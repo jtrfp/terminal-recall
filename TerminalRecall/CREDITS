@@ -1,0 +1,12 @@
+TERMINAL RECALL
+Copyright (c) 2012 Chuck Ritola (cjritola@gmail.com) and contributors listed below.
+
+THIS PROGRAM IS NOT SUPPORTED BY OR AFFILIATED WITH MICROSOFT OR TERMINAL REALITY INC.
+Bring your issues to the Terminal Recall google code page, not them.
+
+The following outside libraries, projects, and documentation are used in the development of Terminal Recall
+
+    JOGL and JOGAmp
+    Java Terminal Reality File Parsers (jTRFP)
+    Java Format Description Toolkit (jFDT)
+    REWiki (http://rewiki.regengedanken.de/wiki/Main_Page) 

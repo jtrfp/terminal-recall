@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JFDT"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-android-armv7.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-linux-armv7.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-linux-armv7hf.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-linux-i586.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-solaris-amd64.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-solaris-i586.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/gluegen-rt-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-mobile.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-android-armv7.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-linux-armv7.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-linux-armv7hf.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-linux-i586.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-solaris-amd64.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-solaris-i586.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/jogl-all-noawt.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/typetools-0.2.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jtrfp"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,42 @@
+TERMINAL RECALL
+Copyright (c) 2012 Chuck Ritola (cjritola@gmail.com) and contributors listed below.
+
+THIS PROGRAM IS NOT SUPPORTED BY OR AFFILIATED WITH MICROSOFT OR TERMINAL REALITY INC.
+Bring your issues to the Terminal Recall google code page.
+
+The following outside libraries, projects, and documentation are used in the development of Terminal Recall
+
+Sven Gothel et. al.
+    JOGL and JOGAmp
+    License: BSD 2-Clause
+    http://jogamp.org/
+    
+Stefan Teitge
+    Java Terminal Reality File Parsers (jTRFP)
+    License: GPL v3
+    http://code.google.com/p/jtrfp/
+    See also: mtmX (Monster Truck Madness remake)
+    http://code.google.com/p/mtmx/
+    
+Xerox Palo Alto Research, DARPA, NISTATP et al.
+	AspectJ
+	License: Eclipse Public License
+	http://www.eclipse.org/aspectj/doc/released/faq.php
+	
+Apache Commons
+	Apache Commons Mathematics Library
+	License: Apache 2.0
+	http://commons.apache.org/math/
+	    
+    Java Format Description Toolkit (jFDT)
+    License: GPL v3
+    http://code.google.com/p/jfdt/
+    
+Capacitor Font
+	by Typodermic Fonts
+	License: Special (see fonts/capacitor.zip for license details)
+	http://typodermicfonts.com/
+    
+Reverse-Engineering Wiki feat. Terminal Velocity / Fury3 file format documentation
+    REWiki (http://rewiki.regengedanken.de/wiki/Main_Page) 
+    

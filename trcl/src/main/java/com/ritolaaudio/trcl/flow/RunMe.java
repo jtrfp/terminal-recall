@@ -27,9 +27,7 @@ import com.ritolaaudio.trcl.TR;
 public class RunMe
 	{
 	public static void main(String [] args)
-		{
-		aspectMain(args);
-		}
+		{aspectMain(args);}
 	
 	public static void aspectMain(String [] args)
 		{

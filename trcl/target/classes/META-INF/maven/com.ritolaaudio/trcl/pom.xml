@@ -2,8 +2,36 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ritolaaudio</groupId>
   <artifactId>trcl</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>TRCL</name>
+  <version>0.0.1-ALPHA</version>
+  <packaging>jar</packaging>
+  <name>Terminal Recall</name>
+  <licenses>
+  	<license>
+  		<name>GNU General Public License Version 3</name>
+  		<url>https://www.gnu.org/licenses/gpl.txt</url>
+  		<distribution>repo</distribution>
+  		<comments>GPL3</comments>
+  	</license>
+  </licenses>
+  <developers>
+  	<developer>
+  		<id>cjritola</id>
+  		<name>Chuck Ritola</name>
+  		<email>cjritola@gmail.com</email>
+  		<roles>
+  			<role>developer</role>
+  		</roles>
+  		<properties>
+  			<picUrl>https://lh4.googleusercontent.com/-ZmHezAG1_0E/AAAAAAAAAAI/AAAAAAAAAAA/ErzgqyJ1tIY/s600-c-k/photo.jpg</picUrl>
+  		</properties>
+  	</developer>
+  </developers>
+  <properties>
+   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   <maven.compiler.target>1.6</maven.compiler.target>
+   <maven.compiler.source>1.6</maven.compiler.source>
+  </properties>
+  
   <dependencies>
      <dependency>
      <groupId>org.jogamp.gluegen</groupId>
@@ -31,4 +59,59 @@
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
   </dependencies>
+  <description>An unofficial engine remake for Terminal Velocity and Fury3 written in Java. It aims to accept POD files for the original games (or third-party creations) and play them with updated graphics and sound, similar to the way Spring RTS enhances the Total Annihilation game. </description>
+  <url>http://code.google.com/p/terminal-recall/</url>
+  <scm>
+  	<url>https://code.google.com/p/terminal-recall/ </url>
+  	<connection>scm:git:https://code.google.com/p/terminal-recall/ </connection>
+  	<developerConnection>scm:git:https://code.google.com/p/terminal-recall/ </developerConnection>
+  	<tag>master</tag>
+  </scm>
+  <issueManagement>
+  	<system>Google Code</system>
+  	<url>http://code.google.com/p/terminal-recall/issues/list</url>
+  </issueManagement>
+  <build>
+  <plugins>
+  <plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-source-plugin</artifactId>
+  <version>2.0.4</version>
+  <executions>
+    <execution>
+      <id>attach-sources</id>
+      <goals>
+        <goal>jar</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+<plugin>
+ <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-gpg-plugin</artifactId>
+  <executions>
+   <execution>
+    <id>sign-artifacts</id>
+     <phase>verify</phase>
+      <goals>
+       <goal>sign</goal>
+      </goals>
+     </execution>
+    </executions>
+   </plugin>
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-javadoc-plugin</artifactId>
+  <version>2.3</version>
+  <executions>
+    <execution>
+      <id>attach-javadocs</id>
+      <goals>
+        <goal>jar</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+</plugins>
+</build>
 </project>

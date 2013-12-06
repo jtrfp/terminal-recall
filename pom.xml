@@ -61,7 +61,7 @@
 			<version>3.2</version>
 		</dependency>
 		<dependency>
-			<groupId>jtrfp</groupId>
+			<groupId>org.jtrfp</groupId>
 			<artifactId>jtrfp</artifactId>
 			<version>0.0.1</version>
 		</dependency>

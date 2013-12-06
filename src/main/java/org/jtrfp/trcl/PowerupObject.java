@@ -3,7 +3,7 @@ package org.jtrfp.trcl;
 import java.awt.Dimension;
 import java.io.IOException;
 
-import org.jtrfp.common.FileLoadException;
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.objects.BillboardSprite;
 

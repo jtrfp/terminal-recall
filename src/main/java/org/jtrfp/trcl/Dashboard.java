@@ -18,7 +18,7 @@ package org.jtrfp.trcl;
 import java.io.IOException;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.common.FileLoadException;
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.objects.WorldObject2D;
 
 public class Dashboard extends WorldObject2D

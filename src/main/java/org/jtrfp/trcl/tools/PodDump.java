@@ -17,9 +17,9 @@ package org.jtrfp.trcl.tools;
 
 import java.io.File;
 
-import org.jtrfp.common.FileLoadException;
-import org.jtrfp.common.pod.IPodFileEntry;
-import org.jtrfp.common.pod.PodFile;
+import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.jtrfp.pod.IPodFileEntry;
+import org.jtrfp.jtrfp.pod.PodFile;
 
 public class PodDump
 	{

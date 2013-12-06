@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.common.FileLoadException;
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile;

@@ -35,16 +35,16 @@ import java.util.zip.ZipFile;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.common.FileLoadException;
-import org.jtrfp.common.act.ActColor;
-import org.jtrfp.common.internal.act.ActDataLoader;
-import org.jtrfp.common.internal.tex.TexDataLoader;
-import org.jtrfp.common.pod.IPodData;
-import org.jtrfp.common.pod.IPodFileEntry;
-import org.jtrfp.common.pod.PodFile;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.jtrfp.act.ActColor;
+import org.jtrfp.jtrfp.internal.act.ActDataLoader;
+import org.jtrfp.jtrfp.internal.tex.TexDataLoader;
+import org.jtrfp.jtrfp.pod.IPodData;
+import org.jtrfp.jtrfp.pod.IPodFileEntry;
+import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.EOFBlock;

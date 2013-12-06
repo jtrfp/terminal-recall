@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.jtrfp.common.act.ActColor;
-import org.jtrfp.common.act.ActFile;
+import org.jtrfp.jtrfp.act.ActColor;
+import org.jtrfp.jtrfp.act.ActFile;
 import org.jtrfp.trcl.SpecialRAWDimensions;
 import org.jtrfp.trcl.file.RAWFile;
 

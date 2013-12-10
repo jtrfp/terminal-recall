@@ -11,7 +11,7 @@ import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.jfdt.v1.UnrecognizedFormatException;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DirectionVector;

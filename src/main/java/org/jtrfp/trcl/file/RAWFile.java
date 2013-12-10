@@ -21,9 +21,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.jtrfp.jfdt.v1.Parser;
-import org.jtrfp.jfdt.v1.SelfParsingFile;
-import org.jtrfp.jfdt.v1.UnrecognizedFormatException;
+import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.SelfParsingFile;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.trcl.SpecialRAWDimensions;
 
 public class RAWFile extends SelfParsingFile
@@ -45,8 +45,8 @@ public class RAWFile extends SelfParsingFile
 		}
 
 	@Override
-	public void describeFormat() throws UnrecognizedFormatException
-		{Parser.bytesEndingWith(null,Parser.property("rawBytes",byte[].class),false);}
+	public void describeFormat(Parser p) throws UnrecognizedFormatException
+		{p.bytesEndingWith(null,p.property("rawBytes",byte[].class),false);}
 
 	/**
 	 * @return the rawBytes

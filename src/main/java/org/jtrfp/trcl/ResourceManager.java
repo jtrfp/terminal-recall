@@ -510,7 +510,7 @@ public class ResourceManager
 	public TNLFile getTNLData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
 		{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
-		TNLFile result = org.jtrfp.jfdt.v1.Parser.readToNewBean(is, TNLFile.class);
+		TNLFile result = new Parser().readToNewBean(is, TNLFile.class);
 		is.close();
 		return result;
 		}

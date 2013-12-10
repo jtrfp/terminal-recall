@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.jtrfp.jfdt.v1.EndianAwareDataInputStream;
-import org.jtrfp.jfdt.v1.EndianAwareDataOutputStream;
-import org.jtrfp.jfdt.v1.Parser;
-import org.jtrfp.jfdt.v1.ThirdPartyParseable;
-import org.jtrfp.jfdt.v1.UnrecognizedFormatException;
+import org.jtrfp.jfdt.EndianAwareDataInputStream;
+import org.jtrfp.jfdt.EndianAwareDataOutputStream;
+import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.ThirdPartyParseable;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 public class TRParsers
 	{
@@ -47,9 +47,10 @@ public class TRParsers
 			{
 			try
 				{
+				final Parser p = new Parser();
 				Class classToTry = Class.forName("com.ritolaaudio.trcl.file."+classFile.getName().substring(0,classFile.getName().length()-6));
 				ThirdPartyParseable result =  
-						Parser.readToNewBean(new EndianAwareDataInputStream(new DataInputStream(new BufferedInputStream(is))), classToTry);
+						p.readToNewBean(new EndianAwareDataInputStream(new DataInputStream(new BufferedInputStream(is))), classToTry);
 				if(result!=null)return result;
 				}
 			catch(UnrecognizedFormatException e){}
@@ -61,6 +62,7 @@ public class TRParsers
 	
 	public static void write(ThirdPartyParseable bean,OutputStream os) throws IOException
 		{
-		Parser.writeBean(bean, new EndianAwareDataOutputStream(new DataOutputStream(os)));
+		final Parser p = new Parser();
+		p.writeBean(bean, new EndianAwareDataOutputStream(new DataOutputStream(os)));
 		}
 	}//end TRParsers

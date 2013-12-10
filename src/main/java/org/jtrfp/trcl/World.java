@@ -40,7 +40,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.objects.WorldObject;
 
 import com.jogamp.opengl.util.glsl.ShaderState;
-import org.jtrfp.jfdt.v1.Parser;
+import org.jtrfp.jfdt.Parser;
 
 public final class World implements GLEventListener
 	{
@@ -337,8 +337,9 @@ public final class World implements GLEventListener
 		int fs = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
 		//int gs = gl.glCreateShader(GL3.GL_GEOMETRY_SHADER);
 		shaderProgram = gl.glCreateProgram();
-		genShader(gl,vs,Parser.readUTF8FileToString(new File("texturedVertexShader.glsl")));
-		genShader(gl,fs,Parser.readUTF8FileToString(new File("texturedFragShader.glsl")));
+		Parser p = new Parser();
+		genShader(gl,vs,p.readUTF8FileToString(new File("texturedVertexShader.glsl")));
+		genShader(gl,fs,p.readUTF8FileToString(new File("texturedFragShader.glsl")));
 		//genShader(gl,gs,Parser.readUTF8FileToString(new File("geometryShader.glsl")));
 		gl.glAttachShader(shaderProgram, vs);
 		gl.glAttachShader(shaderProgram, fs);

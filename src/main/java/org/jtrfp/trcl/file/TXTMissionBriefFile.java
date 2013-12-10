@@ -15,9 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
-import org.jtrfp.jfdt.v1.Parser;
-import org.jtrfp.jfdt.v1.ThirdPartyParseable;
-import org.jtrfp.jfdt.v1.UnrecognizedFormatException;
+import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.ThirdPartyParseable;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 public class TXTMissionBriefFile implements ThirdPartyParseable
 	{
@@ -26,11 +26,11 @@ public class TXTMissionBriefFile implements ThirdPartyParseable
 	String missionText;
 	
 	@Override
-	public void describeFormat() throws UnrecognizedFormatException
+	public void describeFormat(Parser p) throws UnrecognizedFormatException
 		{
-		Parser.stringEndingWith("\r\n", Parser.property("planetModelFile", String.class), false);
-		Parser.stringEndingWith("\r\n", Parser.property("planetTextureFile", String.class), false);
-		Parser.stringEndingWith(null, Parser.property("missionText", String.class), false);// null means go until EOF
+		p.stringEndingWith("\r\n", p.property("planetModelFile", String.class), false);
+		p.stringEndingWith("\r\n", p.property("planetTextureFile", String.class), false);
+		p.stringEndingWith(null, p.property("missionText", String.class), false);// null means go until EOF
 		}
 
 	/**

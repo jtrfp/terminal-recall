@@ -15,25 +15,25 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
-import org.jtrfp.jfdt.v1.Parser;
-import org.jtrfp.jfdt.v1.ThirdPartyParseable;
-import org.jtrfp.jfdt.v1.UnrecognizedFormatException;
+import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.ThirdPartyParseable;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 public class TNLFile implements ThirdPartyParseable
 	{
 	int numSegments;
 	Segment [] segments;
 	
-	private static void Int(String targetProperty)
+	private static void Int(String targetProperty, Parser parser)
 		{
-		Parser.stringEndingWith("\r\n", Parser.property(targetProperty, int.class), false);
+		parser.stringEndingWith("\r\n", parser.property(targetProperty, int.class), false);
 		}
 	
 	@Override
-	public void describeFormat() throws UnrecognizedFormatException
+	public void describeFormat(Parser parser) throws UnrecognizedFormatException
 		{
-		Parser.stringEndingWith("\r\n", Parser.property("numSegments", int.class), false);
-		Parser.arrayOf(getNumSegments(), "segments", Segment.class);
+		parser.stringEndingWith("\r\n", parser.property("numSegments", int.class), false);
+		parser.arrayOf(getNumSegments(), "segments", Segment.class);
 		}
 	
 	public static class Segment implements ThirdPartyParseable
@@ -51,25 +51,25 @@ public class TNLFile implements ThirdPartyParseable
 		FlickerLightType flickerLightType;
 		int flickerLightStrength,ambientLight;
 		@Override
-		public void describeFormat() throws UnrecognizedFormatException
+		public void describeFormat(Parser p) throws UnrecognizedFormatException
 			{
-			Parser.stringCSVEndingWith("\r\n", int.class, false, "startX","startY","endX","endY","numPolygons");
-			Parser.stringCSVEndingWith("\r\n", int.class, false, "startAngle1","startAngle2","rotationSpeed");
-			Parser.stringCSVEndingWith("\r\n", int.class, false,"startWidth","startHeight");
-			Parser.stringCSVEndingWith("\r\n", int.class, false, "endAngle1","endAngle2");
-			Parser.stringCSVEndingWith("\r\n", int.class, false, "endWidth","endHeight");
+			p.stringCSVEndingWith("\r\n", int.class, false, "startX","startY","endX","endY","numPolygons");
+			p.stringCSVEndingWith("\r\n", int.class, false, "startAngle1","startAngle2","rotationSpeed");
+			p.stringCSVEndingWith("\r\n", int.class, false,"startWidth","startHeight");
+			p.stringCSVEndingWith("\r\n", int.class, false, "endAngle1","endAngle2");
+			p.stringCSVEndingWith("\r\n", int.class, false, "endWidth","endHeight");
 			//Int("endAngle1");Int("endAngle2");Int("endWidth");Int("endHeight");
-			Int("unknown1");
-			Int("lightPolygon");
-			Parser.stringEndingWith("\r\n", Parser.property("cutout", Boolean.class), false);
-			Parser.stringEndingWith("\r\n", Parser.property("obstacle", Obstacle.class), false);
-			Int("obstacleTextureIndex");
+			Int("unknown1",p);
+			Int("lightPolygon",p);
+			p.stringEndingWith("\r\n", p.property("cutout", Boolean.class), false);
+			p.stringEndingWith("\r\n", p.property("obstacle", Obstacle.class), false);
+			Int("obstacleTextureIndex",p);
 			for(int i=0; i<getNumPolygons(); i++)
-				{Parser.stringEndingWith("\r\n", Parser.indexedProperty("polyTextureIndices", int.class, i), false);}
+				{p.stringEndingWith("\r\n", p.indexedProperty("polyTextureIndices", int.class, i), false);}
 			
-			Parser.stringEndingWith("\r\n",Parser.property("flickerLightType", FlickerLightType.class),false);
-			Int("flickerLightStrength");
-			Int("ambientLight");
+			p.stringEndingWith("\r\n",p.property("flickerLightType", FlickerLightType.class),false);
+			Int("flickerLightStrength",p);
+			Int("ambientLight",p);
 			}//end describeFormat()
 		
 		public static enum Obstacle

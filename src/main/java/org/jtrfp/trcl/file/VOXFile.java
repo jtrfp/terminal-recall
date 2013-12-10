@@ -15,10 +15,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
-import org.jtrfp.jfdt.v1.ClassInclusion;
-import org.jtrfp.jfdt.v1.Parser;
-import org.jtrfp.jfdt.v1.ThirdPartyParseable;
-import org.jtrfp.jfdt.v1.UnrecognizedFormatException;
+import org.jtrfp.jfdt.ClassInclusion;
+import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.ThirdPartyParseable;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 public class VOXFile implements ThirdPartyParseable
 	{
@@ -26,13 +26,13 @@ public class VOXFile implements ThirdPartyParseable
 	String missionName;
 	MissionLevel [] levels;
 	@Override
-	public void describeFormat() throws UnrecognizedFormatException
+	public void describeFormat(Parser p) throws UnrecognizedFormatException
 		{
-		Parser.stringEndingWith("\r\n", Parser.property("numEntries", int.class), false);
-		Parser.stringEndingWith("\r\n", Parser.property("missionName", String.class), false);
+		p.stringEndingWith("\r\n", p.property("numEntries", int.class), false);
+		p.stringEndingWith("\r\n", p.property("missionName", String.class), false);
 		for(int i=0; i<getNumEntries(); i++)
 			{
-			Parser.subParseProposedClasses(Parser.indexedProperty("levels", MissionLevel.class, i), ClassInclusion.classOf(MissionLevel.class));
+			p.subParseProposedClasses(p.indexedProperty("levels", MissionLevel.class, i), ClassInclusion.classOf(MissionLevel.class));
 			}
 		}//end describeFormat()
 	
@@ -41,10 +41,10 @@ public class VOXFile implements ThirdPartyParseable
 		int planetNumber, stageNumber;
 		String lvlFile;
 		@Override
-		public void describeFormat() throws UnrecognizedFormatException
+		public void describeFormat(Parser p) throws UnrecognizedFormatException
 			{
-			Parser.stringCSVEndingWith(",", int.class, false, "planetNumber","stageNumber");
-			Parser.stringEndingWith("\r\n", Parser.property("lvlFile", String.class), false);
+			p.stringCSVEndingWith(",", int.class, false, "planetNumber","stageNumber");
+			p.stringEndingWith("\r\n", p.property("lvlFile", String.class), false);
 			}//end describeFormat()
 		/**
 		 * @return the planetNumber

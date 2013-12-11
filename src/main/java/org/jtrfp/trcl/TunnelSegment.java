@@ -69,7 +69,7 @@ public class TunnelSegment extends WorldObject
 						
 						new double[]{0,0,1,1},
 						new double[]{0,1,1,0},
-						tunnelTexturePalette[s.getPolyTextureIndices()[pi]], RenderMode.DYNAMIC));
+						tunnelTexturePalette[s.getPolyTextureIndices().get(pi)], RenderMode.DYNAMIC));
 			startAngle+=dAngleStart;
 			endAngle+=dAngleEnd;
 			}//for(polygons)
@@ -86,7 +86,7 @@ public class TunnelSegment extends WorldObject
 					
 					new double[]{0,0,1,1},
 					new double[]{0,1,1,0},
-					tunnelTexturePalette[s.getPolyTextureIndices()[0]], RenderMode.DYNAMIC));
+					tunnelTexturePalette[s.getPolyTextureIndices().get(0)], RenderMode.DYNAMIC));
 		
 		return m.finalizeModel();
 		}

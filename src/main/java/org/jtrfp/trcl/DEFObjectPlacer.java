@@ -1,5 +1,7 @@
 package org.jtrfp.trcl;
 
+import java.util.List;
+
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -18,17 +20,17 @@ public class DEFObjectPlacer implements ObjectPlacer
 	@Override
 	public void placeObjects(RenderableSpacePartitioningGrid target)
 		{
-		EnemyDefinition [] defs = def.getEnemyDefinitions();
-		EnemyPlacement [] places = def.getEnemyPlacements();
+		List<EnemyDefinition> defs = def.getEnemyDefinitions();
+		List<EnemyPlacement> places = def.getEnemyPlacements();
 		//com.ritolaaudio.trcl.file.TDFFile.Tunnel [] tuns = tdf.getTunnels();
-		Model [] models = new Model[defs.length];
+		Model [] models = new Model[defs.size()];
 		GL3 gl = world.getTr().getGl();
 		TR tr = world.getTr();
 		
 		//Get BIN models
-		for(int i=0; i<defs.length; i++)
+		for(int i=0; i<defs.size(); i++)
 			{
-			final EnemyDefinition def = defs[i];
+			final EnemyDefinition def = defs.get(i);
 			tr.releaseGL();
 			tr.takeGL();
 			try{models[i]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),gl);}
@@ -43,7 +45,7 @@ public class DEFObjectPlacer implements ObjectPlacer
 			Model model =models[pl.getDefIndex()];
 			if(model!=null)
 				{
-				final EnemyDefinition def = defs[pl.getDefIndex()];
+				final EnemyDefinition def = defs.get(pl.getDefIndex());
 				final RigidMobileObject obj =new RigidMobileObject(model,new TVBehavior(def,terrainSystem,pl.getStrength()),world);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(

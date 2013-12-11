@@ -85,7 +85,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 		double x=TR.legacy2Modern(loc.getZ());//ZYX
 		double y=TR.legacy2Modern(loc.getY());
 		double z=TR.legacy2Modern(loc.getX());
-		List<Segment> segs = Arrays.asList(tun.getSegments());
+		List<Segment> segs = tun.getSegments();
 		Vector3D tunnelEnd = new Vector3D(0,0,0);
 		//Rotation rotation = new Rotation(new Vector3D(0,0,1),groundVector);
 		Rotation rotation = entrance?new Rotation(new Vector3D(0,0,1),groundVector):new Rotation(new Vector3D(0,0,1),new Vector3D(1,0,0));

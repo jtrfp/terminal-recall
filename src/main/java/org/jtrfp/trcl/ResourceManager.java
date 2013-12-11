@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -217,7 +218,7 @@ public class ResourceManager
 			Model [] frames = new Model[ac.getNumFrames()];
 			gl.getContext().makeCurrent();//feed the dog
 			for(int i=0; i<frames.length;i++)
-				{frames[i]=getBINModel(ac.getBinFiles()[i],defaultTexture,scale,cache,palette,gl);}
+				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette,gl);}
 			if(gl.getContext().isCurrent())gl.getContext().release();
 			//Consolidate the frames to one model
 			for(int i=1; i<frames.length;i++)
@@ -244,7 +245,7 @@ public class ResourceManager
 					modBinNameMap.put(name, m);
 					}//end if(null)
 				System.out.println("Recognized as model file.");
-				BINFile.Model.Vertex[] vertices = m.getVertices();
+				List<BINFile.Model.Vertex> vertices = m.getVertices();
 				final double cpScalar=(scale*TR.crossPlatformScalar*256.)/(double)m.getScale();
 				TextureDescription currentTexture=null;
 				for(ThirdPartyParseable b:m.getDataBlocks())
@@ -261,7 +262,7 @@ public class ResourceManager
 					else if(b instanceof FaceBlock)
 						{
 						FaceBlock block = (FaceBlock)b;
-						FaceBlockVertex [] vertIndices = block.getVertices();
+						List<FaceBlockVertex>vertIndices = block.getVertices();
 						if(currentTexture==null){System.out.println("Warning: Face texture not specified. Using fallback texture.");currentTexture=defaultTexture;}
 						/*
 						 * "The two vb_tex_coord values map the vertices of the face to the texture. 
@@ -275,47 +276,47 @@ public class ResourceManager
 						
 						//System.out.println("cpScalar:"+cpScalar);
 						//System.out.println("Block class: "+b.getClass());
-						if(vertIndices.length==4)//Quads
+						if(vertIndices.size()==4)//Quads
 							{
 							Vertex [] vtx = new Vertex[4];
 							for(int i=0; i<4; i++)
-								{vtx[i]=vertices[vertIndices[i].getVertexIndex()];}
+								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex());}
 							Triangle [] tris = Triangle.quad2Triangles(
 									new double [] {vtx[0].getX()*cpScalar,vtx[1].getX()*cpScalar,vtx[2].getX()*cpScalar,vtx[3].getX()*cpScalar},//X 
 									new double [] {vtx[0].getY()*cpScalar,vtx[1].getY()*cpScalar,vtx[2].getY()*cpScalar,vtx[3].getY()*cpScalar}, 
 									new double [] {vtx[0].getZ()*cpScalar,vtx[1].getZ()*cpScalar,vtx[2].getZ()*cpScalar,vtx[3].getZ()*cpScalar}, 
-									new double [] {(double)vertIndices[0].getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices[1].getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices[2].getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices[3].getTextureCoordinateU()/(double)0xFF0000},//U 
-									new double [] {1.-(double)vertIndices[0].getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices[1].getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices[2].getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices[3].getTextureCoordinateV()/(double)0xFF0000}, 
+									new double [] {(double)vertIndices.get(0).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(1).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(2).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(3).getTextureCoordinateU()/(double)0xFF0000},//U 
+									new double [] {1.-(double)vertIndices.get(0).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(1).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(2).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(3).getTextureCoordinateV()/(double)0xFF0000}, 
 									currentTexture,
 									RenderMode.DYNAMIC);
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
 							}
-						else if(vertIndices.length==3)//Triangles
+						else if(vertIndices.size()==3)//Triangles
 							{
 							Triangle t = new Triangle();
 							int vi=0;
 							Vertex vtx;
-							vtx=vertices[vertIndices[vi].getVertexIndex()];
+							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
 							t.getX()[vi]=vtx.getX()*cpScalar;
 							t.getY()[vi]=vtx.getY()*cpScalar;
 							t.getZ()[vi]=vtx.getZ()*cpScalar;
-							t.getU()[vi]=(double)vertIndices[vi].getTextureCoordinateU()/(double)0xFF0000;
-							t.getV()[vi]=1.-(double)vertIndices[vi].getTextureCoordinateV()/(double)0xFF0000;
+							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
+							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
 							vi++;
-							vtx=vertices[vertIndices[vi].getVertexIndex()];
+							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
 							t.getX()[vi]=vtx.getX()*cpScalar;
 							t.getY()[vi]=vtx.getY()*cpScalar;
 							t.getZ()[vi]=vtx.getZ()*cpScalar;
-							t.getU()[vi]=(double)vertIndices[vi].getTextureCoordinateU()/(double)0xFF0000;
-							t.getV()[vi]=1.-(double)vertIndices[vi].getTextureCoordinateV()/(double)0xFF0000;
+							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
+							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
 							vi++;
-							vtx=vertices[vertIndices[vi].getVertexIndex()];
+							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
 							t.getX()[vi]=vtx.getX()*cpScalar;
 							t.getY()[vi]=vtx.getY()*cpScalar;
 							t.getZ()[vi]=vtx.getZ()*cpScalar;
-							t.getU()[vi]=(double)vertIndices[vi].getTextureCoordinateU()/(double)0xFF0000;
-							t.getV()[vi]=1.-(double)vertIndices[vi].getTextureCoordinateV()/(double)0xFF0000;
+							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
+							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
 							
 							t.setRenderMode(RenderMode.DYNAMIC);
 							if(currentTexture==null)
@@ -324,7 +325,7 @@ public class ResourceManager
 							result.addTriangle(t);
 							}//end if(3 vertices)
 						else
-							{System.err.println("ResourceManager: FaceBlock has "+vertIndices.length+" vertices. Only 3 or 4 supported.");}
+							{System.err.println("ResourceManager: FaceBlock has "+vertIndices.size()+" vertices. Only 3 or 4 supported.");}
 						}//end if(FaceBlock)
 					else if(b instanceof FaceBlock19)
 						{System.out.println("FaceBlock 0x19 (solid colored faces) not yet implemented. Skipping...");}
@@ -332,8 +333,8 @@ public class ResourceManager
 						{
 						LineSegmentBlock block = (LineSegmentBlock)b;
 						LineSegment seg = new LineSegment();
-						Vertex v1 = vertices[block.getVertexID1()];
-						Vertex v2 = vertices[block.getVertexID2()];
+						Vertex v1 = vertices.get(block.getVertexID1());
+						Vertex v2 = vertices.get(block.getVertexID2());
 						seg.getX()[0]=v1.getX()*cpScalar;
 						seg.getY()[0]=v1.getY()*cpScalar;
 						seg.getZ()[0]=v1.getZ()*cpScalar;
@@ -351,13 +352,13 @@ public class ResourceManager
 						{
 						System.out.println("Found animated texture block.");
 						AnimatedTextureBlock block = (AnimatedTextureBlock)b;
-						String [] frames = block.getFrameNames();
+						List<String> frames = block.getFrameNames();
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
-						Texture [] subTextures = new Texture[frames.length];
-						for(int ti=0; ti<frames.length; ti++)
+						Texture [] subTextures = new Texture[frames.size()];
+						for(int ti=0; ti<frames.size(); ti++)
 							{
 							gl.getContext().makeCurrent();
-							TextureDescription tex=getRAWAsTexture(frames[ti], palette, GammaCorrectingColorProcessor.singleton,gl);
+							TextureDescription tex=getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
 							subTextures[ti]=tex instanceof Texture?(Texture)tex:Texture.getFallbackTexture();
 							gl.getContext().release();
 							}//end for(frames) //fDelay, nFrames,interp
@@ -524,6 +525,7 @@ public class ResourceManager
 	public Font getFont(String fileName) throws IOException, FontFormatException
 		{
 		File fontDir = new File("fonts");
+		//System.out.println("Searching for fonts in "+fontDir.getAbsolutePath());
 		File [] files = fontDir.listFiles();
 		if(files==null){throw new IOException("Failed to find font directory, or directory isn't really a directory at path "+fontDir);}
 		for(File fFile:fontDir.listFiles())
@@ -538,7 +540,7 @@ public class ResourceManager
 				while(ze.hasMoreElements())
 					{
 					entry = ze.nextElement();
-					System.out.println("ZIP ENTRY: "+entry.getName());
+					//System.out.println("ZIP ENTRY: "+entry.getName());
 					if(entry.getName().toUpperCase().endsWith(fileName.toUpperCase()+".TTF"))
 						return Font.createFont(Font.TRUETYPE_FONT, zip.getInputStream(entry));
 					}//end while(elements)

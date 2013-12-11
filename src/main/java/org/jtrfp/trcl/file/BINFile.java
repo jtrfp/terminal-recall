@@ -17,13 +17,8 @@ package org.jtrfp.trcl.file;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.jtrfp.trcl.RenderMode;
-import org.jtrfp.trcl.TR;
-import org.jtrfp.trcl.Texture;
-import org.jtrfp.trcl.Triangle;
-import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock;
-import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertex;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jtrfp.jfdt.ClassInclusion;
 import org.jtrfp.jfdt.FailureBehavior;
@@ -40,8 +35,8 @@ public abstract class BINFile implements ThirdPartyParseable
 		int scale;
 		int unknown1,unknown2;
 		int numVertices;
-		Vertex [] vertices;
-		ThirdPartyParseable [] dataBlocks;
+		ArrayList<Vertex> vertices;
+		ArrayList<ThirdPartyParseable> dataBlocks;
 		
 		public Model(InputStream is) throws IllegalAccessException, IOException{super(is);}
 		
@@ -65,7 +60,7 @@ public abstract class BINFile implements ThirdPartyParseable
 					prs.subParseProposedClasses(prs.indexedProperty("dataBlocks", ThirdPartyParseable.class, i), 
 							ClassInclusion.nestedClassesOf(DataBlock.class));
 					//if(getDataBlocks()[i++] instanceof DataBlock.EOFBlock)break;
-					}while(!(getDataBlocks()[i++] instanceof DataBlock.EOFBlock));
+					}while(!(getDataBlocks().get(i++) instanceof DataBlock.EOFBlock));
 				}
 			catch(UnrecognizedFormatException e)
 				{}
@@ -152,7 +147,7 @@ public abstract class BINFile implements ThirdPartyParseable
 			public static class FaceBlock05 implements ThirdPartyParseable
 				{
 				int numVertices,normalX,normalY,normalZ,magic;
-				ShortFaceBlockVertex [] vertices;
+				ArrayList<ShortFaceBlockVertex>  vertices;
 				@Override
 				public void describeFormat(Parser prs) throws UnrecognizedFormatException
 					{
@@ -275,7 +270,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @return the vertices
 				 */
-				public ShortFaceBlockVertex[] getVertices()
+				public ArrayList<ShortFaceBlockVertex>  getVertices()
 					{
 					return vertices;
 					}
@@ -283,7 +278,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @param vertices the vertices to set
 				 */
-				public void setVertices(ShortFaceBlockVertex[] vertices)
+				public void setVertices(ArrayList<ShortFaceBlockVertex>  vertices)
 					{
 					this.vertices = vertices;
 					}
@@ -371,7 +366,7 @@ public abstract class BINFile implements ThirdPartyParseable
 			public static class FaceBlock19 implements ThirdPartyParseable
 				{
 				int numVertices,normalX,normalY,normalZ,magic;
-				ShortFaceBlockVertex [] vertices;
+				ArrayList<ShortFaceBlockVertex> vertices;
 				@Override
 				public void describeFormat(Parser prs) throws UnrecognizedFormatException
 					{
@@ -495,7 +490,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @return the vertices
 				 */
-				public ShortFaceBlockVertex[] getVertices()
+				public List<ShortFaceBlockVertex> getVertices()
 					{
 					return vertices;
 					}
@@ -503,7 +498,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @param vertices the vertices to set
 				 */
-				public void setVertices(ShortFaceBlockVertex[] vertices)
+				public void setVertices(ArrayList<ShortFaceBlockVertex> vertices)
 					{
 					this.vertices = vertices;
 					}
@@ -514,7 +509,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				int numVertices,normalX,normalY,normalZ,magic;
 				public static final int BACKDROP_MAGIC=0x80000000;
 				protected abstract byte getBlockID();
-				FaceBlockVertex [] vertices;
+				ArrayList<FaceBlockVertex> vertices;
 				@Override
 				public void describeFormat(Parser prs) throws UnrecognizedFormatException
 					{
@@ -668,7 +663,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @return the vertices
 				 */
-				public FaceBlockVertex[] getVertices()
+				public List<FaceBlockVertex> getVertices()
 					{
 					return vertices;
 					}
@@ -676,7 +671,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @param vertices the vertices to set
 				 */
-				public void setVertices(FaceBlockVertex[] vertices)
+				public void setVertices(ArrayList<FaceBlockVertex> vertices)
 					{
 					this.vertices = vertices;
 					}
@@ -806,7 +801,8 @@ public abstract class BINFile implements ThirdPartyParseable
 			public static class AnimatedTextureBlock implements ThirdPartyParseable
 				{
 				int unknown1,numTextures,unknown2,delay,unknown3,unknown4;
-				String [] frameNames;
+				//String [] frameNames;
+				ArrayList<String> frameNames;
 				
 				@Override
 				public void describeFormat(Parser prs) throws UnrecognizedFormatException
@@ -928,7 +924,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @return the frameNames
 				 */
-				public String[] getFrameNames()
+				public List<String> getFrameNames()
 					{
 					return frameNames;
 					}
@@ -936,7 +932,7 @@ public abstract class BINFile implements ThirdPartyParseable
 				/**
 				 * @param frameNames the frameNames to set
 				 */
-				public void setFrameNames(String[] frameNames)
+				public void setFrameNames(ArrayList<String> frameNames)
 					{
 					this.frameNames = frameNames;
 					}
@@ -1184,7 +1180,7 @@ public abstract class BINFile implements ThirdPartyParseable
 		/**
 		 * @return the vertices
 		 */
-		public Vertex []getVertices()
+		public ArrayList<Vertex> getVertices()
 			{
 			return vertices;
 			}
@@ -1192,7 +1188,7 @@ public abstract class BINFile implements ThirdPartyParseable
 		/**
 		 * @param vertices the vertices to set
 		 */
-		public void setVertices(Vertex []vertices)
+		public void setVertices(ArrayList<Vertex> vertices)
 			{
 			this.vertices = vertices;
 			}
@@ -1200,7 +1196,7 @@ public abstract class BINFile implements ThirdPartyParseable
 		/**
 		 * @return the dataBlocks
 		 */
-		public ThirdPartyParseable[] getDataBlocks()
+		public List<ThirdPartyParseable> getDataBlocks()
 			{
 			return dataBlocks;
 			}
@@ -1208,7 +1204,7 @@ public abstract class BINFile implements ThirdPartyParseable
 		/**
 		 * @param dataBlocks the dataBlocks to set
 		 */
-		public void setDataBlocks(ThirdPartyParseable[] dataBlocks)
+		public void setDataBlocks(ArrayList<ThirdPartyParseable> dataBlocks)
 			{
 			this.dataBlocks = dataBlocks;
 			}
@@ -1217,7 +1213,8 @@ public abstract class BINFile implements ThirdPartyParseable
 	public static class AnimationControl extends SelfParsingFile
 		{
 		int unknown1,numFrames,delay, unknown2,unknown3;
-		String [] binFiles;
+		//String [] binFiles;
+		ArrayList<String> binFiles;
 		
 		public AnimationControl(InputStream is) throws IllegalAccessException, IOException{super(is);}
 		
@@ -1318,7 +1315,7 @@ public abstract class BINFile implements ThirdPartyParseable
 		/**
 		 * @return the binFiles
 		 */
-		public String[] getBinFiles()
+		public List<String> getBinFiles()
 			{
 			return binFiles;
 			}
@@ -1326,7 +1323,7 @@ public abstract class BINFile implements ThirdPartyParseable
 		/**
 		 * @param binFiles the binFiles to set
 		 */
-		public void setBinFiles(String[] binFiles)
+		public void setBinFiles(ArrayList<String> binFiles)
 			{
 			this.binFiles = binFiles;
 			}

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jtrfp.jfdt.ClassInclusion;
 import org.jtrfp.jfdt.FailureBehavior;
 import org.jtrfp.jfdt.Parser;
@@ -24,7 +27,7 @@ import org.jtrfp.jfdt.UnrecognizedFormatException;
 public class NAVFile implements ThirdPartyParseable
 	{
 	int numNavigationPoints;
-	NAVSubObject [] navObjects;
+	ArrayList<NAVSubObject> navObjects;
 	@Override
 	public void describeFormat(Parser prs) throws UnrecognizedFormatException
 		{
@@ -421,7 +424,7 @@ public class NAVFile implements ThirdPartyParseable
 	/**
 	 * @return the navObjects
 	 */
-	public NAVSubObject[] getNavObjects()
+	public List<NAVSubObject> getNavObjects()
 		{
 		return navObjects;
 		}
@@ -429,7 +432,7 @@ public class NAVFile implements ThirdPartyParseable
 	/**
 	 * @param navObjects the navObjects to set
 	 */
-	public void setNavObjects(NAVSubObject[] navObjects)
+	public void setNavObjects(ArrayList<NAVSubObject> navObjects)
 		{
 		this.navObjects = navObjects;
 		}

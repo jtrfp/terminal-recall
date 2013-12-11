@@ -17,8 +17,17 @@ package org.jtrfp.trcl.file;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.jtrfp.jfdt.*;
+import org.jtrfp.jfdt.CSV;
+import org.jtrfp.jfdt.ClassInclusion;
+import org.jtrfp.jfdt.FailureBehavior;
+import org.jtrfp.jfdt.IntParser;
+import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.SelfParsingFile;
+import org.jtrfp.jfdt.ThirdPartyParseable;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 
 
@@ -30,9 +39,10 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 		}
 	
 	int numEnemyDefinitions;
-	EnemyDefinition [] enemyDefinitions;
+	ArrayList<EnemyDefinition> enemyDefinitions;
+	//EnemyDefinition [] enemyDefinitions;
 	int numPlacements;
-	EnemyPlacement [] enemyPlacements;
+	ArrayList<EnemyPlacement> enemyPlacements;
 	@Override
 	public void describeFormat(Parser prs) throws UnrecognizedFormatException
 		{
@@ -811,7 +821,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	/**
 	 * @return the enemydefinitions
 	 */
-	public EnemyDefinition[] getEnemyDefinitions()
+	public List<EnemyDefinition> getEnemyDefinitions()
 		{
 		return enemyDefinitions;
 		}
@@ -819,7 +829,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	/**
 	 * @param enemydefinitions the enemydefinitions to set
 	 */
-	public void setEnemyDefinitions(EnemyDefinition[] enemydefinitions)
+	public void setEnemyDefinitions(ArrayList<EnemyDefinition> enemydefinitions)
 		{
 		this.enemyDefinitions = enemydefinitions;
 		}
@@ -843,7 +853,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	/**
 	 * @return the enemyPlacements
 	 */
-	public EnemyPlacement[] getEnemyPlacements()
+	public List<EnemyPlacement> getEnemyPlacements()
 		{
 		return enemyPlacements;
 		}
@@ -851,7 +861,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	/**
 	 * @param enemyPlacements the enemyPlacements to set
 	 */
-	public void setEnemyPlacements(EnemyPlacement[] enemyPlacements)
+	public void setEnemyPlacements(ArrayList<EnemyPlacement> enemyPlacements)
 		{
 		this.enemyPlacements = enemyPlacements;
 		}

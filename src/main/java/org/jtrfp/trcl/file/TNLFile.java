@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
@@ -22,7 +25,7 @@ import org.jtrfp.jfdt.UnrecognizedFormatException;
 public class TNLFile implements ThirdPartyParseable
 	{
 	int numSegments;
-	Segment [] segments;
+	ArrayList<Segment> segments;
 	
 	private static void Int(String targetProperty, Parser parser)
 		{
@@ -47,7 +50,8 @@ public class TNLFile implements ThirdPartyParseable
 		boolean cutout;
 		Obstacle obstacle;
 		int obstacleTextureIndex;
-		int [] polyTextureIndices;
+		ArrayList<Integer> polyTextureIndices;
+		//int [] polyTextureIndices;
 		FlickerLightType flickerLightType;
 		int flickerLightStrength,ambientLight;
 		@Override
@@ -383,14 +387,14 @@ public class TNLFile implements ThirdPartyParseable
 		/**
 		 * @return the polyTextureIndices
 		 */
-		public int[] getPolyTextureIndices()
+		public List<Integer> getPolyTextureIndices()
 			{
 			return polyTextureIndices;
 			}
 		/**
 		 * @param polyTextureIndices the polyTextureIndices to set
 		 */
-		public void setPolyTextureIndices(int[] polyTextureIndices)
+		public void setPolyTextureIndices(ArrayList<Integer> polyTextureIndices)
 			{
 			this.polyTextureIndices = polyTextureIndices;
 			}
@@ -457,7 +461,7 @@ public class TNLFile implements ThirdPartyParseable
 	/**
 	 * @return the segments
 	 */
-	public Segment[] getSegments()
+	public List<Segment> getSegments()
 		{
 		return segments;
 		}
@@ -465,7 +469,7 @@ public class TNLFile implements ThirdPartyParseable
 	/**
 	 * @param segments the segments to set
 	 */
-	public void setSegments(Segment[] segments)
+	public void setSegments(ArrayList<Segment> segments)
 		{
 		this.segments = segments;
 		}

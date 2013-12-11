@@ -86,9 +86,9 @@ public class RunMe
 		{
 		if(!isAlreadyConfigured())
 			{
-			System.out.println("Overriding the settings passed to this JVM. If you wish to manually set the JVM settings, include the `-Dcom.ritolaaudio.bypassConfigure=true` flag in the java command.");
+			System.out.println("Overriding the settings passed to this JVM. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
 			String executable=new File("RunMe.jar").exists()?"-jar RunMe.jar":"-cp "+System.getProperty("java.class.path")+" org.jtrfp.trcl.flow.RunMe";
-			String cmd="java -Xmx1024M -Dcom.ritolaaudio.bypassConfigure=true "+executable;
+			String cmd="java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true "+executable;
 			for(String arg:args){cmd+=" "+arg;}
 			try {
 				System.out.println("Restarting JVM with: \n\t"+cmd);
@@ -123,5 +123,5 @@ public class RunMe
 		}//end Ensure...Configured(...)
 	
 	private static boolean isAlreadyConfigured()
-		{return System.getProperty("com.ritolaaudio.bypassConfigure")!=null;}
+		{return System.getProperty("org.jtrfp.trcl.bypassConfigure")!=null;}
 	}//end Run

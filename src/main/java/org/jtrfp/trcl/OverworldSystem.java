@@ -43,8 +43,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			System.out.println("...Done.");
 			//Objects
 			System.out.println("Setting up objects...");
-			
-			//ObjectSystem objectSystem=new ObjectSystem(this,world,lvl);
+			ObjectSystem objectSystem=new ObjectSystem(w.getRootGrid(),world,terrain,lvl);
+			objectSystem.activate();
 			
 			System.out.println("...Done.");
 			//Tunnel activators

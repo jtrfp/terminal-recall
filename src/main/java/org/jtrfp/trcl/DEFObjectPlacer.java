@@ -1,9 +1,12 @@
 package org.jtrfp.trcl;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
@@ -15,28 +18,41 @@ public class DEFObjectPlacer implements ObjectPlacer
 	private World world;
 	private TerrainSystem terrainSystem;
 	
+	//private static final ExecutorService 
+	
 	public DEFObjectPlacer(DEFFile def, World world,TerrainSystem terrainSystem)
 		{this.def=def;this.world=world;this.terrainSystem=terrainSystem;}
 	@Override
 	public void placeObjects(RenderableSpacePartitioningGrid target)
 		{
-		List<EnemyDefinition> defs = def.getEnemyDefinitions();
-		List<EnemyPlacement> places = def.getEnemyPlacements();
+		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
+		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		//com.ritolaaudio.trcl.file.TDFFile.Tunnel [] tuns = tdf.getTunnels();
-		Model [] models = new Model[defs.size()];
-		GL3 gl = world.getTr().getGl();
-		TR tr = world.getTr();
+		final Model [] models = new Model[defs.size()];
+		final GL3 gl = world.getTr().getGl();
+		final TR tr = world.getTr();
 		
+		tr.releaseGL();
+		
+		Future []futures = new Future[defs.size()];
 		//Get BIN models
 		for(int i=0; i<defs.size(); i++)
 			{
-			final EnemyDefinition def = defs.get(i);
-			tr.releaseGL();
-			tr.takeGL();
-			try{models[i]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),gl);}
-			catch(Exception e){e.printStackTrace();}
-			if(models[i]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+i);
+			final int index = i;
+			futures[i]=TR.threadPool.submit(new Runnable()
+				{
+				public void run()
+					{
+					final EnemyDefinition def = defs.get(index);
+					tr.takeGL();
+					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),gl);}
+					catch(Exception e){e.printStackTrace();}
+					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
+					tr.releaseGL();
+					}
+				});
 			}
+		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		
 		for(EnemyPlacement pl:places)
 			{//behavior objects cannot be shared because they contain state data for each mobile object
@@ -55,7 +71,8 @@ public class DEFObjectPlacer implements ObjectPlacer
 						));
 				//NOTE: The current scheme might very well be wrong because of the lack of pivot impl. Namely the ZYX config of TRCL and TRI's XYZ stuff
 				//Vector3D heading = new Vector3D(Math.cos((double)pl.getPitch())/32767.,0.,Math.sin((double)pl.getPitch()/32767.));
-				obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));
+				try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
+				catch(MathArithmeticException e){e.printStackTrace();}
 				
 				target.add(obj);
 				}

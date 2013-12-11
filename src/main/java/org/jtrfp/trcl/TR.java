@@ -21,6 +21,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
@@ -61,6 +63,7 @@ public final class TR
 	private final FPSAnimator animator = new FPSAnimator(canvas,FPS);
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
+	public static final ExecutorService threadPool = Executors.newCachedThreadPool();
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,

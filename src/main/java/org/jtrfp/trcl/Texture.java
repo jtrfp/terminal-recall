@@ -34,7 +34,6 @@ public class Texture implements TextureDescription
 	private Color averageColor;
 	private static double pixelSize=1./512.; //This is a kludge; doesn't scale with megatexture
 	private static TextureTreeNode rootNode=null;
-	//private static int globalTexID=-1;
 	private static GLTexture globalTexture;
 	private static final Texture fallbackTexture;
 	static
@@ -204,33 +203,6 @@ public class Texture implements TextureDescription
 		GLTexture tex = gpu.newTexture(/*(int)(int) (Math.log(gSideLen) / Math.log(2))*/);
 		tex.setTextureImageRGBA(buf);
 		globalTexture=tex;
-		//globalTexID=tex.getTextureID();
-		/*
-		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
-		globalTexID=createTextureID(gl);
-		System.out.println("\t...Done.");
-		System.out.println("Uploading megatexture to OpenGL...");
-		
-		GLUgl2 glu = new GLUgl2();
-		System.out.println("glu: "+glu.getCurrentGL()+" gl: "+gl);
-		
-		gl.glBindTexture(GL3.GL_TEXTURE_2D, globalTexID);
-		FloatBuffer isoSize = FloatBuffer.wrap(new float[]{0});
-		gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);
-		System.out.println("Isotropy limit: "+isoSize.get(0));
-		gl.glTexParameterf(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, isoSize.get(0));
-		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
-		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
-		//gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, 
-		//                   GL3.GL_LINEAR_MIPMAP_LINEAR);
-		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, 
-		                   GL3.GL_LINEAR_MIPMAP_LINEAR);
-		glu.gluBuild2DMipmaps( GL3.GL_TEXTURE_2D, GL3.GL_RGBA4, gSideLen, gSideLen, 
-				GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
-		System.out.println("Result from mipmap: "+glu.gluErrorString(gl.glGetError()));
-		System.out.println("\t...Done.");
-		*/
-		
 		}//end finalize()
 	
 	public static final int createTextureID(GL3 gl)

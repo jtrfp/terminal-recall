@@ -17,27 +17,9 @@ public class GLTexture
 		{
 		System.out.println("Creating GL Texture...");
 		this.gpu=gpu;
-		gpu.takeGL();
 		textureID=gpu.newTextureID();
-		gpu.releaseGL();
 		//Setup the empty rows
-		//rawSideLength=(int)Math.pow(2, sideLengthPowerOfTwo);
 		System.out.println("...Done.");
-		/*
-		ByteBuffer emptyRow = ByteBuffer.allocate((rawSideLength*4));
-		for(int i=0; i<rawSideLength; i++)
-			{emptyRow.put((byte)(Math.random()*256));}
-		emptyRow.rewind();
-		
-		ByteBuffer buf = ByteBuffer.allocateDirect(rawSideLength*rawSideLength*4);
-		System.out.println("\t...Done.");
-		//System.out.println("Assembling the megatexture...");
-		//Fill the buffer, raster row by raster row
-		buf.rewind();
-		for(int row=0; row<rawSideLength*rawSideLength*4; row++)
-			{buf.put((byte)(Math.random()*255.));}
-		buf.rewind();
-		*/
 		}//end constructor
 	
 	/**
@@ -47,10 +29,6 @@ public class GLTexture
 	 */
 	public void setTextureImageRGBA(ByteBuffer buf)
 		{
-		/*
-		for(int row=rawSideLength-1; row>=0; row--)
-			{rootNode.dumpRowToBuffer(buf,row);}
-		*/
 		rawSideLength = (int)Math.sqrt(buf.capacity()/4);
 		buf.rewind();
 		System.out.println("Creating a new OpenGL texture for megatexture...");

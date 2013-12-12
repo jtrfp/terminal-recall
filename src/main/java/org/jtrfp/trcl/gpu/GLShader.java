@@ -14,21 +14,18 @@ public abstract class GLShader
 	GLShader(GPU gpu)
 		{
 		this.gpu=gpu;
-		GL3 gl =gpu.takeGL();
-		shaderID= gl.glCreateShader(getShaderType());
-		gpu.releaseGL();
+		shaderID= gpu.getGl().glCreateShader(getShaderType());
 		}
 	
 	protected abstract int getShaderType();
 	
 	public void setSource(String source)
 		{
-		GL3 gl = gpu.takeGL();
+		GL3 gl = gpu.getGl();
 		gl.glShaderSource(shaderID, 1, new String[]
 			{ source }, (IntBuffer) null);
 		gl.glCompileShader(shaderID);
 		printStatusInfo(gl, shaderID);
-		gpu.releaseGL();
 		}
 	
 	private void printStatusInfo(GL3 gl, int shaderID)

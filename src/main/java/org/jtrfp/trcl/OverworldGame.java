@@ -30,13 +30,7 @@ import org.jtrfp.trcl.gpu.GPU;
 
 public class OverworldGame
 	{
-	private AltitudeMap heightMap;
-	private LVLFile lvlFile;
-	private TextureMesh textureGrid;
-	//private TerrainSystem terrain;
-	//private CloudSystem cloudSystem;
 	private World world;
-	//private ObjectSystem objectSystem;
 	private OverworldSystem overworldSystem;
 	private HUDSystem hudSystem;
 	private BackdropSystem backdropSystem;

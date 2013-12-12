@@ -178,9 +178,6 @@ public final class World implements GLEventListener
 					nudgeUnit * manueverSpeed));
 			positionChanged = true;
 			}
-		// if(keyStatus.isPressed(KeyEvent.VK_LEFT)){newX=getCameraPosition().getX()+nudgeUnit;positionChanged=true;}
-		// if(keyStatus.isPressed(KeyEvent.VK_RIGHT)){newX=getCameraPosition().getX()-nudgeUnit;positionChanged=true;}
-
 		if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP))
 			{
 			newCamPos = newCamPos.add(upVector.scalarMultiply(nudgeUnit
@@ -290,49 +287,33 @@ public final class World implements GLEventListener
 	private void fauxInit(GL3 gl)
 		{
 		System.out.println("World.init() start.");
-		// tr.getCanvas().setGL(new DebugGL3(gl));
-		gl.getContext().makeCurrent();
 		setupFixedPipelineBehavior(gl);
 		ByteArrayOutputStream shaderOS = new ByteArrayOutputStream();
 		PrintStream shaderLog = new PrintStream(shaderOS);
 
 		try {
 			System.out.println("buildShaderProgram...");
-			buildShaderProgram(gl, shaderLog);
+			buildShaderProgram(shaderLog);
 			System.out.println("setupProjectionMatrix...");
 			setupProjectionMatrix(gl);
 			System.out.println("uploadDataToGPU...");
-			gl.getContext().makeCurrent();
 			uploadDataToGPU(gl);
 			System.out.println("bindBuffersAndTextures...");
-			gl.getContext().makeCurrent();
 			bindBuffersAndTextures(gl, shaderLog);
 
 			float fogRed = (float) fogColor.getRed() / 255f;
 			float fogGreen = (float) fogColor.getGreen() / 255f;
 			float fogBlue = (float) fogColor.getBlue() / 255f;
 			
-			shaderProgram.getUniform(gl,"fogStart").set(gl,(float) (cameraViewDepth * 1.2) / 5f);
-			/*gl.glUniform1f(gl.glGetUniformLocation(shaderProgram, "fogStart"),
-					(float) (cameraViewDepth * 1.2) / 5f);*/
-			
-			shaderProgram.getUniform(gl,"fogEnd").set(gl,(float) (cameraViewDepth * 1.5) * 1.3f);
-			/*gl.glUniform1f(gl.glGetUniformLocation(shaderProgram, "fogEnd"),
-					(float) (cameraViewDepth * 1.5) * 1.3f);*/
-			
-			shaderProgram.getUniform(gl,"fogColor").set(gl,fogRed, fogGreen, fogBlue);
-			/*gl.glUniform3f(gl.glGetUniformLocation(shaderProgram, "fogColor"),
-					fogRed, fogGreen, fogBlue);*/
-			
+			shaderProgram.getUniform(gl,"fogStart").set((float) (cameraViewDepth * 1.2) / 5f);
+			shaderProgram.getUniform(gl,"fogEnd").set((float) (cameraViewDepth * 1.5) * 1.3f);
+			shaderProgram.getUniform(gl,"fogColor").set(fogRed, fogGreen, fogBlue);
 			}
 		catch (Exception e)
 			{
 			shaderLog.flush();
 			e.printStackTrace();
 			System.exit(1);
-			/*tr.showStopper(new Exception(e.getMessage()
-					+ "\nShader log follows: \n"
-					+ new String(shaderOS.toByteArray())));*/
 			}
 		firstRun = false;
 		System.out.println("");
@@ -341,10 +322,7 @@ public final class World implements GLEventListener
 	private void bindBuffersAndTextures(GL3 gl, PrintStream shaderLog)
 		{try{
 			GlobalDynamicTextureBuffer.getTextureBuffer().bindToUniform(gl, 1, shaderProgram, "rootBuffer");
-			//		gl.glGetUniformLocation(shaderProgram, "rootBuffer"));
-			shaderProgram.getUniform(gl, "textureMap").set(gl,(int)0);//Texture unit 0 mapped to textureMap
-			/*gl.glUniform1i(
-					gl.glGetUniformLocation(shaderProgram, "textureMap"), 0);*/
+			shaderProgram.getUniform(gl, "textureMap").set((int)0);//Texture unit 0 mapped to textureMap
 			}
 		catch (RuntimeException e)
 			{e.printStackTrace();}
@@ -355,7 +333,6 @@ public final class World implements GLEventListener
 			System.out.println(shaderProgram.getInfoLog());
 			System.exit(1);
 			}
-		tr.getGPU().takeGL();
 		System.out.println("Initializing RenderList...");
 		renderList = new RenderList(gl, shaderProgram);
 		System.out.println("...Done.");
@@ -374,74 +351,20 @@ public final class World implements GLEventListener
 		GlobalDynamicTextureBuffer.getTextureBuffer().unmap(gl);
 		}
 
-	private void buildShaderProgram(GL3 gl, PrintStream shaderLog)
+	private void buildShaderProgram(PrintStream shaderLog)
 			throws IOException
 		{
-		/*
-		 * System.out.println("Building and installing shader programs...");
-		 * ShaderCode fs = new ShaderCode(GL2.GL_FRAGMENT_SHADER,1,new
-		 * String[][]{new String[]{Parser.readUTF8FileToString(new
-		 * File("texturedFragShader.glsl"))}}); fs.compile(gl); ShaderCode vs =
-		 * new ShaderCode(GL2.GL_VERTEX_SHADER,1,new String[][]{new
-		 * String[]{Parser.readUTF8FileToString(new
-		 * File("texturedVertexShader.glsl"))}}); vs.compile(gl); //ShaderCode
-		 * gs = new ShaderCode(GL4.GL_GEOMETRY_SHADER_ARB,1,new String[][]{new
-		 * String[]{Parser.readUTF8FileToString(new
-		 * File("geometryShader.glsl"))}}); //gs.compile(gl); final int gs =
-		 * gl.glCreateShader(GL4.GL_GEOMETRY_SHADER); String
-		 * s=Parser.readUTF8FileToString(new File("geometryShader.glsl"));
-		 * 
-		 * gl.glShaderSource(gs, 1, new String[]{s}, (IntBuffer)null);
-		 * gl.glCompileShader(gs); IntBuffer statBuf = IntBuffer.allocate(1);
-		 * gl.glGetShaderiv(gs, GL4.GL_COMPILE_STATUS, statBuf);
-		 * if(statBuf.get(0)==GL4.GL_FALSE) { statBuf.clear();
-		 * gl.glGetShaderiv(gs, GL4.GL_INFO_LOG_LENGTH, statBuf); ByteBuffer log
-		 * = ByteBuffer.allocate(statBuf.get(0)); gl.glGetShaderInfoLog(gs,
-		 * statBuf.get(0), null, log);
-		 * System.out.println(Charset.forName("US-ASCII").decode(log)
-		 * .toString()); System.exit(1); } else
-		 * System.out.println("Geometry shader compiled successfully.");
-		 * 
-		 * texturedShaderProgram = new ShaderProgram();
-		 * texturedShaderProgram.add(fs); texturedShaderProgram.add(vs);
-		 * System.out.println("gs="+gs);
-		 * System.out.println("Pre Attach Error code: "+gl.glGetError());
-		 * gl.glAttachShader(shaderProgram, gs);
-		 * System.out.println("Post-Attach Error code: "+gl.glGetError());
-		 * texturedShaderProgram.link(gl, shaderLog);
-		 * worldShaderState.attachShaderProgram(gl, texturedShaderProgram,
-		 * true);
-		 */
-		
 		GLVertexShader vertexShader = tr.getGPU().newVertexShader();
 		GLFragmentShader fragmentShader = tr.getGPU().newFragmentShader();
-		//int vs = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
-		//int fs = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
-		// int gs = gl.glCreateShader(GL3.GL_GEOMETRY_SHADER);
-		//shaderProgram = gl.glCreateProgram();
 		shaderProgram = tr.getGPU().newProgram();
 		
 		Parser p = new Parser();
 		vertexShader.setSource(p.readUTF8FileToString(new File("texturedVertexShader.glsl")));
 		fragmentShader.setSource(p.readUTF8FileToString(new File("texturedFragShader.glsl")));
-		/*
-		genShader(gl, vs,
-				);
-		genShader(gl, fs,
-				p.readUTF8FileToString(new File("texturedFragShader.glsl")));
-		*/
-		
-		// genShader(gl,gs,Parser.readUTF8FileToString(new
-		// File("geometryShader.glsl")));
 		shaderProgram.attachShader(vertexShader);
 		shaderProgram.attachShader(fragmentShader);
-		//gl.glAttachShader(shaderProgram, vs);
-		//gl.glAttachShader(shaderProgram, fs);
-		// gl.glAttachShader(shaderProgram, gs);
 		shaderProgram.link();
 		shaderProgram.use();
-		
-		//gl.glUseProgram(shaderProgram);
 		}
 
 	private void setupProjectionMatrix(GL3 gl)
@@ -467,18 +390,14 @@ public final class World implements GLEventListener
 		{
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL2.GL_LESS);
-		// gl.glDepthFunc(GL2.GL_ALWAYS);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glClearColor(0f, 0f, 0f, 0f);
-		// gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-		// gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		}
 
 	@Override
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,
 			int arg4)
-		{
-		}
+		{}
 
 	public ObjectDirection getCameraDirection()
 		{
@@ -489,18 +408,14 @@ public final class World implements GLEventListener
 	 * @return the fogColor
 	 */
 	public Color getFogColor()
-		{
-		return fogColor;
-		}
+		{return fogColor;}
 
 	/**
 	 * @param fogColor
 	 *            the fogColor to set
 	 */
 	public void setFogColor(Color fogColor)
-		{
-		this.fogColor = fogColor;
-		}
+		{this.fogColor = fogColor;}
 
 	/**
 	 * @return the tr

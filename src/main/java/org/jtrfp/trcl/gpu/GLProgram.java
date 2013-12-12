@@ -10,40 +10,30 @@ import javax.media.opengl.GL4;
 public class GLProgram
 	{
 	private GPU gpu;
+	private final GL3 gl;
 	private final int programID;
 	GLProgram(GPU gpu)
 		{this.gpu=gpu;
-		GL3 gl = gpu.takeGL();
+		this.gl=gpu.getGl();
 		programID=gl.glCreateProgram();
-		gpu.releaseGL();
 		}
 	
 	public void attachShader(GLShader shader)
-		{
-		GL3 gl = gpu.takeGL();
-		gl.glAttachShader(programID, shader.getShaderID());
-		gpu.releaseGL();
-		}
+		{gl.glAttachShader(programID, shader.getShaderID());}
 
-	public void link()
-		{GL3 gl = gpu.takeGL();
+	public void link(){
 		gl.glLinkProgram(programID);
-		gpu.releaseGL();
 		}
 
-	public void use()
-		{GL3 gl = gpu.takeGL();
+	public void use(){
 		gl.glUseProgram(programID);
-		gpu.releaseGL();
 		}
 
 	public boolean validate()
 		{
 		IntBuffer statBuf = IntBuffer.allocate(1);
-		GL3 gl = gpu.takeGL();
 		gl.glValidateProgram(programID);
 		gl.glGetProgramiv(programID, GL4.GL_VALIDATE_STATUS, statBuf);
-		gpu.releaseGL();
 		return statBuf.get(0)==GL3.GL_TRUE;
 		}
 	
@@ -51,11 +41,9 @@ public class GLProgram
 		{
 		IntBuffer statBuf = IntBuffer.allocate(1);
 		statBuf.clear();
-		GL3 gl = gpu.takeGL();
 		gl.glGetProgramiv(programID, GL4.GL_INFO_LOG_LENGTH, statBuf);
 		ByteBuffer log = ByteBuffer.allocate(statBuf.get(0));
 		gl.glGetProgramInfoLog(programID, statBuf.get(0), null, log);
-		gpu.releaseGL();
 		return Charset.forName("US-ASCII").decode(log)
 				.toString();
 		}
@@ -65,4 +53,6 @@ public class GLProgram
 
 	int getProgramID()
 		{return programID;}
+	
+	GL3 getGl(){return gl;}
 	}//end GLPRogram

@@ -29,16 +29,7 @@ public class GPU
 	private GL3 gl;
 	public GL3 takeGL()
 		{
-		if(gl==null)
-			{GL gl1;
-			//In case GL is not ready, wait and try again.
-			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
-				{gl=gl1.getGL3();
-				canvas.setGL(gl=new DebugGL3(gl));
-				break;
-				} Thread.sleep(100);}}
-			catch(InterruptedException e){e.printStackTrace();}
-			}//end if(!null)
+		gl=getGl();
 		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
 		return gl;
 		}
@@ -55,9 +46,7 @@ public class GPU
 		}
 	
 	public String glGetString(int key)
-		{
-		return gl.glGetString(key);
-		}
+		{return gl.glGetString(key);}
 	
 	public Component getComponent(){return canvas;}
 	
@@ -91,4 +80,18 @@ public class GPU
 		{return new GLVertexShader(this);}
 	public GLProgram newProgram()
 		{return new GLProgram(this);}
+	public GL3 getGl()
+		{
+		if(gl==null)
+			{GL gl1;
+			//In case GL is not ready, wait and try again.
+			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
+				{gl=gl1.getGL3();
+				canvas.setGL(gl=new DebugGL3(gl));
+				break;
+				} Thread.sleep(100);}}
+			catch(InterruptedException e){e.printStackTrace();}
+			}//end if(!null)
+		return gl;
+		}
 	}//end GPU

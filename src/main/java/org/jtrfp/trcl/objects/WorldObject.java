@@ -19,6 +19,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -50,7 +52,7 @@ public class WorldObject implements PositionedRenderable
 	private ByteBuffer opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocate(0);//defaults to empty
 	private ByteBuffer transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocate(0);//defaults to empty
 	protected final Matrix matrix;
-	private static final ArrayList<WorldObject> allWorldObjects = new ArrayList<WorldObject>();
+	private static final List<WorldObject> allWorldObjects = Collections.synchronizedList(new ArrayList<WorldObject>());
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
 	

@@ -16,12 +16,14 @@
 package org.jtrfp.trcl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.media.opengl.GL3;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4Element>
 	{
-	private static final ArrayList<PrimitiveList<?,?>> allLists = new ArrayList<PrimitiveList<?,?>>();
+	private static final List<PrimitiveList<?,?>> allLists = Collections.synchronizedList(new ArrayList<PrimitiveList<?,?>>());
 	protected static final double coordDownScaler=512;
 	protected static final double uvUpScaler=4096;
 	private final PRIMITIVE_TYPE [][] primitives;
@@ -50,7 +52,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 		{return value/Math.pow(2,packedScale-16);}
 	
 	protected static void addList(PrimitiveList l){if(l==null){new Exception().printStackTrace();System.exit(1);}allLists.add(l);}
-	protected static ArrayList<PrimitiveList<?,?>> getAllArrayLists(){return allLists;}
+	protected static List<PrimitiveList<?,?>> getAllArrayLists(){return allLists;}
 	
 	protected abstract double getMaximumVertexValue();
 	public PRIMITIVE_TYPE [][] getPrimitives() {return primitives;}

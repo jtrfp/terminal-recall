@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.gpu.GPU;
+
 public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	{
 	private static final AtomicInteger sizeInBytes = new AtomicInteger();
@@ -38,7 +40,7 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 		return result;
 		}
 	
-	public static void finalizeAllocation(GL3 gl)
+	public static void finalizeAllocation(GPU gpu)
 		{
 		//Finalize dependent allocations
 		for(Class<?> c:finalizationList)
@@ -46,7 +48,9 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 			c.getMethod("finalizeAllocation", (Class<?>[])null).invoke(null, (Object[])null);
 			}catch(Exception e){e.printStackTrace();}}
 		finalizationList.clear();
+		GL3 gl = gpu.takeGL();
 		buffer=new GlobalDynamicTextureBuffer(sizeInBytes.get(),gl);
+		gpu.releaseGL();
 		}
 	
 	@Override

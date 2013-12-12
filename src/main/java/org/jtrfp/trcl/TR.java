@@ -38,6 +38,7 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.gpu.GPU;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
@@ -52,15 +53,9 @@ public final class TR
 	public static final double antiGamma=1.6;
 	public static final boolean ANIMATED_TERRAIN=false;
 	
-	static {GLProfile.initSingleton();}
-	
-	private final GLProfile glProfile = GLProfile.get(GLProfile.GL2GL3);
-	private final GLCapabilities capabilities = new GLCapabilities(glProfile);
-	private final GLCanvas canvas = new GLCanvas(capabilities);
+	private final GPU gpu = new GPU();
 	private final JFrame frame = new JFrame("Terminal Recall");
 	private Color [] globalPalette;
-	public static final int FPS=60;
-	private final FPSAnimator animator = new FPSAnimator(canvas,FPS);
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
 	public static final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -91,21 +86,9 @@ public final class TR
 		return v>134217727?v-268435456:v;
 		}
 	
-	public int glGet(int key)
-		{
-		IntBuffer buf = IntBuffer.wrap(new int[1]);
-		glCache.glGetIntegerv(key, buf);
-		return buf.get(0);
-		}
-	
-	public String glGetString(int key)
-		{
-		return this.getGl().glGetString(key);
-		}
-	
 	public TR()
 		{
-		keyStatus = new KeyStatus(canvas);
+		keyStatus = new KeyStatus(gpu.getComponent());
 		try{
 		SwingUtilities.invokeAndWait(new Runnable()
 			{
@@ -113,7 +96,7 @@ public final class TR
 			public void run(){
 			configureMenuBar();
 			//frame.setBackground(Color.black);
-			frame.getContentPane().add(canvas);
+			frame.getContentPane().add(gpu.getComponent());
 			frame.setVisible(true);
 			frame.setSize(800,600);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -153,16 +136,6 @@ public final class TR
 		frame.getJMenuBar().add(window);
 		}
 	
-	public GL3 takeGL()
-		{getGl().
-			getContext().
-			makeCurrent(); 
-		return getGl();
-		}
-	
-	public void releaseGL()
-		{if(getGl().getContext().isCurrent())getGl().getContext().release();}
-	
 	public static int bidiMod(int v, int mod)
 		{
 		while(v<0)v+=mod;
@@ -187,19 +160,6 @@ public final class TR
 		}
 
 	/**
-	 * @return the gl
-	 */
-	public GL3 getGl()
-		{
-		if(glCache!=null)return glCache;
-		GL gl1;
-		//In case GL is not ready, wait and try again.
-		try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null){glCache=gl1.getGL3();System.out.println("getGL returning "+glCache);return glCache;} Thread.sleep(100);}}
-		catch(InterruptedException e){e.printStackTrace();}
-		return null;
-		}
-
-	/**
 	 * @return the resourceManager
 	 */
 	public ResourceManager getResourceManager()
@@ -213,38 +173,6 @@ public final class TR
 	public void setResourceManager(ResourceManager resourceManager)
 		{
 		this.resourceManager = resourceManager;
-		}
-
-	/**
-	 * @return the glProfile
-	 */
-	public GLProfile getGlProfile()
-		{
-		return glProfile;
-		}
-
-	/**
-	 * @return the capabilities
-	 */
-	public GLCapabilities getCapabilities()
-		{
-		return capabilities;
-		}
-
-	/**
-	 * @return the canvas
-	 */
-	public GLCanvas getCanvas()
-		{
-		return canvas;
-		}
-
-	/**
-	 * @return the animator
-	 */
-	public FPSAnimator getAnimator()
-		{
-		return animator;
 		}
 
 	/**
@@ -294,13 +222,6 @@ public final class TR
 	public void setGlobalPalette(Color[] palette)
 		{globalPalette = palette;}
 	public Color [] getGlobalPalette(){return globalPalette;}
-
-	public ByteOrder getGPUByteOrder()
-		{
-		if(byteOrder==null)
-			{
-			byteOrder = System.getProperty("sun.cpu.endian").contentEquals("little")?ByteOrder.LITTLE_ENDIAN:ByteOrder.BIG_ENDIAN;
-			}
-		return byteOrder;
-		}
+	
+	public GPU getGPU(){return gpu;}
 	}//end TR

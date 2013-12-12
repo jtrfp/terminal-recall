@@ -27,7 +27,7 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 		}
 	
 	public TriangleList [] getAllLists()
-		{return allLists.toArray(new TriangleList [] {});}
+		{return getAllArrayLists().toArray(new TriangleList [] {});}
 	private Sequencer getVertexSequencer(int timeBetweenFramesMsec, int nFrames)
 		{
 		if(vSequencer!=null)return vSequencer;

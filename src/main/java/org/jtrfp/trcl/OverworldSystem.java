@@ -19,7 +19,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			//Active by default
 			Color [] globalPalette = tr.getGlobalPalette();
 			TextureDescription [] texturePalette=tr.getResourceManager().getTextures(lvl.getLevelTextureListFile(), 
-					globalPalette,GammaCorrectingColorProcessor.singleton,tr.getGl());
+					globalPalette,GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
 			System.out.println("Loading height map...");
 			altitudeMap=		tr.getResourceManager().getRAWAltitude(lvl.getHeightMapOrTunnelFile());
 			System.out.println("... Done");

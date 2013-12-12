@@ -27,7 +27,7 @@ public class Dashboard extends WorldObject2D
 		{
 		setWorld(world);
 		//Dashboard
-		TextureDescription[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", world.getTr().getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGl(),2);
+		TextureDescription[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", world.getTr().getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL(),2);
 		Model dashModel = new Model(false);
 		for(int seg=0; seg<5; seg++)
 			{

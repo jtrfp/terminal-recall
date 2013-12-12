@@ -23,6 +23,7 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.OverworldGame;
 import org.jtrfp.trcl.TR;
+import org.jtrfp.trcl.gpu.GPU;
 
 public class RunMe
 	{
@@ -69,10 +70,11 @@ public class RunMe
 	
 	private static void printSysInfo(TR tr, PrintStream out)
 		{
-		tr.getGl().getContext().makeCurrent();
+		GPU gpu = tr.getGPU();
+		GL3 gl = gpu.takeGL();
 		out.println("==SYS INFO==");
-		out.println("GPU Vendor: "+tr.glGetString(GL3.GL_VENDOR)+" \nRenderer: "+tr.glGetString(GL3.GL_RENDERER)+" \nVersion: "+tr.glGetString(GL3.GL_VERSION));
-		tr.getGl().getContext().release();
+		out.println("GPU Vendor: "+gpu.glGetString(GL3.GL_VENDOR)+" \nRenderer: "+gpu.glGetString(GL3.GL_RENDERER)+" \nVersion: "+gpu.glGetString(GL3.GL_VERSION));
+		tr.getGPU().releaseGL();
 		out.println("CPU Cores : "+Runtime.getRuntime().availableProcessors());
 		out.println("Operating System: "+System.getProperty("os.name"));
 		

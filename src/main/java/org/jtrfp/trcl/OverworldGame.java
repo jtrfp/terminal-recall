@@ -26,6 +26,7 @@ import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
+import org.jtrfp.trcl.gpu.GPU;
 
 public class OverworldGame
 	{
@@ -75,25 +76,23 @@ public class OverworldGame
 		backdropSystem = new BackdropSystem(world);
 		
 		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),world);
-		
-		GL3 gl = tr.getGl();
-		//gl.getContext().makeCurrent();
+		GPU gpu = tr.getGPU();
 		System.out.println("Building master texture...");
-		Texture.finalize(gl);
+		Texture.finalize(gpu);
 		System.out.println("\t...Done.");
 		System.out.println("Finalizing GPU memory allocation...");
-		GlobalDynamicTextureBuffer.finalizeAllocation(gl);
-		gl.getContext().release();
+		GlobalDynamicTextureBuffer.finalizeAllocation(gpu);
 		//////// NO GL BEYOND THIS POINT ////////
 		System.out.println("\t...Done.");
 		System.out.println("Invoking JVM's garbage collector...");
 		System.gc();
 		System.out.println("\t...Ahh, that felt good.");
 		System.out.println("Attaching to GL Canvas...");
-		tr.getCanvas().addGLEventListener(world);
+		gpu.addGLEventListener(world);
+		
 		System.out.println("\t...Done.");
 		System.out.println("Starting animator...");
-		tr.getAnimator().start();
+		gpu.startAnimator();
 		System.out.println("\t...Done.");
 		}//end OverworldGame
 	}//end OverworldGame

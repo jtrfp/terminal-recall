@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.awt.Canvas;
+import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -23,7 +23,7 @@ public class KeyStatus implements KeyListener
 	{
 	boolean [] keyStates = new boolean[256];
 	
-	public KeyStatus(Canvas c)
+	public KeyStatus(Component c)
 		{
 		c.addKeyListener(this);
 		}

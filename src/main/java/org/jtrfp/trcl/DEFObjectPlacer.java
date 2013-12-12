@@ -29,10 +29,10 @@ public class DEFObjectPlacer implements ObjectPlacer
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		//com.ritolaaudio.trcl.file.TDFFile.Tunnel [] tuns = tdf.getTunnels();
 		final Model [] models = new Model[defs.size()];
-		final GL3 gl = world.getTr().getGl();
+		final GL3 gl = world.getTr().getGPU().takeGL();
 		final TR tr = world.getTr();
 		
-		tr.releaseGL();
+		tr.getGPU().releaseGL();
 		
 		Future []futures = new Future[defs.size()];
 		//Get BIN models
@@ -44,11 +44,11 @@ public class DEFObjectPlacer implements ObjectPlacer
 				public void run()
 					{
 					final EnemyDefinition def = defs.get(index);
-					tr.takeGL();
+					tr.getGPU().takeGL();
 					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),gl);}
 					catch(Exception e){e.printStackTrace();}
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
-					tr.releaseGL();
+					tr.getGPU().releaseGL();
 					}
 				});
 			}
@@ -56,8 +56,8 @@ public class DEFObjectPlacer implements ObjectPlacer
 		
 		for(EnemyPlacement pl:places)
 			{//behavior objects cannot be shared because they contain state data for each mobile object
-			tr.releaseGL();
-			tr.takeGL();
+			tr.getGPU().releaseGL();
+			tr.getGPU().takeGL();
 			Model model =models[pl.getDefIndex()];
 			if(model!=null)
 				{

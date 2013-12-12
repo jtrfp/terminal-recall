@@ -42,7 +42,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 		
 		tr=world.getTr();
 		palette=tr.getGlobalPalette();
-		gl=tr.getGl();
+		gl=tr.getGPU().takeGL();
 		
 		sourceTunnel.getEntrance();
 		sourceTunnel.getExit();
@@ -52,12 +52,12 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 		try {
 			lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
 			def=world.getTr().getResourceManager().getDEFData(lvl.getEnemyDefinitionAndPlacementFile());
-			tr.releaseGL();
+			tr.getGPU().releaseGL();
 			DirectionVector entranceDV= sourceTunnel.getEntrance();
 			DirectionVector exitDV=sourceTunnel.getExit();
 			Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
 			Vector3D exitVector = new Vector3D((double)exitDV.getZ()/65535.,-.1,(double)exitDV.getX()/65535.).normalize();
-			tr.takeGL();
+			tr.getGPU().takeGL();
 			buildTunnel(sourceTunnel,entranceVector,true);
 			buildTunnel(sourceTunnel,exitVector,false);
 			
@@ -149,7 +149,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 		Color [] palette = tr.getGlobalPalette();
 		Obstacle obs = s.getObstacle();
 		WorldObject wo;
-		GL3 gl = tr.getGl();
+		GL3 gl = tr.getGPU().takeGL();
 		//obs=Obstacle.rotating34Wall;
 		Model m;
 		

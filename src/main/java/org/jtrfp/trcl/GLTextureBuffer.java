@@ -20,6 +20,8 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.gpu.GLProgram;
+
 public abstract class GLTextureBuffer extends RawGLBuffer
 	{
 	private final int textureID;
@@ -80,12 +82,13 @@ public abstract class GLTextureBuffer extends RawGLBuffer
 		gl.glBindTexture(getBindingTarget(), getTextureID());
 		}
 	
-	public final void bindToUniform(GL3 gl, int textureUnit, int uniformIndex)
+	public final void bindToUniform(GL3 gl, int textureUnit, GLProgram program, String uniformName)
 		{
-		if(uniformIndex==-1)throw new RuntimeException("UnformIndex is -1, which is invalid.");
+		//if(uniformIndex==-1)throw new RuntimeException("UnformIndex is -1, which is invalid.");
 		bindToTextureUnit(gl,textureUnit);
-		System.out.println("Binding texture unit "+textureUnit+" to uniform index "+uniformIndex);
-		gl.glUniform1i(uniformIndex, textureUnit);
+		//System.out.println("Binding texture unit "+textureUnit+" to uniform index "+uniformIndex);
+		program.getUniform(gl, uniformName).set(gl,textureUnit);
+		//gl.glUniform1i(uniformIndex, textureUnit);
 		}
 
 	}//end GLTextureBuffer(...)

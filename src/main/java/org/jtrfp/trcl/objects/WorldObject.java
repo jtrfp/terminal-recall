@@ -56,7 +56,7 @@ public class WorldObject implements PositionedRenderable
 	
 	public WorldObject()
 		{
-		allWorldObjects.add(this);
+		addWorldObject(this);
 		matrix=Matrix.create4x4();
 		}
 	
@@ -66,6 +66,10 @@ public class WorldObject implements PositionedRenderable
 		setWorld(w);
 		setModel(m);
 		}//end constructor
+	
+	private static final void addWorldObject(WorldObject o)
+		{if(o==null){new Exception().printStackTrace();System.exit(1);}
+		allWorldObjects.add(o);}
 	
 	public void setModel(Model m)
 		{
@@ -123,7 +127,8 @@ public class WorldObject implements PositionedRenderable
 		
 		ByteOrder order=world.
 				getTr().
-				getGPUByteOrder();
+				getGPU().
+				getByteOrder();
 		opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(opaqueIndicesList.size()*4).order(order);//4 bytes per int
 		transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(transparentIndicesList.size()*4).order(order);
 		

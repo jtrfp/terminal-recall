@@ -21,6 +21,9 @@ import java.util.Collection;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.gpu.GLProgram;
+import org.jtrfp.trcl.gpu.GLUniform;
+
 public class RenderList
 	{
 	public static final int NUM_SUBPASSES=4;
@@ -34,7 +37,8 @@ public class RenderList
 	private final int dummyBufferID;
 	private int numOpaqueBlocks;
 	private int numTransparentBlocks;
-	private final int renderListOffsetID,renderModeID;
+	//private final int renderListOffsetID,renderModeID;
+	private final GLUniform renderListOffsetUniform,renderModeUniform;
 	private ByteBuffer globalGPUBuffer[];
 	//private final TR tr;
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>()
@@ -74,7 +78,7 @@ public class RenderList
 		return globalGPUBuffer;
 		}//end getGlobalGPUBuffer()
 	
-	public RenderList(GL3 gl,int prg)
+	public RenderList(GL3 gl, GLProgram prg)
 		{
 		//Build VAO
 		IntBuffer ib = IntBuffer.allocate(1);
@@ -85,17 +89,19 @@ public class RenderList
 		gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0 );
-		renderListOffsetID=gl.glGetUniformLocation(prg, "renderListOffset");
-		renderModeID=gl.glGetUniformLocation(prg, "renderFlags");
+		renderListOffsetUniform=prg.getUniform(gl,"renderListOffset");
+		renderModeUniform=prg.getUniform(gl,"renderFlags");
+		//renderListOffsetID=gl.glGetUniformLocation(prg, "renderListOffset");
+		//renderModeID=gl.glGetUniformLocation(prg, "renderFlags");
 		}
 	private static int frameCounter=0;
 	
-	public void sendToGPU(GL3 gl, int prg)
+	public void sendToGPU(GL3 gl)
 		{
 		frameCounter++; frameCounter%=100;
 		}
 	
-	public void render(GL3 gl, int prg)
+	public void render(GL3 gl)
 		{
 		globalGPUBuffer=null;
 		
@@ -105,7 +111,8 @@ public class RenderList
 		//OPAQUE
 		//Turn on depth write, turn off transparency
 		gl.glDisable(GL3.GL_BLEND);
-		gl.glUniform1ui(renderModeID,OPAQUE_PASS);
+		//gl.glUniform1ui(renderModeID,OPAQUE_PASS);
+		renderModeUniform.set(gl, OPAQUE_PASS);
 		final int verticesPerSubPass=(NUM_BLOCKS_PER_SUBPASS*GPUTriangleVertex.VERTICES_PER_BLOCK);
 		final int numSubPasses=(numOpaqueVertices/verticesPerSubPass)+1;
 		//System.out.println("Performing "+numSubPasses+" subpasses.");
@@ -123,7 +130,8 @@ public class RenderList
 			final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
 			remainingVerts-=numVerts;
 			final int newOffset=rlOffset+sp*NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
-			gl.glUniform1ui(renderListOffsetID,newOffset);
+			//gl.glUniform1ui(renderListOffsetID,newOffset);
+			renderListOffsetUniform.setui(gl, newOffset);
 			gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
 			}//end for(subpasses)
 		//TRANSPARENT
@@ -133,9 +141,11 @@ public class RenderList
 		//////////
 		//gl.glDepthFunc(GL3.GL_ALWAYS);
 		/////////
-		gl.glUniform1ui(renderListOffsetID,
-				(GlobalObjectList.getArrayOffsetInBytes()/4)+NUM_BLOCKS_PER_PASS);
-		gl.glUniform1ui(renderModeID,BLEND_PASS);
+		/*gl.glUniform1ui(renderListOffsetID,
+				(GlobalObjectList.getArrayOffsetInBytes()/4)+NUM_BLOCKS_PER_PASS);*/
+		renderListOffsetUniform.setui(gl, (GlobalObjectList.getArrayOffsetInBytes()/4)+NUM_BLOCKS_PER_PASS);
+		renderModeUniform.set(gl, BLEND_PASS);
+		//gl.glUniform1ui(renderModeID,BLEND_PASS);
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 		
 		//////////

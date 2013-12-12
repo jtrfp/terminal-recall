@@ -20,12 +20,13 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
-import javax.media.opengl.glu.gl2.GLUgl2;
+
+import org.jtrfp.trcl.gpu.GLTexture;
+import org.jtrfp.trcl.gpu.GPU;
 
 public class Texture implements TextureDescription
 	{
@@ -33,7 +34,8 @@ public class Texture implements TextureDescription
 	private Color averageColor;
 	private static double pixelSize=1./512.; //This is a kludge; doesn't scale with megatexture
 	private static TextureTreeNode rootNode=null;
-	private static int globalTexID=-1;
+	//private static int globalTexID=-1;
+	private static GLTexture globalTexture;
 	private static final Texture fallbackTexture;
 	static
 		{
@@ -102,6 +104,8 @@ public class Texture implements TextureDescription
 	
 	static double getPixelSize(){return pixelSize;}
 	
+	public static GLTexture getGlobalTexture(){return globalTexture;}
+	
 	private static void registerNode(TextureTreeNode newNode)
 		{
 		if(rootNode==null)
@@ -149,7 +153,7 @@ public class Texture implements TextureDescription
 	
 	public static Texture getFallbackTexture(){return fallbackTexture;}
 	
-	public static int getGlobalTextureID(){return globalTexID;}
+	//public static int getGlobalTextureID(){return globalTexID;}
 	
 	public Color getAverageColor()
 		{
@@ -167,8 +171,9 @@ public class Texture implements TextureDescription
 		return averageColor;
 		}//end getAverageColor()
 	
-	public static void finalize(GL3 gl)
+	public static void finalize(GPU gpu)
 		{
+		//gl.getContext().release();
 		final int gSideLen=rootNode.getSideLength();
 		
 		//Setup the empty rows
@@ -196,6 +201,11 @@ public class Texture implements TextureDescription
 		buf.rewind();
 		System.out.println("Creating a new OpenGL texture for megatexture...");
 		
+		GLTexture tex = gpu.newTexture(/*(int)(int) (Math.log(gSideLen) / Math.log(2))*/);
+		tex.setTextureImageRGBA(buf);
+		globalTexture=tex;
+		//globalTexID=tex.getTextureID();
+		/*
 		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
 		globalTexID=createTextureID(gl);
 		System.out.println("\t...Done.");
@@ -211,14 +221,16 @@ public class Texture implements TextureDescription
 		gl.glTexParameterf(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, isoSize.get(0));
 		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
 		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
-		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, 
-		                   GL3.GL_LINEAR_MIPMAP_LINEAR);
+		//gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, 
+		//                   GL3.GL_LINEAR_MIPMAP_LINEAR);
 		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, 
 		                   GL3.GL_LINEAR_MIPMAP_LINEAR);
 		glu.gluBuild2DMipmaps( GL3.GL_TEXTURE_2D, GL3.GL_RGBA4, gSideLen, gSideLen, 
 				GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
 		System.out.println("Result from mipmap: "+glu.gluErrorString(gl.glGetError()));
 		System.out.println("\t...Done.");
+		*/
+		
 		}//end finalize()
 	
 	public static final int createTextureID(GL3 gl)

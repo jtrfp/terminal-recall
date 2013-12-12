@@ -32,24 +32,14 @@ public class KeyStatus implements KeyEventDispatcher
 	public boolean dispatchKeyEvent(KeyEvent evt)
 		{
 		if(evt.getID()==KeyEvent.KEY_PRESSED)
-			{keyPressed(evt);return true;}
+			{keyStates[evt.getKeyCode()]=true;return true;}
 		else if(evt.getID()==KeyEvent.KEY_RELEASED)
-			{keyReleased(evt);return true;}
+			{keyStates[evt.getKeyCode()]=false;return true;}
 		return false;
 		}
 	
 	public boolean isPressed(int index)
-		{
-		return keyStates[index];
-		}
-	
-	public void keyPressed(KeyEvent evt)
-		{keyStates[evt.getKeyCode()]=true;}
-
-	public void keyReleased(KeyEvent evt)
-		{
-		keyStates[evt.getKeyCode()]=false;
-		}
+		{return keyStates[index];}
 	
 	public void keyTyped(KeyEvent evt)
 		{}

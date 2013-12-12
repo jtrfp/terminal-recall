@@ -16,16 +16,26 @@
 package org.jtrfp.trcl;
 
 import java.awt.Component;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class KeyStatus implements KeyListener
+public class KeyStatus implements KeyEventDispatcher
 	{
 	boolean [] keyStates = new boolean[256];
 	
 	public KeyStatus(Component c)
+		{KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);}
+	
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent evt)
 		{
-		c.addKeyListener(this);
+		if(evt.getID()==KeyEvent.KEY_PRESSED)
+			{keyPressed(evt);return true;}
+		else if(evt.getID()==KeyEvent.KEY_RELEASED)
+			{keyReleased(evt);return true;}
+		return false;
 		}
 	
 	public boolean isPressed(int index)
@@ -33,19 +43,14 @@ public class KeyStatus implements KeyListener
 		return keyStates[index];
 		}
 	
-	@Override
 	public void keyPressed(KeyEvent evt)
-		{
-		keyStates[evt.getKeyCode()]=true;
-		}
+		{keyStates[evt.getKeyCode()]=true;}
 
-	@Override
 	public void keyReleased(KeyEvent evt)
 		{
 		keyStates[evt.getKeyCode()]=false;
 		}
-
-	@Override
+	
 	public void keyTyped(KeyEvent evt)
 		{}
 	}//end KeyStatus

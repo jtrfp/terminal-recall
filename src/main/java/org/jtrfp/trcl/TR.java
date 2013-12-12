@@ -17,18 +17,16 @@ package org.jtrfp.trcl;
 
 
 import java.awt.Color;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -39,8 +37,6 @@ import javax.swing.SwingUtilities;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
-
-import com.jogamp.opengl.util.FPSAnimator;
 
 public final class TR
 	{
@@ -88,7 +84,7 @@ public final class TR
 	
 	public TR()
 		{
-		keyStatus = new KeyStatus(gpu.getComponent());
+		keyStatus = new KeyStatus(frame);
 		try{
 		SwingUtilities.invokeAndWait(new Runnable()
 			{

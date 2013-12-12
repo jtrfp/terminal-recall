@@ -87,8 +87,8 @@ public class RenderList
 		gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0 );
-		renderListOffsetUniform=prg.getUniform(gl,"renderListOffset");
-		renderModeUniform=prg.getUniform(gl,"renderFlags");
+		renderListOffsetUniform=prg.getUniform("renderListOffset");
+		renderModeUniform=prg.getUniform("renderFlags");
 		}
 	private static int frameCounter=0;
 	

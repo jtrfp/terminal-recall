@@ -48,7 +48,7 @@ public class GLProgram
 				.toString();
 		}
 
-	public GLUniform getUniform(GL3 gl, String uniformName)
+	public GLUniform getUniform(String uniformName)
 		{return new GLUniform(this,gl.glGetUniformLocation(programID,uniformName));}
 
 	int getProgramID()

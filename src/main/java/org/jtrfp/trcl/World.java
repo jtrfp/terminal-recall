@@ -305,9 +305,9 @@ public final class World implements GLEventListener
 			float fogGreen = (float) fogColor.getGreen() / 255f;
 			float fogBlue = (float) fogColor.getBlue() / 255f;
 			
-			shaderProgram.getUniform(gl,"fogStart").set((float) (cameraViewDepth * 1.2) / 5f);
-			shaderProgram.getUniform(gl,"fogEnd").set((float) (cameraViewDepth * 1.5) * 1.3f);
-			shaderProgram.getUniform(gl,"fogColor").set(fogRed, fogGreen, fogBlue);
+			shaderProgram.getUniform("fogStart").set((float) (cameraViewDepth * 1.2) / 5f);
+			shaderProgram.getUniform("fogEnd").set((float) (cameraViewDepth * 1.5) * 1.3f);
+			shaderProgram.getUniform("fogColor").set(fogRed, fogGreen, fogBlue);
 			}
 		catch (Exception e)
 			{
@@ -322,7 +322,7 @@ public final class World implements GLEventListener
 	private void bindBuffersAndTextures(GL3 gl, PrintStream shaderLog)
 		{try{
 			GlobalDynamicTextureBuffer.getTextureBuffer().bindToUniform(gl, 1, shaderProgram, "rootBuffer");
-			shaderProgram.getUniform(gl, "textureMap").set((int)0);//Texture unit 0 mapped to textureMap
+			shaderProgram.getUniform("textureMap").set((int)0);//Texture unit 0 mapped to textureMap
 			}
 		catch (RuntimeException e)
 			{e.printStackTrace();}

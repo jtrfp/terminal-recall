@@ -87,7 +87,7 @@ public abstract class GLTextureBuffer extends RawGLBuffer
 		//if(uniformIndex==-1)throw new RuntimeException("UnformIndex is -1, which is invalid.");
 		bindToTextureUnit(gl,textureUnit);
 		//System.out.println("Binding texture unit "+textureUnit+" to uniform index "+uniformIndex);
-		program.getUniform(gl, uniformName).set(textureUnit);
+		program.getUniform(uniformName).set(textureUnit);
 		//gl.glUniform1i(uniformIndex, textureUnit);
 		}
 

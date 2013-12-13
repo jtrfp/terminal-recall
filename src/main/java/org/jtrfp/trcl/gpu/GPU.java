@@ -92,4 +92,7 @@ public class GPU
 			}//end if(!null)
 		return gl;
 		}
+	
+	public ReallocatableGLMemory newEmptyGLMemory()
+		{return new ReallocatableGLTextureBuffer(this);}
 	}//end GPU

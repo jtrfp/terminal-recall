@@ -22,7 +22,7 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.Texture;
 
-public abstract class GLTextureBuffer extends RawGLBuffer
+public class GLTextureBuffer extends RawGLBuffer
 	{
 	private final int textureID;
 	public static final int BYTES_PER_VEC4=4*4;
@@ -82,12 +82,12 @@ public abstract class GLTextureBuffer extends RawGLBuffer
 		gl.glBindTexture(getBindingTarget(), getTextureID());
 		}
 	
-	public final void bindToUniform(GL3 gl, int textureUnit, GLProgram program, String uniformName)
+	public final void bindToUniform(GL3 gl, int textureUnit, GLProgram program, GLUniform uniform)
 		{
 		//if(uniformIndex==-1)throw new RuntimeException("UnformIndex is -1, which is invalid.");
 		bindToTextureUnit(gl,textureUnit);
 		//System.out.println("Binding texture unit "+textureUnit+" to uniform index "+uniformIndex);
-		program.getUniform(uniformName).set(textureUnit);
+		uniform.set(textureUnit);
 		//gl.glUniform1i(uniformIndex, textureUnit);
 		}
 

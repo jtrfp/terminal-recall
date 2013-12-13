@@ -29,6 +29,7 @@ public class RawGLBuffer
 	private boolean mapped=false;
 	protected static GL3 gl;
 	protected static GPU gpu;
+	private int memoryUsageHint=MemoryUsageHint.DynamicRead.getGLEnumInt();
 	
 	protected RawGLBuffer(int sizeInBytes, GPU gpu)
 		{
@@ -45,8 +46,10 @@ public class RawGLBuffer
 		//map(gl); //causes more problems than it solves
 		}//end constructor
 	
+	void setUsageHint(int hint){memoryUsageHint=hint;}
+	
 	protected int getReadWriteParameter()
-		{return GL2.GL_DYNAMIC_READ;}
+		{return memoryUsageHint;}
 	
 	protected int getBindingTarget()
 		{return GL2.GL_ARRAY_BUFFER;}
@@ -74,7 +77,7 @@ public class RawGLBuffer
 		mapped=false;
 		}
 	
-	public void free(GL4 gl)
+	public void free(GL3 gl)
 		{
 		unmap(gl);
 		gl.glDeleteBuffers(1, IntBuffer.wrap(new int [] {bufferID}));
@@ -124,4 +127,10 @@ public class RawGLBuffer
 		}
 	
 	public ByteBuffer getUnderlyingBuffer(){return localBuffer;}
+	public ByteBuffer getDuplicateReferenceOfUnderlyingBuffer()
+		{
+		final ByteBuffer result = localBuffer.duplicate();
+		result.order(localBuffer.order()).clear();
+		return result;
+		}
 	}//end GLBuffer

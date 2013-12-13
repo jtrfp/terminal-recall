@@ -231,7 +231,7 @@ public final class World implements GLEventListener
 	private void renderVisibleObjects(GL3 gl)
 		{
 		// Update GPU
-		GlobalDynamicTextureBuffer.getTextureBuffer().map(gl);
+		GlobalDynamicTextureBuffer.getTextureBuffer().map();
 		PrimitiveList.tickAnimators();
 		// Ticks
 		long tickTimeInMillis = System.currentTimeMillis();
@@ -242,7 +242,7 @@ public final class World implements GLEventListener
 						lookAtVector.scalarMultiply(cameraViewDepth / 2.1)),
 				renderList.getSubmitter());
 		renderList.sendToGPU(gl);
-		GlobalDynamicTextureBuffer.getTextureBuffer().unmap(gl);
+		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
 		
 		// Render objects
 		renderList.render(gl);
@@ -316,7 +316,7 @@ public final class World implements GLEventListener
 
 	private void bindBuffersAndTextures(GL3 gl, PrintStream shaderLog)
 		{try{
-			GlobalDynamicTextureBuffer.getTextureBuffer().bindToUniform(gl, 1, shaderProgram, "rootBuffer");
+			GlobalDynamicTextureBuffer.getTextureBuffer().bindToUniform(1, shaderProgram, shaderProgram.getUniform("rootBuffer"));
 			shaderProgram.getUniform("textureMap").set((int)0);//Texture unit 0 mapped to textureMap
 			}
 		catch (RuntimeException e)
@@ -335,7 +335,7 @@ public final class World implements GLEventListener
 	
 	private void uploadDataToGPU(GL3 gl)
 		{
-		GlobalDynamicTextureBuffer.getTextureBuffer().map(gl);
+		GlobalDynamicTextureBuffer.getTextureBuffer().map();
 		System.out.println("Uploading vertex data to GPU...");
 		TriangleList.uploadAllListsToGPU(gl);
 		System.out.println("...Done.");
@@ -343,7 +343,7 @@ public final class World implements GLEventListener
 		WorldObject.uploadAllObjectDefinitionsToGPU();
 		System.out.println("...Done.");
 		System.out.println("\t...World.init() complete.");
-		GlobalDynamicTextureBuffer.getTextureBuffer().unmap(gl);
+		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
 		}
 
 	private void buildShaderProgram(PrintStream shaderLog)

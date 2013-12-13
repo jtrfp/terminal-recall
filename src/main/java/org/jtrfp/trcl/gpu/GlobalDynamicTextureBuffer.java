@@ -13,7 +13,7 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.gpu.GPU;
 
 public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	{
@@ -30,8 +29,8 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	private static GLTextureBuffer buffer;
 	private static final ArrayList<Class<?>>finalizationList = new ArrayList<Class<?>>(10);
 	
-	private GlobalDynamicTextureBuffer(int sizeInBytes, GL3 gl)
-		{super(sizeInBytes,gl);}
+	private GlobalDynamicTextureBuffer(int sizeInBytes, GPU gpu)
+		{super(sizeInBytes,gpu);}
 	
 	public static ByteBuffer getByteBuffer()
 		{
@@ -48,9 +47,7 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 			c.getMethod("finalizeAllocation", (Class<?>[])null).invoke(null, (Object[])null);
 			}catch(Exception e){e.printStackTrace();}}
 		finalizationList.clear();
-		GL3 gl = gpu.takeGL();
-		buffer=new GlobalDynamicTextureBuffer(sizeInBytes.get(),gl);
-		gpu.releaseGL();
+		buffer=new GlobalDynamicTextureBuffer(sizeInBytes.get(),gpu);
 		}
 	
 	@Override

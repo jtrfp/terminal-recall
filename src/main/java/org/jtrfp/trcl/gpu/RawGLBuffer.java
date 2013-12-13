@@ -13,7 +13,7 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -27,10 +27,14 @@ public class RawGLBuffer
 	private int bufferID;
 	protected ByteBuffer localBuffer;
 	private boolean mapped=false;
+	protected static GL3 gl;
+	protected static GPU gpu;
 	
-	protected RawGLBuffer(int sizeInBytes, final GL3 gl)
+	protected RawGLBuffer(int sizeInBytes, GPU gpu)
 		{
 		if(sizeInBytes==0)throw new RuntimeException("Cannot allocate a buffer of size zero.");
+		RawGLBuffer.gpu=gpu;
+		gl=gpu.getGl();
 		final IntBuffer iBuf = IntBuffer.allocate(1);
 		gl.glGenBuffers(1, iBuf);
 		

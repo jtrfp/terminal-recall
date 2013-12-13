@@ -13,14 +13,14 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.gpu;
 
 import java.nio.IntBuffer;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.gpu.GLProgram;
+import org.jtrfp.trcl.Texture;
 
 public abstract class GLTextureBuffer extends RawGLBuffer
 	{
@@ -33,9 +33,9 @@ public abstract class GLTextureBuffer extends RawGLBuffer
 	 * @param sizeInBytes	Number of bytes to allocate. NOTE: This will round up to next multiple of 1024 to reduce probability of segfault in AMD driver.
 	 * @param gl
 	 */
-	public GLTextureBuffer(int sizeInBytes, final GL3 gl)
+	GLTextureBuffer(int sizeInBytes, GPU gpu)
 		{
-		super(roundToNextKB(sizeInBytes),gl);
+		super(roundToNextKB(sizeInBytes),gpu);
 		//Allocate a texture id
 		textureID=Texture.createTextureID(gl);
 		gl.glBindTexture(getBindingTarget(), getTextureID());

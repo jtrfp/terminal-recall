@@ -12,8 +12,6 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
-import org.jtrfp.trcl.World;
-
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class GPU

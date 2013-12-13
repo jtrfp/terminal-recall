@@ -17,6 +17,8 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+
 public final class ObjectDefinition
 	{
 	public static final int BYTES_PER_OBJECT_BLOCK = 16; // One vec4 is 16bytes

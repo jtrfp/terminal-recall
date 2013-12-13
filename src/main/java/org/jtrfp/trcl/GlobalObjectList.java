@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+
 public class GlobalObjectList
 	{
 	private static final IndirectObject<Integer> arrayOffset = new IndirectObject<Integer>();

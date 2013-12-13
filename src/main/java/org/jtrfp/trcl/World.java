@@ -41,6 +41,7 @@ import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLVertexShader;
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.objects.WorldObject;
 
 import com.jogamp.opengl.util.glsl.ShaderState;
@@ -136,8 +137,7 @@ public final class World implements GLEventListener
 		fpsTracking();
 
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-		// gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-
+		
 		updateCameraMovement();
 		calculateCameraMatrix(gl);
 		renderVisibleObjects(gl);
@@ -286,19 +286,14 @@ public final class World implements GLEventListener
 
 	private void fauxInit(GL3 gl)
 		{
-		System.out.println("World.init() start.");
 		setupFixedPipelineBehavior(gl);
 		ByteArrayOutputStream shaderOS = new ByteArrayOutputStream();
 		PrintStream shaderLog = new PrintStream(shaderOS);
 
 		try {
-			System.out.println("buildShaderProgram...");
 			buildShaderProgram(shaderLog);
-			System.out.println("setupProjectionMatrix...");
 			setupProjectionMatrix(gl);
-			System.out.println("uploadDataToGPU...");
 			uploadDataToGPU(gl);
-			System.out.println("bindBuffersAndTextures...");
 			bindBuffersAndTextures(gl, shaderLog);
 
 			float fogRed = (float) fogColor.getRed() / 255f;
@@ -316,7 +311,7 @@ public final class World implements GLEventListener
 			System.exit(1);
 			}
 		firstRun = false;
-		System.out.println("");
+		//System.out.println("");
 		}
 
 	private void bindBuffersAndTextures(GL3 gl, PrintStream shaderLog)

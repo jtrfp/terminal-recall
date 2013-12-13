@@ -17,6 +17,8 @@ package org.jtrfp.trcl;
 
 import java.nio.ByteBuffer;
 
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+
 public class ElementAttrib<TYPE extends Number> implements Settable
 	{
 	private final int byteOffset;

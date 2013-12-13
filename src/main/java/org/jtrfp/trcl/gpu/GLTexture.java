@@ -37,7 +37,7 @@ public class GLTexture
 		System.out.println("Uploading megatexture to OpenGL...");
 		
 		GLUgl2 glu = new GLUgl2();
-		GL3 gl = gpu.takeGL();
+		GL3 gl = gpu.getGl();
 		System.out.println("glu: "+glu.getCurrentGL()+" gl: "+gl);
 		gl.glBindTexture(GL3.GL_TEXTURE_2D, textureID);
 		FloatBuffer isoSize = FloatBuffer.wrap(new float[]{0});
@@ -53,7 +53,6 @@ public class GLTexture
 		System.out.println("Uploading texture...");
 		glu.gluBuild2DMipmaps( GL3.GL_TEXTURE_2D, GL3.GL_RGBA4, rawSideLength, rawSideLength, 
 				GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
-		gpu.releaseGL();
 		System.out.println("\t...Done.");
 		}
 	

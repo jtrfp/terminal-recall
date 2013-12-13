@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.jtrfp.trcl.GLTextureBuffer;
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.Matrix;
 import org.jtrfp.trcl.Model;
@@ -36,6 +35,7 @@ import org.jtrfp.trcl.PositionedRenderable;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.TR;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.gpu.GLTextureBuffer;
 
 public class WorldObject implements PositionedRenderable
 	{

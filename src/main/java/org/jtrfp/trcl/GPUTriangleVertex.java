@@ -17,6 +17,9 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jtrfp.trcl.gpu.GLTextureBuffer;
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+
 public class GPUTriangleVertex implements GPUVec4Element
 	{
 	public static final int BYTES_PER_VERTEX=GLTextureBuffer.BYTES_PER_VEC4; //16 bytes in a vec4, 1 vec4 per Vertex

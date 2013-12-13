@@ -27,6 +27,7 @@ import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public class OverworldGame
 	{
@@ -76,6 +77,7 @@ public class OverworldGame
 		System.out.println("\t...Done.");
 		System.out.println("Finalizing GPU memory allocation...");
 		GlobalDynamicTextureBuffer.finalizeAllocation(gpu);
+		gpu.releaseGL();
 		//////// NO GL BEYOND THIS POINT ////////
 		System.out.println("\t...Done.");
 		System.out.println("Invoking JVM's garbage collector...");

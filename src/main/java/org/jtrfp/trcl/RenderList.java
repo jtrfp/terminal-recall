@@ -23,6 +23,7 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
+import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public class RenderList
 	{

@@ -3,8 +3,8 @@ package org.jtrfp.trcl.objects;
 import java.awt.Dimension;
 
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.ObjectDirection;
 import org.jtrfp.trcl.RenderMode;
+import org.jtrfp.trcl.TR;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Triangle;
 
@@ -12,12 +12,13 @@ import org.jtrfp.trcl.Triangle;
 public class BillboardSprite extends WorldObject
 	{
 	Dimension dim;
+	
+	public BillboardSprite(TR tr){super(tr);}
 	@Override
 	protected void recalculateTransRotMBuffer()
 		{
-		ObjectDirection camDir=getWorld().getCameraDirection();
-		this.setHeading(camDir.getHeading().negate());
-		this.setTop(camDir.getTop());
+		this.setHeading(getTr().getRenderer().getCamera().getLookAtVector().negate());
+		this.setTop(getTr().getRenderer().getCamera().getUpVector());
 		super.recalculateTransRotMBuffer();
 		}//end recalculateTransRotMBuffer()
 	

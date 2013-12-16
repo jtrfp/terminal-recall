@@ -81,7 +81,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 						//System.out.println("TerrainSystem: addToGrid ...");
 						if(m.finalizeModel().getTriangleList()!=null)
 							{
-							final TerrainChunk chunkToAdd = new TerrainChunk(world,m);
+							final TerrainChunk chunkToAdd = new TerrainChunk(world.getTr(),m);
 							chunkToAdd.setPosition(new Vector3D(objectX, objectY, objectZ));
 							add(chunkToAdd);
 							}

@@ -20,14 +20,13 @@ import org.jtrfp.trcl.objects.WorldObject2D;
 
 public class CharDisplay extends WorldObject2D
 	{
-	private GLFont font;
+	//private GLFont font;
 	private SelectableTexture tex;
 	
-	public CharDisplay(RenderableSpacePartitioningGrid grid, double glSize, GLFont font)
+	public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid, double glSize, GLFont font)
 		{
-		super();
-		setWorld(grid.getWorld());
-		this.font=font;
+		super(tr);
+		//this.font=font;
 		final Model model = new Model(false);
 		tex=new SelectableTexture(font.getTextures());
 		Triangle [] tris = Triangle.quad2Triangles(

@@ -34,6 +34,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.core.Renderer;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -55,6 +57,7 @@ public final class TR
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
 	public static final ExecutorService threadPool = Executors.newCachedThreadPool();
+	private final Renderer renderer;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -64,6 +67,7 @@ public final class TR
 	private TRConfiguration trConfig;
 	private GL3 glCache;
 	private ByteOrder byteOrder;
+	private final World world;
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -99,8 +103,16 @@ public final class TR
 			//frame.pack();
 			}});
 		}catch(Exception e){e.printStackTrace();}
+		gpu.takeGL();
+		renderer=new Renderer(gpu);
+		gpu.releaseGL();
 		setResourceManager(new ResourceManager(this));
-		}
+		world = new World(
+				256*mapSquareSize,
+				14.*mapSquareSize,
+				256*mapSquareSize,
+				mapSquareSize*visibilityDiameterInMapSquares/2., this);
+		}//end constructor
 	
 	public void showStopper(final Exception e)
 		{try{
@@ -220,4 +232,20 @@ public final class TR
 	public Color [] getGlobalPalette(){return globalPalette;}
 	
 	public GPU getGPU(){return gpu;}
+
+	/**
+	 * @return the renderer
+	 */
+	public Renderer getRenderer()
+		{
+		return renderer;
+		}
+
+	/**
+	 * @return the world
+	 */
+	public World getWorld()
+		{
+		return world;
+		}
 	}//end TR

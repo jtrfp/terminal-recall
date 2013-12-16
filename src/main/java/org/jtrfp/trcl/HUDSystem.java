@@ -21,13 +21,13 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	{
 	public HUDSystem(World world)
 		{
-		super(world.getRootGrid());
+		super(world);
 		
 		//Dash Text
 		GLFont font;
 		try
 			{//TODO: Have TR allocate the font ahead of time.
-			addAlwaysVisible(new Dashboard(world,world.getTr()));
+			addAlwaysVisible(new Dashboard(world.getTr()));
 			font = new GLFont(world.getTr().getResourceManager().getFont("capacitor"));
 			}
 		catch(Exception e)
@@ -41,26 +41,26 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		final double BOTTOM_LINE_Y=.82;
 		final double FONT_SIZE=.04;
 		
-		CharLineDisplay objective = new CharLineDisplay(this,FONT_SIZE,16,font);
+		CharLineDisplay objective = new CharLineDisplay(world.getTr(),this,FONT_SIZE,16,font);
 		objective.setContent("FLY TO JUMP ZONE");
 		objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,0));
 		
-		CharLineDisplay distance = new CharLineDisplay(this,FONT_SIZE,5,font);
+		CharLineDisplay distance = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		distance.setContent("01234");
 		distance.setPosition(new Vector3D(.42,TOP_LINE_Y,0));
 		
-		CharLineDisplay weapon = new CharLineDisplay(this,FONT_SIZE,5,font);
+		CharLineDisplay weapon = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		weapon.setContent("RFL20");
 		weapon.setPosition(new Vector3D(-.44,BOTTOM_LINE_Y,0));
 		
-		CharLineDisplay sector = new CharLineDisplay(this,FONT_SIZE,7,font);
+		CharLineDisplay sector = new CharLineDisplay(world.getTr(),this,FONT_SIZE,7,font);
 		sector.setContent("255,255");
 		sector.setPosition(new Vector3D(.38,BOTTOM_LINE_Y,0));
 		
-		CharLineDisplay ammo = new CharLineDisplay(this,FONT_SIZE,5,font);
+		CharLineDisplay ammo = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		ammo.setContent("1337");
 		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,0));
 		
-		addAlwaysVisible(new Crosshairs(world));
+		addAlwaysVisible(new Crosshairs(world.getTr()));
 		}//end constructor
 	}//end HUDSystem

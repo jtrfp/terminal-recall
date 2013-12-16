@@ -27,10 +27,9 @@ public abstract class MobileObject extends WorldObject implements TickListener
 	
 	public MobileObject(Model model, ObjectBehavior behavior, World world)
 		{
-		super(world,model);
+		super(world.getTr(),model);
 		this.behavior=behavior;
 		if(behavior!=null)behavior.setParent(this);
-		if(world==null)throw new RuntimeException("World cannot be null.");
 		world.addTickListener(this);
 		}//end constructor()
 	

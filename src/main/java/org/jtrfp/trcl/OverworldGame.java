@@ -31,7 +31,7 @@ import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public class OverworldGame
 	{
-	private World world;
+	//private World world;
 	private OverworldSystem overworldSystem;
 	private HUDSystem hudSystem;
 	private BackdropSystem backdropSystem;
@@ -40,13 +40,12 @@ public class OverworldGame
 	
 	public OverworldGame(LVLFile lvl, TR tr) throws IllegalAccessException, FileLoadException, IOException
 		{
-		world = new World(256*TR.mapSquareSize,14.*TR.mapSquareSize,256*TR.mapSquareSize,TR.mapSquareSize*visibleTerrainGridDiameter/2., tr);
 		//Set up palette
 		Color [] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 		globalPalette[0]=new Color(0,0,0,0);//index zero is transparent
 		tr.setGlobalPalette(globalPalette);
 		
-		hudSystem = new HUDSystem(world);
+		hudSystem = new HUDSystem(tr.getWorld());
 		
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());
@@ -56,8 +55,8 @@ public class OverworldGame
 				{
 				NAVFile.START start = (NAVFile.START)nObj;
 				Location3D loc = start.getLocationOnMap();
-				world.setCameraPosition(Tunnel.TUNNEL_START_POS);
-				world.setCameraDirection(Tunnel.TUNNEL_START_DIRECTION);
+				tr.getRenderer().getCamera().setCameraPosition(Tunnel.TUNNEL_START_POS);
+				tr.getWorld().setCameraDirection(Tunnel.TUNNEL_START_DIRECTION);
 				//TODO: Uncomment to enable player locale
 				//world.setCameraDirection(new ObjectDirection(start.getRoll(),start.getPitch(),start.getYaw()));
 				//Y is nudged up because some levels put player disturbingly close to the ground
@@ -67,10 +66,10 @@ public class OverworldGame
 		
 		//TODO: Tunnel activators
 		
-		overworldSystem = new OverworldSystem(world, lvl);
-		backdropSystem = new BackdropSystem(world);
+		overworldSystem = new OverworldSystem(tr.getWorld(), lvl);
+		backdropSystem = new BackdropSystem(tr.getWorld());
 		
-		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),world);
+		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
 		GPU gpu = tr.getGPU();
 		System.out.println("Building master texture...");
 		Texture.finalize(gpu);
@@ -84,7 +83,7 @@ public class OverworldGame
 		System.gc();
 		System.out.println("\t...Ahh, that felt good.");
 		System.out.println("Attaching to GL Canvas...");
-		gpu.addGLEventListener(world);
+		gpu.addGLEventListener(tr.getWorld());
 		
 		System.out.println("\t...Done.");
 		System.out.println("Starting animator...");

@@ -27,28 +27,28 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 					(lvl.getTexturePlacementFile(),texturePalette);
 			//Terrain
 			System.out.println("Building terrain...");
-			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize, world.sizeY/2.,world);
+			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize, w.sizeY/2.,w);
 			System.out.println("...Done.");
 			//Clouds
 			System.out.println("Setting up sky...");
 			if(!lvl.getCloudTextureFile().contentEquals("stars.vox"))
 				{
 				cloudSystem = new CloudSystem(
+						tr,
 						this,
 						lvl,
 						TR.mapSquareSize*8,
 						(int)(TR.mapWidth/(TR.mapSquareSize*8)),
-						world.sizeY/3.5);
+						w.sizeY/3.5);
 				}
 			System.out.println("...Done.");
 			//Objects
 			System.out.println("Setting up objects...");
-			ObjectSystem objectSystem=new ObjectSystem(this,world,terrain,lvl);
+			ObjectSystem objectSystem=new ObjectSystem(this,w,terrain,lvl);
 			objectSystem.activate();
 			
 			System.out.println("...Done.");
 			//Tunnel activators
-			
 			}
 		catch(Exception e)
 			{e.printStackTrace();}

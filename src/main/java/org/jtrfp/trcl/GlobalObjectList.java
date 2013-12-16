@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import org.jtrfp.trcl.core.RenderList;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public class GlobalObjectList

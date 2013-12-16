@@ -87,7 +87,7 @@ public class GPU
 				{gl=gl1.getGL3();
 				canvas.setGL(gl=new DebugGL3(gl));
 				break;
-				} Thread.sleep(100);}}
+				} Thread.sleep(2000);}}
 			catch(InterruptedException e){e.printStackTrace();}
 			}//end if(!null)
 		return gl;

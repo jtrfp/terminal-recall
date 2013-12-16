@@ -25,7 +25,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	private double squareSize, viewingRadius;
 	private Object [] gridSquares;
 	private int squaresX, squaresY, squaresZ;
-	World world;
+	//World world;
 	private ArrayList<E> alwaysVisible = new ArrayList<E>();
 	private SpacePartitioningGrid<E> parentGrid = null;
 	private ArrayList<SpacePartitioningGrid<E>> branchGrids = new ArrayList<SpacePartitioningGrid<E>>();
@@ -54,19 +54,17 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		setSquaresY(parentGrid.getSquaresY());
 		setSquaresZ(parentGrid.getSquaresZ());
 		setViewingRadius(parentGrid.getViewingRadius());
-		setWorld(parentGrid.getWorld());
 		
 		allocateSquares();
 		}//end setParentGrid(...)
 
-	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius, World world)
+	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius)
 		{
 		setSquareSize(squareSize);
 		setSquaresX((int)(size.getX()/squareSize));
 		setSquaresY((int)(size.getY()/squareSize));
 		setSquaresZ((int)(size.getZ()/squareSize));
 		setViewingRadius(viewingRadius);
-		setWorld(world);
 		
 		allocateSquares();
 		}//end constructor
@@ -352,21 +350,5 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	public void setViewingRadius(double viewingRadius)
 		{
 		this.viewingRadius = viewingRadius;
-		}
-
-	/**
-	 * @return the world
-	 */
-	public World getWorld()
-		{
-		return world;
-		}
-
-	/**
-	 * @param world the world to set
-	 */
-	public void setWorld(World world)
-		{
-		this.world = world;
 		}
 	}//end SpacePartitionGrid

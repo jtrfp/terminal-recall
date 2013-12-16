@@ -42,7 +42,8 @@ public class WorldObject implements PositionedRenderable
 	private Vector3D heading = new Vector3D(new double []{0,0,1}); //Facing direction
 	private Vector3D top = new Vector3D(new double []{0,1,0});		//Normal describing the top of the object (for tilt)
 	protected Vector3D position;
-	private World world;
+	private final TR tr;
+	//private World world;
 	private boolean visible=false;
 	private Model model;
 	private ArrayList<PositionListener> positionListeners = new ArrayList<PositionListener>();
@@ -56,16 +57,16 @@ public class WorldObject implements PositionedRenderable
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
 	
-	public WorldObject()
+	public WorldObject(TR tr)
 		{
+		this.tr=tr;
 		addWorldObject(this);
 		matrix=Matrix.create4x4();
 		}
 	
-	public WorldObject(World w,Model m)
+	public WorldObject(TR tr,Model m)
 		{
-		this();
-		setWorld(w);
+		this(tr);
 		setModel(m);
 		}//end constructor
 	
@@ -119,7 +120,7 @@ public class WorldObject implements PositionedRenderable
 	
 	public final void initializeObjectDefinitions()
 		{
-		if(world==null)throw new RuntimeException("World cannot be null. (did you forget to set it?)");
+		//if(world==null)throw new RuntimeException("World cannot be null. (did you forget to set it?)");
 		ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
 		ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
 		
@@ -127,8 +128,7 @@ public class WorldObject implements PositionedRenderable
 		processPrimitiveList(model.getLineSegmentList(),lineSegmentObjectDefinitions,transparentIndicesList);
 		processPrimitiveList(model.getTransparentTriangleList(),transparentTriangleObjectDefinitions,transparentIndicesList);
 		
-		ByteOrder order=world.
-				getTr().
+		ByteOrder order=getTr().
 				getGPU().
 				getByteOrder();
 		opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(opaqueIndicesList.size()*4).order(order);//4 bytes per int
@@ -176,17 +176,17 @@ public class WorldObject implements PositionedRenderable
 		
 		if(LOOP)
 			{
-			double delta = position.getX()-world.getCameraPosition().getX();
+			double delta = position.getX()-tr.getRenderer().getCamera().getCameraPosition().getX();
 			if(delta>TR.mapWidth/2.)
 				{tV=new Vector3D(tV.getX()-TR.mapWidth,tV.getY(),tV.getZ());}
 			else if(delta<-TR.mapWidth/2.)
 				{tV=new Vector3D(tV.getX()+TR.mapWidth,tV.getY(),tV.getZ());}
-			delta = position.getY()-world.getCameraPosition().getY();
+			delta = position.getY()-tr.getRenderer().getCamera().getCameraPosition().getY();
 			if(delta>TR.mapWidth/2.)
 				{tV=new Vector3D(tV.getX(),tV.getY()-TR.mapWidth,tV.getZ());}
 			else if(delta<-TR.mapWidth/2.)
 				{tV=new Vector3D(tV.getX(),tV.getY()+TR.mapWidth,tV.getZ());}
-			delta = position.getZ()-world.getCameraPosition().getZ();
+			delta = position.getZ()-tr.getRenderer().getCamera().getCameraPosition().getZ();
 			if(delta>TR.mapWidth/2.)
 				{tV=new Vector3D(tV.getX(),tV.getY(),tV.getZ()-TR.mapWidth);}
 			else if(delta<-TR.mapWidth/2.)
@@ -217,23 +217,10 @@ public class WorldObject implements PositionedRenderable
 		if(translate())		{rotTransM = tM.multiply(rM);}
 		else 				{rotTransM = rM;}
 		
-		matrix.set(world.getCameraMatrix().multiply(rotTransM).transpose());
+		matrix.set(tr.getRenderer().getCamera().getMatrix().multiply(rotTransM).transpose());
 		}//end recalculateTransRotMBuffer()
 	
 	protected boolean translate(){return true;}
-	
-	/**
-	 * @return the world
-	 */
-	public final World getWorld()
-		{return world;}
-
-	/**
-	 * @param world the world to set
-	 */
-	public void setWorld(World world)
-		{this.world = world;}
-
 	/**
 	 * @return the visible
 	 */
@@ -313,4 +300,12 @@ public class WorldObject implements PositionedRenderable
 		for(WorldObject wo:allWorldObjects)
 			{wo.initializeObjectDefinitions();}
 		}//end uploadAllObjectDefinitionsToGPU()
+
+	/**
+	 * @return the tr
+	 */
+	public TR getTr()
+		{
+		return tr;
+		}
 	}//end WorldObject

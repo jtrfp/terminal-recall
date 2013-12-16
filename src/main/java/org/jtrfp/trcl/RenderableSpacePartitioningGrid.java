@@ -20,9 +20,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 public abstract class RenderableSpacePartitioningGrid extends SpacePartitioningGrid<PositionedRenderable>
 	{
 	
-	public RenderableSpacePartitioningGrid(World world)
+	public RenderableSpacePartitioningGrid(double sizeX, double sizeY, double sizeZ, double gridBlockSize, double viewDepth)
 		{
-		super(new Vector3D(world.sizeX,world.sizeY,world.sizeZ),world.gridBlockSize,world.cameraViewDepth*1.2,world);
+		super(new Vector3D(sizeX,sizeY,sizeZ),gridBlockSize,viewDepth*1.2);
 		activate();
 		}
 	

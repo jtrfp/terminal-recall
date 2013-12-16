@@ -29,28 +29,30 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 	TextureDescription cloudTexture;
 	double cloudTileSideSize;
 	int gridSideSizeInTiles;
-	public CloudSystem(RenderableSpacePartitioningGrid grid,LVLFile lvl, double cloudTileSideSize, int gridSideSizeInTiles, double ceilingHeight) throws IllegalAccessException, FileLoadException, IOException
+	private final TR tr;
+	public CloudSystem(TR tr, RenderableSpacePartitioningGrid grid,LVLFile lvl, double cloudTileSideSize, int gridSideSizeInTiles, double ceilingHeight) throws IllegalAccessException, FileLoadException, IOException
 		{
 		super(grid);
+		this.tr=tr;
 		final int transpose=48;
 		this.ceilingHeight=ceilingHeight;
 		this.cloudTileSideSize=cloudTileSideSize;
 		this.gridSideSizeInTiles=gridSideSizeInTiles;
 		String cloudTextureFileName=lvl.getCloudTextureFile();
-		Color[] palette = world.getTr().getResourceManager().getPalette(lvl.getBackgroundGradientPaletteFile());
+		Color[] palette = tr.getResourceManager().getPalette(lvl.getBackgroundGradientPaletteFile());
 		Color [] newPalette = new Color[256];
 		//Transpose palette by 48
 		for(int i=0; i<256; i++)
 			{newPalette[TR.bidiMod((i+transpose),256)]=palette[i];}
 		
-		cloudTexture = world.getTr().getResourceManager().getRAWAsTexture(cloudTextureFileName, newPalette, GammaCorrectingColorProcessor.singleton,world.getTr().getGPU().takeGL());
+		cloudTexture = tr.getResourceManager().getRAWAsTexture(cloudTextureFileName, newPalette, GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
 		addToWorld();
 		}//end constructor
 	
 	private void addToWorld()
 		{
 		//Set fog
-		world.fogColor=cloudTexture.getAverageColor();
+		tr.getRenderer().setFogColor(cloudTexture.getAverageColor());
 		//Create a grid
 		for(int z=0; z<gridSideSizeInTiles; z++)
 			{
@@ -70,7 +72,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 				final Model m = new Model(false);
 				m.addTriangle(tris[0]);
 				m.addTriangle(tris[1]);
-				final TerrainChunk rq = new TerrainChunk(world,m.finalizeModel());
+				final TerrainChunk rq = new TerrainChunk(tr,m.finalizeModel());
 				rq.setPosition(new Vector3D(xPos,ceilingHeight,zPos));
 				add(rq);
 				}//end for(x)

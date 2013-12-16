@@ -25,9 +25,9 @@ import org.jtrfp.trcl.objects.WorldObject;
  */
 public class TerrainChunk extends WorldObject
 	{
-	public TerrainChunk(World w, Model m)
+	public TerrainChunk(TR tr, Model m)
 		{
-		super(w,m);
+		super(tr,m);
 		m.setDebugName("TerrainChunk");
 		}
 	}//end RenderingCube

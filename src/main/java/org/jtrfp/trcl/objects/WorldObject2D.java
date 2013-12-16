@@ -19,7 +19,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.TR;
 
 
 /**
@@ -30,10 +30,10 @@ import org.jtrfp.trcl.World;
  */
 public class WorldObject2D extends WorldObject
 	{
-	public WorldObject2D(){super();}
-	public WorldObject2D(World w, Model m)
+	public WorldObject2D(TR tr){super(tr);}
+	public WorldObject2D(TR tr, Model m)
 		{
-		super(w, m);
+		super(tr, m);
 		}//end WorldObject2D
 	
 	@Override

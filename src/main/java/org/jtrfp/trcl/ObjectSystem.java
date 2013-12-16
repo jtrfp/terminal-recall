@@ -33,10 +33,10 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid
 		PUPFile pupFile = tr.getResourceManager().getPUPData(lvl.getPowerupPlacementFile());
 		//TDFFile tdf = tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile());
 		//this.palette=palette;
-		DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile,world,terrain);
+		DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile,w,terrain);
 		defPlacer.placeObjects(this);
 		
-		PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile,world);
+		PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile,w);
 		pupPlacer.placeObjects(this);
 		}//end ObjectSystem(...)
 	}//end ObjectSystem

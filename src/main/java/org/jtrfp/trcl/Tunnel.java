@@ -13,6 +13,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
@@ -31,6 +32,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 	private final GL3 gl;
 	final double tunnelDia=100000;
 	final double wallThickness=5000;
+	private final World world;
 	
 	public static final Vector3D TUNNEL_START_POS = new Vector3D(0,Math.pow(2, 16)*.75,Math.pow(2, 17));
 	public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(new Vector3D(1,0,0),new Vector3D(0,1,0));
@@ -38,6 +40,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 	public Tunnel(RenderableSpacePartitioningGrid parentGrid, World world, TDFFile.Tunnel sourceTunnel)
 		{
 		super(parentGrid);
+		this.world=world;
 		deactivate();//Sleep until activated by tunnel entrance
 		
 		tr=world.getTr();
@@ -114,7 +117,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 			Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness*-1,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
 			//Create the segment
 			Vector3D position=startPoint.add(rotation.applyTo(segPos));
-			TunnelSegment ts = new TunnelSegment(world,s,tunnelTexturePalette,segLen,positionDelta.getX(),positionDelta.getY());
+			TunnelSegment ts = new TunnelSegment(tr,s,tunnelTexturePalette,segLen,positionDelta.getX(),positionDelta.getY());
 			ts.setPosition(position);
 			ts.setHeading(entrance?groundVector:Vector3D.PLUS_I);
 			ts.setTop(entrance?top:Vector3D.PLUS_J);

@@ -25,13 +25,13 @@ public class CharLineDisplay
 	private GLFont font;
 	private final double glSize;
 	
-	public CharLineDisplay(RenderableSpacePartitioningGrid grid, double glSize, int lengthInChars, GLFont font)
+	public CharLineDisplay(TR tr,RenderableSpacePartitioningGrid grid, double glSize, int lengthInChars, GLFont font)
 		{content = new char[lengthInChars];
 		displays = new CharDisplay[lengthInChars];
 		this.font=font;
 		for(int i=0; i<lengthInChars; i++)
 			{content[i]='X';
-			displays[i]=new CharDisplay(grid,glSize,font);
+			displays[i]=new CharDisplay(tr,grid,glSize,font);
 			displays[i].setChar('X');
 			grid.addAlwaysVisible(displays[i]);
 			}//end for(lengthInChars)

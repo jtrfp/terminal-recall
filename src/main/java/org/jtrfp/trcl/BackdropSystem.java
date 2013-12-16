@@ -29,7 +29,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
 						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(world.getFogColor()), RenderMode.DYNAMIC));
-		WorldObject2D backdrop = new WorldObject2D(world,backdropModel.finalizeModel());
+		WorldObject2D backdrop = new WorldObject2D(world.getTr(),backdropModel.finalizeModel());
 		backdrop.setPosition(new Vector3D(0,0,0));
 		addAlwaysVisible(backdrop);
 		}

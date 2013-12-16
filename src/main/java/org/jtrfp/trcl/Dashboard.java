@@ -23,11 +23,11 @@ import org.jtrfp.trcl.objects.WorldObject2D;
 
 public class Dashboard extends WorldObject2D
 	{
-	public Dashboard(World world,TR tr) throws IllegalAccessException, FileLoadException, IOException
+	public Dashboard(TR tr) throws IllegalAccessException, FileLoadException, IOException
 		{
-		setWorld(world);
+		super(tr);
 		//Dashboard
-		TextureDescription[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", world.getTr().getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL(),2);
+		TextureDescription[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL(),2);
 		Model dashModel = new Model(false);
 		for(int seg=0; seg<5; seg++)
 			{

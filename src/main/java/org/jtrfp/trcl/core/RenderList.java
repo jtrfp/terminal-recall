@@ -13,7 +13,7 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.core;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -21,9 +21,15 @@ import java.util.Collection;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.GPUTriangleVertex;
+import org.jtrfp.trcl.GlobalObjectList;
+import org.jtrfp.trcl.PositionedRenderable;
+import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.objects.WorldObject;
 
 public class RenderList
 	{

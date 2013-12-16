@@ -63,9 +63,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory
 	@Override
 	public void bindToUniform(int textureUnit, GLProgram program,
 			GLUniform uniform)
-		{
-		buffer.bindToUniform(gpu.getGl(), textureUnit, program, uniform);
-		}
+		{buffer.bindToUniform(gpu.getGl(), textureUnit, program, uniform);}
 
 	@Override
 	public void reallocate(int sizeInBytes)

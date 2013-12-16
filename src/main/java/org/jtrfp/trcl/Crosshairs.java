@@ -22,10 +22,9 @@ import org.jtrfp.trcl.objects.WorldObject2D;
 
 public class Crosshairs extends WorldObject2D
 	{
-	public Crosshairs(World world)
+	public Crosshairs(TR tr)
 		{
-		super();
-		setWorld(world);
+		super(tr);
 		//Crosshairs
 		Model crossModel = new Model(false);
 		Texture [] greenThrobFrames = new Texture[16];

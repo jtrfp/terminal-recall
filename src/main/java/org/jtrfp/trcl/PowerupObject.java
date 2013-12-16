@@ -10,11 +10,9 @@ import org.jtrfp.trcl.objects.BillboardSprite;
 
 public class PowerupObject extends BillboardSprite
 	{
-	TR tr;
 	public PowerupObject(PowerupLocation loc, World world)
 		{
-		this.tr= world.getTr();
-		setWorld(world);
+		super(world.getTr());
 		setBillboardSize(new Dimension(20000,20000));
 		TextureDescription desc=Texture.getFallbackTexture();
 		final int animationRate=500;
@@ -200,5 +198,5 @@ public class PowerupObject extends BillboardSprite
 		}//end constructor
 
 	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Texture)tr.getResourceManager().getRAWAsTexture(name, tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL());}
+		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
 	}//end PowerupObject

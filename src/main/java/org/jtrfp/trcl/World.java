@@ -21,14 +21,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
@@ -37,6 +33,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.jfdt.Parser;
+import org.jtrfp.trcl.core.Camera;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLTexture;
@@ -46,40 +44,16 @@ import org.jtrfp.trcl.objects.WorldObject;
 
 import com.jogamp.opengl.util.glsl.ShaderState;
 
-public final class World implements GLEventListener
+public final class World extends RenderableSpacePartitioningGrid implements GLEventListener
 	{
-	double sizeX, sizeY, sizeZ, cameraViewDepth;
-
-	Vector3D lookAtVector = new Vector3D(0, 0, 1);
-
-	Vector3D upVector = new Vector3D(0, 1, 0);
-
-	private final int blockGranularity = 8;// Dim-Segments per diameter. should
-											// exceed 2.
-
-	double gridBlockSize;
-
-	Vector3D cameraPosition = new Vector3D(50000, 0, 50000);
-
+	double sizeX, sizeY, sizeZ;
+	private static final int blockGranularity = 8;// Dim-Segments per diameter. should
+	//double gridBlockSize;
 	Color fogColor = Color.black;
-
 	LinkedList<TickListener> tickListeners = new LinkedList<TickListener>();
-
 	TR tr;
-
 	RenderableSpacePartitioningGrid rootGrid;
-
-	GLProgram shaderProgram;
-
 	boolean drawBackdrop = true;
-
-	ShaderState worldShaderState = new ShaderState();
-
-	RealMatrix projectionMatrix;
-
-	RealMatrix cameraMatrix;
-
-	RenderList renderList;
 
 	private long lastTimeMillis;
 
@@ -88,22 +62,27 @@ public final class World implements GLEventListener
 	boolean firstRun = true;
 
 	KeyStatus keyStatus;
+	
+	//private final Renderer renderer;
 
 	public World(double sizeX, double sizeY, double sizeZ,
 			double cameraViewDepth, TR tr)
 		{
+		super(sizeX,sizeY,sizeZ,cameraViewDepth / (double) blockGranularity,cameraViewDepth);
 		this.tr = tr;
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.sizeZ = sizeZ;
-		this.cameraViewDepth = cameraViewDepth;
+		//this.camera=new Camera(tr);
+		tr.getGPU().takeGL();
+		tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
+		tr.getGPU().releaseGL();
 		// Create the grid
-		gridBlockSize = cameraViewDepth / (double) blockGranularity;
-		rootGrid = new RenderableSpacePartitioningGrid(this)
-			{
-			};
-		setCameraPosition(new Vector3D(getCameraPosition().getX(),
-				sizeY / 3.15, getCameraPosition().getZ()));
+		rootGrid = new RenderableSpacePartitioningGrid(this){};
+		tr.getRenderer().setRootGrid(rootGrid);
+		Camera camera = tr.getRenderer().getCamera();
+		camera.setCameraPosition(new Vector3D(camera.getCameraPosition().getX(),
+				sizeY / 3.15, camera.getCameraPosition().getZ()));
 		GlobalObjectList.poke();
 		keyStatus = tr.getKeyStatus();
 		}// end constructor
@@ -115,32 +94,28 @@ public final class World implements GLEventListener
 
 	public void setCameraDirection(ObjectDirection dir)
 		{
-		this.setLookAtVector(dir.getHeading());
-		upVector = dir.getTop();
+		tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
+		tr.getRenderer().getCamera().setUpVector(dir.getTop());
 		}
 
 	public RenderableSpacePartitioningGrid getRootGrid()
-		{
-		return rootGrid;
-		}
+		{return rootGrid;}
 
 	@Override
 	public final void display(GLAutoDrawable drawable)
 		{
 		Thread.currentThread().setPriority(8);
-		GL3 gl = tr.getGPU().takeGL();
-		if (firstRun)
-			{
-			fauxInit(gl);
-			return;
-			}
 		fpsTracking();
-
-		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		
 		updateCameraMovement();
-		calculateCameraMatrix(gl);
-		renderVisibleObjects(gl);
+		// Update GPU
+		GlobalDynamicTextureBuffer.getTextureBuffer().map();
+		PrimitiveList.tickAnimators();
+		// Ticks
+		long tickTimeInMillis = System.currentTimeMillis();
+		for (TickListener l : tickListeners)
+			{l.tick(tickTimeInMillis);}
+		tr.getRenderer().render();
 		}// end display()
 
 	private void fpsTracking()
@@ -164,34 +139,35 @@ public final class World implements GLEventListener
 		boolean positionChanged = false, lookAtChanged = false;
 		// double
 		// newX=getCameraPosition().getX(),newY=getCameraPosition().getY(),newZ=getCameraPosition().getZ();
-		Vector3D newCamPos = this.getCameraPosition();
-		Vector3D newLookAt = getLookAtVector();
+		final Camera camera = tr.getRenderer().getCamera();
+		Vector3D newCamPos = camera.getCameraPosition();
+		Vector3D newLookAt = camera.getLookAtVector();
 		if (keyStatus.isPressed(KeyEvent.VK_UP))
 			{
-			newCamPos = newCamPos.add(getLookAtVector().scalarMultiply(
+			newCamPos = newCamPos.add(camera.getLookAtVector().scalarMultiply(
 					nudgeUnit * manueverSpeed));
 			positionChanged = true;
 			}
 		if (keyStatus.isPressed(KeyEvent.VK_DOWN))
 			{
-			newCamPos = newCamPos.subtract(getLookAtVector().scalarMultiply(
+			newCamPos = newCamPos.subtract(camera.getLookAtVector().scalarMultiply(
 					nudgeUnit * manueverSpeed));
 			positionChanged = true;
 			}
 		if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP))
 			{
-			newCamPos = newCamPos.add(upVector.scalarMultiply(nudgeUnit
+			newCamPos = newCamPos.add(camera.getUpVector().scalarMultiply(nudgeUnit
 					* manueverSpeed));
 			positionChanged = true;
 			}
 		if (keyStatus.isPressed(KeyEvent.VK_PAGE_DOWN))
 			{
-			newCamPos = newCamPos.subtract(upVector.scalarMultiply(nudgeUnit
+			newCamPos = newCamPos.subtract(camera.getUpVector().scalarMultiply(nudgeUnit
 					* manueverSpeed));
 			positionChanged = true;
 			}
 
-		Rotation turnRot = new Rotation(upVector, angleUnit);
+		Rotation turnRot = new Rotation(camera.getUpVector(), angleUnit);
 
 		if (keyStatus.isPressed(KeyEvent.VK_LEFT))
 			{
@@ -223,57 +199,11 @@ public final class World implements GLEventListener
 			}
 
 		if (lookAtChanged)
-			this.setLookAtVector(newLookAt);
+			camera.setLookAtVector(newLookAt);
 		if (positionChanged)
-			setCameraPosition(newCamPos);
+			camera.setCameraPosition(newCamPos);
 		}
-
-	private void renderVisibleObjects(GL3 gl)
-		{
-		// Update GPU
-		GlobalDynamicTextureBuffer.getTextureBuffer().map();
-		PrimitiveList.tickAnimators();
-		// Ticks
-		long tickTimeInMillis = System.currentTimeMillis();
-		for (TickListener l : tickListeners)
-			{l.tick(tickTimeInMillis);}
-		rootGrid.itemsWithinRadiusOf(
-				getCameraPosition().add(
-						lookAtVector.scalarMultiply(cameraViewDepth / 2.1)),
-				renderList.getSubmitter());
-		renderList.sendToGPU(gl);
-		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
-		
-		// Render objects
-		renderList.render(gl);
-		}// renderVisibleObjects
-
-	private void calculateCameraMatrix(GL3 gl)
-		{
-		// CAMERA
-		Vector3D eyeLoc = getCameraPosition();
-
-		Vector3D aZ = getLookAtVector().negate();
-		Vector3D aX = upVector.crossProduct(aZ).normalize();
-		Vector3D aY = aZ.crossProduct(aX);
-
-		RealMatrix rM = new Array2DRowRealMatrix(new double[][]
-			{ new double[]
-				{ -aX.getX(), aY.getX(), aZ.getX(), 0 }, new double[]
-				{ -aX.getY(), aY.getY(), aZ.getY(), 0 }, new double[]
-				{ -aX.getZ(), aY.getZ(), aZ.getZ(), 0 }, new double[]
-				{ 0, 0, 0, 1 } });
-
-		RealMatrix tM = new Array2DRowRealMatrix(new double[][]
-			{ new double[]
-				{ 1, 0, 0, -eyeLoc.getX() }, new double[]
-				{ 0, 1, 0, -eyeLoc.getY() }, new double[]
-				{ 0, 0, 1, -eyeLoc.getZ() }, new double[]
-				{ 0, 0, 0, 1 } });
-
-		setCameraMatrix(projectionMatrix.multiply(rM.multiply(tM)));
-		}// end calculatateCameraMatrix(...)
-
+	
 	@Override
 	public void dispose(GLAutoDrawable arg0)
 		{
@@ -284,120 +214,15 @@ public final class World implements GLEventListener
 		{
 		}
 
-	private void fauxInit(GL3 gl)
-		{
-		setupFixedPipelineBehavior(gl);
-		ByteArrayOutputStream shaderOS = new ByteArrayOutputStream();
-		PrintStream shaderLog = new PrintStream(shaderOS);
-
-		try {
-			buildShaderProgram(shaderLog);
-			setupProjectionMatrix(gl);
-			uploadDataToGPU(gl);
-			bindBuffersAndTextures(gl, shaderLog);
-
-			float fogRed = (float) fogColor.getRed() / 255f;
-			float fogGreen = (float) fogColor.getGreen() / 255f;
-			float fogBlue = (float) fogColor.getBlue() / 255f;
-			
-			shaderProgram.getUniform("fogStart").set((float) (cameraViewDepth * 1.2) / 5f);
-			shaderProgram.getUniform("fogEnd").set((float) (cameraViewDepth * 1.5) * 1.3f);
-			shaderProgram.getUniform("fogColor").set(fogRed, fogGreen, fogBlue);
-			}
-		catch (Exception e)
-			{
-			shaderLog.flush();
-			e.printStackTrace();
-			System.exit(1);
-			}
-		firstRun = false;
-		//System.out.println("");
-		}
-
-	private void bindBuffersAndTextures(GL3 gl, PrintStream shaderLog)
-		{try{
-			GlobalDynamicTextureBuffer.getTextureBuffer().bindToUniform(1, shaderProgram, shaderProgram.getUniform("rootBuffer"));
-			shaderProgram.getUniform("textureMap").set((int)0);//Texture unit 0 mapped to textureMap
-			}
-		catch (RuntimeException e)
-			{e.printStackTrace();}
-		GLTexture.specifyTextureUnit(gl, 0);
-		Texture.getGlobalTexture().bind(gl);
-		if(!shaderProgram.validate())
-			{
-			System.out.println(shaderProgram.getInfoLog());
-			System.exit(1);
-			}
-		System.out.println("Initializing RenderList...");
-		renderList = new RenderList(gl, shaderProgram);
-		System.out.println("...Done.");
-		}
-	
-	private void uploadDataToGPU(GL3 gl)
-		{
-		GlobalDynamicTextureBuffer.getTextureBuffer().map();
-		System.out.println("Uploading vertex data to GPU...");
-		TriangleList.uploadAllListsToGPU(gl);
-		System.out.println("...Done.");
-		System.out.println("Uploading object defintion data to GPU...");
-		WorldObject.uploadAllObjectDefinitionsToGPU();
-		System.out.println("...Done.");
-		System.out.println("\t...World.init() complete.");
-		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
-		}
-
-	private void buildShaderProgram(PrintStream shaderLog)
-			throws IOException
-		{
-		GLVertexShader vertexShader = tr.getGPU().newVertexShader();
-		GLFragmentShader fragmentShader = tr.getGPU().newFragmentShader();
-		shaderProgram = tr.getGPU().newProgram();
-		
-		Parser p = new Parser();
-		vertexShader.setSource(p.readUTF8FileToString(new File("texturedVertexShader.glsl")));
-		fragmentShader.setSource(p.readUTF8FileToString(new File("texturedFragShader.glsl")));
-		shaderProgram.attachShader(vertexShader);
-		shaderProgram.attachShader(fragmentShader);
-		shaderProgram.link();
-		shaderProgram.use();
-		}
-
-	private void setupProjectionMatrix(GL3 gl)
-		{
-		final float fov = 70f;// In degrees
-		final float aspect = (float) tr.getFrame().getWidth()
-				/ (float) tr.getFrame().getHeight();
-		final float zF = (float) (cameraViewDepth * 1.5);// 1.5 because the
-															// visibility is
-															// pushed forward
-															// from the lookAt
-		final float zN = (float) (TR.mapSquareSize / 10);
-		final float f = (float) (1. / Math.tan(fov * Math.PI / 360.));
-		projectionMatrix = new Array2DRowRealMatrix(new double[][]
-			{ new double[]
-				{ f / aspect, 0, 0, 0 }, new double[]
-				{ 0, f, 0, 0 }, new double[]
-				{ 0, 0, (zF + zN) / (zN - zF), -1f }, new double[]
-				{ 0, 0, (2f * zF * zN) / (zN - zF), 0 } }).transpose();
-		}// end setupProjectionMatrix()
-
-	private void setupFixedPipelineBehavior(GL3 gl)
-		{
-		gl.glEnable(GL2.GL_DEPTH_TEST);
-		gl.glDepthFunc(GL2.GL_LESS);
-		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glClearColor(0f, 0f, 0f, 0f);
-		}
-
 	@Override
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,
 			int arg4)
 		{}
 
-	public ObjectDirection getCameraDirection()
+	/*public ObjectDirection getCameraDirection()
 		{
-		return new ObjectDirection(this.lookAtVector, this.upVector);
-		}
+		return new ObjectDirection(camera.getLookAtVector(), camera.getUpVector());
+		}*/
 
 	/**
 	 * @return the fogColor
@@ -427,56 +252,5 @@ public final class World implements GLEventListener
 	public void setTr(TR tr)
 		{
 		this.tr = tr;
-		}
-
-	/**
-	 * @return the lookAtVector
-	 */
-	public Vector3D getLookAtVector()
-		{
-		return lookAtVector;
-		}
-
-	/**
-	 * @param lookAtVector
-	 *            the lookAtVector to set
-	 */
-	public void setLookAtVector(Vector3D lookAtVector)
-		{
-		this.lookAtVector = lookAtVector;
-		}
-
-	/**
-	 * @return the cameraPosition
-	 */
-	public Vector3D getCameraPosition()
-		{
-		return cameraPosition;
-		}
-
-	/**
-	 * @param cameraPosition
-	 *            the cameraPosition to set
-	 */
-	public void setCameraPosition(Vector3D cameraPosition)
-		{
-		this.cameraPosition = cameraPosition;
-		}
-
-	/**
-	 * @return the cameraMatrix
-	 */
-	public RealMatrix getCameraMatrix()
-		{
-		return cameraMatrix;
-		}
-
-	/**
-	 * @param cameraMatrix
-	 *            the cameraMatrix to set
-	 */
-	private void setCameraMatrix(RealMatrix cameraMatrix)
-		{
-		this.cameraMatrix = cameraMatrix;
 		}
 	}// World

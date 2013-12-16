@@ -25,9 +25,9 @@ public class TunnelSegment extends WorldObject
 	Segment segment;
 	//private double width,height;
 	
-	public TunnelSegment(World w, Segment s, TextureDescription[] tunnelTexturePalette, double segLen, double endX, double endY)
+	public TunnelSegment(TR tr, Segment s, TextureDescription[] tunnelTexturePalette, double segLen, double endX, double endY)
 		{
-		super(w, createModel(s,segLen, tunnelTexturePalette,endX,endY));
+		super(tr, createModel(s,segLen, tunnelTexturePalette,endX,endY));
 		this.segment=s;
 		}
 	

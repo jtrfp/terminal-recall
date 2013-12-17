@@ -19,5 +19,4 @@ public abstract class Weapon
 	{
 	public abstract String getHUDName();
 	public abstract String getPowerupName();
-	
 	}

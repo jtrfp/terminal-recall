@@ -50,14 +50,10 @@ public class RenderList
 	private final GLUniform renderListOffsetUniform,renderModeUniform;
 	private ByteBuffer globalGPUBuffer[];
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>()
-		{
-		@Override
+		{@Override
 		public void submit(PositionedRenderable item)
-			{
-			//System.out.println("SUBMIT "+item);
-			numOpaqueBlocks+=item.getOpaqueObjectDefinitionAddresses().capacity()/4;
+			{numOpaqueBlocks+=item.getOpaqueObjectDefinitionAddresses().capacity()/4;
 			numTransparentBlocks+=item.getTransparentObjectDefinitionAddresses().capacity()/4;
-			//item.updateStateToGPU();
 			renderables[renderablesIndex++]=item;
 			final ByteBuffer [] buf=getGlobalGPUBuffer();
 			buf[OPAQUE_PASS].put(
@@ -72,8 +68,7 @@ public class RenderList
 		};
 	
 	private ByteBuffer []getGlobalGPUBuffer()
-		{
-		if(globalGPUBuffer==null)
+		{if(globalGPUBuffer==null)
 			{globalGPUBuffer = new ByteBuffer[NUM_RENDER_PASSES];
 			for(int i=0; i<NUM_RENDER_PASSES; i++)
 				{final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
@@ -86,8 +81,7 @@ public class RenderList
 		}//end getGlobalGPUBuffer()
 	
 	public RenderList(GL3 gl, GLProgram prg)
-		{
-		//Build VAO
+		{//Build VAO
 		IntBuffer ib = IntBuffer.allocate(1);
 		gl.glGenBuffers(1, ib);
 		ib.clear();
@@ -109,30 +103,25 @@ public class RenderList
 		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
 	
 	public void render(GL3 gl)
-		{
-		gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
+		{gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 		final int numOpaqueVertices = numOpaqueBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK+96;
 		final int numTransparentVertices = numTransparentBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK;
-		
 		//OPAQUE
 		//Turn on depth write, turn off transparency
 		gl.glDisable(GL3.GL_BLEND);
 		renderModeUniform.set(OPAQUE_PASS);
 		final int verticesPerSubPass=(NUM_BLOCKS_PER_SUBPASS*GPUTriangleVertex.VERTICES_PER_BLOCK);
 		final int numSubPasses=(numOpaqueVertices/verticesPerSubPass)+1;
-		//System.out.println("Performing "+numSubPasses+" subpasses.");
 		int remainingVerts=numOpaqueVertices;
 		final int rlOffset=GlobalObjectList.getArrayOffsetInBytes()/4;
 		
 		if(frameCounter==0)
-			{
-			System.out.println("rendering "+numOpaqueBlocks+" opaque object blocks...");
+			{System.out.println("rendering "+numOpaqueBlocks+" opaque object blocks...");
 			System.out.println("rendering "+numTransparentBlocks+" blended object blocks...");
 			}
 		
 		for(int sp=0; sp<numSubPasses; sp++)
-			{
-			final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
+			{final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
 			remainingVerts-=numVerts;
 			final int newOffset=rlOffset+sp*NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
 			renderListOffsetUniform.setui(newOffset);
@@ -147,7 +136,6 @@ public class RenderList
 		/////////
 		renderListOffsetUniform.setui((GlobalObjectList.getArrayOffsetInBytes()/4)+NUM_BLOCKS_PER_PASS);
 		renderModeUniform.set(BLEND_PASS);
-		//gl.glUniform1ui(renderModeID,BLEND_PASS);
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 		
 		//////////
@@ -157,9 +145,7 @@ public class RenderList
 		gl.glDepthMask(true);
 		}//end render()
 	public Submitter<PositionedRenderable> getSubmitter()
-		{
-		return submitter;
-		}
+		{return submitter;}
 
 	public void reset()
 		{renderablesIndex=0;

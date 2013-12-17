@@ -11,9 +11,7 @@ import javax.media.opengl.awt.GLCanvas;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
-import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.TickListener;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.objects.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
@@ -41,37 +39,23 @@ public class ThreadManager
 			{
 			@Override
 			public void init(GLAutoDrawable drawable)
-				{
-				// TODO Auto-generated method stub
-				
-				}
+				{}
 
 			@Override
 			public void dispose(GLAutoDrawable drawable)
-				{
-				// TODO Auto-generated method stub
-				
-				}
+				{}
 
 			@Override
 			public void display(GLAutoDrawable drawable)
 				{
 				Thread.currentThread().setPriority(RENDERING_PRIORITY);
-				/*
-				PrimitiveList.tickAnimators();
-				// Ticks
-				long tickTimeInMillis = System.currentTimeMillis();
-				for (TickListener l : ThreadManager.this.tr.getWorld().getTickListeners())
-					{l.tick(tickTimeInMillis);}
-				*/
 				ThreadManager.this.tr.getRenderer().render();
 				}
 
 			@Override
 			public void reshape(GLAutoDrawable drawable, int x, int y,
 					int width, int height)
-				{
-				}
+				{display(drawable);}
 			});
 		
 		}//end constructor
@@ -87,8 +71,7 @@ public class ThreadManager
 				// Ticks
 				long tickTimeInMillis = System.currentTimeMillis();
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
-					{
-					updateCameraMovement();
+					{updateCameraMovement();
 					for (TickListener l : ThreadManager.this.tr.getWorld().getTickListeners())
 						{l.tick(tickTimeInMillis);}
 					}
@@ -97,8 +80,7 @@ public class ThreadManager
 		renderListRefreshTimer.scheduleAtFixedRate(new TimerTask()
 			{@Override
 			public void run()
-				{
-				Thread.currentThread().setPriority(RENDERING_PRIORITY);
+				{Thread.currentThread().setPriority(RENDERING_PRIORITY);
 				tr.getRenderer().updateVisibilityList();
 				}
 			}, 0, 1000/RENDERLIST_REFRESH_FPS);
@@ -107,8 +89,7 @@ public class ThreadManager
 			{
 			@Override
 			public void run()
-				{
-				renderListRefreshTimer.cancel();
+				{renderListRefreshTimer.cancel();
 				gameplayTimer.cancel();
 				}
 			});

@@ -99,8 +99,7 @@ public class Renderer
 		}//end ensureInit()
 	
 	private void fpsTracking()
-		{
-		frameNumber++;
+		{frameNumber++;
 		if ((frameNumber %= 20) == 0)
 			{
 			System.out
@@ -111,8 +110,7 @@ public class Renderer
 		}
 	
 	public void render()
-		{
-		fpsTracking();
+		{fpsTracking();
 		// Update GPU
 		GlobalDynamicTextureBuffer.getTextureBuffer().map();
 		PrimitiveList.tickAnimators();
@@ -131,39 +129,33 @@ public class Renderer
 		}
 	
 	public void updateVisibilityList()
-		{
-		synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
+		{synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
 			renderListToggle=!renderListToggle;
 			renderList[renderListToggle?0:1].reset();
 			rootGrid.itemsWithinRadiusOf(
-					camera.getCameraPosition().add(
-							camera.getLookAtVector().scalarMultiply(getCamera().getViewDepth() / 2.1)),
-							renderList[renderListToggle?0:1].getSubmitter());
+				camera.getCameraPosition().add(
+					camera.getLookAtVector().scalarMultiply(getCamera().getViewDepth() / 2.1)),
+					renderList[renderListToggle?0:1].getSubmitter());
 			}//end sync()
 		}//end updateVisibilityList()
 	
 	public void setFogColor(Color c)
-		{
-		fogColor.set(
-				(float) _fogColor.getRed() / 255f, 
-				(float) _fogColor.getGreen() / 255f, 
-				(float) _fogColor.getBlue() / 255f);
+		{fogColor.set(
+			(float) _fogColor.getRed() / 255f, 
+			(float) _fogColor.getGreen() / 255f, 
+			(float) _fogColor.getBlue() / 255f);
 		}
 	/**
 	 * @return the camera
 	 */
 	public Camera getCamera()
-		{
-		return camera;
-		}
+		{return camera;}
 
 	/**
 	 * @return the rootGrid
 	 */
 	public RenderableSpacePartitioningGrid getRootGrid()
-		{
-		return rootGrid;
-		}
+		{return rootGrid;}
 
 	/**
 	 * @param rootGrid the rootGrid to set

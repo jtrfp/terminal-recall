@@ -26,7 +26,6 @@ import javax.media.opengl.GL3;
 public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	{
 	private static final AtomicInteger sizeInBytes = new AtomicInteger();
-	//private static GLTextureBuffer buffer;
 	private static ReallocatableGLMemory buffer;
 	private static final ArrayList<Class<?>>finalizationList = new ArrayList<Class<?>>(10);
 	
@@ -34,16 +33,10 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 		{super(sizeInBytes,gpu);}
 	
 	public static ByteBuffer getByteBuffer()
-		{
-		return buffer.getDuplicateReferenceOfUnderlyingBuffer();
-		//final ByteBuffer result = buffer.localBuffer.duplicate();
-		//result.order(buffer.localBuffer.order()).clear();
-		//return result;
-		}
+		{return buffer.getDuplicateReferenceOfUnderlyingBuffer();}
 	
 	public static void finalizeAllocation(GPU gpu)
-		{
-		//Finalize dependent allocations
+		{//Finalize dependent allocations
 		for(Class<?> c:finalizationList)
 			{try{
 			c.getMethod("finalizeAllocation", (Class<?>[])null).invoke(null, (Object[])null);
@@ -51,7 +44,6 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 		finalizationList.clear();
 		buffer=gpu.newEmptyGLMemory();
 		buffer.reallocate(sizeInBytes.get());
-		//buffer=new GlobalDynamicTextureBuffer(sizeInBytes.get(),gpu);
 		}
 	
 	@Override

@@ -29,13 +29,9 @@ public final class World extends RenderableSpacePartitioningGrid
 	{
 	double sizeX, sizeY, sizeZ;
 	private static final int blockGranularity = 8;// Dim-Segments per diameter. should
-	//double gridBlockSize;
-	Color fogColor = Color.black;
+	private Color fogColor = Color.black;
 	private final List<TickListener> tickListeners = new LinkedList<TickListener>();
-	TR tr;
-	boolean drawBackdrop = true;
-	private long lastTimeMillis;
-	private int frameNumber = 0;
+	private final TR tr;
 
 	public World(double sizeX, double sizeY, double sizeZ,
 			double cameraViewDepth, TR tr)
@@ -45,12 +41,7 @@ public final class World extends RenderableSpacePartitioningGrid
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.sizeZ = sizeZ;
-		//this.camera=new Camera(tr);
-		tr.getGPU().takeGL();
 		tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
-		tr.getGPU().releaseGL();
-		// Create the grid
-		//rootGrid = new RenderableSpacePartitioningGrid(this){};
 		Camera camera = tr.getRenderer().getCamera();
 		camera.setCameraPosition(new Vector3D(camera.getCameraPosition().getX(),
 				sizeY / 3.15, camera.getCameraPosition().getZ()));
@@ -61,15 +52,8 @@ public final class World extends RenderableSpacePartitioningGrid
 		{tickListeners.add(l);}
 
 	public void setCameraDirection(ObjectDirection dir)
-		{
-		tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
-		tr.getRenderer().getCamera().setUpVector(dir.getTop());
-		}
-
-	/*public ObjectDirection getCameraDirection()
-		{
-		return new ObjectDirection(camera.getLookAtVector(), camera.getUpVector());
-		}*/
+		{tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
+		tr.getRenderer().getCamera().setUpVector(dir.getTop());}
 
 	/**
 	 * @return the fogColor
@@ -88,24 +72,11 @@ public final class World extends RenderableSpacePartitioningGrid
 	 * @return the tr
 	 */
 	public TR getTr()
-		{
-		return tr;
-		}
-
-	/**
-	 * @param tr
-	 *            the tr to set
-	 */
-	public void setTr(TR tr)
-		{
-		this.tr = tr;
-		}
+		{return tr;}
 
 	/**
 	 * @return the tickListeners
 	 */
 	public List<TickListener> getTickListeners()
-		{
-		return tickListeners;
-		}
+		{return tickListeners;}
 	}// World

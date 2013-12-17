@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.objects.BillboardSprite;
 
 public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	{

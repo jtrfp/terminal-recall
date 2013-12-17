@@ -37,9 +37,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 	public static final Vector3D TUNNEL_START_POS = new Vector3D(0,Math.pow(2, 16)*.75,Math.pow(2, 17));
 	public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(new Vector3D(1,0,0),new Vector3D(0,1,0));
 
-	public Tunnel(RenderableSpacePartitioningGrid parentGrid, World world, TDFFile.Tunnel sourceTunnel)
+	public Tunnel(World world, TDFFile.Tunnel sourceTunnel)
 		{
-		super(parentGrid);
+		super(world);
 		this.world=world;
 		deactivate();//Sleep until activated by tunnel entrance
 		

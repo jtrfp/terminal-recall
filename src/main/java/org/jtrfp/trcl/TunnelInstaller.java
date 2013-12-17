@@ -26,7 +26,7 @@ public class TunnelInstaller
 				Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
 				Vector3D exitVector = new Vector3D((double)exitDV.getZ()/65535.,-.1,(double)exitDV.getX()/65535.).normalize();
 				world.getTr().getGPU().takeGL();
-				Tunnel tunnel = new Tunnel(world.getRootGrid(),world,tun);
+				Tunnel tunnel = new Tunnel(world,tun);
 				if(tIndex++==0)tunnel.activate();//TODO: Remove
 				}
 			}//end if(tuns!=null)

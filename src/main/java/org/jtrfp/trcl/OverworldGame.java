@@ -46,6 +46,7 @@ public class OverworldGame
 		tr.setGlobalPalette(globalPalette);
 		
 		hudSystem = new HUDSystem(tr.getWorld());
+		hudSystem.activate();
 		
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());

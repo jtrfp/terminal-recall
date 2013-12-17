@@ -12,7 +12,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	
 	public OverworldSystem(World w, LVLFile lvl)
 		{
-		super(w.getRootGrid());
+		super(w);
 		try
 			{
 			TR tr = w.getTr();

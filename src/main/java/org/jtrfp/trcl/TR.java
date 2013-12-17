@@ -112,6 +112,7 @@ public final class TR
 				14.*mapSquareSize,
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
+		getRenderer().setRootGrid(world);
 		}//end constructor
 	
 	public void showStopper(final Exception e)

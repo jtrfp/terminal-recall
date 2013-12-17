@@ -52,18 +52,10 @@ public final class World extends RenderableSpacePartitioningGrid implements GLEv
 	Color fogColor = Color.black;
 	LinkedList<TickListener> tickListeners = new LinkedList<TickListener>();
 	TR tr;
-	RenderableSpacePartitioningGrid rootGrid;
 	boolean drawBackdrop = true;
-
 	private long lastTimeMillis;
-
 	private int frameNumber = 0;
-
-	boolean firstRun = true;
-
 	KeyStatus keyStatus;
-	
-	//private final Renderer renderer;
 
 	public World(double sizeX, double sizeY, double sizeZ,
 			double cameraViewDepth, TR tr)
@@ -78,8 +70,7 @@ public final class World extends RenderableSpacePartitioningGrid implements GLEv
 		tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
 		tr.getGPU().releaseGL();
 		// Create the grid
-		rootGrid = new RenderableSpacePartitioningGrid(this){};
-		tr.getRenderer().setRootGrid(rootGrid);
+		//rootGrid = new RenderableSpacePartitioningGrid(this){};
 		Camera camera = tr.getRenderer().getCamera();
 		camera.setCameraPosition(new Vector3D(camera.getCameraPosition().getX(),
 				sizeY / 3.15, camera.getCameraPosition().getZ()));
@@ -97,9 +88,6 @@ public final class World extends RenderableSpacePartitioningGrid implements GLEv
 		tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
 		tr.getRenderer().getCamera().setUpVector(dir.getTop());
 		}
-
-	public RenderableSpacePartitioningGrid getRootGrid()
-		{return rootGrid;}
 
 	@Override
 	public final void display(GLAutoDrawable drawable)

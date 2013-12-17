@@ -22,7 +22,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid
 	{
 	public BackdropSystem(World world)
 		{
-		super(world.getRootGrid());
+		super(world);
 		//Backdrop
 		Model backdropModel=new Model(false);
 		backdropModel.addTriangles(

@@ -22,7 +22,6 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	public HUDSystem(World world)
 		{
 		super(world);
-		
 		//Dash Text
 		GLFont font;
 		try

@@ -27,7 +27,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final double heightScalar, final World world)
 		{
-		super(world.getRootGrid());
+		super(world);
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
 		this.gridSquareSize=gridSquareSize;
 		this.heightScalar=heightScalar;

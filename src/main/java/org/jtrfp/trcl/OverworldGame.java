@@ -22,6 +22,7 @@ import java.io.IOException;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile;
@@ -84,11 +85,10 @@ public class OverworldGame
 		System.gc();
 		System.out.println("\t...Ahh, that felt good.");
 		System.out.println("Attaching to GL Canvas...");
-		gpu.addGLEventListener(tr.getWorld());
 		
 		System.out.println("\t...Done.");
 		System.out.println("Starting animator...");
-		gpu.startAnimator();
+		tr.getThreadManager().start();
 		System.out.println("\t...Done.");
 		}//end OverworldGame
 	}//end OverworldGame

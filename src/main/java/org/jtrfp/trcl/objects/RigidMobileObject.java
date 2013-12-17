@@ -13,8 +13,18 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
-public interface PositionedRenderable extends Renderable, PositionListenable
+import org.jtrfp.trcl.MobileObject;
+import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.ObjectBehavior;
+import org.jtrfp.trcl.World;
+
+public class RigidMobileObject extends MobileObject
 	{
-	}
+	public RigidMobileObject(Model model,
+			ObjectBehavior behavior, World world)
+		{
+		super(model, behavior, world);
+		}
+	}//end RigidMobileObject

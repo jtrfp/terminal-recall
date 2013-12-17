@@ -14,6 +14,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.ResourceManager;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
@@ -21,6 +22,9 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
+import org.jtrfp.trcl.objects.RigidMobileObject;
+import org.jtrfp.trcl.objects.RotatingObjectBehavior;
+import org.jtrfp.trcl.objects.ShiftingObjectBehavior;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public class Tunnel extends RenderableSpacePartitioningGrid

@@ -7,8 +7,8 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.jfdt.Parser;
+import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.TR;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
@@ -28,6 +28,12 @@ public class Renderer
 	private Color _fogColor = Color.black;
 	private boolean initialized=false;
 	private final GPU gpu;
+	private final RenderList [] renderList = new RenderList[2];
+	private boolean renderListToggle=false;
+	private RenderableSpacePartitioningGrid rootGrid;
+	
+	private int frameNumber;
+	private long lastTimeMillis;
 	
 	public Renderer(GPU gpu)
 		{this.gpu=gpu;this.camera=new Camera(gpu);
@@ -57,10 +63,9 @@ public class Renderer
 		fogColor=shaderProgram.getUniform("fogColor");
 		
 		System.out.println("Initializing RenderList...");
-		renderList = new RenderList(gl, shaderProgram);
+		renderList[0] = new RenderList(gl, shaderProgram);
+		renderList[1] = new RenderList(gl, shaderProgram);
 		}
-	private final RenderList renderList;
-	private RenderableSpacePartitioningGrid rootGrid;
 	
 	private void ensureInit()
 		{if(initialized) return;
@@ -93,26 +98,50 @@ public class Renderer
 		initialized=true;
 		}//end ensureInit()
 	
+	private void fpsTracking()
+		{
+		frameNumber++;
+		if ((frameNumber %= 20) == 0)
+			{
+			System.out
+					.println((1000. / (double) (System.currentTimeMillis() - lastTimeMillis))
+							+ " FPS");
+			}
+		lastTimeMillis = System.currentTimeMillis();
+		}
+	
 	public void render()
 		{
+		fpsTracking();
+		// Update GPU
+		GlobalDynamicTextureBuffer.getTextureBuffer().map();
+		PrimitiveList.tickAnimators();
 		ensureInit();
 		final GL3 gl = gpu.getGl();
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		final double cameraViewDepth = camera.getViewDepth();
 		fogStart.set((float) (cameraViewDepth * 1.2) / 5f);
 		fogEnd.set((float) (cameraViewDepth * 1.5) * 1.3f);
-		shaderProgram.getUniform("fogEnd").set((float) (cameraViewDepth * 1.5) * 1.3f);
-		rootGrid.itemsWithinRadiusOf(
-				camera.getCameraPosition().add(
-						camera.getLookAtVector().scalarMultiply(getCamera().getViewDepth() / 2.1)),
-						renderList.getSubmitter());
-		renderList.sendToGPU(gl);
+		int renderListIndex=0;
+		synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK)
+			{renderListIndex=renderListToggle?0:1;renderList[renderListIndex].sendToGPU(gl);}
 		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
-
 		// Render objects
-		renderList.render(gl);
+		renderList[renderListIndex].render(gl);
 		}
-
+	
+	public void updateVisibilityList()
+		{
+		synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
+			renderListToggle=!renderListToggle;
+			renderList[renderListToggle?0:1].reset();
+			rootGrid.itemsWithinRadiusOf(
+					camera.getCameraPosition().add(
+							camera.getLookAtVector().scalarMultiply(getCamera().getViewDepth() / 2.1)),
+							renderList[renderListToggle?0:1].getSubmitter());
+			}//end sync()
+		}//end updateVisibilityList()
+	
 	public void setFogColor(Color c)
 		{
 		fogColor.set(

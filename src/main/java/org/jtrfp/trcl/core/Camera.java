@@ -3,7 +3,6 @@ package org.jtrfp.trcl.core;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.jtrfp.trcl.TR;
 import org.jtrfp.trcl.gpu.GPU;
 
 public class Camera

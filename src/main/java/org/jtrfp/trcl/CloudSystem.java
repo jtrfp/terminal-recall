@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 
 public class CloudSystem extends RenderableSpacePartitioningGrid

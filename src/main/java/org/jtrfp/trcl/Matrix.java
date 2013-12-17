@@ -20,6 +20,7 @@ import java.nio.FloatBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.linear.RealMatrix;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public final class Matrix

@@ -13,9 +13,11 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
-public class TRConfiguration
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
+public interface Positionable
 	{
-	public TRConfiguration(){}
+	public Vector3D getPosition();
 	}

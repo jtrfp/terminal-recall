@@ -13,10 +13,10 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
-public interface PositionListenable extends Positionable
+import org.jtrfp.trcl.Renderable;
+
+public interface PositionedRenderable extends Renderable, PositionListenable
 	{
-	public void addPositionListener(PositionListener listenerToAdd);
-	public void removePositionListener(PositionListener listenerToAdd);
 	}

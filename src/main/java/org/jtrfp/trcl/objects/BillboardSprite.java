@@ -4,9 +4,9 @@ import java.awt.Dimension;
 
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
-import org.jtrfp.trcl.TR;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.core.TR;
 
 
 public class BillboardSprite extends WorldObject

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.objects.WorldObject;
 
 

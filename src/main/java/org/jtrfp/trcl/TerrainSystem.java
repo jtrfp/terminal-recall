@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.TR;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	{

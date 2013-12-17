@@ -23,12 +23,12 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.GlobalObjectList;
-import org.jtrfp.trcl.PositionedRenderable;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.objects.PositionedRenderable;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public class RenderList
@@ -40,6 +40,9 @@ public class RenderList
 	
 	private static final int OPAQUE_PASS=0;
 	private static final int BLEND_PASS=1;
+	
+	private final PositionedRenderable [] renderables = new PositionedRenderable[NUM_BLOCKS_PER_SUBPASS];
+	private int renderablesIndex=0;
 	
 	private final int dummyBufferID;
 	private int numOpaqueBlocks;
@@ -54,7 +57,8 @@ public class RenderList
 			//System.out.println("SUBMIT "+item);
 			numOpaqueBlocks+=item.getOpaqueObjectDefinitionAddresses().capacity()/4;
 			numTransparentBlocks+=item.getTransparentObjectDefinitionAddresses().capacity()/4;
-			item.updateStateToGPU();
+			//item.updateStateToGPU();
+			renderables[renderablesIndex++]=item;
 			final ByteBuffer [] buf=getGlobalGPUBuffer();
 			buf[OPAQUE_PASS].put(
 					item.getOpaqueObjectDefinitionAddresses());
@@ -70,11 +74,9 @@ public class RenderList
 	private ByteBuffer []getGlobalGPUBuffer()
 		{
 		if(globalGPUBuffer==null)
-			{
-			globalGPUBuffer = new ByteBuffer[NUM_RENDER_PASSES];
+			{globalGPUBuffer = new ByteBuffer[NUM_RENDER_PASSES];
 			for(int i=0; i<NUM_RENDER_PASSES; i++)
-				{
-				final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
+				{final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
 				int pos=GlobalObjectList.getArrayOffsetInBytes()+i*GlobalObjectList.OBJECT_LIST_SIZE_BYTES_PER_PASS;
 				bb.position(pos);
 				globalGPUBuffer[i]=bb;
@@ -99,15 +101,16 @@ public class RenderList
 		}
 	private static int frameCounter=0;
 	
+	private void updateStatesToGPU()
+		{for(int i=0; i<renderablesIndex; i++)
+			{renderables[i].updateStateToGPU();}}
+	
 	public void sendToGPU(GL3 gl)
-		{
-		frameCounter++; frameCounter%=100;
-		}
+		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
 	
 	public void render(GL3 gl)
 		{
-		globalGPUBuffer=null;
-		
+		gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 		final int numOpaqueVertices = numOpaqueBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK+96;
 		final int numTransparentVertices = numTransparentBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK;
 		
@@ -152,11 +155,16 @@ public class RenderList
 		//////////
 		
 		gl.glDepthMask(true);
-		numOpaqueBlocks=0;
-		numTransparentBlocks=0;
 		}//end render()
 	public Submitter<PositionedRenderable> getSubmitter()
 		{
 		return submitter;
+		}
+
+	public void reset()
+		{renderablesIndex=0;
+		numOpaqueBlocks=0;
+		numTransparentBlocks=0;
+		globalGPUBuffer=null;
 		}
 	}//end RenderList

@@ -30,11 +30,9 @@ import org.jtrfp.trcl.Matrix;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.ObjectDirection;
-import org.jtrfp.trcl.PositionListener;
-import org.jtrfp.trcl.PositionedRenderable;
 import org.jtrfp.trcl.PrimitiveList;
-import org.jtrfp.trcl.TR;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 
 public class WorldObject implements PositionedRenderable

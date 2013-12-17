@@ -13,13 +13,9 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.core;
 
-public class RigidMobileObject extends MobileObject
+public class TRConfiguration
 	{
-	public RigidMobileObject(Model model,
-			ObjectBehavior behavior, World world)
-		{
-		super(model, behavior, world);
-		}
-	}//end RigidMobileObject
+	public TRConfiguration(){}
+	}

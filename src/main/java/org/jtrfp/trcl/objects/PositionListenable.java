@@ -13,11 +13,10 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-
-public interface Positionable
+public interface PositionListenable extends Positionable
 	{
-	public Vector3D getPosition();
+	public void addPositionListener(PositionListener listenerToAdd);
+	public void removePositionListener(PositionListener listenerToAdd);
 	}

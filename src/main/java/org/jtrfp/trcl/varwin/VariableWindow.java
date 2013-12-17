@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.TR;
+import org.jtrfp.trcl.core.TR;
 
 public class VariableWindow extends JFrame
 	{

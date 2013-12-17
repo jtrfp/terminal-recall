@@ -22,8 +22,6 @@ public class GPU
 	private final GLCanvas canvas = new GLCanvas(capabilities);
 	private ByteOrder byteOrder;
 	
-	public static final int FPS=60;
-	
 	private GL3 gl;
 	public GL3 takeGL()
 		{
@@ -48,8 +46,6 @@ public class GPU
 	
 	public Component getComponent(){return canvas;}
 	
-	private final FPSAnimator animator = new FPSAnimator(canvas,FPS);
-	
 	public ByteOrder getByteOrder()
 		{
 		if(byteOrder==null)
@@ -58,11 +54,6 @@ public class GPU
 		}
 	public void addGLEventListener(GLEventListener l)
 		{canvas.addGLEventListener(l);}
-	public void startAnimator()
-		{
-		animator.start();
-		}
-	public int getFrameRate(){return FPS;}
 	public GLTexture newTexture()
 		{return new GLTexture(this);}
 	public int newTextureID()

@@ -18,6 +18,7 @@ package org.jtrfp.trcl;
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile;

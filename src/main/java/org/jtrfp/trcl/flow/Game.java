@@ -19,7 +19,7 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
-import org.jtrfp.trcl.TR;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
 
 public class Game

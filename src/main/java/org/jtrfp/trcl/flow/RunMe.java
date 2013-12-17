@@ -22,7 +22,7 @@ import java.util.Map.Entry;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.OverworldGame;
-import org.jtrfp.trcl.TR;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 
 public class RunMe

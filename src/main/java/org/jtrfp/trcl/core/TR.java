@@ -13,15 +13,12 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.nio.ByteOrder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,8 +31,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.jtrfp.trcl.core.Renderer;
-import org.jtrfp.trcl.core.ResourceManager;
+import org.jtrfp.trcl.KeyStatus;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -56,7 +53,8 @@ public final class TR
 	private Color [] globalPalette;
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
-	public static final ExecutorService threadPool = Executors.newCachedThreadPool();
+	public static final ExecutorService threadPool = Executors.newCachedThreadPool();//TODO: Migrate to ThreadManager
+	private final ThreadManager threadManager;
 	private final Renderer renderer;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
@@ -113,6 +111,7 @@ public final class TR
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		getRenderer().setRootGrid(world);
+		threadManager = new ThreadManager(this);
 		}//end constructor
 	
 	public void showStopper(final Exception e)
@@ -249,4 +248,7 @@ public final class TR
 		{
 		return world;
 		}
+
+	public ThreadManager getThreadManager()
+		{return threadManager;}
 	}//end TR

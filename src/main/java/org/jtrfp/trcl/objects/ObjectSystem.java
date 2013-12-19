@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.DEFObjectPlacer;
-import org.jtrfp.trcl.PUPObjectPlacer;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.Tunnel;

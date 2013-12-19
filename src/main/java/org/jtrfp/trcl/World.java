@@ -28,7 +28,9 @@ import org.jtrfp.trcl.objects.ObjectDirection;
 
 public final class World extends RenderableSpacePartitioningGrid
 	{
-	double sizeX, sizeY, sizeZ;
+	double sizeX;
+	public double sizeY;
+	double sizeZ;
 	private static final int blockGranularity = 8;// Dim-Segments per diameter. should
 	private Color fogColor = Color.black;
 	private final List<TickListener> tickListeners = new LinkedList<TickListener>();

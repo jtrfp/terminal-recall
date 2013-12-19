@@ -30,6 +30,7 @@ import org.jtrfp.trcl.Matrix;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.PrimitiveList;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
@@ -53,6 +54,7 @@ public class WorldObject implements PositionedRenderable
 	private static final List<WorldObject> allWorldObjects = Collections.synchronizedList(new ArrayList<WorldObject>());
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
+	private SpacePartitioningGrid containingGrid;
 	
 	public WorldObject(TR tr)
 		{
@@ -307,4 +309,15 @@ public class WorldObject implements PositionedRenderable
 		{
 		return tr;
 		}
+	
+	public void destroy()
+		{tr.getCollisionManager().remove(this);
+		containingGrid.remove(this);
+		//this.setVisible(false);
+		}
+	
+	@Override
+	public void setContainingGrid(SpacePartitioningGrid grid)
+		{containingGrid=grid;}
+	public SpacePartitioningGrid getContainingGrid(){return containingGrid;}
 	}//end WorldObject

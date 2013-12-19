@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.objects.BillboardSprite;
 import org.jtrfp.trcl.objects.PositionListenable;
 import org.jtrfp.trcl.objects.PositionListener;
 
@@ -115,7 +114,16 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	public void add(E objectWithPosition)
 		{//Figure out where it goes
 		GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
+		objectWithPosition.setContainingGrid(this);
 		dest.add(objectWithPosition);
+		}
+	public void remove(E objectWithPosition)
+		{
+		for(Object o:gridSquares)
+			{//Blind removal
+			GridCube gc = (GridCube)o;
+			gc.remove(objectWithPosition);
+			}
 		}
 	public void addAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.add(objectWithPosition);}

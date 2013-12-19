@@ -16,8 +16,10 @@
 package org.jtrfp.trcl.objects;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 
 public interface Positionable
 	{
 	public Vector3D getPosition();
+	public void setContainingGrid(SpacePartitioningGrid grid);
 	}

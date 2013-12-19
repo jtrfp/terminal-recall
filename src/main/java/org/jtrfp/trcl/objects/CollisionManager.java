@@ -10,6 +10,7 @@ public class CollisionManager
 	{
 	private final TR tr;
 	private ArrayList<WorldObject> visibilityList = new ArrayList<WorldObject>();
+	public static final int SHIP_COLLISION_DISTANCE = 30000;
 	public CollisionManager(TR tr)
 		{this.tr=tr;
 		}
@@ -29,15 +30,16 @@ public class CollisionManager
 		}//end updateVisibilityList()
 	public synchronized void performCollisionTests()
 		{
-		final int size=visibilityList.size();
-		for(int i=0; i<size; i++)
+		for(int i=0; i<visibilityList.size(); i++)
 			{
 			final WorldObject left=visibilityList.get(i);
-			for(int j=i; j<size; j++)
+			for(int j=i; j<visibilityList.size(); j++)
 				{final WorldObject right=visibilityList.get(j);
 				left.proposeCollision(right);
 				right.proposeCollision(left);
 				}//end for(j)
 			}//end for(i)
 		}
+	public void remove(WorldObject worldObject)
+		{visibilityList.remove(worldObject);}
 	}//end CollisionManager

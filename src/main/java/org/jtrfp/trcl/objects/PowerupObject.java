@@ -1,18 +1,26 @@
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
 import java.awt.Dimension;
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.AnimatedTexture;
+import org.jtrfp.trcl.GammaCorrectingColorProcessor;
+import org.jtrfp.trcl.Sequencer;
+import org.jtrfp.trcl.Texture;
+import org.jtrfp.trcl.TextureDescription;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
-import org.jtrfp.trcl.objects.BillboardSprite;
+import org.jtrfp.trcl.file.Powerup;
 
 
 public class PowerupObject extends BillboardSprite
 	{
+	private final Powerup powerupType;
 	public PowerupObject(PowerupLocation loc, World world)
 		{
 		super(world.getTr());
+		powerupType=loc.getType();
 		setBillboardSize(new Dimension(20000,20000));
 		TextureDescription desc=Texture.getFallbackTexture();
 		final int animationRate=500;
@@ -199,4 +207,46 @@ public class PowerupObject extends BillboardSprite
 
 	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
 		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
+
+	public Powerup getPowerupType()
+		{return powerupType;}
+
+	public void applyToPlayer(Player p)
+		{switch(powerupType)
+			{
+			case RTL:
+				p.setRtlQuantity(p.getRtlQuantity()+100);
+				break;
+			case PAC:
+				p.setPacQuantity(p.getPacQuantity()+100);
+				break;
+			case ION:
+				p.setIonQuantity(p.getIonQuantity()+100);
+				break;
+			case MAM:
+				p.setMamQuantity(p.getMamQuantity()+40);
+				break;
+			case SAD:
+				p.setSadQuantity(p.getSadQuantity()+20);
+				break;
+			case SWT:
+				p.setSwtQuantity(p.getSwtQuantity()+20);
+				break;
+			case shieldRestore:
+				break;
+			case invisibility:
+				break;
+			case invincibility:
+				break;
+			case DAM:
+				p.setDamQuantity(1);
+				break;
+			case Afterburner:
+				break;
+			case PowerCore:
+				break;
+			case Random:
+				break;
+			}
+		}//end applyToPlayer()
 	}//end PowerupObject

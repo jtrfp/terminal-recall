@@ -16,6 +16,25 @@ public class Player extends RigidMobileObject
 	private final Camera camera;
 	//private int cameraDistance=10000;
 	private int cameraDistance=0;
+	private int shieldQuantity;
+	private int speed;
+	private int afterburnerQuantity;
+	private static final int SINGLE_SKL=0;
+	private int sklLevel;
+	private int rflLevel;
+	
+	private int rtlQuantity;
+	private int pacQuantity;
+	private int ionQuantity;
+	private int mamQuantity;
+	private int sadQuantity;
+	private int swtQuantity;
+	private int damQuantity;
+	private static final int CLOAK_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
+	private int cloakCountdown;
+	private static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
+	private int invincibilityCountdown;
+	//private int 
 
 	public Player(Model model, World world)
 		{
@@ -28,9 +47,33 @@ public class Player extends RigidMobileObject
 		{
 		@Override
 		public void tick(long tickTimeInMillis)
-			{updateMovement();}
-		}
+			{updateMovement();
+			updateCountdowns();
+			}
+		}//end PlayerBehavior
 	
+	@Override
+	public void proposeCollision(WorldObject other)
+		{
+		if(other instanceof PowerupObject)
+			{PowerupObject pow=(PowerupObject)other;
+			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
+				{System.out.println("Got powerup "+pow.getPowerupType());other.destroy();
+				pow.applyToPlayer(this);
+				}//end if(collided)
+			}
+		super.proposeCollision(other);
+		}//end proposeCollision()
+	
+	public void updateCountdowns()
+		{if(cloakCountdown>0)
+			{if(--cloakCountdown==0)
+				{setVisible(true);}
+			else setVisible(false);}
+		if(invincibilityCountdown>0)
+			{--invincibilityCountdown;}
+		}
+
 	@Override
 	public void setHeading(Vector3D lookAt)
 		{camera.setLookAtVector(lookAt);
@@ -116,5 +159,229 @@ public class Player extends RigidMobileObject
 			this.setHeading(newLookAt);
 		if (positionChanged)
 			this.setPosition(newPos);
+		}
+
+	/**
+	 * @return the shieldQuantity
+	 */
+	public int getShieldQuantity()
+		{
+		return shieldQuantity;
+		}
+
+	/**
+	 * @param shieldQuantity the shieldQuantity to set
+	 */
+	public void setShieldQuantity(int shieldQuantity)
+		{
+		this.shieldQuantity = shieldQuantity;
+		}
+
+	/**
+	 * @return the speed
+	 */
+	public int getSpeed()
+		{
+		return speed;
+		}
+
+	/**
+	 * @param speed the speed to set
+	 */
+	public void setSpeed(int speed)
+		{
+		this.speed = speed;
+		}
+
+	/**
+	 * @return the afterburnerQuantity
+	 */
+	public int getAfterburnerQuantity()
+		{
+		return afterburnerQuantity;
+		}
+
+	/**
+	 * @param afterburnerQuantity the afterburnerQuantity to set
+	 */
+	public void setAfterburnerQuantity(int afterburnerQuantity)
+		{
+		this.afterburnerQuantity = afterburnerQuantity;
+		}
+
+	/**
+	 * @return the sklLevel
+	 */
+	public int getSklLevel()
+		{
+		return sklLevel;
+		}
+
+	/**
+	 * @param sklLevel the sklLevel to set
+	 */
+	public void setSklLevel(int sklLevel)
+		{
+		this.sklLevel = sklLevel;
+		}
+
+	/**
+	 * @return the rflLevel
+	 */
+	public int getRflLevel()
+		{
+		return rflLevel;
+		}
+
+	/**
+	 * @param rflLevel the rflLevel to set
+	 */
+	public void setRflLevel(int rflLevel)
+		{
+		this.rflLevel = rflLevel;
+		}
+
+	/**
+	 * @return the rtlQuantity
+	 */
+	public int getRtlQuantity()
+		{
+		return rtlQuantity;
+		}
+
+	/**
+	 * @param rtlQuantity the rtlQuantity to set
+	 */
+	public void setRtlQuantity(int rtlQuantity)
+		{
+		this.rtlQuantity = rtlQuantity;
+		}
+
+	/**
+	 * @return the pacQuantity
+	 */
+	public int getPacQuantity()
+		{
+		return pacQuantity;
+		}
+
+	/**
+	 * @param pacQuantity the pacQuantity to set
+	 */
+	public void setPacQuantity(int pacQuantity)
+		{
+		this.pacQuantity = pacQuantity;
+		}
+
+	/**
+	 * @return the ionQuantity
+	 */
+	public int getIonQuantity()
+		{
+		return ionQuantity;
+		}
+
+	/**
+	 * @param ionQuantity the ionQuantity to set
+	 */
+	public void setIonQuantity(int ionQuantity)
+		{
+		this.ionQuantity = ionQuantity;
+		}
+
+	/**
+	 * @return the mamQuantity
+	 */
+	public int getMamQuantity()
+		{
+		return mamQuantity;
+		}
+
+	/**
+	 * @param mamQuantity the mamQuantity to set
+	 */
+	public void setMamQuantity(int mamQuantity)
+		{
+		this.mamQuantity = mamQuantity;
+		}
+
+	/**
+	 * @return the sadQuantity
+	 */
+	public int getSadQuantity()
+		{
+		return sadQuantity;
+		}
+
+	/**
+	 * @param sadQuantity the sadQuantity to set
+	 */
+	public void setSadQuantity(int sadQuantity)
+		{
+		this.sadQuantity = sadQuantity;
+		}
+
+	/**
+	 * @return the swtQuantity
+	 */
+	public int getSwtQuantity()
+		{
+		return swtQuantity;
+		}
+
+	/**
+	 * @param swtQuantity the swtQuantity to set
+	 */
+	public void setSwtQuantity(int swtQuantity)
+		{
+		this.swtQuantity = swtQuantity;
+		}
+
+	/**
+	 * @return the damQuantity
+	 */
+	public int getDamQuantity()
+		{
+		return damQuantity;
+		}
+
+	/**
+	 * @param damQuantity the damQuantity to set
+	 */
+	public void setDamQuantity(int damQuantity)
+		{
+		this.damQuantity = damQuantity;
+		}
+
+	/**
+	 * @return the cloakCountdown
+	 */
+	public int getCloakCountdown()
+		{
+		return cloakCountdown;
+		}
+
+	/**
+	 * @param cloakCountdown the cloakCountdown to set
+	 */
+	public void setCloakCountdown(int cloakCountdown)
+		{
+		this.cloakCountdown = cloakCountdown;
+		}
+
+	/**
+	 * @return the invincibilityCountdown
+	 */
+	public int getInvincibilityCountdown()
+		{
+		return invincibilityCountdown;
+		}
+
+	/**
+	 * @param invincibilityCountdown the invincibilityCountdown to set
+	 */
+	public void setInvincibilityCountdown(int invincibilityCountdown)
+		{
+		this.invincibilityCountdown = invincibilityCountdown;
 		}
 	}//end Player

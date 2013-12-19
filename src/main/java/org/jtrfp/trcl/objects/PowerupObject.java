@@ -213,8 +213,7 @@ public class PowerupObject extends BillboardSprite
 
 	public void applyToPlayer(Player p)
 		{switch(powerupType)
-			{
-			case RTL:
+			{case RTL:
 				p.setRtlQuantity(p.getRtlQuantity()+100);
 				break;
 			case PAC:
@@ -233,17 +232,22 @@ public class PowerupObject extends BillboardSprite
 				p.setSwtQuantity(p.getSwtQuantity()+20);
 				break;
 			case shieldRestore:
+				p.setShieldQuantity(65535);
 				break;
 			case invisibility:
+				p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
 				break;
 			case invincibility:
+				p.setInvincibilityCountdown(Player.INVINCIBILITY_COUNTDOWN_START);
 				break;
 			case DAM:
 				p.setDamQuantity(1);
 				break;
 			case Afterburner:
+				p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
 				break;
 			case PowerCore:
+				p.setShieldQuantity(p.getShieldQuantity()+6554);
 				break;
 			case Random:
 				break;

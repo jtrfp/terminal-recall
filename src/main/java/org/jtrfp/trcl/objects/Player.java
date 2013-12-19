@@ -16,12 +16,12 @@ public class Player extends RigidMobileObject
 	private final Camera camera;
 	//private int cameraDistance=10000;
 	private int cameraDistance=0;
-	private int shieldQuantity;
+	private int shieldQuantity=65535;
 	private int speed;
 	private int afterburnerQuantity;
 	private static final int SINGLE_SKL=0;
-	private int sklLevel;
-	private int rflLevel;
+	private int rtlLevel;
+	private int pacLevel;
 	
 	private int rtlQuantity;
 	private int pacQuantity;
@@ -30,11 +30,10 @@ public class Player extends RigidMobileObject
 	private int sadQuantity;
 	private int swtQuantity;
 	private int damQuantity;
-	private static final int CLOAK_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
+	public static final int CLOAK_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
 	private int cloakCountdown;
-	private static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
+	public static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
 	private int invincibilityCountdown;
-	//private int 
 
 	public Player(Model model, World world)
 		{
@@ -60,7 +59,6 @@ public class Player extends RigidMobileObject
 			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{System.out.println("Got powerup "+pow.getPowerupType());other.destroy();
 				pow.applyToPlayer(this);
-				//System.exit(1);
 				}//end if(collided)
 			}
 		super.proposeCollision(other);
@@ -175,7 +173,7 @@ public class Player extends RigidMobileObject
 	 */
 	public void setShieldQuantity(int shieldQuantity)
 		{
-		this.shieldQuantity = shieldQuantity;
+		this.shieldQuantity = shieldQuantity<=65535?shieldQuantity:65535;
 		}
 
 	/**
@@ -211,38 +209,6 @@ public class Player extends RigidMobileObject
 		}
 
 	/**
-	 * @return the sklLevel
-	 */
-	public int getSklLevel()
-		{
-		return sklLevel;
-		}
-
-	/**
-	 * @param sklLevel the sklLevel to set
-	 */
-	public void setSklLevel(int sklLevel)
-		{
-		this.sklLevel = sklLevel;
-		}
-
-	/**
-	 * @return the rflLevel
-	 */
-	public int getRflLevel()
-		{
-		return rflLevel;
-		}
-
-	/**
-	 * @param rflLevel the rflLevel to set
-	 */
-	public void setRflLevel(int rflLevel)
-		{
-		this.rflLevel = rflLevel;
-		}
-
-	/**
 	 * @return the rtlQuantity
 	 */
 	public int getRtlQuantity()
@@ -254,7 +220,7 @@ public class Player extends RigidMobileObject
 	 * @param rtlQuantity the rtlQuantity to set
 	 */
 	public void setRtlQuantity(int rtlQuantity)
-		{
+		{if(this.rtlQuantity>0&& rtlLevel<2 && rtlQuantity>this.rtlQuantity)this.rtlLevel++;
 		this.rtlQuantity = rtlQuantity;
 		}
 
@@ -270,7 +236,7 @@ public class Player extends RigidMobileObject
 	 * @param pacQuantity the pacQuantity to set
 	 */
 	public void setPacQuantity(int pacQuantity)
-		{
+		{if(this.pacQuantity>0&& pacLevel<2 && pacQuantity>this.pacQuantity)this.pacLevel++;
 		this.pacQuantity = pacQuantity;
 		}
 

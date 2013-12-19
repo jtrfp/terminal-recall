@@ -24,6 +24,7 @@ import org.jtrfp.trcl.objects.WorldObject2D;
 
 public class Dashboard extends WorldObject2D
 	{
+	private static final double Z=-1;
 	public Dashboard(TR tr) throws IllegalAccessException, FileLoadException, IOException
 		{
 		super(tr);
@@ -36,7 +37,7 @@ public class Dashboard extends WorldObject2D
 			final double x=-1+segWidth*seg;
 			
 			Triangle [] tris=Triangle.quad2Triangles(
-					new double[]{x,x+segWidth,x+segWidth,x}, new double[]{.36,.36,1,1}, new double[]{.000001,.000001,.000001,.000001}, 
+					new double[]{x,x+segWidth,x+segWidth,x}, new double[]{.36,.36,1,1}, new double[]{Z,Z,Z,Z}, 
 					new double[]{0,1,1,0}, new double[]{0,0,1,1}, dashTexture[seg], RenderMode.DYNAMIC);
 			tris[0].setAlphaBlended(true);
 			tris[1].setAlphaBlended(true);

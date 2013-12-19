@@ -19,6 +19,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid
 	{
+	private static final double Z=-1;
 	public HUDSystem(World world)
 		{
 		super(world);
@@ -42,23 +43,23 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		
 		CharLineDisplay objective = new CharLineDisplay(world.getTr(),this,FONT_SIZE,16,font);
 		objective.setContent("FLY TO JUMP ZONE");
-		objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,0));
+		objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,Z));
 		
 		CharLineDisplay distance = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		distance.setContent("01234");
-		distance.setPosition(new Vector3D(.42,TOP_LINE_Y,0));
+		distance.setPosition(new Vector3D(.42,TOP_LINE_Y,Z));
 		
 		CharLineDisplay weapon = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		weapon.setContent("RFL20");
-		weapon.setPosition(new Vector3D(-.44,BOTTOM_LINE_Y,0));
+		weapon.setPosition(new Vector3D(-.44,BOTTOM_LINE_Y,Z));
 		
 		CharLineDisplay sector = new CharLineDisplay(world.getTr(),this,FONT_SIZE,7,font);
 		sector.setContent("255,255");
-		sector.setPosition(new Vector3D(.38,BOTTOM_LINE_Y,0));
+		sector.setPosition(new Vector3D(.38,BOTTOM_LINE_Y,Z));
 		
 		CharLineDisplay ammo = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		ammo.setContent("1337");
-		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,0));
+		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,Z));
 		
 		addAlwaysVisible(new Crosshairs(world.getTr()));
 		}//end constructor

@@ -60,6 +60,7 @@ public class Player extends RigidMobileObject
 			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{System.out.println("Got powerup "+pow.getPowerupType());other.destroy();
 				pow.applyToPlayer(this);
+				//System.exit(1);
 				}//end if(collided)
 			}
 		super.proposeCollision(other);

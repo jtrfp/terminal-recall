@@ -10,7 +10,7 @@ public class CollisionManager
 	{
 	private final TR tr;
 	private ArrayList<WorldObject> visibilityList = new ArrayList<WorldObject>();
-	public static final int SHIP_COLLISION_DISTANCE = 30000;
+	public static final int SHIP_COLLISION_DISTANCE = 50000;
 	public CollisionManager(TR tr)
 		{this.tr=tr;
 		}
@@ -25,7 +25,7 @@ public class CollisionManager
 
 			@Override
 			public void submit(Collection<PositionedRenderable> items)
-				{for(PositionedRenderable pr:items){submit(pr);}}
+				{for(PositionedRenderable pr:items.toArray(new PositionedRenderable[]{})){submit(pr);}}
 			});
 		}//end updateVisibilityList()
 	public synchronized void performCollisionTests()

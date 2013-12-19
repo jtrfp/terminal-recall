@@ -321,7 +321,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0));
 				wo = new RigidMobileObject(m,new RotatingObjectBehavior(heading,heading,top,6000,Math.PI/2),world);
-				wo.setPosition(wPos.add(new Vector3D(0,0,10)));
+				wo.setPosition(wPos.add(new Vector3D(100,0,0)));
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);

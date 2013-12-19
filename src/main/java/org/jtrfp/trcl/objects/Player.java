@@ -51,19 +51,6 @@ public class Player extends RigidMobileObject
 			}
 		}//end PlayerBehavior
 	
-	@Override
-	public void proposeCollision(WorldObject other)
-		{
-		if(other instanceof PowerupObject)
-			{PowerupObject pow=(PowerupObject)other;
-			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
-				{System.out.println("Got powerup "+pow.getPowerupType());other.destroy();
-				pow.applyToPlayer(this);
-				}//end if(collided)
-			}
-		super.proposeCollision(other);
-		}//end proposeCollision()
-	
 	public void updateCountdowns()
 		{if(cloakCountdown>0)
 			{if(--cloakCountdown==0)
@@ -172,9 +159,7 @@ public class Player extends RigidMobileObject
 	 * @param shieldQuantity the shieldQuantity to set
 	 */
 	public void setShieldQuantity(int shieldQuantity)
-		{
-		this.shieldQuantity = shieldQuantity<=65535?shieldQuantity:65535;
-		}
+		{this.shieldQuantity = shieldQuantity<=65535?shieldQuantity:65535;}
 
 	/**
 	 * @return the speed

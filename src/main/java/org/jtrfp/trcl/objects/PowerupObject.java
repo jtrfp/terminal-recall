@@ -210,7 +210,19 @@ public class PowerupObject extends BillboardSprite
 
 	public Powerup getPowerupType()
 		{return powerupType;}
-
+	
+	@Override
+	public void proposeCollision(WorldObject other)
+		{
+		if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
+			{if(other instanceof Player)
+				{Player p=(Player)other;
+				applyToPlayer(p);
+				destroy();
+				}
+			}//end if(close enough)
+		}//end proposeCollision()
+	
 	public void applyToPlayer(Player p)
 		{switch(powerupType)
 			{case RTL:

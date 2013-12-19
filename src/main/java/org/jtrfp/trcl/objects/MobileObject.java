@@ -13,9 +13,11 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
-import org.jtrfp.trcl.objects.WorldObject;
+import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.TickListener;
+import org.jtrfp.trcl.World;
 
 
 public abstract class MobileObject extends WorldObject implements TickListener

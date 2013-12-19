@@ -1,4 +1,6 @@
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
+
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 
 public interface ObjectPlacer
 	{

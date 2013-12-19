@@ -15,9 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.objects;
 
-import org.jtrfp.trcl.MobileObject;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.ObjectBehavior;
 import org.jtrfp.trcl.World;
 
 public class RigidMobileObject extends MobileObject

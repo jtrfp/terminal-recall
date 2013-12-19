@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
 
 
 public final class GlobalDynamicTextureBuffer extends GLTextureBuffer

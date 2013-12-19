@@ -29,7 +29,6 @@ import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.Matrix;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
-import org.jtrfp.trcl.ObjectDirection;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
@@ -67,6 +66,8 @@ public class WorldObject implements PositionedRenderable
 		this(tr);
 		setModel(m);
 		}//end constructor
+	
+	void proposeCollision(WorldObject other){}
 	
 	private static final void addWorldObject(WorldObject o)
 		{if(o==null){new Exception().printStackTrace();System.exit(1);}
@@ -255,13 +256,13 @@ public class WorldObject implements PositionedRenderable
 	/**
 	 * @return the heading
 	 */
-	public final Vector3D getHeading()
+	public final Vector3D getLookAt()
 		{return heading;}
 
 	/**
 	 * @param heading the heading to set
 	 */
-	public final void setHeading(Vector3D heading)
+	public void setHeading(Vector3D heading)
 		{this.heading = heading;}
 
 	/**
@@ -273,7 +274,7 @@ public class WorldObject implements PositionedRenderable
 	/**
 	 * @param top the top to set
 	 */
-	public final void setTop(Vector3D top)
+	public void setTop(Vector3D top)
 		{this.top = top;}
 	
 	private void notifyPositionListeners()

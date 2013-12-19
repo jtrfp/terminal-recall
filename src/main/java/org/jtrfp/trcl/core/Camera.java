@@ -75,7 +75,7 @@ public class Camera
 	/**
 	 * @param cameraPosition the cameraPosition to set
 	 */
-	public void setCameraPosition(Vector3D cameraPosition)
+	public void setPosition(Vector3D cameraPosition)
 		{
 		this.cameraPosition = cameraPosition;
 		cameraMatrix=null;

@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
+import org.jtrfp.trcl.objects.ObjectSystem;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid
 	{

@@ -36,6 +36,8 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.objects.CollisionManager;
+import org.jtrfp.trcl.objects.Player;
 
 public final class TR
 	{
@@ -49,6 +51,7 @@ public final class TR
 	public static final boolean ANIMATED_TERRAIN=false;
 	
 	private final GPU gpu = new GPU();
+	private Player player;
 	private final JFrame frame = new JFrame("Terminal Recall");
 	private Color [] globalPalette;
 	private final KeyStatus keyStatus;
@@ -56,6 +59,7 @@ public final class TR
 	public static final ExecutorService threadPool = Executors.newCachedThreadPool();//TODO: Migrate to ThreadManager
 	private final ThreadManager threadManager;
 	private final Renderer renderer;
+	private final CollisionManager collisionManager = new CollisionManager(this);
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -251,4 +255,12 @@ public final class TR
 
 	public ThreadManager getThreadManager()
 		{return threadManager;}
+
+	public CollisionManager getCollisionManager()
+		{return collisionManager;}
+
+	public void setPlayer(Player player)
+		{this.player=player;}
+	
+	public Player getPlayer(){return player;}
 	}//end TR

@@ -13,11 +13,17 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.DEFObjectPlacer;
+import org.jtrfp.trcl.PUPObjectPlacer;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.TerrainSystem;
+import org.jtrfp.trcl.Tunnel;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;

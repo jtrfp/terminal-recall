@@ -6,6 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
+import org.jtrfp.trcl.objects.ObjectPlacer;
 
 public class PUPObjectPlacer implements ObjectPlacer
 	{

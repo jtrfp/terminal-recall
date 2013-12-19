@@ -29,6 +29,7 @@ import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.objects.Player;
 
 public class OverworldGame
 	{
@@ -57,7 +58,7 @@ public class OverworldGame
 				{
 				NAVFile.START start = (NAVFile.START)nObj;
 				Location3D loc = start.getLocationOnMap();
-				tr.getRenderer().getCamera().setCameraPosition(Tunnel.TUNNEL_START_POS);
+				tr.getRenderer().getCamera().setPosition(Tunnel.TUNNEL_START_POS);
 				tr.getWorld().setCameraDirection(Tunnel.TUNNEL_START_DIRECTION);
 				//TODO: Uncomment to enable player locale
 				//world.setCameraDirection(new ObjectDirection(start.getRoll(),start.getPitch(),start.getYaw()));
@@ -70,6 +71,12 @@ public class OverworldGame
 		
 		overworldSystem = new OverworldSystem(tr.getWorld(), lvl);
 		backdropSystem = new BackdropSystem(tr.getWorld());
+		
+		Player player =new Player(tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl()),tr.getWorld()); 
+		player.setPosition(Tunnel.TUNNEL_START_POS);
+		player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+		tr.getWorld().add(player);
+		tr.setPlayer(player);
 		
 		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
 		GPU gpu = tr.getGPU();

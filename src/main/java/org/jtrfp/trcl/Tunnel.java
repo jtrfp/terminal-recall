@@ -22,6 +22,8 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
+import org.jtrfp.trcl.objects.ObjectDirection;
+import org.jtrfp.trcl.objects.ObjectSystem;
 import org.jtrfp.trcl.objects.RigidMobileObject;
 import org.jtrfp.trcl.objects.RotatingObjectBehavior;
 import org.jtrfp.trcl.objects.ShiftingObjectBehavior;

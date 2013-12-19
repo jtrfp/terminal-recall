@@ -19,7 +19,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
-import org.jtrfp.trcl.ObjectBehavior;
 import org.jtrfp.trcl.Sequencer;
 
 public class RotatingObjectBehavior extends ObjectBehavior

@@ -24,6 +24,7 @@ import javax.media.opengl.GLAutoDrawable;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.objects.ObjectDirection;
 
 public final class World extends RenderableSpacePartitioningGrid
 	{
@@ -43,7 +44,7 @@ public final class World extends RenderableSpacePartitioningGrid
 		this.sizeZ = sizeZ;
 		tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
 		Camera camera = tr.getRenderer().getCamera();
-		camera.setCameraPosition(new Vector3D(camera.getCameraPosition().getX(),
+		camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 				sizeY / 3.15, camera.getCameraPosition().getZ()));
 		GlobalObjectList.poke();
 		}// end constructor

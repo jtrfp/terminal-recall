@@ -12,6 +12,8 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.objects.ObjectDirection;
+import org.jtrfp.trcl.objects.ObjectPlacer;
 import org.jtrfp.trcl.objects.RigidMobileObject;
 
 public class DEFObjectPlacer implements ObjectPlacer

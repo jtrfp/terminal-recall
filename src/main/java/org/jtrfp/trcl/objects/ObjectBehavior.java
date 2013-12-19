@@ -13,7 +13,9 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
+
+import org.jtrfp.trcl.TickListener;
 
 public abstract class ObjectBehavior implements TickListener
 	{

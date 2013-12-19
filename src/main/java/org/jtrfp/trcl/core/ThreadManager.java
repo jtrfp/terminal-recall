@@ -28,7 +28,7 @@ public class ThreadManager
 	private final TR tr;
 	private final FPSAnimator renderingAnimator;
 	private final Timer gameplayTimer = new Timer("GameplayTimer");
-	private final Timer renderListRefreshTimer = new Timer("RenderListRefreshTimer");
+	private final Timer visibilityCalculationTimer = new Timer("RenderListRefreshTimer");
 	public static final Object GAME_OBJECT_MODIFICATION_LOCK = new Object();
 	
 	ThreadManager(TR tr)
@@ -71,17 +71,19 @@ public class ThreadManager
 				// Ticks
 				long tickTimeInMillis = System.currentTimeMillis();
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
-					{updateCameraMovement();
+					{
 					for (TickListener l : ThreadManager.this.tr.getWorld().getTickListeners())
 						{l.tick(tickTimeInMillis);}
+					tr.getCollisionManager().performCollisionTests();
 					}
 				}//end run()
 			}, 0, 1000/GAMEPLAY_FPS);
-		renderListRefreshTimer.scheduleAtFixedRate(new TimerTask()
+		visibilityCalculationTimer.scheduleAtFixedRate(new TimerTask()
 			{@Override
 			public void run()
 				{Thread.currentThread().setPriority(RENDERING_PRIORITY);
 				tr.getRenderer().updateVisibilityList();
+				tr.getCollisionManager().updateVisibilityList();
 				}
 			}, 0, 1000/RENDERLIST_REFRESH_FPS);
 		//CLEANUP
@@ -89,84 +91,11 @@ public class ThreadManager
 			{
 			@Override
 			public void run()
-				{renderListRefreshTimer.cancel();
+				{visibilityCalculationTimer.cancel();
 				gameplayTimer.cancel();
 				}
 			});
 		}//end constructor
 	
-	private void updateCameraMovement()
-		{
-		final double manueverSpeed = 20. / (double) ThreadManager.RENDER_FPS;
-		final double nudgeUnit = TR.mapSquareSize / 9.;
-		final double angleUnit = Math.PI * .015 * manueverSpeed;
-		
-		boolean positionChanged = false, lookAtChanged = false;
-		// double
-		// newX=getCameraPosition().getX(),newY=getCameraPosition().getY(),newZ=getCameraPosition().getZ();
-		final Camera camera = tr.getRenderer().getCamera();
-		Vector3D newCamPos = camera.getCameraPosition();
-		Vector3D newLookAt = camera.getLookAtVector();
-		final KeyStatus keyStatus = tr.getKeyStatus();
-		if (keyStatus.isPressed(KeyEvent.VK_UP))
-			{
-			newCamPos = newCamPos.add(camera.getLookAtVector().scalarMultiply(
-					nudgeUnit * manueverSpeed));
-			positionChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_DOWN))
-			{
-			newCamPos = newCamPos.subtract(camera.getLookAtVector().scalarMultiply(
-					nudgeUnit * manueverSpeed));
-			positionChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP))
-			{
-			newCamPos = newCamPos.add(camera.getUpVector().scalarMultiply(nudgeUnit
-					* manueverSpeed));
-			positionChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_PAGE_DOWN))
-			{
-			newCamPos = newCamPos.subtract(camera.getUpVector().scalarMultiply(nudgeUnit
-					* manueverSpeed));
-			positionChanged = true;
-			}
-
-		Rotation turnRot = new Rotation(camera.getUpVector(), angleUnit);
-
-		if (keyStatus.isPressed(KeyEvent.VK_LEFT))
-			{
-			newLookAt = turnRot.applyInverseTo(newLookAt);
-			lookAtChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_RIGHT))
-			{
-			newLookAt = turnRot.applyTo(newLookAt);
-			lookAtChanged = true;
-			}
-
-		// Loop correction
-		if (WorldObject.LOOP)
-			{
-			if (newCamPos.getX() > TR.mapWidth)
-				newCamPos = newCamPos.subtract(new Vector3D(TR.mapWidth, 0, 0));
-			if (newCamPos.getY() > TR.mapWidth)
-				newCamPos = newCamPos.subtract(new Vector3D(0, TR.mapWidth, 0));
-			if (newCamPos.getZ() > TR.mapWidth)
-				newCamPos = newCamPos.subtract(new Vector3D(0, 0, TR.mapWidth));
-
-			if (newCamPos.getX() < 0)
-				newCamPos = newCamPos.add(new Vector3D(TR.mapWidth, 0, 0));
-			if (newCamPos.getY() < 0)
-				newCamPos = newCamPos.add(new Vector3D(0, TR.mapWidth, 0));
-			if (newCamPos.getZ() < 0)
-				newCamPos = newCamPos.add(new Vector3D(0, 0, TR.mapWidth));
-			}
-
-		if (lookAtChanged)
-			camera.setLookAtVector(newLookAt);
-		if (positionChanged)
-			camera.setCameraPosition(newCamPos);
-		}
+	
 	}//end ThreadManager

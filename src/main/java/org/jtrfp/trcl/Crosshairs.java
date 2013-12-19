@@ -23,6 +23,7 @@ import org.jtrfp.trcl.objects.WorldObject2D;
 
 public class Crosshairs extends WorldObject2D
 	{
+	private static final double Z = 0;
 	public Crosshairs(TR tr)
 		{
 		super(tr);
@@ -36,22 +37,22 @@ public class Crosshairs extends WorldObject2D
 		final double xhairThick=.005*xhairScale;
 		final double xhairLen=.015*xhairScale;
 		crossModel.addTriangles(Triangle.quad2Triangles(//Horiz
-				new double[]{-xhairLen,xhairLen,xhairLen,-xhairLen}, new double[]{xhairThick,xhairThick,-xhairThick,-xhairThick}, new double[]{.00001,.00001,.00001,.00001}, 
+				new double[]{-xhairLen,xhairLen,xhairLen,-xhairLen}, new double[]{xhairThick,xhairThick,-xhairThick,-xhairThick}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1}, greenThrob, RenderMode.DYNAMIC));
 		crossModel.addTriangles(Triangle.quad2Triangles(//Vert
-				new double[]{-xhairThick,xhairThick,xhairThick,-xhairThick}, new double[]{xhairLen,xhairLen,-xhairLen,-xhairLen}, new double[]{.00001,.00001,.00001,.00001}, 
+				new double[]{-xhairThick,xhairThick,xhairThick,-xhairThick}, new double[]{xhairLen,xhairLen,-xhairLen,-xhairLen}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC));
 		crossModel.addTriangles(Triangle.quad2Triangles(//Top
-				new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{xhairLen+xhairThick*6,xhairLen+xhairThick*6,xhairLen,xhairLen}, new double[]{.00001,.00001,.00001,.00001}, 
+				new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{xhairLen+xhairThick*6,xhairLen+xhairThick*6,xhairLen,xhairLen}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC));
 		crossModel.addTriangles(Triangle.quad2Triangles(//Bottom
-				new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{-(xhairLen+xhairThick*6),-(xhairLen+xhairThick*6),-(xhairLen),-(xhairLen)}, new double[]{.00001,.00001,.00001,.00001}, 
+				new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{-(xhairLen+xhairThick*6),-(xhairLen+xhairThick*6),-(xhairLen),-(xhairLen)}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC));
 		crossModel.addTriangles(Triangle.quad2Triangles(//Left
-				new double[]{-(xhairLen+xhairThick*6),-(xhairLen+xhairThick*6),-(xhairLen),-(xhairLen)}, new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{.00001,.00001,.00001,.00001}, 
+				new double[]{-(xhairLen+xhairThick*6),-(xhairLen+xhairThick*6),-(xhairLen),-(xhairLen)}, new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC));
 		crossModel.addTriangles(Triangle.quad2Triangles(//Right
-				new double[]{(xhairLen+xhairThick*6),(xhairLen+xhairThick*6),(xhairLen),(xhairLen)}, new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{.00001,.00001,.00001,.00001}, 
+				new double[]{(xhairLen+xhairThick*6),(xhairLen+xhairThick*6),(xhairLen),(xhairLen)}, new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC));
 		setPosition(Vector3D.ZERO);
 		setModel(crossModel.finalizeModel());

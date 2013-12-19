@@ -16,6 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
+import org.jtrfp.trcl.objects.ObjectBehavior;
 
 public class TVBehavior extends ObjectBehavior
 	{

@@ -39,10 +39,10 @@ public class TunnelSegment extends WorldObject
 		//System.out.println("Start width (legacy): "+s.getStartWidth());
 		//System.out.println("Start width (modern*TUNNEL_DIA_SCALAR): "+TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR));
 		final int numPolys=s.getNumPolygons();
-		double startWidth=TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR);
-		double startHeight=TR.legacy2Modern(s.getStartHeight()*TUNNEL_DIA_SCALAR);
-		double endWidth=TR.legacy2Modern(s.getEndWidth()*TUNNEL_DIA_SCALAR);
-		double endHeight=TR.legacy2Modern(s.getEndHeight()*TUNNEL_DIA_SCALAR);
+		double startWidth=TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR*2);
+		double startHeight=TR.legacy2Modern(s.getStartHeight()*TUNNEL_DIA_SCALAR*2);
+		double endWidth=TR.legacy2Modern(s.getEndWidth()*TUNNEL_DIA_SCALAR*2);
+		double endHeight=TR.legacy2Modern(s.getEndHeight()*TUNNEL_DIA_SCALAR*2);
 		//TODO: x,y, rotation, 
 		double startAngle1=((double)s.getStartAngle1()/65535.)*2.*Math.PI;
 		double startAngle2=((double)s.getStartAngle2()/65535.)*2.*Math.PI;

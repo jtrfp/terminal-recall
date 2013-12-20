@@ -32,7 +32,6 @@ public class DEFObjectPlacer implements ObjectPlacer
 		{
 		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
-		//com.ritolaaudio.trcl.file.TDFFile.Tunnel [] tuns = tdf.getTunnels();
 		final Model [] models = new Model[defs.size()];
 		final GL3 gl = world.getTr().getGPU().takeGL();
 		final TR tr = world.getTr();
@@ -78,7 +77,6 @@ public class DEFObjectPlacer implements ObjectPlacer
 				//Vector3D heading = new Vector3D(Math.cos((double)pl.getPitch())/32767.,0.,Math.sin((double)pl.getPitch()/32767.));
 				try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
 				catch(MathArithmeticException e){e.printStackTrace();}
-				
 				target.add(obj);
 				}
 			else{System.out.println("Skipping triangle list at index "+pl.getDefIndex());}

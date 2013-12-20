@@ -100,8 +100,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 		Rotation rotation = entrance?new Rotation(new Vector3D(0,0,1),groundVector):new Rotation(new Vector3D(0,0,1),new Vector3D(1,0,0));
 		//CALCULATE ENDPOINT
 		for(Segment s:segs)
-			{
-			Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
+			{Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
 			tunnelEnd=tunnelEnd.add(rotation.applyTo(positionDelta));
 			}
 		

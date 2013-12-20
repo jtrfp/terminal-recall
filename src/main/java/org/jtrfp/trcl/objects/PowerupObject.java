@@ -10,6 +10,7 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
 
@@ -22,6 +23,7 @@ public class PowerupObject extends BillboardSprite
 		super(world.getTr());
 		powerupType=loc.getType();
 		setBillboardSize(new Dimension(20000,20000));
+		setBehavior(new PowerupBehavior(getBehavior()));
 		TextureDescription desc=Texture.getFallbackTexture();
 		final int animationRate=500;
 		try//TODO: refactor this to read from an array using an ordinal
@@ -205,64 +207,74 @@ public class PowerupObject extends BillboardSprite
 			{e.printStackTrace();}
 		}//end constructor
 
+	private class PowerupBehavior extends ObjectBehavior<PowerupObject>
+		{
+		protected PowerupBehavior(ObjectBehavior<?> wrapped)
+			{
+			super(wrapped);
+			}
+		
+		@Override
+		public void _proposeCollision(WorldObject other)
+			{
+			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
+				{if(other instanceof Player)
+					{Player p=(Player)other;
+					applyToPlayer(p);
+					destroy();
+					}
+				}//end if(close enough)
+			}//end proposeCollision()
+		
+		public void applyToPlayer(Player p)
+			{switch(powerupType)
+				{case RTL:
+					p.setRtlQuantity(p.getRtlQuantity()+100);
+					break;
+				case PAC:
+					p.setPacQuantity(p.getPacQuantity()+100);
+					break;
+				case ION:
+					p.setIonQuantity(p.getIonQuantity()+100);
+					break;
+				case MAM:
+					p.setMamQuantity(p.getMamQuantity()+40);
+					break;
+				case SAD:
+					p.setSadQuantity(p.getSadQuantity()+20);
+					break;
+				case SWT:
+					p.setSwtQuantity(p.getSwtQuantity()+20);
+					break;
+				case shieldRestore:
+					p.setShieldQuantity(65535);
+					break;
+				case invisibility:
+					p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
+					break;
+				case invincibility:
+					p.setInvincibilityCountdown(Player.INVINCIBILITY_COUNTDOWN_START);
+					break;
+				case DAM:
+					p.setDamQuantity(1);
+					break;
+				case Afterburner:
+					p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
+					break;
+				case PowerCore:
+					p.setShieldQuantity(p.getShieldQuantity()+6554);
+					break;
+				case Random:
+					break;
+				}
+			}//end applyToPlayer()
+		}
+	
 	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
 		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
 
 	public Powerup getPowerupType()
 		{return powerupType;}
 	
-	@Override
-	public void proposeCollision(WorldObject other)
-		{
-		if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
-			{if(other instanceof Player)
-				{Player p=(Player)other;
-				applyToPlayer(p);
-				destroy();
-				}
-			}//end if(close enough)
-		}//end proposeCollision()
 	
-	public void applyToPlayer(Player p)
-		{switch(powerupType)
-			{case RTL:
-				p.setRtlQuantity(p.getRtlQuantity()+100);
-				break;
-			case PAC:
-				p.setPacQuantity(p.getPacQuantity()+100);
-				break;
-			case ION:
-				p.setIonQuantity(p.getIonQuantity()+100);
-				break;
-			case MAM:
-				p.setMamQuantity(p.getMamQuantity()+40);
-				break;
-			case SAD:
-				p.setSadQuantity(p.getSadQuantity()+20);
-				break;
-			case SWT:
-				p.setSwtQuantity(p.getSwtQuantity()+20);
-				break;
-			case shieldRestore:
-				p.setShieldQuantity(65535);
-				break;
-			case invisibility:
-				p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
-				break;
-			case invincibility:
-				p.setInvincibilityCountdown(Player.INVINCIBILITY_COUNTDOWN_START);
-				break;
-			case DAM:
-				p.setDamQuantity(1);
-				break;
-			case Afterburner:
-				p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
-				break;
-			case PowerCore:
-				p.setShieldQuantity(p.getShieldQuantity()+6554);
-				break;
-			case Random:
-				break;
-			}
-		}//end applyToPlayer()
 	}//end PowerupObject

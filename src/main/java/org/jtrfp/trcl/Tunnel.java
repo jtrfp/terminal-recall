@@ -13,6 +13,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.ai.RotatingObjectBehavior;
+import org.jtrfp.trcl.ai.ShiftingObjectBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
@@ -25,8 +27,6 @@ import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
 import org.jtrfp.trcl.objects.ObjectDirection;
 import org.jtrfp.trcl.objects.ObjectSystem;
 import org.jtrfp.trcl.objects.RigidMobileObject;
-import org.jtrfp.trcl.objects.RotatingObjectBehavior;
-import org.jtrfp.trcl.objects.ShiftingObjectBehavior;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public class Tunnel extends RenderableSpacePartitioningGrid
@@ -36,7 +36,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 	private final TR tr;
 	private final Color [] palette;
 	private final GL3 gl;
-	final double tunnelDia=100000;
+	final double tunnelDia=200000;
 	final double wallThickness=5000;
 	private final World world;
 	
@@ -231,7 +231,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia));
-				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(3000,wPos,endPos),world);
+				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(null,3000,wPos,endPos),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
@@ -242,7 +242,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia));
-				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(3000,wPos,endPos),world);
+				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(null,3000,wPos,endPos),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
@@ -253,7 +253,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.subtract(top.scalarMultiply(tunnelDia));
-				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(3000,wPos,endPos),world);
+				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(null,3000,wPos,endPos),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
@@ -264,7 +264,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.add(top.scalarMultiply(tunnelDia));
-				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(3000,wPos,endPos),world);
+				wo = new RigidMobileObject(m,new ShiftingObjectBehavior(null,3000,wPos,endPos),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
@@ -305,7 +305,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				break;
 			case rotatingHalfWall:
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0));
-				wo = new RigidMobileObject(m,new RotatingObjectBehavior(heading,heading,top,6000,0),world);
+				wo = new RigidMobileObject(m,new RotatingObjectBehavior(null,heading,heading,top,6000,0),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
@@ -313,14 +313,14 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				break;
 			case rotating34Wall:
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,10));
-				wo = new RigidMobileObject(m,new RotatingObjectBehavior(heading,heading,top,6000,0),world);
+				wo = new RigidMobileObject(m,new RotatingObjectBehavior(null,heading,heading,top,6000,0),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);
 				
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0));
-				wo = new RigidMobileObject(m,new RotatingObjectBehavior(heading,heading,top,6000,Math.PI/2),world);
+				wo = new RigidMobileObject(m,new RotatingObjectBehavior(null,heading,heading,top,6000,Math.PI/2),world);
 				wo.setPosition(wPos.add(new Vector3D(100,0,0)));
 				wo.setHeading(heading);
 				wo.setTop(top);
@@ -337,14 +337,14 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 			case jawsVertical:
 				//Up jaw
 				wo = new RigidMobileObject(tr.getResourceManager().getBINModel("JAW2.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl),
-						new ShiftingObjectBehavior(3000,wPos,wPos.add(top.scalarMultiply(tunnelDia/2))),world);
+						new ShiftingObjectBehavior(null,3000,wPos,wPos.add(top.scalarMultiply(tunnelDia/2))),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
 				add(wo);
 				//Down jaw
 				wo = new RigidMobileObject(tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl),
-						new ShiftingObjectBehavior(3000,wPos,wPos.subtract(top.scalarMultiply(tunnelDia/2))),world);
+						new ShiftingObjectBehavior(null,3000,wPos,wPos.subtract(top.scalarMultiply(tunnelDia/2))),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
@@ -353,14 +353,14 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 			case jawsHorizontal:
 				//Left jaw
 				wo = new RigidMobileObject(tr.getResourceManager().getBINModel("JAW2.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl),
-						new ShiftingObjectBehavior(3000,wPos,wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia/2))),world);
+						new ShiftingObjectBehavior(null,3000,wPos,wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia/2))),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);
 				//Right jaw
 				wo = new RigidMobileObject(tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl),
-						new ShiftingObjectBehavior(3000,wPos,wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia/2))),world);
+						new ShiftingObjectBehavior(null,3000,wPos,wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia/2))),world);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);

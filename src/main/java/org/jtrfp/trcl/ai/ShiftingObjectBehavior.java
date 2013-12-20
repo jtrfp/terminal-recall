@@ -13,14 +13,15 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.objects;
+package org.jtrfp.trcl.ai;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
+import org.jtrfp.trcl.objects.RigidMobileObject;
 
-public class ShiftingObjectBehavior extends ObjectBehavior
+public class ShiftingObjectBehavior extends ObjectBehavior<RigidMobileObject>
 	{
 	private final Sequencer seq;
 	//private final WorldObject obj;
@@ -32,15 +33,16 @@ public class ShiftingObjectBehavior extends ObjectBehavior
 	private final IndirectDouble zPos = new IndirectDouble();
 	
 	//private final TNLFile.Segment.Obstacle obstacle;
-	public ShiftingObjectBehavior(int totalShiftPeriodMsec,Vector3D startPos, Vector3D endPos)
+	public ShiftingObjectBehavior(ObjectBehavior<?> wrapped, int totalShiftPeriodMsec,Vector3D startPos, Vector3D endPos)
 		{
+		super(wrapped);
 		seq=new Sequencer(totalShiftPeriodMsec,2,true);
 		xAnimator=new AttribAnimator(xPos,seq,new double [] {startPos.getX(),endPos.getX()});
 		yAnimator=new AttribAnimator(yPos,seq,new double [] {startPos.getY(),endPos.getY()});
 		zAnimator=new AttribAnimator(zPos,seq,new double [] {startPos.getZ(),endPos.getZ()});
 		}
 	@Override
-	public void tick(long tickTimeInMillis)
+	public void _tick(long tickTimeInMillis)
 		{
 		xAnimator.updateAnimation();
 		yAnimator.updateAnimation();

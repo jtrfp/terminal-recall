@@ -7,6 +7,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -38,16 +39,24 @@ public class Player extends RigidMobileObject
 	public Player(Model model, World world)
 		{
 		super(model, null, world);
-		setBehavior(new PlayerBehavior());
+		setBehavior(new PlayerBehavior(null));
 		camera = getTr().getRenderer().getCamera();
 		}
 	
-	private class PlayerBehavior extends ObjectBehavior
+	private class PlayerBehavior extends ObjectBehavior<Player>
 		{
+		public PlayerBehavior(ObjectBehavior wrapped)
+			{super(wrapped);}
+		
 		@Override
-		public void tick(long tickTimeInMillis)
+		public void _tick(long tickTimeInMillis)
 			{updateMovement();
 			updateCountdowns();
+			}
+
+		@Override
+		public void _proposeCollision(WorldObject other)
+			{
 			}
 		}//end PlayerBehavior
 	

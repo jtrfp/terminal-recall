@@ -13,28 +13,18 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.ai;
 
+import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
-import org.jtrfp.trcl.objects.ObjectBehavior;
+import org.jtrfp.trcl.objects.RigidMobileObject;
 
-public class TVBehavior extends ObjectBehavior
+public class TVBehavior extends ObjectBehavior<RigidMobileObject>
 	{
 	TerrainSystem terrainSystem;
 	
-	public TVBehavior(){}
-	
-	public TVBehavior(EnemyDefinition def, TerrainSystem terrainSystem, int strength)
-		{
+	public TVBehavior(ObjectBehavior wrapped, EnemyDefinition def, TerrainSystem terrainSystem, int strength)
+		{super(wrapped);
 		this.terrainSystem=terrainSystem;
-		//TODO
-		
-		}
-
-	@Override
-	public void tick(long tickTimeInMillis)
-		{
-		// TODO Auto-generated method stub
-		
 		}
 	}//end TVBehavior

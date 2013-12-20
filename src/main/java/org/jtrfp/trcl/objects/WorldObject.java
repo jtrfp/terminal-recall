@@ -32,6 +32,7 @@ import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 
@@ -55,6 +56,7 @@ public class WorldObject implements PositionedRenderable
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
 	private SpacePartitioningGrid containingGrid;
+	private ObjectBehavior behavior;
 	
 	public WorldObject(TR tr)
 		{
@@ -69,7 +71,7 @@ public class WorldObject implements PositionedRenderable
 		setModel(m);
 		}//end constructor
 	
-	void proposeCollision(WorldObject other){}
+	void proposeCollision(WorldObject other){if(behavior!=null)behavior.proposeCollision(other);}
 	
 	private static final void addWorldObject(WorldObject o)
 		{if(o==null){new Exception().printStackTrace();System.exit(1);}
@@ -320,4 +322,16 @@ public class WorldObject implements PositionedRenderable
 	public void setContainingGrid(SpacePartitioningGrid grid)
 		{containingGrid=grid;}
 	public SpacePartitioningGrid getContainingGrid(){return containingGrid;}
+
+	/**
+	 * @return the behavior
+	 */
+	public ObjectBehavior getBehavior()
+		{return behavior;}
+
+	/**
+	 * @param behavior the behavior to set
+	 */
+	public void setBehavior(ObjectBehavior behavior)
+		{this.behavior = behavior;behavior.setParent(this);}
 	}//end WorldObject

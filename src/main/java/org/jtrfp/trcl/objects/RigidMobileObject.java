@@ -17,12 +17,11 @@ package org.jtrfp.trcl.objects;
 
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ai.ObjectBehavior;
 
 public class RigidMobileObject extends MobileObject
 	{
 	public RigidMobileObject(Model model,
 			ObjectBehavior behavior, World world)
-		{
-		super(model, behavior, world);
-		}
+		{super(model, behavior, world);}
 	}//end RigidMobileObject

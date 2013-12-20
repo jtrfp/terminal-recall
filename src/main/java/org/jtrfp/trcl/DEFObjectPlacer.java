@@ -8,6 +8,7 @@ import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.ai.TVBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
@@ -66,7 +67,7 @@ public class DEFObjectPlacer implements ObjectPlacer
 			if(model!=null)
 				{
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
-				final RigidMobileObject obj =new RigidMobileObject(model,new TVBehavior(def,terrainSystem,pl.getStrength()),world);
+				final RigidMobileObject obj =new RigidMobileObject(model,new TVBehavior(null,def,terrainSystem,pl.getStrength()),world);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),

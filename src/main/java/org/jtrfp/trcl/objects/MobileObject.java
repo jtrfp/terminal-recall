@@ -18,6 +18,7 @@ package org.jtrfp.trcl.objects;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.TickListener;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ai.ObjectBehavior;
 
 
 public abstract class MobileObject extends WorldObject implements TickListener
@@ -39,9 +40,7 @@ public abstract class MobileObject extends WorldObject implements TickListener
 	
 	@Override
 	public void tick(long time)
-		{
-		//TODO
-		if(lastTimeInMillis==-1)
+		{if(lastTimeInMillis==-1)
 			{//First time <3 <3 <3
 			}
 		else
@@ -51,42 +50,35 @@ public abstract class MobileObject extends WorldObject implements TickListener
 		lastTimeInMillis=time;
 		}//end tick()
 	
+	@Override
+	public void proposeCollision(WorldObject other)
+		{if(this.getBehavior()!=null)this.getBehavior().proposeCollision(other);}
 	
 	@Override
 	public String toString()
-		{
-		return "MobileObject x="+position.getX()+" y="+position.getY()+" z="+position.getZ();
-		}
+		{return "MobileObject x="+position.getX()+" y="+position.getY()+" z="+position.getZ();}
 
 	/**
 	 * @return the lastTimeInMillis
 	 */
 	public long getLastTimeInMillis()
-		{
-		return lastTimeInMillis;
-		}
+		{return lastTimeInMillis;}
 
 	/**
 	 * @param lastTimeInMillis the lastTimeInMillis to set
 	 */
 	public void setLastTimeInMillis(long lastTimeInMillis)
-		{
-		this.lastTimeInMillis = lastTimeInMillis;
-		}
+		{this.lastTimeInMillis = lastTimeInMillis;}
 
 	/**
 	 * @return the behavior
 	 */
 	public ObjectBehavior getBehavior()
-		{
-		return behavior;
-		}
+		{return behavior;}
 
 	/**
 	 * @param behavior the behavior to set
 	 */
 	public void setBehavior(ObjectBehavior behavior)
-		{
-		this.behavior = behavior;
-		}
+		{this.behavior = behavior;}
 	}//end MobileObject

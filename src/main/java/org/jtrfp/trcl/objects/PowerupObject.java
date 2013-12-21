@@ -247,7 +247,7 @@ public class PowerupObject extends BillboardSprite
 					p.setSwtQuantity(p.getSwtQuantity()+20);
 					break;
 				case shieldRestore:
-					p.setShieldQuantity(65535);
+					p.unDamage();
 					break;
 				case invisibility:
 					p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
@@ -262,7 +262,7 @@ public class PowerupObject extends BillboardSprite
 					p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
 					break;
 				case PowerCore:
-					p.setShieldQuantity(p.getShieldQuantity()+6554);
+					p.unDamage(6554);
 					break;
 				case Random:
 					break;

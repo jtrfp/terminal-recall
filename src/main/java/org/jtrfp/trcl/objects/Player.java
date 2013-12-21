@@ -7,18 +7,19 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
 import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 
-public class Player extends RigidMobileObject
+public class Player extends GameplayObject implements Damageable, Propelled
 	{
 	private final Camera camera;
 	//private int cameraDistance=10000;
 	private int cameraDistance=0;
-	private int shieldQuantity=65535;
-	private int speed;
+	//private int shieldQuantity=65535;
+	private double propulsion=0;
 	private int afterburnerQuantity;
 	private static final int SINGLE_SKL=0;
 	private int rtlLevel;
@@ -39,7 +40,9 @@ public class Player extends RigidMobileObject
 	public Player(Model model, World world)
 		{
 		super(model, null, world);
-		setBehavior(new PlayerBehavior(null));
+		setBehavior(
+				new PlayerBehavior(
+				new BouncesOffTunnelWalls<Player>(null)));
 		camera = getTr().getRenderer().getCamera();
 		}
 	
@@ -144,8 +147,8 @@ public class Player extends RigidMobileObject
 
 			if (newPos.getX() < 0)
 				newPos = newPos.add(new Vector3D(TR.mapWidth, 0, 0));
-			if (newPos.getY() < 0)
-				newPos = newPos.add(new Vector3D(0, TR.mapWidth, 0));
+			/*if (newPos.getY() < 0)
+				newPos = newPos.add(new Vector3D(0, TR.mapWidth, 0));*/
 			if (newPos.getZ() < 0)
 				newPos = newPos.add(new Vector3D(0, 0, TR.mapWidth));
 			}
@@ -154,36 +157,6 @@ public class Player extends RigidMobileObject
 			this.setHeading(newLookAt);
 		if (positionChanged)
 			this.setPosition(newPos);
-		}
-
-	/**
-	 * @return the shieldQuantity
-	 */
-	public int getShieldQuantity()
-		{
-		return shieldQuantity;
-		}
-
-	/**
-	 * @param shieldQuantity the shieldQuantity to set
-	 */
-	public void setShieldQuantity(int shieldQuantity)
-		{this.shieldQuantity = shieldQuantity<=65535?shieldQuantity:65535;}
-
-	/**
-	 * @return the speed
-	 */
-	public int getSpeed()
-		{
-		return speed;
-		}
-
-	/**
-	 * @param speed the speed to set
-	 */
-	public void setSpeed(int speed)
-		{
-		this.speed = speed;
 		}
 
 	/**
@@ -310,33 +283,25 @@ public class Player extends RigidMobileObject
 	 * @param damQuantity the damQuantity to set
 	 */
 	public void setDamQuantity(int damQuantity)
-		{
-		this.damQuantity = damQuantity;
-		}
+		{this.damQuantity = damQuantity;}
 
 	/**
 	 * @return the cloakCountdown
 	 */
 	public int getCloakCountdown()
-		{
-		return cloakCountdown;
-		}
+		{return cloakCountdown;}
 
 	/**
 	 * @param cloakCountdown the cloakCountdown to set
 	 */
 	public void setCloakCountdown(int cloakCountdown)
-		{
-		this.cloakCountdown = cloakCountdown;
-		}
+		{this.cloakCountdown = cloakCountdown;}
 
 	/**
 	 * @return the invincibilityCountdown
 	 */
 	public int getInvincibilityCountdown()
-		{
-		return invincibilityCountdown;
-		}
+		{return invincibilityCountdown;}
 
 	/**
 	 * @param invincibilityCountdown the invincibilityCountdown to set
@@ -345,4 +310,12 @@ public class Player extends RigidMobileObject
 		{
 		this.invincibilityCountdown = invincibilityCountdown;
 		}
+
+	@Override
+	public void setPropulsion(double magnitude)
+		{propulsion=magnitude;}
+
+	@Override
+	public double getPropulsion()
+		{return propulsion;}
 	}//end Player

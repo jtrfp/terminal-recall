@@ -5,11 +5,11 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.ai.ObjectBehavior;
 
-public class GameplayObject extends SmartObject implements Damageable, Velocible
+public class GameplayObject extends SmartObject implements Damageable, Velocible, VelocityDragged
 	{
 	private int health;
 	private Vector3D velocity = Vector3D.ZERO;
-	private Vector3D drag = Vector3D.ZERO;
+	private double drag = 0;
 	public GameplayObject(Model model, ObjectBehavior behavior, World world)
 		{
 		super(model, behavior, world);
@@ -49,15 +49,11 @@ public class GameplayObject extends SmartObject implements Damageable, Velocible
 	public void setVelocity(Vector3D velocity)
 		{this.velocity = velocity;}
 
-	/**
-	 * @return the drag
-	 */
-	public Vector3D getDrag()
-		{return drag;}
+	@Override
+	public void setVelocityDrag(double dragCoefficientPerSecond)
+		{this.drag=dragCoefficientPerSecond;}
 
-	/**
-	 * @param drag the drag to set
-	 */
-	public void setDrag(Vector3D drag)
-		{this.drag = drag;}
+	@Override
+	public double getVelocityDrag()
+		{return drag;}
 	}//end GameplayObject

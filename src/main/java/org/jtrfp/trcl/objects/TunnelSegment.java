@@ -13,24 +13,42 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.objects;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.RenderMode;
+import org.jtrfp.trcl.TextureDescription;
+import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
-import org.jtrfp.trcl.objects.WorldObject;
 
 public class TunnelSegment extends WorldObject
 	{
 	public static final int TUNNEL_DIA_SCALAR=256;
 	Segment segment;
+	private final double segmentLength;
+	private final double endX,endY;
 	//private double width,height;
 	
 	public TunnelSegment(TR tr, Segment s, TextureDescription[] tunnelTexturePalette, double segLen, double endX, double endY)
 		{
 		super(tr, createModel(s,segLen, tunnelTexturePalette,endX,endY));
+		segmentLength=segLen;
+		this.endX=endX;
+		this.endY=endY;
 		this.segment=s;
+		System.out.println("TUNNEL SEGMENT segLen="+segLen+" endX="+endX+" endY="+endY);
 		}
+	
+	public static double getStartWidth(Segment s)
+		{return TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR*3);}
+	public static double getEndWidth(Segment s)
+		{return TR.legacy2Modern(s.getEndWidth()*TUNNEL_DIA_SCALAR*3);}
+	public static double getStartHeight(Segment s)
+		{return TR.legacy2Modern(s.getStartHeight()*TUNNEL_DIA_SCALAR*3);}
+	public static double getEndHeight(Segment s)
+		{return TR.legacy2Modern(s.getEndHeight()*TUNNEL_DIA_SCALAR*3);}
 	
 	private static Model createModel(Segment s,double segLen, TextureDescription[] tunnelTexturePalette, double endX,double endY)
 		{
@@ -39,10 +57,10 @@ public class TunnelSegment extends WorldObject
 		//System.out.println("Start width (legacy): "+s.getStartWidth());
 		//System.out.println("Start width (modern*TUNNEL_DIA_SCALAR): "+TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR));
 		final int numPolys=s.getNumPolygons();
-		double startWidth=TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR*2);
-		double startHeight=TR.legacy2Modern(s.getStartHeight()*TUNNEL_DIA_SCALAR*2);
-		double endWidth=TR.legacy2Modern(s.getEndWidth()*TUNNEL_DIA_SCALAR*2);
-		double endHeight=TR.legacy2Modern(s.getEndHeight()*TUNNEL_DIA_SCALAR*2);
+		double startWidth=getStartWidth(s);
+		double startHeight=getStartHeight(s);
+		double endWidth=getEndWidth(s);
+		double endHeight=getEndHeight(s);
 		//TODO: x,y, rotation, 
 		double startAngle1=((double)s.getStartAngle1()/65535.)*2.*Math.PI;
 		double startAngle2=((double)s.getStartAngle2()/65535.)*2.*Math.PI;
@@ -95,4 +113,8 @@ public class TunnelSegment extends WorldObject
 	private static Vector3D segPoint(double angle, double z, double w, double h, double x, double y)
 		{return new Vector3D(Math.cos(angle)*w+x,Math.sin(angle)*h+y,z);}
 	
+	public Segment getSegmentData(){return segment;}
+	public double getSegmentLength(){return segmentLength;}
+	public double getEndX(){return endX;}
+	public double getEndY(){return endY;}
 	}//end TunnelSegment

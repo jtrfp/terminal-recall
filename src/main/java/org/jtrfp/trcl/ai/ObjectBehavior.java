@@ -30,8 +30,7 @@ public abstract class ObjectBehavior<PARENT_TYPE extends WorldObject>
 	protected void _proposeCollision(WorldObject other){}
 	
 	public final void proposeCollision(WorldObject other)
-		{
-		_proposeCollision(other);
+		{_proposeCollision(other);
 		if(wrapped!=null)wrapped.proposeCollision(other);
 		}
 	

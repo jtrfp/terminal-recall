@@ -1,7 +1,6 @@
 package org.jtrfp.trcl;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.media.opengl.GL3;
@@ -13,6 +12,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.objects.GameplayObject;
 import org.jtrfp.trcl.objects.ObjectDirection;
 import org.jtrfp.trcl.objects.ObjectPlacer;
 import org.jtrfp.trcl.objects.RigidMobileObject;
@@ -66,7 +66,7 @@ public class DEFObjectPlacer implements ObjectPlacer
 			if(model!=null)
 				{
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
-				final RigidMobileObject obj =new RigidMobileObject(model,new TVBehavior(null,def,terrainSystem,pl.getStrength()),world);
+				final RigidMobileObject obj =new GameplayObject(model,new TVBehavior(null,def,terrainSystem,pl.getStrength()),world);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),

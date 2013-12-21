@@ -27,6 +27,7 @@ import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
 import org.jtrfp.trcl.objects.ObjectDirection;
 import org.jtrfp.trcl.objects.ObjectSystem;
 import org.jtrfp.trcl.objects.RigidMobileObject;
+import org.jtrfp.trcl.objects.TunnelSegment;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public class Tunnel extends RenderableSpacePartitioningGrid

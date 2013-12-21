@@ -17,11 +17,11 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.objects.CollisionManager;
 import org.jtrfp.trcl.objects.Damageable;
-import org.jtrfp.trcl.objects.MobileObject;
+import org.jtrfp.trcl.objects.SmartObject;
 import org.jtrfp.trcl.objects.Player;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject <T extends MobileObject & Damageable> extends ObjectBehavior<T>
+public class DamagedByCollisionWithGameplayObject <T extends SmartObject & Damageable> extends ObjectBehavior<T>
 	{
 	public DamagedByCollisionWithGameplayObject(ObjectBehavior<?> wrapped)
 		{super(wrapped);}

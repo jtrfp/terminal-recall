@@ -19,9 +19,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.objects.MobileObject;
+import org.jtrfp.trcl.objects.SmartObject;
 
-public class ShiftingObjectBehavior extends ObjectBehavior<MobileObject>
+public class ShiftingObjectBehavior extends ObjectBehavior<SmartObject>
 	{
 	private final Sequencer seq;
 	//private final WorldObject obj;

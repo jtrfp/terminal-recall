@@ -18,9 +18,9 @@ package org.jtrfp.trcl.ai;
 import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.objects.Damageable;
-import org.jtrfp.trcl.objects.MobileObject;
+import org.jtrfp.trcl.objects.SmartObject;
 
-public class TVBehavior <T extends MobileObject & Damageable> extends ObjectBehavior<T>{
+public class TVBehavior <T extends SmartObject & Damageable> extends ObjectBehavior<T>{
 	TerrainSystem terrainSystem;
 	private final EnemyDefinition def;
 	

@@ -31,7 +31,6 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
@@ -43,7 +42,7 @@ public class WorldObject implements PositionedRenderable
 	protected Vector3D position;
 	private final TR tr;
 	//private World world;
-	private boolean visible=false;
+	private boolean visible=true;
 	private Model model;
 	private ArrayList<PositionListener> positionListeners = new ArrayList<PositionListener>();
 	private ObjectDefinition []triangleObjectDefinitions;
@@ -243,7 +242,7 @@ public class WorldObject implements PositionedRenderable
 	 * @return the position
 	 */
 	public final Vector3D getPosition()
-		{return position;}
+		{return position!=null?position:Vector3D.ZERO;}
 
 	/**
 	 * @param position the position to set
@@ -268,6 +267,7 @@ public class WorldObject implements PositionedRenderable
 	 */
 	public void setHeading(Vector3D heading)
 		{this.heading = heading;}
+	public Vector3D getHeading(){return heading;}
 
 	/**
 	 * @return the top
@@ -333,5 +333,5 @@ public class WorldObject implements PositionedRenderable
 	 * @param behavior the behavior to set
 	 */
 	public void setBehavior(ObjectBehavior behavior)
-		{this.behavior = behavior;behavior.setParent(this);}
+		{behavior.setParent(this);this.behavior = behavior;}
 	}//end WorldObject

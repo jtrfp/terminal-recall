@@ -23,16 +23,13 @@ import org.jtrfp.trcl.ai.ObjectBehavior;
 
 public abstract class MobileObject extends WorldObject implements TickListener
 	{
-	
 	private long lastTimeInMillis=-1;//Makes sure if this is read without being set, it's very obvious.
-	
-	private ObjectBehavior behavior;
+	//private ObjectBehavior behavior;
 	
 	public MobileObject(Model model, ObjectBehavior behavior, World world)
 		{
 		super(world.getTr(),model);
-		this.behavior=behavior;
-		if(behavior!=null)behavior.setParent(this);
+		if(behavior!=null){setBehavior(behavior);behavior.setParent(this);}
 		world.addTickListener(this);
 		}//end constructor()
 	
@@ -45,7 +42,7 @@ public abstract class MobileObject extends WorldObject implements TickListener
 			}
 		else
 			{//Been around...
-			if(behavior!=null)behavior.tick(time);
+			if(getBehavior()!=null)getBehavior().tick(time);
 			}
 		lastTimeInMillis=time;
 		}//end tick()
@@ -69,16 +66,4 @@ public abstract class MobileObject extends WorldObject implements TickListener
 	 */
 	public void setLastTimeInMillis(long lastTimeInMillis)
 		{this.lastTimeInMillis = lastTimeInMillis;}
-
-	/**
-	 * @return the behavior
-	 */
-	public ObjectBehavior getBehavior()
-		{return behavior;}
-
-	/**
-	 * @param behavior the behavior to set
-	 */
-	public void setBehavior(ObjectBehavior behavior)
-		{this.behavior = behavior;}
 	}//end MobileObject

@@ -15,15 +15,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.ai;
 
-import org.jtrfp.trcl.TerrainSystem;
-import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.objects.CollisionManager;
 import org.jtrfp.trcl.objects.Damageable;
+import org.jtrfp.trcl.objects.MobileObject;
 import org.jtrfp.trcl.objects.Player;
-import org.jtrfp.trcl.objects.RigidMobileObject;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject <T extends RigidMobileObject & Damageable> extends ObjectBehavior<T>
+public class DamagedByCollisionWithGameplayObject <T extends MobileObject & Damageable> extends ObjectBehavior<T>
 	{
 	public DamagedByCollisionWithGameplayObject(ObjectBehavior<?> wrapped)
 		{super(wrapped);}

@@ -20,9 +20,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.objects.RigidMobileObject;
+import org.jtrfp.trcl.objects.MobileObject;
 
-public class RotatingObjectBehavior <PARENT_TYPE extends RigidMobileObject>extends ObjectBehavior<PARENT_TYPE>
+public class RotatingObjectBehavior <PARENT_TYPE extends MobileObject>extends ObjectBehavior<PARENT_TYPE>
 	{
 	private final IndirectDouble angle = new IndirectDouble();
 	private final Sequencer seq;

@@ -4,7 +4,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.ai.ObjectBehavior;
 
-public class GameplayObject extends RigidMobileObject implements Damageable
+public class GameplayObject extends MobileObject implements Damageable
 	{
 	private int health;
 	public GameplayObject(Model model, ObjectBehavior behavior, World world)

@@ -17,11 +17,11 @@ package org.jtrfp.trcl.ai;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.file.TNLFile.Segment;
-import org.jtrfp.trcl.objects.RigidMobileObject;
+import org.jtrfp.trcl.objects.MobileObject;
 import org.jtrfp.trcl.objects.TunnelSegment;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class BouncesOffTunnelWalls <T extends RigidMobileObject> extends ObjectBehavior<T>
+public class BouncesOffTunnelWalls <T extends MobileObject> extends ObjectBehavior<T>
 	{
 	public BouncesOffTunnelWalls(ObjectBehavior<?> wrapped)
 		{super(wrapped);}

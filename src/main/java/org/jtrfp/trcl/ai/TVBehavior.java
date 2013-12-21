@@ -17,13 +17,10 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
-import org.jtrfp.trcl.objects.CollisionManager;
 import org.jtrfp.trcl.objects.Damageable;
-import org.jtrfp.trcl.objects.Player;
-import org.jtrfp.trcl.objects.RigidMobileObject;
-import org.jtrfp.trcl.objects.WorldObject;
+import org.jtrfp.trcl.objects.MobileObject;
 
-public class TVBehavior <T extends RigidMobileObject & Damageable> extends ObjectBehavior<T>{
+public class TVBehavior <T extends MobileObject & Damageable> extends ObjectBehavior<T>{
 	TerrainSystem terrainSystem;
 	private final EnemyDefinition def;
 	

@@ -17,14 +17,19 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
+import org.jtrfp.trcl.objects.CollisionManager;
+import org.jtrfp.trcl.objects.Damageable;
+import org.jtrfp.trcl.objects.Player;
 import org.jtrfp.trcl.objects.RigidMobileObject;
+import org.jtrfp.trcl.objects.WorldObject;
 
-public class TVBehavior extends ObjectBehavior<RigidMobileObject>
-	{
+public class TVBehavior <T extends RigidMobileObject & Damageable> extends ObjectBehavior<T>{
 	TerrainSystem terrainSystem;
+	private final EnemyDefinition def;
 	
 	public TVBehavior(ObjectBehavior wrapped, EnemyDefinition def, TerrainSystem terrainSystem, int strength)
-		{super(wrapped);
+		{super(new DamagedByCollisionWithGameplayObject(wrapped));
 		this.terrainSystem=terrainSystem;
+		this.def=def;
 		}
 	}//end TVBehavior

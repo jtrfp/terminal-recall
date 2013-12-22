@@ -17,15 +17,11 @@ public class Camera
 	public Camera(GPU gpu)
 		{this.gpu=gpu;}
 	
-	private void updateProjectionMatrix()
-		{
+	private void updateProjectionMatrix(){
 		final float fov = 70f;// In degrees
 		final float aspect = (float) gpu.getComponent().getWidth()
 				/ (float) gpu.getComponent().getHeight();
-		final float zF = (float) (viewDepth * 1.5);// 1.5 because the
-															// visibility is
-															// pushed forward
-															// from the lookAt
+		final float zF = (float) (viewDepth * 1.5);
 		final float zN = (float) (TR.mapSquareSize / 10);
 		final float f = (float) (1. / Math.tan(fov * Math.PI / 360.));
 		projectionMatrix = new Array2DRowRealMatrix(new double[][]
@@ -39,14 +35,11 @@ public class Camera
 	 * @return the lookAtVector
 	 */
 	public Vector3D getLookAtVector()
-		{
-		return lookAtVector;
-		}
+		{return lookAtVector;}
 	/**
 	 * @param lookAtVector the lookAtVector to set
 	 */
-	public void setLookAtVector(Vector3D lookAtVector)
-		{
+	public void setLookAtVector(Vector3D lookAtVector){
 		this.lookAtVector = lookAtVector;
 		cameraMatrix=null;
 		}
@@ -54,14 +47,11 @@ public class Camera
 	 * @return the upVector
 	 */
 	public Vector3D getUpVector()
-		{
-		return upVector;
-		}
+		{return upVector;}
 	/**
 	 * @param upVector the upVector to set
 	 */
-	public void setUpVector(Vector3D upVector)
-		{
+	public void setUpVector(Vector3D upVector){
 		this.upVector = upVector;
 		cameraMatrix=null;
 		}
@@ -69,31 +59,26 @@ public class Camera
 	 * @return the cameraPosition
 	 */
 	public Vector3D getCameraPosition()
-		{
-		return cameraPosition;
-		}
+		{return cameraPosition;}
 	/**
 	 * @param cameraPosition the cameraPosition to set
 	 */
-	public void setPosition(Vector3D cameraPosition)
-		{
+	public void setPosition(Vector3D cameraPosition){
 		this.cameraPosition = cameraPosition;
 		cameraMatrix=null;
 		}
 	
-	private void applyMatrix()
-		{
+	private void applyMatrix(){
 		Vector3D eyeLoc = getCameraPosition();
-
 		Vector3D aZ = getLookAtVector().negate();
 		Vector3D aX = getUpVector().crossProduct(aZ).normalize();
-		Vector3D aY = aZ.crossProduct(aX);
+		Vector3D aY = /*aZ.crossProduct(aX)*/getUpVector();
 
 		RealMatrix rM = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
-				{ -aX.getX(), aY.getX(), aZ.getX(), 0 }, new double[]
-				{ -aX.getY(), aY.getY(), aZ.getY(), 0 }, new double[]
-				{ -aX.getZ(), aY.getZ(), aZ.getZ(), 0 }, new double[]
+				{ aX.getX(), aX.getY(), aX.getZ(), 0 }, new double[]
+				{ aY.getX(), aY.getY(), aY.getZ(), 0 }, new double[]
+				{ aZ.getX(), aZ.getY(), aZ.getZ(), 0 }, new double[]
 				{ 0, 0, 0, 1 } });
 
 		RealMatrix tM = new Array2DRowRealMatrix(new double[][]
@@ -105,14 +90,13 @@ public class Camera
 		
 		cameraMatrix = getProjectionMatrix().multiply(rM.multiply(tM));
 		}//end applyMatrix()
-	public void setViewDepth(double cameraViewDepth)
-		{this.viewDepth=cameraViewDepth;
+	public void setViewDepth(double cameraViewDepth){
+	    	this.viewDepth=cameraViewDepth;
 		cameraMatrix=null;
 		projectionMatrix=null;
 		}
 
-	private RealMatrix getProjectionMatrix()
-		{
+	private RealMatrix getProjectionMatrix(){
 		if(projectionMatrix==null)updateProjectionMatrix();
 		return projectionMatrix;
 		}

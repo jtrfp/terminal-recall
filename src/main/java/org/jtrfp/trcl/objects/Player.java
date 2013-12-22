@@ -17,14 +17,11 @@ import org.jtrfp.trcl.core.ThreadManager;
 public class Player extends WorldObject
 	{
 	private final Camera camera;
-	//private int cameraDistance=10000;
 	private int cameraDistance=0;
-	//private int shieldQuantity=65535;
 	private int afterburnerQuantity;
 	private static final int SINGLE_SKL=0;
 	private int rtlLevel;
 	private int pacLevel;
-	
 	private int rtlQuantity;
 	private int pacQuantity;
 	private int ionQuantity;
@@ -38,8 +35,7 @@ public class Player extends WorldObject
 	private int invincibilityCountdown;
 
 	public Player(TR tr,Model model)
-		{
-		super(tr,model);
+		{super(tr,model);
 		addBehavior(new PlayerBehavior());
 		addBehavior(new DamageableBehavior());
 		addBehavior(new MovesByVelocity());
@@ -47,51 +43,46 @@ public class Player extends WorldObject
 		camera = tr.getRenderer().getCamera();
 		}
 	
-	private class PlayerBehavior extends ObjectBehavior
-		{
+	private class PlayerBehavior extends ObjectBehavior{
 		@Override
-		public void _tick(long tickTimeInMillis)
-			{updateMovement();
+		public void _tick(long tickTimeInMillis){
+			updateMovement();
 			updateCountdowns();
 			}
 		}//end PlayerBehavior
 	
-	public void updateCountdowns()
-		{if(cloakCountdown>0)
-			{if(--cloakCountdown==0)
+	public void updateCountdowns(){
+		if(cloakCountdown>0){
+			if(--cloakCountdown==0)
 				{setVisible(true);}
 			else setVisible(false);}
-		if(invincibilityCountdown>0)
-			{--invincibilityCountdown;}
+		if(invincibilityCountdown>0){
+			--invincibilityCountdown;}
 		}
 
 	@Override
-	public void setHeading(Vector3D lookAt)
-		{camera.setLookAtVector(lookAt);
+	public void setHeading(Vector3D lookAt){
+		camera.setLookAtVector(lookAt);
 		camera.setPosition(getPosition().subtract(lookAt.scalarMultiply(cameraDistance)));
 		super.setHeading(lookAt);
 		}
 	@Override
-	public void setTop(Vector3D top)
-		{camera.setUpVector(top);
-		//camera.setPosition(getPosition().subtract(getLookAt().scalarMultiply(cameraDistance)));
+	public void setTop(Vector3D top){
+		camera.setUpVector(top);
 		super.setTop(top);
 		}
 	@Override
-	public void setPosition(Vector3D pos)
-		{camera.setPosition(pos.subtract(getLookAt().scalarMultiply(cameraDistance)));
+	public void setPosition(Vector3D pos){
+		camera.setPosition(pos.subtract(getLookAt().scalarMultiply(cameraDistance)));
 		super.setPosition(pos);
 		}
 	
-	private void updateMovement()
-		{
+	private void updateMovement(){
 		final double manueverSpeed = 20. / (double) ThreadManager.RENDER_FPS;
 		final double nudgeUnit = TR.mapSquareSize / 9.;
 		final double angleUnit = Math.PI * .015 * manueverSpeed;
 		
 		boolean positionChanged = false, lookAtChanged = false;
-		// double
-		// newX=getCameraPosition().getX(),newY=getCameraPosition().getY(),newZ=getCameraPosition().getZ();
 		final TR tr = getTr();
 		Vector3D newPos = this.getPosition();
 		Vector3D newLookAt = this.getLookAt();
@@ -106,21 +97,21 @@ public class Player extends WorldObject
 					nudgeUnit * manueverSpeed));
 			positionChanged = true;
 			}
-		if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP))
-			{newPos = newPos.add(this.getTop().scalarMultiply(nudgeUnit
+		if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP)){
+			newPos = newPos.add(this.getTop().scalarMultiply(nudgeUnit
 					* manueverSpeed));
 			positionChanged = true;
 			}
-		if (keyStatus.isPressed(KeyEvent.VK_PAGE_DOWN))
-			{newPos = newPos.subtract(this.getTop().scalarMultiply(nudgeUnit
+		if (keyStatus.isPressed(KeyEvent.VK_PAGE_DOWN)){
+			newPos = newPos.subtract(this.getTop().scalarMultiply(nudgeUnit
 					* manueverSpeed));
 			positionChanged = true;
 			}
 
 		Rotation turnRot = new Rotation(this.getTop(), angleUnit);
 
-		if (keyStatus.isPressed(KeyEvent.VK_LEFT))
-			{newLookAt = turnRot.applyInverseTo(newLookAt);
+		if (keyStatus.isPressed(KeyEvent.VK_LEFT)){
+			newLookAt = turnRot.applyInverseTo(newLookAt);
 			lookAtChanged = true;
 			}
 		if (keyStatus.isPressed(KeyEvent.VK_RIGHT))
@@ -129,8 +120,7 @@ public class Player extends WorldObject
 			}
 
 		// Loop correction
-		if (WorldObject.LOOP)
-			{
+		if (WorldObject.LOOP){
 			if (newPos.getX() > TR.mapWidth)
 				newPos = newPos.subtract(new Vector3D(TR.mapWidth, 0, 0));
 			if (newPos.getY() > TR.mapWidth)
@@ -140,8 +130,6 @@ public class Player extends WorldObject
 
 			if (newPos.getX() < 0)
 				newPos = newPos.add(new Vector3D(TR.mapWidth, 0, 0));
-			/*if (newPos.getY() < 0)
-				newPos = newPos.add(new Vector3D(0, TR.mapWidth, 0));*/
 			if (newPos.getZ() < 0)
 				newPos = newPos.add(new Vector3D(0, 0, TR.mapWidth));
 			}
@@ -164,23 +152,19 @@ public class Player extends WorldObject
 	 * @param afterburnerQuantity the afterburnerQuantity to set
 	 */
 	public void setAfterburnerQuantity(int afterburnerQuantity)
-		{
-		this.afterburnerQuantity = afterburnerQuantity;
-		}
+		{this.afterburnerQuantity = afterburnerQuantity;}
 
 	/**
 	 * @return the rtlQuantity
 	 */
 	public int getRtlQuantity()
-		{
-		return rtlQuantity;
-		}
+		{return rtlQuantity;}
 
 	/**
 	 * @param rtlQuantity the rtlQuantity to set
 	 */
-	public void setRtlQuantity(int rtlQuantity)
-		{if(this.rtlQuantity>0&& rtlLevel<2 && rtlQuantity>this.rtlQuantity)this.rtlLevel++;
+	public void setRtlQuantity(int rtlQuantity){
+		if(this.rtlQuantity>0&& rtlLevel<2 && rtlQuantity>this.rtlQuantity)this.rtlLevel++;
 		this.rtlQuantity = rtlQuantity;
 		}
 
@@ -188,9 +172,7 @@ public class Player extends WorldObject
 	 * @return the pacQuantity
 	 */
 	public int getPacQuantity()
-		{
-		return pacQuantity;
-		}
+		{return pacQuantity;}
 
 	/**
 	 * @param pacQuantity the pacQuantity to set
@@ -204,9 +186,7 @@ public class Player extends WorldObject
 	 * @return the ionQuantity
 	 */
 	public int getIonQuantity()
-		{
-		return ionQuantity;
-		}
+		{return ionQuantity;}
 
 	/**
 	 * @param ionQuantity the ionQuantity to set
@@ -220,57 +200,43 @@ public class Player extends WorldObject
 	 * @return the mamQuantity
 	 */
 	public int getMamQuantity()
-		{
-		return mamQuantity;
-		}
+		{return mamQuantity;}
 
 	/**
 	 * @param mamQuantity the mamQuantity to set
 	 */
 	public void setMamQuantity(int mamQuantity)
-		{
-		this.mamQuantity = mamQuantity;
-		}
+		{this.mamQuantity = mamQuantity;}
 
 	/**
 	 * @return the sadQuantity
 	 */
 	public int getSadQuantity()
-		{
-		return sadQuantity;
-		}
+		{return sadQuantity;}
 
 	/**
 	 * @param sadQuantity the sadQuantity to set
 	 */
 	public void setSadQuantity(int sadQuantity)
-		{
-		this.sadQuantity = sadQuantity;
-		}
+		{this.sadQuantity = sadQuantity;}
 
 	/**
 	 * @return the swtQuantity
 	 */
 	public int getSwtQuantity()
-		{
-		return swtQuantity;
-		}
+		{return swtQuantity;}
 
 	/**
 	 * @param swtQuantity the swtQuantity to set
 	 */
 	public void setSwtQuantity(int swtQuantity)
-		{
-		this.swtQuantity = swtQuantity;
-		}
+		{this.swtQuantity = swtQuantity;}
 
 	/**
 	 * @return the damQuantity
 	 */
 	public int getDamQuantity()
-		{
-		return damQuantity;
-		}
+		{return damQuantity;}
 
 	/**
 	 * @param damQuantity the damQuantity to set

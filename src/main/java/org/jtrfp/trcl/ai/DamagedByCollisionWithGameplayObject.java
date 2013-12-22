@@ -17,21 +17,16 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.objects.CollisionManager;
 import org.jtrfp.trcl.objects.Damageable;
-import org.jtrfp.trcl.objects.SmartObject;
 import org.jtrfp.trcl.objects.Player;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject <T extends SmartObject & Damageable> extends ObjectBehavior<T>
+public class DamagedByCollisionWithGameplayObject extends ObjectBehavior
 	{
-	public DamagedByCollisionWithGameplayObject(ObjectBehavior<?> wrapped)
-		{super(wrapped);}
-	
 	protected void _proposeCollision(WorldObject other)
 		{
 		if(other.getPosition().distance(getParent().getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 			{if(other instanceof Player)
-				{getParent().damage(65535/10);
-				}
+				{getParent().getBehavior().probeForBehavior(Damageable.class).damage(65535/10);}
 			}//end if(nearby)
 		}//end proposeCollision
 	}//end TVBehavior

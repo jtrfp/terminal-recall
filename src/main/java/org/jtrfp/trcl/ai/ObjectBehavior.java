@@ -15,17 +15,19 @@
  ******************************************************************************/
 package org.jtrfp.trcl.ai;
 
-import org.jtrfp.trcl.TickListener;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public abstract class ObjectBehavior<PARENT_TYPE extends WorldObject> 
+public abstract class ObjectBehavior
 	{
-	private PARENT_TYPE parent;
+	private WorldObject parent;
 	private ObjectBehavior wrapped;
-	protected ObjectBehavior(ObjectBehavior<?> wrapped)
-		{this.wrapped=wrapped;}
 	
-	public PARENT_TYPE getParent(){return parent;}
+	public WorldObject getParent(){return parent;}
+	public <T> T probeForBehavior(Class<T> type)
+		{if(type.isAssignableFrom(this.getClass())){return (T)this;}
+		if(wrapped!=null)return wrapped.probeForBehavior(type);
+		throw new BehaviorNotFoundException("Cannot find behavior of type "+type.getName()+" in behavior sandwich owned by "+parent);
+		}
 	
 	protected void _proposeCollision(WorldObject other){}
 	
@@ -41,6 +43,8 @@ public abstract class ObjectBehavior<PARENT_TYPE extends WorldObject>
 		if(wrapped!=null)wrapped.tick(tickTimeInMillis);
 		}
 
-	public void setParent(PARENT_TYPE newParent)
+	public void setParent(WorldObject newParent)
 		{this.parent=newParent;if(wrapped!=null){wrapped.setParent(newParent);}}
+	
+	public void setDelegate(ObjectBehavior delegate){wrapped=delegate;}
 	}//end ObjectBehavior

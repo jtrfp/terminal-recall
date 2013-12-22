@@ -19,12 +19,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.objects.SmartObject;
 
-public class ShiftingObjectBehavior extends ObjectBehavior<SmartObject>
+public class ShiftingObjectBehavior extends ObjectBehavior
 	{
 	private final Sequencer seq;
-	//private final WorldObject obj;
 	private final AttribAnimator xAnimator;
 	private final AttribAnimator yAnimator;
 	private final AttribAnimator zAnimator;
@@ -32,10 +30,8 @@ public class ShiftingObjectBehavior extends ObjectBehavior<SmartObject>
 	private final IndirectDouble yPos = new IndirectDouble();
 	private final IndirectDouble zPos = new IndirectDouble();
 	
-	//private final TNLFile.Segment.Obstacle obstacle;
-	public ShiftingObjectBehavior(ObjectBehavior<?> wrapped, int totalShiftPeriodMsec,Vector3D startPos, Vector3D endPos)
+	public ShiftingObjectBehavior(int totalShiftPeriodMsec,Vector3D startPos, Vector3D endPos)
 		{
-		super(wrapped);
 		seq=new Sequencer(totalShiftPeriodMsec,2,true);
 		xAnimator=new AttribAnimator(xPos,seq,new double [] {startPos.getX(),endPos.getX()});
 		yAnimator=new AttribAnimator(yPos,seq,new double [] {startPos.getY(),endPos.getY()});

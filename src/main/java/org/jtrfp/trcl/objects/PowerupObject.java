@@ -14,7 +14,6 @@ import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
 
-
 public class PowerupObject extends BillboardSprite
 	{
 	private final Powerup powerupType;
@@ -23,11 +22,10 @@ public class PowerupObject extends BillboardSprite
 		super(world.getTr());
 		powerupType=loc.getType();
 		setBillboardSize(new Dimension(20000,20000));
-		setBehavior(new PowerupBehavior(getBehavior()));
+		addBehavior(new PowerupBehavior());
 		TextureDescription desc=Texture.getFallbackTexture();
 		final int animationRate=500;
-		try//TODO: refactor this to read from an array using an ordinal
-			{
+		try {
 			switch(loc.getType())
 				{
 				case Afterburner:
@@ -207,13 +205,8 @@ public class PowerupObject extends BillboardSprite
 			{e.printStackTrace();}
 		}//end constructor
 
-	private class PowerupBehavior extends ObjectBehavior<PowerupObject>
+	private class PowerupBehavior extends ObjectBehavior
 		{
-		protected PowerupBehavior(ObjectBehavior<?> wrapped)
-			{
-			super(wrapped);
-			}
-		
 		@Override
 		public void _proposeCollision(WorldObject other)
 			{
@@ -247,7 +240,7 @@ public class PowerupObject extends BillboardSprite
 					p.setSwtQuantity(p.getSwtQuantity()+20);
 					break;
 				case shieldRestore:
-					p.unDamage();
+					p.getBehavior().probeForBehavior(Damageable.class).unDamage();
 					break;
 				case invisibility:
 					p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
@@ -262,7 +255,7 @@ public class PowerupObject extends BillboardSprite
 					p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
 					break;
 				case PowerCore:
-					p.unDamage(6554);
+					getParent().getBehavior().probeForBehavior(Damageable.class).unDamage(6554);
 					break;
 				case Random:
 					break;

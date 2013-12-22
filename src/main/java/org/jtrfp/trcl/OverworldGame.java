@@ -72,7 +72,7 @@ public class OverworldGame
 		overworldSystem = new OverworldSystem(tr.getWorld(), lvl);
 		backdropSystem = new BackdropSystem(tr.getWorld());
 		
-		Player player =new Player(tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl()),tr.getWorld()); 
+		Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
 		player.setPosition(Tunnel.TUNNEL_START_POS);
 		player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		tr.getWorld().add(player);

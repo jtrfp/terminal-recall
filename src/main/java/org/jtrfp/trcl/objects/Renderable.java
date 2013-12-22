@@ -13,20 +13,14 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.ai;
+package org.jtrfp.trcl.objects;
 
-import org.jtrfp.trcl.TerrainSystem;
-import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
-import org.jtrfp.trcl.objects.Damageable;
-import org.jtrfp.trcl.objects.SmartObject;
+import java.nio.ByteBuffer;
 
-public class TVBehavior <T extends SmartObject & Damageable> extends ObjectBehavior<T>{
-	TerrainSystem terrainSystem;
-	private final EnemyDefinition def;
-	
-	public TVBehavior(ObjectBehavior wrapped, EnemyDefinition def, TerrainSystem terrainSystem, int strength)
-		{super(new DamagedByCollisionWithGameplayObject(wrapped));
-		this.terrainSystem=terrainSystem;
-		this.def=def;
-		}
-	}//end TVBehavior
+public interface Renderable
+	{
+	ByteBuffer getOpaqueObjectDefinitionAddresses();
+	ByteBuffer getTransparentObjectDefinitionAddresses();
+	void updateStateToGPU();
+	void initializeObjectDefinitions();
+	}

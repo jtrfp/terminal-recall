@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.core;
 
-import java.awt.event.KeyEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -8,10 +7,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.KeyStatus;
-import org.jtrfp.trcl.TickListener;
 import org.jtrfp.trcl.objects.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
@@ -32,8 +27,7 @@ public class ThreadManager
 	public static final Object GAME_OBJECT_MODIFICATION_LOCK = new Object();
 	
 	ThreadManager(TR tr)
-		{
-		this.tr=tr;
+		{this.tr=tr;
 		renderingAnimator = new FPSAnimator((GLCanvas)tr.getGPU().getComponent(),RENDER_FPS);
 		tr.getGPU().addGLEventListener(new GLEventListener()
 			{
@@ -60,22 +54,18 @@ public class ThreadManager
 		
 		}//end constructor
 	
-	public void start()
-		{
+	public void start(){
 		renderingAnimator.start();
 		gameplayTimer.scheduleAtFixedRate(new TimerTask()
 			{@Override
 			public void run()
-				{
-				Thread.currentThread().setPriority(GAMEPLAY_PRIORITY);
+				{Thread.currentThread().setPriority(GAMEPLAY_PRIORITY);
 				// Ticks
 				long tickTimeInMillis = System.currentTimeMillis();
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
-					{
-					for (TickListener l : ThreadManager.this.tr.getWorld().getTickListeners())
-						{l.tick(tickTimeInMillis);}
-					tr.getCollisionManager().performCollisionTests();
-					}
+					{for(WorldObject wo:tr.getCollisionManager().getVisibilityList())
+						{wo.tick(tickTimeInMillis);}
+					tr.getCollisionManager().performCollisionTests();}
 				}//end run()
 			}, 0, 1000/GAMEPLAY_FPS);
 		visibilityCalculationTimer.scheduleAtFixedRate(new TimerTask()
@@ -96,6 +86,4 @@ public class ThreadManager
 				}
 			});
 		}//end constructor
-	
-	
 	}//end ThreadManager

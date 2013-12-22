@@ -20,18 +20,16 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.objects.SmartObject;
 
-public class RotatingObjectBehavior <PARENT_TYPE extends SmartObject>extends ObjectBehavior<PARENT_TYPE>
+public class RotatingObjectBehavior extends ObjectBehavior
 	{
 	private final IndirectDouble angle = new IndirectDouble();
 	private final Sequencer seq;
 	private final AttribAnimator angleAnimator;
 	private final Vector3D rotationAxisTop,originalHeading,originalTop;
 	
-	public RotatingObjectBehavior(ObjectBehavior<PARENT_TYPE> wrapped, Vector3D rotationAxisTop, Vector3D originalHeading, Vector3D originalTop, int periodLengthMsec, double phaseShift)
+	public RotatingObjectBehavior(Vector3D rotationAxisTop, Vector3D originalHeading, Vector3D originalTop, int periodLengthMsec, double phaseShift)
 		{
-		super(wrapped);
 		seq=new Sequencer(periodLengthMsec,2,true);
 		angleAnimator= new AttribAnimator(angle,seq,new double [] {0+phaseShift,2.*Math.PI+phaseShift},false);
 		this.rotationAxisTop=rotationAxisTop;

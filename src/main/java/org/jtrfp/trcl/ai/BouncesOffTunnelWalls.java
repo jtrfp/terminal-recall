@@ -17,17 +17,15 @@ package org.jtrfp.trcl.ai;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.file.TNLFile.Segment;
-import org.jtrfp.trcl.objects.SmartObject;
 import org.jtrfp.trcl.objects.TunnelSegment;
+import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class BouncesOffTunnelWalls <T extends SmartObject> extends ObjectBehavior<T>
+public class BouncesOffTunnelWalls extends ObjectBehavior
 	{
-	public BouncesOffTunnelWalls(ObjectBehavior<?> wrapped)
-		{super(wrapped);}
-	
 	protected void _proposeCollision(WorldObject other){
-		final T parent = getParent();
+		final WorldObject parent = getParent();
+		final Velocible velocible = getParent().getBehavior().probeForBehavior(Velocible.class);
 		if(other instanceof TunnelSegment)
 			{TunnelSegment seg=(TunnelSegment)other;
 			if(parent.getPosition().
@@ -58,12 +56,12 @@ public class BouncesOffTunnelWalls <T extends SmartObject> extends ObjectBehavio
 					final Vector3D oldPosition = parent.getPosition();
 					parent.setPosition(circleCenter.scalarMultiply(.2).add(oldPosition.scalarMultiply(.8)));
 					final Vector3D oldHeading = parent.getHeading();
-					final Vector3D oldVelocity = parent.getVelocity();
+					final Vector3D oldVelocity = velocible.getVelocity();
 					final Vector3D oldTop = parent.getTop();
 					final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize().negate();
 					//Bounce the heading and velocity
 					parent.setHeading((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*2).subtract(oldHeading)).negate());
-					parent.setVelocity((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*2).subtract(oldHeading)).negate());
+					velocible.setVelocity((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*2).subtract(oldHeading)).negate());
 					//parent.setTop((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldTop)*2).subtract(oldTop)));
 					//parent.setHeading((inwardHeading.scalarMultiply(.5).add(oldHeading.scalarMultiply(.5))).normalize());
 					//parent.setTop(parent.getTop().crossProduct(parent.getHeading()));

@@ -7,15 +7,13 @@ import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.ai.TVBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
-import org.jtrfp.trcl.objects.GameplayObject;
 import org.jtrfp.trcl.objects.ObjectDirection;
 import org.jtrfp.trcl.objects.ObjectPlacer;
-import org.jtrfp.trcl.objects.RigidMobileObject;
+import org.jtrfp.trcl.objects.WorldObject;
 
 public class DEFObjectPlacer implements ObjectPlacer
 	{
@@ -66,7 +64,8 @@ public class DEFObjectPlacer implements ObjectPlacer
 			if(model!=null)
 				{
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
-				final RigidMobileObject obj =new GameplayObject(model,new TVBehavior(null,def,terrainSystem,pl.getStrength()),world);
+				//,new TVBehavior(null,def,terrainSystem,pl.getStrength())
+				final WorldObject obj =new WorldObject(tr,model);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),

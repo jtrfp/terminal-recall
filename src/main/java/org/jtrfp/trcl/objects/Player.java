@@ -6,20 +6,20 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
+import org.jtrfp.trcl.ai.DamageableBehavior;
+import org.jtrfp.trcl.ai.MovesByVelocity;
 import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 
-public class Player extends GameplayObject implements Damageable, Propelled
+public class Player extends WorldObject
 	{
 	private final Camera camera;
 	//private int cameraDistance=10000;
 	private int cameraDistance=0;
 	//private int shieldQuantity=65535;
-	private double propulsion=0;
 	private int afterburnerQuantity;
 	private static final int SINGLE_SKL=0;
 	private int rtlLevel;
@@ -37,29 +37,22 @@ public class Player extends GameplayObject implements Damageable, Propelled
 	public static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
 	private int invincibilityCountdown;
 
-	public Player(Model model, World world)
+	public Player(TR tr,Model model)
 		{
-		super(model, null, world);
-		setBehavior(
-				new PlayerBehavior(
-				new BouncesOffTunnelWalls<Player>(null)));
-		camera = getTr().getRenderer().getCamera();
+		super(tr,model);
+		addBehavior(new PlayerBehavior());
+		addBehavior(new DamageableBehavior());
+		addBehavior(new MovesByVelocity());
+		addBehavior(new BouncesOffTunnelWalls());
+		camera = tr.getRenderer().getCamera();
 		}
 	
-	private class PlayerBehavior extends ObjectBehavior<Player>
+	private class PlayerBehavior extends ObjectBehavior
 		{
-		public PlayerBehavior(ObjectBehavior wrapped)
-			{super(wrapped);}
-		
 		@Override
 		public void _tick(long tickTimeInMillis)
 			{updateMovement();
 			updateCountdowns();
-			}
-
-		@Override
-		public void _proposeCollision(WorldObject other)
-			{
 			}
 		}//end PlayerBehavior
 	
@@ -307,15 +300,5 @@ public class Player extends GameplayObject implements Damageable, Propelled
 	 * @param invincibilityCountdown the invincibilityCountdown to set
 	 */
 	public void setInvincibilityCountdown(int invincibilityCountdown)
-		{
-		this.invincibilityCountdown = invincibilityCountdown;
-		}
-
-	@Override
-	public void setPropulsion(double magnitude)
-		{propulsion=magnitude;}
-
-	@Override
-	public double getPropulsion()
-		{return propulsion;}
+		{this.invincibilityCountdown = invincibilityCountdown;}
 	}//end Player

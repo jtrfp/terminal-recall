@@ -33,7 +33,6 @@ public final class World extends RenderableSpacePartitioningGrid
 	double sizeZ;
 	private static final int blockGranularity = 8;// Dim-Segments per diameter. should
 	private Color fogColor = Color.black;
-	private final List<TickListener> tickListeners = new LinkedList<TickListener>();
 	private final TR tr;
 
 	public World(double sizeX, double sizeY, double sizeZ,
@@ -50,9 +49,6 @@ public final class World extends RenderableSpacePartitioningGrid
 				sizeY / 3.15, camera.getCameraPosition().getZ()));
 		GlobalObjectList.poke();
 		}// end constructor
-
-	public void addTickListener(TickListener l)
-		{tickListeners.add(l);}
 
 	public void setCameraDirection(ObjectDirection dir)
 		{tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
@@ -76,10 +72,4 @@ public final class World extends RenderableSpacePartitioningGrid
 	 */
 	public TR getTr()
 		{return tr;}
-
-	/**
-	 * @return the tickListeners
-	 */
-	public List<TickListener> getTickListeners()
-		{return tickListeners;}
 	}// World

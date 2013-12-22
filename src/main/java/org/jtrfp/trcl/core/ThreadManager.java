@@ -58,6 +58,7 @@ public class ThreadManager
 	
 	public void start(){
 		renderingAnimator.start();
+		lastGameplayTickTime=System.currentTimeMillis();
 		gameplayTimer.scheduleAtFixedRate(new TimerTask()
 			{@Override
 			public void run()
@@ -69,6 +70,7 @@ public class ThreadManager
 					{for(WorldObject wo:tr.getCollisionManager().getVisibilityList())
 						{wo.tick(tickTimeInMillis);}
 					tr.getCollisionManager().performCollisionTests();}
+				lastGameplayTickTime=tickTimeInMillis;
 				}//end run()
 			}, 0, 1000/GAMEPLAY_FPS);
 		visibilityCalculationTimer.scheduleAtFixedRate(new TimerTask()

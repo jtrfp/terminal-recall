@@ -1,10 +1,6 @@
 package org.jtrfp.trcl.objects;
 
-import java.awt.event.KeyEvent;
-
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ai.AccelleratedByPropulsion;
 import org.jtrfp.trcl.ai.AutoLeveling;
@@ -13,6 +9,9 @@ import org.jtrfp.trcl.ai.DamageableBehavior;
 import org.jtrfp.trcl.ai.HasPropulsion;
 import org.jtrfp.trcl.ai.MovesByVelocity;
 import org.jtrfp.trcl.ai.ObjectBehavior;
+import org.jtrfp.trcl.ai.RotationalDragBehavior;
+import org.jtrfp.trcl.ai.RotationalMomentumBehavior;
+import org.jtrfp.trcl.ai.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.ai.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.ai.VelocityDragBehavior;
 import org.jtrfp.trcl.core.Camera;
@@ -50,10 +49,14 @@ public class Player extends WorldObject
 		addBehavior(new UserInputThrottleControlBehavior());
 		addBehavior(new VelocityDragBehavior());
 		addBehavior(new AutoLeveling());
+		addBehavior(new UserInputRudderElevatorControlBehavior());
+		addBehavior(new RotationalMomentumBehavior());
+		addBehavior(new RotationalDragBehavior());
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setVelocityDrag(.0001);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 		getBehavior().probeForBehavior(Propelled.class).setMaxPropulsion(1000000);
+		getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.9999);
 		}
 	
 	private class PlayerBehavior extends ObjectBehavior{
@@ -99,27 +102,7 @@ public class Player extends WorldObject
 		final TR tr = getTr();
 		Vector3D newPos = this.getPosition();
 		Vector3D newLookAt = this.getLookAt();
-		final KeyStatus keyStatus = tr.getKeyStatus();
-		if (keyStatus.isPressed(KeyEvent.VK_UP))
-			{newPos = newPos.add(this.getLookAt().scalarMultiply(
-					nudgeUnit * manueverSpeed));
-			positionChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_DOWN))
-			{newPos = newPos.subtract(this.getLookAt().scalarMultiply(
-					nudgeUnit * manueverSpeed));
-			positionChanged = true;
-			}
-		Rotation turnRot = new Rotation(this.getTop(), angleUnit);
-
-		if (keyStatus.isPressed(KeyEvent.VK_LEFT)){
-			newLookAt = turnRot.applyInverseTo(newLookAt);
-			lookAtChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_RIGHT))
-			{newLookAt = turnRot.applyTo(newLookAt);
-			lookAtChanged = true;
-			}
+		
 
 		// Loop correction
 		if (WorldObject.LOOP){

@@ -38,8 +38,6 @@ import org.jtrfp.trcl.gpu.GLTextureBuffer;
 
 public class WorldObject implements PositionedRenderable
 	{
-	private long lastTimeInMillis=-1;//Makes sure if this is read without being set, it's very obvious.
-	private long timePassedSinceLastTick=0L;
 	private Vector3D heading = new Vector3D(new double []{0,0,1}); //Facing direction
 	private Vector3D top = new Vector3D(new double []{0,1,0});		//Normal describing the top of the object (for tilt)
 	protected Vector3D position = Vector3D.ZERO;
@@ -80,16 +78,7 @@ public class WorldObject implements PositionedRenderable
 		}
 	
 	public void tick(long time)
-		{if(lastTimeInMillis==-1)
-			{//First time <3 <3 <3
-			}
-		else
-			{//Been around...
-			timePassedSinceLastTick=time-lastTimeInMillis;
-			if(getBehavior()!=null)getBehavior().tick(time);
-			}
-		lastTimeInMillis=time;
-		}//end tick()
+		{getBehavior().tick(time);}
 	
 	private static final void addWorldObject(WorldObject o)
 		{if(o==null){new Exception().printStackTrace();System.exit(1);}

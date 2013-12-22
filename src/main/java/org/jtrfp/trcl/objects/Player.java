@@ -6,10 +6,15 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.ai.AccelleratedByPropulsion;
+import org.jtrfp.trcl.ai.AutoLeveling;
 import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
 import org.jtrfp.trcl.ai.DamageableBehavior;
+import org.jtrfp.trcl.ai.HasPropulsion;
 import org.jtrfp.trcl.ai.MovesByVelocity;
 import org.jtrfp.trcl.ai.ObjectBehavior;
+import org.jtrfp.trcl.ai.UserInputThrottleControlBehavior;
+import org.jtrfp.trcl.ai.VelocityDragBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -39,8 +44,16 @@ public class Player extends WorldObject
 		addBehavior(new PlayerBehavior());
 		addBehavior(new DamageableBehavior());
 		addBehavior(new MovesByVelocity());
+		addBehavior(new HasPropulsion());
+		addBehavior(new AccelleratedByPropulsion());
 		addBehavior(new BouncesOffTunnelWalls());
+		addBehavior(new UserInputThrottleControlBehavior());
+		addBehavior(new VelocityDragBehavior());
+		addBehavior(new AutoLeveling());
 		camera = tr.getRenderer().getCamera();
+		getBehavior().probeForBehavior(VelocityDragBehavior.class).setVelocityDrag(.0001);
+		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
+		getBehavior().probeForBehavior(Propelled.class).setMaxPropulsion(1000000);
 		}
 	
 	private class PlayerBehavior extends ObjectBehavior{
@@ -97,17 +110,6 @@ public class Player extends WorldObject
 					nudgeUnit * manueverSpeed));
 			positionChanged = true;
 			}
-		if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP)){
-			newPos = newPos.add(this.getTop().scalarMultiply(nudgeUnit
-					* manueverSpeed));
-			positionChanged = true;
-			}
-		if (keyStatus.isPressed(KeyEvent.VK_PAGE_DOWN)){
-			newPos = newPos.subtract(this.getTop().scalarMultiply(nudgeUnit
-					* manueverSpeed));
-			positionChanged = true;
-			}
-
 		Rotation turnRot = new Rotation(this.getTop(), angleUnit);
 
 		if (keyStatus.isPressed(KeyEvent.VK_LEFT)){

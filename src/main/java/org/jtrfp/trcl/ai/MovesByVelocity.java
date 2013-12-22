@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.ai;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
@@ -9,7 +10,8 @@ public class MovesByVelocity extends ObjectBehavior implements Velocible {
 	@Override
 	public void _tick(long tickTimeMillis){
 		final WorldObject p = getParent();
-		p.setPosition(p.getPosition().add(getVelocity()));
+		final double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		p.setPosition(p.getPosition().add(getVelocity().scalarMultiply(progressionInSeconds)));
 		}
 
 	@Override
@@ -21,6 +23,6 @@ public class MovesByVelocity extends ObjectBehavior implements Velocible {
 		{return velocity;}
 
 	@Override
-	public void accellerate(Vector3D scalarMultiply)
-		{velocity=velocity.add(scalarMultiply);}
+	public void accellerate(Vector3D accelVector)
+		{velocity=velocity.add(accelVector);}
 	}//end MovesWithVelocity

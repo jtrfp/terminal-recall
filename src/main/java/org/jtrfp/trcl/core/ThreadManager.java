@@ -90,5 +90,5 @@ public class ThreadManager
 			});
 		}//end constructor
 	
-	public long getTimeInMillisSinceLastGameTick(){return timeInMillisSinceLastGameTick;}
+	public long getElapsedTimeInMillisSinceLastGameTick(){return timeInMillisSinceLastGameTick;}
 	}//end ThreadManager

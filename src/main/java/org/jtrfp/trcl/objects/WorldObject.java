@@ -31,15 +31,18 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
+import org.jtrfp.trcl.ai.NullBehavior;
 import org.jtrfp.trcl.ai.ObjectBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 
 public class WorldObject implements PositionedRenderable
 	{
+	private long lastTimeInMillis=-1;//Makes sure if this is read without being set, it's very obvious.
+	private long timePassedSinceLastTick=0L;
 	private Vector3D heading = new Vector3D(new double []{0,0,1}); //Facing direction
 	private Vector3D top = new Vector3D(new double []{0,1,0});		//Normal describing the top of the object (for tilt)
-	protected Vector3D position;
+	protected Vector3D position = Vector3D.ZERO;
 	private final TR tr;
 	//private World world;
 	private boolean visible=true;
@@ -55,7 +58,7 @@ public class WorldObject implements PositionedRenderable
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
 	private SpacePartitioningGrid containingGrid;
-	private ObjectBehavior behavior;
+	private ObjectBehavior behavior=new NullBehavior(this);
 	
 	public WorldObject(TR tr)
 		{
@@ -65,12 +68,28 @@ public class WorldObject implements PositionedRenderable
 		}
 	
 	public WorldObject(TR tr,Model m)
-		{
-		this(tr);
+		{this(tr);
 		setModel(m);
 		}//end constructor
 	
 	void proposeCollision(WorldObject other){if(behavior!=null)behavior.proposeCollision(other);}
+	public void addBehavior(ObjectBehavior ob)
+		{ob.setDelegate(behavior);
+		ob.setParent(this);
+		behavior=ob;
+		}
+	
+	public void tick(long time)
+		{if(lastTimeInMillis==-1)
+			{//First time <3 <3 <3
+			}
+		else
+			{//Been around...
+			timePassedSinceLastTick=time-lastTimeInMillis;
+			if(getBehavior()!=null)getBehavior().tick(time);
+			}
+		lastTimeInMillis=time;
+		}//end tick()
 	
 	private static final void addWorldObject(WorldObject o)
 		{if(o==null){new Exception().printStackTrace();System.exit(1);}
@@ -118,7 +137,7 @@ public class WorldObject implements PositionedRenderable
 	
 	@Override
 	public String toString()
-		{return "WorldObject Model="+model.getDebugName()+" pos="+this.getPosition();}
+		{return "WorldObject Model="+model.getDebugName()+" pos="+this.getPosition()+" class="+getClass().getName();}
 	
 	public final void initializeObjectDefinitions()
 		{
@@ -308,9 +327,7 @@ public class WorldObject implements PositionedRenderable
 	 * @return the tr
 	 */
 	public TR getTr()
-		{
-		return tr;
-		}
+		{return tr;}
 	
 	public void destroy()
 		{tr.getCollisionManager().remove(this);
@@ -328,10 +345,4 @@ public class WorldObject implements PositionedRenderable
 	 */
 	public ObjectBehavior getBehavior()
 		{return behavior;}
-
-	/**
-	 * @param behavior the behavior to set
-	 */
-	public void setBehavior(ObjectBehavior behavior)
-		{behavior.setParent(this);this.behavior = behavior;}
 	}//end WorldObject

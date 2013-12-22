@@ -25,6 +25,8 @@ public class ThreadManager
 	private final Timer gameplayTimer = new Timer("GameplayTimer");
 	private final Timer visibilityCalculationTimer = new Timer("RenderListRefreshTimer");
 	public static final Object GAME_OBJECT_MODIFICATION_LOCK = new Object();
+	private long lastGameplayTickTime=0;
+	private long timeInMillisSinceLastGameTick=0L;
 	
 	ThreadManager(TR tr)
 		{this.tr=tr;
@@ -61,7 +63,8 @@ public class ThreadManager
 			public void run()
 				{Thread.currentThread().setPriority(GAMEPLAY_PRIORITY);
 				// Ticks
-				long tickTimeInMillis = System.currentTimeMillis();
+				final long tickTimeInMillis = System.currentTimeMillis();
+				timeInMillisSinceLastGameTick=tickTimeInMillis-lastGameplayTickTime;
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
 					{for(WorldObject wo:tr.getCollisionManager().getVisibilityList())
 						{wo.tick(tickTimeInMillis);}
@@ -86,4 +89,6 @@ public class ThreadManager
 				}
 			});
 		}//end constructor
+	
+	public long getTimeInMillisSinceLastGameTick(){return timeInMillisSinceLastGameTick;}
 	}//end ThreadManager

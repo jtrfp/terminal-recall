@@ -53,10 +53,10 @@ public class Player extends WorldObject
 		addBehavior(new RotationalMomentumBehavior());
 		addBehavior(new RotationalDragBehavior());
 		camera = tr.getRenderer().getCamera();
-		getBehavior().probeForBehavior(VelocityDragBehavior.class).setVelocityDrag(.0001);
+		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
-		getBehavior().probeForBehavior(Propelled.class).setMaxPropulsion(1000000);
-		getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.9999);
+		getBehavior().probeForBehavior(Propelled.class).setMaxPropulsion(1300000);
+		getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
 		}
 	
 	private class PlayerBehavior extends ObjectBehavior{

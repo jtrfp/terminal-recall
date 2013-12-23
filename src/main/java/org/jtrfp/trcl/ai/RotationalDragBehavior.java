@@ -1,16 +1,15 @@
 package org.jtrfp.trcl.ai;
 
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public class RotationalDragBehavior extends ObjectBehavior {
     private double dragCoeff=1;
     @Override
     public void _tick(long tickTimeInMillis){
-	final double timeProgressed=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.);
-    	if(timeProgressed<=0)return;
-    	final double slowdown = 1-dragCoeff;
-    	final double timeAdjSlowdown=1-(slowdown*timeProgressed);
-    	final double finalCoeff=Math.pow(timeAdjSlowdown,4);
+	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
+    	if(timeProgressedInFrames<=0)return;
+    	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);
 	final WorldObject p = getParent();
 	final RotationalMomentumBehavior rmb = (RotationalMomentumBehavior)p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
 	rmb.setEquatorialMomentum(rmb.getEquatorialMomentum()*finalCoeff);

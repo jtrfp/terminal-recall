@@ -1,5 +1,6 @@
 package org.jtrfp.trcl.ai;
 
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.VelocityDragged;
 
@@ -17,13 +18,11 @@ public class VelocityDragBehavior extends ObjectBehavior implements
 	
 	@Override
 	public void _tick(long tickTimeMillis){
-	    	final double timeProgressed=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.);
-	    	if(timeProgressed<=0)return;
+	    	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
+	    	if(timeProgressedInFrames<=0)return;
+	    	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);
 	    	Velocible v=getParent().getBehavior().probeForBehavior(Velocible.class);
-	    	//System.out.println(dragCoeff);
-	    	final double slowdown = 1-dragCoeff;
-	    	final double timeAdjSlowdown=1-(slowdown*timeProgressed);
-	    	v.setVelocity(v.getVelocity().scalarMultiply(Math.pow(timeAdjSlowdown,4)));
+	    	v.setVelocity(v.getVelocity().scalarMultiply(finalCoeff));
 		}
 
 	}//end VelocityDragBehavior

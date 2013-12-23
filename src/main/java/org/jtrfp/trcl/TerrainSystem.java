@@ -32,17 +32,14 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
 		this.gridSquareSize=gridSquareSize;
 		this.heightScalar=heightScalar;
-		
-		final int chunkSideLength=4;//Keep at power of two for now. 4x4 = 16. 16x6 = 96. 96 vertices per GLSL block means 1 chunk per block.
-		
+		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
 		final double v[] = {1,1,0,0};
 		Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;
 		//For each chunk
 		for(int gZ=0; gZ<height; gZ+=chunkSideLength)
-			{
-			final int _gZ=gZ;
+			{final int _gZ=gZ;
 			futures[futureIndex++]=TR.threadPool.submit(new Runnable()
 				{
 				public void run(){

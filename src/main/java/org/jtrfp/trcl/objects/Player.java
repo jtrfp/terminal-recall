@@ -4,11 +4,13 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ai.AccelleratedByPropulsion;
 import org.jtrfp.trcl.ai.AutoLeveling;
+import org.jtrfp.trcl.ai.Behavior;
+import org.jtrfp.trcl.ai.BouncesOffTerrain;
 import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
 import org.jtrfp.trcl.ai.DamageableBehavior;
 import org.jtrfp.trcl.ai.HasPropulsion;
+import org.jtrfp.trcl.ai.LoopingPositionBehavior;
 import org.jtrfp.trcl.ai.MovesByVelocity;
-import org.jtrfp.trcl.ai.Behavior;
 import org.jtrfp.trcl.ai.RotationalDragBehavior;
 import org.jtrfp.trcl.ai.RotationalMomentumBehavior;
 import org.jtrfp.trcl.ai.UserInputRudderElevatorControlBehavior;
@@ -52,6 +54,8 @@ public class Player extends WorldObject
 		addBehavior(new UserInputRudderElevatorControlBehavior());
 		addBehavior(new RotationalMomentumBehavior());
 		addBehavior(new RotationalDragBehavior());
+		addBehavior(new BouncesOffTerrain());
+		addBehavior(new LoopingPositionBehavior());
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
@@ -62,7 +66,6 @@ public class Player extends WorldObject
 	private class PlayerBehavior extends Behavior{
 		@Override
 		public void _tick(long tickTimeInMillis){
-			updateMovement();
 			updateCountdowns();
 			}
 		}//end PlayerBehavior
@@ -91,38 +94,6 @@ public class Player extends WorldObject
 	public void setPosition(Vector3D pos){
 		camera.setPosition(pos.subtract(getLookAt().scalarMultiply(cameraDistance)));
 		super.setPosition(pos);
-		}
-	
-	private void updateMovement(){
-		final double manueverSpeed = 20. / (double) ThreadManager.RENDER_FPS;
-		final double nudgeUnit = TR.mapSquareSize / 9.;
-		final double angleUnit = Math.PI * .015 * manueverSpeed;
-		
-		boolean positionChanged = false, lookAtChanged = false;
-		final TR tr = getTr();
-		Vector3D newPos = this.getPosition();
-		Vector3D newLookAt = this.getLookAt();
-		
-
-		// Loop correction
-		if (WorldObject.LOOP){
-			if (newPos.getX() > TR.mapWidth)
-				newPos = newPos.subtract(new Vector3D(TR.mapWidth, 0, 0));
-			if (newPos.getY() > TR.mapWidth)
-				newPos = newPos.subtract(new Vector3D(0, TR.mapWidth, 0));
-			if (newPos.getZ() > TR.mapWidth)
-				newPos = newPos.subtract(new Vector3D(0, 0, TR.mapWidth));
-
-			if (newPos.getX() < 0)
-				newPos = newPos.add(new Vector3D(TR.mapWidth, 0, 0));
-			if (newPos.getZ() < 0)
-				newPos = newPos.add(new Vector3D(0, 0, TR.mapWidth));
-			}
-
-		if (lookAtChanged)
-			this.setHeading(newLookAt);
-		if (positionChanged)
-			this.setPosition(newPos);
 		}
 
 	/**

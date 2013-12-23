@@ -8,7 +8,7 @@ public class VelocityDragBehavior extends ObjectBehavior implements
 	{
 	private double dragCoeff=1;
 	@Override
-	public void setVelocityDrag(double dragCoefficientPerSecond)
+	public void setDragCoefficient(double dragCoefficientPerSecond)
 		{dragCoeff=dragCoefficientPerSecond;}
 
 	@Override

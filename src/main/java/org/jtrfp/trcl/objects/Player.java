@@ -45,7 +45,7 @@ public class Player extends WorldObject
 		addBehavior(new MovesByVelocity());
 		addBehavior(new HasPropulsion());
 		addBehavior(new AccelleratedByPropulsion());
-		addBehavior(new BouncesOffTunnelWalls());
+		addBehavior(new BouncesOffTunnelWalls(true,true));
 		addBehavior(new UserInputThrottleControlBehavior());
 		addBehavior(new VelocityDragBehavior());
 		addBehavior(new AutoLeveling());

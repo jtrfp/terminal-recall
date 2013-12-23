@@ -21,8 +21,11 @@ import org.jtrfp.trcl.objects.TunnelSegment;
 import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class BouncesOffTunnelWalls extends Behavior
-	{
+public class BouncesOffTunnelWalls extends Behavior{
+    private final boolean changeHeadingAndTop, alwaysTopUp;
+    public BouncesOffTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
+	super();this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;
+    }
 	protected void _proposeCollision(WorldObject other){
 		final WorldObject parent = getParent();
 		final Velocible velocible = getParent().getBehavior().probeForBehavior(Velocible.class);
@@ -46,9 +49,9 @@ public class BouncesOffTunnelWalls extends Behavior
 				final double startHeight=TunnelSegment.getStartHeight(s);
 				final double endWidth=TunnelSegment.getEndWidth(s);
 				final double endHeight=TunnelSegment.getEndHeight(s);
-				// 0.8 is a fudge-factor to ensure the player doesn't see the outside of the tunnel (due to clipping) before bouncing off.
-				final double widthHere=.8*(startWidth*(1.-pctDownSeg)+endWidth*pctDownSeg);
-				final double heightHere=.8*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
+				// 0.6 is a fudge-factor to ensure the player doesn't see the outside of the tunnel (due to clipping) before bouncing off.
+				final double widthHere=.6*(startWidth*(1.-pctDownSeg)+endWidth*pctDownSeg);
+				final double heightHere=.6*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
 				//Parent position relative to tunnel
 				final Vector3D pprtt = parent.getPosition().subtract(circleCenter);
 				if((pprtt.getZ()*pprtt.getZ())/(widthHere*widthHere)+(pprtt.getY()*pprtt.getY())/(heightHere*heightHere)>1){
@@ -58,14 +61,15 @@ public class BouncesOffTunnelWalls extends Behavior
 					final Vector3D oldHeading = parent.getHeading();
 					final Vector3D oldVelocity = velocible.getVelocity();
 					final Vector3D oldTop = parent.getTop();
-					final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize().negate();
+					final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize();
 					//Bounce the heading and velocity
-					parent.setHeading((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*2).subtract(oldHeading)).negate());
-					velocible.setVelocity((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*2).subtract(oldHeading)).negate());
-					//parent.setTop((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldTop)*2).subtract(oldTop)));
-					//parent.setHeading((inwardHeading.scalarMultiply(.5).add(oldHeading.scalarMultiply(.5))).normalize());
-					//parent.setTop(parent.getTop().crossProduct(parent.getHeading()));
-					//parent.setHeading(new Vector3D(oldHeading.getX()>0?oldHeading.getX():.00001,oldHeading.getY()*-1,oldHeading.getZ()*-1).normalize());
+					if(changeHeadingAndTop){
+					    parent.setHeading((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*-2).add(oldHeading)));
+					    Vector3D newTop = ((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldTop)*-2).add(oldTop)));
+        				    if(newTop.getY()<0)newTop=new Vector3D(newTop.getX(),newTop.getY()*-1,newTop.getZ());
+        				    parent.setTop(newTop);
+					    }
+					velocible.setVelocity((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)));
 					}
 				else{seg.setVisible(true);}
 				}//end if(in range of segment)

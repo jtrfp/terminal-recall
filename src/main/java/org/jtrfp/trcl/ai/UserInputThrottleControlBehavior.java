@@ -6,8 +6,7 @@ import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.objects.Propelled;
 
 public class UserInputThrottleControlBehavior extends ObjectBehavior {
-   // final double nudgeUnit = TR.mapSquareSize / 9.;
-    final double nudgeUnit = 30000;
+    private double nudgeUnit = 40000;
     @Override
     public void _tick(long timeInMillis){
 	final KeyStatus keyStatus=getParent().getTr().getKeyStatus(); 
@@ -20,4 +19,16 @@ public class UserInputThrottleControlBehavior extends ObjectBehavior {
 	    	p.deltaPropulsion(-nudgeUnit);
 		}
     }//end _tick(...)
+    /**
+     * @return the nudgeUnit
+     */
+    public double getNudgeUnit() {
+        return nudgeUnit;
+    }
+    /**
+     * @param nudgeUnit the nudgeUnit to set
+     */
+    public void setNudgeUnit(double nudgeUnit) {
+        this.nudgeUnit = nudgeUnit;
+    }
 }//end UseInputThrottleControlBehavior

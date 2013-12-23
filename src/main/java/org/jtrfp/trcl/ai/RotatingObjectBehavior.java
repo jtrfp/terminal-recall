@@ -21,7 +21,7 @@ import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
 
-public class RotatingObjectBehavior extends ObjectBehavior
+public class RotatingObjectBehavior extends Behavior
 	{
 	private final IndirectDouble angle = new IndirectDouble();
 	private final Sequencer seq;

@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.objects.Propelled;
 
-public class UserInputThrottleControlBehavior extends ObjectBehavior {
+public class UserInputThrottleControlBehavior extends Behavior {
     private double nudgeUnit = 40000;
     @Override
     public void _tick(long timeInMillis){

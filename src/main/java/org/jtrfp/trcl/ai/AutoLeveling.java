@@ -2,7 +2,7 @@ package org.jtrfp.trcl.ai;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-public class AutoLeveling extends ObjectBehavior {
+public class AutoLeveling extends Behavior {
     @Override
     public void _tick(long timeInMillis){
 	final Vector3D old = getParent().getHeading();

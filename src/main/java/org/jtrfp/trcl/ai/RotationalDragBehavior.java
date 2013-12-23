@@ -3,7 +3,7 @@ package org.jtrfp.trcl.ai;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class RotationalDragBehavior extends ObjectBehavior {
+public class RotationalDragBehavior extends Behavior {
     private double dragCoeff=1;
     @Override
     public void _tick(long tickTimeInMillis){

@@ -5,7 +5,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class MovesByVelocity extends ObjectBehavior implements Velocible {
+public class MovesByVelocity extends Behavior implements Velocible {
 	private Vector3D velocity=Vector3D.ZERO;
 	@Override
 	public void _tick(long tickTimeMillis){

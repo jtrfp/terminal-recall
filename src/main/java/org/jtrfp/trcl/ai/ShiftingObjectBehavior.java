@@ -20,7 +20,7 @@ import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
 
-public class ShiftingObjectBehavior extends ObjectBehavior
+public class ShiftingObjectBehavior extends Behavior
 	{
 	private final Sequencer seq;
 	private final AttribAnimator xAnimator;

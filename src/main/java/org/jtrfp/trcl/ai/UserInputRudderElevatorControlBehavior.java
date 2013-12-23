@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.objects.Player;
 
-public class UserInputRudderElevatorControlBehavior extends ObjectBehavior {
+public class UserInputRudderElevatorControlBehavior extends Behavior {
     private  double accellerationFactor=.0005;
     @Override
     public void _tick(long tickTimeMillis){

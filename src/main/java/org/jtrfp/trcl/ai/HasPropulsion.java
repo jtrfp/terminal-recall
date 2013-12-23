@@ -2,7 +2,7 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.objects.Propelled;
 
-public class HasPropulsion extends ObjectBehavior implements Propelled {
+public class HasPropulsion extends Behavior implements Propelled {
     private double propulsion=0;
     private double max=Double.POSITIVE_INFINITY;
     private double min=Double.NEGATIVE_INFINITY;

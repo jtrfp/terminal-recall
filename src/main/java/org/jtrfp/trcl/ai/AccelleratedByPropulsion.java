@@ -5,7 +5,7 @@ import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
 
-public class AccelleratedByPropulsion extends ObjectBehavior{
+public class AccelleratedByPropulsion extends Behavior{
 	@Override
 	public void _tick(long timeInMillis)
 		{WorldObject wo = getParent();

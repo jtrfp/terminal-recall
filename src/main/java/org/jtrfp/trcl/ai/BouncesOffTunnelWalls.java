@@ -21,7 +21,7 @@ import org.jtrfp.trcl.objects.TunnelSegment;
 import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class BouncesOffTunnelWalls extends ObjectBehavior
+public class BouncesOffTunnelWalls extends Behavior
 	{
 	protected void _proposeCollision(WorldObject other){
 		final WorldObject parent = getParent();

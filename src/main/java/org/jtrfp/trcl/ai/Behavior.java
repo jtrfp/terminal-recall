@@ -17,10 +17,10 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.objects.WorldObject;
 
-public abstract class ObjectBehavior
+public abstract class Behavior
 	{
 	private WorldObject parent;
-	private ObjectBehavior wrapped;
+	private Behavior wrapped;
 	
 	public WorldObject getParent(){return parent;}
 	public <T> T probeForBehavior(Class<T> type)
@@ -46,5 +46,5 @@ public abstract class ObjectBehavior
 	public void setParent(WorldObject newParent)
 		{this.parent=newParent;if(wrapped!=null){wrapped.setParent(newParent);}}
 	
-	public void setDelegate(ObjectBehavior delegate){wrapped=delegate;}
+	public void setDelegate(Behavior delegate){wrapped=delegate;}
 	}//end ObjectBehavior

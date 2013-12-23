@@ -2,7 +2,7 @@ package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.objects.Damageable;
 
-public class DamageableBehavior extends ObjectBehavior implements Damageable
+public class DamageableBehavior extends Behavior implements Damageable
 	{
 	private int health=65535;
 

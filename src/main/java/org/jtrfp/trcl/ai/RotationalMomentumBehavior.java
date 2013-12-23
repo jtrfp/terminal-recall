@@ -3,7 +3,7 @@ package org.jtrfp.trcl.ai;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class RotationalMomentumBehavior extends ObjectBehavior {
+public class RotationalMomentumBehavior extends Behavior {
     private double equatorialMomentum=0;//Axis is getTop()
     private double polarMomentum=0;//Axis is getHeading().crossProduct(getTop())
     private double lateralMomentum=0;//Axis is getHeading()

@@ -8,7 +8,7 @@ import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
 import org.jtrfp.trcl.ai.DamageableBehavior;
 import org.jtrfp.trcl.ai.HasPropulsion;
 import org.jtrfp.trcl.ai.MovesByVelocity;
-import org.jtrfp.trcl.ai.ObjectBehavior;
+import org.jtrfp.trcl.ai.Behavior;
 import org.jtrfp.trcl.ai.RotationalDragBehavior;
 import org.jtrfp.trcl.ai.RotationalMomentumBehavior;
 import org.jtrfp.trcl.ai.UserInputRudderElevatorControlBehavior;
@@ -59,7 +59,7 @@ public class Player extends WorldObject
 		getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
 		}
 	
-	private class PlayerBehavior extends ObjectBehavior{
+	private class PlayerBehavior extends Behavior{
 		@Override
 		public void _tick(long tickTimeInMillis){
 			updateMovement();

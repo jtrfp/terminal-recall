@@ -10,7 +10,7 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.ai.ObjectBehavior;
+import org.jtrfp.trcl.ai.Behavior;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
 
@@ -187,7 +187,7 @@ public class PowerupObject extends BillboardSprite{
 			{e.printStackTrace();}
 		}//end constructor
 
-	private class PowerupBehavior extends ObjectBehavior{
+	private class PowerupBehavior extends Behavior{
 		@Override
 		public void _proposeCollision(WorldObject other){
 			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)

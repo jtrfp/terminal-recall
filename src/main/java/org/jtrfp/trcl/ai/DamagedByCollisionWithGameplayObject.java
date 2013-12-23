@@ -20,7 +20,7 @@ import org.jtrfp.trcl.objects.Damageable;
 import org.jtrfp.trcl.objects.Player;
 import org.jtrfp.trcl.objects.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject extends ObjectBehavior
+public class DamagedByCollisionWithGameplayObject extends Behavior
 	{
 	protected void _proposeCollision(WorldObject other)
 		{

@@ -4,7 +4,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.VelocityDragged;
 
-public class VelocityDragBehavior extends ObjectBehavior implements
+public class VelocityDragBehavior extends Behavior implements
 		VelocityDragged
 	{
 	private double dragCoeff=1;

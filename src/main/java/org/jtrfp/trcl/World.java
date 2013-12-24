@@ -16,10 +16,6 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.media.opengl.GLAutoDrawable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;

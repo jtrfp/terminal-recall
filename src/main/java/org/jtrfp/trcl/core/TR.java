@@ -51,7 +51,7 @@ public final class TR
 	public static final double antiGamma=1.6;
 	public static final boolean ANIMATED_TERRAIN=false;
 	
-	private final GPU gpu = new GPU();
+	private final GPU gpu = new GPU(this);
 	private Player player;
 	private final JFrame frame = new JFrame("Terminal Recall");
 	private Color [] globalPalette;

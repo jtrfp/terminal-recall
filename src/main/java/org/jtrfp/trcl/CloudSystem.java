@@ -54,7 +54,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 	private void addToWorld()
 		{
 		//Set fog
-		tr.getRenderer().setFogColor(cloudTexture.getAverageColor());
+		tr.getWorld().setFogColor(cloudTexture.getAverageColor());
 		//Create a grid
 		for(int z=0; z<gridSideSizeInTiles; z++)
 			{

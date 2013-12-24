@@ -25,7 +25,6 @@ public class Renderer
 	private final Camera camera;
 	private final GLProgram shaderProgram;
 	private final GLUniform fogStart,fogEnd,fogColor;
-	private Color _fogColor = Color.black;
 	private boolean initialized=false;
 	private final GPU gpu;
 	private final RenderList [] renderList = new RenderList[2];
@@ -116,6 +115,7 @@ public class Renderer
 		PrimitiveList.tickAnimators();
 		ensureInit();
 		final GL3 gl = gpu.getGl();
+		setFogColor(gpu.getTr().getWorld().getFogColor());
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		final double cameraViewDepth = camera.getViewDepth();
 		fogStart.set((float) (cameraViewDepth * 1.2) / 5f);
@@ -141,9 +141,9 @@ public class Renderer
 	
 	public void setFogColor(Color c)
 		{fogColor.set(
-			(float) _fogColor.getRed() / 255f, 
-			(float) _fogColor.getGreen() / 255f, 
-			(float) _fogColor.getBlue() / 255f);
+			(float) c.getRed() / 255f, 
+			(float) c.getGreen() / 255f, 
+			(float)c.getBlue() / 255f);
 		}
 	/**
 	 * @return the camera

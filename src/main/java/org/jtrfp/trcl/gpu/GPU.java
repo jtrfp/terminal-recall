@@ -12,7 +12,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
-import com.jogamp.opengl.util.FPSAnimator;
+import org.jtrfp.trcl.core.TR;
 
 public class GPU
 	{
@@ -21,8 +21,10 @@ public class GPU
 	private final GLCapabilities capabilities = new GLCapabilities(glProfile);
 	private final GLCanvas canvas = new GLCanvas(capabilities);
 	private ByteOrder byteOrder;
-	
+	private final TR tr;
 	private GL3 gl;
+	
+	public GPU(TR tr){this.tr=tr;}
 	public GL3 takeGL()
 		{
 		gl=getGl();
@@ -86,4 +88,7 @@ public class GPU
 	
 	public ReallocatableGLMemory newEmptyGLMemory()
 		{return new ReallocatableGLTextureBuffer(this);}
+	public TR getTr() {
+	    	return tr;
+		}
 	}//end GPU

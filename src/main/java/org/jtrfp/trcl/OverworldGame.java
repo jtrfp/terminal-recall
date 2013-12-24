@@ -19,8 +19,6 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.io.IOException;
 
-import javax.media.opengl.GL3;
-
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
@@ -66,17 +64,16 @@ public class OverworldGame
 				//world.setCameraPosition(new Vector3D(TR.legacy2Modern(loc.getZ()),TR.legacy2Modern(loc.getY())+TR.mapSquareSize/2,TR.legacy2Modern(loc.getX())));
 				}
 			}//end for(nav.getNavObjects())
-		
 		//TODO: Tunnel activators
-		
-		overworldSystem = new OverworldSystem(tr.getWorld(), lvl);
-		backdropSystem = new BackdropSystem(tr.getWorld());
 		
 		Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
 		player.setPosition(Tunnel.TUNNEL_START_POS);
 		player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		tr.getWorld().add(player);
 		tr.setPlayer(player);
+		
+		overworldSystem = new OverworldSystem(tr.getWorld(), lvl);
+		backdropSystem = new BackdropSystem(tr.getWorld());
 		
 		//TODO: Uncomment for tunnel
 		//TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());

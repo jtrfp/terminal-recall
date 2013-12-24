@@ -20,13 +20,13 @@ public class UserInputRudderElevatorControlBehavior extends Behavior {
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_LEFT)){
 	    	//Tilt
-		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor);
+		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor*.25);
 		//Turn
 		rmb.accellerateEquatorialMomentum(2*Math.PI*accellerationFactor);
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_RIGHT)){
 	    	//Tilt
-		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor);
+		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor*.25);
 		//Turn
 		rmb.accellerateEquatorialMomentum(-2*Math.PI*accellerationFactor);
 		}

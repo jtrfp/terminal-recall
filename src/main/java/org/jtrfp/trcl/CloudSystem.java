@@ -22,6 +22,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
+import org.jtrfp.trcl.objects.CloudCeiling;
 
 public class CloudSystem extends RenderableSpacePartitioningGrid
 	{
@@ -73,7 +74,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 				final Model m = new Model(false);
 				m.addTriangle(tris[0]);
 				m.addTriangle(tris[1]);
-				final TerrainChunk rq = new TerrainChunk(tr,m.finalizeModel());
+				final CloudCeiling rq = new CloudCeiling(tr,m.finalizeModel());
 				rq.setPosition(new Vector3D(xPos,ceilingHeight,zPos));
 				add(rq);
 				}//end for(x)

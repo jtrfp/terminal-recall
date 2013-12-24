@@ -21,7 +21,6 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.DEFObjectPlacer;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.TerrainSystem;
-import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;

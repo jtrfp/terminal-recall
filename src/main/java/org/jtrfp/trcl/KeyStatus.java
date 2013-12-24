@@ -19,7 +19,6 @@ import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 public class KeyStatus implements KeyEventDispatcher
 	{

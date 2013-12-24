@@ -24,7 +24,6 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.GlobalObjectList;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;

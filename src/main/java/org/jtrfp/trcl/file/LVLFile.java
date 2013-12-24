@@ -14,8 +14,6 @@
  *      chuck - initial API and implementation
  ******************************************************************************/
 package org.jtrfp.trcl.file;
-import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 

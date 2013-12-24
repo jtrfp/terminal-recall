@@ -69,7 +69,13 @@ public class BouncesOffTunnelWalls extends Behavior{
         				    if(newTop.getY()<0)newTop=new Vector3D(newTop.getX(),newTop.getY()*-1,newTop.getZ());
         				    parent.setTop(newTop);
 					    }
+					final RotationalMomentumBehavior rmb = parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
 					velocible.setVelocity((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)));
+					if(rmb!=null){//If this is a spinning object, reverse its spin momentum
+				    	    rmb.setLateralMomentum(rmb.getLateralMomentum()*-1);
+				    	    rmb.setEquatorialMomentum(rmb.getEquatorialMomentum()*-1);
+				    	    rmb.setPolarMomentum(rmb.getPolarMomentum()*-1);
+				    	    }
 					}
 				else{seg.setVisible(true);}
 				}//end if(in range of segment)

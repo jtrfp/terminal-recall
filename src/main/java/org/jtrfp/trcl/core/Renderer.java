@@ -140,7 +140,8 @@ public class Renderer
 		}//end updateVisibilityList()
 	
 	public void setFogColor(Color c)
-		{fogColor.set(
+		{
+	    	fogColor.set(
 			(float) c.getRed() / 255f, 
 			(float) c.getGreen() / 255f, 
 			(float)c.getBlue() / 255f);

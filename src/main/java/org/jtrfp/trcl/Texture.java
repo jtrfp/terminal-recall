@@ -63,6 +63,7 @@ public class Texture implements TextureDescription
 		g.drawImage(img,0, 0, img.getWidth(), img.getHeight(), 0, 0, img.getWidth(), img.getHeight(), null);
 		g.drawImage(img, 4, 4, img.getWidth()-2, img.getHeight()-2, 0, 0, img.getWidth(), img.getHeight(), null);
 		g.dispose();
+		long redA=0,greenA=0,blueA=0;
 		ByteBuffer data = ByteBuffer.allocateDirect(img.getWidth()*img.getHeight()*4);
 		for(int y=0; y<img.getHeight(); y++)
 			{for(int x=0; x<img.getWidth(); x++)
@@ -71,8 +72,13 @@ public class Texture implements TextureDescription
 				data.put((byte)c.getGreen());
 				data.put((byte)c.getBlue());
 				data.put((byte)c.getAlpha());
+				redA+=c.getRed();
+				greenA+=c.getGreen();
+				blueA+=c.getBlue();
 				}//end for(x)
 			}//end for(y)
+		final int div=data.capacity()/4;
+		averageColor=new Color((redA/div)/255f,(greenA/div)/255f,(blueA/div)/255f);
 		newNode.setImage(data);
 		registerNode(newNode);
 		}

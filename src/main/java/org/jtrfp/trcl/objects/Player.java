@@ -5,8 +5,8 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ai.AccelleratedByPropulsion;
 import org.jtrfp.trcl.ai.AutoLeveling;
 import org.jtrfp.trcl.ai.Behavior;
-import org.jtrfp.trcl.ai.CollidesWithTerrain;
 import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
+import org.jtrfp.trcl.ai.CollidesWithTerrain;
 import org.jtrfp.trcl.ai.DamageableBehavior;
 import org.jtrfp.trcl.ai.HasPropulsion;
 import org.jtrfp.trcl.ai.LoopingPositionBehavior;
@@ -47,7 +47,7 @@ public class Player extends WorldObject
 		addBehavior(new MovesByVelocity());
 		addBehavior(new HasPropulsion());
 		addBehavior(new AccelleratedByPropulsion());
-		//addBehavior(new BouncesOffTunnelWalls(true,true));
+		addBehavior(new BouncesOffTunnelWalls(true,true));
 		addBehavior(new UserInputThrottleControlBehavior());
 		addBehavior(new VelocityDragBehavior());
 		addBehavior(new AutoLeveling());

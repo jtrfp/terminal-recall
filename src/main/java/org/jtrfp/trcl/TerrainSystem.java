@@ -26,12 +26,12 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	final double gridSquareSize;
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
-	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final double heightScalar, final World world)
+	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final World world)
 		{
 		super(world);
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
 		this.gridSquareSize=gridSquareSize;
-		this.heightScalar=heightScalar;
+		this.heightScalar=world.sizeY/2;
 		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
 		final double v[] = {1,1,0,0};
@@ -79,7 +79,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 						//System.out.println("TerrainSystem: addToGrid ...");
 						if(m.finalizeModel().getTriangleList()!=null)
 							{
-							final TerrainChunk chunkToAdd = new TerrainChunk(world.getTr(),m);
+							final TerrainChunk chunkToAdd = new TerrainChunk(world.getTr(),m,altitude);
 							chunkToAdd.setPosition(new Vector3D(objectX, objectY, objectZ));
 							add(chunkToAdd);
 							}

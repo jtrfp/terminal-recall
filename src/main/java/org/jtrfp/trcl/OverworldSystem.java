@@ -23,13 +23,13 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			TextureDescription [] texturePalette=tr.getResourceManager().getTextures(lvl.getLevelTextureListFile(), 
 					globalPalette,GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
 			System.out.println("Loading height map...");
-			altitudeMap=		tr.getResourceManager().getRAWAltitude(lvl.getHeightMapOrTunnelFile());
+			altitudeMap=new InterpolatingAltitudeMap(tr.getResourceManager().getRAWAltitude(lvl.getHeightMapOrTunnelFile()));
 			System.out.println("... Done");
 			textureMesh = tr.getResourceManager().getTerrainTextureMesh
 					(lvl.getTexturePlacementFile(),texturePalette);
 			//Terrain
 			System.out.println("Building terrain...");
-			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize, w.sizeY/2.,w);
+			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize,w);
 			System.out.println("...Done.");
 			//Clouds
 			System.out.println("Setting up sky...");

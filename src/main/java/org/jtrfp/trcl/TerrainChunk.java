@@ -26,9 +26,13 @@ import org.jtrfp.trcl.objects.WorldObject;
  */
 public class TerrainChunk extends WorldObject
 	{
-	public TerrainChunk(TR tr, Model m)
+    	private final AltitudeMap map;
+	public TerrainChunk(TR tr, Model m, AltitudeMap map)
 		{
 		super(tr,m);
+		this.map=map;
 		m.setDebugName("TerrainChunk");
 		}
-	}//end RenderingCube
+	
+	public AltitudeMap getAltitudeMap(){return map;}
+	}//end TerrainChunk

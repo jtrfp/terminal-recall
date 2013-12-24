@@ -78,8 +78,10 @@ public class OverworldGame
 		tr.getWorld().add(player);
 		tr.setPlayer(player);
 		
-		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
+		//TODO: Uncomment for tunnel
+		//TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
 		GPU gpu = tr.getGPU();
+		gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
 		System.out.println("Building master texture...");
 		Texture.finalize(gpu);
 		System.out.println("\t...Done.");

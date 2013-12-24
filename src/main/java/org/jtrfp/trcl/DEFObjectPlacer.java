@@ -11,6 +11,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.objects.DEFObject;
 import org.jtrfp.trcl.objects.ObjectDirection;
 import org.jtrfp.trcl.objects.ObjectPlacer;
 import org.jtrfp.trcl.objects.WorldObject;
@@ -65,7 +66,7 @@ public class DEFObjectPlacer implements ObjectPlacer
 				{
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
 				//,new TVBehavior(null,def,terrainSystem,pl.getStrength())
-				final WorldObject obj =new WorldObject(tr,model);
+				final WorldObject obj =new DEFObject(tr,model,def);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),

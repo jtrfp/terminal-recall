@@ -12,6 +12,7 @@ public class CollidesWithTerrain extends Behavior {
     private static final double nudge=1000;
     private boolean bounce=false;
     private double pad=0;
+    private boolean groundLock=false;
     private InterpolatingAltitudeMap map;
     public CollidesWithTerrain(boolean bounce, double pad){
 	this.bounce=bounce;
@@ -26,6 +27,9 @@ public class CollidesWithTerrain extends Behavior {
 	    (thisPos.getZ()/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	final Vector3D groundNormal = (map.normalAt((thisPos.getX()/TR.mapSquareSize), 
 	    (thisPos.getZ()/TR.mapSquareSize)));
+
+    	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),height+pad,thisPos.getZ()));return;}
+    	
 	if(thisPos.getY()<height+pad)
 	    {p.setPosition(new Vector3D(thisPos.getX(),height+pad+nudge,thisPos.getZ()));
 	    //Reflect heading,top
@@ -57,4 +61,17 @@ public class CollidesWithTerrain extends Behavior {
 	if(other instanceof TerrainChunk){
 	    if(map==null)map = (InterpolatingAltitudeMap)((TerrainChunk)other).getAltitudeMap();}
     }//end _tick
+    /**
+     * @return the groundLock
+     */
+    public boolean isGroundLock() {
+        return groundLock;
+    }
+    /**
+     * @param groundLock the groundLock to set
+     */
+    public CollidesWithTerrain setGroundLock(boolean groundLock) {
+        this.groundLock = groundLock;
+        return this;
+    }
 }//end BouncesOffTerrain

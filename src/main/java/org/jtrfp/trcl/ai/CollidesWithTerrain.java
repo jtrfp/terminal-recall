@@ -45,7 +45,6 @@ public class CollidesWithTerrain extends Behavior {
 	    	p.setHeading(newHeading);
 	    	final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
 	    	Vector3D newTop = resultingRotation.applyTo(oldTop);
-	    	//Vector3D newTop = ((groundNormal.scalarMultiply(groundNormal.dotProduct(oldTop.negate())*-2).add(oldTop.negate())));
 		p.setTop(newTop);
 		//System.out.println("BOUNCE. GroundNorm="+groundNormal+" Old heading="+oldHeading+" New heading="+newHeading);
 		//System.out.println("OldTop="+oldTop+" NewTop="+newTop);

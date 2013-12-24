@@ -25,13 +25,8 @@ import org.jtrfp.trcl.OverworldGame;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 
-public class RunMe
-	{
-	public static void main(String [] args)
-		{aspectMain(args);}
-	
-	public static void aspectMain(String [] args)
-		{
+public class RunMe{
+	public static void main(String [] args){
 		ensureJVMIsProperlyConfigured(args);
 		System.out.println(
 				"\t\t\t***TERMINAL RECALL***\n"+

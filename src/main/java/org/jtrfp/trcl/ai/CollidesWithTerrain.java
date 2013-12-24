@@ -1,5 +1,6 @@
 package org.jtrfp.trcl.ai;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.TerrainChunk;
@@ -8,7 +9,7 @@ import org.jtrfp.trcl.objects.Velocible;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {
-    private static final double nudge=10000;
+    private static final double nudge=1000;
     private boolean bounce=false;
     private double pad=0;
     private InterpolatingAltitudeMap map;
@@ -42,7 +43,9 @@ public class CollidesWithTerrain extends Behavior {
 	    	final Vector3D oldVelocity = v.getVelocity();
 	    	v.setVelocity(groundNormal.scalarMultiply(groundNormal.dotProduct(oldVelocity)*-2).add(oldVelocity));
 	    	p.setHeading(newHeading);
-	    	Vector3D newTop = ((groundNormal.scalarMultiply(groundNormal.dotProduct(oldTop.negate())*-2).add(oldTop.negate())));
+	    	final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
+	    	Vector3D newTop = resultingRotation.applyTo(oldTop);
+	    	//Vector3D newTop = ((groundNormal.scalarMultiply(groundNormal.dotProduct(oldTop.negate())*-2).add(oldTop.negate())));
 		p.setTop(newTop);
 		//System.out.println("BOUNCE. GroundNorm="+groundNormal+" Old heading="+oldHeading+" New heading="+newHeading);
 		//System.out.println("OldTop="+oldTop+" NewTop="+newTop);

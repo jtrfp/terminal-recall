@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.ai;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.objects.TunnelSegment;
@@ -64,9 +65,11 @@ public class BouncesOffTunnelWalls extends Behavior{
 					final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize();
 					//Bounce the heading and velocity
 					if(changeHeadingAndTop){
-					    parent.setHeading((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*-2).add(oldHeading)));
-					    Vector3D newTop = ((inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldTop.negate())*-2).add(oldTop.negate())));
-        				    if(newTop.getY()<0)newTop=new Vector3D(newTop.getX(),newTop.getY()*-1,newTop.getZ());
+					    Vector3D newHeading = (inwardNormal.scalarMultiply(inwardNormal.dotProduct(oldHeading)*-2).add(oldHeading));
+					    parent.setHeading(newHeading);
+					    final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
+					    Vector3D newTop = resultingRotation.applyTo(oldTop);
+					    if(newTop.getY()<0)newTop=new Vector3D(newTop.getX(),newTop.getY()*-1,newTop.getZ());
         				    parent.setTop(newTop);
 					    }
 					final RotationalMomentumBehavior rmb = parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);

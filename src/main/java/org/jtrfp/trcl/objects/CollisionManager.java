@@ -22,7 +22,7 @@ public class CollisionManager
 		tr.getWorld().itemsWithinRadiusOf(tr.getRenderer().getCamera().getCameraPosition(), new Submitter<PositionedRenderable>()
 			{@Override
 			public void submit(PositionedRenderable item)
-				{if(item instanceof WorldObject)list.add((WorldObject)item);}
+				{if(item instanceof WorldObject){list.add((WorldObject)item);}}
 			@Override
 			public void submit(Collection<PositionedRenderable> items)
 				{for(PositionedRenderable pr:items.toArray(new PositionedRenderable[]{})){submit(pr);}}

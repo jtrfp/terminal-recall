@@ -1,5 +1,6 @@
 package org.jtrfp.trcl.core;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -67,7 +68,8 @@ public class ThreadManager
 				final long tickTimeInMillis = System.currentTimeMillis();
 				timeInMillisSinceLastGameTick=tickTimeInMillis-lastGameplayTickTime;
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
-					{for(WorldObject wo:tr.getCollisionManager().getVisibilityList())
+					{List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
+				    	for(WorldObject wo:vl)
 						{wo.tick(tickTimeInMillis);}
 					tr.getCollisionManager().performCollisionTests();}
 				lastGameplayTickTime=tickTimeInMillis;
@@ -82,8 +84,7 @@ public class ThreadManager
 				}
 			}, 0, 1000/RENDERLIST_REFRESH_FPS);
 		//CLEANUP
-		Runtime.getRuntime().addShutdownHook(new Thread()
-			{
+		Runtime.getRuntime().addShutdownHook(new Thread(){
 			@Override
 			public void run()
 				{visibilityCalculationTimer.cancel();

@@ -28,7 +28,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
     	    mobile=false;
     	    break;
     	case groundTargeting:
-    	    groundLocked=true;
+    	    mobile=false;
     	    break;
     	case flyingDumb:
     	    mobile=false;
@@ -61,6 +61,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
     	    mobile=false;
     	    break;
     	case staticFiringSmart:
+    	    mobile=false;
     	    break;
     	case sittingDuck:
     	    mobile=false;
@@ -133,6 +134,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
     	case attackRetreatAboveSky:
     	    break;
     	case bobAboveSky:
+    	    mobile=false;
     	    break;
     	case factory:
     	    mobile=false;

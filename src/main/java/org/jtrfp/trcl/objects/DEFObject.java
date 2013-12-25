@@ -6,6 +6,7 @@ import org.jtrfp.trcl.ai.AutoLeveling;
 import org.jtrfp.trcl.ai.ChaseBehavior;
 import org.jtrfp.trcl.ai.CollidesWithTerrain;
 import org.jtrfp.trcl.ai.DamageableBehavior;
+import org.jtrfp.trcl.ai.ExplodesOnDeath;
 import org.jtrfp.trcl.ai.HasPropulsion;
 import org.jtrfp.trcl.ai.LoopingPositionBehavior;
 import org.jtrfp.trcl.ai.MovesByVelocity;
@@ -15,6 +16,7 @@ import org.jtrfp.trcl.ai.VelocityDragBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
+import org.jtrfp.trcl.objects.Explosion.ExplosionType;
 
 public class DEFObject extends WorldObject {
 public DEFObject(TR tr,Model model, EnemyDefinition def){
@@ -152,10 +154,14 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
 	addBehavior(new CollidesWithTerrain(false, 0).setGroundLock(groundLocked));
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new DamageableBehavior());
+	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
 	getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
     	}//end if(mobile)
+    else{
+	addBehavior(new ExplodesOnDeath(ExplosionType.Billow));
+        }
     }//end DEFObject
 }//end DEFObject

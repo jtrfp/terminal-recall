@@ -15,22 +15,24 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public final class Sequencer implements Controller
-	{
+public final class Sequencer implements Controller{
 	private final int frameDelayMsec;
 	private final boolean interpolate;
 	private final int numFrames;
+	private long timeOffset=0;
 	
-	public Sequencer(int frameDelayMsec, int numFrames, boolean interpolate)
-		{
+	public Sequencer(int frameDelayMsec, int numFrames, boolean interpolate){
 		this.numFrames=numFrames;
 		this.frameDelayMsec=frameDelayMsec;
 		this.interpolate=interpolate;
-		}//end constructor(...)
+	}//end constructor(...)
 	
-	public double getCurrentFrame()
-		{
-		double result = (((double)System.currentTimeMillis()/(double)frameDelayMsec))%(double)numFrames;
+	public double getCurrentFrame(){
+		double result = (((double)(System.currentTimeMillis()-timeOffset)/(double)frameDelayMsec))%(double)numFrames;
 		return interpolate?result:(int)result;
-		}//end getCurentFrame()
-	}//end Sequencer
+	}//end getCurentFrame()
+
+	public void reset() {
+	    timeOffset=System.currentTimeMillis();
+	}
+}//end Sequencer

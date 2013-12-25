@@ -79,21 +79,32 @@ import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
+import org.jtrfp.trcl.objects.ExplosionFactory;
 
-public class ResourceManager
-	{
+public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
 	private HashMap<String, TextureDescription> textureNameMap = new HashMap<String,TextureDescription>();
 	private HashMap<String, TextureDescription[]> specialTextureNameMap = new HashMap<String,TextureDescription[]>();
 	private HashMap<String, BINFile.AnimationControl> aniBinNameMap = new HashMap<String,BINFile.AnimationControl>();
 	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
 	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
+	private ExplosionFactory explosionFactory;
+	
 	private final TR tr;
 	
-	public ResourceManager(TR tr)
-		{
+	public ResourceManager(TR tr){
 		this.tr=tr;
-		}//end ResourceManager
+	}//end ResourceManager
+	
+	/**
+	 * @return the explosionFactory
+	 */
+	public ExplosionFactory getExplosionFactory() {
+	    return explosionFactory;
+	}
+	public void setExplosionFactory(ExplosionFactory ef){
+	    explosionFactory=ef;
+	}
 	
 	public LVLFile getLVL(String name) throws IOException, FileLoadException, IllegalAccessException
 		{
@@ -571,4 +582,4 @@ public class ResourceManager
 		is.close();
 		return result;
 		}
-	}//end ResourceManager
+}//end ResourceManager

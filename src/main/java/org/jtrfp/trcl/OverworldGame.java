@@ -27,6 +27,7 @@ import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.objects.ExplosionFactory;
 import org.jtrfp.trcl.objects.Player;
 
 public class OverworldGame
@@ -38,8 +39,7 @@ public class OverworldGame
 	
 	final int visibleTerrainGridDiameter=(int)TR.visibilityDiameterInMapSquares;
 	
-	public OverworldGame(LVLFile lvl, TR tr) throws IllegalAccessException, FileLoadException, IOException
-		{
+	public OverworldGame(LVLFile lvl, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		//Set up palette
 		Color [] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 		globalPalette[0]=new Color(0,0,0,0);//index zero is transparent
@@ -47,6 +47,8 @@ public class OverworldGame
 		
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
+		
+		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
 		
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());

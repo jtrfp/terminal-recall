@@ -34,6 +34,7 @@ import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.ai.Behavior;
 import org.jtrfp.trcl.ai.NullBehavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 
 public class WorldObject implements PositionedRenderable
@@ -319,9 +320,8 @@ public class WorldObject implements PositionedRenderable
 		{return tr;}
 	
 	public void destroy()
-		{tr.getCollisionManager().remove(this);
-		containingGrid.remove(this);
-		//this.setVisible(false);
+		{//tr.getCollisionManager().remove(this);
+		if(containingGrid!=null)containingGrid.remove(this);
 		}
 	
 	@Override

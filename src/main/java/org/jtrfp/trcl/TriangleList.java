@@ -82,7 +82,10 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			{//Animated texture
 			AnimatedTexture at =((AnimatedTexture)t.getTexture());
 			
-			Texture.TextureTreeNode tx=at.getFrames()[0].getNodeForThisTexture();//Default frame
+			Texture.TextureTreeNode tx=at.
+				getFrames()
+				[0].
+				getNodeForThisTexture();//Default frame
 			vtx.u.set((short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
 			vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
 			

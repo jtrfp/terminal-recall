@@ -1,11 +1,13 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import org.apache.commons.io.IOUtils;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
@@ -19,6 +21,8 @@ import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.objects.WorldObject;
+
+import com.jogamp.common.util.IOUtil;
 
 public class Renderer
 	{
@@ -47,10 +51,10 @@ public class Renderer
 		GLVertexShader vertexShader = gpu.newVertexShader();
 		GLFragmentShader fragmentShader = gpu.newFragmentShader();
 		shaderProgram = gpu.newProgram();
-		
-		Parser p = new Parser();
-		try{vertexShader.setSource(p.readUTF8FileToString(new File("texturedVertexShader.glsl")));
-		fragmentShader.setSource(p.readUTF8FileToString(new File("texturedFragShader.glsl")));}
+		try{//Apache Commons to the rescue again. (:
+		    vertexShader.setSource(IOUtils.toString(getClass().getResourceAsStream("/vertexShader.glsl")));
+		    fragmentShader.setSource(IOUtils.toString(getClass().getResourceAsStream("/fragShader.glsl")));
+		}
 		catch(Exception e){e.printStackTrace();}
 		shaderProgram.attachShader(vertexShader);
 		shaderProgram.attachShader(fragmentShader);

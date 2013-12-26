@@ -51,7 +51,7 @@ public class LineSegmentList extends PrimitiveList<LineSegment,GPULineSegment>
 			gls.green.set((byte)ls.getColor().getGreen());
 			gls.blue.set((byte)ls.getColor().getBlue());
 			//THICKNESS
-			gls.thickness.set((byte)Math.round(ls.getThickness()/(coordDownScaler/8)));
+			gls.thickness.set((byte)Math.round(ls.getThickness())&0xFF);
 			}//end for(lineSegments)
 		}//end uploadToGPU
 

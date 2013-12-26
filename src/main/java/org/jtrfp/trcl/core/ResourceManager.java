@@ -80,6 +80,7 @@ import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.objects.ExplosionFactory;
+import org.jtrfp.trcl.objects.ProjectileFactory;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
@@ -89,6 +90,7 @@ public class ResourceManager{
 	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
 	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
 	private ExplosionFactory explosionFactory;
+	private ProjectileFactory projectileFactory;
 	
 	private final TR tr;
 	
@@ -371,7 +373,7 @@ public class ResourceManager{
 						Color c= palette[block.getColor()+16];
 						seg.setColor(c);
 						//System.out.println("ResourceManager.LineSegmentBlock(): red="+c.getRed()+" green="+c.getGreen()+" blue="+c.getBlue());
-						seg.setThickness(256);//Defaulted since the file doesn't specify
+						seg.setThickness(8);//Defaulted since the file doesn't specify
 						result.addLineSegment(seg);
 						}
 					else if(b instanceof AnimatedTextureBlock)
@@ -381,8 +383,7 @@ public class ResourceManager{
 						List<String> frames = block.getFrameNames();
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						Texture [] subTextures = new Texture[frames.size()];
-						for(int ti=0; ti<frames.size(); ti++)
-							{
+						for(int ti=0; ti<frames.size(); ti++){
 							gl.getContext().makeCurrent();
 							TextureDescription tex=getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
 							subTextures[ti]=tex instanceof Texture?(Texture)tex:Texture.getFallbackTexture();
@@ -582,4 +583,18 @@ public class ResourceManager{
 		is.close();
 		return result;
 		}
+
+	/**
+	 * @return the projectileFactory
+	 */
+	public ProjectileFactory getProjectileFactory() {
+	    return projectileFactory;
+	}
+
+	/**
+	 * @param projectileFactory the projectileFactory to set
+	 */
+	public void setProjectileFactory(ProjectileFactory projectileFactory) {
+	    this.projectileFactory = projectileFactory;
+	}
 }//end ResourceManager

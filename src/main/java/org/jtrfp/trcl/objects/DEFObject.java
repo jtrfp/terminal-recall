@@ -32,7 +32,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
     	    mobile=false;
     	    break;
     	case groundTargeting:
-    	    mobile=false;
+    	    mobile=true;
+    	    groundLocked=true;
     	    break;
     	case flyingDumb:
     	    mobile=false;

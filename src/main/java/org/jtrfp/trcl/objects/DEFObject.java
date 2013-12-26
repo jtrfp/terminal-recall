@@ -166,8 +166,6 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
 	getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
     	}//end if(mobile)
-    else{
-	addBehavior(new ExplodesOnDeath(ExplosionType.Billow));
-        }
+    else{addBehavior(new ExplodesOnDeath(ExplosionType.Billow));}
     }//end DEFObject
 }//end DEFObject

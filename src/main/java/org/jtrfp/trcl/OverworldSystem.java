@@ -17,11 +17,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private TextureMesh textureMesh;
 	private AltitudeMap altitudeMap;
 	
-	public OverworldSystem(World w, LVLFile lvl)
-		{
+	public OverworldSystem(World w, LVLFile lvl){
 		super(w);
-		try
-			{
+		try{
 			TR tr = w.getTr();
 			//Active by default
 			Color [] globalPalette = tr.getGlobalPalette();
@@ -38,8 +36,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			System.out.println("...Done.");
 			//Clouds
 			System.out.println("Setting up sky...");
-			if(!lvl.getCloudTextureFile().contentEquals("stars.vox"))
-				{
+			if(!lvl.getCloudTextureFile().contentEquals("stars.vox")){
 				cloudSystem = new CloudSystem(
 						tr,
 						this,

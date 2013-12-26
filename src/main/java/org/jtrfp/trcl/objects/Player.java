@@ -77,7 +77,7 @@ public class Player extends WorldObject
 			    	getTr().getResourceManager().
 			    	getProjectileFactory().
 			    	triggerLaser(getPosition().add(getHeading().crossProduct(getTop()).normalize().
-			    		scalarMultiply(7000)).add(new Vector3D(0,-3000,0)), getHeading().add(getHeading().scalarMultiply(CollisionManager.SHIP_COLLISION_DISTANCE+512)));}
+			    		scalarMultiply(10000)).add(new Vector3D(0,-3000,0)), getHeading().add(getHeading().scalarMultiply(CollisionManager.SHIP_COLLISION_DISTANCE+512)));}
 			}
 		}//end PlayerBehavior
 	

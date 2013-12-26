@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.ai;
 
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.objects.WorldObject;
 
 public abstract class Behavior
@@ -47,4 +48,9 @@ public abstract class Behavior
 		{this.parent=newParent;if(wrapped!=null){wrapped.setParent(newParent);}}
 	
 	public void setDelegate(Behavior delegate){wrapped=delegate;}
+	public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
+	    	if(type.isAssignableFrom(this.getClass())){sub.submit((T)this);return;}
+	    	if(wrapped!=null){wrapped.probeForBehavior(type);return;}
+		throw new BehaviorNotFoundException("Cannot find behavior of type "+type.getName()+" in behavior sandwich owned by "+parent);
+		}
 	}//end ObjectBehavior

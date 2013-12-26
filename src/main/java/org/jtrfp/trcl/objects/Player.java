@@ -1,10 +1,13 @@
 package org.jtrfp.trcl.objects;
 
+import java.awt.event.KeyEvent;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ai.AccelleratedByPropulsion;
 import org.jtrfp.trcl.ai.AutoLeveling;
 import org.jtrfp.trcl.ai.Behavior;
+import org.jtrfp.trcl.ai.BouncesOffSurfaces;
 import org.jtrfp.trcl.ai.BouncesOffTunnelWalls;
 import org.jtrfp.trcl.ai.CollidesWithTerrain;
 import org.jtrfp.trcl.ai.DamageableBehavior;
@@ -19,6 +22,8 @@ import org.jtrfp.trcl.ai.VelocityDragBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
+
+import com.jogamp.newt.event.KeyListener;
 
 public class Player extends WorldObject
 	{
@@ -54,8 +59,9 @@ public class Player extends WorldObject
 		addBehavior(new UserInputRudderElevatorControlBehavior());
 		addBehavior(new RotationalMomentumBehavior());
 		addBehavior(new RotationalDragBehavior());
-		addBehavior(new CollidesWithTerrain(true, 0));
+		addBehavior(new CollidesWithTerrain());
 		addBehavior(new LoopingPositionBehavior());
+		addBehavior(new BouncesOffSurfaces());
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
@@ -67,6 +73,11 @@ public class Player extends WorldObject
 		@Override
 		public void _tick(long tickTimeInMillis){
 			updateCountdowns();
+			if(getTr().getKeyStatus().isPressed(KeyEvent.VK_SPACE)){
+			    	getTr().getResourceManager().
+			    	getProjectileFactory().
+			    	triggerLaser(getPosition().add(getHeading().crossProduct(getTop()).normalize().
+			    		scalarMultiply(7000)).add(new Vector3D(0,-3000,0)), getHeading().add(getHeading().scalarMultiply(CollisionManager.SHIP_COLLISION_DISTANCE+512)));}
 			}
 		}//end PlayerBehavior
 	

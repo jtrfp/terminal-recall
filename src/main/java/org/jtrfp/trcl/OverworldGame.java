@@ -29,6 +29,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.objects.ExplosionFactory;
 import org.jtrfp.trcl.objects.Player;
+import org.jtrfp.trcl.objects.ProjectileFactory;
 
 public class OverworldGame
 	{
@@ -49,6 +50,7 @@ public class OverworldGame
 		hudSystem.activate();
 		
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
+		tr.getResourceManager().setProjectileFactory(new ProjectileFactory(tr));
 		
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());

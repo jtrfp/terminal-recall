@@ -19,6 +19,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -36,10 +39,9 @@ public class Texture implements TextureDescription
 	private static TextureTreeNode rootNode=null;
 	private static GLTexture globalTexture;
 	private static final Texture fallbackTexture;
-	static
-		{
+	static  {
 		Texture t;
-		t=new Texture(RGBA8FromPNG(new File("fallbackTexture.png")));
+		t=new Texture(RGBA8FromPNG(Texture.class.getResourceAsStream("/fallbackTexture.png")));
 		fallbackTexture=t;
 		}
 	private static ByteBuffer emptyRow=null;
@@ -83,8 +85,11 @@ public class Texture implements TextureDescription
 		registerNode(newNode);
 		}
 	
-	public static ByteBuffer RGBA8FromPNG(File f)
-		{
+	public static ByteBuffer RGBA8FromPNG(File f){
+	    try{return RGBA8FromPNG(new FileInputStream(f));}
+	    catch(FileNotFoundException e){e.printStackTrace();return null;}
+	}
+	public static ByteBuffer RGBA8FromPNG(InputStream f){
 		try
 			{
 			BufferedImage defaultImage = ImageIO.read(f);

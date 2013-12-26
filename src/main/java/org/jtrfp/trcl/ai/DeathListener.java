@@ -1,4 +1,4 @@
-package org.jtrfp.trcl.objects;
+package org.jtrfp.trcl.ai;
 
 public interface DeathListener {
 public void notifyDeath();

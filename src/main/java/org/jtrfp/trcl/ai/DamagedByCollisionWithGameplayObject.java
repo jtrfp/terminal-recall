@@ -16,7 +16,6 @@
 package org.jtrfp.trcl.ai;
 
 import org.jtrfp.trcl.objects.CollisionManager;
-import org.jtrfp.trcl.objects.Damageable;
 import org.jtrfp.trcl.objects.Player;
 import org.jtrfp.trcl.objects.WorldObject;
 
@@ -26,7 +25,7 @@ public class DamagedByCollisionWithGameplayObject extends Behavior
 		{
 		if(other.getPosition().distance(getParent().getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 			{if(other instanceof Player)
-				{getParent().getBehavior().probeForBehavior(Damageable.class).damage(65535/10);}
+				{getParent().getBehavior().probeForBehavior(DamageableBehavior.class).damage(65535/10);}
 			}//end if(nearby)
 		}//end proposeCollision
 	}//end TVBehavior

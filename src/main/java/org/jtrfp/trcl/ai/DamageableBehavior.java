@@ -1,33 +1,42 @@
 package org.jtrfp.trcl.ai;
 
-import org.jtrfp.trcl.objects.Damageable;
+import java.util.Collection;
 
-public class DamageableBehavior extends Behavior implements Damageable
-	{
+import org.jtrfp.trcl.Submitter;
+
+public class DamageableBehavior extends Behavior{
 	private int health=65535;
 
-	@Override
-	public void damage(int dmg)
-		{
+	public void damage(int dmg){
 		health-=dmg;
-		}
+		if(health<=0){
+		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
+		}//end if(dead)
+	    }
 
-	@Override
-	public int getHealth()
-		{
+	public int getHealth(){
 		return health;
 		}
 
-	@Override
-	public void unDamage(int amt)
-		{
+	public void unDamage(int amt){
 		health+=amt;
 		}
 
-	@Override
-	public void unDamage()
-		{
+	public void unDamage(){
 		health=65535;
 		}
 	
-	}//end DamageableBehavior
+	private final Submitter<DeathListener> deathSub = new Submitter<DeathListener>(){
+
+	    @Override
+	    public void submit(DeathListener item) {
+		item.notifyDeath();
+	    }
+
+	    @Override
+	    public void submit(Collection<DeathListener> items) {
+		for(DeathListener l:items){submit(l);}
+	    }
+	};
+	
+    }//end DamageableBehavior

@@ -3,6 +3,7 @@ package org.jtrfp.trcl.objects;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ai.AccelleratedByPropulsion;
 import org.jtrfp.trcl.ai.AutoLeveling;
+import org.jtrfp.trcl.ai.BouncesOffSurfaces;
 import org.jtrfp.trcl.ai.ChaseBehavior;
 import org.jtrfp.trcl.ai.CollidesWithTerrain;
 import org.jtrfp.trcl.ai.DamageableBehavior;
@@ -12,6 +13,7 @@ import org.jtrfp.trcl.ai.LoopingPositionBehavior;
 import org.jtrfp.trcl.ai.MovesByVelocity;
 import org.jtrfp.trcl.ai.RotationalDragBehavior;
 import org.jtrfp.trcl.ai.RotationalMomentumBehavior;
+import org.jtrfp.trcl.ai.TerrainLocked;
 import org.jtrfp.trcl.ai.VelocityDragBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
@@ -151,7 +153,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
 	addBehavior(new AutoLeveling());
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());
-	addBehavior(new CollidesWithTerrain(false, 0).setGroundLock(groundLocked));
+	
+	if(groundLocked)addBehavior(new TerrainLocked());
+	else 	{addBehavior(new BouncesOffSurfaces());
+	    	addBehavior(new CollidesWithTerrain());}
+	
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new DamageableBehavior());
 	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));

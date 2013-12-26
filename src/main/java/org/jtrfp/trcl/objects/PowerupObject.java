@@ -11,6 +11,7 @@ import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.ai.Behavior;
+import org.jtrfp.trcl.ai.DamageableBehavior;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
 
@@ -220,7 +221,7 @@ public class PowerupObject extends BillboardSprite{
 					p.setSwtQuantity(p.getSwtQuantity()+20);
 					break;
 				case shieldRestore:
-					p.getBehavior().probeForBehavior(Damageable.class).unDamage();
+					p.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();
 					break;
 				case invisibility:
 					p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
@@ -235,7 +236,7 @@ public class PowerupObject extends BillboardSprite{
 					p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
 					break;
 				case PowerCore:
-					getParent().getBehavior().probeForBehavior(Damageable.class).unDamage(6554);
+					getParent().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage(6554);
 					break;
 				case Random:
 					break;

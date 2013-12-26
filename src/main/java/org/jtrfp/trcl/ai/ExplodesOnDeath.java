@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.ai;
 
-import org.jtrfp.trcl.objects.DeathListener;
 import org.jtrfp.trcl.objects.Explosion.ExplosionType;
 import org.jtrfp.trcl.objects.WorldObject;
 

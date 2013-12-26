@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
 
@@ -549,32 +549,23 @@ public class ResourceManager{
 		is.close();
 		return result;
 		}
-	public Font getFont(String fileName) throws IOException, FontFormatException
+	public Font getFont(String zipName, String fontFileName) throws IOException, FontFormatException
 		{
-		File fontDir = new File("fonts");
-		//System.out.println("Searching for fonts in "+fontDir.getAbsolutePath());
-		File [] files = fontDir.listFiles();
-		if(files==null){throw new IOException("Failed to find font directory, or directory isn't really a directory at path "+fontDir);}
-		for(File fFile:fontDir.listFiles())
-			{
-			if(fFile.getName().toUpperCase().contentEquals(fileName.toUpperCase()+".TTF"))
-				{return Font.createFont(Font.TRUETYPE_FONT, fFile);}
-			if(fFile.getName().toUpperCase().endsWith(".ZIP"))
-				{//Search the zip
-				ZipFile zip = new ZipFile(fFile);
-				ZipEntry entry;
-				Enumeration<? extends ZipEntry> ze = zip.entries();
-				while(ze.hasMoreElements())
-					{
-					entry = ze.nextElement();
-					//System.out.println("ZIP ENTRY: "+entry.getName());
-					if(entry.getName().toUpperCase().endsWith(fileName.toUpperCase()+".TTF"))
-						return Font.createFont(Font.TRUETYPE_FONT, zip.getInputStream(entry));
-					}//end while(elements)
-				}//end if(zip)
-			}//end for(fontDir)
+	    	zipName="/fonts/"+zipName;
+		if(zipName.toUpperCase().endsWith(".ZIP"))
+			{//Search the zip
+			ZipInputStream zip = new ZipInputStream(ResourceManager.class.getResourceAsStream(zipName));
+			ZipEntry entry;
+			
+			while((entry=zip.getNextEntry())!=null){
+				System.out.println("ZIP ENTRY: "+entry.getName());
+				if(entry.getName().toUpperCase().endsWith(fontFileName.toUpperCase()))
+					return Font.createFont(Font.TRUETYPE_FONT, zip);
+				}//end while(elements)
+			}//end if(zip)
+		else{}//TODO: Handle non-zipped fonts?
 		return null;
-		}//end getFont()
+		}//end getFont(...)
 
 	public PUPFile getPUPData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
 		{

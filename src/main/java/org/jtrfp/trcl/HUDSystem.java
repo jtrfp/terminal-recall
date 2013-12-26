@@ -28,7 +28,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		try
 			{//TODO: Have TR allocate the font ahead of time.
 			addAlwaysVisible(new Dashboard(world.getTr()));
-			font = new GLFont(world.getTr().getResourceManager().getFont("capacitor"));
+			font = new GLFont(world.getTr().getResourceManager().getFont("capacitor.zip","capacitor.ttf"));
 			}
 		catch(Exception e)
 			{

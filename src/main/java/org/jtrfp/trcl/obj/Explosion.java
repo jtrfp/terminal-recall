@@ -20,7 +20,7 @@ public class Explosion extends BillboardSprite {
     public Explosion(TR tr, ExplosionType type) {
 	super(tr);
 	this.type=type;
-	setBillboardSize(new Dimension(100000,100000));
+	setBillboardSize(type.getBillboardSize());
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
 	Texture [] frames = new Texture[aniFiles.length];
@@ -56,7 +56,7 @@ public class Explosion extends BillboardSprite {
 		"BLAST14.RAW",
 		"BLAST15.RAW",
 		"BLAST16.RAW"
-	},new Vector3D(0,0,0)),
+	},new Vector3D(0,0,0),new Dimension(20000,20000)),
 	Billow(new String[]{
 		"BILLOW1.RAW",
 		"BILLOW2.RAW",
@@ -74,7 +74,7 @@ public class Explosion extends BillboardSprite {
 		"BILLOW14.RAW",
 		"BILLOW15.RAW",
 		"BILLOW16.RAW",
-	},new Vector3D(0,0,0)),
+	},new Vector3D(0,0,0),new Dimension(40000,40000)),
 	BigExplosion(new String[]{
 		"BIGEX1.RAW",
 		"BIGEX2.RAW",
@@ -92,12 +92,16 @@ public class Explosion extends BillboardSprite {
 		"BIGEX14.RAW",
 		"BIGEX15.RAW",
 		"BIGEX16.RAW",
-	},new Vector3D(0,-1,0));
+	},new Vector3D(0,-1,0), new Dimension(100000,100000));
 	
 	private final String [] animationFiles;
 	private final Vector3D origin;
-	ExplosionType(String [] animationFiles,Vector3D origin){
-	    this.animationFiles=animationFiles; this.origin=origin;
+	private final Dimension billboardSize;
+	ExplosionType(String [] animationFiles,Vector3D origin, Dimension billboardSize){
+	    this.animationFiles=animationFiles; this.origin=origin;this.billboardSize=billboardSize;
+	}
+	public Dimension getBillboardSize() {
+	    return billboardSize;
 	}
 	public String [] getAnimationFiles(){
 	    return animationFiles;

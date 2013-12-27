@@ -26,7 +26,6 @@ public class DEFObject extends WorldObject {
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     final EnemyLogic logic = def.getLogic();
-    System.out.println(logic);
     boolean mobile=true;
     boolean groundLocked=false;
     switch(logic){
@@ -165,7 +164,6 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	    	addBehavior(new CollidesWithTerrain());}
 	
 	addBehavior(new LoopingPositionBehavior());
-	addBehavior(new DamageableBehavior());
 	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);

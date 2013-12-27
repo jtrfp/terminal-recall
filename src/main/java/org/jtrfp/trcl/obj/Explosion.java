@@ -16,8 +16,10 @@ public class Explosion extends BillboardSprite {
     private final Sequencer sequencer;
     private static final int NUM_FRAMES=16;
     private static final int TIME_PER_FRAME=150;
+    private final ExplosionType type;
     public Explosion(TR tr, ExplosionType type) {
 	super(tr);
+	this.type=type;
 	setBillboardSize(new Dimension(100000,100000));
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
@@ -30,7 +32,12 @@ public class Explosion extends BillboardSprite {
 	final int animationRate=TIME_PER_FRAME;
 	setTexture(new AnimatedTexture(sequencer=new Sequencer(animationRate, frames.length, false),frames),true);
     }//end constructor
-
+    
+    @Override
+    public void setPosition(Vector3D pos){
+	super.setPosition(pos.subtract(type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.)));
+    }
+    
     public static enum ExplosionType{
 	Blast(new String[]{
 		"BLAST1.RAW",

@@ -24,6 +24,7 @@ public class BillboardSprite extends WorldObject
 	
 	public void setBillboardSize(Dimension dim)
 		{this.dim=dim;}
+	public Dimension getBillboardSize(){return this.dim;}
 	
 	public void setTexture(TextureDescription desc, boolean useAlpha)
 		{

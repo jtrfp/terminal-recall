@@ -78,7 +78,7 @@ public class GameSetup
 	    		globalPalette, 
 	    		GammaCorrectingColorProcessor.singleton, 
 	    		tr.getGPU().getGl());
-	    	 tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/2.,SEG_LEN/2.,SEG_LEN/2.,0}, //X
+	    	 tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/1.5,SEG_LEN/1.5,SEG_LEN/1.5,0}, //X
 	    		new double[]{0,0,0,0}, new double[]{-SEG_LEN*(7./2.),-SEG_LEN*(7./2.),SEG_LEN*(7/2),SEG_LEN*(7./2.)}, //YZ
 	    		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC));//UVtr
 	    	 tris[0].setAlphaBlended(true);

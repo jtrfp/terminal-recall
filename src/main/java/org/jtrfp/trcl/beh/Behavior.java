@@ -50,9 +50,8 @@ public abstract class Behavior
 	
 	public void setDelegate(Behavior delegate){wrapped=delegate;}
 	public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
-	    	if(type.isAssignableFrom(this.getClass())){sub.submit((T)this);return;}
-	    	if(wrapped!=null){wrapped.probeForBehavior(type);return;}
-		throw new BehaviorNotFoundException("Cannot find behavior of type "+type.getName()+" in behavior sandwich owned by "+parent);
+	    	if(type.isAssignableFrom(this.getClass())){sub.submit((T)this);}
+	    	if(wrapped!=null)wrapped.probeForBehaviors(sub,type);
 		}
 	public void setEnable(boolean doIt){enable=true;}
 	}//end ObjectBehavior

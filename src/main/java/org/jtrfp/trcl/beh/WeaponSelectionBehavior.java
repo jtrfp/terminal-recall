@@ -12,7 +12,7 @@ public class WeaponSelectionBehavior extends Behavior {
     public void _tick(long tickTimeMillis){
 	final WorldObject parent = getParent();
 	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
-	for(int k=KeyEvent.VK_1; k<KeyEvent.VK_7;k++){
+	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
 		activeBehavior=behaviors[k];
 		}//end if (selection key is pressed)

@@ -1,7 +1,5 @@
 package org.jtrfp.trcl.obj;
 
-import java.awt.event.KeyEvent;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AccelleratedByPropulsion;
@@ -17,6 +15,7 @@ import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.RotationalMomentumBehavior;
+import org.jtrfp.trcl.beh.SurfaceImpactListener;
 import org.jtrfp.trcl.beh.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.VelocityDragBehavior;

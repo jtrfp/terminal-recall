@@ -71,6 +71,5 @@ public class ProjectileFactory {
 	projectileIndex++;
 	projectileIndex%=projectiles.length;
 	return result;
-	
     }
 }//end ProjectileFactory

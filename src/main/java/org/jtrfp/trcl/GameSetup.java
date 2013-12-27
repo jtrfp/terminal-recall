@@ -50,7 +50,7 @@ public class GameSetup
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
 		
-		/// PROJECTILES
+		/// EXPLOSIONS
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
 		Model m;
 		Triangle [] tris;
@@ -70,7 +70,7 @@ public class GameSetup
 	    	 tris[1].setAlphaBlended(true);
 	    	 m.addTriangles(tris);
 	    	 m.finalizeModel();
-		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,6555,ExplosionType.Blast));
+		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,512,ExplosionType.Blast));
 		//WHITE LASERS
 		m = new Model(false);
 		t = tr.getResourceManager().getRAWAsTexture(

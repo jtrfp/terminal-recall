@@ -15,7 +15,6 @@ import org.jtrfp.trcl.core.TR;
 public class Explosion extends BillboardSprite {
     private final Sequencer sequencer;
     private static final int NUM_FRAMES=16;
-    private static final int TIME_PER_FRAME=150;
     private final ExplosionType type;
     public Explosion(TR tr, ExplosionType type) {
 	super(tr);
@@ -29,8 +28,7 @@ public class Explosion extends BillboardSprite {
 	    }
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
-	final int animationRate=TIME_PER_FRAME;
-	setTexture(new AnimatedTexture(sequencer=new Sequencer(animationRate, frames.length, false),frames),true);
+	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false),frames),true);
     }//end constructor
     
     @Override
@@ -56,7 +54,7 @@ public class Explosion extends BillboardSprite {
 		"BLAST14.RAW",
 		"BLAST15.RAW",
 		"BLAST16.RAW"
-	},new Vector3D(0,0,0),new Dimension(20000,20000)),
+	},new Vector3D(0,0,0),new Dimension(20000,20000),100),
 	Billow(new String[]{
 		"BILLOW1.RAW",
 		"BILLOW2.RAW",
@@ -74,7 +72,7 @@ public class Explosion extends BillboardSprite {
 		"BILLOW14.RAW",
 		"BILLOW15.RAW",
 		"BILLOW16.RAW",
-	},new Vector3D(0,0,0),new Dimension(40000,40000)),
+	},new Vector3D(0,0,0),new Dimension(40000,40000),100),
 	BigExplosion(new String[]{
 		"BIGEX1.RAW",
 		"BIGEX2.RAW",
@@ -92,13 +90,17 @@ public class Explosion extends BillboardSprite {
 		"BIGEX14.RAW",
 		"BIGEX15.RAW",
 		"BIGEX16.RAW",
-	},new Vector3D(0,-1,0), new Dimension(100000,100000));
+	},new Vector3D(0,-1,0), new Dimension(100000,100000),120);
 	
 	private final String [] animationFiles;
 	private final Vector3D origin;
 	private final Dimension billboardSize;
-	ExplosionType(String [] animationFiles,Vector3D origin, Dimension billboardSize){
-	    this.animationFiles=animationFiles; this.origin=origin;this.billboardSize=billboardSize;
+	private final int millisPerFrame;
+	ExplosionType(String [] animationFiles,Vector3D origin, Dimension billboardSize, int millisPerFrame){
+	    this.animationFiles=animationFiles; this.origin=origin;this.billboardSize=billboardSize;this.millisPerFrame=millisPerFrame;
+	}
+	public int getMillisPerFrame() {
+	    return millisPerFrame;
 	}
 	public Dimension getBillboardSize() {
 	    return billboardSize;
@@ -128,7 +130,7 @@ public class Explosion extends BillboardSprite {
 	    }//end if(timeout)
 	}//end _tick(...)
 	public void reset(){
-	    timeoutTimeInMillis=System.currentTimeMillis()+TIME_PER_FRAME*NUM_FRAMES;
+	    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*NUM_FRAMES;
 	}//end reset()
     }//end ExplosionBehavior
 

@@ -79,8 +79,8 @@ import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
-import org.jtrfp.trcl.objects.ExplosionFactory;
-import org.jtrfp.trcl.objects.ProjectileFactory;
+import org.jtrfp.trcl.obj.ExplosionFactory;
+import org.jtrfp.trcl.obj.ProjectileFactory;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();

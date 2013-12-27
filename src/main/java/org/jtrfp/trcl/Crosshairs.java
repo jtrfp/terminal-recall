@@ -19,7 +19,7 @@ import java.awt.Color;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.objects.WorldObject2D;
+import org.jtrfp.trcl.obj.WorldObject2D;
 
 public class Crosshairs extends WorldObject2D
 	{

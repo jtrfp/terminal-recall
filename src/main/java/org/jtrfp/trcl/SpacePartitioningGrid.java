@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.objects.PositionListenable;
-import org.jtrfp.trcl.objects.PositionListener;
+import org.jtrfp.trcl.obj.PositionListenable;
+import org.jtrfp.trcl.obj.PositionListener;
 
 public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	{

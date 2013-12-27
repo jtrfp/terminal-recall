@@ -16,7 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.objects.WorldObject2D;
+import org.jtrfp.trcl.obj.WorldObject2D;
 
 public class BackdropSystem extends RenderableSpacePartitioningGrid
 	{

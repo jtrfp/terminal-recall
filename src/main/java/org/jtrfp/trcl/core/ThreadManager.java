@@ -8,7 +8,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 
-import org.jtrfp.trcl.objects.WorldObject;
+import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
 

@@ -20,7 +20,7 @@ import java.awt.Color;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.objects.ObjectDirection;
+import org.jtrfp.trcl.obj.ObjectDirection;
 
 public final class World extends RenderableSpacePartitioningGrid
 	{

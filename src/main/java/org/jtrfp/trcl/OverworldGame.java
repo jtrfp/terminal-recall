@@ -27,10 +27,10 @@ import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
-import org.jtrfp.trcl.objects.Explosion.ExplosionType;
-import org.jtrfp.trcl.objects.ExplosionFactory;
-import org.jtrfp.trcl.objects.Player;
-import org.jtrfp.trcl.objects.ProjectileFactory;
+import org.jtrfp.trcl.obj.ExplosionFactory;
+import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.ProjectileFactory;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class OverworldGame
 	{

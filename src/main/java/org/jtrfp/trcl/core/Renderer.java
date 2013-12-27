@@ -20,7 +20,7 @@ import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
-import org.jtrfp.trcl.objects.WorldObject;
+import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.common.util.IOUtil;
 

@@ -27,8 +27,8 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
-import org.jtrfp.trcl.objects.PositionedRenderable;
-import org.jtrfp.trcl.objects.WorldObject;
+import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class RenderList
 	{

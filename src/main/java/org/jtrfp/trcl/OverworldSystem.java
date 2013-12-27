@@ -7,9 +7,9 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
-import org.jtrfp.trcl.objects.Explosion;
-import org.jtrfp.trcl.objects.ObjectSystem;
-import org.jtrfp.trcl.objects.PowerupObject;
+import org.jtrfp.trcl.obj.Explosion;
+import org.jtrfp.trcl.obj.ObjectSystem;
+import org.jtrfp.trcl.obj.PowerupObject;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid
 	{

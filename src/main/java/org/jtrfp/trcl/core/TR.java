@@ -36,8 +36,8 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.objects.CollisionManager;
-import org.jtrfp.trcl.objects.Player;
+import org.jtrfp.trcl.obj.CollisionManager;
+import org.jtrfp.trcl.obj.Player;
 
 public final class TR
 	{

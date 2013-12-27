@@ -20,6 +20,7 @@ public class Explosion extends BillboardSprite {
 	super(tr);
 	this.type=type;
 	setBillboardSize(type.getBillboardSize());
+	setRotation(2*Math.PI*Math.random());
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
 	Texture [] frames = new Texture[aniFiles.length];
@@ -54,7 +55,7 @@ public class Explosion extends BillboardSprite {
 		"BLAST14.RAW",
 		"BLAST15.RAW",
 		"BLAST16.RAW"
-	},new Vector3D(0,0,0),new Dimension(20000,20000),100),
+	},new Vector3D(0,0,0),new Dimension(20000,20000),100,true),
 	Billow(new String[]{
 		"BILLOW1.RAW",
 		"BILLOW2.RAW",
@@ -72,7 +73,7 @@ public class Explosion extends BillboardSprite {
 		"BILLOW14.RAW",
 		"BILLOW15.RAW",
 		"BILLOW16.RAW",
-	},new Vector3D(0,0,0),new Dimension(40000,40000),100),
+	},new Vector3D(0,0,0),new Dimension(40000,40000),100,true),
 	BigExplosion(new String[]{
 		"BIGEX1.RAW",
 		"BIGEX2.RAW",
@@ -90,14 +91,19 @@ public class Explosion extends BillboardSprite {
 		"BIGEX14.RAW",
 		"BIGEX15.RAW",
 		"BIGEX16.RAW",
-	},new Vector3D(0,-1,0), new Dimension(100000,100000),120);
+	},new Vector3D(0,-1,0), new Dimension(100000,100000),120,false);
 	
 	private final String [] animationFiles;
 	private final Vector3D origin;
 	private final Dimension billboardSize;
 	private final int millisPerFrame;
-	ExplosionType(String [] animationFiles,Vector3D origin, Dimension billboardSize, int millisPerFrame){
-	    this.animationFiles=animationFiles; this.origin=origin;this.billboardSize=billboardSize;this.millisPerFrame=millisPerFrame;
+	private final boolean randomRotate;
+	ExplosionType(String [] animationFiles,Vector3D origin, Dimension billboardSize, int millisPerFrame, boolean randomRotate){
+	    this.animationFiles=animationFiles; 
+	    this.origin=origin;
+	    this.billboardSize=billboardSize;
+	    this.millisPerFrame=millisPerFrame;
+	    this.randomRotate=randomRotate;
 	}
 	public int getMillisPerFrame() {
 	    return millisPerFrame;

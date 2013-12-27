@@ -10,6 +10,7 @@ public class DamageableBehavior extends Behavior{
 	public void damage(int dmg){
 		health-=dmg;
 		if(health<=0){
+		    getParent().destroy();
 		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
 		}//end if(dead)
 	    }

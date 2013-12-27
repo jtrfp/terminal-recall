@@ -50,7 +50,6 @@ public class GameSetup
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
 		
-		
 		/// PROJECTILES
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
 		Model m;
@@ -64,16 +63,29 @@ public class GameSetup
 	    		globalPalette, 
 	    		GammaCorrectingColorProcessor.singleton, 
 	    		tr.getGPU().getGl());
-	    	 tris =(Triangle.quad2Triangles(new double[]{0,SEG_LEN/2,SEG_LEN/2,0}, //X
-	    		new double[]{0,0,0,0}, new double[]{0,0,SEG_LEN*7,SEG_LEN*7}, //YZ
+	    	tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/2.,SEG_LEN/2.,SEG_LEN/2.,0}, //X
+	    		new double[]{0,0,0,0}, new double[]{-SEG_LEN*(7./2.),-SEG_LEN*(7./2.),SEG_LEN*(7/2),SEG_LEN*(7./2.)}, //YZ
 	    		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC));//UVtr
 	    	 tris[0].setAlphaBlended(true);
 	    	 tris[1].setAlphaBlended(true);
 	    	 m.addTriangles(tris);
 	    	 m.finalizeModel();
 		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,6555,ExplosionType.Blast));
-		
-		
+		//WHITE LASERS
+		m = new Model(false);
+		t = tr.getResourceManager().getRAWAsTexture(
+	    		"NEWLASER.RAW", 
+	    		globalPalette, 
+	    		GammaCorrectingColorProcessor.singleton, 
+	    		tr.getGPU().getGl());
+	    	 tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/2.,SEG_LEN/2.,SEG_LEN/2.,0}, //X
+	    		new double[]{0,0,0,0}, new double[]{-SEG_LEN*(7./2.),-SEG_LEN*(7./2.),SEG_LEN*(7/2),SEG_LEN*(7./2.)}, //YZ
+	    		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC));//UVtr
+	    	 tris[0].setAlphaBlended(true);
+	    	 tris[1].setAlphaBlended(true);
+	    	 m.addTriangles(tris);
+	    	 m.finalizeModel();
+	    	tr.getResourceManager().setWhiteLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*18,6555,ExplosionType.Blast));
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());
 		for(NAVSubObject nObj:nav.getNavObjects())

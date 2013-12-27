@@ -45,6 +45,7 @@ public class Player extends WorldObject
 	public static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
 	private int invincibilityCountdown;
 	private final ProjectileFiringBehavior pacFiringBehavior;
+	private final ProjectileFiringBehavior rtlFiringBehavior;
 
 	public Player(TR tr,Model model)
 		{super(tr,model);
@@ -65,10 +66,14 @@ public class Player extends WorldObject
 		addBehavior(new BouncesOffSurfaces());pacFiringBehavior=
 		addBehavior(new ProjectileFiringBehavior()
 			.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
-			setProjectileFactory(tr.getResourceManager().getRedLaserFactory()));
+			setProjectileFactory(tr.getResourceManager().getRedLaserFactory()));rtlFiringBehavior=
+		addBehavior(new ProjectileFiringBehavior()
+    			.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
+    			setProjectileFactory(tr.getResourceManager().getWhiteLaserFactory()));
 		addBehavior(new WeaponSelectionBehavior().setBehaviors(new ProjectileFiringBehavior[]
 			{pacFiringBehavior,
-			null,null,null,null,null,null}));
+			null,
+			rtlFiringBehavior,null,null,null,null}));
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);

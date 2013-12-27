@@ -32,7 +32,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
-public class OverworldGame
+public class GameSetup
 	{
 	//private World world;
 	private OverworldSystem overworldSystem;
@@ -41,7 +41,7 @@ public class OverworldGame
 	
 	final int visibleTerrainGridDiameter=(int)TR.visibilityDiameterInMapSquares;
 	
-	public OverworldGame(LVLFile lvl, TR tr) throws IllegalAccessException, FileLoadException, IOException{
+	public GameSetup(LVLFile lvl, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		//Set up palette
 		Color [] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 		globalPalette[0]=new Color(0,0,0,0);//index zero is transparent

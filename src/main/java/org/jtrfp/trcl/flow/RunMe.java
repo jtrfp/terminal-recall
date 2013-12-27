@@ -21,7 +21,7 @@ import java.util.Map.Entry;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.OverworldGame;
+import org.jtrfp.trcl.GameSetup;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 
@@ -53,7 +53,7 @@ public class RunMe{
 				printSysInfo(tr,System.out);
 				for(int argI=0; argI<args.length-1; argI++)
 					{tr.getResourceManager().registerPOD(new File(args[argI]));}
-				new OverworldGame(tr.getResourceManager().getLVL(args[args.length-1]),tr);
+				new GameSetup(tr.getResourceManager().getLVL(args[args.length-1]),tr);
 				}
 			catch(Exception e) {e.printStackTrace();}
 			}//end if(good)

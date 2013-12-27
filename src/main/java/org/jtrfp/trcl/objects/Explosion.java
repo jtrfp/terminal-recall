@@ -8,7 +8,7 @@ import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
-import org.jtrfp.trcl.ai.Behavior;
+import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 
 public class Explosion extends BillboardSprite {

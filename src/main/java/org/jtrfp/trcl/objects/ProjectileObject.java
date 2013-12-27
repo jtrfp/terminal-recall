@@ -2,10 +2,10 @@ package org.jtrfp.trcl.objects;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.ai.Behavior;
-import org.jtrfp.trcl.ai.LimitedLifeSpan;
-import org.jtrfp.trcl.ai.MovesByVelocity;
-import org.jtrfp.trcl.ai.SurfaceImpactListener;
+import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.LimitedLifeSpan;
+import org.jtrfp.trcl.beh.MovesByVelocity;
+import org.jtrfp.trcl.beh.SurfaceImpactListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.objects.Explosion.ExplosionType;
 

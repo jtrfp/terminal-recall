@@ -10,8 +10,8 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.ai.Behavior;
-import org.jtrfp.trcl.ai.DamageableBehavior;
+import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
 

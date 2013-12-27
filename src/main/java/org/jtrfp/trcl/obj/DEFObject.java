@@ -27,7 +27,7 @@ public class DEFObject extends WorldObject {
     private final double boundingRadius;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
-    boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/2.;
+    boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
     final EnemyLogic logic = def.getLogic();
     boolean mobile=true;
     boolean groundLocked=false;

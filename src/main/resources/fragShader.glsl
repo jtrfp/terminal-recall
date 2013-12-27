@@ -53,10 +53,11 @@ void main()
 switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
 	{
 case RENDER_MODE_TRIANGLES:
+	vec4 color=texture2D(textureMap,fragTexCoord);
 	gl_FragColor = mix(
-	    texture2D(textureMap,fragTexCoord),
+	    color,
 	    vec4(fogColor,1),
-	    fogLevel);
+	    fogLevel*color.a);
 	break;
 case RENDER_MODE_LINES:
 	float alpha;

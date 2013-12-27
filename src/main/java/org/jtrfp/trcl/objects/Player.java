@@ -14,6 +14,7 @@ import org.jtrfp.trcl.ai.DamageableBehavior;
 import org.jtrfp.trcl.ai.HasPropulsion;
 import org.jtrfp.trcl.ai.LoopingPositionBehavior;
 import org.jtrfp.trcl.ai.MovesByVelocity;
+import org.jtrfp.trcl.ai.ProjectileFiringBehavior;
 import org.jtrfp.trcl.ai.RotationalDragBehavior;
 import org.jtrfp.trcl.ai.RotationalMomentumBehavior;
 import org.jtrfp.trcl.ai.UserInputRudderElevatorControlBehavior;
@@ -22,8 +23,6 @@ import org.jtrfp.trcl.ai.VelocityDragBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
-
-import com.jogamp.newt.event.KeyListener;
 
 public class Player extends WorldObject
 	{
@@ -44,6 +43,7 @@ public class Player extends WorldObject
 	private int cloakCountdown;
 	public static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
 	private int invincibilityCountdown;
+	private final ProjectileFiringBehavior pacFiringBehavior;
 
 	public Player(TR tr,Model model)
 		{super(tr,model);
@@ -61,7 +61,10 @@ public class Player extends WorldObject
 		addBehavior(new RotationalDragBehavior());
 		addBehavior(new CollidesWithTerrain());
 		addBehavior(new LoopingPositionBehavior());
-		addBehavior(new BouncesOffSurfaces());
+		addBehavior(new BouncesOffSurfaces());pacFiringBehavior=
+		addBehavior(new ProjectileFiringBehavior()
+			.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
+			setProjectileFactory(tr.getResourceManager().getRedLaserFactory()));
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
@@ -74,12 +77,10 @@ public class Player extends WorldObject
 		public void _tick(long tickTimeInMillis){
 			updateCountdowns();
 			if(getTr().getKeyStatus().isPressed(KeyEvent.VK_SPACE)){
-			    	getTr().getResourceManager().
-			    	getRedLaserFactory().
-			    	fire(getPosition().add(getHeading().crossProduct(getTop()).normalize().
-			    		scalarMultiply(10000)).add(new Vector3D(0,-3000,0)), getHeading().add(getHeading().scalarMultiply(CollisionManager.SHIP_COLLISION_DISTANCE+512)));}
-			}
-		}//end PlayerBehavior
+			    	pacFiringBehavior.requestFire();
+			}//end if(SPACE)
+		}//end _Tick
+	}//end PlayerBehavior
 	
 	public void updateCountdowns(){
 		if(cloakCountdown>0){

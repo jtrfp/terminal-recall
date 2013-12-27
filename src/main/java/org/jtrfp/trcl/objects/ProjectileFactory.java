@@ -15,7 +15,7 @@ public class ProjectileFactory {
     private int projectileIndex=0;
     private final TR tr;
     private final ProjectileObject [] projectiles = new ProjectileObject[20];
-    private final double projectileSpeed;//40
+    private final double projectileSpeed;
     private final ExplosionType explosionType;
     private final double damageOnImpact;
     public ProjectileFactory(TR tr, Model modelToUse, double projectileSpeed, double damageOnImpact, ExplosionType explosionType){

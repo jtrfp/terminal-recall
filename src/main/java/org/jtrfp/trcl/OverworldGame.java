@@ -71,8 +71,7 @@ public class OverworldGame
 	    	 tris[1].setAlphaBlended(true);
 	    	 m.addTriangles(tris);
 	    	 m.finalizeModel();
-		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,40,6555,ExplosionType.Blast));
-		
+		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,6555,ExplosionType.Blast));
 		
 		
 		//MAV targets

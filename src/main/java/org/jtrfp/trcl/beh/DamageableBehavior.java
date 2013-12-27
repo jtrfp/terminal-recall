@@ -25,6 +25,9 @@ public class DamageableBehavior extends Behavior{
 	public void unDamage(){
 		health=65535;
 		}
+	public DamageableBehavior setHealth(int val){
+	    health=val;return this;
+	}
 	
 	private final Submitter<DeathListener> deathSub = new Submitter<DeathListener>(){
 

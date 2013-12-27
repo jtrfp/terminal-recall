@@ -3,6 +3,7 @@ package org.jtrfp.trcl.obj;
 import java.awt.Dimension;
 import java.io.IOException;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
@@ -49,7 +50,7 @@ public class Explosion extends BillboardSprite {
 		"BLAST14.RAW",
 		"BLAST15.RAW",
 		"BLAST16.RAW"
-	}),
+	},new Vector3D(0,0,0)),
 	Billow(new String[]{
 		"BILLOW1.RAW",
 		"BILLOW2.RAW",
@@ -66,8 +67,8 @@ public class Explosion extends BillboardSprite {
 		"BILLOW13.RAW",
 		"BILLOW14.RAW",
 		"BILLOW15.RAW",
-		"BILLOW16.RAW"
-	}),
+		"BILLOW16.RAW",
+	},new Vector3D(0,0,0)),
 	BigExplosion(new String[]{
 		"BIGEX1.RAW",
 		"BIGEX2.RAW",
@@ -84,16 +85,19 @@ public class Explosion extends BillboardSprite {
 		"BIGEX13.RAW",
 		"BIGEX14.RAW",
 		"BIGEX15.RAW",
-		"BIGEX16.RAW"
-	});
+		"BIGEX16.RAW",
+	},new Vector3D(0,-1,0));
 	
 	private final String [] animationFiles;
-	ExplosionType(String [] animationFiles){
-	    this.animationFiles=animationFiles;
+	private final Vector3D origin;
+	ExplosionType(String [] animationFiles,Vector3D origin){
+	    this.animationFiles=animationFiles; this.origin=origin;
 	}
 	public String [] getAnimationFiles(){
 	    return animationFiles;
 	}
+	public Vector3D getOrigin(){
+	    return origin;}
     }//end ExplosionType
     
     private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException

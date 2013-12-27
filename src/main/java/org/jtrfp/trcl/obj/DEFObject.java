@@ -5,6 +5,7 @@ import org.jtrfp.trcl.beh.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.ChaseBehavior;
+import org.jtrfp.trcl.beh.CollidesWithDEFObjects;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DeathBehavior;
@@ -23,8 +24,10 @@ import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class DEFObject extends WorldObject {
+    private final double boundingRadius;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
+    boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/2.;
     final EnemyLogic logic = def.getLogic();
     boolean mobile=true;
     boolean groundLocked=false;
@@ -173,4 +176,10 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	}//end if(mobile)
     else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
     }//end DEFObject
+/**
+ * @return the boundingRadius
+ */
+public double getBoundingRadius() {
+    return boundingRadius;
+}
 }//end DEFObject

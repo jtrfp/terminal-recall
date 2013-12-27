@@ -91,7 +91,7 @@ public class Explosion extends BillboardSprite {
 		"BIGEX14.RAW",
 		"BIGEX15.RAW",
 		"BIGEX16.RAW",
-	},new Vector3D(0,-1,0), new Dimension(100000,100000),120,false);
+	},new Vector3D(0,-1,0), new Dimension(80000,90000),120,false);
 	
 	private final String [] animationFiles;
 	private final Vector3D origin;

@@ -2,23 +2,29 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 
 
 public class BillboardSprite extends WorldObject
-	{
-	Dimension dim;
+{
+	private Dimension dim;
+	private double rotation=0;
 	
 	public BillboardSprite(TR tr){super(tr);}
 	@Override
-	protected void recalculateTransRotMBuffer()
-		{
-		this.setHeading(getTr().getRenderer().getCamera().getLookAtVector().negate());
-		this.setTop(getTr().getRenderer().getCamera().getUpVector());
+	protected void recalculateTransRotMBuffer(){
+	    	final Camera camera = getTr().getRenderer().getCamera();
+	    	final Vector3D cLookAt = camera.getLookAtVector();
+	    	final Rotation rot = new Rotation(cLookAt,rotation);
+		this.setHeading(rot.applyTo(cLookAt.negate()));
+		this.setTop(rot.applyTo(camera.getUpVector()));
 		super.recalculateTransRotMBuffer();
 		}//end recalculateTransRotMBuffer()
 	
@@ -43,4 +49,8 @@ public class BillboardSprite extends WorldObject
 		m.addTriangles(tris);
 		setModel(m.finalizeModel());
 		}
-	}//end BillboardSprite
+	
+	public void setRotation(double angle){
+	    rotation=angle;
+	}
+}//end BillboardSprite

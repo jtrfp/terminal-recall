@@ -46,6 +46,7 @@ public class ProjectileObject extends WorldObject implements Projectile {
 	setPosition(newPos);
 	setVisible(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
+	getBehavior().probeForBehavior(DeathBehavior.class).reset();
     }//end reset()
 
     /**

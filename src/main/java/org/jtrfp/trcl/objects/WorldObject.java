@@ -72,10 +72,11 @@ public class WorldObject implements PositionedRenderable
 		}//end constructor
 	
 	void proposeCollision(WorldObject other){if(behavior!=null)behavior.proposeCollision(other);}
-	public void addBehavior(Behavior ob)
+	public <T extends Behavior>T addBehavior(T ob)
 		{ob.setDelegate(behavior);
 		ob.setParent(this);
 		behavior=ob;
+		return ob;
 		}
 	
 	public void tick(long time)

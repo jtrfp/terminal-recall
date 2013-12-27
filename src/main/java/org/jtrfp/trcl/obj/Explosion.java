@@ -22,10 +22,9 @@ public class Explosion extends BillboardSprite {
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
 	Texture [] frames = new Texture[aniFiles.length];
-	try{
-    		for(int i=0; i<aniFiles.length;i++){
-    		    frames[i]=frame(aniFiles[i]);
-    		}
+	try{for(int i=0; i<aniFiles.length;i++){
+	        frames[i]=frame(aniFiles[i]);
+	    }
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
 	final int animationRate=TIME_PER_FRAME;

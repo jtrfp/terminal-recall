@@ -20,16 +20,14 @@ import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 
-public class KeyStatus implements KeyEventDispatcher
-	{
+public class KeyStatus implements KeyEventDispatcher{
 	boolean [] keyStates = new boolean[256];
 	
-	public KeyStatus(Component c)
-		{KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);}
+	public KeyStatus(Component c){
+	    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);}
 	
 	@Override
-	public boolean dispatchKeyEvent(KeyEvent evt)
-		{
+	public boolean dispatchKeyEvent(KeyEvent evt){
 		if(evt.getID()==KeyEvent.KEY_PRESSED)
 			{keyStates[evt.getKeyCode()]=true;return true;}
 		else if(evt.getID()==KeyEvent.KEY_RELEASED)
@@ -37,9 +35,8 @@ public class KeyStatus implements KeyEventDispatcher
 		return false;
 		}
 	
-	public boolean isPressed(int index)
-		{return keyStates[index];}
+	public boolean isPressed(int index){
+	    return keyStates[index];}
 	
-	public void keyTyped(KeyEvent evt)
-		{}
-	}//end KeyStatus
+	public void keyTyped(KeyEvent evt){}
+}//end KeyStatus

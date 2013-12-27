@@ -7,7 +7,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class ProjectileFiringBehavior extends Behavior {
     long timeWhenNextFiringPermittedMillis=0;
-    long timeBetweenFiringsMillis=100;
+    long timeBetweenFiringsMillis=130;
     private Vector3D [] firingPositions;
     private int firingPositionIndex=0;
     private ProjectileFactory projectileFactory;

@@ -21,12 +21,6 @@ public class WeaponSelectionBehavior extends Behavior {
 	    activeBehavior.requestFire();
 	}//end if(SPACE)
     }//end _tick(...)
-    
-    private void resetBehaviors(){
-	for(ProjectileFiringBehavior b:behaviors){
-	    b.setEnable(false);
-	}
-    }
     /**
      * @return the behaviors
      */

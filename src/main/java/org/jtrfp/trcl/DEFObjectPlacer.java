@@ -66,7 +66,7 @@ public class DEFObjectPlacer implements ObjectPlacer
 				{
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
 				//,new TVBehavior(null,def,terrainSystem,pl.getStrength())
-				final WorldObject obj =new DEFObject(tr,model,def);
+				final WorldObject obj =new DEFObject(tr,model,def,pl);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),

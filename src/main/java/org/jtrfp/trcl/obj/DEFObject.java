@@ -7,6 +7,7 @@ import org.jtrfp.trcl.beh.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.ChaseBehavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.HasPropulsion;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
@@ -18,10 +19,11 @@ import org.jtrfp.trcl.beh.VelocityDragBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
+import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class DEFObject extends WorldObject {
-public DEFObject(TR tr,Model model, EnemyDefinition def){
+public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     final EnemyLogic logic = def.getLogic();
     System.out.println(logic);
@@ -145,6 +147,9 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
     	    mobile=false;
     	    break;
     	}//end switch(logic)
+    addBehavior(new DeathBehavior());
+    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
+    
     if(mobile){
 	addBehavior(new ChaseBehavior(tr.getPlayer()));
 	addBehavior(new MovesByVelocity());
@@ -166,7 +171,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def){
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
 	getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
+	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
     	}//end if(mobile)
-    else{addBehavior(new ExplodesOnDeath(ExplosionType.Billow));}
+    else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
     }//end DEFObject
 }//end DEFObject

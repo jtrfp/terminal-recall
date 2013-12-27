@@ -18,7 +18,7 @@ public class ProjectileFactory {
     private final double projectileSpeed;
     private final ExplosionType explosionType;
     private final double damageOnImpact;
-    public ProjectileFactory(TR tr, Model modelToUse, double projectileSpeed, double damageOnImpact, ExplosionType explosionType){
+    public ProjectileFactory(TR tr, Model modelToUse, double projectileSpeed, int damageOnImpact, ExplosionType explosionType){
     	this.tr=tr;
     	this.projectileSpeed=projectileSpeed;
     	this.explosionType=explosionType;

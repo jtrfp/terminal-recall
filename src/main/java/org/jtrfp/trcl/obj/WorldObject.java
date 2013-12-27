@@ -322,6 +322,7 @@ public class WorldObject implements PositionedRenderable
 	
 	public void destroy()
 		{//tr.getCollisionManager().remove(this);
+	    	setVisible(false);
 		if(containingGrid!=null)containingGrid.remove(this);
 		}
 	

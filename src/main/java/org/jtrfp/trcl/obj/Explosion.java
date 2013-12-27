@@ -20,7 +20,7 @@ public class Explosion extends BillboardSprite {
 	super(tr);
 	this.type=type;
 	setBillboardSize(type.getBillboardSize());
-	setRotation(2*Math.PI*Math.random());
+	if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
 	Texture [] frames = new Texture[aniFiles.length];
@@ -116,6 +116,12 @@ public class Explosion extends BillboardSprite {
 	}
 	public Vector3D getOrigin(){
 	    return origin;}
+	/**
+	 * @return the randomRotate
+	 */
+	public boolean isRandomRotate() {
+	    return randomRotate;
+	}
     }//end ExplosionType
     
     private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException

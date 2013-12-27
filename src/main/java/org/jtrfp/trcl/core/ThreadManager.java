@@ -70,7 +70,7 @@ public class ThreadManager
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
 					{List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
 				    	for(WorldObject wo:vl)
-						{wo.tick(tickTimeInMillis);}
+						{if(wo.isVisible())wo.tick(tickTimeInMillis);}
 					tr.getCollisionManager().performCollisionTests();}
 				lastGameplayTickTime=tickTimeInMillis;
 				}//end run()

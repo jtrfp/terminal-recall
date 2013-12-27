@@ -90,7 +90,9 @@ public class ResourceManager{
 	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
 	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
 	private ExplosionFactory explosionFactory;
-	private ProjectileFactory projectileFactory;
+	private ProjectileFactory redLaserFactory;
+	private ProjectileFactory whiteLaserFactory;
+	private ProjectileFactory blueLaserFactory;
 	
 	private final TR tr;
 	
@@ -583,14 +585,42 @@ public class ResourceManager{
 	/**
 	 * @return the projectileFactory
 	 */
-	public ProjectileFactory getProjectileFactory() {
-	    return projectileFactory;
+	public ProjectileFactory getRedLaserFactory() {
+	    return redLaserFactory;
 	}
 
 	/**
 	 * @param projectileFactory the projectileFactory to set
 	 */
-	public void setProjectileFactory(ProjectileFactory projectileFactory) {
-	    this.projectileFactory = projectileFactory;
+	public void setRedLaserFactory(ProjectileFactory projectileFactory) {
+	    this.redLaserFactory = projectileFactory;
+	}
+
+	/**
+	 * @return the greenLaserFactory
+	 */
+	public ProjectileFactory getWhiteLaserFactory() {
+	    return whiteLaserFactory;
+	}
+
+	/**
+	 * @param greenLaserFactory the greenLaserFactory to set
+	 */
+	public void setWhiteLaserFactory(ProjectileFactory greenLaserFactory) {
+	    this.whiteLaserFactory = greenLaserFactory;
+	}
+
+	/**
+	 * @return the blueLaserFactory
+	 */
+	public ProjectileFactory getBlueLaserFactory() {
+	    return blueLaserFactory;
+	}
+
+	/**
+	 * @param blueLaserFactory the blueLaserFactory to set
+	 */
+	public void setBlueLaserFactory(ProjectileFactory blueLaserFactory) {
+	    this.blueLaserFactory = blueLaserFactory;
 	}
 }//end ResourceManager

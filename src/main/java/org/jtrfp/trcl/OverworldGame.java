@@ -27,6 +27,7 @@ import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.objects.Explosion.ExplosionType;
 import org.jtrfp.trcl.objects.ExplosionFactory;
 import org.jtrfp.trcl.objects.Player;
 import org.jtrfp.trcl.objects.ProjectileFactory;
@@ -49,8 +50,30 @@ public class OverworldGame
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
 		
+		
+		/// PROJECTILES
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
-		tr.getResourceManager().setProjectileFactory(new ProjectileFactory(tr));
+		Model m;
+		Triangle [] tris;
+		TextureDescription t;
+		final double SEG_LEN=5000;
+		//RED LASERS
+		m = new Model(false);
+	    	 t = tr.getResourceManager().getRAWAsTexture(
+	    		"BIGEX8.RAW",
+	    		globalPalette, 
+	    		GammaCorrectingColorProcessor.singleton, 
+	    		tr.getGPU().getGl());
+	    	 tris =(Triangle.quad2Triangles(new double[]{0,SEG_LEN/2,SEG_LEN/2,0}, //X
+	    		new double[]{0,0,0,0}, new double[]{0,0,SEG_LEN*7,SEG_LEN*7}, //YZ
+	    		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC));//UVtr
+	    	 tris[0].setAlphaBlended(true);
+	    	 tris[1].setAlphaBlended(true);
+	    	 m.addTriangles(tris);
+	    	 m.finalizeModel();
+		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,40,6555,ExplosionType.Blast));
+		
+		
 		
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());

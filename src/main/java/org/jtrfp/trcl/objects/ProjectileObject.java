@@ -7,11 +7,16 @@ import org.jtrfp.trcl.ai.LimitedLifeSpan;
 import org.jtrfp.trcl.ai.MovesByVelocity;
 import org.jtrfp.trcl.ai.SurfaceImpactListener;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.objects.Explosion.ExplosionType;
 
-public class LaserProjectile extends WorldObject implements Projectile {
+public class ProjectileObject extends WorldObject implements Projectile {
     private static final long LIFESPAN_MILLIS=4500;
-    public LaserProjectile(TR tr,Model m){
+    private final double damageOnImpact;
+    private final ExplosionType explosionType;
+    public ProjectileObject(TR tr,Model m, double damageOnImpact, ExplosionType explosionType){
 	super(tr,m);
+	this.damageOnImpact=damageOnImpact;
+	this.explosionType=explosionType;
 	addBehavior(new MovesByVelocity());
 	addBehavior(new LaserBehavior());
 	//addBehavior(new LimitedLifeSpan());
@@ -37,4 +42,18 @@ public class LaserProjectile extends WorldObject implements Projectile {
 	setVisible(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
     }//end reset()
+
+    /**
+     * @return the damageOnImpact
+     */
+    public double getDamageOnImpact() {
+        return damageOnImpact;
+    }
+
+    /**
+     * @return the explosionType
+     */
+    public ExplosionType getExplosionType() {
+        return explosionType;
+    }
 }

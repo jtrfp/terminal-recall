@@ -75,8 +75,8 @@ public class Player extends WorldObject
 			updateCountdowns();
 			if(getTr().getKeyStatus().isPressed(KeyEvent.VK_SPACE)){
 			    	getTr().getResourceManager().
-			    	getProjectileFactory().
-			    	triggerRedLaser(getPosition().add(getHeading().crossProduct(getTop()).normalize().
+			    	getRedLaserFactory().
+			    	fire(getPosition().add(getHeading().crossProduct(getTop()).normalize().
 			    		scalarMultiply(10000)).add(new Vector3D(0,-3000,0)), getHeading().add(getHeading().scalarMultiply(CollisionManager.SHIP_COLLISION_DISTANCE+512)));}
 			}
 		}//end PlayerBehavior

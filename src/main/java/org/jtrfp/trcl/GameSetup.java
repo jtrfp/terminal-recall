@@ -70,7 +70,7 @@ public class GameSetup
 	    	 tris[1].setAlphaBlended(true);
 	    	 m.addTriangles(tris);
 	    	 m.finalizeModel();
-		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,512,ExplosionType.Blast));
+		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,2048,ExplosionType.Blast));
 		//WHITE LASERS
 		m = new Model(false);
 		t = tr.getResourceManager().getRAWAsTexture(
@@ -85,7 +85,7 @@ public class GameSetup
 	    	 tris[1].setAlphaBlended(true);
 	    	 m.addTriangles(tris);
 	    	 m.finalizeModel();
-	    	tr.getResourceManager().setWhiteLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*18,6555,ExplosionType.Blast));
+	    	tr.getResourceManager().setWhiteLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*18,4096,ExplosionType.Blast));
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());
 		for(NAVSubObject nObj:nav.getNavObjects())

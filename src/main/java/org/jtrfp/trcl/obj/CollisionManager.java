@@ -33,7 +33,7 @@ public class CollisionManager
 		{List<WorldObject>list=getVisibilityList();
 		for(int i=0; i<list.size(); i++)
 			{final WorldObject left=list.get(i);
-			for(int j=i; j<list.size(); j++)
+			for(int j=i+1; j<list.size(); j++)
 				{final WorldObject right=list.get(j);
 				left.proposeCollision(right);
 				right.proposeCollision(left);

@@ -155,10 +155,14 @@ public class ResourceManager{
 		return result;
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException
+	public TextureDescription getRAWAsTexture(String name, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException{
+	    return getRAWAsTexture(name,palette,proc,gl3,true);
+	}
+	
+	public TextureDescription getRAWAsTexture(String name, Color [] palette, ColorProcessor proc, GL3 gl3,boolean useCache) throws IOException, FileLoadException, IllegalAccessException
 		{
 		TextureDescription result=textureNameMap.get(name);
-		if(result==null)
+		if(result==null||!useCache)
 			{
 			try {
 				if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
@@ -182,11 +186,12 @@ public class ResourceManager{
 						for(int i=0; i<tFrames.length;i++)
 							{tFrames[i]=new Texture(getRAWImage(frames.get(i),palette,proc));textureNameMap.put(frames.get(i), tFrames[i]);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
-						textureNameMap.put(name, aTex);
+						if(useCache)textureNameMap.put(name, aTex);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWImage(name,palette,proc));textureNameMap.put(name, result);
+				result = new Texture(getRAWImage(name,palette,proc));
+				if(useCache)textureNameMap.put(name, result);
 				}
 			catch(NotSquareException e)
 				{

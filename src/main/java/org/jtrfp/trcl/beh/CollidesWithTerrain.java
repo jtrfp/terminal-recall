@@ -67,7 +67,6 @@ public class CollidesWithTerrain extends Behavior {
 	@Override
 	public void submit(SurfaceImpactListener item) {
 	    	item.collidedWithSurface(null,surfaceNormalVar);//TODO: Isolate which chunk and pass it
-	    	if(CollidesWithTerrain.this.getParent()instanceof Player)System.out.println("submit: "+item.getClass().getName());
 		}
 	@Override
 	public void submit(Collection<SurfaceImpactListener> items) {

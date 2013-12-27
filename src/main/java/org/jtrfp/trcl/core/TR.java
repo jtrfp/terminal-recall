@@ -54,7 +54,7 @@ public final class TR
 	private final GPU gpu = new GPU(this);
 	private Player player;
 	private final JFrame frame = new JFrame("Terminal Recall");
-	private Color [] globalPalette;
+	private Color [] globalPalette, darkIsClearPalette;
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
 	public static final ExecutorService threadPool = Executors.newCachedThreadPool();//TODO: Migrate to ThreadManager
@@ -232,9 +232,16 @@ public final class TR
 		return keyStatus;
 		}
 
-	public void setGlobalPalette(Color[] palette)
-		{globalPalette = palette;}
+	public void setGlobalPalette(Color[] palette){
+	    globalPalette = palette;
+	    darkIsClearPalette = new Color[256];
+	    for(int i=0; i<256; i++){
+		    float newAlpha=(float)Math.pow(((palette[i].getRed()+palette[i].getGreen()+palette[i].getBlue())/(3f*255f)),.5);
+		    darkIsClearPalette[i]=new Color(palette[i].getRed()/255f,palette[i].getGreen()/255f,palette[i].getBlue()/255f,newAlpha);
+	    }//end for(i)
+	}
 	public Color [] getGlobalPalette(){return globalPalette;}
+	public Color [] getDarkIsClearPalette(){return darkIsClearPalette;}
 	
 	public GPU getGPU(){return gpu;}
 

@@ -60,7 +60,7 @@ public class GameSetup
 		m = new Model(false);
 	    	 t = tr.getResourceManager().getRAWAsTexture(
 	    		"BIGEX8.RAW",
-	    		globalPalette, 
+	    		tr.getDarkIsClearPalette(), 
 	    		GammaCorrectingColorProcessor.singleton, 
 	    		tr.getGPU().getGl());
 	    	tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/2.,SEG_LEN/2.,SEG_LEN/2.,0}, //X

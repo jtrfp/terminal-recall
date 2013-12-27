@@ -6,19 +6,21 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 public class ExplodesOnDeath extends Behavior implements DeathListener {
 private boolean dead=false;
 private final ExplosionType type;
+private int explosionTally=0;
     public ExplodesOnDeath(ExplosionType type){
 	this.type=type;
     }
     @Override
-    public void notifyDeath() {
-	dead=true;
+    public synchronized void notifyDeath() {
+	if(!dead){
+	    dead=true;
+	    final WorldObject p = getParent();
+	    p.getTr().getResourceManager().getExplosionFactory().triggerExplosion(p.getPosition(),type);
+	    
+	    }
     }
     @Override
     public void _tick(long tickTimeMillis){
-	if(dead){
-	    dead=false;
-	    final WorldObject p = getParent();
-	    p.getTr().getResourceManager().getExplosionFactory().triggerBigExplosion(p.getPosition());
-	    }
+	
     }//end _tick()
 }//end ExplodesOnDeath

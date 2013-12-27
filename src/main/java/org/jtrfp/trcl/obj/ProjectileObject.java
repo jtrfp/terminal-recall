@@ -3,7 +3,9 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.beh.LimitedLifeSpan;
+import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.DeathBehavior;
+import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.SurfaceImpactListener;
 import org.jtrfp.trcl.core.TR;
@@ -13,19 +15,22 @@ public class ProjectileObject extends WorldObject implements Projectile {
     private static final long LIFESPAN_MILLIS=4500;
     private final double damageOnImpact;
     private final ExplosionType explosionType;
+    private final DeathBehavior deathBehavior;
     public ProjectileObject(TR tr,Model m, double damageOnImpact, ExplosionType explosionType){
 	super(tr,m);
 	this.damageOnImpact=damageOnImpact;
 	this.explosionType=explosionType;
 	addBehavior(new MovesByVelocity());
-	addBehavior(new LaserBehavior());
-	//addBehavior(new LimitedLifeSpan());
+	addBehavior(new CollidesWithTerrain());deathBehavior=
+	addBehavior(new DeathBehavior());
+	addBehavior(new ExplodesOnDeath(explosionType));
+	addBehavior(new ProjectileBehavior());
     }
-    private class LaserBehavior extends Behavior implements SurfaceImpactListener{
+    private class ProjectileBehavior extends Behavior implements SurfaceImpactListener{
 
 	@Override
 	public void collidedWithSurface(WorldObject wo, Vector3D surfaceNormal) {
-	    {destroy();System.out.println("Laserbeam destroyed by collision with Surface");}
+	    {deathBehavior.die();}
 	}
 	@Override
 	public void _proposeCollision(WorldObject wo){

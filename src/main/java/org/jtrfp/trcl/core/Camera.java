@@ -14,6 +14,7 @@ public class Camera
 	private double viewDepth;
 	private RealMatrix projectionMatrix;
 	private final GPU gpu;
+	private int updateDebugStateCounter;
 	public Camera(GPU gpu)
 		{this.gpu=gpu;}
 	
@@ -105,5 +106,13 @@ public class Camera
 		{return viewDepth;}
 	
 	public RealMatrix getMatrix()
-		{if(cameraMatrix==null){applyMatrix();}return cameraMatrix;}
-	}
+		{if(cameraMatrix==null){
+		    applyMatrix();
+		    if(updateDebugStateCounter++ % 30 ==0){
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", cameraPosition);
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", lookAtVector);
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", upVector);
+			}}
+		return cameraMatrix;
+		}
+	}//end Camera

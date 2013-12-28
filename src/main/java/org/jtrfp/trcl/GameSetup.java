@@ -19,6 +19,7 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.io.IOException;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
@@ -27,10 +28,10 @@ import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.ProjectileFactory;
-import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class GameSetup
 	{
@@ -105,7 +106,15 @@ public class GameSetup
 		//TODO: Tunnel activators
 		
 		Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
-		player.setPosition(Tunnel.TUNNEL_START_POS);
+		final String startX=System.getProperty("org.jtrfp.trcl.startX");
+		final String startY=System.getProperty("org.jtrfp.trcl.startY");
+		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
+		if(startX!=null && startY!=null){
+		    final int sX=Integer.parseInt(startX);
+		    final int sY=Integer.parseInt(startY);
+		    final int sZ=Integer.parseInt(startZ);
+		    player.setPosition(new Vector3D(sX,sY,sZ));
+		}else {player.setPosition(Tunnel.TUNNEL_START_POS);}
 		player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		tr.getWorld().add(player);
 		tr.setPlayer(player);

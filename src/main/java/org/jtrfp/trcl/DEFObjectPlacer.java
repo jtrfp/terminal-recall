@@ -54,6 +54,8 @@ public class DEFObjectPlacer implements ObjectPlacer
 					tr.getGPU().releaseGL();
 					}
 				});
+			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
+			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
 			}
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		

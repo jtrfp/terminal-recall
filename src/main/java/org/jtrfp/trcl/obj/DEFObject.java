@@ -30,21 +30,25 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
     final EnemyLogic logic = def.getLogic();
     boolean mobile=true;
+    boolean canTurn=true;
     boolean groundLocked=false;
     switch(logic){
     	case groundDumb:
     	    mobile=false;
+    	    canTurn=false;
     	    break;
-    	case groundTargeting:
+    	case groundTargeting://Ground turrets
     	    mobile=false;
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case flyingDumb:
-    	    mobile=false;
+    	    canTurn=false;
     	    break;
     	case groundTargetingDumb:
     	    groundLocked=true;
     	    break;
     	case flyingSmart:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case bankSpinDrill:
     	    break;
@@ -52,33 +56,42 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=true;
     	    break;
     	case flyingAttackRetreatSmart:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case splitShipSmart:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case groundStaticRuin:
     	    mobile=false;
+    	    canTurn=false;
     	    break;
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case targetPitchSmart:
     	    break;
     	case coreBossSmart:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case cityBossSmart:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case staticFiringSmart:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case sittingDuck:
+    	    canTurn=false;
     	    mobile=false;
     	    break;
     	case tunnelAttack:
     	    mobile=false;
     	    break;
     	case takeoffAndEscape:
+    	    canTurn=false;
     	    break;
     	case fallingAsteroid:
     	    mobile=false;
@@ -93,12 +106,15 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case geigerBoss:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case volcanoBoss:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case volcano:
+    	    canTurn=false;
     	    mobile=false;
     	    break;
     	case missile://Silo?
@@ -108,66 +124,78 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case alienBoss:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case canyonBoss1:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case canyonBoss2:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case lavaMan:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case arcticBoss:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case helicopter:
     	    break;
     	case tree:
+    	    canTurn=false;
     	    mobile=false;
     	    break;
     	case ceilingStatic:
+    	    canTurn=false;
     	    mobile=false;
     	    break;
     	case bobAndAttack:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case forwardDrive:
+    	    canTurn=false;
     	    groundLocked=true;
     	    break;
     	case fallingStalag:
+    	    canTurn=false;
     	    mobile=false;
     	    break;
     	case attackRetreatBelowSky:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case attackRetreatAboveSky:
+    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
     	    break;
     	case bobAboveSky:
     	    mobile=false;
     	    break;
     	case factory:
+    	    canTurn=false;
     	    mobile=false;
     	    break;
     	}//end switch(logic)
     addBehavior(new DeathBehavior());
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
-    
+    if(canTurn){
+	addBehavior(new RotationalMomentumBehavior());
+	addBehavior(new RotationalDragBehavior());
+	addBehavior(new AutoLeveling());
+    }
     if(mobile){
-	//addBehavior(new ChaseBehavior(tr.getPlayer()));
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
 	addBehavior(new AccelleratedByPropulsion());
 	addBehavior(new VelocityDragBehavior());
-	addBehavior(new AutoLeveling());
-	addBehavior(new RotationalMomentumBehavior());
-	addBehavior(new RotationalDragBehavior());
 	
 	if(groundLocked)addBehavior(new TerrainLocked());
 	else 	{addBehavior(new BouncesOffSurfaces());
 	    	addBehavior(new CollidesWithTerrain());}
 	
 	addBehavior(new LoopingPositionBehavior());
-	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());

@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -136,7 +137,12 @@ public class Reporter extends JFrame {
 		final DefaultMutableTreeNode n =new DefaultMutableTreeNode(new TreeEntry(treeItem,null));
 		workNode.add(n);
 		tree.expandPath(new TreePath(workNode.getPath()));
-		tree.updateUI();
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			tree.updateUI();
+		    }
+		});
 		workNode=n;
 	    }//end matchingNode==null
 	}//end while(hasNext())

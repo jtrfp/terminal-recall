@@ -136,10 +136,11 @@ public class Reporter extends JFrame {
 	    }else{
 		final DefaultMutableTreeNode n =new DefaultMutableTreeNode(new TreeEntry(treeItem,null));
 		workNode.add(n);
-		tree.expandPath(new TreePath(workNode.getPath()));
+		final DefaultMutableTreeNode _workNode=workNode;
 		SwingUtilities.invokeLater(new Runnable(){
 		    @Override
 		    public void run() {
+			tree.expandPath(new TreePath(_workNode.getPath()));
 			tree.updateUI();
 		    }
 		});

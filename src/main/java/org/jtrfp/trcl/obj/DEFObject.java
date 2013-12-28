@@ -60,6 +60,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case targetHeadingSmart:
+    	    mobile=false;//Belazure's crane bots
     	    break;
     	case targetPitchSmart:
     	    break;

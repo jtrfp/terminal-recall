@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -61,6 +62,7 @@ public final class TR
 	private final ThreadManager threadManager;
 	private final Renderer renderer;
 	private final CollisionManager collisionManager = new CollisionManager(this);
+	private final Reporter reporter = new Reporter();
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -138,13 +140,17 @@ public final class TR
 		JMenu file=new JMenu("File"),window=new JMenu("Window");
 		
 		//And menus to menubar
-		JMenuItem /*file_addRemovePODs=new JMenuItem("Add/Remove .POD file(s)"),*/ file_exit=new JMenuItem("Exit");
+		JMenuItem file_exit=new JMenuItem("Exit");
+		JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
 		//Menu item behaviors
-		file_exit.addActionListener(new ActionListener()
-					{@Override public void actionPerformed(ActionEvent arg0){System.exit(1);}});
-		
-		//file.add(file_addRemovePODs);
+		file_exit.addActionListener(new ActionListener(){
+		    @Override public void actionPerformed(ActionEvent arg0){System.exit(1);}});
+		debugStatesMenuItem.addActionListener(new ActionListener(){
+		    @Override public void actionPerformed(ActionEvent ev){reporter.setVisible(true);};});
+		final String showDebugStatesOnStartup = System.getProperty("org.jtrfp.trcl.showDebugStates");
+		if(showDebugStatesOnStartup!=null){if(showDebugStatesOnStartup.toUpperCase().contains("TRUE")){reporter.setVisible(true);}}
 		file.add(file_exit);
+		window.add(debugStatesMenuItem);
 		frame.getJMenuBar().add(file);
 		frame.getJMenuBar().add(window);
 		}
@@ -271,4 +277,11 @@ public final class TR
 		{this.player=player;}
 	
 	public Player getPlayer(){return player;}
+
+	/**
+	 * @return the reporter
+	 */
+	public Reporter getReporter() {
+	    return reporter;
+	}
 	}//end TR

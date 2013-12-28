@@ -4,7 +4,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.BouncesOffSurfaces;
-import org.jtrfp.trcl.beh.ChaseBehavior;
+import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.CollidesWithDEFObjects;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
@@ -39,7 +39,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	case groundTargeting://Ground turrets
     	    mobile=false;
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    canTurn=true;
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case flyingDumb:
     	    canTurn=false;
@@ -48,7 +49,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    groundLocked=true;
     	    break;
     	case flyingSmart:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case bankSpinDrill:
     	    break;
@@ -56,10 +57,10 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=true;
     	    break;
     	case flyingAttackRetreatSmart:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case splitShipSmart:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case groundStaticRuin:
     	    mobile=false;
@@ -67,20 +68,20 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case targetPitchSmart:
     	    break;
     	case coreBossSmart:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case cityBossSmart:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case staticFiringSmart:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case sittingDuck:
@@ -106,11 +107,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case geigerBoss:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case volcanoBoss:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case volcano:
@@ -124,22 +125,22 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case alienBoss:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case canyonBoss1:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case canyonBoss2:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case lavaMan:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case arcticBoss:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case helicopter:
@@ -153,7 +154,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case bobAndAttack:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case forwardDrive:
@@ -165,10 +166,10 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case attackRetreatBelowSky:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case attackRetreatAboveSky:
-    	    addBehavior(new ChaseBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case bobAboveSky:
     	    mobile=false;
@@ -182,7 +183,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
     if(canTurn){
 	addBehavior(new RotationalMomentumBehavior());
-	addBehavior(new RotationalDragBehavior());
+	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
 	addBehavior(new AutoLeveling());
     }
     if(mobile){
@@ -199,7 +200,6 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
-	getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
     	}//end if(mobile)
     else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}

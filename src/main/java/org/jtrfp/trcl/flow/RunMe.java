@@ -23,6 +23,7 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.GameSetup;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.gpu.GPU;
 
 public class RunMe{
@@ -50,7 +51,7 @@ public class RunMe{
 			{
 			try {
 				TR tr = new TR();
-				printSysInfo(tr,System.out);
+				gatherSysInfo(tr,System.out);
 				for(int argI=0; argI<args.length-1; argI++)
 					{tr.getResourceManager().registerPOD(new File(args[argI]));}
 				new GameSetup(tr.getResourceManager().getLVL(args[args.length-1]),tr);
@@ -63,20 +64,19 @@ public class RunMe{
 			}
 		}//end aspectMain
 	
-	private static void printSysInfo(TR tr, PrintStream out)
+	private static void gatherSysInfo(TR tr, PrintStream out)
 		{
-		GPU gpu = tr.getGPU();
+		final GPU gpu = tr.getGPU();
+		final Reporter r = tr.getReporter();
 		GL3 gl = gpu.takeGL();
-		out.println("==SYS INFO==");
-		out.println("GPU Vendor: "+gpu.glGetString(GL3.GL_VENDOR)+" \nRenderer: "+gpu.glGetString(GL3.GL_RENDERER)+" \nVersion: "+gpu.glGetString(GL3.GL_VERSION));
+		r.report("org.jtrfp.trcl.flow.RunMe.glVendor", gpu.glGetString(GL3.GL_VENDOR));
+		r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", gpu.glGetString(GL3.GL_RENDERER));
+		r.report("org.jtrfp.trcl.flow.RunMe.glVersion", gpu.glGetString(GL3.GL_VERSION));
 		tr.getGPU().releaseGL();
-		out.println("CPU Cores : "+Runtime.getRuntime().availableProcessors());
-		out.println("Operating System: "+System.getProperty("os.name"));
+		r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime.getRuntime().availableProcessors());
 		
 		for(Entry<Object,Object> prop:System.getProperties().entrySet())
-			{System.out.println("Property: "+prop.getKey()+" \tValue: "+prop.getValue());}
-		
-		out.println("=======\n");
+			{r.report((String)prop.getKey(),prop.getValue());}
 		}
 	
 	private static void ensureJVMIsProperlyConfigured(String [] args)

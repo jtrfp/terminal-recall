@@ -66,8 +66,8 @@ public class Renderer
 		fogColor=shaderProgram.getUniform("fogColor");
 		
 		System.out.println("Initializing RenderList...");
-		renderList[0] = new RenderList(gl, shaderProgram);
-		renderList[1] = new RenderList(gl, shaderProgram);
+		renderList[0] = new RenderList(gl, shaderProgram,gpu.getTr());
+		renderList[1] = new RenderList(gl, shaderProgram,gpu.getTr());
 		}
 	
 	private void ensureInit()
@@ -103,11 +103,9 @@ public class Renderer
 	
 	private void fpsTracking()
 		{frameNumber++;
-		if ((frameNumber %= 20) == 0)
-			{
-			System.out
-					.println((1000. / (double) (System.currentTimeMillis() - lastTimeMillis))
-							+ " FPS");
+		if ((frameNumber %= 20) == 0){
+		    	final int fps = (1000 / (int) (System.currentTimeMillis() - lastTimeMillis));
+		    	gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Renderer.FPS", ""+fps);
 			}
 		lastTimeMillis = System.currentTimeMillis();
 		}

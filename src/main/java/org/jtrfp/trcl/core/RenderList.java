@@ -42,6 +42,7 @@ public class RenderList
 	
 	private final PositionedRenderable [] renderables = new PositionedRenderable[NUM_BLOCKS_PER_SUBPASS];
 	private int renderablesIndex=0;
+	private final TR tr;
 	
 	private final int dummyBufferID;
 	private int numOpaqueBlocks;
@@ -80,9 +81,10 @@ public class RenderList
 		return globalGPUBuffer;
 		}//end getGlobalGPUBuffer()
 	
-	public RenderList(GL3 gl, GLProgram prg)
+	public RenderList(GL3 gl, GLProgram prg, TR tr)
 		{//Build VAO
 		IntBuffer ib = IntBuffer.allocate(1);
+		this.tr=tr;
 		gl.glGenBuffers(1, ib);
 		ib.clear();
 		dummyBufferID=ib.get();
@@ -115,10 +117,10 @@ public class RenderList
 		int remainingVerts=numOpaqueVertices;
 		final int rlOffset=GlobalObjectList.getArrayOffsetInBytes()/4;
 		
-		if(frameCounter==0)
-			{System.out.println("rendering "+numOpaqueBlocks+" opaque object blocks...");
-			System.out.println("rendering "+numTransparentBlocks+" blended object blocks...");
-			}
+		if(frameCounter==0){
+		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numOpaqueBlocks", ""+numOpaqueBlocks);
+		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numTransparentBlocks", ""+numTransparentBlocks);
+		    }
 		
 		for(int sp=0; sp<numSubPasses; sp++)
 			{final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;

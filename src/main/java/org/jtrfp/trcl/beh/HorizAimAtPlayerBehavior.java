@@ -4,11 +4,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class ChaseBehavior extends Behavior {
+public class HorizAimAtPlayerBehavior extends Behavior {
     private WorldObject chaseTarget;
     private double equatorialAccelleration=.004;
-    public ChaseBehavior(){super();}
-    public ChaseBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
+    public HorizAimAtPlayerBehavior(){super();}
+    public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
     @Override
     public void _tick(long timeInMillis){
 	if(chaseTarget!=null){

@@ -36,8 +36,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case groundTargeting:
-    	    mobile=true;
-    	    groundLocked=true;
+    	    mobile=false;
     	    break;
     	case flyingDumb:
     	    mobile=false;
@@ -154,7 +153,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
     
     if(mobile){
-	addBehavior(new ChaseBehavior(tr.getPlayer()));
+	//addBehavior(new ChaseBehavior(tr.getPlayer()));
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
 	addBehavior(new AccelleratedByPropulsion());

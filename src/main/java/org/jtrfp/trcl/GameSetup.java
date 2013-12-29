@@ -31,6 +31,7 @@ import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 
 public class GameSetup
@@ -50,6 +51,9 @@ public class GameSetup
 		
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
+		
+		// POWERUPS
+		tr.getResourceManager().setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 		
 		/// EXPLOSIONS
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));

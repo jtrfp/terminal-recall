@@ -80,6 +80,7 @@ import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.obj.ExplosionFactory;
+import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 
 public class ResourceManager{
@@ -93,6 +94,7 @@ public class ResourceManager{
 	private ProjectileFactory redLaserFactory;
 	private ProjectileFactory whiteLaserFactory;
 	private ProjectileFactory blueLaserFactory;
+	private PluralizedPowerupFactory pluralizedPowerupFactory;
 	
 	private final TR tr;
 	
@@ -623,4 +625,11 @@ public class ResourceManager{
 	public void setBlueLaserFactory(ProjectileFactory blueLaserFactory) {
 	    this.blueLaserFactory = blueLaserFactory;
 	}
+
+	public void setPluralizedPowerupFactory(
+		PluralizedPowerupFactory pluralizedPowerupFactory) {
+	    this.pluralizedPowerupFactory=pluralizedPowerupFactory;
+	    
+	}
+	public PluralizedPowerupFactory getPluralizedPowerupFactory(){return pluralizedPowerupFactory;}
 }//end ResourceManager

@@ -35,7 +35,7 @@ public class Texture implements TextureDescription
 	{
 	TextureTreeNode nodeForThisTexture;
 	private Color averageColor;
-	private static double pixelSize=1./512.; //This is a kludge; doesn't scale with megatexture
+	private static double pixelSize=.7/4096.; //TODO: This is a kludge; doesn't scale with megatexture
 	private static TextureTreeNode rootNode=null;
 	private static GLTexture globalTexture;
 	private static final Texture fallbackTexture;

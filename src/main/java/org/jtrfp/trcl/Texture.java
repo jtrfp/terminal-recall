@@ -60,16 +60,16 @@ public class Texture implements TextureDescription
 		final int sideLength=img.getWidth();
 		TextureTreeNode newNode = new TextureTreeNode(sideLength,null);
 		nodeForThisTexture=newNode;
-		BufferedImage scaledDown=new BufferedImage(img.getWidth(),img.getHeight(),BufferedImage.TYPE_INT_ARGB);
-		Graphics g = scaledDown.getGraphics();
-		g.drawImage(img,0, 0, img.getWidth(), img.getHeight(), 0, 0, img.getWidth(), img.getHeight(), null);
-		g.drawImage(img, 4, 4, img.getWidth()-2, img.getHeight()-2, 0, 0, img.getWidth(), img.getHeight(), null);
-		g.dispose();
+		//BufferedImage scaledDown=new BufferedImage(img.getWidth(),img.getHeight(),BufferedImage.TYPE_INT_ARGB);
+		//Graphics g = scaledDown.getGraphics();
+		//g.drawImage(img,0, 0, img.getWidth(), img.getHeight(), 0, 0, img.getWidth(), img.getHeight(), null);
+		//g.drawImage(img, 4, 4, img.getWidth()-2, img.getHeight()-2, 0, 0, img.getWidth(), img.getHeight(), null);
+		//g.dispose();
 		long redA=0,greenA=0,blueA=0;
 		ByteBuffer data = ByteBuffer.allocateDirect(img.getWidth()*img.getHeight()*4);
 		for(int y=0; y<img.getHeight(); y++)
 			{for(int x=0; x<img.getWidth(); x++)
-				{Color c= new Color(scaledDown.getRGB(x, y),true);
+				{Color c= new Color(img.getRGB(x, y),true);
 				data.put((byte)c.getRed());
 				data.put((byte)c.getGreen());
 				data.put((byte)c.getBlue());

@@ -3,6 +3,7 @@ package org.jtrfp.trcl.obj;
 import java.awt.Dimension;
 import java.io.IOException;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
@@ -12,6 +13,7 @@ import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.file.Powerup;
 
@@ -249,4 +251,9 @@ public class PowerupObject extends BillboardSprite{
 
 	public Powerup getPowerupType()
 		{return powerupType;}
+	
+	public void reset(Vector3D newPos){
+		setPosition(newPos);
+		setVisible(true);
+	    }//end reset()
 	}//end PowerupObject

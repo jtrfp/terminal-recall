@@ -132,8 +132,7 @@ public class WorldObject implements PositionedRenderable
 		{return "WorldObject Model="+model.getDebugName()+" pos="+this.getPosition()+" class="+getClass().getName();}
 	
 	public final void initializeObjectDefinitions()
-		{
-		//if(world==null)throw new RuntimeException("World cannot be null. (did you forget to set it?)");
+		{if(model==null)throw new NullPointerException("Model is null. Did you forget to set it?");
 		ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
 		ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
 		
@@ -258,13 +257,12 @@ public class WorldObject implements PositionedRenderable
 	/**
 	 * @param position the position to set
 	 */
-	public void setPosition(Vector3D position)
-		{
-		synchronized(position)
-			{
+	public WorldObject setPosition(Vector3D position){
+		synchronized(position){
 			this.position = position;
 			notifyPositionListeners();
 			}
+		return this;
 		}//end setPosition()
 	
 	/**

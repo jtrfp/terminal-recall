@@ -238,7 +238,7 @@ public class PowerupObject extends BillboardSprite{
 					p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
 					break;
 				case PowerCore:
-					getParent().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage(6554);
+					p.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage(6554);
 					break;
 				case Random:
 					break;

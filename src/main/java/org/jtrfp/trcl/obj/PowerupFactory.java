@@ -15,7 +15,7 @@ public class PowerupFactory {
 	    objects[i]=new PowerupObject(type,tr.getWorld());
 	}//end for(objects)
     }//end constructor
-    public PowerupObject spawn(Vector3D newPosition, Vector3D heading) {
+    public PowerupObject spawn(Vector3D newPosition) {
 	final PowerupObject result = objects[powerupIndex];
 	result.destroy();
 	result.reset(newPosition);

@@ -203,7 +203,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
     	}//end if(mobile)
     else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
-    if(def.getPowerup()!=null){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
+    if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
 /**
  * @return the boundingRadius

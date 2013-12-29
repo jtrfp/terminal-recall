@@ -8,7 +8,8 @@ public class LimitedLifeSpan extends Behavior {
 	if(timeRemainingMillis<-0){getParent().destroy();System.out.println("LimiteDLifeSpan timed out.");}
     }
     
-    public void reset(long millisUntilDestroyed){
+    public LimitedLifeSpan reset(long millisUntilDestroyed){
 	timeRemainingMillis=millisUntilDestroyed+System.currentTimeMillis();
+	return this;
     }
-}
+}//end LimitedLifeSpan

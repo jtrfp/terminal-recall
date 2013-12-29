@@ -56,6 +56,7 @@ public class WorldObject implements PositionedRenderable
 	private static final List<WorldObject> allWorldObjects = Collections.synchronizedList(new ArrayList<WorldObject>());
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
+	public static final Vector3D EVERYWHERE = new Vector3D(Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY);
 	private SpacePartitioningGrid containingGrid;
 	private Behavior behavior=new NullBehavior(this);
 	

@@ -4,13 +4,13 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.BouncesOffSurfaces;
-import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
-import org.jtrfp.trcl.beh.CollidesWithDEFObjects;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.HasPropulsion;
+import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
+import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.RotationalDragBehavior;
@@ -203,6 +203,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
     	}//end if(mobile)
     else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
+    if(def.getPowerup()!=null){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
 /**
  * @return the boundingRadius

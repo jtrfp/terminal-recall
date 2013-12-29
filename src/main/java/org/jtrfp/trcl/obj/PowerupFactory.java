@@ -12,7 +12,7 @@ public class PowerupFactory {
     public PowerupFactory(TR tr, Powerup type){
 	this.tr=tr;
 	for(int i=0; i<objects.length;i++){
-	    objects[i]=new PowerupObject(type,tr.getWorld());
+	    (objects[i]=new PowerupObject(type,tr.getWorld())).setVisible(false);
 	}//end for(objects)
     }//end constructor
     public PowerupObject spawn(Vector3D newPosition) {

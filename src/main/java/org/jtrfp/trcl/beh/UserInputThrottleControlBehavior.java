@@ -10,11 +10,11 @@ public class UserInputThrottleControlBehavior extends Behavior {
     @Override
     public void _tick(long timeInMillis){
 	final KeyStatus keyStatus=getParent().getTr().getKeyStatus(); 
-	if (keyStatus.isPressed(KeyEvent.VK_PAGE_UP)){
+	if (keyStatus.isPressed(KeyEvent.VK_A)){
 	    	Propelled p=getParent().getBehavior().probeForBehavior(Propelled.class);
 	    	p.deltaPropulsion(nudgeUnit);
 		}
-	if (keyStatus.isPressed(KeyEvent.VK_PAGE_DOWN)){
+	if (keyStatus.isPressed(KeyEvent.VK_Z)){
 	    	Propelled p=getParent().getBehavior().probeForBehavior(Propelled.class);
 	    	p.deltaPropulsion(-nudgeUnit);
 		}

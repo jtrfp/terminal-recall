@@ -113,7 +113,8 @@ public class Renderer
 	public void render()
 		{fpsTracking();
 		// Update GPU
-		GlobalDynamicTextureBuffer.getTextureBuffer().map();
+		try{GlobalDynamicTextureBuffer.getTextureBuffer().map();}
+		catch(NullPointerException e){return;}//Not ready yet; bail out.
 		PrimitiveList.tickAnimators();
 		ensureInit();
 		final GL3 gl = gpu.getGl();

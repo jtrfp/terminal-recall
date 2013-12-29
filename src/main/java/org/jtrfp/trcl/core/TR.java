@@ -32,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.KeyStatus;
+import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
@@ -63,6 +64,7 @@ public final class TR
 	private final Renderer renderer;
 	private final CollisionManager collisionManager = new CollisionManager(this);
 	private final Reporter reporter = new Reporter();
+	private ManuallySetController throttleMeter, healthMeter;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -283,5 +285,30 @@ public final class TR
 	 */
 	public Reporter getReporter() {
 	    return reporter;
+	}
+
+	public ManuallySetController getThrottleMeter() {
+	    return throttleMeter;
+	}
+
+	/**
+	 * @return the healthMeter
+	 */
+	public ManuallySetController getHealthMeter() {
+	    return healthMeter;
+	}
+
+	/**
+	 * @param healthMeter the healthMeter to set
+	 */
+	public void setHealthMeter(ManuallySetController healthMeter) {
+	    this.healthMeter = healthMeter;
+	}
+
+	/**
+	 * @param throttleMeter the throttleMeter to set
+	 */
+	public void setThrottleMeter(ManuallySetController throttleMeter) {
+	    this.throttleMeter = throttleMeter;
 	}
 	}//end TR

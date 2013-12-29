@@ -15,14 +15,23 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.geom.Point2D;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.obj.MeterBar;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid
 	{
 	private static final double Z=-1;
+	private static final Vector3D HEALTH_POS = new Vector3D(.13000-1,1-.205,0);
+	private static final Vector3D THROTTLE_POS = new Vector3D(.18875-1,1-.205,0);
+	private static final double METER_WIDTH = .02;
+	private static final double METER_HEIGHT = .16;
 	public HUDSystem(World world)
 		{
 		super(world);
+		TR tr =  world.getTr();
 		//Dash Text
 		GLFont font;
 		try
@@ -62,5 +71,18 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,Z));
 		
 		addAlwaysVisible(new Crosshairs(world.getTr()));
+		try{
+		    MeterBar mb;
+		addAlwaysVisible(mb=new MeterBar(world.getTr(),
+			new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png"))),
+			METER_WIDTH,METER_HEIGHT,false));
+		mb.setPosition(HEALTH_POS);
+		tr.setHealthMeter(mb.getController());
+		addAlwaysVisible(mb=new MeterBar(world.getTr(),
+			new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/BlueBlackGradient.png"))),
+			METER_WIDTH,METER_HEIGHT,false));
+		mb.setPosition(THROTTLE_POS);
+		tr.setThrottleMeter(mb.getController());
+		}catch(Exception e){e.printStackTrace();}
 		}//end constructor
 	}//end HUDSystem

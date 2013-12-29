@@ -15,7 +15,8 @@ import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.RotationalMomentumBehavior;
-import org.jtrfp.trcl.beh.SurfaceImpactListener;
+import org.jtrfp.trcl.beh.UpdatesHealthMeterBehavior;
+import org.jtrfp.trcl.beh.UpdatesThrottleMeterBehavior;
 import org.jtrfp.trcl.beh.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.VelocityDragBehavior;
@@ -62,6 +63,8 @@ public class Player extends WorldObject
 		addBehavior(new RotationalDragBehavior());
 		addBehavior(new CollidesWithTerrain());
 		addBehavior(new LoopingPositionBehavior());
+		addBehavior(new UpdatesThrottleMeterBehavior().setController(tr.getThrottleMeter()));
+		addBehavior(new UpdatesHealthMeterBehavior().setController(tr.getHealthMeter()));
 		addBehavior(new BouncesOffSurfaces());pacFiringBehavior=
 		addBehavior(new ProjectileFiringBehavior()
 			.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).

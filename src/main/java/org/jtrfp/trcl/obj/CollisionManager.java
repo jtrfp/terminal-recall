@@ -9,6 +9,7 @@ import org.jtrfp.trcl.core.TR;
 
 public class CollisionManager
 	{
+    	public static final double MAX_CONSIDERATION_DISTANCE=TR.mapSquareSize*15;
 	private final TR tr;
 	private final ArrayList<WorldObject> [] visibilityList = new ArrayList[2];
 	public static final int SHIP_COLLISION_DISTANCE = 15000;
@@ -35,7 +36,8 @@ public class CollisionManager
 			{final WorldObject left=list.get(i);
 			for(int j=i+1; j<list.size(); j++)
 				{final WorldObject right=list.get(j);
-				if(left.isVisible()&&right.isVisible()){
+				if(left.isVisible()&&right.isVisible()&& 
+					left.getPosition().distance(right.getPosition())<MAX_CONSIDERATION_DISTANCE){
 				    left.proposeCollision(right);
 				    right.proposeCollision(left);}
 				}//end for(j)

@@ -8,6 +8,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 
+import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
@@ -70,7 +71,9 @@ public class ThreadManager
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
 					{List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
 				    	for(WorldObject wo:vl)
-						{if(wo.isVisible())wo.tick(tickTimeInMillis);}
+						{if(wo.isVisible()&&((wo.getPosition().distance(tr.getPlayer().getPosition())
+							<CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo.getPosition()==WorldObject.EVERYWHERE))
+						    wo.tick(tickTimeInMillis);}
 					tr.getCollisionManager().performCollisionTests();}
 				lastGameplayTickTime=tickTimeInMillis;
 				}//end run()

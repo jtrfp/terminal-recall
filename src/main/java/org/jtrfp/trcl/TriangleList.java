@@ -19,19 +19,22 @@ import javax.media.opengl.GL3;
 
 public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 	{
-	private Sequencer vSequencer;
+	private Controller controller;
 	private int timeBetweenFramesMsec;
-	public TriangleList(Triangle [][] triangles, int timeBetweenFramesMsec, String debugName)
+	private final boolean animateUV;
+	public TriangleList(Triangle [][] triangles, int timeBetweenFramesMsec, String debugName, boolean animateUV, Controller controller)
 		{super(debugName,triangles,GPUTriangleVertex.createVertexBlock(triangles[0].length*3));
 		this.timeBetweenFramesMsec=timeBetweenFramesMsec;
+		this.animateUV=animateUV;
+		if(controller==null)throw new NullPointerException("Controller is intolerably null.");
+		this.controller=controller;
 		}
 	
 	public TriangleList [] getAllLists()
 		{return getAllArrayLists().toArray(new TriangleList [] {});}
-	private Sequencer getVertexSequencer(int timeBetweenFramesMsec, int nFrames)
+	private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames)
 		{
-		if(vSequencer!=null)return vSequencer;
-		return vSequencer=new Sequencer(timeBetweenFramesMsec,nFrames,true);
+		return controller;
 		}
 	private Triangle triangleAt(int frame, int tIndex)
 		{return getPrimitives()[frame][tIndex];}
@@ -65,19 +68,26 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 				{zFrames[i]=Math.round(triangleAt(i,tIndex).z[vIndex]/scale);}
 			animators.add(new AttribAnimator(vtx.z,getVertexSequencer(timeBetweenFramesMsec,numFrames),zFrames));
 			}
-		else
-			{
-			throw new RuntimeException("Empty triangle vertex!");
-			}
+		else{throw new RuntimeException("Empty triangle vertex!");}
 		
 		TextureDescription td = t.getTexture();
-		if(td instanceof Texture)
-			{//Static texture
+		if(td instanceof Texture){//Static texture
 			final Texture.TextureTreeNode tx;
 			tx= ((Texture)t.getTexture()).getNodeForThisTexture();
-			vtx.u.set((short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
-			vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
-			}
+			if(animateUV&&numFrames>1){//Animated UV
+			    double []uFrames = new double[numFrames];
+			    double []vFrames = new double[numFrames];
+			    for(int i=0; i<numFrames; i++){
+				uFrames[i]=uvUpScaler*tx.getGlobalUFromLocal(triangleAt(i,tIndex).u[vIndex]);
+				vFrames[i]=uvUpScaler*tx.getGlobalVFromLocal(triangleAt(i,tIndex).v[vIndex]);
+			    }//end for(numFrames)
+			    animators.add(new AttribAnimator(vtx.u,getVertexSequencer(timeBetweenFramesMsec,numFrames),uFrames));
+			    animators.add(new AttribAnimator(vtx.v,getVertexSequencer(timeBetweenFramesMsec,numFrames),vFrames));
+			}else{//end if(animateUV)
+			    vtx.u.set((short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
+			    vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
+			}//end if(!animateUV)
+		    }
 		else 
 			{//Animated texture
 			AnimatedTexture at =((AnimatedTexture)t.getTexture());

@@ -19,9 +19,9 @@ package org.jtrfp.trcl;
 public class TransparentTriangleList extends TriangleList
 	{
 	public TransparentTriangleList(Triangle[][] triangles,
-			int timeBetweenFramesMsec, String debugName)
+			int timeBetweenFramesMsec, String debugName, boolean animateUV, Controller controller)
 		{
-		super(triangles, timeBetweenFramesMsec, debugName);
+		super(triangles, timeBetweenFramesMsec, debugName,animateUV,controller);
 		}
 	
 	@Override

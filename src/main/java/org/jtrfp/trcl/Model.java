@@ -31,6 +31,8 @@ public class Model
 	private int frameDelay;
 	private boolean smoothAnimation;
 	private String debugName="[unnamed]";
+	private boolean animateUV=false;
+	private Controller controller;
 	
 	public Model(boolean smoothAnimation)
 		{
@@ -69,16 +71,17 @@ public class Model
 	 */
 	public Model finalizeModel()
 		{
+	    	if(controller==null)controller=new Sequencer(getFrameDelayInMillis(),tLists.size(),true);
 		Triangle [][] tris = new Triangle[tLists.size()][];
 		for(int i=0; i<tLists.size(); i++)
 			{tris[i]=tLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),"TriangleList...");
+		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),"TriangleList...", animateUV,controller);
 		else tpList=null;
 		
 		Triangle [][] ttris = new Triangle[ttLists.size()][];
 		for(int i=0; i<ttLists.size(); i++)
 			{ttris[i]=ttLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),"TransparentTriangleList...");
+		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),"TransparentTriangleList...", animateUV,controller);
 		else ttpList=null;
 		
 		LineSegment [][] segs = new LineSegment[lsLists.size()][];
@@ -211,4 +214,28 @@ public class Model
 		{
 		this.debugName = debugName;
 		}
+	/**
+	 * @return the animateUV
+	 */
+	public boolean isAnimateUV() {
+	    return animateUV;
+	}
+	/**
+	 * @param animateUV the animateUV to set
+	 */
+	public void setAnimateUV(boolean animateUV) {
+	    this.animateUV = animateUV;
+	}
+	/**
+	 * @return the controller
+	 */
+	public Controller getController() {
+	    return controller;
+	}
+	/**
+	 * @param controller the controller to set
+	 */
+	public void setController(Controller controller) {
+	    this.controller = controller;
+	}
 	}//end Model

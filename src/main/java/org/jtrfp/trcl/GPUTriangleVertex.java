@@ -79,6 +79,23 @@ public class GPUTriangleVertex implements GPUVec4Element
 		v=ElementAttrib.create(arrayOffset, byteOffset+10, Short.class);
 		// 12, 14 are unused
 		}
+	/*
+	 * Wow, you've gone quite deep... way down here in the GPUTriangleVertex class.
+	 * You must be up to something very heavy to dare tread in a foresaken place such as this;
+	 * surely there are other things you wish you could be doing than sifting through this code...
+	 * Remember when you were a kid: what did you want to be when you grow up? Doing this?
+	 * Did you really think "I want to read through thousands of lines of GPU glue code"
+	 * Did you even know what GPU glue code is? Probably not. But I bet you wanted to do
+	 * something which has lead you to doing this. And that's what adulthood really is: The use of 
+	 * wisdom to reconcile reality with your earlier dreams in hopes that a win-win situation will be found.
+	 * 
+	 * That's probably why you are here. 
+	 * 
+	 * Or, perhaps you just want to suffer. 
+	 * That can be accommodated too. (:
+	 * 
+	 */
+	
 	
 	public final int getAddressInBytes()
 		{

@@ -241,6 +241,7 @@ public class PowerupObject extends BillboardSprite{
 					p.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage(6554);
 					break;
 				case Random:
+				    	applyToPlayer(p);
 					break;
 				}//end switch(powerupType)
 			}//end applyToPlayer()

@@ -9,6 +9,7 @@ import org.jtrfp.trcl.beh.DEFObjectCollisionListener;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
+import org.jtrfp.trcl.beh.LimitedLifeSpan;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.SurfaceImpactListener;
@@ -30,6 +31,7 @@ public class ProjectileObject extends WorldObject implements Projectile {
 	addBehavior(new ExplodesOnDeath(explosionType));
 	addBehavior(new ProjectileBehavior());
 	addBehavior(new CollidesWithDEFObjects(2000));
+	addBehavior(new LimitedLifeSpan().reset(LIFESPAN_MILLIS));
     }
     private class ProjectileBehavior extends Behavior implements SurfaceImpactListener,DEFObjectCollisionListener{
 
@@ -51,7 +53,7 @@ public class ProjectileObject extends WorldObject implements Projectile {
     }//end LaserBehavior
     
     public void reset(Vector3D newPos, Vector3D newVelocity){
-	//getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
+	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	setHeading(newVelocity.normalize());
 	setPosition(newPos);
 	setVisible(true);

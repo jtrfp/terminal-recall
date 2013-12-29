@@ -33,8 +33,9 @@ public class Explosion extends BillboardSprite {
     }//end constructor
     
     @Override
-    public void setPosition(Vector3D pos){
+    public Explosion setPosition(Vector3D pos){
 	super.setPosition(pos.subtract(type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.)));
+	return this;
     }
     
     public static enum ExplosionType{

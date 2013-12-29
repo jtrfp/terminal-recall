@@ -109,9 +109,10 @@ public class Player extends WorldObject
 		super.setTop(top);
 		}
 	@Override
-	public void setPosition(Vector3D pos){
+	public Player setPosition(Vector3D pos){
 		camera.setPosition(pos.subtract(getLookAt().scalarMultiply(cameraDistance)));
 		super.setPosition(pos);
+		return this;
 		}
 
 	/**

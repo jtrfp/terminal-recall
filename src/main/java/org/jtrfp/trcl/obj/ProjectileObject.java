@@ -9,6 +9,7 @@ import org.jtrfp.trcl.beh.DEFObjectCollisionListener;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
+import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.SurfaceImpactListener;
 import org.jtrfp.trcl.core.TR;
@@ -56,6 +57,7 @@ public class ProjectileObject extends WorldObject implements Projectile {
 	setVisible(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	getBehavior().probeForBehavior(DeathBehavior.class).reset();
+	addBehavior(new LoopingPositionBehavior());
     }//end reset()
 
     /**

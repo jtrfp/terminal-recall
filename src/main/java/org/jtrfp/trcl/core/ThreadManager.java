@@ -71,10 +71,11 @@ public class ThreadManager
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
 					{List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
 				    	for(WorldObject wo:vl)
-						{if(wo.isVisible()&&((wo.getPosition().distance(tr.getPlayer().getPosition())
-							<CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo.getPosition()==WorldObject.EVERYWHERE))
-						    wo.tick(tickTimeInMillis);}
-					tr.getCollisionManager().performCollisionTests();}
+						{if(wo.isVisible()&&
+						    (TR.twosComplimentDistance(wo.getPosition(), tr.getPlayer().getPosition())
+						    <CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo.getPosition()==WorldObject.EVERYWHERE)
+						        wo.tick(tickTimeInMillis);}
+				    			tr.getCollisionManager().performCollisionTests();}
 				lastGameplayTickTime=tickTimeInMillis;
 				}//end run()
 			}, 0, 1000/GAMEPLAY_FPS);

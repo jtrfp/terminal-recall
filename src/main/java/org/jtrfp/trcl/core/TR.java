@@ -31,6 +31,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.World;
@@ -92,6 +93,20 @@ public final class TR
 		v*=crossPlatformScalar;
 		return v>134217727?v-268435456:v;
 		}
+	public static Vector3D twosComplimentSubtract(Vector3D l, Vector3D r){
+	    return new Vector3D(
+		    deltaRollover(l.getX()-r.getX()),
+		    deltaRollover(l.getY()-r.getY()),
+		    deltaRollover(l.getZ()-r.getZ()));
+	}
+	public static double twosComplimentDistance(Vector3D l, Vector3D r){
+	    return twosComplimentSubtract(l,r).getNorm();
+	}
+	public static double deltaRollover(double v){
+	    if(v>mapCartOffset)return v-mapWidth;
+	    else if(v<-mapCartOffset)return v+mapWidth;
+	    return v;
+	}
 	
 	public TR()
 		{

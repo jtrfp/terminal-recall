@@ -201,6 +201,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
     else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}

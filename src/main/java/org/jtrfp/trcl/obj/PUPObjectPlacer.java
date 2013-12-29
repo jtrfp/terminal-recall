@@ -15,7 +15,7 @@ public class PUPObjectPlacer implements ObjectPlacer
 	public PUPObjectPlacer(PUPFile pupFile, World world)
 		{
 		for(PowerupLocation loc:pupFile.getPowerupLocations())
-			{PowerupObject powerup = new PowerupObject(loc,world);
+			{PowerupObject powerup = new PowerupObject(loc.getType(),world);
 			powerup.setPosition(new Vector3D(
 					TR.legacy2Modern(loc.getZ()),
 					(TR.legacy2Modern(loc.getY())/TR.mapWidth)*16.*world.sizeY,

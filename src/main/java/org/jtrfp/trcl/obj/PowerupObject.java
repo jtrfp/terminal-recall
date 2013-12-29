@@ -17,14 +17,14 @@ import org.jtrfp.trcl.file.Powerup;
 
 public class PowerupObject extends BillboardSprite{
 	private final Powerup powerupType;
-	public PowerupObject(PowerupLocation loc, World world){
+	public PowerupObject(Powerup pt, World world){
 		super(world.getTr());
-		powerupType=loc.getType();
+		powerupType=pt;
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
 		TextureDescription desc=Texture.getFallbackTexture();
 		final int animationRate=500;
-		try {switch(loc.getType()){
+		try {switch(pt){
 		 case Afterburner:
 			desc = new AnimatedTexture(new Sequencer(animationRate, 8, false),new Texture[]{
 				frame("AFTR0000.RAW"),

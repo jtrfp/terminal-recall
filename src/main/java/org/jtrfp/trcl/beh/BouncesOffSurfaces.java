@@ -21,7 +21,6 @@ public class BouncesOffSurfaces extends Behavior implements
 	    final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
 	    Vector3D newTop = resultingRotation.applyTo(oldTop);
 	    if(newTop.getY()<0)newTop=newTop.negate();
-	    System.out.println("reflecting heading of "+parent.getClass().getName());
 	    parent.setTop(newTop);
 	}//end if(should reflect)
 	if(parent instanceof Velocible){

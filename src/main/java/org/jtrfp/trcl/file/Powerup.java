@@ -15,8 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
-public enum Powerup
-	{
+public enum Powerup{
 	RTL,
 	PAC,
 	ION,
@@ -29,5 +28,8 @@ public enum Powerup
 	DAM,
 	Afterburner,
 	PowerCore,
-	Random //Not for use in TV
+	Random; //Not for use in TV
+	Powerup(){
+	    
 	}
+}

@@ -335,4 +335,8 @@ public class WorldObject implements PositionedRenderable
 	 */
 	public Behavior getBehavior()
 		{return behavior;}
+
+	public Model getModel() {
+	    return model;
+	}
 	}//end WorldObject

@@ -91,13 +91,13 @@ public class Player extends WorldObject
 		}//end _Tick
 	}//end PlayerBehavior
 	
-	public void updateCountdowns(){
-		if(cloakCountdown>0){
+	public void updateCountdowns(){//TODO: BUG - setting visibility to false causes Player to no longer receive ticks!
+		/*if(cloakCountdown>0){
 			if(--cloakCountdown==0)
 				{setVisible(true);}
 			else setVisible(false);}
 		if(invincibilityCountdown>0){
-			--invincibilityCountdown;}
+			--invincibilityCountdown;}*/
 		}
 
 	@Override

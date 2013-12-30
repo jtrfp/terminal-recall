@@ -17,6 +17,6 @@ public class RotationalDragBehavior extends Behavior {
 	rmb.setPolarMomentum(rmb.getPolarMomentum()*finalCoeff);
     }//end _tick()
     
-    public void setDragCoefficient(double drag){dragCoeff=drag;}
+    public RotationalDragBehavior setDragCoefficient(double drag){dragCoeff=drag;return this;}
     public double getDragCoefficient(){return dragCoeff;}
 }

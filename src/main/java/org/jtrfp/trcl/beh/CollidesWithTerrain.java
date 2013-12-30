@@ -13,9 +13,9 @@ import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {
-    private static final double nudge=1000;
+    private static final double nudge=1;
     private boolean bounce=false;
-    private double pad=1000;
+    private double pad=0;
     private boolean groundLock=false;
     private InterpolatingAltitudeMap map;
     private Vector3D surfaceNormalVar;

@@ -2,17 +2,13 @@ package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.obj.Velocible;
-import org.jtrfp.trcl.obj.VelocityDragged;
 
-public class VelocityDragBehavior extends Behavior implements
-		VelocityDragged
+public class VelocityDragBehavior extends Behavior
 	{
 	private double dragCoeff=1;
-	@Override
-	public void setDragCoefficient(double dragCoefficientPerSecond)
-		{dragCoeff=dragCoefficientPerSecond;}
+	public VelocityDragBehavior setDragCoefficient(double dragCoefficientPerSecond)
+		{dragCoeff=dragCoefficientPerSecond; return this;}
 
-	@Override
 	public double getVelocityDrag()
 		{return dragCoeff;}
 	

@@ -7,6 +7,7 @@ import org.jtrfp.trcl.beh.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DeathBehavior;
+import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.HasPropulsion;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
@@ -31,6 +32,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     final EnemyLogic logic = def.getLogic();
     boolean mobile=true;
     boolean canTurn=true;
+    boolean foliage=false;
     boolean groundLocked=false;
     switch(logic){
     	case groundDumb:
@@ -148,6 +150,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case tree:
     	    canTurn=false;
     	    mobile=false;
+    	    foliage=true;
     	    break;
     	case ceilingStatic:
     	    canTurn=false;
@@ -181,6 +184,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	}//end switch(logic)
     addBehavior(new DeathBehavior());
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
+    if(!foliage)addBehavior(new DebrisOnDeathBehavior());
     if(canTurn){
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);

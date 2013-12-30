@@ -27,7 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,6 +78,7 @@ import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
+import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
@@ -95,6 +95,7 @@ public class ResourceManager{
 	private ProjectileFactory whiteLaserFactory;
 	private ProjectileFactory blueLaserFactory;
 	private PluralizedPowerupFactory pluralizedPowerupFactory;
+	private DebrisFactory debrisFactory;
 	
 	private final TR tr;
 	
@@ -632,4 +633,18 @@ public class ResourceManager{
 	    
 	}
 	public PluralizedPowerupFactory getPluralizedPowerupFactory(){return pluralizedPowerupFactory;}
+
+	/**
+	 * @return the debrisFactory
+	 */
+	public DebrisFactory getDebrisFactory() {
+	    return debrisFactory;
+	}
+
+	/**
+	 * @param debrisFactory the debrisFactory to set
+	 */
+	public void setDebrisFactory(DebrisFactory debrisFactory) {
+	    this.debrisFactory = debrisFactory;
+	}
 }//end ResourceManager

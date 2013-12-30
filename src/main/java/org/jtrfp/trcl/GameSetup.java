@@ -28,6 +28,7 @@ import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.Player;
@@ -57,6 +58,9 @@ public class GameSetup
 		
 		/// EXPLOSIONS
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
+		// DEBRIS
+		tr.getResourceManager().setDebrisFactory(new DebrisFactory(tr));
+		
 		Model m;
 		Triangle [] tris;
 		TextureDescription t;

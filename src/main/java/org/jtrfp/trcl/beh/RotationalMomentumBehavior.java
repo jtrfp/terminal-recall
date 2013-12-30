@@ -28,11 +28,11 @@ public class RotationalMomentumBehavior extends Behavior {
     /**
      * @param equatorialMomentum the equatorialMomentum to set
      */
-    public void setEquatorialMomentum(double equatorialMomentum) {
-        this.equatorialMomentum = equatorialMomentum;
+    public RotationalMomentumBehavior setEquatorialMomentum(double equatorialMomentum) {
+        this.equatorialMomentum = equatorialMomentum; return this;
     }
     
-    public void accellerateEquatorialMomentum(double delta){equatorialMomentum+=delta;}
+    public RotationalMomentumBehavior accellerateEquatorialMomentum(double delta){equatorialMomentum+=delta;return this;}
     
     /**
      * @return the polarMomentum
@@ -45,11 +45,11 @@ public class RotationalMomentumBehavior extends Behavior {
     /**
      * @param polarMomentum the polarMomentum to set
      */
-    public void setPolarMomentum(double polarMomentum) {
-        this.polarMomentum = polarMomentum;
+    public RotationalMomentumBehavior setPolarMomentum(double polarMomentum) {
+        this.polarMomentum = polarMomentum; return this;
     }
     
-    public void accelleratePolarMomentum(double delta){polarMomentum+=delta;}
+    public RotationalMomentumBehavior accelleratePolarMomentum(double delta){polarMomentum+=delta;return this;}
     /**
      * @return the lateralMomentum
      */
@@ -57,11 +57,11 @@ public class RotationalMomentumBehavior extends Behavior {
         return lateralMomentum;
     }
     
-    public void accellerateLateralMomentum(double delta){lateralMomentum+=delta;}
+    public RotationalMomentumBehavior accellerateLateralMomentum(double delta){lateralMomentum+=delta;return this;}
     /**
      * @param lateralMomentum the lateralMomentum to set
      */
-    public void setLateralMomentum(double lateralMomentum) {
-        this.lateralMomentum = lateralMomentum;
+    public RotationalMomentumBehavior setLateralMomentum(double lateralMomentum) {
+        this.lateralMomentum = lateralMomentum; return this;
     }
 }

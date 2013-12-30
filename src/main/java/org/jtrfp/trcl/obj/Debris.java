@@ -50,7 +50,7 @@ private static final String [] TYPES = new String[]{
 		.setEquatorialMomentum(.2*Math.random())
 		.setLateralMomentum(.2*Math.random())
 		.setPolarMomentum(.2*Math.random()));
-	addBehavior(new RotationalDragBehavior().setDragCoefficient(.9));
+	addBehavior(new RotationalDragBehavior().setDragCoefficient(.99));
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor
 

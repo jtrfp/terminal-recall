@@ -32,6 +32,7 @@ public class ProjectileObject extends WorldObject implements Projectile {
 	addBehavior(new ProjectileBehavior());
 	addBehavior(new CollidesWithDEFObjects(2000));
 	addBehavior(new LimitedLifeSpan().reset(LIFESPAN_MILLIS));
+	addBehavior(new LoopingPositionBehavior());
     }
     private class ProjectileBehavior extends Behavior implements SurfaceImpactListener,DEFObjectCollisionListener{
 
@@ -59,7 +60,6 @@ public class ProjectileObject extends WorldObject implements Projectile {
 	setVisible(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	getBehavior().probeForBehavior(DeathBehavior.class).reset();
-	addBehavior(new LoopingPositionBehavior());
     }//end reset()
 
     /**

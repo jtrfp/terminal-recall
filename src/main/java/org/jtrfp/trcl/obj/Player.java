@@ -3,6 +3,7 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AccelleratedByPropulsion;
+import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BouncesOffSurfaces;
@@ -62,6 +63,7 @@ public class Player extends WorldObject
 		addBehavior(new RotationalMomentumBehavior());
 		addBehavior(new RotationalDragBehavior());
 		addBehavior(new CollidesWithTerrain());
+		addBehavior(new AfterburnerBehavior());
 		addBehavior(new LoopingPositionBehavior());
 		addBehavior(new UpdatesThrottleMeterBehavior().setController(tr.getThrottleMeter()));
 		addBehavior(new UpdatesHealthMeterBehavior().setController(tr.getHealthMeter()));
@@ -79,7 +81,7 @@ public class Player extends WorldObject
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
-		getBehavior().probeForBehavior(Propelled.class).setMaxPropulsion(1300000);
+		getBehavior().probeForBehavior(Propelled.class).setMaxPropulsion(900000);
 		getBehavior().probeForBehavior(RotationalDragBehavior.class).setDragCoefficient(.86);
 		
 		}

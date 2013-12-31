@@ -1,7 +1,7 @@
 package org.jtrfp.trcl.obj;
 
 public interface Propelled
-	{public void setPropulsion(double magnitude);
+	{public Propelled setPropulsion(double magnitude);
 	public double getPropulsion();
 	public void setMaxPropulsion(double max);
 	public double getMaxPropulsion();

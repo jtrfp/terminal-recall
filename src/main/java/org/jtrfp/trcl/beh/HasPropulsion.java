@@ -7,8 +7,8 @@ public class HasPropulsion extends Behavior implements Propelled {
     private double max=Double.POSITIVE_INFINITY;
     private double min=Double.NEGATIVE_INFINITY;
     @Override
-    public void setPropulsion(double magnitude) {
-	propulsion=magnitude;
+    public Propelled setPropulsion(double magnitude) {
+	propulsion=magnitude;return this;
     }
 
     @Override

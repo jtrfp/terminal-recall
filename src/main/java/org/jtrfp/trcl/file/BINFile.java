@@ -798,6 +798,56 @@ public abstract class BINFile implements ThirdPartyParseable
 					}
 				}//end ColorBlock
 			
+			public static class Unknown0x0F implements ThirdPartyParseable{
+			    byte [] unknown;
+			    
+			    @Override
+			    public void describeFormat(Parser prs){
+				prs.littleEndian();
+				prs.expectBytes(new byte[]{0,0,0,0x0F}, FailureBehavior.UNRECOGNIZED_FORMAT);
+				prs.bytesOfCount(9*4, prs.property("unknown", byte.class));
+			    }//end describeFormat(..)
+
+			    /**
+			     * @return the unknown
+			     */
+			    public byte[] getUnknown() {
+			        return unknown;
+			    }
+
+			    /**
+			     * @param unknown the unknown to set
+			     */
+			    public void setUnknown(byte[] unknown) {
+			        this.unknown = unknown;
+			    }
+			}//end Unknown 0x04
+			
+			public static class Unknown0x04 implements ThirdPartyParseable{
+			    byte [] unknown;
+			    
+			    @Override
+			    public void describeFormat(Parser prs){
+				prs.littleEndian();
+				prs.expectBytes(new byte[]{0,0,0,0x04}, FailureBehavior.UNRECOGNIZED_FORMAT);
+				prs.bytesOfCount(10*4, prs.property("unknown", byte.class));
+			    }//end describeFormat(..)
+
+			    /**
+			     * @return the unknown
+			     */
+			    public byte[] getUnknown() {
+			        return unknown;
+			    }
+
+			    /**
+			     * @param unknown the unknown to set
+			     */
+			    public void setUnknown(byte[] unknown) {
+			        this.unknown = unknown;
+			    }
+			}//end Unknown 0x04
+			
 			public static class AnimatedTextureBlock implements ThirdPartyParseable
 				{
 				int unknown1,numTextures,unknown2,delay,unknown3,unknown4;

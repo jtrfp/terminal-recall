@@ -18,6 +18,7 @@ import org.jtrfp.trcl.beh.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.UpdatesHealthMeterBehavior;
 import org.jtrfp.trcl.beh.UpdatesThrottleMeterBehavior;
+import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.VelocityDragBehavior;
@@ -25,28 +26,18 @@ import org.jtrfp.trcl.beh.WeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.file.Weapon;
 
 public class Player extends WorldObject
 	{
 	private final Camera camera;
 	private int cameraDistance=0;
-	private int afterburnerQuantity;
 	private static final int SINGLE_SKL=0;
-	private int rtlLevel;
-	private int pacLevel;
-	private int rtlQuantity;
-	private int pacQuantity;
-	private int ionQuantity;
-	private int mamQuantity;
-	private int sadQuantity;
-	private int swtQuantity;
-	private int damQuantity;
 	public static final int CLOAK_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
-	private int cloakCountdown;
 	public static final int INVINCIBILITY_COUNTDOWN_START=ThreadManager.GAMEPLAY_FPS*30;//30sec
-	private int invincibilityCountdown;
-	private final ProjectileFiringBehavior pacFiringBehavior;
-	private final ProjectileFiringBehavior rtlFiringBehavior;
+	//private final ProjectileFiringBehavior pacFiringBehavior;
+	//private final ProjectileFiringBehavior rtlFiringBehavior;
+	private final ProjectileFiringBehavior [] weapons = new ProjectileFiringBehavior[Weapon.values().length];
 
 	public Player(TR tr,Model model)
 		{super(tr,model);
@@ -67,17 +58,32 @@ public class Player extends WorldObject
 		addBehavior(new LoopingPositionBehavior());
 		addBehavior(new UpdatesThrottleMeterBehavior().setController(tr.getThrottleMeter()));
 		addBehavior(new UpdatesHealthMeterBehavior().setController(tr.getHealthMeter()));
-		addBehavior(new BouncesOffSurfaces());pacFiringBehavior=
-		addBehavior(new ProjectileFiringBehavior()
-			.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
-			setProjectileFactory(tr.getResourceManager().getRedLaserFactory()));rtlFiringBehavior=
-		addBehavior(new ProjectileFiringBehavior()
-    			.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
-    			setProjectileFactory(tr.getResourceManager().getWhiteLaserFactory()));
-		addBehavior(new WeaponSelectionBehavior().setBehaviors(new ProjectileFiringBehavior[]
-			{pacFiringBehavior,
-			null,
-			rtlFiringBehavior,null,null,null,null}));
+		addBehavior(new BouncesOffSurfaces());
+		final Weapon [] allWeapons = Weapon.values();
+		final ProjectileFactory [] projectileFactories=tr.getResourceManager().getProjectileFactories();
+		for(int i=0; i<allWeapons.length; i++){
+		    final Weapon w=allWeapons[i];
+		    if(w.getButtonToSelect()!=-1){
+			final ProjectileFiringBehavior pfb;
+			if(w.isLaser()){//LASER
+			    pfb = new UpgradeableProjectileFiringBehavior().
+				setProjectileFactory(tr.getResourceManager().getProjectileFactories()[w.ordinal()]);
+			    ((UpgradeableProjectileFiringBehavior)pfb).setMaxCapabilityLevel(2).setFiringMultiplexMap(
+				    new Vector3D[][]{new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)},//Level 0, single
+					    new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)},//Level 1, double
+					    new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0),//Level 2 quad
+					    new Vector3D(5000,3000,0),new Vector3D(-5000,3000,0)}});// Level 2 cont'd
+			}//end if(isLaser)
+			else{//NOT LASER
+			    pfb = new ProjectileFiringBehavior()
+				.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
+				setProjectileFactory(tr.getResourceManager().getProjectileFactories()[w.ordinal()]);
+			}
+			addBehavior(pfb);
+			weapons[w.getButtonToSelect()-1]=pfb;
+		    }//end if(hasButton)
+		}
+		addBehavior(new WeaponSelectionBehavior().setBehaviors(weapons));
 		camera = tr.getRenderer().getCamera();
 		getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 		getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
@@ -121,130 +127,9 @@ public class Player extends WorldObject
 		}
 
 	/**
-	 * @return the afterburnerQuantity
+	 * @return the weapons
 	 */
-	public int getAfterburnerQuantity()
-		{
-		return afterburnerQuantity;
-		}
-
-	/**
-	 * @param afterburnerQuantity the afterburnerQuantity to set
-	 */
-	public void setAfterburnerQuantity(int afterburnerQuantity)
-		{this.afterburnerQuantity = afterburnerQuantity;}
-
-	/**
-	 * @return the rtlQuantity
-	 */
-	public int getRtlQuantity()
-		{return rtlQuantity;}
-
-	/**
-	 * @param rtlQuantity the rtlQuantity to set
-	 */
-	public void setRtlQuantity(int rtlQuantity){
-		if(this.rtlQuantity>0&& rtlLevel<2 && rtlQuantity>this.rtlQuantity)this.rtlLevel++;
-		this.rtlQuantity = rtlQuantity;
-		}
-
-	/**
-	 * @return the pacQuantity
-	 */
-	public int getPacQuantity()
-		{return pacQuantity;}
-
-	/**
-	 * @param pacQuantity the pacQuantity to set
-	 */
-	public void setPacQuantity(int pacQuantity)
-		{if(this.pacQuantity>0&& pacLevel<2 && pacQuantity>this.pacQuantity)this.pacLevel++;
-		this.pacQuantity = pacQuantity;
-		}
-
-	/**
-	 * @return the ionQuantity
-	 */
-	public int getIonQuantity()
-		{return ionQuantity;}
-
-	/**
-	 * @param ionQuantity the ionQuantity to set
-	 */
-	public void setIonQuantity(int ionQuantity)
-		{
-		this.ionQuantity = ionQuantity;
-		}
-
-	/**
-	 * @return the mamQuantity
-	 */
-	public int getMamQuantity()
-		{return mamQuantity;}
-
-	/**
-	 * @param mamQuantity the mamQuantity to set
-	 */
-	public void setMamQuantity(int mamQuantity)
-		{this.mamQuantity = mamQuantity;}
-
-	/**
-	 * @return the sadQuantity
-	 */
-	public int getSadQuantity()
-		{return sadQuantity;}
-
-	/**
-	 * @param sadQuantity the sadQuantity to set
-	 */
-	public void setSadQuantity(int sadQuantity)
-		{this.sadQuantity = sadQuantity;}
-
-	/**
-	 * @return the swtQuantity
-	 */
-	public int getSwtQuantity()
-		{return swtQuantity;}
-
-	/**
-	 * @param swtQuantity the swtQuantity to set
-	 */
-	public void setSwtQuantity(int swtQuantity)
-		{this.swtQuantity = swtQuantity;}
-
-	/**
-	 * @return the damQuantity
-	 */
-	public int getDamQuantity()
-		{return damQuantity;}
-
-	/**
-	 * @param damQuantity the damQuantity to set
-	 */
-	public void setDamQuantity(int damQuantity)
-		{this.damQuantity = damQuantity;}
-
-	/**
-	 * @return the cloakCountdown
-	 */
-	public int getCloakCountdown()
-		{return cloakCountdown;}
-
-	/**
-	 * @param cloakCountdown the cloakCountdown to set
-	 */
-	public void setCloakCountdown(int cloakCountdown)
-		{this.cloakCountdown = cloakCountdown;}
-
-	/**
-	 * @return the invincibilityCountdown
-	 */
-	public int getInvincibilityCountdown()
-		{return invincibilityCountdown;}
-
-	/**
-	 * @param invincibilityCountdown the invincibilityCountdown to set
-	 */
-	public void setInvincibilityCountdown(int invincibilityCountdown)
-		{this.invincibilityCountdown = invincibilityCountdown;}
+	public ProjectileFiringBehavior[] getWeapons() {
+	    return weapons;
+	}
 	}//end Player

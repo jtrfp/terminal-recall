@@ -6,6 +6,7 @@ import org.jtrfp.trcl.Submitter;
 
 public class DamageableBehavior extends Behavior{
 	private int health=65535;
+	private long invincibilityExpirationTime=System.currentTimeMillis();
 
 	public void damage(int dmg){
 		health-=dmg;
@@ -15,6 +16,10 @@ public class DamageableBehavior extends Behavior{
 		}//end if(dead)
 	    }
 
+	public boolean isInvincible(){
+	    return invincibilityExpirationTime>System.currentTimeMillis();
+	}
+	
 	public int getHealth(){
 		return health;
 		}
@@ -42,5 +47,14 @@ public class DamageableBehavior extends Behavior{
 		for(DeathListener l:items){submit(l);}
 	    }
 	};
+
+	public void addInvincibility(int invincibilityTimeDeltaMillis) {
+	    ensureIsInvincible();
+	    invincibilityExpirationTime+=invincibilityTimeDeltaMillis;
+	}
+
+	protected void ensureIsInvincible() {
+	    if(!isInvincible())invincibilityExpirationTime=System.currentTimeMillis()+10;//10 for padding
+	}
 	
     }//end DamageableBehavior

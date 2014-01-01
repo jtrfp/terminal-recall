@@ -2,20 +2,23 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
-import org.jtrfp.trcl.beh.DeathBehavior;
-import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
+import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.file.Powerup;
+import org.jtrfp.trcl.file.Weapon;
 
 public class PowerupObject extends BillboardSprite{
 	private final Powerup powerupType;
@@ -54,50 +57,27 @@ public class PowerupObject extends BillboardSprite{
 				}//end if(close enough)
 			}//end proposeCollision()
 		
-		public void applyToPlayer(Player p)
-			{switch(powerupType)
-				{case RTL:
-					p.setRtlQuantity(p.getRtlQuantity()+100);
-					break;
-				case PAC:
-					p.setPacQuantity(p.getPacQuantity()+100);
-					break;
-				case ION:
-					p.setIonQuantity(p.getIonQuantity()+100);
-					break;
-				case MAM:
-					p.setMamQuantity(p.getMamQuantity()+40);
-					break;
-				case SAD:
-					p.setSadQuantity(p.getSadQuantity()+20);
-					break;
-				case SWT:
-					p.setSwtQuantity(p.getSwtQuantity()+20);
-					break;
-				case shieldRestore:
-					p.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();
-					break;
-				case invisibility:
-					p.setCloakCountdown(Player.CLOAK_COUNTDOWN_START);
-					break;
-				case invincibility:
-					p.setInvincibilityCountdown(Player.INVINCIBILITY_COUNTDOWN_START);
-					break;
-				case DAM:
-					p.setDamQuantity(1);
-					break;
-				case Afterburner:
-					p.setAfterburnerQuantity(p.getAfterburnerQuantity()+20);
-					break;
-				case PowerCore:
-					p.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage(6554);
-					break;
-				case Random:
-				    	applyToPlayer(p);
-					break;
-				}//end switch(powerupType)
-			}//end applyToPlayer()
-		}//end PowerupBehavior
+		public void applyToPlayer(Player p){
+			if(powerupType.getAfterburnerDelta()!=0){
+			    AfterburnerBehavior ab = p.getBehavior().probeForBehavior(AfterburnerBehavior.class);
+			    ab.addSupply(powerupType.getAfterburnerDelta());
+			}
+			if(powerupType.getInvincibilityTimeDeltaMillis()!=0){
+			    DamageableBehavior db = p.getBehavior().probeForBehavior(DamageableBehavior.class);
+			    db.addInvincibility(powerupType.getInvincibilityTimeDeltaMillis());
+			}
+			if(powerupType.getInvisibiltyTimeDeltaMillis()!=0){
+			    //TODO: Need to re-design invisible vs. inactive.
+			}
+			if(powerupType.getShieldDelta()!=0){
+			    DamageableBehavior db = p.getBehavior().probeForBehavior(DamageableBehavior.class);
+			    db.unDamage(powerupType.getAfterburnerDelta());
+			}
+			//wEAPON DELTAS
+			final Weapon pWeapon=powerupType.getWeapon();
+			if(pWeapon!=null){p.getWeapons()[pWeapon.ordinal()].addSupply(powerupType.getWeaponSupplyDelta());}
+		}//end applyToPlayer()
+	}//end PowerupBehavior
 	
 	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
 		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}

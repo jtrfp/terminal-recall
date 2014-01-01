@@ -91,11 +91,9 @@ public class ResourceManager{
 	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
 	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
 	private ExplosionFactory explosionFactory;
-	private ProjectileFactory redLaserFactory;
-	private ProjectileFactory whiteLaserFactory;
-	private ProjectileFactory blueLaserFactory;
 	private PluralizedPowerupFactory pluralizedPowerupFactory;
 	private DebrisFactory debrisFactory;
+	private ProjectileFactory [] projectileFactories;
 	
 	private final TR tr;
 	
@@ -236,7 +234,9 @@ public class ResourceManager{
 		}
 	
 	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException
-		{
+		{if(name==null)throw new NullPointerException("Name cannot be null");
+		if(palette==null)throw new NullPointerException("Palette cannot be null");
+		if(gl==null)throw new NullPointerException("GL cannot be null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
 		if(gl.getContext().isCurrent())gl.getContext().release();//Feed the dog
 		try {
@@ -585,48 +585,6 @@ public class ResourceManager{
 		return result;
 		}
 
-	/**
-	 * @return the projectileFactory
-	 */
-	public ProjectileFactory getRedLaserFactory() {
-	    return redLaserFactory;
-	}
-
-	/**
-	 * @param projectileFactory the projectileFactory to set
-	 */
-	public void setRedLaserFactory(ProjectileFactory projectileFactory) {
-	    this.redLaserFactory = projectileFactory;
-	}
-
-	/**
-	 * @return the greenLaserFactory
-	 */
-	public ProjectileFactory getWhiteLaserFactory() {
-	    return whiteLaserFactory;
-	}
-
-	/**
-	 * @param greenLaserFactory the greenLaserFactory to set
-	 */
-	public void setWhiteLaserFactory(ProjectileFactory greenLaserFactory) {
-	    this.whiteLaserFactory = greenLaserFactory;
-	}
-
-	/**
-	 * @return the blueLaserFactory
-	 */
-	public ProjectileFactory getBlueLaserFactory() {
-	    return blueLaserFactory;
-	}
-
-	/**
-	 * @param blueLaserFactory the blueLaserFactory to set
-	 */
-	public void setBlueLaserFactory(ProjectileFactory blueLaserFactory) {
-	    this.blueLaserFactory = blueLaserFactory;
-	}
-
 	public void setPluralizedPowerupFactory(
 		PluralizedPowerupFactory pluralizedPowerupFactory) {
 	    this.pluralizedPowerupFactory=pluralizedPowerupFactory;
@@ -646,5 +604,16 @@ public class ResourceManager{
 	 */
 	public void setDebrisFactory(DebrisFactory debrisFactory) {
 	    this.debrisFactory = debrisFactory;
+	}
+
+	public ProjectileFactory[] getProjectileFactories() {
+	    return projectileFactories;
+	}
+
+	/**
+	 * @param projectileFactories the projectileFactories to set
+	 */
+	public void setProjectileFactories(ProjectileFactory[] projectileFactories) {
+	    this.projectileFactories = projectileFactories;
 	}
 }//end ResourceManager

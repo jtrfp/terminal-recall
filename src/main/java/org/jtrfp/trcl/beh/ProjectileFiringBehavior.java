@@ -5,24 +5,28 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class ProjectileFiringBehavior extends Behavior {
+public class ProjectileFiringBehavior extends Behavior implements HasQuantifiableSupply{
     long timeWhenNextFiringPermittedMillis=0;
     long timeBetweenFiringsMillis=130;
     private Vector3D [] firingPositions;
     private int firingPositionIndex=0;
     private ProjectileFactory projectileFactory;
     private boolean pendingFiring=false;
+    private int multiplexLevel=1;
+    private int ammo=100;
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
+	    if(takeAmmo()){
 	    	final WorldObject p = getParent();
 	    	final Vector3D heading = p.getHeading();
-	    	final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
+	    	for(int mi=0; mi<multiplexLevel;mi++){
+	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		heading,p.getTop()).applyTo(getNextFiringPosition());
-	    	//final Vector3D firingPosition = new Rotation(heading,Vector3D.PLUS_K,
-	    	//	p.getTop(),Vector3D.PLUS_J).applyTo(getNextFiringPosition());
-	    	resetFiringTimer();
-	    	projectileFactory.fire(p.getPosition().add(firingPosition), heading);
+	    	    resetFiringTimer();
+	    	    projectileFactory.fire(p.getPosition().add(firingPosition), heading);
+	    	}//for(multiplex)
+	    }//end if(ammo)
 	    	pendingFiring=false;
 	}//end timeWhenNextfiringPermitted
     }//end _tick
@@ -30,6 +34,10 @@ public class ProjectileFiringBehavior extends Behavior {
     public ProjectileFiringBehavior requestFire(){
 	pendingFiring=true;
 	return this;
+    }
+    
+    protected boolean takeAmmo(){
+	if(ammo<=0)return false; ammo--; return true;
     }
     
     private void resetFiringTimer(){
@@ -66,6 +74,39 @@ public class ProjectileFiringBehavior extends Behavior {
      */
     public ProjectileFiringBehavior setProjectileFactory(ProjectileFactory projectileFactory) {
         this.projectileFactory = projectileFactory;
+        return this;
+    }
+
+    /**
+     * @return the ammo
+     */
+    public int getAmmo() {
+        return ammo;
+    }
+
+    @Override
+    public void addSupply(double amount) {
+	ammo+=amount;
+	
+    }
+
+    @Override
+    public double getSupply() {
+	return ammo;
+    }
+
+    /**
+     * @return the multiplexLevel
+     */
+    public int getMultiplexLevel() {
+        return multiplexLevel;
+    }
+
+    /**
+     * @param multiplexLevel the multiplexLevel to set
+     */
+    public ProjectileFiringBehavior setMultiplexLevel(int multiplexLevel) {
+        this.multiplexLevel = multiplexLevel;
         return this;
     }
 }//end ProjectileFiringBehavior

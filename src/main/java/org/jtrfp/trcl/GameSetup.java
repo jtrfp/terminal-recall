@@ -26,6 +26,7 @@ import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
+import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.obj.DebrisFactory;
@@ -49,52 +50,21 @@ public class GameSetup
 		Color [] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 		globalPalette[0]=new Color(0,0,0,0);//index zero is transparent
 		tr.setGlobalPalette(globalPalette);
-		
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
-		
 		// POWERUPS
 		tr.getResourceManager().setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
-		
 		/// EXPLOSIONS
 		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
 		// DEBRIS
 		tr.getResourceManager().setDebrisFactory(new DebrisFactory(tr));
-		
-		Model m;
-		Triangle [] tris;
-		TextureDescription t;
-		final double SEG_LEN=5000;
-		//RED LASERS
-		m = new Model(false);
-	    	 t = tr.getResourceManager().getRAWAsTexture(
-	    		"BIGEX8.RAW",
-	    		tr.getDarkIsClearPalette(), 
-	    		GammaCorrectingColorProcessor.singleton, 
-	    		tr.getGPU().getGl());
-	    	tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/2.,SEG_LEN/2.,SEG_LEN/2.,0}, //X
-	    		new double[]{0,0,0,0}, new double[]{-SEG_LEN*(7./2.),-SEG_LEN*(7./2.),SEG_LEN*(7/2),SEG_LEN*(7./2.)}, //YZ
-	    		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC));//UVtr
-	    	 tris[0].setAlphaBlended(true);
-	    	 tris[1].setAlphaBlended(true);
-	    	 m.addTriangles(tris);
-	    	 m.finalizeModel();
-		tr.getResourceManager().setRedLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*12,2048,ExplosionType.Blast));
-		//WHITE LASERS
-		m = new Model(false);
-		t = tr.getResourceManager().getRAWAsTexture(
-	    		"NEWLASER.RAW", 
-	    		globalPalette, 
-	    		GammaCorrectingColorProcessor.singleton, 
-	    		tr.getGPU().getGl());
-	    	 tris =(Triangle.quad2Triangles(new double[]{-SEG_LEN/1.5,SEG_LEN/1.5,SEG_LEN/1.5,0}, //X
-	    		new double[]{0,0,0,0}, new double[]{-SEG_LEN*(7./2.),-SEG_LEN*(7./2.),SEG_LEN*(7/2),SEG_LEN*(7./2.)}, //YZ
-	    		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC));//UVtr
-	    	 tris[0].setAlphaBlended(true);
-	    	 tris[1].setAlphaBlended(true);
-	    	 m.addTriangles(tris);
-	    	 m.finalizeModel();
-	    	tr.getResourceManager().setWhiteLaserFactory(new ProjectileFactory(tr,m,TR.mapSquareSize*18,4096,ExplosionType.Blast));
+		//SETUP PROJECTILE FACTORIES
+		Weapon [] w = Weapon.values();
+		ProjectileFactory [] pf = new ProjectileFactory[w.length];
+		for(int i=0; i<w.length;i++){
+		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+		}//end for(weapons)
+		tr.getResourceManager().setProjectileFactories(pf);
 		//MAV targets
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());
 		for(NAVSubObject nObj:nav.getNavObjects())

@@ -31,8 +31,7 @@ public class WeaponSelectionBehavior extends Behavior {
      * @param behaviors the behaviors to set
      */
     public WeaponSelectionBehavior setBehaviors(ProjectileFiringBehavior[] behaviors) {
-        if(behaviors.length==7)this.behaviors = behaviors;
-        else throw new IllegalArgumentException("Need seven behaviors. Got "+behaviors.length);
+        this.behaviors = behaviors;
         activeBehavior=behaviors[0];
         return this;
     }

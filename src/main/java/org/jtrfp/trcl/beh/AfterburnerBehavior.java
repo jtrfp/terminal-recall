@@ -6,7 +6,7 @@ import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class AfterburnerBehavior extends Behavior {
+public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupply {
     boolean firstDetected=true;
     private double fuelRemaining=0;
     private double formerMax,formerProp,newMax;
@@ -43,16 +43,15 @@ public class AfterburnerBehavior extends Behavior {
 	prop.setMaxPropulsion(formerMax);
 	prop.setPropulsion(formerProp);
     }
-    /**
-     * @return the fuelRemaining
-     */
-    public double getFuelRemaining() {
-        return fuelRemaining;
+
+    @Override
+    public void addSupply(double amount) {
+	fuelRemaining+=amount;
+	
     }
-    /**
-     * @param fuelRemaining the fuelRemaining to set
-     */
-    public void setFuelRemaining(double fuelRemaining) {
-        this.fuelRemaining = fuelRemaining;
+
+    @Override
+    public double getSupply() {
+	return fuelRemaining;
     }
 }//end AfterburnerBehavior

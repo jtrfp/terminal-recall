@@ -31,20 +31,20 @@ public enum Weapon{
 	//////// THESE ARE NOT PART OF THE ORDINAL ORDER OF A DEF FILE AND MAY BE RE-ORDERED
 	SAD("SAD","VIP",new BINModelingType("MISSILE.BIN"),8192,ModelingType.MAP_SQUARE_SIZE*5,5,2048,false),
 	SWT("SWT","BFM",new BINModelingType("MISSILE.BIN"),8192,ModelingType.MAP_SQUARE_SIZE*7,6,2048,false),
-	DAM("DAM","FFF",null,Integer.MAX_VALUE,0,7,ModelingType.MAP_SQUARE_SIZE*15,false);
+	DAM("DAM","FFF",new FlatModelingType("FIRBAL0.RAW",new Dimension(80000,560000)),Integer.MAX_VALUE,0,7,ModelingType.MAP_SQUARE_SIZE*15,false);
 	private final String tvDisplayName,f3DisplayName;
 	private final int damage,speed,buttonToSelect;
 	private final ModelingType modelingType;
-	private final boolean limitlessAndCompoundable;
+	private final boolean laser;
 	Weapon(String tvDisplayName, String f3DisplayName, ModelingType modelingType,
-		int damage,int speed, int buttonToSelect, int hitRadius, boolean limitlessAndCompoundable){
+		int damage,int speed, int buttonToSelect, int hitRadius, boolean laser){
 	    this.modelingType=modelingType;
 	    this.damage=damage;
 	    this.speed=speed;
 	    this.buttonToSelect=buttonToSelect;
 	    this.tvDisplayName=tvDisplayName;
 	    this.f3DisplayName=f3DisplayName;
-	    this.limitlessAndCompoundable=limitlessAndCompoundable;
+	    this.laser=laser;
 	}//end constructor
 	/**
 	 * @return the damage
@@ -62,7 +62,7 @@ public enum Weapon{
 	 * @return the java.awt.event.KeyEvent.KV** constant representing desired button, or Integer.MIN_VALUE if unavailable
 	 */
 	public int getButtonToSelect() {
-	    return buttonToSelect!=-1?KeyEvent.VK_0+buttonToSelect:Integer.MIN_VALUE;
+	    return buttonToSelect;
 	}
 	/**
 	 * @return the tvDisplayName
@@ -87,10 +87,10 @@ public enum Weapon{
 	    return modelingType;
 	}
 	/**
-	 * @return the limitlessAndCompoundable
+	 * @return the laser
 	 */
-	public boolean isLimitlessAndCompoundable() {
-	    return limitlessAndCompoundable;
+	public boolean isLaser() {
+	    return laser;
 	   
 	
 	}

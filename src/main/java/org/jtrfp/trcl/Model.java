@@ -34,26 +34,22 @@ public class Model
 	private boolean animateUV=false;
 	private Controller controller;
 	
-	public Model(boolean smoothAnimation)
-		{
+	public Model(boolean smoothAnimation){
 		this.smoothAnimation=smoothAnimation;
 		//Frame zero
 		tLists.add(new ArrayList<Triangle>());
 		lsLists.add(new ArrayList<LineSegment>());
 		ttLists.add(new ArrayList<Triangle>());
 		}
-	public TriangleList getTriangleList()
-		{
+	public TriangleList getTriangleList(){
 		try{return tpList;}
 		catch(IndexOutOfBoundsException e){return null;}
 		}
-	public LineSegmentList getLineSegmentList()
-		{
+	public LineSegmentList getLineSegmentList(){
 		try{return lsList;}
 		catch(IndexOutOfBoundsException e){return null;}
 		}
-	public TransparentTriangleList getTransparentTriangleList()
-		{
+	public TransparentTriangleList getTransparentTriangleList(){
 		try{return ttpList;}
 		catch(IndexOutOfBoundsException e){return null;}
 		}
@@ -71,17 +67,18 @@ public class Model
 	 */
 	public Model finalizeModel()
 		{
-	    	if(controller==null)controller=new Sequencer(getFrameDelayInMillis(),tLists.size(),true);
+	    	Controller c = controller;
+	    	if(c==null)c=new Sequencer(getFrameDelayInMillis(),tLists.size(),true);
 		Triangle [][] tris = new Triangle[tLists.size()][];
 		for(int i=0; i<tLists.size(); i++)
 			{tris[i]=tLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),"TriangleList...", animateUV,controller);
+		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),"TriangleList...", animateUV,c);
 		else tpList=null;
 		
 		Triangle [][] ttris = new Triangle[ttLists.size()][];
 		for(int i=0; i<ttLists.size(); i++)
 			{ttris[i]=ttLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),"TransparentTriangleList...", animateUV,controller);
+		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),"TransparentTriangleList...", animateUV,c);
 		else ttpList=null;
 		
 		LineSegment [][] segs = new LineSegment[lsLists.size()][];
@@ -95,17 +92,11 @@ public class Model
 	public void addFrame(Model m)
 		{
 		//Opaque Triangles
-			{
-			tLists.add(m.getRawTriangleLists().get(0));
-			}
+			{tLists.add(m.getRawTriangleLists().get(0));}
 		//Transparent triangles
-			{
-			ttLists.add(m.getRawTransparentTriangleLists().get(0));
-			}
+			{ttLists.add(m.getRawTransparentTriangleLists().get(0));}
 		//Line Segs	
-			{
-			lsLists.add(m.getRawLineSegmentLists().get(0));
-			}
+			{lsLists.add(m.getRawLineSegmentLists().get(0));}
 		}//end addFrame(...)
 	
 	/**
@@ -145,25 +136,21 @@ public class Model
 	/**
 	 * @return the smoothAnimation
 	 */
-	public boolean isSmoothAnimation()
-		{
+	public boolean isSmoothAnimation(){
 		return smoothAnimation;
 		}
 	/**
 	 * @param smoothAnimation the smoothAnimation to set
 	 */
-	public void setSmoothAnimation(boolean smoothAnimation)
-		{
+	public void setSmoothAnimation(boolean smoothAnimation){
 		this.smoothAnimation = smoothAnimation;
 		}
 	
-	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin)
-		{
+	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin){
 		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1);
 		}
 	
-	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1)
-		{
+	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1){
 		Model m = new Model(false);
 		//Front
 		m.addTriangles(Triangle.quad2Triangles(
@@ -203,15 +190,13 @@ public class Model
 	/**
 	 * @return the debugName
 	 */
-	public String getDebugName()
-		{
+	public String getDebugName(){
 		return debugName;
 		}
 	/**
 	 * @param debugName the debugName to set
 	 */
-	public void setDebugName(String debugName)
-		{
+	public void setDebugName(String debugName){
 		this.debugName = debugName;
 		}
 	/**
@@ -226,16 +211,11 @@ public class Model
 	public void setAnimateUV(boolean animateUV) {
 	    this.animateUV = animateUV;
 	}
-	/**
-	 * @return the controller
-	 */
-	public Controller getController() {
-	    return controller;
-	}
+	
 	/**
 	 * @param controller the controller to set
 	 */
 	public void setController(Controller controller) {
 	    this.controller = controller;
 	}
-	}//end Model
+}//end Model

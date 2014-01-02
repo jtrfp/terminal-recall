@@ -29,7 +29,7 @@ public class Explosion extends BillboardSprite {
 	    }
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
-	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false),frames),true);
+	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
     }//end constructor
     
     @Override

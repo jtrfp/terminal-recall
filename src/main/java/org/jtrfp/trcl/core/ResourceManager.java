@@ -258,6 +258,7 @@ public class ResourceManager{
 			for(int i=0; i<frames.length;i++)
 				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette,gl);}
 			if(gl.getContext().isCurrent())gl.getContext().release();
+			frames[0].setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumPrimitives());
 			//Consolidate the frames to one model
 			for(int i=1; i<frames.length;i++)
 				{frames[0].addFrame(frames[i]);}
@@ -265,7 +266,6 @@ public class ResourceManager{
 			result.setFrameDelayInMillis((int)(((double)ac.getDelay()/65535.)*1000.));
 			result.finalizeModel();
 			if(cache)modelCache.put(name, result);
-			result.setDebugName(name+" triangles: "+result.getTriangleList().getNumPrimitives());
 			gl.getContext().makeCurrent();
 			return result;
 			}//end try{}
@@ -407,6 +407,7 @@ public class ResourceManager{
 						{System.out.println("Failed to identify DataBlock: "+b.getClass().getName());}
 					}//end for(dataBlocks)
 				result.finalizeModel();
+				result.setDebugName(name);
 				if(cache)modelCache.put(name, result);
 				if(gl.getContext().isCurrent())gl.getContext().release();
 				return result;

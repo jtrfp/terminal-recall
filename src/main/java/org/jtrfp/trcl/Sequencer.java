@@ -42,4 +42,8 @@ public final class Sequencer implements Controller{
 	public void reset() {
 	    timeOffset=System.currentTimeMillis();
 	}
+
+	public int getNumFrames() {
+	    return numFrames;
+	}
 }//end Sequencer

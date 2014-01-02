@@ -10,11 +10,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
+import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectPlacer;
-import org.jtrfp.trcl.obj.WorldObject;
 
 public class DEFObjectPlacer implements ObjectPlacer
 	{
@@ -56,6 +56,7 @@ public class DEFObjectPlacer implements ObjectPlacer
 				});
 			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
 			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
+			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
 			}
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		
@@ -68,13 +69,37 @@ public class DEFObjectPlacer implements ObjectPlacer
 				{
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
 				//,new TVBehavior(null,def,terrainSystem,pl.getStrength())
-				final WorldObject obj =new DEFObject(tr,model,def,pl);
+				final DEFObject obj =new DEFObject(tr,model,def,pl);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),
 						(TR.legacy2Modern(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY,
 						TR.legacy2Modern(pl.getLocationOnMap().getX())
 						));
+				//TODO: Damaged weapons bunkers
+				if(def.getLogic()==EnemyLogic.groundStaticRuin){
+				    //Spawn a second, powerup-free model using the simplemodel
+				    Model simpleModel=null;
+				    try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPalette(),gl);}
+				    catch(Exception e){e.printStackTrace();}
+				    EnemyDefinition ed = new EnemyDefinition();
+				    ed.setLogic(EnemyLogic.groundDumb);
+				    ed.setDescription("auto-generated enemy rubble def");
+				    ed.setPowerupProbability(0);
+				    EnemyPlacement simplePlacement = new EnemyPlacement();
+				    simplePlacement.setPitch(pl.getPitch());
+				    simplePlacement.setStrength(pl.getStrength());
+				    simplePlacement.setRoll(pl.getRoll());
+				    simplePlacement.setYaw(pl.getYaw());
+				    simplePlacement.setStrength(pl.getStrength());
+				    final DEFObject ruin = new DEFObject(tr,simpleModel,ed,simplePlacement);
+				    ruin.setVisible(false);//TODO: Use setActive later
+				    obj.setRuinObject(ruin);
+				    ruin.setPosition(obj.getPosition());
+				    try{ruin.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
+					catch(MathArithmeticException e){e.printStackTrace();}
+				    target.add(ruin);
+				}
 				//NOTE: The current scheme might very well be wrong because of the lack of pivot impl. Namely the ZYX config of TRCL and TRI's XYZ stuff
 				//Vector3D heading = new Vector3D(Math.cos((double)pl.getPitch())/32767.,0.,Math.sin((double)pl.getPitch()/32767.));
 				try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}

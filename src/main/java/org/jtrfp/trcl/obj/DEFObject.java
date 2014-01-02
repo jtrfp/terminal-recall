@@ -26,6 +26,7 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class DEFObject extends WorldObject {
     private final double boundingRadius;
+    private WorldObject ruinObject;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
@@ -64,7 +65,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case splitShipSmart:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
-    	case groundStaticRuin:
+    	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
     	    mobile=false;
     	    canTurn=false;
     	    break;
@@ -210,10 +211,20 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
+
+@Override
+public void destroy(){
+    if(ruinObject!=null)ruinObject.setVisible(true);//TODO: Switch to setActive later.
+    super.destroy();
+}
 /**
  * @return the boundingRadius
  */
 public double getBoundingRadius() {
     return boundingRadius;
+}
+public void setRuinObject(DEFObject ruin) {
+    ruinObject=ruin;
+    
 }
 }//end DEFObject

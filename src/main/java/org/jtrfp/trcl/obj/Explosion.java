@@ -138,12 +138,12 @@ public class Explosion extends BillboardSprite {
 	private long timeoutTimeInMillis=0;
 	@Override
 	public void _tick(long tickTimeMillis){
-	    if(tickTimeMillis>timeoutTimeInMillis){
+	    if(tickTimeMillis>=timeoutTimeInMillis){
 		destroy();
 	    }//end if(timeout)
 	}//end _tick(...)
 	public void reset(){
-	    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*NUM_FRAMES;
+	    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*(NUM_FRAMES-2);//-10 is padding to avoid stray frame looping
 	}//end reset()
     }//end ExplosionBehavior
 

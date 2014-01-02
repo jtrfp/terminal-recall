@@ -77,7 +77,7 @@ public class PowerupObject extends BillboardSprite{
 			final Weapon pWeapon=powerupType.getWeapon();
 			if(pWeapon!=null){
 			    if(pWeapon.getButtonToSelect()!=-1){
-			    p.getWeapons()[pWeapon.getButtonToSelect()].
+			    p.getWeapons()[pWeapon.getButtonToSelect()-1].
 			    addSupply(powerupType.
 				    getWeaponSupplyDelta());}}
 		}//end applyToPlayer()

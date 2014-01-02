@@ -59,6 +59,7 @@ public class WorldObject implements PositionedRenderable
 	public static final Vector3D EVERYWHERE = new Vector3D(Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY);
 	private SpacePartitioningGrid containingGrid;
 	private Behavior behavior=new NullBehavior(this);
+	private boolean active=true;
 	
 	public WorldObject(TR tr)
 		{
@@ -321,7 +322,8 @@ public class WorldObject implements PositionedRenderable
 	
 	public void destroy()
 		{//tr.getCollisionManager().remove(this);
-	    	setVisible(false);
+	    	//setVisible(false);
+	    	setActive(false);
 		if(containingGrid!=null)containingGrid.remove(this);
 		}
 	
@@ -338,5 +340,19 @@ public class WorldObject implements PositionedRenderable
 
 	public Model getModel() {
 	    return model;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+	    return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+	    this.active = active;
 	}
 	}//end WorldObject

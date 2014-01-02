@@ -36,7 +36,7 @@ public class CollisionManager
 			{final WorldObject left=list.get(i);
 			for(int j=i+1; j<list.size(); j++)
 				{final WorldObject right=list.get(j);
-				if(left.isVisible()&&right.isVisible()&& 
+				if(left.isActive()&&right.isActive()&& 
 					TR.twosComplimentDistance(left.getPosition(), right.getPosition())<MAX_CONSIDERATION_DISTANCE){
 					//left.getPosition().distance(right.getPosition())%TR.mapWidth<MAX_CONSIDERATION_DISTANCE){
 				    left.proposeCollision(right);

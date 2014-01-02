@@ -91,6 +91,7 @@ public class PowerupObject extends BillboardSprite{
 	
 	public void reset(Vector3D newPos){
 		setPosition(newPos);
+		setActive(true);
 		setVisible(true);
 	    }//end reset()
 	}//end PowerupObject

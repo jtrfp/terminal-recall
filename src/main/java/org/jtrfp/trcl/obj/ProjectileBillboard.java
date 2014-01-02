@@ -26,6 +26,7 @@ public class ProjectileBillboard extends BillboardSprite implements Projectile {
 	setHeading(newVelocity.normalize());
 	setPosition(newPos);
 	setVisible(true);
+	setActive(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	getBehavior().probeForBehavior(DeathBehavior.class).reset();
     }//end reset()

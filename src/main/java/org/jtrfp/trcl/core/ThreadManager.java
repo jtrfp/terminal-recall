@@ -71,7 +71,7 @@ public class ThreadManager
 				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
 					{List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
 				    	for(WorldObject wo:vl)
-						{if(wo.isVisible()&&
+						{if(wo.isActive()&&
 						    (TR.twosComplimentDistance(wo.getPosition(), tr.getPlayer().getPosition())
 						    <CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo.getPosition()==WorldObject.EVERYWHERE)
 						        wo.tick(tickTimeInMillis);}

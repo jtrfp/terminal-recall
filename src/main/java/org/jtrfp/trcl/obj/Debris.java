@@ -63,6 +63,7 @@ private static final String [] TYPES = new String[]{
 	setHeading(newVelocity.normalize());
 	setPosition(newPos);
 	setVisible(true);
+	setActive(true);
 	getBehavior().probeForBehavior(RotationalMomentumBehavior.class)
 		.setEquatorialMomentum(.2*Math.random())
 		.setLateralMomentum(.2*Math.random())

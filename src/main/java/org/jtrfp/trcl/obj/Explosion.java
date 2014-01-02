@@ -131,6 +131,7 @@ public class Explosion extends BillboardSprite {
     public void resetExplosion() {
 	getBehavior().probeForBehavior(ExplosionBehavior.class).reset();
 	setVisible(true);
+	setActive(true);
 	sequencer.reset();
     }
     

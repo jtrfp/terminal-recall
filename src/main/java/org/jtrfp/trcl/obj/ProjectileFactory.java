@@ -15,6 +15,7 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.beh.DestroysEverythingBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.ModelingType;
@@ -76,11 +77,18 @@ public class ProjectileFactory {
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;
    	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPalette(), tr.getGPU().getGl());
    	     for(int i=0; i<projectiles.length; i++){
-   		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, damageOnImpact, explosionType);}
+   		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, damageOnImpact, explosionType);
+   		 }
    	 }//end BIN Modeling Type
    	 else{throw new RuntimeException("Unhandled ModelingType: "+modelingType.getClass().getName());}
     	}//end try
 	catch(Exception e){e.printStackTrace();}
+    	//CLAUSE: FFF needs destroysEvertyhing behavior
+    	if(weapon==Weapon.DAM){
+    	for(int i=0; i<projectiles.length; i++){
+		 ((WorldObject)projectiles[i]).addBehavior(new DestroysEverythingBehavior());
+		 }
+    	}//end if(DAM)
        }//end constructor(...)
     public Projectile fire(Vector3D firingPosition, Vector3D heading) {
 	final Projectile result = projectiles[projectileIndex];

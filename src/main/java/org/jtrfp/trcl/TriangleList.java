@@ -26,7 +26,6 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 		{super(debugName,triangles,GPUTriangleVertex.createVertexBlock(triangles[0].length*3));
 		this.timeBetweenFramesMsec=timeBetweenFramesMsec;
 		this.animateUV=animateUV;
-		if(controller==null)throw new NullPointerException("Controller is intolerably null.");
 		this.controller=controller;
 		}
 	

@@ -9,7 +9,6 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	DeathListener {
-    private InterpolatingAltitudeMap map;
     private static final int OVER_TERRAIN_PAD=20000;
     private final Powerup pup;
     public LeavesPowerupOnDeathBehavior(Powerup p){
@@ -20,6 +19,7 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	final WorldObject p=getParent();
 	final Vector3D thisPos=p.getPosition();
 	double height;
+	final InterpolatingAltitudeMap map=p.getTr().getAltitudeMap();
 	if(map!=null)height= map.heightAt((thisPos.getX()/TR.mapSquareSize), 
 		    (thisPos.getZ()/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	else{height=Double.NEGATIVE_INFINITY;}
@@ -27,11 +27,4 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	getParent().getTr().getResourceManager().getPluralizedPowerupFactory().
 		spawn(getParent().getPosition().add(yFudge), pup);
     }//end notifyDeath()
-    
-    //I'm not proud of this; it's a hack to get the heightmap.
-    @Override
-    public void _proposeCollision(WorldObject other){
-	if(other instanceof TerrainChunk){
-	    if(map==null)map = (InterpolatingAltitudeMap)((TerrainChunk)other).getAltitudeMap();}
-    }//end _tick
 }//end LeavesPowerupOnDeathBehavior

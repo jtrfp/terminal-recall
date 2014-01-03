@@ -19,8 +19,10 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
     public void notifyDeath() {//Y-fudge to ensure powerup is not too close to ground.
 	final WorldObject p=getParent();
 	final Vector3D thisPos=p.getPosition();
-	final double height = map.heightAt((thisPos.getX()/TR.mapSquareSize), 
+	double height;
+	if(map!=null)height= map.heightAt((thisPos.getX()/TR.mapSquareSize), 
 		    (thisPos.getZ()/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
+	else{height=Double.NEGATIVE_INFINITY;}
 	final Vector3D yFudge=thisPos.getY()<height+13000?new Vector3D(0,13000,0):Vector3D.ZERO;
 	getParent().getTr().getResourceManager().getPluralizedPowerupFactory().
 		spawn(getParent().getPosition().add(yFudge), pup);

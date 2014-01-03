@@ -53,5 +53,5 @@ public abstract class Behavior
 	    	if(type.isAssignableFrom(this.getClass())){sub.submit((T)this);}
 	    	if(wrapped!=null)wrapped.probeForBehaviors(sub,type);
 		}
-	public void setEnable(boolean doIt){enable=true;}
+	public void setEnable(boolean doIt){enable=doIt;}
 	}//end ObjectBehavior

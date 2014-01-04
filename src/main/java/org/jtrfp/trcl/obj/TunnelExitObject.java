@@ -28,8 +28,7 @@ public class TunnelExitObject extends WorldObject {
 	final Vector3D exitTop = exitHeading.crossProduct(horiz).normalize();
 	exitDirection = new ObjectDirection(exitHeading,exitTop);
 	this.tr=tr;
-	//setVisible(false);
-	setVisible(true);
+	setVisible(false);
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
 	setModel(m);}
 	catch(Exception e){e.printStackTrace();}
@@ -40,7 +39,6 @@ public class TunnelExitObject extends WorldObject {
 	public void _proposeCollision(WorldObject other){
 	    if(other instanceof Player){
 		if(other.getPosition().getX()>TunnelExitObject.this.getPosition().getX()){
-		    System.out.println("Tunnel exit triggered. Exit="+TunnelExitObject.this.getPosition()+" player="+other.getPosition()+" exiting to "+exitLocation);
 		    tr.getWorld().setFogColor((tr.getOverworldSystem().getFogColor()));
 		    tr.getBackdropSystem().overworldMode();
 		    //Teleport

@@ -19,7 +19,7 @@ public class TunnelEntranceObject extends WorldObject {
 	super(tr);
 	this.tunnel=tunnel;
 	addBehavior(new TunnelEntranceBehavior());
-	setVisible(true);
+	setVisible(false);
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
 	setPosition(new Vector3D(TR.legacy2Modern(entrance.getZ()),TR.legacy2Modern(entrance.getY())-45000,TR.legacy2Modern(entrance.getX())));
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());

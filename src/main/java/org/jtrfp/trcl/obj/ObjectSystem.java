@@ -28,20 +28,15 @@ import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile;
 
 public class ObjectSystem extends RenderableSpacePartitioningGrid
-	{
-	
-	public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,TerrainSystem terrain, LVLFile lvl) throws IllegalAccessException, IOException, FileLoadException
-		{
+{
+	public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,TerrainSystem terrain, LVLFile lvl) throws IllegalAccessException, IOException, FileLoadException{
 		super(parentGrid);
 		TR tr = w.getTr();
 		DEFFile defFile = tr.getResourceManager().getDEFData(lvl.getEnemyDefinitionAndPlacementFile());
 		PUPFile pupFile = tr.getResourceManager().getPUPData(lvl.getPowerupPlacementFile());
-		//TDFFile tdf = tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile());
-		//this.palette=palette;
 		DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile,w,terrain);
 		defPlacer.placeObjects(this);
-		
 		PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile,w);
 		pupPlacer.placeObjects(this);
 		}//end ObjectSystem(...)
-	}//end ObjectSystem
+}//end ObjectSystem

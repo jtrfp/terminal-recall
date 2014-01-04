@@ -394,7 +394,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case invisibleWallRight://TODO
 				break;
 			case iris:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8*96,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8*256,false,palette,gl));
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);

@@ -1,5 +1,7 @@
 package org.jtrfp.trcl.obj;
 
+import java.awt.Color;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.Tunnel;
@@ -9,6 +11,7 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
+import org.jtrfp.trcl.gpu.GPU;
 
 public class TunnelEntranceObject extends WorldObject {
     private final Tunnel tunnel;
@@ -36,6 +39,8 @@ public class TunnelEntranceObject extends WorldObject {
 		 //Turn on tunnel
 		 tunnel.activate();
 		 //Move player to tunnel
+		 tr.getWorld().setFogColor(Color.black);
+		 tr.getBackdropSystem().tunnelMode();
 		 tr.getPlayer().setPosition(Tunnel.TUNNEL_START_POS);
 		 tr.getPlayer().setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		 tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);

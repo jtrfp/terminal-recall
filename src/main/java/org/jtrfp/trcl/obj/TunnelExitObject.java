@@ -9,6 +9,7 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
+import org.jtrfp.trcl.gpu.GPU;
 
 public class TunnelExitObject extends WorldObject {
     private final Vector3D exitLocation;
@@ -40,6 +41,8 @@ public class TunnelExitObject extends WorldObject {
 	    if(other instanceof Player){
 		if(other.getPosition().getX()>TunnelExitObject.this.getPosition().getX()){
 		    System.out.println("Tunnel exit triggered. Exit="+TunnelExitObject.this.getPosition()+" player="+other.getPosition()+" exiting to "+exitLocation);
+		    tr.getWorld().setFogColor((tr.getOverworldSystem().getFogColor()));
+		    tr.getBackdropSystem().overworldMode();
 		    //Teleport
 		    other.setPosition(exitLocation);
 		    //Heading

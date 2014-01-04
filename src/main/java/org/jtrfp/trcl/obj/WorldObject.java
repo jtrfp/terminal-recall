@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -205,7 +206,7 @@ public class WorldObject implements PositionedRenderable
 			else if(delta<-TR.mapWidth/2.)
 				{tV=new Vector3D(tV.getX(),tV.getY(),tV.getZ()+TR.mapWidth);}
 			}
-		
+		try{
 		Vector3D aZ=heading.normalize();
 		Vector3D aX=top.crossProduct(aZ).normalize();
 		Vector3D aY=aZ.crossProduct(aX);
@@ -231,6 +232,7 @@ public class WorldObject implements PositionedRenderable
 		else 				{rotTransM = rM;}
 		
 		matrix.set(tr.getRenderer().getCamera().getMatrix().multiply(rotTransM).transpose());
+		}catch(MathArithmeticException e){e.printStackTrace();}//Yell but don't crash.
 		}//end recalculateTransRotMBuffer()
 	
 	protected boolean translate(){return true;}

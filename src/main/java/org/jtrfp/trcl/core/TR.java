@@ -32,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.ManuallySetController;
@@ -70,6 +71,7 @@ public final class TR
 	private ManuallySetController throttleMeter, healthMeter;
 	private OverworldSystem overworldSystem;
 	private InterpolatingAltitudeMap altitudeMap;
+	private BackdropSystem backdropSystem;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -354,5 +356,19 @@ public final class TR
 	 */
 	public void setAltitudeMap(InterpolatingAltitudeMap altitudeMap) {
 	    this.altitudeMap = altitudeMap;
+	}
+
+	/**
+	 * @return the backdropSystem
+	 */
+	public BackdropSystem getBackdropSystem() {
+	    return backdropSystem;
+	}
+
+	/**
+	 * @param backdropSystem the backdropSystem to set
+	 */
+	public void setBackdropSystem(BackdropSystem backdropSystem) {
+	    this.backdropSystem = backdropSystem;
 	}
 	}//end TR

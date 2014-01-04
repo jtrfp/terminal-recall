@@ -32,7 +32,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 	double cloudTileSideSize;
 	int gridSideSizeInTiles;
 	private final TR tr;
-	public CloudSystem(TR tr, RenderableSpacePartitioningGrid grid,LVLFile lvl, double cloudTileSideSize, int gridSideSizeInTiles, double ceilingHeight) throws IllegalAccessException, FileLoadException, IOException
+	public CloudSystem(OverworldSystem os, TR tr, RenderableSpacePartitioningGrid grid,LVLFile lvl, double cloudTileSideSize, int gridSideSizeInTiles, double ceilingHeight) throws IllegalAccessException, FileLoadException, IOException
 		{
 		super(grid);
 		this.tr=tr;
@@ -48,13 +48,14 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 			{newPalette[TR.bidiMod((i+transpose),256)]=palette[i];}
 		
 		cloudTexture = tr.getResourceManager().getRAWAsTexture(cloudTextureFileName, newPalette, GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
-		addToWorld();
+		addToWorld(os);
 		}//end constructor
 	
-	private void addToWorld()
+	private void addToWorld(OverworldSystem os)
 		{
 		//Set fog
 		tr.getWorld().setFogColor(cloudTexture.getAverageColor());
+		os.setFogColor(cloudTexture.getAverageColor());
 		//Create a grid
 		for(int z=0; z<gridSideSizeInTiles; z++)
 			{

@@ -16,6 +16,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private CloudSystem cloudSystem;
 	private TextureMesh textureMesh;
 	private InterpolatingAltitudeMap altitudeMap;
+	private Color fogColor;
 	
 	public OverworldSystem(World w, LVLFile lvl){
 		super(w);
@@ -39,6 +40,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			System.out.println("Setting up sky...");
 			if(!lvl.getCloudTextureFile().contentEquals("stars.vox")){
 				cloudSystem = new CloudSystem(
+						this,
 						tr,
 						this,
 						lvl,
@@ -57,4 +59,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 		catch(Exception e)
 			{e.printStackTrace();}
 		}//end constructor
+
+	public Color getFogColor() {
+	    return fogColor;
+	}
+	public void setFogColor(Color c){fogColor=c;}
 	}//end OverworldSystem

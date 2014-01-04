@@ -99,7 +99,7 @@ public class GameSetup
 		tr.setPlayer(player);
 		
 		tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl));
-		backdropSystem = new BackdropSystem(tr.getWorld());
+		tr.setBackdropSystem(new BackdropSystem(tr.getWorld()));
 		
 		//TODO: Uncomment for tunnel
 		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());

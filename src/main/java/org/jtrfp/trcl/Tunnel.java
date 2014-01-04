@@ -29,10 +29,8 @@ import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class Tunnel extends RenderableSpacePartitioningGrid
-	{
+public class Tunnel extends RenderableSpacePartitioningGrid{
 	private LVLFile lvl;
-	private DEFFile def;
 	private final TR tr;
 	private final Color [] palette;
 	private final GL3 gl;
@@ -49,79 +47,61 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 		this.world=world;
 		this.sourceTunnel=sourceTunnel;
 		deactivate();//Sleep until activated by tunnel entrance
-		
 		tr=world.getTr();
 		palette=tr.getGlobalPalette();
 		gl=tr.getGPU().takeGL();
 		
-		try {
-			lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
-			def=world.getTr().getResourceManager().getDEFData(lvl.getEnemyDefinitionAndPlacementFile());
+		try {   lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
 			tr.getGPU().releaseGL();
-			DirectionVector entranceDV= sourceTunnel.getEntrance();
 			DirectionVector exitDV=sourceTunnel.getExit();
 			//Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
 			final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading(); 
-			Vector3D exitVector = new Vector3D((double)exitDV.getZ()/65535.,-.1,(double)exitDV.getX()/65535.).normalize();
 			tr.getGPU().takeGL();
 			final Vector3D tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
 			final TunnelExitObject eo = new TunnelExitObject(tr,this);
 			System.out.println("Tunnel ends at "+tunnelEnd);
 			eo.setPosition(tunnelEnd.subtract(new Vector3D(80000,0,0)));
 			add(eo);
-			
-			//buildTunnel(sourceTunnel,exitVector,false);
-			
 			// X is tunnel depth, Z is left-right
-			ObjectSystem os = new ObjectSystem(this,world,null,lvl);
-			//TODO: Tunnel deactivators
+			new ObjectSystem(this,world,null,lvl);
 			}
 		catch(Exception e){e.printStackTrace();}
 		}//end constructor
 
-	private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector, boolean entrance) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
-		{//Entrance uses only a stub. Player is warped to 0,0,0 facing 0,0,1
+	private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector, boolean entrance) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
+	    	//Entrance uses only a stub. Player is warped to 0,0,0 facing 0,0,1
 		ResourceManager rm = tr.getResourceManager();
 		LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
 		TextureDescription [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
-		//double z=0;
 		double segLen=256*TunnelSegment.TUNNEL_DIA_SCALAR;
-		//DirectionVector loc=_tun.getEntrance();
-		//System.out.println("Tunnel X: "+TR.legacy2Modern(loc.getX())+" Tunnel Y: "+TR.legacy2Modern(loc.getY())+" Tunnel Z: "+TR.legacy2Modern(loc.getZ()));
 		final double tunnelScalar=(TunnelSegment.TUNNEL_DIA_SCALAR/TR.crossPlatformScalar);
 		final double bendiness=tunnelScalar;
-		//double x=TR.legacy2Modern(loc.getZ());//ZYX
-		//double y=TR.legacy2Modern(loc.getY());
-		//double z=TR.legacy2Modern(loc.getX());
 		List<Segment> segs = tun.getSegments();
 		Vector3D tunnelEnd = new Vector3D(0,0,0);
-		//Rotation rotation = new Rotation(new Vector3D(0,0,1),groundVector);
 		Rotation rotation = entrance?new Rotation(new Vector3D(0,0,1),groundVector):new Rotation(new Vector3D(0,0,1),new Vector3D(1,0,0));
 		//CALCULATE ENDPOINT
-		for(Segment s:segs)
-			{Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
+		for(Segment s:segs){
+		    	Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
 			tunnelEnd=tunnelEnd.add(rotation.applyTo(positionDelta));
 			System.out.println("New endpoint: "+tunnelEnd);
 			}
 		final Vector3D finalEnd=tunnelEnd;
-		//Vector3D startPoint= entrance?new Vector3D(x,y,z):new Vector3D(x,y,z).subtract(tunnelEnd);
 		Vector3D startPoint= TUNNEL_START_POS;
 		
 		Vector3D segPos=Vector3D.ZERO;
 		final Vector3D top=rotation.applyTo(new Vector3D(0,1,0));
 		tunnelEnd=entrance?segPos.add(tunnelEnd):segPos;
-		if(entrance)//Entrance is just a stub so we only need a few of the segments
-			{List<Segment>newSegs = new ArrayList<Segment>();
+		if(entrance){
+		    	//Entrance is just a stub so we only need a few of the segments
+		    	List<Segment>newSegs = new ArrayList<Segment>();
 			for(int i=0; i<10; i++){newSegs.add(segs.get(i));}
 			segs=newSegs;
 			}
-		
 		//CONSTRUCT AND INSTALL SEGMENTS
-		
-		for(Segment s:segs)
-			{//Figure out the space the segment will take
+		for(Segment s:segs){
+		    	//Figure out the space the segment will take
 			Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness*-1,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
 			//Create the segment
 			Vector3D position=startPoint.add(rotation.applyTo(segPos));
@@ -131,13 +111,11 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 			ts.setTop(entrance?top:Vector3D.PLUS_J);
 			//Install the segment
 			add(ts);
-			
 			installObstacles(s,tunnelTexturePalette,entrance?groundVector:Vector3D.PLUS_I,entrance?top:Vector3D.PLUS_J,position,
 					TR.legacy2Modern(s.getStartWidth()*TunnelSegment.TUNNEL_DIA_SCALAR),TR.legacy2Modern(s.getStartWidth()*TunnelSegment.TUNNEL_DIA_SCALAR),tr);
 			//Move origin to next segment
 			segPos=segPos.add(positionDelta);
 			}//end for(segments)
-		
 		return finalEnd;
 		}//end buildTunnel(...)
 	
@@ -155,22 +133,16 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 	 * 
 	 */
 	
-	private void installObstacles(Segment s, TextureDescription[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException
-		{
+	private void installObstacles(Segment s, TextureDescription[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		Color [] palette = tr.getGlobalPalette();
 		Obstacle obs = s.getObstacle();
 		WorldObject wo;
 		GL3 gl = tr.getGPU().takeGL();
-		//obs=Obstacle.rotating34Wall;
 		Model m;
-		
-		switch(obs)
-			{
+		switch(obs){
 			case none0:
-				
 				break;
-			case doorway:
-				{
+			case doorway:{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1);
 				wo = new WorldObject(world.getTr(),m);
 				wo.setPosition(wPos);
@@ -179,8 +151,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				add(wo);
 				break;
 				}
-			case closedDoor:
-				{
+			case closedDoor:{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,0,1);
 				wo = new WorldObject(world.getTr(),m);
 				wo.setPosition(wPos);
@@ -229,8 +200,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				wo.setTop(top);
 				add(wo);
 				break;
-			case movingWallLeft:
-				{
+			case movingWallLeft:{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia));
 				wo = new WorldObject(tr,m);
@@ -241,8 +211,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				add(wo);
 				break;
 				}
-			case movingWallRight:
-				{
+			case movingWallRight:{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia));
 				wo = new WorldObject(tr,m);
@@ -253,8 +222,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				add(wo);
 				break;
 				}
-			case movingWallDown:
-				{
+			case movingWallDown:{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.subtract(top.scalarMultiply(tunnelDia));
 				wo = new WorldObject(tr,m);
@@ -265,8 +233,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				add(wo);
 				break;
 				}
-			case movingWallUp:
-				{
+			case movingWallUp:{
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.add(top.scalarMultiply(tunnelDia));
 				wo = new WorldObject(tr,m);
@@ -407,8 +374,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				wo.setTop(top.crossProduct(heading));
 				add(wo);
 				break;
-			case forceField://TODO
-				{
+			case forceField:{//TODO
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1);
 				wo = new WorldObject(world.getTr(),m);
 				wo.setPosition(wPos);
@@ -417,17 +383,15 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 				add(wo);
 				break;
 				}
+			//Invisible walls, as far as I know, are never used.
+			//This makes sense: There is nothing fun about trying to get through a tunnel and crashing into invisible walls.
 			case invisibleWallUp://TODO
-				
 				break;
 			case invisibleWallDown://TODO
-				
 				break;
 			case invisibleWallLeft://TODO
-				
 				break;
 			case invisibleWallRight://TODO
-				
 				break;
 			case iris:
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8*96,false,palette,gl));
@@ -439,8 +403,6 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 			}//end switch(obstruction)
 		}//end installObstacles()
 	
-	
-	
 	public WorldObject getFallbackModel() throws IllegalAccessException, FileLoadException, IOException
 		{return new WorldObject(tr,tr.getResourceManager().getBINModel("NAVTARG.BIN",null,8,false,palette,gl));}
 
@@ -450,4 +412,4 @@ public class Tunnel extends RenderableSpacePartitioningGrid
 	public TDFFile.Tunnel getSourceTunnel() {
 	    return sourceTunnel;
 	}
-	}//end Tunnel
+}//end Tunnel

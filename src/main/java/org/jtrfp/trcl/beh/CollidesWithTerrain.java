@@ -33,7 +33,7 @@ public class CollidesWithTerrain extends Behavior {
     	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),height,thisPos.getZ()));return;}
     	
 	if(thisPos.getY()<height)
-	    {//p.setPosition(new Vector3D(thisPos.getX(),height+nudge,thisPos.getZ()));
+	    {p.setPosition(new Vector3D(thisPos.getX(),height+nudge,thisPos.getZ()));
 	    //Call impact listeners
 	    surfaceNormalVar=groundNormal;
 	    getParent().getBehavior().probeForBehaviors(sub,SurfaceImpactListener.class);

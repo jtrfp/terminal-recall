@@ -15,12 +15,14 @@ public class BouncesOffSurfaces extends Behavior implements
 	final WorldObject parent = getParent();
 	final Vector3D oldHeading = parent.getHeading();
 	final Vector3D oldTop = parent.getTop();
+	if(oldHeading==null)throw new NullPointerException("Parent heading is null.");
+	if(surfaceNormal==null)throw new NullPointerException("Surface normal is null.");
 	if(reflectHeading && new Rotation(oldHeading,surfaceNormal).getAngle()>Math.PI/2.){
 	    Vector3D newHeading = (surfaceNormal.scalarMultiply(surfaceNormal.dotProduct(oldHeading)*-2).add(oldHeading));
 	    parent.setHeading(newHeading);
 	    final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
 	    Vector3D newTop = resultingRotation.applyTo(oldTop);
-	    if(newTop.getY()<0)newTop=newTop.negate();
+	    //if(newTop.getY()<0)newTop=newTop.negate();
 	    parent.setTop(newTop);
 	}//end if(should reflect)
 	if(parent instanceof Velocible){

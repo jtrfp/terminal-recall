@@ -1,8 +1,8 @@
 package org.jtrfp.trcl;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.obj.TunnelEntranceObject;
 
 public class TunnelInstaller
 	{
@@ -23,11 +23,16 @@ public class TunnelInstaller
 				world.getTr().getGPU().releaseGL();
 				DirectionVector entranceDV= tun.getEntrance();
 				DirectionVector exitDV=tun.getExit();
-				Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
-				Vector3D exitVector = new Vector3D((double)exitDV.getZ()/65535.,-.1,(double)exitDV.getX()/65535.).normalize();
+				//Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
+				//Vector3D exitVector = new Vector3D((double)exitDV.getZ()/65535.,-.1,(double)exitDV.getX()/65535.).normalize();
 				world.getTr().getGPU().takeGL();
 				Tunnel tunnel = new Tunnel(world,tun);
-				if(tIndex++==0)tunnel.activate();//TODO: Remove
+				world.getTr().
+				getOverworldSystem().
+				add(new TunnelEntranceObject(
+					world.
+					getTr(),tunnel));
+				//if(tIndex++==0)tunnel.activate();//TODO: Remove
 				}
 			}//end if(tuns!=null)
 		}//end constructor

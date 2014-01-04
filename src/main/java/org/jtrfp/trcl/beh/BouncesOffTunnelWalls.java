@@ -45,14 +45,15 @@ public class BouncesOffTunnelWalls extends Behavior{
 				{final Segment s = seg.getSegmentData();
 				final double segLen=seg.getSegmentLength();
 				final Vector3D start =seg.getPosition();
-				final Vector3D end = start.add(new Vector3D(segLen,seg.getEndY(),seg.getEndX()));//ZYX
+				final Vector3D end = start.add(new Vector3D(segLen,seg.getEndY(),-seg.getEndX()));//ZYX
 				final Vector3D tunnelSpineNoNorm=end.subtract(start);
 				final Vector3D tunnelSpineNorm=tunnelSpineNoNorm.normalize();
 				
 				final double depthDownSeg=start.getX()-parent.getPosition().getX();
 				final double pctDownSeg=depthDownSeg/segLen;
-				final Vector3D circleCenter=
+				Vector3D circleCenter=
 						start.add(tunnelSpineNorm.scalarMultiply(parent.getPosition().getX()-start.getX()));
+				circleCenter = (new Vector3D(parent.getPosition().getX(),circleCenter.getY(),circleCenter.getZ()));//TODO Remove dubg code
 				final double startWidth=TunnelSegment.getStartWidth(s);
 				final double startHeight=TunnelSegment.getStartHeight(s);
 				final double endWidth=TunnelSegment.getEndWidth(s);
@@ -62,21 +63,25 @@ public class BouncesOffTunnelWalls extends Behavior{
 				final double heightHere=.7*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
 				//Parent position relative to tunnel
 				final Vector3D pprtt = parent.getPosition().subtract(circleCenter);
-				if((pprtt.getZ()*pprtt.getZ())/(widthHere*widthHere)+(pprtt.getY()*pprtt.getY())/(heightHere*heightHere)>1){
+				final double protrusion =(pprtt.getZ()*pprtt.getZ())/(widthHere*widthHere)+(pprtt.getY()*pprtt.getY())/(heightHere*heightHere); 
+				if(protrusion>1){
 					//Execute the "bounce"
-				    	//Notify listeners
-					parent.getBehavior().probeForBehaviors(sub, SurfaceImpactListener.class);
 				    	final Vector3D oldPosition = parent.getPosition();
-					//parent.setPosition(circleCenter.scalarMultiply(.2).add(oldPosition.scalarMultiply(.8)));
-					final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize();
+				    	//Barrier
+				    	parent.setPosition(circleCenter.scalarMultiply(.01).add(oldPosition.scalarMultiply(.99)));
+				    	final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize();
 					surfaceNormalVar = inwardNormal;
-					final RotationalMomentumBehavior rmb = parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
-					
+					//System.exit(10);
+					//Notify listeners
+					parent.getBehavior().probeForBehaviors(sub, SurfaceImpactListener.class);
+					//final RotationalMomentumBehavior rmb = parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+					/*
 					if(rmb!=null){//If this is a spinning object, reverse its spin momentum
 				    	    rmb.setLateralMomentum(rmb.getLateralMomentum()*-1);
 				    	    rmb.setEquatorialMomentum(rmb.getEquatorialMomentum()*-1);
 				    	    rmb.setPolarMomentum(rmb.getPolarMomentum()*-1);
 				    	    }
+					*/
 					}//end if collided with tunnel
 				else{seg.setVisible(true);}
 				}//end if(in range of segment)

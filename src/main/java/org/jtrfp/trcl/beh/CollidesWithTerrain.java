@@ -15,11 +15,9 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class CollidesWithTerrain extends Behavior {
     private static final double nudge=1;
     private boolean bounce=false;
-    private double pad=0;
     private boolean groundLock=false;
     private InterpolatingAltitudeMap map;
     private Vector3D surfaceNormalVar;
-    private WorldObject other;
     public CollidesWithTerrain(){
     }
     @Override
@@ -31,15 +29,15 @@ public class CollidesWithTerrain extends Behavior {
 	    (thisPos.getZ()/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	final Vector3D groundNormal = (map.normalAt((thisPos.getX()/TR.mapSquareSize), 
 	    (thisPos.getZ()/TR.mapSquareSize)));
-
-    	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),height+pad,thisPos.getZ()));return;}
+	
+    	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),height,thisPos.getZ()));return;}
     	
-	if(thisPos.getY()<height+pad)
-	    {p.setPosition(new Vector3D(thisPos.getX(),height+pad+nudge,thisPos.getZ()));
+	if(thisPos.getY()<height)
+	    {//p.setPosition(new Vector3D(thisPos.getX(),height+nudge,thisPos.getZ()));
 	    //Call impact listeners
 	    surfaceNormalVar=groundNormal;
 	    getParent().getBehavior().probeForBehaviors(sub,SurfaceImpactListener.class);
-	    /*
+	    
 	    //Reflect heading,top
 	    if(bounce){
 	    	final Vector3D oldHeading = p.getHeading();
@@ -59,7 +57,7 @@ public class CollidesWithTerrain extends Behavior {
 	    	Vector3D newTop = resultingRotation.applyTo(oldTop);
 		p.setTop(newTop);
 	    	}//end if(bounce)
-	    	*/
+	    	
 	    }//end if()
     map=null;
     }//end _tick

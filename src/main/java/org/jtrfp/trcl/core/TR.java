@@ -32,8 +32,10 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.ManuallySetController;
+import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
@@ -66,6 +68,8 @@ public final class TR
 	private final CollisionManager collisionManager = new CollisionManager(this);
 	private final Reporter reporter = new Reporter();
 	private ManuallySetController throttleMeter, healthMeter;
+	private OverworldSystem overworldSystem;
+	private InterpolatingAltitudeMap altitudeMap;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -325,5 +329,30 @@ public final class TR
 	 */
 	public void setThrottleMeter(ManuallySetController throttleMeter) {
 	    this.throttleMeter = throttleMeter;
+	}
+
+	public void setOverworldSystem(OverworldSystem overworldSystem) {
+	    this.overworldSystem=overworldSystem;
+	}
+
+	/**
+	 * @return the overworldSystem
+	 */
+	public OverworldSystem getOverworldSystem() {
+	    return overworldSystem;
+	}
+
+	/**
+	 * @return the altitudeMap
+	 */
+	public InterpolatingAltitudeMap getAltitudeMap() {
+	    return altitudeMap;
+	}
+
+	/**
+	 * @param altitudeMap the altitudeMap to set
+	 */
+	public void setAltitudeMap(InterpolatingAltitudeMap altitudeMap) {
+	    this.altitudeMap = altitudeMap;
 	}
 	}//end TR

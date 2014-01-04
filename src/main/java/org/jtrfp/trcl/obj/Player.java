@@ -11,6 +11,7 @@ import org.jtrfp.trcl.beh.BouncesOffTunnelWalls;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HasPropulsion;
+import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MovesByVelocity;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
@@ -56,6 +57,7 @@ public class Player extends WorldObject
 		addBehavior(new CollidesWithTerrain());
 		addBehavior(new AfterburnerBehavior());
 		addBehavior(new LoopingPositionBehavior());
+		addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
 		addBehavior(new UpdatesThrottleMeterBehavior().setController(tr.getThrottleMeter()));
 		addBehavior(new UpdatesHealthMeterBehavior().setController(tr.getHealthMeter()));
 		addBehavior(new BouncesOffSurfaces());

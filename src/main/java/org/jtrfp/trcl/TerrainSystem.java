@@ -33,7 +33,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
 		this.gridSquareSize=gridSquareSize;
 		//this.heightScalar=world.sizeY/2;
-		this.heightScalar=parent.getSquaresY()*gridSquareSize;
+		this.heightScalar=tr.getWorld().sizeY/2;
 		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
 		final double v[] = {1,1,0,0};

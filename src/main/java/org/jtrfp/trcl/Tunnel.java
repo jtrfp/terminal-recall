@@ -12,6 +12,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.beh.IrisBehavior;
 import org.jtrfp.trcl.beh.RotatingObjectBehavior;
 import org.jtrfp.trcl.beh.ShiftingObjectBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
@@ -393,13 +394,15 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case invisibleWallRight://TODO
 				break;
-			case iris:
+			case iris:{
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8*256,false,palette,gl));
+				final Model mod = wo.getModel();
+				wo.addBehavior(new IrisBehavior(new Sequencer(mod.getFrameDelayInMillis(), 2, true),width));
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);
-				break;
+				break;}
 			}//end switch(obstruction)
 		}//end installObstacles()
 	

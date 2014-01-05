@@ -218,4 +218,10 @@ public class Model
 	public void setController(Controller controller) {
 	    this.controller = controller;
 	}
+	/**
+	 * @return the controller
+	 */
+	public Controller getController() {
+	    return controller;
+	}
 }//end Model

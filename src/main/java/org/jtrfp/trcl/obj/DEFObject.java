@@ -197,18 +197,19 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new AccelleratedByPropulsion());
 	addBehavior(new VelocityDragBehavior());
 	
-	if(groundLocked)addBehavior(new TerrainLocked());
+	if(groundLocked){
+	    addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
+	    addBehavior(new TerrainLocked());}
 	else 	{addBehavior(new BouncesOffSurfaces());
-	    	addBehavior(new CollidesWithTerrain());}
+	    	addBehavior(new CollidesWithTerrain());
+	    	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));}
 	
-	addBehavior(new LoopingPositionBehavior());
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
-	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
-    else{addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));}
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
 

@@ -10,7 +10,6 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ProjectileObject3D extends WorldObject implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
-    
     public ProjectileObject3D(TR tr,Model m, int damageOnImpact, ExplosionType explosionType){
 	super(tr,m);
 	addBehavior(new ProjectileBehavior(this,damageOnImpact,explosionType));
@@ -27,4 +26,4 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	getBehavior().probeForBehavior(DeathBehavior.class).reset();
     }//end reset()
-}
+}//end ProjectilObject3D

@@ -7,7 +7,7 @@ import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BouncesOffSurfaces;
-import org.jtrfp.trcl.beh.BouncesOffTunnelWalls;
+import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HasPropulsion;
@@ -47,7 +47,7 @@ public class Player extends WorldObject
 		addBehavior(new MovesByVelocity());
 		addBehavior(new HasPropulsion());
 		addBehavior(new AccelleratedByPropulsion());
-		addBehavior(new BouncesOffTunnelWalls(true,true));
+		addBehavior(new CollidesWithTunnelWalls(true,true));
 		addBehavior(new UserInputThrottleControlBehavior());
 		addBehavior(new VelocityDragBehavior());
 		addBehavior(new AutoLeveling());

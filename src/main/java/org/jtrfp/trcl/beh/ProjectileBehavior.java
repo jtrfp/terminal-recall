@@ -12,7 +12,7 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	public ProjectileBehavior(WorldObject parent, int damageOnImpact, ExplosionType explosionType){
 	    this.damageOnImpact=damageOnImpact;
 	    parent.addBehavior(new MovesByVelocity());
-	    parent.addBehavior(new BouncesOffTunnelWalls(false, false));
+	    parent.addBehavior(new CollidesWithTunnelWalls(false, false));
 	    parent.addBehavior(new CollidesWithTerrain());deathBehavior=
 	    parent.addBehavior(new DeathBehavior());
 	    parent.addBehavior(new ExplodesOnDeath(explosionType));

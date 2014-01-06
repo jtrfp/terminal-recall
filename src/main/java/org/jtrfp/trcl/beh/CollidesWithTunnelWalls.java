@@ -26,13 +26,13 @@ import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class BouncesOffTunnelWalls extends Behavior{
+public class CollidesWithTunnelWalls extends Behavior{
     private final boolean changeHeadingAndTop, alwaysTopUp;
     
     private TunnelSegment seg;
     private Vector3D surfaceNormalVar;
     
-    public BouncesOffTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
+    public CollidesWithTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
 	super();this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;
     }
 	protected void _proposeCollision(WorldObject other){

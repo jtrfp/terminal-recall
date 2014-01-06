@@ -31,7 +31,12 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	}//end _proposeCollision(...)
 	@Override
 	public void collidedWithDEFObject(DEFObject other) {
-	    other.getBehavior().probeForBehavior(DamageableBehavior.class).damage(damageOnImpact);
+	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(damageOnImpact);
 	    deathBehavior.die();
+	}
+	public void forceCollision(WorldObject other) {
+	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(damageOnImpact);
+	    deathBehavior.die();
+	    
 	}
 }//end ProjectileBehavior

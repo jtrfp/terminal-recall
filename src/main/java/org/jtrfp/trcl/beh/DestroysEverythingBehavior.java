@@ -8,7 +8,7 @@ public class DestroysEverythingBehavior extends Behavior {
     @Override
     public void _proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
-	    other.getBehavior().probeForBehavior(DamageableBehavior.class).damage(65536);//Really smash that sucker.
+	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65536);//Really smash that sucker.
 	}//end if(DEFObject)
     }//end proposeCollision()
     @Override

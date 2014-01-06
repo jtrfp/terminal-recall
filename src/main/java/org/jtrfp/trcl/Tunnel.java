@@ -67,7 +67,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			final Vector3D tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
 			final TunnelExitObject eo = new TunnelExitObject(tr,this);
 			System.out.println("Tunnel ends at "+tunnelEnd);
-			eo.setPosition(tunnelEnd.subtract(new Vector3D(80000,0,0)));
+			eo.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)));
 			add(eo);
 			// X is tunnel depth, Z is left-right
 			new ObjectSystem(this,world,null,lvl);

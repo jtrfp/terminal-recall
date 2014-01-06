@@ -149,4 +149,9 @@ public class Game
 		{
 		this.difficulty = difficulty;
 		}
+
+	public void missionComplete() {
+	    //TODO: Handle this.
+	    System.out.println("MISSION COMPLETE");
+	}
 	}//end Game

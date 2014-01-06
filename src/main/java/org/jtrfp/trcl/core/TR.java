@@ -72,6 +72,7 @@ public final class TR
 	private OverworldSystem overworldSystem;
 	private InterpolatingAltitudeMap altitudeMap;
 	private BackdropSystem backdropSystem;
+	private Game game = new Game();
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -370,5 +371,9 @@ public final class TR
 	 */
 	public void setBackdropSystem(BackdropSystem backdropSystem) {
 	    this.backdropSystem = backdropSystem;
+	}
+
+	public Game getGame() {
+	    return game;
 	}
 	}//end TR

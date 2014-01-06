@@ -15,17 +15,28 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.CollisionManager;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject extends Behavior
-	{
-	protected void _proposeCollision(WorldObject other)
-		{
+public class DamagedByCollisionWithGameplayObject extends Behavior{
+    private final double MAX_SPEED=70000;
+    private final int MIN_FRAGS=6;
+	protected void _proposeCollision(WorldObject other){
+	    	final WorldObject p = getParent();
 		if(other.getPosition().distance(getParent().getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
-			{if(other instanceof Player)
-				{getParent().getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/10);}
+			{if(other instanceof Player && getParent() instanceof DEFObject)
+				{getParent().getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/30);
+				other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/10);
+				getParent().getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), new Vector3D(0,1000,0));}
+			/*for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
+			    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
+			    new Vector3D(
+				Math.random()*MAX_SPEED-MAX_SPEED/2.,
+				Math.random()*MAX_SPEED+30000,
+				Math.random()*MAX_SPEED-MAX_SPEED/2.));}*/
 			}//end if(nearby)
 		}//end proposeCollision
-	}//end TVBehavior
+	}//end DamagedByCollisionWithGameplayObject

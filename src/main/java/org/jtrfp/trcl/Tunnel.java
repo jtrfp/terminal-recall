@@ -12,18 +12,24 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DeathBehavior;
+import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
+import org.jtrfp.trcl.beh.DestructibleWallBehavior;
+import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.IrisBehavior;
 import org.jtrfp.trcl.beh.RotatingObjectBehavior;
 import org.jtrfp.trcl.beh.ShiftingObjectBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
+import org.jtrfp.trcl.obj.BarrierCube;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.TunnelExitObject;
@@ -153,21 +159,32 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 				}
 			case closedDoor:{
+			    	BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,0,1,false);
+				bc.setPosition(wPos);
+				bc.setHeading(heading);
+				bc.addBehavior(new DamageableBehavior().setHealth(6554*2));
+				bc.addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+				bc.addBehavior(new DeathBehavior());
+				bc.addBehavior(new DebrisOnDeathBehavior());
+				bc.addBehavior(new DestructibleWallBehavior());
+				bc.setTop(top);
+				add(bc);
+			    /*
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,0,1);
 				wo = new WorldObject(world.getTr(),m);
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);
+				*/
 				break;
 				}
 			case blownOpenDoor:
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1);
-				wo = new WorldObject(world.getTr(),m);
-				wo.setPosition(wPos);
-				wo.setHeading(heading);
-				wo.setTop(top);
-				add(wo);
+				BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1,true);
+				bc.setPosition(wPos);
+				bc.setHeading(heading);
+				bc.setTop(top);
+				add(bc);
 				break;
 			case wallUpSTUB:
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));

@@ -187,7 +187,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				bc.setTop(top);
 				add(bc);
 				break;
-			case wallUpSTUB:
+			case wallUpSTUB://Are these stubs even used?
 			    /*
 				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				wo = new WorldObject(world.getTr(),m);
@@ -357,11 +357,13 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("FANBODY.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case jawsVertical:
@@ -372,6 +374,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				//Down jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
@@ -379,6 +382,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case jawsHorizontal:
@@ -388,6 +392,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				//Right jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
@@ -395,6 +400,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamUp:
@@ -402,6 +408,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos.add(new Vector3D(0,tunnelDia/6,0)));
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamDown:
@@ -409,6 +416,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos.add(new Vector3D(0,-tunnelDia/6,0)));
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamLeft:
@@ -416,6 +424,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos.add(new Vector3D(-tunnelDia/6,0,0)));
 				wo.setHeading(heading);
 				wo.setTop(top.crossProduct(heading));
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamRight:
@@ -423,6 +432,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos.add(new Vector3D(tunnelDia/6,0,0)));
 				wo.setHeading(heading);
 				wo.setTop(top.crossProduct(heading));
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case forceField:{//TODO
@@ -451,6 +461,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
+				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;}
 			}//end switch(obstruction)

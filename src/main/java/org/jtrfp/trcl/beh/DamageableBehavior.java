@@ -3,10 +3,11 @@ package org.jtrfp.trcl.beh;
 import java.util.Collection;
 
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.obj.Player;
 
 public class DamageableBehavior extends Behavior{
 	private int health=65535;
-	private long invincibilityExpirationTime=System.currentTimeMillis();
+	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
 
 	public DamageableBehavior impactDamage(int dmg){
 	    generalDamage(dmg);
@@ -19,12 +20,16 @@ public class DamageableBehavior extends Behavior{
 	}
 	
 	protected void generalDamage(int dmg){
+	    if(isInvincible())return;
 	    health-=dmg;
 		if(health<=0){
 		    getParent().destroy();
 		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
 		}//end if(dead)
-	}
+		else{
+		    if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
+		}//end (!dead)
+	}//end generalDamage(...)
 
 	public boolean isInvincible(){
 	    return invincibilityExpirationTime>System.currentTimeMillis();

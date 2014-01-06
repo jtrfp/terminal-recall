@@ -4,6 +4,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
@@ -185,6 +186,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	}//end switch(logic)
     addBehavior(new DeathBehavior());
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
+    addBehavior(new DamagedByCollisionWithGameplayObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
     if(canTurn){
 	addBehavior(new RotationalMomentumBehavior());

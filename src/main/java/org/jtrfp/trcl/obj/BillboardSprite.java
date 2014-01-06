@@ -12,8 +12,7 @@ import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 
 
-public class BillboardSprite extends WorldObject
-{
+public class BillboardSprite extends WorldObject{
 	private Dimension dim;
 	private double rotation=0;
 	
@@ -32,8 +31,7 @@ public class BillboardSprite extends WorldObject
 		{this.dim=dim;}
 	public Dimension getBillboardSize(){return this.dim;}
 	
-	public void setTexture(TextureDescription desc, boolean useAlpha)
-		{
+	public void setTexture(TextureDescription desc, boolean useAlpha){
 		if(dim==null)throw new NullPointerException("Billboard size must be non-null. (did you forget to set it?)");
 		Triangle[] tris= Triangle.quad2Triangles(
 				new double[]{-.5*dim.getWidth(),.5*dim.getWidth(),.5*dim.getWidth(),-.5*dim.getWidth()}, //X
@@ -42,9 +40,7 @@ public class BillboardSprite extends WorldObject
 				new double[]{0,1,1,0}, //U
 				new double[]{0,0,1,1}, 
 				desc, 
-				RenderMode.DYNAMIC);
-		tris[0].setAlphaBlended(useAlpha);
-		tris[1].setAlphaBlended(useAlpha);
+				RenderMode.DYNAMIC,true);
 		Model m = new Model(false);
 		m.addTriangles(tris);
 		setModel(m.finalizeModel());

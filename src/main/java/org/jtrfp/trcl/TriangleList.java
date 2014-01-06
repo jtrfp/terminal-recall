@@ -17,6 +17,8 @@ package org.jtrfp.trcl;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
 public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 	{
 	private Controller controller;
@@ -143,16 +145,49 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 	public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle()
 		{return RenderStyle.OPAQUE;}
 	
-	public double getMaximumVertexValue()
-		{
+	public Vector3D getMaximumVertexDims(){
+		Vector3D result=Vector3D.ZERO;
+		Triangle [][]t=getPrimitives();
+		for(Triangle [] frame:t){
+			for(Triangle tri:frame){
+				for(int i=0; i<3; i++){
+					double v;
+					v=(tri.x[i]);
+					result=result.getX()<v?new Vector3D(v,result.getY(),result.getZ()):result;
+					v=(tri.y[i]);
+					result=result.getY()<v?new Vector3D(result.getX(),v,result.getZ()):result;
+					v=(tri.z[i]);
+					result=result.getZ()<v?new Vector3D(result.getX(),result.getY(),v):result;
+					}//end for(vertex)
+				}//end for(triangle)
+			}//end for(triangles)
+		return result;
+		}//end getMaximumVertexDims()
+	public Vector3D getMinimumVertexDims(){
+		Vector3D result=new Vector3D(Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY);
+		Triangle [][]t=getPrimitives();
+		for(Triangle [] frame:t){
+			for(Triangle tri:frame){
+				for(int i=0; i<3; i++){
+					double v;
+					v=(tri.x[i]);
+					result=result.getX()>v?new Vector3D(v,result.getY(),result.getZ()):result;
+					v=(tri.y[i]);
+					result=result.getY()>v?new Vector3D(result.getX(),v,result.getZ()):result;
+					v=(tri.z[i]);
+					result=result.getZ()>v?new Vector3D(result.getX(),result.getY(),v):result;
+					}//end for(vertex)
+				}//end for(triangle)
+			}//end for(triangles)
+		return result;
+		}//end getMaximumVertexDims()
+	
+	public double getMaximumVertexValue(){
 		double result=0;
 		Triangle [][]t=getPrimitives();
-		for(Triangle [] frame:t)
-			{
-			for(Triangle tri:frame)
-				{
-				for(int i=0; i<3; i++)
-					{
+		for(Triangle [] frame:t){
+			for(Triangle tri:frame){
+				for(int i=0; i<3; i++){
 					double v;
 					v=Math.abs(tri.x[i]);
 					result=result<v?v:result;

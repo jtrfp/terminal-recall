@@ -2,6 +2,7 @@ package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -14,7 +15,7 @@ public class CollidesWithDEFObjects extends Behavior {
     @Override
     public void _proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
-	    final double distance=other.getPosition().distance(getParent().getPosition());
+	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
 	    otherDEF=(DEFObject)other;
 	    if(distance<(boundingRadius+otherDEF.getBoundingRadius())){
 		getParent().getBehavior().probeForBehaviors(sub, DEFObjectCollisionListener.class);

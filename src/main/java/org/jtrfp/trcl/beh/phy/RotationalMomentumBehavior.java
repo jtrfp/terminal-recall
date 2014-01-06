@@ -1,6 +1,7 @@
-package org.jtrfp.trcl.beh;
+package org.jtrfp.trcl.beh.phy;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class RotationalMomentumBehavior extends Behavior {

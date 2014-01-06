@@ -1,5 +1,6 @@
-package org.jtrfp.trcl.beh;
+package org.jtrfp.trcl.beh.phy;
 
+import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.obj.Velocible;
 

@@ -13,12 +13,13 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.beh;
+package org.jtrfp.trcl.beh.phy;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AttribAnimator;
 import org.jtrfp.trcl.IndirectDouble;
 import org.jtrfp.trcl.Sequencer;
+import org.jtrfp.trcl.beh.Behavior;
 
 public class ShiftingObjectBehavior extends Behavior
 	{

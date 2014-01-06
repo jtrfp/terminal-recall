@@ -2,17 +2,17 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.beh.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.LimitedLifeSpan;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
-import org.jtrfp.trcl.beh.MovesByVelocity;
-import org.jtrfp.trcl.beh.PulledDownByGravityBehavior;
-import org.jtrfp.trcl.beh.RotationalDragBehavior;
-import org.jtrfp.trcl.beh.RotationalMomentumBehavior;
-import org.jtrfp.trcl.beh.VelocityDragBehavior;
+import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
+import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
+import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
+import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
+import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 

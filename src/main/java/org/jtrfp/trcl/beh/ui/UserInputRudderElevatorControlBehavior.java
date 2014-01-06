@@ -1,8 +1,10 @@
-package org.jtrfp.trcl.beh;
+package org.jtrfp.trcl.beh.ui;
 
 import java.awt.event.KeyEvent;
 
 import org.jtrfp.trcl.KeyStatus;
+import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.obj.Player;
 
 public class UserInputRudderElevatorControlBehavior extends Behavior {

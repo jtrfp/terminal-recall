@@ -1,7 +1,9 @@
-package org.jtrfp.trcl.beh;
+package org.jtrfp.trcl.beh.tun;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Controller;
+import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 

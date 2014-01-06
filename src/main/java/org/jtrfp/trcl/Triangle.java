@@ -28,12 +28,16 @@ public class Triangle
         private boolean isAlphaBlended=false;
        
         TextureDescription texture;
-
+        
+        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, TextureDescription textureToUse, RenderMode mode){
+            return quad2Triangles(x,y,z,u,v,textureToUse,mode,false);
+        }
+        
         /**
          * Converts supplied quad coordinates to a pair of triangles in clockwise order, top-left being index zero.
          *
          */
-        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, TextureDescription textureToUse, RenderMode mode)
+        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, TextureDescription textureToUse, RenderMode mode, boolean hasAlpha)
                 {
                 Triangle [] result = new Triangle[2];
                
@@ -45,6 +49,7 @@ public class Triangle
                 t=new Triangle();
                 t.setTexture(textureToUse);
                 t.setRenderMode(mode);
+                t.setAlphaBlended(hasAlpha);
                 t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
                 t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
                 //BOTTOM LEFT (3)
@@ -63,6 +68,7 @@ public class Triangle
                 t = new Triangle();
                 t.setTexture(textureToUse);
                 t.setRenderMode(mode);
+                t.setAlphaBlended(hasAlpha);
                
                 vtx=0;
                 //TOP LEFT (0)

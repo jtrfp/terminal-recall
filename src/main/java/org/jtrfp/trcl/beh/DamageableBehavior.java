@@ -84,8 +84,9 @@ public class DamageableBehavior extends Behavior{
 	/**
 	 * @param maxHealth the maxHealth to set
 	 */
-	public void setMaxHealth(int maxHealth) {
+	public DamageableBehavior setMaxHealth(int maxHealth) {
 	    this.maxHealth = maxHealth;
+	    return this;
 	}
 	
     }//end DamageableBehavior

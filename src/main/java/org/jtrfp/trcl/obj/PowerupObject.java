@@ -17,6 +17,7 @@ import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 
@@ -48,7 +49,7 @@ public class PowerupObject extends BillboardSprite{
 	private class PowerupBehavior extends Behavior{
 		@Override
 		public void _proposeCollision(WorldObject other){
-			if(other.getPosition().distance(getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
+			if(TR.twosComplimentDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{if(other instanceof Player){
 				    	Player p=(Player)other;
 					applyToPlayer(p);
@@ -71,7 +72,7 @@ public class PowerupObject extends BillboardSprite{
 			}
 			if(powerupType.getShieldDelta()!=0){
 			    DamageableBehavior db = p.getBehavior().probeForBehavior(DamageableBehavior.class);
-			    db.unDamage(powerupType.getAfterburnerDelta());
+			    db.unDamage(powerupType.getShieldDelta());
 			}
 			//wEAPON DELTAS
 			final Weapon pWeapon=powerupType.getWeapon();

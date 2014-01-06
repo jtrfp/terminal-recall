@@ -6,7 +6,8 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.Player;
 
 public class DamageableBehavior extends Behavior{
-	private int health=65535;
+    	private int maxHealth=65535;
+	private int health=maxHealth;
 	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
 
 	public DamageableBehavior impactDamage(int dmg){
@@ -41,10 +42,11 @@ public class DamageableBehavior extends Behavior{
 
 	public void unDamage(int amt){
 		health+=amt;
+		if(health>maxHealth)health=maxHealth;
 		}
 
 	public void unDamage(){
-		health=65535;
+		health=maxHealth;
 		}
 	public DamageableBehavior setHealth(int val){
 	    health=val;return this;
@@ -70,6 +72,20 @@ public class DamageableBehavior extends Behavior{
 
 	protected void ensureIsInvincible() {
 	    if(!isInvincible())invincibilityExpirationTime=System.currentTimeMillis()+10;//10 for padding
+	}
+
+	/**
+	 * @return the maxHealth
+	 */
+	public int getMaxHealth() {
+	    return maxHealth;
+	}
+
+	/**
+	 * @param maxHealth the maxHealth to set
+	 */
+	public void setMaxHealth(int maxHealth) {
+	    this.maxHealth = maxHealth;
 	}
 	
     }//end DamageableBehavior

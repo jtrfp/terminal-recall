@@ -52,6 +52,8 @@ public class GameSetup
 		tr.setGlobalPalette(globalPalette);
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
+		// NAV SYSTEM
+		tr.setNavSystem(new NAVSystem(tr.getWorld(),tr));
 		// POWERUPS
 		tr.getResourceManager().setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 		/// EXPLOSIONS

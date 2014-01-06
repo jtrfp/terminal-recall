@@ -36,6 +36,7 @@ import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.ManuallySetController;
+import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
@@ -73,6 +74,7 @@ public final class TR
 	private InterpolatingAltitudeMap altitudeMap;
 	private BackdropSystem backdropSystem;
 	private Game game = new Game();
+	private NAVSystem navSystem;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -375,5 +377,19 @@ public final class TR
 
 	public Game getGame() {
 	    return game;
+	}
+
+	/**
+	 * @return the navSystem
+	 */
+	public NAVSystem getNavSystem() {
+	    return navSystem;
+	}
+
+	/**
+	 * @param navSystem the navSystem to set
+	 */
+	public void setNavSystem(NAVSystem navSystem) {
+	    this.navSystem = navSystem;
 	}
 	}//end TR

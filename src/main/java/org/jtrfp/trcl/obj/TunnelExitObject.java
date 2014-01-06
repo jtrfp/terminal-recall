@@ -53,6 +53,14 @@ public class TunnelExitObject extends WorldObject {
 		    tr.getPlayer().getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(true);
 		    tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
 		    tr.getPlayer().getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(false);
+		    //Reset projectile behavior
+		    final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
+			 for(ProjectileFactory pf:pfs){
+			     Projectile [] projectiles = pf.getProjectiles();
+			     for(Projectile proj:projectiles){
+				 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
+			     }//end for(projectiles)
+			 }//end for(projectileFactories)
 		}//end if(x past threshold)
 	    }//end if(Player)
 	}//end proposeCollision()

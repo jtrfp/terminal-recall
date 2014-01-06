@@ -2,8 +2,8 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.DEFObject;
-import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class ProjectileBehavior extends Behavior implements SurfaceImpactListener,DEFObjectCollisionListener{
     	public static final long LIFESPAN_MILLIS=4500;
@@ -12,6 +12,7 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	public ProjectileBehavior(WorldObject parent, int damageOnImpact, ExplosionType explosionType){
 	    this.damageOnImpact=damageOnImpact;
 	    parent.addBehavior(new MovesByVelocity());
+	    parent.addBehavior(new BouncesOffTunnelWalls(false, false));
 	    parent.addBehavior(new CollidesWithTerrain());deathBehavior=
 	    parent.addBehavior(new DeathBehavior());
 	    parent.addBehavior(new ExplodesOnDeath(explosionType));

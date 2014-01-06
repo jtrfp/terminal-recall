@@ -20,6 +20,7 @@ import java.util.Collection;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.Velocible;
@@ -46,14 +47,14 @@ public class BouncesOffTunnelWalls extends Behavior{
 				final double segLen=seg.getSegmentLength();
 				final Vector3D start =seg.getPosition();
 				final Vector3D end = start.add(new Vector3D(segLen,seg.getEndY(),-seg.getEndX()));//ZYX
-				final Vector3D tunnelSpineNoNorm=end.subtract(start);
+				final Vector3D tunnelSpineNoNorm=TR.twosComplimentSubtract(end, start);
 				final Vector3D tunnelSpineNorm=tunnelSpineNoNorm.normalize();
 				
 				final double depthDownSeg=start.getX()-parent.getPosition().getX();
 				final double pctDownSeg=depthDownSeg/segLen;
 				Vector3D circleCenter=
-						start.add(tunnelSpineNorm.scalarMultiply(parent.getPosition().getX()-start.getX()));
-				circleCenter = (new Vector3D(parent.getPosition().getX(),circleCenter.getY(),circleCenter.getZ()));//TODO Remove dubg code
+						start.add(tunnelSpineNorm.scalarMultiply(TR.deltaRollover(parent.getPosition().getX()-start.getX())));
+				circleCenter = (new Vector3D(parent.getPosition().getX(),circleCenter.getY(),circleCenter.getZ()));
 				final double startWidth=TunnelSegment.getStartWidth(s);
 				final double startHeight=TunnelSegment.getStartHeight(s);
 				final double endWidth=TunnelSegment.getEndWidth(s);
@@ -62,14 +63,14 @@ public class BouncesOffTunnelWalls extends Behavior{
 				final double widthHere=.7*(startWidth*(1.-pctDownSeg)+endWidth*pctDownSeg);
 				final double heightHere=.7*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
 				//Parent position relative to tunnel
-				final Vector3D pprtt = parent.getPosition().subtract(circleCenter);
+				final Vector3D pprtt = TR.twosComplimentSubtract(parent.getPosition(), circleCenter);
 				final double protrusion =(pprtt.getZ()*pprtt.getZ())/(widthHere*widthHere)+(pprtt.getY()*pprtt.getY())/(heightHere*heightHere); 
 				if(protrusion>1){
 					//Execute the "bounce"
 				    	final Vector3D oldPosition = parent.getPosition();
 				    	//Barrier
 				    	parent.setPosition(circleCenter.scalarMultiply(.01).add(oldPosition.scalarMultiply(.99)));
-				    	final Vector3D inwardNormal = circleCenter.subtract(oldPosition).normalize();
+				    	final Vector3D inwardNormal = TR.twosComplimentSubtract(circleCenter, oldPosition).normalize();
 					surfaceNormalVar = inwardNormal;
 					//System.exit(10);
 					//Notify listeners

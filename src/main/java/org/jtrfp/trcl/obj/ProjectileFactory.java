@@ -99,4 +99,7 @@ public class ProjectileFactory {
 	projectileIndex%=projectiles.length;
 	return result;
     }//end fire(...)
+    public Projectile[] getProjectiles() {
+	return projectiles;
+    }
 }//end ProjectileFactory

@@ -11,7 +11,6 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
-import org.jtrfp.trcl.gpu.GPU;
 
 public class TunnelEntranceObject extends WorldObject {
     private final Tunnel tunnel;
@@ -41,6 +40,15 @@ public class TunnelEntranceObject extends WorldObject {
 		 //Move player to tunnel
 		 tr.getWorld().setFogColor(Color.black);
 		 tr.getBackdropSystem().tunnelMode();
+		 
+		 final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
+		 for(ProjectileFactory pf:pfs){
+		     Projectile [] projectiles = pf.getProjectiles();
+		     for(Projectile proj:projectiles){
+			 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
+		     }//end for(projectiles)
+		 }//end for(projectileFactories)
+		 
 		 tr.getPlayer().setPosition(Tunnel.TUNNEL_START_POS);
 		 tr.getPlayer().setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		 tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);

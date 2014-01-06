@@ -8,14 +8,23 @@ public class DamageableBehavior extends Behavior{
 	private int health=65535;
 	private long invincibilityExpirationTime=System.currentTimeMillis();
 
-	public DamageableBehavior damage(int dmg){
-		health-=dmg;
+	public DamageableBehavior impactDamage(int dmg){
+	    generalDamage(dmg);
+	    return this;
+	}
+	
+	public DamageableBehavior shearDamage(int dmg){
+	    generalDamage(dmg);
+	    return this;
+	}
+	
+	protected void generalDamage(int dmg){
+	    health-=dmg;
 		if(health<=0){
 		    getParent().destroy();
 		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
 		}//end if(dead)
-	    return this;
-	    }
+	}
 
 	public boolean isInvincible(){
 	    return invincibilityExpirationTime>System.currentTimeMillis();

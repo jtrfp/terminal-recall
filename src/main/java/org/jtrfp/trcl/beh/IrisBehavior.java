@@ -6,6 +6,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class IrisBehavior extends Behavior {
+public static final int DAMAGE_ON_IMPACT=6554;
 private final Controller controller;
 private final double maxRadius;
 private static final double X_FLUFF=80000;
@@ -26,7 +27,7 @@ private static final double X_FLUFF=80000;
 		final double dist=Math.sqrt(dY*dY+dZ*dZ);
 		final double currentRadius=maxRadius*(1.-Math.abs(1-controller.getCurrentFrame()));
 		if(dist>currentRadius){
-		    wo.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(1024);
+		    wo.getBehavior().probeForBehavior(DamageableBehavior.class).shearDamage(DAMAGE_ON_IMPACT);
 		}//end if(crushed)
 	    }//end if(in range)
 	}//end if(Player)

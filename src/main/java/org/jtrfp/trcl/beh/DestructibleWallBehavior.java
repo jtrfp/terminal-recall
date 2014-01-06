@@ -7,6 +7,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class DestructibleWallBehavior extends Behavior {
     private static final double THICKNESS_X=4000;
+    public static final int DAMAGE_ON_IMPACT=6554;
     @Override
     public void _proposeCollision(WorldObject other){
 	final Vector3D otherPos=other.getPosition();
@@ -15,7 +16,7 @@ public class DestructibleWallBehavior extends Behavior {
 	if(otherPos.getX()>thisPos.getX()&& otherPos.getX()<thisPos.getX()+THICKNESS_X){
     	    if(other instanceof Player){
     	        final Player player=(Player)other;
-    	        player.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(1024);
+    	        player.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(DAMAGE_ON_IMPACT);
     	        }//end if(Player)
     	    else if(other instanceof Projectile){
     		other.getBehavior().probeForBehavior(ProjectileBehavior.class).forceCollision(p);

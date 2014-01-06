@@ -162,7 +162,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			    	BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,0,1,false);
 				bc.setPosition(wPos);
 				bc.setHeading(heading);
-				bc.addBehavior(new DamageableBehavior().setHealth(6554*2));
+				bc.addBehavior(new DamageableBehavior().setHealth(4096));
 				bc.addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
 				bc.addBehavior(new DeathBehavior());
 				bc.addBehavior(new DebrisOnDeathBehavior());

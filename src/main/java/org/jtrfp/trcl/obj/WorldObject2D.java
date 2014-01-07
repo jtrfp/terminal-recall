@@ -28,9 +28,11 @@ import org.jtrfp.trcl.core.TR;
  * @author Chuck Ritola
  *
  */
-public class WorldObject2D extends WorldObject
-	{
-	public WorldObject2D(TR tr){super(tr);}
+public class WorldObject2D extends WorldObject{
+	public WorldObject2D(TR tr){
+	    super(tr);
+	    setTop(Vector3D.PLUS_J);
+	    setHeading(Vector3D.PLUS_K);}
 	public WorldObject2D(TR tr, Model m)
 		{
 		super(tr, m);
@@ -41,6 +43,18 @@ public class WorldObject2D extends WorldObject
 		{
 		final Vector3D tV = position;
 		
+		Vector3D aZ=getHeading().normalize();
+		Vector3D aX=getTop().crossProduct(aZ).normalize();
+		Vector3D aY=aZ.crossProduct(aX);
+		
+		RealMatrix rM = new Array2DRowRealMatrix(new double [][] 
+			{
+			new double[]{aX.getX(),aY.getX(),	aZ.getX(),	0},
+			new double[]{aX.getY(),aY.getY(),	aZ.getY(),	0},
+			new double[]{aX.getZ(),aY.getZ(),	aZ.getZ(),	0},
+			new double[]{0,		0,			0,			1}
+			});
+		
 		RealMatrix tM = new Array2DRowRealMatrix(new double [][] 
 					{
 					new double[]{1,0,	0,	tV.getX()},
@@ -48,6 +62,6 @@ public class WorldObject2D extends WorldObject
 					new double[]{0,0,	1,	tV.getZ()},
 					new double[]{0,0,	0,	1}
 					});
-		matrix.set(tM.transpose());
+		matrix.set(tM.multiply(rM).transpose());
 		}//end recalculateTransRotMBuffer()
 	}//end WorldObject2D

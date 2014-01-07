@@ -52,8 +52,6 @@ public class GameSetup
 		tr.setGlobalPalette(globalPalette);
 		hudSystem = new HUDSystem(tr.getWorld());
 		hudSystem.activate();
-		// NAV SYSTEM
-		tr.setNavSystem(new NAVSystem(tr.getWorld(),tr));
 		// POWERUPS
 		tr.getResourceManager().setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 		/// EXPLOSIONS
@@ -68,6 +66,7 @@ public class GameSetup
 		}//end for(weapons)
 		tr.getResourceManager().setProjectileFactories(pf);
 		//MAV targets
+		/*
 		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());
 		for(NAVSubObject nObj:nav.getNavObjects())
 			{
@@ -83,9 +82,12 @@ public class GameSetup
 				//world.setCameraPosition(new Vector3D(TR.legacy2Modern(loc.getZ()),TR.legacy2Modern(loc.getY())+TR.mapSquareSize/2,TR.legacy2Modern(loc.getX())));
 				}
 			}//end for(nav.getNavObjects())
-		//TODO: Tunnel activators
+		*/
 		
 		Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
+		tr.setPlayer(player);
+		// NAV SYSTEM
+		tr.setNavSystem(new NAVSystem(tr.getWorld(),tr.getResourceManager().getNAVData(lvl.getNavigationFile()).getNavObjects(),tr));
 		final String startX=System.getProperty("org.jtrfp.trcl.startX");
 		final String startY=System.getProperty("org.jtrfp.trcl.startY");
 		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
@@ -95,15 +97,11 @@ public class GameSetup
 		    final int sY=Integer.parseInt(startY);
 		    final int sZ=Integer.parseInt(startZ);
 		    player.setPosition(new Vector3D(sX,sY,sZ));
-		}else {player.setPosition(Tunnel.TUNNEL_START_POS);}
-		player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+		}
 		tr.getWorld().add(player);
-		tr.setPlayer(player);
-		
 		tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl));
 		tr.setBackdropSystem(new BackdropSystem(tr.getWorld()));
 		
-		//TODO: Uncomment for tunnel
 		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
 		GPU gpu = tr.getGPU();
 		//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.

@@ -9,6 +9,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.obj.CollisionManager;
+import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
@@ -73,7 +74,7 @@ public class ThreadManager
 				    	for(WorldObject wo:vl)
 						{if(wo.isActive()&&
 						    (TR.twosComplimentDistance(wo.getPosition(), tr.getPlayer().getPosition())
-						    <CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo.getPosition()==WorldObject.EVERYWHERE)
+						    <CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo instanceof VisibleEverywhere)
 						        wo.tick(tickTimeInMillis);}
 				    			tr.getCollisionManager().performCollisionTests();}
 				lastGameplayTickTime=tickTimeInMillis;

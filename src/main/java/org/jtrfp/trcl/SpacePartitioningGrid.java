@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.PositionListenable;
 import org.jtrfp.trcl.obj.PositionListener;
+import org.jtrfp.trcl.obj.VisibleEverywhere;
 
 public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	{
@@ -115,6 +116,9 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		{//Figure out where it goes
 		GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
 		objectWithPosition.setContainingGrid(this);
+		if(objectWithPosition instanceof VisibleEverywhere){
+		    addAlwaysVisible(objectWithPosition);
+		}
 		dest.add(objectWithPosition);
 		}
 	public void remove(E objectWithPosition)
@@ -125,7 +129,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 			gc.remove(objectWithPosition);
 			}
 		}
-	public void addAlwaysVisible(E objectWithPosition)
+	private void addAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.add(objectWithPosition);}
 	
 	private static double absMod(double value, double mod)

@@ -20,9 +20,9 @@ import java.io.IOException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.WorldObject2D;
+import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
-public class Dashboard extends WorldObject2D
+public class Dashboard extends WorldObject2DVisibleEverywhere
 	{
 	private static final double Z=-1;
 	public Dashboard(TR tr) throws IllegalAccessException, FileLoadException, IOException

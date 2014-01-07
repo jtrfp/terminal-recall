@@ -17,9 +17,10 @@ package org.jtrfp.trcl;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
 
-public class CharDisplay extends WorldObject2D
+public class CharDisplay extends WorldObject2D implements VisibleEverywhere
 	{
 	//private GLFont font;
 	private SelectableTexture tex;

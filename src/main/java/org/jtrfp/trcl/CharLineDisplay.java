@@ -34,7 +34,7 @@ public class CharLineDisplay
 			{content[i]='X';
 			displays[i]=new CharDisplay(tr,grid,glSize,font);
 			displays[i].setChar('X');
-			grid.addAlwaysVisible(displays[i]);
+			grid.add(displays[i]);
 			}//end for(lengthInChars)
 		
 		this.glSize=glSize;

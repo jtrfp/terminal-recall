@@ -36,7 +36,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		GLFont font;
 		try
 			{//TODO: Have TR allocate the font ahead of time.
-			addAlwaysVisible(new Dashboard(world.getTr()));
+			add(new Dashboard(world.getTr()));
 			font = new GLFont(world.getTr().getResourceManager().getFont("capacitor.zip","capacitor.ttf"));
 			}
 		catch(Exception e)
@@ -70,15 +70,15 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		ammo.setContent("1337");
 		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,Z));
 		
-		addAlwaysVisible(new Crosshairs(world.getTr()));
+		add(new Crosshairs(world.getTr()));
 		try{
 		    MeterBar mb;
-		addAlwaysVisible(mb=new MeterBar(world.getTr(),
+		add(mb=new MeterBar(world.getTr(),
 			new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png"))),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(HEALTH_POS);
 		tr.setHealthMeter(mb.getController());
-		addAlwaysVisible(mb=new MeterBar(world.getTr(),
+		add(mb=new MeterBar(world.getTr(),
 			new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/BlueBlackGradient.png"))),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(THROTTLE_POS);

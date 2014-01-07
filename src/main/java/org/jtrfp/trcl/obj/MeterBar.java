@@ -7,7 +7,7 @@ import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
 
-public class MeterBar extends WorldObject2D {
+public class MeterBar extends WorldObject2DVisibleEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
     public MeterBar(TR tr, TextureDescription tex, double height, double length, boolean horizontal) {
 	super(tr);

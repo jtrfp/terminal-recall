@@ -1,5 +1,6 @@
 package org.jtrfp.trcl.beh.phy;
 
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -12,6 +13,7 @@ public class RotationalMomentumBehavior extends Behavior {
     public void _tick(long tickTimeInMillis){
 	final WorldObject p = getParent();
 	Rotation rot;
+	try{
 	rot = new Rotation(p.getTop(),equatorialMomentum);
 	p.setHeading(rot.applyTo(p.getHeading()));
 	rot = new Rotation(p.getHeading().crossProduct(p.getTop()),polarMomentum);
@@ -19,6 +21,7 @@ public class RotationalMomentumBehavior extends Behavior {
 	p.setTop(rot.applyTo(p.getTop()));
 	rot = new Rotation(p.getHeading(),lateralMomentum);
 	p.setTop(rot.applyTo(p.getTop()));
+	}catch(MathIllegalArgumentException e){}
     }//end _tick(....)
     /**
      * @return the equatorialMomentum

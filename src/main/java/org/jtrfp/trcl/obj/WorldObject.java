@@ -232,7 +232,7 @@ public class WorldObject implements PositionedRenderable
 		else 				{rotTransM = rM;}
 		
 		matrix.set(tr.getRenderer().getCamera().getMatrix().multiply(rotTransM).transpose());
-		}catch(MathArithmeticException e){e.printStackTrace();}//Yell but don't crash.
+		}catch(MathArithmeticException e){}//Don't crash.
 		}//end recalculateTransRotMBuffer()
 	
 	protected boolean translate(){return true;}

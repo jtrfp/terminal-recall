@@ -16,6 +16,7 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationOrder;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 public class ObjectDirection
@@ -26,25 +27,27 @@ public class ObjectDirection
 	public ObjectDirection(int legacyRoll, int legacyPitch, int legacyYaw)
 		{
 		heading = new Vector3D(0,0,1);
-		final double yaw=((double)legacyYaw/65535.)*Math.PI;
-		final double roll=((double)legacyRoll/65535.)*Math.PI;
-		final double tilt=((double)legacyPitch/65535.)*Math.PI;
-		
+		final double yaw=((double)legacyYaw/65535.)*2*Math.PI;
+		final double roll=((double)legacyRoll/65535.)*2*Math.PI;
+		final double tilt=((double)legacyPitch/65535.)*2*Math.PI;
+		/*
 		Rotation hRot = new Rotation(//yaw only.
 				new Vector3D(0,1,0),
 				new Vector3D(0,0,1),
 				new Vector3D(0,1,0),
 				new Vector3D(Math.cos(yaw),0.,Math.sin(yaw)));
 		heading = hRot.applyTo(heading);
-		
+		*/
 		top = new Vector3D(0,1,0);
+		/*
 		Rotation tRot = new Rotation(//Pitch and roll
 				new Vector3D(0,1,0),
 				new Vector3D(0,1,0),
 				new Vector3D(Math.sin(roll),1,Math.cos(roll)),
 				new Vector3D(0.,Math.cos(tilt),Math.cos(tilt)));
-		top = tRot.applyTo(top);
-		top = hRot.applyTo(top);//Need to apply heading rotation to the top as well
+		*/
+		Rotation rot = new Rotation(Vector3D.PLUS_J,yaw+1.5*Math.PI);
+		heading=rot.applyTo(heading);
 		}
 	
 	public ObjectDirection(Vector3D heading, Vector3D top)

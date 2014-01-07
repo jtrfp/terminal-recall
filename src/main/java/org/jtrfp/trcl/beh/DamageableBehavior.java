@@ -40,12 +40,13 @@ public class DamageableBehavior extends Behavior{
 		return health;
 		}
 
-	public void unDamage(int amt){
+	public void unDamage(int amt) throws HealthNotNeededException{
+	    	if(health>maxHealth)throw new HealthNotNeededException();
 		health+=amt;
-		if(health>maxHealth)health=maxHealth;
 		}
 
-	public void unDamage(){
+	public void unDamage() throws HealthNotNeededException{
+	    	if(health>=maxHealth)throw new HealthNotNeededException();
 		health=maxHealth;
 		}
 	public DamageableBehavior setHealth(int val){
@@ -89,4 +90,8 @@ public class DamageableBehavior extends Behavior{
 	    return this;
 	}
 	
+	
+	public static class HealthNotNeededException extends Exception{
+	    
+	}
     }//end DamageableBehavior

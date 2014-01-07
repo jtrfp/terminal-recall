@@ -2,11 +2,9 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
-import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
@@ -16,7 +14,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
-import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.DamageableBehavior.HealthNotNeededException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
@@ -52,13 +50,14 @@ public class PowerupObject extends BillboardSprite{
 			if(TR.twosComplimentDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{if(other instanceof Player){
 				    	Player p=(Player)other;
-					applyToPlayer(p);
-					destroy();
+					try{applyToPlayer(p);
+					destroy();}
+					catch(HealthNotNeededException e){}
 					}//end if(Player)
 				}//end if(close enough)
 			}//end proposeCollision()
 		
-		public void applyToPlayer(Player p){
+		public void applyToPlayer(Player p) throws HealthNotNeededException{
 			if(powerupType.getAfterburnerDelta()!=0){
 			    AfterburnerBehavior ab = p.getBehavior().probeForBehavior(AfterburnerBehavior.class);
 			    ab.addSupply(powerupType.getAfterburnerDelta());

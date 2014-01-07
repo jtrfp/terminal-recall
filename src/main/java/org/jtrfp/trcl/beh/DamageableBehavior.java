@@ -41,7 +41,8 @@ public class DamageableBehavior extends Behavior{
 		}
 
 	public void unDamage(int amt) throws HealthNotNeededException{
-	    	if(health>maxHealth)throw new HealthNotNeededException();
+	    	if(amt==maxHealth){unDamage();return;}
+	    	if(health+amt>maxHealth)throw new HealthNotNeededException();
 		health+=amt;
 		}
 

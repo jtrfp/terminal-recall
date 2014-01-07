@@ -193,6 +193,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
 	addBehavior(new AutoLeveling());
     }
+    if(!mobile || groundLocked){
+	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
+    }else{
+	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    }
     if(mobile){
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
@@ -200,11 +205,10 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new VelocityDragBehavior());
 	
 	if(groundLocked){
-	    addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
 	    addBehavior(new TerrainLocked());}
 	else 	{addBehavior(new BouncesOffSurfaces());
 	    	addBehavior(new CollidesWithTerrain());
-	    	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));}
+	    	}
 	
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);

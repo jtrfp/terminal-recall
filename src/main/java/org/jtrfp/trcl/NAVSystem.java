@@ -8,6 +8,7 @@ import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.obj.NavArrow;
+import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class NAVSystem extends RenderableSpacePartitioningGrid {
@@ -25,7 +26,8 @@ private int navIndex=0;
 	activate();
 	START s = (START)navs.get(navIndex++);
 	Location3D l3d = s.getLocationOnMap();
-	tr.getPlayer().setPosition(new Vector3D(TR.legacy2Modern(l3d.getX()),TR.legacy2Modern(l3d.getY()),TR.legacy2Modern(l3d.getZ())));
+	tr.getPlayer().setPosition(new Vector3D(TR.legacy2Modern(l3d.getZ()),TR.legacy2Modern(l3d.getY()),TR.legacy2Modern(l3d.getX())));
+	tr.getPlayer().setDirection(new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw()));
 	System.out.println("Start position set to "+tr.getPlayer().getPosition());
 	System.out.println("...Done.");
     }//end constructor

@@ -114,11 +114,10 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	*/
 	public void add(E objectWithPosition)
 		{//Figure out where it goes
-		GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
-		objectWithPosition.setContainingGrid(this);
-		if(objectWithPosition instanceof VisibleEverywhere){
-		    addAlwaysVisible(objectWithPosition);
-		}
+	    	objectWithPosition.setContainingGrid(this);
+	    	if(objectWithPosition instanceof VisibleEverywhere){
+		    addAlwaysVisible(objectWithPosition);return;}
+		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
 		dest.add(objectWithPosition);
 		}
 	public void remove(E objectWithPosition)

@@ -24,20 +24,17 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 
-public final class TerrainSystem extends RenderableSpacePartitioningGrid
-	{
+public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
 	
-	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr, final TDFFile tdf)
-		{
+	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr, final TDFFile tdf){
 		super(parent);
 		this.tr=tr;
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
 		this.gridSquareSize=gridSquareSize;
-		//this.heightScalar=world.sizeY/2;
 		this.heightScalar=tr.getWorld().sizeY/2;
 		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
@@ -51,28 +48,21 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 		    tp = new TunnelPoint(tunnels[i],false);
 		    points.put(tp.hashCode(),tp);
 		}
-		
 		Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;
 		//For each chunk
-		for(int gZ=0; gZ<height; gZ+=chunkSideLength)
-			{final int _gZ=gZ;
-			futures[futureIndex++]=TR.threadPool.submit(new Runnable()
-				{
+		for(int gZ=0; gZ<height; gZ+=chunkSideLength){
+		    	final int _gZ=gZ;
+			futures[futureIndex++]=TR.threadPool.submit(new Runnable(){
 				public void run(){
-					for(int gX=0; gX<width; gX+=chunkSideLength)
-						{
+					for(int gX=0; gX<width; gX+=chunkSideLength){
 						final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 						final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
 						final double objectY=Math.round(altitude.heightAt(gX, _gZ)*heightScalar);
-						
 						final Model m = new Model(false);
-						//m.setDebugName("TerrainChunk z="+gZ+" x="+gX);
 						//for each square
-						for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++)//TODO: affix to origin and apply matrix.
-							{
-							for(int cX=gX; cX<gX+chunkSideLength; cX++)
-								{
+						for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
+							for(int cX=gX; cX<gX+chunkSideLength; cX++){
 								final double hTL=altitude.heightAt(cX, cZ)*heightScalar;
 								final double hTR=altitude.heightAt((cX+1),cZ)*heightScalar;
 								final double hBR=altitude.heightAt((cX+1),(cZ+1))*heightScalar;
@@ -82,7 +72,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 								
 								final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
 								TextureDescription td=points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ);
-								//else{System.out.println("Failed to find key "+tpi);}
 								Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 										new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 										new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
@@ -96,15 +85,12 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 								}//end for(cX)
 							}//end for(cZ)
 						//Add to grid
-						//System.out.println("TerrainSystem: addToGrid ...");
-						if(m.finalizeModel().getTriangleList()!=null)
-							{
+						if(m.finalizeModel().getTriangleList()!=null){
 							final TerrainChunk chunkToAdd = new TerrainChunk(tr,m,altitude);
 							chunkToAdd.setPosition(new Vector3D(objectX, objectY, objectZ));
 							add(chunkToAdd);
 							}
 						else {System.out.println("Rejected chunk: "+m.getDebugName());}
-						//System.out.println("TerrainSystem: END addToGrid ...");
 						}//end for(gX)
 					}//end run(){}
 				});//end submit()
@@ -154,22 +140,19 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	/**
 	 * @return the gridSquareSize
 	 */
-	public double getGridSquareSize()
-		{
+	public double getGridSquareSize(){
 		return gridSquareSize;
 		}
 	/**
 	 * @return the heightScalar
 	 */
-	public double getHeightScalar()
-		{
+	public double getHeightScalar(){
 		return heightScalar;
 		}
 	/**
 	 * @return the renderingCubes
 	 */
-	public ArrayList<TerrainChunk> getRenderingCubes()
-		{
+	public ArrayList<TerrainChunk> getRenderingCubes(){
 		return renderingCubes;
 		}
 	}//end TerrainSystem

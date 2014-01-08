@@ -10,12 +10,14 @@ import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Location3D;
 
 public class NavArrow extends WorldObject2DVisibleEverywhere {
 private static final double WIDTH=.08;
 private static final double HEIGHT=.08;
 private static final double Z=.0001;
+private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final NAVSystem nav;
     public NavArrow(TR tr, NAVSystem navSystem) {
 	super(tr);
@@ -41,6 +43,7 @@ private final NAVSystem nav;
     }//end constructor
     
     private class NavArrowBehavior extends Behavior{
+	private int counter=0;
 	@Override
 	public void _tick(long time){
 	    final WorldObject player = getTr().getPlayer();
@@ -48,20 +51,24 @@ private final NAVSystem nav;
 	    final Vector3D playerPosXY = new Vector3D(playerPos.getX(),playerPos.getZ(),0);
 	    final Vector3D playerHeading = player.getHeading();
 	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
-	    final Location3D loc =nav.currentNAVTarget().getLocationOnMap();
-	    final Vector3D navLoc = new Vector3D(
-		    TR.legacy2Modern(loc.getZ()),
-		    TR.legacy2Modern(loc.getY()),
-		    TR.legacy2Modern(loc.getX()));
-	    final Vector3D navLocXY = new Vector3D(navLoc.getX(),navLoc.getZ(),0);
+	    if(nav.currentNAVTarget().getTarget()==null){setVisible(false);return;}
+	    	else setVisible(true);
+	    final Vector3D loc =nav.currentNAVTarget().getTarget().getPosition();
+	    final Vector3D navLocXY = new Vector3D(loc.getX(),loc.getZ(),0);
 	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
 	    final double modernDistance = player2NavVectorXY.getNorm();
+	    counter++;counter%=TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS);
+	    //This need only be done occasionally
+	    if(counter==0){
+		getTr().getHudSystem().getDistance().setContent(""+(int)(modernDistance/TR.mapSquareSize));
+		getTr().getHudSystem().getSector().setContent(((int)((playerPos.getX()+TR.mapCartOffset)/TR.mapSquareSize))+"."+
+		    ((int)((playerPos.getZ()+TR.mapCartOffset)/TR.mapSquareSize)));
+	    }
 	    final Vector3D normPlayer2NavVector = player2NavVectorXY.normalize();
 	    //Kludge to correct negative X bug in engine. (mirrored world)
 	    final Vector3D correctedNormPlayer2NavVector = new Vector3D(-normPlayer2NavVector.getX(),normPlayer2NavVector.getY(),0);
-	    final Rotation rot = new Rotation(Vector3D.PLUS_J,playerHeadingXY);
+	    final Rotation rot = new Rotation(Vector3D.PLUS_J,playerHeadingXY.getNorm()!=0?playerHeadingXY:Vector3D.PLUS_I);
 	    setTop(rot.applyTo(correctedNormPlayer2NavVector));
-	    //System.out.println("TICK");
 	}//_ticks(...)
     }//end NavArrowBehavior
 }//end NavArrow

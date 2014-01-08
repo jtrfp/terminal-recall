@@ -51,6 +51,7 @@ public class GameSetup
 		globalPalette[0]=new Color(0,0,0,0);//index zero is transparent
 		tr.setGlobalPalette(globalPalette);
 		hudSystem = new HUDSystem(tr.getWorld());
+		tr.setHudSystem(hudSystem);
 		hudSystem.activate();
 		// POWERUPS
 		tr.getResourceManager().setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
@@ -65,29 +66,9 @@ public class GameSetup
 		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
 		}//end for(weapons)
 		tr.getResourceManager().setProjectileFactories(pf);
-		//MAV targets
-		/*
-		NAVFile nav = tr.getResourceManager().getNAVData(lvl.getNavigationFile());
-		for(NAVSubObject nObj:nav.getNavObjects())
-			{
-			if(nObj instanceof NAVFile.START)
-				{
-				NAVFile.START start = (NAVFile.START)nObj;
-				Location3D loc = start.getLocationOnMap();
-				tr.getRenderer().getCamera().setPosition(Tunnel.TUNNEL_START_POS);
-				tr.getWorld().setCameraDirection(Tunnel.TUNNEL_START_DIRECTION);
-				//TODO: Uncomment to enable player locale
-				//world.setCameraDirection(new ObjectDirection(start.getRoll(),start.getPitch(),start.getYaw()));
-				//Y is nudged up because some levels put player disturbingly close to the ground
-				//world.setCameraPosition(new Vector3D(TR.legacy2Modern(loc.getZ()),TR.legacy2Modern(loc.getY())+TR.mapSquareSize/2,TR.legacy2Modern(loc.getX())));
-				}
-			}//end for(nav.getNavObjects())
-		*/
 		
 		Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
 		tr.setPlayer(player);
-		// NAV SYSTEM
-		tr.setNavSystem(new NAVSystem(tr.getWorld(),tr.getResourceManager().getNAVData(lvl.getNavigationFile()).getNavObjects(),tr));
 		final String startX=System.getProperty("org.jtrfp.trcl.startX");
 		final String startY=System.getProperty("org.jtrfp.trcl.startY");
 		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
@@ -101,6 +82,8 @@ public class GameSetup
 		tr.getWorld().add(player);
 		tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl));
 		tr.setBackdropSystem(new BackdropSystem(tr.getWorld()));
+		// NAV SYSTEM
+		tr.setNavSystem(new NAVSystem(tr.getWorld(),tr.getResourceManager().getNAVData(lvl.getNavigationFile()).getNavObjects(), tr));
 		
 		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
 		GPU gpu = tr.getGPU();

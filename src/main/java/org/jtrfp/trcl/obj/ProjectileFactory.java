@@ -27,8 +27,10 @@ public class ProjectileFactory {
     private final TR tr;
     private final Projectile [] projectiles = new Projectile[20];
     private final double projectileSpeed;
+    private final Weapon weapon;
     public ProjectileFactory(TR tr, Weapon weapon, ExplosionType explosionType){
     	this.tr=tr;
+    	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
     	Model modelToUse;
     	TextureDescription t;
@@ -101,5 +103,8 @@ public class ProjectileFactory {
     }//end fire(...)
     public Projectile[] getProjectiles() {
 	return projectiles;
+    }
+    public Weapon getWeapon() {
+	return weapon;
     }
 }//end ProjectileFactory

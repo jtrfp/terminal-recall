@@ -122,8 +122,12 @@ public class WorldObject implements PositionedRenderable
 			}
 		}//end setModel(...)
 	
-	public void setDirection(ObjectDirection dir)
-		{
+	public void setDirection(ObjectDirection dir){
+	    	if(dir.getHeading().getNorm()==0||dir.getTop().getNorm()==0){
+	    	    System.err.println("Warning: Rejecting zero-norm for object direction. "+dir);
+	    	    new Exception().printStackTrace();
+	    	    return;
+	    	}
 		heading=dir.getHeading();
 		top=dir.getTop();
 		}

@@ -44,7 +44,8 @@ public class WorldObject2D extends WorldObject{
 		final Vector3D tV = position;
 		
 		Vector3D aZ=getHeading().normalize();
-		Vector3D aX=getTop().crossProduct(aZ).normalize();
+		Vector3D aX=getTop().crossProduct(aZ);
+		if(aX.getNorm()==0)aX=Vector3D.PLUS_K;
 		Vector3D aY=aZ.crossProduct(aX);
 		
 		RealMatrix rM = new Array2DRowRealMatrix(new double [][] 

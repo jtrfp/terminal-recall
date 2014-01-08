@@ -14,6 +14,11 @@ public class UpgradeableProjectileFiringBehavior extends
 	raiseCapabilityLevel();
 	super.addSupply(amt);
     }
+    @Override
+    public double getSupply(){
+	if(limitlessBottomLevel && capabilityLevel==0)return -1;
+	else return super.getSupply();
+    }
     
     @Override
     protected boolean takeAmmo(){

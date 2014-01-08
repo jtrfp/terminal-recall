@@ -18,6 +18,7 @@ package org.jtrfp.trcl.file;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.trcl.core.TR;
 
 public class AbstractVector implements ThirdPartyParseable
 	{
@@ -89,4 +90,8 @@ public class AbstractVector implements ThirdPartyParseable
 		{
 		this.z = z;
 		}
+	
+	@Override
+	public String toString(){return this.getClass().getSimpleName()+" x="+x+" y="+y+" z="+z+"\n"+
+		"TRCL: x="+TR.legacy2Modern(x)+" y="+TR.legacy2Modern(y)+" z="+TR.legacy2Modern(z);}
 	}//end DirectionVector

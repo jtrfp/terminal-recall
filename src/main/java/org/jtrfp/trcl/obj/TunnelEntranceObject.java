@@ -3,12 +3,14 @@ package org.jtrfp.trcl.obj;
 import java.awt.Color;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 
@@ -48,7 +50,7 @@ public class TunnelEntranceObject extends WorldObject {
 			 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
-		 
+		 p.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 		 tr.getPlayer().setPosition(Tunnel.TUNNEL_START_POS);
 		 tr.getPlayer().setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		 tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
@@ -58,4 +60,8 @@ public class TunnelEntranceObject extends WorldObject {
 	    }//end if(Player)
 	}//end _proposeCollision
     }//end TunnelEntranceBehavior
+    private final AbstractSubmitter<TunnelEntryListener> TELsubmitter = new AbstractSubmitter<TunnelEntryListener>(){
+	@Override
+	public void submit(TunnelEntryListener tel){tel.notifyTunnelEntered();} 
+    };
 }//end TunnelEntrance

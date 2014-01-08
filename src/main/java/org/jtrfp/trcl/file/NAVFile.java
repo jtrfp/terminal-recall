@@ -328,15 +328,15 @@ public class NAVFile implements ThirdPartyParseable
 	
 	public static class TUN extends NAVSubObject
 		{
-		String unused;
+		private String unused;
+		private String tunnelFileName;
 		@Override
-		public void describeFormat(Parser prs) throws UnrecognizedFormatException
-			{
+		public void describeFormat(Parser prs) throws UnrecognizedFormatException{
 			prs.expectString("1\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
 			prs.subParseProposedClasses(prs.property("locationOnMap", Location3D.class), ClassInclusion.classOf(Location3D.class));
 			prs.stringEndingWith("\r\n", prs.property("description", String.class), false);
+			prs.stringEndingWith("\r\n", prs.property("tunnelFileName", String.class), false);
 			prs.stringEndingWith("\r\n", prs.property("unused", String.class),false);
-			//System.out.println("unused="+unused);
 			}
 		/**
 		 * @return the unused
@@ -352,6 +352,18 @@ public class NAVFile implements ThirdPartyParseable
 			{
 			this.unused = unused;
 			}
+		/**
+		 * @return the tunnelFileName
+		 */
+		public String getTunnelFileName() {
+		    return tunnelFileName;
+		}
+		/**
+		 * @param tunnelFileName the tunnelFileName to set
+		 */
+		public void setTunnelFileName(String tunnelFileName) {
+		    this.tunnelFileName = tunnelFileName;
+		}
 		
 		}//end TUN
 	

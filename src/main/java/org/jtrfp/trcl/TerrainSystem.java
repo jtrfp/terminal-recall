@@ -16,10 +16,12 @@
 package org.jtrfp.trcl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid
@@ -27,10 +29,12 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	final double gridSquareSize;
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
+	private final TR tr;
 	
-	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr, TDFFile tdf)
+	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr, final TDFFile tdf)
 		{
 		super(parent);
+		this.tr=tr;
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
 		this.gridSquareSize=gridSquareSize;
 		//this.heightScalar=world.sizeY/2;
@@ -38,6 +42,16 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
 		final double v[] = {1,1,0,0};
+		//Come up with a point list for tunnel entrances and exits
+		TDFFile.Tunnel [] tunnels = tdf.getTunnels();
+		final HashMap<Integer,TunnelPoint> points = new HashMap<Integer,TunnelPoint>();
+		for(int i=0; i<tunnels.length; i++){
+		    TunnelPoint tp = new TunnelPoint(tunnels[i],true);
+		    points.put(tp.hashCode(),tp);
+		    tp = new TunnelPoint(tunnels[i],false);
+		    points.put(tp.hashCode(),tp);
+		}
+		
 		Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;
 		//For each chunk
@@ -66,13 +80,16 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 								final double xPos=cX*gridSquareSize;
 								final double zPos=cZ*gridSquareSize;
 								
+								final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
+								TextureDescription td=points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ);
+								//else{System.out.println("Failed to find key "+tpi);}
 								Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 										new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 										new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
 										new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 										u,
 										v,
-										textureMesh.textureAt(cX, cZ), RenderMode.STATIC);
+										td, RenderMode.STATIC);
 								
 								m.addTriangle(tris[0]);
 								m.addTriangle(tris[1]);
@@ -96,6 +113,44 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		//System.out.println("TerrainSystem.constructor finish");
 		}//end constructor
+	
+	private class TunnelPointInquiry{
+	    private final int x,z;
+	    public TunnelPointInquiry(int x, int z){
+		this.x=x;
+		this.z=z;
+	    }//end constructor
+	    @Override
+	    public boolean equals(Object other){
+		return other.hashCode()==this.hashCode();
+	    }
+	    @Override
+	    public int hashCode(){
+		return (int)(9000+1337*x+z);
+	    }
+	}//end TunnelPointInquiry
+	private class TunnelPoint{
+	    final int x,z;
+	    TextureDescription textureToInsert;
+	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
+		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
+		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());}
+		catch(Exception e){e.printStackTrace();}
+		DirectionVector v = entrance?tun.getEntrance():tun.getExit();
+		x=(int)TR.legacy2MapSquare(v.getZ());//Reversed on purpose
+		z=(int)TR.legacy2MapSquare(v.getX());
+	    }
+	    public TextureDescription getTexture(){return textureToInsert;}
+	    
+	    @Override
+	    public boolean equals(Object other){
+		return other.hashCode()==this.hashCode();
+	    }
+	    @Override
+	    public int hashCode(){
+		return (int)(9000+1337*x+z);
+	    }
+	}
 	/**
 	 * @return the gridSquareSize
 	 */

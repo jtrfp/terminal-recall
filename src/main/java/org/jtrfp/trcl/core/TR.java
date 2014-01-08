@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.BackdropSystem;
+import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.ManuallySetController;
@@ -75,6 +76,7 @@ public final class TR
 	private BackdropSystem backdropSystem;
 	private Game game = new Game();
 	private NAVSystem navSystem;
+	private HUDSystem hudSystem;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -391,5 +393,19 @@ public final class TR
 	 */
 	public void setNavSystem(NAVSystem navSystem) {
 	    this.navSystem = navSystem;
+	}
+
+	/**
+	 * @return the hudSystem
+	 */
+	public HUDSystem getHudSystem() {
+	    return hudSystem;
+	}
+
+	/**
+	 * @param hudSystem the hudSystem to set
+	 */
+	public void setHudSystem(HUDSystem hudSystem) {
+	    this.hudSystem = hudSystem;
 	}
 	}//end TR

@@ -84,6 +84,7 @@ public class Player extends WorldObject
 			    pfb = new ProjectileFiringBehavior()
 				.setFiringPositions(new Vector3D[]{new Vector3D(5000,-3000,0),new Vector3D(-5000,-3000,0)}).
 				setProjectileFactory(tr.getResourceManager().getProjectileFactories()[w.ordinal()]);
+			if(w==Weapon.DAM)pfb.setAmmoLimit(1);
 			}
 			addBehavior(pfb);
 			weapons[w.getButtonToSelect()-1]=pfb;

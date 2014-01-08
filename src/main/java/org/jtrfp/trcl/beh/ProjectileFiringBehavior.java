@@ -13,7 +13,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private ProjectileFactory projectileFactory;
     private boolean pendingFiring=false;
     private int multiplexLevel=1;
-    private int ammo=100;
+    private int ammoLimit=Integer.MAX_VALUE;
+    private int ammo=ammoLimit;
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
@@ -81,12 +82,12 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
      * @return the ammo
      */
     public int getAmmo() {
-        return ammo;
+        return (int)getSupply();
     }
 
     @Override
     public void addSupply(double amount) {
-	ammo+=amount;
+	ammo=(int)Math.min(ammo+amount, ammoLimit);
 	
     }
 
@@ -108,5 +109,20 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     public ProjectileFiringBehavior setMultiplexLevel(int multiplexLevel) {
         this.multiplexLevel = multiplexLevel;
         return this;
+    }
+
+    /**
+     * @return the ammoLimit
+     */
+    public int getAmmoLimit() {
+        return ammoLimit;
+    }
+
+    /**
+     * @param ammoLimit the ammoLimit to set
+     */
+    public void setAmmoLimit(int ammoLimit) {
+        this.ammoLimit = ammoLimit;
+        ammo=(int)(Math.min(getSupply(), ammoLimit));
     }
 }//end ProjectileFiringBehavior

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
+import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 
@@ -17,7 +18,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private Color fogColor;
 	private final ArrayList<DEFObject> defList = new ArrayList<DEFObject>();
 	
-	public OverworldSystem(World w, LVLFile lvl){
+	public OverworldSystem(World w, LVLFile lvl, TDFFile tdf){
 		super(w);
 		try{
 			TR tr = w.getTr();
@@ -33,7 +34,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 					(lvl.getTexturePlacementFile(),texturePalette);
 			//Terrain
 			System.out.println("Building terrain...");
-			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize,this,tr);
+			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize,this,tr,tdf);
 			System.out.println("...Done.");
 			//Clouds
 			System.out.println("Setting up sky...");

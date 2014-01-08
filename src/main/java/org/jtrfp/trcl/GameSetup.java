@@ -81,7 +81,7 @@ public class GameSetup
 		}
 		tr.getWorld().add(player);
 		final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
-		tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl));
+		tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl, tdf));
 		tr.setBackdropSystem(new BackdropSystem(tr.getWorld()));
 		// NAV SYSTEM
 		tr.setNavSystem(new NAVSystem(tr.getWorld(),rm.getNAVData(lvl.getNavigationFile()).getNavObjects(), tr));

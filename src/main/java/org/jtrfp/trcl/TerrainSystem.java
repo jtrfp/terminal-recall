@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.TDFFile;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	{
@@ -27,7 +28,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	
-	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr)
+	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr, TDFFile tdf)
 		{
 		super(parent);
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();

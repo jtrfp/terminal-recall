@@ -15,7 +15,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
-public class TRConfiguration
-	{
+import org.jtrfp.trcl.flow.GameVersion;
+
+public class TRConfiguration{
+    	private GameVersion gameVersion=GameVersion.F3;
 	public TRConfiguration(){}
+
+	public GameVersion getGameVersion() {
+	    return GameVersion.F3;
 	}
+}//end TRConfiguration

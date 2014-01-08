@@ -21,11 +21,10 @@ import java.io.IOException;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
-import org.jtrfp.trcl.file.Location3D;
-import org.jtrfp.trcl.file.NAVFile;
-import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
+import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
@@ -47,25 +46,26 @@ public class GameSetup
 	
 	public GameSetup(LVLFile lvl, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		//Set up palette
-		Color [] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
+	    	final ResourceManager rm = tr.getResourceManager();
+		Color [] globalPalette = rm.getPalette(lvl.getGlobalPaletteFile());
 		globalPalette[0]=new Color(0,0,0,0);//index zero is transparent
 		tr.setGlobalPalette(globalPalette);
 		hudSystem = new HUDSystem(tr.getWorld());
 		tr.setHudSystem(hudSystem);
 		hudSystem.activate();
 		// POWERUPS
-		tr.getResourceManager().setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
+		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 		/// EXPLOSIONS
-		tr.getResourceManager().setExplosionFactory(new ExplosionFactory(tr));
+		rm.setExplosionFactory(new ExplosionFactory(tr));
 		// DEBRIS
-		tr.getResourceManager().setDebrisFactory(new DebrisFactory(tr));
+		rm.setDebrisFactory(new DebrisFactory(tr));
 		//SETUP PROJECTILE FACTORIES
 		Weapon [] w = Weapon.values();
 		ProjectileFactory [] pf = new ProjectileFactory[w.length];
 		for(int i=0; i<w.length;i++){
 		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
 		}//end for(weapons)
-		tr.getResourceManager().setProjectileFactories(pf);
+		rm.setProjectileFactories(pf);
 		
 		Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
 		tr.setPlayer(player);
@@ -80,12 +80,13 @@ public class GameSetup
 		    player.setPosition(new Vector3D(sX,sY,sZ));
 		}
 		tr.getWorld().add(player);
+		final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
 		tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl));
 		tr.setBackdropSystem(new BackdropSystem(tr.getWorld()));
 		// NAV SYSTEM
-		tr.setNavSystem(new NAVSystem(tr.getWorld(),tr.getResourceManager().getNAVData(lvl.getNavigationFile()).getNavObjects(), tr));
+		tr.setNavSystem(new NAVSystem(tr.getWorld(),rm.getNAVData(lvl.getNavigationFile()).getNavObjects(), tr));
 		
-		TunnelInstaller tunnelInstaller = new TunnelInstaller(tr.getResourceManager().getTDFData(lvl.getTunnelDefinitionFile()),tr.getWorld());
+		TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,tr.getWorld());
 		GPU gpu = tr.getGPU();
 		//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
 		System.out.println("Building master texture...");

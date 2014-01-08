@@ -193,8 +193,8 @@ public final class TR
 	/**
 	 * @return the trConfig
 	 */
-	public TRConfiguration getTrConfig()
-		{
+	public TRConfiguration getTrConfig(){
+	    	if(trConfig==null)trConfig=new TRConfiguration();
 		return trConfig;
 		}
 

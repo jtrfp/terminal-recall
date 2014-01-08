@@ -71,7 +71,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			eo.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)));
 			add(eo);
 			// X is tunnel depth, Z is left-right
-			new ObjectSystem(this,world,null,lvl);
+			new ObjectSystem(this,world,lvl,null);
 			}
 		catch(Exception e){e.printStackTrace();}
 		}//end constructor

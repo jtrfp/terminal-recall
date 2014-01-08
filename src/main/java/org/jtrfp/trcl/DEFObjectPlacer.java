@@ -1,5 +1,6 @@
 package org.jtrfp.trcl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -20,12 +21,15 @@ public class DEFObjectPlacer implements ObjectPlacer
 	{
 	private DEFFile def;
 	private World world;
-	private TerrainSystem terrainSystem;
+	private List<DEFObject> defList;
 	
-	//private static final ExecutorService 
-	
-	public DEFObjectPlacer(DEFFile def, World world,TerrainSystem terrainSystem)
-		{this.def=def;this.world=world;this.terrainSystem=terrainSystem;}
+	public DEFObjectPlacer(DEFFile def, World world)
+		{this.def=def;this.world=world;}
+	public DEFObjectPlacer(DEFFile defFile, World w,
+		ArrayList<DEFObject> defList) {
+	    this(defFile,w);
+	    this.defList=defList;
+	}
 	@Override
 	public void placeObjects(RenderableSpacePartitioningGrid target)
 		{
@@ -70,13 +74,13 @@ public class DEFObjectPlacer implements ObjectPlacer
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
 				//,new TVBehavior(null,def,terrainSystem,pl.getStrength())
 				final DEFObject obj =new DEFObject(tr,model,def,pl);
+				if(defList!=null)defList.add(obj);
 				//USING  z,x coords
 				obj.setPosition(new Vector3D(
 						TR.legacy2Modern(pl.getLocationOnMap().getZ()),
 						(TR.legacy2Modern(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY,
 						TR.legacy2Modern(pl.getLocationOnMap().getX())
 						));
-				//TODO: Damaged weapons bunkers
 				if(def.getLogic()==EnemyLogic.groundStaticRuin){
 				    //Spawn a second, powerup-free model using the simplemodel
 				    Model simpleModel=null;

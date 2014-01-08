@@ -16,6 +16,7 @@
 package org.jtrfp.trcl.obj;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.DEFObjectPlacer;
@@ -29,12 +30,12 @@ import org.jtrfp.trcl.file.PUPFile;
 
 public class ObjectSystem extends RenderableSpacePartitioningGrid
 {
-	public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,TerrainSystem terrain, LVLFile lvl) throws IllegalAccessException, IOException, FileLoadException{
+	public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,LVLFile lvl, ArrayList<DEFObject> defList) throws IllegalAccessException, IOException, FileLoadException{
 		super(parentGrid);
 		TR tr = w.getTr();
 		DEFFile defFile = tr.getResourceManager().getDEFData(lvl.getEnemyDefinitionAndPlacementFile());
 		PUPFile pupFile = tr.getResourceManager().getPUPData(lvl.getPowerupPlacementFile());
-		DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile,w,terrain);
+		DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile,w,defList);
 		defPlacer.placeObjects(this);
 		PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile,w);
 		pupPlacer.placeObjects(this);

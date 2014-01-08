@@ -1,15 +1,13 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
-import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
-import org.jtrfp.trcl.file.Powerup;
-import org.jtrfp.trcl.obj.Explosion;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
-import org.jtrfp.trcl.obj.PowerupObject;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid
 	{
@@ -17,6 +15,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private TextureMesh textureMesh;
 	private InterpolatingAltitudeMap altitudeMap;
 	private Color fogColor;
+	private final ArrayList<DEFObject> defList = new ArrayList<DEFObject>();
 	
 	public OverworldSystem(World w, LVLFile lvl){
 		super(w);
@@ -51,7 +50,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			System.out.println("...Done.");
 			//Objects
 			System.out.println("Setting up objects...");
-			ObjectSystem objectSystem=new ObjectSystem(this,w,terrain,lvl);
+			ObjectSystem objectSystem=new ObjectSystem(this,w,lvl,defList);
 			objectSystem.activate();
 			System.out.println("...Done.");
 			//Tunnel activators
@@ -64,4 +63,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	    return fogColor;
 	}
 	public void setFogColor(Color c){fogColor=c;}
-	}//end OverworldSystem
+
+	public List<DEFObject> getDefList() {
+	    return defList;
+	}
+}//end OverworldSystem

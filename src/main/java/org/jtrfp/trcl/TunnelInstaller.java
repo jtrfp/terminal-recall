@@ -20,6 +20,7 @@ public class TunnelInstaller
 			//Build tunnels
 			for(TDFFile.Tunnel tun:tuns)
 				{
+			    	world.getTr().getReporter().report("org.jtrfp.trcl.TunnelInstaller.tunnel."+tIndex+".entrance", tun.getEntrance());
 				world.getTr().getGPU().releaseGL();
 				DirectionVector entranceDV= tun.getEntrance();
 				DirectionVector exitDV=tun.getExit();
@@ -32,7 +33,7 @@ public class TunnelInstaller
 				add(new TunnelEntranceObject(
 					world.
 					getTr(),tunnel));
-				//if(tIndex++==0)tunnel.activate();//TODO: Remove
+				tIndex++;
 				}
 			}//end if(tuns!=null)
 		}//end constructor

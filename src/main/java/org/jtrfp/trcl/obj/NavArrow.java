@@ -51,6 +51,7 @@ private final NAVSystem nav;
 	    final Vector3D playerPosXY = new Vector3D(playerPos.getX(),playerPos.getZ(),0);
 	    final Vector3D playerHeading = player.getHeading();
 	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
+	    if(nav.currentNAVTarget()==null){setVisible(false);return;}
 	    if(nav.currentNAVTarget().getTarget()==null){setVisible(false);return;}
 	    	else setVisible(true);
 	    final Vector3D loc =nav.currentNAVTarget().getTarget().getPosition();

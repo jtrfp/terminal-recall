@@ -8,6 +8,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
+import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -43,6 +44,7 @@ private final List<NAVObjective> navs= new LinkedList<NAVObjective>();
     }//end constructor
     
     public NAVObjective currentNAVTarget(){
+	if(navs.isEmpty())return null;
 	return navs.get(0);
     }
     public void removeNAVObjective(NAVObjective o){

@@ -408,4 +408,8 @@ public final class TR
 	public void setHudSystem(HUDSystem hudSystem) {
 	    this.hudSystem = hudSystem;
 	}
-	}//end TR
+
+	public static double legacy2MapSquare(double z) {
+	    return ((z/crossPlatformScalar)/mapWidth)*255.;
+	}
+}//end TR

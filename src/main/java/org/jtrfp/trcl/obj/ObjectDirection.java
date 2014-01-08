@@ -21,12 +21,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 public class ObjectDirection
 	{
-	private Vector3D heading;
-	private Vector3D top;
+	private final Vector3D heading;
+	private final Vector3D top;
 	
 	public ObjectDirection(int legacyRoll, int legacyPitch, int legacyYaw)
 		{
-		heading = new Vector3D(0,0,1);
 		final double yaw=((double)legacyYaw/65535.)*2*Math.PI;
 		final double roll=((double)legacyRoll/65535.)*2*Math.PI;
 		final double tilt=((double)legacyPitch/65535.)*2*Math.PI;
@@ -47,7 +46,7 @@ public class ObjectDirection
 				new Vector3D(0.,Math.cos(tilt),Math.cos(tilt)));
 		*/
 		Rotation rot = new Rotation(Vector3D.PLUS_J,yaw+1.5*Math.PI);
-		heading=rot.applyTo(heading);
+		heading=rot.applyTo(Vector3D.PLUS_K);
 		}
 	
 	public ObjectDirection(Vector3D heading, Vector3D top)
@@ -58,4 +57,7 @@ public class ObjectDirection
 
 	public Vector3D getHeading(){return heading;}
 	public Vector3D getTop(){return top;}
+	
+	@Override
+	public String toString(){return "ObjectDirection heading="+heading+" top="+top+" hash="+hashCode();}
 	}//end ObjectDirection

@@ -56,7 +56,8 @@ public class CharLineDisplay
 	private void updatePositions()
 		{Vector3D charPosition=position;
 		for(int i=0; i<displays.length; i++)
-			{displays[i].setPosition(charPosition);
+			{
+		    	displays[i].setPosition(charPosition);
 			char _content = content[i];
 			final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
 			charPosition=charPosition.add(new Vector3D(progress,0,0));

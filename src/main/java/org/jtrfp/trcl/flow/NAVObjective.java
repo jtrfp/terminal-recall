@@ -21,7 +21,8 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class NAVObjective {
     private static TR tr;//for debug
-    private static int counter=0;
+    private static int counter=0;//for debug
+    private static final double CHECKPOINT_HEIGHT_PADDING=70000;
     public static void create(TR tr, NAVSubObject obj, final List<DEFObject>defs, List<NAVObjective>dest, OverworldSystem overworld, NAVSystem ns){
 	NAVObjective.tr=tr;
 	if(obj instanceof TGT){///////////////////////////////////////////
@@ -87,7 +88,7 @@ public abstract class NAVObjective {
 		        TR.legacy2Modern(loc3d.getY()),
 			TR.legacy2Modern(loc3d.getX()));
 	    final Checkpoint chk = new Checkpoint(tr);
-	    chk.setPosition(loc);
+	    chk.setPosition(loc.add(new Vector3D(0,CHECKPOINT_HEIGHT_PADDING,0)));
 	    chk.setIncludeYAxisInCollision(false);
 	    final NAVObjective objective = new NAVObjective(){
 		    @Override

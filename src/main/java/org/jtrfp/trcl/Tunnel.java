@@ -108,7 +108,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			segs=newSegs;
 			}
 		//CONSTRUCT AND INSTALL SEGMENTS
+		int segIndex=0;
 		for(Segment s:segs){
+		    	tr.getReporter().report("org.jtrfp.trcl.Tunnel."+_tun.getTunnelLVLFile()+".segment"+(segIndex++)+"", s.getObstacle().name());
 		    	//Figure out the space the segment will take
 			Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness*-1,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
 			//Create the segment
@@ -374,7 +376,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				//Down jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
@@ -382,7 +384,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case jawsHorizontal:
@@ -392,7 +394,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				//Right jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
@@ -400,39 +402,39 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo.setPosition(wPos);
 				wo.setHeading(heading);
 				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamUp:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],16,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.setPosition(wPos.add(new Vector3D(0,tunnelDia/6,0)));
 				wo.setHeading(heading);
 				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamDown:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],16,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.setPosition(wPos.add(new Vector3D(0,-tunnelDia/6,0)));
 				wo.setHeading(heading);
 				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamLeft:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],16,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.setPosition(wPos.add(new Vector3D(-tunnelDia/6,0,0)));
 				wo.setHeading(heading);
 				wo.setTop(top.crossProduct(heading));
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case metalBeamRight:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],16,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.setPosition(wPos.add(new Vector3D(tunnelDia/6,0,0)));
 				wo.setHeading(heading);
 				wo.setTop(top.crossProduct(heading));
-				wo.addBehavior(new CubeCollisionBehavior(wo));
+				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case forceField:{//TODO

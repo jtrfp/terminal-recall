@@ -46,9 +46,7 @@ public class CollidesWithTunnelWalls extends Behavior{
 				{final Segment s = seg.getSegmentData();
 				final double segLen=seg.getSegmentLength();
 				final Vector3D start =seg.getPosition();
-				//I have no idea why Y has to be cut in half.
 				final Vector3D end = start.add(new Vector3D(segLen,seg.getEndY(),-seg.getEndX()));//ZYX
-				//final Vector3D end = (new Vector3D(start.getX()+segLen,seg.getEndY(),-seg.getEndX()));//ZYX
 				final Vector3D tunnelSpineNoNorm=TR.twosComplimentSubtract(end, start);
 				final Vector3D tunnelSpineNorm=tunnelSpineNoNorm.normalize();
 				
@@ -57,7 +55,6 @@ public class CollidesWithTunnelWalls extends Behavior{
 				Vector3D circleCenter=
 						start.add(tunnelSpineNorm.scalarMultiply(TR.deltaRollover(parent.getPosition().getX()-start.getX())));
 				circleCenter = (new Vector3D(parent.getPosition().getX(),circleCenter.getY(),circleCenter.getZ()));
-				//parent.setPosition(circleCenter);//Rail-mode debug code.
 				final double startWidth=TunnelSegment.getStartWidth(s);
 				final double startHeight=TunnelSegment.getStartHeight(s);
 				final double endWidth=TunnelSegment.getEndWidth(s);
@@ -66,10 +63,8 @@ public class CollidesWithTunnelWalls extends Behavior{
 				final double widthHere=.9*(startWidth*(1.-pctDownSeg)+endWidth*pctDownSeg);
 				final double heightHere=.9*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
 				//Parent position relative to tunnel
-				//final Vector3D pprtt = TR.twosComplimentSubtract(parent.getPosition(), circleCenter);
 				final Vector3D pprtt = parent.getPosition().subtract(circleCenter);
 				final double protrusion =(pprtt.getZ()*pprtt.getZ())/(widthHere*widthHere)+(pprtt.getY()*pprtt.getY())/(heightHere*heightHere); 
-				//if(parent instanceof Player){System.out.println("width="+widthHere+" height="+heightHere+" pctDownSeg="+pctDownSeg);}//TODO
 				if(protrusion>1){
 					//Execute the "bounce"
 				    	final Vector3D oldPosition = parent.getPosition();

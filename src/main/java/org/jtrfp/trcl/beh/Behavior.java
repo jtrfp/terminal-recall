@@ -54,4 +54,5 @@ public abstract class Behavior
 	    	if(wrapped!=null)wrapped.probeForBehaviors(sub,type);
 		}
 	public Behavior setEnable(boolean doIt){enable=doIt;return this;}
+	public boolean isEnabled(){return enable;}
 	}//end ObjectBehavior

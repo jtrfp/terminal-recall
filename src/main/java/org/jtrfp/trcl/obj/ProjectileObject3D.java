@@ -5,6 +5,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.LimitedLifeSpan;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
+import org.jtrfp.trcl.beh.ReportsCollisionsToStdout;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
@@ -13,6 +14,7 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
     public ProjectileObject3D(TR tr,Model m, int damageOnImpact, ExplosionType explosionType){
 	super(tr,m);
 	addBehavior(new ProjectileBehavior(this,damageOnImpact,explosionType));
+	addBehavior(new ReportsCollisionsToStdout().setEnable(false));
     }
 
     

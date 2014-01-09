@@ -14,7 +14,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private boolean pendingFiring=false;
     private int multiplexLevel=1;
     private int ammoLimit=Integer.MAX_VALUE;
-    private int ammo=ammoLimit;
+    private int ammo=0;
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.concurrent.Future;
+
 public interface TextureMesh
 	{
 	/**
@@ -24,5 +26,5 @@ public interface TextureMesh
 	 * @return
 	 * @since Oct 14, 2012
 	 */
-	public TextureDescription textureAt(double x, double z);
+	public Future<TextureDescription> textureAt(double x, double z);
 	}

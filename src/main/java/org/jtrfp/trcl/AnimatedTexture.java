@@ -16,13 +16,14 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
+import java.util.concurrent.Future;
 
 public class AnimatedTexture implements TextureDescription
 	{
-	private Texture [] frames;
+	private Future<Texture> [] frames;
 	//private int timeBetweenFramesInMillis;
 	private Controller textureSequencer;
-	public AnimatedTexture(Controller textureSequencer, Texture [] frames)
+	public AnimatedTexture(Controller textureSequencer, Future<Texture>[] frames)
 		{
 		this.frames=frames;
 		this.textureSequencer=textureSequencer;
@@ -30,14 +31,14 @@ public class AnimatedTexture implements TextureDescription
 	/**
 	 * @return the frames
 	 */
-	public Texture[] getFrames()
+	public Future<Texture>[] getFrames()
 		{
 		return frames;
 		}
 	/**
 	 * @param frames the frames to set
 	 */
-	public void setFrames(Texture[] frames)
+	public void setFrames(Future<Texture>[] frames)
 		{
 		this.frames = frames;
 		}
@@ -46,6 +47,8 @@ public class AnimatedTexture implements TextureDescription
 	@Override
 	public Color getAverageColor()
 		{
-		return frames[0].getAverageColor();
+		try{return frames[0].get().getAverageColor();}
+		catch(Exception e){e.printStackTrace();}
+		return null;
 		}
 	}//end AnimatedTexture

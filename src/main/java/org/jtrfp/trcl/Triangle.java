@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.concurrent.Future;
+
 public class Triangle
         {
         double [] x = new double[3];
@@ -27,17 +29,17 @@ public class Triangle
         RenderMode renderMode;
         private boolean isAlphaBlended=false;
        
-        TextureDescription texture;
+        Future<TextureDescription> texture;
         
-        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, TextureDescription textureToUse, RenderMode mode){
-            return quad2Triangles(x,y,z,u,v,textureToUse,mode,false);
+        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, Future<TextureDescription> cloudTexture, RenderMode mode){
+            return quad2Triangles(x,y,z,u,v,cloudTexture,mode,false);
         }
         
         /**
          * Converts supplied quad coordinates to a pair of triangles in clockwise order, top-left being index zero.
          *
          */
-        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, TextureDescription textureToUse, RenderMode mode, boolean hasAlpha)
+        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, Future<TextureDescription> cloudTexture, RenderMode mode, boolean hasAlpha)
                 {
                 Triangle [] result = new Triangle[2];
                
@@ -47,7 +49,7 @@ public class Triangle
                 qvx=0;
                 Triangle t;
                 t=new Triangle();
-                t.setTexture(textureToUse);
+                t.setTexture(cloudTexture);
                 t.setRenderMode(mode);
                 t.setAlphaBlended(hasAlpha);
                 t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
@@ -66,7 +68,7 @@ public class Triangle
                 result[0]=t;
                
                 t = new Triangle();
-                t.setTexture(textureToUse);
+                t.setTexture(cloudTexture);
                 t.setRenderMode(mode);
                 t.setAlphaBlended(hasAlpha);
                
@@ -190,17 +192,17 @@ public class Triangle
         /**
          * @return the texture
          */
-        public TextureDescription getTexture()
+        public Future<TextureDescription> getTexture()
                 {
                 return texture;
                 }
 
         /**
-         * @param texture the texture to set
+         * @param cloudTexture the texture to set
          */
-        public void setTexture(TextureDescription texture)
+        public void setTexture(Future<TextureDescription> cloudTexture)
                 {
-                this.texture = texture;
+                this.texture = cloudTexture;
                 }
        
         public String toString()

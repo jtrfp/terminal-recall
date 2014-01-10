@@ -71,7 +71,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								final double zPos=cZ*gridSquareSize;
 								
 								final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
-								TextureDescription td=points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ);
+								Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
 								Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 										new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 										new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
@@ -117,7 +117,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	}//end TunnelPointInquiry
 	private class TunnelPoint{
 	    final int x,z;
-	    TextureDescription textureToInsert;
+	    Future<TextureDescription> textureToInsert;
 	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
 		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());}
@@ -126,7 +126,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		x=(int)TR.legacy2MapSquare(v.getZ());//Reversed on purpose
 		z=(int)TR.legacy2MapSquare(v.getX());
 	    }
-	    public TextureDescription getTexture(){return textureToInsert;}
+	    public Future<TextureDescription> getTexture(){return textureToInsert;}
 	    
 	    @Override
 	    public boolean equals(Object other){

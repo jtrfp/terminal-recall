@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -31,7 +32,7 @@ public class BillboardSprite extends WorldObject{
 		{this.dim=dim;}
 	public Dimension getBillboardSize(){return this.dim;}
 	
-	public void setTexture(TextureDescription desc, boolean useAlpha){
+	public void setTexture(Future<TextureDescription> desc, boolean useAlpha){
 		if(dim==null)throw new NullPointerException("Billboard size must be non-null. (did you forget to set it?)");
 		Triangle[] tris= Triangle.quad2Triangles(
 				new double[]{-.5*dim.getWidth(),.5*dim.getWidth(),.5*dim.getWidth(),-.5*dim.getWidth()}, //X

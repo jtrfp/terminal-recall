@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import javax.media.opengl.GL3;
 
@@ -80,7 +81,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	    	//Entrance uses only a stub. Player is warped to 0,0,0 facing 0,0,1
 		ResourceManager rm = tr.getResourceManager();
 		LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
-		TextureDescription [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
+		Future<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
 		double segLen=256*TunnelSegment.TUNNEL_DIA_SCALAR;
@@ -143,7 +144,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	 * 
 	 */
 	
-	private void installObstacles(Segment s, TextureDescription[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
+	private void installObstacles(Segment s, Future<TextureDescription>[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		Color [] palette = tr.getGlobalPalette();
 		Obstacle obs = s.getObstacle();
 		WorldObject wo;

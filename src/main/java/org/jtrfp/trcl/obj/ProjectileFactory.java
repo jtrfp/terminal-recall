@@ -2,12 +2,14 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.concurrent.Future;
 
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.ColorProcessor;
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
@@ -33,7 +35,7 @@ public class ProjectileFactory {
     	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
     	Model modelToUse;
-    	TextureDescription t;
+    	Future<TextureDescription> t;
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
@@ -61,16 +63,16 @@ public class ProjectileFactory {
     	}//end if(isLaser)
    	 else if(modelingType instanceof ModelingType.BillboardModelingType){
    	     final ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)modelingType;
-   	     final Texture [] frames = new Texture[mt.getRawFileNames().length];
+   	     final Future<Texture> [] frames = new Future[mt.getRawFileNames().length];
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
    	     final Color [] pal = tr.getGlobalPalette();
    	     ColorProcessor proc = GammaCorrectingColorProcessor.singleton;
    	     GL3 gl = tr.getGPU().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl);
+   		 frames[i]=(Future)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl);
    	     }//end for(frames)
-   	     TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
+   	     Future<TextureDescription> tex = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames));
 	     ProjectileBillboard bb = new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow);
 	     for(int i=0; i<projectiles.length; i++){
 	   	    projectiles[i]=bb;}

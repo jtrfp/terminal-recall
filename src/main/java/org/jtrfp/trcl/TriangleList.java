@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.concurrent.ExecutionException;
+
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -39,7 +41,7 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 		}
 	private Triangle triangleAt(int frame, int tIndex)
 		{return getPrimitives()[frame][tIndex];}
-	private void setupVertex(int vIndex,GPUTriangleVertex vtx, int tIndex)
+	private void setupVertex(int vIndex,GPUTriangleVertex vtx, int tIndex) throws ExecutionException, InterruptedException
 		{final int numFrames = getPrimitives().length;
 		Triangle t=triangleAt(0,tIndex);
 		if(numFrames==1)
@@ -71,10 +73,10 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			}
 		else{throw new RuntimeException("Empty triangle vertex!");}
 		
-		TextureDescription td = t.getTexture();
+		TextureDescription td = t.getTexture().get();
 		if(td instanceof Texture){//Static texture
 			final Texture.TextureTreeNode tx;
-			tx= ((Texture)t.getTexture()).getNodeForThisTexture();
+			tx= ((Texture)t.getTexture().get()).getNodeForThisTexture();
 			if(animateUV&&numFrames>1){//Animated UV
 			    double []uFrames = new double[numFrames];
 			    double []vFrames = new double[numFrames];
@@ -91,11 +93,11 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 		    }
 		else 
 			{//Animated texture
-			AnimatedTexture at =((AnimatedTexture)t.getTexture());
+			AnimatedTexture at =((AnimatedTexture)t.getTexture().get());
 			
 			Texture.TextureTreeNode tx=at.
 				getFrames()
-				[0].
+				[0].get().
 				getNodeForThisTexture();//Default frame
 			vtx.u.set((short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
 			vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
@@ -105,7 +107,7 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			double [] vFrames = new double[numTextureFrames];
 			for(int ti=0; ti<numTextureFrames;ti++)
 				{
-				tx=at.getFrames()[ti].getNodeForThisTexture();
+				tx=at.getFrames()[ti].get().getNodeForThisTexture();
 				uFrames[ti]=(short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex]));
 				vFrames[ti]=(short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex]));
 				}//end for(frame)
@@ -114,7 +116,7 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			}//end animated texture
 		}//end setupVertex
 	
-	private void setupTriangle(int index)
+	private void setupTriangle(int index) throws ExecutionException,InterruptedException
 		{
 		final int vIndex=index*3;
 		setupVertex(0,getVec4s()[vIndex],index);
@@ -126,9 +128,12 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 		{
 		int nPrimitives=getNumPrimitives();
 		//System.out.println("Model: "+this.getDebugName()+" NumPrimitives: "+nPrimitives);
+		try{
 		for(int tIndex=0;tIndex<nPrimitives;tIndex++)
 			{setupTriangle(tIndex);
 			}//end for(getPrimitives)
+		}catch(InterruptedException e){e.printStackTrace();}
+		catch(ExecutionException e){e.printStackTrace();}
 		}//end allocateIndices(...)
 
 	@Override

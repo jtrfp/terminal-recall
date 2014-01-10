@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -48,6 +51,7 @@ import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.ColorProcessor;
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.LineSegment;
 import org.jtrfp.trcl.Model;
@@ -85,8 +89,8 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
-	private HashMap<String, TextureDescription> textureNameMap = new HashMap<String,TextureDescription>();
-	private HashMap<String, TextureDescription[]> specialTextureNameMap = new HashMap<String,TextureDescription[]>();
+	private HashMap<String, Future<TextureDescription>> textureNameMap = new HashMap<String,Future<TextureDescription>>();
+	private HashMap<String, Future<TextureDescription>[]> specialTextureNameMap = new HashMap<String,Future<TextureDescription>[]>();
 	private HashMap<String, BINFile.AnimationControl> aniBinNameMap = new HashMap<String,BINFile.AnimationControl>();
 	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
 	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
@@ -135,38 +139,41 @@ public class ResourceManager{
 		pods.add(new PodFile(f).getData());
 		}
 	
-	public TextureDescription [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException
+	public Future<TextureDescription> [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException
 		{
 		String [] files = getTEXListFile(texFileName);
-		TextureDescription [] result = new TextureDescription[files.length];
+		Future<TextureDescription> [] result = new Future[files.length];
 		//Color [] palette = getPalette(actFileName);
 		for(int i=0; i<files.length;i++)
 			{result[i]=getRAWAsTexture(files[i],palette,proc,gl3);}
 		return result;
 		}//end loadTextures(...)
 	
-	public TextureDescription [] getSpecialRAWAsTextures(String name, Color [] palette, ColorProcessor proc, GL3 gl, int upScalePowerOfTwo) throws IOException, FileLoadException, IllegalAccessException
-		{
-		TextureDescription [] result = specialTextureNameMap.get(name);
+	public Future<TextureDescription>[] getSpecialRAWAsTextures(String name, Color [] palette, ColorProcessor proc, GL3 gl, int upScalePowerOfTwo) throws IOException, FileLoadException, IllegalAccessException{
+		Future<TextureDescription> [] result = specialTextureNameMap.get(name);
 		if(result==null)
 			{BufferedImage [] segs = getSpecialRAWImage(name, palette, proc, upScalePowerOfTwo);
-			result=new Texture[segs.length];
+			result=new Future[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new Texture(segs[si]);}
+				{result[si] = new DummyFuture<TextureDescription>(new Texture(segs[si]));}
 			specialTextureNameMap.put(name,result);
 			}
 		return result;
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException{
+	public Future<TextureDescription> getRAWAsTexture(String name, final Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException{
 	    return getRAWAsTexture(name,palette,proc,gl3,true);
 	}
 	
-	public TextureDescription getRAWAsTexture(String name, Color [] palette, ColorProcessor proc, GL3 gl3,boolean useCache) throws IOException, FileLoadException, IllegalAccessException
-		{
-		TextureDescription result=textureNameMap.get(name);
-		if(result==null||!useCache)
-			{
+	public Future<TextureDescription> getRAWAsTexture(final String name, final Color [] palette, final ColorProcessor proc, GL3 gl3,
+			final boolean useCache) throws IOException, FileLoadException, IllegalAccessException{
+	    	Future<TextureDescription> result=textureNameMap.get(name);
+	    	if(result!=null&&useCache)return result;
+		result= TR.threadPool.submit(new Callable<TextureDescription>(){
+
+		    @Override
+		    public TextureDescription call() throws Exception {
+			TextureDescription result=null;
 			try {
 				if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
 					{//ends in number
@@ -185,30 +192,32 @@ public class ResourceManager{
 						}
 					if(frames.size()>1)
 						{
-						Texture [] tFrames = new Texture[frames.size()];
+						Future<Texture> [] tFrames = new Future[frames.size()];
 						for(int i=0; i<tFrames.length;i++)
-							{tFrames[i]=new Texture(getRAWImage(frames.get(i),palette,proc));textureNameMap.put(frames.get(i), tFrames[i]);}
+							{tFrames[i]=new DummyFuture<Texture>(new Texture(getRAWImage(frames.get(i),palette,proc)));/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
-						if(useCache)textureNameMap.put(name, aTex);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
 				result = new Texture(getRAWImage(name,palette,proc));
-				if(useCache)textureNameMap.put(name, result);
 				}
 			catch(NotSquareException e)
 				{
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=Texture.getFallbackTexture();
+				result=Texture.getFallbackTexture().get();
 				}
 			catch(NonPowerOfTwoException e)
 				{
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=Texture.getFallbackTexture();
+				result=Texture.getFallbackTexture().get();
 				}
-			}//end if(!null)
+			return result;
+		    }
+		    
+		});
+		if(useCache)textureNameMap.put(name, result);
 		return result;
 		}//end getRAWAsTexture(...)
 	
@@ -233,7 +242,7 @@ public class ResourceManager{
 		return getBINModel(name,Texture.getFallbackTexture(),1,true,palette,gl);
 		}
 	
-	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException
+	public Model getBINModel(String name,Future<TextureDescription> defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException
 		{if(name==null)throw new NullPointerException("Name cannot be null");
 		if(palette==null)throw new NullPointerException("Palette cannot be null");
 		if(gl==null)throw new NullPointerException("GL cannot be null");
@@ -285,7 +294,7 @@ public class ResourceManager{
 				System.out.println("Recognized as model file.");
 				List<BINFile.Model.Vertex> vertices = m.getVertices();
 				final double cpScalar=(scale*TR.crossPlatformScalar*256.)/(double)m.getScale();
-				TextureDescription currentTexture=null;
+				Future<TextureDescription> currentTexture=null;
 				for(ThirdPartyParseable b:m.getDataBlocks())
 					{
 					//Sort out types of block
@@ -293,7 +302,7 @@ public class ResourceManager{
 						{
 						TextureBlock tb = (TextureBlock)b;
 						gl.getContext().makeCurrent();
-						currentTexture = this.getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl);
+						currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl);
 						gl.getContext().release();
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
@@ -392,14 +401,14 @@ public class ResourceManager{
 						AnimatedTextureBlock block = (AnimatedTextureBlock)b;
 						List<String> frames = block.getFrameNames();
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
-						Texture [] subTextures = new Texture[frames.size()];
+						Future<Texture> [] subTextures = new Future[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
 							gl.getContext().makeCurrent();
-							TextureDescription tex=getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
-							subTextures[ti]=tex instanceof Texture?(Texture)tex:Texture.getFallbackTexture();
+							subTextures[ti]=(Future)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
+							//subTextures[ti]=tex instanceof Texture?new DummyFuture<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							gl.getContext().release();
 							}//end for(frames) //fDelay, nFrames,interp
-						currentTexture = new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures);
+						currentTexture = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures));
 						}
 					else if(b instanceof EOFBlock)
 						{System.out.println("...That's all, end of BIN");}
@@ -412,11 +421,12 @@ public class ResourceManager{
 				if(gl.getContext().isCurrent())gl.getContext().release();
 				return result;
 				}//end try{}
-			catch(UnrecognizedFormatException ee)
-				{
+			catch(UnrecognizedFormatException ee){
 				//Not-good fail
 				throw new UnrecognizedFormatException("Can't figure out what this is: "+name+". Giving up. Expect trouble ahead.");
 				}
+			catch(Exception ee){ee.printStackTrace();return null;}//TODO: This probably can be removed
+			//catch(InterruptedException ee){ee.printStackTrace(); return null;}
 			}//end catch(ok fail)
 		//throw new NullPointerException("Experienced an unexpected failure.");
 		//Bad fail.
@@ -511,7 +521,7 @@ public class ResourceManager{
 		return new RawAltitudeMapWrapper(new RAWFile(getInputStreamFromResource("DATA\\"+name)));
 		}//end getRAWAltitude
 	
-	public TextureMesh getTerrainTextureMesh(String name, TextureDescription[] texturePalette) throws IOException, FileLoadException, IllegalAccessException
+	public TextureMesh getTerrainTextureMesh(String name, Future<TextureDescription>[] texturePalette) throws IOException, FileLoadException, IllegalAccessException
 		{
 		final CLRFile	dat = new CLRFile(getInputStreamFromResource("DATA\\"+name));
 		return new RawTextureMeshWrapper(dat,texturePalette);

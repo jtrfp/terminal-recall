@@ -1,5 +1,7 @@
 package org.jtrfp.trcl.obj;
 
+import java.util.concurrent.Future;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
@@ -24,7 +26,7 @@ private final NAVSystem nav;
 	this.nav=navSystem;
 	try{
 	final Model m = new Model(false);
-	final TextureDescription tex = tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());
+	final Future<TextureDescription> tex = tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());
 	Triangle [] tris = Triangle.quad2Triangles(
 		new double[]{-WIDTH,WIDTH,WIDTH,-WIDTH}, 
 		new double[]{-HEIGHT,-HEIGHT,HEIGHT,HEIGHT}, 

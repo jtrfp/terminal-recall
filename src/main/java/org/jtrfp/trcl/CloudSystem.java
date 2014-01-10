@@ -17,6 +17,7 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
@@ -28,7 +29,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 	{
 	Color fogColor;
 	double ceilingHeight;
-	TextureDescription cloudTexture;
+	Future<TextureDescription> cloudTexture;
 	double cloudTileSideSize;
 	int gridSideSizeInTiles;
 	private final TR tr;
@@ -47,15 +48,18 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 		for(int i=0; i<256; i++)
 			{newPalette[TR.bidiMod((i+transpose),256)]=palette[i];}
 		
-		cloudTexture = tr.getResourceManager().getRAWAsTexture(cloudTextureFileName, newPalette, GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
+		cloudTexture = tr.getResourceManager().
+			getRAWAsTexture(cloudTextureFileName, newPalette, GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
 		addToWorld(os);
 		}//end constructor
 	
 	private void addToWorld(OverworldSystem os)
 		{
 		//Set fog
-		tr.getWorld().setFogColor(cloudTexture.getAverageColor());
-		os.setFogColor(cloudTexture.getAverageColor());
+	    	try{
+	    	final Color averageColor = cloudTexture.get().getAverageColor();
+		tr.getWorld().setFogColor(averageColor);
+		os.setFogColor(averageColor);
 		//Create a grid
 		for(int z=0; z<gridSideSizeInTiles; z++)
 			{
@@ -80,5 +84,6 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 				add(rq);
 				}//end for(x)
 			}//end for(z)
+	    	}catch(Exception e){e.printStackTrace();}
 		}//end addToWorld
 	}//end CloudSystem

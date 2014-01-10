@@ -23,8 +23,7 @@ import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
 public class BackdropSystem extends RenderableSpacePartitioningGrid{
     private WorldObject overworldBackdrop,tunnelBackdrop;
-	public BackdropSystem(World world)
-		{
+	public BackdropSystem(World world){
 		super(world);
 		//Backdrop
 		Model backdropModel=new Model(false);

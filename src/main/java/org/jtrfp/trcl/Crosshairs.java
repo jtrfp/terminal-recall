@@ -16,6 +16,7 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
@@ -29,10 +30,10 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere
 		super(tr);
 		//Crosshairs
 		Model crossModel = new Model(false);
-		Texture [] greenThrobFrames = new Texture[16];
+		Future<Texture> [] greenThrobFrames = new Future[16];
 		for(int f=0; f<8; f++)
-			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Texture)Texture.solidColor(new Color(f*22,f*32,f*23,170));}
-		AnimatedTexture greenThrob = new AnimatedTexture(new Sequencer(20,greenThrobFrames.length,false), greenThrobFrames);
+			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)Texture.solidColor(new Color(f*22,f*32,f*23,170));}
+		Future<TextureDescription> greenThrob = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(20,greenThrobFrames.length,false), greenThrobFrames));
 		final double xhairScale=.80;
 		final double xhairThick=.005*xhairScale;
 		final double xhairLen=.015*xhairScale;

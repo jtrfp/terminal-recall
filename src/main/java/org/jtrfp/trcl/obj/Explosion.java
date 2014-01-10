@@ -2,13 +2,16 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
+import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 
@@ -23,13 +26,13 @@ public class Explosion extends BillboardSprite {
 	if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
-	Texture [] frames = new Texture[aniFiles.length];
+	Future<Texture> [] frames = new Future[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){
 	        frames[i]=frame(aniFiles[i]);
 	    }
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
-	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
+	setTexture(new DummyFuture<TextureDescription>(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames)),true);
     }//end constructor
     
     @Override
@@ -125,8 +128,8 @@ public class Explosion extends BillboardSprite {
 	}
     }//end ExplosionType
     
-    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-	{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
+    private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
+	{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
 
     public void resetExplosion() {
 	getBehavior().probeForBehavior(ExplosionBehavior.class).reset();

@@ -15,26 +15,29 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.concurrent.Future;
+
 import org.jtrfp.trcl.file.CLRFile;
 
 public class RawTextureMeshWrapper implements TextureMesh
 	{
 	private static final int WIDTH=256;
 	CLRFile file;
-	TextureDescription [] palette;
+	Future<TextureDescription> [] palette;
 	//Texture [][] textures = new Texture[WIDTH][WIDTH];
 	
-	public RawTextureMeshWrapper(CLRFile f, TextureDescription[] texturePalette)
+	public RawTextureMeshWrapper(CLRFile f, Future<TextureDescription>[] texturePalette)
 		{
 		file=f;
 		palette=texturePalette;
 		}
 	@Override
-	public TextureDescription textureAt(double x, double z)
+	public Future<TextureDescription> textureAt(double x, double z)
 		{
 		if(x<0)x+=WIDTH;
 		if(z<0)z+=WIDTH;
-		return palette[file.valueAt((int)z%WIDTH, (int)x%WIDTH)];
+		try{return palette[file.valueAt((int)z%WIDTH, (int)x%WIDTH)];}
+		catch(Exception e){e.printStackTrace();return null;}
 		}
 
 	}

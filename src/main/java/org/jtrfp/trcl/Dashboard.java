@@ -16,6 +16,7 @@
 package org.jtrfp.trcl;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
@@ -29,7 +30,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere
 		{
 		super(tr);
 		//Dashboard
-		TextureDescription[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL(),2);
+		Future<TextureDescription>[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL(),2);
 		Model dashModel = new Model(false);
 		for(int seg=0; seg<5; seg++)
 			{

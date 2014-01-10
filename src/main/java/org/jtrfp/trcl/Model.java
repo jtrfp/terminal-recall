@@ -16,6 +16,7 @@
 package org.jtrfp.trcl;
 
 import java.util.ArrayList;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -146,19 +147,19 @@ public class Model
 		this.smoothAnimation = smoothAnimation;
 		}
 	
-	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin,boolean hasAlpha){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin,boolean hasAlpha){
 		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1,hasAlpha);
 		}
 	
-	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin){
 		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1);
 		}
 	
-	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1){
 	    return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,false);
 	}
 	
-	public static Model buildCube(double w, double h, double d, TextureDescription tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1, boolean hasAlpha){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1, boolean hasAlpha){
 		Model m = new Model(false);
 		//Front
 		m.addTriangles(Triangle.quad2Triangles(

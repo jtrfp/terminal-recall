@@ -3,6 +3,7 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
@@ -24,7 +25,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			TR tr = w.getTr();
 			//Active by default
 			Color [] globalPalette = tr.getGlobalPalette();
-			TextureDescription [] texturePalette=tr.getResourceManager().getTextures(lvl.getLevelTextureListFile(), 
+			Future<TextureDescription> [] texturePalette=tr.getResourceManager().getTextures(lvl.getLevelTextureListFile(), 
 					globalPalette,GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
 			System.out.println("Loading height map...");
 			altitudeMap=new InterpolatingAltitudeMap(tr.getResourceManager().getRAWAltitude(lvl.getHeightMapOrTunnelFile()));

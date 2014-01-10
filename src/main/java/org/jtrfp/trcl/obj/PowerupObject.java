@@ -2,10 +2,12 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;
@@ -25,7 +27,7 @@ public class PowerupObject extends BillboardSprite{
 		super(world.getTr());
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
-		TextureDescription desc=Texture.getFallbackTexture();
+		Future<TextureDescription> desc=Texture.getFallbackTexture();
 		if(pt==Powerup.Random){
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
 		}
@@ -33,11 +35,11 @@ public class PowerupObject extends BillboardSprite{
 		String [] bbFrames = pt.getBillboardFrames();
 		Sequencer s = new Sequencer(Powerup.TIME_PER_FRAME_MILLIS,bbFrames.length,false);
 		try {
-		    Texture [] t = new Texture[pt.getBillboardFrames().length];
+		    Future<Texture> [] t = new Future[pt.getBillboardFrames().length];
 			for(int i=0; i<t.length;i++){
 			    t[i]=frame(bbFrames[i]);
 			}
-			desc=new AnimatedTexture(s,t);
+			desc=new DummyFuture<TextureDescription>(new AnimatedTexture(s,t));
 			//Do something with desc
 			setTexture(desc,true);}//end try{}
 		catch(Exception e)
@@ -83,8 +85,8 @@ public class PowerupObject extends BillboardSprite{
 		}//end applyToPlayer()
 	}//end PowerupBehavior
 	
-	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
+	private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
+		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
 
 	public Powerup getPowerupType()
 		{return powerupType;}

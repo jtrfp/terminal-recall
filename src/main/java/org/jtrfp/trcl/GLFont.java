@@ -21,11 +21,12 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.Future;
 
 public class GLFont
 	{
 	private final Font realFont;
-	private final Texture[] textures;
+	private final Future<Texture>[] textures;
 	private Graphics2D g;
 	private FontMetrics metrics;
 	private final int [] widths = new int[256];
@@ -37,12 +38,12 @@ public class GLFont
 		{
 		this.realFont=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
 		//Generate the textures
-		textures = new Texture[256];
+		textures = new Future[256];
 		Texture empty=renderToTexture(' ');
 		for(int c=0; c<256; c++)
-			{textures[c]=realFont.canDisplay(c)?renderToTexture(c):empty;}
+			{textures[c]=new DummyFuture<Texture>(realFont.canDisplay(c)?renderToTexture(c):empty);}
 		}//end constructor
-	public Texture[] getTextures()
+	public Future<Texture>[] getTextures()
 		{return textures;}
 	
 	private Texture renderToTexture(int c)

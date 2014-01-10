@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.util.concurrent.Future;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
@@ -31,7 +33,7 @@ public class TunnelSegment extends WorldObject
 	private final double endX,endY;
 	//private double width,height;
 	
-	public TunnelSegment(TR tr, Segment s, TextureDescription[] tunnelTexturePalette, double segLen, double endX, double endY)
+	public TunnelSegment(TR tr, Segment s, Future<TextureDescription>[] tunnelTexturePalette, double segLen, double endX, double endY)
 		{
 		super(tr, createModel(s,segLen, tunnelTexturePalette,endX,endY));
 		segmentLength=segLen;
@@ -50,7 +52,7 @@ public class TunnelSegment extends WorldObject
 	public static double getEndHeight(Segment s)
 		{return TR.legacy2Modern(s.getEndHeight()*TUNNEL_DIA_SCALAR*3);}
 	
-	private static Model createModel(Segment s,double segLen, TextureDescription[] tunnelTexturePalette, double endX,double endY)
+	private static Model createModel(Segment s,double segLen, Future<TextureDescription>[] tunnelTexturePalette, double endX,double endY)
 		{
 		Model m = new Model(true);
 		m.setDebugName("Tunnel Segment");

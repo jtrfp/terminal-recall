@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureDescription;
@@ -14,7 +15,7 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ProjectileBillboard extends BillboardSprite implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
-    public ProjectileBillboard(TR tr,Weapon w,TextureDescription textureToUse,ExplosionType explosionType) {
+    public ProjectileBillboard(TR tr,Weapon w,Future<TextureDescription> textureToUse,ExplosionType explosionType) {
 	super(tr);
 	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType));
 	ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)w.getModelingType();

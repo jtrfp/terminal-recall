@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
@@ -38,11 +39,11 @@ public class Texture implements TextureDescription
 	private static double pixelSize=.7/4096.; //TODO: This is a kludge; doesn't scale with megatexture
 	private static TextureTreeNode rootNode=null;
 	private static GLTexture globalTexture;
-	private static final Texture fallbackTexture;
+	private static final Future<TextureDescription> fallbackTexture;
 	static  {
 		Texture t;
 		t=new Texture(RGBA8FromPNG(Texture.class.getResourceAsStream("/fallbackTexture.png")));
-		fallbackTexture=t;
+		fallbackTexture=new DummyFuture<TextureDescription>(t);
 		}
 	private static ByteBuffer emptyRow=null;
 	
@@ -161,7 +162,7 @@ public class Texture implements TextureDescription
 		//System.out.println("...done registering.\n");
 		}//end registerNode(...)
 	
-	public static Texture getFallbackTexture(){return fallbackTexture;}
+	public static Future<TextureDescription> getFallbackTexture(){return fallbackTexture;}
 	
 	//public static int getGlobalTextureID(){return globalTexID;}
 	
@@ -665,7 +666,7 @@ public class Texture implements TextureDescription
 		this.nodeForThisTexture = nodeForThisTexture;
 		}
 
-	public static TextureDescription solidColor(Color color)
+	public static Future<TextureDescription> solidColor(Color color)
 		{
 		BufferedImage img = new BufferedImage(64,64,BufferedImage.TYPE_INT_RGB);
 		Graphics g = img.getGraphics();
@@ -673,6 +674,6 @@ public class Texture implements TextureDescription
 		g.fillRect(0, 0, 64, 64);
 		g.dispose();
 		
-		return new Texture(img);
+		return new DummyFuture<TextureDescription>(new Texture(img));
 		}
 	}//end Texture

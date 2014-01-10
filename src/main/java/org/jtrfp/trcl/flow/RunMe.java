@@ -16,15 +16,8 @@
 package org.jtrfp.trcl.flow;
 
 import java.io.File;
-import java.io.PrintStream;
-import java.util.Map.Entry;
 
-import javax.media.opengl.GL3;
-
-import org.jtrfp.trcl.GameSetup;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.dbg.Reporter;
-import org.jtrfp.trcl.gpu.GPU;
 
 public class RunMe{
 	public static void main(String [] args){

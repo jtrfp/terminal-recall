@@ -31,9 +31,9 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	private final CharLineDisplay weapon;
 	private final CharLineDisplay sector;
 	private final CharLineDisplay ammo;
+	private final ManuallySetController throttleMeter,healthMeter;
 	public HUDSystem(World world){
 		super(world);
-		TR tr =  world.getTr();
 		//Dash Text
 		GLFont font;
 		try	{//TODO: Have TR allocate the font ahead of time.
@@ -70,19 +70,19 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,Z));
 		
 		add(new Crosshairs(world.getTr()));
-		try{
+		//try{
 		    MeterBar mb;
 		add(mb=new MeterBar(world.getTr(),
 			new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png"))),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(HEALTH_POS);
-		tr.setHealthMeter(mb.getController());
+		healthMeter = mb.getController();
 		add(mb=new MeterBar(world.getTr(),
 			new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/BlueBlackGradient.png"))),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(THROTTLE_POS);
-		tr.setThrottleMeter(mb.getController());
-		}catch(Exception e){e.printStackTrace();}
+		throttleMeter = mb.getController();
+		//}catch(Exception e){e.printStackTrace();}
 		}//end constructor
 	/**
 	 * @return the objective
@@ -113,5 +113,17 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	 */
 	public CharLineDisplay getAmmo() {
 	    return ammo;
+	}
+	/**
+	 * @return the throttleMeter
+	 */
+	public ManuallySetController getThrottleMeter() {
+	    return throttleMeter;
+	}
+	/**
+	 * @return the healthMeter
+	 */
+	public ManuallySetController getHealthMeter() {
+	    return healthMeter;
 	}
 	}//end HUDSystem

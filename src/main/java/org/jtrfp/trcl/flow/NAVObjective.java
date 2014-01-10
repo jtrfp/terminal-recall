@@ -23,7 +23,7 @@ public abstract class NAVObjective {
     private static TR tr;//for debug
     private static int counter=0;//for debug
     private static final double CHECKPOINT_HEIGHT_PADDING=70000;
-    public static void create(TR tr, NAVSubObject obj, final List<DEFObject>defs, List<NAVObjective>dest, OverworldSystem overworld, NAVSystem ns){
+    public static void create(TR tr, NAVSubObject obj, final List<DEFObject>defs, List<NAVObjective>dest, OverworldSystem overworld){
 	NAVObjective.tr=tr;
 	if(obj instanceof TGT){///////////////////////////////////////////
 	    TGT tgt = (TGT)obj;
@@ -41,7 +41,7 @@ public abstract class NAVObjective {
 		    }
 		};//end new NAVObjective
 		dest.add(objective);
-		targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,ns));
+		targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,tr.getCurrentMission()));
 	    }//end for(targs)
 	} else if(obj instanceof TUN){///////////////////////////////////////////
 	    TUN tun = (TUN)obj;
@@ -62,7 +62,7 @@ public abstract class NAVObjective {
 			return chk;
 		    }
 	    };//end new NAVObjective
-	    chk.setObjectiveToRemove(objective,ns);
+	    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
 	    overworld.add(chk);
 	    dest.add(objective);
 	} else if(obj instanceof BOS){///////////////////////////////////////////
@@ -79,7 +79,7 @@ public abstract class NAVObjective {
 		    }
 		};//end new NAVObjective
 		dest.add(objective);
-		bossObject.addBehavior(new RemovesNAVObjectiveOnDeath(objective,ns));
+		bossObject.addBehavior(new RemovesNAVObjectiveOnDeath(objective,tr.getCurrentMission()));
 	} else if(obj instanceof CHK){///////////////////////////////////////////
 	    final CHK cp = (CHK)obj;
 	    final Location3D loc3d = cp.getLocationOnMap();
@@ -100,7 +100,7 @@ public abstract class NAVObjective {
 			return chk;
 		    }
 	    };//end new NAVObjective
-	    chk.setObjectiveToRemove(objective,ns);
+	    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
 	    overworld.add(chk);
 	    dest.add(objective);
 	} else if(obj instanceof XIT){///////////////////////////////////////////
@@ -140,7 +140,7 @@ public abstract class NAVObjective {
 			return chk;
 		    }
 	    };//end new NAVObjective
-	    chk.setObjectiveToRemove(objective,ns);
+	    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
 	    overworld.add(chk);
 	    dest.add(objective);
 	    }catch(Exception e){e.printStackTrace();}

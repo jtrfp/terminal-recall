@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public class Util {
 public static final Color [] DEFAULT_PALETTE = new Color []{
-    new Color(0,0,0),
+    new Color(0,0,0,0),
     new Color(7,7,7),
     new Color(14,14,14),
     new Color(22,22,22),

@@ -46,9 +46,11 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.tools.Util;
 
 public final class TR
 	{
@@ -73,7 +75,6 @@ public final class TR
 	private final Renderer renderer;
 	private final CollisionManager collisionManager = new CollisionManager(this);
 	private final Reporter reporter = new Reporter();
-	private ManuallySetController throttleMeter, healthMeter;
 	private OverworldSystem overworldSystem;
 	private InterpolatingAltitudeMap altitudeMap;
 	private BackdropSystem backdropSystem;
@@ -265,21 +266,21 @@ public final class TR
 	/**
 	 * @return the keyStatus
 	 */
-	public KeyStatus getKeyStatus()
-		{
-		return keyStatus;
-		}
-
-	public void setGlobalPalette(Color[] palette){
-	    globalPalette = palette;
-	    darkIsClearPalette = new Color[256];
-	    for(int i=0; i<256; i++){
-		    float newAlpha=(float)Math.pow(((palette[i].getRed()+palette[i].getGreen()+palette[i].getBlue())/(3f*255f)),.5);
-		    darkIsClearPalette[i]=new Color(palette[i].getRed()/255f,palette[i].getGreen()/255f,palette[i].getBlue()/255f,newAlpha);
-	    }//end for(i)
-	}
-	public Color [] getGlobalPalette(){return globalPalette;}
-	public Color [] getDarkIsClearPalette(){return darkIsClearPalette;}
+	public KeyStatus getKeyStatus(){
+		return keyStatus;}
+	public Color [] getGlobalPalette(){
+	    if(globalPalette==null)globalPalette=Util.DEFAULT_PALETTE;
+	    return globalPalette;}
+	public Color [] getDarkIsClearPalette(){
+	    if(darkIsClearPalette==null){
+		darkIsClearPalette = new Color[256];
+		    for(int i=0; i<256; i++){
+			float newAlpha=(float)Math.pow(((globalPalette[i].getRed()+globalPalette[i].getGreen()+globalPalette[i].getBlue())/(3f*255f)),.5);
+			darkIsClearPalette[i]=new Color(globalPalette[i].getRed()/255f,globalPalette[i].getGreen()/255f,globalPalette[i].getBlue()/255f,newAlpha);
+		    }//end for(colors)
+	    }//end if(null)
+	    return darkIsClearPalette;
+	}//end getDarkIsClearPalette
 	
 	public GPU getGPU(){return gpu;}
 
@@ -315,31 +316,6 @@ public final class TR
 	 */
 	public Reporter getReporter() {
 	    return reporter;
-	}
-
-	public ManuallySetController getThrottleMeter() {
-	    return throttleMeter;
-	}
-
-	/**
-	 * @return the healthMeter
-	 */
-	public ManuallySetController getHealthMeter() {
-	    return healthMeter;
-	}
-
-	/**
-	 * @param healthMeter the healthMeter to set
-	 */
-	public void setHealthMeter(ManuallySetController healthMeter) {
-	    this.healthMeter = healthMeter;
-	}
-
-	/**
-	 * @param throttleMeter the throttleMeter to set
-	 */
-	public void setThrottleMeter(ManuallySetController throttleMeter) {
-	    this.throttleMeter = throttleMeter;
 	}
 
 	public void setOverworldSystem(OverworldSystem overworldSystem) {
@@ -389,6 +365,9 @@ public final class TR
 	 * @return the navSystem
 	 */
 	public NAVSystem getNavSystem() {
+	    if(navSystem==null){
+		navSystem=new NAVSystem(getWorld(),this);
+	    }
 	    return navSystem;
 	}
 
@@ -403,6 +382,8 @@ public final class TR
 	 * @return the hudSystem
 	 */
 	public HUDSystem getHudSystem() {
+	    if(hudSystem==null)hudSystem = new HUDSystem(getWorld());
+	    hudSystem.activate();
 	    return hudSystem;
 	}
 
@@ -437,8 +418,8 @@ public final class TR
 	
 	private void recursiveMissionSequence(String lvlFileName){
 	    try{
-	    final Mission mission = new Mission(this, getResourceManager().getLVL(lvlFileName));
-	    Mission.Result result = mission.go();
+	    currentMission = new Mission(this, getResourceManager().getLVL(lvlFileName));
+	    Mission.Result result = currentMission.go();
 	    final String nextLVL=result.getNextLVL();
 	    if(nextLVL!=null)recursiveMissionSequence(nextLVL);
 	    }catch(IllegalAccessException e){e.printStackTrace();}

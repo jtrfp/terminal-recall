@@ -7,12 +7,13 @@ import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 
 
 public class Checkpoint extends BillboardSprite {
 private NAVObjective objective;
-private NAVSystem ns;
+private Mission m;
 private boolean includeYAxisInCollision=true;
     public Checkpoint(TR tr) {
 	super(tr);
@@ -26,9 +27,9 @@ private boolean includeYAxisInCollision=true;
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor
 
-    public void setObjectiveToRemove(NAVObjective objective, NAVSystem ns) {
+    public void setObjectiveToRemove(NAVObjective objective, Mission m) {
 	this.objective=objective;
-	this.ns=ns;
+	this.m=m;
     }//end setObjectiveToRemove(...)
     
     private class CheckpointBehavior extends Behavior{
@@ -41,7 +42,7 @@ private boolean includeYAxisInCollision=true;
 		Vector3D parentPos = includeYAxisInCollision?parent.getPosition():new Vector3D(parent.getPosition().getX(),0,parent.getPosition().getZ());
 		if(TR.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
 		    destroy();
-		    ns.removeNAVObjective(objective);
+		    m.removeNAVObjective(objective);
 		}//end if(collided)
 	    }//end if(Player)
 	}//end _proposeCollision()

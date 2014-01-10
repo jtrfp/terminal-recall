@@ -60,8 +60,8 @@ public class Player extends WorldObject
 		addBehavior(new AfterburnerBehavior());
 		addBehavior(new LoopingPositionBehavior());
 		addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
-		addBehavior(new UpdatesThrottleMeterBehavior().setController(tr.getThrottleMeter()));
-		addBehavior(new UpdatesHealthMeterBehavior().setController(tr.getHealthMeter()));
+		addBehavior(new UpdatesThrottleMeterBehavior().setController(tr.getHudSystem().getThrottleMeter()));
+		addBehavior(new UpdatesHealthMeterBehavior().setController(tr.getHudSystem().getHealthMeter()));
 		addBehavior(new DamagedByCollisionWithGameplayObject());
 		addBehavior(new DamagedByCollisionWithSurface());
 		addBehavior(new BouncesOffSurfaces());

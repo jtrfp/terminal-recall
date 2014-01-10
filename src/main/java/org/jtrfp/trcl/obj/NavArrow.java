@@ -11,7 +11,7 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.file.Location3D;
+import org.jtrfp.trcl.flow.Mission;
 
 public class NavArrow extends WorldObject2DVisibleEverywhere {
 private static final double WIDTH=.08;
@@ -46,15 +46,17 @@ private final NAVSystem nav;
 	private int counter=0;
 	@Override
 	public void _tick(long time){
-	    final WorldObject player = getTr().getPlayer();
+	    final TR tr=getTr();
+	    final Mission mission = tr.getCurrentMission();
+	    final WorldObject player = tr.getPlayer();
 	    final Vector3D playerPos = player.getPosition();
 	    final Vector3D playerPosXY = new Vector3D(playerPos.getX(),playerPos.getZ(),0);
 	    final Vector3D playerHeading = player.getHeading();
 	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
-	    if(nav.currentNAVTarget()==null){setVisible(false);return;}
-	    if(nav.currentNAVTarget().getTarget()==null){setVisible(false);return;}
+	    if(mission.currentNAVTarget()==null){setVisible(false);return;}
+	    if(mission.currentNAVTarget().getTarget()==null){setVisible(false);return;}
 	    	else setVisible(true);
-	    final Vector3D loc =nav.currentNAVTarget().getTarget().getPosition();
+	    final Vector3D loc =mission.currentNAVTarget().getTarget().getPosition();
 	    final Vector3D navLocXY = new Vector3D(loc.getX(),loc.getZ(),0);
 	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
 	    final double modernDistance = player2NavVectorXY.getNorm();

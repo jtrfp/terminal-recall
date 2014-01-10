@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteOrder;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,6 +42,7 @@ import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
+import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -412,4 +414,18 @@ public final class TR
 	public static double legacy2MapSquare(double z) {
 	    return ((z/crossPlatformScalar)/mapWidth)*255.;
 	}
+	
+	public void gatherSysInfo(){
+    	    final GPU gpu = getGPU();
+    	    final Reporter r = getReporter();
+    	    GL3 gl = gpu.takeGL();
+    	    r.report("org.jtrfp.trcl.flow.RunMe.glVendor", gpu.glGetString(GL3.GL_VENDOR));
+    	    r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", gpu.glGetString(GL3.GL_RENDERER));
+    	    r.report("org.jtrfp.trcl.flow.RunMe.glVersion", gpu.glGetString(GL3.GL_VERSION));
+    	    getGPU().releaseGL();
+    	    r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime.getRuntime().availableProcessors());
+    	
+    	    for(Entry<Object,Object> prop:System.getProperties().entrySet())
+    		{r.report((String)prop.getKey(),prop.getValue());}
+    	    }//end gatherSysInfo()
 }//end TR

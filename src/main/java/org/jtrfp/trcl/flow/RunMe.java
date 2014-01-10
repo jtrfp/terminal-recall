@@ -51,7 +51,7 @@ public class RunMe{
 			{
 			try {
 				TR tr = new TR();
-				gatherSysInfo(tr,System.out);
+				tr.gatherSysInfo();
 				for(int argI=0; argI<args.length-1; argI++)
 					{tr.getResourceManager().registerPOD(new File(args[argI]));}
 				new GameSetup(tr.getResourceManager().getLVL(args[args.length-1]),tr);
@@ -64,20 +64,7 @@ public class RunMe{
 			}
 		}//end aspectMain
 	
-	private static void gatherSysInfo(TR tr, PrintStream out)
-		{
-		final GPU gpu = tr.getGPU();
-		final Reporter r = tr.getReporter();
-		GL3 gl = gpu.takeGL();
-		r.report("org.jtrfp.trcl.flow.RunMe.glVendor", gpu.glGetString(GL3.GL_VENDOR));
-		r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", gpu.glGetString(GL3.GL_RENDERER));
-		r.report("org.jtrfp.trcl.flow.RunMe.glVersion", gpu.glGetString(GL3.GL_VERSION));
-		tr.getGPU().releaseGL();
-		r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime.getRuntime().availableProcessors());
-		
-		for(Entry<Object,Object> prop:System.getProperties().entrySet())
-			{r.report((String)prop.getKey(),prop.getValue());}
-		}
+	
 	
 	private static void ensureJVMIsProperlyConfigured(String [] args)
 		{

@@ -19,6 +19,7 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
@@ -42,7 +44,6 @@ import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
-import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -79,6 +80,7 @@ public final class TR
 	private Game game = new Game();
 	private NAVSystem navSystem;
 	private HUDSystem hudSystem;
+	private Mission currentMission;
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -428,4 +430,26 @@ public final class TR
     	    for(Entry<Object,Object> prop:System.getProperties().entrySet())
     		{r.report((String)prop.getKey(),prop.getValue());}
     	    }//end gatherSysInfo()
+
+	public void startMissionSequence(String lvlFileName) {
+	    recursiveMissionSequence(lvlFileName);
+	}
+	
+	private void recursiveMissionSequence(String lvlFileName){
+	    try{
+	    final Mission mission = new Mission(this, getResourceManager().getLVL(lvlFileName));
+	    Mission.Result result = mission.go();
+	    final String nextLVL=result.getNextLVL();
+	    if(nextLVL!=null)recursiveMissionSequence(nextLVL);
+	    }catch(IllegalAccessException e){e.printStackTrace();}
+	    catch(FileLoadException e){e.printStackTrace();}
+	    catch(IOException e){e.printStackTrace();}
+	}
+
+	/**
+	 * @return the currentMission
+	 */
+	public Mission getCurrentMission() {
+	    return currentMission;
+	}
 }//end TR

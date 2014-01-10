@@ -47,14 +47,13 @@ public class RunMe{
 				"		THIS PROGRAM IS NOT SUPPORTED BY OR AFFILIATED WITH MICROSOFT OR TERMINAL REALITY INC.\n"+
 				"	Bring any issues to the Terminal Recall google code page.\n"
 				);
-		if(args.length>=2)
-			{
+		if(args.length>=2){
 			try {
 				TR tr = new TR();
 				tr.gatherSysInfo();
 				for(int argI=0; argI<args.length-1; argI++)
 					{tr.getResourceManager().registerPOD(new File(args[argI]));}
-				new GameSetup(tr.getResourceManager().getLVL(args[args.length-1]),tr);
+				tr.startMissionSequence(args[args.length-1]);
 				}
 			catch(Exception e) {e.printStackTrace();}
 			}//end if(good)

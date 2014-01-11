@@ -936,28 +936,98 @@ public abstract class BINFile implements ThirdPartyParseable
 					}
 			}//end Unknown 0x0F
 			
-			public static class Unknown0x04 implements ThirdPartyParseable{
-			    byte [] unknown;
+			public static class BillboardTexCoords0x04 implements ThirdPartyParseable{
+			    private int numVertices;
+			    private List<FaceBlockVertex> vertices = new ArrayList<FaceBlockVertex>();
 			    
 			    @Override
 			    public void describeFormat(Parser prs){
 				prs.littleEndian();
 				prs.expectBytes(new byte[]{0,0,0,0x04}, FailureBehavior.UNRECOGNIZED_FORMAT);
-				prs.bytesOfCount(10*4, prs.property("unknown", byte.class));
+				prs.expectBytes(new byte[]{0}, FailureBehavior.UNRECOGNIZED_FORMAT);
+				prs.int4s(prs.property("numVertices", int.class));
+				for(int i=0; i<getNumVertices(); i++){
+				    prs.indexedProperty("vertices", FaceBlockVertex.class, i);
+				}
 			    }//end describeFormat(..)
-
+			    public static class FaceBlockVertex implements ThirdPartyParseable
+				{
+				int vertexIndex,textureCoordinateU,textureCoordinateV;
+				@Override
+				public void describeFormat(Parser prs)
+						throws UnrecognizedFormatException
+					{
+					prs.int4s(prs.property("vertexIndex", int.class));
+					prs.int4s(prs.property("textureCoordinateU", int.class));
+					prs.int4s(prs.property("textureCoordinateV", int.class));
+					}
+				/**
+				 * @return the vertexIndex
+				 */
+				public int getVertexIndex()
+					{
+					return vertexIndex;
+					}
+				/**
+				 * @param vertexIndex the vertexIndex to set
+				 */
+				public void setVertexIndex(int vertexIndex)
+					{
+					this.vertexIndex = vertexIndex;
+					}
+				/**
+				 * @return the textureCoordinateU
+				 */
+				public int getTextureCoordinateU()
+					{
+					return textureCoordinateU;
+					}
+				/**
+				 * @param textureCoordinateU the textureCoordinateU to set
+				 */
+				public void setTextureCoordinateU(int textureCoordinateU)
+					{
+					this.textureCoordinateU = textureCoordinateU;
+					}
+				/**
+				 * @return the textureCoordinateV
+				 */
+				public int getTextureCoordinateV()
+					{
+					return textureCoordinateV;
+					}
+				/**
+				 * @param textureCoordinateV the textureCoordinateV to set
+				 */
+				public void setTextureCoordinateV(int textureCoordinateV)
+					{
+					this.textureCoordinateV = textureCoordinateV;
+					}
+				
+				}//end FaceBlockVertex
 			    /**
-			     * @return the unknown
+			     * @return the numVertices
 			     */
-			    public byte[] getUnknown() {
-			        return unknown;
+			    public int getNumVertices() {
+			        return numVertices;
 			    }
-
 			    /**
-			     * @param unknown the unknown to set
+			     * @param numVertices the numVertices to set
 			     */
-			    public void setUnknown(byte[] unknown) {
-			        this.unknown = unknown;
+			    public void setNumVertices(int numVertices) {
+			        this.numVertices = numVertices;
+			    }
+			    /**
+			     * @return the vertices
+			     */
+			    public List<FaceBlockVertex> getVertices() {
+			        return vertices;
+			    }
+			    /**
+			     * @param vertices the vertices to set
+			     */
+			    public void setVertices(List<FaceBlockVertex> vertices) {
+			        this.vertices = vertices;
 			    }
 			}//end Unknown 0x04
 			

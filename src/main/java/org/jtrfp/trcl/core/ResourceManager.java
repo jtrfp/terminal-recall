@@ -155,7 +155,7 @@ public class ResourceManager{
 			{BufferedImage [] segs = getSpecialRAWImage(name, palette, proc, upScalePowerOfTwo);
 			result=new Future[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new DummyFuture<TextureDescription>(new Texture(segs[si]));}
+				{result[si] = new DummyFuture<TextureDescription>(new Texture(segs[si],"name"));}
 			specialTextureNameMap.put(name,result);
 			}
 		return result;
@@ -194,12 +194,12 @@ public class ResourceManager{
 						{
 						Future<Texture> [] tFrames = new Future[frames.size()];
 						for(int i=0; i<tFrames.length;i++)
-							{tFrames[i]=new DummyFuture<Texture>(new Texture(getRAWImage(frames.get(i),palette,proc)));/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
+							{tFrames[i]=new DummyFuture<Texture>(new Texture(getRAWImage(frames.get(i),palette,proc),""+frames.get(i)));/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWImage(name,palette,proc));
+				result = new Texture(getRAWImage(name,palette,proc),name);
 				}
 			catch(NotSquareException e)
 				{

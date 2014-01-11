@@ -73,12 +73,12 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		//try{
 		    MeterBar mb;
 		add(mb=new MeterBar(world.getTr(),
-			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png")))),
+			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png")),"HealthBar orangeOrange")),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(HEALTH_POS);
 		healthMeter = mb.getController();
 		add(mb=new MeterBar(world.getTr(),
-			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/BlueBlackGradient.png")))),
+			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/BlueBlackGradient.png")),"ThrottleBar blackBlue")),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(THROTTLE_POS);
 		throttleMeter = mb.getController();

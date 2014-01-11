@@ -16,7 +16,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private CloudSystem cloudSystem;
 	private TextureMesh textureMesh;
 	private InterpolatingAltitudeMap altitudeMap;
-	private Color fogColor;
+	private Color fogColor=Color.black;
 	private final ArrayList<DEFObject> defList = new ArrayList<DEFObject>();
 	
 	public OverworldSystem(World w, LVLFile lvl, TDFFile tdf){
@@ -64,7 +64,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	public Color getFogColor() {
 	    return fogColor;
 	}
-	public void setFogColor(Color c){fogColor=c;}
+	public void setFogColor(Color c){
+	    fogColor=c;if(fogColor==null)throw new NullPointerException("Passed color is intolerably null.");}
 
 	public List<DEFObject> getDefList() {
 	    return defList;

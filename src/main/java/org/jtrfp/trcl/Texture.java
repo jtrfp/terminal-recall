@@ -42,24 +42,24 @@ public class Texture implements TextureDescription
 	private static final Future<TextureDescription> fallbackTexture;
 	static  {
 		Texture t;
-		t=new Texture(RGBA8FromPNG(Texture.class.getResourceAsStream("/fallbackTexture.png")));
+		t=new Texture(RGBA8FromPNG(Texture.class.getResourceAsStream("/fallbackTexture.png")),"Fallback");
 		fallbackTexture=new DummyFuture<TextureDescription>(t);
 		}
 	private static ByteBuffer emptyRow=null;
 	
-	public Texture(ByteBuffer imageRGB8)
-		{
+	public Texture(ByteBuffer imageRGB8, String debugName){
+	    	if(imageRGB8.capacity()==0){throw new IllegalArgumentException("Cannot create texture of zero size.");}
 		final int sideLength=(int)Math.sqrt((imageRGB8.capacity()/4));
-		TextureTreeNode newNode = new TextureTreeNode(sideLength,null);
+		TextureTreeNode newNode = new TextureTreeNode(sideLength,null,debugName);
 		nodeForThisTexture=newNode;
 		newNode.setImage(imageRGB8);
 		registerNode(newNode);
 		}//end constructor
 	
-	public Texture(BufferedImage img)
-		{
+	public Texture(BufferedImage img, String debugName){
 		final int sideLength=img.getWidth();
-		TextureTreeNode newNode = new TextureTreeNode(sideLength,null);
+		if(sideLength==0){throw new IllegalArgumentException("Cannot create texture of zero size.");}
+		TextureTreeNode newNode = new TextureTreeNode(sideLength,null,debugName);
 		nodeForThisTexture=newNode;
 		//BufferedImage scaledDown=new BufferedImage(img.getWidth(),img.getHeight(),BufferedImage.TYPE_INT_ARGB);
 		//Graphics g = scaledDown.getGraphics();
@@ -122,7 +122,7 @@ public class Texture implements TextureDescription
 		if(rootNode==null)
 			{
 			//System.out.println("Creating initial rootNode with sideLength of "+newNode.getSideLength()*2);
-			rootNode=new TextureTreeNode(newNode.getSideLength()*2,null);//Assuming square
+			rootNode=new TextureTreeNode(newNode.getSideLength()*2,null,"Root or former root as branch");//Assuming square
 			rootNode.setSizeU(1);rootNode.setSizeV(1);
 			//System.out.println("Adding first subnode to this new root..");
 			rootNode.addNode(newNode);
@@ -133,7 +133,7 @@ public class Texture implements TextureDescription
 				{//New, bigger root
 				//System.out.println("NewNode>=rootNode sideLen");
 				TextureTreeNode oldRoot = rootNode;
-				rootNode=new TextureTreeNode(newNode.getSideLength()*2,null);
+				rootNode=new TextureTreeNode(newNode.getSideLength()*2,null,"Root or former root as branch");
 				rootNode.addNode(newNode);
 				//Try again recursively until we fit the old root into the new root
 				registerNode(oldRoot);
@@ -150,7 +150,7 @@ public class Texture implements TextureDescription
 					TextureTreeNode oldRoot = rootNode;
 					//System.out.println("===>Need a bigger root. Creating one of size "+oldRoot.getSideLength()*2);
 					//System.out.println("This resize is upon receiving texture #"+textureCount);
-					rootNode=new TextureTreeNode(oldRoot.getSideLength()*2,null);
+					rootNode=new TextureTreeNode(oldRoot.getSideLength()*2,null,"Root or former root as branch");
 					//System.out.println("Adding oldRoot to new rootNode...");
 					rootNode.addNode(oldRoot);
 					//Try again recursively until we fit the new node into the tree
@@ -243,11 +243,13 @@ public class Texture implements TextureDescription
 		private TextureTreeNode topLeft,topRight,bottomLeft,bottomRight;
 		private ByteBuffer image;
 		private int sideLength;
+		private String debugName="[unset]";
 		
-		public TextureTreeNode(int sideLength, TextureTreeNode parent)
+		public TextureTreeNode(int sideLength, TextureTreeNode parent, String debugName)
 			{
 			this.sideLength=sideLength;
 			this.parent=parent;
+			this.debugName=debugName;
 			}
 		
 		public boolean isFull()
@@ -275,7 +277,7 @@ public class Texture implements TextureDescription
 		
 		public void dumpRowToBuffer(ByteBuffer buf, int row)
 			{//Rows start at top, not OpenGL-bottom.
-			if(this.getSizeU()<=0){System.out.println("Usize is "+this.getSizeU()+" name is ");System.exit(1);}
+			if(this.getSizeU()<=0){System.out.println("Usize is "+this.getSizeU()+" name is "+debugName);System.exit(1);}
 			if(this.getSizeV()<=0){System.out.println("Vsize is "+this.getSizeV());System.exit(1);}
 			if(image==null)
 				{
@@ -416,28 +418,28 @@ public class Texture implements TextureDescription
 					{
 					if(topLeft==null)
 						{
-						topLeft=new TextureTreeNode(this.sideLength/2,this);
+						topLeft=new TextureTreeNode(this.sideLength/2,this,"Branch");
 						topLeft.addNode(newNode);
 						//System.out.println("pushed to new TopLeft");
 						return;
 						}
 					if(topRight==null)
 						{
-						topRight=new TextureTreeNode(this.sideLength/2,this);
+						topRight=new TextureTreeNode(this.sideLength/2,this,"Branch");
 						topRight.addNode(newNode);
 						//System.out.println("pushed to new TopRight");
 						return;
 						}
 					if(bottomLeft==null)
 						{
-						bottomLeft=new TextureTreeNode(this.sideLength/2,this);
+						bottomLeft=new TextureTreeNode(this.sideLength/2,this,"Branch");
 						bottomLeft.addNode(newNode);
 						//System.out.println("pushed to new BottomLeft");
 						return;
 						}
 					if(bottomRight==null)
 						{
-						bottomRight=new TextureTreeNode(this.sideLength/2,this);
+						bottomRight=new TextureTreeNode(this.sideLength/2,this,"Branch");
 						bottomRight.addNode(newNode);
 						//System.out.println("pushed to new BottomRight");
 						return;
@@ -674,6 +676,6 @@ public class Texture implements TextureDescription
 		g.fillRect(0, 0, 64, 64);
 		g.dispose();
 		
-		return new DummyFuture<TextureDescription>(new Texture(img));
+		return new DummyFuture<TextureDescription>(new Texture(img,"Solid color "+color));
 		}
 	}//end Texture

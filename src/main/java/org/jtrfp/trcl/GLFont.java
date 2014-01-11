@@ -64,7 +64,7 @@ public class GLFont
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
 		g.dispose();
-		return new Texture(img);
+		return new Texture(img,"GLFont "+(char)c);
 		}
 	
 	public double getTextureSideLength(){return sideLength;}

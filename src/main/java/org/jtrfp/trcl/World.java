@@ -61,7 +61,8 @@ public final class World extends RenderableSpacePartitioningGrid
 	 *            the fogColor to set
 	 */
 	public void setFogColor(Color fogColor)
-		{this.fogColor = fogColor;}
+		{if(fogColor==null)throw new NullPointerException("Color is intolerably null.");
+	    	this.fogColor = fogColor;}
 
 	/**
 	 * @return the tr

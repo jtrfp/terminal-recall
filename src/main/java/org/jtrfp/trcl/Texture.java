@@ -117,7 +117,7 @@ public class Texture implements TextureDescription
 	
 	public static GLTexture getGlobalTexture(){return globalTexture;}
 	
-	private static void registerNode(TextureTreeNode newNode)
+	private static synchronized void registerNode(TextureTreeNode newNode)
 		{
 		if(rootNode==null)
 			{
@@ -262,8 +262,7 @@ public class Texture implements TextureDescription
 			return false;
 			}//end isFull()
 		
-		public void finalizeUV(double offU, double offV, double sU, double sV)
-			{
+		public void finalizeUV(double offU, double offV, double sU, double sV){
 			this.setOffsetU(offU+Texture.getPixelSize());
 			this.setOffsetV(offV+Texture.getPixelSize());
 			this.setSizeU(sU-Texture.getPixelSize()*2.);
@@ -307,14 +306,12 @@ public class Texture implements TextureDescription
 				}//end image!=null
 			}//end dumpRowToBuffer()
 
-		public boolean isLeaf()
-			{
+		public boolean isLeaf(){
 			return image!=null;
 			}
 		
 		
-		public void addNode(TextureTreeNode newNode)
-			{
+		public void addNode(TextureTreeNode newNode){
 			if(isFull())throw new OutOfTextureSpaceException();
 			
 			final int sideLength=newNode.getSideLength();
@@ -615,9 +612,7 @@ public class Texture implements TextureDescription
 		 * @param sizeU the sizeU to set
 		 */
 		public void setSizeU(double sizeU)
-			{
-			this.sizeU = sizeU;
-			}
+			{this.sizeU = sizeU;}
 
 		/**
 		 * @return the sizeV

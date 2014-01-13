@@ -30,8 +30,7 @@ import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class RenderList
-	{
+public class RenderList{
 	public static final int NUM_SUBPASSES=4;
 	public static final int NUM_BLOCKS_PER_SUBPASS=1024*4;
 	public static final int NUM_BLOCKS_PER_PASS=NUM_BLOCKS_PER_SUBPASS*NUM_SUBPASSES;
@@ -49,8 +48,8 @@ public class RenderList
 	private int numTransparentBlocks;
 	private final GLUniform renderListOffsetUniform,renderModeUniform;
 	private ByteBuffer globalGPUBuffer[];
-	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>()
-		{@Override
+	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
+	    	@Override
 		public void submit(PositionedRenderable item)
 			{if(item instanceof WorldObject){if(!((WorldObject)item).isVisible()){return;}}
 			numOpaqueBlocks+=item.getOpaqueObjectDefinitionAddresses().capacity()/4;
@@ -68,11 +67,11 @@ public class RenderList
 			{for(PositionedRenderable r:items){submit(r);}}
 		};
 	
-	private ByteBuffer []getGlobalGPUBuffer()
-		{if(globalGPUBuffer==null)
-			{globalGPUBuffer = new ByteBuffer[NUM_RENDER_PASSES];
-			for(int i=0; i<NUM_RENDER_PASSES; i++)
-				{final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
+	private ByteBuffer []getGlobalGPUBuffer(){
+	    	if(globalGPUBuffer==null){
+	    	    globalGPUBuffer = new ByteBuffer[NUM_RENDER_PASSES];
+			for(int i=0; i<NUM_RENDER_PASSES; i++){
+			    	final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
 				int pos=GlobalObjectList.getArrayOffsetInBytes()+i*GlobalObjectList.OBJECT_LIST_SIZE_BYTES_PER_PASS;
 				bb.position(pos);
 				globalGPUBuffer[i]=bb;
@@ -81,8 +80,8 @@ public class RenderList
 		return globalGPUBuffer;
 		}//end getGlobalGPUBuffer()
 	
-	public RenderList(GL3 gl, GLProgram prg, TR tr)
-		{//Build VAO
+	public RenderList(GL3 gl, GLProgram prg, TR tr){
+	    	//Build VAO
 		IntBuffer ib = IntBuffer.allocate(1);
 		this.tr=tr;
 		gl.glGenBuffers(1, ib);
@@ -97,15 +96,15 @@ public class RenderList
 		}
 	private static int frameCounter=0;
 	
-	private void updateStatesToGPU()
-		{for(int i=0; i<renderablesIndex; i++)
+	private void updateStatesToGPU(){
+	    	for(int i=0; i<renderablesIndex; i++)
 			{renderables[i].updateStateToGPU();}}
 	
 	public void sendToGPU(GL3 gl)
 		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
 	
-	public void render(GL3 gl)
-		{gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
+	public void render(GL3 gl){
+	    	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 		final int numOpaqueVertices = numOpaqueBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK+96;
 		final int numTransparentVertices = numTransparentBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK;
 		//OPAQUE
@@ -122,8 +121,8 @@ public class RenderList
 		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numTransparentBlocks", ""+numTransparentBlocks);
 		    }
 		
-		for(int sp=0; sp<numSubPasses; sp++)
-			{final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
+		for(int sp=0; sp<numSubPasses; sp++){
+		    	final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
 			remainingVerts-=numVerts;
 			final int newOffset=rlOffset+sp*NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
 			renderListOffsetUniform.setui(newOffset);
@@ -149,8 +148,8 @@ public class RenderList
 	public Submitter<PositionedRenderable> getSubmitter()
 		{return submitter;}
 
-	public void reset()
-		{renderablesIndex=0;
+	public void reset(){
+	    	renderablesIndex=0;
 		numOpaqueBlocks=0;
 		numTransparentBlocks=0;
 		globalGPUBuffer=null;

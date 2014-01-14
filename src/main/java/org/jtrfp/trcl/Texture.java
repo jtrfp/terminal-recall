@@ -24,6 +24,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
@@ -39,6 +42,14 @@ public class Texture implements TextureDescription
 	private static double pixelSize=.7/4096.; //TODO: This is a kludge; doesn't scale with megatexture
 	private static TextureTreeNode rootNode=null;
 	private static GLTexture globalTexture;
+	public static final List<Future<TextureDescription>> texturesToBeAccounted = Collections.synchronizedList(new LinkedList<Future<TextureDescription>>());
+	
+	private static void waitUntilTextureProcessingEnds(){
+	    while(!texturesToBeAccounted.isEmpty()){
+		try{texturesToBeAccounted.remove(0).get();}catch(Exception e){e.printStackTrace();}
+	    }
+	}//end waitUntilTextureProcessingEnds()
+	
 	private static final Future<TextureDescription> fallbackTexture;
 	static  {
 		Texture t;
@@ -193,6 +204,7 @@ public class Texture implements TextureDescription
 			{emptyRow.put((byte)(Math.random()*256));}
 		emptyRow.rewind();
 		System.out.println("Finalizing global U/V coordinates...");
+		waitUntilTextureProcessingEnds();
 		rootNode.finalizeUV(0, 0, 1, 1);
 		System.out.println("\t...Done.");
 		System.out.println("Allocating "+gSideLen+"x"+gSideLen+" shared texture in client RAM...");

@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -72,6 +71,7 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertex;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
 import org.jtrfp.trcl.file.BINFile.Model.Vertex;
 import org.jtrfp.trcl.file.CLRFile;
 import org.jtrfp.trcl.file.DEFFile;
@@ -218,6 +218,7 @@ public class ResourceManager{
 		    
 		});
 		if(useCache)textureNameMap.put(name, result);
+		Texture.texturesToBeAccounted.add(result);
 		return result;
 		}//end getRAWAsTexture(...)
 	
@@ -247,6 +248,7 @@ public class ResourceManager{
 		if(palette==null)throw new NullPointerException("Palette cannot be null");
 		if(gl==null)throw new NullPointerException("GL cannot be null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
+		boolean hasAlpha=false;
 		if(gl.getContext().isCurrent())gl.getContext().release();//Feed the dog
 		try {
 			BINFile.AnimationControl ac=null;
@@ -302,7 +304,8 @@ public class ResourceManager{
 						{
 						TextureBlock tb = (TextureBlock)b;
 						gl.getContext().makeCurrent();
-						currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl);
+						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,hasAlpha);
+						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl);}
 						gl.getContext().release();
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
@@ -335,9 +338,10 @@ public class ResourceManager{
 									new double [] {(double)vertIndices.get(0).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(1).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(2).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(3).getTextureCoordinateU()/(double)0xFF0000},//U 
 									new double [] {1.-(double)vertIndices.get(0).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(1).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(2).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(3).getTextureCoordinateV()/(double)0xFF0000}, 
 									currentTexture,
-									RenderMode.DYNAMIC);
+									RenderMode.DYNAMIC,hasAlpha);
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
+							//hasAlpha=false;//DOn't rjeally know when alpha is gonna b usezed.fj;dk
 							}
 						else if(vertIndices.size()==3)//Triangles
 							{
@@ -350,6 +354,7 @@ public class ResourceManager{
 							t.getZ()[vi]=vtx.getZ()*cpScalar;
 							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
 							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
+							t.setAlphaBlended(hasAlpha);
 							vi++;
 							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
 							t.getX()[vi]=vtx.getX()*cpScalar;
@@ -357,6 +362,7 @@ public class ResourceManager{
 							t.getZ()[vi]=vtx.getZ()*cpScalar;
 							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
 							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
+							t.setAlphaBlended(hasAlpha);
 							vi++;
 							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
 							t.getX()[vi]=vtx.getX()*cpScalar;
@@ -364,12 +370,14 @@ public class ResourceManager{
 							t.getZ()[vi]=vtx.getZ()*cpScalar;
 							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
 							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
+							t.setAlphaBlended(hasAlpha);
 							
 							t.setRenderMode(RenderMode.DYNAMIC);
 							if(currentTexture==null)
 								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=Texture.getFallbackTexture();}
 							t.setTexture(currentTexture);
 							result.addTriangle(t);
+							//hasAlpha=false;
 							}//end if(3 vertices)
 						else
 							{System.err.println("ResourceManager: FaceBlock has "+vertIndices.size()+" vertices. Only 3 or 4 supported.");}
@@ -395,8 +403,11 @@ public class ResourceManager{
 						seg.setThickness(8);//Defaulted since the file doesn't specify
 						result.addLineSegment(seg);
 						}
-					else if(b instanceof AnimatedTextureBlock)
-						{
+					else if(b instanceof Unknown12){
+					    System.out.println("Found unknown12. Assuming this is a tag for a transparent texture...");
+					    hasAlpha=true;
+					}
+					else if(b instanceof AnimatedTextureBlock){
 						System.out.println("Found animated texture block.");
 						AnimatedTextureBlock block = (AnimatedTextureBlock)b;
 						List<String> frames = block.getFrameNames();
@@ -404,7 +415,8 @@ public class ResourceManager{
 						Future<Texture> [] subTextures = new Future[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
 							gl.getContext().makeCurrent();
-							subTextures[ti]=(Future)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
+							if(!hasAlpha)subTextures[ti]=(Future)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
+							else subTextures[ti]=(Future)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl,true);
 							//subTextures[ti]=tex instanceof Texture?new DummyFuture<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							gl.getContext().release();
 							}//end for(frames) //fDelay, nFrames,interp

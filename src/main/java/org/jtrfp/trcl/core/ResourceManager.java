@@ -115,32 +115,27 @@ public class ResourceManager{
 	    explosionFactory=ef;
 	}
 	
-	public LVLFile getLVL(String name) throws IOException, FileLoadException, IllegalAccessException
-		{
+	public LVLFile getLVL(String name) throws IOException, FileLoadException, IllegalAccessException{
 		System.out.println("Getting level "+name);
 		return new LVLFile(getInputStreamFromResource("LEVELS\\"+name));
 		}//end getLVL
 	
-	private InputStream getInputStreamFromResource(String name) throws FileNotFoundException, FileLoadException, IOException
-		{
+	private InputStream getInputStreamFromResource(String name) throws FileNotFoundException, FileLoadException, IOException{
 		System.out.println("Getting resource: "+name);
 		IPodFileEntry ent;
-		for(IPodData p:pods)
-			{
+		for(IPodData p:pods){
 			if((ent=p.findEntry(name))!=null)
 				{return new BufferedInputStream(ent.getInputStreamFromPod());}
 			}//end for(podFiles)
 		throw new FileNotFoundException(name);
 		}//end getInputStreamFromResource(...)
 	
-	public void registerPOD(File f) throws FileLoadException
-		{
+	public void registerPOD(File f) throws FileLoadException{
 		if(f==null)throw new NullPointerException("fileToUse should not be null.");
 		pods.add(new PodFile(f).getData());
 		}
 	
-	public Future<TextureDescription> [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException
-		{
+	public Future<TextureDescription> [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException{
 		String [] files = getTEXListFile(texFileName);
 		Future<TextureDescription> [] result = new Future[files.length];
 		//Color [] palette = getPalette(actFileName);
@@ -151,13 +146,13 @@ public class ResourceManager{
 	
 	public Future<TextureDescription>[] getSpecialRAWAsTextures(String name, Color [] palette, ColorProcessor proc, GL3 gl, int upScalePowerOfTwo) throws IOException, FileLoadException, IllegalAccessException{
 		Future<TextureDescription> [] result = specialTextureNameMap.get(name);
-		if(result==null)
-			{BufferedImage [] segs = getSpecialRAWImage(name, palette, proc, upScalePowerOfTwo);
+		if(result==null){
+		    BufferedImage [] segs = getSpecialRAWImage(name, palette, proc, upScalePowerOfTwo);
 			result=new Future[segs.length];
 			for(int si=0; si<segs.length; si++)
 				{result[si] = new DummyFuture<TextureDescription>(new Texture(segs[si],"name"));}
 			specialTextureNameMap.put(name,result);
-			}
+			}//end if(result=null)
 		return result;
 		}//end getSpecialRAWAsTextures
 	
@@ -201,14 +196,12 @@ public class ResourceManager{
 					}//end if(may be animated)
 				result = new Texture(getRAWImage(name,palette,proc),name);
 				}
-			catch(NotSquareException e)
-				{
+			catch(NotSquareException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
 				result=Texture.getFallbackTexture().get();
 				}
-			catch(NonPowerOfTwoException e)
-				{
+			catch(NonPowerOfTwoException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
 				result=Texture.getFallbackTexture().get();
@@ -224,12 +217,8 @@ public class ResourceManager{
 	
 	public boolean rawExists(String name)
 		{
-		for(IPodData p:pods)
-			{
-			/*for(IPodFileEntry ent: p.getEntries())
-				{System.out.println("POD PATH: "+ent.getPath());}*/
-			if((p.findEntry("ART\\"+name))!=null)
-				{
+		for(IPodData p:pods){
+			if((p.findEntry("ART\\"+name))!=null){
 				System.out.println(name+" found to exist. Returning true...");
 				return true;
 				}
@@ -238,14 +227,13 @@ public class ResourceManager{
 		return false;
 		}//end rawExists
 	
-	public Model getBINModel(String name, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException
-		{
+	public Model getBINModel(String name, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
 		return getBINModel(name,Texture.getFallbackTexture(),1,true,palette,gl);
 		}
 	
-	public Model getBINModel(String name,Future<TextureDescription> defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException
-		{if(name==null)throw new NullPointerException("Name cannot be null");
-		if(palette==null)throw new NullPointerException("Palette cannot be null");
+	public Model getBINModel(String name,Future<TextureDescription> defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
+	    	if(name==null)throw new NullPointerException("Name is intolerably null");
+		if(palette==null)throw new NullPointerException("Palette is intolerably null");
 		if(gl==null)throw new NullPointerException("GL cannot be null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
 		boolean hasAlpha=false;
@@ -254,8 +242,7 @@ public class ResourceManager{
 			BINFile.AnimationControl ac=null;
 			Model result;
 			ac = aniBinNameMap.get(name);
-			if(ac==null)
-				{
+			if(ac==null){
 				InputStream is = getInputStreamFromResource("MODELS\\"+name);
 				//TODO: InputStream not guaranteed to close when exception is thrown. Wrap in try{}, close it, and re-throw.
 				ac = new BINFile.AnimationControl(is);//This will throw an exception on and escape to the static model block
@@ -280,15 +267,12 @@ public class ResourceManager{
 			gl.getContext().makeCurrent();
 			return result;
 			}//end try{}
-		catch(UnrecognizedFormatException e)
-			{//ok fail. Static model
-			try
-				{
+		catch(UnrecognizedFormatException e){//ok fail. Static model
+			try	{
 				BINFile.Model m=null;
 				Model result = new Model(false);
 				m = modBinNameMap.get(name);
-				if(m==null)
-					{
+				if(m==null){
 					InputStream is = getInputStreamFromResource("MODELS\\"+name);
 					m = new BINFile.Model(is);
 					modBinNameMap.put(name, m);
@@ -297,11 +281,9 @@ public class ResourceManager{
 				List<BINFile.Model.Vertex> vertices = m.getVertices();
 				final double cpScalar=(scale*TR.crossPlatformScalar*256.)/(double)m.getScale();
 				Future<TextureDescription> currentTexture=null;
-				for(ThirdPartyParseable b:m.getDataBlocks())
-					{
+				for(ThirdPartyParseable b:m.getDataBlocks()){
 					//Sort out types of block
-					if(b instanceof TextureBlock)
-						{
+					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
 						gl.getContext().makeCurrent();
 						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,hasAlpha);
@@ -309,8 +291,7 @@ public class ResourceManager{
 						gl.getContext().release();
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
-					else if(b instanceof FaceBlock)
-						{
+					else if(b instanceof FaceBlock){
 						FaceBlock block = (FaceBlock)b;
 						List<FaceBlockVertex>vertIndices = block.getVertices();
 						if(currentTexture==null){System.out.println("Warning: Face texture not specified. Using fallback texture.");currentTexture=defaultTexture;}
@@ -326,8 +307,7 @@ public class ResourceManager{
 						
 						//System.out.println("cpScalar:"+cpScalar);
 						//System.out.println("Block class: "+b.getClass());
-						if(vertIndices.size()==4)//Quads
-							{
+						if(vertIndices.size()==4){//Quads
 							Vertex [] vtx = new Vertex[4];
 							for(int i=0; i<4; i++)
 								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex());}
@@ -341,11 +321,9 @@ public class ResourceManager{
 									RenderMode.DYNAMIC,hasAlpha);
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
-							//hasAlpha=false;//DOn't rjeally know when alpha is gonna b usezed.fj;dk
 							}
 						else if(vertIndices.size()==3)//Triangles
-							{
-							Triangle t = new Triangle();
+							{Triangle t = new Triangle();
 							int vi=0;
 							Vertex vtx;
 							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
@@ -384,8 +362,7 @@ public class ResourceManager{
 						}//end if(FaceBlock)
 					else if(b instanceof FaceBlock19)
 						{System.out.println("FaceBlock 0x19 (solid colored faces) not yet implemented. Skipping...");}
-					else if(b instanceof LineSegmentBlock)
-						{
+					else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
 						LineSegment seg = new LineSegment();
 						Vertex v1 = vertices.get(block.getVertexID1());
@@ -444,14 +421,11 @@ public class ResourceManager{
 		//Bad fail.
 		}//end getBINModel()
 	
-	private BufferedImage [] getSpecialRAWImage(String name, Color [] palette, ColorProcessor proc, int upscalePowerOfTwo) throws IllegalAccessException, FileLoadException, IOException
-		{
+	private BufferedImage [] getSpecialRAWImage(String name, Color [] palette, ColorProcessor proc, int upscalePowerOfTwo) throws IllegalAccessException, FileLoadException, IOException{
 		RAWFile dat = getRAW(name);
 		dat.setPalette(palette);
 		BufferedImage [] segs = dat.asSegments(upscalePowerOfTwo);
-		
-		for(BufferedImage seg:segs)
-			{
+		for(BufferedImage seg:segs){
 			//stamper.setRGB(0, 0, dat.getSideLength(), dat.getSideLength(), temp, 0, 1);
 			Graphics g = seg.getGraphics();
 			BufferedImage scaled = new BufferedImage(seg.getColorModel(),seg.copyData(null),seg.isAlphaPremultiplied(),null);
@@ -476,9 +450,7 @@ public class ResourceManager{
 	 * @throws NotSquareException 
 	 * @since Oct 26, 2012
 	 */
-	public BufferedImage getRAWImage(String name, Color [] palette, ColorProcessor proc) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException
-		{
-		//IRawData dat = RawDataLoader.load(getInputStreamFromResource("ART\\"+name));
+	public BufferedImage getRAWImage(String name, Color [] palette, ColorProcessor proc) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException{
 		RAWFile dat = getRAW(name);
 		
 		byte [] raw = dat.getRawBytes();
@@ -491,12 +463,10 @@ public class ResourceManager{
 		
 		Graphics stG = stamper.getGraphics();
 		//Graphics scG = scaled.getGraphics();
-		for(int i=0; i<raw.length; i++)
-			{
+		for(int i=0; i<raw.length; i++){
 			Color c= palette[(int)raw[i] & 0xFF];
 			stG.setColor(c);
 			//scG.setColor(c);
-			
 			stG.fillRect(i%dat.getSideLength(), i/dat.getSideLength(), 1, 1);
 			//scG.fillRect(i%dat.getSideLength(), i/dat.getSideLength(), 1, 1);
 			}
@@ -505,8 +475,7 @@ public class ResourceManager{
 		//stamper.setRGB(0, 0, dat.getSideLength(), dat.getSideLength(), temp, 0, 1);
 		Graphics g = stamper.getGraphics();
 		//The following code stamps the filename into the texture for debugging purposes
-		if(tr.isStampingTextures())
-			{
+		if(tr.isStampingTextures()){
 			g.setFont(new Font(g.getFont().getName(),g.getFont().getStyle(),9));
 			g.drawString(name, 1, 16);
 			}
@@ -528,65 +497,54 @@ public class ResourceManager{
 		*/
 		}//end getRAWImage
 	
-	public AltitudeMap getRAWAltitude(String name) throws IOException, FileLoadException, IllegalAccessException
-		{
-		return new RawAltitudeMapWrapper(new RAWFile(getInputStreamFromResource("DATA\\"+name)));
+	public AltitudeMap getRAWAltitude(String name) throws IOException, FileLoadException, IllegalAccessException{
+	    	return new RawAltitudeMapWrapper(new RAWFile(getInputStreamFromResource("DATA\\"+name)));
 		}//end getRAWAltitude
 	
-	public TextureMesh getTerrainTextureMesh(String name, Future<TextureDescription>[] texturePalette) throws IOException, FileLoadException, IllegalAccessException
-		{
+	public TextureMesh getTerrainTextureMesh(String name, Future<TextureDescription>[] texturePalette) throws IOException, FileLoadException, IllegalAccessException{
 		final CLRFile	dat = new CLRFile(getInputStreamFromResource("DATA\\"+name));
 		return new RawTextureMeshWrapper(dat,texturePalette);
 		}//end getRAWAltitude
 	
-	public String [] getTEXListFile(String name) throws IOException, FileLoadException, IllegalAccessException
-		{
+	public String [] getTEXListFile(String name) throws IOException, FileLoadException, IllegalAccessException{
 		return TexDataLoader.load(getInputStreamFromResource("DATA\\"+name)).getTextureNames();
 		}//end getTEXListFile
 	
-	public Color [] getPalette(String name) throws IOException, FileLoadException, IllegalAccessException
-		{
+	public Color [] getPalette(String name) throws IOException, FileLoadException, IllegalAccessException{
 		ActColor [] actColors= ActDataLoader.load(getInputStreamFromResource("ART\\"+name)).getColors();
 		
 		Color [] result = new Color[actColors.length];
-		for(int i=0; i<result.length;i++)
-			{
+		for(int i=0; i<result.length;i++){
 			result[i]=new Color(actColors[i].getComponent1(),actColors[i].getComponent2(),actColors[i].getComponent3());
 			}
 		return result;
 		}//end getTEXListFile
 
-	public DEFFile getDEFData(String enemyDefinitionAndPlacementFile) throws FileNotFoundException, IOException, IllegalAccessException, FileLoadException
-		{
+	public DEFFile getDEFData(String enemyDefinitionAndPlacementFile) throws FileNotFoundException, IOException, IllegalAccessException, FileLoadException{
 		return new DEFFile(getInputStreamFromResource("DATA\\"+enemyDefinitionAndPlacementFile));
 		}
 	
-	public TDFFile getTDFData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
-		{
+	public TDFFile getTDFData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		TDFFile result = new Parser().readToNewBean(is, TDFFile.class);
 		is.close();
 		return result;
 		}
-	public TNLFile getTNLData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
-		{
+	public TNLFile getTNLData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		TNLFile result = new Parser().readToNewBean(is, TNLFile.class);
 		is.close();
 		return result;
 		}
-	public NAVFile getNAVData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
-		{
+	public NAVFile getNAVData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		NAVFile result = new Parser().readToNewBean(is, NAVFile.class);
 		is.close();
 		return result;
 		}
-	public Font getFont(String zipName, String fontFileName) throws IOException, FontFormatException
-		{
+	public Font getFont(String zipName, String fontFileName) throws IOException, FontFormatException{
 	    	zipName="/fonts/"+zipName;
-		if(zipName.toUpperCase().endsWith(".ZIP"))
-			{//Search the zip
+		if(zipName.toUpperCase().endsWith(".ZIP")){//Search the zip
 			ZipInputStream zip = new ZipInputStream(ResourceManager.class.getResourceAsStream(zipName));
 			ZipEntry entry;
 			
@@ -600,8 +558,7 @@ public class ResourceManager{
 		return null;
 		}//end getFont(...)
 
-	public PUPFile getPUPData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException
-		{
+	public PUPFile getPUPData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		PUPFile result = new Parser().readToNewBean(is, PUPFile.class);
 		is.close();

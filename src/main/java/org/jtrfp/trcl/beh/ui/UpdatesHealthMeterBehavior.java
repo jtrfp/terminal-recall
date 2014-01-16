@@ -4,7 +4,7 @@ import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 
-public class UpdatesHealthMeterBehavior extends Behavior {
+public class UpdatesHealthMeterBehavior extends Behavior implements GUIUpdateBehavior {
     private ManuallySetController controller;
     @Override
     public void _tick(long tickTimeMillis){

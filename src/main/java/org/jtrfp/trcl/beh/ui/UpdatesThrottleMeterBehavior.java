@@ -4,7 +4,7 @@ import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.obj.Propelled;
 
-public class UpdatesThrottleMeterBehavior extends Behavior {
+public class UpdatesThrottleMeterBehavior extends Behavior implements GUIUpdateBehavior{
     private ManuallySetController controller;
     @Override
     public void _tick(long tickTimeMillis){

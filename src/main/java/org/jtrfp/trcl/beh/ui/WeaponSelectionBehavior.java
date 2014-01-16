@@ -10,7 +10,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class WeaponSelectionBehavior extends Behavior {
+public class WeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
     private ProjectileFiringBehavior [] behaviors;
     private ProjectileFiringBehavior activeBehavior;
     private int ammoDisplayUpdateCounter=0;

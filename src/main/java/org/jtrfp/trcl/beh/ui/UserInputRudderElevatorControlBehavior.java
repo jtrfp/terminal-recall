@@ -7,7 +7,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.obj.Player;
 
-public class UserInputRudderElevatorControlBehavior extends Behavior {
+public class UserInputRudderElevatorControlBehavior extends Behavior implements PlayerControlBehavior {
     private  double accellerationFactor=.0005;
     @Override
     public void _tick(long tickTimeMillis){

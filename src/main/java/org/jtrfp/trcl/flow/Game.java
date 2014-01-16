@@ -154,4 +154,9 @@ public class Game
 	    //TODO: Handle this.
 	    System.out.println("MISSION COMPLETE");
 	}
+
+	public void missionFailed() {
+	    //TODO
+	    System.out.println("MISSION FAILED");
+	}
 	}//end Game

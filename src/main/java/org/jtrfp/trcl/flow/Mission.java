@@ -12,6 +12,7 @@ import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.TunnelInstaller;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
@@ -63,7 +64,7 @@ public class Mission {
 	    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
 	}//end for(weapons)
 	rm.setProjectileFactories(pf);
-	Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
+	final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
 	tr.setPlayer(player);
 	final String startX=System.getProperty("org.jtrfp.trcl.startX");
 	final String startY=System.getProperty("org.jtrfp.trcl.startY");
@@ -75,9 +76,11 @@ public class Mission {
 	    final int sZ=Integer.parseInt(startZ);
 	    player.setPosition(new Vector3D(sX,sY,sZ));
 	}
-	tr.getWorld().add(player);
+	final World world = tr.getWorld();
+	world.add(player);
 	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	tr.setOverworldSystem(new OverworldSystem(tr.getWorld(), lvl, tdf));
+	final OverworldSystem overworldSystem;
+	tr.setOverworldSystem(overworldSystem=new OverworldSystem(world, lvl, tdf));
 	final NAVSystem navSystem = tr.getNavSystem();
 	
 	List<NAVSubObject> navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
@@ -86,20 +89,20 @@ public class Mission {
 	Location3D l3d = s.getLocationOnMap();
 	playerStartPosition = new Vector3D(TR.legacy2Modern(l3d.getZ()),TR.legacy2Modern(l3d.getY()),TR.legacy2Modern(l3d.getX()));
 	playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
-	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,tr.getWorld());
+	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
 	//Install NAVs
 	for(NAVSubObject obj:navSubObjects){
-	    NAVObjective.create(tr, obj, tr.getOverworldSystem().getDefList(), navs, tr.getOverworldSystem());
+	    NAVObjective.create(tr, obj, navs);
 	}//end for(navSubObjects)
 	navSystem.updateNAVState();
-	tr.setBackdropSystem(new BackdropSystem(tr.getWorld()));
-
-	//////// INITIAL HEADING
-	tr.getPlayer().setPosition(tr.getCurrentMission().getPlayerStartPosition());
-	tr.getPlayer().setDirection(tr.getCurrentMission().getPlayerStartDirection());
-	tr.getPlayer().setHeading(tr.getPlayer().getHeading().negate());//Kludge to fix incorrect heading
-	System.out.println("Start position set to "+tr.getPlayer().getPosition());
+	tr.setBackdropSystem(new BackdropSystem(world));
 	
+	final Mission mission = tr.getCurrentMission();
+	//////// INITIAL HEADING
+	player.setPosition(mission.getPlayerStartPosition());
+	player.setDirection(mission.getPlayerStartDirection());
+	player.setHeading(player.getHeading().negate());//Kludge to fix incorrect heading
+	System.out.println("Start position set to "+player.getPosition());
 	
 	GPU gpu = tr.getGPU();
 	//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.

@@ -13,9 +13,11 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
+import org.jtrfp.trcl.flow.NAVObjective;
 
 public class TunnelEntranceObject extends WorldObject {
     private final Tunnel tunnel;
+    private NAVObjective navObjectiveToRemove;
     public TunnelEntranceObject(TR tr, Tunnel tunnel) {
 	super(tr);
 	this.tunnel=tunnel;
@@ -51,12 +53,17 @@ public class TunnelEntranceObject extends WorldObject {
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
 		 p.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
-		 tr.getPlayer().setPosition(Tunnel.TUNNEL_START_POS);
-		 tr.getPlayer().setDirection(Tunnel.TUNNEL_START_DIRECTION);
-		 tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
-		 tr.getPlayer().getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
-		 tr.getPlayer().getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
-	        }//end if(close)
+		 final Player player = tr.getPlayer();
+		 player.setPosition(Tunnel.TUNNEL_START_POS);
+		 player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+		 player.getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
+		 player.getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
+		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
+		 final NAVObjective navObjective = getNavObjectiveToRemove();
+	         if(navObjective!=null){
+	             tr.getCurrentMission().removeNAVObjective(navObjective);
+	         }//end if(have NAV to remove
+	        }//end if(close to Player)
 	    }//end if(Player)
 	}//end _proposeCollision
     }//end TunnelEntranceBehavior
@@ -64,4 +71,16 @@ public class TunnelEntranceObject extends WorldObject {
 	@Override
 	public void submit(TunnelEntryListener tel){tel.notifyTunnelEntered();} 
     };
+    /**
+     * @return the navObjectiveToRemove
+     */
+    public NAVObjective getNavObjectiveToRemove() {
+        return navObjectiveToRemove;
+    }
+    /**
+     * @param navObjectiveToRemove the navObjectiveToRemove to set
+     */
+    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
+        this.navObjectiveToRemove = navObjectiveToRemove;
+    }
 }//end TunnelEntrance

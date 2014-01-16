@@ -9,13 +9,14 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
-import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.flow.NAVObjective;
 
 public class TunnelExitObject extends WorldObject {
     private final Vector3D exitLocation;
     private final ObjectDirection exitDirection;
     private final Tunnel tun;
     private final TR tr;
+    private NAVObjective navObjectiveToRemove;
     public TunnelExitObject(TR tr, Tunnel tun) {
 	super(tr);
 	addBehavior(new TunnelExitBehavior());
@@ -61,9 +62,27 @@ public class TunnelExitObject extends WorldObject {
 				 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
 			     }//end for(projectiles)
 			 }//end for(projectileFactories)
+		final NAVObjective navObjective = getNavObjectiveToRemove();
+		    if(navObjective!=null){
+		        tr.getCurrentMission().removeNAVObjective(navObjective);
+		    }//end if(have NAV to remove
 		}//end if(x past threshold)
 	    }//end if(Player)
 	}//end proposeCollision()
     }//end TunnelExitBehavior
+
+    /**
+     * @return the navObjectiveToRemove
+     */
+    public NAVObjective getNavObjectiveToRemove() {
+        return navObjectiveToRemove;
+    }
+
+    /**
+     * @param navObjectiveToRemove the navObjectiveToRemove to set
+     */
+    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
+        this.navObjectiveToRemove = navObjectiveToRemove;
+    }
 
 }//end TunnelExitObject

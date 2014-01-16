@@ -146,6 +146,7 @@ public abstract class NAVObjective {
 		    }
 	    };//end new NAVObjective
 	    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
+	    chk.setIncludeYAxisInCollision(false);
 	    overworld.add(chk);
 	    dest.add(objective);
 	    }catch(Exception e){e.printStackTrace();}

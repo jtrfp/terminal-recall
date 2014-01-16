@@ -1,7 +1,10 @@
 package org.jtrfp.trcl;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 
 public class TunnelInstaller
@@ -13,6 +16,10 @@ public class TunnelInstaller
 		{
 		this.tdf=tdf;
 		this.world=world;
+		final TR tr = world.getTr();
+		final GPU gpu = tr.getGPU();
+		final OverworldSystem overworldSystem = tr.getOverworldSystem();
+		final Mission mission = tr.getCurrentMission();
 		TDFFile.Tunnel []tuns = tdf.getTunnels();
 		if(tuns!=null)
 			{
@@ -22,17 +29,14 @@ public class TunnelInstaller
 				{
 			    	world.getTr().getReporter().report("org.jtrfp.trcl.TunnelInstaller.tunnel."+tIndex+".entrance", tun.getEntrance());
 				world.getTr().getGPU().releaseGL();
+				
 				DirectionVector entranceDV= tun.getEntrance();
 				DirectionVector exitDV=tun.getExit();
 				//Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
 				//Vector3D exitVector = new Vector3D((double)exitDV.getZ()/65535.,-.1,(double)exitDV.getX()/65535.).normalize();
-				world.getTr().getGPU().takeGL();
-				Tunnel tunnel = new Tunnel(world,tun);
-				world.getTr().
-				getOverworldSystem().
-				add(new TunnelEntranceObject(
-					world.
-					getTr(),tunnel));
+				gpu.takeGL();
+				Tunnel tunnel = mission.newTunnel(tun);
+				
 				tIndex++;
 				}
 			}//end if(tuns!=null)

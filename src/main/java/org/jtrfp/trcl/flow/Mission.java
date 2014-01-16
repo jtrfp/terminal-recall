@@ -1,5 +1,6 @@
 package org.jtrfp.trcl.flow;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Texture;
+import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.TunnelInstaller;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -26,12 +28,14 @@ import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class Mission {
     private final TR tr;
     private final List<NAVObjective> navs= new LinkedList<NAVObjective>();
     private final LVLFile lvl;
     private final Object missionCompleteBarrier = new Object();
+    private final HashMap<String,Tunnel> tunnels = new HashMap<String,Tunnel>();
     private Vector3D playerStartPosition;
     private ObjectDirection playerStartDirection;
     public Mission(TR tr, LVLFile lvl){
@@ -79,6 +83,7 @@ public class Mission {
 	Location3D l3d = s.getLocationOnMap();
 	playerStartPosition = new Vector3D(TR.legacy2Modern(l3d.getZ()),TR.legacy2Modern(l3d.getY()),TR.legacy2Modern(l3d.getX()));
 	playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
+	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,tr.getWorld());
 	//Install NAVs
 	for(NAVSubObject obj:navSubObjects){
 	    NAVObjective.create(tr, obj, tr.getOverworldSystem().getDefList(), navs, tr.getOverworldSystem());
@@ -92,7 +97,7 @@ public class Mission {
 	tr.getPlayer().setHeading(tr.getPlayer().getHeading().negate());//Kludge to fix incorrect heading
 	System.out.println("Start position set to "+tr.getPlayer().getPosition());
 	
-	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,tr.getWorld());
+	
 	GPU gpu = tr.getGPU();
 	//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
 	System.out.println("Building master texture...");
@@ -148,5 +153,15 @@ public class Mission {
      */
     public ObjectDirection getPlayerStartDirection() {
         return playerStartDirection;
+    }
+
+    public Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun) {
+	final Tunnel result = new Tunnel(tr.getWorld(),tun);
+	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
+	return result;
+    }
+
+    public Tunnel getTunnelByFileName(String tunnelFileName) {
+	return tunnels.get(tunnelFileName.toUpperCase());
     }
 }//end Mission

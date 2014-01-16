@@ -34,6 +34,7 @@ import org.jtrfp.trcl.obj.BarrierCube;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectSystem;
+import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -47,6 +48,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	final double wallThickness=5000;
 	private final World world;
 	private final TDFFile.Tunnel sourceTunnel;
+	private final TunnelEntranceObject entranceObject;
+	private final TunnelExitObject exitObject;
 	
 	public static final Vector3D TUNNEL_START_POS = new Vector3D(0,Math.pow(2, 16)*.75,Math.pow(2, 17));
 	public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(new Vector3D(1,0,0),new Vector3D(0,1,0));
@@ -59,22 +62,25 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		tr=world.getTr();
 		palette=tr.getGlobalPalette();
 		gl=tr.getGPU().takeGL();
-		
+		Vector3D tunnelEnd=null;
 		try {   lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
 			tr.getGPU().releaseGL();
 			DirectionVector exitDV=sourceTunnel.getExit();
 			//Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
 			final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading(); 
 			tr.getGPU().takeGL();
-			final Vector3D tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
-			final TunnelExitObject eo = new TunnelExitObject(tr,this);
+			tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
+		}catch(Exception e){e.printStackTrace();}
+			exitObject = new TunnelExitObject(tr,this);
 			System.out.println("Tunnel ends at "+tunnelEnd);
-			eo.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)));
-			add(eo);
+			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)));
+			add(exitObject);
 			// X is tunnel depth, Z is left-right
-			new ObjectSystem(this,world,lvl,null);
-			}
-		catch(Exception e){e.printStackTrace();}
+			try{new ObjectSystem(this,world,lvl,null);}
+			catch(Exception e){e.printStackTrace();}
+		tr.getOverworldSystem().
+		add(entranceObject=new TunnelEntranceObject(
+			tr,this));
 		}//end constructor
 
 	private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector, boolean entrance) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
@@ -478,5 +484,19 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	 */
 	public TDFFile.Tunnel getSourceTunnel() {
 	    return sourceTunnel;
+	}
+
+	/**
+	 * @return the entranceObject
+	 */
+	public TunnelEntranceObject getEntranceObject() {
+	    return entranceObject;
+	}
+
+	/**
+	 * @return the exitObject
+	 */
+	public TunnelExitObject getExitObject() {
+	    return exitObject;
 	}
 }//end Tunnel

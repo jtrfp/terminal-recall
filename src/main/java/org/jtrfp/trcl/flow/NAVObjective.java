@@ -3,7 +3,6 @@ package org.jtrfp.trcl.flow;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.beh.RemovesNAVObjectiveOnDeath;
 import org.jtrfp.trcl.core.TR;
@@ -17,6 +16,8 @@ import org.jtrfp.trcl.file.NAVFile.TUN;
 import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
+import org.jtrfp.trcl.obj.TunnelEntranceObject;
+import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class NAVObjective {
@@ -50,8 +51,10 @@ public abstract class NAVObjective {
 		        TR.legacy2Modern(loc3d.getZ()),
 		        TR.legacy2Modern(loc3d.getY()),
 			TR.legacy2Modern(loc3d.getX()));
-	    final Checkpoint chk = new Checkpoint(tr);
-	    chk.setPosition(loc);
+	    final TunnelEntranceObject tunnelEntrance = tr.getCurrentMission().
+		    getTunnelByFileName(tun.getTunnelFileName()).
+		    getEntranceObject();
+	   
 	    final NAVObjective objective = new NAVObjective(){
 		    @Override
 		    public String getDescription() {
@@ -59,12 +62,24 @@ public abstract class NAVObjective {
 		    }
 		    @Override
 		    public WorldObject getTarget() {
-			return chk;
+			return tunnelEntrance;
 		    }
 	    };//end new NAVObjective
-	    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
-	    overworld.add(chk);
+	    tunnelEntrance.setNavObjectiveToRemove(objective);
 	    dest.add(objective);
+	    final TunnelExitObject tunnelExit = tr.getCurrentMission().getTunnelByFileName(tun.getTunnelFileName()).getExitObject();
+	    final NAVObjective exitObjective = new NAVObjective(){
+		    @Override
+		    public String getDescription() {
+			return "Exit Tunnel";
+		    }
+		    @Override
+		    public WorldObject getTarget() {
+			return tunnelExit;
+		    }
+	    };//end new NAVObjective
+	    dest.add(exitObjective);
+	    tunnelExit.setNavObjectiveToRemove(exitObjective);
 	} else if(obj instanceof BOS){///////////////////////////////////////////
 	    final BOS bos = (BOS)obj;
 	    final WorldObject bossObject = defs.get(bos.getBossIndex());
@@ -104,17 +119,7 @@ public abstract class NAVObjective {
 	    overworld.add(chk);
 	    dest.add(objective);
 	} else if(obj instanceof XIT){///////////////////////////////////////////
-	    final NAVObjective objective = new NAVObjective(){
-		    @Override
-		    public String getDescription() {
-			return "Exit Tunnel";
-		    }
-		    @Override
-		    public WorldObject getTarget() {
-			return null;
-		    }
-	    };//end new NAVObjective
-	    dest.add(objective);
+	    //Not used (TUN automatically sets this up)
 	} else if(obj instanceof DUN){///////////////////////////////////////////
 	    final DUN xit = (DUN)obj;
 	    final Location3D loc3d = xit.getLocationOnMap();

@@ -127,7 +127,7 @@ public class Mission {
     }
     public void removeNAVObjective(NAVObjective o){
 	navs.remove(o);
-	if(navs.size()==0){tr.getGame().missionComplete();}
+	if(navs.size()==0){missionCompleteSequence();}
 	else tr.getNavSystem().updateNAVState();
     }//end removeNAVObjective(...)
     
@@ -164,4 +164,36 @@ public class Mission {
     public Tunnel getTunnelByFileName(String tunnelFileName) {
 	return tunnels.get(tunnelFileName.toUpperCase());
     }
+    
+    private void missionCompleteSequence(){
+	new Thread(){
+	    @Override
+	    public void run(){
+		//TODO: Behavior change: Camera XZ static, lag Y by ~16 squares, heading/top affix toward player
+		//TODO: Turn off all player control behavior
+		//TODO: Behavior change: Player turns upward, top rolls on heading, speed at full throttle
+		//TODO: Wait 3 seconds
+		//TODO: Lightning shell on
+		//TODO: Wait 1 second
+		//TODO: Turbo forward
+		//TODO: Wait 500ms
+		//TODO: Jet thrust noise
+		//TODO: Player invisible.
+		tr.getGame().missionComplete();
+	    }//end run()
+	}.start();
+    }
+    public void playerDestroyed(){
+	new Thread(){
+	    @Override
+	    public void run(){
+		//TODO Behavior change: Camera XYZ static, heading/top affix toward player
+		//TODO: Turn off all player control behavior
+		//TODO Player behavior change: Slow spin along heading axis, slow downward drift of heading
+		//TODO: Add behavior: explode and destroy on impact with ground
+		tr.getGame().missionFailed();
+	    }//end run()
+	}.start();
+	
+    }//end playerDestroyed()
 }//end Mission

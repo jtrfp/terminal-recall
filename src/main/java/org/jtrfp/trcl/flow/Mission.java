@@ -1,5 +1,6 @@
 package org.jtrfp.trcl.flow;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,6 @@ import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
-import org.jtrfp.trcl.obj.WorldObject;
 
 public class Mission {
     private final TR tr;
@@ -47,6 +47,9 @@ public class Mission {
 	try{
 	//Set up palette
     	final ResourceManager rm = tr.getResourceManager();
+    	final Color [] pal = rm.getPalette(lvl.getGlobalPaletteFile());
+    	pal[0]=new Color(0,0,0,0);
+    	tr.setGlobalPalette(pal);
 	// POWERUPS
 	rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 	/// EXPLOSIONS

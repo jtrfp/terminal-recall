@@ -23,12 +23,10 @@ import org.jtrfp.trcl.obj.PositionListenable;
 import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 
-public abstract class SpacePartitioningGrid<E extends PositionListenable>
-	{
+public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	private double squareSize, viewingRadius;
 	private Object [] gridSquares;
 	private int squaresX, squaresY, squaresZ;
-	//World world;
 	private ArrayList<E> alwaysVisible = new ArrayList<E>();
 	private SpacePartitioningGrid<E> parentGrid = null;
 	private ArrayList<SpacePartitioningGrid<E>> branchGrids = new ArrayList<SpacePartitioningGrid<E>>();
@@ -49,8 +47,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	private void removeBranch(SpacePartitioningGrid<E> branchToRemove)
 		{branchGrids.remove(branchToRemove);}
 	
-	private void setParentGrid(SpacePartitioningGrid<E> parentGrid)
-		{
+	private void setParentGrid(SpacePartitioningGrid<E> parentGrid){
 		this.parentGrid=parentGrid;
 		setSquareSize(parentGrid.getSquareSize());
 		setSquaresX(parentGrid.getSquaresX());
@@ -61,8 +58,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		allocateSquares();
 		}//end setParentGrid(...)
 
-	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius)
-		{
+	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
 		setSquareSize(squareSize);
 		setSquaresX((int)(size.getX()/squareSize));
 		setSquaresY((int)(size.getY()/squareSize));
@@ -72,8 +68,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		allocateSquares();
 		}//end constructor
 	
-	private void allocateSquares()
-		{
+	private void allocateSquares(){
 		Object []squares = new Object[squaresX*squaresY*squaresZ];
 		int squaresZMult=squaresX*squaresY;
 		setGridSquares(squares);
@@ -99,19 +94,6 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	
 	private int space2Flat(Vector3D space)
 		{return (int)(space.getX()+space.getY()*squaresX+space.getZ()*squaresX*squaresY);}
-	/*
-	private Vector3D flat2Space(int flat)
-		{
-		int x,y,z;
-		int squaresXY=squaresX*squaresY;
-		z=(flat/(squaresXY));
-		flat-=squaresXY*z;
-		y=flat/squaresX;
-		flat-=squaresX*y;
-		x=flat;
-		return new Vector3D(x,y,z);
-		}
-	*/
 	public void add(E objectWithPosition)
 		{//Figure out where it goes
 	    	objectWithPosition.setContainingGrid(this);
@@ -120,8 +102,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
 		dest.add(objectWithPosition);
 		}
-	public void remove(E objectWithPosition)
-		{
+	public void remove(E objectWithPosition){
 		for(Object o:gridSquares)
 			{//Blind removal
 			GridCube gc = (GridCube)o;
@@ -131,8 +112,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	private void addAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.add(objectWithPosition);}
 	
-	private static double absMod(double value, double mod)
-		{
+	private static double absMod(double value, double mod){
 		if(value>=-0.)
 			{return value%mod;}
 		value*=-1;
@@ -141,8 +121,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		return mod-value;
 		}//end absMod
 	
-	private Vector3D world2Square(Vector3D coord)
-		{
+	private Vector3D world2Square(Vector3D coord){
 		return new Vector3D(
 				absMod(Math.round(coord.getX()/getSquareSize()),squaresX),
 				absMod(Math.round(coord.getY()/getSquareSize()),squaresY),
@@ -157,22 +136,18 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		{return (GridCube)(gridSquares[space2Flat(gridCoord)]);}
 	
 	@SuppressWarnings("unchecked")
-	public void itemsWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<E> submitter)
-		{
+	public void itemsWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<E> submitter){
 		recursiveAlwaysVisibleSubmit(submitter);
 		
 		Vector3D startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits));
 		int startRaw=space2Flat(world2Square(startPoint));
 		
 		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
-		for(int point=startRaw; point<zEnd; point+=zProgression)//Z
-			{
+		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
 			final int yEnd=point+getSquaresX()*rawDiaY;
-			for(;point<yEnd; point+=yProgression)//Y
-				{
+			for(;point<yEnd; point+=yProgression){//Y
 				final int xEnd=point+rawDiaX;
-				for(;point<xEnd; point+=xProgression)//X
-					{
+				for(;point<xEnd; point+=xProgression){//X
 					final int wrappedPoint=point%rolloverPoint;
 					recursiveBlockSubmit(submitter,wrappedPoint);
 					}//end for(X)
@@ -198,57 +173,48 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	/**
 	 * @return the squareSize
 	 */
-	public double getSquareSize()
-		{
+	public double getSquareSize(){
 		return squareSize;
 		}
 	/**
 	 * @param squareSize the squareSize to set
 	 */
-	public void setSquareSize(double squareSize)
-		{
+	public void setSquareSize(double squareSize){
 		this.squareSize = squareSize;
 		}
 	
-	class GridCube implements PositionListener
-		{
+	class GridCube implements PositionListener{
 		Vector3D topLeftPosition;
 		ArrayList<E> elements = new ArrayList<E>();
 		
-		public GridCube(Vector3D topLeftPosition)
-			{
+		public GridCube(Vector3D topLeftPosition){
 			setTopLeftPosition(topLeftPosition);
 			}
 		
-		public void add(E objectToAdd)
-			{
-			if(getElements().contains(objectToAdd)){System.err.println("WARNING: Redundant add!");return;}
+		public void add(E objectToAdd){
+			//if(getElements().contains(objectToAdd)){System.err.println("WARNING: Redundant add!");return;}
 			getElements().add(objectToAdd);
 			objectToAdd.addPositionListener(this);
 			}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public void positionChanged(PositionListenable objectWithPosition)
-			{
+		public void positionChanged(PositionListenable objectWithPosition){
 			//Is it still in the range of this cube
 			if(isInRange(objectWithPosition.getPosition()))return;// Then ignore
 			//Else remove and re-add so it finds its new cube.
-			synchronized(SpacePartitioningGrid.this){synchronized(objectWithPosition)
-				{
+			synchronized(SpacePartitioningGrid.this){synchronized(objectWithPosition){
 				remove(objectWithPosition);
 				SpacePartitioningGrid.this.add((E)objectWithPosition);
 				}}
 			}//end constructor(..)
 
-		private void remove(PositionListenable objectWithPosition)
-			{
+		private void remove(PositionListenable objectWithPosition){
 			getElements().remove(objectWithPosition);
 			objectWithPosition.removePositionListener(this);
 			}
 
-		private boolean isInRange(Vector3D position)
-			{
+		private boolean isInRange(Vector3D position){
 			return(	position.getX()>topLeftPosition.getX() &&												//Top Left
 					position.getY()>topLeftPosition.getY() &&
 					position.getZ()>topLeftPosition.getZ() &&
@@ -260,32 +226,28 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 		/**
 		 * @return the topLeftPosition
 		 */
-		public Vector3D getTopLeftPosition()
-			{
+		public Vector3D getTopLeftPosition(){
 			return topLeftPosition;
 			}
 
 		/**
 		 * @param topLeftPosition the topLeftPosition to set
 		 */
-		public void setTopLeftPosition(Vector3D topLeftPosition)
-			{
+		public void setTopLeftPosition(Vector3D topLeftPosition){
 			this.topLeftPosition = topLeftPosition;
 			}
 
 		/**
 		 * @return the elements
 		 */
-		public ArrayList<E> getElements()
-			{
+		public ArrayList<E> getElements(){
 			return elements;
 			}
 
 		/**
 		 * @param elements the elements to set
 		 */
-		public void setElements(ArrayList<E> elements)
-			{
+		public void setElements(ArrayList<E> elements){
 			this.elements = elements;
 			}
 		}//end GridSquare
@@ -293,59 +255,51 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	/**
 	 * @return the gridSquares
 	 */
-	public Object[] getGridSquares()
-		{
+	public Object[] getGridSquares(){
 		return gridSquares;
 		}
 	/**
 	 * @param squares the gridSquares to set
 	 */
-	public void setGridSquares(Object[] squares)
-		{
+	public void setGridSquares(Object[] squares){
 		this.gridSquares = squares;
 		}
 	/**
 	 * @return the squaresX
 	 */
-	public int getSquaresX()
-		{
+	public int getSquaresX(){
 		return squaresX;
 		}
 	/**
 	 * @param squaresX the squaresX to set
 	 */
-	public void setSquaresX(int squaresX)
-		{
+	public void setSquaresX(int squaresX){
 		if(squaresX<=0)throw new RuntimeException("Invalid size: "+squaresX);
 		this.squaresX = squaresX;
 		}
 	/**
 	 * @return the squaresY
 	 */
-	public int getSquaresY()
-		{
+	public int getSquaresY(){
 		return squaresY;
 		}
 	/**
 	 * @param squaresY the squaresY to set
 	 */
-	public void setSquaresY(int squaresY)
-		{
+	public void setSquaresY(int squaresY){
 		if(squaresY<=0)throw new RuntimeException("Invalid size: "+squaresY);
 		this.squaresY = squaresY;
 		}
 	/**
 	 * @return the squaresZ
 	 */
-	public int getSquaresZ()
-		{
+	public int getSquaresZ(){
 		return squaresZ;
 		}
 	/**
 	 * @param squaresZ the squaresZ to set
 	 */
-	public void setSquaresZ(int squaresZ)
-		{
+	public void setSquaresZ(int squaresZ){
 		if(squaresZ<=0)throw new RuntimeException("Invalid size: "+squaresZ);
 		this.squaresZ = squaresZ;
 		}
@@ -353,16 +307,14 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>
 	/**
 	 * @return the viewingRadius
 	 */
-	public double getViewingRadius()
-		{
+	public double getViewingRadius(){
 		return viewingRadius;
 		}
 
 	/**
 	 * @param viewingRadius the viewingRadius to set
 	 */
-	public void setViewingRadius(double viewingRadius)
-		{
+	public void setViewingRadius(double viewingRadius){
 		this.viewingRadius = viewingRadius;
 		}
 	}//end SpacePartitionGrid

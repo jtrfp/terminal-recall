@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
-import java.awt.Dimension;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -98,8 +98,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 		try {
 			prs.expectString(";NewHit\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
 			prs.stringEndingWith(",",prs.property("numNewHBoxes", int.class), false);
-			for(int i=0; i<15; i++)
-				{
+			for(int i=0; i<15; i++){
 				prs.stringEndingWith(",", prs.indexedProperty("hboxVertices", int.class, i), false);
 				}
 			prs.stringEndingWith("\r\n", prs.indexedProperty("hboxVertices",int.class,15), false);//last one, ending in newline.
@@ -127,8 +126,8 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 			prs.stringEndingWith("\r\n", prs.property("fireVelocity", 		int.class), 		false);
 			}
 		catch(UnrecognizedFormatException e){System.out.println("2nd Weapon not given for this def");}
-		try
-			{
+		try	{
+		    	prs.ignoreEOF=true;
 			prs.expectString("%SFX\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
 			prs.stringEndingWith("\r\n", prs.property("bossFireSFXFile", 		String.class), 		false);
 			prs.stringEndingWith("\r\n", prs.property("bossYellSFXFile", 		String.class), 		false);

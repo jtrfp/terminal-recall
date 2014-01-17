@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.obj;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 
@@ -15,10 +14,10 @@ public class PowerupFactory {
 	    (objects[i]=new PowerupObject(type,tr.getWorld())).setVisible(false);
 	}//end for(objects)
     }//end constructor
-    public PowerupObject spawn(Vector3D newPosition) {
+    public PowerupObject spawn(double[] ds) {
 	final PowerupObject result = objects[powerupIndex];
 	result.destroy();
-	result.reset(newPosition);
+	result.reset(ds);
 	tr.getWorld().add(result);
 	powerupIndex++;
 	powerupIndex%=objects.length;

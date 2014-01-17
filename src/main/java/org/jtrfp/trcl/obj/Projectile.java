@@ -6,6 +6,6 @@ public interface Projectile {
 
     void destroy();
 
-    void reset(Vector3D firingPosition, Vector3D scalarMultiply);
+    void reset(double[] ds, Vector3D scalarMultiply);
 
 }

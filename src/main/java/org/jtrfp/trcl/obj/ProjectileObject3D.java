@@ -18,11 +18,11 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
     }
 
     
-    public void reset(Vector3D newPos, Vector3D newVelocity){
+    public void reset(double [] newPos, Vector3D newVelocity){
 	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	if(newVelocity.getNorm()!=0)setHeading(newVelocity.normalize());
 	else setHeading(Vector3D.PLUS_I);//meh.
-	setPosition(newPos);
+	setPosition(newPos[0],newPos[1],newPos[2]);
 	setVisible(true);
 	setActive(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);

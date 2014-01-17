@@ -49,7 +49,7 @@ public class ExplosionFactory {
 	    return result;
 	}
 */
-	public Explosion triggerExplosion(Vector3D position, ExplosionType type) {
+	public Explosion triggerExplosion(double [] position, ExplosionType type) {
 	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_EXPLOSIONS_PER_POOL;
 	    Explosion result = allExplosions[type.ordinal()][indices[type.ordinal()]];
 	    result.destroy();

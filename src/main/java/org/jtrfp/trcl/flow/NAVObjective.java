@@ -106,12 +106,12 @@ public abstract class NAVObjective {
 	} else if(obj instanceof CHK){///////////////////////////////////////////
 	    final CHK cp = (CHK)obj;
 	    final Location3D loc3d = cp.getLocationOnMap();
-	    final Vector3D loc = new Vector3D(
-		        TR.legacy2Modern(loc3d.getZ()),
-		        TR.legacy2Modern(loc3d.getY()),
-			TR.legacy2Modern(loc3d.getX()));
 	    final Checkpoint chk = new Checkpoint(tr);
-	    chk.setPosition(loc.add(new Vector3D(0,CHECKPOINT_HEIGHT_PADDING,0)));
+	    final double [] chkPos = chk.getPosition();
+	    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
+	    chkPos[1]=TR.legacy2Modern(loc3d.getY()+CHECKPOINT_HEIGHT_PADDING);
+	    chkPos[2]=TR.legacy2Modern(loc3d.getX());
+	    chk.notifyPositionChange();
 	    chk.setIncludeYAxisInCollision(false);
 	    final NAVObjective objective = new NAVObjective(){
 		    @Override
@@ -131,12 +131,12 @@ public abstract class NAVObjective {
 	} else if(obj instanceof DUN){///////////////////////////////////////////
 	    final DUN xit = (DUN)obj;
 	    final Location3D loc3d = xit.getLocationOnMap();
-	    final Vector3D loc = new Vector3D(
-		        TR.legacy2Modern(loc3d.getZ()),
-		        TR.legacy2Modern(loc3d.getY()),
-			TR.legacy2Modern(loc3d.getX()));
 	    final Checkpoint chk = new Checkpoint(tr);
-	    chk.setPosition(loc);
+	    final double [] chkPos = chk.getPosition();
+	    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
+	    chkPos[1]=TR.legacy2Modern(loc3d.getY());
+	    chkPos[2]=TR.legacy2Modern(loc3d.getX());
+	    chk.notifyPositionChange();
 	    chk.setVisible(false);
 	    try{
 	    WorldObject jumpZone = new WorldObject(tr,tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPalette(), tr.getGPU().getGl()));

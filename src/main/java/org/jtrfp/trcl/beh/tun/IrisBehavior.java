@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.beh.tun;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Controller;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
@@ -21,11 +20,11 @@ private static final double X_FLUFF=80000;
     public void _proposeCollision(WorldObject wo){
 	if(wo instanceof Player){
 	    final WorldObject p = getParent();
-	    final Vector3D thisPos = p.getPosition();
-	    final Vector3D playerPos = wo.getPosition();
-	    if(playerPos.getX()>p.getPosition().getX()&&playerPos.getX()<p.getPosition().getX()+X_FLUFF){
-		final double dY=thisPos.getY()-playerPos.getY();
-		final double dZ=thisPos.getZ()-playerPos.getZ();
+	    final double [] thisPos = p.getPosition();
+	    final double [] playerPos = wo.getPosition();
+	    if(playerPos[0]>thisPos[0]&&playerPos[0]<thisPos[0]+X_FLUFF){
+		final double dY=thisPos[1]-playerPos[1];
+		final double dZ=thisPos[2]-playerPos[2];
 		final double dist=Math.sqrt(dY*dY+dZ*dZ);
 		final double currentRadius=maxRadius*(1.-Math.abs(1-controller.getCurrentFrame()));
 		if(dist>currentRadius){

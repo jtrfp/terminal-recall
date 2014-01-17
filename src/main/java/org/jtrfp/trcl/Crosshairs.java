@@ -55,7 +55,6 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere
 		crossModel.addTriangles(Triangle.quad2Triangles(//Right
 				new double[]{(xhairLen+xhairThick*6),(xhairLen+xhairThick*6),(xhairLen),(xhairLen)}, new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC));
-		setPosition(Vector3D.ZERO);
 		setModel(crossModel.finalizeModel());
 		}
 	}

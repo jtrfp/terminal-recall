@@ -37,7 +37,7 @@ public class Mission {
     private final LVLFile lvl;
     private final Object missionCompleteBarrier = new Object();
     private final HashMap<String,Tunnel> tunnels = new HashMap<String,Tunnel>();
-    private Vector3D playerStartPosition;
+    private double [] playerStartPosition=  new double[3];
     private ObjectDirection playerStartDirection;
     public Mission(TR tr, LVLFile lvl){
 	this.tr=tr;
@@ -69,12 +69,16 @@ public class Mission {
 	final String startX=System.getProperty("org.jtrfp.trcl.startX");
 	final String startY=System.getProperty("org.jtrfp.trcl.startY");
 	final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
+	final double [] playerPos = player.getPosition();
 	if(startX!=null && startY!=null&&startZ!=null){
 	    System.out.println("Using user-specified start point");
 	    final int sX=Integer.parseInt(startX);
 	    final int sY=Integer.parseInt(startY);
 	    final int sZ=Integer.parseInt(startZ);
-	    player.setPosition(new Vector3D(sX,sY,sZ));
+	    playerPos[0]=sX;
+	    playerPos[1]=sY;
+	    playerPos[2]=sZ;
+	    player.notifyPositionChange();
 	}
 	final World world = tr.getWorld();
 	world.add(player);
@@ -87,7 +91,9 @@ public class Mission {
 	START s = (START)navSubObjects.get(0);
 	navSubObjects.remove(0);
 	Location3D l3d = s.getLocationOnMap();
-	playerStartPosition = new Vector3D(TR.legacy2Modern(l3d.getZ()),TR.legacy2Modern(l3d.getY()),TR.legacy2Modern(l3d.getX()));
+	playerStartPosition[0]=TR.legacy2Modern(l3d.getZ());
+	playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
+	playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
 	playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
 	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
 	//Install NAVs
@@ -150,7 +156,7 @@ public class Mission {
     /**
      * @return the playerStartPosition
      */
-    public Vector3D getPlayerStartPosition() {
+    public double[] getPlayerStartPosition() {
         return playerStartPosition;
     }
 

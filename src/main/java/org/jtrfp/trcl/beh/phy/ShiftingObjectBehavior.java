@@ -39,11 +39,10 @@ public class ShiftingObjectBehavior extends Behavior
 		zAnimator=new AttribAnimator(zPos,seq,new double [] {startPos.getZ(),endPos.getZ()});
 		}
 	@Override
-	public void _tick(long tickTimeInMillis)
-		{
+	public void _tick(long tickTimeInMillis){
 		xAnimator.updateAnimation();
 		yAnimator.updateAnimation();
 		zAnimator.updateAnimation();
-		super.getParent().setPosition(new Vector3D(xPos.get(),yPos.get(),zPos.get()));
+		super.getParent().setPosition(xPos.get(),yPos.get(),zPos.get());
 		}
 	}//end TunnelObjectBehavior

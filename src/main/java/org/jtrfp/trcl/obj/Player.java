@@ -118,7 +118,7 @@ public class Player extends WorldObject
 	@Override
 	public void setHeading(Vector3D lookAt){
 		camera.setLookAtVector(lookAt);
-		camera.setPosition(getPosition().subtract(lookAt.scalarMultiply(cameraDistance)));
+		camera.setPosition( new Vector3D(getPosition()).subtract(lookAt.scalarMultiply(cameraDistance)) );
 		super.setHeading(lookAt);
 		}
 	@Override
@@ -127,8 +127,8 @@ public class Player extends WorldObject
 		super.setTop(top);
 		}
 	@Override
-	public Player setPosition(Vector3D pos){
-		camera.setPosition(pos.subtract(getLookAt().scalarMultiply(cameraDistance)));
+	public Player setPosition(double [] pos){
+		camera.setPosition(new Vector3D(pos).subtract(getLookAt().scalarMultiply(cameraDistance)));
 		super.setPosition(pos);
 		return this;
 		}

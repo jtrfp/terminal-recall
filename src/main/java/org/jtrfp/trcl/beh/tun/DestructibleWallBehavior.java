@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.beh.tun;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
@@ -13,10 +12,10 @@ public class DestructibleWallBehavior extends Behavior {
     public static final int DAMAGE_ON_IMPACT=6554;
     @Override
     public void _proposeCollision(WorldObject other){
-	final Vector3D otherPos=other.getPosition();
+	final double [] otherPos=other.getPosition();
 	final WorldObject p = getParent();
-	final Vector3D thisPos=p.getPosition();
-	if(otherPos.getX()>thisPos.getX()&& otherPos.getX()<thisPos.getX()+THICKNESS_X){
+	final double [] thisPos=p.getPosition();
+	if(otherPos[0]>thisPos[0]&& otherPos[0]<thisPos[0]+THICKNESS_X){
     	    if(other instanceof Player){
     	        final Player player=(Player)other;
     	        player.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(DAMAGE_ON_IMPACT);

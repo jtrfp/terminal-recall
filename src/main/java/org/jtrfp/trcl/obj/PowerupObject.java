@@ -2,9 +2,9 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Future;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.DummyFuture;
@@ -91,8 +91,8 @@ public class PowerupObject extends BillboardSprite{
 	public Powerup getPowerupType()
 		{return powerupType;}
 	
-	public void reset(Vector3D newPos){
-		setPosition(newPos);
+	public void reset(double[] ds){
+		setPosition(Arrays.copyOf(ds,3));
 		setActive(true);
 		setVisible(true);
 	    }//end reset()

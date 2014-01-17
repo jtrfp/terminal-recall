@@ -80,7 +80,12 @@ public class CloudSystem extends RenderableSpacePartitioningGrid
 				m.addTriangle(tris[0]);
 				m.addTriangle(tris[1]);
 				final CloudCeiling rq = new CloudCeiling(tr,m.finalizeModel());
-				rq.setPosition(new Vector3D(xPos,ceilingHeight,zPos));
+				//rq.setPosition(new Vector3D(xPos,ceilingHeight,zPos));
+				final double [] rqPos=rq.getPosition();
+				rqPos[0]=xPos;
+				rqPos[1]=ceilingHeight;
+				rqPos[2]=zPos;
+				rq.notifyPositionChange();
 				add(rq);
 				}//end for(x)
 			}//end for(z)

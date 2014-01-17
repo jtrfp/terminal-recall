@@ -8,7 +8,7 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
     private final double MAX_SPEED=70000;
     private final int MIN_FRAGS=6;
     @Override
-    public void collidedWithSurface(WorldObject wo, Vector3D surfaceNormal) {
+    public void collidedWithSurface(WorldObject wo, double[] surfaceNormal) {
 	final WorldObject p = getParent();
 	p.getBehavior().probeForBehavior(DamageableBehavior.class).shearDamage(collisionDamage);
 	for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){

@@ -45,6 +45,5 @@ public class Dashboard extends WorldObject2DVisibleEverywhere
 			dashModel.addTriangles(tris);
 			}//end for(segs)
 		setModel(dashModel.finalizeModel());
-		setPosition(Vector3D.ZERO);
 		}
 	}//end Dashboard

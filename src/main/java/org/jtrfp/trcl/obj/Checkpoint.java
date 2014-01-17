@@ -38,8 +38,8 @@ private boolean includeYAxisInCollision=true;
 	    if(other instanceof Player){
 		final Player player = (Player)other;
 		final WorldObject parent = getParent();
-		Vector3D playerPos = includeYAxisInCollision?player.getPosition():new Vector3D(player.getPosition().getX(),0,player.getPosition().getZ());
-		Vector3D parentPos = includeYAxisInCollision?parent.getPosition():new Vector3D(parent.getPosition().getX(),0,parent.getPosition().getZ());
+		double [] playerPos = includeYAxisInCollision?player.getPosition():new double []{player.getPosition()[0],0,player.getPosition()[2]};
+		double [] parentPos = includeYAxisInCollision?parent.getPosition():new double []{parent.getPosition()[0],0,parent.getPosition()[2]};
 		if(TR.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
 		    destroy();
 		    m.removeNAVObjective(objective);

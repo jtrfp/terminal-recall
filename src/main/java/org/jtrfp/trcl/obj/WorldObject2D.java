@@ -41,7 +41,7 @@ public class WorldObject2D extends WorldObject{
 	@Override
 	protected void recalculateTransRotMBuffer()
 		{
-		final Vector3D tV = position;
+		final double [] tV = position;
 		
 		Vector3D aZ=getHeading().normalize();
 		Vector3D aX=getTop().crossProduct(aZ);
@@ -58,9 +58,9 @@ public class WorldObject2D extends WorldObject{
 		
 		RealMatrix tM = new Array2DRowRealMatrix(new double [][] 
 					{
-					new double[]{1,0,	0,	tV.getX()},
-					new double[]{0,1,	0,	tV.getY()},
-					new double[]{0,0,	1,	tV.getZ()},
+					new double[]{1,0,	0,	tV[0]},
+					new double[]{0,1,	0,	tV[1]},
+					new double[]{0,0,	1,	tV[2]},
 					new double[]{0,0,	0,	1}
 					});
 		matrix.set(tM.multiply(rM).transpose());

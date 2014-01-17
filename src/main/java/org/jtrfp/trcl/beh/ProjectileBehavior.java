@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.beh;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -22,7 +21,7 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	    parent.addBehavior(new LoopingPositionBehavior());
 	}
 	@Override
-	public void collidedWithSurface(WorldObject wo, Vector3D surfaceNormal) {
+	public void collidedWithSurface(WorldObject wo, double [] surfaceNormal) {
 	    {deathBehavior.die();}
 	}
 	@Override

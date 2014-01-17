@@ -437,4 +437,20 @@ public final class TR
 	public void setGlobalPalette(Color[] palette) {
 	    globalPalette=palette;
 	}
+
+	public static double twosComplimentDistance(double[] l,
+		double[] r) {
+	    final double dx=deltaRollover(l[0]-r[0]);
+	    final double dy=deltaRollover(l[1]-r[1]);
+	    final double dz=deltaRollover(l[2]-r[2]);
+	    return Math.sqrt( (dx)*(dx) + (dy)*(dy) + (dz)*(dz) );
+	}
+
+	public static double[] twosComplimentSubtract(double[] l,
+		double[] r, double [] dest) {
+	    dest[0]=deltaRollover(l[0]-r[0]);
+	    dest[1]=deltaRollover(l[1]-r[1]);
+	    dest[2]=deltaRollover(l[2]-r[2]);
+	    return dest;
+	}
 }//end TR

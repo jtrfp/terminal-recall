@@ -76,11 +76,12 @@ public class DEFObjectPlacer implements ObjectPlacer
 				final DEFObject obj =new DEFObject(tr,model,def,pl);
 				if(defList!=null)defList.add(obj);
 				//USING  z,x coords
-				obj.setPosition(new Vector3D(
-						TR.legacy2Modern(pl.getLocationOnMap().getZ()),
-						(TR.legacy2Modern(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY,
-						TR.legacy2Modern(pl.getLocationOnMap().getX())
-						));
+				final double [] objPos = obj.getPosition();
+				objPos[0]=TR.legacy2Modern(pl.getLocationOnMap().getZ());
+				objPos[1]=(TR.legacy2Modern(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY;
+				objPos[2]=TR.legacy2Modern(pl.getLocationOnMap().getX());
+				obj.notifyPositionChange();
+				
 				if(def.getLogic()==EnemyLogic.groundStaticRuin){
 				    //Spawn a second, powerup-free model using the simplemodel
 				    Model simpleModel=null;

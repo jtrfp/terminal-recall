@@ -1,10 +1,9 @@
 package org.jtrfp.trcl.beh;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
-import org.jtrfp.trcl.TerrainChunk;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class LeavesPowerupOnDeathBehavior extends Behavior implements
@@ -17,14 +16,14 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
     @Override
     public void notifyDeath() {//Y-fudge to ensure powerup is not too close to ground.
 	final WorldObject p=getParent();
-	final Vector3D thisPos=p.getPosition();
+	final double [] thisPos=p.getPosition();
 	double height;
 	final InterpolatingAltitudeMap map=p.getTr().getAltitudeMap();
-	if(map!=null)height= map.heightAt((thisPos.getX()/TR.mapSquareSize), 
-		    (thisPos.getZ()/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
+	if(map!=null)height= map.heightAt((thisPos[0]/TR.mapSquareSize), 
+		    (thisPos[2]/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	else{height=Double.NEGATIVE_INFINITY;}
-	final Vector3D yFudge=thisPos.getY()<height+OVER_TERRAIN_PAD?new Vector3D(0,OVER_TERRAIN_PAD,0):Vector3D.ZERO;
+	final double [] yFudge=thisPos[1]<height+OVER_TERRAIN_PAD?new double[]{0,OVER_TERRAIN_PAD,0}:new double[3];
 	getParent().getTr().getResourceManager().getPluralizedPowerupFactory().
-		spawn(getParent().getPosition().add(yFudge), pup);
+		spawn(Vect3D.add(getParent().getPosition(), yFudge, yFudge), pup);
     }//end notifyDeath()
 }//end LeavesPowerupOnDeathBehavior

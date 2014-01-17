@@ -9,20 +9,20 @@ import org.jtrfp.trcl.core.TR;
 
 public class BarrierCube extends WorldObject {
     final double fluffX;
-    final Vector3D dims;
-    final Vector3D origin;
-    protected BarrierCube(TR tr, double w, double h, double d, Vector3D origin){
+    final double [] dims;
+    final double [] origin;
+    protected BarrierCube(TR tr, double w, double h, double d, double []origin){
 	super(tr);
 	fluffX=d;
-	this.dims=new Vector3D(w,h,d);
+	this.dims=new double[]{w,h,d};
 	this.origin=origin;
     }
-    public BarrierCube(TR tr,double w, double h, double d, Future<TextureDescription> tex, Vector3D origin, boolean hasAlpha) {
+    public BarrierCube(TR tr,double w, double h, double d, Future<TextureDescription> tex, double [] origin, boolean hasAlpha) {
 	this(tr,w,h,d,origin);
 	Model m = Model.buildCube(w, h, d, tex, origin,hasAlpha);
 	setModel(m);
     }// end constructor
-    public BarrierCube(TR tr,double w, double h, double d, Future<TextureDescription> tex, Vector3D origin, double u0, double v0, double u1, double v1, boolean hasAlpha) {
+    public BarrierCube(TR tr,double w, double h, double d, Future<TextureDescription> tex, double [] origin, double u0, double v0, double u1, double v1, boolean hasAlpha) {
 	this(tr,w,h,d,origin);
 	Model m = Model.buildCube(w, h, d, tex, origin,u0,v0,u1,v1,hasAlpha);
 	setModel(m);
@@ -36,13 +36,13 @@ public class BarrierCube extends WorldObject {
     /**
      * @return the dims
      */
-    public Vector3D getDims() {
+    public double[] getDims() {
         return dims;
     }
     /**
      * @return the origin
      */
-    public Vector3D getOrigin() {
+    public double[] getOrigin() {
         return origin;
     }
 

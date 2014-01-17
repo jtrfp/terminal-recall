@@ -51,23 +51,23 @@ private final NAVSystem nav;
 	    final TR tr=getTr();
 	    final Mission mission = tr.getCurrentMission();
 	    final WorldObject player = tr.getPlayer();
-	    final Vector3D playerPos = player.getPosition();
-	    final Vector3D playerPosXY = new Vector3D(playerPos.getX(),playerPos.getZ(),0);
+	    final double [] playerPos = player.getPosition();
+	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
 	    final Vector3D playerHeading = player.getHeading();
 	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
 	    if(mission.currentNAVTarget()==null){setVisible(false);return;}
 	    if(mission.currentNAVTarget().getTarget()==null){setVisible(false);return;}
 	    	else setVisible(true);
-	    final Vector3D loc =mission.currentNAVTarget().getTarget().getPosition();
-	    final Vector3D navLocXY = new Vector3D(loc.getX(),loc.getZ(),0);
+	    final double [] loc =mission.currentNAVTarget().getTarget().getPosition();
+	    final Vector3D navLocXY = new Vector3D(loc[0],loc[2],0);
 	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
 	    final double modernDistance = player2NavVectorXY.getNorm();
 	    counter++;counter%=TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS);
 	    //This need only be done occasionally
 	    if(counter==0){
 		getTr().getHudSystem().getDistance().setContent(""+(int)(modernDistance/TR.mapSquareSize));
-		getTr().getHudSystem().getSector().setContent(((int)((playerPos.getX()+TR.mapCartOffset)/TR.mapSquareSize))+"."+
-		    ((int)((playerPos.getZ()+TR.mapCartOffset)/TR.mapSquareSize)));
+		getTr().getHudSystem().getSector().setContent(((int)((playerPos[0]+TR.mapCartOffset)/TR.mapSquareSize))+"."+
+		    ((int)((playerPos[2]+TR.mapCartOffset)/TR.mapSquareSize)));
 	    }
 	    final Vector3D normPlayer2NavVector = player2NavVectorXY.normalize();
 	    //Kludge to correct negative X bug in engine. (mirrored world)

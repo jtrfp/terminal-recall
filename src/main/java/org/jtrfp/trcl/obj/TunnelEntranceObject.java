@@ -24,7 +24,10 @@ public class TunnelEntranceObject extends WorldObject {
 	addBehavior(new TunnelEntranceBehavior());
 	setVisible(false);
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
-	setPosition(new Vector3D(TR.legacy2Modern(entrance.getZ()),TR.legacy2Modern(entrance.getY())-45000,TR.legacy2Modern(entrance.getX())));
+	final double [] position = getPosition();
+	position[0]=TR.legacy2Modern(entrance.getZ());
+	position[1]=TR.legacy2Modern(entrance.getY())-45000;
+	position[2]=TR.legacy2Modern(entrance.getX());
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
 	setModel(m);}
 	catch(Exception e){e.printStackTrace();}
@@ -35,7 +38,7 @@ public class TunnelEntranceObject extends WorldObject {
 	public void _proposeCollision(WorldObject other){
 	    WorldObject p = getParent();
 	      if(other instanceof Player){
-	        if(p.getPosition().distance(other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE*3){
+	        if(new Vector3D(p.getPosition()).distance(new Vector3D(other.getPosition()))<CollisionManager.SHIP_COLLISION_DISTANCE*3){
 		 //Turn off overworld
 		 final TR tr = getTr();
 		 tr.getOverworldSystem().deactivate();
@@ -54,7 +57,7 @@ public class TunnelEntranceObject extends WorldObject {
 		 }//end for(projectileFactories)
 		 p.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 		 final Player player = tr.getPlayer();
-		 player.setPosition(Tunnel.TUNNEL_START_POS);
+		 player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
 		 player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
 		 player.getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 		 player.getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);

@@ -16,11 +16,11 @@ public class PUPObjectPlacer implements ObjectPlacer
 		{
 		for(PowerupLocation loc:pupFile.getPowerupLocations())
 			{PowerupObject powerup = new PowerupObject(loc.getType(),world);
-			powerup.setPosition(new Vector3D(
-					TR.legacy2Modern(loc.getZ()),
-					(TR.legacy2Modern(loc.getY())/TR.mapWidth)*16.*world.sizeY,
-					TR.legacy2Modern(loc.getX())
-					));
+			final double [] pupPos = powerup.getPosition();
+			pupPos[0]=TR.legacy2Modern(loc.getZ());
+			pupPos[1]=(TR.legacy2Modern(loc.getY())/TR.mapWidth)*16.*world.sizeY;
+			pupPos[2]=TR.legacy2Modern(loc.getX());
+			powerup.notifyPositionChange();
 			objs.add(powerup);
 			}//end for(locations)
 		}//end PUPObjectPlacer

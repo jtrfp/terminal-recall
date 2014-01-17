@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.obj;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 
@@ -12,7 +11,7 @@ public class PluralizedPowerupFactory {
 	}//end for(Powerups)
     }//end constructor
     
-    public PowerupObject spawn(Vector3D newPosition, Powerup type) {
-	return factories[type.ordinal()].spawn(newPosition);
+    public PowerupObject spawn(double[] ds, Powerup type) {
+	return factories[type.ordinal()].spawn(ds);
     }//end spawn(...)
 }//end PluralizedPowerupFactory

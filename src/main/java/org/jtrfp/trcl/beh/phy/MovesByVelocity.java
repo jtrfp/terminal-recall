@@ -11,7 +11,8 @@ public class MovesByVelocity extends Behavior implements Velocible {
 	public void _tick(long tickTimeMillis){
 		final WorldObject p = getParent();
 		final double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
-		p.setPosition(p.getPosition().add(getVelocity().scalarMultiply(progressionInSeconds)));
+		p.movePositionBy(getVelocity().scalarMultiply(progressionInSeconds));
+		//p.setPosition(p.getPosition().add();
 		}
 
 	@Override

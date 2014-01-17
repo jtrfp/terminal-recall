@@ -22,8 +22,8 @@ import org.jtrfp.trcl.obj.MeterBar;
 public class HUDSystem extends RenderableSpacePartitioningGrid
 	{
 	private static final double Z=-1;
-	private static final Vector3D HEALTH_POS = new Vector3D(.13000-1,1-.205,0);
-	private static final Vector3D THROTTLE_POS = new Vector3D(.18875-1,1-.205,0);
+	private static final double [] HEALTH_POS = new double[]{.13000-1,1-.205,0};
+	private static final double [] THROTTLE_POS = new double[]{.18875-1,1-.205,0};
 	private static final double METER_WIDTH = .02;
 	private static final double METER_HEIGHT = .16;
 	private final CharLineDisplay objective;
@@ -51,23 +51,24 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		
 		objective = new CharLineDisplay(world.getTr(),this,FONT_SIZE,16,font);
 		objective.setContent("FLY TO JUMP ZONE");
-		objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,Z));
+		objective.setPosition(-.45,TOP_LINE_Y,Z);
+		//objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,Z));
 		
 		distance = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		distance.setContent("01234");
-		distance.setPosition(new Vector3D(.42,TOP_LINE_Y,Z));
+		distance.setPosition(.42,TOP_LINE_Y,Z);
 		
 		weapon = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		weapon.setContent("RFL20");
-		weapon.setPosition(new Vector3D(-.44,BOTTOM_LINE_Y,Z));
+		weapon.setPosition(-.44,BOTTOM_LINE_Y,Z);
 		
 		sector = new CharLineDisplay(world.getTr(),this,FONT_SIZE,7,font);
 		sector.setContent("255,255");
-		sector.setPosition(new Vector3D(.38,BOTTOM_LINE_Y,Z));
+		sector.setPosition(.38,BOTTOM_LINE_Y,Z);
 		
 		ammo = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
 		ammo.setContent("1337");
-		ammo.setPosition(new Vector3D(.01,BOTTOM_LINE_Y,Z));
+		ammo.setPosition(.01,BOTTOM_LINE_Y,Z);
 		
 		add(new Crosshairs(world.getTr()));
 		//try{

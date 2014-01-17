@@ -42,9 +42,9 @@ public class WorldObject implements PositionedRenderable
 	{
 	private Vector3D heading = new Vector3D(new double []{0,0,1}); //Facing direction
 	private Vector3D top = new Vector3D(new double []{0,1,0});		//Normal describing the top of the object (for tilt)
-	protected Vector3D position = Vector3D.ZERO;
+	//protected Vector3D position = Vector3D.ZERO;
+	protected double [] position = new double[3];
 	private final TR tr;
-	//private World world;
 	private boolean visible=true;
 	private Model model;
 	private ArrayList<PositionListener> positionListeners = new ArrayList<PositionListener>();
@@ -61,8 +61,7 @@ public class WorldObject implements PositionedRenderable
 	private Behavior behavior=new NullBehavior(this);
 	private boolean active=true;
 	
-	public WorldObject(TR tr)
-		{
+	public WorldObject(TR tr){
 		this.tr=tr;
 		addWorldObject(this);
 		matrix=Matrix.create4x4();
@@ -94,8 +93,7 @@ public class WorldObject implements PositionedRenderable
 		model=m;
 		int numObjDefs,sizeInVerts;
 		if(m.getLineSegmentList()==null)lineSegmentObjectDefinitions=new ObjectDefinition[0];
-		else
-			{
+		else	{
 			sizeInVerts=m.getLineSegmentList().getTotalSizeInGPUVertices();
 			numObjDefs=sizeInVerts/GPU_VERTICES_PER_BLOCK;
 			if(sizeInVerts%GPU_VERTICES_PER_BLOCK != 0)numObjDefs++;
@@ -103,8 +101,7 @@ public class WorldObject implements PositionedRenderable
 			for(int i=0; i<numObjDefs; i++){lineSegmentObjectDefinitions[i]=ObjectDefinition.create();}
 			}
 		if(m.getTriangleList()==null)triangleObjectDefinitions=new ObjectDefinition[0];
-		else
-			{
+		else	{
 			sizeInVerts=m.getTriangleList().getTotalSizeInGPUVertices();
 			numObjDefs=sizeInVerts/GPU_VERTICES_PER_BLOCK;
 			if(sizeInVerts%GPU_VERTICES_PER_BLOCK != 0)numObjDefs++;
@@ -112,8 +109,7 @@ public class WorldObject implements PositionedRenderable
 			for(int i=0; i<numObjDefs; i++){triangleObjectDefinitions[i]=ObjectDefinition.create();}
 			}
 		if(m.getTransparentTriangleList()==null)transparentTriangleObjectDefinitions=new ObjectDefinition[0];
-		else
-			{
+		else	{
 			sizeInVerts=m.getTransparentTriangleList().getTotalSizeInGPUVertices();
 			numObjDefs=sizeInVerts/GPU_VERTICES_PER_BLOCK;
 			if(sizeInVerts%GPU_VERTICES_PER_BLOCK != 0)numObjDefs++;
@@ -159,8 +155,7 @@ public class WorldObject implements PositionedRenderable
 			{opaque.put(elm);}
 		}//end initializeObjectDefinitions()
 	
-	private void processPrimitiveList(PrimitiveList<?,?> primitiveList, ObjectDefinition [] objectDefinitions, ArrayList<Integer> indicesList)
-		{
+	private void processPrimitiveList(PrimitiveList<?,?> primitiveList, ObjectDefinition [] objectDefinitions, ArrayList<Integer> indicesList){
 		if(primitiveList==null)return; //Nothing to do, no primitives here
 		int vec4Counter = primitiveList.getTotalSizeInVec4s();
 		int primitiveListByteAddress = primitiveList.getStartAddressInBytes();
@@ -187,27 +182,24 @@ public class WorldObject implements PositionedRenderable
 	public final void updateStateToGPU()
 		{recalculateTransRotMBuffer();}
 	
-	protected void recalculateTransRotMBuffer()
-		{
-		Vector3D tV=position;
-		
-		if(LOOP)
-			{
-			double delta = position.getX()-tr.getRenderer().getCamera().getCameraPosition().getX();
+	protected void recalculateTransRotMBuffer(){
+		double [] tV=position;
+		if(LOOP){//TODO: Optimize
+			double delta = position[0]-tr.getRenderer().getCamera().getCameraPosition().getX();
 			if(delta>TR.mapWidth/2.)
-				{tV=new Vector3D(tV.getX()-TR.mapWidth,tV.getY(),tV.getZ());}
+				{tV=new double [] {tV[0]-TR.mapWidth,tV[1],tV[2]};}
 			else if(delta<-TR.mapWidth/2.)
-				{tV=new Vector3D(tV.getX()+TR.mapWidth,tV.getY(),tV.getZ());}
-			delta = position.getY()-tr.getRenderer().getCamera().getCameraPosition().getY();
+				{tV=new double [] {tV[0]+TR.mapWidth,tV[1],tV[2]};}
+			delta = position[1]-tr.getRenderer().getCamera().getCameraPosition().getY();
 			if(delta>TR.mapWidth/2.)
-				{tV=new Vector3D(tV.getX(),tV.getY()-TR.mapWidth,tV.getZ());}
+				{tV=new double [] {tV[0],tV[1]-TR.mapWidth,tV[2]};}
 			else if(delta<-TR.mapWidth/2.)
-				{tV=new Vector3D(tV.getX(),tV.getY()+TR.mapWidth,tV.getZ());}
-			delta = position.getZ()-tr.getRenderer().getCamera().getCameraPosition().getZ();
+				{tV=new double [] {tV[0],tV[1]+TR.mapWidth,tV[2]};}
+			delta = position[2]-tr.getRenderer().getCamera().getCameraPosition().getZ();
 			if(delta>TR.mapWidth/2.)
-				{tV=new Vector3D(tV.getX(),tV.getY(),tV.getZ()-TR.mapWidth);}
+				{tV=new double [] {tV[0],tV[1],tV[2]-TR.mapWidth};}
 			else if(delta<-TR.mapWidth/2.)
-				{tV=new Vector3D(tV.getX(),tV.getY(),tV.getZ()+TR.mapWidth);}
+				{tV=new double [] {tV[0],tV[1],tV[2]+TR.mapWidth};}
 			}
 		try{
 		Vector3D aZ=heading.normalize();
@@ -224,9 +216,9 @@ public class WorldObject implements PositionedRenderable
 		
 		RealMatrix tM = new Array2DRowRealMatrix(new double [][] 
 					{
-					new double[]{1,0,	0,	tV.getX()},
-					new double[]{0,1,	0,	tV.getY()},
-					new double[]{0,0,	1,	tV.getZ()},
+					new double[]{1,0,	0,	tV[0]},
+					new double[]{0,1,	0,	tV[1]},
+					new double[]{0,0,	1,	tV[2]},
 					new double[]{0,0,	0,	1}
 					});
 		
@@ -242,34 +234,36 @@ public class WorldObject implements PositionedRenderable
 	/**
 	 * @return the visible
 	 */
-	public boolean isVisible()
-		{
+	public boolean isVisible(){
 		return visible;
 		}
 
 	/**
 	 * @param visible the visible to set
 	 */
-	public void setVisible(boolean visible)
-		{
+	public void setVisible(boolean visible){
 		this.visible = visible;
 		}
 	/**
 	 * @return the position
 	 */
-	public final Vector3D getPosition()
-		{return position!=null?position:Vector3D.ZERO;}
+	public final double [] getPosition()
+		{return position;}
 
 	/**
 	 * @param position the position to set
 	 */
-	public WorldObject setPosition(Vector3D position){
+	public WorldObject setPosition(double [] position){
 		synchronized(position){
 			this.position = position;
 			notifyPositionListeners();
 			}
 		return this;
 		}//end setPosition()
+	public WorldObject notifyPositionChange(){
+	    notifyPositionListeners();
+	    return this;
+	}
 	
 	/**
 	 * @return the heading
@@ -313,8 +307,7 @@ public class WorldObject implements PositionedRenderable
 	public final ByteBuffer getTransparentObjectDefinitionAddresses()
 		{transparentObjectDefinitionAddressesInVec4.clear();return transparentObjectDefinitionAddressesInVec4;}
 
-	public static void uploadAllObjectDefinitionsToGPU()
-		{
+	public static void uploadAllObjectDefinitionsToGPU(){
 		for(WorldObject wo:allWorldObjects)
 			{wo.initializeObjectDefinitions();}
 		}//end uploadAllObjectDefinitionsToGPU()
@@ -360,4 +353,18 @@ public class WorldObject implements PositionedRenderable
 	public void setActive(boolean active) {
 	    this.active = active;
 	}
-	}//end WorldObject
+
+	public void movePositionBy(Vector3D delta) {
+	    position[0]+=delta.getX();
+	    position[1]+=delta.getY();
+	    position[2]+=delta.getZ();
+	    notifyPositionChange();
+	}
+
+	public void setPosition(double x, double y, double z) {
+	    position[0]=x;
+	    position[1]=y;
+	    position[2]=z;
+	    notifyPositionChange();
+	}
+}//end WorldObject

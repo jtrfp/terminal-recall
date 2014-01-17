@@ -22,10 +22,10 @@ public class ProjectileBillboard extends BillboardSprite implements Projectile {
 	this.setBillboardSize(new Dimension((int)(mt.getBillboardSize().getWidth()/TR.crossPlatformScalar),(int)(mt.getBillboardSize().getHeight()/TR.crossPlatformScalar)));
 	this.setTexture(textureToUse, true);
     }
-    public void reset(Vector3D newPos, Vector3D newVelocity){
+    public void reset(double [] newPos, Vector3D newVelocity){
 	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	setHeading(newVelocity.normalize());
-	setPosition(newPos);
+	setPosition(newPos[0],newPos[1],newPos[2]);
 	setVisible(true);
 	setActive(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);

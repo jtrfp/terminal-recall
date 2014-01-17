@@ -147,49 +147,49 @@ public class Model
 		this.smoothAnimation = smoothAnimation;
 		}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin,boolean hasAlpha){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin,boolean hasAlpha){
 		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1,hasAlpha);
 		}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin){
 		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1);
 		}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin, double u0, double v0, double u1, double v1){
 	    return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,false);
 	}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, Vector3D origin, double u0, double v0, double u1, double v1, boolean hasAlpha){
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin, double u0, double v0, double u1, double v1, boolean hasAlpha){
 		Model m = new Model(false);
 		//Front
 		m.addTriangles(Triangle.quad2Triangles(
-				new double [] {0-origin.getX(),w-origin.getX(),w-origin.getX(),0-origin.getX()}, 
-				new double [] {0-origin.getY(),0-origin.getY(),h-origin.getY(),h-origin.getY()}, 
-				new double [] {0-origin.getZ(),0-origin.getZ(),0-origin.getZ(),0-origin.getZ()}, 
+				new double [] {0-origin[0],w-origin[0],w-origin[0],0-origin[0]}, 
+				new double [] {0-origin[1],0-origin[1],h-origin[1],h-origin[1]}, 
+				new double [] {0-origin[2],0-origin[2],0-origin[2],0-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
 				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
 		//Left
 		m.addTriangles(Triangle.quad2Triangles(
-				new double [] {0-origin.getX(),0-origin.getX(),0-origin.getX(),0-origin.getX()}, 
-				new double [] {0-origin.getY(),0-origin.getY(),h-origin.getY(),h-origin.getY()}, 
-				new double [] {0-origin.getZ(),d-origin.getZ(),d-origin.getZ(),0-origin.getZ()}, 
+				new double [] {0-origin[0],0-origin[0],0-origin[0],0-origin[0]}, 
+				new double [] {0-origin[1],0-origin[1],h-origin[1],h-origin[1]}, 
+				new double [] {0-origin[2],d-origin[2],d-origin[2],0-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
 				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
 		//Right
 		m.addTriangles(Triangle.quad2Triangles(
-				new double [] {w-origin.getX(),w-origin.getX(),w-origin.getX(),w-origin.getX()}, 
-				new double [] {0-origin.getY(),0-origin.getY(),h-origin.getY(),h-origin.getY()}, 
-				new double [] {0-origin.getZ(),d-origin.getZ(),d-origin.getZ(),0-origin.getZ()}, 
+				new double [] {w-origin[0],w-origin[0],w-origin[0],w-origin[0]}, 
+				new double [] {0-origin[1],0-origin[1],h-origin[1],h-origin[1]}, 
+				new double [] {0-origin[2],d-origin[2],d-origin[2],0-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
 				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
 		//Back
 		m.addTriangles(Triangle.quad2Triangles(
-				new double [] {0-origin.getX(),w-origin.getX(),w-origin.getX(),0-origin.getX()}, 
-				new double [] {0-origin.getY(),0-origin.getY(),h-origin.getY(),h-origin.getY()}, 
-				new double [] {d-origin.getZ(),d-origin.getZ(),d-origin.getZ(),d-origin.getZ()}, 
+				new double [] {0-origin[0],w-origin[0],w-origin[0],0-origin[0]}, 
+				new double [] {0-origin[1],0-origin[1],h-origin[1],h-origin[1]}, 
+				new double [] {d-origin[2],d-origin[2],d-origin[2],d-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
 				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));

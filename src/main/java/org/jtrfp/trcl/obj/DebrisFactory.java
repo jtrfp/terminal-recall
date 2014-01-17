@@ -15,10 +15,10 @@ public class DebrisFactory {
 	    }//end for(debris)
     }//end constructor
     
-    public Debris spawn(Vector3D startPosition, Vector3D velocity) {
+    public Debris spawn(double[] ds, Vector3D velocity) {
 	final Debris result = allDebris[index];
 	result.destroy();
-	result.reset(startPosition, velocity);
+	result.reset(ds, velocity);
 	tr.getWorld().add(result);
 	index++;
 	index%=DEBRIS_POOL_SIZE;

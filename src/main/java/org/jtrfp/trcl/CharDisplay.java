@@ -15,7 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
@@ -43,7 +42,6 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere
 		tris[1].setAlphaBlended(true);
 		model.addTriangles(tris);
 		setModel(model.finalizeModel());
-		setPosition(Vector3D.ZERO);
 		}//end constructor()
 	
 	public void setChar(char c){tex.setFrame(c);}

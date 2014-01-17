@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 
@@ -22,7 +24,7 @@ public class CharLineDisplay
 	{
 	private char [] content;
 	private CharDisplay [] displays;
-	Vector3D position = new Vector3D(0,0,.0001);
+	double [] position = new double []{0,0,.0001};
 	private GLFont font;
 	private final double glSize;
 	
@@ -54,18 +56,29 @@ public class CharLineDisplay
 		}//end setContent(...)
 	
 	private void updatePositions()
-		{Vector3D charPosition=position;
-		for(int i=0; i<displays.length; i++)
-			{
-		    	displays[i].setPosition(charPosition);
+		{final double[] charPosition=Arrays.copyOf(position,3);
+		for(int i=0; i<displays.length; i++){
+		    	final double [] dispPos = displays[i].getPosition();
+		    	dispPos[0]=charPosition[0];
+		    	dispPos[1]=charPosition[1];
+		    	dispPos[2]=charPosition[2];
+		    	displays[i].notifyPositionChange();
 			char _content = content[i];
 			final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
-			charPosition=charPosition.add(new Vector3D(progress,0,0));
+			charPosition[0]+=progress;
+			//charPosition=charPosition.add(new Vector3D(progress,0,0));
 			}//end for(length)
 		}//end updatePositions
 	
-	public void setPosition(Vector3D location)
+	public void setPosition(double [] location)
 		{this.position=location;
 		updatePositions();
 		}//end setPosition(...)
-	}//end LineDisplay
+
+	public void setPosition(double x, double y, double z) {
+	    position[0]=x;
+	    position[1]=y;
+	    position[2]=z;
+	    updatePositions();
+	}
+}//end LineDisplay

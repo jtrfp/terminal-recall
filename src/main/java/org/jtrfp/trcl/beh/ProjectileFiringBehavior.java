@@ -2,6 +2,7 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -25,7 +26,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		heading,p.getTop()).applyTo(getNextFiringPosition());
 	    	    resetFiringTimer();
-	    	    projectileFactory.fire(p.getPosition().add(firingPosition), heading);
+	    	    projectileFactory.fire(Vect3D.add(p.getPosition(),firingPosition.toArray(),new double[3]), heading);
 	    	}//for(multiplex)
 	    }//end if(ammo)
 	    	pendingFiring=false;

@@ -89,7 +89,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						//Add to grid
 						if(m.finalizeModel().getTriangleList()!=null){
 							final TerrainChunk chunkToAdd = new TerrainChunk(tr,m,altitude);
-							chunkToAdd.setPosition(new Vector3D(objectX, objectY, objectZ));
+							final double [] chunkPos = chunkToAdd.getPosition();
+							chunkPos[0]=objectX;
+							chunkPos[1]=objectY;
+							chunkPos[2]=objectZ;
+							chunkToAdd.notifyPositionChange();
 							add(chunkToAdd);
 							}
 						else {System.out.println("Rejected chunk: "+m.getDebugName());}
@@ -126,7 +130,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							//Add to grid
 							if(m.finalizeModel().getTriangleList()!=null){
 								final TerrainChunk chunkToAdd = new TerrainChunk(tr,m,altitude);
-								chunkToAdd.setPosition(new Vector3D(objectX, objectY, objectZ));
+								final double [] chunkPos = chunkToAdd.getPosition();
+								chunkPos[0]=objectX;
+								chunkPos[1]=objectY;
+								chunkPos[2]=objectZ;
+								chunkToAdd.notifyPositionChange();
 								chunkToAdd.setCeiling(true);
 								terrainMirror.add(chunkToAdd);
 								}

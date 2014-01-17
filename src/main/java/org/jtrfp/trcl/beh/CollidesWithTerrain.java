@@ -26,24 +26,27 @@ public class CollidesWithTerrain extends Behavior {
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
-	final Vector3D thisPos=p.getPosition();
-	final double groundHeight = map.heightAt((thisPos.getX()/TR.mapSquareSize), 
-	    (thisPos.getZ()/TR.mapSquareSize))*(world.sizeY/2);
-	final double ceilingHeight = (1.-map.heightAt((thisPos.getX()/TR.mapSquareSize), 
-		    (thisPos.getZ()/TR.mapSquareSize)))*(world.sizeY/2);
-	final Vector3D groundNormal = (map.normalAt((thisPos.getX()/TR.mapSquareSize), 
-	    (thisPos.getZ()/TR.mapSquareSize)));
+	final double [] thisPos=p.getPosition();
+	final double groundHeight = map.heightAt((thisPos[0]/TR.mapSquareSize), 
+	    (thisPos[2]/TR.mapSquareSize))*(world.sizeY/2);
+	final double ceilingHeight = (1.-map.heightAt((thisPos[0]/TR.mapSquareSize), 
+		    (thisPos[2]/TR.mapSquareSize)))*(world.sizeY/2);
+	final Vector3D groundNormal = (map.normalAt((thisPos[0]/TR.mapSquareSize), 
+	    (thisPos[2]/TR.mapSquareSize)));
 	final boolean terrainMirror=tr.getOverworldSystem().isChamberMode();
-	final double thisY=thisPos.getY();
+	final double thisY=thisPos[1];
     	final boolean groundImpact=thisY<groundHeight;
     	final boolean ceilingImpact=(thisY>ceilingHeight&&terrainMirror);
 	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),-groundNormal.getY(),groundNormal.getZ());
 	final Vector3D surfaceNormal = groundImpact?groundNormal:ceilingNormal;
 	
-    	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),groundHeight,thisPos.getZ()));return;}
+    	if(groundLock){
+    	    thisPos[1]=groundHeight;p.notifyPositionChange();return;
+    	    }
     	
-	if( groundImpact || ceilingImpact)//detect collision
-	    {p.setPosition(new Vector3D(thisPos.getX(),(groundImpact?groundHeight:ceilingHeight)+(groundImpact?nudge:-nudge),thisPos.getZ()));
+	if( groundImpact || ceilingImpact){//detect collision
+	    thisPos[1]=(groundImpact?groundHeight:ceilingHeight)+(groundImpact?nudge:-nudge);
+	    p.notifyPositionChange();
 	    //Call impact listeners
 	    surfaceNormalVar=surfaceNormal;
 	    final Behavior behavior = p.getBehavior();
@@ -74,7 +77,7 @@ public class CollidesWithTerrain extends Behavior {
     private final Submitter<SurfaceImpactListener>sub=new Submitter<SurfaceImpactListener>(){
 	@Override
 	public void submit(SurfaceImpactListener item) {
-	    	item.collidedWithSurface(null,surfaceNormalVar);//TODO: Isolate which chunk and pass it
+	    	item.collidedWithSurface(null,surfaceNormalVar.toArray());//TODO: Isolate which chunk and pass it
 		}
 	@Override
 	public void submit(Collection<SurfaceImpactListener> items) {

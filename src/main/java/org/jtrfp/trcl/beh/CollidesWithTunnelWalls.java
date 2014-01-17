@@ -15,12 +15,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.Velocible;
@@ -30,7 +32,8 @@ public class CollidesWithTunnelWalls extends Behavior{
     private final boolean changeHeadingAndTop, alwaysTopUp;
     
     private TunnelSegment seg;
-    private Vector3D surfaceNormalVar;
+    private double [] surfaceNormalVar;
+    private final double [] pprtt = new double[]{0,0,0}, circleCenter = new double []{0,0,0};
     
     public CollidesWithTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
 	super();this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;
@@ -40,21 +43,23 @@ public class CollidesWithTunnelWalls extends Behavior{
 		final Velocible velocible = getParent().getBehavior().probeForBehavior(Velocible.class);
 		if(other instanceof TunnelSegment)
 			{seg=(TunnelSegment)other;
-			if(parent.getPosition().
-					getX()>seg.getPosition().getX()&&
-					parent.getPosition().getX()<seg.getPosition().getX()+seg.getSegmentLength())
+			final double [] pPos = parent.getPosition();
+			final double [] segPos = seg.getPosition();
+			if(pPos[0]>segPos[0]&&
+					pPos[0]<segPos[0]+seg.getSegmentLength())
 				{final Segment s = seg.getSegmentData();
 				final double segLen=seg.getSegmentLength();
-				final Vector3D start =seg.getPosition();
-				final Vector3D end = start.add(new Vector3D(segLen,seg.getEndY(),-seg.getEndX()));//ZYX
-				final Vector3D tunnelSpineNoNorm=TR.twosComplimentSubtract(end, start);
-				final Vector3D tunnelSpineNorm=tunnelSpineNoNorm.normalize();
+				final double [] start =segPos;
+				final double [] end = Vect3D.add(start,segLen,seg.getEndY(),-seg.getEndX(),new double[3]);//ZYX
+				final double [] tunnelSpineNoNorm=TR.twosComplimentSubtract(end, start,new double[3]);
+				final double [] tunnelSpineNorm=Vect3D.normalize(tunnelSpineNoNorm);
 				
-				final double depthDownSeg=parent.getPosition().getX()-start.getX();
+				final double depthDownSeg=pPos[0]-start[0];
 				final double pctDownSeg=depthDownSeg/segLen;
-				Vector3D circleCenter=
-						start.add(tunnelSpineNorm.scalarMultiply(TR.deltaRollover(parent.getPosition().getX()-start.getX())));
-				circleCenter = (new Vector3D(parent.getPosition().getX(),circleCenter.getY(),circleCenter.getZ()));
+				//Vector3D circleCenter=
+				Vect3D.scalarMultiply(tunnelSpineNorm,TR.deltaRollover(pPos[0]-start[0]),circleCenter);
+				Vect3D.add(start,circleCenter,circleCenter);
+				//circleCenter = (new Vector3D(pPos[0],circleCenter[1],circleCenter[2]));
 				final double startWidth=TunnelSegment.getStartWidth(s);
 				final double startHeight=TunnelSegment.getStartHeight(s);
 				final double endWidth=TunnelSegment.getEndWidth(s);
@@ -63,14 +68,17 @@ public class CollidesWithTunnelWalls extends Behavior{
 				final double widthHere=.9*(startWidth*(1.-pctDownSeg)+endWidth*pctDownSeg);
 				final double heightHere=.9*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
 				//Parent position relative to tunnel
-				final Vector3D pprtt = parent.getPosition().subtract(circleCenter);
-				final double protrusion =(pprtt.getZ()*pprtt.getZ())/(widthHere*widthHere)+(pprtt.getY()*pprtt.getY())/(heightHere*heightHere); 
+				//final Vector3D pprtt = pPos.subtract(circleCenter);
+				Vect3D.subtract(pPos, circleCenter, pprtt);
+				final double protrusion =(pprtt[2]*pprtt[2])/(widthHere*widthHere)+(pprtt[1]*pprtt[1])/(heightHere*heightHere); 
 				if(protrusion>1){
 					//Execute the "bounce"
-				    	final Vector3D oldPosition = parent.getPosition();
+				    	final double [] oldPosition = Arrays.copyOf(pPos,3);
 				    	//Barrier
-				    	parent.setPosition(circleCenter.scalarMultiply(.01).add(oldPosition.scalarMultiply(.99)));
-				    	final Vector3D inwardNormal = TR.twosComplimentSubtract(circleCenter, oldPosition).normalize();
+				    	Vect3D.scalarMultiply(circleCenter, .01, pPos);
+				    	Vect3D.add(pPos, Vect3D.scalarMultiply(oldPosition, .99, new double[3]), pPos);
+				    	//parent.setPosition(circleCenter.scalarMultiply(.01).add(oldPosition.scalarMultiply(.99)));
+				    	final double[]inwardNormal = Vect3D.normalize(TR.twosComplimentSubtract(circleCenter, oldPosition, new double[3]));
 					surfaceNormalVar = inwardNormal;
 					//Notify listeners
 					parent.getBehavior().probeForBehaviors(sub, SurfaceImpactListener.class);

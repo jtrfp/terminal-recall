@@ -40,12 +40,12 @@ public class TunnelExitObject extends WorldObject {
 	@Override
 	public void _proposeCollision(WorldObject other){
 	    if(other instanceof Player){
-		if(other.getPosition().getX()>TunnelExitObject.this.getPosition().getX()){
+		if(other.getPosition()[0]>TunnelExitObject.this.getPosition()[0]){
 		    tr.getOverworldSystem().setChamberMode(mirrorTerrain);
 		    tr.getWorld().setFogColor((tr.getOverworldSystem().getFogColor()));
 		    tr.getBackdropSystem().overworldMode();
 		    //Teleport
-		    other.setPosition(exitLocation);
+		    other.setPosition(exitLocation.toArray());
 		    //Heading
 		    other.setDirection(exitDirection);
 		    //Tunnel off

@@ -1,5 +1,7 @@
 package org.jtrfp.trcl.obj;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -58,10 +60,10 @@ private static final String [] TYPES = new String[]{
 	return (int)(MIN_LIFESPAN_MILLIS+Math.random()*LIFESPAN_RANGE_MILLIS);
     }
     
-    public void reset(Vector3D newPos, Vector3D newVelocity){
+    public void reset(double[] ds, Vector3D newVelocity){
 	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(lifespan());
 	setHeading(newVelocity.normalize());
-	setPosition(newPos);
+	setPosition(Arrays.copyOf(ds,3));
 	setVisible(true);
 	setActive(true);
 	getBehavior().probeForBehavior(RotationalMomentumBehavior.class)

@@ -75,7 +75,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			exitObject = new TunnelExitObject(tr,this);
 			exitObject.setMirrorTerrain(sourceTunnel.getExitMode()==ExitMode.exitToChamber);
 			System.out.println("Tunnel ends at "+tunnelEnd);
-			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)));
+			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)).toArray());
 			add(exitObject);
 			// X is tunnel depth, Z is left-right
 			try{new ObjectSystem(this,world,lvl,null);}
@@ -125,7 +125,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			//Create the segment
 			Vector3D position=startPoint.add(rotation.applyTo(segPos));
 			TunnelSegment ts = new TunnelSegment(tr,s,tunnelTexturePalette,segLen,positionDelta.getX(),positionDelta.getY());
-			ts.setPosition(position);
+			ts.setPosition(position.toArray());
 			ts.setHeading(entrance?groundVector:Vector3D.PLUS_I);
 			ts.setTop(entrance?top:Vector3D.PLUS_J);
 			//Install the segment
@@ -162,17 +162,17 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case none0:
 				break;
 			case doorway:{
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1);
+				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1);
 				wo = new WorldObject(world.getTr(),m);
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);
 				break;
 				}
 			case closedDoor:{
-			    	BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,0,1,false);
-				bc.setPosition(wPos);
+			    	BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,0,1,false);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.addBehavior(new DamageableBehavior().setHealth(4096));
 				bc.addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
@@ -192,8 +192,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 				}
 			case blownOpenDoor:
-				BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1,true);
-				bc.setPosition(wPos);
+				BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1,true);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				add(bc);
@@ -242,9 +242,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia));
 				//wo = new WorldObject(tr,m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
 				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.setPosition(wPos);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -255,10 +255,10 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia));
 				//wo = new WorldObject(tr,m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
 				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
 				bc.addBehavior(new CubeCollisionBehavior(bc));
-				bc.setPosition(wPos);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -268,10 +268,10 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case movingWallDown:{
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.subtract(top.scalarMultiply(tunnelDia));
-				bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),false);
+				bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
 				//wo = new WorldObject(tr,m);
 				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.setPosition(wPos);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -282,9 +282,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				Vector3D endPos = wPos.add(top.scalarMultiply(tunnelDia));
 				//wo = new WorldObject(tr,m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
 				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.setPosition(wPos);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -294,8 +294,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case wallLeft:
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0));
 				//wo = new WorldObject(world.getTr(),m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0.,tunnelDia/2.,0),false);
-				bc.setPosition(wPos);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0.,tunnelDia/2.,0},false);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -304,8 +304,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case wallRight:
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia,tunnelDia/2.,0));
 				//wo = new WorldObject(world.getTr(),m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia,tunnelDia/2.,0),false);
-				bc.setPosition(wPos);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia,tunnelDia/2.,0},false);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -313,9 +313,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case wallDown:
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
 				//wo = new WorldObject(world.getTr(),m);
-				bc.setPosition(wPos.subtract(top.scalarMultiply(tunnelDia/2)));
+				bc.setPosition((wPos.subtract(top.scalarMultiply(tunnelDia/2))).toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -324,8 +324,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case wallUp:
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0));
 				//wo = new WorldObject(world.getTr(),m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),false);
-			    	bc.setPosition(wPos.add(top.scalarMultiply(tunnelDia/2)));
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
+			    	bc.setPosition((wPos.add(top.scalarMultiply(tunnelDia/2))).toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -334,9 +334,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case rotatingHalfWall:
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0));
 				//wo = new WorldObject(tr,m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0,tunnelDia/2.,0},false);
 				bc.addBehavior(new RotatingObjectBehavior(heading,heading,top,6000,0));
-				bc.setPosition(wPos);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -345,9 +345,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case rotating34Wall:
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,10));
 				//wo = new WorldObject(tr,m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,10),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0,tunnelDia/2.,10},false);
 				bc.addBehavior(new RotatingObjectBehavior(heading,heading,top,6000,0));
-				bc.setPosition(wPos);
+				bc.setPosition(wPos.toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -355,9 +355,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				
 				//m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0));
 				//wo = new WorldObject(tr,m);
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(0,tunnelDia/2.,0),false);
+			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0,tunnelDia/2.,0},false);
 				bc.addBehavior(new RotatingObjectBehavior(heading,heading,top,6000,Math.PI/2));
-				bc.setPosition(wPos.add(new Vector3D(100,0,0)));
+				bc.setPosition((wPos.add(new Vector3D(100,0,0))).toArray());
 				bc.setHeading(heading);
 				bc.setTop(top);
 				bc.addBehavior(new CubeCollisionBehavior(bc));
@@ -365,13 +365,13 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case fan:
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BLADE.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("FANBODY.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -382,7 +382,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW2.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.add(top.scalarMultiply(tunnelDia/2))));
 				wo.addBehavior(new CubeCollisionBehavior(wo));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -390,7 +390,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				//Down jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.subtract(top.scalarMultiply(tunnelDia/2))));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(heading.crossProduct(top).negate());
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -400,7 +400,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				//Left jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW2.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia/2))));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -408,7 +408,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				//Right jaw
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
 				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia/2))));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -416,7 +416,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case metalBeamUp:
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(0,tunnelDia/6,0)));
+				wo.setPosition(wPos.add(new Vector3D(0,tunnelDia/6,0)).toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -424,7 +424,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case metalBeamDown:
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(0,-tunnelDia/6,0)));
+				wo.setPosition(wPos.add(new Vector3D(0,-tunnelDia/6,0)).toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -432,7 +432,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case metalBeamLeft:
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(-tunnelDia/6,0,0)));
+				wo.setPosition(wPos.add(new Vector3D(-tunnelDia/6,0,0)).toArray());
 				wo.setHeading(heading);
 				wo.setTop(top.crossProduct(heading));
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -440,16 +440,16 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				break;
 			case metalBeamRight:
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(tunnelDia/6,0,0)));
+				wo.setPosition(wPos.add(new Vector3D(tunnelDia/6,0,0)).toArray());
 				wo.setHeading(heading);
 				wo.setTop(top.crossProduct(heading));
 				//wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
 				break;
 			case forceField:{//TODO
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new Vector3D(tunnelDia/2.,tunnelDia/2.,0),.5,.5,1,1);
+				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1);
 				wo = new WorldObject(world.getTr(),m);
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				add(wo);
@@ -469,7 +469,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8*256,false,palette,gl));
 				final Model mod = wo.getModel();
 				wo.addBehavior(new IrisBehavior(new Sequencer(mod.getFrameDelayInMillis(), 2, true),width));
-				wo.setPosition(wPos);
+				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				wo.addBehavior(new CubeCollisionBehavior(wo));

@@ -1,5 +1,7 @@
 package org.jtrfp.trcl.core;
 
+import java.awt.Component;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -19,9 +21,10 @@ public class Camera
 		{this.gpu=gpu;}
 	
 	private void updateProjectionMatrix(){
+	    	final Component component = gpu.getComponent();
 		final float fov = 70f;// In degrees
-		final float aspect = (float) gpu.getComponent().getWidth()
-				/ (float) gpu.getComponent().getHeight();
+		final float aspect = (float) component.getWidth()
+				/ (float) component.getHeight();
 		final float zF = (float) (viewDepth * 1.5);
 		final float zN = (float) (TR.mapSquareSize / 10);
 		final float f = (float) (1. / Math.tan(fov * Math.PI / 360.));

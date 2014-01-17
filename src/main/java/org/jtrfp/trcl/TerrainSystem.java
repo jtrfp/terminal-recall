@@ -30,7 +30,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
 	
-	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final TR tr, final TDFFile tdf){
+	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf){
 		super(parent);
 		this.tr=tr;
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
@@ -56,34 +56,36 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			futures[futureIndex++]=TR.threadPool.submit(new Runnable(){
 				public void run(){
 					for(int gX=0; gX<width; gX+=chunkSideLength){
-						final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
-						final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
-						final double objectY=Math.round(altitude.heightAt(gX, _gZ)*heightScalar);
-						final Model m = new Model(false);
-						//for each square
-						for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
-							for(int cX=gX; cX<gX+chunkSideLength; cX++){
-								final double hTL=altitude.heightAt(cX, cZ)*heightScalar;
-								final double hTR=altitude.heightAt((cX+1),cZ)*heightScalar;
-								final double hBR=altitude.heightAt((cX+1),(cZ+1))*heightScalar;
-								final double hBL=altitude.heightAt(cX,(cZ+1))*heightScalar;
-								final double xPos=cX*gridSquareSize;
-								final double zPos=cZ*gridSquareSize;
-								
-								final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
-								Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
-								Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
-										new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
-										new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
-										new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
-										u,
-										v,
-										td, RenderMode.STATIC);
-								
-								m.addTriangle(tris[0]);
-								m.addTriangle(tris[1]);
-								}//end for(cX)
-							}//end for(cZ)
+					    //GROUND
+					    {//Start varzone
+					    final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
+					    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
+					    final double objectY=Math.round(altitude.heightAt(gX, _gZ)*heightScalar);
+					    final Model m = new Model(false);
+					    //for each square
+					    for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
+						for(int cX=gX; cX<gX+chunkSideLength; cX++){
+						    final double hTL=altitude.heightAt(cX, cZ)*heightScalar;
+						    final double hTR=altitude.heightAt((cX+1),cZ)*heightScalar;
+						    final double hBR=altitude.heightAt((cX+1),(cZ+1))*heightScalar;
+						    final double hBL=altitude.heightAt(cX,(cZ+1))*heightScalar;
+						    final double xPos=cX*gridSquareSize;
+						    final double zPos=cZ*gridSquareSize;
+						    
+						    final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
+						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
+						    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
+							new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
+							new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
+							new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
+							u,
+							v,
+							td, RenderMode.STATIC);
+							
+							m.addTriangle(tris[0]);
+							m.addTriangle(tris[1]);
+							}//end for(cX)
+						    }//end for(cZ)
 						//Add to grid
 						if(m.finalizeModel().getTriangleList()!=null){
 							final TerrainChunk chunkToAdd = new TerrainChunk(tr,m,altitude);
@@ -91,6 +93,45 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							add(chunkToAdd);
 							}
 						else {System.out.println("Rejected chunk: "+m.getDebugName());}
+					    	}//end varzone
+					    	{//start varzone ///// CEILING
+					    	final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
+						    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
+						    final double objectY=Math.round((1.-altitude.heightAt(gX, _gZ))*heightScalar);
+						    final Model m = new Model(false);
+						    //for each square
+						    for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
+							for(int cX=gX; cX<gX+chunkSideLength; cX++){
+							    final double hTL=(1.-altitude.heightAt(cX, cZ))*heightScalar;
+							    final double hTR=(1.-altitude.heightAt((cX+1),cZ))*heightScalar;
+							    final double hBR=(1.-altitude.heightAt((cX+1),(cZ+1)))*heightScalar;
+							    final double hBL=(1.-altitude.heightAt(cX,(cZ+1)))*heightScalar;
+							    final double xPos=cX*gridSquareSize;
+							    final double zPos=cZ*gridSquareSize;
+							    
+							    final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
+							    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX+10, cZ));
+							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
+								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
+								new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
+								new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
+								u,
+								v,
+								td, RenderMode.STATIC);
+								
+								m.addTriangle(tris[0]);
+								m.addTriangle(tris[1]);
+								}//end for(cX)
+							    }//end for(cZ)
+							//Add to grid
+							if(m.finalizeModel().getTriangleList()!=null){
+								final TerrainChunk chunkToAdd = new TerrainChunk(tr,m,altitude);
+								chunkToAdd.setPosition(new Vector3D(objectX, objectY, objectZ));
+								chunkToAdd.setCeiling(true);
+								terrainMirror.add(chunkToAdd);
+								}
+							else {System.out.println("Rejected chunk: "+m.getDebugName());}
+					    	}//end varzone
 						}//end for(gX)
 					}//end run(){}
 				});//end submit()

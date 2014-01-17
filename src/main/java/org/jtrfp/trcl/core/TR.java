@@ -433,4 +433,8 @@ public final class TR
 	public Mission getCurrentMission() {
 	    return currentMission;
 	}
+
+	public void setGlobalPalette(Color[] palette) {
+	    globalPalette=palette;
+	}
 }//end TR

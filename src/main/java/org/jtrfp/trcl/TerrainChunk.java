@@ -24,15 +24,20 @@ import org.jtrfp.trcl.obj.WorldObject;
  * @author Chuck Ritola
  *
  */
-public class TerrainChunk extends WorldObject
-	{
+public class TerrainChunk extends WorldObject{
+    	private boolean isCeiling=false;
     	private final AltitudeMap map;
-	public TerrainChunk(TR tr, Model m, AltitudeMap map)
-		{
+	public TerrainChunk(TR tr, Model m, AltitudeMap map){
 		super(tr,m);
 		this.map=map;
 		m.setDebugName("TerrainChunk");
 		}
 	
 	public AltitudeMap getAltitudeMap(){return map;}
-	}//end TerrainChunk
+	
+	public boolean isCeiling(){return isCeiling;}
+	
+	public void setCeiling(boolean b) {
+	    isCeiling=b;
+	}
+}//end TerrainChunk

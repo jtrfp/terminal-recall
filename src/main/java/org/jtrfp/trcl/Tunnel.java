@@ -27,6 +27,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
@@ -72,6 +73,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
 		}catch(Exception e){e.printStackTrace();}
 			exitObject = new TunnelExitObject(tr,this);
+			exitObject.setMirrorTerrain(sourceTunnel.getExitMode()==ExitMode.exitToChamber);
 			System.out.println("Tunnel ends at "+tunnelEnd);
 			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)));
 			add(exitObject);

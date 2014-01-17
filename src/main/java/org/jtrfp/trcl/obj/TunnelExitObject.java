@@ -17,6 +17,7 @@ public class TunnelExitObject extends WorldObject {
     private final Tunnel tun;
     private final TR tr;
     private NAVObjective navObjectiveToRemove;
+    private boolean mirrorTerrain=false;
     public TunnelExitObject(TR tr, Tunnel tun) {
 	super(tr);
 	addBehavior(new TunnelExitBehavior());
@@ -40,6 +41,7 @@ public class TunnelExitObject extends WorldObject {
 	public void _proposeCollision(WorldObject other){
 	    if(other instanceof Player){
 		if(other.getPosition().getX()>TunnelExitObject.this.getPosition().getX()){
+		    tr.getOverworldSystem().setChamberMode(mirrorTerrain);
 		    tr.getWorld().setFogColor((tr.getOverworldSystem().getFogColor()));
 		    tr.getBackdropSystem().overworldMode();
 		    //Teleport
@@ -83,6 +85,10 @@ public class TunnelExitObject extends WorldObject {
      */
     public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
         this.navObjectiveToRemove = navObjectiveToRemove;
+    }
+
+    public void setMirrorTerrain(boolean b) {
+	mirrorTerrain=b;
     }
 
 }//end TunnelExitObject

@@ -7,9 +7,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.TerrainChunk;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -19,47 +19,56 @@ public class CollidesWithTerrain extends Behavior {
     private boolean groundLock=false;
     private InterpolatingAltitudeMap map;
     private Vector3D surfaceNormalVar;
-    public CollidesWithTerrain(){
-    }
+    public CollidesWithTerrain(){}
     @Override
     public void _tick(long tickTimeMillis){
 	if(map==null)return;//null map means no terrain present, which means no need to check
 	final WorldObject p = getParent();
+	final TR tr = p.getTr();
+	final World world = tr.getWorld();
 	final Vector3D thisPos=p.getPosition();
-	final double height = map.heightAt((thisPos.getX()/TR.mapSquareSize), 
-	    (thisPos.getZ()/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
+	final double groundHeight = map.heightAt((thisPos.getX()/TR.mapSquareSize), 
+	    (thisPos.getZ()/TR.mapSquareSize))*(world.sizeY/2);
+	final double ceilingHeight = (1.-map.heightAt((thisPos.getX()/TR.mapSquareSize), 
+		    (thisPos.getZ()/TR.mapSquareSize)))*(world.sizeY/2);
 	final Vector3D groundNormal = (map.normalAt((thisPos.getX()/TR.mapSquareSize), 
 	    (thisPos.getZ()/TR.mapSquareSize)));
+	final boolean terrainMirror=tr.getOverworldSystem().isChamberMode();
+	final double thisY=thisPos.getY();
+    	final boolean groundImpact=thisY<groundHeight;
+    	final boolean ceilingImpact=(thisY>ceilingHeight&&terrainMirror);
+	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),-groundNormal.getY(),groundNormal.getZ());
+	final Vector3D surfaceNormal = groundImpact?groundNormal:ceilingNormal;
 	
-    	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),height,thisPos.getZ()));return;}
+    	if(groundLock){p.setPosition(new Vector3D(thisPos.getX(),groundHeight,thisPos.getZ()));return;}
     	
-	if(thisPos.getY()<height)
-	    {p.setPosition(new Vector3D(thisPos.getX(),height+nudge,thisPos.getZ()));
+	if( groundImpact || ceilingImpact)//detect collision
+	    {p.setPosition(new Vector3D(thisPos.getX(),(groundImpact?groundHeight:ceilingHeight)+(groundImpact?nudge:-nudge),thisPos.getZ()));
 	    //Call impact listeners
-	    surfaceNormalVar=groundNormal;
-	    getParent().getBehavior().probeForBehaviors(sub,SurfaceImpactListener.class);
+	    surfaceNormalVar=surfaceNormal;
+	    final Behavior behavior = p.getBehavior();
+	    behavior.probeForBehaviors(sub,SurfaceImpactListener.class);
 	    
 	    //Reflect heading,top
 	    if(bounce){
 	    	final Vector3D oldHeading = p.getHeading();
 	    	final Vector3D oldTop = p.getTop();
-	    	final Vector3D newHeading = (groundNormal.scalarMultiply(groundNormal.dotProduct(oldHeading)*-2).add(oldHeading));
-	    	final Velocible v=p.getBehavior().probeForBehavior(Velocible.class);
-	    	final RotationalMomentumBehavior rmb = p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+	    	final Vector3D newHeading = (surfaceNormal.scalarMultiply(surfaceNormal.dotProduct(oldHeading)*-2).add(oldHeading));
+	    	final Velocible v=behavior.probeForBehavior(Velocible.class);
+	    	final RotationalMomentumBehavior rmb = behavior.probeForBehavior(RotationalMomentumBehavior.class);
 	    	if(rmb!=null){//If this is a spinning object, reverse its spin momentum
 	    	    rmb.setLateralMomentum(rmb.getLateralMomentum()*-1);
 	    	    rmb.setEquatorialMomentum(rmb.getEquatorialMomentum()*-1);
 	    	    rmb.setPolarMomentum(rmb.getPolarMomentum()*-1);
 	    	    }
 	    	final Vector3D oldVelocity = v.getVelocity();
-	    	v.setVelocity(groundNormal.scalarMultiply(groundNormal.dotProduct(oldVelocity)*-2).add(oldVelocity));
+	    	v.setVelocity(surfaceNormal.scalarMultiply(surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity));
 	    	p.setHeading(newHeading);
 	    	final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
 	    	Vector3D newTop = resultingRotation.applyTo(oldTop);
 		p.setTop(newTop);
 	    	}//end if(bounce)
-	    	
-	    }//end if()
+	    }//end if(collision)
     map=null;
     }//end _tick
     private final Submitter<SurfaceImpactListener>sub=new Submitter<SurfaceImpactListener>(){

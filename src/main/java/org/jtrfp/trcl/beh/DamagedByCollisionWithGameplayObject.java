@@ -27,7 +27,7 @@ public class DamagedByCollisionWithGameplayObject extends Behavior{
     private final int MIN_FRAGS=6;
 	protected void _proposeCollision(WorldObject other){
 	    	final WorldObject p = getParent();
-	    	final double distance = Vect3D.distance(other.getPosition(),getParent().getPosition());
+	    	final double distance = Vect3D.distance(other.getPosition(),p.getPosition());
 		if(distance<CollisionManager.SHIP_COLLISION_DISTANCE)
 			{if(other instanceof Player && getParent() instanceof DEFObject)
 				{getParent().getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/30);

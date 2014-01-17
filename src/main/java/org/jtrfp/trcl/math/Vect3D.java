@@ -57,8 +57,8 @@ public class Vect3D {
 
     public static double distance(double[] l, double[] r) {
 	final double dx=l[0]-r[0];
-	final double dy=l[0]-r[0];
-	final double dz=l[0]-r[0];
+	final double dy=l[1]-r[1];
+	final double dz=l[2]-r[2];
 	return Math.sqrt(dx*dx + dy*dy + dz*dz);
     }
 

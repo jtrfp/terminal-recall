@@ -32,29 +32,23 @@ import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 
 
-public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
-	{
-	public DEFFile(InputStream is) throws IOException, IllegalAccessException
-		{
+public class DEFFile extends SelfParsingFile implements ThirdPartyParseable{
+	public DEFFile(InputStream is) throws IOException, IllegalAccessException{
 		super(is);
 		}
-	
 	int numEnemyDefinitions;
 	ArrayList<EnemyDefinition> enemyDefinitions;
-	//EnemyDefinition [] enemyDefinitions;
 	int numPlacements;
 	ArrayList<EnemyPlacement> enemyPlacements;
 	@Override
-	public void describeFormat(Parser prs) throws UnrecognizedFormatException
-		{
+	public void describeFormat(Parser prs) throws UnrecognizedFormatException{
 		prs.stringEndingWith("\r\n",prs.property("numEnemyDefinitions", int.class), false);
 		prs.arrayOf(getNumEnemyDefinitions(), "enemyDefinitions", EnemyDefinition.class);
 		prs.stringEndingWith("\r\n", prs.property("numPlacements",int.class), false);
 		prs.arrayOf(getNumPlacements(), "enemyPlacements", EnemyPlacement.class);
 		}
 	
-	public static class EnemyDefinition implements ThirdPartyParseable
-	{
+	public static class EnemyDefinition implements ThirdPartyParseable{
 	EnemyDefinition.EnemyLogic logic; int unknown1, boundingBoxRadius, pivotX,pivotY,pivotZ; String complexModelFile, simpleModel;
 	int thrustSpeed, rotationSpeed, fireSpeed, fireStrength; Weapon weapon;
 	boolean showOnBriefing, createRandomly; int powerupProbability; Powerup powerup;
@@ -70,8 +64,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	String bossFireSFXFile;
 	String bossYellSFXFile;
 	@Override
-	public void describeFormat(Parser prs) throws UnrecognizedFormatException
-		{
+	public void describeFormat(Parser prs) throws UnrecognizedFormatException{
 		//LINE 1
 		prs.stringEndingWith(",", 	prs.property("logic", 			EnemyDefinition.EnemyLogic.class), false);
 		prs.stringCSVEndingWith(",", int.class, false, "unknown1","boundingBoxRadius","pivotX","pivotY","pivotZ");
@@ -117,8 +110,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 		
 		prs.stringEndingWith("\r\n", prs.property("description", 			String.class), 		false);
 		
-		try
-			{
+		try	{
 			prs.expectString("#New2ndweapon\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
 			prs.stringEndingWith(",", 	prs.property("fireSpread", 			EnemyDefinition.FireSpread.class), 	false);
 			prs.stringEndingWith(",",	prs.property("secondaryWeapon",		Weapon.class), 		false);
@@ -134,15 +126,13 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 			}
 		catch(UnrecognizedFormatException e){System.out.println("SFX not given for this def.");}
 		}//end describeFormat()
-	public static enum FireSpread
-		{
+	public static enum FireSpread{
 		forward,
 		horiz3,
 		horizVert5;
 		}
 	
-	public static enum EnemyLogic
-		{
+	public static enum EnemyLogic{
 		groundDumb,
 		groundTargeting,
 		flyingDumb,
@@ -190,48 +180,42 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	/**
 	 * @return the behavior of this enemy.
 	 */
-	public EnemyDefinition.EnemyLogic getLogic()
-		{
+	public EnemyDefinition.EnemyLogic getLogic(){
 		return logic;
 		}
 
 	/**
 	 * @param logic The behavior of this enemy to use.
 	 */
-	public void setLogic(EnemyDefinition.EnemyLogic logic)
-		{
+	public void setLogic(EnemyDefinition.EnemyLogic logic){
 		this.logic = logic;
 		}
 
 	/**
 	 * @return the unknown1
 	 */
-	public int getUnknown1()
-		{
+	public int getUnknown1(){
 		return unknown1;
 		}
 
 	/**
 	 * @param unknown1 the unknown1 to set
 	 */
-	public void setUnknown1(int unknown1)
-		{
+	public void setUnknown1(int unknown1){
 		this.unknown1 = unknown1;
 		}
 
 	/**
 	 * @return the boundingBoxRadius
 	 */
-	public int getBoundingBoxRadius()
-		{
+	public int getBoundingBoxRadius(){
 		return boundingBoxRadius;
 		}
 
 	/**
 	 * @param boundingBoxRadius the boundingBoxRadius to set
 	 */
-	public void setBoundingBoxRadius(int boundingBoxRadius)
-		{
+	public void setBoundingBoxRadius(int boundingBoxRadius){
 		this.boundingBoxRadius = boundingBoxRadius;
 		}
 
@@ -239,450 +223,391 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	 * The coordinate for the object's Pivot Point in rotation.
 	 * @return 
 	 */
-	public int getPivotX()
-		{
+	public int getPivotX(){
 		return pivotX;
 		}
-	public void setPivotX(int x)
-		{
+	public void setPivotX(int x){
 		this.pivotX = x;
 		}
-	public int getPivotY()
-		{
+	public int getPivotY(){
 		return pivotY;
 		}
-	public void setPivotY(int y)
-		{
+	public void setPivotY(int y){
 		this.pivotY = y;
 		}
-	public int getPivotZ()
-		{
+	public int getPivotZ(){
 		return pivotZ;
 		}
-	public void setPivotZ(int z)
-		{
+	public void setPivotZ(int z){
 		this.pivotZ = z;
 		}
 
 	/**
 	 * @return the complexModelFile
 	 */
-	public String getComplexModelFile()
-		{
+	public String getComplexModelFile(){
 		return complexModelFile;
 		}
 
 	/**
 	 * @param complexModelFile the complexModelFile to set
 	 */
-	public void setComplexModelFile(String complexModelFile)
-		{
+	public void setComplexModelFile(String complexModelFile){
 		this.complexModelFile = complexModelFile;
 		}
 
 	/**
 	 * @return the simpleModel
 	 */
-	public String getSimpleModel()
-		{
+	public String getSimpleModel(){
 		return simpleModel;
 		}
 
 	/**
 	 * @param simpleModel the simpleModel to set
 	 */
-	public void setSimpleModel(String simpleModel)
-		{
+	public void setSimpleModel(String simpleModel){
 		this.simpleModel = simpleModel;
 		}
 
 	/**
 	 * @return the thrustSpeed
 	 */
-	public int getThrustSpeed()
-		{
+	public int getThrustSpeed(){
 		return thrustSpeed;
 		}
 
 	/**
 	 * @param thrustSpeed the thrustSpeed to set
 	 */
-	public void setThrustSpeed(int thrustSpeed)
-		{
+	public void setThrustSpeed(int thrustSpeed){
 		this.thrustSpeed = thrustSpeed;
 		}
 
 	/**
 	 * @return the rotationSpeed
 	 */
-	public int getRotationSpeed()
-		{
+	public int getRotationSpeed(){
 		return rotationSpeed;
 		}
 
 	/**
 	 * @param rotationSpeed the rotationSpeed to set
 	 */
-	public void setRotationSpeed(int rotationSpeed)
-		{
+	public void setRotationSpeed(int rotationSpeed){
 		this.rotationSpeed = rotationSpeed;
 		}
 
 	/**
 	 * @return the fireSpeed
 	 */
-	public int getFireSpeed()
-		{
+	public int getFireSpeed(){
 		return fireSpeed;
 		}
 
 	/**
 	 * @param fireSpeed the fireSpeed to set
 	 */
-	public void setFireSpeed(int fireSpeed)
-		{
+	public void setFireSpeed(int fireSpeed){
 		this.fireSpeed = fireSpeed;
 		}
 
 	/**
 	 * @return the fireStrength
 	 */
-	public int getFireStrength()
-		{
+	public int getFireStrength(){
 		return fireStrength;
 		}
 
 	/**
 	 * @param fireStrength the fireStrength to set
 	 */
-	public void setFireStrength(int fireStrength)
-		{
+	public void setFireStrength(int fireStrength){
 		this.fireStrength = fireStrength;
 		}
 
 	/**
 	 * @return the weapon
 	 */
-	public Weapon getWeapon()
-		{
+	public Weapon getWeapon(){
 		return weapon;
 		}
 
 	/**
 	 * @param weapon the weapon to set
 	 */
-	public void setWeapon(Weapon weapon)
-		{
+	public void setWeapon(Weapon weapon){
 		this.weapon = weapon;
 		}
 
 	/**
 	 * @return the showOnBriefing
 	 */
-	public boolean isShowOnBriefing()
-		{
+	public boolean isShowOnBriefing(){
 		return showOnBriefing;
 		}
 
 	/**
 	 * @param showOnBriefing the showOnBriefing to set
 	 */
-	public void setShowOnBriefing(boolean showOnBriefing)
-		{
+	public void setShowOnBriefing(boolean showOnBriefing){
 		this.showOnBriefing = showOnBriefing;
 		}
 
 	/**
 	 * @return the createRandomly
 	 */
-	public boolean isCreateRandomly()
-		{
+	public boolean isCreateRandomly(){
 		return createRandomly;
 		}
 
 	/**
 	 * @param createRandomly the createRandomly to set
 	 */
-	public void setCreateRandomly(boolean createRandomly)
-		{
+	public void setCreateRandomly(boolean createRandomly){
 		this.createRandomly = createRandomly;
 		}
 
 	/**
 	 * @return the powerupProbability
 	 */
-	public int getPowerupProbability()
-		{
+	public int getPowerupProbability(){
 		return powerupProbability;
 		}
 
 	/**
 	 * @param powerupProbability the powerupProbability to set
 	 */
-	public void setPowerupProbability(int powerupProbability)
-		{
+	public void setPowerupProbability(int powerupProbability){
 		this.powerupProbability = powerupProbability;
 		}
 
 	/**
 	 * @return the powerup
 	 */
-	public Powerup getPowerup()
-		{
+	public Powerup getPowerup(){
 		return powerup;
 		}
 
 	/**
 	 * @param powerup the powerup to set
 	 */
-	public void setPowerup(Powerup powerup)
-		{
+	public void setPowerup(Powerup powerup){
 		this.powerup = powerup;
 		}
 
 	/**
 	 * @return the numRandomFiringVertices
 	 */
-	public int getNumRandomFiringVertices()
-		{
+	public int getNumRandomFiringVertices(){
 		return numRandomFiringVertices;
 		}
 
 	/**
 	 * @param numRandomFiringVertices the numRandomFiringVertices to set
 	 */
-	public void setNumRandomFiringVertices(int numRandomFiringVertices)
-		{
+	public void setNumRandomFiringVertices(int numRandomFiringVertices){
 		this.numRandomFiringVertices = numRandomFiringVertices;
 		}
 
 	/**
 	 * @return the firingVertices
 	 */
-	public Integer[] getFiringVertices()
-		{
+	public Integer[] getFiringVertices(){
 		return firingVertices;
 		}
 
 	/**
 	 * @param firingVertices the firingVertices to set
 	 */
-	public void setFiringVertices(Integer[] firingVertices)
-		{
+	public void setFiringVertices(Integer[] firingVertices){
 		this.firingVertices = firingVertices;
 		}
 
 	/**
 	 * @return the numNewHBoxes
 	 */
-	public int getNumNewHBoxes()
-		{
+	public int getNumNewHBoxes(){
 		return numNewHBoxes;
 		}
 
 	/**
 	 * @param numNewHBoxes the numNewHBoxes to set
 	 */
-	public void setNumNewHBoxes(int numNewHBoxes)
-		{
+	public void setNumNewHBoxes(int numNewHBoxes){
 		this.numNewHBoxes = numNewHBoxes;
 		}
 
 	/**
 	 * @return the hboxVertices
 	 */
-	public int[] getHboxVertices()
-		{
+	public int[] getHboxVertices(){
 		return hboxVertices;
 		}
 
 	/**
 	 * @param hboxVertices the hboxVertices to set
 	 */
-	public void setHboxVertices(int[] hboxVertices)
-		{
+	public void setHboxVertices(int[] hboxVertices){
 		this.hboxVertices = hboxVertices;
 		}
 
 	/**
 	 * @return the attackDistance
 	 */
-	public int getAttackDistance()
-		{
+	public int getAttackDistance(){
 		return attackDistance;
 		}
 
 	/**
 	 * @param attackDistance the attackDistance to set
 	 */
-	public void setAttackDistance(int attackDistance)
-		{
+	public void setAttackDistance(int attackDistance){
 		this.attackDistance = attackDistance;
 		}
 
 	/**
 	 * @return the retreatDistance
 	 */
-	public int getRetreatDistance()
-		{
+	public int getRetreatDistance(){
 		return retreatDistance;
 		}
 
 	/**
 	 * @param retreatDistance the retreatDistance to set
 	 */
-	public void setRetreatDistance(int retreatDistance)
-		{
+	public void setRetreatDistance(int retreatDistance){
 		this.retreatDistance = retreatDistance;
 		}
 
 	/**
 	 * @return the objectIsBoss
 	 */
-	public boolean isObjectIsBoss()
-		{
+	public boolean isObjectIsBoss(){
 		return objectIsBoss;
 		}
 
 	/**
 	 * @param objectIsBoss the objectIsBoss to set
 	 */
-	public void setObjectIsBoss(boolean objectIsBoss)
-		{
+	public void setObjectIsBoss(boolean objectIsBoss){
 		this.objectIsBoss = objectIsBoss;
 		}
 
 	/**
 	 * @return the unknown
 	 */
-	public int getUnknown()
-		{
+	public int getUnknown(){
 		return unknown;
 		}
 
 	/**
 	 * @param unknown the unknown to set
 	 */
-	public void setUnknown(int unknown)
-		{
+	public void setUnknown(int unknown){
 		this.unknown = unknown;
 		}
 
 	/**
 	 * @return the description
 	 */
-	public String getDescription()
-		{
+	public String getDescription(){
 		return description;
 		}
 
 	/**
 	 * @param description the description to set
 	 */
-	public void setDescription(String description)
-		{
+	public void setDescription(String description){
 		this.description = description;
 		}
 
 	/**
 	 * @return the fireSpread
 	 */
-	public EnemyDefinition.FireSpread getFireSpread()
-		{
+	public EnemyDefinition.FireSpread getFireSpread(){
 		return fireSpread;
 		}
 
 	/**
 	 * @param fireSpread the fireSpread to set
 	 */
-	public void setFireSpread(EnemyDefinition.FireSpread fireSpread)
-		{
+	public void setFireSpread(EnemyDefinition.FireSpread fireSpread){
 		this.fireSpread = fireSpread;
 		}
 
 	/**
 	 * @return the secondaryWeapon
 	 */
-	public Weapon getSecondaryWeapon()
-		{
+	public Weapon getSecondaryWeapon(){
 		return secondaryWeapon;
 		}
 
 	/**
 	 * @param secondaryWeapon the secondaryWeapon to set
 	 */
-	public void setSecondaryWeapon(Weapon secondaryWeapon)
-		{
+	public void setSecondaryWeapon(Weapon secondaryWeapon){
 		this.secondaryWeapon = secondaryWeapon;
 		}
 
 	/**
 	 * @return the secondWeaponDistance
 	 */
-	public int getSecondWeaponDistance()
-		{
+	public int getSecondWeaponDistance(){
 		return secondWeaponDistance;
 		}
 
 	/**
 	 * @param secondWeaponDistance the secondWeaponDistance to set
 	 */
-	public void setSecondWeaponDistance(int secondWeaponDistance)
-		{
+	public void setSecondWeaponDistance(int secondWeaponDistance){
 		this.secondWeaponDistance = secondWeaponDistance;
 		}
 
 	/**
 	 * @return the fireVelocity
 	 */
-	public int getFireVelocity()
-		{
+	public int getFireVelocity(){
 		return fireVelocity;
 		}
 
 	/**
 	 * @param fireVelocity the fireVelocity to set
 	 */
-	public void setFireVelocity(int fireVelocity)
-		{
+	public void setFireVelocity(int fireVelocity){
 		this.fireVelocity = fireVelocity;
 		}
 
 	/**
 	 * @return the bossFireSFXFile
 	 */
-	public String getBossFireSFXFile()
-		{
+	public String getBossFireSFXFile(){
 		return bossFireSFXFile;
 		}
 
 	/**
 	 * @param bossFireSFXFile the bossFireSFXFile to set
 	 */
-	public void setBossFireSFXFile(String bossFireSFXFile)
-		{
+	public void setBossFireSFXFile(String bossFireSFXFile){
 		this.bossFireSFXFile = bossFireSFXFile;
 		}
 
 	/**
 	 * @return the bossYellSFXFile
 	 */
-	public String getBossYellSFXFile()
-		{
+	public String getBossYellSFXFile(){
 		return bossYellSFXFile;
 		}
 
 	/**
 	 * @param bossYellSFXFile the bossYellSFXFile to set
 	 */
-	public void setBossYellSFXFile(String bossYellSFXFile)
-		{
+	public void setBossYellSFXFile(String bossYellSFXFile){
 		this.bossYellSFXFile = bossYellSFXFile;
 		}
 	}//end EnemyDefinition
 	
-	public static class EnemyPlacement implements ThirdPartyParseable
-		{
+	public static class EnemyPlacement implements ThirdPartyParseable{
 		int defIndex,strength; Location3D locationOnMap; int pitch,roll,yaw;
 		@Override
 		public void describeFormat(Parser prs) throws UnrecognizedFormatException
@@ -696,86 +621,74 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 		 * for this placement.
 		 * @return the defIndex
 		 */
-		public int getDefIndex()
-			{
+		public int getDefIndex(){
 			return defIndex;
 			}
 		/**
 		 * @param defIndex the defIndex to set
 		 */
-		public void setDefIndex(int defIndex)
-			{
+		public void setDefIndex(int defIndex){
 			this.defIndex = defIndex;
 			}
 		/**
 		 * 
 		 * @return strength of the enemy being placed (shields). 65536 is strength of the player.
 		 */
-		public int getStrength()
-			{
+		public int getStrength(){
 			return strength;
 			}
 		/**
 		 * @param strength strength of the enemy being placed (shields). 65536 is strength of the player. Zero places no object.
 		 */
-		public void setStrength(int strength)
-			{
+		public void setStrength(int strength){
 			this.strength = strength;
 			}
 		/**
 		 * @return the locationOnMap
 		 */
-		public Location3D getLocationOnMap()
-			{
+		public Location3D getLocationOnMap(){
 			return locationOnMap;
 			}
 		/**
 		 * @param locationOnMap the locationOnMap to set
 		 */
-		public void setLocationOnMap(Location3D locationOnMap)
-			{
+		public void setLocationOnMap(Location3D locationOnMap){
 			this.locationOnMap = locationOnMap;
 			}
 		/**
 		 * @return the pitch
 		 */
-		public int getPitch()
-			{
+		public int getPitch(){
 			return pitch;
 			}
 		/**
 		 * @param pitch the pitch to set
 		 */
-		public void setPitch(int pitch)
-			{
+		public void setPitch(int pitch){
 			this.pitch = pitch;
 			}
 		/**
 		 * @return the roll
 		 */
-		public int getRoll()
-			{
+		public int getRoll(){
 			return roll;
 			}
 		/**
 		 * @param roll the roll to set
 		 */
-		public void setRoll(int roll)
-			{
+		public void setRoll(int roll){
 			this.roll = roll;
 			}
 		/**
 		 * @return the yaw
 		 */
-		public int getYaw()
-			{
+		public int getYaw(){
 			return yaw;
 			}
 		/**
 		 * @param yaw the yaw to set
 		 */
-		public void setYaw(int yaw)
-			{
+		public void setYaw(int yaw){
 			this.yaw = yaw;
 			}
 		}//end EnemyPlacement
@@ -783,64 +696,56 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable
 	/**
 	 * @return the numEnemyDefinitions
 	 */
-	public int getNumEnemyDefinitions()
-		{
+	public int getNumEnemyDefinitions(){
 		return numEnemyDefinitions;
 		}
 
 	/**
 	 * @param numEnemyDefinitions the numEnemyDefinitions to set
 	 */
-	public void setNumEnemyDefinitions(int numEnemyDefinitions)
-		{
+	public void setNumEnemyDefinitions(int numEnemyDefinitions){
 		this.numEnemyDefinitions = numEnemyDefinitions;
 		}
 
 	/**
 	 * @return the enemydefinitions
 	 */
-	public List<EnemyDefinition> getEnemyDefinitions()
-		{
+	public List<EnemyDefinition> getEnemyDefinitions(){
 		return enemyDefinitions;
 		}
 
 	/**
 	 * @param enemydefinitions the enemydefinitions to set
 	 */
-	public void setEnemyDefinitions(ArrayList<EnemyDefinition> enemydefinitions)
-		{
+	public void setEnemyDefinitions(ArrayList<EnemyDefinition> enemydefinitions){
 		this.enemyDefinitions = enemydefinitions;
 		}
 
 	/**
 	 * @return the numPlacements
 	 */
-	public int getNumPlacements()
-		{
+	public int getNumPlacements(){
 		return numPlacements;
 		}
 
 	/**
 	 * @param numPlacements the numPlacements to set
 	 */
-	public void setNumPlacements(int numPlacements)
-		{
+	public void setNumPlacements(int numPlacements){
 		this.numPlacements = numPlacements;
 		}
 
 	/**
 	 * @return the enemyPlacements
 	 */
-	public List<EnemyPlacement> getEnemyPlacements()
-		{
+	public List<EnemyPlacement> getEnemyPlacements(){
 		return enemyPlacements;
 		}
 
 	/**
 	 * @param enemyPlacements the enemyPlacements to set
 	 */
-	public void setEnemyPlacements(ArrayList<EnemyPlacement> enemyPlacements)
-		{
+	public void setEnemyPlacements(ArrayList<EnemyPlacement> enemyPlacements){
 		this.enemyPlacements = enemyPlacements;
 		}
 	}//end DEFFile

@@ -30,9 +30,9 @@ public class DamagedByCollisionWithGameplayObject extends Behavior{
 	    	final double distance = Vect3D.distance(other.getPosition(),p.getPosition());
 		if(distance<CollisionManager.SHIP_COLLISION_DISTANCE)
 			{if(other instanceof Player && getParent() instanceof DEFObject)
-				{getParent().getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/30);
+				{p.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/30);
 				other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/10);
-				getParent().getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), new Vector3D(0,1000,0));}
+				p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), new Vector3D(0,1000,0));}
 			/*for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
 			    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
 			    new Vector3D(

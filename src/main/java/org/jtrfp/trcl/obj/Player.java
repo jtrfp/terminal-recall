@@ -128,10 +128,14 @@ public class Player extends WorldObject
 		}
 	@Override
 	public Player setPosition(double [] pos){
-		camera.setPosition(new Vector3D(pos).subtract(getLookAt().scalarMultiply(cameraDistance)));
 		super.setPosition(pos);
 		return this;
 		}
+	@Override
+	public WorldObject notifyPositionChange(){
+	    camera.setPosition(new Vector3D(getPosition()).subtract(getLookAt().scalarMultiply(cameraDistance)));
+	    return super.notifyPositionChange();
+	}
 
 	/**
 	 * @return the weapons

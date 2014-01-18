@@ -28,6 +28,7 @@ public class TunnelEntranceObject extends WorldObject {
 	position[0]=TR.legacy2Modern(entrance.getZ());
 	position[1]=TR.legacy2Modern(entrance.getY())-45000;
 	position[2]=TR.legacy2Modern(entrance.getX());
+	notifyPositionChange();
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
 	setModel(m);}
 	catch(Exception e){e.printStackTrace();}
@@ -47,6 +48,10 @@ public class TunnelEntranceObject extends WorldObject {
 		 //Move player to tunnel
 		 tr.getWorld().setFogColor(Color.black);
 		 tr.getBackdropSystem().tunnelMode();
+		 //Ensure chamber mode is off
+		 tr.getOverworldSystem().setChamberMode(false);
+		 //Update debug data
+		 tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "true");
 		 
 		 final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
 		 for(ProjectileFactory pf:pfs){

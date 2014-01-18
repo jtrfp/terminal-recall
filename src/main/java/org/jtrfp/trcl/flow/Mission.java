@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
@@ -21,6 +20,7 @@ import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.obj.DebrisFactory;
@@ -97,8 +97,9 @@ public class Mission {
 	playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
 	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
 	//Install NAVs
+	Factory f = new NAVObjective.Factory(tr);
 	for(NAVSubObject obj:navSubObjects){
-	    NAVObjective.create(tr, obj, navs);
+	    f.create(tr, obj, navs);
 	}//end for(navSubObjects)
 	navSystem.updateNAVState();
 	tr.setBackdropSystem(new BackdropSystem(world));

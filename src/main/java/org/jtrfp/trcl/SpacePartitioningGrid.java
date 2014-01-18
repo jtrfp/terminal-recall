@@ -157,15 +157,21 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	
 	private void recursiveAlwaysVisibleSubmit(Submitter<E> sub)
 		{sub.submit(alwaysVisible);
+		final int size=branchGrids.size();
+		for(int index=0; index<size; index++){
+		    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
+		}
 		for(SpacePartitioningGrid<E> grid:branchGrids)
 			{grid.recursiveAlwaysVisibleSubmit(sub);}
 		}//end recursiveAlwaysVisisbleSubmit(...)
 	
 	private void recursiveBlockSubmit(Submitter<E> sub, int blockID)
 		{sub.submit(((GridCube)gridSquares[blockID]).getElements());
-		for(SpacePartitioningGrid<E> grid:branchGrids)
-			{grid.recursiveBlockSubmit(sub,blockID);}
-		}//end recusiveBlockSubmit(...)
+		final int size=branchGrids.size();
+		for(int index=0; index<size; index++){
+		    branchGrids.get(index).recursiveBlockSubmit(sub,blockID);
+		}
+	}//end recusiveBlockSubmit(...)
 	
 	private Collection<E> getAlwaysVisible()
 		{return alwaysVisible;}
@@ -215,7 +221,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			}
 
 		private boolean isInRange(double[] ds){
-			return(	ds[0]>topLeftPosition[0] &&												//Top Left
+			return(	ds[0]>topLeftPosition[0] &&							//Top Left
 					ds[1]>topLeftPosition[1] &&
 					ds[2]>topLeftPosition[2] &&
 					ds[0]<topLeftPosition[0]+SpacePartitioningGrid.this.getSquareSize() && 	//Bottom right

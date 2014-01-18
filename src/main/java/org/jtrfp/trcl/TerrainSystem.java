@@ -98,22 +98,24 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							}
 						else {System.out.println("Rejected chunk: "+m.getDebugName());}
 					    	}//end varzone
+					    
 					    	{//start varzone ///// CEILING
 					    	final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 						    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
-						    final double objectY=Math.round((1.-altitude.heightAt(gX, _gZ))*heightScalar);
+						    final double objectY=Math.round((2.-altitude.heightAt(gX, _gZ))*heightScalar);
 						    final Model m = new Model(false);
 						    //for each square
 						    for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
 							for(int cX=gX; cX<gX+chunkSideLength; cX++){
-							    final double hTL=(1.-altitude.heightAt(cX, cZ))*heightScalar;
-							    final double hTR=(1.-altitude.heightAt((cX+1),cZ))*heightScalar;
-							    final double hBR=(1.-altitude.heightAt((cX+1),(cZ+1)))*heightScalar;
-							    final double hBL=(1.-altitude.heightAt(cX,(cZ+1)))*heightScalar;
+							    final double hTL=(2.-altitude.heightAt(cX, cZ))*heightScalar;
+							    final double hTR=(2.-altitude.heightAt((cX+1),cZ))*heightScalar;
+							    final double hBR=(2.-altitude.heightAt((cX+1),(cZ+1)))*heightScalar;
+							    final double hBL=(2.-altitude.heightAt(cX,(cZ+1)))*heightScalar;
 							    final double xPos=cX*gridSquareSize;
 							    final double zPos=cZ*gridSquareSize;
 							    
 							    final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
+							    //Ceiling texture cell X value is offset by 10.
 							    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX+10, cZ));
 							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
@@ -140,6 +142,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								}
 							else {System.out.println("Rejected chunk: "+m.getDebugName());}
 					    	}//end varzone
+					    	
 						}//end for(gX)
 					}//end run(){}
 				});//end submit()

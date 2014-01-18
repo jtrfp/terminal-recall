@@ -29,7 +29,7 @@ public class CollidesWithTerrain extends Behavior {
 	final double [] thisPos=p.getPosition();
 	final double groundHeight = map.heightAt((thisPos[0]/TR.mapSquareSize), 
 	    (thisPos[2]/TR.mapSquareSize))*(world.sizeY/2);
-	final double ceilingHeight = (1.-map.heightAt((thisPos[0]/TR.mapSquareSize), 
+	final double ceilingHeight = (2.-map.heightAt((thisPos[0]/TR.mapSquareSize), 
 		    (thisPos[2]/TR.mapSquareSize)))*(world.sizeY/2);
 	final Vector3D groundNormal = (map.normalAt((thisPos[0]/TR.mapSquareSize), 
 	    (thisPos[2]/TR.mapSquareSize)));

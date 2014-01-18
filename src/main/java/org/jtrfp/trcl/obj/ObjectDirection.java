@@ -25,7 +25,8 @@ public class ObjectDirection
 	private final Vector3D top;
 	
 	public ObjectDirection(int legacyRoll, int legacyPitch, int legacyYaw)
-		{
+		{Vector3D headingAccumulator,topAccumulator;
+		Rotation rot;
 		final double yaw=((double)legacyYaw/65535.)*2*Math.PI;
 		final double roll=((double)legacyRoll/65535.)*2*Math.PI;
 		final double tilt=((double)legacyPitch/65535.)*2*Math.PI;
@@ -37,7 +38,7 @@ public class ObjectDirection
 				new Vector3D(Math.cos(yaw),0.,Math.sin(yaw)));
 		heading = hRot.applyTo(heading);
 		*/
-		top = new Vector3D(0,1,0);
+		topAccumulator = new Vector3D(0,1,0);
 		/*
 		Rotation tRot = new Rotation(//Pitch and roll
 				new Vector3D(0,1,0),
@@ -45,12 +46,19 @@ public class ObjectDirection
 				new Vector3D(Math.sin(roll),1,Math.cos(roll)),
 				new Vector3D(0.,Math.cos(tilt),Math.cos(tilt)));
 		*/
-		Rotation rot = new Rotation(Vector3D.PLUS_J,yaw+1.5*Math.PI);
-		heading=rot.applyTo(Vector3D.PLUS_K);
+		headingAccumulator=Vector3D.PLUS_K;
+		rot = new Rotation(Vector3D.PLUS_I,tilt);
+		headingAccumulator=rot.applyTo(headingAccumulator);
+		topAccumulator=rot.applyTo(topAccumulator);
+		rot = new Rotation(Vector3D.PLUS_J,yaw+1.5*Math.PI);
+		headingAccumulator=rot.applyTo(headingAccumulator);
+		topAccumulator=rot.applyTo(topAccumulator);
+		//Commit the values
+		heading=headingAccumulator;
+		top=topAccumulator;
 		}
 	
-	public ObjectDirection(Vector3D heading, Vector3D top)
-		{
+	public ObjectDirection(Vector3D heading, Vector3D top){
 		this.heading=heading;
 		this.top=top;
 		}

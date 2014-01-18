@@ -21,12 +21,12 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private final ArrayList<DEFObject> defList = new ArrayList<DEFObject>();
 	private RenderableSpacePartitioningGrid terrainMirror=new RenderableSpacePartitioningGrid(this){};
 	private boolean chamberMode=false;
+	private final TR tr;
 	
 	public OverworldSystem(World w, LVLFile lvl, TDFFile tdf){
 		super(w);
-		try{
-			TR tr = w.getTr();
-			//Active by default
+		this.tr = w.getTr();
+		try{	//Active by default
 			Color [] globalPalette = tr.getGlobalPalette();
 			Future<TextureDescription> [] texturePalette=tr.getResourceManager().getTextures(lvl.getLevelTextureListFile(), 
 					globalPalette,GammaCorrectingColorProcessor.singleton,tr.getGPU().takeGL());
@@ -62,7 +62,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			}
 		catch(Exception e)
 			{e.printStackTrace();}
-		terrainMirror.deactivate();
+		//terrainMirror.deactivate();//TODO: Uncomment
 		}//end constructor
 
 	public Color getFogColor() {
@@ -80,13 +80,15 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	}
 
 	public void setChamberMode(boolean mirrorTerrain) {
+	    tr.getReporter().report("org.jtrfp.OverworldSystem.isInChamber?", ""+mirrorTerrain);
 	    chamberMode=mirrorTerrain;
+	    final CloudSystem cs = getCloudSystem();
 	    if(mirrorTerrain){
 		this.getTerrainMirror().activate();
-		this.getCloudSystem().deactivate();
+		if(cs!=null)cs.deactivate();
 	    }else{
 		this.getTerrainMirror().deactivate();
-		this.getCloudSystem().activate();
+		if(cs!=null)cs.activate();
 	    }
 	}//end chamberMode
 

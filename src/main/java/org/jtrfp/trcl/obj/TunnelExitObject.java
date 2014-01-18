@@ -12,8 +12,8 @@ import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.NAVObjective;
 
 public class TunnelExitObject extends WorldObject {
-    private final Vector3D exitLocation;
-    private final ObjectDirection exitDirection;
+    private  Vector3D exitLocation;
+    private  ObjectDirection exitDirection;
     private final Tunnel tun;
     private final TR tr;
     private NAVObjective navObjectiveToRemove;
@@ -56,6 +56,8 @@ public class TunnelExitObject extends WorldObject {
 		    tr.getPlayer().getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(true);
 		    tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
 		    tr.getPlayer().getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(false);
+		    //Update debug data
+		    tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "false");
 		    //Reset projectile behavior
 		    final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
 			 for(ProjectileFactory pf:pfs){
@@ -89,6 +91,41 @@ public class TunnelExitObject extends WorldObject {
 
     public void setMirrorTerrain(boolean b) {
 	mirrorTerrain=b;
+    }
+
+    /**
+     * @return the exitLocation
+     */
+    public Vector3D getExitLocation() {
+        return exitLocation;
+    }
+
+    /**
+     * @param exitLocation the exitLocation to set
+     */
+    public void setExitLocation(Vector3D exitLocation) {
+        this.exitLocation = exitLocation;
+    }
+
+    /**
+     * @return the exitDirection
+     */
+    public ObjectDirection getExitDirection() {
+        return exitDirection;
+    }
+
+    /**
+     * @param exitDirection the exitDirection to set
+     */
+    public void setExitDirection(ObjectDirection exitDirection) {
+        this.exitDirection = exitDirection;
+    }
+
+    /**
+     * @return the mirrorTerrain
+     */
+    public boolean isMirrorTerrain() {
+        return mirrorTerrain;
     }
 
 }//end TunnelExitObject

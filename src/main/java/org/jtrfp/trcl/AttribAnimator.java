@@ -37,7 +37,7 @@ public final class AttribAnimator
 		}
 	
 	public void updateAnimation()
-		{if(!controller.isStale())return;
+		{//if(!controller.isStale())return;//Not yet ready for prime time.
 		double frame=controller.getCurrentFrame();
 		controller.unstale();
 		int lowFrame = (int)frame;

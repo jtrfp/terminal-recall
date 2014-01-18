@@ -46,4 +46,14 @@ public final class Sequencer implements Controller{
 	public int getNumFrames() {
 	    return numFrames;
 	}
+
+	@Override
+	public void unstale() {
+	   //Do nothing. Always stale.
+	}
+
+	@Override
+	public boolean isStale() {
+	    return true;
+	}
 }//end Sequencer

@@ -15,23 +15,31 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public class Selector implements Controller
-	{
+public class Selector implements Controller{
 	double frame=0;
+	private boolean stale=true;
 	public Selector()
 		{}
 	
-	public Selector(double frame)
-		{
+	public Selector(double frame){
 		this.frame=frame;
 		}
 	
-	public void set(double frame){this.frame=frame;}
+	public void set(double frame){
+	    this.frame=frame;stale=true;}
 	
 	@Override
-	public double getCurrentFrame()
-		{
+	public double getCurrentFrame(){
 		return frame;
 		}
 
+	@Override
+	public void unstale() {
+	    stale=false;
 	}
+
+	@Override
+	public boolean isStale() {
+	    return stale;
+	}
+}//end Selector

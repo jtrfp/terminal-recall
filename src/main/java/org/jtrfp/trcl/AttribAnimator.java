@@ -37,8 +37,9 @@ public final class AttribAnimator
 		}
 	
 	public void updateAnimation()
-		{
+		{if(!controller.isStale())return;
 		double frame=controller.getCurrentFrame();
+		controller.unstale();
 		int lowFrame = (int)frame;
 		int hiFrame = (lowFrame+1)%frames.length;
 		double interpolation = frame-(double)lowFrame;
@@ -47,7 +48,7 @@ public final class AttribAnimator
 		double lI=1.-interpolation;
 		attrib.set(frames[lowFrame]*lI+frames[hiFrame]*hI);
 		}
-	
+	/*
 	public static void updateAllAnimators(Object objectWithAnimators)
 		{//Includes private fields!
 		Field [] fields = objectWithAnimators.getClass().getDeclaredFields();
@@ -66,4 +67,5 @@ public final class AttribAnimator
 				}
 			}//end for(fields)
 		}//end updateAllAnimators()
+	*/
 	}//end AttribAnimator

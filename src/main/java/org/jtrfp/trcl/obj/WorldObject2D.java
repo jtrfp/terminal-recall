@@ -36,49 +36,19 @@ public class WorldObject2D extends WorldObject{
 	    super(tr);
 	    setTop(Vector3D.PLUS_J);
 	    setHeading(Vector3D.PLUS_K);
-	    //Setup matrices 
-	    /*
-	    rM.setEntry(0, 3, 0);
-	    rM.setEntry(1, 3, 0);
-	    rM.setEntry(2, 3, 0);
-	  		
-	    rM.setEntry(3, 0, 0);
-	    rM.setEntry(3, 1, 0);
-	    rM.setEntry(3, 2, 0);
-	    rM.setEntry(3, 3, 1);
-	  	*/
+	    //Setup matrices
 	    rMd[15]=1;
-	    /*
-	    tM.setEntry(0, 0, 1);
-	    tM.setEntry(0, 1, 0);
-	    tM.setEntry(0, 2, 0);
-	  		
-	    tM.setEntry(1, 0, 0);
-	    tM.setEntry(1, 1, 1);
-	    tM.setEntry(1, 2, 0);
-	  		
-	    tM.setEntry(2, 0, 0);
-	    tM.setEntry(2, 1, 0);
-	    tM.setEntry(2, 2, 1);
-	  		
-	    tM.setEntry(3, 0, 0);
-	    tM.setEntry(3, 1, 0);
-	    tM.setEntry(3, 2, 0);
-	    tM.setEntry(3, 3, 1);
-	    */
 
 	    tMd[0]=1;
 	    tMd[5]=1;
 	    tMd[10]=1;
 	    tMd[15]=1;
 	    }
-	public WorldObject2D(TR tr, Model m)
-		{
+	public WorldObject2D(TR tr, Model m){
 		super(tr, m);
 		}//end WorldObject2D
 	@Override
-	protected void recalculateTransRotMBuffer()
-		{
+	protected void recalculateTransRotMBuffer(){
 		final double [] tV = position;
 		
 		Vect3D.normalize(getHeadingArray(), aZ);
@@ -100,16 +70,9 @@ public class WorldObject2D extends WorldObject{
 		tMd[3]=tV[0];
 		tMd[7]=tV[1];
 		tMd[11]=tV[2];
-		
-		//tM.setEntry(0, 3, tV[0]);
-		//tM.setEntry(1, 3, tV[1]);
-		
-		//tM.setEntry(2, 3, tV[2]);
-		
 		Mat4x4.mul(tMd, rMd, rotTransM);
 		
 		matrix.setTransposed(rotTransM);
-		//matrix.setTransposed(tM.multiply(rM));
 		}//end recalculateTransRotMBuffer()
 	
 	}//end WorldObject2D

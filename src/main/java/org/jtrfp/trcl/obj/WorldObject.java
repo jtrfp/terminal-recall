@@ -74,6 +74,7 @@ public class WorldObject implements PositionedRenderable
 		this.tr=tr;
 		addWorldObject(this);
 		matrix=Matrix.create4x4();
+		//Matrix constants setup
 		rMd[15]=1;
 		
 		tMd[0]=1;

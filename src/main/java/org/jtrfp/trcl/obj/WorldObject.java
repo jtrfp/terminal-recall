@@ -182,45 +182,74 @@ public class WorldObject implements PositionedRenderable
 	public final void updateStateToGPU()
 		{recalculateTransRotMBuffer();}
 	
+	private final RealMatrix rM = new Array2DRowRealMatrix(new double [4][4]);
+	private final RealMatrix tM = new Array2DRowRealMatrix(new double [4][4]);
+	
 	protected void recalculateTransRotMBuffer(){
 		double [] tV=position;
-		if(LOOP){//TODO: Optimize
+		if(LOOP){
 			double delta = position[0]-tr.getRenderer().getCamera().getCameraPosition().getX();
 			if(delta>TR.mapWidth/2.)
-				{tV=new double [] {tV[0]-TR.mapWidth,tV[1],tV[2]};}
+				{tV[0]-=TR.mapWidth;}
 			else if(delta<-TR.mapWidth/2.)
-				{tV=new double [] {tV[0]+TR.mapWidth,tV[1],tV[2]};}
+			{tV[0]+=TR.mapWidth;}
 			delta = position[1]-tr.getRenderer().getCamera().getCameraPosition().getY();
 			if(delta>TR.mapWidth/2.)
-				{tV=new double [] {tV[0],tV[1]-TR.mapWidth,tV[2]};}
+				{tV[1]-=TR.mapWidth;}
 			else if(delta<-TR.mapWidth/2.)
-				{tV=new double [] {tV[0],tV[1]+TR.mapWidth,tV[2]};}
+				{tV[1]+=TR.mapWidth;}
 			delta = position[2]-tr.getRenderer().getCamera().getCameraPosition().getZ();
 			if(delta>TR.mapWidth/2.)
-				{tV=new double [] {tV[0],tV[1],tV[2]-TR.mapWidth};}
+				{tV[2]-=TR.mapWidth;}
 			else if(delta<-TR.mapWidth/2.)
-				{tV=new double [] {tV[0],tV[1],tV[2]+TR.mapWidth};}
+				{tV[2]+=TR.mapWidth;}
 			}
 		try{
 		Vector3D aZ=heading.normalize();
 		Vector3D aX=top.crossProduct(aZ).normalize();
 		Vector3D aY=aZ.crossProduct(aX);
+		//TODO: Optimize by skipping unchanged entries
+		rM.setEntry(0, 0, aX.getX());
+		rM.setEntry(0, 1, aY.getX());
+		rM.setEntry(0, 2, aZ.getX());
+		rM.setEntry(0, 3, 0);
 		
-		RealMatrix rM = new Array2DRowRealMatrix(new double [][] 
-					{
-					new double[]{aX.getX(),aY.getX(),	aZ.getX(),	0},
-					new double[]{aX.getY(),aY.getY(),	aZ.getY(),	0},
-					new double[]{aX.getZ(),aY.getZ(),	aZ.getZ(),	0},
-					new double[]{0,		0,			0,			1}
-					});
+		rM.setEntry(1, 0, aX.getY());
+		rM.setEntry(1, 1, aY.getY());
+		rM.setEntry(1, 2, aZ.getY());
+		rM.setEntry(1, 3, 0);
 		
-		RealMatrix tM = new Array2DRowRealMatrix(new double [][] 
-					{
-					new double[]{1,0,	0,	tV[0]},
-					new double[]{0,1,	0,	tV[1]},
-					new double[]{0,0,	1,	tV[2]},
-					new double[]{0,0,	0,	1}
-					});
+		rM.setEntry(2, 0, aX.getZ());
+		rM.setEntry(2, 1, aY.getZ());
+		rM.setEntry(2, 2, aZ.getZ());
+		rM.setEntry(2, 3, 0);
+		
+		rM.setEntry(3, 0, 0);
+		rM.setEntry(3, 1, 0);
+		rM.setEntry(3, 2, 0);
+		rM.setEntry(3, 3, 1);
+		
+		///////////
+		
+		tM.setEntry(0, 0, 1);
+		tM.setEntry(0, 1, 0);
+		tM.setEntry(0, 2, 0);
+		tM.setEntry(0, 3, tV[0]);
+		
+		tM.setEntry(1, 0, 0);
+		tM.setEntry(1, 1, 1);
+		tM.setEntry(1, 2, 0);
+		tM.setEntry(1, 3, tV[1]);
+		
+		tM.setEntry(2, 0, 0);
+		tM.setEntry(2, 1, 0);
+		tM.setEntry(2, 2, 1);
+		tM.setEntry(2, 3, tV[2]);
+		
+		tM.setEntry(3, 0, 0);
+		tM.setEntry(3, 1, 0);
+		tM.setEntry(3, 2, 0);
+		tM.setEntry(3, 3, 1);
 		
 		RealMatrix rotTransM;
 		if(translate())		{rotTransM = tM.multiply(rM);}

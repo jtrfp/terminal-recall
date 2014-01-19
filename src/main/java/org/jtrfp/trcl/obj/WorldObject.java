@@ -36,6 +36,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
+import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class WorldObject implements PositionedRenderable
@@ -61,44 +62,24 @@ public class WorldObject implements PositionedRenderable
 	private Behavior behavior=new NullBehavior(this);
 	private boolean active=true;
 	
-	protected final RealMatrix rM = new Array2DRowRealMatrix(new double [4][4]);
-	protected final RealMatrix tM = new Array2DRowRealMatrix(new double [4][4]);
 	protected final double[] aX = new double[3];
 	protected final double[] aY = new double[3];
 	protected final double[] aZ = new double[3];
+	protected final double[] rotTransM = new double[16];
+	protected final double[] camM = new double[16];
+	protected final double[] rMd = new double[16];
+	protected final double[] tMd = new double[16];
 	
 	public WorldObject(TR tr){
 		this.tr=tr;
 		addWorldObject(this);
 		matrix=Matrix.create4x4();
-		//Setup matrices 
-		rM.setEntry(0, 3, 0);
-		rM.setEntry(2, 3, 0);
+		rMd[15]=1;
 		
-		rM.setEntry(3, 0, 0);
-		rM.setEntry(3, 1, 0);
-		rM.setEntry(3, 2, 0);
-		rM.setEntry(3, 3, 1);
-		
-		///////////
-		
-		tM.setEntry(0, 0, 1);
-		tM.setEntry(0, 1, 0);
-		tM.setEntry(0, 2, 0);
-		
-		tM.setEntry(1, 0, 0);
-		tM.setEntry(1, 1, 1);
-		tM.setEntry(1, 2, 0);
-		rM.setEntry(1, 3, 0);
-		
-		tM.setEntry(2, 0, 0);
-		tM.setEntry(2, 1, 0);
-		tM.setEntry(2, 2, 1);
-		
-		tM.setEntry(3, 0, 0);
-		tM.setEntry(3, 1, 0);
-		tM.setEntry(3, 2, 0);
-		tM.setEntry(3, 3, 1);
+		tMd[0]=1;
+		tMd[5]=1;
+		tMd[10]=1;
+		tMd[15]=1;
 		}
 	
 	public WorldObject(TR tr,Model m)
@@ -239,27 +220,33 @@ public class WorldObject implements PositionedRenderable
 		Vect3D.cross(top,aZ,aX);
 		Vect3D.cross(aZ,aX,aY);
 		
-		rM.setEntry(0, 0, aX[0]);
-		rM.setEntry(0, 1, aY[0]);
-		rM.setEntry(0, 2, aZ[0]);
+		rMd[0]=aX[0];
+		rMd[1]=aY[0];
+		rMd[2]=aZ[0];
 		
-		rM.setEntry(1, 0, aX[1]);
-		rM.setEntry(1, 1, aY[1]);
-		rM.setEntry(1, 2, aZ[1]);
+		rMd[4]=aX[1];
+		rMd[5]=aY[1];
+		rMd[6]=aZ[1];
 		
+		rMd[8]=aX[2];
+		rMd[9]=aY[2];
+		rMd[10]=aZ[2];
 		
-		rM.setEntry(2, 0, aX[2]);
-		rM.setEntry(2, 1, aY[2]);
-		rM.setEntry(2, 2, aZ[2]);
-		tM.setEntry(0, 3, tV[0]);
-		tM.setEntry(1, 3, tV[1]);
-		tM.setEntry(2, 3, tV[2]);
+		tMd[3]=tV[0];
+		tMd[7]=tV[1];
+		tMd[11]=tV[2];
 		
-		RealMatrix rotTransM;
-		if(translate())		{rotTransM = tM.multiply(rM);}
-		else 				{rotTransM = rM;}
+		final RealMatrix cm = tr.getRenderer().getCamera().getMatrix();
+		double [] cMd = new double[16];
+		for(int i=0; i<16; i++){
+		    cMd[i]=cm.getEntry(i/4, i%4);
+		}
+		if(translate()){Mat4x4.mul(tMd, rMd, rotTransM);}
+		else	{System.arraycopy(rMd, 0, rotTransM, 0, 16);}
 		
-		matrix.setTransposed(tr.getRenderer().getCamera().getMatrix().multiply(rotTransM));
+		Mat4x4.mul(cMd, rotTransM, camM);
+		
+		matrix.setTransposed(camM);
 		}catch(MathArithmeticException e){}//Don't crash.
 		}//end recalculateTransRotMBuffer()
 	

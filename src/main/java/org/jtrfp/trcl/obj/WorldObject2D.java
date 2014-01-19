@@ -20,6 +20,7 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 
 
@@ -36,6 +37,7 @@ public class WorldObject2D extends WorldObject{
 	    setTop(Vector3D.PLUS_J);
 	    setHeading(Vector3D.PLUS_K);
 	    //Setup matrices 
+	    /*
 	    rM.setEntry(0, 3, 0);
 	    rM.setEntry(1, 3, 0);
 	    rM.setEntry(2, 3, 0);
@@ -44,7 +46,9 @@ public class WorldObject2D extends WorldObject{
 	    rM.setEntry(3, 1, 0);
 	    rM.setEntry(3, 2, 0);
 	    rM.setEntry(3, 3, 1);
-	  		
+	  	*/
+	    rMd[15]=1;
+	    /*
 	    tM.setEntry(0, 0, 1);
 	    tM.setEntry(0, 1, 0);
 	    tM.setEntry(0, 2, 0);
@@ -61,6 +65,12 @@ public class WorldObject2D extends WorldObject{
 	    tM.setEntry(3, 1, 0);
 	    tM.setEntry(3, 2, 0);
 	    tM.setEntry(3, 3, 1);
+	    */
+
+	    tMd[0]=1;
+	    tMd[5]=1;
+	    tMd[10]=1;
+	    tMd[15]=1;
 	    }
 	public WorldObject2D(TR tr, Model m)
 		{
@@ -75,25 +85,31 @@ public class WorldObject2D extends WorldObject{
 		Vect3D.cross(getTopArray(),aZ,aX);
 		Vect3D.cross(aZ,aX,aY);
 		
-		rM.setEntry(0, 0, aX[0]);
-		rM.setEntry(0, 1, aY[0]);
-		rM.setEntry(0, 2, aZ[0]);
+		rMd[0]=aX[0];
+		rMd[1]=aY[0];
+		rMd[2]=aZ[0];
 		
-		rM.setEntry(1, 0, aX[1]);
-		rM.setEntry(1, 1, aY[1]);
-		rM.setEntry(1, 2, aZ[1]);
+		rMd[4]=aX[1];
+		rMd[5]=aY[1];
+		rMd[6]=aZ[1];
 		
-		rM.setEntry(2, 0, aX[2]);
-		rM.setEntry(2, 1, aY[2]);
-		rM.setEntry(2, 2, aZ[2]);
+		rMd[8]=aX[2];
+		rMd[9]=aY[2];
+		rMd[10]=aZ[2];
 		
-		tM.setEntry(0, 3, tV[0]);
-		tM.setEntry(1, 3, tV[1]);
+		tMd[3]=tV[0];
+		tMd[7]=tV[1];
+		tMd[11]=tV[2];
 		
-		tM.setEntry(2, 3, tV[2]);
+		//tM.setEntry(0, 3, tV[0]);
+		//tM.setEntry(1, 3, tV[1]);
 		
+		//tM.setEntry(2, 3, tV[2]);
 		
-		matrix.setTransposed(tM.multiply(rM));
+		Mat4x4.mul(tMd, rMd, rotTransM);
+		
+		matrix.setTransposed(rotTransM);
+		//matrix.setTransposed(tM.multiply(rM));
 		}//end recalculateTransRotMBuffer()
 	
 	}//end WorldObject2D

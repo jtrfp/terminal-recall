@@ -61,6 +61,12 @@ public class WorldObject implements PositionedRenderable
 	private Behavior behavior=new NullBehavior(this);
 	private boolean active=true;
 	
+	protected final RealMatrix rM = new Array2DRowRealMatrix(new double [4][4]);
+	protected final RealMatrix tM = new Array2DRowRealMatrix(new double [4][4]);
+	protected final double[] aX = new double[3];
+	protected final double[] aY = new double[3];
+	protected final double[] aZ = new double[3];
+	
 	public WorldObject(TR tr){
 		this.tr=tr;
 		addWorldObject(this);
@@ -208,12 +214,6 @@ public class WorldObject implements PositionedRenderable
 	public final void updateStateToGPU()
 		{recalculateTransRotMBuffer();}
 	
-	private final RealMatrix rM = new Array2DRowRealMatrix(new double [4][4]);
-	private final RealMatrix tM = new Array2DRowRealMatrix(new double [4][4]);
-	private final double[] aX = new double[3];
-	private final double[] aY = new double[3];
-	private final double[] aZ = new double[3];
-	
 	protected void recalculateTransRotMBuffer(){
 		double [] tV=position;
 		if(LOOP){
@@ -234,16 +234,13 @@ public class WorldObject implements PositionedRenderable
 				{tV[2]+=TR.mapWidth;}
 			}
 		try{
-		//Vector3D aZ=heading.normalize();
 		Vect3D.normalize(heading, aZ);
 		Vect3D.cross(top,aZ,aX);
-		//Vector3D aX=top.crossProduct(aZ).normalize();
 		Vect3D.cross(aZ,aX,aY);
-		//Vector3D aY=aZ.crossProduct(aX);
+		
 		rM.setEntry(0, 0, aX[0]);
 		rM.setEntry(0, 1, aY[0]);
 		rM.setEntry(0, 2, aZ[0]);
-		//rM.setEntry(0, 3, 0);
 		
 		rM.setEntry(1, 0, aX[1]);
 		rM.setEntry(1, 1, aY[1]);
@@ -253,34 +250,9 @@ public class WorldObject implements PositionedRenderable
 		rM.setEntry(2, 0, aX[2]);
 		rM.setEntry(2, 1, aY[2]);
 		rM.setEntry(2, 2, aZ[2]);
-		/*rM.setEntry(2, 3, 0);
-		
-		rM.setEntry(3, 0, 0);
-		rM.setEntry(3, 1, 0);
-		rM.setEntry(3, 2, 0);
-		rM.setEntry(3, 3, 1);
-		
-		///////////
-		
-		tM.setEntry(0, 0, 1);
-		tM.setEntry(0, 1, 0);
-		tM.setEntry(0, 2, 0);*/
 		tM.setEntry(0, 3, tV[0]);
-		
-		/*tM.setEntry(1, 0, 0);
-		tM.setEntry(1, 1, 1);
-		tM.setEntry(1, 2, 0);*/
 		tM.setEntry(1, 3, tV[1]);
-		
-		/*tM.setEntry(2, 0, 0);
-		tM.setEntry(2, 1, 0);
-		tM.setEntry(2, 2, 1);*/
 		tM.setEntry(2, 3, tV[2]);
-		
-		/*tM.setEntry(3, 0, 0);
-		tM.setEntry(3, 1, 0);
-		tM.setEntry(3, 2, 0);
-		tM.setEntry(3, 3, 1);*/
 		
 		RealMatrix rotTransM;
 		if(translate())		{rotTransM = tM.multiply(rM);}
@@ -433,4 +405,7 @@ public class WorldObject implements PositionedRenderable
 	    position[2]=z;
 	    notifyPositionChange();
 	}
+	
+	public double [] getHeadingArray(){return heading;}
+	public double [] getTopArray(){return top;}
 }//end WorldObject

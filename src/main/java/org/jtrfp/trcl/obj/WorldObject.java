@@ -35,13 +35,13 @@ import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
+import org.jtrfp.trcl.math.Vect3D;
 
 public class WorldObject implements PositionedRenderable
 	{
-	private Vector3D heading = new Vector3D(new double []{0,0,1}); //Facing direction
-	private Vector3D top = new Vector3D(new double []{0,1,0});		//Normal describing the top of the object (for tilt)
+	private double []heading = new double []{0,0,1}; //Facing direction
+	private double []top = new double []{0,1,0};		//Normal describing the top of the object (for tilt)
 	//protected Vector3D position = Vector3D.ZERO;
 	protected double [] position = new double[3];
 	private final TR tr;
@@ -65,6 +65,33 @@ public class WorldObject implements PositionedRenderable
 		this.tr=tr;
 		addWorldObject(this);
 		matrix=Matrix.create4x4();
+		//Setup matrices 
+		rM.setEntry(0, 3, 0);
+		rM.setEntry(2, 3, 0);
+		
+		rM.setEntry(3, 0, 0);
+		rM.setEntry(3, 1, 0);
+		rM.setEntry(3, 2, 0);
+		rM.setEntry(3, 3, 1);
+		
+		///////////
+		
+		tM.setEntry(0, 0, 1);
+		tM.setEntry(0, 1, 0);
+		tM.setEntry(0, 2, 0);
+		
+		tM.setEntry(1, 0, 0);
+		tM.setEntry(1, 1, 1);
+		tM.setEntry(1, 2, 0);
+		
+		tM.setEntry(2, 0, 0);
+		tM.setEntry(2, 1, 0);
+		tM.setEntry(2, 2, 1);
+		
+		tM.setEntry(3, 0, 0);
+		tM.setEntry(3, 1, 0);
+		tM.setEntry(3, 2, 0);
+		tM.setEntry(3, 3, 1);
 		}
 	
 	public WorldObject(TR tr,Model m)
@@ -122,10 +149,9 @@ public class WorldObject implements PositionedRenderable
 	    	if(dir.getHeading().getNorm()==0||dir.getTop().getNorm()==0){
 	    	    System.err.println("Warning: Rejecting zero-norm for object direction. "+dir);
 	    	    new Exception().printStackTrace();
-	    	    return;
-	    	}
-		heading=dir.getHeading();
-		top=dir.getTop();
+	    	    return;}
+		setHeading(dir.getHeading());
+		setTop(dir.getTop());
 		}
 	
 	@Override
@@ -184,6 +210,9 @@ public class WorldObject implements PositionedRenderable
 	
 	private final RealMatrix rM = new Array2DRowRealMatrix(new double [4][4]);
 	private final RealMatrix tM = new Array2DRowRealMatrix(new double [4][4]);
+	private final double[] aX = new double[3];
+	private final double[] aY = new double[3];
+	private final double[] aZ = new double[3];
 	
 	protected void recalculateTransRotMBuffer(){
 		double [] tV=position;
@@ -205,24 +234,26 @@ public class WorldObject implements PositionedRenderable
 				{tV[2]+=TR.mapWidth;}
 			}
 		try{
-		Vector3D aZ=heading.normalize();
-		Vector3D aX=top.crossProduct(aZ).normalize();
-		Vector3D aY=aZ.crossProduct(aX);
-		//TODO: Optimize by skipping unchanged entries
-		rM.setEntry(0, 0, aX.getX());
-		rM.setEntry(0, 1, aY.getX());
-		rM.setEntry(0, 2, aZ.getX());
-		rM.setEntry(0, 3, 0);
+		//Vector3D aZ=heading.normalize();
+		Vect3D.normalize(heading, aZ);
+		Vect3D.cross(top,aZ,aX);
+		//Vector3D aX=top.crossProduct(aZ).normalize();
+		Vect3D.cross(aZ,aX,aY);
+		//Vector3D aY=aZ.crossProduct(aX);
+		rM.setEntry(0, 0, aX[0]);
+		rM.setEntry(0, 1, aY[0]);
+		rM.setEntry(0, 2, aZ[0]);
+		//rM.setEntry(0, 3, 0);
 		
-		rM.setEntry(1, 0, aX.getY());
-		rM.setEntry(1, 1, aY.getY());
-		rM.setEntry(1, 2, aZ.getY());
+		rM.setEntry(1, 0, aX[1]);
+		rM.setEntry(1, 1, aY[1]);
+		rM.setEntry(1, 2, aZ[1]);
 		rM.setEntry(1, 3, 0);
 		
-		rM.setEntry(2, 0, aX.getZ());
-		rM.setEntry(2, 1, aY.getZ());
-		rM.setEntry(2, 2, aZ.getZ());
-		rM.setEntry(2, 3, 0);
+		rM.setEntry(2, 0, aX[2]);
+		rM.setEntry(2, 1, aY[2]);
+		rM.setEntry(2, 2, aZ[2]);
+		/*rM.setEntry(2, 3, 0);
 		
 		rM.setEntry(3, 0, 0);
 		rM.setEntry(3, 1, 0);
@@ -233,23 +264,23 @@ public class WorldObject implements PositionedRenderable
 		
 		tM.setEntry(0, 0, 1);
 		tM.setEntry(0, 1, 0);
-		tM.setEntry(0, 2, 0);
+		tM.setEntry(0, 2, 0);*/
 		tM.setEntry(0, 3, tV[0]);
 		
-		tM.setEntry(1, 0, 0);
+		/*tM.setEntry(1, 0, 0);
 		tM.setEntry(1, 1, 1);
-		tM.setEntry(1, 2, 0);
+		tM.setEntry(1, 2, 0);*/
 		tM.setEntry(1, 3, tV[1]);
 		
-		tM.setEntry(2, 0, 0);
+		/*tM.setEntry(2, 0, 0);
 		tM.setEntry(2, 1, 0);
-		tM.setEntry(2, 2, 1);
+		tM.setEntry(2, 2, 1);*/
 		tM.setEntry(2, 3, tV[2]);
 		
-		tM.setEntry(3, 0, 0);
+		/*tM.setEntry(3, 0, 0);
 		tM.setEntry(3, 1, 0);
 		tM.setEntry(3, 2, 0);
-		tM.setEntry(3, 3, 1);
+		tM.setEntry(3, 3, 1);*/
 		
 		RealMatrix rotTransM;
 		if(translate())		{rotTransM = tM.multiply(rM);}
@@ -298,26 +329,32 @@ public class WorldObject implements PositionedRenderable
 	 * @return the heading
 	 */
 	public final Vector3D getLookAt()
-		{return heading;}
+		{return new Vector3D(heading);}
 
 	/**
 	 * @param heading the heading to set
 	 */
-	public void setHeading(Vector3D heading)
-		{this.heading = heading;}
-	public Vector3D getHeading(){return heading;}
+	public void setHeading(Vector3D nHeading){
+	    	heading[0]=nHeading.getX();
+	    	heading[1]=nHeading.getY();
+	    	heading[2]=nHeading.getZ();
+		}
+	public Vector3D getHeading(){return new Vector3D(heading);}
 
 	/**
 	 * @return the top
 	 */
 	public final Vector3D getTop()
-		{return top;}
+		{return new Vector3D(top);}
 
 	/**
 	 * @param top the top to set
 	 */
-	public void setTop(Vector3D top)
-		{this.top = top;}
+	public void setTop(Vector3D nTop)
+		{top[0]=nTop.getX();
+	    	top[1]=nTop.getY();
+	    	top[2]=nTop.getZ();
+	    	}
 	
 	private void notifyPositionListeners()
 		{for(PositionListener l:positionListeners){l.positionChanged(this);}}

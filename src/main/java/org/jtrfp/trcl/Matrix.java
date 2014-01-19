@@ -52,10 +52,20 @@ public final class Matrix
 	
 	public void set(RealMatrix m)//406801
 		{
-		final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
-		bb.position(arrayOffset+byteOffset);
-		FloatBuffer putter=bb.asFloatBuffer();
+		//final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
+		//bb.position(arrayOffset+byteOffset);
+		final int firstOffset=arrayOffset+byteOffset;
+		for(int index=0; index<16; index++){
+		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)m.getEntry(index/4, index%4));
+		}
+		
 		/*
+		for(int c=0; c<4; c++)
+    		{
+    		float [] valuesToPut=TR.doubles2Floats(m.getRow(c));
+    		putter.put(valuesToPut);
+    		}//end for(row)
+		
 		if(bb.position()==406801*16)
 			{
 			//System.out.println("FOUND MAT: "+m.getEntry(0, 0)+" float[]="+valuesToPut[0]+" c="+c);
@@ -78,13 +88,14 @@ public final class Matrix
 			m.setEntry(1, 3, 14);
 			m.setEntry(2, 3, 15);
 			m.setEntry(3, 3, 16);
-			}*/
+			}
 		
 		for(int c=0; c<4; c++)
 			{
 			float [] valuesToPut=TR.doubles2Floats(m.getRow(c));
 			putter.put(valuesToPut);
 			}//end for(row)
+			*/
 		}///end set(...)
 	
 	public int getAddressInBytes()

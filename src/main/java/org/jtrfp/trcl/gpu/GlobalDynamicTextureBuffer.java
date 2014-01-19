@@ -72,4 +72,8 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	 */
 	public static GLMemory getTextureBuffer()
 		{return buffer;}
-	}//end GlobalTextureBuffer
+
+	public static void putShort(int byteOffset, short val) {
+	    buffer.putShort(byteOffset,val);
+	}
+}//end GlobalTextureBuffer

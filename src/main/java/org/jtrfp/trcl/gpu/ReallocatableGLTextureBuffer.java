@@ -72,4 +72,9 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory
 		buffer = new GLTextureBuffer(sizeInBytes,gpu);
 		}
 
+	@Override
+	public void putShort(int byteOffset, short val) {
+	    buffer.getUnderlyingBuffer().putShort(byteOffset, val);
+	}
+
 	}//end ReallocatableGLTextureBuffer

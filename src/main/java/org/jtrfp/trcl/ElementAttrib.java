@@ -62,11 +62,11 @@ public class ElementAttrib<TYPE extends Number> implements Settable
 	private class ShortSetter extends Setter
 		{
 		@Override
-		public void set(double val)
-			{
-			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset+arrayOffset.get());
-			bb.putShort((short)val);
+		public void set(double val){
+			//final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
+			GlobalDynamicTextureBuffer.putShort(byteOffset+arrayOffset.get(),(short)val);
+			//bb.position(byteOffset+arrayOffset.get());
+			//bb.putShort((short)val);
 			}
 		}//end ShortSetter
 	private class FloatSetter extends Setter

@@ -89,6 +89,7 @@ public class WorldObject implements PositionedRenderable
 		tM.setEntry(1, 0, 0);
 		tM.setEntry(1, 1, 1);
 		tM.setEntry(1, 2, 0);
+		rM.setEntry(1, 3, 0);
 		
 		tM.setEntry(2, 0, 0);
 		tM.setEntry(2, 1, 0);
@@ -245,7 +246,7 @@ public class WorldObject implements PositionedRenderable
 		rM.setEntry(1, 0, aX[1]);
 		rM.setEntry(1, 1, aY[1]);
 		rM.setEntry(1, 2, aZ[1]);
-		rM.setEntry(1, 3, 0);
+		
 		
 		rM.setEntry(2, 0, aX[2]);
 		rM.setEntry(2, 1, aY[2]);

@@ -37,6 +37,7 @@ public class WorldObject2D extends WorldObject{
 	    setHeading(Vector3D.PLUS_K);
 	    //Setup matrices 
 	    rM.setEntry(0, 3, 0);
+	    rM.setEntry(1, 3, 0);
 	    rM.setEntry(2, 3, 0);
 	  		
 	    rM.setEntry(3, 0, 0);
@@ -81,12 +82,11 @@ public class WorldObject2D extends WorldObject{
 		rM.setEntry(1, 0, aX[1]);
 		rM.setEntry(1, 1, aY[1]);
 		rM.setEntry(1, 2, aZ[1]);
-		rM.setEntry(1, 3, 0);
 		
 		rM.setEntry(2, 0, aX[2]);
 		rM.setEntry(2, 1, aY[2]);
 		rM.setEntry(2, 2, aZ[2]);
-		tM.setEntry(0, 2, 0);
+		
 		tM.setEntry(0, 3, tV[0]);
 		tM.setEntry(1, 3, tV[1]);
 		

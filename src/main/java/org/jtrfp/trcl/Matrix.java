@@ -51,6 +51,13 @@ public final class Matrix
 		 }//end for(16)
 		}///end set(...)
 	
+	public void setTransposed(RealMatrix m){
+		final int firstOffset=arrayOffset+byteOffset;
+		for(int index=0; index<16; index++){
+		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)m.getEntry(index%4, index/4));
+		 }//end for(16)
+		}///end set(...)
+	
 	public int getAddressInBytes(){
 		return arrayOffset+byteOffset;
 		}

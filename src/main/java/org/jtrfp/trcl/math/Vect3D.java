@@ -69,4 +69,11 @@ public class Vect3D {
 	return in;
     }
     
+    public static double [] cross(double [] l, double [] r, double []dest){
+	dest[0]=l[1]*r[2]-l[2]*r[1];
+	dest[1]=l[2]*r[0]-l[0]*r[2];
+	dest[2]=l[0]*r[1]-l[1]*r[0];
+	return dest;
+    }
+    
 }//end Vect3D

@@ -20,6 +20,7 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.math.Vect3D;
 
 
 /**
@@ -29,40 +30,70 @@ import org.jtrfp.trcl.core.TR;
  *
  */
 public class WorldObject2D extends WorldObject{
+    
 	public WorldObject2D(TR tr){
 	    super(tr);
 	    setTop(Vector3D.PLUS_J);
-	    setHeading(Vector3D.PLUS_K);}
+	    setHeading(Vector3D.PLUS_K);
+	    //Setup matrices 
+	    rM.setEntry(0, 3, 0);
+	    rM.setEntry(2, 3, 0);
+	  		
+	    rM.setEntry(3, 0, 0);
+	    rM.setEntry(3, 1, 0);
+	    rM.setEntry(3, 2, 0);
+	    rM.setEntry(3, 3, 1);
+	  		
+	    tM.setEntry(0, 0, 1);
+	    tM.setEntry(0, 1, 0);
+	    tM.setEntry(0, 2, 0);
+	  		
+	    tM.setEntry(1, 0, 0);
+	    tM.setEntry(1, 1, 1);
+	    tM.setEntry(1, 2, 0);
+	  		
+	    tM.setEntry(2, 0, 0);
+	    tM.setEntry(2, 1, 0);
+	    tM.setEntry(2, 2, 1);
+	  		
+	    tM.setEntry(3, 0, 0);
+	    tM.setEntry(3, 1, 0);
+	    tM.setEntry(3, 2, 0);
+	    tM.setEntry(3, 3, 1);
+	    }
 	public WorldObject2D(TR tr, Model m)
 		{
 		super(tr, m);
 		}//end WorldObject2D
-	
 	@Override
 	protected void recalculateTransRotMBuffer()
 		{
 		final double [] tV = position;
 		
-		Vector3D aZ=getHeading().normalize();
-		Vector3D aX=getTop().crossProduct(aZ);
-		if(aX.getNorm()==0)aX=Vector3D.PLUS_K;
-		Vector3D aY=aZ.crossProduct(aX);
+		Vect3D.normalize(getHeadingArray(), aZ);
+		Vect3D.cross(getTopArray(),aZ,aX);
+		Vect3D.cross(aZ,aX,aY);
 		
-		RealMatrix rM = new Array2DRowRealMatrix(new double [][] 
-			{
-			new double[]{aX.getX(),aY.getX(),	aZ.getX(),	0},
-			new double[]{aX.getY(),aY.getY(),	aZ.getY(),	0},
-			new double[]{aX.getZ(),aY.getZ(),	aZ.getZ(),	0},
-			new double[]{0,		0,			0,			1}
-			});
+		rM.setEntry(0, 0, aX[0]);
+		rM.setEntry(0, 1, aY[0]);
+		rM.setEntry(0, 2, aZ[0]);
 		
-		RealMatrix tM = new Array2DRowRealMatrix(new double [][] 
-					{
-					new double[]{1,0,	0,	tV[0]},
-					new double[]{0,1,	0,	tV[1]},
-					new double[]{0,0,	1,	tV[2]},
-					new double[]{0,0,	0,	1}
-					});
+		rM.setEntry(1, 0, aX[1]);
+		rM.setEntry(1, 1, aY[1]);
+		rM.setEntry(1, 2, aZ[1]);
+		rM.setEntry(1, 3, 0);
+		
+		rM.setEntry(2, 0, aX[2]);
+		rM.setEntry(2, 1, aY[2]);
+		rM.setEntry(2, 2, aZ[2]);
+		tM.setEntry(0, 2, 0);
+		tM.setEntry(0, 3, tV[0]);
+		tM.setEntry(1, 3, tV[1]);
+		
+		tM.setEntry(2, 3, tV[2]);
+		
+		
 		matrix.set(tM.multiply(rM).transpose());
 		}//end recalculateTransRotMBuffer()
+	
 	}//end WorldObject2D

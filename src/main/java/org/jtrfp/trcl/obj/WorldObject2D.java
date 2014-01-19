@@ -93,7 +93,7 @@ public class WorldObject2D extends WorldObject{
 		tM.setEntry(2, 3, tV[2]);
 		
 		
-		matrix.set(tM.multiply(rM).transpose());
+		matrix.setTransposed(tM.multiply(rM));
 		}//end recalculateTransRotMBuffer()
 	
 	}//end WorldObject2D

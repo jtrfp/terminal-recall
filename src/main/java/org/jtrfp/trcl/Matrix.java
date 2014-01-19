@@ -44,6 +44,19 @@ public final class Matrix
 		this.byteOffset=byteOffset;
 		}
 	
+	public void set(double [] vals){
+	    final int firstOffset=arrayOffset+byteOffset;
+	    for(int index=0; index<16; index++){
+		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)vals[index]);
+		 }//end for(16)
+	}
+	public void setTransposed(double [] vals){
+	    final int firstOffset=arrayOffset+byteOffset;
+	    for(int index=0; index<16; index++){
+		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)vals[(index/4)+(index%4)*4]);
+		 }//end for(16)
+	}
+	
 	public void set(RealMatrix m){
 		final int firstOffset=arrayOffset+byteOffset;
 		for(int index=0; index<16; index++){

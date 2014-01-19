@@ -69,6 +69,7 @@ public class WorldObject implements PositionedRenderable
 	protected final double[] camM = new double[16];
 	protected final double[] rMd = new double[16];
 	protected final double[] tMd = new double[16];
+	protected double [] cMd = new double[16];
 	
 	public WorldObject(TR tr){
 		this.tr=tr;
@@ -198,23 +199,22 @@ public class WorldObject implements PositionedRenderable
 		{recalculateTransRotMBuffer();}
 	
 	protected void recalculateTransRotMBuffer(){
-		double [] tV=position;
 		if(LOOP){
 			double delta = position[0]-tr.getRenderer().getCamera().getCameraPosition().getX();
 			if(delta>TR.mapWidth/2.)
-				{tV[0]-=TR.mapWidth;}
+				{position[0]-=TR.mapWidth;}
 			else if(delta<-TR.mapWidth/2.)
-			{tV[0]+=TR.mapWidth;}
+			{position[0]+=TR.mapWidth;}
 			delta = position[1]-tr.getRenderer().getCamera().getCameraPosition().getY();
 			if(delta>TR.mapWidth/2.)
-				{tV[1]-=TR.mapWidth;}
+				{position[1]-=TR.mapWidth;}
 			else if(delta<-TR.mapWidth/2.)
-				{tV[1]+=TR.mapWidth;}
+				{position[1]+=TR.mapWidth;}
 			delta = position[2]-tr.getRenderer().getCamera().getCameraPosition().getZ();
 			if(delta>TR.mapWidth/2.)
-				{tV[2]-=TR.mapWidth;}
+				{position[2]-=TR.mapWidth;}
 			else if(delta<-TR.mapWidth/2.)
-				{tV[2]+=TR.mapWidth;}
+				{position[2]+=TR.mapWidth;}
 			}
 		try{
 		Vect3D.normalize(heading, aZ);
@@ -233,12 +233,11 @@ public class WorldObject implements PositionedRenderable
 		rMd[9]=aY[2];
 		rMd[10]=aZ[2];
 		
-		tMd[3]=tV[0];
-		tMd[7]=tV[1];
-		tMd[11]=tV[2];
+		tMd[3]=position[0];
+		tMd[7]=position[1];
+		tMd[11]=position[2];
 		
 		final RealMatrix cm = tr.getRenderer().getCamera().getMatrix();
-		double [] cMd = new double[16];
 		for(int i=0; i<16; i++){
 		    cMd[i]=cm.getEntry(i/4, i%4);
 		}

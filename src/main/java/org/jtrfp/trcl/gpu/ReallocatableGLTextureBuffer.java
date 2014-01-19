@@ -77,4 +77,9 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory
 	    buffer.getUnderlyingBuffer().putShort(byteOffset, val);
 	}
 
+	@Override
+	public void putFloat(int byteOffset, float val) {
+	    buffer.getUnderlyingBuffer().putFloat(byteOffset,val);
+	}
+
 	}//end ReallocatableGLTextureBuffer

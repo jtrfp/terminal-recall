@@ -116,7 +116,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    
 							    final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
 							    //Ceiling texture cell X value is offset by 10.
-							    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX+10, cZ));
+							    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ+10));
 							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 								new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 

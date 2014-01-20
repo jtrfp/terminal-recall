@@ -13,7 +13,7 @@ import org.jtrfp.trcl.flow.NAVObjective;
 
 public class TunnelExitObject extends WorldObject {
     private  Vector3D exitLocation;
-    private  ObjectDirection exitDirection;
+    private  Vector3D exitHeading,exitTop;
     private final Tunnel tun;
     private final TR tr;
     private NAVObjective navObjectiveToRemove;
@@ -22,13 +22,13 @@ public class TunnelExitObject extends WorldObject {
 	super(tr);
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
-	this.exitLocation=new Vector3D(TR.legacy2Modern(v.getZ()),TR.legacy2Modern(v.getY()),TR.legacy2Modern(v.getX()));
+	final double EXIT_Y_NUDGE=-10000;
+	this.exitLocation=new Vector3D(TR.legacy2Modern(v.getZ()),TR.legacy2Modern(v.getY()+EXIT_Y_NUDGE),TR.legacy2Modern(v.getX()));
 	this.tun=tun;
-	final Vector3D exitHeading = tr.getAltitudeMap().normalAt(exitLocation.getX()/TR.mapWidth, exitLocation.getZ()/TR.mapWidth);
+	exitHeading = tr.getAltitudeMap().normalAt(exitLocation.getZ()/TR.mapWidth, exitLocation.getX()/TR.mapWidth);
 	Vector3D horiz = exitHeading.crossProduct(Vector3D.PLUS_J);
-	if(horiz.getNorm()==0)horiz=Vector3D.PLUS_I;
-	final Vector3D exitTop = exitHeading.crossProduct(horiz).normalize();
-	exitDirection = new ObjectDirection(exitHeading,exitTop);
+	if(horiz.getNorm()==0)horiz=Vector3D.PLUS_I;else horiz=horiz.normalize();
+	exitTop = exitHeading.crossProduct(horiz.negate()).normalize();
 	this.tr=tr;
 	setVisible(false);
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
@@ -47,7 +47,10 @@ public class TunnelExitObject extends WorldObject {
 		    //Teleport
 		    other.setPosition(exitLocation.toArray());
 		    //Heading
-		    other.setDirection(exitDirection);
+		    other.setHeading(exitHeading);
+		    other.setTop(exitTop);
+		   /* System.out.println("Setting player direction to heading="+
+			    exitHeading+" top="+exitTop);*/
 		    //Tunnel off
 		    tun.deactivate();
 		    //World on
@@ -105,20 +108,6 @@ public class TunnelExitObject extends WorldObject {
      */
     public void setExitLocation(Vector3D exitLocation) {
         this.exitLocation = exitLocation;
-    }
-
-    /**
-     * @return the exitDirection
-     */
-    public ObjectDirection getExitDirection() {
-        return exitDirection;
-    }
-
-    /**
-     * @param exitDirection the exitDirection to set
-     */
-    public void setExitDirection(ObjectDirection exitDirection) {
-        this.exitDirection = exitDirection;
     }
 
     /**

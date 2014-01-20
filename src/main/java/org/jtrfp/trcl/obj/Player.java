@@ -46,9 +46,9 @@ public class Player extends WorldObject
 		{super(tr,model);
 		addBehavior(new PlayerBehavior());
 		addBehavior(new DamageableBehavior());
+		addBehavior(new AccelleratedByPropulsion());
 		addBehavior(new MovesByVelocity());
 		addBehavior(new HasPropulsion());
-		addBehavior(new AccelleratedByPropulsion());
 		addBehavior(new CollidesWithTunnelWalls(true,true));
 		addBehavior(new UserInputThrottleControlBehavior());
 		addBehavior(new VelocityDragBehavior());

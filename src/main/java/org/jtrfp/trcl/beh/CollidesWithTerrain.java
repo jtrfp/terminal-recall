@@ -10,6 +10,7 @@ import org.jtrfp.trcl.TerrainChunk;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -19,6 +20,7 @@ public class CollidesWithTerrain extends Behavior {
     private boolean groundLock=false;
     private InterpolatingAltitudeMap map;
     private Vector3D surfaceNormalVar;
+    public static final double CEILING_Y_NUDGE=-5000;
     public CollidesWithTerrain(){}
     @Override
     public void _tick(long tickTimeMillis){
@@ -27,18 +29,23 @@ public class CollidesWithTerrain extends Behavior {
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
 	final double [] thisPos=p.getPosition();
-	final double groundHeight = map.heightAt((thisPos[0]/TR.mapSquareSize), 
-	    (thisPos[2]/TR.mapSquareSize))*(world.sizeY/2);
-	final double ceilingHeight = (2.-map.heightAt((thisPos[0]/TR.mapSquareSize), 
-		    (thisPos[2]/TR.mapSquareSize)))*(world.sizeY/2);
+	final double groundHeightNorm =map.heightAt((thisPos[0]/TR.mapSquareSize), 
+		    (thisPos[2]/TR.mapSquareSize));
+	final double groundHeight = groundHeightNorm*(world.sizeY/2);
+	final double ceilingHeight = (1.99-map.heightAt((thisPos[0]/TR.mapSquareSize), 
+		    (thisPos[2]/TR.mapSquareSize)))*(world.sizeY/2)+CEILING_Y_NUDGE;
 	final Vector3D groundNormal = (map.normalAt((thisPos[0]/TR.mapSquareSize), 
 	    (thisPos[2]/TR.mapSquareSize)));
+	Vector3D downhillDirectionXZ=new Vector3D(groundNormal.getX(),0,groundNormal.getZ());
+	if(downhillDirectionXZ.getNorm()!=0)downhillDirectionXZ=downhillDirectionXZ.normalize();
+	else downhillDirectionXZ=Vector3D.PLUS_J;
 	final boolean terrainMirror=tr.getOverworldSystem().isChamberMode();
 	final double thisY=thisPos[1];
-    	final boolean groundImpact=thisY<groundHeight;
+    	boolean groundImpact=thisY<groundHeight;
     	final boolean ceilingImpact=(thisY>ceilingHeight&&terrainMirror);
 	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),-groundNormal.getY(),groundNormal.getZ());
-	final Vector3D surfaceNormal = groundImpact?groundNormal:ceilingNormal;
+	Vector3D surfaceNormal = groundImpact?groundNormal:ceilingNormal;
+	if(terrainMirror && groundHeightNorm>.95){groundImpact=true; surfaceNormal=downhillDirectionXZ;}
 	
     	if(groundLock){
     	    thisPos[1]=groundHeight;p.notifyPositionChange();return;
@@ -51,6 +58,8 @@ public class CollidesWithTerrain extends Behavior {
 	    surfaceNormalVar=surfaceNormal;
 	    final Behavior behavior = p.getBehavior();
 	    behavior.probeForBehaviors(sub,SurfaceImpactListener.class);
+	    
+	    if(p instanceof Player)System.out.println("Impact ceiling="+ceilingImpact+" ground="+groundImpact);
 	    
 	    //Reflect heading,top
 	    if(bounce){

@@ -33,7 +33,7 @@ public class BouncesOffSurfaces extends Behavior implements
 	    if(new Rotation(oldVelocity.normalize(),_surfaceNormal).getAngle()>Math.PI/2.){
 		velocible.setVelocity((_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)));
 		//Nudge
-		//parent.setPosition(parent.getPosition().add(velocible.getVelocity().scalarMultiply(100.)));
+		parent.setPosition(new Vector3D(parent.getPosition()).add(_surfaceNormal.scalarMultiply(1000.)).toArray());
 	    }//end if(should bounce)
 	}//end if(Velocible)
     }//end collidedWithSurface(...)

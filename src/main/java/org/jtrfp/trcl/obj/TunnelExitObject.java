@@ -5,6 +5,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.core.TR;
@@ -22,7 +23,7 @@ public class TunnelExitObject extends WorldObject {
 	super(tr);
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
-	final double EXIT_Y_NUDGE=-10000;
+	final double EXIT_Y_NUDGE=-8000;
 	this.exitLocation=new Vector3D(TR.legacy2Modern(v.getZ()),TR.legacy2Modern(v.getY()+EXIT_Y_NUDGE),TR.legacy2Modern(v.getX()));
 	this.tun=tun;
 	exitHeading = tr.getAltitudeMap().normalAt(exitLocation.getZ()/TR.mapWidth, exitLocation.getX()/TR.mapWidth);
@@ -49,13 +50,12 @@ public class TunnelExitObject extends WorldObject {
 		    //Heading
 		    other.setHeading(exitHeading);
 		    other.setTop(exitTop);
-		   /* System.out.println("Setting player direction to heading="+
-			    exitHeading+" top="+exitTop);*/
 		    //Tunnel off
 		    tun.deactivate();
 		    //World on
 		    tr.getOverworldSystem().activate();
 		    //Reset player behavior
+		    tr.getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).addInvincibility(250);//Safety kludge when near walls.
 		    tr.getPlayer().getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(true);
 		    tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
 		    tr.getPlayer().getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(false);

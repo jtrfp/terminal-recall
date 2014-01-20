@@ -25,9 +25,7 @@ import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class NAVObjective {
-    
     private static final double CHECKPOINT_HEIGHT_PADDING=70000;
-    
     public abstract String getDescription();
     public abstract WorldObject getTarget();
     private final Factory factory;
@@ -38,8 +36,6 @@ public abstract class NAVObjective {
 	if(getTarget()!=null)f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+counter+".loc", getTarget().getPosition());
 	counter++;
     }
-    
-    
     public static class Factory{
 	private TR tr;//for debug
 	private int counter=0;//for debug
@@ -71,16 +67,9 @@ public abstract class NAVObjective {
 		    }//end for(targs)
 		} else if(obj instanceof TUN){///////////////////////////////////////////
 		    TUN tun = (TUN)obj;
-		    
-		    /*final Vector3D loc = new Vector3D(
-			        TR.legacy2Modern(loc3d.getZ()),
-			        TR.legacy2Modern(loc3d.getY()),
-				TR.legacy2Modern(loc3d.getX()));*/
 		    //Entrance and exit locations are already set up.
 		    final Location3D loc3d = tun.getLocationOnMap();
 		    final Tunnel tunnel = tr.getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
-		    /*final Tunnel tunnel = tr.getCurrentMission().
-			    getTunnelByFileName(tun.getTunnelFileName());*/
 		    currentTunnel = tunnel;
 		    final TunnelEntranceObject tunnelEntrance = tunnel.
 			    getEntranceObject();
@@ -193,5 +182,4 @@ public abstract class NAVObjective {
 		}else{System.err.println("Unrecognized NAV objective: "+obj);}
 	    }//end create()
     }//end Factory
-    
 }//end NAVObjective

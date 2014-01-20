@@ -28,7 +28,7 @@ public class TunnelExitObject extends WorldObject {
 	exitHeading = tr.getAltitudeMap().normalAt(exitLocation.getZ()/TR.mapWidth, exitLocation.getX()/TR.mapWidth);
 	Vector3D horiz = exitHeading.crossProduct(Vector3D.PLUS_J);
 	if(horiz.getNorm()==0)horiz=Vector3D.PLUS_I;else horiz=horiz.normalize();
-	exitTop = exitHeading.crossProduct(horiz.negate()).normalize();
+	exitTop = exitHeading.crossProduct(horiz.negate()).normalize().negate();
 	this.tr=tr;
 	setVisible(false);
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());

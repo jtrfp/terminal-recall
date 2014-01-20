@@ -57,7 +57,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				public void run(){
 					for(int gX=0; gX<width; gX+=chunkSideLength){
 					    //GROUND
-					    {//Start varzone
+					    {//Start scope
 					    final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 					    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
 					    final double objectY=Math.round(altitude.heightAt(gX, _gZ)*heightScalar);
@@ -97,9 +97,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							add(chunkToAdd);
 							}
 						else {System.out.println("Rejected chunk: "+m.getDebugName());}
-					    	}//end varzone
+					    	}//end scope
 					    
-					    	{//start varzone ///// CEILING
+					    	{//start scope ///// CEILING
 					    	final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 						    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
 						    final double objectY=Math.round((2.-altitude.heightAt(gX, _gZ))*heightScalar);
@@ -114,9 +114,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    final double xPos=cX*gridSquareSize;
 							    final double zPos=cZ*gridSquareSize;
 							    
-							    final Integer tpi =  new TunnelPointInquiry(cX,cZ).hashCode();
-							    //Ceiling texture cell X value is offset by 10.
-							    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ+10));
+							    //Ceiling texture cell X (Z in this engine) value is offset by 10.
+							    //No tunnelpoints on ceiling
+							    Future<TextureDescription> td=(Future<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
 							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 								new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
@@ -141,7 +141,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								terrainMirror.add(chunkToAdd);
 								}
 							else {System.out.println("Rejected chunk: "+m.getDebugName());}
-					    	}//end varzone
+					    	}//end scope
 					    	
 						}//end for(gX)
 					}//end run(){}

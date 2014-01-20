@@ -66,8 +66,8 @@ private final NAVSystem nav;
 	    //This need only be done occasionally
 	    if(counter==0){
 		getTr().getHudSystem().getDistance().setContent(""+(int)(modernDistance/TR.mapSquareSize));
-		getTr().getHudSystem().getSector().setContent(((int)((playerPos[0]+TR.mapCartOffset)/TR.mapSquareSize))+"."+
-		    ((int)((playerPos[2]+TR.mapCartOffset)/TR.mapSquareSize)));
+		getTr().getHudSystem().getSector().setContent(((byte)((playerPos[2])/TR.mapSquareSize)&0xFF)+"."+
+		    ((int)((playerPos[0])/TR.mapSquareSize)&0xFF));
 	    }
 	    final Vector3D normPlayer2NavVector = player2NavVectorXY.normalize();
 	    //Kludge to correct negative X bug in engine. (mirrored world)

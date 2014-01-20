@@ -87,8 +87,9 @@ public class ThreadManager
 			{@Override
 			public void run()
 				{Thread.currentThread().setPriority(RENDERING_PRIORITY);
+				synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
 				tr.getRenderer().updateVisibilityList();
-				tr.getCollisionManager().updateVisibilityList();
+				tr.getCollisionManager().updateVisibilityList();}
 				}
 			}, 0, 1000/RENDERLIST_REFRESH_FPS);
 		//CLEANUP

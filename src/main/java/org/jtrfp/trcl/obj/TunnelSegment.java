@@ -27,11 +27,10 @@ import org.jtrfp.trcl.file.TNLFile.Segment;
 
 public class TunnelSegment extends WorldObject
 	{
-	public static final int TUNNEL_DIA_SCALAR=256;
+	public static final int TUNNEL_DIA_SCALAR=128;
 	Segment segment;
 	private final double segmentLength;
 	private final double endX,endY;
-	//private double width,height;
 	
 	public TunnelSegment(TR tr, Segment s, Future<TextureDescription>[] tunnelTexturePalette, double segLen, double endX, double endY)
 		{
@@ -56,14 +55,12 @@ public class TunnelSegment extends WorldObject
 		{
 		Model m = new Model(true);
 		m.setDebugName("Tunnel Segment");
-		//System.out.println("Start width (legacy): "+s.getStartWidth());
-		//System.out.println("Start width (modern*TUNNEL_DIA_SCALAR): "+TR.legacy2Modern(s.getStartWidth()*TUNNEL_DIA_SCALAR));
 		final int numPolys=s.getNumPolygons();
 		double startWidth=getStartWidth(s);
 		double startHeight=getStartHeight(s);
 		double endWidth=getEndWidth(s);
 		double endHeight=getEndHeight(s);
-		//TODO: x,y, rotation, 
+		//TODO: x,y, rotation
 		double startAngle1=((double)s.getStartAngle1()/65535.)*2.*Math.PI;
 		double startAngle2=((double)s.getStartAngle2()/65535.)*2.*Math.PI;
 		double startAngle=startAngle1;

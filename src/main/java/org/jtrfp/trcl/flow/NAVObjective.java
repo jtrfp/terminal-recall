@@ -78,8 +78,9 @@ public abstract class NAVObjective {
 				TR.legacy2Modern(loc3d.getX()));*/
 		    //Entrance and exit locations are already set up.
 		    final Location3D loc3d = tun.getLocationOnMap();
-		    final Tunnel tunnel = tr.getCurrentMission().
-			    getTunnelByFileName(tun.getTunnelFileName());
+		    final Tunnel tunnel = tr.getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
+		    /*final Tunnel tunnel = tr.getCurrentMission().
+			    getTunnelByFileName(tun.getTunnelFileName());*/
 		    currentTunnel = tunnel;
 		    final TunnelEntranceObject tunnelEntrance = tunnel.
 			    getEntranceObject();

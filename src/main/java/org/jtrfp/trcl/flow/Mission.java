@@ -14,6 +14,7 @@ import org.jtrfp.trcl.TunnelInstaller;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -177,6 +178,19 @@ public class Mission {
     public Tunnel getTunnelByFileName(String tunnelFileName) {
 	return tunnels.get(tunnelFileName.toUpperCase());
     }
+    public Tunnel getTunnelWhoseEntranceClosestTo(double xInLegacyUnits, double yInLegacyUnits, double zInLegacyUnits){
+	Tunnel result=null; 
+	double closestDistance=Double.POSITIVE_INFINITY;
+	for(Tunnel t:tunnels.values()){
+	    TDFFile.Tunnel src =t.getSourceTunnel();
+	    final double distance=Math.sqrt(
+		    Math.pow((xInLegacyUnits-src.getEntrance().getX()),2)+
+		    Math.pow((yInLegacyUnits-src.getEntrance().getY()),2)+
+		    Math.pow((zInLegacyUnits-src.getEntrance().getZ()),2));
+	    if(distance<closestDistance){closestDistance=distance;result=t;}
+	}//end for(tunnels)
+	return result;
+    }//end getTunnelWhoseEntranceClosestTo(...)
     
     private void missionCompleteSequence(){
 	new Thread(){

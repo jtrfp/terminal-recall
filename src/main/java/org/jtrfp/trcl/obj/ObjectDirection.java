@@ -23,13 +23,14 @@ public class ObjectDirection
 	{
 	private final Vector3D heading;
 	private final Vector3D top;
+	private final double yaw,roll,tilt;
 	
 	public ObjectDirection(int legacyRoll, int legacyPitch, int legacyYaw)
 		{Vector3D headingAccumulator,topAccumulator;
 		Rotation rot;
-		final double yaw=((double)legacyYaw/65535.)*2*Math.PI;
-		final double roll=((double)legacyRoll/65535.)*2*Math.PI;
-		final double tilt=((double)legacyPitch/65535.)*2*Math.PI;
+		yaw=((double)legacyYaw/65535.)*2*Math.PI;
+		roll=((double)legacyRoll/65535.)*2*Math.PI;
+		tilt=((double)legacyPitch/65535.)*2*Math.PI;
 		/*
 		Rotation hRot = new Rotation(//yaw only.
 				new Vector3D(0,1,0),
@@ -61,6 +62,9 @@ public class ObjectDirection
 	public ObjectDirection(Vector3D heading, Vector3D top){
 		this.heading=heading;
 		this.top=top;
+		yaw=Double.POSITIVE_INFINITY;
+		tilt=Double.POSITIVE_INFINITY;
+		roll=Double.POSITIVE_INFINITY;
 		}
 
 	public Vector3D getHeading(){return heading;}
@@ -68,4 +72,25 @@ public class ObjectDirection
 	
 	@Override
 	public String toString(){return "ObjectDirection heading="+heading+" top="+top+" hash="+hashCode();}
+
+	/**
+	 * @return the yaw
+	 */
+	public double getYaw() {
+	    return yaw;
+	}
+
+	/**
+	 * @return the roll
+	 */
+	public double getRoll() {
+	    return roll;
+	}
+
+	/**
+	 * @return the tilt
+	 */
+	public double getTilt() {
+	    return tilt;
+	}
 	}//end ObjectDirection

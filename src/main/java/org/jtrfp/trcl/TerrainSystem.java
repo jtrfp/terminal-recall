@@ -100,17 +100,25 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    	}//end scope
 					    
 					    	{//start scope ///// CEILING
+					    	final double Y_NUDGE = -5000;
+					    	/*
+					    	 * Y_NUDGE is a kludge. There is a tiny sliver of space between the ceiling and ground, 
+					    	 * likely caused by model vertex quantization in the rendering engine.
+					    	 * I would rather put up with this quirk than re-design the engine, as
+					    	 * the quantization exists as a side-effect of a memory-space optimization
+					    	 * in the GPU and accommodating the fix of this bug could cause bigger problems further down the road.
+					    	 */
 					    	final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 						    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
-						    final double objectY=Math.round((2.-altitude.heightAt(gX, _gZ))*heightScalar);
+						    final double objectY=Math.round((2.-altitude.heightAt(gX, _gZ))*heightScalar+Y_NUDGE);
 						    final Model m = new Model(false);
 						    //for each square
 						    for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
 							for(int cX=gX; cX<gX+chunkSideLength; cX++){
-							    final double hTL=(2.-altitude.heightAt(cX, cZ))*heightScalar;
-							    final double hTR=(2.-altitude.heightAt((cX+1),cZ))*heightScalar;
-							    final double hBR=(2.-altitude.heightAt((cX+1),(cZ+1)))*heightScalar;
-							    final double hBL=(2.-altitude.heightAt(cX,(cZ+1)))*heightScalar;
+							    final double hTL=(2.-altitude.heightAt(cX, cZ))*heightScalar+Y_NUDGE;
+							    final double hTR=(2.-altitude.heightAt((cX+1),cZ))*heightScalar+Y_NUDGE;
+							    final double hBR=(2.-altitude.heightAt((cX+1),(cZ+1)))*heightScalar+Y_NUDGE;
+							    final double hBL=(2.-altitude.heightAt(cX,(cZ+1)))*heightScalar+Y_NUDGE;
 							    final double xPos=cX*gridSquareSize;
 							    final double zPos=cZ*gridSquareSize;
 							    

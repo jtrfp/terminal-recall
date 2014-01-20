@@ -64,8 +64,8 @@ public class TunnelSegment extends WorldObject
 		double startAngle1=((double)s.getStartAngle1()/65535.)*2.*Math.PI;
 		double startAngle2=((double)s.getStartAngle2()/65535.)*2.*Math.PI;
 		double startAngle=startAngle1;
-		final double endAngle1=((double)s.getStartAngle1()/65535.)*2.*Math.PI;
-		final double endAngle2=((double)s.getStartAngle2()/65535.)*2.*Math.PI;
+		final double endAngle1=((double)s.getEndAngle1()/65535.)*2.*Math.PI;
+		final double endAngle2=((double)s.getEndAngle2()/65535.)*2.*Math.PI;
 		double endAngle=endAngle1;
 		final double dAngleStart=(startAngle2-startAngle1)/(double)numPolys;
 		final double dAngleEnd=(endAngle2-endAngle1)/(double)numPolys;
@@ -73,9 +73,9 @@ public class TunnelSegment extends WorldObject
 		final double startY=0;
 		final double zStart=0;
 		final double zEnd=segLen;
+		final int numPolygonsMinusOne=s.getNumPolygons()-1;
 		//Poly quads
-		for(int pi=0; pi<s.getNumPolygons(); pi++)
-			{
+		for(int pi=0; pi<numPolygonsMinusOne; pi++){
 			Vector3D p0=segPoint(startAngle,zStart,startWidth,startHeight,startX,startY);
 			Vector3D p1=segPoint(endAngle,zEnd,endWidth,endHeight,endX,endY);
 			Vector3D p2=segPoint(endAngle+dAngleEnd,zEnd,endWidth,endHeight,endX,endY);
@@ -93,10 +93,10 @@ public class TunnelSegment extends WorldObject
 			}//for(polygons)
 		
 		//The slice quad
-		Vector3D p0=segPoint(startAngle1,zStart,startWidth,startHeight,startX,startY);
-		Vector3D p1=segPoint(endAngle1,zEnd,endWidth,endHeight,endX,endY);
-		Vector3D p2=segPoint(endAngle2,zEnd,endWidth,endHeight,endX,endY);
-		Vector3D p3=segPoint(startAngle2,zStart,startWidth,startHeight,startX,startY);
+		Vector3D p0=segPoint(startAngle,zStart,startWidth,startHeight,startX,startY);
+		Vector3D p1=segPoint(endAngle,zEnd,endWidth,endHeight,endX,endY);
+		Vector3D p2=segPoint(endAngle1,zEnd,endWidth,endHeight,endX,endY);
+		Vector3D p3=segPoint(startAngle1,zStart,startWidth,startHeight,startX,startY);
 		m.addTriangles(Triangle.quad2Triangles(
 					new double[]{p0.getX(),p1.getX(),p2.getX(),p3.getX()},
 					new double[]{p0.getY(),p1.getY(),p2.getY(),p3.getY()},
@@ -104,7 +104,7 @@ public class TunnelSegment extends WorldObject
 					
 					new double[]{0,0,1,1},
 					new double[]{0,1,1,0},
-					tunnelTexturePalette[s.getPolyTextureIndices().get(0)], RenderMode.DYNAMIC));
+					tunnelTexturePalette[s.getPolyTextureIndices().get(numPolygonsMinusOne)], RenderMode.DYNAMIC));
 		
 		return m.finalizeModel();
 		}

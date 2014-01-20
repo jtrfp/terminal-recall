@@ -65,7 +65,7 @@ private final NAVSystem nav;
 	    counter++;counter%=TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS);
 	    //This need only be done occasionally
 	    if(counter==0){
-		getTr().getHudSystem().getDistance().setContent(""+(int)(modernDistance/TR.mapSquareSize));
+		getTr().getHudSystem().getDistance().setContent(""+(int)((modernDistance*16)/TR.mapSquareSize));
 		getTr().getHudSystem().getSector().setContent(((byte)((playerPos[2])/TR.mapSquareSize)&0xFF)+"."+
 		    ((int)((playerPos[0])/TR.mapSquareSize)&0xFF));
 	    }

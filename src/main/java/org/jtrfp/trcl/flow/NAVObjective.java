@@ -29,17 +29,17 @@ public abstract class NAVObjective {
     public abstract String getDescription();
     public abstract WorldObject getTarget();
     private final Factory factory;
-    private int counter;
     protected NAVObjective(Factory f){
 	factory=f;
-	f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+counter+".desc", getDescription());
-	if(getTarget()!=null)f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+counter+".loc", getTarget().getPosition());
-	counter++;
+	f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
+	final double [] loc = getTarget().getPosition();
+	if(getTarget()!=null)f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
+	f.counter++;
     }
     public static class Factory{
 	private TR tr;//for debug
-	private int counter=0;//for debug
 	private Tunnel currentTunnel;
+	int counter;
 	public Factory(TR tr){
 	    this.tr=tr;
 	}//end constructor

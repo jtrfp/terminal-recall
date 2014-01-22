@@ -19,56 +19,61 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.core.IndexPool;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
-public final class Matrix
+public final class MatrixWindow
 	{
 	public static final int BYTES_PER_MATRIX=4*16; // 16 floats
-	private static int arrayOffset=Integer.MIN_VALUE;
-	private static final AtomicInteger numMatrices = new AtomicInteger();
-	private static final IndexPool indexPool = new IndexPool();
+	private int arrayOffset=Integer.MIN_VALUE;
+	private final AtomicInteger numMatrices = new AtomicInteger();
+	private final IndexPool indexPool = new IndexPool();
 	
-	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(Matrix.class);}
+	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(MatrixWindow.class);}
 	
-	public static int create4x4(){
+	public final int create4x4(){
 	    	numMatrices.incrementAndGet();
 	    	return indexPool.pop();
 		}
 	
-	public static void finalizeAllocation(){
-		int bytesToAllocate=numMatrices.get()*BYTES_PER_MATRIX;
+	public static void finalizeAllocation(TR tr){
+	    	final MatrixWindow mw=tr.getMatrixWindow();
+		int bytesToAllocate=mw.getNumMatrices()*BYTES_PER_MATRIX;
 		System.out.println("Matrices: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
-		arrayOffset=GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate);
+		mw.setArrayOffset(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
 		}
 	
-	public static void set(double [] vals, int id){
+	public final void set(double [] vals, int id){
 	    final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
 	    for(int index=0; index<16; index++){
 		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)vals[index]);
 		 }//end for(16)
 	}
-	public static void setTransposed(double [] vals, int id){
+	public final void setTransposed(double [] vals, int id){
 	    final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
 	    for(int index=0; index<16; index++){
 		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)vals[(index/4)+(index%4)*4]);
 		 }//end for(16)
 	}
 	
-	public static void set(RealMatrix m, int id){
+	public final void set(RealMatrix m, int id){
 		final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
 		for(int index=0; index<16; index++){
 		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)m.getEntry(index/4, index%4));
 		 }//end for(16)
 		}///end set(...)
 	
-	public static void setTransposed(RealMatrix m, int id){
+	public final void setTransposed(RealMatrix m, int id){
 		final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
 		for(int index=0; index<16; index++){
 		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)m.getEntry(index%4, index/4));
 		 }//end for(16)
 		}///end set(...)
 	
-	public static int getAddressInBytes(int id){
+	public final int getAddressInBytes(int id){
 	    return id*BYTES_PER_MATRIX+arrayOffset;
 	}
+	
+	public final int getNumMatrices(){return numMatrices.get();}
+	private void setArrayOffset(int off){arrayOffset=off;}
 	}//end Matrix

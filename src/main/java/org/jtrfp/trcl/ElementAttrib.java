@@ -34,58 +34,64 @@ public class ElementAttrib<TYPE extends Number> implements Settable
 		{
 		this.arrayOffset=arrayOffset;
 		this.byteOffset=byteOffset;
-		if(type==Short.class)setter=new ShortSetter();
-		else if(type==Integer.class)setter=new IntSetter();
-		else if(type==Float.class)setter=new FloatSetter();
-		else if(type==Byte.class)setter=new ByteSetter();
+		if(type==Short.class)setter=shortSetter;
+		else if(type==Integer.class)setter=intSetter;
+		else if(type==Float.class)setter=floatSetter;
+		else if(type==Byte.class)setter=byteSetter;
 		else throw new RuntimeException("Invalid class: "+type.getName());
 		}
 	@Override
 	public void set(double value)
 		{
-		setter.set(value);
+		setter.set(value, byteOffset+arrayOffset.get());
 		}
-	private abstract class Setter
+	
+	private static final ShortSetter shortSetter = new ShortSetter();
+	private static final IntSetter intSetter = new IntSetter();
+	private static final FloatSetter floatSetter = new FloatSetter();
+	private static final ByteSetter byteSetter = new ByteSetter();
+	
+	private static interface Setter
 		{
-		public abstract void set(double val);
+		public abstract void set(double val, int byteOffset);
 		}
-	private class ByteSetter extends Setter
+	private static final class ByteSetter implements Setter
 		{
 		@Override
-		public void set(double val)
+		public void set(double val, int byteOffset)
 			{
 			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset+arrayOffset.get());
+			bb.position(byteOffset);
 			bb.put((byte)val);
 			}
 		}//end ShortSetter
-	private class ShortSetter extends Setter
+	private static final class ShortSetter implements Setter
 		{
 		@Override
-		public void set(double val){
+		public void set(double val, int byteOffset){
 			//final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			GlobalDynamicTextureBuffer.putShort(byteOffset+arrayOffset.get(),(short)val);
+			GlobalDynamicTextureBuffer.putShort(byteOffset,(short)val);
 			//bb.position(byteOffset+arrayOffset.get());
 			//bb.putShort((short)val);
 			}
 		}//end ShortSetter
-	private class FloatSetter extends Setter
+	private static final class FloatSetter implements Setter
 		{
 		@Override
-		public void set(double val)
+		public void set(double val, int byteOffset)
 			{
 			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset+arrayOffset.get());
+			bb.position(byteOffset);
 			bb.putFloat((float)val);
 			}
 		}//end ShortSetter
-	private class IntSetter extends Setter
+	private static final class IntSetter implements Setter
 		{
 		@Override
-		public void set(double val)
+		public void set(double val, int byteOffset)
 			{
 			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset+arrayOffset.get());
+			bb.position(byteOffset);
 			bb.putInt((int)val);
 			}
 		}//end ShortSetter

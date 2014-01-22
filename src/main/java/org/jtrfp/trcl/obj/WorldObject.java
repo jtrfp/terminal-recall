@@ -54,7 +54,7 @@ public class WorldObject implements PositionedRenderable
 	private ObjectDefinition []transparentTriangleObjectDefinitions;
 	private ByteBuffer opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocate(0);//defaults to empty
 	private ByteBuffer transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocate(0);//defaults to empty
-	protected final Matrix matrix;
+	protected final int matrixID;
 	private static final List<WorldObject> allWorldObjects = Collections.synchronizedList(new ArrayList<WorldObject>());
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
@@ -74,7 +74,7 @@ public class WorldObject implements PositionedRenderable
 	public WorldObject(TR tr){
 		this.tr=tr;
 		addWorldObject(this);
-		matrix=Matrix.create4x4();
+		matrixID=Matrix.create4x4();
 		//Matrix constants setup
 		rMd[15]=1;
 		
@@ -180,7 +180,7 @@ public class WorldObject implements PositionedRenderable
 		//For each of the allocated-but-not-yet-initialized object definitions.
 		for(final ObjectDefinition ob:objectDefinitions)
 			{
-			ob.matrixOffset.set(matrix.getAddressInBytes()/GLTextureBuffer.BYTES_PER_VEC4);
+			ob.matrixOffset.set(Matrix.getAddressInBytes(matrixID)/GLTextureBuffer.BYTES_PER_VEC4);
 			ob.vertexOffset.set(primitiveListByteAddress/GLTextureBuffer.BYTES_PER_VEC4);
 			ob.mode.set(primitiveList.getPrimitiveRenderMode());
 			ob.modelScale.set(primitiveList.getPackedScale());
@@ -246,7 +246,7 @@ public class WorldObject implements PositionedRenderable
 		
 		Mat4x4.mul(cMd, rotTransM, camM);
 		
-		matrix.setTransposed(camM);
+		Matrix.setTransposed(camM,matrixID);
 		}catch(MathArithmeticException e){}//Don't crash.
 		}//end recalculateTransRotMBuffer()
 	

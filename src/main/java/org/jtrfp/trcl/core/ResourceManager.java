@@ -270,7 +270,7 @@ public class ResourceManager{
 		catch(UnrecognizedFormatException e){//ok fail. Static model
 			try	{
 				BINFile.Model m=null;
-				Model result = new Model(false);
+				Model result = new Model(false,tr);
 				m = modBinNameMap.get(name);
 				if(m==null){
 					InputStream is = getInputStreamFromResource("MODELS\\"+name);

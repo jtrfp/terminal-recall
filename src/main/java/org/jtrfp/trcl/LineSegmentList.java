@@ -17,13 +17,15 @@ package org.jtrfp.trcl;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.core.TR;
+
 public class LineSegmentList extends PrimitiveList<LineSegment,GPULineSegment>
 	{//NOTE: ANIMATION NOT SUPPORTED
 	private final LineSegment [][]lineSegments;
 	
-	public LineSegmentList(LineSegment [][] lineSegments, String debugName)
+	public LineSegmentList(LineSegment [][] lineSegments, String debugName,TR tr)
 		{
-		super(debugName, lineSegments, GPULineSegment.createLineSegmentBlock(lineSegments[0].length));
+		super(debugName, lineSegments, GPULineSegment.createLineSegmentBlock(lineSegments[0].length),tr);
 		this.lineSegments=lineSegments;
 		}
 

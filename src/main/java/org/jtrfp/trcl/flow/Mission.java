@@ -118,7 +118,7 @@ public class Mission {
 	Texture.finalize(gpu);
 	System.out.println("\t...Done.");
 	System.out.println("Finalizing GPU memory allocation...");
-	GlobalDynamicTextureBuffer.finalizeAllocation(gpu);
+	GlobalDynamicTextureBuffer.finalizeAllocation(gpu,tr);
 	gpu.releaseGL();
 	//////// NO GL BEYOND THIS POINT ////////
 	System.out.println("\t...Done.");

@@ -18,7 +18,7 @@ package org.jtrfp.trcl;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.TR;
 
 public class Model
 	{
@@ -34,8 +34,10 @@ public class Model
 	private String debugName="[unnamed]";
 	private boolean animateUV=false;
 	private Controller controller;
+	private final TR tr;
 	
-	public Model(boolean smoothAnimation){
+	public Model(boolean smoothAnimation,TR tr){
+	    	this.tr=tr;
 		this.smoothAnimation=smoothAnimation;
 		//Frame zero
 		tLists.add(new ArrayList<Triangle>());
@@ -73,19 +75,19 @@ public class Model
 		Triangle [][] tris = new Triangle[tLists.size()][];
 		for(int i=0; i<tLists.size(); i++)
 			{tris[i]=tLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),"TriangleList...", animateUV,c);
+		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),"TriangleList...", animateUV,c,tr);
 		else tpList=null;
 		
 		Triangle [][] ttris = new Triangle[ttLists.size()][];
 		for(int i=0; i<ttLists.size(); i++)
 			{ttris[i]=ttLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),"TransparentTriangleList...", animateUV,c);
+		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),"TransparentTriangleList...", animateUV,c,tr);
 		else ttpList=null;
 		
 		LineSegment [][] segs = new LineSegment[lsLists.size()][];
 		for(int i=0; i<lsLists.size(); i++)
 			{segs[i]=lsLists.get(i).toArray(new LineSegment[]{});}//Get all frames for each line seg
-		if(segs[0].length!=0)lsList=new LineSegmentList(segs,"Line Segment List...");
+		if(segs[0].length!=0)lsList=new LineSegmentList(segs,"Line Segment List...",tr);
 		else lsList=null;
 		return this;
 		}//end finalizeModel()
@@ -147,20 +149,20 @@ public class Model
 		this.smoothAnimation = smoothAnimation;
 		}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin,boolean hasAlpha){
-		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1,hasAlpha);
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin,boolean hasAlpha,TR tr){
+		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1,hasAlpha,tr);
 		}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin){
-		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1);
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin,TR tr){
+		return buildCube(w, h, d, tunnelTexturePalette,origin, 0,0,1,1,tr);
 		}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin, double u0, double v0, double u1, double v1){
-	    return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,false);
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin, double u0, double v0, double u1, double v1, TR tr){
+	    return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,false,tr);
 	}
 	
-	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin, double u0, double v0, double u1, double v1, boolean hasAlpha){
-		Model m = new Model(false);
+	public static Model buildCube(double w, double h, double d, Future<TextureDescription> tunnelTexturePalette, double[] origin, double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr){
+		Model m = new Model(false, tr);
 		//Front
 		m.addTriangles(Triangle.quad2Triangles(
 				new double [] {0-origin[0],w-origin[0],w-origin[0],0-origin[0]}, 

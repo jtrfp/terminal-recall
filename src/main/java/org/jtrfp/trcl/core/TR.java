@@ -39,7 +39,7 @@ import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
-import org.jtrfp.trcl.ManuallySetController;
+import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
@@ -82,6 +82,9 @@ public final class TR
 	private NAVSystem navSystem;
 	private HUDSystem hudSystem;
 	private Mission currentMission;
+	private final MatrixWindow matrixWindow = new MatrixWindow();
+	private final TriangleVertexWindow triangleVertexWindow = new TriangleVertexWindow();
+	private final TriangleVertex2FlatDoubleWindow tv2fdWindow = new TriangleVertex2FlatDoubleWindow(triangleVertexWindow);
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -452,5 +455,23 @@ public final class TR
 	    dest[1]=deltaRollover(l[1]-r[1]);
 	    dest[2]=deltaRollover(l[2]-r[2]);
 	    return dest;
+	}
+
+	public MatrixWindow getMatrixWindow() {
+	    return matrixWindow;
+	}
+
+	/**
+	 * @return the tv2fdWindow
+	 */
+	public TriangleVertex2FlatDoubleWindow getTv2fdWindow() {
+	    return tv2fdWindow;
+	}
+
+	/**
+	 * @return the triangleVertexWindow
+	 */
+	public TriangleVertexWindow getTriangleVertexWindow() {
+	    return triangleVertexWindow;
 	}
 }//end TR

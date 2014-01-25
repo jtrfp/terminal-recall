@@ -25,7 +25,7 @@ private final NAVSystem nav;
 	super(tr);
 	this.nav=navSystem;
 	try{
-	final Model m = new Model(false);
+	final Model m = new Model(false,tr);
 	final Future<TextureDescription> tex = tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());
 	Triangle [] tris = Triangle.quad2Triangles(
 		new double[]{-WIDTH,WIDTH,WIDTH,-WIDTH}, 

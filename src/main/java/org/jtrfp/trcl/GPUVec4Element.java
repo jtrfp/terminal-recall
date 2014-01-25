@@ -17,5 +17,5 @@ package org.jtrfp.trcl;
 
 public interface GPUVec4Element
 	{
-	public int getAddressInBytes();
+    	public int getAddressInBytes();
 	}

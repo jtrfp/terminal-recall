@@ -29,7 +29,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere
 		{
 		super(tr);
 		//Crosshairs
-		Model crossModel = new Model(false);
+		Model crossModel = new Model(false,tr);
 		Future<Texture> [] greenThrobFrames = new Future[16];
 		for(int f=0; f<8; f++)
 			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)Texture.solidColor(new Color(f*22,f*32,f*23,170));}

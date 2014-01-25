@@ -16,7 +16,7 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Matrix;
+import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Mat4x4;
@@ -71,7 +71,7 @@ public class WorldObject2D extends WorldObject{
 		tMd[11]=tV[2];
 		Mat4x4.mul(tMd, rMd, rotTransM);
 		
-		Matrix.setTransposed(rotTransM,matrixID);
+		getTr().getMatrixWindow().setTransposed(rotTransM,matrixID);
 		}//end recalculateTransRotMBuffer()
 	
 	}//end WorldObject2D

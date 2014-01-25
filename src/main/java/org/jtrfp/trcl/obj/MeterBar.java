@@ -15,8 +15,8 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	super(tr);
 	//height*=.5;
 	//length*=.5;
-	Model m = new Model(true);
-	Model m2 = new Model(true);
+	Model m = new Model(true,tr);
+	Model m2 = new Model(true,tr);
 	Triangle [] tris;
 	if(horizontal){
 	tris = Triangle.quad2Triangles(
@@ -45,7 +45,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 		tex, RenderMode.DYNAMIC);
 	    m.addTriangles(tris);
 		
-	    m2 = new Model(true);
+	    m2 = new Model(true,tr);
 		tris = Triangle.quad2Triangles(
 		new double[]{height,-height,-height,height}, //X
 		new double []{-length,-length,-length,-length}, //Y

@@ -20,38 +20,47 @@ import java.util.concurrent.ExecutionException;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TriangleVertexWindow;
 
 public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 	{
 	private Controller controller;
 	private int timeBetweenFramesMsec;
 	private final boolean animateUV;
-	public TriangleList(Triangle [][] triangles, int timeBetweenFramesMsec, String debugName, boolean animateUV, Controller controller)
-		{super(debugName,triangles,GPUTriangleVertex.createVertexBlock(triangles[0].length*3));
+	private final TR tr;
+	public TriangleList(Triangle [][] triangles, int timeBetweenFramesMsec, String debugName, boolean animateUV, Controller controller, TR tr)
+		{super(debugName,triangles,GPUTriangleVertex.createVertexBlock(triangles[0].length*3,tr),tr);
 		this.timeBetweenFramesMsec=timeBetweenFramesMsec;
 		this.animateUV=animateUV;
 		this.controller=controller;
+		this.tr=tr;
 		}
 	
 	public TriangleList [] getAllLists()
 		{return getAllArrayLists().toArray(new TriangleList [] {});}
-	private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames)
-		{
+	private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames){
 		return controller;
 		}
 	private Triangle triangleAt(int frame, int tIndex)
 		{return getPrimitives()[frame][tIndex];}
-	private void setupVertex(int vIndex,GPUTriangleVertex vtx, int tIndex) throws ExecutionException, InterruptedException
+	private void setupVertex(int vIndex, int gpuTVIndex, Triangle t) throws ExecutionException, InterruptedException
 		{final int numFrames = getPrimitives().length;
-		Triangle t=triangleAt(0,tIndex);
-		if(numFrames==1)
-			{
+		//Triangle t=triangleAt(0,tIndex);
+		final TriangleVertexWindow vw = tr.getTriangleVertexWindow();
+		//if(numFrames==1){
+		    	vw.setX(gpuTVIndex, (short)applyScale(t.x[vIndex]));
+		    	vw.setY(gpuTVIndex, (short)applyScale(t.y[vIndex]));
+		    	vw.setZ(gpuTVIndex, (short)applyScale(t.z[vIndex]));
+		    	/*
 			vtx.x.set((short)applyScale(t.x[vIndex]));
 			vtx.y.set((short)applyScale(t.y[vIndex]));
 			vtx.z.set((short)applyScale(t.z[vIndex]));
+			
 			}
 		else if(numFrames>1)
-			{
+			{//TODO
+		    	
 			vtx.x.set((short)applyScale(t.x[vIndex]));
 			vtx.y.set((short)applyScale(t.y[vIndex]));
 			vtx.z.set((short)applyScale(t.z[vIndex]));
@@ -70,14 +79,16 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			for(int i=0; i<numFrames; i++)
 				{zFrames[i]=Math.round(triangleAt(i,tIndex).z[vIndex]/scale);}
 			animators.add(new AttribAnimator(vtx.z,getVertexSequencer(timeBetweenFramesMsec,numFrames),zFrames));
+			
 			}
-		else{throw new RuntimeException("Empty triangle vertex!");}
+		else{throw new RuntimeException("Empty triangle vertex!");}*/
 		
 		TextureDescription td = t.getTexture().get();
 		if(td instanceof Texture){//Static texture
 			final Texture.TextureTreeNode tx;
 			tx= ((Texture)t.getTexture().get()).getNodeForThisTexture();
-			if(animateUV&&numFrames>1){//Animated UV
+			//if(animateUV&&numFrames>1){//Animated UV
+			/*//TODO
 			    double []uFrames = new double[numFrames];
 			    double []vFrames = new double[numFrames];
 			    for(int i=0; i<numFrames; i++){
@@ -86,12 +97,15 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			    }//end for(numFrames)
 			    animators.add(new AttribAnimator(vtx.u,getVertexSequencer(timeBetweenFramesMsec,numFrames),uFrames));
 			    animators.add(new AttribAnimator(vtx.v,getVertexSequencer(timeBetweenFramesMsec,numFrames),vFrames));
-			}else{//end if(animateUV)
-			    vtx.u.set((short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
-			    vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
-			}//end if(!animateUV)
+			*/
+			//}else{//end if(animateUV)
+			    vw.setU(gpuTVIndex, (short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
+			    vw.setV(gpuTVIndex, (short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
+			    //vtx.u.set((short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
+			    //vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
+			//}//end if(!animateUV)
 		    }
-		else 
+		/*else //TODO
 			{//Animated texture
 			AnimatedTexture at =((AnimatedTexture)t.getTexture().get());
 			
@@ -114,23 +128,21 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			animators.add(new AttribAnimator(vtx.u,at.getTextureSequencer(),uFrames));
 			animators.add(new AttribAnimator(vtx.v,at.getTextureSequencer(),vFrames));
 			}//end animated texture
+			*/
 		}//end setupVertex
 	
-	private void setupTriangle(int index) throws ExecutionException,InterruptedException
-		{
-		final int vIndex=index*3;
-		setupVertex(0,getVec4s()[vIndex],index);
-		setupVertex(1,getVec4s()[vIndex+1],index);
-		setupVertex(2,getVec4s()[vIndex+2],index);
+	private void setupTriangle(int gpuTriangleVertIndex, Triangle t) throws ExecutionException,InterruptedException{
+		setupVertex(0,gpuTriangleVertIndex+0,t);
+		setupVertex(1,gpuTriangleVertIndex+1,t);
+		setupVertex(2,gpuTriangleVertIndex+2,t);
 		}
 	
-	public void uploadToGPU(GL3 gl)
-		{
+	public void uploadToGPU(GL3 gl){
 		int nPrimitives=getNumPrimitives();
-		//System.out.println("Model: "+this.getDebugName()+" NumPrimitives: "+nPrimitives);
+		System.out.println("Model: "+this.getDebugName()+" NumPrimitives: "+nPrimitives);
 		try{
 		for(int tIndex=0;tIndex<nPrimitives;tIndex++)
-			{setupTriangle(tIndex);
+			{setupTriangle(getGPUPrimitiveStartIndex()+tIndex*3,triangleAt(0, tIndex));
 			}//end for(getPrimitives)
 		}catch(InterruptedException e){e.printStackTrace();}
 		catch(ExecutionException e){e.printStackTrace();}

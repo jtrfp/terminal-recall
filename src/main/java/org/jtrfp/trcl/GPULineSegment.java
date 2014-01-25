@@ -17,11 +17,11 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
-public class GPULineSegment implements GPUVec4Element
-	{
+public class GPULineSegment implements GPUVec4Element{
 	public static final int BYTES_PER_SEGMENT=GLTextureBuffer.BYTES_PER_VEC4; //16 bytes in a vec4, 1 vec4 per LineSegment
 	public static final int SEGMENTS_PER_BLOCK=96/6;
 	
@@ -46,15 +46,13 @@ public class GPULineSegment implements GPUVec4Element
 	
 	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(GPULineSegment.class);}
 	
-	public static void finalizeAllocation()
-		{
+	public static void finalizeAllocation(TR tr){
 		int bytesToAllocate = numSegments.get()*GPULineSegment.BYTES_PER_SEGMENT;
 		System.out.println("LineSegments: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
 		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
 		}
 	
-	public static GPULineSegment [] createLineSegmentBlock(int numSegments)
-		{
+	public static GPULineSegment [] createLineSegmentBlock(int numSegments){
 		int startIndex = GPULineSegment.numSegments.getAndAdd(numSegments)*BYTES_PER_SEGMENT;//16 bytes per uint vec4
 		GPULineSegment [] result = new GPULineSegment[numSegments];
 		for(int i=0; i<numSegments;i++)
@@ -65,8 +63,7 @@ public class GPULineSegment implements GPUVec4Element
 	public static GPULineSegment create()
 		{return new GPULineSegment(numSegments.getAndIncrement()*BYTES_PER_SEGMENT);}
 	
-	private GPULineSegment(int byteOffset)
-		{
+	private GPULineSegment(int byteOffset){
 		this.byteOffset=byteOffset;
 		x1=ElementAttrib.create(arrayOffset, byteOffset, Short.class);
 		y1=ElementAttrib.create(arrayOffset, byteOffset+2, Short.class);

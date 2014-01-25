@@ -39,7 +39,7 @@ public class ProjectileFactory {
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
-    	 modelToUse = new Model(false);
+    	 modelToUse = new Model(false,tr);
    	 final ModelingType modelingType = weapon.getModelingType();
    	 if(modelingType instanceof ModelingType.FlatModelingType){
    	 ModelingType.FlatModelingType mt = (ModelingType.FlatModelingType)modelingType;

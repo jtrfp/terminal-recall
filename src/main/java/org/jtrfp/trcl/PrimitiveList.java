@@ -21,30 +21,37 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4Element>
-	{
+import org.jtrfp.trcl.core.TR;
+
+public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4Element>{
 	private static final List<PrimitiveList<?,?>> allLists = Collections.synchronizedList(new ArrayList<PrimitiveList<?,?>>());
 	protected static final double coordDownScaler=512;
 	protected static final double uvUpScaler=4096;
 	private final PRIMITIVE_TYPE [][] primitives;
-	private final GPU_VEC4_TYPE [] vec4s;
+	private GPU_VEC4_TYPE [] vec4s;
 	public static enum RenderStyle{OPAQUE,TRANSPARENT};
 	protected static final ArrayList<AttribAnimator> animators = new ArrayList<AttribAnimator>();
 	protected final String debugName;
 	protected double scale;
 	protected int packedScale;
+	protected final int gpuPrimitiveStartIndex;
+	protected final TR tr;
 	
-	protected PrimitiveList(String debugName, PRIMITIVE_TYPE [][] primitives, GPU_VEC4_TYPE []vec4s)
-		{
+	protected PrimitiveList(String debugName, PRIMITIVE_TYPE [][] primitives, GPU_VEC4_TYPE []vec4s, TR tr){
+		this(debugName,primitives,0,tr);
 		if(vec4s.length==0)throw new RuntimeException("Cannot accept empty vec4 array.");
-		this.primitives=primitives;
-		this.debugName=debugName;
 		this.vec4s=vec4s;
-		setScale((getMaximumVertexValue()/2048.));
-		addList(this);
 		}
-	protected int packScale(double scaleToPack)
-		{
+	public PrimitiveList(String debugName, PRIMITIVE_TYPE[][] primitives,
+		int gpuPrimitiveStartIndex, TR tr) {
+	    	this.tr=tr;
+	    	this.gpuPrimitiveStartIndex=gpuPrimitiveStartIndex;
+	    	this.debugName=debugName;
+	    	this.primitives=primitives;
+	    	setScale((getMaximumVertexValue()/2048.));
+	    	addList(this);
+	}
+	protected int packScale(double scaleToPack){
 		int result= (int)Math.round(Math.log(scaleToPack)/Math.log(2));//Base-2 log
 		return result+16;
 		}
@@ -74,8 +81,11 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 	
 	public abstract void uploadToGPU(GL3 gl);
 	public abstract byte getPrimitiveRenderMode();
-	public int getStartAddressInBytes()
-		{return vec4s[0].getAddressInBytes();}
+	public int getStartAddressInBytes(){
+	    	if(vec4s==null){//New system
+	    	    return tr.getTriangleVertexWindow().getStartAddressInBytes(this.getGPUPrimitiveStartIndex());}
+	    	//old system
+	    	return vec4s[0].getAddressInBytes();}
 	
 	/**
 	 * @return the vec4s
@@ -100,4 +110,10 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 		}
 	public final double getScale(){return scale;}
 	public final int getPackedScale(){return packedScale;}
+	/**
+	 * @return the gpuPrimitiveStartIndex
+	 */
+	public int getGPUPrimitiveStartIndex() {
+	    return gpuPrimitiveStartIndex;
+	}
 	}//end PrimitiveList

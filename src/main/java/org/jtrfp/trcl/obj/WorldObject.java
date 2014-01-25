@@ -27,7 +27,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.GPUTriangleVertex;
-import org.jtrfp.trcl.Matrix;
+import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.PrimitiveList;
@@ -74,7 +74,7 @@ public class WorldObject implements PositionedRenderable
 	public WorldObject(TR tr){
 		this.tr=tr;
 		addWorldObject(this);
-		matrixID=Matrix.create4x4();
+		matrixID=tr.getMatrixWindow().create4x4();
 		//Matrix constants setup
 		rMd[15]=1;
 		
@@ -180,7 +180,7 @@ public class WorldObject implements PositionedRenderable
 		//For each of the allocated-but-not-yet-initialized object definitions.
 		for(final ObjectDefinition ob:objectDefinitions)
 			{
-			ob.matrixOffset.set(Matrix.getAddressInBytes(matrixID)/GLTextureBuffer.BYTES_PER_VEC4);
+			ob.matrixOffset.set(tr.getMatrixWindow().getAddressInBytes(matrixID)/GLTextureBuffer.BYTES_PER_VEC4);
 			ob.vertexOffset.set(primitiveListByteAddress/GLTextureBuffer.BYTES_PER_VEC4);
 			ob.mode.set(primitiveList.getPrimitiveRenderMode());
 			ob.modelScale.set(primitiveList.getPackedScale());
@@ -246,7 +246,7 @@ public class WorldObject implements PositionedRenderable
 		
 		Mat4x4.mul(cMd, rotTransM, camM);
 		
-		Matrix.setTransposed(camM,matrixID);
+		tr.getMatrixWindow().setTransposed(camM,matrixID);
 		}catch(MathArithmeticException e){}//Don't crash.
 		}//end recalculateTransRotMBuffer()
 	

@@ -16,6 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.RenderList;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public class GlobalObjectList
@@ -26,7 +27,7 @@ public class GlobalObjectList
 	
 	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(GlobalObjectList.class);}
 	
-	public static void finalizeAllocation()
+	public static void finalizeAllocation(TR tr)
 		{
 		int bytesToAllocate = OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES;
 		System.out.println("ObjectList: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");

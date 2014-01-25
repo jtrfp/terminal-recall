@@ -61,7 +61,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 					    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
 					    final double objectY=Math.round(altitude.heightAt(gX, _gZ)*heightScalar);
-					    final Model m = new Model(false);
+					    final Model m = new Model(false,tr);
 					    //for each square
 					    for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
 						for(int cX=gX; cX<gX+chunkSideLength; cX++){
@@ -111,7 +111,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    	final double objectX=Math.round(((double)gX+((double)chunkSideLength/2.))*gridSquareSize);
 						    final double objectZ=Math.round(((double)_gZ+((double)chunkSideLength/2.))*gridSquareSize);
 						    final double objectY=Math.round((2.-altitude.heightAt(gX, _gZ))*heightScalar+Y_NUDGE);
-						    final Model m = new Model(false);
+						    final Model m = new Model(false,tr);
 						    //for each square
 						    for(int cZ=_gZ; cZ<_gZ+chunkSideLength; cZ++){
 							for(int cX=gX; cX<gX+chunkSideLength; cX++){

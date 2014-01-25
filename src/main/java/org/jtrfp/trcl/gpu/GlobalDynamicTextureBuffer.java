@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.media.opengl.GL2;
 
+import org.jtrfp.trcl.core.TR;
+
 
 public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	{
@@ -34,11 +36,11 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	public static ByteBuffer getByteBuffer()
 		{return buffer.getDuplicateReferenceOfUnderlyingBuffer();}
 	
-	public static void finalizeAllocation(GPU gpu)
+	public static void finalizeAllocation(GPU gpu, TR tr)
 		{//Finalize dependent allocations
 		for(Class<?> c:finalizationList)
 			{try{
-			c.getMethod("finalizeAllocation", (Class<?>[])null).invoke(null, (Object[])null);
+			c.getMethod("finalizeAllocation", new Class<?>[]{TR.class}).invoke(null, (Object[])new Object[]{tr});
 			}catch(Exception e){e.printStackTrace();}}
 		finalizationList.clear();
 		buffer=gpu.newEmptyGLMemory();

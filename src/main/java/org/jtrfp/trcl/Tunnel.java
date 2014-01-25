@@ -162,7 +162,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case none0:
 				break;
 			case doorway:{
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1);
+				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1,tr);
 				wo = new WorldObject(world.getTr(),m);
 				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
@@ -381,7 +381,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				add(wo);
 				break;
 			case forceField:{//TODO
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1);
+				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1,tr);
 				wo = new WorldObject(world.getTr(),m);
 				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);

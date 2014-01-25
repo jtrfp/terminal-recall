@@ -27,7 +27,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		super(world);
 		final TR tr = world.getTr();
 		//Backdrop
-		Model backdropModel=new Model(false);
+		Model backdropModel=new Model(false,tr);
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
@@ -36,7 +36,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		add(overworldBackdrop);
 		//addAlwaysVisible(overworldBackdrop);
 		
-		backdropModel=new Model(false);
+		backdropModel=new Model(false,tr);
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 

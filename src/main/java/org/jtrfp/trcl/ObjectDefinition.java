@@ -17,6 +17,7 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
 public final class ObjectDefinition
@@ -38,7 +39,7 @@ public final class ObjectDefinition
 	public static ObjectDefinition create()
 		{return new ObjectDefinition();}
 	
-	public static void finalizeAllocation()
+	public static void finalizeAllocation(TR tr)
 		{
 		int bytesToAllocate=objectBlockCount.getAndIncrement()*BYTES_PER_OBJECT_BLOCK;
 		System.out.println("Object Definitions: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");

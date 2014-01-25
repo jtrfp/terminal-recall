@@ -42,7 +42,7 @@ public class BillboardSprite extends WorldObject{
 				new double[]{0,0,1,1}, 
 				desc, 
 				RenderMode.DYNAMIC,true);
-		Model m = new Model(false);
+		Model m = new Model(false,getTr());
 		m.addTriangles(tris);
 		setModel(m.finalizeModel());
 		}

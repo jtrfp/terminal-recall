@@ -28,7 +28,7 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere
 		{
 		super(tr);
 		//this.font=font;
-		final Model model = new Model(false);
+		final Model model = new Model(false,tr);
 		tex=new SelectableTexture(font.getTextures());
 		Triangle [] tris = Triangle.quad2Triangles(
 				new double []{0.,glSize,glSize,0.},//x

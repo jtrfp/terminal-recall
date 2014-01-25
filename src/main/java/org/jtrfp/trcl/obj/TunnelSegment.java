@@ -34,7 +34,7 @@ public class TunnelSegment extends WorldObject
 	
 	public TunnelSegment(TR tr, Segment s, Future<TextureDescription>[] tunnelTexturePalette, double segLen, double endX, double endY)
 		{
-		super(tr, createModel(s,segLen, tunnelTexturePalette,endX,endY));
+		super(tr, createModel(s,segLen, tunnelTexturePalette,endX,endY,tr));
 		segmentLength=segLen;
 		this.endX=endX;
 		this.endY=endY;
@@ -51,9 +51,9 @@ public class TunnelSegment extends WorldObject
 	public static double getEndHeight(Segment s)
 		{return TR.legacy2Modern(s.getEndHeight()*TUNNEL_DIA_SCALAR*3);}
 	
-	private static Model createModel(Segment s,double segLen, Future<TextureDescription>[] tunnelTexturePalette, double endX,double endY)
+	private static Model createModel(Segment s,double segLen, Future<TextureDescription>[] tunnelTexturePalette, double endX,double endY, TR tr)
 		{
-		Model m = new Model(true);
+		Model m = new Model(true,tr);
 		m.setDebugName("Tunnel Segment");
 		final int numPolys=s.getNumPolygons();
 		double startWidth=getStartWidth(s);

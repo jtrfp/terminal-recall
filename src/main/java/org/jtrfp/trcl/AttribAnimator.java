@@ -18,7 +18,7 @@ package org.jtrfp.trcl;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public final class AttribAnimator
+public final class AttribAnimator implements Tickable
 	{
 	Settable attrib;
 	Controller controller;
@@ -35,6 +35,10 @@ public final class AttribAnimator
 		this.controller=sequencer;
 		this.frames=frames;
 		}
+	
+	public void tick(){
+	    updateAnimation();
+	}
 	
 	public void updateAnimation()
 		{//if(!controller.isStale())return;//Not yet ready for prime time.

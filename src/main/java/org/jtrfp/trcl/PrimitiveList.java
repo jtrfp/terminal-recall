@@ -30,7 +30,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 	private final PRIMITIVE_TYPE [][] primitives;
 	private GPU_VEC4_TYPE [] vec4s;
 	public static enum RenderStyle{OPAQUE,TRANSPARENT};
-	protected static final ArrayList<AttribAnimator> animators = new ArrayList<AttribAnimator>();
+	protected static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
 	protected final String debugName;
 	protected double scale;
 	protected int packedScale;
@@ -95,8 +95,8 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 	
 	public static void tickAnimators()
 		{
-		for(AttribAnimator ani:animators)
-			{ani.updateAnimation();}
+		for(Tickable ani:animators)
+			{ani.tick();}
 		}//end tickAnimators()
 	
 	/**

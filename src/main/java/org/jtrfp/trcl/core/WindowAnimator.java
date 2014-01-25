@@ -7,7 +7,7 @@ import org.jtrfp.trcl.IntTransferFunction;
 public class WindowAnimator implements Tickable {
     private final TriangleVertex2FlatDoubleWindow w;
     private final int numElements, numFrames;
-    private final double[][] frames;
+    private final float[][] frames;
     private final boolean loopInterpolate;
     private final Controller controller;
     private int indexCounter=0;
@@ -20,11 +20,11 @@ public class WindowAnimator implements Tickable {
 	this.numFrames=numFrames;
 	this.indexXferFun=indexXferFun;
 	//this.startElement=startElement;
-	frames = new double[numElements*numFrames][];
+	frames = new float[numElements*numFrames][];
 	this.loopInterpolate=loopInterpolate;
 	this.controller=controller;
     }
-    public void addFrames(double[] newFrames) {
+    public void addFrames(float[] newFrames) {
 	//indices[indexCounter]=globalFlatID;
 	frames[indexCounter]=(newFrames);
 	indexCounter++;

@@ -99,9 +99,9 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			//vtx.y.set((short)applyScale(t.y[vIndex]));
 			//vtx.z.set((short)applyScale(t.z[vIndex]));
 			
-			double []xFrames = new double[numFrames];
-			double []yFrames = new double[numFrames];
-			double []zFrames = new double[numFrames];
+			float []xFrames = new float[numFrames];
+			float []yFrames = new float[numFrames];
+			float []zFrames = new float[numFrames];
 			for(int i=0; i<numFrames; i++)
 				{xFrames[i]=Math.round(triangleAt(i,triangleIndex).x[vIndex]/scale);}
 			xyzAnimator.addFrames(xFrames);
@@ -124,16 +124,16 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			final Texture.TextureTreeNode tx;
 			tx= ((Texture)t.getTexture().get()).getNodeForThisTexture();
 			if(animateUV&&numFrames>1){//Animated UV
-			    double []uFrames = new double[numFrames];
-			    double []vFrames = new double[numFrames];
+			    float []uFrames = new float[numFrames];
+			    float []vFrames = new float[numFrames];
 			    final WindowAnimator uvAnimator =  new WindowAnimator(flatTVWindow,
 				    2,// UV per vertex
 				    numFrames, false, getVertexSequencer(timeBetweenFramesMsec,numFrames),
 				    new UVXferFunc(gpuTVIndex*5));
 			    	animators.add(uvAnimator);
 			    for(int i=0; i<numFrames; i++){
-				uFrames[i]=uvUpScaler*tx.getGlobalUFromLocal(triangleAt(i,triangleIndex).u[vIndex]);
-				vFrames[i]=uvUpScaler*tx.getGlobalVFromLocal(triangleAt(i,triangleIndex).v[vIndex]);
+				uFrames[i]=(float)(uvUpScaler*tx.getGlobalUFromLocal(triangleAt(i,triangleIndex).u[vIndex]));
+				vFrames[i]=(float)(uvUpScaler*tx.getGlobalVFromLocal(triangleAt(i,triangleIndex).v[vIndex]));
 			    }//end for(numFrames)
 			    //TODO
 			    uvAnimator.addFrames(uFrames);
@@ -165,8 +165,8 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 			//vtx.v.set((short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
 			
 			final int numTextureFrames = at.getFrames().length;
-			double [] uFrames = new double[numTextureFrames];
-			double [] vFrames = new double[numTextureFrames];
+			float [] uFrames = new float[numTextureFrames];
+			float [] vFrames = new float[numTextureFrames];
 			for(int ti=0; ti<numTextureFrames;ti++){
 				tx=at.getFrames()[ti].get().getNodeForThisTexture();
 				uFrames[ti]=(short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex]));
@@ -186,7 +186,6 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>
 	
 	public void uploadToGPU(GL3 gl){
 		int nPrimitives=getNumPrimitives();
-		System.out.println("Model: "+this.getDebugName()+" NumPrimitives: "+nPrimitives);
 		try{
 		for(int tIndex=0;tIndex<nPrimitives;tIndex++)
 			{

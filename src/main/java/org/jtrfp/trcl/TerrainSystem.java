@@ -109,7 +109,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    	}//end scope
 					    
 					    	{//start scope ///// CEILING
-					    	final double Y_NUDGE = -10000;
+					    	final double Y_NUDGE = -5000;
 					    	/*
 					    	 * Y_NUDGE is a kludge. There is a tiny sliver of space between the ceiling and ground, 
 					    	 * likely caused by model vertex quantization in the rendering engine.

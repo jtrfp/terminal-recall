@@ -165,6 +165,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			}//end for(gZ)
 		//Wait to finish
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
+		terrainMirror.deactivate();
 		}//end constructor
 	
 	private class TunnelPoint{

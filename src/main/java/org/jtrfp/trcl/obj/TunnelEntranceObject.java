@@ -26,7 +26,7 @@ public class TunnelEntranceObject extends WorldObject {
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
 	final double [] position = getPosition();
 	position[0]=TR.legacy2Modern(entrance.getZ());
-	position[1]=TR.legacy2Modern(entrance.getY())-45000;
+	position[1]=TR.legacy2Modern(entrance.getY())-35000;
 	position[2]=TR.legacy2Modern(entrance.getX());
 	notifyPositionChange();
 	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());

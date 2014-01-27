@@ -14,7 +14,6 @@ import org.jtrfp.trcl.TunnelInstaller;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -39,6 +38,7 @@ public class Mission {
     private final Object missionCompleteBarrier = new Object();
     private final HashMap<String,Tunnel> tunnels = new HashMap<String,Tunnel>();
     private double [] playerStartPosition=  new double[3];
+    private List<NAVSubObject> navSubObjects;
     private ObjectDirection playerStartDirection;
     public Mission(TR tr, LVLFile lvl){
 	this.tr=tr;
@@ -84,11 +84,12 @@ public class Mission {
 	final World world = tr.getWorld();
 	world.add(player);
 	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	final OverworldSystem overworldSystem;
-	tr.setOverworldSystem(overworldSystem=new OverworldSystem(world, lvl, tdf));
+
+	//Install NAVs
 	final NAVSystem navSystem = tr.getNavSystem();
+	navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
+	tr.setOverworldSystem(new OverworldSystem(world, lvl, tdf));
 	
-	List<NAVSubObject> navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
 	START s = (START)navSubObjects.get(0);
 	navSubObjects.remove(0);
 	Location3D l3d = s.getLocationOnMap();
@@ -96,14 +97,15 @@ public class Mission {
 	playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
 	playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
 	playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
+	
 	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
-	//Install NAVs
 	Factory f = new NAVObjective.Factory(tr);
 	for(NAVSubObject obj:navSubObjects){
 	    f.create(tr, obj, navs);
 	}//end for(navSubObjects)
 	navSystem.updateNAVState();
 	tr.setBackdropSystem(new BackdropSystem(world));
+	
 	
 	final Mission mission = tr.getCurrentMission();
 	//////// INITIAL HEADING
@@ -223,4 +225,22 @@ public class Mission {
 	}.start();
 	
     }//end playerDestroyed()
+
+    public List<NAVObjective> getRemainingNAVObjectives() {
+	return navs;
+    }
+
+    /**
+     * @return the navSubObjects
+     */
+    public List<NAVSubObject> getNavSubObjects() {
+        return navSubObjects;
+    }
+
+    /**
+     * @param navSubObjects the navSubObjects to set
+     */
+    public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
+        this.navSubObjects = navSubObjects;
+    }
 }//end Mission

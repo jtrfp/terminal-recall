@@ -45,7 +45,7 @@ public class CollidesWithTerrain extends Behavior {
     	final boolean ceilingImpact=(thisY>ceilingHeight&&terrainMirror);
 	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),-groundNormal.getY(),groundNormal.getZ());
 	Vector3D surfaceNormal = groundImpact?groundNormal:ceilingNormal;
-	if(terrainMirror && groundHeightNorm>.95){groundImpact=true; surfaceNormal=downhillDirectionXZ;}
+	if(terrainMirror && groundHeightNorm>.97){groundImpact=true; surfaceNormal=downhillDirectionXZ;}
 	
     	if(groundLock){
     	    thisPos[1]=groundHeight;p.notifyPositionChange();return;

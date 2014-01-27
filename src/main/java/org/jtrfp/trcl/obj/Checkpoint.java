@@ -42,7 +42,7 @@ private boolean includeYAxisInCollision=true;
 		double [] parentPos = includeYAxisInCollision?parent.getPosition():new double []{parent.getPosition()[0],0,parent.getPosition()[2]};
 		if(TR.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
 		    destroy();
-		    m.removeNAVObjective(objective);
+		    getTr().getCurrentMission().removeNAVObjective(objective);
 		}//end if(collided)
 	    }//end if(Player)
 	}//end _proposeCollision()

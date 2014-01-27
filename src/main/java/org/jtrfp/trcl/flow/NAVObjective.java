@@ -77,6 +77,7 @@ public abstract class NAVObjective {
 		    entPos[0]=TR.legacy2Modern(loc3d.getZ());
 		    entPos[1]=TR.legacy2Modern(loc3d.getY());
 		    entPos[2]=TR.legacy2Modern(loc3d.getX());
+		    entPos[2]=entPos[2]>0?entPos[2]:entPos[2]-.5*TR.mapSquareSize;//Kludge for weird off-center tunnel entrances
 		    tunnelEntrance.notifyPositionChange();
 		    
 		    final NAVObjective enterObjective = new NAVObjective(this){

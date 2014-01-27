@@ -1,6 +1,9 @@
 package org.jtrfp.trcl;
 
+import java.util.List;
+
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 

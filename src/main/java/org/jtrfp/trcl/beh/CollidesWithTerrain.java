@@ -59,7 +59,7 @@ public class CollidesWithTerrain extends Behavior {
 	    final Behavior behavior = p.getBehavior();
 	    behavior.probeForBehaviors(sub,SurfaceImpactListener.class);
 	    
-	    if(p instanceof Player)System.out.println("Impact ceiling="+ceilingImpact+" ground="+groundImpact);
+	    //if(p instanceof Player)System.out.println("Impact ceiling="+ceilingImpact+" ground="+groundImpact);
 	    
 	    //Reflect heading,top
 	    if(bounce){

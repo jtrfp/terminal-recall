@@ -57,48 +57,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		    points.put(tp.hashCode(),tp);
 		    tunnelsByName.put(tun.getTunnelLVLFile(), tunnels[i]);
 		}
-		final Mission mission = tr.getCurrentMission();
-		List<NAVSubObject> navs = mission.getNavSubObjects();
-		TUN lastTun=null;
-		/*
-		for(int i=0; i<navs.size(); i++){
-		    final NAVSubObject nav = navs.get(i);
-		    if(nav instanceof TUN){
-			final TUN tun = (TUN)nav;
-			final String entranceTex = tunnelsByName.get(
-					tun.
-					getTunnelFileName()).
-					getEntranceTerrainTextureFile();
-			final TunnelPoint tp = new TunnelPoint(tun.getLocationOnMap(),entranceTex);
-			points.put(tp.hashCode(), tp);
-			System.out.println("TerrainSystem.nav Added tunnelPoint tun at x="+tp.x+" z="+tp.z+". Texture="+entranceTex);
-			Location3D loc3d = tun.getLocationOnMap();
-			Checkpoint chk = new Checkpoint(tr);
-			final double [] chkPos = chk.getPosition();
-			    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
-			    chkPos[1]=TR.legacy2Modern(loc3d.getY()+4000);
-			    chkPos[2]=TR.legacy2Modern(loc3d.getX());
-			    chk.notifyPositionChange();
-			    chk.setIncludeYAxisInCollision(false);
-			    tr.getWorld().add(chk);
-			lastTun=tun;
-		    }else if(nav instanceof XIT){
-			final XIT xit = (XIT)nav;
-			final String exitTex = tunnelsByName.get(lastTun.getTunnelFileName()).getExitTerrainTextureFile();
-			final TunnelPoint tp = new TunnelPoint(xit.getLocationOnMap(),exitTex);
-			points.put(tp.hashCode(), tp);
-			System.out.println("TerrainSystem.nav Added tunnelPoint xit at x="+tp.x+" z="+tp.z+". Texture="+exitTex);
-			Location3D loc3d = xit.getLocationOnMap();
-			Checkpoint chk = new Checkpoint(tr);
-			final double [] chkPos = chk.getPosition();
-			    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
-			    chkPos[1]=TR.legacy2Modern(loc3d.getY()+4000);
-			    chkPos[2]=TR.legacy2Modern(loc3d.getX());
-			    chk.notifyPositionChange();
-			    chk.setIncludeYAxisInCollision(false);
-			    tr.getWorld().add(chk);
-		    }//end for(navs)
-		}*/
 		Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;
 		//For each chunk
@@ -124,7 +82,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    final double zPos=cZ*gridSquareSize;
 						    
 						    final Integer tpi = cX+cZ*256;
-						    if(points.containsKey(tpi))System.out.println("TerrainSystem.constructor cX="+cX+" cZ="+cZ);
 						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
 						    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 							new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
@@ -208,20 +165,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			}//end for(gZ)
 		//Wait to finish
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
-		
-		//System.out.println("TerrainSystem.constructor finish");
 		}//end constructor
 	
 	private class TunnelPoint{
 	    final int x,z;
 	    Future<TextureDescription> textureToInsert;
-	    /*public TunnelPoint(Location3D loc, String textureFileName){
-		try{
-		textureToInsert = tr.getResourceManager().getRAWAsTexture(textureFileName, tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());}
-		catch(Exception e){e.printStackTrace();}
-		x=(byte)Math.ceil(TR.legacy2MapSquare(loc.getZ()))&0xFF;//Reversed on purpose
-		z=(byte)Math.ceil(TR.legacy2MapSquare(loc.getX()))&0xFF;
-	    }*/
 	    
 	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();

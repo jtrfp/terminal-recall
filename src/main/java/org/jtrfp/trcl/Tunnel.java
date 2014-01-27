@@ -52,7 +52,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	private final TunnelEntranceObject entranceObject;
 	private final TunnelExitObject exitObject;
 	
-	public static final Vector3D TUNNEL_START_POS = new Vector3D(0,Math.pow(2, 16)*.75,Math.pow(2, 17));
+	public static final Vector3D TUNNEL_START_POS = new Vector3D(0,Math.pow(2, 16)*1.2,Math.pow(2, 17));
 	public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(new Vector3D(1,0,0),new Vector3D(0,1,0));
 
 	public Tunnel(World world, TDFFile.Tunnel sourceTunnel){
@@ -400,7 +400,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			case invisibleWallRight://TODO
 				break;
 			case iris:{
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8*256,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],4*256,false,palette,gl));
 				final Model mod = wo.getModel();
 				wo.addBehavior(new IrisBehavior(new Sequencer(mod.getFrameDelayInMillis(), 2, true),width));
 				wo.setPosition(wPos.toArray());

@@ -1,11 +1,13 @@
 package org.jtrfp.trcl;
 
-import java.util.List;
+import java.util.Collection;
 
+import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class NAVSystem extends RenderableSpacePartitioningGrid {
 private final NavArrow arrow;
@@ -30,10 +32,27 @@ private final TR tr;
     }//end constructor
     
     public void updateNAVState(){
+	final NAVObjective obj = tr.getCurrentMission().currentNAVObjective();
 	tr.getHudSystem().
-	getObjective().
-	setContent(tr.getCurrentMission().
-		currentNAVObjective().
-		getDescription());
-    }
+		getObjective().
+		setContent(obj.getDescription());
+	final WorldObject target = obj.getTarget();
+	if(target!=null){
+	    target.getBehavior().probeForBehaviors(ntbSubmitter, NAVTargetableBehavior.class);
+	}//end if(target!=null)
+    }//end updateNAVState()
+    
+    private final Submitter<NAVTargetableBehavior> ntbSubmitter = new Submitter<NAVTargetableBehavior>(){
+
+	@Override
+	public void submit(NAVTargetableBehavior item) {
+	    item.notifyBecomingCurrentTarget();
+	}
+
+	@Override
+	public void submit(Collection<NAVTargetableBehavior> items) {
+	    for(NAVTargetableBehavior i:items){this.submit(i);}
+	}
+	
+    };//end ntbSubmitter
 }//end NAVSystem

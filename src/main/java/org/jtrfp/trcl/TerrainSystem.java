@@ -27,6 +27,7 @@ import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.TUN;
 import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.obj.Checkpoint;
 
@@ -51,11 +52,14 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		final HashMap<String,TDFFile.Tunnel> tunnelsByName = new HashMap<String,TDFFile.Tunnel>();
 		for(int i=0; i<tunnels.length; i++){
 		    final TDFFile.Tunnel tun = tunnels[i];
-		    TunnelPoint tp = new TunnelPoint(tun,true);
-		    points.put(tp.hashCode(),tp);
-		    tp = new TunnelPoint(tun,false);
-		    points.put(tp.hashCode(),tp);
-		    tunnelsByName.put(tun.getTunnelLVLFile(), tunnels[i]);
+		    if(tun.getEntranceLogic()!=TunnelLogic.invisible){
+			final TunnelPoint tp = new TunnelPoint(tun,true);
+			points.put(tp.hashCode(),tp);
+		    }
+		    if(tun.getExitLogic()!=TunnelLogic.invisible){
+			final TunnelPoint tp = new TunnelPoint(tun,false);
+			points.put(tp.hashCode(),tp);
+			tunnelsByName.put(tun.getTunnelLVLFile(), tunnels[i]);}
 		}
 		Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;

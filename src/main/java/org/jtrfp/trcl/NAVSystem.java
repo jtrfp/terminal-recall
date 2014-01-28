@@ -33,7 +33,7 @@ private final TR tr;
 	tr.getHudSystem().
 	getObjective().
 	setContent(tr.getCurrentMission().
-		currentNAVTarget().
+		currentNAVObjective().
 		getDescription());
     }
 }//end NAVSystem

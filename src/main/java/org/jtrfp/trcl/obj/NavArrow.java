@@ -55,10 +55,10 @@ private final NAVSystem nav;
 	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
 	    final Vector3D playerHeading = player.getHeading();
 	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
-	    if(mission.currentNAVTarget()==null){setVisible(false);return;}
-	    if(mission.currentNAVTarget().getTarget()==null){setVisible(false);return;}
+	    if(mission.currentNAVObjective()==null){setVisible(false);return;}
+	    if(mission.currentNAVObjective().getTarget()==null){setVisible(false);return;}
 	    	else setVisible(true);
-	    final double [] loc =mission.currentNAVTarget().getTarget().getPosition();
+	    final double [] loc =mission.currentNAVObjective().getTarget().getPosition();
 	    final Vector3D navLocXY = new Vector3D(loc[0],loc[2],0);
 	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
 	    final double modernDistance = player2NavVectorXY.getNorm();

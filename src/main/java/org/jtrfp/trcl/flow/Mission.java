@@ -137,7 +137,7 @@ public class Mission {
 	return new Result(null);//TODO: Replace null with actual value unless end of game.
     }//end go()
     
-    public NAVObjective currentNAVTarget(){
+    public NAVObjective currentNAVObjective(){
 	if(navs.isEmpty())return null;
 	return navs.get(0);
     }

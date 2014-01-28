@@ -34,7 +34,7 @@ public class TunnelEntranceObject extends WorldObject {
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
 
-    private class TunnelEntranceBehavior extends Behavior{
+    public class TunnelEntranceBehavior extends Behavior{
 	@Override
 	public void _proposeCollision(WorldObject other){
 	    WorldObject p = getParent();

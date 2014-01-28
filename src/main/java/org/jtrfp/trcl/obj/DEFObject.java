@@ -35,6 +35,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     boolean mobile=true;
     boolean canTurn=true;
     boolean foliage=false;
+    final boolean isBoss=def.isObjectIsBoss();
     boolean groundLocked=false;
     switch(logic){
     	case groundDumb:
@@ -185,7 +186,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	}//end switch(logic)
     addBehavior(new DeathBehavior());
-    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()));
+    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setEnable(!isBoss));
     addBehavior(new DamagedByCollisionWithGameplayObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
     if(canTurn){

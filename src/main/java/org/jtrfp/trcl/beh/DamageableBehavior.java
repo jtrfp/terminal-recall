@@ -11,16 +11,17 @@ public class DamageableBehavior extends Behavior{
 	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
 
 	public DamageableBehavior impactDamage(int dmg){
-	    generalDamage(dmg);
+	    if(isEnabled())generalDamage(dmg);
 	    return this;
 	}
 	
 	public DamageableBehavior shearDamage(int dmg){
-	    generalDamage(dmg);
+	    if(isEnabled())generalDamage(dmg);
 	    return this;
 	}
 	
 	protected void generalDamage(int dmg){
+	    if(!isEnabled())return;
 	    if(isInvincible())return;
 	    health-=dmg;
 		if(health<=0){
@@ -41,12 +42,14 @@ public class DamageableBehavior extends Behavior{
 		}
 
 	public void unDamage(int amt) throws HealthNotNeededException{
+	    	if(!isEnabled())return;
 	    	if(amt==maxHealth){unDamage();return;}
 	    	if(health+amt>maxHealth)throw new HealthNotNeededException();
 		health+=amt;
 		}
 
 	public void unDamage() throws HealthNotNeededException{
+	    	if(!isEnabled())return;
 	    	if(health>=maxHealth)throw new HealthNotNeededException();
 		health=maxHealth;
 		}

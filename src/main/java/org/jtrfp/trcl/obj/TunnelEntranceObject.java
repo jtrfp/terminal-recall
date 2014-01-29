@@ -13,11 +13,13 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 
 public class TunnelEntranceObject extends WorldObject {
     private final Tunnel tunnel;
     private NAVObjective navObjectiveToRemove;
+    private boolean onlyRemoveIfCurrent=false;
     public TunnelEntranceObject(TR tr, Tunnel tunnel) {
 	super(tr);
 	this.tunnel=tunnel;
@@ -69,7 +71,8 @@ public class TunnelEntranceObject extends WorldObject {
 		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
 		 final NAVObjective navObjective = getNavObjectiveToRemove();
 	         if(navObjective!=null){
-	             tr.getCurrentMission().removeNAVObjective(navObjective);
+	             final Mission m = tr.getCurrentMission();
+	             if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
 	         }//end if(have NAV to remove
 	        }//end if(close to Player)
 	    }//end if(Player)
@@ -90,5 +93,21 @@ public class TunnelEntranceObject extends WorldObject {
      */
     public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
         this.navObjectiveToRemove = navObjectiveToRemove;
+    }
+    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove, boolean onlyRemoveIfLast) {
+	this.onlyRemoveIfCurrent=true;
+	setNavObjectiveToRemove(navObjectiveToRemove);
+    }
+    /**
+     * @return the onlyRemoveIfCurrent
+     */
+    public boolean isOnlyRemoveIfCurrent() {
+        return onlyRemoveIfCurrent;
+    }
+    /**
+     * @param onlyRemoveIfCurrent the onlyRemoveIfCurrent to set
+     */
+    public void setOnlyRemoveIfCurrent(boolean onlyRemoveIfCurrent) {
+        this.onlyRemoveIfCurrent = onlyRemoveIfCurrent;
     }
 }//end TunnelEntrance

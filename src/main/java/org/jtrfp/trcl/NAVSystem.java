@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -12,6 +13,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class NAVSystem extends RenderableSpacePartitioningGrid {
 private final NavArrow arrow;
 private final TR tr;
+private final NAVRadarBlipFactory blips;
 
     public NAVSystem(SpacePartitioningGrid<PositionedRenderable> parent, 
 	    TR tr) {
@@ -26,6 +28,7 @@ private final TR tr;
 	arrow.notifyPositionChange();
 	//arrow.setPosition(new Vector3D(.825,.8,0));
 	add(arrow);
+	blips=new NAVRadarBlipFactory(tr,this);
 	activate();
 	
 	System.out.println("...Done.");
@@ -55,4 +58,15 @@ private final TR tr;
 	}
 	
     };//end ntbSubmitter
+
+    /**
+     * @return the blips
+     */
+    public NAVRadarBlipFactory getBlips() {
+        return blips;
+    }
+
+    public double[] getHeadingXY() {
+	return arrow.getTopArray();
+    }
 }//end NAVSystem

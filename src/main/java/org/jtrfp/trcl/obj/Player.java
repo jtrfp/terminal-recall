@@ -13,6 +13,7 @@ import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
@@ -65,6 +66,7 @@ public class Player extends WorldObject
 		addBehavior(new DamagedByCollisionWithGameplayObject());
 		addBehavior(new DamagedByCollisionWithSurface());
 		addBehavior(new BouncesOffSurfaces());
+		addBehavior(new UpdatesNAVRadar());
 		final Weapon [] allWeapons = Weapon.values();
 		final ProjectileFactory [] projectileFactories=tr.getResourceManager().getProjectileFactories();
 		for(int i=0; i<allWeapons.length; i++){

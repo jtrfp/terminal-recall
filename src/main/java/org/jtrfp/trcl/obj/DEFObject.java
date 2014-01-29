@@ -28,15 +28,17 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 public class DEFObject extends WorldObject {
     private final double boundingRadius;
     private WorldObject ruinObject;
+    private final EnemyLogic logic;
+    private boolean mobile,canTurn,foliage,boss,groundLocked;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
-    final EnemyLogic logic = def.getLogic();
-    boolean mobile=true;
-    boolean canTurn=true;
-    boolean foliage=false;
-    final boolean isBoss=def.isObjectIsBoss();
-    boolean groundLocked=false;
+    logic = def.getLogic();
+    mobile=true;
+    canTurn=true;
+    foliage=false;
+    boss=def.isObjectIsBoss();
+    groundLocked=false;
     switch(logic){
     	case groundDumb:
     	    mobile=false;
@@ -186,7 +188,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	}//end switch(logic)
     addBehavior(new DeathBehavior());
-    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setEnable(!isBoss));
+    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setEnable(!boss));
     addBehavior(new DamagedByCollisionWithGameplayObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
     if(canTurn){
@@ -234,5 +236,47 @@ public double getBoundingRadius() {
 public void setRuinObject(DEFObject ruin) {
     ruinObject=ruin;
     
+}
+
+/**
+ * @return the logic
+ */
+public EnemyLogic getLogic() {
+    return logic;
+}
+
+/**
+ * @return the mobile
+ */
+public boolean isMobile() {
+    return mobile;
+}
+
+/**
+ * @return the canTurn
+ */
+public boolean isCanTurn() {
+    return canTurn;
+}
+
+/**
+ * @return the foliage
+ */
+public boolean isFoliage() {
+    return foliage;
+}
+
+/**
+ * @return the boss
+ */
+public boolean isBoss() {
+    return boss;
+}
+
+/**
+ * @return the groundLocked
+ */
+public boolean isGroundLocked() {
+    return groundLocked;
 }
 }//end DEFObject

@@ -5,44 +5,40 @@ import java.util.concurrent.Future;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.NAVSystem;
-import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.TextureDescription;
-import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Mission;
 
-public class NavArrow extends WorldObject2DVisibleEverywhere {
+public class NavArrow extends Sprite2D {
 private static final double WIDTH=.08;
 private static final double HEIGHT=.08;
 private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final NAVSystem nav;
     public NavArrow(TR tr, NAVSystem navSystem) {
-	super(tr);
+	super(tr, Z, 
+		WIDTH, 
+		HEIGHT, 
+		getTexture(tr), true);
 	this.nav=navSystem;
 	try{
-	final Model m = new Model(false,tr);
-	final Future<TextureDescription> tex = tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl());
-	Triangle [] tris = Triangle.quad2Triangles(
-		new double[]{-WIDTH,WIDTH,WIDTH,-WIDTH}, 
-		new double[]{-HEIGHT,-HEIGHT,HEIGHT,HEIGHT}, 
-		new double[]{Z,Z,Z,Z},
-		new double[]{0,1,1,0},
-		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, true);
-	m.addTriangles(tris);
-	m.finalizeModel();
-	setModel(m);
-	setTop(Vector3D.PLUS_J);
-	setActive(true);
-	setVisible(true);
 	addBehavior(new NavArrowBehavior());
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
+    
+    private static Future<TextureDescription> getTexture(TR tr){
+	try{
+	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
+		tr.getGlobalPalette(), 
+		GammaCorrectingColorProcessor.singleton, 
+		tr.getGPU().getGl());}
+	catch(Exception e){e.printStackTrace();}
+	return null;
+    }
     
     private class NavArrowBehavior extends Behavior{
 	private int counter=0;
@@ -73,7 +69,7 @@ private final NAVSystem nav;
 	    //Kludge to correct negative X bug in engine. (mirrored world)
 	    final Vector3D correctedNormPlayer2NavVector = new Vector3D(-normPlayer2NavVector.getX(),normPlayer2NavVector.getY(),0);
 	    final Rotation rot = new Rotation(Vector3D.PLUS_J,playerHeadingXY.getNorm()!=0?playerHeadingXY:Vector3D.PLUS_I);
-	    setTop(rot.applyTo(correctedNormPlayer2NavVector));
+	    setTop(rot.applyTo(correctedNormPlayer2NavVector).normalize());
 	}//_ticks(...)
     }//end NavArrowBehavior
 }//end NavArrow

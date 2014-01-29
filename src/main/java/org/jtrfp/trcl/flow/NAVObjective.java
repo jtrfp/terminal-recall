@@ -6,6 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.ChangesBehaviorWhenTargeted;
+import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.RemovesNAVObjectiveOnDeath;
 import org.jtrfp.trcl.core.TR;
@@ -42,7 +43,7 @@ public abstract class NAVObjective {
 	private TR tr;//for debug
 	private Tunnel currentTunnel;
 	int counter;
-	private WorldObject worldBossObject;
+	private WorldObject worldBossObject,bossChamberExitShutoffTrigger;
 	public Factory(TR tr){
 	    this.tr=tr;
 	}//end constructor
@@ -93,7 +94,7 @@ public abstract class NAVObjective {
 				return tunnelEntrance;
 			    }
 		    };//end new NAVObjective tunnelEnrance
-		    tunnelEntrance.setNavObjectiveToRemove(enterObjective);
+		    tunnelEntrance.setNavObjectiveToRemove(enterObjective,true);
 		    dest.add(enterObjective);
 		    final TunnelExitObject tunnelExit = tunnel.getExitObject();
 		    final NAVObjective exitObjective = new NAVObjective(this){
@@ -109,8 +110,13 @@ public abstract class NAVObjective {
 		    dest.add(exitObjective);
 		    tunnelExit.setNavObjectiveToRemove(exitObjective);
 		    tunnelExit.setMirrorTerrain(tunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
-		    if(tunnel.getSourceTunnel().getExitLogic()==TunnelLogic.visibleUnlessBoss){//This logic is a little different from original game: Stays disabled until boss is destroyed, so no cheating from player (:
-			tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceObject.TunnelEntranceBehavior.class).setEnable(false);
+		    if(tunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
+			//tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceObject.TunnelEntranceBehavior.class).setEnable(false);
+			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+			    @Override
+			    public void run() {
+				tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(false);}
+			}));
 			worldBossObject.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
@@ -121,19 +127,31 @@ public abstract class NAVObjective {
 		} else if(obj instanceof BOS){///////////////////////////////////////////
 		    final Mission mission = tr.getCurrentMission();
 		    final BOS bos = (BOS)obj;
+		    boolean first=true;
 		    for(final int target:bos.getTargets()){
 			final WorldObject shieldGen = defs.get(target);
 			final NAVObjective objective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {
-				return "Destroy Shield Generator";
+				return "Destroy Shield Gen";
 			    }
 			    @Override
 			    public WorldObject getTarget() {
 				return shieldGen;
 			    }
 			};//end new NAVObjective
+			if(first){
+			    bossChamberExitShutoffTrigger=shieldGen;
+			    first=false;
+			}//end if(first)
 			shieldGen.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
+			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+			    @Override
+			    public void run() {
+				shieldGen.getBehavior().probeForBehavior(DamageableBehavior.class).setEnable(true);
+				shieldGen.setActive(true);
+			    }
+			}));
 			dest.add(objective);
 		    }//end for(targets)
 		    final WorldObject bossObject = defs.get(bos.getBossIndex());
@@ -150,7 +168,14 @@ public abstract class NAVObjective {
 			dest.add(objective);
 			bossObject.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
 			bossObject.addBehavior(new ChangesBehaviorWhenTargeted(true,DamageableBehavior.class));
+			if(bos.getTargets().length==0){
+			    bossChamberExitShutoffTrigger=bossObject;}
 			worldBossObject = bossObject;
+			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+			    @Override
+			    public void run() {
+				bossObject.setActive(true);}
+			}));
 		} else if(obj instanceof CHK){///////////////////////////////////////////
 		    final CHK cp = (CHK)obj;
 		    final Location3D loc3d = cp.getLocationOnMap();

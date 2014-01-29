@@ -51,7 +51,7 @@ public class RenderList{
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
 	    	@Override
 		public void submit(PositionedRenderable item)
-			{if(item instanceof WorldObject){if(!((WorldObject)item).isVisible()){return;}}
+			{if(item instanceof WorldObject){if(!((WorldObject)item).isVisible()||!((WorldObject)item).isActive()){return;}}
 			numOpaqueBlocks+=item.getOpaqueObjectDefinitionAddresses().capacity()/4;
 			numTransparentBlocks+=item.getTransparentObjectDefinitionAddresses().capacity()/4;
 			renderables[renderablesIndex++]=item;

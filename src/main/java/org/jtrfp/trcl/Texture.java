@@ -15,13 +15,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Collections;
@@ -31,6 +35,10 @@ import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
@@ -101,20 +109,19 @@ public class Texture implements TextureDescription
 	    try{return RGBA8FromPNG(new FileInputStream(f));}
 	    catch(FileNotFoundException e){e.printStackTrace();return null;}
 	}
+	
 	public static ByteBuffer RGBA8FromPNG(InputStream f){
-		try
-			{
-			BufferedImage defaultImage = ImageIO.read(f);
-			ByteBuffer buf = ByteBuffer.allocateDirect(defaultImage.getWidth()*defaultImage.getHeight()*4);
-			for(int y=0; y<defaultImage.getHeight(); y++)
-				{
-				for(int x=0; x<defaultImage.getWidth(); x++)
-					{
-					final Color c = new Color(defaultImage.getRGB(x, y));
-					buf.put((byte)c.getRed());
-					buf.put((byte)c.getGreen());
-					buf.put((byte)c.getBlue());
-					buf.put((byte)c.getAlpha());
+		try{
+			BufferedImage image = ImageIO.read(f);
+			int color;
+			ByteBuffer buf = ByteBuffer.allocateDirect(image.getWidth()*image.getHeight()*4);
+			for(int y=0; y<image.getHeight(); y++){
+				for(int x=0; x<image.getWidth(); x++){
+				    	color=image.getRGB(x, y);
+					buf.put((byte)((color&0x00FF0000)>>16));
+					buf.put((byte)((color&0x0000FF00)>>8));
+					buf.put((byte)(color&0x000000FF));
+					buf.put((byte)((color&0xFF000000)>>24));
 					}//end for(x)
 				}//end for(y)
 			buf.clear();//Rewind

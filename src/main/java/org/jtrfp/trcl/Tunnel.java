@@ -45,7 +45,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	private final TR tr;
 	private final Color [] palette;
 	private final GL3 gl;
-	final double tunnelDia=200000;
+	final double tunnelDia=150000;
 	final double wallThickness=5000;
 	private final World world;
 	private final TDFFile.Tunnel sourceTunnel;

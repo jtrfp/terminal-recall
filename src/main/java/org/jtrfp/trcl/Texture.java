@@ -51,6 +51,7 @@ public class Texture implements TextureDescription
 	private static TextureTreeNode rootNode=null;
 	private static GLTexture globalTexture;
 	public static final List<Future<TextureDescription>> texturesToBeAccounted = Collections.synchronizedList(new LinkedList<Future<TextureDescription>>());
+	private ByteBuffer rgba;
 	
 	private static void waitUntilTextureProcessingEnds(){
 	    while(!texturesToBeAccounted.isEmpty()){
@@ -65,6 +66,10 @@ public class Texture implements TextureDescription
 		fallbackTexture=new DummyFuture<TextureDescription>(t);
 		}
 	private static ByteBuffer emptyRow=null;
+	
+	public Texture(Texture parent, double uOff, double vOff, double uSize, double vSize){
+	    nodeForThisTexture=new UVTranslatingTextureTreeNode(parent.getNodeForThisTexture(),uOff,vOff,uSize,vSize);
+	}
 	
 	public Texture(ByteBuffer imageRGB8, String debugName){
 	    	if(imageRGB8.capacity()==0){throw new IllegalArgumentException("Cannot create texture of zero size.");}
@@ -85,23 +90,24 @@ public class Texture implements TextureDescription
 		//g.drawImage(img,0, 0, img.getWidth(), img.getHeight(), 0, 0, img.getWidth(), img.getHeight(), null);
 		//g.drawImage(img, 4, 4, img.getWidth()-2, img.getHeight()-2, 0, 0, img.getWidth(), img.getHeight(), null);
 		//g.dispose();
+		//TODO Add true alpha support and optimize like the one below
 		long redA=0,greenA=0,blueA=0;
-		ByteBuffer data = ByteBuffer.allocateDirect(img.getWidth()*img.getHeight()*4);
+		rgba = ByteBuffer.allocateDirect(img.getWidth()*img.getHeight()*4);
 		for(int y=0; y<img.getHeight(); y++)
 			{for(int x=0; x<img.getWidth(); x++)
 				{Color c= new Color(img.getRGB(x, y),true);
-				data.put((byte)c.getRed());
-				data.put((byte)c.getGreen());
-				data.put((byte)c.getBlue());
-				data.put((byte)c.getAlpha());
+				rgba.put((byte)c.getRed());
+				rgba.put((byte)c.getGreen());
+				rgba.put((byte)c.getBlue());
+				rgba.put((byte)c.getAlpha());
 				redA+=c.getRed();
 				greenA+=c.getGreen();
 				blueA+=c.getBlue();
 				}//end for(x)
 			}//end for(y)
-		final int div=data.capacity()/4;
+		final int div=rgba.capacity()/4;
 		averageColor=new Color((redA/div)/255f,(greenA/div)/255f,(blueA/div)/255f);
-		newNode.setImage(data);
+		newNode.setImage(rgba);
 		registerNode(newNode);
 		}
 	
@@ -110,13 +116,18 @@ public class Texture implements TextureDescription
 	    catch(FileNotFoundException e){e.printStackTrace();return null;}
 	}
 	
-	public static ByteBuffer RGBA8FromPNG(InputStream f){
-		try{
-			BufferedImage image = ImageIO.read(f);
+	public static ByteBuffer RGBA8FromPNG(InputStream is){
+	    try{BufferedImage bi = ImageIO.read(is);
+		return RGBA8FromPNG(bi,0,0,bi.getWidth(),bi.getHeight());}
+	    catch(Exception e){e.printStackTrace();}
+	    return null;
+	}
+	
+	public static ByteBuffer RGBA8FromPNG(BufferedImage image, int startX, int startY, int sizeX, int sizeY){
 			int color;
 			ByteBuffer buf = ByteBuffer.allocateDirect(image.getWidth()*image.getHeight()*4);
-			for(int y=0; y<image.getHeight(); y++){
-				for(int x=0; x<image.getWidth(); x++){
+			for(int y=startY; y<startY+sizeY; y++){
+				for(int x=startX; x<startX+sizeX; x++){
 				    	color=image.getRGB(x, y);
 					buf.put((byte)((color&0x00FF0000)>>16));
 					buf.put((byte)((color&0x0000FF00)>>8));
@@ -126,9 +137,6 @@ public class Texture implements TextureDescription
 				}//end for(y)
 			buf.clear();//Rewind
 			return buf;
-			}
-		catch(Exception e){e.printStackTrace();}
-		return null;
 		}//end RGB8FromPNG(...)
 	
 	static double getPixelSize(){return pixelSize;}
@@ -253,6 +261,28 @@ public class Texture implements TextureDescription
 			GREYSCALE[i]=new Color(i,i,i);
 			}
 		}//end static{}
+	
+	static class UVTranslatingTextureTreeNode extends TextureTreeNode{
+	    private final TextureTreeNode pNode;
+	    private final double uOffset,vOffset,uSize,vSize;
+	    public UVTranslatingTextureTreeNode(TextureTreeNode parent, double uOffset, double vOffset, double uSize, double vSize) {
+		super(parent.sideLength, parent.parent, parent.debugName);
+		pNode=parent;
+		this.uOffset=uOffset;
+		this.vOffset=vOffset;
+		this.uSize=uSize;
+		this.vSize=vSize;
+	    }
+	    @Override
+	    public double getGlobalUFromLocal(double u){
+		return pNode.getGlobalUFromLocal(u*uSize+uOffset);
+	    }
+	    @Override
+	    public double getGlobalVFromLocal(double v){
+		return pNode.getGlobalVFromLocal(v*vSize+vOffset);
+	    }
+	    
+	}
 	
 	static class TextureTreeNode
 		{
@@ -692,4 +722,26 @@ public class Texture implements TextureDescription
 		
 		return new DummyFuture<TextureDescription>(new Texture(img,"Solid color "+color));
 		}
-	}//end Texture
+
+	/**
+	 * @return the rgba
+	 */
+	public ByteBuffer getRgba() {
+	    return rgba;
+	}
+
+	public static ByteBuffer fragmentRGBA(ByteBuffer input,
+		int quadDepth, int x, int y) {
+	    final int originalSideLen=(int)Math.sqrt(input.capacity()/4);
+	    final int splitAmount = (int)Math.pow(2, quadDepth);
+	    final int newSideLen=originalSideLen/splitAmount;
+	    ByteBuffer  result = ByteBuffer.allocateDirect((int)(Math.pow(newSideLen,2)*4));
+	    for(int row=y*newSideLen; row<(y+1)*newSideLen; row++){
+		input.clear();
+		input.limit((x+1)*newSideLen*4+row*originalSideLen*4);
+		input.position(x*newSideLen*4+row*originalSideLen*4);
+		result.put(input);
+	    }
+	    return result;
+	}//end fragmentRGBA(...)
+}//end Texture

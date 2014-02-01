@@ -92,7 +92,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		Future<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
-		double segLen=512*TunnelSegment.TUNNEL_DIA_SCALAR;
+		final double segLen=65536;
 		final double tunnelScalar=(TunnelSegment.TUNNEL_DIA_SCALAR/TR.crossPlatformScalar);
 		final double bendiness=tunnelScalar;
 		List<Segment> segs = tun.getSegments();

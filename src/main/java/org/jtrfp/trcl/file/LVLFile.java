@@ -47,8 +47,9 @@ public class LVLFile extends SelfParsingFile
 	
 	AbstractVector sunlightDirectionVector;
 	int ambientLight;
-	AbstractVector unknownVector;
-	int unknownInt0,unknownInt1;
+	//Chamber light found by WDLMaster
+	AbstractVector chamberLightDirectionVector;
+	int chamberAmbientLight,unknownInt1;
 	//New Story stuff
 	String introVideoFile;
 	String levelEndVideoFile;
@@ -90,8 +91,8 @@ public class LVLFile extends SelfParsingFile
 		
 		prs.subParseProposedClasses(prs.property("sunlightDirectionVector",AbstractVector.class),ClassInclusion.classOf(AbstractVector.class));
 		prs.stringEndingWith("\r\n", prs.property("ambientLight",Integer.class), false);
-		prs.subParseProposedClasses(prs.property("unknownVector",AbstractVector.class),ClassInclusion.classOf(AbstractVector.class));
-		prs.stringEndingWith("\r\n",prs.property("unknownInt0",Integer.class),false);
+		prs.subParseProposedClasses(prs.property("chamberLightDirectionVector",AbstractVector.class),ClassInclusion.classOf(AbstractVector.class));
+		prs.stringEndingWith("\r\n",prs.property("chamberAmbientLight",Integer.class),false);
 		prs.stringEndingWith("\r\n",prs.property("unknownInt1",Integer.class),false);
 		
 		prs.ignoreEOF(true);
@@ -431,27 +432,30 @@ public class LVLFile extends SelfParsingFile
 		}
 
 	/**
-	 * @return the unknownVector
+	 * Found by WDLMaster
+	 * @return the chamberLightDirectionVector
 	 */
-	public AbstractVector getUnknownVector()
+	public AbstractVector getChamberLightDirectionVector()
 		{
-		return unknownVector;
+		return chamberLightDirectionVector;
 		}
 
 	/**
-	 * @return the unknownInt0
+	 * Found by WDLMaster
+	 * @return the chamberAmbientLight
 	 */
-	public int getUnknownInt0()
+	public int getChamberAmbientLight()
 		{
-		return unknownInt0;
+		return chamberAmbientLight;
 		}
 
 	/**
-	 * @param unknownInt0 the unknownInt0 to set
+	 * Found by WDLMaster
+	 * @param chamberAmbientLight the chamberAmbientLight to set
 	 */
-	public void setUnknownInt0(int unknownInt0)
+	public void setChamberAmbientLight(int chamberAmbientLight)
 		{
-		this.unknownInt0 = unknownInt0;
+		this.chamberAmbientLight = chamberAmbientLight;
 		}
 
 	/**
@@ -472,11 +476,12 @@ public class LVLFile extends SelfParsingFile
 
 	
 	/**
-	 * @param unknownVector the unknownVector to set
+	 * Found by WDLMaster
+	 * @param chamberLightDirectionVector the chamberLightDirectionVector to set
 	 */
-	public void setUnknownVector(AbstractVector unknownVector)
+	public void setChamberLightDirectionVector(AbstractVector chamberLightDirectionVector)
 		{
-		this.unknownVector = unknownVector;
+		this.chamberLightDirectionVector = chamberLightDirectionVector;
 		}
 
 	/**

@@ -30,7 +30,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 	private final PRIMITIVE_TYPE [][] primitives;
 	private GPU_VEC4_TYPE [] vec4s;
 	public static enum RenderStyle{OPAQUE,TRANSPARENT};
-	protected static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
+	public static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
 	protected final String debugName;
 	protected double scale;
 	protected int packedScale;

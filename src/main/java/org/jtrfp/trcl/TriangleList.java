@@ -22,7 +22,6 @@ import javax.media.opengl.GL3;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
-import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow.Variable;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
 
@@ -133,12 +132,14 @@ public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>{
 				getFrames()
 				[0].get().
 				getNodeForThisTexture();//Default frame
+			final int numTextureFrames = at.getFrames().length;
 			final WindowAnimator uvAnimator =  new WindowAnimator(flatTVWindow,
 				    2,// UV per vertex
-				    at.getFrames().length, false, at.getTextureSequencer(),
+				    numTextureFrames, false, at.getTextureSequencer(),
 				    new UVXferFunc(gpuTVIndex*5));
+			uvAnimator.setDebugName(debugName+".uvAnimator");
 			animators.add(uvAnimator);
-			final int numTextureFrames = at.getFrames().length;
+			
 			float [] uFrames = new float[numTextureFrames];
 			float [] vFrames = new float[numTextureFrames];
 			for(int ti=0; ti<numTextureFrames;ti++){

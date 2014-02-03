@@ -12,6 +12,7 @@ public class WindowAnimator implements Tickable {
     private final Controller controller;
     private int indexCounter=0;
     private final IntTransferFunction indexXferFun;
+    private String debugName;
     public WindowAnimator(TriangleVertex2FlatDoubleWindow w, 
 	    int numElements, int numFrames,
 	    boolean loopInterpolate, Controller controller, IntTransferFunction indexXferFun){
@@ -35,7 +36,7 @@ public class WindowAnimator implements Tickable {
 	if(indexCounter<numElements){
 	    return;}
 	final double frame=controller.getCurrentFrame();
-	controller.unstale();
+	//controller.unstale();
 	int lowFrame = (int)frame;
 	int hiFrame = (lowFrame+1)%numFrames;
 	double interpolation = frame-(double)lowFrame;
@@ -45,7 +46,20 @@ public class WindowAnimator implements Tickable {
 	for(int index=0; index<numElements; index++){
 	    final double val = frames[index][lowFrame]*lI+frames[index][hiFrame]*hI;
 	    //System.out.println("Element index="+index+" location="+indexXferFun.transfer(index));
+	    //if(debugName!=null)if(debugName.contains("uvAnimator"))System.out.println("name: "+debugName+": "+indexXferFun.transfer(index)+" set to "+val);
 	    w.set(indexXferFun.transfer(index), val);
 	}//end for(numElements)
     }//update()
+    /**
+     * @return the debugName
+     */
+    public String getDebugName() {
+        return debugName;
+    }
+    /**
+     * @param debugName the debugName to set
+     */
+    public void setDebugName(String debugName) {
+        this.debugName = debugName;
+    }
 }//end WindowAnimator

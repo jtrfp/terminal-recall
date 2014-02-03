@@ -18,6 +18,7 @@ package org.jtrfp.trcl;
 public class Selector implements Controller{
 	double frame=0;
 	private boolean stale=true;
+	public boolean debug=false;
 	public Selector()
 		{}
 	
@@ -26,13 +27,14 @@ public class Selector implements Controller{
 		}
 	
 	public void set(double frame){
-	    this.frame=frame;stale=true;}
+	    this.frame=frame;stale=true;if(debug)System.out.println("Set to frame "+frame);}
 	
 	@Override
 	public double getCurrentFrame(){
+	    	if(debug)System.out.println("getCurrentFrame() "+frame);
 		return frame;
 		}
-
+/*
 	@Override
 	public void unstale() {
 	    stale=false;
@@ -41,5 +43,10 @@ public class Selector implements Controller{
 	@Override
 	public boolean isStale() {
 	    return stale;
+	}*/
+
+	@Override
+	public void setDebugMode(boolean b) {
+	   debug=b;
 	}
 }//end Selector

@@ -19,13 +19,10 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
 
-public class CharDisplay extends WorldObject2D implements VisibleEverywhere
-	{
-	//private GLFont font;
-	private SelectableTexture tex;
+public class CharDisplay extends WorldObject2D implements VisibleEverywhere{
+	private final SelectableTexture tex;
 	
-	public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid, double glSize, GLFont font)
-		{
+	public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid, double glSize, GLFont font){
 		super(tr);
 		//this.font=font;
 		final Model model = new Model(false,tr);
@@ -37,7 +34,7 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere
 				
 				new double []{0,1,1,0},//u
 				new double []{0,0,1,1},
-				new DummyFuture<TextureDescription>(tex), RenderMode.DYNAMIC);//TODO: tex instead of fallback
+				new DummyFuture<TextureDescription>(tex), RenderMode.DYNAMIC);
 		tris[0].setAlphaBlended(true);
 		tris[1].setAlphaBlended(true);
 		model.addTriangles(tris);
@@ -45,4 +42,6 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere
 		}//end constructor()
 	
 	public void setChar(char c){tex.setFrame(c);}
+	
+	public SelectableTexture getSelectableTexture(){return tex;}
 	}//end CharDisplay

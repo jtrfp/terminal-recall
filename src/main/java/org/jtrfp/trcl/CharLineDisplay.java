@@ -23,7 +23,7 @@ import org.jtrfp.trcl.core.TR;
 public class CharLineDisplay
 	{
 	private char [] content;
-	private CharDisplay [] displays;
+	private final CharDisplay [] displays;
 	double [] position = new double []{0,0,.0001};
 	private GLFont font;
 	private final double glSize;
@@ -80,5 +80,17 @@ public class CharLineDisplay
 	    position[1]=y;
 	    position[2]=z;
 	    updatePositions();
+	}
+
+	/**
+	 * @return the displays
+	 */
+	public CharDisplay[] getDisplays() {
+	    return displays;
+	}
+
+	public GLFont getFont() {
+	    // TODO Auto-generated method stub
+	    return font;
 	}
 }//end LineDisplay

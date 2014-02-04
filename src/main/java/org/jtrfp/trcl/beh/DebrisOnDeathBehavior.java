@@ -6,7 +6,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
     private final double MAX_SPEED=70000;
-    private final int MIN_FRAGS=6;
+    private final int MIN_FRAGS=12;
     @Override
     public void notifyDeath() {
 	WorldObject p = getParent();
@@ -16,7 +16,7 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
 	else if(model.getTransparentTriangleList()!=null)maxVertexValue=model.getTransparentTriangleList().getMaximumVertexValue();
 	else if(model.getLineSegmentList()!=null)maxVertexValue=model.getLineSegmentList().getMaximumVertexValue();
 	else return;//Give up
-	for(int i=0; i<MIN_FRAGS+maxVertexValue/6000; i++){
+	for(int i=0; i<MIN_FRAGS+maxVertexValue/4000; i++){
 	    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
 	    new Vector3D(
 		Math.random()*MAX_SPEED-MAX_SPEED/2.,

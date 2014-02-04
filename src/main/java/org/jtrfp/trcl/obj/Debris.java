@@ -24,6 +24,9 @@ private final int MIN_LIFESPAN_MILLIS=3000;
 private final double LIFESPAN_RANGE_MILLIS=MAX_LIFESPAN_MILLIS-MIN_LIFESPAN_MILLIS;
 private static final String [] TYPES = new String[]{
     "CHUNK.BIN",
+    "PIPE.BIN",
+    "PIPE.BIN",
+    "PIPE.BIN",
     "FRAG1.BIN",
     "FRAG2.BIN",
     "FRAG3.BIN",

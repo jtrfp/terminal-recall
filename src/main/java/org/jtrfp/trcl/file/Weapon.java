@@ -10,9 +10,9 @@ import org.jtrfp.trcl.file.ModelingType.FlatModelingType;
 public enum Weapon{
     	/// THESE ARE LISTED REPRESENTATIVE OF THE ORDINAL ORDER IN A DEF FILE. DO NOT RE-ORDER!!
 	purpleLaser(null,null,new FlatModelingType("PURFRIN2.RAW",new Dimension(80000,560000)),2048,ModelingType.MAP_SQUARE_SIZE*12,-1,2048,false),
-	PAC("PAC","SKL",new FlatModelingType("BIGEX8.RAW",new Dimension(80000,560000)),2048,ModelingType.MAP_SQUARE_SIZE*12,1,2048,true),
+	PAC("PAC","SKL",new FlatModelingType("SQGLSR.RAW",new Dimension(120000,560000)),2048,ModelingType.MAP_SQUARE_SIZE*12,1,2048,true),
 	ION("ION","DC1",new BillboardModelingType(new String[]{"PULSE0.RAW","PULSE1.RAW","PULSE2.RAW"},70,new Dimension(320000,320000)),4096,ModelingType.MAP_SQUARE_SIZE*12,2,2048,false),
-	RTL("RTL","RFL20",new FlatModelingType("NEWLASER.RAW",new Dimension(80000,560000)),4096,ModelingType.MAP_SQUARE_SIZE*18,3,2048,true),
+	RTL("RTL","RFL20",new FlatModelingType("NEWLASER.RAW",new Dimension(100000,560000)),4096,ModelingType.MAP_SQUARE_SIZE*18,3,2048,true),
 	fireBall(null,null,new BINModelingType("FIREBALL.BIN"),8192,ModelingType.MAP_SQUARE_SIZE*8,-1,2048,false),
 	greenLaser(null,null,new FlatModelingType("GIDMIS.RAW",new Dimension(80000,560000)),2048,ModelingType.MAP_SQUARE_SIZE*12,-1,2048,false),
 	redLaser(null,null,new FlatModelingType("BIGEX8.RAW",new Dimension(80000,560000)),2048,ModelingType.MAP_SQUARE_SIZE*14,-1,2048,false),

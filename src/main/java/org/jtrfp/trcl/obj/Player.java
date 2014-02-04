@@ -45,6 +45,7 @@ public class Player extends WorldObject
 
 	public Player(TR tr,Model model)
 		{super(tr,model);
+		setVisible(false);
 		addBehavior(new PlayerBehavior());
 		addBehavior(new DamageableBehavior());
 		addBehavior(new AccelleratedByPropulsion());

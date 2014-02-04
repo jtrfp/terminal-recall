@@ -15,20 +15,20 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
 	final KeyStatus keyStatus = p.getTr().getKeyStatus();
 	final RotationalMomentumBehavior rmb = p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
 	if (keyStatus.isPressed(KeyEvent.VK_UP)){
-		rmb.accelleratePolarMomentum(-2.*Math.PI*accellerationFactor);
+		rmb.accelleratePolarMomentum(-2.*Math.PI*accellerationFactor*1.2);
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_DOWN)){
-	    	rmb.accelleratePolarMomentum(2.*Math.PI*accellerationFactor);
+	    	rmb.accelleratePolarMomentum(2.*Math.PI*accellerationFactor*1.2);
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_LEFT)){
 	    	//Tilt
-		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor*.25);
+		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor*.6);
 		//Turn
 		rmb.accellerateEquatorialMomentum(2*Math.PI*accellerationFactor);
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_RIGHT)){
 	    	//Tilt
-		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor*.25);
+		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor*.6);
 		//Turn
 		rmb.accellerateEquatorialMomentum(-2*Math.PI*accellerationFactor);
 		}

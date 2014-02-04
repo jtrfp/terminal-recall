@@ -11,7 +11,7 @@ public class AutoLeveling extends Behavior {
 	final Vector3D oldHeading = parent.getHeading();
 	final Vector3D newHeading =new Vector3D(oldHeading.getX(),oldHeading.getY(),oldHeading.getZ()).normalize();
 	final Vector3D oldTop = parent.getTop();
-	final Vector3D newTop=new Vector3D(oldTop.getX()*.993,oldTop.getY(),oldTop.getZ()*.993).normalize();
+	final Vector3D newTop=new Vector3D(oldTop.getX()*.985,oldTop.getY(),oldTop.getZ()*.985).normalize();
 	final Rotation topDelta=new Rotation(oldTop,newTop);
 	final Rotation headingDelta=new Rotation(oldHeading,newHeading);
 	parent.setHeading(headingDelta.applyTo(topDelta.applyTo(oldHeading)));

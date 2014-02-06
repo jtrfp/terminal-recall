@@ -298,13 +298,13 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 				add(bc);
 				break;
 			case fan:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BLADE.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BLADE.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],28,false,palette,gl));
 				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);
 				wo.addBehavior(new CubeCollisionBehavior(wo));
 				add(wo);
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("FANBODY.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
+				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("FANBODY.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],28,false,palette,gl));
 				wo.setPosition(wPos.toArray());
 				wo.setHeading(heading);
 				wo.setTop(top);

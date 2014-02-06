@@ -50,7 +50,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		TDFFile.Tunnel [] tunnels = tdf.getTunnels();
 		final HashMap<Integer,TunnelPoint> points = new HashMap<Integer,TunnelPoint>();
 		final HashMap<String,TDFFile.Tunnel> tunnelsByName = new HashMap<String,TDFFile.Tunnel>();
-		for(int i=0; i<tunnels.length; i++){
+		if(tunnels!=null){//Null means no tunnels
+		 for(int i=0; i<tunnels.length; i++){
 		    final TDFFile.Tunnel tun = tunnels[i];
 		    if(tun.getEntranceLogic()!=TunnelLogic.invisible){
 			final TunnelPoint tp = new TunnelPoint(tun,true);
@@ -60,7 +61,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			final TunnelPoint tp = new TunnelPoint(tun,false);
 			points.put(tp.hashCode(),tp);
 			tunnelsByName.put(tun.getTunnelLVLFile(), tunnels[i]);}
-		}
+		 }//end for(tunnels)
+		}//end if(tunnels)
+		
 		Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;
 		//For each chunk

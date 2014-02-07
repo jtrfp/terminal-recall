@@ -111,6 +111,66 @@ public class ObjectPool<TYPE> {
 	public TYPE reactivate(TYPE obj);
     }
     
+    public static final class FillThenDrain<TYPE> implements PoolingMethod<TYPE>{
+	private final ArrayList<TYPE> pool = new ArrayList<TYPE>();
+	private int counter=0;
+	private final int initialSizeInElements;
+	private PreparationMethod<TYPE> preparationMethod;
+	private GenerativeMethod<TYPE> generativeMethod;
+	
+	public FillThenDrain(int initialSize){
+	    this.initialSizeInElements=initialSize;
+	}//end constructor
+	@Override
+	public PoolingMethod<TYPE> initialize(ObjectPool<TYPE> parent,
+		PreparationMethod<TYPE> preparationMethod,
+		GenerativeMethod<TYPE> generativeMethod) {
+	    this.preparationMethod=preparationMethod;
+	    this.generativeMethod=generativeMethod;
+	    generativeMethod.generateConsecutive(initialSizeInElements, populationTarget);
+	    return this;
+	}//end initialize()
+	private final Submitter<TYPE> populationTarget = new AbstractSubmitter<TYPE>(){
+	    @Override
+	    public void submit(TYPE item) {
+		pool.add(item);
+	    }//end submit(...)
+	};
+	@Override
+	public TYPE notifyExpiration(TYPE obj) {
+	    throw new RuntimeException("Feature not supported.");
+	}
+	@Override
+	public TYPE pop() {
+	    final TYPE result= pool.get(counter++);
+	    counter=counter>=pool.size()?pool.size()-1:counter;
+	    return result;}
+	@Override
+	public Submitter<TYPE> pop(Submitter<TYPE> target, int numItems) {
+	    for(int i=0; i<numItems; i++){
+		target.submit(pop());
+	    }//end for(items)
+	    return target;
+	}
+	@Override
+	public Submitter<TYPE> popConsective(Submitter<TYPE> target,
+		int numItems) {
+	    return pop(target,numItems);
+	}
+	@Override
+	public Submitter<TYPE> getPopulationTarget() {
+	    return populationTarget;
+	}
+	public PoolingMethod<TYPE> drain(){
+	    for(int i=counter; i>=0; i--){
+		preparationMethod.deactivate(pool.get(counter));
+	    }//end for(counter)
+	    counter=0;
+	    return this;
+	}//end drain()
+	
+    }//end FillThenDrain<TYPE>
+    
     /**
      * Static-sized round
      * @author Chuck Ritola

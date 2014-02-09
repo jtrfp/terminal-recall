@@ -190,7 +190,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		//This is probably related to the fact that absolute coordinates are being tacked onto cell coordinates.
 		final double signed=TR.legacy2MapSquare(v.getX());
 		z=(byte)Math.round(signed>0?signed:signed-.5)&0xFF;
-		//z=(byte)Math.round(TR.legacy2MapSquare(v.getX()))&0xFF;
 	    }
 	    public Future<TextureDescription> getTexture(){return textureToInsert;}
 	    

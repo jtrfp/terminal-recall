@@ -81,8 +81,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			try{new ObjectSystem(this,world,lvl,null);}
 			catch(Exception e){e.printStackTrace();}
 		tr.getOverworldSystem().
-		add(entranceObject=new TunnelEntranceObject(
-			tr,this));
+		  add(entranceObject=new TunnelEntranceObject(
+		    tr,this));
 		}//end constructor
 
 	private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector, boolean entrance) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{

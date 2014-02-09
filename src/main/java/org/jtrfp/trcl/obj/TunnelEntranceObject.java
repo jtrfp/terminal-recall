@@ -15,6 +15,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.math.Vect3D;
 
 public class TunnelEntranceObject extends WorldObject {
     private final Tunnel tunnel;
@@ -41,7 +42,9 @@ public class TunnelEntranceObject extends WorldObject {
 	public void _proposeCollision(WorldObject other){
 	    WorldObject p = getParent();
 	      if(other instanceof Player){
-	        if(new Vector3D(p.getPosition()).distance(new Vector3D(other.getPosition()))<CollisionManager.SHIP_COLLISION_DISTANCE*3){
+		double [] pPos = p.getPosition();
+		if(pPos[1]>p.getPosition()[1]+CollisionManager.SHIP_COLLISION_DISTANCE)return;
+	        if(Vect3D.distanceXZ(p.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE){
 		 //Turn off overworld
 		 final TR tr = getTr();
 		 tr.getOverworldSystem().deactivate();

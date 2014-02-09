@@ -25,10 +25,11 @@ import java.util.concurrent.Future;
 
 public class GLFont
 	{
-	private final Font realFont;
+	//private final Font realFont;
 	private final Future<Texture>[] textures;
-	private Graphics2D g;
-	private FontMetrics metrics;
+	//private Graphics2D g;
+	//private FontMetrics metrics;
+	private double maxAdvance=-1;
 	private final int [] widths = new int[256];
 	private final double [] glWidths=new double[256];
 	private static final int sideLength=64;
@@ -36,27 +37,28 @@ public class GLFont
 	
 	public GLFont(Font realFont)
 		{
-		this.realFont=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
+		final Font font=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
 		//Generate the textures
 		textures = new Future[256];
-		Texture empty=renderToTexture(' ');
+		Texture empty=renderToTexture(' ',realFont);
 		for(int c=0; c<256; c++)
-			{textures[c]=new DummyFuture<Texture>(realFont.canDisplay(c)?renderToTexture(c):empty);}
+			{textures[c]=new DummyFuture<Texture>(realFont.canDisplay(c)?renderToTexture(c,font):empty);}
 		}//end constructor
 	public Future<Texture>[] getTextures()
 		{return textures;}
 	
-	private Texture renderToTexture(int c)
+	private Texture renderToTexture(int c, Font font)
 		{
 		BufferedImage img = new BufferedImage(sideLength, sideLength, BufferedImage.TYPE_INT_ARGB);
-		g=img.createGraphics();
+		final Graphics2D g=img.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g.setFont(realFont);
-		metrics=g.getFontMetrics();
+		g.setFont(font);
+		FontMetrics metrics=g.getFontMetrics();
+		maxAdvance=metrics.getMaxAdvance();
 		if(metrics.charWidth(c)>=getTextureSideLength())
 			{int size=g.getFont().getSize();
-			g.setFont(realFont.deriveFont((float)(size*size)/(float)metrics.charWidth(c)*.9f));
+			g.setFont(font.deriveFont((float)(size*size)/(float)metrics.charWidth(c)*.9f));
 			metrics=g.getFontMetrics();
 			}//end if(too big to fit)
 		g.setColor(TEXT_COLOR);
@@ -67,8 +69,8 @@ public class GLFont
 		return new Texture(img,"GLFont "+(char)c);
 		}
 	
-	public double getTextureSideLength(){return sideLength;}
+	public static double getTextureSideLength(){return sideLength;}
 	public double glWidthOf(char currentChar)
 		{return glWidths[currentChar];}
-	public double height(){return metrics.getMaxAdvance();}
+	public double height(){return maxAdvance;}
 	}//end GLFont

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.NDXFile;
@@ -28,6 +31,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	private static final double METER_WIDTH = .02;
 	private static final double METER_HEIGHT = .16;
 	private static final int UPFRONT_HEIGHT=23;
+	private int upfrontDisplayCountdown=0;
 	private final CharLineDisplay objective;
 	private final CharLineDisplay distance;
 	private final CharLineDisplay weapon;
@@ -35,6 +39,8 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	private final CharLineDisplay ammo;
 	private final CharLineDisplay upfrontBillboard;
 	private final ManuallySetController throttleMeter,healthMeter;
+	private final Timer timer = new Timer();
+	
 	public HUDSystem(World world){
 		super(world);
 		//Dash Text
@@ -91,16 +97,16 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		upfrontBillboard1.setContent("the greatest actor");
 		upfrontBillboard2.setContent("of all time.");
 		*/
-		upfrontBillboard.setPosition(-.8,.2,Z);
-		upfrontBillboard.setContent("");
+		upfrontBillboard.setPosition(0,.2,Z);
+		upfrontBillboard.setVisible(false);
+		upfrontBillboard.setCentered(true);
 		/*
 		upfrontBillboard0.setPosition(-.8,0,Z);
 		upfrontBillboard1.setPosition(-.8,-.2,Z);
 		upfrontBillboard2.setPosition(-.8,-.4,Z);
 		*/
 		add(new Crosshairs(tr));
-		//try{
-		    MeterBar mb;
+		MeterBar mb;
 		add(mb=new MeterBar(tr,
 			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png")),"HealthBar orangeOrange")),
 			METER_WIDTH,METER_HEIGHT,false));
@@ -111,8 +117,24 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(THROTTLE_POS);
 		throttleMeter = mb.getController();
-		//}catch(Exception e){e.printStackTrace();}
+		
+		tr.getThreadManager().getGameplayTimer().scheduleAtFixedRate(new TimerTask(){
+		    @Override
+		    public void run() {
+			upfrontDisplayCountdown-=200;
+			if(upfrontDisplayCountdown<=0 && upfrontDisplayCountdown!=Integer.MIN_VALUE){
+			    upfrontBillboard.setVisible(false);
+			    upfrontDisplayCountdown=Integer.MIN_VALUE;
+			}//end if(timeout)
+		    }
+		}, 1, 200);
 		}//end constructor
+	
+	public void submitMomentaryUpfrontMessage(String message){
+	    upfrontBillboard.setContent(message);
+	    upfrontBillboard.setVisible(true);
+	    upfrontDisplayCountdown=2000;
+	}
 	/**
 	 * @return the objective
 	 */

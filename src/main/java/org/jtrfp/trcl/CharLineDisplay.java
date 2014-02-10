@@ -27,6 +27,8 @@ public class CharLineDisplay
 	double [] position = new double []{0,0,.0001};
 	private GLFont font;
 	private final double glSize;
+	private double totGlLen=0;
+	private boolean centered=false; 
 	
 	public CharLineDisplay(TR tr,RenderableSpacePartitioningGrid grid, double glSize, int lengthInChars, GLFont font)
 		{content = new char[lengthInChars];
@@ -57,6 +59,14 @@ public class CharLineDisplay
 	
 	private void updatePositions()
 		{final double[] charPosition=Arrays.copyOf(position,3);
+		totGlLen=0;
+		//Determine total length;
+		for(int i=0; i<displays.length; i++){
+		    char _content = content[i];
+		    final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
+		    totGlLen+=progress;
+		}//end for(displays)
+		if(centered)charPosition[0]-=totGlLen/4.;
 		for(int i=0; i<displays.length; i++){
 		    	final double [] dispPos = displays[i].getPosition();
 		    	dispPos[0]=charPosition[0];
@@ -66,8 +76,7 @@ public class CharLineDisplay
 			char _content = content[i];
 			final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
 			charPosition[0]+=progress;
-			//charPosition=charPosition.add(new Vector3D(progress,0,0));
-			}//end for(length)
+			}//end for(displays)
 		}//end updatePositions
 	
 	public void setPosition(double [] location)
@@ -90,7 +99,26 @@ public class CharLineDisplay
 	}
 
 	public GLFont getFont() {
-	    // TODO Auto-generated method stub
 	    return font;
 	}
+
+	/**
+	 * @return the centered
+	 */
+	public boolean isCentered() {
+	    return centered;
+	}
+
+	/**
+	 * @param centered the centered to set
+	 */
+	public void setCentered(boolean centered) {
+	    this.centered = centered;
+	}
+
+	public void setVisible(boolean b) {
+	    for(CharDisplay disp:displays){
+		disp.setVisible(b);
+	    }//end for(displays)
+	}//end setVisible(...)
 }//end LineDisplay

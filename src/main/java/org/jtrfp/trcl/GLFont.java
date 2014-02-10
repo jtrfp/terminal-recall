@@ -21,22 +21,61 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.Future;
 
 public class GLFont
 	{
-	//private final Font realFont;
 	private final Future<Texture>[] textures;
-	//private Graphics2D g;
-	//private FontMetrics metrics;
 	private double maxAdvance=-1;
 	private final int [] widths = new int[256];
 	private final double [] glWidths=new double[256];
-	private static final int sideLength=64;
+	private final int sideLength;
 	private static final Color TEXT_COLOR=new Color(80,200,180);
+	
+	public GLFont(ByteBuffer []indexedPixels, Color [] palette, int imgHeight, List<Integer> widths, int asciiOffset){
+	    this(Texture.indexed2RGBA8888(indexedPixels,palette),imgHeight,widths,asciiOffset);
+	}
+	
+	public GLFont(ByteBuffer []rgba8888, int imgHeight, List<Integer> widths, int asciiOffset){
+	    final int numChars = widths.size();
+	    int maxDim=0;// xOffset=0;
+	    for(int i=0; i<widths.size(); i++){
+		if(widths.get(i)>maxDim)maxDim=widths.get(i);
+		this.widths[i+asciiOffset]=widths.get(i);
+	    }if(imgHeight>maxDim)maxDim=imgHeight;
+	    sideLength = (int)Math.pow(2, Math.ceil(Math.log(maxDim)/Math.log(2)));
+	    maxAdvance=imgHeight;
+	    textures = new Future[256];
+	    DummyFuture<Texture> empty = new DummyFuture<Texture>(new Texture(ByteBuffer.allocateDirect(sideLength*sideLength*4),"GLFont rgba buf empty"));
+	    for(int i=0; i<widths.size();i++){
+		glWidths[i+asciiOffset]=(double)widths.get(i)/((double)getTextureSideLength()*1.2);
+	    }
+	    for(int i=0; i<asciiOffset;i++){
+		textures[i] = empty;
+	    }//end for(i:asciiOffset)
+	    for(int i=0; i<numChars; i++){
+		ByteBuffer texBuf = ByteBuffer.allocateDirect(sideLength*sideLength*4);
+		for(int row=0; row<imgHeight; row++){
+		    rgba8888[i].clear();
+		    rgba8888[i].position(4*row*widths.get(i));
+		    rgba8888[i].limit(rgba8888[i].position()+4*widths.get(i));
+		    texBuf.clear();
+		    texBuf.position(row*sideLength*4);
+		    texBuf.limit(texBuf.position()+sideLength*4);
+		    texBuf.put(rgba8888[i]);
+		}//end for(imgHeight)
+		textures[i+asciiOffset]=new DummyFuture<Texture>(new Texture(texBuf,"GLFont rgba buf char="+(char)i));
+	    }//end for(i:numChars)
+	    for(int i=asciiOffset+numChars; i<256;i++){
+		textures[i] = empty;
+	    }//end for(i:asciiOffset)
+	}//end GLFont
 	
 	public GLFont(Font realFont)
 		{
+	    	sideLength=64;
 		final Font font=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
 		//Generate the textures
 		textures = new Future[256];
@@ -69,7 +108,7 @@ public class GLFont
 		return new Texture(img,"GLFont "+(char)c);
 		}
 	
-	public static double getTextureSideLength(){return sideLength;}
+	public double getTextureSideLength(){return sideLength;}
 	public double glWidthOf(char currentChar)
 		{return glWidths[currentChar];}
 	public double height(){return maxAdvance;}

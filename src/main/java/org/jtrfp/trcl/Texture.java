@@ -744,4 +744,30 @@ public class Texture implements TextureDescription
 	    }
 	    return result;
 	}//end fragmentRGBA(...)
+
+	public static ByteBuffer indexed2RGBA8888(ByteBuffer indexedPixels,
+		Color[] palette) {
+		Color color;
+		ByteBuffer buf = ByteBuffer.allocate(indexedPixels.capacity()*4);
+		final int cap = indexedPixels.capacity(); 
+		for(int i=0; i<cap; i++){
+		  color=palette[(indexedPixels.get()&0xFF)];
+		  buf.put((byte)color.getRed());
+		  buf.put((byte)color.getGreen());
+		  buf.put((byte)color.getBlue());
+		  buf.put((byte)color.getAlpha());
+		}//end for(i)
+	   buf.clear();//Rewind
+	   return buf;
+	}
+
+	public static ByteBuffer[] indexed2RGBA8888(ByteBuffer[] indexedPixels,
+		Color[] palette) {
+	    final int len = indexedPixels.length;
+	    ByteBuffer [] result = new ByteBuffer[len];
+	    for(int i=0; i<len;i++){
+		result[i]=indexed2RGBA8888(indexedPixels[i],palette);
+	    }
+	    return result;
+	}
 }//end Texture

@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,6 +79,7 @@ import org.jtrfp.trcl.file.CLRFile;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.NAVFile;
+import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.NotSquareException;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.RAWFile;
@@ -595,5 +598,32 @@ public class ResourceManager{
 	 */
 	public void setProjectileFactories(ProjectileFactory[] projectileFactories) {
 	    this.projectileFactories = projectileFactories;
+	}
+
+	public ByteBuffer []getFontBIN(String fontPath, NDXFile ndx) {
+	    try{
+	     InputStream is = getInputStreamFromResource(fontPath);
+	     List<Integer>widths=ndx.getWidths();
+	     ByteBuffer [] result = new ByteBuffer[widths.size()];
+	     for(int c=0; c<ndx.getWidths().size(); c++){
+		 final int len = 23*widths.get(c);
+		 result[c]=ByteBuffer.allocate(23*widths.get(c)*4);
+		 result[c].order(ByteOrder.LITTLE_ENDIAN);
+		 for(int i=0; i<len; i++){
+		     byte b= (byte)(is.read());
+		     result[c].put(b);
+		     result[c].put(b);
+		     result[c].put(b);
+		     result[c].put((byte)((b&0xFF)>16?255:b));//Less than 16 is alpha'd out
+		 }
+		 result[c].clear();
+	     }//end for(chars)
+	     return result;
+	    }catch(Exception e){e.printStackTrace();return null;}
+	}//end getFontBIN(...)
+
+	public NDXFile getNDXFile(String resString) {
+	    try{return new NDXFile(getInputStreamFromResource(resString));}
+	    catch(Exception e){e.printStackTrace();return null;}
 	}
 }//end ResourceManager

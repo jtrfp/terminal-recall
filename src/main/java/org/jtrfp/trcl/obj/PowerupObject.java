@@ -20,6 +20,7 @@ import org.jtrfp.trcl.beh.DamageableBehavior.HealthNotNeededException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.GameVersion;
 
 public class PowerupObject extends BillboardSprite{
 	private final Powerup powerupType;
@@ -82,6 +83,11 @@ public class PowerupObject extends BillboardSprite{
 			    p.getWeapons()[pWeapon.getButtonToSelect()-1].
 			    addSupply(powerupType.
 				    getWeaponSupplyDelta());}}
+			final TR tr = getParent().getTr();
+			tr.getHudSystem().submitMomentaryUpfrontMessage(
+				tr.getTrConfig().getGameVersion()==GameVersion.F3?
+					powerupType.getF3Description():
+					powerupType.getTvDescription());
 		}//end applyToPlayer()
 	}//end PowerupBehavior
 	

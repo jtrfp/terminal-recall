@@ -15,8 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.obj.MeterBar;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid
@@ -26,19 +27,29 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 	private static final double [] THROTTLE_POS = new double[]{.18875-1,1-.205,0};
 	private static final double METER_WIDTH = .02;
 	private static final double METER_HEIGHT = .16;
+	private static final int UPFRONT_HEIGHT=23;
 	private final CharLineDisplay objective;
 	private final CharLineDisplay distance;
 	private final CharLineDisplay weapon;
 	private final CharLineDisplay sector;
 	private final CharLineDisplay ammo;
+	private final CharLineDisplay upfrontBillboard;
 	private final ManuallySetController throttleMeter,healthMeter;
 	public HUDSystem(World world){
 		super(world);
 		//Dash Text
-		GLFont font;
+		final TR tr = world.getTr();
+		final ResourceManager rm = tr.getResourceManager();
+		final GLFont font, upfrontFont;
 		try	{//TODO: Have TR allocate the font ahead of time.
-			add(new Dashboard(world.getTr()));
-			font = new GLFont(world.getTr().getResourceManager().getFont("capacitor.zip","capacitor.ttf"));
+			add(new Dashboard(tr));
+			NDXFile ndx = rm.getNDXFile("STARTUP\\FONT.NDX");
+			font = new GLFont(rm.getFont("capacitor.zip","capacitor.ttf"));
+			upfrontFont = new GLFont(
+				rm.getFontBIN("STARTUP\\FONT.BIN",ndx),
+				UPFRONT_HEIGHT,
+				ndx.getWidths(),
+				32);
 			}
 		catch(Exception e){
 			System.out.println("Failed to get HUD font.");
@@ -49,36 +60,53 @@ public class HUDSystem extends RenderableSpacePartitioningGrid
 		final double BOTTOM_LINE_Y=.82;
 		final double FONT_SIZE=.04;
 		
-		objective = new CharLineDisplay(world.getTr(),this,FONT_SIZE,16,font);
+		objective = new CharLineDisplay(tr,this,FONT_SIZE,16,font);
 		objective.setContent("FLY TO JUMP ZONE");
 		objective.setPosition(-.45,TOP_LINE_Y,Z);
 		//objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,Z));
 		
-		distance = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
+		distance = new CharLineDisplay(tr,this,FONT_SIZE,5,font);
 		distance.setContent("01234");
 		distance.setPosition(.42,TOP_LINE_Y,Z);
 		
-		weapon = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
+		weapon = new CharLineDisplay(tr,this,FONT_SIZE,5,font);
 		weapon.setContent("RFL20");
 		weapon.setPosition(-.44,BOTTOM_LINE_Y,Z);
 		
-		sector = new CharLineDisplay(world.getTr(),this,FONT_SIZE,7,font);
+		sector = new CharLineDisplay(tr,this,FONT_SIZE,7,font);
 		sector.setContent("255,255");
 		sector.setPosition(.38,BOTTOM_LINE_Y,Z);
 		
-		ammo = new CharLineDisplay(world.getTr(),this,FONT_SIZE,5,font);
+		ammo = new CharLineDisplay(tr,this,FONT_SIZE,5,font);
 		ammo.setContent("1337");
 		ammo.setPosition(.01,BOTTOM_LINE_Y,Z);
 		
-		add(new Crosshairs(world.getTr()));
+		upfrontBillboard = new CharLineDisplay(tr,this,.2,35,upfrontFont);
+		/*
+		CharLineDisplay upfrontBillboard0 = new CharLineDisplay(tr,this,.22,35,upfrontFont);
+		CharLineDisplay upfrontBillboard1 = new CharLineDisplay(tr,this,.22,35,upfrontFont);
+		CharLineDisplay upfrontBillboard2 = new CharLineDisplay(tr,this,.22,35,upfrontFont);
+		upfrontBillboard.setContent("Shaquille O'Neal is");
+		upfrontBillboard0.setContent("quite possibly");
+		upfrontBillboard1.setContent("the greatest actor");
+		upfrontBillboard2.setContent("of all time.");
+		*/
+		upfrontBillboard.setPosition(-.8,.2,Z);
+		upfrontBillboard.setContent("");
+		/*
+		upfrontBillboard0.setPosition(-.8,0,Z);
+		upfrontBillboard1.setPosition(-.8,-.2,Z);
+		upfrontBillboard2.setPosition(-.8,-.4,Z);
+		*/
+		add(new Crosshairs(tr));
 		//try{
 		    MeterBar mb;
-		add(mb=new MeterBar(world.getTr(),
+		add(mb=new MeterBar(tr,
 			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/OrangeOrangeGradient.png")),"HealthBar orangeOrange")),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(HEALTH_POS);
 		healthMeter = mb.getController();
-		add(mb=new MeterBar(world.getTr(),
+		add(mb=new MeterBar(tr,
 			new DummyFuture<TextureDescription>(new Texture(Texture.RGBA8FromPNG(Texture.class.getResourceAsStream("/BlueBlackGradient.png")),"ThrottleBar blackBlue")),
 			METER_WIDTH,METER_HEIGHT,false));
 		mb.setPosition(THROTTLE_POS);

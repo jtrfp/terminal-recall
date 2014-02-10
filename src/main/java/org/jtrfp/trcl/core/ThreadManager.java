@@ -103,4 +103,8 @@ public class ThreadManager
 		}//end constructor
 	
 	public long getElapsedTimeInMillisSinceLastGameTick(){return timeInMillisSinceLastGameTick;}
+
+	public Timer getGameplayTimer() {
+	    return gameplayTimer;
+	}
 	}//end ThreadManager

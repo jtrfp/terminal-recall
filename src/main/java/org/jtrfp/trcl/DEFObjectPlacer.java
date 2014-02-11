@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
@@ -17,8 +17,7 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectPlacer;
 
-public class DEFObjectPlacer implements ObjectPlacer
-	{
+public class DEFObjectPlacer implements ObjectPlacer{
 	private DEFFile def;
 	private World world;
 	private List<DEFObject> defList;
@@ -29,10 +28,9 @@ public class DEFObjectPlacer implements ObjectPlacer
 		ArrayList<DEFObject> defList) {
 	    this(defFile,w);
 	    this.defList=defList;
-	}
+	}//end constructor
 	@Override
-	public void placeObjects(RenderableSpacePartitioningGrid target)
-		{
+	public void placeObjects(RenderableSpacePartitioningGrid target){
 		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		final Model [] models = new Model[defs.size()];
@@ -43,13 +41,10 @@ public class DEFObjectPlacer implements ObjectPlacer
 		
 		Future []futures = new Future[defs.size()];
 		//Get BIN models
-		for(int i=0; i<defs.size(); i++)
-			{
+		for(int i=0; i<defs.size(); i++){
 			final int index = i;
-			futures[i]=TR.threadPool.submit(new Runnable()
-				{
-				public void run()
-					{
+			futures[i]=TR.threadPool.submit(new Runnable(){
+				public void run(){
 					final EnemyDefinition def = defs.get(index);
 					tr.getGPU().takeGL();
 					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),gl);}
@@ -58,28 +53,26 @@ public class DEFObjectPlacer implements ObjectPlacer
 					tr.getGPU().releaseGL();
 					}
 				});
-			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
-			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
-			tr.getReporter().report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
-			}
+			final Reporter reporter = tr.getReporter();
+			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
+			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
+			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
+			}//end for(i:defs)
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		
-		for(EnemyPlacement pl:places)
-			{//behavior objects cannot be shared because they contain state data for each mobile object
+		for(EnemyPlacement pl:places){
 			tr.getGPU().releaseGL();
 			tr.getGPU().takeGL();
 			Model model =models[pl.getDefIndex()];
-			if(model!=null)
-				{
+			if(model!=null){
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
-				//,new TVBehavior(null,def,terrainSystem,pl.getStrength())
 				final DEFObject obj =new DEFObject(tr,model,def,pl);
 				if(defList!=null)defList.add(obj);
 				//USING  z,x coords
 				final double [] objPos = obj.getPosition();
-				objPos[0]=TR.legacy2Modern(pl.getLocationOnMap().getZ());
-				objPos[1]=(TR.legacy2Modern(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY;
-				objPos[2]=TR.legacy2Modern(pl.getLocationOnMap().getX());
+				objPos[0]= TR.legacy2Modern	(pl.getLocationOnMap().getZ());
+				objPos[1]=(TR.legacy2Modern	(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY;
+				objPos[2]= TR.legacy2Modern	(pl.getLocationOnMap().getX());
 				obj.notifyPositionChange();
 				
 				if(def.getLogic()==EnemyLogic.groundStaticRuin){
@@ -92,11 +85,11 @@ public class DEFObjectPlacer implements ObjectPlacer
 				    ed.setDescription("auto-generated enemy rubble def");
 				    ed.setPowerupProbability(0);
 				    EnemyPlacement simplePlacement = new EnemyPlacement();
-				    simplePlacement.setPitch(pl.getPitch());
-				    simplePlacement.setStrength(pl.getStrength());
-				    simplePlacement.setRoll(pl.getRoll());
-				    simplePlacement.setYaw(pl.getYaw());
-				    simplePlacement.setStrength(pl.getStrength());
+				    simplePlacement.setPitch	(pl.getPitch());
+				    simplePlacement.setStrength	(pl.getStrength());
+				    simplePlacement.setRoll	(pl.getRoll());
+				    simplePlacement.setYaw	(pl.getYaw());
+				    simplePlacement.setStrength	(pl.getStrength());
 				    final DEFObject ruin = new DEFObject(tr,simpleModel,ed,simplePlacement);
 				    ruin.setVisible(false);//TODO: Use setActive later
 				    obj.setRuinObject(ruin);
@@ -104,13 +97,11 @@ public class DEFObjectPlacer implements ObjectPlacer
 				    try{ruin.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
 					catch(MathArithmeticException e){e.printStackTrace();}
 				    target.add(ruin);
-				}
-				//NOTE: The current scheme might very well be wrong because of the lack of pivot impl. Namely the ZYX config of TRCL and TRI's XYZ stuff
-				//Vector3D heading = new Vector3D(Math.cos((double)pl.getPitch())/32767.,0.,Math.sin((double)pl.getPitch()/32767.));
+				}//end if(groundStaticRuin)
 				try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
 				catch(MathArithmeticException e){e.printStackTrace();}
 				target.add(obj);
-				}
+				}//end if(model!=null)
 			else{System.out.println("Skipping triangle list at index "+pl.getDefIndex());}
 			}//end for(places)
 		}//end placeObjects

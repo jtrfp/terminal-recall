@@ -25,14 +25,14 @@ public class TunnelEntranceObject extends WorldObject {
 	super(tr);
 	this.tunnel=tunnel;
 	addBehavior(new TunnelEntranceBehavior());
-	setVisible(false);
+	setVisible(true);
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
 	final double [] position = getPosition();
 	position[0]=TR.legacy2Modern(entrance.getZ());
 	position[1]=TR.legacy2Modern(entrance.getY())-35000;
 	position[2]=TR.legacy2Modern(entrance.getX());
 	notifyPositionChange();
-	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
+	try{Model m = tr.getResourceManager().getBINModel("MINBOS.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
 	setModel(m);}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
@@ -40,11 +40,11 @@ public class TunnelEntranceObject extends WorldObject {
     public class TunnelEntranceBehavior extends Behavior{
 	@Override
 	public void _proposeCollision(WorldObject other){
-	    WorldObject p = getParent();
+	    WorldObject entranceObject = getParent();
 	      if(other instanceof Player){
-		double [] pPos = p.getPosition();
-		if(pPos[1]>p.getPosition()[1]+CollisionManager.SHIP_COLLISION_DISTANCE)return;
-	        if(Vect3D.distanceXZ(p.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE){
+		double [] playerPos = other.getPosition();
+		if(playerPos[1]>entranceObject.getPosition()[1]+7000)return;
+	        if(Vect3D.distanceXZ(entranceObject.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE/2){
 		 //Turn off overworld
 		 final TR tr = getTr();
 		 tr.getOverworldSystem().deactivate();
@@ -65,7 +65,7 @@ public class TunnelEntranceObject extends WorldObject {
 			 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
-		 p.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
+		 entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 		 final Player player = tr.getPlayer();
 		 player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
 		 player.setDirection(Tunnel.TUNNEL_START_DIRECTION);

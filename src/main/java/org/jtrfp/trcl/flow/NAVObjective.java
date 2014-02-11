@@ -31,9 +31,7 @@ public abstract class NAVObjective {
     private static final double CHECKPOINT_HEIGHT_PADDING=70000;
     public abstract String getDescription();
     public abstract WorldObject getTarget();
-    private final Factory factory;
     protected NAVObjective(Factory f){
-	factory=f;
 	f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
 	final double [] loc = getTarget().getPosition();
 	if(getTarget()!=null)f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
@@ -48,11 +46,11 @@ public abstract class NAVObjective {
 	    this.tr=tr;
 	}//end constructor
 	
-	public void create(TR tr, NAVSubObject obj, List<NAVObjective>dest){
+	public void create(TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
 		final OverworldSystem overworld=tr.getOverworldSystem();
 		final List<DEFObject> defs = overworld.getDefList();
-		if(obj instanceof TGT){///////////////////////////////////////////
-		    TGT tgt = (TGT)obj;
+		if(navSubObject instanceof TGT){///////////////////////////////////////////
+		    TGT tgt = (TGT)navSubObject;
 		    int [] targs =  tgt.getTargets();
 		    for(int i=0; i<targs.length;i++){
 			final WorldObject targ = defs.get(targs[i]);
@@ -66,17 +64,16 @@ public abstract class NAVObjective {
 				return targ;
 			    }
 			};//end new NAVObjective
-			dest.add(objective);
+			indexedNAVObjectiveList.add(objective);
 			targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,tr.getCurrentMission()));
 		    }//end for(targs)
-		} else if(obj instanceof TUN){///////////////////////////////////////////
-		    TUN tun = (TUN)obj;
+		} else if(navSubObject instanceof TUN){///////////////////////////////////////////
+		    TUN tun = (TUN)navSubObject;
 		    //Entrance and exit locations are already set up.
-		    final Location3D loc3d = tun.getLocationOnMap();
-		    final Tunnel tunnel = tr.getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
-		    currentTunnel = tunnel;
-		    final TunnelEntranceObject tunnelEntrance = tunnel.
-			    getEntranceObject();
+		    final Location3D 	loc3d 	= tun.getLocationOnMap();
+		    		currentTunnel 	= tr.getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
+		    final TunnelEntranceObject tunnelEntrance 
+		    				= currentTunnel.getEntranceObject();
 		    final double [] entPos=tunnelEntrance.getPosition();
 		    entPos[0]=TR.legacy2Modern(loc3d.getZ());
 		    entPos[1]=TR.legacy2Modern(loc3d.getY());
@@ -98,8 +95,8 @@ public abstract class NAVObjective {
 			    }
 		    };//end new NAVObjective tunnelEnrance
 		    tunnelEntrance.setNavObjectiveToRemove(enterObjective,true);
-		    dest.add(enterObjective);
-		    final TunnelExitObject tunnelExit = tunnel.getExitObject();
+		    indexedNAVObjectiveList.add(enterObjective);
+		    final TunnelExitObject tunnelExit = currentTunnel.getExitObject();
 		    final NAVObjective exitObjective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {
@@ -110,11 +107,10 @@ public abstract class NAVObjective {
 				return tunnelExit;
 			    }
 		    };//end new NAVObjective tunnelExit
-		    dest.add(exitObjective);
+		    indexedNAVObjectiveList.add(exitObjective);
 		    tunnelExit.setNavObjectiveToRemove(exitObjective);
-		    tunnelExit.setMirrorTerrain(tunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
-		    if(tunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
-			//tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceObject.TunnelEntranceBehavior.class).setEnable(false);
+		    tunnelExit.setMirrorTerrain(currentTunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
+		    if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
 			    public void run() {
@@ -127,9 +123,9 @@ public abstract class NAVObjective {
 			    }
 			}));
 		    }//end if(visibleUnlessBoss)
-		} else if(obj instanceof BOS){///////////////////////////////////////////
+		} else if(navSubObject instanceof BOS){///////////////////////////////////////////
 		    final Mission mission = tr.getCurrentMission();
-		    final BOS bos = (BOS)obj;
+		    final BOS bos = (BOS)navSubObject;
 		    boolean first=true;
 		    for(final int target:bos.getTargets()){
 			final WorldObject shieldGen = defs.get(target);
@@ -155,7 +151,7 @@ public abstract class NAVObjective {
 				shieldGen.setActive(true);
 			    }
 			}));
-			dest.add(objective);
+			indexedNAVObjectiveList.add(objective);
 		    }//end for(targets)
 		    final WorldObject bossObject = defs.get(bos.getBossIndex());
 		    final NAVObjective objective = new NAVObjective(this){
@@ -168,7 +164,7 @@ public abstract class NAVObjective {
 				return bossObject;
 			    }
 			};//end new NAVObjective
-			dest.add(objective);
+			indexedNAVObjectiveList.add(objective);
 			bossObject.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
 			bossObject.addBehavior(new ChangesBehaviorWhenTargeted(true,DamageableBehavior.class));
 			if(bos.getTargets().length==0){
@@ -179,8 +175,8 @@ public abstract class NAVObjective {
 			    public void run() {
 				bossObject.setActive(true);}
 			}));
-		} else if(obj instanceof CHK){///////////////////////////////////////////
-		    final CHK cp = (CHK)obj;
+		} else if(navSubObject instanceof CHK){///////////////////////////////////////////
+		    final CHK cp = (CHK)navSubObject;
 		    final Location3D loc3d = cp.getLocationOnMap();
 		    final Checkpoint chk = new Checkpoint(tr);
 		    final double [] chkPos = chk.getPosition();
@@ -201,15 +197,14 @@ public abstract class NAVObjective {
 		    };//end new NAVObjective
 		    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
 		    overworld.add(chk);
-		    dest.add(objective);
-		} else if(obj instanceof XIT){///////////////////////////////////////////
-		    XIT xit = (XIT)obj;
+		    indexedNAVObjectiveList.add(objective);
+		} else if(navSubObject instanceof XIT){///////////////////////////////////////////
+		    XIT xit = (XIT)navSubObject;
 		    Location3D loc3d = xit.getLocationOnMap();
 		    currentTunnel.getExitObject().setExitLocation(
 			    new Vector3D(TR.legacy2Modern(loc3d.getZ()),TR.legacy2Modern(loc3d.getY()),TR.legacy2Modern(loc3d.getX())));
-		    //currentTunnel.getExitObject().setExitDirection(exitDirection);
-		} else if(obj instanceof DUN){///////////////////////////////////////////
-		    final DUN xit = (DUN)obj;
+		} else if(navSubObject instanceof DUN){///////////////////////////////////////////
+		    final DUN xit = (DUN)navSubObject;
 		    final Location3D loc3d = xit.getLocationOnMap();
 		    final Checkpoint chk = new Checkpoint(tr);
 		    final double [] chkPos = chk.getPosition();
@@ -218,7 +213,7 @@ public abstract class NAVObjective {
 		    chkPos[2]=TR.legacy2Modern(loc3d.getX());
 		    chk.notifyPositionChange();
 		    chk.setVisible(false);
-		    try{
+		    try{//Start placing the jump zone.
 		    WorldObject jumpZone = new WorldObject(tr,tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPalette(), tr.getGPU().getGl()));
 		    jumpZone.setPosition(chk.getPosition());
 		    jumpZone.setVisible(true);
@@ -236,9 +231,9 @@ public abstract class NAVObjective {
 		    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
 		    chk.setIncludeYAxisInCollision(false);
 		    overworld.add(chk);
-		    dest.add(objective);
+		    indexedNAVObjectiveList.add(objective);
 		    }catch(Exception e){e.printStackTrace();}
-		}else{System.err.println("Unrecognized NAV objective: "+obj);}
+		}else{System.err.println("Unrecognized NAV objective: "+navSubObject);}
 	    }//end create()
     }//end Factory
 }//end NAVObjective

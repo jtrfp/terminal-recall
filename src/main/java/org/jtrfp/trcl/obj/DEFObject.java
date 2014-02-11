@@ -220,6 +220,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
+    if(boss){addBehavior(new HorizAimAtPlayerBehavior());}
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
 

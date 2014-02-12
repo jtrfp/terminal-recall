@@ -11,7 +11,6 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     private WorldObject chaseTarget;
     private double equatorialAccelleration=.004;
     private final double [] vectorToTargetVar = new double[3];
-    public HorizAimAtPlayerBehavior(){super();}
     public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
     @Override
     public void _tick(long timeInMillis){

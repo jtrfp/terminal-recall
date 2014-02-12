@@ -1,7 +1,10 @@
 package org.jtrfp.trcl.obj;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoLeveling;
+import org.jtrfp.trcl.beh.Bobbing;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
@@ -11,11 +14,15 @@ import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.ResetsRandomlyAfterDeath;
+import org.jtrfp.trcl.beh.SteadilyRotating;
 import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.phy.HasPropulsion;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
@@ -48,6 +55,10 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    canTurn=true;
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    //TODO: def.getFiringVertices() needs actual vertex lookup.
+    	    addBehavior(new ProjectileFiringBehavior().setFiringPositions(new Vector3D[]{
+    		    new Vector3D(0,0,0)
+    	    }));
     	    break;
     	case flyingDumb:
     	    canTurn=false;
@@ -56,18 +67,22 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    groundLocked=true;
     	    break;
     	case flyingSmart:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    smartPlaneBehavior(tr);
     	    break;
     	case bankSpinDrill:
+    	    unhandled(def);
     	    break;
     	case sphereBoss:
+    	    unhandled(def);
     	    mobile=true;
     	    break;
     	case flyingAttackRetreatSmart:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    smartPlaneBehavior(tr);
+    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case splitShipSmart:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    smartPlaneBehavior(tr);
+    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
     	    mobile=false;
@@ -78,13 +93,12 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case targetPitchSmart:
+    	    unhandled(def);
     	    break;
     	case coreBossSmart:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case cityBossSmart:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case staticFiringSmart:
@@ -95,14 +109,34 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    canTurn=false;
     	    mobile=false;
     	    break;
-    	case tunnelAttack:
+    	case tunnelAttack://TODO
     	    mobile=false;
     	    break;
-    	case takeoffAndEscape:
+    	case takeoffAndEscape://TODO
     	    canTurn=false;
     	    break;
     	case fallingAsteroid:
-    	    mobile=false;
+    	    fallingObjectBehavior();
+    	    addBehavior(new RotationalMomentumBehavior()
+    	    	.accellerateEquatorialMomentum(1)
+    	    	.accellerateLateralMomentum(1)
+    	    	.accelleratePolarMomentum(1));
+    	    { final DEFObject thisObject = this;
+    	    final Vector3D centerPos = new Vector3D(this.getPosition());
+    	    final TR thisTr = tr;
+    	    addBehavior(new ResetsRandomlyAfterDeath()
+    	    	.setMinWaitMillis(100)
+    	    	.setMaxWaitMillis(1000)
+    	    	.setRunOnReset(new Runnable(){
+    	    	    @Override
+    	    	    public void run(){
+    	    		final double [] pos = thisObject.getPosition();
+    	    		pos[0]=centerPos.getX()+Math.random()*TR.mapSquareSize*10;
+    	    		pos[1]=thisTr.getWorld().sizeY/1.5;
+    	    		pos[2]=centerPos.getZ()+Math.random()*TR.mapSquareSize*10;
+    	    		thisObject.notifyPositionChange();
+    	    	    }//end run()
+    	    	}));}
     	    break;
     	case cNome://Walky bot?
     	    groundLocked=true;
@@ -121,36 +155,35 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
-    	case volcano:
+    	case volcano://Wat.
+    	    unhandled(def);
     	    canTurn=false;
     	    mobile=false;
     	    break;
     	case missile://Silo?
-    	    mobile=false;
+    	    mobile=false;//TODO
     	    break;
     	case bob:
+    	    addBehavior(new Bobbing());
+    	    addBehavior(new SteadilyRotating());
     	    mobile=false;
+    	    canTurn=false;//ironic?
     	    break;
     	case alienBoss:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case canyonBoss1:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
     	case canyonBoss2:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
-    	case lavaMan:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	case lavaMan://Also terraform-o-bot
     	    mobile=false;
     	    break;
     	case arcticBoss:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    mobile=false;
     	    break;
-    	case helicopter:
+    	case helicopter://TODO
     	    break;
     	case tree:
     	    canTurn=false;
@@ -161,23 +194,44 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    canTurn=false;
     	    mobile=false;
     	    break;
-    	case bobAndAttack:
+    	case bobAndAttack://TODO: Add firing
+    	    addBehavior(new RotationalMomentumBehavior());
+    	    addBehavior(new RotationalDragBehavior());
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new Bobbing().setPhase(Math.random()).setBobPeriodMillis(10*1000+Math.random()*3000));
     	    mobile=false;
+    	    canTurn=false;
     	    break;
     	case forwardDrive:
     	    canTurn=false;
     	    groundLocked=true;
     	    break;
     	case fallingStalag:
+    	    fallingObjectBehavior();
+	    {final DEFObject thisObject = this;
+	    final Vector3D centerPos = new Vector3D(this.getPosition());
+	    final TR thisTr = tr;
+	    addBehavior(new ResetsRandomlyAfterDeath()
+	    	.setMinWaitMillis(100)
+	    	.setMaxWaitMillis(1000)
+	    	.setRunOnReset(new Runnable(){
+	    	    @Override
+	    	    public void run(){
+	    		final double [] pos = thisObject.getPosition();
+	    		pos[0]=centerPos.getX()+Math.random()*TR.mapSquareSize*10;
+	    		pos[1]=thisTr.getWorld().sizeY/1.5;
+	    		pos[2]=centerPos.getZ()+Math.random()*TR.mapSquareSize*10;
+	    		thisObject.notifyPositionChange();
+	    	    }//end run()
+	    	}));}
     	    canTurn=false;
     	    mobile=false;
     	    break;
     	case attackRetreatBelowSky:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    smartPlaneBehavior(tr);
     	    break;
     	case attackRetreatAboveSky:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    smartPlaneBehavior(tr);
     	    break;
     	case bobAboveSky:
     	    mobile=false;
@@ -188,11 +242,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	}//end switch(logic)
     addBehavior(new DeathBehavior());
-    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setEnable(!boss));
+    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setMaxHealth(pl.getStrength()).setEnable(!boss));
     setActive(!boss);
     addBehavior(new DamagedByCollisionWithGameplayObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
-    if(canTurn){
+    if(canTurn||boss){
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
 	addBehavior(new AutoLeveling());
@@ -220,7 +274,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
-    if(boss){addBehavior(new HorizAimAtPlayerBehavior());}
+    if(boss){bossBehavior(tr,def);}
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
 
@@ -228,6 +282,28 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 public void destroy(){
     if(ruinObject!=null)ruinObject.setVisible(true);//TODO: Switch to setActive later.
     super.destroy();
+}
+
+private void unhandled(EnemyDefinition def){
+    System.err.println("UNHANDLED DEF LOGIC: "+def.getLogic()+". MODEL="+def.getComplexModelFile()+" DESC="+def.getDescription());
+}
+
+private void bossBehavior(TR tr, EnemyDefinition def){//Don't include hitzones for aiming.
+    if(!def.getComplexModelFile().toUpperCase().contains("HITZO"))addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+}
+
+private void fallingObjectBehavior(){
+    canTurn=false;
+    addBehavior(new PulledDownByGravityBehavior());
+    addBehavior(new DamageableBehavior().setHealth(1));
+    addBehavior(new CollidesWithTerrain());
+}
+
+private void smartPlaneBehavior(TR tr){
+    final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(tr.getPlayer()); 
+    addBehavior(haapb);
+    final AdjustAltitudeToPlayerBehavior aatpb = new AdjustAltitudeToPlayerBehavior(tr.getPlayer()).setAccelleration(1000);
+    addBehavior(aatpb);
 }
 /**
  * @return the boundingRadius

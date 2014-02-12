@@ -54,7 +54,6 @@ public class TunnelEntranceObject extends WorldObject {
 		final double groundHeight = groundHeightNorm*(world.sizeY/2);
 		//Ignore ground height with chambers because entrances don't behave themselves with this.
 		if(!tr.getOverworldSystem().isChamberMode()&&playerPos[1]>groundHeight+GROUND_HEIGHT_PAD)return;
-		System.out.println("dist="+Vect3D.distanceXZ(entranceObject.getPosition(),other.getPosition())+" thresh="+CollisionManager.SHIP_COLLISION_DISTANCE);
 	        if(Vect3D.distanceXZ(entranceObject.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE){
 		 //Turn off overworld
 		 tr.getOverworldSystem().deactivate();

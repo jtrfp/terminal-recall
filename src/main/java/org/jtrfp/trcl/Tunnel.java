@@ -93,8 +93,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
 		final double segLen=65536;
-		final double tunnelScalar=(TunnelSegment.TUNNEL_DIA_SCALAR/TR.crossPlatformScalar);
-		final double bendiness=tunnelScalar;
+		final double bendiness=18;
 		List<Segment> segs = tun.getSegments();
 		Vector3D tunnelEnd = new Vector3D(0,0,0);
 		Rotation rotation = entrance?new Rotation(new Vector3D(0,0,1),groundVector):new Rotation(new Vector3D(0,0,1),new Vector3D(1,0,0));

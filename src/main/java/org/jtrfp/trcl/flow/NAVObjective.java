@@ -81,7 +81,6 @@ public abstract class NAVObjective {
 		    entPos[1]=tr.getAltitudeMap().heightAt(
 				TR.legacy2MapSquare(loc3d.getZ()), 
 				TR.legacy2MapSquare(loc3d.getX()))*(tr.getWorld().sizeY/2);
-		    entPos[1]-=7000;//nudge
 		    tunnelEntrance.notifyPositionChange();
 		    
 		    final NAVObjective enterObjective = new NAVObjective(this){

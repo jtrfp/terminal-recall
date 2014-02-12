@@ -53,10 +53,10 @@ public enum Powerup{
 		    "MEGA0004.RAW","MEGA0005.RAW","MEGA0006.RAW","MEGA0007.RAW"},"Discrete Annihilation Missile","FFF"),
 	Afterburner(null,0,0,0,0,120,false,Integer.MAX_VALUE,new String[]{
 	    "AFTR0000.RAW","AFTR0001.RAW","AFTR0002.RAW","AFTR0003.RAW",
-	    "AFTR0004.RAW","AFTR0005.RAW","AFTR0006.RAW","AFTR0007.RAW"},"Afterburner","Turbo Thrust"),
+	    "AFTR0004.RAW","AFTR0005.RAW","AFTR0006.RAW","AFTR0007.RAW"},"Afterburner","Turbo!"),
 	PowerCore(null,0,6554,0,0,0,false,Integer.MAX_VALUE,new String[]{
 	    "ENCA0000.RAW","ENCA0001.RAW","ENCA0002.RAW","ENCA0003.RAW",
-	    "ENCA0004.RAW","ENCA0005.RAW","ENCA0006.RAW","ENCA0007.RAW"},"Shield Boost","Shield Boost"),
+	    "ENCA0004.RAW","ENCA0005.RAW","ENCA0006.RAW","ENCA0007.RAW"},"Shield Boost","Shield Boost!"),
 	Random(null,0,0,0,0,0,false,Integer.MAX_VALUE,null,"???","???"); //Not for use in TV
 	private final int shieldDelta,invisibiltyTimeDeltaMillis,
 		invincibilityTimeDeltaMillis,afterburnerDelta,weaponSupplyDelta;

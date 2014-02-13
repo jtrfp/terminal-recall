@@ -11,6 +11,8 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     private WorldObject chaseTarget;
     private double equatorialAccelleration=.004;
     private final double [] vectorToTargetVar = new double[3];
+    private boolean reverse = false;
+    private boolean leftHanded = true;
     public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
     @Override
     public void _tick(long timeInMillis){
@@ -21,13 +23,43 @@ public class HorizAimAtPlayerBehavior extends Behavior {
 	   // Vector3D vectorToTarget = chaseTarget.getPosition().subtract(p.getPosition()).normalize();
 	    vectorToTarget[1]=0;
 	    Vect3D.normalize(vectorToTarget);
-	    Vect3D.negate(vectorToTarget);
+	    if(!reverse)Vect3D.negate(vectorToTarget);
 	    //(vectorToTarget.getX(),0,vectorToTarget.getZ()).normalize().negate();
 	    final Vector3D thisHeading=new Vector3D(p.getHeading().getX(),0,p.getHeading().getZ()).normalize();
 	    Rotation rot = new Rotation(new Vector3D(vectorToTarget),thisHeading);
 	    final Vector3D deltaVector=rot.applyTo(Vector3D.PLUS_K);
-	    if(deltaVector.getZ()>0||deltaVector.getX()<0){rmb.accellerateEquatorialMomentum(-equatorialAccelleration);}
+	    if((deltaVector.getZ()>0||deltaVector.getX()<0)==leftHanded){rmb.accellerateEquatorialMomentum(-equatorialAccelleration);}
 	    else{rmb.accellerateEquatorialMomentum(equatorialAccelleration);}
 	}//end if(target!null)
+    }
+    /**
+     * @return the reverse
+     */
+    public boolean isReverse() {
+        return reverse;
+    }
+    /**
+     * @param reverse the reverse to set
+     * @return 
+     */
+    public HorizAimAtPlayerBehavior setReverse(boolean reverse) {
+        this.reverse = reverse;
+        return this;
+    }
+    public void setTurnAcceleration(double accelleration) {
+	equatorialAccelleration=accelleration;
+    }
+    /**
+     * @return the leftHanded
+     */
+    public boolean isLeftHanded() {
+        return leftHanded;
+    }
+    /**
+     * @param leftHanded the leftHanded to set
+     */
+    public HorizAimAtPlayerBehavior setLeftHanded(boolean leftHanded) {
+        this.leftHanded = leftHanded;
+        return this;
     }
 }//end ChaseBehavior

@@ -3,6 +3,7 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
+import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.Bobbing;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -194,14 +195,18 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    canTurn=false;
     	    mobile=false;
     	    break;
-    	case bobAndAttack://TODO: Add firing
-    	    addBehavior(new RotationalMomentumBehavior());
-    	    addBehavior(new RotationalDragBehavior());
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	case bobAndAttack:{
+    	    addBehavior(new SteadilyRotating().setRotationPhase(2*Math.PI*Math.random()));
+    	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
+    	    pfb.addSupply(99999999);
+    	    pfb.setMultiplexLevel(1);
+    	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[/*def.getWeapon().ordinal()*/1]);
+    	    addBehavior(pfb);
+    	    addBehavior(new AutoFiring().setProjectileFiringBehavior(pfb));
     	    addBehavior(new Bobbing().setPhase(Math.random()).setBobPeriodMillis(10*1000+Math.random()*3000));
     	    mobile=false;
     	    canTurn=false;
-    	    break;
+    	    break;}
     	case forwardDrive:
     	    canTurn=false;
     	    groundLocked=true;

@@ -6,6 +6,8 @@ public interface Projectile {
 
     void destroy();
 
-    void reset(double[] ds, Vector3D scalarMultiply);
+    void reset(double[] ds, Vector3D scalarMultiply, WorldObject objectOfOrigin);
+    
+    WorldObject getObjectOfOrigin();
 
 }

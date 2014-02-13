@@ -11,14 +11,16 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ProjectileObject3D extends WorldObject implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
+    private WorldObject objectOfOrigin;
     public ProjectileObject3D(TR tr,Model m, int damageOnImpact, ExplosionType explosionType){
 	super(tr,m);
 	addBehavior(new ProjectileBehavior(this,damageOnImpact,explosionType));
 	addBehavior(new ReportsCollisionsToStdout().setEnable(false));
     }
 
-    
-    public void reset(double [] newPos, Vector3D newVelocity){
+    @Override
+    public void reset(double [] newPos, Vector3D newVelocity, WorldObject objectOfOrigin){
+	this.objectOfOrigin=objectOfOrigin;
 	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	if(newVelocity.getNorm()!=0)setHeading(newVelocity.normalize());
 	else setHeading(Vector3D.PLUS_I);//meh.
@@ -28,4 +30,9 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	getBehavior().probeForBehavior(DeathBehavior.class).reset();
     }//end reset()
+
+    @Override
+    public WorldObject getObjectOfOrigin() {
+	return objectOfOrigin;
+    }
 }//end ProjectilObject3D

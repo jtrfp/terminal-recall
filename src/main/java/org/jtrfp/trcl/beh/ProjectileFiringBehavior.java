@@ -21,11 +21,14 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
+	    //System.out.println("Attempting firing...");
 	    if(takeAmmo()){
+		//System.out.println("Ammo approved.");
 	    	final WorldObject p = getParent();
 	    	Vector3D heading=this.firingHeading;
 	    	if(this.firingHeading==null)heading = p.getHeading();
 	    	for(int mi=0; mi<multiplexLevel;mi++){
+	    	//System.out.println("Multiplex="+mi);
 	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		heading,p.getTop()).applyTo(getNextFiringPosition());
 	    	    resetFiringTimer();
@@ -43,6 +46,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     }
     
     public ProjectileFiringBehavior requestFire(Vector3D heading){
+	//System.out.println("Firing requested.");
 	pendingFiring=true;
 	firingHeading=heading;
 	return this;

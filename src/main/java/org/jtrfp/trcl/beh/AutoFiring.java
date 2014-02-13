@@ -11,11 +11,12 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
     private double minFiringDistance=TR.mapSquareSize*0;
     private int lastIndexVisited=0;
     private boolean [] firingPattern = new boolean []
-	    {true,true,true,false,false,false,false,false,false,false,false,false,false,false,false};
+	    {true,true,false,false,false,false,false,false,true,false,false,false,false};
     private int timePerPatternEntry=250;
     private int totalFiringPatternTimeMillis=firingPattern.length*timePerPatternEntry;
     private ProjectileFiringBehavior projectileFiringBehavior;
     private final double [] firingVector = new double[3];
+    private int patternOffsetMillis=0;
     @Override
     public void _tick(long timeMillis){
 	final WorldObject thisObject = getParent();
@@ -24,11 +25,10 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 	final double [] playerPos = player.getPosition();
 	final double dist = Vect3D.distance(thisPos, playerPos);
 	if(dist<maxFiringDistance||dist>minFiringDistance){
-	    final int patIndex=(int)((timeMillis%totalFiringPatternTimeMillis)/timePerPatternEntry);
+	    final int patIndex=(int)(((timeMillis+patternOffsetMillis)%totalFiringPatternTimeMillis)/timePerPatternEntry);
 	    if(patIndex!=lastIndexVisited){//end if(lastVisited)
 		if(firingPattern[patIndex]){
-		    System.out.println("Requesting Fire...");
-		    Vect3D.subtract(thisPos, playerPos, firingVector);
+		    Vect3D.subtract(playerPos, thisPos, firingVector);
 		    projectileFiringBehavior.requestFire(new Vector3D(Vect3D.normalize(firingVector,firingVector)));}}
 	    lastIndexVisited=patIndex;
 	}//end in range
@@ -125,6 +125,19 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
     public AutoFiring setProjectileFiringBehavior(
     	ProjectileFiringBehavior projectileFiringBehavior) {
         this.projectileFiringBehavior = projectileFiringBehavior;
+        return this;
+    }
+    /**
+     * @return the patternOffsetMillis
+     */
+    public int getPatternOffsetMillis() {
+        return patternOffsetMillis;
+    }
+    /**
+     * @param patternOffsetMillis the patternOffsetMillis to set
+     */
+    public AutoFiring setPatternOffsetMillis(int patternOffsetMillis) {
+        this.patternOffsetMillis = patternOffsetMillis;
         return this;
     }
 }//end AutoFiring

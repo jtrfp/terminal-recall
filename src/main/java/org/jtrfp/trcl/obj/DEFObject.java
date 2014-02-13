@@ -200,9 +200,9 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
     	    pfb.addSupply(99999999);
     	    pfb.setMultiplexLevel(1);
-    	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[/*def.getWeapon().ordinal()*/1]);
+    	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     	    addBehavior(pfb);
-    	    addBehavior(new AutoFiring().setProjectileFiringBehavior(pfb));
+    	    addBehavior(new AutoFiring().setProjectileFiringBehavior(pfb).setPatternOffsetMillis((int)(Math.random()*2000)));
     	    addBehavior(new Bobbing().setPhase(Math.random()).setBobPeriodMillis(10*1000+Math.random()*3000));
     	    mobile=false;
     	    canTurn=false;

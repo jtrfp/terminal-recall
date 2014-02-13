@@ -9,7 +9,9 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class ProjectileFiringBehavior extends Behavior implements HasQuantifiableSupply{
     long timeWhenNextFiringPermittedMillis=0;
     long timeBetweenFiringsMillis=130;
-    private Vector3D [] firingPositions;
+    private static final Vector3D [] DEFAULT_POS=new Vector3D[]{Vector3D.ZERO};
+    private Vector3D [] firingPositions=DEFAULT_POS;
+    private Vector3D firingHeading;
     private int firingPositionIndex=0;
     private ProjectileFactory projectileFactory;
     private boolean pendingFiring=false;
@@ -21,13 +23,15 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
 	    if(takeAmmo()){
 	    	final WorldObject p = getParent();
-	    	final Vector3D heading = p.getHeading();
+	    	Vector3D heading=this.firingHeading;
+	    	if(this.firingHeading==null)heading = p.getHeading();
 	    	for(int mi=0; mi<multiplexLevel;mi++){
 	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		heading,p.getTop()).applyTo(getNextFiringPosition());
 	    	    resetFiringTimer();
-	    	    projectileFactory.fire(Vect3D.add(p.getPosition(),firingPosition.toArray(),new double[3]), heading);
+	    	    projectileFactory.fire(Vect3D.add(p.getPosition(),firingPosition.toArray(),new double[3]), heading, getParent());
 	    	}//for(multiplex)
+	    	heading = p.getHeading();
 	    }//end if(ammo)
 	    	pendingFiring=false;
 	}//end timeWhenNextfiringPermitted
@@ -37,6 +41,13 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	pendingFiring=true;
 	return this;
     }
+    
+    public ProjectileFiringBehavior requestFire(Vector3D heading){
+	pendingFiring=true;
+	firingHeading=heading;
+	return this;
+    }
+    
     
     protected boolean takeAmmo(){
 	if(ammo<=0)return false; ammo--; return true;

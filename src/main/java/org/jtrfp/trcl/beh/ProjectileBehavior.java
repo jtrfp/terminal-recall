@@ -38,6 +38,7 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	@Override
 	public void collidedWithDEFObject(DEFObject other) {
 	    if(other==parent.getObjectOfOrigin())return;//Don't shoot yourself.
+	    if(parent.getObjectOfOrigin() instanceof DEFObject)return;//Don't shoot your buddy.
 	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(damageOnImpact);
 	    deathBehavior.die();
 	}

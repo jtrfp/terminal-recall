@@ -94,10 +94,10 @@ public class ProjectileFactory {
 		 }
     	}//end if(DAM)
        }//end constructor(...)
-    public Projectile fire(double[] ds, Vector3D heading) {
+    public Projectile fire(double[] ds, Vector3D heading, WorldObject objectOfOrigin) {
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
-	result.reset(ds, heading.scalarMultiply(projectileSpeed));
+	result.reset(ds, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	tr.getWorld().add((WorldObject)result);
 	projectileIndex++;
 	projectileIndex%=projectiles.length;

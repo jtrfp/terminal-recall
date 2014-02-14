@@ -32,7 +32,7 @@ public class Vect3D {
 	return dest;
     }
 
-    private static double norm(double[] src) {
+    public static double norm(double[] src) {
 	final double x=src[0];
 	final double y=src[1];
 	final double z=src[2];

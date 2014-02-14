@@ -96,25 +96,50 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case targetPitchSmart:
-    	    unhandled(def);
-    	    break;
+    	    mobile=false;
+	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    break;
     	case coreBossSmart:
     	    mobile=false;
     	    break;
     	case cityBossSmart:
     	    mobile=false;
     	    break;
-    	case staticFiringSmart:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	case staticFiringSmart:{
+    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
+    	    pfb.addSupply(99999999);
+    	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
+    	    addBehavior(pfb);
+    	    addBehavior(new AutoFiring().
+    		    setProjectileFiringBehavior(pfb).
+    		    setPatternOffsetMillis((int)(Math.random()*2000)).
+    		    setMaxFiringDistance(TR.mapSquareSize*8).
+    		    setSmartFiring(true));
     	    mobile=false;
-    	    break;
+    	    canTurn=false;
+    	    break;}
     	case sittingDuck:
     	    canTurn=false;
     	    mobile=false;
     	    break;
-    	case tunnelAttack://TODO
-    	    mobile=false;
-    	    break;
+    	case tunnelAttack:{
+	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
+	    pfb.addSupply(99999999);
+	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
+	    addBehavior(pfb);
+	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    addBehavior(new AutoFiring().
+		    setProjectileFiringBehavior(pfb).
+		    setPatternOffsetMillis((int)(Math.random()*2000)).
+		    setMaxFiringDistance(TR.mapSquareSize*1).
+		    setSmartFiring(false).
+		    setTimePerPatternEntry(1000));
+	    addBehavior(new Bobbing().
+		    setPhase(Math.random()).
+		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000));
+	    mobile=false;
+	    break;}
     	case takeoffAndEscape://TODO
     	    canTurn=false;
     	    break;
@@ -246,8 +271,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    smartPlaneBehavior(tr,def);
     	    break;
     	case bobAboveSky:
-    	    mobile=false;
-    	    break;
+    	    addBehavior(new Bobbing());
+	    addBehavior(new SteadilyRotating());
+	    mobile=false;
+	    canTurn=false;
+	    break;
     	case factory:
     	    canTurn=false;
     	    mobile=false;

@@ -276,7 +276,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	if(groundLocked){
 	    addBehavior(new TerrainLocked());}
-	else 	{addBehavior(new BouncesOffSurfaces());
+	else 	{addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 	    	addBehavior(new CollidesWithTerrain());
 	    	}
 	

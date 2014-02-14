@@ -18,7 +18,9 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
     private int totalFiringPatternTimeMillis=firingPattern.length*timePerPatternEntry;
     private ProjectileFiringBehavior projectileFiringBehavior;
     private final double [] firingVector = new double[3];
+    private final double [] headingDelta = new double[3];
     private int patternOffsetMillis=0;
+    private double maxFireVectorDeviation=1.1;
     @Override
     public void _tick(long timeMillis){
 	//System.out.println("AutoFiring: Tick");
@@ -42,6 +44,9 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 			Vect3D.subtract(virtualPlayerPos.toArray(), thisPos, firingVector);}
 		    else{Vect3D.subtract(playerPos, thisPos, firingVector); }
 		    result = new Vector3D(Vect3D.normalize(firingVector,firingVector));
+		    final double [] objectHeading = thisObject.getHeadingArray();
+		    Vect3D.subtract(objectHeading, result.toArray(), headingDelta);
+		    if(Vect3D.norm(headingDelta)>maxFireVectorDeviation)return;
 		    projectileFiringBehavior.requestFire(result);}}
 	    lastIndexVisited=patIndex;
 	}//end in range
@@ -181,6 +186,21 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
      */
     public AutoFiring setSmartFiring(boolean smartFiring) {
         this.smartFiring = smartFiring;
+        return this;
+    }
+
+    /**
+     * @return the maxFireVectorDeviation
+     */
+    public double getMaxFireVectorDeviation() {
+        return maxFireVectorDeviation;
+    }
+
+    /**
+     * @param maxFireVectorDeviation the maxFireVectorDeviation to set
+     */
+    public AutoFiring setMaxFireVectorDeviation(double maxFireVectorDeviation) {
+        this.maxFireVectorDeviation = maxFireVectorDeviation;
         return this;
     }
 }//end AutoFiring

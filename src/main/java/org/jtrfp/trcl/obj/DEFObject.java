@@ -130,13 +130,14 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	    pfb.addSupply(99999999);
 	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
 	    addBehavior(pfb);
-	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
 	    addBehavior(new AutoFiring().
 		    setProjectileFiringBehavior(pfb).
 		    setPatternOffsetMillis((int)(Math.random()*2000)).
-		    setMaxFiringDistance(TR.mapSquareSize*1).
+		    setMaxFiringDistance(TR.mapSquareSize*.2).
 		    setSmartFiring(false).
-		    setTimePerPatternEntry(1000));
+		    setMaxFireVectorDeviation(.3).
+		    setTimePerPatternEntry(2000));
 	    addBehavior(new Bobbing().
 		    setPhase(Math.random()).
 		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000));

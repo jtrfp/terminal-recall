@@ -30,8 +30,8 @@ public class UpgradeableProjectileFiringBehavior extends
     
     protected void raiseCapabilityLevel(){
 	capabilityLevel++;
-	super.setFiringPositions(firingMultiplexMap[capabilityLevel]);
 	capabilityLevel=Math.min(capabilityLevel,maxCapabilityLevel);
+	super.setFiringPositions(firingMultiplexMap[capabilityLevel]);
     }
     
     protected void resetCapabilityLevel(){

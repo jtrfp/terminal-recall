@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.beh.SpinAccellerationBehavior.SpinMode;
+import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
@@ -11,15 +12,20 @@ private final HorizAimAtPlayerBehavior aimAtPlayer;
 private final AutoFiring autoFiring;
 private final SpinAccellerationBehavior spinBehavior;
 private final AdjustAltitudeToPlayerBehavior adjustAlt;
+private final AccelleratedByPropulsion escapeProp;
 private int sequenceUpdateIntervalMillis = 2000;
 private long nextUpdateTimeMillis = 0;
 private double ignorePlayerDistanceMin = TR.mapSquareSize*15;
 private double attackPlayerDistanceMin = TR.mapSquareSize*5;//Any closer is retreat mode
 private BehaviorMode behaviorMode = null;
 private int behaviorSubSequence = 0;
+private final boolean retreatAboveSky;
 
     public SmartPlaneBehavior(HorizAimAtPlayerBehavior haapb,
-	    AutoFiring afb, SpinAccellerationBehavior sahb, AdjustAltitudeToPlayerBehavior aatpb) {
+	    AutoFiring afb, SpinAccellerationBehavior sahb, AdjustAltitudeToPlayerBehavior aatpb, 
+	    AccelleratedByPropulsion escapeProp, boolean retreatAboveSky) {
+	this.retreatAboveSky=retreatAboveSky;
+	this.escapeProp=escapeProp;
 	adjustAlt=aatpb;
 	aimAtPlayer=haapb;
 	autoFiring=afb;
@@ -50,9 +56,13 @@ private int behaviorSubSequence = 0;
 	aimAtPlayer.setEnable(true);
 	aimAtPlayer.setReverse(true);
 	autoFiring.setEnable(false);
+	if(retreatAboveSky){
+	    escapeProp.setEnable(true);
+	    adjustAlt.setEnable(false);
+	}else{
 	adjustAlt.setEnable(true);
 	adjustAlt.setReverse(true);
-	adjustAlt.setAccelleration(4000);
+	adjustAlt.setAccelleration(4000);}
 	//spinBehavior.setEnable(true);
 	//spinBehavior.setSpinMode(SpinMode.LATERAL);
 	//spinBehavior.setSpinAccelleration(.007);//Spin away
@@ -61,6 +71,9 @@ private int behaviorSubSequence = 0;
     
     private void attackPlayer(){//Turn toward player, auto-fire on.
 	//System.out.println("SmartPlaneBehavior: Attack.");
+	if(retreatAboveSky){
+	    escapeProp.setEnable(false);
+	}
 	aimAtPlayer.setEnable(true);
 	aimAtPlayer.setReverse(false);
 	autoFiring.setEnable(true);
@@ -75,6 +88,9 @@ private int behaviorSubSequence = 0;
 	//Straight, turn+, straight, turn-
 	//System.out.println("SmartPlaneBehavior: Ignore.");
 	if(behaviorMode!=BehaviorMode.ignore){
+	    if(retreatAboveSky){
+		    escapeProp.setEnable(false);
+		}
 	    behaviorMode=BehaviorMode.ignore;
 	    behaviorSubSequence=0;
 	    aimAtPlayer.setEnable(false);

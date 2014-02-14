@@ -72,7 +72,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    groundLocked=true;
     	    break;
     	case flyingSmart:
-    	    smartPlaneBehavior(tr,def);
+    	    smartPlaneBehavior(tr,def,false);
     	    break;
     	case bankSpinDrill:
     	    unhandled(def);
@@ -82,11 +82,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=true;
     	    break;
     	case flyingAttackRetreatSmart:
-    	    smartPlaneBehavior(tr,def);
+    	    smartPlaneBehavior(tr,def,false);
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case splitShipSmart://TODO
-    	    smartPlaneBehavior(tr,def);
+    	    smartPlaneBehavior(tr,def,false);
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    break;
     	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
@@ -283,10 +283,10 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case attackRetreatBelowSky:
-    	    smartPlaneBehavior(tr,def);
+    	    smartPlaneBehavior(tr,def,false);
     	    break;
     	case attackRetreatAboveSky:
-    	    smartPlaneBehavior(tr,def);
+    	    smartPlaneBehavior(tr,def,true);
     	    break;
     	case bobAboveSky:
     	    addBehavior(new Bobbing());
@@ -357,7 +357,7 @@ private void fallingObjectBehavior(){
     addBehavior(new CollidesWithTerrain());
 }
 
-private void smartPlaneBehavior(TR tr, EnemyDefinition def){
+private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
     final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(tr.getPlayer()).setLeftHanded(Math.random()>=.5);
     addBehavior(haapb);
     final AdjustAltitudeToPlayerBehavior aatpb = new AdjustAltitudeToPlayerBehavior(tr.getPlayer()).setAccelleration(1000);
@@ -365,7 +365,13 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def){
     final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     pfb.addSupply(99999999);
     addBehavior(pfb);
+    AccelleratedByPropulsion escapeProp=null;
+    if(retreatAboveSky){
+      escapeProp = new AccelleratedByPropulsion();
+      escapeProp.setThrustVector(new Vector3D(0,.25,0)).setEnable(false);
+      addBehavior(escapeProp);}
     final AutoFiring afb = new AutoFiring();
+    afb.setMaxFireVectorDeviation(.3);
     afb.setFiringPattern(new boolean [] {true,false,false,false,true,true,false});
     afb.setTimePerPatternEntry((int)(400+Math.random()*300));
     afb.setPatternOffsetMillis((int)(Math.random()*1000));
@@ -375,7 +381,7 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def){
     //addBehavior(eu);
     final SpinAccellerationBehavior sab = (SpinAccellerationBehavior)new SpinAccellerationBehavior().setEnable(false);
     addBehavior(sab);
-    addBehavior(new SmartPlaneBehavior(haapb,afb,sab,aatpb));
+    addBehavior(new SmartPlaneBehavior(haapb,afb,sab,aatpb,escapeProp,retreatAboveSky));
 }
 /**
  * @return the boundingRadius

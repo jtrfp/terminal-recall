@@ -18,9 +18,9 @@ public class HasPropulsion extends Behavior implements Propelled {
     }
 
     @Override
-    public void setMaxPropulsion(double max) {
+    public HasPropulsion setMaxPropulsion(double max) {
 	this.max=max;
-	
+	return this;
     }
 
     @Override
@@ -29,15 +29,17 @@ public class HasPropulsion extends Behavior implements Propelled {
     }
 
     @Override
-    public void deltaPropulsion(double delta) {
+    public HasPropulsion deltaPropulsion(double delta) {
 	propulsion+=delta;
 	if(propulsion>max){propulsion=max;}
 	else if(propulsion<min){propulsion=min;}
+	return this;
     }
 
     @Override
-    public void setMinPropulsion(double min) {
+    public HasPropulsion setMinPropulsion(double min) {
 	this.min=min;
+	return this;
     }
 
     @Override

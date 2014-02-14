@@ -614,7 +614,7 @@ public class ResourceManager{
 		     result[c].put(b);
 		     result[c].put(b);
 		     result[c].put(b);
-		     result[c].put((byte)((b&0xFF)>16?255:b));//Less than 16 is alpha'd out
+		     result[c].put((byte)((b&0xFF)>1?255:b));//Less than 1 is alpha'd out
 		 }
 		 result[c].clear();
 	     }//end for(chars)

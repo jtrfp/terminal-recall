@@ -5,8 +5,10 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
+import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Bobbing;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
 import org.jtrfp.trcl.beh.DeathBehavior;
@@ -140,8 +142,24 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000));
 	    mobile=false;
 	    break;}
-    	case takeoffAndEscape://TODO
+    	case takeoffAndEscape:
+    	    addBehavior(new MovesByVelocity());
+    	    addBehavior((Behavior)(new HasPropulsion().setMinPropulsion(0).setPropulsion(def.getThrustSpeed())));
+    	    addBehavior(new AccelleratedByPropulsion().setEnable(false));
+    	    addBehavior(new VelocityDragBehavior().setDragCoefficient(.86));
+    	    addBehavior(new CustomPlayerWithinRangeBehavior(){
+    		@Override
+    		public void withinRange(){
+    		    DEFObject.this.getBehavior().
+    		     probeForBehavior(AccelleratedByPropulsion.class).
+    		     setThrustVector(Vector3D.PLUS_J).
+    		     setEnable(true);
+    		}
+    	    }).setRange(TR.mapSquareSize*10);
+	
+    	    addBehavior(new LoopingPositionBehavior());
     	    canTurn=false;
+    	    mobile=false;
     	    break;
     	case fallingAsteroid:
     	    fallingObjectBehavior();

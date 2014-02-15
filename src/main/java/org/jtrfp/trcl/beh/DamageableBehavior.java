@@ -41,16 +41,16 @@ public class DamageableBehavior extends Behavior{
 		return health;
 		}
 
-	public void unDamage(int amt) throws HealthNotNeededException{
+	public void unDamage(int amt) throws SupplyNotNeededException{
 	    	if(!isEnabled())return;
 	    	if(amt==maxHealth){unDamage();return;}
-	    	if(health+amt>maxHealth)throw new HealthNotNeededException();
+	    	if(health+amt>maxHealth)throw new SupplyNotNeededException();
 		health+=amt;
 		}
 
-	public void unDamage() throws HealthNotNeededException{
+	public void unDamage() throws SupplyNotNeededException{
 	    	if(!isEnabled())return;
-	    	if(health>=maxHealth)throw new HealthNotNeededException();
+	    	if(health>=maxHealth)throw new SupplyNotNeededException();
 		health=maxHealth;
 		}
 	public DamageableBehavior setHealth(int val){
@@ -95,7 +95,7 @@ public class DamageableBehavior extends Behavior{
 	}
 	
 	
-	public static class HealthNotNeededException extends Exception{
+	public static class SupplyNotNeededException extends Exception{
 	    
 	}
     }//end DamageableBehavior

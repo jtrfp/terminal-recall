@@ -216,6 +216,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case bob:
     	    addBehavior(new Bobbing());
     	    addBehavior(new SteadilyRotating());
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;//ironic?
     	    break;
@@ -258,6 +260,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    addBehavior(new Bobbing().
     		    setPhase(Math.random()).
     		    setBobPeriodMillis(10*1000+Math.random()*3000));
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;
     	    break;}
@@ -321,7 +325,9 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
 	addBehavior(new AutoLeveling());
     }
-    if((!mobile || groundLocked) && !customExplosion){
+    if(foliage){
+	addBehavior(new ExplodesOnDeath(ExplosionType.Billow));
+    }else if((!mobile || groundLocked) && !customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
     }else if(!customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));

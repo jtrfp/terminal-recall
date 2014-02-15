@@ -34,8 +34,9 @@ public double getSpinAccelleration() {
 /**
  * @param spinAccelleration the spinAccelleration to set
  */
-public void setSpinAccelleration(double spinAccelleration) {
+public SpinAccellerationBehavior setSpinAccelleration(double spinAccelleration) {
     this.spinAccelleration = spinAccelleration;
+    return this;
 }
 
 /**
@@ -48,7 +49,8 @@ public SpinMode getSpinMode() {
 /**
  * @param spinMode the spinMode to set
  */
-public void setSpinMode(SpinMode spinMode) {
+public SpinAccellerationBehavior setSpinMode(SpinMode spinMode) {
     this.spinMode = spinMode;
+    return this;
 }
 }//end SpinAlongHeading

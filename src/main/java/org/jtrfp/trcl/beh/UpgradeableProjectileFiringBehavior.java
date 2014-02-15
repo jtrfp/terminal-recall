@@ -32,10 +32,13 @@ public class UpgradeableProjectileFiringBehavior extends
 	capabilityLevel++;
 	capabilityLevel=Math.min(capabilityLevel,maxCapabilityLevel);
 	super.setFiringPositions(firingMultiplexMap[capabilityLevel]);
+	super.setMultiplexLevel((int)Math.pow(2,capabilityLevel));//Double the multiplex for each capability
     }
     
     protected void resetCapabilityLevel(){
 	capabilityLevel=0;
+	super.setFiringPositions(firingMultiplexMap[capabilityLevel]);
+	super.setMultiplexLevel((int)Math.pow(2,capabilityLevel));//Double the multiplex for each capability
     }
     
     protected boolean limitlessBottomLevel(){return limitlessBottomLevel;}

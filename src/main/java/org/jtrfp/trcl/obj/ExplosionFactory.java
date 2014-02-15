@@ -7,7 +7,7 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 public class ExplosionFactory {
     	//private int billowIndex=0,blastIndex=0,bigExplosionIndex=0;
     	private final TR tr;
-    	private final int MAX_EXPLOSIONS_PER_POOL=10;
+    	private final int MAX_EXPLOSIONS_PER_POOL=20;
     	private final Explosion[][] allExplosions = new Explosion[ExplosionType.values().length][];
     	private final int [] indices = new int[ExplosionType.values().length];
 	public ExplosionFactory(TR tr){

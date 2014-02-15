@@ -6,7 +6,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.pool.ObjectPool;
 
 public class DebrisFactory{
-    private final int DEBRIS_POOL_SIZE=40;
+    private final int DEBRIS_POOL_SIZE=80;
     private final TR tr;
     private final ObjectPool<Debris> pool;
     public DebrisFactory(TR tr){

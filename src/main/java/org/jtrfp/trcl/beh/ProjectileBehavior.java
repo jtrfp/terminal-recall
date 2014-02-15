@@ -39,18 +39,18 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	public void collidedWithDEFObject(DEFObject other) {
 	    if(other==parent.getObjectOfOrigin())return;//Don't shoot yourself.
 	    if(parent.getObjectOfOrigin() instanceof DEFObject)return;//Don't shoot your buddy.
-	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(damageOnImpact);
+	    other.getBehavior().probeForBehavior(DamageableBehavior.class).projectileDamage(damageOnImpact);
 	    deathBehavior.die();
 	}
 	public void forceCollision(WorldObject other) {
-	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(damageOnImpact);
+	    other.getBehavior().probeForBehavior(DamageableBehavior.class).projectileDamage(damageOnImpact);
 	    deathBehavior.die();
 	    
 	}
 	@Override
 	public void collidedWithPlayer(Player other) {
 	    if(other==parent.getObjectOfOrigin())return;//Don't shoot yourself.
-	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(damageOnImpact);
+	    other.getBehavior().probeForBehavior(DamageableBehavior.class).projectileDamage(damageOnImpact);
 	    deathBehavior.die();
 	}
 }//end ProjectileBehavior

@@ -8,18 +8,22 @@ import org.jtrfp.trcl.obj.Player;
 public class DamageableBehavior extends Behavior{
     	private int maxHealth=65535;
 	private int health=maxHealth;
+	private boolean acceptsProjectileDamage=true;
 	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
-
+	
 	public DamageableBehavior impactDamage(int dmg){
 	    if(isEnabled())generalDamage(dmg);
 	    return this;
 	}
-	
 	public DamageableBehavior shearDamage(int dmg){
 	    if(isEnabled())generalDamage(dmg);
 	    return this;
 	}
-	
+	public DamageableBehavior projectileDamage(int dmg){
+	    if(!acceptsProjectileDamage)return this;
+	    if(isEnabled())generalDamage(dmg);
+	    return this;
+	}
 	protected void generalDamage(int dmg){
 	    if(!isEnabled())return;
 	    if(isInvincible())return;
@@ -28,9 +32,7 @@ public class DamageableBehavior extends Behavior{
 		    getParent().destroy();
 		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
 		}//end if(dead)
-		else{
-		    if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
-		}//end (!dead)
+		else if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
 	}//end generalDamage(...)
 
 	public boolean isInvincible(){
@@ -97,5 +99,24 @@ public class DamageableBehavior extends Behavior{
 	
 	public static class SupplyNotNeededException extends Exception{
 	    
+	}
+
+
+	public DamageableBehavior addHealth(int delta) {
+	    setHealth(getHealth()+delta);
+	    return this;
+	}
+	/**
+	 * @return the acceptsProjectileDamage
+	 */
+	public boolean isAcceptsProjectileDamage() {
+	    return acceptsProjectileDamage;
+	}
+	/**
+	 * @param acceptsProjectileDamage the acceptsProjectileDamage to set
+	 */
+	public DamageableBehavior setAcceptsProjectileDamage(boolean acceptsProjectileDamage) {
+	    this.acceptsProjectileDamage = acceptsProjectileDamage;
+	    return this;
 	}
     }//end DamageableBehavior

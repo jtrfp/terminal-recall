@@ -9,6 +9,7 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
     private final int MIN_FRAGS=6;
     @Override
     public void collidedWithSurface(WorldObject wo, double[] surfaceNormal) {
+	if(!isEnabled())return;
 	final WorldObject p = getParent();
 	p.getBehavior().probeForBehavior(DamageableBehavior.class).shearDamage(collisionDamage);
 	for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){

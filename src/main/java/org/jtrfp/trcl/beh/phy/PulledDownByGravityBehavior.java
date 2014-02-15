@@ -6,7 +6,7 @@ import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class PulledDownByGravityBehavior extends Behavior {
-    private static final Vector3D G = new Vector3D(0,-700,0);
+    private static final Vector3D G = new Vector3D(0,-1400,0);
     @Override
     public void _tick(long tickTimeMillis){
 	final WorldObject p = getParent();

@@ -17,6 +17,7 @@ import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.ResetsRandomlyAfterDeath;
 import org.jtrfp.trcl.beh.SmartPlaneBehavior;
@@ -300,6 +301,14 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	}//end switch(logic)
+    ///////////////////////////////////////////////////////////
+    //Position Limit
+     {final PositionLimit posLimit = new PositionLimit();
+     posLimit.getPositionMaxima()[1]=TR.mapSquareSize*10;
+     posLimit.getPositionMinima()[1]=-TR.mapSquareSize;
+     addBehavior(posLimit);}
+     
+    //Misc
     addBehavior(new DeathBehavior());
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setMaxHealth(pl.getStrength()).setEnable(!boss));
     setActive(!boss);
@@ -369,7 +378,7 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     AccelleratedByPropulsion escapeProp=null;
     if(retreatAboveSky){
       escapeProp = new AccelleratedByPropulsion();
-      escapeProp.setThrustVector(new Vector3D(0,.25,0)).setEnable(false);
+      escapeProp.setThrustVector(new Vector3D(0,.1,0)).setEnable(false);
       addBehavior(escapeProp);}
     final AutoFiring afb = new AutoFiring();
     afb.setMaxFireVectorDeviation(.3);

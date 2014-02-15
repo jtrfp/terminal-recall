@@ -52,6 +52,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     foliage=false;
     boss=def.isObjectIsBoss();
     groundLocked=false;
+    boolean customExplosion=false;
     switch(logic){
     	case groundDumb:
     	    mobile=false;
@@ -127,7 +128,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;
     	    break;
     	case tunnelAttack:{
-	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
+	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior();
 	    pfb.addSupply(99999999);
 	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
 	    addBehavior(pfb);
@@ -158,8 +159,9 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     		     setEnable(true);
     		}
     	    }).setRange(TR.mapSquareSize*10);
-	
     	    addBehavior(new LoopingPositionBehavior());
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    	    customExplosion=true;
     	    canTurn=false;
     	    mobile=false;
     	    break;
@@ -319,9 +321,9 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
 	addBehavior(new AutoLeveling());
     }
-    if(!mobile || groundLocked){
+    if((!mobile || groundLocked) && !customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
-    }else{
+    }else if(!customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
     }
     if(mobile){

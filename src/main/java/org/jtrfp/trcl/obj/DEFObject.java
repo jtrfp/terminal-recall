@@ -222,6 +222,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    addBehavior(new Bobbing());
     	    addBehavior(new SteadilyRotating());
     	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    	    possibleBobbingSpinAndCrashOnDeath(.5);
 	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;//ironic?
@@ -266,6 +267,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     		    setPhase(Math.random()).
     		    setBobPeriodMillis(10*1000+Math.random()*3000));
     	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    	    
+    	    possibleBobbingSpinAndCrashOnDeath(.5);
 	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;
@@ -304,6 +307,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case bobAboveSky:
     	    addBehavior(new Bobbing());
 	    addBehavior(new SteadilyRotating());
+	    possibleBobbingSpinAndCrashOnDeath(.5);
 	    mobile=false;
 	    canTurn=false;
 	    break;
@@ -380,6 +384,59 @@ private void fallingObjectBehavior(){
     addBehavior(new CollidesWithTerrain());
 }
 
+private void possibleSpinAndCrashOnDeath(double probability, final double spinSpeedCoeff){
+    spinCrash=Math.random()<probability;//40%
+    if(spinCrash){
+    final DamageTrigger spinAndCrash = new DamageTrigger(){
+	@Override
+	public void healthBelowThreshold(){// Spinout and crash
+	    final WorldObject 	parent 	= getParent();
+	    final Behavior 	beh 	= parent.getBehavior();
+	    addBehavior(new PulledDownByGravityBehavior());
+	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
+	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
+	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
+	    //Catastrophy
+	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009*spinSpeedCoeff));
+	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006*spinSpeedCoeff));
+	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007*spinSpeedCoeff));
+	    //TODO: Smoke, sparks, and other fun stuff.
+	    addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
+	}//end healthBelowThreshold
+    }.setThreshold(2048);
+    addBehavior(new DamagedByCollisionWithSurface().setCollisionDamage(65535).setEnable(false));
+    addBehavior(spinAndCrash);}
+}
+
+private void possibleBobbingSpinAndCrashOnDeath(double probability){
+    possibleSpinAndCrashOnDeath(probability,.3);
+	    if(spinCrash){
+		addBehavior(new CollidesWithTerrain());
+		addBehavior(new MovesByVelocity()).setEnable(false);
+		addBehavior(new HasPropulsion()).setEnable(false);
+		addBehavior(new AccelleratedByPropulsion()).setEnable(false);
+		addBehavior(new VelocityDragBehavior()).setEnable(false);
+		addBehavior(new RotationalMomentumBehavior()).setEnable(false);
+		addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
+		final DamageTrigger spinAndCrashAddendum = new DamageTrigger(){
+		@Override
+		public void healthBelowThreshold(){
+		    final WorldObject 	parent 	= getParent();
+		    parent.getBehavior().probeForBehavior(MovesByVelocity.class).setEnable(true);
+		parent.getBehavior().probeForBehavior(HasPropulsion.class).setEnable(true);
+		parent.getBehavior().probeForBehavior(AccelleratedByPropulsion.class).setEnable(true);
+		parent.getBehavior().probeForBehavior(VelocityDragBehavior.class).setEnable(true);
+		parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class).setEnable(true);
+		
+		    parent.getBehavior().probeForBehavior(SteadilyRotating.class).setEnable(false);
+		    parent.getBehavior().probeForBehavior(Bobbing.class).setEnable(false);
+		   // parent.getBehavior().probeForBehavior(AutoFiring.class).setBerzerk(true)
+		   // 	.setFiringPattern(new boolean[]{true}).setTimePerPatternEntry(100);
+		}};
+		addBehavior(spinAndCrashAddendum);
+	    }//end if(spinCrash)
+}
+
 private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
     final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(tr.getPlayer()).setLeftHanded(Math.random()>=.5);
     addBehavior(haapb);
@@ -389,32 +446,21 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     pfb.addSupply(99999999);
     addBehavior(pfb);
     
-    spinCrash=Math.random()<.4;//40%
+    possibleSpinAndCrashOnDeath(.4,1.);
     if(spinCrash){
-    final DamageTrigger spinAndCrash = new DamageTrigger(){
-	@Override
-	public void healthBelowThreshold(){// Spinout and crash
-	    final WorldObject 	parent 	= getParent();
-	    final Behavior 	beh 	= parent.getBehavior();
-	    final HasPropulsion hp 	= beh.probeForBehavior(HasPropulsion.class);
-	    hp.setPropulsion(hp.getPropulsion()/1);
-	    addBehavior(new PulledDownByGravityBehavior());
-	    beh.probeForBehavior(AutoLeveling.class).
-		    setLevelingAxis(LevelingAxis.HEADING).
-		    setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985);
-	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
-	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
-	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
-	    //Catastrophy
-	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009));
-	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006));
-	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007));
-	    //TODO: Smoke, sparks, and other fun stuff.
-	    addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
-	}//end healthBelowThreshold
-    }.setThreshold(2048);
-    addBehavior(new DamagedByCollisionWithSurface().setCollisionDamage(65535).setEnable(false));
-    addBehavior(spinAndCrash);}
+		final DamageTrigger spinAndCrashAddendum = new DamageTrigger(){
+		@Override
+		public void healthBelowThreshold(){
+		    final WorldObject 	parent 	= getParent();
+		    final Behavior	beh	= parent.getBehavior();
+		    final HasPropulsion hp 	= beh.probeForBehavior(HasPropulsion.class);
+		    hp.setPropulsion(hp.getPropulsion()/1);
+		    beh.probeForBehavior(AutoLeveling.class).
+		    	setLevelingAxis(LevelingAxis.HEADING).
+		    	setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985);
+		}};
+		addBehavior(spinAndCrashAddendum);
+	    }//end if(spinCrash)
     
     AccelleratedByPropulsion escapeProp=null;
     if(retreatAboveSky){

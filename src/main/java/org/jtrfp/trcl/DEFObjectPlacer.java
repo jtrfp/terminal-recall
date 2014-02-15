@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.DEFFile;
@@ -21,6 +22,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	private DEFFile def;
 	private World world;
 	private List<DEFObject> defList;
+	private Vector3D headingOverride=null;
 	
 	public DEFObjectPlacer(DEFFile def, World world)
 		{this.def=def;this.world=world;}
@@ -61,7 +63,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		
 		for(EnemyPlacement pl:places){
-			tr.getGPU().releaseGL();
+			tr.getGPU().releaseGL();//Feed the dog
 			tr.getGPU().takeGL();
 			Model model =models[pl.getDefIndex()];
 			if(model!=null){
@@ -100,9 +102,28 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				}//end if(groundStaticRuin)
 				try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
 				catch(MathArithmeticException e){e.printStackTrace();}
+				if(headingOverride!=null){
+				    final double [] headingArray = obj.getHeadingArray();
+				    headingArray[0]=headingOverride.getX();
+				    headingArray[1]=headingOverride.getY();
+				    headingArray[2]=headingOverride.getZ();
+				  }//end if(headingOverride)
 				target.add(obj);
 				}//end if(model!=null)
 			else{System.out.println("Skipping triangle list at index "+pl.getDefIndex());}
 			}//end for(places)
 		}//end placeObjects
+	/**
+	 * @return the headingOverride
+	 */
+	public Vector3D getHeadingOverride() {
+	    return headingOverride;
+	}
+	/**
+	 * @param headingOverride the headingOverride to set
+	 */
+	public DEFObjectPlacer setHeadingOverride(Vector3D headingOverride) {
+	    this.headingOverride = headingOverride;
+	    return this;
+	}
 	}//end DEFObjectPlacer

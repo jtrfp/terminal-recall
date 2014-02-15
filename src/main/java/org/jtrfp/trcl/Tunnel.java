@@ -78,7 +78,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)).toArray());
 			add(exitObject);
 			// X is tunnel depth, Z is left-right
-			try{new ObjectSystem(this,world,lvl,null);}
+			try{new ObjectSystem(this,world,lvl,null,Vector3D.MINUS_I);}
 			catch(Exception e){e.printStackTrace();}
 		tr.getOverworldSystem().
 		  add(entranceObject=new TunnelEntranceObject(

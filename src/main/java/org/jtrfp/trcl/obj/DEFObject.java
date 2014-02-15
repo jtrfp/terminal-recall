@@ -5,12 +5,15 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
+import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Bobbing;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
+import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
+import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
@@ -22,6 +25,7 @@ import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.ResetsRandomlyAfterDeath;
 import org.jtrfp.trcl.beh.SmartPlaneBehavior;
 import org.jtrfp.trcl.beh.SpinAccellerationBehavior;
+import org.jtrfp.trcl.beh.SpinAccellerationBehavior.SpinMode;
 import org.jtrfp.trcl.beh.SteadilyRotating;
 import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
@@ -43,6 +47,7 @@ public class DEFObject extends WorldObject {
     private WorldObject ruinObject;
     private final EnemyLogic logic;
     private boolean mobile,canTurn,foliage,boss,groundLocked;
+    boolean spinCrash=false;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
@@ -316,7 +321,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
      
     //Misc
     addBehavior(new DeathBehavior());
-    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()).setMaxHealth(pl.getStrength()).setEnable(!boss));
+    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()+(spinCrash?16:0)).setMaxHealth(pl.getStrength()+(spinCrash?16:0)).setEnable(!boss));
     setActive(!boss);
     addBehavior(new DamagedByCollisionWithGameplayObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
@@ -383,6 +388,34 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     pfb.addSupply(99999999);
     addBehavior(pfb);
+    
+    spinCrash=Math.random()<.4;//40%
+    if(spinCrash){
+    final DamageTrigger spinAndCrash = new DamageTrigger(){
+	@Override
+	public void healthBelowThreshold(){// Spinout and crash
+	    final WorldObject 	parent 	= getParent();
+	    final Behavior 	beh 	= parent.getBehavior();
+	    final HasPropulsion hp 	= beh.probeForBehavior(HasPropulsion.class);
+	    hp.setPropulsion(hp.getPropulsion()/1);
+	    addBehavior(new PulledDownByGravityBehavior());
+	    beh.probeForBehavior(AutoLeveling.class).
+		    setLevelingAxis(LevelingAxis.HEADING).
+		    setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985);
+	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
+	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
+	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
+	    //Catastrophy
+	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009));
+	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006));
+	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007));
+	    //TODO: Smoke, sparks, and other fun stuff.
+	    addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
+	}//end healthBelowThreshold
+    }.setThreshold(2048);
+    addBehavior(new DamagedByCollisionWithSurface().setCollisionDamage(65535).setEnable(false));
+    addBehavior(spinAndCrash);}
+    
     AccelleratedByPropulsion escapeProp=null;
     if(retreatAboveSky){
       escapeProp = new AccelleratedByPropulsion();

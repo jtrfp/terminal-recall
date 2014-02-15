@@ -1,6 +1,6 @@
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.beh.DamageableBehavior.HealthNotNeededException;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.WorldObject;
 
 
@@ -23,7 +23,7 @@ public void notifyDeath() {
 	    thisObject.setActive(true);//Is this really needed?
 	    thisObject.setVisible(true);
 	    try{thisObject.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
-	    catch(HealthNotNeededException e){e.printStackTrace();}//?!?!    
+	    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!    
 	    _runOnReset.run();
 	}//end run()
     }.start();

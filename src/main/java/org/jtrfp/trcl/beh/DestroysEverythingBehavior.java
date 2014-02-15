@@ -1,6 +1,6 @@
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.beh.DamageableBehavior.HealthNotNeededException;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -18,7 +18,7 @@ public class DestroysEverythingBehavior extends Behavior {
 	counter--;
 	if(counter==1&&isReplenishingPlayerHealth()){
 	    try{getParent().getTr().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
-	    catch(HealthNotNeededException e){}//Ok, whatever.
+	    catch(SupplyNotNeededException e){}//Ok, whatever.
 	}
 	if(counter<=0){//We can't stick around for long. Not with all this destroying going on.
 	    getParent().destroy();counter=2;

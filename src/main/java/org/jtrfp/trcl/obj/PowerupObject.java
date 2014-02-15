@@ -16,7 +16,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
-import org.jtrfp.trcl.beh.DamageableBehavior.HealthNotNeededException;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
@@ -55,12 +55,12 @@ public class PowerupObject extends BillboardSprite{
 				    	Player p=(Player)other;
 					try{applyToPlayer(p);
 					destroy();}
-					catch(HealthNotNeededException e){}
+					catch(SupplyNotNeededException e){}
 					}//end if(Player)
 				}//end if(close enough)
 			}//end proposeCollision()
 		
-		public void applyToPlayer(Player p) throws HealthNotNeededException{
+		public void applyToPlayer(Player p) throws SupplyNotNeededException{
 			if(powerupType.getAfterburnerDelta()!=0){
 			    AfterburnerBehavior ab = p.getBehavior().probeForBehavior(AfterburnerBehavior.class);
 			    ab.addSupply(powerupType.getAfterburnerDelta());

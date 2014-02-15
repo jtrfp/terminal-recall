@@ -5,7 +5,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
-    private final double MAX_SPEED=70000;
+    private final double MAX_SPEED=110000;
     private final int MIN_FRAGS=12;
     @Override
     public void notifyDeath() {
@@ -20,7 +20,7 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
 	    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
 	    new Vector3D(
 		Math.random()*MAX_SPEED-MAX_SPEED/2.,
-		Math.random()*MAX_SPEED+30000,
+		Math.random()*MAX_SPEED+60000,
 		Math.random()*MAX_SPEED-MAX_SPEED/2.));
 	}//end for(NUM_FRAGS)
     }//end constructor

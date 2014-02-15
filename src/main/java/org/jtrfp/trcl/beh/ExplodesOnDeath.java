@@ -4,7 +4,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ExplodesOnDeath extends Behavior implements DeathListener {
-private final ExplosionType type;
+private ExplosionType type;
     public ExplodesOnDeath(ExplosionType type){
 	this.type=type;
     }
@@ -17,4 +17,8 @@ private final ExplosionType type;
     public void _tick(long tickTimeMillis){
 	
     }//end _tick()
+    public ExplodesOnDeath setExplosionType(ExplosionType type) {
+	this.type=type;
+	return this;
+    }//end setExplosionType
 }//end ExplodesOnDeath

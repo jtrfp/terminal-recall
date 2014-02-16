@@ -33,14 +33,14 @@ import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 
-public class WorldObject implements PositionedRenderable
-	{
+public class WorldObject implements PositionedRenderable{
 	private double []heading = new double []{0,0,1}; //Facing direction
 	private double []top = new double []{0,1,0};		//Normal describing the top of the object (for tilt)
 	//protected Vector3D position = Vector3D.ZERO;
@@ -60,11 +60,11 @@ public class WorldObject implements PositionedRenderable
 	public static final boolean LOOP = true;
 	private SpacePartitioningGrid containingGrid;
 	//private Behavior behavior=new NullBehavior(this);
-	private ArrayList<Behavior>inactiveBehaviors = new ArrayList<Behavior>();
-	private ArrayList<Behavior>collisionBehaviors = new ArrayList<Behavior>();
-	private ArrayList<Behavior>tickBehaviors = new ArrayList<Behavior>();
-	private final NullBehavior nullBehavior;
-	private boolean active=true;
+	private ArrayList<Behavior>		inactiveBehaviors 	= new ArrayList<Behavior>();
+	private ArrayList<CollisionBehavior>	collisionBehaviors 	= new ArrayList<CollisionBehavior>();
+	private ArrayList<Behavior>		tickBehaviors 		= new ArrayList<Behavior>();
+	private final NullBehavior 		nullBehavior;
+	private boolean 			active			= true;
 	
 	protected final double[] aX = new double[3];
 	protected final double[] aY = new double[3];
@@ -102,17 +102,19 @@ public class WorldObject implements PositionedRenderable
 	}//end proposeCollision(...)
 	public <T extends Behavior>T addBehavior(T ob){
 	    	if(ob.isEnabled()){
-	    	    collisionBehaviors.add(ob);
+	    	    if(ob instanceof CollisionBehavior)collisionBehaviors.add((CollisionBehavior)ob);
 	    	    tickBehaviors.add(ob);}
 	    	else{inactiveBehaviors.add(ob);}
 		ob.setParent(this);
 		return ob;
 		}
 	public <T> T probeForBehavior(Class<T> bC){
-	    for(int i=0; i<collisionBehaviors.size();i++){
+	    if(bC.isAssignableFrom(CollisionBehavior.class)){
+	     for(int i=0; i<collisionBehaviors.size();i++){
 		if(bC.isAssignableFrom(collisionBehaviors.get(i).getClass())){
 		    return (T)collisionBehaviors.get(i);}
 		}//end if(instanceof)
+	      }//emd if(isAssignableFrom(CollisionBehavior.class))
 	    for(int i=0; i<inactiveBehaviors.size();i++){
 		if(bC.isAssignableFrom(inactiveBehaviors.get(i).getClass())){
 		    return (T)inactiveBehaviors.get(i);}
@@ -124,10 +126,12 @@ public class WorldObject implements PositionedRenderable
 	    throw new BehaviorNotFoundException("Cannot find behavior of type "+bC.getName()+" in behavior sandwich owned by "+this.getClass().getName());
 	}//end probeForBehavior
 	public <T> void probeForBehaviors(Submitter<T>sub, Class<T> type){
-	    for(int i=0; i<collisionBehaviors.size();i++){
+	    if(type.isAssignableFrom(CollisionBehavior.class)){
+	     for(int i=0; i<collisionBehaviors.size();i++){
 		if(type.isAssignableFrom(collisionBehaviors.get(i).getClass())){
 		    sub.submit((T)collisionBehaviors.get(i));}
 		}//end if(instanceof)
+	     }//end isAssignableFrom(CollisionBehavior.class)
 	    for(int i=0; i<inactiveBehaviors.size();i++){
 		if(type.isAssignableFrom(inactiveBehaviors.get(i).getClass())){
 		    sub.submit((T)inactiveBehaviors.get(i));}
@@ -440,8 +444,9 @@ public class WorldObject implements PositionedRenderable
 	public void enableBehavior(Behavior behavior){
 	    if(!inactiveBehaviors.contains(behavior)){
 		throw new RuntimeException("Tried to enabled an unregistered behavior.");
-	    }if(!collisionBehaviors.contains(behavior)){
-		collisionBehaviors.add(behavior);
+	    }if(behavior instanceof CollisionBehavior){
+		if(!collisionBehaviors.contains(behavior)&&behavior instanceof CollisionBehavior){
+		 collisionBehaviors.add((CollisionBehavior)behavior);}
 	    }if(!tickBehaviors.contains(behavior)){
 		tickBehaviors.add(behavior);
 	    }
@@ -449,7 +454,7 @@ public class WorldObject implements PositionedRenderable
 	
 	public void disableBehavior(Behavior behavior) {
 	    if(!inactiveBehaviors.contains(behavior))inactiveBehaviors.add(behavior);
-	    collisionBehaviors.remove(behavior);
+	    if(behavior instanceof CollisionBehavior)collisionBehaviors.remove(behavior);
 	    tickBehaviors.remove(behavior);
 	}
 }//end WorldObject

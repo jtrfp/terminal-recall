@@ -1,12 +1,11 @@
 package org.jtrfp.trcl.beh;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.TerrainChunk;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class TerrainLocked extends Behavior {
+public class TerrainLocked extends Behavior implements CollisionBehavior {
     private double pad=0;
     private InterpolatingAltitudeMap map;
     @Override
@@ -24,7 +23,7 @@ public class TerrainLocked extends Behavior {
 	p.notifyPositionChange();
     }
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	if(other instanceof TerrainChunk){
 	    if(map==null)map = (InterpolatingAltitudeMap)((TerrainChunk)other).getAltitudeMap();}
     }//end _tick

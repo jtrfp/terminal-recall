@@ -14,7 +14,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CollidesWithTerrain extends Behavior {
+public class CollidesWithTerrain extends Behavior implements CollisionBehavior {
     private static final double nudge=1;
     private boolean bounce=false;
     private boolean groundLock=false;
@@ -94,7 +94,7 @@ public class CollidesWithTerrain extends Behavior {
 		}
     };
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	if(other instanceof TerrainChunk){
 	    if(map==null)map = (InterpolatingAltitudeMap)((TerrainChunk)other).getAltitudeMap();}
     }//end _tick

@@ -3,7 +3,7 @@ package org.jtrfp.trcl.beh;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class UpdatesNAVRadar extends Behavior {
+public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
     private int counter=0;
     private boolean performRefresh=false;
     public static final int REFRESH_INTERVAL=5;
@@ -20,7 +20,7 @@ public class UpdatesNAVRadar extends Behavior {
 	}
     }//end _tick(...)
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	if(performRefresh){
 	    blips.submitRadarBlip(other);
 	}

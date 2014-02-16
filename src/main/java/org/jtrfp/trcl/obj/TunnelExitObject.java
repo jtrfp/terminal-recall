@@ -5,6 +5,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
@@ -39,9 +40,9 @@ public class TunnelExitObject extends WorldObject {
 	catch(Exception e){e.printStackTrace();}
     }
     
-    private class TunnelExitBehavior extends Behavior{
+    private class TunnelExitBehavior extends Behavior implements CollisionBehavior{
 	@Override
-	public void _proposeCollision(WorldObject other){
+	public void proposeCollision(WorldObject other){
 	    if(other instanceof Player){
 		if(other.getPosition()[0]>TunnelExitObject.this.getPosition()[0]){
 		    tr.getOverworldSystem().setChamberMode(mirrorTerrain);

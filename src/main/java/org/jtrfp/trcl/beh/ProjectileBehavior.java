@@ -7,7 +7,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class ProjectileBehavior extends Behavior implements SurfaceImpactListener,DEFObjectCollisionListener,PlayerCollisionListener{
+public class ProjectileBehavior extends Behavior implements SurfaceImpactListener,DEFObjectCollisionListener,PlayerCollisionListener,CollisionBehavior{
     	public static final long LIFESPAN_MILLIS=4500;
 	private final int damageOnImpact;
 	private final DeathBehavior deathBehavior;
@@ -30,7 +30,7 @@ public class ProjectileBehavior extends Behavior implements SurfaceImpactListene
 	    {deathBehavior.die();}
 	}
 	@Override
-	public void _proposeCollision(WorldObject wo){
+	public void proposeCollision(WorldObject wo){
 	   /* if(wo instanceof DEFObject && wo.getPosition().distance(getParent().getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE){
 		{destroy();System.out.println("Laserbeam destroyed by collision with DEFObject");}
 	    }//end if(close by)*/

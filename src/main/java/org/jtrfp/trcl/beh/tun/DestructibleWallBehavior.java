@@ -1,17 +1,18 @@
 package org.jtrfp.trcl.beh.tun;
 
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class DestructibleWallBehavior extends Behavior {
+public class DestructibleWallBehavior extends Behavior implements CollisionBehavior {
     private static final double THICKNESS_X=4000;
     public static final int DAMAGE_ON_IMPACT=6554;
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	final double [] otherPos=other.getPosition();
 	final WorldObject p = getParent();
 	final double [] thisPos=p.getPosition();

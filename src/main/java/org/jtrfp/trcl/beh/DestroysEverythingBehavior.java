@@ -4,11 +4,11 @@ import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class DestroysEverythingBehavior extends Behavior {
+public class DestroysEverythingBehavior extends Behavior implements CollisionBehavior {
     int counter=2;
     boolean replenishingPlayerHealth=true;
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
 	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65536);//Really smash that sucker.
 	}//end if(DEFObject)

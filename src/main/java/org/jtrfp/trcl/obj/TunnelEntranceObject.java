@@ -9,6 +9,7 @@ import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
@@ -39,9 +40,9 @@ public class TunnelEntranceObject extends WorldObject {
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
 
-    public class TunnelEntranceBehavior extends Behavior{
+    public class TunnelEntranceBehavior extends Behavior implements CollisionBehavior{
 	@Override
-	public void _proposeCollision(WorldObject other){
+	public void proposeCollision(WorldObject other){
 	      if(other instanceof Player){
 		 WorldObject entranceObject = getParent();
 		final TR tr = entranceObject.getTr();

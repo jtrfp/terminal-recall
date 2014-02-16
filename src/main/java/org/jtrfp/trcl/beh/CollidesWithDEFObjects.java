@@ -6,14 +6,14 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CollidesWithDEFObjects extends Behavior {
+public class CollidesWithDEFObjects extends Behavior implements CollisionBehavior {
     private final double boundingRadius;
     private DEFObject otherDEF;
     public CollidesWithDEFObjects(double boundingRadius){
 	this.boundingRadius=boundingRadius;
     }
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
 	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
 	    otherDEF=(DEFObject)other;

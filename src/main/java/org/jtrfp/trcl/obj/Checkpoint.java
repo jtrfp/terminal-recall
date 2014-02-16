@@ -6,6 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
@@ -32,9 +33,9 @@ private boolean includeYAxisInCollision=true;
 	this.m=m;
     }//end setObjectiveToRemove(...)
     
-    private class CheckpointBehavior extends Behavior{
+    private class CheckpointBehavior extends Behavior implements CollisionBehavior{
 	@Override
-	public void _proposeCollision(WorldObject other){
+	public void proposeCollision(WorldObject other){
 	    if(other instanceof Player){
 		final Player player = (Player)other;
 		final WorldObject parent = getParent();

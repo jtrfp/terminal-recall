@@ -2,11 +2,12 @@ package org.jtrfp.trcl.beh.tun;
 
 import org.jtrfp.trcl.Controller;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class IrisBehavior extends Behavior {
+public class IrisBehavior extends Behavior implements CollisionBehavior {
 public static final int DAMAGE_ON_IMPACT=6554;
 private final Controller controller;
 private final double maxRadius;
@@ -17,7 +18,7 @@ private static final double X_FLUFF=80000;
 	this.maxRadius=maxRadius;
     }//end constructor
     @Override
-    public void _proposeCollision(WorldObject wo){
+    public void proposeCollision(WorldObject wo){
 	if(wo instanceof Player){
 	    final WorldObject p = getParent();
 	    final double [] thisPos = p.getPosition();

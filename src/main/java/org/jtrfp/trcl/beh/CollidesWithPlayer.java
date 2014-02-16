@@ -6,14 +6,14 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CollidesWithPlayer extends Behavior {
+public class CollidesWithPlayer extends Behavior implements CollisionBehavior {
     private final double boundingRadius;
     private Player player;
     public CollidesWithPlayer(double boundingRadius){
 	this.boundingRadius=boundingRadius;
     }
     @Override
-    public void _proposeCollision(WorldObject other){
+    public void proposeCollision(WorldObject other){
 	if(other instanceof Player){
 	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
 	    player=(Player)other;

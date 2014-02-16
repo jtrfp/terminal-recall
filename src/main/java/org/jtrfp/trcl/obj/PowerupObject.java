@@ -15,6 +15,7 @@ import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.core.TR;
@@ -47,9 +48,9 @@ public class PowerupObject extends BillboardSprite{
 			{e.printStackTrace();}
 		}//end constructor
 
-	private class PowerupBehavior extends Behavior{
+	private class PowerupBehavior extends Behavior implements CollisionBehavior{
 		@Override
-		public void _proposeCollision(WorldObject other){
+		public void proposeCollision(WorldObject other){
 			if(TR.twosComplimentDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{if(other instanceof Player){
 				    	Player p=(Player)other;

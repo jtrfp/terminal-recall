@@ -24,13 +24,7 @@ public abstract class Behavior{
 	
 	public WorldObject getParent(){return parent;}
 	public <T> T probeForBehavior(Class<T> type){
-	    	return parent.probeForBehavior(type);
-		}
-	
-	protected void _proposeCollision(WorldObject other){}
-	
-	public final void proposeCollision(WorldObject other){
-	    if(enable)_proposeCollision(other);}
+	    	return parent.probeForBehavior(type);}
 	
 	protected void _tick(long tickTimeInMillis){}
 	

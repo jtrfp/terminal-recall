@@ -8,7 +8,7 @@ import org.jtrfp.trcl.obj.BarrierCube;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CubeCollisionBehavior extends Behavior {
+public class CubeCollisionBehavior extends Behavior implements CollisionBehavior {
 private double [] dims;
 private double [] origin;
 private final double [] rotTransPosVar = new double[3];
@@ -27,7 +27,7 @@ private int damageOnImpact= 6554;
 	    dims = new double[]{max.getX()-min.getX(),max.getY()-min.getY(),max.getZ()-min.getZ()};
 	}
 	@Override
-	public void _proposeCollision(WorldObject obj){
+	public void proposeCollision(WorldObject obj){
 	    if(obj instanceof Player){
 		final WorldObject p = getParent();
 		final double [] relPos=TR.twosComplimentSubtract(obj.getPosition(), p.getPosition(), new double[3]);

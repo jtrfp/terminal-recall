@@ -36,6 +36,7 @@ private final NAVRadarBlipFactory blips;
     
     public void updateNAVState(){
 	final NAVObjective obj = tr.getCurrentMission().currentNAVObjective();
+	if(obj==null)return;
 	tr.getHudSystem().
 		getObjective().
 		setContent(obj.getDescription());

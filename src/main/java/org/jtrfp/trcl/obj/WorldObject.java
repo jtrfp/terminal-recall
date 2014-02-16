@@ -60,6 +60,7 @@ public class WorldObject implements PositionedRenderable
 	public static final boolean LOOP = true;
 	private SpacePartitioningGrid containingGrid;
 	//private Behavior behavior=new NullBehavior(this);
+	private ArrayList<Behavior>inactiveBehaviors = new ArrayList<Behavior>();
 	private ArrayList<Behavior>collisionBehaviors = new ArrayList<Behavior>();
 	private ArrayList<Behavior>tickBehaviors = new ArrayList<Behavior>();
 	private final NullBehavior nullBehavior;
@@ -100,8 +101,10 @@ public class WorldObject implements PositionedRenderable
 	    }//end for(collisionBehaviors)
 	}//end proposeCollision(...)
 	public <T extends Behavior>T addBehavior(T ob){
-	    	collisionBehaviors.add(ob);
-	    	tickBehaviors.add(ob);
+	    	if(ob.isEnabled()){
+	    	    collisionBehaviors.add(ob);
+	    	    tickBehaviors.add(ob);}
+	    	else{inactiveBehaviors.add(ob);}
 		ob.setParent(this);
 		return ob;
 		}
@@ -109,6 +112,10 @@ public class WorldObject implements PositionedRenderable
 	    for(int i=0; i<collisionBehaviors.size();i++){
 		if(bC.isAssignableFrom(collisionBehaviors.get(i).getClass())){
 		    return (T)collisionBehaviors.get(i);}
+		}//end if(instanceof)
+	    for(int i=0; i<inactiveBehaviors.size();i++){
+		if(bC.isAssignableFrom(inactiveBehaviors.get(i).getClass())){
+		    return (T)inactiveBehaviors.get(i);}
 		}//end if(instanceof)
 	    for(int i=0; i<tickBehaviors.size();i++){
 		if(bC.isAssignableFrom(tickBehaviors.get(i).getClass())){
@@ -121,6 +128,10 @@ public class WorldObject implements PositionedRenderable
 		if(type.isAssignableFrom(collisionBehaviors.get(i).getClass())){
 		    sub.submit((T)collisionBehaviors.get(i));}
 		}//end if(instanceof)
+	    for(int i=0; i<inactiveBehaviors.size();i++){
+		if(type.isAssignableFrom(inactiveBehaviors.get(i).getClass())){
+		    sub.submit((T)inactiveBehaviors.get(i));}
+		}//end if(instanceof)
 	    for(int i=0; i<tickBehaviors.size();i++){
 		if(type.isAssignableFrom(tickBehaviors.get(i).getClass())){
 		    sub.submit((T)tickBehaviors.get(i));}
@@ -128,8 +139,7 @@ public class WorldObject implements PositionedRenderable
 	}//end probeForBehaviors(...)
 	
 	public void tick(long time){
-	    final int size=tickBehaviors.size();
-	    for(int i=0; i<size; i++){
+	    for(int i=0; i<tickBehaviors.size(); i++){
 		tickBehaviors.get(i).tick(time);
 	    }//end for(size)
 	}//end tick(...)
@@ -138,8 +148,7 @@ public class WorldObject implements PositionedRenderable
 		{if(o==null){new Exception().printStackTrace();System.exit(1);}
 		allWorldObjects.add(o);}
 	
-	public void setModel(Model m)
-		{
+	public void setModel(Model m){
 		if(m==null)throw new RuntimeException("Passed model cannot be null.");
 		model=m;
 		int numObjDefs,sizeInVerts;
@@ -427,4 +436,20 @@ public class WorldObject implements PositionedRenderable
 	
 	public double [] getHeadingArray(){return heading;}
 	public double [] getTopArray(){return top;}
+
+	public void enableBehavior(Behavior behavior){
+	    if(!inactiveBehaviors.contains(behavior)){
+		throw new RuntimeException("Tried to enabled an unregistered behavior.");
+	    }if(!collisionBehaviors.contains(behavior)){
+		collisionBehaviors.add(behavior);
+	    }if(!tickBehaviors.contains(behavior)){
+		tickBehaviors.add(behavior);
+	    }
+	}//end enableBehavior(...)
+	
+	public void disableBehavior(Behavior behavior) {
+	    if(!inactiveBehaviors.contains(behavior))inactiveBehaviors.add(behavior);
+	    collisionBehaviors.remove(behavior);
+	    tickBehaviors.remove(behavior);
+	}
 }//end WorldObject

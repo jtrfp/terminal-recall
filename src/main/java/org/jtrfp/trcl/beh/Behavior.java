@@ -29,22 +29,25 @@ public abstract class Behavior{
 	
 	protected void _proposeCollision(WorldObject other){}
 	
-	public final void proposeCollision(WorldObject other)
-		{if(enable)_proposeCollision(other);
-		}
+	public final void proposeCollision(WorldObject other){
+	    if(enable)_proposeCollision(other);}
 	
 	protected void _tick(long tickTimeInMillis){}
 	
-	public final void tick(long tickTimeInMillis)
-		{if(enable)_tick(tickTimeInMillis);
-		}
+	public final void tick(long tickTimeInMillis){
+	    if(enable)_tick(tickTimeInMillis);}
 
-	public void setParent(WorldObject newParent)
-		{this.parent=newParent;}
+	public void setParent(WorldObject newParent){
+	    this.parent=newParent;}
 	
 	public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
-	    	parent.probeForBehaviors(sub, type);
-		}
-	public Behavior setEnable(boolean doIt){enable=doIt;return this;}
+	    	parent.probeForBehaviors(sub, type);}
+	
+	public Behavior setEnable(boolean doIt){
+	    if(parent!=null){
+		if(!doIt&&enable)parent.disableBehavior(this);
+	    	if(doIt&&!enable)parent.enableBehavior(this);}
+	    enable=doIt;
+	    return this;}
 	public boolean isEnabled(){return enable;}
 	}//end ObjectBehavior

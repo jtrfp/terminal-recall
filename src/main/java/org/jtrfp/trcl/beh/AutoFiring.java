@@ -41,7 +41,8 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 		    if(smartFiring){
 			final Vector3D playerVelocity = player.getBehavior().probeForBehavior(Velocible.class).getVelocity();
 			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TR.crossPlatformScalar; 
-			final Vector3D virtualPlayerPos = interceptOf(new Vector3D(playerPos),playerVelocity,new Vector3D(thisPos),projectileSpeed);
+			Vector3D virtualPlayerPos = interceptOf(new Vector3D(playerPos),playerVelocity,new Vector3D(thisPos),projectileSpeed);
+			if(virtualPlayerPos==null)virtualPlayerPos=new Vector3D(playerPos);
 			Vect3D.subtract(virtualPlayerPos.toArray(), thisPos, firingVector);}
 		    else{Vect3D.subtract(playerPos, thisPos, firingVector); }
 		    result = new Vector3D(Vect3D.normalize(firingVector,firingVector));

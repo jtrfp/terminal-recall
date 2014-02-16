@@ -24,8 +24,9 @@ public class RunMe{
 		ensureJVMIsProperlyConfigured(args);
 		System.out.println(
 				"\t\t\t***TERMINAL RECALL***\n"+
-				"	An unofficial engine remake for Terminal Velocity and Fury3.\n"+
-				"	Copyright (c) 2012,2013 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n\n"+
+				"	An unofficial enhancement engine for Terminal Velocity and Fury3.\n"+
+				"	Copyright (c) 2012-2014 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
+				"	Part of the Java Terminal Reality File Parsers Project.\n\n"+
 				"		This program is free software; you can redistribute it and/or modify\n"+
 				"	it under the terms of the GNU General Public License as published by\n"+
    				"	the Free Software Foundation; either version 3 of the License, or\n"+
@@ -38,7 +39,8 @@ public class RunMe{
 				"	along with this program; if not, write to the Free Software Foundation,\n"+
 				"	Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA\n\n"+
 				"		THIS PROGRAM IS NOT SUPPORTED BY OR AFFILIATED WITH MICROSOFT OR TERMINAL REALITY INC.\n"+
-				"	Bring any issues to the Terminal Recall google code page.\n"
+				"	Bring any issues to the Terminal Recall GitHub page.\n" +
+				"	www.jtrfp.org\n"
 				);
 		if(args.length>=2){
 			try {

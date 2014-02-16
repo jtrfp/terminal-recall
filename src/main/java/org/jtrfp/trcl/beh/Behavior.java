@@ -18,40 +18,32 @@ package org.jtrfp.trcl.beh;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public abstract class Behavior
-	{
+public abstract class Behavior{
 	private WorldObject parent;
-	private Behavior wrapped;
 	private boolean enable=true;
 	
 	public WorldObject getParent(){return parent;}
-	public <T> T probeForBehavior(Class<T> type)
-		{if(type.isAssignableFrom(this.getClass())){return (T)this;}
-		if(wrapped!=null)return wrapped.probeForBehavior(type);
-		throw new BehaviorNotFoundException("Cannot find behavior of type "+type.getName()+" in behavior sandwich owned by "+parent);
+	public <T> T probeForBehavior(Class<T> type){
+	    	return parent.probeForBehavior(type);
 		}
 	
 	protected void _proposeCollision(WorldObject other){}
 	
 	public final void proposeCollision(WorldObject other)
 		{if(enable)_proposeCollision(other);
-		if(wrapped!=null)wrapped.proposeCollision(other);
 		}
 	
 	protected void _tick(long tickTimeInMillis){}
 	
 	public final void tick(long tickTimeInMillis)
 		{if(enable)_tick(tickTimeInMillis);
-		if(wrapped!=null)wrapped.tick(tickTimeInMillis);
 		}
 
 	public void setParent(WorldObject newParent)
-		{this.parent=newParent;if(wrapped!=null){wrapped.setParent(newParent);}}
+		{this.parent=newParent;}
 	
-	public void setDelegate(Behavior delegate){wrapped=delegate;}
 	public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
-	    	if(type.isAssignableFrom(this.getClass())){sub.submit((T)this);}
-	    	if(wrapped!=null)wrapped.probeForBehaviors(sub,type);
+	    	parent.probeForBehaviors(sub, type);
 		}
 	public Behavior setEnable(boolean doIt){enable=doIt;return this;}
 	public boolean isEnabled(){return enable;}

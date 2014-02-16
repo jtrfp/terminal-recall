@@ -24,15 +24,15 @@ import java.util.List;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.GPUTriangleVertex;
-import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinition;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
@@ -59,7 +59,10 @@ public class WorldObject implements PositionedRenderable
 	public static final int GPU_VERTICES_PER_BLOCK=96;
 	public static final boolean LOOP = true;
 	private SpacePartitioningGrid containingGrid;
-	private Behavior behavior=new NullBehavior(this);
+	//private Behavior behavior=new NullBehavior(this);
+	private ArrayList<Behavior>collisionBehaviors = new ArrayList<Behavior>();
+	private ArrayList<Behavior>tickBehaviors = new ArrayList<Behavior>();
+	private final NullBehavior nullBehavior;
 	private boolean active=true;
 	
 	protected final double[] aX = new double[3];
@@ -71,7 +74,9 @@ public class WorldObject implements PositionedRenderable
 	protected final double[] tMd = new double[16];
 	protected double [] cMd = new double[16];
 	
+	
 	public WorldObject(TR tr){
+	    	this.nullBehavior = new NullBehavior(this);
 		this.tr=tr;
 		addWorldObject(this);
 		matrixID=tr.getMatrixWindow().create4x4();
@@ -89,16 +94,45 @@ public class WorldObject implements PositionedRenderable
 		setModel(m);
 		}//end constructor
 	
-	void proposeCollision(WorldObject other){if(behavior!=null)behavior.proposeCollision(other);}
-	public <T extends Behavior>T addBehavior(T ob)
-		{ob.setDelegate(behavior);
+	void proposeCollision(WorldObject other){
+	    for(int i=0; i<collisionBehaviors.size();i++){//Not using iterator to avoid excess garbage creation.
+		collisionBehaviors.get(i).proposeCollision(other);
+	    }//end for(collisionBehaviors)
+	}//end proposeCollision(...)
+	public <T extends Behavior>T addBehavior(T ob){
+	    	collisionBehaviors.add(ob);
+	    	tickBehaviors.add(ob);
 		ob.setParent(this);
-		behavior=ob;
 		return ob;
 		}
+	public <T> T probeForBehavior(Class<T> bC){
+	    for(int i=0; i<collisionBehaviors.size();i++){
+		if(bC.isAssignableFrom(collisionBehaviors.get(i).getClass())){
+		    return (T)collisionBehaviors.get(i);}
+		}//end if(instanceof)
+	    for(int i=0; i<tickBehaviors.size();i++){
+		if(bC.isAssignableFrom(tickBehaviors.get(i).getClass())){
+		    return (T)tickBehaviors.get(i);}
+		}//end if(instanceof)
+	    throw new BehaviorNotFoundException("Cannot find behavior of type "+bC.getName()+" in behavior sandwich owned by "+this.getClass().getName());
+	}//end probeForBehavior
+	public <T> void probeForBehaviors(Submitter<T>sub, Class<T> type){
+	    for(int i=0; i<collisionBehaviors.size();i++){
+		if(type.isAssignableFrom(collisionBehaviors.get(i).getClass())){
+		    sub.submit((T)collisionBehaviors.get(i));}
+		}//end if(instanceof)
+	    for(int i=0; i<tickBehaviors.size();i++){
+		if(type.isAssignableFrom(tickBehaviors.get(i).getClass())){
+		    sub.submit((T)tickBehaviors.get(i));}
+	    }//end for (tickBehaviors)
+	}//end probeForBehaviors(...)
 	
-	public void tick(long time)
-		{getBehavior().tick(time);}
+	public void tick(long time){
+	    final int size=tickBehaviors.size();
+	    for(int i=0; i<size; i++){
+		tickBehaviors.get(i).tick(time);
+	    }//end for(size)
+	}//end tick(...)
 	
 	private static final void addWorldObject(WorldObject o)
 		{if(o==null){new Exception().printStackTrace();System.exit(1);}
@@ -355,16 +389,13 @@ public class WorldObject implements PositionedRenderable
 	public void setContainingGrid(SpacePartitioningGrid grid)
 		{containingGrid=grid;}
 	public SpacePartitioningGrid getContainingGrid(){return containingGrid;}
-
-	/**
-	 * @return the behavior
-	 */
-	public Behavior getBehavior()
-		{return behavior;}
-
+	
 	public Model getModel() {
 	    return model;
 	}
+	
+	public Behavior getBehavior(){
+	    return nullBehavior;}
 
 	/**
 	 * @return the active

@@ -106,11 +106,9 @@ public class Mission {
 	navSystem.updateNAVState();
 	tr.setBackdropSystem(new BackdropSystem(world));
 	
-	
-	final Mission mission = tr.getCurrentMission();
 	//////// INITIAL HEADING
-	player.setPosition(mission.getPlayerStartPosition());
-	player.setDirection(mission.getPlayerStartDirection());
+	player.setPosition(getPlayerStartPosition());
+	player.setDirection(getPlayerStartDirection());
 	player.setHeading(player.getHeading().negate());//Kludge to fix incorrect heading
 	System.out.println("Start position set to "+player.getPosition());
 	

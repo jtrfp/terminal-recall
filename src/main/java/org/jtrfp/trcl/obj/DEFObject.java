@@ -46,10 +46,13 @@ public class DEFObject extends WorldObject {
     private final double boundingRadius;
     private WorldObject ruinObject;
     private final EnemyLogic logic;
+    private final EnemyDefinition def;
     private boolean mobile,canTurn,foliage,boss,groundLocked;
     boolean spinCrash=false;
+    boolean ignoringProjectiles=false;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
+    this.def=def;
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
     logic = def.getLogic();
     mobile=true;
@@ -64,18 +67,30 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    canTurn=false;
     	    break;
     	case groundTargeting://Ground turrets
-    	    mobile=false;
+    	    {mobile=false;
     	    canTurn=true;
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    //TODO: def.getFiringVertices() needs actual vertex lookup.
-    	    addBehavior(new ProjectileFiringBehavior().setFiringPositions(new Vector3D[]{
-    		    new Vector3D(0,0,0)
-    	    }));
-    	    break;
+    	 ProjectileFiringBehavior pfb;
+	    addBehavior(pfb=new ProjectileFiringBehavior().
+		    setProjectileFactory(tr.getResourceManager().
+			    getProjectileFactories()[def.getWeapon().ordinal()]).
+			    setFiringPositions(new Vector3D[]{new Vector3D(0,0,0)
+	    }));
+	    pfb.addSupply(9999999);
+	    addBehavior(new AutoFiring().
+	     setProjectileFiringBehavior(pfb).
+	     setPatternOffsetMillis((int)(Math.random()*2000)).
+	     setMaxFiringDistance(TR.mapSquareSize*3).
+	     setSmartFiring(false).
+	     setMaxFireVectorDeviation(.5).
+	     setTimePerPatternEntry(500));
+    	    break;}
     	case flyingDumb:
     	    canTurn=false;
     	    break;
     	case groundTargetingDumb:
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    groundLocked=true;
     	    break;
     	case flyingSmart:
@@ -85,7 +100,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    unhandled(def);
     	    break;
     	case sphereBoss:
-    	    unhandled(def);
+    	    projectileFiringBehavior();
     	    mobile=true;
     	    break;
     	case flyingAttackRetreatSmart:
@@ -103,16 +118,20 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    projectileFiringBehavior();
     	    break;
     	case targetPitchSmart:
     	    mobile=false;
 	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    projectileFiringBehavior();
 	    break;
     	case coreBossSmart:
     	    mobile=false;
+    	    projectileFiringBehavior();
     	    break;
     	case cityBossSmart:
     	    mobile=false;
+    	    projectileFiringBehavior();
     	    break;
     	case staticFiringSmart:{
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
@@ -147,7 +166,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 		    setTimePerPatternEntry(2000));
 	    addBehavior(new Bobbing().
 		    setPhase(Math.random()).
-		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000));
+		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000).
+		    setAdditionalHeight(0));
 	    mobile=false;
 	    break;}
     	case takeoffAndEscape:
@@ -204,10 +224,12 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	case geigerBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    projectileFiringBehavior();
     	    mobile=false;
     	    break;
     	case volcanoBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    projectileFiringBehavior();
     	    mobile=false;
     	    break;
     	case volcano://Wat.
@@ -219,27 +241,38 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    mobile=false;//TODO
     	    break;
     	case bob:
-    	    addBehavior(new Bobbing());
+    	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*1));
     	    addBehavior(new SteadilyRotating());
     	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
-    	    possibleBobbingSpinAndCrashOnDeath(.5);
+    	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;//ironic?
     	    break;
     	case alienBoss:
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    projectileFiringBehavior();
+	    mobile=false;
     	    break;
     	case canyonBoss1:
-    	    mobile=false;
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    projectileFiringBehavior();
+	    mobile=false;
     	    break;
     	case canyonBoss2:
-    	    mobile=false;
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    projectileFiringBehavior();
+	    mobile=false;
     	    break;
     	case lavaMan://Also terraform-o-bot
-    	    mobile=false;
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    projectileFiringBehavior();
+	    mobile=false;
     	    break;
     	case arcticBoss:
-    	    mobile=false;
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    projectileFiringBehavior();
+	    mobile=false;
     	    break;
     	case helicopter://TODO
     	    break;
@@ -268,7 +301,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     		    setBobPeriodMillis(10*1000+Math.random()*3000));
     	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
     	    
-    	    possibleBobbingSpinAndCrashOnDeath(.5);
+    	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;
@@ -305,9 +338,9 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    smartPlaneBehavior(tr,def,true);
     	    break;
     	case bobAboveSky:
-    	    addBehavior(new Bobbing());
+    	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*5));
 	    addBehavior(new SteadilyRotating());
-	    possibleBobbingSpinAndCrashOnDeath(.5);
+	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    mobile=false;
 	    canTurn=false;
 	    break;
@@ -369,13 +402,33 @@ public void destroy(){
     super.destroy();
 }
 
+private void projectileFiringBehavior(){
+    ProjectileFiringBehavior pfb;
+	    addBehavior(pfb=new ProjectileFiringBehavior().
+		    setProjectileFactory(getTr().getResourceManager().
+			    getProjectileFactories()[def.getWeapon().ordinal()]).setFiringPositions(new Vector3D[]{
+		    new Vector3D(0,0,0)
+	    }));
+	    pfb.addSupply(99999999);
+    addBehavior(new AutoFiring().
+	    setProjectileFiringBehavior(pfb).
+	    setPatternOffsetMillis((int)(Math.random()*2000)).
+	    setMaxFiringDistance(TR.mapSquareSize*5).
+	    setSmartFiring(false).
+	    setMaxFireVectorDeviation(.3).
+	    setTimePerPatternEntry(2000));
+}
+
 private void unhandled(EnemyDefinition def){
     System.err.println("UNHANDLED DEF LOGIC: "+def.getLogic()+". MODEL="+def.getComplexModelFile()+" DESC="+def.getDescription());
 }
 
 private void bossBehavior(TR tr, EnemyDefinition def){//Don't include hitzones for aiming.
-    if(!def.getComplexModelFile().toUpperCase().contains("HITZO"))addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
-}
+    if(!def.getComplexModelFile().toUpperCase().contains("HITZO")){
+	addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	setIgnoringProjectiles(true);
+    }
+}//end bossBehavior(...)
 
 private void fallingObjectBehavior(){
     canTurn=false;
@@ -384,7 +437,7 @@ private void fallingObjectBehavior(){
     addBehavior(new CollidesWithTerrain());
 }
 
-private void possibleSpinAndCrashOnDeath(double probability, final double spinSpeedCoeff){
+private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefinition def){
     spinCrash=Math.random()<probability;//40%
     if(spinCrash){
     final DamageTrigger spinAndCrash = new DamageTrigger(){
@@ -397,6 +450,7 @@ private void possibleSpinAndCrashOnDeath(double probability, final double spinSp
 	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
 	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
 	    //Catastrophy
+	    final double spinSpeedCoeff=Math.max(def.getThrustSpeed()!=0?def.getThrustSpeed()/1200000:.3,.4);
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009*spinSpeedCoeff));
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006*spinSpeedCoeff));
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007*spinSpeedCoeff));
@@ -408,8 +462,8 @@ private void possibleSpinAndCrashOnDeath(double probability, final double spinSp
     addBehavior(spinAndCrash);}
 }
 
-private void possibleBobbingSpinAndCrashOnDeath(double probability){
-    possibleSpinAndCrashOnDeath(probability,.3);
+private void possibleBobbingSpinAndCrashOnDeath(double probability, EnemyDefinition def){
+    possibleSpinAndCrashOnDeath(probability,def);
 	    if(spinCrash){
 		addBehavior(new CollidesWithTerrain());
 		addBehavior(new MovesByVelocity()).setEnable(false);
@@ -435,7 +489,7 @@ private void possibleBobbingSpinAndCrashOnDeath(double probability){
 		}};
 		addBehavior(spinAndCrashAddendum);
 	    }//end if(spinCrash)
-}
+}//end possibleBobbingSpinAndCrashOnDeath
 
 private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
     final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(tr.getPlayer()).setLeftHanded(Math.random()>=.5);
@@ -446,7 +500,7 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     pfb.addSupply(99999999);
     addBehavior(pfb);
     
-    possibleSpinAndCrashOnDeath(.4,1.);
+    possibleSpinAndCrashOnDeath(.4,def);
     if(spinCrash){
 		final DamageTrigger spinAndCrashAddendum = new DamageTrigger(){
 		@Override
@@ -531,5 +585,19 @@ public boolean isBoss() {
  */
 public boolean isGroundLocked() {
     return groundLocked;
+}
+
+/**
+ * @return the ignoringProjectiles
+ */
+public boolean isIgnoringProjectiles() {
+    return ignoringProjectiles;
+}
+
+/**
+ * @param ignoringProjectiles the ignoringProjectiles to set
+ */
+public void setIgnoringProjectiles(boolean ignoringProjectiles) {
+    this.ignoringProjectiles = ignoringProjectiles;
 }
 }//end DEFObject

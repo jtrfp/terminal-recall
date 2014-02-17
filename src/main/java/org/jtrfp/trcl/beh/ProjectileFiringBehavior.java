@@ -32,7 +32,13 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		heading,p.getTop()).applyTo(getNextFiringPosition());
 	    	    resetFiringTimer();
-	    	    projectileFactory.fire(Vect3D.add(p.getPosition(),firingPosition.toArray(),new double[3]), heading, getParent());
+	    	    projectileFactory.
+	    	      fire(Vect3D.add(
+	    		      p.getPosition(),
+	    		      firingPosition.toArray(),
+	    		      new double[3]), 
+	    		      heading, 
+	    		      getParent());
 	    	}//for(multiplex)
 	    	heading = p.getHeading();
 	    }//end if(ammo)

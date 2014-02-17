@@ -47,7 +47,11 @@ public class Player extends WorldObject
 		{super(tr,model);
 		setVisible(false);
 		addBehavior(new PlayerBehavior());
-		addBehavior(new DamageableBehavior());
+		DamageableBehavior db = new DamageableBehavior();
+		addBehavior(db);
+		String godMode = System.getProperty("org.jtrfp.trcl.godMode");
+		if(godMode!=null){
+		    if(godMode.toUpperCase().contains("TRUE")){db.setEnable(false);}}
 		addBehavior(new AccelleratedByPropulsion());
 		addBehavior(new MovesByVelocity());
 		addBehavior(new HasPropulsion());

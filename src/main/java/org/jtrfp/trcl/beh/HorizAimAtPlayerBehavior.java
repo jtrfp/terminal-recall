@@ -11,8 +11,10 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     private WorldObject chaseTarget;
     private double equatorialAccelleration=.004;
     private final double [] vectorToTargetVar = new double[3];
+    private final double [] headingVarianceDelta = new double[3];
     private boolean reverse = false;
     private boolean leftHanded = true;
+    private double hysteresis=.02;//Prevents gimbal shake.
     public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
     @Override
     public void _tick(long timeInMillis){
@@ -20,12 +22,12 @@ public class HorizAimAtPlayerBehavior extends Behavior {
 	    WorldObject p = getParent();
 	    final RotationalMomentumBehavior rmb = p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
 	    double [] vectorToTarget = Vect3D.normalize(TR.twosComplimentSubtract(chaseTarget.getPosition(), p.getPosition(),vectorToTargetVar),vectorToTargetVar);
-	   // Vector3D vectorToTarget = chaseTarget.getPosition().subtract(p.getPosition()).normalize();
 	    vectorToTarget[1]=0;
-	    Vect3D.normalize(vectorToTarget);
-	    if(!reverse)Vect3D.negate(vectorToTarget);
-	    //(vectorToTarget.getX(),0,vectorToTarget.getZ()).normalize().negate();
+	    Vect3D.normalize(vectorToTarget,vectorToTarget);
 	    final Vector3D thisHeading=new Vector3D(p.getHeading().getX(),0,p.getHeading().getZ()).normalize();
+	    Vect3D.subtract(thisHeading.toArray(), vectorToTarget, headingVarianceDelta);	
+	    if(Math.sqrt(headingVarianceDelta[2]*headingVarianceDelta[2]+headingVarianceDelta[0]*headingVarianceDelta[0])<hysteresis)return;
+	    if(!reverse)Vect3D.negate(vectorToTarget);
 	    Rotation rot = new Rotation(new Vector3D(vectorToTarget),thisHeading);
 	    final Vector3D deltaVector=rot.applyTo(Vector3D.PLUS_K);
 	    if((deltaVector.getZ()>0||deltaVector.getX()<0)==leftHanded){rmb.accellerateEquatorialMomentum(-equatorialAccelleration);}
@@ -60,6 +62,19 @@ public class HorizAimAtPlayerBehavior extends Behavior {
      */
     public HorizAimAtPlayerBehavior setLeftHanded(boolean leftHanded) {
         this.leftHanded = leftHanded;
+        return this;
+    }
+    /**
+     * @return the hysteresis
+     */
+    public double getHysteresis() {
+        return hysteresis;
+    }
+    /**
+     * @param hysteresis the hysteresis to set
+     */
+    public HorizAimAtPlayerBehavior setHysteresis(double hysteresis) {
+        this.hysteresis = hysteresis;
         return this;
     }
 }//end ChaseBehavior

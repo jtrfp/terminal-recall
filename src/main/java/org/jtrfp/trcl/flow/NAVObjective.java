@@ -152,7 +152,7 @@ public abstract class NAVObjective {
 			}));
 			indexedNAVObjectiveList.add(objective);
 		    }//end for(targets)
-		    final WorldObject bossObject = defs.get(bos.getBossIndex());
+		    final DEFObject bossObject = defs.get(bos.getBossIndex());
 		    final NAVObjective objective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {
@@ -165,7 +165,13 @@ public abstract class NAVObjective {
 			};//end new NAVObjective
 			indexedNAVObjectiveList.add(objective);
 			bossObject.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
-			bossObject.addBehavior(new ChangesBehaviorWhenTargeted(true,DamageableBehavior.class));
+			//bossObject.addBehavior(new ChangesBehaviorWhenTargeted(true,DamageableBehavior.class));
+			bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+			    @Override
+			    public void run() {
+				bossObject.probeForBehavior(DamageableBehavior.class).setEnable(true);
+				bossObject.setIgnoringProjectiles(false);}
+				}));
 			if(bos.getTargets().length==0){
 			    bossChamberExitShutoffTrigger=bossObject;}
 			worldBossObject = bossObject;

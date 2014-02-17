@@ -18,17 +18,15 @@ package org.jtrfp.trcl.beh;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.math.Vect3D;
-import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CollidesWithTunnelWalls extends Behavior{
+public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavior{
     private final boolean changeHeadingAndTop, alwaysTopUp;
     
     private TunnelSegment seg;
@@ -38,7 +36,7 @@ public class CollidesWithTunnelWalls extends Behavior{
     public CollidesWithTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
 	super();this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;
     }
-	protected void _proposeCollision(WorldObject other){
+	public void proposeCollision(WorldObject other){
 		final WorldObject parent = getParent();
 		final Velocible velocible = getParent().getBehavior().probeForBehavior(Velocible.class);
 		if(other instanceof TunnelSegment)

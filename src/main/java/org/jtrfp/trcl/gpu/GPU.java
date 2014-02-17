@@ -14,8 +14,7 @@ import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.core.TR;
 
-public class GPU
-	{
+public class GPU{
 	static {GLProfile.initSingleton();}
 	private final GLProfile glProfile = GLProfile.get(GLProfile.GL2GL3);
 	private final GLCapabilities capabilities = new GLCapabilities(glProfile);
@@ -25,8 +24,7 @@ public class GPU
 	private GL3 gl;
 	
 	public GPU(TR tr){this.tr=tr;}
-	public GL3 takeGL()
-		{
+	public GL3 takeGL(){
 		gl=getGl();
 		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
 		return gl;
@@ -36,8 +34,7 @@ public class GPU
 	
 	public GLCapabilities getCapabilities(){return capabilities;}
 	
-	public int glGet(int key)
-		{
+	public int glGet(int key){
 		IntBuffer buf = IntBuffer.wrap(new int[1]);
 		gl.glGetIntegerv(key, buf);
 		return buf.get(0);
@@ -48,8 +45,7 @@ public class GPU
 	
 	public Component getComponent(){return canvas;}
 	
-	public ByteOrder getByteOrder()
-		{
+	public ByteOrder getByteOrder(){
 		if(byteOrder==null)
 			{byteOrder = System.getProperty("sun.cpu.endian").contentEquals("little")?ByteOrder.LITTLE_ENDIAN:ByteOrder.BIG_ENDIAN;}
 		return byteOrder;
@@ -58,8 +54,7 @@ public class GPU
 		{canvas.addGLEventListener(l);}
 	public GLTexture newTexture()
 		{return new GLTexture(this);}
-	public int newTextureID()
-		{
+	public int newTextureID(){
 		IntBuffer ib= IntBuffer.allocate(1);
 		gl.glGenTextures(1, ib);
 		ib.clear();
@@ -71,8 +66,7 @@ public class GPU
 		{return new GLVertexShader(this);}
 	public GLProgram newProgram()
 		{return new GLProgram(this);}
-	public GL3 getGl()
-		{
+	public GL3 getGl(){
 		if(gl==null)
 			{GL gl1;
 			//In case GL is not ready, wait and try again.

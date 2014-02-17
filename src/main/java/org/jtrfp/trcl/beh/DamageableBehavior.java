@@ -44,15 +44,17 @@ public class DamageableBehavior extends Behavior{
 		}
 
 	public void unDamage(int amt) throws SupplyNotNeededException{
-	    	if(!isEnabled())return;
+	    	if(!isEnabled())throw new SupplyNotNeededException();
 	    	if(amt==maxHealth){unDamage();return;}
-	    	if(health+amt>maxHealth)throw new SupplyNotNeededException();
+	    	if(health+amt>maxHealth){
+	    	    throw new SupplyNotNeededException();}
 		health+=amt;
 		}
 
 	public void unDamage() throws SupplyNotNeededException{
-	    	if(!isEnabled())return;
-	    	if(health>=maxHealth)throw new SupplyNotNeededException();
+	    	if(!isEnabled())throw new SupplyNotNeededException();
+	    	//10% of hysteresis to avoid frivolous use of full shield restores.
+	    	if(health+maxHealth*.1>=maxHealth)throw new SupplyNotNeededException();
 		health=maxHealth;
 		}
 	public DamageableBehavior setHealth(int val){

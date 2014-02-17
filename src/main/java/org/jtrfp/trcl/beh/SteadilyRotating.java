@@ -24,8 +24,9 @@ public class SteadilyRotating extends Behavior {
     /**
      * @param rotationPeriodMillis the rotationPeriodMillis to set
      */
-    public void setRotationPeriodMillis(double rotationPeriodMillis) {
+    public SteadilyRotating setRotationPeriodMillis(double rotationPeriodMillis) {
         this.rotationPeriodMillis = rotationPeriodMillis;
+        return this;
     }
     public Behavior setRotationPhase(double phaseInRadians) {
 	rotationPhase=phaseInRadians;

@@ -135,11 +135,9 @@ public class RenderList{
 		//////////
 		//gl.glDepthFunc(GL3.GL_ALWAYS);
 		/////////
-		synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
 		renderListOffsetUniform.setui((GlobalObjectList.getArrayOffsetInBytes()/4)+NUM_BLOCKS_PER_PASS);
 		renderModeUniform.set(BLEND_PASS);
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
-		}
 		//////////
 		//gl.glDepthFunc(GL3.GL_LESS);
 		//////////

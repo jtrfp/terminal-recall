@@ -124,22 +124,20 @@ public class Renderer
 		fogStart.set((float) (cameraViewDepth * 1.2) / 5f);
 		fogEnd.set((float) (cameraViewDepth * 1.5) * 1.3f);
 		int renderListIndex=0;
-		synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK)
-			{renderListIndex=renderListToggle?0:1;renderList[renderListIndex].sendToGPU(gl);}
+		renderListIndex=renderListToggle?0:1;renderList[renderListIndex].sendToGPU(gl);
 		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
 		// Render objects
 		renderList[renderListIndex].render(gl);
 		}
 	
 	public void updateVisibilityList()
-		{synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
+		{
 			renderListToggle=!renderListToggle;
 			renderList[renderListToggle?0:1].reset();
 			rootGrid.itemsWithinRadiusOf(
 				camera.getCameraPosition().add(
 					camera.getLookAtVector().scalarMultiply(getCamera().getViewDepth() / 2.1)),
 					renderList[renderListToggle?0:1].getSubmitter());
-			}//end sync()
 		}//end updateVisibilityList()
 	
 	public void setFogColor(Color c)

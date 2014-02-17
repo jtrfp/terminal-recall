@@ -19,18 +19,17 @@ import com.jogamp.opengl.util.FPSAnimator;
 public class ThreadManager
 	{
 	public static final int RENDER_FPS=60;
-	public static final int GAMEPLAY_FPS=60;
+	public static final int GAMEPLAY_FPS=RENDER_FPS;
 	public static final int RENDERLIST_REFRESH_FPS=5;
 	public static final int RENDERING_PRIORITY=6;
-	public static final int GAMEPLAY_PRIORITY=7;
 	public static final int SOUND_PRIORITY=8;
 	private final TR tr;
 	private final FPSAnimator renderingAnimator;
 	private final Timer gameplayTimer = new Timer("GameplayTimer");
-	private final Timer visibilityCalculationTimer = new Timer("RenderListRefreshTimer");
-	public static final Object GAME_OBJECT_MODIFICATION_LOCK = new Object();
 	private long lastGameplayTickTime=0;
 	private long timeInMillisSinceLastGameTick=0L;
+	
+	private int counter=0;
 	
 	ThreadManager(TR tr)
 		{this.tr=tr;
@@ -49,6 +48,8 @@ public class ThreadManager
 			public void display(GLAutoDrawable drawable)
 				{
 				Thread.currentThread().setPriority(RENDERING_PRIORITY);
+				if(counter++%(RENDER_FPS/RENDERLIST_REFRESH_FPS)==0)visibilityCalc();
+				gameplay();
 				ThreadManager.this.tr.getRenderer().render();
 				}
 
@@ -60,46 +61,29 @@ public class ThreadManager
 		
 		}//end constructor
 	
+	private void gameplay(){
+	 // Ticks
+		final long tickTimeInMillis = System.currentTimeMillis();
+		timeInMillisSinceLastGameTick=tickTimeInMillis-lastGameplayTickTime;
+			List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
+		    	for(WorldObject wo:vl){
+		    	    if(wo.isActive()&&
+				    (TR.twosComplimentDistance(wo.getPosition(), tr.getPlayer().getPosition())
+				    <CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo instanceof VisibleEverywhere)
+				       wo.tick(tickTimeInMillis);
+		    	    }//end for(worldObjects)
+		    	  tr.getCollisionManager().performCollisionTests();
+		lastGameplayTickTime=tickTimeInMillis;
+	}//end gameplay()
+	
+	private void visibilityCalc(){
+		tr.getRenderer().updateVisibilityList();
+		tr.getCollisionManager().updateVisibilityList();
+	}
+	
 	public void start(){
 		renderingAnimator.start();
 		lastGameplayTickTime=System.currentTimeMillis();
-		gameplayTimer.schedule(new TimerTask()
-			{@Override
-			public void run()
-				{Thread.currentThread().setPriority(GAMEPLAY_PRIORITY);
-				// Ticks
-				final long tickTimeInMillis = System.currentTimeMillis();
-				timeInMillisSinceLastGameTick=tickTimeInMillis-lastGameplayTickTime;
-				synchronized(GAME_OBJECT_MODIFICATION_LOCK)
-					{List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
-				    	for(WorldObject wo:vl){
-				    	    if(wo.isActive()&&
-						    (TR.twosComplimentDistance(wo.getPosition(), tr.getPlayer().getPosition())
-						    <CollisionManager.MAX_CONSIDERATION_DISTANCE)||wo instanceof VisibleEverywhere)
-						       wo.tick(tickTimeInMillis);
-				    	    }//end for(worldObjects)
-				    	  tr.getCollisionManager().performCollisionTests();
-				    	}//end sync(GAME_OBJECT_MODIFICATION_LOCK)
-				lastGameplayTickTime=tickTimeInMillis;
-				}//end run()
-			}, 0, 1000/GAMEPLAY_FPS);
-		visibilityCalculationTimer.schedule(new TimerTask()
-			{@Override
-			public void run()
-				{Thread.currentThread().setPriority(RENDERING_PRIORITY);
-				synchronized(ThreadManager.GAME_OBJECT_MODIFICATION_LOCK){
-				tr.getRenderer().updateVisibilityList();
-				tr.getCollisionManager().updateVisibilityList();}
-				}
-			}, 0, 1000/RENDERLIST_REFRESH_FPS);
-		//CLEANUP
-		Runtime.getRuntime().addShutdownHook(new Thread(){
-			@Override
-			public void run()
-				{visibilityCalculationTimer.cancel();
-				gameplayTimer.cancel();
-				}
-			});
 		}//end constructor
 	
 	public long getElapsedTimeInMillisSinceLastGameTick(){return timeInMillisSinceLastGameTick;}

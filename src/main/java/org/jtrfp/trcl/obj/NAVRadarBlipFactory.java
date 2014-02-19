@@ -60,6 +60,9 @@ public class NAVRadarBlipFactory {
 	final double [] playerPos=tr.getPlayer().getPosition();
 	BlipType type=null;
 	if(Vect3D.distance(playerPos, otherPos)<RADAR_RANGE){
+	    if(wo instanceof TunnelEntranceObject){
+		if(!((TunnelEntranceObject)wo).isVisible())return;//Invisible entrances are no-go.
+	    }
 	    if(otherPos[1]>playerPos[1]){
 		//Higher
 		if(wo instanceof DEFObject){

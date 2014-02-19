@@ -13,7 +13,7 @@ public class IndexPool{
 	public IndexPool(){
 	}
 		
-	public int pop()
+	public synchronized int pop()
 		{if(!freeIndices.isEmpty())
 			{return freeIndices.remove();}
 		else if(highestIndex+1<maxCapacity)
@@ -24,7 +24,7 @@ public class IndexPool{
 			}
 		}//end pop()
 	
-	public int free(int index)
+	public synchronized int free(int index)
 		{freeIndices.add(index);return index;}
 	
 	static interface GrowthBehavior
@@ -41,13 +41,13 @@ public class IndexPool{
 		System.out.println("free(): "+ip.free(i));
 	    }//end for(i)
 	    */
-	   for(int i=0; i<5; i++){
+	   /*for(int i=0; i<5; i++){
 		System.out.println(ip.popConsecutive(5)+"");
 	    }
-	    System.out.println("free: "+ip.freeIndices.size()+" highest: "+ip.highestIndex+" max: "+ip.maxCapacity);
+	    System.out.println("free: "+ip.freeIndices.size()+" highest: "+ip.highestIndex+" max: "+ip.maxCapacity);*/
 	}
 
-	public int popConsecutive(int numNewItems) {
+	public synchronized int popConsecutive(int numNewItems) {
 	    //TODO This should use the freed pool instead of always allocating new
 	    if(highestIndex+numNewItems<maxCapacity)
 		{final int result = highestIndex+1; highestIndex+=numNewItems;

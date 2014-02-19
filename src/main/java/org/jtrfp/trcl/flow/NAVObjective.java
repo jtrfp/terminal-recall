@@ -113,12 +113,14 @@ public abstract class NAVObjective {
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
 			    public void run() {
-				tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(false);}
+				tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(false);
+				tunnelEntrance.setVisible(false);}
 			}));
 			worldBossObject.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
 				tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(true);
+				tunnelEntrance.setVisible(true);
 			    }
 			}));
 		    }//end if(visibleUnlessBoss)

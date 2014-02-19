@@ -89,6 +89,7 @@ import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
+import org.jtrfp.trcl.obj.SmokeFactory;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
@@ -98,6 +99,7 @@ public class ResourceManager{
 	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
 	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
 	private ExplosionFactory explosionFactory;
+	private SmokeFactory smokeFactory;
 	private PluralizedPowerupFactory pluralizedPowerupFactory;
 	private DebrisFactory debrisFactory;
 	private ProjectileFactory [] projectileFactories;
@@ -625,5 +627,19 @@ public class ResourceManager{
 	public NDXFile getNDXFile(String resString) {
 	    try{return new NDXFile(getInputStreamFromResource(resString));}
 	    catch(Exception e){e.printStackTrace();return null;}
+	}
+
+	/**
+	 * @return the smokeFactory
+	 */
+	public SmokeFactory getSmokeFactory() {
+	    return smokeFactory;
+	}
+
+	/**
+	 * @param smokeFactory the smokeFactory to set
+	 */
+	public void setSmokeFactory(SmokeFactory smokeFactory) {
+	    this.smokeFactory = smokeFactory;
 	}
 }//end ResourceManager

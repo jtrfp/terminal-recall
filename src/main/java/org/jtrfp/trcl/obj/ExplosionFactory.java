@@ -2,7 +2,9 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.obj.Smoke.SmokeType;
 
 public class ExplosionFactory {
     	//private int billowIndex=0,blastIndex=0,bigExplosionIndex=0;
@@ -54,7 +56,25 @@ public class ExplosionFactory {
 	    Explosion result = allExplosions[type.ordinal()][indices[type.ordinal()]];
 	    result.destroy();
 	    result.resetExplosion();
-	    result.setPosition(position);
+	    final double [] pos = result.getPosition();
+	    pos[0]=position[0];
+	    pos[1]=position[1];
+	    pos[2]=position[2];
+	    result.notifyPositionChange();
+	    final SmokeFactory sf = tr.getResourceManager().getSmokeFactory();
+	    final int NUM_PUFFS=1;
+	    for(int i=0; i<NUM_PUFFS; i++){
+		final double [] work =
+			new double[]{
+			Math.random()*10000,
+			Math.random()*10000,
+			Math.random()*10000};
+		sf.triggerSmoke(Vect3D.add(
+			position,
+			work,
+			work),
+			SmokeType.Puff);
+	    }//end for(i)
 	    tr.getWorld().add(result);
 	    return result;
 	    

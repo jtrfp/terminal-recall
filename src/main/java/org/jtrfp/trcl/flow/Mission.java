@@ -30,6 +30,7 @@ import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
+import org.jtrfp.trcl.obj.SmokeFactory;
 
 public class Mission {
     private final TR tr;
@@ -56,6 +57,8 @@ public class Mission {
 	rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 	/// EXPLOSIONS
 	rm.setExplosionFactory(new ExplosionFactory(tr));
+	// SMOKE
+	rm.setSmokeFactory(new SmokeFactory(tr));
 	// DEBRIS
 	rm.setDebrisFactory(new DebrisFactory(tr));
 	//SETUP PROJECTILE FACTORIES

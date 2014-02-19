@@ -22,6 +22,7 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
     private int patternOffsetMillis=0;
     private double maxFireVectorDeviation=1.1;
     private boolean berzerk=false;
+    private double aimRandomness=0;
     @Override
     public void _tick(long timeMillis){
 	//System.out.println("AutoFiring: Tick");
@@ -51,6 +52,12 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 		    Vect3D.subtract(objectHeading, result.toArray(), headingDelta);
 		    if(Vect3D.norm(headingDelta)>maxFireVectorDeviation)return;
 		    if(berzerk)result=new Vector3D(Math.random(),Math.random(),Math.random()).normalize();
+		    Vector3D rand = new Vector3D(
+			    (Math.random()*2.-1.)*aimRandomness,
+			    (Math.random()*2.-1.)*aimRandomness,
+			    (Math.random()*2.-1.)*aimRandomness);
+		    //rand = rand.getNorm()!=0?rand.normalize():rand;
+		    result=result.add(rand).normalize();
 		    projectileFiringBehavior.requestFire(result);}}
 	    lastIndexVisited=patIndex;
 	}//end in range
@@ -210,6 +217,11 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 
     public AutoFiring setBerzerk(boolean berzerk) {
 	this.berzerk=berzerk;
+	return this;
+    }
+
+    public AutoFiring setAimRandomness(double randomnessCoeff) {
+	aimRandomness=randomnessCoeff;
 	return this;
     }
 }//end AutoFiring

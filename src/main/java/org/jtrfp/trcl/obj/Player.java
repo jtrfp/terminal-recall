@@ -5,6 +5,7 @@ import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.DamageableBehavior;
@@ -72,6 +73,7 @@ public class Player extends WorldObject
 		addBehavior(new DamagedByCollisionWithSurface());
 		addBehavior(new BouncesOffSurfaces());
 		addBehavior(new UpdatesNAVRadar());
+		addBehavior(new Cloakable());
 		final Weapon [] allWeapons = Weapon.values();
 		final ProjectileFactory [] projectileFactories=tr.getResourceManager().getProjectileFactories();
 		for(int i=0; i<allWeapons.length; i++){

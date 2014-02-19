@@ -10,6 +10,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class BouncesOffSurfaces extends Behavior implements
 	SurfaceImpactListener {
     private boolean reflectHeading=true;
+    private double velocityRetainmentCoefficient=.5;
 
     @Override
     public void collidedWithSurface(WorldObject wo, double [] surfaceNormal) {
@@ -27,15 +28,15 @@ public class BouncesOffSurfaces extends Behavior implements
 	    //if(newTop.getY()<0)newTop=newTop.negate();
 	    parent.setTop(newTop);
 	}//end if(should reflect)
-	if(parent instanceof Velocible){
-	    final Velocible velocible = (Velocible)parent;
+	//if(parent instanceof Velocible){
+	    final Velocible velocible = (Velocible)parent.probeForBehavior(Velocible.class);
 	    final Vector3D oldVelocity = velocible.getVelocity();
 	    if(new Rotation(oldVelocity.normalize(),_surfaceNormal).getAngle()>Math.PI/2.){
-		velocible.setVelocity((_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)));
+		velocible.setVelocity((_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)).scalarMultiply(velocityRetainmentCoefficient));
 		//Nudge
 		parent.setPosition(new Vector3D(parent.getPosition()).add(_surfaceNormal.scalarMultiply(1000.)).toArray());
 	    }//end if(should bounce)
-	}//end if(Velocible)
+	//}//end if(Velocible)
     }//end collidedWithSurface(...)
 
     /**
@@ -50,6 +51,22 @@ public class BouncesOffSurfaces extends Behavior implements
      */
     public BouncesOffSurfaces setReflectHeading(boolean reflectHeading) {
         this.reflectHeading = reflectHeading;
+        return this;
+    }
+
+    /**
+     * @return the velocityRetainmentCoefficient
+     */
+    public double getVelocityRetainmentCoefficient() {
+        return velocityRetainmentCoefficient;
+    }
+
+    /**
+     * @param velocityRetainmentCoefficient the velocityRetainmentCoefficient to set
+     */
+    public BouncesOffSurfaces setVelocityRetainmentCoefficient(
+    	double velocityRetainmentCoefficient) {
+        this.velocityRetainmentCoefficient = velocityRetainmentCoefficient;
         return this;
     }
 

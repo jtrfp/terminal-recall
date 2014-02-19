@@ -51,8 +51,9 @@ public class HorizAimAtPlayerBehavior extends Behavior {
         this.reverse = reverse;
         return this;
     }
-    public void setTurnAcceleration(double accelleration) {
+    public HorizAimAtPlayerBehavior setTurnAcceleration(double accelleration) {
 	equatorialAccelleration=accelleration;
+	return this;
     }
     /**
      * @return the leftHanded

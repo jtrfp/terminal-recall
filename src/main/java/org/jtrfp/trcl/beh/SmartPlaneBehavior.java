@@ -39,7 +39,8 @@ private final boolean retreatAboveSky;
 	    final Player player = thisObject.getTr().getPlayer();
 	    final double [] thisPos = thisObject.getPosition();
 	    final double [] playerPos = player.getPosition();
-	    final double distFromPlayer = Vect3D.distance(thisPos, playerPos);
+	    boolean cloakedPlayer = player.getBehavior().probeForBehavior(Cloakable.class).isCloaked();
+	    final double distFromPlayer = cloakedPlayer?Double.POSITIVE_INFINITY:Vect3D.distance(thisPos, playerPos);
 	    if(distFromPlayer>ignorePlayerDistanceMin){
 		ignorePlayer();
 	    }else if(distFromPlayer<ignorePlayerDistanceMin && distFromPlayer>attackPlayerDistanceMin){

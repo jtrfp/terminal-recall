@@ -29,8 +29,8 @@ public class DamageableBehavior extends Behavior{
 	    if(isInvincible())return;
 	    health-=dmg;
 		if(health<=0){
-		    getParent().destroy();
 		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
+		    getParent().destroy();
 		}//end if(dead)
 		else if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
 	}//end generalDamage(...)

@@ -5,6 +5,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class HorizAimAtPlayerBehavior extends Behavior {
@@ -19,12 +20,14 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     @Override
     public void _tick(long timeInMillis){
 	if(chaseTarget!=null){
-	    WorldObject p = getParent();
-	    final RotationalMomentumBehavior rmb = p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
-	    double [] vectorToTarget = Vect3D.normalize(TR.twosComplimentSubtract(chaseTarget.getPosition(), p.getPosition(),vectorToTargetVar),vectorToTargetVar);
+	    WorldObject thisObject = getParent();
+	    final Player player = thisObject.getTr().getPlayer();
+	    if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
+	    final RotationalMomentumBehavior rmb = thisObject.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+	    double [] vectorToTarget = Vect3D.normalize(TR.twosComplimentSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar),vectorToTargetVar);
 	    vectorToTarget[1]=0;
 	    Vect3D.normalize(vectorToTarget,vectorToTarget);
-	    final Vector3D thisHeading=new Vector3D(p.getHeading().getX(),0,p.getHeading().getZ()).normalize();
+	    final Vector3D thisHeading=new Vector3D(thisObject.getHeading().getX(),0,thisObject.getHeading().getZ()).normalize();
 	    Vect3D.subtract(thisHeading.toArray(), vectorToTarget, headingVarianceDelta);	
 	    if(Math.sqrt(headingVarianceDelta[2]*headingVarianceDelta[2]+headingVarianceDelta[0]*headingVarianceDelta[0])<hysteresis)return;
 	    if(!reverse)Vect3D.negate(vectorToTarget);

@@ -26,8 +26,9 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
     public void _tick(long timeMillis){
 	//System.out.println("AutoFiring: Tick");
 	final WorldObject thisObject = getParent();
-	final double [] thisPos = thisObject.getPosition();
 	final Player player = thisObject.getTr().getPlayer();
+	if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
+	final double [] thisPos = thisObject.getPosition();
 	final double [] playerPos = player.getPosition();
 	final double dist = Vect3D.distance(thisPos, playerPos);
 	if(dist<maxFiringDistance||dist>minFiringDistance){

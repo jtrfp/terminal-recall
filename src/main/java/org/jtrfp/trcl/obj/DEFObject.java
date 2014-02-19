@@ -1,5 +1,7 @@
 package org.jtrfp.trcl.obj;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
@@ -24,6 +26,7 @@ import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.ResetsRandomlyAfterDeath;
 import org.jtrfp.trcl.beh.SmartPlaneBehavior;
+import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
 import org.jtrfp.trcl.beh.SpinAccellerationBehavior;
 import org.jtrfp.trcl.beh.SpinAccellerationBehavior.SpinMode;
 import org.jtrfp.trcl.beh.SteadilyRotating;
@@ -172,7 +175,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	    break;}
     	case takeoffAndEscape:
     	    addBehavior(new MovesByVelocity());
-    	    addBehavior((Behavior)(new HasPropulsion().setMinPropulsion(0).setPropulsion(def.getThrustSpeed())));
+    	    addBehavior((Behavior)(new HasPropulsion().setMinPropulsion(0).setPropulsion(def.getThrustSpeed()/2)));
     	    addBehavior(new AccelleratedByPropulsion().setEnable(false));
     	    addBehavior(new VelocityDragBehavior().setDragCoefficient(.86));
     	    addBehavior(new CustomPlayerWithinRangeBehavior(){
@@ -388,17 +391,22 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
-	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed());
+	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/2);
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
     if(boss){bossBehavior(tr,def);}
-    if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
+    if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){
+	addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
 
 @Override
 public void destroy(){
-    if(ruinObject!=null)ruinObject.setVisible(true);//TODO: Switch to setActive later.
+    if(ruinObject!=null){
+	//Give the ruinObject is own position because it is sharing positions with the original WorldObject, 
+	//which is going to be sent to xyz=Double.INFINITY soon.
+	ruinObject.setPosition(Arrays.copyOf(ruinObject.getPosition(), 3));
+	ruinObject.setVisible(true);}
     super.destroy();
 }
 
@@ -410,13 +418,15 @@ private void projectileFiringBehavior(){
 		    new Vector3D(0,0,0)
 	    }));
 	    pfb.addSupply(99999999);
-    addBehavior(new AutoFiring().
+    final AutoFiring af;
+    addBehavior(af=new AutoFiring().
 	    setProjectileFiringBehavior(pfb).
 	    setPatternOffsetMillis((int)(Math.random()*2000)).
 	    setMaxFiringDistance(TR.mapSquareSize*5).
 	    setSmartFiring(false).
-	    setMaxFireVectorDeviation(.3).
-	    setTimePerPatternEntry(2000));
+	    setMaxFireVectorDeviation(2.).
+	    setTimePerPatternEntry(!boss?2000:350));
+    if(boss)af.setFiringPattern(new boolean []{true,true,true,true,false,false,true,false}).setAimRandomness(.07);
 }
 
 private void unhandled(EnemyDefinition def){
@@ -450,12 +460,13 @@ private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefiniti
 	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
 	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
 	    //Catastrophy
-	    final double spinSpeedCoeff=Math.max(def.getThrustSpeed()!=0?def.getThrustSpeed()/1200000:.3,.4);
+	    final double spinSpeedCoeff=Math.max(def.getThrustSpeed()!=0?def.getThrustSpeed()/1600000:.3,.4);
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009*spinSpeedCoeff));
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006*spinSpeedCoeff));
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007*spinSpeedCoeff));
 	    //TODO: Smoke, sparks, and other fun stuff.
 	    addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
+	    addBehavior(new SpawnsRandomSmoke(parent.getTr()));
 	}//end healthBelowThreshold
     }.setThreshold(2048);
     addBehavior(new DamagedByCollisionWithSurface().setCollisionDamage(65535).setEnable(false));

@@ -132,6 +132,16 @@ public class Mission {
 	tr.getThreadManager().start();
 	System.out.println("\t...Done.");
 	}catch(Exception e){e.printStackTrace();}
+	if(System.getProperties().containsKey("org.jtrfp.trcl.flow.Mission.skipNavs")){
+	    try{
+	    final int skips = Integer.parseInt(System.getProperty("org.jtrfp.trcl.flow.Mission.skipNavs"));
+	    System.out.println("Skipping "+skips+" navs.");
+	    for(int i=0; i<skips; i++){
+		removeNAVObjective(currentNAVObjective());
+	    }//end for(skips)
+	    }catch(NumberFormatException e){
+		System.err.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");}
+	}//end if(containsKey)
 	return new Result(null);//TODO: Replace null with actual value unless end of game.
     }//end go()
     

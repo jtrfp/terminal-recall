@@ -15,6 +15,7 @@ import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
@@ -71,7 +72,7 @@ public class PowerupObject extends BillboardSprite{
 			    db.addInvincibility(powerupType.getInvincibilityTimeDeltaMillis());
 			}
 			if(powerupType.getInvisibiltyTimeDeltaMillis()!=0){
-			    //TODO: Need to re-design invisible vs. inactive.
+			    p.getBehavior().probeForBehavior(Cloakable.class).addSupply(powerupType.getInvisibiltyTimeDeltaMillis());
 			}
 			if(powerupType.getShieldDelta()!=0){
 			    DamageableBehavior db = p.getBehavior().probeForBehavior(DamageableBehavior.class);

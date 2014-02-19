@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.LimitedLifeSpan;
@@ -45,6 +46,7 @@ private static final String [] TYPES = new String[]{
 	addBehavior(new MovesByVelocity());
 	addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));
 	addBehavior(new CollidesWithTerrain());
+	addBehavior(new CollidesWithTunnelWalls(false, false));
 	addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 	addBehavior(new DeathBehavior());
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));

@@ -391,9 +391,13 @@ public class WorldObject implements PositionedRenderable{
 	public TR getTr()
 		{return tr;}
 	
-	public void destroy()
-		{//tr.getCollisionManager().remove(this);
-	    	//setVisible(false);
+	public void destroy(){
+	    	//Send it to the land of wind and ghosts.
+	    	final double [] pos = getPosition();
+	    	pos[0]=Double.NEGATIVE_INFINITY;
+	    	pos[1]=Double.NEGATIVE_INFINITY;
+	    	pos[2]=Double.NEGATIVE_INFINITY;
+	    	notifyPositionChange();
 	    	setActive(false);
 		if(containingGrid!=null)containingGrid.remove(this);
 		}

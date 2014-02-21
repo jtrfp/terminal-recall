@@ -27,9 +27,9 @@ public class IndexPool{
 	public synchronized int free(int index)
 		{freeIndices.add(index);return index;}
 	
-	static interface GrowthBehavior
+	public static interface GrowthBehavior
 		{int grow(int previousMaxCapacity);}
-	void setGrowthBehavior(GrowthBehavior gb){growthBehavior=gb;}
+	public void setGrowthBehavior(GrowthBehavior gb){growthBehavior=gb;}
 	
 	public static void main(String [] args){
 	    System.out.println("Testing index pool");
@@ -57,4 +57,11 @@ public class IndexPool{
 		return popConsecutive(numNewItems);//Try again.
 		}
 	}//end popConsecutive(...)
+
+	/**
+	 * @return the maxCapacity
+	 */
+	public int getMaxCapacity() {
+	    return maxCapacity;
+	}
 }//end IndexPool

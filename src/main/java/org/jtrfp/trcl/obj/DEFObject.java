@@ -175,7 +175,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	    break;}
     	case takeoffAndEscape:
     	    addBehavior(new MovesByVelocity());
-    	    addBehavior((Behavior)(new HasPropulsion().setMinPropulsion(0).setPropulsion(def.getThrustSpeed()/2)));
+    	    addBehavior((Behavior)(new HasPropulsion().setMinPropulsion(0).setPropulsion(def.getThrustSpeed()/1.2)));
     	    addBehavior(new AccelleratedByPropulsion().setEnable(false));
     	    addBehavior(new VelocityDragBehavior().setDragCoefficient(.86));
     	    addBehavior(new CustomPlayerWithinRangeBehavior(){
@@ -391,7 +391,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
-	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/2);
+	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/1.2);
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)

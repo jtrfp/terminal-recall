@@ -48,6 +48,7 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.mem.GPUMemDump;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.tools.Util;
@@ -178,14 +179,18 @@ public final class TR
 		//And menus to menubar
 		JMenuItem file_exit=new JMenuItem("Exit");
 		JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
+		JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
 		//Menu item behaviors
 		file_exit.addActionListener(new ActionListener(){
 		    @Override public void actionPerformed(ActionEvent arg0){System.exit(1);}});
 		debugStatesMenuItem.addActionListener(new ActionListener(){
 		    @Override public void actionPerformed(ActionEvent ev){reporter.setVisible(true);};});
+		gpuMemDump.addActionListener(new ActionListener(){
+		    @Override public void actionPerformed(ActionEvent ev){new GPUMemDump(TR.this);};});
 		final String showDebugStatesOnStartup = System.getProperty("org.jtrfp.trcl.showDebugStates");
 		if(showDebugStatesOnStartup!=null){if(showDebugStatesOnStartup.toUpperCase().contains("TRUE")){reporter.setVisible(true);}}
 		file.add(file_exit);
+		file.add(gpuMemDump);
 		window.add(debugStatesMenuItem);
 		frame.getJMenuBar().add(file);
 		frame.getJMenuBar().add(window);

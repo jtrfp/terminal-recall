@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 
 
 public class UpgradeableProjectileFiringBehavior extends
@@ -10,7 +11,7 @@ public class UpgradeableProjectileFiringBehavior extends
     private boolean limitlessBottomLevel=true;
     private Vector3D [][] firingMultiplexMap;
     @Override
-    public void addSupply(double amt){
+    public void addSupply(double amt) throws SupplyNotNeededException{
 	raiseCapabilityLevel();
 	super.addSupply(amt);
     }

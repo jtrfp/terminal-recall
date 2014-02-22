@@ -14,6 +14,7 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
 import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.DeathBehavior;
@@ -80,7 +81,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 			    getProjectileFactories()[def.getWeapon().ordinal()]).
 			    setFiringPositions(new Vector3D[]{new Vector3D(0,0,0)
 	    }));
-	    pfb.addSupply(9999999);
+	    try{pfb.addSupply(9999999);}catch(SupplyNotNeededException e){}
 	    addBehavior(new AutoFiring().
 	     setProjectileFiringBehavior(pfb).
 	     setPatternOffsetMillis((int)(Math.random()*2000)).
@@ -139,7 +140,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case staticFiringSmart:{
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
-    	    pfb.addSupply(99999999);
+    	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     	    addBehavior(pfb);
     	    addBehavior(new AutoFiring().
@@ -156,7 +157,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	    break;
     	case tunnelAttack:{
 	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior();
-	    pfb.addSupply(99999999);
+	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
 	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
 	    addBehavior(pfb);
 	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
@@ -291,7 +292,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     	case bobAndAttack:{
     	    addBehavior(new SteadilyRotating().setRotationPhase(2*Math.PI*Math.random()));
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
-    	    pfb.addSupply(99999999);
+    	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     	    addBehavior(pfb);//Bob and attack don't have the advantage of movement, so give them the advantage of range.
     	    addBehavior(new AutoFiring().
@@ -417,7 +418,7 @@ private void projectileFiringBehavior(){
 			    getProjectileFactories()[def.getWeapon().ordinal()]).setFiringPositions(new Vector3D[]{
 		    new Vector3D(0,0,0)
 	    }));
-	    pfb.addSupply(99999999);
+	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     final AutoFiring af;
     addBehavior(af=new AutoFiring().
 	    setProjectileFiringBehavior(pfb).
@@ -508,7 +509,7 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     final AdjustAltitudeToPlayerBehavior aatpb = new AdjustAltitudeToPlayerBehavior(tr.getPlayer()).setAccelleration(1000);
     addBehavior(aatpb);
     final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
-    pfb.addSupply(99999999);
+    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     addBehavior(pfb);
     
     possibleSpinAndCrashOnDeath(.4,def);

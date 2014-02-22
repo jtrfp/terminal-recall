@@ -2,6 +2,7 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -108,7 +109,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     }
 
     @Override
-    public void addSupply(double amount) {
+    public void addSupply(double amount) throws SupplyNotNeededException {
+	if(ammo==ammoLimit)throw new SupplyNotNeededException();
 	ammo=(int)Math.min(ammo+amount, ammoLimit);
 	
     }

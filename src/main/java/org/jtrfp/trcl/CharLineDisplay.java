@@ -50,7 +50,7 @@ public class CharLineDisplay
 			{char newContent;
 			if(i<content.length())
 				{newContent=content.charAt(i);}
-			else{newContent=' ';}
+			else{newContent=0;}
 			this.content[i]=newContent;
 			displays[i].setChar(newContent);
 			}//end for(length)
@@ -63,10 +63,11 @@ public class CharLineDisplay
 		//Determine total length;
 		for(int i=0; i<displays.length; i++){
 		    char _content = content[i];
+		    if(_content!=0){
 		    final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
-		    totGlLen+=progress;
+		    totGlLen+=progress;}
 		}//end for(displays)
-		if(centered)charPosition[0]-=totGlLen/4.;
+		if(centered)charPosition[0]-=totGlLen/2.;
 		for(int i=0; i<displays.length; i++){
 		    	final double [] dispPos = displays[i].getPosition();
 		    	dispPos[0]=charPosition[0];

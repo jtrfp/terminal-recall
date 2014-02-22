@@ -8,11 +8,13 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
     static final 	int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Vertex Block is 1536 bytes
     private 		int [] 		pageTable;//Using array since performance is crucial
-    private final IndexPool 		pageIndexPool;
+    private final 	IndexPool 	pageIndexPool;
+    private final 	String		debugName;
     
-    PagedByteBuffer(ByteBuffer [] intrinsic, IndexPool pageIndexPool, int initialSizeInBytes){
+    PagedByteBuffer(ByteBuffer [] intrinsic, IndexPool pageIndexPool, int initialSizeInBytes, String debugName){
 	this.intrinsic=intrinsic;
 	this.pageIndexPool=pageIndexPool;
+	this.debugName=debugName;
 	final int sizeInPages = sizeInPages(initialSizeInBytes);
 	pageTable = new int[sizeInPages];
 	for(int i=0; i<sizeInPages; i++){
@@ -30,7 +32,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	return indexInBytes%PAGE_SIZE_BYTES;
     }
     private final int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
-	return pageTable[index2Page(logicalIndexInBytes)]+pageModulus(logicalIndexInBytes);
+	return (PAGE_SIZE_BYTES*pageTable[index2Page(logicalIndexInBytes)])+pageModulus(logicalIndexInBytes);
     }
 
     @Override
@@ -90,5 +92,24 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     @Override
     public short getShort(int indexInBytes) {
 	return intrinsic[0].getShort(logicalIndex2PhysicalIndex(indexInBytes));
+    }
+
+    @Override
+    public IByteBuffer putFloat(int indexInBytes, float val) {
+	intrinsic[0].putFloat(logicalIndex2PhysicalIndex(indexInBytes), val);
+	return this;
+    }
+
+    @Override
+    public IByteBuffer put(int startIndexInBytes, ByteBuffer src) {
+	intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
+	intrinsic[0].put(src);
+	return this;
+    }
+
+    @Override
+    public IByteBuffer putInt(int indexInBytes, int val) {
+	intrinsic[0].putInt(indexInBytes,val);
+	return this;
     }
 }//end PageByteBuffer

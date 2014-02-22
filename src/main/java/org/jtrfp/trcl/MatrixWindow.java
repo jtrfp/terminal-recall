@@ -22,8 +22,7 @@ import org.jtrfp.trcl.core.IndexPool;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
-public final class MatrixWindow
-	{
+public final class MatrixWindow{
 	public static final int BYTES_PER_MATRIX=4*16; // 16 floats
 	private int arrayOffset=Integer.MIN_VALUE;
 	private final AtomicInteger numMatrices = new AtomicInteger();
@@ -40,7 +39,9 @@ public final class MatrixWindow
 	    	final MatrixWindow mw=tr.getMatrixWindow();
 		int bytesToAllocate=mw.getNumMatrices()*BYTES_PER_MATRIX;
 		System.out.println("Matrices: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
-		mw.setArrayOffset(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
+		int arrayOffset;
+		mw.setArrayOffset(arrayOffset=GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
+		tr.getReporter().report("org.jtrfp.trcl.MatrixWindow.arrayOffsetBytes", String.format("%08X", arrayOffset));
 		}
 	
 	public final void set(double [] vals, int id){
@@ -75,5 +76,7 @@ public final class MatrixWindow
 	}
 	
 	public final int getNumMatrices(){return numMatrices.get();}
-	private void setArrayOffset(int off){arrayOffset=off;}
+	private void setArrayOffset(int off){
+	    arrayOffset=off;
+	    }
 	}//end Matrix

@@ -27,6 +27,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -47,19 +48,25 @@ public class RenderList{
 	private int numOpaqueBlocks;
 	private int numTransparentBlocks;
 	private final GLUniform renderListOffsetUniform,renderModeUniform;
-	private ByteBuffer globalGPUBuffer[];
+	private int globalGPUBuffer[];
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
 	    	@Override
 		public void submit(PositionedRenderable item)
 			{if(item instanceof WorldObject){if(!((WorldObject)item).isVisible()||!((WorldObject)item).isActive()){return;}}
-			numOpaqueBlocks+=item.getOpaqueObjectDefinitionAddresses().capacity()/4;
-			numTransparentBlocks+=item.getTransparentObjectDefinitionAddresses().capacity()/4;
+			final ByteBuffer opOD=item.getOpaqueObjectDefinitionAddresses();
+			final ByteBuffer trOD=item.getTransparentObjectDefinitionAddresses();
+			numOpaqueBlocks+=opOD.capacity()/4;
+			numTransparentBlocks+=trOD.capacity()/4;
 			renderables[renderablesIndex++]=item;
-			final ByteBuffer [] buf=getGlobalGPUBuffer();
-			buf[OPAQUE_PASS].put(
+			final int [] buf=getGlobalGPUBuffer();
+			GlobalDynamicTextureBuffer.put(buf[OPAQUE_PASS], opOD);
+			buf[OPAQUE_PASS]+=opOD.capacity();
+			GlobalDynamicTextureBuffer.put(buf[BLEND_PASS], trOD);
+			buf[BLEND_PASS]+=trOD.capacity();
+			/*buf[OPAQUE_PASS].put(
 					item.getOpaqueObjectDefinitionAddresses());
 			buf[BLEND_PASS].put(
-					item.getTransparentObjectDefinitionAddresses());
+					item.getTransparentObjectDefinitionAddresses());*/
 			}//end submit(...)
 
 		@Override
@@ -67,14 +74,14 @@ public class RenderList{
 			{for(PositionedRenderable r:items){submit(r);}}
 		};
 	
-	private ByteBuffer []getGlobalGPUBuffer(){
+	private int []getGlobalGPUBuffer(){
 	    	if(globalGPUBuffer==null){
-	    	    globalGPUBuffer = new ByteBuffer[NUM_RENDER_PASSES];
+	    	    globalGPUBuffer = new int[NUM_RENDER_PASSES];
 			for(int i=0; i<NUM_RENDER_PASSES; i++){
-			    	final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
+			    	//final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
 				int pos=GlobalObjectList.getArrayOffsetInBytes()+i*GlobalObjectList.OBJECT_LIST_SIZE_BYTES_PER_PASS;
-				bb.position(pos);
-				globalGPUBuffer[i]=bb;
+				//bb.position(pos);
+				globalGPUBuffer[i]=pos;
 				}
 			}//end if(null)
 		return globalGPUBuffer;

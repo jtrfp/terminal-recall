@@ -60,7 +60,7 @@ public class RawGLBuffer
 		{
 		if(mapped)return;
 		gl.glBindBuffer(getBindingTarget(),bufferID);
-		localBuffer = gl.glMapBuffer(getBindingTarget(), GL2.GL_READ_WRITE);
+		localBuffer = gl.glMapBuffer(getBindingTarget(), GL3.GL_READ_WRITE);
 		if(localBuffer==null)
 			{throw new NullPointerException("Failed to map buffer.");}
 		gl.glBindBuffer(getBindingTarget(), 0);

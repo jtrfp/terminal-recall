@@ -10,7 +10,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory
 	private GPU gpu;
 	private MemoryUsageHint usageHint;
 	
-	ReallocatableGLTextureBuffer(GPU gpu)
+	public ReallocatableGLTextureBuffer(GPU gpu)
 		{this.gpu=gpu;buffer=new GLTextureBuffer(1,gpu);}
 	
 	@Override

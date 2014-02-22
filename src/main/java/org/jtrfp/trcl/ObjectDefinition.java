@@ -44,6 +44,7 @@ public final class ObjectDefinition
 		int bytesToAllocate=objectBlockCount.getAndIncrement()*BYTES_PER_OBJECT_BLOCK;
 		System.out.println("Object Definitions: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
 		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
+		tr.getReporter().report("org.jtrfp.trcl.ObjectDefinition.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
 		}
 	
 	private ObjectDefinition()

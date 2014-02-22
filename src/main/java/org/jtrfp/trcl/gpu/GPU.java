@@ -7,12 +7,14 @@ import java.nio.IntBuffer;
 import javax.media.opengl.DebugGL3;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.mem.MemoryManager;
 
 public class GPU{
 	static {GLProfile.initSingleton();}
@@ -22,8 +24,29 @@ public class GPU{
 	private ByteOrder byteOrder;
 	private final TR tr;
 	private GL3 gl;
+	private MemoryManager memoryManager;
 	
-	public GPU(TR tr){this.tr=tr;}
+	public GPU(TR tr){
+	    this.tr=tr;
+	    addGLEventListener(new GLEventListener(){
+
+		@Override
+		public void init(GLAutoDrawable drawable) {
+		    GPU.this.memoryManager=new MemoryManager(GPU.this);
+		}
+
+		@Override
+		public void dispose(GLAutoDrawable drawable) {}
+
+		@Override
+		public void display(GLAutoDrawable drawable) {}
+
+		@Override
+		public void reshape(GLAutoDrawable drawable, int x, int y,
+			int width, int height) {}
+		
+	    });
+	}
 	public GL3 takeGL(){
 		gl=getGl();
 		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
@@ -80,9 +103,13 @@ public class GPU{
 		return gl;
 		}
 	
-	public ReallocatableGLMemory newEmptyGLMemory()
-		{return new ReallocatableGLTextureBuffer(this);}
 	public TR getTr() {
 	    	return tr;
 		}
+	/**
+	 * @return the memoryManager
+	 */
+	public MemoryManager getMemoryManager() {
+	    return memoryManager;
+	}
 	}//end GPU

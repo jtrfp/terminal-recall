@@ -48,6 +48,7 @@ public class ThreadManager
 			public void display(GLAutoDrawable drawable)
 				{
 				Thread.currentThread().setPriority(RENDERING_PRIORITY);
+				ThreadManager.this.tr.getGPU().getMemoryManager().map();
 				if(counter++%(RENDER_FPS/RENDERLIST_REFRESH_FPS)==0)visibilityCalc();
 				gameplay();
 				ThreadManager.this.tr.getRenderer().render();

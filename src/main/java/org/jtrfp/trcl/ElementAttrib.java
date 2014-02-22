@@ -60,9 +60,10 @@ public class ElementAttrib<TYPE extends Number> implements Settable
 		@Override
 		public void set(double val, int byteOffset)
 			{
-			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset);
-			bb.put((byte)val);
+			//final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
+		    	GlobalDynamicTextureBuffer.put(byteOffset,(byte)val);
+			//bb.position(byteOffset);
+			//bb.put((byte)val);
 			}
 		}//end ShortSetter
 	private static final class ShortSetter implements Setter
@@ -80,9 +81,10 @@ public class ElementAttrib<TYPE extends Number> implements Settable
 		@Override
 		public void set(double val, int byteOffset)
 			{
-			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset);
-			bb.putFloat((float)val);
+			//final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
+			GlobalDynamicTextureBuffer.putFloat(byteOffset,(float)val);
+			//bb.position(byteOffset);
+			//bb.putFloat((float)val);
 			}
 		}//end ShortSetter
 	private static final class IntSetter implements Setter
@@ -90,9 +92,10 @@ public class ElementAttrib<TYPE extends Number> implements Settable
 		@Override
 		public void set(double val, int byteOffset)
 			{
-			final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
-			bb.position(byteOffset);
-			bb.putInt((int)val);
+			//final ByteBuffer bb=GlobalDynamicTextureBuffer.getByteBuffer();
+		    	GlobalDynamicTextureBuffer.putInt(byteOffset,(int)val);
+			//bb.position(byteOffset);
+			//bb.putInt((int)val);
 			}
 		}//end ShortSetter
 	}//end ElementAttrib

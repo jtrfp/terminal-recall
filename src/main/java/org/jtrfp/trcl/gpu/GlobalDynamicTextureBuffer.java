@@ -19,38 +19,35 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.media.opengl.GL2;
-
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.mem.IByteBuffer;
 
 
-public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
+public final class GlobalDynamicTextureBuffer
 	{
 	private static final AtomicInteger sizeInBytes = new AtomicInteger();
-	private static ReallocatableGLMemory buffer;
+	//private static GlobalDynamicTextureBuffer buffer;
 	private static final ArrayList<Class<?>>finalizationList = new ArrayList<Class<?>>(10);
+	private static IByteBuffer logicalMemory;
 	
-	private GlobalDynamicTextureBuffer(int sizeInBytes, GPU gpu)
-		{super(sizeInBytes,gpu);}
-	
-	public static ByteBuffer getByteBuffer()
-		{return buffer.getDuplicateReferenceOfUnderlyingBuffer();}
+	/*public static ByteBuffer getByteBuffer()
+		{return buffer.getDuplicateReferenceOfUnderlyingBuffer();}*/
 	
 	public static void finalizeAllocation(GPU gpu, TR tr)
 		{//Finalize dependent allocations
 		for(Class<?> c:finalizationList)
 			{try{
+			System.out.println("Finalizing allocation: "+c);
 			c.getMethod("finalizeAllocation", new Class<?>[]{TR.class}).invoke(null, (Object[])new Object[]{tr});
 			}catch(Exception e){e.printStackTrace();}}
 		finalizationList.clear();
-		buffer=gpu.newEmptyGLMemory();
-		buffer.reallocate(sizeInBytes.get());
+		logicalMemory = tr.getGPU().getMemoryManager().createPagedByteBuffer(sizeInBytes.get(),"Legacy Buffer");
 		}
-	
+	/*
 	@Override
 	protected int getReadWriteParameter()
 		{return GL2.GL_DYNAMIC_DRAW;}
-	
+	*/
 	public static void addAllocationToFinalize(Class<?> clazz)
 		{finalizationList.add(clazz);}
 	
@@ -68,18 +65,20 @@ public final class GlobalDynamicTextureBuffer extends GLTextureBuffer
 	 */
 	public static int getSizeinbytes()
 		{return sizeInBytes.get();}
-
-	/**
-	 * @return the buffer
-	 */
-	public static GLMemory getTextureBuffer()
-		{return buffer;}
-
+	
 	public static void putShort(int byteOffset, short val) {
-	    buffer.putShort(byteOffset,val);
+	    logicalMemory.putShort(byteOffset,val);
 	}
-
 	public static void putFloat(int byteOffset, float val) {
-	    buffer.putFloat(byteOffset,val);
+	    logicalMemory.putFloat(byteOffset,val);
+	}
+	public static void put(int byteOffset, ByteBuffer bytes){
+	    logicalMemory.put(byteOffset, bytes);
+	}
+	public static void put(int byteOffset, byte val){
+	    logicalMemory.put(byteOffset, val);
+	}
+	public static void putInt(int byteOffset, int val) {
+	    logicalMemory.putInt(byteOffset, val);
 	}
 }//end GlobalTextureBuffer

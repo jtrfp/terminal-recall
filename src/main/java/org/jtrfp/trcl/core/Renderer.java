@@ -66,15 +66,18 @@ public class Renderer
 		fogColor=shaderProgram.getUniform("fogColor");
 		
 		System.out.println("Initializing RenderList...");
-		renderList[0] = new RenderList(gl, shaderProgram,gpu.getTr());
-		renderList[1] = new RenderList(gl, shaderProgram,gpu.getTr());
+		final TR tr = gpu.getTr();
+		renderList[0] = new RenderList(gl, shaderProgram,tr);
+		renderList[1] = new RenderList(gl, shaderProgram,tr);
 		}
 	
 	private void ensureInit()
 		{if(initialized) return;
 		final GL3 gl = gpu.getGl();
 		
-		GlobalDynamicTextureBuffer.getTextureBuffer().map();
+		//GlobalDynamicTextureBuffer.getTextureBuffer().map();
+		gpu.getMemoryManager().map();
+		
 		System.out.println("Uploading vertex data to GPU...");
 		TriangleList.uploadAllListsToGPU(gl);
 		System.out.println("...Done.");
@@ -82,10 +85,12 @@ public class Renderer
 		WorldObject.uploadAllObjectDefinitionsToGPU();
 		System.out.println("...Done.");
 		System.out.println("\t...World.init() complete.");
-		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
+		
+		//GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
+		//gpu.getMemoryManager().unmap();
 		
 		try{
-		GlobalDynamicTextureBuffer.getTextureBuffer().bindToUniform(1, shaderProgram, shaderProgram.getUniform("rootBuffer"));
+		gpu.getMemoryManager().bindToUniform(1, shaderProgram, shaderProgram.getUniform("rootBuffer"));
 		shaderProgram.getUniform("textureMap").set((int)0);//Texture unit 0 mapped to textureMap
 		}
 	catch (RuntimeException e)
@@ -98,6 +103,7 @@ public class Renderer
 		System.exit(1);
 		}
 	System.out.println("...Done.");
+	gpu.getMemoryManager().map();
 		initialized=true;
 		}//end ensureInit()
 	
@@ -113,8 +119,8 @@ public class Renderer
 	public void render()
 		{fpsTracking();
 		// Update GPU
-		try{GlobalDynamicTextureBuffer.getTextureBuffer().map();}
-		catch(NullPointerException e){return;}//Not ready yet; bail out.
+		//try{gpu.getMemoryManager().map();}
+		//catch(NullPointerException e){return;}//Not ready yet; bail out.
 		PrimitiveList.tickAnimators();
 		ensureInit();
 		final GL3 gl = gpu.getGl();
@@ -125,7 +131,7 @@ public class Renderer
 		fogEnd.set((float) (cameraViewDepth * 1.5) * 1.3f);
 		int renderListIndex=0;
 		renderListIndex=renderListToggle?0:1;renderList[renderListIndex].sendToGPU(gl);
-		GlobalDynamicTextureBuffer.getTextureBuffer().unmap();
+		//gpu.getMemoryManager().unmap();
 		// Render objects
 		renderList[renderListIndex].render(gl);
 		}

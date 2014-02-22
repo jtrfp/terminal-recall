@@ -37,6 +37,7 @@ public class GPUTriangleVertex implements GPUVec4Element
 		int bytesToAllocate = numVertices.get()*GPUTriangleVertex.BYTES_PER_VERTEX;
 		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
 		System.out.println("Triangle Vertices: Allocating "+bytesToAllocate+" bytes of GPU resident RAM, starting at offset "+arrayOffset.get());
+		tr.getReporter().report("org.jtrfp.trcl.GPUTriangleVertex.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
 		finalized=true;
 		}
 	

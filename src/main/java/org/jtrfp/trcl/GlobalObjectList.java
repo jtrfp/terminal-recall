@@ -32,6 +32,7 @@ public class GlobalObjectList
 		int bytesToAllocate = OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES;
 		System.out.println("ObjectList: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
 		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
+		tr.getReporter().report("org.jtrfp.trcl.GlobalObjectList.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
 		}
 	public static int getArrayOffsetInBytes(){return arrayOffset.get();}
 	}//end GlobalObjectList

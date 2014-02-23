@@ -22,7 +22,7 @@ import java.util.Collection;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.GPUTriangleVertex;
-import org.jtrfp.trcl.GlobalObjectList;
+import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
@@ -77,9 +77,8 @@ public class RenderList{
 	private int []getGlobalGPUBuffer(){
 	    	if(globalGPUBuffer==null){
 	    	    globalGPUBuffer = new int[NUM_RENDER_PASSES];
-			for(int i=0; i<NUM_RENDER_PASSES; i++){
-			    	//final ByteBuffer bb = GlobalDynamicTextureBuffer.getByteBuffer();
-				int pos=GlobalObjectList.getArrayOffsetInBytes()+i*GlobalObjectList.OBJECT_LIST_SIZE_BYTES_PER_PASS;
+			for(int i=0; i<NUM_RENDER_PASSES; i++){//TODO: Directly feed index to getPhysicalAddressInBytes
+				int pos=tr.getObjectListWindow().getPhysicalAddressInBytes(0)+i*ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS;
 				//bb.position(pos);
 				globalGPUBuffer[i]=pos;
 				}
@@ -121,7 +120,7 @@ public class RenderList{
 		final int verticesPerSubPass=(NUM_BLOCKS_PER_SUBPASS*GPUTriangleVertex.VERTICES_PER_BLOCK);
 		final int numSubPasses=(numOpaqueVertices/verticesPerSubPass)+1;
 		int remainingVerts=numOpaqueVertices;
-		final int rlOffset=GlobalObjectList.getArrayOffsetInBytes()/4;
+		final int rlOffset=tr.getObjectListWindow().getPhysicalAddressInBytes(0)/4;
 		
 		if(frameCounter==0){
 		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numOpaqueBlocks", ""+numOpaqueBlocks);
@@ -142,7 +141,7 @@ public class RenderList{
 		//////////
 		//gl.glDepthFunc(GL3.GL_ALWAYS);
 		/////////
-		renderListOffsetUniform.setui((GlobalObjectList.getArrayOffsetInBytes()/4)+NUM_BLOCKS_PER_PASS);
+		renderListOffsetUniform.setui((tr.getObjectListWindow().getPhysicalAddressInBytes(0)/4)+NUM_BLOCKS_PER_PASS);
 		renderModeUniform.set(BLEND_PASS);
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 		//////////

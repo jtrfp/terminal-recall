@@ -36,6 +36,7 @@ import javax.swing.SwingUtilities;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
+import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
@@ -84,6 +85,7 @@ public final class TR
 	private HUDSystem hudSystem;
 	private Mission currentMission;
 	private final MatrixWindow matrixWindow = new MatrixWindow();
+	private final ObjectListWindow objectListWindow = new ObjectListWindow();
 	private final TriangleVertexWindow triangleVertexWindow = new TriangleVertexWindow();
 	private final TriangleVertex2FlatDoubleWindow tv2fdWindow = new TriangleVertex2FlatDoubleWindow(triangleVertexWindow);
 	/*
@@ -478,5 +480,12 @@ public final class TR
 	 */
 	public TriangleVertexWindow getTriangleVertexWindow() {
 	    return triangleVertexWindow;
+	}
+
+	/**
+	 * @return the objectListWindow
+	 */
+	public ObjectListWindow getObjectListWindow() {
+	    return objectListWindow;
 	}
 }//end TR

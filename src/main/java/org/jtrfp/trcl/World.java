@@ -43,7 +43,6 @@ public final class World extends RenderableSpacePartitioningGrid
 		Camera camera = tr.getRenderer().getCamera();
 		camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 				sizeY / 3.15, camera.getCameraPosition().getZ()));
-		GlobalObjectList.poke();
 		}// end constructor
 
 	public void setCameraDirection(ObjectDirection dir)

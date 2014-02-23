@@ -122,4 +122,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     public double getFloat(int posInBytes) {
 	return intrinsic[0].getFloat(posInBytes);
     }
+
+    @Override
+    public Integer getInt(int posInBytes) {
+	return intrinsic[0].getInt(posInBytes);
+    }
 }//end PageByteBuffer

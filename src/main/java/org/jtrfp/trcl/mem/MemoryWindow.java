@@ -56,6 +56,20 @@ public abstract class MemoryWindow {
 	    return byteOffset;}
     }//end Property
     
+    public static final class IntVariable extends Variable<Integer,IntVariable>{
+	@Override
+	public IntVariable set(int objectIndex, Integer value) {
+	    getParent().getBuffer().putInt(byteOffset()+objectIndex*getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
+
+	@Override
+	public Integer get(int objectIndex) {
+	    return getParent().getBuffer().getInt(byteOffset()+objectIndex*getParent().getObjectSizeInBytes());
+	}
+	
+    }//end IntVariable
+    
     public static final class ByteVariable extends Variable<Byte, ByteVariable>{
 
 	@Override

@@ -91,4 +91,9 @@ public final class SubByteBuffer implements IByteBuffer {
 	return intrinsic.getFloat(posInBytes);
     }
 
+    @Override
+    public Integer getInt(int posInBytes) {
+	return intrinsic.getInt(posInBytes);
+    }
+
 }//end SubByteBuffer

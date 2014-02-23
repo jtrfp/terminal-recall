@@ -117,4 +117,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     public int logical2PhysicalAddressBytes(int logicalAddressInBytes) {
 	return logicalIndex2PhysicalIndex(logicalAddressInBytes);
     }
+
+    @Override
+    public double getFloat(int posInBytes) {
+	return intrinsic[0].getFloat(posInBytes);
+    }
 }//end PageByteBuffer

@@ -29,8 +29,8 @@ public final class GlobalDynamicTextureBuffer
 	private static final AtomicInteger sizeInBytes = new AtomicInteger();
 	private static final ArrayList<Class<?>>finalizationList = new ArrayList<Class<?>>(10);
 	private static PagedByteBuffer logicalMemory;
-	public static void finalizeAllocation(GPU gpu, TR tr)
-		{//Finalize dependent allocations
+	
+	public static void finalizeAllocation(GPU gpu, TR tr){//Finalize dependent allocations
 	    	logicalMemory = tr.getGPU().getMemoryManager().createPagedByteBuffer(4, "Legacy Buffer");
 		for(Class<?> c:finalizationList)
 			{try{

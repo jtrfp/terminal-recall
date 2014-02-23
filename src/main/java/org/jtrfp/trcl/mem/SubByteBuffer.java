@@ -86,4 +86,9 @@ public final class SubByteBuffer implements IByteBuffer {
 	return logicalAddressInBytes+byteOffset;
     }
 
+    @Override
+    public double getFloat(int posInBytes) {
+	return intrinsic.getFloat(posInBytes);
+    }
+
 }//end SubByteBuffer

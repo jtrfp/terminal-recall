@@ -80,7 +80,7 @@ public class WorldObject implements PositionedRenderable{
 	    	this.nullBehavior = new NullBehavior(this);
 		this.tr=tr;
 		addWorldObject(this);
-		matrixID=tr.getMatrixWindow().create4x4();
+		matrixID=tr.getMatrixWindow().create();
 		//Matrix constants setup
 		rMd[15]=1;
 		

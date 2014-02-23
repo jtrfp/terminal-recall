@@ -227,7 +227,7 @@ public class WorldObject implements PositionedRenderable{
 		//For each of the allocated-but-not-yet-initialized object definitions.
 		for(final ObjectDefinition ob:objectDefinitions)
 			{
-			ob.matrixOffset.set(tr.getMatrixWindow().getAddressInBytes(matrixID)/GLTextureBuffer.BYTES_PER_VEC4);
+			ob.matrixOffset.set(tr.getMatrixWindow().getPhysicalAddressInBytes(matrixID)/GLTextureBuffer.BYTES_PER_VEC4);
 			ob.vertexOffset.set(primitiveListByteAddress/GLTextureBuffer.BYTES_PER_VEC4);
 			ob.mode.set(primitiveList.getPrimitiveRenderMode());
 			ob.modelScale.set(primitiveList.getPackedScale());

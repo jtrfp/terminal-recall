@@ -21,12 +21,14 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.core.IndexPool;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.mem.IByteBuffer;
+import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public final class MatrixWindow{
 	public static final int BYTES_PER_MATRIX=4*16; // 16 floats
-	private int arrayOffset=Integer.MIN_VALUE;
 	private final AtomicInteger numMatrices = new AtomicInteger();
 	private final IndexPool indexPool = new IndexPool();
+	private IByteBuffer buffer;
 	
 	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(MatrixWindow.class);}
 	
@@ -39,44 +41,58 @@ public final class MatrixWindow{
 	    	final MatrixWindow mw=tr.getMatrixWindow();
 		int bytesToAllocate=mw.getNumMatrices()*BYTES_PER_MATRIX;
 		System.out.println("Matrices: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
-		int arrayOffset;
-		mw.setArrayOffset(arrayOffset=GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
-		tr.getReporter().report("org.jtrfp.trcl.MatrixWindow.arrayOffsetBytes", String.format("%08X", arrayOffset));
+		//mw.setArrayOffset(arrayOffset=GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
+		mw.setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer.getLogicalMemory(),GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate)));
+		tr.getReporter().report("org.jtrfp.trcl.MatrixWindow.arrayOffsetBytes", String.format("%08X", mw.getBuffer().logical2PhysicalAddressBytes(0)));
 		}
 	
 	public final void set(double [] vals, int id){
-	    final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
+	    final int firstOffset=id*BYTES_PER_MATRIX;
 	    for(int index=0; index<16; index++){
-		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)vals[index]);
+		    buffer.putFloat(firstOffset+index*4,(float)vals[index]);
 		 }//end for(16)
 	}
 	public final void setTransposed(double [] vals, int id){
-	    final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
+	    final int firstOffset=id*BYTES_PER_MATRIX;
 	    for(int index=0; index<16; index++){
-		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)vals[(index/4)+(index%4)*4]);
+		    buffer.putFloat(firstOffset+index*4,(float)vals[(index/4)+(index%4)*4]);
 		 }//end for(16)
 	}
 	
 	public final void set(RealMatrix m, int id){
-		final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
+		final int firstOffset=id*BYTES_PER_MATRIX;
 		for(int index=0; index<16; index++){
-		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)m.getEntry(index/4, index%4));
+		    buffer.putFloat(firstOffset+index*4,(float)m.getEntry(index/4, index%4));
 		 }//end for(16)
 		}///end set(...)
 	
 	public final void setTransposed(RealMatrix m, int id){
-		final int firstOffset=arrayOffset+id*BYTES_PER_MATRIX;
+		final int firstOffset=id*BYTES_PER_MATRIX;
 		for(int index=0; index<16; index++){
-		    GlobalDynamicTextureBuffer.putFloat(firstOffset+index*4,(float)m.getEntry(index%4, index/4));
+		    buffer.putFloat(firstOffset+index*4,(float)m.getEntry(index%4, index/4));
 		 }//end for(16)
 		}///end set(...)
 	
-	public final int getAddressInBytes(int id){
-	    return id*BYTES_PER_MATRIX+arrayOffset;
+	/*public final int getLogicalAddressInBytes(int id){
+	    return id*BYTES_PER_MATRIX;
+	}*/
+	public final int getPhysicalAddressInBytes(int id){
+	    return buffer.logical2PhysicalAddressBytes(id*BYTES_PER_MATRIX);
 	}
 	
 	public final int getNumMatrices(){return numMatrices.get();}
-	private void setArrayOffset(int off){
-	    arrayOffset=off;
-	    }
+
+	/**
+	 * @return the buffer
+	 */
+	public IByteBuffer getBuffer() {
+	    return buffer;
+	}
+
+	/**
+	 * @param buffer the buffer to set
+	 */
+	public void setBuffer(IByteBuffer buffer) {
+	    this.buffer = buffer;
+	}
 	}//end Matrix

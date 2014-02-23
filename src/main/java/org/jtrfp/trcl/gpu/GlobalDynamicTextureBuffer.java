@@ -21,33 +21,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.mem.IByteBuffer;
+import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 
 public final class GlobalDynamicTextureBuffer
 	{
 	private static final AtomicInteger sizeInBytes = new AtomicInteger();
-	//private static GlobalDynamicTextureBuffer buffer;
 	private static final ArrayList<Class<?>>finalizationList = new ArrayList<Class<?>>(10);
-	private static IByteBuffer logicalMemory;
-	
-	/*public static ByteBuffer getByteBuffer()
-		{return buffer.getDuplicateReferenceOfUnderlyingBuffer();}*/
-	
+	private static PagedByteBuffer logicalMemory;
 	public static void finalizeAllocation(GPU gpu, TR tr)
 		{//Finalize dependent allocations
+	    	logicalMemory = tr.getGPU().getMemoryManager().createPagedByteBuffer(4, "Legacy Buffer");
 		for(Class<?> c:finalizationList)
 			{try{
 			System.out.println("Finalizing allocation: "+c);
 			c.getMethod("finalizeAllocation", new Class<?>[]{TR.class}).invoke(null, (Object[])new Object[]{tr});
 			}catch(Exception e){e.printStackTrace();}}
 		finalizationList.clear();
-		logicalMemory = tr.getGPU().getMemoryManager().createPagedByteBuffer(sizeInBytes.get(),"Legacy Buffer");
+		logicalMemory.resize(sizeInBytes.get());
 		}
-	/*
-	@Override
-	protected int getReadWriteParameter()
-		{return GL2.GL_DYNAMIC_DRAW;}
-	*/
+	
 	public static void addAllocationToFinalize(Class<?> clazz)
 		{finalizationList.add(clazz);}
 	
@@ -80,5 +73,8 @@ public final class GlobalDynamicTextureBuffer
 	}
 	public static void putInt(int byteOffset, int val) {
 	    logicalMemory.putInt(byteOffset, val);
+	}
+	public static IByteBuffer getLogicalMemory(){
+	    return logicalMemory;
 	}
 }//end GlobalTextureBuffer

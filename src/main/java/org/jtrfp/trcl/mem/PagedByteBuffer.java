@@ -112,4 +112,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	intrinsic[0].putInt(indexInBytes,val);
 	return this;
     }
+
+    @Override
+    public int logical2PhysicalAddressBytes(int logicalAddressInBytes) {
+	return logicalIndex2PhysicalIndex(logicalAddressInBytes);
+    }
 }//end PageByteBuffer

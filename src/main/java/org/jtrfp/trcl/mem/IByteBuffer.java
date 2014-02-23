@@ -19,4 +19,5 @@ public interface IByteBuffer {
     public byte get(int indexInBytes);
     public short getShort(int indexInBytes);
     public int logical2PhysicalAddressBytes(int logicalAddressInBytes);
+    public double getFloat(int posInBytes);
 }//end IByteBuffer

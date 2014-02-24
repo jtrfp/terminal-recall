@@ -6,7 +6,7 @@ import org.jtrfp.trcl.core.IndexPool;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
-    static final 	int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Vertex Block is 1536 bytes
+    public static final int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Vertex Block is 1536 bytes
     private 		int [] 		pageTable;//Using array since performance is crucial
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;

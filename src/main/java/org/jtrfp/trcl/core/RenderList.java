@@ -20,6 +20,8 @@ import java.nio.IntBuffer;
 import java.util.Collection;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.ObjectListWindow;
@@ -27,7 +29,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
-import org.jtrfp.trcl.mem.MemoryManager;
+import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -47,8 +49,10 @@ public class RenderList{
 	private final int dummyBufferID;
 	private int numOpaqueBlocks;
 	private int numTransparentBlocks;
-	private final GLUniform renderListOffsetUniform,renderModeUniform;
+	private final GLUniform renderListOffsetUniform,renderModeUniform,renderListPageTable;
 	private int globalGPUBuffer[];
+	private int [] hostRenderListPageTable;
+	private int modulusUintOffset;
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
 	    	@Override
 		public void submit(PositionedRenderable item)
@@ -63,10 +67,6 @@ public class RenderList{
 			buf[OPAQUE_PASS]+=opOD.capacity();
 			GlobalDynamicTextureBuffer.put(buf[BLEND_PASS], trOD);
 			buf[BLEND_PASS]+=trOD.capacity();
-			/*buf[OPAQUE_PASS].put(
-					item.getOpaqueObjectDefinitionAddresses());
-			buf[BLEND_PASS].put(
-					item.getTransparentObjectDefinitionAddresses());*/
 			}//end submit(...)
 
 		@Override
@@ -99,7 +99,27 @@ public class RenderList{
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0 );
 		renderListOffsetUniform=prg.getUniform("renderListOffset");
 		renderModeUniform=prg.getUniform("renderFlags");
-		}
+		renderListPageTable=prg.getUniform("renderListPageTable");
+		hostRenderListPageTable=new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES/PagedByteBuffer.PAGE_SIZE_BYTES];
+		
+		tr.getGPU().addGLEventListener(new GLEventListener(){
+		    @Override
+		    public void init(GLAutoDrawable drawable) {
+			System.out.println("hostRenderListPageTable length="+hostRenderListPageTable.length);
+			for(int i=0; i<hostRenderListPageTable.length;i++){
+			    hostRenderListPageTable[i]=RenderList.this.tr.getObjectListWindow().logicalPage2PhysicalPage(i);
+			}//end for(hostRenderListPageTable.length)
+			renderListPageTable.setArrayui(hostRenderListPageTable);
+			modulusUintOffset = (RenderList.this.tr.getObjectListWindow().getPhysicalAddressInBytes(0)%PagedByteBuffer.PAGE_SIZE_BYTES)/4;
+		    }
+		    @Override
+		    public void dispose(GLAutoDrawable drawable) {}
+		    @Override
+		    public void display(GLAutoDrawable drawable) {}
+		    @Override
+		    public void reshape(GLAutoDrawable drawable, int x, int y,
+			    int width, int height) {}});
+	    }
 	private static int frameCounter=0;
 	
 	private void updateStatesToGPU(){
@@ -120,7 +140,6 @@ public class RenderList{
 		final int verticesPerSubPass=(NUM_BLOCKS_PER_SUBPASS*GPUTriangleVertex.VERTICES_PER_BLOCK);
 		final int numSubPasses=(numOpaqueVertices/verticesPerSubPass)+1;
 		int remainingVerts=numOpaqueVertices;
-		final int rlOffset=tr.getObjectListWindow().getPhysicalAddressInBytes(0)/4;
 		
 		if(frameCounter==0){
 		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numOpaqueBlocks", ""+numOpaqueBlocks);
@@ -130,7 +149,7 @@ public class RenderList{
 		for(int sp=0; sp<numSubPasses; sp++){
 		    	final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
 			remainingVerts-=numVerts;
-			final int newOffset=rlOffset+sp*NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
+			final int newOffset=modulusUintOffset+sp*NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
 			renderListOffsetUniform.setui(newOffset);
 			gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
 			}//end for(subpasses)
@@ -141,7 +160,7 @@ public class RenderList{
 		//////////
 		//gl.glDepthFunc(GL3.GL_ALWAYS);
 		/////////
-		renderListOffsetUniform.setui((tr.getObjectListWindow().getPhysicalAddressInBytes(0)/4)+NUM_BLOCKS_PER_PASS);
+		renderListOffsetUniform.setui(modulusUintOffset+NUM_BLOCKS_PER_PASS);
 		renderModeUniform.set(BLEND_PASS);
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 		//////////

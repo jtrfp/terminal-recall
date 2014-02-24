@@ -18,7 +18,6 @@ public abstract class MemoryWindow {
 	final Class thisClass = getClass();
 	for(Field f:getClass().getFields()){
 	    if(Variable.class.isAssignableFrom(f.getType())){
-		System.out.println("FIELD: "+f.getName());
 		try{final Variable<?,?> var = (Variable<?,?>)f.get(this);
 		    var.initialize(this);}
 		catch(IllegalAccessException e){e.printStackTrace();}
@@ -67,7 +66,6 @@ public abstract class MemoryWindow {
 	public Integer get(int objectIndex) {
 	    return getParent().getBuffer().getInt(byteOffset()+objectIndex*getParent().getObjectSizeInBytes());
 	}
-	
     }//end IntVariable
     
     public static final class ByteVariable extends Variable<Byte, ByteVariable>{
@@ -119,4 +117,9 @@ public abstract class MemoryWindow {
     }
     public final int getObjectSizeInBytes(){return objectSizeInBytes;}
     public final int getPhysicalAddressInBytes(int objectIndex){return buffer.logical2PhysicalAddressBytes(objectIndex*objectSizeInBytes);}
+    public final int numObjectsPerPage(){return PagedByteBuffer.PAGE_SIZE_BYTES/getObjectSizeInBytes();}
+    public final int numPages(){return getNumObjects()/numObjectsPerPage();}
+    public final int logicalPage2PhysicalPage(int logicalPage){
+	return buffer.
+		logical2PhysicalAddressBytes(logicalPage*PagedByteBuffer.PAGE_SIZE_BYTES)/PagedByteBuffer.PAGE_SIZE_BYTES;}
 }//end ObjectWindow

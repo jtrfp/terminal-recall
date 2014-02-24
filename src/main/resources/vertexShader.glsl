@@ -17,6 +17,17 @@
 #version 330
 //#extension GL_ARB_explicit_uniform_location : enable
 
+//CONSTANTS
+//const uint NUM_RENDERLIST_PAGES=
+const float COORD_DOWNSCALER=512+1;
+const uint RENDER_MODE_TRIANGLES=0u;
+const uint RENDER_MODE_LINES=1u;
+
+const uint PACKED_DATA_RENDER_MODE=0u;	//UNibble
+const uint PACKED_DATA_COLOR_RED=1u;		//UNibble
+const uint PACKED_DATA_COLOR_GREEN=2u;	//UNibble
+const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
+
 //OUT
 smooth out vec2 fragTexCoord;
 smooth out float fogLevel;
@@ -27,19 +38,12 @@ uniform uint renderListOffset;
 uniform uint renderFlags;
 uniform float fogStart;
 uniform float fogEnd;
+uniform uint renderListPageTable[85];
 
 in float dummy;
 uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
 
-//CONSTANTS
-const float COORD_DOWNSCALER=512+1;
-const uint RENDER_MODE_TRIANGLES=0u;
-const uint RENDER_MODE_LINES=1u;
 
-const uint PACKED_DATA_RENDER_MODE=0u;	//UNibble
-const uint PACKED_DATA_COLOR_RED=1u;		//UNibble
-const uint PACKED_DATA_COLOR_GREEN=2u;	//UNibble
-const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
 //RENDER MODES
 const uint OPAQUE_PASS=0u;
@@ -101,6 +105,13 @@ int firstSShort(uint _input)
 	return result;
 	}
 
+int renderListLogicalVEC42PhysicalVEC4(uint logical)
+	{
+	return int(renderListPageTable
+		[logical/96u]*96u
+		+logical%96u);
+	}
+
 /*Object definition VEC4
 	uint matrix offset
 	uint vertex offset
@@ -130,7 +141,7 @@ gl_Position.x=dummy*0;
 		int objectIndex = (gl_VertexID / 96);
 		int intraObjectVertexIndex = gl_VertexID % 96;
 		int adjustedListIndex=objectIndex+int(renderListOffset);
-		int objectDefIndex=int(texelFetch(rootBuffer,int((adjustedListIndex/4)))[adjustedListIndex%4]);
+		int objectDefIndex=int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(adjustedListIndex/4)))[adjustedListIndex%4]);
 		uvec4 objectDef = texelFetch(rootBuffer,objectDefIndex);
 		
 		int numVertices = int(UByte(objectDef[2],0u));

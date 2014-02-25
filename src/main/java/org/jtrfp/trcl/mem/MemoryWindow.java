@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.mem;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 
 import org.jtrfp.trcl.core.IndexPool;
 
@@ -82,6 +83,24 @@ public abstract class MemoryWindow {
 	}
     }//end ByteVariable
     
+    public static final class ByteArrayVariable extends Variable<ByteBuffer,ByteArrayVariable>{
+	private int arrayLen=0;//Keep for automatic size calculation
+	public ByteArrayVariable(int arrayLen){this.arrayLen=arrayLen;}
+	@Override
+	public ByteArrayVariable set(int objectIndex, ByteBuffer value) {
+	    getParent().getBuffer().put(byteOffset()+objectIndex*getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
+	public ByteArrayVariable set(int objectIndex, int offsetInBytes, ByteBuffer value) {
+	    getParent().getBuffer().put(offsetInBytes+byteOffset()+objectIndex*getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
+	@Override
+	public ByteBuffer get(int objectIndex) {
+	    return null;//unimplemented
+	}
+    }//end Double2FloatArrayVariable
+    
     public static final class Double2FloatArrayVariable extends Variable<double [],Double2FloatArrayVariable>{
 	private int arrayLen=0;
 	public Double2FloatArrayVariable(int arrayLen){this.arrayLen=arrayLen;}
@@ -101,7 +120,7 @@ public abstract class MemoryWindow {
 	    return result;
 	}
     }//end Double2FloatArrayVariable
-
+    
     /**
      * @return the buffer
      */

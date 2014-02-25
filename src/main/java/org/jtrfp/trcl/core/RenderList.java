@@ -50,9 +50,10 @@ public class RenderList{
 	private int numOpaqueBlocks;
 	private int numTransparentBlocks;
 	private final GLUniform renderListOffsetUniform,renderModeUniform,renderListPageTable;
-	private int globalGPUBuffer[];
 	private int [] hostRenderListPageTable;
 	private int modulusUintOffset;
+	
+	private int opaqueIndex=0,blendIndex=0;
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
 	    	@Override
 		public void submit(PositionedRenderable item)
@@ -62,29 +63,16 @@ public class RenderList{
 			numOpaqueBlocks+=opOD.capacity()/4;
 			numTransparentBlocks+=trOD.capacity()/4;
 			renderables[renderablesIndex++]=item;
-			final int [] buf=getGlobalGPUBuffer();
-			GlobalDynamicTextureBuffer.put(buf[OPAQUE_PASS], opOD);
-			buf[OPAQUE_PASS]+=opOD.capacity();
-			GlobalDynamicTextureBuffer.put(buf[BLEND_PASS], trOD);
-			buf[BLEND_PASS]+=trOD.capacity();
+			tr.getObjectListWindow().opaqueIDs.set(0, opaqueIndex, opOD);
+			opaqueIndex+=opOD.capacity();
+			tr.getObjectListWindow().blendIDs.set(0, blendIndex, trOD);
+			blendIndex+=trOD.capacity();
 			}//end submit(...)
 
 		@Override
 		public void submit(Collection<PositionedRenderable> items)
 			{for(PositionedRenderable r:items){submit(r);}}
 		};
-	
-	private int []getGlobalGPUBuffer(){
-	    	if(globalGPUBuffer==null){
-	    	    globalGPUBuffer = new int[NUM_RENDER_PASSES];
-			for(int i=0; i<NUM_RENDER_PASSES; i++){//TODO: Directly feed index to getPhysicalAddressInBytes
-				int pos=tr.getObjectListWindow().getPhysicalAddressInBytes(0)+i*ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS;
-				//bb.position(pos);
-				globalGPUBuffer[i]=pos;
-				}
-			}//end if(null)
-		return globalGPUBuffer;
-		}//end getGlobalGPUBuffer()
 	
 	public RenderList(GL3 gl, GLProgram prg, TR tr){
 	    	//Build VAO
@@ -176,6 +164,7 @@ public class RenderList{
 	    	renderablesIndex=0;
 		numOpaqueBlocks=0;
 		numTransparentBlocks=0;
-		globalGPUBuffer=null;
+		blendIndex=0;
+		opaqueIndex=0;
 		}
 	}//end RenderList

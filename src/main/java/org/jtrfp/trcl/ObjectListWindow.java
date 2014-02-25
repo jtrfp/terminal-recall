@@ -26,12 +26,13 @@ public class ObjectListWindow extends MemoryWindow {/* TODO: Must be able to
 						     Currently assumes
 						     monolithic allocation.*/
     public ObjectListWindow() {
-	super(4);
+	super(OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES);
 	init();
-    }
-
-    public final IntVariable objectIDs = new IntVariable();
-
+    }//end constructor
+    
+    public final ByteArrayVariable opaqueIDs = new ByteArrayVariable(OBJECT_LIST_SIZE_BYTES_PER_PASS);
+    public final ByteArrayVariable blendIDs = new ByteArrayVariable(OBJECT_LIST_SIZE_BYTES_PER_PASS).byteOffset(OBJECT_LIST_SIZE_BYTES_PER_PASS);
+    
     public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = RenderList.NUM_BLOCKS_PER_PASS * 4;
     static {
 	GlobalDynamicTextureBuffer
@@ -39,11 +40,13 @@ public class ObjectListWindow extends MemoryWindow {/* TODO: Must be able to
     }
 
     public static void finalizeAllocation(TR tr) {
-	int bytesToAllocate = OBJECT_LIST_SIZE_BYTES_PER_PASS
-		* RenderList.NUM_RENDER_PASSES;
+	/*int bytesToAllocate = OBJECT_LIST_SIZE_BYTES_PER_PASS
+		* RenderList.NUM_RENDER_PASSES;*/
+	ObjectListWindow olw = tr.getObjectListWindow();
+	int bytesToAllocate = olw.getObjectSizeInBytes()*olw.getNumObjects();
+	
 	System.out.println("ObjectList: Allocating " + bytesToAllocate
 		+ " bytes of GPU resident RAM.");
-	ObjectListWindow olw = tr.getObjectListWindow();
 	olw.setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
 		.getLogicalMemory(), GlobalDynamicTextureBuffer
 		.requestAllocation(bytesToAllocate)));

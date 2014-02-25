@@ -7,23 +7,22 @@ import org.jtrfp.trcl.core.IndexPool;
 
 public abstract class MemoryWindow {
     private IByteBuffer buffer;
-    private final int objectSizeInBytes;
+    private int objectSizeInBytes;
     private final IndexPool indexPool = new IndexPool();
     //TODO: GrowthBehavior to resize the buffer.
     
-    protected MemoryWindow(int objectSizeInBytes){
-	this.objectSizeInBytes=objectSizeInBytes;
-    }//end constructor
-    
     protected final void init(){
-	final Class thisClass = getClass();
+	int byteOffset=0;
 	for(Field f:getClass().getFields()){
 	    if(Variable.class.isAssignableFrom(f.getType())){
 		try{final Variable<?,?> var = (Variable<?,?>)f.get(this);
-		    var.initialize(this);}
+		    var.initialize(this);
+		    var.byteOffset(byteOffset);
+		    byteOffset+=var.getSizeInBytes();}
 		catch(IllegalAccessException e){e.printStackTrace();}
 	    }//end if(Variable)
 	}//end for(fields)
+	objectSizeInBytes=byteOffset;
     }//end init()
     
     public final int create(){
@@ -48,12 +47,13 @@ public abstract class MemoryWindow {
 	protected final MemoryWindow getParent() {
 	    return parent;
 	}
-	public final THIS_CLASS byteOffset(int off){
+	private final THIS_CLASS byteOffset(int off){
 	    this.byteOffset=off;
 	    return (THIS_CLASS)this;
 	}
 	protected final int byteOffset(){
 	    return byteOffset;}
+	protected abstract int getSizeInBytes();
     }//end Property
     
     public static final class IntVariable extends Variable<Integer,IntVariable>{
@@ -67,6 +67,10 @@ public abstract class MemoryWindow {
 	public Integer get(int objectIndex) {
 	    return getParent().getBuffer().getInt(byteOffset()+objectIndex*getParent().getObjectSizeInBytes());
 	}
+
+	@Override
+	protected int getSizeInBytes() {
+	    return 4;}
     }//end IntVariable
     
     public static final class ByteVariable extends Variable<Byte, ByteVariable>{
@@ -80,6 +84,11 @@ public abstract class MemoryWindow {
 	@Override
 	public Byte get(int objectIndex) {
 	    return getParent().getBuffer().get(byteOffset()+objectIndex*getParent().getObjectSizeInBytes());
+	}
+
+	@Override
+	protected int getSizeInBytes() {
+	    return 1;
 	}
     }//end ByteVariable
     
@@ -98,6 +107,10 @@ public abstract class MemoryWindow {
 	@Override
 	public ByteBuffer get(int objectIndex) {
 	    return null;//unimplemented
+	}
+	@Override
+	protected int getSizeInBytes() {
+	    return arrayLen;
 	}
     }//end Double2FloatArrayVariable
     
@@ -118,6 +131,10 @@ public abstract class MemoryWindow {
 		result[i]=getParent().getBuffer().getFloat(i*4+byteOffset()+objectIndex*getParent().getObjectSizeInBytes());
 	    }
 	    return result;
+	}
+	@Override
+	protected int getSizeInBytes() {
+	    return arrayLen*4;
 	}
     }//end Double2FloatArrayVariable
     

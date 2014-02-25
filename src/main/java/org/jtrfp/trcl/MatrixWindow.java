@@ -25,7 +25,6 @@ public final class MatrixWindow extends MemoryWindow{
     	public final Double2FloatArrayVariable matrix = new Double2FloatArrayVariable(16);
     	
 	public MatrixWindow() {
-	super(BYTES_PER_MATRIX);
 	init();
 	}
 	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(MatrixWindow.class);}

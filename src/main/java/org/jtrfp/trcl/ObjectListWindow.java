@@ -26,12 +26,11 @@ public class ObjectListWindow extends MemoryWindow {/* TODO: Must be able to
 						     Currently assumes
 						     monolithic allocation.*/
     public ObjectListWindow() {
-	super(OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES);
 	init();
     }//end constructor
     
     public final ByteArrayVariable opaqueIDs = new ByteArrayVariable(OBJECT_LIST_SIZE_BYTES_PER_PASS);
-    public final ByteArrayVariable blendIDs = new ByteArrayVariable(OBJECT_LIST_SIZE_BYTES_PER_PASS).byteOffset(OBJECT_LIST_SIZE_BYTES_PER_PASS);
+    public final ByteArrayVariable blendIDs = new ByteArrayVariable(OBJECT_LIST_SIZE_BYTES_PER_PASS);
     
     public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = RenderList.NUM_BLOCKS_PER_PASS * 4;
     static {

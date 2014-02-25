@@ -21,6 +21,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public class GPUTriangleVertex implements GPUVec4Element
 	{
@@ -35,6 +36,9 @@ public class GPUTriangleVertex implements GPUVec4Element
 	
 	public static void finalizeAllocation(TR tr){
 		int bytesToAllocate = numVertices.get()*GPUTriangleVertex.BYTES_PER_VERTEX;
+		tr.getTriangleVertexWindow().setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
+			.getLogicalMemory(), GlobalDynamicTextureBuffer
+			.requestAllocation(bytesToAllocate)));
 		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
 		System.out.println("Triangle Vertices: Allocating "+bytesToAllocate+" bytes of GPU resident RAM, starting at offset "+arrayOffset.get());
 		tr.getReporter().report("org.jtrfp.trcl.GPUTriangleVertex.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
@@ -45,10 +49,7 @@ public class GPUTriangleVertex implements GPUVec4Element
 		if(finalized)throw new RuntimeException("Can't create a vertex block after their allocation has already been finalized.");
 		GPUTriangleVertex.numVertices.getAndAdd(numVertices);
 		final TriangleVertexWindow tvw = tr.getTriangleVertexWindow();
-		tvw.setArrayOffset(arrayOffset);
-		return tr.
-			getTriangleVertexWindow().
-			createTriangleVertices(numVertices);
+		return tvw.createTriangleVertices(numVertices);
 		}
 
 	@Override

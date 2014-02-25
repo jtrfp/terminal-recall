@@ -113,6 +113,29 @@ public abstract class MemoryWindow {
 	    return 1;
 	}
     }// end ByteVariable
+    
+    public static final class ShortVariable extends Variable<Short, ShortVariable> {
+
+	@Override
+	public ShortVariable set(int objectIndex, Short value) {
+	    getParent().getBuffer().putShort(
+		    byteOffset() + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
+
+	@Override
+	public Short get(int objectIndex) {
+	    return getParent().getBuffer().getShort(
+		    byteOffset() + objectIndex
+			    * getParent().getObjectSizeInBytes());
+	}
+
+	@Override
+	protected int getSizeInBytes() {
+	    return 2;
+	}
+    }// end ShortVariable
 
     public static final class ByteArrayVariable extends
 	    Variable<ByteBuffer, ByteArrayVariable> {

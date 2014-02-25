@@ -221,7 +221,7 @@ public class WorldObject implements PositionedRenderable{
 	private void processPrimitiveList(PrimitiveList<?,?> primitiveList, ObjectDefinition [] objectDefinitions, ArrayList<Integer> indicesList){
 		if(primitiveList==null)return; //Nothing to do, no primitives here
 		int vec4Counter = primitiveList.getTotalSizeInVec4s();
-		int primitiveListByteAddress = primitiveList.getStartAddressInBytes();
+		int primitiveListByteAddress = primitiveList.getPhysicalStartAddressInBytes();
 		final int vec4sPerBlock = primitiveList.getPrimitiveSizeInVec4s()*(GPU_VERTICES_PER_BLOCK/primitiveList.getGPUVerticesPerPrimitive());
 		final int verticesPerVec4 = (int)((double)primitiveList.getGPUVerticesPerPrimitive()/(double)primitiveList.getPrimitiveSizeInVec4s());
 		//For each of the allocated-but-not-yet-initialized object definitions.

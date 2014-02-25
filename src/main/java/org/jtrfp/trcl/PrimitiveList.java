@@ -81,9 +81,9 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 	
 	public abstract void uploadToGPU(GL3 gl);
 	public abstract byte getPrimitiveRenderMode();
-	public int getStartAddressInBytes(){
+	public int getPhysicalStartAddressInBytes(){
 	    	if(vec4s==null){//New system
-	    	    return tr.getTriangleVertexWindow().getStartAddressInBytes(this.getGPUPrimitiveStartIndex());}
+	    	    return tr.getTriangleVertexWindow().getPhysicalAddressInBytes(this.getGPUPrimitiveStartIndex());}
 	    	//old system
 	    	return vec4s[0].getAddressInBytes();}
 	

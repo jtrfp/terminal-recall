@@ -147,6 +147,7 @@ public final class TR
 			//frame.pack();
 			}});
 		}catch(Exception e){e.printStackTrace();}
+		threadManager = new ThreadManager(this);
 		gpu.takeGL();
 		renderer=new Renderer(gpu);
 		gpu.releaseGL();
@@ -157,7 +158,6 @@ public final class TR
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		getRenderer().setRootGrid(world);
-		threadManager = new ThreadManager(this);
 		}//end constructor
 	
 	public void showStopper(final Exception e)

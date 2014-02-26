@@ -28,7 +28,6 @@ import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -89,24 +88,16 @@ public class RenderList{
 		renderModeUniform=prg.getUniform("renderFlags");
 		renderListPageTable=prg.getUniform("renderListPageTable");
 		hostRenderListPageTable=new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES/PagedByteBuffer.PAGE_SIZE_BYTES];
-		
-		tr.getGPU().addGLEventListener(new GLEventListener(){
+		tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable(){
 		    @Override
-		    public void init(GLAutoDrawable drawable) {
+		    public void run() {
 			System.out.println("hostRenderListPageTable length="+hostRenderListPageTable.length);
 			for(int i=0; i<hostRenderListPageTable.length;i++){
 			    hostRenderListPageTable[i]=RenderList.this.tr.getObjectListWindow().logicalPage2PhysicalPage(i);
 			}//end for(hostRenderListPageTable.length)
 			renderListPageTable.setArrayui(hostRenderListPageTable);
 			modulusUintOffset = (RenderList.this.tr.getObjectListWindow().getPhysicalAddressInBytes(0)%PagedByteBuffer.PAGE_SIZE_BYTES)/4;
-		    }
-		    @Override
-		    public void dispose(GLAutoDrawable drawable) {}
-		    @Override
-		    public void display(GLAutoDrawable drawable) {}
-		    @Override
-		    public void reshape(GLAutoDrawable drawable, int x, int y,
-			    int width, int height) {}});
+		    }});
 	    }
 	private static int frameCounter=0;
 	

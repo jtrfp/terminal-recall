@@ -625,7 +625,7 @@ public class ResourceManager{
 	}//end getFontBIN(...)
 
 	public NDXFile getNDXFile(String resString) {
-	    try{return new NDXFile(getInputStreamFromResource(resString));}
+	    try{return new NDXFile().read(getInputStreamFromResource(resString));}
 	    catch(Exception e){e.printStackTrace();return null;}
 	}
 

@@ -27,7 +27,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.ObjectDefinition;
+import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
@@ -53,9 +53,9 @@ public class WorldObject implements PositionedRenderable {
     private boolean 			visible = true;
     private Model 			model;
     private ArrayList<PositionListener> positionListeners = new ArrayList<PositionListener>();
-    private ObjectDefinition[] 		triangleObjectDefinitions;
-    private ObjectDefinition[] 		lineSegmentObjectDefinitions;
-    private ObjectDefinition[] 		transparentTriangleObjectDefinitions;
+    private ObjectDefinitionWindow[] 		triangleObjectDefinitions;
+    private ObjectDefinitionWindow[] 		lineSegmentObjectDefinitions;
+    private ObjectDefinitionWindow[] 		transparentTriangleObjectDefinitions;
     protected final int 		matrixID;
     private ByteBuffer 			opaqueObjectDefinitionAddressesInVec4 = 
 	    ByteBuffer.allocate(0);// defaults to empty
@@ -185,40 +185,40 @@ public class WorldObject implements PositionedRenderable {
 	model = m;
 	int numObjDefs, sizeInVerts;
 	if (m.getLineSegmentList() == null)
-	    lineSegmentObjectDefinitions = new ObjectDefinition[0];
+	    lineSegmentObjectDefinitions = new ObjectDefinitionWindow[0];
 	else {
 	    sizeInVerts = m.getLineSegmentList().getTotalSizeInGPUVertices();
 	    numObjDefs = sizeInVerts / GPU_VERTICES_PER_BLOCK;
 	    if (sizeInVerts % GPU_VERTICES_PER_BLOCK != 0)
 		numObjDefs++;
-	    lineSegmentObjectDefinitions = new ObjectDefinition[numObjDefs];
+	    lineSegmentObjectDefinitions = new ObjectDefinitionWindow[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
-		lineSegmentObjectDefinitions[i] = ObjectDefinition.create();
+		lineSegmentObjectDefinitions[i] = ObjectDefinitionWindow.create();
 	    }
 	}
 	if (m.getTriangleList() == null)
-	    triangleObjectDefinitions = new ObjectDefinition[0];
+	    triangleObjectDefinitions = new ObjectDefinitionWindow[0];
 	else {
 	    sizeInVerts = m.getTriangleList().getTotalSizeInGPUVertices();
 	    numObjDefs = sizeInVerts / GPU_VERTICES_PER_BLOCK;
 	    if (sizeInVerts % GPU_VERTICES_PER_BLOCK != 0)
 		numObjDefs++;
-	    triangleObjectDefinitions = new ObjectDefinition[numObjDefs];
+	    triangleObjectDefinitions = new ObjectDefinitionWindow[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
-		triangleObjectDefinitions[i] = ObjectDefinition.create();
+		triangleObjectDefinitions[i] = ObjectDefinitionWindow.create();
 	    }
 	}
 	if (m.getTransparentTriangleList() == null)
-	    transparentTriangleObjectDefinitions = new ObjectDefinition[0];
+	    transparentTriangleObjectDefinitions = new ObjectDefinitionWindow[0];
 	else {
 	    sizeInVerts = m.getTransparentTriangleList()
 		    .getTotalSizeInGPUVertices();
 	    numObjDefs = sizeInVerts / GPU_VERTICES_PER_BLOCK;
 	    if (sizeInVerts % GPU_VERTICES_PER_BLOCK != 0)
 		numObjDefs++;
-	    transparentTriangleObjectDefinitions = new ObjectDefinition[numObjDefs];
+	    transparentTriangleObjectDefinitions = new ObjectDefinitionWindow[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
-		transparentTriangleObjectDefinitions[i] = ObjectDefinition
+		transparentTriangleObjectDefinitions[i] = ObjectDefinitionWindow
 			.create();
 	    }
 	}
@@ -275,7 +275,7 @@ public class WorldObject implements PositionedRenderable {
     }// end initializeObjectDefinitions()
 
     private void processPrimitiveList(PrimitiveList<?> primitiveList,
-	    ObjectDefinition[] objectDefinitions, ArrayList<Integer> indicesList) {
+	    ObjectDefinitionWindow[] objectDefinitions, ArrayList<Integer> indicesList) {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	int vec4Counter = primitiveList.getTotalSizeInVec4s();
@@ -288,7 +288,7 @@ public class WorldObject implements PositionedRenderable {
 		.getGPUVerticesPerPrimitive() / (double) primitiveList
 		.getPrimitiveSizeInVec4s());
 	// For each of the allocated-but-not-yet-initialized object definitions.
-	for (final ObjectDefinition ob : objectDefinitions) {
+	for (final ObjectDefinitionWindow ob : objectDefinitions) {
 	    ob.matrixOffset.set(tr.getMatrixWindow().getPhysicalAddressInBytes(
 		    matrixID)
 		    / GLTextureBuffer.BYTES_PER_VEC4);

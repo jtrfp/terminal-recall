@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 
-public final class ObjectDefinition
+public final class ObjectDefinitionWindow
 	{
 	public static final int BYTES_PER_OBJECT_BLOCK = 16; // One vec4 is 16bytes
 	private static final AtomicInteger objectBlockCount = new AtomicInteger();
@@ -34,10 +34,10 @@ public final class ObjectDefinition
 	
 	private final int byteOffset;
 	
-	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(ObjectDefinition.class);}
+	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(ObjectDefinitionWindow.class);}
 	
-	public static ObjectDefinition create()
-		{return new ObjectDefinition();}
+	public static ObjectDefinitionWindow create()
+		{return new ObjectDefinitionWindow();}
 	
 	public static void finalizeAllocation(TR tr)
 		{
@@ -47,7 +47,7 @@ public final class ObjectDefinition
 		tr.getReporter().report("org.jtrfp.trcl.ObjectDefinition.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
 		}
 	
-	private ObjectDefinition()
+	private ObjectDefinitionWindow()
 		{
 		byteOffset= objectBlockCount.getAndIncrement()*BYTES_PER_OBJECT_BLOCK;
 		matrixOffset=ElementAttrib.create(arrayOffset, byteOffset+0, Integer.class);

@@ -15,51 +15,42 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
+import org.jtrfp.trcl.mem.MemoryWindow;
+import org.jtrfp.trcl.mem.SubByteBuffer;
 
-public final class ObjectDefinitionWindow
-	{
-	public static final int BYTES_PER_OBJECT_BLOCK = 16; // One vec4 is 16bytes
-	private static final AtomicInteger objectBlockCount = new AtomicInteger();
-	private static final IndirectObject<Integer> arrayOffset = new IndirectObject<Integer>();
-	
-	public final ElementAttrib<Integer>matrixOffset;
-	public final ElementAttrib<Integer>vertexOffset;
-	public final ElementAttrib<Byte>numVertices;
-	public final ElementAttrib<Byte>mode;
-	public final ElementAttrib<Byte>modelScale;
-	
-	private final int byteOffset;
-	
-	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(ObjectDefinitionWindow.class);}
-	
-	public static ObjectDefinitionWindow create()
-		{return new ObjectDefinitionWindow();}
-	
-	public static void finalizeAllocation(TR tr)
-		{
-		int bytesToAllocate=objectBlockCount.getAndIncrement()*BYTES_PER_OBJECT_BLOCK;
-		System.out.println("Object Definitions: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
-		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
-		tr.getReporter().report("org.jtrfp.trcl.ObjectDefinition.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
-		}
-	
-	private ObjectDefinitionWindow()
-		{
-		byteOffset= objectBlockCount.getAndIncrement()*BYTES_PER_OBJECT_BLOCK;
-		matrixOffset=ElementAttrib.create(arrayOffset, byteOffset+0, Integer.class);
-		vertexOffset=ElementAttrib.create(arrayOffset, byteOffset+4, Integer.class);
-		numVertices=ElementAttrib.create(arrayOffset, byteOffset+8, Byte.class);
-		mode=ElementAttrib.create(arrayOffset, byteOffset+9, Byte.class);
-		modelScale=ElementAttrib.create(arrayOffset, byteOffset+10, Byte.class);
-		}
-	
-	public int getByteOffset()
-		{return byteOffset;}
-	
-	public int getAddressInBytes()
-		{return byteOffset+arrayOffset.get();}
-	}//end ObjectBlock
+public final class ObjectDefinitionWindow extends MemoryWindow {
+    public static final int BYTES_PER_OBJECT_BLOCK = 16; // One vec4 is 16bytes
+
+    public final IntVariable 	matrixOffset 	= new IntVariable();// 0
+    public final IntVariable 	vertexOffset 	= new IntVariable();// 4
+    public final ByteVariable 	numVertices 	= new ByteVariable();// 8
+    public final ByteVariable 	mode 		= new ByteVariable();// 9
+    public final ByteVariable 	modelScale 	= new ByteVariable();// 10
+    // 11, 12, 13, 14, 15
+    public final IntVariable 	unused11 	= new IntVariable();// 11
+    public final ByteVariable 	unused15 	= new ByteVariable();// 15
+
+    static {
+	GlobalDynamicTextureBuffer
+		.addAllocationToFinalize(ObjectDefinitionWindow.class);
+    }
+
+    public static void finalizeAllocation(TR tr) {
+	final ObjectDefinitionWindow window = tr.getObjectDefinitionWindow();
+	final int bytesToAllocate = window.getNumObjects() * BYTES_PER_OBJECT_BLOCK;
+	System.out.println("Object Definitions: Allocating " + bytesToAllocate
+		+ " bytes of GPU resident RAM.");
+	window.setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
+		.getLogicalMemory(), GlobalDynamicTextureBuffer
+		.requestAllocation(bytesToAllocate)));
+	tr.getReporter().report(
+		"org.jtrfp.trcl.ObjectDefinition.arrayOffsetBytes",
+		String.format("%08X", window.getPhysicalAddressInBytes(0)));
+    }//end finalizeAllocation()
+
+    public ObjectDefinitionWindow() {
+	init();
+    }//end constructor
+}// end ObjectBlock

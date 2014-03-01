@@ -42,6 +42,7 @@ import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.LineSegmentWindow;
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.NAVSystem;
+import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
@@ -90,6 +91,7 @@ public final class TR
 	private final TriangleVertexWindow triangleVertexWindow = new TriangleVertexWindow();
 	private final TriangleVertex2FlatDoubleWindow tv2fdWindow = new TriangleVertex2FlatDoubleWindow(triangleVertexWindow);
 	private final LineSegmentWindow lsWindow = new LineSegmentWindow();
+	private final ObjectDefinitionWindow odWindow = new ObjectDefinitionWindow();
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -496,5 +498,12 @@ public final class TR
 	 */
 	public LineSegmentWindow getLineSegmentWindow() {
 	    return lsWindow;
+	}
+
+	/**
+	 * @return the odWindow
+	 */
+	public ObjectDefinitionWindow getObjectDefinitionWindow() {
+	    return odWindow;
 	}
 }//end TR

@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
@@ -27,9 +25,7 @@ public class GPUTriangleVertex{
     // 16 bytes in a vec4, 1 vec4 per Vertex
     public static final int BYTES_PER_VERTEX = GLTextureBuffer.BYTES_PER_VEC4;
     public static final int VERTICES_PER_BLOCK = 96;
-
-    private static final IndirectObject<Integer> arrayOffset = new IndirectObject<Integer>();
-    private static final AtomicInteger numVertices = new AtomicInteger();
+    
     private static boolean finalized = false;
 
     static {
@@ -38,21 +34,20 @@ public class GPUTriangleVertex{
     }
 
     public static void finalizeAllocation(TR tr) {
-	int bytesToAllocate = numVertices.get()
+	final TriangleVertexWindow window = tr.getTriangleVertexWindow();
+	int bytesToAllocate = window.getNumObjects()
 		* GPUTriangleVertex.BYTES_PER_VERTEX;
-	tr.getTriangleVertexWindow().setBuffer(
+	window.setBuffer(
 		new SubByteBuffer(
 			GlobalDynamicTextureBuffer.getLogicalMemory(),
 			GlobalDynamicTextureBuffer
 				.requestAllocation(bytesToAllocate)));
-	arrayOffset.set(GlobalDynamicTextureBuffer
-		.requestAllocation(bytesToAllocate));// TODO: Remove this?
 	System.out.println("Triangle Vertices: Allocating " + bytesToAllocate
-		+ " bytes of GPU resident RAM, starting at offset "
-		+ arrayOffset.get());
+		+ " bytes of GPU resident RAM, starting at physical offset "
+		+ window.getPhysicalAddressInBytes(0));
 	tr.getReporter().report(
 		"org.jtrfp.trcl.GPUTriangleVertex.arrayOffsetBytes",
-		String.format("%08X", arrayOffset.get()));
+		String.format("%08X", window.getPhysicalAddressInBytes(0)));
 	finalized = true;
     }
 
@@ -63,7 +58,6 @@ public class GPUTriangleVertex{
 	if (finalized)
 	    throw new RuntimeException(
 		    "Can't create a vertex block after their allocation has already been finalized.");
-	GPUTriangleVertex.numVertices.getAndAdd(numVertices);
 	final TriangleVertexWindow tvw = tr.getTriangleVertexWindow();
 	return tvw.createTriangleVertices(numVertices);
     }

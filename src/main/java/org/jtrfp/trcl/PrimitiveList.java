@@ -83,9 +83,15 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE,GPU_VEC4_TYPE extends GPUVec4
 	public abstract byte getPrimitiveRenderMode();
 	public int getPhysicalStartAddressInBytes(){
 	    	if(vec4s==null){//New system
-	    	    return tr.getTriangleVertexWindow().getPhysicalAddressInBytes(this.getGPUPrimitiveStartIndex());}
+	    	    if(this instanceof TriangleList)
+	    		return tr.getTriangleVertexWindow().getPhysicalAddressInBytes(this.getGPUPrimitiveStartIndex());
+	    	    else if(this instanceof LineSegmentList)
+	    		return tr.getLineSegmentWindow().getPhysicalAddressInBytes(this.getGPUPrimitiveStartIndex());
+	    	    else{throw new RuntimeException("Unrecognized self: "+this.getClass().getName());}}
 	    	//old system
-	    	return vec4s[0].getAddressInBytes();}
+	    	//return vec4s[0].getAddressInBytes();}
+	    	throw new RuntimeException("Nobody should be using the vec4s variable anymore!");
+	    	}
 	
 	/**
 	 * @return the vec4s

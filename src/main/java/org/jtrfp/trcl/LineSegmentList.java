@@ -19,79 +19,75 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TR;
 
-public class LineSegmentList extends PrimitiveList<LineSegment,GPULineSegment>
-	{//NOTE: ANIMATION NOT SUPPORTED
-	private final LineSegment [][]lineSegments;
-	
-	public LineSegmentList(LineSegment [][] lineSegments, String debugName,TR tr)
-		{
-		super(debugName, lineSegments, GPULineSegment.createLineSegmentBlock(lineSegments[0].length),tr);
-		this.lineSegments=lineSegments;
-		}
+public class LineSegmentList extends
+	PrimitiveList<LineSegment, LineSegmentWindow> {// NOTE: ANIMATION NOT
+						       // SUPPORTED
+    private final LineSegment[][] lineSegments;
 
-	@Override
-	public void uploadToGPU(GL3 gl)
-		{
-		int sIndex=0;
-		LineSegment []frame = lineSegments[0];
-		for(LineSegment ls:frame)
-			{
-			int i=0;
-			GPULineSegment gls = getVec4s()[sIndex++];
-			
-			//P1
-			gls.x1.set((short)applyScale(Math.round(ls.getX()[i])));
-			gls.y1.set((short)applyScale(Math.round(ls.getY()[i])));
-			gls.z1.set((short)applyScale(Math.round(ls.getZ()[i])));
-			//P2
-			i++;
-			gls.x2.set((short)applyScale(Math.round(ls.getX()[i])));
-			gls.y2.set((short)applyScale(Math.round(ls.getY()[i])));
-			gls.z2.set((short)applyScale(Math.round(ls.getZ()[i])));
-			//RGB
-			gls.red.set((byte)ls.getColor().getRed());
-			gls.green.set((byte)ls.getColor().getGreen());
-			gls.blue.set((byte)ls.getColor().getBlue());
-			//THICKNESS
-			gls.thickness.set((byte)Math.round(ls.getThickness())&0xFF);
-			}//end for(lineSegments)
-		}//end uploadToGPU
+    public LineSegmentList(LineSegment[][] lineSegments, String debugName, TR tr) {
+	super(debugName, lineSegments, LineSegmentWindow
+		.createLineSegments(tr,lineSegments[0].length), tr);
+	this.lineSegments = lineSegments;
+    }
 
-	@Override
-	public int getPrimitiveSizeInVec4s()
-		{
-		return 1;
-		}
+    @Override
+    public void uploadToGPU(GL3 gl) {
+	int sIndex = 0;
+	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
+	LineSegment[] frame = lineSegments[0];
+	for (LineSegment ls : frame) {
+	    final int overlayIndex=sIndex+this.getGPUPrimitiveStartIndex();
+	    // P1
+	    lsw.x1.set(overlayIndex,(short) applyScale(Math.round(ls.getX()[0])));
+	    lsw.y1.set(overlayIndex,(short) applyScale(Math.round(ls.getY()[0])));
+	    lsw.z1.set(overlayIndex,(short) applyScale(Math.round(ls.getZ()[0])));
+	    // P2
+	    lsw.x2.set(overlayIndex,(short) applyScale(Math.round(ls.getX()[1])));
+	    lsw.y2.set(overlayIndex,(short) applyScale(Math.round(ls.getY()[1])));
+	    lsw.z2.set(overlayIndex,(short) applyScale(Math.round(ls.getZ()[1])));
+	    // RGB
+	    lsw.red.set(overlayIndex,(byte) ls.getColor().getRed());
+	    lsw.green.set(overlayIndex,(byte) ls.getColor().getGreen());
+	    lsw.blue.set(overlayIndex,(byte) ls.getColor().getBlue());
+	    // THICKNESS
+	    lsw.thickness.set(overlayIndex,(byte)((byte)Math.round(ls.getThickness()) & 0xFF));
+	    
+	    sIndex++;
+	}// end for(lineSegments)
+    }// end uploadToGPU
 
-	@Override
-	public int getGPUVerticesPerPrimitive()
-		{
-		return 6;
-		}
-	@Override
-	public byte getPrimitiveRenderMode()
-		{return PrimitiveRenderMode.RENDER_MODE_LINES;}
+    @Override
+    public int getPrimitiveSizeInVec4s() {
+	return 1;
+    }
 
-	@Override
-	public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle()
-		{return RenderStyle.TRANSPARENT;}
-	
-	public double getMaximumVertexValue()
-		{
-		double result=0;
-		LineSegment [][]t=getPrimitives();
-		for(LineSegment [] frame:t)
-			{
-			for(LineSegment ls:frame)
-				{
-				for(int i=0; i<2; i++)
-					{
-					double v;
-					v=Math.abs(ls.getX()[i]);
-					result=result<v?v:result;
-					}//end for(vertex)
-				}//end for(triangle)
-			}//end for(triangles)
-		return result;
-		}//end getMaximumVertexValue()
-	}//end LineSegmentList
+    @Override
+    public int getGPUVerticesPerPrimitive() {
+	return 6;
+    }
+
+    @Override
+    public byte getPrimitiveRenderMode() {
+	return PrimitiveRenderMode.RENDER_MODE_LINES;
+    }
+
+    @Override
+    public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle() {
+	return RenderStyle.TRANSPARENT;
+    }
+
+    public double getMaximumVertexValue() {
+	double result = 0;
+	LineSegment[][] t = getPrimitives();
+	for (LineSegment[] frame : t) {
+	    for (LineSegment ls : frame) {
+		for (int i = 0; i < 2; i++) {
+		    double v;
+		    v = Math.abs(ls.getX()[i]);
+		    result = result < v ? v : result;
+		}// end for(vertex)
+	    }// end for(triangle)
+	}// end for(triangles)
+	return result;
+    }// end getMaximumVertexValue()
+}// end LineSegmentList

@@ -39,12 +39,14 @@ public class GPUTriangleVertex implements GPUVec4Element
 		tr.getTriangleVertexWindow().setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
 			.getLogicalMemory(), GlobalDynamicTextureBuffer
 			.requestAllocation(bytesToAllocate)));
-		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
+		arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));//TODO: Remove this?
 		System.out.println("Triangle Vertices: Allocating "+bytesToAllocate+" bytes of GPU resident RAM, starting at offset "+arrayOffset.get());
 		tr.getReporter().report("org.jtrfp.trcl.GPUTriangleVertex.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
 		finalized=true;
 		}
 	
+	//TODO: Return a TriangleVertexWindow using a SubByteBuffer (later a PagedByteBuffer)
+	//TODO: Convert to a straight page-sized block, return a window.
 	public static int createVertexBlock(int numVertices, TR tr){
 		if(finalized)throw new RuntimeException("Can't create a vertex block after their allocation has already been finalized.");
 		GPUTriangleVertex.numVertices.getAndAdd(numVertices);
@@ -54,7 +56,7 @@ public class GPUTriangleVertex implements GPUVec4Element
 
 	@Override
 	public int getAddressInBytes() {
-	    return 0;
+	    throw new RuntimeException("Not implemented..");
 	}
 	
 	/*private GPUTriangleVertex(int byteOffset){

@@ -36,12 +36,13 @@ import javax.swing.SwingUtilities;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
-import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
+import org.jtrfp.trcl.LineSegmentWindow;
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.NAVSystem;
+import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
@@ -88,6 +89,7 @@ public final class TR
 	private final ObjectListWindow objectListWindow = new ObjectListWindow();
 	private final TriangleVertexWindow triangleVertexWindow = new TriangleVertexWindow();
 	private final TriangleVertex2FlatDoubleWindow tv2fdWindow = new TriangleVertex2FlatDoubleWindow(triangleVertexWindow);
+	private final LineSegmentWindow lsWindow = new LineSegmentWindow();
 	/*
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
 			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
@@ -487,5 +489,12 @@ public final class TR
 	 */
 	public ObjectListWindow getObjectListWindow() {
 	    return objectListWindow;
+	}
+
+	/**
+	 * @return the lsWindow
+	 */
+	public LineSegmentWindow getLineSegmentWindow() {
+	    return lsWindow;
 	}
 }//end TR

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import org.jtrfp.trcl.PrimitiveList.RenderStyle;
 import org.jtrfp.trcl.core.TR;
 
 

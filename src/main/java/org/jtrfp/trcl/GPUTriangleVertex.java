@@ -23,7 +23,7 @@ import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.SubByteBuffer;
 
-public class GPUTriangleVertex implements GPUVec4Element {
+public class GPUTriangleVertex{
     // 16 bytes in a vec4, 1 vec4 per Vertex
     public static final int BYTES_PER_VERTEX = GLTextureBuffer.BYTES_PER_VEC4;
     public static final int VERTICES_PER_BLOCK = 96;
@@ -66,10 +66,5 @@ public class GPUTriangleVertex implements GPUVec4Element {
 	GPUTriangleVertex.numVertices.getAndAdd(numVertices);
 	final TriangleVertexWindow tvw = tr.getTriangleVertexWindow();
 	return tvw.createTriangleVertices(numVertices);
-    }
-
-    @Override
-    public int getAddressInBytes() {
-	throw new RuntimeException("Not implemented..");
     }
 }// end Vertex

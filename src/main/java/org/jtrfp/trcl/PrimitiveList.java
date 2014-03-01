@@ -23,14 +23,13 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TR;
 
-public abstract class PrimitiveList<PRIMITIVE_TYPE, GPU_VEC4_TYPE extends GPUVec4Element> {
-    private static final List<PrimitiveList<?, ?>> allLists = Collections
-	    .synchronizedList(new ArrayList<PrimitiveList<?, ?>>());
+public abstract class PrimitiveList<PRIMITIVE_TYPE> {
+    private static final List<PrimitiveList<?>> allLists = Collections
+	    .synchronizedList(new ArrayList<PrimitiveList<?>>());
     
     protected static final double coordDownScaler = 512;
     protected static final double uvUpScaler = 4096;
     private final PRIMITIVE_TYPE[][] primitives;
-    private GPU_VEC4_TYPE[] vec4s;
 
     public static enum RenderStyle {
 	OPAQUE, TRANSPARENT
@@ -43,14 +42,6 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE, GPU_VEC4_TYPE extends GPUVec
     protected 		int 	packedScale;
     protected final 	int 	gpuPrimitiveStartIndex;
     protected final 	TR 	tr;
-
-    protected PrimitiveList(String debugName, PRIMITIVE_TYPE[][] primitives,
-	    GPU_VEC4_TYPE[] vec4s, TR tr) {
-	this(debugName, primitives, 0, tr);
-	if (vec4s.length == 0)
-	    throw new RuntimeException("Cannot accept empty vec4 array.");
-	this.vec4s = vec4s;
-    }
 
     public PrimitiveList(String debugName, PRIMITIVE_TYPE[][] primitives,
 	    int gpuPrimitiveStartIndex, TR tr) {
@@ -80,7 +71,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE, GPU_VEC4_TYPE extends GPUVec
 	allLists.add(l);
     }
 
-    protected static List<PrimitiveList<?, ?>> getAllArrayLists() {
+    protected static List<PrimitiveList<?>> getAllArrayLists() {
 	return allLists;
     }
 
@@ -114,7 +105,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE, GPU_VEC4_TYPE extends GPUVec
     }
 
     public static void uploadAllListsToGPU(GL3 gl) {
-	for (PrimitiveList<?, ?> l : allLists) {
+	for (PrimitiveList<?> l : allLists) {
 	    l.uploadToGPU(gl);
 	}
     }// end uploadAllListsToGPU
@@ -124,7 +115,6 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE, GPU_VEC4_TYPE extends GPUVec
     public abstract byte getPrimitiveRenderMode();
 
     public int getPhysicalStartAddressInBytes() {
-	if (vec4s == null) {// New system
 	    if (this instanceof TriangleList)
 		return tr.getTriangleVertexWindow().getPhysicalAddressInBytes(
 			this.getGPUPrimitiveStartIndex());
@@ -135,17 +125,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE, GPU_VEC4_TYPE extends GPUVec
 		throw new RuntimeException("Unrecognized self: "
 			+ this.getClass().getName());
 	    }
-	}
-	throw new RuntimeException(
-		"Nobody should be using the vec4s variable anymore!");
-    }
-
-    /**
-     * @return the vec4s
-     */
-    protected GPU_VEC4_TYPE[] getVec4s() {
-	return vec4s;
-    }
+    }//end getPhysicalAddressInBytes
 
     public static void tickAnimators() {
 	for (Tickable ani : animators) {

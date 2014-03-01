@@ -21,7 +21,7 @@ import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.mem.SubByteBuffer;
 
-public class LineSegmentWindow extends MemoryWindow implements GPUVec4Element {
+public class LineSegmentWindow extends MemoryWindow{
     // 16 bytes in a vec4, 1 vec4 per LineSegment
     public static final int BYTES_PER_SEGMENT = GLTextureBuffer.BYTES_PER_VEC4;
     public static final int SEGMENTS_PER_BLOCK = 96 / 6;
@@ -70,9 +70,4 @@ public class LineSegmentWindow extends MemoryWindow implements GPUVec4Element {
 	}
 	return startIndex;
     }
-
-    @Override
-    public int getAddressInBytes() {
-	throw new RuntimeException("Unimplemented.");
-    }// end getAddressInBytes()
 }// end LineSegment

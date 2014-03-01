@@ -218,7 +218,7 @@ public class WorldObject implements PositionedRenderable{
 			{opaque.put(elm);}
 		}//end initializeObjectDefinitions()
 	
-	private void processPrimitiveList(PrimitiveList<?,?> primitiveList, ObjectDefinition [] objectDefinitions, ArrayList<Integer> indicesList){
+	private void processPrimitiveList(PrimitiveList<?> primitiveList, ObjectDefinition [] objectDefinitions, ArrayList<Integer> indicesList){
 		if(primitiveList==null)return; //Nothing to do, no primitives here
 		int vec4Counter = primitiveList.getTotalSizeInVec4s();
 		int primitiveListByteAddress = primitiveList.getPhysicalStartAddressInBytes();

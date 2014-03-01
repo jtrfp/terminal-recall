@@ -20,7 +20,7 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.core.TR;
 
 public class LineSegmentList extends
-	PrimitiveList<LineSegment, LineSegmentWindow> {// NOTE: ANIMATION NOT
+	PrimitiveList<LineSegment> {// NOTE: ANIMATION NOT
 						       // SUPPORTED
     private final LineSegment[][] lineSegments;
 

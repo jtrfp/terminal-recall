@@ -25,7 +25,7 @@ import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
 
-public class TriangleList extends PrimitiveList<Triangle,GPUTriangleVertex>{
+public class TriangleList extends PrimitiveList<Triangle>{
 	private Controller controller;
 	private int timeBetweenFramesMsec;
 	private final boolean animateUV;

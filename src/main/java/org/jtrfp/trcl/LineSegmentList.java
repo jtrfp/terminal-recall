@@ -25,8 +25,8 @@ public class LineSegmentList extends
     private final LineSegment[][] lineSegments;
 
     public LineSegmentList(LineSegment[][] lineSegments, String debugName, TR tr) {
-	super(debugName, lineSegments, LineSegmentWindow
-		.createLineSegments(tr,lineSegments[0].length), tr);
+	super(debugName, lineSegments, LineSegmentWindow.createLineSegments(tr,
+		lineSegments[0].length), tr);
 	this.lineSegments = lineSegments;
     }
 
@@ -36,22 +36,28 @@ public class LineSegmentList extends
 	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
 	LineSegment[] frame = lineSegments[0];
 	for (LineSegment ls : frame) {
-	    final int overlayIndex=sIndex+this.getGPUPrimitiveStartIndex();
+	    final int overlayIndex = sIndex + this.getGPUPrimitiveStartIndex();
 	    // P1
-	    lsw.x1.set(overlayIndex,(short) applyScale(Math.round(ls.getX()[0])));
-	    lsw.y1.set(overlayIndex,(short) applyScale(Math.round(ls.getY()[0])));
-	    lsw.z1.set(overlayIndex,(short) applyScale(Math.round(ls.getZ()[0])));
+	    lsw.x1.set(overlayIndex,
+		    (short) applyScale(Math.round(ls.getX()[0])));
+	    lsw.y1.set(overlayIndex,
+		    (short) applyScale(Math.round(ls.getY()[0])));
+	    lsw.z1.set(overlayIndex,
+		    (short) applyScale(Math.round(ls.getZ()[0])));
 	    // P2
-	    lsw.x2.set(overlayIndex,(short) applyScale(Math.round(ls.getX()[1])));
-	    lsw.y2.set(overlayIndex,(short) applyScale(Math.round(ls.getY()[1])));
-	    lsw.z2.set(overlayIndex,(short) applyScale(Math.round(ls.getZ()[1])));
+	    lsw.x2.set(overlayIndex,
+		    (short) applyScale(Math.round(ls.getX()[1])));
+	    lsw.y2.set(overlayIndex,
+		    (short) applyScale(Math.round(ls.getY()[1])));
+	    lsw.z2.set(overlayIndex,
+		    (short) applyScale(Math.round(ls.getZ()[1])));
 	    // RGB
-	    lsw.red.set(overlayIndex,(byte) ls.getColor().getRed());
-	    lsw.green.set(overlayIndex,(byte) ls.getColor().getGreen());
-	    lsw.blue.set(overlayIndex,(byte) ls.getColor().getBlue());
+	    lsw.red.set(overlayIndex, (byte) ls.getColor().getRed());
+	    lsw.green.set(overlayIndex, (byte) ls.getColor().getGreen());
+	    lsw.blue.set(overlayIndex, (byte) ls.getColor().getBlue());
 	    // THICKNESS
-	    lsw.thickness.set(overlayIndex,(byte)((byte)Math.round(ls.getThickness()) & 0xFF));
-	    
+	    lsw.thickness.set(overlayIndex,
+		    (byte) ((byte) Math.round(ls.getThickness()) & 0xFF));
 	    sIndex++;
 	}// end for(lineSegments)
     }// end uploadToGPU

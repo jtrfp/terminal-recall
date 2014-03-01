@@ -113,8 +113,9 @@ public abstract class MemoryWindow {
 	    return 1;
 	}
     }// end ByteVariable
-    
-    public static final class ShortVariable extends Variable<Short, ShortVariable> {
+
+    public static final class ShortVariable extends
+	    Variable<Short, ShortVariable> {
 
 	@Override
 	public ShortVariable set(int objectIndex, Short value) {

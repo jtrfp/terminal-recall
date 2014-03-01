@@ -21,48 +21,58 @@ import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.mem.SubByteBuffer;
 
-public class LineSegmentWindow extends MemoryWindow implements GPUVec4Element{
-	public static final int BYTES_PER_SEGMENT=GLTextureBuffer.BYTES_PER_VEC4; //16 bytes in a vec4, 1 vec4 per LineSegment
-	public static final int SEGMENTS_PER_BLOCK=96/6;
-	
-	public final ShortVariable x1 = new ShortVariable();
-	public final ShortVariable y1 = new ShortVariable();
-	public final ShortVariable z1 = new ShortVariable();
-	
-	public final ShortVariable x2 = new ShortVariable();
-	public final ShortVariable y2 = new ShortVariable();
-	public final ShortVariable z2 = new ShortVariable();
-	
-	public final ByteVariable thickness = new ByteVariable();
-	
-	public final ByteVariable red = new ByteVariable();
-	public final ByteVariable green = new ByteVariable();
-	public final ByteVariable blue = new ByteVariable();
-	
-	public LineSegmentWindow(){init();}
-	
-	static {GlobalDynamicTextureBuffer.addAllocationToFinalize(LineSegmentWindow.class);}
-	
-	public static void finalizeAllocation(TR tr){
-	    	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
-		int bytesToAllocate = lsw.getNumObjects()*LineSegmentWindow.BYTES_PER_SEGMENT;
-		System.out.println("LineSegments: Allocating "+bytesToAllocate+" bytes of GPU resident RAM.");
-		tr.getLineSegmentWindow().setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
-			.getLogicalMemory(), GlobalDynamicTextureBuffer
-			.requestAllocation(bytesToAllocate)));
-		//arrayOffset.set(GlobalDynamicTextureBuffer.requestAllocation(bytesToAllocate));
-		//tr.getReporter().report("org.jtrfp.trcl.LineSegmentWindow.arrayOffsetBytes", String.format("%08X", arrayOffset.get()));
-		}
-	
-	public static int createLineSegments(TR tr, int numLineSegments){//TODO: Convert to a straight page-sized block, return a window.
-	    	final int startIndex=tr.getLineSegmentWindow().create();
-		for(int i=1; i<numLineSegments;i++)
-			{tr.getLineSegmentWindow().create();}
-		return startIndex;
-		}
+public class LineSegmentWindow extends MemoryWindow implements GPUVec4Element {
+    // 16 bytes in a vec4, 1 vec4 per LineSegment
+    public static final int BYTES_PER_SEGMENT = GLTextureBuffer.BYTES_PER_VEC4;
+    public static final int SEGMENTS_PER_BLOCK = 96 / 6;
 
-	@Override
-	public int getAddressInBytes() {
-	    throw new RuntimeException("Unimplemented.");
+    public final ShortVariable x1 = new ShortVariable();
+    public final ShortVariable y1 = new ShortVariable();
+    public final ShortVariable z1 = new ShortVariable();
+
+    public final ShortVariable x2 = new ShortVariable();
+    public final ShortVariable y2 = new ShortVariable();
+    public final ShortVariable z2 = new ShortVariable();
+
+    public final ByteVariable thickness = new ByteVariable();
+
+    public final ByteVariable red = new ByteVariable();
+    public final ByteVariable green = new ByteVariable();
+    public final ByteVariable blue = new ByteVariable();
+
+    public LineSegmentWindow() {
+	init();
+    }
+
+    static {
+	GlobalDynamicTextureBuffer
+		.addAllocationToFinalize(LineSegmentWindow.class);
+    }
+
+    public static void finalizeAllocation(TR tr) {
+	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
+	int bytesToAllocate = lsw.getNumObjects()
+		* LineSegmentWindow.BYTES_PER_SEGMENT;
+	System.out.println("LineSegments: Allocating " + bytesToAllocate
+		+ " bytes of GPU resident RAM.");
+	tr.getLineSegmentWindow().setBuffer(
+		new SubByteBuffer(
+			GlobalDynamicTextureBuffer.getLogicalMemory(),
+			GlobalDynamicTextureBuffer
+				.requestAllocation(bytesToAllocate)));
+    }
+
+    // TODO: Convert to a straight page-sized block, return a window.
+    public static int createLineSegments(TR tr, int numLineSegments) {
+	final int startIndex = tr.getLineSegmentWindow().create();
+	for (int i = 1; i < numLineSegments; i++) {
+	    tr.getLineSegmentWindow().create();
 	}
-	}//end LineSegment
+	return startIndex;
+    }
+
+    @Override
+    public int getAddressInBytes() {
+	throw new RuntimeException("Unimplemented.");
+    }// end getAddressInBytes()
+}// end LineSegment

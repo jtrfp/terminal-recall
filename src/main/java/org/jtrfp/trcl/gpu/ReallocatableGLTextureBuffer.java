@@ -73,8 +73,18 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 
     @Override
     public void reallocate(int sizeInBytes) {
+	ByteBuffer bb = buffer.getUnderlyingBuffer();
+	bb.clear();
+	bb.limit(Math.min(sizeInBytes,bb.capacity()));
+	ByteBuffer replacement = ByteBuffer.allocate(sizeInBytes);
+	replacement.put(bb);
+	replacement.rewind();
 	buffer.free(gpu.getGl());
 	buffer = new GLTextureBuffer(sizeInBytes, gpu);
+	bb = buffer.getUnderlyingBuffer();
+	bb.clear();
+	bb.put(replacement);
+	bb.clear();
     }
 
     @Override

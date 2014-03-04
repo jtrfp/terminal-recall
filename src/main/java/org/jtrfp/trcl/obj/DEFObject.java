@@ -449,23 +449,27 @@ private void fallingObjectBehavior(){
 }
 
 private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefinition def){
-    spinCrash=Math.random()<probability;//40%
+    spinCrash=Math.random()<probability;
     if(spinCrash){
     final DamageTrigger spinAndCrash = new DamageTrigger(){
 	@Override
 	public void healthBelowThreshold(){// Spinout and crash
 	    final WorldObject 	parent 	= getParent();
 	    final Behavior 	beh 	= parent.getBehavior();
-	    addBehavior(new PulledDownByGravityBehavior());
+	    addBehavior(new PulledDownByGravityBehavior().setEnable(true));
 	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
 	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
 	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
+	    if(def.getThrustSpeed()<800000){
+		beh.probeForBehavior(HasPropulsion.class).setPropulsion(0);
+		beh.probeForBehavior(VelocityDragBehavior.class).setEnable(false);
+		}
 	    //Catastrophy
 	    final double spinSpeedCoeff=Math.max(def.getThrustSpeed()!=0?def.getThrustSpeed()/1600000:.3,.4);
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009*spinSpeedCoeff));
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006*spinSpeedCoeff));
 	    addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007*spinSpeedCoeff));
-	    //TODO: Smoke, sparks, and other fun stuff.
+	    //TODO: Sparks, and other fun stuff.
 	    addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
 	    addBehavior(new SpawnsRandomSmoke(parent.getTr()));
 	}//end healthBelowThreshold

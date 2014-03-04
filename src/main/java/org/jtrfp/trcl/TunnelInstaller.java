@@ -25,8 +25,6 @@ public class TunnelInstaller{
 			for(TDFFile.Tunnel tun:tuns){
 			    	world.getTr().getReporter().report("org.jtrfp.trcl.TunnelInstaller.tunnel."+tIndex+".entrance", tun.getEntrance());
 			    	world.getTr().getReporter().report("org.jtrfp.trcl.TunnelInstaller.tunnel."+tIndex+".exit", tun.getExit());
-				world.getTr().getGPU().releaseGL();
-				gpu.takeGL();
 				mission.newTunnel(tun);
 				tIndex++;
 				}

@@ -22,6 +22,7 @@ import java.util.List;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.mem.MemoryWindow;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     private static final List<PrimitiveList<?>> allLists = Collections
@@ -37,16 +38,16 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 
     public static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
     
-    protected final 	String 	debugName;
-    protected 		double 	scale;
-    protected 		int 	packedScale;
-    protected final 	int 	gpuPrimitiveStartIndex;
-    protected final 	TR 	tr;
+    protected final 	String 		debugName;
+    protected 		double 		scale;
+    protected 		int 		packedScale;
+    protected final 	TR 		tr;
+    protected final 	MemoryWindow	window;
 
     public PrimitiveList(String debugName, PRIMITIVE_TYPE[][] primitives,
-	    int gpuPrimitiveStartIndex, TR tr) {
+	    MemoryWindow window, TR tr) {
 	this.tr = tr;
-	this.gpuPrimitiveStartIndex = gpuPrimitiveStartIndex;
+	this.window=window;
 	this.debugName = debugName;
 	this.primitives = primitives;
 	setScale((getMaximumVertexValue() / 2048.));
@@ -113,20 +114,15 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public abstract void uploadToGPU(GL3 gl);
 
     public abstract byte getPrimitiveRenderMode();
-
-    public int getPhysicalStartAddressInBytes() {
-	    if (this instanceof TriangleList)
-		return tr.getTriangleVertexWindow().getPhysicalAddressInBytes(
-			this.getGPUPrimitiveStartIndex());
-	    else if (this instanceof LineSegmentList)
-		return tr.getLineSegmentWindow().getPhysicalAddressInBytes(
-			this.getGPUPrimitiveStartIndex());
-	    else {
-		throw new RuntimeException("Unrecognized self: "
-			+ this.getClass().getName());
-	    }
+/*
+    public int []getPhysicalPages() {
+	final int [] result = new int[window.numPages()];
+	for(int i=0; i<result.length;i++){
+	    result[i]=window.logicalPage2PhysicalPage(i);
+	}
+	return result;
     }//end getPhysicalAddressInBytes
-
+*/
     public static void tickAnimators() {
 	for (Tickable ani : animators) {
 	    ani.tick();
@@ -150,11 +146,8 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public final int getPackedScale() {
 	return packedScale;
     }
-
-    /**
-     * @return the gpuPrimitiveStartIndex
-     */
-    public int getGPUPrimitiveStartIndex() {
-	return gpuPrimitiveStartIndex;
+    
+    public final MemoryWindow getMemoryWindow(){
+	return window;
     }
 }// end PrimitiveList

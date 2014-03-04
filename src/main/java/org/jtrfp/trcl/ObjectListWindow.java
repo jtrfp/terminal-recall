@@ -22,8 +22,8 @@ import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public class ObjectListWindow extends MemoryWindow {
-    public ObjectListWindow() {
-	init();
+    public ObjectListWindow(TR tr) {
+	init(tr,"ObjectListWindow");
     }// end constructor
 
     public final ByteArrayVariable opaqueIDs = new ByteArrayVariable(
@@ -32,12 +32,14 @@ public class ObjectListWindow extends MemoryWindow {
 	    OBJECT_LIST_SIZE_BYTES_PER_PASS);
 
     public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = RenderList.NUM_BLOCKS_PER_PASS * 4;
+    /*
     static {
 	GlobalDynamicTextureBuffer
 		.addAllocationToFinalize(ObjectListWindow.class);
-    }
+    }*/
 
     public static void finalizeAllocation(TR tr) {
+	/*
 	ObjectListWindow olw = tr.getObjectListWindow();
 	int bytesToAllocate = olw.getObjectSizeInBytes() * olw.getNumObjects();
 
@@ -49,5 +51,6 @@ public class ObjectListWindow extends MemoryWindow {
 	tr.getReporter().report(
 		"org.jtrfp.trcl.GlobalObjectList.arrayOffsetBytes",
 		String.format("%08X", olw.getPhysicalAddressInBytes(0)));
+	*/
     }
 }// end GlobalObjectList

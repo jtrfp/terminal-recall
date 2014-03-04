@@ -34,6 +34,7 @@ public class Renderer
 	private final RenderList [] renderList = new RenderList[2];
 	private boolean renderListToggle=false;
 	private RenderableSpacePartitioningGrid rootGrid;
+	private boolean active=false;//TODO: Remove when conversion is complete
 	
 	private int frameNumber;
 	private long lastTimeMillis;
@@ -116,8 +117,9 @@ public class Renderer
 		lastTimeMillis = System.currentTimeMillis();
 		}
 	
-	public void render()
-		{fpsTracking();
+	public void render(){
+	    	if(!active)return;
+	    	fpsTracking();
 		// Update GPU
 		//try{gpu.getMemoryManager().map();}
 		//catch(NullPointerException e){return;}//Not ready yet; bail out.
@@ -135,6 +137,8 @@ public class Renderer
 		// Render objects
 		renderList[renderListIndex].render(gl);
 		}
+	
+	public void activate(){active=true;}//TODO: Remove this when paged conversion is complete.
 	
 	public void updateVisibilityList()
 		{

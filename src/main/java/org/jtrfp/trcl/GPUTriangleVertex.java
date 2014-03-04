@@ -27,16 +27,17 @@ public class GPUTriangleVertex{
     public static final int VERTICES_PER_BLOCK = 96;
     
     private static boolean finalized = false;
-
+/*
     static {
 	GlobalDynamicTextureBuffer
 		.addAllocationToFinalize(GPUTriangleVertex.class);
-    }
+    }*/
 
     public static void finalizeAllocation(TR tr) {
+	/*
 	final TriangleVertexWindow window = tr.getTriangleVertexWindow();
 	int bytesToAllocate = window.getNumObjects()
-		* GPUTriangleVertex.BYTES_PER_VERTEX;
+		* window.getObjectSizeInBytes();
 	window.setBuffer(
 		new SubByteBuffer(
 			GlobalDynamicTextureBuffer.getLogicalMemory(),
@@ -48,12 +49,15 @@ public class GPUTriangleVertex{
 	tr.getReporter().report(
 		"org.jtrfp.trcl.GPUTriangleVertex.arrayOffsetBytes",
 		String.format("%08X", window.getPhysicalAddressInBytes(0)));
+	*/
 	finalized = true;
+	
     }
 
     // TODO: Return a TriangleVertexWindow using a SubByteBuffer (later a
     // PagedByteBuffer)
     // TODO: Convert to a straight page-sized block, return a window.
+    /*
     public static int createVertexBlock(int numVertices, TR tr) {
 	if (finalized)
 	    throw new RuntimeException(
@@ -61,4 +65,5 @@ public class GPUTriangleVertex{
 	final TriangleVertexWindow tvw = tr.getTriangleVertexWindow();
 	return tvw.createTriangleVertices(numVertices);
     }
+    */
 }// end Vertex

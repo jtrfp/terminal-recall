@@ -25,215 +25,274 @@ import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
 
-public class TriangleList extends PrimitiveList<Triangle>{
-	private Controller controller;
-	private int timeBetweenFramesMsec;
-	private final boolean animateUV;
-	private final TR tr;
-	private final WindowAnimator xyzAnimator;
-	private final TriangleVertex2FlatDoubleWindow flatTVWindow;
-	public TriangleList(Triangle [][] triangles, int timeBetweenFramesMsec, String debugName, boolean animateUV, Controller controller, TR tr)
-		{super(debugName,triangles,GPUTriangleVertex.createVertexBlock(triangles[0].length*3,tr),tr);
-		this.timeBetweenFramesMsec=timeBetweenFramesMsec;
-		this.animateUV=animateUV;
-		this.controller=controller;
-		this.tr=tr;
-		this.flatTVWindow = tr.getTv2fdWindow();
-		if(getPrimitives().length>1){
-		    this.xyzAnimator = new WindowAnimator(flatTVWindow,
-		      this.getNumPrimitives()*3*3,// 3 vertices per triangle, XYZ per vertex
-		      getPrimitives().length, true, controller,new XYZXferFunc(getGPUPrimitiveStartIndex()*5));
-		      animators.add(xyzAnimator);}
-		else{this.xyzAnimator=null;}
-		}
-	
-	private static class XYZXferFunc implements IntTransferFunction{
-	    private final int startIndex;
-	    public XYZXferFunc(int startIndex){
-		this.startIndex=startIndex;
-	    }//end constructor
-	    @Override
-	    public int transfer(int input) {
-		return (input/3)*5+(input%3)+startIndex;
-	    }//end transfer(...)
-	}//end class XYZXferFunc
-	
-	private static class UVXferFunc implements IntTransferFunction{
-	    private final int startIndex;
-	    public UVXferFunc(int startIndex){
-		this.startIndex=startIndex;
-	    }//end constructor
-	    @Override
-	    public int transfer(int input) {
-		return (input/2)*5+(input%2)+startIndex+3;
-	    }//end transfer(...)
-	}//end class XYZXferFunc
-	
-	public TriangleList [] getAllLists(){
-	    	return getAllArrayLists().toArray(new TriangleList [] {});}
-	private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames){
-		return controller;
-		}
-	private Triangle triangleAt(int frame, int tIndex)
-		{return getPrimitives()[frame][tIndex];}
-	private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex) throws ExecutionException, InterruptedException
-		{final int numFrames = getPrimitives().length;
-		Triangle t=triangleAt(0,triangleIndex);
-		final TriangleVertexWindow vw = tr.getTriangleVertexWindow();
-		if(numFrames==1){
-		    	vw.setX(gpuTVIndex, (short)applyScale(t.x[vIndex]));
-		    	vw.setY(gpuTVIndex, (short)applyScale(t.y[vIndex]));
-		    	vw.setZ(gpuTVIndex, (short)applyScale(t.z[vIndex]));
-			}
-		else if(numFrames>1){
-			float []xFrames = new float[numFrames];
-			float []yFrames = new float[numFrames];
-			float []zFrames = new float[numFrames];
-			for(int i=0; i<numFrames; i++)
-				{xFrames[i]=Math.round(triangleAt(i,triangleIndex).x[vIndex]/scale);}
-			xyzAnimator.addFrames(xFrames);
-			
-			for(int i=0; i<numFrames; i++)
-				{yFrames[i]=Math.round(triangleAt(i,triangleIndex).y[vIndex]/scale);}
-			xyzAnimator.addFrames(yFrames);
-			
-			for(int i=0; i<numFrames; i++)
-				{zFrames[i]=Math.round(triangleAt(i,triangleIndex).z[vIndex]/scale);}
-			xyzAnimator.addFrames(zFrames);
-			}
-		else{throw new RuntimeException("Empty triangle vertex!");}
-		
-		TextureDescription td = t.getTexture().get();
-		if(td instanceof Texture){//Static texture
-			final Texture.TextureTreeNode tx;
-			tx= ((Texture)t.getTexture().get()).getNodeForThisTexture();
-			if(animateUV&&numFrames>1){//Animated UV
-			    float []uFrames = new float[numFrames];
-			    float []vFrames = new float[numFrames];
-			    final WindowAnimator uvAnimator =  new WindowAnimator(flatTVWindow,
-				    2,// UV per vertex
-				    numFrames, false, getVertexSequencer(timeBetweenFramesMsec,numFrames),
-				    new UVXferFunc(gpuTVIndex*5));
-			    	animators.add(uvAnimator);
-			    for(int i=0; i<numFrames; i++){
-				uFrames[i]=(float)(uvUpScaler*tx.getGlobalUFromLocal(triangleAt(i,triangleIndex).u[vIndex]));
-				vFrames[i]=(float)(uvUpScaler*tx.getGlobalVFromLocal(triangleAt(i,triangleIndex).v[vIndex]));
-			    }//end for(numFrames)
-			    uvAnimator.addFrames(uFrames);
-			    uvAnimator.addFrames(vFrames);
-			}else{//end if(animateUV)
-			    vw.setU(gpuTVIndex, (short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex])));
-			    vw.setV(gpuTVIndex, (short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex])));
-			}//end if(!animateUV)
-		    }//end if(Texture)
-		else {//Animated texture
-			AnimatedTexture at =((AnimatedTexture)t.getTexture().get());
-			Texture.TextureTreeNode tx=at.
-				getFrames()
-				[0].get().
-				getNodeForThisTexture();//Default frame
-			final int numTextureFrames = at.getFrames().length;
-			final WindowAnimator uvAnimator =  new WindowAnimator(flatTVWindow,
-				    2,// UV per vertex
-				    numTextureFrames, false, at.getTextureSequencer(),
-				    new UVXferFunc(gpuTVIndex*5));
-			uvAnimator.setDebugName(debugName+".uvAnimator");
-			animators.add(uvAnimator);
-			
-			float [] uFrames = new float[numTextureFrames];
-			float [] vFrames = new float[numTextureFrames];
-			for(int ti=0; ti<numTextureFrames;ti++){
-				tx=at.getFrames()[ti].get().getNodeForThisTexture();
-				uFrames[ti]=(short)(uvUpScaler*tx.getGlobalUFromLocal(t.u[vIndex]));
-				vFrames[ti]=(short)(uvUpScaler*tx.getGlobalVFromLocal(t.v[vIndex]));
-				}//end for(frame)
-			uvAnimator.addFrames(uFrames);
-			uvAnimator.addFrames(vFrames);
-			}//end animated texture
-		}//end setupVertex
-	
-	private void setupTriangle(int gpuTriangleVertIndex, int triangleIndex) throws ExecutionException,InterruptedException{
-		setupVertex(0,gpuTriangleVertIndex+0,triangleIndex);
-		setupVertex(1,gpuTriangleVertIndex+1,triangleIndex);
-		setupVertex(2,gpuTriangleVertIndex+2,triangleIndex);
-		}
-	
-	public void uploadToGPU(GL3 gl){
-		int nPrimitives=getNumPrimitives();
-		try{
-		for(int tIndex=0;tIndex<nPrimitives;tIndex++)
-			{setupTriangle(getGPUPrimitiveStartIndex()+tIndex*3,tIndex);}
-		}catch(InterruptedException e){e.printStackTrace();}
-		catch(ExecutionException e){e.printStackTrace();}
-		}//end allocateIndices(...)
+public class TriangleList extends PrimitiveList<Triangle> {
+    private Controller controller;
+    private int timeBetweenFramesMsec;
+    private final boolean animateUV;
+    private final TR tr;
+    private final WindowAnimator xyzAnimator;
+    private TriangleVertex2FlatDoubleWindow flatTVWindow;
+
+    public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
+	    String debugName, boolean animateUV, Controller controller, TR tr) {
+	super(debugName, triangles, new TriangleVertexWindow(tr, debugName), tr);
+	this.timeBetweenFramesMsec = timeBetweenFramesMsec;
+	this.animateUV = animateUV;
+	this.controller = controller;
+	this.tr = tr;
+	if (getPrimitives().length > 1) {
+	    this.xyzAnimator = new WindowAnimator(
+		    getFlatTVWindow(),
+		    this.getNumPrimitives() * 3 * 3,// 3 vertices per triangle,
+						    // XYZ per vertex
+		    getPrimitives().length, true, controller,
+		    new XYZXferFunc(0));
+	    animators.add(xyzAnimator);
+	} else if (animateUV) {
+	    this.xyzAnimator = null;
+	} else {
+	    this.xyzAnimator = null;
+	}
+    }
+
+    private static class XYZXferFunc implements IntTransferFunction {
+	private final int startIndex;
+
+	public XYZXferFunc(int startIndex) {
+	    this.startIndex = startIndex;
+	}// end constructor
 
 	@Override
-	public int getPrimitiveSizeInVec4s(){return 3;}
+	public int transfer(int input) {
+	    return (input / 3) * 5 + (input % 3) + startIndex;
+	}// end transfer(...)
+    }// end class XYZXferFunc
+
+    private static class UVXferFunc implements IntTransferFunction {
+	private final int startIndex;
+
+	public UVXferFunc(int startIndex) {
+	    this.startIndex = startIndex;
+	}// end constructor
 
 	@Override
-	public int getGPUVerticesPerPrimitive(){return 3;}
+	public int transfer(int input) {
+	    return (input / 2) * 5 + (input % 2) + startIndex + 3;
+	}// end transfer(...)
+    }// end class XYZXferFunc
 
-	@Override
-	public byte getPrimitiveRenderMode()
-		{return PrimitiveRenderMode.RENDER_MODE_TRIANGLES;}
+    public TriangleList[] getAllLists() {
+	return getAllArrayLists().toArray(new TriangleList[] {});
+    }
 
-	@Override
-	public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle()
-		{return RenderStyle.OPAQUE;}
-	
-	public Vector3D getMaximumVertexDims(){
-		Vector3D result=Vector3D.ZERO;
-		Triangle [][]t=getPrimitives();
-		for(Triangle [] frame:t){
-			for(Triangle tri:frame){
-				for(int i=0; i<3; i++){
-					double v;
-					v=(tri.x[i]);
-					result=result.getX()<v?new Vector3D(v,result.getY(),result.getZ()):result;
-					v=(tri.y[i]);
-					result=result.getY()<v?new Vector3D(result.getX(),v,result.getZ()):result;
-					v=(tri.z[i]);
-					result=result.getZ()<v?new Vector3D(result.getX(),result.getY(),v):result;
-					}//end for(vertex)
-				}//end for(triangle)
-			}//end for(triangles)
-		return result;
-		}//end getMaximumVertexDims()
-	public Vector3D getMinimumVertexDims(){
-		Vector3D result=new Vector3D(Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY);
-		Triangle [][]t=getPrimitives();
-		for(Triangle [] frame:t){
-			for(Triangle tri:frame){
-				for(int i=0; i<3; i++){
-					double v;
-					v=(tri.x[i]);
-					result=result.getX()>v?new Vector3D(v,result.getY(),result.getZ()):result;
-					v=(tri.y[i]);
-					result=result.getY()>v?new Vector3D(result.getX(),v,result.getZ()):result;
-					v=(tri.z[i]);
-					result=result.getZ()>v?new Vector3D(result.getX(),result.getY(),v):result;
-					}//end for(vertex)
-				}//end for(triangle)
-			}//end for(triangles)
-		return result;
-		}//end getMaximumVertexDims()
-	
-	public double getMaximumVertexValue(){
-		double result=0;
-		Triangle [][]t=getPrimitives();
-		for(Triangle [] frame:t){
-			for(Triangle tri:frame){
-				for(int i=0; i<3; i++){
-					double v;
-					v=Math.abs(tri.x[i]);
-					result=result<v?v:result;
-					v=Math.abs(tri.y[i]);
-					result=result<v?v:result;
-					v=Math.abs(tri.z[i]);
-					result=result<v?v:result;
-					}//end for(vertex)
-				}//end for(triangle)
-			}//end for(triangles)
-		return result;
-		}//end getMaximumVertexValue()
-	}//end SingleTextureTriangleList
+    private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames) {
+	return controller;
+    }
+
+    private Triangle triangleAt(int frame, int tIndex) {
+	return getPrimitives()[frame][tIndex];
+    }
+
+    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex)
+	    throws ExecutionException, InterruptedException {
+	final int numFrames = getPrimitives().length;
+	Triangle t = triangleAt(0, triangleIndex);
+	final TriangleVertexWindow vw = (TriangleVertexWindow) getMemoryWindow();
+	if (numFrames == 1) {
+	    vw.setX(gpuTVIndex, (short) applyScale(t.x[vIndex]));
+	    vw.setY(gpuTVIndex, (short) applyScale(t.y[vIndex]));
+	    vw.setZ(gpuTVIndex, (short) applyScale(t.z[vIndex]));
+	} else if (numFrames > 1) {
+	    float[] xFrames = new float[numFrames];
+	    float[] yFrames = new float[numFrames];
+	    float[] zFrames = new float[numFrames];
+	    for (int i = 0; i < numFrames; i++) {
+		xFrames[i] = Math.round(triangleAt(i, triangleIndex).x[vIndex]
+			/ scale);
+	    }
+	    xyzAnimator.addFrames(xFrames);
+
+	    for (int i = 0; i < numFrames; i++) {
+		yFrames[i] = Math.round(triangleAt(i, triangleIndex).y[vIndex]
+			/ scale);
+	    }
+	    xyzAnimator.addFrames(yFrames);
+
+	    for (int i = 0; i < numFrames; i++) {
+		zFrames[i] = Math.round(triangleAt(i, triangleIndex).z[vIndex]
+			/ scale);
+	    }
+	    xyzAnimator.addFrames(zFrames);
+	} else {
+	    throw new RuntimeException("Empty triangle vertex!");
+	}
+
+	TextureDescription td = t.getTexture().get();
+	if (td instanceof Texture) {// Static texture
+	    final Texture.TextureTreeNode tx;
+	    tx = ((Texture) t.getTexture().get()).getNodeForThisTexture();
+	    if (animateUV && numFrames > 1) {// Animated UV
+		float[] uFrames = new float[numFrames];
+		float[] vFrames = new float[numFrames];
+		final WindowAnimator uvAnimator = new WindowAnimator(
+			getFlatTVWindow(), 2,// UV per vertex
+			numFrames, false, getVertexSequencer(
+				timeBetweenFramesMsec, numFrames),
+			new UVXferFunc(gpuTVIndex * 5));
+		animators.add(uvAnimator);
+		for (int i = 0; i < numFrames; i++) {
+		    uFrames[i] = (float) (uvUpScaler * tx
+			    .getGlobalUFromLocal(triangleAt(i, triangleIndex).u[vIndex]));
+		    vFrames[i] = (float) (uvUpScaler * tx
+			    .getGlobalVFromLocal(triangleAt(i, triangleIndex).v[vIndex]));
+		}// end for(numFrames)
+		uvAnimator.addFrames(uFrames);
+		uvAnimator.addFrames(vFrames);
+	    } else {// end if(animateUV)
+		vw.setU(gpuTVIndex, (short) (uvUpScaler * tx
+			.getGlobalUFromLocal(t.u[vIndex])));
+		vw.setV(gpuTVIndex, (short) (uvUpScaler * tx
+			.getGlobalVFromLocal(t.v[vIndex])));
+	    }// end if(!animateUV)
+	}// end if(Texture)
+	else {// Animated texture
+	    AnimatedTexture at = ((AnimatedTexture) t.getTexture().get());
+	    Texture.TextureTreeNode tx = at.getFrames()[0].get()
+		    .getNodeForThisTexture();// Default frame
+	    final int numTextureFrames = at.getFrames().length;
+	    final WindowAnimator uvAnimator = new WindowAnimator(
+		    getFlatTVWindow(),
+		    2,// UV per vertex
+		    numTextureFrames, false, at.getTextureSequencer(),
+		    new UVXferFunc(gpuTVIndex * 5));
+	    uvAnimator.setDebugName(debugName + ".uvAnimator");
+	    animators.add(uvAnimator);
+
+	    float[] uFrames = new float[numTextureFrames];
+	    float[] vFrames = new float[numTextureFrames];
+	    for (int ti = 0; ti < numTextureFrames; ti++) {
+		tx = at.getFrames()[ti].get().getNodeForThisTexture();
+		uFrames[ti] = (short) (uvUpScaler * tx
+			.getGlobalUFromLocal(t.u[vIndex]));
+		vFrames[ti] = (short) (uvUpScaler * tx
+			.getGlobalVFromLocal(t.v[vIndex]));
+	    }// end for(frame)
+	    uvAnimator.addFrames(uFrames);
+	    uvAnimator.addFrames(vFrames);
+	}// end animated texture
+    }// end setupVertex
+
+    private void setupTriangle(int triangleIndex) throws ExecutionException,
+	    InterruptedException {
+	setupVertex(0, getMemoryWindow().create(), triangleIndex);
+	setupVertex(1, getMemoryWindow().create(), triangleIndex);
+	setupVertex(2, getMemoryWindow().create(), triangleIndex);
+    }
+
+    public void uploadToGPU(GL3 gl) {
+	int nPrimitives = getNumPrimitives();
+	try {
+	    for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
+		setupTriangle(tIndex);
+	    }
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	} catch (ExecutionException e) {
+	    e.printStackTrace();
+	}
+    }// end allocateIndices(...)
+
+    @Override
+    public int getPrimitiveSizeInVec4s() {
+	return 3;
+    }
+
+    @Override
+    public int getGPUVerticesPerPrimitive() {
+	return 3;
+    }
+
+    @Override
+    public byte getPrimitiveRenderMode() {
+	return PrimitiveRenderMode.RENDER_MODE_TRIANGLES;
+    }
+
+    @Override
+    public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle() {
+	return RenderStyle.OPAQUE;
+    }
+
+    public Vector3D getMaximumVertexDims() {
+	Vector3D result = Vector3D.ZERO;
+	Triangle[][] t = getPrimitives();
+	for (Triangle[] frame : t) {
+	    for (Triangle tri : frame) {
+		for (int i = 0; i < 3; i++) {
+		    double v;
+		    v = (tri.x[i]);
+		    result = result.getX() < v ? new Vector3D(v, result.getY(),
+			    result.getZ()) : result;
+		    v = (tri.y[i]);
+		    result = result.getY() < v ? new Vector3D(result.getX(), v,
+			    result.getZ()) : result;
+		    v = (tri.z[i]);
+		    result = result.getZ() < v ? new Vector3D(result.getX(),
+			    result.getY(), v) : result;
+		}// end for(vertex)
+	    }// end for(triangle)
+	}// end for(triangles)
+	return result;
+    }// end getMaximumVertexDims()
+
+    public Vector3D getMinimumVertexDims() {
+	Vector3D result = new Vector3D(Double.POSITIVE_INFINITY,
+		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+	Triangle[][] t = getPrimitives();
+	for (Triangle[] frame : t) {
+	    for (Triangle tri : frame) {
+		for (int i = 0; i < 3; i++) {
+		    double v;
+		    v = (tri.x[i]);
+		    result = result.getX() > v ? new Vector3D(v, result.getY(),
+			    result.getZ()) : result;
+		    v = (tri.y[i]);
+		    result = result.getY() > v ? new Vector3D(result.getX(), v,
+			    result.getZ()) : result;
+		    v = (tri.z[i]);
+		    result = result.getZ() > v ? new Vector3D(result.getX(),
+			    result.getY(), v) : result;
+		}// end for(vertex)
+	    }// end for(triangle)
+	}// end for(triangles)
+	return result;
+    }// end getMaximumVertexDims()
+
+    public double getMaximumVertexValue() {
+	double result = 0;
+	Triangle[][] t = getPrimitives();
+	for (Triangle[] frame : t) {
+	    for (Triangle tri : frame) {
+		for (int i = 0; i < 3; i++) {
+		    double v;
+		    v = Math.abs(tri.x[i]);
+		    result = result < v ? v : result;
+		    v = Math.abs(tri.y[i]);
+		    result = result < v ? v : result;
+		    v = Math.abs(tri.z[i]);
+		    result = result < v ? v : result;
+		}// end for(vertex)
+	    }// end for(triangle)
+	}// end for(triangles)
+	return result;
+    }// end getMaximumVertexValue()
+
+    /**
+     * @return the flatTVWindow
+     */
+    private TriangleVertex2FlatDoubleWindow getFlatTVWindow() {
+	if (flatTVWindow == null)
+	    flatTVWindow = new TriangleVertex2FlatDoubleWindow(
+		    (TriangleVertexWindow) this.getMemoryWindow());
+	return flatTVWindow;
+    }
+}// end SingleTextureTriangleList

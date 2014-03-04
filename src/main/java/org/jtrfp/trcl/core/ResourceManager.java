@@ -242,7 +242,6 @@ public class ResourceManager{
 		if(gl==null)throw new NullPointerException("GL cannot be null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
 		boolean hasAlpha=false;
-		if(gl.getContext().isCurrent())gl.getContext().release();//Feed the dog
 		try {
 			BINFile.AnimationControl ac=null;
 			Model result;
@@ -257,10 +256,8 @@ public class ResourceManager{
 			System.out.println("Recognized as animation control file.");
 			//Build the Model from the BINFile.Model
 			Model [] frames = new Model[ac.getNumFrames()];
-			gl.getContext().makeCurrent();//feed the dog
 			for(int i=0; i<frames.length;i++)
 				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette,gl);}
-			if(gl.getContext().isCurrent())gl.getContext().release();
 			frames[0].setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumPrimitives());
 			//Consolidate the frames to one model
 			for(int i=1; i<frames.length;i++)
@@ -269,7 +266,6 @@ public class ResourceManager{
 			result.setFrameDelayInMillis((int)(((double)ac.getDelay()/65535.)*1000.));
 			result.finalizeModel();
 			if(cache)modelCache.put(name, result);
-			gl.getContext().makeCurrent();
 			return result;
 			}//end try{}
 		catch(UnrecognizedFormatException e){//ok fail. Static model
@@ -290,10 +286,8 @@ public class ResourceManager{
 					//Sort out types of block
 					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
-						gl.getContext().makeCurrent();
 						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,hasAlpha);
 						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl);}
-						gl.getContext().release();
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
@@ -396,11 +390,9 @@ public class ResourceManager{
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						Future<Texture> [] subTextures = new Future[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							gl.getContext().makeCurrent();
 							if(!hasAlpha)subTextures[ti]=(Future)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
 							else subTextures[ti]=(Future)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl,true);
 							//subTextures[ti]=tex instanceof Texture?new DummyFuture<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
-							gl.getContext().release();
 							}//end for(frames) //fDelay, nFrames,interp
 						currentTexture = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures));
 						}
@@ -412,7 +404,6 @@ public class ResourceManager{
 				result.finalizeModel();
 				result.setDebugName(name);
 				if(cache)modelCache.put(name, result);
-				if(gl.getContext().isCurrent())gl.getContext().release();
 				return result;
 				}//end try{}
 			catch(UnrecognizedFormatException ee){

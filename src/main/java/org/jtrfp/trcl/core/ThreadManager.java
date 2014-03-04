@@ -3,6 +3,7 @@ package org.jtrfp.trcl.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -27,6 +28,8 @@ public class ThreadManager {
     private long timeInMillisSinceLastGameTick = 0L;
     private ArrayList<Runnable> runWhenFirstStarted = new ArrayList<Runnable>();
     private boolean firstRun = true;
+    private final ConcurrentLinkedQueue<Runnable> mappedOperationQueue = new ConcurrentLinkedQueue<Runnable>();
+    private Thread renderingThread;
 
     private int counter = 0;
 
@@ -70,13 +73,20 @@ public class ThreadManager {
 
 	    @Override
 	    public void display(GLAutoDrawable drawable) {
+		Thread.currentThread().setName("OpenGL display()");
+		renderingThread=Thread.currentThread();
 		if (firstRun) {
 		    for (Runnable r : runWhenFirstStarted) {
 			r.run();
-		    }
-		}
+		    }//end for(runnable)
+		}//end if(firstRun)
 		Thread.currentThread().setPriority(RENDERING_PRIORITY);
 		ThreadManager.this.tr.getGPU().getMemoryManager().map();
+		while(!mappedOperationQueue.isEmpty()){
+		    final Runnable r = mappedOperationQueue.poll();
+		    r.run();
+		    synchronized(r){r.notifyAll();}
+		}
 		if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS) == 0)
 		    visibilityCalc();
 		gameplay();
@@ -93,6 +103,18 @@ public class ThreadManager {
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end constructor
 
+    public void enqueueGLOperation(Runnable r){
+	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(r);
+	else r.run();
+    }
+    public void blockingEnqueueGLOperation(Runnable r){
+	if(Thread.currentThread()!=renderingThread){
+	    synchronized(r){
+	    mappedOperationQueue.add(r);
+	    try{r.wait();}catch(Exception e){e.printStackTrace();}}}
+	else {r.run();}
+    }
+    
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;
     }

@@ -14,6 +14,7 @@ import org.jtrfp.trcl.TunnelInstaller;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -50,90 +51,109 @@ public class Mission {
 	try{
 	//Set up palette
     	final ResourceManager rm = tr.getResourceManager();
+    	final ThreadManager tm = tr.getThreadManager();
     	final Color [] pal = rm.getPalette(lvl.getGlobalPaletteFile());
+    	System.out.println("Starting animator...");
+	tr.getThreadManager().start();
+	System.out.println("\t...Done.");
     	pal[0]=new Color(0,0,0,0);
     	tr.setGlobalPalette(pal);
-	// POWERUPS
-	rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
-	/// EXPLOSIONS
-	rm.setExplosionFactory(new ExplosionFactory(tr));
-	// SMOKE
-	rm.setSmokeFactory(new SmokeFactory(tr));
-	// DEBRIS
-	rm.setDebrisFactory(new DebrisFactory(tr));
-	//SETUP PROJECTILE FACTORIES
-	Weapon [] w = Weapon.values();
-	ProjectileFactory [] pf = new ProjectileFactory[w.length];
-	for(int i=0; i<w.length;i++){
-	    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
-	}//end for(weapons)
-	rm.setProjectileFactories(pf);
-	final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
-	tr.setPlayer(player);
-	final String startX=System.getProperty("org.jtrfp.trcl.startX");
-	final String startY=System.getProperty("org.jtrfp.trcl.startY");
-	final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
-	final double [] playerPos = player.getPosition();
-	if(startX!=null && startY!=null&&startZ!=null){
-	    System.out.println("Using user-specified start point");
-	    final int sX=Integer.parseInt(startX);
-	    final int sY=Integer.parseInt(startY);
-	    final int sZ=Integer.parseInt(startZ);
-	    playerPos[0]=sX;
-	    playerPos[1]=sY;
-	    playerPos[2]=sZ;
-	    player.notifyPositionChange();
-	}
+    	tm.blockingEnqueueGLOperation(new Runnable(){
+    	    public void run(){
+    		try{
+    		// POWERUPS
+    		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
+    		/// EXPLOSIONS
+    		rm.setExplosionFactory(new ExplosionFactory(tr));
+    		// SMOKE
+    		rm.setSmokeFactory(new SmokeFactory(tr));
+    		// DEBRIS
+    		rm.setDebrisFactory(new DebrisFactory(tr));
+    		//SETUP PROJECTILE FACTORIES
+    		Weapon [] w = Weapon.values();
+    		ProjectileFactory [] pf = new ProjectileFactory[w.length];
+    		for(int i=0; i<w.length;i++){
+    		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+    		}//end for(weapons)
+    		rm.setProjectileFactories(pf);
+    		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
+    		tr.setPlayer(player);
+    		final String startX=System.getProperty("org.jtrfp.trcl.startX");
+    		final String startY=System.getProperty("org.jtrfp.trcl.startY");
+    		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
+    		final double [] playerPos = player.getPosition();
+    		if(startX!=null && startY!=null&&startZ!=null){
+    		    System.out.println("Using user-specified start point");
+    		    final int sX=Integer.parseInt(startX);
+    		    final int sY=Integer.parseInt(startY);
+    		    final int sZ=Integer.parseInt(startZ);
+    		    playerPos[0]=sX;
+    		    playerPos[1]=sY;
+    		    playerPos[2]=sZ;
+    		    player.notifyPositionChange();
+    		}//end if(start!=null)
+    		}catch(Exception e){e.printStackTrace();}
+    	    }
+    	});
+    	
+    	final Player player = tr.getPlayer();
 	final World world = tr.getWorld();
 	world.add(player);
-	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
+    	
+    	tm.blockingEnqueueGLOperation(new Runnable(){
+    	    public void run(){
+    		try{
+    		final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
 
-	//Install NAVs
-	final NAVSystem navSystem = tr.getNavSystem();
-	navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
-	tr.setOverworldSystem(new OverworldSystem(world, lvl, tdf));
-	
-	START s = (START)navSubObjects.get(0);
-	navSubObjects.remove(0);
-	Location3D l3d = s.getLocationOnMap();
-	playerStartPosition[0]=TR.legacy2Modern(l3d.getZ());
-	playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
-	playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
-	playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
-	
-	TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
-	Factory f = new NAVObjective.Factory(tr);
-	for(NAVSubObject obj:navSubObjects){
-	    f.create(tr, obj, navs);
-	}//end for(navSubObjects)
-	navSystem.updateNAVState();
-	tr.setBackdropSystem(new BackdropSystem(world));
-	
-	//////// INITIAL HEADING
-	player.setPosition(getPlayerStartPosition());
-	player.setDirection(getPlayerStartDirection());
-	player.setHeading(player.getHeading().negate());//Kludge to fix incorrect heading
-	System.out.println("Start position set to "+player.getPosition());
-	
-	GPU gpu = tr.getGPU();
-	//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
-	System.out.println("Building master texture...");
-	Texture.finalize(gpu);
-	System.out.println("\t...Done.");
-	System.out.println("Finalizing GPU memory allocation...");
-	GlobalDynamicTextureBuffer.finalizeAllocation(gpu,tr);
-	gpu.releaseGL();
+    		//Install NAVs
+    		final NAVSystem navSystem = tr.getNavSystem();
+    		navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
+    		tr.setOverworldSystem(new OverworldSystem(world, lvl, tdf));
+    		
+    		START s = (START)navSubObjects.get(0);
+    		navSubObjects.remove(0);
+    		Location3D l3d = s.getLocationOnMap();
+    		playerStartPosition[0]=TR.legacy2Modern(l3d.getZ());
+    		playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
+    		playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
+    		playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
+    		
+    		TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
+    		Factory f = new NAVObjective.Factory(tr);
+    		for(NAVSubObject obj:navSubObjects){
+    		    f.create(tr, obj, navs);
+    		}//end for(navSubObjects)
+    		navSystem.updateNAVState();
+    		tr.setBackdropSystem(new BackdropSystem(world));
+    		}catch(Exception e){e.printStackTrace();}
+    	    }});
+    	
+    	tm.blockingEnqueueGLOperation(new Runnable(){
+    	    public void run(){
+    		//////// INITIAL HEADING
+    		player.setPosition(getPlayerStartPosition());
+    		player.setDirection(getPlayerStartDirection());
+    		player.setHeading(player.getHeading().negate());//Kludge to fix incorrect heading
+    		System.out.println("Start position set to "+player.getPosition());
+    		
+    		GPU gpu = tr.getGPU();
+    		//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
+    		System.out.println("Building master texture...");
+    		Texture.finalize(gpu);
+    		System.out.println("\t...Done.");
+    		System.out.println("Finalizing GPU memory allocation...");
+    		GlobalDynamicTextureBuffer.finalizeAllocation(gpu,tr);
+    	    }});
+    	
 	//////// NO GL BEYOND THIS POINT ////////
 	System.out.println("\t...Done.");
 	System.out.println("Invoking JVM's garbage collector...");
 	System.gc();
 	System.out.println("\t...Ahh, that felt good.");
-	System.out.println("Attaching to GL Canvas...");
+	System.out.println("Activating renderer...");
+	tr.getRenderer().activate();
+	System.out.println("\t...Done.");
 	
-	System.out.println("\t...Done.");
-	System.out.println("Starting animator...");
-	tr.getThreadManager().start();
-	System.out.println("\t...Done.");
 	}catch(Exception e){e.printStackTrace();}
 	if(System.getProperties().containsKey("org.jtrfp.trcl.flow.Mission.skipNavs")){
 	    try{

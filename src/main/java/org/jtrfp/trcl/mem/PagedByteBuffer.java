@@ -6,7 +6,7 @@ import org.jtrfp.trcl.core.IndexPool;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
-    public static final int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Vertex Block is 1536 bytes
+    public static final int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Triangle Vertex Block is 1536 bytes
     private 		int [] 		pageTable;//Using array since performance is crucial
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;
@@ -21,6 +21,13 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	    pageTable[i]=pageIndexPool.pop();
 	}//end for(sizeInPages)
     }//end constructor
+    
+    public int sizeInPages(){
+	return pageTable.length;
+    }
+    public int logicalPage2PhysicalPage(int logicalPage){
+	return pageTable[logicalPage];
+    }
     
     private static int sizeInPages(int sizeInBytes){
 	return index2Page(sizeInBytes)+1;
@@ -74,7 +81,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer putShort(int indexInBytes, short val) {
-	intrinsic[0].putShort(logicalIndex2PhysicalIndex(indexInBytes), val);
+	int index=logicalIndex2PhysicalIndex(indexInBytes);
+	//System.out.println("index="+index+" cap="+intrinsic[0].capacity()+" lim="+intrinsic[0].limit());
+	intrinsic[0].putShort(index, val);
 	return this;
     }
 

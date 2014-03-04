@@ -133,7 +133,7 @@ public class Explosion extends BillboardSprite {
     }//end ExplosionType
     
     private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
-	{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().takeGL());}
+	{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().getGl());}
 
     public void resetExplosion() {
 	getBehavior().probeForBehavior(ExplosionBehavior.class).reset();

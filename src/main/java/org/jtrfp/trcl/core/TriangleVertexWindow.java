@@ -22,8 +22,8 @@ public final class TriangleVertexWindow extends MemoryWindow {
     public final ShortVariable unusedShort12 = new ShortVariable();
     public final ShortVariable unusedShort14 = new ShortVariable();
     
-    public TriangleVertexWindow(){
-	init();
+    public TriangleVertexWindow(TR tr, String debugName){
+	init(tr, "TriangleVertexWindow."+debugName);
     }
     
     /*

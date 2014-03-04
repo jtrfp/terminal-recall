@@ -30,7 +30,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere
 		{
 		super(tr);
 		//Dashboard
-		Future<TextureDescription>[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().takeGL(),2);
+		Future<TextureDescription>[] dashTexture = tr.getResourceManager().getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl(),2);
 		Model dashModel = new Model(false,tr);
 		for(int seg=0; seg<5; seg++)
 			{

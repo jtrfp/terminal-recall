@@ -58,10 +58,9 @@ public class GLTexture
 	
 	public void delete()
 		{
-		GL3 gl = gpu.takeGL();
+	    	GL3 gl = gpu.getGl();
 		gl.glBindTexture(GL3.GL_TEXTURE_2D, textureID);
 		gl.glDeleteTextures(1, IntBuffer.wrap(new int[]{textureID}));
-		gpu.releaseGL();
 		}
 
 	int getTextureID()

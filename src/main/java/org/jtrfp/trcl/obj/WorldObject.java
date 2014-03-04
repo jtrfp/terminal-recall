@@ -39,6 +39,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class WorldObject implements PositionedRenderable {
     public static final int GPU_VERTICES_PER_BLOCK = 96;
@@ -281,8 +282,8 @@ public class WorldObject implements PositionedRenderable {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	int vec4Counter = primitiveList.getTotalSizeInVec4s();
-	int primitiveListByteAddress = primitiveList
-		.getPhysicalStartAddressInBytes();
+	/*final int [] primitiveListPhysicalPages = primitiveList
+		.getPhysicalPages();*/
 	final int vec4sPerBlock = primitiveList.getPrimitiveSizeInVec4s()
 		* (GPU_VERTICES_PER_BLOCK / primitiveList
 			.getGPUVerticesPerPrimitive());
@@ -291,12 +292,19 @@ public class WorldObject implements PositionedRenderable {
 		.getPrimitiveSizeInVec4s());
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
+	//System.out.println("numPrimitives="+primitiveList.getNumPrimitives());
+	//System.out.println("numObjectDefinitions="+objectDefinitions.length+" numPhysicalPages="+primitiveListPhysicalPages.length);
+	int odCounter=0;
+	final int primitivesPerObjectDef=GPU_VERTICES_PER_BLOCK / primitiveList.getGPUVerticesPerPrimitive();
 	for (final int index : objectDefinitions) {
 	    odw.matrixOffset.set(index, tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)
 		    / GLTextureBuffer.BYTES_PER_VEC4);
-	    odw.vertexOffset.set(index, primitiveListByteAddress
-		    / GLTextureBuffer.BYTES_PER_VEC4);
+	    odw.vertexOffset.set(index,
+		    primitiveList.getMemoryWindow().getPhysicalAddressInBytes((odCounter*primitivesPerObjectDef))
+		    /GLTextureBuffer.BYTES_PER_VEC4);
+	    /*odw.vertexOffset.set(index, PagedByteBuffer.PAGE_SIZE_BYTES*primitiveListPhysicalPages[odCounter]
+		    / GLTextureBuffer.BYTES_PER_VEC4);*/
 	    odw.mode.set(index, primitiveList.getPrimitiveRenderMode());
 	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
 	    if (vec4Counter >= vec4sPerBlock) {
@@ -309,10 +317,9 @@ public class WorldObject implements PositionedRenderable {
 		throw new RuntimeException("Ran out of vec4s.");
 	    }
 	    vec4Counter -= vec4sPerBlock;
-	    primitiveListByteAddress += vec4sPerBlock
-		    * GLTextureBuffer.BYTES_PER_VEC4;
 	    indicesList.add(odw.getPhysicalAddressInBytes(index)
 		    / GLTextureBuffer.BYTES_PER_VEC4);
+	    odCounter++;
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)
 

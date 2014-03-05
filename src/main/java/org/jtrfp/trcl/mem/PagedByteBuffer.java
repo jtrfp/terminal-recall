@@ -38,7 +38,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private static int pageModulus(int indexInBytes){
 	return indexInBytes%PAGE_SIZE_BYTES;
     }
-    private final int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
+    private int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
 	return (PAGE_SIZE_BYTES*pageTable[index2Page(logicalIndexInBytes)])+pageModulus(logicalIndexInBytes);
     }
 
@@ -118,7 +118,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer putInt(int indexInBytes, int val) {
-	intrinsic[0].putInt(indexInBytes,val);
+	intrinsic[0].putInt(logicalIndex2PhysicalIndex(indexInBytes),val);
 	return this;
     }
 
@@ -129,11 +129,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public double getFloat(int posInBytes) {
-	return intrinsic[0].getFloat(posInBytes);
+	return intrinsic[0].getFloat(logicalIndex2PhysicalIndex(posInBytes));
     }
 
     @Override
     public Integer getInt(int posInBytes) {
-	return intrinsic[0].getInt(posInBytes);
+	return intrinsic[0].getInt(logicalIndex2PhysicalIndex(posInBytes));
     }
 }//end PageByteBuffer

@@ -82,7 +82,6 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     @Override
     public IByteBuffer putShort(int indexInBytes, short val) {
 	int index=logicalIndex2PhysicalIndex(indexInBytes);
-	//System.out.println("index="+index+" cap="+intrinsic[0].capacity()+" lim="+intrinsic[0].limit());
 	intrinsic[0].putShort(index, val);
 	return this;
     }
@@ -111,6 +110,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer put(int startIndexInBytes, ByteBuffer src) {
+	if(logicalIndex2PhysicalIndex(startIndexInBytes)==0)throw new RuntimeException("ZERO!");
 	intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
 	intrinsic[0].put(src);
 	return this;

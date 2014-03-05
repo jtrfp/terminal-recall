@@ -17,9 +17,7 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.RenderList;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
-import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public class ObjectListWindow extends MemoryWindow {
     public ObjectListWindow(TR tr) {
@@ -32,25 +30,4 @@ public class ObjectListWindow extends MemoryWindow {
 	    OBJECT_LIST_SIZE_BYTES_PER_PASS);
 
     public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = RenderList.NUM_BLOCKS_PER_PASS * 4;
-    /*
-    static {
-	GlobalDynamicTextureBuffer
-		.addAllocationToFinalize(ObjectListWindow.class);
-    }*/
-
-    public static void finalizeAllocation(TR tr) {
-	/*
-	ObjectListWindow olw = tr.getObjectListWindow();
-	int bytesToAllocate = olw.getObjectSizeInBytes() * olw.getNumObjects();
-
-	System.out.println("ObjectList: Allocating " + bytesToAllocate
-		+ " bytes of GPU resident RAM.");
-	olw.setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
-		.getLogicalMemory(), GlobalDynamicTextureBuffer
-		.requestAllocation(bytesToAllocate)));
-	tr.getReporter().report(
-		"org.jtrfp.trcl.GlobalObjectList.arrayOffsetBytes",
-		String.format("%08X", olw.getPhysicalAddressInBytes(0)));
-	*/
-    }
 }// end GlobalObjectList

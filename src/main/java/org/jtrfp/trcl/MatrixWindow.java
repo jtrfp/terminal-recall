@@ -16,9 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
-import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public final class MatrixWindow extends MemoryWindow {
     public static final int BYTES_PER_MATRIX = 4 * 16; // 16 floats

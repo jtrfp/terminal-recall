@@ -50,7 +50,6 @@ public abstract class MemoryWindow {
 		return newSizeInObjects;
 	    }});
 	buffer.resize(getObjectSizeInBytes()*getNumObjects());
-	System.out.println("numPages="+numPages()+" numObjectsPerPage="+numObjectsPerPage());
 	for(int p=0; p<numPages(); p++){
 	    MemoryWindow.this.tr.getReporter().report("org.jtrfp.trcl.mem.MemoryWindow."+
 			MemoryWindow.this.debugName+".page"+p, String.format("%08x", MemoryWindow.this.logicalPage2PhysicalPage(p)*PagedByteBuffer.PAGE_SIZE_BYTES));}

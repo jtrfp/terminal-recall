@@ -23,7 +23,6 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionFactory;
@@ -58,6 +57,7 @@ public class Mission {
 	System.out.println("\t...Done.");
     	pal[0]=new Color(0,0,0,0);
     	tr.setGlobalPalette(pal);
+    	
     	tm.blockingEnqueueGLOperation(new Runnable(){
     	    public void run(){
     		try{
@@ -141,8 +141,6 @@ public class Mission {
     		System.out.println("Building master texture...");
     		Texture.finalize(gpu);
     		System.out.println("\t...Done.");
-    		System.out.println("Finalizing GPU memory allocation...");
-    		GlobalDynamicTextureBuffer.finalizeAllocation(gpu,tr);
     	    }});
     	
 	//////// NO GL BEYOND THIS POINT ////////

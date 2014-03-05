@@ -16,9 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
-import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public final class ObjectDefinitionWindow extends MemoryWindow {
     public static final int BYTES_PER_OBJECT_BLOCK = 16; // One vec4 is 16bytes

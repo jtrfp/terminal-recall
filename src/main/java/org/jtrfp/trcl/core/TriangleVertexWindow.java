@@ -2,9 +2,7 @@ package org.jtrfp.trcl.core;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jtrfp.trcl.IndirectObject;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public final class TriangleVertexWindow extends MemoryWindow {

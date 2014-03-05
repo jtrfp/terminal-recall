@@ -1,14 +1,11 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.io.IOUtils;
-import org.jtrfp.jfdt.Parser;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Texture;
@@ -19,10 +16,7 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.obj.WorldObject;
-
-import com.jogamp.common.util.IOUtil;
 
 public class Renderer {
     private final Camera camera;

@@ -17,9 +17,7 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
-import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public class LineSegmentWindow extends MemoryWindow{
     // 16 bytes in a vec4, 1 vec4 per LineSegment

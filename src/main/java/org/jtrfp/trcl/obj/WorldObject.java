@@ -297,12 +297,16 @@ public class WorldObject implements PositionedRenderable {
 	int odCounter=0;
 	final int primitivesPerObjectDef=GPU_VERTICES_PER_BLOCK / primitiveList.getGPUVerticesPerPrimitive();
 	for (final int index : objectDefinitions) {
-	    odw.matrixOffset.set(index, tr.getMatrixWindow()
+	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*primitivesPerObjectDef)
+		    /GLTextureBuffer.BYTES_PER_VEC4;
+	    final int matrixOffsetVec4s=tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)
-		    / GLTextureBuffer.BYTES_PER_VEC4);
-	    odw.vertexOffset.set(index,
-		    primitiveList.getMemoryWindow().getPhysicalAddressInBytes((odCounter*primitivesPerObjectDef))
-		    /GLTextureBuffer.BYTES_PER_VEC4);
+		    / GLTextureBuffer.BYTES_PER_VEC4;
+	    if(vertexOffsetVec4s==8448)System.err.println("N!! "+index+" "+
+		    String.format("0x%06X", odw.getPhysicalAddressInBytes(0))+
+		    "vtx="+String.format("0x%06X", vertexOffsetVec4s));
+	    odw.matrixOffset.set(index, matrixOffsetVec4s);
+	    odw.vertexOffset.set(index,vertexOffsetVec4s);
 	    /*odw.vertexOffset.set(index, PagedByteBuffer.PAGE_SIZE_BYTES*primitiveListPhysicalPages[odCounter]
 		    / GLTextureBuffer.BYTES_PER_VEC4);*/
 	    odw.mode.set(index, primitiveList.getPrimitiveRenderMode());

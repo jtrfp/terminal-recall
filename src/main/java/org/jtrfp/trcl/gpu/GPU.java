@@ -47,6 +47,7 @@ public class GPU{
 		
 	    });
 	}
+	/*
 	public GL3 takeGL(){
 		gl=getGl();
 		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
@@ -54,7 +55,7 @@ public class GPU{
 		}
 	public void releaseGL()
 		{if(gl.getContext().isCurrent())gl.getContext().release();}
-	
+	*/
 	public GLCapabilities getCapabilities(){return capabilities;}
 	
 	public int glGet(int key){

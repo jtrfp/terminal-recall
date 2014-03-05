@@ -16,9 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
-import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public final class ObjectDefinitionWindow extends MemoryWindow {
     public static final int BYTES_PER_OBJECT_BLOCK = 16; // One vec4 is 16bytes
@@ -32,25 +30,7 @@ public final class ObjectDefinitionWindow extends MemoryWindow {
     public final IntVariable 	unused11 	= new IntVariable();// 11
     public final ByteVariable 	unused15 	= new ByteVariable();// 15
 
-    static {
-	GlobalDynamicTextureBuffer
-		.addAllocationToFinalize(ObjectDefinitionWindow.class);
-    }
-
-    public static void finalizeAllocation(TR tr) {
-	final ObjectDefinitionWindow window = tr.getObjectDefinitionWindow();
-	final int bytesToAllocate = window.getNumObjects() * BYTES_PER_OBJECT_BLOCK;
-	System.out.println("Object Definitions: Allocating " + bytesToAllocate
-		+ " bytes of GPU resident RAM.");
-	window.setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
-		.getLogicalMemory(), GlobalDynamicTextureBuffer
-		.requestAllocation(bytesToAllocate)));
-	tr.getReporter().report(
-		"org.jtrfp.trcl.ObjectDefinition.arrayOffsetBytes",
-		String.format("%08X", window.getPhysicalAddressInBytes(0)));
-    }//end finalizeAllocation()
-
-    public ObjectDefinitionWindow() {
-	init();
+    public ObjectDefinitionWindow(TR tr) {
+	init(tr, "ObjectDefinitionWindow");
     }//end constructor
 }// end ObjectBlock

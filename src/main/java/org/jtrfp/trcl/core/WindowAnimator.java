@@ -16,6 +16,8 @@ public class WindowAnimator implements Tickable {
     public WindowAnimator(TriangleVertex2FlatDoubleWindow w, 
 	    int numElements, int numFrames,
 	    boolean loopInterpolate, Controller controller, IntTransferFunction indexXferFun){
+	if(controller==null) throw new NullPointerException("Controller is intolerably null.");
+	if(w==null) throw new NullPointerException("TriangleVertex2FlatDoubleWindow is intolerably null.");
 	this.w=w;
 	this.numElements=numElements;
 	this.numFrames=numFrames;
@@ -47,7 +49,8 @@ public class WindowAnimator implements Tickable {
 	    final double val = frames[index][lowFrame]*lI+frames[index][hiFrame]*hI;
 	    //System.out.println("Element index="+index+" location="+indexXferFun.transfer(index));
 	    //if(debugName!=null)if(debugName.contains("uvAnimator"))System.out.println("name: "+debugName+": "+indexXferFun.transfer(index)+" set to "+val);
-	    w.set(indexXferFun.transfer(index), val);
+	    w.set(
+		    indexXferFun.transfer(index), val);
 	}//end for(numElements)
     }//update()
     /**

@@ -281,8 +281,6 @@ public class WorldObject implements PositionedRenderable {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	int vec4Counter = primitiveList.getTotalSizeInVec4s();
-	int primitiveListByteAddress = primitiveList
-		.getPhysicalStartAddressInBytes();
 	final int vec4sPerBlock = primitiveList.getPrimitiveSizeInVec4s()
 		* (GPU_VERTICES_PER_BLOCK / primitiveList
 			.getGPUVerticesPerPrimitive());
@@ -291,12 +289,17 @@ public class WorldObject implements PositionedRenderable {
 		.getPrimitiveSizeInVec4s());
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
+	int odCounter=0;
+	final int vec4sPerElement = primitiveList.getMemoryWindow().getObjectSizeInBytes()/GLTextureBuffer.BYTES_PER_VEC4;
+	final int elementsPerBlock = GPU_VERTICES_PER_BLOCK / vec4sPerElement;
 	for (final int index : objectDefinitions) {
-	    odw.matrixOffset.set(index, tr.getMatrixWindow()
+	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock)
+		    /GLTextureBuffer.BYTES_PER_VEC4;
+	    final int matrixOffsetVec4s=tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)
-		    / GLTextureBuffer.BYTES_PER_VEC4);
-	    odw.vertexOffset.set(index, primitiveListByteAddress
-		    / GLTextureBuffer.BYTES_PER_VEC4);
+		    / GLTextureBuffer.BYTES_PER_VEC4;
+	    odw.matrixOffset.set(index, matrixOffsetVec4s);
+	    odw.vertexOffset.set(index,vertexOffsetVec4s);
 	    odw.mode.set(index, primitiveList.getPrimitiveRenderMode());
 	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
 	    if (vec4Counter >= vec4sPerBlock) {
@@ -309,10 +312,9 @@ public class WorldObject implements PositionedRenderable {
 		throw new RuntimeException("Ran out of vec4s.");
 	    }
 	    vec4Counter -= vec4sPerBlock;
-	    primitiveListByteAddress += vec4sPerBlock
-		    * GLTextureBuffer.BYTES_PER_VEC4;
 	    indicesList.add(odw.getPhysicalAddressInBytes(index)
 		    / GLTextureBuffer.BYTES_PER_VEC4);
+	    odCounter++;
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)
 

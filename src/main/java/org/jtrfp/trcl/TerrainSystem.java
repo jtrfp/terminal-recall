@@ -46,6 +46,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
 		final double v[] = {1,1,0,0};
+		
+		//TODO: Means of ensuring we have the GL and the buffer is mapped.
+		
 		//Come up with a point list for tunnel entrances and exits
 		TDFFile.Tunnel [] tunnels = tdf.getTunnels();
 		final HashMap<Integer,TunnelPoint> points = new HashMap<Integer,TunnelPoint>();
@@ -64,13 +67,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		 }//end for(tunnels)
 		}//end if(tunnels)
 		
-		Future [] futures = new Future[height/chunkSideLength];
+		//Future [] futures = new Future[height/chunkSideLength];
 		int futureIndex=0;
 		//For each chunk
 		for(int gZ=0; gZ<height; gZ+=chunkSideLength){
 		    	final int _gZ=gZ;
-			futures[futureIndex++]=TR.threadPool.submit(new Runnable(){
-				public void run(){
+			//futures[futureIndex++]=TR.threadPool.submit(new Runnable(){
+			//	public void run(){
 					for(int gX=0; gX<width; gX+=chunkSideLength){
 					    //GROUND
 					    {//Start scope
@@ -167,11 +170,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							else {System.out.println("Rejected chunk: "+m.getDebugName());}
 					    	}//end scope(CEILING)
 						}//end for(gX)
-					}//end run(){}
-				});//end submit()
+			//		}//end run(){}
+			//	});//end submit()
 			}//end for(gZ)
 		//Wait to finish
-		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
+		//for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		terrainMirror.deactivate();
 		}//end constructor
 	

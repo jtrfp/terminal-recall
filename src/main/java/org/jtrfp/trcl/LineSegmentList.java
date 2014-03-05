@@ -25,40 +25,37 @@ public class LineSegmentList extends
     private final LineSegment[][] lineSegments;
 
     public LineSegmentList(LineSegment[][] lineSegments, String debugName, TR tr) {
-	super(debugName, lineSegments, LineSegmentWindow.createLineSegments(tr,
-		lineSegments[0].length), tr);
+	super(debugName, lineSegments, new LineSegmentWindow(tr,debugName), tr);
 	this.lineSegments = lineSegments;
     }
 
     @Override
     public void uploadToGPU(GL3 gl) {
-	int sIndex = 0;
-	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
+	final LineSegmentWindow lsw = (LineSegmentWindow)getMemoryWindow();
 	LineSegment[] frame = lineSegments[0];
 	for (LineSegment ls : frame) {
-	    final int overlayIndex = sIndex + this.getGPUPrimitiveStartIndex();
+	    final int sIndex=lsw.create();
 	    // P1
-	    lsw.x1.set(overlayIndex,
+	    lsw.x1.set(sIndex,
 		    (short) applyScale(Math.round(ls.getX()[0])));
-	    lsw.y1.set(overlayIndex,
+	    lsw.y1.set(sIndex,
 		    (short) applyScale(Math.round(ls.getY()[0])));
-	    lsw.z1.set(overlayIndex,
+	    lsw.z1.set(sIndex,
 		    (short) applyScale(Math.round(ls.getZ()[0])));
 	    // P2
-	    lsw.x2.set(overlayIndex,
+	    lsw.x2.set(sIndex,
 		    (short) applyScale(Math.round(ls.getX()[1])));
-	    lsw.y2.set(overlayIndex,
+	    lsw.y2.set(sIndex,
 		    (short) applyScale(Math.round(ls.getY()[1])));
-	    lsw.z2.set(overlayIndex,
+	    lsw.z2.set(sIndex,
 		    (short) applyScale(Math.round(ls.getZ()[1])));
 	    // RGB
-	    lsw.red.set(overlayIndex, (byte) ls.getColor().getRed());
-	    lsw.green.set(overlayIndex, (byte) ls.getColor().getGreen());
-	    lsw.blue.set(overlayIndex, (byte) ls.getColor().getBlue());
+	    lsw.red.set(sIndex, (byte) ls.getColor().getRed());
+	    lsw.green.set(sIndex, (byte) ls.getColor().getGreen());
+	    lsw.blue.set(sIndex, (byte) ls.getColor().getBlue());
 	    // THICKNESS
-	    lsw.thickness.set(overlayIndex,
+	    lsw.thickness.set(sIndex,
 		    (byte) ((byte) Math.round(ls.getThickness()) & 0xFF));
-	    sIndex++;
 	}// end for(lineSegments)
     }// end uploadToGPU
 

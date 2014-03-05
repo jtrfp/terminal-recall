@@ -17,9 +17,7 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
-import org.jtrfp.trcl.gpu.GlobalDynamicTextureBuffer;
 import org.jtrfp.trcl.mem.MemoryWindow;
-import org.jtrfp.trcl.mem.SubByteBuffer;
 
 public class LineSegmentWindow extends MemoryWindow{
     // 16 bytes in a vec4, 1 vec4 per LineSegment
@@ -40,19 +38,19 @@ public class LineSegmentWindow extends MemoryWindow{
     public final ByteVariable green = new ByteVariable();
     public final ByteVariable blue = new ByteVariable();
 
-    public LineSegmentWindow() {
-	init();
+    public LineSegmentWindow(TR tr, String debugName) {
+	init(tr, "LineSegmentWindow."+debugName);
     }
-
+/*
     static {
 	GlobalDynamicTextureBuffer
 		.addAllocationToFinalize(LineSegmentWindow.class);
-    }
+    }*/
 
     public static void finalizeAllocation(TR tr) {
+	/*
 	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
-	int bytesToAllocate = lsw.getNumObjects()
-		* LineSegmentWindow.BYTES_PER_SEGMENT;
+	int bytesToAllocate = lsw.getNumObjects()*lsw.getObjectSizeInBytes();
 	System.out.println("LineSegments: Allocating " + bytesToAllocate
 		+ " bytes of GPU resident RAM.");
 	tr.getLineSegmentWindow().setBuffer(
@@ -60,14 +58,6 @@ public class LineSegmentWindow extends MemoryWindow{
 			GlobalDynamicTextureBuffer.getLogicalMemory(),
 			GlobalDynamicTextureBuffer
 				.requestAllocation(bytesToAllocate)));
-    }
-
-    // TODO: Convert to a straight page-sized block, return a window.
-    public static int createLineSegments(TR tr, int numLineSegments) {
-	final int startIndex = tr.getLineSegmentWindow().create();
-	for (int i = 1; i < numLineSegments; i++) {
-	    tr.getLineSegmentWindow().create();
-	}
-	return startIndex;
+	*/
     }
 }// end LineSegment

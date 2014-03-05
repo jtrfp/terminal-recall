@@ -22,10 +22,14 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.Map.Entry;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -39,7 +43,6 @@ import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
-import org.jtrfp.trcl.LineSegmentWindow;
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
@@ -76,7 +79,7 @@ public final class TR
 	private ResourceManager resourceManager;
 	public static final ExecutorService threadPool = Executors.newCachedThreadPool();//TODO: Migrate to ThreadManager
 	private final ThreadManager threadManager;
-	private final Renderer renderer;
+	private Renderer renderer;
 	private final CollisionManager collisionManager = new CollisionManager(this);
 	private final Reporter reporter = new Reporter();
 	private OverworldSystem overworldSystem;
@@ -86,18 +89,10 @@ public final class TR
 	private NAVSystem navSystem;
 	private HUDSystem hudSystem;
 	private Mission currentMission;
-	private final MatrixWindow matrixWindow = new MatrixWindow();
-	private final ObjectListWindow objectListWindow = new ObjectListWindow();
-	private final TriangleVertexWindow triangleVertexWindow = new TriangleVertexWindow();
-	private final TriangleVertex2FlatDoubleWindow tv2fdWindow = new TriangleVertex2FlatDoubleWindow(triangleVertexWindow);
-	private final LineSegmentWindow lsWindow = new LineSegmentWindow();
-	private final ObjectDefinitionWindow odWindow = new ObjectDefinitionWindow();
-	/*
-	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor
-			(Runtime.getRuntime().availableProcessors(),Runtime.getRuntime().availableProcessors()*2,
-			2000,TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>());
-	*/
+	
+	private MatrixWindow matrixWindow ;
+	private ObjectListWindow objectListWindow;
+	private ObjectDefinitionWindow odWindow;
 	private TRConfiguration trConfig;
 	private GL3 glCache;
 	private ByteOrder byteOrder;
@@ -152,9 +147,7 @@ public final class TR
 			}});
 		}catch(Exception e){e.printStackTrace();}
 		threadManager = new ThreadManager(this);
-		gpu.takeGL();
-		renderer=new Renderer(gpu);
-		gpu.releaseGL();
+		initializeGraphicsEngine();
 		setResourceManager(new ResourceManager(this));
 		world = new World(
 				256*mapSquareSize,
@@ -163,6 +156,29 @@ public final class TR
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		getRenderer().setRootGrid(world);
 		}//end constructor
+	
+	private void initializeGraphicsEngine(){
+	    System.out.println("Initializing graphics engine...");
+	    final CyclicBarrier barrier = new CyclicBarrier(2);
+	    gpu.addGLEventListener(new GLEventListener(){
+		@Override
+		public void init(GLAutoDrawable drawable) {
+		    renderer=new Renderer(gpu);
+		    matrixWindow = new MatrixWindow(TR.this);
+		    objectListWindow = new ObjectListWindow(TR.this);
+		    odWindow = new ObjectDefinitionWindow(TR.this);
+		    try{barrier.await();}catch(Exception e){}
+		}
+		@Override
+		public void dispose(GLAutoDrawable drawable) {}
+		@Override
+		public void display(GLAutoDrawable drawable) {}
+		@Override
+		public void reshape(GLAutoDrawable drawable, int x, int y,
+			int width, int height) {}});
+	    try{barrier.await();}catch(Exception e){}
+	    System.out.println("...Done");
+	}//end initializeRenderingEngine()
 	
 	public void showStopper(final Exception e)
 		{try{
@@ -415,13 +431,12 @@ public final class TR
 	public void gatherSysInfo(){
     	    final GPU gpu = getGPU();
     	    final Reporter r = getReporter();
-    	    GL3 gl = gpu.takeGL();
+    	    gpu.getGl().getContext().makeCurrent();
     	    r.report("org.jtrfp.trcl.flow.RunMe.glVendor", gpu.glGetString(GL3.GL_VENDOR));
     	    r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", gpu.glGetString(GL3.GL_RENDERER));
     	    r.report("org.jtrfp.trcl.flow.RunMe.glVersion", gpu.glGetString(GL3.GL_VERSION));
-    	    getGPU().releaseGL();
     	    r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime.getRuntime().availableProcessors());
-    	
+    	    gpu.getGl().getContext().release();
     	    for(Entry<Object,Object> prop:System.getProperties().entrySet())
     		{r.report((String)prop.getKey(),prop.getValue());}
     	    }//end gatherSysInfo()
@@ -473,31 +488,10 @@ public final class TR
 	}
 
 	/**
-	 * @return the tv2fdWindow
-	 */
-	public TriangleVertex2FlatDoubleWindow getTv2fdWindow() {
-	    return tv2fdWindow;
-	}
-
-	/**
-	 * @return the triangleVertexWindow
-	 */
-	public TriangleVertexWindow getTriangleVertexWindow() {
-	    return triangleVertexWindow;
-	}
-
-	/**
 	 * @return the objectListWindow
 	 */
 	public ObjectListWindow getObjectListWindow() {
 	    return objectListWindow;
-	}
-
-	/**
-	 * @return the lsWindow
-	 */
-	public LineSegmentWindow getLineSegmentWindow() {
-	    return lsWindow;
 	}
 
 	/**

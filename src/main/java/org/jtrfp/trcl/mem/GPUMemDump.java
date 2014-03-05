@@ -23,12 +23,10 @@ public class GPUMemDump {
 	RandomAccessFile raf = new RandomAccessFile(outFile,"rw");
 	raf.setLength(gpuMemSize);
 	FileChannel channel = raf.getChannel();
-	gpu.takeGL();
 	MappedByteBuffer bb = channel.map(MapMode.READ_WRITE, 0, gpuMemSize);
 	memMgr.dumpAllGPUMemTo(bb);
 	raf.close();}
 	catch(Exception e){e.printStackTrace();}
-	gpu.releaseGL();
     }//end constructor
 
 }//end GPUMemDump

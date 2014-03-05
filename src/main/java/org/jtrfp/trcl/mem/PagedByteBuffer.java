@@ -6,7 +6,7 @@ import org.jtrfp.trcl.core.IndexPool;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
-    public static final int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Vertex Block is 1536 bytes
+    public static final int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Triangle Vertex Block is 1536 bytes
     private 		int [] 		pageTable;//Using array since performance is crucial
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;
@@ -22,6 +22,13 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	}//end for(sizeInPages)
     }//end constructor
     
+    public int sizeInPages(){
+	return pageTable.length;
+    }
+    public int logicalPage2PhysicalPage(int logicalPage){
+	return pageTable[logicalPage];
+    }
+    
     private static int sizeInPages(int sizeInBytes){
 	return index2Page(sizeInBytes)+1;
     }
@@ -31,7 +38,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private static int pageModulus(int indexInBytes){
 	return indexInBytes%PAGE_SIZE_BYTES;
     }
-    private final int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
+    private int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
 	return (PAGE_SIZE_BYTES*pageTable[index2Page(logicalIndexInBytes)])+pageModulus(logicalIndexInBytes);
     }
 
@@ -74,7 +81,8 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer putShort(int indexInBytes, short val) {
-	intrinsic[0].putShort(logicalIndex2PhysicalIndex(indexInBytes), val);
+	int index=logicalIndex2PhysicalIndex(indexInBytes);
+	intrinsic[0].putShort(index, val);
 	return this;
     }
 
@@ -102,6 +110,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer put(int startIndexInBytes, ByteBuffer src) {
+	if(logicalIndex2PhysicalIndex(startIndexInBytes)==0)throw new RuntimeException("ZERO!");
 	intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
 	intrinsic[0].put(src);
 	return this;
@@ -109,7 +118,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer putInt(int indexInBytes, int val) {
-	intrinsic[0].putInt(indexInBytes,val);
+	intrinsic[0].putInt(logicalIndex2PhysicalIndex(indexInBytes),val);
 	return this;
     }
 
@@ -120,11 +129,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public double getFloat(int posInBytes) {
-	return intrinsic[0].getFloat(posInBytes);
+	return intrinsic[0].getFloat(logicalIndex2PhysicalIndex(posInBytes));
     }
 
     @Override
     public Integer getInt(int posInBytes) {
-	return intrinsic[0].getInt(posInBytes);
+	return intrinsic[0].getInt(logicalIndex2PhysicalIndex(posInBytes));
     }
 }//end PageByteBuffer

@@ -36,35 +36,28 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		final Model [] models = new Model[defs.size()];
-		final GL3 gl = world.getTr().getGPU().takeGL();
 		final TR tr = world.getTr();
 		
-		tr.getGPU().releaseGL();
-		
-		Future []futures = new Future[defs.size()];
+		//Future []futures = new Future[defs.size()];
 		//Get BIN models
 		for(int i=0; i<defs.size(); i++){
 			final int index = i;
-			futures[i]=TR.threadPool.submit(new Runnable(){
-				public void run(){
+			//futures[i]=TR.threadPool.submit(new Runnable(){
+			//	public void run(){
 					final EnemyDefinition def = defs.get(index);
-					tr.getGPU().takeGL();
-					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),gl);}
+					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),tr.getGPU().getGl());}
 					catch(Exception e){e.printStackTrace();}
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
-					tr.getGPU().releaseGL();
-					}
-				});
+			//		}
+			//	});
 			final Reporter reporter = tr.getReporter();
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
 			}//end for(i:defs)
-		for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
+		//for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
 		
 		for(EnemyPlacement pl:places){
-			tr.getGPU().releaseGL();//Feed the dog
-			tr.getGPU().takeGL();
 			Model model =models[pl.getDefIndex()];
 			if(model!=null){
 				final EnemyDefinition def = defs.get(pl.getDefIndex());
@@ -80,7 +73,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				if(def.getLogic()==EnemyLogic.groundStaticRuin){
 				    //Spawn a second, powerup-free model using the simplemodel
 				    Model simpleModel=null;
-				    try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPalette(),gl);}
+				    try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPalette(),tr.getGPU().getGl());}
 				    catch(Exception e){e.printStackTrace();}
 				    EnemyDefinition ed = new EnemyDefinition();
 				    ed.setLogic(EnemyLogic.groundDumb);

@@ -15,15 +15,19 @@ public final class MemoryManager {
     private final IndexPool 			pageIndexPool 	= new IndexPool();
     private final ByteBuffer [] 		physicalMemory 	= new ByteBuffer[1];
     private final ReallocatableGLTextureBuffer 	glPhysicalMemory;
+    private final GPU				gpu;
     
     public MemoryManager(GPU gpu){
+	this.gpu=gpu;
 	glPhysicalMemory=new ReallocatableGLTextureBuffer(gpu);
 	glPhysicalMemory.reallocate(PagedByteBuffer.PAGE_SIZE_BYTES);
+	physicalMemory[0] = glPhysicalMemory.map();
 	glPhysicalMemory.setUsageHint(MemoryUsageHint.DymamicDraw);
 	pageIndexPool.setGrowthBehavior(new GrowthBehavior(){
 	    @Override
 	    public int grow(int previousMaxCapacity) {
 		glPhysicalMemory.reallocate(previousMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES*2);
+		physicalMemory[0] = glPhysicalMemory.map();
 		return previousMaxCapacity*2;
 	    }//end grow(...)
 	});

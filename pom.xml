@@ -103,6 +103,28 @@
 					<stagingProfileId>1f138f325160b3</stagingProfileId>
 				</configuration>
 			</plugin>
+			<plugin>
+  				<artifactId>maven-assembly-plugin</artifactId>
+  				 <configuration>
+    			  <archive>
+      				<manifest>
+        			 <mainClass>org.jtrfp.trcl.flow.RunMe</mainClass>
+      				</manifest>
+    			  </archive>
+    			<descriptorRefs>
+      			 <descriptorRef>terminal-recall-runme</descriptorRef>
+    			</descriptorRefs>
+  			   </configuration>
+  			   <executions>
+    			<execution>
+      			 <id>make-assembly</id>
+      			 <phase>package</phase>
+      			  <goals>
+        			<goal>single</goal>
+      			  </goals>
+    			</execution>
+  			   </executions>
+			  </plugin>
 		</plugins>
 	</build>
 </project>

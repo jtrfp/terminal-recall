@@ -290,9 +290,10 @@ public class WorldObject implements PositionedRenderable {
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
 	int odCounter=0;
-	final int primitivesPerObjectDef=GPU_VERTICES_PER_BLOCK / primitiveList.getGPUVerticesPerPrimitive();
+	final int vec4sPerElement = primitiveList.getMemoryWindow().getObjectSizeInBytes()/GLTextureBuffer.BYTES_PER_VEC4;
+	final int elementsPerBlock = GPU_VERTICES_PER_BLOCK / vec4sPerElement;
 	for (final int index : objectDefinitions) {
-	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*primitivesPerObjectDef)
+	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock)
 		    /GLTextureBuffer.BYTES_PER_VEC4;
 	    final int matrixOffsetVec4s=tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)

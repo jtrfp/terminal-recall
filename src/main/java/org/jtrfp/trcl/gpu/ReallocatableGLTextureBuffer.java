@@ -86,7 +86,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 	bb.clear();
 	bb.put(temp);
 	bb.clear();
-	unmap();
+	buffer.unmap(gpu.getGl());
     }
 
     @Override

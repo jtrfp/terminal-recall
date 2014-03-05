@@ -17,8 +17,8 @@ package org.jtrfp.trcl.obj;
 
 import org.jtrfp.trcl.SpacePartitioningGrid;
 
-public interface Positionable
-	{
-	public double[] getPosition();
-	public void setContainingGrid(SpacePartitioningGrid grid);
-	}
+public interface Positionable {
+    public double[] getPosition();
+
+    public void setContainingGrid(SpacePartitioningGrid grid);
+}

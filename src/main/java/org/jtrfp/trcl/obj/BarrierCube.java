@@ -2,7 +2,6 @@ package org.jtrfp.trcl.obj;
 
 import java.util.concurrent.Future;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.core.TR;

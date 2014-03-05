@@ -106,4 +106,4 @@ public class Smoke extends BillboardSprite {
 		    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*(NUM_FRAMES);
 		}//end reset()
 	    }//end SmokeBehavior
-}
+}//end Smoke

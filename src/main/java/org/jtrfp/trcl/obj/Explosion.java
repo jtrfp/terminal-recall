@@ -41,7 +41,6 @@ public class Explosion extends BillboardSprite {
 	final double [] superPos = super.getPosition();
 	Vect3D.subtract(getPosition(),type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.).toArray(),superPos);
 	super.notifyPositionChange();
-	//super.setPosition(pos.subtract(type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.)));
 	return this;
     }
     

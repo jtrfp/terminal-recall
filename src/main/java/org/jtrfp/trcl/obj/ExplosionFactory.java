@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.obj;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -22,35 +21,7 @@ public class ExplosionFactory {
 		    }
 	    }
 	}//end constructor()
-	/*
-	public synchronized Explosion triggerBillowExplosion(Vector3D location){
-	    billowIndex++;billowIndex%=billowExplosions.length;
-	    Explosion result = billowExplosions[billowIndex];
-	    result.destroy();
-	    result.resetExplosion();
-	    result.setPosition(location);
-	    tr.getWorld().add(result);
-	    return result;
-	}
-	public synchronized Explosion triggerBigExplosion(Vector3D location){
-	    bigExplosionIndex++;bigExplosionIndex%=bigExplosions.length;
-	    Explosion result = bigExplosions[bigExplosionIndex];
-	    result.destroy();
-	    result.resetExplosion();
-	    result.setPosition(location);
-	    tr.getWorld().add(result);
-	    return result;
-	}
-	public synchronized Explosion triggerBlastExplosion(Vector3D location){
-	    blastIndex++;blastIndex%=blastExplosions.length;
-	    Explosion result = blastExplosions[blastIndex];
-	    result.destroy();
-	    result.resetExplosion();
-	    result.setPosition(location);
-	    tr.getWorld().add(result);
-	    return result;
-	}
-*/
+	
 	public Explosion triggerExplosion(double [] position, ExplosionType type) {
 	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_EXPLOSIONS_PER_POOL;
 	    Explosion result = allExplosions[type.ordinal()][indices[type.ordinal()]];

@@ -2,9 +2,7 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
-import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
@@ -14,7 +12,6 @@ import org.jtrfp.trcl.flow.NAVObjective;
 
 public class Checkpoint extends BillboardSprite {
 private NAVObjective objective;
-private Mission m;
 private boolean includeYAxisInCollision=true;
     public Checkpoint(TR tr) {
 	super(tr);
@@ -30,7 +27,6 @@ private boolean includeYAxisInCollision=true;
 
     public void setObjectiveToRemove(NAVObjective objective, Mission m) {
 	this.objective=objective;
-	this.m=m;
     }//end setObjectiveToRemove(...)
     
     private class CheckpointBehavior extends Behavior implements CollisionBehavior{

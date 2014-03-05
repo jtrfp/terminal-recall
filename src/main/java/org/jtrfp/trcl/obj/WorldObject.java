@@ -39,7 +39,6 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
-import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class WorldObject implements PositionedRenderable {
     public static final int GPU_VERTICES_PER_BLOCK = 96;
@@ -282,8 +281,6 @@ public class WorldObject implements PositionedRenderable {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	int vec4Counter = primitiveList.getTotalSizeInVec4s();
-	/*final int [] primitiveListPhysicalPages = primitiveList
-		.getPhysicalPages();*/
 	final int vec4sPerBlock = primitiveList.getPrimitiveSizeInVec4s()
 		* (GPU_VERTICES_PER_BLOCK / primitiveList
 			.getGPUVerticesPerPrimitive());
@@ -292,8 +289,6 @@ public class WorldObject implements PositionedRenderable {
 		.getPrimitiveSizeInVec4s());
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
-	//System.out.println("numPrimitives="+primitiveList.getNumPrimitives());
-	//System.out.println("numObjectDefinitions="+objectDefinitions.length+" numPhysicalPages="+primitiveListPhysicalPages.length);
 	int odCounter=0;
 	final int primitivesPerObjectDef=GPU_VERTICES_PER_BLOCK / primitiveList.getGPUVerticesPerPrimitive();
 	for (final int index : objectDefinitions) {
@@ -302,13 +297,8 @@ public class WorldObject implements PositionedRenderable {
 	    final int matrixOffsetVec4s=tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)
 		    / GLTextureBuffer.BYTES_PER_VEC4;
-	    if(vertexOffsetVec4s==8448)System.err.println("N!! "+index+" "+
-		    String.format("0x%06X", odw.getPhysicalAddressInBytes(0))+
-		    "vtx="+String.format("0x%06X", vertexOffsetVec4s));
 	    odw.matrixOffset.set(index, matrixOffsetVec4s);
 	    odw.vertexOffset.set(index,vertexOffsetVec4s);
-	    /*odw.vertexOffset.set(index, PagedByteBuffer.PAGE_SIZE_BYTES*primitiveListPhysicalPages[odCounter]
-		    / GLTextureBuffer.BYTES_PER_VEC4);*/
 	    odw.mode.set(index, primitiveList.getPrimitiveRenderMode());
 	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
 	    if (vec4Counter >= vec4sPerBlock) {

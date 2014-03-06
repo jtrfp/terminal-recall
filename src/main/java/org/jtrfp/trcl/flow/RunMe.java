@@ -44,6 +44,7 @@ public class RunMe{
 				);
 		if(args.length>=2){
 			try {
+			    	JarExploder.explodeLibFiles();
 				TR tr = new TR();
 				tr.gatherSysInfo();
 				for(int argI=0; argI<args.length-1; argI++)

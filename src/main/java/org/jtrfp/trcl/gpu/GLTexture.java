@@ -4,9 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.glu.gl2.GLUgl2;
 
 public class GLTexture
 	{
@@ -31,14 +29,12 @@ public class GLTexture
 		{
 		rawSideLength = (int)Math.sqrt(buf.capacity()/4);
 		buf.rewind();
-		System.out.println("Creating a new OpenGL texture for megatexture...");
+		System.out.println("Creating a new OpenGL texture for texture palette...");
 		
 		System.out.println("\t...Done.");
-		System.out.println("Uploading megatexture to OpenGL...");
+		System.out.println("Uploading texture palette to OpenGL...");
 		
-		GLUgl2 glu = new GLUgl2();
 		GL3 gl = gpu.getGl();
-		System.out.println("glu: "+glu.getCurrentGL()+" gl: "+gl);
 		gl.glBindTexture(GL3.GL_TEXTURE_2D, textureID);
 		FloatBuffer isoSize = FloatBuffer.wrap(new float[]{0});
 		gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);
@@ -46,13 +42,11 @@ public class GLTexture
 		gl.glTexParameterf(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, isoSize.get(0));
 		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_REPEAT);
 		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_REPEAT);
-		/*gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, 
-		                   GL3.GL_LINEAR_MIPMAP_LINEAR);*/
 		gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, 
 		                   GL3.GL_LINEAR_MIPMAP_LINEAR);
 		System.out.println("Uploading texture...");
-		glu.gluBuild2DMipmaps( GL3.GL_TEXTURE_2D, GL3.GL_RGBA4, rawSideLength, rawSideLength, 
-				GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
+		gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA4, rawSideLength, rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
+		gl.glGenerateMipmap(GL3.GL_TEXTURE_2D);
 		System.out.println("\t...Done.");
 		}
 	
@@ -67,10 +61,10 @@ public class GLTexture
 		{return textureID;}
 	
 	public static void specifyTextureUnit(GL3 gl,int unitNumber)
-		{gl.glActiveTexture(GL2.GL_TEXTURE0+unitNumber);}
+		{gl.glActiveTexture(GL3.GL_TEXTURE0+unitNumber);}
 	
 	public void bind(GL3 gl)
-		{gl.glBindTexture(GL2.GL_TEXTURE_2D, getTextureID());}
+		{gl.glBindTexture(GL3.GL_TEXTURE_2D, getTextureID());}
 	
 	public int getCurrentSideLength(){return rawSideLength;}
 	}//GLTexture

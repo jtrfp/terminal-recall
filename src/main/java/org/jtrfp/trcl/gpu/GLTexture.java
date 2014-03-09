@@ -1,23 +1,35 @@
 package org.jtrfp.trcl.gpu;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.media.opengl.GL3;
 
-public class GLTexture {
+public final class GLTexture {
     private final GPU gpu;
     private final int textureID;
     private int rawSideLength;
+    private GL3 gl;
 
-    GLTexture(GPU gpu) {
+    public GLTexture(GPU gpu) {
 	System.out.println("Creating GL Texture...");
 	this.gpu = gpu;
 	textureID = gpu.newTextureID();
+	gl = gpu.getGl();
 	// Setup the empty rows
 	System.out.println("...Done.");
     }// end constructor
+    
+    public GLTexture setImage(int internalOrder, int width, int height, int colorOrder, int numericalFormat, Buffer pixels){
+	gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	return this;
+    }
+    public GLTexture setParameteri(int parameterName, int value){
+	gl.glTexParameteri(textureID, parameterName, value);
+	return this;
+    }
 
     /**
      * Takes a square texture in RGBA 8888 format. Automatically determines
@@ -57,7 +69,6 @@ public class GLTexture {
     }
 
     public void delete() {
-	GL3 gl = gpu.getGl();
 	gl.glBindTexture(GL3.GL_TEXTURE_2D, textureID);
 	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID }));
     }
@@ -65,16 +76,34 @@ public class GLTexture {
     int getTextureID() {
 	return textureID;
     }
+    
+    public void setGl(GL3 gl){
+	this.gl=gl;
+    }
 
     public static void specifyTextureUnit(GL3 gl, int unitNumber) {
 	gl.glActiveTexture(GL3.GL_TEXTURE0 + unitNumber);
     }
-
-    public void bind(GL3 gl) {
+    
+    public GLTexture bind(){
+	return bind(gl);
+    }
+    
+    public GLTexture bind(GL3 gl) {
 	gl.glBindTexture(GL3.GL_TEXTURE_2D, getTextureID());
+	return this;
     }
 
     public int getCurrentSideLength() {
 	return rawSideLength;
+    }
+
+    public GLTexture setMagFilter(int mode) {
+	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, mode);
+	return this;
+    }
+    public GLTexture setMinFilter(int mode){
+	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, mode);
+	return this;
     }
 }// GLTexture

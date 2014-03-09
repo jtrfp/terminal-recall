@@ -113,4 +113,10 @@ public class GPU{
 	public MemoryManager getMemoryManager() {
 	    return memoryManager;
 	}
+	public GLFrameBuffer newFrameBuffer() {
+	    return new GLFrameBuffer(gl);
+	}
+	public GLRenderBuffer newRenderBuffer() {
+	    return new GLRenderBuffer(gl);
+	}
 	}//end GPU

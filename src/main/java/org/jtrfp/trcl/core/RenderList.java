@@ -20,6 +20,8 @@ import java.nio.IntBuffer;
 import java.util.Collection;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.ObjectListWindow;
@@ -50,7 +52,7 @@ public class RenderList{
 	private final int dummyBufferID;
 	private int numOpaqueBlocks;
 	private int numTransparentBlocks;
-	private final GLUniform renderListOffsetUniform/*,renderModeUniform*/,renderListPageTable;
+	private final GLUniform renderListOffsetUniform/*,renderModeUniform*/,renderListPageTable, screenWidth, screenHeight;
 	private int [] hostRenderListPageTable;
 	private int modulusUintOffset;
 	private GLTexture intermediateColorTexture;
@@ -79,7 +81,7 @@ public class RenderList{
 			{for(PositionedRenderable r:items){submit(r);}}
 		};
 	
-	public RenderList(GL3 gl, GLProgram prg, TR tr){
+	public RenderList(GL3 gl, GLProgram primaryProgram, GLProgram deferredProgram, TR tr){
 	    	//Build VAO
 		IntBuffer ib = IntBuffer.allocate(1);
 		final GPU gpu = tr.getGPU();
@@ -91,9 +93,10 @@ public class RenderList{
 		gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0 );
-		renderListOffsetUniform=prg.getUniform("renderListOffset");
-		//renderModeUniform=prg.getUniform("renderFlags");
-		renderListPageTable=prg.getUniform("renderListPageTable");
+		renderListOffsetUniform=primaryProgram.getUniform("renderListOffset");
+		screenWidth=deferredProgram.getUniform("screenWidth");
+		screenHeight=deferredProgram.getUniform("screenHeight");
+		renderListPageTable=primaryProgram.getUniform("renderListPageTable");
 		hostRenderListPageTable=new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES/PagedByteBuffer.PAGE_SIZE_BYTES];
 		
 		intermediateColorTexture=gpu.
@@ -119,10 +122,33 @@ public class RenderList{
 			for(int i=0; i<hostRenderListPageTable.length;i++){
 			    hostRenderListPageTable[i]=RenderList.this.tr.getObjectListWindow().logicalPage2PhysicalPage(i);
 			}//end for(hostRenderListPageTable.length)
+			RenderList.this.tr.getRenderer().getPrimaryProgram().use();
 			renderListPageTable.setArrayui(hostRenderListPageTable);
 			modulusUintOffset = (RenderList.this.tr.getObjectListWindow().getPhysicalAddressInBytes(0)%PagedByteBuffer.PAGE_SIZE_BYTES)/4;
+			
 		    }});
-	    }
+		tr.getGPU().addGLEventListener(new GLEventListener(){
+		    @Override
+		    public void init(GLAutoDrawable drawable) {}
+		    @Override
+		    public void dispose(GLAutoDrawable drawable) {}
+		    @Override
+		    public void display(GLAutoDrawable drawable) {}
+		    @Override
+		    public void reshape(GLAutoDrawable drawable, int x, int y,
+			    int width, int height) {
+			RenderList.this.tr.getRenderer().getDeferredProgram().use();
+			intermediateDepthRenderBuffer.
+				bind().
+				setStorage(GL3.GL_DEPTH_COMPONENT,width, height);
+			intermediateColorTexture.
+				bind().
+				setImage(GL3.GL_RGB, width, height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE,null);
+			screenWidth.setui(width);
+			screenHeight.setui(height);
+			RenderList.this.tr.getRenderer().getPrimaryProgram().use();
+		    }});
+	    }//end constructor
 	private static int frameCounter=0;
 	
 	private void updateStatesToGPU(){
@@ -133,6 +159,7 @@ public class RenderList{
 		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
 	
 	public void render(GL3 gl){
+	    	tr.getRenderer().getPrimaryProgram().use();
 	    	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, intermediateFrameBuffer.getId());
 	    	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER,dummyBufferID);
 	    	gl.glClear(GL3.GL_COLOR_BUFFER_BIT|GL3.GL_DEPTH_BUFFER_BIT);

@@ -20,11 +20,13 @@
 
 // INPUTS
 uniform sampler2D primaryRendering;
+uniform uint screenWidth;
+uniform uint screenHeight;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-fragColor.rgba = texture2D(primaryRendering,vec2(gl_FragCoord.x/1024,gl_FragCoord.y/768));
+fragColor.rgba = texture2D(primaryRendering,vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight));
 }

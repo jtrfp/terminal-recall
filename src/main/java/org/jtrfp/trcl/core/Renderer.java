@@ -67,11 +67,6 @@ public class Renderer {
 	fogEnd = primaryProgram.getUniform("fogEnd");
 	fogColor = primaryProgram.getUniform("fogColor");
 
-	System.out.println("Initializing RenderList...");
-	final TR tr = gpu.getTr();
-	renderList[0] = new RenderList(gl, primaryProgram, tr);
-	renderList[1] = new RenderList(gl, primaryProgram, tr);
-	
 	//DEFERRED PROGRAM
 	vertexShader = gpu.newVertexShader();
 	fragmentShader = gpu.newFragmentShader();
@@ -94,7 +89,12 @@ public class Renderer {
 	deferredProgram.use();
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	primaryProgram.use();
-    }//end Renderer
+	
+	System.out.println("Initializing RenderList...");
+	final TR tr = gpu.getTr();
+	renderList[0] = new RenderList(gl, primaryProgram,deferredProgram, tr);
+	renderList[1] = new RenderList(gl, primaryProgram,deferredProgram, tr);
+    }//end constructor
 
     private void ensureInit() {
 	if (initialized)

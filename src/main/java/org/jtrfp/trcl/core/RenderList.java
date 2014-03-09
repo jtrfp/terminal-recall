@@ -20,14 +20,16 @@ import java.nio.IntBuffer;
 import java.util.Collection;
 
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
+import org.jtrfp.trcl.gpu.GLRenderBuffer;
+import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -51,6 +53,10 @@ public class RenderList{
 	private final GLUniform renderListOffsetUniform,renderModeUniform,renderListPageTable;
 	private int [] hostRenderListPageTable;
 	private int modulusUintOffset;
+	private GLTexture intermediateColorTexture;
+	//private final int intermediateFrameBuffer;
+	private GLFrameBuffer intermediateFrameBuffer;
+	private GLRenderBuffer intermediateDepthRenderBuffer;
 	
 	private int opaqueIndex=0,blendIndex=0;
 	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
@@ -76,6 +82,7 @@ public class RenderList{
 	public RenderList(GL3 gl, GLProgram prg, TR tr){
 	    	//Build VAO
 		IntBuffer ib = IntBuffer.allocate(1);
+		final GPU gpu = tr.getGPU();
 		this.tr=tr;
 		gl.glGenBuffers(1, ib);
 		ib.clear();
@@ -88,6 +95,24 @@ public class RenderList{
 		renderModeUniform=prg.getUniform("renderFlags");
 		renderListPageTable=prg.getUniform("renderListPageTable");
 		hostRenderListPageTable=new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES/PagedByteBuffer.PAGE_SIZE_BYTES];
+		
+		intermediateColorTexture=gpu.
+			newTexture().
+			bind().
+			setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE,null).
+			setMagFilter(GL3.GL_NEAREST).
+			setMinFilter(GL3.GL_NEAREST);
+		intermediateDepthRenderBuffer=gpu.
+			newRenderBuffer().
+			bind().
+			setStorage(GL3.GL_DEPTH_COMPONENT, 1024, 768);
+		/*
+		intermediateFrameBuffer=gpu.
+			newFrameBuffer().
+			bindToDraw().
+			attachDrawTexture(intermediateColorTexture,GL3.GL_COLOR_ATTACHMENT0).
+			attachDepthRenderBuffer(intermediateDepthRenderBuffer);
+		*/
 		tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable(){
 		    @Override
 		    public void run() {

@@ -40,10 +40,8 @@ uniform float fogStart;
 uniform float fogEnd;
 uniform uint renderListPageTable[85];
 
-in float dummy;
+layout (location = 0) in float dummy;
 uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
-
-
 
 //RENDER MODES
 const uint OPAQUE_PASS=0u;

@@ -36,6 +36,9 @@ smooth in float fogLevel;
 smooth in vec2 fragTexCoord;
 flat in uint packedFragData;
 
+// OUTPUTS
+layout(location = 0) out vec4 fragColor;
+
 uint bit(uint _input, uint index)
 	{return (_input >> index) & 0x00000001u;}
 
@@ -54,7 +57,7 @@ switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
 	{
 case RENDER_MODE_TRIANGLES:
 	vec4 color=texture2D(textureMap,fragTexCoord);
-	gl_FragColor = mix(
+	fragColor = mix(
 	    color,
 	    vec4(fogColor,1),
 	    fogLevel*color.a);
@@ -62,7 +65,7 @@ case RENDER_MODE_TRIANGLES:
 case RENDER_MODE_LINES:
 	float alpha;
 	alpha=(1-abs(fragTexCoord.y*pow(fragTexCoord.x,.5)))*.5;
-	gl_FragColor = mix(
+	fragColor = mix(
 	    vec4(
 	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_RED))/16,
 	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_GREEN))/16,

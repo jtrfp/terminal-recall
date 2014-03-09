@@ -106,13 +106,13 @@ public class RenderList{
 			newRenderBuffer().
 			bind().
 			setStorage(GL3.GL_DEPTH_COMPONENT, 1024, 768);
-		/*
+		
 		intermediateFrameBuffer=gpu.
 			newFrameBuffer().
 			bindToDraw().
 			attachDrawTexture(intermediateColorTexture,GL3.GL_COLOR_ATTACHMENT0).
 			attachDepthRenderBuffer(intermediateDepthRenderBuffer);
-		*/
+		
 		tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable(){
 		    @Override
 		    public void run() {
@@ -134,6 +134,7 @@ public class RenderList{
 		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
 	
 	public void render(GL3 gl){
+	    	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	    	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 		final int numOpaqueVertices = numOpaqueBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK+96;
 		final int numTransparentVertices = numTransparentBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK;
@@ -172,6 +173,11 @@ public class RenderList{
 		//////////
 		
 		gl.glDepthMask(true);
+		
+		//DEFERRED STAGE
+		//Set output to screen
+		//TODO:
+		
 		}//end render()
 	public Submitter<PositionedRenderable> getSubmitter()
 		{return submitter;}

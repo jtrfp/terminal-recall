@@ -36,186 +36,222 @@ import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class RenderList{
-	public static final int NUM_SUBPASSES=4;
-	public static final int NUM_BLOCKS_PER_SUBPASS=1024*4;
-	public static final int NUM_BLOCKS_PER_PASS=NUM_BLOCKS_PER_SUBPASS*NUM_SUBPASSES;
-	public static final int NUM_RENDER_PASSES=2;// Opaque + transparent
-	
-	private static final int OPAQUE_PASS=0;
-	private static final int BLEND_PASS=1;
-	
-	private final PositionedRenderable [] renderables = new PositionedRenderable[NUM_BLOCKS_PER_SUBPASS];
-	private int renderablesIndex=0;
-	private final TR tr;
-	
-	private final int dummyBufferID;
-	private int numOpaqueBlocks;
-	private int numTransparentBlocks;
-	private final GLUniform renderListOffsetUniform/*,renderModeUniform*/,renderListPageTable, screenWidth, screenHeight;
-	private int [] hostRenderListPageTable;
-	private int modulusUintOffset;
-	private GLTexture intermediateColorTexture;
-	//private final int intermediateFrameBuffer;
-	private GLFrameBuffer intermediateFrameBuffer;
-	private GLRenderBuffer intermediateDepthRenderBuffer;
-	
-	private int opaqueIndex=0,blendIndex=0;
-	private final Submitter<PositionedRenderable> submitter = new Submitter<PositionedRenderable>(){
-	    	@Override
-		public void submit(PositionedRenderable item)
-			{if(item instanceof WorldObject){if(!((WorldObject)item).isVisible()||!((WorldObject)item).isActive()){return;}}
-			final ByteBuffer opOD=item.getOpaqueObjectDefinitionAddresses();
-			final ByteBuffer trOD=item.getTransparentObjectDefinitionAddresses();
-			numOpaqueBlocks+=opOD.capacity()/4;
-			numTransparentBlocks+=trOD.capacity()/4;
-			renderables[renderablesIndex++]=item;
-			tr.getObjectListWindow().opaqueIDs.set(0, opaqueIndex, opOD);
-			opaqueIndex+=opOD.capacity();
-			tr.getObjectListWindow().blendIDs.set(0, blendIndex, trOD);
-			blendIndex+=trOD.capacity();
-			}//end submit(...)
+public class RenderList {
+    public static final int 	NUM_SUBPASSES 		= 4;
+    public static final int	NUM_BLOCKS_PER_SUBPASS 	= 1024 * 4;
+    public static final int	NUM_BLOCKS_PER_PASS 	= NUM_BLOCKS_PER_SUBPASS
+	    						* NUM_SUBPASSES;
+    public static final int	NUM_RENDER_PASSES 	= 2;// Opaque + transparent
+    private static final int	OPAQUE_PASS 		= 0;
+    private static final int	BLEND_PASS 		= 1;
 
-		@Override
-		public void submit(Collection<PositionedRenderable> items)
-			{for(PositionedRenderable r:items){submit(r);}}
-		};
-	
-	public RenderList(GL3 gl, GLProgram primaryProgram, GLProgram deferredProgram, TR tr){
-	    	//Build VAO
-		IntBuffer ib = IntBuffer.allocate(1);
-		final GPU gpu = tr.getGPU();
-		this.tr=tr;
-		gl.glGenBuffers(1, ib);
-		ib.clear();
-		dummyBufferID=ib.get();
-		gl.glBindBuffer(GL3.GL_ARRAY_BUFFER,dummyBufferID);
-		gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
-		gl.glEnableVertexAttribArray(0);
-		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0 );
-		renderListOffsetUniform=primaryProgram.getUniform("renderListOffset");
-		screenWidth=deferredProgram.getUniform("screenWidth");
-		screenHeight=deferredProgram.getUniform("screenHeight");
-		renderListPageTable=primaryProgram.getUniform("renderListPageTable");
-		hostRenderListPageTable=new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES/PagedByteBuffer.PAGE_SIZE_BYTES];
-		
-		intermediateColorTexture=gpu.
-			newTexture().
-			bind().
-			setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE,null).
-			setMagFilter(GL3.GL_NEAREST).
-			setMinFilter(GL3.GL_NEAREST);
-		intermediateDepthRenderBuffer=gpu.
-			newRenderBuffer().
-			bind().
-			setStorage(GL3.GL_DEPTH_COMPONENT, 1024, 768);
-		intermediateFrameBuffer=gpu.
-			newFrameBuffer().
-			bindToDraw().
-			attachDrawTexture(intermediateColorTexture,GL3.GL_COLOR_ATTACHMENT0).
-			attachDepthRenderBuffer(intermediateDepthRenderBuffer);
-		
-		tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable(){
-		    @Override
-		    public void run() {
-			System.out.println("hostRenderListPageTable length="+hostRenderListPageTable.length);
-			for(int i=0; i<hostRenderListPageTable.length;i++){
-			    hostRenderListPageTable[i]=RenderList.this.tr.getObjectListWindow().logicalPage2PhysicalPage(i);
-			}//end for(hostRenderListPageTable.length)
-			RenderList.this.tr.getRenderer().getPrimaryProgram().use();
-			renderListPageTable.setArrayui(hostRenderListPageTable);
-			modulusUintOffset = (RenderList.this.tr.getObjectListWindow().getPhysicalAddressInBytes(0)%PagedByteBuffer.PAGE_SIZE_BYTES)/4;
-			
-		    }});
-		tr.getGPU().addGLEventListener(new GLEventListener(){
-		    @Override
-		    public void init(GLAutoDrawable drawable) {}
-		    @Override
-		    public void dispose(GLAutoDrawable drawable) {}
-		    @Override
-		    public void display(GLAutoDrawable drawable) {}
-		    @Override
-		    public void reshape(GLAutoDrawable drawable, int x, int y,
-			    int width, int height) {
-			RenderList.this.tr.getRenderer().getDeferredProgram().use();
-			intermediateDepthRenderBuffer.
-				bind().
-				setStorage(GL3.GL_DEPTH_COMPONENT,width, height);
-			intermediateColorTexture.
-				bind().
-				setImage(GL3.GL_RGB, width, height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE,null);
-			screenWidth.setui(width);
-			screenHeight.setui(height);
-			RenderList.this.tr.getRenderer().getPrimaryProgram().use();
-		    }});
-	    }//end constructor
-	private static int frameCounter=0;
-	
-	private void updateStatesToGPU(){
-	    	for(int i=0; i<renderablesIndex; i++)
-			{renderables[i].updateStateToGPU();}}
-	
-	public void sendToGPU(GL3 gl)
-		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
-	
-	public void render(GL3 gl){
-	    	tr.getRenderer().getPrimaryProgram().use();
-	    	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, intermediateFrameBuffer.getId());
-	    	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER,dummyBufferID);
-	    	gl.glClear(GL3.GL_COLOR_BUFFER_BIT|GL3.GL_DEPTH_BUFFER_BIT);
-		final int numOpaqueVertices = numOpaqueBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK+96;
-		final int numTransparentVertices = numTransparentBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK;
-		//OPAQUE
-		//Turn on depth write, turn off transparency
-		gl.glDisable(GL3.GL_BLEND);
-		//renderModeUniform.set(OPAQUE_PASS);
-		final int verticesPerSubPass=(NUM_BLOCKS_PER_SUBPASS*GPUTriangleVertex.VERTICES_PER_BLOCK);
-		final int numSubPasses=(numOpaqueVertices/verticesPerSubPass)+1;
-		int remainingVerts=numOpaqueVertices;
-		
-		if(frameCounter==0){
-		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numOpaqueBlocks", ""+numOpaqueBlocks);
-		    tr.getReporter().report("org.jtrfp.trcl.core.RenderList.numTransparentBlocks", ""+numTransparentBlocks);
-		    }
-		
-		for(int sp=0; sp<numSubPasses; sp++){
-		    	final int numVerts=remainingVerts<=verticesPerSubPass?remainingVerts:verticesPerSubPass;
-			remainingVerts-=numVerts;
-			final int newOffset=modulusUintOffset+sp*NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
-			renderListOffsetUniform.setui(newOffset);
-			gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
-			}//end for(subpasses)
-		//TRANSPARENT
-		//Turn off depth write, turn on transparency
-		gl.glEnable(GL3.GL_BLEND);
-		gl.glDepthMask(false);
-		//////////
-		//gl.glDepthFunc(GL3.GL_ALWAYS);
-		/////////
-		renderListOffsetUniform.setui(modulusUintOffset+NUM_BLOCKS_PER_PASS);
-		//renderModeUniform.set(BLEND_PASS);
-		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
-		//////////
-		//gl.glDepthFunc(GL3.GL_LESS);
-		//////////
-		
-		//DEFERRED STAGE
-		tr.getRenderer().getDeferredProgram().use();
-		gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);//Zero means "Draw to screen"
-		GLTexture.specifyTextureUnit(gl, 1);
-		intermediateColorTexture.bind(gl);
-		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-		tr.getRenderer().getPrimaryProgram().use();
-		gl.glDepthMask(true);
-		}//end render()
-	public Submitter<PositionedRenderable> getSubmitter()
-		{return submitter;}
-
-	public void reset(){
-	    	renderablesIndex=0;
-		numOpaqueBlocks=0;
-		numTransparentBlocks=0;
-		blendIndex=0;
-		opaqueIndex=0;
+    private final 	TR 			tr;
+    private final 	PositionedRenderable[] 	renderables = new PositionedRenderable[NUM_BLOCKS_PER_SUBPASS];
+    private 		int[] 			hostRenderListPageTable;
+    private 		int 			renderablesIndex = 0;
+    private final 	int 			dummyBufferID;
+    private 		int 			numOpaqueBlocks;
+    private 		int 			numTransparentBlocks;
+    private 		int 			modulusUintOffset;
+    private 		int 			opaqueIndex = 0, blendIndex = 0;
+    private final 	GLUniform 		renderListOffsetUniform,
+    /*    */	    				renderListPageTable, 
+    /*    */	    				screenWidth, 
+    /*    */	    				screenHeight;
+    private 		GLTexture 		intermediateColorTexture;
+    private 		GLFrameBuffer 		intermediateFrameBuffer;
+    private 		GLRenderBuffer 		intermediateDepthRenderBuffer;
+    private final 	Submitter<PositionedRenderable> 
+    						submitter = new Submitter<PositionedRenderable>() {
+	@Override
+	public void submit(PositionedRenderable item) {
+	    if (item instanceof WorldObject) {
+		if (!((WorldObject) item).isVisible()
+			|| !((WorldObject) item).isActive()) {
+		    return;
 		}
-	}//end RenderList
+	    }//end if(WorldObject)
+	    final ByteBuffer opOD = item.getOpaqueObjectDefinitionAddresses();
+	    final ByteBuffer trOD = item
+		    .getTransparentObjectDefinitionAddresses();
+	    numOpaqueBlocks += opOD.capacity() / 4;
+	    numTransparentBlocks += trOD.capacity() / 4;
+	    renderables[renderablesIndex++] = item;
+	    tr.getObjectListWindow().opaqueIDs.set(0, opaqueIndex, opOD);
+	    opaqueIndex += opOD.capacity();
+	    tr.getObjectListWindow().blendIDs.set(0, blendIndex, trOD);
+	    blendIndex += trOD.capacity();
+	}// end submit(...)
+
+	@Override
+	public void submit(Collection<PositionedRenderable> items) {
+	    for (PositionedRenderable r : items) {
+		submit(r);
+	    }//end for(items)
+	}//end submit(...)
+    };
+
+    public RenderList(GL3 gl, GLProgram primaryProgram,
+	    GLProgram deferredProgram, final TR tr) {
+	// Build VAO
+	IntBuffer ib = IntBuffer.allocate(1);
+	final GPU gpu = tr.getGPU();
+	this.tr = tr;
+	gl.glGenBuffers(1, ib);
+	ib.clear();
+	dummyBufferID = ib.get();
+	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
+	gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
+	gl.glEnableVertexAttribArray(0);
+	gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
+	renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
+	screenWidth = deferredProgram.getUniform("screenWidth");
+	screenHeight = deferredProgram.getUniform("screenHeight");
+	renderListPageTable = primaryProgram.getUniform("renderListPageTable");
+	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
+		* RenderList.NUM_RENDER_PASSES
+		/ PagedByteBuffer.PAGE_SIZE_BYTES];
+
+	intermediateColorTexture = gpu
+		.newTexture()
+		.bind()
+		.setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB,
+			GL3.GL_UNSIGNED_BYTE, null)
+		.setMagFilter(GL3.GL_NEAREST).setMinFilter(GL3.GL_NEAREST);
+	intermediateDepthRenderBuffer = gpu.newRenderBuffer().bind()
+		.setStorage(GL3.GL_DEPTH_COMPONENT, 1024, 768);
+	intermediateFrameBuffer = gpu
+		.newFrameBuffer()
+		.bindToDraw()
+		.attachDrawTexture(intermediateColorTexture,
+			GL3.GL_COLOR_ATTACHMENT0)
+		.attachDepthRenderBuffer(intermediateDepthRenderBuffer);
+
+	tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable() {
+	    @Override
+	    public void run() {
+		for (int i = 0; i < hostRenderListPageTable.length; i++) {
+		    hostRenderListPageTable[i] = RenderList.this.tr
+			    .getObjectListWindow().logicalPage2PhysicalPage(i);
+		}// end for(hostRenderListPageTable.length)
+		tr.getRenderer().getPrimaryProgram().use();
+		renderListPageTable.setArrayui(hostRenderListPageTable);
+		modulusUintOffset = (tr.getObjectListWindow()
+			.getPhysicalAddressInBytes(0) % PagedByteBuffer.PAGE_SIZE_BYTES) / 4;
+	    }
+	});
+	tr.getGPU().addGLEventListener(new GLEventListener() {
+	    @Override
+	    public void init(GLAutoDrawable drawable) {
+	    }
+
+	    @Override
+	    public void dispose(GLAutoDrawable drawable) {
+	    }
+
+	    @Override
+	    public void display(GLAutoDrawable drawable) {
+	    }
+
+	    @Override
+	    public void reshape(GLAutoDrawable drawable, int x, int y,
+		    int width, int height) {
+		tr.getRenderer().getDeferredProgram().use();
+		intermediateDepthRenderBuffer.bind().setStorage(
+			GL3.GL_DEPTH_COMPONENT, width, height);
+		intermediateColorTexture.bind().setImage(GL3.GL_RGB, width,
+			height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE, null);
+		screenWidth.setui(width);
+		screenHeight.setui(height);
+		tr.getRenderer().getPrimaryProgram().use();
+	    }
+	});
+    }// end constructor
+
+    private static int frameCounter = 0;
+
+    private void updateStatesToGPU() {
+	for (int i = 0; i < renderablesIndex; i++) {
+	    renderables[i].updateStateToGPU();
+	}
+    }//end updateStatesToGPU
+
+    public void sendToGPU(GL3 gl) {
+	frameCounter++;
+	frameCounter %= 100;
+	updateStatesToGPU();
+    }//end sendToGPU
+
+    public void render(GL3 gl) {
+	tr.getRenderer().getPrimaryProgram().use();
+	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER,
+		intermediateFrameBuffer.getId());
+	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
+	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+	final int numOpaqueVertices = numOpaqueBlocks
+		* GPUTriangleVertex.VERTICES_PER_BLOCK + 96;
+	final int numTransparentVertices = numTransparentBlocks
+		* GPUTriangleVertex.VERTICES_PER_BLOCK;
+	// OPAQUE
+	// Turn on depth write, turn off transparency
+	gl.glDisable(GL3.GL_BLEND);
+	// renderModeUniform.set(OPAQUE_PASS);
+	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * GPUTriangleVertex.VERTICES_PER_BLOCK);
+	final int numSubPasses = (numOpaqueVertices / verticesPerSubPass) + 1;
+	int remainingVerts = numOpaqueVertices;
+
+	if (frameCounter == 0) {
+	    tr.getReporter().report(
+		    "org.jtrfp.trcl.core.RenderList.numOpaqueBlocks",
+		    "" + numOpaqueBlocks);
+	    tr.getReporter().report(
+		    "org.jtrfp.trcl.core.RenderList.numTransparentBlocks",
+		    "" + numTransparentBlocks);
+	}
+
+	for (int sp = 0; sp < numSubPasses; sp++) {
+	    final int numVerts = remainingVerts <= verticesPerSubPass ? remainingVerts
+		    : verticesPerSubPass;
+	    remainingVerts -= numVerts;
+	    final int newOffset = modulusUintOffset + sp
+		    * NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
+	    renderListOffsetUniform.setui(newOffset);
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
+	}// end for(subpasses)
+	// TRANSPARENT
+	// Turn off depth write, turn on transparency
+	gl.glEnable(GL3.GL_BLEND);
+	gl.glDepthMask(false);
+	// ////////
+	// gl.glDepthFunc(GL3.GL_ALWAYS);
+	// ///////
+	renderListOffsetUniform.setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
+	// renderModeUniform.set(BLEND_PASS);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
+	// ////////
+	// gl.glDepthFunc(GL3.GL_LESS);
+	// ////////
+
+	// DEFERRED STAGE
+	tr.getRenderer().getDeferredProgram().use();
+	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
+						    // "Draw to screen"
+	GLTexture.specifyTextureUnit(gl, 1);
+	intermediateColorTexture.bind(gl);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	tr.getRenderer().getPrimaryProgram().use();
+	gl.glDepthMask(true);
+    }// end render()
+
+    public Submitter<PositionedRenderable> getSubmitter() {
+	return submitter;
+    }
+
+    public void reset() {
+	renderablesIndex = 0;
+	numOpaqueBlocks = 0;
+	numTransparentBlocks = 0;
+	blendIndex = 0;
+	opaqueIndex = 0;
+    }
+}// end RenderList

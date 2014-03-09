@@ -50,7 +50,7 @@ public class RenderList{
 	private final int dummyBufferID;
 	private int numOpaqueBlocks;
 	private int numTransparentBlocks;
-	private final GLUniform renderListOffsetUniform,renderModeUniform,renderListPageTable;
+	private final GLUniform renderListOffsetUniform/*,renderModeUniform*/,renderListPageTable;
 	private int [] hostRenderListPageTable;
 	private int modulusUintOffset;
 	private GLTexture intermediateColorTexture;
@@ -92,7 +92,7 @@ public class RenderList{
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0 );
 		renderListOffsetUniform=prg.getUniform("renderListOffset");
-		renderModeUniform=prg.getUniform("renderFlags");
+		//renderModeUniform=prg.getUniform("renderFlags");
 		renderListPageTable=prg.getUniform("renderListPageTable");
 		hostRenderListPageTable=new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS*RenderList.NUM_RENDER_PASSES/PagedByteBuffer.PAGE_SIZE_BYTES];
 		
@@ -106,7 +106,6 @@ public class RenderList{
 			newRenderBuffer().
 			bind().
 			setStorage(GL3.GL_DEPTH_COMPONENT, 1024, 768);
-		
 		intermediateFrameBuffer=gpu.
 			newFrameBuffer().
 			bindToDraw().
@@ -134,14 +133,15 @@ public class RenderList{
 		{frameCounter++; frameCounter%=100;updateStatesToGPU();}
 	
 	public void render(GL3 gl){
-	    	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
-	    	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
+	    	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, intermediateFrameBuffer.getId());
+	    	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER,dummyBufferID);
+	    	gl.glClear(GL3.GL_COLOR_BUFFER_BIT|GL3.GL_DEPTH_BUFFER_BIT);
 		final int numOpaqueVertices = numOpaqueBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK+96;
 		final int numTransparentVertices = numTransparentBlocks*GPUTriangleVertex.VERTICES_PER_BLOCK;
 		//OPAQUE
 		//Turn on depth write, turn off transparency
 		gl.glDisable(GL3.GL_BLEND);
-		renderModeUniform.set(OPAQUE_PASS);
+		//renderModeUniform.set(OPAQUE_PASS);
 		final int verticesPerSubPass=(NUM_BLOCKS_PER_SUBPASS*GPUTriangleVertex.VERTICES_PER_BLOCK);
 		final int numSubPasses=(numOpaqueVertices/verticesPerSubPass)+1;
 		int remainingVerts=numOpaqueVertices;
@@ -166,18 +166,20 @@ public class RenderList{
 		//gl.glDepthFunc(GL3.GL_ALWAYS);
 		/////////
 		renderListOffsetUniform.setui(modulusUintOffset+NUM_BLOCKS_PER_PASS);
-		renderModeUniform.set(BLEND_PASS);
+		//renderModeUniform.set(BLEND_PASS);
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 		//////////
 		//gl.glDepthFunc(GL3.GL_LESS);
 		//////////
 		
-		gl.glDepthMask(true);
-		
 		//DEFERRED STAGE
-		//Set output to screen
-		//TODO:
-		
+		tr.getRenderer().getDeferredProgram().use();
+		gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);//Zero means "Draw to screen"
+		GLTexture.specifyTextureUnit(gl, 1);
+		intermediateColorTexture.bind(gl);
+		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+		tr.getRenderer().getPrimaryProgram().use();
+		gl.glDepthMask(true);
 		}//end render()
 	public Submitter<PositionedRenderable> getSubmitter()
 		{return submitter;}

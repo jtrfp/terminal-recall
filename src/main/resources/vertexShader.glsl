@@ -35,7 +35,6 @@ flat out uint packedFragData;
 
 //IN
 uniform uint renderListOffset;
-uniform uint renderFlags;
 uniform float fogStart;
 uniform float fogEnd;
 uniform uint renderListPageTable[85];

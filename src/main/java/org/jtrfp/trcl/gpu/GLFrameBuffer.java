@@ -40,4 +40,8 @@ public final class GLFrameBuffer {
 	gl.glFramebufferRenderbuffer(GL3.GL_FRAMEBUFFER, GL3.GL_DEPTH_ATTACHMENT, GL3.GL_RENDERBUFFER, renderBuffer.getId());
 	return this;
     }
+
+    public int getId() {
+	return id;
+    }
 }//end GLFrameBuffer

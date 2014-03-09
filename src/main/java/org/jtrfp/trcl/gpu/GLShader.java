@@ -15,6 +15,7 @@ public abstract class GLShader
 		{
 		this.gpu=gpu;
 		shaderID= gpu.getGl().glCreateShader(getShaderType());
+		if(shaderID<0)throw new RuntimeException("Invalid shader ID "+shaderID+". Something went wrong somewhere in putting the shader together.");
 		}
 	
 	protected abstract int getShaderType();

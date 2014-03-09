@@ -20,7 +20,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class Renderer {
     private final Camera camera;
-    private final GLProgram shaderProgram;
+    private final GLProgram primaryProgram, deferredProgram;
     private final GLUniform fogStart, fogEnd, fogColor;
     private boolean initialized = false;
     private final GPU gpu;
@@ -45,7 +45,7 @@ public class Renderer {
 	// Generate shader program
 	GLVertexShader vertexShader = gpu.newVertexShader();
 	GLFragmentShader fragmentShader = gpu.newFragmentShader();
-	shaderProgram = gpu.newProgram();
+	primaryProgram = gpu.newProgram();
 	try {// Apache Commons to the rescue again. (:
 	    vertexShader.setSource(IOUtils.toString(getClass()
 		    .getResourceAsStream("/vertexShader.glsl")));
@@ -54,20 +54,47 @@ public class Renderer {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	shaderProgram.attachShader(vertexShader);
-	shaderProgram.attachShader(fragmentShader);
-	shaderProgram.link();
-	shaderProgram.use();
-
-	fogStart = shaderProgram.getUniform("fogStart");
-	fogEnd = shaderProgram.getUniform("fogEnd");
-	fogColor = shaderProgram.getUniform("fogColor");
+	primaryProgram.attachShader(vertexShader);
+	primaryProgram.attachShader(fragmentShader);
+	primaryProgram.link();
+	if(!primaryProgram.validate()){
+	    System.out.println("PRIMARY PROGRAM VALIDATION FAILED:");
+	    System.out.println(primaryProgram.getInfoLog());
+	}
+	primaryProgram.use();
+	
+	fogStart = primaryProgram.getUniform("fogStart");
+	fogEnd = primaryProgram.getUniform("fogEnd");
+	fogColor = primaryProgram.getUniform("fogColor");
 
 	System.out.println("Initializing RenderList...");
 	final TR tr = gpu.getTr();
-	renderList[0] = new RenderList(gl, shaderProgram, tr);
-	renderList[1] = new RenderList(gl, shaderProgram, tr);
-    }
+	renderList[0] = new RenderList(gl, primaryProgram, tr);
+	renderList[1] = new RenderList(gl, primaryProgram, tr);
+	
+	//DEFERRED PROGRAM
+	vertexShader = gpu.newVertexShader();
+	fragmentShader = gpu.newFragmentShader();
+	deferredProgram = gpu.newProgram();
+	try {
+	    vertexShader.setSource(IOUtils.toString(getClass()
+		    .getResourceAsStream("/deferredVertexShader.glsl")));
+	    fragmentShader.setSource(IOUtils.toString(getClass()
+		    .getResourceAsStream("/deferredFragShader.glsl")));
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+	deferredProgram.attachShader(vertexShader);
+	deferredProgram.attachShader(fragmentShader);
+	deferredProgram.link();
+	if(!deferredProgram.validate()){
+	    System.out.println("DEFERRED PROGRAM VALIDATION FAILED:");
+	    System.out.println(deferredProgram.getInfoLog());
+	}
+	deferredProgram.use();
+	deferredProgram.getUniform("primaryRendering").set((int) 1);
+	primaryProgram.use();
+    }//end Renderer
 
     private void ensureInit() {
 	if (initialized)
@@ -79,15 +106,15 @@ public class Renderer {
 	System.out.println("Uploading vertex data to GPU...");
 	TriangleList.uploadAllListsToGPU(gl);
 	System.out.println("...Done.");
-	System.out.println("Uploading object defintion data to GPU...");
+	System.out.println("Uploading object definition data to GPU...");
 	WorldObject.uploadAllObjectDefinitionsToGPU();
 	System.out.println("...Done.");
 	System.out.println("\t...World.init() complete.");
 
 	try {
-	    gpu.getMemoryManager().bindToUniform(1, shaderProgram,
-		    shaderProgram.getUniform("rootBuffer"));
-	    shaderProgram.getUniform("textureMap").set((int) 0);// Texture unit
+	    gpu.getMemoryManager().bindToUniform(1, primaryProgram,
+		    primaryProgram.getUniform("rootBuffer"));
+	    primaryProgram.getUniform("textureMap").set((int) 0);// Texture unit
 								// 0 mapped to
 								// textureMap
 	} catch (RuntimeException e) {
@@ -95,8 +122,8 @@ public class Renderer {
 	}
 	GLTexture.specifyTextureUnit(gl, 0);
 	Texture.getGlobalTexture().bind(gl);
-	if (!shaderProgram.validate()) {
-	    System.out.println(shaderProgram.getInfoLog());
+	if (!primaryProgram.validate()) {
+	    System.out.println(primaryProgram.getInfoLog());
 	    System.exit(1);
 	}
 	System.out.println("...Done.");
@@ -173,4 +200,18 @@ public class Renderer {
     public void setRootGrid(RenderableSpacePartitioningGrid rootGrid) {
 	this.rootGrid = rootGrid;
     }
-}
+
+    /**
+     * @return the primaryProgram
+     */
+    GLProgram getPrimaryProgram() {
+        return primaryProgram;
+    }
+
+    /**
+     * @return the deferredProgram
+     */
+    GLProgram getDeferredProgram() {
+        return deferredProgram;
+    }
+}//end Renderer

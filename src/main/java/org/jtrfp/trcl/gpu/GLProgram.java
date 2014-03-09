@@ -16,6 +16,7 @@ public class GLProgram
 		{this.gpu=gpu;
 		this.gl=gpu.getGl();
 		programID=gl.glCreateProgram();
+		if(programID<0)throw new RuntimeException("Invalid program ID: "+programID+". Something went wrong.");
 		}
 	
 	public void attachShader(GLShader shader)
@@ -48,8 +49,10 @@ public class GLProgram
 				.toString();
 		}
 
-	public GLUniform getUniform(String uniformName)
-		{return new GLUniform(this,gl.glGetUniformLocation(programID,uniformName));}
+	public GLUniform getUniform(String uniformName){
+		final int loc = gl.glGetUniformLocation(programID,uniformName);
+		if(loc<0)throw new RuntimeException("Invalid uniform location on lookup: "+loc+" of name "+uniformName);
+		return new GLUniform(this,loc);}
 
 	int getProgramID()
 		{return programID;}

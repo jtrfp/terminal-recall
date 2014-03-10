@@ -106,4 +106,13 @@ public final class GLTexture {
 	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, mode);
 	return this;
     }
+
+    public GLTexture setWrapS(int val) {
+	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, val);
+	return this;
+    }
+    public GLTexture setWrapT(int val) {
+	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, val);
+	return this;
+    }
 }// GLTexture

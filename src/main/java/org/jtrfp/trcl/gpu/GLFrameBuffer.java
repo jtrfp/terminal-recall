@@ -28,7 +28,14 @@ public final class GLFrameBuffer {
 	this.gl=gl;
 	return this;
     }
-
+    
+    public GLFrameBuffer attachDepthTexture(GLTexture depthTexture){
+	gl.glFramebufferTexture(
+		GL3.GL_FRAMEBUFFER, 
+		GL3.GL_DEPTH_ATTACHMENT, depthTexture.getTextureID(), 0);
+	return this;
+    }
+    
     public GLFrameBuffer attachDrawTexture(GLTexture texture,
 	    int attachmentIndex) {
 	gl.glFramebufferTexture(GL3.GL_FRAMEBUFFER, attachmentIndex, texture.getTextureID(), 0);

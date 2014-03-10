@@ -60,7 +60,6 @@ public class RenderList {
     /*    */	    				screenHeight;
     private 		GLTexture 		intermediateColorTexture,intermediateDepthTexture;
     private 		GLFrameBuffer 		intermediateFrameBuffer;
-    private 		GLRenderBuffer 		intermediateDepthRenderBuffer;
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
@@ -111,25 +110,29 @@ public class RenderList {
 	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
 		* RenderList.NUM_RENDER_PASSES
 		/ PagedByteBuffer.PAGE_SIZE_BYTES];
-	intermediateDepthTexture = gpu
-		.newTexture()
-		.bind()
-		.setImage(GL3.GL_DEPTH_COMPONENT24, 1024, 768, 
-			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null);
 	intermediateColorTexture = gpu
 		.newTexture()
 		.bind()
 		.setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB,
 			GL3.GL_UNSIGNED_BYTE, null)
-		.setMagFilter(GL3.GL_NEAREST).setMinFilter(GL3.GL_NEAREST);
-	intermediateDepthRenderBuffer = gpu.newRenderBuffer().bind()
-		.setStorage(GL3.GL_DEPTH_COMPONENT, 1024, 768);
+		.setMagFilter(GL3.GL_NEAREST)
+		.setMinFilter(GL3.GL_NEAREST);
+	intermediateDepthTexture = gpu
+		.newTexture()
+		.bind()
+		.setImage(GL3.GL_DEPTH_COMPONENT24, 1024, 768, 
+			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null)
+		.setMagFilter(GL3.GL_NEAREST)
+		.setMinFilter(GL3.GL_NEAREST)
+		.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+		.setWrapT(GL3.GL_CLAMP_TO_EDGE);
 	intermediateFrameBuffer = gpu
 		.newFrameBuffer()
 		.bindToDraw()
 		.attachDrawTexture(intermediateColorTexture,
 			GL3.GL_COLOR_ATTACHMENT0)
-		.attachDepthRenderBuffer(intermediateDepthRenderBuffer);
+		.attachDepthTexture(intermediateDepthTexture)
+		/*.attachDepthRenderBuffer(intermediateDepthRenderBuffer)*/;
 
 	tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable() {
 	    @Override
@@ -161,8 +164,6 @@ public class RenderList {
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
 		    int width, int height) {
 		tr.getRenderer().getDeferredProgram().use();
-		intermediateDepthRenderBuffer.bind().setStorage(
-			GL3.GL_DEPTH_COMPONENT, width, height);
 		intermediateColorTexture.bind().setImage(GL3.GL_RGB, width,
 			height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE, null);
 		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 

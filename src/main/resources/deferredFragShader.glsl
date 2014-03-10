@@ -24,8 +24,6 @@ uniform sampler2D depthTexture;
 uniform vec3 fogColor;
 uniform uint screenWidth;
 uniform uint screenHeight;
-//uniform float fogStart;
-//uniform float fogEnd;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;

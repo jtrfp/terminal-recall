@@ -22,23 +22,21 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class Renderer {
-    private final Camera camera;
-    private final GLProgram primaryProgram, deferredProgram;
-    private final GLUniform /*fogStart, fogEnd,*/ fogColor;
-    private boolean initialized = false;
-    private final GPU gpu;
-    private final RenderList[] renderList = new RenderList[2];
-    private boolean renderListToggle = false;
-    private RenderableSpacePartitioningGrid rootGrid;
-    private boolean active = false;// TODO: Remove when conversion is complete
+    private 		RenderableSpacePartitioningGrid rootGrid;
+    private final 	Camera			camera;
+    private final 	GLProgram 		primaryProgram, deferredProgram;
+    private 		boolean 		initialized = false;
+    private		boolean 		active = false;// TODO: Remove when conversion is complete
+    private 		boolean 		renderListToggle = false;
+    private final 	GPU 			gpu;
+    private final 	RenderList[] 		renderList = new RenderList[2];
     private final 	GLUniform	    	screenWidth, 
     /*    */	    				screenHeight,
-    /*	  */					depthTextureUniform;
+    /*    */					fogColor;
     private final	GLTexture 		intermediateColorTexture,intermediateDepthTexture;
     private final	GLFrameBuffer 		intermediateFrameBuffer;
-
-    private int frameNumber;
-    private long lastTimeMillis;
+    private 		int			frameNumber;
+    private 		long			lastTimeMillis;
 
     public Renderer(GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -94,7 +92,6 @@ public class Renderer {
 	deferredProgram.use();
 	screenWidth = deferredProgram.getUniform("screenWidth");
 	screenHeight = deferredProgram.getUniform("screenHeight");
-	depthTextureUniform = deferredProgram.getUniform("depthTexture");
 	fogColor = deferredProgram.getUniform("fogColor");
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	deferredProgram.getUniform("depthTexture").set((int) 2);

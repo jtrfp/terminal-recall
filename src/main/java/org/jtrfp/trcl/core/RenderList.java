@@ -57,7 +57,8 @@ public class RenderList {
     private final 	GLUniform 		renderListOffsetUniform,
     /*    */	    				renderListPageTable, 
     /*    */	    				screenWidth, 
-    /*    */	    				screenHeight;
+    /*    */	    				screenHeight,
+    /*	  */					depthTextureUniform;
     private 		GLTexture 		intermediateColorTexture,intermediateDepthTexture;
     private 		GLFrameBuffer 		intermediateFrameBuffer;
     private final 	Submitter<PositionedRenderable> 
@@ -106,6 +107,7 @@ public class RenderList {
 	renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
 	screenWidth = deferredProgram.getUniform("screenWidth");
 	screenHeight = deferredProgram.getUniform("screenHeight");
+	depthTextureUniform = deferredProgram.getUniform("depthTexture");
 	renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
 		* RenderList.NUM_RENDER_PASSES
@@ -131,8 +133,7 @@ public class RenderList {
 		.bindToDraw()
 		.attachDrawTexture(intermediateColorTexture,
 			GL3.GL_COLOR_ATTACHMENT0)
-		.attachDepthTexture(intermediateDepthTexture)
-		/*.attachDepthRenderBuffer(intermediateDepthRenderBuffer)*/;
+		.attachDepthTexture(intermediateDepthTexture);
 
 	tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable() {
 	    @Override
@@ -225,10 +226,22 @@ public class RenderList {
 	    renderListOffsetUniform.setui(newOffset);
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
 	}// end for(subpasses)
+	
+	// DEFERRED STAGE
+	gl.glDepthMask(false);
+	tr.getRenderer().getDeferredProgram().use();
+	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
+						    // "Draw to screen"
+	GLTexture.specifyTextureUnit(gl, 1);//TODO: Try TU 0
+	intermediateColorTexture.bind(gl);
+	GLTexture.specifyTextureUnit(gl, 2);
+	intermediateDepthTexture.bind(gl);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	tr.getRenderer().getPrimaryProgram().use();
+	
 	// TRANSPARENT
 	// Turn off depth write, turn on transparency
 	gl.glEnable(GL3.GL_BLEND);
-	gl.glDepthMask(false);
 	// ////////
 	// gl.glDepthFunc(GL3.GL_ALWAYS);
 	// ///////
@@ -239,14 +252,7 @@ public class RenderList {
 	// gl.glDepthFunc(GL3.GL_LESS);
 	// ////////
 
-	// DEFERRED STAGE
-	tr.getRenderer().getDeferredProgram().use();
-	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
-						    // "Draw to screen"
-	GLTexture.specifyTextureUnit(gl, 1);
-	intermediateColorTexture.bind(gl);
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	tr.getRenderer().getPrimaryProgram().use();
+	
 	gl.glDepthMask(true);
     }// end render()
 

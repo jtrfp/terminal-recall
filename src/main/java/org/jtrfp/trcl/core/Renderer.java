@@ -21,7 +21,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class Renderer {
     private final Camera camera;
     private final GLProgram primaryProgram, deferredProgram;
-    private final GLUniform fogStart, fogEnd, fogColor;
+    private final GLUniform /*fogStart, fogEnd,*/ fogColor;
     private boolean initialized = false;
     private final GPU gpu;
     private final RenderList[] renderList = new RenderList[2];
@@ -63,10 +63,6 @@ public class Renderer {
 	}
 	primaryProgram.use();
 	
-	fogStart = primaryProgram.getUniform("fogStart");
-	fogEnd = primaryProgram.getUniform("fogEnd");
-	fogColor = primaryProgram.getUniform("fogColor");
-
 	//DEFERRED PROGRAM
 	vertexShader = gpu.newVertexShader();
 	fragmentShader = gpu.newFragmentShader();
@@ -87,7 +83,11 @@ public class Renderer {
 	    System.out.println(deferredProgram.getInfoLog());
 	}
 	deferredProgram.use();
+	fogColor = deferredProgram.getUniform("fogColor");
+	//fogStart = deferredProgram.getUniform("fogStart");
+	//fogEnd = deferredProgram.getUniform("fogEnd");
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
+	deferredProgram.getUniform("depthTexture").set((int) 2);
 	primaryProgram.use();
 	
 	System.out.println("Initializing RenderList...");
@@ -152,8 +152,10 @@ public class Renderer {
 	setFogColor(gpu.getTr().getWorld().getFogColor());
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	final double cameraViewDepth = camera.getViewDepth();
-	fogStart.set((float) (cameraViewDepth * 1.2) / 5f);
-	fogEnd.set((float) (cameraViewDepth * 1.5) * 1.3f);
+	//deferredProgram.use();
+	//fogStart.set((float) (cameraViewDepth * 1.2) / 5f);
+	//fogEnd.set((float) (cameraViewDepth * 1.5) * 1.3f);
+	//primaryProgram.use();
 	int renderListIndex = 0;
 	renderListIndex = renderListToggle ? 0 : 1;
 	renderList[renderListIndex].sendToGPU(gl);
@@ -175,8 +177,10 @@ public class Renderer {
     }// end updateVisibilityList()
 
     public void setFogColor(Color c) {
+	deferredProgram.use();
 	fogColor.set((float) c.getRed() / 255f, (float) c.getGreen() / 255f,
 		(float) c.getBlue() / 255f);
+	primaryProgram.use();
     }
 
     /**

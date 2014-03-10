@@ -20,13 +20,23 @@
 
 // INPUTS
 uniform sampler2D primaryRendering;
+uniform sampler2D depthTexture;
+uniform vec3 fogColor;
 uniform uint screenWidth;
 uniform uint screenHeight;
+//uniform float fogStart;
+//uniform float fogEnd;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-fragColor.rgba = texture2D(primaryRendering,vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight));
+vec2 primaryUV = vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
+float depth = texture2D(depthTexture,primaryUV)[0];
+// FOG
+float fogLevel;
+fogLevel=pow(depth,80);
+fragColor = texture2D(primaryRendering,primaryUV);
+fragColor = mix(fragColor,vec4(fogColor,1),fogLevel);
 }

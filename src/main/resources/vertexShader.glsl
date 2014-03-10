@@ -30,17 +30,14 @@ const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
 //OUT
 smooth out vec2 fragTexCoord;
-smooth out float fogLevel;
 flat out uint packedFragData;
 
 //IN
 uniform uint renderListOffset;
-uniform float fogStart;
-uniform float fogEnd;
 uniform uint renderListPageTable[85];
+uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
 
 layout (location = 0) in float dummy;
-uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
 
 //RENDER MODES
 const uint OPAQUE_PASS=0u;
@@ -163,8 +160,8 @@ gl_Position.x=dummy*0;
     			fragTexCoord = vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
     			gl_Position = matrix * vertexCoord;
     			
-    			fogLevel=(length(gl_Position)-fogStart)/(fogEnd-fogStart);
-    			fogLevel=clamp(fogLevel,0.0,1.0);
+    			//fogLevel=(length(gl_Position)-fogStart)/(fogEnd-fogStart);
+    			//fogLevel=clamp(fogLevel,0.0,1.0);
     			break;//end RENDER_MODE_TRIANGLES
     		case RENDER_MODE_LINES:
     			//LOAD DATA
@@ -187,8 +184,8 @@ gl_Position.x=dummy*0;
 				//FOG
 				vec4 fogP;
 				fogP=(vID==0||vID==1||vID==5)?p1:p2;
-				fogLevel=(length(fogP)-fogStart)/(fogEnd-fogStart);
-    			fogLevel=clamp(fogLevel,0.0,1.0);
+				//fogLevel=(length(fogP)-fogStart)/(fogEnd-fogStart);
+    			//fogLevel=clamp(fogLevel,0.0,1.0);
 				p1/=abs(p1.w);//Normalize
     			p2/=abs(p2.w);//Normalize
     			vec2 perpSlope = vec2(p2.y-p1.y,p1.x-p2.x)/length(p1.xy-p2.xy);

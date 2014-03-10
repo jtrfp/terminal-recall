@@ -29,10 +29,8 @@ const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
 // UNIFORMS
 uniform sampler2D textureMap;
-uniform vec3 fogColor;
 
 // INPUTS
-smooth in float fogLevel;
 smooth in vec2 fragTexCoord;
 flat in uint packedFragData;
 
@@ -57,22 +55,16 @@ switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
 	{
 case RENDER_MODE_TRIANGLES:
 	vec4 color=texture2D(textureMap,fragTexCoord);
-	fragColor = mix(
-	    color,
-	    vec4(fogColor,1),
-	    fogLevel*color.a);
+	fragColor = color;
 	break;
 case RENDER_MODE_LINES:
 	float alpha;
 	alpha=(1-abs(fragTexCoord.y*pow(fragTexCoord.x,.5)))*.5;
-	fragColor = mix(
-	    vec4(
+	fragColor =  vec4(
 	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_RED))/16,
 	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_GREEN))/16,
 	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_BLUE))/16,alpha
-	    	),
-	    	vec4(fogColor,1),
-	    	fogLevel);
+	    	);
 	break;
 	}//end switch(RENDER_MODE)
 }

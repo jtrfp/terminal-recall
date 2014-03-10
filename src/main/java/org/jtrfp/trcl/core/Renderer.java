@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
 
 import org.apache.commons.io.IOUtils;
 import org.jtrfp.trcl.PrimitiveList;
@@ -11,6 +13,7 @@ import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
+import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
@@ -28,11 +31,17 @@ public class Renderer {
     private boolean renderListToggle = false;
     private RenderableSpacePartitioningGrid rootGrid;
     private boolean active = false;// TODO: Remove when conversion is complete
+    private final 	GLUniform	    	screenWidth, 
+    /*    */	    				screenHeight,
+    /*	  */					depthTextureUniform;
+    private final	GLTexture 		intermediateColorTexture,intermediateDepthTexture;
+    private final	GLFrameBuffer 		intermediateFrameBuffer;
 
     private int frameNumber;
     private long lastTimeMillis;
 
     public Renderer(GPU gpu) {
+	final TR tr = gpu.getTr();
 	this.gpu = gpu;
 	this.camera = new Camera(gpu);
 	final GL3 gl = gpu.getGl();
@@ -83,17 +92,68 @@ public class Renderer {
 	    System.out.println(deferredProgram.getInfoLog());
 	}
 	deferredProgram.use();
+	screenWidth = deferredProgram.getUniform("screenWidth");
+	screenHeight = deferredProgram.getUniform("screenHeight");
+	depthTextureUniform = deferredProgram.getUniform("depthTexture");
 	fogColor = deferredProgram.getUniform("fogColor");
-	//fogStart = deferredProgram.getUniform("fogStart");
-	//fogEnd = deferredProgram.getUniform("fogEnd");
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	deferredProgram.getUniform("depthTexture").set((int) 2);
+	intermediateColorTexture = gpu
+		.newTexture()
+		.bind()
+		.setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB,
+			GL3.GL_UNSIGNED_BYTE, null)
+		.setMagFilter(GL3.GL_NEAREST)
+		.setMinFilter(GL3.GL_NEAREST);
+	intermediateDepthTexture = gpu
+		.newTexture()
+		.bind()
+		.setImage(GL3.GL_DEPTH_COMPONENT24, 1024, 768, 
+			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null)
+		.setMagFilter(GL3.GL_NEAREST)
+		.setMinFilter(GL3.GL_NEAREST)
+		.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+		.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+	intermediateFrameBuffer = gpu
+		.newFrameBuffer()
+		.bindToDraw()
+		.attachDrawTexture(intermediateColorTexture,
+			GL3.GL_COLOR_ATTACHMENT0)
+		.attachDepthTexture(intermediateDepthTexture);
 	primaryProgram.use();
 	
+	gpu.addGLEventListener(new GLEventListener() {
+	    @Override
+	    public void init(GLAutoDrawable drawable) {
+	    }
+
+	    @Override
+	    public void dispose(GLAutoDrawable drawable) {
+	    }
+
+	    @Override
+	    public void display(GLAutoDrawable drawable) {
+	    }
+
+	    @Override
+	    public void reshape(GLAutoDrawable drawable, int x, int y,
+		    int width, int height) {
+		tr.getRenderer().getDeferredProgram().use();
+		intermediateColorTexture.bind().setImage(GL3.GL_RGB, width,
+			height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE, null);
+		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
+			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null);
+		screenWidth.setui(width);
+		screenHeight.setui(height);
+		tr.getRenderer().getPrimaryProgram().use();
+	    }
+	});
+	
 	System.out.println("Initializing RenderList...");
-	final TR tr = gpu.getTr();
-	renderList[0] = new RenderList(gl, primaryProgram,deferredProgram, tr);
-	renderList[1] = new RenderList(gl, primaryProgram,deferredProgram, tr);
+	renderList[0] = new RenderList(gl, primaryProgram,deferredProgram, intermediateFrameBuffer, 
+		    intermediateColorTexture,intermediateDepthTexture, tr);
+	renderList[1] = new RenderList(gl, primaryProgram,deferredProgram,intermediateFrameBuffer, 
+		    intermediateColorTexture,intermediateDepthTexture, tr);
     }//end constructor
 
     private void ensureInit() {
@@ -151,11 +211,6 @@ public class Renderer {
 	final GL3 gl = gpu.getGl();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-	final double cameraViewDepth = camera.getViewDepth();
-	//deferredProgram.use();
-	//fogStart.set((float) (cameraViewDepth * 1.2) / 5f);
-	//fogEnd.set((float) (cameraViewDepth * 1.5) * 1.3f);
-	//primaryProgram.use();
 	int renderListIndex = 0;
 	renderListIndex = renderListToggle ? 0 : 1;
 	renderList[renderListIndex].sendToGPU(gl);

@@ -37,6 +37,7 @@ float depth = texture2D(depthTexture,primaryUV)[0];
 // FOG
 float fogLevel;
 fogLevel=pow(depth,80);
+gl_FragDepth = depth;
 fragColor = texture2D(primaryRendering,primaryUV);
 fragColor = mix(fragColor,vec4(fogColor,1),fogLevel);
 }

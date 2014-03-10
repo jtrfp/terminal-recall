@@ -55,12 +55,10 @@ public class RenderList {
     private 		int 			modulusUintOffset;
     private 		int 			opaqueIndex = 0, blendIndex = 0;
     private final 	GLUniform 		renderListOffsetUniform,
-    /*    */	    				renderListPageTable, 
-    /*    */	    				screenWidth, 
-    /*    */	    				screenHeight,
-    /*	  */					depthTextureUniform;
-    private 		GLTexture 		intermediateColorTexture,intermediateDepthTexture;
-    private 		GLFrameBuffer 		intermediateFrameBuffer;
+    /*    */	    				renderListPageTable;
+    private final	GLFrameBuffer		intermediateFrameBuffer;
+    private final	GLTexture		intermediateDepthTexture,
+    /*    */					intermediateColorTexture;
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
@@ -92,11 +90,16 @@ public class RenderList {
     };
 
     public RenderList(GL3 gl, GLProgram primaryProgram,
-	    GLProgram deferredProgram, final TR tr) {
+	    GLProgram deferredProgram, GLFrameBuffer intermediateFrameBuffer, 
+	    GLTexture intermediateColorTexture, GLTexture intermediateDepthTexture, 
+	    final TR tr) {
 	// Build VAO
 	IntBuffer ib = IntBuffer.allocate(1);
 	final GPU gpu = tr.getGPU();
 	this.tr = tr;
+	this.intermediateColorTexture=intermediateColorTexture;
+	this.intermediateDepthTexture=intermediateDepthTexture;
+	this.intermediateFrameBuffer=intermediateFrameBuffer;
 	gl.glGenBuffers(1, ib);
 	ib.clear();
 	dummyBufferID = ib.get();
@@ -105,35 +108,11 @@ public class RenderList {
 	gl.glEnableVertexAttribArray(0);
 	gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
 	renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
-	screenWidth = deferredProgram.getUniform("screenWidth");
-	screenHeight = deferredProgram.getUniform("screenHeight");
-	depthTextureUniform = deferredProgram.getUniform("depthTexture");
 	renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
 		* RenderList.NUM_RENDER_PASSES
 		/ PagedByteBuffer.PAGE_SIZE_BYTES];
-	intermediateColorTexture = gpu
-		.newTexture()
-		.bind()
-		.setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB,
-			GL3.GL_UNSIGNED_BYTE, null)
-		.setMagFilter(GL3.GL_NEAREST)
-		.setMinFilter(GL3.GL_NEAREST);
-	intermediateDepthTexture = gpu
-		.newTexture()
-		.bind()
-		.setImage(GL3.GL_DEPTH_COMPONENT24, 1024, 768, 
-			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null)
-		.setMagFilter(GL3.GL_NEAREST)
-		.setMinFilter(GL3.GL_NEAREST)
-		.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-		.setWrapT(GL3.GL_CLAMP_TO_EDGE);
-	intermediateFrameBuffer = gpu
-		.newFrameBuffer()
-		.bindToDraw()
-		.attachDrawTexture(intermediateColorTexture,
-			GL3.GL_COLOR_ATTACHMENT0)
-		.attachDepthTexture(intermediateDepthTexture);
+	
 
 	tr.getThreadManager().addRunnableWhenFirstStarted(new Runnable() {
 	    @Override
@@ -146,32 +125,6 @@ public class RenderList {
 		renderListPageTable.setArrayui(hostRenderListPageTable);
 		modulusUintOffset = (tr.getObjectListWindow()
 			.getPhysicalAddressInBytes(0) % PagedByteBuffer.PAGE_SIZE_BYTES) / 4;
-	    }
-	});
-	tr.getGPU().addGLEventListener(new GLEventListener() {
-	    @Override
-	    public void init(GLAutoDrawable drawable) {
-	    }
-
-	    @Override
-	    public void dispose(GLAutoDrawable drawable) {
-	    }
-
-	    @Override
-	    public void display(GLAutoDrawable drawable) {
-	    }
-
-	    @Override
-	    public void reshape(GLAutoDrawable drawable, int x, int y,
-		    int width, int height) {
-		tr.getRenderer().getDeferredProgram().use();
-		intermediateColorTexture.bind().setImage(GL3.GL_RGB, width,
-			height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE, null);
-		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
-			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null);
-		screenWidth.setui(width);
-		screenHeight.setui(height);
-		tr.getRenderer().getPrimaryProgram().use();
 	    }
 	});
     }// end constructor
@@ -228,7 +181,7 @@ public class RenderList {
 	}// end for(subpasses)
 	
 	// DEFERRED STAGE
-	gl.glDepthMask(false);
+	gl.glDepthMask(true);
 	tr.getRenderer().getDeferredProgram().use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
@@ -237,10 +190,11 @@ public class RenderList {
 	GLTexture.specifyTextureUnit(gl, 2);
 	intermediateDepthTexture.bind(gl);
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	tr.getRenderer().getPrimaryProgram().use();
 	
 	// TRANSPARENT
 	// Turn off depth write, turn on transparency
+	tr.getRenderer().getPrimaryProgram().use();
+	gl.glDepthMask(false);
 	gl.glEnable(GL3.GL_BLEND);
 	// ////////
 	// gl.glDepthFunc(GL3.GL_ALWAYS);
@@ -251,8 +205,6 @@ public class RenderList {
 	// ////////
 	// gl.glDepthFunc(GL3.GL_LESS);
 	// ////////
-
-	
 	gl.glDepthMask(true);
     }// end render()
 

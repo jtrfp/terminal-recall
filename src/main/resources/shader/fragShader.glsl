@@ -28,7 +28,8 @@ const uint PACKED_DATA_COLOR_GREEN=2u;	//UNibble
 const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
 // UNIFORMS
-uniform sampler2D textureMap;
+uniform sampler2D texturePalette;
+uniform int useTextureMap;
 
 // INPUTS
 smooth in vec2 fragTexCoord;
@@ -54,8 +55,9 @@ void main()
 switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
 	{
 case RENDER_MODE_TRIANGLES:
-	vec4 color=texture2D(textureMap,fragTexCoord);
-	fragColor = color;
+	if(useTextureMap!=0)
+		{fragColor = texture2D(texturePalette,fragTexCoord);}
+		else{fragColor.rg = fragTexCoord;}
 	break;
 case RENDER_MODE_LINES:
 	float alpha;

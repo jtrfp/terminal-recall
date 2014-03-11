@@ -69,6 +69,7 @@ public class Renderer {
 	    System.out.println(primaryProgram.getInfoLog());
 	}
 	primaryProgram.use();
+	primaryProgram.getUniform("texturePalette").set((int)0);
 	
 	//DEFERRED PROGRAM
 	vertexShader = gpu.newVertexShader();
@@ -93,20 +94,21 @@ public class Renderer {
 	screenWidth = deferredProgram.getUniform("screenWidth");
 	screenHeight = deferredProgram.getUniform("screenHeight");
 	fogColor = deferredProgram.getUniform("fogColor");
+	deferredProgram.getUniform("texturePalette").set((int) 0);
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	deferredProgram.getUniform("depthTexture").set((int) 2);
 	intermediateColorTexture = gpu
 		.newTexture()
 		.bind()
-		.setImage(GL3.GL_RGB, 1024, 768, GL3.GL_RGB,
-			GL3.GL_UNSIGNED_BYTE, null)
+		.setImage(GL3.GL_RG16, 1024, 768, GL3.GL_RGB,
+			GL3.GL_FLOAT, null)
 		.setMagFilter(GL3.GL_NEAREST)
 		.setMinFilter(GL3.GL_NEAREST);
 	intermediateDepthTexture = gpu
 		.newTexture()
 		.bind()
 		.setImage(GL3.GL_DEPTH_COMPONENT24, 1024, 768, 
-			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null)
+			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null)
 		.setMagFilter(GL3.GL_NEAREST)
 		.setMinFilter(GL3.GL_NEAREST)
 		.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -136,10 +138,10 @@ public class Renderer {
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
 		    int width, int height) {
 		tr.getRenderer().getDeferredProgram().use();
-		intermediateColorTexture.bind().setImage(GL3.GL_RGB, width,
-			height, GL3.GL_RGB, GL3.GL_UNSIGNED_BYTE, null);
+		intermediateColorTexture.bind().setImage(GL3.GL_RG16, width,
+			height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
-			GL3.GL_DEPTH_COMPONENT, GL3.GL_UNSIGNED_BYTE, null);
+			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		tr.getRenderer().getPrimaryProgram().use();
@@ -171,7 +173,7 @@ public class Renderer {
 	try {
 	    gpu.getMemoryManager().bindToUniform(1, primaryProgram,
 		    primaryProgram.getUniform("rootBuffer"));
-	    primaryProgram.getUniform("textureMap").set((int) 0);// Texture unit
+	    //primaryProgram.getUniform("textureMap").set((int) 0);// Texture unit
 								// 0 mapped to
 								// textureMap
 	} catch (RuntimeException e) {

@@ -55,7 +55,8 @@ public class RenderList {
     private 		int 			modulusUintOffset;
     private 		int 			opaqueIndex = 0, blendIndex = 0;
     private final 	GLUniform 		renderListOffsetUniform,
-    /*    */	    				renderListPageTable;
+    /*    */	    				renderListPageTable,
+    /*    */					useTextureMap;
     private final	GLFrameBuffer		intermediateFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
     /*    */					intermediateColorTexture;
@@ -109,6 +110,7 @@ public class RenderList {
 	gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
 	renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
 	renderListPageTable = primaryProgram.getUniform("renderListPageTable");
+	useTextureMap = primaryProgram.getUniform("useTextureMap");
 	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
 		* RenderList.NUM_RENDER_PASSES
 		/ PagedByteBuffer.PAGE_SIZE_BYTES];
@@ -144,7 +146,9 @@ public class RenderList {
     }//end sendToGPU
 
     public void render(GL3 gl) {
+	// OPAQUE STAGE
 	tr.getRenderer().getPrimaryProgram().use();
+	useTextureMap.set((int)0);
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER,
 		intermediateFrameBuffer.getId());
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
@@ -153,7 +157,6 @@ public class RenderList {
 		* GPUTriangleVertex.VERTICES_PER_BLOCK + 96;
 	final int numTransparentVertices = numTransparentBlocks
 		* GPUTriangleVertex.VERTICES_PER_BLOCK;
-	// OPAQUE
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
 	// renderModeUniform.set(OPAQUE_PASS);
@@ -185,7 +188,7 @@ public class RenderList {
 	tr.getRenderer().getDeferredProgram().use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
-	GLTexture.specifyTextureUnit(gl, 1);//TODO: Try TU 0
+	GLTexture.specifyTextureUnit(gl, 1);
 	intermediateColorTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 2);
 	intermediateDepthTexture.bind(gl);
@@ -194,6 +197,7 @@ public class RenderList {
 	// TRANSPARENT
 	// Turn off depth write, turn on transparency
 	tr.getRenderer().getPrimaryProgram().use();
+	useTextureMap.set((int)1);
 	gl.glDepthMask(false);
 	gl.glEnable(GL3.GL_BLEND);
 	// ////////
@@ -218,5 +222,5 @@ public class RenderList {
 	numTransparentBlocks = 0;
 	blendIndex = 0;
 	opaqueIndex = 0;
-    }
+    }//end reset()
 }// end RenderList

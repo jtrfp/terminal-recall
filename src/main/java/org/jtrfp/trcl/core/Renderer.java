@@ -19,9 +19,10 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class Renderer {
+public final class Renderer {
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final 	Camera			camera;
     private final 	GLProgram 		primaryProgram, deferredProgram;
@@ -219,7 +220,12 @@ public class Renderer {
     public void activate() {
 	active = true;
     }// TODO: Remove this when paged conversion is complete.
-
+    
+    public void temporarilyMakeImmediatelyVisible(PositionedRenderable pr){
+	renderList[0].getSubmitter().submit(pr);
+	renderList[1].getSubmitter().submit(pr);
+    }
+    
     public void updateVisibilityList() {
 	renderListToggle = !renderListToggle;
 	renderList[renderListToggle ? 0 : 1].reset();

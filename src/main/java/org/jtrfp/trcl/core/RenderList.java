@@ -149,8 +149,7 @@ public class RenderList {
 	// OPAQUE STAGE
 	tr.getRenderer().getPrimaryProgram().use();
 	useTextureMap.set((int)0);
-	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER,
-		intermediateFrameBuffer.getId());
+	intermediateFrameBuffer.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	final int numOpaqueVertices = numOpaqueBlocks

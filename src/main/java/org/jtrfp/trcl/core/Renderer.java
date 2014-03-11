@@ -55,9 +55,9 @@ public class Renderer {
 	primaryProgram = gpu.newProgram();
 	try {// Apache Commons to the rescue again. (:
 	    vertexShader.setSource(IOUtils.toString(getClass()
-		    .getResourceAsStream("/vertexShader.glsl")));
+		    .getResourceAsStream("/shader/vertexShader.glsl")));
 	    fragmentShader.setSource(IOUtils.toString(getClass()
-		    .getResourceAsStream("/fragShader.glsl")));
+		    .getResourceAsStream("/shader/fragShader.glsl")));
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -76,9 +76,9 @@ public class Renderer {
 	deferredProgram = gpu.newProgram();
 	try {
 	    vertexShader.setSource(IOUtils.toString(getClass()
-		    .getResourceAsStream("/deferredVertexShader.glsl")));
+		    .getResourceAsStream("/shader/deferredVertexShader.glsl")));
 	    fragmentShader.setSource(IOUtils.toString(getClass()
-		    .getResourceAsStream("/deferredFragShader.glsl")));
+		    .getResourceAsStream("/shader/deferredFragShader.glsl")));
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

@@ -51,7 +51,8 @@ public class GLProgram
 
 	public GLUniform getUniform(String uniformName){
 		final int loc = gl.glGetUniformLocation(programID,uniformName);
-		if(loc<0)throw new RuntimeException("Invalid uniform location on lookup: "+loc+" of name "+uniformName);
+		if(loc==-1)throw new RuntimeException("Could not find unifrom "+uniformName);
+		else if(loc<0)throw new RuntimeException("Invalid uniform location on lookup: "+loc+" of name "+uniformName);
 		return new GLUniform(this,loc);}
 
 	int getProgramID()

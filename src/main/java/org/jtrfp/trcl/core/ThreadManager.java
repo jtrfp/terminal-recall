@@ -44,7 +44,8 @@ public class ThreadManager {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
-	for (WorldObject wo : vl) {
+	for (int i = 0; i<vl.size(); i++) {
+	    final WorldObject wo = vl.get(i);
 	    if (wo.isActive()
 		    && (TR.twosComplimentDistance(wo.getPosition(), tr
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
@@ -34,7 +35,7 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere{
 				
 				new double []{0,1,1,0},//u
 				new double []{0,0,1,1},
-				new DummyFuture<TextureDescription>(tex), RenderMode.DYNAMIC);
+				new DummyFuture<TextureDescription>(tex), RenderMode.DYNAMIC,Vector3D.MINUS_K);
 		tris[0].setAlphaBlended(true);
 		tris[1].setAlphaBlended(true);
 		model.addTriangles(tris);

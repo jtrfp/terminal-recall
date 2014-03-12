@@ -39,6 +39,9 @@ import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.exception.MathArithmeticException;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
@@ -74,7 +77,6 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
-import org.jtrfp.trcl.file.BINFile.Model.Vertex;
 import org.jtrfp.trcl.file.CLRFile;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
@@ -278,9 +280,16 @@ public class ResourceManager{
 					m = new BINFile.Model(is);
 					modBinNameMap.put(name, m);
 					}//end if(null)
-				System.out.println("Recognized as model file.");
-				List<BINFile.Model.Vertex> vertices = m.getVertices();
 				final double cpScalar=(scale*TR.crossPlatformScalar*256.)/(double)m.getScale();
+				System.out.println("Recognized as model file.");
+				List<org.jtrfp.trcl.gpu.Vertex> vertices = new ArrayList<org.jtrfp.trcl.gpu.Vertex>();
+				for(BINFile.Model.Vertex binVtx:m.getVertices()){
+				    vertices.add(new org.jtrfp.trcl.gpu.Vertex().setPosition(new Vector3D(
+						    binVtx.getX()*cpScalar,
+						    binVtx.getY()*cpScalar,
+						    binVtx.getZ()*cpScalar)));
+				}//end try{}
+				
 				Future<TextureDescription> currentTexture=null;
 				for(ThirdPartyParseable b:m.getDataBlocks()){
 					//Sort out types of block
@@ -301,60 +310,51 @@ public class ResourceManager{
 						 * - http://www.viaregio.de/pieper/mtm/bin_file_format.shtml
 						 */
 						//// Note: It appears that Stefan's 0xFF0000 approach works rather than the 0xFF00 value. typo?
-						
-						//final double cpScalar=1024./(double)m.getScale();
-						
-						//System.out.println("cpScalar:"+cpScalar);
-						//System.out.println("Block class: "+b.getClass());
 						if(vertIndices.size()==4){//Quads
-							Vertex [] vtx = new Vertex[4];
+						    	org.jtrfp.trcl.gpu.Vertex [] vtx = new org.jtrfp.trcl.gpu.Vertex[4];
 							for(int i=0; i<4; i++)
 								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex());}
 							Triangle [] tris = Triangle.quad2Triangles(
-									new double [] {vtx[0].getX()*cpScalar,vtx[1].getX()*cpScalar,vtx[2].getX()*cpScalar,vtx[3].getX()*cpScalar},//X 
-									new double [] {vtx[0].getY()*cpScalar,vtx[1].getY()*cpScalar,vtx[2].getY()*cpScalar,vtx[3].getY()*cpScalar}, 
-									new double [] {vtx[0].getZ()*cpScalar,vtx[1].getZ()*cpScalar,vtx[2].getZ()*cpScalar,vtx[3].getZ()*cpScalar}, 
-									new double [] {(double)vertIndices.get(0).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(1).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(2).getTextureCoordinateU()/(double)0xFF0000,(double)vertIndices.get(3).getTextureCoordinateU()/(double)0xFF0000},//U 
-									new double [] {1.-(double)vertIndices.get(0).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(1).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(2).getTextureCoordinateV()/(double)0xFF0000,1.-(double)vertIndices.get(3).getTextureCoordinateV()/(double)0xFF0000}, 
+									vtx,
+									new Vector2D[]{
+										new Vector2D(
+											(double)vertIndices.get(0).getTextureCoordinateU()/(double)0xFF0000,
+											1.-(double)vertIndices.get(0).getTextureCoordinateV()/(double)0xFF0000),
+										new Vector2D(
+											(double)vertIndices.get(1).getTextureCoordinateU()/(double)0xFF0000,
+											1.-(double)vertIndices.get(1).getTextureCoordinateV()/(double)0xFF0000),
+										new Vector2D(
+											(double)vertIndices.get(2).getTextureCoordinateU()/(double)0xFF0000,
+											1.-(double)vertIndices.get(2).getTextureCoordinateV()/(double)0xFF0000),
+										new Vector2D(
+											(double)vertIndices.get(3).getTextureCoordinateU()/(double)0xFF0000,
+											1.-(double)vertIndices.get(3).getTextureCoordinateV()/(double)0xFF0000)
+									},
 									currentTexture,
-									RenderMode.DYNAMIC,hasAlpha);
+									RenderMode.DYNAMIC,hasAlpha,
+									new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize());
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
 							}
 						else if(vertIndices.size()==3)//Triangles
 							{Triangle t = new Triangle();
-							int vi=0;
-							Vertex vtx;
-							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
-							t.getX()[vi]=vtx.getX()*cpScalar;
-							t.getY()[vi]=vtx.getY()*cpScalar;
-							t.getZ()[vi]=vtx.getZ()*cpScalar;
-							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
-							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
+							try{t.setCentroidNormal(new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize());}
+							catch(MathArithmeticException ee){t.setCentroidNormal(Vector3D.PLUS_I);}//TODO: Pass zero and process special.
 							t.setAlphaBlended(hasAlpha);
-							vi++;
-							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
-							t.getX()[vi]=vtx.getX()*cpScalar;
-							t.getY()[vi]=vtx.getY()*cpScalar;
-							t.getZ()[vi]=vtx.getZ()*cpScalar;
-							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
-							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
-							t.setAlphaBlended(hasAlpha);
-							vi++;
-							vtx=vertices.get(vertIndices.get(vi).getVertexIndex());
-							t.getX()[vi]=vtx.getX()*cpScalar;
-							t.getY()[vi]=vtx.getY()*cpScalar;
-							t.getZ()[vi]=vtx.getZ()*cpScalar;
-							t.getU()[vi]=(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000;
-							t.getV()[vi]=1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000;
-							t.setAlphaBlended(hasAlpha);
-							
 							t.setRenderMode(RenderMode.DYNAMIC);
+							t.setTexture(currentTexture);
+							
+							for(int vi=0; vi < 3; vi++){
+							    final org.jtrfp.trcl.gpu.Vertex vtx=
+								    vertices.get(vertIndices.get(vi).getVertexIndex());
+							    t.setVertex(vtx, vi);
+								t.setUV(new Vector2D(
+									(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000,
+									1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000), vi);
+							}//end for(vi)
 							if(currentTexture==null)
 								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=Texture.getFallbackTexture();}
-							t.setTexture(currentTexture);
 							result.addTriangle(t);
-							//hasAlpha=false;
 							}//end if(3 vertices)
 						else
 							{System.err.println("ResourceManager: FaceBlock has "+vertIndices.size()+" vertices. Only 3 or 4 supported.");}
@@ -364,18 +364,12 @@ public class ResourceManager{
 					else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
 						LineSegment seg = new LineSegment();
-						Vertex v1 = vertices.get(block.getVertexID1());
-						Vertex v2 = vertices.get(block.getVertexID2());
-						seg.getX()[0]=v1.getX()*cpScalar;
-						seg.getY()[0]=v1.getY()*cpScalar;
-						seg.getZ()[0]=v1.getZ()*cpScalar;
-						
-						seg.getX()[1]=v2.getX()*cpScalar;
-						seg.getY()[1]=v2.getY()*cpScalar;
-						seg.getZ()[1]=v2.getZ()*cpScalar;
+						org.jtrfp.trcl.gpu.Vertex v1 = vertices.get(block.getVertexID1());
+						org.jtrfp.trcl.gpu.Vertex v2 = vertices.get(block.getVertexID2());
+						seg.setVertex(v1,0);
+						seg.setVertex(v2,1);
 						Color c= palette[block.getColor()+16];
 						seg.setColor(c);
-						//System.out.println("ResourceManager.LineSegmentBlock(): red="+c.getRed()+" green="+c.getGreen()+" blue="+c.getBlue());
 						seg.setThickness(8);//Defaulted since the file doesn't specify
 						result.addLineSegment(seg);
 						}

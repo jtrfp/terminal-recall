@@ -2,6 +2,7 @@ package org.jtrfp.trcl.obj;
 
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
@@ -25,7 +26,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	    new double []{-1.0000001,-1.0000001,-1.0000001,-1.0000001}, //Z  ...hacky hacky hacky... /:
 	    new double[]{0,1,1,0},//U
 	    new double[]{0,0,1,1}, //V
-	    tex, RenderMode.DYNAMIC);
+	    tex, RenderMode.DYNAMIC,Vector3D.MINUS_K);
 	m.addTriangles(tris);
 	
 	tris = Triangle.quad2Triangles(
@@ -34,7 +35,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	    new double []{-1.0000001,-1.0000001,-1.0000001,-1.0000001}, //Z
 	    new double[]{0,0,0,0},//U
 	    new double[]{0,0,1,1}, //V
-	    tex, RenderMode.DYNAMIC);
+	    tex, RenderMode.DYNAMIC,Vector3D.MINUS_K);
 	}else{
 	    tris = Triangle.quad2Triangles(
 		new double[]{height,-height,-height,height}, //X
@@ -42,7 +43,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 		new double []{-1.0000001,-1.0000001,-1.0000001,-1.0000001}, //Z  ...hacky hacky hacky... /:
 		new double[]{0,0,1,1},//U
 		new double[]{1,0,0,1}, //V
-		tex, RenderMode.DYNAMIC);
+		tex, RenderMode.DYNAMIC,Vector3D.MINUS_K);
 	    m.addTriangles(tris);
 		
 	    m2 = new Model(true,tr);
@@ -52,7 +53,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 		new double []{-1.0000001,-1.0000001,-1.0000001,-1.0000001}, //Z
 		new double[]{0,0,0,0},//U
 		new double[]{1,0,0,1}, //V
-		tex, RenderMode.DYNAMIC);
+		tex, RenderMode.DYNAMIC,Vector3D.MINUS_K);
 	}
 	controller.setFrame(0);
 	m2.addTriangles(tris);

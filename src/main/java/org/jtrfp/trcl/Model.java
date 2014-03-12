@@ -18,6 +18,7 @@ package org.jtrfp.trcl;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 
 public class Model
@@ -170,7 +171,7 @@ public class Model
 				new double [] {0-origin[2],0-origin[2],0-origin[2],0-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
-				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
+				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha,Vector3D.MINUS_K));
 		//Left
 		m.addTriangles(Triangle.quad2Triangles(
 				new double [] {0-origin[0],0-origin[0],0-origin[0],0-origin[0]}, 
@@ -178,7 +179,7 @@ public class Model
 				new double [] {0-origin[2],d-origin[2],d-origin[2],0-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
-				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
+				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha,Vector3D.MINUS_I));
 		//Right
 		m.addTriangles(Triangle.quad2Triangles(
 				new double [] {w-origin[0],w-origin[0],w-origin[0],w-origin[0]}, 
@@ -186,7 +187,7 @@ public class Model
 				new double [] {0-origin[2],d-origin[2],d-origin[2],0-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
-				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
+				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha,Vector3D.PLUS_I));
 		//Back
 		m.addTriangles(Triangle.quad2Triangles(
 				new double [] {0-origin[0],w-origin[0],w-origin[0],0-origin[0]}, 
@@ -194,7 +195,7 @@ public class Model
 				new double [] {d-origin[2],d-origin[2],d-origin[2],d-origin[2]}, 
 				
 				new double [] {u0,u1,u1,u0}, 
-				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha));
+				new double [] {v0,v0,v1,v1}, tunnelTexturePalette, RenderMode.STATIC,hasAlpha,Vector3D.PLUS_K));
 		m.finalizeModel();
 		return m;
 		}//end buildCube

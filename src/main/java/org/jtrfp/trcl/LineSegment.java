@@ -17,62 +17,51 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 
-public class LineSegment
-	{
-	private final double [] x = new double[2];
-	private final double [] y = new double[2];
-	private final double [] z = new double[2];
-	//Bad values given to make unset-variable bugs obvious.
-	private Color color=null;
-	private double thickness = Double.POSITIVE_INFINITY;
-	/**
-	 * @return the color
-	 */
-	public Color getColor()
-		{
-		return color;
-		}
-	/**
-	 * @param color the color to set
-	 */
-	public void setColor(Color color)
-		{
-		this.color = color;
-		}
-	/**
-	 * @return the thickness
-	 */
-	public double getThickness()
-		{
-		return thickness;
-		}
-	/**
-	 * @param thickness the thickness to set
-	 */
-	public void setThickness(double thickness)
-		{
-		this.thickness = thickness;
-		}
-	/**
-	 * @return the x
-	 */
-	public double[] getX()
-		{
-		return x;
-		}
-	/**
-	 * @return the y
-	 */
-	public double[] getY()
-		{
-		return y;
-		}
-	/**
-	 * @return the z
-	 */
-	public double[] getZ()
-		{
-		return z;
-		}
-	
-	}//end LineSegment
+import org.jtrfp.trcl.gpu.Vertex;
+
+public class LineSegment {
+    private final Vertex[] vertices = new Vertex[2];
+    // Bad values given to make unset-variable bugs obvious.
+    private Color color = null;
+    private double thickness = Double.POSITIVE_INFINITY;
+
+    /**
+     * @return the color
+     */
+    public Color getColor() {
+	return color;
+    }
+
+    /**
+     * @param color
+     *            the color to set
+     */
+    public void setColor(Color color) {
+	this.color = color;
+    }
+
+    /**
+     * @return the thickness
+     */
+    public double getThickness() {
+	return thickness;
+    }
+
+    /**
+     * @param thickness
+     *            the thickness to set
+     */
+    public void setThickness(double thickness) {
+	this.thickness = thickness;
+    }
+
+    public LineSegment setVertex(Vertex vtx, int i) {
+	vertices[i] = vtx;
+	return this;
+    }
+
+    public Vertex getVertex(int i) {
+	return vertices[i];
+    }
+
+}// end LineSegment

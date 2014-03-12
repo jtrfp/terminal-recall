@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.Location3D;
@@ -99,7 +100,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 							u,
 							v,
-							td, RenderMode.STATIC);
+							td, RenderMode.STATIC, Vector3D.PLUS_J);//TODO: use ground normal
 							
 							m.addTriangle(tris[0]);
 							m.addTriangle(tris[1]);
@@ -150,7 +151,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 								u,
 								v,
-								td, RenderMode.STATIC);
+								td, RenderMode.STATIC,Vector3D.PLUS_J);//TODO: Use ground normal
 								
 								m.addTriangle(tris[0]);
 								m.addTriangle(tris[1]);

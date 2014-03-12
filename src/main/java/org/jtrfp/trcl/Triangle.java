@@ -17,215 +17,178 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.Future;
 
-public class Triangle
-        {
-        double [] x = new double[3];
-        double [] y = new double[3];
-        double [] z = new double[3];
-       
-        double [] u = new double[3];
-        double [] v = new double[3];
-       
-        RenderMode renderMode;
-        private boolean isAlphaBlended=false;
-       
-        Future<TextureDescription> texture;
-        
-        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, Future<TextureDescription> cloudTexture, RenderMode mode){
-            return quad2Triangles(x,y,z,u,v,cloudTexture,mode,false);
-        }
-        
-        /**
-         * Converts supplied quad coordinates to a pair of triangles in clockwise order, top-left being index zero.
-         *
-         */
-        public static Triangle [] quad2Triangles(double [] x, double [] y, double [] z, double [] u, double [] v, Future<TextureDescription> cloudTexture, RenderMode mode, boolean hasAlpha)
-                {
-                Triangle [] result = new Triangle[2];
-               
-                int vtx=0;
-                int qvx;
-                //TOP LEFT (0)
-                qvx=0;
-                Triangle t;
-                t=new Triangle();
-                t.setTexture(cloudTexture);
-                t.setRenderMode(mode);
-                t.setAlphaBlended(hasAlpha);
-                t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
-                t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
-                //BOTTOM LEFT (3)
-                qvx=3;
-                vtx++;
-                t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
-                t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
-                //BOTTOM RIGHT (2)
-                qvx=2;
-                vtx++;
-                t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
-                t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
-               
-                result[0]=t;
-               
-                t = new Triangle();
-                t.setTexture(cloudTexture);
-                t.setRenderMode(mode);
-                t.setAlphaBlended(hasAlpha);
-               
-                vtx=0;
-                //TOP LEFT (0)
-                qvx=0;
-                t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
-                t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
-                //TOP RIGHT (1)
-                qvx=1;
-                vtx++;
-                t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
-                t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
-                //BOTTOM RIGHT (2)
-                vtx++;
-                qvx=2;
-                t.x[vtx]=x[qvx];t.y[vtx]=y[qvx];t.z[vtx]=z[qvx];
-                t.u[vtx]=u[qvx]; t.v[vtx]=v[qvx];
-               
-                result[1]=t;
-               
-                return result;
-                }
-       
-        /**
-         * @return the x
-         */
-        public double[] getX()
-                {
-                return x;
-                }
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.jtrfp.trcl.gpu.Vertex;
 
-        /**
-         * @param x the x to set
-         */
-        public void setX(double[] x)
-                {
-                this.x = x;
-                }
+public class Triangle {
+    private Vertex [] vertices = new Vertex[3];
+    private Vector2D [] uv = new Vector2D[3];
+    private RenderMode renderMode;
+    private boolean isAlphaBlended = false;
+    private Vector3D centroidNormal;
 
-        /**
-         * @return the y
-         */
-        public double[] getY()
-                {
-                return y;
-                }
+    private Future<TextureDescription> texture;
+    
+    public Triangle(){}
+    public Triangle(Vertex [] vertices){
+	setVertex(vertices[0],0);
+	setVertex(vertices[1],1);
+	setVertex(vertices[2],2);
+	}
+    
+    public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
+	    double[] u, double[] v, Future<TextureDescription> texture,
+	    RenderMode mode, Vector3D centroidNormal) {
+	return quad2Triangles(x, y, z, u, v, texture, mode, false, centroidNormal);
+    }
+    
+    public void setVertex(Vertex vtx, int index){
+	if(vertices[index]!=null){
+	    vertices[index].removeTriangle(this);
+	}
+	vertices[index]=vtx;
+	vtx.addTriangle(this);
+    }//end setVertex(...)
+    
+    public void setUV(Vector2D uv, int index){
+	this.uv[index]=uv;
+    }
+    public void setUVNoCopy(Vector2D [] uv){
+	this.uv=uv;
+    }
+    public void setUVCopy(Vector2D [] uv){
+	for(int i=0; i<3; i++){
+	    this.uv[i]=uv[i];
+	}
+    }//end setUVCopy
+    
+    public Vector2D getUV(int index){
+	return this.uv[index];
+    }
+    
+    public static Triangle[] quad2Triangles(
+	    Vertex [] vertices, Vector2D [] uv,
+	    Future<TextureDescription> texture, 
+	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal){
+	Triangle[] result = new Triangle[2];
+	Triangle t;
+	t = new Triangle();
+	t.setTexture(texture);
+	t.setRenderMode(mode);
+	t.setAlphaBlended(hasAlpha);
+	t.setVertex(vertices[0], 0);
+	t.setVertex(vertices[1], 1);
+	t.setVertex(vertices[2], 2);
+	t.setUV(uv[0],0);
+	t.setUV(uv[1],1);
+	t.setUV(uv[2],2);
+	t.setCentroidNormal(centroidNormal);
+	result[0]=t;
+	t = new Triangle();
+	t.setTexture(texture);
+	t.setRenderMode(mode);
+	t.setAlphaBlended(hasAlpha);
+	
+	t.setVertex(vertices[2], 0);
+	t.setVertex(vertices[3], 1);
+	t.setVertex(vertices[0], 2);
+	t.setUV(uv[2],0);
+	t.setUV(uv[3],1);
+	t.setUV(uv[0],2);
+	t.setCentroidNormal(centroidNormal);
+	result[1] = t;
+	return result;
+    }
+    /**
+     * Converts supplied quad coordinates to a pair of triangles in clockwise
+     * order, top-left being index zero.
+     * 
+     */
+    public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
+	    double[] u, double[] v, Future<TextureDescription> texture,
+	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal) {
+	Triangle[] result = new Triangle[2];
+	final Vertex [] vertices = new Vertex[]{
+		new Vertex().setPosition(new Vector3D(x[0],y[0],z[0])),
+		new Vertex().setPosition(new Vector3D(x[1],y[1],z[1])),
+		new Vertex().setPosition(new Vector3D(x[2],y[2],z[2])),
+		new Vertex().setPosition(new Vector3D(x[3],y[3],z[3])),
+	};
+	Vector2D [] uvs = new Vector2D[4];
+	for(int i=0; i<4; i++){
+	    uvs[i]=new Vector2D(u[i],v[i]);
+	}
+	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha, centroidNormal);
+    }//end quad2Triangles(...)
 
-        /**
-         * @param y the y to set
-         */
-        public void setY(double[] y)
-                {
-                this.y = y;
-                }
+    /**
+     * @return the renderMode
+     */
+    public RenderMode getRenderMode() {
+	return renderMode;
+    }
 
-        /**
-         * @return the z
-         */
-        public double[] getZ()
-                {
-                return z;
-                }
+    /**
+     * @param renderMode
+     *            the renderMode to set
+     */
+    public void setRenderMode(RenderMode renderMode) {
+	this.renderMode = renderMode;
+    }
 
-        /**
-         * @param z the z to set
-         */
-        public void setZ(double[] z)
-                {
-                this.z = z;
-                }
+    /**
+     * @return the texture
+     */
+    public Future<TextureDescription> getTexture() {
+	return texture;
+    }
 
-        /**
-         * @return the u
-         */
-        public double[] getU()
-                {
-                return u;
-                }
+    /**
+     * @param cloudTexture
+     *            the texture to set
+     */
+    public void setTexture(Future<TextureDescription> cloudTexture) {
+	this.texture = cloudTexture;
+    }
 
-        /**
-         * @param u the u to set
-         */
-        public void setU(double[] u)
-                {
-                this.u = u;
-                }
+    /**
+     * @return the isAlphaBlended
+     */
+    public boolean isAlphaBlended() {
+	return isAlphaBlended;
+    }
 
-        /**
-         * @return the v
-         */
-        public double[] getV()
-                {
-                return v;
-                }
-
-        /**
-         * @param v the v to set
-         */
-        public void setV(double[] v)
-                {
-                this.v = v;
-                }
-
-        /**
-         * @return the renderMode
-         */
-        public RenderMode getRenderMode()
-                {
-                return renderMode;
-                }
-
-        /**
-         * @param renderMode the renderMode to set
-         */
-        public void setRenderMode(RenderMode renderMode)
-                {
-                this.renderMode = renderMode;
-                }
-
-        /**
-         * @return the texture
-         */
-        public Future<TextureDescription> getTexture()
-                {
-                return texture;
-                }
-
-        /**
-         * @param cloudTexture the texture to set
-         */
-        public void setTexture(Future<TextureDescription> cloudTexture)
-                {
-                this.texture = cloudTexture;
-                }
-       
-        public String toString()
-                {
-                //new RuntimeException().printStackTrace();
-                return "TRIANGLE {"+x[0]+", "+y[0]+", "+z[0]+"} , {"+x[1]+", "+y[1]+", "+z[1]+"} , {"+x[2]+", "+y[2]+", "+z[2]+"}\n"+
-                                "\tUV: {"+u[0]+", "+v[0]+" }"+"  {"+u[1]+", "+v[1]+" }"+" {"+u[2]+", "+v[2]+" }";
-                }
-
-		/**
-		 * @return the isAlphaBlended
-		 */
-		public boolean isAlphaBlended()
-			{
-			return isAlphaBlended;
-			}
-
-		/**
-		 * @param isAlphaBlended the isAlphaBlended to set
-		 */
-		public void setAlphaBlended(boolean isAlphaBlended)
-			{
-			this.isAlphaBlended = isAlphaBlended;
-			}
-        }//Triangle
+    /**
+     * @param isAlphaBlended
+     *            the isAlphaBlended to set
+     */
+    public void setAlphaBlended(boolean isAlphaBlended) {
+	this.isAlphaBlended = isAlphaBlended;
+    }
+    /**
+     * @return the vertices
+     */
+    public Vertex[] getVertices() {
+        return vertices;
+    }
+    /**
+     * @param vertices the vertices to set
+     */
+    public void setVertices(Vertex[] vertices) {
+        this.vertices = vertices;
+    }
+    /**
+     * @return the centroidNormal
+     */
+    public Vector3D getCentroidNormal() {
+        return centroidNormal;
+    }
+    /**
+     * @param centroidNormal the centroidNormal to set
+     */
+    public void setCentroidNormal(Vector3D centroidNormal) {
+        this.centroidNormal = centroidNormal;
+    }
+}// Triangle
 

@@ -39,7 +39,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere
 			
 			Triangle [] tris=Triangle.quad2Triangles(
 					new double[]{x,x+segWidth,x+segWidth,x}, new double[]{.36,.36,1,1}, new double[]{Z,Z,Z,Z}, 
-					new double[]{0,1,1,0}, new double[]{0,0,1,1}, dashTexture[seg], RenderMode.DYNAMIC);
+					new double[]{0,1,1,0}, new double[]{0,0,1,1}, dashTexture[seg], RenderMode.DYNAMIC,Vector3D.MINUS_K);
 			tris[0].setAlphaBlended(true);
 			tris[1].setAlphaBlended(true);
 			dashModel.addTriangles(tris);

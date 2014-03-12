@@ -17,6 +17,7 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
@@ -31,7 +32,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(world.getFogColor()), RenderMode.DYNAMIC));
+						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(world.getFogColor()), RenderMode.DYNAMIC,Vector3D.MINUS_K));
 		overworldBackdrop = new WorldObject2DVisibleEverywhere(tr,backdropModel.finalizeModel());
 		add(overworldBackdrop);
 		//addAlwaysVisible(overworldBackdrop);
@@ -40,7 +41,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(Color.black), RenderMode.DYNAMIC));
+						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(Color.black), RenderMode.DYNAMIC,Vector3D.MINUS_K));
 		tunnelBackdrop = new WorldObject2DVisibleEverywhere(tr,backdropModel.finalizeModel());
 		tunnelBackdrop.setActive(false);
 		//addAlwaysVisible(tunnelBackdrop);

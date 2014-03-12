@@ -24,6 +24,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
+import org.jtrfp.trcl.gpu.Vertex;
 
 public class TriangleList extends PrimitiveList<Triangle> {
     private Controller controller;
@@ -97,29 +98,31 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    throws ExecutionException, InterruptedException {
 	final int numFrames = getPrimitives().length;
 	Triangle t = triangleAt(0, triangleIndex);
+	Vector3D pos = t.getVertices()[vIndex].getPosition();
 	final TriangleVertexWindow vw = (TriangleVertexWindow) getMemoryWindow();
 	if (numFrames == 1) {
-	    vw.setX(gpuTVIndex, (short) applyScale(t.x[vIndex]));
-	    vw.setY(gpuTVIndex, (short) applyScale(t.y[vIndex]));
-	    vw.setZ(gpuTVIndex, (short) applyScale(t.z[vIndex]));
+	   
+	    vw.setX(gpuTVIndex, (short) applyScale(pos.getX()));
+	    vw.setY(gpuTVIndex, (short) applyScale(pos.getY()));
+	    vw.setZ(gpuTVIndex, (short) applyScale(pos.getZ()));
 	} else if (numFrames > 1) {
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
 	    float[] zFrames = new float[numFrames];
 	    for (int i = 0; i < numFrames; i++) {
-		xFrames[i] = Math.round(triangleAt(i, triangleIndex).x[vIndex]
+		xFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getX()
 			/ scale);
 	    }
 	    xyzAnimator.addFrames(xFrames);
 
 	    for (int i = 0; i < numFrames; i++) {
-		yFrames[i] = Math.round(triangleAt(i, triangleIndex).y[vIndex]
+		yFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getY()
 			/ scale);
 	    }
 	    xyzAnimator.addFrames(yFrames);
 
 	    for (int i = 0; i < numFrames; i++) {
-		zFrames[i] = Math.round(triangleAt(i, triangleIndex).z[vIndex]
+		zFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getZ()
 			/ scale);
 	    }
 	    xyzAnimator.addFrames(zFrames);
@@ -142,17 +145,17 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		animators.add(uvAnimator);
 		for (int i = 0; i < numFrames; i++) {
 		    uFrames[i] = (float) (uvUpScaler * tx
-			    .getGlobalUFromLocal(triangleAt(i, triangleIndex).u[vIndex]));
+			    .getGlobalUFromLocal(triangleAt(i, triangleIndex).getUV(vIndex).getX()));
 		    vFrames[i] = (float) (uvUpScaler * tx
-			    .getGlobalVFromLocal(triangleAt(i, triangleIndex).v[vIndex]));
+			    .getGlobalVFromLocal(triangleAt(i, triangleIndex).getUV(vIndex).getY()));
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
 		vw.setU(gpuTVIndex, (short) (uvUpScaler * tx
-			.getGlobalUFromLocal(t.u[vIndex])));
+			.getGlobalUFromLocal(t.getUV(vIndex).getX())));
 		vw.setV(gpuTVIndex, (short) (uvUpScaler * tx
-			.getGlobalVFromLocal(t.v[vIndex])));
+			.getGlobalVFromLocal(t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	}// end if(Texture)
 	else {// Animated texture
@@ -173,9 +176,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    for (int ti = 0; ti < numTextureFrames; ti++) {
 		tx = at.getFrames()[ti].get().getNodeForThisTexture();
 		uFrames[ti] = (short) (uvUpScaler * tx
-			.getGlobalUFromLocal(t.u[vIndex]));
+			.getGlobalUFromLocal(t.getUV(vIndex).getX()));
 		vFrames[ti] = (short) (uvUpScaler * tx
-			.getGlobalVFromLocal(t.v[vIndex]));
+			.getGlobalVFromLocal(t.getUV(vIndex).getY()));
 	    }// end for(frame)
 	    uvAnimator.addFrames(uFrames);
 	    uvAnimator.addFrames(vFrames);
@@ -229,13 +232,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
 		    double v;
-		    v = (tri.x[i]);
+		    final Vector3D pos = tri.getVertices()[i].getPosition();
+		    v = pos.getX();
 		    result = result.getX() < v ? new Vector3D(v, result.getY(),
 			    result.getZ()) : result;
-		    v = (tri.y[i]);
+		    v = pos.getY();
 		    result = result.getY() < v ? new Vector3D(result.getX(), v,
 			    result.getZ()) : result;
-		    v = (tri.z[i]);
+		    v = pos.getZ();
 		    result = result.getZ() < v ? new Vector3D(result.getX(),
 			    result.getY(), v) : result;
 		}// end for(vertex)
@@ -252,13 +256,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
 		    double v;
-		    v = (tri.x[i]);
+		    final Vector3D pos = tri.getVertices()[i].getPosition();
+		    v = pos.getX();
 		    result = result.getX() > v ? new Vector3D(v, result.getY(),
 			    result.getZ()) : result;
-		    v = (tri.y[i]);
+		    v = pos.getY();
 		    result = result.getY() > v ? new Vector3D(result.getX(), v,
 			    result.getZ()) : result;
-		    v = (tri.z[i]);
+		    v = pos.getZ();
 		    result = result.getZ() > v ? new Vector3D(result.getX(),
 			    result.getY(), v) : result;
 		}// end for(vertex)
@@ -274,11 +279,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
 		    double v;
-		    v = Math.abs(tri.x[i]);
+		    final Vector3D pos = tri.getVertices()[i].getPosition();
+		    v = Math.abs(pos.getX());
 		    result = result < v ? v : result;
-		    v = Math.abs(tri.y[i]);
+		    v = Math.abs(pos.getY());
 		    result = result < v ? v : result;
-		    v = Math.abs(tri.z[i]);
+		    v = Math.abs(pos.getZ());
 		    result = result < v ? v : result;
 		}// end for(vertex)
 	    }// end for(triangle)

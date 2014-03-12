@@ -37,18 +37,18 @@ public class LineSegmentList extends
 	    final int sIndex=lsw.create();
 	    // P1
 	    lsw.x1.set(sIndex,
-		    (short) applyScale(Math.round(ls.getX()[0])));
+		    (short) applyScale(Math.round(ls.getVertex(0).getPosition().getX())));
 	    lsw.y1.set(sIndex,
-		    (short) applyScale(Math.round(ls.getY()[0])));
+		    (short) applyScale(Math.round(ls.getVertex(0).getPosition().getY())));
 	    lsw.z1.set(sIndex,
-		    (short) applyScale(Math.round(ls.getZ()[0])));
+		    (short) applyScale(Math.round(ls.getVertex(0).getPosition().getZ())));
 	    // P2
 	    lsw.x2.set(sIndex,
-		    (short) applyScale(Math.round(ls.getX()[1])));
+		    (short) applyScale(Math.round(ls.getVertex(1).getPosition().getX())));
 	    lsw.y2.set(sIndex,
-		    (short) applyScale(Math.round(ls.getY()[1])));
+		    (short) applyScale(Math.round(ls.getVertex(1).getPosition().getY())));
 	    lsw.z2.set(sIndex,
-		    (short) applyScale(Math.round(ls.getZ()[1])));
+		    (short) applyScale(Math.round(ls.getVertex(1).getPosition().getZ())));
 	    // RGB
 	    lsw.red.set(sIndex, (byte) ls.getColor().getRed());
 	    lsw.green.set(sIndex, (byte) ls.getColor().getGreen());
@@ -86,7 +86,11 @@ public class LineSegmentList extends
 	    for (LineSegment ls : frame) {
 		for (int i = 0; i < 2; i++) {
 		    double v;
-		    v = Math.abs(ls.getX()[i]);
+		    v = Math.abs(ls.getVertex(i).getPosition().getX());
+		    result = result < v ? v : result;
+		    v = Math.abs(ls.getVertex(i).getPosition().getY());
+		    result = result < v ? v : result;
+		    v = Math.abs(ls.getVertex(i).getPosition().getZ());
 		    result = result < v ? v : result;
 		}// end for(vertex)
 	    }// end for(triangle)

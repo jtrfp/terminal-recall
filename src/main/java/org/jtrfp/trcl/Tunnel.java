@@ -65,14 +65,11 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		gl=tr.getGPU().getGl();
 		Vector3D tunnelEnd=null;
 		try {   lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
-			DirectionVector exitDV=sourceTunnel.getExit();
-			//Vector3D entranceVector = new Vector3D((double)entranceDV.getZ()/65535.,-.1,(double)entranceDV.getX()/65535.).normalize();
 			final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
 			tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
 		}catch(Exception e){e.printStackTrace();}
 			exitObject = new TunnelExitObject(tr,this);
 			exitObject.setMirrorTerrain(sourceTunnel.getExitMode()==ExitMode.exitToChamber);
-			System.out.println("Tunnel ends at "+tunnelEnd);
 			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)).toArray());
 			add(exitObject);
 			// X is tunnel depth, Z is left-right
@@ -99,7 +96,6 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		for(Segment s:segs){
 		    	Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
 			tunnelEnd=tunnelEnd.add(rotation.applyTo(positionDelta));
-			System.out.println("New endpoint: "+tunnelEnd);
 			}
 		final Vector3D finalEnd=tunnelEnd;
 		Vector3D startPoint= TUNNEL_START_POS;

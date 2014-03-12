@@ -47,7 +47,6 @@ public class TunnelSegment extends WorldObject
 		this.endX=endX;
 		this.endY=endY;
 		this.segment=s;
-		System.out.println("TUNNEL SEGMENT segLen="+segLen+" endX="+endX+" endY="+endY);
 		}
 	
 	public static double getStartWidth(Segment s)
@@ -64,7 +63,6 @@ public class TunnelSegment extends WorldObject
 	private static Model createModel(Segment s,double segLen, Future<TextureDescription>[] tunnelTexturePalette, double endX,double endY, final TR tr)
 		{
 		Model m = new Model(false,tr);
-		m.setDebugName("Tunnel Segment");
 		final int numPolys=s.getNumPolygons();
 		double startWidth=getStartWidth(s);
 		double startHeight=getStartHeight(s);
@@ -128,15 +126,6 @@ public class TunnelSegment extends WorldObject
 				   else st.setFrame(0);
 				}
 			    });
-			    /*
-			    //ON
-			    u[0]=0;u[1]=0;u[2]=.5;u[3]=.5;
-			    v[0]=.5;v[1]=1; v[2]=1;v[3]=.5;
-			    
-			    //OFF
-			    u[0]=.5;u[1]=.5;u[2]=1;u[3]=1;
-			    v[0]=.5;v[1]=1; v[2]=1;v[3]=.5;
-			    */
 			    }catch(Exception e){e.printStackTrace();}
 			}else{}//No light
 			

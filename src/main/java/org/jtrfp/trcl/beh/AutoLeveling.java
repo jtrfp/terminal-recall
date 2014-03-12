@@ -5,8 +5,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class AutoLeveling extends Behavior {
-    private double retainmentCoeff=.988;
-    private double inverseRetainmentCoeff=1.-retainmentCoeff;
+    private double [] retainmentCoeff=new double[]{.988,.988,.988};
+    private double [] inverseRetainmentCoeff = new double[]{1-.988,1-.988,1-.988};
     private LevelingAxis levelingAxis = LevelingAxis.TOP;
     private Vector3D levelingVector=new Vector3D(0,1,0);
     @Override
@@ -18,17 +18,17 @@ public class AutoLeveling extends Behavior {
 	final Vector3D newHeading = 
 		levelingAxis==LevelingAxis.TOP?	new Vector3D(oldHeading.getX(),oldHeading.getY(),oldHeading.getZ()).normalize():
 		    		/*heading*/	new Vector3D(
-		    	oldHeading.getX()*retainmentCoeff+levelingVector.getX()*inverseRetainmentCoeff,
-		    	oldHeading.getY()*retainmentCoeff+levelingVector.getY()*inverseRetainmentCoeff,
-		    	oldHeading.getZ()*retainmentCoeff+levelingVector.getZ()*inverseRetainmentCoeff)
+		    	oldHeading.getX()*retainmentCoeff[0]+levelingVector.getX()*inverseRetainmentCoeff[0],
+		    	oldHeading.getY()*retainmentCoeff[1]+levelingVector.getY()*inverseRetainmentCoeff[1],
+		    	oldHeading.getZ()*retainmentCoeff[2]+levelingVector.getZ()*inverseRetainmentCoeff[2])
 		    	    .normalize();
 	
 	final Vector3D newTop = 
 		levelingAxis==LevelingAxis.HEADING?new Vector3D(oldTop.getX(),oldTop.getY(),oldTop.getZ()).normalize():
 		    		/*heading*/	new Vector3D(
-			oldTop.getX()*retainmentCoeff+levelingVector.getX()*inverseRetainmentCoeff,
-			oldTop.getY()*retainmentCoeff+levelingVector.getY()*inverseRetainmentCoeff,
-			oldTop.getZ()*retainmentCoeff+levelingVector.getZ()*inverseRetainmentCoeff)
+			oldTop.getX()*retainmentCoeff[0]+levelingVector.getX()*inverseRetainmentCoeff[0],
+			oldTop.getY()*retainmentCoeff[1]+levelingVector.getY()*inverseRetainmentCoeff[1],
+			oldTop.getZ()*retainmentCoeff[2]+levelingVector.getZ()*inverseRetainmentCoeff[2])
 			    .normalize();
 	
 	final Rotation topDelta=new Rotation(oldTop,newTop);
@@ -45,16 +45,20 @@ public class AutoLeveling extends Behavior {
     /**
      * @return the retainmentCoeff
      */
-    public double getRetainmentCoeff() {
+    public double [] getRetainmentCoeff() {
         return retainmentCoeff;
     }
 
     /**
      * @param retainmentCoeff the retainmentCoeff to set
      */
-    public AutoLeveling setRetainmentCoeff(double retainmentCoeff) {
-        this.retainmentCoeff = retainmentCoeff;
-        inverseRetainmentCoeff=1.-retainmentCoeff;
+    public AutoLeveling setRetainmentCoeff(double x, double y, double z) {
+	retainmentCoeff[0]=x;
+	retainmentCoeff[1]=y;
+	retainmentCoeff[2]=z;
+	inverseRetainmentCoeff[0]=1.-x;
+	inverseRetainmentCoeff[1]=1.-y;
+	inverseRetainmentCoeff[2]=1.-z;
         return this;
     }
 

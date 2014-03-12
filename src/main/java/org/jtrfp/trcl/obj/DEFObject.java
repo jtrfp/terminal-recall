@@ -527,11 +527,10 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 		    hp.setPropulsion(hp.getPropulsion()/1);
 		    beh.probeForBehavior(AutoLeveling.class).
 		    	setLevelingAxis(LevelingAxis.HEADING).
-		    	setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985);
+		    	setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985,.985,.985);
 		}};
 		addBehavior(spinAndCrashAddendum);
 	    }//end if(spinCrash)
-    
     AccelleratedByPropulsion escapeProp=null;
     if(retreatAboveSky){
       escapeProp = new AccelleratedByPropulsion();
@@ -544,8 +543,6 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     afb.setPatternOffsetMillis((int)(Math.random()*1000));
     afb.setProjectileFiringBehavior(pfb);
     addBehavior(afb);
-    //final EnsureUpright eu = new EnsureUpright();
-    //addBehavior(eu);
     final SpinAccellerationBehavior sab = (SpinAccellerationBehavior)new SpinAccellerationBehavior().setEnable(false);
     addBehavior(sab);
     addBehavior(new SmartPlaneBehavior(haapb,afb,sab,aatpb,escapeProp,retreatAboveSky));

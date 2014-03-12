@@ -43,7 +43,7 @@ public class ThreadManager {
 	// Ticks
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
-	List<WorldObject> vl = tr.getCollisionManager().getVisibilityList();
+	List<WorldObject> vl = tr.getCollisionManager().getCurrentlyActiveVisibilityList();
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo = vl.get(i);
 	    if (wo.isActive()

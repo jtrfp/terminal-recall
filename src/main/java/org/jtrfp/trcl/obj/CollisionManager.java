@@ -45,7 +45,7 @@ public class CollisionManager {
     }// end updateVisibilityList()
 
     public synchronized void performCollisionTests() {
-	List<WorldObject> list = getVisibilityList();
+	List<WorldObject> list = getCurrentlyActiveVisibilityList();
 	for (int i = 0; i < list.size(); i++) {
 	    final WorldObject left = list.get(i);
 	    for (int j = i + 1; j < list.size(); j++) {
@@ -62,10 +62,10 @@ public class CollisionManager {
     }
 
     public void remove(WorldObject worldObject) {
-	getVisibilityList().remove(worldObject);
+	getCurrentlyActiveVisibilityList().remove(worldObject);
     }
 
-    public List<WorldObject> getVisibilityList() {
+    public List<WorldObject> getCurrentlyActiveVisibilityList() {
 	return visibilityList[flip ? 1 : 0];
     }
 

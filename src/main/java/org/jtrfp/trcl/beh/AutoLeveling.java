@@ -5,8 +5,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class AutoLeveling extends Behavior {
-    private double [] retainmentCoeff=new double[]{.988,.988,.988};
-    private double [] inverseRetainmentCoeff = new double[]{1-.988,1-.988,1-.988};
+    private double [] retainmentCoeff=new double[]{.988,1,.988};
+    private double [] inverseRetainmentCoeff = new double[]{1-.988,0,1-.988};
     private LevelingAxis levelingAxis = LevelingAxis.TOP;
     private Vector3D levelingVector=new Vector3D(0,1,0);
     @Override

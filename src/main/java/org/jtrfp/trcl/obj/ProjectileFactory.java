@@ -74,9 +74,8 @@ public class ProjectileFactory {
    		 frames[i]=(Future)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl);
    	     }//end for(frames)
    	     Future<TextureDescription> tex = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames));
-	     ProjectileBillboard bb = new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow);
 	     for(int i=0; i<projectiles.length; i++){
-	   	    projectiles[i]=bb;}
+	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow);}
    	 }//end (billboard)
    	 else if(modelingType instanceof ModelingType.BINModelingType){
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;

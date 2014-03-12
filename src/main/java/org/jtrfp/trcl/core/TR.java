@@ -466,6 +466,10 @@ public final class TR
 	public void setGlobalPalette(Color[] palette) {
 	    globalPalette=palette;
 	}
+	
+	public static double sloppyTwosComplimentTaxicabDistanceXZ(double []l, double []r){
+	    return deltaRollover(Math.abs(l[0]-r[0])+Math.abs(l[2]-r[2]));
+	}
 
 	public static double twosComplimentDistance(double[] l,
 		double[] r) {

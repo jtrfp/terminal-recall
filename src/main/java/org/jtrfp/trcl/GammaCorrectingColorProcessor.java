@@ -17,17 +17,16 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 
-public class GammaCorrectingColorProcessor implements ColorProcessor
-	{
-	double GAMMA=1.2;
-	public static final GammaCorrectingColorProcessor singleton = new GammaCorrectingColorProcessor();
-	@Override
-	public Color process(Color c)
-		{
-		return new Color(
-				(int)(Math.pow((double)c.getRed()/256.,GAMMA)*256.),
-				(int)(Math.pow((double)c.getGreen()/256.,GAMMA)*256.),
-				(int)(Math.pow((double)c.getBlue()/256.,GAMMA)*256.));
-		}//end process()
+public class GammaCorrectingColorProcessor implements ColorProcessor {
+    double GAMMA = .9;
+    public static final GammaCorrectingColorProcessor singleton = new GammaCorrectingColorProcessor();
 
-	}//end GammaCorrectingColorProcessor
+    @Override
+    public Color process(Color c) {
+	return new Color(
+		(int) (Math.pow((double) c.getRed() / 256., GAMMA) * 256.),
+		(int) (Math.pow((double) c.getGreen() / 256., GAMMA) * 256.),
+		(int) (Math.pow((double) c.getBlue() / 256., GAMMA) * 256.));
+    }// end process()
+
+}// end GammaCorrectingColorProcessor

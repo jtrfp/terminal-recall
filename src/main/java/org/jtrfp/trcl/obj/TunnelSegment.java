@@ -136,7 +136,7 @@ public class TunnelSegment extends WorldObject
 						
 						u,
 						v,
-						tex, RenderMode.DYNAMIC,Vector3D.MINUS_K));
+						tex, RenderMode.DYNAMIC,Vector3D.ZERO));
 			startAngle+=dAngleStart;
 			endAngle+=dAngleEnd;
 			}//for(polygons)
@@ -154,7 +154,7 @@ public class TunnelSegment extends WorldObject
 					new double[]{0,0,1,1},
 					new double[]{0,1,1,0},
 					tunnelTexturePalette[s.getPolyTextureIndices().get(numPolygonsMinusOne)], 
-					RenderMode.DYNAMIC,Vector3D.MINUS_K));
+					RenderMode.DYNAMIC,Vector3D.ZERO));
 		
 		return m.finalizeModel();
 		}

@@ -22,12 +22,17 @@
 uniform sampler2D primaryRendering;
 uniform sampler2D depthTexture;
 uniform sampler2D texturePalette;
+uniform sampler2D normTexture;
 uniform vec3 fogColor;
 uniform uint screenWidth;
 uniform uint screenHeight;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
+
+const vec3 sunVector = vec3(.5774,.5774,.5774);// temporary.
+const vec3 sunColor = vec3(1.1,1,1);
+const float ambientIllumination = .5; //temporary. Blue sky.
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
 float linearizeDepth(float z)
@@ -40,11 +45,15 @@ return z;
 
 void main()
 {
-vec2 primaryUV = vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
-float depth = texture(depthTexture,primaryUV)[0];
+vec2 screenLoc=vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
+float depth = texture(depthTexture,screenLoc)[0];
 gl_FragDepth = depth;
 float linearDepth = linearizeDepth(depth);
-fragColor = texture(primaryRendering,primaryUV);//DEFERRED
-fragColor = textureLod(texturePalette,fragColor.rg,linearDepth);//TEX
+fragColor = texture(primaryRendering,screenLoc);//GET UV
+vec3 origColor = textureLod(texturePalette,fragColor.rg,linearDepth).rgb;//GET COLOR
+vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
+// Calc illumination. Near-zero norm means 
+float sunIllumination = length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):1;
+fragColor.rgb =origColor*ambientIllumination*fogColor+origColor*sunIllumination*sunColor;
 fragColor = mix(fragColor,vec4(fogColor,1),linearDepth);//FOG
 }

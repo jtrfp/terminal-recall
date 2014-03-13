@@ -113,7 +113,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 
     public abstract void uploadToGPU(GL3 gl);
 
-    public abstract byte getPrimitiveRenderMode();
+    //public abstract byte getPrimitiveRenderMode();
 /*
     public int []getPhysicalPages() {
 	final int [] result = new int[window.numPages()];
@@ -150,4 +150,9 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public final MemoryWindow getMemoryWindow(){
 	return window;
     }
+
+    /**
+     * @return the primitiveRenderMode
+     */
+    public abstract byte getPrimitiveRenderMode();
 }// end PrimitiveList

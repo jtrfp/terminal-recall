@@ -14,10 +14,14 @@ public final class TriangleVertexWindow extends MemoryWindow {
     public final ShortVariable x = new ShortVariable();
     public final ShortVariable y = new ShortVariable();
     public final ShortVariable z = new ShortVariable();
-    public final ShortVariable unusedShort6 = new ShortVariable();
+    public final ByteVariable normX = new ByteVariable();
+    public final ByteVariable normY = new ByteVariable();
+    //public final ShortVariable unusedShort6 = new ShortVariable();
     public final ShortVariable u = new ShortVariable();
     public final ShortVariable v = new ShortVariable();
-    public final ShortVariable unusedShort12 = new ShortVariable();
+    //public final ShortVariable unusedShort12 = new ShortVariable();
+    public final ByteVariable normZ = new ByteVariable();
+    public final ByteVariable unusedByte13 = new ByteVariable();
     public final ShortVariable unusedShort14 = new ShortVariable();
     
     public TriangleVertexWindow(TR tr, String debugName){

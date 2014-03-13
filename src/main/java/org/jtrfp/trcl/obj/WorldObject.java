@@ -71,6 +71,7 @@ public class WorldObject implements PositionedRenderable {
     private ArrayList<Behavior> tickBehaviors = new ArrayList<Behavior>();
     private final NullBehavior nullBehavior;
     private boolean active = true;
+    private byte renderFlags=0;
 
     protected final double[] aX = new double[3];
     protected final double[] aY = new double[3];
@@ -300,7 +301,7 @@ public class WorldObject implements PositionedRenderable {
 		    / GLTextureBuffer.BYTES_PER_VEC4;
 	    odw.matrixOffset.set(index, matrixOffsetVec4s);
 	    odw.vertexOffset.set(index,vertexOffsetVec4s);
-	    odw.mode.set(index, primitiveList.getPrimitiveRenderMode());
+	    odw.mode.set(index, (byte)(primitiveList.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
 	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
 	    if (vec4Counter >= vec4sPerBlock) {
 		odw.numVertices.set(index,
@@ -367,19 +368,20 @@ public class WorldObject implements PositionedRenderable {
 	    tMd[7] = position[1];
 	    tMd[11] = position[2];
 
-	    final RealMatrix cm = tr.getRenderer().getCamera().getMatrix();
+	    /*final RealMatrix cm = tr.getRenderer().getCamera().getMatrix();
 	    for (int i = 0; i < 16; i++) {
 		cMd[i] = cm.getEntry(i / 4, i % 4);
-	    }
+	    }*/
 	    if (translate()) {
 		Mat4x4.mul(tMd, rMd, rotTransM);
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
 
-	    Mat4x4.mul(cMd, rotTransM, camM);
+	    //Mat4x4.mul(cMd, rotTransM, camM);//Camera matrix calc moved to GPU
 
-	    tr.getMatrixWindow().setTransposed(camM, matrixID);
+	    //tr.getMatrixWindow().setTransposed(camM, matrixID);//Camera matrix calc moved to GPU
+	    tr.getMatrixWindow().setTransposed(rotTransM, matrixID);//New version
 	} catch (MathArithmeticException e) {
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()
@@ -592,5 +594,19 @@ public class WorldObject implements PositionedRenderable {
 	if (behavior instanceof CollisionBehavior)
 	    collisionBehaviors.remove(behavior);
 	tickBehaviors.remove(behavior);
+    }
+
+    /**
+     * @return the renderFlags
+     */
+    public int getRenderFlags() {
+        return renderFlags;
+    }
+
+    /**
+     * @param renderFlags the renderFlags to set
+     */
+    public void setRenderFlags(byte renderFlags) {
+        this.renderFlags = renderFlags;
     }
 }// end WorldObject

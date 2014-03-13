@@ -33,10 +33,12 @@ uniform int useTextureMap;
 
 // INPUTS
 smooth in vec2 fragTexCoord;
+smooth in vec3 norm;
 flat in uint packedFragData;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec3 fragNormal;
 
 uint bit(uint _input, uint index)
 	{return (_input >> index) & 0x00000001u;}
@@ -52,6 +54,7 @@ uint UNibble(uint _input, uint index)
 
 void main()
 {
+fragNormal=norm;//Pass it along
 switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
 	{
 case RENDER_MODE_TRIANGLES:

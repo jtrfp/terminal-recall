@@ -18,7 +18,6 @@
 //#extension GL_ARB_explicit_uniform_location : enable
 
 //CONSTANTS
-//const uint NUM_RENDERLIST_PAGES=
 const float COORD_DOWNSCALER=512+1;
 const uint RENDER_MODE_TRIANGLES=0u;
 const uint RENDER_MODE_LINES=1u;
@@ -30,12 +29,14 @@ const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
 //OUT
 smooth out vec2 fragTexCoord;
+smooth out vec3 norm;
 flat out uint packedFragData;
 
 //IN
 uniform uint renderListOffset;
 uniform uint renderListPageTable[85];
 uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
+uniform mat4 cameraMatrix;
 
 layout (location = 0) in float dummy;
 
@@ -114,10 +115,10 @@ int renderListLogicalVEC42PhysicalVEC4(uint logical)
 */
 
 /*Triangle Vertex VEC4
-	uint short x,y //Scaled by COORD_DOWNSCALER
-	uint short z,???
+	uint short x,y // XYZ Scaled by COORD_DOWNSCALER
+	uint short z, byte normX, byte normY
 	uint short u,v // scaled by 4096
-	uint short ???? //32 bits unused.
+	uint byte normZ // 3 bytes unused
 */
 
 /*Line Segment VEC4
@@ -142,14 +143,16 @@ gl_Position.x=dummy*0;
 		
 		if(intraObjectVertexIndex<numVertices)
 			{
-			packedFragData=setUNibble(packedFragData,0u,UByte(objectDef[2],1u));
+			uint renderMode = UByte(objectDef[2],1u);
+			packedFragData=setUNibble(packedFragData,0u,renderMode);
 			int matrixOffset = int(objectDef[0]);
 			int vertexOffset = int(objectDef[1]);
 			int modelScalar = int(UByte(objectDef[2],2u))-16;//Numerical domain offset for negatives
 			mat4 matrix = mat4(uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),
 										uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+2)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
 			// objectDef[3] unused.
-			switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
+			uint skipCameraMatrix=UNibble(packedFragData,PACKED_DATA_RENDER_MODE);
+			switch(UNibble(renderMode,0u))
 				{
 			case RENDER_MODE_TRIANGLES:
 				uvec4 packedVertex = texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
@@ -158,10 +161,11 @@ gl_Position.x=dummy*0;
 												float(firstSShort(packedVertex[1])));
 				vertexCoord.w=1;
     			fragTexCoord = vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
-    			gl_Position = matrix * vertexCoord;
-    			
-    			//fogLevel=(length(gl_Position)-fogStart)/(fogEnd-fogStart);
-    			//fogLevel=clamp(fogLevel,0.0,1.0);
+    			gl_Position = UNibble(renderMode,1u)==0u?cameraMatrix * matrix * vertexCoord:matrix * vertexCoord;
+    			float normX = float(SByte(packedVertex[1],2u))/128;
+				float normY = float(SByte(packedVertex[1],3u))/128;
+				float normZ = float(SByte(packedVertex[3],0u))/128;
+				norm = ((matrix*vec4(normX,normY,normZ,0)).xyz+vec3(1,1,1))/2;//Crunch this into [0,1] domain
     			break;//end RENDER_MODE_TRIANGLES
     		case RENDER_MODE_LINES:
     			//LOAD DATA
@@ -179,13 +183,12 @@ gl_Position.x=dummy*0;
 				scalingProbe=(vID==0||vID==1||vID==5)?p1:p2;
 				
 				//MATRIX OPS
-				p1=matrix*p1;
-				p2=matrix*p2;
+				mat4 fullMatrix = cameraMatrix * matrix;
+				p1=fullMatrix * p1;
+				p2=fullMatrix * p2;
 				//FOG
 				vec4 fogP;
 				fogP=(vID==0||vID==1||vID==5)?p1:p2;
-				//fogLevel=(length(fogP)-fogStart)/(fogEnd-fogStart);
-    			//fogLevel=clamp(fogLevel,0.0,1.0);
 				p1/=abs(p1.w);//Normalize
     			p2/=abs(p2.w);//Normalize
     			vec2 perpSlope = vec2(p2.y-p1.y,p1.x-p2.x)/length(p1.xy-p2.xy);
@@ -207,6 +210,7 @@ gl_Position.x=dummy*0;
 				packedFragData = setUNibble(packedFragData,PACKED_DATA_COLOR_RED,UByte(packedSegment[int(3)],1u)/16u);//red
 				packedFragData = setUNibble(packedFragData,PACKED_DATA_COLOR_GREEN,UByte(packedSegment[int(3)],2u)/16u);//green
 				packedFragData = setUNibble(packedFragData,PACKED_DATA_COLOR_BLUE,UByte(packedSegment[int(3)],3u)/16u);//blue
+				norm = vec3(0,1,0);//Nonsensical value
 				break;//end RENDER_MODE_LINES
     			}//end switch(RENDER_MODE)
     		}//end if(object)

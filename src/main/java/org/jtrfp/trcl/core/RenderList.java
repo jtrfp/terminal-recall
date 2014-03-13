@@ -56,10 +56,12 @@ public class RenderList {
     private 		int 			opaqueIndex = 0, blendIndex = 0;
     private final 	GLUniform 		renderListOffsetUniform,
     /*    */	    				renderListPageTable,
-    /*    */					useTextureMap;
+    /*    */					useTextureMap,
+    /*	  */					cameraMatrixUniform;
     private final	GLFrameBuffer		intermediateFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
-    /*    */					intermediateColorTexture;
+    /*    */					intermediateColorTexture,
+    /*    */					intermediateNormTexture;
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
@@ -92,7 +94,8 @@ public class RenderList {
 
     public RenderList(GL3 gl, GLProgram primaryProgram,
 	    GLProgram deferredProgram, GLFrameBuffer intermediateFrameBuffer, 
-	    GLTexture intermediateColorTexture, GLTexture intermediateDepthTexture, 
+	    GLTexture intermediateColorTexture, GLTexture intermediateDepthTexture,
+	    GLTexture intermediateNormTexture,
 	    final TR tr) {
 	// Build VAO
 	IntBuffer ib = IntBuffer.allocate(1);
@@ -101,6 +104,7 @@ public class RenderList {
 	this.intermediateColorTexture=intermediateColorTexture;
 	this.intermediateDepthTexture=intermediateDepthTexture;
 	this.intermediateFrameBuffer=intermediateFrameBuffer;
+	this.intermediateNormTexture=intermediateNormTexture;
 	gl.glGenBuffers(1, ib);
 	ib.clear();
 	dummyBufferID = ib.get();
@@ -111,6 +115,7 @@ public class RenderList {
 	renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
 	renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 	useTextureMap = primaryProgram.getUniform("useTextureMap");
+	cameraMatrixUniform = primaryProgram.getUniform("cameraMatrix");
 	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
 		* RenderList.NUM_RENDER_PASSES
 		/ PagedByteBuffer.PAGE_SIZE_BYTES];
@@ -144,10 +149,11 @@ public class RenderList {
 	frameCounter %= 100;
 	updateStatesToGPU();
     }//end sendToGPU
-
+    
     public void render(GL3 gl) {
 	// OPAQUE STAGE
 	tr.getRenderer().getPrimaryProgram().use();
+	cameraMatrixUniform.set4x4Matrix(tr.getRenderer().getCamera().getMatrixAsFlatArray(),true);
 	useTextureMap.set((int)0);
 	intermediateFrameBuffer.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
@@ -191,6 +197,8 @@ public class RenderList {
 	intermediateColorTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 2);
 	intermediateDepthTexture.bind(gl);
+	GLTexture.specifyTextureUnit(gl, 3);
+	intermediateNormTexture.bind(gl);
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	
 	// TRANSPARENT

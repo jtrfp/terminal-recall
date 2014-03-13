@@ -34,7 +34,7 @@ public final class Renderer {
     private final 	GLUniform	    	screenWidth, 
     /*    */	    				screenHeight,
     /*    */					fogColor;
-    private final	GLTexture 		intermediateColorTexture,intermediateDepthTexture;
+    private final	GLTexture 		intermediateColorTexture,intermediateDepthTexture,intermediateNormTexture;
     private final	GLFrameBuffer 		intermediateFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
@@ -98,11 +98,18 @@ public final class Renderer {
 	deferredProgram.getUniform("texturePalette").set((int) 0);
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	deferredProgram.getUniform("depthTexture").set((int) 2);
+	deferredProgram.getUniform("normTexture").set((int) 3);
 	intermediateColorTexture = gpu
 		.newTexture()
 		.bind()
 		.setImage(GL3.GL_RG16, 1024, 768, GL3.GL_RGB,
 			GL3.GL_FLOAT, null)
+		.setMagFilter(GL3.GL_NEAREST)
+		.setMinFilter(GL3.GL_NEAREST);
+	intermediateNormTexture = gpu
+		.newTexture()
+		.bind()
+		.setImage(GL3.GL_RGB8, 1024, 768, GL3.GL_RGB, GL3.GL_FLOAT, null)
 		.setMagFilter(GL3.GL_NEAREST)
 		.setMinFilter(GL3.GL_NEAREST);
 	intermediateDepthTexture = gpu
@@ -119,7 +126,14 @@ public final class Renderer {
 		.bindToDraw()
 		.attachDrawTexture(intermediateColorTexture,
 			GL3.GL_COLOR_ATTACHMENT0)
-		.attachDepthTexture(intermediateDepthTexture);
+		.attachDrawTexture(intermediateNormTexture, 
+			GL3.GL_COLOR_ATTACHMENT1)
+		.attachDepthTexture(intermediateDepthTexture)
+		.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
+	if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+	    System.out.println("Framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+	    System.exit(1);
+	}
 	primaryProgram.use();
 	
 	gpu.addGLEventListener(new GLEventListener() {
@@ -143,6 +157,7 @@ public final class Renderer {
 			height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
+		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		tr.getRenderer().getPrimaryProgram().use();
@@ -151,9 +166,9 @@ public final class Renderer {
 	
 	System.out.println("Initializing RenderList...");
 	renderList[0] = new RenderList(gl, primaryProgram,deferredProgram, intermediateFrameBuffer, 
-		    intermediateColorTexture,intermediateDepthTexture, tr);
+		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, tr);
 	renderList[1] = new RenderList(gl, primaryProgram,deferredProgram,intermediateFrameBuffer, 
-		    intermediateColorTexture,intermediateDepthTexture, tr);
+		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, tr);
     }//end constructor
 
     private void ensureInit() {

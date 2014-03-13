@@ -12,6 +12,7 @@ import org.jtrfp.trcl.ColorProcessor;
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.PrimitiveRenderMode;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Texture;

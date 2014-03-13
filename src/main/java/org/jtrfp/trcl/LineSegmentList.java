@@ -70,11 +70,6 @@ public class LineSegmentList extends
     }
 
     @Override
-    public byte getPrimitiveRenderMode() {
-	return PrimitiveRenderMode.RENDER_MODE_LINES;
-    }
-
-    @Override
     public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle() {
 	return RenderStyle.TRANSPARENT;
     }
@@ -97,4 +92,9 @@ public class LineSegmentList extends
 	}// end for(triangles)
 	return result;
     }// end getMaximumVertexValue()
+
+    @Override
+    public byte getPrimitiveRenderMode() {
+	return PrimitiveRenderMode.RENDER_MODE_LINES;
+    }
 }// end LineSegmentList

@@ -108,7 +108,7 @@ public class Camera
 	public double getViewDepth()
 		{return viewDepth;}
 	
-	public RealMatrix getMatrix()
+	private RealMatrix getMatrix()
 		{if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
@@ -118,4 +118,12 @@ public class Camera
 			}}
 		return cameraMatrix;
 		}
+	public float [] getMatrixAsFlatArray(){
+	    final float [] result = new float[16];
+	    final RealMatrix mat = getMatrix();
+	    for(int i=0; i<16; i++){
+		result[i]=(float)mat.getEntry(i/4, i%4);
+	    }//end for(16)
+	    return result;
+	}
 	}//end Camera

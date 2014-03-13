@@ -38,7 +38,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
 	
-	public TerrainSystem(final AltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf){
+	public TerrainSystem(final InterpolatingAltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf){
 		super(parent);
 		this.tr=tr;
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
@@ -92,6 +92,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    final double xPos=cX*gridSquareSize;
 						    final double zPos=cZ*gridSquareSize;
 						    
+						    Vector3D norm = altitude.normalAt(cX+.5, cZ+.5);
+						    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
+						    
 						    final Integer tpi = cX+cZ*256;
 						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
 						    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
@@ -100,7 +103,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 							u,
 							v,
-							td, RenderMode.STATIC, Vector3D.PLUS_J);//TODO: use ground normal
+							td, RenderMode.STATIC, norm);
 							
 							m.addTriangle(tris[0]);
 							m.addTriangle(tris[1]);
@@ -145,14 +148,15 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    //Ceiling texture cell X (Z in this engine) value is offset by 10.
 							    //No tunnelpoints on ceiling
 							    Future<TextureDescription> td=(Future<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
+							    Vector3D norm = altitude.normalAt(cX+.5, cZ+.5).negate();
+							    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
 							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 								new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
 								new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 								u,
 								v,
-								td, RenderMode.STATIC,Vector3D.PLUS_J);//TODO: Use ground normal
-								
+								td, RenderMode.STATIC,norm);
 								m.addTriangle(tris[0]);
 								m.addTriangle(tris[1]);
 								}//end for(cX)

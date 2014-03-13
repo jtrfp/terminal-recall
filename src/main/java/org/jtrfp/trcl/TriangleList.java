@@ -20,11 +20,11 @@ import java.util.concurrent.ExecutionException;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
-import org.jtrfp.trcl.gpu.Vertex;
 
 public class TriangleList extends PrimitiveList<Triangle> {
     private Controller controller;
@@ -105,6 +105,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.setX(gpuTVIndex, (short) applyScale(pos.getX()));
 	    vw.setY(gpuTVIndex, (short) applyScale(pos.getY()));
 	    vw.setZ(gpuTVIndex, (short) applyScale(pos.getZ()));
+	    final Vector3D normal = t.getVertices()[vIndex].getNormal();
+	    vw.normX.set(gpuTVIndex, (byte)(normal.getX()*127));
+	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
+	    vw.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
 	} else if (numFrames > 1) {
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
@@ -216,11 +220,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }
 
     @Override
-    public byte getPrimitiveRenderMode() {
-	return PrimitiveRenderMode.RENDER_MODE_TRIANGLES;
-    }
-
-    @Override
     public org.jtrfp.trcl.PrimitiveList.RenderStyle getRenderStyle() {
 	return RenderStyle.OPAQUE;
     }
@@ -300,5 +299,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    flatTVWindow = new TriangleVertex2FlatDoubleWindow(
 		    (TriangleVertexWindow) this.getMemoryWindow());
 	return flatTVWindow;
+    }
+
+    @Override
+    public byte getPrimitiveRenderMode() {
+	return PrimitiveRenderMode.RENDER_MODE_TRIANGLES;
     }
 }// end SingleTextureTriangleList

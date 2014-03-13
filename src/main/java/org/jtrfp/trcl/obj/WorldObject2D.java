@@ -16,8 +16,9 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.PrimitiveRenderMode;
+import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
@@ -42,9 +43,12 @@ public class WorldObject2D extends WorldObject{
 	    tMd[5]=1;
 	    tMd[10]=1;
 	    tMd[15]=1;
+	    
+	    setRenderFlags((byte)1);
 	    }
 	public WorldObject2D(TR tr, Model m){
 		super(tr, m);
+		setRenderFlags((byte)1);
 		}//end WorldObject2D
 	@Override
 	protected void recalculateTransRotMBuffer(){
@@ -74,4 +78,8 @@ public class WorldObject2D extends WorldObject{
 		getTr().getMatrixWindow().setTransposed(rotTransM,matrixID);
 		}//end recalculateTransRotMBuffer()
 	
-	}//end WorldObject2D
+	@Override
+	public void setModel(Model m){
+	    super.setModel(m);
+	}
+}//end WorldObject2D

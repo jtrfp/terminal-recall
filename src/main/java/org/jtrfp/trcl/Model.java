@@ -76,13 +76,17 @@ public class Model
 		Triangle [][] tris = new Triangle[tLists.size()][];
 		for(int i=0; i<tLists.size(); i++)
 			{tris[i]=tLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(tris[0].length!=0)tpList=new TriangleList(tris,getFrameDelayInMillis(),debugName, animateUV,c,tr);
+		if(tris[0].length!=0){
+		    tpList=new TriangleList(tris,getFrameDelayInMillis(),debugName, animateUV,c,tr);
+		    }//end if(length!=0)
 		else tpList=null;
 		
 		Triangle [][] ttris = new Triangle[ttLists.size()][];
 		for(int i=0; i<ttLists.size(); i++)
 			{ttris[i]=ttLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
-		if(ttris[0].length!=0)ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),debugName, animateUV,c,tr);
+		if(ttris[0].length!=0){
+		    ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),debugName, animateUV,c,tr);
+		    }//end if(length!=0)
 		else ttpList=null;
 		
 		LineSegment [][] segs = new LineSegment[lsLists.size()][];

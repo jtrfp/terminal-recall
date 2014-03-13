@@ -51,4 +51,9 @@ public final class GLFrameBuffer {
     public int getId() {
 	return id;
     }
+
+    public GLFrameBuffer setDrawBufferList(int ... attachments) {
+	gl.glDrawBuffers(attachments.length, IntBuffer.wrap(attachments));
+	return this;
+    }
 }//end GLFrameBuffer

@@ -284,31 +284,17 @@ public class WorldObject implements PositionedRenderable {
 	//int vec4sRemaining = primitiveList.getTotalSizeInVec4s();
 	final int gpuVerticesPerElement = primitiveList.getGPUVerticesPerElement();
 	final int elementsPerBlock = GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
-	final int vec4sPerBlock = elementsPerBlock * primitiveList.getElementSizeInVec4s();
 	int gpuVerticesRemaining = primitiveList.getNumElements()*gpuVerticesPerElement;
-	/*final int vec4sPerBlock = primitiveList.getElementSizeInVec4s()
-		* (GPU_VERTICES_PER_BLOCK / primitiveList
-			.getGPUVerticesPerElement());*/
-	final int verticesPerVec4 =
-		gpuVerticesPerElement / primitiveList
-		.getElementSizeInVec4s();
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
 	int odCounter=0;
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
-	//final int vec4sPerElement = primitiveList.getMemoryWindow().getObjectSizeInBytes()/GLTextureBuffer.BYTES_PER_VEC4;
-	
-	System.out.println("primitiveList "+primitiveList.getClass().getName()+
-		"\ngpuVerticesPerElement="+gpuVerticesPerElement+" elementsPerBlock="+elementsPerBlock+" vec4sPerBlock="+vec4sPerBlock);
-	System.out.println("verticesPerVec4="+verticesPerVec4);
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)
 		    /GLTextureBuffer.BYTES_PER_VEC4;
 	    final int matrixOffsetVec4s=tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)
 		    / GLTextureBuffer.BYTES_PER_VEC4;
-	    System.out.println("odIndex="+odCounter+" vertexOffsetInVEC4s="+vertexOffsetVec4s);
-	    System.out.println("matrixOffset="+matrixOffsetVec4s);
 	    odw.matrixOffset.set(index,matrixOffsetVec4s);
 	    odw.vertexOffset.set(index,vertexOffsetVec4s);
 	    odw.mode.set(index, (byte)(primitiveList.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));

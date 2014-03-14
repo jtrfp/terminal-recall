@@ -15,6 +15,7 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.phy.HasPropulsion;
@@ -58,7 +59,10 @@ public class Player extends WorldObject {
 	addBehavior(new CollidesWithTunnelWalls(true, true));
 	addBehavior(new UserInputThrottleControlBehavior());
 	addBehavior(new VelocityDragBehavior());
-	addBehavior(new AutoLeveling());
+	addBehavior(new AutoLeveling()
+		.setLevelingAxis(LevelingAxis.CROSS)
+		.setLevelingVector(Vector3D.PLUS_I)
+		.setRetainmentCoeff(1, .98, 1));
 	addBehavior(new UserInputRudderElevatorControlBehavior());
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());

@@ -41,23 +41,4 @@ public class LineSegmentWindow extends MemoryWindow{
     public LineSegmentWindow(TR tr, String debugName) {
 	init(tr, "LineSegmentWindow."+debugName);
     }
-/*
-    static {
-	GlobalDynamicTextureBuffer
-		.addAllocationToFinalize(LineSegmentWindow.class);
-    }*/
-
-    public static void finalizeAllocation(TR tr) {
-	/*
-	final LineSegmentWindow lsw = tr.getLineSegmentWindow();
-	int bytesToAllocate = lsw.getNumObjects()*lsw.getObjectSizeInBytes();
-	System.out.println("LineSegments: Allocating " + bytesToAllocate
-		+ " bytes of GPU resident RAM.");
-	tr.getLineSegmentWindow().setBuffer(
-		new SubByteBuffer(
-			GlobalDynamicTextureBuffer.getLogicalMemory(),
-			GlobalDynamicTextureBuffer
-				.requestAllocation(bytesToAllocate)));
-	*/
-    }
 }// end LineSegment

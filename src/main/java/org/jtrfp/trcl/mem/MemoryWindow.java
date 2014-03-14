@@ -126,6 +126,13 @@ public abstract class MemoryWindow {
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
+	
+	public ByteVariable set(int objectIndex, byte value) {
+	    getParent().getBuffer().put(
+		    byteOffset() + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
 
 	@Override
 	public Byte get(int objectIndex) {
@@ -145,6 +152,13 @@ public abstract class MemoryWindow {
 
 	@Override
 	public ShortVariable set(int objectIndex, Short value) {
+	    getParent().getBuffer().putShort(
+		    byteOffset() + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
+	
+	public ShortVariable set(int objectIndex, short value) {
 	    getParent().getBuffer().putShort(
 		    byteOffset() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);

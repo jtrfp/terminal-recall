@@ -31,7 +31,7 @@ uniform uint screenHeight;
 layout(location = 0) out vec4 fragColor;
 
 const vec3 sunVector = vec3(.5774,.5774,.5774);// temporary.
-const vec3 sunColor = vec3(1.2,1.1,1);
+const vec3 sunColor = vec3(1.1,1.1,1);
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
 float linearizeDepth(float z)
@@ -53,6 +53,6 @@ vec3 origColor = textureLod(texturePalette,fragColor.rg,linearDepth).rgb;//GET C
 vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 // Calc illumination. Near-zero norm means assume full lighting
 float sunIllumination = length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):1;
-fragColor.rgb =origColor*fogColor*2+origColor*sunIllumination*sunColor;
+fragColor.rgb =origColor*fogColor+origColor*sunIllumination*sunColor;
 fragColor = mix(fragColor,vec4(fogColor,1),linearDepth);//FOG
 }

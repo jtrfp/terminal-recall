@@ -62,7 +62,7 @@ public class Player extends WorldObject {
 	addBehavior(new AutoLeveling()
 		.setLevelingAxis(LevelingAxis.CROSS)
 		.setLevelingVector(Vector3D.PLUS_I)
-		.setRetainmentCoeff(1, .98, 1));
+		.setRetainmentCoeff(1, .977, 1));
 	addBehavior(new UserInputRudderElevatorControlBehavior());
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());

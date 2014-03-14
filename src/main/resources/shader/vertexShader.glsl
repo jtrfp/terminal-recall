@@ -196,7 +196,7 @@ gl_Position.x=dummy*0;
     			
     			//Line thickness probe
     			scalingProbe.y+=(float(UByte(packedSegment[3],0u)))*(COORD_DOWNSCALER/8u);
-				scalingProbe=matrix*scalingProbe;
+				scalingProbe=fullMatrix*scalingProbe;
 				scalingProbe/=abs(scalingProbe.w);
 				
 				//THICKNESS CALCULATION (Heavily-optimized voodoo below)

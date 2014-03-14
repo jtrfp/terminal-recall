@@ -44,7 +44,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	if (getPrimitives().length > 1) {
 	    this.xyzAnimator = new WindowAnimator(
 		    getFlatTVWindow(),
-		    this.getNumPrimitives() * 3 * 3,// 3 vertices per triangle,
+		    this.getNumElements() * 3 * 3,// 3 vertices per triangle,
 						    // XYZ per vertex
 		    getPrimitives().length, true, controller,
 		    new XYZXferFunc(0));
@@ -197,7 +197,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }
 
     public void uploadToGPU(GL3 gl) {
-	int nPrimitives = getNumPrimitives();
+	int nPrimitives = getNumElements();
 	try {
 	    for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 		setupTriangle(tIndex);
@@ -210,12 +210,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }// end allocateIndices(...)
 
     @Override
-    public int getPrimitiveSizeInVec4s() {
+    public int getElementSizeInVec4s() {
 	return 3;
     }
 
     @Override
-    public int getGPUVerticesPerPrimitive() {
+    public int getGPUVerticesPerElement() {
 	return 3;
     }
 
@@ -304,5 +304,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
     @Override
     public byte getPrimitiveRenderMode() {
 	return PrimitiveRenderMode.RENDER_MODE_TRIANGLES;
+    }
+
+    @Override
+    public int getNumMemoryWindowIndicesPerElement() {
+	return 3;
     }
 }// end SingleTextureTriangleList

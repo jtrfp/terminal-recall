@@ -82,23 +82,23 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	return primitives;
     }
 
-    public int getNumPrimitives() {
+    public int getNumElements() {
 	return primitives[0].length;
     }
 
-    public abstract int getPrimitiveSizeInVec4s();
+    public abstract int getElementSizeInVec4s();
 
-    public abstract int getGPUVerticesPerPrimitive();
+    public abstract int getGPUVerticesPerElement();
 
     public abstract RenderStyle getRenderStyle();
 
     public int getTotalSizeInVec4s() {
-	return getPrimitiveSizeInVec4s() * getNumPrimitives();
+	return getElementSizeInVec4s() * getNumElements();
     }
 
     public int getTotalSizeInGPUVertices() {
-	return (getTotalSizeInVec4s() / getPrimitiveSizeInVec4s())
-		* getGPUVerticesPerPrimitive();
+	return (getTotalSizeInVec4s() / getElementSizeInVec4s())
+		* getGPUVerticesPerElement();
     }
 
     public String getDebugName() {
@@ -155,4 +155,6 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
      * @return the primitiveRenderMode
      */
     public abstract byte getPrimitiveRenderMode();
+
+    public abstract int getNumMemoryWindowIndicesPerElement();
 }// end PrimitiveList

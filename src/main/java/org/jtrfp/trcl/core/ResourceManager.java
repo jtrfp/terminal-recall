@@ -260,7 +260,7 @@ public class ResourceManager{
 			Model [] frames = new Model[ac.getNumFrames()];
 			for(int i=0; i<frames.length;i++)
 				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette,gl);}
-			frames[0].setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumPrimitives());
+			frames[0].setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumElements());
 			//Consolidate the frames to one model
 			for(int i=1; i<frames.length;i++)
 				{frames[0].addFrame(frames[i]);}

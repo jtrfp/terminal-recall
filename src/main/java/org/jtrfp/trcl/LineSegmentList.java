@@ -60,12 +60,12 @@ public class LineSegmentList extends
     }// end uploadToGPU
 
     @Override
-    public int getPrimitiveSizeInVec4s() {
+    public int getElementSizeInVec4s() {
 	return 1;
     }
 
     @Override
-    public int getGPUVerticesPerPrimitive() {
+    public int getGPUVerticesPerElement() {
 	return 6;
     }
 
@@ -96,5 +96,10 @@ public class LineSegmentList extends
     @Override
     public byte getPrimitiveRenderMode() {
 	return PrimitiveRenderMode.RENDER_MODE_LINES;
+    }
+
+    @Override
+    public int getNumMemoryWindowIndicesPerElement() {
+	return 1;
     }
 }// end LineSegmentList

@@ -44,8 +44,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	if (getPrimitives().length > 1) {
 	    this.xyzAnimator = new WindowAnimator(
 		    getFlatTVWindow(),
-		    this.getNumElements() * 3 * 3,// 3 vertices per triangle,
-						    // XYZ per vertex
+		    this.getNumElements() * 3 * XYZXferFunc.FRONT_STRIDE_LEN,
+		    				// 3 vertices per triangle,
+						// XYZ+NxNyNz per vertex
 		    getPrimitives().length, true, controller,
 		    new XYZXferFunc(0));
 	    animators.add(xyzAnimator);
@@ -58,6 +59,13 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     private static class XYZXferFunc implements IntTransferFunction {
 	private final int startIndex;
+	public static final int BACK_STRIDE_LEN=8;
+	public static final int FRONT_STRIDE_LEN=6;
+	private static final byte [] STRIDE_PATTERN = new byte[]{
+	    0,1,2,//XYZ
+	    //UV
+	    5,6,7//NxNyNz
+	};
 
 	public XYZXferFunc(int startIndex) {
 	    this.startIndex = startIndex;
@@ -65,20 +73,23 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
 	@Override
 	public int transfer(int input) {
-	    return (input / 3) * 5 + (input % 3) + startIndex;
+	    //return (input / FRONT_STRIDE_LEN) * BACK_STRIDE_LEN + (input % FRONT_STRIDE_LEN) + startIndex;
+	    return startIndex + STRIDE_PATTERN[input%FRONT_STRIDE_LEN]+(input/FRONT_STRIDE_LEN)*BACK_STRIDE_LEN;
 	}// end transfer(...)
     }// end class XYZXferFunc
 
     private static class UVXferFunc implements IntTransferFunction {
 	private final int startIndex;
-
+	public static final int BACK_STRIDE_LEN=8;
+	private final int FRONT_STRIDE_LEN=2;
+	
 	public UVXferFunc(int startIndex) {
 	    this.startIndex = startIndex;
 	}// end constructor
 
 	@Override
 	public int transfer(int input) {
-	    return (input / 2) * 5 + (input % 2) + startIndex + 3;
+	    return (input / FRONT_STRIDE_LEN) * BACK_STRIDE_LEN + (input % FRONT_STRIDE_LEN) + startIndex + 3;
 	}// end transfer(...)
     }// end class XYZXferFunc
 
@@ -113,6 +124,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
 	    float[] zFrames = new float[numFrames];
+	    float[] nxFrames = new float[numFrames];
+	    float[] nyFrames = new float[numFrames];
+	    float[] nzFrames = new float[numFrames];
 	    for (int i = 0; i < numFrames; i++) {
 		xFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getX()
 			/ scale);
@@ -130,6 +144,21 @@ public class TriangleList extends PrimitiveList<Triangle> {
 			/ scale);
 	    }
 	    xyzAnimator.addFrames(zFrames);
+	    
+	    for (int i = 0; i < numFrames; i++) {
+		nxFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getX()*127);
+	    }
+	    xyzAnimator.addFrames(nxFrames);
+
+	    for (int i = 0; i < numFrames; i++) {
+		nyFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getY()*127);
+	    }
+	    xyzAnimator.addFrames(nyFrames);
+
+	    for (int i = 0; i < numFrames; i++) {
+		nzFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getZ()*127);
+	    }
+	    xyzAnimator.addFrames(nzFrames);
 	} else {
 	    throw new RuntimeException("Empty triangle vertex!");
 	}
@@ -145,7 +174,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 			getFlatTVWindow(), 2,// UV per vertex
 			numFrames, false, getVertexSequencer(
 				timeBetweenFramesMsec, numFrames),
-			new UVXferFunc(gpuTVIndex * 5));
+			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
 		animators.add(uvAnimator);
 		for (int i = 0; i < numFrames; i++) {
 		    uFrames[i] = (float) (uvUpScaler * tx
@@ -171,7 +200,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		    getFlatTVWindow(),
 		    2,// UV per vertex
 		    numTextureFrames, false, at.getTextureSequencer(),
-		    new UVXferFunc(gpuTVIndex * 5));
+		    new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
 	    uvAnimator.setDebugName(debugName + ".uvAnimator");
 	    animators.add(uvAnimator);
 

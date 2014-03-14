@@ -2,6 +2,7 @@ package org.jtrfp.trcl.core;
 
 public class TriangleVertex2FlatDoubleWindow {
     private final TriangleVertexWindow parentWindow;
+    private final int NUM_ELEMENTS = Variable.values().length;
     public TriangleVertex2FlatDoubleWindow(TriangleVertexWindow parentWindow){
 	this.parentWindow=parentWindow;
     }
@@ -11,7 +12,10 @@ public class TriangleVertex2FlatDoubleWindow {
 	Y(1),
 	Z(2),
 	U(3),
-	V(4);
+	V(4),
+	NORMX(5),
+	NORMY(6),
+	NORMZ(7);
 	private int idOffset;
 	private Variable(int idOffset){
 	    this.idOffset=idOffset;
@@ -23,8 +27,8 @@ public class TriangleVertex2FlatDoubleWindow {
     }//end Variable
     
     public void set(int id, double val){
-	final int vid=id/5;
-	id%=5;
+	final int vid=id/NUM_ELEMENTS;
+	id%=NUM_ELEMENTS;
 	switch (id){
 	    case 0:
 		parentWindow.setX(vid,(short)val);
@@ -40,6 +44,15 @@ public class TriangleVertex2FlatDoubleWindow {
 		break;
 	    case 4:
 		parentWindow.setV(vid,(short)val);
+		break;
+	    case 5:
+		parentWindow.normX.set(vid, (byte)val);
+		break;
+	    case 6:
+		parentWindow.normY.set(vid, (byte)val);
+		break;
+	    case 7:
+		parentWindow.normZ.set(vid, (byte)val);
 		break;
 	}//end switch(...)
     }//end set(...)

@@ -48,15 +48,6 @@ public final class TriangleVertexWindow extends MemoryWindow {
 	return create();
     }//end createTriangle
     
-    ///TODO: Pages may be out of order. Must submit every ID
-    public synchronized final int createTriangleVertices(final int numNewVertices){
-	numTriangles.addAndGet(numNewVertices);
-	int first=create();
-	for(int i=0; i<numNewVertices-1; i++){
-	    create();
-	}
-	return first;
-    }
     
     public final void setX(int id, short val){
 	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+X,(short)val);

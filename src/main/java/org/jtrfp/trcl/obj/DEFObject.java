@@ -54,6 +54,7 @@ public class DEFObject extends WorldObject {
     private boolean mobile,canTurn,foliage,boss,groundLocked;
     boolean spinCrash=false;
     boolean ignoringProjectiles=false;
+    boolean isRuin=false;
 public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
@@ -555,7 +556,6 @@ public double getBoundingRadius() {
 }
 public void setRuinObject(DEFObject ruin) {
     ruinObject=ruin;
-    
 }
 
 /**
@@ -612,5 +612,23 @@ public boolean isIgnoringProjectiles() {
  */
 public void setIgnoringProjectiles(boolean ignoringProjectiles) {
     this.ignoringProjectiles = ignoringProjectiles;
+}
+
+public void setIsRuin(boolean b) {
+    isRuin=b;
+}
+
+/**
+ * @return the isRuin
+ */
+public boolean isRuin() {
+    return isRuin;
+}
+
+/**
+ * @param isRuin the isRuin to set
+ */
+public void setRuin(boolean isRuin) {
+    this.isRuin = isRuin;
 }
 }//end DEFObject

@@ -79,7 +79,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    ed.setLogic(EnemyLogic.groundDumb);
 				    ed.setDescription("auto-generated enemy rubble def");
 				    ed.setPowerupProbability(0);
-				    EnemyPlacement simplePlacement = new EnemyPlacement();
+				    EnemyPlacement simplePlacement = new EnemyPlacement();//TODO: EnemyPlacement.clone()
 				    simplePlacement.setPitch	(pl.getPitch());
 				    simplePlacement.setStrength	(pl.getStrength());
 				    simplePlacement.setRoll	(pl.getRoll());
@@ -87,6 +87,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    simplePlacement.setStrength	(pl.getStrength());
 				    final DEFObject ruin = new DEFObject(tr,simpleModel,ed,simplePlacement);
 				    ruin.setVisible(false);//TODO: Use setActive later
+				    ruin.setIsRuin(true);
 				    obj.setRuinObject(ruin);
 				    ruin.setPosition(obj.getPosition());
 				    try{ruin.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}

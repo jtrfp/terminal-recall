@@ -92,8 +92,15 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    final double xPos=cX*gridSquareSize;
 						    final double zPos=cZ*gridSquareSize;
 						    
-						    Vector3D norm = altitude.normalAt(cX+.5, cZ+.5);
-						    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
+						    Vector3D norm0,norm1,norm2,norm3;
+						    Vector3D norm = altitude.normalAt(cX, cZ);
+						    norm0 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
+						    norm = altitude.normalAt(cX+1, cZ);
+						    norm1 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+						    norm = altitude.normalAt(cX+1, cZ+1);
+						    norm2 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+						    norm = altitude.normalAt(cX, cZ+1);
+						    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 						    
 						    final Integer tpi = cX+cZ*256;
 						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
@@ -103,8 +110,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 							u,
 							v,
-							td, RenderMode.STATIC, norm);
-							
+							td, RenderMode.STATIC,
+							new Vector3D[]{
+								norm0,
+								norm1,
+								norm2,
+								norm3
+							});
 							m.addTriangle(tris[0]);
 							m.addTriangle(tris[1]);
 							}//end for(cX)
@@ -145,10 +157,19 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    final double xPos=cX*gridSquareSize;
 							    final double zPos=cZ*gridSquareSize;
 							    
+							    Vector3D norm0,norm1,norm2,norm3;
+							    Vector3D norm = altitude.normalAt(cX, cZ);
+							    norm0 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
+							    norm = altitude.normalAt(cX+1, cZ);
+							    norm1 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+							    norm = altitude.normalAt(cX+1, cZ+1);
+							    norm2 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+							    norm = altitude.normalAt(cX, cZ+1);
+							    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+							    
 							    //Ceiling texture cell X (Z in this engine) value is offset by 10.
 							    //No tunnelpoints on ceiling
 							    Future<TextureDescription> td=(Future<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
-							    Vector3D norm = altitude.normalAt(cX+.5, cZ+.5).negate();
 							    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
 							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
 								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
@@ -156,7 +177,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
 								u,
 								v,
-								td, RenderMode.STATIC,norm);
+								td, RenderMode.STATIC,
+								new Vector3D[]{
+									norm0.negate(),
+									norm1.negate(),
+									norm2.negate(),
+									norm3.negate()
+								});
 								m.addTriangle(tris[0]);
 								m.addTriangle(tris[1]);
 								}//end for(cX)

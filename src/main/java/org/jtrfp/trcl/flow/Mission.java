@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
@@ -15,6 +16,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.file.AbstractVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -138,8 +140,11 @@ public class Mission {
     		
     		GPU gpu = tr.getGPU();
     		//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
-    		System.out.println("Building master texture...");
+    		System.out.println("Building atlas texture...");
     		Texture.finalize(gpu);
+    		System.out.println("Setting sun vector");
+    		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
+    		tr.getRenderer().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
     		System.out.println("\t...Done.");
     	    }});
     	

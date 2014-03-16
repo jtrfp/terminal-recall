@@ -26,12 +26,12 @@ uniform sampler2D normTexture;
 uniform vec3 fogColor;
 uniform uint screenWidth;
 uniform uint screenHeight;
+uniform vec3 sunVector;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
-
-const vec3 sunVector = vec3(.5774,.5774,.5774);// temporary.
 const vec3 sunColor = vec3(1.4,1.4,1.2);
+
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
 float linearizeDepth(float z)

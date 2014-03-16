@@ -8,6 +8,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Texture;
@@ -33,7 +34,8 @@ public final class Renderer {
     private final 	RenderList[] 		renderList = new RenderList[2];
     private final 	GLUniform	    	screenWidth, 
     /*    */	    				screenHeight,
-    /*    */					fogColor;
+    /*    */					fogColor,
+    /*    */					sunVector;
     private final	GLTexture 		intermediateColorTexture,intermediateDepthTexture,intermediateNormTexture;
     private final	GLFrameBuffer 		intermediateFrameBuffer;
     private 		int			frameNumber;
@@ -95,10 +97,12 @@ public final class Renderer {
 	screenWidth = deferredProgram.getUniform("screenWidth");
 	screenHeight = deferredProgram.getUniform("screenHeight");
 	fogColor = deferredProgram.getUniform("fogColor");
+	sunVector = deferredProgram.getUniform("sunVector");
 	deferredProgram.getUniform("texturePalette").set((int) 0);
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	deferredProgram.getUniform("depthTexture").set((int) 2);
 	deferredProgram.getUniform("normTexture").set((int) 3);
+	sunVector.set(.5774f,.5774f,.5774f);
 	intermediateColorTexture = gpu
 		.newTexture()
 		.bind()
@@ -255,6 +259,12 @@ public final class Renderer {
 	deferredProgram.use();
 	fogColor.set((float) c.getRed() / 255f, (float) c.getGreen() / 255f,
 		(float) c.getBlue() / 255f);
+	primaryProgram.use();
+    }
+    
+    public void setSunVector(Vector3D sv){
+	deferredProgram.use();
+	sunVector.set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
 	primaryProgram.use();
     }
 

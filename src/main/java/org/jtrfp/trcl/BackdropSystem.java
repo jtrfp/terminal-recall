@@ -32,19 +32,20 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(world.getFogColor()), RenderMode.DYNAMIC,Vector3D.MINUS_K));
+						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(world.getFogColor()), RenderMode.DYNAMIC,Vector3D.ZERO));
 		overworldBackdrop = new WorldObject2DVisibleEverywhere(tr,backdropModel.finalizeModel());
+		overworldBackdrop.setRenderFlags((byte)1);
 		add(overworldBackdrop);
-		//addAlwaysVisible(overworldBackdrop);
 		
 		backdropModel=new Model(false,tr);
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(Color.black), RenderMode.DYNAMIC,Vector3D.MINUS_K));
+						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(Color.black), RenderMode.DYNAMIC,Vector3D.ZERO));
 		tunnelBackdrop = new WorldObject2DVisibleEverywhere(tr,backdropModel.finalizeModel());
-		tunnelBackdrop.setActive(false);
-		//addAlwaysVisible(tunnelBackdrop);
+		tunnelBackdrop.setRenderFlags((byte)1);
+		tunnelBackdrop.setVisible(false);
+		add(tunnelBackdrop);
 		}
 	
 	public void overworldMode(){overworldBackdrop.setVisible(true);tunnelBackdrop.setVisible(false);}

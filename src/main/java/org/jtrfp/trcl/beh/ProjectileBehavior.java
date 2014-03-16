@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
-import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
-import org.jtrfp.trcl.beh.phy.HasPropulsion;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -65,24 +63,14 @@ public class ProjectileBehavior extends Behavior implements
 		    if (!possibleDEFTarget.isIgnoringProjectiles() && !possibleDEFTarget.isRuin()) {
 			final Vector3D targetPos = new Vector3D(
 				possibleTarget.getPosition());
-			final Vector3D thisPos = new Vector3D(getParent()
-				.getPosition());
-			System.out.println("thisPos=" + thisPos + " otherPos="
-				+ targetPos);
 			final Vector3D delta = targetPos.subtract(new Vector3D(
 				getParent().getPosition()));
 			final double dist = delta.getNorm();
 			final Vector3D proposedHeading = delta.normalize();
-			System.out.println("proposedHeading=" + proposedHeading
-				+ " dist=" + dist);
 			final Vector3D headingDelta = getParent().getHeading()
 				.subtract(proposedHeading);
-			System.out.println("headingDelta norm="
-				+ headingDelta.getNorm());
 			final double compositeHeadingDelta = headingDelta.getNorm();
 			if (compositeHeadingDelta < .5) {
-			    System.out.println("dist=" + dist
-				    + " closestDistance=" + closestDistance);
 			final double compositeDistance = dist; 
 			    if (compositeDistance < closestDistance) {
 				closestDistance = dist;
@@ -96,7 +84,6 @@ public class ProjectileBehavior extends Behavior implements
 		}// end if(DEFObject)
 	    }// end for(WorldObject others)
 	    honingTarget = closestObject;
-	    System.out.println("Honing " + honingTarget);
 	   // if(honingTarget==null){
 		getParent().getBehavior().probeForBehavior(AutoLeveling.class)
 		.setLevelingVector(heading);
@@ -112,9 +99,8 @@ public class ProjectileBehavior extends Behavior implements
     public void _tick(long tickTimeMillis) {
 	if (honingTarget != null) {
 	    if (honingAdjustmentUpdate++ % 5 == 0) {
-		/*if (!honingTarget.isVisible())
+		if (!honingTarget.isVisible())
 		    return;// Dead or otherwise.
-		    */
 		final Vector3D honingVector = new Vector3D(
 			honingTarget.getPosition()).subtract(new Vector3D(
 			getParent().getPosition())).normalize();
@@ -122,7 +108,6 @@ public class ProjectileBehavior extends Behavior implements
 		if(Double.isNaN(honingVector.getX()))return;
 		if(Double.isNaN(honingVector.getY()))return;
 		if(Double.isNaN(honingVector.getZ()))return;
-		System.out.println("honingVector="+honingVector);
 		getParent().getBehavior().probeForBehavior(AutoLeveling.class)
 			.setLevelingVector(honingVector);
 		movesByVelocity.setVelocity(getParent().getHeading()

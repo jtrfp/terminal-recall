@@ -42,6 +42,11 @@ public class Triangle {
 	    RenderMode mode, Vector3D centroidNormal) {
 	return quad2Triangles(x, y, z, u, v, texture, mode, false, centroidNormal);
     }
+    public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
+	    double[] u, double[] v, Future<TextureDescription> texture,
+	    RenderMode mode, Vector3D [] normals) {
+	return quad2Triangles(x, y, z, u, v, texture, mode, false, normals);
+    }
     
     public void setVertex(Vertex vtx, int index){
 	if(vertices[index]!=null){
@@ -65,6 +70,38 @@ public class Triangle {
     
     public Vector2D getUV(int index){
 	return this.uv[index];
+    }
+    
+    public static Triangle[] quad2Triangles(
+	    Vertex [] vertices, Vector2D [] uv,
+	    Future<TextureDescription> texture, 
+	    RenderMode mode, boolean hasAlpha){
+	Triangle[] result = new Triangle[2];
+	Triangle t;
+	t = new Triangle();
+	t.setTexture(texture);
+	t.setRenderMode(mode);
+	t.setAlphaBlended(hasAlpha);
+	t.setVertex(vertices[0], 0);
+	t.setVertex(vertices[1], 1);
+	t.setVertex(vertices[2], 2);
+	t.setUV(uv[0],0);
+	t.setUV(uv[1],1);
+	t.setUV(uv[2],2);
+	result[0]=t;
+	t = new Triangle();
+	t.setTexture(texture);
+	t.setRenderMode(mode);
+	t.setAlphaBlended(hasAlpha);
+	
+	t.setVertex(vertices[2], 0);
+	t.setVertex(vertices[3], 1);
+	t.setVertex(vertices[0], 2);
+	t.setUV(uv[2],0);
+	t.setUV(uv[3],1);
+	t.setUV(uv[0],2);
+	result[1] = t;
+	return result;
     }
     
     public static Triangle[] quad2Triangles(
@@ -108,7 +145,6 @@ public class Triangle {
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
 	    double[] u, double[] v, Future<TextureDescription> texture,
 	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal) {
-	Triangle[] result = new Triangle[2];
 	final Vertex [] vertices = new Vertex[]{
 		new Vertex().setPosition(new Vector3D(x[0],y[0],z[0])),
 		new Vertex().setPosition(new Vector3D(x[1],y[1],z[1])),
@@ -120,6 +156,27 @@ public class Triangle {
 	    uvs[i]=new Vector2D(u[i],v[i]);
 	}
 	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha, centroidNormal);
+    }//end quad2Triangles(...)
+    
+    /**
+     * Converts supplied quad coordinates to a pair of triangles in clockwise
+     * order, top-left being index zero.
+     * 
+     */
+    public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
+	    double[] u, double[] v, Future<TextureDescription> texture,
+	    RenderMode mode, boolean hasAlpha, Vector3D [] normals) {
+	final Vertex [] vertices = new Vertex[]{
+		new Vertex().setPosition(new Vector3D(x[0],y[0],z[0])).setNormal(normals[0]),
+		new Vertex().setPosition(new Vector3D(x[1],y[1],z[1])).setNormal(normals[1]),
+		new Vertex().setPosition(new Vector3D(x[2],y[2],z[2])).setNormal(normals[2]),
+		new Vertex().setPosition(new Vector3D(x[3],y[3],z[3])).setNormal(normals[3]),
+	};
+	Vector2D [] uvs = new Vector2D[4];
+	for(int i=0; i<4; i++){
+	    uvs[i]=new Vector2D(u[i],v[i]);
+	}
+	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha);
     }//end quad2Triangles(...)
 
     /**

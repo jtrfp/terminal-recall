@@ -4,10 +4,12 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.AutoLeveling;
+import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
@@ -15,7 +17,6 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
-import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.phy.HasPropulsion;
@@ -53,6 +54,7 @@ public class Player extends WorldObject {
 		db.setEnable(false);
 	    }
 	}
+	
 	addBehavior(new AccelleratedByPropulsion());
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
@@ -125,6 +127,13 @@ public class Player extends WorldObject {
 		}
 		addBehavior(pfb);
 		weapons[w.getButtonToSelect() - 1] = pfb;
+		if(System.getProperties().containsKey("org.jtrfp.trcl.allAmmo")){
+		    if(System.getProperty("org.jtrfp.trcl.allAmmo").toUpperCase().contains("TRUE")){
+			System.out.println("allAmmo cheat active for weapon "+w.getButtonToSelect());
+			pfb.setAmmoLimit(Integer.MAX_VALUE);
+			try{pfb.addSupply(Double.POSITIVE_INFINITY);}catch(SupplyNotNeededException e){}
+		    }//end if(property=true)
+		}//end if(allAmmo)
 	    }// end if(hasButton)
 	}
 	addBehavior(new WeaponSelectionBehavior().setBehaviors(weapons));
@@ -137,7 +146,7 @@ public class Player extends WorldObject {
 	getBehavior().probeForBehavior(RotationalDragBehavior.class)
 		.setDragCoefficient(.86);
 
-    }
+    }//end constructor
 
     @Override
     public void setHeading(Vector3D lookAt) {

@@ -104,7 +104,8 @@ public class AutoLeveling extends Behavior {
      *            the levelingVector to set
      */
     public AutoLeveling setLevelingVector(Vector3D levelingVector) {
-	this.levelingVector = levelingVector;
+	if(levelingVector.getNorm()==0)throw new RuntimeException("Intolerable zero leveling vector.");
+	this.levelingVector = levelingVector.normalize();
 	return this;
     }
 }// end AutoLeveling

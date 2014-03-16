@@ -18,7 +18,7 @@ public class ProjectileBillboard extends BillboardSprite implements Projectile {
     private WorldObject objectOfOrigin;
     public ProjectileBillboard(TR tr,Weapon w,Future<TextureDescription> textureToUse,ExplosionType explosionType) {
 	super(tr);
-	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType));
+	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType,w.isHoning()));
 	ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)w.getModelingType();
 	this.setBillboardSize(new Dimension((int)(mt.getBillboardSize().getWidth()/TR.crossPlatformScalar),(int)(mt.getBillboardSize().getHeight()/TR.crossPlatformScalar)));
 	this.setTexture(textureToUse, true);
@@ -31,7 +31,7 @@ public class ProjectileBillboard extends BillboardSprite implements Projectile {
 	setVisible(true);
 	setActive(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
-	getBehavior().probeForBehavior(DeathBehavior.class).reset();
+	getBehavior().probeForBehavior(ProjectileBehavior.class).reset(newVelocity.normalize(),newVelocity.getNorm());
     }//end reset()
     @Override
     public WorldObject getObjectOfOrigin() {

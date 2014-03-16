@@ -61,7 +61,7 @@ public class ProjectileFactory {
    	 modelToUse.addTriangles(tris);
  	 modelToUse.finalizeModel();
    	 for(int i=0; i<projectiles.length; i++){
-   	    projectiles[i]=new ProjectileObject3D(tr,modelToUse, damageOnImpact, explosionType);}
+   	    projectiles[i]=new ProjectileObject3D(tr,modelToUse, weapon, explosionType);}
     	}//end if(isLaser)
    	 else if(modelingType instanceof ModelingType.BillboardModelingType){
    	     final ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)modelingType;
@@ -82,7 +82,7 @@ public class ProjectileFactory {
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;
    	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPalette(), tr.getGPU().getGl());
    	     for(int i=0; i<projectiles.length; i++){
-   		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, damageOnImpact, explosionType);
+   		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, weapon, explosionType);
    		 }
    	 }//end BIN Modeling Type
    	 else{throw new RuntimeException("Unhandled ModelingType: "+modelingType.getClass().getName());}
@@ -95,10 +95,10 @@ public class ProjectileFactory {
 		 }
     	}//end if(DAM)
        }//end constructor(...)
-    public Projectile fire(double[] ds, Vector3D heading, WorldObject objectOfOrigin) {
+    public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin) {
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
-	result.reset(ds, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
+	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	tr.getWorld().add((WorldObject)result);
 	tr.getRenderer().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
 	tr.getCollisionManager().getCurrentlyActiveVisibilityList().add((WorldObject)result);

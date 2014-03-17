@@ -144,144 +144,12 @@ public abstract class BINFile implements ThirdPartyParseable
 			 * @author Chuck Ritola
 			 */
 			
-			public static class FaceBlock05 implements ThirdPartyParseable
+			public static class FaceBlock05 extends NoUVFaceBlock
 				{
-				int numVertices,normalX,normalY,normalZ,magic;
-				ArrayList<ShortFaceBlockVertex>  vertices;
 				@Override
-				public void describeFormat(Parser prs) throws UnrecognizedFormatException
-					{
-					prs.littleEndian();
-					prs.expectBytes(new byte[]{0,0,0,0x05}, FailureBehavior.UNRECOGNIZED_FORMAT);
-					prs.int4s(prs.property("numVertices", int.class));
-					prs.int4s(prs.property("normalX", int.class));
-					prs.int4s(prs.property("normalY", int.class));
-					prs.int4s(prs.property("normalZ", int.class));
-					prs.int4s(prs.property("magic", int.class));
-					for(int i=0; i<getNumVertices();i++)
-						{prs.subParseProposedClasses(prs.indexedProperty("vertices", ShortFaceBlockVertex.class, i), ClassInclusion.classOf(ShortFaceBlockVertex.class));}
-					}//end describeFormat(Parser prs)
-				
-				public static class ShortFaceBlockVertex implements ThirdPartyParseable
-					{
-					int vertexIndex;
-					@Override
-					public void describeFormat(Parser prs)
-							throws UnrecognizedFormatException
-						{
-						prs.int4s(prs.property("vertexIndex", int.class));
-						}
-					/**
-					 * @return the vertexIndex
-					 */
-					public int getVertexIndex()
-						{
-						return vertexIndex;
-						}
-					/**
-					 * @param vertexIndex the vertexIndex to set
-					 */
-					public void setVertexIndex(int vertexIndex)
-						{
-						this.vertexIndex = vertexIndex;
-						}
-					}//end ShortFaceBlockVertex
-	
-				/**
-				 * @return the numVertices
-				 */
-				public int getNumVertices()
-					{
-					return numVertices;
-					}
-	
-				/**
-				 * @param numVertices the numVertices to set
-				 */
-				public void setNumVertices(int numVertices)
-					{
-					this.numVertices = numVertices;
-					}
-	
-				/**
-				 * @return the normalX
-				 */
-				public int getNormalX()
-					{
-					return normalX;
-					}
-	
-				/**
-				 * @param normalX the normalX to set
-				 */
-				public void setNormalX(int normalX)
-					{
-					this.normalX = normalX;
-					}
-	
-				/**
-				 * @return the normalY
-				 */
-				public int getNormalY()
-					{
-					return normalY;
-					}
-	
-				/**
-				 * @param normalY the normalY to set
-				 */
-				public void setNormalY(int normalY)
-					{
-					this.normalY = normalY;
-					}
-	
-				/**
-				 * @return the normalZ
-				 */
-				public int getNormalZ()
-					{
-					return normalZ;
-					}
-	
-				/**
-				 * @param normalZ the normalZ to set
-				 */
-				public void setNormalZ(int normalZ)
-					{
-					this.normalZ = normalZ;
-					}
-	
-				/**
-				 * @return the magic
-				 */
-				public int getMagic()
-					{
-					return magic;
-					}
-	
-				/**
-				 * @param magic the magic to set
-				 */
-				public void setMagic(int magic)
-					{
-					this.magic = magic;
-					}
-	
-				/**
-				 * @return the vertices
-				 */
-				public ArrayList<ShortFaceBlockVertex>  getVertices()
-					{
-					return vertices;
-					}
-	
-				/**
-				 * @param vertices the vertices to set
-				 */
-				public void setVertices(ArrayList<ShortFaceBlockVertex>  vertices)
-					{
-					this.vertices = vertices;
-					}
+				protected byte getBlockID() {
+				    return 0x05;
+				}
 				}//end FaceBlock05
 			
 			/**
@@ -798,14 +666,12 @@ public abstract class BINFile implements ThirdPartyParseable
 					}
 				}//end ColorBlock
 			
-			public static class BillboardSprite0x0F implements ThirdPartyParseable{
-			    int numVertices,normalX,normalY,normalZ,magic;
-				private ArrayList<ShortFaceBlockVertex> vertices;
+			public static abstract class NoUVFaceBlock extends FaceBlock{
 				@Override
 				public void describeFormat(Parser prs) throws UnrecognizedFormatException
 					{
 					prs.littleEndian();
-					prs.expectBytes(new byte[]{0,0,0,0x0F}, FailureBehavior.UNRECOGNIZED_FORMAT);
+					prs.expectBytes(new byte[]{0,0,0,getBlockID()}, FailureBehavior.UNRECOGNIZED_FORMAT);
 					prs.int4s(prs.property("numVertices", int.class));
 					prs.int4s(prs.property("normalX", int.class));
 					prs.int4s(prs.property("normalY", int.class));
@@ -816,124 +682,22 @@ public abstract class BINFile implements ThirdPartyParseable
 					
 					}//end describeFormat(Parser prs)
 				
-				public static class ShortFaceBlockVertex implements ThirdPartyParseable{
-					int vertexIndex;
+				protected abstract byte getBlockID();
+				
+				public static class ShortFaceBlockVertex extends FaceBlockVertex{
 					@Override
 					public void describeFormat(Parser prs)
 							throws UnrecognizedFormatException{
 						prs.int4s(prs.property("vertexIndex", int.class));
 						}
-					/**
-					 * @return the vertexIndex
-					 */
-					public int getVertexIndex()
-						{
-						return vertexIndex;
-						}
-					/**
-					 * @param vertexIndex the vertexIndex to set
-					 */
-					public void setVertexIndex(int vertexIndex)
-						{
-						this.vertexIndex = vertexIndex;
-						}
 					}//end ShortFaceBlockVertex
-
-				/**
-				 * @return the numVertices
-				 */
-				public int getNumVertices()
-					{
-					return numVertices;
-					}
-
-				/**
-				 * @param numVertices the numVertices to set
-				 */
-				public void setNumVertices(int numVertices)
-					{
-					this.numVertices = numVertices;
-					}
-
-				/**
-				 * @return the normalX
-				 */
-				public int getNormalX()
-					{
-					return normalX;
-					}
-
-				/**
-				 * @param normalX the normalX to set
-				 */
-				public void setNormalX(int normalX)
-					{
-					this.normalX = normalX;
-					}
-
-				/**
-				 * @return the normalY
-				 */
-				public int getNormalY()
-					{
-					return normalY;
-					}
-
-				/**
-				 * @param normalY the normalY to set
-				 */
-				public void setNormalY(int normalY)
-					{
-					this.normalY = normalY;
-					}
-
-				/**
-				 * @return the normalZ
-				 */
-				public int getNormalZ()
-					{
-					return normalZ;
-					}
-
-				/**
-				 * @param normalZ the normalZ to set
-				 */
-				public void setNormalZ(int normalZ)
-					{
-					this.normalZ = normalZ;
-					}
-
-				/**
-				 * @return the magic
-				 */
-				public int getMagic()
-					{
-					return magic;
-					}
-
-				/**
-				 * @param magic the magic to set
-				 */
-				public void setMagic(int magic)
-					{
-					this.magic = magic;
-					}
-
-				/**
-				 * @return the vertices
-				 */
-				public List<ShortFaceBlockVertex> getVertices()
-					{
-					return vertices;
-					}
-
-				/**
-				 * @param vertices the vertices to set
-				 */
-				public void setVertices(ArrayList<ShortFaceBlockVertex> vertices)
-					{
-					this.vertices = vertices;
-					}
+			}//end NoUVFaceBlock
+			
+			public static class BillboardSprite0x0F extends NoUVFaceBlock{
+			    @Override
+			    protected byte getBlockID() {
+				return 0x0F;
+			    }
 			}//end Unknown 0x0F
 			
 			public static class BillboardTexCoords0x04 implements ThirdPartyParseable{

@@ -14,110 +14,143 @@ import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.NAVObjective;
 
 public class TunnelExitObject extends WorldObject {
-    private  Vector3D exitLocation;
-    private  Vector3D exitHeading,exitTop;
-    private final Tunnel tun;
-    private final TR tr;
-    private NAVObjective navObjectiveToRemove;
-    private boolean mirrorTerrain=false;
+    private 		Vector3D 	exitLocation, exitHeading, exitTop;
+    private final 	Tunnel 		tun;
+    private final 	TR 		tr;
+    private 		NAVObjective 	navObjectiveToRemove;
+    private boolean 			mirrorTerrain = false;
+
     public TunnelExitObject(TR tr, Tunnel tun) {
 	super(tr);
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
-	final double EXIT_Y_NUDGE=0;
-	this.exitLocation=new Vector3D(TR.legacy2Modern(v.getZ()),TR.legacy2Modern(v.getY()+EXIT_Y_NUDGE),TR.legacy2Modern(v.getX()));
-	this.tun=tun;
-	exitHeading = tr.getAltitudeMap().normalAt(exitLocation.getZ()/TR.mapSquareSize, exitLocation.getX()/TR.mapSquareSize);
+	final double EXIT_Y_NUDGE = 0;
+	this.exitLocation = new Vector3D(TR.legacy2Modern(v.getZ()),
+		TR.legacy2Modern(v.getY() + EXIT_Y_NUDGE), TR.legacy2Modern(v
+			.getX()));
+	this.tun = tun;
+	exitHeading = tr.getAltitudeMap().normalAt(
+		exitLocation.getZ() / TR.mapSquareSize,
+		exitLocation.getX() / TR.mapSquareSize);
 	Vector3D horiz = exitHeading.crossProduct(Vector3D.MINUS_J);
-	if(horiz.getNorm()==0){horiz=Vector3D.PLUS_I;}else horiz=horiz.normalize();
+	if (horiz.getNorm() == 0) {
+	    horiz = Vector3D.PLUS_I;
+	} else
+	    horiz = horiz.normalize();
 	exitTop = exitHeading.crossProduct(horiz.negate()).normalize().negate();
-	exitLocation=exitLocation.add(exitHeading.scalarMultiply(10000));
-	this.tr=tr;
+	exitLocation = exitLocation.add(exitHeading.scalarMultiply(10000));
+	this.tr = tr;
 	setVisible(false);
-	try{Model m = tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl());
-	setModel(m);}
-	catch(Exception e){e.printStackTrace();}
+	try {
+	    Model m = tr.getResourceManager().getBINModel("SHIP.BIN",
+		    tr.getGlobalPalette(), tr.getGPU().getGl());
+	    setModel(m);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
     }
-    
-    private class TunnelExitBehavior extends Behavior implements CollisionBehavior{
+
+    private class TunnelExitBehavior extends Behavior implements
+	    CollisionBehavior {
 	@Override
-	public void proposeCollision(WorldObject other){
-	    if(other instanceof Player){
-		if(other.getPosition()[0]>TunnelExitObject.this.getPosition()[0]){
+	public void proposeCollision(WorldObject other) {
+	    if (other instanceof Player) {
+		if (other.getPosition()[0] > TunnelExitObject.this
+			.getPosition()[0]) {
 		    tr.getOverworldSystem().setChamberMode(mirrorTerrain);
-		    tr.getWorld().setFogColor((tr.getOverworldSystem().getFogColor()));
+		    tr.getWorld().setFogColor(
+			    (tr.getOverworldSystem().getFogColor()));
 		    tr.getBackdropSystem().overworldMode();
-		    //Teleport
+		    // Teleport
 		    other.setPosition(exitLocation.toArray());
-		    //Heading
+		    // Heading
 		    other.setHeading(exitHeading);
 		    other.setTop(exitTop);
-		    //Tunnel off
+		    // Tunnel off
 		    tun.deactivate();
-		    //World on
+		    // World on
 		    tr.getOverworldSystem().activate();
 		    tr.getOverworldSystem().setTunnelMode(false);
-		    //Reset player behavior
-		    tr.getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).addInvincibility(250);//Safety kludge when near walls.
-		    tr.getPlayer().getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(true);
-		    tr.getPlayer().getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
-		    tr.getPlayer().getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(false);
-		    //Update debug data
-		    tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "false");
-		    //Reset projectile behavior
-		    final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
-			 for(ProjectileFactory pf:pfs){
-			     Projectile [] projectiles = pf.getProjectiles();
-			     for(Projectile proj:projectiles){
-				 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(true);
-			     }//end for(projectiles)
-			 }//end for(projectileFactories)
-		final NAVObjective navObjective = getNavObjectiveToRemove();
-		    if(navObjective!=null){
-		        tr.getCurrentMission().removeNAVObjective(navObjective);
-		    }//end if(have NAV to remove
-		}//end if(x past threshold)
-	    }//end if(Player)
-	}//end proposeCollision()
-    }//end TunnelExitBehavior
+		    // Reset player behavior
+		    tr.getPlayer().getBehavior()
+			    .probeForBehavior(DamageableBehavior.class)
+			    .addInvincibility(250);// Safety kludge when near
+						   // walls.
+		    tr.getPlayer().getBehavior()
+			    .probeForBehavior(CollidesWithTerrain.class)
+			    .setEnable(true);
+		    tr.getPlayer().getBehavior()
+			    .probeForBehavior(LoopingPositionBehavior.class)
+			    .setEnable(true);
+		    tr.getPlayer()
+			    .getBehavior()
+			    .probeForBehavior(
+				    HeadingXAlwaysPositiveBehavior.class)
+			    .setEnable(false);
+		    // Update debug data
+		    tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?",
+			    "false");
+		    // Reset projectile behavior
+		    final ProjectileFactory[] pfs = tr.getResourceManager()
+			    .getProjectileFactories();
+		    for (ProjectileFactory pf : pfs) {
+			Projectile[] projectiles = pf.getProjectiles();
+			for (Projectile proj : projectiles) {
+			    ((WorldObject) proj)
+				    .getBehavior()
+				    .probeForBehavior(
+					    LoopingPositionBehavior.class)
+				    .setEnable(true);
+			}// end for(projectiles)
+		    }// end for(projectileFactories)
+		    final NAVObjective navObjective = getNavObjectiveToRemove();
+		    if (navObjective != null) {
+			tr.getCurrentMission().removeNAVObjective(navObjective);
+		    }// end if(have NAV to remove
+		}// end if(x past threshold)
+	    }// end if(Player)
+	}// end proposeCollision()
+    }// end TunnelExitBehavior
 
     /**
      * @return the navObjectiveToRemove
      */
     public NAVObjective getNavObjectiveToRemove() {
-        return navObjectiveToRemove;
+	return navObjectiveToRemove;
     }
 
     /**
-     * @param navObjectiveToRemove the navObjectiveToRemove to set
+     * @param navObjectiveToRemove
+     *            the navObjectiveToRemove to set
      */
     public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
-        this.navObjectiveToRemove = navObjectiveToRemove;
+	this.navObjectiveToRemove = navObjectiveToRemove;
     }
 
     public void setMirrorTerrain(boolean b) {
-	mirrorTerrain=b;
+	mirrorTerrain = b;
     }
 
     /**
      * @return the exitLocation
      */
     public Vector3D getExitLocation() {
-        return exitLocation;
+	return exitLocation;
     }
 
     /**
-     * @param exitLocation the exitLocation to set
+     * @param exitLocation
+     *            the exitLocation to set
      */
     public void setExitLocation(Vector3D exitLocation) {
-        this.exitLocation = exitLocation;
+	this.exitLocation = exitLocation;
     }
 
     /**
      * @return the mirrorTerrain
      */
     public boolean isMirrorTerrain() {
-        return mirrorTerrain;
+	return mirrorTerrain;
     }
 
-}//end TunnelExitObject
+}// end TunnelExitObject

@@ -23,14 +23,14 @@ public enum Weapon{
 	goldBall(null,null,new BINModelingType("FIREBALL.BIN"),8000,ModelingType.MAP_SQUARE_SIZE*10,-1,2048,false,false),
 	atomWeapon(null,null,new BillboardModelingType(new String[]{"ATM2.RAW","ATM3.RAW"},70,new Dimension(320000,320000)),10000,ModelingType.MAP_SQUARE_SIZE*4,-1,2048,false,false),
 	purpleRing(null,null,new BillboardModelingType(new String[]{"PURFRIN2.RAW","PURFRIN3.RAW"},8192,new Dimension(320000,320000)),8192,ModelingType.MAP_SQUARE_SIZE*3,-1,2048,false,false),
-	bossW6(null,null,new BINModelingType("MISSILE.BIN"),6554,ModelingType.MAP_SQUARE_SIZE*7,-1,2048,false,false),
+	bossW6(null,null,new BINModelingType("BRADMIS.BIN"),6554,ModelingType.MAP_SQUARE_SIZE*7,-1,2048,false,false),
 	bossW7(null,null,new BillboardModelingType(new String[]{"BFIRJ0.RAW","BFIRJ2.RAW"},100,new Dimension(320000,320000)),8192,ModelingType.MAP_SQUARE_SIZE*4,-1,2048,false,false),
 	bossW8(null,null,new BINModelingType("FIREBALL.BIN"),8192,ModelingType.MAP_SQUARE_SIZE*6,-1,2048,false,false),
-	enemyMissile(null,null,new BINModelingType("MISSILE.BIN"),8192,ModelingType.MAP_SQUARE_SIZE*2,-1,2048,false,false),
-	MAM("MAM","DOM",new BINModelingType("MISSILE.BIN"),16384,ModelingType.MAP_SQUARE_SIZE*5,4,2048,false,false),
+	enemyMissile(null,null,new BINModelingType("BRADMIS.BIN"),8192,ModelingType.MAP_SQUARE_SIZE*2,-1,2048,false,false),
+	MAM("MAM","DOM",new BINModelingType("BRADMIS.BIN"),16384,ModelingType.MAP_SQUARE_SIZE*5,4,2048,false,false),
 	//////// THESE ARE NOT PART OF THE ORDINAL ORDER OF A DEF FILE AND MAY BE RE-ORDERED
-	SAD("SAD","VIP",new BINModelingType("MISSILE.BIN"),32768,ModelingType.MAP_SQUARE_SIZE*5,5,2048,false,true),
-	SWT("SWT","BFM",new BINModelingType("MISSILE.BIN"),65536,ModelingType.MAP_SQUARE_SIZE*7,6,2048,false,true),
+	SAD("SAD","VIP",new BINModelingType("BRADMIS.BIN"),32768,ModelingType.MAP_SQUARE_SIZE*5,5,2048,false,true),
+	SWT("SWT","BFM",new BINModelingType("BRADMIS.BIN"),65536,ModelingType.MAP_SQUARE_SIZE*7,6,2048,false,true),
 	DAM("DAM","FFF",new FlatModelingType("FIRBAL0.RAW",new Dimension(80000,560000)),Integer.MAX_VALUE,0,7,ModelingType.MAP_SQUARE_SIZE*15,false,false);
 	private final String tvDisplayName,f3DisplayName;
 	private final int damage,speed,buttonToSelect;

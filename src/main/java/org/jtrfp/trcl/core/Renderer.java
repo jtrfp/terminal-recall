@@ -213,7 +213,9 @@ public final class Renderer {
     private void fpsTracking() {
 	frameNumber++;
 	if ((frameNumber %= 20) == 0) {
-	    final int fps = (1000 / (int) (System.currentTimeMillis() - lastTimeMillis));
+	    final int dT = (int) (System.currentTimeMillis() - lastTimeMillis);
+	    if(dT<=0)return;
+	    final int fps = (1000 / dT);
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + fps);
 	}

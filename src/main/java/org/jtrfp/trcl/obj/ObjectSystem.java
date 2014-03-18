@@ -28,17 +28,21 @@ import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile;
 
-public class ObjectSystem extends RenderableSpacePartitioningGrid
-{
-	public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,LVLFile lvl, ArrayList<DEFObject> defList, Vector3D headingOverride) throws IllegalAccessException, IOException, FileLoadException{
-		super(parentGrid);
-		TR tr = w.getTr();
-		DEFFile defFile = tr.getResourceManager().getDEFData(lvl.getEnemyDefinitionAndPlacementFile());
-		PUPFile pupFile = tr.getResourceManager().getPUPData(lvl.getPowerupPlacementFile());
-		DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile,w,defList);
-		defPlacer.setHeadingOverride(headingOverride);
-		defPlacer.placeObjects(this);
-		PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile,w);
-		pupPlacer.placeObjects(this);
-		}//end ObjectSystem(...)
-}//end ObjectSystem
+public class ObjectSystem extends RenderableSpacePartitioningGrid {
+    public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,
+	    LVLFile lvl, ArrayList<DEFObject> defList,
+	    Vector3D headingOverride, Vector3D positionOffset)
+	    throws IllegalAccessException, IOException, FileLoadException {
+	super(parentGrid);
+	TR tr = w.getTr();
+	DEFFile defFile = tr.getResourceManager().getDEFData(
+		lvl.getEnemyDefinitionAndPlacementFile());
+	PUPFile pupFile = tr.getResourceManager().getPUPData(
+		lvl.getPowerupPlacementFile());
+	DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile, w, defList);
+	defPlacer.setHeadingOverride(headingOverride);
+	defPlacer.placeObjects(this, positionOffset);
+	PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile, w);
+	pupPlacer.placeObjects(this, positionOffset);
+    }// end ObjectSystem(...)
+}// end ObjectSystem

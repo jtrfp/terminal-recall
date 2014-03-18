@@ -2,6 +2,7 @@ package org.jtrfp.trcl.obj;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
@@ -25,8 +26,9 @@ public class PUPObjectPlacer implements ObjectPlacer {
     }// end PUPObjectPlacer
 
     @Override
-    public void placeObjects(RenderableSpacePartitioningGrid target) {
+    public void placeObjects(RenderableSpacePartitioningGrid target, Vector3D positionOffset) {
 	for (PowerupObject obj : objs) {
+	    obj.movePositionBy(positionOffset);
 	    target.add(obj);
 	}//end for(objs)
     }//end placeObjects()

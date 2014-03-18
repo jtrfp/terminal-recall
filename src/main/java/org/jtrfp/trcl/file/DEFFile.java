@@ -174,7 +174,8 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable{
 		attackRetreatBelowSky,
 		attackRetreatAboveSky,
 		bobAboveSky,
-		factory;
+		factory,
+		unknown42;
 		}//end EnemyLogic
 
 	/**

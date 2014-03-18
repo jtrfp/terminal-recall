@@ -28,7 +28,6 @@ public class TunnelExitObject extends WorldObject {
 	this.exitLocation=new Vector3D(TR.legacy2Modern(v.getZ()),TR.legacy2Modern(v.getY()+EXIT_Y_NUDGE),TR.legacy2Modern(v.getX()));
 	this.tun=tun;
 	exitHeading = tr.getAltitudeMap().normalAt(exitLocation.getZ()/TR.mapSquareSize, exitLocation.getX()/TR.mapSquareSize);
-	System.out.println("exitHeading="+exitHeading);
 	Vector3D horiz = exitHeading.crossProduct(Vector3D.MINUS_J);
 	if(horiz.getNorm()==0){horiz=Vector3D.PLUS_I;}else horiz=horiz.normalize();
 	exitTop = exitHeading.crossProduct(horiz.negate()).normalize().negate();
@@ -57,6 +56,7 @@ public class TunnelExitObject extends WorldObject {
 		    tun.deactivate();
 		    //World on
 		    tr.getOverworldSystem().activate();
+		    tr.getOverworldSystem().setTunnelMode(false);
 		    //Reset player behavior
 		    tr.getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).addInvincibility(250);//Safety kludge when near walls.
 		    tr.getPlayer().getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(true);

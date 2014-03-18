@@ -72,6 +72,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 tr.getBackdropSystem().tunnelMode();
 		 //Ensure chamber mode is off
 		 tr.getOverworldSystem().setChamberMode(false);
+		 tr.getOverworldSystem().setTunnelMode(true);
 		 //Update debug data
 		 tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "true");
 		 
@@ -86,6 +87,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 final Player player = tr.getPlayer();
 		 player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
 		 player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+		 player.notifyPositionChange();
 		 player.getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 		 player.getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);

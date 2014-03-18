@@ -18,6 +18,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
@@ -30,6 +31,7 @@ public class PowerupObject extends BillboardSprite{
 		super(world.getTr());
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
+		addBehavior(new TunnelRailed(getTr()));
 		Future<TextureDescription> desc=Texture.getFallbackTexture();
 		if(pt==Powerup.Random){
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];

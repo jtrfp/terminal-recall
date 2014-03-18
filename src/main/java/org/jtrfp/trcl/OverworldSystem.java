@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
@@ -21,6 +22,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	private final ArrayList<DEFObject> defList = new ArrayList<DEFObject>();
 	private RenderableSpacePartitioningGrid terrainMirror=new RenderableSpacePartitioningGrid(this){};
 	private boolean chamberMode=false;
+	private boolean tunnelMode=false;
 	private final TR tr;
 	
 	public OverworldSystem(World w, LVLFile lvl, TDFFile tdf){
@@ -55,7 +57,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 			System.out.println("...Done.");
 			//Objects
 			System.out.println("Setting up objects...");
-			ObjectSystem objectSystem=new ObjectSystem(this,w,lvl,defList,null);
+			ObjectSystem objectSystem=new ObjectSystem(this,w,lvl,defList,null, Vector3D.ZERO);
 			objectSystem.activate();
 			System.out.println("...Done.");
 			//Tunnel activators
@@ -101,5 +103,19 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 	 */
 	public boolean isChamberMode() {
 	    return chamberMode;
+	}
+
+	/**
+	 * @return the tunnelMode
+	 */
+	public boolean isTunnelMode() {
+	    return tunnelMode;
+	}
+
+	/**
+	 * @param tunnelMode the tunnelMode to set
+	 */
+	public void setTunnelMode(boolean tunnelMode) {
+	    this.tunnelMode = tunnelMode;
 	}
 }//end OverworldSystem

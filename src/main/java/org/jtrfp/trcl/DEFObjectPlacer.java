@@ -32,7 +32,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    this.defList=defList;
 	}//end constructor
 	@Override
-	public void placeObjects(RenderableSpacePartitioningGrid target){
+	public void placeObjects(RenderableSpacePartitioningGrid target, Vector3D positionOffset){
 		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		final Model [] models = new Model[defs.size()];
@@ -65,9 +65,9 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				if(defList!=null)defList.add(obj);
 				//USING  z,x coords
 				final double [] objPos = obj.getPosition();
-				objPos[0]= TR.legacy2Modern	(pl.getLocationOnMap().getZ());
-				objPos[1]=(TR.legacy2Modern	(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY;
-				objPos[2]= TR.legacy2Modern	(pl.getLocationOnMap().getX());
+				objPos[0]= TR.legacy2Modern	(pl.getLocationOnMap().getZ())+positionOffset.getX();
+				objPos[1]=(TR.legacy2Modern	(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY+positionOffset.getY();
+				objPos[2]= TR.legacy2Modern	(pl.getLocationOnMap().getX())+positionOffset.getZ();
 				obj.notifyPositionChange();
 				
 				if(def.getLogic()==EnemyLogic.groundStaticRuin){

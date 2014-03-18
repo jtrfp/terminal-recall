@@ -32,6 +32,7 @@ import org.jtrfp.trcl.beh.SpinAccellerationBehavior;
 import org.jtrfp.trcl.beh.SpinAccellerationBehavior.SpinMode;
 import org.jtrfp.trcl.beh.SteadilyRotating;
 import org.jtrfp.trcl.beh.TerrainLocked;
+import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
 import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.phy.HasPropulsion;
@@ -362,6 +363,7 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
      addBehavior(posLimit);}
      
     //Misc
+    addBehavior(new TunnelRailed(tr));//Centers in tunnel when appropriate
     addBehavior(new DeathBehavior());
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()+(spinCrash?16:0)).setMaxHealth(pl.getStrength()+(spinCrash?16:0)).setEnable(!boss));
     setActive(!boss);

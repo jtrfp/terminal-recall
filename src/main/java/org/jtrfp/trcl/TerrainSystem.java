@@ -31,12 +31,14 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.obj.Checkpoint;
+import org.jtrfp.trcl.tools.Util;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
+	private int ringIndex=0;
 	
 	public TerrainSystem(final InterpolatingAltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf){
 		super(parent);
@@ -116,7 +118,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								norm1,
 								norm2,
 								norm3
-							});
+							},cX+cZ%4);
 							m.addTriangle(tris[0]);
 							m.addTriangle(tris[1]);
 							}//end for(cX)
@@ -183,7 +185,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 									norm1.negate(),
 									norm2.negate(),
 									norm3.negate()
-								});
+								},cX+cZ%4);
 								m.addTriangle(tris[0]);
 								m.addTriangle(tris[1]);
 								}//end for(cX)

@@ -150,7 +150,7 @@ public class TunnelSegment extends WorldObject
 							new Vector3D(
 								-Math.cos(startAngle+dAngleStart),
 								-Math.sin(startAngle+dAngleStart),0)
-						}
+						},0
 						));
 			startAngle+=dAngleStart;
 			endAngle+=dAngleEnd;
@@ -183,7 +183,7 @@ public class TunnelSegment extends WorldObject
 						new Vector3D(
 							-Math.cos(startAngle1),
 							-Math.sin(startAngle1),0)
-					}));
+					},0));
 		
 		return m.finalizeModel();
 		}

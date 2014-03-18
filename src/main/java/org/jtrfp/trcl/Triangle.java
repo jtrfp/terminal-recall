@@ -20,6 +20,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.gpu.Vertex;
+import org.jtrfp.trcl.tools.Util;
 
 public class Triangle {
     private Vertex [] vertices = new Vertex[3];
@@ -42,10 +43,11 @@ public class Triangle {
 	    RenderMode mode, Vector3D centroidNormal) {
 	return quad2Triangles(x, y, z, u, v, texture, mode, false, centroidNormal);
     }
+    
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
 	    double[] u, double[] v, Future<TextureDescription> texture,
-	    RenderMode mode, Vector3D [] normals) {
-	return quad2Triangles(x, y, z, u, v, texture, mode, false, normals);
+	    RenderMode mode, Vector3D [] normals, int ringRotation) {
+	return quad2Triangles(x, y, z, u, v, texture, mode, false, normals, ringRotation);
     }
     
     public void setVertex(Vertex vtx, int index){
@@ -160,21 +162,23 @@ public class Triangle {
     
     /**
      * Converts supplied quad coordinates to a pair of triangles in clockwise
-     * order, top-left being index zero.
+     * order, top-left being index zero+ringRotation.
+     * @param ringRotation 
      * 
      */
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
 	    double[] u, double[] v, Future<TextureDescription> texture,
-	    RenderMode mode, boolean hasAlpha, Vector3D [] normals) {
+	    RenderMode mode, boolean hasAlpha, Vector3D [] normals, int ringRotation) {
 	final Vertex [] vertices = new Vertex[]{
-		new Vertex().setPosition(new Vector3D(x[0],y[0],z[0])).setNormal(normals[0]),
-		new Vertex().setPosition(new Vector3D(x[1],y[1],z[1])).setNormal(normals[1]),
-		new Vertex().setPosition(new Vector3D(x[2],y[2],z[2])).setNormal(normals[2]),
-		new Vertex().setPosition(new Vector3D(x[3],y[3],z[3])).setNormal(normals[3]),
+		new Vertex().setPosition(new Vector3D(x[(0+ringRotation)%4],y[(0+ringRotation)%4],z[(0+ringRotation)%4])).setNormal(normals[(0+ringRotation)%4]),
+		new Vertex().setPosition(new Vector3D(x[(1+ringRotation)%4],y[(1+ringRotation)%4],z[(1+ringRotation)%4])).setNormal(normals[(1+ringRotation)%4]),
+		new Vertex().setPosition(new Vector3D(x[(2+ringRotation)%4],y[(2+ringRotation)%4],z[(2+ringRotation)%4])).setNormal(normals[(2+ringRotation)%4]),
+		new Vertex().setPosition(new Vector3D(x[(3+ringRotation)%4],y[(3+ringRotation)%4],z[(3+ringRotation)%4])).setNormal(normals[(3+ringRotation)%4]),
 	};
 	Vector2D [] uvs = new Vector2D[4];
 	for(int i=0; i<4; i++){
-	    uvs[i]=new Vector2D(u[i],v[i]);
+	    final int rotI=(i+ringRotation)%4;
+	    uvs[i]=new Vector2D(u[rotI],v[rotI]);
 	}
 	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha);
     }//end quad2Triangles(...)

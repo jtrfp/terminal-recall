@@ -40,7 +40,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	private final TR tr;
 	private int ringIndex=0;
 	
-	public TerrainSystem(final InterpolatingAltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf){
+	public TerrainSystem(final InterpolatingAltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf, boolean flatShading){
 		super(parent);
 		this.tr=tr;
 		final int width=(int)altitude.getWidth(); int height=(int)altitude.getHeight();
@@ -103,6 +103,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    norm2 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 						    norm = altitude.normalAt(cX, cZ+1);
 						    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+						    
+						    if(flatShading)norm0=norm1=norm2=norm3=
+							    altitude.normalAt(cX+.5, cZ+.5);
 						    
 						    final Integer tpi = cX+cZ*256;
 						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
@@ -168,6 +171,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    norm2 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 							    norm = altitude.normalAt(cX, cZ+1);
 							    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+							    
+							    if(flatShading)norm0=norm1=norm2=norm3=
+								    altitude.normalAt(cX+.5, cZ+.5);
 							    
 							    //Ceiling texture cell X (Z in this engine) value is offset by 10.
 							    //No tunnelpoints on ceiling

@@ -40,7 +40,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid
 					(lvl.getTexturePlacementFile(),texturePalette);
 			//Terrain
 			System.out.println("Building terrain...");
-			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize,this,terrainMirror,tr,tdf);
+			boolean flatShadedTerrain=lvl.getHeightMapOrTunnelFile().toUpperCase().contains("BORG");
+			TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh, TR.mapSquareSize,this,terrainMirror,tr,tdf,flatShadedTerrain);
 			System.out.println("...Done.");
 			//Clouds
 			System.out.println("Setting up sky...");

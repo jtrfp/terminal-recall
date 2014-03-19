@@ -73,8 +73,10 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.EOFBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertex;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock05;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.NoUVFaceBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
 import org.jtrfp.trcl.file.CLRFile;
@@ -238,6 +240,9 @@ public class ResourceManager{
 		return getBINModel(name,Texture.getFallbackTexture(),1,true,palette,gl);
 		}
 	
+	private static final double [] BOX_U = new double[]{0,1,1,0};
+	private static final double [] BOX_V = new double[]{0,0,1,1};
+	
 	public Model getBINModel(String name,Future<TextureDescription> defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
@@ -313,7 +318,7 @@ public class ResourceManager{
 						if(vertIndices.size()==4){//Quads
 						    	org.jtrfp.trcl.gpu.Vertex [] vtx = new org.jtrfp.trcl.gpu.Vertex[4];
 							for(int i=0; i<4; i++)
-								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex());}
+								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex()%(b instanceof FaceBlock05?10:Integer.MAX_VALUE));}
 							Triangle [] tris = Triangle.quad2Triangles(
 									vtx,
 									new Vector2D[]{
@@ -339,18 +344,21 @@ public class ResourceManager{
 						else if(vertIndices.size()==3)//Triangles
 							{Triangle t = new Triangle();
 							try{t.setCentroidNormal(new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize());}
-							catch(MathArithmeticException ee){t.setCentroidNormal(Vector3D.PLUS_I);}//TODO: Pass zero and process special.
+							catch(MathArithmeticException ee){t.setCentroidNormal(Vector3D.ZERO);}
 							t.setAlphaBlended(hasAlpha);
 							t.setRenderMode(RenderMode.DYNAMIC);
 							t.setTexture(currentTexture);
 							
 							for(int vi=0; vi < 3; vi++){
 							    final org.jtrfp.trcl.gpu.Vertex vtx=
-								    vertices.get(vertIndices.get(vi).getVertexIndex());
+								    vertices.get(vertIndices.get(vi).getVertexIndex()-(b instanceof FaceBlock05?m.getUnknown2():0));
 							    t.setVertex(vtx, vi);
-								t.setUV(new Vector2D(
+								if(b instanceof FaceBlock05)
+								    t.setUV(new Vector2D(BOX_U[vi],BOX_V[vi]), vi);
+								else{
+								    t.setUV(new Vector2D(
 									(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000,
-									1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000), vi);
+									1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000), vi);}
 							}//end for(vi)
 							if(currentTexture==null)
 								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=Texture.getFallbackTexture();}
@@ -360,7 +368,15 @@ public class ResourceManager{
 							{System.err.println("ResourceManager: FaceBlock has "+vertIndices.size()+" vertices. Only 3 or 4 supported.");}
 						}//end if(FaceBlock)
 					else if(b instanceof FaceBlock19)
-						{System.out.println("FaceBlock 0x19 (solid colored faces) not yet implemented. Skipping...");}
+						{System.out.println(b.getClass().getSimpleName()+" (solid colored faces) not yet implemented. Skipping...");}
+					else if(b instanceof FaceBlock05){
+					    /*FaceBlock05 fb5 = (FaceBlock05)b;
+					    System.out.println("NormalX="+fb5.getNormalX());
+					    System.out.println("NormalY="+fb5.getNormalY());
+					    System.out.println("NormalZ="+fb5.getNormalZ());
+					    System.out.println("Magic="+fb5.getMagic());
+					    */
+					}
 					else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
 						LineSegment seg = new LineSegment();

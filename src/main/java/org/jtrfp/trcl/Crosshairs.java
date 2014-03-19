@@ -29,14 +29,18 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere
 		{
 		super(tr);
 		//Crosshairs
-		Model crossModel = new Model(false,tr);
+		Model crossModel=null;
+		
+		//Fallback
 		Future<Texture> [] greenThrobFrames = new Future[16];
 		for(int f=0; f<8; f++)
 			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)Texture.solidColor(new Color(f*22,f*32,f*23,170));}
-		Future<TextureDescription> greenThrob = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(20,greenThrobFrames.length,false), greenThrobFrames));
+		Future<TextureDescription> greenThrob = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(80,greenThrobFrames.length,false), greenThrobFrames));
+		/*
 		final double xhairScale=.80;
 		final double xhairThick=.005*xhairScale;
 		final double xhairLen=.015*xhairScale;
+		crossModel = new Model(false,tr);
 		crossModel.addTriangles(Triangle.quad2Triangles(//Horiz
 				new double[]{-xhairLen,xhairLen,xhairLen,-xhairLen}, new double[]{xhairThick,xhairThick,-xhairThick,-xhairThick}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1}, greenThrob, RenderMode.DYNAMIC,Vector3D.ZERO));
@@ -55,6 +59,18 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere
 		crossModel.addTriangles(Triangle.quad2Triangles(//Right
 				new double[]{(xhairLen+xhairThick*6),(xhairLen+xhairThick*6),(xhairLen),(xhairLen)}, new double[]{-xhairThick*3,xhairThick*3,xhairThick*3,-xhairThick*3}, new double[]{Z,Z,Z,Z}, 
 				new double[]{0,1,1,0}, new double[]{0,0,1,1},greenThrob, RenderMode.DYNAMIC,Vector3D.ZERO));
-		setModel(crossModel.finalizeModel());
+		*/
+		/*The official crosshairs. We supply the 'green throb'
+		TARGET.BIN has a size range of [-8192,8192], a far cry from OpenGL's [-1,1] range.
+		Also has a Z offset of +204,800.
+		Scaling down by 204800 and subtracting 1 for a Z of zero we get correct size.
+		In the real game TARGET.BIN is apparently appended to the player ship model itself such that the Z protrusion is real.
+		Furthermore, enemies try to attack the crosshairs instead of the plane, perhaps as a kludge for motion-compensated aiming.
+		*/
+		try{crossModel = tr.getResourceManager().getBINModel("TARGET.BIN",greenThrob,1./204800.,true, tr.getGlobalPalette(), tr.getGPU().getGl());
+		}catch(Exception e){e.printStackTrace();System.exit(1);}
+		this.setRenderFlags((byte)1);
+		setModel(crossModel);
+		this.movePositionBy(new Vector3D(0,0,-1));
 		}
 	}

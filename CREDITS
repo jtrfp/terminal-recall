@@ -22,8 +22,13 @@ Apache Commons
 	Apache Commons Mathematics Library / Commons IO
 	License: Apache 2.0
 	http://commons.apache.org/math/
-	    
-    Java Format Description Toolkit (jFDT)
+	
+	Apache Commons Imaging
+	package org.apache.commons.imaging.formats.jpeg.decoder.Dct only.
+	License: Apache 2.0
+	Class access modified to be public.
+	   
+Java Format Description Toolkit (jFDT)
     License: GPL v3
     http://code.google.com/p/jfdt/
     

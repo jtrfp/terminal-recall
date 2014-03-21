@@ -56,4 +56,18 @@ public class Img {
 	    pixIndex++;
 	}//end for(pixelData)
     }//end rgba8888toyuva8888
+    
+    public static void readRasterized8x8ByteBlockOf(byte [] buf, int offX, int offY, int rasterWidth, float [] dest){
+	final int offXY = offX+offY*rasterWidth;
+	for(int i=0; i< 64; i++){
+	    dest[i]=(buf[offXY+i%8+(i/8)*rasterWidth]&0xFF);
+	}//end for(64)
+    }//end rasterized8x8ByteBlockOf(...)
+    
+    public static void writeRasterized8x8ByteBlockOf(byte [] buf, int offX, int offY, int rasterWidth, float [] src){
+	final int offXY = offX+offY*rasterWidth;
+	for(int i=0; i< 64; i++){
+		buf[offXY+i%8+(i/8)*rasterWidth]=(byte)Math.round(src[i]);
+	}//end for(64)
+    }//end rasterized8x8ByteBlockOf(...)
 }//end Img

@@ -22,10 +22,10 @@ public class Img {
 	rgba8888in.clear();
 	int pixIndex=0;
 	while(rgba8888in.hasRemaining()){
-	    final double r = rgba8888in.get();
-	    final double g = rgba8888in.get();
-	    final double b = rgba8888in.get();
-	    final double a = rgba8888in.get();
+	    final double r = (rgba8888in.get()&0xFF)-127;
+	    final double g = (rgba8888in.get()&0xFF)-127;
+	    final double b = (rgba8888in.get()&0xFF)-127;
+	    final double a = (rgba8888in.get()&0xFF)-127;
 	    
 	    final double y = WEIGHT_RED*r + WEIGHT_GREEN*g + WEIGHT_BLUE*b;
 	    final double u = .492*(b-y);
@@ -44,14 +44,14 @@ public class Img {
 	rgba8888out.clear();
 	int pixIndex=0;
 	while(rgba8888out.hasRemaining()){
-	    final double y = yIn[pixIndex];
-	    final double u = uIn[pixIndex];
-	    final double v = vIn[pixIndex];
+	    final double y = (yIn[pixIndex]);
+	    final double u = (uIn[pixIndex]);
+	    final double v = (vIn[pixIndex]);
 	    
-	    rgba8888out.put((byte)(y+(v/.877)));
-	    rgba8888out.put((byte)(y-.395*u-.581*v));
-	    rgba8888out.put((byte)(y+(u/.492)));
-	    rgba8888out.put(aIn[pixIndex]);
+	    rgba8888out.put((byte)(y+(v/.877)+127));
+	    rgba8888out.put((byte)(y-.395*u-.581*v+127));
+	    rgba8888out.put((byte)(y+(u/.492)+127));
+	    rgba8888out.put((byte)(aIn[pixIndex]+127));
 	    
 	    pixIndex++;
 	}//end for(pixelData)
@@ -60,14 +60,14 @@ public class Img {
     public static void readRasterized8x8ByteBlockOf(byte [] buf, int offX, int offY, int rasterWidth, float [] dest){
 	final int offXY = offX+offY*rasterWidth;
 	for(int i=0; i< 64; i++){
-	    dest[i]=(buf[offXY+i%8+(i/8)*rasterWidth]&0xFF);
+	    dest[i]=(buf[offXY+i%8+(i/8)*rasterWidth]&0xFF)-127f;
 	}//end for(64)
     }//end rasterized8x8ByteBlockOf(...)
     
     public static void writeRasterized8x8ByteBlockOf(byte [] buf, int offX, int offY, int rasterWidth, float [] src){
 	final int offXY = offX+offY*rasterWidth;
 	for(int i=0; i< 64; i++){
-		buf[offXY+i%8+(i/8)*rasterWidth]=(byte)Math.round(src[i]);
+		buf[offXY+i%8+(i/8)*rasterWidth]=(byte)(src[i]+127);
 	}//end for(64)
     }//end rasterized8x8ByteBlockOf(...)
 }//end Img

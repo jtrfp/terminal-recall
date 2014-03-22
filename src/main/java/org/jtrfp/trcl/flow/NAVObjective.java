@@ -8,6 +8,7 @@ import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.ChangesBehaviorWhenTargeted;
 import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.RemovesNAVObjectiveOnDeath;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Location3D;
@@ -155,6 +156,8 @@ public abstract class NAVObjective {
 			indexedNAVObjectiveList.add(objective);
 		    }//end for(targets)
 		    final DEFObject bossObject = defs.get(bos.getBossIndex());
+		    bossObject.addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+		    bossObject.setIgnoringProjectiles(true);
 		    final NAVObjective objective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {

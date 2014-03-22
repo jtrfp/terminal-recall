@@ -399,7 +399,6 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
-    if(boss){bossBehavior(tr,def);}
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){
 	addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     }//end DEFObject
@@ -436,13 +435,6 @@ private void projectileFiringBehavior(){
 private void unhandled(EnemyDefinition def){
     System.err.println("UNHANDLED DEF LOGIC: "+def.getLogic()+". MODEL="+def.getComplexModelFile()+" DESC="+def.getDescription());
 }
-
-private void bossBehavior(TR tr, EnemyDefinition def){//Don't include hitzones for aiming.
-    if(!def.getComplexModelFile().toUpperCase().contains("HITZO")){
-	addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
-	setIgnoringProjectiles(true);
-    }
-}//end bossBehavior(...)
 
 private void fallingObjectBehavior(){
     canTurn=false;

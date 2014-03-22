@@ -5,5 +5,15 @@ public class Misc {
 	for(int i=0; i<vals.length; i++){
 	    vals[i]*=scalar;
 	}
+    }//end scalarMutliply(...)
+    public static void clamp(float []vals, float min, float max){
+	for(int i=0; i<vals.length; i++){
+	    vals[i]=Math.min(Math.max(vals[i], min), max);
+	}
+    }//end clamp(...)
+    
+    public static void round(float []vals){
+	for(int i=0; i<vals.length; i++)
+	    vals[i]=Math.round(vals[i]);
     }
 }

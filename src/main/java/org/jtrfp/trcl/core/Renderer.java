@@ -225,17 +225,18 @@ public final class Renderer {
     public void render() {
 	if (!active)
 	    return;
+	final GL3 gl = gpu.getGl();
+	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+	int renderListIndex = 0;
+	renderListIndex = renderListToggle ? 0 : 1;
+	renderList[renderListIndex].render(gl);
 	fpsTracking();
 	// Update GPU
 	PrimitiveList.tickAnimators();
 	ensureInit();
-	final GL3 gl = gpu.getGl();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
-	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-	int renderListIndex = 0;
-	renderListIndex = renderListToggle ? 0 : 1;
 	renderList[renderListIndex].sendToGPU(gl);
-	renderList[renderListIndex].render(gl);
+	//gpu.getMemoryManager().unmap();
     }
 
     public void activate() {

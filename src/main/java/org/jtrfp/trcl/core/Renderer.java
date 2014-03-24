@@ -227,13 +227,13 @@ public final class Renderer {
 	    return;
 	final GL3 gl = gpu.getGl();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+	ensureInit();
 	int renderListIndex = 0;
 	renderListIndex = renderListToggle ? 0 : 1;
 	renderList[renderListIndex].render(gl);
 	fpsTracking();
 	// Update GPU
 	PrimitiveList.tickAnimators();
-	ensureInit();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
 	renderList[renderListIndex].sendToGPU(gl);
 	//gpu.getMemoryManager().unmap();

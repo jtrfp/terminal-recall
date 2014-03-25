@@ -13,7 +13,7 @@
  *  under the License.
  */
 
-package org.apache.commons.imaging.formats.jpeg.decoder;
+package modified.org.apache.commons.imaging.formats.jpeg.decoder;
 
 public final class Dct {
     /*

@@ -54,5 +54,5 @@ vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 // Calc illumination. Near-zero norm means assume full lighting
 float sunIllumination = length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):1;
 fragColor.rgb =origColor*fogColor+origColor*sunIllumination*sunColor;
-fragColor = mix(fragColor,vec4(fogColor*sunColor,1),linearDepth);//FOG
+fragColor = mix(fragColor,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
 }

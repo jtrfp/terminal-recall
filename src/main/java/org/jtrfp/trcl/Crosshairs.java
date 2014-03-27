@@ -69,6 +69,9 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere
 		*/
 		try{crossModel = tr.getResourceManager().getBINModel("TARGET.BIN",greenThrob,1./204800.,true, tr.getGlobalPalette(), tr.getGPU().getGl());
 		}catch(Exception e){e.printStackTrace();System.exit(1);}
+		final TriangleList tl = crossModel.getTriangleList();
+		Triangle [] tris = tl.getPrimitives()[0];
+		for(Triangle t:tris) t.setCentroidNormal(Vector3D.ZERO);
 		this.setRenderFlags((byte)1);
 		setModel(crossModel);
 		this.movePositionBy(new Vector3D(0,0,-1));

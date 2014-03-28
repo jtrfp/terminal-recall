@@ -103,14 +103,22 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		dest.add(objectWithPosition);
 		}
 	public void remove(E objectWithPosition){
-		for(Object o:gridSquares)
+	    if(objectWithPosition instanceof VisibleEverywhere){
+		removeAlwaysVisible(objectWithPosition);
+	    }else{
+		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
+		dest.remove(objectWithPosition);
+	    }
+		/*for(Object o:gridSquares)
 			{//Blind removal
 			GridCube gc = (GridCube)o;
 			gc.remove(objectWithPosition);
-			}
+			}*/
 		}
 	private void addAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.add(objectWithPosition);}
+	private void removeAlwaysVisible(E objectWithPosition)
+		{alwaysVisible.remove(objectWithPosition);}
 	
 	private static double absMod(double value, double mod){
 		if(value>=-0.)

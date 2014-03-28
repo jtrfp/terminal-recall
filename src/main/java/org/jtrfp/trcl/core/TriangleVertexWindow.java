@@ -48,7 +48,7 @@ public final class TriangleVertexWindow extends MemoryWindow {
 	return create();
     }//end createTriangle
     
-    
+    /*
     public final void setX(int id, short val){
 	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+X,(short)val);
 	x.set(id, val);
@@ -68,6 +68,6 @@ public final class TriangleVertexWindow extends MemoryWindow {
     public final void setV(int id, short val){
 	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+V,(short)val);
 	v.set(id, val);
-    }
+    }*/
     
 }//end TriangleWindow

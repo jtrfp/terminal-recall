@@ -31,19 +31,19 @@ public class TriangleVertex2FlatDoubleWindow {
 	id%=NUM_ELEMENTS;
 	switch (id){
 	    case 0:
-		parentWindow.setX(vid,(short)val);
+		parentWindow.x.set(vid,(short)val);
 		break;
 	    case 1:
-		parentWindow.setY(vid,(short)val);
+		parentWindow.y.set(vid,(short)val);
 		break;
 	    case 2:
-		parentWindow.setZ(vid,(short)val);
+		parentWindow.z.set(vid,(short)val);
 		break;
 	    case 3:
-		parentWindow.setU(vid,(short)val);
+		parentWindow.u.set(vid,(short)val);
 		break;
 	    case 4:
-		parentWindow.setV(vid,(short)val);
+		parentWindow.v.set(vid,(short)val);
 		break;
 	    case 5:
 		parentWindow.normX.set(vid, (byte)val);

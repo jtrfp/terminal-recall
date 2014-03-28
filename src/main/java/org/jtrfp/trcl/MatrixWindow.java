@@ -46,9 +46,10 @@ public final class MatrixWindow extends MemoryWindow {
 			.logical2PhysicalAddressBytes(0)));
 	*/
     }
-
+    
+    private final double [] newVals = new double[16];
     public final void setTransposed(double[] vals, int id) {
-	double[] newVals = new double[16];
+	//double[] newVals = new double[16];
 	for (int index = 0; index < 16; index++) {
 	    newVals[index] = (float) vals[(index / 4) + (index % 4) * 4];
 	}// end for(16)

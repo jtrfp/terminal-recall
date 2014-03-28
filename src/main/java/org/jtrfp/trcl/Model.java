@@ -246,10 +246,13 @@ public class Model
 	public void proposeAnimationUpdate() {
 	    long currentTimeMillis = System.currentTimeMillis();
 	   if(currentTimeMillis>animationUpdateThresholdMillis){
-	       for(Tickable t:tickableAnimators){t.tick();}
+	       final int size=tickableAnimators.size();
+	       for(int i=0; i<size; i++){
+		   tickableAnimators.get(i).tick();
+	       }//end for(animators.tick)
 	       animationUpdateThresholdMillis=currentTimeMillis+ANIMATION_UPDATE_INTERVAL;
-	   }
-	}
+	   }//end if(time to update)
+	}//end proposeAnimationUpdate()
 	
 	public void addTickableAnimator(Tickable t){
 	    tickableAnimators.add(t);

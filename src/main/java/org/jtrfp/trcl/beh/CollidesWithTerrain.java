@@ -14,27 +14,26 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CollidesWithTerrain extends Behavior implements CollisionBehavior {
+public class CollidesWithTerrain extends Behavior {
     private static final double nudge=1;
     private boolean bounce=false;
     private boolean groundLock=false;
-    private InterpolatingAltitudeMap map;
     private Vector3D surfaceNormalVar;
     public static final double CEILING_Y_NUDGE=-5000;
-    public CollidesWithTerrain(){}
+    private int tickCounter=0;
     @Override
     public void _tick(long tickTimeMillis){
-	if(map==null)return;//null map means no terrain present, which means no need to check
+	if(tickCounter++ % 2==0)return;
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
 	final double [] thisPos=p.getPosition();
-	final double groundHeightNorm =map.heightAt((thisPos[0]/TR.mapSquareSize), 
+	final double groundHeightNorm =p.getTr().getAltitudeMap().heightAt((thisPos[0]/TR.mapSquareSize), 
 		    (thisPos[2]/TR.mapSquareSize));
 	final double groundHeight = groundHeightNorm*(world.sizeY/2);
-	final double ceilingHeight = (1.99-map.heightAt((thisPos[0]/TR.mapSquareSize), 
+	final double ceilingHeight = (1.99-p.getTr().getAltitudeMap().heightAt((thisPos[0]/TR.mapSquareSize), 
 		    (thisPos[2]/TR.mapSquareSize)))*(world.sizeY/2)+CEILING_Y_NUDGE;
-	final Vector3D groundNormal = (map.normalAt((thisPos[0]/TR.mapSquareSize), 
+	final Vector3D groundNormal = (p.getTr().getAltitudeMap().normalAt((thisPos[0]/TR.mapSquareSize), 
 	    (thisPos[2]/TR.mapSquareSize)));
 	Vector3D downhillDirectionXZ=new Vector3D(groundNormal.getX(),0,groundNormal.getZ());
 	if(downhillDirectionXZ.getNorm()!=0)downhillDirectionXZ=downhillDirectionXZ.normalize();
@@ -81,7 +80,6 @@ public class CollidesWithTerrain extends Behavior implements CollisionBehavior {
 		p.setTop(newTop);
 	    	}//end if(bounce)
 	    }//end if(collision)
-    map=null;
     }//end _tick
     private final Submitter<SurfaceImpactListener>sub=new Submitter<SurfaceImpactListener>(){
 	@Override
@@ -93,9 +91,4 @@ public class CollidesWithTerrain extends Behavior implements CollisionBehavior {
 	    	for(SurfaceImpactListener l:items){submit(l);}
 		}
     };
-    @Override
-    public void proposeCollision(WorldObject other){
-	if(other instanceof TerrainChunk){
-	    if(map==null)map = (InterpolatingAltitudeMap)((TerrainChunk)other).getAltitudeMap();}
-    }//end _tick
 }//end BouncesOffTerrain

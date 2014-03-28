@@ -230,10 +230,10 @@ public final class Renderer {
 	ensureInit();
 	int renderListIndex = 0;
 	renderListIndex = renderListToggle ? 0 : 1;
-	renderList[renderListIndex].render(gl);
+	getCurrentRenderList().render(gl);
 	fpsTracking();
 	// Update GPU
-	PrimitiveList.tickAnimators();
+	//PrimitiveList.tickAnimators();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
 	renderList[renderListIndex].sendToGPU(gl);
 	//gpu.getMemoryManager().unmap();
@@ -249,14 +249,25 @@ public final class Renderer {
     }
     
     public void updateVisibilityList() {
-	renderListToggle = !renderListToggle;
-	renderList[renderListToggle ? 0 : 1].reset();
+	final RenderList rl = getBackRenderList();
+	rl.reset();
 	rootGrid.itemsWithinRadiusOf(
 		camera.getCameraPosition().add(
 			camera.getLookAtVector().scalarMultiply(
 				getCamera().getViewDepth() / 2.1)),
-		renderList[renderListToggle ? 0 : 1].getSubmitter());
+		rl.getSubmitter());
+	toggleRenderList();
     }// end updateVisibilityList()
+    
+    public RenderList getCurrentRenderList(){
+	return renderList[renderListToggle ? 0 : 1];
+    }
+    public RenderList getBackRenderList(){
+	return renderList[renderListToggle ? 1 : 0];
+    }
+    private void toggleRenderList(){
+	renderListToggle = !renderListToggle;
+    }
 
     public void setFogColor(Color c) {
 	deferredProgram.use();

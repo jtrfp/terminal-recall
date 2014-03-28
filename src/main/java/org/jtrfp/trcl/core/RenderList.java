@@ -17,18 +17,17 @@ package org.jtrfp.trcl.core;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
-import org.jtrfp.trcl.gpu.GLRenderBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
@@ -62,15 +61,18 @@ public class RenderList {
     private final	GLTexture		intermediateDepthTexture,
     /*    */					intermediateColorTexture,
     /*    */					intermediateNormTexture;
+    private final	ArrayList<WorldObject>	visibleWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
 	public void submit(PositionedRenderable item) {
 	    if (item instanceof WorldObject) {
+		final WorldObject wo = (WorldObject)item;
 		if (!((WorldObject) item).isVisible()
 			|| !((WorldObject) item).isActive()) {
 		    return;
 		}
+		visibleWorldObjects.add(wo);
 	    }//end if(WorldObject)
 	    final ByteBuffer opOD = item.getOpaqueObjectDefinitionAddresses();
 	    final ByteBuffer trOD = item
@@ -229,5 +231,10 @@ public class RenderList {
 	numTransparentBlocks = 0;
 	blendIndex = 0;
 	opaqueIndex = 0;
+	visibleWorldObjects.clear();
     }//end reset()
+    
+    public List<WorldObject> getVisibleWorldObjectList(){
+	return visibleWorldObjects;
+    }
 }// end RenderList

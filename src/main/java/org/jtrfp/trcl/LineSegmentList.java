@@ -24,8 +24,8 @@ public class LineSegmentList extends
 						       // SUPPORTED
     private final LineSegment[][] lineSegments;
 
-    public LineSegmentList(LineSegment[][] lineSegments, String debugName, TR tr) {
-	super(debugName, lineSegments, new LineSegmentWindow(tr,debugName), tr);
+    public LineSegmentList(LineSegment[][] lineSegments, String debugName, TR tr, Model m) {
+	super(debugName, lineSegments, new LineSegmentWindow(tr,debugName), tr, m);
 	this.lineSegments = lineSegments;
     }
 

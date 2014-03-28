@@ -101,7 +101,7 @@ public class ProjectileFactory {
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	tr.getWorld().add((WorldObject)result);
 	tr.getRenderer().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
-	tr.getCollisionManager().getCurrentlyActiveVisibilityList().add((WorldObject)result);
+	tr.getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)result);
 	projectileIndex++;
 	projectileIndex%=projectiles.length;
 	return result;

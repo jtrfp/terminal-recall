@@ -35,8 +35,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private TriangleVertex2FlatDoubleWindow flatTVWindow;
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
-	    String debugName, boolean animateUV, Controller controller, TR tr) {
-	super(debugName, triangles, new TriangleVertexWindow(tr, debugName), tr);
+	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
+	super(debugName, triangles, new TriangleVertexWindow(tr, debugName), tr,m);
 	this.timeBetweenFramesMsec = timeBetweenFramesMsec;
 	this.animateUV = animateUV;
 	this.controller = controller;
@@ -49,7 +49,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 						// XYZ+NxNyNz per vertex
 		    getPrimitives().length, true, controller,
 		    new XYZXferFunc(0));
-	    animators.add(xyzAnimator);
+	    getModel().addTickableAnimator(xyzAnimator);
 	} else if (animateUV) {
 	    this.xyzAnimator = null;
 	} else {
@@ -113,9 +113,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	final TriangleVertexWindow vw = (TriangleVertexWindow) getMemoryWindow();
 	if (numFrames == 1) {
 	   
-	    vw.setX(gpuTVIndex, (short) applyScale(pos.getX()));
-	    vw.setY(gpuTVIndex, (short) applyScale(pos.getY()));
-	    vw.setZ(gpuTVIndex, (short) applyScale(pos.getZ()));
+	    vw.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
+	    vw.y.set(gpuTVIndex, (short) applyScale(pos.getY()));
+	    vw.z.set(gpuTVIndex, (short) applyScale(pos.getZ()));
 	    final Vector3D normal = t.getVertices()[vIndex].getNormal();
 	    vw.normX.set(gpuTVIndex, (byte)(normal.getX()*127));
 	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
@@ -175,7 +175,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 			numFrames, false, getVertexSequencer(
 				timeBetweenFramesMsec, numFrames),
 			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
-		animators.add(uvAnimator);
+		getModel().addTickableAnimator(uvAnimator);
 		for (int i = 0; i < numFrames; i++) {
 		    uFrames[i] = (float) (uvUpScaler * tx
 			    .getGlobalUFromLocal(triangleAt(i, triangleIndex).getUV(vIndex).getX()));
@@ -185,9 +185,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
-		vw.setU(gpuTVIndex, (short) (uvUpScaler * tx
+		vw.u.set(gpuTVIndex, (short) (uvUpScaler * tx
 			.getGlobalUFromLocal(t.getUV(vIndex).getX())));
-		vw.setV(gpuTVIndex, (short) (uvUpScaler * tx
+		vw.v.set(gpuTVIndex, (short) (uvUpScaler * tx
 			.getGlobalVFromLocal(t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	}// end if(Texture)
@@ -202,7 +202,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		    numTextureFrames, false, at.getTextureSequencer(),
 		    new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
 	    uvAnimator.setDebugName(debugName + ".uvAnimator");
-	    animators.add(uvAnimator);
+	    getModel().addTickableAnimator(uvAnimator);
 
 	    float[] uFrames = new float[numTextureFrames];
 	    float[] vFrames = new float[numTextureFrames];

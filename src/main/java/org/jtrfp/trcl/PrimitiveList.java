@@ -31,12 +31,13 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected static final double coordDownScaler = 512;
     protected static final double uvUpScaler = 4096;
     private final PRIMITIVE_TYPE[][] primitives;
+    private final Model model;
 
     public static enum RenderStyle {
 	OPAQUE, TRANSPARENT
     };
 
-    public static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
+    //public static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
     
     protected final 	String 		debugName;
     protected 		double 		scale;
@@ -45,11 +46,12 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected final 	MemoryWindow	window;
 
     public PrimitiveList(String debugName, PRIMITIVE_TYPE[][] primitives,
-	    MemoryWindow window, TR tr) {
+	    MemoryWindow window, TR tr, Model model) {
 	this.tr = tr;
 	this.window=window;
 	this.debugName = debugName;
 	this.primitives = primitives;
+	this.model = model;
 	setScale((getMaximumVertexValue() / 2048.));
 	addList(this);
     }
@@ -123,12 +125,12 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	return result;
     }//end getPhysicalAddressInBytes
 */
-    public static void tickAnimators() {
+ /*   public static void tickAnimators() {
 	for (Tickable ani : animators) {
 	    ani.tick();
 	}
     }// end tickAnimators()
-
+*/
     /**
      * @param scale
      *            the scale to set
@@ -157,4 +159,11 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public abstract byte getPrimitiveRenderMode();
 
     public abstract int getNumMemoryWindowIndicesPerElement();
+
+    /**
+     * @return the model
+     */
+    protected Model getModel() {
+        return model;
+    }
 }// end PrimitiveList

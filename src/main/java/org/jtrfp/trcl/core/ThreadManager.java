@@ -43,7 +43,7 @@ public class ThreadManager {
 	// Ticks
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
-	List<WorldObject> vl = tr.getCollisionManager().getCurrentlyActiveVisibilityList();
+	List<WorldObject> vl = tr.getRenderer().getCurrentRenderList().getVisibleWorldObjectList();
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo = vl.get(i);
 	    if (wo.isActive()
@@ -52,13 +52,14 @@ public class ThreadManager {
 		    || wo instanceof VisibleEverywhere)
 		wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
+	tr.getPlayer().tick(tickTimeInMillis);
 	tr.getCollisionManager().performCollisionTests();
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
 
     private void visibilityCalc() {
 	tr.getRenderer().updateVisibilityList();
-	tr.getCollisionManager().updateVisibilityList();
+	tr.getCollisionManager().updateCollisionList();
     }
 
     public void start() {

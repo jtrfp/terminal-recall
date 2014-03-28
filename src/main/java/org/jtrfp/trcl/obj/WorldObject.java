@@ -24,8 +24,6 @@ import java.util.List;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
@@ -111,6 +109,11 @@ public class WorldObject implements PositionedRenderable {
 	}// end for(collisionBehaviors)
     }// end proposeCollision(...)
 
+    
+    public boolean isCollideable(){
+	return !collisionBehaviors.isEmpty();
+    }
+    
     public <T extends Behavior> T addBehavior(T ob) {
 	if (ob.isEnabled()) {
 	    if (ob instanceof CollisionBehavior)
@@ -317,6 +320,7 @@ public class WorldObject implements PositionedRenderable {
 
     public final void updateStateToGPU() {
 	recalculateTransRotMBuffer();
+	model.proposeAnimationUpdate();
     }
 
     protected void recalculateTransRotMBuffer() {

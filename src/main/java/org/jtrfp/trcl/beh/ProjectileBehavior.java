@@ -56,7 +56,7 @@ public class ProjectileBehavior extends Behavior implements
 	    WorldObject closestObject = null;
 	    double closestDistance = Double.POSITIVE_INFINITY;
 	    List<WorldObject> possibleTargets = getParent().getTr()
-		    .getCollisionManager().getCurrentlyActiveVisibilityList();
+		    .getCollisionManager().getCurrentlyActiveCollisionList();
 	    for (WorldObject possibleTarget : possibleTargets) {
 		if (possibleTarget instanceof DEFObject) {
 		    DEFObject possibleDEFTarget = (DEFObject)possibleTarget;

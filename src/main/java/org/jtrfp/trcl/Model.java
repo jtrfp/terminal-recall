@@ -36,6 +36,9 @@ public class Model
 	private boolean animateUV=false;
 	private Controller controller;
 	private final TR tr;
+	private long animationUpdateThresholdMillis=0;
+	private static final long ANIMATION_UPDATE_INTERVAL = 10;
+	private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
 	
 	public Model(boolean smoothAnimation,TR tr){
 	    	this.tr=tr;
@@ -77,7 +80,7 @@ public class Model
 		for(int i=0; i<tLists.size(); i++)
 			{tris[i]=tLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
 		if(tris[0].length!=0){
-		    tpList=new TriangleList(tris,getFrameDelayInMillis(),debugName, animateUV,c,tr);
+		    tpList=new TriangleList(tris,getFrameDelayInMillis(),debugName, animateUV,c,tr,this);
 		    }//end if(length!=0)
 		else tpList=null;
 		
@@ -85,14 +88,14 @@ public class Model
 		for(int i=0; i<ttLists.size(); i++)
 			{ttris[i]=ttLists.get(i).toArray(new Triangle[]{});}//Get all frames for each triangle
 		if(ttris[0].length!=0){
-		    ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),debugName, animateUV,c,tr);
+		    ttpList=new TransparentTriangleList(ttris,getFrameDelayInMillis(),debugName, animateUV,c,tr,this);
 		    }//end if(length!=0)
 		else ttpList=null;
 		
 		LineSegment [][] segs = new LineSegment[lsLists.size()][];
 		for(int i=0; i<lsLists.size(); i++)
 			{segs[i]=lsLists.get(i).toArray(new LineSegment[]{});}//Get all frames for each line seg
-		if(segs[0].length!=0)lsList=new LineSegmentList(segs,debugName,tr);
+		if(segs[0].length!=0)lsList=new LineSegmentList(segs,debugName,tr,this);
 		else lsList=null;
 		return this;
 		}//end finalizeModel()
@@ -239,5 +242,16 @@ public class Model
 	 */
 	public Controller getController() {
 	    return controller;
+	}
+	public void proposeAnimationUpdate() {
+	    long currentTimeMillis = System.currentTimeMillis();
+	   if(currentTimeMillis>animationUpdateThresholdMillis){
+	       for(Tickable t:tickableAnimators){t.tick();}
+	       animationUpdateThresholdMillis=currentTimeMillis+ANIMATION_UPDATE_INTERVAL;
+	   }
+	}
+	
+	public void addTickableAnimator(Tickable t){
+	    tickableAnimators.add(t);
 	}
 }//end Model

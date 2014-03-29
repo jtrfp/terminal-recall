@@ -11,33 +11,41 @@ TRCL is currently in a playable development phase. Because it is not yet close t
 
 ##Build Instructions
 You will need:
-Java JDK 6 or later (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
-Git (http://git-scm.com/downloads)
-Maven (https://maven.apache.org/download.cgi)
-Video card (and drivers) capable of OpenGL 3.3 (post-2009 roughly speaking). No known tablets or phones yet.
-Windows or Linux. (maybe Mac too if they get caught up)
+* Java JDK 6 or later (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
+* Git (http://git-scm.com/downloads)
+* Maven (https://maven.apache.org/download.cgi)
+* Video card (and drivers) capable of OpenGL 3.3 (post-2009 roughly speaking).
+* Windows or Linux. (maybe Mac too if they get caught up)
 
 In a folder/directory of your choice run:
-
+```
 git clone https://github.com/jtrfp/terminal-recall.git
+```
 ... this will create a directory called terminal-recall and download the project to that directory.
-cd terminal-recall
-mvn clean install
+```
+    cd terminal-recall
+    mvn clean install
+```
 
 ... you will see lots of fireworks as it builds. (it doesn't really 'install' anything)
 You should see BUILD SUCCESS. If you see BUILD FAILURE come to the Terminal Recall gitHub issues section (https://github.com/jtrfp/terminal-recall/issues?page=1), file a new issue and post the output and we'll hopefully figure it out.
-
-cd target
-java -jar RunMe.jar [path_to_POD_file0] [path_to_POD_file1] [...] [level_name.LVL]
+```
+    cd target
+    java -jar RunMe.jar [path_to_POD_file0] [path_to_POD_file1] [...] [level_name.LVL]
+```
 
 For example:
+```
 java -jar RunMe.jar "/home/chuck/pods/STARTUP.POD" "/home/chuck/pods/FURY3.POD" "BORG3.LVL"
+```
 ... to run the final level in Fury3.
 
 If its been a few weeks since you first downloaded and you want to update to the newest version you can cd into your terminal-recall directory and run:
 
-git pull
-mvn clean install
+```
+    git pull
+    mvn clean install
+```
 
 ... this will only download whatever has changed since your last download and then rebuild it all.
 

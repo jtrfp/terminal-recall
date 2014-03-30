@@ -1,7 +1,5 @@
-package org.jtrfp.trcl.flow;
+package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.beh.DeathListener;
 
 public class CustomDeathBehavior extends Behavior implements DeathListener {
     private final Runnable r;

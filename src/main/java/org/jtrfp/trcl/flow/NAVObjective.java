@@ -6,6 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.ChangesBehaviorWhenTargeted;
+import org.jtrfp.trcl.beh.CustomDeathBehavior;
 import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;

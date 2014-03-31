@@ -3,10 +3,11 @@ package org.jtrfp.trcl.mem;
 import java.nio.ByteBuffer;
 
 import org.jtrfp.trcl.core.IndexPool;
+import org.jtrfp.trcl.gpu.GPU;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
-    public static final int 		PAGE_SIZE_BYTES=1536;//Should be enforced since a GPU Triangle Vertex Block is 1536 bytes
+    public static final int 		PAGE_SIZE_BYTES=GPU.BYTES_PER_VEC4*GPU.GPU_VERTICES_PER_BLOCK;//Anchored to number of triangle vertices per block
     private 		int [] 		pageTable;//Using array since performance is crucial
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;
@@ -135,5 +136,10 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     @Override
     public Integer getInt(int posInBytes) {
 	return intrinsic[0].getInt(logicalIndex2PhysicalIndex(posInBytes));
+    }
+    
+    @Override
+    public String toString(){
+	return "PagedByteBuffer '"+debugName+"' "+" hash="+hashCode();
     }
 }//end PageByteBuffer

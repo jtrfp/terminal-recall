@@ -16,13 +16,13 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GLTextureBuffer;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class LineSegmentWindow extends MemoryWindow{
     // 16 bytes in a vec4, 1 vec4 per LineSegment
-    public static final int BYTES_PER_SEGMENT = GLTextureBuffer.BYTES_PER_VEC4;
-    public static final int SEGMENTS_PER_BLOCK = 96 / 6;
+    public static final int BYTES_PER_SEGMENT = GPU.BYTES_PER_VEC4;
+    public static final int SEGMENTS_PER_BLOCK = GPU.GPU_VERTICES_PER_BLOCK / 6;
 
     public final ShortVariable x1 = new ShortVariable();
     public final ShortVariable y1 = new ShortVariable();

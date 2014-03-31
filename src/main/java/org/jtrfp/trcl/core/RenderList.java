@@ -23,7 +23,6 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.GPUTriangleVertex;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
@@ -161,13 +160,13 @@ public class RenderList {
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	final int numOpaqueVertices = numOpaqueBlocks
-		* GPUTriangleVertex.VERTICES_PER_BLOCK + 96;
+		* (WorldObject.GPU_VERTICES_PER_BLOCK+1);
 	final int numTransparentVertices = numTransparentBlocks
-		* GPUTriangleVertex.VERTICES_PER_BLOCK;
+		* WorldObject.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
 	// renderModeUniform.set(OPAQUE_PASS);
-	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * GPUTriangleVertex.VERTICES_PER_BLOCK);
+	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * WorldObject.GPU_VERTICES_PER_BLOCK);
 	final int numSubPasses = (numOpaqueVertices / verticesPerSubPass) + 1;
 	int remainingVerts = numOpaqueVertices;
 

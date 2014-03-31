@@ -27,6 +27,9 @@ const uint PACKED_DATA_COLOR_RED=1u;		//UNibble
 const uint PACKED_DATA_COLOR_GREEN=2u;	//UNibble
 const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
+const int GPU_VERTICES_PER_BLOCK=96;
+const int PAGE_SIZE_VEC4=96;
+
 //OUT
 smooth out vec2 fragTexCoord;
 smooth out vec3 norm;
@@ -103,8 +106,8 @@ int firstSShort(uint _input)
 int renderListLogicalVEC42PhysicalVEC4(uint logical)
 	{
 	return int(renderListPageTable
-		[logical/96u]*96u
-		+logical%96u);
+		[logical/uint(PAGE_SIZE_VEC4)]*uint(PAGE_SIZE_VEC4)
+		+logical%uint(PAGE_SIZE_VEC4));
 	}
 
 /*Object definition VEC4
@@ -133,8 +136,8 @@ void main()
 gl_Position.x=dummy*0;
 
 		//TODO: Look into optimizing this by moving some of it into the numVertices block below
-		int objectIndex = (gl_VertexID / 96);
-		int intraObjectVertexIndex = gl_VertexID % 96;
+		int objectIndex = (gl_VertexID / GPU_VERTICES_PER_BLOCK);
+		int intraObjectVertexIndex = gl_VertexID % GPU_VERTICES_PER_BLOCK;
 		int adjustedListIndex=objectIndex+int(renderListOffset);
 		int objectDefIndex=int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(adjustedListIndex/4)))[adjustedListIndex%4]);
 		uvec4 objectDef = texelFetch(rootBuffer,objectDefIndex);

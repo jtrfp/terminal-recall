@@ -218,6 +218,8 @@ public final class Renderer {
 	    final int fps = (1000 / dT);
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + fps);
+	    gpu.getTr().getReporter()
+	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", renderList[renderListToggle ? 0 : 1].getVisibleWorldObjectList().size());
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }

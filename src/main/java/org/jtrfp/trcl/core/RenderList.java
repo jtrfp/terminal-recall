@@ -177,6 +177,9 @@ public class RenderList {
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.numTransparentBlocks",
 		    "" + numTransparentBlocks);
+	    tr.getReporter().report(
+		    "org.jtrfp.trcl.core.RenderList.approxNumSceneTriangles",
+		    "" + ((numOpaqueBlocks+numTransparentBlocks)*WorldObject.GPU_VERTICES_PER_BLOCK)/3);
 	}
 
 	for (int sp = 0; sp < numSubPasses; sp++) {

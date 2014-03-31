@@ -25,7 +25,6 @@ import org.jtrfp.trcl.Texture;
 public class GLTextureBuffer extends RawGLBuffer
 	{
 	private final int textureID;
-	public static final int BYTES_PER_VEC4=4*4;
 	private static final int DEADBEEF = 0xEFBEADDE;
 	
 	/**

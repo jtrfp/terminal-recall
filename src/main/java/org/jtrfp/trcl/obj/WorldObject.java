@@ -35,11 +35,12 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTextureBuffer;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class WorldObject implements PositionedRenderable {
-    public static final int GPU_VERTICES_PER_BLOCK = 96;
+    
     public static final boolean LOOP = true;
 
     private double[] heading = new double[] { 0, 0, 1 }; // Facing direction
@@ -192,8 +193,8 @@ public class WorldObject implements PositionedRenderable {
 	    lineSegmentObjectDefinitions = new int[0];
 	else {
 	    sizeInVerts = m.getLineSegmentList().getTotalSizeInGPUVertices();
-	    numObjDefs = sizeInVerts / GPU_VERTICES_PER_BLOCK;
-	    if (sizeInVerts % GPU_VERTICES_PER_BLOCK != 0)
+	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
+	    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
 		numObjDefs++;
 	    lineSegmentObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
@@ -205,8 +206,8 @@ public class WorldObject implements PositionedRenderable {
 	    triangleObjectDefinitions = new int[0];
 	else {
 	    sizeInVerts = m.getTriangleList().getTotalSizeInGPUVertices();
-	    numObjDefs = sizeInVerts / GPU_VERTICES_PER_BLOCK;
-	    if (sizeInVerts % GPU_VERTICES_PER_BLOCK != 0)
+	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
+	    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
 		numObjDefs++;
 	    triangleObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
@@ -219,8 +220,8 @@ public class WorldObject implements PositionedRenderable {
 	else {
 	    sizeInVerts = m.getTransparentTriangleList()
 		    .getTotalSizeInGPUVertices();
-	    numObjDefs = sizeInVerts / GPU_VERTICES_PER_BLOCK;
-	    if (sizeInVerts % GPU_VERTICES_PER_BLOCK != 0)
+	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
+	    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
 		numObjDefs++;
 	    transparentTriangleObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
@@ -286,7 +287,7 @@ public class WorldObject implements PositionedRenderable {
 	    return; // Nothing to do, no primitives here
 	//int vec4sRemaining = primitiveList.getTotalSizeInVec4s();
 	final int gpuVerticesPerElement = primitiveList.getGPUVerticesPerElement();
-	final int elementsPerBlock = GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
+	final int elementsPerBlock = GPU.GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
 	int gpuVerticesRemaining = primitiveList.getNumElements()*gpuVerticesPerElement;
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
@@ -294,26 +295,26 @@ public class WorldObject implements PositionedRenderable {
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)
-		    /GLTextureBuffer.BYTES_PER_VEC4;
+		    /GPU.BYTES_PER_VEC4;
 	    final int matrixOffsetVec4s=tr.getMatrixWindow()
 		    .getPhysicalAddressInBytes(matrixID)
-		    / GLTextureBuffer.BYTES_PER_VEC4;
+		    / GPU.BYTES_PER_VEC4;
 	    odw.matrixOffset.set(index,matrixOffsetVec4s);
 	    odw.vertexOffset.set(index,vertexOffsetVec4s);
 	    odw.mode.set(index, (byte)(primitiveList.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
 	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
-	    if (gpuVerticesRemaining >= GPU_VERTICES_PER_BLOCK) {
+	    if (gpuVerticesRemaining >= GPU.GPU_VERTICES_PER_BLOCK) {
 		odw.numVertices.set(index,
-			(byte) GPU_VERTICES_PER_BLOCK);
+			(byte) GPU.GPU_VERTICES_PER_BLOCK);
 	    } else if (gpuVerticesRemaining > 0) {
 		odw.numVertices.set(index,
 			(byte) (gpuVerticesRemaining));
 	    } else {
 		throw new RuntimeException("Ran out of vec4s.");
 	    }
-	    gpuVerticesRemaining -= GPU_VERTICES_PER_BLOCK;
+	    gpuVerticesRemaining -= GPU.GPU_VERTICES_PER_BLOCK;
 	    indicesList.add(odw.getPhysicalAddressInBytes(index)
-		    / GLTextureBuffer.BYTES_PER_VEC4);
+		    / GPU.BYTES_PER_VEC4);
 	    odCounter++;
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)

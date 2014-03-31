@@ -17,6 +17,8 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.mem.MemoryManager;
 
 public class GPU{
+    	public static final int GPU_VERTICES_PER_BLOCK = 96;
+    	public static final int BYTES_PER_VEC4 = 16;
 	static {GLProfile.initSingleton();}
 	private final GLProfile glProfile = GLProfile.get(GLProfile.GL2GL3);
 	private final GLCapabilities capabilities = new GLCapabilities(glProfile);

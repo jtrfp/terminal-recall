@@ -160,13 +160,13 @@ public class RenderList {
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	final int numOpaqueVertices = numOpaqueBlocks
-		* (WorldObject.GPU_VERTICES_PER_BLOCK+1);
+		* (GPU.GPU_VERTICES_PER_BLOCK+1);
 	final int numTransparentVertices = numTransparentBlocks
-		* WorldObject.GPU_VERTICES_PER_BLOCK;
+		* GPU.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
 	// renderModeUniform.set(OPAQUE_PASS);
-	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * WorldObject.GPU_VERTICES_PER_BLOCK);
+	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
 	final int numSubPasses = (numOpaqueVertices / verticesPerSubPass) + 1;
 	int remainingVerts = numOpaqueVertices;
 
@@ -179,7 +179,7 @@ public class RenderList {
 		    "" + numTransparentBlocks);
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.approxNumSceneTriangles",
-		    "" + ((numOpaqueBlocks+numTransparentBlocks)*WorldObject.GPU_VERTICES_PER_BLOCK)/3);
+		    "" + ((numOpaqueBlocks+numTransparentBlocks)*GPU.GPU_VERTICES_PER_BLOCK)/3);
 	}
 
 	for (int sp = 0; sp < numSubPasses; sp++) {

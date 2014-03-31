@@ -22,6 +22,13 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.Texture;
 
+/**
+ * Partial wrap implementation of OpenGL 1D RGBA32UI CPU-write-optimized Texture
+ * Buffer.
+ * 
+ * @author Chuck Ritola
+ * 
+ */
 public class GLTextureBuffer extends RawGLBuffer {
     private final int textureID;
     private static final int DEADBEEF = 0xEFBEADDE;
@@ -48,7 +55,7 @@ public class GLTextureBuffer extends RawGLBuffer {
 	    buf.put(DEADBEEF);
 	}
 	this.unmap(gl);
-    }
+    }//end constructor
 
     /**
      * This gets around a quirk where AMD driver will segfault with
@@ -62,29 +69,59 @@ public class GLTextureBuffer extends RawGLBuffer {
     private static int roundToNextKB(int sizeInBytes) {
 	int kb = (sizeInBytes / 1024) + 1;// Round to lower KB, add 1KB
 	return kb * 1024;
-    }
+    }//end roundToNextKB(...)
 
     @Override
     protected int getBindingTarget() {
 	return GL2.GL_TEXTURE_BUFFER;
-    }
+    }//end getBindingTarget()
 
     /**
+     * Get the OpenGL texture "name" (integer given by OpenGL representing the
+     * texture)
+     * 
      * @return the textureID
      */
     public final int getTextureID() {
 	return textureID;
-    }
+    }//end getTextureID()
 
-    public final void bindToTextureUnit(GL3 gl, int textureUnit) {
+    /**
+     * Binds this TextureBuffer to the specified texture unit.
+     * 
+     * @param gl
+     * @param textureUnit
+     *            Integer ID of the texture unit to bind to (typically 0-8). Do
+     *            not pass a GL enum such as GL_TEXTURE0. It will take care of
+     *            this automatically.
+     * @return monad
+     * @since Mar 31, 2014
+     */
+    public final GLTextureBuffer bindToTextureUnit(GL3 gl, int textureUnit) {
 	gl.glActiveTexture(GL2.GL_TEXTURE0 + textureUnit);
 	gl.glBindTexture(getBindingTarget(), getTextureID());
-    }
+	return this;
+    }//end bindToTextureUnit
 
-    public final void bindToUniform(GL3 gl, int textureUnit, GLProgram program,
-	    GLUniform uniform) {
+    /**
+     * Bind this TextureBuffer to the specified Uniform varible of the specified
+     * shader program by binding to a texture unit then passing said texture
+     * unit ID to the uniform.
+     * 
+     * @param gl
+     * @param textureUnit
+     *            Integer ID of target texture unit,, typ. [0,8]. Do not pass a
+     *            GL enum such as GL_TEXTURE0.
+     * @param program
+     * @param uniform
+     * @return monad
+     * @since Mar 31, 2014
+     */
+    public final GLTextureBuffer bindToUniform(GL3 gl, int textureUnit,
+	    GLProgram program, GLUniform uniform) {
 	bindToTextureUnit(gl, textureUnit);
 	uniform.set(textureUnit);
-    }
+	return this;
+    }//end bindToUniform
 
 }// end GLTextureBuffer(...)

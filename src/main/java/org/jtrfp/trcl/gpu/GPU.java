@@ -49,15 +49,6 @@ public class GPU{
 		
 	    });
 	}
-	/*
-	public GL3 takeGL(){
-		gl=getGl();
-		if(!gl.getContext().isCurrent())gl.getContext().makeCurrent();
-		return gl;
-		}
-	public void releaseGL()
-		{if(gl.getContext().isCurrent())gl.getContext().release();}
-	*/
 	public GLCapabilities getCapabilities(){return capabilities;}
 	
 	public int glGet(int key){

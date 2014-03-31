@@ -22,72 +22,69 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.Texture;
 
-public class GLTextureBuffer extends RawGLBuffer
-	{
-	private final int textureID;
-	private static final int DEADBEEF = 0xEFBEADDE;
-	
-	/**
-	 * 
-	 * @param sizeInBytes	Number of bytes to allocate. NOTE: This will round up to next multiple of 1024 to reduce probability of segfault in AMD driver.
-	 * @param gl
-	 */
-	GLTextureBuffer(int sizeInBytes, GPU gpu)
-		{
-		super(roundToNextKB(sizeInBytes),gpu);
-		//Allocate a texture id
-		textureID=Texture.createTextureID(gl);
-		gl.glBindTexture(getBindingTarget(), getTextureID());
-		gl.glTexBuffer(getBindingTarget(),GL2.GL_RGBA32UI,this.getBufferID());
-		this.map(gl);
-		IntBuffer buf = this.getUnderlyingBuffer().asIntBuffer();
-		buf.rewind();
-		//Fill with empty data
-		while(buf.remaining()>0)
-			{buf.put(DEADBEEF);}
-		this.unmap(gl);
-		}
-	
-	/**
-	 * This gets around a quirk where AMD driver will segfault with certain-sized texture buffers.
-	 * No explicit pattern found, however multiples of 1024B appear safe for now.
-	 * @param sizeInBytes
-	 * @return
-	 * @since Dec 12, 2012
-	 */
-	private static int roundToNextKB(int sizeInBytes)
-		{
-		int kb = (sizeInBytes/1024)+1;//Round to lower KB, add 1KB
-		return kb*1024;
-		}
-	
-	@Override
-	protected int getBindingTarget()
-		{
-		return GL2.GL_TEXTURE_BUFFER;
-		}
-	
-	/**
-	 * @return the textureID
-	 */
-	public final int getTextureID()
-		{
-		return textureID;
-		}
-	
-	public final void bindToTextureUnit(GL3 gl, int textureUnit)
-		{
-		gl.glActiveTexture(GL2.GL_TEXTURE0+textureUnit);
-		gl.glBindTexture(getBindingTarget(), getTextureID());
-		}
-	
-	public final void bindToUniform(GL3 gl, int textureUnit, GLProgram program, GLUniform uniform)
-		{
-		//if(uniformIndex==-1)throw new RuntimeException("UnformIndex is -1, which is invalid.");
-		bindToTextureUnit(gl,textureUnit);
-		//System.out.println("Binding texture unit "+textureUnit+" to uniform index "+uniformIndex);
-		uniform.set(textureUnit);
-		//gl.glUniform1i(uniformIndex, textureUnit);
-		}
+public class GLTextureBuffer extends RawGLBuffer {
+    private final int textureID;
+    private static final int DEADBEEF = 0xEFBEADDE;
 
-	}//end GLTextureBuffer(...)
+    /**
+     * 
+     * @param sizeInBytes
+     *            Number of bytes to allocate. NOTE: This will round up to next
+     *            multiple of 1024 to reduce probability of segfault in AMD
+     *            driver.
+     * @param gl
+     */
+    GLTextureBuffer(int sizeInBytes, GPU gpu) {
+	super(roundToNextKB(sizeInBytes), gpu);
+	// Allocate a texture id
+	textureID = Texture.createTextureID(gl);
+	gl.glBindTexture(getBindingTarget(), getTextureID());
+	gl.glTexBuffer(getBindingTarget(), GL2.GL_RGBA32UI, this.getBufferID());
+	this.map(gl);
+	IntBuffer buf = this.getUnderlyingBuffer().asIntBuffer();
+	buf.rewind();
+	// Fill with empty data
+	while (buf.remaining() > 0) {
+	    buf.put(DEADBEEF);
+	}
+	this.unmap(gl);
+    }
+
+    /**
+     * This gets around a quirk where AMD driver will segfault with
+     * certain-sized texture buffers. No explicit pattern found, however
+     * multiples of 1024B appear safe for now.
+     * 
+     * @param sizeInBytes
+     * @return
+     * @since Dec 12, 2012
+     */
+    private static int roundToNextKB(int sizeInBytes) {
+	int kb = (sizeInBytes / 1024) + 1;// Round to lower KB, add 1KB
+	return kb * 1024;
+    }
+
+    @Override
+    protected int getBindingTarget() {
+	return GL2.GL_TEXTURE_BUFFER;
+    }
+
+    /**
+     * @return the textureID
+     */
+    public final int getTextureID() {
+	return textureID;
+    }
+
+    public final void bindToTextureUnit(GL3 gl, int textureUnit) {
+	gl.glActiveTexture(GL2.GL_TEXTURE0 + textureUnit);
+	gl.glBindTexture(getBindingTarget(), getTextureID());
+    }
+
+    public final void bindToUniform(GL3 gl, int textureUnit, GLProgram program,
+	    GLUniform uniform) {
+	bindToTextureUnit(gl, textureUnit);
+	uniform.set(textureUnit);
+    }
+
+}// end GLTextureBuffer(...)

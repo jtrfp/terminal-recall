@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -76,7 +77,6 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertex;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock05;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
-import org.jtrfp.trcl.file.BINFile.Model.DataBlock.NoUVFaceBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
 import org.jtrfp.trcl.file.CLRFile;
@@ -248,6 +248,9 @@ public class ResourceManager{
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
 		if(gl==null)throw new NullPointerException("GL cannot be null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
+		//The models like to set up two line segments where there should be one. 
+		//This set is for identifying and culling redundant segs.
+		final HashSet<Integer>alreadyVisitedLineSegs = new HashSet<Integer>();
 		boolean hasAlpha=false;
 		try {
 			BINFile.AnimationControl ac=null;
@@ -379,15 +382,25 @@ public class ResourceManager{
 					}
 					else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
-						LineSegment seg = new LineSegment();
+						//LineSegment seg = new LineSegment();
 						org.jtrfp.trcl.gpu.Vertex v1 = vertices.get(block.getVertexID1());
 						org.jtrfp.trcl.gpu.Vertex v2 = vertices.get(block.getVertexID2());
+						if(!alreadyVisitedLineSegs.contains(v1.hashCode()*v2.hashCode())){
+						    Triangle [] newTris = new Triangle[6];
+						   
+						    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(), LineSegment.getDefaultTriPipeTexture(), 200, newTris, 0);
+						    result.addTriangles(newTris);
+						    alreadyVisitedLineSegs.add(v1.hashCode()*v2.hashCode());
+						}
+						/*
 						seg.setVertex(v1,0);
 						seg.setVertex(v2,1);
 						Color c= palette[block.getColor()+16];
 						seg.setColor(c);
 						seg.setThickness(8);//Defaulted since the file doesn't specify
 						result.addLineSegment(seg);
+						*/
+						
 						}
 					else if(b instanceof Unknown12){
 					    System.out.println("Found unknown12. Assuming this is a tag for a transparent texture...");

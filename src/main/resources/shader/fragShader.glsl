@@ -19,13 +19,6 @@
 //#define DEBUG 1
 
 // CONSTANTS
-const uint RENDER_MODE_TRIANGLES=0u;
-const uint RENDER_MODE_LINES=1u;
-
-const uint PACKED_DATA_RENDER_MODE=0u;	//UNibble
-const uint PACKED_DATA_COLOR_RED=1u;		//UNibble
-const uint PACKED_DATA_COLOR_GREEN=2u;	//UNibble
-const uint PACKED_DATA_COLOR_BLUE=3u;		//UNibble
 
 // UNIFORMS
 uniform sampler2D texturePalette;
@@ -34,7 +27,6 @@ uniform int useTextureMap;
 // INPUTS
 smooth in vec2 fragTexCoord;
 smooth in vec3 norm;
-flat in uint packedFragData;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
@@ -55,21 +47,7 @@ uint UNibble(uint _input, uint index)
 void main()
 {
 fragNormal=norm;//Pass it along
-switch(UNibble(packedFragData,PACKED_DATA_RENDER_MODE))
-	{
-case RENDER_MODE_TRIANGLES:
 	if(useTextureMap!=0)
 		{fragColor = texture2D(texturePalette,fragTexCoord);}
 		else{fragColor.rg = fragTexCoord;}
-	break;
-case RENDER_MODE_LINES:
-	float alpha;
-	alpha=(1-abs(fragTexCoord.y*pow(fragTexCoord.x,.5)))*.5;
-	fragColor =  vec4(
-	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_RED))/16,
-	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_GREEN))/16,
-	    	float(UNibble(packedFragData,PACKED_DATA_COLOR_BLUE))/16,alpha
-	    	);
-	break;
-	}//end switch(RENDER_MODE)
 }

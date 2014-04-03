@@ -75,6 +75,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     public void reallocate(int sizeInBytes) {
 	ByteBuffer oldBuffer,newBuffer;
 	GLTextureBuffer oldTextureBuffer, newTextureBuffer;
+	gpu.getTr().getReporter().report("org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer."+hashCode()+".sizeInBytes", ""+sizeInBytes);
 	oldBuffer = buffer.getUnderlyingBuffer();
 	oldBuffer.clear();
 	oldBuffer.limit(Math.min(sizeInBytes,oldBuffer.capacity()));

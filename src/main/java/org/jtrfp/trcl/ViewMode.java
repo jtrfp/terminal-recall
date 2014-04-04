@@ -15,9 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public enum ViewMode
-	{
-	wIDE_HUD,
-	COCKPIT_HUD,
-	CHASE
-	}
+public enum ViewMode {
+    wIDE_HUD, COCKPIT_HUD, CHASE
+}

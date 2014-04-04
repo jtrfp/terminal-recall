@@ -17,7 +17,6 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 
-public interface ColorProcessor
-	{
-	Color process(Color c);
-	}
+public interface ColorProcessor {
+    Color process(Color c);
+}

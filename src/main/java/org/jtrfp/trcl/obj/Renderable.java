@@ -17,10 +17,12 @@ package org.jtrfp.trcl.obj;
 
 import java.nio.ByteBuffer;
 
-public interface Renderable
-	{
-	ByteBuffer getOpaqueObjectDefinitionAddresses();
-	ByteBuffer getTransparentObjectDefinitionAddresses();
-	void updateStateToGPU();
-	void initializeObjectDefinitions();
-	}
+public interface Renderable {
+    ByteBuffer getOpaqueObjectDefinitionAddresses();
+
+    ByteBuffer getTransparentObjectDefinitionAddresses();
+
+    void updateStateToGPU();
+
+    void initializeObjectDefinitions();
+}

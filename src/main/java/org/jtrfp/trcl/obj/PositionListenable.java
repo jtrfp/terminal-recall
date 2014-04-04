@@ -15,8 +15,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-public interface PositionListenable extends Positionable
-	{
-	public void addPositionListener(PositionListener listenerToAdd);
-	public void removePositionListener(PositionListener listenerToAdd);
-	}
+public interface PositionListenable extends Positionable {
+    public void addPositionListener(PositionListener listenerToAdd);
+
+    public void removePositionListener(PositionListener listenerToAdd);
+}

@@ -15,18 +15,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public enum RenderMode
-	{
-	/**
-	 * Nexer changes traits
-	 */
-	STATIC,
-	/**
-	 * Always changing traits
-	 */
-	STREAM,
-	/**
-	 * Sometimes changing traits
-	 */
-	DYNAMIC
-	}
+public enum RenderMode {
+    /**
+     * Nexer changes traits
+     */
+    STATIC,
+    /**
+     * Always changing traits
+     */
+    STREAM,
+    /**
+     * Sometimes changing traits
+     */
+    DYNAMIC
+}

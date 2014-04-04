@@ -17,14 +17,16 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.Future;
 
-public interface TextureMesh
-	{
-	/**
-	 * Get the Texture at the mesh coordinates
-	 * @param x		x-Cell coordinate to query
-	 * @param z		z-Cell coordinate to query
-	 * @return
-	 * @since Oct 14, 2012
-	 */
-	public Future<TextureDescription> textureAt(double x, double z);
-	}
+public interface TextureMesh {
+    /**
+     * Get the Texture at the mesh coordinates
+     * 
+     * @param x
+     *            x-Cell coordinate to query
+     * @param z
+     *            z-Cell coordinate to query
+     * @return
+     * @since Oct 14, 2012
+     */
+    public Future<TextureDescription> textureAt(double x, double z);
+}

@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-
-public interface PositionListener
-	{
-	public void positionChanged(PositionListenable objectWithPosition);
-	}
+public interface PositionListener {
+    public void positionChanged(PositionListenable objectWithPosition);
+}

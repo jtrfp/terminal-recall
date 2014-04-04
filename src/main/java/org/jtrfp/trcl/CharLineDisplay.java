@@ -20,106 +20,116 @@ import java.util.Arrays;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 
-public class CharLineDisplay
-	{
-	private char [] content;
-	private final CharDisplay [] displays;
-	double [] position = new double []{0,0,.0001};
-	private GLFont font;
-	private final double glSize;
-	private double totGlLen=0;
-	private boolean centered=false; 
-	
-	public CharLineDisplay(TR tr,RenderableSpacePartitioningGrid grid, double glSize, int lengthInChars, GLFont font)
-		{content = new char[lengthInChars];
-		displays = new CharDisplay[lengthInChars];
-		this.font=font;
-		for(int i=0; i<lengthInChars; i++)
-			{content[i]='X';
-			displays[i]=new CharDisplay(tr,grid,glSize,font);
-			displays[i].setChar('X');
-			grid.add(displays[i]);
-			}//end for(lengthInChars)
-		
-		this.glSize=glSize;
-		updatePositions();
-		}//end LineDisplay(...)
-	
-	public void setContent(String content)
-		{for(int i=0; i<this.content.length; i++)
-			{char newContent;
-			if(i<content.length())
-				{newContent=content.charAt(i);}
-			else{newContent=0;}
-			this.content[i]=newContent;
-			displays[i].setChar(newContent);
-			}//end for(length)
-		updatePositions();
-		}//end setContent(...)
-	
-	private void updatePositions()
-		{final double[] charPosition=Arrays.copyOf(position,3);
-		totGlLen=0;
-		//Determine total length;
-		for(int i=0; i<displays.length; i++){
-		    char _content = content[i];
-		    if(_content!=0){
-		    final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
-		    totGlLen+=progress;}
-		}//end for(displays)
-		if(centered)charPosition[0]-=totGlLen/2.;
-		for(int i=0; i<displays.length; i++){
-		    	final double [] dispPos = displays[i].getPosition();
-		    	dispPos[0]=charPosition[0];
-		    	dispPos[1]=charPosition[1];
-		    	dispPos[2]=charPosition[2];
-		    	displays[i].notifyPositionChange();
-			char _content = content[i];
-			final double progress=((double)glSize)*font.glWidthOf(_content)*1.1;//1.1 fudge factor for space between letters
-			charPosition[0]+=progress;
-			}//end for(displays)
-		}//end updatePositions
-	
-	public void setPosition(double [] location)
-		{this.position=location;
-		updatePositions();
-		}//end setPosition(...)
+public class CharLineDisplay {
+    private char[] content;
+    private final CharDisplay[] displays;
+    double[] position = new double[] { 0, 0, .0001 };
+    private GLFont font;
+    private final double glSize;
+    private double totGlLen = 0;
+    private boolean centered = false;
 
-	public void setPosition(double x, double y, double z) {
-	    position[0]=x;
-	    position[1]=y;
-	    position[2]=z;
-	    updatePositions();
-	}
+    public CharLineDisplay(TR tr, RenderableSpacePartitioningGrid grid,
+	    double glSize, int lengthInChars, GLFont font) {
+	content = new char[lengthInChars];
+	displays = new CharDisplay[lengthInChars];
+	this.font = font;
+	for (int i = 0; i < lengthInChars; i++) {
+	    content[i] = 'X';
+	    displays[i] = new CharDisplay(tr, grid, glSize, font);
+	    displays[i].setChar('X');
+	    grid.add(displays[i]);
+	}// end for(lengthInChars)
 
-	/**
-	 * @return the displays
-	 */
-	public CharDisplay[] getDisplays() {
-	    return displays;
-	}
+	this.glSize = glSize;
+	updatePositions();
+    }// end LineDisplay(...)
 
-	public GLFont getFont() {
-	    return font;
-	}
+    public void setContent(String content) {
+	for (int i = 0; i < this.content.length; i++) {
+	    char newContent;
+	    if (i < content.length()) {
+		newContent = content.charAt(i);
+	    } else {
+		newContent = 0;
+	    }
+	    this.content[i] = newContent;
+	    displays[i].setChar(newContent);
+	}// end for(length)
+	updatePositions();
+    }// end setContent(...)
 
-	/**
-	 * @return the centered
-	 */
-	public boolean isCentered() {
-	    return centered;
-	}
+    private void updatePositions() {
+	final double[] charPosition = Arrays.copyOf(position, 3);
+	totGlLen = 0;
+	// Determine total length;
+	for (int i = 0; i < displays.length; i++) {
+	    char _content = content[i];
+	    if (_content != 0) {
+		final double progress = ((double) glSize)
+			* font.glWidthOf(_content) * 1.1;// 1.1 fudge factor for
+							 // space between
+							 // letters
+		totGlLen += progress;
+	    }
+	}// end for(displays)
+	if (centered)
+	    charPosition[0] -= totGlLen / 2.;
+	for (int i = 0; i < displays.length; i++) {
+	    final double[] dispPos = displays[i].getPosition();
+	    dispPos[0] = charPosition[0];
+	    dispPos[1] = charPosition[1];
+	    dispPos[2] = charPosition[2];
+	    displays[i].notifyPositionChange();
+	    char _content = content[i];
+	    final double progress = ((double) glSize)
+		    * font.glWidthOf(_content) * 1.1;// 1.1 fudge factor for
+						     // space between letters
+	    charPosition[0] += progress;
+	}// end for(displays)
+    }// end updatePositions
 
-	/**
-	 * @param centered the centered to set
-	 */
-	public void setCentered(boolean centered) {
-	    this.centered = centered;
-	}
+    public void setPosition(double[] location) {
+	this.position = location;
+	updatePositions();
+    }// end setPosition(...)
 
-	public void setVisible(boolean b) {
-	    for(CharDisplay disp:displays){
-		disp.setVisible(b);
-	    }//end for(displays)
-	}//end setVisible(...)
-}//end LineDisplay
+    public void setPosition(double x, double y, double z) {
+	position[0] = x;
+	position[1] = y;
+	position[2] = z;
+	updatePositions();
+    }
+
+    /**
+     * @return the displays
+     */
+    public CharDisplay[] getDisplays() {
+	return displays;
+    }
+
+    public GLFont getFont() {
+	return font;
+    }
+
+    /**
+     * @return the centered
+     */
+    public boolean isCentered() {
+	return centered;
+    }
+
+    /**
+     * @param centered
+     *            the centered to set
+     */
+    public void setCentered(boolean centered) {
+	this.centered = centered;
+    }
+
+    public void setVisible(boolean b) {
+	for (CharDisplay disp : displays) {
+	    disp.setVisible(b);
+	}// end for(displays)
+    }// end setVisible(...)
+}// end LineDisplay

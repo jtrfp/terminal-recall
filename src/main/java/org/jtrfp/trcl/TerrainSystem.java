@@ -17,28 +17,19 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
-import org.jtrfp.trcl.file.Location3D;
-import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
-import org.jtrfp.trcl.file.NAVFile.TUN;
-import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
-import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.obj.Checkpoint;
-import org.jtrfp.trcl.tools.Util;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
-	private int ringIndex=0;
 	
 	public TerrainSystem(final InterpolatingAltitudeMap altitude, final TextureMesh textureMesh, final double gridSquareSize, final SpacePartitioningGrid parent, final RenderableSpacePartitioningGrid terrainMirror, final TR tr, final TDFFile tdf, boolean flatShading){
 		super(parent);

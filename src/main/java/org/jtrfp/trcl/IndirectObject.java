@@ -15,23 +15,21 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public class IndirectObject<TYPE>
-	{
-	TYPE object;
+public class IndirectObject<TYPE> {
+    TYPE object;
 
-	/**
-	 * @return the object
-	 */
-	public TYPE get()
-		{
-		return object;
-		}
+    /**
+     * @return the object
+     */
+    public TYPE get() {
+	return object;
+    }
 
-	/**
-	 * @param object the object to set
-	 */
-	public void set(TYPE object)
-		{
-		this.object = object;
-		}
-	}//end IndirectObject
+    /**
+     * @param object
+     *            the object to set
+     */
+    public void set(TYPE object) {
+	this.object = object;
+    }
+}// end IndirectObject

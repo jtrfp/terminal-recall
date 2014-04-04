@@ -15,7 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public interface Settable
-	{
-	public void set(double value);
-	}
+public interface Settable {
+    public void set(double value);
+}

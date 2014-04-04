@@ -15,8 +15,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public final class PrimitiveRenderMode
-	{
-	public static final byte RENDER_MODE_TRIANGLES=0;
-	public static final byte RENDER_MODE_LINES=1;
-	}
+public final class PrimitiveRenderMode {
+    public static final byte RENDER_MODE_TRIANGLES = 0;
+    public static final byte RENDER_MODE_LINES = 1;
+}

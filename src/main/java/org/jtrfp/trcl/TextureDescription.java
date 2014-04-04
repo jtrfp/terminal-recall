@@ -17,7 +17,6 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 
-public interface TextureDescription
-	{
-	public Color getAverageColor();
-	}
+public interface TextureDescription {
+    public Color getAverageColor();
+}

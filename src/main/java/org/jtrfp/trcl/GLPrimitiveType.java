@@ -17,56 +17,75 @@ package org.jtrfp.trcl;
 
 import javax.media.opengl.GL2;
 
-public abstract class GLPrimitiveType
-	{
-	public static final class GL_FLOAT extends GLPrimitiveType {public GL_FLOAT(){super(4,true,true,GL2.GL_FLOAT);}}
-	public static final class GL_DOUBLE extends GLPrimitiveType {public GL_DOUBLE(){super(8,true,true,GL2.GL_DOUBLE);}}
-	public static final class GL_INT extends GLPrimitiveType {public GL_INT(){super(4,true,false,GL2.GL_INT);}}
-	public static final class GL_UNSIGNED_INT extends GLPrimitiveType {public GL_UNSIGNED_INT(){super(4,false,false,GL2.GL_UNSIGNED_INT);}}
-	public static final class GL_SHORT extends GLPrimitiveType {public GL_SHORT(){super(4,true,true,GL2.GL_SHORT);}}
-	
-	private final int sizeInBytes;
-	private final boolean signed;
-	private final boolean floating;
-	private final int glEnumID;
-	
-	public GLPrimitiveType(int size, boolean isSigned, boolean isFloating, int glID)
-		{
-		sizeInBytes=size;
-		signed=isSigned;
-		floating=isFloating;
-		glEnumID=glID;
-		}
-
-	/**
-	 * @return the sizeInBytes
-	 */
-	public int getSizeInBytes()
-		{
-		return sizeInBytes;
-		}
-
-	/**
-	 * @return the signed
-	 */
-	public boolean isSigned()
-		{
-		return signed;
-		}
-
-	/**
-	 * @return the floating
-	 */
-	public boolean isFloating()
-		{
-		return floating;
-		}
-
-	/**
-	 * @return the glEnumID
-	 */
-	public int getGlEnumID()
-		{
-		return glEnumID;
-		}
+public abstract class GLPrimitiveType {
+    public static final class GL_FLOAT extends GLPrimitiveType {
+	public GL_FLOAT() {
+	    super(4, true, true, GL2.GL_FLOAT);
 	}
+    }
+
+    public static final class GL_DOUBLE extends GLPrimitiveType {
+	public GL_DOUBLE() {
+	    super(8, true, true, GL2.GL_DOUBLE);
+	}
+    }
+
+    public static final class GL_INT extends GLPrimitiveType {
+	public GL_INT() {
+	    super(4, true, false, GL2.GL_INT);
+	}
+    }
+
+    public static final class GL_UNSIGNED_INT extends GLPrimitiveType {
+	public GL_UNSIGNED_INT() {
+	    super(4, false, false, GL2.GL_UNSIGNED_INT);
+	}
+    }
+
+    public static final class GL_SHORT extends GLPrimitiveType {
+	public GL_SHORT() {
+	    super(4, true, true, GL2.GL_SHORT);
+	}
+    }
+
+    private final int sizeInBytes;
+    private final boolean signed;
+    private final boolean floating;
+    private final int glEnumID;
+
+    public GLPrimitiveType(int size, boolean isSigned, boolean isFloating,
+	    int glID) {
+	sizeInBytes = size;
+	signed = isSigned;
+	floating = isFloating;
+	glEnumID = glID;
+    }
+
+    /**
+     * @return the sizeInBytes
+     */
+    public int getSizeInBytes() {
+	return sizeInBytes;
+    }
+
+    /**
+     * @return the signed
+     */
+    public boolean isSigned() {
+	return signed;
+    }
+
+    /**
+     * @return the floating
+     */
+    public boolean isFloating() {
+	return floating;
+    }
+
+    /**
+     * @return the glEnumID
+     */
+    public int getGlEnumID() {
+	return glEnumID;
+    }
+}

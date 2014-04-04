@@ -15,16 +15,22 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public interface AltitudeMap
-	{
-	/**
-	 * Returns a height between 0 and 1
-	 * @param x		The x-cell coordinate. Decimals are supported for interpolated values
-	 * @param z		The z-cell coordinate. Decimals are supported for interpolated values
-	 * @return
-	 * @since Oct 3, 2012
-	 */
-	public double heightAt(double x,double z);
-	public double getWidth();
-	public double getHeight();
-	}
+public interface AltitudeMap {
+    /**
+     * Returns a height between 0 and 1
+     * 
+     * @param x
+     *            The x-cell coordinate. Decimals are supported for interpolated
+     *            values
+     * @param z
+     *            The z-cell coordinate. Decimals are supported for interpolated
+     *            values
+     * @return
+     * @since Oct 3, 2012
+     */
+    public double heightAt(double x, double z);
+
+    public double getWidth();
+
+    public double getHeight();
+}

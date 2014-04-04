@@ -15,11 +15,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public class OutOfTextureSpaceException extends RuntimeException
-	{
-	/**
+public class OutOfTextureSpaceException extends RuntimeException {
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2344098263307913546L;
+    private static final long serialVersionUID = 2344098263307913546L;
 
-	}
+}

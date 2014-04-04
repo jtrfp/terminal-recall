@@ -17,8 +17,8 @@ package org.jtrfp.trcl;
 
 import java.util.Collection;
 
-public interface Submitter<T>
-	{
-	public void submit(T item);
-	public void submit(Collection<T>items);
-	}
+public interface Submitter<T> {
+    public void submit(T item);
+
+    public void submit(Collection<T> items);
+}

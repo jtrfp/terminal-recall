@@ -22,50 +22,55 @@ import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.ObjectDirection;
 
-public final class World extends RenderableSpacePartitioningGrid
-	{
-	double sizeX;
-	public double sizeY;
-	double sizeZ;
-	private static final int blockGranularity = 8;// Dim-Segments per diameter. should
-	private Color fogColor = Color.black;
-	private final TR tr;
+public final class World extends RenderableSpacePartitioningGrid {
+    double sizeX;
+    public double sizeY;
+    double sizeZ;
+    private static final int blockGranularity = 8;// Dim-Segments per diameter.
+						  // should
+    private Color fogColor = Color.black;
+    private final TR tr;
 
-	public World(double sizeX, double sizeY, double sizeZ,
-			double cameraViewDepth, TR tr)
-		{
-		super(sizeX,sizeY,sizeZ,cameraViewDepth / (double) blockGranularity,cameraViewDepth);
-		this.tr = tr;
-		this.sizeX = sizeX;
-		this.sizeY = sizeY;
-		this.sizeZ = sizeZ;
-		tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
-		Camera camera = tr.getRenderer().getCamera();
-		camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
-				sizeY / 3.15, camera.getCameraPosition().getZ()));
-		}// end constructor
+    public World(double sizeX, double sizeY, double sizeZ,
+	    double cameraViewDepth, TR tr) {
+	super(sizeX, sizeY, sizeZ, cameraViewDepth / (double) blockGranularity,
+		cameraViewDepth);
+	this.tr = tr;
+	this.sizeX = sizeX;
+	this.sizeY = sizeY;
+	this.sizeZ = sizeZ;
+	tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
+	Camera camera = tr.getRenderer().getCamera();
+	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
+		sizeY / 3.15, camera.getCameraPosition().getZ()));
+    }// end constructor
 
-	public void setCameraDirection(ObjectDirection dir)
-		{tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
-		tr.getRenderer().getCamera().setUpVector(dir.getTop());}
+    public void setCameraDirection(ObjectDirection dir) {
+	tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
+	tr.getRenderer().getCamera().setUpVector(dir.getTop());
+    }
 
-	/**
-	 * @return the fogColor
-	 */
-	public Color getFogColor()
-		{return fogColor;}
+    /**
+     * @return the fogColor
+     */
+    public Color getFogColor() {
+	return fogColor;
+    }
 
-	/**
-	 * @param fogColor
-	 *            the fogColor to set
-	 */
-	public void setFogColor(Color fogColor)
-		{if(fogColor==null)throw new NullPointerException("Color is intolerably null.");
-	    	this.fogColor = fogColor;}
+    /**
+     * @param fogColor
+     *            the fogColor to set
+     */
+    public void setFogColor(Color fogColor) {
+	if (fogColor == null)
+	    throw new NullPointerException("Color is intolerably null.");
+	this.fogColor = fogColor;
+    }
 
-	/**
-	 * @return the tr
-	 */
-	public TR getTr()
-		{return tr;}
-	}// World
+    /**
+     * @return the tr
+     */
+    public TR getTr() {
+	return tr;
+    }
+}// World

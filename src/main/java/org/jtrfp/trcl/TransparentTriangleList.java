@@ -17,15 +17,16 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
 
+public class TransparentTriangleList extends TriangleList {
+    public TransparentTriangleList(Triangle[][] triangles,
+	    int timeBetweenFramesMsec, String debugName, boolean animateUV,
+	    Controller controller, TR tr, Model m) {
+	super(triangles, timeBetweenFramesMsec, debugName, animateUV,
+		controller, tr, m);
+    }
 
-public class TransparentTriangleList extends TriangleList
-	{
-	public TransparentTriangleList(Triangle[][] triangles,
-			int timeBetweenFramesMsec, String debugName, boolean animateUV, Controller controller,TR tr, Model m){
-		super(triangles, timeBetweenFramesMsec, debugName,animateUV,controller,tr, m);
-		}
-	
-	@Override
-	public RenderStyle getRenderStyle()
-		{return RenderStyle.TRANSPARENT;}
-	}//end TransparentTriangleList
+    @Override
+    public RenderStyle getRenderStyle() {
+	return RenderStyle.TRANSPARENT;
+    }
+}// end TransparentTriangleList

@@ -15,11 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public class IndirectDouble extends IndirectObject<Double> implements Settable
-	{
-	@Override
-	public void set(double value)
-		{
-		super.set(value);
-		}
-	}//end SettableObject
+public class IndirectDouble extends IndirectObject<Double> implements Settable {
+    @Override
+    public void set(double value) {
+	super.set(value);
+    }
+}// end SettableObject

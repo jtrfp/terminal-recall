@@ -18,17 +18,17 @@ package org.jtrfp.trcl;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
-public abstract class RenderableSpacePartitioningGrid extends SpacePartitioningGrid<PositionedRenderable>
-	{
-	
-	public RenderableSpacePartitioningGrid(double sizeX, double sizeY, double sizeZ, double gridBlockSize, double viewDepth)
-		{
-		super(new Vector3D(sizeX,sizeY,sizeZ),gridBlockSize,viewDepth*1.2);
-		activate();
-		}
-	
-	public RenderableSpacePartitioningGrid(SpacePartitioningGrid<PositionedRenderable>parent)
-		{
-		super(parent);
-		}
-	}
+public abstract class RenderableSpacePartitioningGrid extends
+	SpacePartitioningGrid<PositionedRenderable> {
+
+    public RenderableSpacePartitioningGrid(double sizeX, double sizeY,
+	    double sizeZ, double gridBlockSize, double viewDepth) {
+	super(new Vector3D(sizeX, sizeY, sizeZ), gridBlockSize, viewDepth * 1.2);
+	activate();
+    }
+
+    public RenderableSpacePartitioningGrid(
+	    SpacePartitioningGrid<PositionedRenderable> parent) {
+	super(parent);
+    }
+}

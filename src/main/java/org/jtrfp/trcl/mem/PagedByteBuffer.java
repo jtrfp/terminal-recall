@@ -7,7 +7,7 @@ import org.jtrfp.trcl.gpu.GPU;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
-    public static final int 		PAGE_SIZE_BYTES=GPU.BYTES_PER_VEC4*GPU.GPU_VERTICES_PER_BLOCK;//Anchored to number of triangle vertices per block
+    public static final int 		PAGE_SIZE_BYTES=GPU.BYTES_PER_VEC4*GPU.GPU_VERTICES_PER_BLOCK*1;//Anchored to number of triangle vertices per block
     private 		int [] 		pageTable;//Using array since performance is crucial
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;

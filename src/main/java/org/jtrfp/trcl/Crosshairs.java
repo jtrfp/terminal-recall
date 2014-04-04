@@ -22,11 +22,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
-public class Crosshairs extends WorldObject2DVisibleEverywhere
-	{
+public class Crosshairs extends WorldObject2DVisibleEverywhere{
 	private static final double Z = 0;
-	public Crosshairs(TR tr)
-		{
+	public Crosshairs(TR tr){
 		super(tr);
 		//Crosshairs
 		Model crossModel=null;

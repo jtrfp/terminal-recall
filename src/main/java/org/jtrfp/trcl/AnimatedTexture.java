@@ -18,37 +18,42 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.util.concurrent.Future;
 
-public class AnimatedTexture implements TextureDescription
-	{
-	private Future<Texture> [] frames;
-	//private int timeBetweenFramesInMillis;
-	private Controller textureSequencer;
-	public AnimatedTexture(Controller textureSequencer, Future<Texture>[] frames)
-		{
-		this.frames=frames;
-		this.textureSequencer=textureSequencer;
-		}
-	/**
-	 * @return the frames
-	 */
-	public Future<Texture>[] getFrames()
-		{
-		return frames;
-		}
-	/**
-	 * @param frames the frames to set
-	 */
-	public void setFrames(Future<Texture>[] frames)
-		{
-		this.frames = frames;
-		}
-	public Controller getTextureSequencer()
-		{return textureSequencer;}
-	@Override
-	public Color getAverageColor()
-		{
-		try{return frames[0].get().getAverageColor();}
-		catch(Exception e){e.printStackTrace();}
-		return null;
-		}
-	}//end AnimatedTexture
+public class AnimatedTexture implements TextureDescription {
+    private Future<Texture>[] frames;
+    // private int timeBetweenFramesInMillis;
+    private Controller textureSequencer;
+
+    public AnimatedTexture(Controller textureSequencer, Future<Texture>[] frames) {
+	this.frames = frames;
+	this.textureSequencer = textureSequencer;
+    }
+
+    /**
+     * @return the frames
+     */
+    public Future<Texture>[] getFrames() {
+	return frames;
+    }
+
+    /**
+     * @param frames
+     *            the frames to set
+     */
+    public void setFrames(Future<Texture>[] frames) {
+	this.frames = frames;
+    }
+
+    public Controller getTextureSequencer() {
+	return textureSequencer;
+    }
+
+    @Override
+    public Color getAverageColor() {
+	try {
+	    return frames[0].get().getAverageColor();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+	return null;
+    }
+}// end AnimatedTexture

@@ -15,10 +15,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-public class NonPowerOfTwoException extends Exception
-	{
-	public NonPowerOfTwoException(String name)
-		{
-		super("Entity of name `"+name+" has a non-power of two side length.");
-		}
-	}//end NonPowerOfTwoException
+public class NonPowerOfTwoException extends Exception {
+    public NonPowerOfTwoException(String name) {
+	super("Entity of name `" + name
+		+ " has a non-power of two side length.");
+    }
+}// end NonPowerOfTwoException

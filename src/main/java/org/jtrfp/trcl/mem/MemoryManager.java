@@ -46,8 +46,8 @@ public final class MemoryManager {
     public PagedByteBuffer createPagedByteBuffer(int initialSizeInBytes, String debugName){
 	return new PagedByteBuffer(physicalMemory, pageIndexPool, initialSizeInBytes, debugName);
     }
-    public void bindToUniform(int i, GLProgram shaderProgram, GLUniform uniform) {
-	glPhysicalMemory.bindToUniform(i, shaderProgram, uniform);
+    public void bindToUniform(int textureUnit, GLProgram shaderProgram, GLUniform uniform) {
+	glPhysicalMemory.bindToUniform(textureUnit, shaderProgram, uniform);
     }
 
     public void dumpAllGPUMemTo(ByteBuffer dest) throws IOException{

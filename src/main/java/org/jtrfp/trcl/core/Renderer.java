@@ -102,6 +102,7 @@ public final class Renderer {
 	deferredProgram.getUniform("primaryRendering").set((int) 1);
 	deferredProgram.getUniform("depthTexture").set((int) 2);
 	deferredProgram.getUniform("normTexture").set((int) 3);
+	deferredProgram.getUniform("rootBuffer").set((int) 4);
 	sunVector.set(.5774f,.5774f,.5774f);
 	intermediateColorTexture = gpu
 		.newTexture()

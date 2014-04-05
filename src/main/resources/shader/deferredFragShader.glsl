@@ -23,6 +23,7 @@ uniform sampler2D primaryRendering;
 uniform sampler2D depthTexture;
 uniform sampler2D texturePalette;
 uniform sampler2D normTexture;
+uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform vec3 fogColor;
 uniform uint screenWidth;
 uniform uint screenHeight;
@@ -51,6 +52,19 @@ float linearDepth = linearizeDepth(depth);
 fragColor = texture(primaryRendering,screenLoc);//GET UV
 vec3 origColor = textureGrad(texturePalette,fragColor.xy,dFdx(fragColor.xy),dFdy(fragColor.xy)).rgb;//GET COLOR
 vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
+
+// DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
+for(int i=0;i<8;i++)
+	{
+	norm+=float(texelFetch(rootBuffer,3*i*int(screenLoc.x)).x)*.00000000000001;
+	screenLoc*=mod(screenLoc,3);
+	norm+=float(texelFetch(rootBuffer,2*i*int(screenLoc.y)).z)*.00000000000001;
+	screenLoc*=mod(screenLoc,3);
+	norm+=float(texelFetch(rootBuffer,1*i*int(screenLoc.y)).y)*.00000000000001;
+	screenLoc*=mod(screenLoc,3);
+	norm+=float(texelFetch(rootBuffer,4*i*int(screenLoc.x)).a)*.00000000000001;
+	screenLoc*=mod(screenLoc,3);
+	}
 
 // Illumination. Near-zero norm means assume full lighting
 float sunIllumination = length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;

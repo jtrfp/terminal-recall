@@ -55,7 +55,8 @@ public class RenderList {
     private final 	GLUniform 		renderListOffsetUniform,
     /*    */	    				renderListPageTable,
     /*    */					useTextureMap,
-    /*	  */					cameraMatrixUniform;
+    /*	  */					cameraMatrixUniform,
+    /*    */					rootBuffer;
     private final	GLFrameBuffer		intermediateFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
     /*    */					intermediateColorTexture,
@@ -117,6 +118,9 @@ public class RenderList {
 	renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 	useTextureMap = primaryProgram.getUniform("useTextureMap");
 	cameraMatrixUniform = primaryProgram.getUniform("cameraMatrix");
+	
+	rootBuffer = deferredProgram.getUniform("rootBuffer");
+	
 	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
 		* RenderList.NUM_RENDER_PASSES
 		/ PagedByteBuffer.PAGE_SIZE_BYTES];
@@ -194,15 +198,19 @@ public class RenderList {
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
-	tr.getRenderer().getDeferredProgram().use();
+	final GLProgram deferredProgram = tr.getRenderer().getDeferredProgram();
+	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
+	
 	GLTexture.specifyTextureUnit(gl, 1);
 	intermediateColorTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 2);
 	intermediateDepthTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 3);
 	intermediateNormTexture.bind(gl);
+	tr.getGPU().getMemoryManager().bindToUniform(4, deferredProgram,
+		    rootBuffer);
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	
 	// TRANSPARENT

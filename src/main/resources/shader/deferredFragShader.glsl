@@ -56,13 +56,13 @@ vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
 for(int i=0;i<8;i++)
 	{
-	norm+=float(texelFetch(rootBuffer,3*i*int(screenLoc.x)).x)*.00000000000001;
+	norm+=float(texelFetch(rootBuffer,3*i*int(gl_FragCoord.x)).x)*.00000000000001;
 	screenLoc*=mod(screenLoc,3);
-	norm+=float(texelFetch(rootBuffer,2*i*int(screenLoc.y)).z)*.00000000000001;
+	norm+=float(texelFetch(rootBuffer,2*i*int(gl_FragCoord.y)).z)*.00000000000001;
 	screenLoc*=mod(screenLoc,3);
-	norm+=float(texelFetch(rootBuffer,1*i*int(screenLoc.y)).y)*.00000000000001;
+	norm+=float(texelFetch(rootBuffer,1*i*int(gl_FragCoord.x)).y)*.00000000000001;
 	screenLoc*=mod(screenLoc,3);
-	norm+=float(texelFetch(rootBuffer,4*i*int(screenLoc.x)).a)*.00000000000001;
+	norm+=float(texelFetch(rootBuffer,4*i*int(gl_FragCoord.y)).a)*.00000000000001;
 	screenLoc*=mod(screenLoc,3);
 	}
 

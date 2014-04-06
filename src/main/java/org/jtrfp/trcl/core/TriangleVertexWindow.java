@@ -7,67 +7,25 @@ import org.jtrfp.trcl.mem.MemoryWindow;
 
 public final class TriangleVertexWindow extends MemoryWindow {
     public static final int BYTES_PER_VERTEX = GPU.BYTES_PER_VEC4;
-    //private IndirectObject<Integer> arrayOffset;
     private final AtomicInteger numTriangles = new AtomicInteger();
-    //private final IndexPool indexPool = new IndexPool();
-    
+
     public final ShortVariable x = new ShortVariable();
     public final ShortVariable y = new ShortVariable();
     public final ShortVariable z = new ShortVariable();
     public final ByteVariable normX = new ByteVariable();
     public final ByteVariable normY = new ByteVariable();
-    //public final ShortVariable unusedShort6 = new ShortVariable();
     public final ShortVariable u = new ShortVariable();
     public final ShortVariable v = new ShortVariable();
-    //public final ShortVariable unusedShort12 = new ShortVariable();
     public final ByteVariable normZ = new ByteVariable();
     public final ByteVariable unusedByte13 = new ByteVariable();
     public final ShortVariable unusedShort14 = new ShortVariable();
-    
-    public TriangleVertexWindow(TR tr, String debugName){
-	init(tr, "TriangleVertexWindow."+debugName);
+
+    public TriangleVertexWindow(TR tr, String debugName) {
+	init(tr, "TriangleVertexWindow." + debugName);
     }
-    
-    /*
-    private static final int X=0;
-    private static final int Y=2;
-    private static final int Z=4;
-    private static final int UNUSED_SHORT_6=6;
-    /**
-    * Scale texture coordinate up by 4096 prior to setting.
-    */
-    /*
-    private static final int U=8;
-    private static final int V=10;
-    private static final int UNUSED_SHORT_12=12;
-    private static final int UNUSED_SHORT_14=14;
-    */
-    
-    public synchronized final int createTriangle(){
+
+    public synchronized final int createTriangle() {
 	numTriangles.addAndGet(3);
 	return create();
-    }//end createTriangle
-    
-    /*
-    public final void setX(int id, short val){
-	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+X,(short)val);
-	x.set(id, val);
-    }
-    public final void setY(int id, short val){
-	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+Y,(short)val);
-	y.set(id, val);
-    }
-    public final void setZ(int id, short val){
-	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+Z,(short)val);
-	z.set(id, val);
-    }
-    public final void setU(int id, short val){
-	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+U,(short)val);
-	u.set(id, val);
-    }
-    public final void setV(int id, short val){
-	//GlobalDynamicTextureBuffer.putShort(arrayOffset.get()+id*BYTES_PER_VERTEX+V,(short)val);
-	v.set(id, val);
-    }*/
-    
-}//end TriangleWindow
+    }// end createTriangle
+}// end TriangleWindow

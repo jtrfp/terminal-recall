@@ -14,6 +14,7 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.mem.MemoryManager;
 
 public class GPU{
@@ -27,14 +28,16 @@ public class GPU{
 	private final TR tr;
 	private GL3 gl;
 	private MemoryManager memoryManager;
+	private TextureManager textureManager;
 	
-	public GPU(TR tr){
+	public GPU(final TR tr){
 	    this.tr=tr;
 	    addGLEventListener(new GLEventListener(){
 
 		@Override
 		public void init(GLAutoDrawable drawable) {
 		    GPU.this.memoryManager=new MemoryManager(GPU.this);
+		    GPU.this.textureManager = new TextureManager(tr);
 		}
 
 		@Override

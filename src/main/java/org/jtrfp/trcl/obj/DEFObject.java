@@ -389,8 +389,8 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	
 	if(groundLocked){
 	    addBehavior(new TerrainLocked());}
-	else 	{addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
-	    	addBehavior(new CollidesWithTerrain());
+	else 	{//addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
+	    	addBehavior(new CollidesWithTerrain().setAutoNudge(true).setNudgePadding(40000));
 	    	}
 	
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);

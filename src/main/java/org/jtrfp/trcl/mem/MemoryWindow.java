@@ -219,13 +219,15 @@ public abstract class MemoryWindow {
 	    return this;
 	}
 
-	public IntArrayVariable set(int objectIndex, int offsetInBytes,
-		ByteBuffer value) {
-	    getParent().getBuffer().put(
-		    offsetInBytes + byteOffset() + objectIndex
-			    * getParent().getObjectSizeInBytes(), value);
+	public IntArrayVariable set(int objectIndex, int offsetInInts,
+		int [] value) {
+	    for(int i=0; i<value.length; i++){
+		getParent().getBuffer().putInt(
+			    byteOffset() + offsetInInts*4 + objectIndex
+				    * getParent().getObjectSizeInBytes(), value[i]);
+	    }//end for(i)
 	    return this;
-	}
+	}//end set(...)
 
 	@Override
 	public int [] get(int objectIndex) {

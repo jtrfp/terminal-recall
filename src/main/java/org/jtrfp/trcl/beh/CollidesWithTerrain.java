@@ -21,6 +21,8 @@ public class CollidesWithTerrain extends Behavior {
     private Vector3D surfaceNormalVar;
     public static final double CEILING_Y_NUDGE=-5000;
     private int tickCounter=0;
+    private boolean autoNudge=false;
+    private double nudgePadding=5000;
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickCounter++ % 2==0)return;
@@ -40,7 +42,7 @@ public class CollidesWithTerrain extends Behavior {
 	else downhillDirectionXZ=Vector3D.PLUS_J;
 	final boolean terrainMirror=tr.getOverworldSystem().isChamberMode();
 	final double thisY=thisPos[1];
-    	boolean groundImpact=thisY<groundHeight;
+    	boolean groundImpact=thisY<(groundHeight+(autoNudge?nudgePadding:0));
     	final boolean ceilingImpact=(thisY>ceilingHeight&&terrainMirror);
 	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),-groundNormal.getY(),groundNormal.getZ());
 	Vector3D surfaceNormal = groundImpact?groundNormal:ceilingNormal;
@@ -51,7 +53,9 @@ public class CollidesWithTerrain extends Behavior {
     	    }
     	
 	if( groundImpact || ceilingImpact){//detect collision
-	    thisPos[1]=(groundImpact?groundHeight:ceilingHeight)+(groundImpact?nudge:-nudge);
+	    double padding = autoNudge?nudgePadding:0;
+	    padding *= groundImpact?1:-1;
+	    thisPos[1]=(groundImpact?groundHeight:ceilingHeight)+padding;
 	    p.notifyPositionChange();
 	    //Call impact listeners
 	    surfaceNormalVar=surfaceNormal;
@@ -91,4 +95,30 @@ public class CollidesWithTerrain extends Behavior {
 	    	for(SurfaceImpactListener l:items){submit(l);}
 		}
     };
+    /**
+     * @return the autoNudge
+     */
+    public boolean isAutoNudge() {
+        return autoNudge;
+    }
+    /**
+     * @param autoNudge the autoNudge to set
+     */
+    public CollidesWithTerrain setAutoNudge(boolean autoNudge) {
+        this.autoNudge = autoNudge;
+        return  this;
+    }
+    /**
+     * @return the nudgePadding
+     */
+    public double getNudgePadding() {
+        return nudgePadding;
+    }
+    /**
+     * @param nudgePadding the nudgePadding to set
+     */
+    public CollidesWithTerrain setNudgePadding(double nudgePadding) {
+        this.nudgePadding = nudgePadding;
+        return this;
+    }
 }//end BouncesOffTerrain

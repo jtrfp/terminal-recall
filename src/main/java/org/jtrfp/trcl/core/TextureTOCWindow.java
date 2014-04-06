@@ -10,4 +10,8 @@ public class TextureTOCWindow extends MemoryWindow {
     public final IntArrayVariable codeBookPageIndices = new IntArrayVariable(4);//16
     //Tally: 1465
     public final ByteArrayVariable unused = new ByteArrayVariable(71);//71
-}
+    
+    public TextureTOCWindow(TR tr){
+	this.init(tr, "TextureTOCWindow");
+    }//end constructor
+}//end TextureTOCWindow

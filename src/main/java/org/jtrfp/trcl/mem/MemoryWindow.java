@@ -15,8 +15,8 @@ public abstract class MemoryWindow {
     private TR tr;
 
     protected final void init(TR tr, String debugName) {
-	this.debugName=debugName;
-	this.tr=tr;
+	this.debugName = debugName;
+	this.tr = tr;
 	int byteOffset = 0;
 	for (Field f : getClass().getFields()) {
 	    if (Variable.class.isAssignableFrom(f.getType())) {
@@ -31,30 +31,53 @@ public abstract class MemoryWindow {
 	    }// end if(Variable)
 	}// end for(fields)
 	objectSizeInBytes = byteOffset;
-	setBuffer(tr.getGPU().getMemoryManager().createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES, "MemoryWindow "+this.getClass().getName()));
-	indexPool.setGrowthBehavior(new GrowthBehavior(){
+	setBuffer(tr
+		.getGPU()
+		.getMemoryManager()
+		.createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES,
+			"MemoryWindow " + this.getClass().getName()));
+	indexPool.setGrowthBehavior(new GrowthBehavior() {
 	    @Override
 	    public int grow(int previousMaxCapacity) {
-		//Grow by one page
-		final int newSizeInObjects=previousMaxCapacity+PagedByteBuffer.PAGE_SIZE_BYTES/getObjectSizeInBytes();
-		getBuffer().resize(newSizeInObjects*getObjectSizeInBytes());
-		MemoryWindow.this.tr.getReporter().report("org.jtrfp.trcl.mem.MemoryWindow."+
-			MemoryWindow.this.debugName+".sizeInObjects", newSizeInObjects);
-		
-		for(int p=0; p<MemoryWindow.this.numPages(); p++){
-		    MemoryWindow.this.tr.getReporter().report("org.jtrfp.trcl.mem.MemoryWindow."+
-				MemoryWindow.this.debugName+".page"+p, String.format("%08x", MemoryWindow.this.logicalPage2PhysicalPage(p)*PagedByteBuffer.PAGE_SIZE_BYTES));
+		// Grow by one page
+		final int newSizeInObjects = previousMaxCapacity
+			+ PagedByteBuffer.PAGE_SIZE_BYTES
+			/ getObjectSizeInBytes();
+		getBuffer().resize(newSizeInObjects * getObjectSizeInBytes());
+		MemoryWindow.this.tr.getReporter().report(
+			"org.jtrfp.trcl.mem.MemoryWindow."
+				+ MemoryWindow.this.debugName
+				+ ".sizeInObjects", newSizeInObjects);
+
+		for (int p = 0; p < MemoryWindow.this.numPages(); p++) {
+		    MemoryWindow.this.tr
+			    .getReporter()
+			    .report("org.jtrfp.trcl.mem.MemoryWindow."
+				    + MemoryWindow.this.debugName + ".page" + p,
+				    String.format(
+					    "%08x",
+					    MemoryWindow.this
+						    .logicalPage2PhysicalPage(p)
+						    * PagedByteBuffer.PAGE_SIZE_BYTES));
 		}
-		MemoryWindow.this.tr.getReporter().report("org.jtrfp.trcl.mem.MemoryWindow."+
-			MemoryWindow.this.debugName+".sizeInObjects", newSizeInObjects);
+		MemoryWindow.this.tr.getReporter().report(
+			"org.jtrfp.trcl.mem.MemoryWindow."
+				+ MemoryWindow.this.debugName
+				+ ".sizeInObjects", newSizeInObjects);
 		return newSizeInObjects;
-	    }});
-	buffer.resize(getObjectSizeInBytes()*getNumObjects());
-	for(int p=0; p<numPages(); p++){
-	    MemoryWindow.this.tr.getReporter().report("org.jtrfp.trcl.mem.MemoryWindow."+
-			MemoryWindow.this.debugName+".page"+p, String.format("%08x", MemoryWindow.this.logicalPage2PhysicalPage(p)*PagedByteBuffer.PAGE_SIZE_BYTES));}
+	    }
+	});
+	buffer.resize(getObjectSizeInBytes() * getNumObjects());
+	for (int p = 0; p < numPages(); p++) {
+	    MemoryWindow.this.tr.getReporter().report(
+		    "org.jtrfp.trcl.mem.MemoryWindow."
+			    + MemoryWindow.this.debugName + ".page" + p,
+		    String.format("%08x",
+			    MemoryWindow.this.logicalPage2PhysicalPage(p)
+				    * PagedByteBuffer.PAGE_SIZE_BYTES));
+	}
     }// end init()
-    
+
     public final int create() {
 	return indexPool.pop();
     }
@@ -126,7 +149,7 @@ public abstract class MemoryWindow {
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
-	
+
 	public ByteVariable set(int objectIndex, byte value) {
 	    getParent().getBuffer().put(
 		    byteOffset() + objectIndex
@@ -157,7 +180,7 @@ public abstract class MemoryWindow {
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
-	
+
 	public ShortVariable set(int objectIndex, short value) {
 	    getParent().getBuffer().putShort(
 		    byteOffset() + objectIndex
@@ -178,9 +201,46 @@ public abstract class MemoryWindow {
 	}
     }// end ShortVariable
 
+    public static final class IntArrayVariable extends
+	    Variable<int[], IntArrayVariable> {
+	private final int arrayLen;// Keep for automatic size calculation
+
+	public IntArrayVariable(int arrayLen) {
+	    this.arrayLen = arrayLen;
+	}
+
+	@Override
+	public IntArrayVariable set(int objectIndex, int [] value) {//TODO: Support buffer copies instead of slow loop
+	    for(int i=0; i<value.length; i++){
+		getParent().getBuffer().putInt(
+			    byteOffset() + objectIndex
+				    * getParent().getObjectSizeInBytes(), value[i]);
+	    }//end for(i)
+	    return this;
+	}
+
+	public IntArrayVariable set(int objectIndex, int offsetInBytes,
+		ByteBuffer value) {
+	    getParent().getBuffer().put(
+		    offsetInBytes + byteOffset() + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
+	    return this;
+	}
+
+	@Override
+	public int [] get(int objectIndex) {
+	    throw new RuntimeException("Unimplemented.");
+	}
+
+	@Override
+	protected int getSizeInBytes() {
+	    return arrayLen*4;
+	}
+    }// end IntArrayVariable
+
     public static final class ByteArrayVariable extends
 	    Variable<ByteBuffer, ByteArrayVariable> {
-	private int arrayLen = 0;// Keep for automatic size calculation
+	private final int arrayLen;// Keep for automatic size calculation
 
 	public ByteArrayVariable(int arrayLen) {
 	    this.arrayLen = arrayLen;
@@ -204,14 +264,14 @@ public abstract class MemoryWindow {
 
 	@Override
 	public ByteBuffer get(int objectIndex) {
-	    return null;// unimplemented
+	    throw new RuntimeException("Unimplemented.");
 	}
 
 	@Override
 	protected int getSizeInBytes() {
 	    return arrayLen;
 	}
-    }// end Double2FloatArrayVariable
+    }// end ByteArrayVariable
 
     public static final class Double2FloatArrayVariable extends
 	    Variable<double[], Double2FloatArrayVariable> {
@@ -274,7 +334,8 @@ public abstract class MemoryWindow {
     }
 
     public final double numObjectsPerPage() {
-	return (double)PagedByteBuffer.PAGE_SIZE_BYTES / (double)getObjectSizeInBytes();
+	return (double) PagedByteBuffer.PAGE_SIZE_BYTES
+		/ (double) getObjectSizeInBytes();
     }
 
     public final int numPages() {

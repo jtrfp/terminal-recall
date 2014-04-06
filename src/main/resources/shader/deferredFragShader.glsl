@@ -56,14 +56,14 @@ vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
 for(int i=0;i<8;i++)
 	{
-	norm+=float(texelFetch(rootBuffer,3*i*int(gl_FragCoord.x)).x)*.00000000000001;
-	screenLoc*=mod(screenLoc,3);
-	norm+=float(texelFetch(rootBuffer,2*i*int(gl_FragCoord.y)).z)*.00000000000001;
-	screenLoc*=mod(screenLoc,3);
-	norm+=float(texelFetch(rootBuffer,1*i*int(gl_FragCoord.x)).y)*.00000000000001;
-	screenLoc*=mod(screenLoc,3);
-	norm+=float(texelFetch(rootBuffer,4*i*int(gl_FragCoord.y)).a)*.00000000000001;
-	screenLoc*=mod(screenLoc,3);
+	//Mip TOC
+	norm+=float(texelFetch(rootBuffer,i*int(gl_FragCoord.x)/40).x)*.00000000000001;
+	//Index Page
+	norm+=float(texelFetch(rootBuffer,i*int(gl_FragCoord.x)/10).x)*.00000000000001;
+	//Codebook
+	norm+=float(texelFetch(rootBuffer,i*int(gl_FragCoord.y)/27).z)*.00000000000001;
+	//Tile
+	norm+=float(texelFetch(rootBuffer,int(gl_FragCoord.x)/34).y)*.00000000000001;
 	}
 
 // Illumination. Near-zero norm means assume full lighting

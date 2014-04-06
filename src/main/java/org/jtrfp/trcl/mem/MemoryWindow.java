@@ -208,37 +208,82 @@ public abstract class MemoryWindow {
 	public IntArrayVariable(int arrayLen) {
 	    this.arrayLen = arrayLen;
 	}
-
+	//TODO: Support buffer copies instead of slow loop
 	@Override
-	public IntArrayVariable set(int objectIndex, int [] value) {//TODO: Support buffer copies instead of slow loop
-	    for(int i=0; i<value.length; i++){
+	public IntArrayVariable set(int objectIndex, int[] value) {
+	    for (int i = 0; i < value.length; i++) {
 		getParent().getBuffer().putInt(
-			    byteOffset() + objectIndex
-				    * getParent().getObjectSizeInBytes(), value[i]);
-	    }//end for(i)
+			byteOffset() + objectIndex
+				* getParent().getObjectSizeInBytes(), value[i]);
+	    }// end for(i)
 	    return this;
 	}
 
 	public IntArrayVariable set(int objectIndex, int offsetInInts,
-		int [] value) {
-	    for(int i=0; i<value.length; i++){
+		int[] value) {
+	    for (int i = 0; i < value.length; i++) {
 		getParent().getBuffer().putInt(
-			    byteOffset() + offsetInInts*4 + objectIndex
-				    * getParent().getObjectSizeInBytes(), value[i]);
-	    }//end for(i)
+			byteOffset() + offsetInInts * 4 + objectIndex
+				* getParent().getObjectSizeInBytes(), value[i]);
+	    }// end for(i)
 	    return this;
-	}//end set(...)
+	}// end set(...)
 
 	@Override
-	public int [] get(int objectIndex) {
+	public int[] get(int objectIndex) {
 	    throw new RuntimeException("Unimplemented.");
 	}
 
 	@Override
 	protected int getSizeInBytes() {
-	    return arrayLen*4;
+	    return arrayLen * 4;
+	}
+
+	public void setAt(int objectIndex, int arrayIndex, int value) {
+	    getParent().getBuffer().putInt(
+		    byteOffset() + arrayIndex * 4 + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
 	}
     }// end IntArrayVariable
+
+    public static final class VEC4ArrayVariable extends
+	    Variable<int[], VEC4ArrayVariable> {
+	private final int arrayLen;// Keep for automatic size calculation
+
+	public VEC4ArrayVariable(int arrayLen) {
+	    this.arrayLen = arrayLen;
+	}
+	
+	@Override
+	public VEC4ArrayVariable set(int objectIndex, int[] value) {
+	    for (int i = 0; i < value.length; i++) {
+		getParent().getBuffer().putInt(
+			byteOffset() + objectIndex
+				* getParent().getObjectSizeInBytes(), value[i]);
+	    }// end for(i)
+	    return this;
+	}
+
+	public VEC4ArrayVariable setAt(int objectIndex, int offsetInVEC4s,
+		int[] value) {
+	    for (int i = 0; i < value.length; i++) {
+		getParent().getBuffer().putInt(
+			byteOffset() + offsetInVEC4s * 16 + objectIndex
+				* getParent().getObjectSizeInBytes(), value[i]);
+	    }// end for(i)
+	    return this;
+	}// end set(...)
+
+	@Override
+	public int[] get(int objectIndex) {
+	    throw new RuntimeException("Unimplemented.");
+	}
+
+	@Override
+	protected int getSizeInBytes() {
+	    return arrayLen * 16;
+	}
+    }// end VEC4ArrayVariable
 
     public static final class ByteArrayVariable extends
 	    Variable<ByteBuffer, ByteArrayVariable> {
@@ -272,6 +317,12 @@ public abstract class MemoryWindow {
 	@Override
 	protected int getSizeInBytes() {
 	    return arrayLen;
+	}
+
+	public void setAt(int objectIndex, int arrayIndex, byte value) {
+	    getParent().getBuffer().putInt(
+		    byteOffset() + arrayIndex + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
 	}
     }// end ByteArrayVariable
 

@@ -453,6 +453,7 @@ private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefiniti
 	    final Behavior 	beh 	= parent.getBehavior();
 	    addBehavior(new PulledDownByGravityBehavior().setEnable(true));
 	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
+	    beh.probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
 	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
 	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
 	    if(def.getThrustSpeed()<800000){

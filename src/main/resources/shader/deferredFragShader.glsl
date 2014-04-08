@@ -53,17 +53,20 @@ fragColor = texture(primaryRendering,screenLoc);//GET UV
 vec3 origColor = textureGrad(texturePalette,fragColor.xy,dFdx(fragColor.xy),dFdy(fragColor.xy)).rgb;//GET COLOR
 vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 
+uvec4 toc = texelFetch(rootBuffer,int(fragColor.x*4096));
+uint indexPage;
+uint codeBook;
+uint tileID;
+uvec4 tile;
+
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
 for(int i=0;i<8;i++)
 	{
-	//Mip TOC
-	norm+=float(texelFetch(rootBuffer,i*int(gl_FragCoord.x)/40).x)*.00000000000001;
-	//Index Page
-	norm+=float(texelFetch(rootBuffer,i*int(gl_FragCoord.x)/10).x)*.00000000000001;
-	//Codebook
-	norm+=float(texelFetch(rootBuffer,i*int(gl_FragCoord.y)/27).z)*.00000000000001;
-	//Tile
-	norm+=float(texelFetch(rootBuffer,int(gl_FragCoord.x)/34).y)*.00000000000001;
+	indexPage=texelFetch(rootBuffer,int(toc[0u])).x;
+	codeBook = texelFetch(rootBuffer,int(indexPage)).y;
+	tileID = texelFetch(rootBuffer,int(codeBook)).z;
+	tile = texelFetch(rootBuffer,int(tileID));
+	norm += float(tile.w)*.000000000001;
 	}
 
 // Illumination. Near-zero norm means assume full lighting

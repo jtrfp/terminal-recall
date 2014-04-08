@@ -2,6 +2,7 @@ package org.jtrfp.trcl.mem;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 
 import org.jtrfp.trcl.core.IndexPool;
 import org.jtrfp.trcl.core.IndexPool.GrowthBehavior;
@@ -208,7 +209,8 @@ public abstract class MemoryWindow {
 	public IntArrayVariable(int arrayLen) {
 	    this.arrayLen = arrayLen;
 	}
-	//TODO: Support buffer copies instead of slow loop
+
+	// TODO: Support buffer copies instead of slow loop
 	@Override
 	public IntArrayVariable set(int objectIndex, int[] value) {
 	    for (int i = 0; i < value.length; i++) {
@@ -253,7 +255,7 @@ public abstract class MemoryWindow {
 	public VEC4ArrayVariable(int arrayLen) {
 	    this.arrayLen = arrayLen;
 	}
-	
+
 	@Override
 	public VEC4ArrayVariable set(int objectIndex, int[] value) {
 	    for (int i = 0; i < value.length; i++) {
@@ -320,11 +322,46 @@ public abstract class MemoryWindow {
 	}
 
 	public void setAt(int objectIndex, int arrayIndex, byte value) {
-	    getParent().getBuffer().putInt(
+	    getParent().getBuffer().put(
 		    byteOffset() + arrayIndex + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
     }// end ByteArrayVariable
+
+    public static final class ShortArrayVariable extends
+	    Variable<ShortBuffer, ShortArrayVariable> {
+	private final int arrayLen;// Keep for automatic size calculation
+
+	public ShortArrayVariable(int arrayLen) {
+	    this.arrayLen = arrayLen;
+	}
+
+	@Override
+	public ShortArrayVariable set(int objectIndex, ShortBuffer value) {
+	    throw new RuntimeException("Unimplemented.");
+	}
+
+	public ByteArrayVariable set(int objectIndex, int offsetInBytes,
+		ByteBuffer value) {
+	    throw new RuntimeException("Unimplemented.");
+	}
+
+	@Override
+	public ShortBuffer get(int objectIndex) {
+	    throw new RuntimeException("Unimplemented.");
+	}
+
+	@Override
+	protected int getSizeInBytes() {
+	    return arrayLen * 2;
+	}
+
+	public void setAt(int objectIndex, int arrayIndex, short value) {
+	    getParent().getBuffer().putShort(
+		    byteOffset() + arrayIndex * 2 + objectIndex
+			    * getParent().getObjectSizeInBytes(), value);
+	}
+    }// end ShortArrayVariable
 
     public static final class Double2FloatArrayVariable extends
 	    Variable<double[], Double2FloatArrayVariable> {

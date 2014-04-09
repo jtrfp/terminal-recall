@@ -169,6 +169,7 @@ public class RenderList {
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
+	if(tr.getRenderer().isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
 	// renderModeUniform.set(OPAQUE_PASS);
 	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
 	final int numSubPasses = (numOpaqueVertices / verticesPerSubPass) + 1;
@@ -198,6 +199,7 @@ public class RenderList {
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
+	if(tr.getRenderer().isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = tr.getRenderer().getDeferredProgram();
 	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means

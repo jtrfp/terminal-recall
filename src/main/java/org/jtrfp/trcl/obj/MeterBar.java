@@ -27,6 +27,8 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	    new double[]{0,1,1,0},//U
 	    new double[]{0,0,1,1}, //V
 	    tex, RenderMode.DYNAMIC,Vector3D.ZERO);
+	tris[0].setAlphaBlended(true);
+	tris[1].setAlphaBlended(true);
 	m.addTriangles(tris);
 	
 	tris = Triangle.quad2Triangles(
@@ -44,6 +46,8 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 		new double[]{1,1,0,0},//U
 		new double[]{1,0,0,1}, //V
 		tex, RenderMode.DYNAMIC,Vector3D.ZERO);
+	    tris[0].setAlphaBlended(true);
+	    tris[1].setAlphaBlended(true);
 	    m.addTriangles(tris);
 		
 	    m2 = new Model(true,tr);
@@ -56,6 +60,8 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 		tex, RenderMode.DYNAMIC,Vector3D.ZERO);
 	}
 	controller.setFrame(0);
+	tris[0].setAlphaBlended(true);
+	tris[1].setAlphaBlended(true);
 	m2.addTriangles(tris);
 	m2.setController(controller);
 	m2.setAnimateUV(true);

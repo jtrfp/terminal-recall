@@ -40,6 +40,7 @@ public final class Renderer {
     private final	GLFrameBuffer 		intermediateFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
+    private final	boolean			backfaceCulling;
 
     public Renderer(GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -174,6 +175,10 @@ public final class Renderer {
 		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, tr);
 	renderList[1] = new RenderList(gl, primaryProgram,deferredProgram,intermediateFrameBuffer, 
 		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, tr);
+	
+	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
+	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");
+	}else backfaceCulling = true;
     }//end constructor
 
     private void ensureInit() {
@@ -319,5 +324,12 @@ public final class Renderer {
      */
     GLProgram getDeferredProgram() {
         return deferredProgram;
+    }
+
+    /**
+     * @return the backfaceCulling
+     */
+    protected boolean isBackfaceCulling() {
+        return backfaceCulling;
     }
 }//end Renderer

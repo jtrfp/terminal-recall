@@ -46,8 +46,11 @@ uint UNibble(uint _input, uint index)
 
 void main()
 {
-fragNormal=norm;//Pass it along
-	if(useTextureMap!=0)
-		{fragColor = texture2D(texturePalette,fragTexCoord);}
+if(useTextureMap!=0)
+		{
+		fragColor = texture2D(texturePalette,fragTexCoord);
+		if(fragColor.a<.07){discard;}
+		}
 		else{fragColor.rg = fragTexCoord;}
+fragNormal=norm;//Pass it along
 }

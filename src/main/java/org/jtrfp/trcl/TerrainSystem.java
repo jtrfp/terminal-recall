@@ -39,7 +39,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		this.heightScalar=tr.getWorld().sizeY/2;
 		final int chunkSideLength=TR.terrainChunkSideLengthInSquares;
 		final double u[] = {0,1,1,0};
-		final double v[] = {1,1,0,0};
+		final double v[] = {0,0,1,1};
 		
 		//TODO: Means of ensuring we have the GL and the buffer is mapped.
 		
@@ -87,23 +87,26 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    
 						    Vector3D norm0,norm1,norm2,norm3;
 						    Vector3D norm = altitude.normalAt(cX, cZ);
-						    norm0 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
+						    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
 						    norm = altitude.normalAt(cX+1, cZ);
-						    norm1 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
-						    norm = altitude.normalAt(cX+1, cZ+1);
 						    norm2 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+						    norm = altitude.normalAt(cX+1, cZ+1);
+						    norm1 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 						    norm = altitude.normalAt(cX, cZ+1);
-						    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+						    norm0 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 						    
 						    if(flatShading)norm0=norm1=norm2=norm3=
 							    altitude.normalAt(cX+.5, cZ+.5);
 						    
 						    final Integer tpi = cX+cZ*256;
 						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
-						    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
-							new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
-							new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
-							new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
+						    Triangle [] tris = Triangle.quad2Triangles(// COUTNER-CLOCKWISE
+							//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
+							new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
+							//new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
+							new double [] {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY}, 
+							//new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
+							new double [] {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
 							u,
 							v,
 							td, RenderMode.STATIC,
@@ -155,13 +158,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    
 							    Vector3D norm0,norm1,norm2,norm3;
 							    Vector3D norm = altitude.normalAt(cX, cZ);
-							    norm0 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
+							    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
 							    norm = altitude.normalAt(cX+1, cZ);
-							    norm1 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
-							    norm = altitude.normalAt(cX+1, cZ+1);
 							    norm2 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+							    norm = altitude.normalAt(cX+1, cZ+1);
+							    norm1 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 							    norm = altitude.normalAt(cX, cZ+1);
-							    norm3 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
+							    norm0 = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();
 							    
 							    if(flatShading)norm0=norm1=norm2=norm3=
 								    altitude.normalAt(cX+.5, cZ+.5);
@@ -170,10 +173,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    //No tunnelpoints on ceiling
 							    Future<TextureDescription> td=(Future<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
 							    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
-							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE
-								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
-								new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY}, 
-								new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ}, 
+							    Triangle [] tris = Triangle.quad2Triangles(// COUNTER CLOCKWISE
+								//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
+								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
+								//new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
+								new double [] {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY}, 
+								//new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
+								new double [] {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
 								u,
 								v,
 								td, RenderMode.STATIC,

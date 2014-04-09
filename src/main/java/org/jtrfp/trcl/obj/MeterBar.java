@@ -39,9 +39,9 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	}else{
 	    tris = Triangle.quad2Triangles(
 		new double[]{height,-height,-height,height}, //X
-		new double []{-length,-length,length,length}, //Y
+		new double []{length,length,-length,-length}, //Y
 		new double []{-1.0000001,-1.0000001,-1.0000001,-1.0000001}, //Z  ...hacky hacky hacky... /:
-		new double[]{0,0,1,1},//U
+		new double[]{1,1,0,0},//U
 		new double[]{1,0,0,1}, //V
 		tex, RenderMode.DYNAMIC,Vector3D.ZERO);
 	    m.addTriangles(tris);

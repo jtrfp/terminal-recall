@@ -221,34 +221,34 @@ public class Model {
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr) {
 	Model m = new Model(false, tr);
 	// Front
-	m.addTriangles(Triangle.quad2Triangles(new double[] { 0 - origin[0],
-		w - origin[0], w - origin[0], 0 - origin[0] }, new double[] {
-		0 - origin[1], 0 - origin[1], h - origin[1], h - origin[1] },
-		new double[] { 0 - origin[2], 0 - origin[2], 0 - origin[2],
-			0 - origin[2] },
-
+	m.addTriangles(Triangle.quad2Triangles(
+		new double[] { 0 - origin[0],w - origin[0], w - origin[0], 0 - origin[0] }, 
+		new double[] 
+			{ h - origin[1], h - origin[1], 0 - origin[1], 0 - origin[1] },
+		new double[] 
+			{ 0 - origin[2], 0 - origin[2], 0 - origin[2],0 - origin[2] },
 		new double[] { u0, u1, u1, u0 },
-		new double[] { v0, v0, v1, v1 }, tunnelTexturePalette,
+		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
 		RenderMode.STATIC, hasAlpha, Vector3D.MINUS_K));
 	// Left
 	m.addTriangles(Triangle.quad2Triangles(new double[] { 0 - origin[0],
 		0 - origin[0], 0 - origin[0], 0 - origin[0] }, new double[] {
-		0 - origin[1], 0 - origin[1], h - origin[1], h - origin[1] },
+		h - origin[1], h - origin[1], 0 - origin[1], 0 - origin[1] },
 		new double[] { 0 - origin[2], d - origin[2], d - origin[2],
 			0 - origin[2] },
 
 		new double[] { u0, u1, u1, u0 },
-		new double[] { v0, v0, v1, v1 }, tunnelTexturePalette,
+		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
 		RenderMode.STATIC, hasAlpha, Vector3D.MINUS_I));
 	// Right
 	m.addTriangles(Triangle.quad2Triangles(new double[] { w - origin[0],
 		w - origin[0], w - origin[0], w - origin[0] }, new double[] {
-		0 - origin[1], 0 - origin[1], h - origin[1], h - origin[1] },
+		h - origin[1], h - origin[1], 0 - origin[1], 0 - origin[1] },
 		new double[] { 0 - origin[2], d - origin[2], d - origin[2],
 			0 - origin[2] },
 
 		new double[] { u0, u1, u1, u0 },
-		new double[] { v0, v0, v1, v1 }, tunnelTexturePalette,
+		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
 		RenderMode.STATIC, hasAlpha, Vector3D.PLUS_I));
 	// Back
 	m.addTriangles(Triangle.quad2Triangles(new double[] { 0 - origin[0],

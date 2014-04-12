@@ -12,6 +12,8 @@ public final class GLTexture {
     private final int textureID;
     private int rawSideLength;
     private GL3 gl;
+    private int bindingTarget = GL3.GL_TEXTURE_2D;
+    private int internalColorFormat = GL3.GL_RGBA4;
 
     public GLTexture(GPU gpu) {
 	System.out.println("Creating GL Texture...");
@@ -23,7 +25,7 @@ public final class GLTexture {
     }// end constructor
     
     public GLTexture setImage(int internalOrder, int width, int height, int colorOrder, int numericalFormat, Buffer pixels){
-	gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	gl.glTexImage2D(bindingTarget, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
 	return this;
     }
     public GLTexture setParameteri(int parameterName, int value){
@@ -49,27 +51,29 @@ public final class GLTexture {
 	System.out.println("Uploading texture palette to OpenGL...");
 
 	GL3 gl = gpu.getGl();
-	gl.glBindTexture(GL3.GL_TEXTURE_2D, textureID);
+	gl.glBindTexture(bindingTarget, textureID);
 	FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
 	gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);
 	System.out.println("Isotropy limit: " + isoSize.get(0));
-	gl.glTexParameterf(GL3.GL_TEXTURE_2D,
+	/*
+	gl.glTexParameterf(bindingTarget,
 		GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, isoSize.get(0));
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S,
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_S,
 		GL3.GL_REPEAT);
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T,
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_T,
 		GL3.GL_REPEAT);
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER,
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MIN_FILTER,
 		GL3.GL_LINEAR_MIPMAP_LINEAR);
+	*/
 	System.out.println("Uploading texture...");
-	gl.glTexImage2D(GL3.GL_TEXTURE_2D, 0, GL3.GL_RGBA4, rawSideLength,
+	gl.glTexImage2D(bindingTarget, 0, internalColorFormat, rawSideLength,
 		rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
-	gl.glGenerateMipmap(GL3.GL_TEXTURE_2D);
+	gl.glGenerateMipmap(bindingTarget);
 	System.out.println("\t...Done.");
     }
-
+    
     public void delete() {
-	gl.glBindTexture(GL3.GL_TEXTURE_2D, textureID);
+	gl.glBindTexture(bindingTarget, textureID);
 	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID }));
     }
 
@@ -90,7 +94,7 @@ public final class GLTexture {
     }
     
     public GLTexture bind(GL3 gl) {
-	gl.glBindTexture(GL3.GL_TEXTURE_2D, getTextureID());
+	gl.glBindTexture(bindingTarget, getTextureID());
 	return this;
     }
 
@@ -99,20 +103,49 @@ public final class GLTexture {
     }
 
     public GLTexture setMagFilter(int mode) {
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, mode);
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MAG_FILTER, mode);
 	return this;
     }
     public GLTexture setMinFilter(int mode){
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, mode);
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MIN_FILTER, mode);
 	return this;
     }
 
     public GLTexture setWrapS(int val) {
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, val);
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_S, val);
 	return this;
     }
     public GLTexture setWrapT(int val) {
-	gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, val);
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_T, val);
 	return this;
+    }
+
+    /**
+     * @return the bindingTarget
+     */
+    public int getBindingTarget() {
+        return bindingTarget;
+    }
+
+    /**
+     * @param bindingTarget the bindingTarget to set
+     */
+    public GLTexture setBindingTarget(int bindingTarget) {
+        this.bindingTarget = bindingTarget;
+        return this;
+    }
+
+    /**
+     * @return the internalColorFormat
+     */
+    public int getInternalColorFormat() {
+        return internalColorFormat;
+    }
+
+    /**
+     * @param internalColorFormat the internalColorFormat to set
+     */
+    public void setInternalColorFormat(int internalColorFormat) {
+        this.internalColorFormat = internalColorFormat;
     }
 }// GLTexture

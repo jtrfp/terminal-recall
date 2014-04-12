@@ -44,27 +44,10 @@ public final class GLTexture {
     public void setTextureImageRGBA(ByteBuffer buf) {
 	rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
 	buf.rewind();
-	System.out
-		.println("Creating a new OpenGL texture for texture palette...");
-
-	System.out.println("\t...Done.");
-	System.out.println("Uploading texture palette to OpenGL...");
-
 	GL3 gl = gpu.getGl();
 	gl.glBindTexture(bindingTarget, textureID);
-	FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
-	gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);
-	System.out.println("Isotropy limit: " + isoSize.get(0));
-	/*
-	gl.glTexParameterf(bindingTarget,
-		GL3.GL_TEXTURE_MAX_ANISOTROPY_EXT, isoSize.get(0));
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_S,
-		GL3.GL_REPEAT);
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_T,
-		GL3.GL_REPEAT);
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MIN_FILTER,
-		GL3.GL_LINEAR_MIPMAP_LINEAR);
-	*/
+	/*FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
+	gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);*/
 	System.out.println("Uploading texture...");
 	gl.glTexImage2D(bindingTarget, 0, internalColorFormat, rawSideLength,
 		rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
@@ -72,6 +55,42 @@ public final class GLTexture {
 	System.out.println("\t...Done.");
     }
     
+    public GLTexture configure(int [] sideLengthsInTexels, int numLevels ){
+	switch(sideLengthsInTexels.length){
+	case 3:{
+	 gl.glTexStorage3D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2]);
+	    break;
+	}case 2:{
+	    gl.glTexStorage2D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1]);
+	    break;
+	}case 1:{
+	    gl.glTexStorage1D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0]);
+	    break;
+	}
+	default:{
+	    throw new RuntimeException("Invalid number of dimensions in specified sideLength: "+sideLengthsInTexels.length);
+	}}
+	return this;
+    }//end configureEmpty(...)
+    
+    public GLTexture subImage(int [] texelCoordinates, int [] sideLengthsInTexels, int format, int level, ByteBuffer texels){
+	switch(texelCoordinates.length){
+	case 3:{
+	    gl.glTexSubImage1D(bindingTarget, level, texelCoordinates[0], sideLengthsInTexels[0], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
+	    break;
+	}case 2:{
+	    gl.glTexSubImage2D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1], sideLengthsInTexels[0], sideLengthsInTexels[1], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
+	    break;
+	}case 1:{
+	    gl.glTexSubImage3D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1],texelCoordinates[2], sideLengthsInTexels[0], sideLengthsInTexels[1],sideLengthsInTexels[2], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
+	    break;
+	}
+	default:{
+	    throw new RuntimeException("Invalid number of dimensions in specified coordinates: "+texelCoordinates.length);
+	}}
+	return this;
+    }
+
     public void delete() {
 	gl.glBindTexture(bindingTarget, textureID);
 	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID }));
@@ -81,8 +100,9 @@ public final class GLTexture {
 	return textureID;
     }
     
-    public void setGl(GL3 gl){
+    public GLTexture setGl(GL3 gl){
 	this.gl=gl;
+	return this;
     }
 
     public static void specifyTextureUnit(GL3 gl, int unitNumber) {
@@ -145,7 +165,8 @@ public final class GLTexture {
     /**
      * @param internalColorFormat the internalColorFormat to set
      */
-    public void setInternalColorFormat(int internalColorFormat) {
+    public GLTexture setInternalColorFormat(int internalColorFormat) {
         this.internalColorFormat = internalColorFormat;
+        return this;
     }
-}// GLTexture
+}// end GLTexture

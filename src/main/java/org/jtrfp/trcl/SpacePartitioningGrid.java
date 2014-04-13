@@ -27,7 +27,8 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	private double squareSize, viewingRadius;
 	private Object [] gridSquares;
 	private int squaresX, squaresY, squaresZ;
-	private ArrayList<E> alwaysVisible = new ArrayList<E>();
+	//private ArrayList<E> alwaysVisible = new ArrayList<E>();
+	private final GridCube alwaysVisible = new GridCube(null);
 	private SpacePartitioningGrid<E> parentGrid = null;
 	private ArrayList<SpacePartitioningGrid<E>> branchGrids = new ArrayList<SpacePartitioningGrid<E>>();
 	
@@ -143,6 +144,24 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	protected GridCube squareAtGridCoord(Vector3D gridCoord)
 		{return (GridCube)(gridSquares[space2Flat(gridCoord)]);}
 	
+	public void cubesWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<GridCube> submitter){
+	    recursiveAlwaysVisibleGridCubeSubmit(submitter);
+	    final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
+		int startRaw=space2Flat(world2Square(startPoint));
+		
+		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
+		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
+			final int yEnd=point+getSquaresX()*rawDiaY;
+			for(;point<yEnd; point+=yProgression){//Y
+				final int xEnd=point+rawDiaX;
+				for(;point<xEnd; point+=xProgression){//X
+					final int wrappedPoint=point%rolloverPoint;
+					recursiveGridCubeSubmit(submitter,wrappedPoint);
+					}//end for(X)
+				}//end for(Y)
+			}//end for(Z)
+	}//end cubesWithRadiusOf(...)
+	
 	@SuppressWarnings("unchecked")
 	public void itemsWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<E> submitter){
 		recursiveAlwaysVisibleSubmit(submitter);
@@ -164,29 +183,46 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		}//end itemsInRadiusOf(...)
 	
 	private void recursiveAlwaysVisibleSubmit(Submitter<E> sub)
-		{sub.submit(alwaysVisible);
+		{sub.submit(alwaysVisible.getElements());
 		final int size=branchGrids.size();
 		for(int index=0; index<size; index++){
 		    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
 		}
-		for(SpacePartitioningGrid<E> grid:branchGrids)
-			{grid.recursiveAlwaysVisibleSubmit(sub);}
 		}//end recursiveAlwaysVisisbleSubmit(...)
+
+    private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<GridCube> sub) {
+	sub.submit(alwaysVisible);
+	final int size = branchGrids.size();
+	for (int index = 0; index < size; index++) {
+	    branchGrids.get(index).recursiveAlwaysVisibleGridCubeSubmit(sub);
+	}
+    }// end recursiveAlwaysVisisbleSubmit(...)
 	
-	private void recursiveBlockSubmit(Submitter<E> sub, int blockID)
-		{final ArrayList<E> elements = ((GridCube)gridSquares[blockID]).getElements();
-		 {final int size=elements.size();
-		 for(int i=0; i<size; i++){
-		    sub.submit(elements.get(i));
-		 }}//end submit local elements
-		final int size=branchGrids.size();
-		for(int index=0; index<size; index++){
-		    branchGrids.get(index).recursiveBlockSubmit(sub,blockID);
-		}
-	}//end recusiveBlockSubmit(...)
-	
+    private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
+	final ArrayList<E> elements = ((GridCube) gridSquares[blockID])
+		.getElements();
+	{
+	    final int size = elements.size();
+	    for (int i = 0; i < size; i++) {
+		sub.submit(elements.get(i));
+	    }
+	}// end submit local elements
+	final int size = branchGrids.size();
+	for (int index = 0; index < size; index++) {
+	    branchGrids.get(index).recursiveBlockSubmit(sub, blockID);
+	}
+    }// end recusiveBlockSubmit(...)
+
+    private void recursiveGridCubeSubmit(Submitter<GridCube> sub, int blockID) {
+	sub.submit((GridCube) gridSquares[blockID]);
+	final int size = branchGrids.size();
+	for (int index = 0; index < size; index++) {
+	    branchGrids.get(index).recursiveGridCubeSubmit(sub, blockID);
+	}
+    }// end recusiveGridCubeSubmit(...)
+
 	private Collection<E> getAlwaysVisible()
-		{return alwaysVisible;}
+		{return alwaysVisible.getElements();}
 
 	/**
 	 * @return the squareSize
@@ -233,6 +269,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			}
 
 		private boolean isInRange(double[] ds){
+		    if(topLeftPosition==null)return true;//Always in range.
 			return(	ds[0]>topLeftPosition[0] &&							//Top Left
 					ds[1]>topLeftPosition[1] &&
 					ds[2]>topLeftPosition[2] &&

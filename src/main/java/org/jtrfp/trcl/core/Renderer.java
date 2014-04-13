@@ -44,6 +44,7 @@ public final class Renderer {
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
+    private		double			meanFPS;
 
     public Renderer(GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -135,7 +136,7 @@ public final class Renderer {
 	intermediateTextureIDTexture = gpu
 		.newTexture()
 		.bind()
-		.setImage(GL3.GL_R16UI, 1024, 768, 
+		.setImage(GL3.GL_R32UI, 1024, 768, 
 			GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null)
 		.setMagFilter(GL3.GL_NEAREST)
 		.setMinFilter(GL3.GL_NEAREST)
@@ -151,7 +152,7 @@ public final class Renderer {
 		.attachDrawTexture(intermediateTextureIDTexture, 
 			GL3.GL_COLOR_ATTACHMENT2)
 		.attachDepthTexture(intermediateDepthTexture)
-		.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
+		.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1,GL3.GL_COLOR_ATTACHMENT2);
 	if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 	    System.out.println("Framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 	    System.exit(1);
@@ -235,12 +236,14 @@ public final class Renderer {
 
     private void fpsTracking() {
 	frameNumber++;
+	final int dT = (int) (System.currentTimeMillis() - lastTimeMillis);
+	if(dT<=0)return;
+	final int fps = (1000 / dT);
+	meanFPS = meanFPS*.9+(double)fps*.1;
 	if ((frameNumber %= 20) == 0) {
-	    final int dT = (int) (System.currentTimeMillis() - lastTimeMillis);
-	    if(dT<=0)return;
-	    final int fps = (1000 / dT);
+	    
 	    gpu.getTr().getReporter()
-		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + fps);
+		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
 	    gpu.getTr().getReporter()
 	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", renderList[renderListToggle ? 0 : 1].getVisibleWorldObjectList().size());
 	}
@@ -253,15 +256,11 @@ public final class Renderer {
 	final GL3 gl = gpu.getGl();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	ensureInit();
-	int renderListIndex = 0;
-	renderListIndex = renderListToggle ? 0 : 1;
 	getCurrentRenderList().render(gl);
+	getCurrentRenderList().sendToGPU(gl);
 	fpsTracking();
 	// Update GPU
-	//PrimitiveList.tickAnimators();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
-	renderList[renderListIndex].sendToGPU(gl);
-	//gpu.getMemoryManager().unmap();
     }
 
     public void activate() {
@@ -282,6 +281,7 @@ public final class Renderer {
 				getCamera().getViewDepth() / 2.1)),
 		rl.getSubmitter());
 	toggleRenderList();
+	getCurrentRenderList().sendToGPU(gpu.getGl());
     }// end updateVisibilityList()
     
     public RenderList getCurrentRenderList(){

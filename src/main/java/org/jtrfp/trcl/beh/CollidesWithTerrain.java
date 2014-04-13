@@ -21,11 +21,13 @@ public class CollidesWithTerrain extends Behavior {
     private int 		tickCounter 		= 0;
     private boolean 		autoNudge 		= false;
     private double 		nudgePadding 		= 5000;
+    private boolean		recentlyCollided	= false;
 
     @Override
     public void _tick(long tickTimeMillis) {
-	if (tickCounter++ % 2 == 0)
+	if (tickCounter++ % 2 == 0 && !recentlyCollided)
 	    return;
+	recentlyCollided=false;
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
@@ -62,12 +64,14 @@ public class CollidesWithTerrain extends Behavior {
 	}//end if(smushed between floor and ceiling)
 
 	if (groundLock) {
+	    recentlyCollided=true;
 	    thisPos[1] = groundHeight;
 	    p.notifyPositionChange();
 	    return;
 	}//end if(groundLock)
 
 	if (groundImpact || ceilingImpact) {// detect collision
+	    recentlyCollided=true;
 	    double padding = autoNudge ? nudgePadding : 0;
 	    padding *= groundImpact ? 1 : -1;
 	    thisPos[1] = (groundImpact ? groundHeight : ceilingHeight)

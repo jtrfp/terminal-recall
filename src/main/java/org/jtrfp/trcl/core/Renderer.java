@@ -36,7 +36,10 @@ public final class Renderer {
     /*    */	    				screenHeight,
     /*    */					fogColor,
     /*    */					sunVector;
-    private final	GLTexture 		intermediateColorTexture,intermediateDepthTexture,intermediateNormTexture;
+    private final	GLTexture 		intermediateColorTexture,
+    /*		*/				intermediateDepthTexture,
+    /*		*/				intermediateNormTexture,
+    /*		*/				intermediateTextureIDTexture;
     private final	GLFrameBuffer 		intermediateFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
@@ -104,6 +107,8 @@ public final class Renderer {
 	deferredProgram.getUniform("depthTexture").set((int) 2);
 	deferredProgram.getUniform("normTexture").set((int) 3);
 	deferredProgram.getUniform("rootBuffer").set((int) 4);
+	deferredProgram.getUniform("rgbaTiles").set((int) 5);
+	deferredProgram.getUniform("textureIDTexture").set((int) 6);
 	sunVector.set(.5774f,.5774f,.5774f);
 	intermediateColorTexture = gpu
 		.newTexture()
@@ -127,6 +132,15 @@ public final class Renderer {
 		.setMinFilter(GL3.GL_NEAREST)
 		.setWrapS(GL3.GL_CLAMP_TO_EDGE)
 		.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+	intermediateTextureIDTexture = gpu
+		.newTexture()
+		.bind()
+		.setImage(GL3.GL_R16UI, 1024, 768, 
+			GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null)
+		.setMagFilter(GL3.GL_NEAREST)
+		.setMinFilter(GL3.GL_NEAREST)
+		.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+		.setWrapT(GL3.GL_CLAMP_TO_EDGE);
 	intermediateFrameBuffer = gpu
 		.newFrameBuffer()
 		.bindToDraw()
@@ -134,6 +148,8 @@ public final class Renderer {
 			GL3.GL_COLOR_ATTACHMENT0)
 		.attachDrawTexture(intermediateNormTexture, 
 			GL3.GL_COLOR_ATTACHMENT1)
+		.attachDrawTexture(intermediateTextureIDTexture, 
+			GL3.GL_COLOR_ATTACHMENT2)
 		.attachDepthTexture(intermediateDepthTexture)
 		.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
 	if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
@@ -164,6 +180,7 @@ public final class Renderer {
 		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
+		intermediateTextureIDTexture.bind().setImage(GL3.GL_R16UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		tr.getRenderer().getPrimaryProgram().use();
@@ -172,9 +189,9 @@ public final class Renderer {
 	
 	System.out.println("Initializing RenderList...");
 	renderList[0] = new RenderList(gl, primaryProgram,deferredProgram, intermediateFrameBuffer, 
-		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, tr);
+		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, intermediateTextureIDTexture, tr);
 	renderList[1] = new RenderList(gl, primaryProgram,deferredProgram,intermediateFrameBuffer, 
-		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, tr);
+		    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, intermediateTextureIDTexture, tr);
 	
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");

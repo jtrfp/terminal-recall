@@ -9,7 +9,7 @@ import org.jtrfp.trcl.gpu.GPU;
 
 public class TextureTileManager {
     private final 	IndexPool 	tileIndices = new IndexPool();
-    private final 	GLTexture 	rgbaTexture,ecTuTvTexture,indentationTexture;
+    private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
     public static final int 		TILE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		TILE_SIDE_LENGTH		=4;
     public static final int 		NUM_TILES_PER_AXIS		=TILE_PAGE_SIDE_LENGTH_TEXELS/TILE_SIDE_LENGTH;
@@ -23,17 +23,17 @@ public class TextureTileManager {
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
 		setInternalColorFormat(GL3.GL_RGBA4).
-		configure(new int[]{TILE_PAGE_SIDE_LENGTH_TEXELS,TILE_PAGE_SIDE_LENGTH_TEXELS}, 1).
+		configure(new int[]{TILE_PAGE_SIDE_LENGTH_TEXELS,TILE_PAGE_SIDE_LENGTH_TEXELS,NUM_TILE_PAGES}, 1).
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE);
-	ecTuTvTexture = gpu.
+	esTuTvTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
 		setInternalColorFormat(GL3.GL_RGBA4).
-		configure(new int[]{TILE_PAGE_SIDE_LENGTH_TEXELS,TILE_PAGE_SIDE_LENGTH_TEXELS}, 1).
+		configure(new int[]{TILE_PAGE_SIDE_LENGTH_TEXELS,TILE_PAGE_SIDE_LENGTH_TEXELS,NUM_TILE_PAGES}, 1).
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
@@ -43,7 +43,7 @@ public class TextureTileManager {
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
 		setInternalColorFormat(GL3.GL_RGBA4).
-		configure(new int[]{TILE_PAGE_SIDE_LENGTH_TEXELS,TILE_PAGE_SIDE_LENGTH_TEXELS}, 1).
+		configure(new int[]{TILE_PAGE_SIDE_LENGTH_TEXELS,TILE_PAGE_SIDE_LENGTH_TEXELS,NUM_TILE_PAGES}, 1).
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
@@ -55,8 +55,8 @@ public class TextureTileManager {
 	return this;
     }// end setRGBA(...)
 
-    public TextureTileManager setECTuTv(int tileID, ByteBuffer ECTuTv) {
-	subImageAutoMip(tileID,ECTuTv,ecTuTvTexture,4);
+    public TextureTileManager setESTuTv(int tileID, ByteBuffer ESTuTv) {
+	subImageAutoMip(tileID,ESTuTv,esTuTvTexture,4);
 	return this;
     }// end setECTuTv(...)
 
@@ -126,5 +126,9 @@ public class TextureTileManager {
     public void releaseTile(int tileToRelease) {
 	tileIndices.free(tileToRelease);
     }// end releaseTile(...)
+    
+    public GLTexture getRGBATexture()		{return rgbaTexture;}
+    public GLTexture getESTuTvTexture()		{return esTuTvTexture;}
+    public GLTexture getIndentationTexture()	{return indentationTexture;}
 
 }// end TextureTileManager

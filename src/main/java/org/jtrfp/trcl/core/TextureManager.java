@@ -14,12 +14,14 @@ public class TextureManager {
     private final TextureTileWindow 		tileWindow;
     private final TextureTOCWindow 		tocWindow;
     private final TextureMipmapTOCWindow 	mipmapTOCWindow;
+    private final TextureTileManager		textureTileManager;
     public TextureManager(TR tr){
 	this.tr=tr;
 	codebookWindow	= new TextureCodebookWindow(tr);
 	tileWindow 	= new TextureTileWindow(tr);
 	tocWindow 	= new TextureTOCWindow(tr);
 	mipmapTOCWindow = new TextureMipmapTOCWindow(tr);
+	textureTileManager = new TextureTileManager(tr.getGPU());
     }//end constructor
     
     public Gen2Texture newTexture(int width, int height){
@@ -27,4 +29,11 @@ public class TextureManager {
 	texture.setSize(new Dimension(width,height));
 	return texture;
     }//end newTexture
+
+    /**
+     * @return the textureTileManager
+     */
+    public TextureTileManager getTextureTileManager() {
+        return textureTileManager;
+    }
 }//end TextureSystem

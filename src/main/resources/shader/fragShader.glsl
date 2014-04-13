@@ -31,6 +31,7 @@ smooth in vec3 norm;
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec3 fragNormal;
+layout(location = 2) out uint textureID;
 
 uint bit(uint _input, uint index)
 	{return (_input >> index) & 0x00000001u;}
@@ -45,7 +46,7 @@ uint UNibble(uint _input, uint index)
 	{return (_input >> 4u*index) & 0x0000000Fu;}
 
 void main()
-{
+{//textureID=10u;
 if(useTextureMap!=0)
 		{
 		fragColor = texture2D(texturePalette,fragTexCoord);

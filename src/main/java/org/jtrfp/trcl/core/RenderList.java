@@ -60,7 +60,8 @@ public class RenderList {
     private final	GLFrameBuffer		intermediateFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
     /*    */					intermediateColorTexture,
-    /*    */					intermediateNormTexture;
+    /*    */					intermediateNormTexture,
+    /*	*	*/				intermediateTextureIDTexture;
     private final	ArrayList<WorldObject>	visibleWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
@@ -97,7 +98,7 @@ public class RenderList {
     public RenderList(GL3 gl, GLProgram primaryProgram,
 	    GLProgram deferredProgram, GLFrameBuffer intermediateFrameBuffer, 
 	    GLTexture intermediateColorTexture, GLTexture intermediateDepthTexture,
-	    GLTexture intermediateNormTexture,
+	    GLTexture intermediateNormTexture, GLTexture intermediateTextureIDTexture,
 	    final TR tr) {
 	// Build VAO
 	IntBuffer ib = IntBuffer.allocate(1);
@@ -107,6 +108,7 @@ public class RenderList {
 	this.intermediateDepthTexture=intermediateDepthTexture;
 	this.intermediateFrameBuffer=intermediateFrameBuffer;
 	this.intermediateNormTexture=intermediateNormTexture;
+	this.intermediateTextureIDTexture=intermediateTextureIDTexture;
 	gl.glGenBuffers(1, ib);
 	ib.clear();
 	dummyBufferID = ib.get();
@@ -215,6 +217,11 @@ public class RenderList {
 	intermediateNormTexture.bind(gl);
 	tr.getGPU().getMemoryManager().bindToUniform(4, deferredProgram,
 		    rootBuffer);
+	GLTexture.specifyTextureUnit(gl, 5);
+	tr.getGPU().getTextureManager().getTextureTileManager().getRGBATexture().bind();
+	GLTexture.specifyTextureUnit(gl, 6);
+	intermediateTextureIDTexture.bind();
+	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	
 	// TRANSPARENT

@@ -23,6 +23,8 @@ uniform sampler2D primaryRendering;
 uniform sampler2D depthTexture;
 uniform sampler2D texturePalette;
 uniform sampler2D normTexture;
+uniform usampler2D textureIDTexture;
+uniform sampler2DArray rgbaTiles;
 uniform usamplerBuffer rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform vec3 fogColor;
 uniform uint screenWidth;
@@ -49,22 +51,25 @@ vec2 screenLoc=vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float depth = texture(depthTexture,screenLoc)[0];
 gl_FragDepth = depth;
 float linearDepth = linearizeDepth(depth);
-fragColor = texture(primaryRendering,screenLoc);//GET UV
-vec3 origColor = textureGrad(texturePalette,fragColor.xy,dFdx(fragColor.xy),dFdy(fragColor.xy)).rgb;//GET COLOR
+uint textureID = texture(textureIDTexture,screenLoc)[0u];
+fragColor = texture(primaryRendering,screenLoc)+float(textureID)*.000000001;//GET UV
+//vec3 origColor = textureGrad(texturePalette,fragColor.xy,dFdx(fragColor.xy),dFdy(fragColor.xy)).rgb;//GET COLOR
+vec3 origColor = texture(texturePalette,fragColor.xy).rgb;//GET COLOR
 vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 
-uvec4 toc = texelFetch(rootBuffer,int(fragColor.x*4096));
+uvec4 toc = texelFetch(rootBuffer,int(fragColor.x*64));
 uint indexPage;
 uint codeBook;
 uint tileID;
 uvec4 tile;
 
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
-for(int i=0;i<8;i++)
+for(int i=0;i<1;i++)
 	{
-	indexPage=texelFetch(rootBuffer,int(toc[0u])).x;
+	indexPage = texelFetch(rootBuffer,int(toc[0u])+i).x;
 	codeBook = texelFetch(rootBuffer,int(indexPage)).y;
 	tileID = texelFetch(rootBuffer,int(codeBook)).z;
+	tileID = texelFetch(rootBuffer,int(tileID)).z;
 	tile = texelFetch(rootBuffer,int(tileID));
 	norm += float(tile.w)*.000000000001;
 	}
@@ -72,5 +77,6 @@ for(int i=0;i<8;i++)
 // Illumination. Near-zero norm means assume full lighting
 float sunIllumination = length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
 fragColor.rgb =origColor*fogColor+origColor*sunIllumination*sunColor;
+fragColor.r += (texture(rgbaTiles,vec3(.5,.5,1)).x*.00000000001);//DUMMY
 fragColor = mix(fragColor,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
 }

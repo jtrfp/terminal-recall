@@ -115,4 +115,16 @@ public class GPU{
 	public GLRenderBuffer newRenderBuffer() {
 	    return new GLRenderBuffer(gl);
 	}
+	/**
+	 * @return the textureManager
+	 */
+	public TextureManager getTextureManager() {
+	    return textureManager;
+	}
+	/**
+	 * @param textureManager the textureManager to set
+	 */
+	public void setTextureManager(TextureManager textureManager) {
+	    this.textureManager = textureManager;
+	}
 	}//end GPU

@@ -76,7 +76,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		for(int z=0; z<squaresZ; z++)
 			{for(int y=0; y<squaresY; y++)
 				{for(int x=0; x<squaresX; x++)
-					{squares[x+y*squaresX+z*squaresZMult]=(new GridCube(new double []{x,y,z}));}
+					{squares[x+y*squaresX+z*squaresZMult]=(new GridCube(square2World(new double[]{x,y,z})));}
 				}//end for(squaresY)
 			}//end for(squaresZ)
 		
@@ -136,6 +136,12 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 				absMod(Math.round(ds[1]/getSquareSize()),squaresY),
 				absMod(Math.round(ds[2]/getSquareSize()),squaresZ));
 		}
+	private double[] square2World(double[] ds){
+		return new double[]{
+				ds[0]*getSquareSize(),
+				ds[1]*getSquareSize(),
+				ds[2]*getSquareSize()};
+		}//end square2World(...)
 	
 	protected GridCube squareAtWorldCoord(double[] ds)
 		{return squareAtGridCoord(world2Square(ds));}
@@ -182,13 +188,13 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			}//end for(Z)
 		}//end itemsInRadiusOf(...)
 	
-	private void recursiveAlwaysVisibleSubmit(Submitter<E> sub)
-		{sub.submit(alwaysVisible.getElements());
-		final int size=branchGrids.size();
-		for(int index=0; index<size; index++){
-		    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
-		}
-		}//end recursiveAlwaysVisisbleSubmit(...)
+    private void recursiveAlwaysVisibleSubmit(Submitter<E> sub) {
+	sub.submit(alwaysVisible.getElements());
+	final int size = branchGrids.size();
+	for (int index = 0; index < size; index++) {
+	    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
+	}
+    }// end recursiveAlwaysVisisbleSubmit(...)
 
     private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<GridCube> sub) {
 	sub.submit(alwaysVisible);
@@ -214,7 +220,8 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
     }// end recusiveBlockSubmit(...)
 
     private void recursiveGridCubeSubmit(Submitter<GridCube> sub, int blockID) {
-	sub.submit((GridCube) gridSquares[blockID]);
+	final GridCube cube = (GridCube)gridSquares[blockID];
+	sub.submit(cube);
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveGridCubeSubmit(sub, blockID);
@@ -237,7 +244,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		this.squareSize = squareSize;
 		}
 	
-	class GridCube implements PositionListener{
+	public class GridCube implements PositionListener{
 		double [] topLeftPosition;
 		private ArrayList<E> elements = new ArrayList<E>();
 		

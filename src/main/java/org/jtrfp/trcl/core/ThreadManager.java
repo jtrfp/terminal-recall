@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -29,6 +31,7 @@ public class ThreadManager {
     private ArrayList<Runnable> runWhenFirstStarted = new ArrayList<Runnable>();
     private boolean firstRun = true;
     private final ConcurrentLinkedQueue<Runnable> mappedOperationQueue = new ConcurrentLinkedQueue<Runnable>();
+    public final ExecutorService threadPool = Executors.newCachedThreadPool();
     private Thread renderingThread;
 
     private int counter = 0;

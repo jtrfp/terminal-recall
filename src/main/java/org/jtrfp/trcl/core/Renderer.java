@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
+import java.util.concurrent.Future;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -9,7 +10,7 @@ import javax.media.opengl.GLEventListener;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.PrimitiveList;
+import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TriangleList;
@@ -25,6 +26,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
     private 		RenderableSpacePartitioningGrid rootGrid;
+    private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;
     private final 	GLProgram 		primaryProgram, deferredProgram;
     private 		boolean 		initialized = false;
@@ -45,6 +47,7 @@ public final class Renderer {
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
+    private		Future			visibilityUpdateFuture;
 
     public Renderer(GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -273,15 +276,25 @@ public final class Renderer {
     }
     
     public void updateVisibilityList() {
-	final RenderList rl = getBackRenderList();
-	rl.reset();
-	rootGrid.itemsWithinRadiusOf(
-		camera.getCameraPosition().add(
-			camera.getLookAtVector().scalarMultiply(
-				getCamera().getViewDepth() / 2.1)),
-		rl.getSubmitter());
-	toggleRenderList();
-	getCurrentRenderList().sendToGPU(gpu.getGl());
+	if(visibilityUpdateFuture!=null){if(!visibilityUpdateFuture.isDone())return;}
+	visibilityUpdateFuture = gpu.getTr().getThreadManager().threadPool.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		final RenderList rl = getBackRenderList();
+		rl.reset();
+		proximitySorter.setCenter(camera.getCameraPosition().toArray());
+		rootGrid.cubesWithinRadiusOf(
+			camera.getCameraPosition().add(
+				camera.getLookAtVector().scalarMultiply(
+					getCamera().getViewDepth() / 2.1)),
+					proximitySorter
+			);
+		proximitySorter.dumpPositionedRenderables(rl.getSubmitter());
+		proximitySorter.reset();
+		toggleRenderList();
+		getCurrentRenderList().sendToGPU(gpu.getGl());
+	    }
+	});
     }// end updateVisibilityList()
     
     public RenderList getCurrentRenderList(){

@@ -59,9 +59,9 @@ public class RenderList {
     /*    */					rootBuffer;
     private final	GLFrameBuffer		intermediateFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
-    /*    */					intermediateColorTexture,
-    /*    */					intermediateNormTexture,
-    /*	*	*/				intermediateTextureIDTexture;
+    /*    	*/				intermediateColorTexture,
+    /*    	*/				intermediateNormTexture,
+    /*		*/				intermediateTextureIDTexture;
     private final	ArrayList<WorldObject>	visibleWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {

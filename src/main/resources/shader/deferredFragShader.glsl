@@ -52,7 +52,7 @@ float depth = texture(depthTexture,screenLoc)[0];
 gl_FragDepth = depth;
 float linearDepth = linearizeDepth(depth);
 uint textureID = texture(textureIDTexture,screenLoc)[0u];
-fragColor = texture(primaryRendering,screenLoc)+float(textureID)*.000000001;//GET UV
+fragColor = (textureID==10u?texture(primaryRendering,screenLoc):vec4(0,0,0,0));//GET UV
 //vec3 origColor = textureGrad(texturePalette,fragColor.xy,dFdx(fragColor.xy),dFdy(fragColor.xy)).rgb;//GET COLOR
 vec3 origColor = texture(texturePalette,fragColor.xy).rgb;//GET COLOR
 vec3 norm = texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
@@ -62,6 +62,9 @@ uint indexPage;
 uint codeBook;
 uint tileID;
 uvec4 tile;
+
+//norm += float(toc[0])*.00000000001;
+
 
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
 for(int i=0;i<1;i++)

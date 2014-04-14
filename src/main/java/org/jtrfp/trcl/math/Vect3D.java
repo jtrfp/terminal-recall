@@ -61,6 +61,13 @@ public class Vect3D {
 	final double dz=l[2]-r[2];
 	return Math.sqrt(dx*dx + dy*dy + dz*dz);
     }
+    
+    public static double taxicabDistance(double [] l, double [] r){
+	final double dx=l[0]-r[0];
+	final double dy=l[1]-r[1];
+	final double dz=l[2]-r[2];
+	return dx+dy+dz;
+    }
 
     public static double[] negate(double[] in) {
 	in[0]=-in[0];

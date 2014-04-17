@@ -29,20 +29,26 @@ public final class RasterizedBlockVectorList implements VectorList {
     public double componentAt(int vectorIndex, int componentIndex) {
 	final int row = vectorIndex / blocksPerRow;
 	final int col = vectorIndex % blocksPerRow;
-	final int x = col * blockWidthInVectors;
-	final int y = row * blockWidthInVectors;
-	return rasterizedVectorList.componentAt(y * rasterWidthInVectors + x
-		* blockWidthInVectors, componentIndex);
+	final int sx = componentIndex % blockWidthInVectors;
+	final int sy = (componentIndex % vectorsPerBlock) / blockWidthInVectors;
+	final int x = col * blockWidthInVectors + sx;
+	final int y = (row * blockWidthInVectors) + sy;
+
+	return rasterizedVectorList.componentAt(y * rasterWidthInVectors + x,
+		componentIndex);
     }// end componentAt(...)
 
     @Override
     public void setComponentAt(int vectorIndex, int componentIndex, double value) {
 	final int row = vectorIndex / blocksPerRow;
 	final int col = vectorIndex % blocksPerRow;
-	final int x = col * blockWidthInVectors;
-	final int y = row * blockWidthInVectors;
-	rasterizedVectorList.setComponentAt(y * rasterWidthInVectors + x
-		* blockWidthInVectors, componentIndex, value);
+	final int sx = componentIndex % blockWidthInVectors;
+	final int sy = (componentIndex % vectorsPerBlock) / blockWidthInVectors;
+	final int x = col * blockWidthInVectors + sx;
+	final int y = (row * blockWidthInVectors) + sy;
+
+	rasterizedVectorList.setComponentAt(y * rasterWidthInVectors + x,
+		componentIndex, value);
     }// end setComponentAt(...)
 
 }// end RasterizedBlockVectorList

@@ -111,8 +111,11 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	Triangle t = triangleAt(0, triangleIndex);
 	Vector3D pos = t.getVertices()[vIndex].getPosition();
 	final TriangleVertexWindow vw = (TriangleVertexWindow) getMemoryWindow();
+	final int textureID=10;// TODO: This is a stub for actual texture TOC vec4 location
 	if (numFrames == 1) {
-	   
+	    vw.textureIDLo.set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    vw.textureIDHi.set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	    vw.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
 	    vw.y.set(gpuTVIndex, (short) applyScale(pos.getY()));
 	    vw.z.set(gpuTVIndex, (short) applyScale(pos.getZ()));
@@ -121,6 +124,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
 	    vw.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
 	} else if (numFrames > 1) {
+	    vw.textureIDLo.set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    vw.textureIDHi.set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
 	    float[] zFrames = new float[numFrames];

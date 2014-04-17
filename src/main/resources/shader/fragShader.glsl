@@ -27,6 +27,7 @@ uniform int useTextureMap;
 // INPUTS
 smooth in vec2 fragTexCoord;
 smooth in vec3 norm;
+flat in uint flatTextureID;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
@@ -52,6 +53,6 @@ if(useTextureMap!=0)
 		fragColor = texture2D(texturePalette,fragTexCoord);
 		if(fragColor.a<.07){discard;}
 		}
-		else{fragColor.rg = fragTexCoord;textureID=10u;}
+		else{fragColor.rg = fragTexCoord;textureID=flatTextureID;}
 fragNormal=norm;//Pass it along
 }

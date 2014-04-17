@@ -28,6 +28,7 @@ const int PAGE_SIZE_VEC4=96;
 //OUT
 smooth out vec2 fragTexCoord;
 smooth out vec3 norm;
+flat out uint flatTextureID;
 
 //IN
 uniform uint renderListOffset;
@@ -111,7 +112,7 @@ int renderListLogicalVEC42PhysicalVEC4(uint logical)
 	uint short x,y // XYZ Scaled by COORD_DOWNSCALER
 	uint short z, byte normX, byte normY
 	uint short u,v // scaled by 4096
-	uint byte normZ // 3 bytes unused
+	uint byte normZ, textureIDlo, textureIDmid, textureIDhi // 3 bytes unused
 */
 
 void main()
@@ -138,6 +139,7 @@ gl_Position.x=dummy*0;
 			// objectDef[3] unused.
 			uint skipCameraMatrix=UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 				uvec4 packedVertex = texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
+				flatTextureID = UByte(packedVertex[3u],1u) + (UByte(packedVertex[3u],2u) * 255u) + (UByte(packedVertex[3u],3u) * 65535u);
 				vec4 vertexCoord;
 				vertexCoord.xyz = exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
 												float(firstSShort(packedVertex[1])));

@@ -3,12 +3,6 @@ package org.jtrfp.trcl.math;
 
 public class Misc {
     
-    public static void main(String [] args){
-	byte test = Img.compileInsertJumpPair(15,0);
-	System.out.println(Img.getInsert(test));
-	System.out.println(Img.getJump(test));
-    }
-    
     public static void scalarMultiply(float [] vals, float scalar){
 	for(int i=0; i<vals.length; i++){
 	    vals[i]*=scalar;

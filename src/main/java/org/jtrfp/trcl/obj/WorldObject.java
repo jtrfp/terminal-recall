@@ -53,7 +53,6 @@ public class WorldObject implements PositionedRenderable {
     private Model model;
     private ArrayList<PositionListener> positionListeners = new ArrayList<PositionListener>();
     private int[] triangleObjectDefinitions;
-    private int[] lineSegmentObjectDefinitions;
     private int[] transparentTriangleObjectDefinitions;
     protected final int matrixID;
     private ByteBuffer opaqueObjectDefinitionAddressesInVec4 = ByteBuffer
@@ -189,6 +188,7 @@ public class WorldObject implements PositionedRenderable {
 	    throw new RuntimeException("Passed model cannot be null.");
 	model = m;
 	int numObjDefs, sizeInVerts;
+	/*
 	if (m.getLineSegmentList() == null)
 	    lineSegmentObjectDefinitions = new int[0];
 	else {
@@ -201,7 +201,8 @@ public class WorldObject implements PositionedRenderable {
 		lineSegmentObjectDefinitions[i] = tr
 			.getObjectDefinitionWindow().create();
 	    }
-	}
+	    
+	}*/
 	if (m.getTriangleList() == null)
 	    triangleObjectDefinitions = new int[0];
 	else {
@@ -258,8 +259,6 @@ public class WorldObject implements PositionedRenderable {
 
 	processPrimitiveList(model.getTriangleList(),
 		triangleObjectDefinitions, opaqueIndicesList);
-	processPrimitiveList(model.getLineSegmentList(),
-		lineSegmentObjectDefinitions, transparentIndicesList);
 	processPrimitiveList(model.getTransparentTriangleList(),
 		transparentTriangleObjectDefinitions, transparentIndicesList);
 

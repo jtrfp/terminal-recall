@@ -28,7 +28,6 @@ public class Model {
     private ArrayList<ArrayList<LineSegment>> lsLists = new ArrayList<ArrayList<LineSegment>>();
     private TransparentTriangleList ttpList;
     private TriangleList tpList;
-    private LineSegmentList lsList;
     private int frameDelay;
     private boolean smoothAnimation;
     private String debugName = "[unnamed]";
@@ -51,14 +50,6 @@ public class Model {
     public TriangleList getTriangleList() {
 	try {
 	    return tpList;
-	} catch (IndexOutOfBoundsException e) {
-	    return null;
-	}
-    }
-
-    public LineSegmentList getLineSegmentList() {
-	try {
-	    return lsList;
 	} catch (IndexOutOfBoundsException e) {
 	    return null;
 	}
@@ -114,15 +105,6 @@ public class Model {
 	}// end if(length!=0)
 	else
 	    ttpList = null;
-
-	LineSegment[][] segs = new LineSegment[lsLists.size()][];
-	for (int i = 0; i < lsLists.size(); i++) {
-	    segs[i] = lsLists.get(i).toArray(new LineSegment[] {});
-	}// Get all frames for each line seg
-	if (segs[0].length != 0)
-	    lsList = new LineSegmentList(segs, debugName, tr, this);
-	else
-	    lsList = null;
 	return this;
     }// end finalizeModel()
 

@@ -15,58 +15,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.awt.Color;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.gpu.Vertex;
 
-public class LineSegment {
-    private final Vertex[] vertices = new Vertex[2];
-    // Bad values given to make unset-variable bugs obvious.
-    private Color color = null;
-    private double thickness = Double.POSITIVE_INFINITY;
-
-    /**
-     * @return the color
-     */
-    public Color getColor() {
-	return color;
-    }
-
-    /**
-     * @param color
-     *            the color to set
-     */
-    public void setColor(Color color) {
-	this.color = color;
-    }
-
-    /**
-     * @return the thickness
-     */
-    public double getThickness() {
-	return thickness;
-    }
-
-    /**
-     * @param thickness
-     *            the thickness to set
-     */
-    public void setThickness(double thickness) {
-	this.thickness = thickness;
-    }
-
-    public LineSegment setVertex(Vertex vtx, int i) {
-	vertices[i] = vtx;
-	return this;
-    }
-
-    public Vertex getVertex(int i) {
-	return vertices[i];
-    }
-
+public abstract class LineSegment {
     public static Triangle[] buildTriPipe(Vector3D start, Vector3D end,
 	    Future<TextureDescription> texture, int thickness, Triangle[] dest,
 	    int destOffset) {

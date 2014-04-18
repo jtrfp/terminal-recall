@@ -5,7 +5,7 @@ import org.jtrfp.trcl.Tickable;
 import org.jtrfp.trcl.IntTransferFunction;
 
 public class WindowAnimator implements Tickable {
-    private final TriangleVertex2FlatDoubleWindow w;
+    private final FlatDoubleWindow w;
     private final int numElements, numFrames;
    // private final float[][] frames;
     private final float [] frames;
@@ -14,7 +14,7 @@ public class WindowAnimator implements Tickable {
     private int indexCounter=0;
     private final IntTransferFunction indexXferFun;
     private String debugName;
-    public WindowAnimator(TriangleVertex2FlatDoubleWindow w, 
+    public WindowAnimator(FlatDoubleWindow w, 
 	    int numElements, int numFrames,
 	    boolean loopInterpolate, Controller controller, IntTransferFunction indexXferFun){
 	if(controller==null) throw new NullPointerException("Controller is intolerably null.");

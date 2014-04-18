@@ -27,20 +27,18 @@ import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
 
 public class TriangleList extends PrimitiveList<Triangle> {
-    private Controller controller;
-    private int timeBetweenFramesMsec;
-    private final boolean animateUV;
-    private final TR tr;
-    private final WindowAnimator xyzAnimator;
-    private TriangleVertex2FlatDoubleWindow flatTVWindow;
+    private 		Controller 			controller;
+    private 		int 				timeBetweenFramesMsec;
+    private final 	boolean 			animateUV;
+    private final 	WindowAnimator 			xyzAnimator;
+    private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
 	super(debugName, triangles, new TriangleVertexWindow(tr, debugName), tr,m);
-	this.timeBetweenFramesMsec = timeBetweenFramesMsec;
-	this.animateUV = animateUV;
-	this.controller = controller;
-	this.tr = tr;
+	this.timeBetweenFramesMsec 	= timeBetweenFramesMsec;
+	this.animateUV 			= animateUV;
+	this.controller 		= controller;
 	if (getPrimitives().length > 1) {
 	    this.xyzAnimator = new WindowAnimator(
 		    getFlatTVWindow(),
@@ -55,15 +53,15 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	} else {
 	    this.xyzAnimator = null;
 	}
-    }
+    }//end constructor
 
     private static class XYZXferFunc implements IntTransferFunction {
 	private final int startIndex;
-	public static final int BACK_STRIDE_LEN=8;
-	public static final int FRONT_STRIDE_LEN=6;
-	private static final byte [] STRIDE_PATTERN = new byte[]{
+	public static final  int 	BACK_STRIDE_LEN		= 8;
+	public static final  int 	FRONT_STRIDE_LEN	= 6;
+	private static final byte 	[] STRIDE_PATTERN 	= new byte[]{
 	    0,1,2,//XYZ
-	    //UV
+	    //..UV
 	    5,6,7//NxNyNz
 	};
 
@@ -73,15 +71,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
 	@Override
 	public int transfer(int input) {
-	    //return (input / FRONT_STRIDE_LEN) * BACK_STRIDE_LEN + (input % FRONT_STRIDE_LEN) + startIndex;
 	    return startIndex + STRIDE_PATTERN[input%FRONT_STRIDE_LEN]+(input/FRONT_STRIDE_LEN)*BACK_STRIDE_LEN;
 	}// end transfer(...)
     }// end class XYZXferFunc
 
     private static class UVXferFunc implements IntTransferFunction {
-	private final int startIndex;
-	public static final int BACK_STRIDE_LEN=8;
-	private final int FRONT_STRIDE_LEN=2;
+	private final 		int startIndex;
+	public static final 	int BACK_STRIDE_LEN=8;
+	private final 		int FRONT_STRIDE_LEN=2;
 	
 	public UVXferFunc(int startIndex) {
 	    this.startIndex = startIndex;
@@ -107,15 +104,15 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex)
 	    throws ExecutionException, InterruptedException {
-	final int numFrames = getPrimitives().length;
-	Triangle t = triangleAt(0, triangleIndex);
-	Vector3D pos = t.getVertices()[vIndex].getPosition();
-	final TriangleVertexWindow vw = (TriangleVertexWindow) getMemoryWindow();
+	final int 	numFrames	= getPrimitives().length;
+	final Triangle 	t 		= triangleAt(0, triangleIndex);
+	final Vector3D 	pos 		= t.getVertices()[vIndex].getPosition();
+	final TriangleVertexWindow vw 	= (TriangleVertexWindow) getMemoryWindow();
 	final int textureID=10;// TODO: This is a stub for actual texture TOC vec4 location
 	if (numFrames == 1) {
-	    vw.textureIDLo.set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vw.textureIDHi.set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
+	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	    vw.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
 	    vw.y.set(gpuTVIndex, (short) applyScale(pos.getY()));
 	    vw.z.set(gpuTVIndex, (short) applyScale(pos.getZ()));
@@ -260,8 +257,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }
 
     public Vector3D getMaximumVertexDims() {
-	Vector3D result = Vector3D.ZERO;
-	Triangle[][] t = getPrimitives();
+	Vector3D 	result 	= Vector3D.ZERO;
+	Triangle[][] 	t 	= getPrimitives();
 	for (Triangle[] frame : t) {
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {

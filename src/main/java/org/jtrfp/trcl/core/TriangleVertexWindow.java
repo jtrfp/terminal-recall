@@ -21,8 +21,6 @@ public final class TriangleVertexWindow extends MemoryWindow {
     public final ByteVariable textureIDLo = new ByteVariable();
     public final ByteVariable textureIDMid = new ByteVariable();
     public final ByteVariable textureIDHi = new ByteVariable();
-    //public final ByteVariable unusedByte13 = new ByteVariable();
-    //public final ShortVariable unusedShort14 = new ShortVariable();
 
     public TriangleVertexWindow(TR tr, String debugName) {
 	init(tr, "TriangleVertexWindow." + debugName);

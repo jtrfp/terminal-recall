@@ -32,8 +32,7 @@ vec3 pos[6] = vec3[]
 	vec3(1,-1,0)
 	);
 
-void main()
-{
+void main(){
 gl_Position.x=dummy*0;
 gl_Position.xyz = pos[gl_VertexID];
 }//end main()

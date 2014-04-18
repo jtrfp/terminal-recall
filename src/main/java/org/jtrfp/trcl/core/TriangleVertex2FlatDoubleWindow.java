@@ -1,11 +1,12 @@
 package org.jtrfp.trcl.core;
 
 public class TriangleVertex2FlatDoubleWindow implements FlatDoubleWindow {
-    private final TriangleVertexWindow parentWindow;
-    private final int NUM_ELEMENTS = Variable.values().length;
+    private final 	TriangleVertexWindow 	parentWindow;
+    private final 	int 			NUM_ELEMENTS = Variable.values().length;
+    
     public TriangleVertex2FlatDoubleWindow(TriangleVertexWindow parentWindow){
 	this.parentWindow=parentWindow;
-    }
+    }//end constructor
     
     public static enum Variable{
 	X(0),
@@ -24,7 +25,7 @@ public class TriangleVertex2FlatDoubleWindow implements FlatDoubleWindow {
 	public int getFlatID(int vertexID){
 	    return vertexID*Variable.values().length+getIDOff();
 	}
-    }//end Variable
+    }//end enum Variable
     
     @Override
     public void set(int id, double val){

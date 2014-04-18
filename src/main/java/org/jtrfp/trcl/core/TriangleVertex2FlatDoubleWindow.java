@@ -1,6 +1,6 @@
 package org.jtrfp.trcl.core;
 
-public class TriangleVertex2FlatDoubleWindow {
+public class TriangleVertex2FlatDoubleWindow implements FlatDoubleWindow {
     private final TriangleVertexWindow parentWindow;
     private final int NUM_ELEMENTS = Variable.values().length;
     public TriangleVertex2FlatDoubleWindow(TriangleVertexWindow parentWindow){
@@ -26,6 +26,7 @@ public class TriangleVertex2FlatDoubleWindow {
 	}
     }//end Variable
     
+    @Override
     public void set(int id, double val){
 	final int vid=id/NUM_ELEMENTS;
 	id%=NUM_ELEMENTS;

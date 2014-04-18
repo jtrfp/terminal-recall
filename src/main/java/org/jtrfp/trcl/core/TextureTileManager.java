@@ -6,6 +6,7 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.pool.IndexPool;
 
 public class TextureTileManager {
     private final 	IndexPool 	tileIndices = new IndexPool();

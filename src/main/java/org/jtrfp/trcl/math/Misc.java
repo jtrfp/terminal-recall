@@ -1,5 +1,9 @@
 package org.jtrfp.trcl.math;
-
+/**
+ * Miscellaneous math operations which defy course-grained categorization.
+ * @author Chuck Ritola
+ *
+ */
 
 public class Misc {
     

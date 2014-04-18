@@ -1,4 +1,4 @@
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.pool;
 
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;

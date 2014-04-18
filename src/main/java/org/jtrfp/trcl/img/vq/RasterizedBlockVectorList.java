@@ -1,9 +1,11 @@
 package org.jtrfp.trcl.img.vq;
 
 public final class RasterizedBlockVectorList implements VectorList {
-    private final VectorList rasterizedVectorList;
-    private final int rasterWidthInVectors, blockWidthInVectors;
-    private final int vectorsPerBlock, blocksPerRow;
+    private final VectorList 	rasterizedVectorList;
+    private final int 		rasterWidthInVectors, 
+    /*			*/	blockWidthInVectors,
+    /*			*/	vectorsPerBlock,
+    /*			*/	blocksPerRow;
 
     public RasterizedBlockVectorList(VectorList rasterizedVectorList,
 	    int rasterWidthInVectors, int blockWidthInVectors) {

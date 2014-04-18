@@ -1,10 +1,6 @@
 package org.jtrfp.trcl.math;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-
-
-
-public class Vect3D {
+public final class Vect3D {
 
     public static void subtract(double[] l, double[] r, double[] dest) {
 	dest[0]=l[0]-r[0];

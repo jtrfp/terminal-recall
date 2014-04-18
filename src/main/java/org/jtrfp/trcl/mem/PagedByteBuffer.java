@@ -2,8 +2,8 @@ package org.jtrfp.trcl.mem;
 
 import java.nio.ByteBuffer;
 
-import org.jtrfp.trcl.core.IndexPool;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.pool.IndexPool;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.

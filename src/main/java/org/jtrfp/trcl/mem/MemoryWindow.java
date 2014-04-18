@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
-import org.jtrfp.trcl.core.IndexPool;
-import org.jtrfp.trcl.core.IndexPool.GrowthBehavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.pool.IndexPool;
+import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
 public abstract class MemoryWindow {
     private PagedByteBuffer buffer;

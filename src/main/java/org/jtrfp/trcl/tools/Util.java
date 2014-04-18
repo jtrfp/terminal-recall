@@ -261,4 +261,4 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
     new Color(0,0,0),
     new Color(0,0,0)
     };
-}
+}//end Util

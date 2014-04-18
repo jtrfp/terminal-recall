@@ -1,8 +1,8 @@
 package org.jtrfp.trcl.img.vq;
 
 public final class RGBA8888VectorList implements VectorList {
-    private final VectorList source;
-    private final int singletOffset;
+    private final VectorList 	source;
+    private final int 		singletOffset;
 
     public RGBA8888VectorList(VectorList source, int singletOffset) {
 	this.source = source;

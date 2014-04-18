@@ -3,13 +3,13 @@ package org.jtrfp.trcl.mem;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.jtrfp.trcl.core.IndexPool;
-import org.jtrfp.trcl.core.IndexPool.GrowthBehavior;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.MemoryUsageHint;
 import org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer;
+import org.jtrfp.trcl.pool.IndexPool;
+import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
 public final class MemoryManager {
     private final IndexPool 			pageIndexPool 	= new IndexPool();

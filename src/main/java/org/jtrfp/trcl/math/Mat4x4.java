@@ -1,6 +1,12 @@
 package org.jtrfp.trcl.math;
 
-public class Mat4x4 {
+/**
+ * Optimized allocation-free 4x4 matrix operations.
+ * @author Chuck Ritola
+ *
+ */
+
+public final class Mat4x4 {
     public static double [] set(int row, int col, double val, double[] dest){
 	dest[row*4+col]=val;
 	return dest;
@@ -74,16 +80,6 @@ public class Mat4x4 {
 		l[3*4+1]*r[1*4+3]+
 		l[3*4+2]*r[2*4+3]+
 		l[3*4+3]*r[3*4+3];
-	/*
-	for(int i=0; i<16; i++){
-	    final int col=i%4;
-	    final int row=i/4;
-	    dest[i]=0;
-	    for(int k=0; k<4; k++){
-		dest[i]+=l[row*4+k]*r[k*4+col];
-	    }
-	}//end for(index:16)
-	*/
 	return dest;
     }//end mul(...)
 }//end Mat4x4

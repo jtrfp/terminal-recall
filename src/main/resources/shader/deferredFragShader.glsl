@@ -84,19 +84,22 @@ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
 uint	startTile	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_TILE];
-vec2	texelUV		= tDims*fragColor.xy;
-uint	tTOCIdx		= uint(texelUV.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelUV.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
+vec2	texelXY		= tDims*fragColor.xy;
+uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
 uint	tTOCvec4Idx	= tTOCIdx / 4u;
 uint	tTOCsubIdx	= tTOCIdx % 4u;
+// Sub-Texture Page
 uint	tilePgAddr	= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
-uvec2	tilePgXY	= uvec2(mod(uvec2(texelUV),SUBTEXTURE_SIDE_WIDTH_TEXELS));
+uvec2	tilePgXY	= uvec2(mod(uvec2(texelXY),SUBTEXTURE_SIDE_WIDTH_TEXELS));
+vec2	tilePgXYsub	= mod(texelXY,float(TILE_SIDE_WIDTH_TEXELS));
 uint	tilePgBytIdx= (uint(tilePgXY.x)/TILE_SIDE_WIDTH_TEXELS + (uint(tilePgXY.y)/TILE_SIDE_WIDTH_TEXELS) * 39u);
 uint	tilePgv4Idx	= tilePgBytIdx / 16u;
 uint	tilePgv4Sub = tilePgBytIdx % 16u;
+// Tile Texture Pages
 uint	tileIdx		= UByte((texelFetch(rootBuffer,int(tilePgv4Idx))[tilePgv4Sub/4u]),tilePgv4Sub%4u);
-uint	tilePgIdx	= (tileIdx+startTile) / TILES_PER_TILE_PAGE;
-uvec2	tilePgUV	= uvec2((tilePgIdx % TILE_PAGE_SIDE_WIDTH_TILES),(tilePgIdx / TILE_PAGE_SIDE_WIDTH_TILES)%TILE_PAGE_SIDE_WIDTH_TILES)*TILE_SIDE_WIDTH_TEXELS;
-uint	tilePgArrID = tilePgIdx / TILES_PER_TILE_PAGE;
+uint	tileArPgIdx	= (tileIdx+startTile) / TILES_PER_TILE_PAGE;
+vec2	tilePgUV	= vec2(float(tileArPgIdx % TILE_PAGE_SIDE_WIDTH_TILES),float((tileArPgIdx / TILE_PAGE_SIDE_WIDTH_TILES)%TILE_PAGE_SIDE_WIDTH_TILES));
+uint	tilePgArrID = tileArPgIdx / TILES_PER_TILE_PAGE;
 //uvec2	tilePgUVsub = ;
 
 uint indexPage;

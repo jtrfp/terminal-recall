@@ -233,7 +233,7 @@ public final class Renderer {
 	    System.exit(1);
 	}
 	System.out.println("...Done.");
-	gpu.getMemoryManager().map();
+	//gpu.getMemoryManager().map();
 	initialized = true;
     }// end ensureInit()
 
@@ -259,7 +259,11 @@ public final class Renderer {
 	final GL3 gl = gpu.getGl();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	ensureInit();
+	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){
+	    gpu.getMemoryManager().unmap();
+	}
 	getCurrentRenderList().render(gl);
+	gpu.getMemoryManager().map();
 	getCurrentRenderList().sendToGPU(gl);
 	fpsTracking();
 	// Update GPU
@@ -270,10 +274,9 @@ public final class Renderer {
 	active = true;
     }// TODO: Remove this when paged conversion is complete.
     
-    public void temporarilyMakeImmediatelyVisible(PositionedRenderable pr){
-	renderList[0].getSubmitter().submit(pr);
-	renderList[1].getSubmitter().submit(pr);
-    }
+    public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
+	Renderer.this.getCurrentRenderList().getSubmitter().submit(pr);
+    }//end temporarilyMakeImmediatelyVisible(...)
     
     public void updateVisibilityList() {
 	if(visibilityUpdateFuture!=null){if(!visibilityUpdateFuture.isDone())return;}
@@ -289,21 +292,26 @@ public final class Renderer {
 					getCamera().getViewDepth() / 2.1)),
 					proximitySorter
 			);
-		proximitySorter.dumpPositionedRenderables(rl.getSubmitter());
+		Renderer.this.gpu.getTr().getThreadManager().blockingEnqueueGLOperation(new Runnable(){
+
+		    @Override
+		    public void run() {
+			proximitySorter.dumpPositionedRenderables(rl.getSubmitter());
+		    }//end gl run()
+		});
 		proximitySorter.reset();
 		toggleRenderList();
-		getCurrentRenderList().sendToGPU(gpu.getGl());
-	    }
+	    }//end pool run()
 	});
     }// end updateVisibilityList()
     
-    public RenderList getCurrentRenderList(){
+    public synchronized RenderList getCurrentRenderList(){
 	return renderList[renderListToggle ? 0 : 1];
     }
-    public RenderList getBackRenderList(){
+    public synchronized RenderList getBackRenderList(){
 	return renderList[renderListToggle ? 1 : 0];
     }
-    private void toggleRenderList(){
+    private synchronized void toggleRenderList(){
 	renderListToggle = !renderListToggle;
     }
 

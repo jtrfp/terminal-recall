@@ -44,9 +44,7 @@ public class RenderList {
     private static final int	BLEND_PASS 		= 1;
 
     private final 	TR 			tr;
-    private final 	PositionedRenderable[] 	renderables = new PositionedRenderable[NUM_BLOCKS_PER_SUBPASS];
     private 		int[] 			hostRenderListPageTable;
-    private 		int 			renderablesIndex = 0;
     private final 	int 			dummyBufferID;
     private 		int 			numOpaqueBlocks;
     private 		int 			numTransparentBlocks;
@@ -80,7 +78,6 @@ public class RenderList {
 		    .getTransparentObjectDefinitionAddresses();
 	    numOpaqueBlocks += opOD.capacity() / 4;
 	    numTransparentBlocks += trOD.capacity() / 4;
-	    renderables[renderablesIndex++] = item;
 	    tr.getObjectListWindow().opaqueIDs.set(0, opaqueIndex, opOD);
 	    opaqueIndex += opOD.capacity();
 	    tr.getObjectListWindow().blendIDs.set(0, blendIndex, trOD);
@@ -146,8 +143,11 @@ public class RenderList {
     private static int frameCounter = 0;
 
     private void updateStatesToGPU() {
-	for (int i = 0; i < renderablesIndex; i++) {
+	/*for (int i = 0; i < renderablesIndex; i++) {
 	    renderables[i].updateStateToGPU();
+	}*/
+	for (int i = 0; i < visibleWorldObjects.size(); i++) {
+	    visibleWorldObjects.get(i).updateStateToGPU();
 	}
     }//end updateStatesToGPU
 
@@ -248,7 +248,6 @@ public class RenderList {
     }
 
     public void reset() {
-	renderablesIndex = 0;
 	numOpaqueBlocks = 0;
 	numTransparentBlocks = 0;
 	blendIndex = 0;

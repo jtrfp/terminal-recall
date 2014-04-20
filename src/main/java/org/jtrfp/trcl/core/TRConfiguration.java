@@ -24,4 +24,13 @@ public class TRConfiguration{
 	public GameVersion getGameVersion() {
 	    return GameVersion.F3;
 	}
+
+	public boolean isUsingTextureBufferUnmap() {
+	    boolean result=true;
+	    if(System.getProperties().containsKey("org.jtrfp.trcl.Renderer.unmapTextureBuffer")){
+		if(System.getProperty("org.jtrfp.trcl.Renderer.unmapTextureBuffer").toUpperCase().contains("FALSE"))
+		    result=false;
+	    }//end if(contains key)
+	    return result;
+	}//end isUsingTextureBufferUnmap()
 }//end TRConfiguration

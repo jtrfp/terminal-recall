@@ -38,15 +38,17 @@ layout(location = 0) out vec4 fragColor;
 const uint TOC_OFFSET_VEC4_HEADER				=91u;//1456/16
 const uint TOC_HEADER_OFFSET_QUADS_WIDTH		=0u;
 const uint TOC_HEADER_OFFSET_QUADS_HEIGHT		=1u;
-const uint TOC_HEADER_OFFSET_QUADS_START_TILE	=2u;
+const uint TOC_HEADER_OFFSET_QUADS_START_CODE	=2u;
 
 const float TILE_PAGE_SIDE_WIDTH_TEXELS = 128;
-const uint TILE_SIDE_WIDTH_TEXELS 		= 4u;
-const uint TILE_PAGE_SIDE_WIDTH_TILES	= uint(TILE_PAGE_SIDE_WIDTH_TEXELS) / TILE_SIDE_WIDTH_TEXELS;
-const uint TILES_PER_TILE_PAGE 			= TILE_PAGE_SIDE_WIDTH_TILES * TILE_PAGE_SIDE_WIDTH_TILES;
+const uint CODE_SIDE_WIDTH_TEXELS 		= 4u;
+const uint CODE_PAGE_SIDE_WIDTH_CODES	= uint(TILE_PAGE_SIDE_WIDTH_TEXELS) / CODE_SIDE_WIDTH_TEXELS;
+const uint CODES_PER_CODE_PAGE 			= CODE_PAGE_SIDE_WIDTH_CODES * CODE_PAGE_SIDE_WIDTH_CODES;
+const uint CODE_PAGE_SIDE_WIDTH_TEXELS	= CODE_PAGE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
+const float CODE_PAGE_TEXEL_SIZE_UV	= 1/float(CODE_PAGE_SIDE_WIDTH_TEXELS);
 
-const uint SUBTEXTURE_SIDE_WIDTH_TILES = 39u;
-const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_TILES * TILE_SIDE_WIDTH_TEXELS;
+const uint SUBTEXTURE_SIDE_WIDTH_CODES = 39u;
+const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
 
 const vec3 sunColor 					= vec3(1.4,1.4,1.2);
 
@@ -66,7 +68,7 @@ uint UByte(uint _input, uint index)
 textureTOC{
 	19^2 x 4B
 	offset 1456B or 91VEC4:
-	TOCHeader {4B width, 4B height, 4B startTile, 4B ???}
+	TOCHeader {4B width, 4B height, 4B startCode, 4B ???}
 	Unused 54B
 	}
 **/
@@ -81,32 +83,34 @@ fragColor 			= (textureID==10u?texture(primaryRendering,screenLoc):vec4(0,0,0,0)
 vec3 	origColor 	= texture(texturePalette,fragColor.xy).rgb;//GET COLOR
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 
+// TOC
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
-uint	startTile	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_TILE];
+uint	startCode	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_CODE];
 vec2	texelXY		= tDims*fragColor.xy;
 uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
 uint	tTOCvec4Idx	= tTOCIdx / 4u;
 uint	tTOCsubIdx	= tTOCIdx % 4u;
-// Sub-Texture Page
-uint	tilePgAddr	= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
-uvec2	tilePgXY	= uvec2(mod(uvec2(texelXY),SUBTEXTURE_SIDE_WIDTH_TEXELS));
-vec2	tilePgXYsub	= mod(texelXY,float(TILE_SIDE_WIDTH_TEXELS));
-uint	tilePgBytIdx= (uint(tilePgXY.x)/TILE_SIDE_WIDTH_TEXELS + (uint(tilePgXY.y)/TILE_SIDE_WIDTH_TEXELS) * 39u);
-uint	tilePgv4Idx	= tilePgBytIdx / 16u;
-uint	tilePgv4Sub = tilePgBytIdx % 16u;
-// Tile Texture Pages
-uint	tileIdx		= UByte((texelFetch(rootBuffer,int(tilePgv4Idx))[tilePgv4Sub/4u]),tilePgv4Sub%4u);
-uint	tileArPgIdx	= (tileIdx+startTile) / TILES_PER_TILE_PAGE;
-vec2	tilePgUV	= vec2(float(tileArPgIdx % TILE_PAGE_SIDE_WIDTH_TILES),float((tileArPgIdx / TILE_PAGE_SIDE_WIDTH_TILES)%TILE_PAGE_SIDE_WIDTH_TILES));
-uint	tilePgArrID = tileArPgIdx / TILES_PER_TILE_PAGE;
-//uvec2	tilePgUVsub = ;
+// Sub-Texture
+uint	subTexAddr	= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
+vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
+vec2	subTexUVsub	= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS))*CODE_PAGE_TEXEL_SIZE_UV;
+vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
+uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * 39u);
+uint	subTexV4Idx	= subTexByIdx / 16u;
+uint	subTexV4Sub = subTexByIdx % 16u;
+// Codebook
+uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx))[subTexV4Sub/4u]),subTexV4Sub%4u);
+uint	codeBkPgNum	= (codeIdx+startCode) / CODES_PER_CODE_PAGE;
+vec2	codePgUV	= (vec2(float(codeBkPgNum % CODE_PAGE_SIDE_WIDTH_CODES),float((codeBkPgNum / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
+uint	codePgArrID = codeBkPgNum / CODES_PER_CODE_PAGE;
+vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codePgArrID));
+//TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
 
 uint indexPage;
 uint codeBook;
 uint tileID;
 uvec4 tile;
-
 
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
 for(int i=0;i<1;i++){

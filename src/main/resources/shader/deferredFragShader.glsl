@@ -107,24 +107,11 @@ uint	codePgArrID = codeBkPgNum / CODES_PER_CODE_PAGE;
 vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codePgArrID));
 //TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
 
-uint indexPage;
-uint codeBook;
-uint tileID;
-uvec4 tile;
-
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
-for(int i=0;i<1;i++){
-	indexPage 	= texelFetch(rootBuffer,int(tocHeader[0u])+i).x;
-	codeBook 	= texelFetch(rootBuffer,int(indexPage)).y;
-	tileID 		= texelFetch(rootBuffer,int(codeBook)).z;
-	tileID 		= texelFetch(rootBuffer,int(tileID)).z;
-	tile		= texelFetch(rootBuffer,int(tileID));
-	norm 		+=float(tile.w)*.000000000001;
-	}
+norm 				+=codeTexel.rgb*.000000000001;
 
 // Illumination. Near-zero norm means assume full lighting
 float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
 fragColor.rgb 			= origColor*fogColor+origColor*sunIllumination*sunColor;
-fragColor.r 			+=(texture(rgbaTiles,vec3(.5,.5,1)).x*.00000000001);//DUMMY
 fragColor 				= mix(fragColor,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
 }//end main()

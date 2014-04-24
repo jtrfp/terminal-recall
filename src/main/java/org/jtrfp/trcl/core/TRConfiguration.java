@@ -19,6 +19,7 @@ import org.jtrfp.trcl.flow.GameVersion;
 
 public class TRConfiguration{
     	private GameVersion gameVersion=GameVersion.F3;
+    	private Boolean usingTextureBufferUnmap;
 	public TRConfiguration(){}
 
 	public GameVersion getGameVersion() {
@@ -26,11 +27,13 @@ public class TRConfiguration{
 	}
 
 	public boolean isUsingTextureBufferUnmap() {
+	    if(usingTextureBufferUnmap!=null)return usingTextureBufferUnmap;
 	    boolean result=true;
 	    if(System.getProperties().containsKey("org.jtrfp.trcl.Renderer.unmapTextureBuffer")){
 		if(System.getProperty("org.jtrfp.trcl.Renderer.unmapTextureBuffer").toUpperCase().contains("FALSE"))
 		    result=false;
 	    }//end if(contains key)
+	    usingTextureBufferUnmap=result;
 	    return result;
 	}//end isUsingTextureBufferUnmap()
 }//end TRConfiguration

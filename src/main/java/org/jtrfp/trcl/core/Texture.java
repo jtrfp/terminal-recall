@@ -34,7 +34,6 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.OutOfTextureSpaceException;
-import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 

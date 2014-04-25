@@ -10,10 +10,10 @@ import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class Explosion extends BillboardSprite {

@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.LineSegment;
-import org.jtrfp.trcl.TextureDescription;
 
 
 /**

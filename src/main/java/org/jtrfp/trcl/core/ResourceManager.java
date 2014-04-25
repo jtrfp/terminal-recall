@@ -65,7 +65,6 @@ import org.jtrfp.trcl.RawAltitudeMapWrapper;
 import org.jtrfp.trcl.RawTextureMeshWrapper;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.file.BINFile;

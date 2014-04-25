@@ -4,9 +4,9 @@ import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class NAVRadarBlipFactory {

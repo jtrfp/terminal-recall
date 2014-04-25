@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Vertex;
 import org.jtrfp.trcl.tools.Util;
 

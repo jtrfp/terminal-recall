@@ -21,6 +21,7 @@ import java.util.TimerTask;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.obj.MeterBar;
 

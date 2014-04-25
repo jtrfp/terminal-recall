@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureDescription;
 
 public class AnimatedTexture implements TextureDescription {
     private Future<Texture>[] frames;

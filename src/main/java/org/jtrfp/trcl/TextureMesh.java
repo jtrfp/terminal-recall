@@ -17,6 +17,8 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.Future;
 
+import org.jtrfp.trcl.core.TextureDescription;
+
 public interface TextureMesh {
     /**
      * Get the Texture at the mesh coordinates

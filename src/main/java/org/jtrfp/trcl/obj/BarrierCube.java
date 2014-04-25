@@ -3,8 +3,8 @@ package org.jtrfp.trcl.obj;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TextureDescription;
 
 public class BarrierCube extends WorldObject {
     final double fluffX;

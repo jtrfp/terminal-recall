@@ -23,6 +23,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;

@@ -24,6 +24,7 @@ import org.jtrfp.trcl.beh.tun.DestructibleWallBehavior;
 import org.jtrfp.trcl.beh.tun.IrisBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;

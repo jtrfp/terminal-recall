@@ -6,9 +6,9 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.NAVSystem;
-import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Mission;
 

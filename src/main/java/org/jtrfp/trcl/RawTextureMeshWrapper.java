@@ -17,6 +17,7 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.Future;
 
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.CLRFile;
 
 public class RawTextureMeshWrapper implements TextureMesh {

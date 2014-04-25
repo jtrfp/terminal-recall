@@ -23,7 +23,7 @@ public class NAVRadarBlipFactory {
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
 	    try{
-	     final Texture tex = new Texture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"");
+	     final Texture tex = new Texture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"",null);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		blipPool[ti][pi]=new Blip(new DummyFuture<TextureDescription>(tex),g);
     	     }//end for(pi)

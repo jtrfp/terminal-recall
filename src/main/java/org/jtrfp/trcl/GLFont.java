@@ -25,6 +25,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.jtrfp.trcl.core.TR;
+
 public class GLFont{
 	private final 		Future<Texture>[] textures;
 	private double 		maxAdvance=-1;
@@ -32,12 +34,14 @@ public class GLFont{
 	private final double [] glWidths=new double[256];
 	private final int 	sideLength;
 	private static final Color TEXT_COLOR=new Color(80,200,180);
+	private final TR	tr;
 	
-	public GLFont(ByteBuffer []indexedPixels, Color [] palette, int imgHeight, List<Integer> widths, int asciiOffset){
-	    this(Texture.indexed2RGBA8888(indexedPixels,palette),imgHeight,widths,asciiOffset);
+	public GLFont(ByteBuffer []indexedPixels, Color [] palette, int imgHeight, List<Integer> widths, int asciiOffset, TR tr){
+	    this(Texture.indexed2RGBA8888(indexedPixels,palette),imgHeight,widths,asciiOffset,tr);
 	}
 	
-	public GLFont(ByteBuffer []rgba8888, int imgHeight, List<Integer> widths, int asciiOffset){
+	public GLFont(ByteBuffer []rgba8888, int imgHeight, List<Integer> widths, int asciiOffset, TR tr){
+	    this.tr=tr;
 	    final int numChars = widths.size();
 	    int maxDim=0;// xOffset=0;
 	    //Determine the biggest dimension and push to maxDim, also load the intrinsic widths
@@ -49,7 +53,7 @@ public class GLFont{
 	    sideLength = (int)Math.pow(2, Math.ceil(Math.log(maxDim)/Math.log(2)));
 	    maxAdvance=imgHeight;
 	    textures = new Future[256];
-	    DummyFuture<Texture> empty = new DummyFuture<Texture>(new Texture(ByteBuffer.allocateDirect(sideLength*sideLength*4),"GLFont rgba buf empty"));
+	    DummyFuture<Texture> empty = new DummyFuture<Texture>(new Texture(ByteBuffer.allocateDirect(sideLength*sideLength*4),"GLFont rgba buf empty",tr));
 	    //Load the gl-specific widths
 	    for(int i=0; i<widths.size();i++){
 		glWidths[i+asciiOffset]=(double)widths.get(i)/((double)getTextureSideLength()*1.2);
@@ -69,7 +73,7 @@ public class GLFont{
 		    texBuf.limit(texBuf.position()+sideLength*4);
 		    texBuf.put(rgba8888[i]);
 		}//end for(imgHeight)
-		textures[i+asciiOffset]=new DummyFuture<Texture>(new Texture(texBuf,"GLFont rgba buf char="+(char)i));
+		textures[i+asciiOffset]=new DummyFuture<Texture>(new Texture(texBuf,"GLFont rgba buf char="+(char)i,tr));
 	    }//end for(i:numChars)
 	    //Load empties to the right side of the ASCII textures.
 	    for(int i=asciiOffset+numChars; i<256;i++){
@@ -77,7 +81,8 @@ public class GLFont{
 	    }//end for(i:asciiOffset)
 	}//end GLFont
 	
-	public GLFont(Font realFont){
+	public GLFont(Font realFont, TR tr){
+	    	this.tr=tr;
 	    	sideLength=64;
 		final Font font=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
 		//Generate the textures
@@ -107,7 +112,7 @@ public class GLFont{
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
 		g.dispose();
-		return new Texture(img,"GLFont "+(char)c);
+		return new Texture(img,"GLFont "+(char)c,tr);
 		}//end renderToTexture(...)
 	
 	public double getTextureSideLength(){return sideLength;}

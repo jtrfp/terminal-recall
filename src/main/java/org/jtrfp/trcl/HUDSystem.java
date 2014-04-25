@@ -51,9 +51,9 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	try {// TODO: Have TR allocate the font ahead of time.
 	    add(new Dashboard(tr));
 	    NDXFile ndx = rm.getNDXFile("STARTUP\\FONT.NDX");
-	    font = new GLFont(rm.getFont("capacitor.zip", "capacitor.ttf"));
+	    font = new GLFont(rm.getFont("capacitor.zip", "capacitor.ttf"),tr);
 	    upfrontFont = new GLFont(rm.getFontBIN("STARTUP\\FONT.BIN", ndx),
-		    UPFRONT_HEIGHT, ndx.getWidths(), 32);
+		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
 	} catch (Exception e) {
 	    System.out.println("Failed to get HUD font.");
 	    throw new RuntimeException(e);
@@ -109,14 +109,14 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	add(mb = new MeterBar(tr, new DummyFuture<TextureDescription>(
 		new Texture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),
-			"HealthBar orangeOrange")), METER_WIDTH, METER_HEIGHT,
+			"HealthBar orangeOrange",tr)), METER_WIDTH, METER_HEIGHT,
 		false));
 	mb.setPosition(HEALTH_POS);
 	healthMeter = mb.getController();
 	add(mb = new MeterBar(tr, new DummyFuture<TextureDescription>(
 		new Texture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),
-			"ThrottleBar blackBlue")), METER_WIDTH, METER_HEIGHT,
+			"ThrottleBar blackBlue",tr)), METER_WIDTH, METER_HEIGHT,
 		false));
 	mb.setPosition(THROTTLE_POS);
 	throttleMeter = mb.getController();

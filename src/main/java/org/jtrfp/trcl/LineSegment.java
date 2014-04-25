@@ -83,7 +83,7 @@ public abstract class LineSegment {
 	 defaultTriPipeTexture
 	    	= new DummyFuture<TextureDescription>(
 	    		new Texture(Texture.RGBA8FromPNG(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
-	    			"Default TriPipe Texture (grayNoise)"));
+	    			"Default TriPipe Texture (grayNoise)",null));
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()

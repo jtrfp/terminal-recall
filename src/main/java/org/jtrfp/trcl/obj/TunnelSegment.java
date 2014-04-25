@@ -144,11 +144,11 @@ public class TunnelSegment extends WorldObject {
 			    // why dummies must
 			    // be added
 			    new DummyFuture<Texture>(new Texture(t, 0, .5, .5,
-				    .5)),// ON
+				    .5,tr)),// ON
 			    new DummyFuture<Texture>(new Texture(t, .505, .5,
-				    .501, .5)),// OFF
-			    new DummyFuture<Texture>(new Texture(t, 0, 0, 0, 0)),// DUMMY
-			    new DummyFuture<Texture>(new Texture(t, 0, 0, 0, 0)) // DUMMY
+				    .501, .5,tr)),// OFF
+			    new DummyFuture<Texture>(new Texture(t, 0, 0, 0, 0,tr)),// DUMMY
+			    new DummyFuture<Texture>(new Texture(t, 0, 0, 0, 0,tr)) // DUMMY
 		    };
 		    final SelectableTexture st = new SelectableTexture(frames);
 		    tex = new DummyFuture<TextureDescription>(st);

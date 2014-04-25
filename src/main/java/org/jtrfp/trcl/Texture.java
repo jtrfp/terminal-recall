@@ -32,11 +32,13 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 
 public class Texture implements TextureDescription {
     TextureTreeNode nodeForThisTexture;
+    private final TR tr;
     private Color averageColor;
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
 						  // doesn't scale with
@@ -63,18 +65,19 @@ public class Texture implements TextureDescription {
 	t = new Texture(
 		RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),
-		"Fallback");
+		"Fallback",null);
 	fallbackTexture = new DummyFuture<TextureDescription>(t);
     }
     private static ByteBuffer emptyRow = null;
 
     public Texture(Texture parent, double uOff, double vOff, double uSize,
-	    double vSize) {
+	    double vSize, TR tr) {
 	nodeForThisTexture = new UVTranslatingTextureTreeNode(
 		parent.getNodeForThisTexture(), uOff, vOff, uSize, vSize);
+	this.tr=tr;
     }
 
-    public Texture(ByteBuffer imageRGB8, String debugName) {
+    public Texture(ByteBuffer imageRGB8, String debugName, TR tr) {
 	if (imageRGB8.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
@@ -85,9 +88,10 @@ public class Texture implements TextureDescription {
 	nodeForThisTexture = newNode;
 	newNode.setImage(imageRGB8);
 	registerNode(newNode);
+	this.tr=tr;
     }// end constructor
 
-    public Texture(BufferedImage img, String debugName) {
+    public Texture(BufferedImage img, String debugName, TR tr) {
 	final int sideLength = img.getWidth();
 	if (sideLength == 0) {
 	    throw new IllegalArgumentException(
@@ -116,8 +120,11 @@ public class Texture implements TextureDescription {
 		(blueA / div) / 255f);
 	newNode.setImage(rgba);
 	registerNode(newNode);
-    }
+	this.tr=tr;
+    }//end constructor
 
+    
+    
     public static ByteBuffer RGBA8FromPNG(File f) {
 	try {
 	    return RGBA8FromPNG(new FileInputStream(f));
@@ -761,7 +768,7 @@ public class Texture implements TextureDescription {
 	this.nodeForThisTexture = nodeForThisTexture;
     }
 
-    public static Future<TextureDescription> solidColor(Color color) {
+    public static Future<TextureDescription> solidColor(Color color, TR tr) {
 	BufferedImage img = new BufferedImage(64, 64,
 		BufferedImage.TYPE_INT_RGB);
 	Graphics g = img.getGraphics();
@@ -770,7 +777,7 @@ public class Texture implements TextureDescription {
 	g.dispose();
 
 	return new DummyFuture<TextureDescription>(new Texture(img,
-		"Solid color " + color));
+		"Solid color " + color,tr));
     }
 
     /**

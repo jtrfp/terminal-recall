@@ -32,7 +32,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere{
 		//Fallback
 		Future<Texture> [] greenThrobFrames = new Future[16];
 		for(int f=0; f<8; f++)
-			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)Texture.solidColor(new Color(f*22,f*32,f*23,170));}
+			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)Texture.solidColor(new Color(f*22,f*32,f*23,170),null);}
 		Future<TextureDescription> greenThrob = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(80,greenThrobFrames.length,false), greenThrobFrames));
 		/*
 		final double xhairScale=.80;

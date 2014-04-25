@@ -60,15 +60,7 @@ public class Texture implements TextureDescription {
 	}
     }// end waitUntilTextureProcessingEnds()
 
-    private static final Future<TextureDescription> fallbackTexture;
-    static {
-	Texture t;
-	t = new Texture(
-		RGBA8FromPNG(Texture.class
-			.getResourceAsStream("/fallbackTexture.png")),
-		"Fallback",null);
-	fallbackTexture = new DummyFuture<TextureDescription>(t);
-    }
+    
     private static ByteBuffer emptyRow = null;
 
     private Texture(Texture parent, double uOff, double vOff, double uSize,
@@ -84,6 +76,9 @@ public class Texture implements TextureDescription {
     }
 
     Texture(ByteBuffer imageRGB8, String debugName, TR tr) {
+if(tr.getTrConfig().isUsingNewTexturing()){
+	    
+	}else{
 	if (imageRGB8.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
@@ -94,38 +89,41 @@ public class Texture implements TextureDescription {
 	nodeForThisTexture = newNode;
 	newNode.setImage(imageRGB8);
 	registerNode(newNode);
+	}
 	this.tr=tr;
     }// end constructor
 
     Texture(BufferedImage img, String debugName, TR tr) {
-	final int sideLength = img.getWidth();
-	if (sideLength == 0) {
-	    throw new IllegalArgumentException(
-		    "Cannot create texture of zero size.");
-	}
-	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
-		debugName);
-	nodeForThisTexture = newNode;
-	// TODO Add true alpha support and optimize like the one below
-	long redA = 0, greenA = 0, blueA = 0;
-	rgba = ByteBuffer.allocateDirect(img.getWidth() * img.getHeight() * 4);
-	for (int y = 0; y < img.getHeight(); y++) {
-	    for (int x = 0; x < img.getWidth(); x++) {
-		Color c = new Color(img.getRGB(x, y), true);
-		rgba.put((byte) c.getRed());
-		rgba.put((byte) c.getGreen());
-		rgba.put((byte) c.getBlue());
-		rgba.put((byte) c.getAlpha());
-		redA += c.getRed();
-		greenA += c.getGreen();
-		blueA += c.getBlue();
-	    }// end for(x)
-	}// end for(y)
-	final int div = rgba.capacity() / 4;
-	averageColor = new Color((redA / div) / 255f, (greenA / div) / 255f,
-		(blueA / div) / 255f);
-	newNode.setImage(rgba);
-	registerNode(newNode);
+	if(tr.getTrConfig().isUsingNewTexturing()){
+	    
+	}else{
+	    final int sideLength = img.getWidth();
+	    
+	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
+		    debugName);
+	    nodeForThisTexture = newNode;
+	    // TODO Add true alpha support and optimize like the one below
+	    long redA = 0, greenA = 0, blueA = 0;
+	    rgba = ByteBuffer.allocateDirect(img.getWidth() * img.getHeight()
+		    * 4);
+	    for (int y = 0; y < img.getHeight(); y++) {
+		for (int x = 0; x < img.getWidth(); x++) {
+		    Color c = new Color(img.getRGB(x, y), true);
+		    rgba.put((byte) c.getRed());
+		    rgba.put((byte) c.getGreen());
+		    rgba.put((byte) c.getBlue());
+		    rgba.put((byte) c.getAlpha());
+		    redA += c.getRed();
+		    greenA += c.getGreen();
+		    blueA += c.getBlue();
+		}// end for(x)
+	    }// end for(y)
+	    final int div = rgba.capacity() / 4;
+	    averageColor = new Color((redA / div) / 255f,
+		    (greenA / div) / 255f, (blueA / div) / 255f);
+	    newNode.setImage(rgba);
+	    registerNode(newNode);
+	}//end if(!newTexturing)
 	this.tr=tr;
     }//end constructor
     
@@ -216,10 +214,10 @@ public class Texture implements TextureDescription {
 	}// end else{rootNode!=null}
 	// System.out.println("...done registering.\n");
     }// end registerNode(...)
-
+/*
     public static Future<TextureDescription> getFallbackTexture() {
 	return fallbackTexture;
-    }
+    }*/
 
     // public static int getGlobalTextureID(){return globalTexID;}
 

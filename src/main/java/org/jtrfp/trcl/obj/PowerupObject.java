@@ -32,7 +32,7 @@ public class PowerupObject extends BillboardSprite{
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
-		Future<TextureDescription> desc=Texture.getFallbackTexture();
+		Future<TextureDescription> desc=getTr().getGPU().getTextureManager().getFallbackTexture();
 		if(pt==Powerup.Random){
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
 		}

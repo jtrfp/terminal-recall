@@ -206,12 +206,12 @@ public class ResourceManager{
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=Texture.getFallbackTexture().get();
+				result=tr.getGPU().getTextureManager().getFallbackTexture().get();
 				}
 			catch(NonPowerOfTwoException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=Texture.getFallbackTexture().get();
+				result=tr.getGPU().getTextureManager().getFallbackTexture().get();
 				}
 			return result;
 		    }
@@ -235,7 +235,7 @@ public class ResourceManager{
 		}//end rawExists
 	
 	public Model getBINModel(String name, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
-		return getBINModel(name,Texture.getFallbackTexture(),1,true,palette,gl);
+		return getBINModel(name,tr.getGPU().getTextureManager().getFallbackTexture(),1,true,palette,gl);
 		}
 	
 	private static final double [] BOX_U = new double[]{0,1,1,0};
@@ -362,7 +362,7 @@ public class ResourceManager{
 									1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000), vi);}
 							}//end for(vi)
 							if(currentTexture==null)
-								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=Texture.getFallbackTexture();}
+								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=tr.getGPU().getTextureManager().getFallbackTexture();}
 							result.addTriangle(t);
 							}//end if(3 vertices)
 						else

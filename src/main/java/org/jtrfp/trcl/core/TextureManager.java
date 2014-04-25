@@ -16,19 +16,24 @@ import org.jtrfp.trcl.LineSegment;
  */
 
 public class TextureManager {
-    private final TR tr;
-    private final TextureCodebookWindow 	codebookWindow;
+    private final TR 				tr;
     private final TextureTileWindow 		tileWindow;
     private final TextureTOCWindow 		tocWindow;
     private final TextureMipmapTOCWindow 	mipmapTOCWindow;
     private final TextureTileManager		textureTileManager;
+    private final Future<TextureDescription>	fallbackTexture;
     public TextureManager(TR tr){
 	this.tr		= tr;
-	codebookWindow	= new TextureCodebookWindow(tr);
 	tileWindow 	= new TextureTileWindow(tr);
 	tocWindow 	= new TextureTOCWindow(tr);
 	mipmapTOCWindow = new TextureMipmapTOCWindow(tr);
 	textureTileManager = new TextureTileManager(tr.getGPU());
+	Texture t;
+	t = new Texture(
+		Texture.RGBA8FromPNG(Texture.class
+			.getResourceAsStream("/fallbackTexture.png")),
+		"Fallback",tr);
+	fallbackTexture = new DummyFuture<TextureDescription>(t);
     }//end constructor
     
     public Gen2Texture newGen2Texture(int width, int height){
@@ -51,7 +56,7 @@ public class TextureManager {
         return textureTileManager;
     }
     
-    private static Future<TextureDescription> defaultTriPipeTexture;
+    private Future<TextureDescription> defaultTriPipeTexture;
     
     public Future<TextureDescription> getDefaultTriPipeTexture(){
 	if(defaultTriPipeTexture==null){
@@ -62,4 +67,8 @@ public class TextureManager {
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
+    
+    public Future<TextureDescription> getFallbackTexture(){
+	return fallbackTexture;
+    }//end getFallbackTexture()
 }//end TextureSystem

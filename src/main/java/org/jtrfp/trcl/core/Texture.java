@@ -13,7 +13,7 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -32,7 +32,9 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.DummyFuture;
+import org.jtrfp.trcl.OutOfTextureSpaceException;
+import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 
@@ -70,14 +72,19 @@ public class Texture implements TextureDescription {
     }
     private static ByteBuffer emptyRow = null;
 
-    public Texture(Texture parent, double uOff, double vOff, double uSize,
+    private Texture(Texture parent, double uOff, double vOff, double uSize,
 	    double vSize, TR tr) {
 	nodeForThisTexture = new UVTranslatingTextureTreeNode(
 		parent.getNodeForThisTexture(), uOff, vOff, uSize, vSize);
 	this.tr=tr;
     }
+    
+    public Texture subTexture(double uOff, double vOff, double uSize,
+	    double vSize){
+	return new Texture(this,uOff,vOff,uSize,vSize,tr);
+    }
 
-    public Texture(ByteBuffer imageRGB8, String debugName, TR tr) {
+    Texture(ByteBuffer imageRGB8, String debugName, TR tr) {
 	if (imageRGB8.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
@@ -91,7 +98,7 @@ public class Texture implements TextureDescription {
 	this.tr=tr;
     }// end constructor
 
-    public Texture(BufferedImage img, String debugName, TR tr) {
+    Texture(BufferedImage img, String debugName, TR tr) {
 	final int sideLength = img.getWidth();
 	if (sideLength == 0) {
 	    throw new IllegalArgumentException(
@@ -122,8 +129,6 @@ public class Texture implements TextureDescription {
 	registerNode(newNode);
 	this.tr=tr;
     }//end constructor
-
-    
     
     public static ByteBuffer RGBA8FromPNG(File f) {
 	try {
@@ -318,7 +323,7 @@ public class Texture implements TextureDescription {
 
     }
 
-    static class TextureTreeNode {
+    public static class TextureTreeNode {
 	private TextureTreeNode parent;
 	private double offsetU, offsetV;// In OpenGL orientation: (0,0) is
 					// bottom left.

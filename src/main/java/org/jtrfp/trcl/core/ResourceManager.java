@@ -65,7 +65,6 @@ import org.jtrfp.trcl.RawAltitudeMapWrapper;
 import org.jtrfp.trcl.RawTextureMeshWrapper;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
@@ -388,7 +387,9 @@ public class ResourceManager{
 						if(!alreadyVisitedLineSegs.contains(v1.hashCode()*v2.hashCode())){
 						    Triangle [] newTris = new Triangle[6];
 						   
-						    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(), LineSegment.getDefaultTriPipeTexture(), 200, newTris, 0);
+						    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(), 
+							    tr.getGPU().getTextureManager().getDefaultTriPipeTexture(), 
+							    200, newTris, 0);
 						    result.addTriangles(newTris);
 						    alreadyVisitedLineSegs.add(v1.hashCode()*v2.hashCode());
 						}

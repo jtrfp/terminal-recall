@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.Texture;
 
 public abstract class LineSegment {
     public static Triangle[] buildTriPipe(Vector3D start, Vector3D end,
@@ -76,15 +77,4 @@ public abstract class LineSegment {
 		destOffset + 4);
 	return dest;
     }// end buildTriPipe
-    
-    private static Future<TextureDescription> defaultTriPipeTexture;
-    public static Future<TextureDescription> getDefaultTriPipeTexture(){
-	if(defaultTriPipeTexture==null){
-	 defaultTriPipeTexture
-	    	= new DummyFuture<TextureDescription>(
-	    		new Texture(Texture.RGBA8FromPNG(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
-	    			"Default TriPipe Texture (grayNoise)",null));
-	}
-	return defaultTriPipeTexture;
-    }//end getDefaultTriPipeTexture()
 }// end LineSegment

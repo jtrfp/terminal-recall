@@ -17,6 +17,8 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.Future;
 
+import org.jtrfp.trcl.core.Texture;
+
 public class SelectableTexture extends AnimatedTexture{
 	public SelectableTexture(Future<Texture>[] frames)
 		{super(new Selector(), frames);}

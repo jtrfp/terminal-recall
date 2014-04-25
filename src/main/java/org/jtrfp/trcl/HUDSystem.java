@@ -20,6 +20,7 @@ import java.util.TimerTask;
 
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.obj.MeterBar;
 
@@ -107,16 +108,16 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	add(new Crosshairs(tr));
 	MeterBar mb;
 	add(mb = new MeterBar(tr, new DummyFuture<TextureDescription>(
-		new Texture(Texture.RGBA8FromPNG(Texture.class
+		tr.getGPU().getTextureManager().newTexture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),
-			"HealthBar orangeOrange",tr)), METER_WIDTH, METER_HEIGHT,
+			"HealthBar orangeOrange")), METER_WIDTH, METER_HEIGHT,
 		false));
 	mb.setPosition(HEALTH_POS);
 	healthMeter = mb.getController();
 	add(mb = new MeterBar(tr, new DummyFuture<TextureDescription>(
-		new Texture(Texture.RGBA8FromPNG(Texture.class
+		tr.getGPU().getTextureManager().newTexture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),
-			"ThrottleBar blackBlue",tr)), METER_WIDTH, METER_HEIGHT,
+			"ThrottleBar blackBlue")), METER_WIDTH, METER_HEIGHT,
 		false));
 	mb.setPosition(THROTTLE_POS);
 	throttleMeter = mb.getController();

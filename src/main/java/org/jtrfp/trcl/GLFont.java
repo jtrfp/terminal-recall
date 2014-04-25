@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Texture;
 
 public class GLFont{
 	private final 		Future<Texture>[] textures;
@@ -53,7 +54,12 @@ public class GLFont{
 	    sideLength = (int)Math.pow(2, Math.ceil(Math.log(maxDim)/Math.log(2)));
 	    maxAdvance=imgHeight;
 	    textures = new Future[256];
-	    DummyFuture<Texture> empty = new DummyFuture<Texture>(new Texture(ByteBuffer.allocateDirect(sideLength*sideLength*4),"GLFont rgba buf empty",tr));
+	DummyFuture<Texture> empty = new DummyFuture<Texture>(tr
+		.getGPU()
+		.getTextureManager()
+		.newTexture(
+			ByteBuffer.allocateDirect(sideLength * sideLength * 4),
+			"GLFont rgba buf empty"));
 	    //Load the gl-specific widths
 	    for(int i=0; i<widths.size();i++){
 		glWidths[i+asciiOffset]=(double)widths.get(i)/((double)getTextureSideLength()*1.2);
@@ -73,7 +79,8 @@ public class GLFont{
 		    texBuf.limit(texBuf.position()+sideLength*4);
 		    texBuf.put(rgba8888[i]);
 		}//end for(imgHeight)
-		textures[i+asciiOffset]=new DummyFuture<Texture>(new Texture(texBuf,"GLFont rgba buf char="+(char)i,tr));
+	    textures[i + asciiOffset] = new DummyFuture<Texture>(tr.getGPU().getTextureManager().newTexture(
+		    texBuf, "GLFont rgba buf char=" + (char) i));
 	    }//end for(i:numChars)
 	    //Load empties to the right side of the ASCII textures.
 	    for(int i=asciiOffset+numChars; i<256;i++){
@@ -112,7 +119,7 @@ public class GLFont{
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
 		g.dispose();
-		return new Texture(img,"GLFont "+(char)c,tr);
+		return tr.getGPU().getTextureManager().newTexture(img,"GLFont "+(char)c);
 		}//end renderToTexture(...)
 	
 	public double getTextureSideLength(){return sideLength;}

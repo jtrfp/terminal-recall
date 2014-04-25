@@ -19,6 +19,7 @@ import java.awt.Color;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 

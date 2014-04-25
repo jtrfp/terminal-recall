@@ -18,6 +18,8 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.util.concurrent.Future;
 
+import org.jtrfp.trcl.core.Texture;
+
 public class AnimatedTexture implements TextureDescription {
     private Future<Texture>[] frames;
     // private int timeBetweenFramesInMillis;

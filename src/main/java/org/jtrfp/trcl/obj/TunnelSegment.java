@@ -20,16 +20,16 @@ import java.util.concurrent.Future;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.SelectableTexture;
-import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.Tickable;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
 import org.jtrfp.trcl.math.IntRandomTransferFunction;
@@ -135,7 +135,7 @@ public class TunnelSegment extends WorldObject {
 	    Future<TextureDescription> tex = tunnelTexturePalette[s
 		    .getPolyTextureIndices().get(pi)];
 
-	    final FlickerLightType flt = s.getFlickerLightType();
+	    final FlickerLightType 	flt 	= s.getFlickerLightType();
 	    if (pi == lightPoly && flt != FlickerLightType.noLight) {
 		try {
 		    final Texture t = (Texture) tex.get();
@@ -143,12 +143,12 @@ public class TunnelSegment extends WorldObject {
 		    Future<Texture>[] frames = new Future[] {// TODO: Figure out
 			    // why dummies must
 			    // be added
-			    new DummyFuture<Texture>(new Texture(t, 0, .5, .5,
-				    .5,tr)),// ON
-			    new DummyFuture<Texture>(new Texture(t, .505, .5,
-				    .501, .5,tr)),// OFF
-			    new DummyFuture<Texture>(new Texture(t, 0, 0, 0, 0,tr)),// DUMMY
-			    new DummyFuture<Texture>(new Texture(t, 0, 0, 0, 0,tr)) // DUMMY
+			    new DummyFuture<Texture>(t.subTexture(0, .5, .5,
+				    .5)),// ON
+			    new DummyFuture<Texture>(t.subTexture(.505, .5,
+				    .501, .5)),// OFF
+			    new DummyFuture<Texture>(t.subTexture(0, 0, 0, 0)),// DUMMY
+			    new DummyFuture<Texture>(t.subTexture(0, 0, 0, 0)) // DUMMY
 		    };
 		    final SelectableTexture st = new SelectableTexture(frames);
 		    tex = new DummyFuture<TextureDescription>(st);

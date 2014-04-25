@@ -4,9 +4,9 @@ import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.Texture;
 import org.jtrfp.trcl.TextureDescription;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class NAVRadarBlipFactory {
@@ -23,7 +23,7 @@ public class NAVRadarBlipFactory {
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
 	    try{
-	     final Texture tex = new Texture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"",null);
+	     final Texture tex = tr.getGPU().getTextureManager().newTexture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"");
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		blipPool[ti][pi]=new Blip(new DummyFuture<TextureDescription>(tex),g);
     	     }//end for(pi)

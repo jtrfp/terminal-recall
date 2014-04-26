@@ -21,15 +21,13 @@ public class TextureManager {
     private final TR 				tr;
     private final TextureTileWindow 		tileWindow;
     private final TextureTOCWindow 		tocWindow;
-    private final TextureMipmapTOCWindow 	mipmapTOCWindow;
-    private final VQCodebookManager		textureTileManager;
+    private final VQCodebookManager		vqCodebookManager;
     private Future<TextureDescription>		fallbackTexture;
     public TextureManager(TR tr){
 	this.tr			= tr;
 	tileWindow 		= new TextureTileWindow(tr);
 	tocWindow 		= new TextureTOCWindow(tr);
-	mipmapTOCWindow 	= new TextureMipmapTOCWindow(tr);
-	textureTileManager 	= new VQCodebookManager(tr.getGPU());
+	vqCodebookManager 	= new VQCodebookManager(tr.getGPU());
     }//end constructor
     
     public Gen2Texture newGen2Texture(int width, int height){
@@ -49,7 +47,7 @@ public class TextureManager {
      * @return the textureTileManager
      */
     public VQCodebookManager getCodebookManager() {
-        return textureTileManager;
+        return vqCodebookManager;
     }
     
     private Future<TextureDescription> defaultTriPipeTexture;

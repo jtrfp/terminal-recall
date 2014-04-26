@@ -16,7 +16,6 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -34,10 +33,12 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.OutOfTextureSpaceException;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
+import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
+import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
 
 public class Texture implements TextureDescription {
     TextureTreeNode nodeForThisTexture;
@@ -77,38 +78,85 @@ public class Texture implements TextureDescription {
 	return new Texture(this,uOff,vOff,uSize,vSize,tr);
     }
 
-    Texture(ByteBuffer imageRGB8, String debugName, TR tr) {
-if(tr.getTrConfig().isUsingNewTexturing()){
-    	final double sideLength = Math.sqrt((imageRGB8.capacity() / 4));
-    	// TEMPORARY TESTING CODE
-    	ByteBuffer nImageRGB8 = ByteBuffer.allocate(64*64*4);
-    	for(int p=0; p<64*64; p++){//Slow but temporary
-    	    final double destU = (p % 64)/64.;
-    	    final double destV = (p / 64.)/64.;
-    	    final double sourceU = (p % sideLength)/sideLength;
-	    final double sourceV = (p / sideLength)/sideLength;
-    	    nImageRGB8.put((int)(destU*64+destV*64*64), 
-    		    imageRGB8.get((int)(sourceU*4*sideLength+sourceV*4*sideLength*sideLength+0)));
-    	    imageRGB8=nImageRGB8;
-    	}
-	}
-	if (imageRGB8.capacity() == 0) {
+    Texture(ByteBuffer imageRGBA8888, String debugName, TR tr) {
+	if (tr.getTrConfig().isUsingNewTexturing()) {// Temporary; conform size
+						     // to 64x64
+	    final double sideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
+	    imageRGBA8888.clear();
+	    // TEMPORARY TESTING CODE
+	    ByteBuffer nImageRGBA8888 = ByteBuffer.allocate(64 * 64 * 4);
+	    for (int p = 0; p < 64 * 64; p++) {// Slow but temporary
+		final double u = (p % 64) / 64.;
+		final double v = (p / 64.) / 64.;
+		final int sx = (int) (u * sideLength);
+		final int sy = (int) (v * sideLength);
+		final int dx = (int) (u * 64.);
+		final int dy = (int) (v * 64.);
+		final int sourceIndex = ((int) (Math.floor(sx) + Math.floor(sy
+			* sideLength)) * 4 + 0);
+		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 0),
+			imageRGBA8888.get(sourceIndex + 0));
+		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 1),
+			imageRGBA8888.get(sourceIndex + 1));
+		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 2),
+			imageRGBA8888.get(sourceIndex + 2));
+		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 3),
+			imageRGBA8888.get(sourceIndex + 3));
+	    }// end for(p)
+	    imageRGBA8888 = nImageRGBA8888;
+	    final GPU 			gpu 	= tr.getGPU();
+	    final TextureManager 	tm 	= gpu.getTextureManager();
+	    final VQCodebookManager 	cbm 	= tm.getCodebookManager();
+	    final TextureTOCWindow 	tw 	= tm.getTOCWindow();
+
+	    // Break down into 4x4 blocks
+	    ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
+	    RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
+	    RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
+		    rgba8888vl, 64, 4);
+	    // Get a codebook256
+	    final int codebook256Index = tm.getCodebookManager()
+		    .newCodebook256();
+	    final int codebookStartOffset = codebook256Index * 256;
+	    // Get a TOC
+	    final int tocIndex = tw.create();
+	    final ByteBuffer vectorBuffer = ByteBuffer
+		    .allocateDirect(4 * 4 * 4);
+	    tw.startTile.set(tocIndex, codebookStartOffset);
+	    tw.height.set(tocIndex, 64);
+	    tw.width.set(tocIndex, 64);
+	    // Push vectors to codebook
+	    for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
+		vectorBuffer.clear();
+		for (int vi = 0; vi < 4 * 4 * 4; vi++) {
+		    vectorBuffer
+			    .put((byte) (rbvl.componentAt(codeIndex, vi) * 255));
+		}
+		final int globalCodeIndex = codeIndex + codebookStartOffset;
+		vectorBuffer.clear();
+		cbm.setRGBA(globalCodeIndex, vectorBuffer);
+		tw.subtexturePageIndices.setAt(tocIndex, codeIndex,
+			globalCodeIndex);
+	    }// end for(codeIndex)
+
+	}// end if(newTexturing)
+	if (imageRGBA8888.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
 	}
-	final int sideLength = (int) Math.sqrt((imageRGB8.capacity() / 4));
+	final int sideLength = (int) Math.sqrt((imageRGBA8888.capacity() / 4));
 	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
 		debugName);
 	nodeForThisTexture = newNode;
-	newNode.setImage(imageRGB8);
+	newNode.setImage(imageRGBA8888);
 	registerNode(newNode);
 	this.tr=tr;
     }// end constructor
 
     Texture(BufferedImage img, String debugName, TR tr) {
-	if(tr.getTrConfig().isUsingNewTexturing()){
-	    final double sx=64/img.getWidth();
-	    final double sy=64/img.getHeight();
+	if(tr.getTrConfig().isUsingNewTexturing()){//Temporary; conform size to 64x64
+	    final double sx=64./img.getWidth();
+	    final double sy=64./img.getHeight();
 	    BufferedImage nImg = new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
 	    AffineTransform at = new AffineTransform();
 	    at.scale(sx, sy);

@@ -121,10 +121,4 @@ public class GPU{
 	public TextureManager getTextureManager() {
 	    return textureManager;
 	}
-	/**
-	 * @param textureManager the textureManager to set
-	 */
-	public void setTextureManager(TextureManager textureManager) {
-	    this.textureManager = textureManager;
-	}
 	}//end GPU

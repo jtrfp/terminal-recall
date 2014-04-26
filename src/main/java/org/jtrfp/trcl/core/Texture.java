@@ -17,6 +17,8 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -77,8 +79,19 @@ public class Texture implements TextureDescription {
 
     Texture(ByteBuffer imageRGB8, String debugName, TR tr) {
 if(tr.getTrConfig().isUsingNewTexturing()){
-	    
-	}else{
+    	final double sideLength = Math.sqrt((imageRGB8.capacity() / 4));
+    	// TEMPORARY TESTING CODE
+    	ByteBuffer nImageRGB8 = ByteBuffer.allocate(64*64*4);
+    	for(int p=0; p<64*64; p++){//Slow but temporary
+    	    final double destU = (p % 64)/64.;
+    	    final double destV = (p / 64.)/64.;
+    	    final double sourceU = (p % sideLength)/sideLength;
+	    final double sourceV = (p / sideLength)/sideLength;
+    	    nImageRGB8.put((int)(destU*64+destV*64*64), 
+    		    imageRGB8.get((int)(sourceU*4*sideLength+sourceV*4*sideLength*sideLength+0)));
+    	    imageRGB8=nImageRGB8;
+    	}
+	}
 	if (imageRGB8.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
@@ -89,14 +102,20 @@ if(tr.getTrConfig().isUsingNewTexturing()){
 	nodeForThisTexture = newNode;
 	newNode.setImage(imageRGB8);
 	registerNode(newNode);
-	}
 	this.tr=tr;
     }// end constructor
 
     Texture(BufferedImage img, String debugName, TR tr) {
 	if(tr.getTrConfig().isUsingNewTexturing()){
-	    
-	}else{
+	    final double sx=64/img.getWidth();
+	    final double sy=64/img.getHeight();
+	    BufferedImage nImg = new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
+	    AffineTransform at = new AffineTransform();
+	    at.scale(sx, sy);
+	    AffineTransformOp scaleOp = 
+	       new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+	    img = scaleOp.filter(img, nImg);
+	}
 	    final int sideLength = img.getWidth();
 	    
 	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
@@ -123,7 +142,6 @@ if(tr.getTrConfig().isUsingNewTexturing()){
 		    (greenA / div) / 255f, (blueA / div) / 255f);
 	    newNode.setImage(rgba);
 	    registerNode(newNode);
-	}//end if(!newTexturing)
 	this.tr=tr;
     }//end constructor
     
@@ -769,19 +787,20 @@ if(tr.getTrConfig().isUsingNewTexturing()){
     public void setNodeForThisTexture(TextureTreeNode nodeForThisTexture) {
 	this.nodeForThisTexture = nodeForThisTexture;
     }
-
-    public static Future<TextureDescription> solidColor(Color color, TR tr) {
+/*
+    public static Future<TextureDescription> solidColor(Color color, TR tr) {//TODO: move to TextureManager.
 	BufferedImage img = new BufferedImage(64, 64,
 		BufferedImage.TYPE_INT_RGB);
 	Graphics g = img.getGraphics();
 	g.setColor(color);
 	g.fillRect(0, 0, 64, 64);
 	g.dispose();
-
-	return new DummyFuture<TextureDescription>(new Texture(img,
-		"Solid color " + color,tr));
+	final DummyFuture<TextureDescription> result = new DummyFuture<TextureDescription>(new Texture(img,
+		"Solid color " + color,tr));////////STACK TRACE LOSS OCCURS HERE
+	
+	return result;
     }
-
+*/
     /**
      * @return the rgba
      */

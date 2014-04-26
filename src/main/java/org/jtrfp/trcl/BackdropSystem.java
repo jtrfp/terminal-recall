@@ -20,6 +20,7 @@ import java.awt.Color;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
@@ -28,12 +29,13 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 	public BackdropSystem(World world){
 		super(world);
 		final TR tr = world.getTr();
+		final TextureManager tm = tr.getGPU().getTextureManager();
 		//Backdrop
 		Model backdropModel=new Model(false,tr);
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(world.getFogColor(),tr), RenderMode.DYNAMIC,Vector3D.ZERO));
+						new double[]{0,1,1,0}, new double[]{0,0,1,1}, tm.solidColor(world.getFogColor()), RenderMode.DYNAMIC,Vector3D.ZERO));
 		overworldBackdrop = new WorldObject2DVisibleEverywhere(tr,backdropModel.finalizeModel());
 		overworldBackdrop.setRenderFlags((byte)1);
 		add(overworldBackdrop);
@@ -42,7 +44,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		backdropModel.addTriangles(
 				Triangle.quad2Triangles(
 						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, Texture.solidColor(Color.black,tr), RenderMode.DYNAMIC,Vector3D.ZERO));
+						new double[]{0,1,1,0}, new double[]{0,0,1,1}, tm.solidColor(Color.black), RenderMode.DYNAMIC,Vector3D.ZERO));
 		tunnelBackdrop = new WorldObject2DVisibleEverywhere(tr,backdropModel.finalizeModel());
 		tunnelBackdrop.setRenderFlags((byte)1);
 		tunnelBackdrop.setVisible(false);

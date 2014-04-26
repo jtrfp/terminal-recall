@@ -22,6 +22,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
 public class Crosshairs extends WorldObject2DVisibleEverywhere{
@@ -30,11 +31,12 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere{
 		super(tr);
 		//Crosshairs
 		Model crossModel=null;
+		final TextureManager tm = tr.getGPU().getTextureManager();
 		
 		//Fallback
 		Future<Texture> [] greenThrobFrames = new Future[16];
 		for(int f=0; f<8; f++)
-			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)Texture.solidColor(new Color(f*22,f*32,f*23,170),null);}
+			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Future)tm.solidColor(new Color(f*22,f*32,f*23,170));}
 		Future<TextureDescription> greenThrob = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(80,greenThrobFrames.length,false), greenThrobFrames));
 		/*
 		final double xhairScale=.80;

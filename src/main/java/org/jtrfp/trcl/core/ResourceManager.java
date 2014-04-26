@@ -201,7 +201,7 @@ public class ResourceManager{
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWImage(name,palette,proc),name,null);
+				result = new Texture(getRAWImage(name,palette,proc),name,tr);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());

@@ -1,6 +1,8 @@
 package org.jtrfp.trcl.core;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
@@ -71,4 +73,16 @@ public class TextureManager {
     public Future<TextureDescription> getFallbackTexture(){
 	return fallbackTexture;
     }//end getFallbackTexture()
+    
+    public Future<TextureDescription> solidColor(Color color) {
+	BufferedImage img = new BufferedImage(64, 64,
+		BufferedImage.TYPE_INT_RGB);
+	Graphics g = img.getGraphics();
+	g.setColor(color);
+	g.fillRect(0, 0, 64, 64);
+	g.dispose();
+	final DummyFuture<TextureDescription> result = new DummyFuture<TextureDescription>(new Texture(img,
+		"Solid color " + color,tr));
+	return result;
+    }//end solidColor(...)
 }//end TextureSystem

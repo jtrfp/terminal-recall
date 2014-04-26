@@ -122,17 +122,18 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 		false));
 	mb.setPosition(THROTTLE_POS);
 	throttleMeter = mb.getController();
-
 	tr.getThreadManager().getGameplayTimer()
 		.scheduleAtFixedRate(new TimerTask() {
 		    @Override
 		    public void run() {
+			try{
 			upfrontDisplayCountdown -= 200;
 			if (upfrontDisplayCountdown <= 0
 				&& upfrontDisplayCountdown != Integer.MIN_VALUE) {
 			    upfrontBillboard.setVisible(false);
 			    upfrontDisplayCountdown = Integer.MIN_VALUE;
 			}// end if(timeout)
+			}catch(Exception e){e.printStackTrace();}
 		    }
 		}, 1, 200);
     }// end constructor

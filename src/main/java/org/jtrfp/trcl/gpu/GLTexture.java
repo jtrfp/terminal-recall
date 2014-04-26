@@ -74,14 +74,16 @@ public final class GLTexture {
     }//end configureEmpty(...)
     
     public GLTexture subImage(int [] texelCoordinates, int [] sideLengthsInTexels, int format, int level, ByteBuffer texels){
+	if(texelCoordinates.length!=sideLengthsInTexels.length)
+	    throw new RuntimeException("Texel coordinate dims ("+texelCoordinates.length+") must match sideLength dims ("+sideLengthsInTexels.length+").");
 	switch(texelCoordinates.length){
-	case 3:{
+	case 1:{
 	    gl.glTexSubImage1D(bindingTarget, level, texelCoordinates[0], sideLengthsInTexels[0], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}case 2:{
 	    gl.glTexSubImage2D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1], sideLengthsInTexels[0], sideLengthsInTexels[1], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
-	}case 1:{
+	}case 3:{
 	    gl.glTexSubImage3D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1],texelCoordinates[2], sideLengthsInTexels[0], sideLengthsInTexels[1],sideLengthsInTexels[2], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}

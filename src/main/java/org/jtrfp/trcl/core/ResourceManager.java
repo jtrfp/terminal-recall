@@ -213,6 +213,7 @@ public class ResourceManager{
 				System.err.println("Using fallback texture.");
 				result=tr.getGPU().getTextureManager().getFallbackTexture().get();
 				}
+			catch(Exception e){e.printStackTrace();result=null;}
 			return result;
 		    }
 		    

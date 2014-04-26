@@ -97,6 +97,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		{return (int)(space.getX()+space.getY()*squaresX+space.getZ()*squaresX*squaresY);}
 	public void add(E objectWithPosition)
 		{//Figure out where it goes
+	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
 	    	objectWithPosition.setContainingGrid(this);
 	    	if(objectWithPosition instanceof VisibleEverywhere){
 		    addAlwaysVisible(objectWithPosition);return;}

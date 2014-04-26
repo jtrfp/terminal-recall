@@ -18,7 +18,8 @@ public class VQCodebookManager {
     public static final int 		TILES_PER_PAGE 			=NUM_TILES_PER_AXIS*NUM_TILES_PER_AXIS;
     public static final int		MIP_DEPTH			=1;
 
-    public VQCodebookManager(GPU gpu) {
+    public VQCodebookManager(TR tr) {
+	final GPU gpu = tr.getGPU();
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).

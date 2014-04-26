@@ -19,15 +19,15 @@ import org.jtrfp.trcl.LineSegment;
 
 public class TextureManager {
     private final TR 				tr;
-    private final TextureTileWindow 		tileWindow;
+    private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
     private final VQCodebookManager		vqCodebookManager;
     private Future<TextureDescription>		fallbackTexture;
     public TextureManager(TR tr){
 	this.tr			= tr;
-	tileWindow 		= new TextureTileWindow(tr);
+	subTextureWindow 	= new SubTextureWindow(tr);
 	tocWindow 		= new TextureTOCWindow(tr);
-	vqCodebookManager 	= new VQCodebookManager(tr.getGPU());
+	vqCodebookManager 	= new VQCodebookManager(tr);
     }//end constructor
     
     public Gen2Texture newGen2Texture(int width, int height){
@@ -48,6 +48,9 @@ public class TextureManager {
      */
     public VQCodebookManager getCodebookManager() {
         return vqCodebookManager;
+    }
+    public SubTextureWindow getSubTextureWindow(){
+	return subTextureWindow;
     }
     
     private Future<TextureDescription> defaultTriPipeTexture;

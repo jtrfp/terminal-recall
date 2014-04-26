@@ -12,7 +12,7 @@ import org.jtrfp.trcl.LineSegment;
 
 
 /**
- * INCOMPLETE - DO NOT USE
+ * 
  * @author Chuck Ritola
  *
  */
@@ -22,20 +22,14 @@ public class TextureManager {
     private final TextureTileWindow 		tileWindow;
     private final TextureTOCWindow 		tocWindow;
     private final TextureMipmapTOCWindow 	mipmapTOCWindow;
-    private final TextureTileManager		textureTileManager;
-    private final Future<TextureDescription>	fallbackTexture;
+    private final VQCodebookManager		textureTileManager;
+    private Future<TextureDescription>		fallbackTexture;
     public TextureManager(TR tr){
-	this.tr		= tr;
-	tileWindow 	= new TextureTileWindow(tr);
-	tocWindow 	= new TextureTOCWindow(tr);
-	mipmapTOCWindow = new TextureMipmapTOCWindow(tr);
-	textureTileManager = new TextureTileManager(tr.getGPU());
-	Texture t;
-	t = new Texture(
-		Texture.RGBA8FromPNG(Texture.class
-			.getResourceAsStream("/fallbackTexture.png")),
-		"Fallback",tr);
-	fallbackTexture = new DummyFuture<TextureDescription>(t);
+	this.tr			= tr;
+	tileWindow 		= new TextureTileWindow(tr);
+	tocWindow 		= new TextureTOCWindow(tr);
+	mipmapTOCWindow 	= new TextureMipmapTOCWindow(tr);
+	textureTileManager 	= new VQCodebookManager(tr.getGPU());
     }//end constructor
     
     public Gen2Texture newGen2Texture(int width, int height){
@@ -54,7 +48,7 @@ public class TextureManager {
     /**
      * @return the textureTileManager
      */
-    public TextureTileManager getTextureTileManager() {
+    public VQCodebookManager getCodebookManager() {
         return textureTileManager;
     }
     
@@ -71,6 +65,13 @@ public class TextureManager {
     }//end getDefaultTriPipeTexture()
     
     public Future<TextureDescription> getFallbackTexture(){
+	if(fallbackTexture!=null)return fallbackTexture;
+	Texture t;
+	t = new Texture(
+		Texture.RGBA8FromPNG(Texture.class
+			.getResourceAsStream("/fallbackTexture.png")),
+		"Fallback",tr);
+	fallbackTexture = new DummyFuture<TextureDescription>(t);
 	return fallbackTexture;
     }//end getFallbackTexture()
     
@@ -85,4 +86,8 @@ public class TextureManager {
 		"Solid color " + color,tr));
 	return result;
     }//end solidColor(...)
+    
+    public TextureTOCWindow getTOCWindow(){
+	return tocWindow;
+    }
 }//end TextureSystem

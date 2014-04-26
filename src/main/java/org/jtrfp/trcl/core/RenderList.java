@@ -218,7 +218,7 @@ public class RenderList {
 	tr.getGPU().getMemoryManager().bindToUniform(4, deferredProgram,
 		    rootBuffer);
 	GLTexture.specifyTextureUnit(gl, 5);
-	tr.getGPU().getTextureManager().getTextureTileManager().getRGBATexture().bind();
+	tr.getGPU().getTextureManager().getCodebookManager().getRGBATexture().bind();
 	GLTexture.specifyTextureUnit(gl, 6);
 	intermediateTextureIDTexture.bind();
 	//Execute the draw to a screen quad

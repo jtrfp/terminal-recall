@@ -8,8 +8,8 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
 
-public class TextureTileManager {
-    private final 	IndexPool 	tileIndices = new IndexPool();
+public class VQCodebookManager {
+    private final 	IndexPool 	codebook256Indices = new IndexPool();
     private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
     public static final int 		TILE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		TILE_SIDE_LENGTH		=4;
@@ -18,7 +18,7 @@ public class TextureTileManager {
     public static final int 		TILES_PER_PAGE 			=NUM_TILES_PER_AXIS*NUM_TILES_PER_AXIS;
     public static final int		MIP_DEPTH			=1;
 
-    public TextureTileManager(GPU gpu) {
+    public VQCodebookManager(GPU gpu) {
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
@@ -51,17 +51,17 @@ public class TextureTileManager {
 		setWrapT(GL3.GL_CLAMP_TO_EDGE);
     }//end constructor
 
-    public TextureTileManager setRGBA(int tileID, ByteBuffer rgba) {
+    public VQCodebookManager setRGBA(int tileID, ByteBuffer rgba) {
 	subImageAutoMip(tileID,rgba,rgbaTexture,4);
 	return this;
     }// end setRGBA(...)
 
-    public TextureTileManager setESTuTv(int tileID, ByteBuffer ESTuTv) {
+    public VQCodebookManager setESTuTv(int tileID, ByteBuffer ESTuTv) {
 	subImageAutoMip(tileID,ESTuTv,esTuTvTexture,4);
 	return this;
     }// end setECTuTv(...)
 
-    public TextureTileManager setIndentation(int tileID, ByteBuffer indentation) {
+    public VQCodebookManager setIndentation(int tileID, ByteBuffer indentation) {
 	subImageAutoMip(tileID,indentation,indentationTexture,1);
 	return this;
     }// end setProtrusion(...)
@@ -71,8 +71,9 @@ public class TextureTileManager {
 	final int x = tileID % NUM_TILES_PER_AXIS;
 	final int z = tileID / TILES_PER_PAGE;
 	final int y = (tileID % TILES_PER_PAGE) / NUM_TILES_PER_AXIS;
+	texels.clear();
 	tex.bind().subImage(new int[] { x, y, z },
-		new int[] { TILE_SIDE_LENGTH, TILE_SIDE_LENGTH }, GL3.GL_RGBA,
+		new int[] { TILE_SIDE_LENGTH, TILE_SIDE_LENGTH, 1 }, GL3.GL_RGBA,
 		0, texels);
     }// end subImage(...)
 
@@ -82,7 +83,7 @@ public class TextureTileManager {
 	ByteBuffer intermediate = ByteBuffer.allocate(texels.capacity() / 4);
 	texels.clear();
 	wb.put(texels);
-	int sideLen = texels.capacity() / byteSizedComponentsPerTexel;
+	int sideLen = (int)Math.sqrt(texels.capacity() / byteSizedComponentsPerTexel);
 	for (int mipLevel = 0; mipLevel < MIP_DEPTH; mipLevel++) {
 	    subImage(tileID, texels, tex, mipLevel);
 	    mipDown(wb, intermediate, sideLen, byteSizedComponentsPerTexel);
@@ -120,12 +121,12 @@ public class TextureTileManager {
 	    }// end for(x)
     }// end mipDown(...)
 
-    public int newTile() {
-	return tileIndices.pop();
+    public int newCodebook256() {
+	return codebook256Indices.pop();
     }// end newTile()
 
     public void releaseTile(int tileToRelease) {
-	tileIndices.free(tileToRelease);
+	codebook256Indices.free(tileToRelease);
     }// end releaseTile(...)
     
     public GLTexture getRGBATexture()		{return rgbaTexture;}

@@ -3,8 +3,9 @@ package org.jtrfp.trcl.core;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TextureTOCWindow extends MemoryWindow {
+    public static final int WIDTH_IN_SUBTEXTURES=19;
     //19^2 * 4 = 1444 bytes
-    public final IntArrayVariable subtexturePageIndices = new IntArrayVariable(361);
+    public final IntArrayVariable subtextureAddrsVec4 = new IntArrayVariable(361);
     //Offset 1456B, 91VEC4
     public final IntVariable width = new IntVariable();//4B
     public final IntVariable height = new IntVariable();//4B

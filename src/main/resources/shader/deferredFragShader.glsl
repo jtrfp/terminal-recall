@@ -92,7 +92,7 @@ uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/
 uint	tTOCvec4Idx	= tTOCIdx / 4u;
 uint	tTOCsubIdx	= tTOCIdx % 4u;
 // Sub-Texture
-uint	subTexAddr	= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
+uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
 vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
 vec2	subTexUVsub	= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS))*CODE_PAGE_TEXEL_SIZE_UV;
 vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
@@ -100,7 +100,7 @@ uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/
 uint	subTexV4Idx	= subTexByIdx / 16u;
 uint	subTexV4Sub = subTexByIdx % 16u;
 // Codebook
-uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx))[subTexV4Sub/4u]),subTexV4Sub%4u);
+uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u);
 uint	codeBkPgNum	= (codeIdx+startCode) / CODES_PER_CODE_PAGE;
 vec2	codePgUV	= (vec2(float(codeBkPgNum % CODE_PAGE_SIDE_WIDTH_CODES),float((codeBkPgNum / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
 uint	codePgArrID = codeBkPgNum / CODES_PER_CODE_PAGE;

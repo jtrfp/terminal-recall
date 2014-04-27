@@ -79,6 +79,11 @@ public class Texture implements TextureDescription {
     }
 
     Texture(ByteBuffer imageRGBA8888, String debugName, TR tr) {
+	this.tr=tr;
+	if (imageRGBA8888.capacity() == 0) {
+	    throw new IllegalArgumentException(
+		    "Cannot create texture of zero size.");
+	}
 	if (tr.getTrConfig().isUsingNewTexturing()) {// Temporary; conform size
 						     // to 64x64
 	    final double sideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
@@ -108,6 +113,7 @@ public class Texture implements TextureDescription {
 	    final TextureManager 	tm 	= gpu.getTextureManager();
 	    final VQCodebookManager 	cbm 	= tm.getCodebookManager();
 	    final TextureTOCWindow 	tw 	= tm.getTOCWindow();
+	    final SubTextureWindow	stw	= tm.getSubTextureWindow();
 
 	    // Break down into 4x4 blocks
 	    ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
@@ -125,6 +131,19 @@ public class Texture implements TextureDescription {
 	    tw.startTile.set(tocIndex, codebookStartOffset);
 	    tw.height.set(tocIndex, 64);
 	    tw.width.set(tocIndex, 64);
+	    // Create subtextures
+	    final int diameterInCodes = (int)Math.ceil(sideLength/VQCodebookManager.TILE_SIDE_LENGTH);
+	    final int diameterInSubtextures = (int)Math.ceil(diameterInCodes/SubTextureWindow.SIDE_LENGTH_CODES);
+	    final int [] subTextureIDs = new int[diameterInSubtextures*diameterInSubtextures];
+	    for(int i=0; i<subTextureIDs.length; i++){
+		//Create subtexture ID
+		final int id = subTextureIDs[i]=stw.create();
+		//Convert subtexture index to index of TOC
+		final int subTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
+		//Load subtexture ID into TOC
+		tw.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+	    }//end for(subTextureIDs)
+	    
 	    // Push vectors to codebook
 	    for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
 		vectorBuffer.clear();
@@ -135,22 +154,30 @@ public class Texture implements TextureDescription {
 		final int globalCodeIndex = codeIndex + codebookStartOffset;
 		vectorBuffer.clear();
 		cbm.setRGBA(globalCodeIndex, vectorBuffer);
-		tw.subtexturePageIndices.setAt(tocIndex, codeIndex,
+		tw.subtextureAddrsVec4.setAt(tocIndex, codeIndex,
 			globalCodeIndex);
 	    }// end for(codeIndex)
-
+	    // Push codes to subtextures
+	    //TODO
+	    
+	    TextureTreeNode newNode = new TextureTreeNode(64, null,
+			debugName);
+	    	newNode.setOffsetU(0);
+	    	newNode.setOffsetV(0);
+	    	newNode.setSizeU(1);
+	    	newNode.setSizeV(1);
+	    	newNode.setTextureID(tw.getPhysicalAddressInBytes(tocIndex)/GPU.BYTES_PER_VEC4);
+		nodeForThisTexture = newNode;
+		//Do not register the node.
+	return;
 	}// end if(newTexturing)
-	if (imageRGBA8888.capacity() == 0) {
-	    throw new IllegalArgumentException(
-		    "Cannot create texture of zero size.");
-	}
+	
 	final int sideLength = (int) Math.sqrt((imageRGBA8888.capacity() / 4));
 	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
 		debugName);
 	nodeForThisTexture = newNode;
 	newNode.setImage(imageRGBA8888);
 	registerNode(newNode);
-	this.tr=tr;
     }// end constructor
 
     Texture(BufferedImage img, String debugName, TR tr) {
@@ -395,6 +422,7 @@ public class Texture implements TextureDescription {
 	private ByteBuffer image;
 	private int sideLength;
 	private String debugName = "[unset]";
+	private int textureID=10;
 
 	public TextureTreeNode(int sideLength, TextureTreeNode parent,
 		String debugName) {
@@ -818,6 +846,20 @@ public class Texture implements TextureDescription {
 	 */
 	public void setImage(ByteBuffer image) {
 	    this.image = image;
+	}
+
+	/**
+	 * @return the textureID
+	 */
+	public int getTextureID() {
+	    return textureID;
+	}
+
+	/**
+	 * @param textureID the textureID to set
+	 */
+	public void setTextureID(int textureID) {
+	    this.textureID = textureID;
 	}
     }// end TextureTreeNode
 

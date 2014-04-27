@@ -110,11 +110,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	final Triangle 	t 		= triangleAt(0, triangleIndex);
 	final Vector3D 	pos 		= t.getVertices()[vIndex].getPosition();
 	final TriangleVertexWindow vw 	= (TriangleVertexWindow) getMemoryWindow();
-	final int textureID=10;// TODO: This is a stub for actual texture TOC vec4 location
+	////////////////////// V E R T E X //////////////////////////////
 	if (numFrames == 1) {
-	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
-	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	    vw.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
 	    vw.y.set(gpuTVIndex, (short) applyScale(pos.getY()));
 	    vw.z.set(gpuTVIndex, (short) applyScale(pos.getZ()));
@@ -123,9 +120,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
 	    vw.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
 	} else if (numFrames > 1) {
-	    vw.textureIDLo.set(gpuTVIndex, (byte)(textureID & 0xFF));
-	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vw.textureIDHi.set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
 	    float[] zFrames = new float[numFrames];
@@ -167,7 +161,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	} else {
 	    throw new RuntimeException("Empty triangle vertex!");
 	}
-
+	//////////////// T E X T U R E ///////////////////////////
 	TextureDescription td = t.getTexture().get();
 	if (td instanceof Texture) {// Static texture
 	    final Texture.TextureTreeNode tx;
@@ -195,6 +189,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		vw.v.set(gpuTVIndex, (short) (uvUpScaler * tx
 			.getGlobalVFromLocal(t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
+	    final int textureID = tx.getTextureID();
+	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
 	else {// Animated texture
 	    AnimatedTexture at = ((AnimatedTexture) t.getTexture().get());
@@ -220,6 +218,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    }// end for(frame)
 	    uvAnimator.addFrames(uFrames);
 	    uvAnimator.addFrames(vFrames);
+	    final int textureID = tx.getTextureID();
+	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end animated texture
     }// end setupVertex
 

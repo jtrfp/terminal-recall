@@ -30,12 +30,6 @@ public class TextureManager {
 	vqCodebookManager 	= new VQCodebookManager(tr);
     }//end constructor
     
-    public Gen2Texture newGen2Texture(int width, int height){
-	final Gen2Texture texture = new Gen2Texture(this);
-	texture.setSize(new Dimension(width,height));
-	return texture;
-    }//end newTexture
-    
     public Texture newTexture(ByteBuffer imageRGB8, String debugName){
 	return new Texture(imageRGB8,debugName,tr);
     }

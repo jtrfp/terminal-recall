@@ -282,6 +282,7 @@ public final class Renderer {
 	visibilityUpdateFuture = gpu.getTr().getThreadManager().threadPool.submit(new Runnable(){
 	    @Override
 	    public void run() {
+		try{
 		final RenderList rl = getBackRenderList();
 		rl.reset();
 		proximitySorter.setCenter(camera.getCameraPosition().toArray());
@@ -300,6 +301,7 @@ public final class Renderer {
 		});
 		proximitySorter.reset();
 		toggleRenderList();
+		}catch(Exception e){e.printStackTrace();}
 	    }//end pool run()
 	});
     }// end updateVisibilityList()

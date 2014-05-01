@@ -22,13 +22,13 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_LEFT)){
 	    	//Tilt
-		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor*.6);
+		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor*.8);
 		//Turn
 		rmb.accellerateEquatorialMomentum(2*Math.PI*accellerationFactor);
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_RIGHT)){
 	    	//Tilt
-		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor*.6);
+		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor*.8);
 		//Turn
 		rmb.accellerateEquatorialMomentum(-2*Math.PI*accellerationFactor);
 		}

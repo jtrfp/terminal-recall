@@ -158,9 +158,10 @@ public class Texture implements TextureDescription {
 	    tw.height	.set(tocIndex, 64);
 	    tw.width	.set(tocIndex, 64);
 	    // Create subtextures
-	    final int diameterInCodes 		= (int)Math.ceil(sideLength/VQCodebookManager.TILE_SIDE_LENGTH);
-	    final int diameterInSubtextures 	= (int)Math.ceil(diameterInCodes/SubTextureWindow.SIDE_LENGTH_CODES);
+	    final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.TILE_SIDE_LENGTH);
+	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
 	    subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
+	    System.out.println("diameterInSubtextures="+diameterInSubtextures);
 	    for(int i=0; i<subTextureIDs.length; i++){
 		//Create subtexture ID
 		final int id = subTextureIDs[i]=stw.create();

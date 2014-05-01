@@ -45,4 +45,4 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
     public void setAccellerationFactor(double accellerationFactor) {
         this.accellerationFactor = accellerationFactor;
     }
-}
+}//end UserInputRudderElevatorControlBeahvior

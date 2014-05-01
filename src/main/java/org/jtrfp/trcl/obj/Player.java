@@ -34,15 +34,14 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 
 public class Player extends WorldObject {
-    private final Camera camera;
-    private int cameraDistance = 0;
-    private static final int SINGLE_SKL = 0;
-    public static final int CLOAK_COUNTDOWN_START = ThreadManager.GAMEPLAY_FPS * 30;// 30sec
-    public static final int INVINCIBILITY_COUNTDOWN_START = ThreadManager.GAMEPLAY_FPS * 30;// 30sec
-    private final ProjectileFiringBehavior[] weapons = new ProjectileFiringBehavior[Weapon
-	    .values().length];
+    private final Camera 	camera;
+    private int 		cameraDistance 			= 0;
+    public static final int 	CLOAK_COUNTDOWN_START 		= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
+    public static final int 	INVINCIBILITY_COUNTDOWN_START 	= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
+    private final 		ProjectileFiringBehavior[] weapons = new ProjectileFiringBehavior[Weapon
+                  		                                   .values().length];
 
-    public Player(TR tr, Model model) {
+    public Player(final TR tr, final Model model) {
 	super(tr, model);
 	setVisible(false);
 	DamageableBehavior db = new DamageableBehavior();
@@ -60,10 +59,6 @@ public class Player extends WorldObject {
 	addBehavior(new CollidesWithTunnelWalls(true, true));
 	addBehavior(new UserInputThrottleControlBehavior());
 	addBehavior(new VelocityDragBehavior());
-	/*addBehavior(new AutoLeveling()
-		.setLevelingAxis(LevelingAxis.CROSS)
-		.setLevelingVector(Vector3D.PLUS_I)
-		.setRetainmentCoeff(1, .977, 1));*/
 	addBehavior(new RollLevelingBehavior());
 	addBehavior(new UserInputRudderElevatorControlBehavior());
 	addBehavior(new RotationalMomentumBehavior());

@@ -3,8 +3,6 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
-import org.jtrfp.trcl.beh.AutoLeveling;
-import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
@@ -15,6 +13,7 @@ import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.RollLevelingBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
@@ -61,10 +60,11 @@ public class Player extends WorldObject {
 	addBehavior(new CollidesWithTunnelWalls(true, true));
 	addBehavior(new UserInputThrottleControlBehavior());
 	addBehavior(new VelocityDragBehavior());
-	addBehavior(new AutoLeveling()
+	/*addBehavior(new AutoLeveling()
 		.setLevelingAxis(LevelingAxis.CROSS)
 		.setLevelingVector(Vector3D.PLUS_I)
-		.setRetainmentCoeff(1, .977, 1));
+		.setRetainmentCoeff(1, .977, 1));*/
+	addBehavior(new RollLevelingBehavior());
 	addBehavior(new UserInputRudderElevatorControlBehavior());
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());

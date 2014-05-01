@@ -95,18 +95,19 @@ import org.jtrfp.trcl.obj.SmokeFactory;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
-	private HashMap<String, Future<TextureDescription>> textureNameMap = new HashMap<String,Future<TextureDescription>>();
-	private HashMap<String, Future<TextureDescription>[]> specialTextureNameMap = new HashMap<String,Future<TextureDescription>[]>();
-	private HashMap<String, BINFile.AnimationControl> aniBinNameMap = new HashMap<String,BINFile.AnimationControl>();
-	private HashMap<String, BINFile.Model> modBinNameMap = new HashMap<String,BINFile.Model>();
-	private HashMap<String, Model> modelCache = new HashMap<String,Model>();
-	private ExplosionFactory explosionFactory;
-	private SmokeFactory smokeFactory;
-	private PluralizedPowerupFactory pluralizedPowerupFactory;
-	private DebrisFactory debrisFactory;
-	private ProjectileFactory [] projectileFactories;
-	
-	private final TR tr;
+	private HashMap<String, Future<TextureDescription>> 
+	/*						*/	textureNameMap = new HashMap<String,Future<TextureDescription>>();
+    	private HashMap<String, Future<TextureDescription>[]> 
+    								specialTextureNameMap 	= new HashMap<String,Future<TextureDescription>[]>();
+	private HashMap<String, BINFile.AnimationControl> 	aniBinNameMap 		= new HashMap<String,BINFile.AnimationControl>();
+	private HashMap<String, BINFile.Model> 			modBinNameMap 		= new HashMap<String,BINFile.Model>();
+	private HashMap<String, Model> 				modelCache 		= new HashMap<String,Model>();
+	private ExplosionFactory 				explosionFactory;
+	private SmokeFactory 					smokeFactory;
+	private PluralizedPowerupFactory 			pluralizedPowerupFactory;
+	private DebrisFactory 					debrisFactory;
+	private ProjectileFactory [] 				projectileFactories;
+	private final TR 					tr;
 	
 	public ResourceManager(TR tr){
 		this.tr=tr;
@@ -181,19 +182,15 @@ public class ResourceManager{
 					{//ends in number
 					System.out.println("RAW "+name+" ends in a zero. Testing if it is animated...");
 					ArrayList<String> frames = new ArrayList<String>();
-					//frames.add(name);
 					int frameNumber=0;
 					String newName=name.substring(0,name.length()-5)+""+frameNumber+".RAW";
 					System.out.println("Testing against "+newName);
-					while(rawExists(newName))
-						{
+					while(rawExists(newName)){
 						frameNumber++;
 						frames.add(newName);
 						newName=name.substring(0,name.length()-5)+""+frameNumber+".RAW";
-						//System.out.println("Testing against "+newName);
 						}
-					if(frames.size()>1)
-						{
+					if(frames.size()>1){
 						Future<Texture> [] tFrames = new Future[frames.size()];
 						for(int i=0; i<tFrames.length;i++)
 							{tFrames[i]=new DummyFuture<Texture>(new Texture(getRAWImage(frames.get(i),palette,proc),""+frames.get(i),null));/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
@@ -223,8 +220,7 @@ public class ResourceManager{
 		return result;
 		}//end getRAWAsTexture(...)
 	
-	public boolean rawExists(String name)
-		{
+	public boolean rawExists(String name){
 		for(IPodData p:pods){
 			if((p.findEntry("ART\\"+name))!=null){
 				System.out.println(name+" found to exist. Returning true...");
@@ -371,17 +367,9 @@ public class ResourceManager{
 						}//end if(FaceBlock)
 					else if(b instanceof FaceBlock19)
 						{System.out.println(b.getClass().getSimpleName()+" (solid colored faces) not yet implemented. Skipping...");}
-					else if(b instanceof FaceBlock05){
-					    /*FaceBlock05 fb5 = (FaceBlock05)b;
-					    System.out.println("NormalX="+fb5.getNormalX());
-					    System.out.println("NormalY="+fb5.getNormalY());
-					    System.out.println("NormalZ="+fb5.getNormalZ());
-					    System.out.println("Magic="+fb5.getMagic());
-					    */
-					}
+					else if(b instanceof FaceBlock05){}//TODO
 					else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
-						//LineSegment seg = new LineSegment();
 						org.jtrfp.trcl.gpu.Vertex v1 = vertices.get(block.getVertexID1());
 						org.jtrfp.trcl.gpu.Vertex v2 = vertices.get(block.getVertexID2());
 						if(!alreadyVisitedLineSegs.contains(v1.hashCode()*v2.hashCode())){
@@ -392,17 +380,8 @@ public class ResourceManager{
 							    200, newTris, 0);
 						    result.addTriangles(newTris);
 						    alreadyVisitedLineSegs.add(v1.hashCode()*v2.hashCode());
-						}
-						/*
-						seg.setVertex(v1,0);
-						seg.setVertex(v2,1);
-						Color c= palette[block.getColor()+16];
-						seg.setColor(c);
-						seg.setThickness(8);//Defaulted since the file doesn't specify
-						result.addLineSegment(seg);
-						*/
-						
-						}
+						}//end if(not already visited)
+					}//end if(LineSegmentBlock)
 					else if(b instanceof Unknown12){
 					    System.out.println("Found unknown12. Assuming this is a tag for a transparent texture...");
 					    hasAlpha=true;
@@ -434,10 +413,7 @@ public class ResourceManager{
 				//Not-good fail
 				throw new UnrecognizedFormatException("Can't figure out what this is: "+name+". Giving up. Expect trouble ahead.");
 				}
-			catch(Exception ee){ee.printStackTrace();return null;}//TODO: This probably can be removed
-			//catch(InterruptedException ee){ee.printStackTrace(); return null;}
 			}//end catch(ok fail)
-		//throw new NullPointerException("Experienced an unexpected failure.");
 		//Bad fail.
 		}//end getBINModel()
 	
@@ -446,7 +422,6 @@ public class ResourceManager{
 		dat.setPalette(palette);
 		BufferedImage [] segs = dat.asSegments(upscalePowerOfTwo);
 		for(BufferedImage seg:segs){
-			//stamper.setRGB(0, 0, dat.getSideLength(), dat.getSideLength(), temp, 0, 1);
 			Graphics g = seg.getGraphics();
 			BufferedImage scaled = new BufferedImage(seg.getColorModel(),seg.copyData(null),seg.isAlphaPremultiplied(),null);
 			g.drawImage(scaled.getScaledInstance(seg.getWidth()-2, seg.getHeight()-2, Image.SCALE_AREA_AVERAGING), 1, 1, seg.getWidth()-2, seg.getHeight()-2, null);
@@ -476,45 +451,23 @@ public class ResourceManager{
 		byte [] raw = dat.getRawBytes();
 		if(raw.length!=dat.getSideLength()*dat.getSideLength()) throw new NotSquareException(name);
 		if((dat.getSideLength() & (dat.getSideLength()-1))!=0) throw new NonPowerOfTwoException(name);
-		//ByteBuffer result = ByteBuffer.allocateDirect(dat.getSideLength()*dat.getSideLength()*4);
-		//int [] temp = new int[raw.length];
 		final BufferedImage stamper = new BufferedImage(dat.getSideLength(),dat.getSideLength(),BufferedImage.TYPE_INT_ARGB);
-		//final BufferedImage scaled = new BufferedImage(dat.getSideLength(),dat.getSideLength(),BufferedImage.TYPE_INT_ARGB);
-		
 		Graphics stG = stamper.getGraphics();
-		//Graphics scG = scaled.getGraphics();
 		for(int i=0; i<raw.length; i++){
 			Color c= palette[(int)raw[i] & 0xFF];
 			stG.setColor(c);
-			//scG.setColor(c);
 			stG.fillRect(i%dat.getSideLength(), i/dat.getSideLength(), 1, 1);
-			//scG.fillRect(i%dat.getSideLength(), i/dat.getSideLength(), 1, 1);
 			}
 		stG.dispose();
-		//scG.dispose();
-		//stamper.setRGB(0, 0, dat.getSideLength(), dat.getSideLength(), temp, 0, 1);
 		Graphics g = stamper.getGraphics();
 		//The following code stamps the filename into the texture for debugging purposes
 		if(tr.isStampingTextures()){
 			g.setFont(new Font(g.getFont().getName(),g.getFont().getStyle(),9));
 			g.drawString(name, 1, 16);
 			}
-		//Blit a scaled-down version by 2 px on each dim, keeping borders for filter padding
-		//g.drawImage(scaled, 1, 1, dat.getSideLength()-2, dat.getSideLength()-2, null);
 		
 		g.dispose();
 		return stamper;
-		/*
-		for(int i=0; i<raw.length; i++)
-			{
-			final Color c=new Color(stamper.getRGB(i%dat.getSideLength(), i/dat.getSideLength()));
-			result.put((byte)c.getRed());
-			result.put((byte)c.getGreen());
-			result.put((byte)c.getBlue());
-			result.put((byte)c.getAlpha());
-			}
-		return result;
-		*/
 		}//end getRAWImage
 	
 	public AltitudeMap getRAWAltitude(String name) throws IOException, FileLoadException, IllegalAccessException{

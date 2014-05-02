@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.media.opengl.GL2;
@@ -292,13 +293,13 @@ public final class Renderer {
 					getCamera().getViewDepth() / 2.1)),
 					proximitySorter
 			);
-		Renderer.this.gpu.getTr().getThreadManager().blockingEnqueueGLOperation(new Runnable(){
-
+		Renderer.this.gpu.getTr().getThreadManager().enqueueGLOperation(new Callable<Object>(){
 		    @Override
-		    public void run() {
+		    public Object call() {
 			proximitySorter.dumpPositionedRenderables(rl.getSubmitter());
-		    }//end gl run()
-		});
+			return null;
+		    }//end gl call()
+		}).get();
 		proximitySorter.reset();
 		toggleRenderList();
 		}catch(Exception e){e.printStackTrace();}

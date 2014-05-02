@@ -81,7 +81,7 @@ public abstract class MemoryWindow {
 
     public final int create() {
 	return indexPool.pop();
-    }
+    }//end create()
 
     public final int getNumObjects() {
 	return indexPool.getMaxCapacity();

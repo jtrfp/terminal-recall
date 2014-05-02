@@ -3,12 +3,15 @@ package org.jtrfp.trcl.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.Threading;
 import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.obj.CollisionManager;
@@ -30,7 +33,7 @@ public class ThreadManager {
     private long timeInMillisSinceLastGameTick = 0L;
     private ArrayList<Runnable> runWhenFirstStarted = new ArrayList<Runnable>();
     private boolean firstRun = true;
-    private final ConcurrentLinkedQueue<Runnable> mappedOperationQueue = new ConcurrentLinkedQueue<Runnable>();
+    private final ConcurrentLinkedQueue<FutureTask> mappedOperationQueue = new ConcurrentLinkedQueue<FutureTask>();
     public final ExecutorService threadPool = Executors.newCachedThreadPool();
     private Thread renderingThread;
 
@@ -108,17 +111,19 @@ public class ThreadManager {
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end constructor
 
-    public void enqueueGLOperation(Runnable r){
-	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(r);
-	else r.run();
+    public <T> FutureTask<T> enqueueGLOperation(Callable<T> r){
+	final FutureTask<T> t = new FutureTask<T>(r);
+	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(t);
+	else t.run();
+	return t;
     }
-    public void blockingEnqueueGLOperation(Runnable r){
+    /*public void blockingEnqueueGLOperation(Runnable r){
 	if(Thread.currentThread()!=renderingThread){
 	    synchronized(r){
 	    mappedOperationQueue.add(r);
 	    try{r.wait();}catch(Exception e){e.printStackTrace();}}}
 	else {r.run();}
-    }
+    }*/
     
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;

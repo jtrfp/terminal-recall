@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.BackdropSystem;
@@ -60,8 +61,8 @@ public class Mission {
     	pal[0]=new Color(0,0,0,0);
     	tr.setGlobalPalette(pal);
     	
-    	tm.blockingEnqueueGLOperation(new Runnable(){
-    	    public void run(){
+    	tm.enqueueGLOperation(new Callable<Object>(){
+    	    public Object call(){
     		try{
     		// POWERUPS
     		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
@@ -95,15 +96,16 @@ public class Mission {
     		    player.notifyPositionChange();
     		}//end if(start!=null)
     		}catch(Exception e){e.printStackTrace();}
-    	    }
-    	});
+    		return null;
+    	    }//end call()
+    	}).get();
     	
     	final Player player = tr.getPlayer();
 	final World world = tr.getWorld();
 	world.add(player);
     	
-    	tm.blockingEnqueueGLOperation(new Runnable(){
-    	    public void run(){
+    	tm.enqueueGLOperation(new Callable<Object>(){
+    	    public Object call(){
     		try{
     		final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
 
@@ -128,10 +130,11 @@ public class Mission {
     		navSystem.updateNAVState();
     		tr.setBackdropSystem(new BackdropSystem(world));
     		}catch(Exception e){e.printStackTrace();}
-    	    }});
+    		return null;
+    	    }}).get();
     	
-    	tm.blockingEnqueueGLOperation(new Runnable(){
-    	    public void run(){
+    	tm.enqueueGLOperation(new Callable<Object>(){
+    	    public Object call(){
     		//////// INITIAL HEADING
     		player.setPosition(getPlayerStartPosition());
     		player.setDirection(getPlayerStartDirection());
@@ -146,7 +149,8 @@ public class Mission {
     		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
     		tr.getRenderer().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
     		System.out.println("\t...Done.");
-    	    }});
+    		return null;
+    	    }}).get();
     	
 	//////// NO GL BEYOND THIS POINT ////////
 	System.out.println("\t...Done.");

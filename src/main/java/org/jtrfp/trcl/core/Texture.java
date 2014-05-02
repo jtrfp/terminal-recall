@@ -28,10 +28,12 @@ import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
+import javax.media.opengl.Threading;
 
 import org.jtrfp.trcl.OutOfTextureSpaceException;
 import org.jtrfp.trcl.gpu.GLTexture;
@@ -46,7 +48,7 @@ public class Texture implements TextureDescription {
     private final GPU 			gpu;
     private final TextureManager 	tm ;
     private final VQCodebookManager 	cbm;
-    private final TextureTOCWindow 	tw;
+    private final TextureTOCWindow 	toc;
     private final SubTextureWindow	stw;
     private 	  Color 		averageColor;
     private 	  int 			codebookStartOffsetAbsolute;
@@ -79,7 +81,7 @@ public class Texture implements TextureDescription {
 	this.gpu	=tr.getGPU();
 	this.tm		=gpu.getTextureManager();
 	this.cbm	=tm.getCodebookManager();
-	this.tw		=tm.getTOCWindow();
+	this.toc		=tm.getTOCWindow();
 	this.stw	=tm.getSubTextureWindow();
 	this.debugName	=debugName;
     }
@@ -151,24 +153,24 @@ public class Texture implements TextureDescription {
 		    .newCodebook256();
 	    codebookStartOffsetAbsolute = codebook256Index * 256;
 	    // Get a TOC
-	    final int tocIndex = tw.create();
+	    final int tocIndex = toc.create();
 	    final ByteBuffer vectorBuffer = ByteBuffer
 		    .allocateDirect(4 * 4 * 4);
-	    tw.startTile.set(tocIndex, codebookStartOffsetAbsolute);
-	    tw.height	.set(tocIndex, 64);
-	    tw.width	.set(tocIndex, 64);
+	    toc.startTile.set(tocIndex, codebookStartOffsetAbsolute);
+	    toc.height	 .set(tocIndex, 64);
+	    toc.width	 .set(tocIndex, 64);
 	    // Create subtextures
 	    final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.TILE_SIDE_LENGTH);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
 	    subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
-	    System.out.println("diameterInSubtextures="+diameterInSubtextures);
+	    //System.out.println("diameterInSubtextures="+diameterInSubtextures);
 	    for(int i=0; i<subTextureIDs.length; i++){
 		//Create subtexture ID
 		final int id = subTextureIDs[i]=stw.create();
 		//Convert subtexture index to index of TOC
 		final int subTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 		//Load subtexture ID into TOC
-		tw.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+		toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
 	    }//end for(subTextureIDs)
 	    
 	    // Push vectors to codebook
@@ -180,9 +182,17 @@ public class Texture implements TextureDescription {
 		}
 		final int globalCodeIndex = codeIndex + codebookStartOffsetAbsolute;
 		vectorBuffer.clear();
-		cbm.setRGBA(globalCodeIndex, vectorBuffer);
-		tw.subtextureAddrsVec4.setAt(tocIndex, codeIndex,
-			globalCodeIndex);
+		/*
+		try{
+		tr.getThreadManager().enqueueGLOperation(new Callable<Object>(){
+		    @Override
+		    public Object call(){
+			try{cbm.setRGBA(globalCodeIndex, vectorBuffer);}
+			catch(Exception e){e.printStackTrace();}
+			return null;
+		    }//end run()
+		});}catch(Exception e){e.printStackTrace();}
+		*/
 	    }// end for(codeIndex)
 	    // Push codes to subtextures
 	    for(int cY=0; cY<diameterInCodes; cY++){
@@ -198,7 +208,7 @@ public class Texture implements TextureDescription {
 	    	newNode.setOffsetV(0);
 	    	newNode.setSizeU(1);
 	    	newNode.setSizeV(1);
-	    	newNode.setTextureID(tw.getPhysicalAddressInBytes(tocIndex)/GPU.BYTES_PER_VEC4);
+	    	newNode.setTextureID(toc.getPhysicalAddressInBytes(tocIndex)/GPU.BYTES_PER_VEC4);
 		nodeForThisTexture = newNode;
 		//Do not register the node.
     }//end vqCompress(...)

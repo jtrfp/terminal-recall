@@ -195,7 +195,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
-	else {// Animated texture
+	//TODO: Temporary. Remove this check and replace with else {}, this is a kludge to avoid nonfunctional animation.
+	else if(!tr.getTrConfig().isUsingNewTexturing()) {// Animated texture
 	    AnimatedTexture at = ((AnimatedTexture) td);
 	    Texture.TextureTreeNode tx = at.getFrames()[0].get()
 		    .getNodeForThisTexture();// Default frame

@@ -227,7 +227,8 @@ public final class Renderer {
 	    e.printStackTrace();
 	}
 	GLTexture.specifyTextureUnit(gl, 0);
-	Texture.getGlobalTexture().bind(gl);
+	if(Texture.getGlobalTexture()!=null)//New texturing leaves this null.
+	    Texture.getGlobalTexture().bind(gl);
 	if (!primaryProgram.validate()) {
 	    System.out.println(primaryProgram.getInfoLog());
 	    System.exit(1);

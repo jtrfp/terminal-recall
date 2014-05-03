@@ -43,8 +43,8 @@ import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
 
 public class Texture implements TextureDescription {
-    TextureTreeNode nodeForThisTexture;
-    private final TR tr;
+    TextureTreeNode 			nodeForThisTexture;
+    private final TR 			tr;
     private final GPU 			gpu;
     private final TextureManager 	tm ;
     private final VQCodebookManager 	cbm;
@@ -382,6 +382,11 @@ public class Texture implements TextureDescription {
     }// end getAverageColor()
 
     public static void finalize(GPU gpu) {
+	if(rootNode==null){
+	    System.out.println("WARNING: RootNode is null. If using new texturing system this is normal.\n" +
+	    		"Else, expect empty textures. Skipping texture finalization phase...");
+	    return;
+	}
 	final int gSideLen = rootNode.getSideLength();
 	// Setup the empty rows
 	emptyRow = ByteBuffer.allocate(gSideLen * 4);

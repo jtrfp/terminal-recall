@@ -21,7 +21,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Vertex;
-import org.jtrfp.trcl.tools.Util;
 
 public class Triangle {
     private Vertex[] vertices = new Vertex[3];
@@ -29,13 +28,20 @@ public class Triangle {
     private RenderMode renderMode;
     private boolean isAlphaBlended = false;
     private Vector3D centroidNormal;
+    private final StackTraceElement[] creationStackTrace;
 
     private Future<TextureDescription> texture;
+    public static boolean debugTriangles = true;
 
     public Triangle() {
+	if (debugTriangles)
+	    creationStackTrace = new Exception().getStackTrace();
+	else
+	    creationStackTrace = null;
     }
 
     public Triangle(Vertex[] vertices) {
+	this();
 	setVertex(vertices[0], 0);
 	setVertex(vertices[1], 1);
 	setVertex(vertices[2], 2);
@@ -43,9 +49,9 @@ public class Triangle {
 
     public static Triangle[] quad2Triangles(Vertex[] vertices, Vector2D[] uvs,
 	    Future<TextureDescription> texture, RenderMode mode,
-	    boolean hasAlpha, Vector3D centroidNormal) {
+	    boolean hasAlpha, Vector3D centroidNormal, String debugName) {
 	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha,
-		centroidNormal, new Triangle[2], 0);
+		centroidNormal, new Triangle[2], 0, debugName);
     }
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
@@ -115,7 +121,7 @@ public class Triangle {
     public static Triangle[] quad2Triangles(Vertex[] vertices, Vector2D[] uv,
 	    Future<TextureDescription> texture, RenderMode mode,
 	    boolean hasAlpha, Vector3D centroidNormal, Triangle[] dest,
-	    int destOffset) {
+	    int destOffset, String debugName) {
 	Triangle t;
 	t = new Triangle();
 	t.setTexture(texture);
@@ -147,9 +153,10 @@ public class Triangle {
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
 	    double[] u, double[] v, Future<TextureDescription> texture,
-	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal) {
+	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal,
+	    String debugName) {
 	return quad2Triangles(x, y, z, u, v, texture, mode, hasAlpha,
-		centroidNormal, new Triangle[2],0);
+		centroidNormal, new Triangle[2], 0, debugName);
     }
 
     /**
@@ -160,7 +167,7 @@ public class Triangle {
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
 	    double[] u, double[] v, Future<TextureDescription> texture,
 	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal,
-	    Triangle[] dest, int destOffset) {
+	    Triangle[] dest, int destOffset, String debugName) {
 	final Vertex[] vertices = new Vertex[] {
 		new Vertex().setPosition(new Vector3D(x[0], y[0], z[0])),
 		new Vertex().setPosition(new Vector3D(x[1], y[1], z[1])),
@@ -171,7 +178,7 @@ public class Triangle {
 	    uvs[i] = new Vector2D(u[i], v[i]);
 	}
 	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha,
-		centroidNormal, dest, destOffset);
+		centroidNormal, dest, destOffset, debugName);
     }// end quad2Triangles(...)
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
@@ -307,9 +314,16 @@ public class Triangle {
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
 	    double[] u, double[] v, Future<TextureDescription> texture,
-	    RenderMode renderMode, Vector3D centroidNormal) {
+	    RenderMode renderMode, Vector3D centroidNormal, String debugName) {
 	return quad2Triangles(x, y, z, u, v, texture, renderMode, false,
-		centroidNormal, new Triangle[2], 0);
+		centroidNormal, new Triangle[2], 0, debugName);
+    }
+
+    /**
+     * @return the creationStackTrace
+     */
+    public StackTraceElement[] getCreationStackTrace() {
+	return creationStackTrace;
     }
 }// Triangle
 

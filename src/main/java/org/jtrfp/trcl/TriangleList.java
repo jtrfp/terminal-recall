@@ -163,6 +163,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}
 	//////////////// T E X T U R E ///////////////////////////
 	TextureDescription td = t.getTexture().get();
+	if(td==null)throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");
 	if (td instanceof Texture) {// Static texture
 	    final Texture.TextureTreeNode tx;
 	    tx = ((Texture) t.getTexture().get()).getNodeForThisTexture();
@@ -195,7 +196,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
 	else {// Animated texture
-	    AnimatedTexture at = ((AnimatedTexture) t.getTexture().get());
+	    AnimatedTexture at = ((AnimatedTexture) td);
 	    Texture.TextureTreeNode tx = at.getFrames()[0].get()
 		    .getNodeForThisTexture();// Default frame
 	    final int numTextureFrames = at.getFrames().length;

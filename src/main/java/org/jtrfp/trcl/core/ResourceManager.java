@@ -335,7 +335,7 @@ public class ResourceManager{
 									},
 									currentTexture,
 									RenderMode.DYNAMIC,hasAlpha,
-									new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize());
+									new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize(),"quad.BINmodel"+name);
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
 							}

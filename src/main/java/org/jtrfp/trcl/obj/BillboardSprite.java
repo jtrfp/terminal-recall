@@ -41,7 +41,7 @@ public class BillboardSprite extends WorldObject{
 				new double[]{0,1,1,0}, //U
 				new double[]{0,0,1,1}, 
 				desc, 
-				RenderMode.DYNAMIC,true,Vector3D.MINUS_K);
+				RenderMode.DYNAMIC,true,Vector3D.MINUS_K,"BillboardSprite");
 		Model m = new Model(false,getTr());
 		m.addTriangles(tris);
 		setModel(m.finalizeModel());

@@ -61,21 +61,21 @@ public abstract class LineSegment {
 		new double[] { sbl.getX(), stp.getX(), etp.getX(), ebl.getX() },
 		new double[] { sbl.getY(), stp.getY(), etp.getY(), ebl.getY() },
 		new double[] { sbl.getZ(), stp.getZ(), etp.getZ(), ebl.getZ() },
-		u, v, texture, RenderMode.STATIC, false, cl, dest, destOffset);
+		u, v, texture, RenderMode.STATIC, false, cl, dest, destOffset,"LineSegment.topLeft");
 	// TOP RIGHT
 	Triangle.quad2Triangles(
 		new double[] { sbr.getX(), stp.getX(), etp.getX(), ebr.getX() },
 		new double[] { sbr.getY(), stp.getY(), etp.getY(), ebr.getY() },
 		new double[] { sbr.getZ(), stp.getZ(), etp.getZ(), ebr.getZ() },
 		u, v, texture, RenderMode.STATIC, false, cr, dest,
-		destOffset + 2);
+		destOffset + 2,"LineSegment.topRight");
 	// BOTTOM
 	Triangle.quad2Triangles(
 		new double[] { sbl.getX(), sbr.getX(), ebr.getX(), ebl.getX() },
 		new double[] { sbl.getY(), sbr.getY(), ebr.getY(), ebl.getY() },
 		new double[] { sbr.getZ(), sbr.getZ(), ebr.getZ(), ebl.getZ() },
 		u, v, texture, RenderMode.STATIC, false, cb, dest,
-		destOffset + 4);
+		destOffset + 4,"LineSegment.bottom");
 	return dest;
     }// end buildTriPipe
 }// end LineSegment

@@ -80,7 +80,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 				    0 + cloudTileSideSize },
 			    new double[] { 0, 1, 1, 0 },// u
 			    new double[] { 1, 1, 0, 0 }, cloudTexture,
-			    RenderMode.STATIC, Vector3D.ZERO);
+			    RenderMode.STATIC, Vector3D.ZERO,"CloudSystem");
 		    final Model m = new Model(false, tr);
 		    m.addTriangle(tris[0]);
 		    m.addTriangle(tris[1]);

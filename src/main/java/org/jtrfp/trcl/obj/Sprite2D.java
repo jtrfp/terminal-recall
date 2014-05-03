@@ -19,7 +19,7 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 		new double[]{-height,-height,height,height}, 
 		new double[]{z,z,z,z},
 		new double[]{0,1,1,0},
-		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.MINUS_K);
+		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.MINUS_K,"Sprite2D");
 	m.addTriangles(tris);
 	m.finalizeModel();
 	setModel(m);

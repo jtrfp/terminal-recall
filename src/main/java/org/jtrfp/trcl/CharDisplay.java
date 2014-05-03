@@ -36,7 +36,7 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere{
 				
 				new double []{0,1,1,0},//u
 				new double []{0,0,1,1},
-				new DummyFuture<TextureDescription>(tex), RenderMode.DYNAMIC,Vector3D.MINUS_K);
+				new DummyFuture<TextureDescription>(tex), RenderMode.DYNAMIC,Vector3D.MINUS_K,"CharDisplay");
 		tris[0].setAlphaBlended(true);
 		tris[1].setAlphaBlended(true);
 		model.addTriangles(tris);

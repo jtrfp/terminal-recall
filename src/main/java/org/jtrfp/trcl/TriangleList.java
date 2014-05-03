@@ -163,7 +163,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}
 	//////////////// T E X T U R E ///////////////////////////
 	TextureDescription td = t.getTexture().get();
-	if(td==null)throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");
+	if(td==null){
+	    System.err.println("Stack trace of triangle creation below. NullPointerException follows.");
+	    for(StackTraceElement el:t.getCreationStackTrace()){
+		System.err.println("\tat "+el.getClassName()+"."+el.getMethodName()+"("+el.getFileName()+":"+el.getLineNumber()+")");
+	    }//end for(stackTrace)
+	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
 	if (td instanceof Texture) {// Static texture
 	    final Texture.TextureTreeNode tx;
 	    tx = ((Texture) t.getTexture().get()).getNodeForThisTexture();

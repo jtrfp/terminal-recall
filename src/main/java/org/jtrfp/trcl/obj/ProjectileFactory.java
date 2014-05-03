@@ -55,7 +55,7 @@ public class ProjectileFactory {
    	 final double Y_SLANT=1024;
    	 tris =(Triangle.quad2Triangles(new double[]{-laserplaneLength/2.,laserplaneLength/2.,laserplaneLength/2.,-laserplaneLength/2.}, //X
    		new double[]{0,0,Y_SLANT,Y_SLANT}, new double[]{-laserplaneWidth/2.,-laserplaneWidth/2.,laserplaneWidth/2.,laserplaneWidth/2.}, //YZ
-   		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC,Vector3D.PLUS_J));//UVtr
+   		new double[]{1,0,0,1}, new double[]{0,0,1,1}, t, RenderMode.STATIC,Vector3D.PLUS_J,"ProjectileFactory:"+weapon.toString()));//UVtr
    	 tris[0].setAlphaBlended(true);
    	 tris[1].setAlphaBlended(true);
    	 modelToUse.addTriangles(tris);

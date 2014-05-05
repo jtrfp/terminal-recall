@@ -43,7 +43,7 @@ public class TunnelExitObject extends WorldObject {
 	setVisible(false);
 	try {
 	    Model m = tr.getResourceManager().getBINModel("SHIP.BIN",
-		    tr.getGlobalPalette(), tr.getGPU().getGl());
+		    tr.getGlobalPalette(), tr.gpu.get().getGl());
 	    setModel(m);
 	} catch (Exception e) {
 	    e.printStackTrace();

@@ -36,7 +36,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), globalPalette,
 			    GammaCorrectingColorProcessor.singleton,
-			    tr.getGPU().getGl());
+			    tr.gpu.get().getGl());
 	    System.out.println("Loading height map...");
 	    altitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
 		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile()));

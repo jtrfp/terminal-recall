@@ -39,15 +39,15 @@ public final class World extends RenderableSpacePartitioningGrid {
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 	this.sizeZ = sizeZ;
-	tr.getRenderer().getCamera().setViewDepth(cameraViewDepth);
-	Camera camera = tr.getRenderer().getCamera();
+	tr.renderer.get().getCamera().setViewDepth(cameraViewDepth);
+	Camera camera = tr.renderer.get().getCamera();
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 		sizeY / 3.15, camera.getCameraPosition().getZ()));
     }// end constructor
 
     public void setCameraDirection(ObjectDirection dir) {
-	tr.getRenderer().getCamera().setLookAtVector(dir.getHeading());
-	tr.getRenderer().getCamera().setUpVector(dir.getTop());
+	tr.renderer.get().getCamera().setLookAtVector(dir.getHeading());
+	tr.renderer.get().getCamera().setUpVector(dir.getTop());
     }
 
     /**

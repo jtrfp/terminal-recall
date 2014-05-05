@@ -34,7 +34,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 	Future<TextureDescription>[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
 			GammaCorrectingColorProcessor.singleton,
-			tr.getGPU().getGl(), 2);
+			tr.gpu.get().getGl(), 2);
 	Model dashModel = new Model(false, tr);
 	for (int seg = 0; seg < 5; seg++) {
 	    final double segWidth = 2. / 5.;

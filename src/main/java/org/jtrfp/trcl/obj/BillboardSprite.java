@@ -20,7 +20,7 @@ public class BillboardSprite extends WorldObject{
 	public BillboardSprite(TR tr){super(tr);}
 	@Override
 	protected void recalculateTransRotMBuffer(){
-	    	final Camera camera = getTr().getRenderer().getCamera();
+	    	final Camera camera = getTr().renderer.get().getCamera();
 	    	final Vector3D cLookAt = camera.getLookAtVector();
 	    	final Rotation rot = new Rotation(cLookAt,rotation);
 		this.setHeading(rot.applyTo(cLookAt.negate()));

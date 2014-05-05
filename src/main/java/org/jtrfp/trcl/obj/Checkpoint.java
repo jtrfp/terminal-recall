@@ -20,7 +20,7 @@ private boolean includeYAxisInCollision=true;
 	setVisible(true);
 	try{setTexture(
 		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", tr.getGlobalPalette(), 
-			    GammaCorrectingColorProcessor.singleton, tr.getGPU().getGl())
+			    GammaCorrectingColorProcessor.singleton, tr.gpu.get().getGl())
 		    ,true);
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor

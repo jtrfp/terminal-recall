@@ -33,8 +33,8 @@ public abstract class MemoryWindow {
 	}// end for(fields)
 	objectSizeInBytes = byteOffset;
 	setBuffer(tr
-		.getGPU()
-		.getMemoryManager()
+		.gpu.get()
+		.memoryManager.get()
 		.createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES,
 			"MemoryWindow " + this.getClass().getName()));
 	indexPool.setGrowthBehavior(new GrowthBehavior() {

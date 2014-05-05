@@ -84,7 +84,7 @@ public class WorldObject implements PositionedRenderable {
 	this.nullBehavior = new NullBehavior(this);
 	this.tr = tr;
 	addWorldObject(this);
-	matrixID = tr.getMatrixWindow().create();
+	matrixID = tr.matrixWindow.get().create();
 	// Matrix constants setup
 	rMd[15] = 1;
 
@@ -212,7 +212,7 @@ public class WorldObject implements PositionedRenderable {
 		numObjDefs++;
 	    triangleObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
-		triangleObjectDefinitions[i] = tr.getObjectDefinitionWindow()
+		triangleObjectDefinitions[i] = tr.objectDefinitionWindow.get()
 			.create();
 	    }
 	}
@@ -227,7 +227,7 @@ public class WorldObject implements PositionedRenderable {
 	    transparentTriangleObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
 		transparentTriangleObjectDefinitions[i] = tr
-			.getObjectDefinitionWindow().create();
+			.objectDefinitionWindow.get().create();
 	    }
 	}
     }// end setModel(...)
@@ -262,7 +262,7 @@ public class WorldObject implements PositionedRenderable {
 	processPrimitiveList(model.getTransparentTriangleList(),
 		transparentTriangleObjectDefinitions, transparentIndicesList);
 
-	ByteOrder order = getTr().getGPU().getByteOrder();
+	ByteOrder order = getTr().gpu.get().getByteOrder();
 	opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
 		opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
 	transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
@@ -289,13 +289,13 @@ public class WorldObject implements PositionedRenderable {
 	final int elementsPerBlock = GPU.GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
 	int gpuVerticesRemaining = primitiveList.getNumElements()*gpuVerticesPerElement;
 	// For each of the allocated-but-not-yet-initialized object definitions.
-	final ObjectDefinitionWindow odw = tr.getObjectDefinitionWindow();
+	final ObjectDefinitionWindow odw = tr.objectDefinitionWindow.get();
 	int odCounter=0;
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)
 		    /GPU.BYTES_PER_VEC4;
-	    final int matrixOffsetVec4s=tr.getMatrixWindow()
+	    final int matrixOffsetVec4s=tr.matrixWindow.get()
 		    .getPhysicalAddressInBytes(matrixID)
 		    / GPU.BYTES_PER_VEC4;
 	    odw.matrixOffset.set(index,matrixOffsetVec4s);
@@ -326,21 +326,21 @@ public class WorldObject implements PositionedRenderable {
     protected void recalculateTransRotMBuffer() {
 	if (LOOP) {
 	    double delta = position[0]
-		    - tr.getRenderer().getCamera().getCameraPosition().getX();
+		    - tr.renderer.get().getCamera().getCameraPosition().getX();
 	    if (delta > TR.mapWidth / 2.) {
 		position[0] -= TR.mapWidth;
 	    } else if (delta < -TR.mapWidth / 2.) {
 		position[0] += TR.mapWidth;
 	    }
 	    delta = position[1]
-		    - tr.getRenderer().getCamera().getCameraPosition().getY();
+		    - tr.renderer.get().getCamera().getCameraPosition().getY();
 	    if (delta > TR.mapWidth / 2.) {
 		position[1] -= TR.mapWidth;
 	    } else if (delta < -TR.mapWidth / 2.) {
 		position[1] += TR.mapWidth;
 	    }
 	    delta = position[2]
-		    - tr.getRenderer().getCamera().getCameraPosition().getZ();
+		    - tr.renderer.get().getCamera().getCameraPosition().getZ();
 	    if (delta > TR.mapWidth / 2.) {
 		position[2] -= TR.mapWidth;
 	    } else if (delta < -TR.mapWidth / 2.) {
@@ -368,7 +368,7 @@ public class WorldObject implements PositionedRenderable {
 	    tMd[7] = position[1];
 	    tMd[11] = position[2];
 
-	    /*final RealMatrix cm = tr.getRenderer().getCamera().getMatrix();
+	    /*final RealMatrix cm = tr.renderer.get().getCamera().getMatrix();
 	    for (int i = 0; i < 16; i++) {
 		cMd[i] = cm.getEntry(i / 4, i % 4);
 	    }*/
@@ -381,7 +381,7 @@ public class WorldObject implements PositionedRenderable {
 	    //Mat4x4.mul(cMd, rotTransM, camM);//Camera matrix calc moved to GPU
 
 	    //tr.getMatrixWindow().setTransposed(camM, matrixID);//Camera matrix calc moved to GPU
-	    tr.getMatrixWindow().setTransposed(rotTransM, matrixID);//New version
+	    tr.matrixWindow.get().setTransposed(rotTransM, matrixID);//New version
 	} catch (MathArithmeticException e) {
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()

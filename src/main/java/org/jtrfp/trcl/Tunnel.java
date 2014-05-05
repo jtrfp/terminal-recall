@@ -63,7 +63,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		deactivate();//Sleep until activated by tunnel entrance
 		tr=world.getTr();
 		palette=tr.getGlobalPalette();
-		gl=tr.getGPU().getGl();
+		gl=tr.gpu.get().getGl();
 		Vector3D tunnelEnd=null;
 		try {   lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
 			final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
@@ -155,7 +155,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		Color [] palette = tr.getGlobalPalette();
 		Obstacle obs = s.getObstacle();
 		WorldObject wo;
-		GL3 gl = tr.getGPU().getGl();
+		GL3 gl = tr.gpu.get().getGl();
 		Model m;
 		switch(obs){
 			case none0:

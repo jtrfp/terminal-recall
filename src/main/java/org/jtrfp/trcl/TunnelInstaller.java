@@ -13,7 +13,7 @@ public class TunnelInstaller {
 	this.tdf = tdf;
 	this.world = world;
 	final TR tr = world.getTr();
-	final GPU gpu = tr.getGPU();
+	final GPU gpu = tr.gpu.get();
 	final OverworldSystem overworldSystem = tr.getOverworldSystem();
 	final Mission mission = tr.getCurrentMission();
 	TDFFile.Tunnel[] tuns = tdf.getTunnels();

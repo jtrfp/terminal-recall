@@ -29,7 +29,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 	public BackdropSystem(World world){
 		super(world);
 		final TR tr = world.getTr();
-		final TextureManager tm = tr.getGPU().getTextureManager();
+		final TextureManager tm = tr.gpu.get().textureManager.get();
 		//Backdrop
 		Model backdropModel=new Model(false,tr);
 		backdropModel.addTriangles(

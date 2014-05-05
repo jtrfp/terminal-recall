@@ -17,25 +17,14 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.Map.Entry;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
@@ -54,13 +43,11 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.mem.GPUMemDump;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.tools.Util;
 
-public final class TR
-	{
+public final class TR{
 	public static final double unitCircle=65535;
 	public static final double crossPlatformScalar=16;//Shrinks everything so that we can use floats instead of ints
 	public static final double mapSquareSize=Math.pow(2, 20)/crossPlatformScalar;
@@ -71,15 +58,15 @@ public final class TR
 	public static final double antiGamma=1.6;
 	public static final boolean ANIMATED_TERRAIN=false;
 	
-	private final GPU gpu = new GPU(this);
+	public final TRFutureTask<GPU> gpu;
 	private Player player;
-	private final JFrame frame = new JFrame("Terminal Recall");
+	public final RootWindow rootWindow;
 	private Color [] globalPalette, darkIsClearPalette;
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
 	public static final ExecutorService threadPool = Executors.newCachedThreadPool();//TODO: Migrate to ThreadManager
-	private final ThreadManager threadManager;
-	private Renderer renderer;
+	public final ThreadManager threadManager;
+	public final TRFutureTask<Renderer> renderer;
 	private final CollisionManager collisionManager = new CollisionManager(this);
 	private final Reporter reporter = new Reporter();
 	private OverworldSystem overworldSystem;
@@ -90,9 +77,9 @@ public final class TR
 	private HUDSystem hudSystem;
 	private Mission currentMission;
 	
-	private MatrixWindow matrixWindow ;
-	private ObjectListWindow objectListWindow;
-	private ObjectDefinitionWindow odWindow;
+	public final TRFutureTask<MatrixWindow> matrixWindow ;
+	public final TRFutureTask<ObjectListWindow> objectListWindow;
+	public final TRFutureTask<ObjectDefinitionWindow> objectDefinitionWindow;
 	private TRConfiguration trConfig;
 	private GL3 glCache;
 	private ByteOrder byteOrder;
@@ -104,16 +91,15 @@ public final class TR
 	 * @return
 	 * @since Oct 17, 2012
 	 */
-	public static double legacy2Modern(double v)
-		{
-		return v<0?(v+268435456)/crossPlatformScalar:v/crossPlatformScalar;
-		}
-	
-	public static double modern2Legacy(double v)
-		{
-		v*=crossPlatformScalar;
-		return v>134217727?v-268435456:v;
-		}
+    public static double legacy2Modern(double v) {
+	return v < 0 ? (v + 268435456) / crossPlatformScalar : v
+		/ crossPlatformScalar;
+    }
+
+    public static double modern2Legacy(double v) {
+	v *= crossPlatformScalar;
+	return v > 134217727 ? v - 268435456 : v;
+    }
 	public static Vector3D twosComplimentSubtract(Vector3D l, Vector3D r){
 	    return new Vector3D(
 		    deltaRollover(l.getX()-r.getX()),
@@ -129,101 +115,89 @@ public final class TR
 	    return v;
 	}
 	
-	public TR()
-		{
-		keyStatus = new KeyStatus(frame);
-		try{
-		SwingUtilities.invokeAndWait(new Runnable()
-			{
-			@Override
-			public void run(){
-			configureMenuBar();
-			//frame.setBackground(Color.black);
-			frame.getContentPane().add(gpu.getComponent());
-			frame.setVisible(true);
-			frame.setSize(800,600);
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			//frame.pack();
-			}});
-		}catch(Exception e){e.printStackTrace();}
+	public TR(){
+	    	AutoInitializable.Initializer.initialize(this);
+	    	rootWindow = new RootWindow(this);
+		keyStatus = new KeyStatus(rootWindow);
 		threadManager = new ThreadManager(this);
-		initializeGraphicsEngine();
+		gpu = new TRFutureTask<GPU>(this,new Callable<GPU>(){
+		    @Override
+		    public GPU call() throws Exception {
+			Thread.currentThread().setName("GPU constructor");
+			return new GPU(TR.this);
+		    }});
+		threadManager.threadPool.submit(gpu);
+		System.out.println("Initializing graphics engine...");
+		    renderer=new TRFutureTask<Renderer>(this,new Callable<Renderer>(){
+			@Override
+			public Renderer call() throws Exception {
+			    Thread.currentThread().setName("Renderer constructor.");
+			    return new Renderer(TR.this.gpu.get());
+			}//end call()
+		    });threadManager.threadPool.submit(renderer);
+		    matrixWindow=new TRFutureTask<MatrixWindow>(this,new Callable<MatrixWindow>(){
+			@Override
+			public MatrixWindow call() throws Exception {
+			    Thread.currentThread().setName("MatrixWindow constructor.");
+			    return new MatrixWindow(TR.this);
+			}//end call()
+		    });threadManager.threadPool.submit(matrixWindow);
+		    objectListWindow=new TRFutureTask<ObjectListWindow>(this,new Callable<ObjectListWindow>(){
+			@Override
+			public ObjectListWindow call() throws Exception {
+			    Thread.currentThread().setName("ObjectListWindow constructor.");
+			    return new ObjectListWindow(TR.this);
+			}//end call()
+		    });threadManager.threadPool.submit(objectListWindow);
+		    objectDefinitionWindow=new TRFutureTask<ObjectDefinitionWindow>(this,new Callable<ObjectDefinitionWindow>(){
+			@Override
+			public ObjectDefinitionWindow call() throws Exception {
+			    Thread.currentThread().setName("ObjectDefinitionWindow constructor.");
+			    return new ObjectDefinitionWindow(TR.this);
+			}//end call()
+		    });threadManager.threadPool.submit(objectDefinitionWindow);
+		    System.out.println("...Done");
 		setResourceManager(new ResourceManager(this));
 		world = new World(
 				256*mapSquareSize,
 				14.*mapSquareSize,
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
-		getRenderer().setRootGrid(world);
+		renderer.get().setRootGrid(world);
 		}//end constructor
 	
-	private void initializeGraphicsEngine(){
-	    System.out.println("Initializing graphics engine...");
-	    final CyclicBarrier barrier = new CyclicBarrier(2);
-	    gpu.addGLEventListener(new GLEventListener(){
-		@Override
-		public void init(GLAutoDrawable drawable) {
-		    renderer=new Renderer(gpu);
-		    matrixWindow = new MatrixWindow(TR.this);
-		    objectListWindow = new ObjectListWindow(TR.this);
-		    odWindow = new ObjectDefinitionWindow(TR.this);
-		    try{barrier.await();}catch(Exception e){}
+    public void showStopper(final Exception e) {
+	System.err.println("==== SHOWSTOPPER ====");
+			    e.printStackTrace();
+	System.err.println("======================");
+	System.err.println("\nToo full of fail to continue. Exiting...\n\n");
+	System.exit(-1);
+	/*
+	try {
+	    SwingUtilities.invokeLater(new Runnable() {
+		public void run() {
+		    int c = JOptionPane.showConfirmDialog(rootWindow,
+			    "A component of Terminal Recall triggered a showstopper error:\n"
+				    + e.getLocalizedMessage()
+				    + "\n\nContinue anyway?", "Uh Oh...",
+			    JOptionPane.ERROR_MESSAGE);
+		    if (c == 1)
+			System.exit(1);
 		}
-		@Override
-		public void dispose(GLAutoDrawable drawable) {}
-		@Override
-		public void display(GLAutoDrawable drawable) {}
-		@Override
-		public void reshape(GLAutoDrawable drawable, int x, int y,
-			int width, int height) {}});
-	    try{barrier.await();}catch(Exception e){}
-	    System.out.println("...Done");
-	}//end initializeRenderingEngine()
-	
-	public void showStopper(final Exception e)
-		{try{
-		SwingUtilities.invokeLater(new Runnable(){public void run()
-			{
-			int c = JOptionPane.showConfirmDialog(getFrame(), "A component of Terminal Recall triggered a showstopper error:\n"+e.getLocalizedMessage()+"\n\nContinue anyway?",
-					"Uh Oh...",
-					JOptionPane.ERROR_MESSAGE);
-			if(c==1)System.exit(1);
-			}});
-		} catch(Exception ite){ite.printStackTrace();}
-		e.printStackTrace();
-		}
-	
-	private void configureMenuBar()
-		{
-		frame.setJMenuBar(new JMenuBar());
-		JMenu file=new JMenu("File"),window=new JMenu("Window");
-		
-		//And menus to menubar
-		JMenuItem file_exit=new JMenuItem("Exit");
-		JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
-		JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
-		//Menu item behaviors
-		file_exit.addActionListener(new ActionListener(){
-		    @Override public void actionPerformed(ActionEvent arg0){System.exit(1);}});
-		debugStatesMenuItem.addActionListener(new ActionListener(){
-		    @Override public void actionPerformed(ActionEvent ev){reporter.setVisible(true);};});
-		gpuMemDump.addActionListener(new ActionListener(){
-		    @Override public void actionPerformed(ActionEvent ev){new GPUMemDump(TR.this);};});
-		final String showDebugStatesOnStartup = System.getProperty("org.jtrfp.trcl.showDebugStates");
-		if(showDebugStatesOnStartup!=null){if(showDebugStatesOnStartup.toUpperCase().contains("TRUE")){reporter.setVisible(true);}}
-		file.add(file_exit);
-		file.add(gpuMemDump);
-		window.add(debugStatesMenuItem);
-		frame.getJMenuBar().add(file);
-		frame.getJMenuBar().add(window);
-		}
-	
-	public static int bidiMod(int v, int mod)
-		{
-		while(v<0)v+=mod;
-		v%=mod;
-		return v;
-		}
+	    });
+	} catch (Exception ite) {
+	    showStopper(ite);
+	}
+	showStopper(e);
+	*/
+    }
+
+    public static int bidiMod(int v, int mod) {
+	while (v < 0)
+	    v += mod;
+	v %= mod;
+	return v;
+    }
 
 	/**
 	 * @return the trConfig
@@ -255,14 +229,6 @@ public final class TR
 	public void setResourceManager(ResourceManager resourceManager)
 		{
 		this.resourceManager = resourceManager;
-		}
-
-	/**
-	 * @return the frame
-	 */
-	public JFrame getFrame()
-		{
-		return frame;
 		}
 	
 	public static double [] floats2Doubles(float [] toConvert)
@@ -311,16 +277,6 @@ public final class TR
 	    }//end if(null)
 	    return darkIsClearPalette;
 	}//end getDarkIsClearPalette
-	
-	public GPU getGPU(){return gpu;}
-
-	/**
-	 * @return the renderer
-	 */
-	public Renderer getRenderer()
-		{
-		return renderer;
-		}
 
 	/**
 	 * @return the world
@@ -429,14 +385,14 @@ public final class TR
 	}
 	
 	public void gatherSysInfo(){
-    	    final GPU gpu = getGPU();
+    	    final GPU _gpu = gpu.get();
     	    final Reporter r = getReporter();
-    	    gpu.getGl().getContext().makeCurrent();
-    	    r.report("org.jtrfp.trcl.flow.RunMe.glVendor", gpu.glGetString(GL3.GL_VENDOR));
-    	    r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", gpu.glGetString(GL3.GL_RENDERER));
-    	    r.report("org.jtrfp.trcl.flow.RunMe.glVersion", gpu.glGetString(GL3.GL_VERSION));
+    	    _gpu.getGl().getContext().makeCurrent();
+    	    r.report("org.jtrfp.trcl.flow.RunMe.glVendor", _gpu.glGetString(GL3.GL_VENDOR));
+    	    r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", _gpu.glGetString(GL3.GL_RENDERER));
+    	    r.report("org.jtrfp.trcl.flow.RunMe.glVersion", _gpu.glGetString(GL3.GL_VERSION));
     	    r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime.getRuntime().availableProcessors());
-    	    gpu.getGl().getContext().release();
+    	    _gpu.getGl().getContext().release();
     	    for(Entry<Object,Object> prop:System.getProperties().entrySet())
     		{r.report((String)prop.getKey(),prop.getValue());}
     	    }//end gatherSysInfo()
@@ -451,9 +407,9 @@ public final class TR
 	    Mission.Result result = currentMission.go();
 	    final String nextLVL=result.getNextLVL();
 	    if(nextLVL!=null)recursiveMissionSequence(nextLVL);
-	    }catch(IllegalAccessException e){e.printStackTrace();}
-	    catch(FileLoadException e){e.printStackTrace();}
-	    catch(IOException e){e.printStackTrace();}
+	    }catch(IllegalAccessException e){showStopper(e);}
+	    catch(FileLoadException e){showStopper(e);}
+	    catch(IOException e){showStopper(e);}
 	}
 
 	/**
@@ -486,22 +442,7 @@ public final class TR
 	    dest[2]=deltaRollover(l[2]-r[2]);
 	    return dest;
 	}
-
-	public MatrixWindow getMatrixWindow() {
-	    return matrixWindow;
-	}
-
-	/**
-	 * @return the objectListWindow
-	 */
-	public ObjectListWindow getObjectListWindow() {
-	    return objectListWindow;
-	}
-
-	/**
-	 * @return the odWindow
-	 */
-	public ObjectDefinitionWindow getObjectDefinitionWindow() {
-	    return odWindow;
+	public RootWindow getRootWindow() {
+	    return rootWindow;
 	}
 }//end TR

@@ -2,23 +2,29 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.core.TRFuture;
+
 public final class GLTexture {
     private final GPU gpu;
-    private final int textureID;
+    private final TRFuture<Integer> textureID;
     private int rawSideLength;
-    private GL3 gl;
+    private final GL3 gl;
     private int bindingTarget = GL3.GL_TEXTURE_2D;
     private int internalColorFormat = GL3.GL_RGBA4;
 
-    public GLTexture(GPU gpu) {
+    public GLTexture(final GPU gpu) {
 	System.out.println("Creating GL Texture...");
 	this.gpu = gpu;
-	textureID = gpu.newTextureID();
+	textureID = gpu.getTr().getThreadManager().submitToGL(new Callable<Integer>(){
+	    @Override
+	    public Integer call() throws Exception {
+		return gpu.newTextureID();
+	    }});
 	gl = gpu.getGl();
 	// Setup the empty rows
 	System.out.println("...Done.");
@@ -29,7 +35,7 @@ public final class GLTexture {
 	return this;
     }
     public GLTexture setParameteri(int parameterName, int value){
-	gl.glTexParameteri(textureID, parameterName, value);
+	gl.glTexParameteri(textureID.get(), parameterName, value);
 	return this;
     }
 
@@ -45,7 +51,7 @@ public final class GLTexture {
 	rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
 	buf.rewind();
 	GL3 gl = gpu.getGl();
-	gl.glBindTexture(bindingTarget, textureID);
+	gl.glBindTexture(bindingTarget, textureID.get());
 	/*FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
 	gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);*/
 	System.out.println("Uploading texture...");
@@ -94,17 +100,12 @@ public final class GLTexture {
     }
 
     public void delete() {
-	gl.glBindTexture(bindingTarget, textureID);
-	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID }));
+	gl.glBindTexture(bindingTarget, textureID.get());
+	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID.get() }));
     }
 
     int getTextureID() {
-	return textureID;
-    }
-    
-    public GLTexture setGl(GL3 gl){
-	this.gl=gl;
-	return this;
+	return textureID.get();
     }
 
     public static void specifyTextureUnit(GL3 gl, int unitNumber) {

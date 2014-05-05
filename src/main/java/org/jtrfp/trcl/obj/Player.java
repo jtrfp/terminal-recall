@@ -132,7 +132,7 @@ public class Player extends WorldObject {
 	    }// end if(hasButton)
 	}
 	addBehavior(new WeaponSelectionBehavior().setBehaviors(weapons));
-	camera = tr.getRenderer().getCamera();
+	camera = tr.renderer.get().getCamera();
 	getBehavior().probeForBehavior(VelocityDragBehavior.class)
 		.setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);

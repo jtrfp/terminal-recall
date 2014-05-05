@@ -75,7 +75,7 @@ public class WorldObject2D extends WorldObject{
 		tMd[11]=tV[2];
 		Mat4x4.mul(tMd, rMd, rotTransM);
 		
-		getTr().getMatrixWindow().setTransposed(rotTransM,matrixID);
+		getTr().matrixWindow.get().setTransposed(rotTransM,matrixID);
 		}//end recalculateTransRotMBuffer()
 	
 	@Override

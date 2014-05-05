@@ -2,6 +2,8 @@ package org.jtrfp.trcl.mem;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
@@ -19,16 +21,32 @@ public final class MemoryManager {
     
     public MemoryManager(GPU gpu){
 	this.gpu=gpu;
-	glPhysicalMemory=new ReallocatableGLTextureBuffer(gpu);
-	glPhysicalMemory.reallocate(PagedByteBuffer.PAGE_SIZE_BYTES);
-	physicalMemory[0] = glPhysicalMemory.map();
-	glPhysicalMemory.setUsageHint(MemoryUsageHint.DymamicDraw);
+	try{
+	glPhysicalMemory = gpu.getTr().getThreadManager().enqueueGLOperation(new Callable<ReallocatableGLTextureBuffer>(){
+	    @Override
+	    public ReallocatableGLTextureBuffer call() throws Exception {
+		ReallocatableGLTextureBuffer tb;
+		tb=new ReallocatableGLTextureBuffer(MemoryManager.this.gpu);
+		tb.reallocate(PagedByteBuffer.PAGE_SIZE_BYTES);
+		physicalMemory[0] = tb.map();
+		tb.setUsageHint(MemoryUsageHint.DymamicDraw);
+		return tb;
+	    }}).get();
+	}catch(Exception e){throw new RuntimeException(e);}
+	
 	pageIndexPool.setGrowthBehavior(new GrowthBehavior(){
 	    @Override
-	    public int grow(int previousMaxCapacity) {
-		glPhysicalMemory.reallocate(previousMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES*2);
-		physicalMemory[0] = glPhysicalMemory.map();
-		return previousMaxCapacity*2;
+	    public int grow(final int previousMaxCapacity) {
+		final FutureTask<Integer> ft = MemoryManager.this.gpu.getTr().getThreadManager().enqueueGLOperation(new Callable<Integer>(){
+		    @Override
+		    public Integer call(){
+			glPhysicalMemory.reallocate(previousMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES*2);
+			physicalMemory[0] = glPhysicalMemory.map();
+			return previousMaxCapacity*2;
+		    }//end call()
+		});
+		try{return ft.get();}catch(Exception e){e.printStackTrace();}
+		return previousMaxCapacity;//Fail by maintaining original size
 	    }//end grow(...)
 	});
     }//end constructor

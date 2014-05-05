@@ -55,8 +55,8 @@ public class GLFont{
 	    maxAdvance=imgHeight;
 	    textures = new Future[256];
 	DummyFuture<Texture> empty = new DummyFuture<Texture>(tr
-		.getGPU()
-		.getTextureManager()
+		.gpu.get()
+		.textureManager.get()
 		.newTexture(
 			ByteBuffer.allocateDirect(sideLength * sideLength * 4),
 			"GLFont rgba buf empty"));
@@ -79,7 +79,7 @@ public class GLFont{
 		    texBuf.limit(texBuf.position()+sideLength*4);
 		    texBuf.put(rgba8888[i]);
 		}//end for(imgHeight)
-	    textures[i + asciiOffset] = new DummyFuture<Texture>(tr.getGPU().getTextureManager().newTexture(
+	    textures[i + asciiOffset] = new DummyFuture<Texture>(tr.gpu.get().textureManager.get().newTexture(
 		    texBuf, "GLFont rgba buf char=" + (char) i));
 	    }//end for(i:numChars)
 	    //Load empties to the right side of the ASCII textures.
@@ -119,7 +119,7 @@ public class GLFont{
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
 		g.dispose();
-		return tr.getGPU().getTextureManager().newTexture(img,"GLFont "+(char)c);
+		return tr.gpu.get().textureManager.get().newTexture(img,"GLFont "+(char)c);
 		}//end renderToTexture(...)
 	
 	public double getTextureSideLength(){return sideLength;}

@@ -1,10 +1,10 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.DummyFuture;
@@ -21,13 +21,18 @@ public class TextureManager {
     private final TR 				tr;
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
-    private final VQCodebookManager		vqCodebookManager;
+    public final TRFuture<VQCodebookManager>	vqCodebookManager;
     private Future<TextureDescription>		fallbackTexture;
-    public TextureManager(TR tr){
+    public TextureManager(final TR tr){
 	this.tr			= tr;
 	subTextureWindow 	= new SubTextureWindow(tr);
 	tocWindow 		= new TextureTOCWindow(tr);
-	vqCodebookManager 	= new VQCodebookManager(tr);
+	vqCodebookManager=tr.getThreadManager().enqueueGLOperation(new Callable<VQCodebookManager>(){
+	    @Override
+	    public VQCodebookManager call() throws Exception {
+		return new VQCodebookManager(tr);
+	    }});
+	
     }//end constructor
     
     public Texture newTexture(ByteBuffer imageRGB8, String debugName){
@@ -35,13 +40,6 @@ public class TextureManager {
     }
     public Texture newTexture(BufferedImage img, String debugName){
 	return new Texture(img,debugName,tr);
-    }
-
-    /**
-     * @return the textureTileManager
-     */
-    public VQCodebookManager getCodebookManager() {
-        return vqCodebookManager;
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;

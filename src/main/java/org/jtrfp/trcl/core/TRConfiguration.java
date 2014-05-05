@@ -21,6 +21,7 @@ public class TRConfiguration{
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
     			usingNewTexturing;
+    	private int targetFPS =60;
 	public TRConfiguration(){}
 
 	public GameVersion getGameVersion() {
@@ -48,4 +49,8 @@ public class TRConfiguration{
 	    usingTextureBufferUnmap=result;
 	    return result;
 	}//end isUsingTextureBufferUnmap()
+
+	public int getTargetFPS() {
+	    return targetFPS;
+	}
 }//end TRConfiguration

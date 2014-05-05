@@ -13,8 +13,8 @@ public class GPUMemDump {
 
     public GPUMemDump(TR tr) {
 	//Dump raw memory
-	final GPU gpu = tr.getGPU();
-	final MemoryManager memMgr = gpu.getMemoryManager();
+	final GPU gpu = tr.gpu.get();
+	final MemoryManager memMgr = gpu.memoryManager.get();
 	final int gpuMemSize = memMgr.getMaxCapacityInBytes();
 	try{
 	File outFile = new File("gpuMemDump.bin");

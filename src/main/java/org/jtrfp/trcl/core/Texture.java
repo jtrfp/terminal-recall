@@ -78,9 +78,9 @@ public class Texture implements TextureDescription {
     
     private Texture(TR tr, String debugName){
 	this.tr=tr;
-	this.gpu	=tr.getGPU();
-	this.tm		=gpu.getTextureManager();
-	this.cbm	=tm.getCodebookManager();
+	this.gpu	=tr.gpu.get();
+	this.tm		=gpu.textureManager.get();
+	this.cbm	=tm.vqCodebookManager.get();
 	this.toc		=tm.getTOCWindow();
 	this.stw	=tm.getSubTextureWindow();
 	this.debugName	=debugName;
@@ -149,7 +149,7 @@ public class Texture implements TextureDescription {
 		    rgba8888vl, 64, 4);
 	    final double sideLength 	= Math.sqrt((imageRGBA8888.capacity() / 4));
 	    // Get a codebook256
-	    final int codebook256Index 	= tm.getCodebookManager()
+	    final int codebook256Index 	= tm.vqCodebookManager.get()
 		    .newCodebook256();
 	    codebookStartOffsetAbsolute = codebook256Index * 256;
 	    // Get a TOC

@@ -32,7 +32,7 @@ public class PowerupObject extends BillboardSprite{
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
-		Future<TextureDescription> desc=getTr().getGPU().getTextureManager().getFallbackTexture();
+		Future<TextureDescription> desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
 		if(pt==Powerup.Random){
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
 		}
@@ -96,7 +96,7 @@ public class PowerupObject extends BillboardSprite{
 	}//end PowerupBehavior
 	
 	private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().getGPU().getGl());}
+		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl());}
 
 	public Powerup getPowerupType()
 		{return powerupType;}

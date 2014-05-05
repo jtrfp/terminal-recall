@@ -41,10 +41,10 @@ public class Game
 	
 	private void setupNameWithUser()
 		{
-		setPlayerName((String)JOptionPane.showInputDialog(tr.getFrame(),
+		setPlayerName((String)JOptionPane.showInputDialog(tr.getRootWindow(),
 				"Callsign:","Pilot Registration",JOptionPane.PLAIN_MESSAGE,
 				null,null,"Councilor"));
-		String difficulty=(String)JOptionPane.showInputDialog(tr.getFrame(),
+		String difficulty=(String)JOptionPane.showInputDialog(tr.getRootWindow(),
 				"Difficulty:","Pilot Registration",JOptionPane.PLAIN_MESSAGE,
 				null,new String[]{"Easy","Normal","Hard","Furious"},"Normal");
 		if(difficulty.contentEquals("Easy"))

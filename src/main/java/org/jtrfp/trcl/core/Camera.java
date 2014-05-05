@@ -21,7 +21,7 @@ public class Camera
 		{this.gpu=gpu;}
 	
 	private void updateProjectionMatrix(){
-	    	final Component component = gpu.getComponent();
+	    	final Component component = gpu.getTr().getRootWindow();
 		final float fov = 70f;// In degrees
 		final float aspect = (float) component.getWidth()
 				/ (float) component.getHeight();

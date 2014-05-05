@@ -23,8 +23,10 @@ public class CollisionManager {
     public synchronized void updateCollisionList() {
 	final List<WorldObject> collideable = getWriteCollisionList();
 	collideable.clear();
-	tr.getWorld().itemsWithinRadiusOf(
-		tr.getRenderer().getCamera().getCameraPosition(),
+	tr.
+	getWorld().
+	itemsWithinRadiusOf(
+		tr.renderer.get().getCamera().getCameraPosition(),
 		new Submitter<PositionedRenderable>() {
 		    @Override
 		    public void submit(PositionedRenderable item) {

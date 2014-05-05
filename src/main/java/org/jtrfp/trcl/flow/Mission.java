@@ -55,8 +55,6 @@ public class Mission {
     	final ResourceManager rm = tr.getResourceManager();
     	final ThreadManager tm = tr.getThreadManager();
     	final Color [] pal = rm.getPalette(lvl.getGlobalPaletteFile());
-    	System.out.println("Starting animator...");
-	tr.getThreadManager().start();
 	System.out.println("\t...Done.");
     	pal[0]=new Color(0,0,0,0);
     	tr.setGlobalPalette(pal);
@@ -79,7 +77,7 @@ public class Mission {
     		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
     		}//end for(weapons)
     		rm.setProjectileFactories(pf);
-    		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.getGPU().getGl())); 
+    		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl())); 
     		tr.setPlayer(player);
     		final String startX=System.getProperty("org.jtrfp.trcl.startX");
     		final String startY=System.getProperty("org.jtrfp.trcl.startY");
@@ -141,13 +139,13 @@ public class Mission {
     		player.setHeading(player.getHeading().negate());//Kludge to fix incorrect heading
     		System.out.println("Start position set to "+player.getPosition());
     		
-    		GPU gpu = tr.getGPU();
+    		GPU gpu = tr.gpu.get();
     		//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
     		System.out.println("Building atlas texture...");
     		Texture.finalize(gpu);
     		System.out.println("Setting sun vector");
     		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
-    		tr.getRenderer().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
+    		tr.renderer.get().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
     		System.out.println("\t...Done.");
     		return null;
     	    }}).get();
@@ -158,7 +156,7 @@ public class Mission {
 	System.gc();
 	System.out.println("\t...Ahh, that felt good.");
 	System.out.println("Activating renderer...");
-	tr.getRenderer().activate();
+	tr.renderer.get().activate();
 	System.out.println("\t...Done.");
 	
 	}catch(Exception e){e.printStackTrace();}

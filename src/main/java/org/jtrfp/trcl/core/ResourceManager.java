@@ -203,12 +203,12 @@ public class ResourceManager{
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=tr.getGPU().getTextureManager().getFallbackTexture().get();
+				result=tr.gpu.get().textureManager.get().getFallbackTexture().get();
 				}
 			catch(NonPowerOfTwoException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=tr.getGPU().getTextureManager().getFallbackTexture().get();
+				result=tr.gpu.get().textureManager.get().getFallbackTexture().get();
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
 			return result;
@@ -232,7 +232,7 @@ public class ResourceManager{
 		}//end rawExists
 	
 	public Model getBINModel(String name, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
-		return getBINModel(name,tr.getGPU().getTextureManager().getFallbackTexture(),1,true,palette,gl);
+		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette,gl);
 		}
 	
 	private static final double [] BOX_U = new double[]{0,1,1,0};
@@ -359,7 +359,7 @@ public class ResourceManager{
 									1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000), vi);}
 							}//end for(vi)
 							if(currentTexture==null)
-								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=tr.getGPU().getTextureManager().getFallbackTexture();}
+								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=tr.gpu.get().textureManager.get().getFallbackTexture();}
 							result.addTriangle(t);
 							}//end if(3 vertices)
 						else
@@ -376,7 +376,7 @@ public class ResourceManager{
 						    Triangle [] newTris = new Triangle[6];
 						   
 						    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(), 
-							    tr.getGPU().getTextureManager().getDefaultTriPipeTexture(), 
+							    tr.gpu.get().textureManager.get().getDefaultTriPipeTexture(), 
 							    200, newTris, 0);
 						    result.addTriangles(newTris);
 						    alreadyVisitedLineSegs.add(v1.hashCode()*v2.hashCode());

@@ -19,7 +19,7 @@ public class VQCodebookManager {
     public static final int		MIP_DEPTH			=1;
 
     public VQCodebookManager(TR tr) {
-	final GPU gpu = tr.getGPU();
+	final GPU gpu = tr.gpu.get();
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).

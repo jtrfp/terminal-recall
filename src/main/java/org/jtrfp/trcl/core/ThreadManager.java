@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.core;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.Callable;
@@ -11,8 +10,6 @@ import java.util.concurrent.FutureTask;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.Threading;
-import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
@@ -31,25 +28,28 @@ public class ThreadManager {
     private final Timer gameplayTimer = new Timer("GameplayTimer");
     private long lastGameplayTickTime = 0;
     private long timeInMillisSinceLastGameTick = 0L;
-    private ArrayList<Runnable> runWhenFirstStarted = new ArrayList<Runnable>();
-    private boolean firstRun = true;
     private final ConcurrentLinkedQueue<FutureTask> mappedOperationQueue = new ConcurrentLinkedQueue<FutureTask>();
     public final ExecutorService threadPool = Executors.newCachedThreadPool();
     private Thread renderingThread;
-
     private int counter = 0;
 
-    ThreadManager(TR tr) {
+    ThreadManager(final TR tr) {
 	this.tr = tr;
-	renderingAnimator = new FPSAnimator((GLCanvas) tr.getGPU()
-		.getComponent(), RENDER_FPS);
+	renderingAnimator = new FPSAnimator(tr.getRootWindow().getCanvas(),
+		RENDER_FPS);
+	start();
     }// end constructor
 
     private void gameplay() {
 	// Ticks
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
-	List<WorldObject> vl = tr.getRenderer().getCurrentRenderList().getVisibleWorldObjectList();
+	if(tr.renderer.isDone()){
+	    if(!tr.renderer.get().getCurrentRenderList().isDone()){
+		return;
+	    }
+	}else return;
+	List<WorldObject> vl = tr.renderer.get().getCurrentRenderList().get().getVisibleWorldObjectList();
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo = vl.get(i);
 	    if (wo.isActive()
@@ -58,18 +58,32 @@ public class ThreadManager {
 		    || wo instanceof VisibleEverywhere)
 		wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
-	tr.getPlayer().tick(tickTimeInMillis);
-	tr.getCollisionManager().performCollisionTests();
+	if(tr.getPlayer()!=null){
+	    tr.getPlayer().tick(tickTimeInMillis);
+	    tr.getCollisionManager().performCollisionTests();
+	}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
 
     private void visibilityCalc() {
-	tr.getRenderer().updateVisibilityList();
+	tr.renderer.get().updateVisibilityList();
 	tr.getCollisionManager().updateCollisionList();
     }
+    public <T> TRFuture<T> submitToGL(Callable<T> c){
+	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
+	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(result);
+	else result.run();
+	return result;
+    }
+    
+    public <T> TRFuture<T> submitToThreadPool(Callable<T> c){
+	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
+	threadPool.submit(result);
+	return result;
+    }
 
-    public void start() {
-	tr.getGPU().addGLEventListener(new GLEventListener() {
+    private void start() {
+	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(GLAutoDrawable drawable) {
 		System.out.println("GLEventListener.init()");
@@ -82,25 +96,25 @@ public class ThreadManager {
 	    @Override
 	    public void display(GLAutoDrawable drawable) {
 		Thread.currentThread().setName("OpenGL display()");
-		renderingThread=Thread.currentThread();
-		if (firstRun) {
-		    for (Runnable r : runWhenFirstStarted) {
-			r.run();
-		    }//end for(runnable)
-		}//end if(firstRun)
 		Thread.currentThread().setPriority(RENDERING_PRIORITY);
-		ThreadManager.this.tr.getGPU().getMemoryManager().map();
+		renderingThread=Thread.currentThread();
+		//if GPU not yet available, mapping not possible.
+		if(ThreadManager.this.tr.gpu.isDone()){
+		    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
+		    ThreadManager.this.tr.gpu.get().memoryManager.get().map();}}
 		while(!mappedOperationQueue.isEmpty()){
 		    final Runnable r = mappedOperationQueue.poll();
 		    r.run();
 		    synchronized(r){r.notifyAll();}
+		}//end while(mappedOperationQueue)
+		//Wait for everyone to finish.
+		if(tr.renderer.isDone()){
+		    if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
+			visibilityCalc();}
+		    gameplay();
+		    ThreadManager.this.tr.renderer.get().render();
 		}
-		if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS) == 0)
-		    visibilityCalc();
-		gameplay();
-		ThreadManager.this.tr.getRenderer().render();
-		firstRun = false;
-	    }
+	    }//end display()
 
 	    @Override
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
@@ -111,8 +125,17 @@ public class ThreadManager {
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end constructor
 
-    public <T> FutureTask<T> enqueueGLOperation(Callable<T> r){
-	final FutureTask<T> t = new FutureTask<T>(r);
+    public <T> TRFutureTask<T> enqueueGLOperation(Callable<T> r){
+	final TRFutureTask<T> t = new TRFutureTask<T>(tr,r);
+	/*
+	if(firstRun){
+	    final boolean startedWithGL = tr.getGPU().getGl().getContext().isCurrent();
+	    if(!startedWithGL){
+		Threading.invokeOnOpenGLThread(false, t);}
+	    else t.run();
+	    return t;
+	}//end if(firstRun)
+	*/
 	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(t);
 	else t.run();
 	return t;
@@ -131,9 +154,5 @@ public class ThreadManager {
 
     public Timer getGameplayTimer() {
 	return gameplayTimer;
-    }
-
-    public void addRunnableWhenFirstStarted(Runnable r) {
-	runWhenFirstStarted.add(r);
     }
 }// end ThreadManager

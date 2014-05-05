@@ -111,7 +111,6 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer put(int startIndexInBytes, ByteBuffer src) {
-	if(logicalIndex2PhysicalIndex(startIndexInBytes)==0)throw new RuntimeException("ZERO!");
 	intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
 	intrinsic[0].put(src);
 	return this;

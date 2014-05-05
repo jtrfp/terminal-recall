@@ -64,7 +64,6 @@ public final class TR{
 	private Color [] globalPalette, darkIsClearPalette;
 	private final KeyStatus keyStatus;
 	private ResourceManager resourceManager;
-	public static final ExecutorService threadPool = Executors.newCachedThreadPool();//TODO: Migrate to ThreadManager
 	public final ThreadManager threadManager;
 	public final TRFutureTask<Renderer> renderer;
 	private final CollisionManager collisionManager = new CollisionManager(this);

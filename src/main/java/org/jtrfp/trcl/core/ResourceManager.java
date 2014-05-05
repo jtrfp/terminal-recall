@@ -172,7 +172,7 @@ public class ResourceManager{
 			final boolean useCache) throws IOException, FileLoadException, IllegalAccessException{
 	    	Future<TextureDescription> result=textureNameMap.get(name);
 	    	if(result!=null&&useCache)return result;
-		result= TR.threadPool.submit(new Callable<TextureDescription>(){
+		result= tr.getThreadManager().threadPool.submit(new Callable<TextureDescription>(){
 
 		    @Override
 		    public TextureDescription call() throws Exception {

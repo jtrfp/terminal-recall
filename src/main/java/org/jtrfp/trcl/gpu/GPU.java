@@ -35,7 +35,7 @@ public class GPU{
 		}
 		
 	    });
-	    TR.threadPool.submit(memoryManager);
+	    tr.getThreadManager().threadPool.submit(memoryManager);
 	    textureManager = new TRFutureTask<TextureManager>(tr,new Callable<TextureManager>(){
 
 		@Override
@@ -44,8 +44,7 @@ public class GPU{
 		    return new TextureManager(tr);
 		}
 		
-	    });
-	    TR.threadPool.submit(textureManager);
+	    });tr.getThreadManager().threadPool.submit(textureManager);
 	}//end constructor
 	
 	public int glGet(int key){

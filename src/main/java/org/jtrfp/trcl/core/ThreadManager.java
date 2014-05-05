@@ -2,11 +2,13 @@ package org.jtrfp.trcl.core;
 
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -29,7 +31,7 @@ public class ThreadManager {
     private long lastGameplayTickTime = 0;
     private long timeInMillisSinceLastGameTick = 0L;
     private final ConcurrentLinkedQueue<FutureTask> mappedOperationQueue = new ConcurrentLinkedQueue<FutureTask>();
-    public final ExecutorService threadPool = Executors.newCachedThreadPool();
+    public final ExecutorService threadPool = new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
     private Thread renderingThread;
     private int counter = 0;
 

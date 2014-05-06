@@ -52,33 +52,33 @@ public class VQCodebookManager {
 		setWrapT(GL3.GL_CLAMP_TO_EDGE);
     }//end constructor
 
-    public VQCodebookManager setRGBA(int CODEID, ByteBuffer rgba) {
-	subImageAutoMip(CODEID,rgba,rgbaTexture,4);
+    public VQCodebookManager setRGBA(int codeID, ByteBuffer rgba) {
+	subImageAutoMip(codeID,rgba,rgbaTexture,4);
 	return this;
     }// end setRGBA(...)
 
-    public VQCodebookManager setESTuTv(int CODEID, ByteBuffer ESTuTv) {
-	subImageAutoMip(CODEID,ESTuTv,esTuTvTexture,4);
+    public VQCodebookManager setESTuTv(int codeID, ByteBuffer ESTuTv) {
+	subImageAutoMip(codeID,ESTuTv,esTuTvTexture,4);
 	return this;
     }// end setECTuTv(...)
 
-    public VQCodebookManager setIndentation(int CODEID, ByteBuffer indentation) {
-	subImageAutoMip(CODEID,indentation,indentationTexture,1);
+    public VQCodebookManager setIndentation(int codeID, ByteBuffer indentation) {
+	subImageAutoMip(codeID,indentation,indentationTexture,1);
 	return this;
     }// end setProtrusion(...)
 
-    private void subImage(final int CODEID, final ByteBuffer texels,
+    private void subImage(final int codeID, final ByteBuffer texels,
 	    final GLTexture tex, int mipLevel) {
-	final int x = CODEID % NUM_CODES_PER_AXIS;
-	final int z = CODEID / CODES_PER_PAGE;
-	final int y = (CODEID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS;
+	final int x = codeID % NUM_CODES_PER_AXIS;
+	final int z = codeID / CODES_PER_PAGE;
+	final int y = (codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS;
 	texels.clear();
 	tex.bind().subImage(new int[] { x, y, z },
 		new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 }, GL3.GL_RGBA,
 		0, texels);
     }// end subImage(...)
 
-    private void subImageAutoMip(final int CODEID, final ByteBuffer texels,
+    private void subImageAutoMip(final int codeID, final ByteBuffer texels,
 	    final GLTexture tex, int byteSizedComponentsPerTexel) {
 	ByteBuffer wb = ByteBuffer.allocate(texels.capacity());
 	ByteBuffer intermediate = ByteBuffer.allocate(texels.capacity() / 4);
@@ -86,7 +86,7 @@ public class VQCodebookManager {
 	wb.put(texels);
 	int sideLen = (int)Math.sqrt(texels.capacity() / byteSizedComponentsPerTexel);
 	for (int mipLevel = 0; mipLevel < MIP_DEPTH; mipLevel++) {
-	    subImage(CODEID, texels, tex, mipLevel);
+	    subImage(codeID, texels, tex, mipLevel);
 	    mipDown(wb, intermediate, sideLen, byteSizedComponentsPerTexel);
 	    wb.clear();
 	    intermediate.clear();
@@ -126,8 +126,8 @@ public class VQCodebookManager {
 	return codebook256Indices.pop();
     }// end newCODE()
 
-    public void releaseCODE(int CODEToRelease) {
-	codebook256Indices.free(CODEToRelease);
+    public void releaseCodebook256(int codebook256ToRelease) {
+	codebook256Indices.free(codebook256ToRelease);
     }// end releaseCODE(...)
     
     public GLTexture getRGBATexture()		{return rgbaTexture;}

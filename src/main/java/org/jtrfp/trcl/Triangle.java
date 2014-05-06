@@ -31,7 +31,7 @@ public class Triangle {
     private final StackTraceElement[] creationStackTrace;
 
     private Future<TextureDescription> texture;
-    public static boolean debugTriangles = true;
+    public static boolean debugTriangles = false;
 
     public Triangle() {
 	if (debugTriangles)

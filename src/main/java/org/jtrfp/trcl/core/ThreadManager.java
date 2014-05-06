@@ -47,10 +47,9 @@ public class ThreadManager {
     private void gameplay() {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
-	if(tr.renderer.isDone()){
-	    if(!tr.renderer.get().getCurrentRenderList().isDone()){
+	if(tr.renderer.isDone() && tr.getPlayer()!=null){
+	    if(!tr.renderer.get().getCurrentRenderList().isDone())
 		return;
-	    }
 	}else return;
 	List<WorldObject> vl = tr.renderer.get().getCurrentRenderList().get().getVisibleWorldObjectList();
 	for (int i = 0; i<vl.size(); i++) {

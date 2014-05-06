@@ -20,20 +20,22 @@ import org.jtrfp.trcl.obj.WorldObject;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class ThreadManager {
-    public static final int RENDER_FPS = 60;
-    public static final int GAMEPLAY_FPS = RENDER_FPS;
-    public static final int RENDERLIST_REFRESH_FPS = 5;
-    public static final int RENDERING_PRIORITY = 6;
-    public static final int SOUND_PRIORITY = 8;
-    private final TR tr;
-    private final FPSAnimator renderingAnimator;
-    private final Timer gameplayTimer = new Timer("GameplayTimer");
-    private long lastGameplayTickTime = 0;
-    private long timeInMillisSinceLastGameTick = 0L;
-    private final ConcurrentLinkedQueue<FutureTask> mappedOperationQueue = new ConcurrentLinkedQueue<FutureTask>();
-    public final ExecutorService threadPool = new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
-    private Thread renderingThread;
-    private int counter = 0;
+    public static final int RENDER_FPS 			= 60;
+    public static final int GAMEPLAY_FPS 		= RENDER_FPS;
+    public static final int RENDERLIST_REFRESH_FPS 	= 5;
+    public static final int RENDERING_PRIORITY 		= 6;
+    public static final int SOUND_PRIORITY 		= 8;
+    private final TR 			tr;
+    private final FPSAnimator 		renderingAnimator;
+    private final Timer 		gameplayTimer 			= new Timer("GameplayTimer");
+    private long 			lastGameplayTickTime 		= 0;
+    private long 			timeInMillisSinceLastGameTick 	= 0L;
+    private int 			counter 			= 0;
+    private Thread 			renderingThread;
+    public final ExecutorService	threadPool 			= 
+	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
+    private final ConcurrentLinkedQueue<FutureTask> 	
+    	mappedOperationQueue 		= new ConcurrentLinkedQueue<FutureTask>();
 
     ThreadManager(final TR tr) {
 	this.tr = tr;
@@ -43,7 +45,6 @@ public class ThreadManager {
     }// end constructor
 
     private void gameplay() {
-	// Ticks
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	if(tr.renderer.isDone()){
@@ -125,30 +126,14 @@ public class ThreadManager {
 	});
 	renderingAnimator.start();
 	lastGameplayTickTime = System.currentTimeMillis();
-    }// end constructor
+    }// end start()
 
     public <T> TRFutureTask<T> enqueueGLOperation(Callable<T> r){
 	final TRFutureTask<T> t = new TRFutureTask<T>(tr,r);
-	/*
-	if(firstRun){
-	    final boolean startedWithGL = tr.getGPU().getGl().getContext().isCurrent();
-	    if(!startedWithGL){
-		Threading.invokeOnOpenGLThread(false, t);}
-	    else t.run();
-	    return t;
-	}//end if(firstRun)
-	*/
 	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(t);
 	else t.run();
 	return t;
-    }
-    /*public void blockingEnqueueGLOperation(Runnable r){
-	if(Thread.currentThread()!=renderingThread){
-	    synchronized(r){
-	    mappedOperationQueue.add(r);
-	    try{r.wait();}catch(Exception e){e.printStackTrace();}}}
-	else {r.run();}
-    }*/
+	}
     
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;

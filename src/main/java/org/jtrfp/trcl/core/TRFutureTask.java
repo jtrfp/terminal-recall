@@ -21,7 +21,6 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     @Override
     public void run(){
 	super.run();
-	Thread.currentThread().setName("Finished TRFutureTask");
     }
 
     @Override

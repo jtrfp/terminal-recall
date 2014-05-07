@@ -61,18 +61,18 @@ public class RenderList {
     /*    	*/				intermediateColorTexture,
     /*    	*/				intermediateNormTexture,
     /*		*/				intermediateTextureIDTexture;
-    private final	ArrayList<WorldObject>	visibleWorldObjects = new ArrayList<WorldObject>();
+    private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
 	public void submit(PositionedRenderable item) {
 	    if (item instanceof WorldObject) {
 		final WorldObject wo = (WorldObject)item;
-		if (!((WorldObject) item).isVisible()
-			|| !((WorldObject) item).isActive()) {
+		if (!wo.isActive()) {
 		    return;
 		}
-		visibleWorldObjects.add(wo);
+		nearbyWorldObjects.add(wo);
+		if(!wo.isVisible())return;
 	    }//end if(WorldObject)
 	    final ByteBuffer opOD = item.getOpaqueObjectDefinitionAddresses();
 	    final ByteBuffer trOD = item
@@ -87,7 +87,7 @@ public class RenderList {
 
 	@Override
 	public void submit(Collection<PositionedRenderable> items) {
-	    for (PositionedRenderable r : items) {
+	    for (PositionedRenderable r : items.toArray(new PositionedRenderable[items.size()])) {
 		submit(r);
 	    }//end for(items)
 	}//end submit(...)
@@ -155,8 +155,8 @@ public class RenderList {
 	/*for (int i = 0; i < renderablesIndex; i++) {
 	    renderables[i].updateStateToGPU();
 	}*/
-	for (int i = 0; i < visibleWorldObjects.size(); i++) {
-	    visibleWorldObjects.get(i).updateStateToGPU();
+	for (int i = 0; i < nearbyWorldObjects.size(); i++) {
+	    nearbyWorldObjects.get(i).updateStateToGPU();
 	}
     }//end updateStatesToGPU
 
@@ -261,10 +261,10 @@ public class RenderList {
 	numTransparentBlocks = 0;
 	blendIndex = 0;
 	opaqueIndex = 0;
-	visibleWorldObjects.clear();
+	nearbyWorldObjects.clear();
     }//end reset()
     
     public List<WorldObject> getVisibleWorldObjectList(){
-	return visibleWorldObjects;
+	return nearbyWorldObjects;
     }
 }// end RenderList

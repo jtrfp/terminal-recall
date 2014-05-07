@@ -58,59 +58,49 @@ public class Mission {
 	System.out.println("\t...Done.");
     	pal[0]=new Color(0,0,0,0);
     	tr.setGlobalPalette(pal);
-    	
-    	tm.enqueueGLOperation(new Callable<Object>(){
-    	    public Object call(){
-    		try{
-    		// POWERUPS
-    		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
-    		/// EXPLOSIONS
-    		rm.setExplosionFactory(new ExplosionFactory(tr));
-    		// SMOKE
-    		rm.setSmokeFactory(new SmokeFactory(tr));
-    		// DEBRIS
-    		rm.setDebrisFactory(new DebrisFactory(tr));
-    		//SETUP PROJECTILE FACTORIES
-    		Weapon [] w = Weapon.values();
-    		ProjectileFactory [] pf = new ProjectileFactory[w.length];
-    		for(int i=0; i<w.length;i++){
-    		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
-    		}//end for(weapons)
-    		rm.setProjectileFactories(pf);
-    		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl())); 
-    		tr.setPlayer(player);
-    		final String startX=System.getProperty("org.jtrfp.trcl.startX");
-    		final String startY=System.getProperty("org.jtrfp.trcl.startY");
-    		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
-    		final double [] playerPos = player.getPosition();
-    		if(startX!=null && startY!=null&&startZ!=null){
-    		    System.out.println("Using user-specified start point");
-    		    final int sX=Integer.parseInt(startX);
-    		    final int sY=Integer.parseInt(startY);
-    		    final int sZ=Integer.parseInt(startZ);
-    		    playerPos[0]=sX;
-    		    playerPos[1]=sY;
-    		    playerPos[2]=sZ;
-    		    player.notifyPositionChange();
-    		}//end if(start!=null)
-    		}catch(Exception e){e.printStackTrace();}
-    		return null;
-    	    }//end call()
-    	}).get();
-    	
-    	final Player player = tr.getPlayer();
-	final World world = tr.getWorld();
-	world.add(player);
-    	
-    	tm.enqueueGLOperation(new Callable<Object>(){
-    	    public Object call(){
-    		try{
-    		final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
 
+	// POWERUPS
+	rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
+	/// EXPLOSIONS
+	rm.setExplosionFactory(new ExplosionFactory(tr));
+	// SMOKE
+	rm.setSmokeFactory(new SmokeFactory(tr));
+	// DEBRIS
+	rm.setDebrisFactory(new DebrisFactory(tr));
+	
+	//SETUP PROJECTILE FACTORIES
+		Weapon [] w = Weapon.values();
+		ProjectileFactory [] pf = new ProjectileFactory[w.length];
+		for(int i=0; i<w.length;i++){
+		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+		}//end for(weapons)
+		rm.setProjectileFactories(pf);
+		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl())); 
+		final String startX=System.getProperty("org.jtrfp.trcl.startX");
+		final String startY=System.getProperty("org.jtrfp.trcl.startY");
+		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
+		final double [] playerPos = player.getPosition();
+		if(startX!=null && startY!=null&&startZ!=null){
+		    System.out.println("Using user-specified start point");
+		    final int sX=Integer.parseInt(startX);
+		    final int sY=Integer.parseInt(startY);
+		    final int sZ=Integer.parseInt(startZ);
+		    playerPos[0]=sX;
+		    playerPos[1]=sY;
+		    playerPos[2]=sZ;
+		    player.notifyPositionChange();
+		}//end if(start!=null)
+    	
+	final World world = tr.getWorld();
+	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
+	tr.setOverworldSystem(new OverworldSystem(world));
+	tr.setPlayer(player);
+	world.add(player);
+	tr.getOverworldSystem().loadLevel(lvl, tdf);
+	
     		//Install NAVs
     		final NAVSystem navSystem = tr.getNavSystem();
     		navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
-    		tr.setOverworldSystem(new OverworldSystem(world, lvl, tdf));
     		
     		START s = (START)navSubObjects.get(0);
     		navSubObjects.remove(0);
@@ -127,12 +117,7 @@ public class Mission {
     		}//end for(navSubObjects)
     		navSystem.updateNAVState();
     		tr.setBackdropSystem(new BackdropSystem(world));
-    		}catch(Exception e){e.printStackTrace();}
-    		return null;
-    	    }}).get();
     	
-    	tm.enqueueGLOperation(new Callable<Object>(){
-    	    public Object call(){
     		//////// INITIAL HEADING
     		player.setPosition(getPlayerStartPosition());
     		player.setDirection(getPlayerStartDirection());
@@ -145,10 +130,14 @@ public class Mission {
     		Texture.finalize(gpu);
     		System.out.println("Setting sun vector");
     		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
-    		tr.renderer.get().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
+    		tr.getThreadManager().enqueueGLOperation(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			tr.renderer.get().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
+			return null;
+		    }
+    		}).get();
     		System.out.println("\t...Done.");
-    		return null;
-    	    }}).get();
     	
 	//////// NO GL BEYOND THIS POINT ////////
 	System.out.println("\t...Done.");

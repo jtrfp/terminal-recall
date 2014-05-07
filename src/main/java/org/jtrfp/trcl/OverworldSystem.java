@@ -27,10 +27,13 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private boolean tunnelMode = false;
     private final TR tr;
 
-    public OverworldSystem(World w, LVLFile lvl, TDFFile tdf) {
+    public OverworldSystem(World w) {
 	super(w);
 	this.tr = w.getTr();
+    }
+    public void loadLevel(final LVLFile lvl, final TDFFile tdf){
 	try { // Active by default
+	    final World w = tr.getWorld();
 	    Color[] globalPalette = tr.getGlobalPalette();
 	    Future<TextureDescription>[] texturePalette = tr
 		    .getResourceManager().getTextures(

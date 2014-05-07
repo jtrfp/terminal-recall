@@ -47,19 +47,24 @@ public final class GLTexture {
      *            Directly-allocated buffer containing the image data.
      * @since Dec 11, 2013
      */
-    public void setTextureImageRGBA(ByteBuffer buf) {
-	rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
-	buf.rewind();
-	GL3 gl = gpu.getGl();
-	gl.glBindTexture(bindingTarget, textureID.get());
-	/*FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
-	gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);*/
-	System.out.println("Uploading texture...");
-	gl.glTexImage2D(bindingTarget, 0, internalColorFormat, rawSideLength,
-		rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
-	gl.glGenerateMipmap(bindingTarget);
-	System.out.println("\t...Done.");
-    }
+    public void setTextureImageRGBA(final ByteBuffer buf) {
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
+		buf.rewind();
+		GL3 gl = gpu.getGl();
+		gl.glBindTexture(bindingTarget, textureID.get());
+		/*FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
+		gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);*/
+		System.out.println("Uploading texture...");
+		gl.glTexImage2D(bindingTarget, 0, internalColorFormat, rawSideLength,
+			rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
+		gl.glGenerateMipmap(bindingTarget);
+		System.out.println("\t...Done.");
+		return null;
+	    }}).get();
+    }//end setTextureImageRGBA
     
     public GLTexture configure(int [] sideLengthsInTexels, int numLevels ){
 	switch(sideLengthsInTexels.length){
@@ -90,6 +95,7 @@ public final class GLTexture {
 	    gl.glTexSubImage2D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1], sideLengthsInTexels[0], sideLengthsInTexels[1], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}case 3:{
+	    if(level<0)throw new RuntimeException("Level is intolerably negative: "+level);
 	    gl.glTexSubImage3D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1],texelCoordinates[2], sideLengthsInTexels[0], sideLengthsInTexels[1],sideLengthsInTexels[2], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}

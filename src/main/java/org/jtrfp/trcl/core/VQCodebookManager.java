@@ -14,7 +14,7 @@ public class VQCodebookManager {
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
     public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
-    public static final int 		NUM_CODE_PAGES			=128;
+    public static final int 		NUM_CODE_PAGES			=1024;
     public static final int 		CODES_PER_PAGE 			=NUM_CODES_PER_AXIS*NUM_CODES_PER_AXIS;
     public static final int		MIP_DEPTH			=1;
 
@@ -73,6 +73,12 @@ public class VQCodebookManager {
 	final int z = codeID / CODES_PER_PAGE;
 	final int y = (codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS;
 	texels.clear();
+	if(z>NUM_CODE_PAGES){
+	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+z+" max: "+NUM_CODE_PAGES);
+	}
+	if(x>CODE_PAGE_SIDE_LENGTH_TEXELS || y > CODE_PAGE_SIDE_LENGTH_TEXELS ){
+	    throw new RuntimeException("One or more texel coords intolerably out of range: x="+x+" y="+y);
+	}
 	tex.bind().subImage(new int[] { x, y, z },
 		new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 }, GL3.GL_RGBA,
 		0, texels);
@@ -82,11 +88,13 @@ public class VQCodebookManager {
 	    final GLTexture tex, int byteSizedComponentsPerTexel) {
 	ByteBuffer wb = ByteBuffer.allocate(texels.capacity());
 	ByteBuffer intermediate = ByteBuffer.allocate(texels.capacity() / 4);
-	texels.clear();
+	texels.clear();wb.clear();
 	wb.put(texels);
 	int sideLen = (int)Math.sqrt(texels.capacity() / byteSizedComponentsPerTexel);
 	for (int mipLevel = 0; mipLevel < MIP_DEPTH; mipLevel++) {
-	    subImage(codeID, texels, tex, mipLevel);
+	    //System.out.println();
+	    wb.clear();
+	    subImage(codeID, wb, tex, mipLevel);
 	    mipDown(wb, intermediate, sideLen, byteSizedComponentsPerTexel);
 	    wb.clear();
 	    intermediate.clear();

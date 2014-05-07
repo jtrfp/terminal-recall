@@ -278,7 +278,7 @@ public final class Renderer {
 	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){
 	    gpu.memoryManager.get().unmap();
 	}
-	final RenderList renderList = getCurrentRenderList().get();
+	final RenderList renderList = currentRenderList().get();
 	renderList.render(gl);
 	gpu.memoryManager.get().map();
 	renderList.sendToGPU(gl);
@@ -292,7 +292,7 @@ public final class Renderer {
     }// TODO: Remove this when paged conversion is complete.
     
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
-	Renderer.this.getCurrentRenderList().get().getSubmitter().submit(pr);
+	Renderer.this.currentRenderList().get().getSubmitter().submit(pr);
     }//end temporarilyMakeImmediatelyVisible(...)
     
     public void updateVisibilityList() {
@@ -325,7 +325,7 @@ public final class Renderer {
 	});
     }// end updateVisibilityList()
     
-    public synchronized TRFutureTask<RenderList> getCurrentRenderList(){
+    public synchronized TRFutureTask<RenderList> currentRenderList(){
 	return renderList[renderListToggle ? 0 : 1];
     }
     public synchronized TRFutureTask<RenderList> getBackRenderList(){

@@ -143,9 +143,9 @@ public class Texture implements TextureDescription {
     
     private void vqCompress(ByteBuffer imageRGBA8888){
 	    // Break down into 4x4 blocks
-	    ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
-	    RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
-	    RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
+	    final ByteBufferVectorList 		bbvl 		= new ByteBufferVectorList(imageRGBA8888);
+	    final RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
+	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
 		    rgba8888vl, 64, 4);
 	    final double sideLength 	= Math.sqrt((imageRGBA8888.capacity() / 4));
 	    // Get a codebook256
@@ -173,27 +173,27 @@ public class Texture implements TextureDescription {
 		toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
 	    }//end for(subTextureIDs)
 	    
-	    // Push vectors to codebook
-	    for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
-		vectorBuffer.clear();
-		for (int vi = 0; vi < 4 * 4 * 4; vi++) {
-		    vectorBuffer
-			    .put((byte) (rbvl.componentAt(codeIndex, vi) * 255));
-		}
-		final int globalCodeIndex = codeIndex + codebookStartOffsetAbsolute;
-		vectorBuffer.clear();
-		/*
-		try{
-		tr.getThreadManager().enqueueGLOperation(new Callable<Object>(){
-		    @Override
-		    public Object call(){
-			try{cbm.setRGBA(globalCodeIndex, vectorBuffer);}
-			catch(Exception e){e.printStackTrace();}
-			return null;
-		    }//end run()
-		});}catch(Exception e){e.printStackTrace();}
-		*/
-	    }// end for(codeIndex)
+	tr.getThreadManager().submitToGL(new Callable<Object>() {
+	    @Override
+	    public Object call() {
+		    Thread.currentThread().setName("Texture.java:189");
+		// Push vectors to codebook
+		for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
+		    vectorBuffer.clear();
+		    for (int vi = 0; vi < 4 * 4 * 4; vi++) {
+			vectorBuffer.put((byte) (rbvl
+				.componentAt(codeIndex, vi) * 255.));
+		    }
+		    final int globalCodeIndex = codeIndex
+			    + codebookStartOffsetAbsolute;
+		    vectorBuffer.clear();
+		    //System.out.println("cbm.setRGBA");
+		    cbm.setRGBA(globalCodeIndex, vectorBuffer);
+
+		}// end for(codeIndex)
+		return null;
+	    }// end run()
+	}).get();
 	    // Push codes to subtextures
 	    for(int cY=0; cY<diameterInCodes; cY++){
 		for(int cX=0; cX<diameterInCodes; cX++){

@@ -79,8 +79,7 @@ float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
 float 	linearDepth = linearizeDepth(depth);
 uint 	textureID 	= texture(textureIDTexture,screenLoc)[0u];
-fragColor 			= (textureID==10u?texture(primaryRendering,screenLoc):vec4(0,0,0,0));//GET UV
-vec3 	origColor 	= texture(texturePalette,fragColor.xy).rgb;//GET COLOR
+		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 
 // TOC
@@ -105,6 +104,8 @@ uint	codeBkPgNum	= (codeIdx+startCode) / CODES_PER_CODE_PAGE;
 vec2	codePgUV	= (vec2(float(codeBkPgNum % CODE_PAGE_SIDE_WIDTH_CODES),float((codeBkPgNum / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
 uint	codePgArrID = codeBkPgNum / CODES_PER_CODE_PAGE;
 vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codePgArrID));
+
+vec3 	origColor 	= textureID==10u?texture(texturePalette,fragColor.xy).rgb:codeTexel.rgb;//GET COLOR
 //TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
 
 // DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION

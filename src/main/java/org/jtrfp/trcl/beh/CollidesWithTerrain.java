@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
+import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.TerrainChunk;
 import org.jtrfp.trcl.World;
@@ -32,6 +33,7 @@ public class CollidesWithTerrain extends Behavior {
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
 	final InterpolatingAltitudeMap aMap = tr.getAltitudeMap();
+	if(aMap==null)return;
 	final double[] thisPos = p.getPosition();
 	final double groundHeightNorm = aMap.heightAt(
 		(thisPos[0] / TR.mapSquareSize),
@@ -50,7 +52,8 @@ public class CollidesWithTerrain extends Behavior {
 	    downhillDirectionXZ = downhillDirectionXZ.normalize();
 	else
 	    downhillDirectionXZ = Vector3D.PLUS_J;
-	final boolean terrainMirror = tr.getOverworldSystem().isChamberMode();
+	final OverworldSystem overworldSystem = tr.getOverworldSystem();
+	final boolean terrainMirror = overworldSystem.isChamberMode();
 	final double thisY = thisPos[1];
 	boolean groundImpact = thisY < (groundHeight + (autoNudge ? nudgePadding
 		: 0));

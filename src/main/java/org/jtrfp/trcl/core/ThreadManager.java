@@ -48,10 +48,10 @@ public class ThreadManager {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	if(tr.renderer.isDone() && tr.getPlayer()!=null){
-	    if(!tr.renderer.get().getCurrentRenderList().isDone())
+	    if(!tr.renderer.get().currentRenderList().isDone())
 		return;
 	}else return;
-	List<WorldObject> vl = tr.renderer.get().getCurrentRenderList().get().getVisibleWorldObjectList();
+	List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo = vl.get(i);
 	    if (wo.isActive()
@@ -61,7 +61,7 @@ public class ThreadManager {
 		wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
 	if(tr.getPlayer()!=null){
-	    tr.getPlayer().tick(tickTimeInMillis);
+	   // tr.getPlayer().tick(tickTimeInMillis);
 	    tr.getCollisionManager().performCollisionTests();
 	}
 	lastGameplayTickTime = tickTimeInMillis;
@@ -107,13 +107,14 @@ public class ThreadManager {
 		while(!mappedOperationQueue.isEmpty()){
 		    final Runnable r = mappedOperationQueue.poll();
 		    r.run();
+		    renderingThread.setName("OpenGL display()");
 		    synchronized(r){r.notifyAll();}
 		}//end while(mappedOperationQueue)
 		//Wait for everyone to finish.
 		if(tr.renderer.isDone()){
 		    if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
 			visibilityCalc();}
-		    gameplay();
+		    if(tr.getPlayer()!=null)gameplay();
 		    ThreadManager.this.tr.renderer.get().render();
 		}
 	    }//end display()

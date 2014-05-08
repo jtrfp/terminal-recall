@@ -468,10 +468,10 @@ public class WorldObject implements PositionedRenderable {
     }
 
     private void notifyPositionListeners() {
-	for (PositionListener l : positionListeners) {
-	    l.positionChanged(this);
+	for(int i=0; i<positionListeners.size(); i++){
+	    positionListeners.get(i).positionChanged(this);
 	}
-    }
+    }//end notifyPositionListeners()
 
     @Override
     public void addPositionListener(PositionListener listenerToAdd) {

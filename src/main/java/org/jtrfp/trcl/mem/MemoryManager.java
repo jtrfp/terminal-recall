@@ -3,8 +3,8 @@ package org.jtrfp.trcl.mem;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
 
+import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
@@ -37,7 +37,7 @@ public final class MemoryManager {
 	pageIndexPool.setGrowthBehavior(new GrowthBehavior(){
 	    @Override
 	    public int grow(final int previousMaxCapacity) {
-		final FutureTask<Integer> ft = MemoryManager.this.gpu.getTr().getThreadManager().enqueueGLOperation(new Callable<Integer>(){
+		final TRFuture<Integer> ft = MemoryManager.this.gpu.getTr().getThreadManager().submitToGL(new Callable<Integer>(){
 		    @Override
 		    public Integer call(){
 			glPhysicalMemory.reallocate(previousMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES*2);

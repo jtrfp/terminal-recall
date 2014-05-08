@@ -17,11 +17,6 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
 	super(runnable,result);
 	this.tr=tr;
     }
-    
-    @Override
-    public void run(){
-	super.run();
-    }
 
     @Override
     public V get() {

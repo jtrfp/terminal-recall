@@ -193,18 +193,20 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	
     private void recursiveAlwaysVisibleSubmit(Submitter<E> sub) {
 	sub.submit(alwaysVisible.getElements());
+	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
-	}
+	}}
     }// end recursiveAlwaysVisisbleSubmit(...)
 
     private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<GridCube> sub) {
 	sub.submit(alwaysVisible);
+	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveAlwaysVisibleGridCubeSubmit(sub);
-	}
+	}}
     }// end recursiveAlwaysVisisbleSubmit(...)
 	
     private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
@@ -216,10 +218,11 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		sub.submit(elements.get(i));
 	    }
 	}// end submit local elements
+	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveBlockSubmit(sub, blockID);
-	}
+	}}
     }// end recusiveBlockSubmit(...)
 
     private void recursiveGridCubeSubmit(Submitter<GridCube> sub, int blockID) {

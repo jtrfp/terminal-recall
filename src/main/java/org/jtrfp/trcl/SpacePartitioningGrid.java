@@ -32,7 +32,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	//private ArrayList<E> alwaysVisible = new ArrayList<E>();
 	private final GridCube alwaysVisible = new GridCube(null);
 	private SpacePartitioningGrid<E> parentGrid = null;
-	private ArrayList<SpacePartitioningGrid<E>> branchGrids = new ArrayList<SpacePartitioningGrid<E>>();
+	private List<SpacePartitioningGrid<E>> branchGrids = Collections.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());
 	
 	private double radiusInWorldUnits;
 	private int rolloverPoint,rawDia,rawDiaX,rawDiaY,rawDiaZ,xProgression,yProgression,zProgression;
@@ -225,10 +225,11 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
     private void recursiveGridCubeSubmit(Submitter<GridCube> sub, int blockID) {
 	final GridCube cube = (GridCube)gridSquares[blockID];
 	sub.submit(cube);
+	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveGridCubeSubmit(sub, blockID);
-	}
+	}}//end for(size) sync(branchGrids)
     }// end recusiveGridCubeSubmit(...)
 
 	private Collection<E> getAlwaysVisible()

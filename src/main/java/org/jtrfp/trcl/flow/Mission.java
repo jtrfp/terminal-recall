@@ -159,6 +159,7 @@ public class Mission {
 	    }catch(NumberFormatException e){
 		System.err.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");}
 	}//end if(containsKey)
+	System.out.println("Mission.go() complete.");
 	return new Result(null);//TODO: Replace null with actual value unless end of game.
     }//end go()
     

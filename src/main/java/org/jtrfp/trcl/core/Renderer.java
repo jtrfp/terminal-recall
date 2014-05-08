@@ -255,19 +255,17 @@ public final class Renderer {
 
     private void fpsTracking() {
 	frameNumber++;
-	final int dT = (int) (System.currentTimeMillis() - lastTimeMillis);
-	if(dT<=0)return;
-	final int fps = (1000 / dT);
+	final long dT = (long) (System.currentTimeMillis() - lastTimeMillis);
+	final int fps = (int)(1000L / dT);
 	meanFPS = meanFPS*.9+(double)fps*.1;
 	if ((frameNumber %= 20) == 0) {
-	    
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
 	    gpu.getTr().getReporter()
 	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", renderList[renderListToggle ? 0 : 1].get().getVisibleWorldObjectList().size());
 	}
 	lastTimeMillis = System.currentTimeMillis();
-    }
+    }//end fpsTracking()
 
     public void render() {
 	if (!active)

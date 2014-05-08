@@ -87,8 +87,8 @@ public class RenderList {
 
 	@Override
 	public void submit(Collection<PositionedRenderable> items) {
-	    for (PositionedRenderable r : items.toArray(new PositionedRenderable[items.size()])) {
-		submit(r);
+	    synchronized(items){
+		for(PositionedRenderable r:items){submit(r);}
 	    }//end for(items)
 	}//end submit(...)
     };

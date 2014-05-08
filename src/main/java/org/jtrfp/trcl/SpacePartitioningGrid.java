@@ -17,6 +17,8 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.PositionListenable;
@@ -206,7 +208,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
     }// end recursiveAlwaysVisisbleSubmit(...)
 	
     private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
-	final ArrayList<E> elements = ((GridCube) gridSquares[blockID])
+	final List<E> elements = ((GridCube) gridSquares[blockID])
 		.getElements();
 	{
 	    final int size = elements.size();
@@ -247,7 +249,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	
 	public class GridCube implements PositionListener{
 		double [] topLeftPosition;
-		private ArrayList<E> elements = new ArrayList<E>();
+		private List<E> elements = Collections.synchronizedList(new ArrayList<E>());
 		
 		public GridCube(double [] topLeftPosition){
 			setTopLeftPosition(topLeftPosition);
@@ -303,7 +305,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		/**
 		 * @return the elements
 		 */
-		public ArrayList<E> getElements(){
+		public List<E> getElements(){
 			return elements;
 			}
 

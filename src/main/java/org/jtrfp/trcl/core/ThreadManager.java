@@ -13,7 +13,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
@@ -28,18 +30,21 @@ public class ThreadManager {
     public static final int RENDERING_PRIORITY 		= 6;
     public static final int SOUND_PRIORITY 		= 8;
     private final TR 			tr;
-    private final Animator 		renderingAnimator;
+    //private final Animator 		renderingAnimator;
     private final Timer 		gameplayTimer 			= new Timer("GameplayTimer");
     private long 			lastGameplayTickTime 		= 0;
     private long 			timeInMillisSinceLastGameTick 	= 0L;
     private int 			counter 			= 0;
     private final Object		renderThisFrameLock		= new Object();
     private Thread 			renderingThread;
-    private volatile boolean		renderThisFrame=true;	
+    private volatile boolean		renderThisFrame			=true;	
+    private volatile boolean		running				=true;
+    private Thread			glExecutorThread;
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
     private final ConcurrentLinkedQueue<FutureTask> 	
     	mappedOperationQueue 		= new ConcurrentLinkedQueue<FutureTask>();
+    private final boolean []		glTasksWaiting			= new boolean[1];
     private final ScheduledThreadPoolExecutor gameplayScheduler = new ScheduledThreadPoolExecutor(1,new ThreadFactory(){
 	@Override
 	public Thread newThread(Runnable runnable) {
@@ -49,26 +54,43 @@ public class ThreadManager {
 	    return thisThread;
 	}
     });
-
     ThreadManager(final TR tr) {
 	this.tr = tr;
-	renderingAnimator = new Animator(tr.getRootWindow().getCanvas());
+	//renderingAnimator = new Animator(tr.getRootWindow().getCanvas());
+	
 	final Thread gameplayThread = new Thread(new Runnable(){
-
 	    @Override
 	    public void run() {
 		try{
-		while(true){
-		    Thread.sleep(1/GAMEPLAY_FPS);
-			synchronized(renderThisFrameLock){
-			    while(renderThisFrame){
-			    renderThisFrameLock.wait();}
-			}//end sync(renderThisFrameLock)
-			//if(tr.getPlayer()!=null)gameplay();
+		Thread.currentThread().setName("gameplayThread");
+		while(running){
+		    Thread.sleep(1000/GAMEPLAY_FPS);
+		    if(tr.getPlayer()!=null)gameplay();
+		    submitToGL(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+			    if(tr.renderer.isDone()){
+				    ThreadManager.this.tr.renderer.get().render();
+				    }////end if(renderer.isDone)
+			    return null;
+			}}).get();
+		    SwingUtilities.invokeAndWait(new Runnable(){
+			@Override
+			public void run() {
+			    tr.getRootWindow().getCanvas().repaint();
+			}});
 		    renderThisFrame = true;
 		}}catch(InterruptedException e){}
 		catch(Exception e){tr.showStopper(e);}
 	    }});
+	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
+	    @Override
+	    public void run() {
+		running=false;
+		glExecutorThread.interrupt();
+		gameplayThread.interrupt();
+	    }}));
+	//gameplayThread.setDaemon(true);
 	gameplayThread.start();
 	start();
     }// end constructor
@@ -108,7 +130,12 @@ public class ThreadManager {
     }
     public <T> TRFuture<T> submitToGL(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
-	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(result);
+	if(Thread.currentThread()!=renderingThread){
+	    synchronized(mappedOperationQueue){
+	    final boolean wasEmpty = mappedOperationQueue.isEmpty();
+	    mappedOperationQueue.add(result);
+	    if(wasEmpty)mappedOperationQueue.notifyAll();}
+	}//end if(current thread is GL)
 	else result.run();
 	return result;
     }
@@ -122,9 +149,55 @@ public class ThreadManager {
     private void start() {
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
-	    public void init(GLAutoDrawable drawable) {
+	    public void init(final GLAutoDrawable drawable) {
 		System.out.println("GLEventListener.init()");
-	    }
+		final GLContext context = drawable.getContext();
+		glExecutorThread = new Thread(new Runnable(){
+		    @Override
+		    public void run() {
+			Thread.currentThread().setName("glExecutorThread");
+			try{
+			while(running){
+			    renderingThread=Thread.currentThread();
+			    synchronized(mappedOperationQueue){
+				if(mappedOperationQueue.isEmpty()){
+				    drawable.getContext().release();
+				    mappedOperationQueue.wait();
+				}//end if(!glTasksWaiting)
+			    }//end sync(glTasksWaiting)
+			    //Execute the tasks
+			    try{context.makeCurrent();}catch(NullPointerException e){break;}
+				//if GPU not yet available, mapping not possible.
+				if(ThreadManager.this.tr.gpu.isDone()){
+				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
+				    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}//end if(mapped)
+				while(!mappedOperationQueue.isEmpty()){
+				    mappedOperationQueue.poll().run();
+				    renderingThread.setName("glExecutorThread");
+				    //synchronized(r){r.notifyAll();}
+				}//end while(mappedOperationQueue)
+				//Render this frame if necessary
+				//System.out.println("display()");
+				/*
+				if(renderThisFrame){
+				if(tr.renderer.isDone()){
+				    if(tr.getPlayer()!=null)gameplay();
+				    //System.out.println("FRAME.");
+				    ThreadManager.this.tr.renderer.get().render();
+				    synchronized(renderThisFrameLock){
+					renderThisFrame=false;
+					    renderThisFrameLock.notifyAll();
+					 }
+				    }////end if(renderer.isDone)
+				}//end if(renderThisFrame)
+				*/
+			}}catch(InterruptedException e){}
+			catch(Exception e){tr.showStopper(e);}
+			if(context.isCurrent())context.release();
+		    }});
+		glExecutorThread.setDaemon(true);
+		glExecutorThread.start();
+	    }//end init()
 
 	    @Override
 	    public void dispose(GLAutoDrawable drawable) {
@@ -133,31 +206,8 @@ public class ThreadManager {
 	    @Override
 	    public void display(GLAutoDrawable drawable) {
 		Thread.currentThread().setName("OpenGL display()");
-		Thread.currentThread().setPriority(RENDERING_PRIORITY);
-		renderingThread=Thread.currentThread();
-		//if GPU not yet available, mapping not possible.
-		if(ThreadManager.this.tr.gpu.isDone()){
-		    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
-		    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}//end if(mapped)
-		while(!mappedOperationQueue.isEmpty()){
-		    mappedOperationQueue.poll().run();
-		    renderingThread.setName("OpenGL display()");
-		    //synchronized(r){r.notifyAll();}
-		}//end while(mappedOperationQueue)
-		//Render this frame if necessary
-		//System.out.println("display()");
-		if(renderThisFrame){
-		if(tr.renderer.isDone()){
-		    if(tr.getPlayer()!=null)gameplay();
-		    //System.out.println("FRAME.");
-		    ThreadManager.this.tr.renderer.get().render();
-
-		    synchronized(renderThisFrameLock){
-			renderThisFrame=false;
-			    renderThisFrameLock.notifyAll();
-			 }
-		    }////end if(renderer.isDone)
-		}//end if(renderThisFrame)
+		
+		
 		
 	    }//end display()
 
@@ -166,16 +216,16 @@ public class ThreadManager {
 		    int width, int height) {
 	    }
 	});
-	renderingAnimator.start();
+	//renderingAnimator.start();
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end start()
-
+/*
     public <T> TRFutureTask<T> enqueueGLOperation(Callable<T> r){
 	final TRFutureTask<T> t = new TRFutureTask<T>(tr,r);
 	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(t);
 	else t.run();
 	return t;
-	}
+	}*/
     
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;

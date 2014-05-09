@@ -48,41 +48,42 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.tools.Util;
 
 public final class TR{
-	public static final double unitCircle=65535;
-	public static final double crossPlatformScalar=16;//Shrinks everything so that we can use floats instead of ints
-	public static final double mapSquareSize=Math.pow(2, 20)/crossPlatformScalar;
-	public static final double mapWidth=mapSquareSize*256;
-	public static final double mapCartOffset=mapWidth/2.;//This is the scaled-down version, not the full version
-	public static final double visibilityDiameterInMapSquares=35;
-	public static final int terrainChunkSideLengthInSquares=4;//Keep at power of two for now. 4x4 = 16. 16x6 = 96. 96 vertices per GLSL block means 1 chunk per block.
-	public static final double antiGamma=1.6;
-	public static final boolean ANIMATED_TERRAIN=false;
+	public static final double 	unitCircle			=65535;
+	public static final double 	crossPlatformScalar		=16;//Shrinks everything so that we can use floats instead of ints
+	public static final double 	mapSquareSize			=Math.pow(2, 20)/crossPlatformScalar;
+	public static final double 	mapWidth			=mapSquareSize*256;
+	public static final double 	mapCartOffset			=mapWidth/2.;//This is the scaled-down version, not the full version
+	public static final double 	visibilityDiameterInMapSquares	=35;
+	public static final int 	terrainChunkSideLengthInSquares	=4;//Keep at power of two for now. 4x4 = 16. 16x6 = 96. 96 vertices per GLSL block means 1 chunk per block.
+	public static final double 	antiGamma			=1.6;
+	public static final boolean 	ANIMATED_TERRAIN		=false;
 	
-	public final TRFutureTask<GPU> gpu;
-	private Player player;
-	public final RootWindow rootWindow;
-	private Color [] globalPalette, darkIsClearPalette;
-	private final KeyStatus keyStatus;
-	private ResourceManager resourceManager;
-	public final ThreadManager threadManager;
-	public final TRFutureTask<Renderer> renderer;
-	private final CollisionManager collisionManager = new CollisionManager(this);
-	private final Reporter reporter = new Reporter();
-	private OverworldSystem overworldSystem;
-	private InterpolatingAltitudeMap altitudeMap;
-	private BackdropSystem backdropSystem;
-	private Game game = new Game();
-	private NAVSystem navSystem;
-	private HUDSystem hudSystem;
-	private Mission currentMission;
+	public final TRFutureTask<GPU> 		gpu;
+	private Player 				player;
+	public final RootWindow 		rootWindow;
+	private Color [] 			globalPalette, 
+						darkIsClearPalette;
+	private final KeyStatus 		keyStatus;
+	private ResourceManager 		resourceManager;
+	public final ThreadManager 		threadManager;
+	public final TRFutureTask<Renderer> 	renderer;
+	private final CollisionManager 		collisionManager	= new CollisionManager(this);
+	private final Reporter 			reporter		= new Reporter();
+	private OverworldSystem 		overworldSystem;
+	private InterpolatingAltitudeMap 	altitudeMap;
+	private BackdropSystem 			backdropSystem;
+	private Game 				game			= new Game();
+	private NAVSystem 			navSystem;
+	private HUDSystem 			hudSystem;
+	private Mission 			currentMission;
 	
-	public final TRFutureTask<MatrixWindow> matrixWindow ;
-	public final TRFutureTask<ObjectListWindow> objectListWindow;
-	public final TRFutureTask<ObjectDefinitionWindow> objectDefinitionWindow;
-	private TRConfiguration trConfig;
-	private GL3 glCache;
-	private ByteOrder byteOrder;
-	private final World world;
+	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
+	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
+	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
+	private TRConfiguration 				trConfig;
+	private GL3 						glCache;
+	private ByteOrder 					byteOrder;
+	private final World 					world;
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -171,24 +172,6 @@ public final class TR{
 	System.err.println("======================");
 	System.err.println("\nToo full of fail to continue. Exiting...\n\n");
 	System.exit(-1);
-	/*
-	try {
-	    SwingUtilities.invokeLater(new Runnable() {
-		public void run() {
-		    int c = JOptionPane.showConfirmDialog(rootWindow,
-			    "A component of Terminal Recall triggered a showstopper error:\n"
-				    + e.getLocalizedMessage()
-				    + "\n\nContinue anyway?", "Uh Oh...",
-			    JOptionPane.ERROR_MESSAGE);
-		    if (c == 1)
-			System.exit(1);
-		}
-	    });
-	} catch (Exception ite) {
-	    showStopper(ite);
-	}
-	showStopper(e);
-	*/
     }
 
     public static int bidiMod(int v, int mod) {
@@ -206,183 +189,198 @@ public final class TR{
 		return trConfig;
 		}
 
-	/**
-	 * @param trConfig the trConfig to set
-	 */
-	public void setTrConfig(TRConfiguration trConfig)
-		{
-		this.trConfig = trConfig;
-		}
+    /**
+     * @param trConfig
+     *            the trConfig to set
+     */
+    public void setTrConfig(TRConfiguration trConfig) {
+	this.trConfig = trConfig;
+    }
 
-	/**
-	 * @return the resourceManager
-	 */
-	public ResourceManager getResourceManager()
-		{
-		return resourceManager;
-		}
+    /**
+     * @return the resourceManager
+     */
+    public ResourceManager getResourceManager() {
+	return resourceManager;
+    }
 
-	/**
-	 * @param resourceManager the resourceManager to set
-	 */
-	public void setResourceManager(ResourceManager resourceManager)
-		{
-		this.resourceManager = resourceManager;
-		}
-	
-	public static double [] floats2Doubles(float [] toConvert)
-		{
-		double [] result = new double[toConvert.length];
-		for(int i=0; i<toConvert.length;i++)
-			{
-			result[i]=toConvert[i];
-			}
-		return result;
-		}//end floats2Doubles
-	
-	public static float [] doubles2Floats(double [] toConvert)
-		{
-		float [] result = new float[toConvert.length];
-		for(int i=0; i<toConvert.length;i++)
-			{
-			result[i]=(float)toConvert[i];
-			}
-		return result;
-		}//end floats2Floats
+    /**
+     * @param resourceManager
+     *            the resourceManager to set
+     */
+    public void setResourceManager(ResourceManager resourceManager) {
+	this.resourceManager = resourceManager;
+    }
 
-	public boolean isStampingTextures()
-		{return false;}
-
-	public Game newGame(VOXFile mission)
-		{
-		return new Game(this, mission);
-		}//end newGame(...)
-
-	/**
-	 * @return the keyStatus
-	 */
-	public KeyStatus getKeyStatus(){
-		return keyStatus;}
-	public Color [] getGlobalPalette(){
-	    if(globalPalette==null)globalPalette=Util.DEFAULT_PALETTE;
-	    return globalPalette;}
-	public Color [] getDarkIsClearPalette(){
-	    if(darkIsClearPalette==null){
-		darkIsClearPalette = new Color[256];
-		    for(int i=0; i<256; i++){
-			float newAlpha=(float)Math.pow(((globalPalette[i].getRed()+globalPalette[i].getGreen()+globalPalette[i].getBlue())/(3f*255f)),.5);
-			darkIsClearPalette[i]=new Color(globalPalette[i].getRed()/255f,globalPalette[i].getGreen()/255f,globalPalette[i].getBlue()/255f,newAlpha);
-		    }//end for(colors)
-	    }//end if(null)
-	    return darkIsClearPalette;
-	}//end getDarkIsClearPalette
-
-	/**
-	 * @return the world
-	 */
-	public World getWorld()
-		{
-		return world;
-		}
-
-	public ThreadManager getThreadManager()
-		{return threadManager;}
-
-	public CollisionManager getCollisionManager()
-		{return collisionManager;}
-
-	public void setPlayer(Player player)
-		{this.player=player;}
-	
-	public Player getPlayer(){return player;}
-
-	/**
-	 * @return the reporter
-	 */
-	public Reporter getReporter() {
-	    return reporter;
+    public static double[] floats2Doubles(float[] toConvert) {
+	double[] result = new double[toConvert.length];
+	for (int i = 0; i < toConvert.length; i++) {
+	    result[i] = toConvert[i];
 	}
+	return result;
+    }// end floats2Doubles
 
-	public void setOverworldSystem(OverworldSystem overworldSystem) {
-	    this.overworldSystem=overworldSystem;
+    public static float[] doubles2Floats(double[] toConvert) {
+	float[] result = new float[toConvert.length];
+	for (int i = 0; i < toConvert.length; i++) {
+	    result[i] = (float) toConvert[i];
 	}
+	return result;
+    }// end floats2Floats
 
-	/**
-	 * @return the overworldSystem
-	 */
-	public OverworldSystem getOverworldSystem() {
-	    return overworldSystem;
-	}
+    public boolean isStampingTextures() {
+	return false;
+    }
 
-	/**
-	 * @return the altitudeMap
-	 */
-	public InterpolatingAltitudeMap getAltitudeMap() {
-	    return altitudeMap;
-	}
+    public Game newGame(VOXFile mission) {
+	return new Game(this, mission);
+    }// end newGame(...)
 
-	/**
-	 * @param altitudeMap the altitudeMap to set
-	 */
-	public void setAltitudeMap(InterpolatingAltitudeMap altitudeMap) {
-	    this.altitudeMap = altitudeMap;
-	}
+    /**
+     * @return the keyStatus
+     */
+    public KeyStatus getKeyStatus() {
+	return keyStatus;
+    }
 
-	/**
-	 * @return the backdropSystem
-	 */
-	public BackdropSystem getBackdropSystem() {
-	    return backdropSystem;
-	}
+    public Color[] getGlobalPalette() {
+	if (globalPalette == null)
+	    globalPalette = Util.DEFAULT_PALETTE;
+	return globalPalette;
+    }
 
-	/**
-	 * @param backdropSystem the backdropSystem to set
-	 */
-	public void setBackdropSystem(BackdropSystem backdropSystem) {
-	    this.backdropSystem = backdropSystem;
-	}
+    public Color[] getDarkIsClearPalette() {
+	if (darkIsClearPalette == null) {
+	    darkIsClearPalette = new Color[256];
+	    for (int i = 0; i < 256; i++) {
+		float newAlpha = (float) Math
+			.pow(((globalPalette[i].getRed()
+				+ globalPalette[i].getGreen() + globalPalette[i]
+				.getBlue()) / (3f * 255f)), .5);
+		darkIsClearPalette[i] = new Color(
+			globalPalette[i].getRed() / 255f,
+			globalPalette[i].getGreen() / 255f,
+			globalPalette[i].getBlue() / 255f, newAlpha);
+	    }// end for(colors)
+	}// end if(null)
+	return darkIsClearPalette;
+    }// end getDarkIsClearPalette
 
-	public Game getGame() {
-	    return game;
-	}
+    /**
+     * @return the world
+     */
+    public World getWorld() {
+	return world;
+    }
 
-	/**
-	 * @return the navSystem
-	 */
-	public NAVSystem getNavSystem() {
-	    if(navSystem==null){
-		navSystem=new NAVSystem(getWorld(),this);
-	    }
-	    return navSystem;
-	}
+    public ThreadManager getThreadManager() {
+	return threadManager;
+    }
 
-	/**
-	 * @param navSystem the navSystem to set
-	 */
-	public void setNavSystem(NAVSystem navSystem) {
-	    this.navSystem = navSystem;
-	}
+    public CollisionManager getCollisionManager() {
+	return collisionManager;
+    }
 
-	/**
-	 * @return the hudSystem
-	 */
-	public HUDSystem getHudSystem() {
-	    if(hudSystem==null)hudSystem = new HUDSystem(getWorld());
-	    hudSystem.activate();
-	    return hudSystem;
-	}
+    public void setPlayer(Player player) {
+	this.player = player;
+    }
 
-	/**
-	 * @param hudSystem the hudSystem to set
-	 */
-	public void setHudSystem(HUDSystem hudSystem) {
-	    this.hudSystem = hudSystem;
-	}
+    public Player getPlayer() {
+	return player;
+    }
 
-	public static double legacy2MapSquare(double z) {
-	    return ((z/crossPlatformScalar)/mapWidth)*255.;
+    /**
+     * @return the reporter
+     */
+    public Reporter getReporter() {
+	return reporter;
+    }
+
+    public void setOverworldSystem(OverworldSystem overworldSystem) {
+	this.overworldSystem = overworldSystem;
+    }
+
+    /**
+     * @return the overworldSystem
+     */
+    public OverworldSystem getOverworldSystem() {
+	return overworldSystem;
+    }
+
+    /**
+     * @return the altitudeMap
+     */
+    public InterpolatingAltitudeMap getAltitudeMap() {
+	return altitudeMap;
+    }
+
+    /**
+     * @param altitudeMap
+     *            the altitudeMap to set
+     */
+    public void setAltitudeMap(InterpolatingAltitudeMap altitudeMap) {
+	this.altitudeMap = altitudeMap;
+    }
+
+    /**
+     * @return the backdropSystem
+     */
+    public BackdropSystem getBackdropSystem() {
+	return backdropSystem;
+    }
+
+    /**
+     * @param backdropSystem
+     *            the backdropSystem to set
+     */
+    public void setBackdropSystem(BackdropSystem backdropSystem) {
+	this.backdropSystem = backdropSystem;
+    }
+
+    public Game getGame() {
+	return game;
+    }
+
+    /**
+     * @return the navSystem
+     */
+    public NAVSystem getNavSystem() {
+	if (navSystem == null) {
+	    navSystem = new NAVSystem(getWorld(), this);
 	}
-	
+	return navSystem;
+    }
+
+    /**
+     * @param navSystem
+     *            the navSystem to set
+     */
+    public void setNavSystem(NAVSystem navSystem) {
+	this.navSystem = navSystem;
+    }
+
+    /**
+     * @return the hudSystem
+     */
+    public HUDSystem getHudSystem() {
+	if (hudSystem == null)
+	    hudSystem = new HUDSystem(getWorld());
+	hudSystem.activate();
+	return hudSystem;
+    }
+
+    /**
+     * @param hudSystem
+     *            the hudSystem to set
+     */
+    public void setHudSystem(HUDSystem hudSystem) {
+	this.hudSystem = hudSystem;
+    }
+
+    public static double legacy2MapSquare(double z) {
+	return ((z / crossPlatformScalar) / mapWidth) * 255.;
+    }
+
     public void gatherSysInfo() {
 	final GPU _gpu = gpu.get();
 	final Reporter r = getReporter();
@@ -402,56 +400,63 @@ public final class TR{
 		    r.report((String) prop.getKey(), prop.getValue());
 		}
 		return null;
-	    }//end call()
+	    }// end call()
 	}).get();
     }// end gatherSysInfo()
 
-	public void startMissionSequence(String lvlFileName) {
-	    recursiveMissionSequence(lvlFileName);
-	}
-	
-	private void recursiveMissionSequence(String lvlFileName){
-	    try{
-	    currentMission = new Mission(this, getResourceManager().getLVL(lvlFileName));
+    public void startMissionSequence(String lvlFileName) {
+	recursiveMissionSequence(lvlFileName);
+    }
+
+    private void recursiveMissionSequence(String lvlFileName) {
+	try {
+	    currentMission = new Mission(this, getResourceManager().getLVL(
+		    lvlFileName));
 	    Mission.Result result = currentMission.go();
-	    final String nextLVL=result.getNextLVL();
-	    if(nextLVL!=null)recursiveMissionSequence(nextLVL);
-	    }catch(IllegalAccessException e){showStopper(e);}
-	    catch(FileLoadException e){showStopper(e);}
-	    catch(IOException e){showStopper(e);}
+	    final String nextLVL = result.getNextLVL();
+	    if (nextLVL != null)
+		recursiveMissionSequence(nextLVL);
+	} catch (IllegalAccessException e) {
+	    showStopper(e);
+	} catch (FileLoadException e) {
+	    showStopper(e);
+	} catch (IOException e) {
+	    showStopper(e);
 	}
+    }
 
-	/**
-	 * @return the currentMission
-	 */
-	public Mission getCurrentMission() {
-	    return currentMission;
-	}
+    /**
+     * @return the currentMission
+     */
+    public Mission getCurrentMission() {
+	return currentMission;
+    }
 
-	public void setGlobalPalette(Color[] palette) {
-	    globalPalette=palette;
-	}
-	
-	public static double sloppyTwosComplimentTaxicabDistanceXZ(double []l, double []r){
-	    return deltaRollover(Math.abs(l[0]-r[0])+Math.abs(l[2]-r[2]));
-	}
+    public void setGlobalPalette(Color[] palette) {
+	globalPalette = palette;
+    }
 
-	public static double twosComplimentDistance(double[] l,
-		double[] r) {
-	    final double dx=deltaRollover(l[0]-r[0]);
-	    final double dy=deltaRollover(l[1]-r[1]);
-	    final double dz=deltaRollover(l[2]-r[2]);
-	    return Math.sqrt( (dx)*(dx) + (dy)*(dy) + (dz)*(dz) );
-	}
+    public static double sloppyTwosComplimentTaxicabDistanceXZ(double[] l,
+	    double[] r) {
+	return deltaRollover(Math.abs(l[0] - r[0]) + Math.abs(l[2] - r[2]));
+    }
 
-	public static double[] twosComplimentSubtract(double[] l,
-		double[] r, double [] dest) {
-	    dest[0]=deltaRollover(l[0]-r[0]);
-	    dest[1]=deltaRollover(l[1]-r[1]);
-	    dest[2]=deltaRollover(l[2]-r[2]);
-	    return dest;
-	}
-	public RootWindow getRootWindow() {
-	    return rootWindow;
-	}
+    public static double twosComplimentDistance(double[] l, double[] r) {
+	final double dx = deltaRollover(l[0] - r[0]);
+	final double dy = deltaRollover(l[1] - r[1]);
+	final double dz = deltaRollover(l[2] - r[2]);
+	return Math.sqrt((dx) * (dx) + (dy) * (dy) + (dz) * (dz));
+    }
+
+    public static double[] twosComplimentSubtract(double[] l, double[] r,
+	    double[] dest) {
+	dest[0] = deltaRollover(l[0] - r[0]);
+	dest[1] = deltaRollover(l[1] - r[1]);
+	dest[2] = deltaRollover(l[2] - r[2]);
+	return dest;
+    }
+
+    public RootWindow getRootWindow() {
+	return rootWindow;
+    }
 }//end TR

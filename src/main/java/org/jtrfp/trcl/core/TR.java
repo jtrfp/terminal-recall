@@ -383,18 +383,28 @@ public final class TR{
 	    return ((z/crossPlatformScalar)/mapWidth)*255.;
 	}
 	
-	public void gatherSysInfo(){
-    	    final GPU _gpu = gpu.get();
-    	    final Reporter r = getReporter();
-    	    _gpu.getGl().getContext().makeCurrent();
-    	    r.report("org.jtrfp.trcl.flow.RunMe.glVendor", _gpu.glGetString(GL3.GL_VENDOR));
-    	    r.report("org.jtrfp.trcl.flow.RunMe.glRenderer", _gpu.glGetString(GL3.GL_RENDERER));
-    	    r.report("org.jtrfp.trcl.flow.RunMe.glVersion", _gpu.glGetString(GL3.GL_VERSION));
-    	    r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime.getRuntime().availableProcessors());
-    	    _gpu.getGl().getContext().release();
-    	    for(Entry<Object,Object> prop:System.getProperties().entrySet())
-    		{r.report((String)prop.getKey(),prop.getValue());}
-    	    }//end gatherSysInfo()
+    public void gatherSysInfo() {
+	final GPU _gpu = gpu.get();
+	final Reporter r = getReporter();
+	getThreadManager().submitToGL(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		r.report("org.jtrfp.trcl.flow.RunMe.glVendor",
+			_gpu.glGetString(GL3.GL_VENDOR));
+		r.report("org.jtrfp.trcl.flow.RunMe.glRenderer",
+			_gpu.glGetString(GL3.GL_RENDERER));
+		r.report("org.jtrfp.trcl.flow.RunMe.glVersion",
+			_gpu.glGetString(GL3.GL_VERSION));
+		r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime
+			.getRuntime().availableProcessors());
+		for (Entry<Object, Object> prop : System.getProperties()
+			.entrySet()) {
+		    r.report((String) prop.getKey(), prop.getValue());
+		}
+		return null;
+	    }//end call()
+	}).get();
+    }// end gatherSysInfo()
 
 	public void startMissionSequence(String lvlFileName) {
 	    recursiveMissionSequence(lvlFileName);

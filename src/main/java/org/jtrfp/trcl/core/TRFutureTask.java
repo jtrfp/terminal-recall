@@ -23,6 +23,7 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
 	try {
 	    return super.get();//Get or block and then get.
 	}
+	catch(InterruptedException e){}
 	catch(Exception e){tr.showStopper(e);}
 	return null;
     }

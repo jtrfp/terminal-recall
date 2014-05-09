@@ -30,34 +30,19 @@ public class ThreadManager {
     public static final int RENDERING_PRIORITY 		= 6;
     public static final int SOUND_PRIORITY 		= 8;
     private final TR 			tr;
-    //private final Animator 		renderingAnimator;
     private final Timer 		gameplayTimer 			= new Timer("GameplayTimer");
     private long 			lastGameplayTickTime 		= 0;
     private long 			timeInMillisSinceLastGameTick 	= 0L;
     private int 			counter 			= 0;
-    private final Object		renderThisFrameLock		= new Object();
     private Thread 			renderingThread;
-    private volatile boolean		renderThisFrame			=true;	
     private volatile boolean		running				=true;
     private Thread			glExecutorThread;
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
     private final ConcurrentLinkedQueue<FutureTask> 	
     	mappedOperationQueue 		= new ConcurrentLinkedQueue<FutureTask>();
-    private final boolean []		glTasksWaiting			= new boolean[1];
-    private final ScheduledThreadPoolExecutor gameplayScheduler = new ScheduledThreadPoolExecutor(1,new ThreadFactory(){
-	@Override
-	public Thread newThread(Runnable runnable) {
-	    final Thread thisThread = new Thread(runnable);
-	    thisThread.setName("gameplaySchedulerThread");
-	    thisThread.setPriority(RENDERING_PRIORITY);
-	    return thisThread;
-	}
-    });
     ThreadManager(final TR tr) {
 	this.tr = tr;
-	//renderingAnimator = new Animator(tr.getRootWindow().getCanvas());
-	
 	final Thread gameplayThread = new Thread(new Runnable(){
 	    @Override
 	    public void run() {
@@ -79,7 +64,6 @@ public class ThreadManager {
 			public void run() {
 			    tr.getRootWindow().getCanvas().repaint();
 			}});
-		    renderThisFrame = true;
 		}}catch(InterruptedException e){}
 		catch(Exception e){tr.showStopper(e);}
 	    }});
@@ -96,7 +80,6 @@ public class ThreadManager {
     }// end constructor
 
     private void gameplay() {
-	//System.out.println("gameplay()");
 	if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
 		visibilityCalc();}
 	final long tickTimeInMillis = System.currentTimeMillis();
@@ -105,7 +88,6 @@ public class ThreadManager {
 	    if(!tr.renderer.get().currentRenderList().isDone())
 		return;
 	}else return;
-	//System.out.println("getVisibleObjectList()");
 	List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo = vl.get(i);
@@ -113,12 +95,9 @@ public class ThreadManager {
 		    && (TR.twosComplimentDistance(wo.getPosition(), tr
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)
 		    || wo instanceof VisibleEverywhere)
-		//System.out.println(wo.getClass().getName());
 		wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
-	//System.out.println("performCollisionTests()");
 	if(tr.getPlayer()!=null){
-	   // tr.getPlayer().tick(tickTimeInMillis);
 	    tr.getCollisionManager().performCollisionTests();
 	}
 	lastGameplayTickTime = tickTimeInMillis;
@@ -170,27 +149,11 @@ public class ThreadManager {
 				//if GPU not yet available, mapping not possible.
 				if(ThreadManager.this.tr.gpu.isDone()){
 				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
-				    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}//end if(mapped)
+				    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}
 				while(!mappedOperationQueue.isEmpty()){
 				    mappedOperationQueue.poll().run();
 				    renderingThread.setName("glExecutorThread");
-				    //synchronized(r){r.notifyAll();}
 				}//end while(mappedOperationQueue)
-				//Render this frame if necessary
-				//System.out.println("display()");
-				/*
-				if(renderThisFrame){
-				if(tr.renderer.isDone()){
-				    if(tr.getPlayer()!=null)gameplay();
-				    //System.out.println("FRAME.");
-				    ThreadManager.this.tr.renderer.get().render();
-				    synchronized(renderThisFrameLock){
-					renderThisFrame=false;
-					    renderThisFrameLock.notifyAll();
-					 }
-				    }////end if(renderer.isDone)
-				}//end if(renderThisFrame)
-				*/
 			}}catch(InterruptedException e){}
 			catch(Exception e){tr.showStopper(e);}
 			if(context.isCurrent())context.release();
@@ -219,13 +182,6 @@ public class ThreadManager {
 	//renderingAnimator.start();
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end start()
-/*
-    public <T> TRFutureTask<T> enqueueGLOperation(Callable<T> r){
-	final TRFutureTask<T> t = new TRFutureTask<T>(tr,r);
-	if(Thread.currentThread()!=renderingThread)mappedOperationQueue.add(t);
-	else t.run();
-	return t;
-	}*/
     
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;

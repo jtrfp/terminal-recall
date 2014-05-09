@@ -27,7 +27,7 @@ public class TextureManager {
 	this.tr			= tr;
 	subTextureWindow 	= new SubTextureWindow(tr);
 	tocWindow 		= new TextureTOCWindow(tr);
-	vqCodebookManager=tr.getThreadManager().enqueueGLOperation(new Callable<VQCodebookManager>(){
+	vqCodebookManager=tr.getThreadManager().submitToGL(new Callable<VQCodebookManager>(){
 	    @Override
 	    public VQCodebookManager call() throws Exception {
 		return new VQCodebookManager(tr);

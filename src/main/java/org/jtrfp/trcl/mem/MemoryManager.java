@@ -22,7 +22,7 @@ public final class MemoryManager {
     public MemoryManager(GPU gpu){
 	this.gpu=gpu;
 	try{
-	glPhysicalMemory = gpu.getTr().getThreadManager().enqueueGLOperation(new Callable<ReallocatableGLTextureBuffer>(){
+	glPhysicalMemory = gpu.getTr().getThreadManager().submitToGL(new Callable<ReallocatableGLTextureBuffer>(){
 	    @Override
 	    public ReallocatableGLTextureBuffer call() throws Exception {
 		ReallocatableGLTextureBuffer tb;

@@ -130,7 +130,7 @@ public class Mission {
     		Texture.finalize(gpu);
     		System.out.println("Setting sun vector");
     		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
-    		tr.getThreadManager().enqueueGLOperation(new Callable<Void>(){
+    		tr.getThreadManager().submitToGL(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
 			tr.renderer.get().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());

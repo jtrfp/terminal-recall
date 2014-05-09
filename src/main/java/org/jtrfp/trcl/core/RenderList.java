@@ -106,7 +106,7 @@ public class RenderList {
 	this.intermediateFrameBuffer=intermediateFrameBuffer;
 	this.intermediateNormTexture=intermediateNormTexture;
 	this.intermediateTextureIDTexture=intermediateTextureIDTexture;
-	final TRFutureTask<Void> task0 = tr.getThreadManager().enqueueGLOperation(new Callable<Void>(){
+	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		gl.glGenBuffers(1, ib);
@@ -134,7 +134,7 @@ public class RenderList {
 		    .objectListWindow.get();
 	final Renderer renderer = tr.renderer.get();
 	task0.get();
-	tr.getThreadManager().enqueueGLOperation(new Callable<Void>(){
+	tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		for (int i = 0; i < hostRenderListPageTable.length; i++) {

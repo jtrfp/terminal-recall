@@ -55,7 +55,7 @@ public final class Renderer {
 	this.gpu = gpu;
 	this.camera = new Camera(gpu);
 	final GL3 gl = gpu.getGl();
-	tr.getThreadManager().enqueueGLOperation(new Callable<Void>(){
+	tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		// Fixed pipeline behavior
@@ -309,7 +309,7 @@ public final class Renderer {
 					getCamera().getViewDepth() / 2.1)),
 					proximitySorter
 			);
-		Renderer.this.gpu.getTr().getThreadManager().enqueueGLOperation(new Callable<Object>(){
+		Renderer.this.gpu.getTr().getThreadManager().submitToGL(new Callable<Object>(){
 		    @Override
 		    public Object call() {
 			proximitySorter.dumpPositionedRenderables(rl.getSubmitter());

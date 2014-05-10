@@ -12,7 +12,7 @@ public class CollisionManager {
     private final TR tr;
     private final ArrayList<WorldObject>[] collisionList = new ArrayList[2];//Collideable objects are O(.5n^2-.5n)  !!!
     public static final int SHIP_COLLISION_DISTANCE = 15000;
-    private boolean flip = false;
+    private volatile boolean flip = false;
 
     public CollisionManager(TR tr) {
 	this.tr = tr;
@@ -20,7 +20,7 @@ public class CollisionManager {
 	collisionList[1] = new ArrayList<WorldObject>();
     }
 
-    public synchronized void updateCollisionList() {
+    public void updateCollisionList() {
 	final List<WorldObject> collideable = getWriteCollisionList();
 	collideable.clear();
 	tr.

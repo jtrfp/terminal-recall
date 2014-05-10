@@ -3,7 +3,6 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -290,7 +289,13 @@ public final class Renderer {
     }// TODO: Remove this when paged conversion is complete.
     
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
-	Renderer.this.currentRenderList().get().getSubmitter().submit(pr);
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		Renderer.this.currentRenderList().get().getSubmitter().submit(pr);
+		return null;
+	    }
+	});
     }//end temporarilyMakeImmediatelyVisible(...)
     
     public void updateVisibilityList() {

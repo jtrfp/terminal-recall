@@ -6,24 +6,22 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
-import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
-import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.FPSAnimator;
 
-public class ThreadManager {
+public final class ThreadManager {
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= RENDER_FPS;
     public static final int RENDERLIST_REFRESH_FPS 	= 5;
@@ -37,51 +35,20 @@ public class ThreadManager {
     private Thread 			renderingThread;
     private volatile boolean		running				=true;
     private Thread			glExecutorThread;
+    private FPSAnimator			animator			=new FPSAnimator(RENDER_FPS);
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
+    private TRFuture<Void> 		renderTask;
+    private TRFutureTask<Void>		visibilityCalcTask;
     private final ConcurrentLinkedQueue<FutureTask> 	
     	mappedOperationQueue 		= new ConcurrentLinkedQueue<FutureTask>();
     ThreadManager(final TR tr) {
 	this.tr = tr;
-	final Thread gameplayThread = new Thread(new Runnable(){
-	    @Override
-	    public void run() {
-		try{
-		Thread.currentThread().setName("gameplayThread");
-		while(running){
-		    Thread.sleep(1000/GAMEPLAY_FPS);
-		    if(tr.getPlayer()!=null)gameplay();
-		    submitToGL(new Callable<Void>(){
-			@Override
-			public Void call() throws Exception {
-			    if(tr.renderer.isDone()){
-				    ThreadManager.this.tr.renderer.get().render();
-				    }////end if(renderer.isDone)
-			    return null;
-			}}).get();
-		    SwingUtilities.invokeAndWait(new Runnable(){
-			@Override
-			public void run() {
-			    tr.getRootWindow().getCanvas().repaint();
-			}});
-		}}catch(InterruptedException e){}
-		catch(Exception e){tr.showStopper(e);}
-	    }});
-	Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
-	    @Override
-	    public void run() {
-		running=false;
-		glExecutorThread.interrupt();
-		gameplayThread.interrupt();
-	    }}));
-	//gameplayThread.setDaemon(true);
-	gameplayThread.start();
 	start();
     }// end constructor
 
     private void gameplay() {
-	if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
-		visibilityCalc();}
+	
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	if(tr.renderer.isDone() && tr.getPlayer()!=null){
@@ -104,9 +71,19 @@ public class ThreadManager {
     }// end gameplay()
 
     private void visibilityCalc() {
+	if(!tr.renderer.isDone())return;
 	tr.renderer.get().updateVisibilityList();
-	tr.getCollisionManager().updateCollisionList();
-    }
+	if(visibilityCalcTask!=null){
+	    if(!visibilityCalcTask.isDone())return;
+	}
+	visibilityCalcTask = new TRFutureTask<Void>(tr,new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		tr.getCollisionManager().updateCollisionList();
+		return null;
+	    }});
+	threadPool.submit(visibilityCalcTask);
+    }//end visibilityCalc()
     public <T> TRFuture<T> submitToGL(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
 	if(Thread.currentThread()!=renderingThread){
@@ -126,6 +103,8 @@ public class ThreadManager {
     }
 
     private void start() {
+	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);
+	animator.start();
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(final GLAutoDrawable drawable) {
@@ -140,12 +119,12 @@ public class ThreadManager {
 			    renderingThread=Thread.currentThread();
 			    synchronized(mappedOperationQueue){
 				if(mappedOperationQueue.isEmpty()){
-				    drawable.getContext().release();
+				    if(context.isCurrent())context.release();
 				    mappedOperationQueue.wait();
 				}//end if(!glTasksWaiting)
 			    }//end sync(glTasksWaiting)
 			    //Execute the tasks
-			    try{context.makeCurrent();}catch(NullPointerException e){break;}
+			    context.makeCurrent();
 				//if GPU not yet available, mapping not possible.
 				if(ThreadManager.this.tr.gpu.isDone()){
 				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
@@ -168,10 +147,26 @@ public class ThreadManager {
 
 	    @Override
 	    public void display(GLAutoDrawable drawable) {
-		Thread.currentThread().setName("OpenGL display()");
-		
-		
-		
+		final GLContext context = drawable.getContext();
+		if(context.isCurrent())context.release();
+		Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
+		Thread.currentThread().setName("OpenGL display(");
+		    //Schedule the rendering pass
+		    renderTask = submitToGL(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+			    if(tr.renderer.isDone()){
+				    ThreadManager.this.tr.renderer.get().render();
+				    }////end if(renderer.isDone)
+			    return null;
+			}});
+		    //While the rendering pass is being executed, consider doing the visiblity calc.
+		    if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
+			visibilityCalc();}
+		    if(tr.getPlayer()!=null)gameplay();
+		    //Barrier for completed rendering
+		    renderTask.get();
+		    context.makeCurrent();
 	    }//end display()
 
 	    @Override
@@ -179,7 +174,6 @@ public class ThreadManager {
 		    int width, int height) {
 	    }
 	});
-	//renderingAnimator.start();
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end start()
     

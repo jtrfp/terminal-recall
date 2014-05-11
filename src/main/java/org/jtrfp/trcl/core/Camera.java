@@ -9,18 +9,18 @@ import org.jtrfp.trcl.gpu.GPU;
 
 public class Camera
 	{
-	private Vector3D lookAtVector = new Vector3D(0, 0, 1);
-	private Vector3D upVector = new Vector3D(0, 1, 0);
-	private Vector3D cameraPosition = new Vector3D(50000, 0, 50000);
-	private RealMatrix cameraMatrix;
-	private double viewDepth;
-	private RealMatrix projectionMatrix;
-	private final GPU gpu;
-	private int updateDebugStateCounter;
+	private volatile Vector3D lookAtVector = new Vector3D(0, 0, 1);
+	private volatile  Vector3D upVector = new Vector3D(0, 1, 0);
+	private volatile  Vector3D cameraPosition = new Vector3D(50000, 0, 50000);
+	private volatile  RealMatrix cameraMatrix;
+	private volatile  double viewDepth;
+	private volatile  RealMatrix projectionMatrix;
+	private final	  GPU gpu;
+	private volatile  int updateDebugStateCounter;
 	public Camera(GPU gpu)
 		{this.gpu=gpu;}
 	
-	private void updateProjectionMatrix(){
+	private synchronized void updateProjectionMatrix(){
 	    	final Component component = gpu.getTr().getRootWindow();
 		final float fov = 70f;// In degrees
 		final float aspect = (float) component.getWidth()

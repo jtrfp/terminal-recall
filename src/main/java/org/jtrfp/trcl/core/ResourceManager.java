@@ -340,12 +340,11 @@ public class ResourceManager{
 							result.addTriangle(tris[1]);
 							}
 						else if(vertIndices.size()==3)//Triangles
-							{Triangle t = new Triangle();
+							{Triangle t = new Triangle(currentTexture);
 							try{t.setCentroidNormal(new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize());}
 							catch(MathArithmeticException ee){t.setCentroidNormal(Vector3D.ZERO);}
 							t.setAlphaBlended(hasAlpha);
 							t.setRenderMode(RenderMode.DYNAMIC);
-							t.setTexture(currentTexture);
 							
 							for(int vi=0; vi < 3; vi++){
 							    final org.jtrfp.trcl.gpu.Vertex vtx=

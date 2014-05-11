@@ -104,7 +104,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	return getPrimitives()[frame][tIndex];
     }
 
-    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex)
+    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, TextureDescription td)
 	    throws ExecutionException, InterruptedException {
 	final int 	numFrames	= getPrimitives().length;
 	final Triangle 	t 		= triangleAt(0, triangleIndex);
@@ -162,7 +162,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    throw new RuntimeException("Empty triangle vertex!");
 	}
 	//////////////// T E X T U R E ///////////////////////////
-	TextureDescription td = t.getTexture().get();
 	if(td==null){
 	    System.err.println("Stack trace of triangle creation below. NullPointerException follows.");
 	    for(StackTraceElement el:t.getCreationStackTrace()){
@@ -171,7 +170,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
 	if (td instanceof Texture) {// Static texture
 	    final Texture.TextureTreeNode tx;
-	    tx = ((Texture) t.getTexture().get()).getNodeForThisTexture();
+	    tx = ((Texture) td).getNodeForThisTexture();
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
@@ -234,9 +233,11 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     private void setupTriangle(int triangleIndex) throws ExecutionException,
 	    InterruptedException {
-	setupVertex(0, getMemoryWindow().create(), triangleIndex);
-	setupVertex(1, getMemoryWindow().create(), triangleIndex);
-	setupVertex(2, getMemoryWindow().create(), triangleIndex);
+	final Triangle triangle = triangleAt(0, triangleIndex);
+	final TextureDescription textureDescription = triangle.texture.get();
+	setupVertex(0, getMemoryWindow().create(), triangleIndex,textureDescription);
+	setupVertex(1, getMemoryWindow().create(), triangleIndex,textureDescription);
+	setupVertex(2, getMemoryWindow().create(), triangleIndex,textureDescription);
     }
 
     public void uploadToGPU(GL3 gl) {

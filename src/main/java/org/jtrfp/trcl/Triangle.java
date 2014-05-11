@@ -30,18 +30,19 @@ public class Triangle {
     private Vector3D centroidNormal;
     private final StackTraceElement[] creationStackTrace;
 
-    private Future<TextureDescription> texture;
+    public final Future<TextureDescription> texture;
     public static boolean debugTriangles = false;
 
-    public Triangle() {
+    public Triangle(Future<TextureDescription> texture) {
 	if (debugTriangles)
 	    creationStackTrace = new Exception().getStackTrace();
 	else
 	    creationStackTrace = null;
+	this.texture=texture;
     }
 
-    public Triangle(Vertex[] vertices) {
-	this();
+    public Triangle(Vertex[] vertices, Future<TextureDescription> texture) {
+	this(texture);
 	setVertex(vertices[0], 0);
 	setVertex(vertices[1], 1);
 	setVertex(vertices[2], 2);
@@ -92,8 +93,7 @@ public class Triangle {
 	    Future<TextureDescription> texture, RenderMode mode,
 	    boolean hasAlpha, Triangle[] dest, int destOffset) {
 	Triangle t;
-	t = new Triangle();
-	t.setTexture(texture);
+	t = new Triangle(texture);
 	t.setRenderMode(mode);
 	t.setAlphaBlended(hasAlpha);
 	t.setVertex(vertices[0], 0);
@@ -103,8 +103,7 @@ public class Triangle {
 	t.setUV(uv[1], 1);
 	t.setUV(uv[2], 2);
 	dest[0 + destOffset] = t;
-	t = new Triangle();
-	t.setTexture(texture);
+	t = new Triangle(texture);
 	t.setRenderMode(mode);
 	t.setAlphaBlended(hasAlpha);
 
@@ -123,8 +122,7 @@ public class Triangle {
 	    boolean hasAlpha, Vector3D centroidNormal, Triangle[] dest,
 	    int destOffset, String debugName) {
 	Triangle t;
-	t = new Triangle();
-	t.setTexture(texture);
+	t = new Triangle(texture);
 	t.setRenderMode(mode);
 	t.setAlphaBlended(hasAlpha);
 	t.setVertex(vertices[0], 0);
@@ -135,8 +133,7 @@ public class Triangle {
 	t.setUV(uv[2], 2);
 	t.setCentroidNormal(centroidNormal);
 	dest[0 + destOffset] = t;
-	t = new Triangle();
-	t.setTexture(texture);
+	t = new Triangle(texture);
 	t.setRenderMode(mode);
 	t.setAlphaBlended(hasAlpha);
 
@@ -243,21 +240,6 @@ public class Triangle {
      */
     public void setRenderMode(RenderMode renderMode) {
 	this.renderMode = renderMode;
-    }
-
-    /**
-     * @return the texture
-     */
-    public Future<TextureDescription> getTexture() {
-	return texture;
-    }
-
-    /**
-     * @param cloudTexture
-     *            the texture to set
-     */
-    public void setTexture(Future<TextureDescription> cloudTexture) {
-	this.texture = cloudTexture;
     }
 
     /**

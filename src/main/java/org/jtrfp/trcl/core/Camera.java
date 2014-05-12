@@ -20,7 +20,7 @@ public class Camera
 	public Camera(GPU gpu)
 		{this.gpu=gpu;}
 	
-	private synchronized void updateProjectionMatrix(){
+	private void updateProjectionMatrix(){
 	    	final Component component = gpu.getTr().getRootWindow();
 		final float fov = 70f;// In degrees
 		final float aspect = (float) component.getWidth()
@@ -108,7 +108,7 @@ public class Camera
 	public double getViewDepth()
 		{return viewDepth;}
 	
-	private RealMatrix getMatrix()
+	private synchronized RealMatrix getMatrix()
 		{if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){

@@ -7,8 +7,7 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.gpu.GPU;
 
-public class Camera
-	{
+public class Camera{
 	private volatile Vector3D lookAtVector = new Vector3D(0, 0, 1);
 	private volatile  Vector3D upVector = new Vector3D(0, 1, 0);
 	private volatile  Vector3D cameraPosition = new Vector3D(50000, 0, 50000);
@@ -43,7 +42,7 @@ public class Camera
 	/**
 	 * @param lookAtVector the lookAtVector to set
 	 */
-	public void setLookAtVector(Vector3D lookAtVector){
+	public synchronized void setLookAtVector(Vector3D lookAtVector){
 		this.lookAtVector = lookAtVector;
 		cameraMatrix=null;
 		}
@@ -55,7 +54,7 @@ public class Camera
 	/**
 	 * @param upVector the upVector to set
 	 */
-	public void setUpVector(Vector3D upVector){
+	public synchronized void setUpVector(Vector3D upVector){
 		this.upVector = upVector;
 		cameraMatrix=null;
 		}
@@ -67,7 +66,7 @@ public class Camera
 	/**
 	 * @param cameraPosition the cameraPosition to set
 	 */
-	public void setPosition(Vector3D cameraPosition){
+	public synchronized void setPosition(Vector3D cameraPosition){
 		this.cameraPosition = cameraPosition;
 		cameraMatrix=null;
 		}
@@ -94,12 +93,12 @@ public class Camera
 		
 		cameraMatrix = getProjectionMatrix().multiply(rM.multiply(tM));
 		}//end applyMatrix()
-	public void setViewDepth(double cameraViewDepth){
+	public synchronized void setViewDepth(double cameraViewDepth){
 	    	this.viewDepth=cameraViewDepth;
 		cameraMatrix=null;
 		projectionMatrix=null;
 		}
-
+	
 	private RealMatrix getProjectionMatrix(){
 		if(projectionMatrix==null)updateProjectionMatrix();
 		return projectionMatrix;

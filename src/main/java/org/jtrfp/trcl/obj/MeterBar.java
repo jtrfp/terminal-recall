@@ -1,18 +1,17 @@
 package org.jtrfp.trcl.obj;
 
-import java.util.concurrent.Future;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class MeterBar extends WorldObject2DVisibleEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
-    public MeterBar(TR tr, Future<TextureDescription> tex, double height, double length, boolean horizontal) {
+    public MeterBar(TR tr, TRFutureTask<TextureDescription> tex, double height, double length, boolean horizontal) {
 	super(tr);
 	//height*=.5;
 	//length*=.5;

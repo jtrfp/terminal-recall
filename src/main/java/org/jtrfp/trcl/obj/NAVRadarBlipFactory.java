@@ -1,10 +1,9 @@
 package org.jtrfp.trcl.obj;
 
-import java.util.concurrent.Future;
-
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.math.Vect3D;
@@ -25,7 +24,7 @@ public class NAVRadarBlipFactory {
 	    try{
 	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"");
     	     for(int pi=0; pi<POOL_SIZE; pi++){
-    		blipPool[ti][pi]=new Blip(new DummyFuture<TextureDescription>(tex),g);
+    		blipPool[ti][pi]=new Blip(new DummyTRFutureTask<TextureDescription>(tex),g);
     	     }//end for(pi)
 	    }catch(Exception e){e.printStackTrace();}
 	}//end for(ti)
@@ -48,7 +47,7 @@ public class NAVRadarBlipFactory {
     }//end BlipType
     
     private class Blip extends Sprite2D{
-	public Blip(Future<TextureDescription> tex, RenderableSpacePartitioningGrid g) {
+	public Blip(TRFutureTask<TextureDescription> tex, RenderableSpacePartitioningGrid g) {
 	    super(tr,-1,.02,.02,tex,true);
 	    g.add(this);
 	}//end constructor

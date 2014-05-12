@@ -15,16 +15,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.concurrent.Future;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public abstract class LineSegment {
     public static Triangle[] buildTriPipe(Vector3D start, Vector3D end,
-	    Future<TextureDescription> texture, int thickness, Triangle[] dest,
+	    TRFutureTask<TextureDescription> texture, int thickness, Triangle[] dest,
 	    int destOffset) {
 	Rotation rot = new Rotation(Vector3D.PLUS_K, end.subtract(start)
 		.normalize());

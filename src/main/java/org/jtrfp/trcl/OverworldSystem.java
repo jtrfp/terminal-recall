@@ -3,10 +3,10 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
@@ -35,7 +35,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	try { // Active by default
 	    final World w = tr.getWorld();
 	    Color[] globalPalette = tr.getGlobalPalette();
-	    Future<TextureDescription>[] texturePalette = tr
+	    TRFutureTask<TextureDescription>[] texturePalette = tr
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), globalPalette,
 			    GammaCorrectingColorProcessor.singleton,

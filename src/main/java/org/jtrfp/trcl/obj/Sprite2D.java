@@ -1,17 +1,16 @@
 package org.jtrfp.trcl.obj;
 
-import java.util.concurrent.Future;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class Sprite2D extends WorldObject2DVisibleEverywhere {
 
-    public Sprite2D(TR tr, double z, double width, double height, Future<TextureDescription> tex, boolean useAlpha) {
+    public Sprite2D(TR tr, double z, double width, double height, TRFutureTask<TextureDescription> tex, boolean useAlpha) {
 	super(tr);
 	final Model m = new Model(false,tr);
 	Triangle [] tris = Triangle.quad2Triangles(

@@ -1,9 +1,8 @@
 package org.jtrfp.trcl.obj;
 
-import java.util.concurrent.Future;
-
 import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class BarrierCube extends WorldObject {
@@ -16,12 +15,12 @@ public class BarrierCube extends WorldObject {
 	this.dims=new double[]{w,h,d};
 	this.origin=origin;
     }
-    public BarrierCube(TR tr,double w, double h, double d, Future<TextureDescription> tex, double [] origin, boolean hasAlpha) {
+    public BarrierCube(TR tr,double w, double h, double d, TRFutureTask<TextureDescription> tex, double [] origin, boolean hasAlpha) {
 	this(tr,w,h,d,origin);
 	Model m = Model.buildCube(w, h, d, tex, origin,hasAlpha,tr);
 	setModel(m);
     }// end constructor
-    public BarrierCube(TR tr,double w, double h, double d, Future<TextureDescription> tex, double [] origin, double u0, double v0, double u1, double v1, boolean hasAlpha) {
+    public BarrierCube(TR tr,double w, double h, double d, TRFutureTask<TextureDescription> tex, double [] origin, double u0, double v0, double u1, double v1, boolean hasAlpha) {
 	this(tr,w,h,d,origin);
 	Model m = Model.buildCube(w, h, d, tex, origin,u0,v0,u1,v1,hasAlpha,tr);
 	setModel(m);

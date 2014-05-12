@@ -26,10 +26,11 @@ import org.jtrfp.trcl.Tickable;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
+import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
-import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
 import org.jtrfp.trcl.math.IntRandomTransferFunction;
@@ -42,7 +43,7 @@ public class TunnelSegment extends WorldObject {
     private final double endX, endY;
 
     public TunnelSegment(TR tr, Segment s,
-	    Future<TextureDescription>[] tunnelTexturePalette, double segLen,
+	    TRFutureTask<TextureDescription>[] tunnelTexturePalette, double segLen,
 	    double endX, double endY) {
 	super(tr, createModel(s, segLen, tunnelTexturePalette, endX, endY, tr));
 	segmentLength = segLen;
@@ -80,7 +81,7 @@ public class TunnelSegment extends WorldObject {
     private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();
 
     private static Model createModel(Segment s, double segLen,
-	    Future<TextureDescription>[] tunnelTexturePalette, double endX,
+	    TRFutureTask<TextureDescription>[] tunnelTexturePalette, double endX,
 	    double endY, final TR tr) {
 	Model m = new Model(false, tr);
 	final int numPolys = s.getNumPolygons();
@@ -132,7 +133,7 @@ public class TunnelSegment extends WorldObject {
 	    Vector3D p3 = segPoint(startAngle + dAngleStart, zStart,
 		    startWidth, startHeight, startX, startY);
 
-	    Future<TextureDescription> tex = tunnelTexturePalette[s
+	    TRFutureTask<TextureDescription> tex = tunnelTexturePalette[s
 		    .getPolyTextureIndices().get(pi)];
 
 	    final FlickerLightType 	flt 	= s.getFlickerLightType();
@@ -151,7 +152,7 @@ public class TunnelSegment extends WorldObject {
 			    new DummyFuture<Texture>(t.subTexture(0, 0, 0, 0)) // DUMMY
 		    };
 		    final SelectableTexture st = new SelectableTexture(frames);
-		    tex = new DummyFuture<TextureDescription>(st);
+		    tex = new DummyTRFutureTask<TextureDescription>(st);
 
 		    final int flickerThresh = flt == FlickerLightType.off1p5Sec ? (int) (-.3 * (double) Integer.MAX_VALUE)
 			    : flt == FlickerLightType.on1p5Sec ? (int) (.4 * (double) Integer.MAX_VALUE)

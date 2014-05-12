@@ -8,6 +8,7 @@ import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Mission;
@@ -30,7 +31,7 @@ private final NAVSystem nav;
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
     
-    private static Future<TextureDescription> getTexture(TR tr){
+    private static TRFutureTask<TextureDescription> getTexture(TR tr){
 	try{
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
 		tr.getGlobalPalette(), 

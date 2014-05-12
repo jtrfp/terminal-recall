@@ -24,8 +24,8 @@ import org.jtrfp.trcl.beh.tun.DestructibleWallBehavior;
 import org.jtrfp.trcl.beh.tun.IrisBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
-import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
@@ -86,7 +86,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	    	//Entrance uses only a stub. Player is warped to TUNNEL_POS facing TUNNEL_START_DIRECTION
 		ResourceManager rm = tr.getResourceManager();
 		LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
-		Future<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
+		TRFutureTask<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
 		final double segLen=65536;
@@ -151,7 +151,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	 * 
 	 */
 	
-	private void installObstacles(Segment s, Future<TextureDescription>[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
+	private void installObstacles(Segment s, TRFutureTask<TextureDescription>[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		Color [] palette = tr.getGlobalPalette();
 		Obstacle obs = s.getObstacle();
 		WorldObject wo;

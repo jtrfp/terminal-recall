@@ -16,10 +16,12 @@
 package org.jtrfp.trcl;
 
 import java.util.ArrayList;
-import java.util.concurrent.Future;
+
+import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class Model {
@@ -83,6 +85,7 @@ public class Model {
      */
     public Model finalizeModel() {
 	Controller c = controller;
+	final GL3 gl = tr.gpu.get().getGl();
 	if (c == null)
 	    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);
 	Triangle[][] tris = new Triangle[tLists.size()][];
@@ -92,6 +95,7 @@ public class Model {
 	if (tris[0].length != 0) {
 	    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
 		    animateUV, c, tr, this);
+	    tpList.uploadToGPU(gl);
 	}// end if(length!=0)
 	else
 	    tpList = null;
@@ -103,6 +107,7 @@ public class Model {
 	if (ttris[0].length != 0) {
 	    ttpList = new TransparentTriangleList(ttris,
 		    getFrameDelayInMillis(), debugName, animateUV, c, tr, this);
+	    ttpList.uploadToGPU(gl);
 	}// end if(length!=0)
 	else
 	    ttpList = null;
@@ -180,27 +185,27 @@ public class Model {
     }
 
     public static Model buildCube(double w, double h, double d,
-	    Future<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
 	    boolean hasAlpha, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1,
 		hasAlpha, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    Future<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
 	    TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    Future<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, u0, v0, u1, v1,
 		false, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    Future<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr) {
 	Model m = new Model(false, tr);
 	// Front

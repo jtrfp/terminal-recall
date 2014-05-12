@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.World;
@@ -16,9 +15,11 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
-import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
+import org.jtrfp.trcl.beh.TunnelRailed;
+import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.Powerup;
@@ -32,7 +33,7 @@ public class PowerupObject extends BillboardSprite{
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
-		Future<TextureDescription> desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
+		TRFutureTask<TextureDescription> desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
 		if(pt==Powerup.Random){
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
 		}
@@ -44,7 +45,7 @@ public class PowerupObject extends BillboardSprite{
 			for(int i=0; i<t.length;i++){
 			    t[i]=frame(bbFrames[i]);
 			}
-			desc=new DummyFuture<TextureDescription>(new AnimatedTexture(s,t));
+			desc=new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(s,t));
 			//Do something with desc
 			setTexture(desc,true);}//end try{}
 		catch(Exception e)

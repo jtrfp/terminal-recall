@@ -10,6 +10,7 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 
@@ -32,7 +33,7 @@ public class BillboardSprite extends WorldObject{
 		{this.dim=dim;}
 	public Dimension getBillboardSize(){return this.dim;}
 	
-	public void setTexture(Future<TextureDescription> desc, boolean useAlpha){
+	public void setTexture(TRFutureTask<TextureDescription> desc, boolean useAlpha){
 		if(dim==null)throw new NullPointerException("Billboard size must be non-null. (did you forget to set it?)");
 		Triangle[] tris= Triangle.quad2Triangles(
 				new double[]{-.5*dim.getWidth(),.5*dim.getWidth(),.5*dim.getWidth(),-.5*dim.getWidth()}, //X

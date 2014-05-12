@@ -16,11 +16,11 @@
 package org.jtrfp.trcl;
 
 import java.io.IOException;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
@@ -31,7 +31,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 	    IOException {
 	super(tr);
 	// Dashboard
-	Future<TextureDescription>[] dashTexture = tr.getResourceManager()
+	TRFutureTask<TextureDescription>[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
 			GammaCorrectingColorProcessor.singleton,
 			tr.gpu.get().getGl(), 2);

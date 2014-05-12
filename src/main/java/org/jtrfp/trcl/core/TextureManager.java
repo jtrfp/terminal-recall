@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.LineSegment;
@@ -22,7 +21,7 @@ public class TextureManager {
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
     public final TRFuture<VQCodebookManager>	vqCodebookManager;
-    private Future<TextureDescription>		fallbackTexture;
+    private TRFutureTask<TextureDescription>		fallbackTexture;
     public TextureManager(final TR tr){
 	this.tr			= tr;
 	subTextureWindow 	= new SubTextureWindow(tr);
@@ -45,37 +44,37 @@ public class TextureManager {
 	return subTextureWindow;
     }
     
-    private Future<TextureDescription> defaultTriPipeTexture;
+    private TRFutureTask<TextureDescription> defaultTriPipeTexture;
     
-    public Future<TextureDescription> getDefaultTriPipeTexture(){
+    public TRFutureTask<TextureDescription> getDefaultTriPipeTexture(){
 	if(defaultTriPipeTexture==null){
 	 defaultTriPipeTexture
-	    	= new DummyFuture<TextureDescription>(
+	    	= new DummyTRFutureTask<TextureDescription>(
 	    		new Texture(Texture.RGBA8FromPNG(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
 	    			"Default TriPipe Texture (grayNoise)",tr));
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
     
-    public Future<TextureDescription> getFallbackTexture(){
+    public TRFutureTask<TextureDescription> getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
 	Texture t;
 	t = new Texture(
 		Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),
 		"Fallback",tr);
-	fallbackTexture = new DummyFuture<TextureDescription>(t);
+	fallbackTexture = new DummyTRFutureTask<TextureDescription>(t);
 	return fallbackTexture;
     }//end getFallbackTexture()
     
-    public Future<TextureDescription> solidColor(Color color) {
+    public TRFutureTask<TextureDescription> solidColor(Color color) {
 	BufferedImage img = new BufferedImage(64, 64,
 		BufferedImage.TYPE_INT_RGB);
 	Graphics g = img.getGraphics();
 	g.setColor(color);
 	g.fillRect(0, 0, 64, 64);
 	g.dispose();
-	final DummyFuture<TextureDescription> result = new DummyFuture<TextureDescription>(new Texture(img,
+	final DummyTRFutureTask<TextureDescription> result = new DummyTRFutureTask<TextureDescription>(new Texture(img,
 		"Solid color " + color,tr));
 	return result;
     }//end solidColor(...)

@@ -9,16 +9,16 @@ import javax.media.opengl.GL3;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.ColorProcessor;
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.PrimitiveRenderMode;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.DestroysEverythingBehavior;
+import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.ModelingType;
@@ -36,7 +36,7 @@ public class ProjectileFactory {
     	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
     	Model modelToUse;
-    	Future<TextureDescription> t;
+    	TRFutureTask<TextureDescription> t;
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
@@ -74,7 +74,7 @@ public class ProjectileFactory {
    	     for(int i=0; i<frames.length;i++){
    		 frames[i]=(Future)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl);
    	     }//end for(frames)
-   	     Future<TextureDescription> tex = new DummyFuture<TextureDescription>(new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames));
+   	  TRFutureTask<TextureDescription> tex = new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames));
 	     for(int i=0; i<projectiles.length; i++){
 	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow);}
    	 }//end (billboard)

@@ -17,11 +17,11 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.obj.CloudCeiling;
@@ -29,7 +29,7 @@ import org.jtrfp.trcl.obj.CloudCeiling;
 public class CloudSystem extends RenderableSpacePartitioningGrid {
     Color fogColor;
     double ceilingHeight;
-    Future<TextureDescription> cloudTexture;
+    TRFutureTask<TextureDescription> cloudTexture;
     double cloudTileSideSize;
     int gridSideSizeInTiles;
     private final TR tr;

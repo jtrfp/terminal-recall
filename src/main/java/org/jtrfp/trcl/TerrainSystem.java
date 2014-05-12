@@ -21,6 +21,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
@@ -100,7 +101,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    altitude.normalAt(cX+.5, cZ+.5);
 						    
 						    final Integer tpi = cX+cZ*256;
-						    Future<TextureDescription> td=(Future<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
+						    TRFutureTask<TextureDescription> td=(TRFutureTask<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
 						    Triangle [] tris = Triangle.quad2Triangles(// COUTNER-CLOCKWISE
 							//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 							new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
@@ -172,7 +173,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    
 							    //Ceiling texture cell X (Z in this engine) value is offset by 10.
 							    //No tunnelpoints on ceiling
-							    Future<TextureDescription> td=(Future<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
+							    TRFutureTask<TextureDescription> td=(TRFutureTask<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
 							    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
 							    Triangle [] tris = Triangle.quad2Triangles(// COUNTER CLOCKWISE
 								//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x

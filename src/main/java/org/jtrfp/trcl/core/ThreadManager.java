@@ -96,7 +96,7 @@ public final class ThreadManager {
 	return result;
     }
     
-    public <T> TRFuture<T> submitToThreadPool(Callable<T> c){
+    public <T> TRFutureTask<T> submitToThreadPool(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
 	threadPool.submit(result);
 	return result;
@@ -117,9 +117,9 @@ public final class ThreadManager {
 			try{
 			while(running){
 			    renderingThread=Thread.currentThread();
+			    if(context.isCurrent())	context.release();	//Feed the watchdog timer.
 			    synchronized(mappedOperationQueue){
 				if(mappedOperationQueue.isEmpty()){
-				    if(context.isCurrent())context.release();
 				    mappedOperationQueue.wait();
 				}//end if(!glTasksWaiting)
 			    }//end sync(glTasksWaiting)
@@ -130,7 +130,13 @@ public final class ThreadManager {
 				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
 				    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}
 				while(!mappedOperationQueue.isEmpty()){
+				    //System.out.println("Making current...");
+				    if(!context.isCurrent())	context.makeCurrent();	//Feed the watchdog timer.
+				    //System.out.println("Is now current. Running...");
 				    mappedOperationQueue.poll().run();
+				   // System.out.println("Releasing...");
+				    context.release();
+				    //System.out.println("Released.");
 				    renderingThread.setName("glExecutorThread");
 				}//end while(mappedOperationQueue)
 			}}catch(InterruptedException e){}
@@ -150,7 +156,7 @@ public final class ThreadManager {
 		final GLContext context = drawable.getContext();
 		if(context.isCurrent())context.release();
 		Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
-		Thread.currentThread().setName("OpenGL display(");
+		Thread.currentThread().setName("OpenGL display()");
 		    //Schedule the rendering pass
 		    renderTask = submitToGL(new Callable<Void>(){
 			@Override

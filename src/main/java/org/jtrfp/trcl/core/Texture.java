@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +34,6 @@ import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
-import javax.media.opengl.Threading;
 
 import org.jtrfp.trcl.OutOfTextureSpaceException;
 import org.jtrfp.trcl.gpu.GLTexture;
@@ -73,7 +73,7 @@ public class Texture implements TextureDescription {
 	}
     }// end waitUntilTextureProcessingEnds()
 
-    
+    public static final ArrayList<Runnable> executeInGLFollowingFinalization = new ArrayList<Runnable>();
     private static ByteBuffer emptyRow = null;
     
     private Texture(TR tr, String debugName){
@@ -422,6 +422,17 @@ public class Texture implements TextureDescription {
 	GLTexture tex = gpu.newTexture();
 	tex.setTextureImageRGBA(buf);
 	globalTexture = tex;
+	final TR tr = gpu.getTr();
+	System.out.println("Legacy texturing mode: Committing models to atlas U/Vs...");
+	for(final Runnable r:Texture.executeInGLFollowingFinalization){
+	    tr.getThreadManager().submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    r.run();
+		    return null;
+		}//end call()
+	    });
+	}//end for(executeInGLFollowingFinalization)
     }// end finalize()
 
     public static final int createTextureID(GL3 gl) {

@@ -276,6 +276,7 @@ public class ResourceManager{
 			try	{
 				BINFile.Model m=null;
 				Model result = new Model(false,tr);
+				result.setDebugName(name);
 				m = modBinNameMap.get(name);
 				if(m==null){
 					InputStream is = getInputStreamFromResource("MODELS\\"+name);

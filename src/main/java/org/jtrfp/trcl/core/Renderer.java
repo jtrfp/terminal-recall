@@ -224,7 +224,7 @@ public final class Renderer {
 	gpu.memoryManager.get().map();
 
 	System.out.println("Uploading vertex data to GPU...");
-	TriangleList.uploadAllListsToGPU(gl);
+	//TriangleList.uploadAllListsToGPU(gl);
 	System.out.println("...Done.");
 	System.out.println("Uploading object definition data to GPU...");
 	WorldObject.uploadAllObjectDefinitionsToGPU();

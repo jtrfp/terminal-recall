@@ -15,18 +15,20 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
+import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TriangleList extends PrimitiveList<Triangle> {
     private 		Controller 			controller;
@@ -34,6 +36,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private final 	boolean 			animateUV;
     private final 	WindowAnimator 			xyzAnimator;
     private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
+    private final 	ArrayList<TextureDescription>	textureDescriptions = new ArrayList<TextureDescription>();
+    private final	ArrayList<Integer>		vertexIDs = new ArrayList<Integer>();
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
@@ -92,9 +96,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}// end transfer(...)
     }// end class XYZXferFunc
 
-    public TriangleList[] getAllLists() {
+    /*public TriangleList[] getAllLists() {
 	return getAllArrayLists().toArray(new TriangleList[] {});
-    }
+    }*/
 
     private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames) {
 	return controller;
@@ -231,26 +235,48 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}// end animated texture
     }// end setupVertex
 
-    private void setupTriangle(int triangleIndex) throws ExecutionException,
+    private void setupTriangle(final int triangleIndex, final TextureDescription textureDescription,final int [] vertexIndices) throws ExecutionException,
 	    InterruptedException {
-	final Triangle triangle = triangleAt(0, triangleIndex);
-	final TextureDescription textureDescription = triangle.texture.get();
-	setupVertex(0, getMemoryWindow().create(), triangleIndex,textureDescription);
-	setupVertex(1, getMemoryWindow().create(), triangleIndex,textureDescription);
-	setupVertex(2, getMemoryWindow().create(), triangleIndex,textureDescription);
-    }
+		setupVertex(0, vertexIndices[triangleIndex*3+0], triangleIndex,textureDescription);
+		setupVertex(1, vertexIndices[triangleIndex*3+1], triangleIndex,textureDescription);
+		setupVertex(2, vertexIndices[triangleIndex*3+2], triangleIndex,textureDescription);
+    }//setupTriangle
 
     public void uploadToGPU(GL3 gl) {
-	int nPrimitives = getNumElements();
-	try {
-	    for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
-		setupTriangle(tIndex);
+	final int nPrimitives = getNumElements();
+	final int [] triangleVertexIndices = new int[nPrimitives*3];
+	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
+	final MemoryWindow mw = getMemoryWindow();
+	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++) {
+		triangleVertexIndices[vIndex]=mw.create();
 	    }
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	} catch (ExecutionException e) {
-	    e.printStackTrace();
+	//System.out.println("Constructing TextureDescription list...");
+	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
+	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture
+		    .get();
 	}
+	//System.out.println("Submitting triangle list "+debugName+" to GL...");
+	// Submit the GL task to set up the triangles.
+	if(tr.getTrConfig().isUsingNewTexturing()){
+	    tr.getThreadManager().submitToGL(new Callable<Void>() {
+		    @Override
+		    public Void call() throws Exception {
+			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
+				setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
+			return null;
+		    }//end Call()
+		}).get();
+	}else{
+	    Texture.executeInGLFollowingFinalization.add(new Runnable() {
+		    @Override
+		    public void run(){
+			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
+				try{setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
+				catch(Exception e){throw new RuntimeException(e);}}
+		    }//end Call()
+		});
+	}//end legacy texturing enqueue later.
+	
     }// end allocateIndices(...)
 
     @Override

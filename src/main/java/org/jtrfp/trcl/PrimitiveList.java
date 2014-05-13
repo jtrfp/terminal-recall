@@ -25,8 +25,8 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE> {
-    private static final List<PrimitiveList<?>> allLists = Collections
-	    .synchronizedList(new ArrayList<PrimitiveList<?>>());
+    /*private static final List<PrimitiveList<?>> allLists = Collections
+	    .synchronizedList(new ArrayList<PrimitiveList<?>>());*/
     
     protected static final double coordDownScaler = 512;
     protected static final double uvUpScaler = 4096;
@@ -53,7 +53,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	this.primitives = primitives;
 	this.model = model;
 	setScale((getMaximumVertexValue() / 2048.));
-	addList(this);
+	//addList(this);
     }
 
     protected int packScale(double scaleToPack) {
@@ -65,7 +65,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected double applyScale(double value) {
 	return value / Math.pow(2, packedScale - 16);
     }
-
+/*
     protected static void addList(PrimitiveList l) {
 	if (l == null) {
 	    new Exception().printStackTrace();
@@ -73,10 +73,10 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	}
 	allLists.add(l);
     }
-
-    protected static List<PrimitiveList<?>> getAllArrayLists() {
+*/
+    /*protected static List<PrimitiveList<?>> getAllArrayLists() {
 	return allLists;
-    }
+    }*/
 
     protected abstract double getMaximumVertexValue();
 
@@ -106,13 +106,13 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public String getDebugName() {
 	return debugName;
     }
-
+/*
     public static void uploadAllListsToGPU(GL3 gl) {
 	for (PrimitiveList<?> l : allLists) {
 	    l.uploadToGPU(gl);
 	}
     }// end uploadAllListsToGPU
-
+*/
     public abstract void uploadToGPU(GL3 gl);
 
     //public abstract byte getPrimitiveRenderMode();

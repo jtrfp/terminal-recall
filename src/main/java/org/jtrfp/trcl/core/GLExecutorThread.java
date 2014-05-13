@@ -7,7 +7,7 @@ public class GLExecutorThread extends Thread {
     public GLExecutorThread(GLContext context, Runnable runnable) {
 	super(runnable);
 	setName("glThreadPool");
-	setPriority(ThreadManager.RENDERING_PRIORITY);
+	//setPriority(ThreadManager.RENDERING_PRIORITY);
 	this.context=context;
     }
     /**

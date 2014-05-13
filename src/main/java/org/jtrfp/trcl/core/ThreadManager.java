@@ -25,8 +25,8 @@ public final class ThreadManager {
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= RENDER_FPS;
     public static final int RENDERLIST_REFRESH_FPS 	= 5;
-    public static final int RENDERING_PRIORITY 		= 6;
-    public static final int SOUND_PRIORITY 		= 8;
+    //public static final int RENDERING_PRIORITY 		= 6;
+    //public static final int SOUND_PRIORITY 		= 8;
     private final TR 			tr;
     private final Timer 		gameplayTimer 			= new Timer("GameplayTimer");
     private long 			lastGameplayTickTime 		= 0;
@@ -134,10 +134,11 @@ public final class ThreadManager {
 				    if(!context.isCurrent())	context.makeCurrent();	//Feed the watchdog timer.
 				    //System.out.println("Is now current. Running...");
 				    mappedOperationQueue.poll().run();
-				   // System.out.println("Releasing...");
+				    //System.out.println("Releasing...");
+				    renderingThread.setName("glExecutorThread");
 				    context.release();
 				    //System.out.println("Released.");
-				    renderingThread.setName("glExecutorThread");
+				    
 				}//end while(mappedOperationQueue)
 			}}catch(InterruptedException e){}
 			catch(Exception e){tr.showStopper(e);}
@@ -155,7 +156,7 @@ public final class ThreadManager {
 	    public void display(GLAutoDrawable drawable) {
 		final GLContext context = drawable.getContext();
 		if(context.isCurrent())context.release();
-		Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
+		//Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
 		Thread.currentThread().setName("OpenGL display()");
 		    //Schedule the rendering pass
 		    renderTask = submitToGL(new Callable<Void>(){

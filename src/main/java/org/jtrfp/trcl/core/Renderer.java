@@ -191,7 +191,7 @@ public final class Renderer {
 		intermediateDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
-		intermediateTextureIDTexture.bind().setImage(GL3.GL_R16UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
+		intermediateTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		Renderer.this.getPrimaryProgram().use();

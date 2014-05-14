@@ -133,7 +133,8 @@ gl_Position.x=dummy*0;
 			// objectDef[3] unused.
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
-			flatTextureID 			= UByte(packedVertex[3u],1u) + (UByte(packedVertex[3u],2u) * 255u) + (UByte(packedVertex[3u],3u) * 65535u);
+			flatTextureID 			= UByte(packedVertex[3u],1u) + (UByte(packedVertex[3u],2u) * 256u) + (UByte(packedVertex[3u],3u) * 65536u);
+			//flatTextureID 			= UByte(packedVertex[3u],1u);
 			vec4 	vertexCoord;
 			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
 												float(firstSShort(packedVertex[1])));

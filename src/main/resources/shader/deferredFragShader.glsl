@@ -85,6 +85,9 @@ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 // TOC
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
+
+tDims = vec2(64,64);///////////////////////////////////////////////DEBUG /////////////////////////////
+
 uint	startCode	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_CODE];
 vec2	texelXY		= tDims*fragColor.xy;
 uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
@@ -105,7 +108,7 @@ vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx
 vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
 
 // DEBUG
-//codeTexel = texture(rgbaTiles,vec3(codePgUV,0));
+codeTexel = texture(rgbaTiles,vec3(codePgUV,0));
 
 vec3 	origColor 	= textureID==10u?texture(texturePalette,fragColor.xy).rgb:
 	codeTexel.rgb;//GET COLOR

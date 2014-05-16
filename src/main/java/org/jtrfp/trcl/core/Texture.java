@@ -156,9 +156,6 @@ public class Texture implements TextureDescription {
 	    final int tocIndex = toc.create();
 	    final ByteBuffer vectorBuffer = ByteBuffer
 		    .allocateDirect(4 * 4 * 4);
-	    toc.startTile.set(tocIndex, codebookStartOffsetAbsolute);
-	    toc.height	 .set(tocIndex, 64);
-	    toc.width	 .set(tocIndex, 64);
 	    // Create subtextures
 	    final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
@@ -166,17 +163,24 @@ public class Texture implements TextureDescription {
 	    //System.out.println("diameterInSubtextures="+diameterInSubtextures);
 	    for(int i=0; i<subTextureIDs.length; i++){
 		//Create subtexture ID
-		final int id = subTextureIDs[i]=stw.create();
-		//Convert subtexture index to index of TOC
-		final int subTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
-		//Load subtexture ID into TOC
-		toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+		subTextureIDs[i]=stw.create();
 	    }//end for(subTextureIDs)
 	    
 	tr.getThreadManager().submitToGL(new Callable<Object>() {
 	    @Override
 	    public Object call() {
-		    Thread.currentThread().setName("Texture.java:189");
+		Thread.currentThread().setName("Texture.java:189");
+		for(int i=0; i<subTextureIDs.length; i++){
+			final int id = subTextureIDs[i];
+			//Convert subtexture index to index of TOC
+			final int subTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
+			//Load subtexture ID into TOC
+			toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+		    }//end for(subTextureIDs)
+		// Set the TOC vars
+		toc.startTile	 .set(tocIndex, codebookStartOffsetAbsolute);
+		toc.height	 .set(tocIndex, 64);
+		toc.width	 .set(tocIndex, 64);
 		// Push vectors to codebook
 		for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
 		    vectorBuffer.clear();
@@ -189,7 +193,6 @@ public class Texture implements TextureDescription {
 		    vectorBuffer.clear();
 		    //System.out.println("cbm.setRGBA");
 		    cbm.setRGBA(globalCodeIndex, vectorBuffer);
-
 		}// end for(codeIndex)
 		return null;
 	    }// end run()

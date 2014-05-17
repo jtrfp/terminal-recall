@@ -69,9 +69,9 @@ public class VQCodebookManager {
 
     private void subImage(final int codeID, final ByteBuffer texels,
 	    final GLTexture tex, int mipLevel) {
-	final int x = codeID % NUM_CODES_PER_AXIS;
+	final int x = (codeID % NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
 	final int z = codeID / CODES_PER_PAGE;
-	final int y = (codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS;
+	final int y = ((codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
 	texels.clear();
 	if(z>NUM_CODE_PAGES){
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+z+" max: "+NUM_CODE_PAGES);
@@ -92,7 +92,6 @@ public class VQCodebookManager {
 	wb.put(texels);
 	int sideLen = (int)Math.sqrt(texels.capacity() / byteSizedComponentsPerTexel);
 	for (int mipLevel = 0; mipLevel < MIP_DEPTH; mipLevel++) {
-	    //System.out.println();
 	    wb.clear();
 	    subImage(codeID, wb, tex, mipLevel);
 	    mipDown(wb, intermediate, sideLen, byteSizedComponentsPerTexel);

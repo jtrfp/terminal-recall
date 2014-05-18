@@ -25,13 +25,13 @@ public final class RGBA8888VectorList implements VectorList {
 
     @Override
     public double componentAt(int vectorIndex, int componentIndex) {
-	return source.componentAt(vectorIndex / 4 + componentIndex,
+	return source.componentAt(vectorIndex * 4 + componentIndex,
 		singletOffset);
     }
 
     @Override
     public void setComponentAt(int vectorIndex, int componentIndex, double value) {
-	source.setComponentAt(vectorIndex / 4 + componentIndex, singletOffset,
+	source.setComponentAt(vectorIndex * 4 + componentIndex, singletOffset,
 		value);
     }
 }// end RGBA8888VectorList

@@ -29,28 +29,39 @@ public final class RasterizedBlockVectorList implements VectorList {
 
     @Override
     public double componentAt(int vectorIndex, int componentIndex) {
-	final int row 	= vectorIndex / blocksPerRow;
-	final int col 	= vectorIndex % blocksPerRow;
-	final int sx 	= componentIndex % blockWidthInVectors;
-	final int sy 	= (componentIndex % vectorsPerBlock) / blockWidthInVectors;
-	final int x 	= col * blockWidthInVectors + sx;
-	final int y 	= (row * blockWidthInVectors) + sy;
-
-	return rasterizedVectorList.componentAt(y * rasterWidthInVectors + x,
-		componentIndex);
+	//System.out.println("RasterizedBlockVectorList.componentAt() vectorIndex="+vectorIndex+" componentIndex="+componentIndex);
+	final int [] trans = transformIndex(vectorIndex,componentIndex);
+	return rasterizedVectorList.componentAt(trans[0],
+		trans[1]);
     }// end componentAt(...)
 
     @Override
     public void setComponentAt(int vectorIndex, int componentIndex, double value) {
-	final int row 	= vectorIndex / blocksPerRow;
-	final int col 	= vectorIndex % blocksPerRow;
-	final int sx 	= componentIndex % blockWidthInVectors;
-	final int sy 	= (componentIndex % vectorsPerBlock) / blockWidthInVectors;
-	final int x 	= col * blockWidthInVectors + sx;
-	final int y 	= (row * blockWidthInVectors) + sy;
-
-	rasterizedVectorList.setComponentAt(y * rasterWidthInVectors + x,
-		componentIndex, value);
+	final int [] trans = transformIndex(vectorIndex,componentIndex);
+	rasterizedVectorList.setComponentAt(trans[0],
+		trans[1], value);
     }// end setComponentAt(...)
-
+    
+    private int[] transformIndex(int vectorIndex, int componentIndex){
+	final int sourceComponentsPerVector = rasterizedVectorList.getNumComponentsPerVector();
+	final int blockID = vectorIndex;
+	
+	final int blockCol = blockID % blocksPerRow;
+	final int blockRow = blockID / blocksPerRow;
+	
+	final int subComponentIndex = componentIndex % sourceComponentsPerVector;
+	final int subVectorIndex = componentIndex/sourceComponentsPerVector;
+	
+	final int intraBlockX = subVectorIndex % blockWidthInVectors;
+	final int intraBlockY = subVectorIndex / blockWidthInVectors;
+	
+	final int sourceX = blockCol * blockWidthInVectors + intraBlockX; 
+	final int sourceY = (blockRow * blockWidthInVectors) + intraBlockY;
+	
+	final int sourceOffset = sourceX + sourceY * rasterWidthInVectors;
+	
+	return new int[] {sourceOffset,subComponentIndex};
+	//return srcBlockOffset + intraBlockX + intraBlockY * rasterWidthInVectors;
+    }//end transformIndex(...)
+    
 }// end RasterizedBlockVectorList

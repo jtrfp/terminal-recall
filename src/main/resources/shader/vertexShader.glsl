@@ -22,7 +22,7 @@ const float COORD_DOWNSCALER		=512+1;
 const uint PACKED_DATA_RENDER_MODE	=0u;	//UNibble
 
 const int GPU_VERTICES_PER_BLOCK	=96;
-const int PAGE_SIZE_VEC4			=96;
+const uint PAGE_SIZE_VEC4			=96u;
 
 //OUT
 smooth out vec2 		fragTexCoord;
@@ -90,8 +90,8 @@ int firstSShort(uint _input){
 
 int renderListLogicalVEC42PhysicalVEC4(uint logical){
 	return int(renderListPageTable
-		[logical/uint(PAGE_SIZE_VEC4)]*uint(PAGE_SIZE_VEC4)
-		+logical%uint(PAGE_SIZE_VEC4));
+		[logical/PAGE_SIZE_VEC4]*PAGE_SIZE_VEC4
+		+logical%PAGE_SIZE_VEC4);
 	}//end renderListLogicalVEC42PhysicalVEC4(...)
 
 ////////////// STRUCT LAYOUTS ///////////////
@@ -133,7 +133,7 @@ gl_Position.x=dummy*0;
 			// objectDef[3] unused.
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
-			flatTextureID 			= UByte(packedVertex[3u],1u) + (UByte(packedVertex[3u],2u) * 256u) + (UByte(packedVertex[3u],3u) * 65536u);
+			flatTextureID 			= PAGE_SIZE_VEC4 * (UByte(packedVertex[3u],1u) + (UByte(packedVertex[3u],2u) * 256u) + (UByte(packedVertex[3u],3u) * 65536u));
 			//flatTextureID 			= UByte(packedVertex[3u],1u);
 			vec4 	vertexCoord;
 			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),

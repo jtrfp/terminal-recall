@@ -41,6 +41,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
+import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class Texture implements TextureDescription {
     TextureTreeNode 			nodeForThisTexture;
@@ -147,6 +148,7 @@ public class Texture implements TextureDescription {
 	    final RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
 	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
 		    rgba8888vl, 64, 4);
+	    if(imageRGBA8888.capacity()<64*64*4)throw new RuntimeException("imageRGBA8888 too small.");
 	    final double sideLength 	= Math.sqrt((imageRGBA8888.capacity() / 4));
 	    // Get a codebook256
 	    final int codebook256Index 	= tm.vqCodebookManager.get()
@@ -211,7 +213,7 @@ public class Texture implements TextureDescription {
 	    	newNode.setOffsetV(0);
 	    	newNode.setSizeU(1);
 	    	newNode.setSizeV(1);
-	    	newNode.setTextureID(toc.getPhysicalAddressInBytes(tocIndex)/GPU.BYTES_PER_VEC4);
+	    	newNode.setTextureID((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
 		nodeForThisTexture = newNode;
 		//Do not register the node.
     }//end vqCompress(...)

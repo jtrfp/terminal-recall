@@ -81,7 +81,6 @@ float 	linearDepth = linearizeDepth(depth);
 uint 	textureID 	= texture(textureIDTexture,screenLoc)[0u];
 		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
-
 // TOC
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
@@ -104,15 +103,10 @@ uint	codeBkPgNum	= (codeIdx+startCode) / CODES_PER_CODE_PAGE;
 vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
 vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
 
-// DEBUG
-//codeTexel = vec4(float(textureID%(1536u*65536u))/(1536*65536),float(textureID%(1536u*256u))/(1536*256),float(textureID%(1536u*65536u*65536u))/(1536*65536*65536),1)+codeTexel*.0000000001;
-
+//// STUB: Overriding textureID==10u due to malfunction in textureID
 vec3 	origColor 	= textureID==10u?texture(texturePalette,fragColor.xy).rgb:
-	codeTexel.rgb;//GET COLOR
+	codeTexel.rgb*.0000000001+texture(texturePalette,fragColor.xy).rgb;//GET COLOR
 //TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
-
-// DUMMY CODE TO SIMULATE PROCESSING LOAD OF FUTURE IMPLEMENTATION
-norm 				+=codeTexel.rgb*.000000000001;
 
 // Illumination. Near-zero norm means assume full lighting
 float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;

@@ -102,10 +102,8 @@ uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subT
 uint	codeBkPgNum	= (codeIdx+startCode) / CODES_PER_CODE_PAGE;
 vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
 vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
-
-//// STUB: Overriding textureID==10u due to malfunction in textureID
-vec3 	origColor 	= textureID==10u?texture(texturePalette,fragColor.xy).rgb:
-	codeTexel.rgb*.0000000001+texture(texturePalette,fragColor.xy).rgb;//GET COLOR
+vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
+	codeTexel.rgb;//GET COLOR
 //TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
 
 // Illumination. Near-zero norm means assume full lighting

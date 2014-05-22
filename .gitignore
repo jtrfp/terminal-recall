@@ -27,6 +27,7 @@
 *.sql
 *.sqlite
 gpuMemDump.bin
+debugCodePage*.png
 
 # OS generated files #
 ######################

@@ -66,6 +66,21 @@ public final class GLTexture {
 	    }}).get();
     }//end setTextureImageRGBA
     
+    public void getTextureImageRGBA(final ByteBuffer buf) {
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
+		buf.rewind();
+		GL3 gl = gpu.getGl();
+		gl.glBindTexture(bindingTarget, textureID.get());
+		System.out.println("Downloading texture...");
+		gl.glGetTexImage(bindingTarget, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
+		System.out.println("\t...Done.");
+		return null;
+	    }}).get();
+    }//end setTextureImageRGBA
+    
     public GLTexture configure(int [] sideLengthsInTexels, int numLevels ){
 	switch(sideLengthsInTexels.length){
 	case 3:{

@@ -2,6 +2,7 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.Callable;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -69,7 +70,13 @@ public class RootWindow extends JFrame {
 	gpuMemDump.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent ev) {
-		new GPUMemDump(tr);
+		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+
+		    @Override
+		    public Void call() throws Exception {
+			new GPUMemDump(tr);
+			return null;
+		    }});
 	    };
 	});
 	final String showDebugStatesOnStartup = System

@@ -1,5 +1,8 @@
 package org.jtrfp.trcl.core;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL3;
@@ -140,5 +143,18 @@ public class VQCodebookManager {
     public GLTexture getRGBATexture()		{return rgbaTexture;}
     public GLTexture getESTuTvTexture()		{return esTuTvTexture;}
     public GLTexture getIndentationTexture()	{return indentationTexture;}
+
+    public ByteBuffer []dumpPagesToBuffer() throws IOException {
+	ByteBuffer buf = ByteBuffer.allocate(4 * CODE_PAGE_SIDE_LENGTH_TEXELS * CODE_PAGE_SIDE_LENGTH_TEXELS * NUM_CODE_PAGES);
+	final ByteBuffer[] result = new ByteBuffer[NUM_CODE_PAGES];
+	for(int pg=0; pg<NUM_CODE_PAGES; pg++){
+	    buf.position(4 * CODE_PAGE_SIDE_LENGTH_TEXELS * CODE_PAGE_SIDE_LENGTH_TEXELS * pg);
+	    buf.limit(4 * CODE_PAGE_SIDE_LENGTH_TEXELS * CODE_PAGE_SIDE_LENGTH_TEXELS * (pg+1));
+	    result[pg]=buf.slice();
+	    result[pg].clear();
+	}
+	rgbaTexture.getTextureImageRGBA(buf);
+	return result;
+    }//end dumpPageToPNG(...)
 
 }// end VQCodebookManager

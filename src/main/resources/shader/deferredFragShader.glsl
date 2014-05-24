@@ -98,8 +98,8 @@ uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/
 uint	subTexV4Idx	= subTexByIdx / 16u;
 uint	subTexV4Sub = subTexByIdx % 16u;
 // Codebook
-uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u);
-uint	codeBkPgNum	= (codeIdx+startCode) / CODES_PER_CODE_PAGE;
+uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
+uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
 vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
 vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:

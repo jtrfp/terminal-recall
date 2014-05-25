@@ -92,7 +92,15 @@ uint	tTOCsubIdx	= tTOCIdx % 4u;
 // Sub-Texture
 uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
 vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
-vec2	subTexUVsub	= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS))*CODE_PAGE_TEXEL_SIZE_UV;
+vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
+
+//Clamp sub-pixels within vector.
+vec2	dH		= vec2(codeXY.x - 3.5,codeXY.y - 3.5);
+vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
+		codeXY	= vec2(dH.x>0?3.5:codeXY.x,dH.y>0?3.5:codeXY.y);//Max
+		codeXY	= vec2(dL.x>0?.5:codeXY.x,dL.y>0?.5:codeXY.y);//Min
+
+vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
 vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
 uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * 39u);
 uint	subTexV4Idx	= subTexByIdx / 16u;

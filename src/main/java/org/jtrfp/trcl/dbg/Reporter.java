@@ -7,6 +7,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,6 +35,9 @@ public class Reporter extends JFrame {
     private JPanel infoBackdropPanel;
     private JLabel lblStringValue;
     private JLabel lblvalueHere;
+    private Executor reportExecutor = Executors.newSingleThreadExecutor();
+    private Executor updateExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean needsUpdating = new AtomicBoolean();
 
     /**
      * Launch the application.
@@ -117,47 +123,69 @@ public class Reporter extends JFrame {
 	tree.updateUI();
     }//end refreshModeDetails()
     
-    public synchronized Reporter report(String path, Object item){
-	Scanner dotScanner = new Scanner(path);
-	DefaultMutableTreeNode workNode = top;
-	dotScanner.useDelimiter("\\.");
-	while(dotScanner.hasNext()){
-	    final String treeItem = dotScanner.next();
-	    Enumeration<DefaultMutableTreeNode> en = workNode.children();
-	    DefaultMutableTreeNode matchingNode=null;
-	    while(en.hasMoreElements()){
-		DefaultMutableTreeNode testNode = en.nextElement();
-		if(((TreeEntry)testNode.getUserObject()).getLabel().contentEquals(treeItem)){
-		    matchingNode=testNode;
-		}//end if(label matches)
-	    }//end while(children)
-	    if(matchingNode!=null){
-		workNode=matchingNode;
-	    }else{
-		final DefaultMutableTreeNode n =new DefaultMutableTreeNode(new TreeEntry(treeItem,null));
-		workNode.add(n);
-		final DefaultMutableTreeNode _workNode=workNode;
-		SwingUtilities.invokeLater(new Runnable(){
-		    @Override
-		    public void run() {
-			tree.expandPath(new TreePath(_workNode.getPath()));
-			tree.updateUI();
-		    }
-		});
-		workNode=n;
-	    }//end matchingNode==null
-	}//end while(hasNext())
-	//Should be at the leaf of the tree. Set the child.
-	((TreeEntry)workNode.getUserObject()).setStored(item);
-	if(tree.getSelectionPath()!=null){
-	    if(workNode == tree.getSelectionPath().getLastPathComponent()){
-	        lblvalueHere.setText(item.toString());
-	        refreshNodeDetails();
-	    }//end if(selected)
-	}//end if(path1=null)
+    public Reporter report(final String path, final Object item){
+	reportExecutor.execute(new Runnable(){
+	    @Override
+	    public void run() {
+		Scanner dotScanner = new Scanner(path);
+		DefaultMutableTreeNode workNode = top;
+		dotScanner.useDelimiter("\\.");
+		while(dotScanner.hasNext()){
+		    final String treeItem = dotScanner.next();
+		    Enumeration<DefaultMutableTreeNode> en = workNode.children();
+		    DefaultMutableTreeNode matchingNode=null;
+		    while(en.hasMoreElements()){
+			DefaultMutableTreeNode testNode = en.nextElement();
+			if(((TreeEntry)testNode.getUserObject()).getLabel().contentEquals(treeItem)){
+			    matchingNode=testNode;
+			}//end if(label matches)
+		    }//end while(children)
+		    if(matchingNode!=null){
+			workNode=matchingNode;
+		    }else{
+			final DefaultMutableTreeNode n =new DefaultMutableTreeNode(new TreeEntry(treeItem,null));
+			workNode.add(n);
+			final DefaultMutableTreeNode _workNode=workNode;
+			SwingUtilities.invokeLater(new Runnable(){
+			    @Override
+			    public void run() {
+				tree.expandPath(new TreePath(_workNode.getPath()));
+				Reporter.this.notifyUpdate();
+			    }
+			});
+			workNode=n;
+		    }//end matchingNode==null
+		}//end while(hasNext())
+		//Should be at the leaf of the tree. Set the child.
+		((TreeEntry)workNode.getUserObject()).setStored(item);
+		if(tree.getSelectionPath()!=null){
+		    if(workNode == tree.getSelectionPath().getLastPathComponent()){
+		        lblvalueHere.setText(item.toString());
+		        refreshNodeDetails();
+		    }//end if(selected)
+		}//end if(path1=null)
+	    }});
 	return this;
-    }
+    }//end report(...)
     
+    protected void notifyUpdate() {
+	if(needsUpdating.compareAndSet(false, true)){
+	    //Enqueue a delayed update
+	    updateExecutor.execute(new Runnable(){
+		@Override
+		public void run() {
+		    try{Thread.currentThread().sleep(2000);}catch(Exception e){e.printStackTrace();}
+		    SwingUtilities.invokeLater(new Runnable(){
+			    @Override
+			    public void run() {
+				needsUpdating.set(false);//Makes sure anything written during updateUI isn't missed.
+				tree.updateUI();
+			    }//end swing.run()
+			});
+		}});//end updateExecutor.execute(){}
+	}//end if(!needsupdating)
+    }//end notifyUpdate
+
     private class TreeEntry{
 	private final String label;
 	private Object stored;

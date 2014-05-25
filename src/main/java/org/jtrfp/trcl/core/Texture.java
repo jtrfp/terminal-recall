@@ -52,7 +52,6 @@ public class Texture implements TextureDescription {
     private final TextureTOCWindow 	toc;
     private final SubTextureWindow	stw;
     private 	  Color 		averageColor;
-    private 	  int 			codebookStartOffsetAbsolute;
     private final String 		debugName;
     private	  int[]			subTextureIDs;
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
@@ -82,7 +81,7 @@ public class Texture implements TextureDescription {
 	this.gpu	=tr.gpu.get();
 	this.tm		=gpu.textureManager.get();
 	this.cbm	=tm.vqCodebookManager.get();
-	this.toc		=tm.getTOCWindow();
+	this.toc	=tm.getTOCWindow();
 	this.stw	=tm.getSubTextureWindow();
 	this.debugName	=debugName;
     }
@@ -153,7 +152,7 @@ public class Texture implements TextureDescription {
 	    // Get a codebook256
 	    final int codebook256Index 	= tm.vqCodebookManager.get()
 		    .newCodebook256();
-	    codebookStartOffsetAbsolute = codebook256Index * 256;
+	    final int codebookStartOffsetAbsolute = codebook256Index * 256;
 	    // Get a TOC
 	    final int tocIndex = toc.create();
 	    final ByteBuffer vectorBuffer = ByteBuffer
@@ -166,7 +165,6 @@ public class Texture implements TextureDescription {
 		//Create subtexture ID
 		subTextureIDs[i]=stw.create();
 	    }//end for(subTextureIDs)
-	    
 	tr.getThreadManager().submitToGL(new Callable<Object>() {
 	    @Override
 	    public Object call() {
@@ -194,17 +192,17 @@ public class Texture implements TextureDescription {
 		    vectorBuffer.clear();
 		    cbm.setRGBA(globalCodeIndex, vectorBuffer);
 		}// end for(codeIndex)
+		// Push codes to subtextures
+		    for(int cY=0; cY<diameterInCodes; cY++){
+			for(int cX=0; cX<diameterInCodes; cX++){
+			    //TODO: Non-64x64 textures
+			    Texture.this.setCodeAt(cX, cY, (byte)(cX+cY*diameterInCodes));
+			}//end for(cX)
+		    }//end for(cY)
 		return null;
 	    }// end run()
 	}).get();
-	    // Push codes to subtextures
-	    for(int cY=0; cY<diameterInCodes; cY++){
-		for(int cX=0; cX<diameterInCodes; cX++){
-		    //TODO: Non-64x64 textures
-		    this.setCodeAt(cX, cY, (byte)(cX+cY*diameterInCodes));
-		}//end for(cX)
-	    }//end for(cY)
-	    
+	
 	    TextureTreeNode newNode = new TextureTreeNode(64, null,
 			debugName);
 	    	newNode.setOffsetU(0);
@@ -212,9 +210,17 @@ public class Texture implements TextureDescription {
 	    	newNode.setSizeU(1);
 	    	newNode.setSizeV(1);
 	    	newNode.setTextureID((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
-	    	if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)throw new RuntimeException("Nonzero modulus."); 
-		nodeForThisTexture = newNode;
+	    	if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)throw new RuntimeException("Nonzero modulus."); 		
+	    	nodeForThisTexture = newNode;
 		//Do not register the node.
+		//Report to debug
+		//This is commented out due to extreme increase in loading time.
+		tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".textureTOC.page", newNode.getTextureID());
+		tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".textureTOC.index", tocIndex);
+		for(int id:subTextureIDs){
+		    tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".SubTexture.id", id);
+		    tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".SubTexture.page", stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+		}//end for(ids)
     }//end vqCompress(...)
 
     Texture(BufferedImage img, String debugName, TR tr) {
@@ -473,7 +479,7 @@ public class Texture implements TextureDescription {
 	private ByteBuffer image;
 	private int sideLength;
 	private String debugName = "[unset]";
-	private int textureID=10;
+	private volatile int textureID=10;
 
 	public TextureTreeNode(int sideLength, TextureTreeNode parent,
 		String debugName) {

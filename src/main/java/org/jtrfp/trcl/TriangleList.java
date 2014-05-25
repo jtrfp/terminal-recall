@@ -15,7 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -36,8 +35,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private final 	boolean 			animateUV;
     private final 	WindowAnimator 			xyzAnimator;
     private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
-    private final 	ArrayList<TextureDescription>	textureDescriptions = new ArrayList<TextureDescription>();
-    private final	ArrayList<Integer>		vertexIDs = new ArrayList<Integer>();
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
@@ -95,10 +92,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    return (input / FRONT_STRIDE_LEN) * BACK_STRIDE_LEN + (input % FRONT_STRIDE_LEN) + startIndex + 3;
 	}// end transfer(...)
     }// end class XYZXferFunc
-
-    /*public TriangleList[] getAllLists() {
-	return getAllArrayLists().toArray(new TriangleList[] {});
-    }*/
 
     private Controller getVertexSequencer(int timeBetweenFramesMsec, int nFrames) {
 	return controller;
@@ -250,12 +243,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++) {
 		triangleVertexIndices[vIndex]=mw.create();
 	    }
-	//System.out.println("Constructing TextureDescription list...");
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture
 		    .get();
 	}
-	//System.out.println("Submitting triangle list "+debugName+" to GL...");
 	// Submit the GL task to set up the triangles.
 	if(tr.getTrConfig().isUsingNewTexturing()){
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {

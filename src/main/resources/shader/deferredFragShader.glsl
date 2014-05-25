@@ -63,6 +63,13 @@ return z;
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
+vec4 codeTexel(vec2 codeXY, uint codeIdx){
+ uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
+ vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
+ vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
+ return				  texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
+ }
+
 ////////// STRUCT LAYOUT DOCUMENTATION ///////////////
 /**
 textureTOC{
@@ -100,18 +107,18 @@ vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
 		codeXY	= vec2(dH.x>0?3.5:codeXY.x,dH.y>0?3.5:codeXY.y);//Max
 		codeXY	= vec2(dL.x>0?.5:codeXY.x,dL.y>0?.5:codeXY.y);//Min
 
-vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
 vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
 uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * 39u);
 uint	subTexV4Idx	= subTexByIdx / 16u;
 uint	subTexV4Sub = subTexByIdx % 16u;
 // Codebook
 uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
-uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
-vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
-vec4	codeTexel	= texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
+
+vec4	cTexel		= codeTexel(codeXY,codeIdx);
+
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
-	codeTexel.rgb;//GET COLOR
+	cTexel.rgb;//GET COLOR
+	
 //TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
 
 // Illumination. Near-zero norm means assume full lighting

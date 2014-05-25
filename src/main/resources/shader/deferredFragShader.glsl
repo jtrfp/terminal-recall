@@ -63,8 +63,10 @@ return z;
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
-vec4 codeTexel(vec2 codeXY, vec2 texelXY, uint textureID, uint startCode){
-
+vec4 codeTexel(vec2 texelXY, uint textureID, uint startCode){
+ vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
+ //Clamp sub-pixels within vector.
+ codeXY				= clamp(codeXY,.5,3.5);
  vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
  uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
  uint	tTOCvec4Idx	= tTOCIdx / 4u;
@@ -106,22 +108,27 @@ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
 uint	startCode	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_CODE];
-vec2	texelXY		= tDims*fragColor.xy;
+vec2	texelXY		= tDims*vec2(fragColor.x,1-fragColor.y);
 vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
-//Clamp sub-pixels within vector.
+
 vec2	dH		= vec2(codeXY.x - 3.5,codeXY.y - 3.5);
 vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
 
 vec4	cTexel;
- //codeXY				= vec2(dH.x>0?3.5:codeXY.x,dH.y>0?3.5:codeXY.y);//Max
- //codeXY				= vec2(dL.x>0?.5:codeXY.x,dL.y>0?.5:codeXY.y);//Min
- codeXY					= clamp(codeXY,.5,3.5);
- 
-/*if(dH.x<0 && dH.y<0 && dL.x<0 && dL.y<0)*/cTexel = codeTexel(codeXY,texelXY,textureID,startCode); // Not near edge
-//else cTexel = vec4(0,0,0,0);
-//else if(dH.x>0 && dH.y<0 && dL.x<0 && dL.y<0)cTexel = codeTexel(codeXY,codeIdx);//Far right
-//else if(dH.x<0 && dH.y<0 && dL.x>0 && dL.y<0)cTexel = codeTexel(codeXY,codeIdx);//Far left
-//else if();
+if(dH.x<0 && dH.y<0 && dL.x<0 && dL.y<0)cTexel = codeTexel(texelXY,textureID,startCode); // Not near edge
+else if(dH.x>0 && dH.y<0 && dL.x<0 && dL.y<0) cTexel = //Far right
+	codeTexel(texelXY,textureID,startCode) * (1-dH.x) + 
+	codeTexel(vec2(ceil(texelXY.x),texelXY.y),textureID,startCode) * dH.x;
+else if(dH.x<0 && dH.y<0 && dL.x>0 && dL.y<0)cTexel = //Far left
+	codeTexel(texelXY,textureID,startCode) * (1-dL.x) + 
+	codeTexel(vec2(floor(texelXY.x),texelXY.y),textureID,startCode) * dL.x;
+else if(dH.x<0 && dH.y<0 && dL.x<0 && dL.y>0) cTexel = //Far up
+	codeTexel(texelXY,textureID,startCode) * (1-dH.y) + 
+	codeTexel(vec2(texelXY.x,ceil(texelXY.y)),textureID,startCode) * dH.y;
+else if(dH.x<0 && dH.y>0 && dL.x>0 && dL.y<0)cTexel = //Far down
+	codeTexel(texelXY,textureID,startCode) * (1-dL.y) + 
+	codeTexel(vec2(texelXY.x,floor(texelXY.y)),textureID,startCode) * dL.y;
+else cTexel = vec4(0,0,0,0);
 
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
 	cTexel.rgb;//GET COLOR

@@ -83,7 +83,7 @@ public class Texture implements TextureDescription {
 	this.cbm	=tm.vqCodebookManager.get();
 	this.toc	=tm.getTOCWindow();
 	this.stw	=tm.getSubTextureWindow();
-	this.debugName	=debugName;
+	this.debugName	=debugName.replace('.', '_');
     }
 
     private Texture(Texture parent, double uOff, double vOff, double uSize,

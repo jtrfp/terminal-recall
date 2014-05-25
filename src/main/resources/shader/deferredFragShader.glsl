@@ -63,7 +63,21 @@ return z;
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
-vec4 codeTexel(vec2 codeXY, uint codeIdx){
+vec4 codeTexel(vec2 codeXY, vec2 texelXY, uint textureID, uint startCode){
+
+ vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
+ uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
+ uint	tTOCvec4Idx	= tTOCIdx / 4u;
+ uint	tTOCsubIdx	= tTOCIdx % 4u;
+ // Sub-Texture
+ uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
+
+ vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
+ uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * 39u);
+ uint	subTexV4Idx	= subTexByIdx / 16u;
+ uint	subTexV4Sub = subTexByIdx % 16u;
+ // Codebook
+ uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
  uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
  vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
  vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
@@ -93,28 +107,21 @@ uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER))
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
 uint	startCode	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_CODE];
 vec2	texelXY		= tDims*fragColor.xy;
-uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
-uint	tTOCvec4Idx	= tTOCIdx / 4u;
-uint	tTOCsubIdx	= tTOCIdx % 4u;
-// Sub-Texture
-uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
-vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
 vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
-
 //Clamp sub-pixels within vector.
 vec2	dH		= vec2(codeXY.x - 3.5,codeXY.y - 3.5);
 vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
-		codeXY	= vec2(dH.x>0?3.5:codeXY.x,dH.y>0?3.5:codeXY.y);//Max
-		codeXY	= vec2(dL.x>0?.5:codeXY.x,dL.y>0?.5:codeXY.y);//Min
 
-vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
-uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * 39u);
-uint	subTexV4Idx	= subTexByIdx / 16u;
-uint	subTexV4Sub = subTexByIdx % 16u;
-// Codebook
-uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
-
-vec4	cTexel		= codeTexel(codeXY,codeIdx);
+vec4	cTexel;
+ //codeXY				= vec2(dH.x>0?3.5:codeXY.x,dH.y>0?3.5:codeXY.y);//Max
+ //codeXY				= vec2(dL.x>0?.5:codeXY.x,dL.y>0?.5:codeXY.y);//Min
+ codeXY					= clamp(codeXY,.5,3.5);
+ 
+/*if(dH.x<0 && dH.y<0 && dL.x<0 && dL.y<0)*/cTexel = codeTexel(codeXY,texelXY,textureID,startCode); // Not near edge
+//else cTexel = vec4(0,0,0,0);
+//else if(dH.x>0 && dH.y<0 && dL.x<0 && dL.y<0)cTexel = codeTexel(codeXY,codeIdx);//Far right
+//else if(dH.x<0 && dH.y<0 && dL.x>0 && dL.y<0)cTexel = codeTexel(codeXY,codeIdx);//Far left
+//else if();
 
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
 	cTexel.rgb;//GET COLOR

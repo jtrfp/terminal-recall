@@ -117,17 +117,17 @@ vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
 vec4	cTexel;
 if(dH.x<0 && dH.y<0 && dL.x<0 && dL.y<0)cTexel = codeTexel(texelXY,textureID,startCode); // Not near edge
 else if(dH.x>0 && dH.y<0 && dL.x<0 && dL.y<0) cTexel = //Far right
-	codeTexel(texelXY,textureID,startCode) * (1-dH.x) + 
-	codeTexel(vec2(ceil(texelXY.x),texelXY.y),textureID,startCode) * dH.x;
+	codeTexel(texelXY,textureID,startCode)/* * (1-dH.x) + */
+	/*codeTexel(vec2(texelXY.x+1,texelXY.y),textureID,startCode) * dH.x*/;
 else if(dH.x<0 && dH.y<0 && dL.x>0 && dL.y<0)cTexel = //Far left
-	codeTexel(texelXY,textureID,startCode) * (1-dL.x) + 
-	codeTexel(vec2(floor(texelXY.x),texelXY.y),textureID,startCode) * dL.x;
+	codeTexel(texelXY,textureID,startCode)/* * (1-dL.x) + */
+	/*codeTexel(vec2(texelXY.x-1,texelXY.y),textureID,startCode)/* dL.x*/;
 else if(dH.x<0 && dH.y<0 && dL.x<0 && dL.y>0) cTexel = //Far up
-	codeTexel(texelXY,textureID,startCode) * (1-dH.y) + 
-	codeTexel(vec2(texelXY.x,ceil(texelXY.y)),textureID,startCode) * dH.y;
-else if(dH.x<0 && dH.y>0 && dL.x>0 && dL.y<0)cTexel = //Far down
-	codeTexel(texelXY,textureID,startCode) * (1-dL.y) + 
-	codeTexel(vec2(texelXY.x,floor(texelXY.y)),textureID,startCode) * dL.y;
+	codeTexel(texelXY,textureID,startCode)/* * (1-dH.y) + */
+	/*codeTexel(vec2(texelXY.x,texelXY.y-1),textureID,startCode) * dH.y*/;
+else if(dH.x<0 && dH.y>0 && dL.x<0 && dL.y<0)cTexel = //Far down
+	codeTexel(texelXY,textureID,startCode)/* * (1-dL.y) + */
+	/*codeTexel(vec2(texelXY.x,texelXY.y+1),textureID,startCode) * dL.y*/;
 else cTexel = vec4(0,0,0,0);
 
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:

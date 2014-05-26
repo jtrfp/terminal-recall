@@ -121,12 +121,12 @@ if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
 else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
 	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,startCode) * (dH.y);//THIS HAS SEAMS
 	
-/*else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
+else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
 	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
 	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,startCode) * dH.x *(1-dH.y)+ //Bottom right
 	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,startCode) * dH.x*dH.y+ //Top right
 	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,startCode) * (1-dH.x)*(dH.y); //Top left
-*/
+
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
 	cTexel.rgb;//GET COLOR
 

@@ -109,7 +109,7 @@ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
 uint	startCode	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_CODE];
-vec2	texelXY		= tDims*vec2(fragColor.x,fragColor.y);
+vec2	texelXY		= tDims*vec2(fragColor.x,1-fragColor.y);
 vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
 
 vec2	dH		= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);

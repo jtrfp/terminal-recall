@@ -63,7 +63,8 @@ return z;
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
-vec4 codeTexel(vec2 texelXY, uint textureID, uint startCode){
+vec4 codeTexel(vec2 texelXY, uint textureID, uint startCode, vec2 tDims){
+ 		texelXY		= mod(texelXY,tDims);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
  //Clamp sub-pixels within vector.
  codeXY				= clamp(codeXY,0,3)+vec2(.5,.5);
@@ -114,18 +115,17 @@ vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
 vec2	dH		= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
 //vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
 
-vec4	cTexel  = codeTexel(texelXY,textureID,startCode);
+vec4	cTexel  = codeTexel(texelXY,textureID,startCode,tDims);
 //if(dH.x<0 && dH.y<0)cTexel = codeTexel(texelXY,textureID,startCode); // Not near edge
 if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
-	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,startCode) * (dH.x);
+	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,startCode,tDims) * (dH.x);
 else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
-	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,startCode) * (dH.y);//THIS HAS SEAMS
-	
+	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,startCode,tDims) * (dH.y);//THIS HAS SEAMS
 else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
 	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
-	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,startCode) * dH.x *(1-dH.y)+ //Bottom right
-	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,startCode) * dH.x*dH.y+ //Top right
-	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,startCode) * (1-dH.x)*(dH.y); //Top left
+	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,startCode,tDims) * dH.x *(1-dH.y)+ //Bottom right
+	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,startCode,tDims) * dH.x*dH.y+ //Top right
+	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,startCode,tDims) * (1-dH.x)*(dH.y); //Top left
 
 vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
 	cTexel.rgb;//GET COLOR

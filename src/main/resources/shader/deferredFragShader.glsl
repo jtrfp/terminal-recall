@@ -47,7 +47,7 @@ const uint CODES_PER_CODE_PAGE 			= CODE_PAGE_SIDE_WIDTH_CODES * CODE_PAGE_SIDE_
 const uint CODE_PAGE_SIDE_WIDTH_TEXELS	= CODE_PAGE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
 const float CODE_PAGE_TEXEL_SIZE_UV	= 1/float(CODE_PAGE_SIDE_WIDTH_TEXELS);
 
-const uint SUBTEXTURE_SIDE_WIDTH_CODES = 39u;
+const uint SUBTEXTURE_SIDE_WIDTH_CODES = 38u;
 const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
 
 const vec3 sunColor 					= vec3(1.4,1.4,1.2);
@@ -76,7 +76,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, uint startCode, vec2 tDims){
  uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
 
  vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
- uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * 39u);
+ uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES);
  uint	subTexV4Idx	= subTexByIdx / 16u;
  uint	subTexV4Sub = subTexByIdx % 16u;
  // Codebook

@@ -177,10 +177,9 @@ public class Texture implements TextureDescription {
 			toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
 		    }//end for(subTextureIDs)
 		// Set the TOC vars
-		toc.startTile			.set(tocIndex, codebookStartOffsetAbsolute);
-		toc.height			.set(tocIndex, 64);
-		toc.width			.set(tocIndex, 64);
-		toc.nibblesPerCode4b_unused4b	.set(tocIndex, (byte)2);
+		toc.startTile	 .set(tocIndex, codebookStartOffsetAbsolute);
+		toc.height	 .set(tocIndex, 64);
+		toc.width	 .set(tocIndex, 64);
 		// Push vectors to codebook
 		for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
 		    vectorBuffer.clear();

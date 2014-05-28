@@ -175,9 +175,13 @@ public class Texture implements TextureDescription {
 			final int subTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 			//Load subtexture ID into TOC
 			toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+			//Fill the subtexture code start offsets
+			for(int off=0; off<6; off++){
+			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetAbsolute);
+			}
 		    }//end for(subTextureIDs)
 		// Set the TOC vars
-		toc.startTile	 .set(tocIndex, codebookStartOffsetAbsolute);
+		//toc.startTile	 .set(tocIndex, codebookStartOffsetAbsolute);
 		toc.height	 .set(tocIndex, 64);
 		toc.width	 .set(tocIndex, 64);
 		// Push vectors to codebook
@@ -196,6 +200,7 @@ public class Texture implements TextureDescription {
 		    for(int cY=0; cY<diameterInCodes; cY++){
 			for(int cX=0; cX<diameterInCodes; cX++){
 			    //TODO: Non-64x64 textures
+			    //TODO: Push codes up to 256, allocate new coodbookBlock
 			    Texture.this.setCodeAt(cX, cY, (byte)(cX+cY*diameterInCodes));
 			}//end for(cX)
 		    }//end for(cY)

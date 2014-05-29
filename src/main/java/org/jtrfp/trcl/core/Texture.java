@@ -108,7 +108,8 @@ public class Texture implements TextureDescription {
 	if (tr.getTrConfig().isUsingNewTexturing()) {// Temporary; conform size
 						     // to 64x64
 	    final double sideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
-	    imageRGBA8888.clear();
+	    imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
+	    /*
 	    // TEMPORARY TESTING CODE
 	    ByteBuffer nImageRGBA8888 = ByteBuffer.allocate(64 * 64 * 4);
 	    for (int p = 0; p < 64 * 64; p++) {// Slow but temporary
@@ -130,6 +131,7 @@ public class Texture implements TextureDescription {
 			imageRGBA8888.get(sourceIndex + 3));
 	    }// end for(p)
 	    imageRGBA8888 = nImageRGBA8888;
+	    */
 	    vqCompress(imageRGBA8888);
 	return;
 	}// end if(newTexturing)
@@ -143,13 +145,12 @@ public class Texture implements TextureDescription {
     }// end constructor
     
     private void vqCompress(ByteBuffer imageRGBA8888){
+	    final int sideLength 				= (int)Math.sqrt((imageRGBA8888.capacity() / 4));
 	    // Break down into 4x4 blocks
 	    final ByteBufferVectorList 		bbvl 		= new ByteBufferVectorList(imageRGBA8888);
 	    final RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
 	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
-		    rgba8888vl, 64, 4);
-	    if(imageRGBA8888.capacity()<64*64*4)throw new RuntimeException("imageRGBA8888 too small.");
-	    final double sideLength 	= Math.sqrt((imageRGBA8888.capacity() / 4));
+		    rgba8888vl, sideLength, 4);
 	    // Get a codebook256
 	    /*final int codebook256Index 	= tm.vqCodebookManager.get()
 		    .newCodebook256();*/
@@ -163,6 +164,7 @@ public class Texture implements TextureDescription {
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
 	    subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
 	    codebookStartOffsetsAbsolute	= new int[diameterInSubtextures*diameterInSubtextures][6];
+	    //System.out.println("Diameter in subtextures = "+diameterInSubtextures+" total num subtextures "+diameterInSubtextures*diameterInSubtextures);
 	    for(int i=0; i<subTextureIDs.length; i++){
 		//Create subtexture ID
 		subTextureIDs[i]=stw.create();
@@ -177,31 +179,28 @@ public class Texture implements TextureDescription {
 		for(int i=0; i<subTextureIDs.length; i++){
 			final int id = subTextureIDs[i];
 			//Convert subtexture index to index of TOC
-			final int subTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
+			final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 			//Load subtexture ID into TOC
-			toc.subtextureAddrsVec4.setAt(tocIndex, subTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+			toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
 			//Fill the subtexture code start offsets
 			for(int off=0; off<6; off++){
-			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetsAbsolute[subTexIndex][off]);
+			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetsAbsolute[i][off]);
 			}
 		    }//end for(subTextureIDs)
 		// Set the TOC vars
 		//toc.startTile	 .set(tocIndex, codebookStartOffsetAbsolute);
-		toc.height	 .set(tocIndex, 64);
-		toc.width	 .set(tocIndex, 64);
-		// Push vectors to codebook
-		for (int codeIndex = 0; codeIndex < 256; codeIndex++) {
-		    
-		}// end for(codeIndex)
+		toc.height	 .set(tocIndex, sideLength);
+		toc.width	 .set(tocIndex, sideLength);
 		// Push codes to subtextures
 		    for(int codeY=0; codeY<diameterInCodes; codeY++){
 			for(int codeX=0; codeX<diameterInCodes; codeX++){
 			    //TODO: Non-64x64 textures
-			    //TODO: Push codes up to 256, allocate new coodbookBlock
+			    //TODO: Nomenclature change of textureIDs to texturePg
 			    final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES;
 				final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
-				final int subtextureIdx 	= subtextureX + subtextureY * TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
-				final int subtextureID		= subTextureIDs[subtextureIdx];
+				final int tocSubtextureIdx 	= subtextureX + subtextureY * TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
+				final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
+				final int subtextureID		= subTextureIDs[subTextureIdx];
 				final int subtextureCodeX 	= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
 				final int subtextureCodeY 	= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
 				final int codeIdx		= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
@@ -211,7 +210,7 @@ public class Texture implements TextureDescription {
 						.componentAt(codeX+codeY*diameterInCodes, vi) * 255.));
 				    }
 				final int globalCodeIndex = codeIdx%256
-					    + codebookStartOffsetsAbsolute[subtextureIdx][codeIdx/256];
+					    + codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
 				    vectorBuffer.clear();
 				cbm.setRGBA(globalCodeIndex, vectorBuffer);
 				stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
@@ -233,17 +232,20 @@ public class Texture implements TextureDescription {
 		//Do not register the node.
 		//Report to debug
 		//This is commented out due to extreme increase in loading time.
+	    	/*
 		tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".textureTOC.page", newNode.getTextureID());
 		tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".textureTOC.index", tocIndex);
 		for(int id:subTextureIDs){
 		    tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".SubTexture.id", id);
 		    tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".SubTexture.page", stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
 		}//end for(ids)
+		*/
     }//end vqCompress(...)
 
     Texture(BufferedImage img, String debugName, TR tr) {
 	this(tr,debugName);
-	if(tr.getTrConfig().isUsingNewTexturing()){//Temporary; conform size to 64x64
+	/*if(tr.getTrConfig().isUsingNewTexturing()){
+	    //Temporary; conform size to 64x64
 	    final double sx=64./img.getWidth();
 	    final double sy=64./img.getHeight();
 	    BufferedImage nImg = new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
@@ -252,7 +254,8 @@ public class Texture implements TextureDescription {
 	    AffineTransformOp scaleOp = 
 	       new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
 	    img = scaleOp.filter(img, nImg);
-	}//end if(newTexturing)
+	    
+	}//end if(newTexturing)*/
 	    final int sideLength = img.getWidth();
 	    
 	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
@@ -283,10 +286,6 @@ public class Texture implements TextureDescription {
 	    vqCompress(rgba);
 	}else{registerNode(newNode);}
     }//end constructor
-    
-    private void setCodeAt(int codeX, int codeY, ByteBuffer vectorBuffer){
-	
-    }
     
     public static ByteBuffer RGBA8FromPNG(File f) {
 	try {

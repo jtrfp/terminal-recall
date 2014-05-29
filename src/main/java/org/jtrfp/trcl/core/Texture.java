@@ -16,8 +16,6 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,6 +53,7 @@ public class Texture implements TextureDescription {
     private final String 		debugName;
     private	  int[]			subTextureIDs;
     private	  int[][]		codebookStartOffsetsAbsolute;
+    private 	  ByteBuffer 		rgba;
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
 						  // doesn't scale with
 						  // texture palette
@@ -62,7 +61,6 @@ public class Texture implements TextureDescription {
     private static GLTexture globalTexture;
     public static final List<Future<TextureDescription>> texturesToBeAccounted = Collections
 	    .synchronizedList(new LinkedList<Future<TextureDescription>>());
-    private 	  ByteBuffer 		rgba;
 
     private static void waitUntilTextureProcessingEnds() {
 	while (!texturesToBeAccounted.isEmpty()) {
@@ -71,7 +69,7 @@ public class Texture implements TextureDescription {
 	    } catch (Exception e) {
 		e.printStackTrace();
 	    }
-	}
+	}//end while(texturesToBeAccounted)
     }// end waitUntilTextureProcessingEnds()
 
     public static final ArrayList<Runnable> executeInGLFollowingFinalization = new ArrayList<Runnable>();
@@ -85,14 +83,14 @@ public class Texture implements TextureDescription {
 	this.toc	=tm.getTOCWindow();
 	this.stw	=tm.getSubTextureWindow();
 	this.debugName	=debugName.replace('.', '_');
-    }
+    }//end constructor
 
     private Texture(Texture parent, double uOff, double vOff, double uSize,
 	    double vSize, TR tr) {
 	this(tr,null);
 	nodeForThisTexture = new UVTranslatingTextureTreeNode(
 		parent.getNodeForThisTexture(), uOff, vOff, uSize, vSize);
-    }
+    }//end constructor
     
     public Texture subTexture(double uOff, double vOff, double uSize,
 	    double vSize){
@@ -104,34 +102,10 @@ public class Texture implements TextureDescription {
 	if (imageRGBA8888.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
-	}
+	}//end if capacity==0
 	if (tr.getTrConfig().isUsingNewTexturing()) {// Temporary; conform size
 						     // to 64x64
-	    final double sideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
 	    imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
-	    /*
-	    // TEMPORARY TESTING CODE
-	    ByteBuffer nImageRGBA8888 = ByteBuffer.allocate(64 * 64 * 4);
-	    for (int p = 0; p < 64 * 64; p++) {// Slow but temporary
-		final double u = (p % 64) / 64.;
-		final double v = (p / 64.) / 64.;
-		final int sx = (int) (u * sideLength);
-		final int sy = (int) (v * sideLength);
-		final int dx = (int) (u * 64.);
-		final int dy = (int) (v * 64.);
-		final int sourceIndex = ((int) (Math.floor(sx) + Math.floor(sy
-			* sideLength)) * 4 + 0);
-		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 0),
-			imageRGBA8888.get(sourceIndex + 0));
-		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 1),
-			imageRGBA8888.get(sourceIndex + 1));
-		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 2),
-			imageRGBA8888.get(sourceIndex + 2));
-		nImageRGBA8888.put((int) ((dx + dy * 64) * 4 + 3),
-			imageRGBA8888.get(sourceIndex + 3));
-	    }// end for(p)
-	    imageRGBA8888 = nImageRGBA8888;
-	    */
 	    vqCompress(imageRGBA8888);
 	return;
 	}// end if(newTexturing)
@@ -151,10 +125,6 @@ public class Texture implements TextureDescription {
 	    final RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
 	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
 		    rgba8888vl, sideLength, 4);
-	    // Get a codebook256
-	    /*final int codebook256Index 	= tm.vqCodebookManager.get()
-		    .newCodebook256();*/
-	    //final int codebookStartOffsetAbsolute = codebook256Index * 256;
 	    // Get a TOC
 	    final int tocIndex = toc.create();
 	    final ByteBuffer vectorBuffer = ByteBuffer
@@ -164,7 +134,6 @@ public class Texture implements TextureDescription {
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
 	    subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
 	    codebookStartOffsetsAbsolute	= new int[diameterInSubtextures*diameterInSubtextures][6];
-	    //System.out.println("Diameter in subtextures = "+diameterInSubtextures+" total num subtextures "+diameterInSubtextures*diameterInSubtextures);
 	    for(int i=0; i<subTextureIDs.length; i++){
 		//Create subtexture ID
 		subTextureIDs[i]=stw.create();
@@ -183,39 +152,33 @@ public class Texture implements TextureDescription {
 			//Load subtexture ID into TOC
 			toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
 			//Fill the subtexture code start offsets
-			for(int off=0; off<6; off++){
+			for(int off=0; off<6; off++)
 			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetsAbsolute[i][off]);
-			}
 		    }//end for(subTextureIDs)
 		// Set the TOC vars
-		//toc.startTile	 .set(tocIndex, codebookStartOffsetAbsolute);
 		toc.height	 .set(tocIndex, sideLength);
 		toc.width	 .set(tocIndex, sideLength);
 		// Push codes to subtextures
 		    for(int codeY=0; codeY<diameterInCodes; codeY++){
 			for(int codeX=0; codeX<diameterInCodes; codeX++){
-			    //TODO: Non-64x64 textures
-			    //TODO: Nomenclature change of textureIDs to texturePg
 			    final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES;
-				final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
-				final int tocSubtextureIdx 	= subtextureX + subtextureY * TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
-				final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
-				final int subtextureID		= subTextureIDs[subTextureIdx];
-				final int subtextureCodeX 	= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
-				final int subtextureCodeY 	= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
-				final int codeIdx		= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
-				vectorBuffer.clear();
-				    for (int vi = 0; vi < 4 * 4 * 4; vi++) {
-					vectorBuffer.put((byte) (rbvl
-						.componentAt(codeX+codeY*diameterInCodes, vi) * 255.));
-				    }
-				final int globalCodeIndex = codeIdx%256
+			    final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
+			    final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
+			    final int subtextureID		= subTextureIDs[subTextureIdx];
+			    final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
+			    final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
+			    final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
+			    vectorBuffer.clear();
+			    for (int vi = 0; vi < 4 * 4 * 4; vi++)
+				vectorBuffer.put((byte) (rbvl
+					.componentAt(codeX+codeY*diameterInCodes, vi) * 255.));
+			    final int globalCodeIndex = codeIdx%256
 					    + codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
 				    vectorBuffer.clear();
-				cbm.setRGBA(globalCodeIndex, vectorBuffer);
-				stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
-			}//end for(cX)
-		    }//end for(cY)
+			    cbm.setRGBA(globalCodeIndex, vectorBuffer);
+			    stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
+			}//end for(codeX)
+		    }//end for(codeY)
 		return null;
 	    }// end run()
 	}).get();
@@ -244,18 +207,6 @@ public class Texture implements TextureDescription {
 
     Texture(BufferedImage img, String debugName, TR tr) {
 	this(tr,debugName);
-	/*if(tr.getTrConfig().isUsingNewTexturing()){
-	    //Temporary; conform size to 64x64
-	    final double sx=64./img.getWidth();
-	    final double sy=64./img.getHeight();
-	    BufferedImage nImg = new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
-	    AffineTransform at = new AffineTransform();
-	    at.scale(sx, sy);
-	    AffineTransformOp scaleOp = 
-	       new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-	    img = scaleOp.filter(img, nImg);
-	    
-	}//end if(newTexturing)*/
 	    final int sideLength = img.getWidth();
 	    
 	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,

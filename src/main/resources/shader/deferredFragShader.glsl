@@ -45,7 +45,7 @@ const uint CODE_SIDE_WIDTH_TEXELS 		= 4u;
 const uint CODE_PAGE_SIDE_WIDTH_CODES	= uint(TILE_PAGE_SIDE_WIDTH_TEXELS) / CODE_SIDE_WIDTH_TEXELS;
 const uint CODES_PER_CODE_PAGE 			= CODE_PAGE_SIDE_WIDTH_CODES * CODE_PAGE_SIDE_WIDTH_CODES;
 const uint CODE_PAGE_SIDE_WIDTH_TEXELS	= CODE_PAGE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
-const float CODE_PAGE_TEXEL_SIZE_UV	= 1/float(CODE_PAGE_SIDE_WIDTH_TEXELS);
+const float CODE_PAGE_TEXEL_SIZE_UV		= 1/float(CODE_PAGE_SIDE_WIDTH_TEXELS);
 
 const uint SUBTEXTURE_SIDE_WIDTH_CODES  = 38u;
 const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
@@ -111,29 +111,23 @@ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 // TOC
 uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
 vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
-//uint	startCode	= tocHeader[TOC_HEADER_OFFSET_QUADS_START_CODE];
 vec2	texelXY		= tDims*vec2(fragColor.x,1-fragColor.y);
 vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
+vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
+vec4	cTexel  	= codeTexel(texelXY,textureID,tDims);
 
-vec2	dH		= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
-//vec2	dL		= vec2(.5 - codeXY.x,.5 - codeXY.y);
-
-vec4	cTexel  = codeTexel(texelXY,textureID,tDims);
-//if(dH.x<0 && dH.y<0)cTexel = codeTexel(texelXY,textureID,startCode); // Not near edge
 if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
 	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * (dH.x);
 else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
-	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (dH.y);//THIS HAS SEAMS
+	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (dH.y);
 else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
 	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
 	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * dH.x *(1-dH.y)+ //Bottom right
 	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims) * dH.x*dH.y+ //Top right
 	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (1-dH.x)*(dH.y); //Top left
 
-vec3 	origColor 	= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
-	cTexel.rgb;//GET COLOR
-
-//TODO: code-tile edge blending compensation (up to 4 samplings of overhead)
+vec3 	origColor 		= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
+						  cTexel.rgb;//GET COLOR
 
 // Illumination. Near-zero norm means assume full lighting
 float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;

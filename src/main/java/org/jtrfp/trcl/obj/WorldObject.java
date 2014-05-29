@@ -182,7 +182,9 @@ public class WorldObject implements PositionedRenderable {
 	}
 	allWorldObjects.add(o);
     }
-
+    
+    private final int [] emptyIntArray = new int[0];
+    
     public void setModel(Model m) {
 	if (m == null)
 	    throw new RuntimeException("Passed model cannot be null.");
@@ -204,7 +206,7 @@ public class WorldObject implements PositionedRenderable {
 	    
 	}*/
 	if (m.getTriangleList() == null)
-	    triangleObjectDefinitions = new int[0];
+	    triangleObjectDefinitions = emptyIntArray;
 	else {
 	    sizeInVerts = m.getTriangleList().getTotalSizeInGPUVertices();
 	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
@@ -217,7 +219,7 @@ public class WorldObject implements PositionedRenderable {
 	    }
 	}
 	if (m.getTransparentTriangleList() == null)
-	    transparentTriangleObjectDefinitions = new int[0];
+	    transparentTriangleObjectDefinitions = emptyIntArray;
 	else {
 	    sizeInVerts = m.getTransparentTriangleList()
 		    .getTotalSizeInGPUVertices();

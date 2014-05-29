@@ -191,7 +191,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		vw.v.set(gpuTVIndex, (short) (uvUpScaler * tx
 			.getGlobalVFromLocal(t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
-	    final int textureID = tx.getTextureID();
+	    final int textureID = tx.getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
@@ -221,7 +221,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    }// end for(frame)
 	    uvAnimator.addFrames(uFrames);
 	    uvAnimator.addFrames(vFrames);
-	    final int textureID = tx.getTextureID();
+	    final int textureID = tx.getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));

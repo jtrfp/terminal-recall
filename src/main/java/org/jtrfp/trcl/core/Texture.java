@@ -189,7 +189,7 @@ public class Texture implements TextureDescription {
 	    	newNode.setOffsetV(0);
 	    	newNode.setSizeU(1);
 	    	newNode.setSizeV(1);
-	    	newNode.setTextureID((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
+	    	newNode.setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
 	    	if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)throw new RuntimeException("Nonzero modulus."); 		
 	    	nodeForThisTexture = newNode;
 		//Do not register the node.
@@ -440,7 +440,7 @@ public class Texture implements TextureDescription {
 	private ByteBuffer image;
 	private int sideLength;
 	private String debugName = "[unset]";
-	private volatile int textureID=10;
+	private volatile int texturePage=10;
 
 	public TextureTreeNode(int sideLength, TextureTreeNode parent,
 		String debugName) {
@@ -834,15 +834,15 @@ public class Texture implements TextureDescription {
 	/**
 	 * @return the textureID
 	 */
-	public int getTextureID() {
-	    return textureID;
+	public int getTexturePage() {
+	    return texturePage;
 	}
 
 	/**
-	 * @param textureID the textureID to set
+	 * @param texturePage the texturePage, where a page is 1536 bytes
 	 */
-	public void setTextureID(int textureID) {
-	    this.textureID = textureID;
+	public void setTexturePage(int textureID) {
+	    this.texturePage = textureID;
 	}
     }// end TextureTreeNode
 

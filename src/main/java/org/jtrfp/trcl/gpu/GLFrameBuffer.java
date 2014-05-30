@@ -41,10 +41,16 @@ public final class GLFrameBuffer {
 	gl.glFramebufferTexture(GL3.GL_FRAMEBUFFER, attachmentIndex, texture.getTextureID(), 0);
 	return this;
     }
+    
+    public GLFrameBuffer attachDrawTexture2D(GLTexture texture,
+	    int attachmentIndex, int textureTarget ) {
+	gl.glFramebufferTexture2D(GL3.GL_FRAMEBUFFER, attachmentIndex, textureTarget, texture.getTextureID(), 0);
+	return this;
+    }
 
     public GLFrameBuffer attachDepthRenderBuffer(
 	    GLRenderBuffer renderBuffer) {
-	gl.glFramebufferRenderbuffer(GL3.GL_FRAMEBUFFER, GL3.GL_DEPTH_ATTACHMENT, GL3.GL_RENDERBUFFER, renderBuffer.getId());
+	gl.glFramebufferRenderbuffer(GL3.GL_DRAW_FRAMEBUFFER, GL3.GL_DEPTH_ATTACHMENT, GL3.GL_RENDERBUFFER, renderBuffer.getId());
 	return this;
     }
 

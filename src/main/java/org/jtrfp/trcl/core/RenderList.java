@@ -56,12 +56,12 @@ public class RenderList {
     /*    */					useTextureMap,
     /*	  */					cameraMatrixUniform,
     /*    */					rootBuffer;
-    private final	GLFrameBuffer		intermediateFrameBuffer;
+    private final	GLFrameBuffer		intermediateFrameBuffer,
+    						depthQueueFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
     /*    	*/				intermediateColorTexture,
     /*    	*/				intermediateNormTexture,
-    /*		*/				intermediateTextureIDTexture,
-    /*		*/				depthQueueTexture;
+    /*		*/				intermediateTextureIDTexture;
     private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
@@ -99,7 +99,7 @@ public class RenderList {
 	    final GLFrameBuffer intermediateFrameBuffer, 
 	    final GLTexture intermediateColorTexture, final GLTexture intermediateDepthTexture,
 	    final GLTexture intermediateNormTexture, final GLTexture intermediateTextureIDTexture,
-	    final GLTexture depthQueueTexture,
+	    final GLFrameBuffer depthQueueFrameBuffer,
 	    final TR tr) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
@@ -109,7 +109,7 @@ public class RenderList {
 	this.intermediateFrameBuffer=intermediateFrameBuffer;
 	this.intermediateNormTexture=intermediateNormTexture;
 	this.intermediateTextureIDTexture=intermediateTextureIDTexture;
-	this.depthQueueTexture=depthQueueTexture;
+	this.depthQueueFrameBuffer=depthQueueFrameBuffer;
 	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -216,7 +216,8 @@ public class RenderList {
 	// DEPTH QUEUE STAGE
 	if(tr.getTrConfig().isUsingNewTexturing()){
 	    GLTexture.specifyTextureUnit(gl, 0);
-	    depthQueueTexture.bind(gl);
+	    intermediateDepthTexture.bind(gl);
+	    depthQueueFrameBuffer.bindToDraw();
 	}//end if(isUsingNewTexturing())
 	
 	// DEFERRED STAGE
@@ -243,23 +244,26 @@ public class RenderList {
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	
-	// TRANSPARENT
-	// Turn off depth write, turn on transparency
-	tr.renderer.get().getPrimaryProgram().use();
-	useTextureMap.set((int)1);
-	gl.glDepthMask(false);
-	gl.glDepthFunc(GL3.GL_LESS);
-	gl.glEnable(GL3.GL_BLEND);
-	// ////////
-	// gl.glDepthFunc(GL3.GL_ALWAYS);
-	// ///////
-	renderListOffsetUniform.setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
-	// renderModeUniform.set(BLEND_PASS);
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
-	// ////////
-	// gl.glDepthFunc(GL3.GL_LESS);
-	// ////////
-	gl.glDepthMask(true);
+	if(!tr.getTrConfig().isUsingNewTexturing()){
+	    // TRANSPARENT
+	    // Turn off depth write, turn on transparency
+	    tr.renderer.get().getPrimaryProgram().use();
+	    useTextureMap.set((int)1);
+	    gl.glDepthMask(false);
+	    gl.glDepthFunc(GL3.GL_LESS);
+	    gl.glEnable(GL3.GL_BLEND);
+	    // ////////
+	    // gl.glDepthFunc(GL3.GL_ALWAYS);
+	    // ///////
+	    renderListOffsetUniform.setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
+	    // renderModeUniform.set(BLEND_PASS);
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
+	    // ////////
+	    // gl.glDepthFunc(GL3.GL_LESS);
+	    // ////////
+	    gl.glDepthMask(true);
+	}//end if(!isUsingNewTexturing())
+	
     }// end render()
 
     public Submitter<PositionedRenderable> getSubmitter() {

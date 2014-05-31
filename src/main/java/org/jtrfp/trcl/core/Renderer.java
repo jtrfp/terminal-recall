@@ -250,14 +250,14 @@ public final class Renderer {
 	    public RenderList call() throws Exception {
 		return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
 			    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-			    intermediateTextureIDTexture, depthQueueTexture , tr);
+			    intermediateTextureIDTexture, depthQueueFrameBuffer , tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
 	    renderList[1] = new TRFutureTask(tr,new Callable<RenderList>(){
 		    @Override
 		    public RenderList call() throws Exception {
 			return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
 				    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-				    intermediateTextureIDTexture, depthQueueTexture, tr);
+				    intermediateTextureIDTexture, depthQueueFrameBuffer, tr);
 		    }});tr.getThreadManager().threadPool.submit(renderList[1]);
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");

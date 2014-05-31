@@ -28,11 +28,11 @@ smooth in uint texturePageIdx;
 flat in uint flatTextureID;
 
 // OUTPUTS
-layout(location=0) out uvec4 pushToDepthQueue;
+layout(location=0) out vec4 pushToDepthQueue;
 
 void main(){
 vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 if(gl_FragCoord.z>depth)discard;
-pushToDepthQueue = uvec4(floatBitsToInt(fragTexCoord),flatTextureID,gl_FragCoord.z);
+pushToDepthQueue = vec4(fragTexCoord,uintBitsToFloat(flatTextureID),gl_FragCoord.z);
 }

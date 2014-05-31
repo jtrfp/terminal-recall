@@ -193,4 +193,10 @@ public final class GLTexture {
         this.internalColorFormat = internalColorFormat;
         return this;
     }
+
+    public GLTexture setImage2DMultisample(int samples,
+	    int internalFormat, int width, int height, boolean fixedSampleLocations) {
+	gl.glTexImage2DMultisample(bindingTarget, samples, internalFormat, width, height, fixedSampleLocations);
+	return this;
+    }
 }// end GLTexture

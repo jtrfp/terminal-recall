@@ -28,7 +28,7 @@ public final class Renderer {
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;
-    private 	 	GLProgram 		primaryProgram, deferredProgram;
+    private 	 	GLProgram 		primaryProgram, deferredProgram, depthQueueProgram;
     private 		boolean 		initialized = false;
     private		boolean 		active = false;// TODO: Remove when conversion is complete
     private 		boolean 		renderListToggle = false;
@@ -36,13 +36,18 @@ public final class Renderer {
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
     private 	 	GLUniform	    	screenWidth, 
     /*    */	    				screenHeight,
+    /*		*/				depthQueueScreenWidth,
+    /*		*/				depthQueueScreenHeight,
     /*    */					fogColor,
     /*    */					sunVector;
     private 		GLTexture 		intermediateColorTexture,
     /*		*/				intermediateDepthTexture,
     /*		*/				intermediateNormTexture,
-    /*		*/				intermediateTextureIDTexture;
-    private 		GLFrameBuffer 		intermediateFrameBuffer;
+    /*		*/				intermediateTextureIDTexture,
+    /*		*/				depthQueueTexture;
+    
+    private 		GLFrameBuffer 		intermediateFrameBuffer,
+    /*			*/			depthQueueFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
@@ -85,6 +90,26 @@ public final class Renderer {
 		primaryProgram.use();
 		primaryProgram.getUniform("texturePalette").set((int)0);
 		
+		//DEPTH STACK PROGRAM
+		depthQueueProgram = gpu.newProgram();
+		fragmentShader = gpu.newFragmentShader();
+		
+		try {
+		    fragmentShader.setSource(IOUtils.toString(getClass()
+			    .getResourceAsStream("/shader/depthQueueFragShader.glsl")));
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+		depthQueueProgram.attachShader(vertexShader);
+		depthQueueProgram.attachShader(fragmentShader);
+		depthQueueProgram.link();
+		if(!depthQueueProgram.validate()){
+		    System.out.println("DEPTH-QUEUE PROGRAM VALIDATION FAILED:");
+		    System.out.println(depthQueueProgram.getInfoLog());
+		}
+		depthQueueProgram.use();
+		depthQueueProgram.getUniform("depthTexture").set((int)0);
+		
 		//DEFERRED PROGRAM
 		vertexShader = gpu.newVertexShader();
 		fragmentShader = gpu.newFragmentShader();
@@ -117,6 +142,7 @@ public final class Renderer {
 		deferredProgram.getUniform("rgbaTiles").set((int) 5);
 		deferredProgram.getUniform("textureIDTexture").set((int) 6);
 		sunVector.set(.5774f,.5774f,.5774f);
+		/////// INTERMEDIATE
 		intermediateColorTexture = gpu
 			.newTexture()
 			.bind()
@@ -160,9 +186,25 @@ public final class Renderer {
 			.attachDepthTexture(intermediateDepthTexture)
 			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1,GL3.GL_COLOR_ATTACHMENT2);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
-		    System.out.println("Framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
-		    System.exit(1);
+		    throw new RuntimeException("Intermediate framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
+		/////// DEPTH QUEUE
+		depthQueueTexture = gpu
+			.newTexture()
+			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
+			.bind()
+			.setImage2DMultisample(8, GL3.GL_RGBA8,1024,768,false);
+		depthQueueFrameBuffer = gpu
+			.newFrameBuffer()
+			.bindToDraw()
+			.attachDrawTexture2D(depthQueueTexture, 
+				GL3.GL_COLOR_ATTACHMENT0,GL3.GL_TEXTURE_2D_MULTISAMPLE)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
+		depthQueueScreenWidth  = depthQueueProgram.getUniform("screenWidth");
+		depthQueueScreenHeight = depthQueueProgram.getUniform("screenHeight");
 		primaryProgram.use();
 		return null;
 	    }
@@ -192,8 +234,12 @@ public final class Renderer {
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		intermediateTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
+		depthQueueTexture.bind().setImage2DMultisample(8, GL3.GL_RGBA8,width,height,false);//TODO: Change to RGBA32
 		screenWidth.setui(width);
 		screenHeight.setui(height);
+		depthQueueProgram.use();
+		depthQueueScreenWidth.setui(width);
+		depthQueueScreenHeight.setui(height);
 		Renderer.this.getPrimaryProgram().use();
 	    }
 	});
@@ -202,14 +248,16 @@ public final class Renderer {
 	renderList[0] = new TRFutureTask(tr,new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
-		return new RenderList(gl, primaryProgram,deferredProgram, intermediateFrameBuffer, 
-			    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, intermediateTextureIDTexture, tr);
+		return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
+			    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
+			    intermediateTextureIDTexture, depthQueueTexture , tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
 	    renderList[1] = new TRFutureTask(tr,new Callable<RenderList>(){
 		    @Override
 		    public RenderList call() throws Exception {
-			return new RenderList(gl, primaryProgram,deferredProgram, intermediateFrameBuffer, 
-				    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, intermediateTextureIDTexture, tr);
+			return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
+				    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
+				    intermediateTextureIDTexture, depthQueueTexture, tr);
 		    }});tr.getThreadManager().threadPool.submit(renderList[1]);
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");

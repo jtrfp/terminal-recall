@@ -60,7 +60,8 @@ public class RenderList {
     private final	GLTexture		intermediateDepthTexture,
     /*    	*/				intermediateColorTexture,
     /*    	*/				intermediateNormTexture,
-    /*		*/				intermediateTextureIDTexture;
+    /*		*/				intermediateTextureIDTexture,
+    /*		*/				depthQueueTexture;
     private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
@@ -94,9 +95,11 @@ public class RenderList {
     };
 
     public RenderList(final GL3 gl,final GLProgram primaryProgram,
-	    final GLProgram deferredProgram, final GLFrameBuffer intermediateFrameBuffer, 
+	    final GLProgram deferredProgram, final GLProgram depthQueueProgram, 
+	    final GLFrameBuffer intermediateFrameBuffer, 
 	    final GLTexture intermediateColorTexture, final GLTexture intermediateDepthTexture,
 	    final GLTexture intermediateNormTexture, final GLTexture intermediateTextureIDTexture,
+	    final GLTexture depthQueueTexture,
 	    final TR tr) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
@@ -106,6 +109,7 @@ public class RenderList {
 	this.intermediateFrameBuffer=intermediateFrameBuffer;
 	this.intermediateNormTexture=intermediateNormTexture;
 	this.intermediateTextureIDTexture=intermediateTextureIDTexture;
+	this.depthQueueTexture=depthQueueTexture;
 	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -208,6 +212,12 @@ public class RenderList {
 	    renderListOffsetUniform.setui(newOffset);
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
 	}// end for(subpasses)
+	
+	// DEPTH QUEUE STAGE
+	if(tr.getTrConfig().isUsingNewTexturing()){
+	    GLTexture.specifyTextureUnit(gl, 0);
+	    depthQueueTexture.bind(gl);
+	}//end if(isUsingNewTexturing())
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);

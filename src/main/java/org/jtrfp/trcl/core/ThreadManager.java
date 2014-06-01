@@ -124,7 +124,9 @@ public final class ThreadManager {
 				}//end if(!glTasksWaiting)
 			    }//end sync(glTasksWaiting)
 			    //Execute the tasks
-			    context.makeCurrent();
+			    try{context.makeCurrent();}
+			    	//Sometimes NPE's out when closing while multiple threads are passing the gl.
+			    	catch(NullPointerException e){break;}
 				//if GPU not yet available, mapping not possible.
 				if(ThreadManager.this.tr.gpu.isDone()){
 				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
@@ -138,7 +140,6 @@ public final class ThreadManager {
 				    renderingThread.setName("glExecutorThread");
 				    context.release();
 				    //System.out.println("Released.");
-				    
 				}//end while(mappedOperationQueue)
 			}}catch(InterruptedException e){}
 			catch(Exception e){tr.showStopper(e);}

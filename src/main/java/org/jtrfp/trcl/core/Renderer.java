@@ -143,24 +143,26 @@ public final class Renderer {
 		deferredProgram.getUniform("textureIDTexture").set((int) 6);
 		deferredProgram.getUniform("depthQueueTexture").set((int) 7);
 		sunVector.set(.5774f,.5774f,.5774f);
+		final int width = tr.getRootWindow().getWidth();
+		final int height = tr.getRootWindow().getHeight();
 		/////// INTERMEDIATE
 		intermediateColorTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_RG16, 1024, 768, GL3.GL_RGB,
+			.setImage(GL3.GL_RG16, width, height, GL3.GL_RGB,
 				GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST);
 		intermediateNormTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_RGB8, 1024, 768, GL3.GL_RGB, GL3.GL_FLOAT, null)
+			.setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST);
 		intermediateDepthTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_DEPTH_COMPONENT24, 1024, 768, 
+			.setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
 				GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)
@@ -169,7 +171,7 @@ public final class Renderer {
 		intermediateTextureIDTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_R32UI, 1024, 768, 
+			.setImage(GL3.GL_R32UI, width, height, 
 				GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)

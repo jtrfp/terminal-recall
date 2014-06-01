@@ -87,7 +87,7 @@ public class Texture implements TextureDescription {
 
     private Texture(Texture parent, double uOff, double vOff, double uSize,
 	    double vSize, TR tr) {
-	this(tr,null);
+	this(tr,"subtexture: "+parent.debugName);
 	nodeForThisTexture = new UVTranslatingTextureTreeNode(
 		parent.getNodeForThisTexture(), uOff, vOff, uSize, vSize);
     }//end constructor

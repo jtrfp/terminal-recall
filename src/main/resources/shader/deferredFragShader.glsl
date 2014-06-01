@@ -26,6 +26,7 @@ uniform sampler2D 		normTexture;
 uniform usampler2D 		textureIDTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
+uniform sampler2DMS		depthQueueTexture;
 uniform vec3 			fogColor;
 uniform uint 			screenWidth;
 uniform uint 			screenHeight;
@@ -89,6 +90,27 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims){
  vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
  return				  texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
  }
+ 
+ vec4 intrinsicCodeTexel(float linearDepth,uint textureID,vec3 norm,vec2 uv){
+ // TOC
+ uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
+ vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
+ vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
+ vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
+ vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
+ vec4	cTexel  	= codeTexel(texelXY,textureID,tDims);
+ 
+ if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
+	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * (dH.x);
+ else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
+	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (dH.y);
+ else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
+	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
+	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * dH.x *(1-dH.y)+ //Bottom right
+	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims) * dH.x*dH.y+ //Top right
+	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (1-dH.x)*(dH.y); //Top left
+ return cTexel;
+ }//end intrinsicCodeTexel
 
 ////////// STRUCT LAYOUT DOCUMENTATION ///////////////
 /**
@@ -105,29 +127,26 @@ vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
 float 	linearDepth = linearizeDepth(depth);
+
 uint 	textureID 	= texture(textureIDTexture,screenLoc)[0u];
+bool	oldTex		= textureID==960u;//Switch for old texturing mode.
 		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
-// TOC
-uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
-vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
-vec2	texelXY		= tDims*vec2(fragColor.x,1-fragColor.y);
-vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
-vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
-vec4	cTexel  	= codeTexel(texelXY,textureID,tDims);
+vec2	uv			= fragColor.xy;
+vec4	color;
 
-if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
-	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * (dH.x);
-else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
-	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (dH.y);
-else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
-	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
-	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * dH.x *(1-dH.y)+ //Bottom right
-	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims) * dH.x*dH.y+ //Top right
-	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (1-dH.x)*(dH.y); //Top left
+color = intrinsicCodeTexel(linearDepth,textureID,norm,uv);
 
-vec3 	origColor 		= textureID==960u?texture(texturePalette,fragColor.xy).rgb:
-						  cTexel.rgb;//GET COLOR
+vec4	depthQueueTexel	=texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),0);
+	 	uv				= depthQueueTexel.rg;
+		textureID		= floatBitsToUint(depthQueueTexel[2u]);
+		//TODO: LinearDepth. Alpha is depth.
+		//TODO: Norm. Calculate from future primitive table implementation?
+
+color += intrinsicCodeTexel(linearDepth,textureID,norm,uv)*.00000001;//TODO: Dummy. Color should not be additive.
+
+vec3 	origColor 		= oldTex?texture(texturePalette,fragColor.xy).rgb:
+						  color.rgb;//GET COLOR
 
 // Illumination. Near-zero norm means assume full lighting
 float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;

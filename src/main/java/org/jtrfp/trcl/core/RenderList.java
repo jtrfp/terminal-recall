@@ -61,7 +61,9 @@ public class RenderList {
     private final	GLTexture		intermediateDepthTexture,
     /*    	*/				intermediateColorTexture,
     /*    	*/				intermediateNormTexture,
-    /*		*/				intermediateTextureIDTexture;
+    /*		*/				intermediateTextureIDTexture,
+    /*		*/				depthQueueTexture;
+    private final	GLProgram		depthQueueProgram;
     private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
@@ -99,7 +101,7 @@ public class RenderList {
 	    final GLFrameBuffer intermediateFrameBuffer, 
 	    final GLTexture intermediateColorTexture, final GLTexture intermediateDepthTexture,
 	    final GLTexture intermediateNormTexture, final GLTexture intermediateTextureIDTexture,
-	    final GLFrameBuffer depthQueueFrameBuffer,
+	    final GLFrameBuffer depthQueueFrameBuffer, final GLTexture depthQueueTexture,
 	    final TR tr) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
@@ -110,6 +112,8 @@ public class RenderList {
 	this.intermediateNormTexture=intermediateNormTexture;
 	this.intermediateTextureIDTexture=intermediateTextureIDTexture;
 	this.depthQueueFrameBuffer=depthQueueFrameBuffer;
+	this.depthQueueProgram=depthQueueProgram;
+	this.depthQueueTexture=depthQueueTexture;
 	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -144,6 +148,8 @@ public class RenderList {
 		for (int i = 0; i < hostRenderListPageTable.length; i++) {
 		    hostRenderListPageTable[i] = olWindow.logicalPage2PhysicalPage(i);
 		}// end for(hostRenderListPageTable.length)
+		depthQueueProgram.use();
+		depthQueueProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);//TODO: Cache or consolidate
 		renderer.getPrimaryProgram().use();
 		renderListPageTable.setArrayui(hostRenderListPageTable);
 		modulusUintOffset = (olWindow
@@ -173,7 +179,8 @@ public class RenderList {
     public void render(GL3 gl) {
 	// OPAQUE STAGE
 	tr.renderer.get().getPrimaryProgram().use();
-	cameraMatrixUniform.set4x4Matrix(tr.renderer.get().getCamera().getMatrixAsFlatArray(),true);
+	final float [] matrixAsFlatArray = tr.renderer.get().getCamera().getMatrixAsFlatArray();
+	cameraMatrixUniform.set4x4Matrix(matrixAsFlatArray,true);
 	useTextureMap.set((int)0);
 	intermediateFrameBuffer.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
@@ -218,6 +225,16 @@ public class RenderList {
 	    GLTexture.specifyTextureUnit(gl, 0);
 	    intermediateDepthTexture.bind(gl);
 	    depthQueueFrameBuffer.bindToDraw();
+	    // Turn off depth write, turn on transparency
+	    depthQueueProgram.use();
+	    depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(matrixAsFlatArray, true);//TODO: Consolidate or abbreviate
+	    gl.glDepthMask(false);//No depth writing
+	    gl.glDepthFunc(GL3.GL_ALWAYS);
+	    depthQueueProgram.getUniform("renderListOffset").setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
+	    tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
+		    depthQueueProgram.getUniform("rootBuffer"));
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
+	    gl.glDepthMask(true);
 	}//end if(isUsingNewTexturing())
 	
 	// DEFERRED STAGE
@@ -228,7 +245,8 @@ public class RenderList {
 	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
-	
+	GLTexture.specifyTextureUnit(gl, 0);
+	    Texture.getGlobalTexture().bind(gl);
 	GLTexture.specifyTextureUnit(gl, 1);
 	intermediateColorTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 2);
@@ -241,6 +259,8 @@ public class RenderList {
 	tr.gpu.get().textureManager.get().vqCodebookManager.get().getRGBATexture().bind();
 	GLTexture.specifyTextureUnit(gl, 6);
 	intermediateTextureIDTexture.bind();
+	GLTexture.specifyTextureUnit(gl, 7);
+	depthQueueTexture.bind();
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	

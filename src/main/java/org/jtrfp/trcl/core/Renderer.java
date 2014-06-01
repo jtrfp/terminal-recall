@@ -44,8 +44,8 @@ public final class Renderer {
     /*		*/				intermediateDepthTexture,
     /*		*/				intermediateNormTexture,
     /*		*/				intermediateTextureIDTexture,
-    /*		*/				depthQueueTexture;
-    
+    /*		*/				depthQueueTexture,
+    /*		*/				depthQueueStencil;
     private 		GLFrameBuffer 		intermediateFrameBuffer,
     /*			*/			depthQueueFrameBuffer;
     private 		int			frameNumber;
@@ -141,6 +141,7 @@ public final class Renderer {
 		deferredProgram.getUniform("rootBuffer").set((int) 4);
 		deferredProgram.getUniform("rgbaTiles").set((int) 5);
 		deferredProgram.getUniform("textureIDTexture").set((int) 6);
+		deferredProgram.getUniform("depthQueueTexture").set((int) 7);
 		sunVector.set(.5774f,.5774f,.5774f);
 		/////// INTERMEDIATE
 		intermediateColorTexture = gpu
@@ -193,12 +194,18 @@ public final class Renderer {
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(8, GL3.GL_RGBA8,1024,768,false);
+			.setImage2DMultisample(8, GL3.GL_RGBA32F,1024,768,false);
+		depthQueueStencil = gpu
+			.newTexture()
+			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
+			.bind()
+			.setImage2DMultisample(8, GL3.GL_DEPTH24_STENCIL8,1024,768,false);
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
 			.attachDrawTexture2D(depthQueueTexture, 
 				GL3.GL_COLOR_ATTACHMENT0,GL3.GL_TEXTURE_2D_MULTISAMPLE)
+			.attachDepthTexture2D(depthQueueStencil)
 			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
@@ -234,7 +241,8 @@ public final class Renderer {
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		intermediateTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
-		depthQueueTexture.bind().setImage2DMultisample(8, GL3.GL_RGBA8,width,height,false);//TODO: Change to RGBA32
+		depthQueueStencil.bind().setImage2DMultisample(8, GL3.GL_DEPTH24_STENCIL8,width,height,false);
+		depthQueueTexture.bind().setImage2DMultisample(8, GL3.GL_RGBA32F,width,height,false);//TODO: Change to RGBA32
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		depthQueueProgram.use();
@@ -250,14 +258,14 @@ public final class Renderer {
 	    public RenderList call() throws Exception {
 		return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
 			    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-			    intermediateTextureIDTexture, depthQueueFrameBuffer , tr);
+			    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture , tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
 	    renderList[1] = new TRFutureTask(tr,new Callable<RenderList>(){
 		    @Override
 		    public RenderList call() throws Exception {
 			return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
 				    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-				    intermediateTextureIDTexture, depthQueueFrameBuffer, tr);
+				    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture, tr);
 		    }});tr.getThreadManager().threadPool.submit(renderList[1]);
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");

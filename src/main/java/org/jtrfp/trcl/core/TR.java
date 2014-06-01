@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
 
@@ -36,6 +34,7 @@ import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
@@ -116,6 +115,8 @@ public final class TR{
 	}
 	
 	public TR(){
+	    	try{new OutputDump();}
+	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
 	    	rootWindow = new RootWindow(this);
 		keyStatus = new KeyStatus(rootWindow);

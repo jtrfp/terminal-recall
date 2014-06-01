@@ -1,12 +1,13 @@
 package org.jtrfp.trcl.core;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -105,6 +106,14 @@ public final class ThreadManager {
     private void start() {
 	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);
 	animator.start();
+	tr.getRootWindow().addWindowListener(new WindowAdapter(){
+	    @Override
+	    public void windowClosing(WindowEvent e){
+		running=false;
+		animator.stop();
+		glExecutorThread.interrupt();
+	    }
+	});
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(final GLAutoDrawable drawable) {

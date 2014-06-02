@@ -126,7 +126,8 @@ public final class ThreadManager {
 			try{
 			while(running){
 			    renderingThread=Thread.currentThread();
-			    if(context.isCurrent())	context.release();	//Feed the watchdog timer.
+			    try{if(context.isCurrent())	context.release();}//Feed the watchdog timer.
+			    catch(NullPointerException e){break;}
 			    synchronized(mappedOperationQueue){
 				if(mappedOperationQueue.isEmpty()){
 				    mappedOperationQueue.wait();
@@ -141,18 +142,17 @@ public final class ThreadManager {
 				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
 				    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}
 				while(!mappedOperationQueue.isEmpty()){
-				    //System.out.println("Making current...");
-				    if(!context.isCurrent())	context.makeCurrent();	//Feed the watchdog timer.
-				    //System.out.println("Is now current. Running...");
+				    try{if(!context.isCurrent())context.makeCurrent();}	//Feed the watchdog timer.
+				    catch(NullPointerException e){break;}
 				    mappedOperationQueue.poll().run();
-				    //System.out.println("Releasing...");
 				    renderingThread.setName("glExecutorThread");
-				    context.release();
-				    //System.out.println("Released.");
+				    try{context.release();}
+				    catch(NullPointerException e){break;}
 				}//end while(mappedOperationQueue)
 			}}catch(InterruptedException e){}
 			catch(Exception e){tr.showStopper(e);}
-			if(context.isCurrent())context.release();
+			try{if(context.isCurrent())context.release();}
+			catch(NullPointerException e){return;}
 		    }});
 		glExecutorThread.setDaemon(true);
 		glExecutorThread.start();

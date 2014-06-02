@@ -13,7 +13,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -116,7 +115,7 @@ public final class Renderer {
 		deferredProgram = gpu.newProgram();
 		try {
 		    vertexShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream("/shader/deferredVertexShader.glsl")));
+			    .getResourceAsStream("/shader/fullScreenQuadVertexShader.glsl")));
 		    fragmentShader.setSource(IOUtils.toString(getClass()
 			    .getResourceAsStream("/shader/deferredFragShader.glsl")));
 		} catch (Exception e) {
@@ -313,6 +312,7 @@ public final class Renderer {
     private void fpsTracking() {
 	frameNumber++;
 	final long dT = (long) (System.currentTimeMillis() - lastTimeMillis);
+	if(dT<=0)return;
 	final int fps = (int)(1000L / dT);
 	meanFPS = meanFPS*.9+(double)fps*.1;
 	if ((frameNumber %= 20) == 0) {

@@ -118,7 +118,7 @@ public final class ThreadManager {
 	    @Override
 	    public void init(final GLAutoDrawable drawable) {
 		System.out.println("GLEventListener.init()");
-		final GLContext context = drawable.getContext();
+		//final GLContext context = drawable.getContext();
 		glExecutorThread = new Thread(new Runnable(){
 		    @Override
 		    public void run() {
@@ -126,6 +126,7 @@ public final class ThreadManager {
 			try{
 			while(running){
 			    renderingThread=Thread.currentThread();
+			    GLContext context = tr.getRootWindow().getCanvas().getContext();
 			    try{if(context.isCurrent())	context.release();}//Feed the watchdog timer.
 			    catch(NullPointerException e){break;}
 			    synchronized(mappedOperationQueue){
@@ -133,6 +134,7 @@ public final class ThreadManager {
 				    mappedOperationQueue.wait();
 				}//end if(!glTasksWaiting)
 			    }//end sync(glTasksWaiting)
+			    context = tr.getRootWindow().getCanvas().getContext();//May have changed while waiting
 			    //Execute the tasks
 			    try{context.makeCurrent();}
 			    	//Sometimes NPE's out when closing while multiple threads are passing the gl.
@@ -151,7 +153,8 @@ public final class ThreadManager {
 				}//end while(mappedOperationQueue)
 			}}catch(InterruptedException e){}
 			catch(Exception e){tr.showStopper(e);}
-			try{if(context.isCurrent())context.release();}
+			try{final GLContext context = tr.getRootWindow().getCanvas().getContext();
+			    if(context.isCurrent())context.release();}
 			catch(NullPointerException e){return;}
 		    }});
 		glExecutorThread.setDaemon(true);

@@ -222,9 +222,18 @@ public class RenderList {
 	
 	// DEPTH QUEUE STAGE
 	if(tr.getTrConfig().isUsingNewTexturing()){
+	    depthQueueFrameBuffer.bindToDraw();
+	    gl.glEnable(GL3.GL_STENCIL_TEST);
+	    /*for(int i = 0; i < 8; i++) {
+	      gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
+	      gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
+	      gl.glSampleMaski(0, 0x1 << i);
+	      gl.glClear(GL3.GL_COLOR_BUFFER_BIT|GL3.GL_DEPTH_BUFFER_BIT);
+	    }*/
+	    gl.glDisable(GL3.GL_STENCIL_TEST);
+	    //gl.glStencilOp(GL3.GL_KEEP, GL3.GL_DECR, GL3.GL_DECR);
 	    GLTexture.specifyTextureUnit(gl, 0);
 	    intermediateDepthTexture.bind(gl);
-	    depthQueueFrameBuffer.bindToDraw();
 	    // Turn off depth write, turn on transparency
 	    depthQueueProgram.use();
 	    depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(matrixAsFlatArray, true);//TODO: Consolidate or abbreviate
@@ -233,6 +242,7 @@ public class RenderList {
 	    depthQueueProgram.getUniform("renderListOffset").setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
 	    tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
 		    depthQueueProgram.getUniform("rootBuffer"));
+	   // gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 	    gl.glDepthMask(true);
 	}//end if(isUsingNewTexturing())
@@ -245,8 +255,8 @@ public class RenderList {
 	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
-	GLTexture.specifyTextureUnit(gl, 0);
-	    Texture.getGlobalTexture().bind(gl);
+	//GLTexture.specifyTextureUnit(gl, 0);
+	//    Texture.getGlobalTexture().bind(gl);
 	GLTexture.specifyTextureUnit(gl, 1);
 	intermediateColorTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 2);

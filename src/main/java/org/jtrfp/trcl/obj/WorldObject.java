@@ -51,7 +51,7 @@ public class WorldObject implements PositionedRenderable {
     private final TR tr;
     private boolean visible = true;
     private Model model;
-    private ArrayList<PositionListener> positionListeners = new ArrayList<PositionListener>();
+    private List<PositionListener> positionListeners = Collections.synchronizedList(new ArrayList<PositionListener>());
     private int[] triangleObjectDefinitions;
     private int[] transparentTriangleObjectDefinitions;
     protected final int matrixID;
@@ -474,6 +474,10 @@ public class WorldObject implements PositionedRenderable {
 	    positionListeners.get(i).positionChanged(this);
 	}
     }//end notifyPositionListeners()
+    
+    public List<PositionListener> getPositionListeners(){
+	return positionListeners;
+    }
 
     @Override
     public void addPositionListener(PositionListener listenerToAdd) {

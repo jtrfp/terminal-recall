@@ -21,10 +21,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionListenable;
 import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	private double squareSize, viewingRadius;
@@ -260,10 +260,17 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			setTopLeftPosition(topLeftPosition);
 			}
 		
+		public String toString(){
+		    return "GridCube topLeftPos=("+topLeftPosition[0]+", "+topLeftPosition[1]+", "+topLeftPosition[2]+")";
+		}//end toString()
+		
 		public void add(E objectToAdd){
-			/*if(getElements().contains(objectToAdd)){
+			if(getElements().contains(objectToAdd)){
 			    new Exception("Redundant add!").printStackTrace();
-			    
+			    List<PositionListener>pcls = ((WorldObject)objectToAdd).getPositionListeners();
+				for(PositionListener pl:pcls){
+				    System.out.println("PositionListener "+pl);
+				}
 			    System.exit(0);}//TODO Comment out */
 			getElements().add(objectToAdd);
 			if(!(objectToAdd instanceof VisibleEverywhere))
@@ -285,7 +292,8 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			}//end constructor(..)
 
 		private void remove(PositionListenable objectWithPosition){
-			/*if(!getElements().remove(objectWithPosition) && objectWithPosition instanceof Player){
+			boolean result = getElements().remove(objectWithPosition);
+			/*if(!result) && objectWithPosition instanceof Player){
 			    new Exception("Removal failure.").printStackTrace();
 			    System.exit(0);
 			}*/

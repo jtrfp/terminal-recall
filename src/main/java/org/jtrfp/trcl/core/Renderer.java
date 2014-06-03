@@ -323,24 +323,37 @@ public final class Renderer {
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
-
+    private volatile int counter=0;//TODO: remove
     public void render() {
+	long startTimeMillis = System.currentTimeMillis();//TODO: Remove
+	counter++;//TODO: Remove
 	if (!active)
 	    return;
 	final GL3 gl = gpu.getGl();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	ensureInit();
+	if(counter%50==0)System.out.println("Passed for ensureInit() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
 	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){
 	    gpu.memoryManager.get().unmap();
 	}
+	if(counter%50==0)System.out.println("Passed for unmap() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
 	final RenderList renderList = currentRenderList().get();
+	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	renderList.render(gl);
+	if(counter%50==0)System.out.println("Passed for RenderList.render() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
+	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	gpu.memoryManager.get().map();
+	if(counter%50==0)System.out.println("Passed for map() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
+	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	renderList.sendToGPU(gl);
+	if(counter%50==0)System.out.println("Passed for sendToGPU() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
 	fpsTracking();
 	// Update GPU
+	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	setFogColor(gpu.getTr().getWorld().getFogColor());
-    }
+	if(counter%50==0)System.out.println("Passed for setFogColor() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
+    }//end render()
 
     public void activate() {
 	active = true;

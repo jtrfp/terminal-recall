@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionListenable;
 import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
@@ -97,7 +98,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	
 	private int space2Flat(Vector3D space)
 		{return (int)(space.getX()+space.getY()*squaresX+space.getZ()*squaresX*squaresY);}
-	public void add(E objectWithPosition)
+	public synchronized void add(E objectWithPosition)
 		{//Figure out where it goes
 	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
 	    	objectWithPosition.setContainingGrid(this);
@@ -106,7 +107,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
 		dest.add(objectWithPosition);
 		}
-	public void remove(E objectWithPosition){
+	public synchronized void remove(E objectWithPosition){
 	    if(objectWithPosition instanceof VisibleEverywhere){
 		removeAlwaysVisible(objectWithPosition);
 	    }else{
@@ -260,14 +261,19 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			}
 		
 		public void add(E objectToAdd){
-			//if(getElements().contains(objectToAdd)){System.err.println("WARNING: Redundant add!");return;}
+			/*if(getElements().contains(objectToAdd)){
+			    new Exception("Redundant add!").printStackTrace();
+			    
+			    System.exit(0);}//TODO Comment out */
 			getElements().add(objectToAdd);
-			objectToAdd.addPositionListener(this);
-			}
+			if(!(objectToAdd instanceof VisibleEverywhere))
+			    objectToAdd.addPositionListener(this);
+			}//end add(E)
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public void positionChanged(PositionListenable objectWithPosition){
+		    	synchronized(SpacePartitioningGrid.this){
 			//Is it still in the range of this cube
 			if(isInRange(objectWithPosition.getPosition()))return;// Then ignore
 			//Else remove and re-add so it finds its new cube.
@@ -275,10 +281,14 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 				remove(objectWithPosition);
 				SpacePartitioningGrid.this.add((E)objectWithPosition);
 				}}
+		    	  }//end sync(SpacePartitioningGrid.this)
 			}//end constructor(..)
 
 		private void remove(PositionListenable objectWithPosition){
-			getElements().remove(objectWithPosition);
+			/*if(!getElements().remove(objectWithPosition) && objectWithPosition instanceof Player){
+			    new Exception("Removal failure.").printStackTrace();
+			    System.exit(0);
+			}*/
 			objectWithPosition.removePositionListener(this);
 			}
 

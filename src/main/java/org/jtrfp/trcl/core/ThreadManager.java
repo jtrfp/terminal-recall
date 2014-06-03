@@ -20,6 +20,7 @@ import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -68,7 +69,12 @@ public final class ThreadManager {
 		    || wo instanceof VisibleEverywhere)
 		if(wo instanceof Player){
 		    if(alreadyVisitedPlayer){
-			throw new RuntimeException("ALREADY VISITED PLAYER");//TODO: Remove
+			new RuntimeException("ALREADY VISITED PLAYER").printStackTrace();//TODO: Remove
+			Player p = (Player)wo;
+			List<PositionListener>pcls = p.getPositionListeners();
+			for(PositionListener pcl:pcls){
+			    System.out.println("PositionListener "+pcl);
+			}//end for(pcls)
 		    }else alreadyVisitedPlayer=true;
 		}
 		wo.tick(tickTimeInMillis);
@@ -194,6 +200,7 @@ public final class ThreadManager {
 		//Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
 		final long _renderStartTick=System.currentTimeMillis();
 		Thread.currentThread().setName("OpenGL display()");
+		if(counter%50==0)System.out.println("mappedOperationQueue size="+mappedOperationQueue.size());
 		    //Schedule the rendering pass
 		    renderTask = submitToGL(new Callable<Void>(){
 			@Override
@@ -203,8 +210,9 @@ public final class ThreadManager {
 				    }////end if(renderer.isDone)
 			    return null;
 			}});
+		    if(counter%50==0)System.out.println("Enqueue overhead: "+(System.currentTimeMillis()-_renderStartTick));
 		    renderTask.get();//TODO: Remove
-		    if(counter%50==0)System.out.println("Render time: "+(System.currentTimeMillis()-_renderStartTick));
+		    if(counter%50==0)System.out.println("Wait-for-Render-Finish time: "+(System.currentTimeMillis()-_renderStartTick));
 		    //While the rendering pass is being executed, consider doing the visiblity calc.
 		    if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
 			visibilityCalc();}

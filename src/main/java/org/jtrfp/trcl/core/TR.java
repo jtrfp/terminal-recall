@@ -171,7 +171,7 @@ public final class TR{
 	System.err.println("==== SHOWSTOPPER ====");
 			    e.printStackTrace();
 	System.err.println("======================");
-	System.err.println("\nToo full of fail to continue. Exiting...\n\n");
+	System.err.println("\nIrrecoverable. Exiting...\n\n");
 	System.exit(-1);
     }
 

@@ -477,7 +477,8 @@ public class WorldObject implements PositionedRenderable {
 
     @Override
     public void addPositionListener(PositionListener listenerToAdd) {
-	positionListeners.add(listenerToAdd);
+	if(!positionListeners.contains(listenerToAdd))
+	    positionListeners.add(listenerToAdd);
     }
 
     @Override

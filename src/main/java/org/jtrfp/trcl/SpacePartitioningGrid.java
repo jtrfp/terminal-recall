@@ -27,16 +27,19 @@ import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class SpacePartitioningGrid<E extends PositionListenable>{
-	private double squareSize, viewingRadius;
-	private Object [] gridSquares;
-	private int squaresX, squaresY, squaresZ;
-	//private ArrayList<E> alwaysVisible = new ArrayList<E>();
-	private final GridCube alwaysVisible = new GridCube(null);
-	private SpacePartitioningGrid<E> parentGrid = null;
-	private List<SpacePartitioningGrid<E>> branchGrids = Collections.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());
+	private double 				squareSize, viewingRadius;
+	private Object [] 			gridSquares;
+	private int 				squaresX, squaresY, squaresZ;
+	private final GridCube 			alwaysVisible = new GridCube(null);
+	private SpacePartitioningGrid<E> 	parentGrid = null;
+	private List<SpacePartitioningGrid<E>> 	branchGrids = Collections
+		.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());
 	
-	private double radiusInWorldUnits;
-	private int rolloverPoint,rawDia,rawDiaX,rawDiaY,rawDiaZ,xProgression,yProgression,zProgression;
+	private double 		radiusInWorldUnits;
+	private int 		rolloverPoint,
+				rawDia,
+				rawDiaX,rawDiaY,rawDiaZ,
+				xProgression,yProgression,zProgression;
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
 		{setParentGrid(parentGrid);activate();}
@@ -83,16 +86,15 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 				}//end for(squaresY)
 			}//end for(squaresZ)
 		
-		radiusInWorldUnits=getViewingRadius()*1.25;//Fudge factor to fix suddenly appearing terrain at distance
-		
-		rolloverPoint=gridSquares.length;
-		rawDia=(int)((radiusInWorldUnits*2)/getSquareSize());
-		rawDiaX=rawDia<getSquaresX()?rawDia:getSquaresX();
-		rawDiaY=rawDia<getSquaresY()?rawDia:getSquaresY();
-		rawDiaZ=rawDia<getSquaresZ()?rawDia:getSquaresZ();
-
-		zProgression=getSquaresX()*getSquaresY()-rawDiaY*getSquaresX();
-		yProgression=getSquaresX()-rawDiaX;
+		//Fudge factor to fix suddenly appearing terrain at distance
+		radiusInWorldUnits	=getViewingRadius()*1.25;
+		rolloverPoint		=gridSquares.length;
+		rawDia			=(int)((radiusInWorldUnits*2)/getSquareSize());
+		rawDiaX			=rawDia<getSquaresX()?rawDia:getSquaresX();
+		rawDiaY			=rawDia<getSquaresY()?rawDia:getSquaresY();
+		rawDiaZ			=rawDia<getSquaresZ()?rawDia:getSquaresZ();
+		zProgression		=getSquaresX()*getSquaresY()-rawDiaY*getSquaresX();
+		yProgression		=getSquaresX()-rawDiaX;
 		xProgression=1;
 		}//end allocateSquares()
 	
@@ -114,11 +116,6 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
 		dest.remove(objectWithPosition);
 	    }
-		/*for(Object o:gridSquares)
-			{//Blind removal
-			GridCube gc = (GridCube)o;
-			gc.remove(objectWithPosition);
-			}*/
 		}
 	private void addAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.add(objectWithPosition);}
@@ -271,7 +268,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 				for(PositionListener pl:pcls){
 				    System.out.println("PositionListener "+pl);
 				}
-			    System.exit(0);}//TODO Comment out */
+			   }//TODO Comment out */
 			getElements().add(objectToAdd);
 			if(!(objectToAdd instanceof VisibleEverywhere))
 			    objectToAdd.addPositionListener(this);
@@ -298,7 +295,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 			    System.exit(0);
 			}*/
 			objectWithPosition.removePositionListener(this);
-			}
+			}//end remove(...)
 
 		private boolean isInRange(double[] ds){
 		    if(topLeftPosition==null)return true;//Always in range.

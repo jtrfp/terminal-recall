@@ -167,7 +167,7 @@ public final class ThreadManager {
 				    catch(NullPointerException e){break;}
 				    mappedOperationQueue.poll().run();
 				    renderingThread.setName("glExecutorThread");
-				    try{context.release();}
+				    try{if(context.isCurrent())context.release();}
 				    catch(NullPointerException e){break;}
 				}//end while(mappedOperationQueue)
 			}}catch(InterruptedException e){}

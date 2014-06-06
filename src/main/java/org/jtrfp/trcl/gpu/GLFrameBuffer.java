@@ -69,4 +69,10 @@ public final class GLFrameBuffer {
 		GL3.GL_DEPTH_ATTACHMENT, GL3.GL_TEXTURE_2D_MULTISAMPLE, depthTexture.getTextureID(), 0);
 	return this;
     }
+    public GLFrameBuffer attachStencilTexture2D(GLTexture depthTexture) {
+	gl.glFramebufferTexture2D(
+		GL3.GL_FRAMEBUFFER, 
+		GL3.GL_STENCIL_ATTACHMENT, GL3.GL_TEXTURE_2D_MULTISAMPLE, depthTexture.getTextureID(), 0);
+	return this;
+    }
 }//end GLFrameBuffer

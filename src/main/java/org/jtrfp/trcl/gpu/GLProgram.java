@@ -12,6 +12,7 @@ public class GLProgram
 	private GPU gpu;
 	private final GL3 gl;
 	private final int programID;
+	private ValidationHandler validationHandler = defaultValidationHandler;
 	GLProgram(GPU gpu)
 		{this.gpu=gpu;
 		this.gl=gpu.getGl();
@@ -24,6 +25,9 @@ public class GLProgram
 
 	public void link(){
 		gl.glLinkProgram(programID);
+		if(!validate()){
+		    validationHandler.invalidProgram(this);
+		}
 		}
 
 	public void use(){
@@ -59,4 +63,30 @@ public class GLProgram
 		{return programID;}
 	
 	GL3 getGl(){return gl;}
+	
+	public interface ValidationHandler{
+	    public void invalidProgram(GLProgram p);
+	}
+	
+	private static final ValidationHandler defaultValidationHandler = new ValidationHandler(){
+	    @Override
+	    public void invalidProgram(GLProgram program) {
+		System.out.println("PRIMARY PROGRAM VALIDATION FAILED:");
+		    System.out.println(program.getInfoLog());
+	    }
+	};
+	/**
+	 * @return the validationHandler
+	 */
+	public ValidationHandler getValidationHandler() {
+	    return validationHandler;
+	}
+
+	/**
+	 * @param validationHandler the validationHandler to set
+	 */
+	public void setValidationHandler(ValidationHandler validationHandler) {
+	    this.validationHandler = validationHandler;
+	}
+	
 	}//end GLPRogram

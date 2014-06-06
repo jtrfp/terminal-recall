@@ -22,19 +22,22 @@ public class GLProgram {
 		    + ". Something went wrong.");
     }//end constructor
 
-    public void attachShader(GLShader shader) {
+    public GLProgram attachShader(GLShader shader) {
 	gl.glAttachShader(programID, shader.getShaderID());
+	return this;
     }//end attachShader()
 
-    public void link() {
+    public GLProgram link() {
 	gl.glLinkProgram(programID);
 	if (!validate()) {
 	    validationHandler.invalidProgram(this);
 	}
+	return this;
     }//end link()
 
-    public void use() {
+    public GLProgram use() {
 	gl.glUseProgram(programID);
+	return this;
     }
 
     public boolean validate() {

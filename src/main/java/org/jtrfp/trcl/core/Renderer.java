@@ -37,8 +37,6 @@ public final class Renderer {
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
     private 	 	GLUniform	    	screenWidth, 
     /*    */	    				screenHeight,
-    /*		*/				depthQueueScreenWidth,
-    /*		*/				depthQueueScreenHeight,
     /*    */					fogColor,
     /*    */					sunVector;
     private 		GLTexture 		intermediateColorTexture,
@@ -68,73 +66,30 @@ public final class Renderer {
 		gl.glDepthFunc(GL2.GL_LESS);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glClearColor(0f, 0f, 0f, 0f);
-
-		// Generate shader program
-		GLVertexShader vertexShader = gpu.newVertexShader();
-		GLFragmentShader fragmentShader = gpu.newFragmentShader();
-		primaryProgram = gpu.newProgram();
-		try {// Apache Commons to the rescue again. (:
-		    vertexShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream("/shader/vertexShader.glsl")));
-		    fragmentShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream("/shader/fragShader.glsl")));
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		primaryProgram.attachShader(vertexShader);
-		primaryProgram.attachShader(fragmentShader);
-		primaryProgram.link();
-		if(!primaryProgram.validate()){
-		    System.out.println("PRIMARY PROGRAM VALIDATION FAILED:");
-		    System.out.println(primaryProgram.getInfoLog());
-		}
-		primaryProgram.use();
-		primaryProgram.getUniform("texturePalette").set((int)0);
 		
-		//DEPTH STACK PROGRAM
-		depthQueueProgram = gpu.newProgram();
-		fragmentShader = gpu.newFragmentShader();
+		// VERTEX SHADERS
+		GLVertexShader		primaryVertexShader		= gpu.newVertexShader(),
+					fullScreenQuadVertexShader	= gpu.newVertexShader();
+		GLFragmentShader	primaryFragShader		= gpu.newFragmentShader(),
+					deferredFragShader		= gpu.newFragmentShader(),
+					depthQueueFragShader		= gpu.newFragmentShader(),
+					erasureFragShader		= gpu.newFragmentShader();
+		primaryVertexShader	  .setSourceFromResource("/shader/vertexShader.glsl");
+		fullScreenQuadVertexShader.setSourceFromResource("/shader/fullScreenQuadVertexShader.glsl");
+		primaryFragShader	  .setSourceFromResource("/shader/fragShader.glsl");
+		deferredFragShader	  .setSourceFromResource("/shader/deferredFragShader.glsl");
+		erasureFragShader	  .setSourceFromResource("/shader/erasureFragShader.glsl");
+		depthQueueFragShader	  .setSourceFromResource("/shader/depthQueueFragShader.glsl");
 		
-		try {
-		    fragmentShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream("/shader/depthQueueFragShader.glsl")));
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		depthQueueProgram.attachShader(vertexShader);
-		depthQueueProgram.attachShader(fragmentShader);
-		depthQueueProgram.link();
-		if(!depthQueueProgram.validate()){
-		    System.out.println("DEPTH-QUEUE PROGRAM VALIDATION FAILED:");
-		    System.out.println(depthQueueProgram.getInfoLog());
-		}
-		depthQueueProgram.use();
-		depthQueueProgram.getUniform("depthTexture").set((int)0);
-		
-		//DEFERRED PROGRAM
-		vertexShader = gpu.newVertexShader();
-		fragmentShader = gpu.newFragmentShader();
-		deferredProgram = gpu.newProgram();
-		try {
-		    vertexShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream("/shader/fullScreenQuadVertexShader.glsl")));
-		    fragmentShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream("/shader/deferredFragShader.glsl")));
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		deferredProgram.attachShader(vertexShader);
-		deferredProgram.attachShader(fragmentShader);
-		deferredProgram.link();
-		if(!deferredProgram.validate()){
-		    System.out.println("DEFERRED PROGRAM VALIDATION FAILED:");
-		    System.out.println(deferredProgram.getInfoLog());
-		}
+		primaryProgram		=gpu.newProgram().attachShader(primaryVertexShader)	  .attachShader(primaryFragShader).link();
+		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
+		depthQueueProgram	=gpu.newProgram().attachShader(primaryVertexShader)	  .attachShader(depthQueueFragShader).link();
+		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
 		deferredProgram.use();
-		screenWidth = deferredProgram.getUniform("screenWidth");
-		screenHeight = deferredProgram.getUniform("screenHeight");
-		fogColor = deferredProgram.getUniform("fogColor");
-		sunVector = deferredProgram.getUniform("sunVector");
+		screenWidth 	= deferredProgram	.getUniform("screenWidth");
+		screenHeight 	= deferredProgram	.getUniform("screenHeight");
+		fogColor 	= deferredProgram	.getUniform("fogColor");
+		sunVector 	= deferredProgram	.getUniform("sunVector");
 		deferredProgram.getUniform("texturePalette").set((int) 0);
 		deferredProgram.getUniform("primaryRendering").set((int) 1);
 		deferredProgram.getUniform("depthTexture").set((int) 2);
@@ -146,26 +101,6 @@ public final class Renderer {
 		sunVector.set(.5774f,.5774f,.5774f);
 		final int width = tr.getRootWindow().getWidth();
 		final int height = tr.getRootWindow().getHeight();
-		
-		// DEPTH ERASURE PROGRAM
-		depthErasureProgram = gpu.newProgram();
-		final GLFragmentShader erasureFragShader = gpu
-			.newFragmentShader();
-		try {
-		    erasureFragShader.setSource(IOUtils.toString(getClass()
-			    .getResourceAsStream(
-				    "/shader/erasureFragShader.glsl")));
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		//Mooch off of deferred program's full-screen quadvertex shader.
-		depthErasureProgram.attachShader(vertexShader);
-		depthErasureProgram.attachShader(erasureFragShader);
-		depthErasureProgram.link();
-		if(!deferredProgram.validate()){
-		    System.out.println("DEFERRED PROGRAM VALIDATION FAILED:");
-		    System.out.println(deferredProgram.getInfoLog());}
-		
 		/////// INTERMEDIATE
 		intermediateColorTexture = gpu
 			.newTexture()
@@ -217,12 +152,12 @@ public final class Renderer {
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,1024,768,false);
+			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);//TODO: width,height
 		depthQueueStencil = gpu
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,1024,768,false);
+			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);//TODO: width,height
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -233,8 +168,6 @@ public final class Renderer {
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
-		depthQueueScreenWidth  = depthQueueProgram.getUniform("screenWidth");
-		depthQueueScreenHeight = depthQueueProgram.getUniform("screenHeight");
 		primaryProgram.use();
 		return null;
 	    }
@@ -269,8 +202,8 @@ public final class Renderer {
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		depthQueueProgram.use();
-		depthQueueScreenWidth.setui(width);
-		depthQueueScreenHeight.setui(height);
+		//depthQueueScreenWidth.setui(width);
+		//depthQueueScreenHeight.setui(height);
 		Renderer.this.getPrimaryProgram().use();
 	    }
 	});

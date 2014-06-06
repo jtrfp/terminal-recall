@@ -29,7 +29,7 @@ public final class MemoryManager {
 		tb=new ReallocatableGLTextureBuffer(MemoryManager.this.gpu);
 		tb.reallocate(PagedByteBuffer.PAGE_SIZE_BYTES);
 		physicalMemory[0] = tb.map();
-		tb.setUsageHint(MemoryUsageHint.DymamicDraw);
+		tb.setUsageHint(MemoryUsageHint.StreamDraw);
 		return tb;
 	    }}).get();
 	}catch(Exception e){throw new RuntimeException(e);}

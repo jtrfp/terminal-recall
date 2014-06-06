@@ -109,6 +109,10 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims){
 	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * dH.x *(1-dH.y)+ //Bottom right
 	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims) * dH.x*dH.y+ //Top right
 	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (1-dH.x)*(dH.y); //Top left
+
+ float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
+ cTexel.rgb 			= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
+ cTexel 				= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
  return cTexel;
  }//end intrinsicCodeTexel
 
@@ -133,9 +137,9 @@ bool	oldTex		= textureID==960u;//Switch for old texturing mode.
 		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 vec2	uv			= fragColor.xy;
-vec4	color;
+vec3	color;
 
-color = intrinsicCodeTexel(linearDepth,textureID,norm,uv);
+color = vec3(intrinsicCodeTexel(linearDepth,textureID,norm,uv));
 
 vec4	depthQueueTexel	=texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),0);
 	 	uv				= depthQueueTexel.rg;
@@ -143,13 +147,9 @@ vec4	depthQueueTexel	=texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),0);
 		//TODO: LinearDepth. Alpha is depth.
 		//TODO: Norm. Calculate from future primitive table implementation?
 
-color += intrinsicCodeTexel(linearDepth,textureID,norm,uv)*.00000001;//TODO: Dummy. Color should not be additive.
+vec4 dqColor = textureID!=0u?intrinsicCodeTexel(0,textureID,vec3(0,0,0),uv):vec4(0,0,0,0);
+color = mix(color.rgb,dqColor.rgb,dqColor.a);
 
-vec3 	origColor 		= oldTex?texture(texturePalette,fragColor.xy).rgb:
-						  color.rgb;//GET COLOR
-
-// Illumination. Near-zero norm means assume full lighting
-float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
-fragColor.rgb 			= origColor*fogColor+origColor*sunIllumination*sunColor;
-fragColor 				= mix(fragColor,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
+fragColor.rgb		 	= oldTex?texture(texturePalette,fragColor.xy).rgb:
+						  color;//GET COLOR
 }//end main()

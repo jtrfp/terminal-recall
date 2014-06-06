@@ -152,4 +152,9 @@ color = mix(color.rgb,dqColor.rgb,dqColor.a);
 
 fragColor.rgb		 	= oldTex?texture(texturePalette,fragColor.xy).rgb:
 						  color;//GET COLOR
+if(oldTex){
+  float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
+  fragColor.rgb 		= fragColor.rgb*fogColor+fragColor.rgb*sunIllumination*sunColor;
+  fragColor.rgb 		= mix(fragColor.rgb,fogColor*sunColor,clamp(pow(linearDepth,3)*1.5,0,1));//FOG
+ }
 }//end main()

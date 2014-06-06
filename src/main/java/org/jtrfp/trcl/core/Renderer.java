@@ -24,10 +24,12 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
+
+    public static final int			DEPTH_QUEUE_SIZE = 3;
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;
-    private 	 	GLProgram 		primaryProgram, deferredProgram, depthQueueProgram;
+    			GLProgram 		primaryProgram, deferredProgram, depthQueueProgram, depthErasureProgram;
     private 		boolean 		initialized = false;
     private		boolean 		active = false;// TODO: Remove when conversion is complete
     private 		boolean 		renderListToggle = false;
@@ -144,6 +146,26 @@ public final class Renderer {
 		sunVector.set(.5774f,.5774f,.5774f);
 		final int width = tr.getRootWindow().getWidth();
 		final int height = tr.getRootWindow().getHeight();
+		
+		// DEPTH ERASURE PROGRAM
+		depthErasureProgram = gpu.newProgram();
+		final GLFragmentShader erasureFragShader = gpu
+			.newFragmentShader();
+		try {
+		    erasureFragShader.setSource(IOUtils.toString(getClass()
+			    .getResourceAsStream(
+				    "/shader/erasureFragShader.glsl")));
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+		//Mooch off of deferred program's full-screen quadvertex shader.
+		depthErasureProgram.attachShader(vertexShader);
+		depthErasureProgram.attachShader(erasureFragShader);
+		depthErasureProgram.link();
+		if(!deferredProgram.validate()){
+		    System.out.println("DEFERRED PROGRAM VALIDATION FAILED:");
+		    System.out.println(deferredProgram.getInfoLog());}
+		
 		/////// INTERMEDIATE
 		intermediateColorTexture = gpu
 			.newTexture()
@@ -195,12 +217,12 @@ public final class Renderer {
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(8, GL3.GL_RGBA32F,1024,768,false);
+			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,1024,768,false);
 		depthQueueStencil = gpu
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(8, GL3.GL_DEPTH24_STENCIL8,1024,768,false);
+			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,1024,768,false);
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -242,8 +264,8 @@ public final class Renderer {
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		intermediateTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
-		depthQueueStencil.bind().setImage2DMultisample(8, GL3.GL_DEPTH24_STENCIL8,width,height,false);
-		depthQueueTexture.bind().setImage2DMultisample(8, GL3.GL_RGBA32F,width,height,false);//TODO: Change to RGBA32
+		depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
+		depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);//TODO: Change to RGBA32
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		depthQueueProgram.use();

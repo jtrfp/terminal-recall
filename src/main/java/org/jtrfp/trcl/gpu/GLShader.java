@@ -1,11 +1,14 @@
 package org.jtrfp.trcl.gpu;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 
 import javax.media.opengl.GL3;
 import javax.media.opengl.GL4;
+
+import org.apache.commons.io.IOUtils;
 
 public abstract class GLShader
 	{
@@ -19,6 +22,12 @@ public abstract class GLShader
 		}
 	
 	protected abstract int getShaderType();
+	
+	public GLShader setSourceFromResource(String resourceURI) throws IOException{
+	    setSource(IOUtils.toString(getClass()
+		    .getResourceAsStream(resourceURI)));
+	    return this;
+	}//end setSourceFromResource(...)
 	
 	public void setSource(String source)
 		{

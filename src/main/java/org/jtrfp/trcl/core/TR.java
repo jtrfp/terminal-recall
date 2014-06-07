@@ -120,13 +120,13 @@ public final class TR{
 	    	AutoInitializable.Initializer.initialize(this);
 	    	rootWindow = new RootWindow(this);
 		keyStatus = new KeyStatus(rootWindow);
-		threadManager = new ThreadManager(this);
 		gpu = new TRFutureTask<GPU>(this,new Callable<GPU>(){
 		    @Override
 		    public GPU call() throws Exception {
 			Thread.currentThread().setName("GPU constructor");
 			return new GPU(TR.this);
 		    }});
+		threadManager = new ThreadManager(this);
 		threadManager.threadPool.submit(gpu);
 		System.out.println("Initializing graphics engine...");
 		    renderer=new TRFutureTask<Renderer>(this,new Callable<Renderer>(){

@@ -4,6 +4,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,8 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLRunnable;
 
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
@@ -24,6 +25,7 @@ import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
+import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public final class ThreadManager {
@@ -40,13 +42,18 @@ public final class ThreadManager {
     private Thread 			renderingThread;
     private volatile boolean		running				=true;
     private Thread			glExecutorThread;
-    private FPSAnimator			animator			=new FPSAnimator(RENDER_FPS);
+    private Animator			animator;
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
     private TRFuture<Void> 		renderTask;
     private TRFutureTask<Void>		visibilityCalcTask;
+    private volatile TRFutureTask<Void> gpuUpdateTask;
     private final ConcurrentLinkedQueue<FutureTask> 	
     	mappedOperationQueue 		= new ConcurrentLinkedQueue<FutureTask>();
+    private final AtomicInteger _counter = new AtomicInteger();
+    private final AtomicLong _lastFPSTime = new AtomicLong();
+    private final AtomicLong _timeInDisplay = new AtomicLong();
+    
     ThreadManager(final TR tr) {
 	this.tr = tr;
 	start();
@@ -86,6 +93,7 @@ public final class ThreadManager {
     }// end gameplay()
 
     private void visibilityCalc() {
+	if(tr.renderer==null)return;
 	if(!tr.renderer.isDone())return;
 	tr.renderer.get().updateVisibilityList();
 	if(visibilityCalcTask!=null){
@@ -102,10 +110,21 @@ public final class ThreadManager {
     public <T> TRFuture<T> submitToGL(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
 	if(Thread.currentThread()!=renderingThread){
-	    synchronized(mappedOperationQueue){
-	    final boolean wasEmpty = mappedOperationQueue.isEmpty();
-	    mappedOperationQueue.add(result);
-	    if(wasEmpty)mappedOperationQueue.notifyAll();}
+	    //System.out.println("Enqueue...");
+	    tr.getRootWindow().getCanvas().invoke(false, new GLRunnable(){
+		@Override
+		public boolean run(GLAutoDrawable drawable) {
+		    //System.out.println("Executing...");
+		    result.run();
+		    //System.out.println("Executed.");
+		    return true;
+		}
+	    });
+	    //synchronized(mappedOperationQueue){
+	    //final boolean wasEmpty = mappedOperationQueue.isEmpty();
+	    //mappedOperationQueue.add(result);
+	    //if(wasEmpty)mappedOperationQueue.notifyAll();}
+	    
 	}//end if(current thread is GL)
 	else result.run();
 	return result;
@@ -118,18 +137,70 @@ public final class ThreadManager {
     }
 
     private void start() {
-	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);
+	gameplayTimer.schedule(new TimerTask(){
+	    @Override
+	    public void run() {
+		//drawable.getContext().getGL().glFinish();//TODO: Remove
+		long startTimeMillis = System.currentTimeMillis();
+		//renderingThread=Thread.currentThread();
+		final int _count = _counter.incrementAndGet();
+		/*
+		if(System.currentTimeMillis() > _lastFPSTime.get()+1000){
+		    _counter.set(0);
+		    System.out.println(_count+" FPS timeInDisplay="+_timeInDisplay.get()+"ms");
+		    _lastFPSTime.set(System.currentTimeMillis());
+		}//end if(1 second)
+		*/
+		//final GLContext context = drawable.getContext();
+		//if(context.isCurrent())context.release();
+		//Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
+		
+		final long _renderStartTick=System.currentTimeMillis();
+		//Thread.currentThread().setName("OpenGL display()");
+		//if(gpuUpdateTask!=null)gpuUpdateTask.get();
+		//if(counter%50==0)System.out.println("mappedOperationQueue size="+mappedOperationQueue.size());
+		    //Schedule the rendering pass
+		    /*renderTask = submitToGL(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+			    if(tr.renderer==null)return null;
+			    if(tr.renderer.isDone()){
+				    if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
+				    }////end if(renderer.isDone)
+			    return null;
+			}});*/
+		    //if(counter%50==0)System.out.println("Enqueue overhead: "+(System.currentTimeMillis()-_renderStartTick));
+		    //renderTask.get();//TODO: Remove
+		    //While the rendering pass is being executed, consider doing the visiblity calc.
+		   /* gpuUpdateTask = ThreadManager.this.submitToThreadPool(new Callable<Void>(){
+			    @Override
+			    public Void call() throws Exception {*/
+				if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
+					visibilityCalc();}
+				    if(tr.getPlayer()!=null)gameplay();
+		/*		return null;
+			    }
+			});*/
+		    //Barrier for completed rendering
+		    //renderTask.get();//TODO: Uncomment
+		    //context.makeCurrent();
+		   // drawable.getContext().getGL().glFinish();//TODO: Remove
+		    //_timeInDisplay.set(System.currentTimeMillis()-startTimeMillis);
+		    //drawable.getContext().getGL().glFinish();//TODO: Remove
+		    //if(counter%50==0)System.out.println("Wait-for-Render-Finish time: "+(System.currentTimeMillis()-_renderStartTick));
+	    }}, 0, 1000/GAMEPLAY_FPS);
+	animator = new Animator(tr.getRootWindow().getCanvas());
 	animator.start();
 	tr.getRootWindow().addWindowListener(new WindowAdapter(){
 	    @Override
 	    public void windowClosing(WindowEvent e){
 		System.out.println("WindowClosing...");
-		glExecutorThread.interrupt();
+		//glExecutorThread.interrupt();
 		animator.stop();
-		running=false;
+		//running=false;
 		System.out.println("glExecutorThread.join()...");
-		try{glExecutorThread.join();}
-		catch(InterruptedException ex){ex.printStackTrace();}
+		//try{glExecutorThread.join();}
+		//catch(InterruptedException ex){ex.printStackTrace();}
 		System.out.println("ThreadManager: WindowClosing Done.");
 	    }
 	});
@@ -137,90 +208,18 @@ public final class ThreadManager {
 	    @Override
 	    public void init(final GLAutoDrawable drawable) {
 		System.out.println("GLEventListener.init()");
-		glExecutorThread = new Thread(new Runnable(){
-		    @Override
-		    public void run() {
-			GLContext context = tr.getRootWindow().getCanvas().getContext();
-			Thread.currentThread().setName("glExecutorThread");
-			try{
-			while(running){
-			    renderingThread=Thread.currentThread();
-			    context = tr.getRootWindow().getCanvas().getContext();
-			    try{if(context.isCurrent())	context.release();}//Feed the watchdog timer.
-			    catch(NullPointerException e){break;}
-			    synchronized(mappedOperationQueue){
-				if(mappedOperationQueue.isEmpty()){
-				    mappedOperationQueue.wait();
-				}//end if(!glTasksWaiting)
-			    }//end sync(glTasksWaiting)
-			    context = tr.getRootWindow().getCanvas().getContext();//May have changed while waiting
-			    //Execute the tasks
-			    try{context.makeCurrent();}
-			    	//Sometimes NPE's out when closing while multiple threads are passing the gl.
-			    	catch(NullPointerException e){break;}
-				//if GPU not yet available, mapping not possible.
-				if(ThreadManager.this.tr.gpu.isDone()){
-				    if(ThreadManager.this.tr.gpu.get().memoryManager.isDone()){
-				    ThreadManager.this.tr.gpu.get().memoryManager.get().map(); }}
-				while(!mappedOperationQueue.isEmpty()){
-				    try{if(!context.isCurrent())context.makeCurrent();}	//Feed the watchdog timer.
-				    catch(NullPointerException e){break;}
-				    mappedOperationQueue.poll().run();
-				    renderingThread.setName("glExecutorThread");
-				    try{if(context.isCurrent())context.release();}
-				    catch(NullPointerException e){break;}
-				}//end while(mappedOperationQueue)
-			}}catch(InterruptedException e){}
-			catch(Exception e){tr.showStopper(e);}
-			try{if(context.isCurrent())context.release();}
-			catch(NullPointerException e){
-			    System.err.println("ThreadManager: NPE when releasing context. Aborting...");return;}
-		    }});
-		glExecutorThread.setDaemon(true);
-		glExecutorThread.start();
 	    }//end init()
 
 	    @Override
 	    public void dispose(GLAutoDrawable drawable) {
 	    }
-	    private final AtomicInteger _counter = new AtomicInteger();
-	    private final AtomicLong _lastFPSTime = new AtomicLong();
-	    private final AtomicLong _timeInDisplay = new AtomicLong();
+	    
 	    @Override
 	    public void display(GLAutoDrawable drawable) {
-		long startTimeMillis = System.currentTimeMillis();
-		final int _count = _counter.incrementAndGet();
-		if(System.currentTimeMillis() > _lastFPSTime.get()+1000){
-		    _counter.set(0);
-		    System.out.println(_count+" FPS timeInDisplay="+_timeInDisplay.get()+"ms");
-		    _lastFPSTime.set(System.currentTimeMillis());
-		}//end if(1 second)
-		final GLContext context = drawable.getContext();
-		if(context.isCurrent())context.release();
-		//Thread.currentThread().setPriority(RENDERING_PRIORITY-1);
-		final long _renderStartTick=System.currentTimeMillis();
-		Thread.currentThread().setName("OpenGL display()");
-		if(counter%50==0)System.out.println("mappedOperationQueue size="+mappedOperationQueue.size());
-		    //Schedule the rendering pass
-		    renderTask = submitToGL(new Callable<Void>(){
-			@Override
-			public Void call() throws Exception {
-			    if(tr.renderer.isDone()){
-				    ThreadManager.this.tr.renderer.get().render();
-				    }////end if(renderer.isDone)
-			    return null;
-			}});
-		    if(counter%50==0)System.out.println("Enqueue overhead: "+(System.currentTimeMillis()-_renderStartTick));
-		    renderTask.get();//TODO: Remove
-		    if(counter%50==0)System.out.println("Wait-for-Render-Finish time: "+(System.currentTimeMillis()-_renderStartTick));
-		    //While the rendering pass is being executed, consider doing the visiblity calc.
-		    if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
-			visibilityCalc();}
-		    if(tr.getPlayer()!=null)gameplay();
-		    //Barrier for completed rendering
-		    //renderTask.get();//TODO: Uncomment
-		    context.makeCurrent();
-		    _timeInDisplay.set(System.currentTimeMillis()-startTimeMillis);
+		renderingThread=Thread.currentThread();
+		if(tr.renderer.isDone()){
+		    if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
+		    }////end if(renderer.isDone)
 	    }//end display()
 
 	    @Override

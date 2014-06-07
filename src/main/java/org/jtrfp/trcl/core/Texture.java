@@ -32,6 +32,7 @@ import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLRunnable;
 
 import org.jtrfp.trcl.OutOfTextureSpaceException;
 import org.jtrfp.trcl.gpu.GLTexture;
@@ -72,7 +73,7 @@ public class Texture implements TextureDescription {
 	}//end while(texturesToBeAccounted)
     }// end waitUntilTextureProcessingEnds()
 
-    public static final ArrayList<Runnable> executeInGLFollowingFinalization = new ArrayList<Runnable>();
+    public static final ArrayList<GLRunnable> executeInGLFollowingFinalization = new ArrayList<GLRunnable>();
     private static ByteBuffer emptyRow = null;
     
     private Texture(TR tr, String debugName){
@@ -380,15 +381,18 @@ public class Texture implements TextureDescription {
 	globalTexture = tex;
 	final TR tr = gpu.getTr();
 	System.out.println("Legacy texturing mode: Committing models to atlas U/Vs...");
-	for(final Runnable r:Texture.executeInGLFollowingFinalization){
+	tr.getRootWindow().getCanvas().invoke(false, Texture.executeInGLFollowingFinalization);
+	/*for(final GLRunnable r:Texture.executeInGLFollowingFinalization){
 	    tr.getThreadManager().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
+		    System.out.println("Texture.finalize.executeInGLFollowingFinalization "+r);
 		    r.run();
 		    return null;
 		}//end call()
 	    });
 	}//end for(executeInGLFollowingFinalization)
+	*/
     }// end finalize()
 
     public static final int createTextureID(GL3 gl) {

@@ -25,7 +25,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
 
-    public static final int			DEPTH_QUEUE_SIZE = 3;
+    public static final int			DEPTH_QUEUE_SIZE = 4;
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;
@@ -164,6 +164,7 @@ public final class Renderer {
 			.attachDrawTexture2D(depthQueueTexture, 
 				GL3.GL_COLOR_ATTACHMENT0,GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.attachDepthTexture2D(depthQueueStencil)
+			.attachStencilTexture2D(depthQueueStencil)
 			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
@@ -177,6 +178,7 @@ public final class Renderer {
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(GLAutoDrawable drawable) {
+		drawable.getGL().setSwapInterval(1);
 	    }
 
 	    @Override
@@ -280,33 +282,44 @@ public final class Renderer {
     }//end fpsTracking()
     private volatile int counter=0;//TODO: remove
     public void render() {
+	final GL3 gl = gpu.getGl();
+	//gl.glFinish();//TODO: Remove
 	long startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	counter++;//TODO: Remove
 	if (!active)
 	    return;
-	final GL3 gl = gpu.getGl();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+	//gl.glFinish();//TODO: Remove
 	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	ensureInit();
+	//gl.glFinish();//TODO: Remove
 	if(counter%50==0)System.out.println("Passed for ensureInit() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
 	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){
 	    gpu.memoryManager.get().unmap();
 	}
+	//gl.glFinish();//TODO: Remove
 	if(counter%50==0)System.out.println("Passed for unmap() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
 	final RenderList renderList = currentRenderList().get();
+	//gl.glFinish();//TODO: Remove
 	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	renderList.render(gl);
+	//gl.glFinish();//TODO: Remove
 	if(counter%50==0)System.out.println("Passed for RenderList.render() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
+	//gl.glFinish();//TODO: Remove
 	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	gpu.memoryManager.get().map();
+	//gl.glFinish();//TODO: Remove
 	if(counter%50==0)System.out.println("Passed for map() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
+	//gl.glFinish();//TODO: Remove
 	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	renderList.sendToGPU(gl);
+	//gl.glFinish();//TODO: Remove
 	if(counter%50==0)System.out.println("Passed for sendToGPU() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
 	fpsTracking();
 	// Update GPU
 	startTimeMillis = System.currentTimeMillis();//TODO: Remove
 	setFogColor(gpu.getTr().getWorld().getFogColor());
+	//gl.glFinish();//TODO: Remove
 	if(counter%50==0)System.out.println("Passed for setFogColor() "+(System.currentTimeMillis()-startTimeMillis));//TODO: Remove
     }//end render()
 

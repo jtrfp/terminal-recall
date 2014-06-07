@@ -19,6 +19,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLRunnable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
@@ -258,13 +260,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		    }//end Call()
 		}).get();
 	}else{
-	    Texture.executeInGLFollowingFinalization.add(new Runnable() {
+	    Texture.executeInGLFollowingFinalization.add(new GLRunnable() {
 		    @Override
-		    public void run(){
+		    public boolean run(GLAutoDrawable d){
 			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 				try{setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
 				catch(Exception e){throw new RuntimeException(e);}}
-		    }//end Call()
+			return true;
+		    }//end run()
 		});
 	}//end legacy texturing enqueue later.
 	

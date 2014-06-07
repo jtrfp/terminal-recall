@@ -70,21 +70,25 @@ public final class ThreadManager {
 	boolean alreadyVisitedPlayer=false;
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo = vl.get(i);
+	    boolean multiplePlayer=false;
 	    if (wo.isActive()
 		    && (TR.twosComplimentDistance(wo.getPosition(), tr
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)
 		    || wo instanceof VisibleEverywhere)
 		if(wo instanceof Player){
 		    if(alreadyVisitedPlayer){
+			multiplePlayer=true;
+			/*
 			new RuntimeException("ALREADY VISITED PLAYER").printStackTrace();//TODO: Remove
 			Player p = (Player)wo;
 			List<PositionListener>pcls = p.getPositionListeners();
 			for(PositionListener pcl:pcls){
 			    System.out.println("PositionListener "+pcl);
 			}//end for(pcls)
+			*/
 		    }else alreadyVisitedPlayer=true;
 		}
-		wo.tick(tickTimeInMillis);
+		if(!multiplePlayer)wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
 	if(tr.getPlayer()!=null){
 	    tr.getCollisionManager().performCollisionTests();

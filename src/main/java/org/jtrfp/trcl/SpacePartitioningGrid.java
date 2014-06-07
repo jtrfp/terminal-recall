@@ -263,15 +263,16 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		
 		public void add(E objectToAdd){
 			if(getElements().contains(objectToAdd)){
-			    new Exception("Redundant add!").printStackTrace();
+			    /*new Exception("Redundant add!").printStackTrace();
 			    List<PositionListener>pcls = ((WorldObject)objectToAdd).getPositionListeners();
 				for(PositionListener pl:pcls){
 				    System.out.println("PositionListener "+pl);
-				}
-			   }//TODO Comment out */
+				}*/
+			   }//TODO Comment out 
+			else{//Ok to add.
 			getElements().add(objectToAdd);
 			if(!(objectToAdd instanceof VisibleEverywhere))
-			    objectToAdd.addPositionListener(this);
+			    objectToAdd.addPositionListener(this);}
 			}//end add(E)
 
 		@SuppressWarnings("unchecked")

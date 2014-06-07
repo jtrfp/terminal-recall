@@ -141,14 +141,15 @@ vec3	color;
 
 color = vec3(intrinsicCodeTexel(linearDepth,textureID,norm,uv));
 
-vec4	depthQueueTexel	=texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),0);
+for(int i=0; i<4; i++){
+vec4	depthQueueTexel	=texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
 	 	uv				= depthQueueTexel.rg;
 		textureID		= floatBitsToUint(depthQueueTexel[2u]);
 		//TODO: LinearDepth. Alpha is depth.
 		//TODO: Norm. Calculate from future primitive table implementation?
 
 vec4 dqColor = textureID!=0u?intrinsicCodeTexel(0,textureID,vec3(0,0,0),uv):vec4(0,0,0,0);
-color = mix(color.rgb,dqColor.rgb,dqColor.a);
+color = mix(color.rgb,dqColor.rgb,dqColor.a);}
 
 fragColor.rgb		 	= oldTex?texture(texturePalette,fragColor.xy).rgb:
 						  color;//GET COLOR

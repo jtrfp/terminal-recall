@@ -222,25 +222,31 @@ public class RenderList {
 	
 	// DEPTH QUEUE STAGE
 	if(tr.getTrConfig().isUsingNewTexturing()){
-	    gl.glDisable(GL3.GL_MULTISAMPLE);
 	    //ERASE
 	    tr.renderer.get().depthErasureProgram.use();
 	    gl.glDisable(GL3.GL_CULL_FACE);
 	    depthQueueFrameBuffer.bindToDraw();
+	    gl.glDisable(GL3.GL_MULTISAMPLE);
+	    gl.glEnable(GL3.GL_SAMPLE_MASK);
 	    gl.glDepthFunc(GL3.GL_ALWAYS);
 	    gl.glDepthMask(false);
 	    gl.glEnable(GL3.GL_STENCIL_TEST);
 	    for(int i = 0; i < Renderer.DEPTH_QUEUE_SIZE; i++) {
-	      gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
+	      gl.glStencilFunc(GL3.GL_ALWAYS, i+1, 0xff);
 	      gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
-	      gl.glSampleMaski(1, 0x1 << i);
+	      gl.glSampleMaski(0, 0x1 << i);
 	      gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	    }
+	    gl.glSampleMaski(0, 0xFF);
 	    //DRAW
-	    gl.glDisable(GL3.GL_STENCIL_TEST);
-	    depthQueueProgram.use();
+	    depthQueueProgram.use(); //TODO: Nothing shows up
+	    //gl.glDepthFunc(GL3.GL_GREATER);
+	    //gl.glDisable(GL3.GL_STENCIL_TEST);
+	    gl.glDisable(GL3.GL_SAMPLE_MASK);
+	    //gl.glEnable(GL3.GL_STENCIL_TEST);
 	    gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
-	    gl.glStencilOp(GL3.GL_KEEP, GL3.GL_DECR, GL3.GL_DECR);
+	    gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
+	    //gl.glSampleMaski(0, 0xFF);
 	    GLTexture.specifyTextureUnit(gl, 0);
 	    intermediateDepthTexture.bind(gl);
 	    depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(matrixAsFlatArray, true);//TODO: Consolidate or abbreviate

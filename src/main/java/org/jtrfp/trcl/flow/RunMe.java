@@ -70,7 +70,7 @@ public class RunMe{
 			String cmd="java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true " +
 					"-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods " +
 					"-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts " +
-					"-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m"+executable;
+					"-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m "+executable;
 			for(String arg:args){cmd+=" "+arg;}
 			try {
 				System.out.println("Restarting JVM with: \n\t"+cmd);

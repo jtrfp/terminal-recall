@@ -2,9 +2,6 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
-
-import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;

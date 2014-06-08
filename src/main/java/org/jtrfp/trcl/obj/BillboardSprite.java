@@ -1,7 +1,6 @@
 package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;

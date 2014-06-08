@@ -9,7 +9,6 @@ import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;

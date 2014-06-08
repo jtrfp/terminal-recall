@@ -1,7 +1,7 @@
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class ExplodesOnDeath extends Behavior implements DeathListener {
 private ExplosionType type;

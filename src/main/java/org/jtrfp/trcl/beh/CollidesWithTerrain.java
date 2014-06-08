@@ -2,17 +2,12 @@ package org.jtrfp.trcl.beh;
 
 import java.util.Collection;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.TerrainChunk;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {

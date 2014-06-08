@@ -24,7 +24,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.PositionListenable;
 import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
-import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	private double 				squareSize, viewingRadius;

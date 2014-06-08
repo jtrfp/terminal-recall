@@ -3,7 +3,6 @@ package org.jtrfp.trcl;
 import java.util.Comparator;
 import java.util.TreeSet;
 
-import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 

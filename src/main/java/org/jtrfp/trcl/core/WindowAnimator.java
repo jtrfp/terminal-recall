@@ -1,8 +1,8 @@
 package org.jtrfp.trcl.core;
 
 import org.jtrfp.trcl.Controller;
-import org.jtrfp.trcl.Tickable;
 import org.jtrfp.trcl.IntTransferFunction;
+import org.jtrfp.trcl.Tickable;
 
 public class WindowAnimator implements Tickable {
     private int 			indexCounter = 0;

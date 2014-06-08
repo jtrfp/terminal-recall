@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.LineSegment;
 
 

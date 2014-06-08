@@ -10,7 +10,6 @@ import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.LimitedLifeSpan;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
-import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
 import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;

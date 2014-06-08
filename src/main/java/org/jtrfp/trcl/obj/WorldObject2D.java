@@ -17,8 +17,6 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.PrimitiveRenderMode;
-import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;

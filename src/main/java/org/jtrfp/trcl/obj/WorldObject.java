@@ -34,7 +34,6 @@ import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GLTextureBuffer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;

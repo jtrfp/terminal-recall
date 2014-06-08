@@ -3,9 +3,6 @@ package org.jtrfp.trcl.core;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLContext;
-
 public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     protected final TR tr;
 

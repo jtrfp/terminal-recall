@@ -1,6 +1,5 @@
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 

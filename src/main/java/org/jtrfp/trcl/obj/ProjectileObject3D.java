@@ -2,8 +2,6 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Model;
-import org.jtrfp.trcl.beh.DeathBehavior;
-import org.jtrfp.trcl.beh.LimitedLifeSpan;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
 import org.jtrfp.trcl.beh.ReportsCollisionsToStdout;
 import org.jtrfp.trcl.core.TR;

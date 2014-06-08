@@ -228,6 +228,15 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end animated texture
+	else{
+	    AnimatedTexture at = ((AnimatedTexture) td);
+	    final int numTextureFrames = at.getFrames().length;
+	    final TexturePageAnimator textureIDAnimator = new TexturePageAnimator(numTextureFrames,at,vw,gpuTVIndex);
+	    /*
+	    textureIDAnimator.setDebugName(debugName + ".uvAnimator");
+	    getModel().addTickableAnimator(textureIDAnimator);
+	    */
+	}
     }// end setupVertex
 
     private void setupTriangle(final int triangleIndex, final TextureDescription textureDescription,final int [] vertexIndices) throws ExecutionException,

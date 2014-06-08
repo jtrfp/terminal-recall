@@ -4,8 +4,6 @@ import java.nio.IntBuffer;
 
 import javax.media.opengl.GL3;
 
-import org.apache.commons.math3.linear.RealMatrix;
-
 public class GLUniform {
     private final GLProgram prg;
     private final int uniformID;

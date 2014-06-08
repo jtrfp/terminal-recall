@@ -34,7 +34,6 @@ import org.jtrfp.trcl.beh.SteadilyRotating;
 import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
-import org.jtrfp.trcl.beh.phy.BouncesOffSurfaces;
 import org.jtrfp.trcl.beh.phy.HasPropulsion;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;

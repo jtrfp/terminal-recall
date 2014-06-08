@@ -1,8 +1,5 @@
 package org.jtrfp.trcl.beh;
 
-import java.util.Arrays;
-
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.WorldObject;
 

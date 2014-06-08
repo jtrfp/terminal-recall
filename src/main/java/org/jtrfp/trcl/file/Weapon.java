@@ -1,7 +1,6 @@
 package org.jtrfp.trcl.file;
 
 import java.awt.Dimension;
-import java.awt.event.KeyEvent;
 
 import org.jtrfp.trcl.file.ModelingType.BINModelingType;
 import org.jtrfp.trcl.file.ModelingType.BillboardModelingType;

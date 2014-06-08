@@ -15,10 +15,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TR;

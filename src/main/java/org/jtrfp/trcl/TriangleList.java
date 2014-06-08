@@ -167,7 +167,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		System.err.println("\tat "+el.getClassName()+"."+el.getMethodName()+"("+el.getFileName()+":"+el.getLineNumber()+")");
 	    }//end for(stackTrace)
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
-	if (td instanceof Texture) {// Static texture
+	if (td instanceof Texture ) {// Static texture
 	    final Texture.TextureTreeNode tx;
 	    tx = ((Texture) td).getNodeForThisTexture();
 	    if (animateUV && numFrames > 1) {// Animated UV
@@ -228,14 +228,30 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end animated texture
-	else{
+	if(tr.getTrConfig().isUsingNewTexturing() && td instanceof AnimatedTexture){//Animated texture (new system)
+	    if (animateUV && numFrames > 1) {// Animated UV
+		float[] uFrames = new float[numFrames];
+		float[] vFrames = new float[numFrames];
+		final WindowAnimator uvAnimator = new WindowAnimator(
+			getFlatTVWindow(), 2,// UV per vertex
+			numFrames, false, getVertexSequencer(
+				timeBetweenFramesMsec, numFrames),
+			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
+		getModel().addTickableAnimator(uvAnimator);
+		for (int i = 0; i < numFrames; i++) {
+		    uFrames[i] = (float) (uvUpScaler * triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) (uvUpScaler * triangleAt(i, triangleIndex).getUV(vIndex).getY());
+		}// end for(numFrames)
+		uvAnimator.addFrames(uFrames);
+		uvAnimator.addFrames(vFrames);
+	    } else {// end if(animateUV)
+		vw.u.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getX()));
+		vw.v.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getY()));
+	    }// end if(!animateUV)
 	    AnimatedTexture at = ((AnimatedTexture) td);
-	    final int numTextureFrames = at.getFrames().length;
-	    final TexturePageAnimator textureIDAnimator = new TexturePageAnimator(numTextureFrames,at,vw,gpuTVIndex);
-	    /*
-	    textureIDAnimator.setDebugName(debugName + ".uvAnimator");
-	    getModel().addTickableAnimator(textureIDAnimator);
-	    */
+	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(at,vw,gpuTVIndex);
+	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");
+	    getModel().addTickableAnimator(texturePageAnimator);
 	}
     }// end setupVertex
 

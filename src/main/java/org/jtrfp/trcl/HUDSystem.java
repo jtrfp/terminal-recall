@@ -123,7 +123,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 		false));
 	mb.setPosition(THROTTLE_POS);
 	throttleMeter = mb.getController();
-	tr.getThreadManager().getGameplayTimer()
+	tr.getThreadManager().getLightweightTimer()
 		.scheduleAtFixedRate(new TimerTask() {
 		    @Override
 		    public void run() {

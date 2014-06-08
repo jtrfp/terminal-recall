@@ -29,7 +29,7 @@ public final class ThreadManager {
     //public static final int RENDERING_PRIORITY 		= 6;
     //public static final int SOUND_PRIORITY 		= 8;
     private final TR 			tr;
-    private final Timer 		gameplayTimer 			= new Timer("GameplayTimer");
+    private final Timer 		lightweightTeimer 		= new Timer("GameplayTimer");
     private long 			lastGameplayTickTime 		= 0;
     private long 			timeInMillisSinceLastGameTick 	= 0L;
     private int 			counter 			= 0;
@@ -118,7 +118,7 @@ public final class ThreadManager {
     }
 
     private void start() {
-	gameplayTimer.schedule(new TimerTask(){
+	lightweightTeimer.schedule(new TimerTask(){
 	    @Override
 	    public void run() {
 				if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
@@ -166,8 +166,13 @@ public final class ThreadManager {
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;
     }
-
-    public Timer getGameplayTimer() {
-	return gameplayTimer;
+    
+    /**
+     * General-use Timer to be used for short, non-timing-critical operations.
+     * @return
+     * @since Jun 8, 2014
+     */
+    public Timer getLightweightTimer() {
+	return lightweightTeimer;
     }
 }// end ThreadManager

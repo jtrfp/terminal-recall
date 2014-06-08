@@ -178,7 +178,7 @@ public final class Renderer {
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(GLAutoDrawable drawable) {
-		drawable.getGL().setSwapInterval(1);
+		drawable.getGL().setSwapInterval(0);
 	    }
 
 	    @Override

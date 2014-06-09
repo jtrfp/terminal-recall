@@ -25,7 +25,7 @@ import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
 public class Dashboard extends WorldObject2DVisibleEverywhere {
-    private static final double Z = -1;
+    private static final double Z = .5;
 
     public Dashboard(TR tr) throws IllegalAccessException, FileLoadException,
 	    IOException {

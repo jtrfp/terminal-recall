@@ -24,7 +24,7 @@ private final NAVRadarBlipFactory blips;
 	final double [] aPos = arrow.getPosition();
 	aPos[0]=.825;
 	aPos[1]=.8;
-	aPos[2]=0;
+	aPos[2]=.00001;
 	arrow.notifyPositionChange();
 	//arrow.setPosition(new Vector3D(.825,.8,0));
 	add(arrow);

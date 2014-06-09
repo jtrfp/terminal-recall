@@ -199,12 +199,12 @@ public final class Renderer {
 		intermediateNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		intermediateTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
 		depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
-		depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);//TODO: Change to RGBA32
+		depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);// Doesn't like RGBA32UI for some reason.
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		depthQueueProgram.use();
-		//depthQueueScreenWidth.setui(width);
-		//depthQueueScreenHeight.setui(height);
+		depthQueueProgram.getUniform("screenWidth").setui(width);//TODO: Optimize
+		depthQueueProgram.getUniform("screenHeight").setui(height);
 		Renderer.this.getPrimaryProgram().use();
 	    }
 	});

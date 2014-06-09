@@ -142,18 +142,42 @@ vec2	uv			= fragColor.xy;
 vec3	color;
 
 color = vec3(intrinsicCodeTexel(linearDepth,textureID,norm,uv));
-
+ uint relevantSize=0u;
+ vec4 depthQueue[DEPTH_QUEUE_SIZE];
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
- vec4	depthQueueTexel	=texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
-	 	uv				= depthQueueTexel.rg;
+ vec4	depthQueueTexel	= texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
+	 	//uv			= depthQueueTexel.rg;
 		textureID		= floatBitsToUint(depthQueueTexel[2u]);
 		//TODO: LinearDepth. Alpha is depth.
 		//TODO: Norm. Calculate from future primitive table implementation?
-
- vec4 dqColor = textureID!=0u?intrinsicCodeTexel(0,textureID,vec3(0,0,0),uv):vec4(0,0,0,0);
- color = mix(color.rgb,dqColor.rgb,dqColor.a);
+ if(textureID!=0u){// Found a valid point
+ 	depthQueue[relevantSize]=depthQueueTexel;
+ 	relevantSize++;
+ 	//color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
+ 	}//end if(valid point)
  }//end for(DEPTH_QUEUE_SIZE)
-
+ 
+ //relevantSize=1u;
+ if(relevantSize>1u){
+ //Perform the not-so-quick sort
+ vec4 intermediary;
+ for(uint i=0u; i<relevantSize-1u; i++){
+  for(uint j=i+1u; j<relevantSize; j++){
+   if(depthQueue[j].a>depthQueue[i].a){//Found new deepest
+    //Trade
+    intermediary = depthQueue[i];
+    depthQueue[i] = depthQueue[j];
+    depthQueue[j] = intermediary;
+    }//end if(new deepest)
+   }//end for(lower end)
+  }//end for(relevantSize)
+  }//end if(relevantSize>1u)
+  //Alpha combine
+  for(uint i=0u; i<relevantSize; i++){
+  vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[i][2u]),vec3(0,0,0),depthQueue[i].rg);
+  color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
+  }//end for(relevantSize)
+  
 fragColor.rgb		 	= oldTex?texture(texturePalette,fragColor.xy).rgb:
 						  color;//GET COLOR
 if(oldTex){

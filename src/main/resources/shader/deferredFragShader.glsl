@@ -55,7 +55,7 @@ const uint SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4
 
 const vec3 sunColor 					= vec3(1.4,1.4,1.2);
 
-const int DEPTH_QUEUE_SIZE				= 4;
+const int DEPTH_QUEUE_SIZE				= 8;
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
 float linearizeDepth(float z){

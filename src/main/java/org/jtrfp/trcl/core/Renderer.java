@@ -24,7 +24,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
 
-    public static final int			DEPTH_QUEUE_SIZE = 4;
+    public static final int			DEPTH_QUEUE_SIZE = 8;
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;

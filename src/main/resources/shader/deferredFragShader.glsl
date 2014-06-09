@@ -39,7 +39,9 @@ layout(location = 0) out vec4 fragColor;
 const uint TOC_OFFSET_VEC4_HEADER				=91u;//1456/16
 const uint TOC_HEADER_OFFSET_QUADS_WIDTH		=0u;
 const uint TOC_HEADER_OFFSET_QUADS_HEIGHT		=1u;
-const uint TOC_HEADER_OFFSET_QUADS_START_CODE	=2u;
+const uint TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS	=2u;
+
+const uint RENDER_FLAGS_WRAP					=0x1u;
 
 const float TILE_PAGE_SIDE_WIDTH_TEXELS = 128;
 const uint CODE_SIDE_WIDTH_TEXELS 		= 4u;
@@ -68,8 +70,8 @@ return z;
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
-vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims){
- 		texelXY		= mod(texelXY,tDims);
+vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
+ 		texelXY		= (renderFlags&RENDER_FLAGS_WRAP)!=0u?mod(texelXY,tDims):clamp(texelXY,vec2(0,0),tDims-vec2(1,1));
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
  //Clamp sub-pixels within vector.
  codeXY				= clamp(codeXY,0,3)+vec2(.5,.5);
@@ -100,17 +102,18 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims){
  vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
  vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
- vec4	cTexel  	= codeTexel(texelXY,textureID,tDims);
+ uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
+ vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
  if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
-	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * (dH.x);
+	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * (dH.x);
  else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
-	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (dH.y);
+	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (dH.y);
  else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
 	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
-	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims) * dH.x *(1-dH.y)+ //Bottom right
-	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims) * dH.x*dH.y+ //Top right
-	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims) * (1-dH.x)*(dH.y); //Top left
+	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * dH.x *(1-dH.y)+ //Bottom right
+	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right
+	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (1-dH.x)*(dH.y); //Top left
 
  float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
  cTexel.rgb 			= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;

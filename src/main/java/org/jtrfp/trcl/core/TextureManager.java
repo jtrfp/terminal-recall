@@ -33,11 +33,11 @@ public class TextureManager {
 	
     }//end constructor
     
-    public Texture newTexture(ByteBuffer imageRGB8, String debugName){
-	return new Texture(imageRGB8,debugName,tr);
+    public Texture newTexture(ByteBuffer imageRGB8, String debugName, boolean uvWrapping){
+	return new Texture(imageRGB8,debugName,tr, uvWrapping);
     }
-    public Texture newTexture(BufferedImage img, String debugName){
-	return new Texture(img,debugName,tr);
+    public Texture newTexture(BufferedImage img, String debugName, boolean uvWrapping){
+	return new Texture(img,debugName,tr, uvWrapping);
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;
@@ -50,7 +50,7 @@ public class TextureManager {
 	 defaultTriPipeTexture
 	    	= new DummyTRFutureTask<TextureDescription>(
 	    		new Texture(Texture.RGBA8FromPNG(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
-	    			"Default TriPipe Texture (grayNoise)",tr));
+	    			"Default TriPipe Texture (grayNoise)",tr,true));
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
@@ -61,7 +61,7 @@ public class TextureManager {
 	t = new Texture(
 		Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),
-		"Fallback",tr);
+		"Fallback",tr,true);
 	fallbackTexture = new DummyTRFutureTask<TextureDescription>(t);
 	return fallbackTexture;
     }//end getFallbackTexture()
@@ -74,7 +74,7 @@ public class TextureManager {
 	g.fillRect(0, 0, 64, 64);
 	g.dispose();
 	final DummyTRFutureTask<TextureDescription> result = new DummyTRFutureTask<TextureDescription>(new Texture(img,
-		"Solid color " + color,tr));
+		"Solid color " + color,tr,false));
 	return result;
     }//end solidColor(...)
     

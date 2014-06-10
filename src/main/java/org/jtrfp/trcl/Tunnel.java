@@ -85,7 +85,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	    	//Entrance uses only a stub. Player is warped to TUNNEL_POS facing TUNNEL_START_DIRECTION
 		ResourceManager rm = tr.getResourceManager();
 		LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
-		TRFutureTask<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl);
+		TRFutureTask<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl,true);
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
 		final double segLen=65536;

@@ -34,7 +34,7 @@ private final NAVSystem nav;
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
 		tr.getGlobalPalette(), 
 		GammaCorrectingColorProcessor.singleton, 
-		tr.gpu.get().getGl());}
+		tr.gpu.get().getGl(),false);}
 	catch(Exception e){e.printStackTrace();}
 	return null;
     }

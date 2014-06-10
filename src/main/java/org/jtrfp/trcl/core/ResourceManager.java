@@ -141,33 +141,33 @@ public class ResourceManager{
 		pods.add(new PodFile(f).getData());
 		}
 	
-	public TRFutureTask<TextureDescription> [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException{
+	public TRFutureTask<TextureDescription> [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		String [] files = getTEXListFile(texFileName);
 		TRFutureTask<TextureDescription> [] result = new TRFutureTask[files.length];
 		//Color [] palette = getPalette(actFileName);
 		for(int i=0; i<files.length;i++)
-			{result[i]=getRAWAsTexture(files[i],palette,proc,gl3);}
+			{result[i]=getRAWAsTexture(files[i],palette,proc,gl3,uvWrapping);}
 		return result;
 		}//end loadTextures(...)
 	
-	public TRFutureTask<TextureDescription>[] getSpecialRAWAsTextures(String name, Color [] palette, ColorProcessor proc, GL3 gl, int upScalePowerOfTwo) throws IOException, FileLoadException, IllegalAccessException{
+	public TRFutureTask<TextureDescription>[] getSpecialRAWAsTextures(String name, Color [] palette, ColorProcessor proc, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		TRFutureTask<TextureDescription> [] result = specialTextureNameMap.get(name);
 		if(result==null){
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, proc, upScalePowerOfTwo);
 			result=new TRFutureTask[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new DummyTRFutureTask<TextureDescription>(new Texture(segs[si],"name",tr));}
+				{result[si] = new DummyTRFutureTask<TextureDescription>(new Texture(segs[si],"name",tr,uvWrapping));}
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
 		}//end getSpecialRAWAsTextures
 	
-	public TRFutureTask<TextureDescription> getRAWAsTexture(String name, final Color [] palette, ColorProcessor proc, GL3 gl3) throws IOException, FileLoadException, IllegalAccessException{
-	    return getRAWAsTexture(name,palette,proc,gl3,true);
+	public TRFutureTask<TextureDescription> getRAWAsTexture(String name, final Color [] palette, ColorProcessor proc, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	    return getRAWAsTexture(name,palette,proc,gl3,true,uvWrapping);
 	}
 	
 	public TRFutureTask<TextureDescription> getRAWAsTexture(final String name, final Color [] palette, final ColorProcessor proc, GL3 gl3,
-			final boolean useCache) throws IOException, FileLoadException, IllegalAccessException{
+			final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    	TRFutureTask<TextureDescription> result=textureNameMap.get(name);
 	    	if(result!=null&&useCache)return result;
 		result= tr.getThreadManager().submitToThreadPool(new Callable<TextureDescription>(){
@@ -191,12 +191,12 @@ public class ResourceManager{
 					if(frames.size()>1){
 						TRFutureTask<Texture> [] tFrames = new TRFutureTask[frames.size()];
 						for(int i=0; i<tFrames.length;i++)
-							{tFrames[i]=new DummyTRFutureTask<Texture>(new Texture(getRAWImage(frames.get(i),palette,proc),""+frames.get(i),null));/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
+							{tFrames[i]=new DummyTRFutureTask<Texture>(new Texture(getRAWImage(frames.get(i),palette,proc),""+frames.get(i),null,uvWrapping));/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWImage(name,palette,proc),name,tr);
+				result = new Texture(getRAWImage(name,palette,proc),name,tr,uvWrapping);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
@@ -298,7 +298,7 @@ public class ResourceManager{
 					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
 						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,hasAlpha);
-						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl);}
+						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,false);}
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
@@ -391,7 +391,7 @@ public class ResourceManager{
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						TRFutureTask<Texture> [] subTextures = new TRFutureTask[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							if(!hasAlpha)subTextures[ti]=(TRFutureTask)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl);
+							if(!hasAlpha)subTextures[ti]=(TRFutureTask)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl,false);
 							else subTextures[ti]=(TRFutureTask)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl,true);
 							//subTextures[ti]=tex instanceof Texture?new DummyTRFutureTask<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							}//end for(frames) //fDelay, nFrames,interp

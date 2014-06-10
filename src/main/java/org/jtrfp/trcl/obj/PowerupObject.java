@@ -97,7 +97,7 @@ public class PowerupObject extends BillboardSprite{
 	}//end PowerupBehavior
 	
 	private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl());}
+		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
 
 	public Powerup getPowerupType()
 		{return powerupType;}

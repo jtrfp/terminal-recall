@@ -55,6 +55,7 @@ public class Texture implements TextureDescription {
     private	  int[]			subTextureIDs;
     private	  int[][]		codebookStartOffsetsAbsolute;
     private 	  ByteBuffer 		rgba;
+    private final boolean		uvWrapping;
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
 						  // doesn't scale with
 						  // texture palette
@@ -76,7 +77,7 @@ public class Texture implements TextureDescription {
     public static final ArrayList<GLRunnable> executeInGLFollowingFinalization = new ArrayList<GLRunnable>();
     private static ByteBuffer emptyRow = null;
     
-    private Texture(TR tr, String debugName){
+    private Texture(TR tr, String debugName, boolean uvWrapping){
 	this.tr=tr;
 	this.gpu	=tr.gpu.get();
 	this.tm		=gpu.textureManager.get();
@@ -84,22 +85,23 @@ public class Texture implements TextureDescription {
 	this.toc	=tm.getTOCWindow();
 	this.stw	=tm.getSubTextureWindow();
 	this.debugName	=debugName.replace('.', '_');
+	this.uvWrapping =uvWrapping;
     }//end constructor
 
     private Texture(Texture parent, double uOff, double vOff, double uSize,
-	    double vSize, TR tr) {
-	this(tr,"subtexture: "+parent.debugName);
+	    double vSize, TR tr, boolean uvWrapping) {
+	this(tr,"subtexture: "+parent.debugName,uvWrapping);
 	nodeForThisTexture = new UVTranslatingTextureTreeNode(
 		parent.getNodeForThisTexture(), uOff, vOff, uSize, vSize);
     }//end constructor
     
     public Texture subTexture(double uOff, double vOff, double uSize,
 	    double vSize){
-	return new Texture(this,uOff,vOff,uSize,vSize,tr);
+	return new Texture(this,uOff,vOff,uSize,vSize,tr,false);
     }
 
-    Texture(ByteBuffer imageRGBA8888, String debugName, TR tr) {
-	this(tr,debugName);
+    Texture(ByteBuffer imageRGBA8888, String debugName, TR tr, boolean uvWrapping) {
+	this(tr,debugName,uvWrapping);
 	if (imageRGBA8888.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
@@ -152,6 +154,10 @@ public class Texture implements TextureDescription {
 			final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 			//Load subtexture ID into TOC
 			toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+			//Render Flags
+			toc.renderFlags.set(tocIndex, 
+				(uvWrapping?0x1:0x0)
+				);
 			//Fill the subtexture code start offsets
 			for(int off=0; off<6; off++)
 			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetsAbsolute[i][off]);
@@ -206,8 +212,8 @@ public class Texture implements TextureDescription {
 		*/
     }//end vqCompress(...)
 
-    Texture(BufferedImage img, String debugName, TR tr) {
-	this(tr,debugName);
+    Texture(BufferedImage img, String debugName, TR tr, boolean uvWrapping) {
+	this(tr,debugName,uvWrapping);
 	    final int sideLength = img.getWidth();
 	    
 	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
@@ -912,4 +918,11 @@ public class Texture implements TextureDescription {
 	}
 	return result;
     }// end indexed2RGBA8888(...)
+
+    /**
+     * @return the uvWrapping
+     */
+    public boolean isUvWrapping() {
+        return uvWrapping;
+    }
 }// end Texture

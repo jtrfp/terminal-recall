@@ -175,13 +175,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    //No tunnelpoints on ceiling
 							    TRFutureTask<TextureDescription> td=(TRFutureTask<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
 							    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
-							    Triangle [] tris = Triangle.quad2Triangles(// COUNTER CLOCKWISE
-								//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
-								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
-								//new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
-								new double [] {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY}, 
-								//new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
-								new double [] {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
+							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE (else backface culling will eat it)
+								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
+								//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
+								new double [] {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
+								//new double [] {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY}, 
+								new double [] {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
+								//new double [] {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
 								u,
 								v,
 								td, RenderMode.STATIC,
@@ -223,7 +223,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    
 	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
-		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.gpu.get().getGl());}
+		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPalette(), GammaCorrectingColorProcessor.singleton, tr.gpu.get().getGl(),false);}
 		catch(Exception e){e.printStackTrace();}
 		DirectionVector v = entrance?tun.getEntrance():tun.getExit();
 		x=(byte)Math.round(TR.legacy2MapSquare(v.getZ()))&0xFF;//Reversed on purpose

@@ -51,7 +51,7 @@ public class ProjectileFactory {
    		mt.getRawFileName(),
    		tr.getDarkIsClearPalette(), 
    		GammaCorrectingColorProcessor.singleton,
-   		tr.gpu.get().getGl());
+   		tr.gpu.get().getGl(),false);
    	 final double Y_SLANT=1024;
    	 tris =(Triangle.quad2Triangles(new double[]{-laserplaneLength/2.,laserplaneLength/2.,laserplaneLength/2.,-laserplaneLength/2.}, //X
    		new double[]{0,0,Y_SLANT,Y_SLANT}, new double[]{-laserplaneWidth/2.,-laserplaneWidth/2.,laserplaneWidth/2.,laserplaneWidth/2.}, //YZ
@@ -72,7 +72,7 @@ public class ProjectileFactory {
    	     ColorProcessor proc = GammaCorrectingColorProcessor.singleton;
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Future)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl);
+   		 frames[i]=(Future)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl,false);
    	     }//end for(frames)
    	  TRFutureTask<TextureDescription> tex = new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames));
 	     for(int i=0; i<projectiles.length; i++){

@@ -98,16 +98,9 @@ public final class ThreadManager {
 	threadPool.submit(visibilityCalcTask);
     }//end visibilityCalc()
     public <T> TRFuture<T> submitToGL(Callable<T> c){
-	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
-	if(Thread.currentThread()!=renderingThread){
-	    tr.getRootWindow().getCanvas().invoke(false, new GLRunnable(){
-		@Override
-		public boolean run(GLAutoDrawable drawable) {
-		    result.run();
-		    return true;
-		}
-	    });
-	}//end if(current thread is GL)
+	final GLFutureTask<T> result = new GLFutureTask<T>(tr,c);
+	if(Thread.currentThread()!=renderingThread)
+	    result.enqueue();
 	else result.run();
 	return result;
     }

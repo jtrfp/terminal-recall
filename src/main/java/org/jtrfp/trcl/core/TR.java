@@ -18,7 +18,6 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
@@ -80,8 +79,6 @@ public final class TR{
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
 	private TRConfiguration 				trConfig;
-	private GL3 						glCache;
-	private ByteOrder 					byteOrder;
 	private final World 					world;
 	
 	/**

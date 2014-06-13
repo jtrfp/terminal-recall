@@ -16,6 +16,7 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.Model;
 
 public class TransparentTriangleList extends TriangleList {
     public TransparentTriangleList(Triangle[][] triangles,

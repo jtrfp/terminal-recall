@@ -1,9 +1,9 @@
 package org.jtrfp.trcl.obj;
 
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.gpu.Model;
 
 public class BarrierCube extends WorldObject {
     final double fluffX;

@@ -24,6 +24,7 @@ import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TextureManager;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
 public class Crosshairs extends WorldObject2DVisibleEverywhere{

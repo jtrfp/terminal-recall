@@ -26,6 +26,7 @@ import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
+import org.jtrfp.trcl.gpu.Model;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;

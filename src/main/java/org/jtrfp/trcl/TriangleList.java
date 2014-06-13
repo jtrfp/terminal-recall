@@ -29,6 +29,7 @@ import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TriangleList extends PrimitiveList<Triangle> {

@@ -2,12 +2,12 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.ManuallySetController;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.gpu.Model;
 
 public class MeterBar extends WorldObject2DVisibleEverywhere {
     private final ManuallySetController controller = new ManuallySetController();

@@ -13,13 +13,21 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.gpu;
 
 import java.util.ArrayList;
 
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Controller;
+import org.jtrfp.trcl.LineSegment;
+import org.jtrfp.trcl.RenderMode;
+import org.jtrfp.trcl.Sequencer;
+import org.jtrfp.trcl.Tickable;
+import org.jtrfp.trcl.TransparentTriangleList;
+import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;

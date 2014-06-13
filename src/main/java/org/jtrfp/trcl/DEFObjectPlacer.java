@@ -11,6 +11,7 @@ import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectPlacer;

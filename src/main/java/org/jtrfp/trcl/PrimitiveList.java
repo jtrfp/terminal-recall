@@ -18,6 +18,7 @@ package org.jtrfp.trcl;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE> {

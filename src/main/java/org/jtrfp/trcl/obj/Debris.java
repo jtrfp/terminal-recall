@@ -3,7 +3,6 @@ package org.jtrfp.trcl.obj;
 import java.util.Arrays;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.DeathBehavior;
@@ -17,6 +16,7 @@ import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class Debris extends WorldObject {

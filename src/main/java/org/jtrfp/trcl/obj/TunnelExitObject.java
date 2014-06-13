@@ -1,7 +1,6 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -12,6 +11,7 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.gpu.Model;
 
 public class TunnelExitObject extends WorldObject {
     private 		Vector3D 	exitLocation, exitHeading, exitTop;

@@ -1,7 +1,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Model;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DebrisOnDeathBehavior extends Behavior implements DeathListener {

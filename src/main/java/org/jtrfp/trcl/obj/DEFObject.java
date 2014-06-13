@@ -3,7 +3,6 @@ package org.jtrfp.trcl.obj;
 import java.util.Arrays;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
@@ -44,6 +43,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class DEFObject extends WorldObject {

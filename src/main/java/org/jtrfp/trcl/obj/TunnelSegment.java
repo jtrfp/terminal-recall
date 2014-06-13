@@ -19,7 +19,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.DummyFuture;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.SelectableTexture;
 import org.jtrfp.trcl.Tickable;
@@ -33,6 +32,7 @@ import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.IntRandomTransferFunction;
 
 public class TunnelSegment extends WorldObject {

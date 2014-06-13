@@ -1,7 +1,6 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -32,6 +31,7 @@ import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.gpu.Model;
 
 public class Player extends WorldObject {
     private final Camera 	camera;

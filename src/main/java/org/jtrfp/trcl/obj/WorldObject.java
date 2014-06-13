@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Model;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
@@ -35,6 +34,7 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 

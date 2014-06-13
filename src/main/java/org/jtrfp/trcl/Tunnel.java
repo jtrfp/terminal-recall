@@ -31,6 +31,7 @@ import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.BarrierCube;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ObjectDirection;

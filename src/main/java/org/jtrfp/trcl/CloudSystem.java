@@ -24,6 +24,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.CloudCeiling;
 
 public class CloudSystem extends RenderableSpacePartitioningGrid {

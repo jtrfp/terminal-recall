@@ -13,11 +13,11 @@
  * Contributors:
  *      chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl;
+package org.jtrfp.trcl.obj;
 
+import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.obj.WorldObject;
 
 
 /**

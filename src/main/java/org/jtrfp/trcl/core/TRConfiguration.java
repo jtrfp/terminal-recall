@@ -27,10 +27,11 @@ public class TRConfiguration{
 
 	public boolean isUsingNewTexturing() {
 	    if(usingNewTexturing!=null)return usingNewTexturing;
-	    boolean result=false;
+	    boolean result=true;//Default
 	    if(System.getProperties().containsKey("org.jtrfp.trcl.core.useNewTexturing")){
 		if(System.getProperty("org.jtrfp.trcl.core.useNewTexturing").toUpperCase().contains("TRUE"))
 		    result=true;
+		else result=false;
 	    }//end if(contains key)
 	    usingNewTexturing=result;
 	    return result;

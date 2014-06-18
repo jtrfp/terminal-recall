@@ -39,42 +39,42 @@ public class WorldObject implements PositionedRenderable {
     
     public static final boolean LOOP = true;
 
-    private double[] heading = new double[] { 0, 0, 1 }; // Facing direction
-    private double[] top = new double[] { 0, 1, 0 }; // Normal describing the
-						     // top of the object (for
-						     // tilt)
+    private double[] 	heading = new double[] { 0, 0, 1 };
+    private double[] 	top 	= new double[] { 0, 1, 0 };
     protected double[] position = new double[3];
-    private final TR tr;
-    private boolean visible = true;
-    private Model model;
-    private List<PositionListener> positionListeners = Collections.synchronizedList(new ArrayList<PositionListener>());
-    private int[] triangleObjectDefinitions;
-    private int[] transparentTriangleObjectDefinitions;
+    private final TR 	tr;
+    private boolean 	visible = true;
+    private Model 	model;
+    private List<PositionListener> 
+    			positionListeners 
+    				= Collections.synchronizedList(new ArrayList<PositionListener>());
+    private int[] 	triangleObjectDefinitions;
+    private int[] 	transparentTriangleObjectDefinitions;
     protected final int matrixID;
-    private ByteBuffer opaqueObjectDefinitionAddressesInVec4 = ByteBuffer
+    private ByteBuffer 	opaqueObjectDefinitionAddressesInVec4 = ByteBuffer
 	    .allocate(0);// defaults to empty
-    private ByteBuffer transparentObjectDefinitionAddressesInVec4 = ByteBuffer
+    private ByteBuffer 	transparentObjectDefinitionAddressesInVec4 = ByteBuffer
 	    .allocate(0);// defaults to empty
 
     private static final List<WorldObject> allWorldObjects = Collections
 	    .synchronizedList(new ArrayList<WorldObject>());
 
-    private SpacePartitioningGrid containingGrid;
-    private ArrayList<Behavior> inactiveBehaviors = new ArrayList<Behavior>();
-    private ArrayList<CollisionBehavior> collisionBehaviors = new ArrayList<CollisionBehavior>();
-    private ArrayList<Behavior> tickBehaviors = new ArrayList<Behavior>();
-    private final NullBehavior nullBehavior;
-    private boolean active = true;
-    private byte renderFlags=0;
+    private SpacePartitioningGrid 	containingGrid;
+    private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
+    private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
+    private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
+    private final NullBehavior 		nullBehavior;
+    private boolean 			active 		   = true;
+    private byte 			renderFlags=0;
 
-    protected final double[] aX = new double[3];
-    protected final double[] aY = new double[3];
-    protected final double[] aZ = new double[3];
-    protected final double[] rotTransM = new double[16];
-    protected final double[] camM = new double[16];
-    protected final double[] rMd = new double[16];
-    protected final double[] tMd = new double[16];
-    protected double[] cMd = new double[16];
+    protected final double[] aX 	= new double[3];
+    protected final double[] aY 	= new double[3];
+    protected final double[] aZ 	= new double[3];
+    protected final double[] rotTransM 	= new double[16];
+    protected final double[] camM 	= new double[16];
+    protected final double[] rMd 	= new double[16];
+    protected final double[] tMd 	= new double[16];
+    protected 	    double[] cMd 	= new double[16];
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);

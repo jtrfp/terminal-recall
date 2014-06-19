@@ -313,6 +313,8 @@ public class ResourceManager{
 						    	org.jtrfp.trcl.gpu.Vertex [] vtx = new org.jtrfp.trcl.gpu.Vertex[4];
 							for(int i=0; i<4; i++)
 								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex()%(b instanceof FaceBlock05?10:Integer.MAX_VALUE));}
+							Vector3D blockNormal = new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ());
+							if(blockNormal.getNorm()==0)blockNormal = new Vector3D(1,0,0);//Use filler if zero norm.
 							Triangle [] tris = Triangle.quad2Triangles(
 									vtx,
 									new Vector2D[]{
@@ -331,7 +333,7 @@ public class ResourceManager{
 									},
 									currentTexture,
 									RenderMode.DYNAMIC,hasAlpha,
-									new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ()).normalize(),"quad.BINmodel"+name);
+									blockNormal.normalize(),"quad.BINmodel"+name);
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
 							}

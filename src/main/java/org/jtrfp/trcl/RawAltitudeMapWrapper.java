@@ -19,30 +19,32 @@ import org.jtrfp.trcl.file.RAWFile;
  * @author Chuck Ritola
  *
  */
-public class RawAltitudeMapWrapper implements AltitudeMap
-	{
-	private int width,height;
-	private RAWFile file;
-	public RawAltitudeMapWrapper(RAWFile dat)
-		{
-		file=dat;
-		width=dat.getSideLength(); height=dat.getSideLength();
-		}//end RawAltitudeMapWrapper
-	@Override
-	public double heightAt(double x, double z)
-		{
-		while(x<0)x+=width;
-		while(z<0)z+=height;
-		return file.valueAt((int)z%width,(int)x%height)/256.;
-		}
-	@Override
-	public double getWidth()
-		{
-		return width;
-		}
-	@Override
-	public double getHeight()
-		{
-		return height;
-		}
-	}//end RawAltitudeMapWrapper
+public class RawAltitudeMapWrapper implements AltitudeMap {
+    private int width, height;
+    private RAWFile file;
+
+    public RawAltitudeMapWrapper(RAWFile dat) {
+	file = dat;
+	width = dat.getSideLength();
+	height = dat.getSideLength();
+    }// end RawAltitudeMapWrapper
+
+    @Override
+    public double heightAt(double x, double z) {
+	while (x < 0)
+	    x += width;
+	while (z < 0)
+	    z += height;
+	return file.valueAt((int) z % width, (int) x % height) / 256.;
+    }
+
+    @Override
+    public double getWidth() {
+	return width;
+    }
+
+    @Override
+    public double getHeight() {
+	return height;
+    }
+}// end RawAltitudeMapWrapper

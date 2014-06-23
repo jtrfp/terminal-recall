@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLRunnable;
 
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
@@ -38,8 +37,6 @@ public final class ThreadManager {
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= RENDER_FPS;
     public static final int RENDERLIST_REFRESH_FPS 	= 5;
-    //public static final int RENDERING_PRIORITY 		= 6;
-    //public static final int SOUND_PRIORITY 		= 8;
     private final TR 			tr;
     private final Timer 		lightweightTimer 	= new Timer("LightweightTimer");
     private final Timer 		gameplayTimer 		= new Timer("GameplayTimer");

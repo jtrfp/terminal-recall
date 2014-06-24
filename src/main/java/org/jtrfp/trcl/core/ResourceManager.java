@@ -81,6 +81,7 @@ import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
+import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.ExplosionFactory;
@@ -607,4 +608,11 @@ public class ResourceManager{
 	public void setSmokeFactory(SmokeFactory smokeFactory) {
 	    this.smokeFactory = smokeFactory;
 	}
+
+	public VOXFile getVOXFile(String fileName) throws IllegalAccessException, IOException, FileLoadException {
+	    InputStream is = getInputStreamFromResource("DATA\\"+fileName);
+		VOXFile result = new Parser().readToNewBean(is, VOXFile.class);
+		is.close();
+		return result;
+	}//end getVOXFile(...)
 }//end ResourceManager

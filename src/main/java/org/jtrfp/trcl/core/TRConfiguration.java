@@ -17,7 +17,8 @@ import org.jtrfp.trcl.flow.GameVersion;
 public class TRConfiguration{
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
-    			usingNewTexturing;
+    			usingNewTexturing,
+    			debugMode;
     	private int targetFPS =60;
     	private String skipToLevel;
 	public TRConfiguration(){}
@@ -48,6 +49,17 @@ public class TRConfiguration{
 	    usingTextureBufferUnmap=result;
 	    return result;
 	}//end isUsingTextureBufferUnmap()
+	
+	public boolean isDebugMode() {
+	    if(debugMode!=null)return debugMode;
+	    boolean result=false;
+	    if(System.getProperties().containsKey("org.jtrfp.trcl.debugMode")){
+		if(System.getProperty("org.jtrfp.trcl.debugMode").toUpperCase().contains("TRUE"))
+		    result=true;
+	    }//end if(contains key)
+	    debugMode=result;
+	    return result;
+	}//end isDebugMode()
 
 	public int getTargetFPS() {
 	    return targetFPS;

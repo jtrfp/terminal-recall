@@ -171,7 +171,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable{
 		attackRetreatAboveSky,
 		bobAboveSky,
 		factory,
-		unknown42;
+		shootOnThrustFrame;//Shoot on frame defined by thrust, smart target, yaw-only rotate
 		}//end EnemyLogic
 
 	/**

@@ -19,6 +19,7 @@ public class TRConfiguration{
     	private Boolean usingTextureBufferUnmap,
     			usingNewTexturing;
     	private int targetFPS =60;
+    	private String skipToLevel;
 	public TRConfiguration(){}
 
 	public GameVersion getGameVersion() {
@@ -50,5 +51,12 @@ public class TRConfiguration{
 
 	public int getTargetFPS() {
 	    return targetFPS;
-	}
+	}//end getTargetFPS()
+
+	public String skipToLevel() {
+	    if(skipToLevel==null){
+		 skipToLevel = System.getProperty("org.jtrfp.flow.Game.skipToLevel");
+	    }//end if(skipToLevel==null)
+	    return skipToLevel;
+	}//end skipToLevel
 }//end TRConfiguration

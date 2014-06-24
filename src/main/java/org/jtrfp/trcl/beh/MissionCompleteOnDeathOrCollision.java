@@ -19,10 +19,10 @@ public class MissionCompleteOnDeathOrCollision extends Behavior implements Death
 
     @Override
     public void notifyDeath() {
-	getParent().getTr().getGame().missionComplete();
+	getParent().getTr().getGame().getCurrentMission().missionComplete();
     }
     @Override
     public void proposeCollision(WorldObject other){
-	if(other instanceof Player){getParent().getTr().getGame().missionComplete();}
+	if(other instanceof Player){getParent().getTr().getGame().getCurrentMission().missionComplete();}
     }
 }

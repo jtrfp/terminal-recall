@@ -56,7 +56,7 @@ private final NAVSystem nav;
 	@Override
 	public void _tick(long time){
 	    final TR tr=getTr();
-	    final Mission mission = tr.getCurrentMission();
+	    final Mission mission = tr.getGame().getCurrentMission();
 	    final WorldObject player = tr.getPlayer();
 	    final double [] playerPos = player.getPosition();
 	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);

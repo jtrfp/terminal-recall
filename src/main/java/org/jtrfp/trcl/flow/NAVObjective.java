@@ -78,13 +78,13 @@ public abstract class NAVObjective {
 			    }
 			};//end new NAVObjective
 			indexedNAVObjectiveList.add(objective);
-			targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,tr.getCurrentMission()));
+			targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,tr.getGame().getCurrentMission()));
 		    }//end for(targs)
 		} else if(navSubObject instanceof TUN){///////////////////////////////////////////
 		    TUN tun = (TUN)navSubObject;
 		    //Entrance and exit locations are already set up.
 		    final Location3D 	loc3d 	= tun.getLocationOnMap();
-		    		currentTunnel 	= tr.getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
+		    		currentTunnel 	= tr.getGame().getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
 		    final TunnelEntranceObject tunnelEntrance 
 		    				= currentTunnel.getEntranceObject();
 		    final double [] entPos=tunnelEntrance.getPosition();
@@ -138,7 +138,7 @@ public abstract class NAVObjective {
 			}));
 		    }//end if(visibleUnlessBoss)
 		} else if(navSubObject instanceof BOS){///////////////////////////////////////////
-		    final Mission mission = tr.getCurrentMission();
+		    final Mission mission = tr.getGame().getCurrentMission();
 		    final BOS bos = (BOS)navSubObject;
 		    boolean first=true;
 		    for(final int target:bos.getTargets()){
@@ -217,7 +217,7 @@ public abstract class NAVObjective {
 				return chk;
 			    }
 		    };//end new NAVObjective
-		    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
+		    chk.setObjectiveToRemove(objective,tr.getGame().getCurrentMission());
 		    overworld.add(chk);
 		    indexedNAVObjectiveList.add(objective);
 		} else if(navSubObject instanceof XIT){///////////////////////////////////////////
@@ -250,7 +250,7 @@ public abstract class NAVObjective {
 				return chk;
 			    }
 		    };//end new NAVObjective
-		    chk.setObjectiveToRemove(objective,tr.getCurrentMission());
+		    chk.setObjectiveToRemove(objective,tr.getGame().getCurrentMission());
 		    chk.setIncludeYAxisInCollision(false);
 		    overworld.add(chk);
 		    indexedNAVObjectiveList.add(objective);

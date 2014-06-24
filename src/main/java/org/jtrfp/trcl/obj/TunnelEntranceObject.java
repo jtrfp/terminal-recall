@@ -105,7 +105,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
 		 final NAVObjective navObjective = getNavObjectiveToRemove();
 	         if(navObjective!=null){
-	             final Mission m = tr.getCurrentMission();
+	             final Mission m = tr.getGame().getCurrentMission();
 	             if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
 	         }//end if(have NAV to remove
 	        }//end if(close to Player)

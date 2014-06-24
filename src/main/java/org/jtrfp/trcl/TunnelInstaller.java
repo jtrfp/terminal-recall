@@ -27,7 +27,7 @@ public class TunnelInstaller {
 	final TR tr = world.getTr();
 	final GPU gpu = tr.gpu.get();
 	final OverworldSystem overworldSystem = tr.getOverworldSystem();
-	final Mission mission = tr.getCurrentMission();
+	final Mission mission = tr.getGame().getCurrentMission();
 	TDFFile.Tunnel[] tuns = tdf.getTunnels();
 	if (tuns != null) {
 	    int tIndex = 0;

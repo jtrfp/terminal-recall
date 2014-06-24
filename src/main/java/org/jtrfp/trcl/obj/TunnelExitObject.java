@@ -117,7 +117,7 @@ public class TunnelExitObject extends WorldObject {
 		    }// end for(projectileFactories)
 		    final NAVObjective navObjective = getNavObjectiveToRemove();
 		    if (navObjective != null) {
-			tr.getCurrentMission().removeNAVObjective(navObjective);
+			tr.getGame().getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
 		}// end if(x past threshold)
 	    }// end if(Player)

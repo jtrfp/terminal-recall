@@ -64,57 +64,15 @@ public class Mission {
     }//end Mission
     
     public Result go(){
+	System.out.println("Starting GampeplayLevel loading sequence...");
 	try{
-	//Set up palette
-    	final ResourceManager rm = tr.getResourceManager();
-    	final ThreadManager tm = tr.getThreadManager();
-    	final Color [] pal = rm.getPalette(lvl.getGlobalPaletteFile());
-	System.out.println("\t...Done.");
-    	pal[0]=new Color(0,0,0,0);
-    	tr.setGlobalPalette(pal);
-
-	// POWERUPS
-	rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
-	/// EXPLOSIONS
-	rm.setExplosionFactory(new ExplosionFactory(tr));
-	// SMOKE
-	rm.setSmokeFactory(new SmokeFactory(tr));
-	// DEBRIS
-	rm.setDebrisFactory(new DebrisFactory(tr));
-	
-	//SETUP PROJECTILE FACTORIES
-		Weapon [] w = Weapon.values();
-		ProjectileFactory [] pf = new ProjectileFactory[w.length];
-		for(int i=0; i<w.length;i++){
-		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
-		}//end for(weapons)
-		rm.setProjectileFactories(pf);
-		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl()));
-		final String startX=System.getProperty("org.jtrfp.trcl.startX");
-		final String startY=System.getProperty("org.jtrfp.trcl.startY");
-		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
-		final double [] playerPos = player.getPosition();
-		if(startX!=null && startY!=null&&startZ!=null){
-		    System.out.println("Using user-specified start point");
-		    final int sX=Integer.parseInt(startX);
-		    final int sY=Integer.parseInt(startY);
-		    final int sZ=Integer.parseInt(startZ);
-		    playerPos[0]=sX;
-		    playerPos[1]=sY;
-		    playerPos[2]=sZ;
-		    player.notifyPositionChange();
-		}//end if(start!=null)
-    	
+	    final ResourceManager rm = tr.getResourceManager();
+	    final Color [] pal = rm.getPalette(lvl.getGlobalPaletteFile());
+	    final Player player = tr.getPlayer();
 	final World world = tr.getWorld();
 	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	tr.setOverworldSystem(new OverworldSystem(world));
-	tr.setPlayer(player);
-	world.add(player);
 	tr.getOverworldSystem().loadLevel(lvl, tdf);
-	
-	
-	System.out.println("Activating renderer...");
-	tr.renderer.get().activate();
 	System.out.println("\t...Done.");
 	
     		//Install NAVs
@@ -128,7 +86,11 @@ public class Mission {
     		playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
     		playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
     		playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
-    		
+    		// ////// INITIAL HEADING
+    	    player.setPosition(getPlayerStartPosition());
+    	    player.setDirection(getPlayerStartDirection());
+    	    player.setHeading(player.getHeading().negate());// Kludge to fix
+    							    // incorrect heading
     		TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
     		Factory f = new NAVObjective.Factory(tr);
     		for(NAVSubObject obj:navSubObjects){
@@ -136,15 +98,8 @@ public class Mission {
     		}//end for(navSubObjects)
     		navSystem.updateNAVState();
     		tr.setBackdropSystem(new BackdropSystem(world));
-    	
-    		//////// INITIAL HEADING
-    		player.setPosition(getPlayerStartPosition());
-    		player.setDirection(getPlayerStartDirection());
-    		player.setHeading(player.getHeading().negate());//Kludge to fix incorrect heading
     		System.out.println("Start position set to "+player.getPosition());
-    		
     		GPU gpu = tr.gpu.get();
-    		//gpu.takeGL();//Remove if tunnels are put back in. TunnelInstaller takes the GL for us.
     		System.out.println("Building atlas texture...");
     		Texture.finalize(gpu);
     		System.out.println("Setting sun vector");
@@ -157,7 +112,8 @@ public class Mission {
 		    }
     		}).get();
     		System.out.println("\t...Done.");
-    	
+    		System.out.println("Activating renderer...");
+    		tr.renderer.get().activate();//TODO: Eventually move this to Game, pending primitives are given valid textureIDs.
 	//////// NO GL BEYOND THIS POINT ////////
 	System.out.println("\t...Done.");
 	System.out.println("Invoking JVM's garbage collector...");

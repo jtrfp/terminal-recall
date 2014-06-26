@@ -12,15 +12,26 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
+import org.jtrfp.trcl.obj.DebrisFactory;
+import org.jtrfp.trcl.obj.ExplosionFactory;
+import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
+import org.jtrfp.trcl.obj.ProjectileFactory;
+import org.jtrfp.trcl.obj.SmokeFactory;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class Game {
     private TR tr;
@@ -176,8 +187,52 @@ public class Game {
 	// Set up player, HUD, fonts...
 	System.out.println("Game.go()...");
 	System.out.println("Initializing general resources...");
+	try{
+	  //Set up palette
+	    	final ResourceManager rm = tr.getResourceManager();
+	    	final Color [] pal = tr.getGlobalPalette();
+	    	pal[0]=new Color(0,0,0,0);
+	    	tr.setGlobalPalette(pal);
+
+		// POWERUPS
+		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
+		/// EXPLOSIONS
+		rm.setExplosionFactory(new ExplosionFactory(tr));
+		// SMOKE
+		rm.setSmokeFactory(new SmokeFactory(tr));
+		// DEBRIS
+		rm.setDebrisFactory(new DebrisFactory(tr));
+		
+		//SETUP PROJECTILE FACTORIES
+			Weapon [] w = Weapon.values();
+			ProjectileFactory [] pf = new ProjectileFactory[w.length];
+			for(int i=0; i<w.length;i++){
+			    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+			}//end for(weapons)
+			rm.setProjectileFactories(pf);
+			//final Player player = tr.getPlayer();
+	final Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl()));
+	final String startX=System.getProperty("org.jtrfp.trcl.startX");
+	final String startY=System.getProperty("org.jtrfp.trcl.startY");
+	final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
+	final double [] playerPos = player.getPosition();
+	if(startX!=null && startY!=null&&startZ!=null){
+	    System.out.println("Using user-specified start point");
+	    final int sX=Integer.parseInt(startX);
+	    final int sY=Integer.parseInt(startY);
+	    final int sZ=Integer.parseInt(startZ);
+	    playerPos[0]=sX;
+	    playerPos[1]=sY;
+	    playerPos[2]=sZ;
+	    player.notifyPositionChange();
+	}//end if(user start point)
+	tr.setPlayer(player);
+	tr.getWorld().add(player);
 	// TODO: Player, fonts
+	System.out.println("\t...Done.");
+	
 	startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
+	}catch(Exception e){throw new RuntimeException(e);}
     }// end go()
 
     public Mission getCurrentMission() {

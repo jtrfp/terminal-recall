@@ -67,10 +67,9 @@ public final class TR{
 	private OverworldSystem 		overworldSystem;
 	private InterpolatingAltitudeMap 	altitudeMap;
 	private BackdropSystem 			backdropSystem;
-	private Game 				game			= new Game();
+	private Game 				game;
 	private NAVSystem 			navSystem;
 	private HUDSystem 			hudSystem;
-	private Mission 			currentMission;
 	
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
@@ -228,7 +227,7 @@ public final class TR{
     }
 
     public Game newGame(VOXFile mission) {
-	return new Game(this, mission);
+	return game = new Game(this, mission);
     }// end newGame(...)
 
     /**
@@ -398,34 +397,6 @@ public final class TR{
 	    }// end call()
 	}).get();
     }// end gatherSysInfo()
-
-    public void startMissionSequence(String lvlFileName) {
-	recursiveMissionSequence(lvlFileName);
-    }
-
-    private void recursiveMissionSequence(String lvlFileName) {
-	try {
-	    currentMission = new Mission(this, getResourceManager().getLVL(
-		    lvlFileName));
-	    Mission.Result result = currentMission.go();
-	    final String nextLVL = result.getNextLVL();
-	    if (nextLVL != null)
-		recursiveMissionSequence(nextLVL);
-	} catch (IllegalAccessException e) {
-	    showStopper(e);
-	} catch (FileLoadException e) {
-	    showStopper(e);
-	} catch (IOException e) {
-	    showStopper(e);
-	}
-    }
-
-    /**
-     * @return the currentMission
-     */
-    public Mission getCurrentMission() {
-	return currentMission;
-    }
 
     public void setGlobalPalette(Color[] palette) {
 	globalPalette = palette;

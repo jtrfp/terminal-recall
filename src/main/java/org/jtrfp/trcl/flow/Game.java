@@ -13,11 +13,14 @@
 package org.jtrfp.trcl.flow;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 
 public class Game
 	{
@@ -26,14 +29,13 @@ public class Game
 	private int levelIndex=0;
 	private String playerName;
 	private Difficulty difficulty;
-	
-	public Game(){}
+	private Mission currentMission;
 	
 	public Game(TR tr, VOXFile vox)
 		{
 		setTr(tr);
 		setVox(vox);
-		setupNameWithUser();
+		if(!tr.getTrConfig().isDebugMode())setupNameWithUser();
 		}//end constructor
 	
 	private void setupNameWithUser()
@@ -146,14 +148,45 @@ public class Game
 		{
 		this.difficulty = difficulty;
 		}
+	
+	    private void startMissionSequence(String lvlFileName) {
+		recursiveMissionSequence(lvlFileName);
+	    }
 
-	public void missionComplete() {
-	    //TODO: Handle this.
-	    System.out.println("MISSION COMPLETE");
-	}
+	    private void recursiveMissionSequence(String lvlFileName) {
+		try {
+		    currentMission = new Mission(tr, this, tr.getResourceManager().getLVL(
+			    lvlFileName));
+		    Mission.Result result = currentMission.go();
+		    final String nextLVL = result.getNextLVL();
+		    if (nextLVL != null)
+			recursiveMissionSequence(nextLVL);
+		} catch (IllegalAccessException e) {
+		    tr.showStopper(e);
+		} catch (FileLoadException e) {
+		    tr.showStopper(e);
+		} catch (IOException e) {
+		    tr.showStopper(e);
+		}
+	    }//end recursiveMissionSequence(...)
 
-	public void missionFailed() {
-	    //TODO
-	    System.out.println("MISSION FAILED");
+	public void setLevel(String skipToLevel) {
+	    final MissionLevel [] levs = vox.getLevels();
+	    for(int index=0; index<levs.length; index++){
+		if(levs[index].getLvlFile().toUpperCase().contentEquals(skipToLevel.toUpperCase()))
+		    setLevelIndex(index);
+	    }//end for(levs)
+	}//end setLevel()
+
+	public void go() {
+	    //Set up player, HUD, fonts...
+	    System.out.println("Game.go()...");
+	    System.out.println("Initializing general resources...");
+	    //TODO: Player, fonts
+	    startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
+	}//end go()
+
+	public Mission getCurrentMission() {
+	    return currentMission;
 	}
 	}//end Game

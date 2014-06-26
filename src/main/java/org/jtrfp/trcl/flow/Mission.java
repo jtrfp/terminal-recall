@@ -56,9 +56,11 @@ public class Mission {
     private double [] playerStartPosition=  new double[3];
     private List<NAVSubObject> navSubObjects;
     private ObjectDirection playerStartDirection;
-    public Mission(TR tr, LVLFile lvl){
+    private final Game game;
+    public Mission(TR tr, Game game, LVLFile lvl){
 	this.tr=tr;
 	this.lvl=lvl;
+	this.game=game;
     }//end Mission
     
     public Result go(){
@@ -87,7 +89,7 @@ public class Mission {
 		    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
 		}//end for(weapons)
 		rm.setProjectileFactories(pf);
-		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl())); 
+		final Player player =new Player(tr,rm.getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl()));
 		final String startX=System.getProperty("org.jtrfp.trcl.startX");
 		final String startY=System.getProperty("org.jtrfp.trcl.startY");
 		final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
@@ -109,6 +111,11 @@ public class Mission {
 	tr.setPlayer(player);
 	world.add(player);
 	tr.getOverworldSystem().loadLevel(lvl, tdf);
+	
+	
+	System.out.println("Activating renderer...");
+	tr.renderer.get().activate();
+	System.out.println("\t...Done.");
 	
     		//Install NAVs
     		final NAVSystem navSystem = tr.getNavSystem();
@@ -156,10 +163,6 @@ public class Mission {
 	System.out.println("Invoking JVM's garbage collector...");
 	System.gc();
 	System.out.println("\t...Ahh, that felt good.");
-	System.out.println("Activating renderer...");
-	tr.renderer.get().activate();
-	System.out.println("\t...Done.");
-	
 	}catch(Exception e){e.printStackTrace();}
 	if(System.getProperties().containsKey("org.jtrfp.trcl.flow.Mission.skipNavs")){
 	    try{
@@ -246,7 +249,7 @@ public class Mission {
 		//TODO: Wait 500ms
 		//TODO: Jet thrust noise
 		//TODO: Player invisible.
-		tr.getGame().missionComplete();
+		System.out.println("MISSION COMPLETE.");
 	    }//end run()
 	}.start();
     }
@@ -258,7 +261,7 @@ public class Mission {
 		//TODO: Turn off all player control behavior
 		//TODO Player behavior change: Slow spin along heading axis, slow downward drift of heading
 		//TODO: Add behavior: explode and destroy on impact with ground
-		tr.getGame().missionFailed();
+		System.out.println("MISSION FAILED.");
 	    }//end run()
 	}.start();
 	
@@ -280,5 +283,9 @@ public class Mission {
      */
     public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
         this.navSubObjects = navSubObjects;
+    }
+
+    public void missionComplete() {
+	missionCompleteSequence();
     }
 }//end Mission

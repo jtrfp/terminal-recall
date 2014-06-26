@@ -64,24 +64,24 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	final double FONT_SIZE = .04;
 
 	objective = new CharLineDisplay(tr, this, FONT_SIZE, 16, font);
-	objective.setContent("FLY TO JUMP ZONE");
+	objective.setContent("LOADING...");
 	objective.setPosition(-.45, TOP_LINE_Y, Z);
 	// objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,Z));
 
 	distance = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
-	distance.setContent("01234");
+	distance.setContent("---");
 	distance.setPosition(.42, TOP_LINE_Y, Z);
 
 	weapon = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
-	weapon.setContent("RFL20");
+	weapon.setContent("---");
 	weapon.setPosition(-.44, BOTTOM_LINE_Y, Z);
 
 	sector = new CharLineDisplay(tr, this, FONT_SIZE, 7, font);
-	sector.setContent("255,255");
+	sector.setContent("---");
 	sector.setPosition(.38, BOTTOM_LINE_Y, Z);
 
 	ammo = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
-	ammo.setContent("1337");
+	ammo.setContent("---");
 	ammo.setPosition(.01, BOTTOM_LINE_Y, Z);
 
 	upfrontBillboard = new CharLineDisplay(tr, this, .2, 35, upfrontFont);

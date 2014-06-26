@@ -13,8 +13,10 @@
 package org.jtrfp.trcl.flow;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.VOXFile;
 
 public class RunMe{
 	public static void main(String [] args){
@@ -46,61 +48,86 @@ public class RunMe{
 				tr.gatherSysInfo();
 				for(int argI=0; argI<args.length-1; argI++)
 					{tr.getResourceManager().registerPOD(new File(args[argI]));}
-				tr.startMissionSequence(args[args.length-1]);
+				try{
+				final VOXFile vox = tr.getResourceManager().getVOXFile(tr.getTrConfig().getVoxFile());
+				final Game game = tr.newGame(vox);
+				if(tr.getTrConfig().skipToLevel()!=null){
+				    game.setLevel(tr.getTrConfig().skipToLevel());
+				}
+				game.go();}
+				catch(FileNotFoundException e){
+				    System.err.println("Error: Could not find VOX file or is not a valid VOX file in the supplied PODs: "+args[args.length-1]);
+				    System.exit(-1);
+				}//end catch(FileNotFoundException)
 				}
 			catch(Exception e) {e.printStackTrace();}
 			}//end if(good)
-		else
-			{//fail
-			System.out.println("USAGE: TerminalRecall [path_to_POD_file0] [path_to_POD_file1] [...] [level_name.LVL]");
+		else	{//fail
+			System.out.println("USAGE: TerminalRecall [path_to_POD_file0] [path_to_POD_file1] [...] [VOXFile.VOX]");
 			}
 		}//end aspectMain
 	
 	
 	
-	private static void ensureJVMIsProperlyConfigured(String [] args)
-		{
-		if(!isAlreadyConfigured())
-			{
-			System.out.println("Overriding the settings passed to this JVM. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
-			String executable=new File("RunMe.jar").exists()?"-jar RunMe.jar":"-cp "+System.getProperty("java.class.path")+" org.jtrfp.trcl.flow.RunMe";
-			String cmd="java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true " +
-					"-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods " +
-					"-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts " +
-					"-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m "+executable;
-			for(String arg:args){cmd+=" "+arg;}
+    private static void ensureJVMIsProperlyConfigured(String[] args) {
+	if (!isAlreadyConfigured()) {
+	    System.out
+		    .println("Overriding the settings passed to this JVM. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
+	    String executable = new File("RunMe.jar").exists() ? "-jar RunMe.jar"
+		    : "-cp " + System.getProperty("java.class.path")
+			    + " org.jtrfp.trcl.flow.RunMe";
+	    String cmd = "java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true "
+		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
+		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
+		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m "
+		    + executable;
+	    for (String arg : args) {
+		cmd += " " + arg;
+	    }
+	    try {
+		System.out.println("Restarting JVM with: \n\t" + cmd);
+		final Process proc = Runtime.getRuntime().exec(cmd);
+		Thread tOut = new Thread() {
+		    public void run() {
+			int bytesRead;
+			byte[] buffer = new byte[1024];
 			try {
-				System.out.println("Restarting JVM with: \n\t"+cmd);
-				final Process proc = Runtime.getRuntime().exec(cmd);
-			    Thread tOut=new Thread()
-			    	{public void run()
-			    		{
-			    		int bytesRead;
-			    		byte[] buffer = new byte[1024];
-			    		try{
-			    		 while ((bytesRead = proc.getInputStream().read(buffer)) != -1)
-						    {System.out.write(buffer, 0, bytesRead);}
-			    			}catch(Exception e){e.printStackTrace();}
-			    		}//end run()
-			    	};
-		    	Thread tErr=new Thread()
-			    	{public void run()
-			    		{int bytesRead;
-			    		byte[] buffer = new byte[1024];
-			    		try{
-			    		 while ((bytesRead = proc.getErrorStream().read(buffer)) != -1)
-						    {System.err.write(buffer, 0, bytesRead);}
-			    			}catch(Exception e){e.printStackTrace();}
-			    		}//end run()
-			    	};
-				tOut.start();tErr.start();
-				tOut.join();tErr.join();
-				}//end try{}
-			catch(Exception e){e.printStackTrace();}
-			System.exit(0);
+			    while ((bytesRead = proc.getInputStream().read(
+				    buffer)) != -1) {
+				System.out.write(buffer, 0, bytesRead);
+			    }
+			} catch (Exception e) {
+			    e.printStackTrace();
 			}
-		}//end Ensure...Configured(...)
-	
-	private static boolean isAlreadyConfigured()
-		{return System.getProperty("org.jtrfp.trcl.bypassConfigure")!=null;}
-	}//end Run
+		    }// end run()
+		};
+		Thread tErr = new Thread() {
+		    public void run() {
+			int bytesRead;
+			byte[] buffer = new byte[1024];
+			try {
+			    while ((bytesRead = proc.getErrorStream().read(
+				    buffer)) != -1) {
+				System.err.write(buffer, 0, bytesRead);
+			    }
+			} catch (Exception e) {
+			    e.printStackTrace();
+			}
+		    }// end run()
+		};
+		tOut.start();
+		tErr.start();
+		tOut.join();
+		tErr.join();
+	    }// end try{}
+	    catch (Exception e) {
+		e.printStackTrace();
+	    }
+	    System.exit(0);
+	}
+    }// end Ensure...Configured(...)
+
+    private static boolean isAlreadyConfigured() {
+	return System.getProperty("org.jtrfp.trcl.bypassConfigure") != null;
+    }
+}// end RunMe

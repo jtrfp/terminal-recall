@@ -25,7 +25,6 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere{
 	
 	public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid, double glSize, GLFont font){
 		super(tr);
-		//this.font=font;
 		final Model model = new Model(false,tr);
 		tex=new SelectableTexture(font.getTextures());
 		Triangle [] tris = Triangle.quad2Triangles(
@@ -35,7 +34,7 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere{
 				
 				new double []{0,1,1,0},//u
 				new double []{0,0,1,1},
-				new DummyTRFutureTask<TextureDescription>(tex), RenderMode.DYNAMIC,Vector3D.MINUS_K,"CharDisplay");
+				tex, RenderMode.DYNAMIC,Vector3D.MINUS_K,"CharDisplay");
 		tris[0].setAlphaBlended(true);
 		tris[1].setAlphaBlended(true);
 		model.addTriangles(tris);

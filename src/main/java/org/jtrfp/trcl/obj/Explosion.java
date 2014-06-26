@@ -22,10 +22,8 @@ import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class Explosion extends BillboardSprite {
@@ -39,13 +37,13 @@ public class Explosion extends BillboardSprite {
 	if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
 	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
-	Future<Texture> [] frames = new Future[aniFiles.length];
+	Texture [] frames = new Texture[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){
 	        frames[i]=frame(aniFiles[i]);
 	    }
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
-	setTexture(new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames)),true);
+	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
     }//end constructor
     
     @Override
@@ -143,8 +141,8 @@ public class Explosion extends BillboardSprite {
 	}
     }//end ExplosionType
     
-    private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
-	{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
+    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
+	{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
 
     public void resetExplosion() {
 	getBehavior().probeForBehavior(ExplosionBehavior.class).reset();

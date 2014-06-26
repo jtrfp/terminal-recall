@@ -29,7 +29,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 	    IOException {
 	super(tr);
 	// Dashboard
-	TRFutureTask<TextureDescription>[] dashTexture = tr.getResourceManager()
+	TextureDescription[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
 			GammaCorrectingColorProcessor.singleton,
 			tr.gpu.get().getGl(), 2,false);

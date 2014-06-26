@@ -98,7 +98,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	    	//Entrance uses only a stub. Player is warped to TUNNEL_POS facing TUNNEL_START_DIRECTION
 		ResourceManager rm = tr.getResourceManager();
 		LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
-		TRFutureTask<TextureDescription> [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl,true);
+		TextureDescription [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, null, gl,true);
 		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
 		
 		final double segLen=65536;
@@ -163,7 +163,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	 * 
 	 */
 	
-	private void installObstacles(Segment s, TRFutureTask<TextureDescription>[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
+	private void installObstacles(Segment s, TextureDescription[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
 		Color [] palette = tr.getGlobalPalette();
 		Obstacle obs = s.getObstacle();
 		WorldObject wo;

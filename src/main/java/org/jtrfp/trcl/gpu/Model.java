@@ -190,27 +190,27 @@ public class Model {
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TextureDescription tunnelTexturePalette, double[] origin,
 	    boolean hasAlpha, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1,
 		hasAlpha, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TextureDescription tunnelTexturePalette, double[] origin,
 	    TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TextureDescription tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, u0, v0, u1, v1,
 		false, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TRFutureTask<TextureDescription> tunnelTexturePalette, double[] origin,
+	    TextureDescription tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr) {
 	Model m = new Model(false, tr);
 	// Front

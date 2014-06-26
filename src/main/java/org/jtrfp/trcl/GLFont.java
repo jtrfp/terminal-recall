@@ -26,7 +26,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 
 public class GLFont{
-	private final 		Future<Texture>[] textures;
+	private final 		Texture[] textures;
 	private double 		maxAdvance=-1;
 	private final int [] 	widths = new int[256];
 	private final double [] glWidths=new double[256];
@@ -50,8 +50,8 @@ public class GLFont{
 	    //Scale maxDim up to next power of 2 and use as sideLength
 	    sideLength = (int)Math.pow(2, Math.ceil(Math.log(maxDim)/Math.log(2)));
 	    maxAdvance=imgHeight;
-	    textures = new Future[256];
-	DummyFuture<Texture> empty = new DummyFuture<Texture>(tr
+	    textures = new Texture[256];
+	Texture empty = (tr
 		.gpu.get()
 		.textureManager.get()
 		.newTexture(
@@ -76,8 +76,8 @@ public class GLFont{
 		    texBuf.limit(texBuf.position()+sideLength*4);
 		    texBuf.put(rgba8888[i]);
 		}//end for(imgHeight)
-	    textures[i + asciiOffset] = new DummyFuture<Texture>(tr.gpu.get().textureManager.get().newTexture(
-		    texBuf, "GLFont rgba buf char=" + (char) i,false));
+	    textures[i + asciiOffset] = tr.gpu.get().textureManager.get().newTexture(
+		    texBuf, "GLFont rgba buf char=" + (char) i,false);
 	    }//end for(i:numChars)
 	    //Load empties to the right side of the ASCII textures.
 	    for(int i=asciiOffset+numChars; i<256;i++){
@@ -90,12 +90,12 @@ public class GLFont{
 	    	sideLength=64;
 		final Font font=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
 		//Generate the textures
-		textures = new Future[256];
+		textures = new Texture[256];
 		Texture empty=renderToTexture(' ',realFont);
 		for(int c=0; c<256; c++)
-			{textures[c]=new DummyFuture<Texture>(realFont.canDisplay(c)?renderToTexture(c,font):empty);}
+			{textures[c]=realFont.canDisplay(c)?renderToTexture(c,font):empty;}
 		}//end constructor
-	public Future<Texture>[] getTextures()
+	public Texture[] getTextures()
 		{return textures;}
 	
 	private Texture renderToTexture(int c, Font font){

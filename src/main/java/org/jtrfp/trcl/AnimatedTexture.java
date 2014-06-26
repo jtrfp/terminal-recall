@@ -19,19 +19,18 @@ import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class AnimatedTexture implements TextureDescription {
-    private Future<Texture>[] frames;
-    // private int timeBetweenFramesInMillis;
+    private Texture[] frames;
     private Controller textureSequencer;
 
-    public AnimatedTexture(Controller textureSequencer, Future<Texture>[] frames) {
-	this.frames = frames;
+    public AnimatedTexture(Controller textureSequencer, Texture[] frames2) {
+	this.frames = frames2;
 	this.textureSequencer = textureSequencer;
     }
 
     /**
      * @return the frames
      */
-    public Future<Texture>[] getFrames() {
+    public Texture[] getFrames() {
 	return frames;
     }
 
@@ -39,7 +38,7 @@ public class AnimatedTexture implements TextureDescription {
      * @param frames
      *            the frames to set
      */
-    public void setFrames(Future<Texture>[] frames) {
+    public void setFrames(Texture[] frames) {
 	this.frames = frames;
     }
 
@@ -50,7 +49,7 @@ public class AnimatedTexture implements TextureDescription {
     @Override
     public Color getAverageColor() {
 	try {
-	    return frames[0].get().getAverageColor();
+	    return frames[0].getAverageColor();
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

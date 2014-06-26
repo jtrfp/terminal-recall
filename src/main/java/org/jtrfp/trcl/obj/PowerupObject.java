@@ -45,7 +45,7 @@ public class PowerupObject extends BillboardSprite{
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
-		TRFutureTask<TextureDescription> desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
+		TextureDescription desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
 		if(pt==Powerup.Random){
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
 		}
@@ -53,11 +53,11 @@ public class PowerupObject extends BillboardSprite{
 		String [] bbFrames = pt.getBillboardFrames();
 		Sequencer s = new Sequencer(Powerup.TIME_PER_FRAME_MILLIS,bbFrames.length,false);
 		try {
-		    Future<Texture> [] t = new Future[pt.getBillboardFrames().length];
+		    Texture [] t = new Texture[pt.getBillboardFrames().length];
 			for(int i=0; i<t.length;i++){
 			    t[i]=frame(bbFrames[i]);
 			}
-			desc=new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(s,t));
+			desc=new AnimatedTexture(s,t);
 			//Do something with desc
 			setTexture(desc,true);}//end try{}
 		catch(Exception e)
@@ -108,8 +108,8 @@ public class PowerupObject extends BillboardSprite{
 		}//end applyToPlayer()
 	}//end PowerupBehavior
 	
-	private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
+	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
+		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
 
 	public Powerup getPowerupType()
 		{return powerupType;}

@@ -27,7 +27,7 @@ import org.jtrfp.trcl.obj.CloudCeiling;
 public class CloudSystem extends RenderableSpacePartitioningGrid {
     Color fogColor;
     double ceilingHeight;
-    TRFutureTask<TextureDescription> cloudTexture;
+    TextureDescription cloudTexture;
     double cloudTileSideSize;
     int gridSideSizeInTiles;
     private final TR tr;
@@ -61,7 +61,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
     private void addToWorld(OverworldSystem os) {
 	// Set fog
 	try {
-	    final Color averageColor = cloudTexture.get().getAverageColor();
+	    final Color averageColor = cloudTexture.getAverageColor();
 	    tr.getWorld().setFogColor(averageColor);
 	    os.setFogColor(averageColor);
 	    // Create a grid

@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.LineSegment;
 
 
@@ -32,7 +33,7 @@ public class TextureManager {
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
     public final TRFuture<VQCodebookManager>	vqCodebookManager;
-    private TRFutureTask<TextureDescription>		fallbackTexture;
+    private TextureDescription			fallbackTexture;
     public TextureManager(final TR tr){
 	this.tr			= tr;
 	subTextureWindow 	= new SubTextureWindow(tr);
@@ -55,38 +56,38 @@ public class TextureManager {
 	return subTextureWindow;
     }
     
-    private TRFutureTask<TextureDescription> defaultTriPipeTexture;
+    private TextureDescription defaultTriPipeTexture;
     
-    public TRFutureTask<TextureDescription> getDefaultTriPipeTexture(){
+    public TextureDescription getDefaultTriPipeTexture(){
 	if(defaultTriPipeTexture==null){
 	 defaultTriPipeTexture
-	    	= new DummyTRFutureTask<TextureDescription>(
+	    	= 
 	    		new Texture(Texture.RGBA8FromPNG(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
-	    			"Default TriPipe Texture (grayNoise)",tr,true));
+	    			"Default TriPipe Texture (grayNoise)",tr,true);
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
     
-    public TRFutureTask<TextureDescription> getFallbackTexture(){
+    public TextureDescription getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
 	Texture t;
 	t = new Texture(
 		Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),
 		"Fallback",tr,true);
-	fallbackTexture = new DummyTRFutureTask<TextureDescription>(t);
+	fallbackTexture = t;
 	return fallbackTexture;
     }//end getFallbackTexture()
     
-    public TRFutureTask<TextureDescription> solidColor(Color color) {
+    public TextureDescription solidColor(Color color) {
 	BufferedImage img = new BufferedImage(64, 64,
 		BufferedImage.TYPE_INT_RGB);
 	Graphics g = img.getGraphics();
 	g.setColor(color);
 	g.fillRect(0, 0, 64, 64);
 	g.dispose();
-	final DummyTRFutureTask<TextureDescription> result = new DummyTRFutureTask<TextureDescription>(new Texture(img,
-		"Solid color " + color,tr,false));
+	final TextureDescription result = new Texture(img,
+		"Solid color " + color,tr,false);
 	return result;
     }//end solidColor(...)
     

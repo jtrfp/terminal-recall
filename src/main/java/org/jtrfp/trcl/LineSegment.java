@@ -19,7 +19,7 @@ import org.jtrfp.trcl.core.TextureDescription;
 
 public abstract class LineSegment {
     public static Triangle[] buildTriPipe(Vector3D start, Vector3D end,
-	    TRFutureTask<TextureDescription> texture, int thickness, Triangle[] dest,
+	    TextureDescription texture, int thickness, Triangle[] dest,
 	    int destOffset) {
 	Rotation rot = new Rotation(Vector3D.PLUS_K, end.subtract(start)
 		.normalize());

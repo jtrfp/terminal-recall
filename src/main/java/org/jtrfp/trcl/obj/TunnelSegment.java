@@ -40,7 +40,7 @@ public class TunnelSegment extends WorldObject {
     private final double endX, endY;
 
     public TunnelSegment(TR tr, Segment s,
-	    TRFutureTask<TextureDescription>[] tunnelTexturePalette, double segLen,
+	    TextureDescription[] tunnelTexturePalette, double segLen,
 	    double endX, double endY) {
 	super(tr, createModel(s, segLen, tunnelTexturePalette, endX, endY, tr));
 	segmentLength = segLen;
@@ -78,7 +78,7 @@ public class TunnelSegment extends WorldObject {
     private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();
 
     private static Model createModel(Segment s, double segLen,
-	    TRFutureTask<TextureDescription>[] tunnelTexturePalette, double endX,
+	    TextureDescription[] tunnelTexturePalette, double endX,
 	    double endY, final TR tr) {
 	Model m = new Model(false, tr);
 	final int numPolys = s.getNumPolygons();
@@ -130,26 +130,24 @@ public class TunnelSegment extends WorldObject {
 	    Vector3D p3 = segPoint(startAngle + dAngleStart, zStart,
 		    startWidth, startHeight, startX, startY);
 
-	    TRFutureTask<TextureDescription> tex = tunnelTexturePalette[s
+	    TextureDescription tex = tunnelTexturePalette[s
 		    .getPolyTextureIndices().get(pi)];
 
 	    final FlickerLightType 	flt 	= s.getFlickerLightType();
 	    if (pi == lightPoly && flt != FlickerLightType.noLight) {
 		try {
-		    final Texture t = (Texture) tex.get();
+		    final Texture t = (Texture) tex;
 		    @SuppressWarnings("unchecked")
-		    Future<Texture>[] frames = new Future[] {// TODO: Figure out
-			    // why dummies must
-			    // be added
-			    new DummyFuture<Texture>(t.subTexture(0, .5, .5,
+		    Texture[] frames = new Texture[] {
+			    (t.subTexture(0, .5, .5,
 				    .5)),// ON
-			    new DummyFuture<Texture>(t.subTexture(.505, .5,
+			    (t.subTexture(.505, .5,
 				    .501, .5)),// OFF
-			    new DummyFuture<Texture>(t.subTexture(0, 0, 0, 0)),// DUMMY
-			    new DummyFuture<Texture>(t.subTexture(0, 0, 0, 0)) // DUMMY
+			    (t.subTexture(0, 0, 0, 0)),// DUMMY
+			    (t.subTexture(0, 0, 0, 0)) // DUMMY
 		    };
 		    final SelectableTexture st = new SelectableTexture(frames);
-		    tex = new DummyTRFutureTask<TextureDescription>(st);
+		    tex = st;
 
 		    final int flickerThresh = flt == FlickerLightType.off1p5Sec ? (int) (-.3 * (double) Integer.MAX_VALUE)
 			    : flt == FlickerLightType.on1p5Sec ? (int) (.4 * (double) Integer.MAX_VALUE)

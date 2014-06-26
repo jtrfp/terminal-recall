@@ -199,7 +199,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	//TODO: Temporary. Remove this check and replace with else {}, this is a kludge to avoid nonfunctional animation.
 	else if(!tr.getTrConfig().isUsingNewTexturing()) {// Animated texture
 	    AnimatedTexture at = ((AnimatedTexture) td);
-	    Texture.TextureTreeNode tx = at.getFrames()[0].get()
+	    Texture.TextureTreeNode tx = at.getFrames()[0]
 		    .getNodeForThisTexture();// Default frame
 	    final int numTextureFrames = at.getFrames().length;
 	    final WindowAnimator uvAnimator = new WindowAnimator(
@@ -213,7 +213,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    float[] uFrames = new float[numTextureFrames];
 	    float[] vFrames = new float[numTextureFrames];
 	    for (int ti = 0; ti < numTextureFrames; ti++) {
-		tx = at.getFrames()[ti].get().getNodeForThisTexture();
+		tx = at.getFrames()[ti].getNodeForThisTexture();
 		uFrames[ti] = (short) (uvUpScaler * tx
 			.getGlobalUFromLocal(t.getUV(vIndex).getX()));
 		vFrames[ti] = (short) (uvUpScaler * tx
@@ -269,8 +269,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		triangleVertexIndices[vIndex]=mw.create();
 	    }
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
-	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture
-		    .get();
+	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
 	}
 	// Submit the GL task to set up the triangles.
 	if(tr.getTrConfig().isUsingNewTexturing()){

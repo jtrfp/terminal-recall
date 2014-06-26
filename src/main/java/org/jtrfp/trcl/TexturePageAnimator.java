@@ -22,7 +22,7 @@ public class TexturePageAnimator implements Tickable{
     private final int 			gpuTVIndex;
     private 	  String 		debugName = "[not set]";
     private final Controller		controller;
-    private final Future<Texture>[]	frames;
+    private final Texture[]		frames;
 
     public TexturePageAnimator(AnimatedTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
 	this.vertexWindow=vw;
@@ -34,7 +34,7 @@ public class TexturePageAnimator implements Tickable{
     @Override
     public void tick() {
 	try{
-	final int texturePage = frames[(int)controller.getCurrentFrame()].get().getNodeForThisTexture().getTexturePage();
+	final int texturePage = frames[(int)controller.getCurrentFrame()].getNodeForThisTexture().getTexturePage();
 	//final int texturePage = 100;
 	vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(texturePage & 0xFF));
 	vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((texturePage >> 8) & 0xFF));

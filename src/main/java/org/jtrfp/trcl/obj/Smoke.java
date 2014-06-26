@@ -39,13 +39,13 @@ public class Smoke extends BillboardSprite {
 		if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
 		addBehavior(new SmokeBehavior());
 		String [] aniFiles = type.getAnimationFiles();
-		Future<Texture> [] frames = new Future[aniFiles.length];
+		Texture [] frames = new Texture[aniFiles.length];
 		try{for(int i=0; i<aniFiles.length;i++){
 		        frames[i]=frame(aniFiles[i]);
 		    }
 		}//end try{}
 		catch(Exception e){e.printStackTrace();}
-		setTexture(new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames)),true);
+		setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
 	    }//end constructor
 	    
 	    @Override
@@ -96,8 +96,8 @@ public class Smoke extends BillboardSprite {
 		}
 	    }//end SmokeType
 	    
-	    private Future<Texture> frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Future)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
+	    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
+		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPalette(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
 
 	    public void resetSmoke() {
 		getBehavior().probeForBehavior(SmokeBehavior.class).reset();

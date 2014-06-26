@@ -48,7 +48,7 @@ public class ProjectileFactory {
     	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
     	Model modelToUse;
-    	TRFutureTask<TextureDescription> t;
+    	TextureDescription t;
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
@@ -77,16 +77,16 @@ public class ProjectileFactory {
     	}//end if(isLaser)
    	 else if(modelingType instanceof ModelingType.BillboardModelingType){
    	     final ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)modelingType;
-   	     final Future<Texture> [] frames = new Future[mt.getRawFileNames().length];
+   	     final Texture [] frames = new Texture[mt.getRawFileNames().length];
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
    	     final Color [] pal = tr.getGlobalPalette();
    	     ColorProcessor proc = GammaCorrectingColorProcessor.singleton;
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Future)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl,false);
+   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl,false);
    	     }//end for(frames)
-   	  TRFutureTask<TextureDescription> tex = new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames));
+   	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){
 	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow);}
    	 }//end (billboard)

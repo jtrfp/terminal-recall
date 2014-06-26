@@ -23,7 +23,7 @@ import org.jtrfp.trcl.gpu.Model;
 
 public class MeterBar extends WorldObject2DVisibleEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
-    public MeterBar(TR tr, TRFutureTask<TextureDescription> tex, double height, double length, boolean horizontal) {
+    public MeterBar(TR tr, TextureDescription tex, double height, double length, boolean horizontal) {
 	super(tr);
 	//height*=.5;
 	//length*=.5;

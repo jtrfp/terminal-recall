@@ -100,7 +100,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    altitude.normalAt(cX+.5, cZ+.5);
 						    
 						    final Integer tpi = cX+cZ*256;
-						    TRFutureTask<TextureDescription> td=(TRFutureTask<TextureDescription>)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
+						    TextureDescription td=(TextureDescription)(points.containsKey(tpi)?points.get(tpi).getTexture():textureMesh.textureAt(cX, cZ));
 						    Triangle [] tris = Triangle.quad2Triangles(// COUTNER-CLOCKWISE
 							//new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
 							new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
@@ -172,7 +172,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    
 							    //Ceiling texture cell X (Z in this engine) value is offset by 10.
 							    //No tunnelpoints on ceiling
-							    TRFutureTask<TextureDescription> td=(TRFutureTask<TextureDescription>)(textureMesh.textureAt(cX, cZ+10));
+							    TextureDescription td=(TextureDescription)(textureMesh.textureAt(cX, cZ+10));
 							    norm = new Vector3D(norm.getX()*3,norm.getY(),norm.getZ()*3).normalize();//Exaggerate features.
 							    Triangle [] tris = Triangle.quad2Triangles(// CLOCKWISE (else backface culling will eat it)
 								new double [] {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX}, //x
@@ -218,7 +218,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	
 	private class TunnelPoint{
 	    final int x,z;
-	    Future<TextureDescription> textureToInsert;
+	    TextureDescription textureToInsert;
 	    
 	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
@@ -232,7 +232,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		final double signed=TR.legacy2MapSquare(v.getX());
 		z=(byte)Math.round(signed>0?signed:signed-.5)&0xFF;
 	    }
-	    public Future<TextureDescription> getTexture(){return textureToInsert;}
+	    public TextureDescription getTexture(){return textureToInsert;}
 	    
 	    @Override
 	    public boolean equals(Object other){

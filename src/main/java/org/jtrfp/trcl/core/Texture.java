@@ -58,13 +58,13 @@ public class Texture implements TextureDescription {
 						  // texture palette
     private static TextureTreeNode rootNode = null;
     private static GLTexture globalTexture;
-    public static final List<Future<TextureDescription>> texturesToBeAccounted = Collections
-	    .synchronizedList(new LinkedList<Future<TextureDescription>>());
+    public static final List<TextureDescription> texturesToBeAccounted = Collections
+	    .synchronizedList(new LinkedList<TextureDescription>());
 
     private static void waitUntilTextureProcessingEnds() {
 	while (!texturesToBeAccounted.isEmpty()) {
 	    try {
-		texturesToBeAccounted.remove(0).get();
+		texturesToBeAccounted.remove(0);
 	    } catch (Exception e) {
 		e.printStackTrace();
 	    }

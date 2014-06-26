@@ -27,5 +27,5 @@ public interface TextureMesh {
      * @return
      * @since Oct 14, 2012
      */
-    public Future<TextureDescription> textureAt(double x, double z);
+    public TextureDescription textureAt(double x, double z);
 }

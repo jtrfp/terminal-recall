@@ -36,7 +36,7 @@ public class NAVRadarBlipFactory {
 	    try{
 	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
-    		blipPool[ti][pi]=new Blip(new DummyTRFutureTask<TextureDescription>(tex),g);
+    		blipPool[ti][pi]=new Blip(tex,g);
     	     }//end for(pi)
 	    }catch(Exception e){e.printStackTrace();}
 	}//end for(ti)
@@ -59,7 +59,7 @@ public class NAVRadarBlipFactory {
     }//end BlipType
     
     private class Blip extends Sprite2D{
-	public Blip(TRFutureTask<TextureDescription> tex, RenderableSpacePartitioningGrid g) {
+	public Blip(TextureDescription tex, RenderableSpacePartitioningGrid g) {
 	    super(tr,-1,.02,.02,tex,true);
 	    g.add(this);
 	}//end constructor

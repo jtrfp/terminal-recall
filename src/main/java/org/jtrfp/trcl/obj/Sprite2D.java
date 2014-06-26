@@ -22,7 +22,7 @@ import org.jtrfp.trcl.gpu.Model;
 
 public class Sprite2D extends WorldObject2DVisibleEverywhere {
 
-    public Sprite2D(TR tr, double z, double width, double height, TRFutureTask<TextureDescription> tex, boolean useAlpha) {
+    public Sprite2D(TR tr, double z, double width, double height, TextureDescription tex, boolean useAlpha) {
 	super(tr);
 	final Model m = new Model(false,tr);
 	Triangle [] tris = Triangle.quad2Triangles(

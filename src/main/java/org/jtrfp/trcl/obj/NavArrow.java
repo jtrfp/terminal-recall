@@ -41,7 +41,7 @@ private final NAVSystem nav;
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
     
-    private static TRFutureTask<TextureDescription> getTexture(TR tr){
+    private static TextureDescription getTexture(TR tr){
 	try{
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
 		tr.getGlobalPalette(), 

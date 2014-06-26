@@ -33,10 +33,10 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere{
 		final TextureManager tm = tr.gpu.get().textureManager.get();
 		
 		//Fallback
-		TRFutureTask<Texture> [] greenThrobFrames = new TRFutureTask[16];
+		Texture [] greenThrobFrames = new Texture[16];
 		for(int f=0; f<8; f++)
-			{greenThrobFrames[f]=greenThrobFrames[15-f]=(TRFutureTask)tm.solidColor(new Color(f*22,f*32,f*23,170));}
-		TRFutureTask<TextureDescription> greenThrob = new DummyTRFutureTask<TextureDescription>(new AnimatedTexture(new Sequencer(80,greenThrobFrames.length,false), greenThrobFrames));
+			{greenThrobFrames[f]=greenThrobFrames[15-f]=(Texture)tm.solidColor(new Color(f*22,f*32,f*23,170));}
+		TextureDescription greenThrob = new AnimatedTexture(new Sequencer(80,greenThrobFrames.length,false), greenThrobFrames);
 		/*
 		final double xhairScale=.80;
 		final double xhairThick=.005*xhairScale;

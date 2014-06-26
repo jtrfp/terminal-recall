@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
@@ -141,25 +140,24 @@ public class Texture implements TextureDescription {
 		@Override
 		public Void call() throws Exception {
 		    	
-	    final ByteBuffer vectorBuffer = ByteBuffer
+		final ByteBuffer vectorBuffer = ByteBuffer
 		    .allocateDirect(4 * 4 * 4);
-	    // Create subtextures
-	    final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH);
-	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
-	    subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
-	    codebookStartOffsetsAbsolute	= new int[diameterInSubtextures*diameterInSubtextures][6];
-	    for(int i=0; i<subTextureIDs.length; i++){
-		//Create subtexture ID
-		subTextureIDs[i]=stw.create();
-		for(int off=0; off<6; off++){
-		codebookStartOffsetsAbsolute[i][off] =  tm.vqCodebookManager.get()
-			    .newCodebook256() * 256;}
-	    }//end for(subTextureIDs)
-	tr.getThreadManager().submitToGL(new Callable<Object>() {
-	    @Override
-	    public Object call() {
-		Thread.currentThread().setName("Texture.java:189");
+		// Create subtextures
+		final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH);
+		final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
+		subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
+		codebookStartOffsetsAbsolute	= new int[diameterInSubtextures*diameterInSubtextures][6];
 		for(int i=0; i<subTextureIDs.length; i++){
+		    //Create subtexture ID
+		    subTextureIDs[i]=stw.create();
+		    for(int off=0; off<6; off++){
+			codebookStartOffsetsAbsolute[i][off] =  tm.vqCodebookManager.get()
+			    .newCodebook256() * 256;}
+		}//end for(subTextureIDs)
+		tr.getThreadManager().submitToGL(new Callable<Void>() {
+		    @Override
+		    public Void call() {
+			for(int i=0; i<subTextureIDs.length; i++){
 			final int id = subTextureIDs[i];
 			//Convert subtexture index to index of TOC
 			final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
@@ -199,21 +197,9 @@ public class Texture implements TextureDescription {
 		    }//end for(codeY)
 		return null;
 	    }// end run()
-	});//end glThread
-	    return null;
+	 });//end glThread
+	return null;
 	}});//end pool thread
-	
-		//Do not register the node.
-		//Report to debug
-		//This is commented out due to extreme increase in loading time.
-	    	/*
-		tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".textureTOC.page", newNode.getTextureID());
-		tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".textureTOC.index", tocIndex);
-		for(int id:subTextureIDs){
-		    tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".SubTexture.id", id);
-		    tr.getReporter().report("org.jtrfp.trcl.core.Texture."+debugName+".SubTexture.page", stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
-		}//end for(ids)
-		*/
     }//end vqCompress(...)
 
     Texture(BufferedImage img, String debugName, TR tr, boolean uvWrapping) {
@@ -392,17 +378,6 @@ public class Texture implements TextureDescription {
 	final TR tr = gpu.getTr();
 	System.out.println("Legacy texturing mode: Committing models to atlas U/Vs...");
 	tr.getRootWindow().getCanvas().invoke(false, Texture.executeInGLFollowingFinalization);
-	/*for(final GLRunnable r:Texture.executeInGLFollowingFinalization){
-	    tr.getThreadManager().submitToGL(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    System.out.println("Texture.finalize.executeInGLFollowingFinalization "+r);
-		    r.run();
-		    return null;
-		}//end call()
-	    });
-	}//end for(executeInGLFollowingFinalization)
-	*/
     }// end finalize()
 
     public static final int createTextureID(GL3 gl) {

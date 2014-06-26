@@ -46,7 +46,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     public void loadLevel(final LVLFile lvl, final TDFFile tdf){
 	try { // Active by default
 	    final World w = tr.getWorld();
-	    Color[] globalPalette = tr.getGlobalPalette();
+	    Color[] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 	    TRFutureTask<TextureDescription>[] texturePalette = tr
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), globalPalette,

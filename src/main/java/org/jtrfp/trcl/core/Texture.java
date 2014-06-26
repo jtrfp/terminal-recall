@@ -103,8 +103,7 @@ public class Texture implements TextureDescription {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
 	}//end if capacity==0
-	if (tr.getTrConfig().isUsingNewTexturing()) {// Temporary; conform size
-						     // to 64x64
+	if (tr.getTrConfig().isUsingNewTexturing()) {
 	    imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
 	    vqCompress(imageRGBA8888);
 	return;
@@ -127,6 +126,21 @@ public class Texture implements TextureDescription {
 		    rgba8888vl, sideLength, 4);
 	    // Get a TOC
 	    final int tocIndex = toc.create();
+	    
+	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
+			debugName);
+	    newNode.setOffsetU(0);
+	    newNode.setOffsetV(0);
+	    newNode.setSizeU(1);
+	    newNode.setSizeV(1);
+	    newNode.setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
+	    if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)throw new RuntimeException("Nonzero modulus."); 		
+	    	nodeForThisTexture = newNode;
+	    
+	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    	
 	    final ByteBuffer vectorBuffer = ByteBuffer
 		    .allocateDirect(4 * 4 * 4);
 	    // Create subtextures
@@ -185,17 +199,10 @@ public class Texture implements TextureDescription {
 		    }//end for(codeY)
 		return null;
 	    }// end run()
-	}).get();
+	});//end glThread
+	    return null;
+	}});//end pool thread
 	
-	    TextureTreeNode newNode = new TextureTreeNode(64, null,
-			debugName);
-	    	newNode.setOffsetU(0);
-	    	newNode.setOffsetV(0);
-	    	newNode.setSizeU(1);
-	    	newNode.setSizeV(1);
-	    	newNode.setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
-	    	if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)throw new RuntimeException("Nonzero modulus."); 		
-	    	nodeForThisTexture = newNode;
 		//Do not register the node.
 		//Report to debug
 		//This is commented out due to extreme increase in loading time.

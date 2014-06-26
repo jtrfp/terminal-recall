@@ -82,6 +82,7 @@ import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.ExplosionFactory;
@@ -610,6 +611,9 @@ public class ResourceManager{
 	}
 
 	public VOXFile getVOXFile(String fileName) throws IllegalAccessException, IOException, FileLoadException {
+	    //Special cases: Fury3, TV, fZone
+	    if(fileName.contentEquals("Fury3"))
+	    	return new Fury3().getDefaultMission();
 	    InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		VOXFile result = new Parser().readToNewBean(is, VOXFile.class);
 		is.close();

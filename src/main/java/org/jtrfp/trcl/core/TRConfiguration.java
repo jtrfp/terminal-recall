@@ -21,6 +21,7 @@ public class TRConfiguration{
     			debugMode;
     	private int targetFPS =60;
     	private String skipToLevel;
+    	private String voxFile;
 	public TRConfiguration(){}
 
 	public GameVersion getGameVersion() {
@@ -71,4 +72,22 @@ public class TRConfiguration{
 	    }//end if(skipToLevel==null)
 	    return skipToLevel;
 	}//end skipToLevel
+
+	/**
+	 * @return the voxFile
+	 */
+	public String getVoxFile() {
+	    if(voxFile==null){
+		voxFile=System.getProperty("org.jtrfp.trcl.flow.voxFile");
+	    }//end if(null)
+	    if(voxFile==null)voxFile="Fury3";
+	    return voxFile;
+	}
+
+	/**
+	 * @param voxFile the voxFile to set
+	 */
+	public void setVoxFile(String voxFile) {
+	    this.voxFile = voxFile;
+	}
 }//end TRConfiguration

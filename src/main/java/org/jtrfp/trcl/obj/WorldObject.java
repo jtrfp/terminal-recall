@@ -56,9 +56,6 @@ public class WorldObject implements PositionedRenderable {
     private ByteBuffer 	transparentObjectDefinitionAddressesInVec4 = ByteBuffer
 	    .allocate(0);// defaults to empty
 
-    private static final List<WorldObject> allWorldObjects = Collections
-	    .synchronizedList(new ArrayList<WorldObject>());
-
     private SpacePartitioningGrid 	containingGrid;
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
@@ -79,7 +76,6 @@ public class WorldObject implements PositionedRenderable {
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
 	this.tr = tr;
-	addWorldObject(this);
 	matrixID = tr.matrixWindow.get().create();
 	// Matrix constants setup
 	rMd[15] = 1;
@@ -96,11 +92,7 @@ public class WorldObject implements PositionedRenderable {
     }// end constructor
 
     void proposeCollision(WorldObject other) {
-	for (int i = 0; i < collisionBehaviors.size(); i++) {// Not using
-							     // iterator to
-							     // avoid excess
-							     // garbage
-							     // creation.
+	for (int i = 0; i < collisionBehaviors.size(); i++) {
 	    collisionBehaviors.get(i).proposeCollision(other);
 	}// end for(collisionBehaviors)
     }// end proposeCollision(...)
@@ -170,14 +162,6 @@ public class WorldObject implements PositionedRenderable {
 	    tickBehaviors.get(i).tick(time);
 	}// end for(size)
     }// end tick(...)
-
-    private static final void addWorldObject(WorldObject o) {
-	if (o == null) {
-	    new Exception().printStackTrace();
-	    System.exit(1);
-	}
-	allWorldObjects.add(o);
-    }
     
     private final int [] emptyIntArray = new int[0];
     
@@ -228,6 +212,7 @@ public class WorldObject implements PositionedRenderable {
 			.objectDefinitionWindow.get().create();
 	    }
 	}
+	initializeObjectDefinitions();
     }// end setModel(...)
 
     public void setDirection(ObjectDirection dir) {
@@ -497,9 +482,10 @@ public class WorldObject implements PositionedRenderable {
     }
 
     public static void uploadAllObjectDefinitionsToGPU() {
+	/*
 	for (WorldObject wo : allWorldObjects) {
 	    wo.initializeObjectDefinitions();
-	}
+	}*/
     }// end uploadAllObjectDefinitionsToGPU()
 
     /**

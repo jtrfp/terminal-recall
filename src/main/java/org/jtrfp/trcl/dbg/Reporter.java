@@ -186,6 +186,7 @@ public class Reporter extends JFrame {
 	    updateExecutor.execute(new Runnable(){
 		@Override
 		public void run() {
+		    Thread.currentThread().setName("Reporter tree UI update thread.");
 		    try{Thread.currentThread().sleep(2000);}catch(Exception e){e.printStackTrace();}
 		    SwingUtilities.invokeLater(new Runnable(){
 			    @Override

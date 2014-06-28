@@ -153,6 +153,7 @@ public final class ThreadManager {
 	    @Override
 	    public void display(GLAutoDrawable drawable) {
 		renderingThread=Thread.currentThread();
+		renderingThread.setName("display()");
 		if(tr.renderer!=null){
 		    if(tr.renderer.isDone()){
 			if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();

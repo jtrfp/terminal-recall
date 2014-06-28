@@ -42,7 +42,6 @@ public class GPU{
 
 		@Override
 		public MemoryManager call() throws Exception {
-		    Thread.currentThread().setName("MemoryManager constructor.");
 		    return new MemoryManager(GPU.this);
 		}
 		
@@ -52,7 +51,6 @@ public class GPU{
 
 		@Override
 		public TextureManager call() throws Exception {
-		    Thread.currentThread().setName("TextureManager constructor.");
 		    return new TextureManager(tr);
 		}
 		

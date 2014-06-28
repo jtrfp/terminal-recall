@@ -116,7 +116,6 @@ public final class TR{
 		gpu = new TRFutureTask<GPU>(this,new Callable<GPU>(){
 		    @Override
 		    public GPU call() throws Exception {
-			Thread.currentThread().setName("GPU constructor");
 			return new GPU(TR.this);
 		    }});
 		threadManager = new ThreadManager(this);
@@ -132,21 +131,18 @@ public final class TR{
 		    matrixWindow=new TRFutureTask<MatrixWindow>(this,new Callable<MatrixWindow>(){
 			@Override
 			public MatrixWindow call() throws Exception {
-			    Thread.currentThread().setName("MatrixWindow constructor.");
 			    return new MatrixWindow(TR.this);
 			}//end call()
 		    });threadManager.threadPool.submit(matrixWindow);
 		    objectListWindow=new TRFutureTask<ObjectListWindow>(this,new Callable<ObjectListWindow>(){
 			@Override
 			public ObjectListWindow call() throws Exception {
-			    Thread.currentThread().setName("ObjectListWindow constructor.");
 			    return new ObjectListWindow(TR.this);
 			}//end call()
 		    });threadManager.threadPool.submit(objectListWindow);
 		    objectDefinitionWindow=new TRFutureTask<ObjectDefinitionWindow>(this,new Callable<ObjectDefinitionWindow>(){
 			@Override
 			public ObjectDefinitionWindow call() throws Exception {
-			    Thread.currentThread().setName("ObjectDefinitionWindow constructor.");
 			    return new ObjectDefinitionWindow(TR.this);
 			}//end call()
 		    });threadManager.threadPool.submit(objectDefinitionWindow);

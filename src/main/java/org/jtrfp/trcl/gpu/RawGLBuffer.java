@@ -25,10 +25,12 @@ public class RawGLBuffer {
     protected static GL3 gl;
     protected static GPU gpu;
     private int memoryUsageHint = MemoryUsageHint.DymamicDraw.getGLEnumInt();
+    private final int sizeInBytes;
 
     protected RawGLBuffer(int sizeInBytes, GPU gpu) {
 	if (sizeInBytes == 0)
 	    throw new RuntimeException("Cannot allocate a buffer of size zero.");
+	this.sizeInBytes=sizeInBytes;
 	RawGLBuffer.gpu = gpu;
 	gl = gpu.getGl();
 	final IntBuffer iBuf = IntBuffer.allocate(1);
@@ -62,7 +64,8 @@ public class RawGLBuffer {
 	if (mapped)
 	    return;
 	gl.glBindBuffer(getBindingTarget(), bufferID);
-	localBuffer = gl.glMapBuffer(getBindingTarget(), GL3.GL_WRITE_ONLY);
+	//localBuffer = gl.glMapBuffer(getBindingTarget(), GL3.GL_WRITE_ONLY);
+	localBuffer = gl.glMapBufferRange(getBindingTarget(), 0, sizeInBytes, GL3.GL_MAP_WRITE_BIT|GL3.GL_MAP_UNSYNCHRONIZED_BIT);
 	if (localBuffer == null) {
 	    throw new NullPointerException("Failed to map buffer.");
 	}

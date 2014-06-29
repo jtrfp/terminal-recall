@@ -69,7 +69,7 @@ public class TRConfiguration{
 
 	public String skipToLevel() {
 	    if(skipToLevel==null){
-		 skipToLevel = System.getProperty("org.jtrfp.flow.Game.skipToLevel");
+		 skipToLevel = System.getProperty("org.jtrfp.trcl.flow.Game.skipToLevel");
 	    }//end if(skipToLevel==null)
 	    return skipToLevel;
 	}//end skipToLevel
@@ -77,12 +77,8 @@ public class TRConfiguration{
 	/**
 	 * @return the voxFile
 	 */
-	public String getVoxFile() {
-	    if(voxFile==null){
-		voxFile=System.getProperty("org.jtrfp.trcl.flow.voxFile");
-	    }//end if(null)
-	    if(voxFile==null)voxFile="Fury3";
-	    return voxFile;
+	public String getVoxFile() {//Return null if not set so it is known that it wasn't set.
+	    return System.getProperty("org.jtrfp.trcl.flow.voxFile");
 	}
 
 	/**

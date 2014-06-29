@@ -295,6 +295,7 @@ public final class Renderer {
 	final GL3 gl = gpu.getGl();
 	if (!active)
 	    return;
+	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	ensureInit();
 	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){

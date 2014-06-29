@@ -14,6 +14,8 @@ package org.jtrfp.trcl.core;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.media.opengl.GL3;
 
@@ -24,6 +26,9 @@ import org.jtrfp.trcl.pool.IndexPool;
 public class VQCodebookManager {
     private final 	IndexPool 	codebook256Indices = new IndexPool();
     private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
+    private final	ByteBuffer[]	codePageBuffers	   = new ByteBuffer[NUM_CODE_PAGES];
+    private final	ConcurrentSkipListSet<Integer>	
+    					staleCodePages	   = new ConcurrentSkipListSet<Integer>();
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
     public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
@@ -79,7 +84,12 @@ public class VQCodebookManager {
 	subImageAutoMip(codeID,indentation,indentationTexture,1);
 	return this;
     }// end setProtrusion(...)
-    private static final int [] codeDims = new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 };
+    private static final int [] codeDims 	= new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 };
+    private static final int [] codePageDims 	= new int[] { CODE_PAGE_SIDE_LENGTH_TEXELS, CODE_PAGE_SIDE_LENGTH_TEXELS, 1 };
+    
+    public static interface RasterRowWriter{
+	public void applyRow(int row, ByteBuffer dest);
+    }//end RasterRowWriter
     
     private void subImage(final int codeID, final ByteBuffer texels,
 	    final GLTexture tex, int mipLevel) {
@@ -93,10 +103,44 @@ public class VQCodebookManager {
 	if(x>=CODE_PAGE_SIDE_LENGTH_TEXELS || y >= CODE_PAGE_SIDE_LENGTH_TEXELS ){
 	    throw new RuntimeException("One or more texel coords intolerably out of range: x="+x+" y="+y);
 	}
+	/*
 	tex.bind().subImage(new int[] { x, y, z },
 		codeDims, GL3.GL_RGBA,
 		0, texels);
+	*/
+	if(codePageBuffers[z]==null){
+	    codePageBuffers[z] = ByteBuffer
+		    .allocateDirect(CODE_PAGE_SIDE_LENGTH_TEXELS
+			    * CODE_PAGE_SIDE_LENGTH_TEXELS * 4);
+	}
+	final ByteBuffer codePageBuffer = codePageBuffers[z];
+	staleCodePages.add(z);
+	synchronized (codePageBuffer) {
+	synchronized (texels) {
+	    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
+		codePageBuffer
+			.position((x + (y+row) * CODE_PAGE_SIDE_LENGTH_TEXELS) * 4);
+		texels.position(row * CODE_SIDE_LENGTH * 4);
+		texels.limit(texels.position() + CODE_SIDE_LENGTH * 4);
+		codePageBuffer.put(texels);
+	    }// end for(rows)
+	}}// end sync(codePageBuffers[z],texels)
     }// end subImage(...)
+    
+    public void refreshStaleCodePages(){
+	while(!staleCodePages.isEmpty()){
+	    final int codePageID = staleCodePages.first();
+	    staleCodePages.remove(codePageID);//Will this work?
+	    final ByteBuffer codePageBuffer=codePageBuffers[codePageID];
+	    synchronized(codePageBuffer){
+	    codePageBuffer.clear();
+	    rgbaTexture.bind().subImage(
+		    new int[]{0,0,codePageID},
+		    codePageDims,
+		    GL3.GL_RGBA, 0, codePageBuffer);
+	    }//end sync(codePageBuffer)
+	}//end for(staleCodePages
+    }//end refreshStaleCodePages()
 
     private void subImageAutoMip(final int codeID, final ByteBuffer texels,
 	    final GLTexture tex, int byteSizedComponentsPerTexel) {

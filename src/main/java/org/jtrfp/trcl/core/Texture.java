@@ -174,30 +174,30 @@ public class Texture implements TextureDescription {
 		// Set the TOC vars
 		toc.height	 .set(tocIndex, sideLength);
 		toc.width	 .set(tocIndex, sideLength);
-		// Push codes to subtextures
-		    for(int codeY=0; codeY<diameterInCodes; codeY++){
-			for(int codeX=0; codeX<diameterInCodes; codeX++){
-			    final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES;
-			    final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
-			    final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
-			    final int subtextureID		= subTextureIDs[subTextureIdx];
-			    final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
-			    final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
-			    final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
-			    vectorBuffer.clear();
-			    for (int vi = 0; vi < 4 * 4 * 4; vi++)
-				vectorBuffer.put((byte) (rbvl
-					.componentAt(codeX+codeY*diameterInCodes, vi) * 255.));
-			    final int globalCodeIndex = codeIdx%256
-					    + codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
-				    vectorBuffer.clear();
-			    cbm.setRGBA(globalCodeIndex, vectorBuffer);
-			    stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
-			}//end for(codeX)
-		    }//end for(codeY)
 		return null;
 	    }// end run()
 	 });//end glThread
+	// Push codes to subtextures
+	for(int codeY=0; codeY<diameterInCodes; codeY++){
+	    for(int codeX=0; codeX<diameterInCodes; codeX++){
+		final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES;
+		final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
+		final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
+		final int subtextureID		= subTextureIDs[subTextureIdx];
+		final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
+		final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
+		final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
+		vectorBuffer.clear();
+		 for (int vi = 0; vi < 4 * 4 * 4; vi++)
+			vectorBuffer.put((byte) (rbvl
+				.componentAt(codeX+codeY*diameterInCodes, vi) * 255.));
+		final int globalCodeIndex = codeIdx%256
+			+ codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
+		vectorBuffer.clear();
+		cbm.setRGBA(globalCodeIndex, vectorBuffer);
+		stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
+		}//end for(codeX)
+	}//end for(codeY)
 	return null;
 	}});//end pool thread
     }//end vqCompress(...)

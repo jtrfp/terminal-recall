@@ -14,6 +14,7 @@ package org.jtrfp.trcl.flow;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Map.Entry;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
@@ -46,24 +47,35 @@ public class RunMe{
 			    	JarExploder.explodeLibFiles();
 				TR tr = new TR();
 				tr.gatherSysInfo();
-				for(int argI=0; argI<args.length-1; argI++)
-					{tr.getResourceManager().registerPOD(new File(args[argI]));}
+				String voxFileName = tr.getTrConfig().getVoxFile();
+				for(int argI=0; argI<args.length; argI++)
+					{if(args[argI].toUpperCase().endsWith(".POD")){
+					    if(args[argI].toUpperCase().endsWith("FURY3.POD")&&voxFileName==null)
+						voxFileName="Fury3";
+					    else if(args[argI].toUpperCase().endsWith("TV.POD")&&voxFileName==null)
+						voxFileName="TV";
+					    tr.getResourceManager().registerPOD(new File(args[argI]));
+					    }//end if(endsWith .POD)
+					}//end for(args)
 				try{
-				final VOXFile vox = tr.getResourceManager().getVOXFile(tr.getTrConfig().getVoxFile());
-				final Game game = tr.newGame(vox);
-				if(tr.getTrConfig().skipToLevel()!=null){
+				    
+				    final VOXFile vox = tr.getResourceManager().getVOXFile(voxFileName);
+				    final Game game = tr.newGame(vox);
+				    final String level = tr.getTrConfig().skipToLevel();
+				    if(level!=null){
+					System.out.println("Skipping to level: "+level);
 				    game.setLevel(tr.getTrConfig().skipToLevel());
-				}
-				game.go();}
+				    }
+				game.go();}//end try{}
 				catch(FileNotFoundException e){
 				    System.err.println("Error: Could not find VOX file or is not a valid VOX file in the supplied PODs: "+args[args.length-1]);
 				    System.exit(-1);
 				}//end catch(FileNotFoundException)
-				}
+				}//end try{}
 			catch(Exception e) {e.printStackTrace();}
 			}//end if(good)
 		else	{//fail
-			System.out.println("USAGE: TerminalRecall [path_to_POD_file0] [path_to_POD_file1] [...] [VOXFile.VOX]");
+			System.out.println("USAGE: java -Dorg.jtrfp.trcl.flow.Game.skipToLevel=[.LVL file] org.jtrfp.trcl.flow.voxFile=[.VOX file] -jar RunMe.jar [path_to_POD_file0] [path_to_POD_file1] [...]");
 			}
 		}//end aspectMain
 	
@@ -72,15 +84,19 @@ public class RunMe{
     private static void ensureJVMIsProperlyConfigured(String[] args) {
 	if (!isAlreadyConfigured()) {
 	    System.out
-		    .println("Overriding the settings passed to this JVM. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
+		    .println("Overriding the default JVM settings. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
 	    String executable = new File("RunMe.jar").exists() ? "-jar RunMe.jar"
 		    : "-cp " + System.getProperty("java.class.path")
 			    + " org.jtrfp.trcl.flow.RunMe";
 	    String cmd = "java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true "
 		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
-		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m "
-		    + executable;
+		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m ";
+	    for (Entry<Object,Object> property:System.getProperties().entrySet()){
+		if(property.getKey().toString().startsWith("org.jtrfp")&&!property.getKey().toString().toLowerCase().contains("org.jtrfp.trcl.bypassconfigure"))
+		    cmd += " -D"+property.getKey()+"="+property.getValue()+" ";
+	    }//end for(properties)
+	    cmd		+= executable;
 	    for (String arg : args) {
 		cmd += " " + arg;
 	    }
@@ -128,6 +144,6 @@ public class RunMe{
     }// end Ensure...Configured(...)
 
     private static boolean isAlreadyConfigured() {
-	return System.getProperty("org.jtrfp.trcl.bypassConfigure") != null;
+	return System.getProperty("org.jtrfp.trcl.bypassConfigure") != null?System.getProperty("org.jtrfp.trcl.bypassConfigure").toUpperCase().contentEquals("TRUE"):false;
     }
 }// end RunMe

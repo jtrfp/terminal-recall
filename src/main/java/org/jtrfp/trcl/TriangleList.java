@@ -116,7 +116,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.normX.set(gpuTVIndex, (byte)(normal.getX()*127));
 	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
 	    vw.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
-	} else if (numFrames > 1) {
+	} else {
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
 	    float[] zFrames = new float[numFrames];
@@ -155,9 +155,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		nzFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getZ()*127);
 	    }
 	    xyzAnimator.addFrames(nzFrames);
-	} else {
-	    throw new RuntimeException("Empty triangle vertex!");
-	}
+	}//end else(frames!=1)
 	//////////////// T E X T U R E ///////////////////////////
 	if(td==null){
 	    System.err.println("Stack trace of triangle creation below. NullPointerException follows.");
@@ -255,9 +253,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     private void setupTriangle(final int triangleIndex, final TextureDescription textureDescription,final int [] vertexIndices) throws ExecutionException,
 	    InterruptedException {
-		setupVertex(0, vertexIndices[triangleIndex*3+0], triangleIndex,textureDescription);
-		setupVertex(1, vertexIndices[triangleIndex*3+1], triangleIndex,textureDescription);
-		setupVertex(2, vertexIndices[triangleIndex*3+2], triangleIndex,textureDescription);
+		int tIndex = triangleIndex*3;
+		setupVertex(0, vertexIndices[tIndex], triangleIndex,textureDescription);
+		setupVertex(1, vertexIndices[tIndex+1], triangleIndex,textureDescription);
+		setupVertex(2, vertexIndices[tIndex+2], triangleIndex,textureDescription);
     }//setupTriangle
 
     public void uploadToGPU(GL3 gl) {
@@ -266,8 +265,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
 	final MemoryWindow mw = getMemoryWindow();
 	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++) {
-		triangleVertexIndices[vIndex]=mw.create();
-	    }
+	    triangleVertexIndices[vIndex]=mw.create();
+	}
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
 	}

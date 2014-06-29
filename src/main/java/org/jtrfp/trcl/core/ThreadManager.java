@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,6 +49,7 @@ public final class ThreadManager {
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
     private TRFutureTask<Void>		visibilityCalcTask;
+    private ArrayDeque<TRFutureTask>	gpuMemAccessTasks	= new ArrayDeque<TRFutureTask>();
     
     ThreadManager(final TR tr) {
 	this.tr = tr;
@@ -106,19 +108,29 @@ public final class ThreadManager {
 	    }});
 	threadPool.submit(visibilityCalcTask);
     }//end visibilityCalc()
+    
+    public <T> TRFuture<T> submitToGPUMemAccess(Callable<T> c){
+	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
+	synchronized(gpuMemAccessTasks){
+	 gpuMemAccessTasks.add(result);
+	 threadPool.submit(result);
+	 }
+	return result;
+    }//end submitToGPUMemAccess(...)
+    
     public <T> TRFuture<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr,c);
 	if(Thread.currentThread()!=renderingThread)
 	    result.enqueue();
 	else result.run();
 	return result;
-    }
+    }//end submitToGL(...)
     
     public <T> TRFutureTask<T> submitToThreadPool(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
 	threadPool.submit(result);
 	return result;
-    }
+    }//end submitToThreadPool(...)
 
     private void start() {
 	gameplayTimer.schedule(new TimerTask(){
@@ -154,9 +166,19 @@ public final class ThreadManager {
 	    public void display(GLAutoDrawable drawable) {
 		renderingThread=Thread.currentThread();
 		renderingThread.setName("display()");
+		render:
 		if(tr.renderer!=null){
 		    if(tr.renderer.isDone()){
-			if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
+			final long timeWaitingStart = System.currentTimeMillis();
+			synchronized(gpuMemAccessTasks){
+			 while(!gpuMemAccessTasks.isEmpty())
+			     if(System.currentTimeMillis()-timeWaitingStart<60){
+				 gpuMemAccessTasks.poll().get();
+			     }else{
+				 break render;
+			     }//end if(timedOut)
+			 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
+			 }//end sync(gpuMemAccessTasks)
 		    	}////end if(renderer.isDone)
 		    }//end if(!null)
 	    }//end display()

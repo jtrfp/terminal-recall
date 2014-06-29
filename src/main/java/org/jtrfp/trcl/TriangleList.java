@@ -259,7 +259,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		setupVertex(2, vertexIndices[tIndex+2], triangleIndex,textureDescription);
     }//setupTriangle
 
-    public void uploadToGPU(GL3 gl) {
+    public void uploadToGPU() {
 	final int nPrimitives = getNumElements();
 	final int [] triangleVertexIndices = new int[nPrimitives*3];
 	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
@@ -278,7 +278,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 				setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
 			return null;
 		    }//end Call()
-		}).get();
+		});
 	}else{
 	    Texture.executeInGLFollowingFinalization.add(new GLRunnable() {
 		    @Override
@@ -290,7 +290,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		    }//end run()
 		});
 	}//end legacy texturing enqueue later.
-	
     }// end allocateIndices(...)
 
     @Override

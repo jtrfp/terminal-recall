@@ -107,7 +107,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	}
     }// end uploadAllListsToGPU
 */
-    public abstract void uploadToGPU(GL3 gl);
+    public abstract void uploadToGPU();
 
     //public abstract byte getPrimitiveRenderMode();
 /*

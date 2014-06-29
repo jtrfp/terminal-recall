@@ -90,7 +90,6 @@ public class Model {
      */
     public Model finalizeModel() {
 	Controller c = controller;
-	final GL3 gl = tr.gpu.get().getGl();
 	if (c == null)
 	    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);
 	Triangle[][] tris = new Triangle[tLists.size()][];
@@ -100,7 +99,7 @@ public class Model {
 	if (tris[0].length != 0) {
 	    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
 		    animateUV, c, tr, this);
-	    tpList.uploadToGPU(gl);
+	    tpList.uploadToGPU();
 	}// end if(length!=0)
 	else
 	    tpList = null;
@@ -112,7 +111,7 @@ public class Model {
 	if (ttris[0].length != 0) {
 	    ttpList = new TransparentTriangleList(ttris,
 		    getFrameDelayInMillis(), debugName, animateUV, c, tr, this);
-	    ttpList.uploadToGPU(gl);
+	    ttpList.uploadToGPU();
 	}// end if(length!=0)
 	else
 	    ttpList = null;

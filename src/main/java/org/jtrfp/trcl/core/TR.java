@@ -14,14 +14,14 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
@@ -36,7 +36,6 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
@@ -112,6 +111,9 @@ public final class TR{
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
 	    	rootWindow = new RootWindow(this);
+	    	if(getTrConfig().isWaitForProfiler()){
+	    	    waitForProfiler();
+	    	}//end if(waitForProfiler)
 		keyStatus = new KeyStatus(rootWindow);
 		gpu = new TRFutureTask<GPU>(this,new Callable<GPU>(){
 		    @Override
@@ -156,6 +158,10 @@ public final class TR{
 		renderer.get().setRootGrid(world);
 		}//end constructor
 	
+    private void waitForProfiler() {
+	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);
+	}
+
     public void showStopper(final Exception e) {
 	System.err.println("==== SHOWSTOPPER ====");
 			    e.printStackTrace();

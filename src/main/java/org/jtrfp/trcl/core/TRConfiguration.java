@@ -18,7 +18,8 @@ public class TRConfiguration{
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
     			usingNewTexturing,
-    			debugMode;
+    			debugMode,
+    			waitForProfiler;
     	private int targetFPS =60;
     	private String skipToLevel;
     	private String voxFile;
@@ -89,5 +90,16 @@ public class TRConfiguration{
 	 */
 	public void setVoxFile(String voxFile) {
 	    this.voxFile = voxFile;
+	}
+
+	public boolean isWaitForProfiler() {
+	    if(waitForProfiler!=null)return waitForProfiler;
+	    boolean result=false;
+	    if(System.getProperties().containsKey("org.jtrfp.trcl.dbg.waitForProfiler")){
+		if(System.getProperty("org.jtrfp.trcl.dbg.waitForProfiler").toUpperCase().contains("TRUE"))
+		    result=true;
+	    }//end if(contains key)
+	    debugMode=result;
+	    return result;
 	}
 }//end TRConfiguration

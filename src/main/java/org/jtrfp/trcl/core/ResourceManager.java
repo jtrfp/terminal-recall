@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -83,6 +82,7 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Fury3;
+import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.ExplosionFactory;
@@ -614,6 +614,8 @@ public class ResourceManager{
 	    //Special cases: Fury3, TV, fZone
 	    if(fileName.contentEquals("Fury3"))
 	    	return new Fury3().getDefaultMission();
+	    if(fileName.contentEquals("TV"))
+	    	return new TV().getDefaultMission();
 	    InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		VOXFile result = new Parser().readToNewBean(is, VOXFile.class);
 		is.close();

@@ -270,9 +270,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
 	}
-	// Submit the GL task to set up the triangles.
 	if(tr.getTrConfig().isUsingNewTexturing()){
-	    tr.getThreadManager().submitToGL(new Callable<Void>() {
+	    tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public Void call() throws Exception {
 			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {

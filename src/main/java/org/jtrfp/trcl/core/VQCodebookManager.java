@@ -14,7 +14,6 @@ package org.jtrfp.trcl.core;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.media.opengl.GL3;
@@ -70,20 +69,11 @@ public class VQCodebookManager {
 		setWrapT(GL3.GL_CLAMP_TO_EDGE);
     }//end constructor
 
-    public VQCodebookManager setRGBA(int codeID, ByteBuffer rgba) {
-	subImageAutoMip(codeID,rgba,rgbaTexture,4);
+    public VQCodebookManager setRGBA(int codeID, RasterRowWriter rowWriter) {
+	subImage(codeID,rowWriter,rgbaTexture,4);
 	return this;
     }// end setRGBA(...)
-
-    public VQCodebookManager setESTuTv(int codeID, ByteBuffer ESTuTv) {
-	subImageAutoMip(codeID,ESTuTv,esTuTvTexture,4);
-	return this;
-    }// end setECTuTv(...)
-
-    public VQCodebookManager setIndentation(int codeID, ByteBuffer indentation) {
-	subImageAutoMip(codeID,indentation,indentationTexture,1);
-	return this;
-    }// end setProtrusion(...)
+    
     private static final int [] codeDims 	= new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 };
     private static final int [] codePageDims 	= new int[] { CODE_PAGE_SIDE_LENGTH_TEXELS, CODE_PAGE_SIDE_LENGTH_TEXELS, 1 };
     
@@ -91,12 +81,12 @@ public class VQCodebookManager {
 	public void applyRow(int row, ByteBuffer dest);
     }//end RasterRowWriter
     
-    private void subImage(final int codeID, final ByteBuffer texels,
+    private void subImage(final int codeID, final RasterRowWriter texels,
 	    final GLTexture tex, int mipLevel) {
 	final int x = (codeID % NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
 	final int z = codeID / CODES_PER_PAGE;
 	final int y = ((codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
-	texels.clear();
+	
 	if(z >= NUM_CODE_PAGES){
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+z+" max: "+NUM_CODE_PAGES);
 	}
@@ -120,9 +110,10 @@ public class VQCodebookManager {
 	    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
 		codePageBuffer
 			.position((x + (y+row) * CODE_PAGE_SIDE_LENGTH_TEXELS) * 4);
-		texels.position(row * CODE_SIDE_LENGTH * 4);
-		texels.limit(texels.position() + CODE_SIDE_LENGTH * 4);
-		codePageBuffer.put(texels);
+		//texels.position(row * CODE_SIDE_LENGTH * 4);
+		//texels.limit(texels.position() + CODE_SIDE_LENGTH * 4);
+		texels.applyRow(row, codePageBuffer);
+		//codePageBuffer.put(texels);
 	    }// end for(rows)
 	}}// end sync(codePageBuffers[z],texels)
     }// end subImage(...)
@@ -141,7 +132,7 @@ public class VQCodebookManager {
 	    }//end sync(codePageBuffer)
 	}//end for(staleCodePages
     }//end refreshStaleCodePages()
-
+/*
     private void subImageAutoMip(final int codeID, final ByteBuffer texels,
 	    final GLTexture tex, int byteSizedComponentsPerTexel) {
 	ByteBuffer wb = ByteBuffer.allocate(texels.capacity());
@@ -158,7 +149,7 @@ public class VQCodebookManager {
 	    wb.put(intermediate);
 	}// end for(mipLevel)
     }// end subImageAutoMip(...)
-
+*/
     private void mipDown(ByteBuffer in, ByteBuffer out, int sideLen,
 	    int componentsPerTexel) {
 	int outX, outY, inX, inY, inIndex, outIndex;

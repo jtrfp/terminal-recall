@@ -84,6 +84,10 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
+import org.jtrfp.trcl.img.vq.PalettedVectorList;
+import org.jtrfp.trcl.img.vq.RAWVectorList;
+import org.jtrfp.trcl.img.vq.VectorList;
 import org.jtrfp.trcl.obj.DebrisFactory;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
@@ -140,7 +144,7 @@ public class ResourceManager{
 		pods.add(new PodFile(f).getData());
 		}
 	
-	public TextureDescription [] getTextures(String texFileName, Color [] palette, ColorProcessor proc, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette, ColorProcessor proc, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		String [] files = getTEXListFile(texFileName);
 		TextureDescription [] result = new TextureDescription[files.length];
 		//Color [] palette = getPalette(actFileName);
@@ -161,19 +165,14 @@ public class ResourceManager{
 		return result;
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, final Color [] palette, ColorProcessor proc, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, ColorProcessor proc, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    return getRAWAsTexture(name,palette,proc,gl3,true,uvWrapping);
 	}
 	
-	public TextureDescription getRAWAsTexture(final String name, final Color [] palette, final ColorProcessor proc, GL3 gl3,
+	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette, final ColorProcessor proc, GL3 gl3,
 			final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    	TextureDescription result=textureNameMap.get(name);
 	    	if(result!=null&&useCache)return result;
-		/*result= tr.getThreadManager().submitToThreadPool(new Callable<TextureDescription>(){
-
-		    @Override
-		    public TextureDescription call() throws Exception {*/
-			//TextureDescription result=null;
 			try {
 				if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
 					{//ends in number
@@ -190,12 +189,12 @@ public class ResourceManager{
 					if(frames.size()>1){
 						Texture [] tFrames = new Texture[frames.size()];
 						for(int i=0; i<tFrames.length;i++)
-							{tFrames[i]=new Texture(getRAWImage(frames.get(i),palette,proc),""+frames.get(i),null,uvWrapping);/*textureNameMap.put(frames.get(i), tFrames[i]);*/}
+							{tFrames[i]=new Texture(getRAWVectorList(frames.get(i),palette),""+frames.get(i),null,uvWrapping);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWImage(name,palette,proc),name,tr,uvWrapping);
+				result = new Texture(getRAWVectorList(name,palette),name,tr,uvWrapping);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
@@ -208,10 +207,6 @@ public class ResourceManager{
 				result=tr.gpu.get().textureManager.get().getFallbackTexture();
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
-			//return result;
-		/*   }
-		    
-		});*/
 		if(useCache)textureNameMap.put(name, result);
 		Texture.texturesToBeAccounted.add(result);
 		return result;
@@ -228,14 +223,14 @@ public class ResourceManager{
 		return false;
 		}//end rawExists
 	
-	public Model getBINModel(String name, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
+	public Model getBINModel(String name, ColorPaletteVectorList palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
 		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette,gl);
 		}
 	
 	private static final double [] BOX_U = new double[]{0,1,1,0};
 	private static final double [] BOX_V = new double[]{0,0,1,1};
 	
-	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, Color [] palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
+	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
 		if(gl==null)throw new NullPointerException("GL cannot be null");
@@ -445,9 +440,8 @@ public class ResourceManager{
 	 * @since Oct 26, 2012
 	 */
 	public BufferedImage getRAWImage(String name, Color [] palette, ColorProcessor proc) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException{
-		RAWFile dat = getRAW(name);
-		
-		byte [] raw = dat.getRawBytes();
+		final RAWFile dat = getRAW(name);
+		final byte [] raw = dat.getRawBytes();
 		if(raw.length!=dat.getSideLength()*dat.getSideLength()) throw new NotSquareException(name);
 		if((dat.getSideLength() & (dat.getSideLength()-1))!=0) throw new NonPowerOfTwoException(name);
 		final BufferedImage stamper = new BufferedImage(dat.getSideLength(),dat.getSideLength(),BufferedImage.TYPE_INT_ARGB);
@@ -468,6 +462,11 @@ public class ResourceManager{
 		g.dispose();
 		return stamper;
 		}//end getRAWImage
+	
+	public PalettedVectorList getRAWVectorList(String name, VectorList palette) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException{
+	    final RAWFile raw =  getRAW(name);
+	    return new PalettedVectorList(new RAWVectorList(raw),palette);
+	}//end getRAWVectorList()
 	
 	public AltitudeMap getRAWAltitude(String name) throws IOException, FileLoadException, IllegalAccessException{
 	    	return new RawAltitudeMapWrapper(new RAWFile(getInputStreamFromResource("DATA\\"+name)));
@@ -490,7 +489,7 @@ public class ResourceManager{
 			result[i]=new Color(actColors[i].getComponent1(),actColors[i].getComponent2(),actColors[i].getComponent3());
 			}
 		return result;
-		}//end getTEXListFile
+		}//end getPalette
 
 	public DEFFile getDEFData(String enemyDefinitionAndPlacementFile) throws FileNotFoundException, IOException, IllegalAccessException, FileLoadException{
 		return new DEFFile(getInputStreamFromResource("DATA\\"+enemyDefinitionAndPlacementFile));

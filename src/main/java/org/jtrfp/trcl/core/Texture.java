@@ -31,11 +31,14 @@ import javax.media.opengl.GL3;
 import javax.media.opengl.GLRunnable;
 
 import org.jtrfp.trcl.OutOfTextureSpaceException;
+import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
+import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
+import org.jtrfp.trcl.img.vq.VectorList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class Texture implements TextureDescription {
@@ -95,6 +98,21 @@ public class Texture implements TextureDescription {
 	    double vSize){
 	return new Texture(this,uOff,vOff,uSize,vSize,tr,false);
     }
+    
+    Texture(PalettedVectorList vl, String debugName, TR tr, boolean uvWrapping){
+	this(tr,debugName,uvWrapping);
+	
+	if (tr.getTrConfig().isUsingNewTexturing()) {
+	    vqCompress(vl);
+	return;
+	}// end if(newTexturing)
+	
+	final int sideLength = (int) Math.sqrt(vl.getNumVectors());
+	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
+		debugName);
+	nodeForThisTexture = newNode;
+	registerNode(newNode);
+    }
 
     Texture(ByteBuffer imageRGBA8888, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
@@ -116,13 +134,30 @@ public class Texture implements TextureDescription {
 	registerNode(newNode);
     }// end constructor
     
+    private void vqCompress(PalettedVectorList squareImageIndexed){
+	final int sideLength = (int)Math.sqrt(squareImageIndexed.getNumVectors());
+	vqCompress(squareImageIndexed,sideLength);
+    }
+    
     private void vqCompress(ByteBuffer imageRGBA8888){
-	    final int sideLength 				= (int)Math.sqrt((imageRGBA8888.capacity() / 4));
+	final int sideLength 					= (int)Math.sqrt((imageRGBA8888.capacity() / 4));
 	    // Break down into 4x4 blocks
 	    final ByteBufferVectorList 		bbvl 		= new ByteBufferVectorList(imageRGBA8888);
 	    final RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
+	    vqCompress(rgba8888vl,sideLength);
+    }
+    
+    private void vqCompress(VectorList rgba8888vl, final int sideLength){
 	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
 		    rgba8888vl, sideLength, 4);
+	    // Calculate a rough average color by averaging random samples.
+	    float redA=0,greenA=0,blueA=0;
+	    final int size = rbvl.getNumVectors();
+	    for(int i=0; i<10; i++){
+		redA+=rbvl.componentAt((int)(Math.random()*size), 0);
+		greenA+=rbvl.componentAt((int)(Math.random()*size), 1);
+		blueA+=rbvl.componentAt((int)(Math.random()*size), 2);
+	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
 	    // Get a TOC
 	    final int tocIndex = toc.create();
 	    
@@ -139,14 +174,11 @@ public class Texture implements TextureDescription {
 	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-		    	
-		final ByteBuffer vectorBuffer = ByteBuffer
-		    .allocateDirect(4 * 4 * 4);
 		// Create subtextures
 		final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH);
 		final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
-		subTextureIDs 			= new int[diameterInSubtextures*diameterInSubtextures];
-		codebookStartOffsetsAbsolute	= new int[diameterInSubtextures*diameterInSubtextures][6];
+		subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
+		codebookStartOffsetsAbsolute		= new int[diameterInSubtextures*diameterInSubtextures][6];
 		for(int i=0; i<subTextureIDs.length; i++){
 		    //Create subtexture ID
 		    subTextureIDs[i]=stw.create();
@@ -154,7 +186,7 @@ public class Texture implements TextureDescription {
 			codebookStartOffsetsAbsolute[i][off] =  tm.vqCodebookManager.get()
 			    .newCodebook256() * 256;}
 		}//end for(subTextureIDs)
-		tr.getThreadManager().submitToGL(new Callable<Void>() {
+		tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public Void call() {
 			for(int i=0; i<subTextureIDs.length; i++){
@@ -176,7 +208,7 @@ public class Texture implements TextureDescription {
 		toc.width	 .set(tocIndex, sideLength);
 		return null;
 	    }// end run()
-	 });//end glThread
+	 });//end gpuMemThread
 	// Push codes to subtextures
 	for(int codeY=0; codeY<diameterInCodes; codeY++){
 	    for(int codeX=0; codeX<diameterInCodes; codeX++){
@@ -187,14 +219,48 @@ public class Texture implements TextureDescription {
 		final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
 		final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
 		final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
-		vectorBuffer.clear();
-		 for (int vi = 0; vi < 4 * 4 * 4; vi++)
-			vectorBuffer.put((byte) (rbvl
-				.componentAt(codeX+codeY*diameterInCodes, vi) * 255.));
 		final int globalCodeIndex = codeIdx%256
 			+ codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
-		vectorBuffer.clear();
-		cbm.setRGBA(globalCodeIndex, vectorBuffer);
+		final int blockPosition = codeX+codeY*diameterInCodes;
+		final RasterRowWriter rw = new RasterRowWriter(){
+		    @Override
+		    public void applyRow(int row, ByteBuffer dest) {
+			int position = row*16;
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+			dest.put((byte) (rbvl
+				.componentAt(blockPosition, position++) * 255.));
+		    }//end applyRow
+		};
+		cbm.setRGBA(globalCodeIndex, rw);
 		stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
 		}//end for(codeX)
 	}//end for(codeY)
@@ -209,7 +275,6 @@ public class Texture implements TextureDescription {
 	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
 		    debugName);
 	    nodeForThisTexture = newNode;
-	    // TODO Add true alpha support and optimize like the one below
 	    long redA = 0, greenA = 0, blueA = 0;
 	    rgba = ByteBuffer.allocateDirect(img.getWidth() * img.getHeight()
 		    * 4);

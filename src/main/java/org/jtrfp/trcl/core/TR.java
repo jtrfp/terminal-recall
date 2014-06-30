@@ -37,6 +37,7 @@ import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.tools.Util;
@@ -57,6 +58,8 @@ public final class TR{
 	public final RootWindow 		rootWindow;
 	private Color [] 			globalPalette, 
 						darkIsClearPalette;
+	private ColorPaletteVectorList		globalPaletteVL,
+						darkIsClearPaletteVL;
 	private final KeyStatus 		keyStatus;
 	private ResourceManager 		resourceManager;
 	public final ThreadManager 		threadManager;
@@ -426,5 +429,17 @@ public final class TR{
 
     public RootWindow getRootWindow() {
 	return rootWindow;
+    }
+
+    public ColorPaletteVectorList getGlobalPaletteVL() {
+	if(globalPaletteVL==null)
+	    globalPaletteVL=new ColorPaletteVectorList(getGlobalPalette());
+	return globalPaletteVL;
+    }
+
+    public ColorPaletteVectorList getDarkIsClearPaletteVL() {
+	if(darkIsClearPaletteVL==null)
+	    darkIsClearPaletteVL=new ColorPaletteVectorList(getDarkIsClearPalette());
+	return darkIsClearPaletteVL;
     }
 }//end TR

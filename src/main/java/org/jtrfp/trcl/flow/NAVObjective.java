@@ -236,7 +236,7 @@ public abstract class NAVObjective {
 		    chk.notifyPositionChange();
 		    chk.setVisible(false);
 		    try{//Start placing the jump zone.
-		    WorldObject jumpZone = new WorldObject(tr,tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl()));
+		    WorldObject jumpZone = new WorldObject(tr,tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
 		    jumpZone.setPosition(chk.getPosition());
 		    jumpZone.setVisible(true);
 		    overworld.add(jumpZone);

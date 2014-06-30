@@ -12,9 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.util.concurrent.Future;
 
 import javax.media.opengl.GL3;
 
@@ -26,15 +24,14 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.DestroysEverythingBehavior;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ProjectileFactory {
@@ -61,7 +58,7 @@ public class ProjectileFactory {
    	 final int laserplaneWidth = (int)(dims.getHeight()/TR.crossPlatformScalar);
    	 t = tr.getResourceManager().getRAWAsTexture(
    		mt.getRawFileName(),
-   		tr.getDarkIsClearPalette(), 
+   		tr.getDarkIsClearPaletteVL(), 
    		GammaCorrectingColorProcessor.singleton,
    		tr.gpu.get().getGl(),false);
    	 final double Y_SLANT=1024;
@@ -80,7 +77,7 @@ public class ProjectileFactory {
    	     final Texture [] frames = new Texture[mt.getRawFileNames().length];
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
-   	     final Color [] pal = tr.getGlobalPalette();
+   	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
    	     ColorProcessor proc = GammaCorrectingColorProcessor.singleton;
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
@@ -92,7 +89,7 @@ public class ProjectileFactory {
    	 }//end (billboard)
    	 else if(modelingType instanceof ModelingType.BINModelingType){
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;
-   	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPalette(), tr.gpu.get().getGl());
+   	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPaletteVL(), tr.gpu.get().getGl());
    	     for(int i=0; i<projectiles.length; i++){
    		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, weapon, explosionType);
    		 }

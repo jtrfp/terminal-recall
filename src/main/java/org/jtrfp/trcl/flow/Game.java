@@ -211,7 +211,7 @@ public class Game {
 			}//end for(weapons)
 			rm.setProjectileFactories(pf);
 			//final Player player = tr.getPlayer();
-	final Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPalette(), tr.gpu.get().getGl()));
+	final Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
 	final String startX=System.getProperty("org.jtrfp.trcl.startX");
 	final String startY=System.getProperty("org.jtrfp.trcl.startY");
 	final String startZ=System.getProperty("org.jtrfp.trcl.startZ");

@@ -35,7 +35,6 @@ import org.jtrfp.trcl.beh.tun.DestructibleWallBehavior;
 import org.jtrfp.trcl.beh.tun.IrisBehavior;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
@@ -44,6 +43,7 @@ import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.BarrierCube;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -56,7 +56,8 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class Tunnel extends RenderableSpacePartitioningGrid{
 	private LVLFile lvl;
 	private final TR tr;
-	private final Color [] palette;
+	//private final Color [] palette;
+	private final ColorPaletteVectorList palette;
 	private final GL3 gl;
 	final double tunnelDia=150000;
 	final double wallThickness=5000;
@@ -74,7 +75,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 		this.sourceTunnel=sourceTunnel;
 		deactivate();//Sleep until activated by tunnel entrance
 		tr=world.getTr();
-		palette=tr.getGlobalPalette();
+		palette=tr.getGlobalPaletteVL();
 		gl=tr.gpu.get().getGl();
 		Vector3D tunnelEnd=null;
 		try {   lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
@@ -164,11 +165,11 @@ public class Tunnel extends RenderableSpacePartitioningGrid{
 	 */
 	
 	private void installObstacles(Segment s, TextureDescription[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
-		Color [] palette = tr.getGlobalPalette();
-		Obstacle obs = s.getObstacle();
-		WorldObject wo;
-		GL3 gl = tr.gpu.get().getGl();
-		Model m;
+		final ColorPaletteVectorList palette	= tr.getGlobalPaletteVL();
+		Obstacle	obs 			= s.getObstacle();
+		GL3 		gl 			= tr.gpu.get().getGl();
+		WorldObject 	wo;
+		Model 		m;
 		switch(obs){
 			case none0:
 				break;

@@ -55,7 +55,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 			//futures[i]=TR.threadPool.submit(new Runnable(){
 			//	public void run(){
 					final EnemyDefinition def = defs.get(index);
-					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPalette(),tr.gpu.get().getGl());}
+					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPaletteVL(),tr.gpu.get().getGl());}
 					catch(Exception e){e.printStackTrace();}
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
 			//		}
@@ -83,7 +83,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				if(def.getLogic()==EnemyLogic.groundStaticRuin){
 				    //Spawn a second, powerup-free model using the simplemodel
 				    Model simpleModel=null;
-				    try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPalette(),tr.gpu.get().getGl());}
+				    try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPaletteVL(),tr.gpu.get().getGl());}
 				    catch(Exception e){e.printStackTrace();}
 				    EnemyDefinition ed = new EnemyDefinition();
 				    ed.setLogic(EnemyLogic.groundDumb);

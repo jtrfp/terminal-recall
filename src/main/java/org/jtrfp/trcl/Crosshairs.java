@@ -68,7 +68,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere{
 		In the real game TARGET.BIN is apparently appended to the player ship model itself such that the Z protrusion is real.
 		Furthermore, enemies try to attack the crosshairs instead of the plane, perhaps as a kludge for motion-compensated aiming.
 		*/
-		try{crossModel = tr.getResourceManager().getBINModel("TARGET.BIN",greenThrob,1./204800.,true, tr.getGlobalPalette(), tr.gpu.get().getGl());
+		try{crossModel = tr.getResourceManager().getBINModel("TARGET.BIN",greenThrob,1./204800.,true, tr.getGlobalPaletteVL(), tr.gpu.get().getGl());
 		}catch(Exception e){e.printStackTrace();System.exit(1);}
 		final TriangleList tl = crossModel.getTriangleList();
 		Triangle [] tris = tl.getPrimitives()[0];

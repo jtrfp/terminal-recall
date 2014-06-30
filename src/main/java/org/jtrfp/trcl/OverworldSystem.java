@@ -18,10 +18,10 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -49,7 +49,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    Color[] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 	    TextureDescription[] texturePalette = tr
 		    .getResourceManager().getTextures(
-			    lvl.getLevelTextureListFile(), globalPalette,
+			    lvl.getLevelTextureListFile(), new ColorPaletteVectorList(globalPalette),
 			    GammaCorrectingColorProcessor.singleton,
 			    tr.gpu.get().getGl(),true);
 	    System.out.println("Loading height map...");

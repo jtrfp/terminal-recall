@@ -54,7 +54,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 
 	cloudTexture = tr.getResourceManager().getRAWAsTexture(
 		cloudTextureFileName, new ColorPaletteVectorList(newPalette),
-		GammaCorrectingColorProcessor.singleton, tr.gpu.get().getGl(),true);
+		tr.gpu.get().getGl(),true);
 	addToWorld(os);
     }// end constructor
 

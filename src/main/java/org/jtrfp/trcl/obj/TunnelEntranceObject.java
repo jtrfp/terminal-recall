@@ -16,7 +16,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
@@ -54,9 +53,12 @@ public class TunnelEntranceObject extends BillboardSprite {
 	position[2]=TR.legacy2Modern(entrance.getX());
 	notifyPositionChange();
 	this.setBillboardSize(new Dimension(10000,10000));
-	
-	try{this.setTexture(tr.getResourceManager().getRAWAsTexture("TARG1.RAW", tr.getGlobalPaletteVL(), GammaCorrectingColorProcessor.singleton, tr.gpu.get().getGl(),false), true);}
-	catch(Exception e){e.printStackTrace();}
+	try {
+	    this.setTexture(
+		    tr.getResourceManager().getRAWAsTexture("TARG1.RAW",
+			    tr.getGlobalPaletteVL(), tr.gpu.get().getGl(),
+			    false), true);
+	}	catch(Exception e){e.printStackTrace();}
     }//end constructor
 
     public class TunnelEntranceBehavior extends Behavior implements CollisionBehavior{

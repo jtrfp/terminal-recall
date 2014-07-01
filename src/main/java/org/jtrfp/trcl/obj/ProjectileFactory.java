@@ -18,8 +18,6 @@ import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.ColorProcessor;
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
@@ -59,7 +57,6 @@ public class ProjectileFactory {
    	 t = tr.getResourceManager().getRAWAsTexture(
    		mt.getRawFileName(),
    		tr.getDarkIsClearPaletteVL(), 
-   		GammaCorrectingColorProcessor.singleton,
    		tr.gpu.get().getGl(),false);
    	 final double Y_SLANT=1024;
    	 tris =(Triangle.quad2Triangles(new double[]{-laserplaneLength/2.,laserplaneLength/2.,laserplaneLength/2.,-laserplaneLength/2.}, //X
@@ -78,10 +75,9 @@ public class ProjectileFactory {
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
    	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
-   	     ColorProcessor proc = GammaCorrectingColorProcessor.singleton;
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, proc, gl,false);
+   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, gl,false);
    	     }//end for(frames)
    	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){

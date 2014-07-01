@@ -15,11 +15,9 @@ package org.jtrfp.trcl.obj;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.concurrent.Future;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
@@ -29,9 +27,7 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.beh.TunnelRailed;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.Powerup;
@@ -107,9 +103,12 @@ public class PowerupObject extends BillboardSprite{
 					powerupType.getTvDescription());
 		}//end applyToPlayer()
 	}//end PowerupBehavior
-	
-	private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getGlobalPaletteVL(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
+
+    private Texture frame(String name) throws IllegalAccessException,
+	    IOException, FileLoadException {
+	return (Texture) getTr().getResourceManager().getRAWAsTexture(name,
+		getTr().getGlobalPaletteVL(), getTr().gpu.get().getGl(), false);
+    }
 
 	public Powerup getPowerupType()
 		{return powerupType;}

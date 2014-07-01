@@ -14,18 +14,14 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class Smoke extends BillboardSprite {
@@ -97,7 +93,7 @@ public class Smoke extends BillboardSprite {
 	    }//end SmokeType
 	    
 	    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), GammaCorrectingColorProcessor.singleton, getTr().gpu.get().getGl(),false);}
+		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), getTr().gpu.get().getGl(),false);}
 
 	    public void resetSmoke() {
 		getBehavior().probeForBehavior(SmokeBehavior.class).reset();

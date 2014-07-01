@@ -14,7 +14,6 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
@@ -32,7 +31,7 @@ private boolean includeYAxisInCollision=true;
 	setVisible(true);
 	try{setTexture(
 		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", tr.getGlobalPaletteVL(), 
-			    GammaCorrectingColorProcessor.singleton, tr.gpu.get().getGl(),false)
+			    tr.gpu.get().getGl(),false)
 		    ,true);
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor

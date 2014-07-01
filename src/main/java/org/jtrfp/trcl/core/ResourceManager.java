@@ -50,8 +50,6 @@ import org.jtrfp.jtrfp.pod.IPodFileEntry;
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.ColorProcessor;
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.LineSegment;
 import org.jtrfp.trcl.NonPowerOfTwoException;
 import org.jtrfp.trcl.RawAltitudeMapWrapper;
@@ -144,19 +142,19 @@ public class ResourceManager{
 		pods.add(new PodFile(f).getData());
 		}
 	
-	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette, ColorProcessor proc, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		String [] files = getTEXListFile(texFileName);
 		TextureDescription [] result = new TextureDescription[files.length];
 		//Color [] palette = getPalette(actFileName);
 		for(int i=0; i<files.length;i++)
-			{result[i]=getRAWAsTexture(files[i],palette,proc,gl3,uvWrapping);}
+			{result[i]=getRAWAsTexture(files[i],palette,gl3,uvWrapping);}
 		return result;
 		}//end loadTextures(...)
 	
-	public TextureDescription[] getSpecialRAWAsTextures(String name, Color [] palette, ColorProcessor proc, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public TextureDescription[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		TextureDescription [] result = specialTextureNameMap.get(name);
 		if(result==null){
-		    BufferedImage [] segs = getSpecialRAWImage(name, palette, proc, upScalePowerOfTwo);
+		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new TextureDescription[segs.length];
 			for(int si=0; si<segs.length; si++)
 				{result[si] = new Texture(segs[si],"name",tr,uvWrapping);}
@@ -165,11 +163,11 @@ public class ResourceManager{
 		return result;
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, ColorProcessor proc, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-	    return getRAWAsTexture(name,palette,proc,gl3,true,uvWrapping);
+	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	    return getRAWAsTexture(name,palette,gl3,true,uvWrapping);
 	}
 	
-	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette, final ColorProcessor proc, GL3 gl3,
+	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette, GL3 gl3,
 			final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    	TextureDescription result=textureNameMap.get(name);
 	    	if(result!=null&&useCache)return result;
@@ -291,8 +289,8 @@ public class ResourceManager{
 					//Sort out types of block
 					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
-						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,hasAlpha);
-						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, GammaCorrectingColorProcessor.singleton,gl,false);}
+						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, gl,hasAlpha);
+						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, gl,false);}
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
@@ -387,8 +385,8 @@ public class ResourceManager{
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						Texture [] subTextures = new Texture[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl,false);
-							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, GammaCorrectingColorProcessor.singleton,gl,true);
+							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, gl,false);
+							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, gl,true);
 							//subTextures[ti]=tex instanceof Texture?new DummyTRFutureTask<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							}//end for(frames) //fDelay, nFrames,interp
 						currentTexture = new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures);
@@ -411,7 +409,7 @@ public class ResourceManager{
 		//Bad fail.
 		}//end getBINModel()
 	
-	private BufferedImage [] getSpecialRAWImage(String name, Color [] palette, ColorProcessor proc, int upscalePowerOfTwo) throws IllegalAccessException, FileLoadException, IOException{
+	private BufferedImage [] getSpecialRAWImage(String name, Color [] palette, int upscalePowerOfTwo) throws IllegalAccessException, FileLoadException, IOException{
 		RAWFile dat = getRAW(name);
 		dat.setPalette(palette);
 		BufferedImage [] segs = dat.asSegments(upscalePowerOfTwo);
@@ -439,7 +437,7 @@ public class ResourceManager{
 	 * @throws NotSquareException 
 	 * @since Oct 26, 2012
 	 */
-	public BufferedImage getRAWImage(String name, Color [] palette, ColorProcessor proc) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException{
+	public BufferedImage getRAWImage(String name, Color [] palette) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException{
 		final RAWFile dat = getRAW(name);
 		final byte [] raw = dat.getRawBytes();
 		if(raw.length!=dat.getSideLength()*dat.getSideLength()) throw new NotSquareException(name);

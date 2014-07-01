@@ -14,11 +14,9 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.GammaCorrectingColorProcessor;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Mission;
@@ -44,8 +42,7 @@ private final NAVSystem nav;
     private static TextureDescription getTexture(TR tr){
 	try{
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
-		tr.getGlobalPaletteVL(), 
-		GammaCorrectingColorProcessor.singleton, 
+		tr.getGlobalPaletteVL(),
 		tr.gpu.get().getGl(),false);}
 	catch(Exception e){e.printStackTrace();}
 	return null;

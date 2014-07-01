@@ -166,21 +166,7 @@ public final class ThreadManager {
 	    public void display(GLAutoDrawable drawable) {
 		renderingThread=Thread.currentThread();
 		renderingThread.setName("display()");
-		render:
-		if(tr.renderer!=null){
-		    if(tr.renderer.isDone()){
-			final long timeWaitingStart = System.currentTimeMillis();
-			synchronized(gpuMemAccessTasks){
-			 while(!gpuMemAccessTasks.isEmpty())
-			     if(System.currentTimeMillis()-timeWaitingStart<60){
-				 gpuMemAccessTasks.poll().get();
-			     }else{
-				 break render;
-			     }//end if(timedOut)
-			 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
-			 }//end sync(gpuMemAccessTasks)
-		    	}////end if(renderer.isDone)
-		    }//end if(!null)
+		attemptRender();
 	    }//end display()
 
 	    @Override
@@ -190,6 +176,21 @@ public final class ThreadManager {
 	});
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end start()
+    
+    private void attemptRender(){
+	if(tr.renderer!=null){
+	    if(tr.renderer.isDone()){
+		synchronized(gpuMemAccessTasks){
+		 while(!gpuMemAccessTasks.isEmpty()){
+		     if(!gpuMemAccessTasks.peek().isDone()){
+			 return;//Abort. Not ready to go yet.
+		     }else gpuMemAccessTasks.poll();
+		 }//end while(!empty)
+		 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
+		 }//end sync(gpuMemAccessTasks)
+	    	}////end if(renderer.isDone)
+	    }//end if(!null)
+    }//end attemptRender()
     
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;

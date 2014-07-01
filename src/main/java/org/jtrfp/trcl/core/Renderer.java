@@ -244,36 +244,7 @@ public final class Renderer {
     private void ensureInit() {
 	if (initialized)
 	    return;
-	final GL3 gl = gpu.getGl();
-
 	gpu.memoryManager.get().map();
-
-	System.out.println("Uploading vertex data to GPU...");
-	//TriangleList.uploadAllListsToGPU(gl);
-	System.out.println("...Done.");
-	System.out.println("Uploading object definition data to GPU...");
-	WorldObject.uploadAllObjectDefinitionsToGPU();
-	System.out.println("...Done.");
-	System.out.println("\t...World.init() complete.");
-
-	try {
-	    gpu.memoryManager.get().bindToUniform(1, primaryProgram,
-		    primaryProgram.getUniform("rootBuffer"));
-	    //primaryProgram.getUniform("textureMap").set((int) 0);// Texture unit
-								// 0 mapped to
-								// textureMap
-	} catch (RuntimeException e) {
-	    e.printStackTrace();
-	}
-	GLTexture.specifyTextureUnit(gl, 0);
-	if(Texture.getGlobalTexture()!=null)//New texturing leaves this null.
-	    Texture.getGlobalTexture().bind(gl);
-	if (!primaryProgram.validate()) {
-	    System.out.println(primaryProgram.getInfoLog());
-	    System.exit(1);
-	}
-	System.out.println("...Done.");
-	//gpu.getMemoryManager().map();
 	initialized = true;
     }// end ensureInit()
 
@@ -298,9 +269,12 @@ public final class Renderer {
 	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
 	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	ensureInit();
+	gpu.memoryManager.get().bindToUniform(1, primaryProgram,
+		    primaryProgram.getUniform("rootBuffer"));
 	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){
 	    gpu.memoryManager.get().unmap();
 	}
+	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
 	renderList.render(gl);
 	gpu.memoryManager.get().map();

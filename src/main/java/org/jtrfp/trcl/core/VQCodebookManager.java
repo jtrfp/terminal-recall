@@ -120,8 +120,7 @@ public class VQCodebookManager {
     
     public void refreshStaleCodePages(){
 	while(!staleCodePages.isEmpty()){
-	    final int codePageID = staleCodePages.first();
-	    staleCodePages.remove(codePageID);//Will this work?
+	    final int codePageID = staleCodePages.pollFirst();
 	    final ByteBuffer codePageBuffer=codePageBuffers[codePageID];
 	    synchronized(codePageBuffer){
 	    codePageBuffer.clear();

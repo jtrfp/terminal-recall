@@ -112,8 +112,6 @@ public class Mission {
 		    }
     		}).get();
     		System.out.println("\t...Done.");
-    		System.out.println("Activating renderer...");
-    		tr.renderer.get().activate();//TODO: Eventually move this to Game, pending primitives are given valid textureIDs.
 	//////// NO GL BEYOND THIS POINT ////////
 	System.out.println("\t...Done.");
 	System.out.println("Invoking JVM's garbage collector...");

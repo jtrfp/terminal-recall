@@ -187,8 +187,10 @@ public class Game {
 	// Set up player, HUD, fonts...
 	System.out.println("Game.go()...");
 	System.out.println("Initializing general resources...");
+	System.out.println("Activating renderer...");
+	tr.renderer.get().activate();//TODO: Eventually move this to Game, pending primitives are given valid textureIDs.
 	try{
-	  //Set up palette
+	  //Make color zero translucent.
 	    	final ResourceManager rm = tr.getResourceManager();
 	    	final Color [] pal = tr.getGlobalPalette();
 	    	pal[0]=new Color(0,0,0,0);

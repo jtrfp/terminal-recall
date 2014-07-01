@@ -18,6 +18,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -237,14 +238,18 @@ public class WorldObject implements PositionedRenderable {
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it?");
-	ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
-	ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
-
-	processPrimitiveList(model.getTriangleList(),
-		triangleObjectDefinitions, opaqueIndicesList);
-	processPrimitiveList(model.getTransparentTriangleList(),
-		transparentTriangleObjectDefinitions, transparentIndicesList);
-
+	final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
+	final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
+	
+	tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		processPrimitiveList(model.getTriangleList(),
+			triangleObjectDefinitions, opaqueIndicesList);
+		processPrimitiveList(model.getTransparentTriangleList(),
+			transparentTriangleObjectDefinitions, transparentIndicesList);
+		return null;
+	    }}).get();//TODO: Make non-blocking
 	ByteOrder order = getTr().gpu.get().getByteOrder();
 	opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
 		opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
@@ -480,13 +485,6 @@ public class WorldObject implements PositionedRenderable {
 	transparentObjectDefinitionAddressesInVec4.clear();
 	return transparentObjectDefinitionAddressesInVec4;
     }
-
-    public static void uploadAllObjectDefinitionsToGPU() {
-	/*
-	for (WorldObject wo : allWorldObjects) {
-	    wo.initializeObjectDefinitions();
-	}*/
-    }// end uploadAllObjectDefinitionsToGPU()
 
     /**
      * @return the tr

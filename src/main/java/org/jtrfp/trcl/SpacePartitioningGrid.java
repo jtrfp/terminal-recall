@@ -38,7 +38,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 				xProgression,yProgression,zProgression;
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
-		{setParentGrid(parentGrid);activate();}
+		{setParentGrid(parentGrid);}
 	
 	public void activate()
 		{if(parentGrid!=null)parentGrid.addBranch(this);}

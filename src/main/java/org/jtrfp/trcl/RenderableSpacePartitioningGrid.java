@@ -21,11 +21,10 @@ public abstract class RenderableSpacePartitioningGrid extends
     public RenderableSpacePartitioningGrid(double sizeX, double sizeY,
 	    double sizeZ, double gridBlockSize, double viewDepth) {
 	super(new Vector3D(sizeX, sizeY, sizeZ), gridBlockSize, viewDepth * 1.2);
-	activate();
     }
 
     public RenderableSpacePartitioningGrid(
 	    SpacePartitioningGrid<PositionedRenderable> parent) {
 	super(parent);
     }
-}
+}//end RenderableSpacePartitioningGrid

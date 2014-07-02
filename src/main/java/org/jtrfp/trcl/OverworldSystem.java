@@ -44,7 +44,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	this.tr = w.getTr();
     }
     public void loadLevel(final LVLFile lvl, final TDFFile tdf){
-	try { // Active by default
+	try {
 	    final World w = tr.getWorld();
 	    Color[] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 	    TextureDescription[] texturePalette = tr
@@ -62,7 +62,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("Building terrain...");
 	    boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
 		    .toUpperCase().contains("BORG");
-	    TerrainSystem terrain = new TerrainSystem(altitudeMap, textureMesh,
+	    TerrainSystem terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
 		    TR.mapSquareSize, this, terrainMirror, tr, tdf,
 		    flatShadedTerrain);
 	    System.out.println("...Done.");
@@ -80,6 +80,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    ObjectSystem objectSystem = new ObjectSystem(this, w, lvl, defList,
 		    null, Vector3D.ZERO);
 	    objectSystem.activate();
+	    terrainSystem.activate();
 	    System.out.println("...Done.");
 	    // Tunnel activators
 	} catch (Exception e) {
@@ -87,6 +88,12 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	}
 	// terrainMirror.deactivate();//TODO: Uncomment
     }// end constructor
+    
+    @Override
+    public void activate(){
+	tr.getWorld().setFogColor(getFogColor());
+	super.activate();
+    }
 
     public Color getFogColor() {
 	return fogColor;

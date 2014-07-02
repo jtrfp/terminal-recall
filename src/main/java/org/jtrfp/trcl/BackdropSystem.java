@@ -51,6 +51,7 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 	
 	public void overworldMode(){overworldBackdrop.setVisible(true);tunnelBackdrop.setVisible(false);}
 	public void tunnelMode(){overworldBackdrop.setVisible(false);tunnelBackdrop.setVisible(true);}
+	public void loadingMode(){overworldBackdrop.setVisible(false);tunnelBackdrop.setVisible(false);}
 	
 	public static class Backdrop extends WorldObject2DVisibleEverywhere{
 

@@ -12,14 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.BackdropSystem;
+import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
@@ -27,25 +26,15 @@ import org.jtrfp.trcl.TunnelInstaller;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.AbstractVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
-import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
-import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.obj.DebrisFactory;
-import org.jtrfp.trcl.obj.Explosion.ExplosionType;
-import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
-import org.jtrfp.trcl.obj.ProjectileFactory;
-import org.jtrfp.trcl.obj.SmokeFactory;
 
 public class Mission {
     private final TR tr;
@@ -57,26 +46,36 @@ public class Mission {
     private List<NAVSubObject> navSubObjects;
     private ObjectDirection playerStartDirection;
     private final Game game;
-    public Mission(TR tr, Game game, LVLFile lvl){
+    private final String levelName;
+    private OverworldSystem overworldSystem;
+    public Mission(TR tr, Game game, LVLFile lvl, String levelName){
 	this.tr=tr;
 	this.lvl=lvl;
 	this.game=game;
+	this.levelName=levelName;
     }//end Mission
     
     public Result go(){
 	System.out.println("Starting GampeplayLevel loading sequence...");
+	final HUDSystem hud = game.getHUDSystem();
+	hud.setLoadingProgress(.1);
+	hud.loadingMode(levelName);
+	hud.activate();
 	try{
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Color [] pal = rm.getPalette(lvl.getGlobalPaletteFile());
+	    hud.setLoadingProgress(.2);
 	    final Player player = tr.getPlayer();
 	final World world = tr.getWorld();
 	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	tr.setOverworldSystem(new OverworldSystem(world));
+	hud.setLoadingProgress(.3);
+	tr.setOverworldSystem(overworldSystem = new OverworldSystem(world));
+	hud.setLoadingProgress(.4);
 	tr.getOverworldSystem().loadLevel(lvl, tdf);
+	hud.setLoadingProgress(.5);
 	System.out.println("\t...Done.");
-	
     		//Install NAVs
-    		final NAVSystem navSystem = tr.getNavSystem();
+    		final NAVSystem navSystem = tr.getGame().getNavSystem();
+    		hud.setLoadingProgress(.6);
     		navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
     		
     		START s = (START)navSubObjects.get(0);
@@ -86,24 +85,21 @@ public class Mission {
     		playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
     		playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
     		playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
-    		// ////// INITIAL HEADING
+    		//////// INITIAL HEADING
     	    player.setPosition(getPlayerStartPosition());
     	    player.setDirection(getPlayerStartDirection());
     	    player.setHeading(player.getHeading().negate());// Kludge to fix
     							    // incorrect heading
     		TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
     		Factory f = new NAVObjective.Factory(tr);
-    		for(NAVSubObject obj:navSubObjects){
+    		for(NAVSubObject obj:navSubObjects)
     		    f.create(tr, obj, navs);
-    		}//end for(navSubObjects)
     		navSystem.updateNAVState();
-    		tr.setBackdropSystem(new BackdropSystem(world));
+    		hud.setLoadingProgress(.7);
     		System.out.println("Start position set to "+player.getPosition());
-    		GPU gpu = tr.gpu.get();
-    		System.out.println("Building atlas texture...");
-    		Texture.finalize(gpu);
     		System.out.println("Setting sun vector");
     		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
+    		hud.setLoadingProgress(.8);
     		tr.getThreadManager().submitToGL(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
@@ -111,8 +107,9 @@ public class Mission {
 			return null;
 		    }
     		}).get();
+    		hud.setLoadingProgress(.9);
     		System.out.println("\t...Done.");
-	//////// NO GL BEYOND THIS POINT ////////
+    		
 	System.out.println("\t...Done.");
 	System.out.println("Invoking JVM's garbage collector...");
 	System.gc();
@@ -129,6 +126,13 @@ public class Mission {
 		System.err.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");}
 	}//end if(containsKey)
 	System.out.println("Mission.go() complete.");
+	//Transition to gameplay mode.
+	hud.gameplayMode();
+	tr.getBackdropSystem().overworldMode();
+	tr.getBackdropSystem().activate();
+	overworldSystem.activate();
+	game.getNavSystem().activate();
+	game.getPlayer().setActive(true);
 	return new Result(null);//TODO: Replace null with actual value unless end of game.
     }//end go()
     
@@ -139,7 +143,7 @@ public class Mission {
     public void removeNAVObjective(NAVObjective o){
 	navs.remove(o);
 	if(navs.size()==0){missionCompleteSequence();}
-	else tr.getNavSystem().updateNAVState();
+	else tr.getGame().getNavSystem().updateNAVState();
     }//end removeNAVObjective(...)
     
     public class Result{

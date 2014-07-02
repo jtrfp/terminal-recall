@@ -95,7 +95,7 @@ public class TRConfiguration{
 		if(System.getProperty("org.jtrfp.trcl.dbg.waitForProfiler").toUpperCase().contains("TRUE"))
 		    result=true;
 	    }//end if(contains key)
-	    debugMode=result;
+	    waitForProfiler=result;
 	    return result;
 	}
 }//end TRConfiguration

@@ -49,7 +49,7 @@ private final NAVRadarBlipFactory blips;
     public void updateNAVState(){
 	final NAVObjective obj = tr.getGame().getCurrentMission().currentNAVObjective();
 	if(obj==null)return;
-	tr.getHudSystem().
+	tr.getGame().getHUDSystem().
 		getObjective().
 		setContent(obj.getDescription());
 	final WorldObject target = obj.getTarget();

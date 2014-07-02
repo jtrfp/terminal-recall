@@ -34,7 +34,7 @@ public class WeaponSelectionBehavior extends Behavior implements PlayerControlBe
 	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
 	    final int ammo = activeBehavior.getAmmo();
-	    parent.getTr().getHudSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
+	    parent.getTr().getGame().getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
@@ -54,7 +54,7 @@ public class WeaponSelectionBehavior extends Behavior implements PlayerControlBe
 			break;
 		        }
 		    }//end switch(game version)
-		    tr.getHudSystem().getWeapon().setContent(content);
+		    tr.getGame().getHUDSystem().getWeapon().setContent(content);
 		}//end if(New Behavior)
 	    }//end if (selection key is pressed)
 	}//end for(keys)

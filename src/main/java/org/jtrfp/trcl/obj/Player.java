@@ -80,9 +80,9 @@ public class Player extends WorldObject {
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
 	addBehavior(new UpdatesThrottleMeterBehavior().setController(tr
-		.getHudSystem().getThrottleMeter()));
+		.getGame().getHUDSystem().getThrottleMeter()));
 	addBehavior(new UpdatesHealthMeterBehavior().setController(tr
-		.getHudSystem().getHealthMeter()));
+		.getGame().getHUDSystem().getHealthMeter()));
 	addBehavior(new DamagedByCollisionWithGameplayObject());
 	addBehavior(new DamagedByCollisionWithSurface());
 	addBehavior(new BouncesOffSurfaces());
@@ -152,7 +152,7 @@ public class Player extends WorldObject {
 		.setMaxPropulsion(900000);
 	getBehavior().probeForBehavior(RotationalDragBehavior.class)
 		.setDragCoefficient(.86);
-
+	setActive(false);
     }//end constructor
 
     @Override

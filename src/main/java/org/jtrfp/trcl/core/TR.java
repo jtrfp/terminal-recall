@@ -70,8 +70,6 @@ public final class TR{
 	private InterpolatingAltitudeMap 	altitudeMap;
 	private BackdropSystem 			backdropSystem;
 	private Game 				game;
-	private NAVSystem 			navSystem;
-	private HUDSystem 			hudSystem;
 	
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
@@ -338,42 +336,6 @@ public final class TR{
 
     public Game getGame() {
 	return game;
-    }
-
-    /**
-     * @return the navSystem
-     */
-    public NAVSystem getNavSystem() {
-	if (navSystem == null) {
-	    navSystem = new NAVSystem(getWorld(), this);
-	}
-	return navSystem;
-    }
-
-    /**
-     * @param navSystem
-     *            the navSystem to set
-     */
-    public void setNavSystem(NAVSystem navSystem) {
-	this.navSystem = navSystem;
-    }
-
-    /**
-     * @return the hudSystem
-     */
-    public HUDSystem getHudSystem() {
-	if (hudSystem == null)
-	    hudSystem = new HUDSystem(getWorld());
-	hudSystem.activate();
-	return hudSystem;
-    }
-
-    /**
-     * @param hudSystem
-     *            the hudSystem to set
-     */
-    public void setHudSystem(HUDSystem hudSystem) {
-	this.hudSystem = hudSystem;
     }
 
     public static double legacy2MapSquare(double z) {

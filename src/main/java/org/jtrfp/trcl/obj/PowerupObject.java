@@ -97,7 +97,7 @@ public class PowerupObject extends BillboardSprite{
 			    addSupply(powerupType.
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
-			tr.getHudSystem().submitMomentaryUpfrontMessage(
+			tr.getGame().getHUDSystem().submitMomentaryUpfrontMessage(
 				tr.getTrConfig().getGameVersion()==GameVersion.F3?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());

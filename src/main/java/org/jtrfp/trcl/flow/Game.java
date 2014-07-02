@@ -19,19 +19,21 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.BackdropSystem;
+import org.jtrfp.trcl.HUDSystem;
+import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.VOXFile;
-import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
+import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.obj.DebrisFactory;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeFactory;
-import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class Game {
     private TR tr;
@@ -40,6 +42,9 @@ public class Game {
     private String playerName;
     private Difficulty difficulty;
     private Mission currentMission;
+    private HUDSystem hudSystem;
+    private NAVSystem navSystem;
+    private Player player;
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
@@ -160,7 +165,7 @@ public class Game {
     private void recursiveMissionSequence(String lvlFileName) {
 	try {
 	    currentMission = new Mission(tr, this, tr.getResourceManager()
-		    .getLVL(lvlFileName));
+		    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
 	    Mission.Result result = currentMission.go();
 	    final String nextLVL = result.getNextLVL();
 	    if (nextLVL != null)
@@ -174,6 +179,10 @@ public class Game {
 	}
     }// end recursiveMissionSequence(...)
 
+    public NAVSystem getNavSystem(){
+	return navSystem;
+    }
+    
     public void setLevel(String skipToLevel) {
 	final MissionLevel[] levs = vox.getLevels();
 	for (int index = 0; index < levs.length; index++) {
@@ -182,11 +191,19 @@ public class Game {
 		setLevelIndex(index);
 	}// end for(levs)
     }// end setLevel()
+    
+    public HUDSystem getHUDSystem(){
+	return hudSystem;
+    }
 
     public void go() {
 	// Set up player, HUD, fonts...
 	System.out.println("Game.go()...");
 	System.out.println("Initializing general resources...");
+	hudSystem = new HUDSystem(tr.getWorld());
+	navSystem = new NAVSystem(tr.getWorld(),tr);
+	hudSystem.deactivate();
+	navSystem.deactivate();
 	System.out.println("Activating renderer...");
 	tr.renderer.get().activate();//TODO: Eventually move this to Game, pending primitives are given valid textureIDs.
 	try{
@@ -195,7 +212,9 @@ public class Game {
 	    	final Color [] pal = tr.getGlobalPalette();
 	    	pal[0]=new Color(0,0,0,0);
 	    	tr.setGlobalPalette(pal);
-
+	    	final BackdropSystem backdrop = new BackdropSystem(tr.getWorld());
+	    	backdrop.loadingMode();
+    		tr.setBackdropSystem(backdrop);
 		// POWERUPS
 		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 		/// EXPLOSIONS
@@ -212,8 +231,7 @@ public class Game {
 			    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
 			}//end for(weapons)
 			rm.setProjectileFactories(pf);
-			//final Player player = tr.getPlayer();
-	final Player player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
+	player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
 	final String startX=System.getProperty("org.jtrfp.trcl.startX");
 	final String startY=System.getProperty("org.jtrfp.trcl.startY");
 	final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
@@ -230,7 +248,6 @@ public class Game {
 	}//end if(user start point)
 	tr.setPlayer(player);
 	tr.getWorld().add(player);
-	// TODO: Player, fonts
 	System.out.println("\t...Done.");
 	
 	startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
@@ -239,5 +256,9 @@ public class Game {
 
     public Mission getCurrentMission() {
 	return currentMission;
+    }
+    
+    public Player getPlayer(){
+	return player;
     }
 }// end Game

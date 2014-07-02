@@ -93,11 +93,6 @@ public class VQCodebookManager {
 	if(x>=CODE_PAGE_SIDE_LENGTH_TEXELS || y >= CODE_PAGE_SIDE_LENGTH_TEXELS ){
 	    throw new RuntimeException("One or more texel coords intolerably out of range: x="+x+" y="+y);
 	}
-	/*
-	tex.bind().subImage(new int[] { x, y, z },
-		codeDims, GL3.GL_RGBA,
-		0, texels);
-	*/
 	if(codePageBuffers[z]==null){
 	    codePageBuffers[z] = ByteBuffer
 		    .allocateDirect(CODE_PAGE_SIDE_LENGTH_TEXELS
@@ -110,8 +105,6 @@ public class VQCodebookManager {
 	    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
 		codePageBuffer
 			.position((x + (y+row) * CODE_PAGE_SIDE_LENGTH_TEXELS) * 4);
-		//texels.position(row * CODE_SIDE_LENGTH * 4);
-		//texels.limit(texels.position() + CODE_SIDE_LENGTH * 4);
 		texels.applyRow(row, codePageBuffer);
 		//codePageBuffer.put(texels);
 	    }// end for(rows)

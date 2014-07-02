@@ -15,6 +15,7 @@ package org.jtrfp.trcl;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.math3.util.MathUtils;
 import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -29,6 +30,9 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	    1 - .205, 0 };
     private static final double[] THROTTLE_POS = new double[] { .18875 - 1,
 	    1 - .205, 0 };
+    private static final double[] LOADING_POS = new double[] { 0,.1,0};
+    private static final double LOADING_WIDTH=.04;
+    private static final double LOADING_LENGTH=.7;
     private static final double METER_WIDTH = .02;
     private static final double METER_HEIGHT = .16;
     private static final int UPFRONT_HEIGHT = 23;
@@ -39,8 +43,11 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final CharLineDisplay sector;
     private final CharLineDisplay ammo;
     private final CharLineDisplay upfrontBillboard;
-    private final ManuallySetController throttleMeter, healthMeter;
+    private final ManuallySetController throttleMeter, healthMeter, loadingMeter;
+    private final MeterBar		throttleMeterBar,healthMeterBar,loadingMeterBar;
     private final Timer timer = new Timer();
+    private final Dashboard	dashboard;
+    private final Crosshairs	crosshairs;
 
     public HUDSystem(World world) {
 	super(world);
@@ -49,7 +56,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	final ResourceManager rm = tr.getResourceManager();
 	final GLFont font, upfrontFont;
 	try {// TODO: Have TR allocate the font ahead of time.
-	    add(new Dashboard(tr));
+	    add(dashboard=new Dashboard(tr));
 	    NDXFile ndx = rm.getNDXFile("STARTUP\\FONT.NDX");
 	    font = new GLFont(rm.getFont("capacitor.zip", "capacitor.ttf"),tr);
 	    upfrontFont = new GLFont(rm.getFontBIN("STARTUP\\FONT.BIN", ndx),
@@ -104,28 +111,35 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	 * upfrontBillboard1.setPosition(-.8,-.2,Z);
 	 * upfrontBillboard2.setPosition(-.8,-.4,Z);
 	 */
-	add(new Crosshairs(tr));
-	MeterBar mb;
-	add(mb = new MeterBar(tr, 
+	add(crosshairs=new Crosshairs(tr));
+	add(loadingMeterBar = new MeterBar(tr, 
+		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
+			.getResourceAsStream("/BlueWhiteGradient.png")),
+			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,
+		true));
+	loadingMeterBar.setPosition(LOADING_POS);
+	loadingMeter = loadingMeterBar.getController();
+	add(healthMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),
 			"HealthBar orangeOrange",false), METER_WIDTH, METER_HEIGHT,
 		false));
-	mb.setPosition(HEALTH_POS);
-	healthMeter = mb.getController();
-	add(mb = new MeterBar(tr, 
+	healthMeterBar.setPosition(HEALTH_POS);
+	healthMeter = healthMeterBar.getController();
+	add(throttleMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),
 			"ThrottleBar blackBlue",false), METER_WIDTH, METER_HEIGHT,
 		false));
-	mb.setPosition(THROTTLE_POS);
-	throttleMeter = mb.getController();
+	throttleMeterBar.setPosition(THROTTLE_POS);
+	throttleMeter = throttleMeterBar.getController();
 	tr.getThreadManager().getLightweightTimer()
 		.scheduleAtFixedRate(new TimerTask() {
 		    @Override
 		    public void run() {
 			try{
-			upfrontDisplayCountdown -= 200;
+			if(upfrontDisplayCountdown>0)
+			    upfrontDisplayCountdown -= 200;
 			if (upfrontDisplayCountdown <= 0
 				&& upfrontDisplayCountdown != Integer.MIN_VALUE) {
 			    upfrontBillboard.setVisible(false);
@@ -134,12 +148,63 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 			}catch(Exception e){e.printStackTrace();}
 		    }
 		}, 1, 200);
+	//Set all to invisible
+	throttleMeterBar.setVisible(false);
+	healthMeterBar.setVisible(false);
+	loadingMeterBar.setVisible(false);
+	upfrontBillboard.setVisible(false);
+	objective.setVisible(false);
+	distance.setVisible(false);
+	weapon.setVisible(false);
+	sector.setVisible(false);
+	ammo.setVisible(false);
+	crosshairs.setVisible(false);
+	dashboard.setVisible(false);
     }// end constructor
 
-    public void submitMomentaryUpfrontMessage(String message) {
+    public HUDSystem submitMomentaryUpfrontMessage(String message) {
 	upfrontBillboard.setContent(message);
-	upfrontBillboard.setVisible(true);
 	upfrontDisplayCountdown = 2000;
+	upfrontBillboard.setVisible(true);
+	return this;
+    }
+    
+    public HUDSystem loadingMode(String levelName){
+	upfrontBillboard.setContent(levelName);
+	upfrontDisplayCountdown=Integer.MAX_VALUE;
+	upfrontBillboard.setVisible(true);
+	healthMeterBar.setVisible(false);
+	throttleMeterBar.setVisible(false);
+	loadingMeterBar.setVisible(true);
+	objective.setVisible(false);
+	distance.setVisible(false);
+	weapon.setVisible(false);
+	sector.setVisible(false);
+	ammo.setVisible(false);
+	crosshairs.setVisible(false);
+	dashboard.setVisible(false);
+	return this;
+    }
+    
+    public HUDSystem setLoadingProgress(double unitPercent){
+	loadingMeter.setFrame(1.-unitPercent);
+	return this;
+    }
+    
+    public HUDSystem gameplayMode(){
+	upfrontDisplayCountdown=0;
+	upfrontBillboard.setVisible(false);
+	healthMeterBar.setVisible(true);
+	throttleMeterBar.setVisible(true);
+	loadingMeterBar.setVisible(false);
+	objective.setVisible(true);
+	distance.setVisible(true);
+	weapon.setVisible(true);
+	sector.setVisible(true);
+	ammo.setVisible(true);
+	crosshairs.setVisible(true);
+	dashboard.setVisible(true);
+	return this;
     }
 
     /**

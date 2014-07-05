@@ -26,13 +26,14 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CloudCeiling;
 
 public class CloudSystem extends RenderableSpacePartitioningGrid {
-    Color fogColor;
-    double ceilingHeight;
-    TextureDescription cloudTexture;
-    double cloudTileSideSize;
-    int gridSideSizeInTiles;
-    private final TR tr;
-    private final LoadingProgressReporter [] cloudTileReporters;
+    Color 		fogColor;
+    double 		ceilingHeight;
+    TextureDescription 	cloudTexture;
+    double 		cloudTileSideSize;
+    int 		gridSideSizeInTiles;
+    private final TR 	tr;
+    private final LoadingProgressReporter []
+	    		cloudTileReporters;
 
     public CloudSystem(OverworldSystem os, TR tr,
 	    RenderableSpacePartitioningGrid grid, LVLFile lvl,
@@ -98,6 +99,6 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	    }// end for(z)
 	} catch (Exception e) {
 	    e.printStackTrace();
-	}
+	}//end catch(e)
     }// end addToWorld
 }// end CloudSystem

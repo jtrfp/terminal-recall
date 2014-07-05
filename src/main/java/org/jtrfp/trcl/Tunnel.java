@@ -53,396 +53,523 @@ import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class Tunnel extends RenderableSpacePartitioningGrid{
-	private LVLFile lvl;
-	private final TR tr;
-	//private final Color [] palette;
-	private final ColorPaletteVectorList palette;
-	private final GL3 gl;
-	final double tunnelDia=150000;
-	final double wallThickness=5000;
-	private final World world;
-	private final TDFFile.Tunnel sourceTunnel;
-	private final TunnelEntranceObject entranceObject;
-	private final TunnelExitObject exitObject;
-	private final LoadingProgressReporter [] reporters;
-	private final LoadingProgressReporter tunnelAssemblyReporter;
-	
-	public static final Vector3D TUNNEL_START_POS = new Vector3D(0,TR.mapSquareSize*15,TR.mapSquareSize);
-	public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(new Vector3D(1,0,0),new Vector3D(0,1,0));
-	public static final Vector3D TUNNEL_OBJECT_POS_OFFSET = new Vector3D(0,0,-2*TR.mapSquareSize);
-	public Tunnel(World world, TDFFile.Tunnel sourceTunnel, LoadingProgressReporter rootReporter){
-		super(world);
-		this.world=world;
-		this.sourceTunnel=sourceTunnel;
-		reporters = rootReporter.generateSubReporters(2);
-		tunnelAssemblyReporter = reporters[0];
-		deactivate();//Sleep until activated by tunnel entrance
-		tr=world.getTr();
-		palette=tr.getGlobalPaletteVL();
-		gl=tr.gpu.get().getGl();
-		Vector3D tunnelEnd=null;
-		try {   lvl=world.getTr().getResourceManager().getLVL(sourceTunnel.getTunnelLVLFile());
-			final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
-			tunnelEnd = buildTunnel(sourceTunnel,entranceVector,false);
-		}catch(Exception e){e.printStackTrace();}
-			exitObject = new TunnelExitObject(tr,this);
-			exitObject.setMirrorTerrain(sourceTunnel.getExitMode()==ExitMode.exitToChamber);
-			exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000,0,0)).toArray());
-			exitObject.notifyPositionChange();
-			add(exitObject);
-			// X is tunnel depth, Z is left-right
-			try{new ObjectSystem(this,world,lvl,null,Vector3D.MINUS_I,TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET),reporters[1]);}
-			catch(Exception e){e.printStackTrace();}
-		tr.getOverworldSystem().
-		  add(entranceObject=new TunnelEntranceObject(
-		    tr,this));
-		}//end constructor
+public class Tunnel extends RenderableSpacePartitioningGrid {
+    private LVLFile 	lvl;
+    private final TR 	tr;
+    private final GL3 	gl;
+    final double 	tunnelDia = 150000;
+    final double 	wallThickness = 5000;
+    private final World world;
+    private final ColorPaletteVectorList   palette;
+    private final TDFFile.Tunnel 	   sourceTunnel;
+    private final TunnelEntranceObject 	   entranceObject;
+    private final TunnelExitObject 	   exitObject;
+    private final LoadingProgressReporter[]reporters;
+    private final LoadingProgressReporter  tunnelAssemblyReporter;
 
-	private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector, boolean entrance) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
-	    	//Entrance uses only a stub. Player is warped to TUNNEL_POS facing TUNNEL_START_DIRECTION
-		ResourceManager rm = tr.getResourceManager();
-		LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
-		TextureDescription [] tunnelTexturePalette = rm.getTextures(tlvl.getLevelTextureListFile(), palette, gl,true);
-		TNLFile tun = tr.getResourceManager().getTNLData(tlvl.getHeightMapOrTunnelFile());
-		
-		final double segLen=65536;
-		final double bendiness=18;
-		List<Segment> segs = tun.getSegments();
-		final LoadingProgressReporter [] reporters = tunnelAssemblyReporter.generateSubReporters(segs.size());
-		//Vector3D tunnelEnd = TUNNEL_START_POS;
-		Rotation rotation = entrance?new Rotation(new Vector3D(0,0,1),groundVector):new Rotation(new Vector3D(0,0,1),new Vector3D(1,0,0));
-		Vector3D startPoint= TUNNEL_START_POS;
-		
-		Vector3D segPos=Vector3D.ZERO;
-		final Vector3D top=rotation.applyTo(new Vector3D(0,1,0));
-		//tunnelEnd=entrance?segPos.add(tunnelEnd):segPos;
-		if(entrance){
-		    	//Entrance is just a stub so we only need a few of the segments
-		    	List<Segment>newSegs = new ArrayList<Segment>();
-			for(int i=0; i<10; i++){newSegs.add(segs.get(i));}
-			segs=newSegs;
-			}
-		//CONSTRUCT AND INSTALL SEGMENTS
-		int segIndex=0;
-		Vector3D finalPos=TUNNEL_START_POS;
-		for(Segment s:segs){
-		    	reporters[segIndex].complete();
-		    	tr.getReporter().report("org.jtrfp.trcl.Tunnel."+_tun.getTunnelLVLFile()+".segment"+(segIndex++)+"", s.getObstacle().name());
-		    	//Figure out the space the segment will take
-			Vector3D positionDelta=new Vector3D((double)(s.getEndX()-s.getStartX())*bendiness*-1,(double)(s.getEndY()-s.getStartY())*bendiness,segLen);
-			//Create the segment
-			Vector3D position=startPoint.add(rotation.applyTo(segPos));
-			TunnelSegment ts = new TunnelSegment(tr,s,tunnelTexturePalette,segLen,positionDelta.getX(),positionDelta.getY());
-			ts.setPosition(position.toArray());
-			ts.setHeading(entrance?groundVector:Vector3D.PLUS_I);
-			ts.setTop(entrance?top:Vector3D.PLUS_J);
-			//Install the segment
-			add(ts);
-			installObstacles(s,tunnelTexturePalette,entrance?groundVector:Vector3D.PLUS_I,entrance?top:Vector3D.PLUS_J,position,
-					TR.legacy2Modern(s.getStartWidth()*TunnelSegment.TUNNEL_DIA_SCALAR),TR.legacy2Modern(s.getStartWidth()*TunnelSegment.TUNNEL_DIA_SCALAR),tr);
-			//Move origin to next segment
-			segPos=segPos.add(positionDelta);
-			finalPos=position;
-			}//end for(segments)
-		return finalPos;
-		}//end buildTunnel(...)
-	
-	/**
-	 * Tunnel items:
-	 * FANBODY.BIN - fan
-	 * IRIS.BIN - animated iris
-	 * BEAM.BIN / PIPE.BIN
-	 * JAW1.BIN (right) JAW2.BIN (left) - jaws
-	 * ELECTRI[0-3].RAW - force field
-	 * TP1.RAW - good enough for blastable door?
-	 * @throws IOException 
-	 * @throws FileLoadException 
-	 * 
-	 * 
-	 */
-	
-	private void installObstacles(Segment s, TextureDescription[] tunnelTexturePalette, Vector3D heading, Vector3D top, Vector3D wPos, double width, double height, TR tr) throws IllegalAccessException, FileLoadException, IOException{
-		final ColorPaletteVectorList palette	= tr.getGlobalPaletteVL();
-		Obstacle	obs 			= s.getObstacle();
-		GL3 		gl 			= tr.gpu.get().getGl();
-		WorldObject 	wo;
-		Model 		m;
-		switch(obs){
-			case none0:
-				break;
-			case doorway:{
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1,tr);
-				wo = new WorldObject(world.getTr(),m);
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				add(wo);
-				break;
-				}
-			case closedDoor:{
-			    	BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,0,1,false);
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.addBehavior(new DamageableBehavior().setHealth(4096));
-				bc.addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
-				bc.addBehavior(new DeathBehavior());
-				bc.addBehavior(new DebrisOnDeathBehavior());
-				bc.addBehavior(new DestructibleWallBehavior());
-				bc.setTop(top);
-				add(bc);
-				break;
-				}
-			case blownOpenDoor:
-				BarrierCube bc = new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1,true);
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				add(bc);
-				break;
-			case movingWallLeft:{
-				Vector3D endPos = wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia));
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
-				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-				}
-			case movingWallRight:{
-				Vector3D endPos = wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia));
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
-				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-				}
-			case movingWallDown:{
-				Vector3D endPos = wPos.subtract(top.scalarMultiply(tunnelDia));
-				bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
-				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-				}
-			case movingWallUp:{
-				Vector3D endPos = wPos.add(top.scalarMultiply(tunnelDia));
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
-				bc.addBehavior(new ShiftingObjectBehavior(3000,wPos,endPos));
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-				}
-			case wallLeftSTUB:
-			case wallLeft:
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0.,tunnelDia/2.,0},false);
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-			case wallRightSTUB:
-			case wallRight:
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia,tunnelDia/2.,0},false);
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-			case wallDownSTUB:
-			case wallDown:
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
-				bc.setPosition((wPos.subtract(top.scalarMultiply(tunnelDia/2))).toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-			case wallUpSTUB:
-			case wallUp:
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},false);
-			    	bc.setPosition((wPos.add(top.scalarMultiply(tunnelDia/2))).toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-			case rotatingHalfWall:
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0,tunnelDia/2.,0},false);
-				bc.addBehavior(new RotatingObjectBehavior(heading,heading,top,6000,0));
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-			case rotating34Wall:
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0,tunnelDia/2.,10},false);
-				bc.addBehavior(new RotatingObjectBehavior(heading,heading,top,6000,0));
-				bc.setPosition(wPos.toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				
-			    	bc =new BarrierCube(tr,tunnelDia,tunnelDia,wallThickness,tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{0,tunnelDia/2.,0},false);
-				bc.addBehavior(new RotatingObjectBehavior(heading,heading,top,6000,Math.PI/2));
-				bc.setPosition((wPos.add(new Vector3D(100,0,0))).toArray());
-				bc.setHeading(heading);
-				bc.setTop(top);
-				bc.addBehavior(new CubeCollisionBehavior(bc));
-				add(bc);
-				break;
-			case fan:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BLADE.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],28,false,palette,gl));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("FANBODY.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],28,false,palette,gl));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case jawsVertical:
-				//Up jaw
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW2.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.add(top.scalarMultiply(tunnelDia/2))));
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(heading.crossProduct(top).negate());
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				//Down jaw
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.subtract(top.scalarMultiply(tunnelDia/2))));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(heading.crossProduct(top).negate());
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case jawsHorizontal:
-				//Left jaw
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW2.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.add(heading.crossProduct(top).scalarMultiply(tunnelDia/2))));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				//Right jaw
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("JAW1.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.addBehavior(new ShiftingObjectBehavior(3000,wPos,wPos.subtract(heading.crossProduct(top).scalarMultiply(tunnelDia/2))));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case metalBeamUp:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(0,tunnelDia/6,0)).toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case metalBeamDown:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(0,-tunnelDia/6,0)).toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case metalBeamLeft:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(-tunnelDia/6,0,0)).toArray());
-				wo.setHeading(heading);
-				wo.setTop(top.crossProduct(heading));
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case metalBeamRight:
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("BEAM.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],8,false,palette,gl));
-				wo.setPosition(wPos.add(new Vector3D(tunnelDia/6,0,0)).toArray());
-				wo.setHeading(heading);
-				wo.setTop(top.crossProduct(heading));
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;
-			case forceField:{//TODO
-				m=Model.buildCube(tunnelDia, tunnelDia, wallThickness, tunnelTexturePalette[s.getObstacleTextureIndex()], new double[]{tunnelDia/2.,tunnelDia/2.,0},.5,.5,1,1,tr);
-				wo = new WorldObject(world.getTr(),m);
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				add(wo);
-				break;
-				}
-			//Invisible walls, as far as I know, are never used.
-			//This makes sense: There is nothing fun about trying to get through a tunnel and crashing into invisible walls.
-			case invisibleWallUp://TODO
-				break;
-			case invisibleWallDown://TODO
-				break;
-			case invisibleWallLeft://TODO
-				break;
-			case invisibleWallRight://TODO
-				break;
-			case iris:{
-				wo = new WorldObject(tr,tr.getResourceManager().getBINModel("IRIS.BIN",tunnelTexturePalette[s.getObstacleTextureIndex()],4*256,false,palette,gl));
-				final Model mod = wo.getModel();
-				wo.addBehavior(new IrisBehavior(new Sequencer(mod.getFrameDelayInMillis(), 2, true),width));
-				wo.setPosition(wPos.toArray());
-				wo.setHeading(heading);
-				wo.setTop(top);
-				wo.addBehavior(new CubeCollisionBehavior(wo));
-				add(wo);
-				break;}
-			}//end switch(obstruction)
-		}//end installObstacles()
-	
-	public WorldObject getFallbackModel() throws IllegalAccessException, FileLoadException, IOException
-		{return new WorldObject(tr,tr.getResourceManager().getBINModel("NAVTARG.BIN",null,8,false,palette,gl));}
+    public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
+	    TR.mapSquareSize * 15, TR.mapSquareSize);
+    public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(
+	    new Vector3D(1, 0, 0), new Vector3D(0, 1, 0));
+    public static final Vector3D TUNNEL_OBJECT_POS_OFFSET = new Vector3D(0, 0,
+	    -2 * TR.mapSquareSize);
 
-	/**
-	 * @return the sourceTunnel
-	 */
-	public TDFFile.Tunnel getSourceTunnel() {
-	    return sourceTunnel;
+    public Tunnel(World world, TDFFile.Tunnel sourceTunnel,
+	    LoadingProgressReporter rootReporter) {
+	super(world);
+	this.world	  = world;
+	reporters	  = rootReporter.generateSubReporters(2);
+	this.sourceTunnel = sourceTunnel;
+	tr 		  = world.getTr();
+	palette 	  = tr.getGlobalPaletteVL();
+	gl 		  = tr.gpu.get().getGl();
+	tunnelAssemblyReporter 
+	  		  = reporters[0];
+	Vector3D tunnelEnd = null;
+	deactivate();// Sleep until activated by tunnel entrance
+	try {
+	    lvl = world.getTr().getResourceManager()
+		    .getLVL(sourceTunnel.getTunnelLVLFile());
+	    final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
+	    tunnelEnd = buildTunnel(sourceTunnel, entranceVector, false);
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
-
-	/**
-	 * @return the entranceObject
-	 */
-	public TunnelEntranceObject getEntranceObject() {
-	    return entranceObject;
+	exitObject = new TunnelExitObject(tr, this);
+	exitObject
+		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
+	exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000, 0, 0))
+		.toArray());
+	exitObject.notifyPositionChange();
+	add(exitObject);
+	// X is tunnel depth, Z is left-right
+	try {
+	    new ObjectSystem(this, world, lvl, null, Vector3D.MINUS_I,
+		    TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET),
+		    reporters[1]);
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
+	tr.getOverworldSystem().add(
+		entranceObject = new TunnelEntranceObject(tr, this));
+    }// end constructor
 
-	/**
-	 * @return the exitObject
-	 */
-	public TunnelExitObject getExitObject() {
-	    return exitObject;
+    private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector,
+	    boolean entrance) throws IllegalAccessException,
+	    UnrecognizedFormatException, FileNotFoundException,
+	    FileLoadException, IOException {
+	// Entrance uses only a stub. Player is warped to TUNNEL_POS facing
+	// TUNNEL_START_DIRECTION
+	ResourceManager rm = tr.getResourceManager();
+	LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
+	TextureDescription[] tunnelTexturePalette = rm.getTextures(
+		tlvl.getLevelTextureListFile(), palette, gl, true);
+	TNLFile tun = tr.getResourceManager().getTNLData(
+		tlvl.getHeightMapOrTunnelFile());
+
+	final double segLen = 65536;
+	final double bendiness = 18;
+	List<Segment> segs = tun.getSegments();
+	final LoadingProgressReporter[] reporters = tunnelAssemblyReporter
+		.generateSubReporters(segs.size());
+	// Vector3D tunnelEnd = TUNNEL_START_POS;
+	Rotation rotation = entrance ? new Rotation(new Vector3D(0, 0, 1),
+		groundVector) : new Rotation(new Vector3D(0, 0, 1),
+		new Vector3D(1, 0, 0));
+	Vector3D startPoint = TUNNEL_START_POS;
+
+	Vector3D segPos = Vector3D.ZERO;
+	final Vector3D top = rotation.applyTo(new Vector3D(0, 1, 0));
+	if (entrance) {
+	    // Entrance is just a stub so we only need a few of the segments
+	    List<Segment> newSegs = new ArrayList<Segment>();
+	    for (int i = 0; i < 10; i++) {
+		newSegs.add(segs.get(i));
+	    }
+	    segs = newSegs;
 	}
-}//end Tunnel
+	// CONSTRUCT AND INSTALL SEGMENTS
+	int segIndex = 0;
+	Vector3D finalPos = TUNNEL_START_POS;
+	for (Segment s : segs) {
+	    reporters[segIndex].complete();
+	    tr.getReporter().report(
+		    "org.jtrfp.trcl.Tunnel." + _tun.getTunnelLVLFile()
+			    + ".segment" + (segIndex++) + "",
+		    s.getObstacle().name());
+	    // Figure out the space the segment will take
+	    Vector3D positionDelta = new Vector3D(
+		    (double) (s.getEndX() - s.getStartX()) * bendiness * -1,
+		    (double) (s.getEndY() - s.getStartY()) * bendiness, segLen);
+	    // Create the segment
+	    Vector3D position = startPoint.add(rotation.applyTo(segPos));
+	    TunnelSegment ts = new TunnelSegment(tr, s, tunnelTexturePalette,
+		    segLen, positionDelta.getX(), positionDelta.getY());
+	    ts.setPosition(position.toArray());
+	    ts.setHeading(entrance ? groundVector : Vector3D.PLUS_I);
+	    ts.setTop(entrance ? top : Vector3D.PLUS_J);
+	    // Install the segment
+	    add(ts);
+	    installObstacles(s, tunnelTexturePalette, entrance ? groundVector
+		    : Vector3D.PLUS_I, entrance ? top : Vector3D.PLUS_J,
+		    position, TR.legacy2Modern(s.getStartWidth()
+			    * TunnelSegment.TUNNEL_DIA_SCALAR),
+		    TR.legacy2Modern(s.getStartWidth()
+			    * TunnelSegment.TUNNEL_DIA_SCALAR), tr);
+	    // Move origin to next segment
+	    segPos = segPos.add(positionDelta);
+	    finalPos = position;
+	}// end for(segments)
+	return finalPos;
+    }// end buildTunnel(...)
+
+    /**
+     * Tunnel items: FANBODY.BIN - fan IRIS.BIN - animated iris BEAM.BIN /
+     * PIPE.BIN JAW1.BIN (right) JAW2.BIN (left) - jaws ELECTRI[0-3].RAW - force
+     * field TP1.RAW - good enough for blastable door?
+     * 
+     * @throws IOException
+     * @throws FileLoadException
+     * 
+     * 
+     */
+
+    private void installObstacles(Segment s,
+	    TextureDescription[] tunnelTexturePalette, Vector3D heading,
+	    Vector3D top, Vector3D wPos, double width, double height, TR tr)
+	    throws IllegalAccessException, FileLoadException, IOException {
+	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();
+	Obstacle obs = s.getObstacle();
+	GL3 gl = tr.gpu.get().getGl();
+	WorldObject wo;
+	Model m;
+	switch (obs) {
+	case none0:
+	    break;
+	case doorway: {
+	    m = Model.buildCube(tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
+		    1, 1, tr);
+	    wo = new WorldObject(world.getTr(), m);
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    add(wo);
+	    break;
+	}
+	case closedDoor: {
+	    BarrierCube bc = new BarrierCube(tr, tunnelDia, tunnelDia,
+		    wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
+		    0, 1, false);
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.addBehavior(new DamageableBehavior().setHealth(4096));
+	    bc.addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	    bc.addBehavior(new DeathBehavior());
+	    bc.addBehavior(new DebrisOnDeathBehavior());
+	    bc.addBehavior(new DestructibleWallBehavior());
+	    bc.setTop(top);
+	    add(bc);
+	    break;
+	}
+	case blownOpenDoor:
+	    BarrierCube bc = new BarrierCube(tr, tunnelDia, tunnelDia,
+		    wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
+		    1, 1, true);
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    add(bc);
+	    break;
+	case movingWallLeft: {
+	    Vector3D endPos = wPos.add(heading.crossProduct(top)
+		    .scalarMultiply(tunnelDia));
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, false);
+	    bc.addBehavior(new ShiftingObjectBehavior(3000, wPos, endPos));
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	}
+	case movingWallRight: {
+	    Vector3D endPos = wPos.subtract(heading.crossProduct(top)
+		    .scalarMultiply(tunnelDia));
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, false);
+	    bc.addBehavior(new ShiftingObjectBehavior(3000, wPos, endPos));
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	}
+	case movingWallDown: {
+	    Vector3D endPos = wPos.subtract(top.scalarMultiply(tunnelDia));
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, false);
+	    bc.addBehavior(new ShiftingObjectBehavior(3000, wPos, endPos));
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	}
+	case movingWallUp: {
+	    Vector3D endPos = wPos.add(top.scalarMultiply(tunnelDia));
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, false);
+	    bc.addBehavior(new ShiftingObjectBehavior(3000, wPos, endPos));
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	}
+	case wallLeftSTUB:
+	case wallLeft:
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { 0., tunnelDia / 2., 0 }, false);
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	case wallRightSTUB:
+	case wallRight:
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia, tunnelDia / 2., 0 }, false);
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	case wallDownSTUB:
+	case wallDown:
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, false);
+	    bc.setPosition((wPos.subtract(top.scalarMultiply(tunnelDia / 2)))
+		    .toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	case wallUpSTUB:
+	case wallUp:
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, false);
+	    bc.setPosition((wPos.add(top.scalarMultiply(tunnelDia / 2)))
+		    .toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	case rotatingHalfWall:
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { 0, tunnelDia / 2., 0 }, false);
+	    bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+		    6000, 0));
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	case rotating34Wall:
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { 0, tunnelDia / 2., 10 }, false);
+	    bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+		    6000, 0));
+	    bc.setPosition(wPos.toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+
+	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { 0, tunnelDia / 2., 0 }, false);
+	    bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+		    6000, Math.PI / 2));
+	    bc.setPosition((wPos.add(new Vector3D(100, 0, 0))).toArray());
+	    bc.setHeading(heading);
+	    bc.setTop(top);
+	    bc.addBehavior(new CubeCollisionBehavior(bc));
+	    add(bc);
+	    break;
+	case fan:
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "BLADE.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
+		    false, palette, gl));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "FANBODY.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
+		    false, palette, gl));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case jawsVertical:
+	    // Up jaw
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "JAW2.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos.add(top
+		    .scalarMultiply(tunnelDia / 2))));
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(heading.crossProduct(top).negate());
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    // Down jaw
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "JAW1.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
+		    .subtract(top.scalarMultiply(tunnelDia / 2))));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(heading.crossProduct(top).negate());
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case jawsHorizontal:
+	    // Left jaw
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "JAW2.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
+		    .add(heading.crossProduct(top)
+			    .scalarMultiply(tunnelDia / 2))));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    // Right jaw
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "JAW1.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
+		    .subtract(heading.crossProduct(top).scalarMultiply(
+			    tunnelDia / 2))));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case metalBeamUp:
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "BEAM.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.setPosition(wPos.add(new Vector3D(0, tunnelDia / 6, 0))
+		    .toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case metalBeamDown:
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "BEAM.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.setPosition(wPos.add(new Vector3D(0, -tunnelDia / 6, 0))
+		    .toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case metalBeamLeft:
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "BEAM.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.setPosition(wPos.add(new Vector3D(-tunnelDia / 6, 0, 0))
+		    .toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top.crossProduct(heading));
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case metalBeamRight:
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "BEAM.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    false, palette, gl));
+	    wo.setPosition(wPos.add(new Vector3D(tunnelDia / 6, 0, 0))
+		    .toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top.crossProduct(heading));
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	case forceField: {// TODO
+	    m = Model.buildCube(tunnelDia, tunnelDia, wallThickness,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()],
+		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
+		    1, 1, tr);
+	    wo = new WorldObject(world.getTr(), m);
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    add(wo);
+	    break;
+	}
+	// Invisible walls, as far as I know, are never used.
+	// This makes sense: There is nothing fun about trying to get through a
+	// tunnel and crashing into invisible walls.
+	case invisibleWallUp:// TODO
+	    break;
+	case invisibleWallDown:// TODO
+	    break;
+	case invisibleWallLeft:// TODO
+	    break;
+	case invisibleWallRight:// TODO
+	    break;
+	case iris: {
+	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
+		    "IRIS.BIN",
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], 4 * 256,
+		    false, palette, gl));
+	    final Model mod = wo.getModel();
+	    wo.addBehavior(new IrisBehavior(new Sequencer(mod
+		    .getFrameDelayInMillis(), 2, true), width));
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    add(wo);
+	    break;
+	}
+	}// end switch(obstruction)
+    }// end installObstacles()
+
+    public WorldObject getFallbackModel() throws IllegalAccessException,
+	    FileLoadException, IOException {
+	return new WorldObject(tr, tr.getResourceManager().getBINModel(
+		"NAVTARG.BIN", null, 8, false, palette, gl));
+    }
+
+    /**
+     * @return the sourceTunnel
+     */
+    public TDFFile.Tunnel getSourceTunnel() {
+	return sourceTunnel;
+    }
+
+    /**
+     * @return the entranceObject
+     */
+    public TunnelEntranceObject getEntranceObject() {
+	return entranceObject;
+    }
+
+    /**
+     * @return the exitObject
+     */
+    public TunnelExitObject getExitObject() {
+	return exitObject;
+    }
+}// end Tunnel

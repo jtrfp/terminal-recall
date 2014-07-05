@@ -36,15 +36,15 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeFactory;
 
 public class Game {
-    private TR tr;
-    private VOXFile vox;
-    private int levelIndex = 0;
-    private String playerName;
-    private Difficulty difficulty;
-    private Mission currentMission;
-    private HUDSystem hudSystem;
-    private NAVSystem navSystem;
-    private Player player;
+    private TR 		tr;
+    private VOXFile 	vox;
+    private int 	levelIndex = 0;
+    private String 	playerName;
+    private Difficulty 	difficulty;
+    private Mission 	currentMission;
+    private HUDSystem 	hudSystem;
+    private NAVSystem 	navSystem;
+    private Player 	player;
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
@@ -201,57 +201,62 @@ public class Game {
 	System.out.println("Game.go()...");
 	System.out.println("Initializing general resources...");
 	hudSystem = new HUDSystem(tr.getWorld());
-	navSystem = new NAVSystem(tr.getWorld(),tr);
+	navSystem = new NAVSystem(tr.getWorld(), tr);
 	hudSystem.deactivate();
 	navSystem.deactivate();
 	System.out.println("Activating renderer...");
-	tr.renderer.get().activate();//TODO: Eventually move this to Game, pending primitives are given valid textureIDs.
-	try{
-	  //Make color zero translucent.
-	    	final ResourceManager rm = tr.getResourceManager();
-	    	final Color [] pal = tr.getGlobalPalette();
-	    	pal[0]=new Color(0,0,0,0);
-	    	tr.setGlobalPalette(pal);
-	    	final BackdropSystem backdrop = new BackdropSystem(tr.getWorld());
-	    	backdrop.loadingMode();
-    		tr.setBackdropSystem(backdrop);
-		// POWERUPS
-		rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
-		/// EXPLOSIONS
-		rm.setExplosionFactory(new ExplosionFactory(tr));
-		// SMOKE
-		rm.setSmokeFactory(new SmokeFactory(tr));
-		// DEBRIS
-		rm.setDebrisFactory(new DebrisFactory(tr));
-		
-		//SETUP PROJECTILE FACTORIES
-			Weapon [] w = Weapon.values();
-			ProjectileFactory [] pf = new ProjectileFactory[w.length];
-			for(int i=0; i<w.length;i++){
-			    pf[i]=new ProjectileFactory(tr, w[i], ExplosionType.Blast);
-			}//end for(weapons)
-			rm.setProjectileFactories(pf);
-	player =new Player(tr,tr.getResourceManager().getBINModel("SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
-	final String startX=System.getProperty("org.jtrfp.trcl.startX");
-	final String startY=System.getProperty("org.jtrfp.trcl.startY");
-	final String startZ=System.getProperty("org.jtrfp.trcl.startZ");
-	final double [] playerPos = player.getPosition();
-	if(startX!=null && startY!=null&&startZ!=null){
-	    System.out.println("Using user-specified start point");
-	    final int sX=Integer.parseInt(startX);
-	    final int sY=Integer.parseInt(startY);
-	    final int sZ=Integer.parseInt(startZ);
-	    playerPos[0]=sX;
-	    playerPos[1]=sY;
-	    playerPos[2]=sZ;
-	    player.notifyPositionChange();
-	}//end if(user start point)
-	tr.setPlayer(player);
-	tr.getWorld().add(player);
-	System.out.println("\t...Done.");
-	
-	startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
-	}catch(Exception e){throw new RuntimeException(e);}
+	tr.renderer.get().activate();// TODO: Eventually move this to Game,
+				     // pending primitives are given valid
+				     // textureIDs.
+	try {
+	    // Make color zero translucent.
+	    final ResourceManager rm = tr.getResourceManager();
+	    final Color[] pal = tr.getGlobalPalette();
+	    pal[0] = new Color(0, 0, 0, 0);
+	    tr.setGlobalPalette(pal);
+	    final BackdropSystem backdrop = new BackdropSystem(tr.getWorld());
+	    backdrop.loadingMode();
+	    tr.setBackdropSystem(backdrop);
+	    // POWERUPS
+	    rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
+	    // / EXPLOSIONS
+	    rm.setExplosionFactory(new ExplosionFactory(tr));
+	    // SMOKE
+	    rm.setSmokeFactory(new SmokeFactory(tr));
+	    // DEBRIS
+	    rm.setDebrisFactory(new DebrisFactory(tr));
+
+	    // SETUP PROJECTILE FACTORIES
+	    Weapon[] w = Weapon.values();
+	    ProjectileFactory[] pf = new ProjectileFactory[w.length];
+	    for (int i = 0; i < w.length; i++) {
+		pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+	    }// end for(weapons)
+	    rm.setProjectileFactories(pf);
+	    player = new Player(tr, tr.getResourceManager().getBINModel(
+		    "SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
+	    final String startX = System.getProperty("org.jtrfp.trcl.startX");
+	    final String startY = System.getProperty("org.jtrfp.trcl.startY");
+	    final String startZ = System.getProperty("org.jtrfp.trcl.startZ");
+	    final double[] playerPos = player.getPosition();
+	    if (startX != null && startY != null && startZ != null) {
+		System.out.println("Using user-specified start point");
+		final int sX = Integer.parseInt(startX);
+		final int sY = Integer.parseInt(startY);
+		final int sZ = Integer.parseInt(startZ);
+		playerPos[0] = sX;
+		playerPos[1] = sY;
+		playerPos[2] = sZ;
+		player.notifyPositionChange();
+	    }// end if(user start point)
+	    tr.setPlayer(player);
+	    tr.getWorld().add(player);
+	    System.out.println("\t...Done.");
+
+	    startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
     }// end go()
 
     public Mission getCurrentMission() {

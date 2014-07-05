@@ -38,17 +38,19 @@ import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 
 public class Mission {
-    private final TR tr;
-    private final List<NAVObjective> navs = new LinkedList<NAVObjective>();
-    private final LVLFile lvl;
-    private final Object missionCompleteBarrier = new Object();
-    private final HashMap<String, Tunnel> tunnels = new HashMap<String, Tunnel>();
-    private double[] playerStartPosition = new double[3];
-    private List<NAVSubObject> navSubObjects;
-    private ObjectDirection playerStartDirection;
-    private final Game game;
-    private final String levelName;
-    private OverworldSystem overworldSystem;
+    private final TR 		tr;
+    private final List<NAVObjective> 
+    				navs	= new LinkedList<NAVObjective>();
+    private final LVLFile 	lvl;
+    private final HashMap<String, Tunnel> 
+    				tunnels = new HashMap<String, Tunnel>();
+    private double[] 		playerStartPosition 
+    					= new double[3];
+    private List<NAVSubObject> 	navSubObjects;
+    private ObjectDirection 	playerStartDirection;
+    private final Game 		game;
+    private final String 	levelName;
+    private OverworldSystem 	overworldSystem;
 
     private enum LoadingStages {
 	navs, tunnels, overworld

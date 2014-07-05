@@ -32,7 +32,7 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
 	    Vector3D headingOverride, Vector3D positionOffset, LoadingProgressReporter objectReporter)
 	    throws IllegalAccessException, IOException, FileLoadException {
 	super(parentGrid);
-	final LoadingProgressReporter [] reporters = objectReporter.generateSubReporters(2);
+	final LoadingProgressReporter [] reporters 	= objectReporter.generateSubReporters(2);
 	final LoadingProgressReporter defObjectReporter = reporters[0];
 	final LoadingProgressReporter pupObjectReporter = reporters[1];
 	TR tr = w.getTr();

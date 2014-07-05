@@ -16,122 +16,117 @@ import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class PUPFile implements ThirdPartyParseable
-	{
-	int numPowerups;
-	PowerupLocation [] powerupLocations;
-	
-	public static class PowerupLocation implements ThirdPartyParseable
-		{
-		int x,y,z;
-		Powerup type;
-		
-		@Override
-		public void describeFormat(Parser p) throws UnrecognizedFormatException
-			{
-			p.stringEndingWith(",",p.property( "x", int.class), false);
-			p.stringEndingWith(",", p.property("y", int.class), false);
-			p.stringEndingWith(",", p.property("z", int.class), false);
-			p.stringEndingWith("\r\n", p.property("type", Powerup.class), false);
-			}//end describeFormat()
-		
-		/**
-		 * @return the x
-		 */
-		public int getX()
-			{
-			return x;
-			}
+public class PUPFile implements ThirdPartyParseable {
+    int numPowerups;
+    PowerupLocation[] powerupLocations;
 
-		/**
-		 * @param x the x to set
-		 */
-		public void setX(int x)
-			{
-			this.x = x;
-			}
+    public static class PowerupLocation implements ThirdPartyParseable {
+	int x, y, z;
+	Powerup type;
 
-		/**
-		 * @return the y
-		 */
-		public int getY()
-			{
-			return y;
-			}
-
-		/**
-		 * @param y the y to set
-		 */
-		public void setY(int y)
-			{
-			this.y = y;
-			}
-
-		/**
-		 * @return the z
-		 */
-		public int getZ()
-			{
-			return z;
-			}
-
-		/**
-		 * @param z the z to set
-		 */
-		public void setZ(int z)
-			{
-			this.z = z;
-			}
-
-		/**
-		 * @return the type
-		 */
-		public Powerup getType()
-			{
-			return type;
-			}
-
-		/**
-		 * @param type the type to set
-		 */
-		public void setType(Powerup type)
-			{
-			this.type = type;
-			}
-
-		}//end PowerupLocation
-	/**
-	 * @return the powerupLocations
-	 */
-	public PowerupLocation[] getPowerupLocations()
-		{
-		return powerupLocations;
-		}
-	/**
-	 * @param powerupLocations the powerupLocations to set
-	 */
-	public void setPowerupLocations(PowerupLocation[] powerupLocations)
-		{
-		this.powerupLocations = powerupLocations;
-		}
 	@Override
-	public void describeFormat(Parser p) throws UnrecognizedFormatException
-		{
-		p.stringEndingWith("\r\n", p.property("numPowerups", int.class), false);
-		p.arrayOf(getNumPowerups(), "powerupLocations", PowerupLocation.class);
-		}
+	public void describeFormat(Parser p) throws UnrecognizedFormatException {
+	    p.stringEndingWith(",", p.property("x", int.class), false);
+	    p.stringEndingWith(",", p.property("y", int.class), false);
+	    p.stringEndingWith(",", p.property("z", int.class), false);
+	    p.stringEndingWith("\r\n", p.property("type", Powerup.class), false);
+	}// end describeFormat()
+
 	/**
-	 * @return the numPowerups
+	 * @return X position of powerup in world units
 	 */
-	public int getNumPowerups()
-		{
-		return numPowerups;
-		}
+	public int getX() {
+	    return x;
+	}
+
 	/**
-	 * @param numPowerups the numPowerups to set
+	 * @param x
+	 *           X position of powerup in world units
 	 */
-	public void setNumPowerups(int numPowerups)
-		{
-		this.numPowerups = numPowerups;
-		}
-	}//end PUPFile
+	public void setX(int x) {
+	    this.x = x;
+	}
+
+	/**
+	 * @return Y position of powerup in world units
+	 */
+	public int getY() {
+	    return y;
+	}
+
+	/**
+	 * @param y
+	 *            Y position of powerup in world units
+	 */
+	public void setY(int y) {
+	    this.y = y;
+	}
+
+	/**
+	 * @return Z position of powerup in world units
+	 */
+	public int getZ() {
+	    return z;
+	}
+
+	/**
+	 * @param z
+	 *            Z position of powerup in world units
+	 */
+	public void setZ(int z) {
+	    this.z = z;
+	}
+
+	/**
+	 * @return Type of powerup
+	 */
+	public Powerup getType() {
+	    return type;
+	}
+
+	/**
+	 * @param type
+	 *            Type of powerup
+	 */
+	public void setType(Powerup type) {
+	    this.type = type;
+	}
+
+    }// end PowerupLocation
+
+    /**
+     * @return the powerupLocations
+     */
+    public PowerupLocation[] getPowerupLocations() {
+	return powerupLocations;
+    }
+
+    /**
+     * @param powerupLocations
+     *            the powerupLocations to set
+     */
+    public void setPowerupLocations(PowerupLocation[] powerupLocations) {
+	this.powerupLocations = powerupLocations;
+    }
+
+    @Override
+    public void describeFormat(Parser p) throws UnrecognizedFormatException {
+	p.stringEndingWith("\r\n", p.property("numPowerups", int.class), false);
+	p.arrayOf(getNumPowerups(), "powerupLocations", PowerupLocation.class);
+    }
+
+    /**
+     * @return Total number of powerups
+     */
+    public int getNumPowerups() {
+	return numPowerups;
+    }
+
+    /**
+     * @param numPowerups
+     *            Total number of powerups
+     */
+    public void setNumPowerups(int numPowerups) {
+	this.numPowerups = numPowerups;
+    }
+}// end PUPFile

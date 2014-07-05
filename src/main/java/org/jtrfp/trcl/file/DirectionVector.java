@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+public class DirectionVector extends AbstractVector {
 
-public class DirectionVector extends AbstractVector
-	{
-
-	}
+}

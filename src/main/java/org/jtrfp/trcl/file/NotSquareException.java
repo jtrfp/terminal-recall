@@ -12,10 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
-public class NotSquareException extends Exception
-	{
-	public NotSquareException(String imageName)
-		{
-		super("Image not square: "+imageName);
-		}
-	}//end NotSquareException
+public class NotSquareException extends Exception {
+    public NotSquareException(String imageName) {
+	super("Image not square: " + imageName);
+    }
+}// end NotSquareException

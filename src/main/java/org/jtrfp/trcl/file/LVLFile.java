@@ -11,6 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 package org.jtrfp.trcl.file;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,529 +21,533 @@ import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
+public class LVLFile extends SelfParsingFile {
+    LevelType levelType;
 
-public class LVLFile extends SelfParsingFile
-	{
-	LevelType levelType;
-	
-	String briefingTextFile;
-	String heightMapOrTunnelFile;
-	String texturePlacementFile;
-	String globalPaletteFile;
-	String levelTextureListFile;
-	String qkeFile; //unknown
-	String powerupPlacementFile;
-	String textureAnimationFile;
-	String tunnelDefinitionFile;
-	String cloudTextureFile;
-	String backgroundGradientPaletteFile;
-	String enemyDefinitionAndPlacementFile;
-	String navigationFile;
-	String backgroundMusicFile;
-	String precalculatedFogFile;
-	String luminanceMapFile;
-	
-	AbstractVector sunlightDirectionVector;
-	int ambientLight;
-	//Chamber light found by WDLMaster
-	AbstractVector chamberLightDirectionVector;
-	int chamberAmbientLight,unknownInt1;
-	//New Story stuff
-	String introVideoFile;
-	String levelEndVideoFile;
-	String transitionVideoFile;
-	String missionStartTextFile;
-	String missionEndTextFile;
-	
-	enum LevelType
-		{
-		UNKNOWN0,
-		Tunnel,
-		UNKNOWN2,
-		UNKNOWN3,
-		Overworld
-		}
-	
-	@Override
-	public void describeFormat(Parser prs) throws UnrecognizedFormatException
-		{
-		//REMEMBER: use \r\n because TR files use carriage-return-line-feed and not just the line-feed \n that java uses.
-		prs.stringEndingWith("\r\n", prs.property("levelType",LevelType.class), false);
-		
-		prs.stringEndingWith("\r\n", prs.property("briefingTextFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("heightMapOrTunnelFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("texturePlacementFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("globalPaletteFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("levelTextureListFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("qkeFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("powerupPlacementFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("textureAnimationFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("tunnelDefinitionFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("cloudTextureFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("backgroundGradientPaletteFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("enemyDefinitionAndPlacementFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("navigationFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("backgroundMusicFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("precalculatedFogFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("luminanceMapFile", String.class), false);
-		
-		prs.subParseProposedClasses(prs.property("sunlightDirectionVector",AbstractVector.class),ClassInclusion.classOf(AbstractVector.class));
-		prs.stringEndingWith("\r\n", prs.property("ambientLight",Integer.class), false);
-		prs.subParseProposedClasses(prs.property("chamberLightDirectionVector",AbstractVector.class),ClassInclusion.classOf(AbstractVector.class));
-		prs.stringEndingWith("\r\n",prs.property("chamberAmbientLight",Integer.class),false);
-		prs.stringEndingWith("\r\n",prs.property("unknownInt1",Integer.class),false);
-		
-		prs.ignoreEOF(true);
-		prs.expectString(";New story stuff\r\n", FailureBehavior.IGNORE);
-		prs.stringEndingWith("\r\n", prs.property("introVideoFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("levelEndVideoFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("transitionVideoFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("missionStartTextFile", String.class), false);
-		prs.stringEndingWith("\r\n", prs.property("missionEndTextFile", String.class), false);
-		//EOF
-		}
+    String briefingTextFile;
+    String heightMapOrTunnelFile;
+    String texturePlacementFile;
+    String globalPaletteFile;
+    String levelTextureListFile;
+    String qkeFile; // unknown
+    String powerupPlacementFile;
+    String textureAnimationFile;
+    String tunnelDefinitionFile;
+    String cloudTextureFile;
+    String backgroundGradientPaletteFile;
+    String enemyDefinitionAndPlacementFile;
+    String navigationFile;
+    String backgroundMusicFile;
+    String precalculatedFogFile;
+    String luminanceMapFile;
 
-	public LVLFile(InputStream is) throws IllegalAccessException, IOException
-	{super(is);}
-	
-	/**
-	 * @return the levelEndVideoFile
-	 */
-	public String getLevelEndVideoFile()
-		{
-		return levelEndVideoFile;
-		}
+    AbstractVector sunlightDirectionVector;
+    int ambientLight;
+    // Chamber light found by WDLMaster
+    AbstractVector chamberLightDirectionVector;
+    int chamberAmbientLight, unknownInt1;
+    // New Story stuff
+    String introVideoFile;
+    String levelEndVideoFile;
+    String transitionVideoFile;
+    String missionStartTextFile;
+    String missionEndTextFile;
 
-	/**
-	 * @param levelEndVideoFile the levelEndVideoFile to set
-	 */
-	public void setLevelEndVideoFile(String levelEndVideoFile)
-		{
-		this.levelEndVideoFile = levelEndVideoFile;
-		}
+    enum LevelType {
+	UNKNOWN0, Tunnel, UNKNOWN2, UNKNOWN3, Overworld
+    }
 
-	/**
-	 * @return the levelType
-	 */
-	public LevelType getLevelType()
-		{
-		return levelType;
-		}
+    @Override
+    public void describeFormat(Parser prs) throws UnrecognizedFormatException {
+	// REMEMBER: use \r\n because TR files use carriage-return-line-feed and
+	// not just the line-feed \n that java uses.
+	prs.stringEndingWith("\r\n",
+		prs.property("levelType", LevelType.class), false);
 
-	/**
-	 * @param levelType the levelType to set
-	 */
-	public void setLevelType(LevelType levelType)
-		{
-		this.levelType = levelType;
-		}
+	prs.stringEndingWith("\r\n",
+		prs.property("briefingTextFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("heightMapOrTunnelFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("texturePlacementFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("globalPaletteFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("levelTextureListFile", String.class), false);
+	prs.stringEndingWith("\r\n", prs.property("qkeFile", String.class),
+		false);
+	prs.stringEndingWith("\r\n",
+		prs.property("powerupPlacementFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("textureAnimationFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("tunnelDefinitionFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("cloudTextureFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("backgroundGradientPaletteFile", String.class),
+		false);
+	prs.stringEndingWith("\r\n",
+		prs.property("enemyDefinitionAndPlacementFile", String.class),
+		false);
+	prs.stringEndingWith("\r\n",
+		prs.property("navigationFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("backgroundMusicFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("precalculatedFogFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("luminanceMapFile", String.class), false);
 
-	/**
-	 * @return the briefingTextFile
-	 */
-	public String getBriefingTextFile()
-		{
-		return briefingTextFile;
-		}
+	prs.subParseProposedClasses(
+		prs.property("sunlightDirectionVector", AbstractVector.class),
+		ClassInclusion.classOf(AbstractVector.class));
+	prs.stringEndingWith("\r\n",
+		prs.property("ambientLight", Integer.class), false);
+	prs.subParseProposedClasses(prs.property("chamberLightDirectionVector",
+		AbstractVector.class), ClassInclusion
+		.classOf(AbstractVector.class));
+	prs.stringEndingWith("\r\n",
+		prs.property("chamberAmbientLight", Integer.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("unknownInt1", Integer.class), false);
 
-	/**
-	 * @param briefingTextFile the briefingTextFile to set
-	 */
-	public void setBriefingTextFile(String briefingTextFile)
-		{
-		this.briefingTextFile = briefingTextFile;
-		}
+	prs.ignoreEOF(true);
+	prs.expectString(";New story stuff\r\n", FailureBehavior.IGNORE);
+	prs.stringEndingWith("\r\n",
+		prs.property("introVideoFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("levelEndVideoFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("transitionVideoFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("missionStartTextFile", String.class), false);
+	prs.stringEndingWith("\r\n",
+		prs.property("missionEndTextFile", String.class), false);
+	// EOF
+    }
 
-	/**
-	 * @return the heightMapOrTunnelFile
-	 */
-	public String getHeightMapOrTunnelFile()
-		{
-		return heightMapOrTunnelFile;
-		}
+    public LVLFile(InputStream is) throws IllegalAccessException, IOException {
+	super(is);
+    }
 
-	/**
-	 * @param heightMapOrTunnelFile the heightMapOrTunnelFile to set
-	 */
-	public void setHeightMapOrTunnelFile(String heightMapOrTunnelFile)
-		{
-		this.heightMapOrTunnelFile = heightMapOrTunnelFile;
-		}
+    /**
+     * @return the levelEndVideoFile
+     */
+    public String getLevelEndVideoFile() {
+	return levelEndVideoFile;
+    }
 
-	/**
-	 * CLR file stored in \DATA containing terrain texture indices to use.
-	 * @return path to CLR file
-	 */
-	public String getTexturePlacementFile()
-		{
-		return texturePlacementFile;
-		}
+    /**
+     * @param levelEndVideoFile
+     *            the levelEndVideoFile to set
+     */
+    public void setLevelEndVideoFile(String levelEndVideoFile) {
+	this.levelEndVideoFile = levelEndVideoFile;
+    }
 
-	/**
-	 * @param texturePlacementFile the texturePlacementFile to set
-	 */
-	public void setTexturePlacementFile(String texturePlacementFile)
-		{
-		this.texturePlacementFile = texturePlacementFile;
-		}
+    /**
+     * @return the levelType
+     */
+    public LevelType getLevelType() {
+	return levelType;
+    }
 
-	/**
-	 * @return the globalPaletteFile
-	 */
-	public String getGlobalPaletteFile()
-		{
-		return globalPaletteFile;
-		}
+    /**
+     * @param levelType
+     *            the levelType to set
+     */
+    public void setLevelType(LevelType levelType) {
+	this.levelType = levelType;
+    }
 
-	/**
-	 * @param globalPaletteFile the globalPaletteFile to set
-	 */
-	public void setGlobalPaletteFile(String globalPaletteFile)
-		{
-		this.globalPaletteFile = globalPaletteFile;
-		}
+    /**
+     * @return the briefingTextFile
+     */
+    public String getBriefingTextFile() {
+	return briefingTextFile;
+    }
 
-	/**
-	 * @return the levelTextureListFile
-	 */
-	public String getLevelTextureListFile()
-		{
-		return levelTextureListFile;
-		}
+    /**
+     * @param briefingTextFile
+     *            the briefingTextFile to set
+     */
+    public void setBriefingTextFile(String briefingTextFile) {
+	this.briefingTextFile = briefingTextFile;
+    }
 
-	/**
-	 * @param levelTextureListFile the levelTextureListFile to set
-	 */
-	public void setLevelTextureListFile(String levelTextureListFile)
-		{
-		this.levelTextureListFile = levelTextureListFile;
-		}
+    /**
+     * @return the heightMapOrTunnelFile
+     */
+    public String getHeightMapOrTunnelFile() {
+	return heightMapOrTunnelFile;
+    }
 
-	/**
-	 * @return the qkeFile
-	 */
-	public String getQkeFile()
-		{
-		return qkeFile;
-		}
+    /**
+     * @param heightMapOrTunnelFile
+     *            the heightMapOrTunnelFile to set
+     */
+    public void setHeightMapOrTunnelFile(String heightMapOrTunnelFile) {
+	this.heightMapOrTunnelFile = heightMapOrTunnelFile;
+    }
 
-	/**
-	 * @param qkeFile the qkeFile to set
-	 */
-	public void setQkeFile(String qkeFile)
-		{
-		this.qkeFile = qkeFile;
-		}
+    /**
+     * CLR file stored in \DATA containing terrain texture indices to use.
+     * 
+     * @return path to CLR file
+     */
+    public String getTexturePlacementFile() {
+	return texturePlacementFile;
+    }
 
-	/**
-	 * @return the powerupPlacementFile
-	 */
-	public String getPowerupPlacementFile()
-		{
-		return powerupPlacementFile;
-		}
+    /**
+     * @param texturePlacementFile
+     *            the texturePlacementFile to set
+     */
+    public void setTexturePlacementFile(String texturePlacementFile) {
+	this.texturePlacementFile = texturePlacementFile;
+    }
 
-	/**
-	 * @param powerupPlacementFile the powerupPlacementFile to set
-	 */
-	public void setPowerupPlacementFile(String powerupPlacementFile)
-		{
-		this.powerupPlacementFile = powerupPlacementFile;
-		}
+    /**
+     * @return the globalPaletteFile
+     */
+    public String getGlobalPaletteFile() {
+	return globalPaletteFile;
+    }
 
-	/**
-	 * @return the textureAnimationFile
-	 */
-	public String getTextureAnimationFile()
-		{
-		return textureAnimationFile;
-		}
+    /**
+     * @param globalPaletteFile
+     *            the globalPaletteFile to set
+     */
+    public void setGlobalPaletteFile(String globalPaletteFile) {
+	this.globalPaletteFile = globalPaletteFile;
+    }
 
-	/**
-	 * @param textureAnimationFile the textureAnimationFile to set
-	 */
-	public void setTextureAnimationFile(String textureAnimationFile)
-		{
-		this.textureAnimationFile = textureAnimationFile;
-		}
+    /**
+     * @return the levelTextureListFile
+     */
+    public String getLevelTextureListFile() {
+	return levelTextureListFile;
+    }
 
-	/**
-	 * @return the tunnelDefinitionFile
-	 */
-	public String getTunnelDefinitionFile()
-		{
-		return tunnelDefinitionFile;
-		}
+    /**
+     * @param levelTextureListFile
+     *            the levelTextureListFile to set
+     */
+    public void setLevelTextureListFile(String levelTextureListFile) {
+	this.levelTextureListFile = levelTextureListFile;
+    }
 
-	/**
-	 * @param tunnelDefinitionFile the tunnelDefinitionFile to set
-	 */
-	public void setTunnelDefinitionFile(String tunnelDefinitionFile)
-		{
-		this.tunnelDefinitionFile = tunnelDefinitionFile;
-		}
+    /**
+     * @return the qkeFile
+     */
+    public String getQkeFile() {
+	return qkeFile;
+    }
 
-	/**
-	 * @return the cloudTextureFile
-	 */
-	public String getCloudTextureFile()
-		{
-		return cloudTextureFile;
-		}
+    /**
+     * @param qkeFile
+     *            the qkeFile to set
+     */
+    public void setQkeFile(String qkeFile) {
+	this.qkeFile = qkeFile;
+    }
 
-	/**
-	 * @param cloudTextureFile the cloudTextureFile to set
-	 */
-	public void setCloudTextureFile(String cloudTextureFile)
-		{
-		this.cloudTextureFile = cloudTextureFile;
-		}
+    /**
+     * @return the powerupPlacementFile
+     */
+    public String getPowerupPlacementFile() {
+	return powerupPlacementFile;
+    }
 
-	/**
-	 * @return the backgroundGradientPaletteFile
-	 */
-	public String getBackgroundGradientPaletteFile()
-		{
-		return backgroundGradientPaletteFile;
-		}
+    /**
+     * @param powerupPlacementFile
+     *            the powerupPlacementFile to set
+     */
+    public void setPowerupPlacementFile(String powerupPlacementFile) {
+	this.powerupPlacementFile = powerupPlacementFile;
+    }
 
-	/**
-	 * @param backgroundGradientPaletteFile the backgroundGradientPaletteFile to set
-	 */
-	public void setBackgroundGradientPaletteFile(
-			String backgroundGradientPaletteFile)
-		{
-		this.backgroundGradientPaletteFile = backgroundGradientPaletteFile;
-		}
+    /**
+     * @return the textureAnimationFile
+     */
+    public String getTextureAnimationFile() {
+	return textureAnimationFile;
+    }
 
-	/**
-	 * @return the enemyDefinitionAndPlacementFile
-	 */
-	public String getEnemyDefinitionAndPlacementFile()
-		{
-		return enemyDefinitionAndPlacementFile;
-		}
+    /**
+     * @param textureAnimationFile
+     *            the textureAnimationFile to set
+     */
+    public void setTextureAnimationFile(String textureAnimationFile) {
+	this.textureAnimationFile = textureAnimationFile;
+    }
 
-	/**
-	 * @param enemyDefinitionAndPlacementFile the enemyDefinitionAndPlacementFile to set
-	 */
-	public void setEnemyDefinitionAndPlacementFile(
-			String enemyDefinitionAndPlacementFile)
-		{
-		this.enemyDefinitionAndPlacementFile = enemyDefinitionAndPlacementFile;
-		}
+    /**
+     * @return the tunnelDefinitionFile
+     */
+    public String getTunnelDefinitionFile() {
+	return tunnelDefinitionFile;
+    }
 
-	/**
-	 * @return the navigationFile
-	 */
-	public String getNavigationFile()
-		{
-		return navigationFile;
-		}
+    /**
+     * @param tunnelDefinitionFile
+     *            the tunnelDefinitionFile to set
+     */
+    public void setTunnelDefinitionFile(String tunnelDefinitionFile) {
+	this.tunnelDefinitionFile = tunnelDefinitionFile;
+    }
 
-	/**
-	 * @param navigationFile the navigationFile to set
-	 */
-	public void setNavigationFile(String navigationFile)
-		{
-		this.navigationFile = navigationFile;
-		}
+    /**
+     * @return the cloudTextureFile
+     */
+    public String getCloudTextureFile() {
+	return cloudTextureFile;
+    }
 
-	/**
-	 * @return the backgroundMusicFile
-	 */
-	public String getBackgroundMusicFile()
-		{
-		return backgroundMusicFile;
-		}
+    /**
+     * @param cloudTextureFile
+     *            the cloudTextureFile to set
+     */
+    public void setCloudTextureFile(String cloudTextureFile) {
+	this.cloudTextureFile = cloudTextureFile;
+    }
 
-	/**
-	 * @param backgroundMusicFile the backgroundMusicFile to set
-	 */
-	public void setBackgroundMusicFile(String backgroundMusicFile)
-		{
-		this.backgroundMusicFile = backgroundMusicFile;
-		}
+    /**
+     * @return the backgroundGradientPaletteFile
+     */
+    public String getBackgroundGradientPaletteFile() {
+	return backgroundGradientPaletteFile;
+    }
 
-	/**
-	 * @return the precalculatedFogFile
-	 */
-	public String getPrecalculatedFogFile()
-		{
-		return precalculatedFogFile;
-		}
+    /**
+     * @param backgroundGradientPaletteFile
+     *            the backgroundGradientPaletteFile to set
+     */
+    public void setBackgroundGradientPaletteFile(
+	    String backgroundGradientPaletteFile) {
+	this.backgroundGradientPaletteFile = backgroundGradientPaletteFile;
+    }
 
-	/**
-	 * @param precalculatedFogFile the precalculatedFogFile to set
-	 */
-	public void setPrecalculatedFogFile(String precalculatedFogFile)
-		{
-		this.precalculatedFogFile = precalculatedFogFile;
-		}
+    /**
+     * @return the enemyDefinitionAndPlacementFile
+     */
+    public String getEnemyDefinitionAndPlacementFile() {
+	return enemyDefinitionAndPlacementFile;
+    }
 
-	/**
-	 * @return the luminanceMapFile
-	 */
-	public String getLuminanceMapFile()
-		{
-		return luminanceMapFile;
-		}
+    /**
+     * @param enemyDefinitionAndPlacementFile
+     *            the enemyDefinitionAndPlacementFile to set
+     */
+    public void setEnemyDefinitionAndPlacementFile(
+	    String enemyDefinitionAndPlacementFile) {
+	this.enemyDefinitionAndPlacementFile = enemyDefinitionAndPlacementFile;
+    }
 
-	/**
-	 * @param luminanceMapFile the luminanceMapFile to set
-	 */
-	public void setLuminanceMapFile(String luminanceMapFile)
-		{
-		this.luminanceMapFile = luminanceMapFile;
-		}
+    /**
+     * @return the navigationFile
+     */
+    public String getNavigationFile() {
+	return navigationFile;
+    }
 
-	/**
-	 * @return the sunlightDirectionVector
-	 */
-	public AbstractVector getSunlightDirectionVector()
-		{
-		return sunlightDirectionVector;
-		}
+    /**
+     * @param navigationFile
+     *            the navigationFile to set
+     */
+    public void setNavigationFile(String navigationFile) {
+	this.navigationFile = navigationFile;
+    }
 
-	/**
-	 * @param sunlightDirectionVector the sunlightDirectionVector to set
-	 */
-	public void setSunlightDirectionVector(AbstractVector sunlightDirectionVector)
-		{
-		this.sunlightDirectionVector = sunlightDirectionVector;
-		}
+    /**
+     * @return the backgroundMusicFile
+     */
+    public String getBackgroundMusicFile() {
+	return backgroundMusicFile;
+    }
 
-	/**
-	 * @return the ambientLight
-	 */
-	public int getAmbientLight()
-		{
-		return ambientLight;
-		}
+    /**
+     * @param backgroundMusicFile
+     *            the backgroundMusicFile to set
+     */
+    public void setBackgroundMusicFile(String backgroundMusicFile) {
+	this.backgroundMusicFile = backgroundMusicFile;
+    }
 
-	/**
-	 * @param ambientLight the ambientLight to set
-	 */
-	public void setAmbientLight(int ambientLight)
-		{
-		this.ambientLight = ambientLight;
-		}
+    /**
+     * @return the precalculatedFogFile
+     */
+    public String getPrecalculatedFogFile() {
+	return precalculatedFogFile;
+    }
 
-	/**
-	 * Found by WDLMaster
-	 * @return the chamberLightDirectionVector
-	 */
-	public AbstractVector getChamberLightDirectionVector()
-		{
-		return chamberLightDirectionVector;
-		}
+    /**
+     * @param precalculatedFogFile
+     *            the precalculatedFogFile to set
+     */
+    public void setPrecalculatedFogFile(String precalculatedFogFile) {
+	this.precalculatedFogFile = precalculatedFogFile;
+    }
 
-	/**
-	 * Found by WDLMaster
-	 * @return the chamberAmbientLight
-	 */
-	public int getChamberAmbientLight()
-		{
-		return chamberAmbientLight;
-		}
+    /**
+     * @return the luminanceMapFile
+     */
+    public String getLuminanceMapFile() {
+	return luminanceMapFile;
+    }
 
-	/**
-	 * Found by WDLMaster
-	 * @param chamberAmbientLight the chamberAmbientLight to set
-	 */
-	public void setChamberAmbientLight(int chamberAmbientLight)
-		{
-		this.chamberAmbientLight = chamberAmbientLight;
-		}
+    /**
+     * @param luminanceMapFile
+     *            the luminanceMapFile to set
+     */
+    public void setLuminanceMapFile(String luminanceMapFile) {
+	this.luminanceMapFile = luminanceMapFile;
+    }
 
-	/**
-	 * @return the unknownInt1
-	 */
-	public int getUnknownInt1()
-		{
-		return unknownInt1;
-		}
+    /**
+     * @return the sunlightDirectionVector
+     */
+    public AbstractVector getSunlightDirectionVector() {
+	return sunlightDirectionVector;
+    }
 
-	/**
-	 * @param unknownInt1 the unknownInt1 to set
-	 */
-	public void setUnknownInt1(int unknownInt1)
-		{
-		this.unknownInt1 = unknownInt1;
-		}
+    /**
+     * @param sunlightDirectionVector
+     *            the sunlightDirectionVector to set
+     */
+    public void setSunlightDirectionVector(
+	    AbstractVector sunlightDirectionVector) {
+	this.sunlightDirectionVector = sunlightDirectionVector;
+    }
 
-	
-	/**
-	 * Found by WDLMaster
-	 * @param chamberLightDirectionVector the chamberLightDirectionVector to set
-	 */
-	public void setChamberLightDirectionVector(AbstractVector chamberLightDirectionVector)
-		{
-		this.chamberLightDirectionVector = chamberLightDirectionVector;
-		}
+    /**
+     * @return the ambientLight
+     */
+    public int getAmbientLight() {
+	return ambientLight;
+    }
 
-	/**
-	 * @return the introVideoFile
-	 */
-	public String getIntroVideoFile()
-		{
-		return introVideoFile;
-		}
+    /**
+     * @param ambientLight
+     *            the ambientLight to set
+     */
+    public void setAmbientLight(int ambientLight) {
+	this.ambientLight = ambientLight;
+    }
 
-	/**
-	 * @param introVideoFile the introVideoFile to set
-	 */
-	public void setIntroVideoFile(String introVideoFile)
-		{
-		this.introVideoFile = introVideoFile;
-		}
+    /**
+     * Found by WDLMaster
+     * 
+     * @return the chamberLightDirectionVector
+     */
+    public AbstractVector getChamberLightDirectionVector() {
+	return chamberLightDirectionVector;
+    }
 
-	/**
-	 * @return the transitionVideoFile
-	 */
-	public String getTransitionVideoFile()
-		{
-		return transitionVideoFile;
-		}
+    /**
+     * Found by WDLMaster
+     * 
+     * @return the chamberAmbientLight
+     */
+    public int getChamberAmbientLight() {
+	return chamberAmbientLight;
+    }
 
-	/**
-	 * @param transitionVideoFile the transitionVideoFile to set
-	 */
-	public void setTransitionVideoFile(String transitionVideoFile)
-		{
-		this.transitionVideoFile = transitionVideoFile;
-		}
+    /**
+     * Found by WDLMaster
+     * 
+     * @param chamberAmbientLight
+     *            the chamberAmbientLight to set
+     */
+    public void setChamberAmbientLight(int chamberAmbientLight) {
+	this.chamberAmbientLight = chamberAmbientLight;
+    }
 
-	/**
-	 * @return the missionStartTextFile
-	 */
-	public String getMissionStartTextFile()
-		{
-		return missionStartTextFile;
-		}
+    /**
+     * @return the unknownInt1
+     */
+    public int getUnknownInt1() {
+	return unknownInt1;
+    }
 
-	/**
-	 * @param missionStartTextFile the missionStartTextFile to set
-	 */
-	public void setMissionStartTextFile(String missionStartTextFile)
-		{
-		this.missionStartTextFile = missionStartTextFile;
-		}
+    /**
+     * @param unknownInt1
+     *            the unknownInt1 to set
+     */
+    public void setUnknownInt1(int unknownInt1) {
+	this.unknownInt1 = unknownInt1;
+    }
 
-	/**
-	 * @return the missionEndTextFile
-	 */
-	public String getMissionEndTextFile()
-		{
-		return missionEndTextFile;
-		}
+    /**
+     * Found by WDLMaster
+     * 
+     * @param chamberLightDirectionVector
+     *            the chamberLightDirectionVector to set
+     */
+    public void setChamberLightDirectionVector(
+	    AbstractVector chamberLightDirectionVector) {
+	this.chamberLightDirectionVector = chamberLightDirectionVector;
+    }
 
-	/**
-	 * @param missionEndTextFile the missionEndTextFile to set
-	 */
-	public void setMissionEndTextFile(String missionEndTextFile)
-		{
-		this.missionEndTextFile = missionEndTextFile;
-		}
+    /**
+     * @return the introVideoFile
+     */
+    public String getIntroVideoFile() {
+	return introVideoFile;
+    }
 
-	}//end LVLFile
+    /**
+     * @param introVideoFile
+     *            the introVideoFile to set
+     */
+    public void setIntroVideoFile(String introVideoFile) {
+	this.introVideoFile = introVideoFile;
+    }
+
+    /**
+     * @return the transitionVideoFile
+     */
+    public String getTransitionVideoFile() {
+	return transitionVideoFile;
+    }
+
+    /**
+     * @param transitionVideoFile
+     *            the transitionVideoFile to set
+     */
+    public void setTransitionVideoFile(String transitionVideoFile) {
+	this.transitionVideoFile = transitionVideoFile;
+    }
+
+    /**
+     * @return the missionStartTextFile
+     */
+    public String getMissionStartTextFile() {
+	return missionStartTextFile;
+    }
+
+    /**
+     * @param missionStartTextFile
+     *            the missionStartTextFile to set
+     */
+    public void setMissionStartTextFile(String missionStartTextFile) {
+	this.missionStartTextFile = missionStartTextFile;
+    }
+
+    /**
+     * @return the missionEndTextFile
+     */
+    public String getMissionEndTextFile() {
+	return missionEndTextFile;
+    }
+
+    /**
+     * @param missionEndTextFile
+     *            the missionEndTextFile to set
+     */
+    public void setMissionEndTextFile(String missionEndTextFile) {
+	this.missionEndTextFile = missionEndTextFile;
+    }
+
+}// end LVLFile

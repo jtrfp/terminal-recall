@@ -15,14 +15,11 @@ package org.jtrfp.trcl.file;
 import java.io.IOException;
 import java.io.InputStream;
 
+public class CLRFile extends RAWFile {
 
-public class CLRFile extends RAWFile
-	{
+    public CLRFile(InputStream inputStream) throws IllegalAccessException,
+	    IOException {
+	super(inputStream);
+    }
 
-	public CLRFile(InputStream inputStream) throws IllegalAccessException,
-			IOException
-		{
-		super(inputStream);
-		}
-
-	}
+}

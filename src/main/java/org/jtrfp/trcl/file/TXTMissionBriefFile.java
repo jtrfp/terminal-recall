@@ -16,66 +16,67 @@ import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class TXTMissionBriefFile implements ThirdPartyParseable
-	{
-	String planetModelFile;
-	String planetTextureFile;
-	String missionText;
-	
-	@Override
-	public void describeFormat(Parser p) throws UnrecognizedFormatException
-		{
-		p.stringEndingWith("\r\n", p.property("planetModelFile", String.class), false);
-		p.stringEndingWith("\r\n", p.property("planetTextureFile", String.class), false);
-		p.stringEndingWith(null, p.property("missionText", String.class), false);// null means go until EOF
-		}
+public class TXTMissionBriefFile implements ThirdPartyParseable {
+    String planetModelFile;
+    String planetTextureFile;
+    String missionText;
 
-	/**
-	 * @return the planetModelFile
-	 */
-	public String getPlanetModelFile()
-		{
-		return planetModelFile;
-		}
+    @Override
+    public void describeFormat(Parser p) throws UnrecognizedFormatException {
+	p.stringEndingWith("\r\n", p.property("planetModelFile", String.class),
+		false);
+	p.stringEndingWith("\r\n",
+		p.property("planetTextureFile", String.class), false);
+	p.stringEndingWith(null, p.property("missionText", String.class), false);// null
+										 // means
+										 // go
+										 // until
+										 // EOF
+    }
 
-	/**
-	 * @param planetModelFile the planetModelFile to set
-	 */
-	public void setPlanetModelFile(String planetModelFile)
-		{
-		this.planetModelFile = planetModelFile;
-		}
+    /**
+     * @return the planetModelFile
+     */
+    public String getPlanetModelFile() {
+	return planetModelFile;
+    }
 
-	/**
-	 * @return the planetTextureFile
-	 */
-	public String getPlanetTextureFile()
-		{
-		return planetTextureFile;
-		}
+    /**
+     * @param planetModelFile
+     *            the planetModelFile to set
+     */
+    public void setPlanetModelFile(String planetModelFile) {
+	this.planetModelFile = planetModelFile;
+    }
 
-	/**
-	 * @param planetTextureFile the planetTextureFile to set
-	 */
-	public void setPlanetTextureFile(String planetTextureFile)
-		{
-		this.planetTextureFile = planetTextureFile;
-		}
+    /**
+     * @return the planetTextureFile
+     */
+    public String getPlanetTextureFile() {
+	return planetTextureFile;
+    }
 
-	/**
-	 * @return the missionText
-	 */
-	public String getMissionText()
-		{
-		return missionText;
-		}
+    /**
+     * @param planetTextureFile
+     *            the planetTextureFile to set
+     */
+    public void setPlanetTextureFile(String planetTextureFile) {
+	this.planetTextureFile = planetTextureFile;
+    }
 
-	/**
-	 * @param missionText the missionText to set
-	 */
-	public void setMissionText(String missionText)
-		{
-		this.missionText = missionText;
-		}
+    /**
+     * @return the missionText
+     */
+    public String getMissionText() {
+	return missionText;
+    }
 
-	}//end MissionBriefFile
+    /**
+     * @param missionText
+     *            the missionText to set
+     */
+    public void setMissionText(String missionText) {
+	this.missionText = missionText;
+    }
+
+}// end MissionBriefFile

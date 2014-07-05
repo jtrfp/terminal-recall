@@ -15,16 +15,14 @@ package org.jtrfp.trcl.file;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class Location3D extends AbstractVector
-	{
-	public static class EndingWithComma extends Location3D
-		{
-		@Override
-		public void describeFormat(Parser prs) throws UnrecognizedFormatException
-			{
-			prs.stringEndingWith(",", prs.property("x", Integer.class), false);
-			prs.stringEndingWith(",", prs.property("y", Integer.class), false);
-			prs.stringEndingWith(",", prs.property("z", Integer.class), false);
-			}
-		}//end EndingWithComma
-	}//end Location3D
+public class Location3D extends AbstractVector {
+    public static class EndingWithComma extends Location3D {
+	@Override
+	public void describeFormat(Parser prs)
+		throws UnrecognizedFormatException {
+	    prs.stringEndingWith(",", prs.property("x", Integer.class), false);
+	    prs.stringEndingWith(",", prs.property("y", Integer.class), false);
+	    prs.stringEndingWith(",", prs.property("z", Integer.class), false);
+	}
+    }// end EndingWithComma
+}// end Location3D

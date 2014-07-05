@@ -28,6 +28,7 @@ public class NDXFile {
 	    String line = s.nextLine();
 	    widths.add(Integer.parseInt(line));
 	}// end while(hasNext)
+	s.close();
 	return this;
     }// end read()
 
@@ -37,7 +38,7 @@ public class NDXFile {
 	    ps.println(w);
 	}
 	return this;
-    }
+    }//end write()
 
     /**
      * @return the widths
@@ -45,25 +46,33 @@ public class NDXFile {
     public List<Integer> getWidths() {
 	return widths;
     }
-    /**
-     * Returns the width in pixels of the supplied ASCII value, if available.
-     * @param asciiValue
-     * @return	Width of the provided ASCII value, or -1 if unavailable.
-     * @since Feb 27, 2014
-     */
-    public int asciiWidth(byte asciiValue){
-	try{return widths.get(asciiValue-32);}
-	catch(ArrayIndexOutOfBoundsException e){
-	    return -1;
-	}
-    }//end asciiWidth
 
     /**
+     * Returns the width in pixels of the supplied ASCII value, if available.
+     * Characters below index 32 are unavailable.
+     * 
+     * @param asciiValue
+     * @return Width of the provided ASCII value, or -1 if unavailable.
+     * @since Feb 27, 2014
+     */
+    public int asciiWidth(byte asciiValue) {
+	try {
+	    return widths.get(asciiValue - 32);
+	} catch (ArrayIndexOutOfBoundsException e) {
+	    return -1;
+	}
+    }// end asciiWidth
+
+    /**
+     * 
+     * Manually set widths by their ASCII index.
+     * Characters below index 32 are unavailable.
      * @param widths
-     *            the widths to set
      */
     public void setWidths(List<Integer> widths) {
-	this.widths = widths;
-    }
+	for(int i=32; i<this.widths.size(); i++){
+	    this.widths.set(i-32, widths.get(i));
+	}
+    }//end setWidths(...)
 
 }// end NDXFile

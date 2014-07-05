@@ -21,6 +21,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
@@ -38,10 +39,15 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private boolean chamberMode = false;
     private boolean tunnelMode = false;
     private final TR tr;
+    private final LoadingProgressReporter terrainReporter, cloudReporter, objectReporter;
 
-    public OverworldSystem(World w) {
+    public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
 	super(w);
 	this.tr = w.getTr();
+	final LoadingProgressReporter []reporters = progressReporter.generateSubReporters(256);
+	terrainReporter = reporters[0];
+	cloudReporter = reporters[1];
+	objectReporter = reporters[2];
     }
     public void loadLevel(final LVLFile lvl, final TDFFile tdf){
 	try {
@@ -64,7 +70,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		    .toUpperCase().contains("BORG");
 	    TerrainSystem terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
 		    TR.mapSquareSize, this, terrainMirror, tr, tdf,
-		    flatShadedTerrain);
+		    flatShadedTerrain, terrainReporter);
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");
@@ -72,13 +78,13 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		cloudSystem = new CloudSystem(this, tr, this, lvl,
 			TR.mapSquareSize * 8,
 			(int) (TR.mapWidth / (TR.mapSquareSize * 8)),
-			w.sizeY / 3.5);
+			w.sizeY / 3.5, cloudReporter);
 	    }
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");
 	    ObjectSystem objectSystem = new ObjectSystem(this, w, lvl, defList,
-		    null, Vector3D.ZERO);
+		    null, Vector3D.ZERO, objectReporter);
 	    objectSystem.activate();
 	    terrainSystem.activate();
 	    System.out.println("...Done.");

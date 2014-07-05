@@ -14,15 +14,14 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.TerrainChunk;
 
@@ -36,7 +35,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    final TextureMesh textureMesh, final double gridSquareSize,
 	    final SpacePartitioningGrid parent,
 	    final RenderableSpacePartitioningGrid terrainMirror, final TR tr,
-	    final TDFFile tdf, boolean flatShading) {
+	    final TDFFile tdf, boolean flatShading, final LoadingProgressReporter terrainReporter) {
 	super(parent);
 	this.tr = tr;
 	final int width = (int) altitude.getWidth();
@@ -62,14 +61,16 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		    final TunnelPoint tp = new TunnelPoint(tun, false);
 		    points.put(tp.hashCode(), tp);
 		    tunnelsByName.put(tun.getTunnelLVLFile(), tunnels[i]);
-		}
+		}//end if(invisible)
 	    }// end for(tunnels)
 	}// end if(tunnels)
-
-	// Future [] futures = new Future[height/chunkSideLength];
-	int futureIndex = 0;
+	
+	final LoadingProgressReporter[] reporters = terrainReporter
+		.generateSubReporters(256/chunkSideLength);
+	int reporterIndex=0;
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
+	    reporters[reporterIndex++].complete();
 	    final int _gZ = gZ;
 	    for (int gX = 0; gX < width; gX += chunkSideLength) {
 		// GROUND

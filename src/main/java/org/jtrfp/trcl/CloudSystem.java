@@ -20,6 +20,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CloudCeiling;
@@ -31,11 +32,12 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
     double cloudTileSideSize;
     int gridSideSizeInTiles;
     private final TR tr;
+    private final LoadingProgressReporter [] cloudTileReporters;
 
     public CloudSystem(OverworldSystem os, TR tr,
 	    RenderableSpacePartitioningGrid grid, LVLFile lvl,
 	    double cloudTileSideSize, int gridSideSizeInTiles,
-	    double ceilingHeight) throws IllegalAccessException,
+	    double ceilingHeight, final LoadingProgressReporter cloudReporter) throws IllegalAccessException,
 	    FileLoadException, IOException {
 	super(grid);
 	this.tr = tr;
@@ -51,10 +53,10 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	for (int i = 0; i < 256; i++) {
 	    newPalette[TR.bidiMod((i + transpose), 256)] = palette[i];
 	}
-
 	cloudTexture = tr.getResourceManager().getRAWAsTexture(
 		cloudTextureFileName, new ColorPaletteVectorList(newPalette),
 		tr.gpu.get().getGl(),true);
+	cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	addToWorld(os);
     }// end constructor
 
@@ -65,6 +67,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	    os.setFogColor(averageColor);
 	    // Create a grid
 	    for (int z = 0; z < gridSideSizeInTiles; z++) {
+		cloudTileReporters[z].complete();
 		for (int x = 0; x < gridSideSizeInTiles; x++) {
 		    double xPos = x * cloudTileSideSize;
 		    double zPos = z * cloudTileSideSize;

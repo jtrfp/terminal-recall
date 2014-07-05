@@ -23,6 +23,7 @@ import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -33,12 +34,13 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	private World world;
 	private List<DEFObject> defList;
 	private Vector3D headingOverride=null;
+	private final LoadingProgressReporter rootReporter;
 	
-	public DEFObjectPlacer(DEFFile def, World world)
-		{this.def=def;this.world=world;}
+	public DEFObjectPlacer(DEFFile def, World world, LoadingProgressReporter reporter)
+		{this.def=def;this.world=world;this.rootReporter=reporter;}
 	public DEFObjectPlacer(DEFFile defFile, World w,
-		ArrayList<DEFObject> defList) {
-	    this(defFile,w);
+		ArrayList<DEFObject> defList, LoadingProgressReporter defObjectReporter) {
+	    this(defFile,w,defObjectReporter);
 	    this.defList=defList;
 	}//end constructor
 	@Override
@@ -47,27 +49,25 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		final Model [] models = new Model[defs.size()];
 		final TR tr = world.getTr();
-		
-		//Future []futures = new Future[defs.size()];
-		//Get BIN models
+		final LoadingProgressReporter[] defReporters = rootReporter
+			.generateSubReporters(defs.size());
+		final LoadingProgressReporter[] placementReporters = rootReporter
+			.generateSubReporters(places.size());
 		for(int i=0; i<defs.size(); i++){
-			final int index = i;
-			//futures[i]=TR.threadPool.submit(new Runnable(){
-			//	public void run(){
+		    	defReporters[i].complete();
+			final int index = i;//???
 					final EnemyDefinition def = defs.get(index);
 					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPaletteVL(),tr.gpu.get().getGl());}
 					catch(Exception e){e.printStackTrace();}
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
-			//		}
-			//	});
 			final Reporter reporter = tr.getReporter();
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
 			}//end for(i:defs)
-		//for(Future f:futures){try{f.get();}catch(Exception e){e.printStackTrace();}}
-		
+		int placementReporterIndex=0;
 		for(EnemyPlacement pl:places){
+		    placementReporters[placementReporterIndex++].complete();
 			Model model =models[pl.getDefIndex()];
 			if(model!=null){
 				final EnemyDefinition def = defs.get(pl.getDefIndex());

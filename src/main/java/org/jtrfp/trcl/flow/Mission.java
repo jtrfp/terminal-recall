@@ -32,146 +32,177 @@ import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 
 public class Mission {
     private final TR tr;
-    private final List<NAVObjective> navs= new LinkedList<NAVObjective>();
+    private final List<NAVObjective> navs = new LinkedList<NAVObjective>();
     private final LVLFile lvl;
     private final Object missionCompleteBarrier = new Object();
-    private final HashMap<String,Tunnel> tunnels = new HashMap<String,Tunnel>();
-    private double [] playerStartPosition=  new double[3];
+    private final HashMap<String, Tunnel> tunnels = new HashMap<String, Tunnel>();
+    private double[] playerStartPosition = new double[3];
     private List<NAVSubObject> navSubObjects;
     private ObjectDirection playerStartDirection;
     private final Game game;
     private final String levelName;
     private OverworldSystem overworldSystem;
-    public Mission(TR tr, Game game, LVLFile lvl, String levelName){
-	this.tr=tr;
-	this.lvl=lvl;
-	this.game=game;
-	this.levelName=levelName;
-    }//end Mission
-    
-    public Result go(){
+
+    private enum LoadingStages {
+	navs, tunnels, overworld
+    }// end LoadingStages
+
+    public Mission(TR tr, Game game, LVLFile lvl, String levelName) {
+	this.tr = tr;
+	this.lvl = lvl;
+	this.game = game;
+	this.levelName = levelName;
+    }// end Mission
+
+    public Result go() {
 	System.out.println("Starting GampeplayLevel loading sequence...");
 	final HUDSystem hud = game.getHUDSystem();
-	hud.setLoadingProgress(.1);
+	final LoadingProgressReporter rootProgress = LoadingProgressReporter.Impl
+		.createRoot(new UpdateHandler() {
+		    @Override
+		    public void update(double unitProgress) {
+			hud.setLoadingProgress(unitProgress);
+		    }
+		});
+	final LoadingProgressReporter[] progressStages = rootProgress
+		.generateSubReporters(LoadingStages.values().length);
 	hud.loadingMode(levelName);
 	hud.activate();
-	try{
+	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    hud.setLoadingProgress(.2);
 	    final Player player = tr.getPlayer();
-	final World world = tr.getWorld();
-	final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	hud.setLoadingProgress(.3);
-	tr.setOverworldSystem(overworldSystem = new OverworldSystem(world));
-	hud.setLoadingProgress(.4);
-	tr.getOverworldSystem().loadLevel(lvl, tdf);
-	hud.setLoadingProgress(.5);
-	System.out.println("\t...Done.");
-    		//Install NAVs
-    		final NAVSystem navSystem = tr.getGame().getNavSystem();
-    		hud.setLoadingProgress(.6);
-    		navSubObjects = rm.getNAVData(lvl.getNavigationFile()).getNavObjects();
-    		
-    		START s = (START)navSubObjects.get(0);
-    		navSubObjects.remove(0);
-    		Location3D l3d = s.getLocationOnMap();
-    		playerStartPosition[0]=TR.legacy2Modern(l3d.getZ());
-    		playerStartPosition[1]=TR.legacy2Modern(l3d.getY());
-    		playerStartPosition[2]=TR.legacy2Modern(l3d.getX());
-    		playerStartDirection = new ObjectDirection(s.getRoll(),s.getPitch(),s.getYaw());
-    		//////// INITIAL HEADING
-    	    player.setPosition(getPlayerStartPosition());
-    	    player.setDirection(getPlayerStartDirection());
-    	    player.setHeading(player.getHeading().negate());// Kludge to fix
-    							    // incorrect heading
-    		TunnelInstaller tunnelInstaller = new TunnelInstaller(tdf,world);
-    		Factory f = new NAVObjective.Factory(tr);
-    		for(NAVSubObject obj:navSubObjects)
-    		    f.create(tr, obj, navs);
-    		navSystem.updateNAVState();
-    		hud.setLoadingProgress(.7);
-    		System.out.println("Start position set to "+player.getPosition());
-    		System.out.println("Setting sun vector");
-    		final AbstractVector sunVector = lvl.getSunlightDirectionVector();
-    		hud.setLoadingProgress(.8);
-    		tr.getThreadManager().submitToGL(new Callable<Void>(){
-		    @Override
-		    public Void call() throws Exception {
-			tr.renderer.get().setSunVector(new Vector3D(sunVector.getX(),-sunVector.getY(),sunVector.getZ()).normalize());
-			return null;
-		    }
-    		}).get();
-    		hud.setLoadingProgress(.9);
-    		System.out.println("\t...Done.");
-    		
-	System.out.println("\t...Done.");
-	System.out.println("Invoking JVM's garbage collector...");
-	System.gc();
-	System.out.println("\t...Ahh, that felt good.");
-	}catch(Exception e){e.printStackTrace();}
-	if(System.getProperties().containsKey("org.jtrfp.trcl.flow.Mission.skipNavs")){
-	    try{
-	    final int skips = Integer.parseInt(System.getProperty("org.jtrfp.trcl.flow.Mission.skipNavs"));
-	    System.out.println("Skipping "+skips+" navs.");
-	    for(int i=0; i<skips; i++){
-		removeNAVObjective(currentNAVObjective());
-	    }//end for(skips)
-	    }catch(NumberFormatException e){
-		System.err.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");}
-	}//end if(containsKey)
+	    final World world = tr.getWorld();
+	    final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
+	    tr.setOverworldSystem(overworldSystem = new OverworldSystem(world,
+		    progressStages[LoadingStages.overworld.ordinal()]));
+	    tr.getOverworldSystem().loadLevel(lvl, tdf);
+	    System.out.println("\t...Done.");
+	    // Install NAVs
+	    final NAVSystem navSystem = tr.getGame().getNavSystem();
+	    navSubObjects = rm.getNAVData(lvl.getNavigationFile())
+		    .getNavObjects();
+
+	    START s = (START) navSubObjects.get(0);
+	    Location3D l3d = s.getLocationOnMap();
+	    playerStartPosition[0] = TR.legacy2Modern(l3d.getZ());
+	    playerStartPosition[1] = TR.legacy2Modern(l3d.getY());
+	    playerStartPosition[2] = TR.legacy2Modern(l3d.getX());
+	    playerStartDirection = new ObjectDirection(s.getRoll(),
+		    s.getPitch(), s.getYaw());
+	    // ////// INITIAL HEADING
+	    player.setPosition(getPlayerStartPosition());
+	    player.setDirection(getPlayerStartDirection());
+	    player.setHeading(player.getHeading().negate());// Kludge to fix
+							    // incorrect heading
+	    new TunnelInstaller(tdf, world,
+		    progressStages[LoadingStages.tunnels.ordinal()]);
+	    Factory f = new NAVObjective.Factory(tr);
+
+	    final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
+		    .ordinal()].generateSubReporters(navSubObjects.size());
+	    for (int i = 0; i < navSubObjects.size(); i++) {
+		final NAVSubObject obj = navSubObjects.get(i);
+		f.create(tr, obj, navs);
+		navProgress[i].complete();
+	    }// end for(navSubObjects)
+	    navSystem.updateNAVState();
+	    System.out.println("Start position set to " + player.getPosition());
+	    System.out.println("Setting sun vector");
+	    final AbstractVector sunVector = lvl.getSunlightDirectionVector();
+	    tr.getThreadManager().submitToGL(new Callable<Void>() {
+		@Override
+		public Void call() throws Exception {
+		    tr.renderer.get().setSunVector(
+			    new Vector3D(sunVector.getX(), -sunVector.getY(),
+				    sunVector.getZ()).normalize());
+		    return null;
+		}
+	    }).get();
+	    System.out.println("\t...Done.");
+
+	    System.out.println("\t...Done.");
+	    System.out.println("Invoking JVM's garbage collector...");
+	    System.gc();
+	    System.out.println("\t...Ahh, that felt good.");
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+	if (System.getProperties().containsKey(
+		"org.jtrfp.trcl.flow.Mission.skipNavs")) {
+	    try {
+		final int skips = Integer.parseInt(System
+			.getProperty("org.jtrfp.trcl.flow.Mission.skipNavs"));
+		System.out.println("Skipping " + skips + " navs.");
+		for (int i = 0; i < skips; i++) {
+		    removeNAVObjective(currentNAVObjective());
+		}// end for(skips)
+	    } catch (NumberFormatException e) {
+		System.err
+			.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");
+	    }
+	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
-	//Transition to gameplay mode.
+	// Transition to gameplay mode.
 	hud.gameplayMode();
 	tr.getBackdropSystem().overworldMode();
 	tr.getBackdropSystem().activate();
 	overworldSystem.activate();
 	game.getNavSystem().activate();
 	game.getPlayer().setActive(true);
-	return new Result(null);//TODO: Replace null with actual value unless end of game.
-    }//end go()
-    
-    public NAVObjective currentNAVObjective(){
-	if(navs.isEmpty())return null;
+	return new Result(null);// TODO: Replace null with actual value unless
+				// end of game.
+    }// end go()
+
+    public NAVObjective currentNAVObjective() {
+	if (navs.isEmpty())
+	    return null;
 	return navs.get(0);
     }
-    public void removeNAVObjective(NAVObjective o){
+
+    public void removeNAVObjective(NAVObjective o) {
 	navs.remove(o);
-	if(navs.size()==0){missionCompleteSequence();}
-	else tr.getGame().getNavSystem().updateNAVState();
-    }//end removeNAVObjective(...)
-    
-    public class Result{
+	if (navs.size() == 0) {
+	    missionCompleteSequence();
+	} else
+	    tr.getGame().getNavSystem().updateNAVState();
+    }// end removeNAVObjective(...)
+
+    public class Result {
 	private final String nextLVL;
-	public Result(String nextLVL){
-	    this.nextLVL=nextLVL;
+
+	public Result(String nextLVL) {
+	    this.nextLVL = nextLVL;
 	}
+
 	public String getNextLVL() {
 	    return nextLVL;
 	}
-    }//end Result
+    }// end Result
 
     /**
      * @return the playerStartPosition
      */
     public double[] getPlayerStartPosition() {
-        return playerStartPosition;
+	return playerStartPosition;
     }
 
     /**
      * @return the playerStartDirection
      */
     public ObjectDirection getPlayerStartDirection() {
-        return playerStartDirection;
+	return playerStartDirection;
     }
 
-    public Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun) {
-	final Tunnel result = new Tunnel(tr.getWorld(),tun);
+    public Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
+	    LoadingProgressReporter reporter) {
+	final Tunnel result = new Tunnel(tr.getWorld(), tun, reporter);
 	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
 	return result;
     }
@@ -179,51 +210,61 @@ public class Mission {
     public Tunnel getTunnelByFileName(String tunnelFileName) {
 	return tunnels.get(tunnelFileName.toUpperCase());
     }
-    public Tunnel getTunnelWhoseEntranceClosestTo(double xInLegacyUnits, double yInLegacyUnits, double zInLegacyUnits){
-	Tunnel result=null; 
-	double closestDistance=Double.POSITIVE_INFINITY;
-	for(Tunnel t:tunnels.values()){
-	    TDFFile.Tunnel src =t.getSourceTunnel();
-	    final double distance=Math.sqrt(
-		    Math.pow((xInLegacyUnits-src.getEntrance().getX()),2)+
-		    Math.pow((yInLegacyUnits-src.getEntrance().getY()),2)+
-		    Math.pow((zInLegacyUnits-src.getEntrance().getZ()),2));
-	    if(distance<closestDistance){closestDistance=distance;result=t;}
-	}//end for(tunnels)
+
+    public Tunnel getTunnelWhoseEntranceClosestTo(double xInLegacyUnits,
+	    double yInLegacyUnits, double zInLegacyUnits) {
+	Tunnel result = null;
+	double closestDistance = Double.POSITIVE_INFINITY;
+	for (Tunnel t : tunnels.values()) {
+	    TDFFile.Tunnel src = t.getSourceTunnel();
+	    final double distance = Math.sqrt(Math.pow((xInLegacyUnits - src
+		    .getEntrance().getX()), 2)
+		    + Math.pow((yInLegacyUnits - src.getEntrance().getY()), 2)
+		    + Math.pow((zInLegacyUnits - src.getEntrance().getZ()), 2));
+	    if (distance < closestDistance) {
+		closestDistance = distance;
+		result = t;
+	    }
+	}// end for(tunnels)
 	return result;
-    }//end getTunnelWhoseEntranceClosestTo(...)
-    
-    private void missionCompleteSequence(){
-	new Thread(){
+    }// end getTunnelWhoseEntranceClosestTo(...)
+
+    private void missionCompleteSequence() {
+	new Thread() {
 	    @Override
-	    public void run(){
-		//TODO: Behavior change: Camera XZ static, lag Y by ~16 squares, heading/top affix toward player
-		//TODO: Turn off all player control behavior
-		//TODO: Behavior change: Player turns upward, top rolls on heading, speed at full throttle
-		//TODO: Wait 3 seconds
-		//TODO: Lightning shell on
-		//TODO: Wait 1 second
-		//TODO: Turbo forward
-		//TODO: Wait 500ms
-		//TODO: Jet thrust noise
-		//TODO: Player invisible.
+	    public void run() {
+		// TODO: Behavior change: Camera XZ static, lag Y by ~16
+		// squares, heading/top affix toward player
+		// TODO: Turn off all player control behavior
+		// TODO: Behavior change: Player turns upward, top rolls on
+		// heading, speed at full throttle
+		// TODO: Wait 3 seconds
+		// TODO: Lightning shell on
+		// TODO: Wait 1 second
+		// TODO: Turbo forward
+		// TODO: Wait 500ms
+		// TODO: Jet thrust noise
+		// TODO: Player invisible.
 		System.out.println("MISSION COMPLETE.");
-	    }//end run()
+	    }// end run()
 	}.start();
     }
-    public void playerDestroyed(){
-	new Thread(){
+
+    public void playerDestroyed() {
+	new Thread() {
 	    @Override
-	    public void run(){
-		//TODO Behavior change: Camera XYZ static, heading/top affix toward player
-		//TODO: Turn off all player control behavior
-		//TODO Player behavior change: Slow spin along heading axis, slow downward drift of heading
-		//TODO: Add behavior: explode and destroy on impact with ground
+	    public void run() {
+		// TODO Behavior change: Camera XYZ static, heading/top affix
+		// toward player
+		// TODO: Turn off all player control behavior
+		// TODO Player behavior change: Slow spin along heading axis,
+		// slow downward drift of heading
+		// TODO: Add behavior: explode and destroy on impact with ground
 		System.out.println("MISSION FAILED.");
-	    }//end run()
+	    }// end run()
 	}.start();
-	
-    }//end playerDestroyed()
+
+    }// end playerDestroyed()
 
     public List<NAVObjective> getRemainingNAVObjectives() {
 	return navs;
@@ -233,17 +274,18 @@ public class Mission {
      * @return the navSubObjects
      */
     public List<NAVSubObject> getNavSubObjects() {
-        return navSubObjects;
+	return navSubObjects;
     }
 
     /**
-     * @param navSubObjects the navSubObjects to set
+     * @param navSubObjects
+     *            the navSubObjects to set
      */
     public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
-        this.navSubObjects = navSubObjects;
+	this.navSubObjects = navSubObjects;
     }
 
     public void missionComplete() {
 	missionCompleteSequence();
     }
-}//end Mission
+}// end Mission

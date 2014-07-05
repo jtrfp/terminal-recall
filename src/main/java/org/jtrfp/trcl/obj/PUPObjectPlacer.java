@@ -20,12 +20,20 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 
 public class PUPObjectPlacer implements ObjectPlacer {
     ArrayList<PowerupObject> objs = new ArrayList<PowerupObject>();
+    private final LoadingProgressReporter []placementReporters;
 
-    public PUPObjectPlacer(PUPFile pupFile, World world) {
+    public PUPObjectPlacer(PUPFile pupFile, World world, LoadingProgressReporter pupObjectReporter) {
+	final LoadingProgressReporter[] locationReporters = pupObjectReporter
+		.generateSubReporters(pupFile.getPowerupLocations().length);
+	placementReporters = pupObjectReporter
+		.generateSubReporters(pupFile.getPowerupLocations().length);
+	int pupIndex=0;
 	for (PowerupLocation loc : pupFile.getPowerupLocations()) {
+	    locationReporters[pupIndex++].complete();
 	    PowerupObject powerup = new PowerupObject(loc.getType(), world);
 	    final double[] pupPos = powerup.getPosition();
 	    pupPos[0] = TR.legacy2Modern(loc.getZ());
@@ -39,10 +47,11 @@ public class PUPObjectPlacer implements ObjectPlacer {
 
     @Override
     public void placeObjects(RenderableSpacePartitioningGrid target, Vector3D positionOffset) {
+	int objIndex=0;
 	for (PowerupObject obj : objs) {
+	    placementReporters[objIndex++].complete();
 	    obj.movePositionBy(positionOffset);
 	    target.add(obj);
 	}//end for(objs)
     }//end placeObjects()
-
 }// end PUPObjectPlacer

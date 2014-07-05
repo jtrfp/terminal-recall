@@ -14,21 +14,22 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.gpu.GPU;
 
 public class TunnelInstaller {
     TDFFile tdf;
     World world;
-
-    public TunnelInstaller(TDFFile tdf, World world) {
+    
+    //TODO: Consolidate this class into Mission
+    public TunnelInstaller(TDFFile tdf, World world, final LoadingProgressReporter reporter) {
 	this.tdf = tdf;
 	this.world = world;
 	final TR tr = world.getTr();
-	final GPU gpu = tr.gpu.get();
-	final OverworldSystem overworldSystem = tr.getOverworldSystem();
 	final Mission mission = tr.getGame().getCurrentMission();
 	TDFFile.Tunnel[] tuns = tdf.getTunnels();
+	final LoadingProgressReporter[] reporters = reporter
+		.generateSubReporters(tuns.length);
 	if (tuns != null) {
 	    int tIndex = 0;
 	    // Build tunnels
@@ -41,7 +42,7 @@ public class TunnelInstaller {
 			.getReporter()
 			.report("org.jtrfp.trcl.TunnelInstaller.tunnel."
 				+ tIndex + ".exit", tun.getExit());
-		mission.newTunnel(tun);
+		mission.newTunnel(tun,reporters[tIndex]);
 		tIndex++;
 	    }
 	}// end if(tuns!=null)

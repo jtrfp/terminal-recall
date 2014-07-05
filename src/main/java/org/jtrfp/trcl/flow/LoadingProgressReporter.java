@@ -24,8 +24,8 @@ public interface LoadingProgressReporter {
 	private boolean 	complete	 =false;
 	private UpdateHandler 	updateHandler;
 	
-	public static Impl createRoot(){
-	    return new Impl(null);
+	public static StemReporter createRoot(UpdateHandler updateHandler){
+	    return new Impl(null).setUpdateHandler(updateHandler);
 	}
 	
 	Impl(StemReporter parent){
@@ -35,12 +35,12 @@ public interface LoadingProgressReporter {
 	@Override
 	public LoadingProgressReporter[] generateSubReporters(
 		final int numSubReporters) {
-	    LoadingProgressReporter [] result = new LoadingProgressReporter[numSubReporters];
+	    final LoadingProgressReporter [] result = new LoadingProgressReporter[numSubReporters];
 	    for(int i=0; i<numSubReporters; i++){
 		result[i]=new Impl(this);
 	    }//end for(reporters)
 	    totalSubReporters+=numSubReporters;
-	    parent.addSubReporters(numSubReporters);
+	    if(parent!=null)parent.addSubReporters(numSubReporters);
 	    return result;
 	}//end constructor
 
@@ -67,6 +67,13 @@ public interface LoadingProgressReporter {
 	public void addSubReporters(int delta) {
 	    totalSubReporters+=delta;
 	}//end addSubReporteres(...)
+
+	@Override
+	public StemReporter setUpdateHandler(UpdateHandler updateHandler) {
+	    this.updateHandler=updateHandler;
+	    updateHandler.update(0);
+	    return this;
+	}
     }//end Impl
     
     public static interface UpdateHandler{
@@ -76,5 +83,6 @@ public interface LoadingProgressReporter {
     static interface StemReporter extends LoadingProgressReporter{
 	public void increment();
 	public void addSubReporters(int delta);
+	public StemReporter setUpdateHandler(UpdateHandler updateHandler);
     }//end StemReporter
 }//end LoadingProgrsesReporter

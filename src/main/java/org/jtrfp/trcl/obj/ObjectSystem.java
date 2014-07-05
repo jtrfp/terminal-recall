@@ -24,22 +24,27 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile;
+import org.jtrfp.trcl.flow.LoadingProgressReporter;
 
 public class ObjectSystem extends RenderableSpacePartitioningGrid {
     public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,
 	    LVLFile lvl, ArrayList<DEFObject> defList,
-	    Vector3D headingOverride, Vector3D positionOffset)
+	    Vector3D headingOverride, Vector3D positionOffset, LoadingProgressReporter objectReporter)
 	    throws IllegalAccessException, IOException, FileLoadException {
 	super(parentGrid);
+	final LoadingProgressReporter [] reporters = objectReporter.generateSubReporters(2);
+	final LoadingProgressReporter defObjectReporter = reporters[0];
+	final LoadingProgressReporter pupObjectReporter = reporters[1];
 	TR tr = w.getTr();
 	DEFFile defFile = tr.getResourceManager().getDEFData(
 		lvl.getEnemyDefinitionAndPlacementFile());
 	PUPFile pupFile = tr.getResourceManager().getPUPData(
 		lvl.getPowerupPlacementFile());
-	DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile, w, defList);
+	DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile, w, defList,defObjectReporter);
 	defPlacer.setHeadingOverride(headingOverride);
 	defPlacer.placeObjects(this, positionOffset);
-	PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile, w);
+	PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile, w,pupObjectReporter);
 	pupPlacer.placeObjects(this, positionOffset);
+	activate();
     }// end ObjectSystem(...)
 }// end ObjectSystem

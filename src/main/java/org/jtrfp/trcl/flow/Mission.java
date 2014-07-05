@@ -22,7 +22,6 @@ import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
-import org.jtrfp.trcl.TunnelInstaller;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -103,8 +102,7 @@ public class Mission {
 	    player.setDirection(getPlayerStartDirection());
 	    player.setHeading(player.getHeading().negate());// Kludge to fix
 							    // incorrect heading
-	    new TunnelInstaller(tdf, world,
-		    progressStages[LoadingStages.tunnels.ordinal()]);
+	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
 	    Factory f = new NAVObjective.Factory(tr);
 
 	    final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
@@ -201,8 +199,30 @@ public class Mission {
     public ObjectDirection getPlayerStartDirection() {
 	return playerStartDirection;
     }
+    
+    private void installTunnels(TDFFile tdf, LoadingProgressReporter reporter){
+	TDFFile.Tunnel[] tuns = tdf.getTunnels();
+	final LoadingProgressReporter[] reporters = reporter
+		.generateSubReporters(tuns.length);
+	if (tuns != null) {
+	    int tIndex = 0;
+	    // Build tunnels
+	    for (TDFFile.Tunnel tun : tuns) {
+		tr
+		 .getReporter()
+		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
+				+ tIndex + ".entrance", tun.getEntrance());
+		tr
+		 .getReporter()
+		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
+				+ tIndex + ".exit", tun.getExit());
+		newTunnel(tun,reporters[tIndex]);
+		tIndex++;
+	    }//end if(tuns!=null)
+	}// end if(tuns!=null)
+    }//end installTunnels()
 
-    public Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
+    private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
 	    LoadingProgressReporter reporter) {
 	final Tunnel result = new Tunnel(tr.getWorld(), tun, reporter);
 	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);

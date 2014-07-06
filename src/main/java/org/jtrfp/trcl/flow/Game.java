@@ -200,14 +200,13 @@ public class Game {
 	// Set up player, HUD, fonts...
 	System.out.println("Game.go()...");
 	System.out.println("Initializing general resources...");
-	hudSystem = new HUDSystem(tr.getWorld());
-	navSystem = new NAVSystem(tr.getWorld(), tr);
-	hudSystem.deactivate();
-	navSystem.deactivate();
 	System.out.println("Activating renderer...");
-	tr.renderer.get().activate();// TODO: Eventually move this to Game,
-				     // pending primitives are given valid
-				     // textureIDs.
+	tr.renderer.get().activate();
+	hudSystem = new HUDSystem(tr.getWorld());
+	hudSystem.earlyLoadingMode();
+	hudSystem.activate();
+	navSystem = new NAVSystem(tr.getWorld(), tr);
+	navSystem.deactivate();
 	try {
 	    // Make color zero translucent.
 	    final ResourceManager rm = tr.getResourceManager();
@@ -218,15 +217,20 @@ public class Game {
 	    backdrop.loadingMode();
 	    tr.setBackdropSystem(backdrop);
 	    // POWERUPS
+	    hudSystem.startupMessage("Loading powerup assets...");
 	    rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
 	    // / EXPLOSIONS
+	    hudSystem.startupMessage("Loading explosion assets...");
 	    rm.setExplosionFactory(new ExplosionFactory(tr));
 	    // SMOKE
+	    hudSystem.startupMessage("Loading smoke assets...");
 	    rm.setSmokeFactory(new SmokeFactory(tr));
 	    // DEBRIS
+	    hudSystem.startupMessage("Loading debris assets...");
 	    rm.setDebrisFactory(new DebrisFactory(tr));
 
 	    // SETUP PROJECTILE FACTORIES
+	    hudSystem.startupMessage("Setting up projectile factories...");
 	    Weapon[] w = Weapon.values();
 	    ProjectileFactory[] pf = new ProjectileFactory[w.length];
 	    for (int i = 0; i < w.length; i++) {
@@ -252,7 +256,7 @@ public class Game {
 	    tr.setPlayer(player);
 	    tr.getWorld().add(player);
 	    System.out.println("\t...Done.");
-
+	    hudSystem.startupMessage("Starting game...");
 	    startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
 	} catch (Exception e) {
 	    throw new RuntimeException(e);

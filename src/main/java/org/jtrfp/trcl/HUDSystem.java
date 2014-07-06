@@ -15,14 +15,12 @@ package org.jtrfp.trcl;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.commons.math3.util.MathUtils;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.obj.MeterBar;
+import org.jtrfp.trcl.obj.Sprite2D;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid {
     private static final double Z = -1;
@@ -46,8 +44,11 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final ManuallySetController throttleMeter, healthMeter, loadingMeter;
     private final MeterBar		throttleMeterBar,healthMeterBar,loadingMeterBar;
     private final Timer timer = new Timer();
-    private final Dashboard	dashboard;
-    private final Crosshairs	crosshairs;
+    private final Dashboard	  dashboard;
+    private final Crosshairs	  crosshairs;
+    private final CharLineDisplay startupText;
+    private final Sprite2D	  startupLogo;
+    
 
     public HUDSystem(World world) {
 	super(world);
@@ -55,25 +56,34 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	final TR tr = world.getTr();
 	final ResourceManager rm = tr.getResourceManager();
 	final GLFont font, upfrontFont;
-	try {// TODO: Have TR allocate the font ahead of time.
-	    add(dashboard=new Dashboard(tr));
-	    NDXFile ndx = rm.getNDXFile("STARTUP\\FONT.NDX");
-	    font = new GLFont(rm.getFont("capacitor.zip", "capacitor.ttf"),tr);
-	    upfrontFont = new GLFont(rm.getFontBIN("STARTUP\\FONT.BIN", ndx),
-		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
-	} catch (Exception e) {
-	    System.out.println("Failed to get HUD font.");
-	    throw new RuntimeException(e);
-	}
-
 	final double TOP_LINE_Y = .93;
 	final double BOTTOM_LINE_Y = .82;
 	final double FONT_SIZE = .04;
-
+	
+	startupLogo = new Sprite2D(tr, .000000001, .9, .9, 
+		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
+			.getResourceAsStream("/TrclLogo.png")), "logoImage", false), true);
+	add(startupLogo);
+	startupLogo.setPosition(0,0,Z);
+	startupLogo.notifyPositionChange();
+	startupLogo.setActive(true);
+	startupLogo.setVisible(true);
+	
+	font = new GLFont(rm.getFont("capacitor.zip", "capacitor.ttf"),tr);
+	
+	startupText = new CharLineDisplay(tr,this,FONT_SIZE, 32, font);
+	startupText.setCentered(true);
+	startupText.setPosition(0,0,Z);
+	startupText.setContent("Reticulating Splines...");
+	
+	add(dashboard=new Dashboard(tr));
+	NDXFile ndx = rm.getNDXFile("STARTUP\\FONT.NDX");
+	upfrontFont = new GLFont(rm.getFontBIN("STARTUP\\FONT.BIN", ndx),
+		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
+	
 	objective = new CharLineDisplay(tr, this, FONT_SIZE, 16, font);
 	objective.setContent("LOADING...");
 	objective.setPosition(-.45, TOP_LINE_Y, Z);
-	// objective.setPosition(new Vector3D(-.45,TOP_LINE_Y,Z));
 
 	distance = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
 	distance.setContent("---");
@@ -169,7 +179,26 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	return this;
     }
     
+    public HUDSystem earlyLoadingMode(){
+	startupLogo.setVisible(true);
+	startupText.setVisible(true);
+	upfrontBillboard.setVisible(false);
+	healthMeterBar.setVisible(false);
+	throttleMeterBar.setVisible(false);
+	loadingMeterBar.setVisible(false);
+	objective.setVisible(false);
+	distance.setVisible(false);
+	weapon.setVisible(false);
+	sector.setVisible(false);
+	ammo.setVisible(false);
+	crosshairs.setVisible(false);
+	dashboard.setVisible(false);
+	return this;
+    }
+    
     public HUDSystem loadingMode(String levelName){
+	startupLogo.setVisible(false);
+	startupText.setVisible(false);
 	upfrontBillboard.setContent(levelName);
 	upfrontDisplayCountdown=Integer.MAX_VALUE;
 	upfrontBillboard.setVisible(true);
@@ -192,6 +221,8 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     }
     
     public HUDSystem gameplayMode(){
+	startupLogo.setVisible(false);
+	startupText.setVisible(false);
 	upfrontDisplayCountdown=0;
 	upfrontBillboard.setVisible(false);
 	healthMeterBar.setVisible(true);
@@ -254,5 +285,9 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
      */
     public ManuallySetController getHealthMeter() {
 	return healthMeter;
+    }
+
+    public void startupMessage(String string) {
+	startupText.setContent(string);
     }
 }// end HUDSystem

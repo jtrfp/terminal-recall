@@ -30,13 +30,32 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 		new double[]{-height,-height,height,height}, 
 		new double[]{z,z,z,z},
 		new double[]{0,1,1,0},
-		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.MINUS_K,"Sprite2D");
+		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.MINUS_K,"Sprite2D non-segmented");
 	m.addTriangles(tris);
 	m.finalizeModel();
 	setModel(m);
 	setTop(Vector3D.PLUS_J);
 	setActive(true);
 	setVisible(true);
-    }
-
-}
+    }//end constructor
+    
+    public Sprite2D(TR tr, double z, double width, double height, TextureDescription [] tex, boolean useAlpha){
+	super(tr);
+	final Model m = new Model(false,tr);
+	final int numSegs = tex.length;
+	for (int seg = 0; seg < numSegs; seg++) {
+	    final double segWidth = width / numSegs;
+	    final double x = (-width/2) + segWidth * seg;
+	    
+	    Triangle[] tris = Triangle.quad2Triangles(new double[] { x,
+		    x + segWidth, x + segWidth, x }, new double[] { -height/2, -height/2,
+		    height/2, height/2 }, new double[] { z, z, z, z }, new double[] { 0, 1,
+		    1, 0 }, new double[] { 0, 0, 1, 1 }, tex[seg],
+		    RenderMode.DYNAMIC, Vector3D.MINUS_K,"Sprite2D "+numSegs+" segments");
+	    tris[0].setAlphaBlended(true);
+	    tris[1].setAlphaBlended(true);
+	    m.addTriangles(tris);
+	}// end for(segs)
+	setModel(m.finalizeModel());
+    }//end constructor
+}//end Sprite2D

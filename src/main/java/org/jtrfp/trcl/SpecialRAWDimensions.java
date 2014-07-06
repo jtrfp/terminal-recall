@@ -17,25 +17,35 @@ import java.awt.Dimension;
 public class SpecialRAWDimensions {
     /**
      * 
-     * @param raw
-     * @return The dimensions of the image, or null if it is a standard square
-     *         power of two.
+     * @param len Un-rasterized length of the image in pixels as if they were one long string.
+     * @return The dimensions of the image.
      * @since May 10, 2013
      */
     public static Dimension getSpecialDimensions(int len) {
 	int xLen = (int) Math.sqrt(len), yLen = (int) Math.sqrt(len);
-	if ((xLen & (xLen - 1)) != 0) {// Non power of two
-	    if (len == 20480) {
-		xLen = 320;
-		yLen = 64;
+	if (!isPowerOfTwo(xLen)) {// Non power of two
+	    for(SpecialDimensions d:SpecialDimensions.values()){
+		final Dimension result = d.dims(len);
+		if(result!=null)return result;
 	    }
-	    if (len == 190512) {
-		xLen = 320;
-		yLen = 200;
-	    }
-	}
+	}//end if(non power of two)
 	return new Dimension((int) xLen, (int) yLen);
     }// end getSpecialDimensions
+    
+    private enum SpecialDimensions{
+	topBar(320,64),
+	fullScreen(320,200);
+	
+	private final int len;
+	private final Dimension dims;
+	SpecialDimensions(int w, int h){
+	    len=w*h;
+	    dims=new Dimension(w,h);
+	}
+	public Dimension dims(int unrasterizedLength){
+	    return unrasterizedLength==len?dims:null;
+	}
+    }//end SpecialDimensions
 
     public static boolean hasIntegralSquareRoot(int val) {
 	double sqt = Math.sqrt(val);
@@ -45,4 +55,4 @@ public class SpecialRAWDimensions {
     public static boolean isPowerOfTwo(int val) {
 	return (val & (val - 1)) == 0;
     }
-}
+}//end SpecialRAWDimensions

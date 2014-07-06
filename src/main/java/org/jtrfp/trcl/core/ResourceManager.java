@@ -151,8 +151,9 @@ public class ResourceManager{
 		return result;
 		}//end loadTextures(...)
 	
-	public TextureDescription[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-		TextureDescription [] result = specialTextureNameMap.get(name);
+	public TextureDescription[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) {
+		try{
+	    	TextureDescription [] result = specialTextureNameMap.get(name);
 		if(result==null){
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new TextureDescription[segs.length];
@@ -161,6 +162,8 @@ public class ResourceManager{
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
+		}catch(Exception e){tr.showStopper(e);}
+		return null;//never happens.
 		}//end getSpecialRAWAsTextures
 	
 	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{

@@ -29,6 +29,8 @@
 gpuMemDump.bin
 debugCodePage*.png
 log.html
+.classpath
+.project
 
 # OS generated files #
 ######################

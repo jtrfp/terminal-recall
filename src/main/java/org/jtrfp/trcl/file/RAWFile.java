@@ -95,17 +95,20 @@ public class RAWFile extends SelfParsingFile {
 		lesserDim = (int) dims.getHeight();
 		greaterDim = (int) dims.getWidth();
 	    }
+	    System.out.println("Raw dims: "+dims.getWidth()+"x"+dims.getHeight());
 	    int newLDim = lesserDim, newGDim = greaterDim;
 	    // If non-square
 	    if (lesserDim != greaterDim) {
 		System.out.println("Detected as non-square.");
 		if (!SpecialRAWDimensions.isPowerOfTwo(lesserDim)) {
 		    newLDim = nextPowerOfTwo(lesserDim);
-		    System.out.println("Lesser dim is non-power-of-two.");
+		    System.out.println("Lesser dim is non-power-of-two. lesserDim="+lesserDim+" newLDim="+newLDim);
 		} else {
 		    System.out.println("Lesser dim is power-of-two.");
 		}
-		newGDim = nextMultiple(greaterDim, lesserDim);
+		System.out.println("Before nextMultiple, greaterDim="+greaterDim+" newLDim="+newLDim);
+		newGDim = nextMultiple(greaterDim, newLDim);
+		System.out.println("After nextMultiple, greaterDim="+newGDim);
 	    }// end if(non-square)
 	    else {// Square, make sure they are a power-of-two
 		System.out.println("Detected as square.");
@@ -117,8 +120,10 @@ public class RAWFile extends SelfParsingFile {
 		    System.out.println("Power-of-two square.");
 		}
 	    }// end if(square)
+	    System.out.println("Before upscale newGDim="+newGDim+" newLDim="+newLDim);
 	    newGDim *= Math.pow(2, upScalePowerOfTwo);
 	    newLDim *= Math.pow(2, upScalePowerOfTwo);
+	    System.out.println("After upscale newGDim="+newGDim+" newLDim="+newLDim);
 	    int newWidth = 0, newHeight = 0;
 	    if (dir == SegmentDirection.VERTICAL) {
 		newWidth = newLDim;
@@ -155,16 +160,21 @@ public class RAWFile extends SelfParsingFile {
 		}// end for(y)
 	    }// end (create rgb888)
 	}// end if(segImg==null)
+	System.out.println("Num segs="+numSegs);
 	return segImg;
     }
 
     private int nextMultiple(int originalValue, int multiplicand) {
-	return (int) Math.ceil((double) originalValue / (double) multiplicand)
+	return ((int) Math.ceil((double) originalValue / (double) multiplicand))
 		* multiplicand;
     }
 
     private int nextPowerOfTwo(double v) {
-	return (int) Math.pow(2, Math.floor(Math.sqrt(v)));
+	return (int) Math.pow(2, Math.ceil(log2(v)));
+    }
+    
+    private static double log2(double v){
+	return Math.log(v)/Math.log(2);
     }
 
     private Color getFilteredSegmentedPixelAt(double u, double v, int segment) {

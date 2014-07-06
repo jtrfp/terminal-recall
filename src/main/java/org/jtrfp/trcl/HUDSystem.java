@@ -47,8 +47,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final Dashboard	  dashboard;
     private final Crosshairs	  crosshairs;
     private final CharLineDisplay startupText;
-    private final Sprite2D	  startupLogo;
-    
+    private final Sprite2D	  startupLogo,briefingScreen;
 
     public HUDSystem(World world) {
 	super(world);
@@ -64,17 +63,26 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/TrclLogo.png")), "logoImage", false), true);
 	add(startupLogo);
-	startupLogo.setPosition(0,0,Z);
-	startupLogo.notifyPositionChange();
+	//startupLogo.setPosition(0,0,Z);
+	//startupLogo.notifyPositionChange();
 	startupLogo.setActive(true);
-	startupLogo.setVisible(true);
+	startupLogo.setVisible(false);
 	
 	font = new GLFont(rm.getFont("capacitor.zip", "capacitor.ttf"),tr);
 	
-	startupText = new CharLineDisplay(tr,this,FONT_SIZE, 32, font);
+	startupText = new CharLineDisplay(tr,this,FONT_SIZE*1.5, 32, font);
 	startupText.setCentered(true);
 	startupText.setPosition(0,0,Z);
 	startupText.setContent("Reticulating Splines...");
+	
+	briefingScreen = new Sprite2D(tr,.000000001, 2, 2,
+		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
+		tr.gpu.get().getGl(), 0,false),true);
+	add(briefingScreen);
+	briefingScreen.setPosition(0,0,Z);
+	briefingScreen.notifyPositionChange();
+	briefingScreen.setActive(true);
+	briefingScreen.setVisible(true);
 	
 	add(dashboard=new Dashboard(tr));
 	NDXFile ndx = rm.getNDXFile("STARTUP\\FONT.NDX");
@@ -170,6 +178,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo.setVisible(false);
 	crosshairs.setVisible(false);
 	dashboard.setVisible(false);
+	briefingScreen.setVisible(false);
     }// end constructor
 
     public HUDSystem submitMomentaryUpfrontMessage(String message) {
@@ -205,6 +214,24 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	healthMeterBar.setVisible(false);
 	throttleMeterBar.setVisible(false);
 	loadingMeterBar.setVisible(true);
+	objective.setVisible(false);
+	distance.setVisible(false);
+	weapon.setVisible(false);
+	sector.setVisible(false);
+	ammo.setVisible(false);
+	crosshairs.setVisible(false);
+	dashboard.setVisible(false);
+	return this;
+    }
+    
+    public HUDSystem briefingMode(){
+	startupLogo.setVisible(false);
+	startupText.setVisible(false);
+	upfrontDisplayCountdown=0;
+	upfrontBillboard.setVisible(false);
+	healthMeterBar.setVisible(false);
+	throttleMeterBar.setVisible(false);
+	loadingMeterBar.setVisible(false);
 	objective.setVisible(false);
 	distance.setVisible(false);
 	weapon.setVisible(false);

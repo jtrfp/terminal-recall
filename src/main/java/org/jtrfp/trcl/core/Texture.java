@@ -206,6 +206,20 @@ public class Texture implements TextureDescription {
 		// Set the TOC vars
 		toc.height	 .set(tocIndex, sideLength);
 		toc.width	 .set(tocIndex, sideLength);
+		final int numCodes = diameterInCodes*diameterInCodes;
+		for(int i = 0; i < numCodes; i++){
+		    final int codeX			= i % diameterInCodes;
+		    final int codeY			= i / diameterInCodes;
+		    final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES;
+		    final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
+		    final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
+		    final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
+		    final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
+		    final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
+		    final int subtextureID		= subTextureIDs[subTextureIdx];
+		    stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
+		}//end for(numCodes)
+		
 		return null;
 	    }// end run()
 	 });//end gpuMemThread
@@ -215,13 +229,12 @@ public class Texture implements TextureDescription {
 		final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES;
 		final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES;
 		final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
-		final int subtextureID		= subTextureIDs[subTextureIdx];
-		final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
-		final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
-		final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
-		final int globalCodeIndex = codeIdx%256
+		final int subtextureCodeX 	= codeX % SubTextureWindow.SIDE_LENGTH_CODES;
+		final int subtextureCodeY 	= codeY % SubTextureWindow.SIDE_LENGTH_CODES;
+		final int codeIdx		= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES;
+		final int globalCodeIndex 	= codeIdx%256
 			+ codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
-		final int blockPosition = codeX+codeY*diameterInCodes;
+		final int blockPosition 	= codeX+codeY*diameterInCodes;
 		final RasterRowWriter rw = new RasterRowWriter(){
 		    @Override
 		    public void applyRow(int row, ByteBuffer dest) {
@@ -261,7 +274,7 @@ public class Texture implements TextureDescription {
 		    }//end applyRow
 		};
 		cbm.setRGBA(globalCodeIndex, rw);
-		stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
+		//stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
 		}//end for(codeX)
 	}//end for(codeY)
 	return null;

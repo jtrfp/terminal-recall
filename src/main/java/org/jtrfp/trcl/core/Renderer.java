@@ -316,9 +316,9 @@ public final class Renderer {
 					getCamera().getViewDepth() / 2.1)),
 					proximitySorter
 			);
-		Renderer.this.gpu.getTr().getThreadManager().submitToGL(new Callable<Object>(){
+		Renderer.this.gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    @Override
-		    public Object call() {
+		    public Void call() {
 			proximitySorter.dumpPositionedRenderables(rl.getSubmitter());
 			return null;
 		    }//end gl call()

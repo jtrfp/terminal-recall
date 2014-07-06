@@ -12,12 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.io.IOException;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
@@ -25,9 +21,9 @@ import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 public class Dashboard extends WorldObject2DVisibleEverywhere {
     private static final double Z = .5;
 
-    public Dashboard(TR tr) throws IllegalAccessException, FileLoadException,
-	    IOException {
+    public Dashboard(TR tr) {
 	super(tr);
+	try{
 	// Dashboard
 	TextureDescription[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
@@ -47,5 +43,6 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 	    dashModel.addTriangles(tris);
 	}// end for(segs)
 	setModel(dashModel.finalizeModel());
+	}catch(Exception e){tr.showStopper(e);}
     }
 }// end Dashboard

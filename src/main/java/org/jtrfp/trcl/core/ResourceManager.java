@@ -511,21 +511,29 @@ public class ResourceManager{
 		is.close();
 		return result;
 		}
-	public Font getFont(String zipName, String fontFileName) throws IOException, FontFormatException{
-	    	zipName="/fonts/"+zipName;
-		if(zipName.toUpperCase().endsWith(".ZIP")){//Search the zip
-			ZipInputStream zip = new ZipInputStream(ResourceManager.class.getResourceAsStream(zipName));
-			ZipEntry entry;
-			
-			while((entry=zip.getNextEntry())!=null){
-				System.out.println("ZIP ENTRY: "+entry.getName());
-				if(entry.getName().toUpperCase().endsWith(fontFileName.toUpperCase()))
-					return Font.createFont(Font.TRUETYPE_FONT, zip);
-				}//end while(elements)
-			}//end if(zip)
-		else{}//TODO: Handle non-zipped fonts?
-		return null;
-		}//end getFont(...)
+
+    public Font getFont(String zipName, String fontFileName) {
+	try {
+	    zipName = "/fonts/" + zipName;
+	    if (zipName.toUpperCase().endsWith(".ZIP")) {// Search the zip
+		ZipInputStream zip = new ZipInputStream(
+			ResourceManager.class.getResourceAsStream(zipName));
+		ZipEntry entry;
+
+		while ((entry = zip.getNextEntry()) != null) {
+		    System.out.println("ZIP ENTRY: " + entry.getName());
+		    if (entry.getName().toUpperCase()
+			    .endsWith(fontFileName.toUpperCase()))
+			return Font.createFont(Font.TRUETYPE_FONT, zip);
+		}// end while(elements)
+	    }// end if(zip)
+	    else {
+	    }// TODO: Handle non-zipped fonts?
+	} catch (Exception e) {
+	    tr.showStopper(e);
+	}
+	return null;
+    }// end getFont(...)
 
 	public PUPFile getPUPData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);

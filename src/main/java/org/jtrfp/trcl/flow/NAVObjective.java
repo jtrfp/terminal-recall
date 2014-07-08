@@ -153,7 +153,7 @@ public abstract class NAVObjective {
 			final NAVObjective objective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {
-				return "Destroy Shield Gen";
+				return "Destroy Shield";
 			    }
 			    @Override
 			    public WorldObject getTarget() {

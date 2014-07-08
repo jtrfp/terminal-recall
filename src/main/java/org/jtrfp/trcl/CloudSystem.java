@@ -59,6 +59,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 		tr.gpu.get().getGl(),true);
 	cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	addToWorld(os);
+	activate();
     }// end constructor
 
     private void addToWorld(OverworldSystem os) {

@@ -20,28 +20,33 @@ import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
 
-public class CharDisplay extends WorldObject2D implements VisibleEverywhere{
-	private final SelectableTexture tex;
-	
-	public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid, double glSize, GLFont font){
-		super(tr);
-		final Model model = new Model(false,tr);
-		tex=new SelectableTexture(font.getTextures());
-		Triangle [] tris = Triangle.quad2Triangles(
-				new double []{0.,glSize,glSize,0.},//x
-				new double []{0.,0.,glSize,glSize},
-				new double []{.000001,.000001,.000001,.000001},
-				
-				new double []{0,1,1,0},//u
-				new double []{0,0,1,1},
-				tex, RenderMode.DYNAMIC,Vector3D.MINUS_K,"CharDisplay");
-		tris[0].setAlphaBlended(true);
-		tris[1].setAlphaBlended(true);
-		model.addTriangles(tris);
-		setModel(model.finalizeModel());
-		}//end constructor()
-	
-	public void setChar(char c){tex.setFrame(c);}
-	
-	public SelectableTexture getSelectableTexture(){return tex;}
-	}//end CharDisplay
+public class CharDisplay extends WorldObject2D implements VisibleEverywhere {
+    private final SelectableTexture tex;
+
+    public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid,
+	    double glSize, GLFont font) {
+	super(tr);
+	final Model model = new Model(false, tr);
+	tex = new SelectableTexture(font.getTextures());
+	Triangle[] tris = Triangle.quad2Triangles(
+		new double[] { 0., glSize, glSize, 0. },// x
+		new double[] { 0., 0., glSize, glSize }, new double[] {
+			.000001, .000001, .000001, .000001 },
+
+		new double[] { 0, 1, 1, 0 },// u
+		new double[] { 0, 0, 1, 1 }, tex, RenderMode.DYNAMIC,
+		Vector3D.MINUS_K, "CharDisplay");
+	tris[0].setAlphaBlended(true);
+	tris[1].setAlphaBlended(true);
+	model.addTriangles(tris);
+	setModel(model.finalizeModel());
+    }// end constructor()
+
+    public void setChar(char c) {
+	tex.setFrame(c);
+    }
+
+    public SelectableTexture getSelectableTexture() {
+	return tex;
+    }
+}// end CharDisplay

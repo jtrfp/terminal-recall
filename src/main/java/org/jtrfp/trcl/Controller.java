@@ -14,10 +14,5 @@ package org.jtrfp.trcl;
 
 public interface Controller {
     public double getCurrentFrame();
-
-    // public void unstale();
-
-    // public boolean isStale();
-
     public void setDebugMode(boolean b);
 }

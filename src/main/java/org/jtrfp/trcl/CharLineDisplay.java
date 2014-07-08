@@ -17,13 +17,14 @@ import java.util.Arrays;
 import org.jtrfp.trcl.core.TR;
 
 public class CharLineDisplay {
-    private char[] content;
+    private char[] 		content;
     private final CharDisplay[] displays;
-    double[] position = new double[] { 0, 0, .0001 };
-    private GLFont font;
-    private final double glSize;
-    private double totGlLen = 0;
-    private boolean centered = false;
+    double[] 			position 
+    	= new double[] { 0, 0, .0001 };
+    private GLFont 		font;
+    private final double 	glSize;
+    private double 		totGlLen = 0;
+    private boolean 		centered = false;
 
     public CharLineDisplay(TR tr, RenderableSpacePartitioningGrid grid,
 	    double glSize, int lengthInChars, GLFont font) {

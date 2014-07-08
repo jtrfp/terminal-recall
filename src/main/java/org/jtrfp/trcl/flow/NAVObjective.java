@@ -51,7 +51,7 @@ public abstract class NAVObjective {
 	f.counter++;
     }
     public static class Factory{
-	private TR tr;//for debug
+	private final TR tr;//for debug
 	private Tunnel currentTunnel;
 	int counter;
 	private WorldObject worldBossObject,bossChamberExitShutoffTrigger;
@@ -59,7 +59,7 @@ public abstract class NAVObjective {
 	    this.tr=tr;
 	}//end constructor
 	
-	public void create(TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
+	public void create(final TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
 		final OverworldSystem overworld=tr.getOverworldSystem();
 		final List<DEFObject> defs = overworld.getDefList();
 		if(navSubObject instanceof TGT){///////////////////////////////////////////
@@ -79,6 +79,13 @@ public abstract class NAVObjective {
 			};//end new NAVObjective
 			indexedNAVObjectiveList.add(objective);
 			targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,tr.getGame().getCurrentMission()));
+			targ.addBehavior(new CustomDeathBehavior(new Runnable(){
+			    @Override
+			    public void run(){
+				tr.getGame().getHUDSystem()
+					.submitMomentaryUpfrontMessage("Target Destroyed");
+			    }//end run()
+			}));
 		    }//end for(targs)
 		} else if(navSubObject instanceof TUN){///////////////////////////////////////////
 		    TUN tun = (TUN)navSubObject;

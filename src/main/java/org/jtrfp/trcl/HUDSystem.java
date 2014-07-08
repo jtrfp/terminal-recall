@@ -48,6 +48,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final Crosshairs	  crosshairs;
     private final CharLineDisplay startupText;
     private final Sprite2D	  startupLogo,briefingScreen;
+    private final CharAreaDisplay briefingChars;
 
     public HUDSystem(World world) {
 	super(world);
@@ -79,6 +80,17 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		tr.gpu.get().getGl(), 0,false),true);
 	add(briefingScreen);
+	
+	briefingChars = new CharAreaDisplay(this,32,7,tr,font);
+	briefingChars.activate();
+	briefingChars.setContent("The quick\nbrown\nfox\njumps over\nthe lazy\ndog.\nAnd a bag of chips.");
+	tr.getThreadManager().getLightweightTimer().scheduleAtFixedRate(new TimerTask(){
+	    @Override
+	    public void run() {
+		briefingChars.setScollPosition(((double)System.currentTimeMillis()/1000.)%14.);
+	    }}, 0, 20);
+	briefingChars.setPosition(-.7, -.5, 0);
+	
 	briefingScreen.setPosition(0,0,Z);
 	briefingScreen.notifyPositionChange();
 	briefingScreen.setActive(true);
@@ -179,6 +191,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	crosshairs.setVisible(false);
 	dashboard.setVisible(false);
 	briefingScreen.setVisible(false);
+	briefingChars.deactivate();
     }// end constructor
 
     public HUDSystem submitMomentaryUpfrontMessage(String message) {
@@ -202,6 +215,8 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo.setVisible(false);
 	crosshairs.setVisible(false);
 	dashboard.setVisible(false);
+	briefingScreen.setVisible(false);
+	briefingChars.deactivate();
 	return this;
     }
     
@@ -221,10 +236,12 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo.setVisible(false);
 	crosshairs.setVisible(false);
 	dashboard.setVisible(false);
+	briefingScreen.setVisible(false);
+	briefingChars.deactivate();
 	return this;
-    }
+    }//end loadingMode
     
-    public HUDSystem briefingMode(){
+    public HUDSystem briefingMode(String briefingMessage){
 	startupLogo.setVisible(false);
 	startupText.setVisible(false);
 	upfrontDisplayCountdown=0;
@@ -239,8 +256,11 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo.setVisible(false);
 	crosshairs.setVisible(false);
 	dashboard.setVisible(false);
+	briefingScreen.setVisible(true);
+	briefingChars.setContent(briefingMessage);
+	briefingChars.activate();
 	return this;
-    }
+    }//end briefingMode()
     
     public HUDSystem setLoadingProgress(double unitPercent){
 	loadingMeter.setFrame(1.-unitPercent);
@@ -262,8 +282,9 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo.setVisible(true);
 	crosshairs.setVisible(true);
 	dashboard.setVisible(true);
+	briefingScreen.setVisible(false);
 	return this;
-    }
+    }//end gameplayMode()
 
     /**
      * @return the objective

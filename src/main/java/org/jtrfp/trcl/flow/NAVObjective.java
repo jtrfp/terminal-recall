@@ -162,6 +162,13 @@ public abstract class NAVObjective {
 			};//end new NAVObjective
 			if(first){
 			    bossChamberExitShutoffTrigger=shieldGen;
+			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+				@Override
+				public void run(){
+				    tr.getGame().getHUDSystem()
+					.submitMomentaryUpfrontMessage("Mission Objective");
+				}//end run()
+			    }));
 			    first=false;
 			}//end if(first)
 			shieldGen.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));

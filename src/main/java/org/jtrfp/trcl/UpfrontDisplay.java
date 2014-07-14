@@ -51,4 +51,17 @@ public class UpfrontDisplay extends RenderableSpacePartitioningGrid {
 	upfrontBillboard.setVisible(true);
 	return this;
     }
+
+    public UpfrontDisplay submitPersistentMessage(String message) {
+	upfrontBillboard.setContent(message);
+	upfrontDisplayCountdown = 2000;
+	upfrontBillboard.setVisible(true);
+	upfrontDisplayCountdown=Integer.MAX_VALUE;
+	return this;
+    }
+    
+    public UpfrontDisplay removePersistentMessage(){
+	upfrontDisplayCountdown=0;
+	return this;
+    }
 }//end UpfrontDisplay()

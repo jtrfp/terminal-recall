@@ -82,7 +82,7 @@ public abstract class NAVObjective {
 			targ.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
-				tr.getGame().getHUDSystem()
+				tr.getGame().getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Target Destroyed");
 			    }//end run()
 			}));
@@ -165,7 +165,7 @@ public abstract class NAVObjective {
 			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
-				    tr.getGame().getHUDSystem()
+				    tr.getGame().getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()
 			    }));

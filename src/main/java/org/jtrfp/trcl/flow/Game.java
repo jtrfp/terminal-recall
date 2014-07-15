@@ -20,10 +20,17 @@ import javax.swing.JOptionPane;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
+import org.jtrfp.trcl.BriefingScreen;
+import org.jtrfp.trcl.DisplayModeHandler;
+import org.jtrfp.trcl.EarlyLoadingScreen;
+import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.HUDSystem;
+import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
+import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
@@ -45,6 +52,26 @@ public class Game {
     private HUDSystem 	hudSystem;
     private NAVSystem 	navSystem;
     private Player 	player;
+    private GLFont	greenFont,upfrontFont;
+    private UpfrontDisplay
+    			upfrontDisplay;
+    private EarlyLoadingScreen
+    			earlyLoadingScreen;
+    private LevelLoadingScreen
+    			levelLoadingScreen;
+    private BriefingScreen
+    			briefingScreen;
+    private final DisplayModeHandler
+    			displayModes =
+    			new DisplayModeHandler();
+    public Object[]	earlyLoadingMode,
+    			levelLoadingMode,
+    			briefingMode,
+    			gameplayMode,
+    			performanceReportMode;
+    
+    private static final int UPFRONT_HEIGHT = 23;
+    private final double 	FONT_SIZE=.07;
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
@@ -202,9 +229,21 @@ public class Game {
 	System.out.println("Initializing general resources...");
 	System.out.println("Activating renderer...");
 	tr.renderer.get().activate();
-	hudSystem = new HUDSystem(tr.getWorld());
-	hudSystem.earlyLoadingMode();
-	hudSystem.activate();
+	greenFont = new GLFont(tr.getResourceManager().getFont("capacitor.zip", "capacitor.ttf"),tr);
+	NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
+	upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
+		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
+	earlyLoadingScreen = new EarlyLoadingScreen(tr.getWorld(), tr, greenFont);
+	earlyLoadingScreen.setStatusText("Reticulating Splines...");
+	earlyLoadingMode = new Object []{
+		earlyLoadingScreen
+	};
+	displayModes.setDisplayMode(earlyLoadingMode);
+	
+	upfrontDisplay = new UpfrontDisplay(tr.getWorld(),tr);
+	
+	hudSystem = new HUDSystem(tr.getWorld(),greenFont);
+	hudSystem.deactivate();
 	navSystem = new NAVSystem(tr.getWorld(), tr);
 	navSystem.deactivate();
 	try {
@@ -217,20 +256,20 @@ public class Game {
 	    backdrop.loadingMode();
 	    tr.setBackdropSystem(backdrop);
 	    // POWERUPS
-	    hudSystem.startupMessage("Loading powerup assets...");
+	    earlyLoadingScreen.setStatusText("Loading powerup assets...");
 	    rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
-	    // / EXPLOSIONS
-	    hudSystem.startupMessage("Loading explosion assets...");
+	    // EXPLOSIONS
+	    earlyLoadingScreen.setStatusText("Loading explosion assets...");
 	    rm.setExplosionFactory(new ExplosionFactory(tr));
 	    // SMOKE
-	    hudSystem.startupMessage("Loading smoke assets...");
+	    earlyLoadingScreen.setStatusText("Loading smoke assets...");
 	    rm.setSmokeFactory(new SmokeFactory(tr));
 	    // DEBRIS
-	    hudSystem.startupMessage("Loading debris assets...");
+	    earlyLoadingScreen.setStatusText("Loading debris assets...");
 	    rm.setDebrisFactory(new DebrisFactory(tr));
 
 	    // SETUP PROJECTILE FACTORIES
-	    hudSystem.startupMessage("Setting up projectile factories...");
+	    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
 	    Weapon[] w = Weapon.values();
 	    ProjectileFactory[] pf = new ProjectileFactory[w.length];
 	    for (int i = 0; i < w.length; i++) {
@@ -256,7 +295,20 @@ public class Game {
 	    tr.setPlayer(player);
 	    tr.getWorld().add(player);
 	    System.out.println("\t...Done.");
-	    hudSystem.startupMessage("Starting game...");
+	    levelLoadingScreen	= new LevelLoadingScreen(tr.getWorld(),tr);
+	    briefingScreen	= new BriefingScreen(tr.getWorld(),tr,greenFont);
+	    earlyLoadingScreen.setStatusText("Starting game...");
+	    levelLoadingMode = new Object[]{
+		 levelLoadingScreen,
+		 upfrontDisplay
+	    };
+	    gameplayMode = new Object[]{
+		 navSystem,
+		 hudSystem
+	    };
+	    briefingMode = new Object[]{
+		 briefingScreen
+	    };
 	    startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
@@ -269,5 +321,33 @@ public class Game {
     
     public Player getPlayer(){
 	return player;
+    }
+
+    public GLFont getGreenFont() {
+	return greenFont;
+    }
+    
+    public GLFont getUpfrontFont() {
+	return upfrontFont;
+    }
+
+    /**
+     * @return the upfrontDisplay
+     */
+    public UpfrontDisplay getUpfrontDisplay() {
+        return upfrontDisplay;
+    }
+
+    public LevelLoadingScreen getLevelLoadingScreen() {
+	return levelLoadingScreen;
+    }
+
+    public Game setDisplayMode(Object[] mode) {
+	displayModes.setDisplayMode(mode);
+	return this;
+    }
+    
+    public BriefingScreen getBriefingScreen(){
+	return briefingScreen;
     }
 }// end Game

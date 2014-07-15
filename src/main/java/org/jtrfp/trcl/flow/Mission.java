@@ -12,12 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
@@ -50,6 +52,7 @@ public class Mission {
     private final Game 		game;
     private final String 	levelName;
     private OverworldSystem 	overworldSystem;
+    private BriefingScreen  	briefingScreen;
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -69,13 +72,13 @@ public class Mission {
 		.createRoot(new UpdateHandler() {
 		    @Override
 		    public void update(double unitProgress) {
-			hud.setLoadingProgress(unitProgress);
+			game.getLevelLoadingScreen().setLoadingProgress(unitProgress);
 		    }
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
-	hud.loadingMode(levelName);
-	hud.activate();
+	game.setDisplayMode(game.levelLoadingMode);
+	game.getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
 	    final Player player = tr.getPlayer();
@@ -150,11 +153,19 @@ public class Mission {
 	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
-	hud.gameplayMode();
 	tr.getBackdropSystem().overworldMode();
 	tr.getBackdropSystem().activate();
 	overworldSystem.activate();
+	
+	game.setDisplayMode(game.briefingMode);
+	/*
+	tr.getWorld().setFogColor(Color.BLACK);
+	try{Thread.currentThread().sleep(10000);}//TODO: remove
+	catch(InterruptedException e){}
+	*/
+	tr.getWorld().setFogColor(overworldSystem.getFogColor());
 	game.getNavSystem().activate();
+	game.setDisplayMode(game.gameplayMode);
 	game.getPlayer().setActive(true);
 	return new Result(null);// TODO: Replace null with actual value unless
 				// end of game.
@@ -309,5 +320,9 @@ public class Mission {
 
     public void missionComplete() {
 	missionCompleteSequence();
+    }
+    
+    public BriefingScreen getBriefingScreen(){
+	return briefingScreen;
     }
 }// end Mission

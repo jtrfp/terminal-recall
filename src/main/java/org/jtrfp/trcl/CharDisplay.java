@@ -31,7 +31,7 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere {
 	Triangle[] tris = Triangle.quad2Triangles(
 		new double[] { 0., glSize, glSize, 0. },// x
 		new double[] { 0., 0., glSize, glSize }, new double[] {
-			.000001, .000001, .000001, .000001 },
+			0, 0, 0, 0 },
 
 		new double[] { 0, 1, 1, 0 },// u
 		new double[] { 0, 0, 1, 1 }, tex, RenderMode.DYNAMIC,

@@ -25,8 +25,8 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 	super(tr);
 	final Model m = new Model(false,tr);
 	Triangle [] tris = Triangle.quad2Triangles(
-		new double[]{-width,width,width,-width}, 
-		new double[]{-height,-height,height,height}, 
+		new double[]{-width/2,width/2,width/2,-width/2}, 
+		new double[]{-height/2,-height/2,height/2,height/2}, 
 		new double[]{z,z,z,z},
 		new double[]{0,1,1,0},
 		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.MINUS_K,"Sprite2D non-segmented");
@@ -56,5 +56,8 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 	    m.addTriangles(tris);
 	}// end for(segs)
 	setModel(m.finalizeModel());
+	setTop(Vector3D.PLUS_J);
+	setActive(true);
+	setVisible(true);
     }//end constructor
 }//end Sprite2D

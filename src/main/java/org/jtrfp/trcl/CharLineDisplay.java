@@ -20,7 +20,7 @@ public class CharLineDisplay {
     private char[] 		content;
     private final CharDisplay[] displays;
     double[] 			position 
-    	= new double[] { 0, 0, .0001 };
+    	= new double[] { 0, 0, 0 };
     private GLFont 		font;
     private final double 	glSize;
     private double 		totGlLen = 0;

@@ -80,6 +80,7 @@ public class TextureManager {
     }//end getFallbackTexture()
     
     public TextureDescription solidColor(Color color) {
+	/*
 	BufferedImage img = new BufferedImage(64, 64,
 		BufferedImage.TYPE_INT_RGB);
 	Graphics g = img.getGraphics();
@@ -88,7 +89,9 @@ public class TextureManager {
 	g.dispose();
 	final TextureDescription result = new Texture(img,
 		"Solid color " + color,tr,false);
-	return result;
+	*/
+	return new Texture(color,tr);
+	//return result;
     }//end solidColor(...)
     
     public TextureTOCWindow getTOCWindow(){

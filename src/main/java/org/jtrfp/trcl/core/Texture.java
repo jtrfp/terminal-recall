@@ -72,6 +72,61 @@ public class Texture implements TextureDescription {
 	    }
 	}//end while(texturesToBeAccounted)
     }// end waitUntilTextureProcessingEnds()
+    
+    Texture(Color c, TR tr){
+	this(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),tr,false);
+    }//end constructor
+    
+    private static VectorList colorZeroRasterVL(){
+	return new VectorList(){
+	    @Override
+	    public int getNumVectors() {
+		return 16;
+	    }
+
+	    @Override
+	    public int getNumComponentsPerVector() {
+		return 1;
+	    }
+
+	    @Override
+	    public double componentAt(int vectorIndex, int componentIndex) {
+		return 0;
+	    }
+
+	    @Override
+	    public void setComponentAt(int vectorIndex, int componentIndex,
+		    double value) {
+		throw new RuntimeException("Cannot write to Texture.colorZeroRasterVL VectorList");
+	    }};
+    }//end colorZeroRasterVL
+    
+    private static VectorList colorVL(Color c){
+	final double [] color = new double[]{
+		c.getRed()/255.,c.getGreen()/255.,c.getBlue()/255.,1.};
+	
+	return  new VectorList(){
+	    @Override
+	    public int getNumVectors() {
+		return 1;
+	    }
+
+	    @Override
+	    public int getNumComponentsPerVector() {
+		return 4;
+	    }
+
+	    @Override
+	    public double componentAt(int vectorIndex, int componentIndex) {
+		return color[componentIndex];
+	    }
+
+	    @Override
+	    public void setComponentAt(int vectorIndex, int componentIndex,
+		    double value) {
+		throw new RuntimeException("Static palette created by Texture(Color c, TR tr) cannot be written to.");
+	    }};
+    }//end colorVL(...)
 
     public static final ArrayList<GLRunnable> executeInGLFollowingFinalization = new ArrayList<GLRunnable>();
     private static ByteBuffer emptyRow = null;
@@ -152,7 +207,7 @@ public class Texture implements TextureDescription {
 		    rgba8888vl, sideLength, 4);
 	    // Calculate a rough average color by averaging random samples.
 	    float redA=0,greenA=0,blueA=0;
-	    final int size = rbvl.getNumVectors();
+	    final double size = rbvl.getNumVectors();
 	    for(int i=0; i<10; i++){
 		redA+=rbvl.componentAt((int)(Math.random()*size), 0);
 		greenA+=rbvl.componentAt((int)(Math.random()*size), 1);

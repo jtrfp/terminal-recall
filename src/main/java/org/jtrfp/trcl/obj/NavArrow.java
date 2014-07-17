@@ -22,8 +22,8 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Mission;
 
 public class NavArrow extends Sprite2D {
-private static final double WIDTH=.08;
-private static final double HEIGHT=.08;
+private static final double WIDTH=.16;
+private static final double HEIGHT=.16;
 private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final NAVSystem nav;

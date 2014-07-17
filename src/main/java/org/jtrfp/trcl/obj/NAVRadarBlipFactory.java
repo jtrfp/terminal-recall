@@ -60,7 +60,7 @@ public class NAVRadarBlipFactory {
     
     private class Blip extends Sprite2D{
 	public Blip(TextureDescription tex, RenderableSpacePartitioningGrid g) {
-	    super(tr,-1,.02,.02,tex,true);
+	    super(tr,-1,.04,.04,tex,true);
 	    g.add(this);
 	}//end constructor
     }//end Blip

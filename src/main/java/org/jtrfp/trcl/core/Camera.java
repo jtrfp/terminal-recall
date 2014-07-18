@@ -17,20 +17,28 @@ import java.awt.Component;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.jtrfp.trcl.beh.FacingObject;
+import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.WorldObject;
 
-public class Camera{
-	private volatile Vector3D lookAtVector = new Vector3D(0, 0, 1);
-	private volatile  Vector3D upVector = new Vector3D(0, 1, 0);
-	private volatile  Vector3D cameraPosition = new Vector3D(50000, 0, 50000);
+public class Camera extends WorldObject implements VisibleEverywhere{
 	private volatile  RealMatrix cameraMatrix;
 	private volatile  double viewDepth;
 	private volatile  RealMatrix projectionMatrix;
 	private final	  GPU gpu;
 	private volatile  int updateDebugStateCounter;
-	public Camera(GPU gpu)
-		{this.gpu=gpu;}
-	
+
+    public Camera(GPU gpu) {
+	super(gpu.getTr());
+	this.gpu = gpu;
+	addBehavior(new MatchPosition().setEnable(true));
+	addBehavior(new FacingObject().setEnable(false));
+	addBehavior(new RotateAroundObject().setEnable(false));
+    }//end constructor
+
 	private void updateProjectionMatrix(){
 	    	final Component component = gpu.getTr().getRootWindow();
 		final float fov = 70f;// In degrees
@@ -50,36 +58,39 @@ public class Camera{
 	 * @return the lookAtVector
 	 */
 	public Vector3D getLookAtVector()
-		{return lookAtVector;}
+		{return getLookAt();}
 	/**
 	 * @param lookAtVector the lookAtVector to set
 	 */
 	public synchronized void setLookAtVector(Vector3D lookAtVector){
-		this.lookAtVector = lookAtVector;
+	    	double [] heading = super.getHeadingArray();
+		heading[0] = lookAtVector.getX();
+		heading[1] = lookAtVector.getY();
+		heading[2] = lookAtVector.getZ();
 		cameraMatrix=null;
 		}
 	/**
 	 * @return the upVector
 	 */
 	public Vector3D getUpVector()
-		{return upVector;}
+		{return super.getTop();}
 	/**
 	 * @param upVector the upVector to set
 	 */
 	public synchronized void setUpVector(Vector3D upVector){
-		this.upVector = upVector;
+		super.setTop(upVector);
 		cameraMatrix=null;
 		}
 	/**
 	 * @return the cameraPosition
 	 */
 	public Vector3D getCameraPosition()
-		{return cameraPosition;}
+		{return new Vector3D(super.getPosition());}
 	/**
 	 * @param cameraPosition the cameraPosition to set
 	 */
 	public synchronized void setPosition(Vector3D cameraPosition){
-		this.cameraPosition = cameraPosition;
+		super.setPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());
 		cameraMatrix=null;
 		}
 	
@@ -123,9 +134,9 @@ public class Camera{
 		{if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", cameraPosition);
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", lookAtVector);
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", upVector);
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition());
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
 			}}
 		return cameraMatrix;
 		}

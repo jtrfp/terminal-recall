@@ -49,4 +49,9 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere {
     public SelectableTexture getSelectableTexture() {
 	return tex;
     }
+
+    public void setFontSize(double glSize) {
+	// TODO Auto-generated method stub
+	throw new RuntimeException("Not implemented.");
+    }
 }// end CharDisplay

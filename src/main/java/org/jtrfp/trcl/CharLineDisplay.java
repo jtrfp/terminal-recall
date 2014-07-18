@@ -22,7 +22,7 @@ public class CharLineDisplay {
     double[] 			position 
     	= new double[] { 0, 0, 0 };
     private GLFont 		font;
-    private final double 	glSize;
+    private double 		glSize;
     private double 		totGlLen = 0;
     private boolean 		centered = false;
 
@@ -44,11 +44,11 @@ public class CharLineDisplay {
 
     public void setContent(String content) {
 	for (int i = 0; i < this.content.length; i++) {
-	    char newContent;
+	    char newContent=0;
 	    if (i < content.length()) {
-		newContent = content.charAt(i);
-	    } else {
-		newContent = 0;
+		final char c = content.charAt(i);
+		if(c>32 || c<127)
+		    newContent = content.charAt(i);
 	    }
 	    this.content[i] = newContent;
 	    displays[i].setChar(newContent);
@@ -129,4 +129,11 @@ public class CharLineDisplay {
 	    disp.setVisible(b);
 	}// end for(displays)
     }// end setVisible(...)
+
+    public void setFontSize(double glSize) {
+	this.glSize=glSize;
+	for(CharDisplay disp : displays){
+	    disp.setFontSize(glSize);
+	}
+    }
 }// end LineDisplay

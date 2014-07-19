@@ -770,6 +770,17 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	public void setYaw(int yaw) {
 	    this.yaw = yaw;
 	}
+	
+	@Override
+	    public EnemyPlacement clone(){
+		EnemyPlacement result = new EnemyPlacement();
+		result.setPitch(getPitch());
+		result.setStrength(getStrength());
+		result.setRoll(getRoll());
+		result.setYaw(getYaw());
+		result.setStrength(getStrength());
+		return result;
+	    }//end clone()
     }// end EnemyPlacement
 
     /**

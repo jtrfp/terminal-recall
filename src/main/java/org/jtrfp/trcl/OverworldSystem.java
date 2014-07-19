@@ -24,6 +24,7 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
+import org.jtrfp.trcl.obj.EnemyIntro;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
@@ -40,6 +41,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private boolean tunnelMode = false;
     private final TR tr;
     private final LoadingProgressReporter terrainReporter, cloudReporter, objectReporter;
+    private		ObjectSystem objectSystem;
 
     public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
 	super(w);
@@ -83,7 +85,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");
-	    ObjectSystem objectSystem = new ObjectSystem(this, w, lvl, defList,
+	    objectSystem = new ObjectSystem(this, w, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
 	    objectSystem.activate();
 	    terrainSystem.activate();
@@ -159,5 +161,11 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
      */
     public void setTunnelMode(boolean tunnelMode) {
 	this.tunnelMode = tunnelMode;
+    }
+    /**
+     * @return the objectSystem
+     */
+    public ObjectSystem getObjectSystem() {
+        return objectSystem;
     }
 }// end OverworldSystem

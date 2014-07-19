@@ -229,7 +229,7 @@ public class Game {
 	System.out.println("Initializing general resources...");
 	System.out.println("Activating renderer...");
 	tr.renderer.get().activate();
-	greenFont = new GLFont(tr.getResourceManager().getFont("capacitor.zip", "capacitor.ttf"),tr);
+	greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.pfa"),tr);
 	NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 	upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);

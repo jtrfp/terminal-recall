@@ -31,11 +31,6 @@ Apache Commons
 Java Format Description Toolkit (jFDT)
     License: GPL v3
     http://code.google.com/p/jfdt/
-    
-Capacitor Font
-	by Typodermic Fonts
-	License: Special (see fonts/capacitor.zip for license details)
-	http://typodermicfonts.com/
 	
 Fast DCT/iDCT Algorithms
 	http://unix4lyfe.org/dct/listing3.c
@@ -43,4 +38,9 @@ Fast DCT/iDCT Algorithms
     
 Reverse-Engineering Wiki feat. Terminal Velocity / Fury3 file format documentation
     REWiki (http://rewiki.regengedanken.de/wiki/Main_Page) 
+    
+OCR-A font
+	John Sauter
+	http://ocr-a-font.sourceforge.net/
+	Public Domain
     

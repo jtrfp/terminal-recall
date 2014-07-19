@@ -18,6 +18,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.beh.FacingObject;
+import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.gpu.GPU;
@@ -35,6 +36,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	super(gpu.getTr());
 	this.gpu = gpu;
 	addBehavior(new MatchPosition().setEnable(true));
+	addBehavior(new MatchDirection()).setEnable(true);
 	addBehavior(new FacingObject().setEnable(false));
 	addBehavior(new RotateAroundObject().setEnable(false));
     }//end constructor
@@ -86,13 +88,28 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	 */
 	public Vector3D getCameraPosition()
 		{return new Vector3D(super.getPosition());}
-	/**
-	 * @param cameraPosition the cameraPosition to set
-	 */
-	public synchronized void setPosition(Vector3D cameraPosition){
-		super.setPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());
-		cameraMatrix=null;
-		}
+
+    /**
+     * @param cameraPosition
+     *            the cameraPosition to set
+     */
+    public void setPosition(Vector3D cameraPosition) {
+	this.setPosition(cameraPosition.getX(), cameraPosition.getY(),
+		cameraPosition.getZ());
+    }
+
+    @Override
+    public synchronized void setPosition(double x, double y, double z) {
+	super.setPosition(x, y, z);
+	//cameraMatrix = null;
+    }
+    
+    @Override
+    public Camera notifyPositionChange(){
+	cameraMatrix=  null;
+	super.notifyPositionChange();
+	return this;
+    }
 	
 	private void applyMatrix(){
 		Vector3D eyeLoc = getCameraPosition();

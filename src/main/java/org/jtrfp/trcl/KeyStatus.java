@@ -26,9 +26,9 @@ public class KeyStatus implements KeyEventDispatcher{
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent evt){
 		if(evt.getID()==KeyEvent.KEY_PRESSED)
-			{keyStates[evt.getKeyCode()]=true;return true;}
+			{keyStates[evt.getKeyCode()]=true;return false;}
 		else if(evt.getID()==KeyEvent.KEY_RELEASED)
-			{keyStates[evt.getKeyCode()]=false;return true;}
+			{keyStates[evt.getKeyCode()]=false;return false;}
 		return false;
 		}
 	
@@ -36,4 +36,34 @@ public class KeyStatus implements KeyEventDispatcher{
 	    return keyStates[index];}
 	
 	public void keyTyped(KeyEvent evt){}
+	
+	public void waitForSequenceTyped(final int ... keys){
+	    final int [] keyArrayIndex 		= new int[]{0};
+	    final boolean [] keyTypeObject 	= new boolean[]{false};
+	    final KeyEventDispatcher dispatcher = new KeyEventDispatcher(){
+		@Override
+		public boolean dispatchKeyEvent(KeyEvent evt) {
+		    if(evt.getID()==KeyEvent.KEY_RELEASED){
+			if(evt.getKeyCode()==keys[keyArrayIndex[0]]){
+			    keyArrayIndex[0]++;
+			    if(keyArrayIndex[0]>=keys.length){
+				synchronized(keyTypeObject){
+					keyTypeObject[0]=true;
+					keyTypeObject.notifyAll();
+				    }//end sync(keyTypeObject)
+				    return false;
+			    }//end if(>keys.length)
+			}else keyArrayIndex[0]=0;//!target key
+		    }//end if(KEY_TYPED)
+		    return false;
+		}};
+	    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher);
+	    synchronized(keyTypeObject){
+		while(!keyTypeObject[0]){
+		    try{keyTypeObject.wait();}
+		    catch(InterruptedException e){break;}
+		}//end while(!keyTypeObject)
+	    }//end sync(keyTypeObject)
+	    KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(dispatcher);
+	}//end waitForKeyTyped
 }//end KeyStatus

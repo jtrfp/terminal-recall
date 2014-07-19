@@ -14,7 +14,6 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -35,6 +34,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -78,6 +78,7 @@ import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.RAWFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
+import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
@@ -527,7 +528,7 @@ public class ResourceManager{
 		    System.out.println("ZIP ENTRY: " + entry.getName());
 		    if (entry.getName().toUpperCase()
 			    .endsWith(fontFileName.toUpperCase()))
-			return Font.createFont(Font.TRUETYPE_FONT, zip);
+			return Font.createFont(Font.TYPE1_FONT, zip);
 		}// end while(elements)
 	    }// end if(zip)
 	    else {
@@ -629,4 +630,13 @@ public class ResourceManager{
 		is.close();
 		return result;
 	}//end getVOXFile(...)
+
+	public TXTMissionBriefFile getMissionText(String missionStartTextFile) {
+	    try{
+	    return new Parser().readToNewBean(getInputStreamFromResource("DATA\\"+missionStartTextFile), TXTMissionBriefFile.class);
+	    }catch(Exception e)
+		{tr.showStopper(e);}
+	    assert false;
+	    return null;
+	}//end getMissionText(...)
 }//end ResourceManager

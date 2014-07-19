@@ -15,29 +15,41 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
-    private final int 		heightChars;
+    private final int 		heightChars,widthChars;
     private final CharLineDisplay[]lines;
-    private final double 	FONT_SIZE=.07;
+    private double 		fontSize=.07;
     private ArrayList<String>	lineStrings = new ArrayList<String>();
     private double 		startString;
     private double		positionX,positionY,positionZ;
     
-    public CharAreaDisplay(SpacePartitioningGrid<PositionedRenderable> parent, int widthChars, int heightChars, TR tr, GLFont font) {
+    public CharAreaDisplay(SpacePartitioningGrid<PositionedRenderable> parent, double fontSize, int widthChars, int heightChars, TR tr, GLFont font) {
 	super(parent);
 	this.heightChars=heightChars;
+	this.widthChars=widthChars;
 	lines = new CharLineDisplay[heightChars];
 	for(int i=0; i<heightChars; i++){
-	    lines[i]=new CharLineDisplay(tr, this, FONT_SIZE, widthChars, font);
+	    lines[i]=new CharLineDisplay(tr, this, fontSize, widthChars, font);
 	}//end for(i)
+	this.fontSize=fontSize;
 	updatePositions();
     }//end constructor
     
+    public void setFontSize(double glSize){
+	this.fontSize=glSize;
+	for(CharLineDisplay line:lines){
+	    line.setFontSize(fontSize);
+	}
+	updatePositions();
+    }//end setFontSize(...)
+    
     public CharAreaDisplay setContent(String content){
+	content = wordWrap(content,widthChars);
 	final Scanner s = new Scanner(content);
 	lineStrings.clear();
 	while(s.hasNext()){
@@ -49,6 +61,39 @@ public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
 	return this;
     }//end setContent()
     
+    private static String wordWrap(final String content, int widthChars) {
+	final StringBuilder result 		= new StringBuilder();
+	//final StringTokenizer newlineScanner	= new StringTokenizer(content,"\n\r");
+	//while(newlineScanner.hasMoreTokens()){
+	for(String line:content.split("\n")){
+	    //final String line = newlineScanner.nextToken();
+	    if(line.length()>=widthChars){
+		 //StringTokenizer wordTokenizer = new StringTokenizer(line," ");
+		 int lineLengthSoFar=0;
+		 for(String word:line.split(" ")){
+		 //while(wordTokenizer.hasMoreElements()){
+		     //String word = wordTokenizer.nextToken();
+		     while(word.length()>widthChars){
+			 result.append(word.substring(0, widthChars));
+			 result.append(' ');
+			 result.append("\n");
+			 lineLengthSoFar=0;
+			 word=word.substring(widthChars);
+			 }//end while(word is longer than line)
+		     if(lineLengthSoFar+word.length()>=widthChars){
+			result.append("\n");
+		        lineLengthSoFar=0;
+		     }//end if(word wrap)
+		     lineLengthSoFar+=word.length()+1;
+		     result.append(word);
+		     result.append(' ');
+		 }//end while(hasMoreElements)
+	    }//end if(length>widthChars)
+	    else{result.append(line);result.append("\n");}
+	}//end while(hasNextLine)
+	return result.toString();
+    }//end wordWrap
+
     public void setScollPosition(double newScrollPos){
 	startString=newScrollPos;
 	updatePositions();
@@ -76,7 +121,11 @@ public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
     
     private void updatePositions(){
 	for(int i=0; i<heightChars; i++){
-	    lines[i].setPosition(positionX, positionY-(i-(startString%1.))*FONT_SIZE, positionZ);
+	    lines[i].setPosition(positionX, positionY-(i-(startString%1.))*fontSize, positionZ);
 	}//end for(i)
     }//end updatePositions()
+    
+    public int getNumActiveLines(){
+	return lineStrings.size();
+    }
 }//end CharAreaDisplay

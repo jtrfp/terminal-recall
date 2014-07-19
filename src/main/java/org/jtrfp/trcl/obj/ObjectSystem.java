@@ -27,6 +27,7 @@ import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.flow.LoadingProgressReporter;
 
 public class ObjectSystem extends RenderableSpacePartitioningGrid {
+    private final DEFObjectPlacer defPlacer;
     public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,
 	    LVLFile lvl, ArrayList<DEFObject> defList,
 	    Vector3D headingOverride, Vector3D positionOffset, LoadingProgressReporter objectReporter)
@@ -40,11 +41,17 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
 		lvl.getEnemyDefinitionAndPlacementFile());
 	PUPFile pupFile = tr.getResourceManager().getPUPData(
 		lvl.getPowerupPlacementFile());
-	DEFObjectPlacer defPlacer = new DEFObjectPlacer(defFile, w, defList,defObjectReporter);
+	defPlacer = new DEFObjectPlacer(defFile, w, defList,defObjectReporter);
 	defPlacer.setHeadingOverride(headingOverride);
 	defPlacer.placeObjects(this, positionOffset);
 	PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile, w,pupObjectReporter);
 	pupPlacer.placeObjects(this, positionOffset);
 	activate();
     }// end ObjectSystem(...)
+    /**
+     * @return the defPlacer
+     */
+    public DEFObjectPlacer getDefPlacer() {
+        return defPlacer;
+    }
 }// end ObjectSystem

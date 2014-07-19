@@ -52,7 +52,6 @@ public class Mission {
     private final Game 		game;
     private final String 	levelName;
     private OverworldSystem 	overworldSystem;
-    private BriefingScreen  	briefingScreen;
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -155,14 +154,8 @@ public class Mission {
 	// Transition to gameplay mode.
 	tr.getBackdropSystem().overworldMode();
 	tr.getBackdropSystem().activate();
-	overworldSystem.activate();
-	
-	game.setDisplayMode(game.briefingMode);
-	/*
-	tr.getWorld().setFogColor(Color.BLACK);
-	try{Thread.currentThread().sleep(10000);}//TODO: remove
-	catch(InterruptedException e){}
-	*/
+	//overworldSystem.activate();
+	game.getBriefingScreen().briefingSequence(lvl);
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
 	game.getNavSystem().activate();
 	game.setDisplayMode(game.gameplayMode);
@@ -321,8 +314,8 @@ public class Mission {
     public void missionComplete() {
 	missionCompleteSequence();
     }
-    
-    public BriefingScreen getBriefingScreen(){
-	return briefingScreen;
+
+    public OverworldSystem getOverworldSystem() {
+	return overworldSystem;
     }
 }// end Mission

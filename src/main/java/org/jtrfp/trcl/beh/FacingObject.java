@@ -32,7 +32,7 @@ public class FacingObject extends Behavior {
 	    parent.setHeading(new Vector3D(Vect3D.normalize(work,work)));
 	    Vect3D.cross(work, UP, perp);
 	    Vect3D.cross(perp, work, perp);
-	    parent.setTop(new Vector3D(perp));
+	    parent.setTop(new Vector3D(UP));
 	}//end if(!null)
     }//end _tick(...)
     /**

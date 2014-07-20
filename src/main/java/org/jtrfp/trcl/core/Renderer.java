@@ -373,6 +373,9 @@ public final class Renderer {
      */
     public void setRootGrid(RenderableSpacePartitioningGrid rootGrid) {
 	this.rootGrid = rootGrid;
+	if(camera.getContainingGrid()!=null)
+	    camera.getContainingGrid().remove(camera);
+	rootGrid.add(camera);
     }
 
     /**

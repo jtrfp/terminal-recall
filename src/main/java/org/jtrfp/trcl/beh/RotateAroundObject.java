@@ -19,23 +19,26 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class RotateAroundObject extends Behavior {
     private WorldObject target;
-    private double distance=TR.mapSquareSize/5.;
+    private double distance=TR.mapSquareSize;
     private double angularVelocityRPS = .25;
     final double [] delta = new double[3];
+    private double []offset = new double[]{0,0,0};
     @Override
     public void _tick(long tickTimeMillis){
 	if(target!=null){
 	    final WorldObject parent	= getParent();
 	    final double [] tPos	= target.getPosition();
 	    final double [] pPos	= parent.getPosition();
-	    //Theta = [0,2]
+	    //Theta = [0,2]pi
 	    final double theta = (((angularVelocityRPS*tickTimeMillis) / 1000.)%1.)*2*Math.PI;
-	    delta[0]=Math.sin(theta);
-	    delta[1]=Math.cos(theta);
-	    delta[2]=0;
+	    delta[0]=Math.sin(theta);	//X
+	    delta[2]=Math.cos(theta);	//Z
+	    delta[1]=0;			//Y
 	    Vect3D.scalarMultiply(delta, distance, delta);
+	    Vect3D.add(delta, offset, delta);
 	    Vect3D.add(tPos, delta, pPos);
-	    parent.notifyPositionChange();
+	    parent.setPosition(pPos[0],pPos[1],pPos[2]);
+	    parent.notifyPositionChange();//TODO: Remove and see if it still works
 	}//end if(!null)
     }//end _tick(...)
     /**
@@ -77,4 +80,7 @@ public class RotateAroundObject extends Behavior {
         this.angularVelocityRPS = angularVelocityRPS;
         return this;
     }
-}
+    public void setOffset(double[] ds) {
+	offset = ds;
+    }
+}//end RotateAroundObject

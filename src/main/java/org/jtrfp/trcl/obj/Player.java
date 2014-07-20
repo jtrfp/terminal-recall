@@ -45,9 +45,9 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
 
-public class Player extends WorldObject {
-    private final Camera 	camera;
-    private int 		cameraDistance 			= 0;
+public class Player extends WorldObject implements VisibleEverywhere{
+    //private final Camera 	camera;
+    //private int 		cameraDistance 			= 0;
     public static final int 	CLOAK_COUNTDOWN_START 		= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
     public static final int 	INVINCIBILITY_COUNTDOWN_START 	= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
     private final 		ProjectileFiringBehavior[] weapons = new ProjectileFiringBehavior[Weapon
@@ -144,7 +144,7 @@ public class Player extends WorldObject {
 	    }// end if(hasButton)
 	}
 	addBehavior(new WeaponSelectionBehavior().setBehaviors(weapons));
-	camera = tr.renderer.get().getCamera();
+	//camera = tr.renderer.get().getCamera();
 	getBehavior().probeForBehavior(VelocityDragBehavior.class)
 		.setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
@@ -157,15 +157,15 @@ public class Player extends WorldObject {
 
     @Override
     public void setHeading(Vector3D lookAt) {
-	camera.setLookAtVector(lookAt);
+	/*camera.setLookAtVector(lookAt);
 	camera.setPosition(new Vector3D(getPosition()).subtract(lookAt
-		.scalarMultiply(cameraDistance)));
+		.scalarMultiply(cameraDistance)));*/
 	super.setHeading(lookAt);
     }
 
     @Override
     public void setTop(Vector3D top) {
-	camera.setUpVector(top);
+	//camera.setUpVector(top);
 	super.setTop(top);
     }
 
@@ -177,8 +177,8 @@ public class Player extends WorldObject {
 
     @Override
     public WorldObject notifyPositionChange() {
-	camera.setPosition(new Vector3D(getPosition()).subtract(getLookAt()
-		.scalarMultiply(cameraDistance)));
+	/*camera.setPosition(new Vector3D(getPosition()).subtract(getLookAt()
+		.scalarMultiply(cameraDistance)));*/
 	return super.notifyPositionChange();
     }
 

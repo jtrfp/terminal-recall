@@ -77,7 +77,8 @@ public class TunnelEntranceObject extends BillboardSprite {
 		//Ignore ground height with chambers because entrances don't behave themselves with this.
 		if(!tr.getOverworldSystem().isChamberMode()&&playerPos[1]>groundHeight+GROUND_HEIGHT_PAD*4)return;
 	        if(Vect3D.distanceXZ(entranceObject.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE*2){
-		 //Turn off overworld
+	         tr.getGame().getCurrentMission().notifyTunnelFound(tunnel);
+	         //Turn off overworld
 		 tr.getOverworldSystem().deactivate();
 		 //Turn on tunnel
 		 tunnel.activate();

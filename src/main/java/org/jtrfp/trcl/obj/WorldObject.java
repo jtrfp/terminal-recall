@@ -73,6 +73,7 @@ public class WorldObject implements PositionedRenderable {
     protected final double[] rMd 	= new double[16];
     protected final double[] tMd 	= new double[16];
     protected 	    double[] cMd 	= new double[16];
+    private boolean respondToTick	= true;
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
@@ -159,6 +160,7 @@ public class WorldObject implements PositionedRenderable {
     }// end probeForBehaviors(...)
 
     public void tick(long time) {
+	if(!respondToTick)return;
 	for (int i = 0; i < tickBehaviors.size(); i++) {
 	    tickBehaviors.get(i).tick(time);
 	}// end for(size)
@@ -308,7 +310,7 @@ public class WorldObject implements PositionedRenderable {
 
     public final void updateStateToGPU() {
 	recalculateTransRotMBuffer();
-	model.proposeAnimationUpdate();
+	if(model!=null)model.proposeAnimationUpdate();
     }
 
     protected void recalculateTransRotMBuffer() {
@@ -595,5 +597,19 @@ public class WorldObject implements PositionedRenderable {
      */
     public void setRenderFlags(byte renderFlags) {
         this.renderFlags = renderFlags;
+    }
+
+    /**
+     * @return the respondToTick
+     */
+    public boolean isRespondToTick() {
+        return respondToTick;
+    }
+
+    /**
+     * @param respondToTick the respondToTick to set
+     */
+    public void setRespondToTick(boolean respondToTick) {
+        this.respondToTick = respondToTick;
     }
 }// end WorldObject

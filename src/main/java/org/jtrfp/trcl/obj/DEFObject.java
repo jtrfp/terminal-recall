@@ -22,6 +22,7 @@ import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Bobbing;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CustomDeathBehavior;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
 import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
@@ -67,7 +68,7 @@ public class DEFObject extends WorldObject {
     boolean spinCrash=false;
     boolean ignoringProjectiles=false;
     boolean isRuin=false;
-public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
+public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
@@ -372,7 +373,20 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
      posLimit.getPositionMaxima()[1]=TR.mapSquareSize*10;
      posLimit.getPositionMinima()[1]=-TR.mapSquareSize;
      addBehavior(posLimit);}
-     
+    
+    if(groundLocked)
+	addBehavior(new CustomDeathBehavior(new Runnable(){
+	    @Override
+	    public void run(){
+		tr.getGame().getCurrentMission().notifyGroundTargetDestroyed();
+	    }
+	}));
+    else addBehavior(new CustomDeathBehavior(new Runnable(){
+	    @Override
+	    public void run(){
+		tr.getGame().getCurrentMission().notifyAirTargetDestroyed();
+	    }
+	}));
     //Misc
     addBehavior(new TunnelRailed(tr));//Centers in tunnel when appropriate
     addBehavior(new DeathBehavior());
@@ -380,6 +394,11 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     setActive(!boss);
     addBehavior(new DamagedByCollisionWithGameplayObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
+    else{addBehavior(new CustomDeathBehavior(new Runnable(){
+	@Override
+	public void run(){
+	    tr.getGame().getCurrentMission().notifyFoliageDestroyed();
+	}}));}
     if(canTurn||boss){
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior()).setDragCoefficient(.86);
@@ -403,7 +422,6 @@ public DEFObject(TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
 	else 	{//addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 	    	addBehavior(new CollidesWithTerrain().setAutoNudge(true).setNudgePadding(40000));
 	    	}
-	
 	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
 	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/1.2);

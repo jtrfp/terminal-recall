@@ -28,6 +28,9 @@ import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.UpfrontDisplay;
+import org.jtrfp.trcl.beh.MatchDirection;
+import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.NDXFile;
@@ -185,27 +188,6 @@ public class Game {
 	this.difficulty = difficulty;
     }
 
-    private void startMissionSequence(String lvlFileName) {
-	recursiveMissionSequence(lvlFileName);
-    }
-
-    private void recursiveMissionSequence(String lvlFileName) {
-	try {
-	    currentMission = new Mission(tr, this, tr.getResourceManager()
-		    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
-	    Mission.Result result = currentMission.go();
-	    final String nextLVL = result.getNextLVL();
-	    if (nextLVL != null)
-		recursiveMissionSequence(nextLVL);
-	} catch (IllegalAccessException e) {
-	    tr.showStopper(e);
-	} catch (FileLoadException e) {
-	    tr.showStopper(e);
-	} catch (IOException e) {
-	    tr.showStopper(e);
-	}
-    }// end recursiveMissionSequence(...)
-
     public NAVSystem getNavSystem(){
 	return navSystem;
     }
@@ -278,6 +260,9 @@ public class Game {
 	    rm.setProjectileFactories(pf);
 	    player = new Player(tr, tr.getResourceManager().getBINModel(
 		    "SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
+	    final Camera camera = tr.renderer.get().getCamera();
+	    camera.probeForBehavior(MatchPosition.class).setTarget(player);
+	    camera.probeForBehavior(MatchDirection.class).setTarget(player);
 	    final String startX = System.getProperty("org.jtrfp.trcl.startX");
 	    final String startY = System.getProperty("org.jtrfp.trcl.startY");
 	    final String startZ = System.getProperty("org.jtrfp.trcl.startZ");
@@ -309,7 +294,22 @@ public class Game {
 	    briefingMode = new Object[]{
 		 briefingScreen
 	    };
-	    startMissionSequence(vox.getLevels()[getLevelIndex()].getLvlFile());
+	    for(MissionLevel lvl:vox.getLevels()){
+		try {
+		    final String lvlFileName = lvl.getLvlFile();
+		    currentMission = new Mission(tr, this, tr.getResourceManager()
+			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
+		    Mission.Result result=null;
+		    while(result==null) 
+			result = currentMission.go();
+		} catch (IllegalAccessException e) {
+		    tr.showStopper(e);
+		} catch (FileLoadException e) {
+		    tr.showStopper(e);
+		} catch (IOException e) {
+		    tr.showStopper(e);
+		}
+	    }//end for(vox.getLevels)
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
 	}

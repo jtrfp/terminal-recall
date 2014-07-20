@@ -12,14 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
-import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
@@ -52,16 +50,21 @@ public class Mission {
     private final Game 		game;
     private final String 	levelName;
     private OverworldSystem 	overworldSystem;
+    private final Result[]	missionEnd = new Result[]{null};
+    private int			groundTargetsDestroyed=0,airTargetsDestroyed=0,foliageDestroyed=0;
+    private int			totalNumTunnels;
+    private final LinkedList<Tunnel>
+    				tunnelsRemaining = new LinkedList<Tunnel>();
 
     private enum LoadingStages {
 	navs, tunnels, overworld
     }// end LoadingStages
 
     public Mission(TR tr, Game game, LVLFile lvl, String levelName) {
-	this.tr = tr;
-	this.lvl = lvl;
-	this.game = game;
-	this.levelName = levelName;
+	this.tr 	= tr;
+	this.lvl 	= lvl;
+	this.game 	= game;
+	this.levelName 	= levelName;
     }// end Mission
 
     public Result go() {
@@ -152,23 +155,28 @@ public class Mission {
 	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
-	tr.getBackdropSystem().overworldMode();
-	tr.getBackdropSystem().activate();
-	//overworldSystem.activate();
+	tr.getBackdropSystem()	.overworldMode();
+	tr.getBackdropSystem()	.activate();
 	game.getBriefingScreen().briefingSequence(lvl);
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
-	game.getNavSystem().activate();
+	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);
-	game.getPlayer().setActive(true);
-	return new Result(null);// TODO: Replace null with actual value unless
-				// end of game.
+	game.getPlayer()	.setActive(true);
+	//Wait for mission end
+	synchronized(missionEnd){
+	while(missionEnd[0]==null){try{missionEnd.wait();}
+		catch(InterruptedException e){break;}}}
+	//Completion summary
+	if(missionEnd[0]!=null)
+	    game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+	return missionEnd[0];
     }// end go()
 
     public NAVObjective currentNAVObjective() {
 	if (navs.isEmpty())
 	    return null;
 	return navs.get(0);
-    }
+    }//end currentNAVObjective()
 
     public void removeNAVObjective(NAVObjective o) {
 	navs.remove(o);
@@ -179,14 +187,42 @@ public class Mission {
     }// end removeNAVObjective(...)
 
     public class Result {
-	private final String nextLVL;
+	private final int airTargetsDestroyed, groundTargetsDestroyed,foliageDestroyed;
+	private final double tunnelsFoundPctNorm;
 
-	public Result(String nextLVL) {
-	    this.nextLVL = nextLVL;
+	public Result(int airTargetsDestroyed, int groundTargetsDestroyed, int foliageDestroyed, double tunnelsFoundPctNorm) {
+	    this.airTargetsDestroyed	=airTargetsDestroyed;
+	    this.groundTargetsDestroyed	=groundTargetsDestroyed;
+	    this.foliageDestroyed	=foliageDestroyed;
+	    this.tunnelsFoundPctNorm	=tunnelsFoundPctNorm;
+	}//end constructor
+
+	/**
+	 * @return the airTargetsDestroyed
+	 */
+	public int getAirTargetsDestroyed() {
+	    return airTargetsDestroyed;
 	}
 
-	public String getNextLVL() {
-	    return nextLVL;
+	/**
+	 * @return the groundTargetsDestroyed
+	 */
+	public int getGroundTargetsDestroyed() {
+	    return groundTargetsDestroyed;
+	}
+
+	/**
+	 * @return the foliageDestroyed
+	 */
+	public int getFoliageDestroyed() {
+	    return foliageDestroyed;
+	}
+
+	/**
+	 * @return the tunnelsFoundPctNorm
+	 */
+	public double getTunnelsFoundPctNorm() {
+	    return tunnelsFoundPctNorm;
 	}
     }// end Result
 
@@ -206,6 +242,7 @@ public class Mission {
     
     private void installTunnels(TDFFile tdf, LoadingProgressReporter reporter){
 	TDFFile.Tunnel[] tuns = tdf.getTunnels();
+	tuns = tuns == null?new TDFFile.Tunnel[0]:tuns;//Null means no tunnels.
 	final LoadingProgressReporter[] reporters = reporter
 		.generateSubReporters(tuns.length);
 	if (tuns != null) {
@@ -224,11 +261,13 @@ public class Mission {
 		tIndex++;
 	    }//end if(tuns!=null)
 	}// end if(tuns!=null)
+	totalNumTunnels = tunnelsRemaining.size();
     }//end installTunnels()
 
     private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
 	    LoadingProgressReporter reporter) {
 	final Tunnel result = new Tunnel(tr.getWorld(), tun, reporter);
+	tunnelsRemaining.add(result);
 	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
 	return result;
     }
@@ -272,9 +311,15 @@ public class Mission {
 		// TODO: Jet thrust noise
 		// TODO: Player invisible.
 		System.out.println("MISSION COMPLETE.");
+		notifyMissionEnd(
+			new Result(
+				airTargetsDestroyed,
+				groundTargetsDestroyed,
+				foliageDestroyed,
+				1.-(double)tunnelsRemaining.size()/(double)totalNumTunnels));
 	    }// end run()
 	}.start();
-    }
+    }//end missionCompleteSequence()
 
     public void playerDestroyed() {
 	new Thread() {
@@ -287,10 +332,16 @@ public class Mission {
 		// slow downward drift of heading
 		// TODO: Add behavior: explode and destroy on impact with ground
 		System.out.println("MISSION FAILED.");
+		notifyMissionEnd(null);
 	    }// end run()
 	}.start();
-
     }// end playerDestroyed()
+    
+    private void notifyMissionEnd(Result r){
+	synchronized(missionEnd){
+	 missionEnd[0]=r;
+	 missionEnd.notifyAll();}
+    }//end notifyMissionEnd()
 
     public List<NAVObjective> getRemainingNAVObjectives() {
 	return navs;
@@ -317,5 +368,25 @@ public class Mission {
 
     public OverworldSystem getOverworldSystem() {
 	return overworldSystem;
+    }
+    
+    public Mission notifyAirTargetDestroyed(){
+	airTargetsDestroyed++;
+	return this;
+    }
+    
+    public Mission notifyGroundTargetDestroyed(){
+	groundTargetsDestroyed++;
+	return this;
+    }
+    
+    public Mission notifyTunnelFound(Tunnel tun){
+	tunnelsRemaining.remove(tun);
+	return this;
+    }
+    
+    public Mission notifyFoliageDestroyed(){
+	foliageDestroyed++;
+	return this;
     }
 }// end Mission

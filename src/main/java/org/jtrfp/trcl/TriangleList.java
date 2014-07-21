@@ -32,6 +32,7 @@ import org.jtrfp.trcl.mem.MemoryWindow;
 public class TriangleList extends PrimitiveList<Triangle> {
     private 		Controller 			controller;
     private 		int 				timeBetweenFramesMsec;
+    private 		int [] 				triangleVertexIndices;
     private final 	boolean 			animateUV;
     private final 	WindowAnimator 			xyzAnimator;
     private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
@@ -258,10 +259,19 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		setupVertex(1, vertexIndices[tIndex+1], triangleIndex,textureDescription);
 		setupVertex(2, vertexIndices[tIndex+2], triangleIndex,textureDescription);
     }//setupTriangle
+    
+    @Override
+    public void finalize(){
+	System.out.println("TriangleList.finalize()");
+	final MemoryWindow mw = getMemoryWindow();
+	for(int i=0; i<triangleVertexIndices.length;i++){
+	    mw.free(triangleVertexIndices[i]);
+	}//end for(triangleVertexIndices)
+    }//end finalize()
 
     public void uploadToGPU() {
 	final int nPrimitives = getNumElements();
-	final int [] triangleVertexIndices = new int[nPrimitives*3];
+	triangleVertexIndices = new int[nPrimitives*3];
 	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
 	final MemoryWindow mw = getMemoryWindow();
 	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++) {

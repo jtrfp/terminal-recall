@@ -612,4 +612,15 @@ public class WorldObject implements PositionedRenderable {
     public void setRespondToTick(boolean respondToTick) {
         this.respondToTick = respondToTick;
     }
+    
+    @Override
+    public void finalize() throws Throwable{
+	System.out.println("WorldObject.finalize()");
+	tr.matrixWindow.get().free(matrixID);
+	for(int def:transparentTriangleObjectDefinitions)
+	    tr.objectDefinitionWindow.get().free(def);
+	for(int def:triangleObjectDefinitions)
+	    tr.objectDefinitionWindow.get().free(def);
+	super.finalize();
+    }//end finalize()
 }// end WorldObject

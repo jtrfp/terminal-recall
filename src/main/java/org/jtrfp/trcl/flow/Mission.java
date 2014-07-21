@@ -83,9 +83,13 @@ public class Mission {
 	game.getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Player player = tr.getPlayer();
-	    final World world = tr.getWorld();
-	    final TDFFile tdf = rm.getTDFData(lvl.getTunnelDefinitionFile());
+	    final Player player      = tr.getPlayer();
+	    final World world 	     = tr.getWorld();
+	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
+	    final OverworldSystem oldOverworldSystem = tr.getOverworldSystem();
+	    if(oldOverworldSystem!=null){
+		oldOverworldSystem.deactivate();
+	    }
 	    tr.setOverworldSystem(overworldSystem = new OverworldSystem(world,
 		    progressStages[LoadingStages.overworld.ordinal()]));
 	    tr.getOverworldSystem().loadLevel(lvl, tdf);

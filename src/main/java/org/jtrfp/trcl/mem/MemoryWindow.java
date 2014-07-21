@@ -94,10 +94,14 @@ public abstract class MemoryWindow {
     public final int create() {
 	return indexPool.pop();
     }//end create()
+    
+    public final int free(int objectIDToFree){
+	return indexPool.free(objectIDToFree);
+    }//end free(...)
 
     public final int getNumObjects() {
 	return indexPool.getMaxCapacity();
-    }
+    }//end getNumObjects()
 
     public static abstract class Variable<TYPE, THIS_CLASS extends Variable> {
 	private MemoryWindow parent;

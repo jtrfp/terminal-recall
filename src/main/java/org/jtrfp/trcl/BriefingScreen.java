@@ -52,18 +52,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private TXTMissionBriefFile missionTXT;
     private ColorPaletteVectorList palette;
     private LVLFile		lvl;
-    private final TimerTask	  scrollTimer=
-	    new TimerTask(){
-	    @Override
-	    public void run() {
-		scrollPos+=scrollIncrement;
-		briefingChars.setScollPosition(scrollPos);
-		if(scrollPos>briefingChars.getNumActiveLines()+NUM_LINES){
-		    BriefingScreen.this.stopScroll();
-		    notifyScrollFinishCallbacks();
-		    scrollFinishCallbacks.clear();
-		}
-	    }};
+    private TimerTask	  scrollTimer;
 
     public BriefingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
 	super(parent);
@@ -108,7 +97,17 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 
     public void startScroll() {
 	scrollPos=0;
-	tr.getThreadManager().getLightweightTimer().scheduleAtFixedRate(scrollTimer, 0, 20);
+	tr.getThreadManager().getLightweightTimer().scheduleAtFixedRate(scrollTimer = new TimerTask(){
+	    @Override
+	    public void run() {
+		scrollPos+=scrollIncrement;
+		briefingChars.setScollPosition(scrollPos);
+		if(scrollPos>briefingChars.getNumActiveLines()+NUM_LINES){
+		    BriefingScreen.this.stopScroll();
+		    notifyScrollFinishCallbacks();
+		    scrollFinishCallbacks.clear();
+		}
+	    }}, 0, 20);
     }//end startScroll()
 
     public void stopScroll() {
@@ -168,7 +167,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 				 = rm.getMissionText(lvl.getBriefingTextFile());
 	planetDisplayMode(lvl);
 	setContent(
-		missionTXT.getMissionText().replace('\r','\n'));
+		missionTXT.getMissionText().replace("\r",""));
 	game.getCurrentMission().getOverworldSystem().activate();
 	tr.getWorld().setFogColor(Color.black);
 	startScroll();

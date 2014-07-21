@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +33,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -56,6 +54,7 @@ import org.jtrfp.trcl.RawAltitudeMapWrapper;
 import org.jtrfp.trcl.RawTextureMeshWrapper;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
+import org.jtrfp.trcl.SoftValueHashMap;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.file.BINFile;
@@ -95,13 +94,18 @@ import org.jtrfp.trcl.obj.SmokeFactory;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
-	private HashMap<String, TextureDescription> 
-	/*						*/	textureNameMap = new HashMap<String,TextureDescription>();
-    	private HashMap<String, TextureDescription[]> 
-    								specialTextureNameMap 	= new HashMap<String,TextureDescription[]>();
-	private HashMap<String, BINFile.AnimationControl> 	aniBinNameMap 		= new HashMap<String,BINFile.AnimationControl>();
-	private HashMap<String, BINFile.Model> 			modBinNameMap 		= new HashMap<String,BINFile.Model>();
-	private HashMap<String, Model> 				modelCache 		= new HashMap<String,Model>();
+	private SoftValueHashMap<String, TextureDescription> 
+	/*						*/	 textureNameMap 
+		= new SoftValueHashMap<String,TextureDescription>();
+    	private SoftValueHashMap<String, TextureDescription[]> 
+    								specialTextureNameMap 	
+    		= new SoftValueHashMap<String,TextureDescription[]>();
+	private SoftValueHashMap<String, BINFile.AnimationControl>aniBinNameMap 	
+		= new SoftValueHashMap<String,BINFile.AnimationControl>();
+	private SoftValueHashMap<String, BINFile.Model> 	modBinNameMap 		
+		= new SoftValueHashMap<String,BINFile.Model>();
+	private SoftValueHashMap<String, Model> 		modelCache 		
+		= new SoftValueHashMap<String,Model>();
 	private ExplosionFactory 				explosionFactory;
 	private SmokeFactory 					smokeFactory;
 	private PluralizedPowerupFactory 			pluralizedPowerupFactory;

@@ -88,7 +88,7 @@ public class GLFont{
 	public GLFont(Font realFont, TR tr){
 	    	this.tr=tr;
 	    	sideLength=64;
-		final Font font=realFont.deriveFont((float)sideLength).deriveFont(Font.BOLD);
+		final Font font=realFont.deriveFont((float)sideLength)/*.deriveFont(Font.BOLD)*/;
 		//Generate the textures
 		textures = new Texture[256];
 		Texture empty=renderToTexture(' ',realFont);

@@ -214,7 +214,7 @@ public class ResourceManager{
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
 		if(useCache)textureNameMap.put(name, result);
-		Texture.texturesToBeAccounted.add(result);
+		//Texture.texturesToBeAccounted.add(result);
 		return result;
 		}//end getRAWAsTexture(...)
 	
@@ -532,7 +532,7 @@ public class ResourceManager{
 		    System.out.println("ZIP ENTRY: " + entry.getName());
 		    if (entry.getName().toUpperCase()
 			    .endsWith(fontFileName.toUpperCase()))
-			return Font.createFont(Font.TYPE1_FONT, zip);
+			return Font.createFont(Font.TRUETYPE_FONT, zip);
 		}// end while(elements)
 	    }// end if(zip)
 	    else {

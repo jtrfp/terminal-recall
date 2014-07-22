@@ -51,6 +51,7 @@ public class Texture implements TextureDescription {
     private final SubTextureWindow	stw;
     private 	  Color 		averageColor;
     private final String 		debugName;
+    private	  int			tocIndex;
     private	  int[]			subTextureIDs;
     private	  int[][]		codebookStartOffsetsAbsolute;
     private 	  ByteBuffer 		rgba;
@@ -58,12 +59,12 @@ public class Texture implements TextureDescription {
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
 						  // doesn't scale with
 						  // texture palette
-    private static TextureTreeNode rootNode = null;
+    /*private static TextureTreeNode rootNode = null;
     private static GLTexture globalTexture;
     public static final List<TextureDescription> texturesToBeAccounted = Collections
-	    .synchronizedList(new LinkedList<TextureDescription>());
+	    .synchronizedList(new LinkedList<TextureDescription>());*/
 
-    private static void waitUntilTextureProcessingEnds() {
+    /*private static void waitUntilTextureProcessingEnds() {
 	while (!texturesToBeAccounted.isEmpty()) {
 	    try {
 		texturesToBeAccounted.remove(0);
@@ -72,6 +73,24 @@ public class Texture implements TextureDescription {
 	    }
 	}//end while(texturesToBeAccounted)
     }// end waitUntilTextureProcessingEnds()
+    */
+    @Override
+    public void finalize() throws Throwable{
+	System.out.println("Texture.finalize() "+debugName);
+	//TOC ID
+	toc.free(tocIndex);
+	//Subtexture IDs
+	for(int stID:subTextureIDs){
+	    stw.free(stID);
+	}
+	//Codebook entries
+	for(int [] array:codebookStartOffsetsAbsolute){
+	    for(int entry:array){
+		tm.vqCodebookManager.get().freeCodebook256(entry/256);
+	    }//end for(entries)
+	}//end for(arrays)
+	super.finalize();
+    }//end finalize()
     
     Texture(Color c, TR tr){
 	this(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),tr,false);
@@ -128,7 +147,7 @@ public class Texture implements TextureDescription {
 	    }};
     }//end colorVL(...)
 
-    public static final ArrayList<GLRunnable> executeInGLFollowingFinalization = new ArrayList<GLRunnable>();
+    //public static final ArrayList<GLRunnable> executeInGLFollowingFinalization = new ArrayList<GLRunnable>();
     private static ByteBuffer emptyRow = null;
     
     private Texture(TR tr, String debugName, boolean uvWrapping){
@@ -165,8 +184,10 @@ public class Texture implements TextureDescription {
 	final int sideLength = (int) Math.sqrt(vl.getNumVectors());
 	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
 		debugName);
+	/*
 	nodeForThisTexture = newNode;
 	registerNode(newNode);
+	*/
     }
 
     Texture(ByteBuffer imageRGBA8888, String debugName, TR tr, boolean uvWrapping) {
@@ -180,13 +201,14 @@ public class Texture implements TextureDescription {
 	    vqCompress(imageRGBA8888);
 	return;
 	}// end if(newTexturing)
-	
+	/*
 	final int sideLength = (int) Math.sqrt((imageRGBA8888.capacity() / 4));
 	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
 		debugName);
 	nodeForThisTexture = newNode;
 	newNode.setImage(imageRGBA8888);
 	registerNode(newNode);
+	*/
     }// end constructor
     
     private void vqCompress(PalettedVectorList squareImageIndexed){
@@ -214,7 +236,7 @@ public class Texture implements TextureDescription {
 		blueA+=rbvl.componentAt((int)(Math.random()*size), 2);
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
 	    // Get a TOC
-	    final int tocIndex = toc.create();
+	    tocIndex = toc.create();
 	    
 	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
 			debugName);
@@ -365,7 +387,7 @@ public class Texture implements TextureDescription {
 	    newNode.setImage(rgba);
 	if(tr.getTrConfig().isUsingNewTexturing()){
 	    vqCompress(rgba);
-	}else{registerNode(newNode);}
+	}//else{registerNode(newNode);}
     }//end constructor
     
     public static ByteBuffer RGBA8FromPNG(File f) {
@@ -408,7 +430,7 @@ public class Texture implements TextureDescription {
     static double getPixelSize() {
 	return pixelSize;
     }
-
+/*
     public static GLTexture getGlobalTexture() {
 	return globalTexture;
     }
@@ -446,8 +468,9 @@ public class Texture implements TextureDescription {
 	    }// end else(small enough to fit)
 	}// end else{rootNode!=null}
     }// end registerNode(...)
-
+    */
     public Color getAverageColor() {
+	/*
 	if (averageColor == null) {// Compute a new one
 	    double sRed = 0, sGreen = 0, sBlue = 0;
 	    final int sLen = nodeForThisTexture.getSideLength();
@@ -463,16 +486,17 @@ public class Texture implements TextureDescription {
 	    sGreen /= sLen;
 	    sBlue /= sLen;
 	    averageColor = new Color((int) sRed, (int) sGreen, (int) sBlue);
-	}
+	}*/
 	return averageColor;
     }// end getAverageColor()
-
+    /*
     public static void finalize(GPU gpu) {
 	if(rootNode==null){
 	    System.out.println("WARNING: RootNode is null. If using new texturing system this is normal.\n" +
 	    		"Else, expect empty textures. Skipping texture finalization phase...");
 	    return;
 	}
+	
 	final int gSideLen = rootNode.getSideLength();
 	// Setup the empty rows
 	emptyRow = ByteBuffer.allocate(gSideLen * 4);
@@ -511,8 +535,9 @@ public class Texture implements TextureDescription {
 	final TR tr = gpu.getTr();
 	System.out.println("Legacy texturing mode: Committing models to atlas U/Vs...");
 	tr.getRootWindow().getCanvas().invoke(false, Texture.executeInGLFollowingFinalization);
+	
     }// end finalize()
-
+*/
     public static final int createTextureID(GL3 gl) {
 	IntBuffer ib = IntBuffer.allocate(1);
 	gl.glGenTextures(1, ib);

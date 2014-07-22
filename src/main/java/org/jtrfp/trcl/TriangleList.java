@@ -290,6 +290,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		    }//end Call()
 		});
 	}else{
+	    /*
 	    Texture.executeInGLFollowingFinalization.add(new GLRunnable() {
 		    @Override
 		    public boolean run(GLAutoDrawable d){
@@ -299,6 +300,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 			return true;
 		    }//end run()
 		});
+	    */
 	}//end legacy texturing enqueue later.
     }// end allocateIndices(...)
 

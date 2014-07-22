@@ -45,7 +45,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private final CharAreaDisplay briefingChars;
     private final Sprite2D	  blackRectangle;
     private volatile double  	  scrollPos = 0;
-    private double		  scrollIncrement=.02;
+    private double		  scrollIncrement=.01;
     private final int		  NUM_LINES=10;
     private final int		  WIDTH_CHARS=36;
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
@@ -101,7 +101,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    @Override
 	    public void run() {
 		scrollPos+=scrollIncrement;
-		briefingChars.setScollPosition(scrollPos);
+		briefingChars.setScrollPosition(scrollPos);
 		if(scrollPos>briefingChars.getNumActiveLines()+NUM_LINES){
 		    BriefingScreen.this.stopScroll();
 		    notifyScrollFinishCallbacks();
@@ -203,7 +203,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);
 	    wo.setRespondToTick(false);//freeze
-	    briefingChars.setScollPosition(NUM_LINES-2);
+	    briefingChars.setScrollPosition(NUM_LINES-2);
 	    setContent(intro.getDescriptionString());
 	    tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	    wo.setRespondToTick(true);//unfreeze

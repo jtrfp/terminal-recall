@@ -88,6 +88,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
      */
     @Override
     public void finalize() throws Throwable{
+	System.out.println("PagedByteBuffer.finalize()");
 	deallocate();
 	super.finalize();
     }//end finalize()

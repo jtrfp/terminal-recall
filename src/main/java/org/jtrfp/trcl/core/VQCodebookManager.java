@@ -26,6 +26,7 @@ public class VQCodebookManager {
     private final 	IndexPool 	codebook256Indices = new IndexPool();
     private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
     private final	ByteBuffer[]	codePageBuffers	   = new ByteBuffer[NUM_CODE_PAGES];
+    private final	long[]		pageBufTimeStamp   = new long[NUM_CODE_PAGES];
     private final	ConcurrentSkipListSet<Integer>	
     					staleCodePages	   = new ConcurrentSkipListSet<Integer>();
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
@@ -34,6 +35,7 @@ public class VQCodebookManager {
     public static final int 		NUM_CODE_PAGES			=2048;
     public static final int 		CODES_PER_PAGE 			=NUM_CODES_PER_AXIS*NUM_CODES_PER_AXIS;
     public static final int		MIP_DEPTH			=1;
+    public static final int		PAGE_BUFFER_TIMEOUT		=5000; //5s then remove the buffer.
 
     public VQCodebookManager(TR tr) {
 	final GPU gpu = tr.gpu.get();
@@ -97,6 +99,7 @@ public class VQCodebookManager {
 	    codePageBuffers[z] = ByteBuffer
 		    .allocateDirect(CODE_PAGE_SIDE_LENGTH_TEXELS
 			    * CODE_PAGE_SIDE_LENGTH_TEXELS * 4);
+	    pageBufTimeStamp[z]=System.currentTimeMillis();
 	}
 	final ByteBuffer codePageBuffer = codePageBuffers[z];
 	staleCodePages.add(z);
@@ -112,6 +115,8 @@ public class VQCodebookManager {
     }// end subImage(...)
     
     public void refreshStaleCodePages(){
+	final long currTime = System.currentTimeMillis();
+	final long timeout  = currTime - PAGE_BUFFER_TIMEOUT;
 	while(!staleCodePages.isEmpty()){
 	    final int codePageID = staleCodePages.pollFirst();
 	    final ByteBuffer codePageBuffer=codePageBuffers[codePageID];
@@ -121,8 +126,16 @@ public class VQCodebookManager {
 		    new int[]{0,0,codePageID},
 		    codePageDims,
 		    GL3.GL_RGBA, 0, codePageBuffer);
+	    pageBufTimeStamp[codePageID]=currTime;
 	    }//end sync(codePageBuffer)
 	}//end for(staleCodePages
+	//Check for not-recently-used codepage buffers and free them up to save memory.
+	for(int i=0; i<NUM_CODE_PAGES; i++){
+	    if(pageBufTimeStamp[i]<timeout){
+		System.out.println("VQCodebookManager releasing codePageBuffer at index "+i);
+		codePageBuffers[i]=null;
+	    }//end if(timeout)
+	}//end for(code pages)
     }//end refreshStaleCodePages()
 /*
     private void subImageAutoMip(final int codeID, final ByteBuffer texels,
@@ -174,7 +187,7 @@ public class VQCodebookManager {
 	return codebook256Indices.pop();
     }// end newCODE()
 
-    public void releaseCodebook256(int codebook256ToRelease) {
+    public void freeCodebook256(int codebook256ToRelease) {
 	codebook256Indices.free(codebook256ToRelease);
     }// end releaseCODE(...)
     

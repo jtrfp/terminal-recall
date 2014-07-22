@@ -211,7 +211,7 @@ public class Game {
 	System.out.println("Initializing general resources...");
 	System.out.println("Activating renderer...");
 	tr.renderer.get().activate();
-	greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.pfa"),tr);
+	greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
 	NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 	upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
@@ -294,8 +294,10 @@ public class Game {
 	    briefingMode = new Object[]{
 		 briefingScreen
 	    };
-	    for(MissionLevel lvl:vox.getLevels()){
+	    MissionLevel [] levels = vox.getLevels();
+	    while(getLevelIndex()<levels.length){
 		try {
+		    MissionLevel lvl = levels[getLevelIndex()];
 		    final String lvlFileName = lvl.getLvlFile();
 		    currentMission = new Mission(tr, this, tr.getResourceManager()
 			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
@@ -309,7 +311,9 @@ public class Game {
 		} catch (IOException e) {
 		    tr.showStopper(e);
 		}
-	    }//end for(vox.getLevels)
+		//Rube Goldberg style increment
+		setLevelIndex(getLevelIndex()+1);
+	    }//end while(getLevelIndex<length)
 	} catch (Exception e) {
 	    throw new RuntimeException(e);
 	}

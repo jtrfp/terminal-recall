@@ -94,7 +94,7 @@ public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
 	return result.toString();
     }//end wordWrap
 
-    public void setScollPosition(double newScrollPos){
+    public void setScrollPosition(double newScrollPos){
 	startString=newScrollPos;
 	updatePositions();
 	updateStrings();

@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.media.opengl.GL3;
@@ -29,6 +30,8 @@ public class VQCodebookManager {
     private final	long[]		pageBufTimeStamp   = new long[NUM_CODE_PAGES];
     private final	ConcurrentSkipListSet<Integer>	
     					staleCodePages	   = new ConcurrentSkipListSet<Integer>();
+    private TRFutureTask<Void>		codePageDiscardTask;
+    private final	GPU		gpu;
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
     public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
@@ -38,7 +41,7 @@ public class VQCodebookManager {
     public static final int		PAGE_BUFFER_TIMEOUT		=5000; //5s then remove the buffer.
 
     public VQCodebookManager(TR tr) {
-	final GPU gpu = tr.gpu.get();
+	gpu = tr.gpu.get();
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
@@ -116,7 +119,6 @@ public class VQCodebookManager {
     
     public void refreshStaleCodePages(){
 	final long currTime = System.currentTimeMillis();
-	final long timeout  = currTime - PAGE_BUFFER_TIMEOUT;
 	while(!staleCodePages.isEmpty()){
 	    final int codePageID = staleCodePages.pollFirst();
 	    final ByteBuffer codePageBuffer=codePageBuffers[codePageID];
@@ -129,13 +131,8 @@ public class VQCodebookManager {
 	    pageBufTimeStamp[codePageID]=currTime;
 	    }//end sync(codePageBuffer)
 	}//end for(staleCodePages
-	//Check for not-recently-used codepage buffers and free them up to save memory.
-	for(int i=0; i<NUM_CODE_PAGES; i++){
-	    if(pageBufTimeStamp[i]<timeout){
-		System.out.println("VQCodebookManager releasing codePageBuffer at index "+i);
-		codePageBuffers[i]=null;
-	    }//end if(timeout)
-	}//end for(code pages)
+	//TODO: Only cleanup when whole page no longer in use
+	//cleanupOldCodePageBuffers(currTime);//Cannot use yet.
     }//end refreshStaleCodePages()
 /*
     private void subImageAutoMip(final int codeID, final ByteBuffer texels,
@@ -155,6 +152,26 @@ public class VQCodebookManager {
 	}// end for(mipLevel)
     }// end subImageAutoMip(...)
 */
+    private void cleanupOldCodePageBuffers(long currTime){
+	final long timeout  = currTime - PAGE_BUFFER_TIMEOUT;
+	if(codePageDiscardTask!=null){
+	    if(!codePageDiscardTask.isDone()){
+		return;}}
+	codePageDiscardTask = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		//Check for not-recently-used codepage buffers and free them up to save memory.
+		for(int i=0; i<NUM_CODE_PAGES; i++){
+		    if(pageBufTimeStamp[i]<timeout && codePageBuffers[i]!=null){
+			System.out.println("VQCodebookManager releasing codePageBuffer at index "+i);
+			codePageBuffers[i]=null;
+		    }//end if(timeout)
+		}//end for(code pages)
+		return null;
+	    }//end call()
+	});//end new Callable()
+    }//end cleanupOldCodePageBuffers()
+    
     private void mipDown(ByteBuffer in, ByteBuffer out, int sideLen,
 	    int componentsPerTexel) {
 	int outX, outY, inX, inY, inIndex, outIndex;
@@ -188,6 +205,7 @@ public class VQCodebookManager {
     }// end newCODE()
 
     public void freeCodebook256(int codebook256ToRelease) {
+	System.out.println("VQCodebookManager.freeCodebook256() "+codebook256ToRelease);
 	codebook256Indices.free(codebook256ToRelease);
     }// end releaseCODE(...)
     

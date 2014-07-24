@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -30,7 +31,7 @@ public class ProjectileBehavior extends Behavior implements
     private final int damageOnImpact;
     private final DeathBehavior deathBehavior;
     private final Projectile parent;
-    private WorldObject honingTarget;
+    private WeakReference<WorldObject> honingTarget = new WeakReference<WorldObject>(null);
     private int honingAdjustmentUpdate = 0;
     private boolean honing = false;
     private double speed;
@@ -95,7 +96,7 @@ public class ProjectileBehavior extends Behavior implements
 		    }// end if(isIgnoringProjectiles)
 		}// end if(DEFObject)
 	    }// end for(WorldObject others)
-	    honingTarget = closestObject;
+	    honingTarget = new WeakReference<WorldObject>(closestObject);
 	   // if(honingTarget==null){
 		getParent().getBehavior().probeForBehavior(AutoLeveling.class)
 		.setLevelingVector(heading);
@@ -111,10 +112,10 @@ public class ProjectileBehavior extends Behavior implements
     public void _tick(long tickTimeMillis) {
 	if (honingTarget != null) {
 	    if (honingAdjustmentUpdate++ % 5 == 0) {
-		if (!honingTarget.isVisible())
+		if (!honingTarget.get().isVisible())
 		    return;// Dead or otherwise.
 		final Vector3D honingVector = new Vector3D(
-			honingTarget.getPosition()).subtract(new Vector3D(
+			honingTarget.get().getPosition()).subtract(new Vector3D(
 			getParent().getPosition())).normalize();
 		//Sanity check
 		if(Double.isNaN(honingVector.getX()))return;
@@ -126,7 +127,7 @@ public class ProjectileBehavior extends Behavior implements
 			.scalarMultiply(speed));
 	    }// end if(updateHoningVector)
 	}// end if(honingTarget)
-    }
+    }//end _tick()
 
     @Override
     public void collidedWithSurface(WorldObject wo, double[] surfaceNormal) {

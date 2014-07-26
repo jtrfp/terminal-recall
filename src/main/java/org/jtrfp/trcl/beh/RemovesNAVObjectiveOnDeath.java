@@ -12,21 +12,23 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.lang.ref.WeakReference;
+
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 
 public class RemovesNAVObjectiveOnDeath extends Behavior implements
 	DeathListener {
-    private final NAVObjective objective;
-    private final Mission m;
+    private final WeakReference<NAVObjective> objective;
+    private final WeakReference<Mission> m;
     public RemovesNAVObjectiveOnDeath(NAVObjective objective, Mission m) {
-	this.objective=objective;
-	this.m=m;
+	this.objective=new WeakReference<NAVObjective>(objective);
+	this.m=new WeakReference<Mission>(m);
     }
 
     @Override
     public void notifyDeath() {
-	m.removeNAVObjective(objective);
+	m.get().removeNAVObjective(objective.get());
     }
 
 }//ebd RemovesNAVObjectiveOnDeath

@@ -167,7 +167,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 				 = rm.getMissionText(lvl.getBriefingTextFile());
 	planetDisplayMode(lvl);
 	setContent(
-		missionTXT.getMissionText().replace("\r",""));
+		missionTXT.getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
 	game.getCurrentMission().getOverworldSystem().activate();
 	tr.getWorld().setFogColor(Color.black);
 	startScroll();

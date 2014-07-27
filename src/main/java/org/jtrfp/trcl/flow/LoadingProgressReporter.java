@@ -13,22 +13,24 @@
 
 package org.jtrfp.trcl.flow;
 
+import java.lang.ref.WeakReference;
+
 public interface LoadingProgressReporter {
     public LoadingProgressReporter [] 	generateSubReporters(int numSubReporters);
     public void 			complete();
     
     public static class Impl implements StemReporter{
-	private final		StemReporter parent;
+	private final		WeakReference<StemReporter> parent;
 	private int 		totalSubReporters=1;
 	private int 		reportCount	 =0;
 	private boolean 	complete	 =false;
-	private UpdateHandler 	updateHandler;
+	private UpdateHandler	updateHandler;
 	
 	public static StemReporter createRoot(UpdateHandler updateHandler){
 	    return new Impl(null).setUpdateHandler(updateHandler);
 	}
 	
-	Impl(StemReporter parent){
+	Impl(WeakReference<StemReporter> parent){
 	    this.parent=parent;
 	}//end Impl()
 	
@@ -37,10 +39,13 @@ public interface LoadingProgressReporter {
 		final int numSubReporters) {
 	    final LoadingProgressReporter [] result = new LoadingProgressReporter[numSubReporters];
 	    for(int i=0; i<numSubReporters; i++){
-		result[i]=new Impl(this);
+		result[i]=new Impl(new WeakReference<StemReporter>(this));
 	    }//end for(reporters)
 	    totalSubReporters+=numSubReporters;
-	    if(parent!=null)parent.addSubReporters(numSubReporters);
+	    if(parent!=null){
+		final StemReporter r = parent.get();
+		if(r!=null)r.addSubReporters(numSubReporters);
+	    }
 	    return result;
 	}//end constructor
 
@@ -58,8 +63,12 @@ public interface LoadingProgressReporter {
 	public void increment() {
 	    if(reportCount<totalSubReporters){
 		reportCount++;
-	    	if(parent!=null)	parent.increment();
-	    	if(updateHandler!=null)	updateHandler.update((double)reportCount/(double)totalSubReporters);
+	    	if(parent!=null){
+	    	    final StemReporter r = parent.get();
+	    	    if(r!=null)	r.increment();
+	    	}//end if(!null)
+	    	if(updateHandler!=null)
+	    	    updateHandler.update((double)reportCount/(double)totalSubReporters);
 	    }//end if(in range)
 	}//end increment()
 
@@ -70,6 +79,7 @@ public interface LoadingProgressReporter {
 
 	@Override
 	public StemReporter setUpdateHandler(UpdateHandler updateHandler) {
+	    if(updateHandler==null)return this;
 	    this.updateHandler=updateHandler;
 	    updateHandler.update(0);
 	    return this;

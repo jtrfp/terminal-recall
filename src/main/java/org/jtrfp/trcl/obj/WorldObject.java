@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -57,7 +58,7 @@ public class WorldObject implements PositionedRenderable {
     private ByteBuffer 	transparentObjectDefinitionAddressesInVec4 = ByteBuffer
 	    .allocate(0);// defaults to empty
 
-    private SpacePartitioningGrid 	containingGrid;
+    private WeakReference<SpacePartitioningGrid> containingGrid;
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
     private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
@@ -503,17 +504,21 @@ public class WorldObject implements PositionedRenderable {
 	pos[2] = Double.NEGATIVE_INFINITY;
 	notifyPositionChange();
 	setActive(false);
-	if (containingGrid != null)
-	    containingGrid.remove(this);
+	if (containingGrid != null){
+	    SpacePartitioningGrid g = getContainingGrid();
+	    if(g!=null)
+		containingGrid.get().remove(this);
+	}//end if(gird!=null)
     }
 
     @Override
     public void setContainingGrid(SpacePartitioningGrid grid) {
-	containingGrid = grid;
+	containingGrid = new WeakReference<SpacePartitioningGrid>(grid);
     }
 
     public SpacePartitioningGrid getContainingGrid() {
-	return containingGrid;
+	try{return containingGrid.get();}
+	catch(NullPointerException e){return null;}
     }
 
     public Model getModel() {

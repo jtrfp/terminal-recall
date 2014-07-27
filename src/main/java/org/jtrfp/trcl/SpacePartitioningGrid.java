@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +28,8 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	private Object [] 			gridSquares;
 	private int 				squaresX, squaresY, squaresZ;
 	private final GridCube 			alwaysVisible = new GridCube(null);
-	private SpacePartitioningGrid<E> 	parentGrid = null;
+	private WeakReference<SpacePartitioningGrid<E>> 	
+						parentGrid = null;
 	private List<SpacePartitioningGrid<E>> 	branchGrids = Collections
 		.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());
 	
@@ -40,18 +42,29 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
 		{setParentGrid(parentGrid);}
 	
-	public void activate()
-		{if(parentGrid!=null)parentGrid.addBranch(this);}
-	public void deactivate()
-		{if(parentGrid!=null)parentGrid.removeBranch(this);}
-	
+    public void activate() {
+	if (parentGrid != null) {
+	    final SpacePartitioningGrid g = parentGrid.get();
+	    if (g != null)
+		g.addBranch(this);
+	}
+    }//end activate()
+
+    public void deactivate() {
+	if (parentGrid != null) {
+	    final SpacePartitioningGrid g = parentGrid.get();
+	    if (g != null)
+		g.removeBranch(this);
+	}
+    }//end deactivate()
+
 	private void addBranch(SpacePartitioningGrid<E> branchToAdd)
 		{if(!branchGrids.contains(branchToAdd))branchGrids.add(branchToAdd);}
 	private void removeBranch(SpacePartitioningGrid<E> branchToRemove)
 		{branchGrids.remove(branchToRemove);}
 	
 	private void setParentGrid(SpacePartitioningGrid<E> parentGrid){
-		this.parentGrid=parentGrid;
+		this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);
 		setSquareSize(parentGrid.getSquareSize());
 		setSquaresX(parentGrid.getSquaresX());
 		setSquaresY(parentGrid.getSquaresY());

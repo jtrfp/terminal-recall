@@ -190,7 +190,7 @@ public class Mission {
 	    tr.getGame().getNavSystem().updateNAVState();
     }// end removeNAVObjective(...)
 
-    public class Result {
+    public static class Result {
 	private final int airTargetsDestroyed, groundTargetsDestroyed,foliageDestroyed;
 	private final double tunnelsFoundPctNorm;
 

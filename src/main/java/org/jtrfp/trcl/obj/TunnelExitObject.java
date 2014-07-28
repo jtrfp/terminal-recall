@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -69,9 +70,10 @@ public class TunnelExitObject extends WorldObject {
 	    if (other instanceof Player) {
 		if (other.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
-		    tr.getOverworldSystem().setChamberMode(mirrorTerrain);
+		    final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
+		    overworldSystem.setChamberMode(mirrorTerrain);
 		    tr.getWorld().setFogColor(
-			    (tr.getOverworldSystem().getFogColor()));
+			    (overworldSystem.getFogColor()));
 		    tr.getBackdropSystem().overworldMode();
 		    // Teleport
 		    other.setPosition(exitLocation.toArray());
@@ -81,8 +83,8 @@ public class TunnelExitObject extends WorldObject {
 		    // Tunnel off
 		    tun.deactivate();
 		    // World on
-		    tr.getOverworldSystem().activate();
-		    tr.getOverworldSystem().setTunnelMode(false);
+		    overworldSystem.activate();
+		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
 		    tr.getPlayer().getBehavior()
 			    .probeForBehavior(DamageableBehavior.class)

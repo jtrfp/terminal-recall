@@ -59,7 +59,7 @@ public class CollidesWithTerrain extends Behavior {
 	    downhillDirectionXZ = downhillDirectionXZ.normalize();
 	else
 	    downhillDirectionXZ = Vector3D.PLUS_J;
-	final OverworldSystem overworldSystem = tr.getOverworldSystem();
+	final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
 	final boolean terrainMirror = overworldSystem.isChamberMode();
 	final double thisY = thisPos[1];
 	boolean groundImpact = thisY < (groundHeight + (autoNudge ? nudgePadding

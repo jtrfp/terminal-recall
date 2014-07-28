@@ -17,6 +17,7 @@ import java.awt.Dimension;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
+import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
@@ -75,19 +76,20 @@ public class TunnelEntranceObject extends BillboardSprite {
 			    (thisPos[2]/TR.mapSquareSize));
 		final double groundHeight = groundHeightNorm*(world.sizeY/2);
 		//Ignore ground height with chambers because entrances don't behave themselves with this.
-		if(!tr.getOverworldSystem().isChamberMode()&&playerPos[1]>groundHeight+GROUND_HEIGHT_PAD*4)return;
+		final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
+		if(!overworldSystem.isChamberMode()&&playerPos[1]>groundHeight+GROUND_HEIGHT_PAD*4)return;
 	        if(Vect3D.distanceXZ(entranceObject.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE*2){
 	         tr.getGame().getCurrentMission().notifyTunnelFound(tunnel);
 	         //Turn off overworld
-		 tr.getOverworldSystem().deactivate();
+		 overworldSystem.deactivate();
 		 //Turn on tunnel
 		 tunnel.activate();
 		 //Move player to tunnel
 		 tr.getWorld().setFogColor(new Color(10,30,15));
 		 tr.getBackdropSystem().tunnelMode();
 		 //Ensure chamber mode is off
-		 tr.getOverworldSystem().setChamberMode(false);
-		 tr.getOverworldSystem().setTunnelMode(true);
+		 overworldSystem.setChamberMode(false);
+		 overworldSystem.setTunnelMode(true);
 		 //Update debug data
 		 tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "true");
 		 

@@ -66,7 +66,6 @@ public final class TR{
 	public final TRFutureTask<Renderer> 	renderer;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter		= new Reporter();
-	private OverworldSystem 		overworldSystem;
 	private InterpolatingAltitudeMap 	altitudeMap;
 	private BackdropSystem 			backdropSystem;
 	private Game 				game;
@@ -291,17 +290,6 @@ public final class TR{
      */
     public Reporter getReporter() {
 	return reporter;
-    }
-
-    public void setOverworldSystem(OverworldSystem overworldSystem) {
-	this.overworldSystem = overworldSystem;
-    }
-
-    /**
-     * @return the overworldSystem
-     */
-    public OverworldSystem getOverworldSystem() {
-	return overworldSystem;
     }
 
     /**

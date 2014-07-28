@@ -110,7 +110,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	tr.getOverworldSystem().add(
+	tr.getGame().getCurrentMission().getOverworldSystem().add(
 		entranceObject = new TunnelEntranceObject(tr, this));
     }// end constructor
 

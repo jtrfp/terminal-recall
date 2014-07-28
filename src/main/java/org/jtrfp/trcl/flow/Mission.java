@@ -86,13 +86,13 @@ public class Mission {
 	    final Player player      = tr.getPlayer();
 	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	    final OverworldSystem oldOverworldSystem = tr.getOverworldSystem();
+	    final OverworldSystem oldOverworldSystem = getOverworldSystem();
 	    if(oldOverworldSystem!=null){
 		oldOverworldSystem.deactivate();
 	    }
-	    tr.setOverworldSystem(overworldSystem = new OverworldSystem(world,
-		    progressStages[LoadingStages.overworld.ordinal()]));
-	    tr.getOverworldSystem().loadLevel(lvl, tdf);
+	    overworldSystem = new OverworldSystem(world,
+		    progressStages[LoadingStages.overworld.ordinal()]);
+	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
 	    final NAVSystem navSystem = tr.getGame().getNavSystem();

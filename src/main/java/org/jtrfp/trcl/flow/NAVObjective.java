@@ -60,7 +60,7 @@ public abstract class NAVObjective {
 	}//end constructor
 	
 	public void create(final TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
-		final OverworldSystem overworld=tr.getOverworldSystem();
+		final OverworldSystem overworld=tr.getGame().getCurrentMission().getOverworldSystem();
 		final List<DEFObject> defs = overworld.getDefList();
 		if(navSubObject instanceof TGT){///////////////////////////////////////////
 		    TGT tgt = (TGT)navSubObject;

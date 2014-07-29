@@ -289,7 +289,8 @@ public class Game {
 	    };
 	    gameplayMode = new Object[]{
 		 navSystem,
-		 hudSystem
+		 hudSystem,
+		 upfrontDisplay
 	    };
 	    briefingMode = new Object[]{
 		 briefingScreen

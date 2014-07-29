@@ -86,9 +86,8 @@ public class Mission {
 	    final Player player      = tr.getPlayer();
 	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	    final OverworldSystem oldOverworldSystem = getOverworldSystem();
-	    if(oldOverworldSystem!=null){
-		oldOverworldSystem.deactivate();
+	    if(overworldSystem!=null){
+		overworldSystem.deactivate();
 	    }
 	    overworldSystem = new OverworldSystem(world,
 		    progressStages[LoadingStages.overworld.ordinal()]);
@@ -165,6 +164,7 @@ public class Mission {
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
 	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);
+	game.getUpfrontDisplay().removePersistentMessage();
 	game.getPlayer()	.setActive(true);
 	//Wait for mission end
 	synchronized(missionEnd){

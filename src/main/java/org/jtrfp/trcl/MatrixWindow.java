@@ -23,26 +23,6 @@ public final class MatrixWindow extends MemoryWindow {
     public MatrixWindow(TR tr) {
 	init(tr,"MatrixWindow");
     }
-/*
-    static {
-	GlobalDynamicTextureBuffer.addAllocationToFinalize(MatrixWindow.class);
-    }*/
-
-    public static void finalizeAllocation(TR tr) {
-	/*
-	final MatrixWindow mw = tr.getMatrixWindow();
-	int bytesToAllocate = mw.getNumObjects() * mw.getObjectSizeInBytes();
-	System.out.println("Matrices: Allocating " + bytesToAllocate
-		+ " bytes of GPU resident RAM.");
-	mw.setBuffer(new SubByteBuffer(GlobalDynamicTextureBuffer
-		.getLogicalMemory(), GlobalDynamicTextureBuffer
-		.requestAllocation(bytesToAllocate)));
-	tr.getReporter().report(
-		"org.jtrfp.trcl.MatrixWindow.arrayOffsetBytes",
-		String.format("%08X", mw.getBuffer()
-			.logical2PhysicalAddressBytes(0)));
-	*/
-    }
     
     private final double [] newVals = new double[16];
     public final void setTransposed(double[] vals, int id) {

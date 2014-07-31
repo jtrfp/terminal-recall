@@ -135,7 +135,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		 8,true,getPalette(),gl);
 	 	     planetObject = new WorldObject(tr,planetModel);
 	 planetObject.setPosition(0, TR.mapSquareSize*20, 0);
-	 tr.getWorld().add(planetObject);
+	 add(planetObject);
 	 planetObject.setVisible(true);
 	 camera.probeForBehavior(FacingObject.class)	  .setTarget(planetObject);
 	 camera.probeForBehavior(RotateAroundObject.class).setTarget(planetObject);
@@ -157,6 +157,12 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	game.getCurrentMission().getOverworldSystem().activate();
 	tr.getWorld().setFogColor(Color.black);
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
+	final Camera camera 	 = tr.renderer.get().getCamera();
+	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
+	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
+	camera.probeForBehavior(FacingObject.class)  	 .setEnable(false);
+	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);
+	game.getCurrentMission().getOverworldSystem().deactivate();
     }//end missionCompleteSummary()
 
     public void briefingSequence(LVLFile lvl) {

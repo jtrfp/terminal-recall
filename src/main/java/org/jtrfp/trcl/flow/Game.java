@@ -27,6 +27,7 @@ import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -42,6 +43,7 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionFactory;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeFactory;
 
@@ -72,6 +74,8 @@ public class Game {
     			briefingMode,
     			gameplayMode,
     			performanceReportMode;
+    private BackdropSystem
+    			backdropSystem;
     
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
@@ -234,9 +238,8 @@ public class Game {
 	    final Color[] pal = tr.getGlobalPalette();
 	    pal[0] = new Color(0, 0, 0, 0);
 	    tr.setGlobalPalette(pal);
-	    final BackdropSystem backdrop = new BackdropSystem(tr.getWorld());
-	    backdrop.loadingMode();
-	    tr.setBackdropSystem(backdrop);
+	    backdropSystem = new BackdropSystem(tr.getWorld());
+	    backdropSystem.loadingMode();
 	    // POWERUPS
 	    earlyLoadingScreen.setStatusText("Loading powerup assets...");
 	    rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
@@ -354,5 +357,9 @@ public class Game {
     
     public BriefingScreen getBriefingScreen(){
 	return briefingScreen;
+    }
+
+    public BackdropSystem getBackdropSystem() {
+	return backdropSystem;
     }
 }// end Game

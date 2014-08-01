@@ -66,7 +66,6 @@ public final class TR{
 	public final TRFutureTask<Renderer> 	renderer;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter		= new Reporter();
-	private BackdropSystem 			backdropSystem;
 	private Game 				game;
 	
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
@@ -289,21 +288,6 @@ public final class TR{
      */
     public Reporter getReporter() {
 	return reporter;
-    }
-
-    /**
-     * @return the backdropSystem
-     */
-    public BackdropSystem getBackdropSystem() {
-	return backdropSystem;
-    }
-
-    /**
-     * @param backdropSystem
-     *            the backdropSystem to set
-     */
-    public void setBackdropSystem(BackdropSystem backdropSystem) {
-	this.backdropSystem = backdropSystem;
     }
 
     public Game getGame() {

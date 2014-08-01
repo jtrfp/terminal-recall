@@ -155,8 +155,8 @@ public class Mission {
 	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
-	tr.getBackdropSystem()	.overworldMode();
-	tr.getBackdropSystem()	.activate();
+	game.getBackdropSystem().overworldMode();
+	game.getBackdropSystem().activate();
 	game.getBriefingScreen().briefingSequence(lvl);
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
 	game.getNavSystem()	.activate();

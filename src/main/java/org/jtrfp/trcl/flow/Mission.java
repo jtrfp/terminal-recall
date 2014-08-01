@@ -86,9 +86,6 @@ public class Mission {
 	    final Player player      = tr.getPlayer();
 	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
-	    if(overworldSystem!=null){
-		overworldSystem.deactivate();
-	    }
 	    overworldSystem = new OverworldSystem(world,
 		    progressStages[LoadingStages.overworld.ordinal()]);
 	    getOverworldSystem().loadLevel(lvl, tdf);

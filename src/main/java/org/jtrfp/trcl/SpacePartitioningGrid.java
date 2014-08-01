@@ -260,7 +260,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	
 	public class GridCube implements PositionListener{
 		double [] topLeftPosition;
-		private List<E> elements = Collections.synchronizedList(new ArrayList<E>());
+		private List<E> elements = null;
 		
 		public GridCube(double [] topLeftPosition){
 			setTopLeftPosition(topLeftPosition);
@@ -335,6 +335,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		 * @return the elements
 		 */
 		public List<E> getElements(){
+		    	if(elements==null)elements =  Collections.synchronizedList(new ArrayList<E>(3));
 			return elements;
 			}
 

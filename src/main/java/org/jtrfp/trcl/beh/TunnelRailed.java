@@ -31,6 +31,8 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 
     @Override
     public void proposeCollision(WorldObject other) {
+	if(tr.getGame().getCurrentMission()==null)return;
+	if(tr.getGame().getCurrentMission().getOverworldSystem()==null)return;
 	if (!tr.getGame().getCurrentMission().getOverworldSystem().isTunnelMode())
 	    return;
 	final WorldObject parent = getParent();

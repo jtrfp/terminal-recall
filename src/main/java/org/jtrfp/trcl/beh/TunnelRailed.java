@@ -20,7 +20,6 @@ import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class TunnelRailed extends Behavior implements CollisionBehavior {
-    private TunnelSegment seg;
     private final double[] circleCenter = new double[3];
     private final double[] pprtt = new double[3];
     private TR tr;
@@ -37,7 +36,7 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 	    return;
 	final WorldObject parent = getParent();
 	if (other instanceof TunnelSegment) {
-	    seg = (TunnelSegment) other;
+	    final TunnelSegment seg = (TunnelSegment) other;
 	    final double[] pPos = parent.getPosition();
 	    final double[] segPos = seg.getPosition();
 	    if (pPos[0] > segPos[0]

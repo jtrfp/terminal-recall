@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -23,10 +24,10 @@ import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavior{
+public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavior{//TODO: Cleanup
     private final boolean changeHeadingAndTop, alwaysTopUp;
     
-    private TunnelSegment seg;
+    private WeakReference<TunnelSegment> segmt;
     private double [] surfaceNormalVar;
     private final double [] pprtt = new double[]{0,0,0}, circleCenter = new double []{0,0,0};
     
@@ -36,8 +37,9 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
 	public void proposeCollision(WorldObject other){
 		final WorldObject parent = getParent();
 		final Velocible velocible = getParent().getBehavior().probeForBehavior(Velocible.class);
-		if(other instanceof TunnelSegment)
-			{seg=(TunnelSegment)other;
+		if(other instanceof TunnelSegment){
+		    	final TunnelSegment seg = (TunnelSegment)other;
+		    	segmt = new WeakReference<TunnelSegment>((TunnelSegment)other);
 			final double [] pPos = parent.getPosition();
 			final double [] segPos = seg.getPosition();
 			if(pPos[0]>segPos[0]&&
@@ -94,7 +96,9 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
 	private final Submitter<SurfaceImpactListener>sub = new Submitter<SurfaceImpactListener>(){
 	    @Override
 	    public void submit(SurfaceImpactListener item) {
-		item.collidedWithSurface(seg, surfaceNormalVar);
+		final TunnelSegment seg = segmt.get();
+		if(seg==null)return;
+		item.collidedWithSurface(segmt.get(), surfaceNormalVar);
 	    	}
 	    @Override
 	    public void submit(Collection<SurfaceImpactListener> items) {

@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.lang.ref.WeakReference;
+
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TR;
@@ -20,7 +22,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithDEFObjects extends Behavior implements CollisionBehavior {
     private final double boundingRadius;
-    private DEFObject otherDEF;
+    private WeakReference<DEFObject> otherDEF;
     public CollidesWithDEFObjects(double boundingRadius){
 	this.boundingRadius=boundingRadius;
     }
@@ -28,8 +30,8 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
     public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
 	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
-	    otherDEF=(DEFObject)other;
-	    if(distance<(boundingRadius+otherDEF.getBoundingRadius())){
+	    otherDEF=new WeakReference<DEFObject>((DEFObject)other);
+	    if(distance<(boundingRadius+otherDEF.get().getBoundingRadius())){
 		getParent().getBehavior().probeForBehaviors(sub, DEFObjectCollisionListener.class);
 	    }
 	}
@@ -38,7 +40,8 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
     private final Submitter<DEFObjectCollisionListener> sub = new AbstractSubmitter<DEFObjectCollisionListener>(){
 	@Override
 	public void submit(DEFObjectCollisionListener l){
-	    l.collidedWithDEFObject(otherDEF);
+	    DEFObject other = otherDEF.get();
+	    if(other!=null)l.collidedWithDEFObject(other);
 	}//end submit(...)
     };//end Submitter
 }

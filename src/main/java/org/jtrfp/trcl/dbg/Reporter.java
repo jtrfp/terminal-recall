@@ -37,6 +37,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 public class Reporter extends JFrame {
+    
+    /**
+     * <i>"Statistics are just a bunch of numbers looking for a fight."</i> - Kyle Richards
+     */
 
     private JPanel contentPane;
     private final JTree tree;

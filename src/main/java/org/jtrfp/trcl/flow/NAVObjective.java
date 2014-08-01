@@ -98,7 +98,11 @@ public abstract class NAVObjective {
 		    entPos[0]=TR.legacy2Modern(loc3d.getZ());
 		    entPos[1]=TR.legacy2Modern(loc3d.getY());
 		    entPos[2]=TR.legacy2Modern(loc3d.getX());
-		    entPos[1]=tr.getAltitudeMap().heightAt(
+		    entPos[1]=tr.getGame().
+			    getCurrentMission().
+			    getOverworldSystem().
+			    getAltitudeMap().
+			    heightAt(
 				TR.legacy2MapSquare(loc3d.getZ()), 
 				TR.legacy2MapSquare(loc3d.getX()))*(tr.getWorld().sizeY/2)+TunnelEntranceObject.GROUND_HEIGHT_PAD;
 		    tunnelEntrance.notifyPositionChange();

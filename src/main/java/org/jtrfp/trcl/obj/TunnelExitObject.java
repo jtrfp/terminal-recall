@@ -42,7 +42,12 @@ public class TunnelExitObject extends WorldObject {
 		TR.legacy2Modern(v.getY() + EXIT_Y_NUDGE), TR.legacy2Modern(v
 			.getX()));
 	this.tun = tun;
-	exitHeading = tr.getAltitudeMap().normalAt(
+	exitHeading = tr.
+		getGame().
+		getCurrentMission().
+		getOverworldSystem().
+		getAltitudeMap().
+		normalAt(
 		exitLocation.getZ() / TR.mapSquareSize,
 		exitLocation.getX() / TR.mapSquareSize);
 	Vector3D horiz = exitHeading.crossProduct(Vector3D.MINUS_J);

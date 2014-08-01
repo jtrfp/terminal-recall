@@ -21,7 +21,12 @@ public class TerrainLocked extends Behavior {
     public void _tick(long tickTimeMillis){
 	final WorldObject p = getParent();
 	final double[] thisPos=p.getPosition();
-	final double height = p.getTr().getAltitudeMap().heightAt((thisPos[0]/TR.mapSquareSize), 
+	final double height = p.getTr().
+		getGame().
+		getCurrentMission().
+		getOverworldSystem().
+		getAltitudeMap().
+		heightAt((thisPos[0]/TR.mapSquareSize), 
 		    (thisPos[2]/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	final double [] pPos = p.getPosition();
 	pPos[0]=thisPos[0];

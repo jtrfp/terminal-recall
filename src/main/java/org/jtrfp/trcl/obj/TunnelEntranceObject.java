@@ -69,7 +69,11 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 WorldObject entranceObject = getParent();
 		final TR tr = entranceObject.getTr();
 		final World world = tr.getWorld();
-		final InterpolatingAltitudeMap map = tr.getAltitudeMap();
+		final InterpolatingAltitudeMap map = 
+			tr.getGame().
+			getCurrentMission().
+			getOverworldSystem().
+			getAltitudeMap();
 		double [] playerPos = other.getPosition();
 		double [] thisPos = entranceObject.getPosition();
 		final double groundHeightNorm =map.heightAt((thisPos[0]/TR.mapSquareSize), 

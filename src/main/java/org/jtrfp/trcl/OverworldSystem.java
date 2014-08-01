@@ -62,7 +62,6 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("Loading height map...");
 	    altitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
 		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile()));
-	    tr.setAltitudeMap(altitudeMap);
 	    System.out.println("... Done");
 	    textureMesh = tr.getResourceManager().getTerrainTextureMesh(
 		    lvl.getTexturePlacementFile(), texturePalette);
@@ -167,5 +166,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
      */
     public ObjectSystem getObjectSystem() {
         return objectSystem;
+    }
+    public InterpolatingAltitudeMap getAltitudeMap() {
+	return altitudeMap;
     }
 }// end OverworldSystem

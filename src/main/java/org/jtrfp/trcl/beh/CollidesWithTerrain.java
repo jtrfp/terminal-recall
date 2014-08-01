@@ -39,7 +39,13 @@ public class CollidesWithTerrain extends Behavior {
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
-	final InterpolatingAltitudeMap aMap = tr.getAltitudeMap();
+	final InterpolatingAltitudeMap aMap;
+	try{
+	aMap =  tr.getGame().
+		getCurrentMission().
+		getOverworldSystem().
+		getAltitudeMap();
+	}catch(NullPointerException e){return;}
 	if(aMap==null)return;
 	final double[] thisPos = p.getPosition();
 	final double groundHeightNorm = aMap.heightAt(

@@ -66,7 +66,6 @@ public final class TR{
 	public final TRFutureTask<Renderer> 	renderer;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter		= new Reporter();
-	private InterpolatingAltitudeMap 	altitudeMap;
 	private BackdropSystem 			backdropSystem;
 	private Game 				game;
 	
@@ -290,21 +289,6 @@ public final class TR{
      */
     public Reporter getReporter() {
 	return reporter;
-    }
-
-    /**
-     * @return the altitudeMap
-     */
-    public InterpolatingAltitudeMap getAltitudeMap() {
-	return altitudeMap;
-    }
-
-    /**
-     * @param altitudeMap
-     *            the altitudeMap to set
-     */
-    public void setAltitudeMap(InterpolatingAltitudeMap altitudeMap) {
-	this.altitudeMap = altitudeMap;
     }
 
     /**

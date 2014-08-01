@@ -30,7 +30,7 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	final WorldObject p=getParent();
 	final double [] thisPos=p.getPosition();
 	double height;
-	final InterpolatingAltitudeMap map=p.getTr().getAltitudeMap();
+	final InterpolatingAltitudeMap map=p.getTr().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap();
 	if(map!=null)height= map.heightAt((thisPos[0]/TR.mapSquareSize), 
 		    (thisPos[2]/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	else{height=Double.NEGATIVE_INFINITY;}

@@ -16,10 +16,11 @@ import java.awt.Color;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
-import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
 public class BackdropSystem extends RenderableSpacePartitioningGrid{
     private WorldObject overworldBackdrop,tunnelBackdrop;
@@ -30,20 +31,13 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		//Backdrop
 		Model backdropModel=new Model(false,tr);
 		backdropModel.setDebugName("Backdrop model: Flat quad.");
-		backdropModel.addTriangles(
-				Triangle.quad2Triangles(
-						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, tm.solidColor(world.getFogColor()), RenderMode.DYNAMIC,Vector3D.ZERO,"backdropSystem"));
-		overworldBackdrop = new Backdrop(tr,backdropModel.finalizeModel());
+		TextureDescription td;
+		td = tm.getFallbackTexture();
+		overworldBackdrop = new Backdrop(tr,td);
 		overworldBackdrop.setRenderFlags((byte)1);
 		add(overworldBackdrop);
-		
-		backdropModel=new Model(false,tr);
-		backdropModel.addTriangles(
-				Triangle.quad2Triangles(
-						new double[]{-1,1,1,-1}, new double[]{-1,-1,1,1}, new double[]{.9999999,.9999999,.9999999,.9999999}, 
-						new double[]{0,1,1,0}, new double[]{0,0,1,1}, tm.solidColor(Color.black), RenderMode.DYNAMIC,Vector3D.ZERO,"BackdropSystem"));
-		tunnelBackdrop = new Backdrop(tr,backdropModel.finalizeModel());
+		td = tm.solidColor(Color.black);
+		tunnelBackdrop = new Backdrop(tr,td);
 		tunnelBackdrop.setRenderFlags((byte)1);
 		tunnelBackdrop.setVisible(false);
 		add(tunnelBackdrop);
@@ -51,17 +45,12 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 	
 	public void overworldMode(){overworldBackdrop.setVisible(true);tunnelBackdrop.setVisible(false);}
 	public void tunnelMode(){overworldBackdrop.setVisible(false);tunnelBackdrop.setVisible(true);}
-	public void loadingMode(){overworldBackdrop.setVisible(false);tunnelBackdrop.setVisible(false);}
+	public void loadingMode(){overworldBackdrop.setVisible(false);tunnelBackdrop.setVisible(true);}
 	
-	public static class Backdrop extends WorldObject2DVisibleEverywhere{
+	public static class Backdrop extends Sprite2D{
 
-	    public Backdrop(TR tr) {
-		super(tr);
+	    public Backdrop(TR tr, TextureDescription tex) {
+		super(tr,.9999999,2,2,tex,false);
 	    }
-
-	    public Backdrop(TR tr, Model model) {
-		super(tr,model);
-	    }
-	    
 	}//end Backdrop
 }//end BackdropSystem

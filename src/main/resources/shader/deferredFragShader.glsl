@@ -40,6 +40,7 @@ const uint TOC_OFFSET_VEC4_HEADER				=91u;//1456/16
 const uint TOC_HEADER_OFFSET_QUADS_WIDTH		=0u;
 const uint TOC_HEADER_OFFSET_QUADS_HEIGHT		=1u;
 const uint TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS	=2u;
+const uint TOC_HEADER_OFFSET_QUADS_MAGIC		=3u;
 
 const uint RENDER_FLAGS_WRAP					=0x1u;
 
@@ -97,7 +98,9 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  
  vec4 intrinsicCodeTexel(float linearDepth,uint textureID,vec3 norm,vec2 uv){
  // TOC
+ if(textureID==0u)return vec4(0,1,0,1);
  uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
+ if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
  vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));

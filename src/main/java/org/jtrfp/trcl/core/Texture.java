@@ -266,6 +266,8 @@ public class Texture implements TextureDescription {
 		tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public Void call() {
+			//Set magic
+			toc.magic.set(tocIndex, 1337);
 			for(int i=0; i<subTextureIDs.length; i++){
 			final int id = subTextureIDs[i];
 			//Convert subtexture index to index of TOC

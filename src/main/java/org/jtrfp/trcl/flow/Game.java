@@ -239,6 +239,7 @@ public class Game {
 	    pal[0] = new Color(0, 0, 0, 0);
 	    tr.setGlobalPalette(pal);
 	    backdropSystem = new BackdropSystem(tr.getWorld());
+	    backdropSystem.activate();
 	    backdropSystem.loadingMode();
 	    // POWERUPS
 	    earlyLoadingScreen.setStatusText("Loading powerup assets...");
@@ -288,15 +289,18 @@ public class Game {
 	    earlyLoadingScreen.setStatusText("Starting game...");
 	    levelLoadingMode = new Object[]{
 		 levelLoadingScreen,
-		 upfrontDisplay
+		 upfrontDisplay,
+		 backdropSystem
 	    };
 	    gameplayMode = new Object[]{
 		 navSystem,
 		 hudSystem,
-		 upfrontDisplay
+		 upfrontDisplay,
+		 backdropSystem
 	    };
 	    briefingMode = new Object[]{
-		 briefingScreen
+		 briefingScreen,
+		 backdropSystem
 	    };
 	    MissionLevel [] levels = vox.getLevels();
 	    while(getLevelIndex()<levels.length){

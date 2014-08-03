@@ -155,13 +155,13 @@ public class Mission {
 	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
+	game.getUpfrontDisplay().removePersistentMessage();
 	game.getBackdropSystem().overworldMode();
 	game.getBackdropSystem().activate();
 	game.getBriefingScreen().briefingSequence(lvl);
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
 	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);
-	game.getUpfrontDisplay().removePersistentMessage();
 	game.getPlayer()	.setActive(true);
 	//Wait for mission end
 	synchronized(missionEnd){

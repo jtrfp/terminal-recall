@@ -208,6 +208,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		    new double []{0,wo.getModel().getTriangleList().getMaximumVertexDims().getY()/2,0});
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);
+	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    wo.setRespondToTick(false);//freeze
 	    briefingChars.setScrollPosition(NUM_LINES-2);
 	    setContent(intro.getDescriptionString());

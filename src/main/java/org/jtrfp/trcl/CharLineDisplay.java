@@ -47,7 +47,7 @@ public class CharLineDisplay {
 	    char newContent=0;
 	    if (i < content.length()) {
 		final char c = content.charAt(i);
-		if(c>32 || c<127)
+		if(c>31 || c<127)
 		    newContent = content.charAt(i);
 	    }
 	    this.content[i] = newContent;

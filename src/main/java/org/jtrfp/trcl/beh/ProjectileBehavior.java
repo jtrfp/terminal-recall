@@ -111,6 +111,7 @@ public class ProjectileBehavior extends Behavior implements
     @Override
     public void _tick(long tickTimeMillis) {
 	if (honingTarget != null) {
+	    if(honingTarget.get()==null)return;
 	    if (honingAdjustmentUpdate++ % 5 == 0) {
 		if (!honingTarget.get().isVisible())
 		    return;// Dead or otherwise.

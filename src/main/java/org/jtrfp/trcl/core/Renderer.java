@@ -291,12 +291,12 @@ public final class Renderer {
     }// TODO: Remove this when paged conversion is complete.
     
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		Renderer.this.currentRenderList().get().getSubmitter().submit(pr);
 		return null;
-	    }
+	      }
 	});
     }//end temporarilyMakeImmediatelyVisible(...)
     

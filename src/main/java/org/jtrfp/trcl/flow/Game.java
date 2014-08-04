@@ -51,7 +51,7 @@ public class Game {
     private TR 		tr;
     private VOXFile 	vox;
     private int 	levelIndex = 0;
-    private String 	playerName;
+    private String 	playerName="DEBUG";
     private Difficulty 	difficulty;
     private Mission 	currentMission;
     private HUDSystem 	hudSystem;

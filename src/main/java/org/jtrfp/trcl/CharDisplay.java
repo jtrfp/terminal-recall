@@ -43,6 +43,8 @@ public class CharDisplay extends WorldObject2D implements VisibleEverywhere {
     }// end constructor()
 
     public void setChar(char c) {
+	if(c==0)setVisible(false);
+	else setVisible(true);
 	tex.setFrame(c);
     }
 

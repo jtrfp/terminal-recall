@@ -28,8 +28,8 @@ public class CollisionManager {
 
     public CollisionManager(TR tr) {
 	this.tr = tr;
-	collisionList[0] = new ArrayList<WorldObject>();
-	collisionList[1] = new ArrayList<WorldObject>();
+	collisionList[0] = new ArrayList<WorldObject>(1024);
+	collisionList[1] = new ArrayList<WorldObject>(1024);
     }
 
     public void updateCollisionList() {

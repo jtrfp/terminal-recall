@@ -28,6 +28,7 @@ import org.jtrfp.trcl.core.Texture;
  */
 public class GLTextureBuffer extends RawGLBuffer {
     private final int textureID;
+    private final GPU gpu;
     private static final int DEADBEEF = 0xEFBEADDE;
 
     /**
@@ -41,7 +42,9 @@ public class GLTextureBuffer extends RawGLBuffer {
     GLTextureBuffer(int sizeInBytes, GPU gpu) {
 	super(roundToNextKB(sizeInBytes), gpu);
 	// Allocate a texture id
+	final GL3 gl = gpu.getGl();
 	textureID = Texture.createTextureID(gl);
+	this.gpu=gpu;
 	gl.glBindTexture(getBindingTarget(), getTextureID());
 	gl.glTexBuffer(getBindingTarget(), GL2.GL_RGBA32UI, this.getBufferID());
 	this.map(gl);
@@ -91,7 +94,7 @@ public class GLTextureBuffer extends RawGLBuffer {
      *            Integer ID of the texture unit to bind to (typically 0-8). Do
      *            not pass a GL enum such as GL_TEXTURE0. It will take care of
      *            this automatically.
-     * @return monad
+     * @return this
      * @since Mar 31, 2014
      */
     public final GLTextureBuffer bindToTextureUnit(GL3 gl, int textureUnit) {
@@ -111,7 +114,7 @@ public class GLTextureBuffer extends RawGLBuffer {
      *            GL enum such as GL_TEXTURE0.
      * @param program
      * @param uniform
-     * @return monad
+     * @return this
      * @since Mar 31, 2014
      */
     public final GLTextureBuffer bindToUniform(GL3 gl, int textureUnit,
@@ -120,5 +123,19 @@ public class GLTextureBuffer extends RawGLBuffer {
 	uniform.set(textureUnit);
 	return this;
     }//end bindToUniform
+    
+    /**
+     * Flush the specified range of this buffer, i.e. update the specified range to the GPU.
+     * If update is mandatory, flushing must be done manually.
+     * It is possible but not guaranteed that the buffer will auto-flush.
+     * @param startPointInBytes
+     * @param lengthInBytes
+     * @since Aug 5, 2014
+     */
+
+    public void flushRange(int startPointInBytes, int lengthInBytes) {
+	bind((GL2)gpu.getGl());
+	gpu.getGl().glFlushMappedBufferRange(getBindingTarget(), startPointInBytes, lengthInBytes);
+    }
 
 }// end GLTextureBuffer(...)

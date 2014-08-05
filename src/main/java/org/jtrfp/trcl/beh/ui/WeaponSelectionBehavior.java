@@ -27,7 +27,7 @@ public class WeaponSelectionBehavior extends Behavior implements PlayerControlBe
     private ProjectileFiringBehavior activeBehavior;
     private int ammoDisplayUpdateCounter=0;
     public static final int AMMO_DISPLAY_UPDATE_INTERVAL_MS=80;
-    private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
+    private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
     @Override
     public void _tick(long tickTimeMillis){
 	final WorldObject parent = getParent();

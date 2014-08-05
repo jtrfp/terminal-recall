@@ -66,7 +66,7 @@ private final NAVSystem nav;
 	    final Vector3D navLocXY = new Vector3D(loc[0],loc[2],0);
 	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
 	    final double modernDistance = player2NavVectorXY.getNorm();
-	    counter++;counter%=TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS);
+	    counter++;counter%=Math.ceil(TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS));
 	    //This need only be done occasionally
 	    if(counter==0){
 		getTr().getGame().getHUDSystem().getDistance().setContent(""+(int)((modernDistance*16)/TR.mapSquareSize));

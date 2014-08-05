@@ -279,10 +279,10 @@ public final class Renderer {
 	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
 	renderList.render(gl);
+	// Update GPU
 	gpu.memoryManager.get().map();
 	renderList.sendToGPU(gl);
 	fpsTracking();
-	// Update GPU
 	setFogColor(gpu.getTr().getWorld().getFogColor());
     }//end render()
 
@@ -295,6 +295,7 @@ public final class Renderer {
 	    @Override
 	    public Void call() throws Exception {
 		Renderer.this.currentRenderList().get().getSubmitter().submit(pr);
+		Renderer.this.getBackRenderList().get().getSubmitter().submit(pr);
 		return null;
 	      }
 	});

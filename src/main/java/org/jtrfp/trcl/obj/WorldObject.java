@@ -358,20 +358,12 @@ public class WorldObject implements PositionedRenderable {
 	    tMd[3] = position[0];
 	    tMd[7] = position[1];
 	    tMd[11] = position[2];
-
-	    /*final RealMatrix cm = tr.renderer.get().getCamera().getMatrix();
-	    for (int i = 0; i < 16; i++) {
-		cMd[i] = cm.getEntry(i / 4, i % 4);
-	    }*/
+	    
 	    if (translate()) {
 		Mat4x4.mul(tMd, rMd, rotTransM);
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
-
-	    //Mat4x4.mul(cMd, rotTransM, camM);//Camera matrix calc moved to GPU
-
-	    //tr.getMatrixWindow().setTransposed(camM, matrixID);//Camera matrix calc moved to GPU
 	    tr.matrixWindow.get().setTransposed(rotTransM, matrixID);//New version
 	} catch (MathArithmeticException e) {
 	}// Don't crash.
@@ -393,8 +385,18 @@ public class WorldObject implements PositionedRenderable {
      *            the visible to set
      */
     public void setVisible(boolean visible) {
-	this.visible = visible;
-    }
+	if(!this.visible && visible){
+	    this.visible = true;
+	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    WorldObject.this.updateStateToGPU();
+		    return null;
+		}
+	    });
+	    tr.renderer.get().temporarilyMakeImmediatelyVisible(this);
+	}else this.visible = visible;
+    }//end setvisible()
 
     /**
      * @return the position
@@ -541,8 +543,19 @@ public class WorldObject implements PositionedRenderable {
      *            the active to set
      */
     public void setActive(boolean active) {
+	if(!this.active && active && isVisible()){
+	    this.active=true;
+	    tr.renderer.get().temporarilyMakeImmediatelyVisible(this);
+	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    WorldObject.this.updateStateToGPU();
+		    return null;
+		}
+	    });
+	}
 	this.active = active;
-    }
+    }//end setActive(...)
 
     public void movePositionBy(Vector3D delta) {
 	position[0] += delta.getX();

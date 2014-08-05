@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.mem;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
@@ -23,16 +24,20 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private 		int [] 		pageTable;//Using array since performance is crucial
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;
+    private		BitSet		stalePageSet;
+    private final	GPU		gpu;
     
-    PagedByteBuffer(ByteBuffer [] intrinsic, IndexPool pageIndexPool, int initialSizeInBytes, String debugName){
+    PagedByteBuffer(GPU gpu, ByteBuffer [] intrinsic, IndexPool pageIndexPool, int initialSizeInBytes, String debugName){
 	this.intrinsic=intrinsic;
 	this.pageIndexPool=pageIndexPool;
 	this.debugName=debugName;
 	final int sizeInPages = sizeInPages(initialSizeInBytes);
 	pageTable = new int[sizeInPages];
+	stalePageSet = new BitSet(sizeInPages);
 	for(int i=0; i<sizeInPages; i++){
 	    pageTable[i]=pageIndexPool.pop();
 	}//end for(sizeInPages)
+	this.gpu=gpu;
     }//end constructor
     
     public int sizeInPages(){
@@ -75,6 +80,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	    }//end for(new pages)
 	}//end if(pageNumDelta...)
 	pageTable = newTable;
+	stalePageSet = new BitSet(newTable.length);
     }//end resize()
     
     private void deallocate(){
@@ -82,6 +88,10 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	    pageIndexPool.free(i);
 	}//end for(pageTable)
     }//end deallocate()
+    
+    private void markPageStale(int indexInBytes){
+	stalePageSet.set(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES);
+    }
     
     /**
      * Must notify the page IndexPool that this buffer is being forgotten such that its pages may be freed.
@@ -95,6 +105,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer putShort(int indexInBytes, short val) {
+	markPageStale(indexInBytes);
 	int index=logicalIndex2PhysicalIndex(indexInBytes);
 	intrinsic[0].putShort(index, val);
 	return this;
@@ -102,35 +113,63 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer put(int indexInBytes, byte val) {
+	markPageStale(indexInBytes);
 	intrinsic[0].put(logicalIndex2PhysicalIndex(indexInBytes), val);
 	return this;
     }
 
     @Override
     public byte get(int indexInBytes) {
+	markPageStale(indexInBytes);
 	return intrinsic[0].get(logicalIndex2PhysicalIndex(indexInBytes));
     }
 
     @Override
     public short getShort(int indexInBytes) {
+	markPageStale(indexInBytes);
 	return intrinsic[0].getShort(logicalIndex2PhysicalIndex(indexInBytes));
     }
 
     @Override
     public IByteBuffer putFloat(int indexInBytes, float val) {
+	markPageStale(indexInBytes);
 	intrinsic[0].putFloat(logicalIndex2PhysicalIndex(indexInBytes), val);
 	return this;
     }
 
     @Override
     public IByteBuffer put(int startIndexInBytes, ByteBuffer src) {
-	intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
-	intrinsic[0].put(src);
+	final int bytesProtrudingIntoPage = startIndexInBytes % PagedByteBuffer.PAGE_SIZE_BYTES;
+	final int bytesRemainingInPage = PagedByteBuffer.PAGE_SIZE_BYTES - bytesProtrudingIntoPage;
+	final int remaining = src.remaining();
+	if(remaining>bytesRemainingInPage){
+	    final int oldLimit = src.limit();
+	    //Split to pages
+	    src.limit(src.position()+bytesRemainingInPage);
+	    put(startIndexInBytes, src);
+	    src.limit(oldLimit);
+	    put(startIndexInBytes+bytesRemainingInPage,src);
+	}else{//Do it
+	    markPageStale(startIndexInBytes);
+	    intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
+	    intrinsic[0].put(src);
+	}
 	return this;
-    }
+    }//end put(...)
+    
+    void flushStalePages(){
+	final int size = stalePageSet.size();
+	for(int i=0; i<size; i++){
+	    if(stalePageSet.get(i)){
+		gpu.memoryManager.get().flushRange(pageTable[i]*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
+	    }//end if(stalePageSet.get(i))
+	}//end for(size)
+	stalePageSet.clear();
+    }//end flushStalePages()
 
     @Override
     public IByteBuffer putInt(int indexInBytes, int val) {
+	markPageStale(indexInBytes);
 	intrinsic[0].putInt(logicalIndex2PhysicalIndex(indexInBytes),val);
 	return this;
     }

@@ -71,18 +71,22 @@ public class RenderList {
 		if (!wo.isActive()) {
 		    return;
 		}
-		nearbyWorldObjects.add(wo);
+		synchronized(nearbyWorldObjects)
+		 {nearbyWorldObjects.add(wo);}
 		if(!wo.isVisible())return;
 	    }//end if(WorldObject)
 	    final ByteBuffer opOD = item.getOpaqueObjectDefinitionAddresses();
 	    final ByteBuffer trOD = item
 		    .getTransparentObjectDefinitionAddresses();
+	    
 	    numOpaqueBlocks += opOD.capacity() / 4;
 	    numTransparentBlocks += trOD.capacity() / 4;
+	    
 	    tr.objectListWindow.get().opaqueIDs.set(0, opaqueIndex, opOD);
 	    opaqueIndex += opOD.capacity();
 	    tr.objectListWindow.get().blendIDs.set(0, blendIndex, trOD);
 	    blendIndex += trOD.capacity();
+	    
 	}// end submit(...)
 
 	@Override
@@ -159,12 +163,11 @@ public class RenderList {
     private static int frameCounter = 0;
 
     private void updateStatesToGPU() {
-	/*for (int i = 0; i < renderablesIndex; i++) {
-	    renderables[i].updateStateToGPU();
-	}*/
-	for (int i = 0; i < nearbyWorldObjects.size(); i++) {
+	synchronized(nearbyWorldObjects){
+	final int size=nearbyWorldObjects.size();
+	for (int i=0; i<size; i++) {
 	    nearbyWorldObjects.get(i).updateStateToGPU();
-	}
+	}}
     }//end updateStatesToGPU
 
     public void sendToGPU(GL3 gl) {
@@ -183,7 +186,7 @@ public class RenderList {
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	final int numOpaqueVertices = numOpaqueBlocks
-		* (GPU.GPU_VERTICES_PER_BLOCK+1);
+		* GPU.GPU_VERTICES_PER_BLOCK;
 	final int numTransparentVertices = numTransparentBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
@@ -218,41 +221,37 @@ public class RenderList {
 	}// end for(subpasses)
 	
 	// DEPTH QUEUE STAGE
-	if(tr.getTrConfig().isUsingNewTexturing()){
-	    //ERASE
-	    tr.renderer.get().depthErasureProgram.use();
-	    gl.glDisable(GL3.GL_CULL_FACE);
-	    depthQueueFrameBuffer.bindToDraw();
-	    gl.glEnable(GL3.GL_MULTISAMPLE);
-	    gl.glEnable(GL3.GL_SAMPLE_MASK);
-	    gl.glDepthFunc(GL3.GL_ALWAYS);
-	    gl.glDepthMask(false);
-	    gl.glEnable(GL3.GL_STENCIL_TEST);
-	    for(int i = 0; i < Renderer.DEPTH_QUEUE_SIZE; i++) {
-	      gl.glStencilFunc(GL3.GL_ALWAYS, i+1, 0xff);
-	      gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
-	      gl.glSampleMaski(0, 0x1 << i);
-	      gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	    }
-	    gl.glSampleMaski(0, 0xFF);
-	    //DRAW
-	    depthQueueProgram.use(); //TODO: Nothing shows up
-	    //gl.glDepthFunc(GL3.GL_GREATER);
-	    //gl.glDisable(GL3.GL_STENCIL_TEST);
-	    //gl.glDisable(GL3.GL_SAMPLE_MASK);
-	    //gl.glEnable(GL3.GL_STENCIL_TEST);
-	    gl.glDisable(GL3.GL_MULTISAMPLE);
-	    gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
-	    gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
-	    gl.glSampleMaski(0, 0xFF);
-	    GLTexture.specifyTextureUnit(gl, 0);
-	    intermediateDepthTexture.bind(gl);
-	    depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(matrixAsFlatArray, true);//TODO: Consolidate or abbreviate
-	    depthQueueProgram.getUniform("renderListOffset").setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
-	    tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
-		    depthQueueProgram.getUniform("rootBuffer"));
-	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
-	}//end if(isUsingNewTexturing())
+	// ERASE
+	tr.renderer.get().depthErasureProgram.use();
+	gl.glDisable(GL3.GL_CULL_FACE);
+	depthQueueFrameBuffer.bindToDraw();
+	gl.glEnable(GL3.GL_MULTISAMPLE);
+	gl.glEnable(GL3.GL_SAMPLE_MASK);
+	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDepthMask(false);
+	gl.glEnable(GL3.GL_STENCIL_TEST);
+	for (int i = 0; i < Renderer.DEPTH_QUEUE_SIZE; i++) {
+	    gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
+	    gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
+	    gl.glSampleMaski(0, 0x1 << i);
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	}
+	gl.glSampleMaski(0, 0xFF);
+	// DRAW
+	depthQueueProgram.use();
+	gl.glDisable(GL3.GL_MULTISAMPLE);
+	gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
+	gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
+	gl.glSampleMaski(0, 0xFF);
+	GLTexture.specifyTextureUnit(gl, 0);
+	intermediateDepthTexture.bind(gl);
+	depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(
+		matrixAsFlatArray, true);// TODO: Consolidate or abbreviate
+	depthQueueProgram.getUniform("renderListOffset").setui(
+		modulusUintOffset + NUM_BLOCKS_PER_PASS);
+	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
+		depthQueueProgram.getUniform("rootBuffer"));
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
 	
 	gl.glEnable(GL3.GL_MULTISAMPLE);
 	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);//NEW
@@ -266,8 +265,6 @@ public class RenderList {
 	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
-	//GLTexture.specifyTextureUnit(gl, 0);
-	//    Texture.getGlobalTexture().bind(gl);
 	GLTexture.specifyTextureUnit(gl, 1);
 	intermediateColorTexture.bind(gl);
 	GLTexture.specifyTextureUnit(gl, 2);
@@ -284,27 +281,6 @@ public class RenderList {
 	depthQueueTexture.bind();
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	
-	if(!tr.getTrConfig().isUsingNewTexturing()){
-	    // TRANSPARENT
-	    // Turn off depth write, turn on transparency
-	    tr.renderer.get().getPrimaryProgram().use();
-	    useTextureMap.set((int)1);
-	    gl.glDepthMask(false);
-	    gl.glDepthFunc(GL3.GL_LESS);
-	    gl.glEnable(GL3.GL_BLEND);
-	    // ////////
-	    // gl.glDepthFunc(GL3.GL_ALWAYS);
-	    // ///////
-	    renderListOffsetUniform.setui(modulusUintOffset + NUM_BLOCKS_PER_PASS);
-	    // renderModeUniform.set(BLEND_PASS);
-	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
-	    // ////////
-	    // gl.glDepthFunc(GL3.GL_LESS);
-	    // ////////
-	    gl.glDepthMask(true);
-	}//end if(!isUsingNewTexturing())
-	
     }// end render()
 
     public Submitter<PositionedRenderable> getSubmitter() {
@@ -316,7 +292,8 @@ public class RenderList {
 	numTransparentBlocks = 0;
 	blendIndex = 0;
 	opaqueIndex = 0;
-	nearbyWorldObjects.clear();
+	synchronized(nearbyWorldObjects)
+	 {nearbyWorldObjects.clear();}
     }//end reset()
     
     public List<WorldObject> getVisibleWorldObjectList(){

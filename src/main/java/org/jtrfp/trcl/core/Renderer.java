@@ -273,14 +273,11 @@ public final class Renderer {
 	ensureInit();
 	gpu.memoryManager.get().bindToUniform(1, primaryProgram,
 		    primaryProgram.getUniform("rootBuffer"));
-	if(gpu.getTr().getTrConfig().isUsingTextureBufferUnmap()){
-	    gpu.memoryManager.get().unmap();
-	}
+	gpu.memoryManager.get().flushStalePages();
 	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
 	renderList.render(gl);
 	// Update GPU
-	gpu.memoryManager.get().map();
 	renderList.sendToGPU(gl);
 	fpsTracking();
 	setFogColor(gpu.getTr().getWorld().getFogColor());

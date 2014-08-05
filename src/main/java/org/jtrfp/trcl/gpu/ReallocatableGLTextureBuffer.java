@@ -25,6 +25,10 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 	this.gpu = gpu;
 	buffer = new GLTextureBuffer(1, gpu);
     }
+    
+    public void flushRange(int startPointInBytes, int lengthInBytes){
+	buffer.flushRange(startPointInBytes, lengthInBytes);
+    }
 
     @Override
     public ByteBuffer map() {
@@ -110,6 +114,10 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     @Override
     public void putFloat(int byteOffset, float val) {
 	buffer.getUnderlyingBuffer().putFloat(byteOffset, val);
+    }
+
+    public boolean isMapped() {
+	return buffer.isMapped();
     }
 
 }// end ReallocatableGLTextureBuffer

@@ -20,28 +20,25 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class ProjectileFiringBehavior extends Behavior implements HasQuantifiableSupply{
-    long timeWhenNextFiringPermittedMillis=0;
-    long timeBetweenFiringsMillis=130;
     private static final Vector3D [] DEFAULT_POS=new Vector3D[]{Vector3D.ZERO};
-    private Vector3D [] firingPositions=DEFAULT_POS;
-    private Vector3D firingHeading;
-    private int firingPositionIndex=0;
-    private ProjectileFactory projectileFactory;
-    private boolean pendingFiring=false;
-    private int multiplexLevel=1;
-    private int ammoLimit=Integer.MAX_VALUE;
-    private int ammo=0;
+    long 			timeWhenNextFiringPermittedMillis=0;
+    long 			timeBetweenFiringsMillis	 =130;
+    private Vector3D [] 	firingPositions			 =DEFAULT_POS;
+    private Vector3D 		firingHeading;
+    private int 		firingPositionIndex		 =0;
+    private ProjectileFactory 	projectileFactory;
+    private boolean 		pendingFiring			 =false;
+    private int 		multiplexLevel			 =1;
+    private int 		ammoLimit			 =Integer.MAX_VALUE;
+    private int 		ammo				 =0;
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
-	    //System.out.println("Attempting firing...");
 	    if(takeAmmo()){
-		//System.out.println("Ammo approved.");
 	    	final WorldObject p = getParent();
 	    	Vector3D heading=this.firingHeading;
 	    	if(this.firingHeading==null)heading = p.getHeading();
 	    	for(int mi=0; mi<multiplexLevel;mi++){
-	    	//System.out.println("Multiplex="+mi);
 	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		heading,p.getTop()).applyTo(getNextFiringPosition());
 	    	    resetFiringTimer();

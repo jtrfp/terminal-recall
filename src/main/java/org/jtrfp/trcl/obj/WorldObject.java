@@ -364,10 +364,12 @@ public class WorldObject implements PositionedRenderable {
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
-	    tr.matrixWindow.get().setTransposed(rotTransM, matrixID);//New version
+	    tr.matrixWindow.get().setTransposed(rotTransM, matrixID, scratchMatrixArray);//New version
 	} catch (MathArithmeticException e) {
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()
+    
+    protected final double [] scratchMatrixArray = new double[16];
 
     protected boolean translate() {
 	return true;

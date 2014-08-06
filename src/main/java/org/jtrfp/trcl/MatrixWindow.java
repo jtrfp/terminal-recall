@@ -23,13 +23,10 @@ public final class MatrixWindow extends MemoryWindow {
     public MatrixWindow(TR tr) {
 	init(tr,"MatrixWindow");
     }
-    
-    private final double [] newVals = new double[16];
-    public final void setTransposed(double[] vals, int id) {
-	//double[] newVals = new double[16];
+    public final void setTransposed(double[] vals, int id, double [] workArray) {
 	for (int index = 0; index < 16; index++) {
-	    newVals[index] = (float) vals[(index / 4) + (index % 4) * 4];
+	    workArray[index] = (float) vals[(index / 4) + (index % 4) * 4];
 	}// end for(16)
-	matrix.set(id, newVals);
+	matrix.set(id, workArray);
     }
 }// end Matrix

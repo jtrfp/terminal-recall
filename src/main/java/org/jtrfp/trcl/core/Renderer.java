@@ -269,7 +269,7 @@ public final class Renderer {
 	if(!gpu.textureManager.isDone()||!gpu.memoryManager.isDone())
 	    return;
 	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
-	gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+	//gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	ensureInit();
 	gpu.memoryManager.get().bindToUniform(1, primaryProgram,
 		    primaryProgram.getUniform("rootBuffer"));

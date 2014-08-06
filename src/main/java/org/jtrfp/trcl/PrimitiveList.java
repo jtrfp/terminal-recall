@@ -12,15 +12,11 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import javax.media.opengl.GL3;
-
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE> {
-    /*private static final List<PrimitiveList<?>> allLists = Collections
-	    .synchronizedList(new ArrayList<PrimitiveList<?>>());*/
     
     protected static final double coordDownScaler = 512;
     protected static final double uvUpScaler = 4096;
@@ -30,8 +26,6 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public static enum RenderStyle {
 	OPAQUE, TRANSPARENT
     };
-
-    //public static final ArrayList<Tickable> animators = new ArrayList<Tickable>();
     
     protected final 	String 		debugName;
     protected 		double 		scale;
@@ -59,18 +53,6 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected double applyScale(double value) {
 	return value / Math.pow(2, packedScale - 16);
     }
-/*
-    protected static void addList(PrimitiveList l) {
-	if (l == null) {
-	    new Exception().printStackTrace();
-	    System.exit(1);
-	}
-	allLists.add(l);
-    }
-*/
-    /*protected static List<PrimitiveList<?>> getAllArrayLists() {
-	return allLists;
-    }*/
 
     protected abstract double getMaximumVertexValue();
 
@@ -100,37 +82,12 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public String getDebugName() {
 	return debugName;
     }
-/*
-    public static void uploadAllListsToGPU(GL3 gl) {
-	for (PrimitiveList<?> l : allLists) {
-	    l.uploadToGPU(gl);
-	}
-    }// end uploadAllListsToGPU
-*/
     public abstract void uploadToGPU();
-
-    //public abstract byte getPrimitiveRenderMode();
-/*
-    public int []getPhysicalPages() {
-	final int [] result = new int[window.numPages()];
-	for(int i=0; i<result.length;i++){
-	    result[i]=window.logicalPage2PhysicalPage(i);
-	}
-	return result;
-    }//end getPhysicalAddressInBytes
-*/
- /*   public static void tickAnimators() {
-	for (Tickable ani : animators) {
-	    ani.tick();
-	}
-    }// end tickAnimators()
-*/
     /**
      * @param scale
      *            the scale to set
      */
     public final void setScale(double scale) {
-	// scale=scale>=1?scale:1;
 	this.scale = scale;
 	packedScale = packScale(scale);
     }

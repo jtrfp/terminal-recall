@@ -46,10 +46,8 @@ public class RenderList {
     private 	 	int 			dummyBufferID;
     private 		int 			numOpaqueBlocks;
     private 		int 			numTransparentBlocks;
-    private 		int 			modulusUintOffset;
     private 		int 			opaqueIndex = 0, blendIndex = 0;
-    private 	 	GLUniform 		renderListOffsetUniform,
-    /*    */	    				renderListPageTable,
+    private 	 	GLUniform 		renderListPageTable,
     /*    */					useTextureMap,
     /*	  */					cameraMatrixUniform,
     /*    */					rootBuffer;
@@ -125,7 +123,7 @@ public class RenderList {
 		gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
-		renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
+		//renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
 		renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 		useTextureMap = primaryProgram.getUniform("useTextureMap");
 		cameraMatrixUniform = primaryProgram.getUniform("cameraMatrix");
@@ -153,8 +151,6 @@ public class RenderList {
 		depthQueueProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);//TODO: Cache or consolidate
 		renderer.getPrimaryProgram().use();
 		renderListPageTable.setArrayui(hostRenderListPageTable);
-		modulusUintOffset = (olWindow
-			.getPhysicalAddressInBytes(0) % PagedByteBuffer.PAGE_SIZE_BYTES) / 4;
 		return null;
 	    }
 	}).get();
@@ -193,7 +189,6 @@ public class RenderList {
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDepthFunc(GL3.GL_LESS);
 	if(tr.renderer.get().isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
-	// renderModeUniform.set(OPAQUE_PASS);
 	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
 	final int numSubPasses = (numOpaqueVertices / verticesPerSubPass) + 1;
 	int remainingVerts = numOpaqueVertices;
@@ -214,10 +209,9 @@ public class RenderList {
 	    final int numVerts = remainingVerts <= verticesPerSubPass ? remainingVerts
 		    : verticesPerSubPass;
 	    remainingVerts -= numVerts;
-	    final int newOffset = modulusUintOffset + sp
-		    * NUM_BLOCKS_PER_SUBPASS;// newOffset is in uints
-	    renderListOffsetUniform.setui(newOffset);
-	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numVerts);
+	    final int newOffset = sp
+		    * NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK;
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, newOffset, numVerts);
 	}// end for(subpasses)
 	
 	// DEPTH QUEUE STAGE
@@ -247,11 +241,9 @@ public class RenderList {
 	intermediateDepthTexture.bind(gl);
 	depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(
 		matrixAsFlatArray, true);// TODO: Consolidate or abbreviate
-	depthQueueProgram.getUniform("renderListOffset").setui(
-		modulusUintOffset + NUM_BLOCKS_PER_PASS);
 	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numTransparentVertices);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
 	
 	gl.glEnable(GL3.GL_MULTISAMPLE);
 	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);//NEW

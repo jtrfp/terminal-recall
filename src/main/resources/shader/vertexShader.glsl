@@ -30,7 +30,6 @@ smooth out vec3 		norm;
 flat out uint 			flatTextureID;
 
 //IN
-uniform uint 			renderListOffset;
 uniform uint 			renderListPageTable[85];
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform mat4 			cameraMatrix;
@@ -118,8 +117,7 @@ gl_Position.x=dummy*0;
 		//TODO: Look into optimizing this by moving some of it into the numVertices block below
 		int 	objectIndex 			= (gl_VertexID / GPU_VERTICES_PER_BLOCK);
 		int 	intraObjectVertexIndex 	= gl_VertexID % GPU_VERTICES_PER_BLOCK;
-		int 	adjustedListIndex		= objectIndex+int(renderListOffset);
-		int 	objectDefIndex			= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(adjustedListIndex/4)))[adjustedListIndex%4]);
+		int 	objectDefIndex			= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
 		uvec4 	objectDef 				= texelFetch(rootBuffer,objectDefIndex);
 		int		numVertices 			= int(UByte(objectDef[2],0u));
 		

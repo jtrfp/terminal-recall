@@ -136,7 +136,7 @@ public final class ThreadManager {
 	gameplayTimer.schedule(new TimerTask(){
 	    @Override
 	    public void run() {
-				if (counter++ % (RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
+				if (counter++ % Math.ceil(RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
 					visibilityCalc();}
 				    if(tr.getPlayer()!=null)gameplay();
 		

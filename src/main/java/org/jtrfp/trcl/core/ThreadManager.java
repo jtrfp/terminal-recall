@@ -63,10 +63,12 @@ public final class ThreadManager {
 	    if(!tr.renderer.get().currentRenderList().isDone())
 		return;
 	}else return;
-	List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
+	//TODO: Co-modification of list risk.
+	final List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	for (int i = 0; i<vl.size(); i++) {
-	    final WorldObject wo = vl.get(i);
+	    final WorldObject wo;
+	    synchronized(vl){wo = vl.get(i);}//TODO: This is slow.
 	    boolean multiplePlayer=false;
 	    if (wo.isActive()
 		    && (TR.twosComplimentDistance(wo.getPosition(), tr

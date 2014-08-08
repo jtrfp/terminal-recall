@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -24,6 +25,7 @@ import javax.media.opengl.GLEventListener;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -42,12 +44,13 @@ public final class Renderer {
     private final 	Camera			camera;
     			GLProgram 		primaryProgram, deferredProgram, depthQueueProgram, depthErasureProgram;
     private 		boolean 		initialized = false;
-    private		boolean 		active = false;// TODO: Remove when conversion is complete
     private 		boolean 		renderListToggle = false;
     private final 	GPU 			gpu;
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
     private 	 	GLUniform	    	screenWidth, 
     /*    */	    				screenHeight,
+    						dqScreenWidth,
+    						dqScreenHeight,
     /*    */					fogColor,
     /*    */					sunVector;
     private 		GLTexture 		intermediateColorTexture,
@@ -62,7 +65,7 @@ public final class Renderer {
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
-    private		Future			visibilityUpdateFuture;
+    private		Future<Void>		visibilityUpdateFuture;
 
     public Renderer(final GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -96,6 +99,9 @@ public final class Renderer {
 		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(primaryVertexShader)	  .attachShader(depthQueueFragShader).link();
 		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
+		depthQueueProgram.use();
+		dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
+		dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();
 		screenWidth 	= deferredProgram	.getUniform("screenWidth");
 		screenHeight 	= deferredProgram	.getUniform("screenHeight");
@@ -163,12 +169,12 @@ public final class Renderer {
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);//TODO: width,height
+			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);
 		depthQueueStencil = gpu
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
 			.bind()
-			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);//TODO: width,height
+			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -215,21 +221,21 @@ public final class Renderer {
 		screenWidth.setui(width);
 		screenHeight.setui(height);
 		depthQueueProgram.use();
-		depthQueueProgram.getUniform("screenWidth").setui(width);//TODO: Optimize
-		depthQueueProgram.getUniform("screenHeight").setui(height);
+		dqScreenWidth.setui(width);
+		dqScreenHeight.setui(height);
 		Renderer.this.getPrimaryProgram().use();
 	    }
 	});
 	System.out.println("...Done.");
 	System.out.println("Initializing RenderList...");
-	renderList[0] = new TRFutureTask(tr,new Callable<RenderList>(){
+	renderList[0] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
 		return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
 			    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
 			    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture , tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
-	    renderList[1] = new TRFutureTask(tr,new Callable<RenderList>(){
+	    renderList[1] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 		    @Override
 		    public RenderList call() throws Exception {
 			return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
@@ -257,15 +263,17 @@ public final class Renderer {
 	if ((frameNumber %= 20) == 0) {
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
+	    final List<WorldObject> list = renderList[renderListToggle ? 0 : 1].get().getVisibleWorldObjectList();
+	    synchronized(list){
 	    gpu.getTr().getReporter()
-	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", renderList[renderListToggle ? 0 : 1].get().getVisibleWorldObjectList().size());
+	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", list.size());}
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
     public void render() {
 	final GL3 gl = gpu.getGl();
-	if (!active)
-	    return;
+	///if (!active)
+	//    return;
 	if(!gpu.textureManager.isDone()||!gpu.memoryManager.isDone())
 	    return;
 	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
@@ -282,29 +290,28 @@ public final class Renderer {
 	fpsTracking();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
     }//end render()
-
-    public void activate() {
-	active = true;
-    }// TODO: Remove this when paged conversion is complete.
     
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
+	
 	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		Renderer.this.currentRenderList().get().getSubmitter().submit(pr);
-		Renderer.this.getBackRenderList().get().getSubmitter().submit(pr);
-		return null;
+		final Submitter<PositionedRenderable> s = Renderer.this.currentRenderList().get().getSubmitter();
+		synchronized(s){
+		s.submit(pr);
+		return null;}
 	      }
 	});
+	
     }//end temporarilyMakeImmediatelyVisible(...)
     
     public void updateVisibilityList() {
 	if(visibilityUpdateFuture!=null){if(!visibilityUpdateFuture.isDone())return;}
 	if(!getBackRenderList().isDone())return;//Not ready.
 	final RenderList rl = getBackRenderList().get();
-	visibilityUpdateFuture = gpu.getTr().getThreadManager().threadPool.submit(new Runnable(){
+	visibilityUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
-	    public void run() {
+	    public Void call() {
 		try{
 		rl.reset();
 		proximitySorter.setCenter(camera.getCameraPosition().toArray());
@@ -317,13 +324,16 @@ public final class Renderer {
 		Renderer.this.gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    @Override
 		    public Void call() {
-			proximitySorter.dumpPositionedRenderables(rl.getSubmitter());
+			final Submitter<PositionedRenderable> s = rl.getSubmitter();
+			synchronized(s){
+			proximitySorter.dumpPositionedRenderables(s);}
 			return null;
 		    }//end gl call()
 		}).get();
 		proximitySorter.reset();
 		toggleRenderList();
 		}catch(Exception e){e.printStackTrace();}
+		return null;
 	    }//end pool run()
 	});
     }// end updateVisibilityList()

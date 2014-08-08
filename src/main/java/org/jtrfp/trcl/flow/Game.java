@@ -213,8 +213,6 @@ public class Game {
 	// Set up player, HUD, fonts...
 	System.out.println("Game.go()...");
 	System.out.println("Initializing general resources...");
-	System.out.println("Activating renderer...");
-	tr.renderer.get().activate();
 	greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
 	NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 	upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),

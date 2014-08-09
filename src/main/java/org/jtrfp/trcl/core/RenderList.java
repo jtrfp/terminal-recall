@@ -50,7 +50,9 @@ public class RenderList {
     private 	 	GLUniform 		renderListPageTable,
     /*    */					useTextureMap,
     /*	  */					cameraMatrixUniform,
-    /*    */					rootBuffer;
+    /*    */					rootBuffer,
+    /*	  */					dqCameraMatrixUniform,
+    /*	  */					dqRenderListPageTable;
     private final	GLFrameBuffer		intermediateFrameBuffer,
     						depthQueueFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
@@ -125,8 +127,10 @@ public class RenderList {
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
 		//renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
 		renderListPageTable = primaryProgram.getUniform("renderListPageTable");
+		dqRenderListPageTable = depthQueueProgram.getUniform("renderListPageTable");
 		useTextureMap = primaryProgram.getUniform("useTextureMap");
 		cameraMatrixUniform = primaryProgram.getUniform("cameraMatrix");
+		dqCameraMatrixUniform = depthQueueProgram.getUniform("cameraMatrix");
 		
 		rootBuffer = deferredProgram.getUniform("rootBuffer");
 		return null;
@@ -148,7 +152,7 @@ public class RenderList {
 		    hostRenderListPageTable[i] = olWindow.logicalPage2PhysicalPage(i);
 		}// end for(hostRenderListPageTable.length)
 		depthQueueProgram.use();
-		depthQueueProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);//TODO: Cache or consolidate
+		dqRenderListPageTable.setArrayui(hostRenderListPageTable);
 		renderer.getPrimaryProgram().use();
 		renderListPageTable.setArrayui(hostRenderListPageTable);
 		return null;
@@ -239,8 +243,8 @@ public class RenderList {
 	gl.glSampleMaski(0, 0xFF);
 	GLTexture.specifyTextureUnit(gl, 0);
 	intermediateDepthTexture.bind(gl);
-	depthQueueProgram.getUniform("cameraMatrix").set4x4Matrix(
-		matrixAsFlatArray, true);// TODO: Consolidate or abbreviate
+	dqCameraMatrixUniform.set4x4Matrix(
+		matrixAsFlatArray, true);
 	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);

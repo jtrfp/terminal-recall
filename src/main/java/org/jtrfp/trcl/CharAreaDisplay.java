@@ -15,7 +15,6 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -63,16 +62,10 @@ public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
     
     private static String wordWrap(final String content, int widthChars) {
 	final StringBuilder result 		= new StringBuilder();
-	//final StringTokenizer newlineScanner	= new StringTokenizer(content,"\n\r");
-	//while(newlineScanner.hasMoreTokens()){
 	for(String line:content.split("\n")){
-	    //final String line = newlineScanner.nextToken();
 	    if(line.length()>=widthChars){
-		 //StringTokenizer wordTokenizer = new StringTokenizer(line," ");
 		 int lineLengthSoFar=0;
 		 for(String word:line.split(" ")){
-		 //while(wordTokenizer.hasMoreElements()){
-		     //String word = wordTokenizer.nextToken();
 		     while(word.length()>widthChars){
 			 result.append(word.substring(0, widthChars));
 			 result.append(' ');

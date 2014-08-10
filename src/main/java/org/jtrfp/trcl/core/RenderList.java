@@ -38,8 +38,6 @@ public class RenderList {
     public static final int	NUM_BLOCKS_PER_PASS 	= NUM_BLOCKS_PER_SUBPASS
 	    						* NUM_SUBPASSES;
     public static final int	NUM_RENDER_PASSES 	= 2;// Opaque + transparent
-    private static final int	OPAQUE_PASS 		= 0;
-    private static final int	BLEND_PASS 		= 1;
 
     private final 	TR 			tr;
     private 		int[] 			hostRenderListPageTable;
@@ -125,7 +123,6 @@ public class RenderList {
 		gl.glBufferData(GL3.GL_ARRAY_BUFFER, 1, null, GL3.GL_DYNAMIC_DRAW);
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
-		//renderListOffsetUniform = primaryProgram.getUniform("renderListOffset");
 		renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 		dqRenderListPageTable = depthQueueProgram.getUniform("renderListPageTable");
 		useTextureMap = primaryProgram.getUniform("useTextureMap");
@@ -180,9 +177,9 @@ public class RenderList {
 	// OPAQUE STAGE
 	tr.renderer.get().getPrimaryProgram().use();
 	final float [] matrixAsFlatArray = tr.renderer.get().getCamera().getMatrixAsFlatArray();
-	cameraMatrixUniform.set4x4Matrix(matrixAsFlatArray,true);
-	useTextureMap.set((int)0);
-	intermediateFrameBuffer.bindToDraw();
+	cameraMatrixUniform	.set4x4Matrix(matrixAsFlatArray,true);
+	useTextureMap		.set((int)0);
+	intermediateFrameBuffer	.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -193,9 +190,9 @@ public class RenderList {
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDepthFunc(GL3.GL_LESS);
 	if(tr.renderer.get().isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
-	final int verticesPerSubPass = (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
-	final int numSubPasses = (numOpaqueVertices / verticesPerSubPass) + 1;
-	int remainingVerts = numOpaqueVertices;
+	final int verticesPerSubPass	= (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
+	final int numSubPasses		= (numOpaqueVertices / verticesPerSubPass) + 1;
+	int remainingVerts		= numOpaqueVertices;
 
 	if (frameCounter == 0) {
 	    tr.getReporter().report(
@@ -219,7 +216,7 @@ public class RenderList {
 	}// end for(subpasses)
 	
 	// DEPTH QUEUE STAGE
-	// ERASE
+	// ERASE //TODO: This dosen't need any rootBuffer data so it can be moved to the end.
 	tr.renderer.get().depthErasureProgram.use();
 	gl.glDisable(GL3.GL_CULL_FACE);
 	depthQueueFrameBuffer.bindToDraw();
@@ -250,8 +247,10 @@ public class RenderList {
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
 	
 	gl.glEnable(GL3.GL_MULTISAMPLE);
-	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);//NEW
+	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
 	gl.glDisable(GL3.GL_STENCIL_TEST);
+	
+	gl.glFinish();//Prevents flicker. TODO: Use sync object instead.
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
@@ -284,10 +283,10 @@ public class RenderList {
     }
 
     public void reset() {
-	numOpaqueBlocks = 0;
-	numTransparentBlocks = 0;
-	blendIndex = 0;
-	opaqueIndex = 0;
+	numOpaqueBlocks 	= 0;
+	numTransparentBlocks 	= 0;
+	blendIndex 		= 0;
+	opaqueIndex 		= 0;
 	synchronized(nearbyWorldObjects)
 	 {nearbyWorldObjects.clear();}
     }//end reset()

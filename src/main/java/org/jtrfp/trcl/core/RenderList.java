@@ -45,6 +45,7 @@ public class RenderList {
     private 		int 			numOpaqueBlocks;
     private 		int 			numTransparentBlocks;
     private 		int 			opaqueIndex = 0, blendIndex = 0;
+    private		long			rootBufferReadFinishedSync;
     private 	 	GLUniform 		renderListPageTable,
     /*    */					useTextureMap,
     /*	  */					cameraMatrixUniform,
@@ -181,7 +182,6 @@ public class RenderList {
 	useTextureMap		.set((int)0);
 	intermediateFrameBuffer	.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
-	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 	final int numOpaqueVertices = numOpaqueBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	final int numTransparentVertices = numTransparentBlocks
@@ -215,23 +215,12 @@ public class RenderList {
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, newOffset, numVerts);
 	}// end for(subpasses)
 	
-	// DEPTH QUEUE STAGE
-	// ERASE //TODO: This dosen't need any rootBuffer data so it can be moved to the end.
+	// DEPTH QUEUE DRAW
 	tr.renderer.get().depthErasureProgram.use();
 	gl.glDisable(GL3.GL_CULL_FACE);
 	depthQueueFrameBuffer.bindToDraw();
-	gl.glEnable(GL3.GL_MULTISAMPLE);
 	gl.glEnable(GL3.GL_SAMPLE_MASK);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
-	gl.glDepthMask(false);
-	gl.glEnable(GL3.GL_STENCIL_TEST);
-	for (int i = 0; i < Renderer.DEPTH_QUEUE_SIZE; i++) {
-	    gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
-	    gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
-	    gl.glSampleMaski(0, 0x1 << i);
-	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	}
-	gl.glSampleMaski(0, 0xFF);
 	// DRAW
 	depthQueueProgram.use();
 	gl.glDisable(GL3.GL_MULTISAMPLE);
@@ -246,11 +235,12 @@ public class RenderList {
 		depthQueueProgram.getUniform("rootBuffer"));
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
 	
+	// FENCE
+	rootBufferReadFinishedSync = gl.glFenceSync(GL3.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+	
 	gl.glEnable(GL3.GL_MULTISAMPLE);
 	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
 	gl.glDisable(GL3.GL_STENCIL_TEST);
-	
-	gl.glFinish();//Prevents flicker. TODO: Use sync object instead.
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
@@ -276,6 +266,28 @@ public class RenderList {
 	depthQueueTexture.bind();
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	
+	// DEPTH QUEUE ERASE
+	tr.renderer.get().depthErasureProgram.use();
+	gl.glDisable(GL3.GL_CULL_FACE);
+	depthQueueFrameBuffer.bindToDraw();
+	gl.glEnable(GL3.GL_MULTISAMPLE);
+	gl.glEnable(GL3.GL_SAMPLE_MASK);
+	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDepthMask(false);
+	gl.glEnable(GL3.GL_STENCIL_TEST);
+	for (int i = 0; i < Renderer.DEPTH_QUEUE_SIZE; i++) {
+	    gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
+	    gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
+	    gl.glSampleMaski(0, 0x1 << i);
+	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	}
+	gl.glDepthMask(true);
+	//INTERMEDIATE ERASE
+	intermediateFrameBuffer	.bindToDraw();
+	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+	gl.glFlush();
+	gl.glWaitSync(rootBufferReadFinishedSync, 0, GL3.GL_TIMEOUT_IGNORED);
     }// end render()
 
     public Submitter<PositionedRenderable> getSubmitter() {

@@ -29,6 +29,7 @@ import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
+import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.math.Vect3D;
@@ -67,13 +68,18 @@ public class TunnelEntranceObject extends BillboardSprite {
 	public void proposeCollision(WorldObject other){
 	      if(other instanceof Player){
 		 WorldObject entranceObject = getParent();
-		final TR tr = entranceObject.getTr();
+		final TR tr	  = entranceObject.getTr();
 		final World world = tr.getWorld();
+		final Game game   = tr.getGame();
+		if(game==null)return;
+		final Mission mission = game.getCurrentMission();
+		if(mission.getOverworldSystem()==null) return;
 		final InterpolatingAltitudeMap map = 
 			tr.getGame().
 			getCurrentMission().
 			getOverworldSystem().
 			getAltitudeMap();
+		if(map==null)return;
 		double [] playerPos = other.getPosition();
 		double [] thisPos = entranceObject.getPosition();
 		final double groundHeightNorm =map.heightAt((thisPos[0]/TR.mapSquareSize), 

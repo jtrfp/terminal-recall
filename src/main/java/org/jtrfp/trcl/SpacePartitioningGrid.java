@@ -57,11 +57,36 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		g.removeBranch(this);
 	}
     }//end deactivate()
+    
+    public void notifyBranchAdded(SpacePartitioningGrid b){
+	final SpacePartitioningGrid<E> g = parentGrid.get();
+	    if (g != null)
+		g.notifyBranchAdded(b);
+    }//end notifyBranchAdded(...)
+    
+    public void notifyBranchRemoved(SpacePartitioningGrid b){
+	final SpacePartitioningGrid<E> g = parentGrid.get();
+	    if (g != null)
+		g.notifyBranchRemoved(b);
+    }//end notifyBranchRemoved(...)
 
 	private void addBranch(SpacePartitioningGrid<E> branchToAdd)
-		{if(!branchGrids.contains(branchToAdd))branchGrids.add(branchToAdd);}
+		{if(!branchGrids.contains(branchToAdd)){
+		    branchGrids.add(branchToAdd);
+		    if(parentGrid==null)return;
+		    final SpacePartitioningGrid<E> g = parentGrid.get();
+		    if (g != null)
+			g.notifyBranchAdded(branchToAdd);
+		    }//end if(!contains)
+		}//end addBranch(...)
 	private void removeBranch(SpacePartitioningGrid<E> branchToRemove)
-		{branchGrids.remove(branchToRemove);}
+		{if(branchGrids.remove(branchToRemove)){
+		    if(parentGrid==null)return;
+		    final SpacePartitioningGrid<E> g = parentGrid.get();
+		    if (g != null)
+			g.notifyBranchRemoved(branchToRemove);
+		    }//end if(!contains)
+		}//end removeBranch(...)
 	
 	private void setParentGrid(SpacePartitioningGrid<E> parentGrid){
 		this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);

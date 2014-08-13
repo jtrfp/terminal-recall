@@ -86,11 +86,11 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RAWVectorList;
 import org.jtrfp.trcl.img.vq.VectorList;
-import org.jtrfp.trcl.obj.DebrisFactory;
-import org.jtrfp.trcl.obj.ExplosionFactory;
-import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
+import org.jtrfp.trcl.obj.DebrisSystem;
+import org.jtrfp.trcl.obj.ExplosionSystem;
+import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
-import org.jtrfp.trcl.obj.SmokeFactory;
+import org.jtrfp.trcl.obj.SmokeSystem;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
@@ -106,10 +106,10 @@ public class ResourceManager{
 		= new SoftValueHashMap<String,BINFile.Model>();
 	private SoftValueHashMap<String, Model> 		modelCache 		
 		= new SoftValueHashMap<String,Model>();
-	private ExplosionFactory 				explosionFactory;
-	private SmokeFactory 					smokeFactory;
-	private PluralizedPowerupFactory 			pluralizedPowerupFactory;
-	private DebrisFactory 					debrisFactory;
+	private ExplosionSystem 				explosionFactory;
+	private SmokeSystem 					smokeFactory;
+	private PowerupSystem 			pluralizedPowerupFactory;
+	private DebrisSystem 					debrisFactory;
 	private ProjectileFactory [] 				projectileFactories;
 	private final TR 					tr;
 	
@@ -120,10 +120,10 @@ public class ResourceManager{
 	/**
 	 * @return the explosionFactory
 	 */
-	public ExplosionFactory getExplosionFactory() {
+	public ExplosionSystem getExplosionFactory() {
 	    return explosionFactory;
 	}
-	public void setExplosionFactory(ExplosionFactory ef){
+	public void setExplosionFactory(ExplosionSystem ef){
 	    explosionFactory=ef;
 	}
 	
@@ -551,23 +551,23 @@ public class ResourceManager{
 		}
 
 	public void setPluralizedPowerupFactory(
-		PluralizedPowerupFactory pluralizedPowerupFactory) {
+		PowerupSystem pluralizedPowerupFactory) {
 	    this.pluralizedPowerupFactory=pluralizedPowerupFactory;
 	    
 	}
-	public PluralizedPowerupFactory getPluralizedPowerupFactory(){return pluralizedPowerupFactory;}
+	public PowerupSystem getPluralizedPowerupFactory(){return pluralizedPowerupFactory;}
 
 	/**
 	 * @return the debrisFactory
 	 */
-	public DebrisFactory getDebrisFactory() {
+	public DebrisSystem getDebrisFactory() {
 	    return debrisFactory;
 	}
 
 	/**
 	 * @param debrisFactory the debrisFactory to set
 	 */
-	public void setDebrisFactory(DebrisFactory debrisFactory) {
+	public void setDebrisFactory(DebrisSystem debrisFactory) {
 	    this.debrisFactory = debrisFactory;
 	}
 
@@ -612,14 +612,14 @@ public class ResourceManager{
 	/**
 	 * @return the smokeFactory
 	 */
-	public SmokeFactory getSmokeFactory() {
+	public SmokeSystem getSmokeFactory() {
 	    return smokeFactory;
 	}
 
 	/**
 	 * @param smokeFactory the smokeFactory to set
 	 */
-	public void setSmokeFactory(SmokeFactory smokeFactory) {
+	public void setSmokeFactory(SmokeSystem smokeFactory) {
 	    this.smokeFactory = smokeFactory;
 	}
 

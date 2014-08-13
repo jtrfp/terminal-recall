@@ -12,15 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 
-public class SmokeFactory {
+public class SmokeSystem extends RenderableSpacePartitioningGrid{
     	private final TR tr;
     	private final int MAX_SMOKE_PER_POOL=80;
     	private final Smoke[][] allSmokes = new Smoke[SmokeType.values().length][];
     	private final int [] indices = new int[SmokeType.values().length];
-	public SmokeFactory(TR tr){
+	public SmokeSystem(TR tr){
+	    super(tr.getWorld());
 	    this.tr=tr;
 	    int i;
 	    for(SmokeType t:SmokeType.values()){
@@ -36,7 +38,7 @@ public class SmokeFactory {
 	    result.destroy();
 	    result.resetSmoke();
 	    result.setPosition(position);
-	    tr.getWorld().add(result);
+	    add(result);
 	    return result;
 	}//end triggerSmoke()
 }//end SmokeFactory

@@ -27,7 +27,6 @@ import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
-import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -38,14 +37,13 @@ import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.obj.DebrisFactory;
+import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
-import org.jtrfp.trcl.obj.ExplosionFactory;
+import org.jtrfp.trcl.obj.ExplosionSystem;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.PluralizedPowerupFactory;
-import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
-import org.jtrfp.trcl.obj.SmokeFactory;
+import org.jtrfp.trcl.obj.SmokeSystem;
 
 public class Game {
     private TR 		tr;
@@ -233,24 +231,28 @@ public class Game {
 	try {
 	    // Make color zero translucent.
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Color[] pal = tr.getGlobalPalette();
-	    pal[0] = new Color(0, 0, 0, 0);
+	    final Color[] pal 	     = tr.getGlobalPalette();
+	    pal[0] 		     = new Color(0, 0, 0, 0);
 	    tr.setGlobalPalette(pal);
 	    backdropSystem = new BackdropSystem(tr.getWorld());
 	    backdropSystem.activate();
 	    backdropSystem.loadingMode();
 	    // POWERUPS
 	    earlyLoadingScreen.setStatusText("Loading powerup assets...");
-	    rm.setPluralizedPowerupFactory(new PluralizedPowerupFactory(tr));
+	    rm.setPluralizedPowerupFactory(new PowerupSystem(tr));
+	    rm.getPluralizedPowerupFactory().activate();
 	    // EXPLOSIONS
 	    earlyLoadingScreen.setStatusText("Loading explosion assets...");
-	    rm.setExplosionFactory(new ExplosionFactory(tr));
+	    rm.setExplosionFactory(new ExplosionSystem(tr));
+	    rm.getExplosionFactory().activate();
 	    // SMOKE
 	    earlyLoadingScreen.setStatusText("Loading smoke assets...");
-	    rm.setSmokeFactory(new SmokeFactory(tr));
+	    rm.setSmokeFactory(new SmokeSystem(tr));
+	    rm.getSmokeFactory().activate();
 	    // DEBRIS
 	    earlyLoadingScreen.setStatusText("Loading debris assets...");
-	    rm.setDebrisFactory(new DebrisFactory(tr));
+	    rm.setDebrisFactory(new DebrisSystem(tr));
+	    rm.getDebrisFactory().activate();
 
 	    // SETUP PROJECTILE FACTORIES
 	    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
@@ -294,7 +296,12 @@ public class Game {
 		 navSystem,
 		 hudSystem,
 		 upfrontDisplay,
-		 backdropSystem
+		 backdropSystem,
+		 rm.getDebrisFactory(),
+		 rm.getPluralizedPowerupFactory(),
+		 rm.getProjectileFactories(),
+		 rm.getExplosionFactory(),
+		 rm.getSmokeFactory()
 	    };
 	    briefingMode = new Object[]{
 		 briefingScreen,

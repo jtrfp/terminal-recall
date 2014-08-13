@@ -20,8 +20,8 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class SpawnsRandomExplosionsAndDebris extends Behavior {
-    private final ExplosionFactory explosions;
-    private final DebrisFactory debris;
+    private final ExplosionSystem explosions;
+    private final DebrisSystem debris;
     public SpawnsRandomExplosionsAndDebris(TR tr){
 	this.explosions=tr.getResourceManager().getExplosionFactory();
 	this.debris=tr.getResourceManager().getDebrisFactory();

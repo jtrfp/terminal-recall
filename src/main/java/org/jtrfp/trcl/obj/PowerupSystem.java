@@ -12,14 +12,16 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 
-public class PluralizedPowerupFactory {
+public class PowerupSystem extends RenderableSpacePartitioningGrid{
     private final PowerupFactory [] factories = new PowerupFactory[Powerup.values().length];
-    public PluralizedPowerupFactory(TR tr){
+    public PowerupSystem(TR tr){
+	super(tr.getWorld());
 	for(Powerup p:Powerup.values()){
-	    factories[p.ordinal()]=new PowerupFactory(tr, p);
+	    factories[p.ordinal()]=new PowerupFactory(tr, p, this);
 	}//end for(Powerups)
     }//end constructor
     

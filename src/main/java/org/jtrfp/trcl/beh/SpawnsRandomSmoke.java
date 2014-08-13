@@ -16,10 +16,10 @@ import java.util.Arrays;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
-import org.jtrfp.trcl.obj.SmokeFactory;
+import org.jtrfp.trcl.obj.SmokeSystem;
 
 public class SpawnsRandomSmoke extends Behavior {
-    private final SmokeFactory Smokes;
+    private final SmokeSystem Smokes;
     public SpawnsRandomSmoke(TR tr){
 	this.Smokes=tr.getResourceManager().getSmokeFactory();
     }

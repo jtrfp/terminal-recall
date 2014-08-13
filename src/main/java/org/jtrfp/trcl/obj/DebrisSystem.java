@@ -13,16 +13,17 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.pool.ObjectPool;
 
-public class DebrisFactory{
+public class DebrisSystem extends RenderableSpacePartitioningGrid{
     private final int DEBRIS_POOL_SIZE=80;
     private final TR tr;
     private final ObjectPool<Debris> pool;
-    public DebrisFactory(TR tr){
-	super();
+    public DebrisSystem(TR tr){
+	super(tr.getWorld());
 	this.tr=tr;
 	this.pool=new ObjectPool<Debris>(
 		new ObjectPool.RoundRobin<Debris>(DEBRIS_POOL_SIZE), 
@@ -62,7 +63,7 @@ public class DebrisFactory{
     public Debris spawn(double[] ds, Vector3D velocity) {
 	final Debris result = pool.pop();
 	result.reset(ds, velocity);
-	tr.getWorld().add(result);
+	add(result);
 	return result;
     }//end fire(...)
 }

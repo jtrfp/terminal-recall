@@ -12,18 +12,20 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 
-public class ExplosionFactory {
+public class ExplosionSystem extends RenderableSpacePartitioningGrid {
     	//private int billowIndex=0,blastIndex=0,bigExplosionIndex=0;
     	private final TR tr;
     	private final int MAX_EXPLOSIONS_PER_POOL=20;
     	private final Explosion[][] allExplosions = new Explosion[ExplosionType.values().length][];
     	private final int [] indices = new int[ExplosionType.values().length];
-	public ExplosionFactory(TR tr){
+	public ExplosionSystem(TR tr){
+	    super(tr.getWorld());
 	    this.tr=tr;
 	    int i;
 	    for(ExplosionType t:ExplosionType.values()){
@@ -31,7 +33,7 @@ public class ExplosionFactory {
 		for(i=0; i<MAX_EXPLOSIONS_PER_POOL; i++){
 			allExplosions[t.ordinal()][i]=new Explosion(tr,t);
 		    }
-	    }
+	    }//end for(explosionTypes)
 	}//end constructor()
 	
 	public Explosion triggerExplosion(double [] position, ExplosionType type) {
@@ -44,7 +46,7 @@ public class ExplosionFactory {
 	    pos[1]=position[1];
 	    pos[2]=position[2];
 	    result.notifyPositionChange();
-	    final SmokeFactory sf = tr.getResourceManager().getSmokeFactory();
+	    final SmokeSystem sf = tr.getResourceManager().getSmokeFactory();
 	    final int NUM_PUFFS=1;
 	    for(int i=0; i<NUM_PUFFS; i++){
 		final double [] work =
@@ -58,7 +60,7 @@ public class ExplosionFactory {
 			work),
 			SmokeType.Puff);
 	    }//end for(i)
-	    tr.getWorld().add(result);
+	    add(result);
 	    return result;
 	    
 	}

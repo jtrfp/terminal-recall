@@ -281,7 +281,9 @@ public final class Renderer {
 	ensureInit();
 	gpu.memoryManager.get().bindToUniform(1, primaryProgram,
 		    primaryProgram.getUniform("rootBuffer"));
-	gpu.memoryManager.get().flushStalePages();
+	//Memory writes have been going directly to the GPU memory over PCIe so flushing isn't needed yet.
+	//If the driver misbehaves then we can go back to flushing pages.
+	//gpu.memoryManager.get().flushStalePages();
 	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
 	renderList.render(gl);
@@ -292,7 +294,8 @@ public final class Renderer {
     }//end render()
     
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
-	
+	if(pr instanceof WorldObject)
+	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
 	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -302,11 +305,14 @@ public final class Renderer {
 		return null;}
 	      }
 	});
-	
     }//end temporarilyMakeImmediatelyVisible(...)
     
     public void updateVisibilityList() {
-	if(visibilityUpdateFuture!=null){if(!visibilityUpdateFuture.isDone())return;}
+	if(visibilityUpdateFuture!=null){
+	    if(!visibilityUpdateFuture.isDone()){
+		System.out.println("Renderer.updateVisibilityList() !done");return;
+		}
+	    }//end if(visibilityUpdateFuture!=null)
 	if(!getBackRenderList().isDone())return;//Not ready.
 	final RenderList rl = getBackRenderList().get();
 	visibilityUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){

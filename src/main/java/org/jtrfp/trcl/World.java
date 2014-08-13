@@ -13,6 +13,8 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
@@ -23,6 +25,7 @@ public final class World extends RenderableSpacePartitioningGrid {
     double sizeX;
     public double sizeY;
     double sizeZ;
+    //private final AtomicBoolean	visibilityRefreshAlreadyRequested = new AtomicBoolean();
     private static final int blockGranularity = 8;// Dim-Segments per diameter.
 						  // should
     private Color fogColor = Color.black;
@@ -46,6 +49,26 @@ public final class World extends RenderableSpacePartitioningGrid {
 	tr.renderer.get().getCamera().setLookAtVector(dir.getHeading());
 	tr.renderer.get().getCamera().setUpVector(dir.getTop());
     }
+    
+    @Override
+    public void notifyBranchAdded(SpacePartitioningGrid b){//TODO: Optimized branch append.
+	notifyBranchRemoved(b);
+    }//end notifyBranchAdded(...)
+    
+    @Override
+    public void notifyBranchRemoved(SpacePartitioningGrid b){
+	tr.getThreadManager().visibilityCalc();
+	/*
+	if(!visibilityRefreshAlreadyRequested.getAndSet(true)){
+	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    tr.getThreadManager().visibilityCalc();
+		    return null;
+		}});
+	}//end if(!alreadyRequested)
+	*/
+    }//end notifyBranchRemoved(...)
 
     /**
      * @return the fogColor

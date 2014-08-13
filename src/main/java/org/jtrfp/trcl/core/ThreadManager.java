@@ -23,10 +23,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
+import org.jtrfp.trcl.AbstractSubmitter;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
@@ -37,7 +40,7 @@ import com.jogamp.opengl.util.Animator;
 public final class ThreadManager {
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= RENDER_FPS;
-    public static final int RENDERLIST_REFRESH_FPS 	= 5;
+    public static final int RENDERLIST_REFRESH_FPS 	= 1;
     private final TR 			tr;
     private final Timer 		lightweightTimer 	= new Timer("LightweightTimer");
     private final Timer 		gameplayTimer 		= new Timer("GameplayTimer");
@@ -47,9 +50,29 @@ public final class ThreadManager {
     private Thread 			renderingThread;
     private Animator			animator;
     public final ExecutorService	threadPool 			= 
-	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));
+	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(200));//TODO: Grow this out.
     private TRFutureTask<Void>		visibilityCalcTask;
-    private ArrayDeque<TRFutureTask>	gpuMemAccessTasks	= new ArrayDeque<TRFutureTask>();
+    public final ArrayDeque<TRFutureTask<?>> pendingGPUMemAccessTasks	= new ArrayDeque<TRFutureTask<?>>();
+    public final ArrayDeque<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayDeque<TRFutureTask<?>>();
+    private final AtomicLong		nextVisCalcTime 		= new AtomicLong(0L);
+    private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
+	@Override
+	public void submit(TRFutureTask<?> item) {
+	    synchronized(pendingGPUMemAccessTasks){
+		pendingGPUMemAccessTasks.add(item);
+		}
+	}//end submit(...)
+    };
+    private final Submitter<TRFutureTask<?>> activeGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
+	@Override
+	public void submit(TRFutureTask<?> item) {
+	    synchronized(activeGPUMemAccessTasks){
+		activeGPUMemAccessTasks.add(item);
+		threadPool.submit(item);
+		}
+	}//end submit(...)
+    };
+    private volatile Submitter<TRFutureTask<?>>	currentGPUMemAccessTaskSubmitter = activeGPUMemAccessTaskSubmitter;
     
     ThreadManager(final TR tr) {
 	this.tr = tr;
@@ -63,7 +86,6 @@ public final class ThreadManager {
 	    if(!tr.renderer.get().currentRenderList().isDone())
 		return;
 	}else return;
-	//TODO: Co-modification of list risk.
 	final List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	for (int i = 0; i<vl.size(); i++) {
@@ -95,17 +117,23 @@ public final class ThreadManager {
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
 
-    private void visibilityCalc() {
-	if(tr.renderer==null)return;
-	if(!tr.renderer.isDone())return;
-	tr.renderer.get().updateVisibilityList();
+    public void visibilityCalc() {
+	final long currTimeMillis = System.currentTimeMillis();
+	//Sanity checks
+	if(tr.renderer==null)		return;
+	if(!tr.renderer.isDone())	return;
 	if(visibilityCalcTask!=null){
-	    if(!visibilityCalcTask.isDone())return;
+	    if(!visibilityCalcTask.isDone())
+		{System.out.println("visiblityCalc() !done. Return...");return;}
 	}
 	visibilityCalcTask = new TRFutureTask<Void>(tr,new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
+		//Thread.sleep(100);
+		tr.renderer.get().updateVisibilityList();
 		tr.getCollisionManager().updateCollisionList();
+		//Nudge of 10ms to compensate for drift of the timer task
+		nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
 		return null;
 	    }});
 	threadPool.submit(visibilityCalcTask);
@@ -113,10 +141,7 @@ public final class ThreadManager {
     
     public <T> TRFuture<T> submitToGPUMemAccess(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
-	synchronized(gpuMemAccessTasks){
-	 gpuMemAccessTasks.add(result);
-	 threadPool.submit(result);
-	 }
+	currentGPUMemAccessTaskSubmitter.submit(result);
 	return result;
     }//end submitToGPUMemAccess(...)
     
@@ -138,9 +163,11 @@ public final class ThreadManager {
 	gameplayTimer.schedule(new TimerTask(){
 	    @Override
 	    public void run() {
-				if (counter++ % Math.ceil(RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
-					visibilityCalc();}
-				    if(tr.getPlayer()!=null)gameplay();
+		if (counter++ % Math.ceil(RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
+		 if(System.currentTimeMillis()<nextVisCalcTime.get())
+		 return;
+		 visibilityCalc();}
+		if(tr.getPlayer()!=null)gameplay();
 		
 	    }}, 0, 1000/GAMEPLAY_FPS);
 	animator = new Animator(tr.getRootWindow().getCanvas());
@@ -182,14 +209,19 @@ public final class ThreadManager {
     private void attemptRender(){
 	if(tr.renderer!=null){
 	    if(tr.renderer.isDone()){
-		synchronized(gpuMemAccessTasks){
-		 while(!gpuMemAccessTasks.isEmpty()){
-		     if(!gpuMemAccessTasks.peek().isDone()){
+		//Swap submitters
+		currentGPUMemAccessTaskSubmitter=pendingGPUMemAccessTaskSubmitter;
+		synchronized(activeGPUMemAccessTasks){
+		 while(!activeGPUMemAccessTasks.isEmpty()){
+		     if(!activeGPUMemAccessTasks.peek().isDone()){
 			 return;//Abort. Not ready to go yet.
-		     }else gpuMemAccessTasks.poll();
+		     }else activeGPUMemAccessTasks.poll();
 		 }//end while(!empty)
 		 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
 		 }//end sync(gpuMemAccessTasks)
+		currentGPUMemAccessTaskSubmitter=activeGPUMemAccessTaskSubmitter;
+		while(!pendingGPUMemAccessTasks.isEmpty())
+		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
 	    	}////end if(renderer.isDone)
 	    }//end if(!null)
     }//end attemptRender()

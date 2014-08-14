@@ -35,6 +35,7 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Propelled;
 
 public class Mission {
     private final TR 		tr;
@@ -86,6 +87,7 @@ public class Mission {
 	    final Player player      = tr.getPlayer();
 	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
+	    player.setActive(false);
 	    overworldSystem = new OverworldSystem(world,
 		    progressStages[LoadingStages.overworld.ordinal()]);
 	    getOverworldSystem().loadLevel(lvl, tdf);
@@ -107,6 +109,10 @@ public class Mission {
 	    player.setDirection(getPlayerStartDirection());
 	    player.setHeading(player.getHeading().negate());// Kludge to fix
 							    // incorrect heading
+	    ///////// STATE
+	    final Propelled propelled = player.probeForBehavior(Propelled.class); 
+	    propelled.setPropulsion(propelled.getMinPropulsion());
+	    
 	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
 	    Factory f = new NAVObjective.Factory(tr);
 

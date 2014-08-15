@@ -139,13 +139,13 @@ public final class ThreadManager {
 	threadPool.submit(visibilityCalcTask);
     }//end visibilityCalc()
     
-    public <T> TRFuture<T> submitToGPUMemAccess(Callable<T> c){
+    public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
 	currentGPUMemAccessTaskSubmitter.submit(result);
 	return result;
     }//end submitToGPUMemAccess(...)
     
-    public <T> TRFuture<T> submitToGL(Callable<T> c){
+    public <T> TRFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr,c);
 	if(Thread.currentThread()!=renderingThread)
 	    result.enqueue();

@@ -274,7 +274,9 @@ public final class Renderer {
 	final GL3 gl = gpu.getGl();
 	///if (!active)
 	//    return;
-	if(!gpu.textureManager.isDone()||!gpu.memoryManager.isDone())
+	if(!gpu.textureManager.isDone())
+	    return;
+	if(!gpu.textureManager.get().vqCodebookManager.isDone())
 	    return;
 	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
 	//gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);

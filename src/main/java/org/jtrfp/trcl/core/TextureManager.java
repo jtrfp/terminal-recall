@@ -32,7 +32,7 @@ public class TextureManager {
     private final TR 				tr;
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
-    public final TRFuture<VQCodebookManager>	vqCodebookManager;
+    public final TRFutureTask<VQCodebookManager>vqCodebookManager;
     private TextureDescription			fallbackTexture;
     public TextureManager(final TR tr){
 	this.tr			= tr;
@@ -43,7 +43,6 @@ public class TextureManager {
 	    public VQCodebookManager call() throws Exception {
 		return new VQCodebookManager(tr);
 	    }});
-	
     }//end constructor
     
     public Texture newTexture(ByteBuffer imageRGB8, String debugName, boolean uvWrapping){

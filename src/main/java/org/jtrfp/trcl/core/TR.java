@@ -18,20 +18,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.BackdropSystem;
-import org.jtrfp.trcl.HUDSystem;
-import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.MatrixWindow;
-import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.OutputDump;
-import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;

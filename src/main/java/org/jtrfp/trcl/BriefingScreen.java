@@ -20,6 +20,7 @@ import java.util.TimerTask;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -169,8 +170,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.renderer.get().getCamera();
-	missionTXT
-				 = rm.getMissionText(lvl.getBriefingTextFile());
+	missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
 	planetDisplayMode(lvl);
 	setContent(
 		missionTXT.getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
@@ -209,6 +209,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
+	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze
 	    briefingChars.setScrollPosition(NUM_LINES-2);
 	    setContent(intro.getDescriptionString());

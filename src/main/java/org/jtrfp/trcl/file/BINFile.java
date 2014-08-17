@@ -680,8 +680,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 				"vertices", ShortFaceBlockVertex.class, i),
 				ClassInclusion
 					.classOf(ShortFaceBlockVertex.class));
-		    }
-
+		    }//end for(vertices)
 		}// end describeFormat(Parser prs)
 
 		protected abstract byte getBlockID();
@@ -706,80 +705,63 @@ public abstract class BINFile implements ThirdPartyParseable {
 	    public static class BillboardTexCoords0x04 implements
 		    ThirdPartyParseable {
 		private int numVertices;
-		private List<FaceBlockVertex> vertices = new ArrayList<FaceBlockVertex>();
+		private List<UVCoordinate> vertices = new ArrayList<UVCoordinate>();
 
 		@Override
 		public void describeFormat(Parser prs) {
 		    prs.littleEndian();
 		    prs.expectBytes(new byte[] { 0, 0, 0, 0x04 },
 			    FailureBehavior.UNRECOGNIZED_FORMAT);
-		    prs.expectBytes(new byte[] { 0 },
+		    prs.expectBytes(new byte[] { 0, 0, 0, 0 },
 			    FailureBehavior.UNRECOGNIZED_FORMAT);
 		    prs.int4s(prs.property("numVertices", int.class));
 		    for (int i = 0; i < getNumVertices(); i++) {
-			prs.indexedProperty("vertices", FaceBlockVertex.class,
-				i);
+			prs.subParseProposedClasses(prs.indexedProperty("vertices", UVCoordinate.class,
+				i),ClassInclusion
+				.classOf(UVCoordinate.class));
 		    }
 		}// end describeFormat(..)
-
-		public static class FaceBlockVertex implements
+		
+		public static class UVCoordinate implements
 			ThirdPartyParseable {
-		    int vertexIndex, textureCoordinateU, textureCoordinateV;
-
+		    int textureCoordinateU, textureCoordinateV;
+		    
 		    @Override
 		    public void describeFormat(Parser prs)
 			    throws UnrecognizedFormatException {
-			prs.int4s(prs.property("vertexIndex", int.class));
+			System.err.println("UVCoordinate");
 			prs.int4s(prs.property("textureCoordinateU", int.class));
 			prs.int4s(prs.property("textureCoordinateV", int.class));
-		    }
-
-		    /**
-		     * @return the vertexIndex
-		     */
-		    public int getVertexIndex() {
-			return vertexIndex;
-		    }
-
-		    /**
-		     * @param vertexIndex
-		     *            the vertexIndex to set
-		     */
-		    public void setVertexIndex(int vertexIndex) {
-			this.vertexIndex = vertexIndex;
 		    }
 
 		    /**
 		     * @return the textureCoordinateU
 		     */
 		    public int getTextureCoordinateU() {
-			return textureCoordinateU;
+		        return textureCoordinateU;
 		    }
 
 		    /**
-		     * @param textureCoordinateU
-		     *            the textureCoordinateU to set
+		     * @param textureCoordinateU the textureCoordinateU to set
 		     */
 		    public void setTextureCoordinateU(int textureCoordinateU) {
-			this.textureCoordinateU = textureCoordinateU;
+		        this.textureCoordinateU = textureCoordinateU;
 		    }
 
 		    /**
 		     * @return the textureCoordinateV
 		     */
 		    public int getTextureCoordinateV() {
-			return textureCoordinateV;
+		        return textureCoordinateV;
 		    }
 
 		    /**
-		     * @param textureCoordinateV
-		     *            the textureCoordinateV to set
+		     * @param textureCoordinateV the textureCoordinateV to set
 		     */
 		    public void setTextureCoordinateV(int textureCoordinateV) {
-			this.textureCoordinateV = textureCoordinateV;
+		        this.textureCoordinateV = textureCoordinateV;
 		    }
-
-		}// end FaceBlockVertex
+		}//end UVCoordinate
 
 		/**
 		 * @return the numVertices
@@ -799,7 +781,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 		/**
 		 * @return the vertices
 		 */
-		public List<FaceBlockVertex> getVertices() {
+		public List<UVCoordinate> getVertices() {
 		    return vertices;
 		}
 
@@ -807,7 +789,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 		 * @param vertices
 		 *            the vertices to set
 		 */
-		public void setVertices(List<FaceBlockVertex> vertices) {
+		public void setVertices(List<UVCoordinate> vertices) {
 		    this.vertices = vertices;
 		}
 	    }// end Unknown 0x04

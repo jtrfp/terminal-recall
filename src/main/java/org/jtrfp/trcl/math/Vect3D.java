@@ -71,9 +71,9 @@ public final class Vect3D {
     }
     
     public static double taxicabDistance(double [] l, double [] r){
-	final double dx=l[0]-r[0];
-	final double dy=l[1]-r[1];
-	final double dz=l[2]-r[2];
+	final double dx=Math.abs(l[0]-r[0]);
+	final double dy=Math.abs(l[1]-r[1]);
+	final double dz=Math.abs(l[2]-r[2]);
 	return dx+dy+dz;
     }
 

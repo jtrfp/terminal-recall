@@ -25,7 +25,7 @@ public class TriggersVisCalcWithMovement extends Behavior {
     public void _tick(long tickTimeMillis){
 	final WorldObject parent = getParent();
 	final double [] pPos = parent.getPosition();
-	final double dist = Math.abs(Vect3D.taxicabDistance(pPos, positionOfLastVisCalc));
+	final double dist = Vect3D.taxicabDistance(pPos, positionOfLastVisCalc);
 	if(dist>distanceThreshold){
 	    System.out.println("TriggersVisCalcWithMovement triggered.");
 	    positionOfLastVisCalc[0]=pPos[0];

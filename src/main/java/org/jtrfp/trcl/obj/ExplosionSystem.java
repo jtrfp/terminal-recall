@@ -46,7 +46,7 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 	    pos[1]=position[1];
 	    pos[2]=position[2];
 	    result.notifyPositionChange();
-	    final SmokeSystem sf = tr.getResourceManager().getSmokeFactory();
+	    final SmokeSystem sf = tr.getResourceManager().getSmokeSystem();
 	    final int NUM_PUFFS=1;
 	    for(int i=0; i<NUM_PUFFS; i++){
 		final double [] work =

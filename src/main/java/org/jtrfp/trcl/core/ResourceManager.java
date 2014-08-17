@@ -107,9 +107,9 @@ public class ResourceManager{
 	private SoftValueHashMap<String, Model> 		modelCache 		
 		= new SoftValueHashMap<String,Model>();
 	private ExplosionSystem 				explosionFactory;
-	private SmokeSystem 					smokeFactory;
-	private PowerupSystem 			pluralizedPowerupFactory;
-	private DebrisSystem 					debrisFactory;
+	private SmokeSystem 					smokeSystem;
+	private PowerupSystem 			powerupSystem;
+	private DebrisSystem 					debrisSystem;
 	private ProjectileFactory [] 				projectileFactories;
 	private final TR 					tr;
 	
@@ -406,6 +406,8 @@ public class ResourceManager{
 					}//end for(dataBlocks)
 				result.finalizeModel();
 				result.setDebugName(name);
+				if(result.getTriangleList()==null && result.getTransparentTriangleList()==null)
+				    throw new RuntimeException("Resulting BIN has no triangleList");
 				if(cache)modelCache.put(name, result);
 				return result;
 				}//end try{}
@@ -550,25 +552,18 @@ public class ResourceManager{
 		return result;
 		}
 
-	public void setPluralizedPowerupFactory(
-		PowerupSystem pluralizedPowerupFactory) {
-	    this.pluralizedPowerupFactory=pluralizedPowerupFactory;
+	public void setPowerupSystem(
+		PowerupSystem powerupSystem) {
+	    this.powerupSystem=powerupSystem;
 	    
 	}
-	public PowerupSystem getPluralizedPowerupFactory(){return pluralizedPowerupFactory;}
+	public PowerupSystem getPowerupSystem(){return powerupSystem;}
 
-	/**
-	 * @return the debrisFactory
-	 */
-	public DebrisSystem getDebrisFactory() {
-	    return debrisFactory;
+	public DebrisSystem getDebrisSystem() {
+	    return debrisSystem;
 	}
-
-	/**
-	 * @param debrisFactory the debrisFactory to set
-	 */
-	public void setDebrisFactory(DebrisSystem debrisFactory) {
-	    this.debrisFactory = debrisFactory;
+	public void setDebrisSystem(DebrisSystem debrisSystem) {
+	    this.debrisSystem = debrisSystem;
 	}
 
 	public ProjectileFactory[] getProjectileFactories() {
@@ -612,15 +607,15 @@ public class ResourceManager{
 	/**
 	 * @return the smokeFactory
 	 */
-	public SmokeSystem getSmokeFactory() {
-	    return smokeFactory;
+	public SmokeSystem getSmokeSystem() {
+	    return smokeSystem;
 	}
 
 	/**
 	 * @param smokeFactory the smokeFactory to set
 	 */
-	public void setSmokeFactory(SmokeSystem smokeFactory) {
-	    this.smokeFactory = smokeFactory;
+	public void setSmokeSystem(SmokeSystem smokeFactory) {
+	    this.smokeSystem = smokeFactory;
 	}
 
 	public VOXFile getVOXFile(String fileName) throws IllegalAccessException, IOException, FileLoadException {

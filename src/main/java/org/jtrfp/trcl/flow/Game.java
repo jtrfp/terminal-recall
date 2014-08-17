@@ -239,20 +239,20 @@ public class Game {
 	    backdropSystem.loadingMode();
 	    // POWERUPS
 	    earlyLoadingScreen.setStatusText("Loading powerup assets...");
-	    rm.setPluralizedPowerupFactory(new PowerupSystem(tr));
-	    rm.getPluralizedPowerupFactory().activate();
+	    rm.setPowerupSystem(new PowerupSystem(tr));
+	    rm.getPowerupSystem().activate();
 	    // EXPLOSIONS
 	    earlyLoadingScreen.setStatusText("Loading explosion assets...");
 	    rm.setExplosionFactory(new ExplosionSystem(tr));
 	    rm.getExplosionFactory().activate();
 	    // SMOKE
 	    earlyLoadingScreen.setStatusText("Loading smoke assets...");
-	    rm.setSmokeFactory(new SmokeSystem(tr));
-	    rm.getSmokeFactory().activate();
+	    rm.setSmokeSystem(new SmokeSystem(tr));
+	    rm.getSmokeSystem().activate();
 	    // DEBRIS
 	    earlyLoadingScreen.setStatusText("Loading debris assets...");
-	    rm.setDebrisFactory(new DebrisSystem(tr));
-	    rm.getDebrisFactory().activate();
+	    rm.setDebrisSystem(new DebrisSystem(tr));
+	    rm.getDebrisSystem().activate();
 
 	    // SETUP PROJECTILE FACTORIES
 	    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
@@ -297,11 +297,11 @@ public class Game {
 		 hudSystem,
 		 upfrontDisplay,
 		 backdropSystem,
-		 rm.getDebrisFactory(),
-		 rm.getPluralizedPowerupFactory(),
+		 rm.getDebrisSystem(),
+		 rm.getPowerupSystem(),
 		 rm.getProjectileFactories(),
 		 rm.getExplosionFactory(),
-		 rm.getSmokeFactory()
+		 rm.getSmokeSystem()
 	    };
 	    briefingMode = new Object[]{
 		 briefingScreen,

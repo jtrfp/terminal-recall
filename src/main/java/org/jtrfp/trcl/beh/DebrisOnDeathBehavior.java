@@ -24,16 +24,17 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
 	WorldObject p = getParent();
 	final double maxVertexValue;
 	final Model model = p.getModel();
-	if(model.getTriangleList()!=null)maxVertexValue=model.getTriangleList().getMaximumVertexValue();
-	else if(model.getTransparentTriangleList()!=null)maxVertexValue=model.getTransparentTriangleList().getMaximumVertexValue();
+	if(model.getTriangleList()!=null)
+	    maxVertexValue=model.getTriangleList().getMaximumVertexValue();
+	else if(model.getTransparentTriangleList()!=null)
+	    maxVertexValue=model.getTransparentTriangleList().getMaximumVertexValue();
 	else return;//Give up
 	for(int i=0; i<MIN_FRAGS+maxVertexValue/4000; i++){
-	    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
+	    p.getTr().getResourceManager().getDebrisSystem().spawn(p.getPositionWithOffset(), 
 	    new Vector3D(
 		Math.random()*MAX_SPEED-MAX_SPEED/2.,
 		Math.random()*MAX_SPEED+60000,
 		Math.random()*MAX_SPEED-MAX_SPEED/2.));
 	}//end for(NUM_FRAGS)
     }//end constructor
-
-}
+}//end DebrisOnDeathBehavior

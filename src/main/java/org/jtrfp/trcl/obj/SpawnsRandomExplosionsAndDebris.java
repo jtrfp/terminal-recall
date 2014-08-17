@@ -24,7 +24,7 @@ public class SpawnsRandomExplosionsAndDebris extends Behavior {
     private final DebrisSystem debris;
     public SpawnsRandomExplosionsAndDebris(TR tr){
 	this.explosions=tr.getResourceManager().getExplosionFactory();
-	this.debris=tr.getResourceManager().getDebrisFactory();
+	this.debris=tr.getResourceManager().getDebrisSystem();
     }
     @Override
     public void _tick(long timeMillis){

@@ -21,7 +21,7 @@ import org.jtrfp.trcl.obj.SmokeSystem;
 public class SpawnsRandomSmoke extends Behavior {
     private final SmokeSystem Smokes;
     public SpawnsRandomSmoke(TR tr){
-	this.Smokes=tr.getResourceManager().getSmokeFactory();
+	this.Smokes=tr.getResourceManager().getSmokeSystem();
     }
     @Override
     public void _tick(long timeMillis){

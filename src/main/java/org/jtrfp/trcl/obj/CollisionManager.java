@@ -66,8 +66,8 @@ public class CollisionManager {
 	    for (int j = i + 1; j < collideable.size(); j++) {
 		final WorldObject right = collideable.get(j);
 		if (left.isActive()&& right.isActive()){
-			if(TR.sloppyTwosComplimentTaxicabDistanceXZ(left.getPosition(),
-				right.getPosition()) < MAX_CONSIDERATION_DISTANCE) {
+		 if(TR.sloppyTwosComplimentTaxicabDistanceXZ(left.getPosition(),
+		  right.getPosition()) < MAX_CONSIDERATION_DISTANCE) {
 		    left.proposeCollision(right);
 		    right.proposeCollision(left);
 		    }//end if(distance<MAX_CONSIDERATION)

@@ -107,7 +107,10 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 for(ProjectileFactory pf:pfs){
 		     Projectile [] projectiles = pf.getProjectiles();
 		     for(Projectile proj:projectiles){
-			 ((WorldObject)proj).getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
+			 ((WorldObject)proj).
+			  getBehavior().
+			  probeForBehavior(LoopingPositionBehavior.class).
+			  setEnable(false);
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
 		 entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);

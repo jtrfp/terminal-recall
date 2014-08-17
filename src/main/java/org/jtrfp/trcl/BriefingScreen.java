@@ -204,10 +204,29 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setTarget(wo);
 	    camera.probeForBehavior(RotateAroundObject.class).setAngularVelocityRPS(.3);
 	    //Roughly center the object (ground objects have their bottom at Y=0)
-	    camera.probeForBehavior(RotateAroundObject.class).setOffset(
-		    new double []{0,wo.getModel().getTriangleList().getMaximumVertexDims().getY()/2,0});
-	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
-		    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);
+	    if(wo.getModel().getTriangleList()!=null){
+	     camera.probeForBehavior(RotateAroundObject.class).setOffset(
+		    new double []{
+			    0,
+			    wo.getModel().
+			     getTriangleList().
+			     getMaximumVertexDims().
+			     getY()/2,
+			    0});
+	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
+			    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);}
+	    else if(wo.getModel().getTransparentTriangleList()!=null){
+	     camera.probeForBehavior(RotateAroundObject.class).setOffset(
+		    new double []{
+			 0,
+			 wo.getModel().
+			 getTransparentTriangleList().
+			 getMaximumVertexDims().
+			 getY()/2,
+			 0});
+	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
+			    wo.getModel().getTransparentTriangleList().getMaximumVertexDims().getX()*6);}
+	    
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze

@@ -39,13 +39,17 @@ public class DamageableBehavior extends Behavior{
 	protected void generalDamage(int dmg){
 	    if(!isEnabled())return;
 	    if(isInvincible())return;
+	    if(health<=0)return;
 	    health-=dmg;
-		if(health<=0){
-		    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
-		    getParent().destroy();
-		}//end if(dead)
+		if(health<=0)
+		    die();
 		else if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
 	}//end generalDamage(...)
+	
+	private void die(){
+	    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
+	    getParent().destroy();
+	}
 
 	public boolean isInvincible(){
 	    return invincibilityExpirationTime>System.currentTimeMillis();

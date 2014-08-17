@@ -79,6 +79,10 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     boss=def.isObjectIsBoss();
     groundLocked=false;
     boolean customExplosion=false;
+    this.setModelOffset(
+	    TR.legacy2Modern(def.getPivotX()), 
+	    TR.legacy2Modern(def.getPivotY()), 
+	    TR.legacy2Modern(def.getPivotZ()));
     switch(logic){
     	case groundDumb:
     	    mobile=false;

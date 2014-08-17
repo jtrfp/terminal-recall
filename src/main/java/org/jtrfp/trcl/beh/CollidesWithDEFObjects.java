@@ -29,12 +29,14 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
     @Override
     public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
-	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
+	    final double distance=TR.twosComplimentDistance(
+		    other.getPositionWithOffset(), 
+		    getParent().getPositionWithOffset());
 	    otherDEF=new WeakReference<DEFObject>((DEFObject)other);
 	    if(distance<(boundingRadius+otherDEF.get().getBoundingRadius())){
 		getParent().getBehavior().probeForBehaviors(sub, DEFObjectCollisionListener.class);
 	    }
-	}
+	}//end if(DEFObject)
     }//end _proposeCollision()
     
     private final Submitter<DEFObjectCollisionListener> sub = new AbstractSubmitter<DEFObjectCollisionListener>(){

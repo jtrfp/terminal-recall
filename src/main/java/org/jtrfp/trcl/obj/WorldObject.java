@@ -40,10 +40,12 @@ import org.jtrfp.trcl.math.Vect3D;
 public class WorldObject implements PositionedRenderable {
     
     public static final boolean LOOP = true;
-
     private double[] 	heading = new double[] { 0, 0, 1 };
     private double[] 	top 	= new double[] { 0, 1, 0 };
     protected double[] position = new double[3];
+    protected double[] modelOffset= new double[3];
+    private final double[] positionWithOffset 
+    				= new double[3];
     private final TR 	tr;
     private boolean 	visible = true;
     private Model 	model;
@@ -355,9 +357,9 @@ public class WorldObject implements PositionedRenderable {
 	    rMd[9] = aY[2];
 	    rMd[10] = aZ[2];
 
-	    tMd[3] = position[0];
-	    tMd[7] = position[1];
-	    tMd[11] = position[2];
+	    tMd[3] = position[0]+modelOffset[0];
+	    tMd[7] = position[1]+modelOffset[1];
+	    tMd[11] = position[2]+modelOffset[2];
 	    
 	    if (translate()) {
 		Mat4x4.mul(tMd, rMd, rotTransM);
@@ -643,4 +645,20 @@ public class WorldObject implements PositionedRenderable {
 	    tr.objectDefinitionWindow.get().free(def);
 	super.finalize();
     }//end finalize()
+
+    /**
+     * @param modelOffset the modelOffset to set
+     */
+    public void setModelOffset(double x, double y, double z) {
+        modelOffset[0]=x;
+        modelOffset[1]=y;
+        modelOffset[2]=z;
+    }
+
+    public double[] getPositionWithOffset() {
+	positionWithOffset[0]=position[0]+modelOffset[0];
+	positionWithOffset[1]=position[1]+modelOffset[1];
+	positionWithOffset[2]=position[2]+modelOffset[2];
+	return positionWithOffset;
+    }
 }// end WorldObject

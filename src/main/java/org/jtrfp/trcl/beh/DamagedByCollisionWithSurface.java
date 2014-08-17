@@ -25,7 +25,7 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
 	final WorldObject p = getParent();
 	p.getBehavior().probeForBehavior(DamageableBehavior.class).shearDamage(collisionDamage);
 	for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
-	    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
+	    p.getTr().getResourceManager().getDebrisSystem().spawn(p.getPosition(), 
 	    new Vector3D(
 		Math.random()*MAX_SPEED-MAX_SPEED/2.,
 		Math.random()*MAX_SPEED+30000,

@@ -29,7 +29,7 @@ public class DamagedByCollisionWithGameplayObject extends Behavior{
 			{if(other instanceof Player && getParent() instanceof DEFObject)
 				{p.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/30);
 				other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/10);
-				p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), new Vector3D(0,1000,0));}
+				p.getTr().getResourceManager().getDebrisSystem().spawn(p.getPosition(), new Vector3D(0,1000,0));}
 			/*for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
 			    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 
 			    new Vector3D(

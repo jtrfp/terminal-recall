@@ -23,7 +23,10 @@ private ExplosionType type;
     @Override
     public synchronized void notifyDeath() {
 	    final WorldObject p = getParent();
-	    p.getTr().getResourceManager().getExplosionFactory().triggerExplosion(p.getPosition(),type);
+	    p.getTr().
+	     getResourceManager().
+	     getExplosionFactory().
+	     triggerExplosion(p.getPositionWithOffset(),type);
     }
     @Override
     public void _tick(long tickTimeMillis){

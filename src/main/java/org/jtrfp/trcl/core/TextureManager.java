@@ -13,12 +13,12 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.LineSegment;
 
 
@@ -34,6 +34,8 @@ public class TextureManager {
     private final TextureTOCWindow 		tocWindow;
     public final TRFutureTask<VQCodebookManager>vqCodebookManager;
     private TextureDescription			fallbackTexture;
+    private final ConcurrentHashMap<Integer,Texture>
+    						colorCache = new ConcurrentHashMap<Integer,Texture>();
     public TextureManager(final TR tr){
 	this.tr			= tr;
 	subTextureWindow 	= new SubTextureWindow(tr);
@@ -79,18 +81,13 @@ public class TextureManager {
     }//end getFallbackTexture()
     
     public TextureDescription solidColor(Color color) {
-	/*
-	BufferedImage img = new BufferedImage(64, 64,
-		BufferedImage.TYPE_INT_RGB);
-	Graphics g = img.getGraphics();
-	g.setColor(color);
-	g.fillRect(0, 0, 64, 64);
-	g.dispose();
-	final TextureDescription result = new Texture(img,
-		"Solid color " + color,tr,false);
-	*/
-	return new Texture(color,tr);
-	//return result;
+	final int	key 	= new Integer(color.getRed()+color.getGreen()*255+color.getBlue()*65535);
+	Texture		result 	= colorCache.get(key);
+	if(result!=null)
+	    return result;
+	result = new Texture(color,tr);
+	colorCache.put(key,result);
+	return result;
     }//end solidColor(...)
     
     public TextureTOCWindow getTOCWindow(){

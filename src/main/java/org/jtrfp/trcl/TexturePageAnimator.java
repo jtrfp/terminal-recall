@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.concurrent.Future;
-
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 
@@ -34,8 +32,10 @@ public class TexturePageAnimator implements Tickable{
     @Override
     public void tick() {
 	try{
-	final int texturePage = frames[(int)controller.getCurrentFrame()].getNodeForThisTexture().getTexturePage();
-	//final int texturePage = 100;
+	final int texturePage = frames[
+	 (int)controller.getCurrentFrame()].
+	 getNodeForThisTexture().
+	 getTexturePage();
 	vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(texturePage & 0xFF));
 	vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((texturePage >> 8) & 0xFF));
 	vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((texturePage >> 16) & 0xFF));}

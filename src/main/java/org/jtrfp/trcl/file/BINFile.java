@@ -145,6 +145,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 		protected byte getBlockID() {
 		    return 0x05;
 		}
+
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertex.class;
+		}
 	    }// end FaceBlock05
 
 	    /**
@@ -159,12 +164,22 @@ public abstract class BINFile implements ThirdPartyParseable {
 		protected byte getBlockID() {
 		    return 0x22;
 		}
+
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
+		}
 	    }// end DoubleSidedFaceBlock
 
 	    public static class ArenaFaceBlock extends FaceBlock {
 		@Override
 		protected byte getBlockID() {
 		    return 0x34;
+		}
+
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
 		}
 
 	    }// end FaceBlockXXX
@@ -176,6 +191,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    return 0x33;
 		}
 
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
+		}
+
 	    }// end FaceBlockXXX
 
 	    public static class OpaqueZeroShinyFaceBlock extends FaceBlock {
@@ -183,6 +203,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 		@Override
 		protected byte getBlockID() {
 		    return 0x29;
+		}
+
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
 		}
 
 	    }// end FaceBlockXXX
@@ -194,6 +219,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    return 0x18;
 		}
 
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
+		}
+
 	    }// end FaceBlockXXX
 
 	    public static class MTM1TransparentZeroFaceBlock extends FaceBlock {
@@ -201,6 +231,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 		@Override
 		protected byte getBlockID() {
 		    return 0x11;
+		}
+
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
 		}
 
 	    }// end FaceBlockXXX
@@ -212,12 +247,15 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    return 0x0E;
 		}
 
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;//TODO: Not really known.
+		}
+
 	    }// end FaceBlockXXX
 
-	    public static class FaceBlock19 implements ThirdPartyParseable {
-		int numVertices, normalX, normalY, normalZ, magic;
-		ArrayList<ShortFaceBlockVertex> vertices;
-
+	    public static class FaceBlock19 extends FaceBlock {
+/*
 		@Override
 		public void describeFormat(Parser prs)
 			throws UnrecognizedFormatException {
@@ -237,121 +275,15 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    }
 
 		}// end describeFormat(Parser prs)
-
-		public static class ShortFaceBlockVertex implements
-			ThirdPartyParseable {
-		    int vertexIndex;
-
-		    @Override
-		    public void describeFormat(Parser prs)
-			    throws UnrecognizedFormatException {
-			prs.int4s(prs.property("vertexIndex", int.class));
-		    }
-
-		    /**
-		     * @return the vertexIndex
-		     */
-		    public int getVertexIndex() {
-			return vertexIndex;
-		    }
-
-		    /**
-		     * @param vertexIndex
-		     *            the vertexIndex to set
-		     */
-		    public void setVertexIndex(int vertexIndex) {
-			this.vertexIndex = vertexIndex;
-		    }
-		}// end ShortFaceBlockVertex
-
-		/**
-		 * @return the numVertices
-		 */
-		public int getNumVertices() {
-		    return numVertices;
+		*/
+		@Override
+		protected byte getBlockID() {
+		    return 0x19;
 		}
 
-		/**
-		 * @param numVertices
-		 *            the numVertices to set
-		 */
-		public void setNumVertices(int numVertices) {
-		    this.numVertices = numVertices;
-		}
-
-		/**
-		 * @return the normalX
-		 */
-		public int getNormalX() {
-		    return normalX;
-		}
-
-		/**
-		 * @param normalX
-		 *            the normalX to set
-		 */
-		public void setNormalX(int normalX) {
-		    this.normalX = normalX;
-		}
-
-		/**
-		 * @return the normalY
-		 */
-		public int getNormalY() {
-		    return normalY;
-		}
-
-		/**
-		 * @param normalY
-		 *            the normalY to set
-		 */
-		public void setNormalY(int normalY) {
-		    this.normalY = normalY;
-		}
-
-		/**
-		 * @return the normalZ
-		 */
-		public int getNormalZ() {
-		    return normalZ;
-		}
-
-		/**
-		 * @param normalZ
-		 *            the normalZ to set
-		 */
-		public void setNormalZ(int normalZ) {
-		    this.normalZ = normalZ;
-		}
-
-		/**
-		 * @return the magic
-		 */
-		public int getMagic() {
-		    return magic;
-		}
-
-		/**
-		 * @param magic
-		 *            the magic to set
-		 */
-		public void setMagic(int magic) {
-		    this.magic = magic;
-		}
-
-		/**
-		 * @return the vertices
-		 */
-		public List<ShortFaceBlockVertex> getVertices() {
-		    return vertices;
-		}
-
-		/**
-		 * @param vertices
-		 *            the vertices to set
-		 */
-		public void setVertices(ArrayList<ShortFaceBlockVertex> vertices) {
-		    this.vertices = vertices;
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertex.class;
 		}
 	    }// end FaceBlock19
 
@@ -377,38 +309,23 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    prs.int4s(prs.property("magic", int.class));
 		    for (int i = 0; i < getNumVertices(); i++) {
 			prs.subParseProposedClasses(prs.indexedProperty(
-				"vertices", FaceBlockVertex.class, i),
-				ClassInclusion.classOf(FaceBlockVertex.class));
+				"vertices", getFaceBlockVertexType(), i),
+				ClassInclusion.classOf(getFaceBlockVertexType()));
 		    }
 		}// end describeFormat(Parser prs)
-
-		public static class FaceBlockVertex implements
-			ThirdPartyParseable {
-		    int vertexIndex, textureCoordinateU, textureCoordinateV;
-
+		
+		protected abstract Class<? extends FaceBlockVertex> getFaceBlockVertexType();
+		
+		public static class FaceBlockVertexWithUV extends FaceBlockVertex implements ThirdPartyParseable{
+		    int textureCoordinateU, textureCoordinateV;
 		    @Override
-		    public void describeFormat(Parser prs)
-			    throws UnrecognizedFormatException {
-			prs.int4s(prs.property("vertexIndex", int.class));
+		    public void describeFormat(Parser prs) 
+			    throws UnrecognizedFormatException{
+			super.describeFormat(prs);
 			prs.int4s(prs.property("textureCoordinateU", int.class));
 			prs.int4s(prs.property("textureCoordinateV", int.class));
-		    }
-
-		    /**
-		     * @return the vertexIndex
-		     */
-		    public int getVertexIndex() {
-			return vertexIndex;
-		    }
-
-		    /**
-		     * @param vertexIndex
-		     *            the vertexIndex to set
-		     */
-		    public void setVertexIndex(int vertexIndex) {
-			this.vertexIndex = vertexIndex;
-		    }
-
+		    }//end describeFormat()
+		    
 		    /**
 		     * @return the textureCoordinateU
 		     */
@@ -438,7 +355,32 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    public void setTextureCoordinateV(int textureCoordinateV) {
 			this.textureCoordinateV = textureCoordinateV;
 		    }
+		}//end FaceBlockVertexWithUV
 
+		public static class FaceBlockVertex implements
+			ThirdPartyParseable {
+		    int vertexIndex;
+
+		    @Override
+		    public void describeFormat(Parser prs)
+			    throws UnrecognizedFormatException {
+			prs.int4s(prs.property("vertexIndex", int.class));
+		    }
+
+		    /**
+		     * @return the vertexIndex
+		     */
+		    public int getVertexIndex() {
+			return vertexIndex;
+		    }
+
+		    /**
+		     * @param vertexIndex
+		     *            the vertexIndex to set
+		     */
+		    public void setVertexIndex(int vertexIndex) {
+			this.vertexIndex = vertexIndex;
+		    }
 		}// end FaceBlockVertex
 
 		/**
@@ -700,6 +642,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 		protected byte getBlockID() {
 		    return 0x0F;
 		}
+
+		@Override
+		protected Class<? extends FaceBlockVertex> getFaceBlockVertexType() {
+		    return FaceBlockVertexWithUV.class;
+		}
 	    }// end Unknown 0x0F
 
 	    public static class BillboardTexCoords0x04 implements
@@ -729,7 +676,6 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    @Override
 		    public void describeFormat(Parser prs)
 			    throws UnrecognizedFormatException {
-			System.err.println("UVCoordinate");
 			prs.int4s(prs.property("textureCoordinateU", int.class));
 			prs.int4s(prs.property("textureCoordinateV", int.class));
 		    }

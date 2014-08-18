@@ -59,9 +59,11 @@ import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.ColorBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.EOFBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertex;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock05;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
@@ -302,6 +304,7 @@ public class ResourceManager{
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
+					    	System.out.println("FaceBlock found: "+b.getClass().getSimpleName());
 						FaceBlock block = (FaceBlock)b;
 						List<FaceBlockVertex>vertIndices = block.getVertices();
 						if(currentTexture==null){System.out.println("Warning: Face texture not specified. Using fallback texture.");currentTexture=defaultTexture;}
@@ -318,21 +321,41 @@ public class ResourceManager{
 								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex()%(b instanceof FaceBlock05?10:Integer.MAX_VALUE));}
 							Vector3D blockNormal = new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ());
 							if(blockNormal.getNorm()==0)blockNormal = new Vector3D(1,0,0);//Use filler if zero norm.
+							double [] u = new double[4];//TODO: Allocate once earlier
+							double [] v = new double[4];
+							if(vertIndices.get(0) instanceof FaceBlockVertexWithUV){
+							    for(int i=0; i<4; i++){
+								final FaceBlockVertexWithUV fbvi = (FaceBlockVertexWithUV)vertIndices.get(i);
+								u[i]=(double)(fbvi).
+									getTextureCoordinateU()/(double)0xFF0000;
+								v[i]=(double)(fbvi).
+									getTextureCoordinateV()/(double)0xFF0000;
+							    }//end for(4)
+							}else{
+							    u[0]=BOX_U[0];
+							    v[0]=BOX_V[0];
+							    u[1]=BOX_U[1];
+							    v[1]=BOX_V[1];
+							    u[2]=BOX_U[2];
+							    v[2]=BOX_V[2];
+							    u[3]=BOX_U[3];
+							    v[3]=BOX_V[3];
+							}
 							Triangle [] tris = Triangle.quad2Triangles(
 									vtx,
 									new Vector2D[]{
 										new Vector2D(
-											(double)vertIndices.get(0).getTextureCoordinateU()/(double)0xFF0000,
-											1.-(double)vertIndices.get(0).getTextureCoordinateV()/(double)0xFF0000),
+											u[0],
+											1.-v[0]),
 										new Vector2D(
-											(double)vertIndices.get(1).getTextureCoordinateU()/(double)0xFF0000,
-											1.-(double)vertIndices.get(1).getTextureCoordinateV()/(double)0xFF0000),
+											u[1],
+											1.-v[1]),
 										new Vector2D(
-											(double)vertIndices.get(2).getTextureCoordinateU()/(double)0xFF0000,
-											1.-(double)vertIndices.get(2).getTextureCoordinateV()/(double)0xFF0000),
+											u[2],
+											1.-v[2]),
 										new Vector2D(
-											(double)vertIndices.get(3).getTextureCoordinateU()/(double)0xFF0000,
-											1.-(double)vertIndices.get(3).getTextureCoordinateV()/(double)0xFF0000)
+											u[3],
+											1.-v[3])
 									},
 									currentTexture,
 									RenderMode.DYNAMIC,hasAlpha,
@@ -351,12 +374,12 @@ public class ResourceManager{
 							    final org.jtrfp.trcl.gpu.Vertex vtx=
 								    vertices.get(vertIndices.get(vi).getVertexIndex()-(b instanceof FaceBlock05?m.getUnknown2():0));
 							    t.setVertex(vtx, vi);
-								if(b instanceof FaceBlock05)
+								if(b instanceof FaceBlock05 || !(vertIndices.get(0) instanceof FaceBlockVertexWithUV))
 								    t.setUV(new Vector2D(BOX_U[vi],BOX_V[vi]), vi);
-								else{
+								else {
 								    t.setUV(new Vector2D(
-									(double)vertIndices.get(vi).getTextureCoordinateU()/(double)0xFF0000,
-									1.-(double)vertIndices.get(vi).getTextureCoordinateV()/(double)0xFF0000), vi);}
+									(double)((FaceBlockVertexWithUV)vertIndices.get(vi)).getTextureCoordinateU()/(double)0xFF0000,
+									1.-(double)((FaceBlockVertexWithUV)vertIndices.get(vi)).getTextureCoordinateV()/(double)0xFF0000), vi);}
 							}//end for(vi)
 							if(currentTexture==null)
 								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=tr.gpu.get().textureManager.get().getFallbackTexture();}
@@ -365,8 +388,14 @@ public class ResourceManager{
 						else
 							{System.err.println("ResourceManager: FaceBlock has "+vertIndices.size()+" vertices. Only 3 or 4 supported.");}
 						}//end if(FaceBlock)
-					else if(b instanceof FaceBlock19)
-						{System.out.println(b.getClass().getSimpleName()+" (solid colored faces) not yet implemented. Skipping...");}
+					else if(b instanceof ColorBlock){
+					    final ColorBlock cb = (ColorBlock)b;
+					    final byte [] bytes = cb.getBytes();
+					    final Color color = new Color(bytes[0]&0xFF,bytes[1]&0xFF,bytes[2]&0xFF);
+					    currentTexture = tr.gpu.get().textureManager.get().solidColor(color);
+					}
+					else if(b instanceof FaceBlock19){
+					    System.out.println(b.getClass().getSimpleName()+" (solid colored faces) not yet implemented. Skipping...");}
 					else if(b instanceof FaceBlock05){}//TODO
 					else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;

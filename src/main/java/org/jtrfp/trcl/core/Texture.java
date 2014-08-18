@@ -42,7 +42,6 @@ import org.jtrfp.trcl.img.vq.VectorList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class Texture implements TextureDescription {
-    TextureTreeNode 			nodeForThisTexture;
     private final TR 			tr;
     private final GPU 			gpu;
     private final TextureManager 	tm ;
@@ -56,24 +55,10 @@ public class Texture implements TextureDescription {
     private	  int[][]		codebookStartOffsetsAbsolute;
     private 	  ByteBuffer 		rgba;
     private final boolean		uvWrapping;
+    private	  int			texturePage;
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
 						  // doesn't scale with
 						  // texture palette
-    /*private static TextureTreeNode rootNode = null;
-    private static GLTexture globalTexture;
-    public static final List<TextureDescription> texturesToBeAccounted = Collections
-	    .synchronizedList(new LinkedList<TextureDescription>());*/
-
-    /*private static void waitUntilTextureProcessingEnds() {
-	while (!texturesToBeAccounted.isEmpty()) {
-	    try {
-		texturesToBeAccounted.remove(0);
-	    } catch (Exception e) {
-		e.printStackTrace();
-	    }
-	}//end while(texturesToBeAccounted)
-    }// end waitUntilTextureProcessingEnds()
-    */
     @Override
     public void finalize() throws Throwable{
 	System.out.println("Texture.finalize() "+debugName);
@@ -146,8 +131,7 @@ public class Texture implements TextureDescription {
 		throw new RuntimeException("Static palette created by Texture(Color c, TR tr) cannot be written to.");
 	    }};
     }//end colorVL(...)
-
-    //public static final ArrayList<GLRunnable> executeInGLFollowingFinalization = new ArrayList<GLRunnable>();
+    
     private static ByteBuffer emptyRow = null;
     
     private Texture(TR tr, String debugName, boolean uvWrapping){
@@ -164,8 +148,6 @@ public class Texture implements TextureDescription {
     private Texture(Texture parent, double uOff, double vOff, double uSize,
 	    double vSize, TR tr, boolean uvWrapping) {
 	this(tr,"subtexture: "+parent.debugName,uvWrapping);
-	nodeForThisTexture = new UVTranslatingTextureTreeNode(
-		parent.getNodeForThisTexture(), uOff, vOff, uSize, vSize);
     }//end constructor
     
     public Texture subTexture(double uOff, double vOff, double uSize,
@@ -180,14 +162,6 @@ public class Texture implements TextureDescription {
 	    vqCompress(vl);
 	return;
 	}// end if(newTexturing)
-	
-	final int sideLength = (int) Math.sqrt(vl.getNumVectors());
-	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
-		debugName);
-	/*
-	nodeForThisTexture = newNode;
-	registerNode(newNode);
-	*/
     }
 
     Texture(ByteBuffer imageRGBA8888, String debugName, TR tr, boolean uvWrapping) {
@@ -201,14 +175,6 @@ public class Texture implements TextureDescription {
 	    vqCompress(imageRGBA8888);
 	return;
 	}// end if(newTexturing)
-	/*
-	final int sideLength = (int) Math.sqrt((imageRGBA8888.capacity() / 4));
-	TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
-		debugName);
-	nodeForThisTexture = newNode;
-	newNode.setImage(imageRGBA8888);
-	registerNode(newNode);
-	*/
     }// end constructor
     
     private void vqCompress(PalettedVectorList squareImageIndexed){
@@ -238,15 +204,9 @@ public class Texture implements TextureDescription {
 	    // Get a TOC
 	    tocIndex = toc.create();
 	    
-	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
-			debugName);
-	    newNode.setOffsetU(0);
-	    newNode.setOffsetV(0);
-	    newNode.setSizeU(1);
-	    newNode.setSizeV(1);
-	    newNode.setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
-	    if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)throw new RuntimeException("Nonzero modulus."); 		
-	    	nodeForThisTexture = newNode;
+	    setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
+	    if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
+		throw new RuntimeException("Nonzero modulus."); 		
 	    
 	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 		@Override
@@ -353,7 +313,6 @@ public class Texture implements TextureDescription {
 		    }//end applyRow
 		};
 		cbm.setRGBA(globalCodeIndex, rw);
-		//stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
 		}//end for(codeX)
 	}//end for(codeY)
 	return null;
@@ -364,9 +323,6 @@ public class Texture implements TextureDescription {
 	this(tr,debugName,uvWrapping);
 	    final int sideLength = img.getWidth();
 	    
-	    TextureTreeNode newNode = new TextureTreeNode(sideLength, null,
-		    debugName);
-	    nodeForThisTexture = newNode;
 	    long redA = 0, greenA = 0, blueA = 0;
 	    rgba = ByteBuffer.allocateDirect(img.getWidth() * img.getHeight()
 		    * 4);
@@ -386,7 +342,6 @@ public class Texture implements TextureDescription {
 	    final int div = rgba.capacity() / 4;
 	    averageColor = new Color((redA / div) / 255f,
 		    (greenA / div) / 255f, (blueA / div) / 255f);
-	    newNode.setImage(rgba);
 	if(tr.getTrConfig().isUsingNewTexturing()){
 	    vqCompress(rgba);
 	}//else{registerNode(newNode);}
@@ -432,121 +387,14 @@ public class Texture implements TextureDescription {
     static double getPixelSize() {
 	return pixelSize;
     }
-/*
-    public static GLTexture getGlobalTexture() {
-	return globalTexture;
-    }
-
-    private static synchronized void registerNode(TextureTreeNode newNode) {
-	if (rootNode == null) {
-	    rootNode = new TextureTreeNode(newNode.getSideLength() * 2, null,
-		    "Root or former root as branch");// Assuming square
-	    rootNode.setSizeU(1);
-	    rootNode.setSizeV(1);
-	    rootNode.addNode(newNode);
-	} else {
-	    if (newNode.getSideLength() >= rootNode.getSideLength())// Too big
-								    // to fit
-	    {// New, bigger root
-		TextureTreeNode oldRoot = rootNode;
-		rootNode = new TextureTreeNode(newNode.getSideLength() * 2,
-			null, "Root or former root as branch");
-		rootNode.addNode(newNode);
-		// Try again recursively until we fit the old root into the new
-		// root
-		registerNode(oldRoot);
-	    } else {// Small enough to fit but might be out of space
-		try {
-		    rootNode.addNode(newNode);
-		} catch (OutOfTextureSpaceException e) {// New, bigger root
-		    TextureTreeNode oldRoot = rootNode;
-		    rootNode = new TextureTreeNode(oldRoot.getSideLength() * 2,
-			    null, "Root or former root as branch");
-		    rootNode.addNode(oldRoot);
-		    // Try again recursively until we fit the new node into the
-		    // tree
-		    registerNode(newNode);
-		}
-	    }// end else(small enough to fit)
-	}// end else{rootNode!=null}
-    }// end registerNode(...)
-    */
-    public Color getAverageColor() {
-	/*
-	if (averageColor == null) {// Compute a new one
-	    double sRed = 0, sGreen = 0, sBlue = 0;
-	    final int sLen = nodeForThisTexture.getSideLength();
-	    final ByteBuffer img = nodeForThisTexture.getImage();
-	    img.clear();// Doesn't erase it. Clears the marks, limits,
-			// positions.
-	    for (int i = 0; i < sLen; i++) {
-		sRed += (int) img.get() & 0xFF;
-		sGreen += (int) img.get() & 0xFF;
-		sBlue += (int) img.get() & 0xFF;
-	    }
-	    sRed /= sLen;
-	    sGreen /= sLen;
-	    sBlue /= sLen;
-	    averageColor = new Color((int) sRed, (int) sGreen, (int) sBlue);
-	}*/
-	return averageColor;
-    }// end getAverageColor()
     /*
-    public static void finalize(GPU gpu) {
-	if(rootNode==null){
-	    System.out.println("WARNING: RootNode is null. If using new texturing system this is normal.\n" +
-	    		"Else, expect empty textures. Skipping texture finalization phase...");
-	    return;
-	}
-	
-	final int gSideLen = rootNode.getSideLength();
-	// Setup the empty rows
-	emptyRow = ByteBuffer.allocate(gSideLen * 4);
-	for (int i = 0; i < gSideLen; i++) {
-	    emptyRow.put((byte) (Math.random() * 256));
-	}
-	emptyRow.rewind();
-	System.out.println("Finalizing global U/V coordinates...");
-	waitUntilTextureProcessingEnds();
-	rootNode.finalizeUV(0, 0, 1, 1);
-	System.out.println("\t...Done.");
-	System.out.println("Allocating " + gSideLen + "x" + gSideLen
-		+ " shared texture in client RAM...");
-	ByteBuffer buf = ByteBuffer.allocateDirect(gSideLen * gSideLen * 4);
-	System.out.println("\t...Done.");
-	System.out.println("Assembling the texture palette...");
-	// Fill the buffer, raster row by raster row
-	buf.rewind();
-	for (int row = 0; row < gSideLen * gSideLen * 4; row++) {
-	    buf.put((byte) (Math.random() * 255.));
-	}
-	buf.rewind();
-
-	for (int row = gSideLen - 1; row >= 0; row--) {
-	    rootNode.dumpRowToBuffer(buf, row);
-	}
-
-	System.out.println("\t...Done.");
-	buf.rewind();
-	System.out
-		.println("Creating a new OpenGL texture for texture palette...");
-
-	GLTexture tex = gpu.newTexture();
-	tex.setTextureImageRGBA(buf);
-	globalTexture = tex;
-	final TR tr = gpu.getTr();
-	System.out.println("Legacy texturing mode: Committing models to atlas U/Vs...");
-	tr.getRootWindow().getCanvas().invoke(false, Texture.executeInGLFollowingFinalization);
-	
-    }// end finalize()
-*/
     public static final int createTextureID(GL3 gl) {
 	IntBuffer ib = IntBuffer.allocate(1);
 	gl.glGenTextures(1, ib);
 	ib.clear();
 	return ib.get();
     }
-
+*/
     public static final Color[] GREYSCALE;
     static {
 	GREYSCALE = new Color[256];
@@ -554,467 +402,6 @@ public class Texture implements TextureDescription {
 	    GREYSCALE[i] = new Color(i, i, i);
 	}
     }// end static{}
-
-    static class UVTranslatingTextureTreeNode extends TextureTreeNode {
-	private final TextureTreeNode pNode;
-	private final double uOffset, vOffset, uSize, vSize;
-
-	public UVTranslatingTextureTreeNode(TextureTreeNode parent,
-		double uOffset, double vOffset, double uSize, double vSize) {
-	    super(parent.sideLength, parent.parent, parent.debugName);
-	    pNode = parent;
-	    this.uOffset = uOffset;
-	    this.vOffset = vOffset;
-	    this.uSize = uSize;
-	    this.vSize = vSize;
-	}
-
-	@Override
-	public double getGlobalUFromLocal(double u) {
-	    return pNode.getGlobalUFromLocal(u * uSize + uOffset);
-	}
-
-	@Override
-	public double getGlobalVFromLocal(double v) {
-	    return pNode.getGlobalVFromLocal(v * vSize + vOffset);
-	}
-    }//end class UVTranslatingTextureTreeNode
-
-    public static class TextureTreeNode {
-	private TextureTreeNode parent;
-	private double offsetU, offsetV;// In OpenGL orientation: (0,0) is
-					// bottom left.
-	private double sizeU, sizeV;
-	private TextureTreeNode topLeft, topRight, bottomLeft, bottomRight;
-	private ByteBuffer image;
-	private int sideLength;
-	private String debugName = "[unset]";
-	private volatile int texturePage=10;
-
-	public TextureTreeNode(int sideLength, TextureTreeNode parent,
-		String debugName) {
-	    this.sideLength = sideLength;
-	    this.parent = parent;
-	    this.debugName = debugName;
-	}
-
-	public boolean isFull() {
-	    if (image != null)
-		return true;
-	    if (topLeft != null && topRight != null && bottomLeft != null
-		    && bottomRight != null) {
-		return topLeft.isFull() && topRight.isFull()
-			&& bottomLeft.isFull() && bottomRight.isFull();
-	    }
-	    return false;
-	}// end isFull()
-
-	public void finalizeUV(double offU, double offV, double sU, double sV) {
-	    this.setOffsetU(offU + Texture.getPixelSize());
-	    this.setOffsetV(offV + Texture.getPixelSize());
-	    this.setSizeU(sU - Texture.getPixelSize() * 2.);
-	    this.setSizeV(sV - Texture.getPixelSize() * 2.);
-
-	    if (topLeft != null) {
-		topLeft.finalizeUV(offU, offV + sV / 2., sU / 2., sV / 2.);
-	    }
-	    if (topRight != null) {
-		topRight.finalizeUV(offU + sU / 2., offV + sV / 2., sU / 2.,
-			sV / 2.);
-	    }
-	    if (bottomLeft != null) {
-		bottomLeft.finalizeUV(offU, offV, sU / 2., sV / 2.);
-	    }
-	    if (bottomRight != null) {
-		bottomRight.finalizeUV(offU + sU / 2., offV, sU / 2., sV / 2.);
-	    }
-	}
-
-	public void dumpRowToBuffer(ByteBuffer buf, int row) {// Rows start at
-							      // top, not
-							      // OpenGL-bottom.
-	    if (this.getSizeU() <= 0) {
-		System.out.println("Usize is " + this.getSizeU() + " name is "
-			+ debugName);
-		System.exit(1);
-	    }
-	    if (this.getSizeV() <= 0) {
-		System.out.println("Vsize is " + this.getSizeV());
-		System.exit(1);
-	    }
-	    if (image == null) {
-		if (row >= getSideLength() / 2) {
-		    // Bottom two
-		    if (bottomLeft != null)
-			bottomLeft.dumpRowToBuffer(buf, row - getSideLength()
-				/ 2);
-		    else {
-			emptyRow.clear();
-			emptyRow.limit(4 * getSideLength() / 2);
-			buf.put(emptyRow);
-		    }
-		    if (bottomRight != null)
-			bottomRight.dumpRowToBuffer(buf, row - getSideLength()
-				/ 2);
-		    else {
-			emptyRow.clear();
-			emptyRow.limit(4 * getSideLength() / 2);
-			buf.put(emptyRow);
-		    }
-		} else {
-		    // Top two
-		    if (topLeft != null)
-			topLeft.dumpRowToBuffer(buf, row);
-		    else {
-			emptyRow.clear();
-			emptyRow.limit(4 * getSideLength() / 2);
-			buf.put(emptyRow);
-		    }
-		    if (topRight != null)
-			topRight.dumpRowToBuffer(buf, row);
-		    else {
-			emptyRow.clear();
-			emptyRow.limit(4 * getSideLength() / 2);
-			buf.put(emptyRow);
-		    }
-		}
-	    }// end image==null
-	    else {
-		image.clear();
-		image.limit((row * getSideLength() * 4) + (getSideLength() * 4));
-		image.position(row * getSideLength() * 4);
-		buf.put(image);
-	    }// end image!=null
-	}// end dumpRowToBuffer()
-
-	public boolean isLeaf() {
-	    return image != null;
-	}
-
-	public void addNode(TextureTreeNode newNode) {
-	    if (isFull())
-		throw new OutOfTextureSpaceException();
-
-	    final int sideLength = newNode.getSideLength();
-	    if (sideLength == this.sideLength / 2)// Perfectly matches
-						  // branches/leaves
-	    {
-		if (topLeft == null) {
-		    newNode.setParent(this);
-		    topLeft = newNode;
-		    return;
-		} else if (topRight == null) {
-		    newNode.setParent(this);
-		    topRight = newNode;
-		    return;
-		} else if (bottomLeft == null) {
-		    newNode.setParent(this);
-		    bottomLeft = newNode;
-		    return;
-		} else if (bottomRight == null) {
-		    newNode.setParent(this);
-		    bottomRight = newNode;
-		    return;
-		}
-		throw new OutOfTextureSpaceException();
-	    }// end if(sideLength==this.sideLength/2)
-	    else if (sideLength <= this.sideLength / 2)// Smaller than
-						       // branches/leaves
-	    {// Find a non-leaf, if none, try to create a leaf. If none can be
-	     // created, throw exception
-	     // Find non-leaf and try to push it there.
-		if (topLeft != null && !topLeft.isLeaf()) {
-		    try {
-			topLeft.addNode(newNode);
-			return;
-		    } catch (OutOfTextureSpaceException e) {
-		    }
-		}// end if(topLeft)
-		if (topRight != null && !topRight.isLeaf()) {
-		    try {
-			topRight.addNode(newNode);
-			return;
-		    } catch (OutOfTextureSpaceException e) {
-		    }
-		}// end if(topRight)
-		if (bottomLeft != null && !bottomLeft.isLeaf()) {
-		    try {
-			bottomLeft.addNode(newNode);
-			return;
-		    } catch (OutOfTextureSpaceException e) {
-		    }
-		}// end if(bottomLeft)
-		if (bottomRight != null && !bottomRight.isLeaf()) {
-		    try {
-			bottomRight.addNode(newNode);
-			return;
-		    } catch (OutOfTextureSpaceException e) {
-		    }
-		}// end if(bottomRight)
-		// No leaf found. Try to create one
-		// System.out.println("Attempt to find an existing branch which can accept this as a leaf has failed.");
-		// System.out.println("Attempting to create a child branch which is larger than this node which can contain the newNode.");
-		try {
-		    if (topLeft == null) {
-			topLeft = new TextureTreeNode(this.sideLength / 2,
-				this, "Branch");
-			topLeft.addNode(newNode);
-			return;
-		    }
-		    if (topRight == null) {
-			topRight = new TextureTreeNode(this.sideLength / 2,
-				this, "Branch");
-			topRight.addNode(newNode);
-			return;
-		    }
-		    if (bottomLeft == null) {
-			bottomLeft = new TextureTreeNode(this.sideLength / 2,
-				this, "Branch");
-			bottomLeft.addNode(newNode);
-			return;
-		    }
-		    if (bottomRight == null) {
-			bottomRight = new TextureTreeNode(this.sideLength / 2,
-				this, "Branch");
-			bottomRight.addNode(newNode);
-			return;
-		    }
-		}// end try{}
-		catch (OutOfTextureSpaceException e) {
-		    e.printStackTrace();
-		    System.out.println("ASSERT: Impossible situation!");
-		}
-		// Could not create leaf. Throw exception
-		throw new OutOfTextureSpaceException();
-	    }// end else if(sideLength<=this.sideLength/2)
-	    else if (sideLength > this.sideLength / 2)// Bigger than these
-						      // leaves
-	    {
-		throw new RuntimeException(
-			"Added Node's sideLength is bigger than half this Node's sideLength. Can't integrate. Proposed sideLength="
-				+ sideLength
-				+ " this.sideLength="
-				+ this.sideLength);
-	    }
-	}// end addTexture(...)
-
-	public double getGlobalUFromLocal(double localU) {
-	    double sizeOfPixel = .5 * this.getSizeU()
-		    / (double) this.getSideLength();
-	    double borderingScalar = (double) this.getSideLength()
-		    / ((double) this.getSideLength() + 1.);
-	    return this.getOffsetU() + sizeOfPixel + localU * this.getSizeU()
-		    * borderingScalar;
-	}
-
-	public double getGlobalVFromLocal(double localV) {
-	    double sizeOfPixel = .5 * this.getSizeU()
-		    / (double) this.getSideLength();
-	    double borderingScalar = (double) this.getSideLength()
-		    / ((double) this.getSideLength() + 1.);
-	    return this.getOffsetV() + sizeOfPixel + localV * this.getSizeV()
-		    * borderingScalar;
-	}
-	/**
-	 * @return the offsetU
-	 */
-	public double getOffsetU() {
-	    return offsetU;
-	}
-
-	/**
-	 * @param offsetU
-	 *            the offsetU to set
-	 */
-	public void setOffsetU(double offsetU) {
-	    this.offsetU = offsetU;
-	}
-
-	/**
-	 * @return the offsetV
-	 */
-	public double getOffsetV() {
-	    return offsetV;
-	}
-
-	/**
-	 * @param offsetV
-	 *            the offsetV to set
-	 */
-	public void setOffsetV(double offsetV) {
-	    this.offsetV = offsetV;
-	}
-
-	/**
-	 * @return the topLeft
-	 */
-	public TextureTreeNode getTopLeft() {
-	    return topLeft;
-	}
-
-	/**
-	 * @param topLeft
-	 *            the topLeft to set
-	 */
-	public void setTopLeft(TextureTreeNode topLeft) {
-	    this.topLeft = topLeft;
-	}
-
-	/**
-	 * @return the topRight
-	 */
-	public TextureTreeNode getTopRight() {
-	    return topRight;
-	}
-
-	/**
-	 * @param topRight
-	 *            the topRight to set
-	 */
-	public void setTopRight(TextureTreeNode topRight) {
-	    this.topRight = topRight;
-	}
-
-	/**
-	 * @return the bottomLeft
-	 */
-	public TextureTreeNode getBottomLeft() {
-	    return bottomLeft;
-	}
-
-	/**
-	 * @param bottomLeft
-	 *            the bottomLeft to set
-	 */
-	public void setBottomLeft(TextureTreeNode bottomLeft) {
-	    this.bottomLeft = bottomLeft;
-	}
-
-	/**
-	 * @return the bottomRight
-	 */
-	public TextureTreeNode getBottomRight() {
-	    return bottomRight;
-	}
-
-	/**
-	 * @param bottomRight
-	 *            the bottomRight to set
-	 */
-	public void setBottomRight(TextureTreeNode bottomRight) {
-	    this.bottomRight = bottomRight;
-	}
-
-	/**
-	 * @return the sideLength
-	 */
-	public int getSideLength() {
-	    return sideLength;
-	}
-
-	/**
-	 * @param sideLength
-	 *            the sideLength to set
-	 */
-	public void setSideLength(int sideLength) {
-	    this.sideLength = sideLength;
-	}
-
-	/**
-	 * @return the parent
-	 */
-	public TextureTreeNode getParent() {
-	    return parent;
-	}
-
-	/**
-	 * @param parent
-	 *            the parent to set
-	 */
-	public void setParent(TextureTreeNode parent) {
-	    this.parent = parent;
-	}
-
-	/**
-	 * @return the sizeU
-	 */
-	public double getSizeU() {
-	    return sizeU;
-	}
-
-	/**
-	 * @param sizeU
-	 *            the sizeU to set
-	 */
-	public void setSizeU(double sizeU) {
-	    this.sizeU = sizeU;
-	}
-
-	/**
-	 * @return the sizeV
-	 */
-	public double getSizeV() {
-	    return sizeV;
-	}
-
-	/**
-	 * @param sizeV
-	 *            the sizeV to set
-	 */
-	public void setSizeV(double sizeV) {
-	    this.sizeV = sizeV;
-	}
-
-	/**
-	 * @return the image
-	 */
-	public ByteBuffer getImage() {
-	    return image;
-	}
-
-	/**
-	 * @param image
-	 *            the image to set
-	 */
-	public void setImage(ByteBuffer image) {
-	    this.image = image;
-	}
-
-	/**
-	 * @return the textureID
-	 */
-	public int getTexturePage() {
-	    return texturePage;
-	}
-
-	/**
-	 * @param texturePage the texturePage, where a page is 1536 bytes
-	 */
-	public void setTexturePage(int textureID) {
-	    this.texturePage = textureID;
-	}
-    }// end TextureTreeNode
-
-    /**
-     * @return the nodeForThisTexture
-     */
-    public TextureTreeNode getNodeForThisTexture() {
-	return nodeForThisTexture;
-    }
-
-    /**
-     * @param nodeForThisTexture
-     *            the nodeForThisTexture to set
-     */
-    public void setNodeForThisTexture(TextureTreeNode nodeForThisTexture) {
-	this.nodeForThisTexture = nodeForThisTexture;
-    }
-    /**
-     * @return the rgba
-     */
-    public ByteBuffer getRgba() {
-	return rgba;
-    }
 
     public static ByteBuffer fragmentRGBA(ByteBuffer input, int quadDepth,
 	    int x, int y) {
@@ -1064,4 +451,30 @@ public class Texture implements TextureDescription {
     public boolean isUvWrapping() {
         return uvWrapping;
     }
+
+    /**
+     * @return the texturePage
+     */
+    public int getTexturePage() {
+        return texturePage;
+    }
+
+    /**
+     * @param texturePage the texturePage to set
+     */
+    public void setTexturePage(int texturePage) {
+        this.texturePage = texturePage;
+    }
+
+    @Override
+    public Color getAverageColor() {
+	return averageColor;
+    }
+    
+    public static final int createTextureID(GL3 gl) {
+	IntBuffer ib = IntBuffer.allocate(1);
+	gl.glGenTextures(1, ib);
+	ib.clear();
+	return ib.get();
+    }//end createTextureID
 }// end Texture

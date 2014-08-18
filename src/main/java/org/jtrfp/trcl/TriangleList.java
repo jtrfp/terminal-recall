@@ -165,8 +165,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    }//end for(stackTrace)
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
 	if (td instanceof Texture ) {// Static texture
-	    final Texture.TextureTreeNode tx;
-	    tx = ((Texture) td).getNodeForThisTexture();
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
@@ -177,20 +175,16 @@ public class TriangleList extends PrimitiveList<Triangle> {
 			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
 		getModel().addTickableAnimator(uvAnimator);
 		for (int i = 0; i < numFrames; i++) {
-		    uFrames[i] = (float) (uvUpScaler * tx
-			    .getGlobalUFromLocal(triangleAt(i, triangleIndex).getUV(vIndex).getX()));
-		    vFrames[i] = (float) (uvUpScaler * tx
-			    .getGlobalVFromLocal(triangleAt(i, triangleIndex).getUV(vIndex).getY()));
+		    uFrames[i] = (float) (triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) (triangleAt(i, triangleIndex).getUV(vIndex).getY());
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
-		vw.u.set(gpuTVIndex, (short) (uvUpScaler * tx
-			.getGlobalUFromLocal(t.getUV(vIndex).getX())));
-		vw.v.set(gpuTVIndex, (short) (uvUpScaler * tx
-			.getGlobalVFromLocal(t.getUV(vIndex).getY())));
+		vw.u.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getX()));
+		vw.v.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getY()));
 	    }// end if(!animateUV)
-	    final int textureID = tx.getTexturePage();
+	    final int textureID = ((Texture)td).getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
@@ -198,8 +192,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	//TODO: Temporary. Remove this check and replace with else {}, this is a kludge to avoid nonfunctional animation.
 	else if(!tr.getTrConfig().isUsingNewTexturing()) {// Animated texture
 	    AnimatedTexture at = ((AnimatedTexture) td);
-	    Texture.TextureTreeNode tx = at.getFrames()[0]
-		    .getNodeForThisTexture();// Default frame
 	    final int numTextureFrames = at.getFrames().length;
 	    final WindowAnimator uvAnimator = new WindowAnimator(
 		    getFlatTVWindow(),
@@ -212,15 +204,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    float[] uFrames = new float[numTextureFrames];
 	    float[] vFrames = new float[numTextureFrames];
 	    for (int ti = 0; ti < numTextureFrames; ti++) {
-		tx = at.getFrames()[ti].getNodeForThisTexture();
-		uFrames[ti] = (short) (uvUpScaler * tx
-			.getGlobalUFromLocal(t.getUV(vIndex).getX()));
-		vFrames[ti] = (short) (uvUpScaler * tx
-			.getGlobalVFromLocal(t.getUV(vIndex).getY()));
+		uFrames[ti] = (short) (uvUpScaler * t.getUV(vIndex).getX());
+		vFrames[ti] = (short) (uvUpScaler * t.getUV(vIndex).getY());
 	    }// end for(frame)
 	    uvAnimator.addFrames(uFrames);
 	    uvAnimator.addFrames(vFrames);
-	    final int textureID = tx.getTexturePage();
+	    final int textureID = ((Texture)td).getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));

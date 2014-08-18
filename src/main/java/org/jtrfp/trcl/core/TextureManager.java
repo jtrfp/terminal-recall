@@ -69,7 +69,7 @@ public class TextureManager {
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
     
-    public TextureDescription getFallbackTexture(){
+    public synchronized TextureDescription getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
 	Texture t;
 	t = new Texture(
@@ -80,7 +80,7 @@ public class TextureManager {
 	return fallbackTexture;
     }//end getFallbackTexture()
     
-    public TextureDescription solidColor(Color color) {
+    public synchronized TextureDescription solidColor(Color color) {
 	final int	key 	= new Integer(color.getRed()+color.getGreen()*255+color.getBlue()*65535);
 	Texture		result 	= colorCache.get(key);
 	if(result!=null)

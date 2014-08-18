@@ -30,11 +30,16 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	Model crossModel = null;
 	final TextureManager tm = tr.gpu.get().textureManager.get();
 	// Fallback
-	Texture[] greenThrobFrames = new Texture[16];
-	for (int f = 0; f < 8; f++) {
-	    greenThrobFrames[f] = greenThrobFrames[15 - f] = (Texture) tm
-		    .solidColor(new Color(f * 22, f * 32, f * 23, 170));
-	}
+	final int NUM_FRAMES = 8;
+	final double LUM_STEP = 255./NUM_FRAMES;
+	Texture[] greenThrobFrames = new Texture[NUM_FRAMES];
+	for (int f = 0; f < NUM_FRAMES; f++) {
+	    greenThrobFrames[f] = greenThrobFrames[(NUM_FRAMES-1) - f] = (Texture) tm
+		    .solidColor(new Color(
+			    (int)(f * LUM_STEP * .8), 
+			    (int)(f * LUM_STEP), 
+			    (int)(f * LUM_STEP*.8), 170));
+	}//end for(NUM_FRAMES)
 	TextureDescription greenThrob = new AnimatedTexture(new Sequencer(80,
 		greenThrobFrames.length, false), greenThrobFrames);
 	// TODO: Set crosshairs as a player-tracking object

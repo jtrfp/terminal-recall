@@ -157,12 +157,8 @@ public class Texture implements TextureDescription {
     
     Texture(PalettedVectorList vl, String debugName, TR tr, boolean uvWrapping){
 	this(tr,debugName,uvWrapping);
-	
-	if (tr.getTrConfig().isUsingNewTexturing()) {
-	    vqCompress(vl);
-	return;
-	}// end if(newTexturing)
-    }
+	vqCompress(vl);
+    }//end constructor
 
     Texture(ByteBuffer imageRGBA8888, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
@@ -170,11 +166,8 @@ public class Texture implements TextureDescription {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
 	}//end if capacity==0
-	if (tr.getTrConfig().isUsingNewTexturing()) {
-	    imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
-	    vqCompress(imageRGBA8888);
-	return;
-	}// end if(newTexturing)
+	imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
+	vqCompress(imageRGBA8888);
     }// end constructor
     
     private void vqCompress(PalettedVectorList squareImageIndexed){
@@ -258,7 +251,6 @@ public class Texture implements TextureDescription {
 		    final int subtextureID		= subTextureIDs[subTextureIdx];
 		    stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
 		}//end for(numCodes)
-		
 		return null;
 	    }// end run()
 	 });//end gpuMemThread

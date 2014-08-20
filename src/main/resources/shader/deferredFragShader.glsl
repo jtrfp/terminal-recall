@@ -109,11 +109,11 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
  vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
- if(dH.x>.000001 && dH.y<.000001) cTexel = //Far right
+ if(dH.x>0 && dH.y==0) cTexel = //Far right
 	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * (dH.x);
- else if(dH.y>.000001 && dH.x<.000001)cTexel = //Far down
+ else if(dH.y>0 && dH.x==0)cTexel = //Far down
 	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (dH.y);
- else if(dH.y>.001 && dH.x>.001)cTexel = //Corner
+ else if(dH.y>0 && dH.x>0)cTexel = //Corner
 	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
 	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * dH.x *(1-dH.y)+ //Bottom right
 	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right

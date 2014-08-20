@@ -74,7 +74,7 @@ uint UByte(uint _input, uint index)
 vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  		texelXY		= (renderFlags&RENDER_FLAGS_WRAP)!=0u?mod(texelXY,tDims):clamp(texelXY,vec2(0,0),tDims-vec2(1,1));
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
- //Clamp sub-pixels within vector.
+ // Clamp sub-pixels within vector.
  codeXY				= clamp(codeXY,0,3)+vec2(.5,.5);
  vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
  uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
@@ -104,21 +104,22 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
  vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
+ vec2	ceilTexXY	= ceil(texelXY);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
  vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
  vec2	idH			= 1-dH;
  uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
  vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
- if(dH.x>0 && dH.y==0) cTexel = //Far right
-	cTexel * (idH.x) + codeTexel(vec2(ceil(texelXY.x),texelXY.y),textureID,tDims,renderFlags) * (dH.x);
- else if(dH.y>0 && dH.x==0)cTexel = //Far down
-	cTexel * (idH.y) + codeTexel(vec2(texelXY.x,ceil(texelXY.y)),textureID,tDims,renderFlags) * (dH.y);
+ if(dH.x>0 && dH.y<=0) cTexel = //Far right
+	cTexel * (idH.x) + codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags) * (dH.x);
+ else if(dH.y>0 && dH.x<=0)cTexel = //Far down
+	cTexel * (idH.y) + codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags) * (dH.y);
  else if(dH.y>0 && dH.x>0)cTexel = //Corner
 	cTexel * (idH.x)*(idH.y)+ //Bottom left
-	codeTexel(vec2(ceil(texelXY.x),texelXY.y),textureID,tDims,renderFlags) * dH.x *(idH.y)+ //Bottom right
-	codeTexel(vec2(ceil(texelXY.x),ceil(texelXY.y)),textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right
-	codeTexel(vec2(texelXY.x,ceil(texelXY.y)),textureID,tDims,renderFlags) * (idH.x)*(dH.y); //Top left
+	codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags) * dH.x *(idH.y)+ //Bottom right
+	codeTexel(ceilTexXY,textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right
+	codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags) * (idH.x)*(dH.y); //Top left
 
  float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
  cTexel.rgb 			= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;

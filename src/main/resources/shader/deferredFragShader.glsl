@@ -106,18 +106,19 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
  vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
+ vec2	idH			= 1-dH;
  uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
  vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
  if(dH.x>0 && dH.y==0) cTexel = //Far right
-	cTexel * (1-dH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * (dH.x);
+	cTexel * (idH.x) + codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * (dH.x);
  else if(dH.y>0 && dH.x==0)cTexel = //Far down
-	cTexel * (1-dH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (dH.y);
+	cTexel * (idH.y) + codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (dH.y);
  else if(dH.y>0 && dH.x>0)cTexel = //Corner
-	cTexel * (1-dH.x)*(1-dH.y)+ //Bottom left
-	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * dH.x *(1-dH.y)+ //Bottom right
+	cTexel * (idH.x)*(idH.y)+ //Bottom left
+	codeTexel(vec2(floor(texelXY.x)+1,texelXY.y),textureID,tDims,renderFlags) * dH.x *(idH.y)+ //Bottom right
 	codeTexel(vec2(floor(texelXY.x)+1,floor(texelXY.y)+1),textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right
-	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (1-dH.x)*(dH.y); //Top left
+	codeTexel(vec2(texelXY.x,floor(texelXY.y)+1),textureID,tDims,renderFlags) * (idH.x)*(dH.y); //Top left
 
  float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
  cTexel.rgb 			= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;

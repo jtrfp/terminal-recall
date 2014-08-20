@@ -98,7 +98,8 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  
  vec4 intrinsicCodeTexel(float linearDepth,uint textureID,vec3 norm,vec2 uv){
  // TOC
- if(textureID==0u)return vec4(0,1,0,1);
+ if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
+ //if(textureID>100024u||textureID<0u)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
  uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
@@ -152,19 +153,16 @@ color = vec3(intrinsicCodeTexel(linearDepth,textureID,norm,uv));
  vec4 depthQueue[DEPTH_QUEUE_SIZE];
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  vec4	depthQueueTexel	= texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
-	 	//uv			= depthQueueTexel.rg;
 		textureID		= floatBitsToUint(depthQueueTexel[2u]);
 		//TODO: LinearDepth. Alpha is depth.
 		//TODO: Norm. Calculate from future primitive table implementation?
  if(textureID!=0u){// Found a valid point
  	depthQueue[relevantSize]=depthQueueTexel;
  	relevantSize++;
- 	//color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
  	}//end if(valid point)
  }//end for(DEPTH_QUEUE_SIZE)
  
- //relevantSize=1u;
- if(relevantSize>1u){
+ if(relevantSize>0u){
  //Perform the not-so-quick sort
  vec4 intermediary;
  for(uint i=0u; i<relevantSize-1u; i++){

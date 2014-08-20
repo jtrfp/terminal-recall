@@ -148,9 +148,12 @@ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 vec2	uv			= fragColor.xy;
 vec3	color;
 
+// S O L I D   B A C K D R O P
 color = vec3(intrinsicCodeTexel(linearDepth,textureID,norm,uv));
- uint relevantSize=0u;
- vec4 depthQueue[DEPTH_QUEUE_SIZE];
+uint relevantSize=0u;
+vec4 depthQueue[DEPTH_QUEUE_SIZE];
+
+// D E P T H   P O P U L A T E
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  vec4	depthQueueTexel	= texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
 		textureID		= floatBitsToUint(depthQueueTexel[2u]);
@@ -162,6 +165,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  	}//end if(valid point)
  }//end for(DEPTH_QUEUE_SIZE)
  
+ // D E P T H   S O R T
  if(relevantSize>0u){
  //Perform the not-so-quick sort
  vec4 intermediary;
@@ -175,18 +179,14 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
     }//end if(new deepest)
    }//end for(lower end)
   }//end for(relevantSize)
-  }//end if(relevantSize>1u)
-  //Alpha combine
+  }//end if(relevantSize>0u)
+  
+  // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
-  vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[i][2u]),vec3(0,0,0),depthQueue[i].rg);
-  color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
+   vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[i][2u]),vec3(0,0,0),depthQueue[i].rg);
+   color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
   }//end for(relevantSize)
   
 fragColor.rgb		 	= oldTex?texture(texturePalette,fragColor.xy).rgb:
 						  color;//GET COLOR
-if(oldTex){
-  float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
-  fragColor.rgb 		= fragColor.rgb*fogColor+fragColor.rgb*sunIllumination*sunColor;
-  fragColor.rgb 		= mix(fragColor.rgb,fogColor*sunColor,clamp(pow(linearDepth,3)*1.5,0,1));//FOG
- }
 }//end main()

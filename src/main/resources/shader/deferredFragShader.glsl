@@ -121,9 +121,9 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
 	codeTexel(ceilTexXY,textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right
 	codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags) * (idH.x)*(dH.y); //Top left
 
- float sunIllumination	= length(norm)>.1?clamp(dot(sunVector,normalize(norm)),0,1):.5;
- cTexel.rgb 			= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
- cTexel 				= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
+ float sunIllumination			= clamp(dot(sunVector,normalize(norm)),0,1);
+ if(length(norm)>.1)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
+ cTexel 						= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
  return cTexel;
  }//end intrinsicCodeTexel
 

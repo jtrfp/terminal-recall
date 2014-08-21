@@ -30,8 +30,8 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	Model crossModel = null;
 	final TextureManager tm = tr.gpu.get().textureManager.get();
 	// Fallback
-	final int NUM_FRAMES = 8;
-	final double LUM_STEP = 255./NUM_FRAMES;
+	final int NUM_FRAMES = 16;
+	final double LUM_STEP = 200./NUM_FRAMES;
 	Texture[] greenThrobFrames = new Texture[NUM_FRAMES];
 	for (int f = 0; f < NUM_FRAMES; f++) {
 	    greenThrobFrames[f] = greenThrobFrames[(NUM_FRAMES-1) - f] = (Texture) tm
@@ -41,7 +41,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 			    (int)(f * LUM_STEP*.8), 170));
 	}//end for(NUM_FRAMES)
 	TextureDescription greenThrob = new AnimatedTexture(new Sequencer(80,
-		greenThrobFrames.length, false), greenThrobFrames);
+		greenThrobFrames.length, false), greenThrobFrames);/*tr.gpu.get().textureManager.get().getFallbackTexture();*/
 	// TODO: Set crosshairs as a player-tracking object
 	/*
 	 * The official crosshairs. We supply the 'green throb' TARGET.BIN has a
@@ -58,15 +58,14 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 		    greenThrob, 1. / 204800., true, tr.getGlobalPaletteVL(),
 		    tr.gpu.get().getGl());
 	} catch (Exception e) {
-	    e.printStackTrace();
-	    System.exit(1);
+	    tr.showStopper(e);
 	}
 	final TriangleList tl = crossModel.getTriangleList();
 	Triangle[] tris = tl.getPrimitives()[0];
 	for (Triangle t : tris)
 	    t.setCentroidNormal(Vector3D.ZERO);
 	this.setRenderFlags((byte) 1);
-	setModel(crossModel);
+	setModel(crossModel.finalizeModel());
 	this.movePositionBy(new Vector3D(0, 0, -1));
     }//end constructor
 }// end Crosshairs

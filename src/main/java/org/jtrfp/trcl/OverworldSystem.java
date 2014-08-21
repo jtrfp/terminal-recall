@@ -24,16 +24,14 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
-import org.jtrfp.trcl.obj.EnemyIntro;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private CloudSystem cloudSystem;
-    private TextureMesh textureMesh;
     private InterpolatingAltitudeMap altitudeMap;
     private Color fogColor = Color.black;
-    private final ArrayList<DEFObject> defList = new ArrayList<DEFObject>();
+    private final List<DEFObject> defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid terrainMirror = new RenderableSpacePartitioningGrid(
 	    this) {
     };
@@ -58,17 +56,17 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    TextureDescription[] texturePalette = tr
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), new ColorPaletteVectorList(globalPalette),
-			    tr.gpu.get().getGl(),true);
+			    tr.gpu.get().getGl(),false);
 	    System.out.println("Loading height map...");
 	    altitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
 		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile()));
 	    System.out.println("... Done");
-	    textureMesh = tr.getResourceManager().getTerrainTextureMesh(
+	    final TextureMesh textureMesh = tr.getResourceManager().getTerrainTextureMesh(
 		    lvl.getTexturePlacementFile(), texturePalette);
 	    // Terrain
 	    System.out.println("Building terrain...");
 	    boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
-		    .toUpperCase().contains("BORG");
+		    .toUpperCase().contains("BORG");//TODO: This should be in a config file.
 	    TerrainSystem terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
 		    TR.mapSquareSize, this, terrainMirror, tr, tdf,
 		    flatShadedTerrain, terrainReporter);

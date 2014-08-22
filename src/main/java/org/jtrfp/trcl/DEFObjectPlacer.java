@@ -44,7 +44,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	public DEFObjectPlacer(DEFFile def, World world, LoadingProgressReporter reporter)
 		{this.def=def;this.world=world;this.rootReporter=reporter;}
 	public DEFObjectPlacer(DEFFile defFile, World w,
-		ArrayList<DEFObject> defList, LoadingProgressReporter defObjectReporter) {
+		List<DEFObject> defList, LoadingProgressReporter defObjectReporter) {
 	    this(defFile,w,defObjectReporter);
 	    this.defList=defList;
 	}//end constructor

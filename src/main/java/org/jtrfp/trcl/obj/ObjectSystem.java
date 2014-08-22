@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.obj;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
@@ -29,7 +29,7 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter;
 public class ObjectSystem extends RenderableSpacePartitioningGrid {
     private final DEFObjectPlacer defPlacer;
     public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, World w,
-	    LVLFile lvl, ArrayList<DEFObject> defList,
+	    LVLFile lvl, List<DEFObject> defList,
 	    Vector3D headingOverride, Vector3D positionOffset, LoadingProgressReporter objectReporter)
 	    throws IllegalAccessException, IOException, FileLoadException {
 	super(parentGrid);

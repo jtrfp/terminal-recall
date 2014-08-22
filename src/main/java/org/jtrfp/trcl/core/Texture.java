@@ -20,19 +20,12 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLRunnable;
 
-import org.jtrfp.trcl.OutOfTextureSpaceException;
 import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
-import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
@@ -56,9 +49,6 @@ public class Texture implements TextureDescription {
     private 	  ByteBuffer 		rgba;
     private final boolean		uvWrapping;
     private volatile int		texturePage;
-    private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
-						  // doesn't scale with
-						  // texture palette
     @Override
     public void finalize() throws Throwable{
 	System.out.println("Texture.finalize() "+debugName);
@@ -133,8 +123,6 @@ public class Texture implements TextureDescription {
 		throw new RuntimeException("Static palette created by Texture(Color c, TR tr) cannot be written to.");
 	    }};
     }//end colorVL(...)
-    
-    private static ByteBuffer emptyRow = null;
     
     private Texture(TR tr, String debugName, boolean uvWrapping){
 	this.tr=tr;
@@ -314,8 +302,6 @@ public class Texture implements TextureDescription {
 
     Texture(BufferedImage img, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
-	    final int sideLength = img.getWidth();
-	    
 	    long redA = 0, greenA = 0, blueA = 0;
 	    rgba = ByteBuffer.allocateDirect(img.getWidth() * img.getHeight()
 		    * 4);
@@ -376,18 +362,7 @@ public class Texture implements TextureDescription {
 	buf.clear();// Rewind
 	return buf;
     }// end RGB8FromPNG(...)
-
-    static double getPixelSize() {
-	return pixelSize;
-    }
-    /*
-    public static final int createTextureID(GL3 gl) {
-	IntBuffer ib = IntBuffer.allocate(1);
-	gl.glGenTextures(1, ib);
-	ib.clear();
-	return ib.get();
-    }
-*/
+    
     public static final Color[] GREYSCALE;
     static {
 	GREYSCALE = new Color[256];

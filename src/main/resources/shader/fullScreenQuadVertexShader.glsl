@@ -22,17 +22,17 @@
 layout (location = 0) in float dummy;
 
 // CONSTANTS
-vec3 pos[6] = vec3[] 
+vec2 pos[6] = vec2[] 
 	(
-	vec3(-1,-1,0),
-	vec3(1,-1,0),
-	vec3(-1,1,0),
-	vec3(-1,1,0),
-	vec3(1,1,0),
-	vec3(1,-1,0)
+	vec2(-1,-1),
+	vec2(1,-1),
+	vec2(-1,1),
+	vec2(-1,1),
+	vec2(1,1),
+	vec2(1,-1)
 	);
 
 void main(){
 gl_Position.x=dummy*0;
-gl_Position.xyz = pos[gl_VertexID];
+gl_Position.xy = pos[gl_VertexID];
 }//end main()

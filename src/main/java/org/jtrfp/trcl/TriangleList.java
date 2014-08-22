@@ -174,9 +174,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 				timeBetweenFramesMsec, numFrames),
 			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
 		getModel().addTickableAnimator(uvAnimator);
+		uvAnimator.setDebugName(debugName + ".uvAnimator");
 		for (int i = 0; i < numFrames; i++) {
-		    uFrames[i] = (float) (triangleAt(i, triangleIndex).getUV(vIndex).getX());
-		    vFrames[i] = (float) (triangleAt(i, triangleIndex).getUV(vIndex).getY());
+		    uFrames[i] = (float) (uvUpScaler*triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) (uvUpScaler*triangleAt(i, triangleIndex).getUV(vIndex).getY());
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
@@ -189,32 +190,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
-	//TODO: Temporary. Remove this check and replace with else {}, this is a kludge to avoid nonfunctional animation.
-	else if(!tr.getTrConfig().isUsingNewTexturing()) {// Animated texture
-	    AnimatedTexture at = ((AnimatedTexture) td);
-	    final int numTextureFrames = at.getFrames().length;
-	    final WindowAnimator uvAnimator = new WindowAnimator(
-		    getFlatTVWindow(),
-		    2,// UV per vertex
-		    numTextureFrames, false, at.getTextureSequencer(),
-		    new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
-	    uvAnimator.setDebugName(debugName + ".uvAnimator");
-	    getModel().addTickableAnimator(uvAnimator);
-
-	    float[] uFrames = new float[numTextureFrames];
-	    float[] vFrames = new float[numTextureFrames];
-	    for (int ti = 0; ti < numTextureFrames; ti++) {
-		uFrames[ti] = (short) (uvUpScaler * t.getUV(vIndex).getX());
-		vFrames[ti] = (short) (uvUpScaler * t.getUV(vIndex).getY());
-	    }// end for(frame)
-	    uvAnimator.addFrames(uFrames);
-	    uvAnimator.addFrames(vFrames);
-	    final int textureID = ((Texture)td).getTexturePage();
-	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
-	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
-	}// end animated texture
-	if(tr.getTrConfig().isUsingNewTexturing() && td instanceof AnimatedTexture){//Animated texture (new system)
+	if(td instanceof AnimatedTexture){//Animated texture
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
@@ -238,7 +214,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(at,vw,gpuTVIndex);
 	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");
 	    getModel().addTickableAnimator(texturePageAnimator);
-	}
+	}//end if(animated texture)
     }// end setupVertex
 
     private void setupTriangle(final int triangleIndex, final TextureDescription textureDescription,final int [] vertexIndices) throws ExecutionException,
@@ -251,7 +227,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
     
     @Override
     public void finalize(){
-	System.out.println("TriangleList.finalize()");
+	System.out.println("TriangleList.finalize() model="+getModel().getDebugName());
 	final MemoryWindow mw = getMemoryWindow();
 	for(int i=0; i<triangleVertexIndices.length;i++){
 	    mw.free(triangleVertexIndices[i]);
@@ -269,7 +245,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
 	}
-	if(tr.getTrConfig().isUsingNewTexturing()){
 	    tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public Void call() throws Exception {
@@ -277,20 +252,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 				setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
 			return null;
 		    }//end Call()
-		});
-	}else{
-	    /*
-	    Texture.executeInGLFollowingFinalization.add(new GLRunnable() {
-		    @Override
-		    public boolean run(GLAutoDrawable d){
-			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
-				try{setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
-				catch(Exception e){throw new RuntimeException(e);}}
-			return true;
-		    }//end run()
-		});
-	    */
-	}//end legacy texturing enqueue later.
+		}).get();
     }// end allocateIndices(...)
 
     @Override

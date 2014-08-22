@@ -295,6 +295,8 @@ public class ResourceManager{
 				}//end try{}
 				
 				TextureDescription currentTexture=null;
+				final double [] u = new double[4];
+				final double [] v = new double[4];
 				for(ThirdPartyParseable b:m.getDataBlocks()){
 					//Sort out types of block
 					if(b instanceof TextureBlock){
@@ -321,8 +323,6 @@ public class ResourceManager{
 								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex()%(b instanceof FaceBlock05?10:Integer.MAX_VALUE));}
 							Vector3D blockNormal = new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ());
 							if(blockNormal.getNorm()==0)blockNormal = new Vector3D(1,0,0);//Use filler if zero norm.
-							double [] u = new double[4];//TODO: Allocate once earlier
-							double [] v = new double[4];
 							if(vertIndices.get(0) instanceof FaceBlockVertexWithUV){
 							    for(int i=0; i<4; i++){
 								final FaceBlockVertexWithUV fbvi = (FaceBlockVertexWithUV)vertIndices.get(i);

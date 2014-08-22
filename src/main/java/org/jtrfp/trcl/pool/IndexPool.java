@@ -37,7 +37,10 @@ public class IndexPool{
 		}//end pop()
 	
 	public synchronized int free(int index)
-		{freeIndices.add(index);return index;}
+		{if(freeIndices.contains(index)){
+		    throw new RuntimeException("Double-release of resources: "+index);
+		}
+		    freeIndices.add(index);return index;}
 	
 	public static interface GrowthBehavior
 		{int grow(int previousMaxCapacity);}

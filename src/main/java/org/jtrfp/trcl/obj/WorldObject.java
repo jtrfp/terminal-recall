@@ -54,7 +54,7 @@ public class WorldObject implements PositionedRenderable {
     				= Collections.synchronizedList(new ArrayList<PositionListener>());
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
-    protected final int matrixID;
+    protected Integer 	matrixID;
     private ByteBuffer 	opaqueObjectDefinitionAddressesInVec4 = ByteBuffer
 	    .allocate(0);// defaults to empty
     private ByteBuffer 	transparentObjectDefinitionAddressesInVec4 = ByteBuffer
@@ -638,10 +638,13 @@ public class WorldObject implements PositionedRenderable {
     @Override
     public void finalize() throws Throwable{
 	System.out.println("WorldObject.finalize()");
-	tr.matrixWindow.get().free(matrixID);
-	for(int def:transparentTriangleObjectDefinitions)
+	if(matrixID!=null)
+	 tr.matrixWindow.get().free(matrixID);
+	if(transparentTriangleObjectDefinitions!=null)
+	 for(int def:transparentTriangleObjectDefinitions)
 	    tr.objectDefinitionWindow.get().free(def);
-	for(int def:triangleObjectDefinitions)
+	if(triangleObjectDefinitions!=null)
+	 for(int def:triangleObjectDefinitions)
 	    tr.objectDefinitionWindow.get().free(def);
 	super.finalize();
     }//end finalize()

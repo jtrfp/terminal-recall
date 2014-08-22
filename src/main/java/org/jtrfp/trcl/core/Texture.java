@@ -50,12 +50,12 @@ public class Texture implements TextureDescription {
     private final SubTextureWindow	stw;
     private 	  Color 		averageColor;
     private final String 		debugName;
-    private	  int			tocIndex;
+    private	  Integer		tocIndex;
     private	  int[]			subTextureIDs;
     private	  int[][]		codebookStartOffsetsAbsolute;
     private 	  ByteBuffer 		rgba;
     private final boolean		uvWrapping;
-    private	  int			texturePage;
+    private volatile int		texturePage;
     private static double pixelSize = .7 / 4096.; // TODO: This is a kludge;
 						  // doesn't scale with
 						  // texture palette
@@ -63,17 +63,19 @@ public class Texture implements TextureDescription {
     public void finalize() throws Throwable{
 	System.out.println("Texture.finalize() "+debugName);
 	//TOC ID
-	toc.free(tocIndex);
+	if(tocIndex!=null)
+	    toc.free(tocIndex);
 	//Subtexture IDs
-	for(int stID:subTextureIDs){
+	if(subTextureIDs!=null)
+	 for(int stID:subTextureIDs)
 	    stw.free(stID);
-	}
 	//Codebook entries
-	for(int [] array:codebookStartOffsetsAbsolute){
+	if(codebookStartOffsetsAbsolute!=null)
+	 for(int [] array:codebookStartOffsetsAbsolute){
 	    for(int entry:array){
 		tm.vqCodebookManager.get().freeCodebook256(entry/256);
 	    }//end for(entries)
-	}//end for(arrays)
+	 }//end for(arrays)
 	super.finalize();
     }//end finalize()
     
@@ -196,7 +198,6 @@ public class Texture implements TextureDescription {
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
 	    // Get a TOC
 	    tocIndex = toc.create();
-	    
 	    setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
 	    if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
 		throw new RuntimeException("Nonzero modulus."); 		
@@ -222,17 +223,17 @@ public class Texture implements TextureDescription {
 			//Set magic
 			toc.magic.set(tocIndex, 1337);
 			for(int i=0; i<subTextureIDs.length; i++){
-			final int id = subTextureIDs[i];
-			//Convert subtexture index to index of TOC
-			final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
-			//Load subtexture ID into TOC
-			toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
-			//Render Flags
-			toc.renderFlags.set(tocIndex, 
+			 final int id = subTextureIDs[i];
+			 //Convert subtexture index to index of TOC
+			 final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
+			 //Load subtexture ID into TOC
+			 toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+			 //Render Flags
+			 toc.renderFlags.set(tocIndex, 
 				(uvWrapping?0x1:0x0)
 				);
-			//Fill the subtexture code start offsets
-			for(int off=0; off<6; off++)
+			 //Fill the subtexture code start offsets
+			 for(int off=0; off<6; off++)
 			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetsAbsolute[i][off]);
 		    }//end for(subTextureIDs)
 		// Set the TOC vars

@@ -54,6 +54,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private ColorPaletteVectorList palette;
     private LVLFile		lvl;
     private TimerTask	  scrollTimer;
+    private WorldObject	  planetObject;
 
     public BriefingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
 	super(parent);
@@ -127,13 +128,16 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
 	//Planet introduction
 	game.setDisplayMode(game.briefingMode);
-	WorldObject planetObject;
+	if(planetObject!=null){
+	    remove(planetObject);
+	    planetObject=null;
+	}
 	try{
 	 final Model planetModel = rm.getBINModel(
 		 missionTXT.getPlanetModelFile(),
 		 rm.getRAWAsTexture(missionTXT.getPlanetTextureFile(), 
-			 getPalette(), gl, true),
-		 8,true,getPalette(),gl);
+			 getPalette(), gl,false, true),
+		 8,false,getPalette(),gl);
 	 	     planetObject = new WorldObject(tr,planetModel);
 	 planetObject.setPosition(0, TR.mapSquareSize*20, 0);
 	 add(planetObject);

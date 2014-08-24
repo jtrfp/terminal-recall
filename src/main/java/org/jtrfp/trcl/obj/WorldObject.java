@@ -426,7 +426,8 @@ public class WorldObject implements PositionedRenderable {
 	    final SpacePartitioningGrid<PositionedRenderable> gr = getContainingGrid();
 	    if(gr==null){
 		if(lastContainingList!=null){
-		    lastContainingList.remove(this);
+		    synchronized(lastContainingList){
+		     lastContainingList.remove(this);}
 		    lastContainingList=null;
 		}//end if(lastContainingList!=null)
 		return this;
@@ -436,8 +437,10 @@ public class WorldObject implements PositionedRenderable {
 	      gr.getAlwaysVisibleList():gr.world2List(position[0],position[1],position[2],true);
 	    if(lastContainingList!=newList){
 		if(lastContainingList!=null)
-		    lastContainingList.remove(this);
-		newList.add(this);
+		    synchronized(lastContainingList){
+		     lastContainingList.remove(this);}
+		synchronized(newList){
+		    newList.add(this);}
 		lastContainingList=newList;
 	    }//end if(posChange)
 	}//end sync(position)
@@ -504,7 +507,8 @@ public class WorldObject implements PositionedRenderable {
 	    SpacePartitioningGrid g = getContainingGrid();
 	    if(g!=null)
 		if(lastContainingList!=null)
-		    lastContainingList.remove(this);
+		    synchronized(lastContainingList){
+		     lastContainingList.remove(this);}
 		//containingGrid.get().remove(this);
 	}//end if(grid!=null)
 	containingGrid=null;

@@ -18,6 +18,7 @@ import java.awt.Color;
 
 public final class ColorPaletteVectorList implements VectorList {
     private final double [][] palette;
+    private Integer hashCode;
     
     public ColorPaletteVectorList(Color [] colors){
 	palette 	 = new double[colors.length][];
@@ -49,5 +50,19 @@ public final class ColorPaletteVectorList implements VectorList {
     public void setComponentAt(int vectorIndex, int componentIndex, double value) {
 	palette[vectorIndex][componentIndex]=value;
     }
+    
+    @Override
+    public int hashCode(){
+	int idx=1;
+	if(hashCode==null){
+	    int hash = 0;
+	    for(final double [] v:palette){
+		for(double d:v)
+		    hash+=d*(idx++);
+	    }//end for(palete)
+	    hashCode = hash;
+	}//end if(null)
+	return hashCode;
+    }//end hashcode()
 
 }//end ColorPaletteVectorList

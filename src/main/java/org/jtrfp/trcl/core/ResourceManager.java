@@ -96,9 +96,9 @@ import org.jtrfp.trcl.obj.SmokeSystem;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
-	private SoftValueHashMap<String, TextureDescription> 
-	/*						*/	 textureNameMap 
-		= new SoftValueHashMap<String,TextureDescription>();
+	private SoftValueHashMap<Integer, TextureDescription> 
+	/*						*/	 rawCache 
+		= new SoftValueHashMap<Integer,TextureDescription>();
     	private SoftValueHashMap<String, TextureDescription[]> 
     								specialTextureNameMap 	
     		= new SoftValueHashMap<String,TextureDescription[]>();
@@ -179,7 +179,8 @@ public class ResourceManager{
 	
 	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette, GL3 gl3,
 			final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-	    	TextureDescription result=textureNameMap.get(name);
+	    	final int hash=name.hashCode()*palette.hashCode();
+	        TextureDescription result=rawCache.get(hash);
 	    	if(result!=null&&useCache)return result;
 			try {
 				if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
@@ -215,7 +216,7 @@ public class ResourceManager{
 				result=tr.gpu.get().textureManager.get().getFallbackTexture();
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
-		if(useCache)textureNameMap.put(name, result);
+		if(useCache)rawCache.put(name.hashCode()*palette.hashCode(), result);
 		//Texture.texturesToBeAccounted.add(result);
 		return result;
 		}//end getRAWAsTexture(...)

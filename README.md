@@ -31,14 +31,14 @@ git clone https://github.com/jtrfp/terminal-recall.git
 You should see BUILD SUCCESS. If you see BUILD FAILURE come to the Terminal Recall gitHub issues section (https://github.com/jtrfp/terminal-recall/issues?page=1), file a new issue and post the output and we'll hopefully figure it out.
 ```
     cd target
-    java -jar RunMe.jar [path_to_POD_file0] [path_to_POD_file1] [...] [level_name.LVL]
+    java -Dorg.jtrfp.trcl.flow.Game.skipToLevel=[levelFile].LVL -jar RunMe.jar [path to STARTUP.POD] [path to additional .POD] [...]
 ```
 
 For example:
 ```
-java -jar RunMe.jar "/home/chuck/pods/STARTUP.POD" "/home/chuck/pods/FURY3.POD" "BORG3.LVL"
+java -Dorg.jtrfp.trcl.flow.Game.skipToLevel=EGYPT.LVL -jar RunMe.jar "/home/username/pods/STARTUP.POD" "/home/username/pods/FURY3.POD"
 ```
-... to run the final level in Fury3.
+... to run the first level of Sebek.
 
 If its been a few weeks since you first downloaded and you want to update to the newest version you can cd into your terminal-recall directory and run:
 

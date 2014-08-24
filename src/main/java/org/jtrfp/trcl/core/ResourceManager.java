@@ -110,7 +110,7 @@ public class ResourceManager{
 		= new SoftValueHashMap<String,Model>();
 	private ExplosionSystem 				explosionFactory;
 	private SmokeSystem 					smokeSystem;
-	private PowerupSystem 			powerupSystem;
+	private PowerupSystem 					powerupSystem;
 	private DebrisSystem 					debrisSystem;
 	private ProjectileFactory [] 				projectileFactories;
 	private final TR 					tr;
@@ -152,7 +152,6 @@ public class ResourceManager{
 	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		String [] files = getTEXListFile(texFileName);
 		TextureDescription [] result = new TextureDescription[files.length];
-		//Color [] palette = getPalette(actFileName);
 		for(int i=0; i<files.length;i++)
 			{result[i]=getRAWAsTexture(files[i],palette,gl3,uvWrapping);}
 		return result;
@@ -217,7 +216,6 @@ public class ResourceManager{
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
 		if(useCache)rawCache.put(name.hashCode()*palette.hashCode(), result);
-		//Texture.texturesToBeAccounted.add(result);
 		return result;
 		}//end getRAWAsTexture(...)
 	

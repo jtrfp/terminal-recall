@@ -41,16 +41,13 @@ public class WorldObject implements PositionedRenderable {
     public static final boolean LOOP = true;
     private double[] 	heading = new double[] { 0, 0, 1 };
     private double[] 	top 	= new double[] { 0, 1, 0 };
-    protected double[] position = new double[3];
-    protected double[] modelOffset= new double[3];
-    private final double[] positionWithOffset 
+    protected double[]  position = new double[3];
+    protected double[]  modelOffset= new double[3];
+    private final double[]positionWithOffset 
     				= new double[3];
     private final TR 	tr;
     private boolean 	visible = true;
     private Model 	model;
-    /*private List<PositionListener> 
-    			positionListeners 
-    				= Collections.synchronizedList(new ArrayList<PositionListener>());*/
     private List<PositionedRenderable>lastContainingList;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
@@ -176,21 +173,6 @@ public class WorldObject implements PositionedRenderable {
 	    throw new RuntimeException("Passed model cannot be null.");
 	model = m;
 	int numObjDefs, sizeInVerts;
-	/*
-	if (m.getLineSegmentList() == null)
-	    lineSegmentObjectDefinitions = new int[0];
-	else {
-	    sizeInVerts = m.getLineSegmentList().getTotalSizeInGPUVertices();
-	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
-	    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
-		numObjDefs++;
-	    lineSegmentObjectDefinitions = new int[numObjDefs];
-	    for (int i = 0; i < numObjDefs; i++) {
-		lineSegmentObjectDefinitions[i] = tr
-			.getObjectDefinitionWindow().create();
-	    }
-	    
-	}*/
 	if (m.getTriangleList() == null)
 	    triangleObjectDefinitions = emptyIntArray;
 	else {
@@ -509,7 +491,6 @@ public class WorldObject implements PositionedRenderable {
 		if(lastContainingList!=null)
 		    synchronized(lastContainingList){
 		     lastContainingList.remove(this);}
-		//containingGrid.get().remove(this);
 	}//end if(grid!=null)
 	containingGrid=null;
 	// Send it to the land of wind and ghosts.

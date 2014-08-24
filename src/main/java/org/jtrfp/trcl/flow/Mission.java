@@ -52,7 +52,9 @@ public class Mission {
     private final String 	levelName;
     private OverworldSystem 	overworldSystem;
     private final Result[]	missionEnd = new Result[]{null};
-    private int			groundTargetsDestroyed=0,airTargetsDestroyed=0,foliageDestroyed=0;
+    private int			groundTargetsDestroyed=0,
+	    			airTargetsDestroyed=0,
+	    			foliageDestroyed=0;
     private int			totalNumTunnels;
     private final LinkedList<Tunnel>
     				tunnelsRemaining = new LinkedList<Tunnel>();

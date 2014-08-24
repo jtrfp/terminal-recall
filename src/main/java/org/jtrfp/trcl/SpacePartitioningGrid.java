@@ -19,15 +19,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.obj.PositionListenable;
-import org.jtrfp.trcl.obj.PositionListener;
 import org.jtrfp.trcl.obj.Positionable;
-import org.jtrfp.trcl.obj.PositionedRenderable;
-import org.jtrfp.trcl.obj.VisibleEverywhere;
 
 public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
-	//private Object [] 			gridSquares;
 	private int 				squaresX, squaresY, squaresZ;
 	private final List<E> 			alwaysVisible = new ArrayList<E>(300);
 	private WeakReference<SpacePartitioningGrid<E>> 	
@@ -133,27 +128,10 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	    	//Figure out where it goes
 	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
 	    	objectWithPosition.setContainingGrid(this);
-	    	//TODO: notifyPositionChanged()
-	    	/*
-	    	if(objectWithPosition instanceof VisibleEverywhere){//TODO: WorldObject's auto-placing clashes with this
-		    addAlwaysVisible(objectWithPosition);return;}
-	    	
-	    	final double [] pos = objectWithPosition.getPosition();
-		//final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
-		final int flatPos = world2Flat(pos[0],pos[1],pos[2]);
-		addDirect(flatPos,objectWithPosition);
-		*/
 		}
 	public synchronized void remove(E objectWithPosition){
-	    //TODO: remove from cube
 	    objectWithPosition.setContainingGrid(null);
-	  //TODO: notifyPositionChanged
 	}//end remove(...)
-	/*private void addAlwaysVisible(E objectWithPosition)
-		{alwaysVisible.add(objectWithPosition);}
-	private void removeAlwaysVisible(E objectWithPosition)
-		{alwaysVisible.remove(objectWithPosition);}
-	*/
 	private static double absMod(double value, double mod){
 		if(value>=-0.)
 			{return value%mod;}
@@ -162,27 +140,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		if(value==0)return 0;
 		return mod-value;
 		}//end absMod
-	
-	private Vector3D world2Square(double[] ds){
-		return new Vector3D(
-				absMod(Math.round(ds[0]/getSquareSize()),squaresX),
-				absMod(Math.round(ds[1]/getSquareSize()),squaresY),
-				absMod(Math.round(ds[2]/getSquareSize()),squaresZ));
-		}
-	private double[] square2World(double[] ds){
-		return new double[]{
-				ds[0]*getSquareSize(),
-				ds[1]*getSquareSize(),
-				ds[2]*getSquareSize()};
-		}//end square2World(...)
-	/*
-	protected GridCube squareAtWorldCoord(double[] ds)
-		{return squareAtGridCoord(world2Square(ds));}
-	
-	@SuppressWarnings("unchecked")
-	protected GridCube squareAtGridCoord(Vector3D gridCoord)
-		{return (GridCube)(gridSquares[space2Flat(gridCoord)]);}
-	*/
 	
 	public void cubesWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<List<E>> submitter){
 	    recursiveAlwaysVisibleGridCubeSubmit(submitter);

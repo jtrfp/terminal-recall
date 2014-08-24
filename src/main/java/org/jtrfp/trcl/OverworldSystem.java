@@ -28,26 +28,29 @@ import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
-    private CloudSystem cloudSystem;
+    private CloudSystem 	     cloudSystem;
     private InterpolatingAltitudeMap altitudeMap;
-    private Color fogColor = Color.black;
-    private final List<DEFObject> defList = new ArrayList<DEFObject>();
-    private RenderableSpacePartitioningGrid terrainMirror = new RenderableSpacePartitioningGrid(
-	    this) {
-    };
-    private boolean chamberMode = false;
-    private boolean tunnelMode = false;
-    private final TR tr;
-    private final LoadingProgressReporter terrainReporter, cloudReporter, objectReporter;
+    private Color 		     fogColor = Color.black;
+    private final List<DEFObject>    defList = new ArrayList<DEFObject>();
+    private RenderableSpacePartitioningGrid 
+    				     terrainMirror = 
+    new RenderableSpacePartitioningGrid(this) {};
+    private boolean 		     chamberMode = false;
+    private boolean 		     tunnelMode = false;
+    private final TR 		     tr;
+    private final LoadingProgressReporter 
+    				     terrainReporter, 
+    				     cloudReporter, 
+    				     objectReporter;
     private		ObjectSystem objectSystem;
 
     public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
 	super(w);
 	this.tr = w.getTr();
 	final LoadingProgressReporter []reporters = progressReporter.generateSubReporters(256);
-	terrainReporter = reporters[0];
-	cloudReporter = reporters[1];
-	objectReporter = reporters[2];
+	terrainReporter	= reporters[0];
+	cloudReporter 	= reporters[1];
+	objectReporter 	= reporters[2];
     }
     public void loadLevel(final LVLFile lvl, final TDFFile tdf){
 	try {
@@ -91,7 +94,6 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	// terrainMirror.deactivate();//TODO: Uncomment
     }// end constructor
     
     @Override

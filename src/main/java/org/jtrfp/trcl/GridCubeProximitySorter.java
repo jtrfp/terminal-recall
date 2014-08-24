@@ -13,12 +13,13 @@
 package org.jtrfp.trcl;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
-public class GridCubeProximitySorter extends AbstractSubmitter<SpacePartitioningGrid<PositionedRenderable>.GridCube> {
+public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRenderable>> {
     private double [] center = new double[]{0,0,0};
     
     public GridCubeProximitySorter setCenter(double [] center){
@@ -26,18 +27,28 @@ public class GridCubeProximitySorter extends AbstractSubmitter<SpacePartitioning
 	return this;
     }
     
-    private final TreeSet<SpacePartitioningGrid<PositionedRenderable>.GridCube> sortedSet = new TreeSet<SpacePartitioningGrid<PositionedRenderable>.GridCube>(new Comparator<SpacePartitioningGrid<PositionedRenderable>.GridCube>(){
+    private final TreeSet<List<PositionedRenderable>> sortedSet = 
+	    new TreeSet<List<PositionedRenderable>>(new Comparator<List<PositionedRenderable>>(){
 
 	@Override
-	public int compare(SpacePartitioningGrid<PositionedRenderable>.GridCube _left, SpacePartitioningGrid<PositionedRenderable>.GridCube _right) {
-	    final double [] left=_left.getTopLeftPosition();
-	    final double [] right=_right.getTopLeftPosition();
+	public int compare(List<PositionedRenderable> _left, List<PositionedRenderable> _right) {
+	    synchronized(_left){
+	    synchronized(_right){
+	    if(_left.isEmpty()&&_right.isEmpty())
+		return 0;
+	    if(_left.isEmpty())
+		return -1;
+	    if(_right.isEmpty())
+		return 1;
+	    final double [] left=_left.get(0).getPosition();
+	    final double [] right=_right.get(0).getPosition();
 	    if((left==right)&&left==null)return Integer.MAX_VALUE;
 	    if(left==null)return Integer.MIN_VALUE;
 	    if(right==null)return Integer.MAX_VALUE;
 	    final int diff = (int)(Vect3D.taxicabDistance(center,left)-Vect3D.taxicabDistance(center,right));
 	    return diff!=0?diff:1;
-	}
+	    }}//end sync()
+	}//end compare()
 	@Override
 	public boolean equals(Object o){
 	    return o.getClass()==this.getClass();
@@ -45,7 +56,9 @@ public class GridCubeProximitySorter extends AbstractSubmitter<SpacePartitioning
 	
     });
     @Override
-    public void submit(SpacePartitioningGrid<PositionedRenderable>.GridCube item) {
+    public void submit(List<PositionedRenderable> item) {
+	if(item==null)return;
+	if(item.isEmpty())return;
 	sortedSet.add(item);
     }
     
@@ -55,8 +68,8 @@ public class GridCubeProximitySorter extends AbstractSubmitter<SpacePartitioning
     }
     
     public GridCubeProximitySorter dumpPositionedRenderables(Submitter<PositionedRenderable> sub){
-	for(SpacePartitioningGrid<PositionedRenderable>.GridCube gc:sortedSet){
-	    sub.submit(gc.getElements());
+	for(List<PositionedRenderable> gc:sortedSet){
+	    sub.submit(gc);
 	}//end for(...)
 	return this;
     }//end dumpPositionedRenderables(...)

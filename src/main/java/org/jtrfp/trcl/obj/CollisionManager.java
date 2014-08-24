@@ -34,6 +34,7 @@ public class CollisionManager {
 
     public void updateCollisionList() {
 	final List<WorldObject> collideable = getWriteCollisionList();
+	System.out.println("CollisionManager.updateCollisionList() "+collideable.size());
 	collideable.clear();
 	tr.
 	getWorld().
@@ -50,13 +51,15 @@ public class CollisionManager {
 
 		    @Override
 		    public void submit(Collection<PositionedRenderable> items) {
-			for (PositionedRenderable pr : items
-				.toArray(new PositionedRenderable[] {})) {
-			    submit(pr);
-			}
+			synchronized(items){
+			    for (PositionedRenderable pr : items) {
+				    submit(pr);
+				}
+			}//end synchronized(...)
 		    }
 		});
 	flip = !flip;
+	System.out.println("Done.");
     }// end updateVisibilityList()
 
     public synchronized void performCollisionTests() {

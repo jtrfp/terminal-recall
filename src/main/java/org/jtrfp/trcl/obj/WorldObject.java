@@ -17,7 +17,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -49,9 +48,10 @@ public class WorldObject implements PositionedRenderable {
     private final TR 	tr;
     private boolean 	visible = true;
     private Model 	model;
-    private List<PositionListener> 
+    /*private List<PositionListener> 
     			positionListeners 
-    				= Collections.synchronizedList(new ArrayList<PositionListener>());
+    				= Collections.synchronizedList(new ArrayList<PositionListener>());*/
+    private List<PositionedRenderable>lastContainingList;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected Integer 	matrixID;
@@ -414,17 +414,35 @@ public class WorldObject implements PositionedRenderable {
      *            the position to set
      */
     public WorldObject setPosition(double[] position) {
-	synchronized (position) {
-	    this.position = position;
-	    notifyPositionListeners();
-	}
+	this.position[0]=position[0];
+	this.position[1]=position[1];
+	this.position[2]=position[2];
+	notifyPositionChange();
 	return this;
     }// end setPosition()
-
-    public WorldObject notifyPositionChange() {
-	notifyPositionListeners();
+    
+    public WorldObject notifyPositionChange(){
+	synchronized (position) {
+	    final SpacePartitioningGrid<PositionedRenderable> gr = getContainingGrid();
+	    if(gr==null){
+		if(lastContainingList!=null){
+		    lastContainingList.remove(this);
+		    lastContainingList=null;
+		}//end if(lastContainingList!=null)
+		return this;
+	    }//end if(gr==null)
+	    final List<PositionedRenderable> newList = 
+	     (this instanceof VisibleEverywhere)?
+	      gr.getAlwaysVisibleList():gr.world2List(position[0],position[1],position[2],true);
+	    if(lastContainingList!=newList){
+		if(lastContainingList!=null)
+		    lastContainingList.remove(this);
+		newList.add(this);
+		lastContainingList=newList;
+	    }//end if(posChange)
+	}//end sync(position)
 	return this;
-    }
+    }//end notifyPositionChange()
 
     /**
      * @return the heading
@@ -464,27 +482,6 @@ public class WorldObject implements PositionedRenderable {
 	top[2] = nTop.getZ();
     }
 
-    private void notifyPositionListeners() {
-	for(int i=0; i<positionListeners.size(); i++){
-	    positionListeners.get(i).positionChanged(this);
-	}
-    }//end notifyPositionListeners()
-    
-    public List<PositionListener> getPositionListeners(){
-	return positionListeners;
-    }
-
-    @Override
-    public void addPositionListener(PositionListener listenerToAdd) {
-	if(!positionListeners.contains(listenerToAdd))
-	    positionListeners.add(listenerToAdd);
-    }
-
-    @Override
-    public void removePositionListener(PositionListener listenerToRemove) {
-	positionListeners.remove(listenerToRemove);
-    }
-
     public final ByteBuffer getOpaqueObjectDefinitionAddresses() {
 	opaqueObjectDefinitionAddressesInVec4.clear();
 	return opaqueObjectDefinitionAddressesInVec4;
@@ -503,6 +500,14 @@ public class WorldObject implements PositionedRenderable {
     }
 
     public void destroy() {
+	if (containingGrid != null){
+	    SpacePartitioningGrid g = getContainingGrid();
+	    if(g!=null)
+		if(lastContainingList!=null)
+		    lastContainingList.remove(this);
+		//containingGrid.get().remove(this);
+	}//end if(grid!=null)
+	containingGrid=null;
 	// Send it to the land of wind and ghosts.
 	final double[] pos = getPosition();
 	pos[0] = Double.NEGATIVE_INFINITY;
@@ -510,19 +515,15 @@ public class WorldObject implements PositionedRenderable {
 	pos[2] = Double.NEGATIVE_INFINITY;
 	notifyPositionChange();
 	setActive(false);
-	if (containingGrid != null){
-	    SpacePartitioningGrid g = getContainingGrid();
-	    if(g!=null)
-		containingGrid.get().remove(this);
-	}//end if(gird!=null)
     }
 
     @Override
     public void setContainingGrid(SpacePartitioningGrid grid) {
 	containingGrid = new WeakReference<SpacePartitioningGrid>(grid);
+	notifyPositionChange();
     }
 
-    public SpacePartitioningGrid getContainingGrid() {
+    public SpacePartitioningGrid<PositionedRenderable> getContainingGrid() {
 	try{return containingGrid.get();}
 	catch(NullPointerException e){return null;}
     }

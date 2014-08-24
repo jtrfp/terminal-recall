@@ -125,6 +125,7 @@ public final class ThreadManager {
 	if(visibilityCalcTask!=null){
 	    if(!visibilityCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}
+	    else visibilityCalcTask.get();
 	}
 	visibilityCalcTask = new TRFutureTask<Void>(tr,new Callable<Void>(){
 	    @Override
@@ -163,12 +164,13 @@ public final class ThreadManager {
 	gameplayTimer.schedule(new TimerTask(){
 	    @Override
 	    public void run() {
+		try{
 		if (counter++ % Math.ceil(RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
 		 if(System.currentTimeMillis()<nextVisCalcTime.get())
-		 return;
+		     return;
 		 visibilityCalc();}
 		if(tr.getPlayer()!=null)gameplay();
-		
+		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
 	animator = new Animator(tr.getRootWindow().getCanvas());
 	animator.start();

@@ -175,13 +175,6 @@ public class Player extends WorldObject implements VisibleEverywhere{
 	return this;
     }
 
-    @Override
-    public WorldObject notifyPositionChange() {
-	/*camera.setPosition(new Vector3D(getPosition()).subtract(getLookAt()
-		.scalarMultiply(cameraDistance)));*/
-	return super.notifyPositionChange();
-    }
-
     /**
      * @return the weapons
      */

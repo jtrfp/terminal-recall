@@ -21,17 +21,20 @@ import java.util.List;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.PositionListenable;
 import org.jtrfp.trcl.obj.PositionListener;
+import org.jtrfp.trcl.obj.Positionable;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 
-public abstract class SpacePartitioningGrid<E extends PositionListenable>{
+public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
-	private Object [] 			gridSquares;
+	//private Object [] 			gridSquares;
 	private int 				squaresX, squaresY, squaresZ;
-	private final GridCube 			alwaysVisible = new GridCube(null);
+	private final List<E> 			alwaysVisible = new ArrayList<E>(300);
 	private WeakReference<SpacePartitioningGrid<E>> 	
 						parentGrid = null;
 	private List<SpacePartitioningGrid<E>> 	branchGrids = Collections
 		.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());
+	private  List<E> []elements;
 	
 	private double 		radiusInWorldUnits;
 	private int 		rolloverPoint,
@@ -110,19 +113,11 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		}//end constructor
 	
 	private void allocateSquares(){
-		Object []squares = new Object[squaresX*squaresY*squaresZ];
-		int squaresZMult=squaresX*squaresY;
-		setGridSquares(squares);
-		for(int z=0; z<squaresZ; z++)
-			{for(int y=0; y<squaresY; y++)
-				{for(int x=0; x<squaresX; x++)
-					{squares[x+y*squaresX+z*squaresZMult]=(new GridCube(square2World(new double[]{x,y,z})));}
-				}//end for(squaresY)
-			}//end for(squaresZ)
-		
+		//Object []squares = new Object[squaresX*squaresY*squaresZ];
+		elements = new List[squaresX*squaresY*squaresZ];
 		//Fudge factor to fix suddenly appearing terrain at distance
 		radiusInWorldUnits	=getViewingRadius()*1.25;
-		rolloverPoint		=gridSquares.length;
+		rolloverPoint		=elements.length;
 		rawDia			=(int)((radiusInWorldUnits*2)/getSquareSize());
 		rawDiaX			=rawDia<getSquaresX()?rawDia:getSquaresX();
 		rawDiaY			=rawDia<getSquaresY()?rawDia:getSquaresY();
@@ -132,30 +127,33 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		xProgression=1;
 		}//end allocateSquares()
 	
-	private int space2Flat(Vector3D space)
-		{return (int)(space.getX()+space.getY()*squaresX+space.getZ()*squaresX*squaresY);}
-	public synchronized void add(E objectWithPosition)
-		{//Figure out where it goes
+	private int space2Flat(int x, int y ,int z)
+		{return (int)(x+y*squaresX+z*squaresX*squaresY);}
+	public synchronized void add(E objectWithPosition){
+	    	//Figure out where it goes
 	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
 	    	objectWithPosition.setContainingGrid(this);
-	    	if(objectWithPosition instanceof VisibleEverywhere){
+	    	//TODO: notifyPositionChanged()
+	    	/*
+	    	if(objectWithPosition instanceof VisibleEverywhere){//TODO: WorldObject's auto-placing clashes with this
 		    addAlwaysVisible(objectWithPosition);return;}
-		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
-		dest.add(objectWithPosition);
+	    	
+	    	final double [] pos = objectWithPosition.getPosition();
+		//final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
+		final int flatPos = world2Flat(pos[0],pos[1],pos[2]);
+		addDirect(flatPos,objectWithPosition);
+		*/
 		}
 	public synchronized void remove(E objectWithPosition){
-	    if(objectWithPosition instanceof VisibleEverywhere){
-		removeAlwaysVisible(objectWithPosition);
-	    }else{
-		final GridCube dest = squareAtWorldCoord(objectWithPosition.getPosition());
-		dest.remove(objectWithPosition);
-	    }
-		}
-	private void addAlwaysVisible(E objectWithPosition)
+	    //TODO: remove from cube
+	    objectWithPosition.setContainingGrid(null);
+	  //TODO: notifyPositionChanged
+	}//end remove(...)
+	/*private void addAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.add(objectWithPosition);}
 	private void removeAlwaysVisible(E objectWithPosition)
 		{alwaysVisible.remove(objectWithPosition);}
-	
+	*/
 	private static double absMod(double value, double mod){
 		if(value>=-0.)
 			{return value%mod;}
@@ -177,18 +175,19 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 				ds[1]*getSquareSize(),
 				ds[2]*getSquareSize()};
 		}//end square2World(...)
-	
+	/*
 	protected GridCube squareAtWorldCoord(double[] ds)
 		{return squareAtGridCoord(world2Square(ds));}
 	
 	@SuppressWarnings("unchecked")
 	protected GridCube squareAtGridCoord(Vector3D gridCoord)
 		{return (GridCube)(gridSquares[space2Flat(gridCoord)]);}
+	*/
 	
-	public void cubesWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<GridCube> submitter){
+	public void cubesWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<List<E>> submitter){
 	    recursiveAlwaysVisibleGridCubeSubmit(submitter);
 	    final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
-		int startRaw=space2Flat(world2Square(startPoint));
+		int startRaw = world2Flat(startPoint[0],startPoint[1],startPoint[2]);
 		
 		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
 		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
@@ -208,7 +207,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		recursiveAlwaysVisibleSubmit(submitter);
 		
 		final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
-		int startRaw=space2Flat(world2Square(startPoint));
+		int startRaw = world2Flat(startPoint[0],startPoint[1],startPoint[2]);
 		
 		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
 		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
@@ -224,15 +223,15 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		}//end itemsInRadiusOf(...)
 	
     private void recursiveAlwaysVisibleSubmit(Submitter<E> sub) {
-	sub.submit(alwaysVisible.getElements());
+	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
-	final int size = branchGrids.size();
-	for (int index = 0; index < size; index++) {
+	 final int size = branchGrids.size();
+	 for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
 	}}
     }// end recursiveAlwaysVisisbleSubmit(...)
 
-    private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<GridCube> sub) {
+    private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<List<E>> sub) {
 	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
@@ -242,14 +241,13 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
     }// end recursiveAlwaysVisisbleSubmit(...)
 	
     private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
-	final List<E> elements = ((GridCube) gridSquares[blockID])
-		.getElements();
-	{
-	    final int size = elements.size();
-	    for (int i = 0; i < size; i++) {
+	final List<E> elements = this.elements[blockID];
+	    if(elements!=null){
+	     final int size = elements.size();
+	      for (int i = 0; i < size; i++) {
 		sub.submit(elements.get(i));
-	    }
-	}// end submit local elements
+	      }//end for(size)
+	    }//end if(!null)
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
@@ -257,9 +255,9 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	}}
     }// end recusiveBlockSubmit(...)
 
-    private void recursiveGridCubeSubmit(Submitter<GridCube> sub, int blockID) {
-	final GridCube cube = (GridCube)gridSquares[blockID];
-	sub.submit(cube);
+    private void recursiveGridCubeSubmit(Submitter<List<E>> sub, int blockID) {
+	//final GridCube cube = (GridCube)gridSquares[blockID];
+	sub.submit(elements[blockID]);
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {
@@ -268,7 +266,7 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
     }// end recusiveGridCubeSubmit(...)
 
 	private Collection<E> getAlwaysVisible()
-		{return alwaysVisible.getElements();}
+		{return alwaysVisible;}
 
 	/**
 	 * @return the squareSize
@@ -283,107 +281,6 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 		this.squareSize = squareSize;
 		}
 	
-	public class GridCube implements PositionListener{
-		double [] topLeftPosition;
-		private List<E> elements = null;
-		
-		public GridCube(double [] topLeftPosition){
-			setTopLeftPosition(topLeftPosition);
-			}
-		
-		public String toString(){
-		    return "GridCube topLeftPos=("+topLeftPosition[0]+", "+topLeftPosition[1]+", "+topLeftPosition[2]+")";
-		}//end toString()
-		
-		public void add(E objectToAdd){
-			if(getElements().contains(objectToAdd)){
-			    /*new Exception("Redundant add!").printStackTrace();
-			    List<PositionListener>pcls = ((WorldObject)objectToAdd).getPositionListeners();
-				for(PositionListener pl:pcls){
-				    System.out.println("PositionListener "+pl);
-				}*/
-			   }//TODO Comment out 
-			else{//Ok to add.
-			getElements().add(objectToAdd);
-			if(!(objectToAdd instanceof VisibleEverywhere))
-			    objectToAdd.addPositionListener(this);}
-			}//end add(E)
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public void positionChanged(PositionListenable objectWithPosition){
-		    	synchronized(SpacePartitioningGrid.this){
-			//Is it still in the range of this cube
-			if(isInRange(objectWithPosition.getPosition()))return;// Then ignore
-			//Else remove and re-add so it finds its new cube.
-			synchronized(SpacePartitioningGrid.this){synchronized(objectWithPosition){
-				remove(objectWithPosition);
-				SpacePartitioningGrid.this.add((E)objectWithPosition);
-				}}
-		    	  }//end sync(SpacePartitioningGrid.this)
-			}//end constructor(..)
-
-		private void remove(PositionListenable objectWithPosition){
-			boolean result = getElements().remove(objectWithPosition);
-			/*if(!result) && objectWithPosition instanceof Player){
-			    new Exception("Removal failure.").printStackTrace();
-			    System.exit(0);
-			}*/
-			objectWithPosition.removePositionListener(this);
-			}//end remove(...)
-
-		private boolean isInRange(double[] ds){
-		    if(topLeftPosition==null)return true;//Always in range.
-			return(	ds[0]>topLeftPosition[0] &&							//Top Left
-					ds[1]>topLeftPosition[1] &&
-					ds[2]>topLeftPosition[2] &&
-					ds[0]<topLeftPosition[0]+SpacePartitioningGrid.this.getSquareSize() && 	//Bottom right
-					ds[1]<topLeftPosition[1]+SpacePartitioningGrid.this.getSquareSize() &&
-					ds[2]<topLeftPosition[2]+SpacePartitioningGrid.this.getSquareSize());
-			}//end isInRange()
-
-		/**
-		 * @return the topLeftPosition
-		 */
-		public double [] getTopLeftPosition(){
-			return topLeftPosition;
-			}
-
-		/**
-		 * @param topLeftPosition2 the topLeftPosition to set
-		 */
-		public void setTopLeftPosition(double[] topLeftPosition2){
-			this.topLeftPosition = topLeftPosition2;
-			}
-
-		/**
-		 * @return the elements
-		 */
-		public List<E> getElements(){
-		    	if(elements==null)elements =  Collections.synchronizedList(new ArrayList<E>(3));
-			return elements;
-			}
-
-		/**
-		 * @param elements the elements to set
-		 */
-		public void setElements(ArrayList<E> elements){
-			this.elements = elements;
-			}
-		}//end GridSquare
-
-	/**
-	 * @return the gridSquares
-	 */
-	public Object[] getGridSquares(){
-		return gridSquares;
-		}
-	/**
-	 * @param squares the gridSquares to set
-	 */
-	public void setGridSquares(Object[] squares){
-		this.gridSquares = squares;
-		}
 	/**
 	 * @return the squaresX
 	 */
@@ -437,4 +334,43 @@ public abstract class SpacePartitioningGrid<E extends PositionListenable>{
 	public void setViewingRadius(double viewingRadius){
 		this.viewingRadius = viewingRadius;
 		}
-	}//end SpacePartitionGrid
+
+	public int world2Flat(double x, double y, double z) {
+	    return space2Flat(
+		    (int)absMod(Math.round(x/getSquareSize()),squaresX),
+		    (int)absMod(Math.round(y/getSquareSize()),squaresY),
+		    (int)absMod(Math.round(z/getSquareSize()),squaresZ));
+	}
+
+	public void removeDirect(int flatPos, E objectWithPosition) {
+	    List<E> list = elements[flatPos];
+	    if(list==null)
+		return;
+	    synchronized(list){
+	     if(list.remove(objectWithPosition))
+		objectWithPosition.setContainingGrid(null);
+	     elements[flatPos].remove(objectWithPosition);
+	     }//end sync(list)
+	}//end removeDirect(...)
+
+	public void addDirect(int flatPos, E objectWithPosition) {
+	    List<E> list = elements[flatPos];
+	    if(list==null)
+		elements[flatPos] = list = new ArrayList<E>(8);
+	    synchronized(list){
+	     list.add(objectWithPosition);}
+	}//end addDirect(...)
+
+	public List<E> world2List(double x, double y,
+		double z, boolean newListIfNull) {
+	    final int pos = world2Flat(x,y,z);
+	    List<E> result = elements[pos];
+	    if(newListIfNull && result==null)
+		result = elements[pos] = new ArrayList<E>(8);
+	    return result;
+	}//end world2List
+	
+	public List<E> getAlwaysVisibleList(){
+	    return alwaysVisible;
+	}
+}//end SpacePartitionGrid

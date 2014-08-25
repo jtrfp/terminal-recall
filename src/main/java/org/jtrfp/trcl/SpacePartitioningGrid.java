@@ -199,12 +199,14 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	
     private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
 	final List<E> elements = this.elements[blockID];
-	    if(elements!=null){
-	     final int size = elements.size();
-	      for (int i = 0; i < size; i++) {
-		sub.submit(elements.get(i));
-	      }//end for(size)
-	    }//end if(!null)
+	if (elements != null) {
+	    synchronized (elements) {
+		final int size = elements.size();
+		for (int i = 0; i < size; i++) {
+		    sub.submit(elements.get(i));
+		}// end for(size)
+	    }// end sync(elements)
+	}// end if(!null)
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
 	for (int index = 0; index < size; index++) {

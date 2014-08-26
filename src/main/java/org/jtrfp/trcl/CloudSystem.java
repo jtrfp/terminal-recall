@@ -55,8 +55,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	    newPalette[TR.bidiMod((i + transpose), 256)] = palette[i];
 	}
 	cloudTexture = tr.getResourceManager().getRAWAsTexture(
-		cloudTextureFileName, new ColorPaletteVectorList(newPalette),
-		tr.gpu.get().getGl(),true);
+		cloudTextureFileName, new ColorPaletteVectorList(newPalette),true);
 	cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	addToWorld(os);
 	activate();

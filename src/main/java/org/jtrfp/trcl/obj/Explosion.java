@@ -142,7 +142,7 @@ public class Explosion extends BillboardSprite {
     private Texture frame(String name) throws IllegalAccessException,
 	    IOException, FileLoadException {
 	return (Texture) getTr().getResourceManager().getRAWAsTexture(name,
-		getTr().getDarkIsClearPaletteVL(), getTr().gpu.get().getGl(),
+		getTr().getDarkIsClearPaletteVL(),
 		false);
     }
 

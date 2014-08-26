@@ -136,8 +136,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	 final Model planetModel = rm.getBINModel(
 		 missionTXT.getPlanetModelFile(),
 		 rm.getRAWAsTexture(missionTXT.getPlanetTextureFile(), 
-			 getPalette(), gl,false, true),
-		 8,false,getPalette(),gl);
+			 getPalette(), false, true),
+		 8,false,getPalette());
 	 	     planetObject = new WorldObject(tr,planetModel);
 	 planetObject.setPosition(0, TR.mapSquareSize*20, 0);
 	 add(planetObject);

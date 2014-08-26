@@ -30,9 +30,8 @@ private boolean includeYAxisInCollision=true;
 	setBillboardSize(new Dimension(80000,80000));
 	setVisible(true);
 	try{setTexture(
-		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", tr.getGlobalPaletteVL(), 
-			    tr.gpu.get().getGl(),false)
-		    ,true);
+		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", 
+			    tr.getGlobalPaletteVL(),false),true);
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor
 

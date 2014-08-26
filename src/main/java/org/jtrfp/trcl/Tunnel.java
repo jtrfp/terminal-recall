@@ -123,7 +123,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	ResourceManager rm = tr.getResourceManager();
 	LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
 	TextureDescription[] tunnelTexturePalette = rm.getTextures(
-		tlvl.getLevelTextureListFile(), palette, gl, true);
+		tlvl.getLevelTextureListFile(), palette, true);
 	TNLFile tun = tr.getResourceManager().getTNLData(
 		tlvl.getHeightMapOrTunnelFile());
 
@@ -386,7 +386,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BLADE.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
-		    false, palette, gl));
+		    false, palette));
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(top);
@@ -395,7 +395,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "FANBODY.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
-		    false, palette, gl));
+		    false, palette));
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(top);
@@ -407,7 +407,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos.add(top
 		    .scalarMultiply(tunnelDia / 2))));
 	    wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -420,7 +420,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .subtract(top.scalarMultiply(tunnelDia / 2))));
 	    wo.setPosition(wPos.toArray());
@@ -434,7 +434,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .add(heading.crossProduct(top)
 			    .scalarMultiply(tunnelDia / 2))));
@@ -447,7 +447,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .subtract(heading.crossProduct(top).scalarMultiply(
 			    tunnelDia / 2))));
@@ -461,7 +461,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.setPosition(wPos.add(new Vector3D(0, tunnelDia / 6, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -473,7 +473,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.setPosition(wPos.add(new Vector3D(0, -tunnelDia / 6, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -485,7 +485,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.setPosition(wPos.add(new Vector3D(-tunnelDia / 6, 0, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -497,7 +497,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette, gl));
+		    false, palette));
 	    wo.setPosition(wPos.add(new Vector3D(tunnelDia / 6, 0, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -532,7 +532,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "IRIS.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 4 * 256,
-		    false, palette, gl));
+		    false, palette));
 	    final Model mod = wo.getModel();
 	    wo.addBehavior(new IrisBehavior(new Sequencer(mod
 		    .getFrameDelayInMillis(), 2, true), width));
@@ -549,7 +549,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     public WorldObject getFallbackModel() throws IllegalAccessException,
 	    FileLoadException, IOException {
 	return new WorldObject(tr, tr.getResourceManager().getBINModel(
-		"NAVTARG.BIN", null, 8, false, palette, gl));
+		"NAVTARG.BIN", null, 8, false, palette));
     }
 
     /**

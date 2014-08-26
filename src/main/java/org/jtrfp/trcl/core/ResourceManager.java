@@ -149,11 +149,11 @@ public class ResourceManager{
 		pods.add(new PodFile(f).getData());
 		}
 	
-	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette, GL3 gl3, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		String [] files = getTEXListFile(texFileName);
 		TextureDescription [] result = new TextureDescription[files.length];
 		for(int i=0; i<files.length;i++)
-			{result[i]=getRAWAsTexture(files[i],palette,gl3,uvWrapping);}
+			{result[i]=getRAWAsTexture(files[i],palette,uvWrapping);}
 		return result;
 		}//end loadTextures(...)
 	
@@ -172,11 +172,11 @@ public class ResourceManager{
 		return null;//never happens.
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, GL3 gl3,boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-	    return getRAWAsTexture(name,palette,gl3,true,uvWrapping);
+	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	    return getRAWAsTexture(name,palette,true,uvWrapping);
 	}
 	
-	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette, GL3 gl3,
+	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette,
 			final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    	final int hash=name.hashCode()*palette.hashCode();
 	        TextureDescription result=rawCache.get(hash);
@@ -231,16 +231,15 @@ public class ResourceManager{
 		}//end rawExists
 	
 	public Model getBINModel(String name, ColorPaletteVectorList palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
-		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette,gl);
+		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette);
 		}
 	
 	private static final double [] BOX_U = new double[]{0,1,1,0};
 	private static final double [] BOX_V = new double[]{0,0,1,1};
 	
-	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
+	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
-		if(gl==null)throw new NullPointerException("GL cannot be null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
 		//The models like to set up two line segments where there should be one. 
 		//This set is for identifying and culling redundant segs.
@@ -261,7 +260,7 @@ public class ResourceManager{
 			//Build the Model from the BINFile.Model
 			Model [] frames = new Model[ac.getNumFrames()];
 			for(int i=0; i<frames.length;i++)
-				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette,gl);}
+				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette);}
 			frames[0].setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumElements());
 			//Consolidate the frames to one model
 			for(int i=1; i<frames.length;i++)
@@ -300,8 +299,8 @@ public class ResourceManager{
 					//Sort out types of block
 					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
-						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, gl,hasAlpha);
-						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, gl,false);}
+						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, hasAlpha);
+						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, false);}
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
@@ -421,8 +420,8 @@ public class ResourceManager{
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						Texture [] subTextures = new Texture[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, gl,false);
-							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, gl,true);
+							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, false);
+							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, true);
 							//subTextures[ti]=tex instanceof Texture?new DummyTRFutureTask<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							}//end for(frames) //fDelay, nFrames,interp
 						currentTexture = new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures);

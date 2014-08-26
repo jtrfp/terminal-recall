@@ -57,7 +57,7 @@ public class ProjectileFactory {
    	 t = tr.getResourceManager().getRAWAsTexture(
    		mt.getRawFileName(),
    		tr.getDarkIsClearPaletteVL(), 
-   		tr.gpu.get().getGl(),false);
+   		false);
    	 final double Y_SLANT=1024;
    	 tris =(Triangle.quad2Triangles(new double[]{-laserplaneLength/2.,laserplaneLength/2.,laserplaneLength/2.,-laserplaneLength/2.}, //X
    		new double[]{0,0,Y_SLANT,Y_SLANT}, new double[]{-laserplaneWidth/2.,-laserplaneWidth/2.,laserplaneWidth/2.,laserplaneWidth/2.}, //YZ
@@ -77,7 +77,7 @@ public class ProjectileFactory {
    	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, gl,false);
+   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, false);
    	     }//end for(frames)
    	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){

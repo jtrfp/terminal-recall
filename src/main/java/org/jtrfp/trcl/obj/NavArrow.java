@@ -42,8 +42,7 @@ private final NAVSystem nav;
     private static TextureDescription getTexture(TR tr){
 	try{
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
-		tr.getGlobalPaletteVL(),
-		tr.gpu.get().getGl(),false);}
+		tr.getGlobalPaletteVL(),false);}
 	catch(Exception e){e.printStackTrace();}
 	return null;
     }

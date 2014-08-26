@@ -252,7 +252,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 				setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
 			return null;
 		    }//end Call()
-		}).get();
+		});
     }// end allocateIndices(...)
 
     @Override

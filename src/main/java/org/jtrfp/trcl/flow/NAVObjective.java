@@ -164,6 +164,7 @@ public abstract class NAVObjective {
 				return shieldGen;
 			    }
 			};//end new NAVObjective
+			((DEFObject)shieldGen).setShieldGen(true);
 			if(first){
 			    bossChamberExitShutoffTrigger=shieldGen;
 			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){

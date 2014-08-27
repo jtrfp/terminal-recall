@@ -64,10 +64,8 @@ public class DEFObject extends WorldObject {
     private WorldObject ruinObject;
     private final EnemyLogic logic;
     private final EnemyDefinition def;
-    private boolean mobile,canTurn,foliage,boss,groundLocked;
-    boolean spinCrash=false;
-    boolean ignoringProjectiles=false;
-    boolean isRuin=false;
+    private boolean mobile,canTurn,foliage,boss,groundLocked,
+    		    shieldGen,isRuin,spinCrash,ignoringProjectiles;
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
@@ -658,5 +656,19 @@ public boolean isRuin() {
  */
 public void setRuin(boolean isRuin) {
     this.isRuin = isRuin;
+}
+
+/**
+ * @return the shieldGen
+ */
+public boolean isShieldGen() {
+    return shieldGen;
+}
+
+/**
+ * @param shieldGen the shieldGen to set
+ */
+public void setShieldGen(boolean shieldGen) {
+    this.shieldGen = shieldGen;
 }
 }//end DEFObject

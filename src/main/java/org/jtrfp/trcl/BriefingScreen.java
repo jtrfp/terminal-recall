@@ -20,7 +20,6 @@ import java.util.TimerTask;
 
 import javax.media.opengl.GL3;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -34,6 +33,7 @@ import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission.Result;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.EnemyIntro;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.Sprite2D;
@@ -234,16 +234,26 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			 0});
 	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
 			    wo.getModel().getTransparentTriangleList().getMaximumVertexDims().getX()*6);}
-	    
+	    //If this intro takes place in the chamber, enter chamber mode.
+	    boolean chamberMode = false;
+	    if(wo instanceof DEFObject){
+		final DEFObject def = (DEFObject)wo;
+		chamberMode = def.isShieldGen() || def.isBoss();
+	    }
+	    if(chamberMode)
+		tr.getGame().getCurrentMission().getOverworldSystem().setChamberMode(true);
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze
 	    briefingChars.setScrollPosition(NUM_LINES-2);
 	    setContent(intro.getDescriptionString());
 	    tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
+	    //Restore previous state.
 	    wo.setVisible(vis);
 	    wo.setActive(act);
 	    wo.setRespondToTick(true);//unfreeze
+	    if(chamberMode)
+		tr.getGame().getCurrentMission().getOverworldSystem().setChamberMode(false);
 	}//end for(enemyIntros)
 	camera.probeForBehavior(FacingObject.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);

@@ -35,6 +35,7 @@ import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
+import org.jtrfp.trcl.obj.Jumpzone;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelEntranceObject.TunnelEntranceBehavior;
 import org.jtrfp.trcl.obj.TunnelExitObject;
@@ -247,7 +248,7 @@ public abstract class NAVObjective {
 		} else if(navSubObject instanceof DUN){///////////////////////////////////////////
 		    final DUN xit = (DUN)navSubObject;
 		    final Location3D loc3d = xit.getLocationOnMap();
-		    final Checkpoint chk = new Checkpoint(tr);
+		    final Jumpzone chk = new Jumpzone(tr);
 		    final double [] chkPos = chk.getPosition();
 		    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
 		    chkPos[1]=TR.legacy2Modern(loc3d.getY());
@@ -255,10 +256,10 @@ public abstract class NAVObjective {
 		    chk.notifyPositionChange();
 		    chk.setVisible(false);
 		    try{//Start placing the jump zone.
-		    WorldObject jumpZone = new WorldObject(tr,tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
-		    jumpZone.setPosition(chk.getPosition());
-		    jumpZone.setVisible(true);
-		    overworld.add(jumpZone);
+		    //WorldObject jumpZone = new WorldObject(tr,tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
+		    //jumpZone.setPosition(chk.getPosition());
+		    //jumpZone.setVisible(true);
+		    //overworld.add(jumpZone);
 		    final NAVObjective objective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {

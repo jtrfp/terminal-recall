@@ -14,9 +14,11 @@ package org.jtrfp.trcl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
@@ -35,7 +37,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    final TextureMesh textureMesh, final double gridSquareSize,
 	    final SpacePartitioningGrid parent,
 	    final RenderableSpacePartitioningGrid terrainMirror, final TR tr,
-	    final TDFFile tdf, boolean flatShading, final LoadingProgressReporter terrainReporter) {
+	    final TDFFile tdf, final boolean flatShading, 
+	    final LoadingProgressReporter terrainReporter) {
 	super(parent);
 	this.tr = tr;
 	final int width = (int) altitude.getWidth();
@@ -68,227 +71,234 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final LoadingProgressReporter[] reporters = terrainReporter
 		.generateSubReporters(256/chunkSideLength);
 	int reporterIndex=0;
+	TRFutureTask<Void> [] rowTasks = new TRFutureTask[width/chunkSideLength];
+	int taskIdx=0;
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
 	    reporters[reporterIndex++].complete();
 	    final int _gZ = gZ;
-	    for (int gX = 0; gX < width; gX += chunkSideLength) {
-		// GROUND
-		{// Start scope
-		    final double objectX = Math
-			    .round(((double) gX + ((double) chunkSideLength / 2.))
-				    * gridSquareSize);
-		    final double objectZ = Math
-			    .round(((double) _gZ + ((double) chunkSideLength / 2.))
-				    * gridSquareSize);
-		    final double objectY = Math.round(altitude
-			    .heightAt(gX, _gZ) * heightScalar);
-		    final Model m = new Model(false, tr);
-		    // for each square
-		    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
-			for (int cX = gX; cX < gX + chunkSideLength; cX++) {
-			    final double hTL = altitude.heightAt(cX, cZ)
-				    * heightScalar;
-			    final double hTR = altitude.heightAt((cX + 1), cZ)
-				    * heightScalar;
-			    final double hBR = altitude.heightAt((cX + 1),
-				    (cZ + 1)) * heightScalar;
-			    final double hBL = altitude.heightAt(cX, (cZ + 1))
-				    * heightScalar;
-			    final double xPos = cX * gridSquareSize;
-			    final double zPos = cZ * gridSquareSize;
+	    /*rowTasks[taskIdx++]=*/tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    for (int gX = 0; gX < width; gX += chunkSideLength) {
+			// GROUND
+			{// Start scope
+			    final double objectX = Math
+				    .round(((double) gX + ((double) chunkSideLength / 2.))
+					    * gridSquareSize);
+			    final double objectZ = Math
+				    .round(((double) _gZ + ((double) chunkSideLength / 2.))
+					    * gridSquareSize);
+			    final double objectY = Math.round(altitude
+				    .heightAt(gX, _gZ) * heightScalar);
+			    final Model m = new Model(false, tr);
+			    // for each square
+			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
+				for (int cX = gX; cX < gX + chunkSideLength; cX++) {
+				    final double hTL = altitude.heightAt(cX, cZ)
+					    * heightScalar;
+				    final double hTR = altitude.heightAt((cX + 1), cZ)
+					    * heightScalar;
+				    final double hBR = altitude.heightAt((cX + 1),
+					    (cZ + 1)) * heightScalar;
+				    final double hBL = altitude.heightAt(cX, (cZ + 1))
+					    * heightScalar;
+				    final double xPos = cX * gridSquareSize;
+				    final double zPos = cZ * gridSquareSize;
 
-			    Vector3D norm0, norm1, norm2, norm3;
-			    Vector3D norm = altitude.normalAt(cX, cZ);
-			    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();// Exaggerate
-								 // features.
-			    norm = altitude.normalAt(cX + 1, cZ);
-			    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();
-			    norm = altitude.normalAt(cX + 1, cZ + 1);
-			    norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();
-			    norm = altitude.normalAt(cX, cZ + 1);
-			    norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();
+				    Vector3D norm0, norm1, norm2, norm3;
+				    Vector3D norm = altitude.normalAt(cX, cZ);
+				    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();// Exaggerate
+									 // features.
+				    norm = altitude.normalAt(cX + 1, cZ);
+				    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();
+				    norm = altitude.normalAt(cX + 1, cZ + 1);
+				    norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();
+				    norm = altitude.normalAt(cX, cZ + 1);
+				    norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();
 
-			    if (flatShading)
-				norm0 = norm1 = norm2 = norm3 = altitude
-					.normalAt(cX + .5, cZ + .5);
+				    if (flatShading)
+					norm0 = norm1 = norm2 = norm3 = altitude
+						.normalAt(cX + .5, cZ + .5);
 
-			    final Integer tpi = cX + cZ * 256;
-			    TextureDescription td = (TextureDescription) (points
-				    .containsKey(tpi) ? points.get(tpi)
-				    .getTexture() : textureMesh.textureAt(cX,
-				    cZ));
-			    Triangle[] tris = Triangle
-				    .quad2Triangles(
-					    // COUTNER-CLOCKWISE
+				    final Integer tpi = cX + cZ * 256;
+				    TextureDescription td = (TextureDescription) (points
+					    .containsKey(tpi) ? points.get(tpi)
+					    .getTexture() : textureMesh.textureAt(cX,
+					    cZ));
+				    Triangle[] tris = Triangle
+					    .quad2Triangles(
+						    // COUTNER-CLOCKWISE
+						    // new double []
+						    // {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
+						    // //x
+						    new double[] {
+							    xPos - objectX,
+							    xPos + gridSquareSize
+								    - objectX,
+							    xPos + gridSquareSize
+								    - objectX,
+							    xPos - objectX },
+						    // new double []
+						    // {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
+						    new double[] { hBL - objectY,
+							    hBR - objectY,
+							    hTR - objectY,
+							    hTL - objectY },
+						    // new double []
+						    // {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
+						    new double[] {
+							    zPos + gridSquareSize
+								    - objectZ,
+							    zPos + gridSquareSize
+								    - objectZ,
+							    zPos - objectZ,
+							    zPos - objectZ }, u, v, td,
+						    RenderMode.STATIC,
+						    new Vector3D[] { norm0, norm1,
+							    norm2, norm3 }, cX + cZ % 4);
+				    m.addTriangle(tris[0]);
+				    m.addTriangle(tris[1]);
+				}// end for(cX)
+			    }// end for(cZ)
+			     // Add to grid
+			    if (m.finalizeModel().getTriangleList() != null) {
+				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
+					altitude);
+				final double[] chunkPos = chunkToAdd.getPosition();
+				chunkPos[0] = objectX;
+				chunkPos[1] = objectY;
+				chunkPos[2] = objectZ;
+				chunkToAdd.notifyPositionChange();
+				add(chunkToAdd);
+			    } else {
+				System.out.println("Rejected chunk: "
+					+ m.getDebugName());
+			    }
+			}// end scope
+
+			{// start scope ///// CEILING
+			    final double Y_NUDGE = -5000;
+			    /*
+			     * Y_NUDGE is a kludge. There is a tiny sliver of space
+			     * between the ceiling and ground, likely caused by model
+			     * vertex quantization in the rendering engine. I would
+			     * rather put up with this quirk than re-design the engine,
+			     * as the quantization exists as a side-effect of a
+			     * memory-space optimization in the GPU and accommodating
+			     * the fix of this bug could cause bigger problems further
+			     * down the road.
+			     */
+			    final double objectX = Math
+				    .round(((double) gX + ((double) chunkSideLength / 2.))
+					    * gridSquareSize);
+			    final double objectZ = Math
+				    .round(((double) _gZ + ((double) chunkSideLength / 2.))
+					    * gridSquareSize);
+			    final double objectY = Math.round((2. - altitude.heightAt(
+				    gX, _gZ)) * heightScalar + Y_NUDGE);
+			    final Model m = new Model(false, tr);
+			    // for each square
+			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
+				for (int cX = gX; cX < gX + chunkSideLength; cX++) {
+				    final double hTL = (2. - altitude.heightAt(cX, cZ))
+					    * heightScalar + Y_NUDGE;
+				    final double hTR = (2. - altitude.heightAt(
+					    (cX + 1), cZ)) * heightScalar + Y_NUDGE;
+				    final double hBR = (2. - altitude.heightAt(
+					    (cX + 1), (cZ + 1)))
+					    * heightScalar
+					    + Y_NUDGE;
+				    final double hBL = (2. - altitude.heightAt(cX,
+					    (cZ + 1))) * heightScalar + Y_NUDGE;
+				    final double xPos = cX * gridSquareSize;
+				    final double zPos = cZ * gridSquareSize;
+
+				    Vector3D norm0, norm1, norm2, norm3;
+				    Vector3D norm = altitude.normalAt(cX, cZ);
+				    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();// Exaggerate
+									 // features.
+				    norm = altitude.normalAt(cX + 1, cZ);
+				    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();
+				    norm = altitude.normalAt(cX + 1, cZ + 1);
+				    norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();
+				    norm = altitude.normalAt(cX, cZ + 1);
+				    norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();
+
+				    if (flatShading)
+					norm0 = norm1 = norm2 = norm3 = altitude
+						.normalAt(cX + .5, cZ + .5);
+
+				    // Ceiling texture cell X (Z in this engine) value
+				    // is offset by 10.
+				    // No tunnelpoints on ceiling
+				    TextureDescription td = (TextureDescription) (textureMesh
+					    .textureAt(cX, cZ + 10));
+				    norm = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();// Exaggerate
+									 // features.
+				    Triangle[] tris = Triangle.quad2Triangles(
+					    // CLOCKWISE (else backface culling will eat
+					    // it)
+					    new double[] { xPos - objectX,
+						    xPos + gridSquareSize - objectX,
+						    xPos + gridSquareSize - objectX,
+						    xPos - objectX }, // x
 					    // new double []
 					    // {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
-					    // //x
-					    new double[] {
-						    xPos - objectX,
-						    xPos + gridSquareSize
-							    - objectX,
-						    xPos + gridSquareSize
-							    - objectX,
-						    xPos - objectX },
+					    new double[] { hTL - objectY,
+						    hTR - objectY, hBR - objectY,
+						    hBL - objectY },
 					    // new double []
-					    // {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
-					    new double[] { hBL - objectY,
-						    hBR - objectY,
-						    hTR - objectY,
-						    hTL - objectY },
-					    // new double []
-					    // {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
-					    new double[] {
-						    zPos + gridSquareSize
-							    - objectZ,
-						    zPos + gridSquareSize
-							    - objectZ,
+					    // {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY},
+					    new double[] { zPos - objectZ,
 						    zPos - objectZ,
-						    zPos - objectZ }, u, v, td,
+						    zPos + gridSquareSize - objectZ,
+						    zPos + gridSquareSize - objectZ },
+					    // new double []
+					    // {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
+					    u,
+					    v,
+					    td,
 					    RenderMode.STATIC,
-					    new Vector3D[] { norm0, norm1,
-						    norm2, norm3 }, cX + cZ % 4);
-			    m.addTriangle(tris[0]);
-			    m.addTriangle(tris[1]);
-			}// end for(cX)
-		    }// end for(cZ)
-		     // Add to grid
-		    if (m.finalizeModel().getTriangleList() != null) {
-			final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
-				altitude);
-			final double[] chunkPos = chunkToAdd.getPosition();
-			chunkPos[0] = objectX;
-			chunkPos[1] = objectY;
-			chunkPos[2] = objectZ;
-			chunkToAdd.notifyPositionChange();
-			add(chunkToAdd);
-		    } else {
-			System.out.println("Rejected chunk: "
-				+ m.getDebugName());
-		    }
-		}// end scope
-
-		{// start scope ///// CEILING
-		    final double Y_NUDGE = -5000;
-		    /*
-		     * Y_NUDGE is a kludge. There is a tiny sliver of space
-		     * between the ceiling and ground, likely caused by model
-		     * vertex quantization in the rendering engine. I would
-		     * rather put up with this quirk than re-design the engine,
-		     * as the quantization exists as a side-effect of a
-		     * memory-space optimization in the GPU and accommodating
-		     * the fix of this bug could cause bigger problems further
-		     * down the road.
-		     */
-		    final double objectX = Math
-			    .round(((double) gX + ((double) chunkSideLength / 2.))
-				    * gridSquareSize);
-		    final double objectZ = Math
-			    .round(((double) _gZ + ((double) chunkSideLength / 2.))
-				    * gridSquareSize);
-		    final double objectY = Math.round((2. - altitude.heightAt(
-			    gX, _gZ)) * heightScalar + Y_NUDGE);
-		    final Model m = new Model(false, tr);
-		    // for each square
-		    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
-			for (int cX = gX; cX < gX + chunkSideLength; cX++) {
-			    final double hTL = (2. - altitude.heightAt(cX, cZ))
-				    * heightScalar + Y_NUDGE;
-			    final double hTR = (2. - altitude.heightAt(
-				    (cX + 1), cZ)) * heightScalar + Y_NUDGE;
-			    final double hBR = (2. - altitude.heightAt(
-				    (cX + 1), (cZ + 1)))
-				    * heightScalar
-				    + Y_NUDGE;
-			    final double hBL = (2. - altitude.heightAt(cX,
-				    (cZ + 1))) * heightScalar + Y_NUDGE;
-			    final double xPos = cX * gridSquareSize;
-			    final double zPos = cZ * gridSquareSize;
-
-			    Vector3D norm0, norm1, norm2, norm3;
-			    Vector3D norm = altitude.normalAt(cX, cZ);
-			    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();// Exaggerate
-								 // features.
-			    norm = altitude.normalAt(cX + 1, cZ);
-			    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();
-			    norm = altitude.normalAt(cX + 1, cZ + 1);
-			    norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();
-			    norm = altitude.normalAt(cX, cZ + 1);
-			    norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();
-
-			    if (flatShading)
-				norm0 = norm1 = norm2 = norm3 = altitude
-					.normalAt(cX + .5, cZ + .5);
-
-			    // Ceiling texture cell X (Z in this engine) value
-			    // is offset by 10.
-			    // No tunnelpoints on ceiling
-			    TextureDescription td = (TextureDescription) (textureMesh
-				    .textureAt(cX, cZ + 10));
-			    norm = new Vector3D(norm.getX() * 3, norm.getY(),
-				    norm.getZ() * 3).normalize();// Exaggerate
-								 // features.
-			    Triangle[] tris = Triangle.quad2Triangles(
-				    // CLOCKWISE (else backface culling will eat
-				    // it)
-				    new double[] { xPos - objectX,
-					    xPos + gridSquareSize - objectX,
-					    xPos + gridSquareSize - objectX,
-					    xPos - objectX }, // x
-				    // new double []
-				    // {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
-				    new double[] { hTL - objectY,
-					    hTR - objectY, hBR - objectY,
-					    hBL - objectY },
-				    // new double []
-				    // {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY},
-				    new double[] { zPos - objectZ,
-					    zPos - objectZ,
-					    zPos + gridSquareSize - objectZ,
-					    zPos + gridSquareSize - objectZ },
-				    // new double []
-				    // {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
-				    u,
-				    v,
-				    td,
-				    RenderMode.STATIC,
-				    new Vector3D[] { norm0.negate(),
-					    norm1.negate(), norm2.negate(),
-					    norm3.negate() }, cX + cZ % 4);
-			    m.addTriangle(tris[0]);
-			    m.addTriangle(tris[1]);
-			}// end for(cX)
-		    }// end for(cZ)
-		     // Add to grid
-		    if (m.finalizeModel().getTriangleList() != null) {
-			final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
-				altitude);
-			final double[] chunkPos = chunkToAdd.getPosition();
-			chunkPos[0] = objectX;
-			chunkPos[1] = objectY;
-			chunkPos[2] = objectZ;
-			chunkToAdd.notifyPositionChange();
-			chunkToAdd.setCeiling(true);
-			terrainMirror.add(chunkToAdd);
-		    } else {
-			System.out.println("Rejected chunk: "
-				+ m.getDebugName());
-		    }
-		}// end scope(CEILING)
-	    }// end for(gX)
+					    new Vector3D[] { norm0.negate(),
+						    norm1.negate(), norm2.negate(),
+						    norm3.negate() }, cX + cZ % 4);
+				    m.addTriangle(tris[0]);
+				    m.addTriangle(tris[1]);
+				}// end for(cX)
+			    }// end for(cZ)
+			     // Add to grid
+			    if (m.finalizeModel().getTriangleList() != null) {
+				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
+					altitude);
+				final double[] chunkPos = chunkToAdd.getPosition();
+				chunkPos[0] = objectX;
+				chunkPos[1] = objectY;
+				chunkPos[2] = objectZ;
+				chunkToAdd.notifyPositionChange();
+				chunkToAdd.setCeiling(true);
+				terrainMirror.add(chunkToAdd);
+			    } else {
+				System.out.println("Rejected chunk: "
+					+ m.getDebugName());
+			    }
+			}// end scope(CEILING)
+		    }// end for(gX)
+		    return null;
+		}}).get();
 	}// end for(gZ)
 	// Wait to finish
-	// for(Future f:futures){try{f.get();}catch(Exception
-	// e){e.printStackTrace();}}
+	/*for(TRFutureTask<Void> t:rowTasks)
+	    {t.get();}*/
 	terrainMirror.deactivate();
     }// end constructor
 	
@@ -298,7 +308,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    
 	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
-		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(), tr.gpu.get().getGl(),false);}
+		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),false);}
 		catch(Exception e){e.printStackTrace();}
 		DirectionVector v = entrance?tun.getEntrance():tun.getExit();
 		x=(byte)Math.round(TR.legacy2MapSquare(v.getZ()))&0xFF;//Reversed on purpose

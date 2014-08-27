@@ -25,6 +25,7 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
@@ -62,7 +63,8 @@ public class TunnelEntranceObject extends BillboardSprite {
 	}	catch(Exception e){e.printStackTrace();}
     }//end constructor
 
-    public class TunnelEntranceBehavior extends Behavior implements CollisionBehavior{
+    public class TunnelEntranceBehavior extends Behavior implements CollisionBehavior, NAVTargetableBehavior{
+	private boolean navTargeted=false;
 	@Override
 	public void proposeCollision(WorldObject other){
 	      if(other instanceof Player){
@@ -121,13 +123,17 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 player.getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
 		 final NAVObjective navObjective = getNavObjectiveToRemove();
-	         if(navObjective!=null){
+	         if(navObjective!=null && navTargeted){
 	             final Mission m = tr.getGame().getCurrentMission();
 	             if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
 	         }//end if(have NAV to remove
 	        }//end if(close to Player)
 	    }//end if(Player)
 	}//end _proposeCollision
+	@Override
+	public void notifyBecomingCurrentTarget() {
+	    navTargeted=true;
+	}
     }//end TunnelEntranceBehavior
     private final AbstractSubmitter<TunnelEntryListener> TELsubmitter = new AbstractSubmitter<TunnelEntryListener>(){
 	@Override

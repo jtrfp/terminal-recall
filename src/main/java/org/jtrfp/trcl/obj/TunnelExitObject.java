@@ -21,6 +21,7 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.NAVObjective;
@@ -69,7 +70,8 @@ public class TunnelExitObject extends WorldObject {
     }
 
     private class TunnelExitBehavior extends Behavior implements
-	    CollisionBehavior {
+	    CollisionBehavior, NAVTargetableBehavior {
+	private boolean navTargeted=false;
 	@Override
 	public void proposeCollision(WorldObject other) {
 	    if (other instanceof Player) {
@@ -123,12 +125,17 @@ public class TunnelExitObject extends WorldObject {
 			}// end for(projectiles)
 		    }// end for(projectileFactories)
 		    final NAVObjective navObjective = getNavObjectiveToRemove();
-		    if (navObjective != null) {
+		    if (navObjective != null && navTargeted) {
 			tr.getGame().getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
 		}// end if(x past threshold)
 	    }// end if(Player)
 	}// end proposeCollision()
+
+	@Override
+	public void notifyBecomingCurrentTarget() {
+	    navTargeted=true;
+	}
     }// end TunnelExitBehavior
 
     /**

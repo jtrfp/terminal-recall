@@ -30,6 +30,11 @@ public class Explosion extends BillboardSprite {
     private final ExplosionType type;
     public Explosion(TR tr, ExplosionType type) {
 	super(tr);
+	final Vector3D origin = type.getOrigin();
+	this.setModelOffset(
+		origin.getX()*type.getBillboardSize().getWidth()*-.5, 
+		origin.getY()*type.getBillboardSize().getHeight()*-.5, 
+		origin.getZ());
 	this.type=type;
 	setBillboardSize(type.getBillboardSize());
 	if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
@@ -43,14 +48,14 @@ public class Explosion extends BillboardSprite {
 	catch(Exception e){e.printStackTrace();}
 	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
     }//end constructor
-    
+    /*
     @Override
     public Explosion notifyPositionChange(){
 	final double [] superPos = super.getPosition();
-	Vect3D.subtract(getPosition(),type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.).toArray(),superPos);
+	//Vect3D.subtract(getPosition(),type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.).toArray(),superPos);
 	super.notifyPositionChange();
 	return this;
-    }
+    }*/
     
     public static enum ExplosionType{
 	Blast(new String[]{

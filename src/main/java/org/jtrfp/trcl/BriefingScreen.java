@@ -204,6 +204,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	tr.getWorld().setFogColor(game.getCurrentMission().getOverworldSystem().getFogColor());
 	for(EnemyIntro intro:game.getCurrentMission().getOverworldSystem().getObjectSystem().getDefPlacer().getEnemyIntros()){
 	    final WorldObject wo = intro.getWorldObject();
+	    final boolean vis = wo.isVisible();
+	    final boolean act = wo.isActive();
+	    wo.setActive(true);
+	    wo.setVisible(true);
 	    camera.probeForBehavior(FacingObject.class).setTarget(wo);
 	    camera.probeForBehavior(RotateAroundObject.class).setTarget(wo);
 	    camera.probeForBehavior(RotateAroundObject.class).setAngularVelocityRPS(.3);
@@ -237,6 +241,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    briefingChars.setScrollPosition(NUM_LINES-2);
 	    setContent(intro.getDescriptionString());
 	    tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
+	    wo.setVisible(vis);
+	    wo.setActive(act);
 	    wo.setRespondToTick(true);//unfreeze
 	}//end for(enemyIntros)
 	camera.probeForBehavior(FacingObject.class).setEnable(false);

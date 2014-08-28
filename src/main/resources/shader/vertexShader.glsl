@@ -115,7 +115,6 @@ int renderListLogicalVEC42PhysicalVEC4(uint logical){
 void main(){
 gl_Position.x=dummy*0;
 
-		//TODO: Look into optimizing this by moving some of it into the numVertices block below
 		int 	objectIndex 			= (gl_VertexID / GPU_VERTICES_PER_BLOCK);
 		int 	intraObjectVertexIndex 	= gl_VertexID % GPU_VERTICES_PER_BLOCK;
 		int 	objectDefIndex			= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
@@ -145,6 +144,6 @@ gl_Position.x=dummy*0;
 			float normY 			= float(SByte(packedVertex[1],3u))/128;
 			float normZ 			= float(SByte(packedVertex[3],0u))/128;
 						//Crunch this into [0,1] domain
-			norm 					= ((matrix*vec4(normX,normY,normZ,0)).xyz+vec3(1,1,1))/2;
+			norm 					= ((matrix*vec4(normX,normY,normZ,0)).xyz+1)/2;
     		}//end if(object)
 }//end main()

@@ -103,8 +103,8 @@ public final class Renderer {
 		dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
 		dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();
-		screenWidth 	= deferredProgram	.getUniform("screenWidth");
-		screenHeight 	= deferredProgram	.getUniform("screenHeight");
+		//screenWidth 	= deferredProgram	.getUniform("screenWidth");
+		//screenHeight 	= deferredProgram	.getUniform("screenHeight");
 		fogColor 	= deferredProgram	.getUniform("fogColor");
 		sunVector 	= deferredProgram	.getUniform("sunVector");
 		deferredProgram.getUniform("texturePalette").set((int) 0);
@@ -218,8 +218,8 @@ public final class Renderer {
 		intermediateTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
 		depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
 		depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);// Doesn't like RGBA32UI for some reason.
-		screenWidth.setui(width);
-		screenHeight.setui(height);
+		//screenWidth.setui(width);
+		//screenHeight.setui(height);
 		depthQueueProgram.use();
 		dqScreenWidth.setui(width);
 		dqScreenHeight.setui(height);

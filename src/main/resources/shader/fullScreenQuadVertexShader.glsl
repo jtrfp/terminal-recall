@@ -21,6 +21,9 @@
 // INPUTS
 layout (location = 0) in float dummy;
 
+// OUTPUTS
+noperspective out vec2 screenLoc;
+
 // CONSTANTS
 vec2 pos[6] = vec2[] 
 	(
@@ -31,8 +34,18 @@ vec2 pos[6] = vec2[]
 	vec2(1,1),
 	vec2(1,-1)
 	);
+vec2 screenLocation[6] = vec2[]
+	(
+	vec2(0,0),
+	vec2(1,0),
+	vec2(0,1),
+	vec2(0,1),
+	vec2(1,1),
+	vec2(1,0)
+	);
 
 void main(){
-gl_Position.x=dummy*0;
-gl_Position.xy = pos[gl_VertexID];
+gl_Position.x 	= dummy*0;
+gl_Position.xy 	= pos[gl_VertexID];
+screenLoc 		= screenLocation[gl_VertexID];
 }//end main()

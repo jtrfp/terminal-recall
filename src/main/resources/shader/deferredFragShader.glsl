@@ -32,6 +32,8 @@ uniform uint 			screenWidth;
 uniform uint 			screenHeight;
 uniform vec3 			sunVector;
 
+noperspective in vec2	screenLoc;
+
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;
 
@@ -138,7 +140,7 @@ textureTOC{
 **/
 
 void main(){
-vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
+//vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
 float 	linearDepth = linearizeDepth(depth);

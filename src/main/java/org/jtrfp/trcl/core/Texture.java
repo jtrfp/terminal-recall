@@ -297,7 +297,7 @@ public class Texture implements TextureDescription {
 		}//end for(codeX)
 	}//end for(codeY)
 	return null;
-	}});//end pool thread
+	}}).get();//end pool thread
     }//end vqCompress(...)
 
     Texture(BufferedImage img, String debugName, TR tr, boolean uvWrapping) {

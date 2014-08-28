@@ -50,7 +50,11 @@ public final class ThreadManager {
     private Thread 			renderingThread;
     private Animator			animator;
     public final ExecutorService	threadPool 			= 
-	    new ThreadPoolExecutor(20,35,10,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
+	    new ThreadPoolExecutor(
+		    30,
+		    35+20*Runtime.getRuntime().availableProcessors(),
+		    15,
+		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
     private TRFutureTask<Void>		visibilityCalcTask;
     public final ArrayDeque<TRFutureTask<?>> pendingGPUMemAccessTasks	= new ArrayDeque<TRFutureTask<?>>();
     public final ArrayDeque<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayDeque<TRFutureTask<?>>();

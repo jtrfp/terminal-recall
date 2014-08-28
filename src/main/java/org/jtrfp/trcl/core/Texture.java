@@ -242,7 +242,7 @@ public class Texture implements TextureDescription {
 		}//end for(numCodes)
 		return null;
 	    }// end run()
-	 });//end gpuMemThread
+	 }).get();//end gpuMemThread
 	// Push codes to subtextures
 	for(int codeY=0; codeY<diameterInCodes; codeY++){
 	    for(int codeX=0; codeX<diameterInCodes; codeX++){

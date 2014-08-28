@@ -40,6 +40,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    final TDFFile tdf, final boolean flatShading, 
 	    final LoadingProgressReporter terrainReporter) {
 	super(parent);
+	final int numCores = Runtime.getRuntime().availableProcessors();
 	this.tr = tr;
 	final int width = (int) altitude.getWidth();
 	int height = (int) altitude.getHeight();
@@ -71,13 +72,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final LoadingProgressReporter[] reporters = terrainReporter
 		.generateSubReporters(256/chunkSideLength);
 	int reporterIndex=0;
-	TRFutureTask<Void> [] rowTasks = new TRFutureTask[width/chunkSideLength];
+	TRFutureTask<Void> [] rowTasks = new TRFutureTask[numCores*2];
 	int taskIdx=0;
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
 	    reporters[reporterIndex++].complete();
 	    final int _gZ = gZ;
-	    /*rowTasks[taskIdx++]=*/tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    rowTasks[taskIdx++]=tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    for (int gX = 0; gX < width; gX += chunkSideLength) {
@@ -294,7 +295,12 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			}// end scope(CEILING)
 		    }// end for(gX)
 		    return null;
-		}}).get();
+		}});
+	    if(taskIdx>=rowTasks.length){
+		for(TRFutureTask<Void> t:rowTasks)
+		    t.get();
+		taskIdx=0;
+	    }//end if(taskIdx>=numRowTasks)
 	}// end for(gZ)
 	// Wait to finish
 	/*for(TRFutureTask<Void> t:rowTasks)

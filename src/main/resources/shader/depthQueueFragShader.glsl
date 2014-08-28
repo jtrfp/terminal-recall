@@ -26,12 +26,13 @@ uniform 	uint 	screenHeight;
 smooth in vec2 fragTexCoord;
 smooth in uint texturePageIdx;
 flat in uint flatTextureID;
+noperspective in vec2 screenLoc;
 
 // OUTPUTS
 layout(location=0) out vec4 pushToDepthQueue;
 
 void main(){
-vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
+//vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 if(gl_FragCoord.z>depth)discard;
 pushToDepthQueue = vec4(fragTexCoord,uintBitsToFloat(flatTextureID),gl_FragCoord.z);

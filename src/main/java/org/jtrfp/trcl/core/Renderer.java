@@ -100,8 +100,8 @@ public final class Renderer {
 		depthQueueProgram	=gpu.newProgram().attachShader(primaryVertexShader)	  .attachShader(depthQueueFragShader).link();
 		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
 		depthQueueProgram.use();
-		dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
-		dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
+		//dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
+		//dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();
 		//screenWidth 	= deferredProgram	.getUniform("screenWidth");
 		//screenHeight 	= deferredProgram	.getUniform("screenHeight");
@@ -221,8 +221,8 @@ public final class Renderer {
 		//screenWidth.setui(width);
 		//screenHeight.setui(height);
 		depthQueueProgram.use();
-		dqScreenWidth.setui(width);
-		dqScreenHeight.setui(height);
+		//dqScreenWidth.setui(width);
+		//dqScreenHeight.setui(height);
 		Renderer.this.getPrimaryProgram().use();
 	    }
 	});

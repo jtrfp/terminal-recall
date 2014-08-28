@@ -28,6 +28,7 @@ const uint PAGE_SIZE_VEC4			=96u;
 smooth out vec2 		fragTexCoord;
 smooth out vec3 		norm;
 flat out uint 			flatTextureID;
+noperspective out vec2	screenLoc;
 
 //IN
 uniform uint 			renderListPageTable[85];
@@ -138,6 +139,8 @@ gl_Position.x=dummy*0;
 			vertexCoord.w=1;
     		fragTexCoord 			= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
     		gl_Position 			= UNibble(renderMode,1u)==0u?cameraMatrix * matrix * vertexCoord:matrix * vertexCoord;
+			 screenLoc				= (((gl_Position.xy/gl_Position.w)+1)/2);
+			
     		float normX 			= float(SByte(packedVertex[1],2u))/128;
 			float normY 			= float(SByte(packedVertex[1],3u))/128;
 			float normZ 			= float(SByte(packedVertex[3],0u))/128;

@@ -391,6 +391,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo.setHeading(heading);
 	    wo.setTop(top);
 	    wo.addBehavior(new CubeCollisionBehavior(wo));
+	    wo.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+		    6000, Math.random()*2*Math.PI));
 	    add(wo);
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "FANBODY.BIN",

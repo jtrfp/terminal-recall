@@ -13,12 +13,15 @@
 package org.jtrfp.trcl.beh;
 
 public class CustomNAVTargetableBehavior extends Behavior implements NAVTargetableBehavior {
+    private boolean notYetTargeted=true;
     private final Runnable r;
     public CustomNAVTargetableBehavior(Runnable r){
 	this.r=r;
     }
     @Override
     public void notifyBecomingCurrentTarget() {
-	r.run();
+	if(notYetTargeted)
+	    r.run();
+	notYetTargeted=false;
     }
 }//end CustomNAVTargetableBehavior

@@ -161,11 +161,12 @@ public class RenderList {
     private static int frameCounter = 0;
 
     private void updateStatesToGPU() {
+	synchronized(tr.getThreadManager().gameStateLock){
 	synchronized(nearbyWorldObjects){
 	final int size=nearbyWorldObjects.size();
 	for (int i=0; i<size; i++) {
 	    nearbyWorldObjects.get(i).updateStateToGPU();
-	}}
+	}}}
     }//end updateStatesToGPU
 
     public void sendToGPU(GL3 gl) {

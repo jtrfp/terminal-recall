@@ -55,6 +55,7 @@ public final class ThreadManager {
 		    35+20*Runtime.getRuntime().availableProcessors(),
 		    15,
 		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
+    public final Object			gameStateLock			= new Object();
     private TRFutureTask<Void>		visibilityCalcTask;
     public final ArrayDeque<TRFutureTask<?>> pendingGPUMemAccessTasks	= new ArrayDeque<TRFutureTask<?>>();
     public final ArrayDeque<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayDeque<TRFutureTask<?>>();
@@ -92,6 +93,7 @@ public final class ThreadManager {
 	}else return;
 	final List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
+	synchronized(gameStateLock){
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo;
 	    synchronized(vl){wo = vl.get(i);}//TODO: This is slow.
@@ -115,6 +117,7 @@ public final class ThreadManager {
 		}
 		if(!multiplePlayer)wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
+	}// end sync(gameStateLock)
 	if(tr.getPlayer()!=null){
 	    tr.getCollisionManager().performCollisionTests();
 	}

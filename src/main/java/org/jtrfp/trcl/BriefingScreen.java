@@ -124,8 +124,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	this.lvl		 = lvl;
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(false);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(false);
-	camera.probeForBehavior(FacingObject.class)  	 .setEnable(true);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
+	camera.probeForBehavior(FacingObject.class)  	 .setEnable(true);
 	//Planet introduction
 	game.setDisplayMode(game.briefingMode);
 	if(planetObject!=null){

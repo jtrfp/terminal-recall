@@ -65,6 +65,7 @@ public final class Renderer {
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
+    private		float[]			cameraMatrixAsFlatArray = new float[16];
     private		Future<Void>		visibilityUpdateFuture;
 
     public Renderer(final GPU gpu) {
@@ -288,9 +289,9 @@ public final class Renderer {
 	//gpu.memoryManager.get().flushStalePages();
 	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
-	renderList.render(gl);
+	renderList.render(gl,cameraMatrixAsFlatArray);
 	// Update GPU
-	renderList.sendToGPU(gl);
+	cameraMatrixAsFlatArray = renderList.sendToGPU(gl);
 	fpsTracking();
 	setFogColor(gpu.getTr().getWorld().getFogColor());
     }//end render()

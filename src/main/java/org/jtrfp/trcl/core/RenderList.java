@@ -160,26 +160,27 @@ public class RenderList {
 
     private static int frameCounter = 0;
 
-    private void updateStatesToGPU() {
+    private float [] updateStatesToGPU() {
 	synchronized(tr.getThreadManager().gameStateLock){
 	synchronized(nearbyWorldObjects){
 	final int size=nearbyWorldObjects.size();
-	for (int i=0; i<size; i++) {
+	for (int i=0; i<size; i++) 
 	    nearbyWorldObjects.get(i).updateStateToGPU();
-	}}}
+	return tr.renderer.get().getCamera().getMatrixAsFlatArray();
+	}}
     }//end updateStatesToGPU
 
-    public void sendToGPU(GL3 gl) {
+    public float [] sendToGPU(GL3 gl) {
 	frameCounter++;
 	frameCounter %= 100;
-	updateStatesToGPU();
+	return updateStatesToGPU();
     }//end sendToGPU
     
-    public void render(GL3 gl) {
+    public void render(final GL3 gl, final float[] cameraMatrixAsFlatArray) {
 	// OPAQUE STAGE
 	tr.renderer.get().getPrimaryProgram().use();
-	final float [] matrixAsFlatArray = tr.renderer.get().getCamera().getMatrixAsFlatArray();
-	cameraMatrixUniform	.set4x4Matrix(matrixAsFlatArray,true);
+	//final float [] matrixAsFlatArray = tr.renderer.get().getCamera().getMatrixAsFlatArray();
+	cameraMatrixUniform	.set4x4Matrix(cameraMatrixAsFlatArray,true);
 	useTextureMap		.set((int)0);
 	intermediateFrameBuffer	.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
@@ -231,7 +232,7 @@ public class RenderList {
 	GLTexture.specifyTextureUnit(gl, 0);
 	intermediateDepthTexture.bind(gl);
 	dqCameraMatrixUniform.set4x4Matrix(
-		matrixAsFlatArray, true);
+		cameraMatrixAsFlatArray, true);
 	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);

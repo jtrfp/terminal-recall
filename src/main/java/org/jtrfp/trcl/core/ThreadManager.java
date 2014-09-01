@@ -218,9 +218,11 @@ public final class ThreadManager {
     private void attemptRender(){
 	if(tr.renderer!=null){
 	    if(tr.renderer.isDone()){
-		//Swap submitters
-		currentGPUMemAccessTaskSubmitter=pendingGPUMemAccessTaskSubmitter;
+		
 		synchronized(activeGPUMemAccessTasks){
+		 //Swap submitters
+		 synchronized(pendingGPUMemAccessTaskSubmitter){
+		 currentGPUMemAccessTaskSubmitter=pendingGPUMemAccessTaskSubmitter;}
 		 while(!activeGPUMemAccessTasks.isEmpty()){
 		     if(!activeGPUMemAccessTasks.peek().isDone()){
 			 return;//Abort. Not ready to go yet.
@@ -228,7 +230,8 @@ public final class ThreadManager {
 		 }//end while(!empty)
 		 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
 		 }//end sync(gpuMemAccessTasks)
-		currentGPUMemAccessTaskSubmitter=activeGPUMemAccessTaskSubmitter;
+		synchronized(pendingGPUMemAccessTaskSubmitter){
+		currentGPUMemAccessTaskSubmitter=activeGPUMemAccessTaskSubmitter;}
 		while(!pendingGPUMemAccessTasks.isEmpty())
 		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
 	    	}////end if(renderer.isDone)

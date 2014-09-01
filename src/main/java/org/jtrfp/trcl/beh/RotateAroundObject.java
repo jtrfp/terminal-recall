@@ -27,8 +27,8 @@ public class RotateAroundObject extends Behavior {
     public void _tick(long tickTimeMillis){
 	if(target!=null){
 	    final WorldObject parent	= getParent();
-	    final double [] tPos	= target.getPosition();
-	    final double [] pPos	= parent.getPosition();
+	    final double []tPos	= target.getPosition();
+	    final double []pPos	= parent.getPosition();
 	    //Theta = [0,2]pi
 	    final double theta = (((angularVelocityRPS*tickTimeMillis) / 1000.)%1.)*2*Math.PI;
 	    delta[0]=Math.sin(theta);	//X
@@ -37,8 +37,8 @@ public class RotateAroundObject extends Behavior {
 	    Vect3D.scalarMultiply(delta, distance, delta);
 	    Vect3D.add(delta, offset, delta);
 	    Vect3D.add(tPos, delta, pPos);
-	    parent.setPosition(pPos[0],pPos[1],pPos[2]);
-	    parent.notifyPositionChange();//TODO: Remove and see if it still works
+	    //parent.setPosition(pPos[0],pPos[1],pPos[2]);
+	    parent.notifyPositionChange();
 	}//end if(!null)
     }//end _tick(...)
     /**

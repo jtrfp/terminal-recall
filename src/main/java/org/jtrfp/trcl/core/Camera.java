@@ -71,7 +71,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 		heading[0] = lookAtVector.getX();
 		heading[1] = lookAtVector.getY();
 		heading[2] = lookAtVector.getZ();
-		cameraMatrix=null;
+		//cameraMatrix=null;
 		}
 	/**
 	 * @return the upVector
@@ -83,7 +83,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	 */
 	public synchronized void setUpVector(Vector3D upVector){
 		super.setTop(upVector);
-		cameraMatrix=null;
+		//cameraMatrix=null;
 		}
 	/**
 	 * @return the cameraPosition
@@ -105,15 +105,8 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	super.setPosition(x, y, z);
 	//cameraMatrix = null;
     }
-    
-    @Override
-    public Camera notifyPositionChange(){
-	cameraMatrix=  null;
-	super.notifyPositionChange();
-	return this;
-    }
 	
-	private void applyMatrix(){
+	private RealMatrix applyMatrix(){
 		Vector3D eyeLoc = getCameraPosition();
 		Vector3D aZ = getLookAtVector().negate();
 		Vector3D aX = getUpVector().crossProduct(aZ).normalize();
@@ -133,11 +126,11 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 				{ 0, 0, 1, -eyeLoc.getZ() }, new double[]
 				{ 0, 0, 0, 1 } });
 		
-		cameraMatrix = getProjectionMatrix().multiply(rM.multiply(tM));
+		return cameraMatrix = getProjectionMatrix().multiply(rM.multiply(tM));
 		}//end applyMatrix()
 	public synchronized void setViewDepth(double cameraViewDepth){
 	    	this.viewDepth=cameraViewDepth;
-		cameraMatrix=null;
+		//cameraMatrix=null;
 		projectionMatrix=null;
 		}
 	
@@ -150,13 +143,13 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 		{return viewDepth;}
 	
 	private synchronized RealMatrix getMatrix()
-		{if(cameraMatrix==null){
+		{//if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition());
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
-			}}
+			}//}
 		return cameraMatrix;
 		}
 	public float [] getMatrixAsFlatArray(){

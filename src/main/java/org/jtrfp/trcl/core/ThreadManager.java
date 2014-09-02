@@ -14,8 +14,9 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -57,24 +58,24 @@ public final class ThreadManager {
 		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
     public final Object			gameStateLock			= new Object();
     private TRFutureTask<Void>		visibilityCalcTask;
-    public final ArrayDeque<TRFutureTask<?>> pendingGPUMemAccessTasks	= new ArrayDeque<TRFutureTask<?>>();
-    public final ArrayDeque<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayDeque<TRFutureTask<?>>();
+    public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(1000);
+    public final Queue<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayBlockingQueue<TRFutureTask<?>>(10000);
     private final AtomicLong		nextVisCalcTime 		= new AtomicLong(0L);
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
 	public void submit(TRFutureTask<?> item) {
-	    synchronized(pendingGPUMemAccessTasks){
+	    //synchronized(pendingGPUMemAccessTasks){
 		pendingGPUMemAccessTasks.add(item);
-		}
+		//}
 	}//end submit(...)
     };
     private final Submitter<TRFutureTask<?>> activeGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
 	public void submit(TRFutureTask<?> item) {
-	    synchronized(activeGPUMemAccessTasks){
+	    //synchronized(activeGPUMemAccessTasks){
 		activeGPUMemAccessTasks.add(item);
 		threadPool.submit(item);
-		}
+		//}
 	}//end submit(...)
     };
     private volatile Submitter<TRFutureTask<?>>	currentGPUMemAccessTaskSubmitter = activeGPUMemAccessTaskSubmitter;
@@ -218,20 +219,15 @@ public final class ThreadManager {
     private void attemptRender(){
 	if(tr.renderer!=null){
 	    if(tr.renderer.isDone()){
-		
-		synchronized(activeGPUMemAccessTasks){
 		 //Swap submitters
-		 synchronized(pendingGPUMemAccessTaskSubmitter){
-		 currentGPUMemAccessTaskSubmitter=pendingGPUMemAccessTaskSubmitter;}
+		 currentGPUMemAccessTaskSubmitter=pendingGPUMemAccessTaskSubmitter;//}
 		 while(!activeGPUMemAccessTasks.isEmpty()){
-		     if(!activeGPUMemAccessTasks.peek().isDone()){
-			 return;//Abort. Not ready to go yet.
-		     }else activeGPUMemAccessTasks.poll();
+		  if(!activeGPUMemAccessTasks.peek().isDone())
+		   return;//Abort. Not ready to go yet.
+		  activeGPUMemAccessTasks.poll();
 		 }//end while(!empty)
 		 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
-		 }//end sync(gpuMemAccessTasks)
-		synchronized(pendingGPUMemAccessTaskSubmitter){
-		currentGPUMemAccessTaskSubmitter=activeGPUMemAccessTaskSubmitter;}
+		currentGPUMemAccessTaskSubmitter=activeGPUMemAccessTaskSubmitter;//}
 		while(!pendingGPUMemAccessTasks.isEmpty())
 		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
 	    	}////end if(renderer.isDone)

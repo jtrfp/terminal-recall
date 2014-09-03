@@ -58,7 +58,7 @@ public final class ThreadManager {
 		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
     public final Object			gameStateLock			= new Object();
     private TRFutureTask<Void>		visibilityCalcTask;
-    public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(1000);
+    public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(10000);
     public final Queue<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayBlockingQueue<TRFutureTask<?>>(10000);
     private final AtomicLong		nextVisCalcTime 		= new AtomicLong(0L);
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){

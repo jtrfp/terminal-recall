@@ -124,13 +124,17 @@ public final class ThreadManager {
 	}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
+    
+    public void visibilityCalc(){
+	visibilityCalc(false);
+    }
 
-    public void visibilityCalc() {
+    public void visibilityCalc(final boolean mandatory) {
 	final long currTimeMillis = System.currentTimeMillis();
 	//Sanity checks
 	if(tr.renderer==null)		return;
 	if(!tr.renderer.isDone())	return;
-	if(visibilityCalcTask!=null){
+	if(visibilityCalcTask!=null && !mandatory){
 	    if(!visibilityCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}
 	    else visibilityCalcTask.get();
@@ -139,7 +143,7 @@ public final class ThreadManager {
 	    @Override
 	    public Void call() throws Exception {
 		//Thread.sleep(100);
-		tr.renderer.get().updateVisibilityList();
+		tr.renderer.get().updateVisibilityList(mandatory);
 		tr.getCollisionManager().updateCollisionList();
 		//Nudge of 10ms to compensate for drift of the timer task
 		nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));

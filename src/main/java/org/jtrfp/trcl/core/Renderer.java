@@ -66,7 +66,7 @@ public final class Renderer {
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
     private		float[]			cameraMatrixAsFlatArray = new float[16];
-    private		Future<Void>		visibilityUpdateFuture;
+    private		TRFutureTask<Void>	visibilityUpdateFuture;
 
     public Renderer(final GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -309,11 +309,15 @@ public final class Renderer {
 	      }
 	});
     }//end temporarilyMakeImmediatelyVisible(...)
-    
     public void updateVisibilityList() {
+	updateVisibilityList(false);
+    }
+    
+    public void updateVisibilityList(boolean mandatory) {
 	if(visibilityUpdateFuture!=null){
 	    if(!visibilityUpdateFuture.isDone()){
-		System.out.println("Renderer.updateVisibilityList() !done");return;
+		if(!mandatory){System.out.println("Renderer.updateVisibilityList() !done");return;}
+		else {visibilityUpdateFuture.get();}
 		}
 	    }//end if(visibilityUpdateFuture!=null)
 	if(!getBackRenderList().isDone())return;//Not ready.

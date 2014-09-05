@@ -363,6 +363,7 @@ public class Game {
 
     public Game setDisplayMode(Object[] mode) {
 	displayModes.setDisplayMode(mode);
+	tr.getThreadManager().visibilityCalc(true);
 	return this;
     }
     

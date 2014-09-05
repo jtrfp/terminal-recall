@@ -195,6 +195,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		synchronized(mWait){mWait[0] = true; mWait.notifyAll();}
 	    }//end run()
 	}).start();
+	tr.getThreadManager().visibilityCalc(true);
 	try{synchronized(mWait){while(!mWait[0])mWait.wait();}}
 	catch(InterruptedException e){}
 	stopScroll();

@@ -57,7 +57,7 @@ public final class World extends RenderableSpacePartitioningGrid {
     
     @Override
     public void notifyBranchRemoved(SpacePartitioningGrid b){
-	tr.getThreadManager().visibilityCalc();
+	//tr.getThreadManager().visibilityCalc();
 	/*
 	if(!visibilityRefreshAlreadyRequested.getAndSet(true)){
 	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){

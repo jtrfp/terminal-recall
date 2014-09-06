@@ -49,6 +49,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };
 	final double v[] = { 0, 0, 1, 1 };
+	final double cu[] = { 0, 1, 1, 0 };
+	final double cv[] = { 1, 1, 0, 0 };
 	
 	// Come up with a point list for tunnel entrances and exits
 	TDFFile.Tunnel[] tunnels = tdf.getTunnels();
@@ -110,8 +112,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    Vector3D norm0, norm1, norm2, norm3;
 				    Vector3D norm = altitude.normalAt(cX, cZ);
 				    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();// Exaggerate
-									 // features.
+					    norm.getZ() * 3).normalize();
 				    norm = altitude.normalAt(cX + 1, cZ);
 				    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
 					    norm.getZ() * 3).normalize();
@@ -221,18 +222,29 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 
 				    Vector3D norm0, norm1, norm2, norm3;
 				    Vector3D norm = altitude.normalAt(cX, cZ);
-				    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();// Exaggerate
-									 // features.
+				    norm3 = altitude.heightAt(cX, cZ)<.9?
+					    new Vector3D(norm.getX() * 3, norm.getY()*-1,
+					    norm.getZ() * 3).normalize():
+						new Vector3D(norm.getX() * 3, norm.getY(),
+						norm.getZ() * 3).normalize();
 				    norm = altitude.normalAt(cX + 1, cZ);
-				    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
+				    norm2 = altitude.heightAt(cX + 1, cZ)<.9?
+					    new Vector3D(norm.getX() * 3, norm.getY()*-1,
+					    norm.getZ() * 3).normalize():
+						new Vector3D(norm.getX() * 3, norm.getY(),
+						norm.getZ() * 3).normalize();
 				    norm = altitude.normalAt(cX + 1, cZ + 1);
-				    norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
+				    norm1 = altitude.heightAt(cX + 1 , cZ + 1)< .9?
+					    new Vector3D(norm.getX() * 3, norm.getY()*-1,
+					    norm.getZ() * 3).normalize():
+					    new Vector3D(norm.getX() * 3, norm.getY(),
+						norm.getZ() * 3).normalize();
 				    norm = altitude.normalAt(cX, cZ + 1);
-				    norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
+				    norm0 = altitude.heightAt(cX, cZ + 1)<.9?
+					    new Vector3D(norm.getX() * 3, norm.getY()*-1,
+					    norm.getZ() * 3).normalize():
+						new Vector3D(norm.getX() * 3, norm.getY(),
+						norm.getZ() * 3).normalize();
 
 				    if (flatShading)
 					norm0 = norm1 = norm2 = norm3 = altitude
@@ -266,13 +278,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    zPos + gridSquareSize - objectZ },
 					    // new double []
 					    // {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
-					    u,
-					    v,
+					    cu,
+					    cv,
 					    td,
 					    RenderMode.STATIC,
-					    new Vector3D[] { norm0.negate(),
-						    norm1.negate(), norm2.negate(),
-						    norm3.negate() }, cX + cZ % 4);
+					    new Vector3D[] { norm3,
+						    norm2, norm1,
+						    norm0 }, cX + cZ % 4);
 				    m.addTriangle(tris[0]);
 				    m.addTriangle(tris[1]);
 				}// end for(cX)

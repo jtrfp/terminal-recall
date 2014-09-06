@@ -127,7 +127,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(true);
 	//Planet introduction
-	game.setDisplayMode(game.briefingMode);
 	if(planetObject!=null){
 	    remove(planetObject);
 	    planetObject=null;
@@ -150,17 +149,19 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    planetModel.getTriangleList().getMaximumVertexDims().getX()*4);
 	 }catch(Exception e){tr.showStopper(e);}
+	game.setDisplayMode(game.briefingMode);
     }//end planetDisplayMode()
     
     public void missionCompleteSummary(LVLFile lvl, Result r){
-	planetDisplayMode(lvl);
 	final Game   game 	 = tr.getGame();
+	game.getPlayer().setActive(false);
 	setContent("Air targets destroyed: "+r.getAirTargetsDestroyed()+
 		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
 	game.getCurrentMission().getOverworldSystem().activate();
 	tr.getWorld().setFogColor(Color.black);
+	planetDisplayMode(lvl);
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.renderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
@@ -175,6 +176,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.renderer.get().getCamera();
 	missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
+	game.getPlayer().setActive(false);
 	planetDisplayMode(lvl);
 	setContent(
 		missionTXT.getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));

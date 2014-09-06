@@ -97,7 +97,7 @@ public final class ThreadManager {
 	synchronized(gameStateLock){
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo;
-	    synchronized(vl){wo = vl.get(i);}//TODO: This is slow.
+	    synchronized(vl){if(!vl.isEmpty())wo = vl.get(i);else break;}//TODO: This is slow.
 	    boolean multiplePlayer=false;
 	    if (wo.isActive()
 		    && (TR.twosComplimentDistance(wo.getPosition(), tr
@@ -129,12 +129,12 @@ public final class ThreadManager {
 	visibilityCalc(false);
     }
 
-    public void visibilityCalc(final boolean mandatory) {
+    public void visibilityCalc(final boolean blocking) {
 	final long currTimeMillis = System.currentTimeMillis();
 	//Sanity checks
 	if(tr.renderer==null)		return;
 	if(!tr.renderer.isDone())	return;
-	if(visibilityCalcTask!=null && !mandatory){
+	if(visibilityCalcTask!=null && !blocking){
 	    if(!visibilityCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}
 	    else visibilityCalcTask.get();
@@ -143,7 +143,7 @@ public final class ThreadManager {
 	    @Override
 	    public Void call() throws Exception {
 		//Thread.sleep(100);
-		tr.renderer.get().updateVisibilityList(mandatory);
+		tr.renderer.get().updateVisibilityList(blocking);
 		tr.getCollisionManager().updateCollisionList();
 		//Nudge of 10ms to compensate for drift of the timer task
 		nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));

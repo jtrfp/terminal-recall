@@ -312,8 +312,6 @@ public class Game {
 		try {
 		    MissionLevel lvl = levels[getLevelIndex()];
 		    final String lvlFileName = lvl.getLvlFile();
-		    currentMission = null;
-		    System.gc();//Clean up if possible.
 		    currentMission = new Mission(tr, this, tr.getResourceManager()
 			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
 		    Mission.Result result=null;

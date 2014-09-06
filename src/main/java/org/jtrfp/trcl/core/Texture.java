@@ -49,6 +49,7 @@ public class Texture implements TextureDescription {
     private 	  ByteBuffer 		rgba;
     private final boolean		uvWrapping;
     private volatile int		texturePage;
+    private int				width;
     @Override
     public void finalize() throws Throwable{
 	System.out.println("Texture.finalize() "+debugName);
@@ -174,6 +175,7 @@ public class Texture implements TextureDescription {
     }
     
     private void vqCompress(VectorList rgba8888vl, final int sideLength){
+	    width=sideLength;
 	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
 		    rgba8888vl, sideLength, 4);
 	    // Calculate a rough average color by averaging random samples.
@@ -293,7 +295,10 @@ public class Texture implements TextureDescription {
 				.componentAt(blockPosition, position++) * 255.));
 		    }//end applyRow
 		};
-		cbm.setRGBA(globalCodeIndex, rw);
+		try{cbm.setRGBA(globalCodeIndex, rw);}
+		catch(ArrayIndexOutOfBoundsException e){
+		    throw new RuntimeException("this="+Texture.this.toString(),e);
+		}
 		}//end for(codeX)
 	}//end for(codeY)
 	return null;
@@ -445,4 +450,9 @@ public class Texture implements TextureDescription {
 	ib.clear();
 	return ib.get();
     }//end createTextureID
+    
+    @Override
+    public String toString(){
+	return "Texture debugName="+debugName+" width="+width;
+    }
 }// end Texture

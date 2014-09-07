@@ -59,18 +59,20 @@ public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRe
     public void submit(List<PositionedRenderable> item) {
 	if(item==null)return;
 	if(item.isEmpty())return;
-	sortedSet.add(item);
+	synchronized(sortedSet){sortedSet.add(item);}
     }
     
     public GridCubeProximitySorter reset(){
-	sortedSet.clear();
+	synchronized(sortedSet){sortedSet.clear();}
 	return this;
     }
     
     public GridCubeProximitySorter dumpPositionedRenderables(Submitter<PositionedRenderable> sub){
+	synchronized(sortedSet){
 	for(List<PositionedRenderable> gc:sortedSet){
 	    sub.submit(gc);
 	}//end for(...)
+	}//end sync(sortedSet)
 	return this;
     }//end dumpPositionedRenderables(...)
 

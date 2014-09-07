@@ -65,6 +65,8 @@ public class CollisionManager {
     public synchronized void performCollisionTests() {
 	List<WorldObject> collideable = getCurrentlyActiveCollisionList();
 	for (int i = 0; i < collideable.size(); i++) {
+	  //Lock occurs inside one loop-level to reduce render pauses.
+	    synchronized(tr.getThreadManager().gameStateLock){
 	    final WorldObject left = collideable.get(i);
 	    for (int j = i + 1; j < collideable.size(); j++) {
 		final WorldObject right = collideable.get(j);
@@ -74,10 +76,11 @@ public class CollisionManager {
 		    left.proposeCollision(right);
 		    right.proposeCollision(left);
 		    }//end if(distance<MAX_CONSIDERATION)
-		}
+		}//end if(both are active)
 	    }// end for(j)
+	}// end sync(gameStateLock)
 	}// end for(i)
-    }
+    }//end performCollisionTests
 
     public void remove(WorldObject worldObject) {
 	getCurrentlyActiveCollisionList().remove(worldObject);

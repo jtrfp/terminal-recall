@@ -403,25 +403,31 @@ public class WorldObject implements PositionedRenderable {
 	return this;
     }// end setPosition()
     
-    public WorldObject notifyPositionChange(){
+    public synchronized WorldObject notifyPositionChange(){
 	synchronized (position) {
-	    final SpacePartitioningGrid<PositionedRenderable> gr = getContainingGrid();
-	    if(gr==null){
-		if(lastContainingList!=null){
+	    final SpacePartitioningGrid<PositionedRenderable> 
+	    	containingGrid = getContainingGrid();
+	    if(containingGrid==null){//Not in grid
+		if(lastContainingList!=null){//Removed from grid
 		    synchronized(lastContainingList){
 		     lastContainingList.remove(this);}
 		    lastContainingList=null;
 		}//end if(lastContainingList!=null)
 		return this;
-	    }//end if(gr==null)
+	    }//end if(not in grid)
+	    //Possibly moved from cube-to-cube
 	    final List<PositionedRenderable> newList = 
 	     (this instanceof VisibleEverywhere)?
-	      gr.getAlwaysVisibleList():gr.world2List(position[0],position[1],position[2],true);
-	    if(lastContainingList!=newList){
-		if(lastContainingList!=null)
+	      containingGrid.getAlwaysVisibleList():containingGrid.world2List(position[0],position[1],position[2],true);
+	    if(lastContainingList!=newList){//Definitely moved from cube-to-cube
+		if(lastContainingList!=null){
+		    synchronized(newList){
 		    synchronized(lastContainingList){
-		     lastContainingList.remove(this);}
-		synchronized(newList){
+			     lastContainingList.remove(this);
+			     newList.add(this);
+			     }}//end sync(new and last)
+		}//end (moved)
+		else synchronized(newList){
 		    newList.add(this);}
 		lastContainingList=newList;
 	    }//end if(posChange)

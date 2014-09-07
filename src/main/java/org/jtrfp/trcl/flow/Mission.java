@@ -126,7 +126,21 @@ public class Mission {
 		navProgress[i].complete();
 	    }// end for(navSubObjects)
 	    navSystem.updateNAVState();
-	    System.out.println("Start position set to " + player.getPosition());
+	    final String startX = System.getProperty("org.jtrfp.trcl.startX");
+	    final String startY = System.getProperty("org.jtrfp.trcl.startY");
+	    final String startZ = System.getProperty("org.jtrfp.trcl.startZ");
+	    final double[] playerPos = player.getPosition();
+	    if (startX != null && startY != null && startZ != null) {
+		System.out.println("Using user-specified start point");
+		final int sX = Integer.parseInt(startX);
+		final int sY = Integer.parseInt(startY);
+		final int sZ = Integer.parseInt(startZ);
+		playerPos[0] = sX;
+		playerPos[1] = sY;
+		playerPos[2] = sZ;
+		player.notifyPositionChange();
+	    }// end if(user start point)
+	    System.out.println("Start position set to " + player.getPosition()[0]+" "+player.getPosition()[1]+" "+player.getPosition()[2]);
 	    System.out.println("Setting sun vector");
 	    final AbstractVector sunVector = lvl.getSunlightDirectionVector();
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {

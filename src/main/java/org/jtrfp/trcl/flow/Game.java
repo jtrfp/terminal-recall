@@ -267,20 +267,6 @@ public class Game {
 	    final Camera camera = tr.renderer.get().getCamera();
 	    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 	    camera.probeForBehavior(MatchDirection.class).setTarget(player);
-	    final String startX = System.getProperty("org.jtrfp.trcl.startX");
-	    final String startY = System.getProperty("org.jtrfp.trcl.startY");
-	    final String startZ = System.getProperty("org.jtrfp.trcl.startZ");
-	    final double[] playerPos = player.getPosition();
-	    if (startX != null && startY != null && startZ != null) {
-		System.out.println("Using user-specified start point");
-		final int sX = Integer.parseInt(startX);
-		final int sY = Integer.parseInt(startY);
-		final int sZ = Integer.parseInt(startZ);
-		playerPos[0] = sX;
-		playerPos[1] = sY;
-		playerPos[2] = sZ;
-		player.notifyPositionChange();
-	    }// end if(user start point)
 	    tr.setPlayer(player);
 	    tr.getWorld().add(player);
 	    System.out.println("\t...Done.");

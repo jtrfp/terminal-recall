@@ -146,7 +146,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 		{//if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition());
+			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
 			}//}

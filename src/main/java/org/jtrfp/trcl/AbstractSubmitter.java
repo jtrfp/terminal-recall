@@ -16,5 +16,7 @@ import java.util.Collection;
 
 public abstract class AbstractSubmitter<T> implements Submitter<T> {
     @Override
-    public void submit(Collection<T> items){for(T item:items){submit(item);}}
-}
+    public void submit(Collection<T> items){
+	synchronized(items){
+	    for(T item:items){submit(item);}}}
+}//end AbstractSubmitter

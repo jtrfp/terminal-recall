@@ -139,7 +139,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	Vector3D startPoint = TUNNEL_START_POS;
 
 	Vector3D segPos = Vector3D.ZERO;
+	
 	final Vector3D top = rotation.applyTo(new Vector3D(0, 1, 0));
+	/*
 	if (entrance) {
 	    // Entrance is just a stub so we only need a few of the segments
 	    List<Segment> newSegs = new ArrayList<Segment>();
@@ -147,7 +149,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		newSegs.add(segs.get(i));
 	    }
 	    segs = newSegs;
-	}
+	}*/
 	// CONSTRUCT AND INSTALL SEGMENTS
 	int segIndex = 0;
 	Vector3D finalPos = TUNNEL_START_POS;

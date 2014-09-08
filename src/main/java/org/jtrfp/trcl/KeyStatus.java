@@ -38,23 +38,24 @@ public class KeyStatus implements KeyEventDispatcher{
 	public void keyTyped(KeyEvent evt){}
 	
 	public void waitForSequenceTyped(final int ... keys){
-	    final int [] keyArrayIndex 		= new int[]{0};
 	    final boolean [] keyTypeObject 	= new boolean[]{false};
 	    final KeyEventDispatcher dispatcher = new KeyEventDispatcher(){
+		private volatile int keyArrayIndex = 0;
 		@Override
-		public boolean dispatchKeyEvent(KeyEvent evt) {
+		public synchronized boolean dispatchKeyEvent(KeyEvent evt) {//one at a time please...
 		    if(evt.getID()==KeyEvent.KEY_RELEASED){
-			if(evt.getKeyCode()==keys[keyArrayIndex[0]]){
-			    keyArrayIndex[0]++;
-			    if(keyArrayIndex[0]>=keys.length){
+			System.out.println("keyArrayIndex="+keyArrayIndex+" len="+keys.length);
+			if(evt.getKeyCode()==keys[keyArrayIndex]){
+			    keyArrayIndex++;
+			    if(keyArrayIndex>=keys.length){
 				synchronized(keyTypeObject){
 					keyTypeObject[0]=true;
 					keyTypeObject.notifyAll();
 				    }//end sync(keyTypeObject)
 				    return false;
 			    }//end if(>keys.length)
-			}else keyArrayIndex[0]=0;//!target key
-		    }//end if(KEY_TYPED)
+			}else keyArrayIndex=0;//!target key
+		    }//end if(KEY_RELEASED)
 		    return false;
 		}};
 	    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher);

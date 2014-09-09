@@ -32,7 +32,8 @@ public class TunnelExitObject extends WorldObject {
     private final 	Tunnel 		tun;
     private final 	TR 		tr;
     private 		NAVObjective 	navObjectiveToRemove;
-    private boolean 			mirrorTerrain = false;
+    private 		boolean 	mirrorTerrain = false;
+    private		boolean		onlyRemoveIfTargeted=false;
 
     public TunnelExitObject(TR tr, Tunnel tun) {
 	super(tr);
@@ -125,7 +126,7 @@ public class TunnelExitObject extends WorldObject {
 			}// end for(projectiles)
 		    }// end for(projectileFactories)
 		    final NAVObjective navObjective = getNavObjectiveToRemove();
-		    if (navObjective != null && navTargeted) {
+		    if (navObjective != null && (navTargeted|!onlyRemoveIfTargeted)) {
 			tr.getGame().getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
 		}// end if(x past threshold)
@@ -148,8 +149,10 @@ public class TunnelExitObject extends WorldObject {
     /**
      * @param navObjectiveToRemove
      *            the navObjectiveToRemove to set
+     * @param onlyRemoveIfTargeted 
      */
-    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
+    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove, boolean onlyRemoveIfTargeted) {
+	this.onlyRemoveIfTargeted = onlyRemoveIfTargeted;
 	this.navObjectiveToRemove = navObjectiveToRemove;
     }
 

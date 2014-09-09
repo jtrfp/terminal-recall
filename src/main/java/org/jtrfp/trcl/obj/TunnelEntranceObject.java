@@ -15,6 +15,7 @@ package org.jtrfp.trcl.obj;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.OverworldSystem;
@@ -26,6 +27,8 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
+import org.jtrfp.trcl.beh.phy.HasPropulsion;
+import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
@@ -114,19 +117,24 @@ public class TunnelEntranceObject extends BillboardSprite {
 			  setEnable(false);
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
-		 entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 		 final Player player = tr.getPlayer();
-		 player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
-		 player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
-		 player.notifyPositionChange();
+		 //player.getBehavior().probeForBehavior(HasPropulsion.class).setPropulsion(0);
+		 player.getBehavior().probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
 		 player.getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 		 player.getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
+		 entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
+		 player.setActive(false);
+		 player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
+		 player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+		 player.notifyPositionChange();
+		 
 		 final NAVObjective navObjective = getNavObjectiveToRemove();
 	         if(navObjective!=null && navTargeted){
 	             final Mission m = tr.getGame().getCurrentMission();
 	             if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
 	         }//end if(have NAV to remove
+	         player.setActive(true);
 	        }//end if(close to Player)
 	    }//end if(Player)
 	}//end _proposeCollision
@@ -149,11 +157,11 @@ public class TunnelEntranceObject extends BillboardSprite {
      * @param navObjectiveToRemove the navObjectiveToRemove to set
      */
     public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
-        this.navObjectiveToRemove = navObjectiveToRemove;
+        setNavObjectiveToRemove(navObjectiveToRemove,false);
     }
-    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove, boolean onlyRemoveIfLast) {
-	this.onlyRemoveIfCurrent=true;
-	setNavObjectiveToRemove(navObjectiveToRemove);
+    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove, boolean onlyRemoveIfCurrent) {
+	this.onlyRemoveIfCurrent=onlyRemoveIfCurrent;
+	this.navObjectiveToRemove=navObjectiveToRemove;
     }
     /**
      * @return the onlyRemoveIfCurrent

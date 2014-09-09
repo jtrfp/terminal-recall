@@ -132,7 +132,7 @@ public abstract class NAVObjective {
 			    }
 		    };//end new NAVObjective tunnelExit
 		    indexedNAVObjectiveList.add(exitObjective);
-		    tunnelExit.setNavObjectiveToRemove(exitObjective);
+		    tunnelExit.setNavObjectiveToRemove(exitObjective,true);
 		    tunnelExit.setMirrorTerrain(currentTunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
 		    if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){

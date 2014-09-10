@@ -79,28 +79,28 @@ public class TunnelEntranceObject extends BillboardSprite {
 		final Mission mission = game.getCurrentMission();
 		if(mission.getOverworldSystem()==null) return;
 		final InterpolatingAltitudeMap map = 
-			tr.getGame().
+			game.
 			getCurrentMission().
 			getOverworldSystem().
 			getAltitudeMap();
 		if(map==null)return;
 		double [] playerPos = other.getPosition();
-		double [] thisPos = entranceObject.getPosition();
-		final double groundHeightNorm =map.heightAt((thisPos[0]/TR.mapSquareSize), 
+		double [] thisPos   = entranceObject.getPosition();
+		final double groundHeightNorm = map.heightAt((thisPos[0]/TR.mapSquareSize), 
 			    (thisPos[2]/TR.mapSquareSize));
 		final double groundHeight = groundHeightNorm*(world.sizeY/2);
 		//Ignore ground height with chambers because entrances don't behave themselves with this.
-		final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
+		final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
 		if(!overworldSystem.isChamberMode()&&playerPos[1]>groundHeight+GROUND_HEIGHT_PAD*4)return;
 	        if(Vect3D.distanceXZ(entranceObject.getPosition(),other.getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE*2){
-	         tr.getGame().getCurrentMission().notifyTunnelFound(tunnel);
+	         game.getCurrentMission().notifyTunnelFound(tunnel);
 	         //Turn off overworld
 		 overworldSystem.deactivate();
 		 //Turn on tunnel
 		 tunnel.activate();
 		 //Move player to tunnel
-		 tr.getWorld().setFogColor(new Color(10,30,15));
-		 tr.getGame().getBackdropSystem().tunnelMode();
+		 world.setFogColor(new Color(10,30,15));
+		 game.getBackdropSystem().tunnelMode();
 		 //Ensure chamber mode is off
 		 overworldSystem.setChamberMode(false);
 		 overworldSystem.setTunnelMode(true);
@@ -119,10 +119,11 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 }//end for(projectileFactories)
 		 final Player player = tr.getPlayer();
 		 //player.getBehavior().probeForBehavior(HasPropulsion.class).setPropulsion(0);
-		 player.getBehavior().probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
-		 player.getBehavior().probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
-		 player.getBehavior().probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
-		 player.getBehavior().probeForBehavior(CollidesWithTerrain.class).setEnable(false);
+		 final Behavior playerBehavior = player.getBehavior();
+		 playerBehavior.probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
+		 playerBehavior.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
+		 playerBehavior.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
+		 playerBehavior.probeForBehavior(CollidesWithTerrain.class).setEnable(false);
 		 entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 		 player.setActive(false);
 		 player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
@@ -131,7 +132,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 
 		 final NAVObjective navObjective = getNavObjectiveToRemove();
 	         if(navObjective!=null && navTargeted){
-	             final Mission m = tr.getGame().getCurrentMission();
+	             final Mission m = game.getCurrentMission();
 	             if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
 	         }//end if(have NAV to remove
 	         player.setActive(true);

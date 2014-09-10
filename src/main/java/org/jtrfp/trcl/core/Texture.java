@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.SpecialRAWDimensions;
 import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
@@ -162,16 +163,26 @@ public class Texture implements TextureDescription {
     }// end constructor
     
     private void vqCompress(PalettedVectorList squareImageIndexed){
-	final int sideLength = (int)Math.sqrt(squareImageIndexed.getNumVectors());
+	final double	fuzzySideLength = Math.sqrt(squareImageIndexed.getNumVectors());
+	final int 	sideLength	= (int)Math.floor(fuzzySideLength);
+	if(!SpecialRAWDimensions.isPowerOfTwo(sideLength))
+	    System.err.println("WARNING: Calculated dimensions are not power-of-two. Trouble ahead.");
+	if(Math.abs(fuzzySideLength-sideLength)>.001)
+	    System.err.println("WARNING: Calculated dimensions are not perfectly square. Trouble ahead.");
 	vqCompress(squareImageIndexed,sideLength);
     }
     
     private void vqCompress(ByteBuffer imageRGBA8888){
-	final int sideLength 					= (int)Math.sqrt((imageRGBA8888.capacity() / 4));
-	    // Break down into 4x4 blocks
-	    final ByteBufferVectorList 		bbvl 		= new ByteBufferVectorList(imageRGBA8888);
-	    final RGBA8888VectorList 		rgba8888vl 	= new RGBA8888VectorList(bbvl);
-	    vqCompress(rgba8888vl,sideLength);
+	final double	fuzzySideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
+	final int 	sideLength	= (int)Math.floor(fuzzySideLength);
+	if(!SpecialRAWDimensions.isPowerOfTwo(sideLength))
+	    System.err.println("WARNING: Calculated dimensions are not power-of-two. Trouble ahead.");
+	if(Math.abs(fuzzySideLength-sideLength)>.001)
+	    System.err.println("WARNING: Calculated dimensions are not perfectly square. Trouble ahead.");
+	 // Break down into 4x4 blocks
+	 final ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
+	 final RGBA8888VectorList 	rgba8888vl 	= new RGBA8888VectorList(bbvl);
+	 vqCompress(rgba8888vl,sideLength);
     }
     
     private void vqCompress(VectorList rgba8888vl, final int sideLength){

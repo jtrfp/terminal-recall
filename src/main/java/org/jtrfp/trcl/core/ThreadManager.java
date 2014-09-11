@@ -14,7 +14,6 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -24,7 +23,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -78,7 +79,9 @@ public final class ThreadManager {
 		//}
 	}//end submit(...)
     };
-    private volatile Submitter<TRFutureTask<?>>	currentGPUMemAccessTaskSubmitter = activeGPUMemAccessTaskSubmitter;
+    private AtomicReference<Submitter<TRFutureTask<?>>>	currentGPUMemAccessTaskSubmitter 
+    	= new AtomicReference<Submitter<TRFutureTask<?>>>(activeGPUMemAccessTaskSubmitter);
+    public AtomicBoolean isRendering = new AtomicBoolean(false); //TODO: Debug
     
     ThreadManager(final TR tr) {
 	this.tr = tr;
@@ -129,24 +132,27 @@ public final class ThreadManager {
 	visibilityCalc(false);
     }
 
-    public void visibilityCalc(final boolean blocking) {
+    private final Object visibilityUpdateLock = new Object();
+    public void visibilityCalc(final boolean mandatory) {
 	final long currTimeMillis = System.currentTimeMillis();
 	//Sanity checks
 	if(tr.renderer==null)		return;
 	if(!tr.renderer.isDone())	return;
-	if(visibilityCalcTask!=null && !blocking){
+	if(visibilityCalcTask!=null && !mandatory){
 	    if(!visibilityCalcTask.isDone())
-		{System.out.println("visiblityCalc() !done. Return...");return;}
-	    else visibilityCalcTask.get();
-	}
+		{System.out.println("visiblityCalc() !done. Return...");return;}}
+	//else if(visibilityCalcTask!=null && mandatory)
+	//    visibilityCalcTask.get();
 	visibilityCalcTask = new TRFutureTask<Void>(tr,new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		//Thread.sleep(100);
-		tr.renderer.get().updateVisibilityList(blocking);
+		synchronized(visibilityUpdateLock){
+		tr.renderer.get().updateVisibilityList(mandatory);
 		tr.getCollisionManager().updateCollisionList();
 		//Nudge of 10ms to compensate for drift of the timer task
 		nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
+		}//end sync(visibilityUpdateLock)
 		return null;
 	    }});
 	threadPool.submit(visibilityCalcTask);
@@ -154,7 +160,8 @@ public final class ThreadManager {
     
     public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
-	currentGPUMemAccessTaskSubmitter.submit(result);
+	synchronized(currentGPUMemAccessTaskSubmitter){
+	    currentGPUMemAccessTaskSubmitter.get().submit(result);}
 	return result;
     }//end submitToGPUMemAccess(...)
     
@@ -224,14 +231,20 @@ public final class ThreadManager {
 	if(tr.renderer!=null){
 	    if(tr.renderer.isDone()){
 		 //Swap submitters
-		 currentGPUMemAccessTaskSubmitter=pendingGPUMemAccessTaskSubmitter;//}
+		 synchronized(currentGPUMemAccessTaskSubmitter){
+		  currentGPUMemAccessTaskSubmitter.set(pendingGPUMemAccessTaskSubmitter);}
 		 while(!activeGPUMemAccessTasks.isEmpty()){
 		  if(!activeGPUMemAccessTasks.peek().isDone())
 		   return;//Abort. Not ready to go yet.
 		  activeGPUMemAccessTasks.poll();
 		 }//end while(!empty)
+		 
+		 ///////// activeGPUMemAccessTasks should be empty beyond this point ////////
+		 if(!activeGPUMemAccessTasks.isEmpty())
+		     tr.showStopper(new RuntimeException("ThreadManager.activeGPUMemAccessTasks intolerably not empty."));
 		 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
-		currentGPUMemAccessTaskSubmitter=activeGPUMemAccessTaskSubmitter;//}
+		 synchronized(currentGPUMemAccessTaskSubmitter){
+		  currentGPUMemAccessTaskSubmitter.set(activeGPUMemAccessTaskSubmitter);}
 		while(!pendingGPUMemAccessTasks.isEmpty())
 		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
 	    	}////end if(renderer.isDone)
@@ -249,5 +262,17 @@ public final class ThreadManager {
      */
     public Timer getLightweightTimer() {
 	return lightweightTimer;
+    }
+    
+    public static final ThreadLocal<TRFutureTask<?>> trFutureTaskIdentities = new ThreadLocal<TRFutureTask<?>>();
+    public void notifyGPUMemAccessFault() {
+	System.err.println("pending tasks:");
+	for(TRFutureTask t: pendingGPUMemAccessTasks)
+	    System.err.println(t);
+	System.err.println("active tasks:");
+	for(TRFutureTask t: activeGPUMemAccessTasks)
+	    System.err.println(t);
+	System.err.println("This task: "+trFutureTaskIdentities.get());
+	tr.showStopper(new RuntimeException("Writing to GPU while rendering!"));
     }
 }// end ThreadManager

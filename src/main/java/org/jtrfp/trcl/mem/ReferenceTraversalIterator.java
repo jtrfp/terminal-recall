@@ -110,6 +110,7 @@ public class ReferenceTraversalIterator implements Iterator<Object> {
 		    for (Field f : fields) {
 			// System.out.println("FIELD: "+f.getType().getName()+" "+f.getName());
 			if (!f.getType().isPrimitive()) {
+			    final boolean wasAccessible = f.isAccessible();
 			    f.setAccessible(true);
 			    try {
 				Object obj = f.get(element);
@@ -117,6 +118,7 @@ public class ReferenceTraversalIterator implements Iterator<Object> {
 			    } catch (IllegalAccessException e) {
 				e.printStackTrace();
 			    }
+			    f.setAccessible(wasAccessible);
 			}// end if(!isPrimitive)
 		    }// end for(fields)
 		    clazz = clazz.getSuperclass();

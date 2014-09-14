@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -30,7 +31,9 @@ import javax.media.opengl.GLContext;
 import org.jtrfp.trcl.core.TR;
 
 public class ReferenceTraversalIterator implements Iterator<Object> {
-    private final Set<Object>	 	      alreadyVisited    = Collections.synchronizedSet(new HashSet<Object>());
+    //private final Set<Object>	 	      alreadyVisited    = Collections.synchronizedSet(new HashSet<Object>());
+    private final Set<Object> 			alreadyVisited = 
+	    Collections.newSetFromMap(new IdentityHashMap<Object,Boolean>());
     //AlreadyVisited is accessed by a single thread, yet getting co-modification exceptions...!
     private final ArrayBlockingQueue<Object> output		= new ArrayBlockingQueue<Object>(100);
     private static final Object END_OF_TRAVERSAL		= new Object();
@@ -106,21 +109,21 @@ public class ReferenceTraversalIterator implements Iterator<Object> {
 		Class clazz = element.getClass();
 		if(clazz==null || clazz == Object.class)return;
 		do {
-		    final Field[] fields = clazz.getDeclaredFields();
-		    for (Field f : fields) {
-			// System.out.println("FIELD: "+f.getType().getName()+" "+f.getName());
-			if (!f.getType().isPrimitive()) {
-			    final boolean wasAccessible = f.isAccessible();
-			    f.setAccessible(true);
-			    try {
-				Object obj = f.get(element);
-				handleElement(obj);
-			    } catch (IllegalAccessException e) {
-				e.printStackTrace();
-			    }
-			    f.setAccessible(wasAccessible);
-			}// end if(!isPrimitive)
-		    }// end for(fields)
+			final Field[] fields = clazz.getDeclaredFields();
+			for (Field f : fields) {
+			    // System.out.println("FIELD: "+f.getType().getName()+" "+f.getName());
+			    if (!f.getType().isPrimitive()) {
+				final boolean wasAccessible = f.isAccessible();
+				f.setAccessible(true);
+				try {
+				    Object obj = f.get(element);
+				    handleElement(obj);
+				} catch (IllegalAccessException e) {
+				    e.printStackTrace();
+				}
+				f.setAccessible(wasAccessible);
+			    }// end if(!isPrimitive)
+			}// end for(fields)
 		    clazz = clazz.getSuperclass();
 		} while (clazz !=Object.class);
 	    }// end handleClassObject(...)

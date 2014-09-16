@@ -62,8 +62,9 @@ public class CollisionManager {
 	System.out.println("Done.");
     }// end updateVisibilityList()
 
-    public synchronized void performCollisionTests() {
+    public void performCollisionTests() {
 	List<WorldObject> collideable = getCurrentlyActiveCollisionList();
+	synchronized(collideable){
 	for (int i = 0; i < collideable.size(); i++) {
 	  //Lock occurs inside one loop-level to reduce render pauses.
 	    synchronized(tr.getThreadManager().gameStateLock){
@@ -80,11 +81,14 @@ public class CollisionManager {
 	    }// end for(j)
 	}// end sync(gameStateLock)
 	}// end for(i)
+	}//end sync(collideable)
     }//end performCollisionTests
 
     public void remove(WorldObject worldObject) {
-	getCurrentlyActiveCollisionList().remove(worldObject);
-    }
+	List<WorldObject> cL = this.getCurrentlyActiveCollisionList();
+	synchronized(cL){
+	    getCurrentlyActiveCollisionList().remove(worldObject);}
+    }//end remove(...)
 
     public List<WorldObject> getCurrentlyActiveCollisionList() {
 	return collisionList[flip ? 1 : 0];

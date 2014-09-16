@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
+import java.util.List;
 
 import javax.media.opengl.GL3;
 
@@ -106,7 +107,8 @@ public class ProjectileFactory {
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	tr.getWorld().add((WorldObject)result);
 	tr.renderer.get().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
-	tr.getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)result);
+	final List<WorldObject> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
+	 synchronized(cL){cL.add((WorldObject)result);}
 	projectileIndex++;
 	projectileIndex%=projectiles.length;
 	return result;

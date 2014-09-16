@@ -33,6 +33,7 @@ import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
 import org.jtrfp.trcl.img.vq.VectorList;
+import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class Texture implements TextureDescription {
@@ -207,7 +208,7 @@ public class Texture implements TextureDescription {
 		@Override
 		public Void call() throws Exception {
 		// Create subtextures
-		final int diameterInCodes 		= (int)Math.ceil((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH);
+		final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 		final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES);
 		subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
 		codebookStartOffsetsAbsolute		= new int[diameterInSubtextures*diameterInSubtextures][6];

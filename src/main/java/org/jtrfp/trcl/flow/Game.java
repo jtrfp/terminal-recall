@@ -300,6 +300,7 @@ public class Game {
 		    final String lvlFileName = lvl.getLvlFile();
 		    currentMission = new Mission(tr, this, tr.getResourceManager()
 			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
+		    TR.nuclearGC();
 		    Mission.Result result=null;
 		    while(result==null) 
 			result = currentMission.go();

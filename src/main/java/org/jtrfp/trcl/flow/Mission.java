@@ -62,7 +62,7 @@ public class Mission {
     private enum LoadingStages {
 	navs, tunnels, overworld
     }// end LoadingStages
-
+    
     public Mission(TR tr, Game game, LVLFile lvl, String levelName) {
 	this.tr 	= tr;
 	this.lvl 	= lvl;

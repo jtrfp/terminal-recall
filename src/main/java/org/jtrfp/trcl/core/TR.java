@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
@@ -168,6 +169,38 @@ public final class TR{
 	v %= mod;
 	return v;
     }
+    
+    /**
+     * A non-diplomatic way of requesting a GC event.
+     * In theory, this call will force (probability=100%) a full sweep including Weak and Soft references.
+     * Unlike System.gc() which serves as a suggestion to execute a GC sweep, nuclearGC creates an
+     * OutOfMemoryError scenario, forcing a sweep in order for the JVM to keep functioning.
+     * <br><br>
+     * This was created mainly in response to GPU resources depending on being freed by finalization but the 
+     * GC ignoring this need as it focuses on CPU resources only. By ensuring the clearance of unused cache 
+     * resources after a level-loading, it can be assured to some degree that unneeded GPU resources will also be
+     * released.
+     * <br><br>
+     * WARNING: This is not a substitute for good programming. If live references are left hanging they will
+     * not be freed by the GC, ever. Also note that this will clear any well-designed caching system so it is
+     * advised to defer calling this method until the program is at its fullest (post-loading) state to avoid 
+     * unnecessary cache misses.
+     * 
+     * Idea adapted from:
+     * http://stackoverflow.com/questions/3785713/how-to-make-the-java-system-release-soft-references>
+     * 
+     * @since Sep 15, 2014
+     */
+    public static void nuclearGC(){
+	try{
+	    final ArrayList<byte[]> spaceHog = new ArrayList<byte[]>();
+	    while(true){
+		spaceHog.add(new byte[1024*1024*16]);//16MB
+	    }
+	}catch(OutOfMemoryError e){}
+	//Still alive? Great!
+	System.gc();
+    }//end nuclearGC()
 
 	/**
 	 * @return the trConfig

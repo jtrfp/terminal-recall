@@ -153,7 +153,9 @@ public abstract class NAVObjective {
 		    final Mission mission = tr.getGame().getCurrentMission();
 		    final BOS bos = (BOS)navSubObject;
 		    boolean first=true;
-		    for(final int target:bos.getTargets()){
+		    final int [] bossTargs = bos.getTargets();
+		    if(bossTargs!=null){
+		     for(final int target:bos.getTargets()){
 			final WorldObject shieldGen = defs.get(target);
 			final NAVObjective objective = new NAVObjective(this){
 			    @Override
@@ -176,7 +178,7 @@ public abstract class NAVObjective {
 				}//end run()
 			    }));
 			    first=false;
-			}//end if(first)
+			 }//end if(first)
 			shieldGen.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
@@ -186,7 +188,8 @@ public abstract class NAVObjective {
 			    }
 			}));
 			indexedNAVObjectiveList.add(objective);
-		    }//end for(targets)
+		     }//end for(targets)
+		    }//end if(bos.targets() !=null))
 		    final DEFObject bossObject = defs.get(bos.getBossIndex());
 		    bossObject.addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
 		    bossObject.setIgnoringProjectiles(true);
@@ -209,8 +212,11 @@ public abstract class NAVObjective {
 				bossObject.probeForBehavior(DamageableBehavior.class).setEnable(true);
 				bossObject.setIgnoringProjectiles(false);}
 				}));
-			if(bos.getTargets().length==0){
-			    bossChamberExitShutoffTrigger=bossObject;}
+			
+			if(bossTargs!=null){
+			 if(bossTargs.length==0){
+			    bossChamberExitShutoffTrigger=bossObject;}}
+			else bossChamberExitShutoffTrigger=bossObject;
 			worldBossObject = bossObject;
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override

@@ -203,7 +203,7 @@ public class WorldObject implements PositionedRenderable {
 	initializeObjectDefinitions();
     }// end setModel(...)
 
-    public void setDirection(ObjectDirection dir) {
+    public synchronized void setDirection(ObjectDirection dir) {
 	if (dir.getHeading().getNorm() == 0 || dir.getTop().getNorm() == 0) {
 	    System.err
 		    .println("Warning: Rejecting zero-norm for object direction. "
@@ -293,7 +293,7 @@ public class WorldObject implements PositionedRenderable {
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)
 
-    public final void updateStateToGPU() {
+    public synchronized final void updateStateToGPU() {
 	recalculateTransRotMBuffer();
 	if(model!=null)model.proposeAnimationUpdate();
     }
@@ -446,7 +446,7 @@ public class WorldObject implements PositionedRenderable {
      * @param heading
      *            the heading to set
      */
-    public void setHeading(Vector3D nHeading) {
+    public synchronized void setHeading(Vector3D nHeading) {
 	heading[0] = nHeading.getX();
 	heading[1] = nHeading.getY();
 	heading[2] = nHeading.getZ();
@@ -467,7 +467,7 @@ public class WorldObject implements PositionedRenderable {
      * @param top
      *            the top to set
      */
-    public void setTop(Vector3D nTop) {
+    public synchronized void setTop(Vector3D nTop) {
 	top[0] = nTop.getX();
 	top[1] = nTop.getY();
 	top[2] = nTop.getZ();
@@ -553,14 +553,14 @@ public class WorldObject implements PositionedRenderable {
 	this.active = active;
     }//end setActive(...)
 
-    public void movePositionBy(Vector3D delta) {
+    public synchronized void movePositionBy(Vector3D delta) {
 	position[0] += delta.getX();
 	position[1] += delta.getY();
 	position[2] += delta.getZ();
 	notifyPositionChange();
     }
 
-    public void setPosition(double x, double y, double z) {
+    public synchronized void setPosition(double x, double y, double z) {
 	position[0] = x;
 	position[1] = y;
 	position[2] = z;

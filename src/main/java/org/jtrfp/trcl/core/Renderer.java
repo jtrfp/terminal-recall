@@ -15,7 +15,7 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -44,7 +44,7 @@ public final class Renderer {
     private final 	Camera			camera;
     			GLProgram 		primaryProgram, deferredProgram, depthQueueProgram, depthErasureProgram;
     private 		boolean 		initialized = false;
-    private 		boolean 		renderListToggle = false;
+    private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
     private 	 	GLUniform	    	screenWidth, 
@@ -264,7 +264,7 @@ public final class Renderer {
 	if ((frameNumber %= 20) == 0) {
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
-	    final List<WorldObject> list = renderList[renderListToggle ? 0 : 1].get().getVisibleWorldObjectList();
+	    final List<WorldObject> list = renderList[renderListToggle.get() ? 0 : 1].get().getVisibleWorldObjectList();
 	    synchronized(list){
 	    gpu.getTr().getReporter()
 	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", list.size());}
@@ -299,6 +299,7 @@ public final class Renderer {
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
 	if(pr instanceof WorldObject)
 	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
+	
 	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -309,9 +310,6 @@ public final class Renderer {
 	      }
 	});
     }//end temporarilyMakeImmediatelyVisible(...)
-    public void updateVisibilityList() {
-	updateVisibilityList(false);
-    }
     
     public void updateVisibilityList(boolean mandatory) {
 	if(visibilityUpdateFuture!=null){
@@ -321,12 +319,10 @@ public final class Renderer {
 		}
 	    }//end if(visibilityUpdateFuture!=null)
 	if(!getBackRenderList().isDone())return;//Not ready.
-	final RenderList rl = getBackRenderList().get();
 	visibilityUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() {
 		try{
-		rl.reset();
 		proximitySorter.setCenter(camera.getCameraPosition().toArray());
 		rootGrid.cubesWithinRadiusOf(
 			camera.getCameraPosition().add(
@@ -337,28 +333,30 @@ public final class Renderer {
 		Renderer.this.gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    @Override
 		    public Void call() {
+			final RenderList rl = getBackRenderList().get();
+			rl.reset();
 			final Submitter<PositionedRenderable> s = rl.getSubmitter();
 			synchronized(s){
-			proximitySorter.dumpPositionedRenderables(s);}
+			 proximitySorter.dumpPositionedRenderables(s);}
+			toggleRenderList();
 			return null;
 		    }//end gl call()
 		}).get();
 		proximitySorter.reset();
-		toggleRenderList();
 		}catch(Exception e){e.printStackTrace();}
 		return null;
 	    }//end pool run()
 	});
     }// end updateVisibilityList()
     
-    public synchronized TRFutureTask<RenderList> currentRenderList(){
-	return renderList[renderListToggle ? 0 : 1];
+    public TRFutureTask<RenderList> currentRenderList(){
+	return renderList[renderListToggle.get() ? 0 : 1];
     }
-    public synchronized TRFutureTask<RenderList> getBackRenderList(){
-	return renderList[renderListToggle ? 1 : 0];
+    public TRFutureTask<RenderList> getBackRenderList(){
+	return renderList[renderListToggle.get() ? 1 : 0];
     }
     private synchronized void toggleRenderList(){
-	renderListToggle = !renderListToggle;
+	renderListToggle.set(!renderListToggle.get());
     }
 
     public void setFogColor(Color c) {

@@ -23,7 +23,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -65,23 +64,18 @@ public final class ThreadManager {
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
 	public void submit(TRFutureTask<?> item) {
-	    //synchronized(pendingGPUMemAccessTasks){
 		pendingGPUMemAccessTasks.add(item);
-		//}
 	}//end submit(...)
     };
     private final Submitter<TRFutureTask<?>> activeGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
 	public void submit(TRFutureTask<?> item) {
-	    //synchronized(activeGPUMemAccessTasks){
 		activeGPUMemAccessTasks.add(item);
 		threadPool.submit(item);
-		//}
 	}//end submit(...)
     };
     private AtomicReference<Submitter<TRFutureTask<?>>>	currentGPUMemAccessTaskSubmitter 
     	= new AtomicReference<Submitter<TRFutureTask<?>>>(activeGPUMemAccessTaskSubmitter);
-    public AtomicBoolean isRendering = new AtomicBoolean(false); //TODO: Debug
     
     ThreadManager(final TR tr) {
 	this.tr = tr;
@@ -109,14 +103,6 @@ public final class ThreadManager {
 		if(wo instanceof Player){
 		    if(alreadyVisitedPlayer){
 			multiplePlayer=true;
-			/*
-			new RuntimeException("ALREADY VISITED PLAYER").printStackTrace();//TODO: Remove
-			Player p = (Player)wo;
-			List<PositionListener>pcls = p.getPositionListeners();
-			for(PositionListener pcl:pcls){
-			    System.out.println("PositionListener "+pcl);
-			}//end for(pcls)
-			*/
 		    }else alreadyVisitedPlayer=true;
 		}
 		if(!multiplePlayer)wo.tick(tickTimeInMillis);
@@ -141,21 +127,18 @@ public final class ThreadManager {
 	if(visibilityCalcTask!=null && !mandatory){
 	    if(!visibilityCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}}
-	//else if(visibilityCalcTask!=null && mandatory)
-	//    visibilityCalcTask.get();
-	visibilityCalcTask = new TRFutureTask<Void>(tr,new Callable<Void>(){
+	visibilityCalcTask = this.submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		//Thread.sleep(100);
 		synchronized(visibilityUpdateLock){
-		tr.renderer.get().updateVisibilityList(mandatory);
-		tr.getCollisionManager().updateCollisionList();
-		//Nudge of 10ms to compensate for drift of the timer task
-		nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
-		}//end sync(visibilityUpdateLock)
+		 tr.renderer.get().updateVisibilityList(mandatory);
+		 tr.getCollisionManager().updateCollisionList();
+		 //Nudge of 10ms to compensate for drift of the timer task
+		 nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
+		 }//end sync(visibilityUpdateLock)
 		return null;
 	    }});
-	threadPool.submit(visibilityCalcTask);
     }//end visibilityCalc()
     
     public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){

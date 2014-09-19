@@ -284,9 +284,8 @@ public final class Renderer {
 	ensureInit();
 	gpu.memoryManager.get().bindToUniform(1, primaryProgram,
 		    primaryProgram.getUniform("rootBuffer"));
-	//Memory writes have been going directly to the GPU memory over PCIe so flushing isn't needed yet.
-	//If the driver misbehaves then we can go back to flushing pages.
-	//gpu.memoryManager.get().flushStalePages();
+	//Make sure memory on the GPU is sync'ed by flushing stale pages to GPU mem.
+	gpu.memoryManager.get().flushStalePages();
 	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
 	renderList.render(gl,cameraMatrixAsFlatArray);
@@ -315,8 +314,9 @@ public final class Renderer {
 	if(visibilityUpdateFuture!=null){
 	    if(!visibilityUpdateFuture.isDone()){
 		if(!mandatory){System.out.println("Renderer.updateVisibilityList() !done");return;}
-		else {visibilityUpdateFuture.get();}
+		else {}
 		}
+	    visibilityUpdateFuture.get();
 	    }//end if(visibilityUpdateFuture!=null)
 	if(!getBackRenderList().isDone())return;//Not ready.
 	visibilityUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){

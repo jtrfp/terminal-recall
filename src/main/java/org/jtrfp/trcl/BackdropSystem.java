@@ -28,9 +28,6 @@ public class BackdropSystem extends RenderableSpacePartitioningGrid{
 		super(world);
 		final TR tr = world.getTr();
 		final TextureManager tm = tr.gpu.get().textureManager.get();
-		//Backdrop
-		Model backdropModel=new Model(false,tr);
-		backdropModel.setDebugName("Backdrop model: Flat quad.");
 		TextureDescription td;
 		td = tm.getFallbackTexture();
 		overworldBackdrop = new Backdrop(tr,td);

@@ -70,6 +70,7 @@ public class ProjectileBehavior extends Behavior implements
 	    double closestDistance = Double.POSITIVE_INFINITY;
 	    List<WorldObject> possibleTargets = getParent().getTr()
 		    .getCollisionManager().getCurrentlyActiveCollisionList();
+	    synchronized(possibleTargets){
 	    for (WorldObject possibleTarget : possibleTargets) {
 		if (possibleTarget instanceof DEFObject) {
 		    DEFObject possibleDEFTarget = (DEFObject)possibleTarget;
@@ -95,7 +96,7 @@ public class ProjectileBehavior extends Behavior implements
 			}// end if(headingDelta<1)
 		    }// end if(isIgnoringProjectiles)
 		}// end if(DEFObject)
-	    }// end for(WorldObject others)
+	    }}// end for(WorldObject others)
 	    honingTarget = new WeakReference<WorldObject>(closestObject);
 	   // if(honingTarget==null){
 		getParent().getBehavior().probeForBehavior(AutoLeveling.class)

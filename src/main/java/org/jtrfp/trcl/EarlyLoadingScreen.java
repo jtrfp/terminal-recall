@@ -28,7 +28,7 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
 
     public EarlyLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
 	super(parent);
-	startupLogo = new Sprite2D(tr, .000000001, .9, .9, 
+	startupLogo = new Sprite2D(tr, .000000001, 2, 2, 
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
 			.getResourceAsStream("/TrclLogo.png")), "logoImage", false), true);
 	add(startupLogo);

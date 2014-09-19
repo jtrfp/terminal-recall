@@ -124,13 +124,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public byte get(int indexInBytes) {
-	markPageStale(indexInBytes);
 	return intrinsic[0].get(logicalIndex2PhysicalIndex(indexInBytes));
     }
 
     @Override
     public short getShort(int indexInBytes) {
-	markPageStale(indexInBytes);
 	return intrinsic[0].getShort(logicalIndex2PhysicalIndex(indexInBytes));
     }
 

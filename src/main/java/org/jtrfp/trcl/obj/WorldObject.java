@@ -45,6 +45,7 @@ public class WorldObject implements PositionedRenderable {
     protected double[]  modelOffset= new double[3];
     private final double[]positionWithOffset 
     				= new double[3];
+    private boolean	needToRecalcMatrix=true;
     private final TR 	tr;
     private boolean 	visible = true;
     private Model 	model;
@@ -114,6 +115,10 @@ public class WorldObject implements PositionedRenderable {
 	}
 	ob.setParent(this);
 	return ob;
+    }
+    
+    protected boolean recalcMatrixWithEachFrame(){
+	return false;
     }
 
     public <T> T probeForBehavior(Class<T> bC) {
@@ -294,11 +299,15 @@ public class WorldObject implements PositionedRenderable {
     }// end processPrimitiveList(...)
 
     public synchronized final void updateStateToGPU() {
-	recalculateTransRotMBuffer();
+	attemptLoop();
+	if(needToRecalcMatrix){
+	    recalculateTransRotMBuffer();
+	    needToRecalcMatrix=recalcMatrixWithEachFrame();
+	}
 	if(model!=null)model.proposeAnimationUpdate();
-    }
-
-    protected void recalculateTransRotMBuffer() {
+    }//end updateStateToGPU()
+    
+    protected void attemptLoop(){
 	if (LOOP) {
 	    double delta = position[0]
 		    - tr.renderer.get().getCamera().getCameraPosition().getX();
@@ -322,6 +331,9 @@ public class WorldObject implements PositionedRenderable {
 		position[2] += TR.mapWidth;
 	    }
 	}
+    }//end attemptLoop()
+
+    protected void recalculateTransRotMBuffer() {
 	try {
 	    Vect3D.normalize(heading, aZ);
 	    Vect3D.cross(top, aZ, aX);
@@ -373,6 +385,7 @@ public class WorldObject implements PositionedRenderable {
     public void setVisible(boolean visible) {
 	if(!this.visible && visible){
 	    this.visible = true;
+	    needToRecalcMatrix=true;
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
@@ -404,6 +417,7 @@ public class WorldObject implements PositionedRenderable {
     }// end setPosition()
     
     public synchronized WorldObject notifyPositionChange(){
+	needToRecalcMatrix=true;
 	synchronized (position) {
 	    final SpacePartitioningGrid<PositionedRenderable> 
 	    	containingGrid = getContainingGrid();
@@ -450,6 +464,7 @@ public class WorldObject implements PositionedRenderable {
 	heading[0] = nHeading.getX();
 	heading[1] = nHeading.getY();
 	heading[2] = nHeading.getZ();
+	needToRecalcMatrix=true;
     }
 
     public Vector3D getHeading() {
@@ -471,6 +486,7 @@ public class WorldObject implements PositionedRenderable {
 	top[0] = nTop.getX();
 	top[1] = nTop.getY();
 	top[2] = nTop.getZ();
+	needToRecalcMatrix=true;
     }
 
     public final ByteBuffer getOpaqueObjectDefinitionAddresses() {
@@ -541,6 +557,7 @@ public class WorldObject implements PositionedRenderable {
     public void setActive(boolean active) {
 	if(!this.active && active && isVisible()){
 	    this.active=true;
+	    needToRecalcMatrix=true;
 	    tr.renderer.get().temporarilyMakeImmediatelyVisible(this);
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override

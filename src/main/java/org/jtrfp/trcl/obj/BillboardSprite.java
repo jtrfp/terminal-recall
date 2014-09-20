@@ -62,4 +62,9 @@ public class BillboardSprite extends WorldObject{
 	public void setRotation(double angle){
 	    rotation=angle;
 	}
+	
+	@Override
+	protected boolean recalcMatrixWithEachFrame(){
+	    return true;
+	}
 }//end BillboardSprite

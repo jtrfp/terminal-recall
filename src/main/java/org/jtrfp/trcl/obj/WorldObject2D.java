@@ -77,4 +77,7 @@ public class WorldObject2D extends WorldObject{
 	public void setModel(Model m){
 	    super.setModel(m);
 	}
+	
+	@Override
+	protected void attemptLoop(){}
 }//end WorldObject2D

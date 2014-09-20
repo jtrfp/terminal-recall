@@ -146,7 +146,7 @@ public class NAVRadarBlipFactory {
 	    poolIndices[i++]=0;//reset index
 	    for(Blip blip: pool){
 		final double [] pos = blip.getPosition();
-		pos[0]=2; pos[1]=2;//TODO Putting it out of view is faster than making it invisible?!
+		pos[0]=2; pos[1]=2;blip.notifyPositionChange();
 	    }//end for(blip)
 	}//end for(pool)
     }//end clearRadarBlips()

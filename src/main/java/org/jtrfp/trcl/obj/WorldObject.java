@@ -309,28 +309,35 @@ public class WorldObject implements PositionedRenderable {
     
     protected void attemptLoop(){
 	if (LOOP) {
+	    final Vector3D camPos = tr.renderer.get().getCamera().getCameraPosition();
 	    double delta = position[0]
-		    - tr.renderer.get().getCamera().getCameraPosition().getX();
+		    - camPos.getX();
 	    if (delta > TR.mapWidth / 2.) {
 		position[0] -= TR.mapWidth;
+		needToRecalcMatrix=true;
 	    } else if (delta < -TR.mapWidth / 2.) {
 		position[0] += TR.mapWidth;
+		needToRecalcMatrix=true;
 	    }
 	    delta = position[1]
-		    - tr.renderer.get().getCamera().getCameraPosition().getY();
+		    - camPos.getY();
 	    if (delta > TR.mapWidth / 2.) {
 		position[1] -= TR.mapWidth;
+		needToRecalcMatrix=true;
 	    } else if (delta < -TR.mapWidth / 2.) {
 		position[1] += TR.mapWidth;
+		needToRecalcMatrix=true;
 	    }
 	    delta = position[2]
-		    - tr.renderer.get().getCamera().getCameraPosition().getZ();
+		    - camPos.getZ();
 	    if (delta > TR.mapWidth / 2.) {
 		position[2] -= TR.mapWidth;
+		needToRecalcMatrix=true;
 	    } else if (delta < -TR.mapWidth / 2.) {
 		position[2] += TR.mapWidth;
+		needToRecalcMatrix=true;
 	    }
-	}
+	}//end if(LOOP)
     }//end attemptLoop()
 
     protected void recalculateTransRotMBuffer() {

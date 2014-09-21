@@ -72,7 +72,6 @@ public class Mission {
 
     public Result go() {
 	System.out.println("Starting GampeplayLevel loading sequence...");
-	final HUDSystem hud = game.getHUDSystem();
 	final LoadingProgressReporter rootProgress = LoadingProgressReporter.Impl
 		.createRoot(new UpdateHandler() {
 		    @Override
@@ -153,11 +152,6 @@ public class Mission {
 		}
 	    }).get();
 	    System.out.println("\t...Done.");
-
-	    System.out.println("\t...Done.");
-	    System.out.println("Invoking JVM's garbage collector...");
-	    System.gc();
-	    System.out.println("\t...Ahh, that felt good.");
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

@@ -338,9 +338,7 @@ public class Texture implements TextureDescription {
 	    final int div = rgba.capacity() / 4;
 	    averageColor = new Color((redA / div) / 255f,
 		    (greenA / div) / 255f, (blueA / div) / 255f);
-	if(tr.getTrConfig().isUsingNewTexturing()){
 	    vqCompress(rgba);
-	}//else{registerNode(newNode);}
     }//end constructor
     
     public static ByteBuffer RGBA8FromPNG(File f) {

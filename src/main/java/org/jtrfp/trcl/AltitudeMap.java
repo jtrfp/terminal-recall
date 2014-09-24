@@ -26,8 +26,18 @@ public interface AltitudeMap {
      * @since Oct 3, 2012
      */
     public double heightAt(double x, double z);
-
+    
+    /**
+     * Returns width in height cells.
+     * @return
+     * @since Sep 23, 2014
+     */
     public double getWidth();
 
+    /**
+     * Returns map height in height cells.
+     * @return
+     * @since Sep 23, 2014
+     */
     public double getHeight();
-}
+}//end AltitudeMap

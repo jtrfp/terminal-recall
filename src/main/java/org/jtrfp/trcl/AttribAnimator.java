@@ -14,14 +14,14 @@ package org.jtrfp.trcl;
 
 
 public final class AttribAnimator implements Tickable {
-    Settable attrib;
-    Controller controller;
-    double[] frames;
+    Settable 	attrib;
+    Controller 	controller;
+    double[] 	frames;
     private final boolean loopInterpolate;
 
     public AttribAnimator(Settable attrib, Controller sequencer, double[] frames) {
 	this(attrib, sequencer, frames, true);
-    }
+    }//end constructor
 
     public AttribAnimator(Settable attrib, Controller sequencer,
 	    double[] frames, boolean loopInterpolate) {
@@ -29,16 +29,14 @@ public final class AttribAnimator implements Tickable {
 	this.attrib = attrib;
 	this.controller = sequencer;
 	this.frames = frames;
-    }
+    }//end constructor
 
     public void tick() {
 	updateAnimation();
-    }
+    }//end tick()
 
-    public void updateAnimation() {// if(!controller.isStale())return;//Not yet
-				   // ready for prime time.
+    public void updateAnimation() {
 	double frame = controller.getCurrentFrame();
-	// controller.unstale();
 	int lowFrame = (int) frame;
 	int hiFrame = (lowFrame + 1) % frames.length;
 	double interpolation = frame - (double) lowFrame;
@@ -49,16 +47,5 @@ public final class AttribAnimator implements Tickable {
 	double hI = interpolation;
 	double lI = 1. - interpolation;
 	attrib.set(frames[lowFrame] * lI + frames[hiFrame] * hI);
-    }
-    /*
-     * public static void updateAllAnimators(Object objectWithAnimators)
-     * {//Includes private fields! Field [] fields =
-     * objectWithAnimators.getClass().getDeclaredFields(); for(Field f:fields) {
-     * if(f.getType()==AttribAnimator.class) { f.setAccessible(true); try {
-     * AttribAnimator ani = (AttribAnimator)f.get(objectWithAnimators);
-     * ani.updateAnimation(); } catch(IllegalAccessException e)
-     * {e.printStackTrace();}
-     * if(Modifier.isPrivate(f.getModifiers()))f.setAccessible(false); } }//end
-     * for(fields) }//end updateAllAnimators()
-     */
+    }//end updateAnimation()
 }// end AttribAnimator

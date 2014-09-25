@@ -19,25 +19,24 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class AutoFiring extends Behavior implements AIFiringBehavior {
-    private double maxFiringDistance=TR.mapSquareSize*10;
-    private double minFiringDistance=TR.mapSquareSize*0;
-    private int lastIndexVisited=0;
-    private boolean smartFiring=false;
-    private boolean [] firingPattern = new boolean []
+public class AutoFiring extends Behavior {
+    private double 	    maxFiringDistance	= TR.mapSquareSize*10;
+    private double 	    minFiringDistance	= TR.mapSquareSize*0;
+    private int 	    lastIndexVisited	= 0;
+    private boolean 	    smartFiring	  	= false;
+    private boolean []      firingPattern = new boolean []
 	    {true,true,false,false,false,true,false,false,true,false,false,false,false};
-    private int timePerPatternEntry=400;
-    private int totalFiringPatternTimeMillis=firingPattern.length*timePerPatternEntry;
+    private int 	    timePerPatternEntry	= 400;
+    private int 	    totalFiringPatternTimeMillis=firingPattern.length*timePerPatternEntry;
     private ProjectileFiringBehavior projectileFiringBehavior;
-    private final double [] firingVector = new double[3];
-    private final double [] headingDelta = new double[3];
-    private int patternOffsetMillis=0;
-    private double maxFireVectorDeviation=1.1;
-    private boolean berzerk=false;
-    private double aimRandomness=0;
+    private final double [] firingVector  	= new double[3];
+    private final double [] headingDelta  	= new double[3];
+    private int 	    patternOffsetMillis	= 0;
+    private double 	    maxFireVectorDeviation=1.1;
+    private boolean 	    berzerk	 	= false;
+    private double 	    aimRandomness	= 0;
     @Override
     public void _tick(long timeMillis){
-	//System.out.println("AutoFiring: Tick");
 	final WorldObject thisObject = getParent();
 	final Player player = thisObject.getTr().getPlayer();
 	if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
@@ -45,12 +44,9 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 	final double [] playerPos = player.getPosition();
 	final double dist = Vect3D.distance(thisPos, playerPos);
 	if(dist<maxFiringDistance||dist>minFiringDistance){
-	    //System.out.println("AutoFiring: Within distance.");
 	    final int patIndex=(int)(((timeMillis+patternOffsetMillis)%totalFiringPatternTimeMillis)/timePerPatternEntry);
 	    if(patIndex!=lastIndexVisited){//end if(lastVisited)
-		//System.out.println("AutoFiring: New index in firing pattern.");
 		if(firingPattern[patIndex]){
-		    //System.out.println("AutoFiring: Firing pattern says yes.");
 		    Vector3D result;
 		    if(smartFiring){
 			final Vector3D playerVelocity = player.getBehavior().probeForBehavior(Velocible.class).getVelocity();
@@ -68,7 +64,6 @@ public class AutoFiring extends Behavior implements AIFiringBehavior {
 			    (Math.random()*2.-1.)*aimRandomness,
 			    (Math.random()*2.-1.)*aimRandomness,
 			    (Math.random()*2.-1.)*aimRandomness);
-		    //rand = rand.getNorm()!=0?rand.normalize():rand;
 		    result=result.add(rand).normalize();
 		    projectileFiringBehavior.requestFire(result);}}
 	    lastIndexVisited=patIndex;

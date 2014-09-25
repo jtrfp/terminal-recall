@@ -18,11 +18,13 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class AdjustAltitudeToPlayerBehavior extends Behavior {
-    private final Player player;
-    private final Cloakable playerCloakability;
-    private Vector3D DOWN=new Vector3D(0,-80000,0),UP=new Vector3D(0,80000,0);
-    private boolean reverse=false;
-    private double hysteresis = 50000;
+    private final Player 	player;
+    private final Cloakable 	playerCloakability;
+    private Vector3D 		DOWN 	   = new Vector3D(0,-80000,0),
+	    			UP	   = new Vector3D(0,80000,0);
+    private boolean 		reverse	   = false;
+    private double 		hysteresis = 50000;
+    
     public AdjustAltitudeToPlayerBehavior(Player player){
 	this.player=player;
 	this.playerCloakability=player.getBehavior().probeForBehavior(Cloakable.class);

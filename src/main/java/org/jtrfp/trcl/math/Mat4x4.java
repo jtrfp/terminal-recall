@@ -23,6 +23,27 @@ public final class Mat4x4 {
 	dest[row*4+col]=val;
 	return dest;
     }//end set(...)
+    
+    public static float [] mul4x42Vect(float [] fourXfour, float [] vect, float [] dest){
+	dest[0]=vect[0*4+0]*fourXfour[0*4+0]+
+		vect[0*4+1]*fourXfour[1*4+0]+
+		vect[0*4+2]*fourXfour[2*4+0]+
+		vect[0*4+3]*fourXfour[3*4+0];
+	dest[1]=vect[0*4+0]*fourXfour[0*4+1]+
+		vect[0*4+1]*fourXfour[1*4+1]+
+		vect[0*4+2]*fourXfour[2*4+1]+
+		vect[0*4+3]*fourXfour[3*4+1];
+	dest[2]=vect[0*4+0]*fourXfour[0*4+2]+
+		vect[0*4+1]*fourXfour[1*4+2]+
+		vect[0*4+2]*fourXfour[2*4+2]+
+		vect[0*4+3]*fourXfour[3*4+2];
+	dest[3]=vect[0*4+0]*fourXfour[0*4+3]+
+		vect[0*4+1]*fourXfour[1*4+3]+
+		vect[0*4+2]*fourXfour[2*4+3]+
+		vect[0*4+3]*fourXfour[3*4+3];
+	return dest;
+    }//end mul4x42Vect(...)
+    
     public static double [] mul(double [] l, double [] r, double [] dest){
 	//ROW 0
 	dest[0]=l[0*4+0]*r[0*4+0]+

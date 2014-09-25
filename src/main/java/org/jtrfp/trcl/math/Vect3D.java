@@ -96,5 +96,20 @@ public final class Vect3D {
 	final double dz=l[2]-r[2];
 	return Math.sqrt(dx*dx + dz*dz);
     }
+
+    public static float [] normalize(float[] val) {
+	final double norm = norm(val);
+	val[0]/=norm;
+	val[1]/=norm;
+	val[2]/=norm;
+	return val;
+    }
+
+    private static double norm(float[] val) {
+	int a=0;
+	for(float v:val)
+	    a+=v*v;
+	return Math.sqrt(a);
+    }
     
 }//end Vect3D

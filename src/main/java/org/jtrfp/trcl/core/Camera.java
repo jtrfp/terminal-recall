@@ -32,6 +32,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	private volatile  RealMatrix projectionMatrix;
 	private final	  GPU gpu;
 	private volatile  int updateDebugStateCounter;
+	private 	  RealMatrix rotationMatrix;
 
     public Camera(GPU gpu) {
 	super(gpu.getTr());
@@ -112,7 +113,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 		Vector3D aX = getUpVector().crossProduct(aZ).normalize();
 		Vector3D aY = /*aZ.crossProduct(aX)*/getUpVector();
 
-		RealMatrix rM = new Array2DRowRealMatrix(new double[][]
+		rotationMatrix = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
 				{ aX.getX(), aX.getY(), aX.getZ(), 0 }, new double[]
 				{ aY.getX(), aY.getY(), aY.getZ(), 0 }, new double[]
@@ -126,7 +127,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 				{ 0, 0, 1, -eyeLoc.getZ() }, new double[]
 				{ 0, 0, 0, 1 } });
 		
-		return cameraMatrix = getProjectionMatrix().multiply(rM.multiply(tM));
+		return cameraMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(tM));
 		}//end applyMatrix()
 	public synchronized void setViewDepth(double cameraViewDepth){
 	    	this.viewDepth=cameraViewDepth;
@@ -152,6 +153,15 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 			}//}
 		return cameraMatrix;
 		}
+	public synchronized float [] getRotationMatrixAsFlatArray(float [] dest){
+	    applyMatrix();
+	    RealMatrix rm = rotationMatrix;
+	    for(int i=0; i<16; i++){
+		dest[i]=(float)rm.getEntry(i/4, i%4);
+	    }//end for(16)
+	    return dest;
+	}// end getRotationMatrixAsFlatArray(...)
+	
 	public float [] getMatrixAsFlatArray(){
 	    final float [] result = new float[16];
 	    final RealMatrix mat = getMatrix();

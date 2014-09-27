@@ -24,7 +24,6 @@ uniform 	uint 	screenHeight;
 
 // INPUTS
 smooth in vec2 fragTexCoord;
-smooth in uint texturePageIdx;
 flat in uint flatTextureID;
 noperspective in vec2 screenLoc;
 

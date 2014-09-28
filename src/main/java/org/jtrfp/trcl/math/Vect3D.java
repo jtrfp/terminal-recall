@@ -111,5 +111,13 @@ public final class Vect3D {
 	    a+=v*v;
 	return Math.sqrt(a);
     }
+
+    public static float[] scalarMultiply(float[] src, int scalar,
+	    float[] dest) {
+	dest[0]=src[0]*scalar;
+	dest[1]=src[1]*scalar;
+	dest[2]=src[2]*scalar;
+	return dest;
+    }
     
 }//end Vect3D

@@ -25,22 +25,22 @@ public final class Mat4x4 {
     }//end set(...)
     
     public static float [] mul4x42Vect(float [] fourXfour, float [] vect, float [] dest){
-	dest[0]=vect[0*4+0]*fourXfour[0*4+0]+
-		vect[0*4+1]*fourXfour[1*4+0]+
-		vect[0*4+2]*fourXfour[2*4+0]+
-		vect[0*4+3]*fourXfour[3*4+0];
-	dest[1]=vect[0*4+0]*fourXfour[0*4+1]+
-		vect[0*4+1]*fourXfour[1*4+1]+
-		vect[0*4+2]*fourXfour[2*4+1]+
-		vect[0*4+3]*fourXfour[3*4+1];
-	dest[2]=vect[0*4+0]*fourXfour[0*4+2]+
-		vect[0*4+1]*fourXfour[1*4+2]+
-		vect[0*4+2]*fourXfour[2*4+2]+
-		vect[0*4+3]*fourXfour[3*4+2];
-	dest[3]=vect[0*4+0]*fourXfour[0*4+3]+
-		vect[0*4+1]*fourXfour[1*4+3]+
-		vect[0*4+2]*fourXfour[2*4+3]+
-		vect[0*4+3]*fourXfour[3*4+3];
+	dest[0]=vect[0]*fourXfour[0*4+0]+
+		vect[0]*fourXfour[0*4+1]+
+		vect[0]*fourXfour[0*4+2]+
+		vect[0]*fourXfour[0*4+3];
+	dest[1]=vect[1]*fourXfour[1*4+0]+
+		vect[1]*fourXfour[1*4+1]+
+		vect[1]*fourXfour[1*4+2]+
+		vect[1]*fourXfour[1*4+3];
+	dest[2]=vect[2]*fourXfour[2*4+0]+
+		vect[2]*fourXfour[2*4+1]+
+		vect[2]*fourXfour[2*4+2]+
+		vect[2]*fourXfour[2*4+3];
+	dest[3]=vect[3]*fourXfour[3*4+0]+
+		vect[3]*fourXfour[3*4+1]+
+		vect[3]*fourXfour[3*4+2]+
+		vect[3]*fourXfour[3*4+3];
 	return dest;
     }//end mul4x42Vect(...)
     

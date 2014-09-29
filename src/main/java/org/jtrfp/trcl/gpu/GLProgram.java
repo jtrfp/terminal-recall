@@ -93,8 +93,10 @@ public class GLProgram {
     private static final ValidationHandler defaultValidationHandler = new ValidationHandler() {
 	@Override
 	public void invalidProgram(GLProgram program) {
-	    System.out.println("PRIMARY PROGRAM VALIDATION FAILED:");
+	    System.out.println("PROGRAM VALIDATION FAILED:");
 	    System.out.println(program.getInfoLog());
+	    System.err.println("Trace of origin:");
+	    new Exception().printStackTrace();
 	}
     };//end anonymous class defaultValidationHandler
 

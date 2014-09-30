@@ -25,19 +25,29 @@ public class IndexPool{
 	public IndexPool(){
 	}
 		
-	public synchronized int pop()
-		{if(!freeIndices.isEmpty())
-			{return freeIndices.remove();}
+	public synchronized int pop(){
+	    	if(!freeIndices.isEmpty())
+			return removalPop();
 		else if(highestIndex+1<maxCapacity)
-			{return (++highestIndex);}
-		else//Need to allocate a new block of indices
-			{maxCapacity = growthBehavior.grow(maxCapacity);
-			return pop();//Try again.
+			return availablePop();
+		else{//Need to allocate a new block of indices
+		    	return growthPop();
 			}
 		}//end pop()
 	
-	public synchronized int free(int index)
-		{if(freeIndices.contains(index)){
+	private int removalPop()
+	    {return freeIndices.remove();}
+	
+	private int availablePop()
+	    {return (++highestIndex);}
+	
+	private int growthPop(){
+	    maxCapacity = growthBehavior.grow(maxCapacity);
+	    return pop();//Try again.
+	}//end grothPop()
+	
+	public synchronized int free(int index){
+	    	if(freeIndices.contains(index)){
 		    throw new RuntimeException("Double-release of resources: "+index);
 		}
 		    freeIndices.add(index);return index;}

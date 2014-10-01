@@ -222,7 +222,10 @@ public class WorldObject implements PositionedRenderable {
 
     @Override
     public String toString() {
-	return "WorldObject Model=" + model.getDebugName() + " pos="
+	final String modelDebugName;
+	if(model!=null)modelDebugName=model.getDebugName();
+	else modelDebugName="[null model]";
+	return "WorldObject Model=" + modelDebugName + " pos="
 		+ this.getPosition() + " class=" + getClass().getName();
     }
 

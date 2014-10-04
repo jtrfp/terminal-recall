@@ -54,8 +54,8 @@ public abstract class MemoryWindow {
 	    public int grow(int previousMaxCapacity) {
 		// Grow by one page
 		final int newSizeInObjects = previousMaxCapacity
-			+ PagedByteBuffer.PAGE_SIZE_BYTES
-			/ getObjectSizeInBytes();
+			+ (int)Math.ceil((double)PagedByteBuffer.PAGE_SIZE_BYTES
+			/ (double)getObjectSizeInBytes());
 		getBuffer().resize(newSizeInObjects * getObjectSizeInBytes());
 		MemoryWindow.this.tr.getReporter().report(
 			"org.jtrfp.trcl.mem.MemoryWindow."

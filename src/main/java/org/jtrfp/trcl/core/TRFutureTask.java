@@ -21,11 +21,11 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     public TRFutureTask(TR tr, Callable<V> callable) {
 	super(callable);
 	this.tr=tr;
-    }
+    }//end constructor
     public TRFutureTask(TR tr, Runnable runnable, V result) {
 	super(runnable,result);
 	this.tr=tr;
-    }
+    }//end constructor
     
     @Override
     public void run(){
@@ -42,6 +42,6 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
 	catch(InterruptedException e){}
 	catch(Exception e){tr.showStopper(e);}
 	return null;
-    }
+    }//end get()
     
 }//end TRFutureTask

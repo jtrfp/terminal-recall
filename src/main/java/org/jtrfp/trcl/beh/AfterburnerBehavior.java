@@ -48,22 +48,22 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	formerMax=prop.getMaxPropulsion();
 	formerProp=prop.getPropulsion();
 	newMax=formerMax*3;
-    }
+    }//end afterburnerOnTriansient(...)
+    
     private void afterburnerOffTransient(WorldObject p){
 	//TODO: De-Ignition SFX, end sustain SFX
 	Propelled prop = p.getBehavior().probeForBehavior(Propelled.class);
 	prop.setMaxPropulsion(formerMax);
 	prop.setPropulsion(formerProp);
-    }
+    }//end afterburnerOffTransient(...)
 
     @Override
     public void addSupply(double amount) {
 	fuelRemaining+=amount;
-	
-    }
+    }//end addSupply(...)
 
     @Override
     public double getSupply() {
 	return fuelRemaining;
-    }
+    }//end getSupply()
 }//end AfterburnerBehavior

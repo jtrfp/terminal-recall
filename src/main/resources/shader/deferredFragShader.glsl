@@ -23,7 +23,7 @@ uniform sampler2D 		primaryRendering;
 uniform sampler2D 		depthTexture;
 uniform sampler2D 		texturePalette;
 uniform sampler2D 		normTexture;
-uniform usampler2D 		textureIDTexture;
+uniform sampler2D 		textureIDTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform sampler2DMS		depthQueueTexture;
@@ -145,7 +145,7 @@ float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
 float 	linearDepth = linearizeDepth(depth);
 
-uint 	textureID 	= texture(textureIDTexture,screenLoc)[0u];
+uint 	textureID 	= floatBitsToUint(texture(textureIDTexture,screenLoc)[0u]);
 bool	oldTex		= textureID==960u;//Switch for old texturing mode.
 		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM

@@ -33,16 +33,23 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.math.Mat4x4;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
 
     public static final int			DEPTH_QUEUE_SIZE = 8;
+    public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;
-    			GLProgram 		primaryProgram, deferredProgram, depthQueueProgram, depthErasureProgram;
+    			GLProgram 		objectProgram,
+    						primaryProgram, 
+    						deferredProgram, 
+    						depthQueueProgram, 
+    						depthErasureProgram;
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
@@ -58,14 +65,17 @@ public final class Renderer {
     /*		*/				intermediateNormTexture,
     /*		*/				intermediateTextureIDTexture,
     /*		*/				depthQueueTexture,
-    /*		*/				depthQueueStencil;
+    /*		*/				depthQueueStencil,
+    /*					*/	objectTexture;
     private 		GLFrameBuffer 		intermediateFrameBuffer,
-    /*			*/			depthQueueFrameBuffer;
+    /*			*/			depthQueueFrameBuffer,
+    /*			*/			objectFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
-    private		float[]			cameraMatrixAsFlatArray = new float[16];
+    private		float[]			cameraMatrixAsFlatArray		= new float[16];
+    private		float[]			cameraRotationMatrixAsFlatArray = new float[16];
     private		TRFutureTask<Void>	visibilityUpdateFuture;
 
     public Renderer(final GPU gpu) {
@@ -83,12 +93,16 @@ public final class Renderer {
 		gl.glClearColor(0f, 0f, 0f, 0f);
 		
 		// VERTEX SHADERS
-		GLVertexShader		primaryVertexShader		= gpu.newVertexShader(),
+		GLVertexShader		matrixVertexShader		= gpu.newVertexShader(),
+					primaryVertexShader		= gpu.newVertexShader(),
 					fullScreenQuadVertexShader	= gpu.newVertexShader();
-		GLFragmentShader	primaryFragShader		= gpu.newFragmentShader(),
+		GLFragmentShader	matrixFragShader		= gpu.newFragmentShader(),
+					primaryFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
 					depthQueueFragShader		= gpu.newFragmentShader(),
 					erasureFragShader		= gpu.newFragmentShader();
+		matrixVertexShader	  .setSourceFromResource("/shader/objectVertexShader.glsl");
+		matrixFragShader	  .setSourceFromResource("/shader/objectFragShader.glsl");
 		primaryVertexShader	  .setSourceFromResource("/shader/vertexShader.glsl");
 		fullScreenQuadVertexShader.setSourceFromResource("/shader/fullScreenQuadVertexShader.glsl");
 		primaryFragShader	  .setSourceFromResource("/shader/fragShader.glsl");
@@ -96,11 +110,19 @@ public final class Renderer {
 		erasureFragShader	  .setSourceFromResource("/shader/erasureFragShader.glsl");
 		depthQueueFragShader	  .setSourceFromResource("/shader/depthQueueFragShader.glsl");
 		
+		objectProgram		=gpu.newProgram().attachShader(matrixFragShader)	  .attachShader(matrixVertexShader).link();
 		primaryProgram		=gpu.newProgram().attachShader(primaryVertexShader)	  .attachShader(primaryFragShader).link();
 		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(primaryVertexShader)	  .attachShader(depthQueueFragShader).link();
 		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
+		
+		primaryProgram.use();
+		primaryProgram.getUniform("objectBuffer").set((int)2);
+		
+		objectProgram.use();
+		
 		depthQueueProgram.use();
+		depthQueueProgram.getUniform("objectBuffer").set((int)2);
 		//dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
 		//dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();
@@ -119,6 +141,24 @@ public final class Renderer {
 		sunVector.set(.5774f,.5774f,.5774f);
 		final int width = tr.getRootWindow().getWidth();
 		final int height = tr.getRootWindow().getHeight();
+		/////// OBJECT
+		objectTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RGBA32F, 1024, 128, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		objectFrameBuffer = gpu
+			.newFrameBuffer()
+			.bindToDraw()
+			.attachDrawTexture(objectTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Object frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
 		/////// INTERMEDIATE
 		intermediateColorTexture = gpu
 			.newTexture()
@@ -145,8 +185,8 @@ public final class Renderer {
 		intermediateTextureIDTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_R32UI, width, height, 
-				GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null)
+			.setImage(GL3.GL_R32F, width, height, 
+				GL3.GL_RED, GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -232,16 +272,16 @@ public final class Renderer {
 	renderList[0] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
-		return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
-			    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-			    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture , tr);
+		return new RenderList(gl, objectProgram, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
+			    objectFrameBuffer, intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
+			    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture, objectTexture, tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
 	    renderList[1] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 		    @Override
 		    public RenderList call() throws Exception {
-			return new RenderList(gl, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
-				    intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-				    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture, tr);
+			return new RenderList(gl, objectProgram, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
+				    objectFrameBuffer, intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
+				    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture, objectTexture, tr);
 		    }});tr.getThreadManager().threadPool.submit(renderList[1]);
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");
@@ -271,6 +311,10 @@ public final class Renderer {
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
+    
+    private final float [] localSunVector = new float[16];
+    private final float [] globalSunVector = new float[]{.5774f,.5774f,.5774f,0f};
+    
     public void render() {
 	final GL3 gl = gpu.getGl();
 	///if (!active)
@@ -280,14 +324,14 @@ public final class Renderer {
 	if(!gpu.textureManager.get().vqCodebookManager.isDone())
 	    return;
 	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
-	//gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 	ensureInit();
 	gpu.memoryManager.get().bindToUniform(1, primaryProgram,
 		    primaryProgram.getUniform("rootBuffer"));
 	//Make sure memory on the GPU is sync'ed by flushing stale pages to GPU mem.
-	gpu.memoryManager.get().flushStalePages();
+	//gpu.memoryManager.get().flushStalePages();// Make up your #%@!& mind, Chuck...
 	if(!currentRenderList().isDone())return;
 	final RenderList renderList = currentRenderList().get();
+	deferredProgram.use();
 	renderList.render(gl,cameraMatrixAsFlatArray);
 	// Update GPU
 	cameraMatrixAsFlatArray = renderList.sendToGPU(gl);

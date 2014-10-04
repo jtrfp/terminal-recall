@@ -65,7 +65,6 @@ void main(){
  uvec4 	objectDef 		= texelFetch(rootBuffer,objectDefIndex);
  int 	matrixOffset 	= int(objectDef[0]);
  uint renderMode 		= UByte(objectDef[2],1u);
- //TODO: This will eventually apply the camera matrix to the whole object block.
  matrix		 			= mat4(
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),

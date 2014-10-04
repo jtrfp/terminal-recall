@@ -12,13 +12,20 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.ObjectListWindow;
@@ -45,22 +52,28 @@ public class RenderList {
     private 		int 			numOpaqueBlocks;
     private 		int 			numTransparentBlocks;
     private 		int 			opaqueIndex = 0, blendIndex = 0;
+    private final	int			renderListIdx;
     private		long			rootBufferReadFinishedSync;
     private 	 	GLUniform 		renderListPageTable,
-    /*    */					useTextureMap,
     /*	  */					cameraMatrixUniform,
     /*    */					rootBuffer,
     /*	  */					dqCameraMatrixUniform,
-    /*	  */					dqRenderListPageTable;
+    /*	  */					dqRenderListPageTable,
+    /*					*/	matrixRootBuffer,
+    /*					*/	objectRenderListPageTable,
+    /*					*/	objectCameraMatrix;
     private final	GLFrameBuffer		intermediateFrameBuffer,
-    						depthQueueFrameBuffer;
+    						depthQueueFrameBuffer,
+    						objectFrameBuffer;
     private final	GLTexture		intermediateDepthTexture,
     /*    	*/				intermediateColorTexture,
     /*    	*/				intermediateNormTexture,
     /*		*/				intermediateTextureIDTexture,
-    /*		*/				depthQueueTexture;
-    private final	GLProgram		depthQueueProgram;
+    /*		*/				depthQueueTexture,
+    /*		*/				objectBufferTexture;
+    private final	GLProgram		depthQueueProgram,objectProgram;
     private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
+    private final 	IntBuffer 		previousViewport;
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
@@ -81,11 +94,10 @@ public class RenderList {
 	    numOpaqueBlocks += opOD.capacity() / 4;
 	    numTransparentBlocks += trOD.capacity() / 4;
 	    
-	    tr.objectListWindow.get().opaqueIDs.set(0, opaqueIndex, opOD);
+	    tr.objectListWindow.get().opaqueIDs.set(renderListIdx, opaqueIndex, opOD);//TODO: Shouldn't this have its own index and not zero?
 	    opaqueIndex += opOD.capacity();
-	    tr.objectListWindow.get().blendIDs.set(0, blendIndex, trOD);
+	    tr.objectListWindow.get().blendIDs.set(renderListIdx, blendIndex, trOD);
 	    blendIndex += trOD.capacity();
-	    
 	}// end submit(...)
 
 	@Override
@@ -96,24 +108,29 @@ public class RenderList {
 	}//end submit(...)
     };
 
-    public RenderList(final GL3 gl,final GLProgram primaryProgram,
+    public RenderList(final GL3 gl,final GLProgram objectProgram, final GLProgram primaryProgram,
 	    final GLProgram deferredProgram, final GLProgram depthQueueProgram, 
-	    final GLFrameBuffer intermediateFrameBuffer, 
+	    final GLFrameBuffer intermediateFrameBuffer, GLFrameBuffer objectFrameBuffer,
 	    final GLTexture intermediateColorTexture, final GLTexture intermediateDepthTexture,
 	    final GLTexture intermediateNormTexture, final GLTexture intermediateTextureIDTexture,
 	    final GLFrameBuffer depthQueueFrameBuffer, final GLTexture depthQueueTexture,
-	    final TR tr) {
+	    final GLTexture objectBufferTexture, final TR tr) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
 	this.tr = tr;
-	this.intermediateColorTexture=intermediateColorTexture;
-	this.intermediateDepthTexture=intermediateDepthTexture;
-	this.intermediateFrameBuffer=intermediateFrameBuffer;
-	this.intermediateNormTexture=intermediateNormTexture;
+	this.objectProgram		=objectProgram;
+	this.intermediateColorTexture	=intermediateColorTexture;
+	this.intermediateDepthTexture	=intermediateDepthTexture;
+	this.intermediateFrameBuffer	=intermediateFrameBuffer;
+	this.intermediateNormTexture	=intermediateNormTexture;
 	this.intermediateTextureIDTexture=intermediateTextureIDTexture;
-	this.depthQueueFrameBuffer=depthQueueFrameBuffer;
-	this.depthQueueProgram=depthQueueProgram;
-	this.depthQueueTexture=depthQueueTexture;
+	this.depthQueueFrameBuffer	=depthQueueFrameBuffer;
+	this.depthQueueProgram		=depthQueueProgram;
+	this.depthQueueTexture		=depthQueueTexture;
+	this.objectFrameBuffer		=objectFrameBuffer;
+	this.objectBufferTexture	=objectBufferTexture;
+	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
+	this.renderListIdx		=tr.objectListWindow.get().create();
 	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -126,37 +143,47 @@ public class RenderList {
 		gl.glVertexAttribPointer(0, 1, GL3.GL_BYTE, false, 0, 0);
 		renderListPageTable = primaryProgram.getUniform("renderListPageTable");
 		dqRenderListPageTable = depthQueueProgram.getUniform("renderListPageTable");
-		useTextureMap = primaryProgram.getUniform("useTextureMap");
-		cameraMatrixUniform = primaryProgram.getUniform("cameraMatrix");
-		dqCameraMatrixUniform = depthQueueProgram.getUniform("cameraMatrix");
+		objectRenderListPageTable = objectProgram.getUniform("renderListPageTable");
+		//cameraMatrixUniform = primaryProgram.getUniform("cameraMatrix");
+		//dqCameraMatrixUniform = depthQueueProgram.getUniform("cameraMatrix");
+		objectCameraMatrix = objectProgram.getUniform("cameraMatrix");
 		
 		rootBuffer = deferredProgram.getUniform("rootBuffer");
+		//matrixRootBuffer = objectProgram.getUniform("rootBuffer");
 		return null;
 	    }
 	});//end task0
 	
-	hostRenderListPageTable = new int[ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
-		* RenderList.NUM_RENDER_PASSES
-		/ PagedByteBuffer.PAGE_SIZE_BYTES];
+	hostRenderListPageTable = new int[((ObjectListWindow.OBJECT_LIST_SIZE_BYTES_PER_PASS
+		* RenderList.NUM_RENDER_PASSES)
+		/ PagedByteBuffer.PAGE_SIZE_BYTES)*3];
 	
-	final ObjectListWindow olWindow = RenderList.this.tr
-		    .objectListWindow.get();
-	final Renderer renderer = tr.renderer.get();
 	task0.get();
 	tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		for (int i = 0; i < hostRenderListPageTable.length; i++) {
-		    hostRenderListPageTable[i] = olWindow.logicalPage2PhysicalPage(i);
-		}// end for(hostRenderListPageTable.length)
-		depthQueueProgram.use();
-		dqRenderListPageTable.setArrayui(hostRenderListPageTable);
-		renderer.getPrimaryProgram().use();
-		renderListPageTable.setArrayui(hostRenderListPageTable);
+		//sendRenderListPageTable();
 		return null;
 	    }
 	}).get();
     }// end constructor
+    
+    private void sendRenderListPageTable(){
+	final ObjectListWindow olWindow = RenderList.this.tr
+		    .objectListWindow.get();
+	final Renderer renderer = tr.renderer.get();
+	final int size = olWindow.numPages();
+	for (int i = 0; i < size; i++) {
+	    hostRenderListPageTable[i] = olWindow.logicalPage2PhysicalPage(i);
+	}// end for(hostRenderListPageTable.length)
+	objectProgram.use();
+	objectRenderListPageTable.setArrayui(hostRenderListPageTable);
+	depthQueueProgram.use();
+	dqRenderListPageTable.setArrayui(hostRenderListPageTable);
+	renderer.getPrimaryProgram().use();
+	renderListPageTable.setArrayui(hostRenderListPageTable);
+	sentPageTable=true;
+    }
 
     private static int frameCounter = 0;
 
@@ -176,12 +203,56 @@ public class RenderList {
 	return updateStatesToGPU();
     }//end sendToGPU
     
+    private boolean sentPageTable=false;
+    
     public void render(final GL3 gl, final float[] cameraMatrixAsFlatArray) {
-	// OPAQUE STAGE
+	if(!sentPageTable)sendRenderListPageTable();
+	final ObjectListWindow olWindow = tr.objectListWindow.get();
+	final int renderListLogicalVec4Offset = ((olWindow.getObjectSizeInBytes()*renderListIdx)/16);
+	objectProgram.use();
+	objectProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
+	gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
+	objectCameraMatrix.set4x4Matrix(cameraMatrixAsFlatArray, true);
+	objectFrameBuffer.bindToDraw();
+	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
+	gl.glViewport(0, 0, 1024, 128);
+	tr.gpu.get().memoryManager.get().bindToUniform(4, objectProgram,
+		objectProgram.getUniform("rootBuffer"));
+	gl.glDepthMask(false);
+	gl.glDisable(GL3.GL_BLEND);
+	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_CULL_FACE);
+	
+	int numRows = (int)Math.ceil(numOpaqueBlocks/256.);
+	int remainingBlocks = numOpaqueBlocks;
+	for(int i=0; i<numRows; i++){
+	    gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
+	    remainingBlocks -= 256;
+	}
+	
+	final int rowOffset = NUM_BLOCKS_PER_PASS/256;
+	final int vtxOffset = rowOffset*257;
+	numRows = (int)Math.ceil(numTransparentBlocks/256.);
+	remainingBlocks = numTransparentBlocks;
+	for(int i=0; i<numRows; i++){
+	    gl.glDrawArrays(GL3.GL_LINE_STRIP, vtxOffset+i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
+	    remainingBlocks -= 256;
+	}
+	
+	///////////////////
+	gl.glViewport(
+		previousViewport.get(0), 
+		previousViewport.get(1), 
+		previousViewport.get(2), 
+		previousViewport.get(3));//Cleanup
+	gl.glDepthMask(true);
+	// OPAQUE.DRAW STAGE
 	tr.renderer.get().getPrimaryProgram().use();
+	tr.renderer.get().getPrimaryProgram().getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	//final float [] matrixAsFlatArray = tr.renderer.get().getCamera().getMatrixAsFlatArray();
-	cameraMatrixUniform	.set4x4Matrix(cameraMatrixAsFlatArray,true);
-	useTextureMap		.set((int)0);
+	GLTexture.specifyTextureUnit(gl, 2);
+	objectBufferTexture.bind(gl);
+	//cameraMatrixUniform	.set4x4Matrix(cameraMatrixAsFlatArray,true);
 	intermediateFrameBuffer	.bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -225,14 +296,17 @@ public class RenderList {
 	gl.glDepthFunc(GL3.GL_ALWAYS);
 	// DRAW
 	depthQueueProgram.use();
+	depthQueueProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	gl.glDisable(GL3.GL_MULTISAMPLE);
 	gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
 	gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
 	gl.glSampleMaski(0, 0xFF);
 	GLTexture.specifyTextureUnit(gl, 0);
 	intermediateDepthTexture.bind(gl);
-	dqCameraMatrixUniform.set4x4Matrix(
-		cameraMatrixAsFlatArray, true);
+	GLTexture.specifyTextureUnit(gl, 2);
+	objectBufferTexture.bind(gl);
+	/*dqCameraMatrixUniform.set4x4Matrix(
+		cameraMatrixAsFlatArray, true);*/
 	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);

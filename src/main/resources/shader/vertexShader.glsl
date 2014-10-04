@@ -27,13 +27,15 @@ const uint PAGE_SIZE_VEC4			=96u;
 //OUT
 smooth out vec2 		fragTexCoord;
 smooth out vec3 		norm;
-flat out uint 			flatTextureID;
+flat out float 			flatTextureID;
 noperspective out vec2	screenLoc;
 
 //IN
-uniform uint 			renderListPageTable[85];
+uniform uint 			renderListPageTable[172];
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform mat4 			cameraMatrix;
+uniform sampler2D		objectBuffer;
+uniform uint			logicalVec4Offset;
 
 layout (location = 0) in float dummy;
 
@@ -88,7 +90,8 @@ int firstSShort(uint _input){
 	return result;
 	}
 
-int renderListLogicalVEC42PhysicalVEC4(uint logical){
+int renderListLogicalVEC42PhysicalVEC4(uint _logical){
+	uint logical = _logical + logicalVec4Offset;
 	return int(renderListPageTable
 		[logical/PAGE_SIZE_VEC4]*PAGE_SIZE_VEC4
 		+logical%PAGE_SIZE_VEC4);
@@ -126,24 +129,31 @@ gl_Position.x=dummy*0;
 			int matrixOffset 	= int(objectDef[0]);
 			int vertexOffset 	= int(objectDef[1]);
 			int modelScalar 	= int(UByte(objectDef[2],2u))-16;//Numerical domain offset for negatives
-			mat4 matrix 		= mat4(uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),
+			mat4 matrixNoCam 	= mat4(uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),
 										uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+2)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
+			ivec2 mOff			= ivec2((objectIndex%256)*4,127-(objectIndex/256));
+			//mOff 				= ivec2(1,0);
+			mat4 matrix			= mat4(
+								texelFetch(objectBuffer,mOff,0),
+								texelFetch(objectBuffer,mOff+ivec2(1,0),0),
+								texelFetch(objectBuffer,mOff+ivec2(2,0),0),
+								texelFetch(objectBuffer,mOff+ivec2(3,0),0));
 			// objectDef[3] unused.
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
-			flatTextureID 			= PAGE_SIZE_VEC4 * (UByte(packedVertex[3u],1u) | (UByte(packedVertex[3u],2u) << 8u ) | (UByte(packedVertex[3u],3u) << 16u));
+			flatTextureID 			= uintBitsToFloat(PAGE_SIZE_VEC4 * (UByte(packedVertex[3u],1u) | (UByte(packedVertex[3u],2u) << 8u ) | (UByte(packedVertex[3u],3u) << 16u)));
 			vec4 	vertexCoord;
 			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
 												float(firstSShort(packedVertex[1])));
 			vertexCoord.w=1;
     		fragTexCoord 			= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
-    		gl_Position 			= UNibble(renderMode,1u)==0u?cameraMatrix * matrix * vertexCoord:matrix * vertexCoord;
+    		gl_Position 			= /*UNibble(renderMode,1u)==0u?cameraMatrix * matrix * vertexCoord:*/matrix * vertexCoord;
 			 screenLoc				= (((gl_Position.xy/gl_Position.w)+1)/2);
 			
     		float normX 			= float(SByte(packedVertex[1],2u))/128;
 			float normY 			= float(SByte(packedVertex[1],3u))/128;
 			float normZ 			= float(SByte(packedVertex[3],0u))/128;
 						//Crunch this into [0,1] domain
-			norm 					= ((matrix*vec4(normX,normY,normZ,0)).xyz+1)/2;
+			norm 					= ((matrixNoCam*vec4(normX,normY,normZ,0)).xyz+1)/2;
     		}//end if(object)
 }//end main()

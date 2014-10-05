@@ -58,16 +58,18 @@ public class Mission {
     private int			totalNumTunnels;
     private final LinkedList<Tunnel>
     				tunnelsRemaining = new LinkedList<Tunnel>();
+    private final boolean	showIntro;
 
     private enum LoadingStages {
 	navs, tunnels, overworld
     }// end LoadingStages
     
-    public Mission(TR tr, Game game, LVLFile lvl, String levelName) {
+    public Mission(TR tr, Game game, LVLFile lvl, String levelName, boolean showIntro) {
 	this.tr 	= tr;
 	this.lvl 	= lvl;
 	this.game 	= game;
 	this.levelName 	= levelName;
+	this.showIntro	= showIntro;
     }// end Mission
 
     public Result go() {
@@ -174,7 +176,8 @@ public class Mission {
 	game.getUpfrontDisplay().removePersistentMessage();
 	game.getBackdropSystem().overworldMode();
 	game.getBackdropSystem().activate();
-	game.getBriefingScreen().briefingSequence(lvl);
+	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
+	getOverworldSystem().activate();
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
 	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);

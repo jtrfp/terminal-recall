@@ -10,9 +10,18 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
+
 package org.jtrfp.trcl.core;
 
-public interface TRFuture<V> {
-    public V get();
-    public V getRealtime() throws NotReadyException;
-}//end TRFuture
+public class NotReadyException extends Exception {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3968251093605098038L;
+
+    public NotReadyException(){
+	super();
+    }//end constructor
+
+}//end NotReadyException
+

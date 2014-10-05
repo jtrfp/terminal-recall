@@ -33,6 +33,13 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
 	catch(Exception e)
 	 {tr.showStopper(e);}
     }//end run()
+    
+    @Override
+    public V getRealtime() throws NotReadyException{
+	if(!this.isDone())
+	    throw new NotReadyException();
+	return get();
+    }//end getRealtime()
 
     @Override
     public V get() {

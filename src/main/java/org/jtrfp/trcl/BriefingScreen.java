@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
@@ -25,6 +26,7 @@ import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.core.Camera;
+import org.jtrfp.trcl.core.LazyTRFuture;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
@@ -50,11 +52,13 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private final int		  NUM_LINES=10;
     private final int		  WIDTH_CHARS=36;
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
-    private TXTMissionBriefFile missionTXT;
+    //private TXTMissionBriefFile missionTXT;
     private ColorPaletteVectorList palette;
     private LVLFile		lvl;
     private TimerTask	  scrollTimer;
     private WorldObject	  planetObject;
+    
+    private final LazyTRFuture<TXTMissionBriefFile> missionTXT;
 
     public BriefingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
 	super(parent);
@@ -77,6 +81,13 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	blackRectangle.setPosition(0, -.7, Z*300);
 	blackRectangle.setVisible(true);
 	blackRectangle.setActive(true);
+	
+	missionTXT = new LazyTRFuture<TXTMissionBriefFile>(tr,new Callable<TXTMissionBriefFile>(){
+	    @Override
+	    public TXTMissionBriefFile call(){
+		return tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
+	    }//end call()
+	});
     }//end constructor
 
     protected void notifyScrollFinishCallbacks() {
@@ -132,9 +143,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    planetObject=null;
 	}
 	try{
+	 
 	 final Model planetModel = rm.getBINModel(
-		 missionTXT.getPlanetModelFile(),
-		 rm.getRAWAsTexture(missionTXT.getPlanetTextureFile(), 
+		 missionTXT.get().getPlanetModelFile(),
+		 rm.getRAWAsTexture(missionTXT.get().getPlanetTextureFile(), 
 			 getPalette(), false, true),
 		 8,false,getPalette());
 	 	     planetObject = new WorldObject(tr,planetModel);
@@ -155,6 +167,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     public void missionCompleteSummary(LVLFile lvl, Result r){
 	final Game   game 	 = tr.getGame();
 	game.getPlayer().setActive(false);
+	briefingChars.setScrollPosition(NUM_LINES-2);
 	setContent("Air targets destroyed: "+r.getAirTargetsDestroyed()+
 		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
@@ -162,6 +175,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	game.getCurrentMission().getOverworldSystem().activate();
 	tr.getWorld().setFogColor(Color.black);
 	planetDisplayMode(lvl);
+	briefingChars.activate();
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.renderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
@@ -175,11 +189,12 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.renderer.get().getCamera();
-	missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
+	//missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
+	missionTXT.reset();
 	game.getPlayer().setActive(false);
 	planetDisplayMode(lvl);
 	setContent(
-		missionTXT.getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
+		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
 	game.getCurrentMission().getOverworldSystem().activate();
 	tr.getWorld().setFogColor(Color.black);
 	startScroll();

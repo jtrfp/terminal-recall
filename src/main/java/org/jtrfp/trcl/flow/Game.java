@@ -299,7 +299,7 @@ public class Game {
 		    MissionLevel lvl = levels[getLevelIndex()];
 		    final String lvlFileName = lvl.getLvlFile();
 		    currentMission = new Mission(tr, this, tr.getResourceManager()
-			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')));
+			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')),getLevelIndex()%3==0);
 		    System.out.println("Invoking JVM's garbage collector...");
 		    TR.nuclearGC();
 		    System.out.println("...Done.");

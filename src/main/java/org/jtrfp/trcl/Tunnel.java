@@ -68,7 +68,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     private final LoadingProgressReporter  tunnelAssemblyReporter;
 
     public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
-	    TR.mapSquareSize * 15, TR.mapSquareSize);
+	    TR.mapSquareSize * 5, TR.mapSquareSize*15);
     public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(
 	    new Vector3D(1, 0, 0), new Vector3D(0, 1, 0));
     public static final Vector3D TUNNEL_OBJECT_POS_OFFSET = new Vector3D(0, 0,

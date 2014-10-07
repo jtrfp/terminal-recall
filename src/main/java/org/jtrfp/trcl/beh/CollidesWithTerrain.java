@@ -46,6 +46,8 @@ public class CollidesWithTerrain extends Behavior {
 		getOverworldSystem().
 		getAltitudeMap();
 	}catch(NullPointerException e){return;}
+	if(tr.getGame().getCurrentMission().getOverworldSystem().isTunnelMode())
+	    return;//No terrain to collide with while in tunnel mode.
 	if(aMap==null)return;
 	final double[] thisPos = p.getPosition();
 	final double groundHeightNorm = aMap.heightAt(

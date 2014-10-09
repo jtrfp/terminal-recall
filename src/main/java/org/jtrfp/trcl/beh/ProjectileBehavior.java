@@ -76,7 +76,7 @@ public class ProjectileBehavior extends Behavior implements
 		    DEFObject possibleDEFTarget = (DEFObject)possibleTarget;
 		    if (!possibleDEFTarget.isIgnoringProjectiles() && !possibleDEFTarget.isRuin()) {
 			final Vector3D targetPos = new Vector3D(
-				possibleTarget.getPosition());
+				possibleTarget.getPositionWithOffset());
 			final Vector3D delta = targetPos.subtract(new Vector3D(
 				getParent().getPosition()));
 			final double dist = delta.getNorm();

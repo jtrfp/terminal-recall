@@ -19,10 +19,11 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject extends Behavior{
+public class DamagedByCollisionWithGameplayObject extends Behavior implements CollisionBehavior{
     private final double MAX_SPEED=70000;
     private final int MIN_FRAGS=6;
-	protected void _proposeCollision(WorldObject other){
+    	@Override
+	public void proposeCollision(WorldObject other){
 	    	final WorldObject p = getParent();
 	    	final double distance = Vect3D.distance(other.getPosition(),p.getPosition());
 		if(distance<CollisionManager.SHIP_COLLISION_DISTANCE)

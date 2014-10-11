@@ -184,10 +184,10 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 		    setSmartFiring(false).
 		    setMaxFireVectorDeviation(.3).
 		    setTimePerPatternEntry(2000));
-	    addBehavior(new Bobbing().
+	    /*addBehavior(new Bobbing().
 		    setPhase(Math.random()).
 		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000).
-		    setAdditionalHeight(0));
+		    setAdditionalHeight(0));*/ //Conflicts with TunnelRailed
 	    mobile=false;
 	    break;}
     	case takeoffAndEscape:
@@ -373,7 +373,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     //Position Limit
      {final PositionLimit posLimit = new PositionLimit();
      posLimit.getPositionMaxima()[1]=TR.mapSquareSize*10;
-     posLimit.getPositionMinima()[1]=-TR.mapSquareSize;
+     posLimit.getPositionMinima()[1]=-TR.mapSquareSize*10;
      addBehavior(posLimit);}
     
     if(groundLocked)

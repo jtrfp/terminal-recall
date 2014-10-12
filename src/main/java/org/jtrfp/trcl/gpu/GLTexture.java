@@ -153,6 +153,12 @@ public final class GLTexture {
 	gl.glBindTexture(bindingTarget, getTextureID());
 	return this;
     }
+    
+    public GLTexture bindToTextureUnit(int unitNumber, GL3 gl){
+	GLTexture.specifyTextureUnit(gl, unitNumber);
+	bind(gl);
+	return this;
+    }
 
     public int getCurrentSideLength() {
 	return rawSideLength;

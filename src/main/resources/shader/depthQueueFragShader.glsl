@@ -18,7 +18,7 @@
 #version 330
 
 // UNIFORMS
-uniform		sampler2D	depthTexture; // Texture unit 0
+uniform		sampler2D	depthTexture;
 uniform 	uint 	screenWidth;
 uniform 	uint 	screenHeight;
 
@@ -31,7 +31,6 @@ noperspective in vec2 screenLoc;
 layout(location=0) out vec4 pushToDepthQueue;
 
 void main(){
-//vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 if(gl_FragCoord.z>depth)discard;
 pushToDepthQueue = vec4(fragTexCoord,flatTextureID,gl_FragCoord.z);

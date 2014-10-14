@@ -33,8 +33,6 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.math.Mat4x4;
-import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -272,16 +270,12 @@ public final class Renderer {
 	renderList[0] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
-		return new RenderList(gl, objectProgram, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
-			    objectFrameBuffer, intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-			    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture, objectTexture, tr);
+		return new RenderList(gl, Renderer.this, tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
 	    renderList[1] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 		    @Override
 		    public RenderList call() throws Exception {
-			return new RenderList(gl, objectProgram, primaryProgram,deferredProgram, depthQueueProgram, intermediateFrameBuffer, 
-				    objectFrameBuffer, intermediateColorTexture,intermediateDepthTexture, intermediateNormTexture, 
-				    intermediateTextureIDTexture, depthQueueFrameBuffer, depthQueueTexture, objectTexture, tr);
+			return new RenderList(gl,Renderer.this, tr);
 		    }});tr.getThreadManager().threadPool.submit(renderList[1]);
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");
@@ -460,5 +454,96 @@ public final class Renderer {
      */
     protected boolean isBackfaceCulling() {
         return backfaceCulling;
+    }
+
+    /**
+     * @return the objectProgram
+     */
+    public GLProgram getObjectProgram() {
+        return objectProgram;
+    }
+
+    /**
+     * @return the depthQueueProgram
+     */
+    public GLProgram getDepthQueueProgram() {
+        return depthQueueProgram;
+    }
+
+    /**
+     * @return the depthErasureProgram
+     */
+    public GLProgram getDepthErasureProgram() {
+        return depthErasureProgram;
+    }
+
+    /**
+     * @return the depthQueueTexture
+     */
+    public GLTexture getDepthQueueTexture() {
+        return depthQueueTexture;
+    }
+
+    /**
+     * @return the depthQueueStencil
+     */
+    public GLTexture getDepthQueueStencil() {
+        return depthQueueStencil;
+    }
+
+    /**
+     * @return the objectTexture
+     */
+    public GLTexture getObjectTexture() {
+        return objectTexture;
+    }
+
+    /**
+     * @return the depthQueueFrameBuffer
+     */
+    public GLFrameBuffer getDepthQueueFrameBuffer() {
+        return depthQueueFrameBuffer;
+    }
+
+    /**
+     * @return the objectFrameBuffer
+     */
+    public GLFrameBuffer getObjectFrameBuffer() {
+        return objectFrameBuffer;
+    }
+
+    /**
+     * @return the intermediateFrameBuffer
+     */
+    public GLFrameBuffer getIntermediateFrameBuffer() {
+        return intermediateFrameBuffer;
+    }
+
+    /**
+     * @return the intermediateColorTexture
+     */
+    public GLTexture getIntermediateColorTexture() {
+        return intermediateColorTexture;
+    }
+
+    /**
+     * @return the intermediateDepthTexture
+     */
+    public GLTexture getIntermediateDepthTexture() {
+        return intermediateDepthTexture;
+    }
+
+    /**
+     * @return the intermediateNormTexture
+     */
+    public GLTexture getIntermediateNormTexture() {
+        return intermediateNormTexture;
+    }
+
+    /**
+     * @return the intermediateTextureIDTexture
+     */
+    public GLTexture getIntermediateTextureIDTexture() {
+        return intermediateTextureIDTexture;
     }
 }//end Renderer

@@ -26,7 +26,7 @@ const uint PAGE_SIZE_VEC4			=96u;
 
 //OUT
 smooth out vec2 		fragTexCoord;
-smooth out vec3 		norm;
+smooth out vec3 		fragNormal;
 flat out float 			flatTextureID;
 noperspective out vec2	screenLoc;
 
@@ -108,9 +108,9 @@ int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 
 /*Triangle Vertex VEC4
 	uint short x,y // XYZ Scaled by COORD_DOWNSCALER
-	uint short z, byte normX, byte normY
+	uint short z, byte fragNormalX, byte fragNormalY
 	uint short u,v // scaled by 4096
-	uint byte normZ, textureIDlo, textureIDmid, textureIDhi // 3 bytes unused
+	uint byte fragNormalZ, textureIDlo, textureIDmid, textureIDhi // 3 bytes unused
 */
 
 /////////////// MAIN ////////////////////////
@@ -150,10 +150,10 @@ gl_Position.x=dummy*0;
     		gl_Position 			= /*UNibble(renderMode,1u)==0u?cameraMatrix * matrix * vertexCoord:*/matrix * vertexCoord;
 			 screenLoc				= (((gl_Position.xy/gl_Position.w)+1)/2);
 			
-    		float normX 			= float(SByte(packedVertex[1],2u))/128;
-			float normY 			= float(SByte(packedVertex[1],3u))/128;
-			float normZ 			= float(SByte(packedVertex[3],0u))/128;
+    		float fragNormalX 			= float(SByte(packedVertex[1],2u))/128;
+			float fragNormalY 			= float(SByte(packedVertex[1],3u))/128;
+			float fragNormalZ 			= float(SByte(packedVertex[3],0u))/128;
 						//Crunch this into [0,1] domain
-			norm 					= ((matrixNoCam*vec4(normX,normY,normZ,0)).xyz+1)/2;
+			fragNormal 					= ((matrixNoCam*vec4(fragNormalX,fragNormalY,fragNormalZ,0)).xyz+1)/2;
     		}//end if(object)
 }//end main()

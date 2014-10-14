@@ -23,28 +23,23 @@ uniform sampler2D	texturePalette;
 uniform int			useTextureMap;
 
 // INPUTS
-smooth in vec2 		fragTexCoord;
-smooth in vec3 		norm;
-flat in float 		flatTextureID;
+smooth in vec2 fragTexCoord;
+smooth in vec3 fragNormal;
+flat in float  flatTextureID;
 
 // OUTPUTS
-layout(location = 0) out vec2 fragColor;
-layout(location = 1) out vec3 fragNormal;
+layout(location = 0) out vec2  fragTexCoordOut;
+layout(location = 1) out vec3  fragNormalOut;
 layout(location = 2) out float textureID;
 
 uint bit(uint _input, uint index)
 	{return (_input >> index) & 0x00000001u;}
 
-float alphaFromProximity(vec3 clearColor, vec3 testColor, float sharpness){
-	vec3 delta = vec3(1,1,1)-abs(clearColor-testColor);
-	return 1-pow(delta.r*delta.g*delta.b,sharpness);
-	}
-
 uint UNibble(uint _input, uint index)
 	{return (_input >> 4u*index) & 0x0000000Fu;}
 
 void main(){
-fragColor.rg = fragTexCoord;
-textureID	 = flatTextureID;
-fragNormal	 = norm;//Pass it along
+fragTexCoordOut.rg = fragTexCoord;
+textureID	       = flatTextureID;
+fragNormalOut      = fragNormal;//Pass it along
 }//end main()

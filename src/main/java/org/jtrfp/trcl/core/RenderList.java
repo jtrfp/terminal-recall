@@ -12,11 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -25,15 +20,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLTexture;
-import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -213,10 +205,10 @@ public class RenderList {
 	
 	gl.glDepthMask(true);
 	// OPAQUE.DRAW STAGE
-	tr.renderer.get().getPrimaryProgram().use();
-	tr.renderer.get().getPrimaryProgram().getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
-	GLTexture.specifyTextureUnit(gl, 2);
-	renderer.getObjectTexture().bind(gl);
+	final GLProgram primaryProgram = tr.renderer.get().getPrimaryProgram();
+	primaryProgram.use();
+	primaryProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
+	renderer.getObjectTexture().bindToTextureUnit(2,gl);
 	renderer.getIntermediateFrameBuffer().bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -267,10 +259,8 @@ public class RenderList {
 	gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
 	gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
 	gl.glSampleMaski(0, 0xFF);
-	GLTexture.specifyTextureUnit(gl, 0);
-	renderer.getIntermediateDepthTexture().bind(gl);
-	GLTexture.specifyTextureUnit(gl, 2);
-	renderer.getObjectTexture().bind(gl);
+	renderer.getIntermediateDepthTexture().bindToTextureUnit(0,gl);
+	renderer.getObjectTexture().bindToTextureUnit(2,gl);
 	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
@@ -290,20 +280,14 @@ public class RenderList {
 	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
-	GLTexture.specifyTextureUnit(gl, 1);
-	renderer.getIntermediateColorTexture().bind(gl);
-	GLTexture.specifyTextureUnit(gl, 2);
-	renderer.getIntermediateDepthTexture().bind(gl);
-	GLTexture.specifyTextureUnit(gl, 3);
-	renderer.getIntermediateNormTexture().bind(gl);
+	renderer.getIntermediateColorTexture().bindToTextureUnit(1,gl);
+	renderer.getIntermediateDepthTexture().bindToTextureUnit(2,gl);
+	renderer.getIntermediateNormTexture().bindToTextureUnit(3,gl);
 	tr.gpu.get().memoryManager.get().bindToUniform(4, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
-	GLTexture.specifyTextureUnit(gl, 5);
-	tr.gpu.get().textureManager.get().vqCodebookManager.get().getRGBATexture().bind();
-	GLTexture.specifyTextureUnit(gl, 6);
-	renderer.getIntermediateTextureIDTexture().bind();
-	GLTexture.specifyTextureUnit(gl, 7);
-	renderer.getDepthQueueTexture().bind();
+	tr.gpu.get().textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(5,gl);
+	renderer.getIntermediateTextureIDTexture().bindToTextureUnit(6,gl);
+	renderer.getDepthQueueTexture().bindToTextureUnit(7,gl);
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	

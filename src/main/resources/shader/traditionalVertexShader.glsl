@@ -35,6 +35,7 @@ uniform uint 			renderListPageTable[172];
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform mat4 			cameraMatrix;
 uniform sampler2D		objectBuffer;
+uniform sampler2D		xyBuffer;
 uniform uint			logicalVec4Offset;
 
 layout (location = 0) in float dummy;
@@ -147,7 +148,9 @@ gl_Position.x=dummy*0;
 												float(firstSShort(packedVertex[1])));
 			vertexCoord.w=1;
     		fragTexCoord 			= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
-    		gl_Position 			= /*UNibble(renderMode,1u)==0u?cameraMatrix * matrix * vertexCoord:*/matrix * vertexCoord;
+    		gl_Position 			= matrix * vertexCoord;
+    		ivec2 fetchPos			= ivec2(gl_VertexID%1024,gl_VertexID/1024);
+    		gl_Position.xy			= texelFetch(xyBuffer,fetchPos,0).xy;
 			 screenLoc				= (((gl_Position.xy/gl_Position.w)+1)/2);
 			
     		float fragNormalX 			= float(SByte(packedVertex[1],2u))/128;

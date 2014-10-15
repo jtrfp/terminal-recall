@@ -135,6 +135,9 @@ public class RenderList {
 	final GLProgram primaryProgram = renderer.getOpaqueProgram();
 	primaryProgram.use();
 	primaryProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
+	final GLProgram vertexProgram = renderer.getVertexProgram();
+	vertexProgram.use();
+	vertexProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
 	sentPageTable=true;
     }
 
@@ -170,6 +173,8 @@ public class RenderList {
 	if(!sentPageTable)sendRenderListPageTable();
 	final ObjectListWindow olWindow = tr.objectListWindow.get();
 	final int renderListLogicalVec4Offset = ((olWindow.getObjectSizeInBytes()*renderListIdx)/16);
+	
+	// OBJECT STAGE
 	final GLProgram objectProgram = renderer.getObjectProgram();
 	objectProgram.use();
 	objectProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
@@ -178,7 +183,7 @@ public class RenderList {
 	renderer.getObjectFrameBuffer().bindToDraw();
 	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
 	gl.glViewport(0, 0, 1024, 128);
-	tr.gpu.get().memoryManager.get().bindToUniform(4, objectProgram,
+	tr.gpu.get().memoryManager.get().bindToUniform(0, objectProgram,
 		objectProgram.getUniform("rootBuffer"));
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_BLEND);
@@ -201,6 +206,23 @@ public class RenderList {
 	    remainingBlocks -= 256;
 	}
 	
+	///// VERTEX STAGE
+	final GLProgram vertexProgram = renderer.getVertexProgram();
+	vertexProgram.use();
+	renderer.getVertexFrameBuffer().bindToDraw();
+	vertexProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
+	tr.gpu.get().memoryManager.get().bindToUniform(0, vertexProgram,
+		vertexProgram.getUniform("rootBuffer"));
+	renderer.getObjectTexture().bindToTextureUnit(1, gl);
+	gl.glDepthMask(false);
+	gl.glDisable(GL3.GL_BLEND);
+	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_CULL_FACE);
+	gl.glViewport(0, 0, Renderer.VERTEX_BUFFER_WIDTH, 256);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Opaque
+	gl.glViewport(0, (NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK)/1024, Renderer.VERTEX_BUFFER_WIDTH, 256);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Transparent
+	
 	revertViewportToWindow(gl);
 	
 	gl.glDepthMask(true);
@@ -208,7 +230,10 @@ public class RenderList {
 	final GLProgram primaryProgram = tr.renderer.get().getOpaqueProgram();
 	primaryProgram.use();
 	primaryProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
-	renderer.getObjectTexture().bindToTextureUnit(2,gl);
+	tr.gpu.get().memoryManager.get().bindToUniform(0, primaryProgram,
+		primaryProgram.getUniform("rootBuffer"));
+	renderer.getObjectTexture().bindToTextureUnit(1,gl);
+	renderer.getVertexXYTexture().bindToTextureUnit(2, gl);
 	renderer.getOpaqueFrameBuffer().bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -259,10 +284,13 @@ public class RenderList {
 	gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
 	gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
 	gl.glSampleMaski(0, 0xFF);
-	renderer.getOpaqueDepthTexture().bindToTextureUnit(0,gl);
-	renderer.getObjectTexture().bindToTextureUnit(2,gl);
-	tr.gpu.get().memoryManager.get().bindToUniform(4, depthQueueProgram,
+	//object, root, depth, xy
+	tr.gpu.get().memoryManager.get().bindToUniform(0, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
+	renderer.getObjectTexture().bindToTextureUnit(1, gl);
+	renderer.getOpaqueDepthTexture().bindToTextureUnit(2,gl);
+	renderer.getVertexXYTexture().bindToTextureUnit(3, gl);
+	
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
 	
 	// FENCE
@@ -280,14 +308,14 @@ public class RenderList {
 	deferredProgram.use();
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
 						    // "Draw to screen"
+	tr.gpu.get().memoryManager.get().bindToUniform(0, deferredProgram,
+		    deferredProgram.getUniform("rootBuffer"));
 	renderer.getOpaqueUVTexture().bindToTextureUnit(1,gl);
 	renderer.getOpaqueDepthTexture().bindToTextureUnit(2,gl);
 	renderer.getOpaqueNormTexture().bindToTextureUnit(3,gl);
-	tr.gpu.get().memoryManager.get().bindToUniform(4, deferredProgram,
-		    deferredProgram.getUniform("rootBuffer"));
-	tr.gpu.get().textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(5,gl);
-	renderer.getOpaqueTextureIDTexture().bindToTextureUnit(6,gl);
-	renderer.getDepthQueueTexture().bindToTextureUnit(7,gl);
+	tr.gpu.get().textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
+	renderer.getOpaqueTextureIDTexture().bindToTextureUnit(5,gl);
+	renderer.getDepthQueueTexture().bindToTextureUnit(6,gl);
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	

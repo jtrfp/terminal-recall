@@ -126,12 +126,18 @@ public final class Renderer {
 		vertexProgram.getUniform("objectBuffer").set((int)1);
 		
 		opaqueProgram.use();
-		opaqueProgram.getUniform("objectBuffer").set((int)2);
+		opaqueProgram.getUniform("rootBuffer").set((int)0);
+		opaqueProgram.getUniform("objectBuffer").set((int)1);
+		opaqueProgram.getUniform("xyBuffer").set((int)2);
 		
 		objectProgram.use();
+		objectProgram.getUniform("rootBuffer").set((int)0);
 		
 		depthQueueProgram.use();
-		depthQueueProgram.getUniform("objectBuffer").set((int)2);
+		depthQueueProgram.getUniform("rootBuffer").set((int)0);
+		depthQueueProgram.getUniform("objectBuffer").set((int)1);
+		depthQueueProgram.getUniform("depthTexture").set((int)2);
+		depthQueueProgram.getUniform("xyBuffer").set((int)3);
 		//dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
 		//dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();
@@ -140,13 +146,13 @@ public final class Renderer {
 		fogColor 	= deferredProgram	.getUniform("fogColor");
 		sunVector 	= deferredProgram	.getUniform("sunVector");
 		//deferredProgram.getUniform("texturePalette").set((int) 0);
+		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		deferredProgram.getUniform("primaryRendering").set((int) 1);
 		deferredProgram.getUniform("depthTexture").set((int) 2);
 		deferredProgram.getUniform("normTexture").set((int) 3);
-		deferredProgram.getUniform("rootBuffer").set((int) 4);
-		deferredProgram.getUniform("rgbaTiles").set((int) 5);
-		deferredProgram.getUniform("textureIDTexture").set((int) 6);
-		deferredProgram.getUniform("depthQueueTexture").set((int) 7);
+		deferredProgram.getUniform("rgbaTiles").set((int) 4);
+		deferredProgram.getUniform("textureIDTexture").set((int) 5);
+		deferredProgram.getUniform("depthQueueTexture").set((int) 6);
 		sunVector.set(.5774f,.5774f,.5774f);
 		final int width = tr.getRootWindow().getWidth();
 		final int height = tr.getRootWindow().getHeight();

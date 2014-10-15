@@ -37,7 +37,8 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
-
+    public static final int			VERTEX_BUFFER_WIDTH = 1024;
+    public static final int			VERTEX_BUFFER_HEIGHT = 4096;
     public static final int			DEPTH_QUEUE_SIZE = 8;
     public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
     private 		RenderableSpacePartitioningGrid rootGrid;
@@ -47,7 +48,8 @@ public final class Renderer {
     						opaqueProgram, 
     						deferredProgram, 
     						depthQueueProgram, 
-    						depthErasureProgram;
+    						depthErasureProgram,
+    						vertexProgram;
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
@@ -64,10 +66,12 @@ public final class Renderer {
     /*		*/				opaqueTextureIDTexture,
     /*		*/				depthQueueTexture,
     /*		*/				depthQueueStencil,
-    /*					*/	objectTexture;
+    /*					*/	objectTexture,
+    /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
     /*			*/			depthQueueFrameBuffer,
-    /*			*/			objectFrameBuffer;
+    /*			*/			objectFrameBuffer,
+    /*			*/			vertexFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
@@ -98,7 +102,8 @@ public final class Renderer {
 					opaqueFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
 					depthQueueFragShader		= gpu.newFragmentShader(),
-					erasureFragShader		= gpu.newFragmentShader();
+					erasureFragShader		= gpu.newFragmentShader(),
+					vertexFragShader		= gpu.newFragmentShader();
 		objectVertexShader	  .setSourceFromResource("/shader/objectVertexShader.glsl");
 		objectFragShader	  .setSourceFromResource("/shader/objectFragShader.glsl");
 		traditionalVertexShader	  .setSourceFromResource("/shader/traditionalVertexShader.glsl");
@@ -107,12 +112,18 @@ public final class Renderer {
 		deferredFragShader	  .setSourceFromResource("/shader/deferredFragShader.glsl");
 		erasureFragShader	  .setSourceFromResource("/shader/erasureFragShader.glsl");
 		depthQueueFragShader	  .setSourceFromResource("/shader/depthQueueFragShader.glsl");
+		vertexFragShader	  .setSourceFromResource("/shader/vertexFragShader.glsl");
 		
 		objectProgram		=gpu.newProgram().attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
+		vertexProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(vertexFragShader).link();
 		opaqueProgram		=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
 		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
 		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
+		
+		vertexProgram.use();
+		vertexProgram.getUniform("rootBuffer").set((int)0);
+		vertexProgram.getUniform("objectBuffer").set((int)1);
 		
 		opaqueProgram.use();
 		opaqueProgram.getUniform("objectBuffer").set((int)2);
@@ -156,6 +167,64 @@ public final class Renderer {
 			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Object frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
+		/////// VERTEX
+		vertexXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RG32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexUVTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RG32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexZTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexWTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexTextureIDTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexFrameBuffer = gpu
+			.newFrameBuffer()
+			.bindToDraw()
+			.attachDrawTexture(vertexXYTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(vertexUVTexture, GL3.GL_COLOR_ATTACHMENT1)
+			.attachDrawTexture(vertexZTexture, GL3.GL_COLOR_ATTACHMENT2)
+			.attachDrawTexture(vertexWTexture, GL3.GL_COLOR_ATTACHMENT3)
+			.attachDrawTexture(vertexTextureIDTexture, GL3.GL_COLOR_ATTACHMENT4)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1,GL3.GL_COLOR_ATTACHMENT2,GL3.GL_COLOR_ATTACHMENT3,GL3.GL_COLOR_ATTACHMENT4);
+		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Vertex frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		/////// INTERMEDIATE
 		opaqueUVTexture = gpu
@@ -530,5 +599,33 @@ public final class Renderer {
     
     public GLTexture getOpaqueTextureIDTexture() {
         return opaqueTextureIDTexture;
+    }
+    
+    public GLProgram getVertexProgram() {
+        return vertexProgram;
+    }
+    
+    public GLTexture getVertexXYTexture() {
+        return vertexXYTexture;
+    }
+    
+    public GLTexture getVertexUVTexture() {
+        return vertexUVTexture;
+    }
+    
+    public GLTexture getVertexWTexture() {
+        return vertexWTexture;
+    }
+    
+    public GLTexture getVertexZTexture() {
+        return vertexZTexture;
+    }
+    
+    public GLTexture getTextureIDTexture() {
+        return vertexTextureIDTexture;
+    }
+    
+    public GLFrameBuffer getVertexFrameBuffer() {
+        return vertexFrameBuffer;
     }
 }//end Renderer

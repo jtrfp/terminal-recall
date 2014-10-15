@@ -21,7 +21,6 @@
 // INPUTS
 uniform sampler2D 		primaryRendering;
 uniform sampler2D 		depthTexture;
-uniform sampler2D 		texturePalette;
 uniform sampler2D 		normTexture;
 uniform sampler2D 		textureIDTexture;
 uniform sampler2DArray 	rgbaTiles;
@@ -146,7 +145,6 @@ gl_FragDepth 		= depth;
 float 	linearDepth = linearizeDepth(depth);
 
 uint 	textureID 	= floatBitsToUint(texture(textureIDTexture,screenLoc)[0u]);
-bool	oldTex		= textureID==960u;//Switch for old texturing mode.
 		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 vec2	uv			= fragColor.xy;
@@ -191,6 +189,5 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
    color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
   }//end for(relevantSize)
   
-fragColor.rgb		 	= oldTex?texture(texturePalette,fragColor.xy).rgb:
-						  color;//GET COLOR
+fragColor.rgb		 	= color;
 }//end main()

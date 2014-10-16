@@ -127,17 +127,23 @@ public final class Renderer {
 		
 		opaqueProgram.use();
 		opaqueProgram.getUniform("rootBuffer").set((int)0);
-		opaqueProgram.getUniform("objectBuffer").set((int)1);
-		opaqueProgram.getUniform("xyBuffer").set((int)2);
+		opaqueProgram.getUniform("xyBuffer").set((int)1);
+		opaqueProgram.getUniform("uvBuffer").set((int)2);
+		opaqueProgram.getUniform("texIDBuffer").set((int)3);
+		opaqueProgram.getUniform("zBuffer").set((int)4);
+		opaqueProgram.getUniform("wBuffer").set((int)5);
 		
 		objectProgram.use();
 		objectProgram.getUniform("rootBuffer").set((int)0);
 		
 		depthQueueProgram.use();
 		depthQueueProgram.getUniform("rootBuffer").set((int)0);
-		depthQueueProgram.getUniform("objectBuffer").set((int)1);
-		depthQueueProgram.getUniform("depthTexture").set((int)2);
-		depthQueueProgram.getUniform("xyBuffer").set((int)3);
+		depthQueueProgram.getUniform("depthTexture").set((int)1);
+		depthQueueProgram.getUniform("xyBuffer").set((int)2);
+		depthQueueProgram.getUniform("uvBuffer").set((int)3);
+		depthQueueProgram.getUniform("texIDBuffer").set((int)4);
+		depthQueueProgram.getUniform("zBuffer").set((int)5);
+		depthQueueProgram.getUniform("wBuffer").set((int)6);
 		//dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
 		//dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();

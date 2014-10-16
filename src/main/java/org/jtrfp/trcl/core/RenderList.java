@@ -232,8 +232,11 @@ public class RenderList {
 	primaryProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	tr.gpu.get().memoryManager.get().bindToUniform(0, primaryProgram,
 		primaryProgram.getUniform("rootBuffer"));
-	renderer.getObjectTexture().bindToTextureUnit(1,gl);
-	renderer.getVertexXYTexture().bindToTextureUnit(2, gl);
+	renderer.getVertexXYTexture().bindToTextureUnit(1, gl);
+	renderer.getVertexUVTexture().bindToTextureUnit(2, gl);
+	renderer.getTextureIDTexture().bindToTextureUnit(3, gl);
+	renderer.getVertexZTexture().bindToTextureUnit(4, gl);
+	renderer.getVertexWTexture().bindToTextureUnit(5, gl);
 	renderer.getOpaqueFrameBuffer().bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -287,9 +290,12 @@ public class RenderList {
 	//object, root, depth, xy
 	tr.gpu.get().memoryManager.get().bindToUniform(0, depthQueueProgram,
 		depthQueueProgram.getUniform("rootBuffer"));
-	renderer.getObjectTexture().bindToTextureUnit(1, gl);
-	renderer.getOpaqueDepthTexture().bindToTextureUnit(2,gl);
-	renderer.getVertexXYTexture().bindToTextureUnit(3, gl);
+	renderer.getOpaqueDepthTexture().bindToTextureUnit(1,gl);
+	renderer.getVertexXYTexture().bindToTextureUnit(2, gl);
+	renderer.getVertexUVTexture().bindToTextureUnit(3, gl);
+	renderer.getTextureIDTexture().bindToTextureUnit(4, gl);
+	renderer.getVertexZTexture().bindToTextureUnit(5, gl);
+	renderer.getVertexWTexture().bindToTextureUnit(6, gl);
 	
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
 	

@@ -237,6 +237,8 @@ public class RenderList {
 	renderer.getTextureIDTexture().bindToTextureUnit(3, gl);
 	renderer.getVertexZTexture().bindToTextureUnit(4, gl);
 	renderer.getVertexWTexture().bindToTextureUnit(5, gl);
+	renderer.getVertexNormXYTexture().bindToTextureUnit(6, gl);
+	renderer.getVertexNormZTexture().bindToTextureUnit(7, gl);
 	renderer.getOpaqueFrameBuffer().bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -296,6 +298,8 @@ public class RenderList {
 	renderer.getTextureIDTexture().bindToTextureUnit(4, gl);
 	renderer.getVertexZTexture().bindToTextureUnit(5, gl);
 	renderer.getVertexWTexture().bindToTextureUnit(6, gl);
+	renderer.getVertexNormXYTexture().bindToTextureUnit(7, gl);
+	renderer.getVertexNormZTexture().bindToTextureUnit(8, gl);
 	
 	gl.glDrawArrays(GL3.GL_TRIANGLES, NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK, numTransparentVertices);
 	

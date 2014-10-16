@@ -38,6 +38,8 @@ uniform sampler2D		xyBuffer;
 uniform sampler2D		uvBuffer;
 uniform sampler2D		zBuffer;
 uniform sampler2D		wBuffer;
+uniform sampler2D		normXYBuffer;
+uniform sampler2D		normZBuffer;
 uniform sampler2D		texIDBuffer;
 uniform uint			logicalVec4Offset;
 
@@ -152,11 +154,9 @@ gl_Position.x=dummy*0;
     		fragTexCoord			= texelFetch(uvBuffer,fetchPos,0).xy;
     		flatTextureID			= texelFetch(texIDBuffer,fetchPos,0).x;
 			 screenLoc				= (((gl_Position.xy/gl_Position.w)+1)/2);
-			
-    		float fragNormalX 			= float(SByte(packedVertex[1],2u))/128;
-			float fragNormalY 			= float(SByte(packedVertex[1],3u))/128;
-			float fragNormalZ 			= float(SByte(packedVertex[3],0u))/128;
+			vec2 normXY					= texelFetch(normXYBuffer,fetchPos,0).xy;
+			float normZ					= texelFetch(normZBuffer,fetchPos,0).x;
 						//Crunch this into [0,1] domain
-			fragNormal 					= ((matrixNoCam*vec4(fragNormalX,fragNormalY,fragNormalZ,0)).xyz+1)/2;
+			fragNormal 					= ((matrixNoCam*vec4(normXY,normZ,0)).xyz+1)/2;
     		}//end if(object)
 }//end main()

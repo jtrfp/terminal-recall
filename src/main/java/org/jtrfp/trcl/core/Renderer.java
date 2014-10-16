@@ -67,7 +67,8 @@ public final class Renderer {
     /*		*/				depthQueueTexture,
     /*		*/				depthQueueStencil,
     /*					*/	objectTexture,
-    /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture;
+    /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
+    /*					*/	vertexNormXYTexture,vertexNormZTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
     /*			*/			depthQueueFrameBuffer,
     /*			*/			objectFrameBuffer,
@@ -132,6 +133,8 @@ public final class Renderer {
 		opaqueProgram.getUniform("texIDBuffer").set((int)3);
 		opaqueProgram.getUniform("zBuffer").set((int)4);
 		opaqueProgram.getUniform("wBuffer").set((int)5);
+		opaqueProgram.getUniform("normXYBuffer").set((int)6);
+		opaqueProgram.getUniform("normZBuffer").set((int)7);
 		
 		objectProgram.use();
 		objectProgram.getUniform("rootBuffer").set((int)0);
@@ -190,6 +193,24 @@ public final class Renderer {
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
 			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexNormXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		vertexNormZTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
 		vertexUVTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -234,7 +255,16 @@ public final class Renderer {
 			.attachDrawTexture(vertexZTexture, GL3.GL_COLOR_ATTACHMENT2)
 			.attachDrawTexture(vertexWTexture, GL3.GL_COLOR_ATTACHMENT3)
 			.attachDrawTexture(vertexTextureIDTexture, GL3.GL_COLOR_ATTACHMENT4)
-			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1,GL3.GL_COLOR_ATTACHMENT2,GL3.GL_COLOR_ATTACHMENT3,GL3.GL_COLOR_ATTACHMENT4);
+			.attachDrawTexture(vertexNormXYTexture, GL3.GL_COLOR_ATTACHMENT5)
+			.attachDrawTexture(vertexNormZTexture, GL3.GL_COLOR_ATTACHMENT6)
+			.setDrawBufferList(
+				GL3.GL_COLOR_ATTACHMENT0,
+				GL3.GL_COLOR_ATTACHMENT1,
+				GL3.GL_COLOR_ATTACHMENT2,
+				GL3.GL_COLOR_ATTACHMENT3,
+				GL3.GL_COLOR_ATTACHMENT4,
+				GL3.GL_COLOR_ATTACHMENT5,
+				GL3.GL_COLOR_ATTACHMENT6);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Vertex frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
@@ -639,5 +669,19 @@ public final class Renderer {
     
     public GLFrameBuffer getVertexFrameBuffer() {
         return vertexFrameBuffer;
+    }
+
+    /**
+     * @return the vertexNormXYTexture
+     */
+    public GLTexture getVertexNormXYTexture() {
+        return vertexNormXYTexture;
+    }
+
+    /**
+     * @return the vertexNormZTexture
+     */
+    public GLTexture getVertexNormZTexture() {
+        return vertexNormZTexture;
     }
 }//end Renderer

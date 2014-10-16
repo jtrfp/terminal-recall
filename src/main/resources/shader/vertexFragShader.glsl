@@ -40,6 +40,8 @@ layout (location=1) out vec2 uv;
 layout (location=2) out float z;
 layout (location=3) out float w;
 layout (location=4) out float flatTextureID;
+layout (location=5) out vec2 nXY;
+layout (location=6) out float nZ;
 
 //FUNCTIONS
 uint bit(uint _input, uint index)
@@ -147,16 +149,12 @@ void main(){
     		vec2 fragTexCoord 		= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
     		vec4 position 			= matrix * vertexCoord;
 			xy.xy					= (position.xy);
-			//vec2 screenLoc			= (((position.xy/position.w)+1)/2);///DEBUG
 			uv.xy					= fragTexCoord.xy;
 			w						= position.w;
 			z						= position.z;
-			
-    		//float normX 			= float(SByte(packedVertex[1],2u))/128;
-			//float normY 			= float(SByte(packedVertex[1],3u))/128;
-			//float normZ 			= float(SByte(packedVertex[3],0u))/128;
-						//Crunch this into [0,1] domain
-			//norm 					= ((matrixNoCam*vec4(normX,normY,normZ,0)).xyz+1)/2;
+    		nXY			 			= vec2(float(SByte(packedVertex[1],2u))/128,
+										   float(SByte(packedVertex[1],3u))/128);
+			nZ 						= float(SByte(packedVertex[3],0u))/128;
     		}//end if(object)
     		
     		else{

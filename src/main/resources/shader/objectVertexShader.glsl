@@ -28,7 +28,8 @@ const float OBJ_TEX_HEIGHT_SCALAR	= 1f/float(OBJECT_TEXTURE_HEIGHT);
 const float OBJ_TEX_WIDTH_SCALAR	= float(TEXELS_PER_MATRIX)/float(OBJECT_TEXTURE_WIDTH);
 
 //OUTPUTS
-flat out mat4 matrix;
+flat out mat4 camMatrix;
+flat out mat4 noCamMatrix;
 
 //IN
 uniform uint 			renderListPageTable[172];
@@ -65,11 +66,12 @@ void main(){
  uvec4 	objectDef 		= texelFetch(rootBuffer,objectDefIndex);
  int 	matrixOffset 	= int(objectDef[0]);
  uint renderMode 		= UByte(objectDef[2],1u);
- matrix		 			= mat4(
+ noCamMatrix		 	= mat4(
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+2)),
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
  uint 	skipCameraMatrix= UNibble(renderMode,1u);
- matrix = skipCameraMatrix==0u?cameraMatrix * matrix:matrix;
+ camMatrix = skipCameraMatrix==0u?cameraMatrix * noCamMatrix:noCamMatrix;
  }
+ 

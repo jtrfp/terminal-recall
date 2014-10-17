@@ -32,7 +32,8 @@ const uint PAGE_SIZE_VEC4			=96u;
 uniform uint 			renderListPageTable[172];
 uniform uint			logicalVec4Offset;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
-uniform sampler2D		objectBuffer;
+uniform sampler2D		camMatrixBuffer;
+uniform sampler2D		noCamMatrixBuffer;
 
 // OUTPUTS
 layout (location=0) out vec2 xy;
@@ -134,10 +135,15 @@ void main(){
 										uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+2)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
 			ivec2 mOff			= ivec2((objectIndex%256)*4,127-(objectIndex/256));
 			mat4 matrix			= mat4(
-								texelFetch(objectBuffer,mOff,0),
-								texelFetch(objectBuffer,mOff+ivec2(1,0),0),
-								texelFetch(objectBuffer,mOff+ivec2(2,0),0),
-								texelFetch(objectBuffer,mOff+ivec2(3,0),0));
+								texelFetch(camMatrixBuffer,mOff,0),
+								texelFetch(camMatrixBuffer,mOff+ivec2(1,0),0),
+								texelFetch(camMatrixBuffer,mOff+ivec2(2,0),0),
+								texelFetch(camMatrixBuffer,mOff+ivec2(3,0),0));
+			/*mat4 matrixNoCam	= mat4(
+								texelFetch(noCamMatrixBuffer,mOff,0),
+								texelFetch(noCamMatrixBuffer,mOff+ivec2(1,0),0),
+								texelFetch(noCamMatrixBuffer,mOff+ivec2(2,0),0),
+								texelFetch(noCamMatrixBuffer,mOff+ivec2(3,0),0));*/
 			// objectDef[3] unused.
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
@@ -152,9 +158,11 @@ void main(){
 			uv.xy					= fragTexCoord.xy;
 			w						= position.w;
 			z						= position.z;
-    		nXY			 			= vec2(float(SByte(packedVertex[1],2u))/128,
-										   float(SByte(packedVertex[1],3u))/128);
-			nZ 						= float(SByte(packedVertex[3],0u))/128;
+			vec4 nNoCam				= matrixNoCam * (vec4(float(SByte(packedVertex[1],2u))/128,
+										   float(SByte(packedVertex[1],3u))/128,
+										   float(SByte(packedVertex[3],0u))/128, 0));
+    		nXY			 			= nNoCam.xy;
+			nZ 						= nNoCam.z;
     		}//end if(object)
     		
     		else{

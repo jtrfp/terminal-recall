@@ -17,11 +17,14 @@
  #version 330
 
 //INPUTS
-flat in mat4	matrix;
+flat in mat4	camMatrix;
+flat in mat4	noCamMatrix;
 
 //OUTPUTS
-layout(location = 0) out vec4 matrixOutput;
+layout(location = 0) out vec4 camMatrixOutput;
+layout(location = 1) out vec4 noCamMatrixOutput;
 
 void main(){
- matrixOutput = matrix[uint(gl_FragCoord.x)%4u];
+ camMatrixOutput = camMatrix[uint(gl_FragCoord.x)%4u];
+ noCamMatrixOutput = noCamMatrix[uint(gl_FragCoord.x)%4u];
  }

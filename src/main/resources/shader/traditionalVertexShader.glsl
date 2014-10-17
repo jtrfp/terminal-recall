@@ -157,6 +157,6 @@ gl_Position.x=dummy*0;
 			vec2 normXY					= texelFetch(normXYBuffer,fetchPos,0).xy;
 			float normZ					= texelFetch(normZBuffer,fetchPos,0).x;
 						//Crunch this into [0,1] domain
-			fragNormal 					= ((matrixNoCam*vec4(normXY,normZ,0)).xyz+1)/2;
+			fragNormal 					= ((vec4(normXY,normZ,0)).xyz+1)/2;
     		}//end if(object)
 }//end main()

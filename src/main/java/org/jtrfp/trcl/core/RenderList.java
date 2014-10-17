@@ -213,7 +213,8 @@ public class RenderList {
 	vertexProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	tr.gpu.get().memoryManager.get().bindToUniform(0, vertexProgram,
 		vertexProgram.getUniform("rootBuffer"));
-	renderer.getObjectTexture().bindToTextureUnit(1, gl);
+	renderer.getCamMatrixTexture().bindToTextureUnit(1, gl);
+	renderer.getNoCamMatrixTexture().bindToTextureUnit(2, gl);
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDepthFunc(GL3.GL_ALWAYS);

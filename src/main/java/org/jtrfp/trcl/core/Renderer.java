@@ -66,7 +66,7 @@ public final class Renderer {
     /*		*/				opaqueTextureIDTexture,
     /*		*/				depthQueueTexture,
     /*		*/				depthQueueStencil,
-    /*					*/	objectTexture,
+    /*					*/	camMatrixTexture,noCamMatrixTexture,
     /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
     /*					*/	vertexNormXYTexture,vertexNormZTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
@@ -124,7 +124,8 @@ public final class Renderer {
 		
 		vertexProgram.use();
 		vertexProgram.getUniform("rootBuffer").set((int)0);
-		vertexProgram.getUniform("objectBuffer").set((int)1);
+		vertexProgram.getUniform("camMatrixBuffer").set((int)1);
+		//vertexProgram.getUniform("noCamMatrixBuffer").set((int)2);
 		
 		opaqueProgram.use();
 		opaqueProgram.getUniform("rootBuffer").set((int)0);
@@ -166,7 +167,16 @@ public final class Renderer {
 		final int width = tr.getRootWindow().getWidth();
 		final int height = tr.getRootWindow().getHeight();
 		/////// OBJECT
-		objectTexture = gpu //Does not need to be in reshape() since it is off-screen.
+		camMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RGBA32F, 1024, 128, 
+				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		noCamMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RGBA32F, 1024, 128, 
@@ -178,8 +188,9 @@ public final class Renderer {
 		objectFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
-			.attachDrawTexture(objectTexture, GL3.GL_COLOR_ATTACHMENT0)
-			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+			.attachDrawTexture(camMatrixTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(noCamMatrixTexture, GL3.GL_COLOR_ATTACHMENT1)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Object frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
@@ -605,8 +616,8 @@ public final class Renderer {
     /**
      * @return the objectTexture
      */
-    public GLTexture getObjectTexture() {
-        return objectTexture;
+    public GLTexture getCamMatrixTexture() {
+        return camMatrixTexture;
     }
 
     /**
@@ -683,5 +694,12 @@ public final class Renderer {
      */
     public GLTexture getVertexNormZTexture() {
         return vertexNormZTexture;
+    }
+
+    /**
+     * @return the noCamMatrixTexture
+     */
+    public GLTexture getNoCamMatrixTexture() {
+        return noCamMatrixTexture;
     }
 }//end Renderer

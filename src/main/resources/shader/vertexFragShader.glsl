@@ -131,19 +131,17 @@ void main(){
 			int matrixOffset 	= int(objectDef[0]);
 			int vertexOffset 	= int(objectDef[1]);
 			int modelScalar 	= int(UByte(objectDef[2],2u))-16;//Numerical domain offset for negatives
-			mat4 matrixNoCam 	= mat4(uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),
-										uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+2)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
 			ivec2 mOff			= ivec2((objectIndex%256)*4,127-(objectIndex/256));
 			mat4 matrix			= mat4(
 								texelFetch(camMatrixBuffer,mOff,0),
 								texelFetch(camMatrixBuffer,mOff+ivec2(1,0),0),
 								texelFetch(camMatrixBuffer,mOff+ivec2(2,0),0),
 								texelFetch(camMatrixBuffer,mOff+ivec2(3,0),0));
-			/*mat4 matrixNoCam	= mat4(
+			mat4 matrixNoCam	= mat4(
 								texelFetch(noCamMatrixBuffer,mOff,0),
 								texelFetch(noCamMatrixBuffer,mOff+ivec2(1,0),0),
 								texelFetch(noCamMatrixBuffer,mOff+ivec2(2,0),0),
-								texelFetch(noCamMatrixBuffer,mOff+ivec2(3,0),0));*/
+								texelFetch(noCamMatrixBuffer,mOff+ivec2(3,0),0));
 			// objectDef[3] unused.
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);

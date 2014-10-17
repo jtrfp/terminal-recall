@@ -25,6 +25,7 @@ layout(location = 0) out vec4 camMatrixOutput;
 layout(location = 1) out vec4 noCamMatrixOutput;
 
 void main(){
- camMatrixOutput = camMatrix[uint(gl_FragCoord.x)%4u];
- noCamMatrixOutput = noCamMatrix[uint(gl_FragCoord.x)%4u];
+ camMatrixOutput  = camMatrix[uint(gl_FragCoord.x)%4u];
+ noCamMatrixOutput= noCamMatrix[uint(gl_FragCoord.x)%4u];
  }
+ 

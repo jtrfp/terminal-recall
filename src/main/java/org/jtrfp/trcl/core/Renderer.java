@@ -125,7 +125,7 @@ public final class Renderer {
 		vertexProgram.use();
 		vertexProgram.getUniform("rootBuffer").set((int)0);
 		vertexProgram.getUniform("camMatrixBuffer").set((int)1);
-		//vertexProgram.getUniform("noCamMatrixBuffer").set((int)2);
+		vertexProgram.getUniform("noCamMatrixBuffer").set((int)2);
 		
 		opaqueProgram.use();
 		opaqueProgram.getUniform("rootBuffer").set((int)0);

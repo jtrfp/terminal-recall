@@ -25,7 +25,6 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLProgram;
-import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -69,7 +68,7 @@ public class RenderList {
 	    numOpaqueBlocks += opOD.capacity() / 4;
 	    numTransparentBlocks += trOD.capacity() / 4;
 	    
-	    tr.objectListWindow.get().opaqueIDs.set(renderListIdx, opaqueIndex, opOD);//TODO: Shouldn't this have its own index and not zero?
+	    tr.objectListWindow.get().opaqueIDs.set(renderListIdx, opaqueIndex, opOD);
 	    opaqueIndex += opOD.capacity();
 	    tr.objectListWindow.get().blendIDs.set(renderListIdx, blendIndex, trOD);
 	    blendIndex += trOD.capacity();

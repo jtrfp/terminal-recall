@@ -45,40 +45,35 @@ public final class Renderer {
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private final 	Camera			camera;
     			GLProgram 		objectProgram,
-    						opaqueProgram, 
-    						deferredProgram, 
-    						depthQueueProgram, 
-    						depthErasureProgram,
-    						vertexProgram;
+    /*					*/	opaqueProgram, 
+    /*					*/	deferredProgram, 
+    /*					*/	depthQueueProgram, 
+    /*					*/	depthErasureProgram,
+    /*					*/	vertexProgram;
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
-    private 	 	GLUniform	    	screenWidth, 
-    /*    */	    				screenHeight,
-    						dqScreenWidth,
-    						dqScreenHeight,
-    /*    */					fogColor,
+    private 	 	GLUniform	    	fogColor,
     /*    */					sunVector;
     private 		GLTexture 		opaqueUVTexture,
-    /*		*/				opaqueDepthTexture,
-    /*		*/				opaqueNormTexture,
-    /*		*/				opaqueTextureIDTexture,
-    /*		*/				depthQueueTexture,
-    /*		*/				depthQueueStencil,
+    /*					*/	opaqueDepthTexture,
+    /*					*/	opaqueNormTexture,
+    /*					*/	opaqueTextureIDTexture,
+    /*					*/	depthQueueTexture,
+    /*					*/	depthQueueStencil,
     /*					*/	camMatrixTexture,noCamMatrixTexture,
     /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
     /*					*/	vertexNormXYTexture,vertexNormZTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
-    /*			*/			depthQueueFrameBuffer,
-    /*			*/			objectFrameBuffer,
-    /*			*/			vertexFrameBuffer;
+    /*					*/	depthQueueFrameBuffer,
+    /*					*/	objectFrameBuffer,
+    /*					*/	vertexFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
     private		float[]			cameraMatrixAsFlatArray		= new float[16];
-    private		float[]			cameraRotationMatrixAsFlatArray = new float[16];
     private		TRFutureTask<Void>	visibilityUpdateFuture;
 
     public Renderer(final GPU gpu) {
@@ -148,14 +143,9 @@ public final class Renderer {
 		depthQueueProgram.getUniform("texIDBuffer").set((int)4);
 		depthQueueProgram.getUniform("zBuffer").set((int)5);
 		depthQueueProgram.getUniform("wBuffer").set((int)6);
-		//dqScreenWidth	= depthQueueProgram	.getUniform("screenWidth");
-		//dqScreenHeight	= depthQueueProgram	.getUniform("screenHeight");
 		deferredProgram.use();
-		//screenWidth 	= deferredProgram	.getUniform("screenWidth");
-		//screenHeight 	= deferredProgram	.getUniform("screenHeight");
 		fogColor 	= deferredProgram	.getUniform("fogColor");
 		sunVector 	= deferredProgram	.getUniform("sunVector");
-		//deferredProgram.getUniform("texturePalette").set((int) 0);
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		deferredProgram.getUniform("primaryRendering").set((int) 1);
 		deferredProgram.getUniform("depthTexture").set((int) 2);
@@ -376,14 +366,10 @@ public final class Renderer {
 		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		opaqueNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
-		opaqueTextureIDTexture.bind().setImage(GL3.GL_R32UI, width, height, GL3.GL_RED_INTEGER, GL3.GL_UNSIGNED_INT, null);
+		opaqueTextureIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
 		depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
 		depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);// Doesn't like RGBA32UI for some reason.
-		//screenWidth.setui(width);
-		//screenHeight.setui(height);
 		depthQueueProgram.use();
-		//dqScreenWidth.setui(width);
-		//dqScreenHeight.setui(height);
 		Renderer.this.getOpaqueProgram().use();
 	    }
 	});
@@ -428,13 +414,8 @@ public final class Renderer {
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
     
-    private final float [] localSunVector = new float[16];
-    private final float [] globalSunVector = new float[]{.5774f,.5774f,.5774f,0f};
-    
     public void render() {
 	final GL3 gl = gpu.getGl();
-	///if (!active)
-	//    return;
 	if(!gpu.textureManager.isDone())
 	    return;
 	if(!gpu.textureManager.get().vqCodebookManager.isDone())
@@ -682,23 +663,14 @@ public final class Renderer {
         return vertexFrameBuffer;
     }
 
-    /**
-     * @return the vertexNormXYTexture
-     */
     public GLTexture getVertexNormXYTexture() {
         return vertexNormXYTexture;
     }
-
-    /**
-     * @return the vertexNormZTexture
-     */
+    
     public GLTexture getVertexNormZTexture() {
         return vertexNormZTexture;
     }
-
-    /**
-     * @return the noCamMatrixTexture
-     */
+    
     public GLTexture getNoCamMatrixTexture() {
         return noCamMatrixTexture;
     }

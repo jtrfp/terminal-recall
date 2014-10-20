@@ -39,6 +39,8 @@ import org.jtrfp.trcl.obj.WorldObject;
 public final class Renderer {
     public static final int			VERTEX_BUFFER_WIDTH = 1024;
     public static final int			VERTEX_BUFFER_HEIGHT = 4096;
+    public static final int			PRIMITIVE_BUFFER_WIDTH = 1024;
+    public static final int			PRIMITIVE_BUFFER_HEIGHT = 4096;
     public static final int			DEPTH_QUEUE_SIZE = 8;
     public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
     private 		RenderableSpacePartitioningGrid rootGrid;
@@ -64,11 +66,13 @@ public final class Renderer {
     /*					*/	depthQueueStencil,
     /*					*/	camMatrixTexture,noCamMatrixTexture,
     /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
-    /*					*/	vertexNormXYTexture,vertexNormZTexture;
+    /*					*/	vertexNormXYTexture,vertexNormZTexture,
+    /*					*/	primitiveUVZWTexture,primitiveNormTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
     /*					*/	depthQueueFrameBuffer,
     /*					*/	objectFrameBuffer,
-    /*					*/	vertexFrameBuffer;
+    /*					*/	vertexFrameBuffer,
+    /*					*/	primitiveFrameBuffer;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
@@ -268,6 +272,32 @@ public final class Renderer {
 				GL3.GL_COLOR_ATTACHMENT6);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Vertex frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
+		/////// PRIMITIVE
+		primitiveNormTexture = gpu  //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RG32F, PRIMITIVE_BUFFER_WIDTH, PRIMITIVE_BUFFER_HEIGHT, GL3.GL_RGBA,
+				GL3.GL_FLOAT, null)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setMinFilter(GL3.GL_NEAREST);
+		primitiveUVZWTexture = gpu  //Does not need to be in reshape() since it is off-screen.
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RGBA32F, PRIMITIVE_BUFFER_WIDTH, PRIMITIVE_BUFFER_HEIGHT, GL3.GL_RGBA,
+				GL3.GL_FLOAT, null)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setMinFilter(GL3.GL_NEAREST);
+		primitiveFrameBuffer = gpu
+			.newFrameBuffer()
+			.bindToDraw()
+			.attachDrawTexture(primitiveUVZWTexture,
+				GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(primitiveNormTexture,
+				GL3.GL_COLOR_ATTACHMENT1)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
+		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Primitive framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		/////// INTERMEDIATE
 		opaqueUVTexture = gpu
@@ -673,5 +703,26 @@ public final class Renderer {
     
     public GLTexture getNoCamMatrixTexture() {
         return noCamMatrixTexture;
+    }
+
+    /**
+     * @return the primitiveUVZWTexture
+     */
+    public GLTexture getPrimitiveUVZWTexture() {
+        return primitiveUVZWTexture;
+    }
+
+    /**
+     * @return the primitiveNormTexture
+     */
+    public GLTexture getPrimitiveNormTexture() {
+        return primitiveNormTexture;
+    }
+
+    /**
+     * @return the primitiveFrameBuffer
+     */
+    public GLFrameBuffer getPrimitiveFrameBuffer() {
+        return primitiveFrameBuffer;
     }
 }//end Renderer

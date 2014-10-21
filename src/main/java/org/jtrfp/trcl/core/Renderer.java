@@ -446,24 +446,21 @@ public final class Renderer {
     
     public void render() {
 	final GL3 gl = gpu.getGl();
-	if(!gpu.textureManager.isDone())
-	    return;
-	if(!gpu.textureManager.get().vqCodebookManager.isDone())
-	    return;
-	gpu.textureManager.get().vqCodebookManager.get().refreshStaleCodePages();
-	ensureInit();
-	gpu.memoryManager.get().bindToUniform(1, opaqueProgram,
-		    opaqueProgram.getUniform("rootBuffer"));
-	//Make sure memory on the GPU is sync'ed by flushing stale pages to GPU mem.
-	//gpu.memoryManager.get().flushStalePages();// Make up your #%@!& mind, Chuck...
-	if(!currentRenderList().isDone())return;
-	final RenderList renderList = currentRenderList().get();
-	deferredProgram.use();
-	renderList.render(gl,cameraMatrixAsFlatArray);
-	// Update GPU
-	cameraMatrixAsFlatArray = renderList.sendToGPU(gl);
-	fpsTracking();
-	setFogColor(gpu.getTr().getWorld().getFogColor());
+	try{
+	    gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
+		ensureInit();
+		gpu.memoryManager.getRealtime().bindToUniform(1, opaqueProgram,
+			    opaqueProgram.getUniform("rootBuffer"));
+		//Make sure memory on the GPU is sync'ed by flushing stale pages to GPU mem.
+		//gpu.memoryManager.get().flushStalePages();
+		final RenderList renderList = currentRenderList().getRealtime();
+		deferredProgram.use();
+		renderList.render(gl,cameraMatrixAsFlatArray);
+		// Update GPU
+		cameraMatrixAsFlatArray = renderList.sendToGPU(gl);
+		fpsTracking();
+		setFogColor(gpu.getTr().getWorld().getFogColor());
+	}catch(NotReadyException e){}
     }//end render()
     
     public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){

@@ -85,11 +85,8 @@ public final class ThreadManager {
     private void gameplay() {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
-	if(tr.renderer.isDone() && tr.getPlayer()!=null){
-	    if(!tr.renderer.get().currentRenderList().isDone())
-		return;
-	}else return;
-	final List<WorldObject> vl = tr.renderer.get().currentRenderList().get().getVisibleWorldObjectList();
+	try{// NotReadyException
+	final List<WorldObject> vl = tr.renderer.getRealtime().currentRenderList().getRealtime().getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	synchronized(gameStateLock){
 	for (int i = 0; i<vl.size(); i++) {
@@ -108,6 +105,7 @@ public final class ThreadManager {
 		if(!multiplePlayer)wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
 	}// end sync(gameStateLock)
+	}catch(NotReadyException e){}
 	if(tr.getPlayer()!=null){
 	    tr.getCollisionManager().performCollisionTests();
 	}
@@ -123,20 +121,20 @@ public final class ThreadManager {
 	final long currTimeMillis = System.currentTimeMillis();
 	//Sanity checks
 	if(tr.renderer==null)		return;
-	if(!tr.renderer.isDone())	return;
 	if(visibilityCalcTask!=null && !mandatory){
 	    if(!visibilityCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}}
 	visibilityCalcTask = this.submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		//Thread.sleep(100);
+	       try{
 		synchronized(visibilityUpdateLock){
-		 tr.renderer.get().updateVisibilityList(mandatory);
+		 tr.renderer.getRealtime().updateVisibilityList(mandatory);
 		 tr.getCollisionManager().updateCollisionList();
 		 //Nudge of 10ms to compensate for drift of the timer task
 		 nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
 		 }//end sync(visibilityUpdateLock)
+	    }catch(NotReadyException e){}
 		return null;
 	    }});
     }//end visibilityCalc()
@@ -212,7 +210,7 @@ public final class ThreadManager {
     
     private void attemptRender(){
 	if(tr.renderer!=null){
-	    if(tr.renderer.isDone()){
+	    try{
 		 //Swap submitters
 		 synchronized(currentGPUMemAccessTaskSubmitter){
 		  currentGPUMemAccessTaskSubmitter.set(pendingGPUMemAccessTaskSubmitter);}
@@ -225,12 +223,12 @@ public final class ThreadManager {
 		 ///////// activeGPUMemAccessTasks should be empty beyond this point ////////
 		 if(!activeGPUMemAccessTasks.isEmpty())
 		     tr.showStopper(new RuntimeException("ThreadManager.activeGPUMemAccessTasks intolerably not empty."));
-		 if(ThreadManager.this.tr.renderer.isDone())ThreadManager.this.tr.renderer.get().render();
+		 ThreadManager.this.tr.renderer.getRealtime().render();
 		 synchronized(currentGPUMemAccessTaskSubmitter){
 		  currentGPUMemAccessTaskSubmitter.set(activeGPUMemAccessTaskSubmitter);}
 		while(!pendingGPUMemAccessTasks.isEmpty())
 		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
-	    	}////end if(renderer.isDone)
+	    	}catch(NotReadyException e){}
 	    }//end if(!null)
     }//end attemptRender()
     

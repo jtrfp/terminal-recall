@@ -108,13 +108,6 @@ public class RenderList {
 		/ PagedByteBuffer.PAGE_SIZE_BYTES)*3];
 	
 	task0.get();
-	tr.getThreadManager().submitToGL(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		//sendRenderListPageTable();
-		return null;
-	    }
-	}).get();
     }// end constructor
     
     private void sendRenderListPageTable(){
@@ -130,10 +123,8 @@ public class RenderList {
 	objectProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
 	final GLProgram depthQueueProgram = renderer.getDepthQueueProgram();
 	depthQueueProgram.use();
-	depthQueueProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
 	final GLProgram primaryProgram = renderer.getOpaqueProgram();
 	primaryProgram.use();
-	primaryProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
 	final GLProgram vertexProgram = renderer.getVertexProgram();
 	vertexProgram.use();
 	vertexProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
@@ -188,23 +179,24 @@ public class RenderList {
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
 	gl.glDisable(GL3.GL_CULL_FACE);
-	
-	int numRows = (int)Math.ceil(numOpaqueBlocks/256.);
-	int remainingBlocks = numOpaqueBlocks;
-	for(int i=0; i<numRows; i++){
-	    gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
-	    remainingBlocks -= 256;
-	}
-	
-	final int rowOffset = NUM_BLOCKS_PER_PASS/256;
-	final int vtxOffset = rowOffset*257;
-	numRows = (int)Math.ceil(numTransparentBlocks/256.);
-	remainingBlocks = numTransparentBlocks;
-	for(int i=0; i<numRows; i++){
-	    gl.glDrawArrays(GL3.GL_LINE_STRIP, vtxOffset+i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
-	    remainingBlocks -= 256;
-	}
-	
+	gl.glLineWidth(1);
+	{//Start variable scope
+    	 int numRows = (int)Math.ceil(numOpaqueBlocks/256.);
+    	 int remainingBlocks = numOpaqueBlocks;
+    	 for(int i=0; i<numRows; i++){
+    	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
+    	     remainingBlocks -= 256;
+    	 }
+    	
+    	 final int rowOffset = NUM_BLOCKS_PER_PASS/256;
+    	 final int vtxOffset = rowOffset*257;
+    	 numRows = (int)Math.ceil(numTransparentBlocks/256.);
+    	 remainingBlocks = numTransparentBlocks;
+    	 for(int i=0; i<numRows; i++){
+    	     gl.glDrawArrays(GL3.GL_LINE_STRIP, vtxOffset+i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
+    	     remainingBlocks -= 256;
+    	 }
+    	}//end variable scope
 	///// VERTEX STAGE
 	final GLProgram vertexProgram = renderer.getVertexProgram();
 	vertexProgram.use();
@@ -222,16 +214,36 @@ public class RenderList {
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Opaque
 	gl.glViewport(0, (NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK)/1024, Renderer.VERTEX_BUFFER_WIDTH, 256);
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Transparent
+	/*
+	///// PRIMITIVE STAGE
+	//Almost like a geometry shader, except writing lookup textures for each primitive.
+	gl.glDisable(GL3.GL_PROGRAM_POINT_SIZE);
+	gl.glPointSize(2);//2x2 points
+	gl.glViewport(0, 0, Renderer.PRIMITIVE_BUFFER_WIDTH, Renderer.PRIMITIVE_BUFFER_HEIGHT);
 	
+	gl.glDepthMask(false);
+	gl.glDisable(GL3.GL_BLEND);
+	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_CULL_FACE);
+	
+	final int primsPerRow = Renderer.PRIMITIVE_BUFFER_WIDTH/2;
+	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
+	int remainingPrims = numOpaqueBlocks*primsPerBlock;
+	int numRows = (int)Math.ceil(remainingPrims/primsPerRow);
+	for(int i=0; i<numRows; i++){
+	    gl.glDrawArrays(GL3.GL_POINTS, i*primsPerRow, remainingPrims<=primsPerRow?remainingPrims:primsPerRow);
+	    remainingPrims -= primsPerRow;
+	}//end for(numRows)
+	//Cleanup
+	gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+	gl.glPointSize(1);
+	*/
 	revertViewportToWindow(gl);
 	
 	gl.glDepthMask(true);
 	// OPAQUE.DRAW STAGE
 	final GLProgram primaryProgram = tr.renderer.get().getOpaqueProgram();
 	primaryProgram.use();
-	primaryProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
-	tr.gpu.get().memoryManager.get().bindToUniform(0, primaryProgram,
-		primaryProgram.getUniform("rootBuffer"));
 	renderer.getVertexXYTexture().bindToTextureUnit(1, gl);
 	renderer.getVertexUVTexture().bindToTextureUnit(2, gl);
 	renderer.getTextureIDTexture().bindToTextureUnit(3, gl);
@@ -284,14 +296,11 @@ public class RenderList {
 	// DRAW
 	final GLProgram depthQueueProgram = renderer.getDepthQueueProgram();
 	depthQueueProgram.use();
-	depthQueueProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	gl.glDisable(GL3.GL_MULTISAMPLE);
 	gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
 	gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
 	gl.glSampleMaski(0, 0xFF);
 	//object, root, depth, xy
-	tr.gpu.get().memoryManager.get().bindToUniform(0, depthQueueProgram,
-		depthQueueProgram.getUniform("rootBuffer"));
 	renderer.getOpaqueDepthTexture().bindToTextureUnit(1,gl);
 	renderer.getVertexXYTexture().bindToTextureUnit(2, gl);
 	renderer.getVertexUVTexture().bindToTextureUnit(3, gl);
@@ -316,8 +325,8 @@ public class RenderList {
 	if(tr.renderer.get().isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = tr.renderer.get().getDeferredProgram();
 	deferredProgram.use();
-	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Zero means
-						    // "Draw to screen"
+	//Zero means 'draw to screen.'
+	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
 	tr.gpu.get().memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
 	renderer.getOpaqueUVTexture().bindToTextureUnit(1,gl);

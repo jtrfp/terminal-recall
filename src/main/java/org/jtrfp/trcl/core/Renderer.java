@@ -37,9 +37,9 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public final class Renderer {
-    public static final int			VERTEX_BUFFER_WIDTH = 1024;
-    public static final int			VERTEX_BUFFER_HEIGHT = 4096;
-    public static final int			PRIMITIVE_BUFFER_WIDTH = 1024;
+    public static final int			VERTEX_BUFFER_WIDTH     = 1024;
+    public static final int			VERTEX_BUFFER_HEIGHT    = 4096;
+    public static final int			PRIMITIVE_BUFFER_WIDTH  = 1024;
     public static final int			PRIMITIVE_BUFFER_HEIGHT = 4096;
     public static final int			DEPTH_QUEUE_SIZE = 8;
     public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
@@ -127,7 +127,6 @@ public final class Renderer {
 		vertexProgram.getUniform("noCamMatrixBuffer").set((int)2);
 		
 		opaqueProgram.use();
-		opaqueProgram.getUniform("rootBuffer").set((int)0);
 		opaqueProgram.getUniform("xyBuffer").set((int)1);
 		opaqueProgram.getUniform("uvBuffer").set((int)2);
 		opaqueProgram.getUniform("texIDBuffer").set((int)3);
@@ -140,7 +139,6 @@ public final class Renderer {
 		objectProgram.getUniform("rootBuffer").set((int)0);
 		
 		depthQueueProgram.use();
-		depthQueueProgram.getUniform("rootBuffer").set((int)0);
 		depthQueueProgram.getUniform("depthTexture").set((int)1);
 		depthQueueProgram.getUniform("xyBuffer").set((int)2);
 		depthQueueProgram.getUniform("uvBuffer").set((int)3);
@@ -449,8 +447,6 @@ public final class Renderer {
 	try{
 	    gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
 		ensureInit();
-		gpu.memoryManager.getRealtime().bindToUniform(1, opaqueProgram,
-			    opaqueProgram.getUniform("rootBuffer"));
 		//Make sure memory on the GPU is sync'ed by flushing stale pages to GPU mem.
 		//gpu.memoryManager.get().flushStalePages();
 		final RenderList renderList = currentRenderList().getRealtime();

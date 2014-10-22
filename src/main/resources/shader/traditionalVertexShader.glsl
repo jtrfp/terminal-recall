@@ -123,40 +123,24 @@ int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 
 void main(){
 gl_Position.x=dummy*0;
-
+/*
 		int 	objectIndex 			= (gl_VertexID / GPU_VERTICES_PER_BLOCK);
 		int 	intraObjectVertexIndex 	= gl_VertexID % GPU_VERTICES_PER_BLOCK;
 		int 	objectDefIndex			= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
 		uvec4 	objectDef 				= texelFetch(rootBuffer,objectDefIndex);
 		int		numVertices 			= int(UByte(objectDef[2],0u));
-		
-		if(intraObjectVertexIndex<numVertices){
-			uint renderMode 	= UByte(objectDef[2],1u);
-			int matrixOffset 	= int(objectDef[0]);
-			int vertexOffset 	= int(objectDef[1]);
-			int modelScalar 	= int(UByte(objectDef[2],2u))-16;//Numerical domain offset for negatives
-			mat4 matrixNoCam 	= mat4(uintBitsToFloat(texelFetch(rootBuffer,matrixOffset)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+1)),
-										uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+2)),uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
-			ivec2 mOff			= ivec2((objectIndex%256)*4,127-(objectIndex/256));
-			// objectDef[3] unused.
-			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
-			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
-			flatTextureID 			= uintBitsToFloat(PAGE_SIZE_VEC4 * (UByte(packedVertex[3u],1u) | (UByte(packedVertex[3u],2u) << 8u ) | (UByte(packedVertex[3u],3u) << 16u)));
-			vec4 	vertexCoord;
-			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
-												float(firstSShort(packedVertex[1])));
-			vertexCoord.w=1;
-    		fragTexCoord 			= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
-    		ivec2 fetchPos			= ivec2(gl_VertexID%1024,gl_VertexID/1024);
-    		gl_Position.xy			= texelFetch(xyBuffer,fetchPos,0).xy;
-    		gl_Position.z			= texelFetch(zBuffer,fetchPos,0).x;
-    		gl_Position.w			= texelFetch(wBuffer,fetchPos,0).x;
-    		fragTexCoord			= texelFetch(uvBuffer,fetchPos,0).xy;
-    		flatTextureID			= texelFetch(texIDBuffer,fetchPos,0).x;
-			 screenLoc				= (((gl_Position.xy/gl_Position.w)+1)/2);
-			vec2 normXY					= texelFetch(normXYBuffer,fetchPos,0).xy;
-			float normZ					= texelFetch(normZBuffer,fetchPos,0).x;
+		*/
+		//if(intraObjectVertexIndex<numVertices){
+    		ivec2 fetchPos	= ivec2(gl_VertexID%1024,gl_VertexID/1024);
+    		gl_Position.xy	= texelFetch(xyBuffer,fetchPos,0).xy;
+    		gl_Position.z	= texelFetch(zBuffer,fetchPos,0).x;
+    		gl_Position.w	= texelFetch(wBuffer,fetchPos,0).x;
+    		fragTexCoord	= texelFetch(uvBuffer,fetchPos,0).xy;
+    		flatTextureID	= texelFetch(texIDBuffer,fetchPos,0).x;
+			 screenLoc		= (((gl_Position.xy/gl_Position.w)+1)/2);
+			vec2 normXY		= texelFetch(normXYBuffer,fetchPos,0).xy;
+			float normZ		= texelFetch(normZBuffer,fetchPos,0).x;
 						//Crunch this into [0,1] domain
-			fragNormal 					= ((vec4(normXY,normZ,0)).xyz+1)/2;
-    		}//end if(object)
+			fragNormal 		= (vec3(normXY,normZ)+1)/2;
+    	//	}//end if(object)
 }//end main()

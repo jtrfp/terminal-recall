@@ -45,6 +45,23 @@ uniform sampler2D		nXnYVBuffer;
 //DUMMY
 layout (location = 0) in float dummy;
 
+mat3 affine(vec2 u, vec2 v, vec2 off){//Each row is a column! Feed it vector [x,y,1], gives [nX,nY,1]
+ return mat3(
+ 	u.x-off.x,  u.y-off.y, 0,
+ 	v.x-off.x,  v.y-off.y, 0,
+ 	off.x,      off.y,     1
+ 		);
+ }//end affine()
+
+mat4 affine4(vec3 u, vec3 v, vec3 off){//Each row is a column! Feed it vector [x,y,1], gives [nX,nY,1]
+ return mat4(
+ 	u.x-off.x,  u.y-off.y, u.z-off.z,0,
+ 	v.x-off.x,  v.y-off.y, v.z-off.z,0,
+ 	off.x,      off.y,     off.z,    1,
+ 	0,          0,         0,        0
+ 		);
+ }//end affine4()
+
 void main(){
  gl_Position.x			= dummy*.00000001;//TODO: Need to compensate for point center offset.
  uint	pid				= uint(gl_VertexID);
@@ -54,7 +71,27 @@ void main(){
  int	vertexIndex		= primitiveIndex*3;
  gl_Position.x			+=(float(col)*PRIM_TEX_WIDTH_SCALAR*2f)-1f;
  gl_Position.y			= 1f-(float(row)*PRIM_TEX_HEIGHT_SCALAR*2f);
- vec4 v0				= getVtxUVZW(pid,0);
- vec4 v1				= getVtxUVZW(pid,1);
- vec4 v2				= getVtxUVZW(pid,2);
+ //Convert screen coords to normalized coords.
+ mat3 normalizationMatrix = inverse(affine(
+  getVtxXY(vtx+1),
+  getVtxXY(vtx+2),
+  getVtxXY(vtx+0)));
+ //Convert normalized coords to uv coords
+ mat3 uvMatrix = affine(
+  getVtxUV(vtx+1),
+  getVtxUV(vtx+2),
+  getVtxUV(vtx+0)
+ 	) * normalizationMatrix;
+ //Convert normalized coords to vtx normals
+ mat4 nXnYnZmatrix = affine3(
+  getVtxnXnYnZ(vtx+1),
+  getVtxnXnYnZ(vtx+2),
+  getVtxnXnYnZ(vtx+0)
+ 	) * normalizationMatrix;
+ //Convert normalized coords to zw
+ mat3 nXnYnZmatrix = affine(
+  getVtxZW(vtx+1),
+  getVtxZW(vtx+2),
+  getVtxZW(vtx+0)
+ 	) * normalizationMatrix;
  }//end main()

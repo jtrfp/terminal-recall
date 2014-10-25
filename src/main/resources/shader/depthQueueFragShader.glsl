@@ -23,9 +23,11 @@ uniform 	uint 	screenWidth;
 uniform 	uint 	screenHeight;
 
 // INPUTS
-smooth in vec2 fragTexCoord;
+noperspective in vec2 fragTexCoord;
+noperspective in float w;
 flat in float flatTextureID;
 noperspective in vec2 screenLoc;
+noperspective in vec4 gl_FragCoord;
 
 // OUTPUTS
 layout(location=0) out vec4 pushToDepthQueue;
@@ -33,5 +35,5 @@ layout(location=0) out vec4 pushToDepthQueue;
 void main(){
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 if(gl_FragCoord.z>depth)discard;
-pushToDepthQueue = vec4(fragTexCoord,flatTextureID,gl_FragCoord.z);
+pushToDepthQueue = vec4(fragTexCoord/w,flatTextureID,gl_FragCoord.z);
 }

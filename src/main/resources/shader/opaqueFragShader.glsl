@@ -23,9 +23,11 @@ uniform sampler2D	texturePalette;
 uniform int			useTextureMap;
 
 // INPUTS
-smooth in vec2 fragTexCoord;
-smooth in vec3 fragNormal;
+noperspective in vec2 fragTexCoord;
+noperspective in float w;
+noperspective in vec3 fragNormal;
 flat in float  flatTextureID;
+noperspective in vec4	gl_FragCoord;
 
 // OUTPUTS
 layout(location = 0) out vec2  fragTexCoordOut;
@@ -39,7 +41,7 @@ uint UNibble(uint _input, uint index)
 	{return (_input >> 4u*index) & 0x0000000Fu;}
 
 void main(){
-fragTexCoordOut.rg = fragTexCoord;
+fragTexCoordOut.rg = fragTexCoord/w;
 textureID	       = flatTextureID;
-fragNormalOut      = fragNormal;//Pass it along
+fragNormalOut      = fragNormal/w;//Pass it along
 }//end main()

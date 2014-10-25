@@ -152,15 +152,15 @@ void main(){
 			vertexCoord.w=1;
     		vec2 fragTexCoord 		= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
     		vec4 position 			= matrix * vertexCoord;
-			xy.xy					= (position.xy);
-			uv.xy					= fragTexCoord.xy;
-			w						= position.w;
+			w						= 1/position.w;
+			xy.xy					= position.xy;
+			uv.xy					= fragTexCoord.xy*w;
 			z						= position.z;
 			vec4 nNoCam				= matrixNoCam * (vec4(float(SByte(packedVertex[1],2u))/128,
 										   float(SByte(packedVertex[1],3u))/128,
 										   float(SByte(packedVertex[3],0u))/128, 0));
-    		nXY			 			= nNoCam.xy;
-			nZ 						= nNoCam.z;
+    		nXY			 			= w*((nNoCam.xy+1)/2);
+			nZ 						= w*((nNoCam.z+1)/2);
     		}//end if(object)
     		
     		else{

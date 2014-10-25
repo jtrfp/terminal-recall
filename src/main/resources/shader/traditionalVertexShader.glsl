@@ -25,10 +25,12 @@ const int GPU_VERTICES_PER_BLOCK	=96;
 const uint PAGE_SIZE_VEC4			=96u;
 
 //OUT
-smooth out vec2 		fragTexCoord;
-smooth out vec3 		fragNormal;
+noperspective out vec2 	fragTexCoord;
+noperspective out vec3 	fragNormal;
+noperspective out float	w;
 flat out float 			flatTextureID;
 noperspective out vec2	screenLoc;
+noperspective out vec4	gl_Position;
 
 //IN
 uniform uint 			renderListPageTable[172];
@@ -119,28 +121,20 @@ int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 	uint byte fragNormalZ, textureIDlo, textureIDmid, textureIDhi // 3 bytes unused
 */
 
-/////////////// MAIN ////////////////////////
+/////////////// MAIN ////////////////////////////////
 
 void main(){
 gl_Position.x=dummy*0;
-/*
-		int 	objectIndex 			= (gl_VertexID / GPU_VERTICES_PER_BLOCK);
-		int 	intraObjectVertexIndex 	= gl_VertexID % GPU_VERTICES_PER_BLOCK;
-		int 	objectDefIndex			= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
-		uvec4 	objectDef 				= texelFetch(rootBuffer,objectDefIndex);
-		int		numVertices 			= int(UByte(objectDef[2],0u));
-		*/
-		//if(intraObjectVertexIndex<numVertices){
     		ivec2 fetchPos	= ivec2(gl_VertexID%1024,gl_VertexID/1024);
     		gl_Position.xy	= texelFetch(xyBuffer,fetchPos,0).xy;
     		gl_Position.z	= texelFetch(zBuffer,fetchPos,0).x;
-    		gl_Position.w	= texelFetch(wBuffer,fetchPos,0).x;
+    		w				= texelFetch(wBuffer,fetchPos,0).x;
+    		gl_Position.w	= 1/w;
     		fragTexCoord	= texelFetch(uvBuffer,fetchPos,0).xy;
     		flatTextureID	= texelFetch(texIDBuffer,fetchPos,0).x;
 			 screenLoc		= (((gl_Position.xy/gl_Position.w)+1)/2);
 			vec2 normXY		= texelFetch(normXYBuffer,fetchPos,0).xy;
 			float normZ		= texelFetch(normZBuffer,fetchPos,0).x;
 						//Crunch this into [0,1] domain
-			fragNormal 		= (vec3(normXY,normZ)+1)/2;
-    	//	}//end if(object)
+			fragNormal 		= vec3(normXY,normZ);
 }//end main()

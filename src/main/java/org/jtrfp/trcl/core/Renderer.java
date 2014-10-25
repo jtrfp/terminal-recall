@@ -246,7 +246,7 @@ public final class Renderer {
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
 			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
 		vertexWTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
+			.newTexture()//// This is actually W-reciprocal.
 			.bind()
 			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
 				GL3.GL_RGBA, GL3.GL_FLOAT, null)

@@ -20,15 +20,15 @@
 
 //INPUTS
 flat in mat4 uvzwQuad;
-flat in mat4 nXnYQuad;
+flat in mat4 nXnYnZQuad;
 
 //OUTPUTS
-vec4 out		uvzwBuffer;
-vec2 out		nXnYBuffer;
+layout(location = 0) out vec4	uvzwBuffer;
+layout(location = 1) out vec4	nXnYnZBuffer;
 
 void main(){
- uint quadrant = gl_FragCoord.x%2+(gl_FragCoord.y%2)*2;
+ uint quadrant = uint(gl_FragCoord.x)%2u+(uint(gl_FragCoord.y)%2u)*2u;
  uvzwBuffer = uvzwQuad[quadrant];
- nXnYBuffer = nXnYBuffer[quadrant];
+ nXnYnZBuffer = nXnYnZQuad[quadrant];
  }
  

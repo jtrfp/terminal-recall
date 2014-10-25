@@ -23,75 +23,91 @@ const uint PAGE_SIZE_VEC4			= 96u;
 const uint PQUAD_SIDE_WIDTH			= 2u;
 const uint PRIM_TEXTURE_WIDTH		= 1024u;
 const uint PRIM_TEXTURE_HEIGHT		= 4096u;
+const uint VTX_TEXTURE_WIDTH		= 1024u;
+const uint VTX_TEXTURE_HEIGHT		= 4096u;
 const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
-const uint VERTICES_PER_ROW			= PRIMS_PER_ROW;
+const uint VERTICES_PER_ROW			= VTX_TEXTURE_WIDTH;
 
 const float PRIM_TEX_HEIGHT_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_HEIGHT);
 const float PRIM_TEX_WIDTH_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_WIDTH);
-
-const vec2 POINT_CENTER_OFFSET		= PRIM_TEX_HEIGHT_SCALAR*2;
+const float VTX_TEX_HEIGHT_SCALAR   = 1f/float(VTX_TEXTURE_HEIGHT);
+const float VTX_TEX_WIDTH_SCALAR    = 1f/float(VTX_TEXTURE_WIDTH);
 
 //OUTPUTS
 flat out mat4 uvzwQuad;
-flat out mat4 nXnYQuad;// UNUSED: two floats
+flat out mat4 nXnYnZQuad;// UNUSED: one float
 
 //IN
-uniform uint			primitiveOffset;
 uniform sampler2D		xyVBuffer;
 uniform sampler2D		wVBuffer;
+uniform sampler2D		zVBuffer;
 uniform sampler2D		uvVBuffer;
-uniform sampler2D		nXnYVBuffer;
+uniform sampler2D		nXnYnZVBuffer;
 
 //DUMMY
 layout (location = 0) in float dummy;
 
-mat3 affine(vec2 u, vec2 v, vec2 off){//Each row is a column! Feed it vector [x,y,1], gives [nX,nY,1]
- return mat3(
- 	u.x-off.x,  u.y-off.y, 0,
- 	v.x-off.x,  v.y-off.y, 0,
- 	off.x,      off.y,     1
- 		);
- }//end affine()
-
-mat4 affine4(vec3 u, vec3 v, vec3 off){//Each row is a column! Feed it vector [x,y,1], gives [nX,nY,1]
+mat4 affine(vec3 u, vec3 v, vec3 off){//Each row is a column! Feed it vector [x,y,z,1], gives [nX,nY,nZ,1]
  return mat4(
  	u.x-off.x,  u.y-off.y, u.z-off.z,0,
  	v.x-off.x,  v.y-off.y, v.z-off.z,0,
  	off.x,      off.y,     off.z,    1,
  	0,          0,         0,        0
  		);
- }//end affine4()
+ }//end affine()
 
 void main(){
  gl_Position.x			= dummy*.00000001;//TODO: Need to compensate for point center offset.
  uint	pid				= uint(gl_VertexID);
  uint	row				= pid/PRIMS_PER_ROW;
- uint	col				= pid%VERTICES_PER_ROW;
- int	primitiveIndex	= int(row*PRIMS_PER_ROW+col);
- int	vertexIndex		= primitiveIndex*3;
- gl_Position.x			+=(float(col)*PRIM_TEX_WIDTH_SCALAR*2f)-1f;
- gl_Position.y			= 1f-(float(row)*PRIM_TEX_HEIGHT_SCALAR*2f);
+ uint	col				= pid%PRIMS_PER_ROW;
+ uint	primitiveIndex	= row*PRIMS_PER_ROW+col;
+ uint	vertexIndex		= primitiveIndex*3u;
+ gl_Position.x			+=((float(col)+.5)*PRIM_TEX_WIDTH_SCALAR*2f)-1f;
+ gl_Position.y			= 1f-((float(row)+.5)*PRIM_TEX_HEIGHT_SCALAR*2f);
+ vec2 increment			= vec2(VTX_TEX_WIDTH_SCALAR,0);
+ vec2 v0				= vec2(
+ 				float(vertexIndex%VERTICES_PER_ROW)*VTX_TEX_WIDTH_SCALAR,
+ 				float(vertexIndex/VERTICES_PER_ROW)*VTX_TEX_HEIGHT_SCALAR);
+ vec2 v1				= v0+increment*1;
+ vec2 v2				= v0+increment*2;
+ ////////////////////////////////////////////////TODO: reciprocal-W
  //Convert screen coords to normalized coords.
- mat3 normalizationMatrix = inverse(affine(
-  getVtxXY(vtx+1),
-  getVtxXY(vtx+2),
-  getVtxXY(vtx+0)));
+ mat4 normalizationMatrix = inverse(affine(
+  vec3(texture(xyVBuffer,v1,0).xy,0),
+  vec3(texture(xyVBuffer,v2,0).xy,0),
+  vec3(texture(xyVBuffer,v0,0).xy,0)));
  //Convert normalized coords to uv coords
- mat3 uvMatrix = affine(
-  getVtxUV(vtx+1),
-  getVtxUV(vtx+2),
-  getVtxUV(vtx+0)
+ mat4 uvMatrix = affine(
+  vec3(texture(uvVBuffer,v1,0).xy,0),
+  vec3(texture(uvVBuffer,v2,0).xy,0),
+  vec3(texture(uvVBuffer,v0,0).xy,0)
  	) * normalizationMatrix;
  //Convert normalized coords to vtx normals
- mat4 nXnYnZmatrix = affine3(
-  getVtxnXnYnZ(vtx+1),
-  getVtxnXnYnZ(vtx+2),
-  getVtxnXnYnZ(vtx+0)
+ mat4 nXnYnZmatrix = affine(
+  texture(nXnYnZVBuffer,v1,0).xyz,
+  texture(nXnYnZVBuffer,v2,0).xyz,
+  texture(nXnYnZVBuffer,v0,0).xyz
  	) * normalizationMatrix;
  //Convert normalized coords to zw
- mat3 nXnYnZmatrix = affine(
-  getVtxZW(vtx+1),
-  getVtxZW(vtx+2),
-  getVtxZW(vtx+0)
+ mat4 zwMatrix = affine(
+  vec3(texture(zVBuffer,v1,0).x,texture(wVBuffer,v1,0).x,0),
+  vec3(texture(zVBuffer,v2,0).x,texture(wVBuffer,v2,0).x,0),
+  vec3(texture(zVBuffer,v0,0).x,texture(wVBuffer,v0,0).x,0)
  	) * normalizationMatrix;
+ 
+ const vec4 topLeft    = vec4(-1,1,0,1);
+ const vec4 topRight   = vec4(1,1,0,1);
+ const vec4 bottomLeft = vec4(-1,-1,0,1);
+ const vec4 bottomRight= vec4(1,-1,0,1);
+ 
+ uvzwQuad[0u]=vec4(vec2(uvMatrix*topLeft),vec2(zwMatrix*topLeft));
+ uvzwQuad[1u]=vec4(vec2(uvMatrix*topRight),vec2(zwMatrix*topRight));
+ uvzwQuad[2u]=vec4(vec2(uvMatrix*bottomLeft),vec2(zwMatrix*bottomLeft));
+ uvzwQuad[3u]=vec4(vec2(uvMatrix*bottomRight),vec2(zwMatrix*bottomRight));
+ 
+ nXnYnZQuad[0u]=nXnYnZmatrix*topLeft;
+ nXnYnZQuad[1u]=nXnYnZmatrix*topRight;
+ nXnYnZQuad[2u]=nXnYnZmatrix*bottomLeft;
+ nXnYnZQuad[3u]=nXnYnZmatrix*bottomRight;
  }//end main()

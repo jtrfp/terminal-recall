@@ -51,7 +51,8 @@ public final class Renderer {
     /*					*/	deferredProgram, 
     /*					*/	depthQueueProgram, 
     /*					*/	depthErasureProgram,
-    /*					*/	vertexProgram;
+    /*					*/	vertexProgram,
+    /*                                  */      primitiveProgram;
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
@@ -97,13 +98,15 @@ public final class Renderer {
 		// VERTEX SHADERS
 		GLVertexShader		objectVertexShader		= gpu.newVertexShader(),
 					traditionalVertexShader		= gpu.newVertexShader(),
-					fullScreenQuadVertexShader	= gpu.newVertexShader();
+					fullScreenQuadVertexShader	= gpu.newVertexShader(),
+					primitiveVertexShader		= gpu.newVertexShader();
 		GLFragmentShader	objectFragShader		= gpu.newFragmentShader(),
 					opaqueFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
 					depthQueueFragShader		= gpu.newFragmentShader(),
 					erasureFragShader		= gpu.newFragmentShader(),
-					vertexFragShader		= gpu.newFragmentShader();
+					vertexFragShader		= gpu.newFragmentShader(),
+					primitiveFragShader		= gpu.newFragmentShader();
 		objectVertexShader	  .setSourceFromResource("/shader/objectVertexShader.glsl");
 		objectFragShader	  .setSourceFromResource("/shader/objectFragShader.glsl");
 		traditionalVertexShader	  .setSourceFromResource("/shader/traditionalVertexShader.glsl");
@@ -113,6 +116,8 @@ public final class Renderer {
 		erasureFragShader	  .setSourceFromResource("/shader/erasureFragShader.glsl");
 		depthQueueFragShader	  .setSourceFromResource("/shader/depthQueueFragShader.glsl");
 		vertexFragShader	  .setSourceFromResource("/shader/vertexFragShader.glsl");
+		primitiveFragShader	  .setSourceFromResource("/shader/primitiveFragShader.glsl");
+		primitiveVertexShader	  .setSourceFromResource("/shader/primitiveVertexShader.glsl");
 		
 		objectProgram		=gpu.newProgram().attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
 		vertexProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(vertexFragShader).link();
@@ -120,6 +125,7 @@ public final class Renderer {
 		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
 		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
+		primitiveProgram	=gpu.newProgram().attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
 		
 		vertexProgram.use();
 		vertexProgram.getUniform("rootBuffer").set((int)0);
@@ -137,6 +143,13 @@ public final class Renderer {
 		
 		objectProgram.use();
 		objectProgram.getUniform("rootBuffer").set((int)0);
+		
+		primitiveProgram.use();
+		primitiveProgram.getUniform("xyVBuffer").set((int)0);
+		primitiveProgram.getUniform("wVBuffer").set((int)1);
+		primitiveProgram.getUniform("zVBuffer").set((int)2);
+		primitiveProgram.getUniform("uvVBuffer").set((int)3);
+		primitiveProgram.getUniform("nXnYnZVBuffer").set((int)4);
 		
 		depthQueueProgram.use();
 		depthQueueProgram.getUniform("depthTexture").set((int)1);

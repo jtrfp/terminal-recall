@@ -56,4 +56,9 @@ public class GLUniform {
 	gl.glUniformMatrix4fv(uniformID, 1, transpose, elements, 0);
 	return this;
     }
+
+    public GLUniform set(float float1, float float2) {
+	gl.glUniform2f(uniformID, float1, float2);
+	return this;
+    }
 }// end GLUniform

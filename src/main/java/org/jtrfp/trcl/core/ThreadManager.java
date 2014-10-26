@@ -76,6 +76,7 @@ public final class ThreadManager {
     };
     private AtomicReference<Submitter<TRFutureTask<?>>>	currentGPUMemAccessTaskSubmitter 
     	= new AtomicReference<Submitter<TRFutureTask<?>>>(activeGPUMemAccessTaskSubmitter);
+    private final long startupTimeMillis = System.currentTimeMillis();
     
     ThreadManager(final TR tr) {
 	this.tr = tr;
@@ -255,5 +256,9 @@ public final class ThreadManager {
 	    System.err.println(t);
 	System.err.println("This task: "+trFutureTaskIdentities.get());
 	tr.showStopper(new RuntimeException("Writing to GPU while rendering!"));
+    }//end notifyGPUMemAccessFault()
+
+    public long getMillisSinceStartup() {
+	return System.currentTimeMillis()-startupTimeMillis;
     }
 }// end ThreadManager

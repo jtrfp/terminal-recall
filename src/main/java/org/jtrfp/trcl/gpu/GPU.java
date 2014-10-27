@@ -59,12 +59,12 @@ public class GPU{
 	
 	public int glGet(int key){
 		IntBuffer buf = IntBuffer.wrap(new int[1]);
-		gl.glGetIntegerv(key, buf);
+		getGl().glGetIntegerv(key, buf);
 		return buf.get(0);
 		}
 	
 	public String glGetString(int key)
-		{return gl.glGetString(key);}
+		{return getGl().glGetString(key);}
 	
 	public ByteOrder getByteOrder(){
 		if(byteOrder==null)
@@ -75,7 +75,7 @@ public class GPU{
 		{return new GLTexture(this);}
 	public int newTextureID(){
 		IntBuffer ib= IntBuffer.allocate(1);
-		gl.glGenTextures(1, ib);
+		getGl().glGenTextures(1, ib);
 		ib.clear();
 		return ib.get();
 		}

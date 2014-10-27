@@ -35,6 +35,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.tools.Util;
 
 public final class TR{
@@ -49,6 +50,7 @@ public final class TR{
 	public static final boolean 	ANIMATED_TERRAIN		=false;
 	
 	public final TRFutureTask<GPU> 		gpu;
+	public final TRFutureTask<SoundSystem>	soundSystem;
 	private Player 				player;
 	public final RootWindow 		rootWindow;
 	private Color [] 			globalPalette, 
@@ -113,8 +115,14 @@ public final class TR{
 		    public GPU call() throws Exception {
 			return new GPU(TR.this);
 		    }});
+		soundSystem = new TRFutureTask<SoundSystem>(this, new Callable<SoundSystem>(){
+		    @Override
+		    public SoundSystem call() throws Exception {
+			return new SoundSystem(TR.this);
+		    }});
 		threadManager = new ThreadManager(this);
 		threadManager.threadPool.submit(gpu);
+		threadManager.threadPool.submit(soundSystem);//TODO: Use new methods
 		System.out.println("Initializing graphics engine...");
 		    renderer=new TRFutureTask<Renderer>(this,new Callable<Renderer>(){
 			@Override

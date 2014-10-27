@@ -319,6 +319,10 @@ public class RenderList {
 	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
 	gl.glDisable(GL3.GL_STENCIL_TEST);
 	
+	// SOUND
+	tr.soundSystem.get().render(gl);
+	revertViewportToWindow(gl);
+	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
 	gl.glDepthFunc(GL3.GL_ALWAYS);

@@ -224,4 +224,9 @@ public final class GLTexture {
 	gl.glTexImage1D(bindingTarget, 0, internalFormat, width, 0, internalOrder, numericalFormat, pixels);
 	return this;
     }
+
+    public GLTexture readPixels(int pixelFormat, int pixelDataType, ByteBuffer buffer) {
+	gl.glGetTexImage(bindingTarget, 0, pixelFormat, pixelDataType, buffer);
+	return this;
+    }
 }// end GLTexture

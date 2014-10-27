@@ -14,6 +14,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.Callable;
 
@@ -215,6 +216,12 @@ public final class GLTexture {
     public GLTexture setImage2DMultisample(int samples,
 	    int internalFormat, int width, int height, boolean fixedSampleLocations) {
 	gl.glTexImage2DMultisample(bindingTarget, samples, internalFormat, width, height, fixedSampleLocations);
+	return this;
+    }
+
+    public GLTexture setImage1D(int internalFormat, int width, int internalOrder, int numericalFormat,
+	    FloatBuffer pixels) {
+	gl.glTexImage1D(bindingTarget, 0, internalFormat, width, 0, internalOrder, numericalFormat, pixels);
 	return this;
     }
 }// end GLTexture

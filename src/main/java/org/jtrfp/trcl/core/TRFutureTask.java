@@ -29,7 +29,7 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     
     @Override
     public void run(){
-	try{super.run();}
+	try{super.run();super.get();}
 	catch(Exception e)
 	 {tr.showStopper(e);}
     }//end run()

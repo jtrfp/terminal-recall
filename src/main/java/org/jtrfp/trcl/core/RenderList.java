@@ -320,8 +320,8 @@ public class RenderList {
 	gl.glDisable(GL3.GL_STENCIL_TEST);
 	
 	// SOUND
-	tr.soundSystem.get().render(gl);
-	revertViewportToWindow(gl);
+	//tr.soundSystem.get().render(gl);
+	//revertViewportToWindow(gl);
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);

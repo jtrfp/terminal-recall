@@ -16,13 +16,14 @@
 #version 330
 
 // INPUTS
-uniform sampler1D soundTexture;
+uniform sampler2D soundTexture;
 smooth in float fragTexPos;
+noperspective in float fragRow;
 flat in vec2 panLR;
  
 // OUTPUTS
 layout (location = 0) out vec2 leftRightOut;
 
 void main(){
- leftRightOut.rg = panLR * texture(soundTexture,fragTexPos,0).r;
+ leftRightOut.rg = panLR * texture(soundTexture,vec2(fragTexPos,fragRow),0).r /* * .0000000001 + sin(gl_FragCoord.x/10)*/;
  }

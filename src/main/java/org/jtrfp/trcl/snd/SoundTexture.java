@@ -19,9 +19,20 @@ package org.jtrfp.trcl.snd;
 import org.jtrfp.trcl.gpu.GLTexture;
 
 public interface SoundTexture {
+    
+    public static final int ROW_LENGTH_SAMPLES = 1024;
 
-    int getLengthInSamples();
+    int getLengthInRealtimeSamples();
 
     GLTexture getGLTexture();
+    
+    /**
+     * Effectively the height of the texture.
+     * @return
+     * @since Oct 28, 2014
+     */
+    int getNumRows();
+
+    double getResamplingScalar();
 
 }//end SoundTexture

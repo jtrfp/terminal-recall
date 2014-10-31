@@ -16,20 +16,39 @@
 
 #version 330
 
+const uint SAMPLES_PER_ROW		= 1024u;
+
 // INPUTS
 uniform vec2 pan;
 uniform float start;
-uniform float length;
+uniform float lengthPerRow;
+uniform uint numRows;
 
 // OUTPUTS
 smooth out float fragTexPos;
+noperspective out float fragRow;
 flat out vec2 panLR;
 
 void main(){
- panLR = pan;
- gl_Position.x=((start+(gl_VertexID%2)*length));
- fragTexPos=gl_VertexID%2;
+ // U/V Zig-Zag pattern
+ /*
+ gl_Position.x=gl_VertexID==0?-1:1;
  gl_Position.y=0;
  gl_Position.z=1;
  gl_Position.w=1;
+ */
+ 
+ int sweep = int((gl_VertexID+1) / 2) % 2;
+ int row = gl_VertexID / 2;
+ fragTexPos = 1 - sweep;
+ float texelHeight = 1f/float(numRows);
+ fragRow = (float(row)*texelHeight) - texelHeight/2;
+ float rowsX = floor((gl_VertexID+1)/2) + floor(gl_VertexID/2)/float(SAMPLES_PER_ROW);
+ 
+ panLR = pan;
+ gl_Position.x= start+rowsX*lengthPerRow;
+ gl_Position.y=0;
+ gl_Position.z=1;
+ gl_Position.w=1;
+ 
  }

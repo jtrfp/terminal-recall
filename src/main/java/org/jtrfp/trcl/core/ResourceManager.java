@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -94,6 +95,10 @@ import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
 
+import de.quippy.javamod.multimedia.mod.loader.Module;
+import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
+import de.quippy.javamod.system.Helpers;
+
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
 	private SoftValueHashMap<Integer, TextureDescription> 
@@ -108,6 +113,8 @@ public class ResourceManager{
 		= new SoftValueHashMap<String,BINFile.Model>();
 	private SoftValueHashMap<String, Model> 		modelCache 		
 		= new SoftValueHashMap<String,Model>();
+	private SoftValueHashMap<String, Module> 		modCache 		
+		= new SoftValueHashMap<String,Module>();
 	private ExplosionSystem 				explosionFactory;
 	private SmokeSystem 					smokeSystem;
 	private PowerupSystem 					powerupSystem;
@@ -117,6 +124,8 @@ public class ResourceManager{
 	
 	public ResourceManager(TR tr){
 		this.tr=tr;
+		try{Helpers.registerAllClasses();}
+		catch(Exception e){tr.showStopper(e);}
 	}//end ResourceManager
 	
 	/**
@@ -665,4 +674,21 @@ public class ResourceManager{
 	    assert false;
 	    return null;
 	}//end getMissionText(...)
+
+	public Module getMOD(String podPath) {
+	    if(modCache.containsKey(podPath))
+		return modCache.get(podPath);
+	    Module result=null;
+	    try{
+	     final InputStream is = getInputStreamFromResource("MUSIC\\"+podPath);
+	     final File tempFile = File.createTempFile("org.jtrfp.trcl.mod", podPath);
+	     final FileOutputStream os = new FileOutputStream(tempFile);
+	     while(is.available()>0)
+		os.write(is.read());//Slow but it's a MOD so it won't matter much.
+	     os.close();
+	     result = ModuleFactory.getInstance(tempFile);
+	     modCache.put(podPath,result);
+	    }catch(Exception e){tr.showStopper(e);}
+	    return result;
+	}//end getMOD(...)
 }//end ResourceManager

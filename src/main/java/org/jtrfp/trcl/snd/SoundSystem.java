@@ -59,9 +59,9 @@ public final class SoundSystem {
 	}//end compare()
     });
     private final ArrayList<PlaybackEvent> activeEvents = new ArrayList<PlaybackEvent>();
-    private long bufferStartTimeSamples;
+    private long bufferStartTimeFrames;
     
-    private static final int SAMPLE_RATE=44100;
+    public static final int SAMPLE_RATE=44100;
     private static final int BUFFER_SIZE_FRAMES=4096*2;
     public static final int NUM_CHANNELS=2;
     public static final int BYTES_PER_SAMPLE=4;
@@ -96,6 +96,10 @@ public final class SoundSystem {
 		playbackTexture = gpu
 			.newTexture()
 			.bind()
+			.setMagFilter(GL3.GL_NEAREST)
+			.setMinFilter(GL3.GL_NEAREST)
+		 	.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+		 	.setWrapT(GL3.GL_CLAMP_TO_EDGE)
 			.setImage(GL3.GL_RG32F, BUFFER_SIZE_FRAMES,
 				NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
 				null);
@@ -123,10 +127,10 @@ public final class SoundSystem {
 	} catch (LineUnavailableException e) {
 	    tr.showStopper(e);
 	}
-
+/*
 	// Startup test beep.
-	final IntBuffer fb = IntBuffer.allocate(4096 * 256);
-	final int period=1024*64;
+	final IntBuffer fb = IntBuffer.allocate(1024 * 16);
+	final int period=1024*16;
 	for (int i = 0; i < fb.capacity(); i++) {
 	    if(i%period < 128)
 		fb.put((int) (Math.sin(i * .1)*(double)Integer.MAX_VALUE));
@@ -139,12 +143,12 @@ public final class SoundSystem {
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
-		 //enqueuePlaybackEvent(newSoundTexture(fb,44100),44100);
-		 //new MusicPlayer(tr);
+		 //enqueuePlaybackEvent(newSoundTexture(fb,44100),44100*30);
+		 new MusicPlayer(tr);
 		return null;
 	    }
 	    
-	});
+	});*/
 	new Thread() {
 	    @Override
 	    public void run() {
@@ -171,6 +175,7 @@ public final class SoundSystem {
 			for (int i = 0; i < BUFFER_SIZE_FRAMES * NUM_CHANNELS; i++) {
 			    iBuf.put((int) (fBuf.get() * (double) Integer.MAX_VALUE));
 			}
+			//iBuf.put(BUFFER_SIZE_FRAMES*NUM_CHANNELS-1,Integer.MAX_VALUE);//TODO: Remove
 			sourceDataLine.write(intBytes, 0, BUFFER_SIZE_BYTES);
 		    }// end while(true)
 		} catch (Exception e) {
@@ -273,7 +278,7 @@ public final class SoundSystem {
 	};//end new SoundTexture()
     }//end newSoundTexture
     
-    public void enqueuePlaybackEvent(SoundTexture tex, long startTimeSamples){
+    public synchronized void enqueuePlaybackEvent(SoundTexture tex, long startTimeSamples){
 	pendingEvents.add(new PlaybackEvent(tex,startTimeSamples));
     }
     
@@ -281,7 +286,7 @@ public final class SoundSystem {
 	firstRun=false;
     }
     
-    public void render(GL3 gl, ByteBuffer audioByteBuffer){
+    public synchronized void render(GL3 gl, ByteBuffer audioByteBuffer){
 	if(firstRun)firstRun();
 	    cleanActiveEvents();
 	    pickupActiveEvents(BUFFER_SIZE_FRAMES);
@@ -292,29 +297,34 @@ public final class SoundSystem {
 	    gl.glDisable(GL3.GL_LINE_SMOOTH);
 	    gl.glEnable(GL3.GL_BLEND);
 	    gl.glDepthFunc(GL3.GL_ALWAYS);
+	    gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
 	    gl.glDepthMask(false);
 	    gl.glBlendFunc(GL3.GL_ONE, GL3.GL_ONE);
 	    soundProgram.use();
 	    soundProgram.getUniform("soundTexture").set((int)0);
-	    
+	    //System.out.println("ACTIVE EVENTS="+activeEvents.size()+" startTimeFrames="+bufferStartTimeFrames);
 	    //Render
 	    for(PlaybackEvent ev:activeEvents){
+		//System.out.println("EVENT PROCESSED start="+ev.getStartTimeSamples()+" end="+ev.getEndTimeSamples()+" dur="+ev.getDurationSamples());
 		soundProgram.getUniform("pan").set(.5f, .5f);//Pan center
-		final double startTime=((ev.getStartTimeSamples()-bufferStartTimeSamples)/BUFFER_SIZE_FRAMES)*2-1;
+		final double startTimeInBuffers=((double)(ev.getStartTimeSamples()-bufferStartTimeFrames)/(double)BUFFER_SIZE_FRAMES)*2-1;
+		//System.out.println("startTime="+startTimeInBuffers);
 		//final double len = ev.getDurationSamples()/framesToWrite;
 		soundProgram.getUniform("numRows").setui((int)ev.getSoundTexture().getNumRows());
-		soundProgram.getUniform("start").set((float)startTime);
+		soundProgram.getUniform("start").set((float)startTimeInBuffers);
 		//soundProgram.getUniform("resamplingScalar").set((float)ev.getSoundTexture().getResamplingScalar());
 		soundProgram.getUniform("lengthPerRow")
 		 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)BUFFER_SIZE_FRAMES))*2*(float)ev.getSoundTexture().getResamplingScalar());
 		final int lengthInSegments = (int)(ev.getSoundTexture().getNumRows()) * 2; //Times two because of the turn
 		ev.getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
+		//System.out.println("SEGS="+(lengthInSegments+1)+" ROWS="+ev.getSoundTexture().getNumRows());
+		//gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, 3);
 		gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
 	    }//end for(events)
 	    //Read and export to sound card.
 	    gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);//Unbind so we can read off the output
 	    playbackTexture.bind().readPixels(GL3.GL_RG, GL3.GL_FLOAT, audioByteBuffer);// RG_INTEGER throws INVALID_OPERATION!?
-	bufferStartTimeSamples+=BUFFER_SIZE_FRAMES;
+	bufferStartTimeFrames+=BUFFER_SIZE_FRAMES;
 	//Cleanup
 	gl.glViewport(0, 0, tr.getRootWindow().getCanvas().getWidth(), tr.getRootWindow().getCanvas().getHeight());
 	gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
@@ -354,7 +364,7 @@ public final class SoundSystem {
     }//end PlaybackEvent
     
     private void pickupActiveEvents(long windowSizeInSamples){
-	final long currentTimeSamples = bufferStartTimeSamples;
+	final long currentTimeSamples = bufferStartTimeFrames;
 	final Iterator<PlaybackEvent> eI = pendingEvents.iterator();
 	while(eI.hasNext()){
 	    final PlaybackEvent event = eI.next();
@@ -368,7 +378,7 @@ public final class SoundSystem {
     }//end pickupActiveEvents()
     
     private void cleanActiveEvents(){
-	final long currentTimeSamples = bufferStartTimeSamples;
+	final long currentTimeSamples = bufferStartTimeFrames;
 	final Iterator<PlaybackEvent> eI = activeEvents.iterator();
 	while(eI.hasNext()){
 	    final PlaybackEvent event = eI.next();

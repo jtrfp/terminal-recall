@@ -676,15 +676,16 @@ public class ResourceManager{
 	}//end getMissionText(...)
 
 	public Module getMOD(String podPath) {
-	    if(modCache.containsKey(podPath))
-		return modCache.get(podPath);
-	    Module result=null;
+	    Module result = modCache.get(podPath);
+	    if(result!=null)
+		return result;
 	    try{
-	     final InputStream is = getInputStreamFromResource("MUSIC\\"+podPath);
+	     final InputStream is= getInputStreamFromResource("MUSIC\\"+podPath);
 	     final File tempFile = File.createTempFile("org.jtrfp.trcl.mod", podPath);
 	     final FileOutputStream os = new FileOutputStream(tempFile);
 	     while(is.available()>0)
 		os.write(is.read());//Slow but it's a MOD so it won't matter much.
+	     is.close();
 	     os.close();
 	     result = ModuleFactory.getInstance(tempFile);
 	     modCache.put(podPath,result);

@@ -123,7 +123,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
 	codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags) * (idH.x)*(dH.y); //Top left
 
  float sunIllumination			= clamp(dot(sunVector,normalize(norm)),0,1);
- if(length(norm)>.1)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
+ if(length(norm)>.4)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
  cTexel 						= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
  return cTexel;
  }//end intrinsicCodeTexel
@@ -139,7 +139,6 @@ textureTOC{
 **/
 
 void main(){
-//vec2	screenLoc 	= vec2(gl_FragCoord.x/screenWidth,gl_FragCoord.y/screenHeight);
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
 float 	linearDepth = linearizeDepth(depth);

@@ -470,8 +470,8 @@ public final class Renderer {
 		cameraMatrixAsFlatArray = renderList.sendToGPU(gl);
 		fpsTracking();
 		final World world = gpu.getTr().getWorld();
-		if(world==null)return;
-		setFogColor(world.getFogColor());
+		if(world!=null)
+		 setFogColor(world.getFogColor());
 	}catch(NotReadyException e){}
     }//end render()
     
@@ -484,8 +484,8 @@ public final class Renderer {
 	    public Void call() throws Exception {
 		final Submitter<PositionedRenderable> s = Renderer.this.currentRenderList().get().getSubmitter();
 		synchronized(s){
-		s.submit(pr);
-		return null;}
+		 s.submit(pr);
+		 return null;}
 	      }
 	});
     }//end temporarilyMakeImmediatelyVisible(...)

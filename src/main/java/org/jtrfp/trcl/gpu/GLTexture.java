@@ -29,6 +29,7 @@ public final class GLTexture {
     private final GL3 gl;
     private int bindingTarget = GL3.GL_TEXTURE_2D;
     private int internalColorFormat = GL3.GL_RGBA4;
+    private boolean deleted=false;
 
     public GLTexture(final GPU gpu) {
 	System.out.println("Creating GL Texture...");
@@ -134,8 +135,11 @@ public final class GLTexture {
     }
 
     public void delete() {
+	if(isDeleted())
+	    return;
 	gl.glBindTexture(bindingTarget, textureID.get());
 	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID.get() }));
+	deleted=true;
     }
 
     int getTextureID() {
@@ -228,5 +232,23 @@ public final class GLTexture {
     public GLTexture readPixels(int pixelFormat, int pixelDataType, ByteBuffer buffer) {
 	gl.glGetTexImage(bindingTarget, 0, pixelFormat, pixelDataType, buffer);
 	return this;
+    }
+    
+    @Override
+    public void finalize() throws Throwable{
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		delete();
+		return null;
+	    }}).get();
+	super.finalize();
+    }
+
+    /**
+     * @return the deleted
+     */
+    public boolean isDeleted() {
+        return deleted;
     }
 }// end GLTexture

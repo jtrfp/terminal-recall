@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
@@ -36,6 +35,11 @@ import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Propelled;
+import org.jtrfp.trcl.snd.GPUResidentMOD;
+import org.jtrfp.trcl.snd.MusicPlaybackEvent;
+import org.jtrfp.trcl.snd.SoundSystem;
+
+import de.quippy.javamod.multimedia.mod.loader.Module;
 
 public class Mission {
     private final TR 		tr;
@@ -59,6 +63,8 @@ public class Mission {
     private final LinkedList<Tunnel>
     				tunnelsRemaining = new LinkedList<Tunnel>();
     private final boolean	showIntro;
+    private volatile MusicPlaybackEvent
+    				bgMusic;
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -173,6 +179,21 @@ public class Mission {
 	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
+	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		final SoundSystem ss = Mission.this.tr.soundSystem.get();
+		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
+			bgMusic =ss
+				.getMusicFactory()
+				.create(new GPUResidentMOD(tr, tr
+					.getResourceManager().getMOD(
+						lvl.getBackgroundMusicFile())),
+					 true));
+		bgMusic.play();
+		return null;
+	    }// end call()
+	});
 	game.getUpfrontDisplay().removePersistentMessage();
 	game.getBackdropSystem().overworldMode();
 	game.getBackdropSystem().activate();
@@ -184,11 +205,18 @@ public class Mission {
 	game.getPlayer()	.setActive(true);
 	//Wait for mission end
 	synchronized(missionEnd){
-	while(missionEnd[0]==null){try{missionEnd.wait();}
+	 while(missionEnd[0]==null){try{missionEnd.wait();}
 		catch(InterruptedException e){break;}}}
 	//Completion summary
 	if(missionEnd[0]!=null)
 	    game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		bgMusic.stop();
+		return null;
+	    }// end call()
+	});
 	return missionEnd[0];
     }// end go()
 

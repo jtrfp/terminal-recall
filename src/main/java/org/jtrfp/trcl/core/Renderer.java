@@ -26,6 +26,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -468,7 +469,9 @@ public final class Renderer {
 		// Update GPU
 		cameraMatrixAsFlatArray = renderList.sendToGPU(gl);
 		fpsTracking();
-		setFogColor(gpu.getTr().getWorld().getFogColor());
+		final World world = gpu.getTr().getWorld();
+		if(world==null)return;
+		setFogColor(world.getFogColor());
 	}catch(NotReadyException e){}
     }//end render()
     

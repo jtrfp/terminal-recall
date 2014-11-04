@@ -20,7 +20,8 @@ public class Fury3 {
 	VOXFile result = new VOXFile();
 	result.setMissionName("Microsoft Fury3");
 	result.setNumEntries(24);
-	result.setLevels(new MissionLevel[] { missionLevel(1, 1, "TERRAN.LVL"),
+	result.setLevels(new MissionLevel[] { 
+		missionLevel(1, 1, "TERRAN.LVL"),
 		missionLevel(1, 2, "TERRAN2.LVL"),
 		missionLevel(1, 3, "TERRAN3.LVL"),
 
@@ -28,7 +29,8 @@ public class Fury3 {
 		missionLevel(2, 2, "ATMOS2.LVL"),
 		missionLevel(2, 3, "ATMOS3.LVL"),
 
-		missionLevel(3, 1, "RED.LVL"), missionLevel(3, 2, "RED2.LVL"),
+		missionLevel(3, 1, "RED.LVL"), 
+		missionLevel(3, 2, "RED2.LVL"),
 		missionLevel(3, 3, "RED3.LVL"),
 
 		missionLevel(4, 1, "CITY.LVL"),
@@ -39,9 +41,9 @@ public class Fury3 {
 		missionLevel(5, 2, "EGYPT2.LVL"),
 		missionLevel(5, 3, "EGYPT3.LVL"),
 
-		missionLevel(6, 1, "AMINE.LVL"),
-		missionLevel(6, 2, "AMINE2.LVL"),
-		missionLevel(6, 3, "AMINE3.LVL"),
+		missionLevel(6, 1, "ASTMINE.LVL"),
+		missionLevel(6, 2, "ASTMINE2.LVL"),
+		missionLevel(6, 3, "ASTMINE3.LVL"),
 
 		missionLevel(7, 1, "WATER.LVL"),
 		missionLevel(7, 2, "WATER2.LVL"),

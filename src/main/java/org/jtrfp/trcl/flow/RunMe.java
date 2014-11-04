@@ -50,9 +50,13 @@ public class RunMe{
 				String voxFileName = tr.getTrConfig().getVoxFile();
 				for(int argI=0; argI<args.length; argI++)
 					{if(args[argI].toUpperCase().endsWith(".POD")){
-					    if(args[argI].toUpperCase().endsWith("FURY3.POD")&&voxFileName==null)
+					    boolean f3Hint,tvHint;
+					    f3Hint = args[argI].toUpperCase().endsWith("FURY3.POD")&&voxFileName==null;
+					    tvHint = args[argI].toUpperCase().endsWith("TV.POD")&&voxFileName==null;
+					    
+					    if(f3Hint && !tvHint)
 						voxFileName="Fury3";
-					    else if(args[argI].toUpperCase().endsWith("TV.POD")&&voxFileName==null)
+					    else if(tvHint && !f3Hint)
 						voxFileName="TV";
 					    tr.getResourceManager().registerPOD(new File(args[argI]));
 					    }//end if(endsWith .POD)

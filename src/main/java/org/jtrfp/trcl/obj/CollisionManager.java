@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 
 public class CollisionManager {
@@ -37,29 +38,32 @@ public class CollisionManager {
 	System.out.println("CollisionManager.updateCollisionList() "+collideable.size());
 	synchronized(collideable){
 	collideable.clear();
-	tr.
-	getWorld().
-	itemsWithinRadiusOf(
-		tr.renderer.get().getCamera().getCameraPosition(),
-		new Submitter<PositionedRenderable>() {
-		    @Override
-		    public void submit(PositionedRenderable item) {
-			if (item instanceof WorldObject) {
-			    final WorldObject wo = (WorldObject)item;
-			    if(wo.isCollideable())collideable.add(wo);
-			}
-		    }
-
-		    @Override
-		    public void submit(Collection<PositionedRenderable> items) {
-			synchronized(items){
-			    for (PositionedRenderable pr : items) {
-				    submit(pr);
+	final World world = tr.getWorld();
+	    if (world != null) {
+		world.itemsWithinRadiusOf(tr.renderer.get().getCamera()
+			.getCameraPosition(),
+			new Submitter<PositionedRenderable>() {
+			    @Override
+			    public void submit(PositionedRenderable item) {
+				if (item instanceof WorldObject) {
+				    final WorldObject wo = (WorldObject) item;
+				    if (wo.isCollideable())
+					collideable.add(wo);
 				}
-			}//end synchronized(...)
-		    }
-		});
-	flip = !flip;
+			    }
+
+			    @Override
+			    public void submit(
+				    Collection<PositionedRenderable> items) {
+				synchronized (items) {
+				    for (PositionedRenderable pr : items) {
+					submit(pr);
+				    }
+				}// end synchronized(...)
+			    }
+			});
+		flip = !flip;
+	    }// end if(!null)
 	}//end sync(collideable)
 	System.out.println("Done.");
     }// end updateVisibilityList()

@@ -49,19 +49,27 @@ public class RunMe{
 				TR tr = new TR();
 				tr.gatherSysInfo();
 				String voxFileName = tr.getTrConfig().getVoxFile();
-				boolean f3Hint=false,tvHint=false;
+				boolean f3Hint=false,tvHint=false,furyseHint=false;
 				for(int argI=0; argI<args.length; argI++)
 					{if(args[argI].toUpperCase().endsWith(".POD")){
 					    final File file = new File(args[argI]);
 					    PodFile pod = new PodFile(file);
 					    final String podComment = pod.getData().getComment();
-					    f3Hint = podComment.toUpperCase().startsWith("FURY3")&&voxFileName==null;
-					    tvHint = podComment.toUpperCase().startsWith("TV")&&voxFileName==null;
+					    if(voxFileName==null){
+						f3Hint = podComment.toUpperCase().startsWith("FURY3");
+						tvHint = podComment.toUpperCase().startsWith("TV");
+						furyseHint = podComment.toUpperCase().startsWith("FURYSE");
+					    }
 					    tr.getResourceManager().registerPOD(pod);
 					    }//end if(endsWith .POD)
 					}//end for(args)
-				if(f3Hint != tvHint)
-				 voxFileName=f3Hint?"Fury3":"TV";
+				int numValidHints=0 + (f3Hint?1:0) + (tvHint?1:0) + (furyseHint?1:0);
+				
+				if(numValidHints==1){
+				 voxFileName=f3Hint?"Fury3":voxFileName;
+				 voxFileName=tvHint?"TV":voxFileName;
+				 voxFileName=furyseHint?"FurySE":voxFileName;
+				}//end if(hints==1)
 				try{
 				    if(voxFileName==null)
 					tr.showStopper(new FileNotFoundException(

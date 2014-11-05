@@ -82,6 +82,7 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
@@ -665,6 +666,8 @@ public class ResourceManager{
 	    	return new Fury3().getDefaultMission();
 	    if(fileName.contentEquals("TV"))
 	    	return new TV().getDefaultMission();
+	    if(fileName.contentEquals("FurySE"))
+	    	return new FZone().getDefaultMission();
 	    InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		VOXFile result = new Parser().readToNewBean(is, VOXFile.class);
 		is.close();

@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Component;
 
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -108,30 +109,32 @@ public class Camera extends WorldObject implements VisibleEverywhere{
     }
 	
 	private RealMatrix applyMatrix(){
-		Vector3D eyeLoc = getCameraPosition();
-		Vector3D aZ = getLookAtVector().negate();
-		Vector3D aX = getUpVector().crossProduct(aZ).normalize();
-		Vector3D aY = /*aZ.crossProduct(aX)*/getUpVector();
+	        try{
+		 Vector3D eyeLoc = getCameraPosition();
+		 Vector3D aZ = getLookAtVector().negate();
+		 Vector3D aX = getUpVector().crossProduct(aZ).normalize();
+		 Vector3D aY = getUpVector();
 
-		rotationMatrix = new Array2DRowRealMatrix(new double[][]
+		 rotationMatrix = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
 				{ aX.getX(), aX.getY(), aX.getZ(), 0 }, new double[]
 				{ aY.getX(), aY.getY(), aY.getZ(), 0 }, new double[]
 				{ aZ.getX(), aZ.getY(), aZ.getZ(), 0 }, new double[]
 				{ 0, 0, 0, 1 } });
 
-		RealMatrix tM = new Array2DRowRealMatrix(new double[][]
+		 RealMatrix tM = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
 				{ 1, 0, 0, -eyeLoc.getX() }, new double[]
 				{ 0, 1, 0, -eyeLoc.getY() }, new double[]
 				{ 0, 0, 1, -eyeLoc.getZ() }, new double[]
 				{ 0, 0, 0, 1 } });
 		
-		return cameraMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(tM));
+		 return cameraMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(tM));
+	         }catch(MathArithmeticException e){}//Don't crash.
+	        return cameraMatrix;
 		}//end applyMatrix()
 	public synchronized void setViewDepth(double cameraViewDepth){
 	    	this.viewDepth=cameraViewDepth;
-		//cameraMatrix=null;
 		projectionMatrix=null;
 		}
 	

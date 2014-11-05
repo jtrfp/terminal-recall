@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Map.Entry;
 
+import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
 
@@ -48,21 +49,20 @@ public class RunMe{
 				TR tr = new TR();
 				tr.gatherSysInfo();
 				String voxFileName = tr.getTrConfig().getVoxFile();
+				boolean f3Hint=false,tvHint=false;
 				for(int argI=0; argI<args.length; argI++)
 					{if(args[argI].toUpperCase().endsWith(".POD")){
-					    boolean f3Hint,tvHint;
-					    f3Hint = args[argI].toUpperCase().endsWith("FURY3.POD")&&voxFileName==null;
-					    tvHint = args[argI].toUpperCase().endsWith("TV.POD")&&voxFileName==null;
-					    
-					    if(f3Hint && !tvHint)
-						voxFileName="Fury3";
-					    else if(tvHint && !f3Hint)
-						voxFileName="TV";
-					    tr.getResourceManager().registerPOD(new File(args[argI]));
+					    final File file = new File(args[argI]);
+					    PodFile pod = new PodFile(file);
+					    final String podComment = pod.getData().getComment();
+					    f3Hint = podComment.toUpperCase().startsWith("FURY3")&&voxFileName==null;
+					    tvHint = podComment.toUpperCase().startsWith("TV")&&voxFileName==null;
+					    tr.getResourceManager().registerPOD(pod);
 					    }//end if(endsWith .POD)
 					}//end for(args)
+				if(f3Hint != tvHint)
+				 voxFileName=f3Hint?"Fury3":"TV";
 				try{
-				    
 				    final VOXFile vox = tr.getResourceManager().getVOXFile(voxFileName);
 				    final Game game = tr.newGame(vox);
 				    final String level = tr.getTrConfig().skipToLevel();

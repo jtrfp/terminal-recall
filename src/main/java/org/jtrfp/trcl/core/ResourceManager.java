@@ -153,9 +153,14 @@ public class ResourceManager{
 		throw new FileNotFoundException(name);
 		}//end getInputStreamFromResource(...)
 	
-	public void registerPOD(File f) throws FileLoadException{
-		if(f==null)throw new NullPointerException("fileToUse should not be null.");
-		pods.add(new PodFile(f).getData());
+	public void registerPOD(PodFile podToRegister) throws FileLoadException{
+	    if(podToRegister==null)throw new NullPointerException("fileToRegister should not be null.");
+	    pods.add(podToRegister.getData());
+	}
+	
+	public void registerPOD(File fileToRegister) throws FileLoadException{
+		if(fileToRegister==null)throw new NullPointerException("fileToRegister should not be null.");
+		registerPOD(new PodFile(fileToRegister));
 		}
 	
 	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{

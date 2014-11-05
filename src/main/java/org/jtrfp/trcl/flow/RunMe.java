@@ -63,6 +63,9 @@ public class RunMe{
 				if(f3Hint != tvHint)
 				 voxFileName=f3Hint?"Fury3":"TV";
 				try{
+				    if(voxFileName==null)
+					tr.showStopper(new FileNotFoundException(
+						"No VOX file specified. TRCL failed to auto-identify the game you are trying to play."));
 				    final VOXFile vox = tr.getResourceManager().getVOXFile(voxFileName);
 				    final Game game = tr.newGame(vox);
 				    final String level = tr.getTrConfig().skipToLevel();

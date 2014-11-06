@@ -12,15 +12,33 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Window;
+import java.beans.PropertyEditorManager;
+import java.beans.PropertyEditorSupport;
+import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.core.RootWindow;
 import org.jtrfp.trcl.core.TRFuture;
+import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.mem.MemoryManager;
 
 public final class GLTexture {
     private final GPU gpu;
@@ -30,6 +48,11 @@ public final class GLTexture {
     private int bindingTarget = GL3.GL_TEXTURE_2D;
     private int internalColorFormat = GL3.GL_RGBA4;
     private boolean deleted=false;
+    private static GLProgram textureRenderProgram;
+    private String debugName="UNNAMED";
+    private final double [] expectedMaxValue = new double[]{1,1,1,1};
+    private final double [] expectedMinValue = new double[]{0,0,0,0};
+    private int preferredUpdateIntervalMillis = 500;
 
     public GLTexture(final GPU gpu) {
 	System.out.println("Creating GL Texture...");
@@ -45,7 +68,12 @@ public final class GLTexture {
     }// end constructor
     
     public GLTexture setImage(int internalOrder, int width, int height, int colorOrder, int numericalFormat, Buffer pixels){
-	gl.glTexImage2D(bindingTarget, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	if(pixels==null && width*height*16 < MemoryManager.ZEROES.capacity()){
+	    pixels=MemoryManager.ZEROES;
+	    synchronized(pixels){
+		pixels.clear();gl.glTexImage2D(bindingTarget, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);}
+	    }//end if(null)
+	else gl.glTexImage2D(bindingTarget, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
 	return this;
     }
     public GLTexture setParameteri(int parameterName, int value){
@@ -250,5 +278,213 @@ public final class GLTexture {
      */
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public GPU getGPU() {
+	return gpu;
+    }
+    
+    private static GLProgram getTextureRenderProgram(GPU gpu){
+	if(textureRenderProgram!=null)
+	    return textureRenderProgram;
+	try{
+	    GLShader vs = gpu.newVertexShader().setSourceFromResource("/shader/fullScreenQuadVertexShader.glsl");
+	    GLShader fs = gpu.newFragmentShader().setSourceFromResource("/shader/fullScreenTextureFragShader.glsl");
+	    textureRenderProgram = gpu.newProgram().attachShader(vs).attachShader(fs).link();
+	    textureRenderProgram.validate();
+	    textureRenderProgram.use();
+	    textureRenderProgram.getUniform("textureToUse").set((int)0);
+	}catch(IOException e){gpu.getTr().showStopper(e);}
+	return textureRenderProgram;
+    }//end getTextureRenderProgram(...)
+    
+    public static final class PropertyEditor extends PropertyEditorSupport{
+	@Override
+	public Component getCustomEditor(){
+	    final GLTexture source = (GLTexture)getSource();
+	    final JPanel result = new JPanel();
+	    if(source.getBindingTarget()==GL3.GL_TEXTURE_2D){
+		result.add(new TextureViewingPanel(source, source.getGPU().getTr().getRootWindow()));
+	    }//TODO: Texture 1D
+	    return result;
+	}//end getCustomEditor()
+    }//end PropertyEditor
+    
+    static{
+	PropertyEditorManager.registerEditor(GLTexture.class, GLTexture.PropertyEditor.class);
+    }//end static{}
+    
+    private static class TextureViewingPanel extends JPanel{
+	private static final long serialVersionUID = 4580039742312228700L;
+	private final RootWindow frame;
+	private GLTexture colorTexture;
+	private GLFrameBuffer frameBuffer;
+	private static final Dimension PANEL_SIZE = new Dimension(200,100);
+	private TRFutureTask future;
+	private final ByteBuffer rgbaBytes = ByteBuffer.allocate((int)((PANEL_SIZE.getWidth()*PANEL_SIZE.getHeight()*4*4)))
+		.order(ByteOrder.nativeOrder());
+	private final FloatBuffer rgbaFloats = rgbaBytes.asFloatBuffer();
+	private final Thread updateThread;
+	public TextureViewingPanel(final GLTexture parent, RootWindow root){
+	    super();
+	    this.setSize(PANEL_SIZE);
+	    this.setPreferredSize(PANEL_SIZE);
+	    this.setMinimumSize(PANEL_SIZE);
+	    this.setAlignmentX(Component.LEFT_ALIGNMENT);
+	    frame = parent.getGPU().getTr().getRootWindow();
+	    final ThreadManager tm = parent.getGPU().getTr().getThreadManager();
+	    final GPU gpu = parent.getGPU();
+	    final Canvas canvas = frame.getCanvas();
+	    updateThread = new Thread(){
+		@Override
+		public void run(){
+		    while(true){
+			try{Thread.currentThread().sleep(parent.getPreferredUpdateIntervalMillis());}
+			catch(InterruptedException e){e.printStackTrace();}
+			Window ancestor = SwingUtilities.getWindowAncestor(TextureViewingPanel.this);
+			if(ancestor!=null)
+			    if(ancestor.isVisible()){
+			 tm.submitToGL(new Callable<Void>(){
+			    @Override
+			    public Void call() throws Exception {
+				GL3 gl = gpu.getGl();
+				gl.glDepthMask(false);
+				gl.glViewport(0, 0, getWidth(), getHeight());
+				gl.glDepthFunc(GL3.GL_ALWAYS);
+				final double [] min = parent.getExpectedMinValue();
+				final double [] max = parent.getExpectedMaxValue();
+				final GLProgram prg = getTextureRenderProgram(gpu);
+				prg.use();
+				prg.getUniform("scalar").set(
+					1f/(float)(max[0]-min[0]), 
+					1f/(float)(max[1]-min[1]), 
+					1f/(float)(max[2]-min[2]), 
+					1f/(float)(max[3]-min[3]));
+				prg.getUniform("offset").set(
+					(float)min[0]/(float)(max[0]-min[0]), 
+					(float)min[1]/(float)(max[1]-min[1]), 
+					(float)min[2]/(float)(max[2]-min[2]), 
+					(float)min[3]/(float)(max[3]-min[3]));
+				colorTexture.bind().readPixels(GL3.GL_RGBA, GL3.GL_FLOAT, rgbaBytes);
+				frameBuffer.bindToDraw();
+				parent.bindToTextureUnit(0, gpu.getGl());
+				gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+				rgbaBytes.clear();
+				//Cleanup
+				gl.glViewport(0, 0, canvas.getWidth(), canvas.getHeight());
+				gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
+				TextureViewingPanel.this.repaint();
+				return null;
+			    }//end call()
+			}).get();}
+		    }//end while(true)
+		}//end run()
+	    };
+	    tm.submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    colorTexture = gpu
+			    .newTexture()
+			    .bind()
+			    .setMinFilter(GL3.GL_NEAREST)
+			    .setMagFilter(GL3.GL_NEAREST)
+			    .setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			    .setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			    .setImage(GL3.GL_RGBA32F, 
+				    (int)PANEL_SIZE.getWidth(), 
+				    (int)PANEL_SIZE.getHeight(), 
+				    GL3.GL_RGBA, 
+				    GL3.GL_FLOAT, null);
+		    frameBuffer = gpu
+			    .newFrameBuffer()
+			    .bindToDraw()
+			    .attachDrawTexture(colorTexture, GL3.GL_COLOR_ATTACHMENT0)
+			    .setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+		    if(gpu.getGl().glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+			    throw new RuntimeException("Texture display frame buffer setup failure. OpenGL code "+gpu.getGl().glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+			}
+		    updateThread.start();
+		    return null;
+		}});
+	}//end constructor
+	
+	final float [] val = new float[4];
+	
+	@Override
+	public void paint(Graphics g){
+	    super.paint(g);
+	    rgbaFloats.clear();
+	    for(int y=0; y<getHeight();y++)
+		for(int x=0; x<getWidth();x++){
+		    rgbaFloats.get(val);
+		    g.setColor(new Color(val[0],val[1],val[2],1));
+		    g.fillRect(x, y, 1, 1);}
+	}//end paint(...)
+    }//end TextureViewingCanvas
+
+    /**
+     * @return the debugName
+     */
+    public String getDebugName() {
+        return debugName;
+    }
+
+    /**
+     * @param debugName the debugName to set
+     */
+    public GLTexture setDebugName(String debugName) {
+        this.debugName = debugName;
+        return this;
+    }
+
+    /**
+     * @return the expectedMaxValue
+     */
+    public double[] getExpectedMaxValue() {
+        return expectedMaxValue;
+    }
+
+    /**
+     * @return the expectedMinValue
+     */
+    public double[] getExpectedMinValue() {
+        return expectedMinValue;
+    }
+
+    /**
+     * @param expectedMaxValue the expectedMaxValue to set
+     */
+    public GLTexture setExpectedMaxValue(double r, double g, double b, double a) {
+        this.expectedMaxValue[0]=r;
+        this.expectedMaxValue[1]=g;
+        this.expectedMaxValue[2]=b;
+        this.expectedMaxValue[3]=a;
+        return this;
+    }
+
+    /**
+     * @param expectedMinValue the expectedMinValue to set
+     */
+    public GLTexture setExpectedMinValue(double r, double g, double b, double a) {
+	this.expectedMaxValue[0]=r;
+        this.expectedMaxValue[1]=g;
+        this.expectedMaxValue[2]=b;
+        this.expectedMaxValue[3]=a;
+        return this;
+    }
+
+    /**
+     * @return the preferredUpdateIntervalMillis
+     */
+    public int getPreferredUpdateIntervalMillis() {
+        return preferredUpdateIntervalMillis;
+    }
+
+    /**
+     * @param preferredUpdateIntervalMillis the preferredUpdateIntervalMillis to set
+     */
+    public GLTexture setPreferredUpdateIntervalMillis(int preferredUpdateIntervalMillis) {
+        this.preferredUpdateIntervalMillis = preferredUpdateIntervalMillis;
+        return this;
     }
 }// end GLTexture

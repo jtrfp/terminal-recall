@@ -107,20 +107,19 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
  vec2	ceilTexXY	= ceil(texelXY);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
- vec2	dH			= clamp(vec2(codeXY.x - 3,codeXY.y - 3),0,1);
- vec2	idH			= 1-dH;
+ vec2	dH			= vec2(codeXY.x,codeXY.y)-3;
  uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
  vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
  if(dH.x>0 && dH.y<=0) cTexel = //Far right
-	cTexel * (idH.x) + codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags) * (dH.x);
+    mix(cTexel,codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags),dH.x);
  else if(dH.y>0 && dH.x<=0)cTexel = //Far down
-	cTexel * (idH.y) + codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags) * (dH.y);
+ 	mix(cTexel,codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags),dH.y);
  else if(dH.y>0 && dH.x>0)cTexel = //Corner
-	cTexel * (idH.x)*(idH.y)+ //Bottom left
-	codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags) * dH.x *(idH.y)+ //Bottom right
-	codeTexel(ceilTexXY,textureID,tDims,renderFlags) * dH.x*dH.y+ //Top right
-	codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags) * (idH.x)*(dH.y); //Top left
+ 	mix(
+ 	 mix(cTexel,codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags),dH.y),//Left
+ 	 mix(codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags),codeTexel(ceilTexXY,textureID,tDims,renderFlags),dH.y),//Right
+ 	   dH.x);//Vertical
 
  float sunIllumination			= clamp(dot(sunVector,normalize(norm)),0,1);
  if(length(norm)>.4)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;

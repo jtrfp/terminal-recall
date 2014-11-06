@@ -181,7 +181,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("camMatrixTexture");
 		noCamMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -190,7 +191,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("noCamMatrixTexture");
 		objectFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -209,7 +211,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("vertexXYTexture");
 		vertexNormXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -218,7 +221,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("vertexNormXYTexture");
 		vertexNormZTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -227,7 +231,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("vertexNormZTexture");
 		vertexUVTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -236,7 +241,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("vertexUVTexture");
 		vertexZTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -245,7 +251,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("vertexZTexture");
 		vertexWTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()//// This is actually W-reciprocal.
 			.bind()
@@ -254,7 +261,8 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("vertexWTexture");
 		vertexTextureIDTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
@@ -263,7 +271,9 @@ public final class Renderer {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setExpectedMaxValue(65535, 65535, 65535, 65535)
+			.setDebugName("vertexTextureIDTexture");
 		vertexFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -292,14 +302,20 @@ public final class Renderer {
 			.setImage(GL3.GL_RG32F, PRIMITIVE_BUFFER_WIDTH, PRIMITIVE_BUFFER_HEIGHT, GL3.GL_RGBA,
 				GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST);
+			.setMinFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("primitiveNormTexture");
 		primitiveUVZWTexture = gpu  //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RGBA32F, PRIMITIVE_BUFFER_WIDTH, PRIMITIVE_BUFFER_HEIGHT, GL3.GL_RGBA,
 				GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST);
+			.setMinFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("primitiveUVZWTexture");
 		primitiveFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -315,16 +331,26 @@ public final class Renderer {
 		opaqueUVTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_RG16, width, height, GL3.GL_RGB,
+			.setImage(GL3.GL_RG16F, width, height, GL3.GL_RGB,
 				GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST);
+			.setMinFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setExpectedMinValue(-1, -1, -1, -1)
+			.setExpectedMaxValue(1, 1, 1, 1)
+			.setDebugName("opaqueUVTexture");
 		opaqueNormTexture = gpu
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST);
+			.setMinFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setExpectedMinValue(-1, -1, -1, -1)
+			.setExpectedMaxValue(1, 1, 1, 1)
+			.setDebugName("opaqueNormTexture");
 		opaqueDepthTexture = gpu
 			.newTexture()
 			.bind()
@@ -333,7 +359,8 @@ public final class Renderer {
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setDebugName("opaqueDepthTexture");
 		opaqueTextureIDTexture = gpu
 			.newTexture()
 			.bind()
@@ -342,7 +369,9 @@ public final class Renderer {
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE);
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setExpectedMaxValue(65535, 65535, 65535, 65535)
+			.setDebugName("opaqueTextureIDTexture");
 		opaqueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()

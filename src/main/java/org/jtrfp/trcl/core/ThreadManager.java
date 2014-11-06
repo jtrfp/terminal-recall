@@ -149,9 +149,12 @@ public final class ThreadManager {
     
     public <T> TRFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr,c);
-	if(Thread.currentThread()!=renderingThread)
-	    result.enqueue();
-	else result.run();
+	if(Thread.currentThread()==renderingThread)
+	    if(tr.gpu.get().getGl().getContext().isCurrent()){
+		result.run();
+		return result;
+	    }
+	result.enqueue();
 	return result;
     }//end submitToGL(...)
     

@@ -101,6 +101,10 @@ public final class SoundSystem {
 			.setMinFilter(GL3.GL_NEAREST)
 		 	.setWrapS(GL3.GL_CLAMP_TO_EDGE)
 		 	.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+		 	.setDebugName("playbackTexture")
+		 	.setExpectedMinValue(-1, -1, -1, -1)
+		 	.setExpectedMaxValue(1, 1, 1, 1)
+		 	.setPreferredUpdateIntervalMillis(100)
 			.setImage(GL3.GL_RG32F, BUFFER_SIZE_FRAMES,
 				NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
 				null);
@@ -353,4 +357,8 @@ public final class SoundSystem {
 	pendingEvents.remove(event);
 	activeEvents.remove(event);
     }//end dequeneSoundEvent(...)
+
+    public GLFrameBuffer getSoundOutputFrameBuffer() {
+	return playbackFrameBuffer;
+    }
 }//end SoundSystem

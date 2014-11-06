@@ -25,6 +25,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.dbg.FramebufferStateWindow;
 import org.jtrfp.trcl.mem.GPUMemDump;
 
 public class RootWindow extends JFrame {
@@ -37,6 +38,7 @@ public class RootWindow extends JFrame {
     private final GLProfile 		glProfile 	= GLProfile.get(GLProfile.GL2GL3);
     private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
     private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
+    private final FramebufferStateWindow fbsw;
 
     public RootWindow(TR tr) {
 	this.tr = tr;
@@ -56,15 +58,16 @@ public class RootWindow extends JFrame {
 	    e.printStackTrace();
 	}//end try/catch Exception
 	setTitle("Terminal Recall");
+	fbsw = new FramebufferStateWindow(tr);
     }//end constructor
 
     private void configureMenuBar() {
 	setJMenuBar(new JMenuBar());
 	JMenu file = new JMenu("File"), window = new JMenu("Window");
-
 	// And menus to menubar
 	JMenuItem file_exit = new JMenuItem("Exit");
 	JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
+	JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
 	JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
 	// Menu item behaviors
 	file_exit.addActionListener(new ActionListener() {
@@ -79,11 +82,15 @@ public class RootWindow extends JFrame {
 		tr.getReporter().setVisible(true);
 	    };
 	});
+	frameBufferStatesMenuItem.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		fbsw.setVisible(true);
+	    }});
 	gpuMemDump.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent ev) {
 		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-
 		    @Override
 		    public Void call() throws Exception {
 			new GPUMemDump(tr);
@@ -101,6 +108,7 @@ public class RootWindow extends JFrame {
 	file.add(file_exit);
 	file.add(gpuMemDump);
 	window.add(debugStatesMenuItem);
+	window.add(frameBufferStatesMenuItem);
 	getJMenuBar().add(file);
 	getJMenuBar().add(window);
     }//end configureMenuBar()

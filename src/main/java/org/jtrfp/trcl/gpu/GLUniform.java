@@ -46,6 +46,11 @@ public class GLUniform {
 	gl.glUniform3f(uniformID, float1, float2, float3);
 	return this;
     }
+    
+    public GLUniform set(float float1, float float2, float float3, float float4) {
+	gl.glUniform4f(uniformID, float1, float2, float3, float4);
+	return this;
+    }
 
     public GLUniform setArrayui(int[] vals) {
 	gl.glUniform1uiv(uniformID, vals.length, IntBuffer.wrap(vals));

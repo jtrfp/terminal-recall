@@ -122,7 +122,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  	   dH.x);//Vertical
 
  float sunIllumination			= clamp(dot(sunVector,normalize(norm)),0,1);
- if(length(norm)>.4)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
+ if(length(norm)>.2)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
  cTexel 						= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
  return cTexel;
  }//end intrinsicCodeTexel

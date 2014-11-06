@@ -134,6 +134,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
     	    mobile=false;
     	    canTurn=false;
+    	    groundLocked=true;
     	    break;
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
@@ -376,13 +377,15 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
      posLimit.getPositionMinima()[1]=-TR.mapSquareSize*10;
      addBehavior(posLimit);}
     
-    if(groundLocked)
+    if(groundLocked){
 	addBehavior(new CustomDeathBehavior(new Runnable(){
 	    @Override
 	    public void run(){
 		tr.getGame().getCurrentMission().notifyGroundTargetDestroyed();
 	    }
 	}));
+	addBehavior(new TerrainLocked());
+	}
     else addBehavior(new CustomDeathBehavior(new Runnable(){
 	    @Override
 	    public void run(){
@@ -419,8 +422,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	addBehavior(new AccelleratedByPropulsion());
 	addBehavior(new VelocityDragBehavior());
 	
-	if(groundLocked){
-	    addBehavior(new TerrainLocked());}
+	if(groundLocked){}
 	else 	{//addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 	    	addBehavior(new CollidesWithTerrain().setAutoNudge(true).setNudgePadding(40000));
 	    	}

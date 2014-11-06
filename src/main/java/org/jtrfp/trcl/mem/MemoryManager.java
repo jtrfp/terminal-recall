@@ -35,6 +35,10 @@ public final class MemoryManager {
     private final GPU				gpu;
     private final ArrayList<WeakReference<PagedByteBuffer>>	
     						pagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
+    /**
+     * 16MB of zeroes. Don't forget to sync to avoid co-modification of the position.
+     */
+    public static final ByteBuffer		ZEROES = ByteBuffer.allocate(1024*1024*16);
     
     public MemoryManager(GPU gpu){
 	this.gpu=gpu;

@@ -141,7 +141,7 @@ public class WorldObject implements PositionedRenderable {
 	}// end if(instanceof)
 	throw new BehaviorNotFoundException("Cannot find behavior of type "
 		+ bC.getName() + " in behavior sandwich owned by "
-		+ this.getClass().getName());
+		+ this.toString());
     }// end probeForBehavior
 
     public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {

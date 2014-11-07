@@ -437,4 +437,46 @@ public class Mission {
 	foliageDestroyed++;
 	return this;
     }
+    
+    public void enterBossMode(final String bossMusicFile){
+	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		MusicPlaybackEvent evt;
+		final SoundSystem ss = Mission.this.tr.soundSystem.get();
+		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
+			evt =ss
+				.getMusicFactory()
+				.create(new GPUResidentMOD(tr, tr
+					.getResourceManager().getMOD(
+						bossMusicFile)),
+					 true));
+		evt.play();
+		bgMusic.stop();
+		bgMusic=evt;
+		return null;
+	    }// end call()
+	});
+    }//end enterBossMode()
+    
+    public void exitBossMode(){
+	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		MusicPlaybackEvent evt;
+		final SoundSystem ss = Mission.this.tr.soundSystem.get();
+		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
+			evt =ss
+				.getMusicFactory()
+				.create(new GPUResidentMOD(tr, tr
+					.getResourceManager().getMOD(
+						lvl.getBackgroundMusicFile())),
+					 true));
+		evt.play();
+		bgMusic.stop();
+		bgMusic=evt;
+		return null;
+	    }// end call()
+	});
+    }//end exitBossMode()
 }// end Mission

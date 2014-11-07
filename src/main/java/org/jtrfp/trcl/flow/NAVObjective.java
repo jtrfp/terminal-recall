@@ -173,6 +173,7 @@ public abstract class NAVObjective {
 			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
+				    mission.enterBossMode(bos.getMusicFile());
 				    tr.getGame().getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()
@@ -206,6 +207,12 @@ public abstract class NAVObjective {
 			indexedNAVObjectiveList.add(objective);
 			bossObject.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
 			//bossObject.addBehavior(new ChangesBehaviorWhenTargeted(true,DamageableBehavior.class));
+			bossObject.addBehavior(new CustomDeathBehavior(new Runnable(){
+			    @Override
+			    public void run(){
+				mission.exitBossMode();
+			    }//end run()
+			}));
 			bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
 			    public void run() {

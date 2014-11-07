@@ -85,6 +85,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case groundDumb:
     	    mobile=false;
     	    canTurn=false;
+    	    groundLocked=true;
     	    break;
     	case groundTargeting://Ground turrets
     	    {mobile=false;
@@ -472,6 +473,7 @@ private void unhandled(EnemyDefinition def){
 private void fallingObjectBehavior(){
     canTurn=false;
     addBehavior(new PulledDownByGravityBehavior());
+    addBehavior(new MovesByVelocity());
     addBehavior(new DamageableBehavior().setHealth(1));
     addBehavior(new CollidesWithTerrain());
 }
@@ -672,5 +674,13 @@ public boolean isShieldGen() {
  */
 public void setShieldGen(boolean shieldGen) {
     this.shieldGen = shieldGen;
+}
+
+@Override
+public String toString(){
+    return "DEFObject Model="+getModel().getDebugName()+" Logic="+logic+" GroundLocked="+groundLocked+
+	    "\n\tmobile="+mobile+" isRuin="+isRuin+" foliage="+foliage+" boss="+boss+" spinCrash="+spinCrash+
+	    "\n\tignoringProjectiles="+ignoringProjectiles+"\n"+
+	    "\tRuinObject="+ruinObject;
 }
 }//end DEFObject

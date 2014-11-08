@@ -360,7 +360,7 @@ public class RenderList {
 	gl.glDepthMask(true);
 	//INTERMEDIATE ERASE
 	renderer.getOpaqueFrameBuffer().bindToDraw();
-	gl.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+	gl.glClear(GL3.GL_DEPTH_BUFFER_BIT);
 	gl.glFlush();
 	gl.glWaitSync(rootBufferReadFinishedSync, 0, GL3.GL_TIMEOUT_IGNORED);
     }// end render()

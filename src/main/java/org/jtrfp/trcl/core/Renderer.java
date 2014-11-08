@@ -343,7 +343,7 @@ public final class Renderer {
 		opaqueNormTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null)
+			.setImage(GL3.GL_RGB565, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -354,7 +354,7 @@ public final class Renderer {
 		opaqueDepthTexture = gpu
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
+			.setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
 				GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setMinFilter(GL3.GL_NEAREST)
@@ -434,9 +434,9 @@ public final class Renderer {
 		Renderer.this.getDeferredProgram().use();
 		opaqueUVTexture.bind().setImage(GL3.GL_RG16, width,
 			height, GL3.GL_RGB, GL3.GL_FLOAT, null);
-		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT24, width, height, 
+		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
-		opaqueNormTexture.bind().setImage(GL3.GL_RGB8, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
+		opaqueNormTexture.bind().setImage(GL3.GL_RGB565, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		opaqueTextureIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
 		depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
 		depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false);// Doesn't like RGBA32UI for some reason.

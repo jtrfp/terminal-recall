@@ -77,13 +77,15 @@ public class CollisionManager {
 	    final WorldObject left = collideable.get(i);
 	    for (int j = i + 1; j < collideable.size(); j++) {
 		final WorldObject right = collideable.get(j);
-		if (left.isActive()&& right.isActive()){
-		 if(TR.sloppyTwosComplimentTaxicabDistanceXZ(left.getPosition(),
-		  right.getPosition()) < MAX_CONSIDERATION_DISTANCE) {
-		    left.proposeCollision(right);
-		    right.proposeCollision(left);
-		    }//end if(distance<MAX_CONSIDERATION)
-		}//end if(both are active)
+		if (left!=null && right!=null){
+		 if (left.isActive()&& right.isActive()){
+		  if(TR.sloppyTwosComplimentTaxicabDistanceXZ(left.getPosition(),
+		   right.getPosition()) < MAX_CONSIDERATION_DISTANCE) {
+		     left.proposeCollision(right);
+		     right.proposeCollision(left);
+		     }//end if(distance<MAX_CONSIDERATION)
+		 }//end if(both are active)
+		}//end if(left/right !=null)
 	    }// end for(j)
 	}// end sync(gameStateLock)
 	}// end for(i)

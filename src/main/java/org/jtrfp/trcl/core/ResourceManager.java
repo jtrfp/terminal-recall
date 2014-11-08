@@ -125,7 +125,9 @@ public class ResourceManager{
 	
 	public ResourceManager(TR tr){
 		this.tr=tr;
-		try{Helpers.registerAllClasses();}
+		try{Class.forName("de.quippy.javamod.multimedia.mod.loader.tracker.ProTrackerMod");
+		    Class.forName("de.quippy.javamod.multimedia.mod.ModContainer"); // ModContainer uses the ModFactory!!
+		    }
 		catch(Exception e){tr.showStopper(e);}
 	}//end ResourceManager
 	
@@ -319,7 +321,7 @@ public class ResourceManager{
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
-					    	System.out.println("FaceBlock found: "+b.getClass().getSimpleName());
+					    	//System.out.println("FaceBlock found: "+b.getClass().getSimpleName());
 						FaceBlock block = (FaceBlock)b;
 						List<FaceBlockVertex>vertIndices = block.getVertices();
 						if(currentTexture==null){System.out.println("Warning: Face texture not specified. Using fallback texture.");currentTexture=defaultTexture;}

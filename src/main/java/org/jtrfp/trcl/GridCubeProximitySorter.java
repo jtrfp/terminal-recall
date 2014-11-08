@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.obj.VisibleEverywhere;
 
 public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRenderable>> {
     private double [] center = new double[]{0,0,0};
@@ -40,13 +41,17 @@ public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRe
 		return -1;
 	    if(_right.isEmpty())
 		return 1;
-	    final double [] left=_left.get(0).getPosition();
-	    final double [] right=_right.get(0).getPosition();
+	    double [] left=_left.get(0).getPosition();
+	    double [] right=_right.get(0).getPosition();
 	    if((left==right)&&left==null)return Integer.MAX_VALUE;
 	    if(left==null)return Integer.MIN_VALUE;
 	    if(right==null)return Integer.MAX_VALUE;
+	    if(_left.get(0) instanceof VisibleEverywhere)
+		left=new double[]{center[0],center[1],center[2]+left[2]*1114112};
+	    if(_right.get(0) instanceof VisibleEverywhere)
+		right=new double[]{center[0],center[1],center[2]+right[2]*1114112};
 	    final int diff = (int)(Vect3D.taxicabDistance(center,left)-Vect3D.taxicabDistance(center,right));
-	    return diff!=0?diff:1;
+	    return diff!=0?diff:_left.hashCode()-_right.hashCode();
 	    }}//end sync()
 	}//end compare()
 	@Override

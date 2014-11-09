@@ -41,10 +41,10 @@ public class LVLFile extends SelfParsingFile {
     String precalculatedFogFile;
     String luminanceMapFile;
 
-    AbstractVector sunlightDirectionVector;
+    AbstractTriplet sunlightDirectionVector;
     int ambientLight;
     // Chamber light found by WDLMaster
-    AbstractVector chamberLightDirectionVector;
+    AbstractTriplet chamberLightDirectionVector;
     int chamberAmbientLight, unknownInt1;
     // New Story stuff
     String introVideoFile;
@@ -100,13 +100,13 @@ public class LVLFile extends SelfParsingFile {
 		prs.property("luminanceMapFile", String.class), false);
 
 	prs.subParseProposedClasses(
-		prs.property("sunlightDirectionVector", AbstractVector.class),
-		ClassInclusion.classOf(AbstractVector.class));
+		prs.property("sunlightDirectionVector", AbstractTriplet.class),
+		ClassInclusion.classOf(AbstractTriplet.class));
 	prs.stringEndingWith("\r\n",
 		prs.property("ambientLight", Integer.class), false);
 	prs.subParseProposedClasses(prs.property("chamberLightDirectionVector",
-		AbstractVector.class), ClassInclusion
-		.classOf(AbstractVector.class));
+		AbstractTriplet.class), ClassInclusion
+		.classOf(AbstractTriplet.class));
 	prs.stringEndingWith("\r\n",
 		prs.property("chamberAmbientLight", Integer.class), false);
 	prs.stringEndingWith("\r\n",
@@ -408,7 +408,7 @@ public class LVLFile extends SelfParsingFile {
     /**
      * @return the sunlightDirectionVector
      */
-    public AbstractVector getSunlightDirectionVector() {
+    public AbstractTriplet getSunlightDirectionVector() {
 	return sunlightDirectionVector;
     }
 
@@ -417,7 +417,7 @@ public class LVLFile extends SelfParsingFile {
      *            the sunlightDirectionVector to set
      */
     public void setSunlightDirectionVector(
-	    AbstractVector sunlightDirectionVector) {
+	    AbstractTriplet sunlightDirectionVector) {
 	this.sunlightDirectionVector = sunlightDirectionVector;
     }
 
@@ -441,7 +441,7 @@ public class LVLFile extends SelfParsingFile {
      * 
      * @return the chamberLightDirectionVector
      */
-    public AbstractVector getChamberLightDirectionVector() {
+    public AbstractTriplet getChamberLightDirectionVector() {
 	return chamberLightDirectionVector;
     }
 
@@ -486,7 +486,7 @@ public class LVLFile extends SelfParsingFile {
      *            the chamberLightDirectionVector to set
      */
     public void setChamberLightDirectionVector(
-	    AbstractVector chamberLightDirectionVector) {
+	    AbstractTriplet chamberLightDirectionVector) {
 	this.chamberLightDirectionVector = chamberLightDirectionVector;
     }
 

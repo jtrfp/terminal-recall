@@ -95,10 +95,11 @@ import org.jtrfp.trcl.obj.ExplosionSystem;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
+import org.jtrfp.trcl.pool.CachedObjectFactory;
+import org.jtrfp.trcl.snd.GPUResidentMOD;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
-import de.quippy.javamod.system.Helpers;
 
 public class ResourceManager{
 	LinkedList<IPodData> pods = new LinkedList<IPodData>();
@@ -123,12 +124,21 @@ public class ResourceManager{
 	private ProjectileFactory [] 				projectileFactories;
 	private final TR 					tr;
 	
+	public final CachedObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
+	
 	public ResourceManager(TR tr){
 		this.tr=tr;
 		try{Class.forName("de.quippy.javamod.multimedia.mod.loader.tracker.ProTrackerMod");
 		    Class.forName("de.quippy.javamod.multimedia.mod.ModContainer"); // ModContainer uses the ModFactory!!
 		    }
 		catch(Exception e){tr.showStopper(e);}
+		gpuResidentMODs = 
+		 new CachedObjectFactory<String, GPUResidentMOD>(){
+		    @Override
+		    protected GPUResidentMOD generate(String key) {
+			return new GPUResidentMOD(ResourceManager.this.tr,getMOD(key));
+		    }//end generate(...)
+	 };
 	}//end ResourceManager
 	
 	/**

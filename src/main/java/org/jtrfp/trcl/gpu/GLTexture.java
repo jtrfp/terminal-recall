@@ -414,7 +414,7 @@ public final class GLTexture {
 	public void paint(Graphics g){
 	    super.paint(g);
 	    rgbaFloats.clear();
-	    for(int y=0; y<getHeight();y++)
+	    for(int y=getHeight()-1; y>=0;y--)
 		for(int x=0; x<getWidth();x++){
 		    rgbaFloats.get(val);
 		    g.setColor(new Color(val[0],val[1],val[2],1));

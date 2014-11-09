@@ -23,7 +23,7 @@ import org.jtrfp.jtrfp.Vertex3f;
  * @author Chuck Ritola
  *
  */
-public class AbstractVector implements ThirdPartyParseable {
+public class AbstractTriplet implements ThirdPartyParseable {
     int x, y, z;
 
     @Override
@@ -33,7 +33,7 @@ public class AbstractVector implements ThirdPartyParseable {
 	prs.stringEndingWith("\r\n", prs.property("z", Integer.class), false);
     }
 
-    public static class EndingWithComma extends AbstractVector {
+    public static class EndingWithComma extends AbstractTriplet {
 	@Override
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
@@ -107,7 +107,7 @@ public class AbstractVector implements ThirdPartyParseable {
      * @return this object
      * @since Nov 9, 2014
      */
-    public AbstractVector importFromVertex3f(Vertex3f importFrom){
+    public AbstractTriplet importFromVertex3f(Vertex3f importFrom){
 	setX((int)importFrom.getX());
 	setY((int)importFrom.getY());
 	setZ((int)importFrom.getZ());

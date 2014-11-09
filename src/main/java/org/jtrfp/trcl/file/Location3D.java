@@ -15,7 +15,7 @@ package org.jtrfp.trcl.file;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class Location3D extends AbstractVector {
+public class Location3D extends AbstractTriplet {
     public static class EndingWithComma extends Location3D {
 	@Override
 	public void describeFormat(Parser prs)

@@ -1,7 +1,6 @@
 /*******************************************************************************
- * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
- * Part of the jTRFP.org project
+ * This file is part of jTRFP
+ * Copyright (c) 2012-2014. See commit history for copyright owners.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -15,8 +14,15 @@ package org.jtrfp.trcl.file;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.jtrfp.Vertex3f;
 
+/**
+ * Abstract implementation of a Terminal Reality heading vector consisting of a triplet of signed ints 
+ * followed by a Windows-style carriage-return newline, or a comma if using EndingWithComma nested class.
+ * Ending with a comma is useful if the triplet is part of a longer list of comma-separated values.
+ * @author Chuck Ritola
+ *
+ */
 public class AbstractVector implements ThirdPartyParseable {
     int x, y, z;
 
@@ -38,45 +44,42 @@ public class AbstractVector implements ThirdPartyParseable {
     }// end EndingWithComma
 
     /**
-     * @return the x
+     * @return legacy X component of this vector.
      */
     public int getX() {
 	return x;
     }
 
     /**
-     * @param x
-     *            the x to set
+     * @param Legacy X component for this vector.
      */
     public void setX(int x) {
 	this.x = x;
     }
 
     /**
-     * @return the y
+     * @return Legacy Y component of this vector.
      */
     public int getY() {
 	return y;
     }
 
     /**
-     * @param y
-     *            the y to set
+     * @param Legacy Y component for this vector.
      */
     public void setY(int y) {
 	this.y = y;
     }
 
     /**
-     * @return the z
+     * @return Legacy Z component of this vector.
      */
     public int getZ() {
 	return z;
     }
 
     /**
-     * @param z
-     *            the z to set
+     * @param Legacy Z component for this vector.
      */
     public void setZ(int z) {
 	this.z = z;
@@ -85,7 +88,29 @@ public class AbstractVector implements ThirdPartyParseable {
     @Override
     public String toString() {
 	return this.getClass().getSimpleName() + " x=" + x + " y=" + y + " z="
-		+ z + "\n" + "TRCL: x=" + TR.legacy2Modern(x) + " y="
-		+ TR.legacy2Modern(y) + " z=" + TR.legacy2Modern(z);
+		+ z + "\n";
     }
-}// end DirectionVector
+    
+    /**
+     * Returns an immutable representation of this triplet as a Vertex3f.
+     * The returned Vertex3f will not reflect changes to this object.
+     * @return A vertex3f of the values at the time of invocation.
+     * @since Nov 9, 2014
+     */
+    public Vertex3f asVertex3f(){
+	return new Vertex3f((float)x,(float)y,(float)z);
+    }
+    
+    /**
+     * Imports contents of a vertex3f into this object.
+     * Note that float-int conversion may result in lost precision and range.
+     * @return this object
+     * @since Nov 9, 2014
+     */
+    public AbstractVector importFromVertex3f(Vertex3f importFrom){
+	setX((int)importFrom.getX());
+	setY((int)importFrom.getY());
+	setZ((int)importFrom.getZ());
+	return this;
+    }
+}// end AbstractVector

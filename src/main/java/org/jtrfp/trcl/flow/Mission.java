@@ -24,7 +24,7 @@ import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.file.AbstractVector;
+import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -149,7 +149,7 @@ public class Mission {
 	    }// end if(user start point)
 	    System.out.println("Start position set to " + player.getPosition()[0]+" "+player.getPosition()[1]+" "+player.getPosition()[2]);
 	    System.out.println("Setting sun vector");
-	    final AbstractVector sunVector = lvl.getSunlightDirectionVector();
+	    final AbstractTriplet sunVector = lvl.getSunlightDirectionVector();
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {
 		@Override
 		public Void call() throws Exception {
@@ -447,9 +447,7 @@ public class Mission {
 		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
 			evt =ss
 				.getMusicFactory()
-				.create(new GPUResidentMOD(tr, tr
-					.getResourceManager().getMOD(
-						bossMusicFile)),
+				.create(tr.getResourceManager().gpuResidentMODs.get(bossMusicFile),
 					 true));
 		evt.play();
 		bgMusic.stop();
@@ -468,9 +466,7 @@ public class Mission {
 		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
 			evt =ss
 				.getMusicFactory()
-				.create(new GPUResidentMOD(tr, tr
-					.getResourceManager().getMOD(
-						lvl.getBackgroundMusicFile())),
+				.create(tr.getResourceManager().gpuResidentMODs.get(lvl.getBackgroundMusicFile()),
 					 true));
 		evt.play();
 		bgMusic.stop();

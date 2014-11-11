@@ -68,7 +68,7 @@ public final class TR{
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
-	private TRConfiguration 				trConfig;
+	private TRConfiguration []				trConfig;
 	private final World 					world;
 	
 	/**
@@ -106,7 +106,7 @@ public final class TR{
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
 	    	rootWindow = new RootWindow(this);
-	    	if(getTrConfig().isWaitForProfiler()){
+	    	if(getTrConfig()[0].isWaitForProfiler()){
 	    	    waitForProfiler();
 	    	}//end if(waitForProfiler)
 		keyStatus = new KeyStatus(rootWindow);
@@ -213,18 +213,12 @@ public final class TR{
 	/**
 	 * @return the trConfig
 	 */
-	public TRConfiguration getTrConfig(){
-	    	if(trConfig==null)trConfig=new TRConfiguration();
+	public TRConfiguration[] getTrConfig(){
+	    	if(trConfig==null){
+	    	    trConfig=new TRConfiguration[1]; 
+	    	    trConfig[0]=TRConfiguration.getConfig();}
 		return trConfig;
 		}
-
-    /**
-     * @param trConfig
-     *            the trConfig to set
-     */
-    public void setTrConfig(TRConfiguration trConfig) {
-	this.trConfig = trConfig;
-    }
 
     /**
      * @return the resourceManager

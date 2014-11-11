@@ -81,7 +81,7 @@ public class Game {
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
 	setVox(vox);
-	if (!tr.getTrConfig().isDebugMode())
+	if (!tr.getTrConfig()[0].isDebugMode())
 	    setupNameWithUser();
     }// end constructor
 

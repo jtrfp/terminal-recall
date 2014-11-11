@@ -44,7 +44,7 @@ public class WeaponSelectionBehavior extends Behavior implements PlayerControlBe
 		    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
 		    final TR tr = parent.getTr();
 		    String content="???";
-		    switch(tr.getTrConfig().getGameVersion()){
+		    switch(tr.getTrConfig()[0].getGameVersion()){
 		    case F3:{
 			content=w.getF3DisplayName();
 			break;

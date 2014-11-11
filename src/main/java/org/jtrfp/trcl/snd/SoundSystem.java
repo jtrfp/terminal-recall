@@ -222,8 +222,8 @@ public final class SoundSystem {
 	    public Void call() throws Exception {
 		texture
 		 .bind()
-		 .setMagFilter(GL3.GL_NEAREST)
-		 .setMinFilter(GL3.GL_NEAREST)
+		 .setMagFilter(getFilteringParm())
+		 .setMinFilter(getFilteringParm())
 		 .setWrapS(GL3.GL_CLAMP_TO_EDGE)
 		 .setWrapT(GL3.GL_CLAMP_TO_EDGE)
 		 .setImage(
@@ -257,6 +257,10 @@ public final class SoundSystem {
 	    }
 	};//end new SoundTexture()
     }//end newSoundTexture
+    
+    private int getFilteringParm(){
+	return tr.getTrConfig()[0].isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
+    }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
 	if(evt instanceof VisibleEverywhere)

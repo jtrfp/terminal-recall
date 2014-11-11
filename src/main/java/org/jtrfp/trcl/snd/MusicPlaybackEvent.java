@@ -59,7 +59,8 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements VisibleEve
 		// Set the song up
 		if(loop){
 		    if(bufferStartTimeFrames > nextLoopTimeFrames-SETUP_PADDING_FRAMES){
-			mod.apply(MusicPlaybackEvent.this.nextLoopTimeFrames,MusicPlaybackEvent.this);
+			mod.apply(MusicPlaybackEvent.this.nextLoopTimeFrames,MusicPlaybackEvent.this,
+				getOrigin().getTR().getTrConfig()[0].getModStereoWidth());
 			MusicPlaybackEvent.this.nextLoopTimeFrames+=mod.getSongLengthInBufferFrames();
 		    }//end if(time to loop)
 		}//end if(loop)

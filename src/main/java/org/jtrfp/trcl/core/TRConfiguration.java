@@ -12,6 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.beans.XMLDecoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+
 import org.jtrfp.trcl.flow.GameVersion;
 
 public class TRConfiguration{
@@ -22,7 +28,17 @@ public class TRConfiguration{
     	private int targetFPS =60;
     	private String skipToLevel;
     	private String voxFile;
-	public TRConfiguration(){}
+    	private boolean audioLinearFiltering=false;
+    	private HashSet<String> missionList = new HashSet<String>();
+    	private HashSet<String> podList = new HashSet<String>();
+    	private double modStereoWidth=1.;
+    	public static final String AUTO_DETECT = "Auto-detect";
+    	
+	public TRConfiguration(){//DEFAULTS
+	    missionList.add(AUTO_DETECT);
+	    missionList.add("Fury3");
+	    missionList.add("TV");
+	}
 
 	public GameVersion getGameVersion() {
 	    return GameVersion.F3;
@@ -64,8 +80,11 @@ public class TRConfiguration{
 	/**
 	 * @return the voxFile
 	 */
-	public String getVoxFile() {//Return null if not set so it is known that it wasn't set.
-	    return System.getProperty("org.jtrfp.trcl.flow.voxFile");
+	public String getVoxFile() {
+	    String result = voxFile;
+	    if(result==null)
+		result = voxFile = AUTO_DETECT;
+	    return result;
 	}
 
 	/**
@@ -85,4 +104,82 @@ public class TRConfiguration{
 	    waitForProfiler=result;
 	    return result;
 	}
+
+	/**
+	 * @return the audioLinearFiltering
+	 */
+	public boolean isAudioLinearFiltering() {
+	    return audioLinearFiltering;
+	}
+
+	/**
+	 * @param audioLinearFiltering the audioLinearFiltering to set
+	 */
+	public void setAudioLinearFiltering(boolean audioLinearFiltering) {
+	    this.audioLinearFiltering = audioLinearFiltering;
+	}
+
+	/**
+	 * @return the missionList
+	 */
+	public HashSet<String> getMissionList() {
+	    return missionList;
+	}
+
+	/**
+	 * @param missionList the missionList to set
+	 */
+	public void setMissionList(HashSet<String> missionList) {
+	    this.missionList = missionList;
+	}
+
+	/**
+	 * @return the podList
+	 */
+	public HashSet<String> getPodList() {
+	    return podList;
+	}
+
+	/**
+	 * @param podList the podList to set
+	 */
+	public void setPodList(HashSet<String> podList) {
+	    this.podList = podList;
+	}
+
+	/**
+	 * @return the modStereoWidth
+	 */
+	public double getModStereoWidth() {
+	    return modStereoWidth;
+	}
+
+	/**
+	 * @param modStereoWidth the modStereoWidth to set
+	 */
+	public void setModStereoWidth(double modStereoWidth) {
+	    this.modStereoWidth = modStereoWidth;
+	}
+	
+	public static File getConfigFilePath(){
+	     String homeProperty = System.getProperty("user.home");
+	     if(homeProperty==null)homeProperty="";
+	     return new File(homeProperty+File.separator+"settings.config.trcl.xml");
+	 }
+	
+	public static TRConfiguration getConfig(){
+	     TRConfiguration result=null;
+	     File fp = TRConfiguration.getConfigFilePath();
+	     if(fp.exists()){
+		 try{FileInputStream is = new FileInputStream(fp);
+		    XMLDecoder xmlDec = new XMLDecoder(is);
+		    result=(TRConfiguration)xmlDec.readObject();
+		    xmlDec.close();
+		    is.close();
+		}catch(Exception e){e.printStackTrace();}
+		 if(result==null)
+		     result = new TRConfiguration();
+	     }//end if(exists)
+	     return result;
+	 }//end getConfig()
 }//end TRConfiguration

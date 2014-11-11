@@ -61,7 +61,7 @@ public class GPUResidentMOD {
 	}//end for(i)
     }//end constructor
     
-    public void apply(final long startOffsetInFrames, SoundEvent parent){
+    public void apply(final long startOffsetInFrames, SoundEvent parent, double stereoWidth){
 	final Pattern []    patterns = module.getPatternContainer().getPattern();
 	final int []        arrangements = module.getArrangement();
 	long 		    frameOffsetCounter=0;
@@ -91,7 +91,7 @@ public class GPUResidentMOD {
 		   if(instID>-1){
 		 	final SoundTexture texture = this.samples[instID];
 			if(texture!=null){
-			  final double ps = (panStates[element.getChannel()]+1)/2.; 
+			  final double ps = (panStates[element.getChannel()]*stereoWidth+1)/2.; 
 			  final double []panState = new double[2];
 			  panState[0]= (1-ps)*volumeStates[element.getChannel()];
 			  panState[1]= ps*volumeStates[element.getChannel()];

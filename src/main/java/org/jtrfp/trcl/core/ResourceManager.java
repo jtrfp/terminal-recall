@@ -27,8 +27,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -102,7 +102,7 @@ import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
 
 public class ResourceManager{
-	LinkedList<IPodData> pods = new LinkedList<IPodData>();
+	Set<IPodData> pods = new HashSet<IPodData>();
 	private SoftValueHashMap<Integer, TextureDescription> 
 	/*						*/	 rawCache 
 		= new SoftValueHashMap<Integer,TextureDescription>();
@@ -673,6 +673,7 @@ public class ResourceManager{
 	}
 
 	public VOXFile getVOXFile(String fileName) throws IllegalAccessException, IOException, FileLoadException {
+	    if(fileName==null)throw new NullPointerException("Passed VOX file name String is intolerably null.");
 	    //Special cases: Fury3, TV, fZone
 	    if(fileName.contentEquals("Fury3"))
 	    	return new Fury3().getDefaultMission();
@@ -712,4 +713,8 @@ public class ResourceManager{
 	    }catch(Exception e){tr.showStopper(e);}
 	    return result;
 	}//end getMOD(...)
+
+	public Set<IPodData> getRegisteredPODs() {
+	    return pods;
+	}
 }//end ResourceManager

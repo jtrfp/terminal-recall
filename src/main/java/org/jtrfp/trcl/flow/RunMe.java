@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
 
 public class RunMe{
@@ -43,58 +44,8 @@ public class RunMe{
 				"	Bring any issues to the Terminal Recall GitHub page.\n" +
 				"	www.jtrfp.org\n"
 				);
-		if(args.length>=2){
-			try {
-			    	JarExploder.explodeLibFiles();
-				TR tr = new TR();
-				tr.gatherSysInfo();
-				String voxFileName = tr.getTrConfig().getVoxFile();
-				boolean f3Hint=false,tvHint=false,furyseHint=false;
-				for(int argI=0; argI<args.length; argI++)
-					{if(args[argI].toUpperCase().endsWith(".POD")){
-					    final File file = new File(args[argI]);
-					    PodFile pod = new PodFile(file);
-					    final String podComment = pod.getData().getComment();
-					    if(voxFileName==null){
-						f3Hint = podComment.toUpperCase().startsWith("FURY3");
-						tvHint = podComment.toUpperCase().startsWith("TV");
-						furyseHint = podComment.toUpperCase().startsWith("FURYSE");
-					    }
-					    tr.getResourceManager().registerPOD(pod);
-					    }//end if(endsWith .POD)
-					}//end for(args)
-				int numValidHints=0 + (f3Hint?1:0) + (tvHint?1:0) + (furyseHint?1:0);
-				
-				if(numValidHints==1){
-				 voxFileName=f3Hint?"Fury3":voxFileName;
-				 voxFileName=tvHint?"TV":voxFileName;
-				 voxFileName=furyseHint?"FurySE":voxFileName;
-				}//end if(hints==1)
-				try{
-				    if(voxFileName==null)
-					tr.showStopper(new FileNotFoundException(
-						"No VOX file specified. TRCL failed to auto-identify the game you are trying to play."));
-				    final VOXFile vox = tr.getResourceManager().getVOXFile(voxFileName);
-				    final Game game = tr.newGame(vox);
-				    final String level = tr.getTrConfig().skipToLevel();
-				    if(level!=null){
-					System.out.println("Skipping to level: "+level);
-				    game.setLevel(tr.getTrConfig().skipToLevel());
-				    }
-				game.go();}//end try{}
-				catch(FileNotFoundException e){
-				    System.err.println("Error: Could not find VOX file or is not a valid VOX file in the supplied PODs: "+args[args.length-1]);
-				    System.exit(-1);
-				}//end catch(FileNotFoundException)
-				}//end try{}
-			catch(Exception e) {e.printStackTrace();}
-			}//end if(good)
-		else	{//fail
-			System.out.println("USAGE: java -Dorg.jtrfp.trcl.flow.Game.skipToLevel=[.LVL file] org.jtrfp.trcl.flow.voxFile=[.VOX file] -jar RunMe.jar [path_to_POD_file0] [path_to_POD_file1] [...]");
-			}
-		}//end aspectMain
-	
-	
+		new GameShell(new TR()).startShell().newGame();
+		}//end main()
 	
     private static void ensureJVMIsProperlyConfigured(String[] args) {
 	if (!isAlreadyConfigured()) {

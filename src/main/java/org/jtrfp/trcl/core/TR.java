@@ -31,6 +31,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CollisionManager;
@@ -70,6 +71,7 @@ public final class TR{
 	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
 	private TRConfiguration []				trConfig;
 	private final World 					world;
+	private final GameShell					gameShell;
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -157,6 +159,8 @@ public final class TR{
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		renderer.get().setRootGrid(world);
+		gameShell = new GameShell(this);
+		gameShell.startShell();
 		}//end constructor
 	
     private void waitForProfiler() {
@@ -388,5 +392,9 @@ public final class TR{
 	if(darkIsClearPaletteVL==null)
 	    darkIsClearPaletteVL=new ColorPaletteVectorList(getDarkIsClearPalette());
 	return darkIsClearPaletteVL;
+    }
+
+    public GameShell getGameShell() {
+	return gameShell;
     }
 }//end TR

@@ -44,7 +44,7 @@ public class RunMe{
 				"	Bring any issues to the Terminal Recall GitHub page.\n" +
 				"	www.jtrfp.org\n"
 				);
-		new GameShell(new TR()).startShell().newGame();
+		new TR();
 		}//end main()
 	
     private static void ensureJVMIsProperlyConfigured(String[] args) {

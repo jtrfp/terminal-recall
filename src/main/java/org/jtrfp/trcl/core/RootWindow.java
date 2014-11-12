@@ -75,6 +75,16 @@ public class RootWindow extends JFrame {
 	JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
 	JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
 	// Menu item behaviors
+	game_new.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent arg0) {
+		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			tr.getGameShell().newGame();
+			return null;
+		    }});
+	    }});
 	file_config.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
@@ -122,6 +132,7 @@ public class RootWindow extends JFrame {
 	window.add(frameBufferStatesMenuItem);
 	gameMenu.add(game_new);
 	getJMenuBar().add(file);
+	getJMenuBar().add(gameMenu);
 	getJMenuBar().add(window);
     }//end configureMenuBar()
 

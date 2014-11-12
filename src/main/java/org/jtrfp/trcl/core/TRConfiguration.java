@@ -177,9 +177,9 @@ public class TRConfiguration{
 		    xmlDec.close();
 		    is.close();
 		}catch(Exception e){e.printStackTrace();}
-		 if(result==null)
-		     result = new TRConfiguration();
 	     }//end if(exists)
+	     if(result==null)
+		result = new TRConfiguration();
 	     return result;
 	 }//end getConfig()
 }//end TRConfiguration

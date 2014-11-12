@@ -12,10 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.beans.Transient;
 import java.beans.XMLDecoder;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.jtrfp.trcl.flow.GameVersion;
@@ -30,18 +30,25 @@ public class TRConfiguration{
     	private String voxFile;
     	private boolean audioLinearFiltering=false;
     	private HashSet<String> missionList = new HashSet<String>();
-    	private HashSet<String> podList = new HashSet<String>();
-    	private double modStereoWidth=1.;
+    	private HashSet<String> podList     = new HashSet<String>();
+    	private double modStereoWidth=.3;
     	public static final String AUTO_DETECT = "Auto-detect";
     	
 	public TRConfiguration(){//DEFAULTS
 	    missionList.add(AUTO_DETECT);
 	    missionList.add("Fury3");
 	    missionList.add("TV");
+	    missionList.add("FurySE");
 	}
 
+	@Transient
 	public GameVersion getGameVersion() {
-	    return GameVersion.F3;
+	    return gameVersion;
+	}
+	
+	@Transient
+	public void setGameVersion(GameVersion gameVersion){
+	    this.gameVersion=gameVersion;
 	}
 	
 	public boolean isUsingTextureBufferUnmap() {

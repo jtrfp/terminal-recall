@@ -87,6 +87,7 @@ public class GameShell {
 	 voxFileName=f3Hint?     "Fury3":voxFileName;
 	 voxFileName=tvHint?        "TV":voxFileName;
 	 voxFileName=furyseHint?"FurySE":voxFileName;
+	 tr.getTrConfig()[0].setGameVersion(f3Hint?GameVersion.F3:tvHint?GameVersion.TV:GameVersion.FURYSE);
 	}//end if(hints==1)
 	if(voxFileName==null){
 	    JOptionPane.showMessageDialog(tr.getRootWindow(), "Could not auto-detect the default mission.\nEnsure all necessary PODs are registered in the File->Configure window or specify a VOX file if it is a custom game.","Auto-Detect Failure", JOptionPane.ERROR_MESSAGE);

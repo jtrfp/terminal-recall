@@ -450,7 +450,8 @@ public class Mission {
 				.create(tr.getResourceManager().gpuResidentMODs.get(bossMusicFile),
 					 true));
 		evt.play();
-		bgMusic.stop();
+		if(bgMusic!=null)
+		    bgMusic.stop();
 		bgMusic=evt;
 		return null;
 	    }// end call()
@@ -469,7 +470,8 @@ public class Mission {
 				.create(tr.getResourceManager().gpuResidentMODs.get(lvl.getBackgroundMusicFile()),
 					 true));
 		evt.play();
-		bgMusic.stop();
+		if(bgMusic!=null)
+		 bgMusic.stop();
 		bgMusic=evt;
 		return null;
 	    }// end call()

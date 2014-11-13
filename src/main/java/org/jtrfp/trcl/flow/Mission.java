@@ -183,14 +183,20 @@ public class Mission {
 	    @Override
 	    public Void call() throws Exception {
 		final SoundSystem ss = Mission.this.tr.soundSystem.get();
+		MusicPlaybackEvent evt;
 		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
-			bgMusic =ss
+			evt =ss
 				.getMusicFactory()
 				.create(new GPUResidentMOD(tr, tr
 					.getResourceManager().getMOD(
 						lvl.getBackgroundMusicFile())),
 					 true));
-		bgMusic.play();
+		synchronized(Mission.this){
+		 if(bgMusic!=null)
+		  return null;
+		 bgMusic=evt;
+		 bgMusic.play();
+		 }//end sync(Mission.this)
 		return null;
 	    }// end call()
 	});
@@ -449,10 +455,12 @@ public class Mission {
 				.getMusicFactory()
 				.create(tr.getResourceManager().gpuResidentMODs.get(bossMusicFile),
 					 true));
-		evt.play();
-		if(bgMusic!=null)
-		    bgMusic.stop();
-		bgMusic=evt;
+		synchronized(Mission.this){
+		 evt.play();
+		 if(bgMusic!=null)
+		  bgMusic.stop();
+		 bgMusic=evt;
+		}
 		return null;
 	    }// end call()
 	});
@@ -469,10 +477,10 @@ public class Mission {
 				.getMusicFactory()
 				.create(tr.getResourceManager().gpuResidentMODs.get(lvl.getBackgroundMusicFile()),
 					 true));
-		evt.play();
-		if(bgMusic!=null)
+		synchronized(Mission.this){
+		 evt.play();
 		 bgMusic.stop();
-		bgMusic=evt;
+		 bgMusic=evt;}
 		return null;
 	    }// end call()
 	});

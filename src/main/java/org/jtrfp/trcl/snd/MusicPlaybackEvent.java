@@ -31,21 +31,27 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements VisibleEve
     private static final int SETUP_PADDING_FRAMES = 1024*16;//Ample time to set up next loop.
     private long nextLoopTimeFrames;
     private TRFutureTask<Void> lastApply;
+    private volatile boolean isPlaying = false;
 
     private MusicPlaybackEvent(
 	    Factory origin, GPUResidentMOD mod, boolean loop, SoundEvent parent) {
 	super(0L, 0L, origin, parent);
 	//this.songStartTimeBufferFrames=songStartTimeBufferFrames;
+	this.deactivate();
 	this.mod=mod;
 	this.loop=loop;
     }//end constructor
     
     public void play(){
-	nextLoopTimeFrames=getOrigin().getTR().soundSystem.get().getCurrentBufferFrameCounter();
+	if(!isPlaying){
+	    activate();
+	    nextLoopTimeFrames=getOrigin().getTR().soundSystem.get().getCurrentBufferFrameCounter();
+	    isPlaying=true;}
     }
     
     public void stop(){
 	destroy();
+	isPlaying=false;
     }//end stop()
 
     @Override

@@ -52,8 +52,10 @@ const uint CODES_PER_CODE_PAGE 			= CODE_PAGE_SIDE_WIDTH_CODES * CODE_PAGE_SIDE_
 const uint CODE_PAGE_SIDE_WIDTH_TEXELS	= CODE_PAGE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
 const float CODE_PAGE_TEXEL_SIZE_UV		= 1/float(CODE_PAGE_SIDE_WIDTH_TEXELS);
 
-const uint SUBTEXTURE_SIDE_WIDTH_CODES  = 38u;
-const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES * CODE_SIDE_WIDTH_TEXELS;
+const uint SUBTEXTURE_SIDE_WIDTH_CODES  = 36u;
+const uint SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER =
+										  SUBTEXTURE_SIDE_WIDTH_CODES + 2u;
+const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER * CODE_SIDE_WIDTH_TEXELS;
 const uint SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4
 										= 91u;
 
@@ -76,15 +78,15 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  		texelXY		= (renderFlags&RENDER_FLAGS_WRAP)!=0u?mod(texelXY,tDims):clamp(texelXY,vec2(0,0),tDims-vec2(1,1));
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
  // Clamp sub-pixels within vector.
- codeXY				= clamp(codeXY,0,3)+vec2(.5,.5);
- vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
+ codeXY				= clamp(codeXY,0,3)+.5;
  uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
  uint	tTOCvec4Idx	= tTOCIdx / 4u;
  uint	tTOCsubIdx	= tTOCIdx % 4u;
  // Sub-Texture
  uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
  vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
- uint	subTexByIdx = (uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + (uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES);
+ vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
+ uint	subTexByIdx = 0u+(uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + ((0u+(uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS)) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
  uint	startCodeIdx= subTexByIdx/256u;
  uint	startCode	= texelFetch(rootBuffer,int(subTexV4Addr+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx/4u)))[startCodeIdx%4u];
  uint	subTexV4Idx	= subTexByIdx / 16u;

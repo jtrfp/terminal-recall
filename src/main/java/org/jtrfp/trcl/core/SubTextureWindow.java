@@ -15,16 +15,19 @@ package org.jtrfp.trcl.core;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class SubTextureWindow extends MemoryWindow {
-    public static final int SIDE_LENGTH_CODES = 38;
+    public static final int BYTES_PER_CODE=1;
+    public static final int SIDE_LENGTH_CODES = 36;
+    public static final int SIDE_LENGTH_CODES_WITH_BORDER = SIDE_LENGTH_CODES+2;
+    public static final int BYTES_PER_SUBTEXTURE = SIDE_LENGTH_CODES_WITH_BORDER*SIDE_LENGTH_CODES_WITH_BORDER*BYTES_PER_CODE;
     //38 tiles squared = 1444
-    public final ByteArrayVariable codeIDs 		= new ByteArrayVariable(1444);
-    public final ByteArrayVariable unusedCID 		= new ByteArrayVariable(12);
+    public final ByteArrayVariable codeIDs 		= new ByteArrayVariable(BYTES_PER_SUBTEXTURE);
+    public final ByteArrayVariable unusedCID 		= new ByteArrayVariable(12);// 3 VEC4s
     //91VEC4
     public final IntArrayVariable codeStartOffsetTable 	= new IntArrayVariable(6);// 6x4B = 24B.
     //1480
     public final ByteArrayVariable unused 		= new ByteArrayVariable(56);
     public void setTile(int objectID, int x, int y, byte tileID){
-	codeIDs.setAt(objectID,x+y*SIDE_LENGTH_CODES,tileID);
+	codeIDs.setAt(objectID,x+y*SIDE_LENGTH_CODES_WITH_BORDER,tileID);
     }//end MemoryWindow
     
     public SubTextureWindow(TR tr){

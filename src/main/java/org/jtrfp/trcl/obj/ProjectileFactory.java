@@ -32,6 +32,8 @@ import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.snd.SoundSystem;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 public class ProjectileFactory {
     private int projectileIndex=0;
@@ -39,6 +41,8 @@ public class ProjectileFactory {
     private final Projectile [] projectiles = new Projectile[20];
     private final double projectileSpeed;
     private final Weapon weapon;
+    private final SoundTexture soundTexture;
+    
     public ProjectileFactory(TR tr, Weapon weapon, ExplosionType explosionType){
     	this.tr=tr;
     	this.weapon=weapon;
@@ -100,6 +104,59 @@ public class ProjectileFactory {
 		 ((WorldObject)projectiles[i]).addBehavior(new DestroysEverythingBehavior());
 		 }
     	}//end if(DAM)
+    	
+    	//Sound
+    	String soundFile=null;
+    	switch(weapon){
+    	//PEW!!!
+    	case PAC:
+    	{
+    	    soundFile="LASER2.WAV";
+    	    break;
+    	}
+    	case ION:
+    	{
+    	    soundFile="LASER3.WAV";
+    	    break;
+    	}
+    	case RTL:
+    	{
+    	    soundFile="LASER4.WAV";
+    	    break;
+    	}
+    	case DAM:
+    	case redLaser:
+    	case blueLaser:
+    	case greenLaser:
+    	case purpleLaser:
+    	case purpleRing:
+    	{
+    	    soundFile="LASER5.WAV";
+    	    break;
+    	}
+    	//Missile
+    	case enemyMissile:
+    	case SWT:
+    	case MAM:
+    	case SAD:
+    	{
+    	    soundFile="MISSILE.WAV";
+    	    break;
+    	}
+    	//SILENT
+    	case purpleBall:
+    	case goldBall:
+    	case fireBall:
+    	case blueFireBall:
+    	case bullet:
+    	case bossW8:
+    	case bossW7:
+    	case bossW6:
+    	case atomWeapon:
+    	default:
+    	    break;
+    	}//end case()
+    	soundTexture = soundFile!=null?tr.getResourceManager().soundTextures.get(soundFile):null;
        }//end constructor(...)
     public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin) {
 	final Projectile result = projectiles[projectileIndex];
@@ -107,6 +164,15 @@ public class ProjectileFactory {
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	tr.getWorld().add((WorldObject)result);
 	tr.renderer.get().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
+	if(soundTexture!=null)
+	    tr.soundSystem.get().enqueuePlaybackEvent(
+		    tr.soundSystem
+			    .get()
+			    .getPlaybackFactory()
+			    .create(soundTexture,
+				    new double[] { 
+				     .5 * SoundSystem.DEFAULT_SFX_VOLUME,
+				     .5 * SoundSystem.DEFAULT_SFX_VOLUME }));
 	final List<WorldObject> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
 	 synchronized(cL){cL.add((WorldObject)result);}
 	projectileIndex++;

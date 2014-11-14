@@ -17,8 +17,6 @@
 package org.jtrfp.trcl.snd;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 import org.jtrfp.trcl.core.TR;
 
@@ -49,14 +47,10 @@ public class GPUResidentMOD {
 	    panStates[i]=((double)module.getPanningValue(i)-128.)/128.;
 	    }
 	this.samples=new SoundTexture[modSamples.length];
-	final int [][] adjustedSamples = new int[modSamples.length][];
 	for(int i=0; i<modSamples.length; i++){
 	    final Sample thisModSample = modSamples[i];
 	    if(thisModSample.sample!=null){
-		adjustedSamples[i] = new int[thisModSample.sample.length];
-		for(int j=0; j<thisModSample.sample.length;j++)
-		     adjustedSamples[i][j]=thisModSample.sample[j]*100;//Increase loudness
-		this.samples[i]=tr.soundSystem.get().newSoundTexture(IntBuffer.wrap(adjustedSamples[i]),thisModSample.baseFrequency);
+		this.samples[i]=tr.soundSystem.get().newSoundTexture(IntBuffer.wrap(thisModSample.sample),thisModSample.baseFrequency);
 	    }//end if(!null)
 	}//end for(i)
     }//end constructor
@@ -79,7 +73,7 @@ public class GPUResidentMOD {
 		   final int op = element.getEffektOp();
 		   switch (fx){
 		    case 0x0C:
-		       volumeStates[element.getChannel()]=(double)op/(double)0x40;
+		       volumeStates[element.getChannel()]=(double)op;
 		       break;
 		    case 0x0F:
 		       setSpeedOrTempo(op);

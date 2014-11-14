@@ -368,4 +368,8 @@ public final class SoundSystem {
     public GLFrameBuffer getSoundOutputFrameBuffer() {
 	return playbackFrameBuffer;
     }
+
+    public double getSamplesPerMilli() {
+	return ((double)SAMPLE_RATE)/1000.;
+    }
 }//end SoundSystem

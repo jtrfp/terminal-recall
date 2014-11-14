@@ -32,6 +32,7 @@ import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
+import org.jtrfp.trcl.img.vq.SubtextureVL;
 import org.jtrfp.trcl.img.vq.VectorList;
 import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
@@ -252,14 +253,14 @@ public class Texture implements TextureDescription {
 		}//end setCodes()
             //REQUIRES GPU MEM ACCESS
             private final void setCodeAt(int codeX, int codeY){
-        	final int subtextureX 		= codeX / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subtextureY 		= codeY / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subtextureCodeX 		= codeX % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subtextureCodeY 		= codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int codeIdx			= subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subTextureIdx		= subtextureX + subtextureY * diameterInSubtextures;
-		final int subtextureID		= subTextureIDs[subTextureIdx];
-		stw.codeIDs.setAt(subtextureID, codeIdx, (byte)(codeIdx%256));
+        	final int subtextureX     = codeX / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		final int subtextureY     = codeY / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		final int subtextureCodeX = codeX % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		final int subtextureCodeY = codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		final int subTextureIdx   = subtextureX + subtextureY * diameterInSubtextures;
+		final int subtextureID    = subTextureIDs[subTextureIdx];
+		new SubtextureVL(stw, subtextureID).setComponentAt(codeIdx, 0, (byte)(codeIdx%256));//TODO: Could make a lot of garbage.
             }//end setCodeAt()
 	 }).get();//end gpuMemThread
 	// Push texels to codebook

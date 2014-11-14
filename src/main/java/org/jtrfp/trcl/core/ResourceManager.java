@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -97,6 +100,7 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
 import org.jtrfp.trcl.pool.CachedObjectFactory;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
@@ -125,8 +129,9 @@ public class ResourceManager{
 	private final TR 					tr;
 	
 	public final CachedObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
+	public final CachedObjectFactory<String,SoundTexture>	soundTextures;
 	
-	public ResourceManager(TR tr){
+	public ResourceManager(final TR tr){
 		this.tr=tr;
 		try{Class.forName("de.quippy.javamod.multimedia.mod.loader.tracker.ProTrackerMod");
 		    Class.forName("de.quippy.javamod.multimedia.mod.ModContainer"); // ModContainer uses the ModFactory!!
@@ -136,9 +141,23 @@ public class ResourceManager{
 		 new CachedObjectFactory<String, GPUResidentMOD>(){
 		    @Override
 		    protected GPUResidentMOD generate(String key) {
-			return new GPUResidentMOD(ResourceManager.this.tr,getMOD(key));
+			return new GPUResidentMOD(tr,getMOD(key));
 		    }//end generate(...)
 	 };
+	 	soundTextures =
+	 	 new CachedObjectFactory<String,SoundTexture>(){
+		    @Override
+		    protected SoundTexture generate(String key) {
+			try{
+			 final AudioInputStream ais = AudioSystem.getAudioInputStream(getInputStreamFromResource("SOUND\\"+key));
+			 final FloatBuffer fb       = ByteBuffer.allocateDirect((int)ais.getFrameLength()*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+		 	 int value;
+			 while((value=ais.read())!=-1){
+			    fb.put(((float)(value-128))/128f);
+			 }fb.clear();
+			 return tr.soundSystem.get().newSoundTexture(fb, (int)ais.getFormat().getFrameRate());
+			}catch(Exception e){tr.showStopper(e);return null;}
+		    }};
 	}//end ResourceManager
 	
 	/**

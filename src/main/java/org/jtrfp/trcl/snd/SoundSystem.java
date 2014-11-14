@@ -63,6 +63,9 @@ public final class SoundSystem {
     private final ArrayList<SoundEvent> activeEvents = new ArrayList<SoundEvent>();
     private long bufferFrameCounter;
     
+
+    public static final double DEFAULT_SFX_VOLUME = .12;
+    
     public static final int SAMPLE_RATE=44100;
     static final int BUFFER_SIZE_FRAMES=4096*2;
     public static final int NUM_CHANNELS=2;

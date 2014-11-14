@@ -111,6 +111,12 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    gl.glDisable(GL3.GL_BLEND);
 	}//end apply(...)
 	
+	public SamplePlaybackEvent create(SoundTexture tex, double [] pan){
+	    final SoundSystem ss = getTR().soundSystem.get();
+	    final double modSamples = (System.currentTimeMillis()*getTR().soundSystem.get().getSamplesPerMilli())%SoundSystem.BUFFER_SIZE_FRAMES;
+	    return create(tex,(long)(ss.getCurrentBufferFrameCounter()+modSamples),pan);
+	}
+	
 	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
 		double[] pan){
 	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,soundProgram,this,null);

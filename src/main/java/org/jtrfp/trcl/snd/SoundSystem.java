@@ -192,52 +192,57 @@ public final class SoundSystem {
      * @return
      * @since Oct 28, 2014
      */
-    public SoundTexture newSoundTexture(FloatBuffer samples, final int localSampleRate){
+    public SoundTexture newSoundTexture(final FloatBuffer samples, final int localSampleRate){
 	final GLTexture texture = tr.gpu.get().newTexture();
 	final int lengthInSamples = samples.remaining();
 	final double resamplingRatio = (double)SAMPLE_RATE / (double)localSampleRate;
 	final int numRows=(int)(Math.ceil((double)lengthInSamples / (double)SoundTexture.ROW_LENGTH_SAMPLES));
 	final int quantizedSize = numRows*SoundTexture.ROW_LENGTH_SAMPLES;
-	    final FloatBuffer fb = FloatBuffer.allocate(quantizedSize);
-	   try{
-	    for(int row=0; row<numRows; row++){
-		int oldPos=fb.position();
-		int newPos=fb.position()+SoundTexture.ROW_LENGTH_SAMPLES;
-		boolean reverse = row%2==1;
-		if(!reverse){// Forward
-		    for(int i=oldPos; i<newPos;i++){
-			fb.put(i, samples.get());
-		    }//end for(i)
-		    fb.position(newPos);//TODO: Optimize
-		}else{       // Reverse
-		    for(int i=newPos-1; i>=oldPos;i--){
-			fb.put(i, samples.get());
-		    }//end for(i)
-		    fb.position(newPos);//TODO: Optimize
-		}//end (reverse)
-	    }//end for(row)
-	   }catch(BufferUnderflowException e){}
-	    fb.clear();
-	
-	final FloatBuffer finalSamples = fb;
-	tr.getThreadManager().submitToGL(new Callable<Void>(){
+	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		texture
-		 .bind()
-		 .setMagFilter(getFilteringParm())
-		 .setMinFilter(getFilteringParm())
-		 .setWrapS(GL3.GL_CLAMP_TO_EDGE)
-		 .setWrapT(GL3.GL_CLAMP_TO_EDGE)
-		 .setImage(
-			 GL3.GL_R32F, 
-			 SoundTexture.ROW_LENGTH_SAMPLES, 
-			 numRows, 
-			 GL3.GL_RED, 
-			 GL3.GL_FLOAT, 
-			 finalSamples);
+		    final FloatBuffer fb = FloatBuffer.allocate(quantizedSize);
+			   try{
+			    for(int row=0; row<numRows; row++){
+				int oldPos=fb.position();
+				int newPos=fb.position()+SoundTexture.ROW_LENGTH_SAMPLES;
+				boolean reverse = row%2==1;
+				if(!reverse){// Forward
+				    for(int i=oldPos; i<newPos;i++){
+					fb.put(i, samples.get());
+				    }//end for(i)
+				    fb.position(newPos);//TODO: Optimize
+				}else{       // Reverse
+				    for(int i=newPos-1; i>=oldPos;i--){
+					fb.put(i, samples.get());
+				    }//end for(i)
+				    fb.position(newPos);//TODO: Optimize
+				}//end (reverse)
+			    }//end for(row)
+			   }catch(BufferUnderflowException e){}
+			    fb.clear();
+			
+			final FloatBuffer finalSamples = fb;
+			tr.getThreadManager().submitToGL(new Callable<Void>(){
+			    @Override
+			    public Void call() throws Exception {
+				texture
+				 .bind()
+				 .setMagFilter(getFilteringParm())
+				 .setMinFilter(getFilteringParm())
+				 .setWrapS(GL3.GL_CLAMP_TO_EDGE)
+				 .setWrapT(GL3.GL_CLAMP_TO_EDGE)
+				 .setImage(
+					 GL3.GL_R32F, 
+					 SoundTexture.ROW_LENGTH_SAMPLES, 
+					 numRows, 
+					 GL3.GL_RED, 
+					 GL3.GL_FLOAT, 
+					 finalSamples);
+				return null;
+			    }}).get();
 		return null;
-	    }}).get();
+	    }});
 	return new SoundTexture(){
 	    @Override
 	    public int getLengthInRealtimeSamples() {

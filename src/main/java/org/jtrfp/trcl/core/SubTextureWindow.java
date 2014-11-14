@@ -26,9 +26,6 @@ public class SubTextureWindow extends MemoryWindow {
     public final IntArrayVariable codeStartOffsetTable 	= new IntArrayVariable(6);// 6x4B = 24B.
     //1480
     public final ByteArrayVariable unused 		= new ByteArrayVariable(56);
-    public void setTile(int objectID, int x, int y, byte tileID){
-	codeIDs.setAt(objectID,x+y*SIDE_LENGTH_CODES_WITH_BORDER,tileID);
-    }//end MemoryWindow
     
     public SubTextureWindow(TR tr){
 	this.init(tr,"SubTextureWindow");

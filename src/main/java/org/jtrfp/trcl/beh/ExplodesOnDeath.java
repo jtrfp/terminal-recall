@@ -12,21 +12,36 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.snd.SoundSystem;
 
 public class ExplodesOnDeath extends Behavior implements DeathListener {
 private ExplosionType type;
+private String explosionSound;
+
     public ExplodesOnDeath(ExplosionType type){
+	this(type,null);
+    }
+    public ExplodesOnDeath(ExplosionType type, String explosionSound){
+	this.explosionSound=explosionSound;
 	this.type=type;
     }
     @Override
     public synchronized void notifyDeath() {
 	    final WorldObject p = getParent();
-	    p.getTr().
+	    final TR tr = p.getTr();
+	    tr.
 	     getResourceManager().
 	     getExplosionFactory().
 	     triggerExplosion(p.getPositionWithOffset(),type);
+	    String explosionSound = this.explosionSound;
+	    if(explosionSound!=null)
+	     tr.soundSystem.get().
+	      enqueuePlaybackEvent(tr.soundSystem.get().getPlaybackFactory().
+		    create(tr.getResourceManager().soundTextures.get(explosionSound),
+			    new double[]{.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2}));
     }
     @Override
     public void _tick(long tickTimeMillis){
@@ -36,4 +51,17 @@ private ExplosionType type;
 	this.type=type;
 	return this;
     }//end setExplosionType
+    /**
+     * @return the explosionSound
+     */
+    public String getExplosionSound() {
+        return explosionSound;
+    }
+    /**
+     * @param explosionSound the explosionSound to set
+     */
+    public ExplodesOnDeath setExplosionSound(String explosionSound) {
+        this.explosionSound = explosionSound;
+        return this;
+    }
 }//end ExplodesOnDeath

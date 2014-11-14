@@ -58,6 +58,7 @@ import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.snd.SoundSystem;
 
 public class DEFObject extends WorldObject {
     private final double boundingRadius;
@@ -66,6 +67,8 @@ public class DEFObject extends WorldObject {
     private final EnemyDefinition def;
     private boolean mobile,canTurn,foliage,boss,groundLocked,
     		    shieldGen,isRuin,spinCrash,ignoringProjectiles;
+    private static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
+    private static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
@@ -207,7 +210,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     		}
     	    }).setRange(TR.mapSquareSize*10);
     	    addBehavior(new LoopingPositionBehavior());
-    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,BIG_EXP_SOUNDS[(int)(Math.random()*3)]));
     	    customExplosion=true;
     	    canTurn=false;
     	    mobile=false;
@@ -265,7 +268,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case bob:
     	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*1));
     	    addBehavior(new SteadilyRotating());
-    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*3)]));
     	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    customExplosion=true;
     	    mobile=false;
@@ -321,7 +324,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    addBehavior(new Bobbing().
     		    setPhase(Math.random()).
     		    setBobPeriodMillis(10*1000+Math.random()*3000));
-    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,BIG_EXP_SOUNDS[(int)(Math.random()*3)]));
     	    
     	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    customExplosion=true;
@@ -378,6 +381,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
      posLimit.getPositionMinima()[1]=-TR.mapSquareSize*10;
      addBehavior(posLimit);}
     
+    groundLocked |= boss;
+     
     if(groundLocked){
 	addBehavior(new CustomDeathBehavior(new Runnable(){
 	    @Override
@@ -413,9 +418,9 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     if(foliage){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Billow));
     }else if((!mobile || groundLocked) && !customExplosion){
-	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
+	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion,BIG_EXP_SOUNDS[(int)(Math.random()*3)]));
     }else if(!customExplosion){
-	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*2)]));
     }
     if(mobile){
 	addBehavior(new MovesByVelocity());
@@ -486,11 +491,16 @@ private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefiniti
 	public void healthBelowThreshold(){// Spinout and crash
 	    final WorldObject 	parent 	= getParent();
 	    final Behavior 	beh 	= parent.getBehavior();
+	    //Trigger small boom
+	    final TR tr = parent.getTr();
+	    tr.soundSystem.get().getPlaybackFactory().
+	     create(tr.getResourceManager().soundTextures.get("EXP2.WAV"), new double[]{.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2});
+	    
 	    addBehavior(new PulledDownByGravityBehavior().setEnable(true));
 	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
 	    beh.probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
 	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
-	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion);
+	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion).setExplosionSound(BIG_EXP_SOUNDS[(int)(Math.random()*3)]);
 	    if(def.getThrustSpeed()<800000){
 		beh.probeForBehavior(HasPropulsion.class).setPropulsion(0);
 		beh.probeForBehavior(VelocityDragBehavior.class).setEnable(false);

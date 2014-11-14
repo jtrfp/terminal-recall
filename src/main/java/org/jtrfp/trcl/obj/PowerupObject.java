@@ -33,9 +33,12 @@ import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
+import org.jtrfp.trcl.snd.SoundSystem;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 public class PowerupObject extends BillboardSprite{
 	private final Powerup powerupType;
+	private final SoundTexture powerupSound;
 	public PowerupObject(Powerup pt, World world){
 		super(world.getTr());
 		setBillboardSize(new Dimension(20000,20000));
@@ -58,6 +61,7 @@ public class PowerupObject extends BillboardSprite{
 			setTexture(desc,true);}//end try{}
 		catch(Exception e)
 			{e.printStackTrace();}
+		powerupSound=world.getTr().getResourceManager().soundTextures.get("POWER-1.WAV");
 		}//end constructor
 
 	private class PowerupBehavior extends Behavior implements CollisionBehavior{
@@ -101,6 +105,11 @@ public class PowerupObject extends BillboardSprite{
 				tr.getTrConfig()[0].getGameVersion()==GameVersion.F3?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());
+			//SOUND FX
+			tr.soundSystem.get()
+			 .enqueuePlaybackEvent(tr
+				 .soundSystem.get().getPlaybackFactory()
+				 .create(powerupSound, new double []{.5*SoundSystem.DEFAULT_SFX_VOLUME*3,.5*SoundSystem.DEFAULT_SFX_VOLUME*3}));
 		}//end applyToPlayer()
 	}//end PowerupBehavior
 

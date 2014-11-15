@@ -54,6 +54,7 @@ public final class TR{
 	public final TRFutureTask<SoundSystem>	soundSystem;
 	private Player 				player;
 	public final RootWindow 		rootWindow;
+	private final MenuSystem		menuSystem;
 	private Color [] 			globalPalette, 
 						darkIsClearPalette;
 	private ColorPaletteVectorList		globalPaletteVL,
@@ -107,7 +108,7 @@ public final class TR{
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
-	    	rootWindow = new RootWindow(this);
+	    	rootWindow = new RootWindow();
 	    	if(getTrConfig()[0].isWaitForProfiler()){
 	    	    waitForProfiler();
 	    	}//end if(waitForProfiler)
@@ -159,7 +160,8 @@ public final class TR{
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		renderer.get().setRootGrid(world);
-		gameShell = new GameShell(this);
+		gameShell  = new GameShell(this);
+		menuSystem = new MenuSystem(this);
 		gameShell.startShell();
 		}//end constructor
 	

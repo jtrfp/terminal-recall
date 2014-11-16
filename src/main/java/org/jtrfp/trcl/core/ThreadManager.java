@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -50,6 +51,7 @@ public final class ThreadManager {
     private int 			counter 			= 0;
     private Thread 			renderingThread;
     private Animator			animator;
+    private AtomicBoolean 		paused = new AtomicBoolean(false);
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(
 		    30,
@@ -103,7 +105,7 @@ public final class ThreadManager {
 			multiplePlayer=true;
 		    }else alreadyVisitedPlayer=true;
 		}
-		if(!multiplePlayer)wo.tick(tickTimeInMillis);
+		if(!multiplePlayer&&!paused.get())wo.tick(tickTimeInMillis);
 	}// end for(worldObjects)
 	}// end sync(gameStateLock)
 	}catch(NotReadyException e){}
@@ -263,5 +265,9 @@ public final class ThreadManager {
 
     public long getMillisSinceStartup() {
 	return System.currentTimeMillis()-startupTimeMillis;
+    }
+
+    public void setPaused(boolean paused) {
+	this.paused.set(paused);
     }
 }// end ThreadManager

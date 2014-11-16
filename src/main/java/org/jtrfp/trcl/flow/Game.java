@@ -13,6 +13,8 @@
 package org.jtrfp.trcl.flow;
 
 import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 
@@ -74,6 +76,9 @@ public class Game {
     			performanceReportMode;
     private BackdropSystem
     			backdropSystem;
+    private final PropertyChangeSupport
+    			pcSupport;
+    private boolean paused=false;
     
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
@@ -83,6 +88,7 @@ public class Game {
 	setVox(vox);
 	if (!tr.getTrConfig()[0].isDebugMode())
 	    setupNameWithUser();
+	pcSupport = new PropertyChangeSupport(this);
     }// end constructor
 
     private void setupNameWithUser() {
@@ -360,5 +366,36 @@ public class Game {
 
     public BackdropSystem getBackdropSystem() {
 	return backdropSystem;
+    }
+
+    /**
+     * @return the paused
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * @param paused the paused to set
+     */
+    public Game setPaused(boolean paused) {
+	if(paused==this.paused)
+	    return this;//nothing to do.
+	pcSupport.firePropertyChange("paused", this.paused, paused);
+        this.paused = paused;
+	getTr().soundSystem.get().setPaused(paused);
+	getTr().getThreadManager().setPaused(paused);
+	//TODO: Show upfront "Paused" msg
+        return this;
+    }
+    
+    public Game addPropertyChangeListener(String propertyName, PropertyChangeListener l){
+	pcSupport.addPropertyChangeListener(propertyName, l);
+	return this;
+    }
+    
+    public Game removePropertyChangeListener(PropertyChangeListener l){
+	pcSupport.removePropertyChangeListener(l);
+	return this;
     }
 }// end Game

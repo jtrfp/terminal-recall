@@ -14,6 +14,8 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -66,6 +68,7 @@ public final class TR{
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter		= new Reporter();
 	private Game 				game;
+	private final PropertyChangeSupport	pcSupport;
 	
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
@@ -108,6 +111,7 @@ public final class TR{
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
+	    	pcSupport = new PropertyChangeSupport(this);
 	    	rootWindow = new RootWindow();
 	    	if(getTrConfig()[0].isWaitForProfiler()){
 	    	    waitForProfiler();
@@ -262,7 +266,9 @@ public final class TR{
     }
 
     public Game newGame(VOXFile mission) {
-	return game = new Game(this, mission);
+	final Game newGame = new Game(this,mission);
+	pcSupport.firePropertyChange("game", game, newGame);
+	return game = newGame;
     }// end newGame(...)
 
     /**
@@ -398,5 +404,15 @@ public final class TR{
 
     public GameShell getGameShell() {
 	return gameShell;
+    }
+    
+    public TR addPropertyChangeListener(String propertyName, PropertyChangeListener l){
+	pcSupport.addPropertyChangeListener(propertyName, l);
+	return this;
+    }
+    
+    public TR removePropertyChangeListener(PropertyChangeListener l){
+	pcSupport.removePropertyChangeListener(l);
+	return this;
     }
 }//end TR

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
@@ -49,6 +50,7 @@ public final class SoundSystem {
     private final SamplePlaybackEvent.Factory playbackFactory;
     private final MusicPlaybackEvent.Factory musicFactory;
     private long soundRenderingFinishedSync;
+    private AtomicBoolean paused = new AtomicBoolean(false);
     
     private boolean firstRun=true;
     private final TreeSet<SoundEvent> pendingEvents = new TreeSet<SoundEvent>(new Comparator<SoundEvent>(){
@@ -145,6 +147,10 @@ public final class SoundSystem {
 		    FloatBuffer fBuf = floatBytes.asFloatBuffer();
 		    sourceDataLine.start();
 		    while (true) {
+			synchronized(paused){
+			    while(paused.get())
+				paused.wait();
+			}//end sync()
 			renderPrep();
 			tr.getThreadManager().submitToGL(new Callable<Void>() {
 			    @Override
@@ -167,6 +173,20 @@ public final class SoundSystem {
 	    }// end run()
 	}.start();
     }// end constructor
+    
+    public SoundSystem setPaused(boolean state){
+	synchronized(paused){
+	    if(paused.get()==state)//No change
+		return this;
+	    paused.set(state);
+	    paused.notifyAll();
+	}//end sync()
+	return this;
+    }//end setPaused()
+    
+    public AtomicBoolean isPaused() {
+	return paused;
+    }//end isPaused()
     
     /**
      * 

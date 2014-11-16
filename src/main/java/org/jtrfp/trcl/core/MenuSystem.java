@@ -15,31 +15,45 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.concurrent.Callable;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.dbg.FramebufferStateWindow;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.mem.GPUMemDump;
+
+import com.jogamp.newt.event.KeyEvent;
 
 public class MenuSystem {
     private final FramebufferStateWindow fbsw;
     private final ConfigWindow		configWindow;
+    private final PropertyChangeListener pausePCL;
+    private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
+    private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
     
     public MenuSystem(final TR tr){
 	final RootWindow rw = tr.getRootWindow();
 	final JMenu file = new JMenu("File"), window = new JMenu("Window"), gameMenu = new JMenu("Game");
 	// And menus to menubar
-	final JMenuItem file_exit = new JMenuItem("Exit");
+	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
 	final JMenuItem game_new = new JMenuItem("New Game");
+	final JMenuItem game_pause = new JMenuItem("Pause");
 	final JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
 	final JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
 	final JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
+	// Accellerator keys
+	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
+	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
 	
 	fbsw = new FramebufferStateWindow(tr);
 	configWindow = new ConfigWindow(tr.getTrConfig());
@@ -55,12 +69,23 @@ public class MenuSystem {
 			return null;
 		    }});
 	    }});
+	game_pause.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent arg0) {
+		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			final Game game = tr.getGame();
+			game.setPaused(!game.isPaused());
+			return null;
+		    }});
+	    }});
 	file_config.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
 		configWindow.setVisible(true);
 	    }});
-	file_exit.addActionListener(new ActionListener() {
+	file_quit.addActionListener(new ActionListener() {
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
 		System.exit(1);
@@ -95,17 +120,19 @@ public class MenuSystem {
 		tr.getReporter().setVisible(true);
 	    }
 	}
-	try{
+	try{//Get this done in the local thread to minimize use of the EDT
+	    final JMenuBar mb = new JMenuBar();
+	    file.add(file_config);
+	    file.add(gpuMemDump);
+	    file.add(file_quit);
+	    window.add(debugStatesMenuItem);
+	    window.add(frameBufferStatesMenuItem);
+            gameMenu.add(game_new);
+            game_pause.setEnabled(false);
+            gameMenu.add(game_pause);
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-		    final JMenuBar mb = new JMenuBar();
-		    file.add(file_exit);
-		    file.add(file_config);
-		    file.add(gpuMemDump);
-		    window.add(debugStatesMenuItem);
-		    window.add(frameBufferStatesMenuItem);
-	            gameMenu.add(game_new);
 	            rw.setVisible(false);//Frame must be invisible to modify.
 		    rw.setJMenuBar(mb);
 		    mb.add(file);
@@ -114,5 +141,24 @@ public class MenuSystem {
 		    rw.setVisible(true);
 		}});
 	}catch(Exception e){tr.showStopper(e);}
+	
+	pausePCL = new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getPropertyName().contentEquals("paused"))
+		    game_pause.setText((Boolean)evt.getNewValue()==true?"Unpause":"Pause");
+	    }//end if(paused)
+	};//end gamePCL
+	
+	tr.addPropertyChangeListener("game", new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		game_pause.setEnabled(evt.getNewValue()!=null);
+		game_new.setEnabled(evt.getNewValue()==null);
+	    }});
+	
+	tr.addPropertyChangeListener("game", new IndirectProperty<Game>().
+		addTargetPropertyChangeListener("paused", pausePCL));
+	//game.addTargetPropertyChangeListener("paused", pausePCL);
     }//end constructor
 }//end MenuSystem

@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.Positionable;
@@ -27,8 +29,11 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private final List<E> 			alwaysVisible = new ArrayList<E>(300);
 	private WeakReference<SpacePartitioningGrid<E>> 	
 						parentGrid = null;
-	private List<SpacePartitioningGrid<E>> 	branchGrids = Collections
-		.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());
+	private Map<SpacePartitioningGrid<E>,String>
+						branchGrids = 
+	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
+	/*private List<SpacePartitioningGrid<E>> 	branchGrids = Collections
+		.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());*/
 	private  List<E> []elements;
 	
 	private double 		radiusInWorldUnits;
@@ -69,8 +74,8 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
     }//end notifyBranchRemoved(...)
 
 	private void addBranch(SpacePartitioningGrid<E> branchToAdd)
-		{if(!branchGrids.contains(branchToAdd)){
-		    branchGrids.add(branchToAdd);
+		{if(!branchGrids.containsKey(branchToAdd)){
+		    branchGrids.put(branchToAdd,"");
 		    if(parentGrid==null)return;
 		    final SpacePartitioningGrid<E> g = parentGrid.get();
 		    if (g != null)
@@ -78,7 +83,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		    }//end if(!contains)
 		}//end addBranch(...)
 	private void removeBranch(SpacePartitioningGrid<E> branchToRemove)
-		{if(branchGrids.remove(branchToRemove)){
+		{if(branchGrids.remove(branchToRemove)!=null){
 		    if(parentGrid==null)return;
 		    final SpacePartitioningGrid<E> g = parentGrid.get();
 		    if (g != null)
@@ -183,18 +188,24 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
 	 final int size = branchGrids.size();
-	 for (int index = 0; index < size; index++) {
+	 for(SpacePartitioningGrid<E> g:branchGrids.keySet())
+	     g.recursiveAlwaysVisibleSubmit(sub);
+	 /*for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
-	}}
+	}*/}
     }// end recursiveAlwaysVisisbleSubmit(...)
 
     private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<List<E>> sub) {
 	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
+	
+	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
+	     g.recursiveAlwaysVisibleGridCubeSubmit(sub);
+	/*
 	for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveAlwaysVisibleGridCubeSubmit(sub);
-	}}
+	}*/}
     }// end recursiveAlwaysVisisbleSubmit(...)
 	
     private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
@@ -209,9 +220,13 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	}// end if(!null)
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
-	for (int index = 0; index < size; index++) {
+	
+	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
+	     g.recursiveBlockSubmit(sub, blockID);
+	
+	/*for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveBlockSubmit(sub, blockID);
-	}}
+	}*/}
     }// end recusiveBlockSubmit(...)
 
     private void recursiveGridCubeSubmit(Submitter<List<E>> sub, int blockID) {
@@ -219,9 +234,13 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	sub.submit(elements[blockID]);
 	synchronized(branchGrids){
 	final int size = branchGrids.size();
-	for (int index = 0; index < size; index++) {
+	
+	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
+	     g.recursiveGridCubeSubmit(sub, blockID);
+	
+	/*for (int index = 0; index < size; index++) {
 	    branchGrids.get(index).recursiveGridCubeSubmit(sub, blockID);
-	}}//end for(size) sync(branchGrids)
+	}*/}//end for(size) sync(branchGrids)
     }// end recusiveGridCubeSubmit(...)
 
 	private Collection<E> getAlwaysVisible()

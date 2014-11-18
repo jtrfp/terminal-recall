@@ -16,11 +16,10 @@ import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import javax.swing.JOptionPane;
 
-import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.DisplayModeHandler;
@@ -35,6 +34,7 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
@@ -77,8 +77,9 @@ public class Game {
     private BackdropSystem
     			backdropSystem;
     private final PropertyChangeSupport
-    			pcSupport;
+    			pcSupport = new PropertyChangeSupport(this);
     private boolean paused=false;
+    private TRFutureTask<Void>[] startupTask = new TRFutureTask[]{null};
     
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
@@ -88,7 +89,6 @@ public class Game {
 	setVox(vox);
 	if (!tr.getTrConfig()[0].isDebugMode())
 	    setupNameWithUser();
-	pcSupport = new PropertyChangeSupport(this);
     }// end constructor
 
     private void setupNameWithUser() {
@@ -144,6 +144,9 @@ public class Game {
      *            the vox to set
      */
     public void setVox(VOXFile vox) {
+	if(this.vox==vox)
+	    return;//No change.
+	pcSupport.firePropertyChange("vox", this.vox, vox);
 	this.vox = vox;
     }
 
@@ -160,7 +163,17 @@ public class Game {
      */
     public void setLevelIndex(int levelIndex) {
 	this.levelIndex = levelIndex;
-    }
+	if (levelIndex != -1) {// -1 means 'abort'
+	    MissionLevel lvl = vox.getLevels()[getLevelIndex()];
+	    final String lvlFileName = lvl.getLvlFile();
+	    try {
+		setCurrentMission(new Mission(tr, this, tr.getResourceManager()
+			.getLVL(lvlFileName), lvlFileName.substring(0,
+			lvlFileName.lastIndexOf('.')), getLevelIndex() % 3 == 0));
+	    } catch (Exception e) {
+		tr.showStopper(e);}
+	}//end if(levelIndex!=-1)
+    }// end setLevelIndex(...)
 
     /**
      * @return the playerName
@@ -214,122 +227,175 @@ public class Game {
     }
 
     public void go() {
-	// Set up player, HUD, fonts...
-	System.out.println("Game.go()...");
-	System.out.println("Initializing general resources...");
-	greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
-	NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
-	upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
-		    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
-	earlyLoadingScreen = new EarlyLoadingScreen(tr.getWorld(), tr, greenFont);
-	earlyLoadingScreen.setStatusText("Reticulating Splines...");
-	earlyLoadingMode = new Object []{
-		earlyLoadingScreen
-	};
-	displayModes.setDisplayMode(earlyLoadingMode);
-	
-	upfrontDisplay = new UpfrontDisplay(tr.getWorld(),tr);
-	
-	hudSystem = new HUDSystem(tr.getWorld(),greenFont);
-	hudSystem.deactivate();
-	navSystem = new NAVSystem(tr.getWorld(), tr);
-	navSystem.deactivate();
-	try {
-	    // Make color zero translucent.
-	    final ResourceManager rm = tr.getResourceManager();
-	    final Color[] pal 	     = tr.getGlobalPalette();
-	    pal[0] 		     = new Color(0, 0, 0, 0);
-	    tr.setGlobalPalette(pal);
-	    backdropSystem = new BackdropSystem(tr.getWorld());
-	    backdropSystem.activate();
-	    backdropSystem.loadingMode();
-	    // POWERUPS
-	    earlyLoadingScreen.setStatusText("Loading powerup assets...");
-	    rm.setPowerupSystem(new PowerupSystem(tr));
-	    rm.getPowerupSystem().activate();
-	    // EXPLOSIONS
-	    earlyLoadingScreen.setStatusText("Loading explosion assets...");
-	    rm.setExplosionFactory(new ExplosionSystem(tr));
-	    rm.getExplosionFactory().activate();
-	    // SMOKE
-	    earlyLoadingScreen.setStatusText("Loading smoke assets...");
-	    rm.setSmokeSystem(new SmokeSystem(tr));
-	    rm.getSmokeSystem().activate();
-	    // DEBRIS
-	    earlyLoadingScreen.setStatusText("Loading debris assets...");
-	    rm.setDebrisSystem(new DebrisSystem(tr));
-	    rm.getDebrisSystem().activate();
-
-	    // SETUP PROJECTILE FACTORIES
-	    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
-	    Weapon[] w = Weapon.values();
-	    ProjectileFactory[] pf = new ProjectileFactory[w.length];
-	    for (int i = 0; i < w.length; i++) {
-		pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast);
-	    }// end for(weapons)
-	    rm.setProjectileFactories(pf);
-	    player = new Player(tr, tr.getResourceManager().getBINModel(
-		    "SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
-	    final Camera camera = tr.renderer.get().getCamera();
-	    camera.probeForBehavior(MatchPosition.class).setTarget(player);
-	    camera.probeForBehavior(MatchDirection.class).setTarget(player);
-	    tr.setPlayer(player);
-	    tr.getWorld().add(player);
-	    System.out.println("\t...Done.");
-	    levelLoadingScreen	= new LevelLoadingScreen(tr.getWorld(),tr);
-	    briefingScreen	= new BriefingScreen(tr.getWorld(),tr,greenFont);
-	    earlyLoadingScreen.setStatusText("Starting game...");
-	    levelLoadingMode = new Object[]{
-		 levelLoadingScreen,
-		 upfrontDisplay,
-		 backdropSystem
-	    };
-	    gameplayMode = new Object[]{
-		 navSystem,
-		 hudSystem,
-		 upfrontDisplay,
-		 backdropSystem,
-		 rm.getDebrisSystem(),
-		 rm.getPowerupSystem(),
-		 rm.getProjectileFactories(),
-		 rm.getExplosionFactory(),
-		 rm.getSmokeSystem()
-	    };
-	    briefingMode = new Object[]{
-		 briefingScreen,
-		 backdropSystem
-	    };
-	    MissionLevel [] levels = vox.getLevels();
-	    while(getLevelIndex()<levels.length){
+	synchronized(startupTask){
+	startupTask[0] = tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		// Set up player, HUD, fonts...
+		System.out.println("Game.go()...");
+		System.out.println("Initializing general resources...");
+		tr.getWorld().setFogColor(Color.BLACK);
+		greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
+		NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
+		upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
+			    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
+		earlyLoadingScreen = new EarlyLoadingScreen(tr.getWorld(), tr, greenFont);
+		earlyLoadingScreen.setStatusText("Reticulating Splines...");
+		earlyLoadingMode = new Object []{
+			earlyLoadingScreen
+		};
+		displayModes.setDisplayMode(earlyLoadingMode);
+		
+		upfrontDisplay = new UpfrontDisplay(tr.getWorld(),tr);
+		
+		hudSystem = new HUDSystem(tr.getWorld(),greenFont);
+		hudSystem.deactivate();
+		navSystem = new NAVSystem(tr.getWorld(), tr);
+		navSystem.deactivate();
 		try {
-		    MissionLevel lvl = levels[getLevelIndex()];
-		    final String lvlFileName = lvl.getLvlFile();
-		    currentMission = new Mission(tr, this, tr.getResourceManager()
-			    .getLVL(lvlFileName),lvlFileName.substring(0, lvlFileName.lastIndexOf('.')),getLevelIndex()%3==0);
-		    System.out.println("Invoking JVM's garbage collector...");
-		    TR.nuclearGC();
-		    System.out.println("...Done.");
-		    Mission.Result result=null;
-		    while(result==null) 
-			result = currentMission.go();
-		} catch (IllegalAccessException e) {
-		    tr.showStopper(e);
-		} catch (FileLoadException e) {
-		    tr.showStopper(e);
-		} catch (IOException e) {
-		    tr.showStopper(e);
-		}
-		//Rube Goldberg style increment
-		setLevelIndex(getLevelIndex()+1);
-	    }//end while(getLevelIndex<length)
-	} catch (Exception e) {
-	    throw new RuntimeException(e);
-	}
+		    // Make color zero translucent.
+		    final ResourceManager rm = tr.getResourceManager();
+		    final Color[] pal 	     = tr.getGlobalPalette();
+		    pal[0] 		     = new Color(0, 0, 0, 0);
+		    tr.setGlobalPalette(pal);
+		    backdropSystem = new BackdropSystem(tr.getWorld());
+		    backdropSystem.activate();
+		    backdropSystem.loadingMode();
+		    // POWERUPS
+		    earlyLoadingScreen.setStatusText("Loading powerup assets...");
+		    rm.setPowerupSystem(new PowerupSystem(tr));
+		    rm.getPowerupSystem().activate();
+		    // EXPLOSIONS
+		    earlyLoadingScreen.setStatusText("Loading explosion assets...");
+		    rm.setExplosionFactory(new ExplosionSystem(tr));
+		    rm.getExplosionFactory().activate();
+		    // SMOKE
+		    earlyLoadingScreen.setStatusText("Loading smoke assets...");
+		    rm.setSmokeSystem(new SmokeSystem(tr));
+		    rm.getSmokeSystem().activate();
+		    // DEBRIS
+		    earlyLoadingScreen.setStatusText("Loading debris assets...");
+		    rm.setDebrisSystem(new DebrisSystem(tr));
+		    rm.getDebrisSystem().activate();
+
+		    // SETUP PROJECTILE FACTORIES
+		    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
+		    Weapon[] w = Weapon.values();
+		    ProjectileFactory[] pf = new ProjectileFactory[w.length];
+		    for (int i = 0; i < w.length; i++) {
+			pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+		    }// end for(weapons)
+		    rm.setProjectileFactories(pf);
+		    player = new Player(tr, tr.getResourceManager().getBINModel(
+			    "SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
+		    final Camera camera = tr.renderer.get().getCamera();
+		    camera.probeForBehavior(MatchPosition.class).setTarget(player);
+		    camera.probeForBehavior(MatchDirection.class).setTarget(player);
+		    tr.setPlayer(player);
+		    tr.getWorld().add(player);
+		    System.out.println("\t...Done.");
+		    levelLoadingScreen	= new LevelLoadingScreen(tr.getWorld(),tr);
+		    briefingScreen	= new BriefingScreen(tr.getWorld(),tr,greenFont);
+		    earlyLoadingScreen.setStatusText("Starting game...");
+		    levelLoadingMode = new Object[]{
+			 levelLoadingScreen,
+			 upfrontDisplay,
+			 backdropSystem
+		    };
+		    gameplayMode = new Object[]{
+			 navSystem,
+			 hudSystem,
+			 upfrontDisplay,
+			 backdropSystem,
+			 rm.getDebrisSystem(),
+			 rm.getPowerupSystem(),
+			 rm.getProjectileFactories(),
+			 rm.getExplosionFactory(),
+			 rm.getSmokeSystem()
+		    };
+		    briefingMode = new Object[]{
+			 briefingScreen,
+			 backdropSystem
+		    };
+
+		} catch (Exception e) {tr.showStopper(e);}
+		return null;
+	    }});
+	}//end sync()
+	startupTask[0].get();
+	beginGameplay();
     }// end go()
 
-    public Mission getCurrentMission() {
-	return currentMission;
+    public void beginGameplay() {
+	MissionLevel[] levels = vox.getLevels();
+	while (getLevelIndex() < levels.length && getLevelIndex()!=-1) {
+	    System.out.println("Invoking JVM's garbage collector...");
+	    TR.nuclearGC();
+	    System.out.println("...Done.");
+	    Mission.Result result = null;
+	    final Mission mission = getCurrentMission();
+	    if(mission==null)
+		break;
+	    while (result == null)
+		result = getCurrentMission().go().get();
+	    if (result.isAbort())
+		break;
+	    // Rube Goldberg style increment
+	    setLevelIndex(getLevelIndex() + 1);
+	}// end while(getLevelIndex<length)
+	System.out.println("Escaping game loop.");
+	cleanup();
+    }// end beginGameplay()
+
+    public void setCurrentMission(Mission mission) {
+	pcSupport.firePropertyChange("currentMission", this.currentMission, mission);
+	this.currentMission=mission;
     }
+    
+    public void abort(){
+	setLevelIndex(-1);
+	abortCurrentMission();
+	cleanup();
+	TR.nuclearGC();
+    }
+    
+    private void cleanup() {
+	if(hudSystem!=null)
+	    hudSystem.deactivate();
+	if(navSystem!=null)
+	    navSystem.deactivate();
+	if(upfrontDisplay!=null)
+	    upfrontDisplay.deactivate();
+	if(earlyLoadingScreen!=null)
+	    earlyLoadingScreen.deactivate();
+	if(levelLoadingScreen!=null)
+	    levelLoadingScreen.deactivate();
+	if(briefingScreen!=null)
+	    briefingScreen.deactivate();
+	if(tr.getResourceManager().getPowerupSystem()!=null)
+	    tr.getResourceManager().getPowerupSystem().deactivate();
+	if(tr.getResourceManager().getSmokeSystem()!=null)
+	    tr.getResourceManager().getSmokeSystem().deactivate();
+	if(tr.getResourceManager().getExplosionFactory()!=null)
+	    tr.getResourceManager().getExplosionFactory().deactivate();
+    }
+
+    public void abortCurrentMission(){
+	synchronized(startupTask){
+	    if(startupTask[0]!=null)
+		startupTask[0].get();//Don't abort while setting up.
+	}//end sync{}
+	if(currentMission!=null)
+	    currentMission.abort();
+	setCurrentMission(null);
+    }//end abortCurrentMission()
+    
+    public Mission getCurrentMission() {
+	if(currentMission==null){
+	    setLevelIndex(getLevelIndex());
+	}
+	return currentMission;
+    }//end getCurrentMission
     
     public Player getPlayer(){
 	return player;

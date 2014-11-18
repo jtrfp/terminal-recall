@@ -24,6 +24,7 @@ import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
@@ -38,8 +39,6 @@ import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
-
-import de.quippy.javamod.multimedia.mod.loader.Module;
 
 public class Mission {
     private final TR 		tr;
@@ -65,6 +64,7 @@ public class Mission {
     private final boolean	showIntro;
     private volatile MusicPlaybackEvent
     				bgMusic;
+    private TRFutureTask<Result>[]missionTask = new TRFutureTask[]{null};
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -77,8 +77,23 @@ public class Mission {
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
     }// end Mission
+    
+    public TRFutureTask<Result> go(){
+	synchronized(missionTask){
+	 missionTask[0] = tr.getThreadManager().submitToThreadPool(new Callable<Result>(){
+	    @Override
+	    public Result call() throws Exception {
+		return _go();
+	    }});
+	}//end sync{}
+	return missionTask[0];
+    }//end go()
 
-    public Result go() {
+    private Result _go() {
+	synchronized(missionEnd){
+	    if(missionEnd[0]!=null)
+		return missionEnd[0]; 
+	}
 	System.out.println("Starting GampeplayLevel loading sequence...");
 	final LoadingProgressReporter rootProgress = LoadingProgressReporter.Impl
 		.createRoot(new UpdateHandler() {
@@ -97,6 +112,12 @@ public class Mission {
 	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	    player.setActive(false);
+	    // Abort check
+	    synchronized(missionEnd){
+		if(missionEnd[0]!=null)
+		return missionEnd[0]; 
+	    }
+	    
 	    overworldSystem = new OverworldSystem(world,
 		    progressStages[LoadingStages.overworld.ordinal()]);
 	    getOverworldSystem().loadLevel(lvl, tdf);
@@ -179,6 +200,11 @@ public class Mission {
 	}// end if(containsKey)
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
+	// Abort check
+	synchronized (missionEnd) {
+	    if (missionEnd[0] != null)
+		return missionEnd[0];
+	}//end sync(missionEnd)
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -203,6 +229,7 @@ public class Mission {
 	game.getUpfrontDisplay().removePersistentMessage();
 	game.getBackdropSystem().overworldMode();
 	game.getBackdropSystem().activate();
+	tr.getThreadManager().setPaused(false);
 	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
 	getOverworldSystem().activate();
 	tr.getWorld().setFogColor(overworldSystem.getFogColor());
@@ -215,7 +242,8 @@ public class Mission {
 		catch(InterruptedException e){break;}}}
 	//Completion summary
 	if(missionEnd[0]!=null)
-	    game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+	    if(!missionEnd[0].isAbort())
+	     game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -223,6 +251,7 @@ public class Mission {
 		return null;
 	    }// end call()
 	});
+	cleanup();
 	return missionEnd[0];
     }// end go()
 
@@ -243,6 +272,7 @@ public class Mission {
     public static class Result {
 	private final int airTargetsDestroyed, groundTargetsDestroyed,foliageDestroyed;
 	private final double tunnelsFoundPctNorm;
+	private boolean abort=false;
 
 	public Result(int airTargetsDestroyed, int groundTargetsDestroyed, int foliageDestroyed, double tunnelsFoundPctNorm) {
 	    this.airTargetsDestroyed	=airTargetsDestroyed;
@@ -277,6 +307,20 @@ public class Mission {
 	 */
 	public double getTunnelsFoundPctNorm() {
 	    return tunnelsFoundPctNorm;
+	}
+
+	/**
+	 * @return the abort
+	 */
+	public boolean isAbort() {
+	    return abort;
+	}
+
+	/**
+	 * @param abort the abort to set
+	 */
+	public void setAbort(boolean abort) {
+	    this.abort = abort;
 	}
     }// end Result
 
@@ -485,4 +529,25 @@ public class Mission {
 	    }// end call()
 	});
     }//end exitBossMode()
+
+    public void abort() {
+	final Result result = new Result(
+		airTargetsDestroyed,
+		groundTargetsDestroyed,
+		foliageDestroyed,
+		1.-(double)tunnelsRemaining.size()/(double)totalNumTunnels);
+	result.setAbort(true);
+	notifyMissionEnd(result);
+	//Wait for mission to end
+	synchronized(missionTask){
+	if(missionTask[0]!=null)
+	 missionTask[0].get();
+	}//end sync{}
+	cleanup();
+    }//end abort()
+
+    private void cleanup() {
+	if(overworldSystem!=null)
+	    overworldSystem.deactivate();
+    }
 }// end Mission

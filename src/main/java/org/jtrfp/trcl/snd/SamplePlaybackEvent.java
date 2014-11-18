@@ -32,14 +32,23 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final SoundTexture soundTexture;
     private final double[] pan;
     private final GLProgram soundProgram;
+    private final double playbackRatio;
     
     private SamplePlaybackEvent(SoundTexture tex, long startTimeSamples,
 		double[] pan, GLProgram soundProgram, Factory origin, SoundEvent parent) {
-	    super(startTimeSamples,tex.getLengthInRealtimeSamples(),origin,parent);
-	    soundTexture = tex;
-	    this.pan = pan;
-	    this.soundProgram=soundProgram;
+	    this(tex,startTimeSamples,pan,soundProgram,origin,parent,1);
 	}//end constructor
+
+    public SamplePlaybackEvent(SoundTexture tex, long startTimeSamples,
+	    double[] pan, GLProgram soundProgram, Factory origin,
+	    SoundEvent parent, double playbackRatio) {
+	super(startTimeSamples, tex.getLengthInRealtimeSamples(), origin,
+		parent);
+	soundTexture = tex;
+	this.pan = pan;
+	this.soundProgram = soundProgram;
+	this.playbackRatio = playbackRatio;
+    }
 
     /**
      * @return the soundTexture
@@ -62,7 +71,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	soundProgram.getUniform("numRows").setui((int)getSoundTexture().getNumRows());
 	soundProgram.getUniform("start").set((float)startTimeInBuffers);
 	soundProgram.getUniform("lengthPerRow")
-	 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)SoundSystem.BUFFER_SIZE_FRAMES))*2*(float)getSoundTexture().getResamplingScalar());
+	 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)SoundSystem.BUFFER_SIZE_FRAMES))*2*(float)getSoundTexture().getResamplingScalar()/(float)playbackRatio);
 	final int lengthInSegments = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
 	getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
 	gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
@@ -124,6 +133,10 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
 		double[] pan, SoundEvent parent){
 	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,soundProgram,this,parent);
+	}//end create(...)
+	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
+		double[] pan, SoundEvent parent, double playbackRatio){
+	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,soundProgram,this,parent,playbackRatio);
 	}//end create(...)
     }//end Factory
 }//end SamplePlaybackEvent

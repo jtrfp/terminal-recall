@@ -17,6 +17,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeListenerProxy;
 import java.beans.PropertyChangeSupport;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 
@@ -37,12 +38,12 @@ public class IndirectProperty<PROPERTY_TYPE> implements PropertyChangeListener{
  private final PropertyChangeSupport
   targetPCS = new PropertyChangeSupport(this),
   thisPCS   = new PropertyChangeSupport(this);
- private PROPERTY_TYPE target;
+ private WeakReference<PROPERTY_TYPE> target = new WeakReference<PROPERTY_TYPE>(null);
 /**
  * @return the target
  */
 public PROPERTY_TYPE getTarget() {
-    return target;
+    return target.get();
 }
 /**
  * @param target the target to set
@@ -50,11 +51,11 @@ public PROPERTY_TYPE getTarget() {
 public void setTarget(PROPERTY_TYPE target) {
     if(this.target!=target){
 	if(this.target!=null)
-	    disconnectAllFrom(this.target);
+	    disconnectAllFrom(this.target.get());
 	if(target!=null)
 	    connectAllTo(target);
 	thisPCS.firePropertyChange("target", this.target, target);
-	this.target = target;
+	this.target = new WeakReference<PROPERTY_TYPE>(target);
 	fireAllPropertiesChanged();
     }//end if(changed)
 }//end setTarget(...)
@@ -70,6 +71,8 @@ private void connectAllTo(PROPERTY_TYPE tgt) {
        }//end for(listener)
 }
 private void disconnectAllFrom(PROPERTY_TYPE tgt) {
+    if(tgt==null)
+	return;
     for(PropertyChangeListener l:targetPCS.getPropertyChangeListeners()){
    	try{tgt.getClass().getMethod("removePropertyChangeListener", PropertyChangeListener.class).invoke(tgt, l);}
    	catch(Exception e){e.printStackTrace();}
@@ -96,6 +99,9 @@ public IndirectProperty<PROPERTY_TYPE> removeTargetPropertyChangeListener(Proper
 }
 
 private void fireAllPropertiesChanged(){
+    PROPERTY_TYPE target = this.target.get();
+    if(target==null)
+	return;
     HashSet<String> propertiesToFireChanged = new HashSet<String>();
     PropertyChangeListener []listeners = targetPCS.getPropertyChangeListeners();
     for(PropertyChangeListener l:listeners){

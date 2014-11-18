@@ -17,6 +17,7 @@
 package org.jtrfp.trcl.snd;
 
 import java.nio.IntBuffer;
+import java.util.HashMap;
 
 import org.jtrfp.trcl.core.TR;
 
@@ -25,6 +26,7 @@ import de.quippy.javamod.multimedia.mod.loader.instrument.Sample;
 import de.quippy.javamod.multimedia.mod.loader.pattern.Pattern;
 import de.quippy.javamod.multimedia.mod.loader.pattern.PatternElement;
 import de.quippy.javamod.multimedia.mod.loader.pattern.PatternRow;
+import de.quippy.javamod.system.Helpers;
 
 public class GPUResidentMOD {
     private final TR tr;
@@ -36,6 +38,7 @@ public class GPUResidentMOD {
     double []panStates = new double[32];// [-1,1]
     double []volumeStates = new double[32]; // [0,1]
     private long songLengthInBufferFrames=-1;
+    private final HashMap<PatternElement,Integer> durationInRows = new HashMap<PatternElement,Integer>();
     
     public GPUResidentMOD(TR tr, Module module){
 	this.tr=tr;
@@ -53,8 +56,34 @@ public class GPUResidentMOD {
 		this.samples[i]=tr.soundSystem.get().newSoundTexture(IntBuffer.wrap(thisModSample.sample),thisModSample.baseFrequency);
 	    }//end if(!null)
 	}//end for(i)
+	calculateNoteLengths();
     }//end constructor
     
+    private void calculateNoteLengths() {
+	final Pattern []    patterns = module.getPatternContainer().getPattern();
+	final int []        arrangements = module.getArrangement();
+	final int []	    rowOfPreviousNote = new int[32];
+	int 		    rowCounter=0;
+	setTempo(module.getBPMSpeed());
+	setInterruptLockedSpeed(module.getTempo());
+	try{
+	 for(int arrIdx=0; arrIdx<module.getSongLength(); arrIdx++){
+	    int arrangement = arrangements[arrIdx];
+	    final Pattern pattern = patterns[arrangement];
+	    for(PatternRow row:pattern.getPatternRow()){
+		rowCounter++;
+		for(PatternElement element:row.getPatternElement()){
+		   if(element.getEffekt()==0x0B)
+		       throw new EndOfSongException();
+		   final int lengthInRows = rowCounter-rowOfPreviousNote[element.getChannel()];
+		   durationInRows.put(element, lengthInRows);
+		   rowOfPreviousNote[element.getChannel()]=rowCounter;
+		}//end for(patternElements)
+	    }//end for(rows)
+	 }//end for(arrangements)
+	}catch(EndOfSongException e){}
+    }//end calculateNoteLength()
+
     public void apply(final long startOffsetInFrames, SoundEvent parent, double stereoWidth){
 	final Pattern []    patterns = module.getPatternContainer().getPattern();
 	final int []        arrangements = module.getArrangement();
@@ -89,9 +118,16 @@ public class GPUResidentMOD {
 			  final double []panState = new double[2];
 			  panState[0]= (1-ps)*volumeStates[element.getChannel()];
 			  panState[1]= ps*volumeStates[element.getChannel()];
-			  final SoundEvent evt = tr.soundSystem.get().getPlaybackFactory().create(texture,(long)frameOffsetCounter+startOffsetInFrames, panState,parent);
+			  final double playbackRatio = 428./Helpers.noteValues[element.getNoteIndex()-1];
+			  final SoundEvent evt = tr.soundSystem.get().
+				  getPlaybackFactory().
+				  create(texture,
+					  (long)frameOffsetCounter+startOffsetInFrames, 
+					  panState,
+					  parent,
+					  playbackRatio);
 			  tr.soundSystem.get().enqueuePlaybackEvent(evt);
-			}
+			}//end if(null)
 		   }//end if(>-1)
 		}//end for(patternElements)
 	    }//end for(rows)

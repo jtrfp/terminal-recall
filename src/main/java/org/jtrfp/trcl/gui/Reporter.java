@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.dbg;
+package org.jtrfp.trcl.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;

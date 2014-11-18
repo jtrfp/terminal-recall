@@ -11,7 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,10 +25,11 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
-import org.jtrfp.trcl.dbg.FramebufferStateWindow;
+import org.jtrfp.trcl.core.RootWindow;
+import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
-import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.mem.GPUMemDump;
 
 import com.jogamp.newt.event.KeyEvent;
@@ -36,6 +37,7 @@ import com.jogamp.newt.event.KeyEvent;
 public class MenuSystem {
     private final FramebufferStateWindow fbsw;
     private final ConfigWindow		configWindow;
+    private final LevelSkipWindow	levelSkipWindow;
     private final PropertyChangeListener pausePCL;
     private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
     private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
@@ -48,6 +50,8 @@ public class MenuSystem {
 	final JMenuItem file_config = new JMenuItem("Configure");
 	final JMenuItem game_new = new JMenuItem("New Game");
 	final JMenuItem game_pause = new JMenuItem("Pause");
+	final JMenuItem game_skip = new JMenuItem("Skip To Level...");
+	final JMenuItem game_abort= new JMenuItem("Abort Game");
 	final JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
 	final JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
 	final JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
@@ -57,6 +61,7 @@ public class MenuSystem {
 	
 	fbsw = new FramebufferStateWindow(tr);
 	configWindow = new ConfigWindow(tr.getTrConfig());
+	levelSkipWindow = new LevelSkipWindow(tr);
 	
 	// Menu item behaviors
 	game_new.addActionListener(new ActionListener(){
@@ -80,6 +85,30 @@ public class MenuSystem {
 			return null;
 		    }});
 	    }});
+	game_skip.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent evt) {
+		levelSkipWindow.setVisible(true);
+	    }});
+	game_abort.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent arg0) {
+		game_abort.setText("Aborting Game...");
+		game_abort.setEnabled(false);
+		final TRFutureTask<Void> task = tr.abortCurrentGame();
+		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			task.get();
+			SwingUtilities.invokeLater(new Runnable(){
+			    @Override
+			    public void run() {
+				game_abort.setText("Abort Game");
+				game_abort.setEnabled(false);
+			    }});//end EDT task
+			return null;
+		    }});//end threadPool task
+	    }});//end actionListener(game_abort)
 	file_config.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
@@ -129,7 +158,11 @@ public class MenuSystem {
 	    window.add(frameBufferStatesMenuItem);
             gameMenu.add(game_new);
             game_pause.setEnabled(false);
+            game_skip.setEnabled(false);
+            game_abort.setEnabled(false);
             gameMenu.add(game_pause);
+            gameMenu.add(game_skip);
+            gameMenu.add(game_abort);
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -155,10 +188,12 @@ public class MenuSystem {
 	    public void propertyChange(PropertyChangeEvent evt) {
 		game_pause.setEnabled(evt.getNewValue()!=null);
 		game_new.setEnabled(evt.getNewValue()==null);
+		game_skip.setEnabled(evt.getNewValue()!=null);
+		game_abort.setEnabled(evt.getNewValue()!=null);
 	    }});
 	
-	tr.addPropertyChangeListener("game", new IndirectProperty<Game>().
-		addTargetPropertyChangeListener("paused", pausePCL));
-	//game.addTargetPropertyChangeListener("paused", pausePCL);
+	IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
+	tr.addPropertyChangeListener("game", gameIP);
+	gameIP.addTargetPropertyChangeListener("paused", pausePCL);
     }//end constructor
 }//end MenuSystem

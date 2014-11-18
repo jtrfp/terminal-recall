@@ -11,7 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.dbg;
+package org.jtrfp.trcl.gui;
 
 import java.awt.Component;
 import java.beans.BeanInfo;

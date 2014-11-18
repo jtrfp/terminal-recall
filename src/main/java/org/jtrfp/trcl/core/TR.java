@@ -30,11 +30,12 @@ import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.dbg.Reporter;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
@@ -267,9 +268,19 @@ public final class TR{
 
     public Game newGame(VOXFile mission) {
 	final Game newGame = new Game(this,mission);
-	pcSupport.firePropertyChange("game", game, newGame);
-	return game = newGame;
+	setGame(newGame);
+	return newGame;
     }// end newGame(...)
+
+    private void setGame(Game newGame) {
+	if(newGame==game)
+	    return;
+	final Game oldGame=game;
+	game=newGame;
+	if(newGame==null)
+	 getThreadManager().setPaused(true);
+	pcSupport.firePropertyChange("game", oldGame, newGame);
+    }
 
     /**
      * @return the keyStatus
@@ -415,4 +426,16 @@ public final class TR{
 	pcSupport.removePropertyChangeListener(l);
 	return this;
     }
+
+    public TRFutureTask<Void> abortCurrentGame() {
+	return getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		final Game game = getGame();
+		if(game!=null)
+		    game.abort();
+		setGame(null);
+		return null;
+	    }});
+    }//end abortCurrentGame()
 }//end TR

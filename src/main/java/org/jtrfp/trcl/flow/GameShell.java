@@ -44,15 +44,7 @@ public class GameShell {
 	vox = determineVOXFile();
 	if(vox==null)
 	    return this;//Abort
-	    final Game game = tr.newGame(vox);
-	    /*//Not finished cooking yet.
-	     * 
-	    final String level = tr.getTrConfig()[0].skipToLevel();
-	    if(level!=null){
-		System.out.println("Skipping to level: "+level);
-	    game.setLevel(tr.getTrConfig()[0].skipToLevel());
-	    }
-	    */
+	final Game game = tr.newGame(vox);
 	game.go();
 	return this;
     }//end newGame()

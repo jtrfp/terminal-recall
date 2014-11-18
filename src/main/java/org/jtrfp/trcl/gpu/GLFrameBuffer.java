@@ -26,7 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import org.jtrfp.trcl.dbg.TRBeanUtils;
+import org.jtrfp.trcl.gui.TRBeanUtils;
 
 public final class GLFrameBuffer {
     private final int id;

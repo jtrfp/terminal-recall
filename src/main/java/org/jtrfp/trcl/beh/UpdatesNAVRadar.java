@@ -24,7 +24,11 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
     public void _tick(long timeInMillis){
 	counter++;
 	if(counter%REFRESH_INTERVAL==0){
-	    blips = getParent().getTr().getGame().getNavSystem().getBlips();
+	    blips = getParent().
+		    getTr().
+		    getGame().
+		    getNavSystem().
+		    getBlips();
 	    blips.clearRadarBlips();
 	    performRefresh=true;
 	}else if(counter%REFRESH_INTERVAL==1){

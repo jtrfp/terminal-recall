@@ -66,6 +66,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     private final TunnelExitObject 	   exitObject;
     private final LoadingProgressReporter[]reporters;
     private final LoadingProgressReporter  tunnelAssemblyReporter;
+    private ObjectSystem		   objectSystem;//Strong reference to avoid GC
 
     public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
 	    TR.mapSquareSize * 5, TR.mapSquareSize*15);
@@ -104,7 +105,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	add(exitObject);
 	// X is tunnel depth, Z is left-right
 	try {
-	    new ObjectSystem(this, world, lvl, null, Vector3D.MINUS_I,
+	    objectSystem = new ObjectSystem(this, world, lvl, null, Vector3D.MINUS_I,
 		    TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET),
 		    reporters[1]);
 	} catch (Exception e) {

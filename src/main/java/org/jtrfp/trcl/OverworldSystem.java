@@ -43,6 +43,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     				     cloudReporter, 
     				     objectReporter;
     private		ObjectSystem objectSystem;
+    private            TerrainSystem terrainSystem;
 
     public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
 	super(w);
@@ -69,7 +70,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("Building terrain...");
 	    boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
 		    .toUpperCase().contains("BORG");//TODO: This should be in a config file.
-	    TerrainSystem terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
+	    terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
 		    TR.mapSquareSize, this, terrainMirror, tr, tdf,
 		    flatShadedTerrain, terrainReporter);
 	    System.out.println("...Done.");

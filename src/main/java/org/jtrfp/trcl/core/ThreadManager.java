@@ -14,6 +14,8 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -51,7 +53,7 @@ public final class ThreadManager {
     private int 			counter 			= 0;
     private Thread 			renderingThread;
     private Animator			animator;
-    private AtomicBoolean 		paused = new AtomicBoolean(false);
+    private boolean[] 			paused = new boolean[]{false};
     public final ExecutorService	threadPool 			= 
 	    new ThreadPoolExecutor(
 		    30,
@@ -92,6 +94,7 @@ public final class ThreadManager {
 	final List<WorldObject> vl = tr.renderer.getRealtime().currentRenderList().getRealtime().getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	synchronized(gameStateLock){
+	synchronized(paused){
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo;
 	    synchronized(vl){if(!vl.isEmpty())wo = vl.get(i);else break;}//TODO: This is slow.
@@ -105,9 +108,9 @@ public final class ThreadManager {
 			multiplePlayer=true;
 		    }else alreadyVisitedPlayer=true;
 		}
-		if(!multiplePlayer&&!paused.get())wo.tick(tickTimeInMillis);
-	}// end for(worldObjects)
-	}// end sync(gameStateLock)
+		if(!multiplePlayer&&!paused[0])wo.tick(tickTimeInMillis);
+	 }// end for(worldObjects)
+	}}// end sync(gameStateLock,paused)
 	}catch(NotReadyException e){}
 	if(tr.getPlayer()!=null){
 	    tr.getCollisionManager().performCollisionTests();
@@ -268,6 +271,7 @@ public final class ThreadManager {
     }
 
     public void setPaused(boolean paused) {
-	this.paused.set(paused);
+	synchronized(this.paused)
+	 {this.paused[0]=paused;}
     }
 }// end ThreadManager

@@ -25,28 +25,27 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
+import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
 
 public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final SoundTexture soundTexture;
     private final double[] pan;
-    private final GLProgram soundProgram;
     private final double playbackRatio;
     
     private SamplePlaybackEvent(SoundTexture tex, long startTimeSamples,
-		double[] pan, GLProgram soundProgram, Factory origin, SoundEvent parent) {
-	    this(tex,startTimeSamples,pan,soundProgram,origin,parent,1);
+		double[] pan, Factory origin, SoundEvent parent) {
+	    this(tex,startTimeSamples,pan,origin,parent,1);
 	}//end constructor
 
     public SamplePlaybackEvent(SoundTexture tex, long startTimeSamples,
-	    double[] pan, GLProgram soundProgram, Factory origin,
+	    double[] pan, Factory origin,
 	    SoundEvent parent, double playbackRatio) {
 	super(startTimeSamples, tex.getLengthInRealtimeSamples(), origin,
 		parent);
 	soundTexture = tex;
 	this.pan = pan;
-	this.soundProgram = soundProgram;
 	this.playbackRatio = playbackRatio;
     }
 
@@ -66,21 +65,23 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 
     @Override
     public void apply(GL3 gl, long bufferStartTimeFrames) {
-	soundProgram.getUniform("pan").set((float)getPan()[0], (float)getPan()[1]);//Pan center
+	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
+	origin.getPanU().set((float)getPan()[0], (float)getPan()[1]);//Pan center
 	final double startTimeInBuffers=((double)(getStartRealtimeSamples()-bufferStartTimeFrames)/(double)SoundSystem.BUFFER_SIZE_FRAMES)*2-1;
-	soundProgram.getUniform("numRows").setui((int)getSoundTexture().getNumRows());
-	soundProgram.getUniform("start").set((float)startTimeInBuffers);
-	soundProgram.getUniform("lengthPerRow")
+	origin.getNumRowsU().setui((int)getSoundTexture().getNumRows());
+	origin.getStartU().set((float)startTimeInBuffers);
+	origin.getLengthPerRowU()
 	 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)SoundSystem.BUFFER_SIZE_FRAMES))*2*(float)getSoundTexture().getResamplingScalar()/(float)playbackRatio);
 	final int lengthInSegments = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
 	getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
 	gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
-    }
+    }//end apply(...)
     
     public static class Factory extends AbstractSoundEvent.Factory{
 	private GLVertexShader   soundVertexShader;
 	private GLFragmentShader soundFragmentShader;//1 fragment = 1 frame
 	private GLProgram soundProgram;
+	private GLUniform panU,numRowsU,startU,lengthPerRowU,soundTextureU;
 	
 	public Factory(final TR tr) {
 	    super(tr);
@@ -88,14 +89,19 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {
 		    @Override
 		    public Void call() throws Exception {
-			soundVertexShader = gpu.newVertexShader();
-			    soundFragmentShader = gpu.newFragmentShader();
+			soundVertexShader      = gpu.newVertexShader();
+			    soundFragmentShader= gpu.newFragmentShader();
 			    soundVertexShader
 				    .setSourceFromResource("/shader/soundVertexShader.glsl");
 			    soundFragmentShader
 				    .setSourceFromResource("/shader/soundFragShader.glsl");
 			    soundProgram = gpu.newProgram().attachShader(soundVertexShader)
 				    .attachShader(soundFragmentShader).link().use();
+			    panU         = soundProgram.getUniform("pan");
+			    numRowsU     = soundProgram.getUniform("numRows");
+			    startU       = soundProgram.getUniform("start");
+			    lengthPerRowU= soundProgram.getUniform("lengthPerRow");
+			    soundTextureU= soundProgram.getUniform("soundTexture");
 			return null;
 		    }// end call()
 		}).get();
@@ -111,7 +117,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    gl.glDepthMask(false);
 	    gl.glBlendFunc(GL3.GL_ONE, GL3.GL_ONE);
 	    soundProgram.use();
-	    soundProgram.getUniform("soundTexture").set((int)0);
+	    soundTextureU.set((int)0);
 	    for(SoundEvent ev:events){
 		ev.apply(gl, bufferStartTimeFrames);
 	    }
@@ -128,15 +134,50 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	
 	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
 		double[] pan){
-	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,soundProgram,this,null);
+	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,this,null);
 	}//end create(...)
 	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
 		double[] pan, SoundEvent parent){
-	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,soundProgram,this,parent);
+	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,this,parent);
 	}//end create(...)
 	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
 		double[] pan, SoundEvent parent, double playbackRatio){
-	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,soundProgram,this,parent,playbackRatio);
+	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,this,parent,playbackRatio);
 	}//end create(...)
+
+	/**
+	 * @return the panU
+	 */
+	GLUniform getPanU() {
+	    return panU;
+	}
+
+	/**
+	 * @return the startU
+	 */
+	GLUniform getStartU() {
+	    return startU;
+	}
+
+	/**
+	 * @return the lengthPerRowU
+	 */
+	GLUniform getLengthPerRowU() {
+	    return lengthPerRowU;
+	}
+
+	/**
+	 * @return the numRowsU
+	 */
+	GLUniform getNumRowsU() {
+	    return numRowsU;
+	}
+
+	/**
+	 * @return the soundProgram
+	 */
+	GLProgram getSoundProgram() {
+	    return soundProgram;
+	}
     }//end Factory
 }//end SamplePlaybackEvent

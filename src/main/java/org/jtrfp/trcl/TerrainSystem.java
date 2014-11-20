@@ -32,6 +32,17 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
+	public static final double Y_NUDGE = -10000;
+	    /*
+	     * Y_NUDGE is a kludge. There is a tiny sliver of space
+	     * between the ceiling and ground, likely caused by model
+	     * vertex quantization in the rendering engine. I would
+	     * rather put up with this quirk than re-design the engine,
+	     * as the quantization exists as a side-effect of a
+	     * memory-space optimization in the GPU and accommodating
+	     * the fix of this bug could cause bigger problems further
+	     * down the road.
+	     */
 	
     public TerrainSystem(final InterpolatingAltitudeMap altitude,
 	    final TextureMesh textureMesh, final double gridSquareSize,
@@ -184,17 +195,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			}// end scope
 
 			{// start scope ///// CEILING
-			    final double Y_NUDGE = -5000;
-			    /*
-			     * Y_NUDGE is a kludge. There is a tiny sliver of space
-			     * between the ceiling and ground, likely caused by model
-			     * vertex quantization in the rendering engine. I would
-			     * rather put up with this quirk than re-design the engine,
-			     * as the quantization exists as a side-effect of a
-			     * memory-space optimization in the GPU and accommodating
-			     * the fix of this bug could cause bigger problems further
-			     * down the road.
-			     */
 			    final double objectX = Math
 				    .round(((double) gX + ((double) chunkSideLength / 2.))
 					    * gridSquareSize);

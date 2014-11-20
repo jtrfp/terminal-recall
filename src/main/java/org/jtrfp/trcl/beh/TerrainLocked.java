@@ -12,12 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class TerrainLocked extends Behavior {
     private double pad=0;
+    private boolean lockedToCeiling=false;
     @Override
     public void _tick(long tickTimeMillis){
 	final WorldObject p = getParent();
@@ -26,12 +28,15 @@ public class TerrainLocked extends Behavior {
 	    return;
 	if(p.getTr().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()==null)
 	    return;
-	final double height = p.getTr().
+	final double height = 
+		(lockedToCeiling?TerrainSystem.Y_NUDGE:0)+
+		(lockedToCeiling?p.getTr().getWorld().sizeY:0)+(lockedToCeiling?-1:1)*
+		p.getTr().
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().
 		getAltitudeMap().
-		heightAt((thisPos[0]/TR.mapSquareSize), 
+		 heightAt((thisPos[0]/TR.mapSquareSize), 
 		    (thisPos[2]/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
 	final double [] pPos = p.getPosition();
 	pPos[0]=thisPos[0];
@@ -39,5 +44,18 @@ public class TerrainLocked extends Behavior {
 	pPos[2]=thisPos[2];
 	p.setPosition(pPos);
 	p.notifyPositionChange();
+    }//end _tick(...)
+    /**
+     * @return the lockedToCeiling
+     */
+    public boolean isLockedToCeiling() {
+        return lockedToCeiling;
+    }
+    /**
+     * @param lockedToCeiling the lockedToCeiling to set
+     */
+    public TerrainLocked setLockedToCeiling(boolean lockedToCeiling) {
+        this.lockedToCeiling = lockedToCeiling;
+        return this;
     }
 }//end TerrainLocked

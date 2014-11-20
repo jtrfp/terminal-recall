@@ -65,20 +65,21 @@ public class DEFObject extends WorldObject {
     private WorldObject ruinObject;
     private final EnemyLogic logic;
     private final EnemyDefinition def;
-    private boolean mobile,canTurn,foliage,boss,groundLocked,
+    private boolean mobile,canTurn,foliage,boss,
     		    shieldGen,isRuin,spinCrash,ignoringProjectiles;
+    private Anchoring anchoring;
     private static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
     private static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
     boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
+    anchoring=Anchoring.floating;
     logic = def.getLogic();
     mobile=true;
     canTurn=true;
     foliage=false;
     boss=def.isObjectIsBoss();
-    groundLocked=false;
     boolean customExplosion=false;
     this.setModelOffset(
 	    TR.legacy2Modern(def.getPivotX()), 
@@ -88,7 +89,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case groundDumb:
     	    mobile=false;
     	    canTurn=false;
-    	    groundLocked=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case groundTargeting://Ground turrets
     	    {mobile=false;
@@ -109,13 +110,14 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	     setSmartFiring(false).
 	     setMaxFireVectorDeviation(.5).
 	     setTimePerPatternEntry(500));
+	    anchoring=Anchoring.terrain;
     	    break;}
     	case flyingDumb:
     	    canTurn=false;
     	    break;
     	case groundTargetingDumb:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
-    	    groundLocked=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case flyingSmart:
     	    smartPlaneBehavior(tr,def,false);
@@ -138,17 +140,19 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
     	    mobile=false;
     	    canTurn=false;
-    	    groundLocked=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    projectileFiringBehavior();
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case targetPitchSmart:
     	    mobile=false;
 	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
 	    projectileFiringBehavior();
+	    anchoring=Anchoring.terrain;
 	    break;
     	case coreBossSmart:
     	    mobile=false;
@@ -216,33 +220,16 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    mobile=false;
     	    break;
     	case fallingAsteroid:
-    	    fallingObjectBehavior();
-    	    addBehavior(new RotationalMomentumBehavior()
-    	    	.accellerateEquatorialMomentum(1)
-    	    	.accellerateLateralMomentum(1)
-    	    	.accelleratePolarMomentum(1));
-    	    { final DEFObject thisObject = this;
-    	    final Vector3D centerPos = new Vector3D(this.getPosition());
-    	    final TR thisTr = tr;
-    	    addBehavior(new ResetsRandomlyAfterDeath()
-    	    	.setMinWaitMillis(100)
-    	    	.setMaxWaitMillis(1000)
-    	    	.setRunOnReset(new Runnable(){
-    	    	    @Override
-    	    	    public void run(){
-    	    		final double [] pos = thisObject.getPosition();
-    	    		pos[0]=centerPos.getX()+Math.random()*TR.mapSquareSize*10;
-    	    		pos[1]=thisTr.getWorld().sizeY/1.5;
-    	    		pos[2]=centerPos.getZ()+Math.random()*TR.mapSquareSize*10;
-    	    		thisObject.notifyPositionChange();
-    	    	    }//end run()
-    	    	}));}
+    	    anchoring=Anchoring.floating;
+    	    //fallingObjectBehavior();
+    	    //setVisible(false);
+    	    //addBehavior(new FallingDebrisBehavior(tr,model));
     	    break;
     	case cNome://Walky bot?
-    	    groundLocked=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case cNomeLegs://Walky bot?
-    	    groundLocked=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case cNomeFactory:
     	    mobile=false;
@@ -250,20 +237,24 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case geigerBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    projectileFiringBehavior();
+    	    anchoring=Anchoring.terrain;
     	    mobile=false;
     	    break;
     	case volcanoBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
     	    projectileFiringBehavior();
+    	    anchoring=Anchoring.terrain;
     	    mobile=false;
     	    break;
     	case volcano://Wat.
     	    unhandled(def);
     	    canTurn=false;
     	    mobile=false;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case missile://Silo?
     	    mobile=false;//TODO
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case bob:
     	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*1));
@@ -271,6 +262,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*3)]));
     	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    customExplosion=true;
+	    anchoring=Anchoring.floating;
     	    mobile=false;
     	    canTurn=false;//ironic?
     	    break;
@@ -295,9 +287,11 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    mobile=false;
     	    break;
     	case arcticBoss:
+    	    //ARTIC / Ymir. Hangs from ceiling.
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
+	    anchoring=Anchoring.ceiling;
     	    break;
     	case helicopter://TODO
     	    break;
@@ -305,10 +299,12 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    canTurn=false;
     	    mobile=false;
     	    foliage=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case ceilingStatic:
     	    canTurn=false;
     	    mobile=false;
+    	    anchoring=Anchoring.ceiling;
     	    break;
     	case bobAndAttack:{
     	    addBehavior(new SteadilyRotating().setRotationPhase(2*Math.PI*Math.random()));
@@ -330,10 +326,11 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;
+    	    anchoring=Anchoring.floating;
     	    break;}
     	case forwardDrive:
     	    canTurn=false;
-    	    groundLocked=true;
+    	    anchoring=Anchoring.terrain;
     	    break;
     	case fallingStalag:
     	    fallingObjectBehavior();
@@ -355,12 +352,15 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    	}));}
     	    canTurn=false;
     	    mobile=false;
+    	    anchoring=Anchoring.floating;
     	    break;
     	case attackRetreatBelowSky:
     	    smartPlaneBehavior(tr,def,false);
+    	    anchoring=Anchoring.floating;
     	    break;
     	case attackRetreatAboveSky:
     	    smartPlaneBehavior(tr,def,true);
+    	    anchoring=Anchoring.floating;
     	    break;
     	case bobAboveSky:
     	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*5));
@@ -368,22 +368,22 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    mobile=false;
 	    canTurn=false;
+	    anchoring=Anchoring.floating;
 	    break;
     	case factory:
     	    canTurn=false;
     	    mobile=false;
+    	    anchoring=Anchoring.floating;
     	    break;
     	}//end switch(logic)
     ///////////////////////////////////////////////////////////
     //Position Limit
      {final PositionLimit posLimit = new PositionLimit();
-     posLimit.getPositionMaxima()[1]=TR.mapSquareSize*10;
-     posLimit.getPositionMinima()[1]=-TR.mapSquareSize*10;
+     posLimit.getPositionMaxima()[1]=tr.getWorld().sizeY;
+     posLimit.getPositionMinima()[1]=-tr.getWorld().sizeY;
      addBehavior(posLimit);}
-    
-    groundLocked |= boss;
      
-    if(groundLocked){
+    if(anchoring==Anchoring.terrain){
 	addBehavior(new CustomDeathBehavior(new Runnable(){
 	    @Override
 	    public void run(){
@@ -392,11 +392,15 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	}));
 	addBehavior(new TerrainLocked());
 	}
+    else if(anchoring==Anchoring.ceiling){
+	addBehavior(new TerrainLocked().setLockedToCeiling(true));
+	setTop(Vector3D.MINUS_J);
+    }
     else addBehavior(new CustomDeathBehavior(new Runnable(){
 	    @Override
 	    public void run(){
 		tr.getGame().getCurrentMission().notifyAirTargetDestroyed();
-	    }
+	    }//end run()
 	}));
     //Misc
     addBehavior(new TunnelRailed(tr));//Centers in tunnel when appropriate
@@ -417,7 +421,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     }
     if(foliage){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Billow));
-    }else if((!mobile || groundLocked) && !customExplosion){
+    }else if((!mobile || anchoring == Anchoring.terrain) && !customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion,BIG_EXP_SOUNDS[(int)(Math.random()*3)]));
     }else if(!customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*2)]));
@@ -428,7 +432,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	addBehavior(new AccelleratedByPropulsion());
 	addBehavior(new VelocityDragBehavior());
 	
-	if(groundLocked){}
+	if(anchoring==Anchoring.terrain){}
 	else 	{//addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 	    	addBehavior(new CollidesWithTerrain().setAutoNudge(true).setNudgePadding(40000));
 	    	}
@@ -479,7 +483,9 @@ private void fallingObjectBehavior(){
     canTurn=false;
     addBehavior(new PulledDownByGravityBehavior());
     addBehavior(new MovesByVelocity());
+    addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));
     addBehavior(new DamageableBehavior().setHealth(1));
+    addBehavior(new DeathBehavior());
     addBehavior(new CollidesWithTerrain());
 }
 
@@ -588,6 +594,11 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     addBehavior(sab);
     addBehavior(new SmartPlaneBehavior(haapb,afb,sab,aatpb,escapeProp,retreatAboveSky));
 }
+
+@Override
+public void setTop(Vector3D top){
+    super.setTop(anchoring==Anchoring.ceiling?Vector3D.MINUS_J:top);
+}
 /**
  * @return the boundingRadius
  */
@@ -637,7 +648,7 @@ public boolean isBoss() {
  * @return the groundLocked
  */
 public boolean isGroundLocked() {
-    return groundLocked;
+    return anchoring==Anchoring.terrain;
 }
 
 /**
@@ -688,9 +699,23 @@ public void setShieldGen(boolean shieldGen) {
 
 @Override
 public String toString(){
-    return "DEFObject Model="+getModel().getDebugName()+" Logic="+logic+" GroundLocked="+groundLocked+
+    return "DEFObject Model="+getModel().getDebugName()+" Logic="+logic+" Anchoring="+anchoring+
 	    "\n\tmobile="+mobile+" isRuin="+isRuin+" foliage="+foliage+" boss="+boss+" spinCrash="+spinCrash+
 	    "\n\tignoringProjectiles="+ignoringProjectiles+"\n"+
 	    "\tRuinObject="+ruinObject;
 }
+
+enum Anchoring{
+    floating(false),
+    terrain(true),
+    ceiling(true);
+    
+    private final boolean locked;
+    private Anchoring(boolean locked){
+	this.locked=locked;
+    }
+    
+    public boolean isLocked()
+     {return locked;}
+ }//end Anchoring
 }//end DEFObject

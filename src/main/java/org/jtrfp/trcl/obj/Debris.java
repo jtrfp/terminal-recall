@@ -70,7 +70,7 @@ private static final String [] TYPES = new String[]{
 		.setLateralMomentum(.2*Math.random())
 		.setPolarMomentum(.2*Math.random()));
 	addBehavior(new RotationalDragBehavior().setDragCoefficient(.99));
-	}catch(Exception e){e.printStackTrace();}
+	}catch(Exception e){tr.showStopper(e);}
     }//end constructor
 
     private int lifespan(){

@@ -161,7 +161,7 @@ public final class TR{
 		setResourceManager(new ResourceManager(this));
 		world = new World(
 				256*mapSquareSize,
-				14.*mapSquareSize,
+				24.*mapSquareSize,
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		renderer.get().setRootGrid(world);

@@ -111,7 +111,7 @@ public class GPUResidentMOD {
 		       throw new EndOfSongException();
 		    default:
 		   }//end switch()
-		   if(instID>-1){
+		   if(instID>-1&&element.getNoteIndex()>0){
 		 	final SoundTexture texture = this.samples[instID];
 			if(texture!=null){
 			  final double ps = (panStates[element.getChannel()]*stereoWidth+1)/2.; 

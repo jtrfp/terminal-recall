@@ -94,17 +94,17 @@ public class TunnelExitObject extends WorldObject {
 		    overworldSystem.activate();
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
-		    tr.getPlayer().getBehavior()
+		    tr.getGame().getPlayer().getBehavior()
 			    .probeForBehavior(DamageableBehavior.class)
 			    .addInvincibility(250);// Safety kludge when near
 						   // walls.
-		    tr.getPlayer().getBehavior()
+		    tr.getGame().getPlayer().getBehavior()
 			    .probeForBehavior(CollidesWithTerrain.class)
 			    .setEnable(true);
-		    tr.getPlayer().getBehavior()
+		    tr.getGame().getPlayer().getBehavior()
 			    .probeForBehavior(LoopingPositionBehavior.class)
 			    .setEnable(true);
-		    tr.getPlayer()
+		    tr.getGame().getPlayer()
 			    .getBehavior()
 			    .probeForBehavior(
 				    HeadingXAlwaysPositiveBehavior.class)

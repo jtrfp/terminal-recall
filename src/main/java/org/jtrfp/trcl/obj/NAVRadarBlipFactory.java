@@ -68,7 +68,7 @@ public class NAVRadarBlipFactory {
     public void submitRadarBlip(WorldObject wo){
 	if(! (wo instanceof DEFObject || wo instanceof PowerupObject || wo instanceof TunnelEntranceObject) )return;
 	final double [] otherPos = wo.getPosition();
-	final double [] playerPos=tr.getPlayer().getPosition();
+	final double [] playerPos=tr.getGame().getPlayer().getPosition();
 	BlipType type=null;
 	if(Vect3D.distance(playerPos, otherPos)<RADAR_RANGE){
 	    if(wo instanceof TunnelEntranceObject){
@@ -108,7 +108,7 @@ public class NAVRadarBlipFactory {
 		final double []blipPos = blip.getPosition();
 		Vect3D.subtract(otherPos, playerPos, blipPos);
 		Vect3D.scalarMultiply(blipPos, RADAR_SCALAR, blipPos);
-		final double [] heading = tr.getPlayer().getHeadingArray();
+		final double [] heading = tr.getGame().getPlayer().getHeadingArray();
 		double hX=heading[0];
 		double hY=heading[2];
 		double norm = Math.sqrt(hX*hX+hY*hY);

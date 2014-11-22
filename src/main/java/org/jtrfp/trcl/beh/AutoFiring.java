@@ -38,7 +38,7 @@ public class AutoFiring extends Behavior {
     @Override
     public void _tick(long timeMillis){
 	final WorldObject thisObject = getParent();
-	final Player player = thisObject.getTr().getPlayer();
+	final Player player = thisObject.getTr().getGame().getPlayer();
 	if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
 	final double [] thisPos = thisObject.getPosition();
 	final double [] playerPos = player.getPosition();

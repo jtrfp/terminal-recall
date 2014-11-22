@@ -108,7 +108,7 @@ public class Mission {
 	game.getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Player player      = tr.getPlayer();
+	    final Player player      = tr.getGame().getPlayer();
 	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	    player.setActive(false);

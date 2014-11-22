@@ -14,8 +14,6 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -25,7 +23,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,6 +31,7 @@ import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
@@ -93,14 +91,17 @@ public final class ThreadManager {
 	try{// NotReadyException
 	final List<WorldObject> vl = tr.renderer.getRealtime().currentRenderList().getRealtime().getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
-	synchronized(gameStateLock){
+	final Game game = tr.getGame();
+	if(game==null)
+	    return;
 	synchronized(paused){
+	synchronized(gameStateLock){
 	for (int i = 0; i<vl.size(); i++) {
 	    final WorldObject wo;
 	    synchronized(vl){if(!vl.isEmpty())wo = vl.get(i);else break;}//TODO: This is slow.
 	    boolean multiplePlayer=false;
 	    if (wo.isActive()
-		    && (TR.twosComplimentDistance(wo.getPosition(), tr
+		    && (TR.twosComplimentDistance(wo.getPosition(), game
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)
 		    || wo instanceof VisibleEverywhere)
 		if(wo instanceof Player){
@@ -110,11 +111,11 @@ public final class ThreadManager {
 		}
 		if(!multiplePlayer&&!paused[0])wo.tick(tickTimeInMillis);
 	 }// end for(worldObjects)
-	}}// end sync(gameStateLock,paused)
-	}catch(NotReadyException e){}
-	if(tr.getPlayer()!=null){
+	}//end sync(gameStateLock)
+	if(game.getPlayer()!=null && !paused[0])
 	    tr.getCollisionManager().performCollisionTests();
-	}
+	}// end sync(paused)
+	}catch(NotReadyException e){}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
     
@@ -178,7 +179,8 @@ public final class ThreadManager {
 		 if(System.currentTimeMillis()<nextVisCalcTime.get())
 		     return;
 		 visibilityCalc();}
-		if(tr.getPlayer()!=null)gameplay();
+		if(tr.getGame()!=null)
+		 if(tr.getGame().getPlayer()!=null)gameplay();
 		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
 	animator = new Animator(tr.getRootWindow().getCanvas());

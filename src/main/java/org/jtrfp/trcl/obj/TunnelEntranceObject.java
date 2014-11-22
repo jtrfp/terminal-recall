@@ -117,7 +117,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 			  setEnable(false);
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
-		 final Player player = tr.getPlayer();
+		 final Player player = tr.getGame().getPlayer();
 		 final Behavior playerBehavior = player.getBehavior();
 		 playerBehavior.probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
 		 playerBehavior.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);

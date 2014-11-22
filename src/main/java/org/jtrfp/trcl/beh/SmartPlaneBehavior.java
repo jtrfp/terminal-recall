@@ -48,7 +48,7 @@ private final boolean retreatAboveSky;
     public void _tick(long timeInMillis){
 	if(timeInMillis>=nextUpdateTimeMillis){
 	    final WorldObject thisObject = getParent();
-	    final Player player = thisObject.getTr().getPlayer();
+	    final Player player = thisObject.getTr().getGame().getPlayer();
 	    final double [] thisPos = thisObject.getPosition();
 	    final double [] playerPos = player.getPosition();
 	    boolean cloakedPlayer = player.getBehavior().probeForBehavior(Cloakable.class).isCloaked();

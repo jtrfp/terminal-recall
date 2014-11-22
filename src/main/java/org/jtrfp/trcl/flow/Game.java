@@ -291,7 +291,6 @@ public class Game {
 		    final Camera camera = tr.renderer.get().getCamera();
 		    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 		    camera.probeForBehavior(MatchDirection.class).setTarget(player);
-		    tr.setPlayer(player);
 		    tr.getWorld().add(player);
 		    System.out.println("\t...Done.");
 		    levelLoadingScreen	= new LevelLoadingScreen(tr.getWorld(),tr);
@@ -328,6 +327,7 @@ public class Game {
 
     public void beginGameplay() {
 	MissionLevel[] levels = vox.getLevels();
+	tr.getThreadManager().setPaused(false);
 	while (getLevelIndex() < levels.length && getLevelIndex()!=-1) {
 	    System.out.println("Invoking JVM's garbage collector...");
 	    TR.nuclearGC();
@@ -344,7 +344,7 @@ public class Game {
 	    setLevelIndex(getLevelIndex() + 1);
 	}// end while(getLevelIndex<length)
 	System.out.println("Escaping game loop.");
-	cleanup();
+	tr.getThreadManager().setPaused(true);
     }// end beginGameplay()
 
     public void setCurrentMission(Mission mission) {
@@ -378,9 +378,12 @@ public class Game {
 	    tr.getResourceManager().getSmokeSystem().deactivate();
 	if(tr.getResourceManager().getExplosionFactory()!=null)
 	    tr.getResourceManager().getExplosionFactory().deactivate();
+	tr.getWorld().remove(player);
+	player=null;
     }
 
     public void abortCurrentMission(){
+	tr.getThreadManager().setPaused(true);
 	synchronized(startupTask){
 	    if(startupTask[0]!=null)
 		startupTask[0].get();//Don't abort while setting up.

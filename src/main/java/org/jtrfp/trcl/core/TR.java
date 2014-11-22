@@ -327,14 +327,6 @@ public final class TR{
 	return collisionManager;
     }
 
-    public void setPlayer(Player player) {
-	this.player = player;
-    }
-
-    public Player getPlayer() {
-	return player;
-    }
-
     /**
      * @return the reporter
      */

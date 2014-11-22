@@ -29,7 +29,7 @@ public class DestroysEverythingBehavior extends Behavior implements CollisionBeh
     public void _tick(long timeMillis){
 	counter--;
 	if(counter==1&&isReplenishingPlayerHealth()){
-	    try{getParent().getTr().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
+	    try{getParent().getTr().getGame().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
 	    catch(SupplyNotNeededException e){}//Ok, whatever.
 	}
 	if(counter<=0){//We can't stick around for long. Not with all this destroying going on.

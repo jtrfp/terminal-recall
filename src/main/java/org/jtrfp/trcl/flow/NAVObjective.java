@@ -192,7 +192,7 @@ public abstract class NAVObjective {
 		     }//end for(targets)
 		    }//end if(bos.targets() !=null))
 		    final DEFObject bossObject = defs.get(bos.getBossIndex());
-		    bossObject.addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+		    bossObject.addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 		    bossObject.setIgnoringProjectiles(true);
 		    final NAVObjective objective = new NAVObjective(this){
 			    @Override

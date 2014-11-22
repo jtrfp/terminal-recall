@@ -94,7 +94,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case groundTargeting://Ground turrets
     	    {mobile=false;
     	    canTurn=true;
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    //TODO: def.getFiringVertices() needs actual vertex lookup.
     	 ProjectileFiringBehavior pfb;
 	    addBehavior(pfb=new ProjectileFiringBehavior().
@@ -116,7 +116,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    canTurn=false;
     	    break;
     	case groundTargetingDumb:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    anchoring=Anchoring.terrain;
     	    break;
     	case flyingSmart:
@@ -131,11 +131,11 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    break;
     	case flyingAttackRetreatSmart:
     	    smartPlaneBehavior(tr,def,false);
-    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    break;
     	case splitShipSmart://TODO
     	    smartPlaneBehavior(tr,def,false);
-    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    break;
     	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
     	    mobile=false;
@@ -144,13 +144,13 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    break;
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    anchoring=Anchoring.terrain;
     	    break;
     	case targetPitchSmart:
     	    mobile=false;
-	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    anchoring=Anchoring.terrain;
 	    break;
@@ -163,7 +163,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    projectileFiringBehavior();
     	    break;
     	case staticFiringSmart:{
-    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
     	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
@@ -185,7 +185,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
 	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
 	    addBehavior(pfb);
-	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    addBehavior(new AutoFiring().
 		    setProjectileFiringBehavior(pfb).
 		    setPatternOffsetMillis((int)(Math.random()*2000)).
@@ -235,13 +235,13 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    mobile=false;
     	    break;
     	case geigerBoss:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    anchoring=Anchoring.terrain;
     	    mobile=false;
     	    break;
     	case volcanoBoss:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    anchoring=Anchoring.terrain;
     	    mobile=false;
@@ -259,7 +259,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case bob:
     	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*1));
     	    addBehavior(new SteadilyRotating());
-    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*3)]));
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*2)]));
     	    possibleBobbingSpinAndCrashOnDeath(.5,def);
 	    customExplosion=true;
 	    anchoring=Anchoring.floating;
@@ -267,28 +267,28 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    canTurn=false;//ironic?
     	    break;
     	case alienBoss:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    break;
     	case canyonBoss1:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    break;
     	case canyonBoss2:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    break;
     	case lavaMan://Also terraform-o-bot
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    break;
     	case arcticBoss:
     	    //ARTIC / Ymir. Hangs from ceiling.
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
 	    anchoring=Anchoring.ceiling;
@@ -555,9 +555,9 @@ private void possibleBobbingSpinAndCrashOnDeath(double probability, EnemyDefinit
 }//end possibleBobbingSpinAndCrashOnDeath
 
 private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
-    final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(tr.getPlayer()).setLeftHanded(Math.random()>=.5);
+    final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()).setLeftHanded(Math.random()>=.5);
     addBehavior(haapb);
-    final AdjustAltitudeToPlayerBehavior aatpb = new AdjustAltitudeToPlayerBehavior(tr.getPlayer()).setAccelleration(1000);
+    final AdjustAltitudeToPlayerBehavior aatpb = new AdjustAltitudeToPlayerBehavior(tr.getGame().getPlayer()).setAccelleration(1000);
     addBehavior(aatpb);
     final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}

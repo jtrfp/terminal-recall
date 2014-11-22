@@ -57,7 +57,7 @@ public class RunMe{
 	    String cmd = "java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true "
 		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
-		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m";
+		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m ";
 	    for (Entry<Object,Object> property:System.getProperties().entrySet()){
 		if(property.getKey().toString().startsWith("org.jtrfp")&&!property.getKey().toString().toLowerCase().contains("org.jtrfp.trcl.bypassconfigure"))
 		    cmd += " -D"+property.getKey()+"="+property.getValue()+" ";

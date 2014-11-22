@@ -145,6 +145,7 @@ public class WorldObject implements PositionedRenderable {
     }// end probeForBehavior
 
     public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
+	synchronized(collisionBehaviors){
 	if (type.isAssignableFrom(CollisionBehavior.class)) {
 	    for (int i = 0; i < collisionBehaviors.size(); i++) {
 		if (type.isAssignableFrom(collisionBehaviors.get(i).getClass())) {
@@ -152,23 +153,25 @@ public class WorldObject implements PositionedRenderable {
 		}
 	    }// end if(instanceof)
 	}// end isAssignableFrom(CollisionBehavior.class)
+	}synchronized(inactiveBehaviors){
 	for (int i = 0; i < inactiveBehaviors.size(); i++) {
-	    if (type.isAssignableFrom(inactiveBehaviors.get(i).getClass())) {
+	    if (type.isAssignableFrom(inactiveBehaviors.get(i).getClass()))
 		sub.submit((T) inactiveBehaviors.get(i));
-	    }
 	}// end if(instanceof)
+	}synchronized(tickBehaviors){
 	for (int i = 0; i < tickBehaviors.size(); i++) {
-	    if (type.isAssignableFrom(tickBehaviors.get(i).getClass())) {
+	    if (type.isAssignableFrom(tickBehaviors.get(i).getClass()))
 		sub.submit((T) tickBehaviors.get(i));
-	    }
 	}// end for (tickBehaviors)
+     }//end sync(tickBehaviors)
     }// end probeForBehaviors(...)
 
     public void tick(long time) {
 	if(!respondToTick)return;
-	for (int i = 0; i < tickBehaviors.size(); i++) {
+	synchronized(tickBehaviors){
+	for (int i = 0; i < tickBehaviors.size(); i++)
 	    tickBehaviors.get(i).tick(time);
-	}// end for(size)
+	}//end sync(tickBehaviors)
     }// end tick(...)
     
     private final int [] emptyIntArray = new int[0];
@@ -620,11 +623,17 @@ public class WorldObject implements PositionedRenderable {
 
     public void disableBehavior(Behavior behavior) {
 	if (!inactiveBehaviors.contains(behavior))
-	    inactiveBehaviors.add(behavior);
+	    synchronized(inactiveBehaviors){
+		inactiveBehaviors.add(behavior);
+	    }
 	if (behavior instanceof CollisionBehavior)
-	    collisionBehaviors.remove(behavior);
-	tickBehaviors.remove(behavior);
-    }
+	    synchronized(collisionBehaviors){
+		collisionBehaviors.remove(behavior);
+	    }
+	synchronized(tickBehaviors){
+	    tickBehaviors.remove(behavior);
+	}
+    }//end disableBehavior(...)
 
     /**
      * @return the renderFlags

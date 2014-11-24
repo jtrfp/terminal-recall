@@ -49,6 +49,7 @@ public class MenuSystem {
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
 	final JMenuItem game_new = new JMenuItem("New Game");
+	final JMenuItem game_start = new JMenuItem("Start Game");
 	final JMenuItem game_pause = new JMenuItem("Pause");
 	final JMenuItem game_skip = new JMenuItem("Skip To Level...");
 	final JMenuItem game_abort= new JMenuItem("Abort Game");
@@ -74,6 +75,16 @@ public class MenuSystem {
 			return null;
 		    }});
 	    }});
+	game_start.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent arg0) {
+		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			tr.getGameShell().startGame();
+			return null;
+		    }});
+	    }});
 	game_pause.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
@@ -95,11 +106,10 @@ public class MenuSystem {
 	    public void actionPerformed(ActionEvent arg0) {
 		game_abort.setText("Aborting Game...");
 		game_abort.setEnabled(false);
-		final TRFutureTask<Void> task = tr.abortCurrentGame();
 		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
-			task.get();
+			tr.abortCurrentGame();
 			SwingUtilities.invokeLater(new Runnable(){
 			    @Override
 			    public void run() {
@@ -158,8 +168,10 @@ public class MenuSystem {
 	    window.add(frameBufferStatesMenuItem);
             gameMenu.add(game_new);
             game_pause.setEnabled(false);
+            game_start.setEnabled(false);
             game_skip.setEnabled(false);
             game_abort.setEnabled(false);
+            gameMenu.add(game_start);
             gameMenu.add(game_pause);
             gameMenu.add(game_skip);
             gameMenu.add(game_abort);
@@ -195,5 +207,15 @@ public class MenuSystem {
 	IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
 	tr.addPropertyChangeListener("game", gameIP);
 	gameIP.addTargetPropertyChangeListener("paused", pausePCL);
+	gameIP.addTargetPropertyChangeListener("currentMission", new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent pc) {
+		game_start.setEnabled(pc.getNewValue()!=null && !tr.getGame().isInGameplay());
+	    }});
+	gameIP.addTargetPropertyChangeListener("inGameplay", new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent pc) {
+		game_start.setEnabled(pc.getNewValue()!=null && pc.getNewValue()==Boolean.FALSE);
+	    }});
     }//end constructor
 }//end MenuSystem

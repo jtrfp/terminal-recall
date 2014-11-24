@@ -17,10 +17,14 @@
 package org.jtrfp.trcl.flow;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.PodFile;
@@ -45,9 +49,43 @@ public class GameShell {
 	if(vox==null)
 	    return this;//Abort
 	final Game game = tr.newGame(vox);
-	game.go();
+	try{game.boot();}
+	catch(Exception e){
+	    gameFailure(e);}
 	return this;
     }//end newGame()
+    
+    public GameShell startGame(){
+	try{tr.getGame().doGameplay();}
+	catch(Exception e){
+	    gameFailure(e);}
+	return this;
+    }
+    
+    private void gameFailure(Exception e){
+	handleLoadFailureException(e);
+	tr.abortCurrentGame();
+    }
+    
+    private void handleLoadFailureException(Throwable e){
+	while(e instanceof RuntimeException || e instanceof ExecutionException)
+	    e=e.getCause();
+	StringBuilder sb = new StringBuilder();
+	    //sb.append("Failure to read the file "+e.get+".\n");
+	    if(e instanceof FileNotFoundException){
+		sb.append("Could not load file from any of the registered PODs.\n");
+		sb.append("Ensure that the necessary PODs are registered in the File->Configure menu.\n");
+	    }else if(e instanceof FileLoadException){
+		sb.append("File was found but could not be loaded, possibly by parsing/formatting error.\n");
+	    }else if(e instanceof UnrecognizedFormatException){
+		sb.append("File was found but could not be loaded to the LVL format being unrecognized. (parse error)\n");
+	    }else if(e instanceof IllegalAccessException){
+		sb.append("Check disk permissions for registered PODs.\n");
+	    }else if(e instanceof IOException){
+		sb.append("An undocumented IO failure has occurred..\n");
+	    }sb.append(e.getLocalizedMessage());
+	    JOptionPane.showMessageDialog(tr.getRootWindow(), sb, "File Load Failure", JOptionPane.ERROR_MESSAGE);
+    }//end handleLoadFailureException(...)
     
     private VOXFile determineVOXFile() {
 	String voxName = tr.getTrConfig()[0].getVoxFile();
@@ -67,8 +105,10 @@ public class GameShell {
     private VOXFile autoDetermineVOXFile(){
 	String voxFileName=null;
 	boolean f3Hint=false,tvHint=false,furyseHint=false;
+	System.out.println("Auto-determine active... pods:"+tr.getResourceManager().getRegisteredPODs().size());
 	for(IPodData pod:tr.getResourceManager().getRegisteredPODs()){
 	    final String podComment = pod.getComment();
+	    System.out.println("POD comment="+podComment);
 	    f3Hint     |= podComment.toUpperCase().startsWith("FURY3");
 	    tvHint     |= podComment.toUpperCase().startsWith("TV");
 	    furyseHint |= podComment.toUpperCase().startsWith("FURYSE");
@@ -98,11 +138,21 @@ public class GameShell {
     }//end attemptGetVOX()
     
     private void registerPODs(){
-	for(String podPath:tr.getTrConfig()[0].getPodList()){
-	    final File file = new File(podPath);
-	    PodFile pod     = new PodFile(file);
-	    try{tr.getResourceManager().registerPOD(pod);
-	    }catch(FileLoadException e){JOptionPane.showMessageDialog(tr.getRootWindow(), "Failed to parse (understand) POD file "+podPath,"Parsing failure", JOptionPane.ERROR_MESSAGE);}
+	DefaultListModel<String> podList = tr.getTrConfig()[0].getPodList();
+	for(int i=0; i<podList.size(); i++){
+	    final String podPath = podList.get(i);
+	    if(podPath!=null){
+		final File file = new File(podPath);
+		PodFile pod = new PodFile(file);
+		try {
+		    tr.getResourceManager().registerPOD(file.getAbsolutePath(),
+			    pod);
+		} catch (FileLoadException e) {
+		    JOptionPane.showMessageDialog(tr.getRootWindow(),
+			    "Failed to parse (understand) POD file " + podPath,
+			    "Parsing failure", JOptionPane.ERROR_MESSAGE);
+		}//end catch(...)
+	    }//end if(!null)
 	}//end for(pods)
     }//end registerPODs
 }//end GameShell

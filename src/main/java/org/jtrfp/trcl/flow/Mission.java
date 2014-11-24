@@ -64,7 +64,8 @@ public class Mission {
     private final boolean	showIntro;
     private volatile MusicPlaybackEvent
     				bgMusic;
-    private TRFutureTask<Result>[]missionTask = new TRFutureTask[]{null};
+    private final Object	missionLock = new Object();
+    //private TRFutureTask<Result>[]missionTask = new TRFutureTask[]{null};
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -77,7 +78,7 @@ public class Mission {
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
     }// end Mission
-    
+    /*
     public TRFutureTask<Result> go(){
 	synchronized(missionTask){
 	 missionTask[0] = tr.getThreadManager().submitToThreadPool(new Callable<Result>(){
@@ -88,8 +89,9 @@ public class Mission {
 	}//end sync{}
 	return missionTask[0];
     }//end go()
-
-    private Result _go() {
+*/
+    public Result go() {
+	synchronized(missionLock){
 	synchronized(missionEnd){
 	    if(missionEnd[0]!=null)
 		return missionEnd[0]; 
@@ -253,6 +255,7 @@ public class Mission {
 	});
 	cleanup();
 	return missionEnd[0];
+	}//end sync
     }// end go()
 
     public NAVObjective currentNAVObjective() {
@@ -539,11 +542,9 @@ public class Mission {
 	result.setAbort(true);
 	notifyMissionEnd(result);
 	//Wait for mission to end
-	synchronized(missionTask){
-	if(missionTask[0]!=null)
-	 missionTask[0].get();
+	synchronized(missionLock){//Don't execute while mission is in progress.
+	    cleanup();
 	}//end sync{}
-	cleanup();
     }//end abort()
 
     private void cleanup() {

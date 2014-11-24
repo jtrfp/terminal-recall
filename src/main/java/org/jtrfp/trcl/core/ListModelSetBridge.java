@@ -67,6 +67,8 @@ public class ListModelSetBridge<E> {
 		for(int i=evt.getIndex0(); i<=evt.getIndex1(); i++){
 		    E oldE = list.remove(evt.getIndex0());
 		    setML.removed(oldE);
+		    if(!list.contains(oldE))
+			checkerSet.remove(oldE);
 		}//end for(i)
 	    }});
     }//end constructor

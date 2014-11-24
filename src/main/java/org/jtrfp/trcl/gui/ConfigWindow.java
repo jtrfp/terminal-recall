@@ -15,12 +15,16 @@ package org.jtrfp.trcl.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.Encoder;
 import java.beans.ExceptionListener;
+import java.beans.Statement;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.File;
@@ -40,7 +44,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -75,7 +81,7 @@ public class ConfigWindow extends JFrame {
  }
  public ConfigWindow(){
  	setTitle("Settings");
- 	setSize(340,640);
+ 	setSize(340,540);
  	if(config==null)
  	    config=new TRConfiguration[]{new TRConfiguration()};
  	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -335,6 +341,13 @@ public class ConfigWindow extends JFrame {
  	JButton btnCancel = new JButton("Cancel");
  	btnCancel.setToolTipText("Close the window without applying settings");
  	okCancelPanel.add(btnCancel, BorderLayout.EAST);
+ 	
+ 	JLabel lblConfigpath = new JLabel(TRConfiguration.getConfigFilePath().getAbsolutePath());
+ 	lblConfigpath.setIcon(null);
+ 	lblConfigpath.setToolTipText("Default config file path");
+ 	lblConfigpath.setHorizontalAlignment(SwingConstants.CENTER);
+ 	lblConfigpath.setFont(new Font("Dialog", Font.BOLD, 6));
+ 	okCancelPanel.add(lblConfigpath, BorderLayout.CENTER);
  	btnCancel.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
@@ -349,9 +362,11 @@ public class ConfigWindow extends JFrame {
      {HashSet<String>pList=new HashSet<String>();
      for(int i=0; i<podLM.getSize();i++)
 	 pList.add((String)podLM.getElementAt(i));
-     config[0].setPodList(pList);}
+     config[0].getPodList().clear();
+     for(String pod:pList)
+	 config[0].getPodList().addElement(pod);
      
-     {HashSet<String>vxList=new HashSet<String>();
+     HashSet<String>vxList=new HashSet<String>();
      for(int i=0; i<missionLM.getSize();i++)
 	 vxList.add((String)missionLM.getElementAt(i));
      config[0].setMissionList(vxList);}
@@ -376,9 +391,12 @@ public class ConfigWindow extends JFrame {
 	 if(missionLM.get(i).contentEquals(missionSelection))missionList.setSelectedIndex(i);}
      
      podLM.removeAllElements();
-     for(String pod:config[0].getPodList()){
-	 if(checkPOD(new File(pod)))
-	  podLM.addElement(pod);}
+     final DefaultListModel<String>podList = config[0].getPodList();
+     for(int i=0; i<podList.size();i++){
+	 final String pod = podList.get(i);
+	 if(pod!=null)
+	  if(checkPOD(new File(pod)))
+	   podLM.addElement(pod);}
  }//end readSettings()
  
  private boolean isBuiltinVOX(String vox){
@@ -409,7 +427,6 @@ public class ConfigWindow extends JFrame {
      if(!checkPOD(file))
 	 return;
      podLM.addElement(file.getAbsolutePath());
-     needRestart=true;
  }//end addPOD()
  
     private void addVOX() {
@@ -443,12 +460,29 @@ public class ConfigWindow extends JFrame {
 		public void exceptionThrown(Exception e) {
 		    e.printStackTrace();
 		}});
+	    xmlEnc.setPersistenceDelegate(DefaultListModel.class,
+		    new DefaultPersistenceDelegate() {
+			protected void initialize(Class clazz,
+				Object oldInst, Object newInst,
+				Encoder out) {
+			    super.initialize(clazz, oldInst, newInst,
+				    out);
+			    DefaultListModel oldLM = (DefaultListModel) oldInst;
+			    DefaultListModel newLM = (DefaultListModel) newInst;
+			    for (int i = 0; i < oldLM.getSize(); i++){
+				final Object value = oldLM.getElementAt(i);
+			    	if(value!=null)//When a DLM is initialized it contains a single null element. )X
+				 out.writeStatement(new Statement(oldInst,"addElement",
+					new Object[] { value }));
+			    }//end for(elements)
+			}//end DefaultPersistenceDelegate()
+		    });
 	    xmlEnc.writeObject(config[0]);
 	    xmlEnc.close();
 	}catch(Exception e){JOptionPane.showMessageDialog(
 		    this,
-		    "Failed to write the specified file:\n"
-			    + e.getLocalizedMessage(),
+		    "Failed to write the config file.\n"
+			    + e.getLocalizedMessage()+"\n"+e.getClass().getName(),
 		    "File write failure", JOptionPane.ERROR_MESSAGE);
 			return false;}
 	return true;

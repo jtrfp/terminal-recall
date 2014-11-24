@@ -16,10 +16,12 @@ import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
-import java.util.concurrent.Callable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.DisplayModeHandler;
@@ -46,6 +48,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
+import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Game {
     private TR 		tr;
@@ -79,10 +82,12 @@ public class Game {
     private final PropertyChangeSupport
     			pcSupport = new PropertyChangeSupport(this);
     private boolean paused=false;
+    private volatile boolean aborting=false;
     private TRFutureTask<Void>[] startupTask = new TRFutureTask[]{null};
     
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
+    private boolean inGameplay	=false;
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
@@ -128,14 +133,14 @@ public class Game {
      * @param tr
      *            the tr to set
      */
-    public void setTr(TR tr) {
+    public synchronized void setTr(TR tr) {
 	this.tr = tr;
     }
 
     /**
      * @return the vox
      */
-    public VOXFile getVox() {
+    public synchronized VOXFile getVox() {
 	return vox;
     }
 
@@ -143,7 +148,7 @@ public class Game {
      * @param vox
      *            the vox to set
      */
-    public void setVox(VOXFile vox) {
+    public synchronized void setVox(VOXFile vox) {
 	if(this.vox==vox)
 	    return;//No change.
 	pcSupport.firePropertyChange("vox", this.vox, vox);
@@ -153,32 +158,44 @@ public class Game {
     /**
      * @return the levelIndex
      */
-    public int getLevelIndex() {
+    public synchronized int getLevelIndex() {
 	return levelIndex;
+    }
+    
+    public boolean isInGameplay(){
+	return inGameplay;
+    }
+    
+    private boolean setInGameplay(boolean newValue){
+	boolean old = inGameplay;
+	inGameplay=newValue;
+	pcSupport.firePropertyChange("inGameplay", old, newValue);
+	return old;
     }
 
     /**
      * @param levelIndex
      *            the levelIndex to set
+     * @throws FileNotFoundException 
+     * @throws FileLoadException 
+     * @throws IOException 
+     * @throws IllegalAccessException 
      */
-    public void setLevelIndex(int levelIndex) {
+    public synchronized void setLevelIndex(int levelIndex) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 	this.levelIndex = levelIndex;
 	if (levelIndex != -1) {// -1 means 'abort'
 	    MissionLevel lvl = vox.getLevels()[getLevelIndex()];
 	    final String lvlFileName = lvl.getLvlFile();
-	    try {
 		setCurrentMission(new Mission(tr, this, tr.getResourceManager()
 			.getLVL(lvlFileName), lvlFileName.substring(0,
 			lvlFileName.lastIndexOf('.')), getLevelIndex() % 3 == 0));
-	    } catch (Exception e) {
-		tr.showStopper(e);}
 	}//end if(levelIndex!=-1)
     }// end setLevelIndex(...)
 
     /**
      * @return the playerName
      */
-    public String getPlayerName() {
+    public synchronized String getPlayerName() {
 	return playerName;
     }
 
@@ -186,7 +203,7 @@ public class Game {
      * @param playerName
      *            the playerName to set
      */
-    public void setPlayerName(String playerName) {
+    public synchronized void setPlayerName(String playerName) {
 	this.playerName = playerName;
     }
 
@@ -197,7 +214,7 @@ public class Game {
     /**
      * @return the difficulty
      */
-    public Difficulty getDifficulty() {
+    public synchronized Difficulty getDifficulty() {
 	return difficulty;
     }
 
@@ -205,7 +222,7 @@ public class Game {
      * @param difficulty
      *            the difficulty to set
      */
-    public void setDifficulty(Difficulty difficulty) {
+    public synchronized void setDifficulty(Difficulty difficulty) {
 	this.difficulty = difficulty;
     }
 
@@ -213,7 +230,7 @@ public class Game {
 	return navSystem;
     }
     
-    public void setLevel(String skipToLevel) {
+    public synchronized void setLevel(String skipToLevel) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 	final MissionLevel[] levs = vox.getLevels();
 	for (int index = 0; index < levs.length; index++) {
 	    if (levs[index].getLvlFile().toUpperCase()
@@ -226,11 +243,7 @@ public class Game {
 	return hudSystem;
     }
 
-    public void go() {
-	synchronized(startupTask){
-	startupTask[0] = tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
+    public synchronized void boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 		// Set up player, HUD, fonts...
 		System.out.println("Game.go()...");
 		System.out.println("Initializing general resources...");
@@ -252,7 +265,6 @@ public class Game {
 		hudSystem.deactivate();
 		navSystem = new NAVSystem(tr.getWorld(), tr);
 		navSystem.deactivate();
-		try {
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
 		    final Color[] pal 	     = tr.getGlobalPalette();
@@ -295,7 +307,7 @@ public class Game {
 		    System.out.println("\t...Done.");
 		    levelLoadingScreen	= new LevelLoadingScreen(tr.getWorld(),tr);
 		    briefingScreen	= new BriefingScreen(tr.getWorld(),tr,greenFont);
-		    earlyLoadingScreen.setStatusText("Starting game...");
+		    earlyLoadingScreen.setStatusText("Ready.");
 		    levelLoadingMode = new Object[]{
 			 levelLoadingScreen,
 			 upfrontDisplay,
@@ -316,35 +328,44 @@ public class Game {
 			 briefingScreen,
 			 backdropSystem
 		    };
-
-		} catch (Exception e) {tr.showStopper(e);}
-		return null;
-	    }});
-	}//end sync()
-	startupTask[0].get();
-	beginGameplay();
-    }// end go()
-
-    public void beginGameplay() {
-	MissionLevel[] levels = vox.getLevels();
-	tr.getThreadManager().setPaused(false);
-	while (getLevelIndex() < levels.length && getLevelIndex()!=-1) {
-	    System.out.println("Invoking JVM's garbage collector...");
-	    TR.nuclearGC();
-	    System.out.println("...Done.");
-	    Mission.Result result = null;
-	    final Mission mission = getCurrentMission();
-	    if(mission==null)
-		break;
-	    while (result == null)
-		result = getCurrentMission().go().get();
-	    if (result.isAbort())
-		break;
-	    // Rube Goldberg style increment
-	    setLevelIndex(getLevelIndex() + 1);
-	}// end while(getLevelIndex<length)
-	System.out.println("Escaping game loop.");
-	tr.getThreadManager().setPaused(true);
+		    setLevelIndex(0);
+    }// end boot()
+    
+    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+	setInGameplay(true);
+	try {
+	    MissionLevel[] levels = vox.getLevels();
+	    tr.getThreadManager().setPaused(false);
+	    while (getLevelIndex() < levels.length && getLevelIndex() != -1) {
+		System.out.println("Invoking JVM's garbage collector...");
+		TR.nuclearGC();
+		System.out.println("...Done.");
+		Mission.Result result = null;
+		final Mission mission = getCurrentMission();
+		if (mission == null)
+		    break;
+		while (result == null)
+		    result = getCurrentMission().go();
+		if (result.isAbort())
+		    break;
+		// Rube Goldberg style increment
+		setLevelIndex(getLevelIndex() + 1);
+	    }// end while(getLevelIndex<length)
+	    System.out.println("Escaping game loop.");
+	    tr.getThreadManager().setPaused(true);
+	    setInGameplay(false);
+	} catch (IllegalAccessException e) {
+	    throw e;
+	} catch (FileNotFoundException e) {
+	    throw e;
+	} catch (IOException e) {
+	    throw e;
+	} catch (FileLoadException e) {
+	    throw e;
+	} finally {
+	    tr.getThreadManager().setPaused(true);
+	    setInGameplay(false);
+	}//end finally{}
     }// end beginGameplay()
 
     public void setCurrentMission(Mission mission) {
@@ -353,7 +374,8 @@ public class Game {
     }
     
     public void abort(){
-	setLevelIndex(-1);
+	try{setLevelIndex(-1);}
+	catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 	abortCurrentMission();
 	cleanup();
 	TR.nuclearGC();
@@ -378,8 +400,8 @@ public class Game {
 	    tr.getResourceManager().getSmokeSystem().deactivate();
 	if(tr.getResourceManager().getExplosionFactory()!=null)
 	    tr.getResourceManager().getExplosionFactory().deactivate();
-	tr.getWorld().remove(player);
-	player=null;
+	if(player!=null)
+	 tr.getWorld().remove(player);
     }
 
     public void abortCurrentMission(){
@@ -394,9 +416,9 @@ public class Game {
     }//end abortCurrentMission()
     
     public Mission getCurrentMission() {
-	if(currentMission==null){
+	/*if(currentMission==null){
 	    setLevelIndex(getLevelIndex());
-	}
+	}*/
 	return currentMission;
     }//end getCurrentMission
     
@@ -452,7 +474,8 @@ public class Game {
 	    return this;//nothing to do.
 	pcSupport.firePropertyChange("paused", this.paused, paused);
         this.paused = paused;
-	getTr().soundSystem.get().setPaused(paused);
+        final SoundSystem ss = getTr().soundSystem.get();
+	ss.setPaused(paused);
 	getTr().getThreadManager().setPaused(paused);
 	//TODO: Show upfront "Paused" msg
         return this;

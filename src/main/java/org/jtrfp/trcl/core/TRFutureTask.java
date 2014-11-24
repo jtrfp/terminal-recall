@@ -17,6 +17,7 @@ import java.util.concurrent.FutureTask;
 
 public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     protected final TR tr;
+    private boolean handleException=true;
 
     public TRFutureTask(TR tr, Callable<V> callable) {
 	super(callable);
@@ -31,7 +32,8 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     public void run(){
 	try{super.run();super.get();}
 	catch(Exception e)
-	 {tr.showStopper(e);}
+	 {if(handleException)tr.showStopper(e);
+	    else throw new RuntimeException(e.getCause());}//Re=wrap
     }//end run()
     
     @Override
@@ -47,8 +49,13 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
 	    return super.get();//Get or block and then get.
 	}
 	catch(InterruptedException e){}
-	catch(Exception e){tr.showStopper(e);}
+	catch(Exception e){
+	    if(handleException)tr.showStopper(e);
+	    else throw new RuntimeException(e);}
 	return null;
     }//end get()
+    public void setHandleException(boolean handleException) {
+	this.handleException=handleException;
+    }
     
 }//end TRFutureTask

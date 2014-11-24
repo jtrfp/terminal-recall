@@ -108,14 +108,14 @@ public final class ThreadManager {
 		    if(alreadyVisitedPlayer){
 			multiplePlayer=true;
 		    }else alreadyVisitedPlayer=true;
-		}
+		}//end if(Player)
 		if(!multiplePlayer&&!paused[0])wo.tick(tickTimeInMillis);
 	 }// end for(worldObjects)
 	}//end sync(gameStateLock)
 	if(game.getPlayer()!=null && !paused[0])
 	    tr.getCollisionManager().performCollisionTests();
 	}// end sync(paused)
-	}catch(NotReadyException e){}
+	}catch(NotReadyException e){System.out.println("ThreadManager: Not ready");}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
     
@@ -165,9 +165,7 @@ public final class ThreadManager {
     }//end submitToGL(...)
     
     public <T> TRFutureTask<T> submitToThreadPool(Callable<T> c){
-	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
-	threadPool.submit(result);
-	return result;
+	return submitToThreadPool(true,c);
     }//end submitToThreadPool(...)
 
     private void start() {
@@ -275,5 +273,13 @@ public final class ThreadManager {
     public void setPaused(boolean paused) {
 	synchronized(this.paused)
 	 {this.paused[0]=paused;}
+    }
+
+    public <T>TRFutureTask<T> submitToThreadPool(boolean handleException,
+	    Callable<T> callable) {
+	final TRFutureTask<T> result = new TRFutureTask<T>(tr,callable);
+	result.setHandleException(handleException);
+	threadPool.submit(result);
+	return result;
     }
 }// end ThreadManager

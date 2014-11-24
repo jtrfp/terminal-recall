@@ -113,7 +113,7 @@ public class LevelSkipWindow extends JFrame {
 			public Void call() throws Exception {
 			    tr.getGame().abortCurrentMission();
 			    tr.getGame().setLevelIndex(levelList.getSelectedIndex());
-			    tr.getGame().beginGameplay();
+			    tr.getGame().doGameplay();
 			    return null;
 			}});
 		}});

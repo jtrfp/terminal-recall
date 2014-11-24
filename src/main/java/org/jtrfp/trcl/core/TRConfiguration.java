@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
 
+import javax.swing.DefaultListModel;
+
 import org.jtrfp.trcl.flow.GameVersion;
 
 public class TRConfiguration{
@@ -30,7 +32,8 @@ public class TRConfiguration{
     	private String voxFile;
     	private boolean audioLinearFiltering=false;
     	private HashSet<String> missionList = new HashSet<String>();
-    	private HashSet<String> podList     = new HashSet<String>();
+    	//private HashSet<String> podList     = new HashSet<String>();
+    	private DefaultListModel<String> podList=new DefaultListModel<String>();
     	private double modStereoWidth=.3;
     	public static final String AUTO_DETECT = "Auto-detect";
     	
@@ -141,20 +144,6 @@ public class TRConfiguration{
 	}
 
 	/**
-	 * @return the podList
-	 */
-	public HashSet<String> getPodList() {
-	    return podList;
-	}
-
-	/**
-	 * @param podList the podList to set
-	 */
-	public void setPodList(HashSet<String> podList) {
-	    this.podList = podList;
-	}
-
-	/**
 	 * @return the modStereoWidth
 	 */
 	public double getModStereoWidth() {
@@ -189,4 +178,18 @@ public class TRConfiguration{
 		result = new TRConfiguration();
 	     return result;
 	 }//end getConfig()
+
+	/**
+	 * @return the podList
+	 */
+	public DefaultListModel getPodList() {
+	    return podList;
+	}
+
+	/**
+	 * @param podList the podList to set
+	 */
+	public void setPodList(DefaultListModel podList) {
+	    this.podList = podList;
+	}
 }//end TRConfiguration

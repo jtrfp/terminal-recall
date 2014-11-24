@@ -27,15 +27,19 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -106,7 +110,7 @@ import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
 
 public class ResourceManager{
-	Set<IPodData> pods = new HashSet<IPodData>();
+	private final Map<String,IPodData> pods = new HashMap<String,IPodData>();
 	private SoftValueHashMap<Integer, TextureDescription> 
 	/*						*/	 rawCache 
 		= new SoftValueHashMap<Integer,TextureDescription>();
@@ -158,7 +162,31 @@ public class ResourceManager{
 			 return tr.soundSystem.get().newSoundTexture(fb, (int)ais.getFormat().getFrameRate());
 			}catch(Exception e){tr.showStopper(e);return null;}
 		    }};
+		    
+		setupPODListeners();
 	}//end ResourceManager
+	
+	private void setupPODListeners(){
+	    final TRConfiguration config = tr.getTrConfig()[0];
+	    final DefaultListModel<String> podList = config.getPodList();
+	    new ListModelSetBridge<String>(podList,new SetModelListener<String>(){
+		@Override
+		public void added(String item) {
+		    if(item!=null)
+		     try{ResourceManager.this.registerPOD(new File(item));}
+		     catch(FileLoadException e){
+			JOptionPane.showMessageDialog(tr.getRootWindow(), 
+				"Failed to parse a PODfile:"+e.getLocalizedMessage(), 
+				"Failed To Load POD", JOptionPane.ERROR_MESSAGE);
+		    }//end catch(e)
+		}//end added()
+
+		@Override
+		public void removed(String item) {
+		    if(item!=null)
+		     ResourceManager.this.deregisterPOD(item);
+		}});
+	}//end setupPODListeners
 	
 	/**
 	 * @return the explosionFactory
@@ -170,7 +198,7 @@ public class ResourceManager{
 	    explosionFactory=ef;
 	}
 	
-	public LVLFile getLVL(String name) throws IOException, FileLoadException, IllegalAccessException{
+	public LVLFile getLVL(String name) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException{
 		System.out.println("Getting level "+name);
 		return new LVLFile(getInputStreamFromResource("LEVELS\\"+name));
 		}//end getLVL
@@ -178,21 +206,27 @@ public class ResourceManager{
 	private InputStream getInputStreamFromResource(String name) throws FileNotFoundException, FileLoadException, IOException{
 		System.out.println("Getting resource: "+name);
 		IPodFileEntry ent;
-		for(IPodData p:pods){
+		for(IPodData p:pods.values()){
 			if((ent=p.findEntry(name))!=null)
 				{return new BufferedInputStream(ent.getInputStreamFromPod());}
 			}//end for(podFiles)
 		throw new FileNotFoundException(name);
 		}//end getInputStreamFromResource(...)
 	
-	public void registerPOD(PodFile podToRegister) throws FileLoadException{
+	public void deregisterPOD(String podToDeregister){
+	    if(podToDeregister==null)throw new NullPointerException("fileToDeregister should not be null.");
+	    pods.remove(podToDeregister);
+	}
+	
+	public void registerPOD(String key, PodFile podToRegister) throws FileLoadException{
 	    if(podToRegister==null)throw new NullPointerException("fileToRegister should not be null.");
-	    pods.add(podToRegister.getData());
+	    pods.put(key,podToRegister.getData());
 	}
 	
 	public void registerPOD(File fileToRegister) throws FileLoadException{
 		if(fileToRegister==null)throw new NullPointerException("fileToRegister should not be null.");
-		registerPOD(new PodFile(fileToRegister));
+		System.out.println("Register pod "+fileToRegister);
+		registerPOD(fileToRegister.getAbsolutePath(),new PodFile(fileToRegister));
 		}
 	
 	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
@@ -266,7 +300,7 @@ public class ResourceManager{
 		}//end getRAWAsTexture(...)
 	
 	public boolean rawExists(String name){
-		for(IPodData p:pods){
+		for(IPodData p:pods.values()){
 			if((p.findEntry("ART\\"+name))!=null){
 				System.out.println(name+" found to exist. Returning true...");
 				return true;
@@ -672,9 +706,8 @@ public class ResourceManager{
 	    }catch(Exception e){e.printStackTrace();return null;}
 	}//end getFontBIN(...)
 
-	public NDXFile getNDXFile(String resString) {
-	    try{return new NDXFile().read(getInputStreamFromResource(resString));}
-	    catch(Exception e){e.printStackTrace();return null;}
+	public NDXFile getNDXFile(String resString) throws FileNotFoundException, FileLoadException, IOException {
+	    return new NDXFile().read(getInputStreamFromResource(resString));
 	}
 
 	/**
@@ -733,7 +766,7 @@ public class ResourceManager{
 	    return result;
 	}//end getMOD(...)
 
-	public Set<IPodData> getRegisteredPODs() {
-	    return pods;
+	public Collection<IPodData> getRegisteredPODs() {
+	    return pods.values();
 	}
 }//end ResourceManager

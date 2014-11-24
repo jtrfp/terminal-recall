@@ -419,15 +419,10 @@ public final class TR{
 	return this;
     }
 
-    public TRFutureTask<Void> abortCurrentGame() {
-	return getThreadManager().submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		final Game game = getGame();
-		if(game!=null)
-		    game.abort();
-		setGame(null);
-		return null;
-	    }});
-    }//end abortCurrentGame()
+    public void abortCurrentGame() {
+	final Game game = getGame();
+	if (game != null)
+	    game.abort();
+	setGame(null);
+    }// end abortCurrentGame()
 }//end TR

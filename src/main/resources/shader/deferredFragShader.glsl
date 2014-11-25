@@ -67,7 +67,7 @@ const int DEPTH_QUEUE_SIZE				= 8;
 float linearizeDepth(float z){
 float zNear = 6554;
 float zFar = 1114112;
-z = (2*zNear) / (zFar + zNear - z * (zFar - zNear));
+z = (2*zNear) / ((zFar + zNear) - z * (zFar - zNear));
 return z;
 }
 
@@ -109,7 +109,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
  vec2	ceilTexXY	= ceil(texelXY);
  vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
- vec2	dH			= vec2(codeXY.x,codeXY.y)-3;
+ vec2	dH			= codeXY-3;
  uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
  vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
@@ -123,8 +123,10 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  	 mix(codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags),codeTexel(ceilTexXY,textureID,tDims,renderFlags),dH.y),//Right
  	   dH.x);//Vertical
 
- float sunIllumination			= clamp(dot(sunVector,normalize(norm)),0,1);
- if(length(norm)>.2)cTexel.rgb	= cTexel.rgb*fogColor+cTexel.rgb*sunIllumination*sunColor;
+ float sunIllumination			= dot(sunVector,norm);
+ if(dot(norm,norm)>.1)cTexel.rgb	//Dot being used as cheap magnitude measurement
+ 								=((clamp(sunIllumination,0,1)*sunColor)+fogColor) * cTexel.rgb;
+ 								// TODO: Re-design and optimize
  cTexel 						= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
  return cTexel;
  }//end intrinsicCodeTexel
@@ -165,6 +167,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  	depthQueue[relevantSize]=depthQueueTexel;
  	relevantSize++;
  	}//end if(valid point)
+  else break;//zero means end-of-list.
  }//end for(DEPTH_QUEUE_SIZE)
  
  // D E P T H   S O R T

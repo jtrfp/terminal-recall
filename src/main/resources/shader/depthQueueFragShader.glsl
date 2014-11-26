@@ -19,8 +19,6 @@
 
 // UNIFORMS
 uniform		sampler2D	depthTexture;
-uniform 	uint 	screenWidth;
-uniform 	uint 	screenHeight;
 
 // INPUTS
 noperspective in vec2 fragTexCoord;

@@ -30,8 +30,8 @@ const uint VERTICES_PER_ROW			= VTX_TEXTURE_WIDTH;
 
 const float PRIM_TEX_HEIGHT_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_HEIGHT);
 const float PRIM_TEX_WIDTH_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_WIDTH);
-const float VTX_TEX_HEIGHT_SCALAR   = 1f/float(VTX_TEXTURE_HEIGHT);
-const float VTX_TEX_WIDTH_SCALAR    = 1f/float(VTX_TEXTURE_WIDTH);
+const float VTX_TEX_HEIGHT_SCALAR   = 1/float(VTX_TEXTURE_HEIGHT);
+const float VTX_TEX_WIDTH_SCALAR    = 1/float(VTX_TEXTURE_WIDTH);
 
 //OUTPUTS
 flat out mat4 uvzwQuad;
@@ -63,8 +63,8 @@ void main(){
  uint	col				= pid%PRIMS_PER_ROW;
  uint	primitiveIndex	= row*PRIMS_PER_ROW+col;
  uint	vertexIndex		= primitiveIndex*3u;
- gl_Position.x			+=((float(col)+.5)*PRIM_TEX_WIDTH_SCALAR*2f)-1f;
- gl_Position.y			= 1f-((float(row)+.5)*PRIM_TEX_HEIGHT_SCALAR*2f);
+ gl_Position.x			+=((float(col)+.5)*PRIM_TEX_WIDTH_SCALAR*2)-1;
+ gl_Position.y			= 1-((float(row)+.5)*PRIM_TEX_HEIGHT_SCALAR*2);
  vec2 increment			= vec2(VTX_TEX_WIDTH_SCALAR,0);
  vec2 v0				= vec2(
  				float(vertexIndex%VERTICES_PER_ROW)*VTX_TEX_WIDTH_SCALAR,

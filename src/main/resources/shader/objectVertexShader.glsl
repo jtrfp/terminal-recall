@@ -24,7 +24,7 @@ const uint OBJECT_TEXTURE_HEIGHT	= 128u;
 const uint MATRICES_PER_ROW			= OBJECT_TEXTURE_WIDTH/TEXELS_PER_MATRIX;
 const uint VERTICES_PER_ROW			= MATRICES_PER_ROW+1u;
 
-const float OBJ_TEX_HEIGHT_SCALAR	= 1f/float(OBJECT_TEXTURE_HEIGHT);
+const float OBJ_TEX_HEIGHT_SCALAR	= 1/float(OBJECT_TEXTURE_HEIGHT);
 const float OBJ_TEX_WIDTH_SCALAR	= float(TEXELS_PER_MATRIX)/float(OBJECT_TEXTURE_WIDTH);
 
 //OUTPUTS
@@ -60,8 +60,8 @@ void main(){
  uint	row				= vid/VERTICES_PER_ROW;
  uint	col				= vid%VERTICES_PER_ROW;
  int	objectIndex		= int(row*MATRICES_PER_ROW+col);
- gl_Position.x			+=(float(col)*OBJ_TEX_WIDTH_SCALAR*2f)-1f;
- gl_Position.y			= 1f-(float(row)*OBJ_TEX_HEIGHT_SCALAR*2f);
+ gl_Position.x			+=(float(col)*OBJ_TEX_WIDTH_SCALAR*2)-1;
+ gl_Position.y			= 1-(float(row)*OBJ_TEX_HEIGHT_SCALAR*2);
  int 	objectDefIndex	= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
  uvec4 	objectDef 		= texelFetch(rootBuffer,objectDefIndex);
  int 	matrixOffset 	= int(objectDef[0]);

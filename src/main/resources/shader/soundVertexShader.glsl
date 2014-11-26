@@ -45,10 +45,10 @@ void main(){
  int sweep = int((gl_VertexID+1) / 2) % 2;
  int row = gl_VertexID / 2;
  fragTexPos = sweep;
- float texelHeight = 1f/float(numRows);
+ float texelHeight = 1/float(numRows);
  fragRow = (float(row)*texelHeight) + texelHeight/2;
  float rowsX = floor((gl_VertexID+1)/2) + floor(gl_VertexID/2)/float(SAMPLES_PER_ROW);
- vid = gl_VertexID / 64f;
+ vid = gl_VertexID / 64;
  
  panLR = pan;
  gl_Position.x= dummy * .0000000001 + start+rowsX*lengthPerRow;

@@ -30,7 +30,6 @@ noperspective out vec3 	fragNormal;
 noperspective out float	w;
 flat out float 			flatTextureID;
 noperspective out vec2	screenLoc;
-noperspective out vec4	gl_Position;
 
 //IN
 uniform uint 			renderListPageTable[172];

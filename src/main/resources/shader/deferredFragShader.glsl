@@ -65,7 +65,7 @@ const int DEPTH_QUEUE_SIZE				= 8;
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
 float warpFog(float z){
-return pow(z,50);
+return clamp(pow(z,80)*1.2,0,1);
 }
 
 uint UByte(uint _input, uint index)

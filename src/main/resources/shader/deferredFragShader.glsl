@@ -64,11 +64,8 @@ const vec3 sunColor 					= vec3(1.4,1.4,1.2);
 const int DEPTH_QUEUE_SIZE				= 8;
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
-float linearizeDepth(float z){
-float zNear = 6554;
-float zFar = 1114112;
-z = (2*zNear) / ((zFar + zNear) - z * (zFar - zNear));
-return z;
+float warpFog(float z){
+return pow(z,50);
 }
 
 uint UByte(uint _input, uint index)
@@ -99,7 +96,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  return				  texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
  }
  
- vec4 intrinsicCodeTexel(float linearDepth,uint textureID,vec3 norm,vec2 uv){
+ vec4 intrinsicCodeTexel(float warpedFog,uint textureID,vec3 norm,vec2 uv, vec3 illuminatedFog){
  // TOC
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  //if(textureID>100024u||textureID<0u)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
@@ -124,10 +121,10 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  	   dH.x);//Vertical
 
  float sunIllumination			= dot(sunVector,norm);
- if(dot(norm,norm)>.1)cTexel.rgb	//Dot being used as cheap magnitude measurement
+ if(dot(norm,norm)>.1)cTexel.rgb
  								=((clamp(sunIllumination,0,1)*sunColor)+fogColor) * cTexel.rgb;
  								// TODO: Re-design and optimize
- cTexel 						= mix(cTexel,vec4(fogColor*sunColor,1),clamp(pow(linearDepth,3)*1.5,0,1));//FOG
+ cTexel 						= mix(cTexel,vec4(illuminatedFog,1),warpedFog);//FOG
  return cTexel;
  }//end intrinsicCodeTexel
 
@@ -144,16 +141,18 @@ textureTOC{
 void main(){
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
-float 	linearDepth = linearizeDepth(depth);
+float 	warpedFog = warpFog(depth);
 
 uint 	textureID 	= floatBitsToUint(texture(textureIDTexture,screenLoc)[0u]);
 		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
 vec2	uv			= fragColor.xy;
 vec3	color;
+vec3	illuminatedFog
+					= fogColor*sunColor;
 
 // S O L I D   B A C K D R O P
-color = vec3(intrinsicCodeTexel(linearDepth,textureID,norm,uv));
+color = vec3(intrinsicCodeTexel(warpedFog,textureID,norm,uv,illuminatedFog));
 uint relevantSize=0u;
 vec4 depthQueue[DEPTH_QUEUE_SIZE];
 
@@ -188,7 +187,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
-   vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[i][2u]),vec3(0,0,0),depthQueue[i].rg);
+   vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[i][2u]),vec3(0,0,0),depthQueue[i].rg,illuminatedFog);
    color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
   }//end for(relevantSize)
   

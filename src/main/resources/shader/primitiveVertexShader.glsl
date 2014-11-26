@@ -65,35 +65,35 @@ void main(){
  uint	vertexIndex		= primitiveIndex*3u;
  gl_Position.x			+=((float(col)+.5)*PRIM_TEX_WIDTH_SCALAR*2)-1;
  gl_Position.y			= 1-((float(row)+.5)*PRIM_TEX_HEIGHT_SCALAR*2);
- vec2 increment			= vec2(VTX_TEX_WIDTH_SCALAR,0);
- vec2 v0				= vec2(
- 				float(vertexIndex%VERTICES_PER_ROW)*VTX_TEX_WIDTH_SCALAR,
- 				float(vertexIndex/VERTICES_PER_ROW)*VTX_TEX_HEIGHT_SCALAR);
- vec2 v1				= v0+increment*1;
- vec2 v2				= v0+increment*2;
+ ivec2 increment		= ivec2(1,0);
+ ivec2 v0				= ivec2(
+ 				vertexIndex%VERTICES_PER_ROW,
+ 				vertexIndex/VERTICES_PER_ROW);
+ ivec2 v1				= increment*1+v0;
+ ivec2 v2				= increment*2+v0;
  ////////////////////////////////////////////////TODO: reciprocal-W
  //Convert screen coords to normalized coords.
  mat4 normalizationMatrix = inverse(affine(
-  vec3(texture(xyVBuffer,v1,0).xy,0),
-  vec3(texture(xyVBuffer,v2,0).xy,0),
-  vec3(texture(xyVBuffer,v0,0).xy,0)));
+  vec3(texelFetch(xyVBuffer,v1,0).xy,0),
+  vec3(texelFetch(xyVBuffer,v2,0).xy,0),
+  vec3(texelFetch(xyVBuffer,v0,0).xy,0)));
  //Convert normalized coords to uv coords
  mat4 uvMatrix = affine(
-  vec3(texture(uvVBuffer,v1,0).xy,0),
-  vec3(texture(uvVBuffer,v2,0).xy,0),
-  vec3(texture(uvVBuffer,v0,0).xy,0)
+  vec3(texelFetch(uvVBuffer,v1,0).xy,0),
+  vec3(texelFetch(uvVBuffer,v2,0).xy,0),
+  vec3(texelFetch(uvVBuffer,v0,0).xy,0)
  	) * normalizationMatrix;
  //Convert normalized coords to vtx normals
  mat4 nXnYnZmatrix = affine(
-  texture(nXnYnZVBuffer,v1,0).xyz,
-  texture(nXnYnZVBuffer,v2,0).xyz,
-  texture(nXnYnZVBuffer,v0,0).xyz
+  texelFetch(nXnYnZVBuffer,v1,0).xyz,
+  texelFetch(nXnYnZVBuffer,v2,0).xyz,
+  texelFetch(nXnYnZVBuffer,v0,0).xyz
  	) * normalizationMatrix;
  //Convert normalized coords to zw
  mat4 zwMatrix = affine(
-  vec3(texture(zVBuffer,v1,0).x,texture(wVBuffer,v1,0).x,0),
-  vec3(texture(zVBuffer,v2,0).x,texture(wVBuffer,v2,0).x,0),
-  vec3(texture(zVBuffer,v0,0).x,texture(wVBuffer,v0,0).x,0)
+  vec3(texelFetch(zVBuffer,v1,0).x,texelFetch(wVBuffer,v1,0).x,0),
+  vec3(texelFetch(zVBuffer,v2,0).x,texelFetch(wVBuffer,v2,0).x,0),
+  vec3(texelFetch(zVBuffer,v0,0).x,texelFetch(wVBuffer,v0,0).x,0)
  	) * normalizationMatrix;
  
  const vec4 topLeft    = vec4(-1,1,0,1);

@@ -29,16 +29,13 @@ git clone https://github.com/jtrfp/terminal-recall.git
 
 ... you will see lots of fireworks as it builds. (it doesn't really 'install' anything)
 You should see BUILD SUCCESS. If you see BUILD FAILURE come to the Terminal Recall gitHub issues section (https://github.com/jtrfp/terminal-recall/issues?page=1), file a new issue and post the output and we'll hopefully figure it out.
+
+Example:
 ```
     cd target
-    java -Dorg.jtrfp.trcl.flow.Game.skipToLevel=[levelFile].LVL -jar RunMe.jar [path to STARTUP.POD] [path to additional .POD] [...]
+    java -jar RunMe.jar
 ```
-
-For example:
-```
-java -Dorg.jtrfp.trcl.flow.Game.skipToLevel=EGYPT.LVL -jar RunMe.jar "/home/username/pods/STARTUP.POD" "/home/username/pods/FURY3.POD"
-```
-... to run the first level of Sebek.
+The first time running Terminal Recall, you should register your POD files using the File->Configure menu so that the game can find them. Note that the original games need at least STARTUP.POD and the specific POD for the game, such as FURY3.POD or TV.POD.
 
 If its been a few weeks since you first downloaded and you want to update to the newest version you can cd into your terminal-recall directory and run:
 

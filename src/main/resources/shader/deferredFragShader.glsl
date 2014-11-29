@@ -62,6 +62,7 @@ const uint SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4
 const vec3 sunColor 					= vec3(1.4,1.4,1.2);
 
 const int DEPTH_QUEUE_SIZE				= 8;
+const uint DEAD_BEEF					= 100024u;
 
 //Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
 float warpFog(float z){
@@ -99,6 +100,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  vec4 intrinsicCodeTexel(float warpedFog,uint textureID,vec3 norm,vec2 uv, vec3 illuminatedFog){
  // TOC
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
+ if(textureID==100024u)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
  uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
@@ -163,11 +165,11 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
 		ordering[i]		= i;
 		//TODO: LinearDepth. Alpha is depth.
 		//TODO: Norm. Calculate from future primitive table implementation?
- if(textureID!=0u){// Found a valid point
+ if(textureID!=DEAD_BEEF){// Found a valid point
  	depthQueue[relevantSize]=depthQueueTexel;
  	relevantSize++;
  	}//end if(valid point)
-  else break;//zero means end-of-list.
+  else break;//DEAD_BEEF means end-of-list.
  }//end for(DEPTH_QUEUE_SIZE)
  
  // D E P T H   S O R T

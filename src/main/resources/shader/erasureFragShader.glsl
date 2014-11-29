@@ -20,5 +20,6 @@
  layout(location = 0)	out	vec4	fragColor;
  
  void main(){
- fragColor=vec4(0,0,uintBitsToFloat(0u),0);
+ fragColor=vec4(0,0,uintBitsToFloat(100024u),0);
  }
+ 

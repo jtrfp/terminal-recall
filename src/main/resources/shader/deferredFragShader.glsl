@@ -99,7 +99,6 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  vec4 intrinsicCodeTexel(float warpedFog,uint textureID,vec3 norm,vec2 uv, vec3 illuminatedFog){
  // TOC
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
- //if(textureID>100024u||textureID<0u)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
  uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
@@ -153,13 +152,15 @@ vec3	illuminatedFog
 
 // S O L I D   B A C K D R O P
 color = vec3(intrinsicCodeTexel(warpedFog,textureID,norm,uv,illuminatedFog));
-uint relevantSize=0u;
+int relevantSize=0;
 vec4 depthQueue[DEPTH_QUEUE_SIZE];
+int ordering[DEPTH_QUEUE_SIZE];
 
 // D E P T H   P O P U L A T E
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  vec4	depthQueueTexel	= texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
 		textureID		= floatBitsToUint(depthQueueTexel[2u]);
+		ordering[i]		= i;
 		//TODO: LinearDepth. Alpha is depth.
 		//TODO: Norm. Calculate from future primitive table implementation?
  if(textureID!=0u){// Found a valid point
@@ -170,24 +171,25 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  }//end for(DEPTH_QUEUE_SIZE)
  
  // D E P T H   S O R T
- if(relevantSize>0u){
+ if(relevantSize>0){
+ float alphaAccumulator=0;
  //Perform the not-so-quick sort
- vec4 intermediary;
- for(uint i=0u; i<relevantSize-1u; i++){
-  for(uint j=i+1u; j<relevantSize; j++){
-   if(depthQueue[j].a>depthQueue[i].a){//Found new deepest
+ int intermediary;
+ for(int i=0; i<relevantSize-1; i++){
+  for(int j=i+1; j<relevantSize; j++){
+   if(depthQueue[ordering[j]].a>depthQueue[ordering[i]].a){//Found new deepest
     //Trade
-    intermediary = depthQueue[i];
-    depthQueue[i] = depthQueue[j];
-    depthQueue[j] = intermediary;
+    intermediary = ordering[i];
+    ordering[i] = ordering[j];
+    ordering[j] = intermediary;
     }//end if(new deepest)
    }//end for(lower end)
   }//end for(relevantSize)
-  }//end if(relevantSize>0u)
+  }//end if(relevantSize>0)
   
   // D E P T H   A S S E M B L Y
-  for(uint i=0u; i<relevantSize; i++){
-   vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[i][2u]),vec3(0,0,0),depthQueue[i].rg,illuminatedFog);
+  for(int i=0; i<relevantSize; i++){
+   vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[ordering[i]][2u]),vec3(0,0,0),depthQueue[ordering[i]].rg,illuminatedFog);
    color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
   }//end for(relevantSize)
   

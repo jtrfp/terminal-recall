@@ -34,6 +34,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
@@ -314,6 +315,7 @@ public final class SoundSystem {
 							  // the output
 	playbackTexture.bind().readPixels(GL3.GL_RG, GL3.GL_FLOAT,
 		audioByteBuffer);// RG_INTEGER throws INVALID_OPERATION!?
+	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	playbackFrameBuffer.bindToDraw();
 	gl.glViewport(0, 0, BUFFER_SIZE_FRAMES, 1);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);

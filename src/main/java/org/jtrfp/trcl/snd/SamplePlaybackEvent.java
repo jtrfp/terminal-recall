@@ -111,6 +111,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	public void apply(GL3 gl, Collection<SoundEvent> events, long bufferStartTimeFrames) {
 	    gl.glLineWidth(1);
 	    gl.glDisable(GL3.GL_LINE_SMOOTH);
+	    gl.glDisable(GL3.GL_CULL_FACE);
 	    gl.glEnable(GL3.GL_BLEND);
 	    gl.glDepthFunc(GL3.GL_ALWAYS);
 	    gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);

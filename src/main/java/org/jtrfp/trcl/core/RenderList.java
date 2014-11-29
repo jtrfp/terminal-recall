@@ -200,6 +200,7 @@ public class RenderList {
 	///// VERTEX STAGE
 	final GLProgram vertexProgram = renderer.getVertexProgram();
 	vertexProgram.use();
+	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	renderer.getVertexFrameBuffer().bindToDraw();
 	vertexProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	tr.gpu.get().memoryManager.get().bindToUniform(0, vertexProgram,
@@ -251,6 +252,7 @@ public class RenderList {
 	renderer.getVertexWTexture().bindToTextureUnit(5, gl);
 	renderer.getVertexNormXYTexture().bindToTextureUnit(6, gl);
 	renderer.getVertexNormZTexture().bindToTextureUnit(7, gl);
+	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	renderer.getOpaqueFrameBuffer().bindToDraw();
 	gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, dummyBufferID);
 	final int numOpaqueVertices = numOpaqueBlocks
@@ -290,6 +292,7 @@ public class RenderList {
 	gl.glDepthMask(false);
 	tr.renderer.get().depthErasureProgram.use();
 	gl.glDisable(GL3.GL_CULL_FACE);
+	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	renderer.getDepthQueueFrameBuffer().bindToDraw();
 	gl.glEnable(GL3.GL_SAMPLE_MASK);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
@@ -319,10 +322,6 @@ public class RenderList {
 	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
 	gl.glDisable(GL3.GL_STENCIL_TEST);
 	
-	// SOUND
-	//tr.soundSystem.get().render(gl);
-	//revertViewportToWindow(gl);
-	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
@@ -345,6 +344,7 @@ public class RenderList {
 	// DEPTH QUEUE ERASE
 	tr.renderer.get().depthErasureProgram.use();
 	gl.glDisable(GL3.GL_CULL_FACE);
+	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	renderer.getDepthQueueFrameBuffer().bindToDraw();
 	gl.glEnable(GL3.GL_MULTISAMPLE);
 	gl.glEnable(GL3.GL_SAMPLE_MASK);
@@ -357,8 +357,13 @@ public class RenderList {
 	    gl.glSampleMaski(0, 0x1 << i);
 	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 	}
+	//Cleanup
 	gl.glDepthMask(true);
+	gl.glDisable(GL3.GL_MULTISAMPLE);
+	gl.glDisable(GL3.GL_SAMPLE_MASK);
+	gl.glDisable(GL3.GL_STENCIL_TEST);
 	//INTERMEDIATE ERASE
+	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	renderer.getOpaqueFrameBuffer().bindToDraw();
 	gl.glClear(GL3.GL_DEPTH_BUFFER_BIT);
 	gl.glFlush();
@@ -380,5 +385,9 @@ public class RenderList {
     
     public List<WorldObject> getVisibleWorldObjectList(){
 	return nearbyWorldObjects;
+    }
+
+    public int getAttribDummyID() {
+	return dummyBufferID;
     }
 }// end RenderList

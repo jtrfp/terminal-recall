@@ -145,9 +145,8 @@ gl_FragDepth 		= depth;
 float 	warpedFog = warpFog(depth);
 
 uint 	textureID 	= floatBitsToUint(texture(textureIDTexture,screenLoc)[0u]);
-		fragColor 	= texture(primaryRendering,screenLoc);//GET UV
 vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
-vec2	uv			= fragColor.xy;
+vec2	uv			= texture(primaryRendering,screenLoc).xy;//GET UV
 vec3	color;
 vec3	illuminatedFog
 					= fogColor*sunColor;

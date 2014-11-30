@@ -35,12 +35,6 @@ layout (location = 0) in float dummy;
 
 void main(){
  // U/V Zig-Zag pattern
- /*
- gl_Position.x=gl_VertexID==0?-1:1;
- gl_Position.y=0;
- gl_Position.z=1;
- gl_Position.w=1;
- */
  
  int sweep = int((gl_VertexID+1) / 2) % 2;
  int row = gl_VertexID / 2;
@@ -55,4 +49,12 @@ void main(){
  gl_Position.y=0;
  gl_Position.z=1;
  gl_Position.w=1;
+ /*
+ //// DEBUG
+ gl_Position.x*=dummy==1234?0:1;
+ gl_Position.x+=(gl_VertexID==0?-1:1);
+ gl_Position.y=0;
+ gl_Position.z=1;
+ gl_Position.w=1;
+ */
  }

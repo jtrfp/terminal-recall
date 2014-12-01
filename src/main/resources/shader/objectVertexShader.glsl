@@ -55,7 +55,7 @@ uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
 void main(){
- gl_Position.x			= dummy*.00000001;
+ gl_Position.x			= dummy==1234?1:0;
  uint	vid				= uint(gl_VertexID);
  uint	row				= vid/VERTICES_PER_ROW;
  uint	col				= vid%VERTICES_PER_ROW;

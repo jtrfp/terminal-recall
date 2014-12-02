@@ -131,6 +131,7 @@ public class ResourceManager{
 	private DebrisSystem 					debrisSystem;
 	private ProjectileFactory [] 				projectileFactories;
 	private final TR 					tr;
+	private TextureDescription				testTexture;
 	
 	public final CachedObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
 	public final CachedObjectFactory<String,SoundTexture>	soundTextures;
@@ -769,4 +770,11 @@ public class ResourceManager{
 	public Collection<IPodData> getRegisteredPODs() {
 	    return pods.values();
 	}
+	
+	public TextureDescription getTestTexture(){
+	    if(testTexture!=null)
+		return testTexture;
+	    return testTexture = tr.gpu.get().textureManager.get().newTexture(
+		    Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/testTexture.png")), "testTexture", true);
+	}//end getTestTexture()
 }//end ResourceManager

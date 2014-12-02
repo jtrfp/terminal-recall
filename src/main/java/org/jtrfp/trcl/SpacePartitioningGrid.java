@@ -351,4 +351,28 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	public List<E> getAlwaysVisibleList(){
 	    return alwaysVisible;
 	}
+	
+	public void removeAll(){
+	    final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
+	    for(SpacePartitioningGrid g:branchGrids.keySet()){
+		branches.add(g);
+	    }
+	    for(SpacePartitioningGrid g:branches){
+		removeBranch(g);
+	    }
+	    final ArrayList<E> alwaysVisible = new ArrayList<E>();
+	    for(E e:getAlwaysVisibleList()){
+		alwaysVisible.add(e);
+	    }
+	    for(E e:alwaysVisible){
+		remove(e);
+	    }
+	    final ArrayList<E> everythingElse = new ArrayList<E>();
+	    for(List<E> l:elements)
+		if(l!=null)
+		 for(E e:l)
+		  everythingElse.add(e);
+	    for(E e:everythingElse)
+		remove(e);
+	}//end removeAll()
 }//end SpacePartitionGrid

@@ -52,8 +52,6 @@ public class LevelSkipWindow extends JFrame {
     	}//end constructor
     
 	public LevelSkipWindow(TR tr) {
-	    	setType(Type.UTILITY);
-	    	//setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 	    	this.tr=tr;
 		setTitle("Skip To Level");
 		setSize(180,300);

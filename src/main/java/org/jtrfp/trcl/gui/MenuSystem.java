@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.RootWindow;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.flow.EngineTests;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.mem.GPUMemDump;
@@ -44,7 +44,10 @@ public class MenuSystem {
     
     public MenuSystem(final TR tr){
 	final RootWindow rw = tr.getRootWindow();
-	final JMenu file = new JMenu("File"), window = new JMenu("Window"), gameMenu = new JMenu("Game");
+	final JMenu file = new JMenu("File"), 
+		    window = new JMenu("Window"), 
+		    gameMenu = new JMenu("Game"),
+		    debugMenu = new JMenu("Debug");
 	// And menus to menubar
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
@@ -56,6 +59,7 @@ public class MenuSystem {
 	final JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
 	final JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
 	final JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
+	final JMenuItem debugSinglet = new JMenuItem("Singlet (fill)");
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
@@ -152,6 +156,16 @@ public class MenuSystem {
 		    }});
 	    };
 	});
+	debugSinglet.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent arg0) {
+		tr.threadManager.submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			EngineTests.singlet(tr);
+			return null;
+		    }});
+	    }});
 	final String showDebugStatesOnStartup = System
 		.getProperty("org.jtrfp.trcl.showDebugStates");
 	if (showDebugStatesOnStartup != null) {
@@ -175,6 +189,7 @@ public class MenuSystem {
             gameMenu.add(game_pause);
             gameMenu.add(game_skip);
             gameMenu.add(game_abort);
+            debugMenu.add(debugSinglet);
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -182,6 +197,7 @@ public class MenuSystem {
 		    rw.setJMenuBar(mb);
 		    mb.add(file);
 		    mb.add(gameMenu);
+		    mb.add(debugMenu);
 		    mb.add(window);
 		    rw.setVisible(true);
 		}});

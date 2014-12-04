@@ -39,6 +39,8 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
+import org.jtrfp.trcl.gpu.GLTexture.PixelReadOrder;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.snd.SoundEvent.Factory;
 
@@ -313,7 +315,7 @@ public final class SoundSystem {
 	 // Read and export previous results to sound card.
 	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Unbind so we can read off
 							  // the output
-	playbackTexture.bind().readPixels(GL3.GL_RG, GL3.GL_FLOAT,
+	playbackTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
 		audioByteBuffer);// RG_INTEGER throws INVALID_OPERATION!?
 	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
 	playbackFrameBuffer.bindToDraw();

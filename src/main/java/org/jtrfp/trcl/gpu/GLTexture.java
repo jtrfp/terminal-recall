@@ -287,8 +287,8 @@ public final class GLTexture {
 	return this;
     }
 
-    public GLTexture readPixels(int pixelFormat, int pixelDataType, ByteBuffer buffer) {
-	gl.glGetTexImage(bindingTarget, 0, pixelFormat, pixelDataType, buffer);
+    public GLTexture readPixels(PixelReadOrder pixelReadOrder, PixelReadDataType pixelReadDataType, ByteBuffer buffer) {
+	gl.glGetTexImage(bindingTarget, 0, pixelReadOrder.getGlEnum(), pixelReadDataType.getGlEnum(), buffer);
 	return this;
     }
     
@@ -399,7 +399,7 @@ public final class GLTexture {
 					(float)min[1]/(float)(max[1]-min[1]), 
 					(float)min[2]/(float)(max[2]-min[2]), 
 					(float)min[3]/(float)(max[3]-min[3]));
-				colorTexture.bind().readPixels(GL3.GL_RGBA, GL3.GL_FLOAT, rgbaBytes);
+				colorTexture.bind().readPixels(PixelReadOrder.RGBA, PixelReadDataType.FLOAT, rgbaBytes);
 				frameBuffer.bindToDraw();
 				parent.bindToTextureUnit(0, gpu.getGl());
 				gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
@@ -594,21 +594,34 @@ public final class GLTexture {
         this.numComponents = numComponents;
     }
     
+    public static abstract class GLEnumWrapper{
+	private final int glEnum;
+	public GLEnumWrapper(int glEnum){
+	    this.glEnum=glEnum;
+	}
+	/**
+	 * @return the glEnum
+	 */
+	public int getGlEnum() {
+	    return glEnum;
+	}
+    }//end GLEnumWrapper
+    
     public static class Format extends InternalFormat{//enums can't be extended. ):
 	public static final Format
 		RED = new Format(GL3.GL_RED,R,8),
-		RG = new Format(GL3.GL_RG,R,8,G,8),
+		RG  = new Format(GL3.GL_RG,R,8,G,8),
 		RGB = new Format(GL3.GL_RGB,R,8,G,8,B,8),
 		BGR = new Format(GL3.GL_BGR,B,8,G,8,R,8),
-		RGBA = new Format(GL3.GL_RGBA,R,8,G,8,B,8,A,8),
-		BGRA = new Format(GL3.GL_BGRA,B,8,G,8,R,8,A,8);
+		RGBA= new Format(GL3.GL_RGBA,R,8,G,8,B,8,A,8),
+		BGRA= new Format(GL3.GL_BGRA,B,8,G,8,R,8,A,8);
 	
 	public Format(int glEnum, int ... order) {
 	    super(glEnum, order);
 	}
     }//end Format()
     
-    public static class InternalFormat {
+    public static class InternalFormat extends GLEnumWrapper {
 	protected static final int R=0,G=1,B=2,A=3,N=-1;
 	public static final InternalFormat
 		R8=new InternalFormat(GL3.GL_R8,R,8),
@@ -673,21 +686,17 @@ public final class GLTexture {
 		RGBA32I=new InternalFormat(GL3.GL_RGBA32I,R,32,G,32,B,32,A,32),
 		RGBA32UI=new InternalFormat(GL3.GL_RGBA32UI,R,32,G,32,B,32,A,32);
 
-	private final int glEnum; 
 	private final int [] order;
 	public InternalFormat(int glEnum, int ... order){
-	    this.glEnum=glEnum;
+	    super(glEnum);
 	    this.order = order;
 	}//end constructor
 	
 	public int getDestComponent(int index){
 	    return order[index*2];
 	}
-	/**
-	 * @return the glEnum
-	 */
-	public int getGlEnum() {
-	    return glEnum;
+	public int getComponentSizeBits(int index){
+	    return order[index*2+1];
 	}
 	/**
 	 * @return the order
@@ -696,4 +705,61 @@ public final class GLTexture {
 	    return order;
 	}
     };
+    
+    public static class PixelReadOrder extends GLEnumWrapper{
+	public static final PixelReadOrder
+		RED =new PixelReadOrder(GL3.GL_RED),
+		GREEN=new PixelReadOrder(GL3.GL_GREEN),
+		BLUE=new PixelReadOrder(GL3.GL_BLUE),
+		RG=new PixelReadOrder(GL3.GL_RG),
+		RGB=new PixelReadOrder(GL3.GL_RGB),
+		RGBA=new PixelReadOrder(GL3.GL_RGBA),
+		BGR=new PixelReadOrder(GL3.GL_BGR),
+		BGRA=new PixelReadOrder(GL3.GL_BGRA),
+		RED_INT=new PixelReadOrder(GL3.GL_RED_INTEGER),
+		GREEN_INT=new PixelReadOrder(GL3.GL_GREEN_INTEGER),
+		BLUE_INT=new PixelReadOrder(GL3.GL_BLUE_INTEGER),
+		RG_INT=new PixelReadOrder(GL3.GL_RG_INTEGER),
+		RGB_INT=new PixelReadOrder(GL3.GL_RGB_INTEGER),
+		RGBA_INT=new PixelReadOrder(GL3.GL_RGBA_INTEGER),
+		BGR_INT=new PixelReadOrder(GL3.GL_BGR_INTEGER),
+		BGRA_INT=new PixelReadOrder(GL3.GL_BGRA_INTEGER);
+
+	public PixelReadOrder(int glEnum) {
+	    super(glEnum);
+	}
+	
+    }//end PixelReadOrder
+    
+    public static class PixelReadDataType extends GLEnumWrapper{
+	public PixelReadDataType(int glEnum) {
+	    super(glEnum);
+	}
+
+	public static final PixelReadDataType
+		UBYTE=new PixelReadDataType(GL3.GL_UNSIGNED_BYTE),
+		BYTE=new PixelReadDataType(GL3.GL_BYTE),
+		USHORT=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT),
+		SHORT=new PixelReadDataType(GL3.GL_SHORT),
+		UINT=new PixelReadDataType(GL3.GL_UNSIGNED_INT),
+		INT=new PixelReadDataType(GL3.GL_INT),
+		HALF_FLOAT=new PixelReadDataType(GL3.GL_HALF_FLOAT),
+		FLOAT=new PixelReadDataType(GL3.GL_FLOAT),
+		UBYTE_3_3_2=new PixelReadDataType(GL3.GL_UNSIGNED_BYTE_3_3_2),
+		UBYTE_2_3_3_REV=new PixelReadDataType(GL3.GL_UNSIGNED_BYTE_2_3_3_REV),
+		USHORT_5_6_5=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT_5_6_5),
+		USHORT_5_6_5_REV=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT_5_6_5_REV),
+		USHORT_4_4_4_4=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT_4_4_4_4),
+		USHORT_4_4_4_4_REV=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT_4_4_4_4_REV),
+		USHORT_5_5_5_1=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT_5_5_5_1),
+		USHORT_1_5_5_5_REV=new PixelReadDataType(GL3.GL_UNSIGNED_SHORT_1_5_5_5_REV),
+		UINT_8_8_8_8=new PixelReadDataType(GL3.GL_UNSIGNED_INT_8_8_8_8),
+		UINT_8_8_8_8_REV=new PixelReadDataType(GL3.GL_UNSIGNED_INT_8_8_8_8_REV),
+		UINT_10_10_10_2=new PixelReadDataType(GL3.GL_UNSIGNED_INT_10_10_10_2),
+		UINT_2_10_10_10_REV=new PixelReadDataType(GL3.GL_UNSIGNED_INT_2_10_10_10_REV),
+		UINT_24_8=new PixelReadDataType(GL3.GL_UNSIGNED_INT_24_8),
+		UINT_10F_11F_11F_REV=new PixelReadDataType(GL3.GL_UNSIGNED_INT_10F_11F_11F_REV),
+		UINT_5_9_9_9_REV=new PixelReadDataType(GL3.GL_UNSIGNED_INT_5_9_9_9_REV),
+		FLOAT32_UINT_24_8_REV=new PixelReadDataType(GL3.GL_FLOAT_32_UNSIGNED_INT_24_8_REV);
+    }//end PixelReadDataType
 }// end GLTexture

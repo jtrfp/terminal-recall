@@ -25,7 +25,9 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -355,7 +357,7 @@ public final class GLTexture {
 	private final FloatBuffer rgbaFloats = rgbaBytes.asFloatBuffer();
 	private final Thread updateThread;
 	private final JPopupMenu popupMenu = new JPopupMenu();
-	private final JMenuItem dumpToCSV = new JMenuItem("Dump To CSV");
+	private final JMenuItem exportToCSV = new JMenuItem("Export To CSV");
 	private final ThreadManager threadManager;
 	public TextureViewingPanel(final GLTexture parent, RootWindow root){
 	    super();
@@ -368,7 +370,7 @@ public final class GLTexture {
 	    threadManager = parent.getGPU().getTr().getThreadManager();
 	    final GPU gpu = parent.getGPU();
 	    final Canvas canvas = frame.getCanvas();
-	    popupMenu.add(dumpToCSV);
+	    popupMenu.add(exportToCSV);
 	    updateThread = new Thread(){
 		@Override
 		public void run(){
@@ -448,14 +450,14 @@ public final class GLTexture {
 		    else popupMenu.setVisible(false);
 		}//end mouseClicked(...)
 		});
-	    dumpToCSV.addActionListener(new ActionListener(){
+	    exportToCSV.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 		    final JFileChooser fc = new JFileChooser();
 		    fc.setFileFilter(new FileFilter(){
 			@Override
 			public boolean accept(File f) {
-			    return f.getAbsolutePath().toUpperCase().endsWith(".CSV");
+			    return f.getAbsolutePath().toUpperCase().endsWith(".CSV")||f.isDirectory();
 			}
 			@Override
 			public String getDescription() {
@@ -463,27 +465,60 @@ public final class GLTexture {
 			}});
 		    final int result = fc.showSaveDialog(TextureViewingPanel.this);
 		    if(result==JFileChooser.APPROVE_OPTION)
-			writeTextureToCSV(fc.getSelectedFile());
+			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()));
 		}});
 	}//end constructor
 	
 	final float [] val = new float[4];
 	
-	private void writeTextureToCSV(File destFile){
+	private File ensureEndsWithCSV(File f){
+	    if(f.getName().toUpperCase().endsWith(".CSV"))
+		return f;
+	    else return new File(f.getAbsolutePath()+".csv");
+	}//end ensureEndsWithCSV(...)
+	
+	private void writeTextureToCSV(final File destFile){
 	    threadManager.submitToThreadPool(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    final ByteBuffer dest = ByteBuffer.allocateDirect(
-			    4*targetTexture.getNumComponents()*
+			    4*4*targetTexture.getNumComponents()*
 			    targetTexture.getWidth()*targetTexture.getHeight());
 		    threadManager.submitToGL(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception {
-			    //TODO
-			    return null;//REMOVE
-			    //targetTexture.readPixels(targetTexture.getPixelFormat(), targetTexture.getPixelDataType(), dest);
+			    targetTexture.
+			    	bind().
+			    	readPixels(PixelReadOrder.RGBA, PixelReadDataType.FLOAT, dest);
+			    targetTexture.gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+			    return null;
 			}}).get();
+		    final FileOutputStream fos = new FileOutputStream(destFile);
+		    final PrintStream printStream = new PrintStream(fos);
+		    final FloatBuffer fb = dest.asFloatBuffer();
+		    fb.clear();
+		    final int numCols = targetTexture.getWidth();
+		    final int numRows = targetTexture.getHeight();
+		    for(int col=0; col<numCols; col++){
+			printStream.print("R,G,B,A");
+			if(col<numCols-1)
+			    printStream.print(",");
+		    }
+		    printStream.println();
+		    for (int row = 0; row < numRows; row++) {
+			for (int col = 0; col < numCols; col++) {
+			    printStream.print(fb.get()+",");
+			    printStream.print(fb.get()+",");
+			    printStream.print(fb.get()+",");
+			    printStream.print(fb.get());
+			    if (col < numCols - 1)
+				printStream.print(",");
+			}// end for(cols)
+			printStream.println();
+		    }// end for(rows)
 		    
+		    printStream.close();
+		    fos.close();
 		    return null;
 		}});
 	}//end writeTextureToCSV(...)

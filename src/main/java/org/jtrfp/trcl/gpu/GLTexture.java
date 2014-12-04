@@ -18,8 +18,13 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
+import java.io.File;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -29,14 +34,15 @@ import java.nio.IntBuffer;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
+import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 import org.jtrfp.trcl.core.RootWindow;
 import org.jtrfp.trcl.core.TRFuture;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.mem.MemoryManager;
 
@@ -53,6 +59,7 @@ public final class GLTexture {
     private final double [] expectedMaxValue = new double[]{1,1,1,1};
     private final double [] expectedMinValue = new double[]{0,0,0,0};
     private int preferredUpdateIntervalMillis = 500;
+    private int width,height,numComponents;
 
     public GLTexture(final GPU gpu) {
 	System.out.println("Creating GL Texture...");
@@ -67,7 +74,24 @@ public final class GLTexture {
 	System.out.println("...Done.");
     }// end constructor
     
+    private int numComponentsFromEnum(int glEnum){
+	switch(glEnum){
+	case GL3.GL_RGBA:
+		return 4;
+	case GL3.GL_RGB:
+	    return 3;
+	case GL3.GL_RG:
+		return 2;
+	case GL3.GL_RED:
+	    return 1;
+	default:
+	    return 0;
+	}//end switch(glEnum)
+    }
+    
     public GLTexture setImage(int internalOrder, int width, int height, int colorOrder, int numericalFormat, Buffer pixels){
+	this.width=width; this.height=height;
+	setNumComponents(numComponentsFromEnum(colorOrder));
 	if(pixels==null && width*height*16 < MemoryManager.ZEROES.capacity()){
 	    pixels=MemoryManager.ZEROES;
 	    synchronized(pixels){
@@ -100,6 +124,8 @@ public final class GLTexture {
 		/*FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
 		gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);*/
 		System.out.println("Uploading texture...");
+		GLTexture.this.width=rawSideLength; GLTexture.this.height=rawSideLength;
+		setNumComponents(numComponentsFromEnum(GL3.GL_RGBA));
 		gl.glTexImage2D(bindingTarget, 0, internalColorFormat, rawSideLength,
 			rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
 		gl.glGenerateMipmap(bindingTarget);
@@ -247,12 +273,16 @@ public final class GLTexture {
 
     public GLTexture setImage2DMultisample(int samples,
 	    int internalFormat, int width, int height, boolean fixedSampleLocations) {
+	this.width=width; this.height=height;
+	//TODO: Num components
 	gl.glTexImage2DMultisample(bindingTarget, samples, internalFormat, width, height, fixedSampleLocations);
 	return this;
     }
 
     public GLTexture setImage1D(int internalFormat, int width, int internalOrder, int numericalFormat,
 	    FloatBuffer pixels) {
+	this.width=width; this.height=1;
+	setNumComponents(numComponentsFromEnum(internalOrder));
 	gl.glTexImage1D(bindingTarget, 0, internalFormat, width, 0, internalOrder, numericalFormat, pixels);
 	return this;
     }
@@ -317,24 +347,28 @@ public final class GLTexture {
     private static class TextureViewingPanel extends JPanel{
 	private static final long serialVersionUID = 4580039742312228700L;
 	private final RootWindow frame;
-	private GLTexture colorTexture;
+	private GLTexture colorTexture,targetTexture;
 	private GLFrameBuffer frameBuffer;
 	private static final Dimension PANEL_SIZE = new Dimension(200,100);
-	private TRFutureTask future;
 	private final ByteBuffer rgbaBytes = ByteBuffer.allocate((int)((PANEL_SIZE.getWidth()*PANEL_SIZE.getHeight()*4*4)))
 		.order(ByteOrder.nativeOrder());
 	private final FloatBuffer rgbaFloats = rgbaBytes.asFloatBuffer();
 	private final Thread updateThread;
+	private final JPopupMenu popupMenu = new JPopupMenu();
+	private final JMenuItem dumpToCSV = new JMenuItem("Dump To CSV");
+	private final ThreadManager threadManager;
 	public TextureViewingPanel(final GLTexture parent, RootWindow root){
 	    super();
+	    this.targetTexture=parent;
 	    this.setSize(PANEL_SIZE);
 	    this.setPreferredSize(PANEL_SIZE);
 	    this.setMinimumSize(PANEL_SIZE);
 	    this.setAlignmentX(Component.LEFT_ALIGNMENT);
 	    frame = parent.getGPU().getTr().getRootWindow();
-	    final ThreadManager tm = parent.getGPU().getTr().getThreadManager();
+	    threadManager = parent.getGPU().getTr().getThreadManager();
 	    final GPU gpu = parent.getGPU();
 	    final Canvas canvas = frame.getCanvas();
+	    popupMenu.add(dumpToCSV);
 	    updateThread = new Thread(){
 		@Override
 		public void run(){
@@ -344,7 +378,7 @@ public final class GLTexture {
 			Window ancestor = SwingUtilities.getWindowAncestor(TextureViewingPanel.this);
 			if(ancestor!=null)
 			    if(ancestor.isVisible()){
-			 tm.submitToGL(new Callable<Void>(){
+			 threadManager.submitToGL(new Callable<Void>(){
 			    @Override
 			    public Void call() throws Exception {
 				GL3 gl = gpu.getGl();
@@ -380,7 +414,7 @@ public final class GLTexture {
 		    }//end while(true)
 		}//end run()
 	    };
-	    tm.submitToGL(new Callable<Void>(){
+	    threadManager.submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    colorTexture = gpu
@@ -406,9 +440,53 @@ public final class GLTexture {
 		    updateThread.start();
 		    return null;
 		}});
+	    this.addMouseListener(new MouseAdapter(){
+		@Override
+		public void mouseClicked(MouseEvent evt) {
+		    if(evt.getButton()==MouseEvent.BUTTON3)
+			popupMenu.show(evt.getComponent(),evt.getX(),evt.getY());
+		    else popupMenu.setVisible(false);
+		}//end mouseClicked(...)
+		});
+	    dumpToCSV.addActionListener(new ActionListener(){
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+		    final JFileChooser fc = new JFileChooser();
+		    fc.setFileFilter(new FileFilter(){
+			@Override
+			public boolean accept(File f) {
+			    return f.getAbsolutePath().toUpperCase().endsWith(".CSV");
+			}
+			@Override
+			public String getDescription() {
+			    return "Comma-Separated Values (.CSV)";
+			}});
+		    final int result = fc.showSaveDialog(TextureViewingPanel.this);
+		    if(result==JFileChooser.APPROVE_OPTION)
+			writeTextureToCSV(fc.getSelectedFile());
+		}});
 	}//end constructor
 	
 	final float [] val = new float[4];
+	
+	private void writeTextureToCSV(File destFile){
+	    threadManager.submitToThreadPool(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    final ByteBuffer dest = ByteBuffer.allocateDirect(
+			    4*targetTexture.getNumComponents()*
+			    targetTexture.getWidth()*targetTexture.getHeight());
+		    threadManager.submitToGL(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+			    //TODO
+			    return null;//REMOVE
+			    //targetTexture.readPixels(targetTexture.getPixelFormat(), targetTexture.getPixelDataType(), dest);
+			}}).get();
+		    
+		    return null;
+		}});
+	}//end writeTextureToCSV(...)
 	
 	@Override
 	public void paint(Graphics g){
@@ -487,4 +565,135 @@ public final class GLTexture {
         this.preferredUpdateIntervalMillis = preferredUpdateIntervalMillis;
         return this;
     }
+
+    /**
+     * @return the width
+     */
+    public int getWidth() {
+        return width;
+    }
+
+    /**
+     * @return the height
+     */
+    public int getHeight() {
+        return height;
+    }
+
+    /**
+     * @return the numComponents
+     */
+    public int getNumComponents() {
+        return numComponents;
+    }
+
+    /**
+     * @param numComponents the numComponents to set
+     */
+    private void setNumComponents(int numComponents) {
+        this.numComponents = numComponents;
+    }
+    
+    public static class Format extends InternalFormat{//enums can't be extended. ):
+	public static final Format
+		RED = new Format(GL3.GL_RED,R,8),
+		RG = new Format(GL3.GL_RG,R,8,G,8),
+		RGB = new Format(GL3.GL_RGB,R,8,G,8,B,8),
+		BGR = new Format(GL3.GL_BGR,B,8,G,8,R,8),
+		RGBA = new Format(GL3.GL_RGBA,R,8,G,8,B,8,A,8),
+		BGRA = new Format(GL3.GL_BGRA,B,8,G,8,R,8,A,8);
+	
+	public Format(int glEnum, int ... order) {
+	    super(glEnum, order);
+	}
+    }//end Format()
+    
+    public static class InternalFormat {
+	protected static final int R=0,G=1,B=2,A=3,N=-1;
+	public static final InternalFormat
+		R8=new InternalFormat(GL3.GL_R8,R,8),
+		R8_SNORM=new InternalFormat(GL3.GL_R8_SNORM,R,8),
+		R16=new InternalFormat(GL3.GL_R16,16,0,0,0,R,16),
+		R16_SNORM=new InternalFormat(GL3.GL_R16_SNORM,R,16),
+		RG8=new InternalFormat(GL3.GL_RG8,R,8,G,8),
+		RG8_SNORM=new InternalFormat(GL3.GL_RG8_SNORM,R,8,G,8),
+		RG16=new InternalFormat(GL3.GL_RG16,R,16,G,16),
+		RG16_SNORM=new InternalFormat(GL3.GL_RG16_SNORM,R,16,G,16),
+		R3_G3_B2=new InternalFormat(GL3.GL_R3_G3_B2,R,3,G,3,B,2),
+		RGB4=new InternalFormat(GL3.GL_RGB4,R,4,G,4,B,4),
+		RGB5=new InternalFormat(GL3.GL_RGB5,R,5,G,5,B,5),
+		RGB8=new InternalFormat(GL3.GL_RGB8,R,8,G,8,B,8),
+		RGB8_SNORM=new InternalFormat(GL3.GL_RGB8_SNORM,R,8,G,8,B,8),
+		RGB10=new InternalFormat(GL3.GL_RGB10,R,10,G,10,B,10),
+		RGB12=new InternalFormat(GL3.GL_RGB12,R,12,G,12,B,12),
+		RGB16=new InternalFormat(GL3.GL_RGB16,R,16,G,16,B,16),
+		RGB16_SNORM=new InternalFormat(GL3.GL_RGB16_SNORM,R,16,G,16,B,16),
+		RGBA2=new InternalFormat(GL3.GL_RGBA2,R,2,G,2,B,2,A,2),
+		RGBA4=new InternalFormat(GL3.GL_RGBA4,R,4,G,4,B,4,A,4),
+		RGB5_A1=new InternalFormat(GL3.GL_RGB5_A1,R,5,G,5,B,5,A,1),
+		RGBA8=new InternalFormat(GL3.GL_RGBA8,R,8,G,8,B,8,A,8),
+		RGBA8_SNORM=new InternalFormat(GL3.GL_RGBA8_SNORM,R,8,G,8,B,8,A,8),
+		RGB10_A2UI=new InternalFormat(GL3.GL_RGB10_A2UI,R,10,G,10,B,10,A,2),
+		RGBA12=new InternalFormat(GL3.GL_RGBA12,R,12,G,12,B,12,A,12),
+		RGBA16=new InternalFormat(GL3.GL_RGBA16,R,16,G,16,B,16,A,16),
+		RGBA16_SNORM=new InternalFormat(GL3.GL_RGBA16_SNORM,R,16,G,16,B,16,A,16),
+		SRGB8=new InternalFormat(GL3.GL_SRGB8,R,8,G,8,B,8),
+		SRGB8_ALPHA8=new InternalFormat(GL3.GL_SRGB8_ALPHA8,R,8,G,8,B,8),
+		R16F=new InternalFormat(GL3.GL_R16F,R,16),
+		RG16F=new InternalFormat(GL3.GL_RG16F,R,16,G,16),
+		RGB16F=new InternalFormat(GL3.GL_RGB16F,R,16,G,16,B,16),
+		R32F=new InternalFormat(GL3.GL_R32F,R,32),
+		RG32F=new InternalFormat(GL3.GL_RG32F,R,32,G,32),
+		RGB32F=new InternalFormat(GL3.GL_RGB32F,R,32,G,32,B,32),
+		RGBA32F=new InternalFormat(GL3.GL_RGBA32F,R,32,G,32,B,32,A,32),
+		R11F_G11F_B10F=new InternalFormat(GL3.GL_R11F_G11F_B10F,R,11,G,11,B,10),
+		RGB9_E5=new InternalFormat(GL3.GL_RGB9_E5,R,9,G,9,B,9),//TODO
+		R8I=new InternalFormat(GL3.GL_R8I,R,8),
+		R8UI=new InternalFormat(GL3.GL_R8UI,R,8),
+		R16I=new InternalFormat(GL3.GL_R16I,R,16),
+		R16UI=new InternalFormat(GL3.GL_R16UI,R,16),
+		R32I=new InternalFormat(GL3.GL_R32I,R,32),
+		R32UI=new InternalFormat(GL3.GL_R32UI,R,32),
+		RG8I=new InternalFormat(GL3.GL_RG8I,R,8,G,8),
+		RG8UI=new InternalFormat(GL3.GL_RG8UI,R,8,G,8),
+		RG16I=new InternalFormat(GL3.GL_RG16I,R,16,G,16),
+		RG16UI=new InternalFormat(GL3.GL_RG16UI,R,16,G,16),
+		RG32I=new InternalFormat(GL3.GL_RG32I,R,32,G,32),
+		RG32UI=new InternalFormat(GL3.GL_RG32UI,R,32,G,32),
+		RGB8I=new InternalFormat(GL3.GL_RGB8I,R,8,G,8,B,8),
+		RGB8UI=new InternalFormat(GL3.GL_RGB8UI,R,8,G,8,B,8),
+		RGB16I=new InternalFormat(GL3.GL_RGB16I,R,16,G,16,B,16),
+		RGB16UI=new InternalFormat(GL3.GL_RGB16UI,R,16,G,16,B,16),
+		RGB32I=new InternalFormat(GL3.GL_RGB32I,R,32,G,32,B,32),
+		RGB32UI=new InternalFormat(GL3.GL_RGB32UI,R,32,G,32,B,32),
+		RGBA8I=new InternalFormat(GL3.GL_RGBA8I,R,8,G,8,B,8,A,8),
+		RGBA8UI=new InternalFormat(GL3.GL_RGBA8UI,R,8,G,8,B,8,A,8),
+		RGBA16I=new InternalFormat(GL3.GL_RGBA16I,R,16,G,16,B,16,A,16),
+		RGBA16UI=new InternalFormat(GL3.GL_RGBA16UI,R,16,G,16,B,16,A,16),
+		RGBA32I=new InternalFormat(GL3.GL_RGBA32I,R,32,G,32,B,32,A,32),
+		RGBA32UI=new InternalFormat(GL3.GL_RGBA32UI,R,32,G,32,B,32,A,32);
+
+	private final int glEnum; 
+	private final int [] order;
+	public InternalFormat(int glEnum, int ... order){
+	    this.glEnum=glEnum;
+	    this.order = order;
+	}//end constructor
+	
+	public int getDestComponent(int index){
+	    return order[index*2];
+	}
+	/**
+	 * @return the glEnum
+	 */
+	public int getGlEnum() {
+	    return glEnum;
+	}
+	/**
+	 * @return the order
+	 */
+	public int[] getOrder() {
+	    return order;
+	}
+    };
 }// end GLTexture

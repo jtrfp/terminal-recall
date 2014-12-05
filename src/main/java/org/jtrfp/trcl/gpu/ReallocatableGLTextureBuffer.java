@@ -119,5 +119,9 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     public boolean isMapped() {
 	return buffer.isMapped();
     }
+    
+    public GLTextureBuffer getGLTextureBuffer(){
+	return buffer;
+    }
 
 }// end ReallocatableGLTextureBuffer

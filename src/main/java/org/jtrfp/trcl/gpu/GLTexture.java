@@ -483,7 +483,7 @@ public final class GLTexture {
 		public Void call() throws Exception {
 		    final ByteBuffer dest = ByteBuffer.allocateDirect(
 			    4*4*targetTexture.getNumComponents()*
-			    targetTexture.getWidth()*targetTexture.getHeight());
+			    targetTexture.getWidth()*targetTexture.getHeight()).order(ByteOrder.nativeOrder());
 		    threadManager.submitToGL(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception {

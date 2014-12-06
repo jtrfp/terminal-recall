@@ -449,43 +449,15 @@ public class ConfigWindow extends JFrame {
     }//end addVOX()
     
     private boolean writeSettingsTo(File f){
-	if(!f.getName().toLowerCase().endsWith(".config.trcl.xml"))
-	    f = new File(f.getAbsolutePath()+".config.trcl.xml");
-	try{if(!f.exists())
-	     f.createNewFile();
-	    FileOutputStream os = new FileOutputStream(f);
-	    XMLEncoder xmlEnc = new XMLEncoder(os);
-	    xmlEnc.setExceptionListener(new ExceptionListener(){
-		@Override
-		public void exceptionThrown(Exception e) {
-		    e.printStackTrace();
-		}});
-	    xmlEnc.setPersistenceDelegate(DefaultListModel.class,
-		    new DefaultPersistenceDelegate() {
-			protected void initialize(Class clazz,
-				Object oldInst, Object newInst,
-				Encoder out) {
-			    super.initialize(clazz, oldInst, newInst,
-				    out);
-			    DefaultListModel oldLM = (DefaultListModel) oldInst;
-			    DefaultListModel newLM = (DefaultListModel) newInst;
-			    for (int i = 0; i < oldLM.getSize(); i++){
-				final Object value = oldLM.getElementAt(i);
-			    	if(value!=null)//When a DLM is initialized it contains a single null element. )X
-				 out.writeStatement(new Statement(oldInst,"addElement",
-					new Object[] { value }));
-			    }//end for(elements)
-			}//end DefaultPersistenceDelegate()
-		    });
-	    xmlEnc.writeObject(config[0]);
-	    xmlEnc.close();
-	}catch(Exception e){JOptionPane.showMessageDialog(
-		    this,
-		    "Failed to write the config file.\n"
-			    + e.getLocalizedMessage()+"\n"+e.getClass().getName(),
-		    "File write failure", JOptionPane.ERROR_MESSAGE);
-			return false;}
-	return true;
+	try{
+	    config[0].saveConfig(f);
+	    return true;
+    }catch(Exception e){JOptionPane.showMessageDialog(
+	    this,
+	    "Failed to write the config file.\n"
+		    + e.getLocalizedMessage()+"\n"+e.getClass().getName(),
+	    "File write failure", JOptionPane.ERROR_MESSAGE);
+		return false;}
     }//end writeSettingsTo(...)
     
     private void exportSettings(){

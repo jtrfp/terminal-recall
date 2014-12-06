@@ -12,10 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.Encoder;
+import java.beans.ExceptionListener;
+import java.beans.Statement;
 import java.beans.Transient;
 import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
@@ -36,6 +43,7 @@ public class TRConfiguration{
     	private DefaultListModel<String> podList=new DefaultListModel<String>();
     	private double modStereoWidth=.3;
     	public static final String AUTO_DETECT = "Auto-detect";
+    	private String fileDialogStartDir;
     	
 	public TRConfiguration(){//DEFAULTS
 	    missionList.add(AUTO_DETECT);
@@ -178,6 +186,43 @@ public class TRConfiguration{
 		result = new TRConfiguration();
 	     return result;
 	 }//end getConfig()
+	
+	public void saveConfig() throws IOException{
+	    saveConfig(TRConfiguration.getConfigFilePath());
+	}
+	
+	public void saveConfig(File f) throws IOException{
+	    if(!f.getName().toLowerCase().endsWith(".config.trcl.xml"))
+		    f = new File(f.getAbsolutePath()+".config.trcl.xml");
+		   if(!f.exists())
+		     f.createNewFile();
+		    FileOutputStream os = new FileOutputStream(f);
+		    XMLEncoder xmlEnc = new XMLEncoder(os);
+		    xmlEnc.setExceptionListener(new ExceptionListener(){
+			@Override
+			public void exceptionThrown(Exception e) {
+			    e.printStackTrace();
+			}});
+		    xmlEnc.setPersistenceDelegate(DefaultListModel.class,
+			    new DefaultPersistenceDelegate() {
+				protected void initialize(Class clazz,
+					Object oldInst, Object newInst,
+					Encoder out) {
+				    super.initialize(clazz, oldInst, newInst,
+					    out);
+				    DefaultListModel oldLM = (DefaultListModel) oldInst;
+				    DefaultListModel newLM = (DefaultListModel) newInst;
+				    for (int i = 0; i < oldLM.getSize(); i++){
+					final Object value = oldLM.getElementAt(i);
+				    	if(value!=null)//When a DLM is initialized it contains a single null element. )X
+					 out.writeStatement(new Statement(oldInst,"addElement",
+						new Object[] { value }));
+				    }//end for(elements)
+				}//end DefaultPersistenceDelegate()
+			    });
+		    xmlEnc.writeObject(this);
+		    xmlEnc.close();
+	}
 
 	/**
 	 * @return the podList
@@ -191,5 +236,18 @@ public class TRConfiguration{
 	 */
 	public void setPodList(DefaultListModel podList) {
 	    this.podList = podList;
+	}
+
+	public String getFileDialogStartDir() {
+	    if(fileDialogStartDir!=null)
+	     return fileDialogStartDir;
+	    return System.getProperty("user.home");
+	}
+
+	/**
+	 * @param fileDialogStartDir the fileDialogStartDir to set
+	 */
+	public void setFileDialogStartDir(String fileDialogStartDir) {
+	    this.fileDialogStartDir = fileDialogStartDir;
 	}
 }//end TRConfiguration

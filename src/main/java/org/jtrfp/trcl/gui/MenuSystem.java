@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
@@ -159,12 +160,19 @@ public class MenuSystem {
 	debugSinglet.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
-		tr.threadManager.submitToThreadPool(new Callable<Void>(){
+		Object result = JOptionPane.showInputDialog(rw, 
+			"Enter number of instances", "How many?", 
+			JOptionPane.QUESTION_MESSAGE, null, null, null);
+		try{
+		 final int numInstances = Integer.parseInt((String)result);
+		 tr.threadManager.submitToThreadPool(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
-			EngineTests.singlet(tr);
+			EngineTests.singlet(tr, numInstances);
 			return null;
 		    }});
+		}catch(NumberFormatException e)
+		 {JOptionPane.showMessageDialog(rw, "Please supply an integer value.");}
 	    }});
 	final String showDebugStatesOnStartup = System
 		.getProperty("org.jtrfp.trcl.showDebugStates");

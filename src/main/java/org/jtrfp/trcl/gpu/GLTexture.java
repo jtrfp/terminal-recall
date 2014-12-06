@@ -454,6 +454,12 @@ public final class GLTexture {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 		    final JFileChooser fc = new JFileChooser();
+		    fc.setSelectedFile(
+			    new File(gpu.getTr().
+				    getTrConfig()[0].
+				    getFileDialogStartDir()
+				    +"/"+parent.
+				    getDebugName()+".csv"));
 		    fc.setFileFilter(new FileFilter(){
 			@Override
 			public boolean accept(File f) {
@@ -464,8 +470,12 @@ public final class GLTexture {
 			    return "Comma-Separated Values (.CSV)";
 			}});
 		    final int result = fc.showSaveDialog(TextureViewingPanel.this);
-		    if(result==JFileChooser.APPROVE_OPTION)
-			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()));
+		    if(result==JFileChooser.APPROVE_OPTION){
+			final File selectedFile = fc.getSelectedFile();
+			if(selectedFile.isDirectory())
+			    return;//Abort
+			gpu.getTr().getTrConfig()[0].setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
+			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()));}
 		}});
 	}//end constructor
 	

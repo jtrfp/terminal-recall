@@ -19,15 +19,17 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class EngineTests {
 
-    public static void singlet(TR tr) {
+    public static void singlet(TR tr, int numInstances) {
 	final TextureDescription test = tr.getResourceManager().getTestTexture();
 	tr.abortCurrentGame();
 	tr.getWorld().removeAll();
-	WorldObject wo = new Sprite2D(tr, .5, 1, 1, test, false);
-	wo.setPosition(new double[]{0,0,.5});
-	wo.setActive(true);
-	wo.setVisible(true);
-	tr.getWorld().add(wo);
+	for (int i = 0; i < numInstances; i++) {
+	    WorldObject wo = new Sprite2D(tr, .5, 1, 1, test, false);
+	    wo.setPosition(new double[] { 0, 0, .5 });
+	    wo.setActive(true);
+	    wo.setVisible(true);
+	    tr.getWorld().add(wo);
+	}//end for(numInstances)
     }//end singlet(tr)
 
 }//end EngineTests

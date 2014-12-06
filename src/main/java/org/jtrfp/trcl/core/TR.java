@@ -168,6 +168,18 @@ public final class TR{
 		gameShell  = new GameShell(this);
 		menuSystem = new MenuSystem(this);
 		gameShell.startShell();
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+		    public void run(){
+			try{trConfig[0].saveConfig();
+		    }catch(Exception e){JOptionPane.showMessageDialog(
+			    rootWindow,
+			    "Failed to write the config file.\n"
+				    + e.getLocalizedMessage()+"\n"+e.getClass().getName(),
+			    "File write failure", JOptionPane.ERROR_MESSAGE);
+				}//end catch(Exception)
+			}//end run()
+		 });
 		}//end constructor
 	
     private void waitForProfiler() {

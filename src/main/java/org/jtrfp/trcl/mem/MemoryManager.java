@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
+import javax.media.opengl.GL3;
+
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.gpu.GLProgram;
+import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.MemoryUsageHint;
@@ -119,13 +122,22 @@ public final class MemoryManager {
 	glPhysicalMemory.bindToUniform(textureUnit, shaderProgram, uniform);
     }
 
-    public void dumpAllGPUMemTo(ByteBuffer dest) throws IOException{
-	map();
-	physicalMemory[0].clear();
+    public void dumpAllGPUMemTo(final ByteBuffer dest) throws IOException{
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		final GL3 gl = gpu.getGl();
+		unmap();
+		glPhysicalMemory.bind();
+		ByteBuffer bb = gl.glMapBuffer(GL3.GL_TEXTURE_BUFFER, GL3.GL_READ_ONLY);
+		bb.clear();
+		dest.clear();
+		bb.limit(dest.limit());//Avoid overflow
+		dest.put(bb);
+		gl.glUnmapBuffer(GL3.GL_TEXTURE_BUFFER);
+		map();
+		return null;
+	    }}).get();
 	dest.clear();
-	physicalMemory[0].limit(dest.limit());//Avoid overflow
-	dest.put(physicalMemory[0]);
-	physicalMemory[0].clear();
-	dest.clear();
-    }
+    }//end dumpAllGPUMemTo(...)
 }//end MemmoryManager

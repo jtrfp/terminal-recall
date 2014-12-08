@@ -24,7 +24,7 @@ public class EngineTests {
 	tr.abortCurrentGame();
 	tr.getWorld().removeAll();
 	for (int i = 0; i < numInstances; i++) {
-	    WorldObject wo = new Sprite2D(tr, .5, 1, 1, test, false);
+	    WorldObject wo = new Sprite2D(tr, 0, 1, 1, test, false);
 	    wo.setPosition(new double[] { 0, 0, .5 });
 	    wo.setActive(true);
 	    wo.setVisible(true);

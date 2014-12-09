@@ -86,6 +86,8 @@ public final class GLTexture {
 		return 2;
 	case GL3.GL_RED:
 	    return 1;
+	case GL3.GL_RED_INTEGER:
+	    return 1;
 	default:
 	    return 0;
 	}//end switch(glEnum)

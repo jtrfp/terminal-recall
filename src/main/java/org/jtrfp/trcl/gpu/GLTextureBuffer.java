@@ -54,6 +54,7 @@ public class GLTextureBuffer extends RawGLBuffer {
 	while (buf.remaining() > 0) {
 	    buf.put(DEADBEEF);
 	}
+	this.flushRange(0, buf.limit());
 	this.unmap(gl);
     }//end constructor
 

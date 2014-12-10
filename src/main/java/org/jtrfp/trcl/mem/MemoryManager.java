@@ -136,6 +136,7 @@ public final class MemoryManager {
 		dest.put(bb);
 		gl.glUnmapBuffer(GL3.GL_TEXTURE_BUFFER);
 		map();
+		glPhysicalMemory.unbind();
 		return null;
 	    }}).get();
 	dest.clear();

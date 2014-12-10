@@ -137,6 +137,7 @@ public class GLTextureBuffer extends RawGLBuffer {
     public void flushRange(int startPointInBytes, int lengthInBytes) {
 	bind((GL2)gpu.getGl());
 	gpu.getGl().glFlushMappedBufferRange(getBindingTarget(), startPointInBytes, lengthInBytes);
+	unbind((GL2)gpu.getGl());
     }
 
 }// end GLTextureBuffer(...)

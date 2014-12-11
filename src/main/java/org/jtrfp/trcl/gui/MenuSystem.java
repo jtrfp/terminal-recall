@@ -60,6 +60,7 @@ public class MenuSystem {
 	final JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
 	final JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
 	final JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
+	final JMenuItem codePageDump = new JMenuItem("Dump Code Pages");
 	final JMenuItem debugSinglet = new JMenuItem("Singlet (fill)");
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
@@ -152,7 +153,18 @@ public class MenuSystem {
 		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
-			new GPUMemDump(tr);
+			new GPUMemDump(tr).dumpRootMemory();
+			return null;
+		    }});
+	    };
+	});
+	codePageDump.addActionListener(new ActionListener() {
+	    @Override
+	    public void actionPerformed(ActionEvent ev) {
+		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			new GPUMemDump(tr).dumpCodePages();
 			return null;
 		    }});
 	    };
@@ -184,7 +196,6 @@ public class MenuSystem {
 	try{//Get this done in the local thread to minimize use of the EDT
 	    final JMenuBar mb = new JMenuBar();
 	    file.add(file_config);
-	    file.add(gpuMemDump);
 	    file.add(file_quit);
 	    window.add(debugStatesMenuItem);
 	    window.add(frameBufferStatesMenuItem);
@@ -198,6 +209,8 @@ public class MenuSystem {
             gameMenu.add(game_skip);
             gameMenu.add(game_abort);
             debugMenu.add(debugSinglet);
+            debugMenu.add(gpuMemDump);
+            debugMenu.add(codePageDump);
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {

@@ -37,13 +37,13 @@ private final GPU gpu;
 	try{
 	System.out.println("Dumping root memory...");
 	dumpRootMemory();
-	System.out.println("Dumping code pages...");
-	dumpCodePages();
+	//System.out.println("Dumping code pages...");
+	//dumpCodePages();
 	}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
     
-    private void dumpCodePages() throws Exception {
+    public void dumpCodePages() throws Exception {
 	final VQCodebookManager vq = gpu.textureManager.get().vqCodebookManager
 		.get();
 	
@@ -73,7 +73,7 @@ private final GPU gpu;
 	}//end for(pageIndex)
     }// end dumpCodePages()
     
-    private void dumpRootMemory() throws Exception{
+    public void dumpRootMemory() throws Exception{
 	File outFile = new File("gpuMemDump.bin");
 	final MemoryManager memMgr = gpu.memoryManager.get();
 	final int gpuMemSize = memMgr.getMaxCapacityInBytes();

@@ -46,7 +46,6 @@ public class MenuSystem {
     public MenuSystem(final TR tr){
 	final RootWindow rw = tr.getRootWindow();
 	final JMenu file = new JMenu("File"), 
-		    window = new JMenu("Window"), 
 		    gameMenu = new JMenu("Game"),
 		    debugMenu = new JMenu("Debug");
 	// And menus to menubar
@@ -197,8 +196,8 @@ public class MenuSystem {
 	    final JMenuBar mb = new JMenuBar();
 	    file.add(file_config);
 	    file.add(file_quit);
-	    window.add(debugStatesMenuItem);
-	    window.add(frameBufferStatesMenuItem);
+	    debugMenu.add(debugStatesMenuItem);
+	    debugMenu.add(frameBufferStatesMenuItem);
             gameMenu.add(game_new);
             game_pause.setEnabled(false);
             game_start.setEnabled(false);
@@ -219,7 +218,6 @@ public class MenuSystem {
 		    mb.add(file);
 		    mb.add(gameMenu);
 		    mb.add(debugMenu);
-		    mb.add(window);
 		    rw.setVisible(true);
 		}});
 	}catch(Exception e){tr.showStopper(e);}

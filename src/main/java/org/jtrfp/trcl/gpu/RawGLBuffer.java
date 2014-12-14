@@ -14,8 +14,6 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 public class RawGLBuffer {
@@ -49,7 +47,7 @@ public class RawGLBuffer {
     }
 
     protected int getBindingTarget() {
-	return GL2.GL_ARRAY_BUFFER;
+	return GL3.GL_ARRAY_BUFFER;
     }
 
     public void rewind() {
@@ -83,16 +81,16 @@ public class RawGLBuffer {
 	localBuffer = null;
     }
 
-    public void bind(GL2 gl) {
-	gl.glBindBuffer(getBindingTarget(), getBufferID());
+    public void bind(GL3 gl3) {
+	gl3.glBindBuffer(getBindingTarget(), getBufferID());
     }
 
-    public void bindAsElementArrayBuffer(final GL2 gl) {
+    public void bindAsElementArrayBuffer(final GL3 gl) {
 	// gl.glEnableClientState(GL2.GL_ELEMENT_ARRAY_BUFFER);
-	gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, getBufferID());
+	gl.glBindBuffer(GL3.GL_ELEMENT_ARRAY_BUFFER, getBufferID());
     }
 
-    public void unbind(GL2 gl) {
+    public void unbind(GL3 gl) {
 	gl.glBindBuffer(getBindingTarget(), 0);
     }
 

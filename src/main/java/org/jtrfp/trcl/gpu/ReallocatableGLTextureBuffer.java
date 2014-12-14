@@ -14,7 +14,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     private GLTextureBuffer buffer;
@@ -68,12 +68,12 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 
     @Override
     public void bind() {
-	buffer.bind((GL2) gpu.getGl());
+	buffer.bind((GL3) gpu.getGl());
     }
 
     @Override
     public void unbind() {
-	buffer.unbind((GL2) gpu.getGl());
+	buffer.unbind((GL3) gpu.getGl());
     }
 
     @Override

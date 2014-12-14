@@ -71,7 +71,8 @@ public class VQCodebookManager {
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
-		setWrapT(GL3.GL_CLAMP_TO_EDGE);
+		setWrapT(GL3.GL_CLAMP_TO_EDGE).
+		unbind();
     }//end constructor
 
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter rowWriter) {

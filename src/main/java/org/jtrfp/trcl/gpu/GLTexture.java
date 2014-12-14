@@ -809,4 +809,9 @@ public final class GLTexture {
 		UINT_5_9_9_9_REV=new PixelReadDataType(GL3.GL_UNSIGNED_INT_5_9_9_9_REV),
 		FLOAT32_UINT_24_8_REV=new PixelReadDataType(GL3.GL_FLOAT_32_UNSIGNED_INT_24_8_REV);
     }//end PixelReadDataType
+
+    public GLTexture unbind() {
+	gl.glBindTexture(getBindingTarget(), 0);
+	return this;
+    }
 }// end GLTexture

@@ -139,4 +139,9 @@ public final class GLFrameBuffer {
     public ArrayList<GLTexture> getAttached2DDrawTextures() {
         return attached2DDrawTextures;
     }
+
+    public GLFrameBuffer unbindFromDraw() {
+	gl.glBindFramebuffer(GL3.GL_DRAW_FRAMEBUFFER, 0);
+	return this;
+    }
 }//end GLFrameBuffer

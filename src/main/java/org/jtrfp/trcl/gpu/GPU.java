@@ -24,6 +24,7 @@ import javax.media.opengl.awt.GLCanvas;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
+import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.mem.MemoryManager;
 
 public class GPU{
@@ -92,7 +93,7 @@ public class GPU{
 			final GLCanvas canvas = tr.getRootWindow().getCanvas();
 			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
 				{gl=gl1.getGL3();
-				canvas.setGL(gl=new DebugGL3(gl));
+				canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
 				break;
 				} Thread.sleep(2000);}}
 			catch(InterruptedException e){e.printStackTrace();}

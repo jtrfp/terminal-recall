@@ -3697,6 +3697,9 @@ public class StateBeanBridgeGL3 implements GL3 {
     public void glBindTexture(int target, int texture) {
 	try{delegate.glBindTexture(target, texture);} catch(GLException e){glException(e); throw e;}
 	switch(target){
+	case GL3.GL_TEXTURE_1D:
+	    bean.setTexture1DBinding(texture);
+	    break;
 	case GL3.GL_TEXTURE_2D:
 	    bean.setTexture2DBinding(texture);
 	    break;

@@ -110,4 +110,28 @@ public class GPU{
 	public GLRenderBuffer newRenderBuffer() {
 	    return new GLRenderBuffer(gl);
 	}
+
+	public void defaultProgram() {
+	    getGl().glUseProgram(0);
+	}
+
+	public void defaultTIU() {
+	    getGl().glActiveTexture(GL3.GL_TEXTURE0+79);
+	}
+
+	public void defaultFrameBuffers() {
+	    getGl().glBindFramebuffer(GL3.GL_DRAW_FRAMEBUFFER, 0);
+	    getGl().glBindFramebuffer(GL3.GL_READ_FRAMEBUFFER, 0);
+	}
+
+	public void defaultTexture() {
+	    getGl().glBindTexture(GL3.GL_TEXTURE_2D_MULTISAMPLE, 0);
+	    getGl().glBindTexture(GL3.GL_TEXTURE_2D, 0);
+	    getGl().glBindTexture(GL3.GL_TEXTURE_1D, 0);
+	}
+
+	public void defaultViewport() {
+	    getGl().glViewport(0, 0, tr.getRootWindow().getCanvas().getWidth(), tr
+			.getRootWindow().getCanvas().getHeight());
+	}
 	}//end GPU

@@ -94,7 +94,7 @@ public final class GLTexture {
     }
     
     public GLTexture setImage(int internalOrder, int width, int height, int colorOrder, int numericalFormat, Buffer pixels){
-	this.width=width; this.height=height;
+	this.width=width; this.height=height; this.internalColorFormat=numericalFormat;
 	setNumComponents(numComponentsFromEnum(colorOrder));
 	if(pixels==null && width*height*16 < MemoryManager.ZEROES.capacity()){
 	    pixels=MemoryManager.ZEROES;
@@ -403,14 +403,15 @@ public final class GLTexture {
 					(float)min[1]/(float)(max[1]-min[1]), 
 					(float)min[2]/(float)(max[2]-min[2]), 
 					(float)min[3]/(float)(max[3]-min[3]));
-				colorTexture.bind().readPixels(PixelReadOrder.RGBA, PixelReadDataType.FLOAT, rgbaBytes);
+				colorTexture.bind().readPixels(PixelReadOrder.RGBA, PixelReadDataType.FLOAT, rgbaBytes).unbind();
 				frameBuffer.bindToDraw();
 				parent.bindToTextureUnit(0, gpu.getGl());
 				gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
 				rgbaBytes.clear();
 				//Cleanup
-				gl.glViewport(0, 0, canvas.getWidth(), canvas.getHeight());
-				gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);
+				gpu.defaultViewport();
+				gpu.defaultProgram();
+				gpu.defaultFrameBuffers();
 				TextureViewingPanel.this.repaint();
 				return null;
 			    }//end call()
@@ -493,7 +494,8 @@ public final class GLTexture {
 	    threadManager.submitToThreadPool(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-		    final ByteBuffer dest = ByteBuffer.allocateDirect(
+		    final boolean intFormat = targetTexture.internalColorFormat==GL3.GL_UNSIGNED_INT;
+		    final ByteBuffer dest = ByteBuffer.allocate(
 			    4*4*targetTexture.getNumComponents()*
 			    targetTexture.getWidth()*targetTexture.getHeight()).order(ByteOrder.nativeOrder());
 		    threadManager.submitToGL(new Callable<Void>(){
@@ -501,14 +503,15 @@ public final class GLTexture {
 			public Void call() throws Exception {
 			    targetTexture.
 			    	bind().
-			    	readPixels(PixelReadOrder.RGBA, PixelReadDataType.FLOAT, dest);
-			    targetTexture.gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);
+			    	readPixels(
+			    		intFormat?PixelReadOrder.RGBA_INT:PixelReadOrder.RGBA, 
+			    		intFormat?PixelReadDataType.UINT:PixelReadDataType.FLOAT, 
+			    		dest).
+			    	unbind();
 			    return null;
 			}}).get();
 		    final FileOutputStream fos = new FileOutputStream(destFile);
 		    final PrintStream printStream = new PrintStream(fos);
-		    final FloatBuffer fb = dest.asFloatBuffer();
-		    fb.clear();
 		    final int numCols = targetTexture.getWidth();
 		    final int numRows = targetTexture.getHeight();
 		    for(int col=0; col<numCols; col++){
@@ -516,13 +519,22 @@ public final class GLTexture {
 			if(col<numCols-1)
 			    printStream.print(",");
 		    }
+		    dest.clear();
 		    printStream.println();
 		    for (int row = 0; row < numRows; row++) {
 			for (int col = 0; col < numCols; col++) {
-			    printStream.print(fb.get()+",");
-			    printStream.print(fb.get()+",");
-			    printStream.print(fb.get()+",");
-			    printStream.print(fb.get());
+			    if (intFormat) {
+				printStream.print(dest.getInt() + ",");
+				printStream.print(dest.getInt() + ",");
+				printStream.print(dest.getInt() + ",");
+				printStream.print(dest.getInt());
+			    } else {
+				printStream.print(dest.getFloat() + ",");
+				printStream.print(dest.getFloat() + ",");
+				printStream.print(dest.getFloat() + ",");
+				printStream.print(dest.getFloat());
+			    }
+			    
 			    if (col < numCols - 1)
 				printStream.print(",");
 			}// end for(cols)

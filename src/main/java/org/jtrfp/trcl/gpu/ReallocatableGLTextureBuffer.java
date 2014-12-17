@@ -58,6 +58,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 	ByteBuffer bb = map();
 	bb.rewind();
 	bb.put(newData);
+	buffer.flushRange(0, newData.capacity());
 	unmap();
     }
 
@@ -101,6 +102,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 	newBuffer = newTextureBuffer.getUnderlyingBuffer();
 	newBuffer.clear();
 	newBuffer.put(oldBuffer);
+	newTextureBuffer.flushRange(0, oldBuffer.capacity());
 	newBuffer.clear();
 	oldTextureBuffer.free(gpu.getGl());
 	buffer.unmap(gpu.getGl());

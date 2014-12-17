@@ -16,6 +16,8 @@ import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.gpu.RawGLBuffer.MapMode;
+
 public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     private GLTextureBuffer buffer;
     private GPU gpu;
@@ -32,7 +34,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 
     @Override
     public ByteBuffer map() {
-	buffer.map(gpu.getGl());
+	buffer.map(gpu.getGl(),MapMode.FLUSH_EXPLICIT,MapMode.WRITE,MapMode.UNSYNCHRONIZED);
 	return buffer.getDuplicateReferenceOfUnderlyingBuffer();
     }
 
@@ -90,22 +92,24 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 
     @Override
     public void reallocate(int sizeInBytes) {
+	final GL3 gl = gpu.getGl();
 	ByteBuffer oldBuffer,newBuffer;
 	GLTextureBuffer oldTextureBuffer, newTextureBuffer;
 	gpu.getTr().getReporter().report("org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer."+hashCode()+".sizeInBytes", ""+sizeInBytes);
-	oldBuffer = buffer.getUnderlyingBuffer();
+	oldTextureBuffer=buffer;
+	oldTextureBuffer.unmap(gl);
+	oldTextureBuffer.map(gl, MapMode.READ);
+	oldBuffer = oldTextureBuffer.getUnderlyingBuffer();
 	oldBuffer.clear();
 	oldBuffer.limit(Math.min(sizeInBytes,oldBuffer.capacity()));
-	oldTextureBuffer=buffer;
 	newTextureBuffer = buffer = new GLTextureBuffer(sizeInBytes, gpu);
-	buffer.map(gpu.getGl());
+	newTextureBuffer.map(gl,MapMode.WRITE);
 	newBuffer = newTextureBuffer.getUnderlyingBuffer();
 	newBuffer.clear();
 	newBuffer.put(oldBuffer);
-	newTextureBuffer.flushRange(0, oldBuffer.capacity());
 	newBuffer.clear();
-	oldTextureBuffer.free(gpu.getGl());
-	buffer.unmap(gpu.getGl());
+	oldTextureBuffer.free(gl);
+	newTextureBuffer.unmap(gl);
     }
 
     @Override

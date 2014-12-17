@@ -47,7 +47,7 @@ public class GLTextureBuffer extends RawGLBuffer {
 	this.gpu=gpu;
 	gl.glBindTexture(getBindingTarget(), getTextureID());
 	gl.glTexBuffer(getBindingTarget(), GL2.GL_RGBA32UI, this.getBufferID());
-	this.map(gl);
+	this.map(gl,MapMode.FLUSH_EXPLICIT,MapMode.WRITE,MapMode.UNSYNCHRONIZED);
 	IntBuffer buf = this.getUnderlyingBuffer().asIntBuffer();
 	buf.rewind();
 	// Fill with empty data

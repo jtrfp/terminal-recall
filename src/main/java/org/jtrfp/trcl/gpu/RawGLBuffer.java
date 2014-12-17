@@ -14,6 +14,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
 import javax.media.opengl.GL3;
 
 public class RawGLBuffer {
@@ -54,11 +55,14 @@ public class RawGLBuffer {
 	localBuffer.rewind();
     }
 
-    public void map(GL3 gl) {
+    public void map(GL3 gl, MapMode ... mapModes ) {
 	if (mapped)
 	    return;
+	int mapMode = 0;
+	for(MapMode mode:mapModes)
+	    mapMode|=mode.getGlMask();
 	gl.glBindBuffer(getBindingTarget(), bufferID);
-	localBuffer = gl.glMapBufferRange(getBindingTarget(), 0, sizeInBytes, GL3.GL_MAP_WRITE_BIT|GL3.GL_MAP_UNSYNCHRONIZED_BIT|GL3.GL_MAP_FLUSH_EXPLICIT_BIT);
+	localBuffer = gl.glMapBufferRange(getBindingTarget(), 0, sizeInBytes, mapMode);
 	if (localBuffer == null) {
 	    throw new NullPointerException("Failed to map buffer.");
 	}
@@ -129,5 +133,23 @@ public class RawGLBuffer {
     
     public boolean isMapped(){
 	return mapped;
+    }
+    
+    public enum MapMode{
+	READ(GL3.GL_MAP_READ_BIT),
+	WRITE(GL3.GL_MAP_WRITE_BIT),
+	UNSYNCHRONIZED(GL3.GL_MAP_UNSYNCHRONIZED_BIT),
+	FLUSH_EXPLICIT(GL3.GL_MAP_FLUSH_EXPLICIT_BIT);
+	
+	private final int glMask;
+	private MapMode(int glEnum){
+	    this.glMask=glEnum;
+	}
+	/**
+	 * @return the glEnum
+	 */
+	public int getGlMask() {
+	    return glMask;
+	}
     }
 }// end GLBuffer

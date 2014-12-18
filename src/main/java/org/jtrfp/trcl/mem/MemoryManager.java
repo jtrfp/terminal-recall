@@ -103,8 +103,6 @@ public final class MemoryManager {
     }
     
     public void flushStalePages(){
-	flushRange(0, physicalMemory[0].capacity());//TODO DEBUG
-	if(1+1==2)return;
 	if(!glPhysicalMemory.isMapped())
 	    return;
 	synchronized(pagedByteBuffers){

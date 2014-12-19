@@ -102,6 +102,10 @@ public final class SoundSystem {
 	    public Void call() throws Exception {
 		System.out.println("SoundSystem: setting up textures...");
 		final GPU gpu = tr.gpu.get();
+		gpu.defaultProgram();
+		gpu.defaultTIU();
+		gpu.defaultTexture();
+		gpu.defaultFrameBuffers();
 		playbackTexture = gpu
 			.newTexture()
 			.bind()
@@ -123,6 +127,10 @@ public final class SoundSystem {
 				GL3.GL_COLOR_ATTACHMENT0);
 		// TODO: Setup uniforms here.
 		System.out.println("...Done.");
+		gpu.defaultProgram();
+		gpu.defaultTIU();
+		gpu.defaultTexture();
+		gpu.defaultFrameBuffers();
 		return null;
 	    }// end call()
 	}).get();
@@ -249,6 +257,7 @@ public final class SoundSystem {
 			tr.getThreadManager().submitToGL(new Callable<Void>(){
 			    @Override
 			    public Void call() throws Exception {
+				tr.gpu.get().defaultTIU();
 				texture
 				 .bind()
 				 .setMagFilter(getFilteringParm())
@@ -262,6 +271,7 @@ public final class SoundSystem {
 					 GL3.GL_RED, 
 					 GL3.GL_FLOAT, 
 					 finalSamples);
+				tr.gpu.get().defaultTexture();
 				return null;
 			    }}).get();
 		return null;
@@ -311,13 +321,11 @@ public final class SoundSystem {
     private void render(GL3 gl, ByteBuffer audioByteBuffer) {
 	if (firstRun)
 	    firstRun();
-	
+	final GPU gpu = tr.gpu.get();
 	 // Read and export previous results to sound card.
-	gl.glBindFramebuffer(GL3.GL_FRAMEBUFFER, 0);// Unbind so we can read off
-							  // the output
+	gpu.defaultFrameBuffers();
 	playbackTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
-		audioByteBuffer);// RG_INTEGER throws INVALID_OPERATION!?
-	gl.glBindTexture(GL3.GL_TEXTURE_2D, 0);//Unbind all.
+		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
 	playbackFrameBuffer.bindToDraw();
 	gl.glViewport(0, 0, BUFFER_SIZE_FRAMES, 1);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
@@ -338,8 +346,11 @@ public final class SoundSystem {
 	}//end for(keySet)
 	bufferFrameCounter += BUFFER_SIZE_FRAMES;
 	// Cleanup
-	gl.glViewport(0, 0, tr.getRootWindow().getCanvas().getWidth(), tr
-		.getRootWindow().getCanvas().getHeight());
+	gpu.defaultFrameBuffers();
+	gpu.defaultProgram();
+	gpu.defaultTIU();
+	gpu.defaultTexture();
+	gpu.defaultViewport();
     }// end process()
     
     private void pickupActiveEvents(long windowSizeInSamples){

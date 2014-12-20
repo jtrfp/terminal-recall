@@ -304,12 +304,13 @@ public class Model {
     public void proposeAnimationUpdate() {
 	long currentTimeMillis = System.currentTimeMillis();
 	if (currentTimeMillis > animationUpdateThresholdMillis) {
+	    synchronized(tickableAnimators){
 	    final int size = tickableAnimators.size();
-	    for (int i = 0; i < size; i++) {
+	    for (int i = 0; i < size; i++)
 		tickableAnimators.get(i).tick();
-	    }// end for(animators.tick)
 	    animationUpdateThresholdMillis = currentTimeMillis
 		    + ANIMATION_UPDATE_INTERVAL;
+	    }//end sync(tickableAnimators)
 	}// end if(time to update)
     }// end proposeAnimationUpdate()
 

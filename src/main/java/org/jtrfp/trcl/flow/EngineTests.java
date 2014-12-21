@@ -23,13 +23,15 @@ public class EngineTests {
 	final TextureDescription test = tr.getResourceManager().getTestTexture();
 	tr.abortCurrentGame();
 	tr.getWorld().removeAll();
+	final int sideLen = (int)Math.ceil(Math.sqrt(numInstances));
+	final double diameter = 2./(double)sideLen;
+	final double off = diameter/2;
 	for (int i = 0; i < numInstances; i++) {
-	    WorldObject wo = new Sprite2D(tr, 0, 1, 1, test, false);
-	    wo.setPosition(new double[] { 0, 0, .5 });
+	    WorldObject wo = new Sprite2D(tr, 0, diameter, diameter, test, false);
+	    wo.setPosition(new double[] { (i%sideLen)*diameter-1+off, (i/sideLen)*diameter-1+off, .01 });
 	    wo.setActive(true);
 	    wo.setVisible(true);
 	    tr.getWorld().add(wo);
 	}//end for(numInstances)
     }//end singlet(tr)
-
 }//end EngineTests

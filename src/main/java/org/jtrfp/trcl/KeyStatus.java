@@ -44,7 +44,6 @@ public class KeyStatus implements KeyEventDispatcher{
 		@Override
 		public synchronized boolean dispatchKeyEvent(KeyEvent evt) {//one at a time please...
 		    if(evt.getID()==KeyEvent.KEY_RELEASED){
-			System.out.println("keyArrayIndex="+keyArrayIndex+" len="+keys.length);
 			if(evt.getKeyCode()==keys[keyArrayIndex]){
 			    keyArrayIndex++;
 			    if(keyArrayIndex>=keys.length){

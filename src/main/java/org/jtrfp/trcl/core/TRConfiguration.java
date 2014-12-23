@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
@@ -192,12 +194,13 @@ public class TRConfiguration{
 	}
 	
 	public void saveConfig(File f) throws IOException{
-	    if(!f.getName().toLowerCase().endsWith(".config.trcl.xml"))
-		    f = new File(f.getAbsolutePath()+".config.trcl.xml");
-		   if(!f.exists())
-		     f.createNewFile();
+	    final File temp = File.createTempFile("temp.org.trcl.", "config.xml");
+	    if(!temp.getName().toLowerCase().endsWith(".config.trcl.xml"))
+		    f = new File(temp.getAbsolutePath()+".config.trcl.xml");
+		   if(!temp.exists())
+		     temp.createNewFile();
 		    FileOutputStream os = new FileOutputStream(f);
-		    XMLEncoder xmlEnc = new XMLEncoder(os);
+		    XMLEncoder xmlEnc   = new XMLEncoder(os);
 		    xmlEnc.setExceptionListener(new ExceptionListener(){
 			@Override
 			public void exceptionThrown(Exception e) {
@@ -222,7 +225,12 @@ public class TRConfiguration{
 			    });
 		    xmlEnc.writeObject(this);
 		    xmlEnc.close();
-	}
+		    Files.move(
+			    temp.toPath(), 
+			    f.toPath(), 
+			    StandardCopyOption.ATOMIC_MOVE, 
+			    StandardCopyOption.REPLACE_EXISTING);
+	}//end saveConfig(...)
 
 	/**
 	 * @return the podList

@@ -306,8 +306,11 @@ public class Model {
 	if (currentTimeMillis > animationUpdateThresholdMillis) {
 	    synchronized(tickableAnimators){
 	    final int size = tickableAnimators.size();
-	    for (int i = 0; i < size; i++)
-		tickableAnimators.get(i).tick();
+	    for (int i = 0; i < size; i++){
+		final Tickable t = tickableAnimators.get(i);
+		if(t!=null)
+		 tickableAnimators.get(i).tick();
+	    }//end for(animators)
 	    animationUpdateThresholdMillis = currentTimeMillis
 		    + ANIMATION_UPDATE_INTERVAL;
 	    }//end sync(tickableAnimators)

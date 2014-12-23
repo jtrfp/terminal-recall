@@ -23,8 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.channels.FileChannel;
 import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
@@ -225,11 +224,16 @@ public class TRConfiguration{
 			    });
 		    xmlEnc.writeObject(this);
 		    xmlEnc.close();
-		    Files.move(
-			    temp.toPath(), 
-			    f.toPath(), 
-			    StandardCopyOption.ATOMIC_MOVE, 
-			    StandardCopyOption.REPLACE_EXISTING);
+		    
+		    FileChannel srcCh = null, dstCh = null;
+		    try {
+		        srcCh = new FileInputStream(temp).getChannel();
+		        dstCh = new FileOutputStream(f).getChannel();
+		        dstCh.transferFrom(srcCh, 0, srcCh.size());
+		       }finally{
+		           srcCh.close();
+		           dstCh.close();
+		       }
 	}//end saveConfig(...)
 
 	/**

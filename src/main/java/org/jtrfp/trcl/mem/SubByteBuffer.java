@@ -108,4 +108,10 @@ public final class SubByteBuffer implements IByteBuffer {
 	return intrinsic.getInt(posInBytes);
     }
 
+    @Override
+    public IByteBuffer putInts(int indexInBytes, int[] vals) {
+	intrinsic.putInts(indexInBytes, vals);
+	return this;
+    }
+
 }//end SubByteBuffer

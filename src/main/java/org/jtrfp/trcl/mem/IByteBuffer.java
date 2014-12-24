@@ -26,6 +26,7 @@ public interface IByteBuffer {
     public IByteBuffer putShort(int indexInBytes,short val);
     public IByteBuffer putFloat(int indexInBytes,float val);
     public IByteBuffer putInt(int indexInBytes,int val);
+    public IByteBuffer putInts(int indexInBytes,int []vals);
     public IByteBuffer put(int indexInBytes,byte val);
     public IByteBuffer put(int startIndexInBytes, ByteBuffer src);
     public byte get(int indexInBytes);

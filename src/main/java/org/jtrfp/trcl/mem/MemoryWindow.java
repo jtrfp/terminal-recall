@@ -225,25 +225,18 @@ public abstract class MemoryWindow {
 	public IntArrayVariable(int arrayLen) {
 	    this.arrayLen = arrayLen;
 	}
-
-	// TODO: Support buffer copies instead of slow loop
+	
 	@Override
 	public IntArrayVariable set(int objectIndex, int[] value) {
-	    for (int i = 0; i < value.length; i++) {
-		getParent().getBuffer().putInt(
-			byteOffset() + objectIndex
-				* getParent().getObjectSizeInBytes(), value[i]);
-	    }// end for(i)
+	    getParent().getBuffer().putInts(byteOffset() + objectIndex
+			* getParent().getObjectSizeInBytes(),value);
 	    return this;
 	}
 
 	public IntArrayVariable set(int objectIndex, int offsetInInts,
 		int[] value) {
-	    for (int i = 0; i < value.length; i++) {
-		getParent().getBuffer().putInt(
-			byteOffset() + offsetInInts * 4 + objectIndex
-				* getParent().getObjectSizeInBytes(), value[i]);
-	    }// end for(i)
+	    getParent().getBuffer().putInts(byteOffset() + offsetInInts * 4 + objectIndex
+			* getParent().getObjectSizeInBytes(),value);
 	    return this;
 	}// end set(...)
 

@@ -16,7 +16,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 public class InterpolatingAltitudeMap implements AltitudeMap {
     private AltitudeMap toWrap;
-    private double NUDGE=.0001;
+    private double NUDGE=.25;
     public InterpolatingAltitudeMap(AltitudeMap toWrap){
 	this.toWrap=toWrap;
     }

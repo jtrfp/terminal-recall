@@ -127,7 +127,7 @@ public abstract class MemoryWindow {
 	    return (THIS_CLASS) this;
 	}
 
-	protected final int byteOffset() {
+	public final int logicalByteOffsetWithinObject() {
 	    return byteOffset;
 	}
 
@@ -139,7 +139,7 @@ public abstract class MemoryWindow {
 	@Override
 	public IntVariable set(int objectIndex, Integer value) {
 	    getParent().getBuffer().putInt(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
@@ -147,7 +147,7 @@ public abstract class MemoryWindow {
 	@Override
 	public Integer get(int objectIndex) {
 	    return getParent().getBuffer().getInt(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
 
@@ -162,14 +162,14 @@ public abstract class MemoryWindow {
 	@Override
 	public ByteVariable set(int objectIndex, Byte value) {
 	    getParent().getBuffer().put(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
 
 	public ByteVariable set(int objectIndex, byte value) {
 	    getParent().getBuffer().put(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
@@ -177,7 +177,7 @@ public abstract class MemoryWindow {
 	@Override
 	public Byte get(int objectIndex) {
 	    return getParent().getBuffer().get(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
 
@@ -193,14 +193,14 @@ public abstract class MemoryWindow {
 	@Override
 	public ShortVariable set(int objectIndex, Short value) {
 	    getParent().getBuffer().putShort(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
 
 	public ShortVariable set(int objectIndex, short value) {
 	    getParent().getBuffer().putShort(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
@@ -208,7 +208,7 @@ public abstract class MemoryWindow {
 	@Override
 	public Short get(int objectIndex) {
 	    return getParent().getBuffer().getShort(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
 
@@ -228,14 +228,14 @@ public abstract class MemoryWindow {
 	
 	@Override
 	public IntArrayVariable set(int objectIndex, int[] value) {
-	    getParent().getBuffer().putInts(byteOffset() + objectIndex
+	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject() + objectIndex
 			* getParent().getObjectSizeInBytes(),value);
 	    return this;
 	}
 
 	public IntArrayVariable set(int objectIndex, int offsetInInts,
 		int[] value) {
-	    getParent().getBuffer().putInts(byteOffset() + offsetInInts * 4 + objectIndex
+	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject() + offsetInInts * 4 + objectIndex
 			* getParent().getObjectSizeInBytes(),value);
 	    return this;
 	}// end set(...)
@@ -252,13 +252,13 @@ public abstract class MemoryWindow {
 
 	public void setAt(int objectIndex, int arrayIndex, int value) {
 	    getParent().getBuffer().putInt(
-		    byteOffset() + arrayIndex * 4 + objectIndex
+		    logicalByteOffsetWithinObject() + arrayIndex * 4 + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
 
 	public int get(int objectIndex, int arrayIndex) {
 	    return getParent().getBuffer().getInt(
-		    byteOffset() + arrayIndex * 4 + objectIndex
+		    logicalByteOffsetWithinObject() + arrayIndex * 4 + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
     }// end IntArrayVariable
@@ -275,7 +275,7 @@ public abstract class MemoryWindow {
 	public VEC4ArrayVariable set(int objectIndex, int[] value) {
 	    for (int i = 0; i < value.length; i++) {
 		getParent().getBuffer().putInt(
-			byteOffset() + objectIndex
+			logicalByteOffsetWithinObject() + objectIndex
 				* getParent().getObjectSizeInBytes(), value[i]);
 	    }// end for(i)
 	    return this;
@@ -285,7 +285,7 @@ public abstract class MemoryWindow {
 		int[] value) {
 	    for (int i = 0; i < value.length; i++) {
 		getParent().getBuffer().putInt(
-			byteOffset() + offsetInVEC4s * 16 + objectIndex
+			logicalByteOffsetWithinObject() + offsetInVEC4s * 16 + objectIndex
 				* getParent().getObjectSizeInBytes(), value[i]);
 	    }// end for(i)
 	    return this;
@@ -313,7 +313,7 @@ public abstract class MemoryWindow {
 	@Override
 	public ByteArrayVariable set(int objectIndex, ByteBuffer value) {
 	    getParent().getBuffer().put(
-		    byteOffset() + objectIndex
+		    logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
@@ -321,7 +321,7 @@ public abstract class MemoryWindow {
 	public ByteArrayVariable set(int objectIndex, int offsetInBytes,
 		ByteBuffer value) {
 	    getParent().getBuffer().put(
-		    offsetInBytes + byteOffset() + objectIndex
+		    offsetInBytes + logicalByteOffsetWithinObject() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
@@ -338,7 +338,7 @@ public abstract class MemoryWindow {
 
 	public void setAt(int objectIndex, int arrayIndex, byte value) {
 	    getParent().getBuffer().put(
-		    byteOffset() + arrayIndex + objectIndex
+		    logicalByteOffsetWithinObject() + arrayIndex + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
     }// end ByteArrayVariable
@@ -373,7 +373,7 @@ public abstract class MemoryWindow {
 
 	public void setAt(int objectIndex, int arrayIndex, short value) {
 	    getParent().getBuffer().putShort(
-		    byteOffset() + arrayIndex * 2 + objectIndex
+		    logicalByteOffsetWithinObject() + arrayIndex * 2 + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
     }// end ShortArrayVariable
@@ -390,7 +390,7 @@ public abstract class MemoryWindow {
 	public Double2FloatArrayVariable set(int objectIndex, double[] value) {
 	    for (int i = 0; i < arrayLen; i++) {
 		getParent().getBuffer().putFloat(
-			i * 4 + byteOffset() + objectIndex
+			i * 4 + logicalByteOffsetWithinObject() + objectIndex
 				* getParent().getObjectSizeInBytes(),
 			(float) value[i]);
 	    }
@@ -402,7 +402,7 @@ public abstract class MemoryWindow {
 	    final double[] result = new double[arrayLen];
 	    for (int i = 0; i < arrayLen; i++) {
 		result[i] = getParent().getBuffer().getFloat(
-			i * 4 + byteOffset() + objectIndex
+			i * 4 + logicalByteOffsetWithinObject() + objectIndex
 				* getParent().getObjectSizeInBytes());
 	    }
 	    return result;

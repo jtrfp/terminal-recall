@@ -29,7 +29,7 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 		new double[]{-height/2,-height/2,height/2,height/2}, 
 		new double[]{z,z,z,z},
 		new double[]{0,1,1,0},
-		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.MINUS_K,"Sprite2D non-segmented");
+		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.ZERO,"Sprite2D non-segmented");
 	m.addTriangles(tris);
 	m.finalizeModel();
 	setModel(m);
@@ -50,13 +50,14 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 		    x + segWidth, x + segWidth, x }, new double[] { -height/2, -height/2,
 		    height/2, height/2 }, new double[] { z, z, z, z }, new double[] { 0, 1,
 		    1, 0 }, new double[] { 0, 0, 1, 1 }, tex[seg],
-		    RenderMode.DYNAMIC, Vector3D.MINUS_K,"Sprite2D "+numSegs+" segments");
+		    RenderMode.DYNAMIC, Vector3D.ZERO,"Sprite2D "+numSegs+" segments");
 	    tris[0].setAlphaBlended(true);
 	    tris[1].setAlphaBlended(true);
 	    m.addTriangles(tris);
 	}// end for(segs)
 	setModel(m.finalizeModel());
 	setTop(Vector3D.PLUS_J);
+	setHeading(Vector3D.PLUS_K);
 	setActive(true);
 	setVisible(true);
     }//end constructor

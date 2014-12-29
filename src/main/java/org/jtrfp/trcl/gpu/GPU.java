@@ -36,6 +36,7 @@ public class GPU{
 	private GL3 					gl;
 	public final TRFutureTask<MemoryManager> 	memoryManager;
 	public final TRFutureTask<TextureManager> 	textureManager;
+	private GPUVendor				vendor=null;
 	
 	public GPU(final TR tr){
 	    this.tr=tr;
@@ -134,4 +135,27 @@ public class GPU{
 	    getGl().glViewport(0, 0, tr.getRootWindow().getCanvas().getWidth(), tr
 			.getRootWindow().getCanvas().getHeight());
 	}
+	
+	public GPUVendor getGPUVendor(){
+	    if(vendor==null){
+		final String vString = gl.glGetString(GL3.GL_VENDOR).toUpperCase();
+		if(vString.contains("AMD")||
+			vString.contains("ATI "))//The space is important because NVIDIA CORPORATION has 'ATI'
+		    vendor=GPUVendor.AMD;
+		else if(vString.contains("INTEL"))
+		    vendor=GPUVendor.Intel;
+		else if(vString.contains("NVIDIA"))
+		    vendor=GPUVendor.nVIDIA;
+		else vendor=GPUVendor.Unknown;
+	    }//end if(null)
+	    return vendor;
+	}//end getGPUVendor()
+	
+	public enum GPUVendor{
+	    Intel,
+	    AMD,
+	    nVIDIA,
+	    Mali,
+	    Unknown
+	    }//end GPUVendor
 	}//end GPU

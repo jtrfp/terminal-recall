@@ -177,7 +177,7 @@ public class Mission {
 		@Override
 		public Void call() throws Exception {
 		    tr.renderer.get().setSunVector(
-			    new Vector3D(sunVector.getX(), -sunVector.getY(),
+			    new Vector3D(sunVector.getX(), sunVector.getY(),
 				    sunVector.getZ()).normalize());
 		    return null;
 		}

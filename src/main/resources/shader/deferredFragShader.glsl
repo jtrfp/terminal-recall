@@ -22,10 +22,14 @@
 uniform sampler2D 		primaryRendering;
 uniform sampler2D 		depthTexture;
 uniform sampler2D 		normTexture;
-uniform sampler2D 		textureIDTexture;
+uniform sampler2D 		primitiveIDTexture;
+uniform sampler2D		vertexTextureIDTexture;
+uniform sampler2D		primitiveUVZWTexture;
+uniform sampler2D		primitivenXnYnZTexture;
 uniform sampler2DArray 	rgbaTiles;
+uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
-uniform sampler2DMS		depthQueueTexture;
+//uniform sampler2DMS		depthQueueTexture;
 uniform vec3 			fogColor;
 uniform uint 			screenWidth;
 uniform uint 			screenHeight;
@@ -61,10 +65,23 @@ const uint SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4
 
 const vec3 sunColor 					= vec3(1.4,1.4,1.2);
 
-const int DEPTH_QUEUE_SIZE				= 8;
-const uint DEAD_BEEF					= 100024u;
+const int DEPTH_QUEUE_SIZE				= 5;
+const float DEAD_BEEF					= 100024;
+const uint PAGE_SIZE_VEC4				= 96u;
 
-//Adapted from http://www.geeks3d.com/20091216/geexlab-how-to-visualize-the-depth-buffer-in-glsl/
+const uint VTX_TEXTURE_WIDTH			= 1024u;
+const uint VTX_TEXTURE_USABLE_WIDTH = (VTX_TEXTURE_WIDTH/3u)*3u;
+
+const uint PQUAD_SIDE_WIDTH			= 2u;
+const uint PRIM_TEXTURE_WIDTH		= 512u;
+const uint PRIM_TEXTURE_HEIGHT		= 512u;
+const float PRIM_TEX_HEIGHT_SCALAR	= 1/float(PRIM_TEXTURE_HEIGHT);
+const float PRIM_TEX_WIDTH_SCALAR	= 1/float(PRIM_TEXTURE_WIDTH);
+const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
+const uint OVERSAMPLING				= 4u;
+
+const  vec2 PRIM_QUAD_BL 			= vec2(PRIM_TEX_WIDTH_SCALAR,PRIM_TEX_HEIGHT_SCALAR)/(2*float(OVERSAMPLING));
+
 float warpFog(float z){
 return clamp(pow(z,80)*1.2,0,1);
 }
@@ -100,7 +117,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  vec4 intrinsicCodeTexel(float warpedFog,uint textureID,vec3 norm,vec2 uv, vec3 illuminatedFog){
  // TOC
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
- if(textureID==100024u)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
+ if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
  uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
@@ -120,14 +137,67 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  	 mix(cTexel,codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags),dH.y),//Left
  	 mix(codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags),codeTexel(ceilTexXY,textureID,tDims,renderFlags),dH.y),//Right
  	   dH.x);//Vertical
-
- float sunIllumination			= dot(sunVector,norm);
- if(dot(norm,norm)>.1)cTexel.rgb
+ 
+ float sunIllumination			= -dot(sunVector,norm);
+ if(dot(norm.xyz,norm.xyz)>.2)cTexel.rgb
  								=((clamp(sunIllumination,0,1)*sunColor)+fogColor) * cTexel.rgb;
  								// TODO: Re-design and optimize
  cTexel 						= mix(cTexel,vec4(illuminatedFog,1),warpedFog);//FOG
  return cTexel;
  }//end intrinsicCodeTexel
+
+vec4 primitiveLayer(vec2 pQuad, float fogFactor, vec3 fogColor, vec4 vUVZI){
+ /*
+ uint		vertexID	= primitiveID*3u;
+ float		textureID	= texelFetch(vertexTextureIDTexture,ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x*65536*PAGE_SIZE_VEC4;
+ uint	row				= primitiveID/PRIMS_PER_ROW;
+ uint	col				= primitiveID%PRIMS_PER_ROW;
+ uint	primitiveIndex	= row*PRIMS_PER_ROW+col;
+ uint	vertexIndex		= primitiveIndex*3u;
+ vec2	pQuadBL			= PRIM_QUAD_BL;
+ pQuadBL.x			+=float(col*2)*PRIM_TEX_WIDTH_SCALAR;// x2 because each quad is 2 texels wide.
+ pQuadBL.y			+=float(row*2)*PRIM_TEX_HEIGHT_SCALAR;
+ vec2	pQuad		= pQuadBL+vec2(PRIM_TEX_WIDTH_SCALAR*screenLoc.x,PRIM_TEX_HEIGHT_SCALAR*screenLoc.y);
+ vec4	uvzw		= textureLod(primitiveUVZWTexture,pQuad,0);
+ */
+ vec4	nXnYnZ		= textureLod(primitivenXnYnZTexture,pQuad,0);
+ vec2	uv			= texture(primaryRendering,screenLoc).xy;//GET UV //TODO: Remove
+ if(uv.x!=-.1234)uv	= vUVZI.xy; //TODO: Remove conditional, keep assignment.
+ vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-1;//UNPACK NORM    //TODO: Remove
+ if(norm.x!=-.1234)norm = (nXnYnZ.xyz*2)-1;//TODO: Remove conditional, keep assignment.
+ return intrinsicCodeTexel(fogFactor,uint(vUVZI[3u]),norm,uv,fogColor);
+}
+
+uint getPrimitiveIDFromQueue(vec4 layerAccumulator, int level){
+ const vec4 ACC_MULTIPLIER = vec4(1,16,256,4096);
+ return uint(dot(mod(floor(layerAccumulator/pow(16.,float(level))),16)*ACC_MULTIPLIER,vec4(1)));
+}
+/*
+float getDepthOfPrimitive(uint primitiveID){
+}
+*/
+
+float logn(float value, float base){
+ return log2(value)/log2(base);
+}
+
+uint depthOfFloatShiftQueue(vec4 fsq){
+ return uint(logn(fsq.x,16));
+}
+
+vec2 getPQuad(uint primitiveID){
+ uint	row			= primitiveID/PRIMS_PER_ROW;
+ uint	col			= primitiveID%PRIMS_PER_ROW;
+ vec2	pQuadBL		= PRIM_QUAD_BL;
+ pQuadBL.x			+=float(col*2u)*PRIM_TEX_WIDTH_SCALAR;// x2 because each quad is 2 texels wide.
+ pQuadBL.y			+=float(row*2u)*PRIM_TEX_HEIGHT_SCALAR;
+ return				pQuadBL+vec2(PRIM_TEX_WIDTH_SCALAR*screenLoc.x,PRIM_TEX_HEIGHT_SCALAR*screenLoc.y);
+}
+
+float getTextureID(uint primitiveID){
+ uint vertexID = primitiveID * 3u;
+ return texelFetch(vertexTextureIDTexture,ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x*65536*PAGE_SIZE_VEC4;
+}
 
 ////////// STRUCT LAYOUT DOCUMENTATION ///////////////
 /**
@@ -142,43 +212,47 @@ textureTOC{
 void main(){
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
-float 	warpedFog = warpFog(depth);
-
-uint 	textureID 	= floatBitsToUint(texture(textureIDTexture,screenLoc)[0u]);
-vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-vec3(1,1,1);//UNPACK NORM
-vec2	uv			= texture(primaryRendering,screenLoc).xy;//GET UV
+float 	warpedFog 	= warpFog(depth);
+uint	primitiveID = uint(texture(primitiveIDTexture,screenLoc)[0u]*65536);
 vec3	color;
 vec3	illuminatedFog
 					= fogColor*sunColor;
 
 // S O L I D   B A C K D R O P
-color = vec3(intrinsicCodeTexel(warpedFog,textureID,norm,uv,illuminatedFog));
-int relevantSize=0;
-vec4 depthQueue[DEPTH_QUEUE_SIZE];
+ {
+ vec2 pq = getPQuad(primitiveID);
+ vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
+ _uvzw.xyz /= _uvzw.w;
+ color = vec3(primitiveLayer(pq, warpedFog, illuminatedFog, vec4(_uvzw.xyz,getTextureID(primitiveID)) ));
+ }
+
+vec4	fsq			= texture(layerAccumulator,screenLoc);
+
+uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
+vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
+vec2 pQuads[DEPTH_QUEUE_SIZE];
 int ordering[DEPTH_QUEUE_SIZE];
 
 // D E P T H   P O P U L A T E
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
- vec4	depthQueueTexel	= texelFetch(depthQueueTexture,ivec2(gl_FragCoord.xy),i);
-		textureID		= floatBitsToUint(depthQueueTexel[2u]);
-		ordering[i]		= i;
-		//TODO: LinearDepth. Alpha is depth.
-		//TODO: Norm. Calculate from future primitive table implementation?
- if(textureID!=DEAD_BEEF){// Found a valid point
- 	depthQueue[relevantSize]=depthQueueTexel;
- 	relevantSize++;
- 	}//end if(valid point)
-  else break;//DEAD_BEEF means end-of-list.
+ vec2 pQuad = pQuads[i]= getPQuad(primitiveID = getPrimitiveIDFromQueue(fsq,i));
+ vec4 _uvzw	= textureLod(primitiveUVZWTexture,pQuad,0);
+ _uvzw.xyz /= _uvzw.w;
+ vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
+ ordering[i]=i;
+ if(primitiveID<=0u)
+  {break;}
+ relevantSize++;
  }//end for(DEPTH_QUEUE_SIZE)
  
  // D E P T H   S O R T
- if(relevantSize>0){
+ if(relevantSize>0u){
  float alphaAccumulator=0;
  //Perform the not-so-quick sort
  int intermediary;
- for(int i=0; i<relevantSize-1; i++){
-  for(int j=i+1; j<relevantSize; j++){
-   if(depthQueue[ordering[j]].a>depthQueue[ordering[i]].a){//Found new deepest
+ for(uint i=0u; i<relevantSize-1u; i++){
+  for(uint j=i+1u; j<relevantSize; j++){
+   if(vUVZI[ordering[j]].z>vUVZI[ordering[i]].z){//Found new deepest
     //Trade
     intermediary = ordering[i];
     ordering[i] = ordering[j];
@@ -189,10 +263,10 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   }//end if(relevantSize>0)
   
   // D E P T H   A S S E M B L Y
-  for(int i=0; i<relevantSize; i++){
-   vec4 dqColor	= intrinsicCodeTexel(0,floatBitsToUint(depthQueue[ordering[i]][2u]),vec3(0,0,0),depthQueue[ordering[i]].rg,illuminatedFog);
+  for(uint i=0u; i<relevantSize; i++){
+   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],0,illuminatedFog,vUVZI[ordering[i]]);
    color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
   }//end for(relevantSize)
-  
+
 fragColor.rgb		 	= color;
 }//end main()

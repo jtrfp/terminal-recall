@@ -35,8 +35,8 @@ flat out mat4 noCamMatrix;
 uniform uint 			renderListPageTable[172];
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform mat4 			cameraMatrix;
-uniform float			objectBufferQuadIncrement;
 uniform uint			logicalVec4Offset;
+uniform uint			rowTweak;
 
 //DUMMY
 layout (location = 0) in float dummy;
@@ -44,7 +44,7 @@ layout (location = 0) in float dummy;
 int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 	uint logical = _logical + logicalVec4Offset;
 	return int(renderListPageTable
-		[logical/PAGE_SIZE_VEC4]*PAGE_SIZE_VEC4
+		[logical/PAGE_SIZE_VEC4+1u]*PAGE_SIZE_VEC4
 		+logical%PAGE_SIZE_VEC4);
 	}//end renderListLogicalVEC42PhysicalVEC4(...)
 
@@ -61,7 +61,7 @@ void main(){
  uint	col				= vid%VERTICES_PER_ROW;
  int	objectIndex		= int(row*MATRICES_PER_ROW+col);
  gl_Position.x			+=(float(col)*OBJ_TEX_WIDTH_SCALAR*2)-1;
- gl_Position.y			= 1-(float(row)*OBJ_TEX_HEIGHT_SCALAR*2);
+ gl_Position.y			= 1-(float(row+rowTweak)*OBJ_TEX_HEIGHT_SCALAR*2);//AMD needs +1u, nVIDIA, +0u
  int 	objectDefIndex	= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
  uvec4 	objectDef 		= texelFetch(rootBuffer,objectDefIndex);
  int 	matrixOffset 	= int(objectDef[0]);

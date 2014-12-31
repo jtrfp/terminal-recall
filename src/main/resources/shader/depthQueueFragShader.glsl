@@ -14,7 +14,7 @@
  *      chuck - initial API and implementation
  ******************************************************************************/
 
-// Blended fragment rendering for stencil-routed K/A buffer referred internally as a 'depth queue'.
+// Blended fragment rendering for stencil-routed A-buffer referred internally as a 'depth queue'.
 #version 330
 
 // UNIFORMS
@@ -33,5 +33,7 @@ layout(location=0) out vec4 pushToDepthQueue;
 void main(){
 float 	depth 		= texture(depthTexture,screenLoc)[0];
 if(gl_FragCoord.z>depth)discard;
-pushToDepthQueue = vec4(fragTexCoord/w,flatTextureID,gl_FragCoord.z);
-}
+float tid = floor(flatTextureID * 65536);
+vec4 tidLMH = floor(mod(tid/vec4(1,16,256,4096),16));
+pushToDepthQueue = tidLMH;
+}//end main()

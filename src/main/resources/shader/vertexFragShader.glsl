@@ -26,10 +26,15 @@ const uint PACKED_DATA_RENDER_MODE	=0u;	//UNibble
 const int GPU_VERTICES_PER_BLOCK	=96;
 const uint PAGE_SIZE_VEC4			=96u;
 
+const uint VTX_TEXTURE_WIDTH		= 1024u;
+const uint VTX_TEXTURE_HEIGHT		= 4096u;
+const uint VTX_TEXTURE_USABLE_WIDTH = (VTX_TEXTURE_WIDTH/3u)*3u;
+const uint VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3u)*3u;
+
 //const float V_COORD_PACK_SCALE		=16;
 
 // INPUTS
-uniform uint 			renderListPageTable[172];
+uniform uint 			renderListPageTable[172];//172
 uniform uint			logicalVec4Offset;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform sampler2D		camMatrixBuffer;
@@ -98,7 +103,7 @@ int firstSShort(uint _input){
 int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 	uint logical = _logical + logicalVec4Offset;
 	return int(renderListPageTable
-		[logical/PAGE_SIZE_VEC4]*PAGE_SIZE_VEC4
+		[logical/PAGE_SIZE_VEC4+1u]*PAGE_SIZE_VEC4
 		+logical%PAGE_SIZE_VEC4);
 	}//end renderListLogicalVEC42PhysicalVEC4(...)
 
@@ -119,10 +124,11 @@ int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 */
 
 void main(){
- int 	vertexIndex 			= int(gl_FragCoord.x)+int(gl_FragCoord.y)*1024;
+ int 	vertexIndex 			= int(gl_FragCoord.x)+int(gl_FragCoord.y)*int(VTX_TEXTURE_USABLE_WIDTH);
  int 	objectIndex 			= (vertexIndex / GPU_VERTICES_PER_BLOCK);
  int 	intraObjectVertexIndex 	= vertexIndex % GPU_VERTICES_PER_BLOCK;
- int 	objectDefIndex			= int(texelFetch(rootBuffer,renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4)))[objectIndex%4]);
+ int	objectDefFetchIdx		= renderListLogicalVEC42PhysicalVEC4(uint(objectIndex/4));
+ int 	objectDefIndex			= int(texelFetch(rootBuffer,objectDefFetchIdx)[objectIndex%4]);
  uvec4 	objectDef 				= texelFetch(rootBuffer,objectDefIndex);
  int	numVertices 			= int(UByte(objectDef[2],0u));
  
@@ -145,7 +151,8 @@ void main(){
 			// objectDef[3] unused.
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
-			flatTextureID 			= uintBitsToFloat(PAGE_SIZE_VEC4 * (UByte(packedVertex[3u],1u) | (UByte(packedVertex[3u],2u) << 8u ) | (UByte(packedVertex[3u],3u) << 16u)));
+			flatTextureID 			= float((UByte(packedVertex[3u],1u) | (UByte(packedVertex[3u],2u) << 8u ) | (UByte(packedVertex[3u],3u) << 16u)))/65536;
+			//if(objectIndex>3000) flatTextureID = 100024/float(65536*PAGE_SIZE_VEC4);
 			vec4 	vertexCoord;
 			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
 												float(firstSShort(packedVertex[1])));
@@ -154,13 +161,16 @@ void main(){
     		vec4 position 			= matrix * vertexCoord;
 			w						= 1/position.w;
 			xy.xy					= position.xy;
-			uv.xy					= fragTexCoord.xy*w;
+			uv.xy					= fragTexCoord.xy * w;
 			z						= position.z;
-			vec4 nNoCam				= matrixNoCam * (vec4(float(SByte(packedVertex[1],2u))/128,
-										   float(SByte(packedVertex[1],3u))/128,
-										   float(SByte(packedVertex[3],0u))/128, 0));
-    		nXY			 			= w*((nNoCam.xy+1)/2);
-			nZ 						= w*((nNoCam.z+1)/2);
+			vec4 nNoCam				= matrixNoCam * (vec4(
+								     float(SByte(packedVertex[1],2u))/128,
+									 float(SByte(packedVertex[1],3u))/128,
+									 float(SByte(packedVertex[3],0u))/128, 0));
+    		nXY			 			= ((nNoCam.xy+1)/2);
+			nZ 						= ((nNoCam.z+1)/2);
+			//if(abs(nZ-.5)<.5) ////////////// DEBUG / KLUDGE
+			//  nZ = -.1; //For some reason, Z-values are not coming through like they should.
     		}//end if(object)
     		
     		else{

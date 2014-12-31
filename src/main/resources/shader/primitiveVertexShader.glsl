@@ -21,17 +21,20 @@
 //CONSTANTS
 const uint PAGE_SIZE_VEC4			= 96u;
 const uint PQUAD_SIDE_WIDTH			= 2u;
-const uint PRIM_TEXTURE_WIDTH		= 1024u;
-const uint PRIM_TEXTURE_HEIGHT		= 4096u;
+const uint PRIM_TEXTURE_WIDTH		= 512u;
+const uint PRIM_TEXTURE_HEIGHT		= 512u;
 const uint VTX_TEXTURE_WIDTH		= 1024u;
 const uint VTX_TEXTURE_HEIGHT		= 4096u;
+const uint VTX_TEXTURE_USABLE_WIDTH = (VTX_TEXTURE_WIDTH/3u)*3u;//Quantize to floored multiple of 3.
+const uint VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3u)*3u;
 const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
-const uint VERTICES_PER_ROW			= VTX_TEXTURE_WIDTH;
+const uint VERTICES_PER_ROW			= VTX_TEXTURE_USABLE_WIDTH;
 
 const float PRIM_TEX_HEIGHT_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_HEIGHT);
 const float PRIM_TEX_WIDTH_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_WIDTH);
-const float VTX_TEX_HEIGHT_SCALAR   = 1/float(VTX_TEXTURE_HEIGHT);
-const float VTX_TEX_WIDTH_SCALAR    = 1/float(VTX_TEXTURE_WIDTH);
+const float VTX_TEX_HEIGHT_SCALAR   = 1/float(VTX_TEXTURE_USABLE_HEIGHT);
+const float VTX_TEX_WIDTH_SCALAR    = 1/float(VTX_TEXTURE_USABLE_WIDTH);
+const vec2 PRIM_TEX_CENTER_OFF		= vec2(PRIM_TEX_HEIGHT_SCALAR,PRIM_TEX_WIDTH_SCALAR);
 
 //OUTPUTS
 flat out mat4 uvzwQuad;
@@ -42,18 +45,20 @@ uniform sampler2D		xyVBuffer;
 uniform sampler2D		wVBuffer;
 uniform sampler2D		zVBuffer;
 uniform sampler2D		uvVBuffer;
-uniform sampler2D		nXnYnZVBuffer;
+uniform sampler2D		nXnYnZVBuffer;//TODO: Rename to nXnYVBuffer
+uniform sampler2D		nZVBuffer;
 
 //DUMMY
 layout (location = 0) in float dummy;
 
-mat4 affine(vec3 u, vec3 v, vec3 off){//Each row is a column! Feed it vector [x,y,z,1], gives [nX,nY,nZ,1]
- return mat4(
- 	u.x-off.x,  u.y-off.y, u.z-off.z,0,
- 	v.x-off.x,  v.y-off.y, v.z-off.z,0,
- 	off.x,      off.y,     off.z,    1,
- 	0,          0,         0,        0
- 		);
+//http://www.math.ucla.edu/~baker/149.1.02w/handouts/i_affine_II.pdf
+
+mat3 affine(vec2 u, vec2 v, vec2 off){//Each row is a column
+ return transpose(mat3(											// TODO: Manually transpose
+ 	u.x-off.x,  v.x-off.x,  off.x,
+ 	u.y-off.y,  v.y-off.y,	off.y,
+ 	0,          0,          1
+ 		));
  }//end affine()
 
 void main(){
@@ -61,11 +66,12 @@ void main(){
  uint	pid				= uint(gl_VertexID);
  uint	row				= pid/PRIMS_PER_ROW;
  uint	col				= pid%PRIMS_PER_ROW;
- uint	primitiveIndex	= row*PRIMS_PER_ROW+col;
+ uint	primitiveIndex	= pid;
  uint	vertexIndex		= primitiveIndex*3u;
- gl_Position.x			+=((float(col)+.5)*PRIM_TEX_WIDTH_SCALAR*2)-1;
- gl_Position.y			= 1-((float(row)+.5)*PRIM_TEX_HEIGHT_SCALAR*2);
- ivec2 increment		= ivec2(1,0);
+ gl_Position.xy			= PRIM_TEX_CENTER_OFF;
+ gl_Position.x			+=((float(col))*PRIM_TEX_WIDTH_SCALAR*2)-1;
+ gl_Position.y			+= ((float(row))*PRIM_TEX_HEIGHT_SCALAR*2)-1;
+ const ivec2 increment	= ivec2(1,0);
  ivec2 v0				= ivec2(
  				vertexIndex%VERTICES_PER_ROW,
  				vertexIndex/VERTICES_PER_ROW);
@@ -73,41 +79,65 @@ void main(){
  ivec2 v2				= increment*2+v0;
  ////////////////////////////////////////////////TODO: reciprocal-W
  //Convert screen coords to normalized coords.
- mat4 normalizationMatrix = inverse(affine(
-  vec3(texelFetch(xyVBuffer,v1,0).xy,0),
-  vec3(texelFetch(xyVBuffer,v2,0).xy,0),
-  vec3(texelFetch(xyVBuffer,v0,0).xy,0)));
+ mat3 debugAffine;
+ 
+ // Convert from cartesian to normalized [0,1] by adding 1 and mul by .5
+ // Also perform a perspective divide. Passed W is a reciprocal so a multiply is in order instead.
+ vec3 wvb = vec3(
+ 	texelFetch(wVBuffer,v0,0).x,
+ 	texelFetch(wVBuffer,v1,0).x,
+ 	texelFetch(wVBuffer,v2,0).x);
+ mat3 normalizationMatrix = inverse(debugAffine = affine(
+  (texelFetch(xyVBuffer,v1,0).xy*wvb[1u]+1)*.5,
+  (texelFetch(xyVBuffer,v2,0).xy*wvb[2u]+1)*.5,
+  (texelFetch(xyVBuffer,v0,0).xy*wvb[0u]+1)*.5));
  //Convert normalized coords to uv coords
- mat4 uvMatrix = affine(
-  vec3(texelFetch(uvVBuffer,v1,0).xy,0),
-  vec3(texelFetch(uvVBuffer,v2,0).xy,0),
-  vec3(texelFetch(uvVBuffer,v0,0).xy,0)
+ mat3 uvMatrix = affine(
+  vec2(texelFetch(uvVBuffer,v1,0).xy),
+  vec2(texelFetch(uvVBuffer,v2,0).xy),
+  vec2(texelFetch(uvVBuffer,v0,0).xy)
  	) * normalizationMatrix;
  //Convert normalized coords to vtx normals
- mat4 nXnYnZmatrix = affine(
-  texelFetch(nXnYnZVBuffer,v1,0).xyz,
-  texelFetch(nXnYnZVBuffer,v2,0).xyz,
-  texelFetch(nXnYnZVBuffer,v0,0).xyz
+ //TODO: Perform 3 texel fetches, swizzle for xy and z
+ mat3 nXnYmatrix = affine(
+  texelFetch(nXnYnZVBuffer,v1,0).xy,
+  texelFetch(nXnYnZVBuffer,v2,0).xy,
+  texelFetch(nXnYnZVBuffer,v0,0).xy
+ 	) * normalizationMatrix;
+ mat3 nZmatrix = affine(// passed y-component is a dummy
+  vec2(texelFetch(nZVBuffer,v1,0).x,1),
+  vec2(texelFetch(nZVBuffer,v2,0).x,0),
+  vec2(texelFetch(nZVBuffer,v0,0).x,.5)
  	) * normalizationMatrix;
  //Convert normalized coords to zw
- mat4 zwMatrix = affine(
-  vec3(texelFetch(zVBuffer,v1,0).x,texelFetch(wVBuffer,v1,0).x,0),
-  vec3(texelFetch(zVBuffer,v2,0).x,texelFetch(wVBuffer,v2,0).x,0),
-  vec3(texelFetch(zVBuffer,v0,0).x,texelFetch(wVBuffer,v0,0).x,0)
+ mat3 zwMatrix = affine(
+  vec2(texelFetch(zVBuffer,v1,0).x*wvb[1u],wvb[1u]),
+  vec2(texelFetch(zVBuffer,v2,0).x*wvb[2u],wvb[2u]),
+  vec2(texelFetch(zVBuffer,v0,0).x*wvb[0u],wvb[0u])
  	) * normalizationMatrix;
  
- const vec4 topLeft    = vec4(-1,1,0,1);
- const vec4 topRight   = vec4(1,1,0,1);
- const vec4 bottomLeft = vec4(-1,-1,0,1);
- const vec4 bottomRight= vec4(1,-1,0,1);
+ const vec3 topLeft    = vec3(0,1,1);
+ const vec3 topRight   = vec3(1,1,1);
+ const vec3 bottomLeft = vec3(0,0,1);
+ const vec3 bottomRight= vec3(1,0,1);
  
- uvzwQuad[0u]=vec4(vec2(uvMatrix*topLeft),vec2(zwMatrix*topLeft));
- uvzwQuad[1u]=vec4(vec2(uvMatrix*topRight),vec2(zwMatrix*topRight));
- uvzwQuad[2u]=vec4(vec2(uvMatrix*bottomLeft),vec2(zwMatrix*bottomLeft));
- uvzwQuad[3u]=vec4(vec2(uvMatrix*bottomRight),vec2(zwMatrix*bottomRight));
+ vec3 tlUV = uvMatrix*topLeft;
+ vec3 trUV = uvMatrix*topRight;
+ vec3 blUV = uvMatrix*bottomLeft;
+ vec3 brUV = uvMatrix*bottomRight;
  
- nXnYnZQuad[0u]=nXnYnZmatrix*topLeft;
- nXnYnZQuad[1u]=nXnYnZmatrix*topRight;
- nXnYnZQuad[2u]=nXnYnZmatrix*bottomLeft;
- nXnYnZQuad[3u]=nXnYnZmatrix*bottomRight;
+ uvzwQuad[0u]=vec4(vec2(blUV),vec2(zwMatrix*bottomLeft));
+ uvzwQuad[1u]=vec4(vec2(brUV),vec2(zwMatrix*bottomRight));
+ uvzwQuad[2u]=vec4(vec2(tlUV),vec2(zwMatrix*topLeft));
+ uvzwQuad[3u]=vec4(vec2(trUV),vec2(zwMatrix*topRight));
+ 
+ nXnYnZQuad[0u].xy=(nXnYmatrix*bottomLeft).xy;
+ nXnYnZQuad[1u].xy=(nXnYmatrix*bottomRight).xy;
+ nXnYnZQuad[2u].xy=(nXnYmatrix*topLeft).xy;
+ nXnYnZQuad[3u].xy=(nXnYmatrix*topRight).xy;
+ 
+ nXnYnZQuad[0u].z=(nZmatrix*bottomLeft).x;
+ nXnYnZQuad[1u].z=(nZmatrix*bottomRight).x;
+ nXnYnZQuad[2u].z=(nZmatrix*topLeft).x;
+ nXnYnZQuad[3u].z=(nZmatrix*topRight).x;
  }//end main()

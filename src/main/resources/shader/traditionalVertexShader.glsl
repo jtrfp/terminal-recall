@@ -24,16 +24,20 @@ const uint PACKED_DATA_RENDER_MODE	=0u;	//UNibble
 const int GPU_VERTICES_PER_BLOCK	=96;
 const uint PAGE_SIZE_VEC4			=96u;
 
+const int VTX_TEXTURE_WIDTH		   = 1024;
+const int VTX_TEXTURE_HEIGHT	   = 4096;
+const int VTX_TEXTURE_USABLE_WIDTH = (VTX_TEXTURE_WIDTH/3)*3;
+const int VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3)*3;
+
 //OUT
 noperspective out vec2 	fragTexCoord;
 noperspective out vec3 	fragNormal;
 noperspective out float	w;
-flat out float 			flatTextureID;
+flat out float 			flatTextureID; //TODO: Nomenclature to primitiveID
 noperspective out vec2	screenLoc;
 
 //IN
 uniform uint 			renderListPageTable[172];
-uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform mat4 			cameraMatrix;
 uniform sampler2D		xyBuffer;
 uniform sampler2D		uvBuffer;
@@ -97,13 +101,6 @@ int firstSShort(uint _input){
 	return result;
 	}
 
-int renderListLogicalVEC42PhysicalVEC4(uint _logical){
-	uint logical = _logical + logicalVec4Offset;
-	return int(renderListPageTable
-		[logical/PAGE_SIZE_VEC4]*PAGE_SIZE_VEC4
-		+logical%PAGE_SIZE_VEC4);
-	}//end renderListLogicalVEC42PhysicalVEC4(...)
-
 ////////////// STRUCT LAYOUTS ///////////////
 
 /*Object definition VEC4
@@ -123,17 +120,34 @@ int renderListLogicalVEC42PhysicalVEC4(uint _logical){
 /////////////// MAIN ////////////////////////////////
 
 void main(){
-gl_Position.x=dummy*0;
-    		ivec2 fetchPos	= ivec2(gl_VertexID%1024,gl_VertexID/1024);
-    		gl_Position.xy	= texelFetch(xyBuffer,fetchPos,0).xy;
+gl_Position.x+=dummy*.000000000000001;
+//if(dummy==123){/// DEBUG
+    		ivec2 fetchPos	= ivec2(gl_VertexID%VTX_TEXTURE_USABLE_WIDTH,gl_VertexID/VTX_TEXTURE_USABLE_WIDTH);
+    		gl_Position.xy	+=texelFetch(xyBuffer,fetchPos,0).xy;
     		gl_Position.z	= texelFetch(zBuffer,fetchPos,0).x;
     		w				= texelFetch(wBuffer,fetchPos,0).x;
     		gl_Position.w	= 1/w;
     		fragTexCoord	= texelFetch(uvBuffer,fetchPos,0).xy;
-    		flatTextureID	= texelFetch(texIDBuffer,fetchPos,0).x;
+    		flatTextureID	= texelFetch(texIDBuffer,fetchPos,0).x;//TODO: Remove later
+    		if(flatTextureID!=-1234)flatTextureID	= float(gl_VertexID)/(65536*3);
 			 screenLoc		= (((gl_Position.xy/gl_Position.w)+1)/2);
 			vec2 normXY		= texelFetch(normXYBuffer,fetchPos,0).xy;
 			float normZ		= texelFetch(normZBuffer,fetchPos,0).x;
 						//Crunch this into [0,1] domain
 			fragNormal 		= vec3(normXY,normZ);
+			//}//DEBUG
+	/*		
+//DEBUG ///////////////////
+else{
+ ivec2 fetchPos	= ivec2(gl_VertexID%VTX_TEXTURE_USABLE_WIDTH,gl_VertexID/VTX_TEXTURE_USABLE_WIDTH);
+ flatTextureID	= texelFetch(texIDBuffer,fetchPos,0).x;
+ gl_Position.xy += pos[gl_VertexID%6];
+ gl_Position.z = .1;
+ gl_Position.w = 1;
+ fragTexCoord = screenLocation[gl_VertexID%6];
+ screenLoc		= (((gl_Position.xy/gl_Position.w)+1)/2);
+ fragNormal = vec3(0,0,0);
+ w = 1;
+ }
+ */
 }//end main()

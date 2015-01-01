@@ -47,8 +47,8 @@ public class DamageableBehavior extends Behavior{
 	}//end generalDamage(...)
 	
 	private void die(){
-	    getParent().getBehavior().probeForBehaviors(deathSub, DeathListener.class);
-	    getParent().destroy();
+	    getParent().probeForBehavior(DeathBehavior.class).die();
+	    //getParent().destroy();
 	}
 
 	public boolean isInvincible(){

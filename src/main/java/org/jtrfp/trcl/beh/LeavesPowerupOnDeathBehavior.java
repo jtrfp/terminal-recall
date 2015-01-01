@@ -28,7 +28,7 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
     @Override
     public void notifyDeath() {//Y-fudge to ensure powerup is not too close to ground.
 	final WorldObject p=getParent();
-	final double [] thisPos=p.getPosition();
+	final double [] thisPos=p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath().toArray();
 	double height;
 	final InterpolatingAltitudeMap map=
 		p.getTr().
@@ -41,6 +41,6 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	else{height=Double.NEGATIVE_INFINITY;}
 	final double [] yFudge=thisPos[1]<height+OVER_TERRAIN_PAD?new double[]{0,OVER_TERRAIN_PAD,0}:new double[3];
 	getParent().getTr().getResourceManager().getPowerupSystem().
-		spawn(Vect3D.add(getParent().getPositionWithOffset(), yFudge, yFudge), pup);
+		spawn(Vect3D.add(thisPos, yFudge, yFudge), pup);
     }//end notifyDeath()
 }//end LeavesPowerupOnDeathBehavior

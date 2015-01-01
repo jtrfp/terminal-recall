@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -32,10 +33,12 @@ private String explosionSound;
     public synchronized void notifyDeath() {
 	    final WorldObject p = getParent();
 	    final TR tr = p.getTr();
+	    final Vector3D loc = p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();
+	    final double [] dPos = new double[] {loc.getX(),loc.getY(),loc.getZ()};
 	    tr.
 	     getResourceManager().
 	     getExplosionFactory().
-	     triggerExplosion(p.getPositionWithOffset(),type);
+	     triggerExplosion(dPos,type);
 	    String explosionSound = this.explosionSound;
 	    if(explosionSound!=null)
 	     tr.soundSystem.get().

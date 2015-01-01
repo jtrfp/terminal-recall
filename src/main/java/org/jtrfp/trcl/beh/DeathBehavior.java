@@ -12,36 +12,57 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DeathBehavior extends Behavior {
-    private boolean dead=false;
+    private volatile boolean dead=false;
+    private Vector3D locationOfDeath;
+    private WeakReference<SpacePartitioningGrid<PositionedRenderable>> spgOfLastDeath =
+	     new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(null);
     public void die(){
 	if(dead)return;
 	dead=true;//Only die once until reset
 	WorldObject wo = getParent();
-	wo.getBehavior().probeForBehaviors(sub,DeathListener.class);
+	locationOfDeath= new Vector3D(wo.getPositionWithOffset());
+	spgOfLastDeath = new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(wo.getContainingGrid());
 	wo.destroy();
+	wo.getBehavior().probeForBehaviors(sub,DeathListener.class);
     }
     private final Submitter<DeathListener> sub = new Submitter<DeathListener>(){
 
 	@Override
 	public void submit(DeathListener item) {
 	    item.notifyDeath();
-	    
 	}
 
 	@Override
 	public void submit(Collection<DeathListener> items) {
 	   for(DeathListener l:items){submit(l);}
-	    
 	}
     };//end submitter
 
     public void reset(){
 	 dead=false;
 	}
-}
+
+    /**
+     * @return the locationOfDeath
+     */
+    public Vector3D getLocationOfLastDeath() {
+        return locationOfDeath;
+    }
+
+    /**
+     * @return the spgOfLastDeath
+     */
+    public SpacePartitioningGrid<PositionedRenderable> getGridOfLastDeath() {
+        return spgOfLastDeath.get();
+    }
+}//end DeathBehavior

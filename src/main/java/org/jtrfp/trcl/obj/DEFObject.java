@@ -221,7 +221,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    break;
     	case fallingAsteroid:
     	    anchoring=Anchoring.floating;
-    	    //fallingObjectBehavior();
+    	    fallingObjectBehavior();
     	    //setVisible(false);
     	    //addBehavior(new FallingDebrisBehavior(tr,model));
     	    break;
@@ -334,24 +334,9 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    break;
     	case fallingStalag:
     	    fallingObjectBehavior();
-	    {final DEFObject thisObject = this;
-	    final Vector3D centerPos = new Vector3D(this.getPosition());
-	    final TR thisTr = tr;
-	    addBehavior(new ResetsRandomlyAfterDeath()
-	    	.setMinWaitMillis(100)
-	    	.setMaxWaitMillis(1000)
-	    	.setRunOnReset(new Runnable(){
-	    	    @Override
-	    	    public void run(){
-	    		final double [] pos = thisObject.getPosition();
-	    		pos[0]=centerPos.getX()+Math.random()*TR.mapSquareSize*10;
-	    		pos[1]=thisTr.getWorld().sizeY/1.5;
-	    		pos[2]=centerPos.getZ()+Math.random()*TR.mapSquareSize*10;
-	    		thisObject.notifyPositionChange();
-	    	    }//end run()
-	    	}));}
-    	    canTurn=false;
-    	    mobile=false;
+	    
+    	    //canTurn=false;
+    	    //mobile=false;
     	    anchoring=Anchoring.floating;
     	    break;
     	case attackRetreatBelowSky:
@@ -481,12 +466,35 @@ private void unhandled(EnemyDefinition def){
 
 private void fallingObjectBehavior(){
     canTurn=false;
-    addBehavior(new PulledDownByGravityBehavior());
-    addBehavior(new MovesByVelocity());
-    addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));
-    addBehavior(new DamageableBehavior().setHealth(1));
+    mobile=false;//Technically wrong but propulsion is unneeded.
+    //addBehavior(new PulledDownByGravityBehavior());
+    final MovesByVelocity mbv = new MovesByVelocity();
+    mbv.setVelocity(new Vector3D(3500,-100000,5000));
+    addBehavior(mbv);
+    //addBehavior(new VelocityDragBehavior().setDragCoefficient(.99)); // For some reason it falls like pine tar
+    addBehavior(new DamageableBehavior().setMaxHealth(10).setHealth(10));
     addBehavior(new DeathBehavior());
     addBehavior(new CollidesWithTerrain());
+    addBehavior(new DamagedByCollisionWithSurface());
+    addBehavior(new RotationalMomentumBehavior()
+    	.setEquatorialMomentum(.01).setLateralMomentum(.02).setPolarMomentum(.03));
+    {final DEFObject thisObject = this;
+    final TR thisTr = getTr();
+    addBehavior(new ResetsRandomlyAfterDeath()
+    	.setMinWaitMillis(100)
+    	.setMaxWaitMillis(1000)
+    	.setRunOnReset(new Runnable(){
+    	    @Override
+    	    public void run(){
+    		final Vector3D centerPos = thisObject.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();
+    		thisObject.probeForBehavior(MovesByVelocity.class).setVelocity(new Vector3D(7000,-200000,1000));
+    		final double [] pos = thisObject.getPosition();
+    		pos[0]=centerPos.getX()+Math.random()*TR.mapSquareSize*3-TR.mapSquareSize*1.5;
+    		pos[1]=thisTr.getWorld().sizeY/2+thisTr.getWorld().sizeY*(Math.random())*.3;
+    		pos[2]=centerPos.getZ()+Math.random()*TR.mapSquareSize*3-TR.mapSquareSize*1.5;
+    		thisObject.notifyPositionChange();
+    	    }//end run()
+    	}));}
 }
 
 private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefinition def){

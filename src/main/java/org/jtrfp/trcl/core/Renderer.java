@@ -13,9 +13,11 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -37,6 +39,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.prop.SkyCube;
 
 public final class Renderer {
     public static final int			VERTEX_BUFFER_WIDTH     = 1024;
@@ -54,7 +57,8 @@ public final class Renderer {
     /*					*/	depthQueueProgram, 
     /*					*/	depthErasureProgram,
     /*					*/	vertexProgram,
-    /*                                  */      primitiveProgram;
+    /*                                  */      primitiveProgram,
+    /*					*/	skyCubeProgram;
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
@@ -82,7 +86,9 @@ public final class Renderer {
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
     private		float[]			cameraMatrixAsFlatArray		= new float[16];
+    private volatile	float	[]		camRotationProjectionMatrix = new float[16];
     private		TRFutureTask<Void>	visibilityUpdateFuture;
+    private 		SkyCube			skyCube;
 
     public Renderer(final GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -103,14 +109,16 @@ public final class Renderer {
 		GLVertexShader		objectVertexShader		= gpu.newVertexShader(),
 					traditionalVertexShader		= gpu.newVertexShader(),
 					fullScreenQuadVertexShader	= gpu.newVertexShader(),
-					primitiveVertexShader		= gpu.newVertexShader();
+					primitiveVertexShader		= gpu.newVertexShader(),
+					skyCubeVertexShader		= gpu.newVertexShader();
 		GLFragmentShader	objectFragShader		= gpu.newFragmentShader(),
 					opaqueFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
 					depthQueueFragShader		= gpu.newFragmentShader(),
 					erasureFragShader		= gpu.newFragmentShader(),
 					vertexFragShader		= gpu.newFragmentShader(),
-					primitiveFragShader		= gpu.newFragmentShader();
+					primitiveFragShader		= gpu.newFragmentShader(),
+					skyCubeFragShader		= gpu.newFragmentShader();
 		objectVertexShader	  .setSourceFromResource("/shader/objectVertexShader.glsl");
 		objectFragShader	  .setSourceFromResource("/shader/objectFragShader.glsl");
 		traditionalVertexShader	  .setSourceFromResource("/shader/traditionalVertexShader.glsl");
@@ -122,6 +130,8 @@ public final class Renderer {
 		vertexFragShader	  .setSourceFromResource("/shader/vertexFragShader.glsl");
 		primitiveFragShader	  .setSourceFromResource("/shader/primitiveFragShader.glsl");
 		primitiveVertexShader	  .setSourceFromResource("/shader/primitiveVertexShader.glsl");
+		skyCubeFragShader	  .setSourceFromResource("/shader/skyCubeFragShader.glsl");
+		skyCubeVertexShader	  .setSourceFromResource("/shader/skyCubeVertexShader.glsl");
 		
 		objectProgram		=gpu.newProgram().attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
 		vertexProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(vertexFragShader).link();
@@ -130,6 +140,10 @@ public final class Renderer {
 		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
 		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
 		primitiveProgram	=gpu.newProgram().attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
+		skyCubeProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)       .attachShader(skyCubeFragShader).link();
+		
+		skyCubeProgram.use();
+		skyCubeProgram.getUniform("cubeTexture").set((int)0);
 		
 		vertexProgram.use();
 		vertexProgram.getUniform("rootBuffer").set((int)0);
@@ -184,6 +198,9 @@ public final class Renderer {
 		final int height = tr.getRootWindow().getHeight();
 		gpu.defaultProgram();
 		gpu.defaultTIU();
+		
+		skyCube = new SkyCube(tr);
+		
 		/////// OBJECT
 		camMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
@@ -485,6 +502,8 @@ public final class Renderer {
 		//depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
 		//depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false).unbind();// Doesn't like RGBA32UI for some reason.
 		layerAccumulatorTexture.bind().setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null);
+		/*skyCubeFrameBufferTexture.bind().setImage(GL3.GL_RGB565, width, height, GL3.GL_RGB,
+			GL3.GL_FLOAT, null);*/
 		gpu.defaultTexture();
 	    }
 	});
@@ -535,11 +554,13 @@ public final class Renderer {
 		ensureInit();
 		final RenderList renderList = currentRenderList().getRealtime();
 		deferredProgram.use();
-		renderList.render(gl,cameraMatrixAsFlatArray);
+		renderList.render(gl);
 		// Update GPU
-		cameraMatrixAsFlatArray = renderList.sendToGPU(gl);
+		renderList.sendToGPU(gl);
+		cameraMatrixAsFlatArray = camera.getCompleteMatrixAsFlatArray();
+		camRotationProjectionMatrix = camera.getProjectionRotationMatrixAsFlatArray();
 		//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
-		gpu.memoryManager.get().flushStalePages();
+		gpu.memoryManager.getRealtime().flushStalePages();
 		gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
 		fpsTracking();
 		final World world = gpu.getTr().getWorld();
@@ -824,5 +845,40 @@ public final class Renderer {
      */
     public GLTexture getLayerAccumulatorTexture() {
         return layerAccumulatorTexture;
+    }
+
+    /**
+     * @return the skyCubeProgram
+     */
+    public GLProgram getSkyCubeProgram() {
+        return skyCubeProgram;
+    }
+
+    /**
+     * @return the cameraMatrixAsFlatArray
+     */
+    public float[] getCameraMatrixAsFlatArray() {
+        return cameraMatrixAsFlatArray;
+    }
+
+    /**
+     * @return the camRotationProjectionMatrix
+     */
+    public float[] getCamRotationProjectionMatrix() {
+        return camRotationProjectionMatrix;
+    }
+
+    /**
+     * @return the skyCube
+     */
+    public SkyCube getSkyCube() {
+        return skyCube;
+    }
+
+    /**
+     * @param skyCube the skyCube to set
+     */
+    public void setSkyCube(SkyCube skyCube) {
+        this.skyCube = skyCube;
     }
 }//end Renderer

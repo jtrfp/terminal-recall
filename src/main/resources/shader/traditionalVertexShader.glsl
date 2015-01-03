@@ -129,7 +129,8 @@ gl_Position.x+=dummy*.000000000000001;
     		gl_Position.w	= 1/w;
     		fragTexCoord	= texelFetch(uvBuffer,fetchPos,0).xy;
     		flatTextureID	= texelFetch(texIDBuffer,fetchPos,0).x;//TODO: Remove later
-    		if(flatTextureID!=-1234)flatTextureID	= float(gl_VertexID)/(65536*3);
+    		uint pid		= uint(gl_VertexID)/3u + 1u; // Add 1 so that zero represents 'unwritten.'
+    		if(flatTextureID!=-1234)flatTextureID	= float(pid)/(65536);
 			 screenLoc		= (((gl_Position.xy/gl_Position.w)+1)/2);
 			vec2 normXY		= texelFetch(normXYBuffer,fetchPos,0).xy;
 			float normZ		= texelFetch(normZBuffer,fetchPos,0).x;

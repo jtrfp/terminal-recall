@@ -160,20 +160,19 @@ public class RenderList {
 
     private static int frameCounter = 0;
 
-    private float [] updateStatesToGPU() {
+    private void updateStatesToGPU() {
 	synchronized(tr.getThreadManager().gameStateLock){
 	synchronized(nearbyWorldObjects){
 	final int size=nearbyWorldObjects.size();
 	for (int i=0; i<size; i++) 
 	    nearbyWorldObjects.get(i).updateStateToGPU();
-	return tr.renderer.get().getCamera().getMatrixAsFlatArray();
 	}}
     }//end updateStatesToGPU
 
-    public float [] sendToGPU(GL3 gl) {
+    public void sendToGPU(GL3 gl) {
 	frameCounter++;
 	frameCounter %= 100;
-	return updateStatesToGPU();
+	updateStatesToGPU();
     }//end sendToGPU
     
     private boolean sentPageTable=false;
@@ -186,11 +185,13 @@ public class RenderList {
 	 previousViewport.get(3));
     }//end revertViewportToWindow()
     
-    public void render(final GL3 gl, final float[] cameraMatrixAsFlatArray) {
+    public void render(final GL3 gl) throws NotReadyException {
 	if(!sentPageTable)sendRenderListPageTable();
 	final GPU gpu = tr.gpu.get();
 	final ObjectListWindow olWindow = tr.objectListWindow.get();
 	final int opaqueRenderListLogicalVec4Offset = ((olWindow.getObjectSizeInBytes()*renderListIdx)/16);
+	
+	renderer.getSkyCube().render(this,gl);
 	
 	// OBJECT STAGE
 	final GLProgram objectProgram = renderer.getObjectProgram();
@@ -198,7 +199,7 @@ public class RenderList {
 	objectProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
 	
 	gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
-	objectProgram.getUniform("cameraMatrix").set4x4Matrix(cameraMatrixAsFlatArray, true);
+	objectProgram.getUniform("cameraMatrix").set4x4Matrix(renderer.getCameraMatrixAsFlatArray(), true);
 	renderer.getObjectFrameBuffer().bindToDraw();
 	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
 	gl.glViewport(0, 0, 1024, 128);
@@ -360,6 +361,7 @@ public class RenderList {
 	//gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
 	//gl.glSampleMaski(0, 0xFF);
 	
+	// Thanks to: http://www.andersriggelsen.dk/glblendfunc.php
 	//Set up float shift queue blending
 	gl.glEnable(GL3.GL_BLEND);
 	gl.glBlendFunc(GL3.GL_ONE, GL3.GL_CONSTANT_COLOR);
@@ -395,10 +397,13 @@ public class RenderList {
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glEnable(GL3.GL_BLEND);
 	if(tr.renderer.get().isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = tr.renderer.get().getDeferredProgram();
 	deferredProgram.use();
-	//Zero means 'draw to screen.'
+	gl.glEnable(GL3.GL_BLEND);
+	gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
+	gl.glBlendEquation(GL3.GL_FUNC_ADD);
 	gpu.defaultFrameBuffers();
 	gpu.memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
@@ -414,6 +419,8 @@ public class RenderList {
 	renderer.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	//Cleanup
+	gl.glDisable(GL3.GL_BLEND);
 	
 	// DEPTH QUEUE ERASE
 	renderer.getDepthQueueFrameBuffer().bindToDraw();
@@ -446,7 +453,7 @@ public class RenderList {
 	
 	//INTERMEDIATE ERASE
 	renderer.getOpaqueFrameBuffer().bindToDraw();
-	gl.glClear(GL3.GL_DEPTH_BUFFER_BIT);
+	gl.glClear(GL3.GL_DEPTH_BUFFER_BIT|GL3.GL_COLOR_BUFFER_BIT);
 	gl.glFlush();
 	gl.glWaitSync(rootBufferReadFinishedSync, 0, GL3.GL_TIMEOUT_IGNORED);
     }// end render()

@@ -126,6 +126,7 @@ public class GPU{
 	}
 
 	public void defaultTexture() {
+	    getGl().glBindTexture(GL3.GL_TEXTURE_CUBE_MAP, 0);
 	    getGl().glBindTexture(GL3.GL_TEXTURE_2D_MULTISAMPLE, 0);
 	    getGl().glBindTexture(GL3.GL_TEXTURE_2D, 0);
 	    getGl().glBindTexture(GL3.GL_TEXTURE_1D, 0);

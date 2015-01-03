@@ -83,7 +83,9 @@ const uint OVERSAMPLING				= 4u;
 const  vec2 PRIM_QUAD_BL 			= vec2(PRIM_TEX_WIDTH_SCALAR,PRIM_TEX_HEIGHT_SCALAR)/(2*float(OVERSAMPLING));
 
 float warpFog(float z){
-return clamp(pow(z,80)*1.2,0,1);
+const float ZNEAR = 6554;
+const float ZFAR = 65536 * 16;
+return clamp((z-ZNEAR)/(ZFAR-ZNEAR),0,1);
 }
 
 uint UByte(uint _input, uint index)
@@ -114,7 +116,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  return				  texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
  }
  
- vec4 intrinsicCodeTexel(float warpedFog,uint textureID,vec3 norm,vec2 uv, vec3 illuminatedFog){
+ vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
  // TOC
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
@@ -141,12 +143,10 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  float sunIllumination			= -dot(sunVector,norm);
  if(dot(norm.xyz,norm.xyz)>.2)cTexel.rgb
  								=((clamp(sunIllumination,0,1)*sunColor)+fogColor) * cTexel.rgb;
- 								// TODO: Re-design and optimize
- cTexel 						= mix(cTexel,vec4(illuminatedFog,1),warpedFog);//FOG
  return cTexel;
  }//end intrinsicCodeTexel
 
-vec4 primitiveLayer(vec2 pQuad, float fogFactor, vec3 fogColor, vec4 vUVZI){
+vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI){
  /*
  uint		vertexID	= primitiveID*3u;
  float		textureID	= texelFetch(vertexTextureIDTexture,ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x*65536*PAGE_SIZE_VEC4;
@@ -165,7 +165,9 @@ vec4 primitiveLayer(vec2 pQuad, float fogFactor, vec3 fogColor, vec4 vUVZI){
  if(uv.x!=-.1234)uv	= vUVZI.xy; //TODO: Remove conditional, keep assignment.
  vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-1;//UNPACK NORM    //TODO: Remove
  if(norm.x!=-.1234)norm = (nXnYnZ.xyz*2)-1;//TODO: Remove conditional, keep assignment.
- return intrinsicCodeTexel(fogFactor,uint(vUVZI[3u]),norm,uv,fogColor);
+ vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
+ texel.a 			*=1-warpFog(vUVZI.z);
+ return texel;
 }
 
 uint getPrimitiveIDFromQueue(vec4 layerAccumulator, int level){
@@ -214,16 +216,17 @@ float 	depth 		= texture(depthTexture,screenLoc)[0];
 gl_FragDepth 		= depth;
 float 	warpedFog 	= warpFog(depth);
 uint	primitiveID = uint(texture(primitiveIDTexture,screenLoc)[0u]*65536);
-vec3	color;
-vec3	illuminatedFog
-					= fogColor*sunColor;
+vec4	color;
+/*vec3	illuminatedFog
+					= fogColor*sunColor;*/
 
 // S O L I D   B A C K D R O P
- {
+if(primitiveID>0u){
+ primitiveID--; //Compensate for zero representing "unwritten."
  vec2 pq = getPQuad(primitiveID);
  vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
  _uvzw.xyz /= _uvzw.w;
- color = vec3(primitiveLayer(pq, warpedFog, illuminatedFog, vec4(_uvzw.xyz,getTextureID(primitiveID)) ));
+ color = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) );
  }
 
 vec4	fsq			= texture(layerAccumulator,screenLoc);
@@ -235,13 +238,15 @@ int ordering[DEPTH_QUEUE_SIZE];
 
 // D E P T H   P O P U L A T E
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
- vec2 pQuad = pQuads[i]= getPQuad(primitiveID = getPrimitiveIDFromQueue(fsq,i));
+ primitiveID = getPrimitiveIDFromQueue(fsq,i);
+ if(primitiveID==0u || primitiveID>65535u)
+  break;
+ primitiveID--; //Compensate for zero representing "unwritten."
+ vec2 pQuad = pQuads[i]= getPQuad(primitiveID);
  vec4 _uvzw	= textureLod(primitiveUVZWTexture,pQuad,0);
  _uvzw.xyz /= _uvzw.w;
  vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
  ordering[i]=i;
- if(primitiveID<=0u)
-  {break;}
  relevantSize++;
  }//end for(DEPTH_QUEUE_SIZE)
  
@@ -264,9 +269,10 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
-   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],0,illuminatedFog,vUVZI[ordering[i]]);
-   color 		= mix(color.rgb,dqColor.rgb,dqColor.a);
+   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]]);
+   color.rgb 	= mix(color.rgb,dqColor.rgb,dqColor.a*( (1-color.a)+(dqColor.a*color.a) ));
+   color.a		= 1-((1-color.a)*(1-dqColor.a));
   }//end for(relevantSize)
 
-fragColor.rgb		 	= color;
+fragColor		 	= color;
 }//end main()

@@ -33,6 +33,7 @@ public class GLStateBean {
     		texture1DBinding,
     		texture2DArrayBinding,
     		textureBufferTextureBinding,
+    		textureCubeMapBinding,
     		
     		arrayBufferBinding,
     		copyReadBufferBinding,
@@ -367,4 +368,9 @@ public class GLStateBean {
         this.drawRenderBufferBinding = drawRenderBufferBinding;
     }
 
-}
+    public void setTextureCubeMapBinding(int textureCubeMapBinding) {
+	pcSupport.firePropertyChange("textureCubeMapBinding", this.textureCubeMapBinding, textureCubeMapBinding);
+        this.drawRenderBufferBinding = drawRenderBufferBinding;
+    }
+
+}//end GLStateBean

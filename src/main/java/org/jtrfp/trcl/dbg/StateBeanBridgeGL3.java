@@ -3712,6 +3712,9 @@ public class StateBeanBridgeGL3 implements GL3 {
 	case GL3.GL_TEXTURE_BUFFER:
 	    bean.setTextureBufferTextureBinding(texture);
 	    break;
+	case GL3.GL_TEXTURE_CUBE_MAP:
+	    bean.setTextureCubeMapBinding(texture);
+	    break;
 	default:
 	    unhandledState("Could not identify binding target: "+target);
 	}

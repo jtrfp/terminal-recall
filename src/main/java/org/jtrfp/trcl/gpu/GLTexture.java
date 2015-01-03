@@ -235,13 +235,16 @@ public final class GLTexture {
 	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MIN_FILTER, mode);
 	return this;
     }
-
-    public GLTexture setWrapS(int val) {
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_S, val);
+    public GLTexture setWrapR(int wrappingMode) {
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_R, wrappingMode);
 	return this;
     }
-    public GLTexture setWrapT(int val) {
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_T, val);
+    public GLTexture setWrapS(int wrappingMode) {
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_S, wrappingMode);
+	return this;
+    }
+    public GLTexture setWrapT(int wrappingMode) {
+	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_T, wrappingMode);
 	return this;
     }
 
@@ -824,6 +827,37 @@ public final class GLTexture {
 
     public GLTexture unbind() {
 	gl.glBindTexture(getBindingTarget(), 0);
+	return this;
+    }
+
+    public GLTexture setImagePositiveX(int internalOrder, int width, int height, int colorOrder,
+	    int numericalFormat, ByteBuffer pixels) {
+	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	return this;
+    }
+    public GLTexture setImageNegativeX(int internalOrder, int width, int height, int colorOrder,
+	    int numericalFormat, ByteBuffer pixels) {
+	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	return this;
+    }
+    public GLTexture setImagePositiveY(int internalOrder, int width, int height, int colorOrder,
+	    int numericalFormat, ByteBuffer pixels) {
+	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	return this;
+    }
+    public GLTexture setImageNegativeY(int internalOrder, int width, int height, int colorOrder,
+	    int numericalFormat, ByteBuffer pixels) {
+	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	return this;
+    }
+    public GLTexture setImagePositiveZ(int internalOrder, int width, int height, int colorOrder,
+	    int numericalFormat, ByteBuffer pixels) {
+	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	return this;
+    }
+    public GLTexture setImageNegativeZ(int internalOrder, int width, int height, int colorOrder,
+	    int numericalFormat, ByteBuffer pixels) {
+	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
 	return this;
     }
 }// end GLTexture

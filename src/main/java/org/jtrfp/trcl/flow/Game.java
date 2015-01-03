@@ -77,8 +77,6 @@ public class Game {
     			briefingMode,
     			gameplayMode,
     			performanceReportMode;
-    private BackdropSystem
-    			backdropSystem;
     private final PropertyChangeSupport
     			pcSupport = new PropertyChangeSupport(this);
     private boolean paused=false;
@@ -270,9 +268,6 @@ public class Game {
 		    final Color[] pal 	     = tr.getGlobalPalette();
 		    pal[0] 		     = new Color(0, 0, 0, 0);
 		    tr.setGlobalPalette(pal);
-		    backdropSystem = new BackdropSystem(tr.getWorld());
-		    backdropSystem.activate();
-		    backdropSystem.loadingMode();
 		    // POWERUPS
 		    earlyLoadingScreen.setStatusText("Loading powerup assets...");
 		    rm.setPowerupSystem(new PowerupSystem(tr));
@@ -310,14 +305,12 @@ public class Game {
 		    earlyLoadingScreen.setStatusText("Ready.");
 		    levelLoadingMode = new Object[]{
 			 levelLoadingScreen,
-			 upfrontDisplay,
-			 backdropSystem
+			 upfrontDisplay
 		    };
 		    gameplayMode = new Object[]{
 			 navSystem,
 			 hudSystem,
 			 upfrontDisplay,
-			 backdropSystem,
 			 rm.getDebrisSystem(),
 			 rm.getPowerupSystem(),
 			 rm.getProjectileFactories(),
@@ -325,8 +318,7 @@ public class Game {
 			 rm.getSmokeSystem()
 		    };
 		    briefingMode = new Object[]{
-			 briefingScreen,
-			 backdropSystem
+			 briefingScreen
 		    };
 		    setLevelIndex(0);
     }// end boot()
@@ -453,10 +445,6 @@ public class Game {
     
     public BriefingScreen getBriefingScreen(){
 	return briefingScreen;
-    }
-
-    public BackdropSystem getBackdropSystem() {
-	return backdropSystem;
     }
 
     /**

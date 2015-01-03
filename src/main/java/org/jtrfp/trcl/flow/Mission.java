@@ -229,8 +229,6 @@ public class Mission {
 	    }// end call()
 	});
 	game.getUpfrontDisplay().removePersistentMessage();
-	game.getBackdropSystem().overworldMode();
-	game.getBackdropSystem().activate();
 	tr.getThreadManager().setPaused(false);
 	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
 	getOverworldSystem().activate();

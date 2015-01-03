@@ -26,6 +26,7 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private CloudSystem 	     cloudSystem;
@@ -110,6 +111,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	fogColor = c;
 	if (fogColor == null)
 	    throw new NullPointerException("Passed color is intolerably null.");
+	tr.renderer.get().getSkyCube().setSkyCubeGen(new HorizGradientCubeGen(c,new Color(c.getRed(),c.getGreen(),255)));
     }
 
     public List<DEFObject> getDefList() {

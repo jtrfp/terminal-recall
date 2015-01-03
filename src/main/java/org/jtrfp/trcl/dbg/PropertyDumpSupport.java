@@ -40,23 +40,25 @@ public class PropertyDumpSupport {
 	}
 	for(PropertyDescriptor pd:props){
 	    final Method rm = pd.getReadMethod();
-	    final String name = pd.getName();
-	    final boolean irrelevantProperty = 
-		    rm.getDeclaringClass()==Object.class ||
-		    name.contentEquals("class")  ||
-		    name.contentEquals("propertyChangeListeners");
-	    if(!irrelevantProperty){
-		try{Object val = rm.invoke(delegator);
-		    try{final Method sm = rm.getReturnType().getMethod("dumpProperties", Map.class);
-			final HashMap<String,Object> subDest = new HashMap<String,Object>();
-			sm.invoke(val, subDest);
-			val = subDest;}
-		    catch(NoSuchMethodException e){}
-		    StackTraceElement [] stackTrace = stackTraces.get(pd.getName());
-		    PropertyDumpElement gsp = new PropertyDumpElement(val,stackTrace);
-		    dest.put(pd.getName(),gsp);}
-		     catch(Exception e){e.printStackTrace();}
-	    }//end if(!irrelevant)
+	    if(rm!=null){
+		final String name = pd.getName();
+		    final boolean irrelevantProperty = 
+			    rm.getDeclaringClass()==Object.class ||
+			    name.contentEquals("class")  ||
+			    name.contentEquals("propertyChangeListeners");
+		    if(!irrelevantProperty){
+			try{Object val = rm.invoke(delegator);
+			    try{final Method sm = rm.getReturnType().getMethod("dumpProperties", Map.class);
+				final HashMap<String,Object> subDest = new HashMap<String,Object>();
+				sm.invoke(val, subDest);
+				val = subDest;}
+			    catch(NoSuchMethodException e){}
+			    StackTraceElement [] stackTrace = stackTraces.get(pd.getName());
+			    PropertyDumpElement gsp = new PropertyDumpElement(val,stackTrace);
+			    dest.put(pd.getName(),gsp);}
+			     catch(Exception e){e.printStackTrace();}
+		    }//end if(!irrelevant)
+	    }//end if(readMethod)
 	}//end for(props)
     }//end dumpProperties(...)
     

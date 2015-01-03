@@ -28,7 +28,7 @@ import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class Camera extends WorldObject implements VisibleEverywhere{
-	private volatile  RealMatrix cameraMatrix;
+	private volatile  RealMatrix completeMatrix;
 	private volatile  double viewDepth;
 	private volatile  RealMatrix projectionMatrix;
 	private final	  GPU gpu;
@@ -129,9 +129,9 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 				{ 0, 0, 1, -eyeLoc.getZ() }, new double[]
 				{ 0, 0, 0, 1 } });
 		
-		 return cameraMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(tM));
+		 return completeMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(tM));
 	         }catch(MathArithmeticException e){}//Don't crash.
-	        return cameraMatrix;
+	        return completeMatrix;
 		}//end applyMatrix()
 	public synchronized void setViewDepth(double cameraViewDepth){
 	    	this.viewDepth=cameraViewDepth;
@@ -146,7 +146,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	public double getViewDepth()
 		{return viewDepth;}
 	
-	private synchronized RealMatrix getMatrix()
+	private synchronized RealMatrix getCompleteMatrix()
 		{//if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
@@ -154,7 +154,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
 			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
 			}//}
-		return cameraMatrix;
+		return completeMatrix;
 		}
 	public synchronized float [] getRotationMatrixAsFlatArray(float [] dest){
 	    applyMatrix();
@@ -165,9 +165,19 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	    return dest;
 	}// end getRotationMatrixAsFlatArray(...)
 	
-	public float [] getMatrixAsFlatArray(){
+	public float [] getProjectionRotationMatrixAsFlatArray(){
+	    applyMatrix();//getProjectionMatrix() doesn't implicitly apply matrix since it would cause a recursion loop
 	    final float [] result = new float[16];
-	    final RealMatrix mat = getMatrix();
+	    final RealMatrix mat = getProjectionMatrix().multiply(rotationMatrix);
+	    for(int i=0; i<16; i++){
+		result[i]=(float)mat.getEntry(i/4, i%4);
+	    }//end for(16)
+	    return result;
+	}
+	
+	public float [] getCompleteMatrixAsFlatArray(){
+	    final float [] result = new float[16];
+	    final RealMatrix mat = getCompleteMatrix();
 	    for(int i=0; i<16; i++){
 		result[i]=(float)mat.getEntry(i/4, i%4);
 	    }//end for(16)

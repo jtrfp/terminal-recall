@@ -83,7 +83,7 @@ public class NAVRadarBlipFactory {
 		    }else if(def.isMobile()&&!def.isGroundLocked()){
 			type=BlipType.AIR_ABOVE;
 		    }
-		}else if(wo instanceof PowerupObject){
+		}else if(wo instanceof PowerupObject || wo instanceof Jumpzone || wo instanceof Checkpoint){
 		    type=BlipType.PWR_ABOVE;
 		    }else if(wo instanceof TunnelEntranceObject){
 			type=BlipType.TUN_ABOVE;
@@ -97,7 +97,7 @@ public class NAVRadarBlipFactory {
 		}else if(def.isMobile()&&!def.isGroundLocked()){
 		 type=BlipType.AIR_BELOW;
 		}
-		}else if(wo instanceof PowerupObject){
+		}else if(wo instanceof PowerupObject || wo instanceof Jumpzone || wo instanceof Checkpoint){
 		type=BlipType.PWR_BELOW;
 		 }else if(wo instanceof TunnelEntranceObject){
 		  type=BlipType.TUN_BELOW;

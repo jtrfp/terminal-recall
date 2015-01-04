@@ -16,6 +16,7 @@ import java.awt.Dimension;
 
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
+import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
@@ -26,7 +27,9 @@ private NAVObjective objective;
 private boolean includeYAxisInCollision=true;
     public Checkpoint(TR tr) {
 	super(tr);
+	super.setModelOffset(0, 80000, 0);
 	addBehavior(new CheckpointBehavior());
+	addBehavior(new TerrainLocked());
 	setBillboardSize(new Dimension(80000,80000));
 	setVisible(true);
 	try{setTexture(

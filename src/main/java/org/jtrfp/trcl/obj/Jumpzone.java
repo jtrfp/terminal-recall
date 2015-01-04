@@ -16,6 +16,7 @@ package org.jtrfp.trcl.obj;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
+import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
@@ -35,6 +36,7 @@ private boolean includeYAxisInCollision=true;
     public void setObjectiveToRemove(NAVObjective objective, Mission m) {
 	this.objective=objective;
 	addBehavior(new JumpzoneBehavior());
+	addBehavior(new TerrainLocked());
     }//end setObjectiveToRemove(...)
     
     private class JumpzoneBehavior extends Behavior implements CollisionBehavior, NAVTargetableBehavior{

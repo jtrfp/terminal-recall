@@ -22,19 +22,10 @@ Apache Commons
 	Apache Commons Mathematics Library / Commons IO
 	License: Apache 2.0
 	http://commons.apache.org/math/
-	
-	Apache Commons Imaging
-	package org.apache.commons.imaging.formats.jpeg.decoder.Dct only.
-	License: Apache 2.0
-	Class access modified to be public.
 	   
 Java Format Description Toolkit (jFDT)
     License: GPL v3
     http://code.google.com/p/jfdt/
-	
-Fast DCT/iDCT Algorithms
-	http://unix4lyfe.org/dct/listing3.c
-	Emil Mikulic, Arai, Agui, Nakajima and Tim Kientzle
     
 Reverse-Engineering Wiki feat. Terminal Velocity / Fury3 file format documentation
     REWiki (http://rewiki.regengedanken.de/wiki/Main_Page) 
@@ -43,4 +34,9 @@ OCR-A font
 	John Sauter
 	http://ocr-a-font.sourceforge.net/
 	Public Domain
+	
+Jordan Moss
+	Star texture
+	Copyright (c) 2014 Jordan Moss
+	GPL3
     

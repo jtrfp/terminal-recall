@@ -146,7 +146,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  return cTexel;
  }//end intrinsicCodeTexel
 
-vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI){
+vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI, bool disableAlpha){
  /*
  uint		vertexID	= primitiveID*3u;
  float		textureID	= texelFetch(vertexTextureIDTexture,ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x*65536*PAGE_SIZE_VEC4;
@@ -166,6 +166,7 @@ vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI){
  vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-1;//UNPACK NORM    //TODO: Remove
  if(norm.x!=-.1234)norm = (nXnYnZ.xyz*2)-1;//TODO: Remove conditional, keep assignment.
  vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
+ if(disableAlpha)	texel.a=1;
  texel.a 			*=1-warpFog(vUVZI.z);
  return texel;
 }
@@ -224,7 +225,7 @@ if(primitiveID>0u){
  vec2 pq = getPQuad(primitiveID);
  vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
  _uvzw.xyz /= _uvzw.w;
- color = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) );
+ color = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true);
  }
 
 vec4	fsq			= texture(layerAccumulator,screenLoc);
@@ -267,7 +268,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
-   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]]);
+   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]], false);
    color.rgb 	= mix(color.rgb,dqColor.rgb,dqColor.a*( (1-color.a)+(dqColor.a*color.a) ));
    color.a		= 1-((1-color.a)*(1-dqColor.a));
   }//end for(relevantSize)

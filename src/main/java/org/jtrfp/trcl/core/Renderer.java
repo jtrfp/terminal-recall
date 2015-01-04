@@ -164,10 +164,11 @@ public final class Renderer {
 		primitiveProgram.getUniform("nZVBuffer").set((int)5);
 		
 		depthQueueProgram.use();
-		depthQueueProgram.getUniform("depthTexture").set((int)1);
+		/// ... zero?
+		/// 1 UNUSED
 		depthQueueProgram.getUniform("xyBuffer").set((int)2);
-		//depthQueueProgram.getUniform("uvBuffer").set((int)3);
-		//depthQueueProgram.getUniform("texIDBuffer").set((int)4);
+		/// 3 UNUSED
+		/// 4 UNUSED
 		depthQueueProgram.getUniform("zBuffer").set((int)5);
 		depthQueueProgram.getUniform("wBuffer").set((int)6);
 		deferredProgram.use();
@@ -404,6 +405,7 @@ public final class Renderer {
 			.newFrameBuffer()
 			.bindToDraw()
 			.attachDrawTexture(layerAccumulatorTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDepthTexture(opaqueDepthTexture)
 			/*
 			.attachDrawTexture2D(depthQueueTexture, 
 				GL3.GL_COLOR_ATTACHMENT0,GL3.GL_TEXTURE_2D_MULTISAMPLE)

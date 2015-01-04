@@ -355,7 +355,7 @@ public class RenderList {
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_CULL_FACE);
 	//gl.glEnable(GL3.GL_SAMPLE_MASK);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDepthFunc(GL3.GL_LESS);
 	//gl.glDisable(GL3.GL_MULTISAMPLE);
 	//gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
 	//gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);

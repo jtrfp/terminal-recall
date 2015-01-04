@@ -13,11 +13,9 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -55,7 +53,6 @@ public final class Renderer {
     /*					*/	opaqueProgram, 
     /*					*/	deferredProgram, 
     /*					*/	depthQueueProgram, 
-    /*					*/	depthErasureProgram,
     /*					*/	vertexProgram,
     /*                                  */      primitiveProgram,
     /*					*/	skyCubeProgram;
@@ -115,7 +112,6 @@ public final class Renderer {
 					opaqueFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
 					depthQueueFragShader		= gpu.newFragmentShader(),
-					erasureFragShader		= gpu.newFragmentShader(),
 					vertexFragShader		= gpu.newFragmentShader(),
 					primitiveFragShader		= gpu.newFragmentShader(),
 					skyCubeFragShader		= gpu.newFragmentShader();
@@ -125,7 +121,6 @@ public final class Renderer {
 		fullScreenQuadVertexShader.setSourceFromResource("/shader/fullScreenQuadVertexShader.glsl");
 		opaqueFragShader	  .setSourceFromResource("/shader/opaqueFragShader.glsl");
 		deferredFragShader	  .setSourceFromResource("/shader/deferredFragShader.glsl");
-		erasureFragShader	  .setSourceFromResource("/shader/erasureFragShader.glsl");
 		depthQueueFragShader	  .setSourceFromResource("/shader/depthQueueFragShader.glsl");
 		vertexFragShader	  .setSourceFromResource("/shader/vertexFragShader.glsl");
 		primitiveFragShader	  .setSourceFromResource("/shader/primitiveFragShader.glsl");
@@ -138,7 +133,6 @@ public final class Renderer {
 		opaqueProgram		=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
 		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
-		depthErasureProgram	=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(erasureFragShader).link();
 		primitiveProgram	=gpu.newProgram().attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
 		skyCubeProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)       .attachShader(skyCubeFragShader).link();
 		
@@ -564,8 +558,6 @@ public final class Renderer {
 		gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
 		fpsTracking();
 		final World world = gpu.getTr().getWorld();
-		if(world!=null)
-		 setFogColor(world.getFogColor());
 	}catch(NotReadyException e){}
     }//end render()
     
@@ -636,18 +628,23 @@ public final class Renderer {
 	//getBackRenderList().get().flushObjectDefsToGPU();
 	renderListToggle.set(!renderListToggle.get());
     }
-
-    public void setFogColor(Color c) {
-	deferredProgram.use();
-	fogColor.set((float) c.getRed() / 255f, (float) c.getGreen() / 255f,
-		(float) c.getBlue() / 255f);
-	opaqueProgram.use();
-    }
-    
+/*
+    public void setFogColor(final Color c) {
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		deferredProgram.use();
+		fogColor.set((float) c.getRed() / 255f, (float) c.getGreen() / 255f,
+			(float) c.getBlue() / 255f);
+		gpu.defaultProgram();
+		return null;
+	    }}).get();
+    }//end setFogColor(...)
+    */
     public void setSunVector(Vector3D sv){
 	deferredProgram.use();
 	sunVector.set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
-	opaqueProgram.use();
+	gpu.defaultProgram();
     }
 
     /**
@@ -708,13 +705,6 @@ public final class Renderer {
      */
     public GLProgram getDepthQueueProgram() {
         return depthQueueProgram;
-    }
-
-    /**
-     * @return the depthErasureProgram
-     */
-    public GLProgram getDepthErasureProgram() {
-        return depthErasureProgram;
     }
 
     /**

@@ -19,9 +19,6 @@
 #version 330
 
 // INPUTS
-uniform sampler2D 		primaryRendering;
-uniform sampler2D 		depthTexture;
-uniform sampler2D 		normTexture;
 uniform sampler2D 		primitiveIDTexture;
 uniform sampler2D		vertexTextureIDTexture;
 uniform sampler2D		primitiveUVZWTexture;
@@ -29,7 +26,6 @@ uniform sampler2D		primitivenXnYnZTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
-//uniform sampler2DMS		depthQueueTexture;
 uniform vec3 			fogColor;
 uniform uint 			screenWidth;
 uniform uint 			screenHeight;
@@ -147,24 +143,9 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  }//end intrinsicCodeTexel
 
 vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI, bool disableAlpha){
- /*
- uint		vertexID	= primitiveID*3u;
- float		textureID	= texelFetch(vertexTextureIDTexture,ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x*65536*PAGE_SIZE_VEC4;
- uint	row				= primitiveID/PRIMS_PER_ROW;
- uint	col				= primitiveID%PRIMS_PER_ROW;
- uint	primitiveIndex	= row*PRIMS_PER_ROW+col;
- uint	vertexIndex		= primitiveIndex*3u;
- vec2	pQuadBL			= PRIM_QUAD_BL;
- pQuadBL.x			+=float(col*2)*PRIM_TEX_WIDTH_SCALAR;// x2 because each quad is 2 texels wide.
- pQuadBL.y			+=float(row*2)*PRIM_TEX_HEIGHT_SCALAR;
- vec2	pQuad		= pQuadBL+vec2(PRIM_TEX_WIDTH_SCALAR*screenLoc.x,PRIM_TEX_HEIGHT_SCALAR*screenLoc.y);
- vec4	uvzw		= textureLod(primitiveUVZWTexture,pQuad,0);
- */
  vec4	nXnYnZ		= textureLod(primitivenXnYnZTexture,pQuad,0);
- vec2	uv			= texture(primaryRendering,screenLoc).xy;//GET UV //TODO: Remove
- if(uv.x!=-.1234)uv	= vUVZI.xy; //TODO: Remove conditional, keep assignment.
- vec3 	norm 		= texture(normTexture,screenLoc).xyz*2-1;//UNPACK NORM    //TODO: Remove
- if(norm.x!=-.1234)norm = (nXnYnZ.xyz*2)-1;//TODO: Remove conditional, keep assignment.
+ vec2	uv			= vUVZI.xy;
+ vec3 	norm 		= (nXnYnZ.xyz*2)-1;
  vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
  if(disableAlpha)	texel.a=1;
  texel.a 			*=1-warpFog(vUVZI.z);
@@ -211,9 +192,6 @@ textureTOC{
 **/
 
 void main(){
-float 	depth 		= texture(depthTexture,screenLoc)[0];
-gl_FragDepth 		= depth;
-float 	warpedFog 	= warpFog(depth);
 uint	primitiveID = uint(texture(primitiveIDTexture,screenLoc)[0u]*65536);
 vec4	color;
 /*vec3	illuminatedFog

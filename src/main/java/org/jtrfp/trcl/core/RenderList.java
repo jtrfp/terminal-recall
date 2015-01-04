@@ -407,13 +407,12 @@ public class RenderList {
 	gpu.defaultFrameBuffers();
 	gpu.memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
-	renderer.getOpaqueUVTexture().bindToTextureUnit(1,gl);
-	renderer.getOpaqueDepthTexture().bindToTextureUnit(2,gl);
-	renderer.getOpaqueNormTexture().bindToTextureUnit(3,gl);
+	/// 1 UNUSED
+	/// 2 UNUSED
+	/// 3 UNUSED
 	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
 	renderer.getOpaquePrimitiveIDTexture().bindToTextureUnit(5,gl);
 	renderer.getLayerAccumulatorTexture().bindToTextureUnit(6,gl);
-	//renderer.getDepthQueueTexture().bindToTextureUnit(6,gl);
 	renderer.getVertexTextureIDTexture().bindToTextureUnit(7,gl);
 	renderer.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	renderer.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
@@ -426,22 +425,6 @@ public class RenderList {
 	renderer.getDepthQueueFrameBuffer().bindToDraw();
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	gpu.defaultFrameBuffers();
-	/*
-	tr.renderer.get().depthErasureProgram.use();
-	gl.glDisable(GL3.GL_CULL_FACE);
-	renderer.getDepthQueueFrameBuffer().bindToDraw();
-	gl.glEnable(GL3.GL_MULTISAMPLE);
-	gl.glEnable(GL3.GL_SAMPLE_MASK);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
-	gl.glDepthMask(false);
-	gl.glEnable(GL3.GL_STENCIL_TEST);
-	for (int i = 0; i < Renderer.DEPTH_QUEUE_SIZE; i++) {
-	    gl.glStencilFunc(GL3.GL_ALWAYS, i + 1, 0xff);
-	    gl.glStencilOp(GL3.GL_REPLACE, GL3.GL_REPLACE, GL3.GL_REPLACE);
-	    gl.glSampleMaski(0, 0x1 << i);
-	    gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
-	}
-	*/
 	//Cleanup
 	gl.glDepthMask(true);
 	gl.glDisable(GL3.GL_MULTISAMPLE);

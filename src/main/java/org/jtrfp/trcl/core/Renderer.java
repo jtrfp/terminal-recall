@@ -62,12 +62,9 @@ public final class Renderer {
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
     private 	 	GLUniform	    	fogColor,
     /*    */					sunVector;
-    private 		GLTexture 		opaqueUVTexture,
-    /*					*/	opaqueDepthTexture,
-    /*					*/	opaqueNormTexture,
+    private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
     /*					*/	depthQueueTexture,
-    /*					*/	depthQueueStencil,
     /*					*/	camMatrixTexture,noCamMatrixTexture,
     /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
     /*					*/	vertexNormXYTexture,vertexNormZTexture,
@@ -146,12 +143,12 @@ public final class Renderer {
 		
 		opaqueProgram.use();
 		opaqueProgram.getUniform("xyBuffer").set((int)1);
-		opaqueProgram.getUniform("uvBuffer").set((int)2);
-		opaqueProgram.getUniform("texIDBuffer").set((int)3);
+		/// 2 UNUSED
+		/// 3 UNUSED
 		opaqueProgram.getUniform("zBuffer").set((int)4);
 		opaqueProgram.getUniform("wBuffer").set((int)5);
-		opaqueProgram.getUniform("normXYBuffer").set((int)6);
-		opaqueProgram.getUniform("normZBuffer").set((int)7);
+		/// 6 UNUSED
+		/// 7 UNUSED
 		
 		objectProgram.use();
 		objectProgram.getUniform("rootBuffer").set((int)0);
@@ -170,20 +167,19 @@ public final class Renderer {
 		depthQueueProgram.getUniform("depthTexture").set((int)1);
 		depthQueueProgram.getUniform("xyBuffer").set((int)2);
 		//depthQueueProgram.getUniform("uvBuffer").set((int)3);
-		depthQueueProgram.getUniform("texIDBuffer").set((int)4);
+		//depthQueueProgram.getUniform("texIDBuffer").set((int)4);
 		depthQueueProgram.getUniform("zBuffer").set((int)5);
 		depthQueueProgram.getUniform("wBuffer").set((int)6);
 		deferredProgram.use();
 		fogColor 	= deferredProgram	.getUniform("fogColor");
 		sunVector 	= deferredProgram	.getUniform("sunVector");
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
-		deferredProgram.getUniform("primaryRendering").set((int) 1);
-		deferredProgram.getUniform("depthTexture").set((int) 2);
-		deferredProgram.getUniform("normTexture").set((int) 3);
+		// 1 UNUSED
+		// 2 UNUSED
+		// 3 UNUSED
 		deferredProgram.getUniform("rgbaTiles").set((int) 4);
 		deferredProgram.getUniform("primitiveIDTexture").set((int) 5);
 		deferredProgram.getUniform("layerAccumulator").set((int)6);
-		//deferredProgram.getUniform("depthQueueTexture").set((int) 6);
 		deferredProgram.getUniform("vertexTextureIDTexture").set((int) 7);
 		deferredProgram.getUniform("primitiveUVZWTexture").set((int) 8);
 		deferredProgram.getUniform("primitivenXnYnZTexture").set((int) 9);
@@ -358,29 +354,6 @@ public final class Renderer {
 		    throw new RuntimeException("Primitive framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		/////// INTERMEDIATE
-		opaqueUVTexture = gpu
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RG16F, width, height, GL3.GL_RGB,
-				GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setExpectedMinValue(-1, -1, -1, -1)
-			.setExpectedMaxValue(1, 1, 1, 1)
-			.setDebugName("opaqueUVTexture");
-		opaqueNormTexture = gpu
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RGB565, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setExpectedMinValue(-1, -1, -1, -1)
-			.setExpectedMaxValue(1, 1, 1, 1)
-			.setDebugName("opaqueNormTexture");
 		opaqueDepthTexture = gpu
 			.newTexture()
 			.bind()
@@ -406,33 +379,16 @@ public final class Renderer {
 		opaqueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
-			.attachDrawTexture(opaqueUVTexture,
-				GL3.GL_COLOR_ATTACHMENT0)
-			.attachDrawTexture(opaqueNormTexture, 
-				GL3.GL_COLOR_ATTACHMENT1)
-			.attachDrawTexture(opaquePrimitiveIDTexture, 
-				GL3.GL_COLOR_ATTACHMENT2)
 			.attachDepthTexture(opaqueDepthTexture)
-			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1,GL3.GL_COLOR_ATTACHMENT2)
+			.attachDrawTexture(opaquePrimitiveIDTexture, 
+				GL3.GL_COLOR_ATTACHMENT0)
+			.attachDepthTexture(opaqueDepthTexture)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0)
 			.unbindFromDraw();
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Intermediate framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		/////// DEPTH QUEUE
-		/*
-		depthQueueTexture = gpu
-			.newTexture()
-			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
-			.bind()
-			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false)
-			.unbind();
-		depthQueueStencil = gpu
-			.newTexture()
-			.setBindingTarget(GL3.GL_TEXTURE_2D_MULTISAMPLE)
-			.bind()
-			.setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false)
-			.unbind();
-		*/
 		layerAccumulatorTexture = gpu
 			.newTexture()
 			.bind()
@@ -487,11 +443,8 @@ public final class Renderer {
 		gpu.defaultProgram();
 		gpu.defaultFrameBuffers();
 		gpu.defaultTIU();
-		opaqueUVTexture.bind().setImage(GL3.GL_RG16, width,
-			height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
-		opaqueNormTexture.bind().setImage(GL3.GL_RGB565, width, height, GL3.GL_RGB, GL3.GL_FLOAT, null);
 		opaquePrimitiveIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
 		//depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
 		//depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false).unbind();// Doesn't like RGBA32UI for some reason.
@@ -715,13 +668,6 @@ public final class Renderer {
     }
 
     /**
-     * @return the depthQueueStencil
-     */
-    public GLTexture getDepthQueueStencil() {
-        return depthQueueStencil;
-    }
-
-    /**
      * @return the objectTexture
      */
     public GLTexture getCamMatrixTexture() {
@@ -746,16 +692,8 @@ public final class Renderer {
         return opaqueFrameBuffer;
     }
     
-    public GLTexture getOpaqueUVTexture() {
-        return opaqueUVTexture;
-    }
-    
     public GLTexture getOpaqueDepthTexture() {
         return opaqueDepthTexture;
-    }
-    
-    public GLTexture getOpaqueNormTexture() {
-        return opaqueNormTexture;
     }
     
     public GLTexture getOpaquePrimitiveIDTexture() {

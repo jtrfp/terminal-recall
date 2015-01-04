@@ -83,7 +83,7 @@ const uint OVERSAMPLING				= 4u;
 const  vec2 PRIM_QUAD_BL 			= vec2(PRIM_TEX_WIDTH_SCALAR,PRIM_TEX_HEIGHT_SCALAR)/(2*float(OVERSAMPLING));
 
 float warpFog(float z){
-const float ZNEAR = 6554;
+const float ZNEAR = 6554 * 32;
 const float ZFAR = 65536 * 16;
 return clamp((z-ZNEAR)/(ZFAR-ZNEAR),0,1);
 }
@@ -174,15 +174,13 @@ uint getPrimitiveIDFromQueue(vec4 layerAccumulator, int level){
  const vec4 ACC_MULTIPLIER = vec4(1,16,256,4096);
  return uint(dot(mod(floor(layerAccumulator/pow(16.,float(level))),16)*ACC_MULTIPLIER,vec4(1)));
 }
-/*
-float getDepthOfPrimitive(uint primitiveID){
-}
-*/
 
+//UNTESTED
 float logn(float value, float base){
  return log2(value)/log2(base);
 }
 
+//DOES NOT WORK
 uint depthOfFloatShiftQueue(vec4 fsq){
  return uint(logn(fsq.x,16));
 }

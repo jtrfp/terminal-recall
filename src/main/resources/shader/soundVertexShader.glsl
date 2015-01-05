@@ -41,7 +41,7 @@ void main(){
  fragTexPos = sweep;
  float texelHeight = 1/float(numRows);
  fragRow = (float(row)*texelHeight) + texelHeight/2;
- float rowsX = floor((gl_VertexID+1)/2) + floor(gl_VertexID/2)/float(SAMPLES_PER_ROW);
+ float rowsX = (gl_VertexID+1)/2 + (gl_VertexID/2)/float(SAMPLES_PER_ROW);
  vid = gl_VertexID / 64;
  
  panLR = pan;

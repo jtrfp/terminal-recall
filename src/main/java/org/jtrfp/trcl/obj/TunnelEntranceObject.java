@@ -99,7 +99,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 //Turn on tunnel
 		 tunnel.activate();
 		 //Move player to tunnel
-		 world.setFogColor(new Color(10,30,15));
+		 tr.renderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 		 //Ensure chamber mode is off
 		 overworldSystem.setChamberMode(false);
 		 overworldSystem.setTunnelMode(true);

@@ -58,6 +58,7 @@ public class SkyCube {
     
     private void buildSkyCubeTexture(){
 	final SkyCubeGen cubeGen = getSkyCubeGen();
+	final int sideWidth = cubeGen.getSideWidth();
 	tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -66,12 +67,12 @@ public class SkyCube {
 			.newTexture()
 			.setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP)
 			.bind()
-			.setImagePositiveX(colorMode,32,32,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getEast())
-			.setImageNegativeX(colorMode,32,32,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getWest())
-			.setImagePositiveY(colorMode,32,32,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getTop())
-			.setImageNegativeY(colorMode,32,32,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getBottom())
-			.setImagePositiveZ(colorMode,32,32,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getNorth())
-			.setImageNegativeZ(colorMode,32,32,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getSouth())
+			.setImagePositiveX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getEast())
+			.setImageNegativeX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getWest())
+			.setImagePositiveY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getTop())
+			.setImageNegativeY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getBottom())
+			.setImagePositiveZ(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getNorth())
+			.setImageNegativeZ(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getSouth())
 			.setMinFilter(GL3.GL_LINEAR)
 			.setMagFilter(GL3.GL_LINEAR)
 			.setWrapR(GL3.GL_CLAMP_TO_EDGE)
@@ -79,7 +80,7 @@ public class SkyCube {
 			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
 			.setDebugName("Sky Cube Texture");
 		return null;
-	    }}).get();
+	    }});
     }//end buildSkyCubeTexture()
 
     /**
@@ -95,6 +96,7 @@ public class SkyCube {
      * @param skyCubeGen the skyCubeGen to set
      */
     public void setSkyCubeGen(SkyCubeGen skyCubeGen) {
+	//If this is the same type of gen as before, we don't want to go through all the redundant work.
 	if(this.skyCubeGen!=null)
 	    if(this.skyCubeGen.hashCode()==skyCubeGen.hashCode())
 		return;//Nothing to do.
@@ -106,14 +108,14 @@ public class SkyCube {
 		public Void call() throws Exception {
 		    thisSkyCubeTexture.delete();
 		    return null;
-		}}).get();
+		}});
 	this.skyCubeTexture=null;
     }//end setSkyCubeGen(...)
 
     /**
      * @return the skyCubeTexture
      */
-    GLTexture getSkyCubeTexture() {
+    private GLTexture getSkyCubeTexture() {
 	if(skyCubeTexture==null)
 	    buildSkyCubeTexture();
         return skyCubeTexture;

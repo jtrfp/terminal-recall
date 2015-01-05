@@ -106,6 +106,7 @@ public class Mission {
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
+	tr.renderer.get().getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
 	game.setDisplayMode(game.levelLoadingMode);
 	game.getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
@@ -232,7 +233,7 @@ public class Mission {
 	tr.getThreadManager().setPaused(false);
 	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
 	getOverworldSystem().activate();
-	tr.getWorld().setFogColor(overworldSystem.getFogColor());
+	tr.renderer.get().getSkyCube().setSkyCubeGen(getOverworldSystem().getSkyCubeGen());
 	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);
 	game.getPlayer()	.setActive(true);

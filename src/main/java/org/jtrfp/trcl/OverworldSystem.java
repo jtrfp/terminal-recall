@@ -27,6 +27,7 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
+import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private CloudSystem 	     cloudSystem;
@@ -45,6 +46,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     				     objectReporter;
     private		ObjectSystem objectSystem;
     private            TerrainSystem terrainSystem;
+    private		SkyCubeGen   skyCubeGen;
 
     public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
 	super(w);
@@ -99,21 +101,20 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     
     @Override
     public void activate(){
-	tr.getWorld().setFogColor(getFogColor());
 	super.activate();
     }
 
     public Color getFogColor() {
 	return fogColor;
     }
-
+/*
     public void setFogColor(Color c) {
 	fogColor = c;
 	if (fogColor == null)
 	    throw new NullPointerException("Passed color is intolerably null.");
 	tr.renderer.get().getSkyCube().setSkyCubeGen(new HorizGradientCubeGen(c,new Color(c.getRed(),c.getGreen(),255)));
     }
-
+*/
     public List<DEFObject> getDefList() {
 	return defList;
     }
@@ -171,5 +172,24 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     }
     public InterpolatingAltitudeMap getAltitudeMap() {
 	return altitudeMap;
+    }
+    /**
+     * @return the skyCubeGen
+     */
+    public SkyCubeGen getSkyCubeGen() {
+	if(skyCubeGen==null){
+	    if(cloudSystem!=null)
+		skyCubeGen = new HorizGradientCubeGen
+		 (fogColor,new Color(fogColor.getRed(),fogColor.getGreen(),255));//TODO: Use the game's gradient info
+	    else
+		skyCubeGen = new HorizGradientCubeGen(Color.black,new Color(0,0,0,0)).
+			setEastTexture("/StarsA.png").
+			setWestTexture("/StarsA.png").
+			setTopTexture("/StarsA.png").
+			setSouthTexture("/StarsB.png").
+			setNorthTexture("/StarsB.png").
+			setVerticalBias(.65f);
+	}//end null
+        return skyCubeGen;
     }
 }// end OverworldSystem

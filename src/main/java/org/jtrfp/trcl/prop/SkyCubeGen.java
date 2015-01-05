@@ -24,4 +24,5 @@ public interface SkyCubeGen {
     public ByteBuffer getSouth();
     public ByteBuffer getWest();
     public ByteBuffer getEast();
+    public int getSideWidth();
 }

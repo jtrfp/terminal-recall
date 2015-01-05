@@ -68,7 +68,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	add(briefingScreen);
 	this.tr	      = tr;
 	briefingChars = new CharAreaDisplay(this,.047,WIDTH_CHARS,NUM_LINES,tr,font);
-	//briefingChars.setFontSize(.035);//TODO: Implement
 	briefingChars.activate();
 	briefingChars.setPosition(-.7, -.45, Z*200);
 	briefingScreen.setPosition(0,0,Z);
@@ -143,7 +142,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    planetObject=null;
 	}
 	try{
-	 
 	 final Model planetModel = rm.getBINModel(
 		 missionTXT.get().getPlanetModelFile(),
 		 rm.getRAWAsTexture(missionTXT.get().getPlanetTextureFile(), 
@@ -173,8 +171,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
 	game.getCurrentMission().getOverworldSystem().activate();
-	tr.getWorld().setFogColor(Color.black);
 	planetDisplayMode(lvl);
+	tr.renderer.get().getSkyCube().setSkyCubeGen(CloudSystem.SPACE_STARS);
 	briefingChars.activate();
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.renderer.get().getCamera();
@@ -189,14 +187,17 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.renderer.get().getCamera();
+	final OverworldSystem overworld
+				= game.getCurrentMission().getOverworldSystem();
 	//missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
 	missionTXT.reset();
 	game.getPlayer().setActive(false);
 	planetDisplayMode(lvl);
 	setContent(
 		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
-	game.getCurrentMission().getOverworldSystem().activate();
-	tr.getWorld().setFogColor(Color.black);
+	overworld.activate();
+	tr.renderer.get().getSkyCube().setSkyCubeGen(CloudSystem.SPACE_STARS);
+	
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};
 	addScrollFinishCallback(new Runnable(){
@@ -219,7 +220,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	spacebarWaitThread.interrupt();
 	
 	//Enemy introduction
-	tr.getWorld().setFogColor(game.getCurrentMission().getOverworldSystem().getFogColor());
+	tr.renderer.get().getSkyCube().setSkyCubeGen(game.getCurrentMission().getOverworldSystem().getSkyCubeGen());
+	
 	for(EnemyIntro intro:game.getCurrentMission().getOverworldSystem().getObjectSystem().getDefPlacer().getEnemyIntros()){
 	    final WorldObject wo = intro.getWorldObject();
 	    final boolean vis = wo.isVisible();

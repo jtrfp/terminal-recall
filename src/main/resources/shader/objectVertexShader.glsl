@@ -32,7 +32,7 @@ flat out mat4 camMatrix;
 flat out mat4 noCamMatrix;
 
 //IN
-uniform uint 			renderListPageTable[172];
+uniform uint 			renderListPageTable[256];
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform mat4 			cameraMatrix;
 uniform uint			logicalVec4Offset;

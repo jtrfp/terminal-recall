@@ -34,7 +34,7 @@ flat out float 			flatTextureID; //TODO: Nomenclature to primitiveID
 noperspective out vec2	screenLoc;
 
 //IN
-uniform uint 			renderListPageTable[172];
+uniform uint 			renderListPageTable[256];
 uniform mat4 			cameraMatrix;
 uniform sampler2D		xyBuffer;
 uniform sampler2D		uvBuffer;

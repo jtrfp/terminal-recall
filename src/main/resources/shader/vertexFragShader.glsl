@@ -34,7 +34,7 @@ const uint VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3u)*3u;
 //const float V_COORD_PACK_SCALE		=16;
 
 // INPUTS
-uniform uint 			renderListPageTable[172];//172
+uniform uint 			renderListPageTable[256];//previously 172
 uniform uint			logicalVec4Offset;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform sampler2D		camMatrixBuffer;

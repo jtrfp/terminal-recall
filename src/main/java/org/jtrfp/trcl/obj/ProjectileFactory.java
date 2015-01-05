@@ -162,6 +162,7 @@ public class ProjectileFactory {
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
+	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getWorld().add((WorldObject)result);
 	tr.renderer.get().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
 	if(soundTexture!=null)

@@ -14,10 +14,12 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.LineSegment;
 
@@ -61,10 +63,11 @@ public class TextureManager {
     
     public TextureDescription getDefaultTriPipeTexture(){
 	if(defaultTriPipeTexture==null){
-	 defaultTriPipeTexture
-	    	= 
-	    		new Texture(Texture.RGBA8FromPNG(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
-	    			"Default TriPipe Texture (grayNoise)",tr,true);
+	 try{
+	  defaultTriPipeTexture = 
+	    		new Texture(ImageIO.read(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
+	    			"Default TriPipe Texture (grayNoise)",tr,true);}
+	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
@@ -72,10 +75,12 @@ public class TextureManager {
     public synchronized TextureDescription getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
 	Texture t;
-	t = new Texture(
-		Texture.RGBA8FromPNG(Texture.class
+	try{
+	 t = new Texture(
+		ImageIO.read(Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),
-		"Fallback",tr,true);
+		"Fallback",tr,true);}
+	catch(IOException e){throw new RuntimeException("Failure to load fallback texture. Is everything right with the resources directory?",e);}
 	fallbackTexture = t;
 	return fallbackTexture;
     }//end getFallbackTexture()

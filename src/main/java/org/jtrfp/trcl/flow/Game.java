@@ -22,7 +22,6 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 
 import org.jtrfp.jtrfp.FileLoadException;
-import org.jtrfp.trcl.BackdropSystem;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.EarlyLoadingScreen;
@@ -31,6 +30,7 @@ import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.UpfrontDisplay;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.Camera;
@@ -48,6 +48,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
+import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Game {
@@ -243,9 +244,8 @@ public class Game {
 
     public synchronized void boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 		// Set up player, HUD, fonts...
-		System.out.println("Game.go()...");
+		System.out.println("Booting...");
 		System.out.println("Initializing general resources...");
-		tr.getWorld().setFogColor(Color.BLACK);
 		greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
 		NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 		upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),

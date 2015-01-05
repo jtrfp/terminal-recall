@@ -20,6 +20,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.ObjectDirection;
+import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 
 public final class World extends RenderableSpacePartitioningGrid {
     double sizeX;
@@ -75,16 +76,6 @@ public final class World extends RenderableSpacePartitioningGrid {
      */
     public Color getFogColor() {
 	return fogColor;
-    }
-
-    /**
-     * @param fogColor
-     *            the fogColor to set
-     */
-    public void setFogColor(Color fogColor) {
-	if (fogColor == null)
-	    throw new NullPointerException("Color is intolerably null.");
-	this.fogColor = fogColor;
     }
 
     /**

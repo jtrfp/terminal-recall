@@ -109,7 +109,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
  vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
  vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
- return				  texture(rgbaTiles,vec3(codePgUV,codeBkPgNum));
+ return				  textureLod(rgbaTiles,vec3(codePgUV,codeBkPgNum),0);
  }
  
  vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
@@ -173,7 +173,7 @@ vec2 getPQuad(uint primitiveID){
  vec2	pQuadBL		= PRIM_QUAD_BL;
  pQuadBL.x			+=float(col*2u)*PRIM_TEX_WIDTH_SCALAR;// x2 because each quad is 2 texels wide.
  pQuadBL.y			+=float(row*2u)*PRIM_TEX_HEIGHT_SCALAR;
- return				pQuadBL+vec2(PRIM_TEX_WIDTH_SCALAR*screenLoc.x,PRIM_TEX_HEIGHT_SCALAR*screenLoc.y);
+ return				pQuadBL+vec2(PRIM_TEX_WIDTH_SCALAR,PRIM_TEX_HEIGHT_SCALAR)*screenLoc.xy;
 }
 
 float getTextureID(uint primitiveID){
@@ -192,7 +192,7 @@ textureTOC{
 **/
 
 void main(){
-uint	primitiveID = uint(texture(primitiveIDTexture,screenLoc)[0u]*65536);
+uint	primitiveID = uint(texelFetch(primitiveIDTexture,ivec2(gl_FragCoord),0)[0u]*65536);
 vec4	color;
 /*vec3	illuminatedFog
 					= fogColor*sunColor;*/
@@ -206,7 +206,7 @@ if(primitiveID>0u){
  color = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true);
  }
 
-vec4	fsq			= texture(layerAccumulator,screenLoc);
+vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0);
 
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID

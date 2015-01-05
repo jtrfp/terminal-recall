@@ -16,6 +16,7 @@
 
 package org.jtrfp.trcl.flow;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,15 +32,21 @@ import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.prop.HorizGradientCubeGen;
+import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class GameShell {
     private final TR tr;
+    public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
+		(Color.darkGray,Color.black);
+    
     public GameShell(TR tr){
 	this.tr=tr;
     }
     public GameShell startShell(){
 	tr.gatherSysInfo();
 	registerPODs();
+	tr.renderer.get().getSkyCube().setSkyCubeGen(DEFAULT_GRADIENT);
 	return this;
     }//end startShell()
     
@@ -83,7 +90,7 @@ public class GameShell {
 		sb.append("Check disk permissions for registered PODs.\n");
 	    }else if(e instanceof IOException){
 		sb.append("An undocumented IO failure has occurred..\n");
-	    }sb.append(e.getLocalizedMessage());
+	    }if(e!=null)sb.append(e.getLocalizedMessage());
 	    JOptionPane.showMessageDialog(tr.getRootWindow(), sb, "File Load Failure", JOptionPane.ERROR_MESSAGE);
     }//end handleLoadFailureException(...)
     

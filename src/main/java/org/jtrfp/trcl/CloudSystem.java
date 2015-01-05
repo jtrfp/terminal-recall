@@ -24,9 +24,10 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CloudCeiling;
+import org.jtrfp.trcl.prop.HorizGradientCubeGen;
+import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class CloudSystem extends RenderableSpacePartitioningGrid {
-    Color 		fogColor;
     double 		ceilingHeight;
     TextureDescription 	cloudTexture;
     double 		cloudTileSideSize;
@@ -34,6 +35,20 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
     private final TR 	tr;
     private final LoadingProgressReporter []
 	    		cloudTileReporters;
+    private Color	suggestedFogColor;
+    public static final SkyCubeGen PLANET_STARS = new HorizGradientCubeGen(Color.black,new Color(0,0,0,0)).
+		setEastTexture("/StarsA.png").
+		setWestTexture("/StarsA.png").
+		setTopTexture("/StarsA.png").
+		setSouthTexture("/StarsB.png").
+		setNorthTexture("/StarsB.png").
+		setVerticalBias(.65f);
+    public static final SkyCubeGen SPACE_STARS = new HorizGradientCubeGen(new Color(0,0,0,0),new Color(0,0,0,0)).
+		setEastTexture("/StarsA.png").
+		setWestTexture("/StarsA.png").
+		setTopTexture("/StarsA.png").
+		setSouthTexture("/StarsB.png").
+		setNorthTexture("/StarsB.png");
 
     public CloudSystem(OverworldSystem os, TR tr,
 	    RenderableSpacePartitioningGrid grid, LVLFile lvl,
@@ -56,6 +71,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	}
 	cloudTexture = tr.getResourceManager().getRAWAsTexture(
 		cloudTextureFileName, new ColorPaletteVectorList(newPalette),true);
+	suggestedFogColor = cloudTexture.getAverageColor();
 	cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	addToWorld(os);
 	activate();
@@ -64,8 +80,6 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
     private void addToWorld(OverworldSystem os) {
 	// Set fog
 	try {
-	    final Color averageColor = cloudTexture.getAverageColor();
-	    os.setFogColor(averageColor);
 	    // Create a grid
 	    for (int z = 0; z < gridSideSizeInTiles; z++) {
 		cloudTileReporters[z].complete();
@@ -101,4 +115,11 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	    e.printStackTrace();
 	}//end catch(e)
     }// end addToWorld
+
+    /**
+     * @return the suggestedFogColor
+     */
+    public Color getSuggestedFogColor() {
+        return suggestedFogColor;
+    }
 }// end CloudSystem

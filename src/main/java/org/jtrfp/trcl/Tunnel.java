@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
@@ -51,6 +52,8 @@ import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.prop.HorizGradientCubeGen;
+import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class Tunnel extends RenderableSpacePartitioningGrid {
     private LVLFile 	lvl;
@@ -65,7 +68,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     private final TunnelExitObject 	   exitObject;
     private final LoadingProgressReporter[]reporters;
     private final LoadingProgressReporter  tunnelAssemblyReporter;
-    private ObjectSystem		   objectSystem;//Strong reference to avoid GC
+    private ObjectSystem		   objectSystem;//DO NOT REMOVE. Strong reference to avoid GC
+    public static final SkyCubeGen	   TUNNEL_SKYCUBE_GEN = new HorizGradientCubeGen
+		(Color.darkGray,Color.black);
 
     public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
 	    TR.mapSquareSize * 5, TR.mapSquareSize*15);

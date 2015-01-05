@@ -30,6 +30,7 @@ import org.jtrfp.trcl.mem.MemoryManager;
 public class GPU{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
+    	private TRFutureTask<Integer>			defaultTIU;
 	
 	private ByteOrder 				byteOrder;
 	private final TR 				tr;
@@ -57,6 +58,11 @@ public class GPU{
 		}
 		
 	    });tr.getThreadManager().threadPool.submit(textureManager);
+	    defaultTIU = tr.getThreadManager().submitToGL(new Callable<Integer>(){
+		@Override
+		public Integer call() throws Exception {
+		    return glGet(GL3.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
+		}});
 	}//end constructor
 	
 	public int glGet(int key){
@@ -117,7 +123,7 @@ public class GPU{
 	}
 
 	public void defaultTIU() {
-	    getGl().glActiveTexture(GL3.GL_TEXTURE0+79);
+	    getGl().glActiveTexture(GL3.GL_TEXTURE0+defaultTIU.get());
 	}
 
 	public void defaultFrameBuffers() {

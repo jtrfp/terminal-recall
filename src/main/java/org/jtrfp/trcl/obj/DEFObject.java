@@ -222,6 +222,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case fallingAsteroid:
     	    anchoring=Anchoring.floating;
     	    fallingObjectBehavior();
+    	    customExplosion=true;
+    	    addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion,MED_EXP_SOUNDS[(int)(Math.random()*2)]));
     	    //setVisible(false);
     	    //addBehavior(new FallingDebrisBehavior(tr,model));
     	    break;
@@ -334,7 +336,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    break;
     	case fallingStalag:
     	    fallingObjectBehavior();
-	    
+    	    customExplosion=true;
+	    addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion,MED_EXP_SOUNDS[(int)(Math.random()*2)]));
     	    //canTurn=false;
     	    //mobile=false;
     	    anchoring=Anchoring.floating;

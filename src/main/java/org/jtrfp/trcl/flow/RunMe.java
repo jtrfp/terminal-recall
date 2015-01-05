@@ -54,7 +54,7 @@ public class RunMe{
 	    String executable = new File("RunMe.jar").exists() ? "-jar RunMe.jar"
 		    : "-cp " + System.getProperty("java.class.path")
 			    + " org.jtrfp.trcl.flow.RunMe";
-	    String cmd = "java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true "
+	    String cmd = "java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true -Dcom.sun.management.jmxremote "
 		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
 		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m ";

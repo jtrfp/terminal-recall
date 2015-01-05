@@ -75,8 +75,6 @@ void main(){
  ivec2 v0				= ivec2(
  				vertexIndex%VERTICES_PER_ROW,
  				vertexIndex/VERTICES_PER_ROW);
- ivec2 v1				= increment*1+v0;
- ivec2 v2				= increment*2+v0;
  ////////////////////////////////////////////////TODO: reciprocal-W
  //Convert screen coords to normalized coords.
  mat3 debugAffine;
@@ -85,34 +83,34 @@ void main(){
  // Also perform a perspective divide. Passed W is a reciprocal so a multiply is in order instead.
  vec3 wvb = vec3(
  	texelFetch(wVBuffer,v0,0).x,
- 	texelFetch(wVBuffer,v1,0).x,
- 	texelFetch(wVBuffer,v2,0).x);
+ 	texelFetchOffset(wVBuffer,v0,0,ivec2(1,0)).x,
+ 	texelFetchOffset(wVBuffer,v0,0,ivec2(2,0)).x);
  mat3 normalizationMatrix = inverse(debugAffine = affine(
-  (texelFetch(xyVBuffer,v1,0).xy*wvb[1u]+1)*.5,
-  (texelFetch(xyVBuffer,v2,0).xy*wvb[2u]+1)*.5,
+  (texelFetchOffset(xyVBuffer,v0,0,ivec2(1,0)).xy*wvb[1u]+1)*.5,
+  (texelFetchOffset(xyVBuffer,v0,0,ivec2(2,0)).xy*wvb[2u]+1)*.5,
   (texelFetch(xyVBuffer,v0,0).xy*wvb[0u]+1)*.5));
  //Convert normalized coords to uv coords
  mat3 uvMatrix = affine(
-  vec2(texelFetch(uvVBuffer,v1,0).xy),
-  vec2(texelFetch(uvVBuffer,v2,0).xy),
+  vec2(texelFetchOffset(uvVBuffer,v0,0,ivec2(1,0)).xy),
+  vec2(texelFetchOffset(uvVBuffer,v0,0,ivec2(2,0)).xy),
   vec2(texelFetch(uvVBuffer,v0,0).xy)
  	) * normalizationMatrix;
  //Convert normalized coords to vtx normals
  //TODO: Perform 3 texel fetches, swizzle for xy and z
  mat3 nXnYmatrix = affine(
-  texelFetch(nXnYnZVBuffer,v1,0).xy,
-  texelFetch(nXnYnZVBuffer,v2,0).xy,
+  texelFetchOffset(nXnYnZVBuffer,v0,0,ivec2(1,0)).xy,
+  texelFetchOffset(nXnYnZVBuffer,v0,0,ivec2(2,0)).xy,
   texelFetch(nXnYnZVBuffer,v0,0).xy
  	) * normalizationMatrix;
  mat3 nZmatrix = affine(// passed y-component is a dummy
-  vec2(texelFetch(nZVBuffer,v1,0).x,1),
-  vec2(texelFetch(nZVBuffer,v2,0).x,0),
+  vec2(texelFetchOffset(nZVBuffer,v0,0,ivec2(1,0)).x,1),
+  vec2(texelFetchOffset(nZVBuffer,v0,0,ivec2(2,0)).x,0),
   vec2(texelFetch(nZVBuffer,v0,0).x,.5)
  	) * normalizationMatrix;
  //Convert normalized coords to zw
  mat3 zwMatrix = affine(
-  vec2(texelFetch(zVBuffer,v1,0).x*wvb[1u],wvb[1u]),
-  vec2(texelFetch(zVBuffer,v2,0).x*wvb[2u],wvb[2u]),
+  vec2(texelFetchOffset(zVBuffer,v0,0,ivec2(1,0)).x*wvb[1u],wvb[1u]),
+  vec2(texelFetchOffset(zVBuffer,v0,0,ivec2(2,0)).x*wvb[2u],wvb[2u]),
   vec2(texelFetch(zVBuffer,v0,0).x*wvb[0u],wvb[0u])
  	) * normalizationMatrix;
  

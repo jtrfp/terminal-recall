@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
@@ -36,7 +40,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final Crosshairs	  crosshairs;
     
 
-    public HUDSystem(World world, GLFont font) {
+    public HUDSystem(World world, GLFont font) throws IOException {
 	super(world);
 	// Dash Text
 	final TR tr = world.getTr();
@@ -69,10 +73,11 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	
 	add(crosshairs=new Crosshairs(tr));
 	add(healthMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),
 			"HealthBar orangeOrange",false), METER_WIDTH, METER_HEIGHT,
 		false));
+	
 	healthMeterBar.setPosition(HEALTH_POS);
 	healthMeter = healthMeterBar.getController();
 	add(throttleMeterBar = new MeterBar(tr, 

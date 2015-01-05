@@ -28,6 +28,7 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.SpecialRAWDimensions;
 import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
@@ -50,7 +51,6 @@ public class Texture implements TextureDescription {
     private	  Integer		tocIndex;
     private	  int[]			subTextureIDs;
     private	  int[][]		codebookStartOffsetsAbsolute;
-    private 	  ByteBuffer 		rgba;
     private final boolean		uvWrapping;
     private volatile int		texturePage;
     private int				width;
@@ -340,38 +340,30 @@ public class Texture implements TextureDescription {
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
     }//end calculateAverageColor(...)
 
-    Texture(BufferedImage img, String debugName, TR tr, boolean uvWrapping) {
+    Texture(BufferedImage image, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
-	    long redA = 0, greenA = 0, blueA = 0;
-	    rgba = ByteBuffer.allocateDirect(img.getWidth() * img.getHeight()
+	    /*
+	    rgba = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight()
 		    * 4);
-	    for (int y = 0; y < img.getHeight(); y++) {
-		for (int x = 0; x < img.getWidth(); x++) {
-		    Color c = new Color(img.getRGB(x, y), true);
-		    rgba.put((byte) c.getRed());
-		    rgba.put((byte) c.getGreen());
-		    rgba.put((byte) c.getBlue());
-		    rgba.put((byte) c.getAlpha());
-		    redA += c.getRed();
-		    greenA += c.getGreen();
-		    blueA += c.getBlue();
-		}// end for(x)
-	    }// end for(y)
-	    
+	    final int [] row = new int[image.getWidth()];
+		for (int y = 0; y < image.getHeight(); y++) {
+		    image.getRGB(0, y, image.getWidth(), 1, row, 0, image.getWidth());
+		    for (int color:row) {
+			rgba.put((byte) ((color & 0x00FF0000) >> 16));
+			rgba.put((byte) ((color & 0x0000FF00) >> 8));
+			rgba.put((byte) (color & 0x000000FF));
+			rgba.put((byte) ((color & 0xFF000000) >> 24));
+		    }// end for(x)
+		}// end for(y)
 	    final int div = rgba.capacity() / 4;
+	    
+	    //TODO: This doesn't do anything but output black. Is it even used?
 	    averageColor = new Color((redA / div) / 255f,
 		    (greenA / div) / 255f, (blueA / div) / 255f);
-	    vqCompress(rgba);
+	    */
+	    //vqCompress(rgba);
+	    try{vqCompress(new BufferedImageRGBA8888VL(image),image.getWidth());}catch(Exception e){e.printStackTrace();}
     }//end constructor
-    
-    public static ByteBuffer RGBA8FromPNG(File f) {
-	try {
-	    return RGBA8FromPNG(new FileInputStream(f));
-	} catch (FileNotFoundException e) {
-	    e.printStackTrace();
-	    return null;
-	}
-    }
 
     public static ByteBuffer RGBA8FromPNG(InputStream is) {
 	try {
@@ -385,12 +377,13 @@ public class Texture implements TextureDescription {
 
     public static ByteBuffer RGBA8FromPNG(BufferedImage image, int startX,
 	    int startY, int sizeX, int sizeY) {
-	int color;
+	//int color;
 	ByteBuffer buf = ByteBuffer.allocateDirect(image.getWidth()
 		* image.getHeight() * 4);
+	final int [] row = new int[image.getWidth()];
 	for (int y = startY; y < startY + sizeY; y++) {
-	    for (int x = startX; x < startX + sizeX; x++) {
-		color = image.getRGB(x, y);
+	    image.getRGB(0, y, image.getWidth(), 1, row, 0, image.getWidth());
+	    for (int color:row) {
 		buf.put((byte) ((color & 0x00FF0000) >> 16));
 		buf.put((byte) ((color & 0x0000FF00) >> 8));
 		buf.put((byte) (color & 0x000000FF));
@@ -428,7 +421,7 @@ public class Texture implements TextureDescription {
     public static ByteBuffer indexed2RGBA8888(ByteBuffer indexedPixels,
 	    Color[] palette) {
 	Color color;
-	ByteBuffer buf = ByteBuffer.allocate(indexedPixels.capacity() * 4);
+	ByteBuffer buf = ByteBuffer.allocateDirect(indexedPixels.capacity() * 4);
 	final int cap = indexedPixels.capacity();
 	for (int i = 0; i < cap; i++) {
 	    color = palette[(indexedPixels.get() & 0xFF)];

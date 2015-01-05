@@ -12,10 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import javax.imageio.ImageIO;
+
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.math.Vect3D;
@@ -34,7 +34,7 @@ public class NAVRadarBlipFactory {
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
 	    try{
-	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"",false);
+	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		blipPool[ti][pi]=new Blip(tex,g);
     	     }//end for(pi)

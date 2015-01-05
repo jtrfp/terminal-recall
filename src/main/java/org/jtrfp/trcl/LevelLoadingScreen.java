@@ -13,6 +13,10 @@
 
 package org.jtrfp.trcl;
 
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.obj.MeterBar;
@@ -25,10 +29,10 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
     ManuallySetController loadingMeter;
     MeterBar		  loadingMeterBar;
 
-    public LevelLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) {
+    public LevelLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) throws IOException {
 	super(parent);
 	add(loadingMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
 			.getResourceAsStream("/BlueWhiteGradient.png")),
 			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,
 		true));

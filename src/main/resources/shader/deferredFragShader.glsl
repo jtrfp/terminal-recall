@@ -195,7 +195,7 @@ textureTOC{
 
 void main(){
 uint	primitiveID;
-vec4	color;
+vec4	color		= vec4(0,0,0,0);
 
 vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
 

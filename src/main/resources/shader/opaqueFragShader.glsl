@@ -24,8 +24,7 @@
 flat in float  flatTextureID;
 
 // OUTPUTS
-layout(location = 0) out float textureID;
 
 void main(){
-textureID	       = flatTextureID;
+gl_FragColor.r = flatTextureID;
 }//end main()

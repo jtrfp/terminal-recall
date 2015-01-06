@@ -206,7 +206,7 @@ if(primitiveID>0u){
  color = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true);
  }
 
-vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0);
+vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
 
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID

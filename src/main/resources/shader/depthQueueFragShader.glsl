@@ -21,16 +21,11 @@
 //uniform		sampler2D	depthTexture;
 
 // INPUTS
-flat in float flatTextureID;
-noperspective in vec2 screenLoc;
+flat in vec4 flatDQPrimID;
 
 // OUTPUTS
 layout(location=0) out vec4 pushToDepthQueue;
 
 void main(){
- //float 	depth 		= texture(depthTexture,screenLoc)[0];
- //if(gl_FragCoord.z>depth)discard;//TODO: Attach opaque Z-buffer and let fixed stages handle it.
- float tid = floor(flatTextureID * 65536);
- vec4 tidLMH = floor(mod(tid/vec4(1,16,256,4096),16));
- pushToDepthQueue = tidLMH;
+ pushToDepthQueue = flatDQPrimID;
 }//end main()

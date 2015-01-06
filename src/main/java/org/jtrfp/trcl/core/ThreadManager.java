@@ -153,9 +153,9 @@ public final class ThreadManager {
 	return result;
     }//end submitToGPUMemAccess(...)
     
-    public <T> TRFutureTask<T> submitToGL(Callable<T> c){
+    public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr,c);
-	if(Thread.currentThread()==renderingThread)
+	if(isGLThread())
 	    if(tr.gpu.get().getGl().getContext().isCurrent()){
 		result.run();
 		return result;
@@ -163,6 +163,10 @@ public final class ThreadManager {
 	result.enqueue();
 	return result;
     }//end submitToGL(...)
+    
+    public boolean isGLThread(){
+	return Thread.currentThread()==renderingThread;
+    }
     
     public <T> TRFutureTask<T> submitToThreadPool(Callable<T> c){
 	return submitToThreadPool(true,c);

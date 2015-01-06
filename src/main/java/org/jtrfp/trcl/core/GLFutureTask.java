@@ -35,5 +35,13 @@ public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
 	super.run();
 	return true;
     }//end run(GL)
+    
+    @Override
+    public V get(){
+	if(!super.isDone())
+	    if(tr.getThreadManager().isGLThread())
+	     run();
+	return super.get();
+    }
 
 }//end GLFutureTask

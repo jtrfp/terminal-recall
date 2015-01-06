@@ -21,6 +21,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.awt.GLCanvas;
 
+import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
@@ -30,7 +31,7 @@ import org.jtrfp.trcl.mem.MemoryManager;
 public class GPU{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
-    	private TRFutureTask<Integer>			defaultTIU;
+    	private GLFutureTask<Integer>			defaultTIU;
 	
 	private ByteOrder 				byteOrder;
 	private final TR 				tr;

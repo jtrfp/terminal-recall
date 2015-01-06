@@ -20,7 +20,7 @@
 // UNIFORMS
 
 // INPUTS
-in vec4 flatDQPrimID;
+flat in vec4 flatDQPrimID;
 
 // OUTPUTS
 

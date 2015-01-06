@@ -45,6 +45,8 @@ const uint TOC_HEADER_OFFSET_QUADS_MAGIC		=3u;
 
 const uint RENDER_FLAGS_WRAP					=0x1u;
 
+const float ALPHA_THRESHOLD						=.85;
+
 const float TILE_PAGE_SIDE_WIDTH_TEXELS = 128;
 const uint CODE_SIDE_WIDTH_TEXELS 		= 4u;
 const uint CODE_PAGE_SIDE_WIDTH_CODES	= uint(TILE_PAGE_SIDE_WIDTH_TEXELS) / CODE_SIDE_WIDTH_TEXELS;
@@ -192,19 +194,8 @@ textureTOC{
 **/
 
 void main(){
-uint	primitiveID = uint(texelFetch(primitiveIDTexture,ivec2(gl_FragCoord),0)[0u]*65536);
+uint	primitiveID;
 vec4	color;
-/*vec3	illuminatedFog
-					= fogColor*sunColor;*/
-
-// S O L I D   B A C K D R O P
-if(primitiveID>0u){
- primitiveID--; //Compensate for zero representing "unwritten."
- vec2 pq = getPQuad(primitiveID);
- vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
- _uvzw.xyz /= _uvzw.w;
- color = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true);
- }
 
 vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
 
@@ -229,12 +220,11 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  
  // D E P T H   S O R T
  if(relevantSize>0u){
- float alphaAccumulator=0;
  //Perform the not-so-quick sort
  int intermediary;
  for(uint i=0u; i<relevantSize-1u; i++){
   for(uint j=i+1u; j<relevantSize; j++){
-   if(vUVZI[ordering[j]].z>vUVZI[ordering[i]].z){//Found new deepest
+   if(vUVZI[ordering[j]].z<vUVZI[ordering[i]].z){//Found new closest
     //Trade
     intermediary = ordering[i];
     ordering[i] = ordering[j];
@@ -247,9 +237,26 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
    vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]], false);
-   color.rgb 	= mix(color.rgb,dqColor.rgb,dqColor.a*( (1-color.a)+(dqColor.a*color.a) ));
-   color.a		= 1-((1-color.a)*(1-dqColor.a));
+   float span = 1-color.a;
+   color.rgb	= mix(dqColor.rgb,color.rgb,dqColor.a*color.a);
+   color.a		= color.a+dqColor.a*span;
+   if(color.a > ALPHA_THRESHOLD)
+    break;
   }//end for(relevantSize)
 
+if(color.a < ALPHA_THRESHOLD){
+ // S O L I D   B A C K D R O P
+ primitiveID = uint(texelFetch(primitiveIDTexture,ivec2(gl_FragCoord),0)[0u]*65536);
+ if(primitiveID>0u){
+  primitiveID--; //Compensate for zero representing "unwritten."
+  vec2 pq = getPQuad(primitiveID);
+  vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
+  _uvzw.xyz /= _uvzw.w;
+  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true);
+  color.rgb	= mix(oColor.rgb,color.rgb,color.a);
+  color.a		= color.a+oColor.a*(1-color.a);
+  }//end if(written)
+ }//end if(visible)
+color.a = (color.a > ALPHA_THRESHOLD)?1:color.a;
 fragColor		 	= color;
 }//end main()

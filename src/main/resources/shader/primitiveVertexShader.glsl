@@ -53,12 +53,11 @@ layout (location = 0) in float dummy;
 
 //http://www.math.ucla.edu/~baker/149.1.02w/handouts/i_affine_II.pdf
 
-mat3 affine(vec2 u, vec2 v, vec2 off){//Each row is a column
- return transpose(mat3(											// TODO: Manually transpose
- 	u.x-off.x,  v.x-off.x,  off.x,
- 	u.y-off.y,  v.y-off.y,	off.y,
- 	0,          0,          1
- 		));
+mat3 affine(vec2 u, vec2 v, vec2 off){
+ return mat3(
+ 	u.x-off.x, 	u.y-off.y, 	0,
+ 	v.x-off.x, 	v.y-off.y, 	0,
+ 	off.x, 		off.y, 		1);
  }//end affine()
 
 void main(){
@@ -77,7 +76,6 @@ void main(){
  				vertexIndex/VERTICES_PER_ROW);
  ////////////////////////////////////////////////TODO: reciprocal-W
  //Convert screen coords to normalized coords.
- mat3 debugAffine;
  
  // Convert from cartesian to normalized [0,1] by adding 1 and mul by .5
  // Also perform a perspective divide. Passed W is a reciprocal so a multiply is in order instead.
@@ -85,7 +83,7 @@ void main(){
  	texelFetch(wVBuffer,v0,0).x,
  	texelFetchOffset(wVBuffer,v0,0,ivec2(1,0)).x,
  	texelFetchOffset(wVBuffer,v0,0,ivec2(2,0)).x);
- mat3 normalizationMatrix = inverse(debugAffine = affine(
+ mat3 normalizationMatrix = inverse(affine(
   (texelFetchOffset(xyVBuffer,v0,0,ivec2(1,0)).xy*wvb[1u]+1)*.5,
   (texelFetchOffset(xyVBuffer,v0,0,ivec2(2,0)).xy*wvb[2u]+1)*.5,
   (texelFetch(xyVBuffer,v0,0).xy*wvb[0u]+1)*.5));

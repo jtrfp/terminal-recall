@@ -45,7 +45,7 @@ const uint TOC_HEADER_OFFSET_QUADS_MAGIC		=3u;
 
 const uint RENDER_FLAGS_WRAP					=0x1u;
 
-const float ALPHA_THRESHOLD						=.85;
+const float ALPHA_THRESHOLD						=.98;
 
 const float TILE_PAGE_SIDE_WIDTH_TEXELS = 128;
 const uint CODE_SIDE_WIDTH_TEXELS 		= 4u;
@@ -139,15 +139,15 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  	   dH.x);//Vertical
  
  float sunIllumination			= -dot(sunVector,norm);
- if(dot(norm.xyz,norm.xyz)>.2)cTexel.rgb
+ if(dot(norm.xyz,norm.xyz)>.01)cTexel.rgb
  								=((clamp(sunIllumination,0,1)*sunColor)+fogColor) * cTexel.rgb;
  return cTexel;
  }//end intrinsicCodeTexel
 
-vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI, bool disableAlpha){
+vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  vec4	nXnYnZ		= textureLod(primitivenXnYnZTexture,pQuad,0);
  vec2	uv			= vUVZI.xy;
- vec3 	norm 		= (nXnYnZ.xyz*2)-1;
+ vec3 	norm 		= nXnYnZ.xyz/w;
  vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
  if(disableAlpha)	texel.a=1;
  texel.a 			*=1-warpFog(vUVZI.z);
@@ -202,6 +202,7 @@ vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
 vec2 pQuads[DEPTH_QUEUE_SIZE];
+float _w[DEPTH_QUEUE_SIZE];
 int ordering[DEPTH_QUEUE_SIZE];
 
 // D E P T H   P O P U L A T E
@@ -214,6 +215,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  vec4 _uvzw	= textureLod(primitiveUVZWTexture,pQuad,0);
  _uvzw.xyz /= _uvzw.w;
  vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
+ _w[i]		= _uvzw.w;
  ordering[i]=i;
  relevantSize++;
  }//end for(DEPTH_QUEUE_SIZE)
@@ -236,7 +238,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
-   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]], false);
+   vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]], false, _w[ordering[i]]);
    float span = 1-color.a;
    color.rgb	= mix(dqColor.rgb,color.rgb,dqColor.a*color.a);
    color.a		= color.a+dqColor.a*span;
@@ -252,7 +254,7 @@ if(color.a < ALPHA_THRESHOLD){
   vec2 pq = getPQuad(primitiveID);
   vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
-  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true);
+  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true,_uvzw.w);
   color.rgb	= mix(oColor.rgb,color.rgb,color.a);
   color.a		= color.a+oColor.a*(1-color.a);
   }//end if(written)

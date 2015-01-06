@@ -167,8 +167,8 @@ void main(){
 								     float(SByte(packedVertex[1],2u))/128,
 									 float(SByte(packedVertex[1],3u))/128,
 									 float(SByte(packedVertex[3],0u))/128, 0));
-    		nXY			 			= ((nNoCam.xy+1)/2);
-			nZ 						= ((nNoCam.z+1)/2);
+    		nXY			 			= nNoCam.xy * w;
+			nZ 						= nNoCam.z * w;
 			//if(abs(nZ-.5)<.5) ////////////// DEBUG / KLUDGE
 			//  nZ = -.1; //For some reason, Z-values are not coming through like they should.
     		}//end if(object)

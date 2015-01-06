@@ -14,7 +14,7 @@
  *      chuck - initial API and implementation
  ******************************************************************************/
 
-#version 110
+#version 330
 
 // CONSTANTS
 
@@ -24,7 +24,8 @@
 flat in float  flatTextureID;
 
 // OUTPUTS
+layout(location = 0) out float textureID;
 
 void main(){
-gl_FragColor.r = flatTextureID;
+textureID	       = flatTextureID;
 }//end main()

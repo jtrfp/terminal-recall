@@ -15,17 +15,15 @@
  ******************************************************************************/
 
 // Blended fragment rendering for stencil-routed A-buffer referred internally as a 'depth queue'.
-#version 330
+#version 110
 
 // UNIFORMS
-//uniform		sampler2D	depthTexture;
 
 // INPUTS
-flat in vec4 flatDQPrimID;
+in vec4 flatDQPrimID;
 
 // OUTPUTS
-layout(location=0) out vec4 pushToDepthQueue;
 
 void main(){
- pushToDepthQueue = flatDQPrimID;
+ gl_FragColor = flatDQPrimID;
 }//end main()

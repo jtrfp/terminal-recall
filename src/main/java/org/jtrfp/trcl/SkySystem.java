@@ -22,6 +22,7 @@ import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.img.ColorUtils;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.CloudCeiling;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
@@ -35,7 +36,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     private final TR 	tr;
     private LoadingProgressReporter []
 	    		cloudTileReporters;
-    private Color	suggestedFogColor;
+    private Color	suggestedFogColor, suggestedAmbientLight;
     private Color []	gradientPalette;
     private String	cloudTextureFileName;
     private		SkyCubeGen   belowCloudsSkyCubeGen,aboveCloudsSkyCubeGen;
@@ -55,6 +56,9 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		setTopTexture("/StarsA.png").
 		setSouthTexture("/StarsB.png").
 		setNorthTexture("/StarsB.png");
+    public static final Color SPACE_SUN_COLOR = new Color(250,250,255);
+    public static final Color PLANET_SUN_COLOR = new Color(250,250,200);
+    public static final Color SPACE_AMBIENT_LIGHT = new Color(15,15,15);
 
     public SkySystem(OverworldSystem os, TR tr,
 	    RenderableSpacePartitioningGrid grid, LVLFile lvl,
@@ -130,17 +134,25 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	if(suggestedFogColor==null){
 	    if(areStarsVisible()){
 		return Color.black;
-	    }else return mix(getHorizonGradientBottom(),cloudTexture.getAverageColor());
+	    }else{
+		Color l = getHorizonGradientBottom();
+		Color r = cloudTexture.getAverageColor();
+		return new Color(
+			(l.getRed()+r.getRed())/2,
+			(l.getGreen()+r.getGreen())/2,
+			(l.getBlue()+r.getBlue())/2,
+			(l.getAlpha()+r.getAlpha())/2);
+	    }
 	}//end if(suggestedFogColor==null)
 	return suggestedFogColor;
     }//end getSuggetedFogColor()
     
-    private static Color mix(Color l, Color r){
-	return new Color(
-		(l.getRed()+r.getRed())/2,
-		(l.getGreen()+r.getGreen())/2,
-		(l.getBlue()+r.getBlue())/2,
-		(l.getAlpha()+r.getAlpha())/2);
+    public Color getSuggestedAmbientLight(){
+	if(suggestedAmbientLight==null)
+	    if(hasClouds())
+		suggestedAmbientLight = ColorUtils.mul(getSuggestedFogColor(),new Color(127,127,127));
+	    else return SPACE_AMBIENT_LIGHT;
+	return suggestedAmbientLight;
     }
     
     public boolean hasClouds(){
@@ -197,5 +209,9 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	}//end null
         return aboveCloudsSkyCubeGen;
     }//end getAboveCloudsSkyCubeGen
+
+    public Color getSuggestedSunColor() {
+	return PLANET_SUN_COLOR;
+    }
     
 }// end CloudSystem

@@ -233,7 +233,7 @@ public class Mission {
 	tr.getThreadManager().setPaused(false);
 	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
 	getOverworldSystem().activate();
-	tr.renderer.get().getSkyCube().setSkyCubeGen(getOverworldSystem().getSkySystem().getSkyCubeGen());
+	tr.renderer.get().getSkyCube().setSkyCubeGen(getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
 	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);
 	game.getPlayer()	.setActive(true);

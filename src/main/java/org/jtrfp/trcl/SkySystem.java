@@ -38,7 +38,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     private Color	suggestedFogColor;
     private Color []	gradientPalette;
     private String	cloudTextureFileName;
-    private		SkyCubeGen   skyCubeGen;
+    private		SkyCubeGen   belowCloudsSkyCubeGen,aboveCloudsSkyCubeGen;
     public static final int 
     	    GRADIENT_PALETTE_START = 193,
 	    GRADIENT_PALETTE_END = 208;
@@ -131,7 +131,10 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	    if(hasClouds())
 		suggestedFogColor=cloudTexture.getAverageColor();
 	    else
-		suggestedFogColor=getHorizonGradientBottom();
+		if(areStarsVisible()){
+		    return Color.black;
+		}else return getHorizonGradientBottom();
+		    
 	}//end if(suggestedFogColor==null)
         return suggestedFogColor;
     }//end getSuggetedFogColor()
@@ -141,16 +144,18 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     }
     
     public boolean areStarsVisible(){
-	Color c = getGradientPalette()[193];
-	return c.getRed()+c.getGreen()+c.getBlue()==0;
+	Color c = getHorizonGradientTop();
+	return c.getRed()+c.getGreen()+c.getBlue()==0 || !hasClouds();
     }
     
-    public Color getHorizonGradientBottom(){
-	return getGradientPalette()[GRADIENT_PALETTE_START];
+    public Color getHorizonGradientBottom(){//Intentionally backwards.
+	System.out.println("bottom color = "+getGradientPalette()[GRADIENT_PALETTE_END]);
+	return getGradientPalette()[GRADIENT_PALETTE_END];
     }
     
     public Color getHorizonGradientTop(){
-	return getGradientPalette()[GRADIENT_PALETTE_END];
+	System.out.println("top color = "+getGradientPalette()[GRADIENT_PALETTE_START]);
+	return getGradientPalette()[GRADIENT_PALETTE_START];
     }
 
     /**
@@ -160,24 +165,33 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
         return gradientPalette;
     }
     
-    /**
-     * @return the skyCubeGen
-     */
-    public SkyCubeGen getSkyCubeGen() {
-	if(skyCubeGen==null){
+    public SkyCubeGen getBelowCloudsSkyCubeGen() {
+	if(belowCloudsSkyCubeGen==null){
 	    final Color fogColor = getSuggestedFogColor();
 	    if(hasClouds())
-		skyCubeGen = new HorizGradientCubeGen
-		 (fogColor,new Color(fogColor.getRed(),fogColor.getGreen(),255));//TODO: Use the game's gradient info
+		belowCloudsSkyCubeGen = new HorizGradientCubeGen
+		(fogColor,fogColor);
 	    else
-		skyCubeGen = new HorizGradientCubeGen(fogColor,new Color(0,0,0,0)).
-			setEastTexture("/StarsA.png").
-			setWestTexture("/StarsA.png").
-			setTopTexture("/StarsA.png").
-			setSouthTexture("/StarsB.png").
-			setNorthTexture("/StarsB.png").
-			setVerticalBias(.65f);
+		    belowCloudsSkyCubeGen = new HorizGradientCubeGen(fogColor,new Color(0,0,0,0)).
+		    setEastTexture("/StarsA.png").
+		    setWestTexture("/StarsA.png").
+		    setTopTexture("/StarsA.png").
+		    setSouthTexture("/StarsB.png").
+		    setNorthTexture("/StarsB.png").
+		    setVerticalBias(.7f);
 	}//end null
-        return skyCubeGen;
-    }
+	return belowCloudsSkyCubeGen;
+    }//end getBelowCloudsSkyCubeGen
+    
+    public SkyCubeGen getAboveCloudsSkyCubeGen() {
+	if(aboveCloudsSkyCubeGen==null){
+	    if(hasClouds())
+		aboveCloudsSkyCubeGen = new HorizGradientCubeGen
+		 (getHorizonGradientBottom(),getHorizonGradientTop());
+	    else
+		aboveCloudsSkyCubeGen = getBelowCloudsSkyCubeGen();
+	}//end null
+        return aboveCloudsSkyCubeGen;
+    }//end getAboveCloudsSkyCubeGen
+    
 }// end CloudSystem

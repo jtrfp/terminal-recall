@@ -60,8 +60,7 @@ public final class Renderer {
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
     public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
-    private 	 	GLUniform	    	fogColor,
-    /*    */					sunVector;
+    private 	 	GLUniform	    	sunVector;
     private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
     /*					*/	depthQueueTexture,
@@ -172,7 +171,6 @@ public final class Renderer {
 		depthQueueProgram.getUniform("zBuffer").set((int)5);
 		depthQueueProgram.getUniform("wBuffer").set((int)6);
 		deferredProgram.use();
-		fogColor 	= deferredProgram	.getUniform("fogColor");
 		sunVector 	= deferredProgram	.getUniform("sunVector");
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		// 1 UNUSED
@@ -184,6 +182,7 @@ public final class Renderer {
 		deferredProgram.getUniform("vertexTextureIDTexture").set((int) 7);
 		deferredProgram.getUniform("primitiveUVZWTexture").set((int) 8);
 		deferredProgram.getUniform("primitivenXnYnZTexture").set((int) 9);
+		deferredProgram.getUniform("ambientLight").set(.4f, .5f, .7f);
 		sunVector.set(.5774f,-.5774f,.5774f);
 		final int width = tr.getRootWindow().getWidth();
 		final int height = tr.getRootWindow().getHeight();
@@ -811,4 +810,30 @@ public final class Renderer {
     public void setSkyCube(SkyCube skyCube) {
         this.skyCube = skyCube;
     }
+
+    public Renderer setSunColor(final Color color) {
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		deferredProgram.use();
+		deferredProgram.getUniform("sunColor").set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f);
+		gpu.defaultProgram();
+		return null;
+	    }
+	});
+	return this;
+    }
+
+    public Renderer setAmbientLight(final Color color) {
+	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		deferredProgram.use();
+		deferredProgram.getUniform("ambientLight").set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f);
+		gpu.defaultProgram();
+		return null;
+	    }
+	});
+	return this;
+    }//end setAmbientLight
 }//end Renderer

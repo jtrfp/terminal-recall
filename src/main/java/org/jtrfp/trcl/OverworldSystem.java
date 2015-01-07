@@ -79,12 +79,10 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");
-	    if (!lvl.getCloudTextureFile().contentEquals("stars.vox")) {
-		cloudSystem = new CloudSystem(this, tr, this, lvl,
+	    cloudSystem = new CloudSystem(this, tr, this, lvl,
 			TR.mapSquareSize * 8,
 			(int) (TR.mapWidth / (TR.mapSquareSize * 8)),
 			w.sizeY / 3.5, cloudReporter);
-	    }
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");
@@ -103,11 +101,11 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     public void activate(){
 	super.activate();
     }
-
+/*
     public Color getFogColor() {
 	return fogColor;
     }
-/*
+
     public void setFogColor(Color c) {
 	fogColor = c;
 	if (fogColor == null)

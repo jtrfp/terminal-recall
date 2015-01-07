@@ -33,9 +33,14 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
     double 		cloudTileSideSize;
     int 		gridSideSizeInTiles;
     private final TR 	tr;
-    private final LoadingProgressReporter []
+    private LoadingProgressReporter []
 	    		cloudTileReporters;
     private Color	suggestedFogColor;
+    private Color []	gradientPalette;
+    private String	cloudTextureFileName;
+    public static final int 
+    	    GRADIENT_PALETTE_START = 193,
+	    GRADIENT_PALETTE_END = 208;
     public static final SkyCubeGen PLANET_STARS = new HorizGradientCubeGen(Color.black,new Color(0,0,0,0)).
 		setEastTexture("/StarsA.png").
 		setWestTexture("/StarsA.png").
@@ -58,26 +63,28 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	super(grid);
 	this.tr = tr;
 	final int transpose = 48;
-	this.ceilingHeight = ceilingHeight;
-	this.cloudTileSideSize = cloudTileSideSize;
-	this.gridSideSizeInTiles = gridSideSizeInTiles;
-	String cloudTextureFileName = lvl.getCloudTextureFile();
-	Color[] palette = tr.getResourceManager().getPalette(
+	this.ceilingHeight 	= ceilingHeight;
+	this.cloudTileSideSize 	= cloudTileSideSize;
+	this.gridSideSizeInTiles= gridSideSizeInTiles;
+	cloudTextureFileName 	= lvl.getCloudTextureFile();
+	gradientPalette 	= tr.getResourceManager().getPalette(
 		lvl.getBackgroundGradientPaletteFile());
-	Color[] newPalette = new Color[256];
-	// Transpose palette by 48
-	for (int i = 0; i < 256; i++) {
-	    newPalette[TR.bidiMod((i + transpose), 256)] = palette[i];
+	if(hasClouds()){
+	    Color[] cloudPalette= new Color[256];
+	    // Transpose palette by 48
+	    for (int i = 0; i < 256; i++) {
+		cloudPalette[TR.bidiMod((i + transpose), 256)] = gradientPalette[i];
+	    }
+	    cloudTexture = tr.getResourceManager().getRAWAsTexture(
+		    cloudTextureFileName, new ColorPaletteVectorList(cloudPalette),true);
+	    suggestedFogColor  = cloudTexture.getAverageColor();
+	    cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
+	    generateClouds(os);
 	}
-	cloudTexture = tr.getResourceManager().getRAWAsTexture(
-		cloudTextureFileName, new ColorPaletteVectorList(newPalette),true);
-	suggestedFogColor = cloudTexture.getAverageColor();
-	cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
-	addToWorld(os);
 	activate();
     }// end constructor
 
-    private void addToWorld(OverworldSystem os) {
+    private void generateClouds(OverworldSystem os) {
 	// Set fog
 	try {
 	    // Create a grid
@@ -86,7 +93,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 		for (int x = 0; x < gridSideSizeInTiles; x++) {
 		    double xPos = x * cloudTileSideSize;
 		    double zPos = z * cloudTileSideSize;
-
+		    
 		    Triangle[] tris = Triangle.quad2Triangles(new double[] { 0,
 			    0 + cloudTileSideSize, 0 + cloudTileSideSize, 0 },
 			    new double[] { ceilingHeight, ceilingHeight,
@@ -102,7 +109,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 		    m.addTriangle(tris[1]);
 		    final CloudCeiling rq = new CloudCeiling(tr,
 			    m.finalizeModel());
-		    // rq.setPosition(new Vector3D(xPos,ceilingHeight,zPos));
+		    
 		    final double[] rqPos = rq.getPosition();
 		    rqPos[0] = xPos;
 		    rqPos[1] = ceilingHeight;
@@ -121,5 +128,29 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
      */
     public Color getSuggestedFogColor() {
         return suggestedFogColor;
+    }
+    
+    public boolean hasClouds(){
+	return !cloudTextureFileName.toUpperCase().contentEquals("STARS.VOX");
+    }
+    
+    public boolean areStarsVisible(){
+	Color c = getGradientPalette()[193];
+	return c.getRed()+c.getGreen()+c.getBlue()==0;
+    }
+    
+    public Color getHorizonGradientBottom(){
+	return getGradientPalette()[GRADIENT_PALETTE_START];
+    }
+    
+    public Color getHorizonGradientTop(){
+	return getGradientPalette()[GRADIENT_PALETTE_END];
+    }
+
+    /**
+     * @return the gradientPalette
+     */
+    public Color[] getGradientPalette() {
+        return gradientPalette;
     }
 }// end CloudSystem

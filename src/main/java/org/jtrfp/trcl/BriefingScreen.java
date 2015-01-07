@@ -27,6 +27,7 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.LazyTRFuture;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
@@ -159,6 +160,9 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    planetModel.getTriangleList().getMaximumVertexDims().getX()*4);
 	 }catch(Exception e){tr.showStopper(e);}
+	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
+	tr.renderer.get().setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
+	tr.renderer.get().setSunColor(SkySystem.SPACE_SUN_COLOR);
 	game.setDisplayMode(game.briefingMode);
     }//end planetDisplayMode()
     
@@ -172,9 +176,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
 	game.getCurrentMission().getOverworldSystem().activate();
 	planetDisplayMode(lvl);
-	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
-	tr.renderer.get().setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
-	tr.renderer.get().setSunColor(SkySystem.SPACE_SUN_COLOR);
 	briefingChars.activate();
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.renderer.get().getCamera();
@@ -198,10 +199,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	setContent(
 		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
 	overworld.activate();
-	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
-	tr.renderer.get().setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
-	tr.renderer.get().setSunColor(SkySystem.SPACE_SUN_COLOR);
-	
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};
 	addScrollFinishCallback(new Runnable(){
@@ -224,8 +221,11 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	spacebarWaitThread.interrupt();
 	
 	//Enemy introduction
-	tr.renderer.get().getSkyCube().setSkyCubeGen(game.getCurrentMission().getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
-	
+	final Renderer renderer = tr.renderer.get();
+	final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
+	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
+	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
+	renderer.setSunColor(skySystem.getSuggestedSunColor());
 	for(EnemyIntro intro:game.getCurrentMission().getOverworldSystem().getObjectSystem().getDefPlacer().getEnemyIntros()){
 	    final WorldObject wo = intro.getWorldObject();
 	    final boolean vis = wo.isVisible();

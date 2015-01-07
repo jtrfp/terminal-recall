@@ -128,16 +128,20 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
      */
     public Color getSuggestedFogColor() {
 	if(suggestedFogColor==null){
-	    if(hasClouds())
-		suggestedFogColor=cloudTexture.getAverageColor();
-	    else
-		if(areStarsVisible()){
-		    return Color.black;
-		}else return getHorizonGradientBottom();
-		    
+	    if(areStarsVisible()){
+		return Color.black;
+	    }else return mix(getHorizonGradientBottom(),cloudTexture.getAverageColor());
 	}//end if(suggestedFogColor==null)
-        return suggestedFogColor;
+	return suggestedFogColor;
     }//end getSuggetedFogColor()
+    
+    private static Color mix(Color l, Color r){
+	return new Color(
+		(l.getRed()+r.getRed())/2,
+		(l.getGreen()+r.getGreen())/2,
+		(l.getBlue()+r.getBlue())/2,
+		(l.getAlpha()+r.getAlpha())/2);
+    }
     
     public boolean hasClouds(){
 	return !cloudTextureFileName.toUpperCase().contentEquals("STARS.VOX");

@@ -22,6 +22,7 @@ import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
+import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.VisibleEverywhere;
@@ -43,6 +44,7 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	addBehavior(new FacingObject().setEnable(false));
 	addBehavior(new RotateAroundObject().setEnable(false));
 	addBehavior(new TriggersVisCalcWithMovement().setEnable(true));
+	addBehavior(new SkyCubeCloudModeUpdateBehavior());
     }//end constructor
 
 	private void updateProjectionMatrix(){

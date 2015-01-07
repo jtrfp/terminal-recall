@@ -27,6 +27,7 @@ uniform sampler2DArray 	rgbaTiles;
 uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform vec3			ambientLight;
+uniform vec3			sunColor;
 uniform uint 			screenWidth;
 uniform uint 			screenHeight;
 uniform vec3 			sunVector;
@@ -60,8 +61,6 @@ const uint SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER =
 const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER * CODE_SIDE_WIDTH_TEXELS;
 const uint SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4
 										= 91u;
-
-const vec3 sunColor 					= vec3(1.4,1.4,1.2);
 
 const int DEPTH_QUEUE_SIZE				= 5;
 const float DEAD_BEEF					= 100024;

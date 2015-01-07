@@ -27,4 +27,12 @@ public class ColorUtils {
 		(int)Misc.clamp((l.getBlue()*r.getBlue())/255, 0, 255),
 		(int)Misc.clamp((l.getAlpha()*r.getAlpha())/255, 0, 255));
     }//end mul()
+    
+    public static Color mul(Color l, float scalar){
+	return new Color(
+		(int)Misc.clamp((l.getRed()*scalar), 0, 255),
+		(int)Misc.clamp((l.getGreen()*scalar), 0, 255),
+		(int)Misc.clamp((l.getBlue()*scalar), 0, 255),
+		(int)Misc.clamp((l.getAlpha()*scalar), 0, 255));
+    }//end mul()
 }//end ColorUtils

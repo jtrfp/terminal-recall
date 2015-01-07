@@ -27,10 +27,11 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
+import org.jtrfp.trcl.prop.SkyCube;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
-    private CloudSystem 	     cloudSystem;
+    private CloudSystem 	     skySystem;
     private InterpolatingAltitudeMap altitudeMap;
     private Color 		     fogColor = Color.black;
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
@@ -46,7 +47,6 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     				     objectReporter;
     private		ObjectSystem objectSystem;
     private            TerrainSystem terrainSystem;
-    private		SkyCubeGen   skyCubeGen;
 
     public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
 	super(w);
@@ -79,7 +79,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");
-	    cloudSystem = new CloudSystem(this, tr, this, lvl,
+	    skySystem = new CloudSystem(this, tr, this, lvl,
 			TR.mapSquareSize * 8,
 			(int) (TR.mapWidth / (TR.mapSquareSize * 8)),
 			w.sizeY / 3.5, cloudReporter);
@@ -138,7 +138,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     }// end chamberMode
 
     private CloudSystem getCloudSystem() {
-	return cloudSystem;
+	return skySystem;
     }
 
     /**
@@ -171,23 +171,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     public InterpolatingAltitudeMap getAltitudeMap() {
 	return altitudeMap;
     }
-    /**
-     * @return the skyCubeGen
-     */
-    public SkyCubeGen getSkyCubeGen() {
-	if(skyCubeGen==null){
-	    if(cloudSystem!=null)
-		skyCubeGen = new HorizGradientCubeGen
-		 (fogColor,new Color(fogColor.getRed(),fogColor.getGreen(),255));//TODO: Use the game's gradient info
-	    else
-		skyCubeGen = new HorizGradientCubeGen(Color.black,new Color(0,0,0,0)).
-			setEastTexture("/StarsA.png").
-			setWestTexture("/StarsA.png").
-			setTopTexture("/StarsA.png").
-			setSouthTexture("/StarsB.png").
-			setNorthTexture("/StarsB.png").
-			setVerticalBias(.65f);
-	}//end null
-        return skyCubeGen;
+    public CloudSystem getSkySystem() {
+	return skySystem;
     }
 }// end OverworldSystem

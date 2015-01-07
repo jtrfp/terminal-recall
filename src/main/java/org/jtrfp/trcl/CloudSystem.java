@@ -38,6 +38,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
     private Color	suggestedFogColor;
     private Color []	gradientPalette;
     private String	cloudTextureFileName;
+    private		SkyCubeGen   skyCubeGen;
     public static final int 
     	    GRADIENT_PALETTE_START = 193,
 	    GRADIENT_PALETTE_END = 208;
@@ -77,7 +78,6 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 	    }
 	    cloudTexture = tr.getResourceManager().getRAWAsTexture(
 		    cloudTextureFileName, new ColorPaletteVectorList(cloudPalette),true);
-	    suggestedFogColor  = cloudTexture.getAverageColor();
 	    cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	    generateClouds(os);
 	}
@@ -127,8 +127,14 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
      * @return the suggestedFogColor
      */
     public Color getSuggestedFogColor() {
+	if(suggestedFogColor==null){
+	    if(hasClouds())
+		suggestedFogColor=cloudTexture.getAverageColor();
+	    else
+		suggestedFogColor=getHorizonGradientBottom();
+	}//end if(suggestedFogColor==null)
         return suggestedFogColor;
-    }
+    }//end getSuggetedFogColor()
     
     public boolean hasClouds(){
 	return !cloudTextureFileName.toUpperCase().contentEquals("STARS.VOX");
@@ -152,5 +158,26 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
      */
     public Color[] getGradientPalette() {
         return gradientPalette;
+    }
+    
+    /**
+     * @return the skyCubeGen
+     */
+    public SkyCubeGen getSkyCubeGen() {
+	if(skyCubeGen==null){
+	    final Color fogColor = getSuggestedFogColor();
+	    if(hasClouds())
+		skyCubeGen = new HorizGradientCubeGen
+		 (fogColor,new Color(fogColor.getRed(),fogColor.getGreen(),255));//TODO: Use the game's gradient info
+	    else
+		skyCubeGen = new HorizGradientCubeGen(fogColor,new Color(0,0,0,0)).
+			setEastTexture("/StarsA.png").
+			setWestTexture("/StarsA.png").
+			setTopTexture("/StarsA.png").
+			setSouthTexture("/StarsB.png").
+			setNorthTexture("/StarsB.png").
+			setVerticalBias(.65f);
+	}//end null
+        return skyCubeGen;
     }
 }// end CloudSystem

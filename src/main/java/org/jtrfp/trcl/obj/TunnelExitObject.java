@@ -80,7 +80,7 @@ public class TunnelExitObject extends WorldObject {
 			.getPosition()[0]) {
 		    final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
 		    overworldSystem.setChamberMode(mirrorTerrain);
-		    tr.renderer.get().getSkyCube().setSkyCubeGen(overworldSystem.getSkyCubeGen());
+		    tr.renderer.get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getSkyCubeGen());
 		    // Teleport
 		    other.setPosition(exitLocation.toArray());
 		    // Heading

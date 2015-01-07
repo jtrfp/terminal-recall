@@ -220,7 +220,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	spacebarWaitThread.interrupt();
 	
 	//Enemy introduction
-	tr.renderer.get().getSkyCube().setSkyCubeGen(game.getCurrentMission().getOverworldSystem().getSkyCubeGen());
+	tr.renderer.get().getSkyCube().setSkyCubeGen(game.getCurrentMission().getOverworldSystem().getSkySystem().getSkyCubeGen());
 	
 	for(EnemyIntro intro:game.getCurrentMission().getOverworldSystem().getObjectSystem().getDefPlacer().getEnemyIntros()){
 	    final WorldObject wo = intro.getWorldObject();

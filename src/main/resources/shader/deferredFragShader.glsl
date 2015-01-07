@@ -26,7 +26,7 @@ uniform sampler2D		primitivenXnYnZTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
-uniform vec3 			fogColor;
+uniform vec3			ambientLight;
 uniform uint 			screenWidth;
 uniform uint 			screenHeight;
 uniform vec3 			sunVector;
@@ -140,7 +140,7 @@ vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
  
  float sunIllumination			= -dot(sunVector,norm);
  if(dot(norm.xyz,norm.xyz)>.01)cTexel.rgb
- 								=((clamp(sunIllumination,0,1)*sunColor)+fogColor) * cTexel.rgb;
+ 								=((clamp(sunIllumination,0,1)*sunColor)+ambientLight) * cTexel.rgb;
  return cTexel;
  }//end intrinsicCodeTexel
 

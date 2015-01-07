@@ -132,7 +132,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
      */
     public Color getSuggestedFogColor() {
 	if(suggestedFogColor==null){
-	    if(areStarsVisible()){
+	    if(!hasClouds()){
 		return Color.black;
 	    }else{
 		Color l = getHorizonGradientBottom();
@@ -150,7 +150,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     public Color getSuggestedAmbientLight(){
 	if(suggestedAmbientLight==null)
 	    if(hasClouds())
-		suggestedAmbientLight = ColorUtils.mul(getSuggestedFogColor(),new Color(127,127,127));
+		suggestedAmbientLight = ColorUtils.mul(getSuggestedFogColor(),.5f);
 	    else return SPACE_AMBIENT_LIGHT;
 	return suggestedAmbientLight;
     }
@@ -161,7 +161,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     
     public boolean areStarsVisible(){
 	Color c = getHorizonGradientTop();
-	return c.getRed()+c.getGreen()+c.getBlue()==0 || !hasClouds();
+	return c.getRed()+c.getGreen()+c.getBlue()<25 || !hasClouds();
     }
     
     public Color getHorizonGradientBottom(){//Intentionally backwards.
@@ -186,9 +186,9 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	    final Color fogColor = getSuggestedFogColor();
 	    if(hasClouds())
 		belowCloudsSkyCubeGen = new HorizGradientCubeGen
-		(fogColor,fogColor);
+		(ColorUtils.mul(fogColor,1.5f),ColorUtils.mul(fogColor,1.1f));
 	    else
-		    belowCloudsSkyCubeGen = new HorizGradientCubeGen(fogColor,new Color(0,0,0,0)).
+		    belowCloudsSkyCubeGen = new HorizGradientCubeGen(ColorUtils.mul(fogColor,1.1f),new Color(0,0,0,0)).
 		    setEastTexture("/StarsA.png").
 		    setWestTexture("/StarsA.png").
 		    setTopTexture("/StarsA.png").
@@ -202,10 +202,28 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     public SkyCubeGen getAboveCloudsSkyCubeGen() {
 	if(aboveCloudsSkyCubeGen==null){
 	    if(hasClouds())
-		aboveCloudsSkyCubeGen = new HorizGradientCubeGen
-		 (getHorizonGradientBottom(),getHorizonGradientTop());
-	    else
-		aboveCloudsSkyCubeGen = getBelowCloudsSkyCubeGen();
+		if(!areStarsVisible())
+		 aboveCloudsSkyCubeGen = new HorizGradientCubeGen
+		  (ColorUtils.mul(getHorizonGradientBottom(),1.5f),ColorUtils.mul(getHorizonGradientTop(),1.5f));
+		else
+		    aboveCloudsSkyCubeGen = new HorizGradientCubeGen(getHorizonGradientBottom(),new Color(0,0,0,0)).
+		    setEastTexture("/StarsA.png").
+		    setWestTexture("/StarsA.png").
+		    setTopTexture("/StarsA.png").
+		    setSouthTexture("/StarsB.png").
+		    setNorthTexture("/StarsB.png").
+		    setVerticalBias(.7f);
+	    else// No clouds
+		if(!areStarsVisible())
+		    aboveCloudsSkyCubeGen = getBelowCloudsSkyCubeGen();
+		else
+		    aboveCloudsSkyCubeGen = new HorizGradientCubeGen(Color.black,new Color(0,0,0,0)).
+		    setEastTexture("/StarsA.png").
+		    setWestTexture("/StarsA.png").
+		    setTopTexture("/StarsA.png").
+		    setSouthTexture("/StarsB.png").
+		    setNorthTexture("/StarsB.png").
+		    setVerticalBias(.7f);
 	}//end null
         return aboveCloudsSkyCubeGen;
     }//end getAboveCloudsSkyCubeGen

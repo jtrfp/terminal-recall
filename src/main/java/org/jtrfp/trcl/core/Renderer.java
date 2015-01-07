@@ -816,11 +816,11 @@ public final class Renderer {
 	    @Override
 	    public Void call() throws Exception {
 		deferredProgram.use();
-		deferredProgram.getUniform("sunColor").set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f);
+		deferredProgram.getUniform("sunColor").set(color.getRed()/128f, color.getGreen()/128f, color.getBlue()/128f);
 		gpu.defaultProgram();
 		return null;
 	    }
-	});
+	}).get();
 	return this;
     }
 
@@ -829,11 +829,11 @@ public final class Renderer {
 	    @Override
 	    public Void call() throws Exception {
 		deferredProgram.use();
-		deferredProgram.getUniform("ambientLight").set(color.getRed()/255f, color.getGreen()/255f, color.getBlue()/255f);
+		deferredProgram.getUniform("ambientLight").set(color.getRed()/128f, color.getGreen()/128f, color.getBlue()/128f);
 		gpu.defaultProgram();
 		return null;
 	    }
-	});
+	}).get();
 	return this;
     }//end setAmbientLight
 }//end Renderer

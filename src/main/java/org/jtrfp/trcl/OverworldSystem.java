@@ -31,7 +31,7 @@ import org.jtrfp.trcl.prop.SkyCube;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
-    private CloudSystem 	     skySystem;
+    private SkySystem 	     skySystem;
     private InterpolatingAltitudeMap altitudeMap;
     private Color 		     fogColor = Color.black;
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
@@ -79,7 +79,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");
-	    skySystem = new CloudSystem(this, tr, this, lvl,
+	    skySystem = new SkySystem(this, tr, this, lvl,
 			TR.mapSquareSize * 8,
 			(int) (TR.mapWidth / (TR.mapSquareSize * 8)),
 			w.sizeY / 3.5, cloudReporter);
@@ -125,7 +125,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	tr.getReporter().report("org.jtrfp.OverworldSystem.isInChamber?",
 		"" + mirrorTerrain);
 	chamberMode = mirrorTerrain;
-	final CloudSystem cs = getCloudSystem();
+	final SkySystem cs = getCloudSystem();
 	if (mirrorTerrain) {
 	    this.getTerrainMirror().activate();
 	    if (cs != null)
@@ -137,7 +137,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	}
     }// end chamberMode
 
-    private CloudSystem getCloudSystem() {
+    private SkySystem getCloudSystem() {
 	return skySystem;
     }
 
@@ -171,7 +171,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     public InterpolatingAltitudeMap getAltitudeMap() {
 	return altitudeMap;
     }
-    public CloudSystem getSkySystem() {
+    public SkySystem getSkySystem() {
 	return skySystem;
     }
 }// end OverworldSystem

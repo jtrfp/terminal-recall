@@ -27,7 +27,7 @@ import org.jtrfp.trcl.obj.CloudCeiling;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
-public class CloudSystem extends RenderableSpacePartitioningGrid {
+public class SkySystem extends RenderableSpacePartitioningGrid {
     double 		ceilingHeight;
     TextureDescription 	cloudTexture;
     double 		cloudTileSideSize;
@@ -56,7 +56,7 @@ public class CloudSystem extends RenderableSpacePartitioningGrid {
 		setSouthTexture("/StarsB.png").
 		setNorthTexture("/StarsB.png");
 
-    public CloudSystem(OverworldSystem os, TR tr,
+    public SkySystem(OverworldSystem os, TR tr,
 	    RenderableSpacePartitioningGrid grid, LVLFile lvl,
 	    double cloudTileSideSize, int gridSideSizeInTiles,
 	    double ceilingHeight, final LoadingProgressReporter cloudReporter) throws IllegalAccessException,

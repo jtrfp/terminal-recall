@@ -172,7 +172,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
 	game.getCurrentMission().getOverworldSystem().activate();
 	planetDisplayMode(lvl);
-	tr.renderer.get().getSkyCube().setSkyCubeGen(CloudSystem.SPACE_STARS);
+	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
 	briefingChars.activate();
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.renderer.get().getCamera();
@@ -196,7 +196,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	setContent(
 		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
 	overworld.activate();
-	tr.renderer.get().getSkyCube().setSkyCubeGen(CloudSystem.SPACE_STARS);
+	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
 	
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};

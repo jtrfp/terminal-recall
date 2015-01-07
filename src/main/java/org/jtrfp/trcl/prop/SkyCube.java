@@ -47,7 +47,6 @@ public class SkyCube {
 	renderer.getSkyCubeProgram().use()
 		.getUniform("projectionRotationMatrix")
 		.set4x4Matrix(renderer.getCamRotationProjectionMatrix(), true);
-
 	getSkyCubeTexture().bindToTextureUnit(0, gl);
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 36);
 	// Cleanup
@@ -63,10 +62,11 @@ public class SkyCube {
 	    @Override
 	    public Void call() throws Exception {
 		final int colorMode = GL3.GL_RGB8;
-		skyCubeTexture = tr.gpu.get()
-			.newTexture()
-			.setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP)
-			.bind()
+		if(skyCubeTexture==null)
+		    skyCubeTexture = tr.gpu.get()
+		    	.newTexture()
+		    	.setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP);
+		skyCubeTexture.bind()
 			.setImagePositiveX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getEast())
 			.setImageNegativeX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getWest())
 			.setImagePositiveY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getTop())
@@ -120,19 +120,16 @@ public class SkyCube {
 	    buildSkyCubeTexture();
         return skyCubeTexture;
     }
-
-    /**
-     * @param skyCubeTexture the skyCubeTexture to set
-     */
-    void setSkyCubeTexture(GLTexture skyCubeTexture) {
-	final GLTexture thisSkyCubeTexture = this.skyCubeTexture;
-	if(thisSkyCubeTexture!=null)
+    
+    @Override
+    public void finalize() throws Throwable{
+	if(skyCubeTexture!=null)
 	    tr.getThreadManager().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-		    thisSkyCubeTexture.delete();
+		    skyCubeTexture.delete();
 		    return null;
-		}}).get();
-        this.skyCubeTexture = skyCubeTexture;
-    }//end setSkyCubeTexture(...)
+		}});
+	super.finalize();
+    }//end finalize()
 }//end SkyCube

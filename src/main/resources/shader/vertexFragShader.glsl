@@ -31,6 +31,8 @@ const uint VTX_TEXTURE_HEIGHT		= 4096u;
 const uint VTX_TEXTURE_USABLE_WIDTH = (VTX_TEXTURE_WIDTH/3u)*3u;
 const uint VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3u)*3u;
 
+const float CODE_SIDE_WIDTH_TEXELS	= 4;
+
 //const float V_COORD_PACK_SCALE		=16;
 
 // INPUTS
@@ -157,7 +159,7 @@ void main(){
 			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
 												float(firstSShort(packedVertex[1])));
 			vertexCoord.w=1;
-    		vec2 fragTexCoord 		= vec2(float(firstSShort(packedVertex[2]))/4096.,float(secondSShort(packedVertex[2]))/4096.);
+    		vec2 fragTexCoord 		= vec2(float(firstSShort(packedVertex[2])),float(secondSShort(packedVertex[2])));
     		vec4 position 			= matrix * vertexCoord;
 			w						= 1/position.w;
 			xy.xy					= position.xy;

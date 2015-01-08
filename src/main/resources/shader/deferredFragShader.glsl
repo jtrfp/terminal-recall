@@ -88,55 +88,120 @@ return clamp((z-ZNEAR)/(ZFAR-ZNEAR),0,1);
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
-vec4 codeTexel(vec2 texelXY, uint textureID, vec2 tDims, uint renderFlags){
- 		texelXY		= (renderFlags&RENDER_FLAGS_WRAP)!=0u?mod(texelXY,tDims):clamp(texelXY,vec2(0,0),tDims-vec2(1,1));
- vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
- // Clamp sub-pixels within vector.
- codeXY				= clamp(codeXY,0,3)+.5;
- uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
- uint	tTOCvec4Idx	= tTOCIdx / 4u;
- uint	tTOCsubIdx	= tTOCIdx % 4u;
+vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub, uint subTexV4Addr, uint startCode){
+ //uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
+ //uint	tTOCvec4Idx	= tTOCIdx / 4u;
+ //uint	tTOCsubIdx	= tTOCIdx % 4u;
  // Sub-Texture
- uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
- vec2	subTexUVblnd= mod(texelXY,CODE_PAGE_TEXEL_SIZE_UV);//Subtexel to blend between texels
- vec2	subTexXY	= mod(texelXY,SUBTEXTURE_SIDE_WIDTH_TEXELS);
- uint	subTexByIdx = 0u+(uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + ((0u+(uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS)) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
- uint	startCodeIdx= subTexByIdx/256u;
- uint	startCode	= texelFetch(rootBuffer,int(subTexV4Addr+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx/4u)))[startCodeIdx%4u];
- uint	subTexV4Idx	= subTexByIdx / 16u;
- uint	subTexV4Sub = subTexByIdx % 16u;
+ //uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
+ //uvec2	subTexXY	= texelXY%SUBTEXTURE_SIDE_WIDTH_TEXELS;// Tile-level divergence here
+ //uint	subTexByIdx = 0u+(uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + ((0u+(uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS)) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
+ //uint	startCodeIdx= subTexByIdx/256u;
+ //uint	startCode	= texelFetch(rootBuffer,int(subTexV4Addr+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx/4u)))[startCodeIdx%4u];
+ //uint	subTexV4Idx	= subTexByIdx / 16u;
+ //uint	subTexV4Sub = subTexByIdx % 16u;
  // Codebook
  uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
  uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
+ uvec2	codeXY		= texelXY%4u;
  vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
- vec2	codePgUV	= (vec2(float(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES),float((codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES))/float(CODE_PAGE_SIDE_WIDTH_CODES))+subTexUVsub;
- return				  textureLod(rgbaTiles,vec3(codePgUV,codeBkPgNum),0);
+ ivec2	codePgXY	= ivec2(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES,(codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES)*4+ivec2(codeXY);
+ return	texelFetch(rgbaTiles,ivec3(codePgXY,codeBkPgNum),0);
  }
  
  vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
- // TOC
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
  uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
- vec2	tDims		= vec2(float(tocHeader[TOC_HEADER_OFFSET_QUADS_WIDTH]),float(tocHeader[TOC_HEADER_OFFSET_QUADS_HEIGHT]));
- vec2	texelXY		= tDims*vec2(uv.x,1-uv.y);
- vec2	ceilTexXY	= ceil(texelXY);
- vec2	codeXY		= mod(texelXY,float(CODE_SIDE_WIDTH_TEXELS));
- vec2	dH			= codeXY-3;
- uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
- vec4	cTexel  	= codeTexel(texelXY,textureID,tDims,renderFlags);
  
- if(dH.x>0 && dH.y<=0) cTexel = //Far right
-    mix(cTexel,codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags),dH.x);
- else if(dH.y>0 && dH.x<=0)cTexel = //Far down
- 	mix(cTexel,codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags),dH.y);
- else if(dH.y>0 && dH.x>0)cTexel = //Corner
- 	mix(
- 	 mix(cTexel,codeTexel(vec2(texelXY.x,ceilTexXY.y),textureID,tDims,renderFlags),dH.y),//Left
- 	 mix(codeTexel(vec2(ceilTexXY.x,texelXY.y),textureID,tDims,renderFlags),codeTexel(ceilTexXY,textureID,tDims,renderFlags),dH.y),//Right
- 	   dH.x);//Vertical
- 
+ //uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
+ uv = clamp(uv-.5,0,4096);
+ vec2 sub = mod(uv,1);
+ uvec2 iuv = uvec2(uv);
+ vec4	cTexel;
+ uvec4 iuv4A,iuv4B, tTOCIdx,tTOCvec4Idx,tTOCsubIdx,subTexV4Addr;
+ uvec4	subTexV4Idx, subTexV4Sub, startCode;
+ iuv4A		 = uvec4(iuv,iuv+uvec2(0,1));
+ iuv4B		 = uvec4(iuv,iuv)+uvec4(1,0,1,1);
+ // PRECALC
+ //////////////// Subtexture-level convergence check
+ if(false){//Test for subtexture convergence
+   // If everything is on the same subtexture (and it likely is) we can share the value on all texels and skip computing each.
+   uint tti = iuv4A.x/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4A.y/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
+   uint ttv4idx = (tti / 4u) + textureID;
+   uint ttsi	= tti % 4u;
+   uint stv4a = texelFetch(rootBuffer,int(ttv4idx))[ttsi];
+   ///////////// Tile-level-convergence check
+   if(false){
+    //Use intra-tile bilinear sampling
+    uvec2	stXY	= iuv4A.xy%SUBTEXTURE_SIDE_WIDTH_TEXELS;
+  	uint	stbi = (stXY.x/CODE_SIDE_WIDTH_TEXELS + (((stXY.y/CODE_SIDE_WIDTH_TEXELS)) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
+  	uint	scI= stbi/256u;
+  	uint	startC	= texelFetch(rootBuffer,int(stv4a+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(scI/4u)))[scI%4u];
+   	uint	stv4idx	= stbi / 16u;
+   	uint	stv4sub = stbi % 16u;
+    // Codebook
+ 	uint	codeIdx		= UByte((texelFetch(rootBuffer,int(stv4idx+stv4a))[stv4sub/4u]),stv4sub%4u)+startC;
+ 	uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
+ 	vec2	codeXY		= stXY%4u;
+ 	vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
+ 	vec2	codePgXY	= vec2(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES,(codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES)*4+codeXY+sub;
+ 	cTexel				= textureLod(rgbaTiles,vec3(codePgXY*CODE_PAGE_TEXEL_SIZE_UV,codeBkPgNum),0);
+ 	float sunIllumination			= -dot(sunVector,norm);
+	if(dot(norm.xyz,norm.xyz)>.01)cTexel.rgb
+ 	 =((clamp(sunIllumination,0,1)*sunColor)+ambientLight) * cTexel.rgb;
+ 	return cTexel;
+    }else{subTexV4Addr = uvec4(stv4a);}
+   uvec4	subTexXY_A	= iuv4A%SUBTEXTURE_SIDE_WIDTH_TEXELS;
+   uvec4	subTexXY_B  = iuv4B%SUBTEXTURE_SIDE_WIDTH_TEXELS;
+   uvec4	subTexByIdx = uvec4(
+   	(subTexXY_A.x/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_A.y/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER),
+   	(subTexXY_A.z/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_A.w/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER),
+   	(subTexXY_B.x/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_B.y/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER),
+   	(subTexXY_B.z/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_B.w/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
+   uvec4	startCodeIdx = subTexByIdx/256u;
+   startCode	= uvec4(
+   	texelFetch(rootBuffer,int(subTexV4Addr[0u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[0u]/4u)))[startCodeIdx[0u]%4u],
+   	texelFetch(rootBuffer,int(subTexV4Addr[1u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[1u]/4u)))[startCodeIdx[1u]%4u],
+   	texelFetch(rootBuffer,int(subTexV4Addr[2u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[2u]/4u)))[startCodeIdx[2u]%4u],
+   	texelFetch(rootBuffer,int(subTexV4Addr[3u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[3u]/4u)))[startCodeIdx[3u]%4u]);
+   subTexV4Idx	= subTexByIdx / 16u;
+   subTexV4Sub  = subTexByIdx % 16u;
+  } else{ ////////////////// Compute the hard way
+  tTOCIdx = uvec4(
+  	iuv4A.x/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4A.y/SUBTEXTURE_SIDE_WIDTH_TEXELS)*19u,
+  	iuv4A.z/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4A.w/SUBTEXTURE_SIDE_WIDTH_TEXELS)*19u,
+  	iuv4B.x/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4B.y/SUBTEXTURE_SIDE_WIDTH_TEXELS)*19u,
+  	iuv4B.z/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4B.w/SUBTEXTURE_SIDE_WIDTH_TEXELS)*19u);
+  tTOCvec4Idx  = (tTOCIdx / 4u) + textureID;
+  tTOCsubIdx   = tTOCIdx % 4u;
+  subTexV4Addr = uvec4(
+  	texelFetch(rootBuffer,int(tTOCvec4Idx[0u]))[tTOCsubIdx[0u]],
+  	texelFetch(rootBuffer,int(tTOCvec4Idx[1u]))[tTOCsubIdx[1u]],
+  	texelFetch(rootBuffer,int(tTOCvec4Idx[2u]))[tTOCsubIdx[2u]],
+  	texelFetch(rootBuffer,int(tTOCvec4Idx[3u]))[tTOCsubIdx[3u]]
+  	);
+   uvec4	subTexXY_A	= iuv4A%SUBTEXTURE_SIDE_WIDTH_TEXELS;
+   uvec4	subTexXY_B  = iuv4B%SUBTEXTURE_SIDE_WIDTH_TEXELS;
+   uvec4	subTexByIdx = uvec4(
+   	(subTexXY_A.x/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_A.y/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER),
+   	(subTexXY_A.z/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_A.w/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER),
+   	(subTexXY_B.x/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_B.y/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER),
+   	(subTexXY_B.z/CODE_SIDE_WIDTH_TEXELS) + ((subTexXY_B.w/CODE_SIDE_WIDTH_TEXELS) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
+   uvec4	startCodeIdx = subTexByIdx/256u;
+   startCode	= uvec4(
+   	texelFetch(rootBuffer,int(subTexV4Addr[0u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[0u]/4u)))[startCodeIdx[0u]%4u],
+   	texelFetch(rootBuffer,int(subTexV4Addr[1u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[1u]/4u)))[startCodeIdx[1u]%4u],
+   	texelFetch(rootBuffer,int(subTexV4Addr[2u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[2u]/4u)))[startCodeIdx[2u]%4u],
+   	texelFetch(rootBuffer,int(subTexV4Addr[3u]+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx[3u]/4u)))[startCodeIdx[3u]%4u]);
+   subTexV4Idx	= subTexByIdx / 16u;
+   subTexV4Sub  = subTexByIdx % 16u;
+  }
+  //Perform 4-way texel mix
+  cTexel		 = mix(codeTexel(iuv4A.xy,textureID, subTexV4Idx[0u], subTexV4Sub[0u],subTexV4Addr[0u],startCode[0u]),codeTexel(iuv4A.zw,textureID, subTexV4Idx[1u], subTexV4Sub[1u],subTexV4Addr[1u],startCode[1u]),sub.y);
+  cTexel		 = mix(cTexel,mix(codeTexel(iuv4B.xy,textureID, subTexV4Idx[2u], subTexV4Sub[2u], subTexV4Addr[2u],startCode[2u]),codeTexel(iuv4B.zw,textureID,subTexV4Idx[3u],subTexV4Sub[3u],subTexV4Addr[3u],startCode[3u]),sub.y),sub.x);
+  
  float sunIllumination			= -dot(sunVector,norm);
  if(dot(norm.xyz,norm.xyz)>.01)cTexel.rgb
  								=((clamp(sunIllumination,0,1)*sunColor)+ambientLight) * cTexel.rgb;

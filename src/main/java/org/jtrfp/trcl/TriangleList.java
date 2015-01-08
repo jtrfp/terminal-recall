@@ -165,6 +165,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    }//end for(stackTrace)
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
 	if (td instanceof Texture ) {// Static texture
+	    final int sideScalar = ((Texture)td).getSideLength()-1;
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
@@ -176,14 +177,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		getModel().addTickableAnimator(uvAnimator);
 		uvAnimator.setDebugName(debugName + ".uvAnimator");
 		for (int i = 0; i < numFrames; i++) {
-		    uFrames[i] = (float) (uvUpScaler*triangleAt(i, triangleIndex).getUV(vIndex).getX());
-		    vFrames[i] = (float) (uvUpScaler*triangleAt(i, triangleIndex).getUV(vIndex).getY());
+		    uFrames[i] = (float) (sideScalar*triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) (sideScalar*(1-triangleAt(i, triangleIndex).getUV(vIndex).getY()));
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
-		vw.u.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getX()));
-		vw.v.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getY()));
+		vw.u.set(gpuTVIndex, (short) (sideScalar * t.getUV(vIndex).getX()));
+		vw.v.set(gpuTVIndex, (short) (sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	    final int textureID = ((Texture)td).getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
@@ -191,6 +192,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
 	if(td instanceof AnimatedTexture){//Animated texture
+	    final AnimatedTexture at = (AnimatedTexture)td;
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
@@ -201,16 +203,17 @@ public class TriangleList extends PrimitiveList<Triangle> {
 			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
 		getModel().addTickableAnimator(uvAnimator);
 		for (int i = 0; i < numFrames; i++) {
-		    uFrames[i] = (float) (uvUpScaler * triangleAt(i, triangleIndex).getUV(vIndex).getX());
-		    vFrames[i] = (float) (uvUpScaler * triangleAt(i, triangleIndex).getUV(vIndex).getY());
+		    final int sideScalar = at.getFrames()[i].getSideLength()-1;
+		    uFrames[i] = (float) (sideScalar * triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) (sideScalar * (1-triangleAt(i, triangleIndex).getUV(vIndex).getY()));
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
-		vw.u.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getX()));
-		vw.v.set(gpuTVIndex, (short) (uvUpScaler * t.getUV(vIndex).getY()));
+		final int sideScalar = at.getFrames()[0].getSideLength()-1;
+		vw.u.set(gpuTVIndex, (short) (sideScalar * t.getUV(vIndex).getX()));
+		vw.v.set(gpuTVIndex, (short) (sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
-	    AnimatedTexture at = ((AnimatedTexture) td);
 	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(at,vw,gpuTVIndex);
 	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");
 	    getModel().addTickableAnimator(texturePageAnimator);

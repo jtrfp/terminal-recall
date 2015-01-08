@@ -53,7 +53,7 @@ public class Texture implements TextureDescription {
     private	  int[][]		codebookStartOffsetsAbsolute;
     private final boolean		uvWrapping;
     private volatile int		texturePage;
-    private int				width;
+    private int				sideLength;
     @Override
     public void finalize() throws Throwable{
 	System.out.println("Texture.finalize() "+debugName);
@@ -189,7 +189,7 @@ public class Texture implements TextureDescription {
     }
     
     private final void vqCompress(VectorList rgba8888vl, final int sideLength){
-	    width=sideLength;
+	    this.sideLength=sideLength;
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
 	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
@@ -479,6 +479,10 @@ public class Texture implements TextureDescription {
     
     @Override
     public String toString(){
-	return "Texture debugName="+debugName+" width="+width;
+	return "Texture debugName="+debugName+" width="+sideLength;
+    }
+    
+    public int getSideLength(){
+	return sideLength;
     }
 }// end Texture

@@ -76,8 +76,9 @@ const float PRIM_TEX_HEIGHT_SCALAR	= 1/float(PRIM_TEXTURE_HEIGHT);
 const float PRIM_TEX_WIDTH_SCALAR	= 1/float(PRIM_TEXTURE_WIDTH);
 const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
 const uint OVERSAMPLING				= 4u;
+const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 
-const  vec2 PRIM_QUAD_BL 			= vec2(PRIM_TEX_WIDTH_SCALAR,PRIM_TEX_HEIGHT_SCALAR)/(2*float(OVERSAMPLING));
+vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
 
 float warpFog(float z){
 const float ZNEAR = 6554 * 32;
@@ -112,8 +113,8 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
  vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
- uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
- if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
+ //uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
+ //if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  
  //uint	renderFlags = tocHeader[TOC_HEADER_OFFSET_QUADS_RENDER_FLAGS];
  uv = clamp(uv-.5,0,4096);
@@ -148,10 +149,10 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
  	vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
  	vec2	codePgXY	= vec2(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES,(codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES)*4+codeXY+sub;
  	cTexel				= textureLod(rgbaTiles,vec3(codePgXY*CODE_PAGE_TEXEL_SIZE_UV,codeBkPgNum),0);
- 	float sunIllumination			= -dot(sunVector,norm);
-	if(dot(norm.xyz,norm.xyz)>.01)cTexel.rgb
- 	 =((clamp(sunIllumination,0,1)*sunColor)+ambientLight) * cTexel.rgb;
- 	return cTexel;
+ 	vec4 illumination;
+ 	if(dot(norm.xyz,norm.xyz)>.01)illumination.rgb
+ 								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight);
+ 	return cTexel * illumination;
     }else{subTexV4Addr = uvec4(stv4a);}
    uvec4	subTexXY_A	= iuv4A%SUBTEXTURE_SIDE_WIDTH_TEXELS;
    uvec4	subTexXY_B  = iuv4B%SUBTEXTURE_SIDE_WIDTH_TEXELS;
@@ -201,15 +202,15 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
   //Perform 4-way texel mix
   cTexel		 = mix(codeTexel(iuv4A.xy,textureID, subTexV4Idx[0u], subTexV4Sub[0u],subTexV4Addr[0u],startCode[0u]),codeTexel(iuv4A.zw,textureID, subTexV4Idx[1u], subTexV4Sub[1u],subTexV4Addr[1u],startCode[1u]),sub.y);
   cTexel		 = mix(cTexel,mix(codeTexel(iuv4B.xy,textureID, subTexV4Idx[2u], subTexV4Sub[2u], subTexV4Addr[2u],startCode[2u]),codeTexel(iuv4B.zw,textureID,subTexV4Idx[3u],subTexV4Sub[3u],subTexV4Addr[3u],startCode[3u]),sub.y),sub.x);
-  
- float sunIllumination			= -dot(sunVector,norm);
- if(dot(norm.xyz,norm.xyz)>.01)cTexel.rgb
- 								=((clamp(sunIllumination,0,1)*sunColor)+ambientLight) * cTexel.rgb;
- return cTexel;
+ 
+ vec4 illumination = vec4(1);
+ if(dot(norm.xyz,norm.xyz)>.01)illumination.rgb
+ 								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight);
+ return cTexel * illumination;
  }//end intrinsicCodeTexel
 
-vec4 primitiveLayer(vec2 pQuad, vec4 vUVZI, bool disableAlpha, float w){
- vec4	nXnYnZ		= textureLod(primitivenXnYnZTexture,pQuad,0);
+vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
+ vec4	nXnYnZ		= textureProjLod(primitivenXnYnZTexture,pQuad,0);
  vec2	uv			= vUVZI.xy;
  vec3 	norm 		= nXnYnZ.xyz/w;
  vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
@@ -233,18 +234,18 @@ uint depthOfFloatShiftQueue(vec4 fsq){
  return uint(logn(fsq.x,16));
 }
 
-vec2 getPQuad(uint primitiveID){
- uint	row			= primitiveID/PRIMS_PER_ROW;
- uint	col			= primitiveID%PRIMS_PER_ROW;
- vec2	pQuadBL		= PRIM_QUAD_BL;
- pQuadBL.x			+=float(col*2u)*PRIM_TEX_WIDTH_SCALAR;// x2 because each quad is 2 texels wide.
- pQuadBL.y			+=float(row*2u)*PRIM_TEX_HEIGHT_SCALAR;
- return				pQuadBL+vec2(PRIM_TEX_WIDTH_SCALAR,PRIM_TEX_HEIGHT_SCALAR)*screenLoc.xy;
+vec3 getPQuad(uint primitiveID){
+ vec2	corner		= vec2(primitiveID%PRIMS_PER_ROW,primitiveID/PRIMS_PER_ROW);
+ return				vec3(corner + halfScreenLocOffset,PQUAD_DENOM);
 }
 
 float getTextureID(uint primitiveID){
  uint vertexID = primitiveID * 3u;
- return texelFetch(vertexTextureIDTexture,ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x*65536*PAGE_SIZE_VEC4;
+ return texelFetch(
+  vertexTextureIDTexture,
+  ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,
+  vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x
+   *(65536u*PAGE_SIZE_VEC4);
 }
 
 ////////// STRUCT LAYOUT DOCUMENTATION ///////////////
@@ -260,12 +261,10 @@ textureTOC{
 void main(){
 uint	primitiveID;
 vec4	color		= vec4(0,0,0,0);
-
 vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
-
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
-vec2 pQuads[DEPTH_QUEUE_SIZE];
+vec3 pQuads[DEPTH_QUEUE_SIZE];
 float _w[DEPTH_QUEUE_SIZE];
 int ordering[DEPTH_QUEUE_SIZE];
 
@@ -275,8 +274,8 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  if(primitiveID==0u || primitiveID>65535u)
   break;
  primitiveID--; //Compensate for zero representing "unwritten."
- vec2 pQuad = pQuads[i]= getPQuad(primitiveID);
- vec4 _uvzw	= textureLod(primitiveUVZWTexture,pQuad,0);
+ vec3 pQuad = pQuads[i]= getPQuad(primitiveID);
+ vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pQuad,0);
  _uvzw.xyz /= _uvzw.w;
  vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
  _w[i]		= _uvzw.w;
@@ -312,13 +311,13 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
 
 if(color.a < ALPHA_THRESHOLD){
  // S O L I D   B A C K D R O P
- primitiveID = uint(texelFetch(primitiveIDTexture,ivec2(gl_FragCoord),0)[0u]*65536);
- if(primitiveID>0u){
-  primitiveID--; //Compensate for zero representing "unwritten."
-  vec2 pq = getPQuad(primitiveID);
-  vec4 _uvzw	= textureLod(primitiveUVZWTexture,pq,0);
+ uint opaquePrimID = uint(texelFetch(primitiveIDTexture,ivec2(gl_FragCoord),0)[0u]*65536);
+ if(opaquePrimID>0u){
+  opaquePrimID--; //Compensate for zero representing "unwritten."
+  vec3 pq = getPQuad(opaquePrimID);
+  vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
-  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(primitiveID)) ,true,_uvzw.w);
+  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(opaquePrimID)) ,true,_uvzw.w);
   color.rgb	= mix(oColor.rgb,color.rgb,color.a);
   color.a		= color.a+oColor.a*(1-color.a);
   }//end if(written)

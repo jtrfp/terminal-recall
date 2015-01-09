@@ -25,6 +25,7 @@ import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
+import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.LazyTRFuture;
 import org.jtrfp.trcl.core.Renderer;
@@ -43,7 +44,14 @@ import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class BriefingScreen extends RenderableSpacePartitioningGrid {
-    private static final double Z = .000000001;
+    private static final double Z_INCREMENT = .00000000000000001;
+    private static final double Z_START = Z_INCREMENT;
+    private static final double BRIEFING_SPRITE_Z = Z_START;
+    private static final double TEXT_Z = BRIEFING_SPRITE_Z + Z_INCREMENT;
+    private static final double TEXT_BG_Z = TEXT_Z + Z_INCREMENT;
+    
+    private static final double MAX_Z_DEPTH = TEXT_BG_Z + Z_INCREMENT;
+    //private static final double Z = .000000001;
     private final TR 		  tr;
     private final Sprite2D	  briefingScreen;
     private final CharAreaDisplay briefingChars;
@@ -63,22 +71,22 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 
     public BriefingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
 	super(parent);
-	briefingScreen = new Sprite2D(tr,0, 2, 2,
+	briefingScreen = new Sprite2D(tr,BRIEFING_SPRITE_Z, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		tr.gpu.get().getGl(), 0,false),true);
 	add(briefingScreen);
 	this.tr	      = tr;
 	briefingChars = new CharAreaDisplay(this,.047,WIDTH_CHARS,NUM_LINES,tr,font);
 	briefingChars.activate();
-	briefingChars.setPosition(-.7, -.45, Z*200);
-	briefingScreen.setPosition(0,0,Z);
+	briefingChars.setPosition(-.7, -.45, TEXT_Z);
+	briefingScreen.setPosition(0,0,BRIEFING_SPRITE_Z);
 	briefingScreen.notifyPositionChange();
 	briefingScreen.setActive(true);
 	briefingScreen.setVisible(true);
 	
-	blackRectangle = new Sprite2D(tr,0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), true);
+	blackRectangle = new Sprite2D(tr,TEXT_BG_Z, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), true);
 	add(blackRectangle);
-	blackRectangle.setPosition(0, -.7, Z*300);
+	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);
 	blackRectangle.setVisible(true);
 	blackRectangle.setActive(true);
 	
@@ -160,6 +168,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    planetModel.getTriangleList().getMaximumVertexDims().getX()*4);
 	 }catch(Exception e){tr.showStopper(e);}
+	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
 	tr.renderer.get().setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
 	tr.renderer.get().setSunColor(SkySystem.SPACE_SUN_COLOR);
@@ -223,6 +232,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	//Enemy introduction
 	final Renderer renderer = tr.renderer.get();
 	final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
+	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());

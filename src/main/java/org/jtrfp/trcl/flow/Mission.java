@@ -23,6 +23,7 @@ import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.SkySystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -107,6 +108,7 @@ public class Mission {
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
+	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	tr.renderer.get().getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
 	game.setDisplayMode(game.levelLoadingMode);
 	game.getUpfrontDisplay().submitPersistentMessage(levelName);
@@ -236,6 +238,7 @@ public class Mission {
 	getOverworldSystem().activate();
 	final Renderer renderer = tr.renderer.get();
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
+	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());

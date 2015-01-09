@@ -29,6 +29,7 @@ import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.PodFile;
+import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
@@ -46,6 +47,7 @@ public class GameShell {
     public GameShell startShell(){
 	tr.gatherSysInfo();
 	registerPODs();
+	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	tr.renderer.get().getSkyCube().setSkyCubeGen(DEFAULT_GRADIENT);
 	return this;
     }//end startShell()

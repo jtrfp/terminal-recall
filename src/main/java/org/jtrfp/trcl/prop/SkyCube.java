@@ -17,6 +17,7 @@ package org.jtrfp.trcl.prop;
 
 import java.awt.Color;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 
@@ -31,6 +32,7 @@ public class SkyCube {
     private final TR tr;
     private volatile GLTexture skyCubeTexture;
     private volatile SkyCubeGen skyCubeGen=null;
+    private AtomicBoolean	skyCubeGenStale = new AtomicBoolean(true);
     
     public SkyCube(TR tr){
 	this.tr=tr;
@@ -39,6 +41,9 @@ public class SkyCube {
     public void render(RenderList rl, GL3 gl) throws NotReadyException {
 	final Renderer renderer = tr.renderer.getRealtime();
 	final GPU gpu = tr.gpu.getRealtime();
+	if(skyCubeGenStale.getAndSet(false)==true){
+	    buildSkyCubeTextureGL();
+	}
 	gl.glDepthMask(false);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
 	gl.glDisable(GL3.GL_CULL_FACE);
@@ -55,32 +60,27 @@ public class SkyCube {
 	gl.glDepthFunc(GL3.GL_LESS);
     }
     
-    private void buildSkyCubeTexture(){
+    private void buildSkyCubeTextureGL(){
 	final SkyCubeGen cubeGen = getSkyCubeGen();
 	final int sideWidth = cubeGen.getSideWidth();
-	tr.getThreadManager().submitToGL(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		final int colorMode = GL3.GL_RGB8;
-		if(skyCubeTexture==null)
-		    skyCubeTexture = tr.gpu.get()
-		    	.newTexture()
-		    	.setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP);
-		skyCubeTexture.bind()
-			.setImagePositiveX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getEast())
-			.setImageNegativeX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getWest())
-			.setImagePositiveY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getTop())
-			.setImageNegativeY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getBottom())
-			.setImagePositiveZ(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getNorth())
-			.setImageNegativeZ(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getSouth())
-			.setMinFilter(GL3.GL_LINEAR)
-			.setMagFilter(GL3.GL_LINEAR)
-			.setWrapR(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("Sky Cube Texture");
-		return null;
-	    }});
+	final int colorMode = GL3.GL_RGB8;
+	if(skyCubeTexture==null)
+	    skyCubeTexture = tr.gpu.get()
+	    .newTexture()
+	    .setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP);
+	skyCubeTexture.bind()
+	.setImagePositiveX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getEast())
+	.setImageNegativeX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getWest())
+	.setImagePositiveY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getTop())
+	.setImageNegativeY(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getBottom())
+	.setImagePositiveZ(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getNorth())
+	.setImageNegativeZ(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getSouth())
+	.setMinFilter(GL3.GL_NEAREST)
+	.setMagFilter(GL3.GL_LINEAR)
+	.setWrapR(GL3.GL_CLAMP_TO_EDGE)
+	.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+	.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+	.setDebugName("Sky Cube Texture");
     }//end buildSkyCubeTexture()
 
     /**
@@ -95,29 +95,19 @@ public class SkyCube {
     /**
      * @param skyCubeGen the skyCubeGen to set
      */
-    public void setSkyCubeGen(SkyCubeGen skyCubeGen) {
+    public synchronized void setSkyCubeGen(SkyCubeGen skyCubeGen) {
 	//If this is the same type of gen as before, we don't want to go through all the redundant work.
 	if(this.skyCubeGen!=null)
 	    if(this.skyCubeGen.hashCode()==skyCubeGen.hashCode())
-		return;//Nothing to do.
+		{System.out.println("skyCubeGen rejected: "+skyCubeGen);return;}//Nothing to do.
         this.skyCubeGen = skyCubeGen;
-        final GLTexture thisSkyCubeTexture = this.skyCubeTexture;
-	if(thisSkyCubeTexture!=null)
-	    tr.getThreadManager().submitToGL(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    thisSkyCubeTexture.delete();
-		    return null;
-		}});
-	this.skyCubeTexture=null;
+        skyCubeGenStale.set(true);
     }//end setSkyCubeGen(...)
 
     /**
      * @return the skyCubeTexture
      */
     private GLTexture getSkyCubeTexture() {
-	if(skyCubeTexture==null)
-	    buildSkyCubeTexture();
         return skyCubeTexture;
     }
     

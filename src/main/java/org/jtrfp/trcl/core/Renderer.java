@@ -97,6 +97,8 @@ public final class Renderer {
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glClearColor(0f, 0f, 0f, 0f);
 		gl.glHint(GL3.GL_POLYGON_SMOOTH_HINT, GL3.GL_NICEST);
+		gl.glDepthRange(0, 1);
+		gl.glEnable(GL3.GL_DEPTH_CLAMP);
 		
 		// VERTEX SHADERS
 		GLVertexShader		objectVertexShader		= gpu.newVertexShader(),
@@ -255,7 +257,7 @@ public final class Renderer {
 		vertexUVTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_RG32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
+			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
 				GL3.GL_RGBA, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)

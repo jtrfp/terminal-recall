@@ -23,6 +23,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 
     public Dashboard(TR tr) {
 	super(tr);
+	setImmuneToOpaqueDepthTest(true);
 	try{
 	// Dashboard
 	TextureDescription[] dashTexture = tr.getResourceManager()

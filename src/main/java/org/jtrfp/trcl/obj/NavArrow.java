@@ -33,6 +33,7 @@ private final NAVSystem nav;
 		HEIGHT, 
 		getTexture(tr), true);
 	this.nav=navSystem;
+	setImmuneToOpaqueDepthTest(true);
 	try{
 	addBehavior(new NavArrowBehavior());
 	}//end try{}

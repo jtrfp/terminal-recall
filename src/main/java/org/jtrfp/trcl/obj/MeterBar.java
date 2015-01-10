@@ -25,6 +25,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
     public MeterBar(TR tr, TextureDescription tex, double height, double length, boolean horizontal) {
 	super(tr);
+	setImmuneToOpaqueDepthTest(true);
 	//height*=.5;
 	//length*=.5;
 	Model m = new Model(true,tr);

@@ -35,6 +35,7 @@ public class CharLineDisplay {
 	    content[i] = 'X';
 	    displays[i] = new CharDisplay(tr, grid, glSize, font);
 	    displays[i].setChar('X');
+	    displays[i].setImmuneToOpaqueDepthTest(true);
 	    grid.add(displays[i]);
 	}// end for(lengthInChars)
 

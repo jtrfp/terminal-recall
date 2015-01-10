@@ -35,6 +35,7 @@ import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission.Result;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -44,13 +45,13 @@ import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class BriefingScreen extends RenderableSpacePartitioningGrid {
-    private static final double Z_INCREMENT = .00000000000000001;
-    private static final double Z_START = Z_INCREMENT;
+    private static final double Z_INCREMENT = .00001;
+    private static final double Z_START = -.99999;
     private static final double BRIEFING_SPRITE_Z = Z_START;
     private static final double TEXT_Z = BRIEFING_SPRITE_Z + Z_INCREMENT;
     private static final double TEXT_BG_Z = TEXT_Z + Z_INCREMENT;
     
-    private static final double MAX_Z_DEPTH = TEXT_BG_Z + Z_INCREMENT;
+    public static final double MAX_Z_DEPTH = TEXT_BG_Z + Z_INCREMENT;
     //private static final double Z = .000000001;
     private final TR 		  tr;
     private final Sprite2D	  briefingScreen;
@@ -71,7 +72,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 
     public BriefingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
 	super(parent);
-	briefingScreen = new Sprite2D(tr,BRIEFING_SPRITE_Z, 2, 2,
+	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		tr.gpu.get().getGl(), 0,false),true);
 	add(briefingScreen);
@@ -81,11 +82,13 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	briefingChars.setPosition(-.7, -.45, TEXT_Z);
 	briefingScreen.setPosition(0,0,BRIEFING_SPRITE_Z);
 	briefingScreen.notifyPositionChange();
+	briefingScreen.setImmuneToOpaqueDepthTest(true);
 	briefingScreen.setActive(true);
 	briefingScreen.setVisible(true);
 	
-	blackRectangle = new Sprite2D(tr,TEXT_BG_Z, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), true);
+	blackRectangle = new Sprite2D(tr,0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), true);
 	add(blackRectangle);
+	blackRectangle.setImmuneToOpaqueDepthTest(true);
 	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);
 	blackRectangle.setVisible(true);
 	blackRectangle.setActive(true);
@@ -139,12 +142,15 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.renderer.get().getCamera();
-	final GL3	gl	 = tr.gpu.get().getGl();
+	final GPU 	gpu 	 = tr.gpu.get();
+	final GL3	gl	 = gpu.getGl();
 	this.lvl		 = lvl;
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(false);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(true);
+	//TODO: Depth range
+	
 	//Planet introduction
 	if(planetObject!=null){
 	    remove(planetObject);

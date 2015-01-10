@@ -26,6 +26,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 
     public Crosshairs(TR tr) {
 	super(tr);
+	setImmuneToOpaqueDepthTest(true);
 	// Crosshairs
 	Model crossModel = null;
 	final TextureManager tm = tr.gpu.get().textureManager.get();

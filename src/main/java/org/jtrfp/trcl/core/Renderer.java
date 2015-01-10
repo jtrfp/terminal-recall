@@ -95,8 +95,7 @@ public final class Renderer {
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL2.GL_LESS);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glClearColor(0f, 0f, 0f, 0f);
-		gl.glHint(GL3.GL_POLYGON_SMOOTH_HINT, GL3.GL_NICEST);
+		gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 		gl.glDepthRange(0, 1);
 		gl.glEnable(GL3.GL_DEPTH_CLAMP);
 		
@@ -228,7 +227,7 @@ public final class Renderer {
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RG32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+				GL3.GL_RG, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -238,7 +237,7 @@ public final class Renderer {
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+				GL3.GL_RG, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -248,7 +247,7 @@ public final class Renderer {
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+				GL3.GL_RED, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -258,7 +257,7 @@ public final class Renderer {
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+				GL3.GL_RG, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -268,7 +267,7 @@ public final class Renderer {
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+				GL3.GL_RED, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
@@ -278,7 +277,7 @@ public final class Renderer {
 			.newTexture()//// This is actually W-reciprocal.
 			.bind()
 			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
+				GL3.GL_RED, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)

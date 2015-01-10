@@ -45,6 +45,7 @@ public class SkyCube {
 	    buildSkyCubeTextureGL();
 	}
 	gl.glDepthMask(false);
+	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDepthFunc(GL3.GL_ALWAYS);
 	gl.glDisable(GL3.GL_CULL_FACE);
 	gpu.defaultFrameBuffers();

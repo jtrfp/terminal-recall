@@ -65,6 +65,7 @@ public class WorldObject implements PositionedRenderable {
     private final NullBehavior 		nullBehavior;
     private boolean 			active 		   = true;
     private byte 			renderFlags=0;
+    private boolean			immuneToOpaqueDepthTest  = false;
 
     protected final double[] aX 	= new double[3];
     protected final double[] aY 	= new double[3];
@@ -691,5 +692,17 @@ public class WorldObject implements PositionedRenderable {
 	positionWithOffset[1]=position[1]+modelOffset[1];
 	positionWithOffset[2]=position[2]+modelOffset[2];
 	return positionWithOffset;
+    }
+
+    public boolean isImmuneToOpaqueDepthTest() {
+	return immuneToOpaqueDepthTest;
+    }
+
+    /**
+     * @param immuneToDepthTest the immuneToDepthTest to set
+     */
+    public WorldObject setImmuneToOpaqueDepthTest(boolean immuneToDepthTest) {
+        this.immuneToOpaqueDepthTest = immuneToDepthTest;
+        return this;
     }
 }// end WorldObject

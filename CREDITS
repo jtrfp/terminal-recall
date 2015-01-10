@@ -1,8 +1,9 @@
 TERMINAL RECALL
-Copyright (c) 2012 Chuck Ritola (cjritola@gmail.com) and contributors listed below.
+Copyright (c) 2012-2015 Chuck Ritola (cjritola@gmail.com) and contributors. 
+See commit log on the Terminal Recall site for details.
 
 THIS PROGRAM IS NOT SUPPORTED BY OR AFFILIATED WITH MICROSOFT OR TERMINAL REALITY INC.
-Bring your issues to the Terminal Recall google code page.
+Bring your issues to the Terminal Recall Github page.
 
 The following outside libraries, projects, and documentation are used in the development of Terminal Recall
 
@@ -17,6 +18,14 @@ Stefan Teitge
     http://code.google.com/p/jtrfp/
     See also: mtmX (Monster Truck Madness remake)
     http://code.google.com/p/mtmx/
+    
+Daniel Becker
+	JavaMOD
+	License: GPL v2
+	http://www.quippy.de/mod_en.php
+	
+	Mavenized by Stefan Teitge
+	https://github.com/jtrfp/javamod
     
 Apache Commons
 	Apache Commons Mathematics Library / Commons IO

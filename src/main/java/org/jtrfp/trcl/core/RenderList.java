@@ -22,9 +22,9 @@ import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
@@ -41,41 +41,51 @@ public class RenderList {
     private final 	TR 			tr;
     private 		int[] 			hostRenderListPageTable;
     private 	 	int 			dummyBufferID;
-    private 		int 			numOpaqueBlocks;
-    private 		int 			numTransparentBlocks;
+    private 		int 			numOpaqueBlocks,
+    						numTransparentBlocks,
+    						numUnoccludedTBlocks;
     private final	int			renderListIdx;
     private		long			rootBufferReadFinishedSync;
     private final	Renderer		renderer;
     private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	IntBuffer 		previousViewport;
     private final	ArrayList<ByteBuffer>	opaqueObjectDefs = new ArrayList<ByteBuffer>(),
-	    					transparentObjectDefs = new ArrayList<ByteBuffer>();
+	    					transparentObjectDefs = new ArrayList<ByteBuffer>(),
+	    					unoccludedTObjectDefs = new ArrayList<ByteBuffer>();
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
 	public void submit(PositionedRenderable item) {
+	    boolean isUnoccluded = false;
 	    if (item instanceof WorldObject) {
 		final WorldObject wo = (WorldObject)item;
-		if (!wo.isActive()) {
+		if (!wo.isActive())
 		    return;
-		}
 		synchronized(nearbyWorldObjects)
 		 {nearbyWorldObjects.add(wo);}
 		if(!wo.isVisible())return;
+		isUnoccluded = ((WorldObject)item).isImmuneToOpaqueDepthTest();
 	    }//end if(WorldObject)
 	    final ByteBuffer opOD = item.getOpaqueObjectDefinitionAddresses();
-	    final ByteBuffer trOD = item
-		    .getTransparentObjectDefinitionAddresses();
+	    final ByteBuffer trOD = item.getTransparentObjectDefinitionAddresses();
 	    
 	    numOpaqueBlocks += opOD.capacity() / 4;
-	    numTransparentBlocks += trOD.capacity() / 4;
-	    
 	    if(opOD.capacity()>0)
-	     synchronized(opaqueObjectDefs)
-	      {opaqueObjectDefs.add(opOD);}
+		     synchronized(opaqueObjectDefs)
+		      {opaqueObjectDefs.add(opOD);}
+	    
+	    if(isUnoccluded){
+		final WorldObject wo = (WorldObject)item;
+		    numUnoccludedTBlocks += trOD.capacity() / 4;
+			if(trOD.capacity()>0)
+			     synchronized(unoccludedTObjectDefs)
+			      {unoccludedTObjectDefs.add(trOD);}
+		}//end if(trOD)
+	    else{numTransparentBlocks += trOD.capacity() / 4;
 	    if(trOD.capacity()>0)
-	     synchronized(transparentObjectDefs)
-	      {transparentObjectDefs.add(trOD);}
+		     synchronized(transparentObjectDefs)
+		      {transparentObjectDefs.add(trOD);}
+	    }//end if(trOD)
 	}// end submit(...)
 
 	@Override
@@ -102,6 +112,13 @@ public class RenderList {
 	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex, bb);
 	     byteIndex += bb.capacity();}
 	 }}
+	synchronized(unoccludedTObjectDefs){
+		 for(ByteBuffer bb:unoccludedTObjectDefs){
+		    synchronized(bb){
+		     bb.clear();
+		     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex, bb);
+		     byteIndex += bb.capacity();}
+		 }}
     }//end flushObjectDefsToGPU()
 
     public RenderList(final GL3 gl, final Renderer renderer, final TR tr) {
@@ -190,6 +207,8 @@ public class RenderList {
 	final GPU gpu = tr.gpu.get();
 	final ObjectListWindow olWindow = tr.objectListWindow.get();
 	final int opaqueRenderListLogicalVec4Offset = ((olWindow.getObjectSizeInBytes()*renderListIdx)/16);
+	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
+	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
 	
 	renderer.getSkyCube().render(this,gl);
 	
@@ -208,11 +227,11 @@ public class RenderList {
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDisable(GL3.GL_LINE_SMOOTH);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_CULL_FACE);
 	gl.glLineWidth(1);
 	{//Start variable scope
-	 int remainingBlocks = numOpaqueBlocks+numTransparentBlocks;
+	 int remainingBlocks = numOpaqueBlocks+numTransparentBlocks+numUnoccludedTBlocks;
     	 int numRows = (int)Math.ceil(remainingBlocks/256.);
     	 for(int i=0; i<numRows; i++){
     	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
@@ -251,9 +270,11 @@ public class RenderList {
 	renderer.getNoCamMatrixTexture().bindToTextureUnit(2, gl);
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_BLEND);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_CULL_FACE);
-	gl.glViewport(0, 0, relevantVertexBufferWidth, 256);//256*256 = 65536, max we can handle.
+	gl.glViewport(0, 0, 
+		relevantVertexBufferWidth, 
+		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Opaque
 	//gl.glViewport(0, (NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK)/relevantVertexBufferWidth, relevantVertexBufferWidth, 256);
 	//gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Transparent
@@ -282,14 +303,11 @@ public class RenderList {
 	
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_BLEND);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_CULL_FACE);
 	
-	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
-	//Opaque
-	gl.glDrawArrays(GL3.GL_POINTS, 0, (numTransparentBlocks+numOpaqueBlocks)*primsPerBlock);
-	//Transparent
-	//gl.glDrawArrays(GL3.GL_POINTS, 0, numTransparentBlocks*primsPerBlock);
+	//Everything
+	gl.glDrawArrays(GL3.GL_POINTS, 0, (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock);
 	//Cleanup
 	gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 	gl.glPointSize(1);
@@ -311,14 +329,20 @@ public class RenderList {
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	final int numTransparentVertices = numTransparentBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
+	final int numUnoccludedVertices = numUnoccludedTBlocks
+		* GPU.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDepthFunc(GL3.GL_LESS);
+	gl.glEnable(GL3.GL_DEPTH_TEST);
+	gl.glEnable(GL3.GL_DEPTH_CLAMP);
+	//gl.glDepthRange((BriefingScreen.MAX_Z_DEPTH+1)/2, 1);
+	
 	if(tr.renderer.get().isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
 	//final int verticesPerSubPass	= (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
 	//final int numSubPasses		= (numOpaqueVertices / verticesPerSubPass) + 1;
 	//int remainingVerts		= numOpaqueVertices;
-
+	
 	if (frameCounter == 0) {
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.numOpaqueBlocks",
@@ -326,6 +350,9 @@ public class RenderList {
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.numTransparentBlocks",
 		    "" + numTransparentBlocks);
+	    tr.getReporter().report(
+		    "org.jtrfp.trcl.core.RenderList.numUnoccludedTransparentBlocks",
+		    "" + numUnoccludedTBlocks);
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.approxNumSceneTriangles",
 		    "" + ((numOpaqueBlocks+numTransparentBlocks)*GPU.GPU_VERTICES_PER_BLOCK)/3);
@@ -354,8 +381,11 @@ public class RenderList {
 	renderer.getDepthQueueFrameBuffer().bindToDraw();
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_CULL_FACE);
+	gl.glEnable(GL3.GL_DEPTH_TEST);
+	gl.glDisable(GL3.GL_DEPTH_CLAMP);
+	gl.glDepthRange(0, 1);
 	//gl.glEnable(GL3.GL_SAMPLE_MASK);
-	gl.glDepthFunc(GL3.GL_LESS);
+	gl.glDepthFunc(GL3.GL_LEQUAL);
 	//gl.glDisable(GL3.GL_MULTISAMPLE);
 	//gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
 	//gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
@@ -379,6 +409,9 @@ public class RenderList {
 	renderer.getVertexNormZTexture().bindToTextureUnit(8, gl);
 	
 	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices, numTransparentVertices);
+	//UNOCCLUDED TRANSPARENT
+	gl.glDisable(GL3.GL_DEPTH_TEST);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices+numTransparentVertices, numUnoccludedVertices);
 	
 	//Cleanup
 	gl.glDisable(GL3.GL_BLEND);
@@ -390,13 +423,13 @@ public class RenderList {
 	// FENCE
 	rootBufferReadFinishedSync = gl.glFenceSync(GL3.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	
-	gl.glEnable(GL3.GL_MULTISAMPLE);
-	gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
-	gl.glDisable(GL3.GL_STENCIL_TEST);
+	//gl.glDisable(GL3.GL_MULTISAMPLE);
+	//gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
+	//gl.glDisable(GL3.GL_STENCIL_TEST);
 	
 	// DEFERRED STAGE
 	gl.glDepthMask(true);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
+	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glEnable(GL3.GL_BLEND);
 	if(tr.renderer.get().isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = tr.renderer.get().getDeferredProgram();
@@ -427,9 +460,9 @@ public class RenderList {
 	gpu.defaultFrameBuffers();
 	//Cleanup
 	gl.glDepthMask(true);
-	gl.glDisable(GL3.GL_MULTISAMPLE);
-	gl.glDisable(GL3.GL_SAMPLE_MASK);
-	gl.glDisable(GL3.GL_STENCIL_TEST);
+	//gl.glDisable(GL3.GL_MULTISAMPLE);
+	//gl.glDisable(GL3.GL_SAMPLE_MASK);
+	//gl.glDisable(GL3.GL_STENCIL_TEST);
 	gpu.defaultProgram();
 	gpu.defaultTIU();
 	gpu.defaultFrameBuffers();
@@ -448,12 +481,15 @@ public class RenderList {
     public void reset() {
 	numOpaqueBlocks 	= 0;
 	numTransparentBlocks 	= 0;
+	numUnoccludedTBlocks	= 0;
 	synchronized(nearbyWorldObjects)
 	 {nearbyWorldObjects.clear();}
 	synchronized(opaqueObjectDefs){
 	    opaqueObjectDefs.clear();}
 	synchronized(transparentObjectDefs){
 	    transparentObjectDefs.clear();}
+	synchronized(unoccludedTObjectDefs){
+	    unoccludedTObjectDefs.clear();}
     }//end reset()
     
     public List<WorldObject> getVisibleWorldObjectList(){

@@ -49,6 +49,10 @@ public class RunMe{
 	
     private static void ensureJVMIsProperlyConfigured(String[] args) {
 	if (!isAlreadyConfigured()) {
+	    //http://stackoverflow.com/questions/13029915/how-to-programmatically-test-if-assertions-are-enabled
+	    //Seems to work better than the official way of querying assertion ability.
+	    boolean useAssertions = false;
+	    assert useAssertions = true;
 	    System.out
 		    .println("Overriding the default JVM settings. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
 	    String executable = new File("RunMe.jar").exists() ? "-jar RunMe.jar"
@@ -58,6 +62,8 @@ public class RunMe{
 		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
 		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m ";
+	    if(useAssertions)
+		cmd+="-ea ";
 	    for (Entry<Object,Object> property:System.getProperties().entrySet()){
 		if(property.getKey().toString().startsWith("org.jtrfp")&&!property.getKey().toString().toLowerCase().contains("org.jtrfp.trcl.bypassconfigure"))
 		    cmd += " -D"+property.getKey()+"="+property.getValue()+" ";

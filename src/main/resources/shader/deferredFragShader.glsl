@@ -124,7 +124,7 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
  uvec4 iuv4A,iuv4B, tTOCIdx,tTOCvec4Idx,tTOCsubIdx,subTexV4Addr;
  uvec4	subTexV4Idx, subTexV4Sub, startCode;
  iuv4A		 = uvec4(iuv,iuv+uvec2(0,1));
- iuv4B		 = uvec4(iuv,iuv)+uvec4(1,0,1,1);
+ //iuv4B		 = uvec4(iuv,iuv)+uvec4(1,0,1,1);
  // PRECALC
  //////////////// Subtexture-level convergence check
  if(false){//Test for subtexture convergence
@@ -153,7 +153,9 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
  	if(dot(norm.xyz,norm.xyz)>.01)illumination.rgb
  								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight);
  	return cTexel * illumination;
-    }else{subTexV4Addr = uvec4(stv4a);}
+    }else{
+     subTexV4Addr = uvec4(stv4a);
+     }
    uvec4	subTexXY_A	= iuv4A%SUBTEXTURE_SIDE_WIDTH_TEXELS;
    uvec4	subTexXY_B  = iuv4B%SUBTEXTURE_SIDE_WIDTH_TEXELS;
    uvec4	subTexByIdx = uvec4(
@@ -170,6 +172,7 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
    subTexV4Idx	= subTexByIdx / 16u;
    subTexV4Sub  = subTexByIdx % 16u;
   } else{ ////////////////// Compute the hard way
+  iuv4B		 = uvec4(iuv,iuv)+uvec4(1,0,1,1);
   tTOCIdx = uvec4(
   	iuv4A.x/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4A.y/SUBTEXTURE_SIDE_WIDTH_TEXELS)*19u,
   	iuv4A.z/SUBTEXTURE_SIDE_WIDTH_TEXELS + (iuv4A.w/SUBTEXTURE_SIDE_WIDTH_TEXELS)*19u,
@@ -219,9 +222,9 @@ vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  return texel;
 }
 
-uint getPrimitiveIDFromQueue(vec4 layerAccumulator, int level){
+uint getPrimitiveIDFromQueue(vec4 layerAccumulator, float level){
  const vec4 ACC_MULTIPLIER = vec4(1,16,256,4096);
- return uint(dot(mod(floor(layerAccumulator/pow(16.,float(level))),16)*ACC_MULTIPLIER,vec4(1)));
+ return uint(dot(mod(floor(layerAccumulator/pow(16.,level)),16)*ACC_MULTIPLIER,vec4(1)));
 }
 
 //UNTESTED

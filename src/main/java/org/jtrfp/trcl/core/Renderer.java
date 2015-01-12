@@ -104,7 +104,8 @@ public final class Renderer {
 					traditionalVertexShader		= gpu.newVertexShader(),
 					fullScreenQuadVertexShader	= gpu.newVertexShader(),
 					primitiveVertexShader		= gpu.newVertexShader(),
-					skyCubeVertexShader		= gpu.newVertexShader();
+					skyCubeVertexShader		= gpu.newVertexShader(),
+					fullScreenTriangleShader	= gpu.newVertexShader();
 		GLFragmentShader	objectFragShader		= gpu.newFragmentShader(),
 					opaqueFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
@@ -112,6 +113,7 @@ public final class Renderer {
 					vertexFragShader		= gpu.newFragmentShader(),
 					primitiveFragShader		= gpu.newFragmentShader(),
 					skyCubeFragShader		= gpu.newFragmentShader();
+		fullScreenTriangleShader  .setSourceFromResource("/shader/fullScreenTriangleVertexShader.glsl");
 		objectVertexShader	  .setSourceFromResource("/shader/objectVertexShader.glsl");
 		objectFragShader	  .setSourceFromResource("/shader/objectFragShader.glsl");
 		traditionalVertexShader	  .setSourceFromResource("/shader/traditionalVertexShader.glsl");
@@ -126,9 +128,9 @@ public final class Renderer {
 		skyCubeVertexShader	  .setSourceFromResource("/shader/skyCubeVertexShader.glsl");
 		
 		objectProgram		=gpu.newProgram().attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
-		vertexProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(vertexFragShader).link();
+		vertexProgram		=gpu.newProgram().attachShader(fullScreenTriangleShader)  .attachShader(vertexFragShader).link();
 		opaqueProgram		=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
-		deferredProgram		=gpu.newProgram().attachShader(fullScreenQuadVertexShader).attachShader(deferredFragShader).link();
+		deferredProgram		=gpu.newProgram().attachShader(fullScreenTriangleShader)  .attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
 		primitiveProgram	=gpu.newProgram().attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
 		skyCubeProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)       .attachShader(skyCubeFragShader).link();

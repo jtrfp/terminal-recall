@@ -275,7 +275,7 @@ public class RenderList {
 	gl.glViewport(0, 0, 
 		relevantVertexBufferWidth, 
 		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Opaque
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);//Opaque
 	//gl.glViewport(0, (NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK)/relevantVertexBufferWidth, relevantVertexBufferWidth, 256);
 	//gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Transparent
 	//Cleanup
@@ -450,7 +450,7 @@ public class RenderList {
 	renderer.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	renderer.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
 	//Execute the draw to a screen quad
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);
 	//Cleanup
 	gl.glDisable(GL3.GL_BLEND);
 	

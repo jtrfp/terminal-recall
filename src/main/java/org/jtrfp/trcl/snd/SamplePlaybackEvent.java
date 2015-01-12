@@ -22,12 +22,18 @@ import java.util.concurrent.Callable;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.math.Misc;
+import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final SoundTexture soundTexture;
@@ -126,6 +132,31 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	    gl.glDisable(GL3.GL_BLEND);
 	}//end apply(...)
+	
+	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar){
+	    final double UNIT_FACTOR = TR.mapSquareSize*8;
+	    final double dist = Vect3D.distance(source, dest.getPosition());
+	    final double unitDist = dist/UNIT_FACTOR;
+	    final double vol = Misc.clamp(1./Math.pow(unitDist, 2),
+		    0,1)*volumeScalar;
+	    final double [] work = new double[3];
+	    final double [] destPos = dest.getPosition();
+	    Vect3D.subtract(source, destPos, work);
+	    Rotation rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);
+	    final Vector3D localDir = rot.applyTo(new Vector3D(work)).normalize();
+	    final double pFactor = (localDir.getX()+1)/2;
+	    assert !Vect3D.isAnyNaN(source);
+	    final double [] pan = new double[]{vol*pFactor,vol*(1-pFactor)};
+	    final double modSamples = (System.currentTimeMillis()*getTR().soundSystem.get().getSamplesPerMilli())%SoundSystem.BUFFER_SIZE_FRAMES;
+	    final long delay = (long)(dist*.01+Math.random()*10);// .01 ms per world unit, temporal dither to avoid phasiness
+	    final SoundSystem ss = getTR().soundSystem.get();
+	    final long startTime = (long)(ss.getCurrentBufferFrameCounter()+modSamples)+delay;
+	    return create(tex,startTime,pan);
+	}
+	
+	public SamplePlaybackEvent create(SoundTexture tex, WorldObject source, Camera dest, double volumeScalar){
+	    return create(tex,source.getPosition(),dest,volumeScalar);
+	}
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] pan){
 	    final SoundSystem ss = getTR().soundSystem.get();

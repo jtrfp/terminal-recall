@@ -31,6 +31,7 @@ import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
@@ -159,6 +160,9 @@ public class ProjectileFactory {
     	soundTexture = soundFile!=null?tr.getResourceManager().soundTextures.get(soundFile):null;
        }//end constructor(...)
     public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin) {
+	assert !Vect3D.isAnyNaN(newPosition);
+	assert heading.getNorm()!=0 && heading.getNorm()!=Double.NaN;
+	
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
@@ -171,9 +175,9 @@ public class ProjectileFactory {
 			    .get()
 			    .getPlaybackFactory()
 			    .create(soundTexture,
-				    new double[] { 
-				     .5 * SoundSystem.DEFAULT_SFX_VOLUME,
-				     .5 * SoundSystem.DEFAULT_SFX_VOLUME }));
+				     (WorldObject)result,
+				     tr.renderer.get().getCamera(),
+				     SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead
 	final List<WorldObject> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
 	 synchronized(cL){cL.add((WorldObject)result);}
 	projectileIndex++;

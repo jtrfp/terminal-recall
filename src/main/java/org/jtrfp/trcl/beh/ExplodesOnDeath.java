@@ -34,17 +34,18 @@ private String explosionSound;
 	    final WorldObject p = getParent();
 	    final TR tr = p.getTr();
 	    final Vector3D loc = p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();
-	    final double [] dPos = new double[] {loc.getX(),loc.getY(),loc.getZ()};
 	    tr.
 	     getResourceManager().
 	     getExplosionFactory().
-	     triggerExplosion(dPos,type);
+	     triggerExplosion(loc,type);
 	    String explosionSound = this.explosionSound;
 	    if(explosionSound!=null)
 	     tr.soundSystem.get().
 	      enqueuePlaybackEvent(tr.soundSystem.get().getPlaybackFactory().
 		    create(tr.getResourceManager().soundTextures.get(explosionSound),
-			    new double[]{.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2}));
+			    loc.toArray(),
+			    tr.renderer.get().getCamera(),
+			    SoundSystem.DEFAULT_SFX_VOLUME*2));
     }
     @Override
     public void _tick(long tickTimeMillis){

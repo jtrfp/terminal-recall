@@ -36,14 +36,21 @@ public class HorizAimAtPlayerBehavior extends Behavior {
 	    final Player player = thisObject.getTr().getGame().getPlayer();
 	    if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
 	    final RotationalMomentumBehavior rmb = thisObject.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
-	    double [] vectorToTarget = Vect3D.normalize(TR.twosComplimentSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar),vectorToTargetVar);
-	    vectorToTarget[1]=0;
-	    Vect3D.normalize(vectorToTarget,vectorToTarget);
+
+	    assert !Vect3D.isAnyEqual(chaseTarget.getPosition(), Double.POSITIVE_INFINITY);
+	    assert !Vect3D.isAnyEqual(thisObject.getPosition(), Double.NEGATIVE_INFINITY);
+	    TR.twosComplimentSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar);
+	    assert !Vect3D.isAnyNaN(vectorToTargetVar);
+	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.POSITIVE_INFINITY);
+	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.NEGATIVE_INFINITY);
+	    Vect3D.normalize(vectorToTargetVar);
+	    vectorToTargetVar[1]=0;
+	    Vect3D.normalize(vectorToTargetVar);
 	    final Vector3D thisHeading=new Vector3D(thisObject.getHeading().getX(),0,thisObject.getHeading().getZ()).normalize();
-	    Vect3D.subtract(thisHeading.toArray(), vectorToTarget, headingVarianceDelta);	
+	    Vect3D.subtract(thisHeading.toArray(), vectorToTargetVar, headingVarianceDelta);	
 	    if(Math.sqrt(headingVarianceDelta[2]*headingVarianceDelta[2]+headingVarianceDelta[0]*headingVarianceDelta[0])<hysteresis)return;
-	    if(!reverse)Vect3D.negate(vectorToTarget);
-	    Rotation rot = new Rotation(new Vector3D(vectorToTarget),thisHeading);
+	    if(!reverse)Vect3D.negate(vectorToTargetVar);
+	    Rotation rot = new Rotation(new Vector3D(vectorToTargetVar),thisHeading);
 	    final Vector3D deltaVector=rot.applyTo(Vector3D.PLUS_K);
 	    if((deltaVector.getZ()>0||deltaVector.getX()<0)==leftHanded){rmb.accellerateEquatorialMomentum(-equatorialAccelleration);}
 	    else{rmb.accellerateEquatorialMomentum(equatorialAccelleration);}

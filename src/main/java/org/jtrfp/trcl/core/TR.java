@@ -37,6 +37,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -390,14 +391,19 @@ public final class TR{
 	final double dx = deltaRollover(l[0] - r[0]);
 	final double dy = deltaRollover(l[1] - r[1]);
 	final double dz = deltaRollover(l[2] - r[2]);
+	assert !Vect3D.isAnyNaN(l);
+	assert !Vect3D.isAnyNaN(r);
 	return Math.sqrt((dx) * (dx) + (dy) * (dy) + (dz) * (dz));
     }
 
     public static double[] twosComplimentSubtract(double[] l, double[] r,
 	    double[] dest) {
+	assert !Vect3D.isAnyNaN(l);
+	assert !Vect3D.isAnyNaN(r);
 	dest[0] = deltaRollover(l[0] - r[0]);
 	dest[1] = deltaRollover(l[1] - r[1]);
 	dest[2] = deltaRollover(l[2] - r[2]);
+	assert !Vect3D.isAnyNaN(dest):"l="+l[0]+" "+l[1]+" "+l[2]+" r="+r[0]+" "+r[1]+" "+r[2];
 	return dest;
     }
 

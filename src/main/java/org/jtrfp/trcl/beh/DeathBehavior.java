@@ -26,7 +26,7 @@ public class DeathBehavior extends Behavior {
     private Vector3D locationOfDeath;
     private WeakReference<SpacePartitioningGrid<PositionedRenderable>> spgOfLastDeath =
 	     new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(null);
-    public void die(){
+    public synchronized void die(){
 	if(dead)return;
 	dead=true;//Only die once until reset
 	WorldObject wo = getParent();

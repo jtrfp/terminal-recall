@@ -145,10 +145,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final GPU 	gpu 	 = tr.gpu.get();
 	final GL3	gl	 = gpu.getGl();
 	this.lvl		 = lvl;
-	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(false);
-	camera.probeForBehavior(MatchDirection.class)	 .setEnable(false);
-	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
-	camera.probeForBehavior(FacingObject.class)  	 .setEnable(true);
+	
 	//TODO: Depth range
 	
 	//Planet introduction
@@ -174,7 +171,14 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
 		    planetModel.getTriangleList().getMaximumVertexDims().getX()*4);
 	 }catch(Exception e){tr.showStopper(e);}
-	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
+	// Turn the camera to the planet
+	camera.probeForBehavior(MatchPosition.class).setEnable(false);
+	camera.probeForBehavior(MatchDirection.class).setEnable(false);
+	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
+	camera.probeForBehavior(FacingObject.class).setEnable(true);
+	tr.renderer.get().getCamera()
+		.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class)
+		.setEnable(false);
 	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
 	tr.renderer.get().setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
 	tr.renderer.get().setSunColor(SkySystem.SPACE_SUN_COLOR);

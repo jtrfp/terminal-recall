@@ -41,7 +41,7 @@ public class WorldObject implements PositionedRenderable {
     public static final boolean LOOP = true;
     private double[] 	heading = new double[] { 0, 0, 1 };
     private double[] 	top 	= new double[] { 0, 1, 0 };
-    protected double[]  position = new double[3];
+    protected volatile double[]  position = new double[3];
     protected double[]  modelOffset= new double[3];
     private final double[]positionWithOffset 
     				= new double[3];
@@ -170,7 +170,7 @@ public class WorldObject implements PositionedRenderable {
     public void tick(long time) {
 	if(!respondToTick)return;
 	synchronized(tickBehaviors){
-	for (int i = 0; i < tickBehaviors.size(); i++)
+	for (int i = 0; i < tickBehaviors.size() && isActive(); i++)
 	    tickBehaviors.get(i).tick(time);
 	}//end sync(tickBehaviors)
     }// end tick(...)
@@ -431,6 +431,8 @@ public class WorldObject implements PositionedRenderable {
     }// end setPosition()
     
     public synchronized WorldObject notifyPositionChange(){
+	if(position[0]==Double.NaN)
+	    throw new RuntimeException("Invalid position.");
 	needToRecalcMatrix=true;
 	synchronized (position) {
 	    final SpacePartitioningGrid<PositionedRenderable> 
@@ -520,7 +522,7 @@ public class WorldObject implements PositionedRenderable {
 	return tr;
     }
 
-    public void destroy() {
+    public synchronized void destroy() {
 	if (containingGrid != null){
 	    SpacePartitioningGrid g = getContainingGrid();
 	    if(g!=null)
@@ -531,11 +533,11 @@ public class WorldObject implements PositionedRenderable {
 	containingGrid=null;
 	// Send it to the land of wind and ghosts.
 	final double[] pos = getPosition();
+	setActive(false);
 	pos[0] = Double.NEGATIVE_INFINITY;
 	pos[1] = Double.NEGATIVE_INFINITY;
 	pos[2] = Double.NEGATIVE_INFINITY;
 	notifyPositionChange();
-	setActive(false);
     }
 
     @Override
@@ -705,4 +707,9 @@ public class WorldObject implements PositionedRenderable {
         this.immuneToOpaqueDepthTest = immuneToDepthTest;
         return this;
     }
+
+    /*public void checkPositionSanity() {
+	if(position[0]==Double.NaN||position[1]==Double.NaN||position[2]==Double.NaN)
+	    throw new RuntimeException("Invalid position");
+    }*/
 }// end WorldObject

@@ -20,6 +20,7 @@ import org.jtrfp.trcl.beh.ReportsCollisionsToStdout;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ProjectileObject3D extends WorldObject implements Projectile {
@@ -36,11 +37,12 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
 	this.objectOfOrigin= new WeakReference<WorldObject>(objectOfOrigin);
 	if(newVelocity.getNorm()!=0)setHeading(newVelocity.normalize());
 	else {setHeading(Vector3D.PLUS_I);newVelocity=Vector3D.PLUS_I;}//meh.
+	assert !Vect3D.isAnyNaN(newPos);
 	setPosition(newPos[0],newPos[1],newPos[2]);
-	setActive(true);
-	setVisible(true);
 	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	getBehavior().probeForBehavior(ProjectileBehavior.class).reset(newVelocity.normalize(),newVelocity.getNorm());
+	setActive(true);
+	setVisible(true);
     }//end reset()
 
     @Override

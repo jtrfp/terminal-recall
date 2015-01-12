@@ -14,6 +14,7 @@ package org.jtrfp.trcl.beh.phy;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -23,8 +24,9 @@ public class MovesByVelocity extends Behavior implements Velocible {
 	public void _tick(long tickTimeMillis){
 		final WorldObject p = getParent();
 		final double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		assert !Vect3D.isAnyNaN(p.getPosition());
 		p.movePositionBy(getVelocity().scalarMultiply(progressionInSeconds));
-		//p.setPosition(p.getPosition().add();
+		assert !Vect3D.isAnyNaN(p.getPosition());
 		}
 
 	@Override

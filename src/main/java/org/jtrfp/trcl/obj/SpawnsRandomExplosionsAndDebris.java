@@ -29,13 +29,13 @@ public class SpawnsRandomExplosionsAndDebris extends Behavior {
     @Override
     public void _tick(long timeMillis){
 	if(Math.random()<.1){
-	    explosions.triggerExplosion(Arrays.copyOf(getParent().getPosition(), 3), ExplosionType.Blast);}
+	    explosions.triggerExplosion(new Vector3D(getParent().getPosition()), ExplosionType.Blast);}
 	if(Math.random()<.1){
-	    explosions.triggerExplosion(Arrays.copyOf(getParent().getPosition(), 3), ExplosionType.Billow);}
+	    explosions.triggerExplosion(new Vector3D(getParent().getPosition()), ExplosionType.Billow);}
 	if(Math.random()<.2){
-	    debris.spawn(Arrays.copyOf(getParent().getPosition(), 3), new Vector3D(
-		    Math.random()*50000,
-		    Math.random()*50000,
-		    Math.random()*50000));}
+	    debris.spawn(new Vector3D(getParent().getPosition()), new Vector3D(
+		    Math.random()*50000-25000,
+		    Math.random()*50000-25000,
+		    Math.random()*50000-25000));}
     }//end _tick(...)
 }//end SpawnsRandomExplosionsAndDebris

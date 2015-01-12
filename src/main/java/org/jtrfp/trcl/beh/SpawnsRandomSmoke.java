@@ -12,8 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import java.util.Arrays;
-
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 import org.jtrfp.trcl.obj.SmokeSystem;
@@ -26,9 +25,11 @@ public class SpawnsRandomSmoke extends Behavior {
     @Override
     public void _tick(long timeMillis){
 	if(Math.random()<.6){
-	    final double [] pos = Arrays.copyOf(getParent().getPosition(), 3);
-	    pos[0]+=Math.random()*2000;
-	    pos[2]+=Math.random()*2000;
-	    Smokes.triggerSmoke(pos, SmokeType.Puff);}
+	    Vector3D pos = new Vector3D(getParent().getPositionWithOffset());
+	    Smokes.triggerSmoke(
+		    pos.add(new Vector3D(Math.random()*2000-1000,
+			    0,
+			    Math.random()*2000-1000)), 
+			    SmokeType.Puff);}
     }//end _tick(...)
 }//end SpawnsRandomSmoke

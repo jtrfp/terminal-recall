@@ -31,7 +31,7 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
 	else return;//Give up
 	for(int i=0; i<MIN_FRAGS+maxVertexValue/4000; i++){
 	    final Vector3D oldPos = p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();
-	    p.getTr().getResourceManager().getDebrisSystem().spawn(new double[]{oldPos.getX(),oldPos.getY(),oldPos.getZ()}, 
+	    p.getTr().getResourceManager().getDebrisSystem().spawn(oldPos, 
 	    new Vector3D(
 		Math.random()*MAX_SPEED-MAX_SPEED/2.,
 		Math.random()*MAX_SPEED+60000,

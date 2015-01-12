@@ -77,10 +77,10 @@ private static final String [] TYPES = new String[]{
 	return (int)(MIN_LIFESPAN_MILLIS+Math.random()*LIFESPAN_RANGE_MILLIS);
     }
     
-    public void reset(double[] ds, Vector3D newVelocity){
+    public void reset(Vector3D pos, Vector3D newVelocity){
 	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(lifespan());
 	setHeading(newVelocity.normalize());
-	setPosition(Arrays.copyOf(ds,3));
+	setPosition(pos.toArray());
 	setVisible(true);
 	setActive(true);
 	getBehavior().probeForBehavior(RotationalMomentumBehavior.class)

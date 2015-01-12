@@ -60,9 +60,9 @@ public class DebrisSystem extends RenderableSpacePartitioningGrid{
 	}//end generateConsective(...)
     };
     
-    public Debris spawn(double[] ds, Vector3D velocity) {
+    public Debris spawn(Vector3D pos, Vector3D velocity) {
 	final Debris result = pool.pop();
-	result.reset(ds, velocity);
+	result.reset(pos, velocity);
 	add(result);
 	return result;
     }//end fire(...)

@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
@@ -32,12 +33,12 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
 		    }//end for(MAX_SMOKE_PER_POOL)
 	    }//end for(SmokeType s)
 	}//end constructor()
-	public Smoke triggerSmoke(double [] position, SmokeType type) {
+	public Smoke triggerSmoke(Vector3D pos, SmokeType type) {
 	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_SMOKE_PER_POOL;
 	    Smoke result = allSmokes[type.ordinal()][indices[type.ordinal()]];
 	    result.destroy();
 	    result.resetSmoke();
-	    result.setPosition(position);
+	    result.setPosition(pos.toArray());
 	    add(result);
 	    return result;
 	}//end triggerSmoke()

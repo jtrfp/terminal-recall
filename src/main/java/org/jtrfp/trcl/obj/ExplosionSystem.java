@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
@@ -34,26 +35,20 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 	    }//end for(explosionTypes)
 	}//end constructor()
 	
-	public Explosion triggerExplosion(double [] position, ExplosionType type) {
+	public Explosion triggerExplosion(Vector3D loc, ExplosionType type) {
 	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_EXPLOSIONS_PER_POOL;
 	    Explosion result = allExplosions[type.ordinal()][indices[type.ordinal()]];
 	    result.destroy();
 	    result.resetExplosion();
-	    final double [] pos = result.getPosition();
-	    System.arraycopy(position, 0, pos, 0, 3);
+	    result.setPosition(loc.getX(), loc.getY(), loc.getZ());
 	    result.notifyPositionChange();
 	    final SmokeSystem sf = tr.getResourceManager().getSmokeSystem();
 	    final int NUM_PUFFS=1;
 	    for(int i=0; i<NUM_PUFFS; i++){
-		final double [] work =
-			new double[]{
-			Math.random()*10000,
-			Math.random()*10000,
-			Math.random()*10000};
-		sf.triggerSmoke(Vect3D.add(
-			position,
-			work,
-			work),
+		sf.triggerSmoke(loc.add(new Vector3D(
+			Math.random()*10000-5000,
+			Math.random()*10000-5000,
+			Math.random()*10000-5000)),
 			SmokeType.Puff);
 	    }//end for(i)
 	    add(result);

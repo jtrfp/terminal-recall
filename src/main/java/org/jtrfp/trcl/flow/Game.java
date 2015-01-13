@@ -180,7 +180,7 @@ public class Game {
      * @throws IOException 
      * @throws IllegalAccessException 
      */
-    public synchronized void setLevelIndex(int levelIndex) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+    public void setLevelIndex(int levelIndex) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 	this.levelIndex = levelIndex;
 	if (levelIndex != -1) {// -1 means 'abort'
 	    MissionLevel lvl = vox.getLevels()[getLevelIndex()];
@@ -370,6 +370,7 @@ public class Game {
 	catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 	abortCurrentMission();
 	cleanup();
+	tr.getGameShell().applyGFXState();
 	TR.nuclearGC();
     }
     

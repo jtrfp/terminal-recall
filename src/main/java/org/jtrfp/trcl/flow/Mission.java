@@ -24,6 +24,7 @@ import org.jtrfp.trcl.SkySystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
+import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -108,8 +109,12 @@ public class Mission {
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
-	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
-	tr.renderer.get().getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
+	final Renderer renderer = tr.renderer.get();
+	renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
+	renderer.getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
+	final Camera camera = renderer.getCamera();
+	camera.setHeading(Vector3D.PLUS_I);
+	camera.setTop(Vector3D.PLUS_J);
 	game.setDisplayMode(game.levelLoadingMode);
 	game.getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
@@ -236,7 +241,6 @@ public class Mission {
 	tr.getThreadManager().setPaused(false);
 	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
 	getOverworldSystem().activate();
-	final Renderer renderer = tr.renderer.get();
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
 	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());

@@ -25,6 +25,12 @@ import org.jtrfp.trcl.gpu.Model;
 public class TerrainChunk extends WorldObject{
     	private boolean isCeiling=false;
     	private final AltitudeMap map;
+    	
+    	public TerrainChunk(TR tr){
+    	    super(tr);
+    	    map=null;
+    	}
+    	
 	public TerrainChunk(TR tr, Model m, AltitudeMap map){
 		super(tr,m);
 		this.map=map;

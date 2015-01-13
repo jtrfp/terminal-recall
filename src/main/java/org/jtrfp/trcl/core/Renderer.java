@@ -499,22 +499,24 @@ public final class Renderer {
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
     
+    private RenderList oneFrameLaggedRenderList;
+    
     public void render() {
 	final GL3 gl = gpu.getGl();
 	try{
 		ensureInit();
-		final RenderList renderList = currentRenderList().getRealtime();
-		deferredProgram.use();
-		renderList.render(gl);
-		// Update GPU
-		renderList.sendToGPU(gl);
+		if(oneFrameLaggedRenderList==null)
+		 oneFrameLaggedRenderList = currentRenderList().getRealtime();
+		oneFrameLaggedRenderList.render(gl);
+		oneFrameLaggedRenderList = currentRenderList().getRealtime();
+		oneFrameLaggedRenderList.sendToGPU(gl);
 		cameraMatrixAsFlatArray = camera.getCompleteMatrixAsFlatArray();
 		camRotationProjectionMatrix = camera.getProjectionRotationMatrixAsFlatArray();
 		//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
 		gpu.memoryManager.getRealtime().flushStalePages();
+		// Update texture codepages
 		gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
 		fpsTracking();
-		final World world = gpu.getTr().getWorld();
 	}catch(NotReadyException e){}
     }//end render()
     

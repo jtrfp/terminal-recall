@@ -56,7 +56,6 @@ public class Texture implements TextureDescription {
     private int				sideLength;
     @Override
     public void finalize() throws Throwable{
-	System.out.println("Texture.finalize() "+debugName);
 	//TOC ID
 	if(tocIndex!=null)
 	    toc.free(tocIndex);

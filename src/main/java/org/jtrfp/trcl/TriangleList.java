@@ -230,7 +230,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
     
     @Override
     public void finalize(){
-	System.out.println("TriangleList.finalize() model="+getModel().getDebugName());
 	final MemoryWindow mw = getMemoryWindow();
 	for(int i=0; i<triangleVertexIndices.length;i++){
 	    mw.free(triangleVertexIndices[i]);

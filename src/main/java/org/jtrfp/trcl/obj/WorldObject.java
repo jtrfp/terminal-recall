@@ -668,7 +668,6 @@ public class WorldObject implements PositionedRenderable {
     
     @Override
     public void finalize() throws Throwable{
-	System.out.println("WorldObject.finalize()");
 	if(matrixID!=null)
 	 tr.matrixWindow.get().free(matrixID);
 	if(transparentTriangleObjectDefinitions!=null)

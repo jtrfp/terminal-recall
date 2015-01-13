@@ -20,6 +20,7 @@ import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {
@@ -106,7 +107,7 @@ public class CollidesWithTerrain extends Behavior {
     private final Submitter<SurfaceImpactListener> sub = new Submitter<SurfaceImpactListener>() {
 	@Override
 	public void submit(SurfaceImpactListener item) {
-	    item.collidedWithSurface(null, surfaceNormalVar.toArray());
+	    item.collidedWithSurface(new TerrainChunk(getParent().getTr()), surfaceNormalVar.toArray());
 	}
 
 	@Override

@@ -25,11 +25,14 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
+import org.jtrfp.trcl.core.Camera;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
@@ -47,10 +50,18 @@ public class GameShell {
     public GameShell startShell(){
 	tr.gatherSysInfo();
 	registerPODs();
-	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
-	tr.renderer.get().getSkyCube().setSkyCubeGen(DEFAULT_GRADIENT);
+	applyGFXState();
 	return this;
     }//end startShell()
+    
+    public void applyGFXState(){
+	final Renderer renderer = tr.renderer.get();
+	final Camera camera = renderer.getCamera();
+	camera.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
+	renderer.getSkyCube().setSkyCubeGen(DEFAULT_GRADIENT);
+	camera.setHeading(Vector3D.PLUS_I);
+	camera.setTop(Vector3D.PLUS_J);
+    }
     
     public GameShell newGame(){
 	VOXFile vox;

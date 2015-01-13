@@ -25,6 +25,7 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RollLevelingBehavior;
+import org.jtrfp.trcl.beh.SurfaceImpactSFXBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
@@ -39,7 +40,6 @@ import org.jtrfp.trcl.beh.ui.UpdatesThrottleMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.WeaponSelectionBehavior;
-import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
@@ -88,6 +88,7 @@ public class Player extends WorldObject implements VisibleEverywhere{
 	addBehavior(new BouncesOffSurfaces());
 	addBehavior(new UpdatesNAVRadar());
 	addBehavior(new Cloakable());
+	addBehavior(new SurfaceImpactSFXBehavior(tr));
 	final Weapon[] allWeapons = Weapon.values();
 	
 	for (int i = 0; i < allWeapons.length; i++) {

@@ -19,6 +19,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.concurrent.Callable;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -90,7 +93,8 @@ public class MenuSystem {
 			return null;
 		    }});
 	    }});
-	game_pause.addActionListener(new ActionListener(){
+	final Action pauseAction = new AbstractAction("Pause Button"){
+	    private static final long serialVersionUID = -5172325691052703896L;
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
 		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
@@ -100,7 +104,16 @@ public class MenuSystem {
 			game.setPaused(!game.isPaused());
 			return null;
 		    }});
+	    }};
+	game_pause.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent evt) {
+		pauseAction.actionPerformed(evt);
 	    }});
+	
+	String pauseKey = "PAUSE_KEY";
+	game_pause.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), pauseKey);
+	game_pause.getActionMap().put(pauseKey, pauseAction);
 	game_skip.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent evt) {

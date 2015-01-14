@@ -466,7 +466,10 @@ public class Game {
         final SoundSystem ss = getTr().soundSystem.get();
 	ss.setPaused(paused);
 	getTr().getThreadManager().setPaused(paused);
-	//TODO: Show upfront "Paused" msg
+	if(paused)
+	 upfrontDisplay.submitPersistentMessage("Paused--F3 to Resume");
+	else
+	 upfrontDisplay.removePersistentMessage();
         return this;
     }
     

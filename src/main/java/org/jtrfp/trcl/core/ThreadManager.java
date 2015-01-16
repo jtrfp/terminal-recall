@@ -58,6 +58,12 @@ public final class ThreadManager {
 		    35+20*Runtime.getRuntime().availableProcessors(),
 		    15,
 		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
+    public final ExecutorService	gpuMemAccessThreadPool 		= 
+	    new ThreadPoolExecutor(
+		    30,
+		    35+20*Runtime.getRuntime().availableProcessors(),
+		    15,
+		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
     public final Object			gameStateLock			= new Object();
     private TRFutureTask<Void>		visibilityCalcTask;
     public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(10000);
@@ -73,7 +79,7 @@ public final class ThreadManager {
 	@Override
 	public void submit(TRFutureTask<?> item) {
 		activeGPUMemAccessTasks.add(item);
-		threadPool.submit(item);
+		gpuMemAccessThreadPool.submit(item);
 	}//end submit(...)
     };
     private AtomicReference<Submitter<TRFutureTask<?>>>	currentGPUMemAccessTaskSubmitter 
@@ -232,16 +238,15 @@ public final class ThreadManager {
 		   return;//Abort. Not ready to go yet.
 		  activeGPUMemAccessTasks.poll();
 		 }//end while(!empty)
-		 
 		 ///////// activeGPUMemAccessTasks should be empty beyond this point ////////
-		 if(!activeGPUMemAccessTasks.isEmpty())
-		     tr.showStopper(new RuntimeException("ThreadManager.activeGPUMemAccessTasks intolerably not empty."));
+		 assert activeGPUMemAccessTasks.isEmpty():"ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
 		 ThreadManager.this.tr.renderer.getRealtime().render();
 		 synchronized(currentGPUMemAccessTaskSubmitter){
 		  currentGPUMemAccessTaskSubmitter.set(activeGPUMemAccessTaskSubmitter);}
 		while(!pendingGPUMemAccessTasks.isEmpty())
 		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
 	    	}catch(NotReadyException e){}
+	    	catch(Exception e){e.printStackTrace();}
 	    }//end if(!null)
     }//end attemptRender()
     

@@ -239,32 +239,34 @@ public class WorldObject implements PositionedRenderable {
 		    "Model is null. Did you forget to set it?");
 	final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
 	final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
-	
-	tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
+	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		processPrimitiveList(model.getTriangleList(),
-			triangleObjectDefinitions, opaqueIndicesList);
-		processPrimitiveList(model.getTransparentTriangleList(),
-			transparentTriangleObjectDefinitions, transparentIndicesList);
+		tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			processPrimitiveList(model.getTriangleList(),
+				triangleObjectDefinitions, opaqueIndicesList);
+			processPrimitiveList(model.getTransparentTriangleList(),
+				transparentTriangleObjectDefinitions, transparentIndicesList);
+			return null;
+		    }}).get();//TODO: Make non-blocking
+		ByteOrder order = getTr().gpu.get().getByteOrder();
+		opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
+			opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
+		transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
+			transparentIndicesList.size() * 4).order(order);
+
+		IntBuffer trans = transparentObjectDefinitionAddressesInVec4
+			.asIntBuffer(), opaque = opaqueObjectDefinitionAddressesInVec4
+			.asIntBuffer();
+
+		for (Integer elm : transparentIndicesList)
+		    trans.put(elm);
+		for (Integer elm : opaqueIndicesList) 
+		    opaque.put(elm);
 		return null;
-	    }}).get();//TODO: Make non-blocking
-	ByteOrder order = getTr().gpu.get().getByteOrder();
-	opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
-		opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
-	transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
-		transparentIndicesList.size() * 4).order(order);
-
-	IntBuffer trans = transparentObjectDefinitionAddressesInVec4
-		.asIntBuffer(), opaque = opaqueObjectDefinitionAddressesInVec4
-		.asIntBuffer();
-
-	for (Integer elm : transparentIndicesList) {
-	    trans.put(elm);
-	}
-	for (Integer elm : opaqueIndicesList) {
-	    opaque.put(elm);
-	}
+	    }});
     }// end initializeObjectDefinitions()
 
     private void processPrimitiveList(PrimitiveList<?> primitiveList,

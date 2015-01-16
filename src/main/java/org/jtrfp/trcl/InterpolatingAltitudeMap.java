@@ -30,9 +30,9 @@ public class InterpolatingAltitudeMap implements AltitudeMap {
 	final double topRight=toWrap.heightAt(xHi, zLow);
 	final double bottomLeft=toWrap.heightAt(xLow, zHi);
 	final double bottomRight=toWrap.heightAt(xHi, zHi);
-	final double wRight=x%1.;
+	final double wRight=x-xLow;
 	final double wLeft=1.-wRight;
-	final double wBottom=z%1.;
+	final double wBottom=z-zLow;
 	final double wTop=1.-wBottom;
 	double accumulator=0;
 	accumulator+=topLeft*wTop*wLeft;
@@ -55,6 +55,6 @@ public class InterpolatingAltitudeMap implements AltitudeMap {
 	final double magX=(heightAt(x-NUDGE,z)-heightAt(x+NUDGE,z))/NUDGE;
 	final double magZ=(heightAt(x,z-NUDGE)-heightAt(x,z+NUDGE))/NUDGE;
 	final double magY=Math.sqrt(1-(magX*magX+magZ*magZ));
-	return new Vector3D(magX,magY,magZ).normalize();
+	return new Vector3D(magZ,magY,magX).normalize();
     }//end normalAt(...)
 }//end InterpolatingAltitudeMap

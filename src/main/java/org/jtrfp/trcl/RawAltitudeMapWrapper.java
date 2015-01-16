@@ -31,11 +31,13 @@ public class RawAltitudeMapWrapper implements AltitudeMap {
 
     @Override
     public double heightAt(double x, double z) {
-	if (x < 0)
-	    x = width-(-x % width);
-	if (z < 0)
-	    z = height-(-z % height);
-	return file.valueAt((int) z % width, (int) x % height) / 256.;
+	int ix = (int)Math.floor(x);
+	int iz = (int)Math.floor(z);
+	if (ix < 0)
+	    ix = (width)-(-ix % (width));
+	if (iz < 0)
+	    iz = (height)-(-iz % (height));
+	return file.valueAt(iz % width, ix % height) / 255.;
     }//end heightAt(...)
 
     @Override

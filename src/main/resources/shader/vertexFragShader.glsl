@@ -154,7 +154,6 @@ void main(){
 			uint 	skipCameraMatrix= UNibble(renderMode,PACKED_DATA_RENDER_MODE);
 			uvec4 	packedVertex 	= texelFetch(rootBuffer,vertexOffset+intraObjectVertexIndex);
 			flatTextureID 			= float((UByte(packedVertex[3u],1u) | (UByte(packedVertex[3u],2u) << 8u ) | (UByte(packedVertex[3u],3u) << 16u)))/65536;
-			//if(objectIndex>3000) flatTextureID = 100024/float(65536*PAGE_SIZE_VEC4);
 			vec4 	vertexCoord;
 			vertexCoord.xyz 		= exp2(float(modelScalar))*vec3(float(firstSShort(packedVertex[0])),float(secondSShort(packedVertex[0])),
 												float(firstSShort(packedVertex[1])));
@@ -171,8 +170,6 @@ void main(){
 									 float(SByte(packedVertex[3],0u))/128, 0));
     		nXY			 			= nNoCam.xy * w;
 			nZ 						= nNoCam.z * w;
-			//if(abs(nZ-.5)<.5) ////////////// DEBUG / KLUDGE
-			//  nZ = -.1; //For some reason, Z-values are not coming through like they should.
     		}//end if(object)
     		
     		else{

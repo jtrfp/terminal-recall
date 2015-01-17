@@ -19,7 +19,6 @@
 uniform sampler2D soundTexture;
 noperspective in float fragTexPos;
 noperspective in float fragRow;
-//flat in float vid;
 flat in vec2 panLR;
 
 // OUTPUTS

@@ -49,12 +49,4 @@ void main(){
  gl_Position.y=0;
  gl_Position.z=1;
  gl_Position.w=1;
- /*
- //// DEBUG
- gl_Position.x*=dummy==1234?0:1;
- gl_Position.x+=(gl_VertexID==0?-1:1);
- gl_Position.y=0;
- gl_Position.z=1;
- gl_Position.w=1;
- */
- }
+}

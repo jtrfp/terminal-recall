@@ -28,8 +28,6 @@ uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform vec3			ambientLight;
 uniform vec3			sunColor;
-uniform uint 			screenWidth;
-uniform uint 			screenHeight;
 uniform vec3 			sunVector;
 
 noperspective in vec2	screenLoc;
@@ -81,26 +79,15 @@ const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
 
 float warpFog(float z){
-const float ZNEAR = 6554 * 32;
-const float ZFAR = 65536 * 16;
-return clamp((z-ZNEAR)/(ZFAR-ZNEAR),0,1);
+ const float ZNEAR = 6554 * 32;
+ const float ZFAR = 65536 * 16;
+ return clamp((z-ZNEAR)/(ZFAR-ZNEAR),0,1);
 }
 
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
 
 vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub, uint subTexV4Addr, uint startCode){
- //uint	tTOCIdx		= uint(texelXY.x)/SUBTEXTURE_SIDE_WIDTH_TEXELS + (uint(texelXY.y)/SUBTEXTURE_SIDE_WIDTH_TEXELS) * 19u;
- //uint	tTOCvec4Idx	= tTOCIdx / 4u;
- //uint	tTOCsubIdx	= tTOCIdx % 4u;
- // Sub-Texture
- //uint	subTexV4Addr= texelFetch(rootBuffer,int(textureID+tTOCvec4Idx))[tTOCsubIdx];
- //uvec2	subTexXY	= texelXY%SUBTEXTURE_SIDE_WIDTH_TEXELS;// Tile-level divergence here
- //uint	subTexByIdx = 0u+(uint(subTexXY.x)/CODE_SIDE_WIDTH_TEXELS + ((0u+(uint(subTexXY.y)/CODE_SIDE_WIDTH_TEXELS)) * SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDER));
- //uint	startCodeIdx= subTexByIdx/256u;
- //uint	startCode	= texelFetch(rootBuffer,int(subTexV4Addr+SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4+(startCodeIdx/4u)))[startCodeIdx%4u];
- //uint	subTexV4Idx	= subTexByIdx / 16u;
- //uint	subTexV4Sub = subTexByIdx % 16u;
  // Codebook
  uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
  uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;

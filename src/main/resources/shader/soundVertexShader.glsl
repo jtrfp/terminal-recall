@@ -16,7 +16,8 @@
 
 #version 330
 
-const uint SAMPLES_PER_ROW		= 1024u;
+const int SAMPLES_PER_ROW		= 1024;
+const int  SAMPLES_PER_ROW_2	= SAMPLES_PER_ROW*2;
 
 // INPUTS
 uniform vec2 pan;
@@ -35,13 +36,12 @@ layout (location = 0) in float dummy;
 
 void main(){
  // U/V Zig-Zag pattern
- 
- int sweep = int((gl_VertexID+1) / 2) % 2;
+ int glvid2=int((gl_VertexID+1) / 2);
+ int sweep = glvid2 % 2;
  int row = gl_VertexID / 2;
  fragTexPos = sweep;
- float texelHeight = 1/float(numRows);
- fragRow = (float(row)*texelHeight) + texelHeight/2;
- float rowsX = (gl_VertexID+1)/2 + (gl_VertexID/2)/float(SAMPLES_PER_ROW);
+ fragRow = ((float(row)+.5)/float(numRows));
+ float rowsX = float(glvid2 + gl_VertexID/SAMPLES_PER_ROW_2);
  vid = gl_VertexID / 64;
  
  panLR = pan;

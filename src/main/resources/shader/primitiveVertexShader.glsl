@@ -35,6 +35,8 @@ const float PRIM_TEX_WIDTH_SCALAR	= float(PQUAD_SIDE_WIDTH)/float(PRIM_TEXTURE_W
 const float VTX_TEX_HEIGHT_SCALAR   = 1/float(VTX_TEXTURE_USABLE_HEIGHT);
 const float VTX_TEX_WIDTH_SCALAR    = 1/float(VTX_TEXTURE_USABLE_WIDTH);
 const vec2 PRIM_TEX_CENTER_OFF		= vec2(PRIM_TEX_HEIGHT_SCALAR,PRIM_TEX_WIDTH_SCALAR);
+const vec2 GL_POS_ADD				= ((PRIM_TEX_CENTER_OFF/2)-.5)/PRIM_TEX_WIDTH_SCALAR;
+const float GL_POS_W				= .5/PRIM_TEX_WIDTH_SCALAR;
 
 //OUTPUTS
 flat out mat4 uvzwQuad;
@@ -61,15 +63,16 @@ mat3 affine(vec2 u, vec2 v, vec2 off){
  }//end affine()
 
 void main(){
- gl_Position.x			= dummy*.00000001;//TODO: Need to compensate for point center offset.
+ gl_Position.x			= dummy*.00000001;
  uint	pid				= uint(gl_VertexID);
  uint	row				= pid/PRIMS_PER_ROW;
  uint	col				= pid%PRIMS_PER_ROW;
  uint	primitiveIndex	= pid;
  uint	vertexIndex		= primitiveIndex*3u;
- gl_Position.xy			= PRIM_TEX_CENTER_OFF;
- gl_Position.x			+=((float(col))*PRIM_TEX_WIDTH_SCALAR*2)-1;
- gl_Position.y			+= ((float(row))*PRIM_TEX_HEIGHT_SCALAR*2)-1;
+ gl_Position.xy			= GL_POS_ADD;
+ gl_Position.x			+=float(col);
+ gl_Position.y			+=float(row);
+ gl_Position.w			= GL_POS_W;//Use W as a free division.
  const ivec2 increment	= ivec2(1,0);
  ivec2 v0				= ivec2(
  				vertexIndex%VERTICES_PER_ROW,

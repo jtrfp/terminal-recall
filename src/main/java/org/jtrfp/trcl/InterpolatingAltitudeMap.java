@@ -55,6 +55,6 @@ public class InterpolatingAltitudeMap implements AltitudeMap {
 	final double magX=(heightAt(x-NUDGE,z)-heightAt(x+NUDGE,z))/NUDGE;
 	final double magZ=(heightAt(x,z-NUDGE)-heightAt(x,z+NUDGE))/NUDGE;
 	final double magY=Math.sqrt(1-(magX*magX+magZ*magZ));
-	return new Vector3D(magZ,magY,magX).normalize();
+	return new Vector3D(magX,magY,magZ).normalize();
     }//end normalAt(...)
 }//end InterpolatingAltitudeMap

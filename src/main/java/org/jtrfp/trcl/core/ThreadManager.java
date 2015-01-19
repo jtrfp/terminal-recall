@@ -20,7 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -52,22 +52,22 @@ public final class ThreadManager {
     private Thread 			renderingThread;
     private Animator			animator;
     private boolean[] 			paused = new boolean[]{false};
-    public final ExecutorService	threadPool 			= 
+    public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
 		    30,
-		    35+20*Runtime.getRuntime().availableProcessors(),
-		    15,
-		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
-    public final ExecutorService	gpuMemAccessThreadPool 		= 
+		    65,
+		    1,
+		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
+    public final ThreadPoolExecutor	gpuMemAccessThreadPool 		= 
 	    new ThreadPoolExecutor(
 		    30,
-		    35+20*Runtime.getRuntime().availableProcessors(),
-		    15,
-		    TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(1000));
+		    65,
+		    1,
+		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
     public final Object			gameStateLock			= new Object();
     private TRFutureTask<Void>		visibilityCalcTask;
-    public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(10000);
-    public final Queue<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayBlockingQueue<TRFutureTask<?>>(10000);
+    public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
+    public final Queue<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
     private final AtomicLong		nextVisCalcTime 		= new AtomicLong(0L);
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
@@ -88,6 +88,24 @@ public final class ThreadManager {
     
     ThreadManager(final TR tr) {
 	this.tr = tr;
+	threadPool.setRejectedExecutionHandler(new RejectedExecutionHandler(){
+	    @Override
+	    public void rejectedExecution(Runnable r, ThreadPoolExecutor exec) {
+		try{Thread.sleep(150);
+		 exec.execute(r);
+		}//Wait 150ms
+		catch(InterruptedException e){e.printStackTrace();}
+	    }});
+	gpuMemAccessThreadPool.setRejectedExecutionHandler(new RejectedExecutionHandler(){
+	    @Override
+	    public void rejectedExecution(Runnable r, ThreadPoolExecutor exec) {
+		try{Thread.sleep(150);
+		 exec.execute(r);
+		}//Wait 150ms
+		catch(InterruptedException e){e.printStackTrace();}
+	    }});
+	threadPool.prestartAllCoreThreads();
+	gpuMemAccessThreadPool.prestartAllCoreThreads();
 	start();
     }// end constructor
     

@@ -401,8 +401,8 @@ public class Mission {
 	DirectionVector v = tun.getEntrance();
 	tunnelsRemaining.add(result);
 	addTunnelEntrance(new Point(
-		(int)(TR.legacy2MapSquare(v.getZ())/TR.mapSquareSize),
-		(int)(TR.legacy2MapSquare(v.getX())/TR.mapSquareSize)),result);
+		(int)(TR.legacy2MapSquare(v.getZ())),
+		(int)(TR.legacy2MapSquare(v.getX()))),result);
 	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
 	return result;
     }

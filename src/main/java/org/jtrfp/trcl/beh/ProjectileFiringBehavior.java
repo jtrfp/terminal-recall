@@ -44,7 +44,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	    resetFiringTimer();
 	    	    projectileFactory.
 	    	      fire(Vect3D.add(
-	    		      p.getPosition(),
+	    		      p.getPositionWithOffset(),
 	    		      firingPosition.toArray(),
 	    		      new double[3]), 
 	    		      heading, 

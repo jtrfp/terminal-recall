@@ -352,7 +352,7 @@ public final class TR{
     }
 
     public static double legacy2MapSquare(double z) {
-	return ((z / crossPlatformScalar) / mapWidth) * 255.;
+	return legacy2Modern(z)/TR.mapSquareSize;
     }
 
     public void gatherSysInfo() {

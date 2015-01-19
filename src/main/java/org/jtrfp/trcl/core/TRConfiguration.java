@@ -192,13 +192,9 @@ public class TRConfiguration{
 	    saveConfig(TRConfiguration.getConfigFilePath());
 	}
 	
-	public void saveConfig(File f) throws IOException{
+	public void saveConfig(File finalDest) throws IOException{
 	    final File temp = File.createTempFile("temp.org.trcl.", "config.xml");
-	    if(!temp.getName().toLowerCase().endsWith(".config.trcl.xml"))
-		    f = new File(temp.getAbsolutePath()+".config.trcl.xml");
-		   if(!temp.exists())
-		     temp.createNewFile();
-		    FileOutputStream os = new FileOutputStream(f);
+		    FileOutputStream os = new FileOutputStream(temp);
 		    XMLEncoder xmlEnc   = new XMLEncoder(os);
 		    xmlEnc.setExceptionListener(new ExceptionListener(){
 			@Override
@@ -228,9 +224,10 @@ public class TRConfiguration{
 		    FileChannel srcCh = null, dstCh = null;
 		    try {
 		        srcCh = new FileInputStream(temp).getChannel();
-		        dstCh = new FileOutputStream(f).getChannel();
+		        dstCh = new FileOutputStream(finalDest).getChannel();
 		        dstCh.transferFrom(srcCh, 0, srcCh.size());
-		       }finally{
+		       }catch(Exception e){e.printStackTrace();}
+		    	finally{
 		           srcCh.close();
 		           dstCh.close();
 		       }

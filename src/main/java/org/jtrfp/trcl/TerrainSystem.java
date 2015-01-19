@@ -12,8 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -329,12 +331,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),false);}
 		catch(Exception e){e.printStackTrace();}
 		DirectionVector v = entrance?tun.getEntrance():tun.getExit();
-		x=(byte)Math.round(TR.legacy2MapSquare(v.getZ()))&0xFF;//Reversed on purpose
-		//KLUDGE: I don't know for sure what exactly is going on, but the tunnel entrance in the first chamber of DESERT.LVL is off by 1 cell.
-		//Yet everything else is fine. This is a nudge to fix that. May break other things. No sure yet.
-		//This is probably related to the fact that absolute coordinates are being tacked onto cell coordinates.
-		final double signed=TR.legacy2MapSquare(v.getX());
-		z=(byte)Math.round(signed>0?signed:signed-.5)&0xFF;
+		x = (int)TR.legacy2MapSquare(v.getZ());
+		z = (int)TR.legacy2MapSquare(v.getX());
 	    }
 	    public TextureDescription getTexture(){return textureToInsert;}
 	    

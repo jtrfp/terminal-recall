@@ -12,60 +12,57 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.awt.Color;
 import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.InterpolatingAltitudeMap;
-import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
-import org.jtrfp.trcl.beh.LoopingPositionBehavior;
-import org.jtrfp.trcl.beh.NAVTargetableBehavior;
-import org.jtrfp.trcl.beh.phy.HasPropulsion;
-import org.jtrfp.trcl.beh.phy.MovesByVelocity;
-import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
-import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.flow.NAVObjective;
-import org.jtrfp.trcl.math.Vect3D;
 
 public class TunnelEntranceObject extends BillboardSprite {
-    private final Tunnel tunnel;
-    private NAVObjective navObjectiveToRemove;
-    private boolean onlyRemoveIfCurrent=false;
-    public static final double GROUND_HEIGHT_PAD=2500;
+    public static final double GROUND_HEIGHT_PAD=3500;
+    private final Tunnel sourceTunnel;
     public TunnelEntranceObject(TR tr, Tunnel tunnel) {
 	super(tr);
-	this.tunnel=tunnel;
-	boolean debugMode=false;
-	if(System.getProperties().containsKey("org.jtrfp.trcl.TunnelEntranceObject.debug")){
-	    debugMode=System.getProperty("org.jtrfp.trcl.TunnelEntranceObject.debug").toUpperCase().contains("TRUE");
-	}if(debugMode)System.out.println("TunnelEntranceObject.debug enabled.");
-	addBehavior(new TunnelEntranceBehavior());
-	setVisible(tunnel.getSourceTunnel().getEntranceLogic()!=TunnelLogic.invisible||debugMode);
+	final Mission mission = tr.getGame().getCurrentMission();
+	mission.addPropertyChangeListener(new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getPropertyName().contentEquals("BossFight"))
+		    TunnelEntranceObject.this.setVisible(!(Boolean)evt.getNewValue());
+	    }});
+	addBehavior(new TunnelEntranceBehavior(){
+	    @Override
+	    public void proposeCollision(WorldObject other) {}
+	    });
+	this.sourceTunnel=tunnel;
+	setVisible(tunnel.getSourceTunnel().getEntranceLogic()!=TunnelLogic.invisible);
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
 	final double [] position = getPosition();
 	position[0]=TR.legacy2Modern(entrance.getZ());
 	position[1]=TR.legacy2Modern(entrance.getY()+GROUND_HEIGHT_PAD);
 	position[2]=TR.legacy2Modern(entrance.getX());
+	double height = (tr.getWorld().sizeY / 2) * tr.getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
+		position[0]/TR.mapSquareSize, position[2]/TR.mapSquareSize);
+	position[1]=height+GROUND_HEIGHT_PAD;
 	notifyPositionChange();
 	this.setBillboardSize(new Dimension(10000,10000));
-	try {
-	    this.setTexture(
+	try {this.setTexture(
 		    tr.getResourceManager().getRAWAsTexture("TARG1.RAW",
 			    tr.getGlobalPaletteVL(),false), true);
 	}	catch(Exception e){e.printStackTrace();}
     }//end constructor
-
+    
+    public class TunnelEntranceBehavior extends Behavior implements CollisionBehavior{
+	@Override
+	public void proposeCollision(WorldObject other) {}
+	}//end TunnelEntranceBehavior
+/*
     public class TunnelEntranceBehavior extends Behavior implements CollisionBehavior, NAVTargetableBehavior{
 	private boolean navTargeted=false;
 	@Override
@@ -145,33 +142,11 @@ public class TunnelEntranceObject extends BillboardSprite {
     private final AbstractSubmitter<TunnelEntryListener> TELsubmitter = new AbstractSubmitter<TunnelEntryListener>(){
 	@Override
 	public void submit(TunnelEntryListener tel){tel.notifyTunnelEntered();} 
-    };
+    };*/
     /**
-     * @return the navObjectiveToRemove
+     * @return the sourceTunnel
      */
-    public NAVObjective getNavObjectiveToRemove() {
-        return navObjectiveToRemove;
-    }
-    /**
-     * @param navObjectiveToRemove the navObjectiveToRemove to set
-     */
-    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove) {
-        setNavObjectiveToRemove(navObjectiveToRemove,false);
-    }
-    public void setNavObjectiveToRemove(NAVObjective navObjectiveToRemove, boolean onlyRemoveIfCurrent) {
-	this.onlyRemoveIfCurrent=onlyRemoveIfCurrent;
-	this.navObjectiveToRemove=navObjectiveToRemove;
-    }
-    /**
-     * @return the onlyRemoveIfCurrent
-     */
-    public boolean isOnlyRemoveIfCurrent() {
-        return onlyRemoveIfCurrent;
-    }
-    /**
-     * @param onlyRemoveIfCurrent the onlyRemoveIfCurrent to set
-     */
-    public void setOnlyRemoveIfCurrent(boolean onlyRemoveIfCurrent) {
-        this.onlyRemoveIfCurrent = onlyRemoveIfCurrent;
+    public Tunnel getSourceTunnel() {
+        return sourceTunnel;
     }
 }//end TunnelEntrance

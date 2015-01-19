@@ -13,10 +13,12 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
@@ -40,15 +42,20 @@ public class TunnelExitObject extends WorldObject {
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
 	final double EXIT_Y_NUDGE = 0;
-	this.exitLocation = new Vector3D(TR.legacy2Modern(v.getZ()),
-		TR.legacy2Modern(v.getY() + EXIT_Y_NUDGE), TR.legacy2Modern(v
-			.getX()));
-	this.tun = tun;
-	exitHeading = tr.
+	final InterpolatingAltitudeMap map = tr.
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().
-		getAltitudeMap().
+		getAltitudeMap();
+	final double exitY = 
+		map.heightAt(TR.legacy2Modern(v.getZ()), TR.legacy2Modern(v
+		.getX()))+EXIT_Y_NUDGE;
+	this.exitLocation = new Vector3D(TR.legacy2Modern(v.getZ()),
+		exitY, TR.legacy2Modern(v
+			.getX()));
+	
+	this.tun = tun;
+	exitHeading = map.
 		normalAt(
 		exitLocation.getZ() / TR.mapSquareSize,
 		exitLocation.getX() / TR.mapSquareSize);
@@ -92,18 +99,20 @@ public class TunnelExitObject extends WorldObject {
 		    overworldSystem.activate();
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
-		    tr.getGame().getPlayer().getBehavior()
+		    final Player player = tr.getGame().getPlayer();
+		    player.probeForBehavior(CollidesWithTunnelWalls.class)
+		    	    .setEnable(false);
+		    player.getBehavior()
 			    .probeForBehavior(DamageableBehavior.class)
 			    .addInvincibility(250);// Safety kludge when near
 						   // walls.
-		    tr.getGame().getPlayer().getBehavior()
+		    player.getBehavior()
 			    .probeForBehavior(CollidesWithTerrain.class)
 			    .setEnable(true);
-		    tr.getGame().getPlayer().getBehavior()
+		    player.getBehavior()
 			    .probeForBehavior(LoopingPositionBehavior.class)
 			    .setEnable(true);
-		    tr.getGame().getPlayer()
-			    .getBehavior()
+		    player.getBehavior()
 			    .probeForBehavior(
 				    HeadingXAlwaysPositiveBehavior.class)
 			    .setEnable(false);

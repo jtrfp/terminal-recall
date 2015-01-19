@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
+import java.awt.Point;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -22,6 +23,7 @@ import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.RemovesNAVObjectiveOnDeath;
+import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.BOS;
@@ -37,7 +39,6 @@ import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Jumpzone;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
-import org.jtrfp.trcl.obj.TunnelEntranceObject.TunnelEntranceBehavior;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -92,8 +93,17 @@ public abstract class NAVObjective {
 		    TUN tun = (TUN)navSubObject;
 		    //Entrance and exit locations are already set up.
 		    final Location3D 	loc3d 	= tun.getLocationOnMap();
-		    		currentTunnel 	= tr.getGame().getCurrentMission().getTunnelWhoseEntranceClosestTo(loc3d.getX(),loc3d.getY(),loc3d.getZ());
-		    final TunnelEntranceObject tunnelEntrance 
+		    final Vector3D modernLoc = new Vector3D(
+				    TR.legacy2Modern(loc3d.getX()),
+				    TR.legacy2Modern(loc3d.getY()),
+				    TR.legacy2Modern(loc3d.getZ()));
+		    /*final TunnelEntranceObject teo = tr.getGame().getCurrentMission().getTunnelEntranceObject(
+			    new Point((int)(modernLoc.getX()/TR.mapSquareSize),(int)(modernLoc.getZ()/TR.mapSquareSize)));
+		    */
+		    final Mission mission = tr.getGame().getCurrentMission();
+		    final TunnelEntranceObject teo = mission.getNearestTunnelEntrance(loc3d.getX(),loc3d.getY(),loc3d.getZ());
+		    currentTunnel=teo.getSourceTunnel();
+		    		/*final TunnelEntranceObject tunnelEntrance 
 		    				= currentTunnel.getEntranceObject();
 		    final double [] entPos=tunnelEntrance.getPosition();
 		    entPos[0]=TR.legacy2Modern(loc3d.getZ());
@@ -107,7 +117,7 @@ public abstract class NAVObjective {
 				TR.legacy2MapSquare(loc3d.getZ()), 
 				TR.legacy2MapSquare(loc3d.getX()))*(tr.getWorld().sizeY/2)+TunnelEntranceObject.GROUND_HEIGHT_PAD;
 		    tunnelEntrance.notifyPositionChange();
-		    
+		    */
 		    final NAVObjective enterObjective = new NAVObjective(this){
 			    @Override
 			    public String getDescription() {
@@ -115,10 +125,16 @@ public abstract class NAVObjective {
 			    }
 			    @Override
 			    public WorldObject getTarget() {
-				return tunnelEntrance;
+				return teo;
 			    }
-		    };//end new NAVObjective tunnelEnrance
-		    tunnelEntrance.setNavObjectiveToRemove(enterObjective,true);
+		    };//end new NAVObjective tunnelEntrance
+		   //tunnelEntrance.setNavObjectiveToRemove(enterObjective,true);
+		    currentTunnel.addTunnelEntryListener(new TunnelEntryListener(){
+			@Override
+			public void notifyTunnelEntered(Tunnel tunnel) {
+			    tr.getGame().getCurrentMission().removeNAVObjective(enterObjective);
+			    tunnel.removeTunnelEntryListener(this);
+			}});
 		    indexedNAVObjectiveList.add(enterObjective);
 		    final TunnelExitObject tunnelExit = currentTunnel.getExitObject();
 		    final NAVObjective exitObjective = new NAVObjective(this){
@@ -134,7 +150,9 @@ public abstract class NAVObjective {
 		    indexedNAVObjectiveList.add(exitObjective);
 		    tunnelExit.setNavObjectiveToRemove(exitObjective,true);
 		    tunnelExit.setMirrorTerrain(currentTunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
-		    if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
+		    
+		    //if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
+			/*
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
 			    public void run() {
@@ -144,11 +162,10 @@ public abstract class NAVObjective {
 			worldBossObject.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
-				tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(true);
-				tunnelEntrance.setVisible(true);
+				//mission.setBossFight(false);
 			    }
-			}));
-		    }//end if(visibleUnlessBoss)
+			}));*/
+		    //}//end if(visibleUnlessBoss)
 		} else if(navSubObject instanceof BOS){///////////////////////////////////////////
 		    final Mission mission = tr.getGame().getCurrentMission();
 		    final BOS bos = (BOS)navSubObject;

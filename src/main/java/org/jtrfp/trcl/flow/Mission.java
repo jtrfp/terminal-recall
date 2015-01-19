@@ -12,9 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
+import java.awt.Point;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -23,12 +27,19 @@ import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.SkySystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.CollidesWithTerrain;
+import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
+import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
+import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
+import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.AbstractTriplet;
+import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -38,7 +49,11 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Projectile;
+import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
+import org.jtrfp.trcl.obj.TunnelEntranceObject;
+import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -68,6 +83,10 @@ public class Mission {
     private volatile MusicPlaybackEvent
     				bgMusic;
     private final Object	missionLock = new Object();
+    private final Map<Integer,TunnelEntranceObject>
+    				tunnelMap = new HashMap<Integer,TunnelEntranceObject>();
+    private boolean 		bossFight = false;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     //private TRFutureTask<Result>[]missionTask = new TRFutureTask[]{null};
 
     private enum LoadingStages {
@@ -379,7 +398,11 @@ public class Mission {
     private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
 	    LoadingProgressReporter reporter) {
 	final Tunnel result = new Tunnel(tr.getWorld(), tun, reporter);
+	DirectionVector v = tun.getEntrance();
 	tunnelsRemaining.add(result);
+	addTunnelEntrance(new Point(
+		(int)(TR.legacy2MapSquare(v.getZ())/TR.mapSquareSize),
+		(int)(TR.legacy2MapSquare(v.getX())/TR.mapSquareSize)),result);
 	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
 	return result;
     }
@@ -388,19 +411,23 @@ public class Mission {
 	return tunnels.get(tunnelFileName.toUpperCase());
     }
 
-    public Tunnel getTunnelWhoseEntranceClosestTo(double xInLegacyUnits,
+    public TunnelEntranceObject getNearestTunnelEntrance(double xInLegacyUnits,
 	    double yInLegacyUnits, double zInLegacyUnits) {
-	Tunnel result = null;
+	TunnelEntranceObject result = null;
 	double closestDistance = Double.POSITIVE_INFINITY;
-	for (Tunnel t : tunnels.values()) {
-	    TDFFile.Tunnel src = t.getSourceTunnel();
-	    final double distance = Math.sqrt(Math.pow((xInLegacyUnits - src
-		    .getEntrance().getX()), 2)
-		    + Math.pow((yInLegacyUnits - src.getEntrance().getY()), 2)
-		    + Math.pow((zInLegacyUnits - src.getEntrance().getZ()), 2));
+	final Vector3D entPos = new Vector3D(
+		    TR.legacy2Modern(zInLegacyUnits),//Intentionally backwards
+		    TR.legacy2Modern(yInLegacyUnits),
+		    TR.legacy2Modern(xInLegacyUnits)
+		    );
+	System.out.println("Requested entry pos="+entPos);
+	for (TunnelEntranceObject teo : tunnelMap.values()) {
+	    final Vector3D pos = new Vector3D(teo.getPosition());
+	    System.out.println("Found tunnel at "+pos);
+	    final double distance = pos.distance(entPos);
 	    if (distance < closestDistance) {
 		closestDistance = distance;
-		result = t;
+		result = teo;
 	    }
 	}// end for(tunnels)
 	return result;
@@ -503,6 +530,7 @@ public class Mission {
     }
     
     public void enterBossMode(final String bossMusicFile){
+	setBossFight(true);
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -525,6 +553,7 @@ public class Mission {
     }//end enterBossMode()
     
     public void exitBossMode(){
+	setBossFight(false);
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -561,5 +590,148 @@ public class Mission {
     private void cleanup() {
 	if(overworldSystem!=null)
 	    overworldSystem.deactivate();
+    }
+    /**
+     * Find a tunnel at the given map square, if any.
+     * @param mapSquareXZ Position in cells, not world coords.
+     * @return The Tunnel at this map square, or null if none here.
+     * @since Jan 13, 2015
+     */
+    public TunnelEntranceObject getTunnelEntranceObject(Point mapSquareXZ){
+	final int key = pointToHash(mapSquareXZ);
+	System.out.println("getTunnelEntranceObject "+mapSquareXZ);
+	for(TunnelEntranceObject teo:tunnelMap.values())
+	    System.out.print(" "+new Vector3D(teo.getPosition()).scalarMultiply(1/TR.mapSquareSize));
+	System.out.println();
+	return tunnelMap.get(key);
+    }
+    
+    public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel){
+	TunnelEntranceObject teo;
+	overworldSystem.add(teo = new TunnelEntranceObject(tr,tunnel));
+	tunnelMap.put(pointToHash(mapSquareXZ),teo);
+    }
+    
+    private int pointToHash(Point point){
+	final int key =(int)point.getX()+(int)point.getY()*65536;
+	return key;
+    }
+    
+    public void enterTunnel(Tunnel tunnel) {
+	final Game game = tr.getGame();
+	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
+	game.getCurrentMission().notifyTunnelFound(tunnel);
+	//Turn off overworld
+	overworldSystem.deactivate();
+	//Turn on tunnel
+	tunnel.activate();
+	//Move player to tunnel
+	tr.renderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
+	//Ensure chamber mode is off
+	overworldSystem.setChamberMode(false);
+	overworldSystem.setTunnelMode(true);
+	//Update debug data
+	tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "true");
+
+	final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
+	for(ProjectileFactory pf:pfs){
+	    Projectile [] projectiles = pf.getProjectiles();
+	    for(Projectile proj:projectiles){
+		((WorldObject)proj).
+		getBehavior().
+		probeForBehavior(LoopingPositionBehavior.class).
+		setEnable(false);
+	    }//end for(projectiles)
+	}//end for(projectileFactories)
+	final Player player = tr.getGame().getPlayer();
+	player.setActive(false);
+	final Behavior playerBehavior = player.getBehavior();
+	playerBehavior.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
+	playerBehavior.probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
+	playerBehavior.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
+	playerBehavior.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
+	playerBehavior.probeForBehavior(CollidesWithTerrain.class).setEnable(false);
+	//entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
+	tunnel.dispatchTunnelEntryNotifications();
+	player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
+	player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+	player.notifyPositionChange();
+	/*
+	final NAVObjective navObjective = getNavObjectiveToRemove();
+	if(navObjective!=null && navTargeted){
+	    final Mission m = game.getCurrentMission();
+	    if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
+	}//end if(have NAV to remove
+	*/
+	player.setActive(true);
+    }//end enterTunnel()
+    /**
+     * @return the bossFight
+     */
+    public boolean isBossFight() {
+        return bossFight;
+    }
+    /**
+     * @param bossFight the bossFight to set
+     */
+    private void setBossFight(boolean bossFight) {
+	pcs.firePropertyChange("BossFight", this.bossFight, bossFight);
+        this.bossFight = bossFight;
+    }
+    /**
+     * @param listener
+     * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
+     */
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+	pcs.addPropertyChangeListener(listener);
+    }
+    /**
+     * @param propertyName
+     * @param listener
+     * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+     */
+    public void addPropertyChangeListener(String propertyName,
+	    PropertyChangeListener listener) {
+	pcs.addPropertyChangeListener(propertyName, listener);
+    }
+    /**
+     * @return
+     * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners()
+     */
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+	return pcs.getPropertyChangeListeners();
+    }
+    /**
+     * @param propertyName
+     * @return
+     * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners(java.lang.String)
+     */
+    public PropertyChangeListener[] getPropertyChangeListeners(
+	    String propertyName) {
+	return pcs.getPropertyChangeListeners(propertyName);
+    }
+    /**
+     * @param propertyName
+     * @return
+     * @see java.beans.PropertyChangeSupport#hasListeners(java.lang.String)
+     */
+    public boolean hasListeners(String propertyName) {
+	return pcs.hasListeners(propertyName);
+    }
+    /**
+     * @param listener
+     * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.beans.PropertyChangeListener)
+     */
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+	pcs.removePropertyChangeListener(listener);
+    }
+    /**
+     * @param propertyName
+     * @param listener
+     * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+     */
+    public void removePropertyChangeListener(String propertyName,
+	    PropertyChangeListener listener) {
+	pcs.removePropertyChangeListener(propertyName, listener);
     }
 }// end Mission

@@ -15,6 +15,7 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.media.opengl.GL3;
@@ -32,6 +33,7 @@ import org.jtrfp.trcl.beh.phy.RotatingObjectBehavior;
 import org.jtrfp.trcl.beh.phy.ShiftingObjectBehavior;
 import org.jtrfp.trcl.beh.tun.DestructibleWallBehavior;
 import org.jtrfp.trcl.beh.tun.IrisBehavior;
+import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
@@ -64,11 +66,12 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     private final World world;
     private final ColorPaletteVectorList   palette;
     private final TDFFile.Tunnel 	   sourceTunnel;
-    private final TunnelEntranceObject 	   entranceObject;
     private final TunnelExitObject 	   exitObject;
     private final LoadingProgressReporter[]reporters;
     private final LoadingProgressReporter  tunnelAssemblyReporter;
     private ObjectSystem		   objectSystem;//DO NOT REMOVE. Strong reference to avoid GC
+    private final HashSet<TunnelEntryListener>
+    					   tunnelEntryListeners = new HashSet<TunnelEntryListener>();
     public static final SkyCubeGen	   TUNNEL_SKYCUBE_GEN = new HorizGradientCubeGen
 		(Color.darkGray,Color.black);
 
@@ -115,8 +118,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	tr.getGame().getCurrentMission().getOverworldSystem().add(
-		entranceObject = new TunnelEntranceObject(tr, this));
+	/*tr.getGame().getCurrentMission().getOverworldSystem().add(
+		entranceObject = new TunnelEntranceObject(tr, this));*/
     }// end constructor
 
     private Vector3D buildTunnel(TDFFile.Tunnel _tun, Vector3D groundVector,
@@ -569,16 +572,22 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     }
 
     /**
-     * @return the entranceObject
-     */
-    public TunnelEntranceObject getEntranceObject() {
-	return entranceObject;
-    }
-
-    /**
      * @return the exitObject
      */
     public TunnelExitObject getExitObject() {
 	return exitObject;
     }
+    
+    public void addTunnelEntryListener(TunnelEntryListener l){
+	tunnelEntryListeners.add(l);
+    }
+    
+    public void removeTunnelEntryListener(TunnelEntryListener l){
+	tunnelEntryListeners.remove(l);
+    }
+
+    public void dispatchTunnelEntryNotifications() {
+	for(TunnelEntryListener l:tunnelEntryListeners)
+	    l.notifyTunnelEntered(this);
+    }//end dispatchTunnelEntryNotifications()
 }// end Tunnel

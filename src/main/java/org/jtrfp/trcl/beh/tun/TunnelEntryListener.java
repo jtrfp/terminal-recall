@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.tun;
 
+import org.jtrfp.trcl.Tunnel;
+
 public interface TunnelEntryListener {
-    public void notifyTunnelEntered();
+    public void notifyTunnelEntered(Tunnel tunnel);
 }

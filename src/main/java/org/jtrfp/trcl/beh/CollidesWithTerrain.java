@@ -12,15 +12,26 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.awt.Point;
 import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Projectile;
+import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.TerrainChunk;
+import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {
@@ -31,6 +42,7 @@ public class CollidesWithTerrain extends Behavior {
     private boolean 		autoNudge 		= false;
     private double 		nudgePadding 		= 5000;
     private boolean		recentlyCollided	= false;
+    private boolean		tunnelEntryCapable	= false;
 
     @Override
     public void _tick(long tickTimeMillis) {
@@ -41,13 +53,13 @@ public class CollidesWithTerrain extends Behavior {
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
 	final InterpolatingAltitudeMap aMap;
+	final Mission mission = tr.getGame().getCurrentMission();
 	try{
-	aMap =  tr.getGame().
-		getCurrentMission().
+	aMap =  mission.
 		getOverworldSystem().
 		getAltitudeMap();
 	}catch(NullPointerException e){return;}
-	if(tr.getGame().getCurrentMission().getOverworldSystem().isTunnelMode())
+	if(mission.getOverworldSystem().isTunnelMode())
 	    return;//No terrain to collide with while in tunnel mode.
 	if(aMap==null)return;
 	final double[] thisPos = p.getPosition();
@@ -78,6 +90,7 @@ public class CollidesWithTerrain extends Behavior {
 	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),
 		-groundNormal.getY(), groundNormal.getZ());
 	Vector3D surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
+	final double dot = surfaceNormal.dotProduct(getParent().getHeading());
 	if (terrainMirror && groundHeightNorm > .97) {
 	    groundImpact = true;
 	    surfaceNormal = downhillDirectionXZ;
@@ -89,6 +102,16 @@ public class CollidesWithTerrain extends Behavior {
 	    p.notifyPositionChange();
 	    return;
 	}//end if(groundLock)
+	if (tunnelEntryCapable && groundImpact && dot < 0){
+		final OverworldSystem os = mission.getOverworldSystem();
+		if(!os.isTunnelMode() ){
+		    TunnelEntranceObject teo = mission.getTunnelEntranceObject(new Point(
+				(int)(thisPos[0] / TR.mapSquareSize),
+				(int)(thisPos[2] / TR.mapSquareSize)));
+		    if(teo!=null && !mission.isBossFight())
+			{mission.enterTunnel(teo.getSourceTunnel());return;}
+		}//end if(above ground)
+	}//end if(tunnelEntryCapable())
 
 	if (groundImpact || ceilingImpact) {// detect collision
 	    recentlyCollided=true;
@@ -97,13 +120,14 @@ public class CollidesWithTerrain extends Behavior {
 	    thisPos[1] = (groundImpact ? groundHeight : ceilingHeight)
 		    + padding;
 	    p.notifyPositionChange();
-	    // Call impact listeners
-	    surfaceNormalVar = surfaceNormal;
-	    final Behavior behavior = p.getBehavior();
-	    behavior.probeForBehaviors(sub, SurfaceImpactListener.class);
+	    if(dot < 0){//If toward ground, call impact listeners.
+		surfaceNormalVar = surfaceNormal;
+		final Behavior behavior = p.getBehavior();
+		behavior.probeForBehaviors(sub, SurfaceImpactListener.class);
+	    }//end if(pointedTowardGround)
 	}// end if(collision)
     }// end _tick
-
+    
     private final Submitter<SurfaceImpactListener> sub = new Submitter<SurfaceImpactListener>() {
 	@Override
 	public void submit(SurfaceImpactListener item) {
@@ -148,5 +172,20 @@ public class CollidesWithTerrain extends Behavior {
     public CollidesWithTerrain setNudgePadding(double nudgePadding) {
 	this.nudgePadding = nudgePadding;
 	return this;
+    }
+
+    /**
+     * @return the tunnelEntryCapable
+     */
+    public boolean isTunnelEntryCapable() {
+        return tunnelEntryCapable;
+    }
+
+    /**
+     * @param tunnelEntryCapable the tunnelEntryCapable to set
+     */
+    public CollidesWithTerrain setTunnelEntryCapable(boolean tunnelEntryCapable) {
+        this.tunnelEntryCapable = tunnelEntryCapable;
+        return this;
     }
 }// end BouncesOffTerrain

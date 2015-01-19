@@ -117,7 +117,7 @@ public class ProjectileBehavior extends Behavior implements
 		if (!honingTarget.get().isVisible())
 		    return;// Dead or otherwise.
 		final Vector3D honingVector = new Vector3D(
-			honingTarget.get().getPosition()).subtract(new Vector3D(
+			honingTarget.get().getPositionWithOffset()).subtract(new Vector3D(
 			getParent().getPosition())).normalize();
 		//Sanity check
 		if(Double.isNaN(honingVector.getX()))return;

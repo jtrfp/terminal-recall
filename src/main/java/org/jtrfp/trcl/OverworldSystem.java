@@ -174,4 +174,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     public SkySystem getSkySystem() {
 	return skySystem;
     }
+    public TerrainSystem getTerrainSystem(){
+	return terrainSystem;
+    }
 }// end OverworldSystem

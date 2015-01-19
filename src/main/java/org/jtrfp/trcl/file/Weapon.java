@@ -71,7 +71,7 @@ public enum Weapon {
     purpleRing(
 	    null, null, new BillboardModelingType(new String[] {
 		    "PURFRIN0.RAW", "PURFRIN1.RAW", "PURFRIN2.RAW",
-		    "PURFRIN3.RAW" }, 8192, new Dimension(320000, 320000)),
+		    "PURFRIN3.RAW" }, 45, new Dimension(320000, 320000)),
 	    8192, ModelingType.MAP_SQUARE_SIZE * 3, -1, 2048, false, false), 
     bossW6(
 	    null, null, new BINModelingType("BRADMIS.BIN"), 6554,
@@ -79,7 +79,7 @@ public enum Weapon {
     bossW7(
 	    null, null, new BillboardModelingType(new String[] { "BFIRJ0.RAW",
 		    "BFIRJ1.RAW", "BFIRJ2.RAW", "BFIRJ3.RAW" }, 100,
-		    new Dimension(320000, 320000)), 8192,
+		    new Dimension(320000, 320000)), 25,
 	    ModelingType.MAP_SQUARE_SIZE * 4, -1, 2048, false, false), 
     bossW8(
 	    null, null, new BINModelingType("FIREBALL.BIN"), 8192,

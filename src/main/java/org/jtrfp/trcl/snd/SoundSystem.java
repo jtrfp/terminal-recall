@@ -69,7 +69,7 @@ public final class SoundSystem {
     private long bufferFrameCounter;
     
 
-    public static final double DEFAULT_SFX_VOLUME = .12;
+    public static final double DEFAULT_SFX_VOLUME = .3;
     
     public static final int SAMPLE_RATE=44100;
     static final int BUFFER_SIZE_FRAMES=4096*2;
@@ -146,6 +146,7 @@ public final class SoundSystem {
 	}
 	
 	new Thread() {
+	    private final AudioCompressor compressor = new AudioCompressor();
 	    @Override
 	    public void run() {
 		try {
@@ -173,8 +174,9 @@ public final class SoundSystem {
 			}).get();
 			sBuf.clear();
 			fBuf.clear();
+			compressor.setSource(fBuf);
 			for (int i = 0; i < BUFFER_SIZE_FRAMES * NUM_CHANNELS; i++) {
-			    sBuf.put((short) (fBuf.get() * (double) Short.MAX_VALUE));
+			    sBuf.put((short) (compressor.get() * (double) Short.MAX_VALUE));
 			}
 			sourceDataLine.write(shortBytes, 0, BUFFER_SIZE_BYTES);
 		    }// end while(true)

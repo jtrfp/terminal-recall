@@ -177,7 +177,7 @@ public class ProjectileFactory {
 			    .create(soundTexture,
 				     (WorldObject)result,
 				     tr.renderer.get().getCamera(),
-				     SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead
+				     (objectOfOrigin instanceof Player?.6:1)*SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead
 	final List<WorldObject> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
 	 synchronized(cL){cL.add((WorldObject)result);}
 	projectileIndex++;

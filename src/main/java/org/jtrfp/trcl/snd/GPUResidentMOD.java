@@ -38,6 +38,7 @@ public class GPUResidentMOD {
     double []panStates = new double[32];// [-1,1]
     double []volumeStates = new double[32]; // [0,1]
     private long songLengthInBufferFrames=-1;
+    private static final double MUSIC_VOLUME = 2; 
     private final HashMap<PatternElement,Integer> durationInRows = new HashMap<PatternElement,Integer>();
     
     public GPUResidentMOD(TR tr, Module module){
@@ -45,7 +46,7 @@ public class GPUResidentMOD {
 	this.module=module;
 	Sample [] modSamples = module.getInstrumentContainer().getSamples();
 	for(int i=0; i<volumeStates.length; i++)
-	    volumeStates[i]=(double)module.getChannelVolume(i)/(double)0x40;
+	    volumeStates[i]=MUSIC_VOLUME*(double)module.getChannelVolume(i);
 	for(int i=0; i<panStates.length; i++){
 	    panStates[i]=((double)module.getPanningValue(i)-128.)/128.;
 	    }
@@ -102,7 +103,7 @@ public class GPUResidentMOD {
 		   final int op = element.getEffektOp();
 		   switch (fx){
 		    case 0x0C:
-		       volumeStates[element.getChannel()]=(double)op;
+		       volumeStates[element.getChannel()]=MUSIC_VOLUME*(double)op;
 		       break;
 		    case 0x0F:
 		       setSpeedOrTempo(op);

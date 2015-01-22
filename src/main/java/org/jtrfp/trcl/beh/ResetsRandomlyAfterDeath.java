@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.concurrent.Callable;
+
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -26,23 +28,28 @@ public void notifyDeath() {
    //Reset state
     final WorldObject thisObject = getParent();
     final Runnable _runOnReset = runOnReset;
-    final long waitTime = (long)(2*minWaitMillis+Math.random()*.5*(maxWaitMillis-minWaitMillis));
-    //new Thread(){
-//	@Override
-//	public void run(){
-	   /* try{Thread.currentThread().sleep(waitTime);}
-	    catch(InterruptedException e){e.printStackTrace();}*/
-	    try{thisObject.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
-	    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!    
-	    SpacePartitioningGrid grid = thisObject.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
-	    thisObject.probeForBehavior(DeathBehavior.class).reset();
-	    if(grid!=null)grid.add(thisObject);
-	    else throw new NullPointerException();
-	    thisObject.setActive(true);//Is this really needed?
-	    thisObject.setVisible(true);
-	    _runOnReset.run();
-//	}//end run()
-//    }.start();
+    final long waitTime = (long)(minWaitMillis+Math.random()*(maxWaitMillis-minWaitMillis));
+    new Thread(){
+	@Override
+	public void run(){
+	    try{Thread.currentThread().sleep(waitTime);}
+	    catch(InterruptedException e){e.printStackTrace();}
+	    getParent().getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    try{thisObject.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
+		    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!    
+		    SpacePartitioningGrid grid = thisObject.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
+		    thisObject.probeForBehavior(DeathBehavior.class).reset();
+		    if(grid!=null)grid.add(thisObject);
+		    else throw new NullPointerException();
+		    thisObject.setActive(true);//Is this really needed?
+		    thisObject.setVisible(true);
+		    _runOnReset.run();
+		    return null;
+		}}).get();
+	}//end run()
+    }.start();
  }//end notifyDeath
 
 /**

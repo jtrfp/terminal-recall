@@ -75,7 +75,7 @@ public class Player extends WorldObject implements VisibleEverywhere{
 	addBehavior(new UserInputRudderElevatorControlBehavior());
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());
-	addBehavior(new CollidesWithTerrain().setTunnelEntryCapable(true));
+	addBehavior(new CollidesWithTerrain().setTunnelEntryCapable(true).setIgnoreHeadingForImpact(false));
 	addBehavior(new AfterburnerBehavior());
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));

@@ -43,6 +43,7 @@ public class CollidesWithTerrain extends Behavior {
     private double 		nudgePadding 		= 5000;
     private boolean		recentlyCollided	= false;
     private boolean		tunnelEntryCapable	= false;
+    private boolean		ignoreHeadingForImpact	= true;
 
     @Override
     public void _tick(long tickTimeMillis) {
@@ -120,7 +121,7 @@ public class CollidesWithTerrain extends Behavior {
 	    thisPos[1] = (groundImpact ? groundHeight : ceilingHeight)
 		    + padding;
 	    p.notifyPositionChange();
-	    if(dot < 0){//If toward ground, call impact listeners.
+	    if(dot < 0 || ignoreHeadingForImpact){//If toward ground, call impact listeners.
 		surfaceNormalVar = surfaceNormal;
 		final Behavior behavior = p.getBehavior();
 		behavior.probeForBehaviors(sub, SurfaceImpactListener.class);
@@ -186,6 +187,14 @@ public class CollidesWithTerrain extends Behavior {
      */
     public CollidesWithTerrain setTunnelEntryCapable(boolean tunnelEntryCapable) {
         this.tunnelEntryCapable = tunnelEntryCapable;
+        return this;
+    }
+
+    /**
+     * @param ignoreHeadingForImpact the ignoreHeadingForImpact to set
+     */
+    public CollidesWithTerrain setIgnoreHeadingForImpact(boolean ignoreHeadingForImpact) {
+        this.ignoreHeadingForImpact = ignoreHeadingForImpact;
         return this;
     }
 }// end BouncesOffTerrain

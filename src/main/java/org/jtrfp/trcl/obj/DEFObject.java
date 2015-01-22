@@ -608,7 +608,7 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 
 @Override
 public void setTop(Vector3D top){
-    super.setTop(anchoring==Anchoring.ceiling?Vector3D.MINUS_J:top);
+    super.setTop(top);
 }
 /**
  * @return the boundingRadius

@@ -192,7 +192,62 @@ public class TunnelSegment extends WorldObject {
 	    startAngle += dAngleStart;
 	    endAngle += dAngleEnd;
 	}// for(polygons)
+	
+	if(s.isCutout()){
+	 // The slice quad
+	// INWARD
+	Vector3D p0 = segPoint(startAngle, zStart, startWidth, startHeight,
+		startX, startY);
+	Vector3D p1 = segPoint(endAngle, zEnd, endWidth, endHeight, endX, endY);
+	Vector3D p2 = segPoint(endAngle1, zEnd, 0, 0, endX, endY);
+	Vector3D p3 = segPoint(startAngle1, zStart, 0, 0,
+		startX, startY);
+	m.addTriangles(Triangle.quad2Triangles(
+		new double[] { p0.getX(), p1.getX(), p2.getX(), p3.getX() },
+		new double[] { p0.getY(), p1.getY(), p2.getY(), p3.getY() },
+		new double[] { p0.getZ(), p1.getZ(), p2.getZ(), p3.getZ() },
 
+		new double[] { 0, 0, 1, 1 },
+		new double[] { 0, 1, 1, 0 },
+		tunnelTexturePalette[s.getPolyTextureIndices().get(
+			numPolygonsMinusOne)],
+		RenderMode.DYNAMIC,
+		new Vector3D[] {
+			new Vector3D(-Math.cos(startAngle), -Math
+				.sin(startAngle), 0),
+			new Vector3D(-Math.cos(endAngle), -Math.sin(endAngle),
+				0),
+			new Vector3D(-Math.cos(endAngle1),
+				-Math.sin(endAngle1), 0),
+			new Vector3D(-Math.cos(startAngle1), -Math
+				.sin(startAngle1), 0) }, 0));
+	// OUTWARD
+	 p3 = segPoint(startAngle1, zStart, startWidth, startHeight,
+		startX, startY);
+	 p2 = segPoint(endAngle1, zEnd, endWidth, endHeight, endX, endY);
+	 p1 = segPoint(endAngle1, zEnd, 0, 0, endX, endY);
+	 p0 = segPoint(startAngle1, zStart, 0, 0,
+		startX, startY);
+	m.addTriangles(Triangle.quad2Triangles(
+		new double[] { p0.getX(), p1.getX(), p2.getX(), p3.getX() },
+		new double[] { p0.getY(), p1.getY(), p2.getY(), p3.getY() },
+		new double[] { p0.getZ(), p1.getZ(), p2.getZ(), p3.getZ() },
+
+		new double[] { 0, 0, 1, 1 },
+		new double[] { 0, 1, 1, 0 },
+		tunnelTexturePalette[s.getPolyTextureIndices().get(
+			numPolygonsMinusOne)],
+		RenderMode.DYNAMIC,
+		new Vector3D[] {
+			new Vector3D(-Math.cos(startAngle), -Math
+				.sin(startAngle), 0),
+			new Vector3D(-Math.cos(endAngle), -Math.sin(endAngle),
+				0),
+			new Vector3D(-Math.cos(endAngle1),
+				-Math.sin(endAngle1), 0),
+			new Vector3D(-Math.cos(startAngle1), -Math
+				.sin(startAngle1), 0) }, 0));
+	}else{
 	// The slice quad
 	Vector3D p0 = segPoint(startAngle, zStart, startWidth, startHeight,
 		startX, startY);
@@ -219,9 +274,9 @@ public class TunnelSegment extends WorldObject {
 				-Math.sin(endAngle1), 0),
 			new Vector3D(-Math.cos(startAngle1), -Math
 				.sin(startAngle1), 0) }, 0));
-
+	}//end !cutout
 	return m.finalizeModel();
-    }
+    }//end createModel()
 
     private static Vector3D segPoint(double angle, double z, double w,
 	    double h, double x, double y) {

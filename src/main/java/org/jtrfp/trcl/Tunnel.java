@@ -370,25 +370,34 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(bc);
 	    break;
 	case rotating34Wall:
+	    final double rotPeriod = 65536./(double)s.getRotationSpeed();
+	    final boolean rotate = !Double.isInfinite(rotPeriod);
 	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
 		    new double[] { 0, tunnelDia / 2., 10 }, false);
-	    bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
-		    6000, 0));
+	    if(rotate){
+		bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+		    (int)rotPeriod, Math.PI));
+		bc.setTop(top);
+	    }else
+		bc.setTop(new Rotation(heading,Math.PI+Math.PI / 2).applyTo(top));
 	    bc.setPosition(wPos.toArray());
 	    bc.setHeading(heading);
-	    bc.setTop(top);
 	    bc.addBehavior(new CubeCollisionBehavior(bc));
 	    add(bc);
-
+	    
 	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
 		    new double[] { 0, tunnelDia / 2., 0 }, false);
-	    bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
-		    6000, Math.PI / 2));
+	    if(rotate){
+		bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+			    (int)rotPeriod, Math.PI+Math.PI / 2));
+		bc.setTop(top);
+	    }else
+		bc.setTop(new Rotation(heading,Math.PI * 2).applyTo(top));
+	    
 	    bc.setPosition((wPos.add(new Vector3D(100, 0, 0))).toArray());
 	    bc.setHeading(heading);
-	    bc.setTop(top);
 	    bc.addBehavior(new CubeCollisionBehavior(bc));
 	    add(bc);
 	    break;

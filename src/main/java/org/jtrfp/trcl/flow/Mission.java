@@ -160,8 +160,11 @@ public class Mission {
 	    START s = (START) navSubObjects.get(0);
 	    Location3D l3d = s.getLocationOnMap();
 	    playerStartPosition[0] = TR.legacy2Modern(l3d.getZ());
-	    playerStartPosition[1] = TR.legacy2Modern(l3d.getY());
 	    playerStartPosition[2] = TR.legacy2Modern(l3d.getX());
+	    final double HEIGHT_PADDING = 10000;
+	    playerStartPosition[1] = Math.max(HEIGHT_PADDING + (world.sizeY/2) * getOverworldSystem().getAltitudeMap().heightAt(
+		    TR.legacy2MapSquare(l3d.getZ()),
+		    TR.legacy2MapSquare(l3d.getX())),TR.legacy2Modern(l3d.getY()));
 	    playerStartDirection = new ObjectDirection(s.getRoll(),
 		    s.getPitch(), s.getYaw());
 	    // ////// INITIAL HEADING

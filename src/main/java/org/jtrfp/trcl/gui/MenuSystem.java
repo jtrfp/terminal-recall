@@ -64,6 +64,7 @@ public class MenuSystem {
 	final JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
 	final JMenuItem codePageDump = new JMenuItem("Dump Code Pages");
 	final JMenuItem debugSinglet = new JMenuItem("Singlet (fill)");
+	final JMenuItem debugDQ = new JMenuItem("Depth Queue Test");
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
@@ -198,6 +199,16 @@ public class MenuSystem {
 		}catch(NumberFormatException e)
 		 {JOptionPane.showMessageDialog(rw, "Please supply an integer value.");}
 	    }});
+	debugDQ.addActionListener(new ActionListener(){
+	    @Override
+	    public void actionPerformed(ActionEvent arg0) {
+		 tr.threadManager.submitToThreadPool(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			EngineTests.depthQueueTest(tr);
+			return null;
+		    }});
+	    }});
 	final String showDebugStatesOnStartup = System
 		.getProperty("org.jtrfp.trcl.showDebugStates");
 	if (showDebugStatesOnStartup != null) {
@@ -221,6 +232,7 @@ public class MenuSystem {
             gameMenu.add(game_skip);
             gameMenu.add(game_abort);
             debugMenu.add(debugSinglet);
+            debugMenu.add(debugDQ);
             debugMenu.add(gpuMemDump);
             debugMenu.add(codePageDump);
 	    SwingUtilities.invokeLater(new Runnable(){

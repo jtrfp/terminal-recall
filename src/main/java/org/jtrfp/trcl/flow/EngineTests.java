@@ -13,16 +13,20 @@
 package org.jtrfp.trcl.flow;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class EngineTests {
 
-    public static void singlet(TR tr, int numInstances) {
-	final TextureDescription test = tr.getResourceManager().getTestTexture();
+    private static void preClean(TR tr){
 	tr.abortCurrentGame();
 	tr.getWorld().removeAll();
+    }
+    public static void singlet(TR tr, int numInstances) {
+	final TextureDescription test = tr.getResourceManager().getTestTexture();
+	preClean(tr);
 	final int sideLen = (int)Math.ceil(Math.sqrt(numInstances));
 	final double diameter = 2./(double)sideLen;
 	final double off = diameter/2;
@@ -34,4 +38,20 @@ public class EngineTests {
 	    tr.getWorld().add(wo);
 	}//end for(numInstances)
     }//end singlet(tr)
+    
+    public static void depthQueueTest(TR tr){
+	preClean(tr);
+	final TextureDescription test = tr.gpu.get().textureManager.get().newTexture(
+		    Texture.RGBA8FromPNG(tr.getClass().getResourceAsStream("/dqTestTexture.png")), "dqTestTexture", true);
+	final int NUM_LAYERS=8;
+	final double INCREMENT = .1;
+	final double OFF=-.5;
+	for (int i = 0; i < NUM_LAYERS; i++) {
+	    WorldObject wo = new Sprite2D(tr, 0, 1, 1, test, true);
+	    wo.setPosition(new double[] { OFF+((double)i)*INCREMENT,OFF+((double)i)*INCREMENT, .01*(double)i });
+	    wo.setActive(true);
+	    wo.setVisible(true);
+	    tr.getWorld().add(wo);
+	}//end for(numInstances)
+    }
 }//end EngineTests

@@ -29,6 +29,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	//height*=.5;
 	//length*=.5;
 	Model m = new Model(true,tr);
+	Model m1 = new Model(true,tr);
 	Model m2 = new Model(true,tr);
 	Triangle [] tris;
 	if(horizontal){
@@ -41,7 +42,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	    tex, RenderMode.DYNAMIC,Vector3D.ZERO,"meterBar.horizontal");
 	tris[0].setAlphaBlended(true);
 	tris[1].setAlphaBlended(true);
-	m.addTriangles(tris);
+	m1.addTriangles(tris);
 	
 	tris = Triangle.quad2Triangles(
 	    new double[]{-length,-length,-length,-length}, //X
@@ -60,7 +61,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 		tex, RenderMode.DYNAMIC,Vector3D.ZERO,"meterBar.vertical");
 	    tris[0].setAlphaBlended(true);
 	    tris[1].setAlphaBlended(true);
-	    m.addTriangles(tris);
+	    m1.addTriangles(tris);
 		
 	    m2 = new Model(true,tr);
 		tris = Triangle.quad2Triangles(
@@ -77,6 +78,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	m2.addTriangles(tris);
 	m2.setController(controller);
 	m2.setAnimateUV(true);
+	m.addFrame(m1.finalizeModel());
 	m.addFrame(m2.finalizeModel());
 	m.setFrameDelayInMillis(1000);
 	m.setAnimateUV(true);

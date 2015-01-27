@@ -45,6 +45,7 @@ public class Model {
     private long animationUpdateThresholdMillis = 0;
     private static final long ANIMATION_UPDATE_INTERVAL = 10;
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
+    private volatile boolean animated=false;
 
     public Model(boolean smoothAnimation, TR tr) {
 	this.tr = tr;
@@ -89,6 +90,9 @@ public class Model {
      * @return
      */
     public Model finalizeModel() {
+	if(animated){//Discard frame zero
+	    tLists.remove(0);ttLists.remove(0);
+	}
 	Controller c = controller;
 	if (c == null)
 	    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);
@@ -119,6 +123,7 @@ public class Model {
     }// end finalizeModel()
 
     public void addFrame(Model m) {
+	if(!animated)animated=true;
 	// Opaque Triangles
 	{
 	    tLists.add(m.getRawTriangleLists().get(0));

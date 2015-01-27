@@ -328,7 +328,7 @@ public class ResourceManager{
 		boolean hasAlpha=false;
 		try {
 			BINFile.AnimationControl ac=null;
-			Model result;
+			Model result = new Model(true,tr);
 			ac = aniBinNameMap.get(name);
 			if(ac==null){
 				InputStream is = getInputStreamFromResource("MODELS\\"+name);
@@ -342,11 +342,10 @@ public class ResourceManager{
 			Model [] frames = new Model[ac.getNumFrames()];
 			for(int i=0; i<frames.length;i++)
 				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette);}
-			frames[0].setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumElements());
+			result.setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumElements());
 			//Consolidate the frames to one model
-			for(int i=1; i<frames.length;i++)
-				{frames[0].addFrame(frames[i]);}
-			result = frames[0];
+			for(int i=0; i<frames.length;i++)
+				{result.addFrame(frames[i]);}
 			result.setFrameDelayInMillis((int)(((double)ac.getDelay()/65535.)*1000.));
 			result.finalizeModel();
 			if(cache)modelCache.put(name, result);

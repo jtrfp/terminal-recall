@@ -32,8 +32,9 @@ public final class Sequencer implements Controller{
 	}//end constructor(...)
 	
 	public double getCurrentFrame(){
-	    	if(!loop&&System.currentTimeMillis()-timeOffset>numFrames*(frameDelayMsec-1))return numFrames-1;//Freeze on last frame/
-		double result = (((double)(System.currentTimeMillis()-timeOffset)/(double)frameDelayMsec))%(double)numFrames;
+	    	final long time = System.currentTimeMillis()-timeOffset;
+	    	if(!loop&&time>numFrames*(frameDelayMsec-1))return numFrames-1;//Freeze on last frame/
+		double result = (((double)time/(double)frameDelayMsec))%(double)numFrames;
 		double frame= interpolate?result:(int)result;
 		if(debug)System.out.println("getCurrentFrame() "+frame);
 		return frame;
@@ -46,16 +47,6 @@ public final class Sequencer implements Controller{
 	public int getNumFrames() {
 	    return numFrames;
 	}
-/*
-	@Override
-	public void unstale() {
-	   //Do nothing. Always stale.
-	}
-
-	@Override
-	public boolean isStale() {
-	    return true;
-	}*/
 
 	@Override
 	public void setDebugMode(boolean b) {

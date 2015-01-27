@@ -76,7 +76,14 @@ public class VQCodebookManager {
     }//end constructor
 
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter rowWriter) {
-	subImage(codeID,rowWriter,rgbaTexture,4);
+	try{subImage(codeID,rowWriter,rgbaTexture,4);}
+	catch(OutOfMemoryError e){
+	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
+	    TR.nuclearGC();
+	    System.err.println("Still alive. Attempting RGBA write again...");
+	    subImage(codeID,rowWriter,rgbaTexture,4);
+	    System.err.println("Success.");
+	}
 	return this;
     }// end setRGBA(...)
     
@@ -88,7 +95,7 @@ public class VQCodebookManager {
     }//end RasterRowWriter
     
     private void subImage(final int codeID, final RasterRowWriter texels,
-	    final GLTexture tex, int mipLevel) {
+	    final GLTexture tex, int mipLevel) throws OutOfMemoryError {
 	final int x = (codeID % NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
 	final int z = codeID / CODES_PER_PAGE;
 	final int y = ((codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;

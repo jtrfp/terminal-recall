@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
@@ -89,9 +90,9 @@ public class GameShell {
     
     private void handleLoadFailureException(Throwable e){
 	while(e instanceof RuntimeException || e instanceof ExecutionException)
-	    e=e.getCause();
+	    if(e.getCause()!=null)e=e.getCause();
+	    else break;
 	StringBuilder sb = new StringBuilder();
-	    //sb.append("Failure to read the file "+e.get+".\n");
 	    if(e instanceof FileNotFoundException){
 		sb.append("Could not load file from any of the registered PODs.\n");
 		sb.append("Ensure that the necessary PODs are registered in the File->Configure menu.\n");
@@ -103,9 +104,16 @@ public class GameShell {
 		sb.append("Check disk permissions for registered PODs.\n");
 	    }else if(e instanceof IOException){
 		sb.append("An undocumented IO failure has occurred..\n");
-	    }if(e!=null)sb.append(e.getLocalizedMessage());
-	    JOptionPane.showMessageDialog(tr.getRootWindow(), sb, "File Load Failure", JOptionPane.ERROR_MESSAGE);
+	    }if(e!=null)throwable2StringBuilder(e,sb);
+	    JOptionPane.showMessageDialog(tr.getRootWindow(), new JTextArea(sb.toString()), "File Load Failure", JOptionPane.ERROR_MESSAGE);
     }//end handleLoadFailureException(...)
+    
+    private void throwable2StringBuilder(Throwable e, StringBuilder sb){
+	sb.append(e.getClass().getName()+"\n");
+	final StackTraceElement [] stackTraceElements = e.getStackTrace();
+	for(StackTraceElement ste:stackTraceElements)
+	    sb.append("\tat "+ste.getClassName()+"."+ste.getMethodName()+"("+ste.getFileName()+":"+ste.getLineNumber()+")\n");
+    }
     
     private VOXFile determineVOXFile() {
 	String voxName = tr.getTrConfig()[0].getVoxFile();

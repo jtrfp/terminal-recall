@@ -358,26 +358,33 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(bc);
 	    break;
 	case rotatingHalfWall:
+	    {final double rotPeriod = 32768./(double)s.getRotationSpeed();
+	    final boolean rotate = !Double.isInfinite(rotPeriod);
+	    
 	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
 		    new double[] { 0, tunnelDia / 2., 0 }, false);
-	    bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
-		    6000, 0));
+	    if(rotate){
+		bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
+		  (int)(rotPeriod*1000.), 0));
+		bc.setTop(top);
+	    }else
+		bc.setTop(new Rotation(heading,Math.PI+Math.PI / 2).applyTo(top));
 	    bc.setPosition(wPos.toArray());
 	    bc.setHeading(heading);
 	    bc.setTop(top);
 	    bc.addBehavior(new CubeCollisionBehavior(bc));
 	    add(bc);
-	    break;
+	    break;}
 	case rotating34Wall:
-	    final double rotPeriod = 65536./(double)s.getRotationSpeed();
+	    {final double rotPeriod = 32768./(double)s.getRotationSpeed();
 	    final boolean rotate = !Double.isInfinite(rotPeriod);
 	    bc = new BarrierCube(tr, tunnelDia, tunnelDia, wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
 		    new double[] { 0, tunnelDia / 2., 10 }, false);
 	    if(rotate){
 		bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
-		    (int)rotPeriod, Math.PI));
+		    (int)(rotPeriod*1000.), Math.PI));
 		bc.setTop(top);
 	    }else
 		bc.setTop(new Rotation(heading,Math.PI+Math.PI / 2).applyTo(top));
@@ -400,7 +407,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    bc.setHeading(heading);
 	    bc.addBehavior(new CubeCollisionBehavior(bc));
 	    add(bc);
-	    break;
+	    break;}
 	case fan:
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BLADE.BIN",

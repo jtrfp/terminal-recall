@@ -80,18 +80,19 @@ public class TunnelSegment extends WorldObject {
     private static Model createModel(Segment s, double segLen,
 	    TextureDescription[] tunnelTexturePalette, double endX,
 	    double endY, final TR tr) {
-	Model m = new Model(false, tr);
+	Model mainModel = new Model(true, tr);
+	mainModel.setDebugName("tunnelSegment main.");
 	final int numPolys = s.getNumPolygons();
 	double startWidth = getStartWidth(s);
 	double startHeight = getStartHeight(s);
 	double endWidth = getEndWidth(s);
 	double endHeight = getEndHeight(s);
 	// TODO: x,y, rotation
-	double startAngle1 = ((double) s.getStartAngle1() / 65535.) * 2.
+	final double startAngle1 = ((double) s.getStartAngle1() / 65535.) * 2.
 		* Math.PI;
-	double startAngle2 = ((double) s.getStartAngle2() / 65535.) * 2.
+	final double startAngle2 = ((double) s.getStartAngle2() / 65535.) * 2.
 		* Math.PI;
-	double startAngle = startAngle1;
+	final double startAngle = startAngle1;
 	final double endAngle1 = ((double) s.getEndAngle1() / 65535.) * 2.
 		* Math.PI;
 	final double endAngle2 = ((double) s.getEndAngle2() / 65535.) * 2.
@@ -106,38 +107,42 @@ public class TunnelSegment extends WorldObject {
 	final double zEnd = segLen;
 	final int numPolygonsMinusOne = s.getNumPolygons() - 1;
 	final int lightPoly = s.getLightPolygon();
-	/*
-	final double[] u = new double[4];
-	final double[] v = new double[4];
-
-	u[0] = 0;
-	u[1] = 0;
-	u[2] = 1;
-	u[3] = 1;
-	v[0] = 0;
-	v[1] = 1;
-	v[2] = 1;
-	v[3] = 0;
-	*/
 	final double[] u=new double[] { 1, 1, 0, 0 };
 	final double[] v=new double[] { 0, 1, 1, 0 };
-
-	// Poly quads
-	for (int pi = 0; pi < numPolygonsMinusOne; pi++) {
-	    Vector3D p0 = segPoint(startAngle, zStart, startWidth, startHeight,
+	
+	final double rotPeriod = (1000.*32768.)/(double)s.getRotationSpeed();
+	final int NUM_FRAMES_IF_ANIMATED=30;
+	int numAnimFrames = Double.isInfinite(rotPeriod)?1:NUM_FRAMES_IF_ANIMATED;
+	if(numAnimFrames!=1)
+	    mainModel.setFrameDelayInMillis((int)(rotPeriod/(numAnimFrames)));//TODO: *2 is a kludge
+	final double ANIMATION_DELTA_RADIANS = -(2 * Math.PI) / (double)numAnimFrames;
+	//final double ANIMATION_DELTA_RADIANS = 0; //TODO Remove
+	for(int frameIndex=0; frameIndex<numAnimFrames; frameIndex++){
+	 //final Model m = numAnimFrames==1?mainModel:new Model(false,tr);
+	 final Model m = new Model(false,tr);
+	 m.setDebugName("TunnelSegment frame "+frameIndex+" of "+numAnimFrames);
+	 final double frameAngleDeltaRadians = ANIMATION_DELTA_RADIANS * (double)frameIndex;
+	 double frameStartAngle = startAngle + frameAngleDeltaRadians;
+	 double frameEndAngle = endAngle + frameAngleDeltaRadians;
+	 final double frameStartAngle1 = startAngle1 + frameAngleDeltaRadians;
+	 final double frameStartAngle2 = startAngle2 + frameAngleDeltaRadians;
+	 final double frameEndAngle1 = endAngle + frameAngleDeltaRadians;
+	 // Poly quads
+	 for (int pi = 0; pi < numPolygonsMinusOne; pi++) {
+	     Vector3D p0 = segPoint(frameStartAngle, zStart, startWidth, startHeight,
 		    startX, startY);
-	    Vector3D p1 = segPoint(endAngle, zEnd, endWidth, endHeight, endX,
+	     Vector3D p1 = segPoint(frameEndAngle, zEnd, endWidth, endHeight, endX,
 		    endY);
-	    Vector3D p2 = segPoint(endAngle + dAngleEnd, zEnd, endWidth,
+	     Vector3D p2 = segPoint(frameEndAngle + dAngleEnd, zEnd, endWidth,
 		    endHeight, endX, endY);
-	    Vector3D p3 = segPoint(startAngle + dAngleStart, zStart,
+	     Vector3D p3 = segPoint(frameStartAngle + dAngleStart, zStart,
 		    startWidth, startHeight, startX, startY);
 
-	    TextureDescription tex = tunnelTexturePalette[s
-		    .getPolyTextureIndices().get(pi)];
+	     TextureDescription tex = tunnelTexturePalette
+		     [s.getPolyTextureIndices().get(pi)];
 
-	    final FlickerLightType 	flt 	= s.getFlickerLightType();
-	    if (pi == lightPoly && flt != FlickerLightType.noLight) {
+	     final FlickerLightType 	flt 	= s.getFlickerLightType();
+	    /* if (pi == lightPoly && flt != FlickerLightType.noLight) {
 		try {
 		    final Texture t = (Texture) tex;
 		    @SuppressWarnings("unchecked")
@@ -170,10 +175,10 @@ public class TunnelSegment extends WorldObject {
 		} catch (Exception e) {
 		    e.printStackTrace();
 		}
-	    } else {
-	    }// No light
-
-	    m.addTriangles(Triangle.quad2Triangles(
+	     } else {
+	     }// No light
+*/
+	     m.addTriangles(Triangle.quad2Triangles(
 		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
 		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
 		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
@@ -182,91 +187,81 @@ public class TunnelSegment extends WorldObject {
 		    tex,
 		    RenderMode.DYNAMIC,
 		    new Vector3D[] {
-			new Vector3D(Math.cos(startAngle + dAngleStart),
-				-Math.sin(startAngle + dAngleStart), 0),
-			new Vector3D(Math.cos(endAngle + dAngleEnd), -Math
-				.sin(endAngle + dAngleEnd), 0),
-			new Vector3D(Math.cos(endAngle), -Math
-				.sin(endAngle), 0),
-			new Vector3D(Math.cos(startAngle), -Math
-				.sin(startAngle), 0)
-			    /*
-			    new Vector3D(Math.cos(startAngle), -Math
-				    .sin(startAngle), 0),
-			    new Vector3D(Math.cos(endAngle), -Math
-				    .sin(endAngle), 0),
-			    new Vector3D(Math.cos(endAngle + dAngleEnd), -Math
-				    .sin(endAngle + dAngleEnd), 0),
-			    new Vector3D(Math.cos(startAngle + dAngleStart),
-				    -Math.sin(startAngle + dAngleStart), 0)*/ },
+			new Vector3D(Math.cos(frameStartAngle + dAngleStart),
+				-Math.sin(frameStartAngle + dAngleStart), 0),
+			new Vector3D(Math.cos(frameEndAngle + dAngleEnd), -Math
+				.sin(frameEndAngle + dAngleEnd), 0),
+			new Vector3D(Math.cos(frameEndAngle), -Math
+				.sin(frameEndAngle), 0),
+			new Vector3D(Math.cos(frameStartAngle), -Math
+				.sin(frameStartAngle), 0) },
 		    0));
-	    startAngle += dAngleStart;
-	    endAngle += dAngleEnd;
-	}// for(polygons)
-	
-	if(s.isCutout()){
-	 // The slice quad
-	// INWARD
-	Vector3D p0 = segPoint(startAngle, zStart, startWidth, startHeight,
+	    frameStartAngle += dAngleStart;
+	    frameEndAngle += dAngleEnd;
+	 }// for(polygons)
+	 if(s.isCutout()){
+	  // The slice quad
+	  // INWARD
+	  Vector3D p0 = segPoint(frameStartAngle, zStart, startWidth, startHeight,
 		startX, startY);
-	Vector3D p1 = segPoint(endAngle, zEnd, endWidth, endHeight, endX, endY);
-	Vector3D p2 = segPoint(endAngle1, zEnd, 0, 0, endX, endY);
-	Vector3D p3 = segPoint(startAngle1, zStart, 0, 0,
+	  Vector3D p1 = segPoint(frameEndAngle, zEnd, endWidth, endHeight, endX, endY);
+	  Vector3D p2 = segPoint(frameEndAngle1, zEnd, 0, 0, endX, endY);
+	  Vector3D p3 = segPoint(frameStartAngle1, zStart, 0, 0,
+    		startX, startY);
+    	  m.addTriangles(Triangle.quad2Triangles(
+    		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
+    		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
+    		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
+    
+    		new double[] { 1, 1, 0, 0 },
+    		new double[] { 0, 1, 1, 0 },
+    		tunnelTexturePalette[s.getPolyTextureIndices().get(
+    			numPolygonsMinusOne)],
+    		RenderMode.DYNAMIC,
+    		new Vector3D[] {
+    			new Vector3D(Math.cos(frameStartAngle + dAngleStart),
+    				-Math.sin(frameStartAngle + dAngleStart), 0),
+    			new Vector3D(Math.cos(frameEndAngle + dAngleEnd), -Math
+    				.sin(frameEndAngle + dAngleEnd), 0),
+    			new Vector3D(Math.cos(frameEndAngle), -Math
+    				.sin(frameEndAngle), 0),
+    			new Vector3D(Math.cos(frameStartAngle), -Math
+    				.sin(frameStartAngle), 0)}, 0));
+    	  // OUTWARD
+    	  p3 = segPoint(frameStartAngle1, zStart, startWidth, startHeight,
+    		startX, startY);
+    	  p2 = segPoint(frameEndAngle1, zEnd, endWidth, endHeight, endX, endY);
+    	  p1 = segPoint(frameEndAngle1, zEnd, 0, 0, endX, endY);
+    	  p0 = segPoint(frameStartAngle1, zStart, 0, 0,
+    		startX, startY);
+    	  m.addTriangles(Triangle.quad2Triangles(
+    		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
+    		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
+    		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
+    
+    		new double[] { 1, 1, 0, 0 },
+    		new double[] { 0, 1, 1, 0 },
+    		tunnelTexturePalette[s.getPolyTextureIndices().get(
+    			numPolygonsMinusOne)],
+    		RenderMode.DYNAMIC,
+    		new Vector3D[] {
+    			new Vector3D(Math.cos(frameStartAngle + dAngleStart),
+    				-Math.sin(frameStartAngle + dAngleStart), 0),
+    			new Vector3D(Math.cos(frameEndAngle + dAngleEnd), -Math
+    				.sin(frameEndAngle + dAngleEnd), 0),
+    			new Vector3D(Math.cos(frameEndAngle), -Math
+    				.sin(frameEndAngle), 0),
+    			new Vector3D(Math.cos(frameStartAngle), -Math
+    				.sin(frameStartAngle), 0) }, 0));
+	 }else{
+	  // The slice quad
+	  Vector3D p0 = segPoint(frameStartAngle, zStart, startWidth, startHeight,
 		startX, startY);
-	m.addTriangles(Triangle.quad2Triangles(
-		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
-		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
-		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
-
-		new double[] { 1, 1, 0, 0 },
-		new double[] { 0, 1, 1, 0 },
-		tunnelTexturePalette[s.getPolyTextureIndices().get(
-			numPolygonsMinusOne)],
-		RenderMode.DYNAMIC,
-		new Vector3D[] {
-			new Vector3D(Math.cos(startAngle + dAngleStart),
-				-Math.sin(startAngle + dAngleStart), 0),
-			new Vector3D(Math.cos(endAngle + dAngleEnd), -Math
-				.sin(endAngle + dAngleEnd), 0),
-			new Vector3D(Math.cos(endAngle), -Math
-				.sin(endAngle), 0),
-			new Vector3D(Math.cos(startAngle), -Math
-				.sin(startAngle), 0)}, 0));
-	// OUTWARD
-	 p3 = segPoint(startAngle1, zStart, startWidth, startHeight,
+	  Vector3D p1 = segPoint(frameEndAngle, zEnd, endWidth, endHeight, endX, endY);
+	  Vector3D p2 = segPoint(frameEndAngle1, zEnd, endWidth, endHeight, endX, endY);
+	  Vector3D p3 = segPoint(frameStartAngle1, zStart, startWidth, startHeight,
 		startX, startY);
-	 p2 = segPoint(endAngle1, zEnd, endWidth, endHeight, endX, endY);
-	 p1 = segPoint(endAngle1, zEnd, 0, 0, endX, endY);
-	 p0 = segPoint(startAngle1, zStart, 0, 0,
-		startX, startY);
-	m.addTriangles(Triangle.quad2Triangles(
-		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
-		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
-		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
-
-		new double[] { 1, 1, 0, 0 },
-		new double[] { 0, 1, 1, 0 },
-		tunnelTexturePalette[s.getPolyTextureIndices().get(
-			numPolygonsMinusOne)],
-		RenderMode.DYNAMIC,
-		new Vector3D[] {
-			new Vector3D(Math.cos(startAngle + dAngleStart),
-				-Math.sin(startAngle + dAngleStart), 0),
-			new Vector3D(Math.cos(endAngle + dAngleEnd), -Math
-				.sin(endAngle + dAngleEnd), 0),
-			new Vector3D(Math.cos(endAngle), -Math
-				.sin(endAngle), 0),
-			new Vector3D(Math.cos(startAngle), -Math
-				.sin(startAngle), 0) }, 0));
-	}else{
-	// The slice quad
-	Vector3D p0 = segPoint(startAngle, zStart, startWidth, startHeight,
-		startX, startY);
-	Vector3D p1 = segPoint(endAngle, zEnd, endWidth, endHeight, endX, endY);
-	Vector3D p2 = segPoint(endAngle1, zEnd, endWidth, endHeight, endX, endY);
-	Vector3D p3 = segPoint(startAngle1, zStart, startWidth, startHeight,
-		startX, startY);
-	m.addTriangles(Triangle.quad2Triangles(
+	  m.addTriangles(Triangle.quad2Triangles(
 		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
 		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
 		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
@@ -277,16 +272,19 @@ public class TunnelSegment extends WorldObject {
 			numPolygonsMinusOne)],
 		RenderMode.DYNAMIC,
 		new Vector3D[] {
-			new Vector3D(Math.cos(startAngle + dAngleStart),
-				-Math.sin(startAngle + dAngleStart), 0),
-			new Vector3D(Math.cos(endAngle + dAngleEnd), -Math
-				.sin(endAngle + dAngleEnd), 0),
-			new Vector3D(Math.cos(endAngle), -Math
-				.sin(endAngle), 0),
-			new Vector3D(Math.cos(startAngle), -Math
-				.sin(startAngle), 0) }, 0));
-	}//end !cutout
-	return m.finalizeModel();
+			new Vector3D(Math.cos(frameStartAngle + dAngleStart),
+				-Math.sin(frameStartAngle + dAngleStart), 0),
+			new Vector3D(Math.cos(frameEndAngle + dAngleEnd), -Math
+				.sin(frameEndAngle + dAngleEnd), 0),
+			new Vector3D(Math.cos(frameEndAngle), -Math
+				.sin(frameEndAngle), 0),
+			new Vector3D(Math.cos(frameStartAngle), -Math
+				.sin(frameStartAngle), 0) }, 0));
+	 }//end !cutout
+	 //if(numAnimFrames!=1)//Push frame if animated.
+	     mainModel.addFrame(m);
+	}//end for(frames)
+	return mainModel.finalizeModel();
     }//end createModel()
 
     private static Vector3D segPoint(double angle, double z, double w,

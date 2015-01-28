@@ -398,7 +398,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    new double[] { 0, tunnelDia / 2., 0 }, false);
 	    if(rotate){
 		bc.addBehavior(new RotatingObjectBehavior(heading, heading, top,
-			    (int)rotPeriod, Math.PI+Math.PI / 2));
+			    (int)(rotPeriod*1000.), Math.PI+Math.PI / 2));
 		bc.setTop(top);
 	    }else
 		bc.setTop(new Rotation(heading,Math.PI * 2).applyTo(top));

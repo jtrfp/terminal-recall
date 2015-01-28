@@ -27,9 +27,17 @@ public class RotatingObjectBehavior extends Behavior
 	private final Vector3D rotationAxisTop,originalHeading,originalTop;
 	
 	public RotatingObjectBehavior(Vector3D rotationAxisTop, Vector3D originalHeading, Vector3D originalTop, int periodLengthMsec, double phaseShift)
-		{
+		{//TODO: Coding style, cleanup
+	    	final boolean reverse = periodLengthMsec < 0;
+	    	if(reverse)
+	    	    periodLengthMsec*=-1;
 		seq=new Sequencer(periodLengthMsec,2,true);
-		angleAnimator= new AttribAnimator(angle,seq,new double [] {0+phaseShift,2.*Math.PI+phaseShift},false);
+		final double [] rotationRange = 
+			reverse?
+			    new double [] {2.*Math.PI+phaseShift,0+phaseShift}
+			:
+			    new double [] {0+phaseShift,2.*Math.PI+phaseShift};
+		angleAnimator= new AttribAnimator(angle,seq,rotationRange,false);
 		this.rotationAxisTop=rotationAxisTop;
 		this.originalHeading=originalHeading;
 		this.originalTop=originalTop;

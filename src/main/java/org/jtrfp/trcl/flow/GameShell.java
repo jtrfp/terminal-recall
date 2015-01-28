@@ -88,28 +88,32 @@ public class GameShell {
 	tr.abortCurrentGame();
     }
     
-    private void handleLoadFailureException(Throwable e){
-	while(e instanceof RuntimeException || e instanceof ExecutionException)
-	    if(e.getCause()!=null)e=e.getCause();
+    private void handleLoadFailureException(Throwable th){
+	assert th!=null;
+	while(th instanceof RuntimeException || th instanceof ExecutionException)
+	    if(th.getCause()!=null)th=th.getCause();
 	    else break;
 	StringBuilder sb = new StringBuilder();
-	    if(e instanceof FileNotFoundException){
+	    if(th instanceof FileNotFoundException){
 		sb.append("Could not load file from any of the registered PODs.\n");
 		sb.append("Ensure that the necessary PODs are registered in the File->Configure menu.\n");
-	    }else if(e instanceof FileLoadException){
+	    }else if(th instanceof FileLoadException){
 		sb.append("File was found but could not be loaded, possibly by parsing/formatting error.\n");
-	    }else if(e instanceof UnrecognizedFormatException){
+	    }else if(th instanceof UnrecognizedFormatException){
 		sb.append("File was found but could not be loaded to the LVL format being unrecognized. (parse error)\n");
-	    }else if(e instanceof IllegalAccessException){
+	    }else if(th instanceof IllegalAccessException){
 		sb.append("Check disk permissions for registered PODs.\n");
-	    }else if(e instanceof IOException){
+	    }else if(th instanceof IOException){
 		sb.append("An undocumented IO failure has occurred..\n");
-	    }if(e!=null)throwable2StringBuilder(e,sb);
+	    }if(th!=null)throwable2StringBuilder(th,sb);
 	    JOptionPane.showMessageDialog(tr.getRootWindow(), new JTextArea(sb.toString()), "File Load Failure", JOptionPane.ERROR_MESSAGE);
+	    throw new RuntimeException(th);
     }//end handleLoadFailureException(...)
     
     private void throwable2StringBuilder(Throwable e, StringBuilder sb){
-	sb.append(e.getClass().getName()+"\n");
+	assert e!=null;
+	assert sb!=null;
+	sb.append(e.getClass().getName()+" "+e.getLocalizedMessage()+"\n");
 	final StackTraceElement [] stackTraceElements = e.getStackTrace();
 	for(StackTraceElement ste:stackTraceElements)
 	    sb.append("\tat "+ste.getClassName()+"."+ste.getMethodName()+"("+ste.getFileName()+":"+ste.getLineNumber()+")\n");

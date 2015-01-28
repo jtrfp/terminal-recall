@@ -129,11 +129,14 @@ public abstract class NAVObjective {
 			    }
 		    };//end new NAVObjective tunnelEntrance
 		   //tunnelEntrance.setNavObjectiveToRemove(enterObjective,true);
+		    final WorldObject tunnelEntranceObject = teo;
 		    currentTunnel.addTunnelEntryListener(new TunnelEntryListener(){
 			@Override
 			public void notifyTunnelEntered(Tunnel tunnel) {
-			    tr.getGame().getCurrentMission().removeNAVObjective(enterObjective);
-			    tunnel.removeTunnelEntryListener(this);
+			    if(tr.getGame().getCurrentMission().getRemainingNAVObjectives().get(0).getTarget()==tunnelEntranceObject){
+				tr.getGame().getCurrentMission().removeNAVObjective(enterObjective);
+				tunnel.removeTunnelEntryListener(this);
+			    }
 			}});
 		    indexedNAVObjectiveList.add(enterObjective);
 		    final TunnelExitObject tunnelExit = currentTunnel.getExitObject();

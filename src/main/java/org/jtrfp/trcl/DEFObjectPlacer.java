@@ -107,7 +107,8 @@ public class DEFObjectPlacer implements ObjectPlacer{
 					catch(MathArithmeticException e){e.printStackTrace();}
 				    target.add(ruin);
 				}//end if(groundStaticRuin)
-				try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
+				if(pl.getRoll()!=0||pl.getPitch()!=0||pl.getYaw()!=0)//Only set if not 0,0,0
+				 try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
 				catch(MathArithmeticException e){e.printStackTrace();}
 				if(headingOverride!=null){
 				    final double [] headingArray = obj.getHeadingArray();

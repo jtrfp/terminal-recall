@@ -23,6 +23,8 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 
     public Sprite2D(TR tr, double z, double width, double height, TextureDescription tex, boolean useAlpha) {
 	super(tr);
+	if(tex==null)
+	    throw new NullPointerException("Supplied texture intolerably null.");
 	final Model m = new Model(false,tr);
 	Triangle [] tris = Triangle.quad2Triangles(
 		new double[]{-width/2,width/2,width/2,-width/2}, 

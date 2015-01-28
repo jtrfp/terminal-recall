@@ -110,15 +110,15 @@ public class TunnelSegment extends WorldObject {
 	final double[] u=new double[] { 1, 1, 0, 0 };
 	final double[] v=new double[] { 0, 1, 1, 0 };
 	
-	final double rotPeriod = (1000.*32768.)/(double)s.getRotationSpeed();
+	double rotPeriod = (1000.*32768.)/(double)s.getRotationSpeed();
+	final boolean reverseDirection = rotPeriod<0;
+	if(reverseDirection)rotPeriod*=-1;
 	final int NUM_FRAMES_IF_ANIMATED=30;
 	int numAnimFrames = Double.isInfinite(rotPeriod)?1:NUM_FRAMES_IF_ANIMATED;
 	if(numAnimFrames!=1)
-	    mainModel.setFrameDelayInMillis((int)(rotPeriod/(numAnimFrames)));//TODO: *2 is a kludge
-	final double ANIMATION_DELTA_RADIANS = -(2 * Math.PI) / (double)numAnimFrames;
-	//final double ANIMATION_DELTA_RADIANS = 0; //TODO Remove
+	    mainModel.setFrameDelayInMillis((int)(rotPeriod/(numAnimFrames)));
+	final double ANIMATION_DELTA_RADIANS = (reverseDirection?1:-1)*(2 * Math.PI) / (double)numAnimFrames;
 	for(int frameIndex=0; frameIndex<numAnimFrames; frameIndex++){
-	 //final Model m = numAnimFrames==1?mainModel:new Model(false,tr);
 	 final Model m = new Model(false,tr);
 	 m.setDebugName("TunnelSegment frame "+frameIndex+" of "+numAnimFrames);
 	 final double frameAngleDeltaRadians = ANIMATION_DELTA_RADIANS * (double)frameIndex;

@@ -21,6 +21,10 @@ public final class Sequencer implements Controller{
 	private boolean debug=false;
 	
 	public Sequencer(int frameDelayMsec, int numFrames, boolean interpolate, boolean loop){
+	    if(frameDelayMsec<=0)
+		throw new IllegalArgumentException("frameDelayMsec intolerably negative or zero: "+frameDelayMsec);
+	    if(numFrames<=0)
+		throw new IllegalArgumentException("numFrames intolerably negative or zero: "+numFrames);
 	    this.numFrames=numFrames;
 	    this.frameDelayMsec=frameDelayMsec;
 	    this.interpolate=interpolate;
@@ -33,10 +37,12 @@ public final class Sequencer implements Controller{
 	
 	public double getCurrentFrame(){
 	    	final long time = System.currentTimeMillis()-timeOffset;
-	    	if(!loop&&time>numFrames*(frameDelayMsec-1))return numFrames-1;//Freeze on last frame/
+	    	assert time>=0;
+	    	if(!loop&&time>numFrames*(frameDelayMsec-1))
+	    	    return numFrames-1;//Freeze on last frame/
 		double result = (((double)time/(double)frameDelayMsec))%(double)numFrames;
 		double frame= interpolate?result:(int)result;
-		if(debug)System.out.println("getCurrentFrame() "+frame);
+		assert frame>=0&&!Double.isInfinite(frame)&&!Double.isNaN(frame);
 		return frame;
 	}//end getCurentFrame()
 
@@ -45,6 +51,7 @@ public final class Sequencer implements Controller{
 	}
 
 	public int getNumFrames() {
+	    assert numFrames>=0;
 	    return numFrames;
 	}
 

@@ -95,7 +95,8 @@ public class Model {
 	}
 	Controller c = controller;
 	if (c == null)
-	    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);
+	    {if(frameDelay==0)frameDelay=1;
+	    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);}
 	Triangle[][] tris = new Triangle[tLists.size()][];
 	for (int i = 0; i < tLists.size(); i++) {
 	    tris[i] = tLists.get(i).toArray(new Triangle[] {});
@@ -152,6 +153,8 @@ public class Model {
      *            the frameDelay to set
      */
     public void setFrameDelayInMillis(int frameDelayInMillis) {
+	if(frameDelayInMillis<=0)
+	    throw new IllegalArgumentException("Frame interval in millis is intolerably zero or negative: "+frameDelayInMillis);
 	this.frameDelay = frameDelayInMillis;
     }
 

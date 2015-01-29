@@ -144,4 +144,9 @@ public final class GLFrameBuffer {
 	gl.glBindFramebuffer(GL3.GL_DRAW_FRAMEBUFFER, 0);
 	return this;
     }
+
+    public GLFrameBuffer destroy() {
+	gl.glDeleteFramebuffers(1, IntBuffer.wrap(new int[]{getId()}));
+	return this;
+    }
 }//end GLFrameBuffer

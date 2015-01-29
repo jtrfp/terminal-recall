@@ -173,11 +173,9 @@ public final class TR{
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
 			try{trConfig[0].saveConfig();
-		    }catch(Exception e){JOptionPane.showMessageDialog(
-			    rootWindow,
+		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"
-				    + e.getLocalizedMessage()+"\n"+e.getClass().getName(),
-			    "File write failure", JOptionPane.ERROR_MESSAGE);
+				    + e.getLocalizedMessage()+"\n");
 				}//end catch(Exception)
 			}//end run()
 		 });

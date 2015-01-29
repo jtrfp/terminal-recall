@@ -306,6 +306,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case ceilingStatic:
     	    canTurn=false;
     	    mobile=false;
+    	    setTop(Vector3D.MINUS_J);
     	    anchoring=Anchoring.ceiling;
     	    break;
     	case bobAndAttack:{
@@ -382,7 +383,6 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	}
     else if(anchoring==Anchoring.ceiling){
 	addBehavior(new TerrainLocked().setLockedToCeiling(true));
-	setTop(Vector3D.MINUS_J);
     }
     else addBehavior(new CustomDeathBehavior(new Runnable(){
 	    @Override

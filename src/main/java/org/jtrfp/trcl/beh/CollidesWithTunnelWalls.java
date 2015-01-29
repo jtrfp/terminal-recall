@@ -30,6 +30,7 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
     private WeakReference<TunnelSegment> segmt;
     private double [] surfaceNormalVar;
     private final double [] pprtt = new double[]{0,0,0}, circleCenter = new double []{0,0,0};
+    private final double [] protrusionVector = new double[]{0,0,0};
     
     public CollidesWithTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
 	super();this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;
@@ -47,27 +48,21 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
 				{final Segment s = seg.getSegmentData();
 				final double segLen=seg.getSegmentLength();
 				final double [] start =segPos;
-				final double [] end = Vect3D.add(start,segLen,seg.getEndY(),-seg.getEndX(),new double[3]);//ZYX
-				final double [] tunnelSpineNoNorm=TR.twosComplimentSubtract(end, start,new double[3]);
-				final double [] tunnelSpineNorm=Vect3D.normalize(tunnelSpineNoNorm);
-				
-				final double depthDownSeg=pPos[0]-start[0];
+				final double depthDownSeg=Math.abs(pPos[0]-start[0]);
 				final double pctDownSeg=depthDownSeg/segLen;
-				//Vector3D circleCenter=
-				Vect3D.scalarMultiply(tunnelSpineNorm,TR.deltaRollover(pPos[0]-start[0]),circleCenter);
-				Vect3D.add(start,circleCenter,circleCenter);
-				//circleCenter = (new Vector3D(pPos[0],circleCenter[1],circleCenter[2]));
-				final double startWidth=TunnelSegment.getStartWidth(s);
+				circleCenter[0]=pPos[0];
+				circleCenter[1]=start[1]+(seg.getEndY()*pctDownSeg);
+				circleCenter[2]=start[2]-(seg.getEndX()*pctDownSeg);
+				final double startWidth =TunnelSegment.getStartWidth(s);
 				final double startHeight=TunnelSegment.getStartHeight(s);
-				final double endWidth=TunnelSegment.getEndWidth(s);
-				final double endHeight=TunnelSegment.getEndHeight(s);
+				final double endWidth   =TunnelSegment.getEndWidth(s);
+				final double endHeight  =TunnelSegment.getEndHeight(s);
 				// fudge-factor to ensure the player doesn't see the outside of the tunnel (due to clipping) before bouncing off.
 				final double widthHere=.9*(startWidth*(1.-pctDownSeg)+endWidth*pctDownSeg);
 				final double heightHere=.9*(startHeight*(1.-pctDownSeg)+endHeight*pctDownSeg);
-				//Parent position relative to tunnel
-				//final Vector3D pprtt = pPos.subtract(circleCenter);
 				Vect3D.subtract(pPos, circleCenter, pprtt);
-				final double protrusion =(pprtt[2]*pprtt[2])/(widthHere*widthHere)+(pprtt[1]*pprtt[1])/(heightHere*heightHere); 
+				final double protrusion =Math.sqrt((pprtt[2]*pprtt[2])/(widthHere*widthHere)+(pprtt[1]*pprtt[1])/(heightHere*heightHere)); 
+				
 				if(protrusion>1){
 					//Execute the "bounce"
 				    	final double [] oldPosition = Arrays.copyOf(pPos,3);

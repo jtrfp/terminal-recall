@@ -329,9 +329,6 @@ public class Game {
 	    MissionLevel[] levels = vox.getLevels();
 	    tr.getThreadManager().setPaused(false);
 	    while (getLevelIndex() < levels.length && getLevelIndex() != -1) {
-		System.out.println("Invoking JVM's garbage collector...");
-		TR.nuclearGC();
-		System.out.println("...Done.");
 		Mission.Result result = null;
 		final Mission mission = getCurrentMission();
 		if (mission == null)
@@ -371,7 +368,6 @@ public class Game {
 	abortCurrentMission();
 	cleanup();
 	tr.getGameShell().applyGFXState();
-	TR.nuclearGC();
     }
     
     private void cleanup() {
@@ -395,6 +391,7 @@ public class Game {
 	    tr.getResourceManager().getExplosionFactory().deactivate();
 	if(player!=null)
 	 tr.getWorld().remove(player);
+	TR.nuclearGC();
     }
 
     public void abortCurrentMission(){

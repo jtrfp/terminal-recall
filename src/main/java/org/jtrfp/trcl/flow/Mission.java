@@ -231,6 +231,8 @@ public class Mission {
 			.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");
 	    }
 	}// end if(containsKey)
+	System.out.println("Invoking JVM's garbage collector...");
+	TR.nuclearGC();
 	System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
 	// Abort check

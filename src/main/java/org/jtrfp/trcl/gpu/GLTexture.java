@@ -195,7 +195,7 @@ public final class GLTexture {
     public void delete() {
 	if(isDeleted())
 	    return;
-	gl.glBindTexture(bindingTarget, textureID.get());
+	gl.glBindTexture(bindingTarget, getId());
 	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID.get() }));
 	deleted=true;
     }
@@ -859,5 +859,9 @@ public final class GLTexture {
 	    int numericalFormat, ByteBuffer pixels) {
 	gl.glTexImage2D(GL3.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
 	return this;
+    }
+
+    public int getId() {
+	return textureID.get();
     }
 }// end GLTexture

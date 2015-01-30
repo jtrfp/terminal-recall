@@ -311,8 +311,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		    return null;
 		}});
 	    if(taskIdx>=rowTasks.length){
-		for(TRFutureTask<Void> t:rowTasks)
-		    t.get();
+		/*for(TRFutureTask<Void> t:rowTasks)
+		    t.get();*/
 		taskIdx=0;
 	    }//end if(taskIdx>=numRowTasks)
 	}// end for(gZ)

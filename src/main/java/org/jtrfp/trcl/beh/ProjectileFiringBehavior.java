@@ -57,7 +57,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     }//end _tick
     
     public ProjectileFiringBehavior requestFire(){
-	pendingFiring=true;
+	if(System.currentTimeMillis()>timeWhenNextFiringPermittedMillis)
+	 pendingFiring=true;
 	return this;
     }
     

@@ -14,12 +14,12 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
@@ -262,6 +262,18 @@ public class Texture implements TextureDescription {
 		new SubtextureVL(stw, subtextureID).setComponentAt(codeIdx, 0, (byte)(codeIdx%256));//TODO: Could make a lot of garbage.
             }//end setCodeAt()
 	 }).get();//end gpuMemThread
+	/*
+	for(int subtextureY=0; subtextureY<diameterInSubtextures; subtextureY++){
+	    for(int subtextureX=0; subtextureX<diameterInSubtextures; subtextureX++){
+		final int subTextureIdx	  = subtextureX + subtextureY * diameterInSubtextures;
+		for(int block256=0; block256<6; block256++){
+		    final int codeStartY=subtextureY*SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		    final int codeStartX=subtextureX*SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+		    
+		}
+	    }//end for(subtextureX)
+	}//end for(subtextureY)
+	*/
 	// Push texels to codebook
 	for(int codeY=0; codeY<diameterInCodes; codeY++){
 	    for(int codeX=0; codeX<diameterInCodes; codeX++){
@@ -276,8 +288,9 @@ public class Texture implements TextureDescription {
 		setCodebookTexelsAt(codeX,codeY,diameterInCodes, globalCodeIndex);
 		}//end for(codeX)
 	}//end for(codeY)
+	flushCodeblock256();
 	return null;
-	}
+	}//end threadPool call()
 	    private void setCodebookTexelsAt(int codeX, int codeY,
 		    int diameterInCodes, int globalCodeIndex) {
 		final int coord[] = new int[]{codeX,codeY};
@@ -320,13 +333,30 @@ public class Texture implements TextureDescription {
 		    }// end applyRow
 		};
 		try {
-		    cbm.setRGBA(globalCodeIndex, rw);
+		    registerRGBAToBlock256(globalCodeIndex, rw);
 		} catch (ArrayIndexOutOfBoundsException e) {
 		    throw new RuntimeException("this="
 			    + Texture.this.toString(), e);
 		}//end catch(ArrayIndexOutOfBoundsException)
 	    }// end setCodebookTexelsAt
-	}).get();// end pool thread
+	    private final Map<Integer,RasterRowWriter[]>block256Map = new HashMap<Integer,RasterRowWriter[]>();
+	    private final void registerRGBAToBlock256(int globalCodeIndex, RasterRowWriter rw){
+		RasterRowWriter[] writers = getBlock256(globalCodeIndex);
+		writers[globalCodeIndex%256]=rw;
+	    }//end registerRGBAToBlock256
+	    private final RasterRowWriter[] getBlock256(int globalCodeIndex){
+		final int key = globalCodeIndex/256;
+		RasterRowWriter [] writers = block256Map.get(key);
+		if(writers==null)
+		   block256Map.put(key,writers = new RasterRowWriter[256]);
+		return writers;
+	    }//end getBlock256(...)
+	    private final void flushCodeblock256(){
+		for(Entry<Integer,RasterRowWriter[]> entry:block256Map.entrySet()){
+		    cbm.setRGBABlock256(entry.getKey(),entry.getValue());
+		}//end for(entries)
+	    }//end flushCodeblock256()
+	});// end pool thread
     }//end vqCompress(...)
 
     private void calulateAverageColor(RasterizedBlockVectorList rbvl) {

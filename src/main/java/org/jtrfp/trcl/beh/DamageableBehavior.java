@@ -137,4 +137,7 @@ public class DamageableBehavior extends Behavior{
 	    this.acceptsProjectileDamage = acceptsProjectileDamage;
 	    return this;
 	}
+	public void electrocutionDamage(int dmgAmt) {
+	    shearDamage(dmgAmt);//Temporarily reroute to shearDamage()
+	}
     }//end DamageableBehavior

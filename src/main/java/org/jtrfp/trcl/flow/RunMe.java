@@ -27,7 +27,7 @@ public class RunMe{
 		System.out.println(
 				"\t\t\t***TERMINAL RECALL***\n"+
 				"	An unofficial enhancement engine for Terminal Velocity and Fury3.\n"+
-				"	Copyright (c) 2012-2014 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
+				"	Copyright (c) 2012-2015 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
 				"	Part of the Java Terminal Reality File Parsers Project.\n\n"+
 				"		This program is free software; you can redistribute it and/or modify\n"+
 				"	it under the terms of the GNU General Public License as published by\n"+
@@ -58,10 +58,11 @@ public class RunMe{
 	    String executable = new File("RunMe.jar").exists() ? "-jar RunMe.jar"
 		    : "-cp " + System.getProperty("java.class.path")
 			    + " org.jtrfp.trcl.flow.RunMe";
-	    String cmd = "java -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true -Dcom.sun.management.jmxremote "
+	    String cmd = "java -server -Xmx1024M -Dorg.jtrfp.trcl.bypassConfigure=true -Dcom.sun.management.jmxremote "
 		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
-		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m ";
+		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m "
+		    + "-XX:+UseCompressedOops -XX:+UseLargePages ";
 	    if(useAssertions)
 		cmd+="-ea ";
 	    for (Entry<Object,Object> property:System.getProperties().entrySet()){

@@ -176,6 +176,7 @@ public class VQCodebookManager {
 		}//end code256
 		else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
 	    }//end for(tileUpdates)
+	    gpu.defaultTexture();
 	    tileUpdates.clear();
 	/*final long currTime = System.currentTimeMillis();
 	while(!staleCodePages.isEmpty()){

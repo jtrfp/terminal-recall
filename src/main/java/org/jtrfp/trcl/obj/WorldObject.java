@@ -366,11 +366,15 @@ public class WorldObject implements PositionedRenderable {
 	    rMd[8] = aX[2];
 	    rMd[9] = aY[2];
 	    rMd[10] = aZ[2];
-
-	    tMd[3] = position[0]+modelOffset[0];
-	    tMd[7] = position[1]+modelOffset[1];
-	    tMd[11] = position[2]+modelOffset[2];
-	    
+	    if(isVisible() && isActive()){
+		tMd[3] = position[0]+modelOffset[0];
+		tMd[7] = position[1]+modelOffset[1];
+		tMd[11]= position[2]+modelOffset[2];
+	    }else{
+		tMd[3] = Double.POSITIVE_INFINITY;
+		tMd[7] = Double.POSITIVE_INFINITY;
+		tMd[11]= Double.POSITIVE_INFINITY;
+	    }//end (!visible)
 	    if (translate()) {
 		Mat4x4.mul(tMd, rMd, rotTransM);
 	    } else {
@@ -399,9 +403,10 @@ public class WorldObject implements PositionedRenderable {
      *            the visible to set
      */
     public void setVisible(boolean visible) {
+	if(this.visible!=visible)
+	    needToRecalcMatrix=true;
 	if(!this.visible && visible){
 	    this.visible = true;
-	    needToRecalcMatrix=true;
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
@@ -486,6 +491,7 @@ public class WorldObject implements PositionedRenderable {
     }
 
     public Vector3D getHeading() {
+	assert !(top[0]==0 && top[1]==0 && top[2]==0);
 	return new Vector3D(heading);
     }
 
@@ -493,6 +499,7 @@ public class WorldObject implements PositionedRenderable {
      * @return the top
      */
     public final Vector3D getTop() {
+	assert !(top[0]==0 && top[1]==0 && top[2]==0);
 	return new Vector3D(top);
     }
 
@@ -534,11 +541,11 @@ public class WorldObject implements PositionedRenderable {
 	}//end if(grid!=null)
 	containingGrid=null;
 	// Send it to the land of wind and ghosts.
-	final double[] pos = getPosition();
+	//final double[] pos = getPosition();
 	setActive(false);
-	pos[0] = Double.NEGATIVE_INFINITY;
-	pos[1] = Double.NEGATIVE_INFINITY;
-	pos[2] = Double.NEGATIVE_INFINITY;
+	//pos[0] = Double.NEGATIVE_INFINITY;
+	//pos[1] = Double.NEGATIVE_INFINITY;
+	//pos[2] = Double.NEGATIVE_INFINITY;
 	notifyPositionChange();
     }
 
@@ -573,9 +580,10 @@ public class WorldObject implements PositionedRenderable {
      *            the active to set
      */
     public void setActive(boolean active) {
+	if(this.active!=active)
+	    needToRecalcMatrix=true;
 	if(!this.active && active && isVisible()){
 	    this.active=true;
-	    needToRecalcMatrix=true;
 	    tr.renderer.get().temporarilyMakeImmediatelyVisible(this);
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override

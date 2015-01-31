@@ -48,9 +48,9 @@ import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.BarrierCube;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.obj.ForceField;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectSystem;
-import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -534,15 +534,12 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(wo);
 	    break;
 	case forceField: {// TODO
-	    m = Model.buildCube(tunnelDia, tunnelDia, wallThickness,
-		    tunnelTexturePalette[s.getObstacleTextureIndex()],
-		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
-		    1, 1, tr);
-	    wo = new WorldObject(world.getTr(), m);
-	    wo.setPosition(wPos.toArray());
-	    wo.setHeading(heading);
-	    wo.setTop(top);
-	    add(wo);
+	    //ELECTRI[0-3].RAW 
+	    final ForceField ff = new ForceField(tr,(int)tunnelDia,(int)wallThickness);
+	    ff.setPosition(wPos.toArray());
+	    ff.setHeading(heading);
+	    ff.setTop(top);
+	    add(ff);
 	    break;
 	}
 	// Invisible walls, as far as I know, are never used.

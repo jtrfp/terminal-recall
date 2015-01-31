@@ -59,4 +59,19 @@ public final class Sequencer implements Controller{
 	public void setDebugMode(boolean b) {
 	    debug=b; 
 	}
+
+	/**
+	 * @return the timeOffset
+	 */
+	public long getTimeOffset() {
+	    return timeOffset;
+	}
+
+	/**
+	 * @param timeOffset the timeOffset to set
+	 */
+	public Sequencer setTimeOffset(long timeOffset) {
+	    this.timeOffset = timeOffset;
+	    return this;
+	}
 }//end Sequencer

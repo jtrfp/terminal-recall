@@ -215,10 +215,16 @@ public class Model {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, u0, v0, u1, v1,
 		false, tr);
     }
-
+    
     public static Model buildCube(double w, double h, double d,
 	    TextureDescription tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr) {
+	return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,hasAlpha,true,tr);
+    }
+
+    public static Model buildCube(double w, double h, double d,
+	    TextureDescription tunnelTexturePalette, double[] origin,
+	    double u0, double v0, double u1, double v1, boolean hasAlpha, boolean hasNorm, TR tr) {
 	Model m = new Model(false, tr);
 	// Front
 	m.addTriangles(Triangle.quad2Triangles(
@@ -229,7 +235,7 @@ public class Model {
 			{ 0 - origin[2], 0 - origin[2], 0 - origin[2],0 - origin[2] },
 		new double[] { u0, u1, u1, u0 },
 		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
-		RenderMode.STATIC, hasAlpha, Vector3D.MINUS_K,"Model.buildCube.front"));
+		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.MINUS_K:Vector3D.ZERO,"Model.buildCube.front"));
 	// Left
 	m.addTriangles(Triangle.quad2Triangles(new double[] { 0 - origin[0],
 		0 - origin[0], 0 - origin[0], 0 - origin[0] }, new double[] {
@@ -239,7 +245,7 @@ public class Model {
 
 		new double[] { u0, u1, u1, u0 },
 		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
-		RenderMode.STATIC, hasAlpha, Vector3D.MINUS_I,"Model.buildCube.left"));
+		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.MINUS_I:Vector3D.ZERO,"Model.buildCube.left"));
 	// Right
 	m.addTriangles(Triangle.quad2Triangles(new double[] { w - origin[0],
 		w - origin[0], w - origin[0], w - origin[0] }, new double[] {
@@ -249,7 +255,7 @@ public class Model {
 
 		new double[] { u0, u1, u1, u0 },
 		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
-		RenderMode.STATIC, hasAlpha, Vector3D.PLUS_I,"Model.buildCube.right"));
+		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.PLUS_I:Vector3D.ZERO,"Model.buildCube.right"));
 	// Back
 	m.addTriangles(Triangle.quad2Triangles(new double[] { 0 - origin[0],
 		w - origin[0], w - origin[0], 0 - origin[0] }, new double[] {
@@ -259,7 +265,7 @@ public class Model {
 
 		new double[] { u0, u1, u1, u0 },
 		new double[] { v0, v0, v1, v1 }, tunnelTexturePalette,
-		RenderMode.STATIC, hasAlpha, Vector3D.PLUS_K,"Model.buildCube.back"));
+		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.PLUS_K:Vector3D.ZERO,"Model.buildCube.back"));
 	m.finalizeModel();
 	return m;
     }// end buildCube

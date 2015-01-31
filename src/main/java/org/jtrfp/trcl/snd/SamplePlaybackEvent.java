@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
@@ -142,7 +143,9 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    final double [] work = new double[3];
 	    final double [] destPos = dest.getPosition();
 	    Vect3D.subtract(source, destPos, work);
-	    Rotation rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);
+	    Rotation rot;
+	    try{rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);}
+	    catch(MathArithmeticException e){rot = new Rotation(Vector3D.PLUS_K, 0);}//Default if given weird top/heading.
 	    final Vector3D localDir = rot.applyTo(new Vector3D(work)).normalize();
 	    final double pFactor = (localDir.getX()+1)/2;
 	    assert !Vect3D.isAnyNaN(source);

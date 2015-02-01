@@ -449,6 +449,8 @@ public class RenderList {
 	renderer.getVertexTextureIDTexture().bindToTextureUnit(7,gl);
 	renderer.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	renderer.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
+	
+	deferredProgram.getUniform("bypassAlpha").setui(!renderer.getCamera().isFogEnabled()?1:0);
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);
 	//Cleanup

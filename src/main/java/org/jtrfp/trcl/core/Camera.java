@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Component;
+import java.beans.PropertyChangeSupport;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -29,12 +30,17 @@ import org.jtrfp.trcl.obj.VisibleEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class Camera extends WorldObject implements VisibleEverywhere{
+    	//// PROPERTIES
+    	public static final String FOG_ENABLED = "fogEnabled";
+    
 	private volatile  RealMatrix completeMatrix;
 	private volatile  double viewDepth;
 	private volatile  RealMatrix projectionMatrix;
 	private final	  GPU gpu;
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix;
+	private boolean	  fogEnabled = true;
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public Camera(GPU gpu) {
 	super(gpu.getTr());
@@ -185,4 +191,20 @@ public class Camera extends WorldObject implements VisibleEverywhere{
 	    }//end for(16)
 	    return result;
 	}
-	}//end Camera
+
+	/**
+	 * @return the fogEnabled
+	 */
+	public boolean isFogEnabled() {
+	    return fogEnabled;
+	}
+
+	/**
+	 * @param fogEnabled the fogEnabled to set
+	 */
+	public Camera setFogEnabled(boolean fogEnabled) {
+	    pcs.firePropertyChange(FOG_ENABLED, this.fogEnabled, fogEnabled);
+	    this.fogEnabled = fogEnabled;
+	    return this;
+	}
+}//end Camera

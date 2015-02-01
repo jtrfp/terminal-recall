@@ -33,10 +33,12 @@ public class RootWindow extends JFrame {
 	    SwingUtilities.invokeAndWait(new Runnable() {
 		@Override
 		public void run() {
+		    canvas.setFocusTraversalKeysEnabled(false);
 		    getContentPane().add(canvas);
 		    setVisible(true);
 		    setSize(800, 600);
 		    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		    setFocusTraversalKeysEnabled(false);
 		}
 	    });
 	} catch (Exception e) {

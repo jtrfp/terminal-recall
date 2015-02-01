@@ -44,6 +44,9 @@ import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.tools.Util;
 
 public final class TR{
+    	//// BEAN PROPERTIES
+    	public static final String	GAME				="game";
+    
 	public static final double 	unitCircle			=65535;
 	public static final double 	crossPlatformScalar		=16;//Shrinks everything so that we can use floats instead of ints
 	public static final double 	mapSquareSize			=Math.pow(2, 20)/crossPlatformScalar;
@@ -177,6 +180,7 @@ public final class TR{
 			    "Failed to write the config file.\n"
 				    + e.getLocalizedMessage()+"\n");
 				}//end catch(Exception)
+			System.err.println("Great work, Guys!");
 			}//end run()
 		 });
 		}//end constructor
@@ -441,4 +445,11 @@ public final class TR{
 	    game.abort();
 	setGame(null);
     }// end abortCurrentGame()
+
+    /**
+     * @return the menuSystem
+     */
+    public MenuSystem getMenuSystem() {
+        return menuSystem;
+    }
 }//end TR

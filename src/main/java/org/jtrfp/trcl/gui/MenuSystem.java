@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -34,6 +35,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.EngineTests;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.mem.GPUMemDump;
 
 import com.jogamp.newt.event.KeyEvent;
@@ -50,8 +52,9 @@ public class MenuSystem {
 	final RootWindow rw = tr.getRootWindow();
 	final JMenu file = new JMenu("File"), 
 		    gameMenu = new JMenu("Game"),
-		    debugMenu = new JMenu("Debug");
-	// And menus to menubar
+		    debugMenu = new JMenu("Debug"),
+		    viewMenu = new JMenu("View");
+	// And items to menus
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
 	final JMenuItem game_new = new JMenuItem("New Game");
@@ -65,9 +68,11 @@ public class MenuSystem {
 	final JMenuItem codePageDump = new JMenuItem("Dump Code Pages");
 	final JMenuItem debugSinglet = new JMenuItem("Singlet (fill)");
 	final JMenuItem debugDQ = new JMenuItem("Depth Queue Test");
+	final JMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
+	view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
 	
 	fbsw = new FramebufferStateWindow(tr);
 	configWindow = new ConfigWindow(tr.getTrConfig());
@@ -111,6 +116,25 @@ public class MenuSystem {
 	    public void actionPerformed(ActionEvent evt) {
 		pauseAction.actionPerformed(evt);
 	    }});
+	
+	Action satelliteAction = new AbstractAction("SATELLITE_VIEW"){
+	    private static final long serialVersionUID = -6843605846847411702L;
+	    @Override
+	    public void actionPerformed(ActionEvent l) {
+		final Mission mission = tr.getGame().getCurrentMission();
+		mission.setSatelliteView(view_sat.isSelected());
+	    }};
+	    Action satelliteKeyAction = new AbstractAction("SATELLITE_VIEW_KEY"){
+		private static final long serialVersionUID = -6843605846847411702L;
+		@Override
+		public void actionPerformed(ActionEvent l) {
+		    if(view_sat.isEnabled())
+			view_sat.doClick();
+		}};
+	String satKey = "SATELLITE_KEY";
+	view_sat.addActionListener(satelliteAction);
+	view_sat.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0), satKey);
+	view_sat.getActionMap().put(satKey, satelliteKeyAction);
 	
 	String pauseKey = "PAUSE_KEY";
 	game_pause.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), pauseKey);
@@ -235,6 +259,8 @@ public class MenuSystem {
             debugMenu.add(debugDQ);
             debugMenu.add(gpuMemDump);
             debugMenu.add(codePageDump);
+            viewMenu.add(view_sat);
+            view_sat.setEnabled(false);
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -243,6 +269,7 @@ public class MenuSystem {
 		    mb.add(file);
 		    mb.add(gameMenu);
 		    mb.add(debugMenu);
+		    mb.add(viewMenu);
 		    rw.setVisible(true);
 		}});
 	}catch(Exception e){tr.showStopper(e);}
@@ -265,9 +292,11 @@ public class MenuSystem {
 	    }});
 	
 	IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
-	tr.addPropertyChangeListener("game", gameIP);
-	gameIP.addTargetPropertyChangeListener("paused", pausePCL);
-	gameIP.addTargetPropertyChangeListener("currentMission", new PropertyChangeListener(){
+	IndirectProperty<Mission>currentMissionIP = new IndirectProperty<Mission>();
+	tr.addPropertyChangeListener(TR.GAME, gameIP);
+	gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, currentMissionIP);
+	gameIP.addTargetPropertyChangeListener(Game.PAUSED, pausePCL);
+	gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent pc) {
 		game_start.setEnabled(pc.getNewValue()!=null && !tr.getGame().isInGameplay());
@@ -276,6 +305,31 @@ public class MenuSystem {
 	    @Override
 	    public void propertyChange(PropertyChangeEvent pc) {
 		game_start.setEnabled(pc.getNewValue()!=null && pc.getNewValue()==Boolean.FALSE);
+	    }});
+	currentMissionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getNewValue()==null){
+		    view_sat.setEnabled(false);
+		    return;
+		}//end if(null)
+		view_sat.setEnabled(evt.getNewValue() instanceof Mission.AboveGroundMode);
+	    }});
+	currentMissionIP.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getNewValue()==Boolean.TRUE)
+		    game_pause.setEnabled(false);
+		if(evt.getNewValue()==Boolean.FALSE && tr.getGame().getCurrentMission().getMissionMode() instanceof Mission.GameplayMode)
+		    game_pause.setEnabled(true);
+	    }});
+	gameIP.addTargetPropertyChangeListener(Game.PAUSED, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getNewValue()==Boolean.TRUE)
+		    view_sat.setEnabled(false);
+		else if(tr.getGame().getCurrentMission()!=null)
+		    view_sat.setEnabled(tr.getGame().getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode);
 	    }});
     }//end constructor
 }//end MenuSystem

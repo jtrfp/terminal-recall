@@ -29,6 +29,7 @@ uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform vec3			ambientLight;
 uniform vec3			sunColor;
 uniform vec3 			sunVector;
+uniform uint			bypassAlpha;
 
 noperspective in vec2	screenLoc;
 
@@ -313,5 +314,7 @@ if(color.a < ALPHA_THRESHOLD){
   }//end if(written)
  }//end if(visible)
 color.a = (color.a > ALPHA_THRESHOLD)?1:color.a;
+if(bypassAlpha!=0u)
+ color.a=1;
 fragColor		 	= color;
 }//end main()

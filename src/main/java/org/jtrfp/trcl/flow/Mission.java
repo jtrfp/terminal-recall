@@ -32,6 +32,8 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.MatchDirection;
+import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Camera;
@@ -59,6 +61,10 @@ import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Mission {
+    // PROPERTIES
+    public static final String MISSION_MODE = "missionMode";
+    public static final String SATELLITE_VIEW = "satelliteView";
+    
     private final TR 		tr;
     private final List<NAVObjective> 
     				navs	= new LinkedList<NAVObjective>();
@@ -85,9 +91,9 @@ public class Mission {
     private final Object	missionLock = new Object();
     private final Map<Integer,TunnelEntranceObject>
     				tunnelMap = new HashMap<Integer,TunnelEntranceObject>();
-    private boolean 		bossFight = false;
+    private boolean 		bossFight = false, satelliteView = false;
+    private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    //private TRFutureTask<Result>[]missionTask = new TRFutureTask[]{null};
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -113,6 +119,7 @@ public class Mission {
     }//end go()
 */
     public Result go() {
+	setMissionMode(new Mission.LoadingMode());
 	synchronized(missionLock){
 	synchronized(missionEnd){
 	    if(missionEnd[0]!=null)
@@ -263,7 +270,11 @@ public class Mission {
 	});
 	game.getUpfrontDisplay().removePersistentMessage();
 	tr.getThreadManager().setPaused(false);
-	if(showIntro)game.getBriefingScreen().briefingSequence(lvl);
+	if(showIntro){
+	    setMissionMode(new Mission.IntroMode());
+	    game.getBriefingScreen().briefingSequence(lvl);
+	}
+	setMissionMode(new Mission.AboveGroundMode());
 	getOverworldSystem().activate();
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
 	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
@@ -272,6 +283,7 @@ public class Mission {
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
 	game.getNavSystem()	.activate();
 	game.setDisplayMode(game.gameplayMode);
+	
 	game.getPlayer()	.setActive(true);
 	//Wait for mission end
 	synchronized(missionEnd){
@@ -279,8 +291,10 @@ public class Mission {
 		catch(InterruptedException e){break;}}}
 	//Completion summary
 	if(missionEnd[0]!=null)
-	    if(!missionEnd[0].isAbort())
-	     game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+	    if(!missionEnd[0].isAbort()){
+		setMissionMode(new Mission.MissionSummaryMode());
+		game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+	    }//end if(proper ending)
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -626,6 +640,7 @@ public class Mission {
 	final Game game = tr.getGame();
 	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
 	game.getCurrentMission().notifyTunnelFound(tunnel);
+	setMissionMode(new TunnelMode());
 	//Turn off overworld
 	overworldSystem.deactivate();
 	//Turn on tunnel
@@ -670,19 +685,6 @@ public class Mission {
 	*/
 	player.setActive(true);
     }//end enterTunnel()
-    /**
-     * @return the bossFight
-     */
-    public boolean isBossFight() {
-        return bossFight;
-    }
-    /**
-     * @param bossFight the bossFight to set
-     */
-    private void setBossFight(boolean bossFight) {
-	pcs.firePropertyChange("BossFight", this.bossFight, bossFight);
-        this.bossFight = bossFight;
-    }
     /**
      * @param listener
      * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
@@ -738,5 +740,87 @@ public class Mission {
     public void removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
 	pcs.removePropertyChangeListener(propertyName, listener);
+    }
+    
+    public static interface MissionMode{}
+    public static class LoadingMode implements MissionMode{}
+    
+    public static class BriefingMode implements MissionMode{}
+    public static class IntroMode extends BriefingMode{}
+    public static class EnemyIntroMode extends IntroMode{}
+    public static class PlanetIntroMode extends IntroMode{}
+    public static class MissionSummaryMode extends BriefingMode{}
+    
+    public static class GameplayMode implements MissionMode{}
+    public static class TunnelMode extends GameplayMode{}
+    public static class ChamberMode extends GameplayMode{}
+    public static class AboveGroundMode extends GameplayMode{}
+
+    /**
+     * @return the missionMode
+     */
+    public MissionMode getMissionMode() {
+        return missionMode;
+    }
+    /**
+     * @param missionMode the missionMode to set
+     */
+    public void setMissionMode(MissionMode missionMode) {
+	pcs.firePropertyChange(MISSION_MODE, this.missionMode, missionMode);
+        this.missionMode = missionMode;
+    }
+    /**
+     * @return the bossFight
+     */
+    public boolean isBossFight() {
+        return bossFight;
+    }
+    /**
+     * @param bossFight the bossFight to set
+     */
+    public void setBossFight(boolean bossFight) {
+	pcs.firePropertyChange("bossFight", this.bossFight, bossFight);
+        this.bossFight = bossFight;
+    }
+    public void setSatelliteView(boolean satelliteView) {
+	if(!(getMissionMode() instanceof AboveGroundMode)&&satelliteView)
+	    throw new IllegalArgumentException("Cannot activate satellite view while mission mode is "+getMissionMode().getClass().getSimpleName());
+	if(satelliteView && tr.getGame().isPaused())
+	    throw new IllegalArgumentException("Cannot activate satellite view while paused.");
+	pcs.firePropertyChange(SATELLITE_VIEW, this.satelliteView, satelliteView);
+	if(satelliteView!=this.satelliteView){
+	    final Game game =  tr.getGame();
+	    final Camera cam = tr.renderer.get().getCamera();
+	    if(satelliteView){//Switched on
+		tr.getThreadManager().setPaused(true);
+		game.getNavSystem().deactivate();
+		game.getHUDSystem().deactivate();
+		cam.setFogEnabled(false);
+		cam.probeForBehavior(MatchPosition.class).setEnable(false);
+		cam.probeForBehavior(MatchDirection.class).setEnable(false);
+		final Vector3D pPos = new Vector3D(game.getPlayer().getPosition());
+		final Vector3D pHeading = tr.getGame().getPlayer().getHeading();
+		cam.setPosition(new Vector3D(pPos.getX(),TR.mapSquareSize*25,pPos.getZ()));
+		cam.setHeading(Vector3D.MINUS_J);
+		cam.setTop(new Vector3D(pHeading.getX(),.0000000001,pHeading.getZ()).normalize());
+		tr.getGame().getSatDashboard().setVisible(true);
+	    }else{//Switched off
+		tr.getThreadManager().setPaused(false);
+		tr.getGame().getNavSystem().activate();
+		game.getHUDSystem().activate();
+		cam.setFogEnabled(true);
+		cam.probeForBehavior(MatchPosition.class).setEnable(true);
+		cam.probeForBehavior(MatchDirection.class).setEnable(true);
+		tr.getGame().getSatDashboard().setVisible(false);
+	    }//end !satelliteView
+	}//end if(change)
+	this.satelliteView=satelliteView;
+    }
+    /**
+     * @return the satelliteView
+     */
+    public boolean isSatelliteView() {
+	System.out.println("isSatelliteView="+satelliteView);
+        return satelliteView;
     }
 }// end Mission

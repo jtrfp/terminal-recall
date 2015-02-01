@@ -28,9 +28,9 @@ import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
+import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.UpfrontDisplay;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.Camera;
@@ -48,10 +48,13 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
-import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Game {
+    //// PROPERTIES
+    public static final String PAUSED = "paused";
+    public static final String CURRENT_MISSION = "currentMission";
+    
     private TR 		tr;
     private VOXFile 	vox;
     private int 	levelIndex = 0;
@@ -60,6 +63,7 @@ public class Game {
     private Mission 	currentMission;
     private HUDSystem 	hudSystem;
     private NAVSystem 	navSystem;
+    private SatelliteDashboard satDashboard;
     private Player 	player;
     private GLFont	greenFont,upfrontFont;
     private UpfrontDisplay
@@ -258,6 +262,10 @@ public class Game {
 		displayModes.setDisplayMode(earlyLoadingMode);
 		
 		upfrontDisplay = new UpfrontDisplay(tr.getWorld(),tr);
+		
+		satDashboard = new SatelliteDashboard(tr);
+		satDashboard.setVisible(false);
+		tr.getWorld().add(satDashboard);
 		
 		hudSystem = new HUDSystem(tr.getWorld(),greenFont);
 		hudSystem.deactivate();
@@ -458,7 +466,7 @@ public class Game {
     public Game setPaused(boolean paused) {
 	if(paused==this.paused)
 	    return this;//nothing to do.
-	pcSupport.firePropertyChange("paused", this.paused, paused);
+	pcSupport.firePropertyChange(PAUSED, this.paused, paused);
         this.paused = paused;
         final SoundSystem ss = getTr().soundSystem.get();
 	ss.setPaused(paused);
@@ -478,5 +486,19 @@ public class Game {
     public Game removePropertyChangeListener(PropertyChangeListener l){
 	pcSupport.removePropertyChangeListener(l);
 	return this;
+    }
+
+    /**
+     * @return the mapDashboard
+     */
+    public SatelliteDashboard getSatDashboard() {
+        return satDashboard;
+    }
+
+    /**
+     * @param satDashboard the mapDashboard to set
+     */
+    public void setSatDashboard(SatelliteDashboard satDashboard) {
+        this.satDashboard = satDashboard;
     }
 }// end Game

@@ -14,11 +14,13 @@ package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 
 public class NavArrow extends Sprite2D {
@@ -52,27 +54,47 @@ private final NAVSystem nav;
 	private int counter=0;
 	@Override
 	public void _tick(long time){
-	    final TR tr=getTr();
-	    final Mission mission = tr.getGame().getCurrentMission();
-	    final WorldObject player = tr.getGame().getPlayer();
-	    final double [] playerPos = player.getPosition();
-	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
-	    final Vector3D playerHeading = player.getHeading();
-	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
+	    final TR tr              = getTr();
+	    final Game game          = tr.getGame();
+	    final Mission mission    = game.getCurrentMission();
+	    final WorldObject player = game.getPlayer();
+	    final HUDSystem hudSystem= game.getHUDSystem();
 	    if(mission.currentNAVObjective()==null){setVisible(false);return;}
 	    if(mission.currentNAVObjective().getTarget()==null){setVisible(false);return;}
-	    	else setVisible(true);
-	    final double [] loc =mission.currentNAVObjective().getTarget().getPosition();
-	    final Vector3D navLocXY = new Vector3D(loc[0],loc[2],0);
+	    counter++;counter%=Math.ceil(TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS));
+
+	    final double [] playerPos = player.getPosition();
+	    Vector3D navLocXY=Vector3D.ZERO;
+	    String sectorMsg="";
+	    //Tunnel
+	    if(mission.getMissionMode() instanceof Mission.TunnelMode){
+		if(counter==0){
+		    setVisible(false);
+		    final TunnelExitObject eo = mission.getCurrentTunnel().getExitObject();
+		    final double [] eoPos = eo.getPosition();
+		    navLocXY = new Vector3D(eoPos[0],eoPos[2],0);
+		    hudSystem.getObjective().setContent("Exit Tunnel");
+		    sectorMsg = "???.???";
+		}
+	    }else{//No Tunnel
+		setVisible(true);
+		final double [] loc =mission.currentNAVObjective().getTarget().getPosition();
+		navLocXY = new Vector3D(loc[0],loc[2],0);
+		sectorMsg = ((byte)((playerPos[2])/TR.mapSquareSize)&0xFF)+"."+
+			((int)((playerPos[0])/TR.mapSquareSize)&0xFF);
+	    }//end no tunnel
+
+	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
 	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
 	    final double modernDistance = player2NavVectorXY.getNorm();
-	    counter++;counter%=Math.ceil(TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS));
-	    //This need only be done occasionally
+
 	    if(counter==0){
-		getTr().getGame().getHUDSystem().getDistance().setContent(""+(int)((modernDistance*16)/TR.mapSquareSize));
-		getTr().getGame().getHUDSystem().getSector().setContent(((byte)((playerPos[2])/TR.mapSquareSize)&0xFF)+"."+
-		    ((int)((playerPos[0])/TR.mapSquareSize)&0xFF));
+		hudSystem.getDistance().setContent(""+(int)((modernDistance*16)/TR.mapSquareSize));
+		hudSystem.getSector().setContent(sectorMsg);
 	    }
+
+	    final Vector3D playerHeading = player.getHeading();
+	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
 	    final Vector3D normPlayer2NavVector = player2NavVectorXY.normalize();
 	    //Kludge to correct negative X bug in engine. (mirrored world)
 	    final Vector3D correctedNormPlayer2NavVector = new Vector3D(-normPlayer2NavVector.getX(),normPlayer2NavVector.getY(),0);

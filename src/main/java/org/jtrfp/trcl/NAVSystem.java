@@ -16,6 +16,8 @@ import java.util.Collection;
 
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.NavArrow;
@@ -47,15 +49,18 @@ private final NAVRadarBlipFactory blips;
     }//end constructor
     
     public void updateNAVState(){
-	final NAVObjective obj = tr.getGame().getCurrentMission().currentNAVObjective();
+	final Game game = tr.getGame();
+	if(game==null)return;
+	final Mission mission = game.getCurrentMission();
+	if(mission==null)return;
+	final NAVObjective obj = mission.currentNAVObjective();
 	if(obj==null)return;
 	tr.getGame().getHUDSystem().
 		getObjective().
 		setContent(obj.getDescription());
 	final WorldObject target = obj.getTarget();
-	if(target!=null){
+	if(target!=null)
 	    target.getBehavior().probeForBehaviors(ntbSubmitter, NAVTargetableBehavior.class);
-	}//end if(target!=null)
     }//end updateNAVState()
     
     private final Submitter<NAVTargetableBehavior> ntbSubmitter = new Submitter<NAVTargetableBehavior>(){
@@ -81,5 +86,11 @@ private final NAVRadarBlipFactory blips;
 
     public double[] getHeadingXY() {
 	return arrow.getTopArray();
+    }
+    
+    @Override
+    public void activate(){
+	super.activate();
+	updateNAVState();
     }
 }//end NAVSystem

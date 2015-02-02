@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -24,13 +26,13 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
     public void _tick(long timeInMillis){
 	counter++;
 	if(counter%REFRESH_INTERVAL==0){
-	    blips = getParent().
-		    getTr().
-		    getGame().
+	    final Game game = getParent().getTr().getGame();
+	    blips = game.
 		    getNavSystem().
 		    getBlips();
 	    blips.clearRadarBlips();
-	    performRefresh=true;
+	    if(game.getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode)
+		performRefresh=true;
 	}else if(counter%REFRESH_INTERVAL==1){
 	    performRefresh=false;
 	}

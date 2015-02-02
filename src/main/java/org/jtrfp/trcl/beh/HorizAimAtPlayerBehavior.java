@@ -27,7 +27,7 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     private final double [] headingVarianceDelta = new double[3];
     private boolean reverse = false;
     private boolean leftHanded = true;
-    private double hysteresis=.02;//Prevents gimbal shake.
+    private double hysteresis=.05;//Prevents gimbal shake.
     public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
     @Override
     public void _tick(long timeInMillis){
@@ -43,9 +43,8 @@ public class HorizAimAtPlayerBehavior extends Behavior {
 	    assert !Vect3D.isAnyNaN(vectorToTargetVar);
 	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.POSITIVE_INFINITY);
 	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.NEGATIVE_INFINITY);
-	    Vect3D.normalize(vectorToTargetVar);
 	    vectorToTargetVar[1]=0;
-	    Vect3D.normalize(vectorToTargetVar);
+	    Vect3D.normalize(vectorToTargetVar,vectorToTargetVar);
 	    final Vector3D thisHeading=new Vector3D(thisObject.getHeading().getX(),0,thisObject.getHeading().getZ()).normalize();
 	    Vect3D.subtract(thisHeading.toArray(), vectorToTargetVar, headingVarianceDelta);	
 	    if(Math.sqrt(headingVarianceDelta[2]*headingVarianceDelta[2]+headingVarianceDelta[0]*headingVarianceDelta[0])<hysteresis)return;

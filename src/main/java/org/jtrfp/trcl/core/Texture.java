@@ -103,7 +103,7 @@ public class Texture implements TextureDescription {
     
     private static VectorList colorVL(Color c){
 	final double [] color = new double[]{
-		c.getRed()/255.,c.getGreen()/255.,c.getBlue()/255.,1.};
+		c.getRed()/255.,c.getGreen()/255.,c.getBlue()/255.,c.getAlpha()/255.};
 	
 	return  new VectorList(){
 	    @Override

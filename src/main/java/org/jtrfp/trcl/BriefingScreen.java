@@ -86,7 +86,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	briefingScreen.setActive(true);
 	briefingScreen.setVisible(true);
 	
-	blackRectangle = new Sprite2D(tr,0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), true);
+	blackRectangle = new Sprite2D(tr,0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), false);
 	add(blackRectangle);
 	blackRectangle.setImmuneToOpaqueDepthTest(true);
 	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);

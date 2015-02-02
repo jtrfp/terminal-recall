@@ -86,7 +86,7 @@ public class TextureManager {
     }//end getFallbackTexture()
     
     public synchronized TextureDescription solidColor(Color color) {
-	final int	key 	= color.getRed()+color.getGreen()*256+color.getBlue()*65536;
+	final int	key 	= color.hashCode();
 	Texture		result 	= colorCache.get(key);
 	if(result!=null)
 	    return result;

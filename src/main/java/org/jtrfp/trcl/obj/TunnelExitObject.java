@@ -26,6 +26,7 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
+import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.gpu.Model;
@@ -86,7 +87,8 @@ public class TunnelExitObject extends WorldObject {
 	    if (other instanceof Player) {
 		if (other.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
-		    final Mission mission = tr.getGame().getCurrentMission();
+		    final Game game = tr.getGame();
+		    final Mission mission = game.getCurrentMission();
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
 		    if(mirrorTerrain){
 			mission.setMissionMode(new Mission.ChamberMode());
@@ -106,6 +108,8 @@ public class TunnelExitObject extends WorldObject {
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
 		    final Player player = tr.getGame().getPlayer();
+		    player.setActive(false);
+		    player.resetVelocityRotMomentum();
 		    player.probeForBehavior(CollidesWithTunnelWalls.class)
 		    	    .setEnable(false);
 		    player.getBehavior()
@@ -142,6 +146,8 @@ public class TunnelExitObject extends WorldObject {
 		    if (navObjective != null && (navTargeted|!onlyRemoveIfTargeted)) {
 			tr.getGame().getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
+		    tr.getGame().getNavSystem().updateNAVState();
+		    player.setActive(true);
 		}// end if(x past threshold)
 	    }// end if(Player)
 	}// end proposeCollision()

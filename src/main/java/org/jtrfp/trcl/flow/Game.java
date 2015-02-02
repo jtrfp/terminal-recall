@@ -28,8 +28,8 @@ import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
-import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.NAVSystem;
+import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -48,6 +48,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
+import org.jtrfp.trcl.prop.RedFlash;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Game {
@@ -74,6 +75,8 @@ public class Game {
     			levelLoadingScreen;
     private BriefingScreen
     			briefingScreen;
+    private final RedFlash
+    			redFlash;
     private final DisplayModeHandler
     			displayModes =
     			new DisplayModeHandler();
@@ -95,6 +98,8 @@ public class Game {
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
 	setVox(vox);
+	redFlash = new RedFlash(tr);
+	tr.getWorld().add(redFlash);
 	if (!tr.getTrConfig()[0].isDebugMode())
 	    setupNameWithUser();
     }// end constructor
@@ -500,5 +505,12 @@ public class Game {
      */
     public void setSatDashboard(SatelliteDashboard satDashboard) {
         this.satDashboard = satDashboard;
+    }
+
+    /**
+     * @return the redFlash
+     */
+    public RedFlash getRedFlash() {
+        return redFlash;
     }
 }// end Game

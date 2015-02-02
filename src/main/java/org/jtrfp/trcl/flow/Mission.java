@@ -94,6 +94,7 @@ public class Mission {
     private boolean 		bossFight = false, satelliteView = false;
     private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private Tunnel		currentTunnel;
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -194,6 +195,7 @@ public class Mission {
 		navProgress[i].complete();
 	    }// end for(navSubObjects)
 	    navSystem.updateNAVState();
+	    player.resetVelocityRotMomentum();
 	    final String startX = System.getProperty("org.jtrfp.trcl.startX");
 	    final String startY = System.getProperty("org.jtrfp.trcl.startY");
 	    final String startZ = System.getProperty("org.jtrfp.trcl.startZ");
@@ -238,9 +240,9 @@ public class Mission {
 			.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");
 	    }
 	}// end if(containsKey)
-	System.out.println("Invoking JVM's garbage collector...");
-	TR.nuclearGC();
-	System.out.println("Mission.go() complete.");
+	//System.out.println("Invoking JVM's garbage collector...");
+	//TR.nuclearGC();
+	//System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
 	// Abort check
 	synchronized (missionEnd) {
@@ -639,6 +641,7 @@ public class Mission {
     public void enterTunnel(Tunnel tunnel) {
 	final Game game = tr.getGame();
 	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
+	currentTunnel = tunnel;
 	game.getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
 	//Turn off overworld
@@ -665,6 +668,7 @@ public class Mission {
 	}//end for(projectileFactories)
 	final Player player = tr.getGame().getPlayer();
 	player.setActive(false);
+	player.resetVelocityRotMomentum();
 	final Behavior playerBehavior = player.getBehavior();
 	playerBehavior.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
 	playerBehavior.probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
@@ -822,5 +826,9 @@ public class Mission {
     public boolean isSatelliteView() {
 	System.out.println("isSatelliteView="+satelliteView);
         return satelliteView;
+    }
+    public Tunnel getCurrentTunnel() {
+	if(!(getMissionMode() instanceof TunnelMode))return null;
+	return currentTunnel;
     }
 }// end Mission

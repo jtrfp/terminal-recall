@@ -403,8 +403,9 @@ public class WorldObject implements PositionedRenderable {
      *            the visible to set
      */
     public void setVisible(boolean visible) {
-	if(this.visible!=visible)
-	    needToRecalcMatrix=true;
+	if(this.visible==visible)
+	    return;
+	needToRecalcMatrix=true;
 	if(!this.visible && visible){
 	    this.visible = true;
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){

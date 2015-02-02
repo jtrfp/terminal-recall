@@ -89,6 +89,8 @@ public class Player extends WorldObject implements VisibleEverywhere{
 	addBehavior(new UpdatesNAVRadar());
 	addBehavior(new Cloakable());
 	addBehavior(new SurfaceImpactSFXBehavior(tr));
+	addBehavior(new RedFlashOnDamage());
+	
 	final Weapon[] allWeapons = Weapon.values();
 	
 	for (int i = 0; i < allWeapons.length; i++) {
@@ -155,6 +157,15 @@ public class Player extends WorldObject implements VisibleEverywhere{
 		.setDragCoefficient(.86);
 	setActive(false);
     }//end constructor
+    
+    public void resetVelocityRotMomentum(){
+	//probeForBehavior(HasPropulsion.class).setPropulsion(0);
+	probeForBehavior(RotationalMomentumBehavior.class).
+		setEquatorialMomentum(0).
+		setLateralMomentum(0).
+		setPolarMomentum(0);
+	probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
+    }
 
     @Override
     public void setHeading(Vector3D lookAt) {

@@ -47,8 +47,8 @@ public class RunMe{
 		new TR();
 		}//end main()
 	
-    private static void ensureJVMIsProperlyConfigured(String[] args) {
-	if (!isAlreadyConfigured()) {
+    private static void ensureJVMIsProperlyConfigured(String[] args) {//Skip if using 32-bit.
+	if (!isAlreadyConfigured()&& System.getProperty("os.arch").toUpperCase().contains("64")) {
 	    //http://stackoverflow.com/questions/13029915/how-to-programmatically-test-if-assertions-are-enabled
 	    //Seems to work better than the official way of querying assertion ability.
 	    boolean useAssertions = false;

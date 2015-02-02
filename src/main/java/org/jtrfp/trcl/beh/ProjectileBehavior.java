@@ -13,9 +13,11 @@
 package org.jtrfp.trcl.beh;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -144,23 +146,47 @@ public class ProjectileBehavior extends Behavior implements
 	    return;// Don't shoot yourself.
 	if (parent.getObjectOfOrigin() instanceof DEFObject)
 	    return;// Don't shoot your buddy.
-	other.getBehavior().probeForBehavior(DamageableBehavior.class)
-		.projectileDamage(damageOnImpact);
+	other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+	    @Override
+	    public void submit(DamageListener item) {
+		item.projectileDamage(damageOnImpact);
+	    }
+	    @Override
+	    public void submit(Collection<DamageListener> items) {
+		for(DamageListener item:items)
+		 item.projectileDamage(damageOnImpact);
+	    }}, DamageListener.class);
 	deathBehavior.die();
-    }
+    }//end collidedWithDEFObject
 
     public void forceCollision(WorldObject other) {
-	other.getBehavior().probeForBehavior(DamageableBehavior.class)
-		.projectileDamage(damageOnImpact);
+	other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+	    @Override
+	    public void submit(DamageListener item) {
+		item.projectileDamage(damageOnImpact);
+	    }
+	    @Override
+	    public void submit(Collection<DamageListener> items) {
+		for(DamageListener item:items)
+		 item.projectileDamage(damageOnImpact);
+	    }}, DamageListener.class);
 	deathBehavior.die();
-    }
+    }//end forceCollision(...)
 
     @Override
     public void collidedWithPlayer(Player other) {
 	if (other == parent.getObjectOfOrigin())
 	    return;// Don't shoot yourself.
-	other.getBehavior().probeForBehavior(DamageableBehavior.class)
-		.projectileDamage(damageOnImpact);
+	other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+	    @Override
+	    public void submit(DamageListener item) {
+		item.projectileDamage(damageOnImpact);
+	    }
+	    @Override
+	    public void submit(Collection<DamageListener> items) {
+		for(DamageListener item:items)
+		 item.projectileDamage(damageOnImpact);
+	    }}, DamageListener.class);
 	deathBehavior.die();
     }
     /*

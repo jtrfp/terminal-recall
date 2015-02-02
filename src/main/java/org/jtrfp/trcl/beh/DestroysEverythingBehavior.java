@@ -12,17 +12,29 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.Collection;
+
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DestroysEverythingBehavior extends Behavior implements CollisionBehavior {
-    int counter=2;
-    boolean replenishingPlayerHealth=true;
+    private volatile int counter=2;
+    private boolean replenishingPlayerHealth=true;
     @Override
     public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
-	    other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65536);//Really smash that sucker.
+	    other.probeForBehaviors(new Submitter<DamageListener>(){
+		    @Override
+		    public void submit(DamageListener item) {
+			item.projectileDamage(65536);
+		    }
+		    @Override
+		    public void submit(Collection<DamageListener> items) {
+			for(DamageListener item:items)
+			 item.projectileDamage(65536);
+		    }}, DamageListener.class);
 	}//end if(DEFObject)
     }//end proposeCollision()
     @Override
@@ -32,7 +44,7 @@ public class DestroysEverythingBehavior extends Behavior implements CollisionBeh
 	    try{getParent().getTr().getGame().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
 	    catch(SupplyNotNeededException e){}//Ok, whatever.
 	}
-	if(counter<=0){//We can't stick around for long. Not with all this destroying going on.
+	if(counter==0){//We can't stick around for long. Not with all this destroying going on.
 	    getParent().destroy();counter=2;
 	}//end if(counter<=0)
     }//end _tick(...)

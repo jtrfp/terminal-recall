@@ -12,7 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.Collection;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -27,9 +30,27 @@ public class DamagedByCollisionWithGameplayObject extends Behavior implements Co
 	    	final WorldObject p = getParent();
 	    	final double distance = Vect3D.distance(other.getPosition(),p.getPosition());
 		if(distance<CollisionManager.SHIP_COLLISION_DISTANCE)
-			{if(other instanceof Player && getParent() instanceof DEFObject)
-				{p.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/30);
-				other.getBehavior().probeForBehavior(DamageableBehavior.class).impactDamage(65535/10);
+			{if(other instanceof Player && getParent() instanceof DEFObject){
+			    p.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+				    @Override
+				    public void submit(DamageListener item) {
+					item.projectileDamage(65535/30);
+				    }
+				    @Override
+				    public void submit(Collection<DamageListener> items) {
+					for(DamageListener item:items)
+					 item.projectileDamage(65535/30);
+				    }}, DamageListener.class);
+			    other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+				    @Override
+				    public void submit(DamageListener item) {
+					item.projectileDamage(65535/10);
+				    }
+				    @Override
+				    public void submit(Collection<DamageListener> items) {
+					for(DamageListener item:items)
+					 item.projectileDamage(65535/10);
+				    }}, DamageListener.class);
 				p.getTr().getResourceManager().getDebrisSystem().spawn(new Vector3D(p.getPosition()), new Vector3D(0,1000,0));}
 			/*for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
 			    p.getTr().getResourceManager().getDebrisFactory().spawn(p.getPosition(), 

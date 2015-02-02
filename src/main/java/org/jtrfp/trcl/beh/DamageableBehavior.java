@@ -17,25 +17,12 @@ import java.util.Collection;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.Player;
 
-public class DamageableBehavior extends Behavior{
+public class DamageableBehavior extends Behavior implements DamageListener{
     	private int maxHealth=65535;
 	private int health=maxHealth;
 	private boolean acceptsProjectileDamage=true;
 	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
 	
-	public DamageableBehavior impactDamage(int dmg){
-	    if(isEnabled())generalDamage(dmg);
-	    return this;
-	}
-	public DamageableBehavior shearDamage(int dmg){
-	    if(isEnabled())generalDamage(dmg);
-	    return this;
-	}
-	public DamageableBehavior projectileDamage(int dmg){
-	    if(!acceptsProjectileDamage)return this;
-	    if(isEnabled())generalDamage(dmg);
-	    return this;
-	}
 	protected void generalDamage(int dmg){
 	    if(!isEnabled())return;
 	    if(isInvincible())return;
@@ -137,7 +124,28 @@ public class DamageableBehavior extends Behavior{
 	    this.acceptsProjectileDamage = acceptsProjectileDamage;
 	    return this;
 	}
-	public void electrocutionDamage(int dmgAmt) {
-	    shearDamage(dmgAmt);//Temporarily reroute to shearDamage()
+	@Override
+	public void airCollisionDamage(int dmg) {
+	    if(isEnabled())generalDamage(dmg);
+	}
+	@Override
+	public void projectileDamage(int dmg) {
+	    if(isEnabled())generalDamage(dmg);
+	}
+	@Override
+	public void groundCollisionDamage(int dmg) {
+	    if(isEnabled())generalDamage(dmg);
+	}
+	@Override
+	public void tunnelCollisionDamage(int dmg) {
+	    if(isEnabled())generalDamage(dmg);
+	}
+	@Override
+	public void electrocutionDamage(int dmg) {
+	    shearDamage(dmg);//Temporarily reroute to shearDamage()
+	}
+	@Override
+	public void shearDamage(int dmg) {
+	    if(isEnabled())generalDamage(dmg);
 	}
     }//end DamageableBehavior

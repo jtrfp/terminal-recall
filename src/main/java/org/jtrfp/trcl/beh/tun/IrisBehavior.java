@@ -12,10 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.tun;
 
+import java.util.Collection;
+
 import org.jtrfp.trcl.Controller;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -41,7 +44,16 @@ private static final double X_FLUFF=80000;
 		final double dist=Math.sqrt(dY*dY+dZ*dZ);
 		final double currentRadius=maxRadius*(1.-Math.abs(1-controller.getCurrentFrame()));
 		if(dist>currentRadius){
-		    wo.getBehavior().probeForBehavior(DamageableBehavior.class).shearDamage(DAMAGE_ON_IMPACT);
+		    wo.probeForBehaviors(new Submitter<DamageListener>(){
+			    @Override
+			    public void submit(DamageListener item) {
+				item.shearDamage(DAMAGE_ON_IMPACT);
+			    }
+			    @Override
+			    public void submit(Collection<DamageListener> items) {
+				for(DamageListener item:items)
+				 item.shearDamage(DAMAGE_ON_IMPACT);
+			    }}, DamageListener.class);
 		}//end if(crushed)
 	    }//end if(in range)
 	}//end if(Player)

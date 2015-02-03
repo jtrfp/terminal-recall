@@ -444,6 +444,9 @@ public final class Renderer {
 	    @Override
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
 		    int width, int height) {
+		// SHAPE-DEPENDENT UNIFORMS
+		deferredProgram.use();
+		deferredProgram.getUniform("screenDims").set(drawable.getWidth(), drawable.getHeight());
 		gpu.defaultProgram();
 		gpu.defaultFrameBuffers();
 		gpu.defaultTIU();

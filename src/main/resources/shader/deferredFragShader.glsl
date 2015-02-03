@@ -30,8 +30,10 @@ uniform vec3			ambientLight;
 uniform vec3			sunColor;
 uniform vec3 			sunVector;
 uniform uint			bypassAlpha;
+uniform vec2			screenDims;
 
-noperspective in vec2	screenLoc;
+//noperspective in vec2	screenLoc;
+vec2 screenLoc									= gl_FragCoord.xy/screenDims;
 
 // OUTPUTS
 layout(location = 0) out vec4 fragColor;

@@ -23,7 +23,8 @@ public class MovesByVelocity extends Behavior implements Velocible {
 	@Override
 	public void _tick(long tickTimeMillis){
 		final WorldObject p = getParent();
-		final double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		if(progressionInSeconds>.25)progressionInSeconds=.25;
 		assert !Vect3D.isAnyNaN(p.getPosition());
 		p.movePositionBy(getVelocity().scalarMultiply(progressionInSeconds));
 		assert !Vect3D.isAnyNaN(p.getPosition());

@@ -26,7 +26,8 @@ public class AccelleratedByPropulsion extends Behavior{
 		{WorldObject wo = getParent();
 		Propelled p = wo.getBehavior().probeForBehavior(Propelled.class);
 		Velocible v = wo.getBehavior().probeForBehavior(Velocible.class);
-		final double progressionInSeconds = (double)wo.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		double progressionInSeconds = (double)wo.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		if(progressionInSeconds>.25)progressionInSeconds=.25;
 		Vector3D tVector = thrustVector!=null?thrustVector:wo.getHeading();
 		v.accellerate(tVector.scalarMultiply(p.getPropulsion()*progressionInSeconds));
 		}//end _tick(...)

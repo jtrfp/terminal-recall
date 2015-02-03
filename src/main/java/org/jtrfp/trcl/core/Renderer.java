@@ -130,7 +130,7 @@ public final class Renderer {
 		objectProgram		=gpu.newProgram().attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
 		vertexProgram		=gpu.newProgram().attachShader(fullScreenTriangleShader)  .attachShader(vertexFragShader).link();
 		opaqueProgram		=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
-		deferredProgram		=gpu.newProgram().attachShader(fullScreenTriangleShader)  .attachShader(deferredFragShader).link();
+		deferredProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)  	  .attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
 		primitiveProgram	=gpu.newProgram().attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
 		skyCubeProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)       .attachShader(skyCubeFragShader).link();
@@ -176,7 +176,7 @@ public final class Renderer {
 		deferredProgram.use();
 		sunVector 	= deferredProgram	.getUniform("sunVector");
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
-		// 1 UNUSED
+		deferredProgram.getUniform("cubeTexture").set((int)1);
 		// 2 UNUSED
 		// 3 UNUSED
 		deferredProgram.getUniform("rgbaTiles").set((int) 4);

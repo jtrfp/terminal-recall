@@ -37,7 +37,7 @@ public class SkyCube {
     public SkyCube(TR tr){
 	this.tr=tr;
     }
-
+/*
     public void render(RenderList rl, GL3 gl) throws NotReadyException {
 	final Renderer renderer = tr.renderer.getRealtime();
 	final GPU gpu = tr.gpu.getRealtime();
@@ -60,7 +60,7 @@ public class SkyCube {
 	gl.glEnable(GL3.GL_CULL_FACE);
 	gl.glDepthFunc(GL3.GL_LESS);
     }
-    
+   */ 
     private void buildSkyCubeTextureGL(){
 	final SkyCubeGen cubeGen = getSkyCubeGen();
 	final int sideWidth = cubeGen.getSideWidth();
@@ -104,13 +104,6 @@ public class SkyCube {
         this.skyCubeGen = skyCubeGen;
         skyCubeGenStale.set(true);
     }//end setSkyCubeGen(...)
-
-    /**
-     * @return the skyCubeTexture
-     */
-    private GLTexture getSkyCubeTexture() {
-        return skyCubeTexture;
-    }
     
     @Override
     public void finalize() throws Throwable{
@@ -123,4 +116,10 @@ public class SkyCube {
 		}});
 	super.finalize();
     }//end finalize()
+
+    public GLTexture getSkyCubeTexture() {
+	if(skyCubeGenStale.getAndSet(false)==true)
+	    buildSkyCubeTextureGL();
+	return skyCubeTexture;
+    }
 }//end SkyCube

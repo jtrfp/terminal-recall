@@ -26,6 +26,9 @@ uniform sampler2D		primitivenXnYnZTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
+uniform samplerCube 	cubeTexture;
+smooth in vec3 			norm;
+
 uniform vec3			ambientLight;
 uniform vec3			sunColor;
 uniform vec3 			sunVector;
@@ -315,8 +318,7 @@ if(color.a < ALPHA_THRESHOLD){
   color.a		= color.a+oColor.a*(1-color.a);
   }//end if(written)
  }//end if(visible)
-color.a = (color.a > ALPHA_THRESHOLD)?1:color.a;
-if(bypassAlpha!=0u)
- color.a=1;
-fragColor		 	= color;
+if(color.a<ALPHA_THRESHOLD && bypassAlpha==0u)
+ gl_FragColor.rgb = mix(texture(cubeTexture,norm).rgb,color.rgb,color.a);
+else gl_FragColor.rgb = color.rgb;
 }//end main()

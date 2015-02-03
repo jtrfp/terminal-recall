@@ -210,8 +210,6 @@ public class RenderList {
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
 	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
 	
-	renderer.getSkyCube().render(this,gl);
-	
 	// OBJECT STAGE
 	final GLProgram objectProgram = renderer.getObjectProgram();
 	objectProgram.use();
@@ -427,19 +425,16 @@ public class RenderList {
 	//gl.glDisable(GL3.GL_STENCIL_TEST);
 	
 	// DEFERRED STAGE
-	gl.glDepthMask(true);
-	gl.glDisable(GL3.GL_DEPTH_TEST);
-	gl.glEnable(GL3.GL_BLEND);
 	if(tr.renderer.get().isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = tr.renderer.get().getDeferredProgram();
 	deferredProgram.use();
-	gl.glEnable(GL3.GL_BLEND);
-	gl.glBlendFunc(GL3.GL_SRC_ALPHA, GL3.GL_ONE_MINUS_SRC_ALPHA);
-	gl.glBlendEquation(GL3.GL_FUNC_ADD);
+	gl.glDepthMask(false);
+	gl.glDisable(GL3.GL_DEPTH_TEST);
+	gl.glDisable(GL3.GL_BLEND);
 	gpu.defaultFrameBuffers();
 	gpu.memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
-	/// 1 UNUSED
+	renderer.getSkyCube().getSkyCubeTexture().bindToTextureUnit(1,gl);
 	/// 2 UNUSED
 	/// 3 UNUSED
 	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
@@ -450,8 +445,10 @@ public class RenderList {
 	renderer.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
 	
 	deferredProgram.getUniform("bypassAlpha").setui(!renderer.getCamera().isFogEnabled()?1:0);
+	deferredProgram.getUniform("projectionRotationMatrix")
+		.set4x4Matrix(renderer.getCamRotationProjectionMatrix(), true);
 	//Execute the draw to a screen quad
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 36);
 	//Cleanup
 	gl.glDisable(GL3.GL_BLEND);
 	

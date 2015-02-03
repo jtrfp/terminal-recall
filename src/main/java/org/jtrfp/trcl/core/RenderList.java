@@ -288,7 +288,6 @@ public class RenderList {
 	//Almost like a geometry shader, except writing lookup textures for each primitive.
 	renderer.getPrimitiveProgram().use();
 	renderer.getPrimitiveFrameBuffer().bindToDraw();
-	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);//TODO: See if this can be removed
 	renderer.getVertexXYTexture().bindToTextureUnit(0, gl);
 	renderer.getVertexWTexture().bindToTextureUnit(1, gl);
 	renderer.getVertexZTexture().bindToTextureUnit(2, gl);

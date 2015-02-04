@@ -71,21 +71,31 @@ public class VQCodebookManager {
 		setWrapT(GL3.GL_CLAMP_TO_EDGE).
 		unbind();
     }//end constructor
-
-    public VQCodebookManager setRGBA(int codeID, RasterRowWriter rowWriter) {
-	try{subImage(codeID,rowWriter,rgbaTexture,2);}
+    public VQCodebookManager setRGBA(int codeID, RasterRowWriter []rowWriter) {
+	return setNNNN(codeID,rowWriter,rgbaTexture);
+    }
+    private VQCodebookManager setNNNN(int codeID, RasterRowWriter []rowWriter, GLTexture texture) {
+	try{subImage(codeID,rowWriter,texture,2);}
 	catch(OutOfMemoryError e){
 	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
 	    TR.nuclearGC();
-	    System.err.println("Still alive. Attempting RGBA write again...");
-	    subImage(codeID,rowWriter,rgbaTexture,4);
+	    System.err.println("Still alive. Attempting texture NNNN write again...");
+	    subImage(codeID,rowWriter,texture,4);
 	    System.err.println("Success.");
 	}
 	return this;
     }// end setRGBA(...)
     
     public VQCodebookManager setRGBABlock256(int blockID, RasterRowWriter [] rowWriters){
-	subImage256(blockID,rowWriters,rgbaTexture,2);
+	return setNNNNBlock256(blockID, new RasterRowWriter[][]{rowWriters},rgbaTexture);
+    }
+    
+    public VQCodebookManager setESTuTvBlock256(int blockID, RasterRowWriter [] rowWriters){
+	return setNNNNBlock256(blockID, new RasterRowWriter[][]{null,rowWriters},esTuTvTexture);
+    }
+    
+    public VQCodebookManager setNNNNBlock256(int blockID, RasterRowWriter [][] rowWriters, GLTexture texture){
+	subImage256(blockID,rowWriters,texture,2);
 	return this;
     }
     
@@ -97,13 +107,13 @@ public class VQCodebookManager {
 	public void applyRow(int row, ByteBuffer dest);
     }//end RasterRowWriter
     
-    private void subImage256(final int blockID, final RasterRowWriter[] texels, GLTexture texture, int mipLevel){
+    private void subImage256(final int blockID, final RasterRowWriter[][] texels, GLTexture texture, int mipLevel){
 	final int y = (blockID % CODE256_PER_PAGE) * CODE256_HEIGHT_CODES * CODE_SIDE_LENGTH;
 	final int page = blockID / CODE256_PER_PAGE;
 	tileUpdates.add(new TileUpdate(texels,0,y,page));
     }
     
-    private void subImage(final int codeID, final RasterRowWriter texels,
+    private void subImage(final int codeID, final RasterRowWriter []texels,
 	    final GLTexture tex, int mipLevel) throws OutOfMemoryError {
 	final int x = (codeID % NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
 	final int z = codeID / CODES_PER_PAGE;
@@ -133,51 +143,61 @@ public class VQCodebookManager {
 	    }// end for(rows)
 	}}// end sync(codePageBuffers[z],texels)
 	*/
-	tileUpdates.add(new TileUpdate(new RasterRowWriter[]{texels},x,y,z));
+	tileUpdates.add(new TileUpdate(new RasterRowWriter[][]{texels},x,y,z));
     }// end subImage(...)
     
     private final ByteBuffer workTile = ByteBuffer.allocateDirect(4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
     private final ByteBuffer workTile256=ByteBuffer.allocateDirect(256*4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
     
-    public void refreshStaleCodePages(){//TODO: This is a major bottleneck
-	rgbaTexture.bind();
-	    TileUpdate tu;
-	    while((tu=tileUpdates.poll())!=null){
-		final RasterRowWriter []rowWriters = tu.getRowWriters();
-		if(rowWriters.length==1){
-		    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
-			workTile.position(row * 4 * CODE_SIDE_LENGTH);
-			tu.getRowWriters()[0].applyRow(row, workTile);
-		    }// end for(rows)
-		    workTile.clear();
-		    rgbaTexture.subImage(
-			    new int[]{tu.getX(),tu.getY(),tu.getZ()},
-			    codeDims,
-			    GL3.GL_RGBA, 0, workTile);
-		}//end if(single code)
-		else if(rowWriters.length==256){
-		    for (int y = 0; y < CODE256_HEIGHT_CODES; y++) {
-			for (int x = 0; x < NUM_CODES_PER_AXIS; x++) {
-			    final RasterRowWriter rw = rowWriters[x+y*NUM_CODES_PER_AXIS];
-			    if(rw!=null){
-				for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
-				    workTile256.position((row+y*CODE_SIDE_LENGTH) * 4
-					    * CODE_PAGE_SIDE_LENGTH_TEXELS + x * 4 * CODE_SIDE_LENGTH);
-				    rw.applyRow(row, workTile256);
-				}// end for(rows)
-			    }//end if(!null)
-			}// end for(x)
-		    }// end for(y)
-		    workTile256.clear();
-		    rgbaTexture.subImage(
-			    new int[]{tu.getX(),tu.getY(),tu.getZ()},
-			    code256Dims,
-			    GL3.GL_RGBA, 0, workTile256);
-		}//end code256
-		else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
-	    }//end for(tileUpdates)
+    public void refreshStaleCodePages(){
+	refreshStaleCodePages(rgbaTexture,0);
+	refreshStaleCodePages(esTuTvTexture,1);
+	tileUpdates.clear();
+    }
+    
+    private void refreshStaleCodePages(GLTexture texture, int channelArrayIndex){
+	texture.bind();
+	for(TileUpdate tu:tileUpdates){
+	    final RasterRowWriter [][]rw2 = tu.getRowWriters();
+	    if(rw2.length>channelArrayIndex){
+		final RasterRowWriter []rowWriters = tu.getRowWriters()[channelArrayIndex];
+		    if(rowWriters!=null){
+			if(rowWriters.length==1){
+			    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
+				workTile.position(row * 4 * CODE_SIDE_LENGTH);
+				rowWriters[0].applyRow(row, workTile);
+			    }// end for(rows)
+			    workTile.clear();
+			    texture.subImage(
+				    new int[]{tu.getX(),tu.getY(),tu.getZ()},
+				    codeDims,
+				    GL3.GL_RGBA, 0, workTile);
+			}//end if(single code)
+			else if(rowWriters.length==256){
+			    for (int y = 0; y < CODE256_HEIGHT_CODES; y++) {
+				for (int x = 0; x < NUM_CODES_PER_AXIS; x++) {
+				    final RasterRowWriter rw = rowWriters[x+y*NUM_CODES_PER_AXIS];
+				    if(rw!=null){
+					for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
+					    workTile256.position((row+y*CODE_SIDE_LENGTH) * 4
+						    * CODE_PAGE_SIDE_LENGTH_TEXELS + x * 4 * CODE_SIDE_LENGTH);
+					    rw.applyRow(row, workTile256);
+					}// end for(rows)
+				    }//end if(!null)
+				}// end for(x)
+			    }// end for(y)
+			    workTile256.clear();
+			    texture.subImage(
+				    new int[]{tu.getX(),tu.getY(),tu.getZ()},
+				    code256Dims,
+				    GL3.GL_RGBA, 0, workTile256);
+			}//end code256
+			else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
+		    }//end if(rw!=null)
+	    }//end if(channelArrayIndex)
+	}//end for(tileUpdates)
 	    gpu.defaultTexture();
-	    tileUpdates.clear();
+	    //tileUpdates.clear();
 	/*final long currTime = System.currentTimeMillis();
 	while(!staleCodePages.isEmpty()){
 	    final int codePageID = staleCodePages.pollFirst();
@@ -287,10 +307,10 @@ public class VQCodebookManager {
 	return result;
     }//end dumpPageToPNG(...)
 
-    private final class TileUpdate{
-	private final RasterRowWriter []rowWriters;
+    private final class TileUpdate{//TODO: 2D array, if null element then skip.
+	private final RasterRowWriter [][]rowWriters;
 	private final int x,y,z;
-	public TileUpdate(RasterRowWriter []rowWriter, int x, int y, int z){
+	public TileUpdate(RasterRowWriter [][]rowWriter, int x, int y, int z){
 	    this.rowWriters=rowWriter;
 	    this.x=x;
 	    this.y=y;
@@ -299,7 +319,7 @@ public class VQCodebookManager {
 	/**
 	 * @return the rowWriters
 	 */
-	public RasterRowWriter[] getRowWriters() {
+	public RasterRowWriter[][] getRowWriters() {
 	    return rowWriters;
 	}
 	/**

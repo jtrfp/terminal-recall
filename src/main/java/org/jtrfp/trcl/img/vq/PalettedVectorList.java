@@ -20,6 +20,10 @@ public final class PalettedVectorList implements VectorList {
 
     public PalettedVectorList(VectorList source,
 	    final VectorList palette) {
+	if(source==null)
+	    throw new NullPointerException("Source is intolerably null.");
+	if(palette==null)
+	    throw new NullPointerException("Palette is intolerably null.");
 	this.numVectors=source.getNumVectors();
 	this.palette=palette;
 	this.source=source;

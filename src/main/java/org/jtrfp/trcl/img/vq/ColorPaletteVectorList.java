@@ -21,6 +21,8 @@ public final class ColorPaletteVectorList implements VectorList {
     private Integer hashCode;
     
     public ColorPaletteVectorList(Color [] colors){
+	if(colors==null)
+	    throw new NullPointerException("Colors arg intolerably null.");
 	palette 	 = new double[colors.length][];
 	for(int i=0; i<colors.length; i++){
 	    palette[i]	 =new double[4];

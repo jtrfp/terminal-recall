@@ -20,6 +20,8 @@ public class ByteBufferVectorList implements VectorList {
     private final ByteBuffer bb;
 
     public ByteBufferVectorList(ByteBuffer bb) {
+	if(bb==null)
+	    throw new NullPointerException("Passed ByteBuffer is intolerably null.");
 	this.bb = bb;
     }
 

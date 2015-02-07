@@ -14,20 +14,28 @@ package org.jtrfp.trcl.beh;
 
 import java.util.Collection;
 
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.Player;
 
-public class DamageableBehavior extends Behavior implements DamageListener{
+public class DamageableBehavior extends Behavior {
     	private int maxHealth=65535;
 	private int health=maxHealth;
 	private boolean acceptsProjectileDamage=true;
 	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
 	
-	protected void generalDamage(int dmg){
+	protected void generalDamage(final DamageListener.Event evt){
+	    if(evt==null)
+		throw new NullPointerException("Passed damage event intolerably null.");
 	    if(!isEnabled())return;
 	    if(isInvincible())return;
 	    if(health<=0)return;
-	    health-=dmg;
+	    probeForBehaviors(new AbstractSubmitter<DamageListener>(){
+		@Override
+		public void submit(DamageListener item) {
+		    item.damageEvent(evt);
+		}}, DamageListener.class);
+	    health-=evt.getDamageAmount();
 		if(health<=0)
 		    die();
 		else if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
@@ -124,28 +132,8 @@ public class DamageableBehavior extends Behavior implements DamageListener{
 	    this.acceptsProjectileDamage = acceptsProjectileDamage;
 	    return this;
 	}
-	@Override
-	public void airCollisionDamage(int dmg) {
-	    if(isEnabled())generalDamage(dmg);
-	}
-	@Override
-	public void projectileDamage(int dmg) {
-	    if(isEnabled())generalDamage(dmg);
-	}
-	@Override
-	public void groundCollisionDamage(int dmg) {
-	    if(isEnabled())generalDamage(dmg);
-	}
-	@Override
-	public void tunnelCollisionDamage(int dmg) {
-	    if(isEnabled())generalDamage(dmg);
-	}
-	@Override
-	public void electrocutionDamage(int dmg) {
-	    shearDamage(dmg);//Temporarily reroute to shearDamage()
-	}
-	@Override
-	public void shearDamage(int dmg) {
-	    if(isEnabled())generalDamage(dmg);
+	
+	public void proposeDamage(DamageListener.Event evt){
+	    generalDamage(evt);
 	}
     }//end DamageableBehavior

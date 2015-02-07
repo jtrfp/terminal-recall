@@ -13,12 +13,12 @@
 package org.jtrfp.trcl.beh;
 
 import java.lang.ref.WeakReference;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
+import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -146,30 +146,20 @@ public class ProjectileBehavior extends Behavior implements
 	    return;// Don't shoot yourself.
 	if (parent.getObjectOfOrigin() instanceof DEFObject)
 	    return;// Don't shoot your buddy.
-	other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+	other.getBehavior().probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
-	    public void submit(DamageListener item) {
-		item.projectileDamage(damageOnImpact);
-	    }
-	    @Override
-	    public void submit(Collection<DamageListener> items) {
-		for(DamageListener item:items)
-		 item.projectileDamage(damageOnImpact);
-	    }}, DamageListener.class);
+	    public void submit(DamageableBehavior item) {
+		item.proposeDamage(new ProjectileDamage(damageOnImpact));
+	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }//end collidedWithDEFObject
 
     public void forceCollision(WorldObject other) {
-	other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+	other.getBehavior().probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
-	    public void submit(DamageListener item) {
-		item.projectileDamage(damageOnImpact);
-	    }
-	    @Override
-	    public void submit(Collection<DamageListener> items) {
-		for(DamageListener item:items)
-		 item.projectileDamage(damageOnImpact);
-	    }}, DamageListener.class);
+	    public void submit(DamageableBehavior item) {
+		item.proposeDamage(new ProjectileDamage(damageOnImpact));
+	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }//end forceCollision(...)
 
@@ -177,16 +167,11 @@ public class ProjectileBehavior extends Behavior implements
     public void collidedWithPlayer(Player other) {
 	if (other == parent.getObjectOfOrigin())
 	    return;// Don't shoot yourself.
-	other.getBehavior().probeForBehaviors(new Submitter<DamageListener>(){
+	other.getBehavior().probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
-	    public void submit(DamageListener item) {
-		item.projectileDamage(damageOnImpact);
-	    }
-	    @Override
-	    public void submit(Collection<DamageListener> items) {
-		for(DamageListener item:items)
-		 item.projectileDamage(damageOnImpact);
-	    }}, DamageListener.class);
+	    public void submit(DamageableBehavior item) {
+		item.proposeDamage(new ProjectileDamage(damageOnImpact));
+	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }
     /*

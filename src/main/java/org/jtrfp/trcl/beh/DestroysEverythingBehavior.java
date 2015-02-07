@@ -12,9 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import java.util.Collection;
-
-import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.AbstractSubmitter;
+import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -25,16 +24,11 @@ public class DestroysEverythingBehavior extends Behavior implements CollisionBeh
     @Override
     public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
-	    other.probeForBehaviors(new Submitter<DamageListener>(){
+	    other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 		    @Override
-		    public void submit(DamageListener item) {
-			item.projectileDamage(65536);
-		    }
-		    @Override
-		    public void submit(Collection<DamageListener> items) {
-			for(DamageListener item:items)
-			 item.projectileDamage(65536);
-		    }}, DamageListener.class);
+		    public void submit(DamageableBehavior item) {
+			item.proposeDamage(new ProjectileDamage(65536));
+		    }}, DamageableBehavior.class);
 	}//end if(DEFObject)
     }//end proposeCollision()
     @Override

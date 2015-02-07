@@ -12,11 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import java.util.Collection;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.AbstractSubmitter;
+import org.jtrfp.trcl.beh.DamageListener.GroundCollisionDamage;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.BarrierCube;
@@ -53,16 +52,11 @@ private int damageOnImpact= 6554;
 		if(	rotTransPos[0]>0 && rotTransPos[0]<dims[0] &&
 			rotTransPos[1]>0 && rotTransPos[1]<dims[1] &&
 			rotTransPos[2]>0 && rotTransPos[2]<dims[2]){
-		    obj.probeForBehaviors(new Submitter<DamageListener>(){
+		    obj.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 			@Override
-			public void submit(DamageListener item) {
-			    item.groundCollisionDamage(damageOnImpact);
-			}
-			@Override
-			public void submit(Collection<DamageListener> items) {
-			    for(DamageListener item:items)
-				item.groundCollisionDamage(damageOnImpact);
-			}}, DamageListener.class);
+			public void submit(DamageableBehavior item) {
+			    item.proposeDamage(new GroundCollisionDamage(damageOnImpact));
+			}}, DamageableBehavior.class);
 		    }//end if(withinRange)
 	    }//end if(Player)
 	}//end _proposeCollision(...)

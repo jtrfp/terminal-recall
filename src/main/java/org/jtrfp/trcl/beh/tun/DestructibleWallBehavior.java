@@ -12,12 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.tun;
 
-import java.util.Collection;
-
-import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.beh.DamageListener;
+import org.jtrfp.trcl.beh.DamageListener.CollisionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
 import org.jtrfp.trcl.obj.Player;
@@ -35,16 +33,11 @@ public class DestructibleWallBehavior extends Behavior implements CollisionBehav
 	if(otherPos[0]>thisPos[0]&& otherPos[0]<thisPos[0]+THICKNESS_X){
     	    if(other instanceof Player){
     	        final Player player=(Player)other;
-    	        player.probeForBehaviors(new Submitter<DamageListener>(){
+    	        player.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 		    @Override
-		    public void submit(DamageListener item) {
-			item.airCollisionDamage(DAMAGE_ON_IMPACT);
-		    }
-		    @Override
-		    public void submit(Collection<DamageListener> items) {
-			for(DamageListener item:items)
-			    item.airCollisionDamage(DAMAGE_ON_IMPACT);
-		    }}, DamageListener.class);
+		    public void submit(DamageableBehavior item) {
+			item.proposeDamage(new CollisionDamage(DAMAGE_ON_IMPACT));
+		    }}, DamageableBehavior.class);
     	        }//end if(Player)
     	    else if(other instanceof Projectile)
     		other.getBehavior().probeForBehavior(ProjectileBehavior.class).forceCollision(p);

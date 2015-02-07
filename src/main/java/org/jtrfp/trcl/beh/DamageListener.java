@@ -12,11 +12,27 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+
 public interface DamageListener {
-    public void airCollisionDamage(int dmg);
-    public void projectileDamage(int dmg);
-    public void groundCollisionDamage(int dmg);
-    public void tunnelCollisionDamage(int dmg);
-    public void electrocutionDamage(int dmg);
-    public void shearDamage(int dmg);
+    public void damageEvent(Event ev);
+    
+    public static abstract class Event{
+	private final int damageAmount;
+	public Event(int damageAmount){
+	    this.damageAmount=damageAmount;
+	}
+	/**
+	 * @return the damageAmount
+	 */
+	public int getDamageAmount() {
+	    return damageAmount;
+	}
+    }//end Event
+    public static class ProjectileDamage extends Event{public ProjectileDamage(int damageAmount){super(damageAmount);}}
+    public static class CollisionDamage extends Event{public CollisionDamage(int damageAmount){super(damageAmount);}}
+    public static class SurfaceCollisionDamage extends Event{public SurfaceCollisionDamage(int damageAmount){super(damageAmount);}}
+    public static class GroundCollisionDamage extends Event{public GroundCollisionDamage(int damageAmount){super(damageAmount);}}
+    public static class ElectrocutionDamage extends Event{public ElectrocutionDamage(int damageAmount){super(damageAmount);}}
+    public static class ShearDamage extends SurfaceCollisionDamage{public ShearDamage(int damageAmount){super(damageAmount);}}
+    public static class AirCollisionDamage extends CollisionDamage{public AirCollisionDamage(int damageAmount){super(damageAmount);}}
 }//end DamageListener

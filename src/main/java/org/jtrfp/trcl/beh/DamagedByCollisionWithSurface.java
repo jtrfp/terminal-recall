@@ -12,10 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import java.util.Collection;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DamagedByCollisionWithSurface extends Behavior implements SurfaceImpactListener {
@@ -26,16 +24,12 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
     public void collidedWithSurface(WorldObject wo, double[] surfaceNormal) {
 	if(!isEnabled())return;
 	final WorldObject p = getParent();
-	p.probeForBehaviors(new Submitter<DamageListener>(){
+	p.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
-	    public void submit(DamageListener item) {
-		item.shearDamage(collisionDamage);
+	    public void submit(DamageableBehavior item) {
+		item.proposeDamage(new DamageListener.ShearDamage(collisionDamage));
 	    }
-	    @Override
-	    public void submit(Collection<DamageListener> items) {
-		for(DamageListener item:items)
-		 item.shearDamage(collisionDamage);
-	    }}, DamageListener.class);
+	    }, DamageableBehavior.class);
 	for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
 	    p.getTr().getResourceManager().getDebrisSystem().spawn(new Vector3D(p.getPosition()), 
 	    new Vector3D(

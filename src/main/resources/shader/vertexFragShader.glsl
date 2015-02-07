@@ -173,10 +173,10 @@ void main(){
     		}//end if(object)
     		
     		else{
-    		 xy=vec2(0,0);
-    		 uv=vec2(0,0);
-    		 z=0;
+    		 //xy=vec2(0,0);
+    		 //uv=vec2(0,0);
+    		 //z=0;
     		 w=0;
-    		 flatTextureID=0;
+    		 //flatTextureID=0;
     		}//end not-in-block
 }//end main()

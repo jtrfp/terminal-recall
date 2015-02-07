@@ -69,10 +69,6 @@ void main(){
  uint	col				= pid%PRIMS_PER_ROW;
  uint	primitiveIndex	= pid;
  uint	vertexIndex		= primitiveIndex*3u;
- gl_Position.xy			= GL_POS_ADD;
- gl_Position.x			+=float(col);
- gl_Position.y			+=float(row);
- gl_Position.w			= GL_POS_W;//Use W as a free division.
  const ivec2 increment	= ivec2(1,0);
  ivec2 v0				= ivec2(
  				vertexIndex%VERTICES_PER_ROW,
@@ -86,6 +82,15 @@ void main(){
  	texelFetch(wVBuffer,v0,0).x,
  	texelFetchOffset(wVBuffer,v0,0,ivec2(1,0)).x,
  	texelFetchOffset(wVBuffer,v0,0,ivec2(2,0)).x);
+ //Early-escape test for unwritten primitives
+ if(wvb[0u] == 0 && wvb[1u] == 0 && wvb[2u] == 0)
+  {gl_Position.w=0;return;}//Pass a coord too insane to render.
+ //Did not escape. Calculate the position. 
+ gl_Position.xy			= GL_POS_ADD;
+ gl_Position.x			+=float(col);
+ gl_Position.y			+=float(row);
+ gl_Position.w			= GL_POS_W;//Use W as a free division.
+  
  mat3 normalizationMatrix = inverse(affine(
   (texelFetchOffset(xyVBuffer,v0,0,ivec2(1,0)).xy*wvb[1u]+1)*.5,
   (texelFetchOffset(xyVBuffer,v0,0,ivec2(2,0)).xy*wvb[2u]+1)*.5,

@@ -22,32 +22,7 @@ public class RedFlashOnDamage extends Behavior implements DamageListener {
     }
 
     @Override
-    public void airCollisionDamage(int dmg) {
-	flash();
-    }
-
-    @Override
-    public void projectileDamage(int dmg) {
-	flash();
-    }
-
-    @Override
-    public void groundCollisionDamage(int dmg) {
-	flash();
-    }
-
-    @Override
-    public void tunnelCollisionDamage(int dmg) {
-	flash();
-    }
-
-    @Override
-    public void electrocutionDamage(int dmg) {
-	flash();
-    }
-
-    @Override
-    public void shearDamage(int dmg) {
+    public void damageEvent(Event ev) {
 	flash();
     }
     

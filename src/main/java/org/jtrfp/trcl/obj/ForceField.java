@@ -20,6 +20,7 @@ import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithPlayer;
+import org.jtrfp.trcl.beh.DamageListener.ElectrocutionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.PlayerCollisionListener;
 import org.jtrfp.trcl.core.TR;
@@ -35,10 +36,10 @@ public class ForceField extends WorldObject {
 	super(tr);
 	final TextureDescription eTex = new AnimatedTexture(new Sequencer(100, 4, false).setTimeOffset((long)(Math.random()*500)), 
 		    new Texture[]{
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(), false),
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI1.RAW", tr.getDarkIsClearPaletteVL(), false),
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(), false),
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(), false)}
+		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(),null, false),
+		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI1.RAW", tr.getDarkIsClearPaletteVL(),null, false),
+		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(),null, false),
+		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(),null, false)}
 		    );
 	    setModel(Model.buildCube(tunnelDia, tunnelDia, wallThickness,
 		    eTex,
@@ -82,7 +83,7 @@ public class ForceField extends WorldObject {
 	}//end _tick()
 	@Override
 	public void collidedWithPlayer(Player player) {
-	    player.probeForBehavior(DamageableBehavior.class).electrocutionDamage(2048);
+	    player.probeForBehavior(DamageableBehavior.class).proposeDamage(new ElectrocutionDamage(2048));
 	}
     }//end ForceFieldBehavior
 }//end ForceField

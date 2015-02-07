@@ -24,6 +24,7 @@ uniform sampler2D		vertexTextureIDTexture;
 uniform sampler2D		primitiveUVZWTexture;
 uniform sampler2D		primitivenXnYnZTexture;
 uniform sampler2DArray 	rgbaTiles;
+uniform sampler2DArray	ESTuTvTiles;
 uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform samplerCube 	cubeTexture;
@@ -34,6 +35,11 @@ uniform vec3			sunColor;
 uniform vec3 			sunVector;
 uniform uint			bypassAlpha;
 uniform vec2			screenDims;
+
+struct CompositeTexel {
+ vec4 rgba;
+ vec4 ESTuTv;
+ };
 
 //noperspective in vec2	screenLoc;
 vec2 screenLoc									= gl_FragCoord.xy/screenDims;
@@ -92,15 +98,25 @@ float warpFog(float z){
 
 uint UByte(uint _input, uint index)
 	{return (_input >> 8u*index) & 0x000000FFu;}
+	
+CompositeTexel cMix(CompositeTexel left, CompositeTexel right, float amt){
+ CompositeTexel result;
+ result.rgba = mix(left.rgba,right.rgba,amt);
+ result.ESTuTv = mix(left.ESTuTv,right.ESTuTv,amt);
+ return result;
+}
 
-vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub, uint subTexV4Addr, uint startCode){
+CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub, uint subTexV4Addr, uint startCode){
  // Codebook
  uint	codeIdx		= UByte((texelFetch(rootBuffer,int(subTexV4Idx+subTexV4Addr))[subTexV4Sub/4u]),subTexV4Sub%4u)+startCode;
  uint	codeBkPgNum	= codeIdx / CODES_PER_CODE_PAGE;
  uvec2	codeXY		= texelXY%4u;
  vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
  ivec2	codePgXY	= ivec2(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES,(codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES)*4+ivec2(codeXY);
- return	texelFetch(rgbaTiles,ivec3(codePgXY,codeBkPgNum),0);
+ CompositeTexel result;
+ result.rgba  = texelFetch(rgbaTiles,ivec3(codePgXY,codeBkPgNum),0);
+ result.ESTuTv= texelFetch(ESTuTvTiles,ivec3(codePgXY,codeBkPgNum),0);  
+ return	result;
  }
  
  vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
@@ -113,7 +129,7 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
  uv = clamp(uv-.5,0,4096);
  vec2 sub = mod(uv,1);
  uvec2 iuv = uvec2(uv);
- vec4	cTexel;
+ CompositeTexel cTexel;
  uvec4 iuv4A,iuv4B, tTOCIdx,tTOCvec4Idx,tTOCsubIdx,subTexV4Addr;
  uvec4	subTexV4Idx, subTexV4Sub, startCode;
  iuv4A		 = uvec4(iuv,iuv+uvec2(0,1));
@@ -141,11 +157,12 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
  	vec2	codeXY		= stXY%4u;
  	vec2	subTexUVsub	= codeXY*CODE_PAGE_TEXEL_SIZE_UV;
  	vec2	codePgXY	= vec2(codeIdx % CODE_PAGE_SIDE_WIDTH_CODES,(codeIdx / CODE_PAGE_SIDE_WIDTH_CODES)%CODE_PAGE_SIDE_WIDTH_CODES)*4+codeXY+sub;
- 	cTexel				= textureLod(rgbaTiles,vec3(codePgXY*CODE_PAGE_TEXEL_SIZE_UV,codeBkPgNum),0);
+ 	cTexel.rgba			= textureLod(rgbaTiles,vec3(codePgXY*CODE_PAGE_TEXEL_SIZE_UV,codeBkPgNum),0);
+ 	cTexel.ESTuTv		= textureLod(ESTuTvTiles,vec3(codePgXY*CODE_PAGE_TEXEL_SIZE_UV,codeBkPgNum),0);
  	vec4 illumination;
  	if(dot(norm.xyz,norm.xyz)>.01)illumination.rgb
- 								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight);
- 	return cTexel * illumination;
+ 								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight) + cTexel.ESTuTv.x;
+ 	return cTexel.rgba * illumination;
     }else{
      subTexV4Addr = uvec4(stv4a);
      }
@@ -196,13 +213,13 @@ vec4 codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint subTexV4Sub
    subTexV4Sub  = subTexByIdx % 16u;
   }
   //Perform 4-way texel mix
-  cTexel		 = mix(codeTexel(iuv4A.xy,textureID, subTexV4Idx[0u], subTexV4Sub[0u],subTexV4Addr[0u],startCode[0u]),codeTexel(iuv4A.zw,textureID, subTexV4Idx[1u], subTexV4Sub[1u],subTexV4Addr[1u],startCode[1u]),sub.y);
-  cTexel		 = mix(cTexel,mix(codeTexel(iuv4B.xy,textureID, subTexV4Idx[2u], subTexV4Sub[2u], subTexV4Addr[2u],startCode[2u]),codeTexel(iuv4B.zw,textureID,subTexV4Idx[3u],subTexV4Sub[3u],subTexV4Addr[3u],startCode[3u]),sub.y),sub.x);
+  cTexel		 = cMix(codeTexel(iuv4A.xy,textureID, subTexV4Idx[0u], subTexV4Sub[0u],subTexV4Addr[0u],startCode[0u]),codeTexel(iuv4A.zw,textureID, subTexV4Idx[1u], subTexV4Sub[1u],subTexV4Addr[1u],startCode[1u]),sub.y);
+  cTexel		 = cMix(cTexel,cMix(codeTexel(iuv4B.xy,textureID, subTexV4Idx[2u], subTexV4Sub[2u], subTexV4Addr[2u],startCode[2u]),codeTexel(iuv4B.zw,textureID,subTexV4Idx[3u],subTexV4Sub[3u],subTexV4Addr[3u],startCode[3u]),sub.y),sub.x);
  
  vec4 illumination = vec4(1);
  if(dot(norm.xyz,norm.xyz)>.01)illumination.rgb
- 								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight);
- return cTexel * illumination;
+ 								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight) + cTexel.ESTuTv.x;
+ return cTexel.rgba * illumination;
  }//end intrinsicCodeTexel
 
 vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){

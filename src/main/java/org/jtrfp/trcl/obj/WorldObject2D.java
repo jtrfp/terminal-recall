@@ -48,27 +48,30 @@ public class WorldObject2D extends WorldObject{
 	@Override
 	protected void recalculateTransRotMBuffer(){
 		final double [] tV = position;
-		
-		Vect3D.normalize(getHeadingArray(), aZ);
-		Vect3D.cross(getTopArray(),aZ,aX);
-		Vect3D.cross(aZ,aX,aY);
-		
-		rMd[0]=aX[0];
-		rMd[1]=aY[0];
-		rMd[2]=aZ[0];
-		
-		rMd[4]=aX[1];
-		rMd[5]=aY[1];
-		rMd[6]=aZ[1];
-		
-		rMd[8]=aX[2];
-		rMd[9]=aY[2];
-		rMd[10]=aZ[2];
-		
-		tMd[3]=tV[0];
-		tMd[7]=tV[1];
-		tMd[11]=tV[2];
-		Mat4x4.mul(tMd, rMd, rotTransM);
+		if(isVisible()){
+		 Vect3D.normalize(getHeadingArray(), aZ);
+		 Vect3D.cross(getTopArray(),aZ,aX);
+		 Vect3D.cross(aZ,aX,aY);
+		 
+		 rMd[0]=aX[0];
+		 rMd[1]=aY[0];
+		 rMd[2]=aZ[0];
+	 	 
+		 rMd[4]=aX[1];
+		 rMd[5]=aY[1];
+		 rMd[6]=aZ[1];
+	 	 
+		 rMd[8]=aX[2];
+		 rMd[9]=aY[2];
+		 rMd[10]=aZ[2];
+		 
+		 tMd[3]=tV[0];
+		 tMd[7]=tV[1];
+		 tMd[11]=tV[2];
+		 Mat4x4.mul(tMd, rMd, rotTransM);
+		 }else
+		    for(int i=0; i<16; i++)
+			rotTransM[i]=Double.NaN;
 		
 		getTr().matrixWindow.get().setTransposed(rotTransM,matrixID, scratchMatrixArray);
 		}//end recalculateTransRotMBuffer()

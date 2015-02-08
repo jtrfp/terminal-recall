@@ -178,7 +178,7 @@ public final class Renderer {
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		deferredProgram.getUniform("cubeTexture").set((int)1);
 		// 2 UNUSED
-		// 3 UNUSED
+		deferredProgram.getUniform("ESTuTvTiles").set((int) 3);// 3 UNUSED
 		deferredProgram.getUniform("rgbaTiles").set((int) 4);
 		deferredProgram.getUniform("primitiveIDTexture").set((int) 5);
 		deferredProgram.getUniform("layerAccumulator").set((int)6);

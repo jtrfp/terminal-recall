@@ -33,7 +33,7 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
 	super(parent);
 	add(loadingMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
-			.getResourceAsStream("/BlueWhiteGradient.png")),
+			.getResourceAsStream("/BlueWhiteGradient.png")),null,
 			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,
 		true));
 	loadingMeterBar.setPosition(LOADING_POS);

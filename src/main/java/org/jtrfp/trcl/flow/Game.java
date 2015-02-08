@@ -307,7 +307,7 @@ public class Game {
 		    }// end for(weapons)
 		    rm.setProjectileFactories(pf);
 		    player = new Player(tr, tr.getResourceManager().getBINModel(
-			    "SHIP.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));
+			    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));
 		    final Camera camera = tr.renderer.get().getCamera();
 		    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 		    camera.probeForBehavior(MatchDirection.class).setTarget(player);

@@ -53,7 +53,7 @@ private static final String [] TYPES = new String[]{
     public Debris(TR tr) {
 	super(tr);
 	try{
-	Model m = tr.getResourceManager().getBINModel(TYPES[(int)(Math.random()*TYPES.length)], tr.getGlobalPaletteVL(), tr.gpu.get().getGl());
+	Model m = tr.getResourceManager().getBINModel(TYPES[(int)(Math.random()*TYPES.length)], tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
 	setModel(m);
 	addBehavior(new MovesByVelocity());
 	addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));

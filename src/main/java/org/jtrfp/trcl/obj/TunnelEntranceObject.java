@@ -54,7 +54,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 	this.setBillboardSize(new Dimension(10000,10000));
 	try {this.setTexture(
 		    tr.getResourceManager().getRAWAsTexture("TARG1.RAW",
-			    tr.getGlobalPaletteVL(),false), true);
+			    tr.getGlobalPaletteVL(),null,false), true);
 	}	catch(Exception e){e.printStackTrace();}
     }//end constructor
     

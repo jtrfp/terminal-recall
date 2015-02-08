@@ -28,7 +28,7 @@ private boolean includeYAxisInCollision=true;
 
     public Jumpzone(TR tr) {
 	super(tr);
-	try{setModel(tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(), tr.gpu.get().getGl()));}
+	try{setModel(tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));}
 	catch(Exception e){tr.showStopper(e);}
 	setVisible(false);
     }//end constructor

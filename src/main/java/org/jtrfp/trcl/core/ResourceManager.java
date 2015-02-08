@@ -79,6 +79,7 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
 import org.jtrfp.trcl.file.CLRFile;
 import org.jtrfp.trcl.file.DEFFile;
+import org.jtrfp.trcl.file.LTEFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.NAVFile;
 import org.jtrfp.trcl.file.NDXFile;
@@ -230,11 +231,15 @@ public class ResourceManager{
 		registerPOD(fileToRegister.getAbsolutePath(),new PodFile(fileToRegister));
 		}
 	
-	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList palette,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-		String [] files = getTEXListFile(texFileName);
+	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList paletteRGBA, ColorPaletteVectorList paletteESTuTv,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+		if(texFileName==null)
+		    throw new NullPointerException("texFileName is intolerably null");
+		if(paletteRGBA==null)
+		    throw new NullPointerException("paletteRGBA is intolerably null");
+	    	String [] files = getTEXListFile(texFileName);
 		TextureDescription [] result = new TextureDescription[files.length];
 		for(int i=0; i<files.length;i++)
-			{result[i]=getRAWAsTexture(files[i],palette,uvWrapping);}
+			{result[i]=getRAWAsTexture(files[i],paletteRGBA,paletteESTuTv,uvWrapping);}
 		return result;
 		}//end loadTextures(...)
 	
@@ -245,7 +250,7 @@ public class ResourceManager{
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new TextureDescription[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new Texture(segs[si],"name",tr,uvWrapping);}
+				{result[si] = new Texture(segs[si],null,"name",tr,uvWrapping);}//TODO: ESTuTv support
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
@@ -253,13 +258,17 @@ public class ResourceManager{
 		return null;//never happens.
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList palette, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-	    return getRAWAsTexture(name,palette,true,uvWrapping);
+	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList paletteRGBA, final ColorPaletteVectorList paletteESTuTv, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	    return getRAWAsTexture(name,paletteRGBA,paletteESTuTv,true,uvWrapping);
 	}
 	
-	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList palette,
-			final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-	    	final int hash=name.hashCode()*palette.hashCode();
+	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList paletteRGBA,
+			ColorPaletteVectorList paletteESTuTv, final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	    if(name==null)
+		throw new NullPointerException("Name is intolerably null.");
+	    if(paletteRGBA==null)
+		throw new NullPointerException("paletteRGBA is intolerably null.");
+	    final int hash=name.hashCode()*paletteRGBA.hashCode();
 	        TextureDescription result=rawCache.get(hash);
 	    	if(result!=null&&useCache)return result;
 			try {
@@ -277,13 +286,15 @@ public class ResourceManager{
 						}
 					if(frames.size()>1){
 						Texture [] tFrames = new Texture[frames.size()];
-						for(int i=0; i<tFrames.length;i++)
-							{tFrames[i]=new Texture(getRAWVectorList(frames.get(i),palette),""+frames.get(i),null,uvWrapping);}
+						for(int i=0; i<tFrames.length;i++){
+						    PalettedVectorList pvlRGBA  = getRAWVectorList(frames.get(i),paletteRGBA);
+						    PalettedVectorList pvlESTuTv= getRAWVectorList(frames.get(i),paletteESTuTv);
+						    tFrames[i]=new Texture(pvlRGBA,pvlESTuTv,""+frames.get(i),tr,uvWrapping);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWVectorList(name,palette),name,tr,uvWrapping);
+				result = new Texture(getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,tr,uvWrapping);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
@@ -296,7 +307,7 @@ public class ResourceManager{
 				result=tr.gpu.get().textureManager.get().getFallbackTexture();
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
-		if(useCache)rawCache.put(name.hashCode()*palette.hashCode(), result);
+		if(useCache)rawCache.put(name.hashCode()*paletteRGBA.hashCode(), result);
 		return result;
 		}//end getRAWAsTexture(...)
 	
@@ -311,14 +322,14 @@ public class ResourceManager{
 		return false;
 		}//end rawExists
 	
-	public Model getBINModel(String name, ColorPaletteVectorList palette, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
-		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette);
+	public Model getBINModel(String name, ColorPaletteVectorList palette,ColorPaletteVectorList paletteESTuTv, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
+		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette,paletteESTuTv);
 		}
 	
 	private static final double [] BOX_U = new double[]{0,1,1,0};
 	private static final double [] BOX_V = new double[]{0,0,1,1};
 	
-	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette) throws FileLoadException, IOException, IllegalAccessException{
+	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, ColorPaletteVectorList ESTuTvPalette) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
@@ -341,7 +352,7 @@ public class ResourceManager{
 			//Build the Model from the BINFile.Model
 			Model [] frames = new Model[ac.getNumFrames()];
 			for(int i=0; i<frames.length;i++)
-				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette);}
+				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette, ESTuTvPalette);}
 			result.setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumElements());
 			//Consolidate the frames to one model
 			for(int i=0; i<frames.length;i++)
@@ -379,8 +390,8 @@ public class ResourceManager{
 					//Sort out types of block
 					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
-						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, hasAlpha);
-						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, false);}
+						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, hasAlpha);
+						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, false);}
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
@@ -500,8 +511,8 @@ public class ResourceManager{
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						Texture [] subTextures = new Texture[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, false);
-							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette, true);
+							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
+							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);
 							//subTextures[ti]=tex instanceof Texture?new DummyTRFutureTask<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							}//end for(frames) //fDelay, nFrames,interp
 						currentTexture = new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures);
@@ -579,6 +590,10 @@ public class ResourceManager{
 		}//end getRAWImage
 	
 	public PalettedVectorList getRAWVectorList(String name, VectorList palette) throws IOException, FileLoadException, IllegalAccessException, NotSquareException, NonPowerOfTwoException{
+	    if(name==null)
+		throw new NullPointerException("Name is intolerably null");
+	    if(palette==null)
+		throw new NullPointerException("Palette is intolerably null");
 	    final RAWFile raw =  getRAW(name);
 	    return new PalettedVectorList(new RAWVectorList(raw),palette);
 	}//end getRAWVectorList()
@@ -774,6 +789,13 @@ public class ResourceManager{
 	    if(testTexture!=null)
 		return testTexture;
 	    return testTexture = tr.gpu.get().textureManager.get().newTexture(
-		    Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/testTexture.png")), "testTexture", true);
+		    Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);
 	}//end getTestTexture()
+	
+	public LTEFile getLTE(String resourceNameWithDirectoryPrefix) throws IOException, IllegalAccessException, UnrecognizedFormatException, FileLoadException{
+	    final InputStream is = getInputStreamFromResource(resourceNameWithDirectoryPrefix);
+	    final LTEFile result = new Parser().readToNewBean(is, LTEFile.class);
+	    is.close();
+	    return result;
+	}
 }//end ResourceManager

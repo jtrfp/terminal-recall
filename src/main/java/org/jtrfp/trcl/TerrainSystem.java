@@ -328,7 +328,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    
 	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
-		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),false);}
+		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),null,false);}
 		catch(Exception e){e.printStackTrace();}
 		DirectionVector v = entrance?tun.getEntrance():tun.getExit();
 		x = (int)TR.legacy2MapSquare(v.getZ());

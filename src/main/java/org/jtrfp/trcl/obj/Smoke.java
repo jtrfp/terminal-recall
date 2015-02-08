@@ -93,7 +93,7 @@ public class Smoke extends BillboardSprite {
 	    }//end SmokeType
 	    
 	    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), false);}
+		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), null, false);}
 
 	    public void resetSmoke() {
 		getBehavior().probeForBehavior(SmokeBehavior.class).reset();

@@ -56,7 +56,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	 */
 	try {
 	    crossModel = tr.getResourceManager().getBINModel("TARGET.BIN",
-		    greenThrob, 1. / 204800., true, tr.getGlobalPaletteVL());
+		    greenThrob, 1. / 204800., true, tr.getGlobalPaletteVL(),null);
 	} catch (Exception e) {
 	    tr.showStopper(e);
 	}

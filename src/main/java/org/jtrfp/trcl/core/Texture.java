@@ -74,7 +74,7 @@ public class Texture implements TextureDescription {
     }//end finalize()
     
     Texture(Color c, TR tr){
-	this(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),tr,false);
+	this(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),tr,false);
     }//end constructor
     
     private static VectorList colorZeroRasterVL(){
@@ -149,32 +149,32 @@ public class Texture implements TextureDescription {
 	return new Texture(this,uOff,vOff,uSize,vSize,tr,false);
     }
     
-    Texture(PalettedVectorList vl, String debugName, TR tr, boolean uvWrapping){
+    Texture(PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, TR tr, boolean uvWrapping){
 	this(tr,debugName,uvWrapping);
-	vqCompress(vl);
+	vqCompress(vlRGBA,vlESTuTv);
     }//end constructor
 
-    Texture(ByteBuffer imageRGBA8888, String debugName, TR tr, boolean uvWrapping) {
+    Texture(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
 	if (imageRGBA8888.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
 	}//end if capacity==0
 	imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
-	vqCompress(imageRGBA8888);
+	vqCompress(imageRGBA8888,imageESTuTv8888);
     }// end constructor
     
-    private void vqCompress(PalettedVectorList squareImageIndexed){
-	final double	fuzzySideLength = Math.sqrt(squareImageIndexed.getNumVectors());
+    private void vqCompress(PalettedVectorList squareImageIndexedRGBA,PalettedVectorList squareImageIndexedESTuTv){
+	final double	fuzzySideLength = Math.sqrt(squareImageIndexedRGBA.getNumVectors());
 	final int 	sideLength	= (int)Math.floor(fuzzySideLength);
 	if(!SpecialRAWDimensions.isPowerOfTwo(sideLength))
 	    System.err.println("WARNING: Calculated dimensions are not power-of-two. Trouble ahead.");
 	if(Math.abs(fuzzySideLength-sideLength)>.001)
 	    System.err.println("WARNING: Calculated dimensions are not perfectly square. Trouble ahead.");
-	vqCompress(squareImageIndexed,sideLength);
+	vqCompress(squareImageIndexedRGBA, squareImageIndexedESTuTv,sideLength);
     }
     
-    private void vqCompress(ByteBuffer imageRGBA8888){
+    private void vqCompress(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888){
 	final double	fuzzySideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
 	final int 	sideLength	= (int)Math.floor(fuzzySideLength);
 	if(!SpecialRAWDimensions.isPowerOfTwo(sideLength))
@@ -184,18 +184,28 @@ public class Texture implements TextureDescription {
 	 // Break down into 4x4 blocks
 	 final ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
 	 final RGBA8888VectorList 	rgba8888vl 	= new RGBA8888VectorList(bbvl);
-	 vqCompress(rgba8888vl,sideLength);
+	 
+	 final ByteBufferVectorList 	bbvlESTuTv 	= imageESTuTv8888!=null?new ByteBufferVectorList(imageESTuTv8888):null;
+	 final RGBA8888VectorList 	esTuTv8888vl 	= bbvlESTuTv!=null?new RGBA8888VectorList(bbvlESTuTv):null;
+	 vqCompress(rgba8888vl,esTuTv8888vl,sideLength);
     }
     
-    private final void vqCompress(VectorList rgba8888vl, final int sideLength){
+    private final void vqCompress(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength){
 	    this.sideLength=sideLength;
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
-	    final RasterizedBlockVectorList 	rbvl 		= new RasterizedBlockVectorList(
+	    final RasterizedBlockVectorList 	rbvlRGBA 		= new RasterizedBlockVectorList(
 		    rgba8888vl, sideLength, 4);
-	    final VectorListRasterizer vlr = new VectorListRasterizer(rbvl, new int [] {diameterInCodes,diameterInCodes});
+	    final VectorListRasterizer vlrRGBA = new VectorListRasterizer(rbvlRGBA, new int [] {diameterInCodes,diameterInCodes});
+	    final RasterizedBlockVectorList 	rbvlESTuTv 		= 
+		    esTuTv8888vl!=null?
+		    new RasterizedBlockVectorList(
+		    esTuTv8888vl, sideLength, 4):null;
+	    final VectorListRasterizer vlrESTuTv = 
+		    rbvlESTuTv!=null?
+		    new VectorListRasterizer(rbvlESTuTv, new int [] {diameterInCodes,diameterInCodes}):null;
 	    // Calculate a rough average color by averaging random samples.
-	    calulateAverageColor(rbvl);
+	    calulateAverageColor(rbvlRGBA);
 	    // Get a TOC
 	    tocIndex = toc.create();
 	    setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
@@ -285,53 +295,19 @@ public class Texture implements TextureDescription {
 		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int globalCodeIndex = codeIdx%256
 			+ codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
-		setCodebookTexelsAt(codeX,codeY,diameterInCodes, globalCodeIndex);
+		setRGBACodebookTexelsAt(vlrRGBA, codeX,codeY,diameterInCodes, globalCodeIndex);
+		if(vlrESTuTv!=null)
+		 setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex);
 		}//end for(codeX)
 	}//end for(codeY)
-	flushCodeblock256();
+	flushRGBACodeblock256();
+	flushESTuTvCodeblock256();
 	return null;
 	}//end threadPool call()
-	    private void setCodebookTexelsAt(int codeX, int codeY,
+	    private void setRGBACodebookTexelsAt(final VectorListRasterizer _vlr, int codeX, int codeY,
 		    int diameterInCodes, int globalCodeIndex) {
 		final int coord[] = new int[]{codeX,codeY};
-		final RasterRowWriter rw = new RasterRowWriter() {
-		    @Override
-		    public void applyRow(int row, ByteBuffer dest) {
-			int position = row * 16;
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (vlr
-				.componentAt(coord, position++) * 255.));
-		    }// end applyRow
-		};
+		final RasterRowWriter rw = new RowWriterImpl(_vlr,coord);
 		try {
 		    registerRGBAToBlock256(globalCodeIndex, rw);
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -339,23 +315,98 @@ public class Texture implements TextureDescription {
 			    + Texture.this.toString(), e);
 		}//end catch(ArrayIndexOutOfBoundsException)
 	    }// end setCodebookTexelsAt
-	    private final Map<Integer,RasterRowWriter[]>block256Map = new HashMap<Integer,RasterRowWriter[]>();
+	    
+	    private void setESTuTvCodebookTexelsAt(final VectorListRasterizer _vlr, int codeX, int codeY,
+		    int diameterInCodes, int globalCodeIndex) {
+		final int coord[] = new int[]{codeX,codeY};
+		final RasterRowWriter rw = new RowWriterImpl(_vlr,coord);
+		try {
+		    registerESTuTvToBlock256(globalCodeIndex, rw);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    throw new RuntimeException("this="
+			    + Texture.this.toString(), e);
+		}//end catch(ArrayIndexOutOfBoundsException)
+	    }// end setCodebookTexelsAt
+	    
+	    final class RowWriterImpl implements RasterRowWriter{
+		private final VectorListRasterizer _vlr;
+		private final int [] coord;
+		public RowWriterImpl(VectorListRasterizer _vlr, int [] coord){
+		    this._vlr=_vlr;
+		    this.coord=coord;
+		}
+		@Override
+		    public void applyRow(int row, ByteBuffer dest) {
+			int position = row * 16;
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+			dest.put((byte) (_vlr
+				.componentAt(coord, position++) * 255.));
+		    }// end applyRow
+	    }//end RasterRowWriter
+	    
+	    private final Map<Integer,RasterRowWriter[]>rgbaBlock256Map = new HashMap<Integer,RasterRowWriter[]>();
+	    private final Map<Integer,RasterRowWriter[]>ESTuTvBlock256Map = new HashMap<Integer,RasterRowWriter[]>();
 	    private final void registerRGBAToBlock256(int globalCodeIndex, RasterRowWriter rw){
-		RasterRowWriter[] writers = getBlock256(globalCodeIndex);
+		RasterRowWriter[] writers = getRGBABlock256(globalCodeIndex);
 		writers[globalCodeIndex%256]=rw;
 	    }//end registerRGBAToBlock256
-	    private final RasterRowWriter[] getBlock256(int globalCodeIndex){
+	    private final void registerESTuTvToBlock256(int globalCodeIndex, RasterRowWriter rw){
+		RasterRowWriter[] writers = getESTuTvBlock256(globalCodeIndex);
+		writers[globalCodeIndex%256]=rw;
+	    }//end registerRGBAToBlock256
+	    private final RasterRowWriter[] getRGBABlock256(int globalCodeIndex){
 		final int key = globalCodeIndex/256;
-		RasterRowWriter [] writers = block256Map.get(key);
+		RasterRowWriter [] writers = rgbaBlock256Map.get(key);
 		if(writers==null)
-		   block256Map.put(key,writers = new RasterRowWriter[256]);
+		   rgbaBlock256Map.put(key,writers = new RasterRowWriter[256]);
 		return writers;
-	    }//end getBlock256(...)
-	    private final void flushCodeblock256(){
-		for(Entry<Integer,RasterRowWriter[]> entry:block256Map.entrySet()){
+	    }//end getRGBABlock256(...)
+	    private final RasterRowWriter[] getESTuTvBlock256(int globalCodeIndex){
+		final int key = globalCodeIndex/256;
+		RasterRowWriter [] writers = ESTuTvBlock256Map.get(key);
+		if(writers==null)
+		   ESTuTvBlock256Map.put(key,writers = new RasterRowWriter[256]);
+		return writers;
+	    }//end getESTuTvBlock256(...)
+	    private final void flushRGBACodeblock256(){
+		for(Entry<Integer,RasterRowWriter[]> entry:rgbaBlock256Map.entrySet()){
 		    cbm.setRGBABlock256(entry.getKey(),entry.getValue());
 		}//end for(entries)
-	    }//end flushCodeblock256()
+	    }//end flushRGBACodeblock256()
+	    private final void flushESTuTvCodeblock256(){
+		for(Entry<Integer,RasterRowWriter[]> entry:ESTuTvBlock256Map.entrySet()){
+		    cbm.setESTuTvBlock256(entry.getKey(),entry.getValue());
+		}//end for(entries)
+	    }//end flushRGBACodeblock256()
 	});// end pool thread
     }//end vqCompress(...)
 
@@ -369,7 +420,7 @@ public class Texture implements TextureDescription {
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
     }//end calculateAverageColor(...)
 
-    Texture(BufferedImage image, String debugName, TR tr, boolean uvWrapping) {
+    Texture(BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
 	    /*
 	    rgba = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight()
@@ -391,7 +442,7 @@ public class Texture implements TextureDescription {
 		    (greenA / div) / 255f, (blueA / div) / 255f);
 	    */
 	    //vqCompress(rgba);
-	    try{vqCompress(new BufferedImageRGBA8888VL(image),image.getWidth());}catch(Exception e){e.printStackTrace();}
+	    try{vqCompress(new BufferedImageRGBA8888VL(imgRGBA),imgESTuTv!=null?new BufferedImageRGBA8888VL(imgESTuTv):null,imgRGBA.getWidth());}catch(Exception e){e.printStackTrace();}
     }//end constructor
 
     public static ByteBuffer RGBA8FromPNG(InputStream is) {

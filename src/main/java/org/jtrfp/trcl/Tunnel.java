@@ -64,7 +64,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     final double 	tunnelDia = 150000;
     final double 	wallThickness = 5000;
     private final World world;
-    private final ColorPaletteVectorList   palette;
+    private 	  Color []		   palette;
+    private 	  ColorPaletteVectorList   paletteVL;
+    private	  ColorPaletteVectorList   ESTuTvPalette;
     private final TDFFile.Tunnel 	   sourceTunnel;
     private final TunnelExitObject 	   exitObject;
     private final LoadingProgressReporter[]reporters;
@@ -89,7 +91,6 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	reporters	  = rootReporter.generateSubReporters(2);
 	this.sourceTunnel = sourceTunnel;
 	tr 		  = world.getTr();
-	palette 	  = tr.getGlobalPaletteVL();
 	gl 		  = tr.gpu.get().getGl();
 	tunnelAssemblyReporter 
 	  		  = reporters[0];
@@ -99,6 +100,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    lvl = world.getTr().getResourceManager()
 		    .getLVL(sourceTunnel.getTunnelLVLFile());
 	    final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
+	    palette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
+	    paletteVL = new ColorPaletteVectorList(palette);
+	    ESTuTvPalette = new ColorPaletteVectorList(tr.getResourceManager().getLTE("FOG\\"+lvl.getLuminanceMapFile()).toColors(palette));
 	    tunnelEnd = buildTunnel(sourceTunnel, entranceVector, false);
 	} catch (Exception e) {
 	    e.printStackTrace();
@@ -130,8 +134,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	// TUNNEL_START_DIRECTION
 	ResourceManager rm = tr.getResourceManager();
 	LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
+	final ColorPaletteVectorList tunnelColorPalette = new ColorPaletteVectorList(tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile()));
 	TextureDescription[] tunnelTexturePalette = rm.getTextures(
-		tlvl.getLevelTextureListFile(), palette, true);
+		tlvl.getLevelTextureListFile(), paletteVL, ESTuTvPalette, true);
 	TNLFile tun = tr.getResourceManager().getTNLData(
 		tlvl.getHeightMapOrTunnelFile());
 
@@ -180,7 +185,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    ts.setTop(entrance ? top : Vector3D.PLUS_J);
 	    // Install the segment
 	    add(ts);
-	    installObstacles(s, tunnelTexturePalette, entrance ? groundVector
+	    installObstacles(s, tunnelColorPalette, ESTuTvPalette, tunnelTexturePalette, entrance ? groundVector
 		    : Vector3D.PLUS_I, entrance ? top : Vector3D.PLUS_J,
 		    position, TR.legacy2Modern(s.getStartWidth()
 			    * TunnelSegment.TUNNEL_DIA_SCALAR),
@@ -204,7 +209,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
      * 
      */
 
-    private void installObstacles(Segment s,
+    private void installObstacles(Segment s, ColorPaletteVectorList tunnelColorPalette, ColorPaletteVectorList ESTuTvPalette,
 	    TextureDescription[] tunnelTexturePalette, Vector3D heading,
 	    Vector3D top, Vector3D wPos, double width, double height, TR tr)
 	    throws IllegalAccessException, FileLoadException, IOException {
@@ -412,7 +417,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BLADE.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
-		    false, palette));
+		    false, palette,ESTuTvPalette));
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(top);
@@ -423,7 +428,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "FANBODY.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
-		    false, palette));
+		    false, palette,null));//No ESTuTv for fan for now.
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(top);
@@ -435,7 +440,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette,ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos.add(top
 		    .scalarMultiply(tunnelDia / 2))));
 	    wo.addBehavior(new CubeCollisionBehavior(wo));
@@ -448,7 +453,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette,ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .subtract(top.scalarMultiply(tunnelDia / 2))));
 	    wo.setPosition(wPos.toArray());
@@ -462,7 +467,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .add(heading.crossProduct(top)
 			    .scalarMultiply(tunnelDia / 2))));
@@ -475,7 +480,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .subtract(heading.crossProduct(top).scalarMultiply(
 			    tunnelDia / 2))));
@@ -489,7 +494,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(0, tunnelDia / 6, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -501,7 +506,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(0, -tunnelDia / 6, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -513,7 +518,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(-tunnelDia / 6, 0, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -525,7 +530,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(tunnelDia / 6, 0, 0))
 		    .toArray());
 	    wo.setHeading(heading);
@@ -533,7 +538,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo.addBehavior(new CubeCollisionBehavior(wo));
 	    add(wo);
 	    break;
-	case forceField: {// TODO
+	case forceField: {
 	    //ELECTRI[0-3].RAW 
 	    final ForceField ff = new ForceField(tr,(int)tunnelDia,(int)wallThickness);
 	    ff.setPosition(wPos.toArray());
@@ -557,7 +562,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "IRIS.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 4 * 256,
-		    false, palette));
+		    false, palette, ESTuTvPalette));
 	    final Model mod = wo.getModel();
 	    wo.addBehavior(new IrisBehavior(new Sequencer(mod
 		    .getFrameDelayInMillis(), 2, true), width));
@@ -574,7 +579,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     public WorldObject getFallbackModel() throws IllegalAccessException,
 	    FileLoadException, IOException {
 	return new WorldObject(tr, tr.getResourceManager().getBINModel(
-		"NAVTARG.BIN", null, 8, false, palette));
+		"NAVTARG.BIN", null, 8, false, paletteVL,null));
     }
 
     /**

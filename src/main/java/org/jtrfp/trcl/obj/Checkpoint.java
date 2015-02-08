@@ -34,7 +34,7 @@ private boolean includeYAxisInCollision=true;
 	setVisible(true);
 	try{setTexture(
 		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", 
-			    tr.getGlobalPaletteVL(),false),true);
+			    tr.getGlobalPaletteVL(),null,false),true);
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor
 

@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
@@ -28,6 +29,7 @@ public class VQCodebookManager {
     private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
     private final	Queue<TileUpdate>tileUpdates	   = new LinkedBlockingQueue<TileUpdate>();
     private final	GPU		gpu;
+    private final	GLFrameBuffer	fb;
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
     public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
@@ -70,6 +72,20 @@ public class VQCodebookManager {
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE).
 		unbind();
+	
+	final GL3 gl = gpu.getGl();
+	
+	fb = gpu.newFrameBuffer();
+	
+	for(int i=0; i<NUM_CODE_PAGES; i++){
+	    fb.bindToDraw();
+	    gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, GL3.GL_COLOR_ATTACHMENT0, esTuTvTexture.getId(), 0, i);
+			//attachDrawTexture(esTuTvTexture, GL3.GL_COLOR_ATTACHMENT0).
+	    fb.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
+	    fb.unbindFromDraw();
+	}//end for(i)
+	
     }//end constructor
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter []rowWriter) {
 	return setNNNN(codeID,rowWriter,rgbaTexture);
@@ -94,7 +110,7 @@ public class VQCodebookManager {
 	return setNNNNBlock256(blockID, new RasterRowWriter[][]{null,rowWriters},esTuTvTexture);
     }
     
-    public VQCodebookManager setNNNNBlock256(int blockID, RasterRowWriter [][] rowWriters, GLTexture texture){
+    private VQCodebookManager setNNNNBlock256(int blockID, RasterRowWriter [][] rowWriters, GLTexture texture){
 	subImage256(blockID,rowWriters,texture,2);
 	return this;
     }
@@ -181,6 +197,7 @@ public class VQCodebookManager {
 					for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
 					    workTile256.position((row+y*CODE_SIDE_LENGTH) * 4
 						    * CODE_PAGE_SIDE_LENGTH_TEXELS + x * 4 * CODE_SIDE_LENGTH);
+					    assert workTile256!=null;
 					    rw.applyRow(row, workTile256);
 					}// end for(rows)
 				    }//end if(!null)

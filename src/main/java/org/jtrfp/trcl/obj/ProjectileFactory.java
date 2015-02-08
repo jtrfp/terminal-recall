@@ -62,7 +62,7 @@ public class ProjectileFactory {
    	 final int laserplaneWidth = (int)(dims.getHeight()/TR.crossPlatformScalar);
    	 t = tr.getResourceManager().getRAWAsTexture(
    		mt.getRawFileName(),
-   		tr.getDarkIsClearPaletteVL(), 
+   		tr.getDarkIsClearPaletteVL(), null,
    		false);
    	 final double Y_SLANT=1024;
    	 tris =(Triangle.quad2Triangles(new double[]{-laserplaneLength/2.,laserplaneLength/2.,laserplaneLength/2.,-laserplaneLength/2.}, //X
@@ -83,7 +83,7 @@ public class ProjectileFactory {
    	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, false);
+   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, null, false);
    	     }//end for(frames)
    	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){
@@ -91,7 +91,7 @@ public class ProjectileFactory {
    	 }//end (billboard)
    	 else if(modelingType instanceof ModelingType.BINModelingType){
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;
-   	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPaletteVL(), tr.gpu.get().getGl());
+   	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
    	     for(int i=0; i<projectiles.length; i++){
    		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, weapon, explosionType);
    		 }

@@ -49,11 +49,11 @@ public class TextureManager {
 	    }});
     }//end constructor
     
-    public Texture newTexture(ByteBuffer imageRGB8, String debugName, boolean uvWrapping){
-	return new Texture(imageRGB8,debugName,tr, uvWrapping);
+    public Texture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping){
+	return new Texture(imageRGB8,imageESTuTv,debugName,tr, uvWrapping);
     }
-    public Texture newTexture(BufferedImage img, String debugName, boolean uvWrapping){
-	return new Texture(img,debugName,tr, uvWrapping);
+    public Texture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping){
+	return new Texture(imgRGBA,imgESTuTv,debugName,tr, uvWrapping);
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;
@@ -65,7 +65,7 @@ public class TextureManager {
 	if(defaultTriPipeTexture==null){
 	 try{
 	  defaultTriPipeTexture = 
-	    		new Texture(ImageIO.read(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),
+	    		new Texture(ImageIO.read(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
 	    			"Default TriPipe Texture (grayNoise)",tr,true);}
 	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
 	}
@@ -78,7 +78,7 @@ public class TextureManager {
 	try{
 	 t = new Texture(
 		ImageIO.read(Texture.class
-			.getResourceAsStream("/fallbackTexture.png")),
+			.getResourceAsStream("/fallbackTexture.png")),null,
 		"Fallback",tr,true);}
 	catch(IOException e){throw new RuntimeException("Failure to load fallback texture. Is everything right with the resources directory?",e);}
 	fallbackTexture = t;

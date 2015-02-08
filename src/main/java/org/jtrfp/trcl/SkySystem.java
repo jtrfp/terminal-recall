@@ -81,7 +81,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		cloudPalette[TR.bidiMod((i + transpose), 256)] = gradientPalette[i];
 	    }
 	    cloudTexture = tr.getResourceManager().getRAWAsTexture(
-		    cloudTextureFileName, new ColorPaletteVectorList(cloudPalette),true);
+		    cloudTextureFileName, new ColorPaletteVectorList(cloudPalette),null,true);
 	    cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	    generateClouds(os);
 	}

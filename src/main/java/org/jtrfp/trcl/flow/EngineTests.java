@@ -42,7 +42,7 @@ public class EngineTests {
     public static void depthQueueTest(TR tr){
 	preClean(tr);
 	final TextureDescription test = tr.gpu.get().textureManager.get().newTexture(
-		    Texture.RGBA8FromPNG(tr.getClass().getResourceAsStream("/dqTestTexture.png")), "dqTestTexture", true);
+		    Texture.RGBA8FromPNG(tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
 	final int NUM_LAYERS=8;
 	final double INCREMENT = .1;
 	final double OFF=-.5;

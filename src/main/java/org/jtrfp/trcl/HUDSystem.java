@@ -74,7 +74,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	add(crosshairs=new Crosshairs(tr));
 	add(healthMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
-			.getResourceAsStream("/OrangeOrangeGradient.png")),
+			.getResourceAsStream("/OrangeOrangeGradient.png")),null,
 			"HealthBar orangeOrange",false), METER_WIDTH, METER_HEIGHT,
 		false));
 	
@@ -82,7 +82,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	healthMeter = healthMeterBar.getController();
 	add(throttleMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
-			.getResourceAsStream("/BlueBlackGradient.png")),
+			.getResourceAsStream("/BlueBlackGradient.png")),null,
 			"ThrottleBar blackBlue",false), METER_WIDTH, METER_HEIGHT,
 		false));
 	throttleMeterBar.setPosition(THROTTLE_POS);

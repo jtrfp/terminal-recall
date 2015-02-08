@@ -59,14 +59,22 @@ public class LTEFile implements ThirdPartyParseable {
     public Color[] toColors(Color [] referencePalette) {
 	Color[] result = new Color[256];
 	for(int i=0; i<256; i++){
+	    final Color rColor = referencePalette[i];
 	    final Color loColor = referencePalette[gradientIndex(i,0)];
 	    final Color hiColor = referencePalette[gradientIndex(i,15)];
 	    final double loIntensity = new Vector3D(loColor.getRed(),loColor.getGreen(),loColor.getBlue()).getNorm();
+	    //Brightest
 	    final double hiIntensity = new Vector3D(hiColor.getRed(),hiColor.getGreen(),hiColor.getBlue()).getNorm();
 	    
-	    final boolean isEmissive = (Math.abs(hiIntensity - loIntensity)<30);
-	    result[i]=new Color(isEmissive?255:0,0,0,0);
+	    final float []hsbVals = new float[3];
+	    Color.RGBtoHSB(rColor.getRed(), rColor.getGreen(), rColor.getBlue(), hsbVals);
+	    final double saturation = hsbVals[1];
+	    double dI = Math.pow(1-(Math.abs(hiIntensity-loIntensity)/442.),1);
+	    //dI = nSaturation*128;
+	    if(dI>255)dI=255;
+	    else if(dI<0)dI=0;
+	    result[i]=new Color((int)(dI*saturation*255.),0,0,0);
 	    }
 	return result;
-    }
+    }//end toColors()
 }//end LTEFile

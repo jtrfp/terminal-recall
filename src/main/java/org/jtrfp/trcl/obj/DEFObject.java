@@ -80,6 +80,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     canTurn=true;
     foliage=false;
     boss=def.isObjectIsBoss();
+    //Default Direction
+    setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));
     boolean customExplosion=false;
     this.setModelOffset(
 	    TR.legacy2Modern(def.getPivotX()), 

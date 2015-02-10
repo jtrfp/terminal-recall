@@ -12,50 +12,53 @@
  ******************************************************************************/
 package org.jtrfp.trcl.img.vq;
 
-public final class RasterizedBlockVectorList implements VectorList {
-    private final VectorList 	rasterizedVectorList;
+import java.util.Arrays;
+
+public final class RasterizedBlockVectorList implements VectorListND {
+    private final VectorListND 	delegate;
     private final int 		rasterWidthInVectors, 
     /*			*/	blockWidthInVectors,
     /*			*/	vectorsPerBlock,
     /*			*/	blocksPerRow;
+    private final int[]		dimensions;
 
-    public RasterizedBlockVectorList(VectorList rasterizedVectorList,
-	    int rasterWidthInVectors, int blockWidthInVectors) {
-	this.rasterWidthInVectors 	= rasterWidthInVectors;
+    public RasterizedBlockVectorList(VectorListND rasterizedVectorList,int blockWidthInVectors) {//TODO: Arbitrary sizes
+	this.rasterWidthInVectors 	= rasterizedVectorList.getDimensions()[0];
 	this.blockWidthInVectors 	= blockWidthInVectors;
-	this.rasterizedVectorList 	= rasterizedVectorList;
+	this.delegate 			= rasterizedVectorList;
 	this.vectorsPerBlock 		= blockWidthInVectors * blockWidthInVectors;
 	this.blocksPerRow 		= rasterWidthInVectors / blockWidthInVectors;
+	dimensions = Arrays.copyOf(delegate.getDimensions(),delegate.getDimensions().length);
+	for(int i=0; i<dimensions.length;i++)
+	    dimensions[i]/=blockWidthInVectors;
     }// end constructor
 
     @Override
     public int getNumVectors() {
-	return rasterizedVectorList.getNumVectors() / vectorsPerBlock;
+	return delegate.getNumVectors() / vectorsPerBlock;
     }
 
     @Override
     public int getNumComponentsPerVector() {
-	return rasterizedVectorList.getNumComponentsPerVector()
+	return delegate.getNumComponentsPerVector()
 		* vectorsPerBlock;
     }
-
+/*
     @Override
     public double componentAt(int vectorIndex, int componentIndex) {
 	//System.out.println("RasterizedBlockVectorList.componentAt() vectorIndex="+vectorIndex+" componentIndex="+componentIndex);
 	final int [] trans = transformIndex(vectorIndex,componentIndex);
-	return rasterizedVectorList.componentAt(trans[0],
-		trans[1]);
+	return delegate.componentAt(trans[0],trans[1]);
     }// end componentAt(...)
 
     @Override
     public void setComponentAt(int vectorIndex, int componentIndex, double value) {
 	final int [] trans = transformIndex(vectorIndex,componentIndex);
-	rasterizedVectorList.setComponentAt(trans[0],
-		trans[1], value);
+	delegate.setComponentAt(trans[0],trans[1], value);
     }// end setComponentAt(...)
     
     private int[] transformIndex(int vectorIndex, int componentIndex){
-	final int sourceComponentsPerVector = rasterizedVectorList.getNumComponentsPerVector();
+	final int sourceComponentsPerVector = delegate.getNumComponentsPerVector();
 	final int blockID = vectorIndex;
 	
 	final int blockCol = blockID % blocksPerRow;
@@ -75,5 +78,28 @@ public final class RasterizedBlockVectorList implements VectorList {
 	return new int[] {sourceOffset,subComponentIndex};
 	//return srcBlockOffset + intraBlockX + intraBlockY * rasterWidthInVectors;
     }//end transformIndex(...)
-    
+    */
+
+    @Override
+    public int[] getDimensions() {
+	return dimensions;
+    }
+
+    @Override
+    public double componentAt(int[] coord, int componentIndex) {
+	coord = Arrays.copyOf(coord, coord.length);
+	int cubeDecumulator = componentIndex / delegate.getNumComponentsPerVector();
+	for(int dim=0; dim<coord.length; dim++){
+	 coord[dim]=coord[dim]*blockWidthInVectors+cubeDecumulator%blockWidthInVectors;
+	 cubeDecumulator/=blockWidthInVectors;
+	 }
+	componentIndex %= delegate.getNumComponentsPerVector();
+	return delegate.componentAt(coord, componentIndex);
+    }//end componentAt
+
+    @Override
+    public void setComponentAt(int[] coordinates, int componentIndex,
+	    double value) {
+	throw new RuntimeException("Not implemented.");
+    }
 }// end RasterizedBlockVectorList

@@ -25,7 +25,11 @@ import java.util.concurrent.Callable;
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.SpecialRAWDimensions;
+import org.jtrfp.trcl.TextureBehavior;
+import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
@@ -35,6 +39,7 @@ import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
 import org.jtrfp.trcl.img.vq.SubtextureVL;
 import org.jtrfp.trcl.img.vq.VectorList;
+import org.jtrfp.trcl.img.vq.VectorListND;
 import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
@@ -54,6 +59,7 @@ public class Texture implements TextureDescription {
     private final boolean		uvWrapping;
     private volatile int		texturePage;
     private int				sideLength;
+    private TextureBehavior.Support	tbs = new TextureBehavior.Support();
     @Override
     public void finalize() throws Throwable{
 	//TOC ID
@@ -195,15 +201,15 @@ public class Texture implements TextureDescription {
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
 	    final RasterizedBlockVectorList 	rbvlRGBA 		= new RasterizedBlockVectorList(
-		    rgba8888vl, sideLength, 4);
-	    final VectorListRasterizer vlrRGBA = new VectorListRasterizer(rbvlRGBA, new int [] {diameterInCodes,diameterInCodes});
+		    new VectorListRasterizer(rgba8888vl,new int[]{sideLength,sideLength}), 4);
+	    final VectorListND vlrRGBA = rbvlRGBA;
 	    final RasterizedBlockVectorList 	rbvlESTuTv 		= 
 		    esTuTv8888vl!=null?
 		    new RasterizedBlockVectorList(
-		    esTuTv8888vl, sideLength, 4):null;
-	    final VectorListRasterizer vlrESTuTv = 
+		    new VectorListRasterizer(esTuTv8888vl, new int[]{sideLength,sideLength}), 4):null;
+	    final VectorListND vlrESTuTv = 
 		    rbvlESTuTv!=null?
-		    new VectorListRasterizer(rbvlESTuTv, new int [] {diameterInCodes,diameterInCodes}):null;
+		    rbvlESTuTv:null;
 	    // Calculate a rough average color by averaging random samples.
 	    calulateAverageColor(rbvlRGBA);
 	    // Get a TOC
@@ -304,10 +310,10 @@ public class Texture implements TextureDescription {
 	flushESTuTvCodeblock256();
 	return null;
 	}//end threadPool call()
-	    private void setRGBACodebookTexelsAt(final VectorListRasterizer _vlr, int codeX, int codeY,
+	    private void setRGBACodebookTexelsAt(final VectorListND vlrRGBA, int codeX, int codeY,
 		    int diameterInCodes, int globalCodeIndex) {
 		final int coord[] = new int[]{codeX,codeY};
-		final RasterRowWriter rw = new RowWriterImpl(_vlr,coord);
+		final RasterRowWriter rw = new RowWriterImpl(vlrRGBA,coord);
 		try {
 		    registerRGBAToBlock256(globalCodeIndex, rw);
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -316,10 +322,10 @@ public class Texture implements TextureDescription {
 		}//end catch(ArrayIndexOutOfBoundsException)
 	    }// end setCodebookTexelsAt
 	    
-	    private void setESTuTvCodebookTexelsAt(final VectorListRasterizer _vlr, int codeX, int codeY,
+	    private void setESTuTvCodebookTexelsAt(final VectorListND vlrESTuTv, int codeX, int codeY,
 		    int diameterInCodes, int globalCodeIndex) {
 		final int coord[] = new int[]{codeX,codeY};
-		final RasterRowWriter rw = new RowWriterImpl(_vlr,coord);
+		final RasterRowWriter rw = new RowWriterImpl(vlrESTuTv,coord);
 		try {
 		    registerESTuTvToBlock256(globalCodeIndex, rw);
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -329,10 +335,10 @@ public class Texture implements TextureDescription {
 	    }// end setCodebookTexelsAt
 	    
 	    final class RowWriterImpl implements RasterRowWriter{
-		private final VectorListRasterizer _vlr;
+		private final VectorListND _vlr;
 		private final int [] coord;
-		public RowWriterImpl(VectorListRasterizer _vlr, int [] coord){
-		    this._vlr=_vlr;
+		public RowWriterImpl(VectorListND vlrRGBA, int [] coord){
+		    this._vlr=vlrRGBA;
 		    this.coord=coord;
 		}
 		@Override
@@ -413,10 +419,11 @@ public class Texture implements TextureDescription {
     private void calulateAverageColor(RasterizedBlockVectorList rbvl) {
 	float redA=0,greenA=0,blueA=0;
 	    final double size = rbvl.getNumVectors();
+	    final int [] dims = rbvl.getDimensions();
 	    for(int i=0; i<10; i++){
-		redA+=rbvl.componentAt((int)(Math.random()*size), 0);
-		greenA+=rbvl.componentAt((int)(Math.random()*size), 1);
-		blueA+=rbvl.componentAt((int)(Math.random()*size), 2);
+		redA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,0);
+		greenA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,1);
+		blueA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,2);
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
     }//end calculateAverageColor(...)
 
@@ -564,5 +571,35 @@ public class Texture implements TextureDescription {
     
     public int getSideLength(){
 	return sideLength;
+    }
+
+    /**
+     * @param beh
+     * @see org.jtrfp.trcl.TextureBehavior.Support#addBehavior(org.jtrfp.trcl.TextureBehavior)
+     */
+    public void addBehavior(TextureBehavior beh) {
+	tbs.addBehavior(beh);
+    }
+
+    /**
+     * @param beh
+     * @see org.jtrfp.trcl.TextureBehavior.Support#removeBehavior(org.jtrfp.trcl.TextureBehavior)
+     */
+    public void removeBehavior(TextureBehavior beh) {
+	tbs.removeBehavior(beh);
+    }
+
+    /**
+     * @param triangleList
+     * @param gpuTVIndex
+     * @param numFrames
+     * @param thisTriangle
+     * @param pos
+     * @param vw
+     * @see org.jtrfp.trcl.TextureBehavior.Support#apply(org.jtrfp.trcl.TriangleList, int, int, org.jtrfp.trcl.Triangle, org.apache.commons.math3.geometry.euclidean.threed.Vector3D, org.jtrfp.trcl.core.TriangleVertexWindow)
+     */
+    public void apply(TriangleList triangleList, int gpuTVIndex, int numFrames,
+	    Triangle thisTriangle, Vector3D pos, TriangleVertexWindow vw) {
+	tbs.apply(triangleList, gpuTVIndex, numFrames, thisTriangle, pos, vw);
     }
 }// end Texture

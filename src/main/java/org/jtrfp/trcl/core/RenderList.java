@@ -69,23 +69,27 @@ public class RenderList {
 	    final ByteBuffer opOD = item.getOpaqueObjectDefinitionAddresses();
 	    final ByteBuffer trOD = item.getTransparentObjectDefinitionAddresses();
 	    
-	    numOpaqueBlocks += opOD.capacity() / 4;
-	    if(opOD.capacity()>0)
-		     synchronized(opaqueObjectDefs)
-		      {opaqueObjectDefs.add(opOD);}
-	    
 	    if(isUnoccluded){
 		final WorldObject wo = (WorldObject)item;
 		    numUnoccludedTBlocks += trOD.capacity() / 4;
 			if(trOD.capacity()>0)
 			     synchronized(unoccludedTObjectDefs)
 			      {unoccludedTObjectDefs.add(trOD);}
+		    numUnoccludedTBlocks += opOD.capacity() / 4;
+			if(opOD.capacity()>0)
+			     synchronized(unoccludedTObjectDefs)
+			      {unoccludedTObjectDefs.add(opOD);}
 		}//end if(trOD)
-	    else{numTransparentBlocks += trOD.capacity() / 4;
-	    if(trOD.capacity()>0)
+	    else{
+		numTransparentBlocks += trOD.capacity() / 4;
+		if(trOD.capacity()>0)
 		     synchronized(transparentObjectDefs)
 		      {transparentObjectDefs.add(trOD);}
-	    }//end if(trOD)
+		numOpaqueBlocks += opOD.capacity() / 4;
+		if(opOD.capacity()>0)
+		 synchronized(opaqueObjectDefs)
+		 {opaqueObjectDefs.add(opOD);}
+	    }//end if(occluded)
 	}// end submit(...)
 
 	@Override

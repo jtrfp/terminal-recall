@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.pool;
 
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -25,18 +26,17 @@ public class IndexPool{
 	public IndexPool(){
 	}
 		
-	public synchronized int pop(){
-	    	if(!freeIndices.isEmpty())
-			return removalPop();
-		else if(highestIndex+1<maxCapacity)
-			return availablePop();
-		else{//Need to allocate a new block of indices
-		    	return growthPop();
-			}
-		}//end pop()
-	
-	private int removalPop()
-	    {return freeIndices.remove();}
+    public int pop() {
+	try {
+	    return freeIndices.remove();
+	} catch (NoSuchElementException e) {
+	    synchronized (this) {
+		if (highestIndex + 1 < maxCapacity)
+		    return availablePop();
+		else return growthPop();
+	    }//end sync(this)
+	}//end catch{no element}
+    }// end pop()
 	
 	private int availablePop()
 	    {return (++highestIndex);}
@@ -46,7 +46,7 @@ public class IndexPool{
 	    return pop();//Try again.
 	}//end grothPop()
 	
-	public synchronized int free(int index){
+	public int free(int index){
 	    	if(freeIndices.contains(index)){
 		    throw new RuntimeException("Double-release of resources: "+index);
 		}

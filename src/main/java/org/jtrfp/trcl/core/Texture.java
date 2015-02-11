@@ -34,6 +34,7 @@ import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
+import org.jtrfp.trcl.img.vq.ConstantVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
@@ -191,7 +192,7 @@ public class Texture implements TextureDescription {
 	 final ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
 	 final RGBA8888VectorList 	rgba8888vl 	= new RGBA8888VectorList(bbvl);
 	 
-	 final ByteBufferVectorList 	bbvlESTuTv 	= imageESTuTv8888!=null?new ByteBufferVectorList(imageESTuTv8888):null;
+	 final VectorList	 	bbvlESTuTv 	= imageESTuTv8888!=null?new ByteBufferVectorList(imageESTuTv8888):new ConstantVectorList(0,bbvl);
 	 final RGBA8888VectorList 	esTuTv8888vl 	= bbvlESTuTv!=null?new RGBA8888VectorList(bbvlESTuTv):null;
 	 vqCompress(rgba8888vl,esTuTv8888vl,sideLength);
     }

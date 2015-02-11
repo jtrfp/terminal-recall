@@ -18,8 +18,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class IndexPool{
 	private final Queue<Integer> 	freeIndices	= new LinkedBlockingQueue<Integer>();
-	private int 			maxCapacity	= 1;
-	private int 			highestIndex	= -1;
+	private volatile int 		maxCapacity	= 1;
+	private volatile int 		highestIndex	= -1;
 	private GrowthBehavior 		growthBehavior	= new GrowthBehavior()
 		{public int grow(int index){return index*2;}};//Default is to double each time.
 	

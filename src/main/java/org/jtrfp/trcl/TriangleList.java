@@ -125,20 +125,17 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    float[] nyFrames = new float[numFrames];
 	    float[] nzFrames = new float[numFrames];
 	    for (int i = 0; i < numFrames; i++) {
-		xFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getX()
-			/ scale);
+		xFrames[i] = (float)applyScale(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getX());
 	    }
 	    xyzAnimator.addFrames(xFrames);
 
 	    for (int i = 0; i < numFrames; i++) {
-		yFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getY()
-			/ scale);
+		yFrames[i] = (float)applyScale(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getY());
 	    }
 	    xyzAnimator.addFrames(yFrames);
 
 	    for (int i = 0; i < numFrames; i++) {
-		zFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getZ()
-			/ scale);
+		zFrames[i] = (float)applyScale(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getZ());
 	    }
 	    xyzAnimator.addFrames(zFrames);
 	    

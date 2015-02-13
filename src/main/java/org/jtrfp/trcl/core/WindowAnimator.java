@@ -52,9 +52,30 @@ public class WindowAnimator implements Tickable {
 
     @Override
     public void tick() {
-	if (indexCounter < numElements) {
+	if (indexCounter < numElements)
 	    return;
-	}
+	
+	final double frame = controller.getCurrentFrame();
+	final int fL       = (int)Math.floor(frame);
+	final int fH       = (int)Math.ceil(frame) % numFrames;
+	final int dF	   = fH-fL;
+	final double xFade = frame%1.;
+	
+	double wL = 1-xFade;
+	double wH = xFade;
+	
+	int indexOffset    = fL;
+	final int nFrames  = numFrames;
+	final int nElements= numElements;
+	for (int counter = 0; counter < nElements; counter++) {
+	    final double vH = frames[indexOffset+dF];
+	    final double vL = frames[indexOffset];
+	    final double val= vH*wH + vL*wL;
+	    w.set(indexXferFun.transfer(counter), val);
+	    indexOffset += nFrames;
+	}// end for(numElements)
+	
+	/*
 	final double frame = controller.getCurrentFrame();
 	int lowFrame = (int) frame;
 	int hiFrame = (lowFrame + 1) % numFrames;
@@ -73,7 +94,8 @@ public class WindowAnimator implements Tickable {
 	    w.set(indexXferFun.transfer(index), val);
 	    indexOffset += numFrames;
 	}// end for(numElements)
-    }// update()
+	*/
+    }// end tick()
 
     /**
      * @return the debugName

@@ -29,6 +29,7 @@ import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
@@ -61,7 +62,7 @@ public class ProjectileFactory {
    	 final int laserplaneLength = (int)(dims.getWidth()/TR.crossPlatformScalar);
    	 final int laserplaneWidth = (int)(dims.getHeight()/TR.crossPlatformScalar);
    	 t = tr.getResourceManager().getRAWAsTexture(
-   		mt.getRawFileName(),
+   		tr.getTrConfig()[0].getGameVersion()!=GameVersion.TV?mt.getF3RawFileName():mt.getTvRawFileName(),
    		tr.getDarkIsClearPaletteVL(), null,
    		false);
    	 final double Y_SLANT=1024;

@@ -33,19 +33,20 @@ public interface ModelingType {
     }//end constructor
 
     public static final class FlatModelingType implements ModelingType {
-	private final String rawFileName;
+	private final String f3RawFileName, tvRawFileName;
 	private final Dimension segmentSize;
 
-	public FlatModelingType(String rawFileName, Dimension segmentSize) {
+	public FlatModelingType(String f3RawFileName, String tvRawFileName, Dimension segmentSize) {
 	    this.segmentSize = segmentSize;
-	    this.rawFileName = rawFileName;
+	    this.f3RawFileName = f3RawFileName;
+	    this.tvRawFileName = tvRawFileName;
 	}
 
 	/**
 	 * @return the rawFileName
 	 */
-	public String getRawFileName() {
-	    return rawFileName;
+	public String getF3RawFileName() {
+	    return f3RawFileName;
 	}
 
 	/**
@@ -53,6 +54,13 @@ public interface ModelingType {
 	 */
 	public Dimension getSegmentSize() {
 	    return segmentSize;
+	}
+
+	/**
+	 * @return the tvRawFileName
+	 */
+	public String getTvRawFileName() {
+	    return tvRawFileName;
 	}
     }//end FlatModelingType
 

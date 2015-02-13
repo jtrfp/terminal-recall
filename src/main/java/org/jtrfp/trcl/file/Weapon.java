@@ -21,10 +21,10 @@ import org.jtrfp.trcl.file.ModelingType.FlatModelingType;
 public enum Weapon {
     // / THESE ARE LISTED REPRESENTATIVE OF THE ORDINAL ORDER IN A DEF FILE. DO
     // NOT RE-ORDER!!
-    purpleLaser(null, null, new FlatModelingType("PURFRIN2.RAW", new Dimension(
+    purpleLaser(null, null, new FlatModelingType("PURFRIN2.RAW","PURFRIN2.RAW", new Dimension(
 	    80000, 560000)), 4096, ModelingType.MAP_SQUARE_SIZE * 6, -1, 2048,
 	    false, false), 
-    PAC("PAC", "SKL", new FlatModelingType("SQGLSR.RAW",
+    PAC("PAC", "SKL", new FlatModelingType("SQGLSR.RAW","SQGLSR.RAW",
 	    new Dimension(120000, 560000)), 4096,
 	    ModelingType.MAP_SQUARE_SIZE * 6, 1, 2048, true, false), 
     ION("ION",
@@ -33,21 +33,21 @@ public enum Weapon {
 		    new Dimension(320000, 320000)), 8192,
 	    ModelingType.MAP_SQUARE_SIZE * 6, 2, 2048, false, false), 
     RTL(
-	    "RTL", "RFL20", new FlatModelingType("NEWLASER.RAW", new Dimension(
+	    "RTL", "RFL20", new FlatModelingType("NEWLASER.RAW","SQGLSR.RAW", new Dimension(
 		    100000, 560000)), 4096, ModelingType.MAP_SQUARE_SIZE * 8,
 	    3, 2048, true, false), 
     fireBall(null, null, new BINModelingType(
 	    "FIREBALL.BIN"), 8192, ModelingType.MAP_SQUARE_SIZE * 8, -1, 1024,
 	    false, false), 
     greenLaser(null, null, new FlatModelingType(
-	    "GIDMIS.RAW", new Dimension(80000, 560000)), 8192,
+	    "GIDMIS.RAW","SQGLSR.RAW", new Dimension(80000, 560000)), 8192,
 	    ModelingType.MAP_SQUARE_SIZE * 6, -1, 2048, false, false), 
     redLaser(
-	    null, null, new FlatModelingType("SQGLSR.RAW", new Dimension(80000,
+	    null, null, new FlatModelingType("SQGLSR.RAW","SQGLSR.RAW", new Dimension(80000,
 		    560000)), 4096, ModelingType.MAP_SQUARE_SIZE * 7, -1, 2048,
 	    false, false), 
     blueLaser(null, null, new FlatModelingType(
-	    "BFIRJ0.RAW", new Dimension(80000, 560000)), 4096,
+	    "BFIRJ0.RAW","SQGLSR.RAW", new Dimension(80000, 560000)), 4096,
 	    ModelingType.MAP_SQUARE_SIZE * 7, -1, 2048, false, false), 
     bullet(
 	    null, null, new BINModelingType("BULLET.BIN"), 6554,
@@ -98,7 +98,7 @@ public enum Weapon {
 	    "BFM", new BINModelingType("BRADMIS.BIN"), 65536,
 	    ModelingType.MAP_SQUARE_SIZE * 7, 6, 2048, false, true), 
     DAM("DAM",
-	    "FFF", new FlatModelingType("FIRBAL0.RAW", new Dimension(80000,
+	    "FFF", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
 		    560000)), Integer.MAX_VALUE, 0, 7,
 	    ModelingType.MAP_SQUARE_SIZE * 15, false, false);
     private final String       tvDisplayName, f3DisplayName;

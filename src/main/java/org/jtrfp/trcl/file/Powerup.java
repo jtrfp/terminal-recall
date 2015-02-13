@@ -21,71 +21,98 @@ public enum Powerup {
     RTL(Weapon.RTL, 100, 0, 0, 0, 0, true, Integer.MAX_VALUE, new String[] {
 	    "LASE0000.RAW", "LASE0001.RAW", "LASE0002.RAW", "LASE0003.RAW",
 	    "LASE0004.RAW", "LASE0005.RAW", "LASE0006.RAW", "LASE0007.RAW" },
+	    new String[]{"LASER00.RAW","LASER04.RAW","LASER08.RAW","LASER12.RAW"},
 	    "Rapid Targeting Laser", "Rapid Fire Laser"), 
     PAC(Weapon.PAC, 100,
 	    0, 0, 0, 0, false, Integer.MAX_VALUE, new String[] {
 		    "PLAS0000.RAW", "PLAS0001.RAW", "PLAS0002.RAW",
 		    "PLAS0003.RAW", "PLAS0004.RAW", "PLAS0005.RAW",
-		    "PLAS0006.RAW", "PLAS0007.RAW" }, "Plasma Assault Cannon",
-	    "Servo-Kinetic Lasers"), 
+		    "PLAS0006.RAW", "PLAS0007.RAW" },
+		    new String[]{"LASER00.RAW","LASER04.RAW","LASER08.RAW","LASER12.RAW"}, 
+		    "Plasma Assault Cannon",
+	    	    "Servo-Kinetic Lasers"), 
     ION(Weapon.ION, 100, 0, 0, 0, 0, true,
 	    Integer.MAX_VALUE, new String[] { "ANTI0000.RAW", "ANTI0001.RAW",
 		    "ANTI0002.RAW", "ANTI0003.RAW", "ANTI0004.RAW",
 		    "ANTI0005.RAW", "ANTI0006.RAW", "ANTI0007.RAW" },
+		    new String[]{ "ANT0004.RAW",
+			    "ANT0008.RAW", "ANT0012.RAW" },
 	    "Ion Burst Cannon", "Dispersion Cannon"), 
     MAM(Weapon.MAM, 40, 0, 0,
 	    0, 0, false, Integer.MAX_VALUE, new String[] { "MISS0000.RAW",
 		    "MISS0001.RAW", "MISS0002.RAW", "MISS0003.RAW",
 		    "MISS0004.RAW", "MISS0005.RAW", "MISS0006.RAW",
-		    "MISS0007.RAW" }, "Manually-Aimed Missiles",
+		    "MISS0007.RAW" },
+		    new String[]{ "MISS0000.RAW",
+			    "MISS0002.RAW", 
+			    "MISS0004.RAW", "MISS0006.RAW"}, "Manually-Aimed Missiles",
 	    "Dead-On Missiles"), 
     SAD(Weapon.SAD, 20, 0, 0, 0, 0, false,
 	    Integer.MAX_VALUE, new String[] { "GMIS0000.RAW", "GMIS0001.RAW",
 		    "GMIS0002.RAW", "GMIS0003.RAW", "GMIS0004.RAW",
 		    "GMIS0005.RAW", "GMIS0006.RAW", "GMIS0007.RAW" },
+		    new String[]{ "GMIS00.RAW", "GMIS04.RAW",
+			    "GMIS08.RAW", "GMIS12.RAW" },
 	    "Seek-and-Destroy Missiles", "Vipers"), 
     SWT(Weapon.SWT, 20, 0, 0,
 	    0, 0, false, Integer.MAX_VALUE, new String[] { "SUPM0000.RAW",
 		    "SUPM0001.RAW", "SUPM0002.RAW", "SUPM0003.RAW",
 		    "SUPM0004.RAW", "SUPM0005.RAW", "SUPM0006.RAW",
-		    "SUPM0007.RAW" }, "ShockWave Torpedoes",
+		    "SUPM0007.RAW" },
+		    new String[]{ "SPRMIS00.RAW", "SPRMIS04.RAW",
+			    "SPRMIS08.RAW", "SPRMIS12.RAW" }, "ShockWave Torpedoes",
 	    "Bion Fury Missiles"), 
     shieldRestore(null, 0, 65535, 0, 0, 0,
 	    false, Integer.MAX_VALUE, new String[] { "SHEI0000.RAW",
 		    "SHEI0001.RAW", "SHEI0002.RAW", "SHEI0003.RAW",
 		    "SHEI0004.RAW", "SHEI0005.RAW", "SHEI0006.RAW",
-		    "SHEI0007.RAW" }, "Shields Restored", "Shields Restored"), 
+		    "SHEI0007.RAW" },
+		    new String[]{ "SHEI0000.RAW",
+			    "SHEI0004.RAW", "SHEI0008.RAW", "SHEI0012.RAW"}, 
+			    "Shields Restored", "Shields Restored"), 
     invisibility(null, 0, 0, 1000 * 30, 0, 0, false, Integer.MAX_VALUE,
 	    new String[] { "INVI0000.RAW", "INVI0001.RAW", "INVI0002.RAW",
 		    "INVI0003.RAW", "INVI0004.RAW", "INVI0005.RAW",
-		    "INVI0006.RAW", "INVI0007.RAW" }, "Invisibility",
+		    "INVI0006.RAW", "INVI0007.RAW" },
+		    new String[]{ "INVI0000.RAW", "INVI0004.RAW", "INVI0008.RAW",
+			    "INVI0012.RAW"}, "Invisibility",
 	    "Invisiblity"), 
     invincibility(null, 0, 0, 0, 1000 * 30, 0, false,
 	    Integer.MAX_VALUE, new String[] { "INVN0000.RAW", "INVN0001.RAW",
 		    "INVN0002.RAW", "INVN0003.RAW", "INVN0004.RAW",
 		    "INVN0005.RAW", "INVN0006.RAW", "INVN0007.RAW" },
+		    new String[]{ "INVIN00.RAW", "INVIN04.RAW",
+			    "INVIN08.RAW", "INVIN12.RAW" },
 	    "Invincibility", "Invincibility"), 
     DAM(Weapon.DAM, 1, 0, 0, 0, 0,
 	    false, 1, new String[] { "MEGA0000.RAW", "MEGA0001.RAW",
 		    "MEGA0002.RAW", "MEGA0003.RAW", "MEGA0004.RAW",
 		    "MEGA0005.RAW", "MEGA0006.RAW", "MEGA0007.RAW" },
+		    new String[]{ "INVIN00.RAW", "INVIN04.RAW",
+			    "INVIN08.RAW", "INVIN12.RAW" },//TODO: What's the real billboard for this?
 	    "Discrete Annihilation Missile", "FFF"), 
     Afterburner(null, 0, 0, 0,
 	    0, 120, false, Integer.MAX_VALUE, new String[] { "AFTR0000.RAW",
 		    "AFTR0001.RAW", "AFTR0002.RAW", "AFTR0003.RAW",
 		    "AFTR0004.RAW", "AFTR0005.RAW", "AFTR0006.RAW",
-		    "AFTR0007.RAW" }, "Afterburner", "Turbo!"), 
+		    "AFTR0007.RAW" },
+		    new String[]{
+			    "ENCA0000.RAW", "ENCA0001.RAW", "ENCA0002.RAW",
+			    "ENCA0003.RAW"}, "Afterburner", "Turbo!"), //TODO: What's the real billboard for this?
     PowerCore(null,
 	    0, 6554, 0, 0, 0, false, Integer.MAX_VALUE, new String[] {
 		    "ENCA0000.RAW", "ENCA0001.RAW", "ENCA0002.RAW",
 		    "ENCA0003.RAW", "ENCA0004.RAW", "ENCA0005.RAW",
-		    "ENCA0006.RAW", "ENCA0007.RAW" }, "Shield Boost",
+		    "ENCA0006.RAW", "ENCA0007.RAW" },
+		    new String[]{
+			    "ENCA0000.RAW", "ENCA0001.RAW", "ENCA0002.RAW",
+			    "ENCA0003.RAW"}, "Shield Boost",
 	    "Shield Boost!"), 
     Random(null, 0, 0, 0, 0, 0, false,
-	    Integer.MAX_VALUE, null, "???", "???"); // Not for use in TV
+	    Integer.MAX_VALUE, null, null, "???", "???"); // Not for use in TV
     private final int	   shieldDelta, invisibiltyTimeDeltaMillis,
 	    invincibilityTimeDeltaMillis, afterburnerDelta, weaponSupplyDelta;
-    private final String[] billboardFrames;
+    private final String[] f3BillboardFrames, tvBillboardFrames;
     private final boolean  doublesFiringMultiplex;
     private final int 	   quantityLimit;
     private final String   tvDescription, f3Description;
@@ -94,13 +121,14 @@ public enum Powerup {
     Powerup(Weapon weapon, int weaponSupplyDelta, int shieldDelta,
 	    int invisibilityTimeDeltaMillis, int invincibilityTimeDeltaMillis,
 	    int afterburnerDelta, boolean doublesFiringMultiplex,
-	    int quantityLimit, String[] billboardFrames, String tvDescription,
+	    int quantityLimit, String[] f3BillboardFrames, String[] tvBillboardFrames, String tvDescription,
 	    String f3Description) {
 	this.shieldDelta 		  = shieldDelta;
 	this.invisibiltyTimeDeltaMillis   = invisibilityTimeDeltaMillis;
 	this.invincibilityTimeDeltaMillis = invincibilityTimeDeltaMillis;
 	this.afterburnerDelta 		  = afterburnerDelta;
-	this.billboardFrames 		  = billboardFrames;
+	this.f3BillboardFrames 		  = f3BillboardFrames;
+	this.tvBillboardFrames 		  = tvBillboardFrames;
 	this.doublesFiringMultiplex 	  = doublesFiringMultiplex;
 	this.quantityLimit 		  = quantityLimit;
 	this.tvDescription 		  = tvDescription;
@@ -146,8 +174,8 @@ public enum Powerup {
     /**
      * @return the billboardFrames
      */
-    public String[] getBillboardFrames() {
-	return billboardFrames;
+    public String[] getF3BillboardFrames() {
+	return f3BillboardFrames;
     }
 
     /**
@@ -190,5 +218,12 @@ public enum Powerup {
      */
     public int getWeaponSupplyDelta() {
 	return weaponSupplyDelta;
+    }
+
+    /**
+     * @return the tvBillboardFrames
+     */
+    public String[] getTvBillboardFrames() {
+        return tvBillboardFrames;
     }
 }//end Powerup

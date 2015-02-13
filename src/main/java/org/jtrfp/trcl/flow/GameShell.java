@@ -65,6 +65,8 @@ public class GameShell {
     }
     
     public GameShell newGame(){
+	GameVersion newGameVersion = determineGameVersion();
+	tr.getTrConfig()[0].setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
 	VOXFile vox;
 	vox = determineVOXFile();
 	if(vox==null)
@@ -134,8 +136,22 @@ public class GameShell {
 	else return attemptGetVOX(voxName);
     }//end determineVOXFile()
     
-    private VOXFile autoDetermineVOXFile(){
-	String voxFileName=null;
+    private GameVersion determineGameVersion(){
+	String voxName = tr.getTrConfig()[0].getVoxFile();
+	if(voxName==null)
+	    return tr.getTrConfig()[0].getGameVersion();
+	else if(voxName.contentEquals(TRConfiguration.AUTO_DETECT))
+	    {return guessGameVersionFromPods();}
+	else if(voxName.contentEquals("Fury3"))
+	    return GameVersion.F3;
+	else if(voxName.contentEquals("TV"))
+	    return GameVersion.TV;
+	else if(voxName.contentEquals("FurySE"))
+	    return GameVersion.FURYSE;
+	else return tr.getTrConfig()[0].getGameVersion();
+    }
+    
+    private GameVersion guessGameVersionFromPods(){
 	boolean f3Hint=false,tvHint=false,furyseHint=false;
 	System.out.println("Auto-determine active... pods:"+tr.getResourceManager().getRegisteredPODs().size());
 	for(IPodData pod:tr.getResourceManager().getRegisteredPODs()){
@@ -148,11 +164,26 @@ public class GameShell {
 	
 	int numValidHints=0 + (f3Hint?1:0) + (tvHint?1:0) + (furyseHint?1:0);
 	if(numValidHints==1){
-	 voxFileName=f3Hint?     "Fury3":voxFileName;
-	 voxFileName=tvHint?        "TV":voxFileName;
-	 voxFileName=furyseHint?"FurySE":voxFileName;
-	 tr.getTrConfig()[0].setGameVersion(f3Hint?GameVersion.F3:tvHint?GameVersion.TV:GameVersion.FURYSE);
+	 return (f3Hint?GameVersion.F3:tvHint?GameVersion.TV:GameVersion.FURYSE);
 	}//end if(hints==1)
+	return null;
+    }
+    
+    private VOXFile autoDetermineVOXFile(){
+	String voxFileName=null;
+	System.out.println("Auto-determine active... pods:"+tr.getResourceManager().getRegisteredPODs().size());
+	GameVersion gameVersion = guessGameVersionFromPods();
+	if (gameVersion != null) {
+	    switch (gameVersion) {
+	    case TV:    voxFileName = "TV";
+		break;
+	    case F3:    voxFileName = "Fury3";
+		break;
+	    case FURYSE:voxFileName = "FurySE";
+		break;
+	    }//end switch(...)
+	}// end if(!null)
+	
 	if(voxFileName==null){
 	    JOptionPane.showMessageDialog(tr.getRootWindow(), "Could not auto-detect the default mission.\nEnsure all necessary PODs are registered in the File->Configure window or specify a VOX file if it is a custom game.","Auto-Detect Failure", JOptionPane.ERROR_MESSAGE);
 	    return null;

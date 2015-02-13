@@ -45,14 +45,19 @@ public class PowerupObject extends BillboardSprite{
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
 		TextureDescription desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
-		if(pt==Powerup.Random){
+		if(pt==Powerup.Random)
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
-		}
 		powerupType=pt;
-		String [] bbFrames = pt.getBillboardFrames();
+		String [] bbFrames;
+		if(getTr().getTrConfig()[0].getGameVersion()!=GameVersion.TV)
+		    bbFrames = pt.getF3BillboardFrames();
+		else
+		    bbFrames = pt.getTvBillboardFrames();
 		Sequencer s = new Sequencer(Powerup.TIME_PER_FRAME_MILLIS,bbFrames.length,false);
 		try {
-		    Texture [] t = new Texture[pt.getBillboardFrames().length];
+		    Texture [] t;
+			t = new Texture[bbFrames.length];
+		    
 			for(int i=0; i<t.length;i++){
 			    t[i]=frame(bbFrames[i]);
 			}
@@ -102,7 +107,7 @@ public class PowerupObject extends BillboardSprite{
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
 			tr.getGame().getUpfrontDisplay().submitMomentaryUpfrontMessage(
-				tr.getTrConfig()[0].getGameVersion()==GameVersion.F3?
+				tr.getTrConfig()[0].getGameVersion()!=GameVersion.TV?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());
 			//SOUND FX

@@ -12,20 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.util.concurrent.Future;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.DummyFuture;
+import org.jtrfp.trcl.Controller;
 import org.jtrfp.trcl.RenderMode;
-import org.jtrfp.trcl.SelectableTexture;
-import org.jtrfp.trcl.Tickable;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
-import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
@@ -87,7 +80,8 @@ public class TunnelSegment extends WorldObject {
 	double startHeight = getStartHeight(s);
 	double endWidth = getEndWidth(s);
 	double endHeight = getEndHeight(s);
-	// TODO: x,y, rotation
+	final FlickerLightType 	lightType = s.getFlickerLightType();
+	// TODO: Cleanup.
 	final double startAngle1 = ((double) s.getStartAngle1() / 65535.) * 2.
 		* Math.PI;
 	final double startAngle2 = ((double) s.getStartAngle2() / 65535.) * 2.
@@ -107,26 +101,80 @@ public class TunnelSegment extends WorldObject {
 	final double zEnd = segLen;
 	final int numPolygonsMinusOne = s.getNumPolygons() - 1;
 	final int lightPoly = s.getLightPolygon();
-	final double[] u=new double[] { 1, 1, 0, 0 };
-	final double[] v=new double[] { 0, 1, 1, 0 };
+	final boolean hasLight = lightPoly!=-1;
+	if(hasLight){
+	    mainModel.setAnimateUV(true);
+	    mainModel.setSmoothAnimation(false);
+	    if(lightType==FlickerLightType.noLight){
+		//Do nothing.
+	    }else if(lightType==FlickerLightType.off1p5Sec){
+		mainModel.setController(new Controller(){
+		    	private final int off = (int)(Math.random()*2000);
+			@Override
+			public double getCurrentFrame() {
+			    return (off+System.currentTimeMillis()%2000)>1500?1:0;
+			}
+
+			@Override
+			public void setDebugMode(boolean b) {
+			    //Not implemented.
+			}});
+	    }else if(lightType==FlickerLightType.on1p5Sec){
+		mainModel.setController(new Controller(){
+		    private final int off = (int)(Math.random()*2000);
+			@Override
+			public double getCurrentFrame() {
+			    return (off+System.currentTimeMillis()%2000)<1500?1:0;
+			}
+
+			@Override
+			public void setDebugMode(boolean b) {
+			    //Not implemented.
+			}});
+	    }else if(lightType==FlickerLightType.on1Sec){
+		mainModel.setController(new Controller(){
+		    private final int off = (int)(Math.random()*2000);
+			@Override
+			public double getCurrentFrame() {
+			    return (off+System.currentTimeMillis()%2000)>1000?1:0;
+			}
+
+			@Override
+			public void setDebugMode(boolean b) {
+			    //Not implemented.
+			}});
+	    }
+	}//end (has light)
+	final double[] noLightU=new double[] { 1, 1, 0, 0 };
+	final double[] noLightV=new double[] { 0, 1, 1, 0 };
+	final double[] lightOffU=new double[] { 1, 1, .5, .5 };
+	final double[] lightOffV=new double[] { .5, 1, 1, .5 };
+	final double[] lightOnU=new double[] { .5, .5, 0, 0 };
+	final double[] lightOnV=new double[] { .5, 1, 1, .5 };
 	
 	double rotPeriod = (1000.*32768.)/(double)s.getRotationSpeed();
 	final boolean reverseDirection = rotPeriod<0;
 	if(reverseDirection)rotPeriod*=-1;
-	final int NUM_FRAMES_IF_ANIMATED=30;
-	int numAnimFrames = Double.isInfinite(rotPeriod)?1:NUM_FRAMES_IF_ANIMATED;
-	if(numAnimFrames!=1)
+	final int numFramesIfRotating=30;
+	final int numFramesIfStatic=2;
+	final boolean isRotating = !Double.isInfinite(rotPeriod);
+	int numAnimFrames = isRotating?numFramesIfRotating:numFramesIfStatic;
+	if(isRotating)
 	    mainModel.setFrameDelayInMillis((int)(rotPeriod/(numAnimFrames)));
-	final double ANIMATION_DELTA_RADIANS = (reverseDirection?1:-1)*(2 * Math.PI) / (double)numAnimFrames;
+	final double animationDeltaRadians = isRotating?
+		((reverseDirection?1:-1)*(2 * Math.PI) / (double)numAnimFrames)
+		:0;
+	//FRAME LOOP
 	for(int frameIndex=0; frameIndex<numAnimFrames; frameIndex++){
 	 final Model m = new Model(false,tr);
 	 m.setDebugName("TunnelSegment frame "+frameIndex+" of "+numAnimFrames);
-	 final double frameAngleDeltaRadians = ANIMATION_DELTA_RADIANS * (double)frameIndex;
+	 final double frameAngleDeltaRadians = animationDeltaRadians * (double)frameIndex;
 	 double frameStartAngle = startAngle + frameAngleDeltaRadians;
 	 double frameEndAngle = endAngle + frameAngleDeltaRadians;
 	 final double frameStartAngle1 = startAngle1 + frameAngleDeltaRadians;
 	 final double frameStartAngle2 = startAngle2 + frameAngleDeltaRadians;
 	 final double frameEndAngle1 = endAngle + frameAngleDeltaRadians;
+	 double []thisU=noLightU,thisV=noLightV;//Changeable u/v references, default to noLight
 	 // Poly quads
 	 for (int pi = 0; pi < numPolygonsMinusOne; pi++) {
 	     Vector3D p0 = segPoint(frameStartAngle, zStart, startWidth, startHeight,
@@ -141,22 +189,11 @@ public class TunnelSegment extends WorldObject {
 	     TextureDescription tex = tunnelTexturePalette
 		     [s.getPolyTextureIndices().get(pi)];
 
-	     final FlickerLightType 	flt 	= s.getFlickerLightType();
-	    /* if (pi == lightPoly && flt != FlickerLightType.noLight) {
-		try {
-		    final Texture t = (Texture) tex;
-		    @SuppressWarnings("unchecked")
-		    Texture[] frames = new Texture[] {
-			    (t.subTexture(0, .5, .5,
-				    .5)),// ON
-			    (t.subTexture(.505, .5,
-				    .501, .5)),// OFF
-			    (t.subTexture(0, 0, 0, 0)),// DUMMY
-			    (t.subTexture(0, 0, 0, 0)) // DUMMY
-		    };
-		    final SelectableTexture st = new SelectableTexture(frames);
-		    tex = st;
-
+	     if (pi == lightPoly && lightType != FlickerLightType.noLight) {
+		 if(frameIndex==0){thisU=lightOnU; thisV=lightOnV;}
+		 else             {thisU=lightOffU;thisV=lightOffV;}
+		/*try {
+		    
 		    final int flickerThresh = flt == FlickerLightType.off1p5Sec ? (int) (-.3 * (double) Integer.MAX_VALUE)
 			    : flt == FlickerLightType.on1p5Sec ? (int) (.4 * (double) Integer.MAX_VALUE)
 				    : flt == FlickerLightType.on1Sec ? (int) (.25 * (double) Integer.MAX_VALUE)
@@ -171,19 +208,20 @@ public class TunnelSegment extends WorldObject {
 			    else
 				st.setFrame(0);
 			}
+			
 		    });
 		} catch (Exception e) {
 		    e.printStackTrace();
-		}
-	     } else {
+		}*/
+	     } else {thisU=noLightU; thisV=noLightV;
 	     }// No light
-*/
+
 	     m.addTriangles(Triangle.quad2Triangles(
 		new double[] { p3.getX(), p2.getX(), p1.getX(), p0.getX() },
 		new double[] { p3.getY(), p2.getY(), p1.getY(), p0.getY() },
 		new double[] { p3.getZ(), p2.getZ(), p1.getZ(), p0.getZ() },
-		    u,
-		    v,
+		    thisU,
+		    thisV,
 		    tex,
 		    RenderMode.DYNAMIC,
 		    new Vector3D[] {

@@ -140,17 +140,17 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    xyzAnimator.addFrames(zFrames);
 	    
 	    for (int i = 0; i < numFrames; i++) {
-		nxFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getX()*127);
+		nxFrames[i] = (float)Math.rint(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getX()*127);
 	    }
 	    xyzAnimator.addFrames(nxFrames);
 
 	    for (int i = 0; i < numFrames; i++) {
-		nyFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getY()*127);
+		nyFrames[i] = (float)Math.rint(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getY()*127);
 	    }
 	    xyzAnimator.addFrames(nyFrames);
 
 	    for (int i = 0; i < numFrames; i++) {
-		nzFrames[i] = Math.round(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getZ()*127);
+		nzFrames[i] = (float)Math.rint(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getZ()*127);
 	    }
 	    xyzAnimator.addFrames(nzFrames);
 	}//end else(frames!=1)
@@ -174,14 +174,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		getModel().addTickableAnimator(uvAnimator);
 		uvAnimator.setDebugName(debugName + ".uvAnimator");
 		for (int i = 0; i < numFrames; i++) {
-		    uFrames[i] = (float) (sideScalar*triangleAt(i, triangleIndex).getUV(vIndex).getX());
-		    vFrames[i] = (float) (sideScalar*(1-triangleAt(i, triangleIndex).getUV(vIndex).getY()));
+		    uFrames[i] = (float) Math.rint(sideScalar*triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) Math.rint(sideScalar*(1-triangleAt(i, triangleIndex).getUV(vIndex).getY()));
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
-		vw.u.set(gpuTVIndex, (short) (sideScalar * t.getUV(vIndex).getX()));
-		vw.v.set(gpuTVIndex, (short) (sideScalar * (1-t.getUV(vIndex).getY())));
+		vw.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
+		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	    final int textureID = ((Texture)td).getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
@@ -201,15 +201,15 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		getModel().addTickableAnimator(uvAnimator);
 		for (int i = 0; i < numFrames; i++) {
 		    final int sideScalar = at.getFrames()[i].getSideLength()-1;
-		    uFrames[i] = (float) (sideScalar * triangleAt(i, triangleIndex).getUV(vIndex).getX());
-		    vFrames[i] = (float) (sideScalar * (1-triangleAt(i, triangleIndex).getUV(vIndex).getY()));
+		    uFrames[i] = (float) Math.rint(sideScalar * triangleAt(i, triangleIndex).getUV(vIndex).getX());
+		    vFrames[i] = (float) Math.rint(sideScalar * (1-triangleAt(i, triangleIndex).getUV(vIndex).getY()));
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
 		final int sideScalar = at.getFrames()[0].getSideLength()-1;
-		vw.u.set(gpuTVIndex, (short) (sideScalar * t.getUV(vIndex).getX()));
-		vw.v.set(gpuTVIndex, (short) (sideScalar * (1-t.getUV(vIndex).getY())));
+		vw.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
+		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(at,vw,gpuTVIndex);
 	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");

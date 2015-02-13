@@ -18,43 +18,50 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodFileEntry;
 import org.jtrfp.jtrfp.pod.PodFile;
 
-public class PodDump
-	{
+/**
+ * A simple POD dumping utility which was thrown together because C-POD suddenly stopped working from behind WINE for me.
+ * @author Chuck Ritola
+ *
+ */
+public class PodDump {
 
-	/**
-	 * @param args
-	 * @since Apr 28, 2013
-	 */
-	public static void main(String[] args)
-		{
-		new PodDump(args);
-		}
+    /**
+     * @param args
+     * @since Apr 28, 2013
+     */
+    public static void main(String[] args) {
+	new PodDump(args);
+    }
 
-	public PodDump(String [] args)
-		{
-		if(args.length!=2)
-			{failure();}
-		File podFile = new File(args[0]);
-		File dest = new File(args[1]);
-		if(!dest.isDirectory())
-			{System.err.println("Destination must be a directory.");System.exit(1);}
-		PodFile pod = new PodFile(podFile);
+    public PodDump(String[] args) {
+	if (args.length != 2) {
+	    failure();
+	}
+	File podFile = new File(args[0]);
+	File dest = new File(args[1]);
+	if (!dest.isDirectory()) {
+	    System.err.println("Destination must be a directory.");
+	    System.exit(1);
+	}
+	PodFile pod = new PodFile(podFile);
+	try {
+	    for (IPodFileEntry ent : pod.getData().getEntries()) {
 		try {
-			for(IPodFileEntry ent:pod.getData().getEntries())
-				{try
-					{
-					File destFile=new File(dest,ent.getPath());
-					System.out.println(""+destFile.getName());
-					ent.toFile(destFile);
-					}
-				catch(Exception e)
-					{e.printStackTrace();}
-				}//end for(files)
-			}
-		catch(FileLoadException e){e.printStackTrace();}
-		}//end PodDump(...)
-	
-	private void failure()
-		{System.err.println("USAGE: PodDump [Path to POD file] [Destination Directory]");
-		System.exit(1);}
-	}//end PodDump
+		    File destFile = new File(dest, ent.getPath());
+		    System.out.println("" + destFile.getName());
+		    ent.toFile(destFile);
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+	    }// end for(files)
+	} catch (FileLoadException e) {
+	    e.printStackTrace();
+	}
+    }// end PodDump(...)
+
+    private void failure() {
+	System.err
+		.println("USAGE: PodDump [Path to POD file] [Destination Directory]");
+	System.exit(1);
+    }
+}// end PodDump

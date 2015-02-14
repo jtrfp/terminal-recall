@@ -26,7 +26,7 @@ import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
 public class VQCodebookManager {
-    private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODES_PER_PAGE*NUM_CODE_PAGES);
+    private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODE256_PER_PAGE*NUM_CODE_PAGES);
     private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
     private final	Queue<TileUpdate>tileUpdates	   = new LinkedBlockingQueue<TileUpdate>();
     private final	GPU		gpu;
@@ -298,8 +298,8 @@ public class VQCodebookManager {
 		}// end for(cIndex)
 	    }// end for(x)
     }// end mipDown(...)
-
-    public int newCodebook256() {
+    
+    public synchronized int newCodebook256() {
 	try{return codebook256Indices.popOrException();}
 	catch(OutOfIndicesException e){
 	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");

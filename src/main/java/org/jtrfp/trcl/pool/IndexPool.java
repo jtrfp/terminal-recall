@@ -13,24 +13,46 @@
 package org.jtrfp.trcl.pool;
 
 import java.util.NoSuchElementException;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class IndexPool{
-	private final Queue<Integer> 	freeIndices	= new LinkedBlockingQueue<Integer>();
+	private final BlockingQueue<Integer> freeIndices= new LinkedBlockingQueue<Integer>();
 	private volatile int 		maxCapacity	= 1;
 	private volatile int 		highestIndex	= -1;
 	private GrowthBehavior 		growthBehavior	= new GrowthBehavior()
 		{public int grow(int index){return index*2;}};//Default is to double each time.
+	private int hardLimit=Integer.MAX_VALUE;//Basically no hard limit by default
 	
 	public IndexPool(){
 	}
-		
-    public int pop() {
+	
+    public int pop(){
+	try{return pop(false);}
+	catch(OutOfIndicesException e){
+	    e.printStackTrace();
+	    assert false;
+	    return -1;
+	    }//Shouldn't happen.
+    }//end pop()
+    
+    public int popOrException() throws OutOfIndicesException{
+	return pop(true);
+    }
+    
+    private int pop(boolean throwException) throws OutOfIndicesException {
 	try {
 	    return freeIndices.remove();
 	} catch (NoSuchElementException e) {
 	    synchronized (this) {
+		if (highestIndex + 1 >= hardLimit)
+		    if(throwException)throw new OutOfIndicesException();
+		    else try{return freeIndices.take();}
+			catch(InterruptedException ex){
+			    ex.printStackTrace(); 
+			    assert false;
+			    return -1;
+			    }
 		if (highestIndex + 1 < maxCapacity)
 		    return availablePop();
 		else return growthPop();
@@ -72,5 +94,21 @@ public class IndexPool{
 	 */
 	public int getMaxCapacity() {
 	    return maxCapacity;
+	}
+	
+	public static class OutOfIndicesException extends Exception{}
+	/**
+	 * @return the hardLimit
+	 */
+	public int getHardLimit() {
+	    return hardLimit;
+	}
+
+	/**
+	 * @param hardLimit the hardLimit to set
+	 */
+	public IndexPool setHardLimit(int hardLimit) {
+	    this.hardLimit = hardLimit;
+	    return this;
 	}
 }//end IndexPool

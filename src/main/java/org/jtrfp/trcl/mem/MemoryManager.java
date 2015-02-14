@@ -17,13 +17,14 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.gpu.GLProgram;
-import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.MemoryUsageHint;
@@ -36,6 +37,9 @@ public final class MemoryManager {
     private final ByteBuffer [] 		physicalMemory 	= new ByteBuffer[1];
     private final ReallocatableGLTextureBuffer 	glPhysicalMemory;
     private final GPU				gpu;
+    private final ArrayBlockingQueue<WeakReference<PagedByteBuffer>>		
+    						newPagedByteBuffers = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
+    						deletedPagedByteBuffers = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024);
     private final ArrayList<WeakReference<PagedByteBuffer>>	
     						pagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
     /**
@@ -93,19 +97,21 @@ public final class MemoryManager {
     }
     
     void registerPagedByteBuffer(WeakReference<PagedByteBuffer> b){
-	synchronized(pagedByteBuffers){
-	pagedByteBuffers.add(b);}
+	try{newPagedByteBuffers.put(b);}
+	catch(InterruptedException e){e.printStackTrace();}
     }
     
     void deRegisterPagedByteBuffer(WeakReference<PagedByteBuffer> b){
-	synchronized(pagedByteBuffers){
-	pagedByteBuffers.remove(b);}
+	try{deletedPagedByteBuffers.put(b);}
+	catch(InterruptedException e){e.printStackTrace();}
     }
     
     public void flushStalePages(){
 	if(!glPhysicalMemory.isMapped())
 	    return;
-	synchronized(pagedByteBuffers){
+	pagedByteBuffers.removeAll(deletedPagedByteBuffers);
+	newPagedByteBuffers.drainTo(pagedByteBuffers);
+	
 	final Iterator<WeakReference<PagedByteBuffer>> it = pagedByteBuffers.iterator();
 	while(it.hasNext()){
 	    final WeakReference<PagedByteBuffer> r = it.next();
@@ -115,7 +121,6 @@ public final class MemoryManager {
 		r.get().flushStalePages();
 	    }//end else{}
 	}//end while(hasNext)
-	}//end sync()
     }//end flushStalePages()
     
     public void bindToUniform(int textureUnit, GLProgram shaderProgram, GLUniform uniform) {

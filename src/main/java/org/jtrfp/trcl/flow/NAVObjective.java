@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
-import java.awt.Point;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -34,7 +34,6 @@ import org.jtrfp.trcl.file.NAVFile.TGT;
 import org.jtrfp.trcl.file.NAVFile.TUN;
 import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
-import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Jumpzone;
@@ -171,6 +170,7 @@ public abstract class NAVObjective {
 		    //}//end if(visibleUnlessBoss)
 		} else if(navSubObject instanceof BOS){///////////////////////////////////////////
 		    final Mission mission = tr.getGame().getCurrentMission();
+		    final WeakReference<Mission> wMission = new WeakReference<Mission>(mission);
 		    final BOS bos = (BOS)navSubObject;
 		    boolean first=true;
 		    final int [] bossTargs = bos.getTargets();
@@ -193,7 +193,7 @@ public abstract class NAVObjective {
 			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
-				    mission.enterBossMode(bos.getMusicFile());
+				    wMission.get().enterBossMode(bos.getMusicFile());
 				    tr.getGame().getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()
@@ -230,7 +230,7 @@ public abstract class NAVObjective {
 			bossObject.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
-				mission.exitBossMode();
+				wMission.get().exitBossMode();
 			    }//end run()
 			}));
 			bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){

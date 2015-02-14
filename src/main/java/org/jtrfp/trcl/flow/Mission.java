@@ -126,6 +126,10 @@ public class Mission {
 	    if(missionEnd[0]!=null)
 		return missionEnd[0]; 
 	}
+	tr.getThreadManager().setPaused(true);
+	for(ProjectileFactory pf:tr.getResourceManager().getProjectileFactories())
+	    for(Projectile proj:pf.getProjectiles())
+		proj.destroy();
 	System.out.println("Starting GampeplayLevel loading sequence...");
 	final LoadingProgressReporter rootProgress = LoadingProgressReporter.Impl
 		.createRoot(new UpdateHandler() {
@@ -287,6 +291,7 @@ public class Mission {
 	game.setDisplayMode(game.gameplayMode);
 	
 	game.getPlayer()	.setActive(true);
+	tr.getGame().setPaused(false);
 	//Wait for mission end
 	synchronized(missionEnd){
 	 while(missionEnd[0]==null){try{missionEnd.wait();}
@@ -796,7 +801,7 @@ public class Mission {
 	    final Game game =  tr.getGame();
 	    final Camera cam = tr.renderer.get().getCamera();
 	    if(satelliteView){//Switched on
-		tr.getThreadManager().setPaused(true);
+		tr.getGame().setPaused(true);
 		game.getNavSystem().deactivate();
 		game.getHUDSystem().deactivate();
 		cam.setFogEnabled(false);

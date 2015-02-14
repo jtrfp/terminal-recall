@@ -23,9 +23,10 @@ import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
+import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
 public class VQCodebookManager {
-    private final 	IndexPool 	codebook256Indices = new IndexPool();
+    private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODES_PER_PAGE*NUM_CODE_PAGES);
     private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
     private final	Queue<TileUpdate>tileUpdates	   = new LinkedBlockingQueue<TileUpdate>();
     private final	GPU		gpu;
@@ -93,12 +94,7 @@ public class VQCodebookManager {
     private VQCodebookManager setNNNN(int codeID, RasterRowWriter []rowWriter, GLTexture texture) {
 	try{subImage(codeID,rowWriter,texture,2);}
 	catch(OutOfMemoryError e){
-	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
-	    TR.nuclearGC();
-	    System.err.println("Still alive. Attempting texture NNNN write again...");
-	    subImage(codeID,rowWriter,texture,4);
-	    System.err.println("Success.");
-	}
+	    gpu.getTr().showStopper(new RuntimeException(e));}
 	return this;
     }// end setRGBA(...)
     
@@ -111,7 +107,10 @@ public class VQCodebookManager {
     }
     
     private VQCodebookManager setNNNNBlock256(int blockID, RasterRowWriter [][] rowWriters, GLTexture texture){
-	subImage256(blockID,rowWriters,texture,2);
+	try{subImage256(blockID,rowWriters,texture,2);}
+	catch(OutOfMemoryError e){
+	    
+	}
 	return this;
     }
     
@@ -123,9 +122,11 @@ public class VQCodebookManager {
 	public void applyRow(int row, ByteBuffer dest);
     }//end RasterRowWriter
     
-    private void subImage256(final int blockID, final RasterRowWriter[][] texels, GLTexture texture, int mipLevel){
+    private void subImage256(final int blockID, final RasterRowWriter[][] texels, GLTexture texture, int mipLevel) throws OutOfMemoryError{
 	final int y = (blockID % CODE256_PER_PAGE) * CODE256_HEIGHT_CODES * CODE_SIDE_LENGTH;
 	final int page = blockID / CODE256_PER_PAGE;
+	if(page >= NUM_CODE_PAGES)
+	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+page+" max: "+NUM_CODE_PAGES);
 	tileUpdates.add(new TileUpdate(texels,0,y,page));
     }
     
@@ -299,7 +300,13 @@ public class VQCodebookManager {
     }// end mipDown(...)
 
     public int newCodebook256() {
-	return codebook256Indices.pop();
+	try{return codebook256Indices.popOrException();}
+	catch(OutOfIndicesException e){
+	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
+	    TR.nuclearGC();
+	    System.err.println("Still alive. Attempting blocking texture codebook256...");
+	    return codebook256Indices.pop();
+	}//end catch()
     }// end newCODE()
 
     public void freeCodebook256(int codebook256ToRelease) {

@@ -110,7 +110,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	exitObject = new TunnelExitObject(tr, this);
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
-	exitObject.setPosition(tunnelEnd.subtract(new Vector3D(10000, 0, 0))
+	exitObject.setPosition(tunnelEnd.add(new Vector3D(50000, 0, 0))
 		.toArray());
 	exitObject.notifyPositionChange();
 	add(exitObject);

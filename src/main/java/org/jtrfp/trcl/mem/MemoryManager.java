@@ -17,9 +17,10 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.opengl.GL3;
 
@@ -37,9 +38,11 @@ public final class MemoryManager {
     private final ByteBuffer [] 		physicalMemory 	= new ByteBuffer[1];
     private final ReallocatableGLTextureBuffer 	glPhysicalMemory;
     private final GPU				gpu;
-    private final ArrayBlockingQueue<WeakReference<PagedByteBuffer>>		
-    						newPagedByteBuffers = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
-    						deletedPagedByteBuffers = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024);
+    private final BlockingQueue<WeakReference<PagedByteBuffer>>		
+    						newPagedByteBuffers             = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
+    						newPagedByteBuffersOverflow     = new LinkedBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
+    						deletedPagedByteBuffers         = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
+    						deletedPagedByteBuffersOverflow = new LinkedBlockingQueue<WeakReference<PagedByteBuffer>>(1024);
     private final ArrayList<WeakReference<PagedByteBuffer>>	
     						pagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
     /**
@@ -97,20 +100,33 @@ public final class MemoryManager {
     }
     
     void registerPagedByteBuffer(WeakReference<PagedByteBuffer> b){
-	try{newPagedByteBuffers.put(b);}
-	catch(InterruptedException e){e.printStackTrace();}
+	try{newPagedByteBuffers.add(b);}
+	catch(IllegalStateException e){
+	    newPagedByteBuffersOverflow.offer(b);
+	}
     }
     
     void deRegisterPagedByteBuffer(WeakReference<PagedByteBuffer> b){
-	try{deletedPagedByteBuffers.put(b);}
-	catch(InterruptedException e){e.printStackTrace();}
+	try{deletedPagedByteBuffers.add(b);}
+	catch(IllegalStateException e){
+	    deletedPagedByteBuffersOverflow.offer(b);
+	}
     }
+    
+    private final ArrayList<WeakReference<PagedByteBuffer>> toRemove = new ArrayList<WeakReference<PagedByteBuffer>>();
     
     public void flushStalePages(){
 	if(!glPhysicalMemory.isMapped())
 	    return;
-	pagedByteBuffers.removeAll(deletedPagedByteBuffers);
+	
+	deletedPagedByteBuffers.drainTo(toRemove);
+	deletedPagedByteBuffersOverflow.drainTo(toRemove);
+	
+	pagedByteBuffers.removeAll(toRemove);
+	toRemove.clear();
+	
 	newPagedByteBuffers.drainTo(pagedByteBuffers);
+	newPagedByteBuffersOverflow.drainTo(pagedByteBuffers);
 	
 	final Iterator<WeakReference<PagedByteBuffer>> it = pagedByteBuffers.iterator();
 	while(it.hasNext()){

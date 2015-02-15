@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.Arrays;
+
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.mem.MemoryWindow;
@@ -22,6 +24,8 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected static final double uvUpScaler = 4096;
     private final PRIMITIVE_TYPE[][] primitives;
     private final Model model;
+    private int cachedNumElements=-1;
+    private boolean primitivesFinalized=false;
 
     public static enum RenderStyle {
 	OPAQUE, TRANSPARENT
@@ -61,6 +65,8 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     }
 
     public int getNumElements() {
+	if(primitives[0]==null)
+	    return cachedNumElements;
 	return primitives[0].length;
     }
 
@@ -116,5 +122,18 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
      */
     protected Model getModel() {
         return model;
+    }
+    
+    protected void finalizePrimitives(){//TODO: Factor this out if switching completely to MemoryWindow
+	cachedNumElements = getNumElements();
+	primitivesFinalized=true;
+	Arrays.fill(primitives, null);
+    }
+
+    /**
+     * @return the primitivesFinalized
+     */
+    protected boolean isPrimitivesFinalized() {
+        return primitivesFinalized;
     }
 }// end PrimitiveList

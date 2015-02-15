@@ -36,6 +36,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private final 	boolean 			animateUV;
     private final 	WindowAnimator 			xyzAnimator;
     private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
+    private		Vector3D			cachedMinimumVertexDims,
+    							cachedMaximumVertexDims;
+    private		double				cachedMaximumVertexValue;
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
@@ -249,6 +252,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		    public Void call() throws Exception {
 			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 				setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
+			finalizePrimitives();//This may break max vertex values
 			return null;
 		    }//end Call()
 		});
@@ -270,6 +274,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }
 
     public Vector3D getMaximumVertexDims() {
+	if(isPrimitivesFinalized())
+	    return cachedMaximumVertexDims;
 	Vector3D 	result 	= Vector3D.ZERO;
 	Triangle[][] 	t 	= getPrimitives();
 	for (Triangle[] frame : t) {
@@ -293,6 +299,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }// end getMaximumVertexDims()
 
     public Vector3D getMinimumVertexDims() {
+	if(isPrimitivesFinalized())
+	    return cachedMinimumVertexDims;
 	Vector3D result = new Vector3D(Double.POSITIVE_INFINITY,
 		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 	Triangle[][] t = getPrimitives();
@@ -317,6 +325,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }// end getMaximumVertexDims()
 
     public double getMaximumVertexValue() {
+	if(isPrimitivesFinalized())
+	    return cachedMaximumVertexValue;
 	double result = 0;
 	Triangle[][] t = getPrimitives();
 	for (Triangle[] frame : t) {
@@ -344,6 +354,14 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    flatTVWindow = new TriangleVertex2FlatDoubleWindow(
 		    (TriangleVertexWindow) this.getMemoryWindow());
 	return flatTVWindow;
+    }
+    
+    @Override
+    protected void finalizePrimitives(){
+	cachedMinimumVertexDims = getMinimumVertexDims();
+	cachedMaximumVertexDims = getMaximumVertexDims();
+	cachedMaximumVertexValue= getMaximumVertexValue();
+	super.finalizePrimitives();
     }
 
     @Override

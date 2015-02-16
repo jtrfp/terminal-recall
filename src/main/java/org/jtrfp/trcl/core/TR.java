@@ -69,7 +69,7 @@ public final class TR{
 	private final KeyStatus 		keyStatus;
 	private ResourceManager 		resourceManager;
 	public final ThreadManager 		threadManager;
-	public final TRFutureTask<Renderer> 	renderer;
+	public final TRFutureTask<Renderer> 	mainRenderer;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter		= new Reporter();
 	private Game 				game;
@@ -136,13 +136,13 @@ public final class TR{
 		threadManager.threadPool.submit(gpu);
 		threadManager.threadPool.submit(soundSystem);//TODO: Use new methods
 		System.out.println("Initializing graphics engine...");
-		    renderer=new TRFutureTask<Renderer>(this,new Callable<Renderer>(){
+		    mainRenderer=new TRFutureTask<Renderer>(this,new Callable<Renderer>(){
 			@Override
 			public Renderer call() throws Exception {
 			    Thread.currentThread().setName("Renderer constructor.");
 			    return new Renderer(TR.this.gpu.get());
 			}//end call()
-		    });threadManager.threadPool.submit(renderer);
+		    });threadManager.threadPool.submit(mainRenderer);
 		    matrixWindow=new TRFutureTask<MatrixWindow>(this,new Callable<MatrixWindow>(){
 			@Override
 			public MatrixWindow call() throws Exception {
@@ -168,7 +168,12 @@ public final class TR{
 				24.*mapSquareSize,
 				256*mapSquareSize,
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
-		renderer.get().setRootGrid(world);
+		
+		final Renderer renderer = mainRenderer.get();
+		renderer.setRootGrid(world);//TODO: replace with Camera objects?
+		renderer.setCollisionManager(getCollisionManager());
+		getThreadManager().registerRenderer(renderer);
+		
 		gameShell  = new GameShell(this);
 		menuSystem = new MenuSystem(this);
 		gameShell.startShell();

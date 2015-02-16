@@ -13,19 +13,18 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.ObjectDirection;
-import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 
 public final class World extends RenderableSpacePartitioningGrid {
     double sizeX;
     public double sizeY;
     double sizeZ;
+    private final Renderer renderer;
     //private final AtomicBoolean	visibilityRefreshAlreadyRequested = new AtomicBoolean();
     private static final int blockGranularity = 8;// Dim-Segments per diameter.
 						  // should
@@ -40,15 +39,16 @@ public final class World extends RenderableSpacePartitioningGrid {
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 	this.sizeZ = sizeZ;
-	tr.renderer.get().getCamera().setViewDepth(cameraViewDepth);
-	Camera camera = tr.renderer.get().getCamera();
+	this.renderer=tr.mainRenderer.get();
+	renderer.getCamera().setViewDepth(cameraViewDepth);
+	Camera camera = renderer.getCamera();
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 		sizeY / 3.15, camera.getCameraPosition().getZ()));
     }// end constructor
 
     public void setCameraDirection(ObjectDirection dir) {
-	tr.renderer.get().getCamera().setLookAtVector(dir.getHeading());
-	tr.renderer.get().getCamera().setUpVector(dir.getTop());
+	renderer.getCamera().setLookAtVector(dir.getHeading());
+	renderer.getCamera().setUpVector(dir.getTop());
     }
     
     @Override

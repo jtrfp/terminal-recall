@@ -22,9 +22,9 @@ import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
@@ -157,7 +157,7 @@ public class RenderList {
     private void sendRenderListPageTable(){
 	final ObjectListWindow olWindow = RenderList.this.tr
 		    .objectListWindow.get();
-	final Renderer renderer = tr.renderer.get();
+	//final Renderer renderer = tr.mainRenderer.get();
 	final int size = olWindow.numPages();
 	//////// Workaround for AMD bug where element zero always returns zero in frag. Shift up one.
 	for (int i = 0; i < size-1; i++) {
@@ -316,7 +316,7 @@ public class RenderList {
 	
 	gl.glDepthMask(true);
 	// OPAQUE.DRAW STAGE
-	final GLProgram primaryProgram = tr.renderer.get().getOpaqueProgram();
+	final GLProgram primaryProgram = renderer.getOpaqueProgram();
 	primaryProgram.use();
 	renderer.getVertexXYTexture().bindToTextureUnit(1, gl);
 	renderer.getVertexUVTexture().bindToTextureUnit(2, gl);
@@ -339,7 +339,7 @@ public class RenderList {
 	gl.glEnable(GL3.GL_DEPTH_CLAMP);
 	//gl.glDepthRange((BriefingScreen.MAX_Z_DEPTH+1)/2, 1);
 	
-	if(tr.renderer.get().isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
+	if(renderer.isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
 	//final int verticesPerSubPass	= (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
 	//final int numSubPasses		= (numOpaqueVertices / verticesPerSubPass) + 1;
 	//int remainingVerts		= numOpaqueVertices;
@@ -429,13 +429,18 @@ public class RenderList {
 	//gl.glDisable(GL3.GL_STENCIL_TEST);
 	
 	// DEFERRED STAGE
-	if(tr.renderer.get().isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
-	final GLProgram deferredProgram = tr.renderer.get().getDeferredProgram();
+	if(renderer.isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
+	final GLProgram deferredProgram = renderer.getDeferredProgram();
 	deferredProgram.use();
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_BLEND);
-	gpu.defaultFrameBuffers();
+	
+	final GLFrameBuffer renderTarget = renderer.getRenderingTarget();
+	if(renderTarget!=null)
+	    renderTarget.bindToDraw();
+	else gpu.defaultFrameBuffers();
+	
 	gpu.memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
 	renderer.getSkyCube().getSkyCubeTexture().bindToTextureUnit(1,gl);

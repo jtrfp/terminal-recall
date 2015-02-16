@@ -95,7 +95,7 @@ public class TunnelExitObject extends WorldObject {
 		    }else mission.setMissionMode(new Mission.AboveGroundMode());
 		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
 		    
-		    tr.renderer.get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
+		    tr.mainRenderer.get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
 		    // Teleport
 		    other.setPosition(exitLocation.toArray());
 		    // Heading

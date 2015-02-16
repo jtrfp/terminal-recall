@@ -318,7 +318,7 @@ public class WorldObject implements PositionedRenderable {
     
     protected void attemptLoop(){
 	if (LOOP) {
-	    final Vector3D camPos = tr.renderer.get().getCamera().getCameraPosition();
+	    final Vector3D camPos = tr.mainRenderer.get().getCamera().getCameraPosition();
 	    double delta = position[0]
 		    - camPos.getX();
 	    if (delta > TR.mapWidth / 2.) {
@@ -408,7 +408,7 @@ public class WorldObject implements PositionedRenderable {
 	needToRecalcMatrix=true;
 	if(!this.visible && visible){
 	    this.visible = true;
-	    tr.renderer.get().temporarilyMakeImmediatelyVisible(this);
+	    tr.mainRenderer.get().temporarilyMakeImmediatelyVisible(this);
 	}else this.visible = visible;
 	tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
@@ -585,7 +585,7 @@ public class WorldObject implements PositionedRenderable {
 	    needToRecalcMatrix=true;
 	if(!this.active && active && isVisible()){
 	    this.active=true;
-	    tr.renderer.get().temporarilyMakeImmediatelyVisible(this);
+	    tr.mainRenderer.get().temporarilyMakeImmediatelyVisible(this);
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {

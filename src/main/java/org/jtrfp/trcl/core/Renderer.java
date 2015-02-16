@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -26,7 +27,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -35,6 +35,7 @@ import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;
+import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.SkyCube;
@@ -73,15 +74,18 @@ public final class Renderer {
     /*					*/	depthQueueFrameBuffer,
     /*					*/	objectFrameBuffer,
     /*					*/	vertexFrameBuffer,
-    /*					*/	primitiveFrameBuffer;
+    /*					*/	primitiveFrameBuffer,
+    /*					*/	renderingTarget;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private final	boolean			backfaceCulling;
     private		double			meanFPS;
     private		float[]			cameraMatrixAsFlatArray		= new float[16];
     private volatile	float	[]		camRotationProjectionMatrix = new float[16];
-    private		TRFutureTask<Void>	visibilityUpdateFuture;
+    private		TRFutureTask<Void>	visibilityUpdateFuture,visibilityCalcTask;
     private 		SkyCube			skyCube;
+    final 	AtomicLong			nextVisCalcTime = new AtomicLong(0L);
+    private		CollisionManager	collisionManager;
 
     public Renderer(final GPU gpu) {
 	final TR tr = gpu.getTr();
@@ -844,4 +848,59 @@ public final class Renderer {
 	}).get();
 	return this;
     }//end setAmbientLight
+
+    /**
+     * @return the renderingTarget
+     */
+    public GLFrameBuffer getRenderingTarget() {
+        return renderingTarget;
+    }
+
+    /**
+     * @param renderingTarget the renderingTarget to set
+     */
+    public Renderer setRenderingTarget(GLFrameBuffer renderingTarget) {
+        this.renderingTarget = renderingTarget;
+        return this;
+    }
+    
+    private final Object visibilityUpdateLock = new Object();
+    
+    public void visibilityCalc(final boolean mandatory) {
+	final long currTimeMillis = System.currentTimeMillis();
+	if(visibilityCalcTask!=null && !mandatory){
+	    if(!visibilityCalcTask.isDone())
+		{System.out.println("visiblityCalc() !done. Return...");return;}}
+	visibilityCalcTask = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		synchronized(visibilityUpdateLock){
+		 updateVisibilityList(mandatory);
+		 if(collisionManager!=null)
+		  collisionManager.updateCollisionList();
+		 //Nudge of 10ms to compensate for drift of the timer task
+		 nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
+		 }//end sync(visibilityUpdateLock)
+		return null;
+	    }});
+    }//end visibilityCalc()
+    
+    public void visibilityCalc(){
+	visibilityCalc(false);
+    }
+
+    /**
+     * @return the collisionManager
+     */
+    public CollisionManager getCollisionManager() {
+        return collisionManager;
+    }
+
+    /**
+     * @param collisionManager the collisionManager to set
+     */
+    public Renderer setCollisionManager(CollisionManager collisionManager) {
+        this.collisionManager = collisionManager;
+        return this;
+    }
 }//end Renderer

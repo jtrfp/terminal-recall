@@ -308,7 +308,7 @@ public class Game {
 		    rm.setProjectileFactories(pf);
 		    player = new Player(tr, tr.getResourceManager().getBINModel(
 			    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));
-		    final Camera camera = tr.renderer.get().getCamera();
+		    final Camera camera = tr.mainRenderer.get().getCamera();
 		    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 		    camera.probeForBehavior(MatchDirection.class).setTarget(player);
 		    tr.getWorld().add(player);
@@ -450,7 +450,7 @@ public class Game {
 
     public Game setDisplayMode(Object[] mode) {
 	displayModes.setDisplayMode(mode);
-	tr.getThreadManager().visibilityCalc(true);
+	tr.mainRenderer.get().visibilityCalc(true);
 	return this;
     }
     

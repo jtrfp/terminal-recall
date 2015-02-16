@@ -140,7 +140,7 @@ public class Mission {
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
-	final Renderer renderer = tr.renderer.get();
+	final Renderer renderer = tr.mainRenderer.get();
 	renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	renderer.getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
 	final Camera camera = renderer.getCamera();
@@ -220,7 +220,7 @@ public class Mission {
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {
 		@Override
 		public Void call() throws Exception {
-		    tr.renderer.get().setSunVector(
+		    tr.mainRenderer.get().setSunVector(
 			    new Vector3D(sunVector.getX(), sunVector.getY(),
 				    sunVector.getZ()).normalize());
 		    return null;
@@ -283,7 +283,7 @@ public class Mission {
 	setMissionMode(new Mission.AboveGroundMode());
 	getOverworldSystem().activate();
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
-	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+	tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
@@ -654,7 +654,7 @@ public class Mission {
 	//Turn on tunnel
 	tunnel.activate();
 	//Move player to tunnel
-	tr.renderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
+	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 	//Ensure chamber mode is off
 	overworldSystem.setChamberMode(false);
 	overworldSystem.setTunnelMode(true);
@@ -799,7 +799,7 @@ public class Mission {
 	pcs.firePropertyChange(SATELLITE_VIEW, this.satelliteView, satelliteView);
 	if(satelliteView!=this.satelliteView){
 	    final Game game =  tr.getGame();
-	    final Camera cam = tr.renderer.get().getCamera();
+	    final Camera cam = tr.mainRenderer.get().getCamera();
 	    if(satelliteView){//Switched on
 		tr.getGame().setPaused(true);
 		game.getNavSystem().deactivate();

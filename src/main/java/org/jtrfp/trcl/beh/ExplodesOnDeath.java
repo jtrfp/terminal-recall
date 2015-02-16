@@ -44,7 +44,7 @@ private String explosionSound;
 	      enqueuePlaybackEvent(tr.soundSystem.get().getPlaybackFactory().
 		    create(tr.getResourceManager().soundTextures.get(explosionSound),
 			    loc.toArray(),
-			    tr.renderer.get().getCamera(),
+			    tr.mainRenderer.get().getCamera(),
 			    SoundSystem.DEFAULT_SFX_VOLUME*2));
     }
     @Override

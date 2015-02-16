@@ -56,7 +56,7 @@ public class GameShell {
     }//end startShell()
     
     public void applyGFXState(){
-	final Renderer renderer = tr.renderer.get();
+	final Renderer renderer = tr.mainRenderer.get();
 	final Camera camera = renderer.getCamera();
 	camera.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	renderer.getSkyCube().setSkyCubeGen(DEFAULT_GRADIENT);

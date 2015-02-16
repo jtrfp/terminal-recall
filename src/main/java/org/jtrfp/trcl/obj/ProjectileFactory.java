@@ -169,7 +169,7 @@ public class ProjectileFactory {
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getWorld().add((WorldObject)result);
-	tr.renderer.get().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
+	tr.mainRenderer.get().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
 	if(soundTexture!=null)
 	    tr.soundSystem.get().enqueuePlaybackEvent(
 		    tr.soundSystem
@@ -177,7 +177,7 @@ public class ProjectileFactory {
 			    .getPlaybackFactory()
 			    .create(soundTexture,
 				     (WorldObject)result,
-				     tr.renderer.get().getCamera(),
+				     tr.mainRenderer.get().getCamera(),
 				     (objectOfOrigin instanceof Player?.6:1)*SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead
 	final List<WorldObject> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
 	 synchronized(cL){cL.add((WorldObject)result);}

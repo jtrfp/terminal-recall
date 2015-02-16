@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -52,6 +53,7 @@ public final class ThreadManager {
     private Thread 			renderingThread;
     private Animator			animator;
     private boolean[] 			paused = new boolean[]{false};
+    private final ArrayList<Renderer>	renderers = new ArrayList<Renderer>();
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
 		    30,
@@ -65,10 +67,8 @@ public final class ThreadManager {
 		    1,
 		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
     public final Object			gameStateLock			= new Object();
-    private TRFutureTask<Void>		visibilityCalcTask;
     public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
     public final Queue<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
-    private final AtomicLong		nextVisCalcTime 		= new AtomicLong(0L);
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
 	public void submit(TRFutureTask<?> item) {
@@ -113,7 +113,12 @@ public final class ThreadManager {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	try{// NotReadyException
-	final List<WorldObject> vl = tr.renderer.getRealtime().currentRenderList().getRealtime().getVisibleWorldObjectList();
+	final List<WorldObject> vl = 
+		tr.mainRenderer.
+		getRealtime().
+		currentRenderList().
+		getRealtime().
+		getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	final Game game = tr.getGame();
 	if(game==null)
@@ -143,32 +148,9 @@ public final class ThreadManager {
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
     
-    public void visibilityCalc(){
-	visibilityCalc(false);
-    }
+    
 
-    private final Object visibilityUpdateLock = new Object();
-    public void visibilityCalc(final boolean mandatory) {
-	final long currTimeMillis = System.currentTimeMillis();
-	//Sanity checks
-	if(tr.renderer==null)		return;
-	if(visibilityCalcTask!=null && !mandatory){
-	    if(!visibilityCalcTask.isDone())
-		{System.out.println("visiblityCalc() !done. Return...");return;}}
-	visibilityCalcTask = this.submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-	       try{
-		synchronized(visibilityUpdateLock){
-		 tr.renderer.getRealtime().updateVisibilityList(mandatory);
-		 tr.getCollisionManager().updateCollisionList();
-		 //Nudge of 10ms to compensate for drift of the timer task
-		 nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
-		 }//end sync(visibilityUpdateLock)
-	    }catch(NotReadyException e){}
-		return null;
-	    }});
-    }//end visibilityCalc()
+    
     
     public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
@@ -200,11 +182,16 @@ public final class ThreadManager {
 	gameplayTimer.schedule(new TimerTask(){
 	    @Override
 	    public void run() {
+		if(tr.mainRenderer==null)
+		    return;
 		try{
 		if (counter++ % Math.ceil(RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
-		 if(System.currentTimeMillis()<nextVisCalcTime.get())
+		 if(System.currentTimeMillis()<
+			 tr.
+			 mainRenderer.get().
+			 nextVisCalcTime.get())
 		     return;
-		 visibilityCalc();}
+		 tr.mainRenderer.get().visibilityCalc();}
 		if(tr.getGame()!=null)
 		 if(tr.getGame().getPlayer()!=null)gameplay();
 		}catch(Exception e){tr.showStopper(e);}
@@ -245,28 +232,35 @@ public final class ThreadManager {
 	lastGameplayTickTime = System.currentTimeMillis();
     }// end start()
     
-    private void attemptRender(){
-	if(tr.renderer!=null){
-	    try{
-		 //Swap submitters
-		 synchronized(currentGPUMemAccessTaskSubmitter){
-		  currentGPUMemAccessTaskSubmitter.set(pendingGPUMemAccessTaskSubmitter);}
-		 while(!activeGPUMemAccessTasks.isEmpty()){
-		  if(!activeGPUMemAccessTasks.peek().isDone())
-		   return;//Abort. Not ready to go yet.
-		  activeGPUMemAccessTasks.poll();
-		 }//end while(!empty)
-		 ///////// activeGPUMemAccessTasks should be empty beyond this point ////////
-		 assert activeGPUMemAccessTasks.isEmpty():"ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
-		 ThreadManager.this.tr.renderer.getRealtime().render();
-		 synchronized(currentGPUMemAccessTaskSubmitter){
-		  currentGPUMemAccessTaskSubmitter.set(activeGPUMemAccessTaskSubmitter);}
-		while(!pendingGPUMemAccessTasks.isEmpty())
-		    activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks.poll());
-	    	}catch(NotReadyException e){}
-	    	catch(Exception e){e.printStackTrace();}
-	    }//end if(!null)
-    }//end attemptRender()
+    private void attemptRender() {
+	// Swap submitters
+	try {
+	    synchronized (currentGPUMemAccessTaskSubmitter) {
+		currentGPUMemAccessTaskSubmitter
+			.set(pendingGPUMemAccessTaskSubmitter);
+	    }//end sync()
+	    while (!activeGPUMemAccessTasks.isEmpty()) {
+		if (!activeGPUMemAccessTasks.peek().isDone())
+		    return;// Abort. Not ready to go yet.
+		activeGPUMemAccessTasks.poll();
+	    }// end while(!empty)
+	     // /////// activeGPUMemAccessTasks should be empty beyond this
+	    assert activeGPUMemAccessTasks.isEmpty() : "ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
+	     // point ////////
+	    for (Renderer renderer : renderers) {
+		renderer.render();
+	    }// end for(renderers)
+	    synchronized (currentGPUMemAccessTaskSubmitter) {
+		currentGPUMemAccessTaskSubmitter
+			.set(activeGPUMemAccessTaskSubmitter);
+	    }
+	    while (!pendingGPUMemAccessTasks.isEmpty())
+		activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks
+			.poll());
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
+    }// end attemptRender()
     
     public long getElapsedTimeInMillisSinceLastGameTick() {
 	return timeInMillisSinceLastGameTick;
@@ -309,4 +303,17 @@ public final class ThreadManager {
 	threadPool.submit(result);
 	return result;
     }
+
+    public void registerRenderer(Renderer r){
+	if(r==null)
+	    throw new NullPointerException("Passed Renderer intolerably null.");
+	if(!renderers.contains(r))
+	    renderers.add(r);
+    }//end registerRenderer(...)
+    
+    public void deregisterRenderer(Renderer r){
+	if(r==null)
+	    throw new NullPointerException("Passed Renderer intolerably null.");
+	renderers.remove(r);
+    }//end deregisterRenderer
 }// end ThreadManager

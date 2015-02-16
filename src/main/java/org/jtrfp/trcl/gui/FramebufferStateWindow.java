@@ -68,7 +68,7 @@ public class FramebufferStateWindow extends JFrame {
 	    subPanel.setBorder(border);
 	    rootPanel.add(subPanel);
 	}// end if(size>0)
-	final Renderer renderer = tr.renderer.get();
+	final Renderer renderer = tr.mainRenderer.get();
 	BeanInfo rendererBeanInfo = null;
 	try {
 	    rendererBeanInfo = Introspector.getBeanInfo(Renderer.class);

@@ -76,7 +76,7 @@ public class ForceField extends WorldObject {
 		 create(st, 
 			ForceField.this, 
 			getTr().
-			 renderer.get().
+			 mainRenderer.get().
 			 getCamera(), 
 		SoundSystem.DEFAULT_SFX_VOLUME));
 	    }//end turned on

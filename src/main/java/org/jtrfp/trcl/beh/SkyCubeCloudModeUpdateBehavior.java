@@ -30,7 +30,7 @@ public class SkyCubeCloudModeUpdateBehavior extends Behavior {
 	if(pos[1]> w.sizeY/2){
 	    if(!over)
 	    {over=true;
-	    tr.renderer.get().
+	    tr.mainRenderer.get().
 	     getSkyCube().
 	     setSkyCubeGen(
 	      tr.getGame().
@@ -43,7 +43,7 @@ public class SkyCubeCloudModeUpdateBehavior extends Behavior {
 	else{
 	    if(over)
 	    {over=false;
-	    tr.renderer.get().
+	    tr.mainRenderer.get().
 	     getSkyCube().
 	     setSkyCubeGen(
 	      tr.getGame().

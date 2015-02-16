@@ -141,7 +141,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private void planetDisplayMode(LVLFile lvl){
 	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
-	final Camera camera 	 = tr.renderer.get().getCamera();
+	final Camera camera 	 = tr.mainRenderer.get().getCamera();
 	final GPU 	gpu 	 = tr.gpu.get();
 	final GL3	gl	 = gpu.getGl();
 	this.lvl		 = lvl;
@@ -176,12 +176,13 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	camera.probeForBehavior(MatchDirection.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
 	camera.probeForBehavior(FacingObject.class).setEnable(true);
-	tr.renderer.get().getCamera()
+	final Renderer renderer = tr.mainRenderer.get();
+	renderer.getCamera()
 		.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class)
 		.setEnable(false);
-	tr.renderer.get().getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
-	tr.renderer.get().setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
-	tr.renderer.get().setSunColor(SkySystem.SPACE_SUN_COLOR);
+	renderer.getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
+	renderer.setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
+	renderer.setSunColor(SkySystem.SPACE_SUN_COLOR);
 	game.setDisplayMode(game.briefingMode);
     }//end planetDisplayMode()
     
@@ -197,7 +198,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	planetDisplayMode(lvl);
 	briefingChars.activate();
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
-	final Camera camera 	 = tr.renderer.get().getCamera();
+	final Camera camera 	 = tr.mainRenderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(false);
@@ -208,7 +209,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     public void briefingSequence(LVLFile lvl) {
 	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
-	final Camera camera 	 = tr.renderer.get().getCamera();
+	final Renderer renderer  = tr.mainRenderer.get();
+	final Camera camera 	 = renderer.getCamera();
 	final OverworldSystem overworld
 				= game.getCurrentMission().getOverworldSystem();
 	//missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
@@ -233,16 +235,15 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		synchronized(mWait){mWait[0] = true; mWait.notifyAll();}
 	    }//end run()
 	}).start();
-	tr.getThreadManager().visibilityCalc(true);
+	renderer.visibilityCalc(true);
 	try{synchronized(mWait){while(!mWait[0])mWait.wait();}}
 	catch(InterruptedException e){}
 	stopScroll();
 	spacebarWaitThread.interrupt();
 	
 	//Enemy introduction
-	final Renderer renderer = tr.renderer.get();
 	final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
-	tr.renderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+	renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());

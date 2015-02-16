@@ -40,7 +40,7 @@ public class CollisionManager {
 	collideable.clear();
 	final World world = tr.getWorld();
 	    if (world != null) {
-		world.itemsWithinRadiusOf(tr.renderer.get().getCamera()
+		world.itemsWithinRadiusOf(tr.mainRenderer.get().getCamera()
 			.getCameraPosition(),
 			new Submitter<PositionedRenderable>() {
 			    @Override

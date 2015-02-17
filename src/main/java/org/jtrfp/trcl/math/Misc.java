@@ -145,4 +145,36 @@ public class Misc {
     public static float cosTriangle(float freq, float phase){
 	return Math.abs(1f-((phase*freq*2)%2));
     }
+    
+    //// SATURATED CASTING
+    
+    public static int satCastInt(long v){
+	return v<Integer.MIN_VALUE?Integer.MIN_VALUE:
+	       v>Integer.MAX_VALUE?Integer.MAX_VALUE:(int)v;
+    }
+    
+    public static int satCastInt(double v){
+	return v<Integer.MIN_VALUE?Integer.MIN_VALUE:
+	       v>Integer.MAX_VALUE?Integer.MAX_VALUE:(int)v;
+    }
+    
+    public static int satCastInt(float v){
+	return v<Integer.MIN_VALUE?Integer.MIN_VALUE:
+	       v>Integer.MAX_VALUE?Integer.MAX_VALUE:(int)v;
+    }
+    
+    public static short satCastShort(long v){
+	return v<Short.MIN_VALUE?Short.MIN_VALUE:
+	       v>Short.MAX_VALUE?Short.MAX_VALUE:(short)v;
+    }
+    
+    public static short satCastShort(double v){
+	return v<Short.MIN_VALUE?Short.MIN_VALUE:
+	       v>Short.MAX_VALUE?Short.MAX_VALUE:(short)v;
+    }
+    
+    public static short satCastShort(float v){
+	return v<Short.MIN_VALUE?Short.MIN_VALUE:
+	       v>Short.MAX_VALUE?Short.MAX_VALUE:(short)v;
+    }
 }//end Misc

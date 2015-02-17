@@ -169,7 +169,7 @@ public class ProjectileFactory {
 	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
 	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getWorld().add((WorldObject)result);
-	tr.mainRenderer.get().temporarilyMakeImmediatelyVisible((PositionedRenderable)result);
+	tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant((PositionedRenderable)result);
 	if(soundTexture!=null)
 	    tr.soundSystem.get().enqueuePlaybackEvent(
 		    tr.soundSystem

@@ -191,7 +191,7 @@ public final class ThreadManager {
 			 mainRenderer.get().
 			 nextVisCalcTime.get())
 		     return;
-		 tr.mainRenderer.get().visibilityCalc();}
+		 tr.mainRenderer.get().relevanceCalc();}
 		if(tr.getGame()!=null)
 		 if(tr.getGame().getPlayer()!=null)gameplay();
 		}catch(Exception e){tr.showStopper(e);}

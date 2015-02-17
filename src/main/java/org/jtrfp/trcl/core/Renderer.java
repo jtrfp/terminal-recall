@@ -82,7 +82,7 @@ public final class Renderer {
     private		double			meanFPS;
     private		float[]			cameraMatrixAsFlatArray		= new float[16];
     private volatile	float	[]		camRotationProjectionMatrix = new float[16];
-    private		TRFutureTask<Void>	visibilityUpdateFuture,visibilityCalcTask;
+    private		TRFutureTask<Void>	relevanceUpdateFuture,visibilityCalcTask;
     private 		SkyCube			skyCube;
     final 	AtomicLong			nextVisCalcTime = new AtomicLong(0L);
     private		CollisionManager	collisionManager;
@@ -527,7 +527,7 @@ public final class Renderer {
 	}catch(NotReadyException e){}
     }//end render()
     
-    public void temporarilyMakeImmediatelyVisible(final PositionedRenderable pr){
+    public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
 	if(pr instanceof WorldObject)
 	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
 	
@@ -542,18 +542,18 @@ public final class Renderer {
 		 return null;}
 	      }
 	});
-    }//end temporarilyMakeImmediatelyVisible(...)
+    }//end temporarilyMakeImmediatelyRelevant(...)
     
-    public void updateVisibilityList(boolean mandatory) {
-	if(visibilityUpdateFuture!=null){
-	    if(!visibilityUpdateFuture.isDone()){
+    public void updateRelevanceList(boolean mandatory) {
+	if(relevanceUpdateFuture!=null){
+	    if(!relevanceUpdateFuture.isDone()){
 		if(!mandatory){System.out.println("Renderer.updateVisibilityList() !done");return;}
 		else {}
 		}
-	    visibilityUpdateFuture.get();
+	    relevanceUpdateFuture.get();
 	    }//end if(visibilityUpdateFuture!=null)
 	if(!getBackRenderList().isDone())return;//Not ready.
-	visibilityUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	relevanceUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() {
 		try{
@@ -582,7 +582,7 @@ public final class Renderer {
 		return null;
 	    }//end pool run()
 	});
-    }// end updateVisibilityList()
+    }// end updateRelevanceList()
     
     public TRFutureTask<RenderList> currentRenderList(){
 	return renderList[renderListToggle.get() ? 0 : 1];
@@ -866,7 +866,7 @@ public final class Renderer {
     
     private final Object visibilityUpdateLock = new Object();
     
-    public void visibilityCalc(final boolean mandatory) {
+    public void relevanceCalc(final boolean mandatory) {
 	final long currTimeMillis = System.currentTimeMillis();
 	if(visibilityCalcTask!=null && !mandatory){
 	    if(!visibilityCalcTask.isDone())
@@ -875,7 +875,7 @@ public final class Renderer {
 	    @Override
 	    public Void call() throws Exception {
 		synchronized(visibilityUpdateLock){
-		 updateVisibilityList(mandatory);
+		 updateRelevanceList(mandatory);
 		 if(collisionManager!=null)
 		  collisionManager.updateCollisionList();
 		 //Nudge of 10ms to compensate for drift of the timer task
@@ -885,8 +885,8 @@ public final class Renderer {
 	    }});
     }//end visibilityCalc()
     
-    public void visibilityCalc(){
-	visibilityCalc(false);
+    public void relevanceCalc(){
+	relevanceCalc(false);
     }
 
     /**

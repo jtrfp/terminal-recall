@@ -31,7 +31,7 @@ public class TriggersVisCalcWithMovement extends Behavior {
 	    positionOfLastVisCalc[0]=pPos[0];
 	    positionOfLastVisCalc[1]=pPos[1];
 	    positionOfLastVisCalc[2]=pPos[2];
-	    parent.getTr().mainRenderer.get().visibilityCalc(true);
+	    parent.getTr().mainRenderer.get().relevanceCalc(true);
 	}
     }//end _tick(...)
 

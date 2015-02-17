@@ -408,7 +408,7 @@ public class WorldObject implements PositionedRenderable {
 	needToRecalcMatrix=true;
 	if(!this.visible && visible){
 	    this.visible = true;
-	    tr.mainRenderer.get().temporarilyMakeImmediatelyVisible(this);
+	    tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant(this);
 	}else this.visible = visible;
 	tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
@@ -585,7 +585,7 @@ public class WorldObject implements PositionedRenderable {
 	    needToRecalcMatrix=true;
 	if(!this.active && active && isVisible()){
 	    this.active=true;
-	    tr.mainRenderer.get().temporarilyMakeImmediatelyVisible(this);
+	    tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant(this);
 	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {

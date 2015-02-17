@@ -82,9 +82,9 @@ public final class Renderer {
     private		double			meanFPS;
     private		float[]			cameraMatrixAsFlatArray		= new float[16];
     private volatile	float	[]		camRotationProjectionMatrix = new float[16];
-    private		TRFutureTask<Void>	relevanceUpdateFuture,visibilityCalcTask;
+    private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
     private 		SkyCube			skyCube;
-    final 	AtomicLong			nextVisCalcTime = new AtomicLong(0L);
+    final 	AtomicLong			nextRelevanceCalcTime = new AtomicLong(0L);
     private		CollisionManager	collisionManager;
 
     public Renderer(final GPU gpu) {
@@ -864,22 +864,22 @@ public final class Renderer {
         return this;
     }
     
-    private final Object visibilityUpdateLock = new Object();
+    private final Object relevanceUpdateLock = new Object();
     
     public void relevanceCalc(final boolean mandatory) {
 	final long currTimeMillis = System.currentTimeMillis();
-	if(visibilityCalcTask!=null && !mandatory){
-	    if(!visibilityCalcTask.isDone())
+	if(relevanceCalcTask!=null && !mandatory){
+	    if(!relevanceCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}}
-	visibilityCalcTask = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	relevanceCalcTask = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		synchronized(visibilityUpdateLock){
+		synchronized(relevanceUpdateLock){
 		 updateRelevanceList(mandatory);
 		 if(collisionManager!=null)
 		  collisionManager.updateCollisionList();
 		 //Nudge of 10ms to compensate for drift of the timer task
-		 nextVisCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
+		 nextRelevanceCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
 		 }//end sync(visibilityUpdateLock)
 		return null;
 	    }});

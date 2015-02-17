@@ -189,7 +189,7 @@ public final class ThreadManager {
 		 if(System.currentTimeMillis()<
 			 tr.
 			 mainRenderer.get().
-			 nextVisCalcTime.get())
+			 nextRelevanceCalcTime.get())
 		     return;
 		 tr.mainRenderer.get().relevanceCalc();}
 		if(tr.getGame()!=null)

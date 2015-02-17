@@ -24,7 +24,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.opengl.GLAutoDrawable;
@@ -66,9 +65,13 @@ public final class ThreadManager {
 		    65,
 		    1,
 		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
-    public final Object			gameStateLock			= new Object();
-    public final Queue<TRFutureTask<?>> pendingGPUMemAccessTasks   = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
-    public final Queue<TRFutureTask<?>> activeGPUMemAccessTasks    = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
+    
+    public final Object			   gameStateLock	   = new Object();
+    public final Queue<TRFutureTask<?>>    pendingGPUMemAccessTasks= new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
+    public final Queue<TRFutureTask<?>>    activeGPUMemAccessTasks = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
+    public final ArrayList<Callable<?>>repeatingGPUMemAccessTasks  = new ArrayList<Callable<?>>();
+    public final ArrayList<Callable<?>>repeatingGLTasks	           = new ArrayList<Callable<?>>();
+    
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
 	public void submit(TRFutureTask<?> item) {
@@ -147,10 +150,6 @@ public final class ThreadManager {
 	}catch(NotReadyException e){System.out.println("ThreadManager: Not ready");}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
-    
-    
-
-    
     
     public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){
 	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
@@ -257,6 +256,12 @@ public final class ThreadManager {
 	    while (!pendingGPUMemAccessTasks.isEmpty())
 		activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks
 			.poll());
+	    for(Callable<?> c:repeatingGPUMemAccessTasks){
+		this.submitToGPUMemAccess(c);
+	    }//end for(repeatingGPUMemAccessTasks)
+	    for(Callable<?> c:repeatingGLTasks){
+		this.submitToGL(c);
+	    }//end for(repeatingGPUMemAccessTasks)
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -316,4 +321,36 @@ public final class ThreadManager {
 	    throw new NullPointerException("Passed Renderer intolerably null.");
 	renderers.remove(r);
     }//end deregisterRenderer
+    
+    public void addRepeatingGLTask(Callable<?> task){
+	if(task==null)
+	    throw new NullPointerException("Passed task intolerably null.");
+	if(repeatingGLTasks.contains(task))
+	    return;
+	repeatingGLTasks.add(task);
+    }//end addRepeatingGLTask(...)
+    
+    public void removeRepeatingGLTask(Callable<?> task){
+	if(task==null)
+	    throw new NullPointerException("Passed task intolerably null.");
+	if(!repeatingGLTasks.contains(task))
+	    return;
+	repeatingGLTasks.remove(task);
+    }//end removeRepeatingGLTask(...)
+    
+    public void addRepeatingGPUMemTask(Callable<?> task){
+	if(task==null)
+	    throw new NullPointerException("Passed task intolerably null.");
+	if(repeatingGPUMemAccessTasks.contains(task))
+	    return;
+	repeatingGPUMemAccessTasks.add(task);
+    }//end addRepeatingGPUMemTask(...)
+    
+    public void removeRepeatingGPUMemTask(Callable<?> task){
+	if(task==null)
+	    throw new NullPointerException("Passed task intolerably null.");
+	if(!repeatingGPUMemAccessTasks.contains(task))
+	    return;
+	repeatingGPUMemAccessTasks.remove(task);
+    }//end removeRepeatingGPUMemTask(...)
 }// end ThreadManager

@@ -455,7 +455,7 @@ public class WorldObject implements PositionedRenderable {
 	    }//end if(not in grid)
 	    //Possibly moved from cube-to-cube
 	    final List<PositionedRenderable> newList = 
-	     (this instanceof VisibleEverywhere)?
+	     (this instanceof RelevantEverywhere)?
 	      containingGrid.getAlwaysVisibleList():containingGrid.world2List(position[0],position[1],position[2],true);
 	    if(lastContainingList!=newList){//Definitely moved from cube-to-cube
 		if(lastContainingList!=null){

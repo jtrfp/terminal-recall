@@ -17,10 +17,10 @@ import org.jtrfp.trcl.core.DummyTRFutureTask;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
 
-public class CharDisplay extends WorldObject2D implements VisibleEverywhere {
+public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     private final SelectableTexture tex;
 
     public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid,

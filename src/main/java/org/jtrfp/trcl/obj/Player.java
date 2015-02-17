@@ -45,7 +45,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
 
-public class Player extends WorldObject implements VisibleEverywhere{
+public class Player extends WorldObject implements RelevantEverywhere{
     //private final Camera 	camera;
     //private int 		cameraDistance 			= 0;
     public static final int 	CLOAK_COUNTDOWN_START 		= ThreadManager.GAMEPLAY_FPS * 30;// 30sec

@@ -16,7 +16,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 
 public abstract class WorldObject2DVisibleEverywhere extends WorldObject2D implements
-	VisibleEverywhere {
+	RelevantEverywhere {
 
     public WorldObject2DVisibleEverywhere(TR tr) {
 	super(tr);

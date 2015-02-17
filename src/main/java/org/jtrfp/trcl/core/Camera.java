@@ -26,10 +26,10 @@ import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class Camera extends WorldObject implements VisibleEverywhere{
+public class Camera extends WorldObject implements RelevantEverywhere{
     	//// PROPERTIES
     	public static final String FOG_ENABLED = "fogEnabled";
     

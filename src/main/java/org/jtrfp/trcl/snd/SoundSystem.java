@@ -41,7 +41,7 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadOrder;
-import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.snd.SoundEvent.Factory;
 
 public final class SoundSystem {
@@ -306,7 +306,7 @@ public final class SoundSystem {
     }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
-	if(evt instanceof VisibleEverywhere)
+	if(evt instanceof RelevantEverywhere)
 	    activeEvents.add(evt);
 	else pendingEvents.add(evt);
     }
@@ -379,7 +379,7 @@ public final class SoundSystem {
 	    if(event.isDestroyed())
 		eI.remove();
 	    else if(event.getEndRealtimeSamples()<currentTimeSamples && 
-		    !(event instanceof VisibleEverywhere))
+		    !(event instanceof RelevantEverywhere))
 		eI.remove();
 	}//end while(hasNext)
     }//end cleanActiveEvents()

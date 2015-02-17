@@ -23,9 +23,9 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
-import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
 
-public class MusicPlaybackEvent extends AbstractSoundEvent implements VisibleEverywhere {
+public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEverywhere {
     private final GPUResidentMOD mod;
     private final boolean loop;
     private static final int SETUP_PADDING_FRAMES = 1024*16;//Ample time to set up next loop.

@@ -35,7 +35,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.VisibleEverywhere;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.Animator;
@@ -132,7 +132,7 @@ public final class ThreadManager {
 	    if (wo.isActive()
 		    && (TR.twosComplimentDistance(wo.getPosition(), game
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)
-		    || wo instanceof VisibleEverywhere)
+		    || wo instanceof RelevantEverywhere)
 		if(wo instanceof Player){
 		    if(alreadyVisitedPlayer){
 			multiplePlayer=true;

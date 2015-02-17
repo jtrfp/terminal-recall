@@ -172,7 +172,7 @@ public final class TR{
 		final Renderer renderer = mainRenderer.get();
 		renderer.setRootGrid(world);//TODO: replace with Camera objects?
 		renderer.setCollisionManager(getCollisionManager());
-		getThreadManager().registerRenderer(renderer);
+		getThreadManager().addRepeatingGLTask(renderer.render);
 		
 		gameShell  = new GameShell(this);
 		menuSystem = new MenuSystem(this);

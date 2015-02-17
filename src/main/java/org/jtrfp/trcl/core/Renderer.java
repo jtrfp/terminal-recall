@@ -508,24 +508,26 @@ public final class Renderer {
     
     private RenderList oneFrameLaggedRenderList;
     
-    public void render() {
-	final GL3 gl = gpu.getGl();
-	try{
-		ensureInit();
-		if(oneFrameLaggedRenderList==null)
-		 oneFrameLaggedRenderList = currentRenderList().getRealtime();
-		oneFrameLaggedRenderList.render(gl);
-		oneFrameLaggedRenderList = currentRenderList().getRealtime();
-		oneFrameLaggedRenderList.sendToGPU(gl);
-		cameraMatrixAsFlatArray = camera.getCompleteMatrixAsFlatArray();
-		camRotationProjectionMatrix = camera.getProjectionRotationMatrixAsFlatArray();
-		//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
-		gpu.memoryManager.getRealtime().flushStalePages();
-		// Update texture codepages
-		gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
-		fpsTracking();
-	}catch(NotReadyException e){}
-    }//end render()
+    public final Callable<?> render = new Callable(){
+	@Override
+	public Object call() throws Exception {
+		final GL3 gl = gpu.getGl();
+		try{	ensureInit();
+			if(oneFrameLaggedRenderList==null)
+			 oneFrameLaggedRenderList = currentRenderList().getRealtime();
+			oneFrameLaggedRenderList.render(gl);
+			oneFrameLaggedRenderList = currentRenderList().getRealtime();
+			oneFrameLaggedRenderList.sendToGPU(gl);
+			cameraMatrixAsFlatArray = camera.getCompleteMatrixAsFlatArray();
+			camRotationProjectionMatrix = camera.getProjectionRotationMatrixAsFlatArray();
+			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
+			gpu.memoryManager.getRealtime().flushStalePages();
+			// Update texture codepages
+			gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
+			fpsTracking();
+		}catch(NotReadyException e){}
+	    return null;
+	}};
     
     public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
 	if(pr instanceof WorldObject)

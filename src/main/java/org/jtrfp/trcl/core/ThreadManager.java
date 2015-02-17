@@ -52,7 +52,6 @@ public final class ThreadManager {
     private Thread 			renderingThread;
     private Animator			animator;
     private boolean[] 			paused = new boolean[]{false};
-    private final ArrayList<Renderer>	renderers = new ArrayList<Renderer>();
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
 		    30,
@@ -248,9 +247,6 @@ public final class ThreadManager {
 	    //// GL ONLY
 	    for(Callable<?> c:repeatingGLTasks)
 		c.call();
-	    for (Renderer renderer : renderers) {
-		renderer.render();
-	    }// end for(renderers)
 	    synchronized (currentGPUMemAccessTaskSubmitter) {
 		currentGPUMemAccessTaskSubmitter
 			.set(activeGPUMemAccessTaskSubmitter);
@@ -307,20 +303,6 @@ public final class ThreadManager {
 	threadPool.submit(result);
 	return result;
     }
-
-    public void registerRenderer(Renderer r){
-	if(r==null)
-	    throw new NullPointerException("Passed Renderer intolerably null.");
-	if(!renderers.contains(r))
-	    renderers.add(r);
-    }//end registerRenderer(...)
-    
-    public void deregisterRenderer(Renderer r){
-	if(r==null)
-	    throw new NullPointerException("Passed Renderer intolerably null.");
-	renderers.remove(r);
-    }//end deregisterRenderer
-    
     public void addRepeatingGLTask(Callable<?> task){
 	if(task==null)
 	    throw new NullPointerException("Passed task intolerably null.");

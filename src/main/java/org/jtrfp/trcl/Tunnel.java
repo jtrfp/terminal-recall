@@ -214,10 +214,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    Vector3D top, Vector3D wPos, double width, double height, TR tr)
 	    throws IllegalAccessException, FileLoadException, IOException {
 	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();
-	Obstacle obs = s.getObstacle();
-	GL3 gl = tr.gpu.get().getGl();
+	Obstacle    obs = s.getObstacle();
 	WorldObject wo;
-	Model m;
+	Model       m;
 	switch (obs) {
 	case none0:
 	    break;

@@ -32,10 +32,8 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
-	/*private List<SpacePartitioningGrid<E>> 	branchGrids = Collections
-		.synchronizedList(new ArrayList<SpacePartitioningGrid<E>>());*/
-	private  List<E> []elements;
 	
+	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;
 	private int 		rolloverPoint,
 				rawDia,
@@ -113,7 +111,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		}//end constructor
 	
 	private void allocateSquares(){
-		//Object []squares = new Object[squaresX*squaresY*squaresZ];
 		elements = new List[squaresX*squaresY*squaresZ];
 		//Fudge factor to fix suddenly appearing terrain at distance
 		radiusInWorldUnits	=getViewingRadius()*1.25;
@@ -187,25 +184,18 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
     private void recursiveAlwaysVisibleSubmit(Submitter<E> sub) {
 	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
-	 final int size = branchGrids.size();
 	 for(SpacePartitioningGrid<E> g:branchGrids.keySet())
 	     g.recursiveAlwaysVisibleSubmit(sub);
-	 /*for (int index = 0; index < size; index++) {
-	    branchGrids.get(index).recursiveAlwaysVisibleSubmit(sub);
-	}*/}
+	 }//end sync(branchGrids)
     }// end recursiveAlwaysVisisbleSubmit(...)
 
     private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<List<E>> sub) {
 	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
-	final int size = branchGrids.size();
 	
 	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
 	     g.recursiveAlwaysVisibleGridCubeSubmit(sub);
-	/*
-	for (int index = 0; index < size; index++) {
-	    branchGrids.get(index).recursiveAlwaysVisibleGridCubeSubmit(sub);
-	}*/}
+	}//end sync(branchGrids)
     }// end recursiveAlwaysVisisbleSubmit(...)
 	
     private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
@@ -219,28 +209,17 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	    }// end sync(elements)
 	}// end if(!null)
 	synchronized(branchGrids){
-	final int size = branchGrids.size();
-	
 	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
 	     g.recursiveBlockSubmit(sub, blockID);
-	
-	/*for (int index = 0; index < size; index++) {
-	    branchGrids.get(index).recursiveBlockSubmit(sub, blockID);
-	}*/}
+	}//end sync(branchGrids)
     }// end recusiveBlockSubmit(...)
 
     private void recursiveGridCubeSubmit(Submitter<List<E>> sub, int blockID) {
-	//final GridCube cube = (GridCube)gridSquares[blockID];
 	sub.submit(elements[blockID]);
 	synchronized(branchGrids){
-	final int size = branchGrids.size();
-	
 	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
 	     g.recursiveGridCubeSubmit(sub, blockID);
-	
-	/*for (int index = 0; index < size; index++) {
-	    branchGrids.get(index).recursiveGridCubeSubmit(sub, blockID);
-	}*/}//end for(size) sync(branchGrids)
+	}//end sync(branchGrids)
     }// end recusiveGridCubeSubmit(...)
 
 	private Collection<E> getAlwaysVisible()
@@ -354,19 +333,15 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	
 	public void removeAll(){
 	    final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
-	    for(SpacePartitioningGrid g:branchGrids.keySet()){
+	    for(SpacePartitioningGrid g:branchGrids.keySet())
 		branches.add(g);
-	    }
-	    for(SpacePartitioningGrid g:branches){
+	    for(SpacePartitioningGrid g:branches)
 		removeBranch(g);
-	    }
 	    final ArrayList<E> alwaysVisible = new ArrayList<E>();
-	    for(E e:getAlwaysVisibleList()){
+	    for(E e:getAlwaysVisibleList())
 		alwaysVisible.add(e);
-	    }
-	    for(E e:alwaysVisible){
+	    for(E e:alwaysVisible)
 		remove(e);
-	    }
 	    final ArrayList<E> everythingElse = new ArrayList<E>();
 	    for(List<E> l:elements)
 		if(l!=null)

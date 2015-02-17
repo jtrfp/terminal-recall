@@ -12,8 +12,11 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-public class BehaviorNotFoundException extends RuntimeException
-	{
+public class BehaviorNotFoundException extends RuntimeException{
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -9178140816092558936L;
 	public BehaviorNotFoundException(){super();}
 	public BehaviorNotFoundException(String msg){super(msg);}
-	}
+}//end BehaviorNotfoundException

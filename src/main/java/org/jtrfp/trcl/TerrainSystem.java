@@ -147,9 +147,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    cZ));
 				    Triangle[] tris = Triangle
 					    .quad2Triangles(
-						    // COUTNER-CLOCKWISE
-						    // new double []
-						    // {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
+						    // COUNTER-CLOCKWISE
 						    // //x
 						    new double[] {
 							    xPos - objectX,
@@ -158,14 +156,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    xPos + gridSquareSize
 								    - objectX,
 							    xPos - objectX },
-						    // new double []
-						    // {hTL-objectY,hTR-objectY,hBR-objectY,hBL-objectY},
 						    new double[] { hBL - objectY,
 							    hBR - objectY,
 							    hTR - objectY,
 							    hTL - objectY },
-						    // new double []
-						    // {zPos-objectZ,zPos-objectZ,zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ},
 						    new double[] {
 							    zPos + gridSquareSize
 								    - objectZ,
@@ -267,19 +261,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    xPos + gridSquareSize - objectX,
 						    xPos + gridSquareSize - objectX,
 						    xPos - objectX }, // x
-					    // new double []
-					    // {xPos-objectX,xPos+gridSquareSize-objectX,xPos+gridSquareSize-objectX,xPos-objectX},
 					    new double[] { hTL - objectY,
 						    hTR - objectY, hBR - objectY,
 						    hBL - objectY },
-					    // new double []
-					    // {hBL-objectY,hBR-objectY,hTR-objectY,hTL-objectY},
 					    new double[] { zPos - objectZ,
 						    zPos - objectZ,
 						    zPos + gridSquareSize - objectZ,
 						    zPos + gridSquareSize - objectZ },
-					    // new double []
-					    // {zPos+gridSquareSize-objectZ,zPos+gridSquareSize-objectZ,zPos-objectZ,zPos-objectZ},
 					    cu,
 					    cv,
 					    td,
@@ -310,15 +298,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		    }// end for(gX)
 		    return null;
 		}});
-	    if(taskIdx>=rowTasks.length){
-		/*for(TRFutureTask<Void> t:rowTasks)
-		    t.get();*/
+	    if(taskIdx>=rowTasks.length)
 		taskIdx=0;
-	    }//end if(taskIdx>=numRowTasks)
 	}// end for(gZ)
-	// Wait to finish
-	/*for(TRFutureTask<Void> t:rowTasks)
-	    {t.get();}*/
 	terrainMirror.deactivate();
     }// end constructor
 	

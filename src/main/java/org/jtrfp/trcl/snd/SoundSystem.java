@@ -71,12 +71,12 @@ public final class SoundSystem {
 
     public static final double DEFAULT_SFX_VOLUME = .3;
     
-    public static final int SAMPLE_RATE=44100;
-    static final int BUFFER_SIZE_FRAMES=4096*2;
-    public static final int NUM_CHANNELS=2;
-    public static final int BYTES_PER_SAMPLE=2;
+    public static final int  SAMPLE_RATE=44100;
+    static final int         BUFFER_SIZE_FRAMES=4096*2;
+    public static final int  NUM_CHANNELS=2;
+    public static final int  BYTES_PER_SAMPLE=2;
     private static final int SAMPLE_SIZE_BITS = BYTES_PER_SAMPLE*8;
-    public static final int BYTES_PER_FRAME=BYTES_PER_SAMPLE*NUM_CHANNELS;
+    public static final int  BYTES_PER_FRAME=BYTES_PER_SAMPLE*NUM_CHANNELS;
     private static final int BUFFER_SIZE_BYTES=BUFFER_SIZE_FRAMES*BYTES_PER_FRAME;
     private static final int NUM_BUFFER_ROWS=1;
     
@@ -135,8 +135,8 @@ public final class SoundSystem {
 	    }// end call()
 	}).get();
 	
-	playbackFactory = new SamplePlaybackEvent.Factory(tr);
-	musicFactory = new MusicPlaybackEvent.Factory(tr);
+	playbackFactory= new SamplePlaybackEvent.Factory(tr);
+	musicFactory   = new MusicPlaybackEvent.Factory(tr);
 	
 	try {
 	    sourceDataLine = (SourceDataLine) AudioSystem.getLine(lineInfo);

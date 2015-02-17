@@ -182,7 +182,7 @@ public final class Renderer {
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		deferredProgram.getUniform("cubeTexture").set((int)1);
 		// 2 UNUSED
-		deferredProgram.getUniform("ESTuTvTiles").set((int) 3);// 3 UNUSED
+		deferredProgram.getUniform("ESTuTvTiles").set((int) 3);
 		deferredProgram.getUniform("rgbaTiles").set((int) 4);
 		deferredProgram.getUniform("primitiveIDTexture").set((int) 5);
 		deferredProgram.getUniform("layerAccumulator").set((int)6);
@@ -457,11 +457,7 @@ public final class Renderer {
 		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		opaquePrimitiveIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
-		//depthQueueStencil.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_DEPTH24_STENCIL8,width,height,false);
-		//depthQueueTexture.bind().setImage2DMultisample(DEPTH_QUEUE_SIZE, GL3.GL_RGBA32F,width,height,false).unbind();// Doesn't like RGBA32UI for some reason.
 		layerAccumulatorTexture.bind().setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null);
-		/*skyCubeFrameBufferTexture.bind().setImage(GL3.GL_RGB565, width, height, GL3.GL_RGB,
-			GL3.GL_FLOAT, null);*/
 		gpu.defaultTexture();
 	    }
 	});
@@ -508,18 +504,19 @@ public final class Renderer {
     
     private RenderList oneFrameLaggedRenderList;
     
-    public final Callable<?> render = new Callable(){
+    public final Callable<?> render = new Callable<Void>(){
 	@Override
-	public Object call() throws Exception {
+	public Void call() throws Exception {
 		final GL3 gl = gpu.getGl();
 		try{	ensureInit();
 			if(oneFrameLaggedRenderList==null)
 			 oneFrameLaggedRenderList = currentRenderList().getRealtime();
+			
 			oneFrameLaggedRenderList.render(gl);
-			oneFrameLaggedRenderList = currentRenderList().getRealtime();
+			oneFrameLaggedRenderList   = currentRenderList().getRealtime();
 			oneFrameLaggedRenderList.sendToGPU(gl);
-			cameraMatrixAsFlatArray = camera.getCompleteMatrixAsFlatArray();
-			camRotationProjectionMatrix = camera.getProjectionRotationMatrixAsFlatArray();
+			cameraMatrixAsFlatArray    = camera.getCompleteMatrixAsFlatArray();
+			camRotationProjectionMatrix= camera.getProjectionRotationMatrixAsFlatArray();
 			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
 			gpu.memoryManager.getRealtime().flushStalePages();
 			// Update texture codepages
@@ -596,19 +593,7 @@ public final class Renderer {
 	//getBackRenderList().get().flushObjectDefsToGPU();
 	renderListToggle.set(!renderListToggle.get());
     }
-/*
-    public void setFogColor(final Color c) {
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		deferredProgram.use();
-		fogColor.set((float) c.getRed() / 255f, (float) c.getGreen() / 255f,
-			(float) c.getBlue() / 255f);
-		gpu.defaultProgram();
-		return null;
-	    }}).get();
-    }//end setFogColor(...)
-    */
+    
     public void setSunVector(Vector3D sv){
 	deferredProgram.use();
 	sunVector.set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());

@@ -20,7 +20,6 @@ public class WindowAnimator implements Tickable {
     private int 			indexCounter = 0;
     private final int			numElements, numFrames;
     private final float[]		frames;
-    private final boolean		loopInterpolate;
     private 	  String 		debugName;
     
     private final FlatDoubleWindow	w;
@@ -40,7 +39,6 @@ public class WindowAnimator implements Tickable {
 	this.numFrames = numFrames;
 	this.indexXferFun = indexXferFun;
 	frames = new float[numElements * numFrames];
-	this.loopInterpolate = loopInterpolate;
 	this.controller = controller;
     }//end constructor
 
@@ -74,27 +72,6 @@ public class WindowAnimator implements Tickable {
 	    w.set(indexXferFun.transfer(counter), val);
 	    indexOffset += nFrames;
 	}// end for(numElements)
-	
-	/*
-	final double frame = controller.getCurrentFrame();
-	int lowFrame = (int) frame;
-	int hiFrame = (lowFrame + 1) % numFrames;
-	double interpolation = frame - (double) lowFrame;
-	if (hiFrame == 0 && !loopInterpolate) {
-	    lowFrame = 0;
-	    hiFrame = 1;
-	}
-	double hI = interpolation;
-	double lI = 1. - interpolation;
-	final int dHi = hiFrame - lowFrame;
-	int indexOffset = lowFrame;
-	for (int index = 0; index < numElements; index++) {
-	    final double val = frames[indexOffset] * lI
-		    + frames[indexOffset + dHi] * hI;
-	    w.set(indexXferFun.transfer(index), val);
-	    indexOffset += numFrames;
-	}// end for(numElements)
-	*/
     }// end tick()
 
     /**

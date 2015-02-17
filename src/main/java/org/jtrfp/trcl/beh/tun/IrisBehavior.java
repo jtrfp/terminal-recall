@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.tun;
 
-import java.util.Collection;
-
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Controller;
 import org.jtrfp.trcl.beh.Behavior;
@@ -24,14 +22,15 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class IrisBehavior extends Behavior implements CollisionBehavior {
-public static final int DAMAGE_ON_IMPACT=6554;
+public static final int     DAMAGE_ON_IMPACT=6554;
+private static final double X_FLUFF         =80000;
 private final Controller controller;
-private final double maxRadius;
-private static final double X_FLUFF=80000;
+private final double     maxRadius;
+
     public IrisBehavior(Controller controller, double maxRadius) {
 	if(controller==null)throw new NullPointerException("Controller is intolerably null.");
 	this.controller=controller;
-	this.maxRadius=maxRadius;
+	this.maxRadius =maxRadius;
     }//end constructor
     @Override
     public void proposeCollision(WorldObject wo){

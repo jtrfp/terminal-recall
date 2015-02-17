@@ -14,11 +14,10 @@ package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.TerrainSystem;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class TerrainLocked extends Behavior {
-    private double pad=0;
+    private double  pad            =0;
     private boolean lockedToCeiling=false;
     @Override
     public void _tick(long tickTimeMillis){

@@ -279,18 +279,7 @@ public class Texture implements TextureDescription {
 		new SubtextureVL(stw, subtextureID).setComponentAt(codeIdx, 0, (byte)(codeIdx%256));//TODO: Could make a lot of garbage.
             }//end setCodeAt()
 	 }).get();//end gpuMemThread
-	/*
-	for(int subtextureY=0; subtextureY<diameterInSubtextures; subtextureY++){
-	    for(int subtextureX=0; subtextureX<diameterInSubtextures; subtextureX++){
-		final int subTextureIdx	  = subtextureX + subtextureY * diameterInSubtextures;
-		for(int block256=0; block256<6; block256++){
-		    final int codeStartY=subtextureY*SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		    final int codeStartX=subtextureX*SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		    
-		}
-	    }//end for(subtextureX)
-	}//end for(subtextureY)
-	*/
+		
 	// Push texels to codebook
 	for(int codeY=0; codeY<diameterInCodes; codeY++){
 	    for(int codeX=0; codeX<diameterInCodes; codeX++){
@@ -430,27 +419,12 @@ public class Texture implements TextureDescription {
 
     Texture(BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, TR tr, boolean uvWrapping) {
 	this(tr,debugName,uvWrapping);
-	    /*
-	    rgba = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight()
-		    * 4);
-	    final int [] row = new int[image.getWidth()];
-		for (int y = 0; y < image.getHeight(); y++) {
-		    image.getRGB(0, y, image.getWidth(), 1, row, 0, image.getWidth());
-		    for (int color:row) {
-			rgba.put((byte) ((color & 0x00FF0000) >> 16));
-			rgba.put((byte) ((color & 0x0000FF00) >> 8));
-			rgba.put((byte) (color & 0x000000FF));
-			rgba.put((byte) ((color & 0xFF000000) >> 24));
-		    }// end for(x)
-		}// end for(y)
-	    final int div = rgba.capacity() / 4;
-	    
-	    //TODO: This doesn't do anything but output black. Is it even used?
-	    averageColor = new Color((redA / div) / 255f,
-		    (greenA / div) / 255f, (blueA / div) / 255f);
-	    */
-	    //vqCompress(rgba);
-	    try{vqCompress(new BufferedImageRGBA8888VL(imgRGBA),imgESTuTv!=null?new BufferedImageRGBA8888VL(imgESTuTv):null,imgRGBA.getWidth());}catch(Exception e){e.printStackTrace();}
+	try{
+	    vqCompress(new BufferedImageRGBA8888VL(imgRGBA),
+		    imgESTuTv!=null?
+			    new BufferedImageRGBA8888VL(imgESTuTv):
+			    null,imgRGBA.getWidth());
+	    }catch(Exception e){e.printStackTrace();}
     }//end constructor
 
     public static ByteBuffer RGBA8FromPNG(InputStream is) {

@@ -655,8 +655,12 @@ public class ResourceManager{
 		while ((entry = zip.getNextEntry()) != null) {
 		    System.out.println("ZIP ENTRY: " + entry.getName());
 		    if (entry.getName().toUpperCase()
-			    .endsWith(fontFileName.toUpperCase()))
-			return Font.createFont(Font.TRUETYPE_FONT, zip);
+			    .endsWith(fontFileName.toUpperCase())){
+			Font font = Font.createFont(Font.TRUETYPE_FONT, zip);
+			zip.closeEntry();
+			zip.close();
+			return font;
+		    }
 		}// end while(elements)
 	    }// end if(zip)
 	    else {

@@ -16,18 +16,14 @@ import java.util.Arrays;
 
 public final class RasterizedBlockVectorList implements VectorListND {
     private final VectorListND 	delegate;
-    private final int 		rasterWidthInVectors, 
-    /*			*/	blockWidthInVectors,
-    /*			*/	vectorsPerBlock,
-    /*			*/	blocksPerRow;
+    private final int 		blockWidthInVectors,
+    /*			*/	vectorsPerBlock;
     private final int[]		dimensions;
 
     public RasterizedBlockVectorList(VectorListND rasterizedVectorList,int blockWidthInVectors) {//TODO: Arbitrary sizes
-	this.rasterWidthInVectors 	= rasterizedVectorList.getDimensions()[0];
 	this.blockWidthInVectors 	= blockWidthInVectors;
 	this.delegate 			= rasterizedVectorList;
 	this.vectorsPerBlock 		= blockWidthInVectors * blockWidthInVectors;
-	this.blocksPerRow 		= rasterWidthInVectors / blockWidthInVectors;
 	dimensions = Arrays.copyOf(delegate.getDimensions(),delegate.getDimensions().length);
 	for(int i=0; i<dimensions.length;i++)
 	    dimensions[i]/=blockWidthInVectors;
@@ -43,42 +39,6 @@ public final class RasterizedBlockVectorList implements VectorListND {
 	return delegate.getNumComponentsPerVector()
 		* vectorsPerBlock;
     }
-/*
-    @Override
-    public double componentAt(int vectorIndex, int componentIndex) {
-	//System.out.println("RasterizedBlockVectorList.componentAt() vectorIndex="+vectorIndex+" componentIndex="+componentIndex);
-	final int [] trans = transformIndex(vectorIndex,componentIndex);
-	return delegate.componentAt(trans[0],trans[1]);
-    }// end componentAt(...)
-
-    @Override
-    public void setComponentAt(int vectorIndex, int componentIndex, double value) {
-	final int [] trans = transformIndex(vectorIndex,componentIndex);
-	delegate.setComponentAt(trans[0],trans[1], value);
-    }// end setComponentAt(...)
-    
-    private int[] transformIndex(int vectorIndex, int componentIndex){
-	final int sourceComponentsPerVector = delegate.getNumComponentsPerVector();
-	final int blockID = vectorIndex;
-	
-	final int blockCol = blockID % blocksPerRow;
-	final int blockRow = blockID / blocksPerRow;
-	
-	final int subComponentIndex = componentIndex % sourceComponentsPerVector;
-	final int subVectorIndex = componentIndex/sourceComponentsPerVector;
-	
-	final int intraBlockX = subVectorIndex % blockWidthInVectors;
-	final int intraBlockY = subVectorIndex / blockWidthInVectors;
-	
-	final int sourceX = blockCol * blockWidthInVectors + intraBlockX; 
-	final int sourceY = (blockRow * blockWidthInVectors) + intraBlockY;
-	
-	final int sourceOffset = sourceX + sourceY * rasterWidthInVectors;
-	
-	return new int[] {sourceOffset,subComponentIndex};
-	//return srcBlockOffset + intraBlockX + intraBlockY * rasterWidthInVectors;
-    }//end transformIndex(...)
-    */
 
     @Override
     public int[] getDimensions() {

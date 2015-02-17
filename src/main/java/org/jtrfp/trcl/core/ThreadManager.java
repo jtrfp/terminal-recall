@@ -136,11 +136,12 @@ public final class ThreadManager {
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)
 		    || wo instanceof RelevantEverywhere)
 		if(wo instanceof Player){
-		    if(alreadyVisitedPlayer){
+		    if(alreadyVisitedPlayer)
 			multiplePlayer=true;
-		    }else alreadyVisitedPlayer=true;
+		    else alreadyVisitedPlayer=true;
 		}//end if(Player)
-		if(!multiplePlayer&&!paused[0])wo.tick(tickTimeInMillis);
+		if(!multiplePlayer&&!paused[0])
+		    wo.tick(tickTimeInMillis);
 	 }// end for(worldObjects)
 	}//end sync(gameStateLock)
 	if(game.getPlayer()!=null && !paused[0])
@@ -237,12 +238,11 @@ public final class ThreadManager {
 		currentGPUMemAccessTaskSubmitter
 			.set(pendingGPUMemAccessTaskSubmitter);
 	    }//end sync()
-	    while (!activeGPUMemAccessTasks.isEmpty()) {
+	    while (!activeGPUMemAccessTasks.isEmpty())
 		if (!activeGPUMemAccessTasks.peek().isDone())
 		    return;// Abort. Not ready to go yet.
-		activeGPUMemAccessTasks.poll();
-	    }// end while(!empty)
-	     // /////// activeGPUMemAccessTasks should be empty beyond this
+		else activeGPUMemAccessTasks.poll();
+	     ///////// activeGPUMemAccessTasks should be empty beyond this
 	    assert activeGPUMemAccessTasks.isEmpty() : "ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
 	    //// GL ONLY
 	    for(Callable<?> c:repeatingGLTasks)
@@ -254,9 +254,8 @@ public final class ThreadManager {
 	    while (!pendingGPUMemAccessTasks.isEmpty())
 		activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks
 			.poll());
-	    for(Callable<?> c:repeatingGPUMemAccessTasks){
+	    for(Callable<?> c:repeatingGPUMemAccessTasks)
 		this.submitToGPUMemAccess(c);
-	    }//end for(repeatingGPUMemAccessTasks)
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -278,10 +277,10 @@ public final class ThreadManager {
     public static final ThreadLocal<TRFutureTask<?>> trFutureTaskIdentities = new ThreadLocal<TRFutureTask<?>>();
     public void notifyGPUMemAccessFault() {
 	System.err.println("pending tasks:");
-	for(TRFutureTask t: pendingGPUMemAccessTasks)
+	for(TRFutureTask<?> t: pendingGPUMemAccessTasks)
 	    System.err.println(t);
 	System.err.println("active tasks:");
-	for(TRFutureTask t: activeGPUMemAccessTasks)
+	for(TRFutureTask<?> t: activeGPUMemAccessTasks)
 	    System.err.println(t);
 	System.err.println("This task: "+trFutureTaskIdentities.get());
 	tr.showStopper(new RuntimeException("Writing to GPU while rendering!"));

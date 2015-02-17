@@ -162,7 +162,6 @@ public class RenderList {
 	//////// Workaround for AMD bug where element zero always returns zero in frag. Shift up one.
 	for (int i = 0; i < size-1; i++) {
 	    hostRenderListPageTable[i+1] = olWindow.logicalPage2PhysicalPage(i);
-	    //System.out.print(" "+hostRenderListPageTable[i+1]);
 	}// end for(hostRenderListPageTable.length)
 	System.out.println();
 	final GLProgram objectProgram = renderer.objectProgram;
@@ -239,22 +238,6 @@ public class RenderList {
     	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
     	     remainingBlocks -= 256;
     	 }
-    	 /*
-    	 final int opaqueVtxOffset = numOpaqueRows*257;
-    	 int numTransRows = (int)Math.ceil(numTransparentBlocks/256.);
-    	 remainingBlocks = numTransparentBlocks;
-    	 */
-    	 /*
-    	 //Need to shift over to the transparent list and then reverse-compensate for the vertex offset
-    	 objectProgram.getUniform("logicalVec4Offset").setui(
-    		 transRenderListLogicalVec4Offset-
-    		 (numOpaqueBlocks/4));//Each block entry is 4 bytes, or 1/4 of a VEC4
-    	 */
-    	 /*
-    	 for(int i=0; i<numTransRows; i++){
-    	     gl.glDrawArrays(GL3.GL_LINE_STRIP, opaqueVtxOffset+i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
-    	     remainingBlocks -= 256;
-    	 }*/
     	}//end variable scope
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
@@ -278,8 +261,6 @@ public class RenderList {
 		relevantVertexBufferWidth, 
 		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);//Opaque
-	//gl.glViewport(0, (NUM_BLOCKS_PER_PASS*GPU.GPU_VERTICES_PER_BLOCK)/relevantVertexBufferWidth, relevantVertexBufferWidth, 256);
-	//gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 6);//Transparent
 	//Cleanup
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
@@ -340,9 +321,6 @@ public class RenderList {
 	//gl.glDepthRange((BriefingScreen.MAX_Z_DEPTH+1)/2, 1);
 	
 	if(renderer.isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
-	//final int verticesPerSubPass	= (NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK);
-	//final int numSubPasses		= (numOpaqueVertices / verticesPerSubPass) + 1;
-	//int remainingVerts		= numOpaqueVertices;
 	
 	if (frameCounter == 0) {
 	    tr.getReporter().report(
@@ -359,16 +337,7 @@ public class RenderList {
 		    "" + ((numOpaqueBlocks+numTransparentBlocks)*GPU.GPU_VERTICES_PER_BLOCK)/3);
 	}
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numOpaqueVertices);
-	/*
-	for (int sp = 0; sp < numSubPasses; sp++) {
-	    final int numVerts = remainingVerts <= verticesPerSubPass ? remainingVerts
-		    : verticesPerSubPass;
-	    remainingVerts -= numVerts;
-	    final int newOffset = sp
-		    * NUM_BLOCKS_PER_SUBPASS * GPU.GPU_VERTICES_PER_BLOCK;
-	    gl.glDrawArrays(GL3.GL_TRIANGLES, newOffset, numVerts);
-	}// end for(subpasses)
-	*/
+	
 	// Cleanup
 	gpu.defaultProgram();
 	gpu.defaultFrameBuffers();
@@ -385,12 +354,7 @@ public class RenderList {
 	gl.glEnable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_DEPTH_CLAMP);
 	gl.glDepthRange(0, 1);
-	//gl.glEnable(GL3.GL_SAMPLE_MASK);
 	gl.glDepthFunc(GL3.GL_LEQUAL);
-	//gl.glDisable(GL3.GL_MULTISAMPLE);
-	//gl.glStencilFunc(GL3.GL_EQUAL, 0x1, 0xFF);
-	//gl.glStencilOp(GL3.GL_DECR, GL3.GL_DECR, GL3.GL_DECR);
-	//gl.glSampleMaski(0, 0xFF);
 	
 	// Thanks to: http://www.andersriggelsen.dk/glblendfunc.php
 	//Set up float shift queue blending
@@ -424,10 +388,6 @@ public class RenderList {
 	// FENCE
 	rootBufferReadFinishedSync = gl.glFenceSync(GL3.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	
-	//gl.glDisable(GL3.GL_MULTISAMPLE);
-	//gl.glStencilFunc(GL3.GL_ALWAYS, 0xFF, 0xFF);
-	//gl.glDisable(GL3.GL_STENCIL_TEST);
-	
 	// DEFERRED STAGE
 	if(renderer.isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = renderer.getDeferredProgram();
@@ -445,7 +405,7 @@ public class RenderList {
 		    deferredProgram.getUniform("rootBuffer"));
 	renderer.getSkyCube().getSkyCubeTexture().bindToTextureUnit(1,gl);
 	/// 2 UNUSED
-	gpu.textureManager.get().vqCodebookManager.get().getESTuTvTexture().bindToTextureUnit(3,gl);/// 3 UNUSED
+	gpu.textureManager.get().vqCodebookManager.get().getESTuTvTexture().bindToTextureUnit(3,gl);
 	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
 	renderer.getOpaquePrimitiveIDTexture().bindToTextureUnit(5,gl);
 	renderer.getLayerAccumulatorTexture().bindToTextureUnit(6,gl);
@@ -467,9 +427,6 @@ public class RenderList {
 	gpu.defaultFrameBuffers();
 	//Cleanup
 	gl.glDepthMask(true);
-	//gl.glDisable(GL3.GL_MULTISAMPLE);
-	//gl.glDisable(GL3.GL_SAMPLE_MASK);
-	//gl.glDisable(GL3.GL_STENCIL_TEST);
 	gpu.defaultProgram();
 	gpu.defaultTIU();
 	gpu.defaultFrameBuffers();

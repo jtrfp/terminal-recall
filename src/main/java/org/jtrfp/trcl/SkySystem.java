@@ -39,7 +39,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     private Color	suggestedFogColor, suggestedAmbientLight;
     private Color []	gradientPalette;
     private String	cloudTextureFileName;
-    private		SkyCubeGen   belowCloudsSkyCubeGen,aboveCloudsSkyCubeGen;
+    private SkyCubeGen  belowCloudsSkyCubeGen,aboveCloudsSkyCubeGen;
     public static final int 
     	    GRADIENT_PALETTE_START = 193,
 	    GRADIENT_PALETTE_END = 208;
@@ -207,23 +207,23 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		  (ColorUtils.mul(getHorizonGradientBottom(),1.5f),ColorUtils.mul(getHorizonGradientTop(),1.5f));
 		else
 		    aboveCloudsSkyCubeGen = new HorizGradientCubeGen(getHorizonGradientBottom(),new Color(0,0,0,0)).
-		    setEastTexture("/StarsA.png").
-		    setWestTexture("/StarsA.png").
-		    setTopTexture("/StarsA.png").
-		    setSouthTexture("/StarsB.png").
-		    setNorthTexture("/StarsB.png").
-		    setVerticalBias(.7f);
+		     setEastTexture("/StarsA.png").
+		     setWestTexture("/StarsA.png").
+		     setTopTexture("/StarsA.png").
+		     setSouthTexture("/StarsB.png").
+		     setNorthTexture("/StarsB.png").
+		     setVerticalBias(.7f);
 	    else// No clouds
 		if(!areStarsVisible())
 		    aboveCloudsSkyCubeGen = getBelowCloudsSkyCubeGen();
 		else
 		    aboveCloudsSkyCubeGen = new HorizGradientCubeGen(Color.black,new Color(0,0,0,0)).
-		    setEastTexture("/StarsA.png").
-		    setWestTexture("/StarsA.png").
-		    setTopTexture("/StarsA.png").
-		    setSouthTexture("/StarsB.png").
-		    setNorthTexture("/StarsB.png").
-		    setVerticalBias(.7f);
+		     setEastTexture("/StarsA.png").
+		     setWestTexture("/StarsA.png").
+		     setTopTexture("/StarsA.png").
+		     setSouthTexture("/StarsB.png").
+		     setNorthTexture("/StarsB.png").
+		     setVerticalBias(.7f);
 	}//end null
         return aboveCloudsSkyCubeGen;
     }//end getAboveCloudsSkyCubeGen

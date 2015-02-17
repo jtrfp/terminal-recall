@@ -27,16 +27,18 @@ import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
 public class VQCodebookManager {
     private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODE256_PER_PAGE*NUM_CODE_PAGES);
-    private final 	GLTexture 	rgbaTexture,esTuTvTexture,indentationTexture;
+    private final 	GLTexture 	rgbaTexture,
+    					esTuTvTexture,
+    					indentationTexture;
     private final	Queue<TileUpdate>tileUpdates	   = new LinkedBlockingQueue<TileUpdate>();
     private final	GPU		gpu;
     private final	GLFrameBuffer	fb;
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
-    public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
     public static final int 		NUM_CODE_PAGES			=2048;
-    public static final int 		CODES_PER_PAGE 			=NUM_CODES_PER_AXIS*NUM_CODES_PER_AXIS;
     public static final int		MIP_DEPTH			=1;
+    public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
+    public static final int 		CODES_PER_PAGE 			=NUM_CODES_PER_AXIS*NUM_CODES_PER_AXIS;
     public static final int 		CODE256_PER_PAGE 		= CODES_PER_PAGE/256;
     public static final int 		CODE256_HEIGHT_CODES		= 256 / NUM_CODES_PER_AXIS;
 
@@ -81,7 +83,6 @@ public class VQCodebookManager {
 	for(int i=0; i<NUM_CODE_PAGES; i++){
 	    fb.bindToDraw();
 	    gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, GL3.GL_COLOR_ATTACHMENT0, esTuTvTexture.getId(), 0, i);
-			//attachDrawTexture(esTuTvTexture, GL3.GL_COLOR_ATTACHMENT0).
 	    fb.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	    fb.unbindFromDraw();
@@ -140,26 +141,6 @@ public class VQCodebookManager {
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+z+" max: "+NUM_CODE_PAGES);
 	if(x>=CODE_PAGE_SIDE_LENGTH_TEXELS || y >= CODE_PAGE_SIDE_LENGTH_TEXELS )
 	    throw new RuntimeException("One or more texel coords intolerably out of range: x="+x+" y="+y);
-	/*
-	if(codePageBuffers[z]==null){
-	    codePageBuffers[z] = ByteBuffer
-		    .allocateDirect(CODE_PAGE_SIDE_LENGTH_TEXELS
-			    * CODE_PAGE_SIDE_LENGTH_TEXELS * 4);
-	    pageBufTimeStamp[z]=System.currentTimeMillis();
-	}
-	
-	final ByteBuffer codePageBuffer = codePageBuffers[z];
-	staleCodePages.add(z);
-	synchronized (codePageBuffer) {
-	synchronized (texels) {
-	    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
-		codePageBuffer
-			.position((x + (y+row) * CODE_PAGE_SIDE_LENGTH_TEXELS) * 4);
-		texels.applyRow(row, codePageBuffer);
-		//codePageBuffer.put(texels);
-	    }// end for(rows)
-	}}// end sync(codePageBuffers[z],texels)
-	*/
 	tileUpdates.add(new TileUpdate(new RasterRowWriter[][]{texels},x,y,z));
     }// end subImage(...)
     
@@ -214,90 +195,8 @@ public class VQCodebookManager {
 		    }//end if(rw!=null)
 	    }//end if(channelArrayIndex)
 	}//end for(tileUpdates)
-	    gpu.defaultTexture();
-	    //tileUpdates.clear();
-	/*final long currTime = System.currentTimeMillis();
-	while(!staleCodePages.isEmpty()){
-	    final int codePageID = staleCodePages.pollFirst();
-	    final ByteBuffer codePageBuffer=codePageBuffers[codePageID];
-	    synchronized(codePageBuffer){
-	    codePageBuffer.clear();
-	    rgbaTexture.bind().subImage(
-		    new int[]{0,0,codePageID},
-		    codePageDims,
-		    GL3.GL_RGBA, 0, codePageBuffer);
-	    pageBufTimeStamp[codePageID]=currTime;
-	    }//end sync(codePageBuffer)
-	}//end for(staleCodePages
-	*/
-	//TODO: Only cleanup when whole page no longer in use
-	//cleanupOldCodePageBuffers(currTime);//Cannot use yet.
+	gpu.defaultTexture();
     }//end refreshStaleCodePages()
-/*
-    private void subImageAutoMip(final int codeID, final ByteBuffer texels,
-	    final GLTexture tex, int byteSizedComponentsPerTexel) {
-	ByteBuffer wb = ByteBuffer.allocate(texels.capacity());
-	ByteBuffer intermediate = ByteBuffer.allocate(texels.capacity() / 4);
-	texels.clear();wb.clear();
-	wb.put(texels);
-	int sideLen = (int)Math.sqrt(texels.capacity() / byteSizedComponentsPerTexel);
-	for (int mipLevel = 0; mipLevel < MIP_DEPTH; mipLevel++) {
-	    wb.clear();
-	    subImage(codeID, wb, tex, mipLevel);
-	    mipDown(wb, intermediate, sideLen, byteSizedComponentsPerTexel);
-	    wb.clear();
-	    intermediate.clear();
-	    wb.put(intermediate);
-	}// end for(mipLevel)
-    }// end subImageAutoMip(...)
-
-    private void cleanupOldCodePageBuffers(long currTime){
-	final long timeout  = currTime - PAGE_BUFFER_TIMEOUT;
-	if(codePageDiscardTask!=null){
-	    if(!codePageDiscardTask.isDone()){
-		return;}}
-	codePageDiscardTask = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		//Check for not-recently-used codepage buffers and free them up to save memory.
-		for(int i=0; i<NUM_CODE_PAGES; i++){
-		    if(pageBufTimeStamp[i]<timeout && codePageBuffers[i]!=null){
-			System.out.println("VQCodebookManager releasing codePageBuffer at index "+i);
-			codePageBuffers[i]=null;
-		    }//end if(timeout)
-		}//end for(code pages)
-		return null;
-	    }//end call()
-	});//end new Callable()
-    }//end cleanupOldCodePageBuffers()
-    */
-    private void mipDown(ByteBuffer in, ByteBuffer out, int sideLen,
-	    int componentsPerTexel) {
-	int outX, outY, inX, inY, inIndex, outIndex;
-	final int newSideLen = sideLen / 2;
-	for (int y = 0; y < newSideLen; y++)
-	    for (int x = 0; x < newSideLen; x++) {
-		inX = x * 2;
-		inY = y * 2;
-		outX = x;
-		outY = y;
-		int component = 0;
-		for (int cIndex = 0; cIndex < componentsPerTexel; cIndex++) {
-		    for (int sy = 0; sy < 2; sy++)
-			for (int sx = 0; sx < 2; sx++) {
-			    inIndex = ((inX + sx) + (inY + sy) * sideLen);
-			    inIndex *= componentsPerTexel;
-			    inIndex += cIndex;
-			    component += in.get(inIndex);
-			}// end for(sx)
-		    outIndex = (outX + outY * newSideLen);
-		    outIndex *= componentsPerTexel;
-		    outIndex += cIndex;
-		    component /= 4;
-		    out.put(outIndex, (byte) component);
-		}// end for(cIndex)
-	    }// end for(x)
-    }// end mipDown(...)
     
     public synchronized int newCodebook256() {
 	try{return codebook256Indices.popOrException();}
@@ -331,7 +230,7 @@ public class VQCodebookManager {
 	return result;
     }//end dumpPageToPNG(...)
 
-    private final class TileUpdate{//TODO: 2D array, if null element then skip.
+    private final class TileUpdate{
 	private final RasterRowWriter [][]rowWriters;
 	private final int x,y,z;
 	public TileUpdate(RasterRowWriter [][]rowWriter, int x, int y, int z){

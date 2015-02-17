@@ -245,7 +245,9 @@ public final class ThreadManager {
 	    }// end while(!empty)
 	     // /////// activeGPUMemAccessTasks should be empty beyond this
 	    assert activeGPUMemAccessTasks.isEmpty() : "ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
-	     // point ////////
+	    //// GL ONLY
+	    for(Callable<?> c:repeatingGLTasks)
+		c.call();
 	    for (Renderer renderer : renderers) {
 		renderer.render();
 	    }// end for(renderers)
@@ -258,9 +260,6 @@ public final class ThreadManager {
 			.poll());
 	    for(Callable<?> c:repeatingGPUMemAccessTasks){
 		this.submitToGPUMemAccess(c);
-	    }//end for(repeatingGPUMemAccessTasks)
-	    for(Callable<?> c:repeatingGLTasks){
-		this.submitToGL(c);
 	    }//end for(repeatingGPUMemAccessTasks)
 	} catch (Exception e) {
 	    e.printStackTrace();

@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -198,6 +199,28 @@ public class VQCodebookManager {
 	gpu.defaultTexture();
     }//end refreshStaleCodePages()
     
+    public synchronized void newCodebook256(List<Integer> list, int count){
+	count=codebook256Indices.pop(list,count);
+	while(count > 0){
+	    System.err.println("Warning: Codepages running low. Attempting a nuclear GC. Hold on to your hats...");
+	    System.err.println("Remaining indices needed: "+count+" list="+list);
+	    TR.nuclearGC();
+	    System.err.println("Still alive. Waiting 250ms and reattempting pop codebook256...");
+	    try{Thread.sleep(3000);}catch(InterruptedException e){}
+	    count=codebook256Indices.pop(list,count);
+	    System.err.println("New count="+count+" list="+list);
+	}//end while(count>0)
+	/*
+	try{codebook256Indices.popOrException(list,count);}
+	catch(OutOfIndicesException e){
+	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
+	    TR.nuclearGC();
+	    System.err.println("Still alive. Attempting blocking texture codebook256...");
+	    codebook256Indices.pop(list,count);
+	}//end catch()
+	*/
+    }
+    
     public synchronized int newCodebook256() {
 	try{return codebook256Indices.popOrException();}
 	catch(OutOfIndicesException e){
@@ -206,12 +229,17 @@ public class VQCodebookManager {
 	    System.err.println("Still alive. Attempting blocking texture codebook256...");
 	    return codebook256Indices.pop();
 	}//end catch()
-    }// end newCODE()
+    }// end newCodebook256()
 
     public void freeCodebook256(int codebook256ToRelease) {
 	System.out.println("VQCodebookManager.freeCodebook256() "+codebook256ToRelease);
 	codebook256Indices.free(codebook256ToRelease);
-    }// end releaseCODE(...)
+    }// end freeCodebook256(...)
+    
+    public void freeCodebook256(List<Integer> list) {
+	System.out.println("VQCodebookManager.freeCodebook256(list) "+list.get(0));
+	codebook256Indices.free(list);
+    }// end freeCodebook256(...)
     
     public GLTexture getRGBATexture()		{return rgbaTexture;}
     public GLTexture getESTuTvTexture()		{return esTuTvTexture;}

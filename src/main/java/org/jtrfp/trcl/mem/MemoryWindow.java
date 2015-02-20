@@ -15,6 +15,7 @@ package org.jtrfp.trcl.mem;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.util.Collection;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.pool.IndexPool;
@@ -94,6 +95,10 @@ public abstract class MemoryWindow {
     public final int create() {
 	return indexPool.pop();
     }//end create()
+    
+    public final void create(Collection<Integer> dest, int count){
+	indexPool.pop(dest, count);
+    }//end create(...)
     
     public final int free(int objectIDToFree){
 	return indexPool.free(objectIDToFree);

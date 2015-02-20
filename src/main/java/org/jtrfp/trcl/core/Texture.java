@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,7 @@ import org.jtrfp.trcl.img.vq.VectorListND;
 import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
+import org.jtrfp.trcl.pool.IntArrayList;
 
 public class Texture implements TextureDescription {
     private final TR 			tr;
@@ -73,9 +75,12 @@ public class Texture implements TextureDescription {
 	//Codebook entries
 	if(codebookStartOffsetsAbsolute!=null)
 	 for(int [] array:codebookStartOffsetsAbsolute){
-	    for(int entry:array){
-		tm.vqCodebookManager.get().freeCodebook256(entry/256);
-	    }//end for(entries)
+	    //for(int entry:array){
+	//	tm.vqCodebookManager.get().freeCodebook256(entry/256);
+	     for(int i=0; i<array.length;i++)
+		 array[i]/=256;//WARNING: This corrupts the original data
+	    tm.vqCodebookManager.get().freeCodebook256(new IntArrayList(array).setRepresentFullSize(true));
+	   // }//end for(entries)
 	 }//end for(arrays)
 	super.finalize();
     }//end finalize()
@@ -228,9 +233,9 @@ public class Texture implements TextureDescription {
 		for(int i=0; i<subTextureIDs.length; i++){
 		    //Create subtexture ID
 		    subTextureIDs[i]=stw.create();
+		    tm.vqCodebookManager.get().newCodebook256(new IntArrayList(codebookStartOffsetsAbsolute[i]), 6);
 		    for(int off=0; off<6; off++){
-			codebookStartOffsetsAbsolute[i][off] =  tm.vqCodebookManager.get()
-			    .newCodebook256() * 256;}
+			codebookStartOffsetsAbsolute[i][off]*= 256;}
 		}//end for(subTextureIDs)
 		tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 		    @Override

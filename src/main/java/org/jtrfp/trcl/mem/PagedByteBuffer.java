@@ -15,10 +15,10 @@ package org.jtrfp.trcl.mem;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
+import org.jtrfp.trcl.pool.IntArrayList;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
@@ -36,10 +36,8 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	this.debugName=debugName;
 	final int sizeInPages = sizeInPages(initialSizeInBytes);
 	pageTable = new int[sizeInPages];
-	stalePages = new boolean[sizeInPages];
-	for(int i=0; i<sizeInPages; i++){
-	    pageTable[i]=pageIndexPool.pop();
-	}//end for(sizeInPages)
+	stalePages= new boolean[sizeInPages];
+	pageIndexPool.pop(new IntArrayList(pageTable),pageTable.length);
 	this.gpu=gpu;
 	weakThis = new WeakReference<PagedByteBuffer>(this);
 	gpu.memoryManager.get().registerPagedByteBuffer(weakThis);
@@ -74,24 +72,18 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	if(pageNumDelta>0){	//GROW
 	    newTable = new int[newNumPages];
 	    System.arraycopy(pageTable, 0, newTable, 0, pageTable.length);
-	    for(int i=pageTable.length; i<newNumPages; i++){
-		newTable[i]=pageIndexPool.pop();
-	    }//end for(new pages)
+	pageIndexPool.pop(new IntArrayList(newTable,pageTable.length),newNumPages-pageTable.length);
 	}else{			//SHRINK
 	    newTable = new int[newNumPages];
 	    System.arraycopy(pageTable, 0, newTable, 0, newTable.length);
-	    for(int i=newTable.length; i<pageTable.length; i++){
-		pageIndexPool.free(pageTable[i]);
-	    }//end for(new pages)
+	    pageIndexPool.free(new IntArrayList(pageTable,newTable.length).setRepresentFullSize(true));
 	}//end if(pageNumDelta...)
 	pageTable = newTable;
 	stalePages = new boolean[newTable.length];
     }//end resize()
     
     private void deallocate(){
-	for(int i:pageTable){
-	    pageIndexPool.free(i);
-	}//end for(pageTable)
+	pageIndexPool.free(new IntArrayList(pageTable).setRepresentFullSize(true));
     }//end deallocate()
     
     private void markPageStale(int indexInBytes){

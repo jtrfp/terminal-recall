@@ -26,8 +26,9 @@ import org.jtrfp.trcl.math.Vect3D;
 
 public class Explosion extends BillboardSprite {
     private final Sequencer sequencer;
-    private static final int NUM_FRAMES=16;
+    public static final int NUM_FRAMES=16;
     private final ExplosionType type;
+    private long timeOfLastReset = 0L;
     public Explosion(TR tr, ExplosionType type) {
 	super(tr);
 	final Vector3D origin = type.getOrigin();
@@ -156,6 +157,7 @@ public class Explosion extends BillboardSprite {
 	setVisible(true);
 	setActive(true);
 	sequencer.reset();
+	timeOfLastReset=System.currentTimeMillis();
     }
     
     private class ExplosionBehavior extends Behavior{
@@ -170,5 +172,12 @@ public class Explosion extends BillboardSprite {
 	    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*(NUM_FRAMES-2);//-10 is padding to avoid stray frame looping
 	}//end reset()
     }//end ExplosionBehavior
+
+    /**
+     * @return the timeOfLastReset
+     */
+    public long getTimeOfLastReset() {
+        return timeOfLastReset;
+    }
 
 }

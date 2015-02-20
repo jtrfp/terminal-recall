@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.pool;
 
+import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,6 +41,36 @@ public class IndexPool{
 	return pop(true);
     }
     
+    public int pop(Collection<Integer> dest, int count){
+	try{return pop(dest,count,false);}
+	catch(OutOfIndicesException e){
+	    e.printStackTrace();
+	    assert false;
+	    return count;
+	    }//Shouldn't happen.
+    }//end pop(...)
+    
+    public void popOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{
+	pop(dest,count,true);
+    }//end pop(...)
+    
+    private int pop(Collection<Integer> dest, int count, boolean throwException) throws OutOfIndicesException{
+	 count-=freeIndices.drainTo(dest,count);
+	 if(count>0) {
+	    synchronized (this) {
+		if (highestIndex + count >= hardLimit){
+		    if(throwException)throw new OutOfIndicesException();
+		    else return count;
+		    }//end if()
+		if (highestIndex + count < maxCapacity)
+		     return availablePop(dest,count);
+		else return growthPop(dest,count);
+	    }//end sync(this)
+	}//end catch{no element}
+	assert count>=0;
+	return count;
+    }//end pop(...)
+    
     private int pop(boolean throwException) throws OutOfIndicesException {
 	try {
 	    return freeIndices.remove();
@@ -50,7 +81,7 @@ public class IndexPool{
 		    else try{return freeIndices.take();}
 			catch(InterruptedException ex){
 			    ex.printStackTrace(); 
-			    assert false;
+			    assert false:"Unexpected interruption.";
 			    return -1;
 			    }
 		if (highestIndex + 1 < maxCapacity)
@@ -59,6 +90,17 @@ public class IndexPool{
 	    }//end sync(this)
 	}//end catch{no element}
     }// end pop()
+    
+    	private int availablePop(Collection<Integer>dest, int count){
+    	    while(count-->0)
+    		dest.add(++highestIndex);
+    	    return 0;
+    	}
+    	
+    	private int growthPop(Collection<Integer>dest, int count){
+    	    maxCapacity = growthBehavior.grow(maxCapacity);
+    	    return pop(dest,count);
+    	}
 	
 	private int availablePop()
 	    {return (++highestIndex);}
@@ -110,5 +152,9 @@ public class IndexPool{
 	public IndexPool setHardLimit(int hardLimit) {
 	    this.hardLimit = hardLimit;
 	    return this;
+	}
+
+	public void free(Collection<Integer> intArrayList) {
+	    freeIndices.addAll(intArrayList);
 	}
 }//end IndexPool

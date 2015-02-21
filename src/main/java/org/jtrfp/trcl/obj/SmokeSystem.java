@@ -59,9 +59,14 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
 	    for(int smokeTypeIndex=0; smokeTypeIndex < allSmokes.length; smokeTypeIndex++){
 		Smoke [] explosionsOfThisType = allSmokes[smokeTypeIndex];
 		for(Smoke thisSmoke:explosionsOfThisType){
-		    if(thisSmoke.isActive())
-		     if(new Vector3D(thisSmoke.getPosition()).distance(loc)<OneShotBillboardEvent.PROXIMITY_TEST_DIST)
+		    if(thisSmoke.isActive()){
+		     final double distance = new Vector3D(thisSmoke.getPosition()).distance(loc);
+		     if(distance<1000)
+			 return false;
+		     if(distance<OneShotBillboardEvent.PROXIMITY_TEST_DIST){
 			proximalSmokes.add(thisSmoke);
+		     }
+		    }//end if(isActive)
 		}//end for(explosionsOfThisType)
 	    }//end for(explosions)
 	    if(proximalSmokes.size()+1>OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)

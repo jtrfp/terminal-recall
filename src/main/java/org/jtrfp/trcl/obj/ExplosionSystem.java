@@ -72,9 +72,13 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 	    for(int explosionTypeIndex=0; explosionTypeIndex < allExplosions.length; explosionTypeIndex++){
 		Explosion [] explosionsOfThisType = allExplosions[explosionTypeIndex];
 		for(Explosion thisExplosion:explosionsOfThisType){
-		    if(thisExplosion.isActive())
-		     if(new Vector3D(thisExplosion.getPosition()).distance(loc)<OneShotBillboardEvent.PROXIMITY_TEST_DIST)
-			proximalExplosions.add(thisExplosion);
+		    if(thisExplosion.isActive()){
+			final double distance = new Vector3D(thisExplosion.getPosition()).distance(loc);
+			     if(distance<1000)
+				 return false;
+			     if(new Vector3D(thisExplosion.getPosition()).distance(loc)<OneShotBillboardEvent.PROXIMITY_TEST_DIST)
+					proximalExplosions.add(thisExplosion);
+		    }//end if(isActive)
 		}//end for(explosionsOfThisType)
 	    }//end for(explosions)
 	    if(proximalExplosions.size()+1>OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)

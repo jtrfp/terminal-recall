@@ -1,13 +1,13 @@
 terminal-recall
 ===============
 
-An unofficial engine remake for Terminal Velocity and Fury3 written in Java. It aims to accept POD files for the original games (or third-party creations) and play them with updated graphics and sound, similar to the way Spring RTS enhances the Total Annihilation game. This will also be an experimenting ground for fairly-radical rendering and processing methods.
+An unofficial engine remake for Terminal Velocity and Fury3 written in Java. It aims to accept POD files for the original games or third-party creations and play them with updated graphics and sound, similar to the way Spring RTS enhances the Total Annihilation game.
 
 See files also: CREDITS, COPYING, LICENSE*
 
 Terminal Recall (TRCL) is part of the Java Terminal Reality File Parsers project (jTRFP.org).
 
-TRCL is currently in a playable development phase. Because it is not yet close to being released (it changes too much), you must build the program from source. Fortunately we put some effort into making this possible without you having to have a computer science degree.
+TRCL is currently in a playable development phase. Because it is not yet close to being released (it changes too much), it must be built from source.
 
 ##Build Instructions
 You will need:
@@ -27,28 +27,28 @@ git clone https://github.com/jtrfp/terminal-recall.git
     mvn clean install
 ```
 
-... you will see lots of fireworks as it builds. (it doesn't really 'install' anything)
-You should see BUILD SUCCESS. If you see BUILD FAILURE come to the Terminal Recall gitHub issues section (https://github.com/jtrfp/terminal-recall/issues?page=1), file a new issue and post the output and we'll hopefully figure it out.
+... there should be a lot of output as it builds. Nothing is actually 'install'ed.
+Expect to see the message 'BUILD SUCCESS'. If it outputs BUILD FAILURE come to the Terminal Recall gitHub issues section (https://github.com/jtrfp/terminal-recall/issues?page=1), search for an existing issue matching yours, or file a new issue and post the output and we'll hopefully figure it out.
 
 Example:
 ```
     cd target
     java -jar RunMe.jar
 ```
-The first time running Terminal Recall, you should register your POD files using the File->Configure menu so that the game can find them. Note that the original games need at least STARTUP.POD and the specific POD for the game, such as FURY3.POD or TV.POD.
+The POD files should be registered via File->Configure menu such that the game can find them. This only needs to be done once so long as the config file isn't corrupted or lost. Note that the original games need at least STARTUP.POD and the specific POD for the game, such as FURY3.POD or TV.POD.
 
-If its been a few weeks since you first downloaded and you want to update to the newest version you can cd into your terminal-recall directory and run:
+If its been a few weeks since first downloading and you wish to update to the newest version, cd into the  terminal-recall directory and run:
 
 ```
     git pull
     mvn clean install
 ```
 
-... this will only download whatever has changed since your last download and then rebuild it all.
+... this will only download whatever has changed since the last download and rebuild the program appropriately.
 
-If the dash in the terminal-recall name is much of a pain in Windows it can be renamed without issue after downloading.
+If the dash in the terminal-recall directory name is an inconvenience in Windows it can be renamed without issue after downloading.
 
-If you wish to move the RunMe.jar file to another location, be sure to also move the 'lib' directory. All other files are unneeded for running.
+If moving the RunMe.jar file to another location, be sure to also move the 'lib' directory. All other files are unneeded for running.
 
 
 ##Disclaimer

@@ -151,6 +151,7 @@ public final class SoundSystem {
 	    public void run() {
 		try {
 		    Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+		    Thread.currentThread().setName("SoundSystem");
 		    byte[] shortBytes = new byte[BUFFER_SIZE_BYTES];
 		    final ByteBuffer floatBytes = ByteBuffer.allocateDirect(
 			    BUFFER_SIZE_FRAMES*4*NUM_CHANNELS).order(ByteOrder.nativeOrder());

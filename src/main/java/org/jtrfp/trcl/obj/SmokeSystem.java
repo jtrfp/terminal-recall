@@ -12,9 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.util.Comparator;
+import java.util.TreeSet;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.math.Misc;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 
 public class SmokeSystem extends RenderableSpacePartitioningGrid{
@@ -34,12 +39,33 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
 	    }//end for(SmokeType s)
 	}//end constructor()
 	public Smoke triggerSmoke(Vector3D pos, SmokeType type) {
+	    if(!isNewSmokeFeasible(pos,type))
+		return null;
 	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_SMOKE_PER_POOL;
 	    Smoke result = allSmokes[type.ordinal()][indices[type.ordinal()]];
 	    result.destroy();
-	    result.resetSmoke();
+	    result.reset();
 	    result.setPosition(pos.toArray());
 	    add(result);
 	    return result;
 	}//end triggerSmoke()
+	
+	private boolean isNewSmokeFeasible(final Vector3D loc, SmokeType type){
+	    final TreeSet<Smoke> proximalSmokes = new TreeSet<Smoke>(new Comparator<Smoke>(){
+		@Override
+		public int compare(Smoke o1, Smoke o2) {
+		    return Misc.satCastInt(o1.getTimeOfLastReset()-o2.getTimeOfLastReset());
+		}});
+	    for(int smokeTypeIndex=0; smokeTypeIndex < allSmokes.length; smokeTypeIndex++){
+		Smoke [] explosionsOfThisType = allSmokes[smokeTypeIndex];
+		for(Smoke thisSmoke:explosionsOfThisType){
+		    if(thisSmoke.isActive())
+		     if(new Vector3D(thisSmoke.getPosition()).distance(loc)<OneShotBillboardEvent.PROXIMITY_TEST_DIST)
+			proximalSmokes.add(thisSmoke);
+		}//end for(explosionsOfThisType)
+	    }//end for(explosions)
+	    if(proximalSmokes.size()+1>OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)
+		proximalSmokes.first().destroy();//Destroy oldest
+	    return true;
+	}//end isNewSmokeFeasible(...)
 }//end SmokeFactory

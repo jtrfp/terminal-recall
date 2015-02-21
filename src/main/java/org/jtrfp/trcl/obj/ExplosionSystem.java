@@ -12,10 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.util.Comparator;
+import java.util.TreeSet;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 
@@ -24,6 +27,7 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
     	private final int    MAX_EXPLOSIONS_PER_POOL=20;
     	private final Explosion[][] allExplosions = new Explosion[ExplosionType.values().length][];
     	private final int [] indices = new int[ExplosionType.values().length];
+    	
 	public ExplosionSystem(TR tr){
 	    super(tr.getWorld());
 	    this.tr=tr;
@@ -36,14 +40,17 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 	}//end constructor()
 	
 	public Explosion triggerExplosion(Vector3D loc, ExplosionType type) {
+	    if(!isNewExplosionFeasible(loc,type))
+		return null;
 	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_EXPLOSIONS_PER_POOL;
 	    Explosion result = allExplosions[type.ordinal()][indices[type.ordinal()]];
 	    result.destroy();
-	    result.resetExplosion();
+	    result.reset();
 	    result.setPosition(loc.getX(), loc.getY(), loc.getZ());
 	    result.notifyPositionChange();
 	    final SmokeSystem sf = tr.getResourceManager().getSmokeSystem();
 	    final int NUM_PUFFS=1;
+	    
 	    for(int i=0; i<NUM_PUFFS; i++){
 		sf.triggerSmoke(loc.add(new Vector3D(
 			Math.random()*10000-5000,
@@ -51,7 +58,27 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 			Math.random()*10000-5000)),
 			SmokeType.Puff);
 	    }//end for(i)
+	    
 	    add(result);
 	    return result;
 	}//end TriggerExplosion
+	
+	private boolean isNewExplosionFeasible(final Vector3D loc, ExplosionType type){
+	    final TreeSet<Explosion> proximalExplosions = new TreeSet<Explosion>(new Comparator<Explosion>(){
+		@Override
+		public int compare(Explosion o1, Explosion o2) {
+		    return Misc.satCastInt(o1.getTimeOfLastReset()-o2.getTimeOfLastReset());
+		}});
+	    for(int explosionTypeIndex=0; explosionTypeIndex < allExplosions.length; explosionTypeIndex++){
+		Explosion [] explosionsOfThisType = allExplosions[explosionTypeIndex];
+		for(Explosion thisExplosion:explosionsOfThisType){
+		    if(thisExplosion.isActive())
+		     if(new Vector3D(thisExplosion.getPosition()).distance(loc)<OneShotBillboardEvent.PROXIMITY_TEST_DIST)
+			proximalExplosions.add(thisExplosion);
+		}//end for(explosionsOfThisType)
+	    }//end for(explosions)
+	    if(proximalExplosions.size()+1>OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)
+		proximalExplosions.first().destroy();//Destroy oldest
+	    return true;
+	}//end isNewExplosionFeasible(...)
 }//end ExplosionFactory

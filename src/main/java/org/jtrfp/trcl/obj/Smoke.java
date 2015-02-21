@@ -35,11 +35,9 @@ public class Smoke extends OneShotBillboardEvent {
 		if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
 		String [] aniFiles = type.getAnimationFiles();
 		Texture [] frames = new Texture[aniFiles.length];
-		try{for(int i=0; i<aniFiles.length;i++){
+		try{for(int i=0; i<aniFiles.length;i++)
 		        frames[i]=frame(aniFiles[i]);
-		    }
-		}//end try{}
-		catch(Exception e){e.printStackTrace();}
+		}catch(Exception e){e.printStackTrace();}
 		setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
 	    }//end constructor
 	    
@@ -48,7 +46,6 @@ public class Smoke extends OneShotBillboardEvent {
 		final double [] superPos = super.getPosition();
 		Vect3D.subtract(pos,type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.).toArray(),superPos);
 		super.notifyPositionChange();
-		//super.setPosition(pos.subtract(type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.)));
 		return this;
 	    }
 	    

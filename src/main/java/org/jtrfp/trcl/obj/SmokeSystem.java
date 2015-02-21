@@ -50,27 +50,30 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
 	    return result;
 	}//end triggerSmoke()
 	
-	private boolean isNewSmokeFeasible(final Vector3D loc, SmokeType type){
-	    final TreeSet<Smoke> proximalSmokes = new TreeSet<Smoke>(new Comparator<Smoke>(){
-		@Override
-		public int compare(Smoke o1, Smoke o2) {
-		    return Misc.satCastInt(o1.getTimeOfLastReset()-o2.getTimeOfLastReset());
-		}});
-	    for(int smokeTypeIndex=0; smokeTypeIndex < allSmokes.length; smokeTypeIndex++){
-		Smoke [] explosionsOfThisType = allSmokes[smokeTypeIndex];
-		for(Smoke thisSmoke:explosionsOfThisType){
-		    if(thisSmoke.isActive()){
-		     final double distance = new Vector3D(thisSmoke.getPosition()).distance(loc);
-		     if(distance<1000)
-			 return false;
-		     if(distance<OneShotBillboardEvent.PROXIMITY_TEST_DIST){
+    private boolean isNewSmokeFeasible(final Vector3D loc, SmokeType type) {
+	final TreeSet<Smoke> proximalSmokes = new TreeSet<Smoke>(
+		new Comparator<Smoke>() {
+		    @Override
+		    public int compare(Smoke o1, Smoke o2) {
+			return Misc.satCastInt(o1.getTimeOfLastReset()
+				- o2.getTimeOfLastReset());
+		    }
+		});
+	for (int smokeTypeIndex = 0; smokeTypeIndex < allSmokes.length; smokeTypeIndex++) {
+	    Smoke[] explosionsOfThisType = allSmokes[smokeTypeIndex];
+	    for (Smoke thisSmoke : explosionsOfThisType) {
+		if (thisSmoke.isActive()) {
+		    final double distance = new Vector3D(
+			    thisSmoke.getPosition()).distance(loc);
+		    if (distance < 1000)
+			return false;
+		    if (distance < OneShotBillboardEvent.PROXIMITY_TEST_DIST)
 			proximalSmokes.add(thisSmoke);
-		     }
-		    }//end if(isActive)
-		}//end for(explosionsOfThisType)
-	    }//end for(explosions)
-	    if(proximalSmokes.size()+1>OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)
-		proximalSmokes.first().destroy();//Destroy oldest
-	    return true;
-	}//end isNewSmokeFeasible(...)
+		}// end if(isActive)
+	    }// end for(explosionsOfThisType)
+	}// end for(explosions)
+	if (proximalSmokes.size() + 1 > OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)
+	    proximalSmokes.first().destroy();// Destroy oldest
+	return true;
+    }// end isNewSmokeFeasible(...)
 }//end SmokeFactory

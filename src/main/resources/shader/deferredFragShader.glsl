@@ -321,9 +321,6 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
    vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]], false, _w[ordering[i]]);
-   //float span = 1-color.a;
-   //color.rgb	= mix(dqColor.rgb,color.rgb,dqColor.a*color.a);
-   //color.a		= color.a+dqColor.a*span;
    color = reverseBlend(dqColor,color,dqColor.a);
    if(color.a < ALPHA_THRESHOLD)
     break;
@@ -338,8 +335,6 @@ if(color.a > ALPHA_THRESHOLD){
   vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
   vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(opaquePrimID)) ,true,_uvzw.w);
-  //color.rgb	= mix(oColor.rgb,color.rgb,color.a);
-  //color.a		= color.a+oColor.a*(1-color.a);
   color = reverseBlend(oColor,color,oColor.a);
   }//end if(written)
  }//end if(visible)

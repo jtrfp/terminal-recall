@@ -69,18 +69,19 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 		public int compare(Explosion o1, Explosion o2) {
 		    return Misc.satCastInt(o1.getTimeOfLastReset()-o2.getTimeOfLastReset());
 		}});
-	    for(int explosionTypeIndex=0; explosionTypeIndex < allExplosions.length; explosionTypeIndex++){
-		Explosion [] explosionsOfThisType = allExplosions[explosionTypeIndex];
-		for(Explosion thisExplosion:explosionsOfThisType){
-		    if(thisExplosion.isActive()){
-			final double distance = new Vector3D(thisExplosion.getPosition()).distance(loc);
-			     if(distance<1000)
-				 return false;
-			     if(new Vector3D(thisExplosion.getPosition()).distance(loc)<OneShotBillboardEvent.PROXIMITY_TEST_DIST)
-					proximalExplosions.add(thisExplosion);
-		    }//end if(isActive)
-		}//end for(explosionsOfThisType)
-	    }//end for(explosions)
+	for (int explosionTypeIndex = 0; explosionTypeIndex < allExplosions.length; explosionTypeIndex++) {
+	    Explosion[] explosionsOfThisType = allExplosions[explosionTypeIndex];
+	    for (Explosion thisExplosion : explosionsOfThisType) {
+		if (thisExplosion.isActive()) {
+		    final double distance = new Vector3D(
+			    thisExplosion.getPosition()).distance(loc);
+		    if (distance < 1000)
+			return false;
+		    if (distance < OneShotBillboardEvent.PROXIMITY_TEST_DIST)
+			proximalExplosions.add(thisExplosion);
+		}// end if(isActive)
+	    }// end for(explosionsOfThisType)
+	}// end for(explosions)
 	    if(proximalExplosions.size()+1>OneShotBillboardEvent.MAX_PROXIMAL_EVENTS)
 		proximalExplosions.first().destroy();//Destroy oldest
 	    return true;

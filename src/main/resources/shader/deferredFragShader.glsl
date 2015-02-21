@@ -56,7 +56,7 @@ const uint TOC_HEADER_OFFSET_QUADS_MAGIC		=3u;
 
 const uint RENDER_FLAGS_WRAP					=0x1u;
 
-const float ALPHA_THRESHOLD						=.98;
+const float ALPHA_THRESHOLD						=.02;
 
 const float TILE_PAGE_SIDE_WIDTH_TEXELS = 128;
 const uint CODE_SIDE_WIDTH_TEXELS 		= 4u;
@@ -271,9 +271,15 @@ textureTOC{
 	}
 **/
 
+vec4 reverseBlend(in vec4 src, in vec4 dest, in float alpha){
+ dest.rgb += (dest.a*src.a)*src.rgb;
+ dest.a *= 1-src.a;
+ return dest;
+}
+
 void main(){
 uint	primitiveID;
-vec4	color		= vec4(0,0,0,0);
+vec4	color		= vec4(0,0,0,1);
 vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
@@ -315,14 +321,15 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
    vec4 dqColor = primitiveLayer(pQuads[ordering[i]],vUVZI[ordering[i]], false, _w[ordering[i]]);
-   float span = 1-color.a;
-   color.rgb	= mix(dqColor.rgb,color.rgb,dqColor.a*color.a);
-   color.a		= color.a+dqColor.a*span;
-   if(color.a > ALPHA_THRESHOLD)
+   //float span = 1-color.a;
+   //color.rgb	= mix(dqColor.rgb,color.rgb,dqColor.a*color.a);
+   //color.a		= color.a+dqColor.a*span;
+   color = reverseBlend(dqColor,color,dqColor.a);
+   if(color.a < ALPHA_THRESHOLD)
     break;
   }//end for(relevantSize)
 
-if(color.a < ALPHA_THRESHOLD){
+if(color.a > ALPHA_THRESHOLD){
  // S O L I D   B A C K D R O P
  uint opaquePrimID = uint(texelFetch(primitiveIDTexture,ivec2(gl_FragCoord),0)[0u]*65536);
  if(opaquePrimID>0u){
@@ -331,11 +338,12 @@ if(color.a < ALPHA_THRESHOLD){
   vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
   vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(opaquePrimID)) ,true,_uvzw.w);
-  color.rgb	= mix(oColor.rgb,color.rgb,color.a);
-  color.a		= color.a+oColor.a*(1-color.a);
+  //color.rgb	= mix(oColor.rgb,color.rgb,color.a);
+  //color.a		= color.a+oColor.a*(1-color.a);
+  color = reverseBlend(oColor,color,oColor.a);
   }//end if(written)
  }//end if(visible)
-if(color.a<ALPHA_THRESHOLD && bypassAlpha==0u)
- gl_FragColor.rgb = mix(texture(cubeTexture,norm).rgb,color.rgb,color.a);
+if(color.a>ALPHA_THRESHOLD && bypassAlpha==0u)
+ gl_FragColor.rgb = mix(color.rgb,texture(cubeTexture,norm).rgb,color.a);
 else gl_FragColor.rgb = color.rgb;
 }//end main()

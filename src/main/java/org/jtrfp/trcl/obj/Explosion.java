@@ -22,15 +22,12 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.math.Vect3D;
 
-public class Explosion extends BillboardSprite {
-    private final Sequencer sequencer;
+public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;
     private final ExplosionType type;
-    private long timeOfLastReset = 0L;
     public Explosion(TR tr, ExplosionType type) {
-	super(tr);
+	super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length);
 	final Vector3D origin = type.getOrigin();
 	this.setModelOffset(
 		origin.getX()*type.getBillboardSize().getWidth()*-.5, 
@@ -39,7 +36,6 @@ public class Explosion extends BillboardSprite {
 	this.type=type;
 	setBillboardSize(type.getBillboardSize());
 	if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
-	addBehavior(new ExplosionBehavior());
 	String [] aniFiles = type.getAnimationFiles();
 	Texture [] frames = new Texture[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){
@@ -47,7 +43,7 @@ public class Explosion extends BillboardSprite {
 	    }
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
-	setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
+	setTexture(new AnimatedTexture(getSequencer(),frames),true);
     }//end constructor
     /*
     @Override
@@ -150,34 +146,6 @@ public class Explosion extends BillboardSprite {
 	return (Texture) getTr().getResourceManager().getRAWAsTexture(name,
 		getTr().getDarkIsClearPaletteVL(),null,
 		false);
-    }
-
-    public void resetExplosion() {
-	getBehavior().probeForBehavior(ExplosionBehavior.class).reset();
-	setVisible(true);
-	setActive(true);
-	sequencer.reset();
-	timeOfLastReset=System.currentTimeMillis();
-    }
-    
-    private class ExplosionBehavior extends Behavior{
-	private long timeoutTimeInMillis=0;
-	@Override
-	public void _tick(long tickTimeMillis){
-	    if(tickTimeMillis>=timeoutTimeInMillis){
-		destroy();
-	    }//end if(timeout)
-	}//end _tick(...)
-	public void reset(){
-	    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*(NUM_FRAMES-2);//-10 is padding to avoid stray frame looping
-	}//end reset()
-    }//end ExplosionBehavior
-
-    /**
-     * @return the timeOfLastReset
-     */
-    public long getTimeOfLastReset() {
-        return timeOfLastReset;
     }
 
 }

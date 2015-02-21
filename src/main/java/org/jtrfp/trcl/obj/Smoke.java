@@ -24,16 +24,15 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.math.Vect3D;
 
-public class Smoke extends BillboardSprite {
+public class Smoke extends OneShotBillboardEvent {
 	    private final Sequencer sequencer;
 	    private static final int NUM_FRAMES=4;
 	    private final SmokeType type;
 	    public Smoke(TR tr, SmokeType type) {
-		super(tr);
+		super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length);
 		this.type=type;
 		setBillboardSize(type.getBillboardSize());
 		if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
-		addBehavior(new SmokeBehavior());
 		String [] aniFiles = type.getAnimationFiles();
 		Texture [] frames = new Texture[aniFiles.length];
 		try{for(int i=0; i<aniFiles.length;i++){
@@ -94,24 +93,4 @@ public class Smoke extends BillboardSprite {
 	    
 	    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
 		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), null, false);}
-
-	    public void resetSmoke() {
-		getBehavior().probeForBehavior(SmokeBehavior.class).reset();
-		setVisible(true);
-		setActive(true);
-		sequencer.reset();
-	    }
-	    
-	    private class SmokeBehavior extends Behavior{
-		private long timeoutTimeInMillis=0;
-		@Override
-		public void _tick(long tickTimeMillis){
-		    if(tickTimeMillis>=timeoutTimeInMillis){
-			destroy();
-		    }//end if(timeout)
-		}//end _tick(...)
-		public void reset(){
-		    timeoutTimeInMillis=System.currentTimeMillis()+type.getMillisPerFrame()*(NUM_FRAMES);
-		}//end reset()
-	    }//end SmokeBehavior
 }//end Smoke

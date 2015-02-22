@@ -39,8 +39,8 @@ Java Format Description Toolkit (jFDT)
 Reverse-Engineering Wiki feat. Terminal Velocity / Fury3 file format documentation
     REWiki (http://rewiki.regengedanken.de/wiki/Main_Page) 
     
-OCR-A font
-	John Sauter
+John Sauter
+	OCR-A font
 	http://ocr-a-font.sourceforge.net/
 	Public Domain
 	
@@ -48,4 +48,10 @@ Jordon Moss
 	Star texture
 	Copyright (c) 2014 Jordon Moss
 	GPL3
+	
+Olivier Chafik
+	Ochafik-utils  - Listenable collections
+	http://ochafik.com/blog/
+	Apache 2.0
+	
     

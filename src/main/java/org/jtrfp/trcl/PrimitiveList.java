@@ -65,9 +65,10 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     }
 
     public int getNumElements() {
-	if(primitives[0]==null)
+	PRIMITIVE_TYPE [] prims = primitives[0];
+	if(prims==null)
 	    return cachedNumElements;
-	return primitives[0].length;
+	return prims.length;
     }
 
     public abstract int getElementSizeInVec4s();

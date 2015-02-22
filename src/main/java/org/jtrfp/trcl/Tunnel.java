@@ -101,6 +101,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    .getLVL(sourceTunnel.getTunnelLVLFile());
 	    final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
 	    palette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
+	    palette[0] = new Color(0,0,0,0);//KLUDGE: Color zero must be transparent.
 	    paletteVL = new ColorPaletteVectorList(palette);
 	    ESTuTvPalette = new ColorPaletteVectorList(tr.getResourceManager().getLTE("FOG\\"+lvl.getLuminanceMapFile()).toColors(palette));
 	    tunnelEnd = buildTunnel(sourceTunnel, entranceVector, false);
@@ -249,7 +250,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(bc);
 	    break;
 	}
-	case blownOpenDoor:
+	case blownOpenDoor://TODO: This is not displaying alpha
 	    BarrierCube bc = new BarrierCube(tr, tunnelDia, tunnelDia,
 		    wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],

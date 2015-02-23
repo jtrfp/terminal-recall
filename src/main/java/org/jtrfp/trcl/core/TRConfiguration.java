@@ -40,6 +40,9 @@ public class TRConfiguration{
     	private String voxFile;
     	private boolean audioLinearFiltering=false;
     	private HashSet<String> missionList = new HashSet<String>();
+    	private String activeAudioDriver;
+    	private String activeAudioDevice;
+    	private String activeAudioOutput;
     	//private HashSet<String> podList     = new HashSet<String>();
     	private DefaultListModel<String> podList=new DefaultListModel<String>();
     	private double modStereoWidth=.3;
@@ -258,5 +261,47 @@ public class TRConfiguration{
 	 */
 	public void setFileDialogStartDir(String fileDialogStartDir) {
 	    this.fileDialogStartDir = fileDialogStartDir;
+	}
+
+	/**
+	 * @return the soundDriver
+	 */
+	public String getSoundDriver() {
+	    return activeAudioDriver;
+	}
+
+	/**
+	 * @param soundDriver the soundDriver to set
+	 */
+	public void setActiveSoundDriver(String soundDriver) {
+	    this.activeAudioDriver = soundDriver;
+	}
+
+	/**
+	 * @return the audioOutput
+	 */
+	public String getActiveAudioOutput() {
+	    return activeAudioOutput;
+	}
+
+	/**
+	 * @param audioOutput the audioOutput to set
+	 */
+	public void setActiveAudioOutput(String audioOutput) {
+	    this.activeAudioOutput = audioOutput;
+	}
+
+	/**
+	 * @return the activeAudioDevice
+	 */
+	public String getActiveAudioDevice() {
+	    return activeAudioDevice;
+	}
+
+	/**
+	 * @param activeAudioDevice the activeAudioDevice to set
+	 */
+	public void setActiveAudioDevice(String activeAudioDevice) {
+	    this.activeAudioDevice = activeAudioDevice;
 	}
 }//end TRConfiguration

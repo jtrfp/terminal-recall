@@ -14,6 +14,8 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Component;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -26,8 +28,12 @@ import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
+
+import com.ochafik.util.listenable.DefaultListenableCollection;
+import com.ochafik.util.listenable.ListenableCollection;
 
 public class Camera extends WorldObject implements RelevantEverywhere{
     	//// PROPERTIES
@@ -41,6 +47,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+	private double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
+	private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
+		new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
 
     public Camera(GPU gpu) {
 	super(gpu.getTr());
@@ -206,5 +215,23 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    pcs.firePropertyChange(FOG_ENABLED, this.fogEnabled, fogEnabled);
 	    this.fogEnabled = fogEnabled;
 	    return this;
+	}
+	
+	public ListenableCollection<ListenableCollection<PositionedRenderable>> getRelevantCubeCollection(){
+	    return relevantCubeCollection;
+	}
+
+	/**
+	 * @return the relevanceRadius
+	 */
+	public double getRelevanceRadius() {
+	    return relevanceRadius;
+	}
+
+	/**
+	 * @param relevanceRadius the relevanceRadius to set
+	 */
+	public void setRelevanceRadius(double relevanceRadius) {
+	    this.relevanceRadius = relevanceRadius;
 	}
 }//end Camera

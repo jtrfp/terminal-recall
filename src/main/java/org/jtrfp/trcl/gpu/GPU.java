@@ -22,6 +22,7 @@ import javax.media.opengl.GL3;
 import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.core.GLFutureTask;
+import org.jtrfp.trcl.core.RendererFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
@@ -39,6 +40,7 @@ public class GPU{
 	public final TRFutureTask<MemoryManager> 	memoryManager;
 	public final TRFutureTask<TextureManager> 	textureManager;
 	private GPUVendor				vendor=null;
+	public final TRFutureTask<RendererFactory> 	rendererFactory;
 	
 	public GPU(final TR tr){
 	    this.tr=tr;
@@ -64,6 +66,13 @@ public class GPU{
 		public Integer call() throws Exception {
 		    return glGet(GL3.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
 		}});
+	    rendererFactory = new TRFutureTask<RendererFactory>(tr,new Callable<RendererFactory>(){
+		@Override
+		public RendererFactory call() throws Exception {
+		    return new RendererFactory(GPU.this);
+		}
+		
+	    });tr.getThreadManager().threadPool.submit(rendererFactory);
 	}//end constructor
 	
 	public int glGet(int key){

@@ -140,7 +140,7 @@ public final class TR{
 			@Override
 			public Renderer call() throws Exception {
 			    Thread.currentThread().setName("Renderer constructor.");
-			    return new Renderer(TR.this.gpu.get());
+			    return gpu.get().rendererFactory.get().newRenderer();
 			}//end call()
 		    });threadManager.threadPool.submit(mainRenderer);
 		    matrixWindow=new TRFutureTask<MatrixWindow>(this,new Callable<MatrixWindow>(){

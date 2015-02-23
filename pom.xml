@@ -97,6 +97,11 @@
 			<artifactId>ochafik-util</artifactId>
 			<version>0.11</version>
 		</dependency>
+		<dependency>
+			<groupId>org.freedesktop.tango</groupId>
+			<artifactId>tango-icon-theme</artifactId>
+			<version>0.8.90</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

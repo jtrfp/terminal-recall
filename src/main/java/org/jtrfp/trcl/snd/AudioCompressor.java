@@ -20,11 +20,12 @@ import java.nio.FloatBuffer;
 
 import org.jtrfp.trcl.math.Misc;
 
-public final class AudioCompressor {
+public final class AudioCompressor implements AudioProcessor {
 private FloatBuffer source;
 private double release = .01f;
 private double scalar = 1f;
 
+@Override
 public float get(){
   scalar += release;
   scalar = Misc.clamp(scalar, 0, 1);

@@ -40,9 +40,10 @@ public class TRConfiguration{
     	private String voxFile;
     	private boolean audioLinearFiltering=false;
     	private HashSet<String> missionList = new HashSet<String>();
-    	private String activeAudioDriver;
-    	private String activeAudioDevice;
-    	private String activeAudioOutput;
+    	private String activeAudioDriver,
+    	               activeAudioDevice,
+    	               activeAudioOutput,
+    	               activeAudioFormat;
     	//private HashSet<String> podList     = new HashSet<String>();
     	private DefaultListModel<String> podList=new DefaultListModel<String>();
     	private double modStereoWidth=.3;
@@ -303,5 +304,19 @@ public class TRConfiguration{
 	 */
 	public void setActiveAudioDevice(String activeAudioDevice) {
 	    this.activeAudioDevice = activeAudioDevice;
+	}
+
+	/**
+	 * @return the activeAudioFormat
+	 */
+	public String getActiveAudioFormat() {
+	    return activeAudioFormat;
+	}
+
+	/**
+	 * @param activeAudioFormat the activeAudioFormat to set
+	 */
+	public void setActiveAudioFormat(String activeAudioFormat) {
+	    this.activeAudioFormat = activeAudioFormat;
 	}
 }//end TRConfiguration

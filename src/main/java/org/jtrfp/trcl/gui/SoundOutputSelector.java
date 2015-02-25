@@ -16,8 +16,11 @@ package org.jtrfp.trcl.gui;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collection;
 import java.util.HashSet;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFormat.Encoding;
 import javax.swing.JPanel;
 
 import org.jtrfp.trcl.core.TRConfiguration;
@@ -37,7 +40,8 @@ public class SoundOutputSelector extends JPanel{
     //// BEAN PROPERTIES
     public static final String  ACTIVE_DRIVER=	"activeDriver",
 	    			ACTIVE_DEVICE=	"activeDevice",
-	    			ACTIVE_OUTPUT=	"activeOutput";
+	    			ACTIVE_OUTPUT=	"activeOutput",
+	    			ACTIVE_FORMAT=  "activeFormat";
     //// STATIC
     public static ListenableCollection<AudioDriver> outputDrivers 
     	= new DefaultListenableCollection<AudioDriver>(new HashSet<AudioDriver>());
@@ -45,11 +49,14 @@ public class SoundOutputSelector extends JPanel{
     private AudioDriver         activeDriver;
     private AudioDevice		activeDevice;
     private AudioOutput		activeOutput;
+    private AudioFormat		activeFormat;
     
     public final ListenableCollection<AudioDevice> deviceList 
     	= new DefaultListenableCollection<AudioDevice>(new HashSet<AudioDevice>());
     public final ListenableCollection<AudioOutput> outputList 
 	= new DefaultListenableCollection<AudioOutput>(new HashSet<AudioOutput>());
+    public final ListenableCollection<AudioFormat> formatList 
+	= new DefaultListenableCollection<AudioFormat>(new HashSet<AudioFormat>());
     
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     
@@ -67,15 +74,24 @@ public class SoundOutputSelector extends JPanel{
 		outputList.clear();
 		outputList.addAll(((AudioDevice)evt.getNewValue()).getOutputs());
 	    }});
+	this.addPropertyChangeListener(ACTIVE_OUTPUT, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		formatList.clear();
+		for(AudioFormat f:((AudioOutput)evt.getNewValue()).getFormats())
+		    if(isAcceptableFormat(f))
+			formatList.add(f);
+	    }});
     }//end constructor
     
-    public void applyToTRConfig(TRConfiguration config){
+    public void applySettings(TRConfiguration config){
 	config.setActiveSoundDriver(activeDriver.getClass().getName());
-	config.setActiveAudioOutput(activeDevice.getUniqueName());
+	config.setActiveAudioDevice(activeDevice.getUniqueName());
 	config.setActiveAudioOutput(activeOutput.getUniqueName());
+	config.setActiveAudioFormat(activeFormat.toString());
     }
     
-    public void loadFromTRConfig(TRConfiguration config){
+    public void readToPanel(TRConfiguration config){
 	String driverClassName = config.getSoundDriver();
 	if(driverClassName==null) driverClassName = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput";
 	Class driverClass;
@@ -87,20 +103,34 @@ public class SoundOutputSelector extends JPanel{
 	try{setActiveDriver((AudioDriver)driverClass.newInstance());}
 	catch(Exception e){e.printStackTrace();return;}
 	final AudioDriver activeDriver = getActiveDriver();
+	
 	String deviceName = config.getActiveAudioDevice();
-	AudioDevice activeDevice = activeDriver.getDeviceByName(deviceName);
-	if(activeDevice!=null) setActiveDevice(activeDevice);
-	String outputName = config.getActiveAudioOutput();
-	AudioOutput ao = activeDevice.getOutputByName(outputName);
-	if(ao!=null) activeDriver.setOutput(ao);
-	else activeDriver.setOutput(activeDriver.getDefaultOutput());
-    }
+	AudioDevice activeDevice=null;
+	if(deviceName!=null)
+	 activeDevice = activeDriver.getDeviceByName(deviceName);
+	if(activeDevice!=null){
+	 setActiveDevice(activeDevice);
+	 System.out.println("activeDevice="+activeDevice);
+	 String outputName = config.getActiveAudioOutput();
+	 AudioOutput ao = activeDevice.getOutputByName(outputName);
+	 System.out.println("activeOutput="+ao);
+	 if(ao!=null) activeDriver.setOutput(ao);
+	 else activeDriver.setOutput(ao = activeDriver.getDefaultOutput());
+	 
+	 String formatName = config.getActiveAudioFormat();
+	 AudioFormat fmt=null;
+	 if(formatName!=null)
+	     fmt = ao.getFormatFromUniqueName(formatName);
+	 if(fmt!=null)
+	     activeDriver.setFormat(fmt);
+	 else activeDriver.setFormat(ao.getFormats()[0]);
+	 }//end if(activeDevice!=null)
+    }//end loadFromTRConfig
 
     /**
      * @return the activeDriver
      */
     public AudioDriver getActiveDriver() {
-	pcs.firePropertyChange(ACTIVE_DRIVER, this.activeDriver, activeDriver);
         return activeDriver;
     }
 
@@ -194,6 +224,27 @@ public class SoundOutputSelector extends JPanel{
     public void setActiveOutput(AudioOutput activeOutput) {
 	pcs.firePropertyChange(ACTIVE_OUTPUT, this.activeOutput, activeOutput);
         this.activeOutput = activeOutput;
+    }
+    
+    private boolean isAcceptableFormat(AudioFormat f){
+	return  f.getChannels()==2 &&
+		f.getEncoding()==Encoding.PCM_SIGNED &&
+		f.getSampleSizeInBits() % 8 == 0;
+    }
+
+    /**
+     * @return the activeFormat
+     */
+    public AudioFormat getActiveFormat() {
+        return activeFormat;
+    }
+
+    /**
+     * @param activeFormat the activeFormat to set
+     */
+    public void setActiveFormat(AudioFormat activeFormat) {
+	pcs.firePropertyChange(ACTIVE_FORMAT, this.activeFormat, activeFormat);
+        this.activeFormat = activeFormat;
     }
     
 }//end soundOutputSelector

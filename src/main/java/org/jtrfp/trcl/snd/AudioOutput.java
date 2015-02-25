@@ -13,6 +13,10 @@
 
 package org.jtrfp.trcl.snd;
 
+import javax.sound.sampled.AudioFormat;
+
 public interface AudioOutput {
     public String getUniqueName();
+    public AudioFormat []getFormats();
+    public AudioFormat getFormatFromUniqueName(String name);
 }

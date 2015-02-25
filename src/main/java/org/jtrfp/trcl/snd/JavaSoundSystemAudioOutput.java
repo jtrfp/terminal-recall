@@ -28,13 +28,13 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jtrfp.trcl.gui.SoundOutputSelector;
 
 public class JavaSoundSystemAudioOutput implements AudioDriver {
     private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
     
-    static{
-	SoundOutputSelector.outputDrivers.add(new JavaSoundSystemAudioOutput());
+    static{SoundOutputSelector.outputDrivers.add(new JavaSoundSystemAudioOutput());
     }
     
     private AudioProcessor source;
@@ -135,7 +135,8 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
      */
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
-        this.buffer.order((getFormat().isBigEndian()?ByteOrder.BIG_ENDIAN:ByteOrder.LITTLE_ENDIAN));
+        if(buffer!=null)
+         this.buffer.order((getFormat().isBigEndian()?ByteOrder.BIG_ENDIAN:ByteOrder.LITTLE_ENDIAN));
     }
 
     /**
@@ -170,12 +171,27 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     }//end getOutputs()
     
     private class JavaSoundOutput implements AudioOutput{
-	final Line.Info info;
-	public JavaSoundOutput(Line.Info info){
+	final SourceDataLine.Info info;
+	public JavaSoundOutput(SourceDataLine.Info info){
 	    this.info=info;}
 	@Override
 	public String getUniqueName() {
 	    return info.toString();
+	}
+	@Override
+	public String toString(){
+	    return getUniqueName();
+	}
+	@Override
+	public AudioFormat[] getFormats() {
+	    return info.getFormats();
+	}
+	@Override
+	public AudioFormat getFormatFromUniqueName(String name) {
+	    for (AudioFormat fmt : getFormats())
+		if (fmt.toString().contentEquals(name))
+		    return fmt;
+	    return null;
 	}
     }//end JavaSoundOutput
     
@@ -189,8 +205,15 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    final Line.Info [] lines = AudioSystem.getMixer(info).getSourceLineInfo();
 	    final Collection<AudioOutput> result = new ArrayList<AudioOutput>();
 	    for(Line.Info info:lines)
-		result.add(new JavaSoundOutput(info));
+		if(info instanceof SourceDataLine.Info){
+		    final SourceDataLine.Info sdlInfo = (SourceDataLine.Info)info;
+		    result.add(new JavaSoundOutput(sdlInfo));
+		}
 	    return result;
+	}
+	@Override
+	public String toString(){
+	    return getUniqueName();
 	}
 	@Override
 	public String getUniqueName() {

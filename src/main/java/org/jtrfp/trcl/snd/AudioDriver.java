@@ -19,7 +19,7 @@ import javax.sound.sampled.AudioFormat;
 
 public interface AudioDriver {
     public void setFormat(AudioFormat format);
-    public void setSource(AudioProcessor compressor);
+    public void setSource(AudioProcessor processor);
     public void flush();
     public Collection<AudioDevice> getDevices();
     public AudioDevice getDeviceByName(String outputName);

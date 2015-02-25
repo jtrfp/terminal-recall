@@ -15,12 +15,16 @@ package org.jtrfp.trcl.gui;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
+import javax.sound.sampled.AudioFormat;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.SwingConstants;
 
 import org.jtrfp.trcl.snd.AudioDevice;
 import org.jtrfp.trcl.snd.AudioDriver;
@@ -50,7 +54,12 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
     	JComboBox<AudioOutput> audioOutputCB = new JComboBox<AudioOutput>(audioOutputCBM);
     	add(audioOutputCB);
     	
+    	final DefaultComboBoxModel<AudioFormat> audioFormatCBM = new DefaultComboBoxModel<AudioFormat>();
+    	JComboBox<AudioFormat> audioFormatCB = new JComboBox<AudioFormat>(audioFormatCBM);
+    	add(audioFormatCB);
+    	
     	JButton testButton = new JButton("Test");
+    	testButton.setHorizontalAlignment(SwingConstants.LEFT);
     	testButton.setIcon(new ImageIcon(SoundOutputSelectorGUI.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png")));
     	add(testButton);
     	
@@ -92,6 +101,26 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 	    public void itemStateChanged(ItemEvent ie) {
 		if(ie.getStateChange()==ItemEvent.SELECTED)
 		    SoundOutputSelectorGUI.this.setActiveDevice((AudioDevice)ie.getItem());
+	    }});
+	
+	final AudioFormat outputSelection = (AudioFormat)audioOutputCB.getSelectedItem();
+    	if(outputSelection != null)
+    	    setActiveOutput((AudioOutput)outputSelection);
+	audioOutputCB.addItemListener(new ItemListener(){
+	    @Override
+	    public void itemStateChanged(ItemEvent ie) {
+		if(ie.getStateChange()==ItemEvent.SELECTED)
+		    SoundOutputSelectorGUI.this.setActiveOutput((AudioOutput)ie.getItem());
+	    }});
+	
+	final AudioFormat formatSelection = (AudioFormat)audioFormatCB.getSelectedItem();
+    	if(formatSelection != null)
+    	    setActiveFormat((AudioFormat)formatSelection);
+	audioFormatCB.addItemListener(new ItemListener(){
+	    @Override
+	    public void itemStateChanged(ItemEvent ie) {
+		if(ie.getStateChange()==ItemEvent.SELECTED)
+		    SoundOutputSelectorGUI.this.setActiveFormat((AudioFormat)ie.getItem());
 	    }});
 	
 	// Init
@@ -141,6 +170,51 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 		    break;
 		}
 	    }});
-    }//end SoundInputSelectorGUI()
+	
+	// Init
+	for (AudioFormat o : formatList)
+	    audioFormatCBM.addElement(o);
 
+	formatList.addCollectionListener(new CollectionListener<AudioFormat>() {
+	    @Override
+	    public void collectionChanged(CollectionEvent<AudioFormat> evt) {
+		switch (evt.getType()) {
+		case ADDED:
+		    for (AudioFormat o : evt.getElements())
+			audioFormatCBM.addElement(o);
+		    break;
+		case REMOVED:
+		    for (AudioFormat o : evt.getElements())
+			audioFormatCBM.removeElement(o);
+		    break;
+		case UPDATED:
+		    break;// ???
+		default:
+		    break;
+		}
+	    }
+	});//end addCollectionListener<AudioFormat>
+	
+	////ACTIVE SELECTION UPDATES
+	this.addPropertyChangeListener(ACTIVE_DRIVER, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		driverSelectCBM.setSelectedItem(evt.getNewValue());
+	    }});
+	this.addPropertyChangeListener(ACTIVE_DEVICE, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		deviceSelectCBM.setSelectedItem(evt.getNewValue());
+	    }});
+	this.addPropertyChangeListener(ACTIVE_OUTPUT, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		audioOutputCBM.setSelectedItem(evt.getNewValue());
+	    }});
+	this.addPropertyChangeListener(ACTIVE_FORMAT, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		audioFormatCBM.setSelectedItem(evt.getNewValue());
+	    }});
+    }//end SoundInputSelectorGUI()
 }//end SoundOutputSelector

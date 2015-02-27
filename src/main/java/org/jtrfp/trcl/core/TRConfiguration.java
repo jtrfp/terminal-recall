@@ -15,6 +15,8 @@ package org.jtrfp.trcl.core;
 import java.beans.DefaultPersistenceDelegate;
 import java.beans.Encoder;
 import java.beans.ExceptionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.beans.Statement;
 import java.beans.Transient;
 import java.beans.XMLDecoder;
@@ -31,6 +33,12 @@ import javax.swing.DefaultListModel;
 import org.jtrfp.trcl.flow.GameVersion;
 
 public class TRConfiguration{
+    	public static final String
+    		ACTIVE_AUDIO_DRIVER = "activeAudioDriver",
+    		ACTIVE_AUDIO_DEVICE = "activeAudioDevice",
+    		ACTIVE_AUDIO_OUTPUT = "activeAudioOutput",
+    		ACTIVE_AUDIO_FORMAT = "activeAudioFormat";
+    	
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
     			debugMode,
@@ -40,7 +48,7 @@ public class TRConfiguration{
     	private String voxFile;
     	private boolean audioLinearFiltering=false;
     	private HashSet<String> missionList = new HashSet<String>();
-    	private String activeAudioDriver,
+    	private String activeAudioDriver = "org.jtrfp.trcl.JavaSoundSystemAudioOutput",
     	               activeAudioDevice,
     	               activeAudioOutput,
     	               activeAudioFormat;
@@ -49,6 +57,8 @@ public class TRConfiguration{
     	private double modStereoWidth=.3;
     	public static final String AUTO_DETECT = "Auto-detect";
     	private String fileDialogStartDir;
+    	
+    	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     	
 	public TRConfiguration(){//DEFAULTS
 	    missionList.add(AUTO_DETECT);
@@ -267,7 +277,7 @@ public class TRConfiguration{
 	/**
 	 * @return the soundDriver
 	 */
-	public String getSoundDriver() {
+	public String getActiveAudioDriver() {
 	    return activeAudioDriver;
 	}
 
@@ -275,6 +285,7 @@ public class TRConfiguration{
 	 * @param soundDriver the soundDriver to set
 	 */
 	public void setActiveSoundDriver(String soundDriver) {
+	    pcs.firePropertyChange(ACTIVE_AUDIO_DRIVER,this.activeAudioDriver,activeAudioDriver);
 	    this.activeAudioDriver = soundDriver;
 	}
 
@@ -289,6 +300,7 @@ public class TRConfiguration{
 	 * @param audioOutput the audioOutput to set
 	 */
 	public void setActiveAudioOutput(String audioOutput) {
+	    pcs.firePropertyChange(ACTIVE_AUDIO_OUTPUT,this.activeAudioOutput,activeAudioOutput);
 	    this.activeAudioOutput = audioOutput;
 	}
 
@@ -303,6 +315,7 @@ public class TRConfiguration{
 	 * @param activeAudioDevice the activeAudioDevice to set
 	 */
 	public void setActiveAudioDevice(String activeAudioDevice) {
+	    pcs.firePropertyChange(ACTIVE_AUDIO_DEVICE,this.activeAudioDevice,activeAudioDevice);
 	    this.activeAudioDevice = activeAudioDevice;
 	}
 
@@ -317,6 +330,70 @@ public class TRConfiguration{
 	 * @param activeAudioFormat the activeAudioFormat to set
 	 */
 	public void setActiveAudioFormat(String activeAudioFormat) {
+	    pcs.firePropertyChange(ACTIVE_AUDIO_FORMAT,this.activeAudioFormat,activeAudioFormat);
 	    this.activeAudioFormat = activeAudioFormat;
+	}
+
+	/**
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
+	 */
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(listener);
+	}
+
+	/**
+	 * @param propertyName
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+	 */
+	public void addPropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(propertyName, listener);
+	}
+
+	/**
+	 * @return
+	 * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners()
+	 */
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+	    return pcs.getPropertyChangeListeners();
+	}
+
+	/**
+	 * @param propertyName
+	 * @return
+	 * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners(java.lang.String)
+	 */
+	public PropertyChangeListener[] getPropertyChangeListeners(
+		String propertyName) {
+	    return pcs.getPropertyChangeListeners(propertyName);
+	}
+
+	/**
+	 * @param propertyName
+	 * @return
+	 * @see java.beans.PropertyChangeSupport#hasListeners(java.lang.String)
+	 */
+	public boolean hasListeners(String propertyName) {
+	    return pcs.hasListeners(propertyName);
+	}
+
+	/**
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.beans.PropertyChangeListener)
+	 */
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(listener);
+	}
+
+	/**
+	 * @param propertyName
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+	 */
+	public void removePropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(propertyName, listener);
 	}
 }//end TRConfiguration

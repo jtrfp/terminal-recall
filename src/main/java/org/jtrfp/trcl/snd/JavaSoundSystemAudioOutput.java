@@ -28,7 +28,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.jtrfp.trcl.gui.SoundOutputSelector;
 
 public class JavaSoundSystemAudioOutput implements AudioDriver {
@@ -51,46 +50,83 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     private int            bufferSizeFrames = 4096 * 2;
     private SourceDataLine sourceDataLine;
     private DataLine.Info  lineInfo;
+    private AudioOutput    output;
     private Collection<AudioDevice>outputs;
     
     @Override
-    public void setFormat(AudioFormat format) {
+    public synchronized void setFormat(AudioFormat format) {
+	if(this.format!=format)
+	    ensureSourceDataLineIsReleased();
 	this.format=format;
 	//Reset dependencies
 	setBuffer(null);
-	setLineInfo(null);
-	setSourceDataLine(null);
+	//setLineInfo(null);
     }
 
     @Override
-    public void setSource(AudioProcessor source) {
+    public synchronized void setSource(AudioProcessor source) {
 	this.source=source;
     }
 
     @Override
-    public void flush() {
+    public synchronized void flush() {
 	if(format==null||source==null)
 	    return;
 	ByteBuffer scratch = getBuffer();
-	ShortBuffer shortScratch = scratch.asShortBuffer();
-	shortScratch.clear();
-	for (int i = 0; i < getBufferSizeFrames() * format.getChannels(); i++) 
-	    scratch.putShort((short) (source.get() * (double) Short.MAX_VALUE));
+	
+	final Putter putter;
+	if(format.getSampleSizeInBits()==8)
+	    putter=new BytePutter();
+	else if(format.getSampleSizeInBits()==16)
+	    putter=new ShortPutter();
+	else return;
+	
+	ShortBuffer shortScratch = scratch.asShortBuffer();//TODO: Remove this?
+	shortScratch.clear();//TODO: Remove this?
+	for (int i = 0; i < getBufferSizeFrames() * format.getChannels(); i++) //TODO: Optimize
+	    putter.put(scratch,source.get());
+	//scratch.order(format.isBigEndian()?ByteOrder.BIG_ENDIAN:ByteOrder.LITTLE_ENDIAN);
+	System.out.println();
 	scratch.clear();
-	try{getSourceDataLine().write(scratch.array(), 0, scratch.remaining());}
+	try{
+	    final SourceDataLine sourceDataLine = getSourceDataLine();
+	    final AudioFormat fmt = sourceDataLine.getFormat();
+	    //System.out.println(""+getLineInfo());
+	    sourceDataLine.write(scratch.array(), 0, scratch.remaining());}
 	catch(LineUnavailableException e){throw new RuntimeException(e);}//TODO: Manage this better.
     }//end flush()
     
     private ByteBuffer getBuffer(){
-	if(buffer==null)
-	    setBuffer(ByteBuffer.allocate(getBufferSizeFrames()*format.getChannels()*(format.getSampleSizeInBits()/8)));
+	if(buffer==null){
+	    final ByteBuffer bb = ByteBuffer.allocate(getBufferSizeFrames()*format.getChannels()*(format.getSampleSizeInBits()/8));
+	    bb.order(format.isBigEndian()?ByteOrder.BIG_ENDIAN:ByteOrder.LITTLE_ENDIAN);
+	    setBuffer(bb);
+	}//end if(buffer)
 	return buffer;
+    }//end getBuffer()
+    
+    private interface Putter{
+	public void put(ByteBuffer bb, float source);
     }
+    
+    private final class BytePutter implements Putter{
+	@Override
+	public synchronized void put(ByteBuffer bb, float source) {
+	    bb.put((byte)(source * (float) Byte.MAX_VALUE));
+	}
+    }//end BytePutter
+    
+    private final class ShortPutter implements Putter{
+	@Override
+	public synchronized void put(ByteBuffer bb, float source) {
+	    bb.putShort((short) (source * (float) Short.MAX_VALUE));
+	}
+    }//end ShortPutter
 
     /**
      * @return the sourceDataLine
      */
-    public SourceDataLine getSourceDataLine() throws LineUnavailableException{
+    public synchronized SourceDataLine getSourceDataLine() throws LineUnavailableException{
 	if(sourceDataLine==null){
 	        setSourceDataLine((SourceDataLine) AudioSystem.getLine(getLineInfo()));
 	        sourceDataLine.open();
@@ -102,38 +138,39 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     /**
      * @return the lineInfo
      */
-    public DataLine.Info getLineInfo() {
+    public synchronized DataLine.Info getLineInfo() {
         if(lineInfo==null)
-            lineInfo = 
-     	       new DataLine.Info(SourceDataLine.class, getFormat());
+            /*lineInfo = 
+     	       new DataLine.Info(SourceDataLine.class, getFormat());*/
+            throw new RuntimeException();//TODO: Remove
         return lineInfo;
     }//end getLineInfo
 
     /**
      * @return the bufferSizeFrames
      */
-    public int getBufferSizeFrames() {
+    public synchronized int getBufferSizeFrames() {
         return bufferSizeFrames;
     }
 
     /**
      * @param bufferSizeFrames the bufferSizeFrames to set
      */
-    public void setBufferSizeFrames(int bufferSizeFrames) {
+    public synchronized void setBufferSizeFrames(int bufferSizeFrames) {
         this.bufferSizeFrames = bufferSizeFrames;
     }
 
     /**
      * @return the format
      */
-    public AudioFormat getFormat() {
+    public synchronized AudioFormat getFormat() {
         return format;
     }
 
     /**
      * @param buffer the buffer to set
      */
-    public void setBuffer(ByteBuffer buffer) {
+    private void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
         if(buffer!=null)
          this.buffer.order((getFormat().isBigEndian()?ByteOrder.BIG_ENDIAN:ByteOrder.LITTLE_ENDIAN));
@@ -142,26 +179,28 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     /**
      * @param sourceDataLine the sourceDataLine to set
      */
-    public void setSourceDataLine(SourceDataLine sourceDataLine) {
-	if(this.sourceDataLine!=null)
-	    this.sourceDataLine.close();
+    public synchronized void setSourceDataLine(SourceDataLine sourceDataLine) {
+	ensureSourceDataLineIsReleased();
         this.sourceDataLine = sourceDataLine;
     }
 
     /**
      * @param lineInfo the lineInfo to set
      */
-    public void setLineInfo(DataLine.Info lineInfo) {
+    public synchronized void setLineInfo(DataLine.Info lineInfo) {
+	if(this.lineInfo!=lineInfo)
+	    ensureSourceDataLineIsReleased();
+	setBuffer(null);
         this.lineInfo = lineInfo;
     }
     
     @Override
-    public String toString(){
+    public synchronized String toString(){
 	return "JavaSound Driver";
     }
 
     @Override
-    public Collection<AudioDevice> getDevices() {
+    public synchronized Collection<AudioDevice> getDevices() {
 	if(outputs==null){
 	    outputs = new ArrayList<AudioDevice>();
 	    for(Mixer.Info i:AudioSystem.getMixerInfo())
@@ -175,22 +214,23 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	public JavaSoundOutput(SourceDataLine.Info info){
 	    this.info=info;}
 	@Override
-	public String getUniqueName() {
+	public synchronized String getUniqueName() {
 	    return info.toString();
 	}
 	@Override
-	public String toString(){
+	public synchronized String toString(){
 	    return getUniqueName();
 	}
 	@Override
-	public AudioFormat[] getFormats() {
+	public synchronized AudioFormat[] getFormats() {
 	    return info.getFormats();
 	}
 	@Override
-	public AudioFormat getFormatFromUniqueName(String name) {
+	public synchronized AudioFormat getFormatFromUniqueName(String name) {
 	    for (AudioFormat fmt : getFormats())
 		if (fmt.toString().contentEquals(name))
 		    return fmt;
+	    System.err.println("Failed to find matching format for "+name);
 	    return null;
 	}
     }//end JavaSoundOutput
@@ -201,7 +241,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    this.info=info;
 	}
 	@Override
-	public Collection<? extends AudioOutput> getOutputs() {
+	public synchronized Collection<? extends AudioOutput> getOutputs() {
 	    final Line.Info [] lines = AudioSystem.getMixer(info).getSourceLineInfo();
 	    final Collection<AudioOutput> result = new ArrayList<AudioOutput>();
 	    for(Line.Info info:lines)
@@ -212,43 +252,67 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    return result;
 	}
 	@Override
-	public String toString(){
+	public synchronized String toString(){
 	    return getUniqueName();
 	}
 	@Override
-	public String getUniqueName() {
+	public synchronized String getUniqueName() {
 	    return info.toString();
 	}
 	@Override
-	public AudioOutput getOutputByName(String uniqueName) {
+	public synchronized AudioOutput getOutputByName(String uniqueName) {
 	    for(AudioOutput ao:getOutputs())
 		if(ao.getUniqueName().contentEquals(uniqueName))
 		    return ao;
+	    System.err.println("Failed to find matching output for "+uniqueName);
 	    return null;
 	}
     }//end JavaSoundDevice
 
     @Override
-    public AudioDevice getDeviceByName(String outputName) {
+    public synchronized AudioDevice getDeviceByName(String name) {
 	for(AudioDevice dev:getDevices())
-	    if(dev.getUniqueName().contentEquals(outputName))
+	    if(dev.getUniqueName().contentEquals(name))
 		return dev;
+	System.err.println("Failed to find matching device for "+name);
 	return null;
     }
 
     @Override
-    public void setOutput(AudioOutput o) {
+    public synchronized void setOutput(AudioOutput o) {
+	if(this.output!=o)
+	    ensureSourceDataLineIsReleased();
+	this.output = o;
+	
 	if(o instanceof JavaSoundOutput){
-	    try{setSourceDataLine((SourceDataLine) AudioSystem.getLine(((JavaSoundOutput) o).info));}
-	    catch(Exception e){e.printStackTrace();}
+	    JavaSoundOutput jso = (JavaSoundOutput)o;
+	    setLineInfo(jso.info);
 	}else throw new RuntimeException("Unsupported AudioOutput type: "+o.getClass().getName()+" expecting JavaSoundOutput created by this driver.");
 	
 	//setLineInfo(info);
     }
 
     @Override
-    public AudioOutput getDefaultOutput() {
+    public synchronized AudioOutput getDefaultOutput() {
 	throw new RuntimeException("Not implemented");//TODO
+    }
+    
+    private void ensureSourceDataLineIsReleased(){
+	if(sourceDataLine!=null)
+	    if(sourceDataLine.isOpen())
+		sourceDataLine.close();
+	sourceDataLine=null;
+    }//end ensureSourceDataLineIsReleased()
+
+    @Override
+    public synchronized void release() {
+	ensureSourceDataLineIsReleased();
+    }
+    
+    @Override
+    public synchronized void finalize() throws Throwable{
+	release();
+	super.finalize();
     }
 
 }//end JavaSoundSystemAudioOutput

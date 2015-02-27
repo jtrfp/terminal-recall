@@ -16,7 +16,6 @@ package org.jtrfp.trcl.gui;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Collection;
 import java.util.HashSet;
 
 import javax.sound.sampled.AudioFormat;
@@ -92,9 +91,9 @@ public class SoundOutputSelector extends JPanel{
     }
     
     public void readToPanel(TRConfiguration config){
-	String driverClassName = config.getSoundDriver();
+	String driverClassName = config.getActiveAudioDriver();
 	if(driverClassName==null) driverClassName = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput";
-	Class driverClass;
+	Class<?> driverClass;
 	try{driverClass = Class.forName(driverClassName);}
 	catch(ClassNotFoundException e){
 	    driverClass = org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput.class;}

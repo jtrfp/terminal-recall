@@ -25,4 +25,5 @@ public interface AudioDriver {
     public AudioDevice getDeviceByName(String outputName);
     public void setOutput(AudioOutput o);
     public AudioOutput getDefaultOutput();
+    public void release();
 }

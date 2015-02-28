@@ -26,4 +26,5 @@ public interface AudioDriver {
     public void setOutput(AudioOutput o);
     public AudioOutput getDefaultOutput();
     public void release();
+    public void setBufferSizeFrames(int numFrames);
 }

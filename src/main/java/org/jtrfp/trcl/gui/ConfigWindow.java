@@ -57,6 +57,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
+import javax.swing.ImageIcon;
 
 public class ConfigWindow extends JFrame {
     private TRConfiguration config;
@@ -86,7 +87,7 @@ public class ConfigWindow extends JFrame {
  	getContentPane().add(tabbedPane, BorderLayout.CENTER);
  	
  	JPanel generalTab = new JPanel();
- 	tabbedPane.addTab("General", null, generalTab, null);
+ 	tabbedPane.addTab("General", new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/22x22/mimetypes/application-x-executable.png")), generalTab, null);
  	GridBagLayout gbl_generalTab = new GridBagLayout();
  	gbl_generalTab.columnWidths = new int[]{0, 0};
  	gbl_generalTab.rowHeights = new int[]{0, 188, 222, 0};
@@ -174,6 +175,7 @@ public class ConfigWindow extends JFrame {
  	flowLayout.setAlignment(FlowLayout.LEFT);
  	
  	JButton addPodButton = new JButton("Add...");
+ 	addPodButton.setIcon(new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/16x16/actions/list-add.png")));
  	addPodButton.setToolTipText("Add a POD to the registry to be considered when running a game.");
  	podListOpButtonPanel.add(addPodButton);
  	addPodButton.addActionListener(new ActionListener(){
@@ -183,6 +185,7 @@ public class ConfigWindow extends JFrame {
 	    }});
  	
  	JButton removePodButton = new JButton("Remove");
+ 	removePodButton.setIcon(new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/16x16/actions/list-remove.png")));
  	removePodButton.setToolTipText("Remove a POD file from being considered when playing a game");
  	podListOpButtonPanel.add(removePodButton);
  	removePodButton.addActionListener(new ActionListener(){
@@ -193,6 +196,7 @@ public class ConfigWindow extends JFrame {
  	
  	
  	JButton podEditButton = new JButton("Edit...");
+ 	podEditButton.setIcon(null);
  	podEditButton.setToolTipText("Edit the selected POD path");
  	podListOpButtonPanel.add(podEditButton);
  	podEditButton.addActionListener(new ActionListener(){
@@ -235,6 +239,7 @@ public class ConfigWindow extends JFrame {
  	missionPanel.add(missionListOpButtonPanel, gbc_missionListOpButtonPanel);
  	
  	JButton addVOXButton = new JButton("Add...");
+ 	addVOXButton.setIcon(new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/16x16/actions/list-add.png")));
  	addVOXButton.setToolTipText("Add an external VOX file as a mission");
  	missionListOpButtonPanel.add(addVOXButton);
  	addVOXButton.addActionListener(new ActionListener(){
@@ -244,6 +249,7 @@ public class ConfigWindow extends JFrame {
 	    }});
  	
  	final JButton removeVOXButton = new JButton("Remove");
+ 	removeVOXButton.setIcon(new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/16x16/actions/list-remove.png")));
  	removeVOXButton.setToolTipText("Remove the selected mission");
  	missionListOpButtonPanel.add(removeVOXButton);
  	removeVOXButton.addActionListener(new ActionListener(){
@@ -275,7 +281,7 @@ public class ConfigWindow extends JFrame {
 	    }});
  	
  	JPanel soundTab = new JPanel();
- 	tabbedPane.addTab("Sound", null, soundTab, null);
+ 	tabbedPane.addTab("Sound", new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png")), soundTab, null);
  	GridBagLayout gbl_soundTab = new GridBagLayout();
  	gbl_soundTab.columnWidths = new int[]{0, 0};
  	gbl_soundTab.rowHeights = new int[]{65, 51, 132, 0, 0, 0};

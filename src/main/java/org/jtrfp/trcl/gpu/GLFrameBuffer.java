@@ -34,7 +34,7 @@ public final class GLFrameBuffer {
     private final ArrayList<GLTexture> attached2DDrawTextures = new ArrayList<GLTexture>();
 
     GLFrameBuffer(GL3 gl) {
-	this.gl=gl;
+	setGl(gl);
 	IntBuffer result = IntBuffer.wrap(new int[1]);
 	gl.glGenFramebuffers(1, result);
 	id = result.get(0);
@@ -50,6 +50,8 @@ public final class GLFrameBuffer {
     }
     
     public GLFrameBuffer setGl(GL3 gl){
+	if(gl==null)
+	    throw new NullPointerException("Passed GL is intolerably null.");
 	this.gl=gl;
 	return this;
     }
@@ -63,6 +65,8 @@ public final class GLFrameBuffer {
     
     public GLFrameBuffer attachDrawTexture(GLTexture texture,
 	    int attachmentIndex) {
+	if(texture==null)
+	    throw new NullPointerException("Passed texture is intolerably null.");
 	gl.glFramebufferTexture(GL3.GL_FRAMEBUFFER, attachmentIndex, texture.getTextureID(), 0);
 	attached2DDrawTextures.add(texture);
 	return this;

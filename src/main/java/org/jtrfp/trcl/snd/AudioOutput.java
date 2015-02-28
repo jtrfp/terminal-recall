@@ -19,4 +19,5 @@ public interface AudioOutput {
     public String getUniqueName();
     public AudioFormat []getFormats();
     public AudioFormat getFormatFromUniqueName(String name);
+    public AudioDevice getDevice();
 }

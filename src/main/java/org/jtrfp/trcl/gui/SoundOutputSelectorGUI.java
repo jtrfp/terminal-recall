@@ -51,17 +51,17 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
     	add(deviceSelectCB);
     	
     	final DefaultComboBoxModel<AudioOutput> audioOutputCBM = new DefaultComboBoxModel<AudioOutput>();
-    	JComboBox<AudioOutput> audioOutputCB = new JComboBox<AudioOutput>(audioOutputCBM);
+    	final JComboBox<AudioOutput> audioOutputCB = new JComboBox<AudioOutput>(audioOutputCBM);
     	add(audioOutputCB);
     	
     	final DefaultComboBoxModel<AudioFormat> audioFormatCBM = new DefaultComboBoxModel<AudioFormat>();
-    	JComboBox<AudioFormat> audioFormatCB = new JComboBox<AudioFormat>(audioFormatCBM);
+    	final JComboBox<AudioFormat> audioFormatCB = new JComboBox<AudioFormat>(audioFormatCBM);
     	add(audioFormatCB);
     	
     	JButton testButton = new JButton("Test");
     	testButton.setHorizontalAlignment(SwingConstants.LEFT);
     	testButton.setIcon(new ImageIcon(SoundOutputSelectorGUI.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png")));
-    	add(testButton);
+    	//add(testButton);//TODO: Implement
     	
     	for(AudioDriver ao:SoundOutputSelector.outputDrivers)
     	    ((DefaultComboBoxModel<AudioDriver>)(driverSelectCB.getModel())).addElement(ao);
@@ -134,12 +134,17 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 		switch(evt.getType()){
 		case ADDED:
 		    for(AudioDevice o:evt.getElements())
-			if(o.getOutputs().size()>0)// Empty devices are useless here.
+			if(o.getOutputs().size()>0){// Empty devices are useless here.
 			    deviceSelectCBM.addElement(o);
+			    deviceSelectCB.setSelectedIndex(0);
+			    }
 		    break;
 		case REMOVED:
-		    for(AudioDevice o:evt.getElements())
+		    for(AudioDevice o:evt.getElements()){
 			deviceSelectCBM.removeElement(o);
+			if(deviceSelectCBM.getSize()>0)
+			    deviceSelectCB.setSelectedIndex(0);
+		    }
 		    break;
 		case UPDATED:
 		    break;//???
@@ -157,12 +162,17 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 	    public void collectionChanged(CollectionEvent<AudioOutput> evt) {
 		switch(evt.getType()){
 		case ADDED:
-		    for(AudioOutput o:evt.getElements())
+		    for(AudioOutput o:evt.getElements()){
 			audioOutputCBM.addElement(o);
+			audioOutputCB.setSelectedIndex(0);
+		    }
 		    break;
 		case REMOVED:
-		    for(AudioOutput o:evt.getElements())
+		    for(AudioOutput o:evt.getElements()){
 			audioOutputCBM.removeElement(o);
+			if(audioOutputCBM.getSize()>0)
+			    audioOutputCB.setSelectedIndex(0);
+		    }
 		    break;
 		case UPDATED:
 		    break;//???
@@ -180,12 +190,17 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 	    public void collectionChanged(CollectionEvent<AudioFormat> evt) {
 		switch (evt.getType()) {
 		case ADDED:
-		    for (AudioFormat o : evt.getElements())
+		    for (AudioFormat o : evt.getElements()){
 			audioFormatCBM.addElement(o);
+			audioFormatCB.setSelectedIndex(0);
+		    }
 		    break;
 		case REMOVED:
-		    for (AudioFormat o : evt.getElements())
+		    for (AudioFormat o : evt.getElements()){
 			audioFormatCBM.removeElement(o);
+			if(audioFormatCBM.getSize()>0)
+			    audioFormatCB.setSelectedIndex(0);
+		    }
 		    break;
 		case UPDATED:
 		    break;// ???

@@ -48,7 +48,7 @@ public class TRConfiguration{
     	private String voxFile;
     	private boolean audioLinearFiltering=false;
     	private HashSet<String> missionList = new HashSet<String>();
-    	private String activeAudioDriver = "org.jtrfp.trcl.JavaSoundSystemAudioOutput",
+    	private String activeAudioDriver = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput",
     	               activeAudioDevice,
     	               activeAudioOutput,
     	               activeAudioFormat;
@@ -285,7 +285,7 @@ public class TRConfiguration{
 	 * @param soundDriver the soundDriver to set
 	 */
 	public void setActiveSoundDriver(String soundDriver) {
-	    pcs.firePropertyChange(ACTIVE_AUDIO_DRIVER,this.activeAudioDriver,activeAudioDriver);
+	    pcs.firePropertyChange(ACTIVE_AUDIO_DRIVER,this.activeAudioDriver,soundDriver);
 	    this.activeAudioDriver = soundDriver;
 	}
 
@@ -300,7 +300,7 @@ public class TRConfiguration{
 	 * @param audioOutput the audioOutput to set
 	 */
 	public void setActiveAudioOutput(String audioOutput) {
-	    pcs.firePropertyChange(ACTIVE_AUDIO_OUTPUT,this.activeAudioOutput,activeAudioOutput);
+	    pcs.firePropertyChange(ACTIVE_AUDIO_OUTPUT,this.activeAudioOutput,audioOutput);
 	    this.activeAudioOutput = audioOutput;
 	}
 

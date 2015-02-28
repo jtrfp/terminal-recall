@@ -39,13 +39,14 @@ public class TRConfiguration{
     		ACTIVE_AUDIO_OUTPUT = "activeAudioOutput",
     		ACTIVE_AUDIO_FORMAT = "activeAudioFormat",
     		
-    		AUDIO_BUFFER_LAG    = "audioBufferLag";
+    		AUDIO_BUFFER_LAG    = "audioBufferLag",
+    		AUDIO_BUFFER_SIZE   = "audioBufferSize";
     	
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
     			debugMode,
     			waitForProfiler;
-    	private int targetFPS =60;
+    	private int targetFPS =60, audioBufferSize = 4096;
     	private String skipToLevel;
     	private String voxFile;
     	private boolean audioLinearFiltering=false, audioBufferLag=true;
@@ -412,5 +413,20 @@ public class TRConfiguration{
 	public void setAudioBufferLag(boolean audioBufferLag) {
 	    pcs.firePropertyChange(AUDIO_BUFFER_LAG, this.audioBufferLag, audioBufferLag);
 	    this.audioBufferLag = audioBufferLag;
+	}
+
+	/**
+	 * @return the audioBufferSize
+	 */
+	public int getAudioBufferSize() {
+	    return audioBufferSize;
+	}
+
+	/**
+	 * @param audioBufferSize the audioBufferSize to set
+	 */
+	public void setAudioBufferSize(int audioBufferSize) {
+	    pcs.firePropertyChange(AUDIO_BUFFER_SIZE, this.audioBufferSize, audioBufferSize);
+	    this.audioBufferSize = audioBufferSize;
 	}
 }//end TRConfiguration

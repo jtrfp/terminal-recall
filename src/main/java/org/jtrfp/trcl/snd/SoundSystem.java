@@ -53,7 +53,8 @@ public final class SoundSystem {
     private final MusicPlaybackEvent.Factory musicFactory;
     private long soundRenderingFinishedSync;
     private AtomicBoolean paused = new AtomicBoolean(false);
-    //private AudioDriver audioOutput;
+    private int bufferSizeFrames = 4096;
+    private ByteBuffer gpuFloatBytes;
     
    ////VARS
    private AudioDriver          activeDriver;
@@ -78,12 +79,12 @@ public final class SoundSystem {
     public static final double DEFAULT_SFX_VOLUME = .3;
     
     public static final int  SAMPLE_RATE=44100;
-    static final int         BUFFER_SIZE_FRAMES=4096*2;
+    //static final int         BUFFER_SIZE_FRAMES=4096*2;
     public static final int  NUM_CHANNELS=2;
     public static final int  BYTES_PER_SAMPLE=2;
     private static final int SAMPLE_SIZE_BITS = BYTES_PER_SAMPLE*8;
     public static final int  BYTES_PER_FRAME=BYTES_PER_SAMPLE*NUM_CHANNELS;
-    private static final int BUFFER_SIZE_BYTES=BUFFER_SIZE_FRAMES*BYTES_PER_FRAME;
+    //private static final int BUFFER_SIZE_BYTES=BUFFER_SIZE_FRAMES*BYTES_PER_FRAME;
     private static final int NUM_BUFFER_ROWS=1;
     
     public SoundSystem(final TR tr) {
@@ -95,29 +96,7 @@ public final class SoundSystem {
 	    public Void call() throws Exception {
 		System.out.println("SoundSystem: setting up textures...");
 		final GPU gpu = tr.gpu.get();
-		gpu.defaultProgram();
-		gpu.defaultTIU();
-		gpu.defaultTexture();
-		gpu.defaultFrameBuffers();
-		playbackTexture = gpu
-			.newTexture()
-			.bind()
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-		 	.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-		 	.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-		 	.setDebugName("playbackTexture")
-		 	.setExpectedMinValue(-1, -1, -1, -1)
-		 	.setExpectedMaxValue(1, 1, 1, 1)
-		 	.setPreferredUpdateIntervalMillis(100)
-			.setImage(GL3.GL_RG32F, BUFFER_SIZE_FRAMES,
-				NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
-				null);
-		playbackFrameBuffer = gpu
-			.newFrameBuffer()
-			.bindToDraw()
-			.attachDrawTexture(playbackTexture,
-				GL3.GL_COLOR_ATTACHMENT0);
+		
 		// TODO: Setup uniforms here.
 		System.out.println("...Done.");
 		gpu.defaultProgram();
@@ -138,12 +117,9 @@ public final class SoundSystem {
 		try {
 		    Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		    Thread.currentThread().setName("SoundSystem");
-		    byte[] shortBytes = new byte[BUFFER_SIZE_BYTES];
-		    final ByteBuffer floatBytes = ByteBuffer.allocateDirect(
-			    BUFFER_SIZE_FRAMES*4*NUM_CHANNELS).order(ByteOrder.nativeOrder());
-		    ShortBuffer sBuf = ByteBuffer.wrap(shortBytes)
-			    .order(ByteOrder.nativeOrder()).asShortBuffer();
-		    FloatBuffer fBuf = floatBytes.asFloatBuffer();
+		    //byte[] shortBytes = new byte[BUFFER_SIZE_BYTES];
+		    /*ShortBuffer sBuf = ByteBuffer.wrap(shortBytes)
+			    .order(ByteOrder.nativeOrder()).asShortBuffer();*/
 		    
 		    while (true) {
 			synchronized(paused){
@@ -154,12 +130,14 @@ public final class SoundSystem {
 			tr.getThreadManager().submitToGL(new Callable<Void>() {
 			    @Override
 			    public Void call() throws Exception {
+				final ByteBuffer floatBytes = getGPUFloatBytes();
 				floatBytes.clear();
 				render(tr.gpu.get().getGl(), floatBytes);
 				return null;
 			    }
 			}).get();
-			sBuf.clear();
+			//sBuf.clear();
+			final FloatBuffer fBuf = getGPUFloatBytes().asFloatBuffer();
 			fBuf.clear();
 			compressor.setSource(fBuf);
 			final AudioDriver driver = getActiveDriver();
@@ -206,10 +184,17 @@ public final class SoundSystem {
 		if(format!=null)
 		    setFormatByName(format);
 	    }});
+	config.addPropertyChangeListener(TRConfiguration.AUDIO_BUFFER_SIZE, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getNewValue()!=null)
+		 setBufferSizeFrames((Integer)evt.getNewValue());
+	    }});
 	setDriverByName(config.getActiveAudioDriver());
 	setDeviceByName(config.getActiveAudioDevice());
 	setOutputByName(config.getActiveAudioOutput());
 	setFormatByName(config.getActiveAudioFormat());
+	setBufferSizeFrames(config.getAudioBufferSize());
     }//end loadConfigAndAttachListeners
 
     protected void setFormatByName(String format) {
@@ -389,10 +374,10 @@ public final class SoundSystem {
     
     private synchronized void renderPrep(){
 	cleanActiveEvents();
-	pickupActiveEvents(BUFFER_SIZE_FRAMES);
+	pickupActiveEvents(getBufferSizeFrames());
     }
     
-    private void render(GL3 gl, ByteBuffer audioByteBuffer) {
+    private synchronized void render(GL3 gl, ByteBuffer audioByteBuffer) {
 	if (firstRun)
 	    firstRun();
 	final GPU gpu = tr.gpu.get();
@@ -401,8 +386,8 @@ public final class SoundSystem {
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	// Render
-	playbackFrameBuffer.bindToDraw();
-	gl.glViewport(0, 0, BUFFER_SIZE_FRAMES, 1);
+	getPlaybackFrameBuffer().bindToDraw();
+	gl.glViewport(0, 0, getBufferSizeFrames(), 1);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	for (SoundEvent ev : activeEvents) {// TODO: Replace with Factory calls
 	    if (ev.isActive()) {
@@ -421,7 +406,7 @@ public final class SoundSystem {
 	if(!tr.config.isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
-	bufferFrameCounter += BUFFER_SIZE_FRAMES;
+	bufferFrameCounter += getBufferSizeFrames();
 	// Cleanup
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
@@ -434,7 +419,7 @@ public final class SoundSystem {
 	// Read and export previous results to sound card.
 	final GL3 gl = gpu.getGl();
 	gpu.defaultFrameBuffers();
-	playbackTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
+	getPlaybackTexture().bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
 		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
     }//end readGLAudioBuffer(...)
     
@@ -495,7 +480,7 @@ public final class SoundSystem {
     }
 
     public double getSamplesPerMilli() {
-	return ((double)SAMPLE_RATE)/1000.;
+	return ((double)getActiveFormat().getFrameRate())/1000.;
     }
 
     /**
@@ -572,5 +557,113 @@ public final class SoundSystem {
         System.out.println("SoundSystem: Active Format Set To "+activeFormat);
         if(activeDriver!=null)
 	    activeDriver.setFormat(activeFormat);
+    }
+
+    /**
+     * @return the bufferSizeFrames
+     */
+    int getBufferSizeFrames() {
+        return bufferSizeFrames;
+    }
+
+    /**
+     * @param bufferSizeFrames the bufferSizeFrames to set
+     */
+    private synchronized void setBufferSizeFrames(int bufferSizeFrames) {
+	if(bufferSizeFrames<=0)
+	    throw new RuntimeException("Invalid buffer size: "+bufferSizeFrames+". Must be greater than zero.");
+        this.bufferSizeFrames = bufferSizeFrames;
+        getActiveDriver().setBufferSizeFrames(bufferSizeFrames);
+        stalePlaybackTexture();
+        staleFloatBytes();
+    }
+    
+    private synchronized GLFrameBuffer getPlaybackFrameBuffer(){
+	if(playbackFrameBuffer==null){
+	    playbackFrameBuffer = tr.getThreadManager().submitToGL(new Callable<GLFrameBuffer>(){
+		@Override
+		public GLFrameBuffer call() throws Exception {
+		    final GPU gpu = tr.gpu.get();
+		    gpu.defaultTexture();
+		    gpu.defaultTIU();
+		    final GLTexture texture = getPlaybackTexture();
+		    return tr.gpu.get()
+				.newFrameBuffer()
+				.bindToDraw()
+				.attachDrawTexture(texture,
+					GL3.GL_COLOR_ATTACHMENT0);
+		}}).get();
+	}//end if(playbackFrameBuffer==null)
+	return playbackFrameBuffer;
+    }//end getPlaybackFrameBuffer()
+    
+    private synchronized void stalePlaybackFrameBuffer(){
+	if(playbackFrameBuffer!=null){
+	    tr.getThreadManager().submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    playbackFrameBuffer.destroy();
+		    return null;
+		}}).get();
+	}//end playbackFrameBuffer!=null
+	playbackFrameBuffer=null;
+    }//end stalePlaybackFrameBuffer()
+    
+    private synchronized GLTexture getPlaybackTexture(){
+	if(playbackTexture==null){
+	    tr.getThreadManager().submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    final GPU gpu = tr.gpu.get();
+		    gpu.defaultProgram();
+		    gpu.defaultTIU();
+		    gpu.defaultTexture();
+		    gpu.defaultFrameBuffers();
+		    playbackTexture = gpu
+			    .newTexture()
+			    .bind()
+			    .setMagFilter(GL3.GL_NEAREST)
+			    .setMinFilter(GL3.GL_NEAREST)
+			    .setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			    .setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			    .setDebugName("playbackTexture")
+			    .setExpectedMinValue(-1, -1, -1, -1)
+			    .setExpectedMaxValue(1, 1, 1, 1)
+			    .setPreferredUpdateIntervalMillis(100)
+			    .setImage(GL3.GL_RG32F, getBufferSizeFrames(),
+				    NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
+				    null);
+		    return null;
+		}}).get();
+	}
+	return playbackTexture;
+    }//end getPlaybackTexture()
+    
+    private synchronized void stalePlaybackTexture(){
+	if(playbackTexture!=null){
+	    tr.getThreadManager().submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    playbackTexture.delete();//This fails with no-GL exception?!
+		    return null;
+		}}).get();
+	}//end playbackTexture!=null
+        stalePlaybackFrameBuffer();
+	playbackTexture=null;
+    }//end stalePlaybackTexture()
+
+    public ByteBuffer getGPUFloatBytes() {
+	if(gpuFloatBytes==null)
+	    gpuFloatBytes = ByteBuffer.allocateDirect(
+		    getBufferSizeFrames()*4*getActiveFormat().getChannels()).order(ByteOrder.nativeOrder());
+	return gpuFloatBytes;
+    }
+
+    public void setGPUFloatBytes(ByteBuffer gpuFloatBytes) {
+	this.gpuFloatBytes = gpuFloatBytes;
+    }
+    
+    private void staleFloatBytes(){
+	gpuFloatBytes=null;
     }
 }//end SoundSystem

@@ -74,11 +74,12 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     public void apply(GL3 gl, long bufferStartTimeFrames) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
 	origin.getPanU().set((float)getPan()[0], (float)getPan()[1]);//Pan center
-	final double startTimeInBuffers=((double)(getStartRealtimeSamples()-bufferStartTimeFrames)/(double)SoundSystem.BUFFER_SIZE_FRAMES)*2-1;
+	final int bufferSizeFrames = this.getOrigin().getTR().soundSystem.get().getBufferSizeFrames();
+	final double startTimeInBuffers=((double)(getStartRealtimeSamples()-bufferStartTimeFrames)/(double)bufferSizeFrames)*2-1;
 	origin.getNumRowsU().setui((int)getSoundTexture().getNumRows());
 	origin.getStartU().set((float)startTimeInBuffers);
 	origin.getLengthPerRowU()
-	 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)SoundSystem.BUFFER_SIZE_FRAMES))*2*(float)getSoundTexture().getResamplingScalar()/(float)playbackRatio);
+	 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)bufferSizeFrames))*2*(float)getSoundTexture().getResamplingScalar()/(float)playbackRatio);
 	final int lengthInSegments = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
 	getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
 	gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
@@ -150,9 +151,9 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    final double pFactor = (localDir.getX()+1)/2;
 	    assert !Vect3D.isAnyNaN(source);
 	    final double [] pan = new double[]{vol*pFactor,vol*(1-pFactor)};
-	    final double modSamples = (System.currentTimeMillis()*getTR().soundSystem.get().getSamplesPerMilli())%SoundSystem.BUFFER_SIZE_FRAMES;
-	    final long delay = (long)(dist*.01+Math.random()*10);// .01 ms per world unit, temporal dither to avoid phasiness
 	    final SoundSystem ss = getTR().soundSystem.get();
+	    final double modSamples = (System.currentTimeMillis()*getTR().soundSystem.get().getSamplesPerMilli())%ss.getBufferSizeFrames();
+	    final long delay = (long)(dist*.01+Math.random()*10);// .01 ms per world unit, temporal dither to avoid phasiness
 	    final long startTime = (long)(ss.getCurrentBufferFrameCounter()+modSamples)+delay;
 	    return create(tex,startTime,pan);
 	}
@@ -163,7 +164,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] pan){
 	    final SoundSystem ss = getTR().soundSystem.get();
-	    final double modSamples = (System.currentTimeMillis()*getTR().soundSystem.get().getSamplesPerMilli())%SoundSystem.BUFFER_SIZE_FRAMES;
+	    final double modSamples = (System.currentTimeMillis()*ss.getSamplesPerMilli())%ss.getBufferSizeFrames();
 	    return create(tex,(long)(ss.getCurrentBufferFrameCounter()+modSamples),pan);
 	}
 	

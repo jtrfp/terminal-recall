@@ -162,6 +162,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
      */
     public synchronized void setBufferSizeFrames(int bufferSizeFrames) {
         this.bufferSizeFrames = bufferSizeFrames;
+        staleBuffer();
     }
 
     /**
@@ -169,6 +170,10 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
      */
     public synchronized AudioFormat getFormat() {
         return format;
+    }
+    
+    private void staleBuffer(){
+	this.buffer=null;
     }
 
     /**

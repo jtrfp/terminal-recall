@@ -29,9 +29,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -57,11 +60,11 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
-import javax.swing.ImageIcon;
 
 public class ConfigWindow extends JFrame {
     private TRConfiguration config;
     private JCheckBox chckbxLinearInterpolation, chckbxBufferLag;
+    private JComboBox audioBufferSizeCB;
     private JSlider modStereoWidthSlider;
     private JList podList,missionList;
     private DefaultListModel<String> podLM=new DefaultListModel<String>(), missionLM=new DefaultListModel<String>();
@@ -284,9 +287,9 @@ public class ConfigWindow extends JFrame {
  	tabbedPane.addTab("Sound", new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png")), soundTab, null);
  	GridBagLayout gbl_soundTab = new GridBagLayout();
  	gbl_soundTab.columnWidths = new int[]{0, 0};
- 	gbl_soundTab.rowHeights = new int[]{65, 51, 132, 0, 0, 0};
+ 	gbl_soundTab.rowHeights = new int[]{65, 51, 70, 132, 0, 0, 0};
  	gbl_soundTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
- 	gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+ 	gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
  	soundTab.setLayout(gbl_soundTab);
  	
  	JPanel checkboxPanel = new JPanel();
@@ -298,7 +301,7 @@ public class ConfigWindow extends JFrame {
  	soundTab.add(checkboxPanel, gbc_checkboxPanel);
  	
  	chckbxLinearInterpolation = new JCheckBox("Linear Filtering");
- 	chckbxLinearInterpolation.setToolTipText("Use the GPU's hardware linear filtering support to smooth playback of low-rate samples.");
+ 	chckbxLinearInterpolation.setToolTipText("Use the GPU's TMU to smooth playback of low-rate samples.");
  	chckbxLinearInterpolation.setHorizontalAlignment(SwingConstants.LEFT);
  	checkboxPanel.add(chckbxLinearInterpolation);
  	
@@ -309,7 +312,7 @@ public class ConfigWindow extends JFrame {
 	    }});
  	
  	chckbxBufferLag = new JCheckBox("Buffer Lag");
- 	chckbxBufferLag.setToolTipText("Waits one buffer cycle before grabbing the framebuffer to reduce blocking of the GL thread. Incurs an additional buffer's worth of latency.");
+ 	chckbxBufferLag.setToolTipText("Improves efficiency, doubles latency.");
  	checkboxPanel.add(chckbxBufferLag);
  	
  	JPanel modStereoWidthPanel = new JPanel();
@@ -332,6 +335,22 @@ public class ConfigWindow extends JFrame {
  	final JLabel modStereoWidthLbl = new JLabel("NN%");
  	modStereoWidthPanel.add(modStereoWidthLbl);
  	
+ 	JPanel bufferSizePanel = new JPanel();
+ 	FlowLayout flowLayout_3 = (FlowLayout) bufferSizePanel.getLayout();
+ 	flowLayout_3.setAlignment(FlowLayout.LEFT);
+ 	bufferSizePanel.setBorder(new TitledBorder(null, "Buffer Size", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+ 	GridBagConstraints gbc_bufferSizePanel = new GridBagConstraints();
+ 	gbc_bufferSizePanel.anchor = GridBagConstraints.NORTH;
+ 	gbc_bufferSizePanel.insets = new Insets(0, 0, 5, 0);
+ 	gbc_bufferSizePanel.fill = GridBagConstraints.HORIZONTAL;
+ 	gbc_bufferSizePanel.gridx = 0;
+ 	gbc_bufferSizePanel.gridy = 2;
+ 	soundTab.add(bufferSizePanel, gbc_bufferSizePanel);
+ 	
+ 	audioBufferSizeCB = new JComboBox();
+ 	audioBufferSizeCB.setModel(new DefaultComboBoxModel(AudioBufferSize.values()));
+ 	bufferSizePanel.add(audioBufferSizeCB);
+ 	
  	soundOutputSelectorGUI = new SoundOutputSelectorGUI();
  	soundOutputSelectorGUI.setBorder(new TitledBorder(null, "Output Driver", TitledBorder.LEADING, TitledBorder.TOP, null, null));
  	GridBagConstraints gbc_soundOutputSelectorGUI = new GridBagConstraints();
@@ -339,7 +358,7 @@ public class ConfigWindow extends JFrame {
  	gbc_soundOutputSelectorGUI.insets = new Insets(0, 0, 5, 0);
  	gbc_soundOutputSelectorGUI.fill = GridBagConstraints.HORIZONTAL;
  	gbc_soundOutputSelectorGUI.gridx = 0;
- 	gbc_soundOutputSelectorGUI.gridy = 2;
+ 	gbc_soundOutputSelectorGUI.gridy = 3;
  	soundTab.add(soundOutputSelectorGUI, gbc_soundOutputSelectorGUI);
  	
  	modStereoWidthSlider.addChangeListener(new ChangeListener(){
@@ -401,12 +420,18 @@ public class ConfigWindow extends JFrame {
      writeSettingsTo(TRConfiguration.getConfigFilePath());
      if(needRestart)
 	 notifyOfRestart();
+     final AudioBufferSize abs = (AudioBufferSize)audioBufferSizeCB.getSelectedItem();
+     config.setAudioBufferSize(abs.getSizeInFrames());
  }//end applySettings()
  
  private void readSettingsToPanel(){
      modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
      chckbxLinearInterpolation.setSelected(config.isAudioLinearFiltering());
      chckbxBufferLag.setSelected(config.isAudioBufferLag());
+     final int bSize = config.getAudioBufferSize();
+     for(AudioBufferSize abs:AudioBufferSize.values())
+	 if(abs.getSizeInFrames()==bSize)
+	     audioBufferSizeCB.setSelectedItem(abs);
      
      missionLM.removeAllElements();
      for(String vox:config.getMissionList()){
@@ -600,4 +625,26 @@ public class ConfigWindow extends JFrame {
 	}
 	return true;
  }//end checkVOX(...)
+ 
+ private enum AudioBufferSize{
+     SAMPLES_8192(8192),
+     SAMPLES_4096(4096),
+     SAMPLES_2048(2048),
+     SAMPLES_1024(1024),
+     SAMPLES_512(512),
+     SAMPLES_256(256);
+     
+     private final int sizeInFrames;
+     AudioBufferSize(int sizeInFrames){
+	 this.sizeInFrames=sizeInFrames;
+     }
+     @Override
+     public String toString(){
+	 return sizeInFrames+" frames";
+     }
+     
+     public int getSizeInFrames(){
+	 return sizeInFrames;
+     }
+ }//end AudioBufferSize
 }//end ConfigWindow

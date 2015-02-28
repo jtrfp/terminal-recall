@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.snd;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -30,17 +32,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 
-import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
-import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadOrder;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.snd.SoundEvent.Factory;
 
@@ -54,6 +53,13 @@ public final class SoundSystem {
     private final MusicPlaybackEvent.Factory musicFactory;
     private long soundRenderingFinishedSync;
     private AtomicBoolean paused = new AtomicBoolean(false);
+    //private AudioDriver audioOutput;
+    
+   ////VARS
+   private AudioDriver          activeDriver;
+   private AudioDevice		activeDevice;
+   private AudioOutput		activeOutput;
+   private AudioFormat		activeFormat;
     
     private boolean firstRun=true;
     private final TreeSet<SoundEvent> pendingEvents = new TreeSet<SoundEvent>(new Comparator<SoundEvent>(){
@@ -80,23 +86,10 @@ public final class SoundSystem {
     private static final int BUFFER_SIZE_BYTES=BUFFER_SIZE_FRAMES*BYTES_PER_FRAME;
     private static final int NUM_BUFFER_ROWS=1;
     
-    private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
-    private static final AudioFormat audioFormat = new AudioFormat(
-	    encoding,
-	    (float)SAMPLE_RATE,
-	    SAMPLE_SIZE_BITS,
-	    NUM_CHANNELS,
-	    BYTES_PER_FRAME,
-	    SAMPLE_RATE,
-	    ByteOrder.nativeOrder()==ByteOrder.BIG_ENDIAN,
-	    new HashMap<String,Object>());
-    private static final DataLine.Info lineInfo = 
-	    new DataLine.Info(SourceDataLine.class, audioFormat);
-    private SourceDataLine sourceDataLine;
-
     public SoundSystem(final TR tr) {
 	this.tr = tr;
 	System.out.println("Setting up sound system...");
+	loadConfigAndAttachListeners();
 	tr.getThreadManager().submitToGL(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -138,13 +131,6 @@ public final class SoundSystem {
 	playbackFactory= new SamplePlaybackEvent.Factory(tr);
 	musicFactory   = new MusicPlaybackEvent.Factory(tr);
 	
-	try {
-	    sourceDataLine = (SourceDataLine) AudioSystem.getLine(lineInfo);
-	    sourceDataLine.open();
-	} catch (LineUnavailableException e) {
-	    tr.showStopper(e);
-	}
-	
 	new Thread() {
 	    private final AudioCompressor compressor = new AudioCompressor();
 	    @Override
@@ -158,7 +144,7 @@ public final class SoundSystem {
 		    ShortBuffer sBuf = ByteBuffer.wrap(shortBytes)
 			    .order(ByteOrder.nativeOrder()).asShortBuffer();
 		    FloatBuffer fBuf = floatBytes.asFloatBuffer();
-		    sourceDataLine.start();
+		    
 		    while (true) {
 			synchronized(paused){
 			    while(paused.get())
@@ -176,10 +162,11 @@ public final class SoundSystem {
 			sBuf.clear();
 			fBuf.clear();
 			compressor.setSource(fBuf);
-			for (int i = 0; i < BUFFER_SIZE_FRAMES * NUM_CHANNELS; i++) {
-			    sBuf.put((short) (compressor.get() * (double) Short.MAX_VALUE));
-			}
-			sourceDataLine.write(shortBytes, 0, BUFFER_SIZE_BYTES);
+			final AudioDriver driver = getActiveDriver();
+			if(driver!=null){
+			    driver.setSource(compressor);
+			    driver.flush();
+			}//end driver!=null
 		    }// end while(true)
 		} catch (Exception e) {
 		    tr.showStopper(e);
@@ -188,6 +175,90 @@ public final class SoundSystem {
 	}.start();
     }// end constructor
     
+    private void loadConfigAndAttachListeners() {
+	final TRConfiguration config = tr.config;
+	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_DRIVER,new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final String driver = (String)evt.getNewValue();
+		if(driver!=null)
+		    setDriverByName(driver);
+	    }});
+	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_DEVICE,new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final String device = (String)evt.getNewValue();
+		if(device!=null)
+		    setDeviceByName(device);
+	    }});
+	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_OUTPUT,new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final String output = (String)evt.getNewValue();
+		System.out.println("SoundSystem property change ACTIVE_AUDIO_OUTPUT /// "+evt);
+		if(output!=null)
+		    setOutputByName(output);
+	    }});
+	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_FORMAT,new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final String format = (String)evt.getNewValue();
+		if(format!=null)
+		    setFormatByName(format);
+	    }});
+	setDriverByName(config.getActiveAudioDriver());
+	setDeviceByName(config.getActiveAudioDevice());
+	setOutputByName(config.getActiveAudioOutput());
+	setFormatByName(config.getActiveAudioFormat());
+    }//end loadConfigAndAttachListeners
+
+    protected void setFormatByName(String format) {
+	final AudioOutput activeOutput = getActiveOutput();
+	if(activeOutput==null)
+	    return;
+	if(format!=null){
+	    final AudioFormat fmt = getActiveOutput().getFormatFromUniqueName(format);
+	    if(fmt!=null){
+		setActiveFormat(fmt);
+	    }
+	}else{setActiveFormat(null);}
+    }//end setFormatByName(...)
+
+    protected void setOutputByName(String output) {
+	System.out.println("setOutputByName "+output);
+	if(output!=null){
+	    final AudioOutput ao = getActiveDevice().getOutputByName(output);
+	    System.out.println("ao="+ao);
+	    if(ao!=null)
+		setActiveOutput(ao);
+	}else{setActiveOutput(null);}
+    }//end setOutputByName(...)
+
+    protected void setDeviceByName(String device) {
+	if(device!=null){
+	    final AudioDevice audioDevice = getActiveDriver().getDeviceByName(device);
+	    if(audioDevice!=null)
+		setActiveDevice(audioDevice);
+	}else{setActiveDevice(null);}
+	//setOutputByName(null);
+    }//end setDeviceByName(...)
+
+    protected void setDriverByName(String driver) {
+	if(driver!=null){
+	    if(activeDriver!=null)
+		activeDriver.release();
+	    Class driverClass;
+	    try{driverClass = Class.forName(driver);}
+		catch(ClassNotFoundException e){
+	    driverClass = org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput.class;}
+	    if(!AudioDriver.class.isAssignableFrom(driverClass))
+	      driverClass = org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput.class;
+	    try{setActiveDriver((AudioDriver)driverClass.newInstance());}
+	     catch(Exception e){e.printStackTrace();return;}
+	}else{}
+	//setDeviceByName(null);
+    }//end setDriverByName(...)
+
     public SoundSystem setPaused(boolean state){
 	synchronized(paused){
 	    if(paused.get()==state)//No change
@@ -303,7 +374,7 @@ public final class SoundSystem {
     }//end newSoundTexture
     
     private int getFilteringParm(){
-	return tr.getTrConfig()[0].isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
+	return tr.config.isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
     }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
@@ -414,5 +485,81 @@ public final class SoundSystem {
 
     public double getSamplesPerMilli() {
 	return ((double)SAMPLE_RATE)/1000.;
+    }
+
+    /**
+     * @return the activeDriver
+     */
+    private AudioDriver getActiveDriver() {
+        return activeDriver;
+    }
+
+    /**
+     * @param activeDriver the activeDriver to set
+     */
+    private void setActiveDriver(AudioDriver activeDriver) {
+        this.activeDriver = activeDriver;
+        System.out.println("SoundSystem: Active Driver Set To "+activeDriver);
+    }
+
+    /**
+     * @return the activeDevice
+     */
+    private AudioDevice getActiveDevice() {
+        return activeDevice;
+    }
+
+    /**
+     * @param activeDevice the activeDevice to set
+     */
+    private void setActiveDevice(AudioDevice activeDevice) {
+        this.activeDevice = activeDevice;
+        System.out.println("SoundSystem: Active Device Set To "+activeDevice);
+    }
+
+    /**
+     * @return the activeOutput
+     */
+    private AudioOutput getActiveOutput() {
+        return activeOutput;
+    }
+
+    /**
+     * @param activeOutput the activeOutput to set
+     */
+    private void setActiveOutput(AudioOutput activeOutput) {
+        this.activeOutput = activeOutput;
+        System.out.println("SoundSystem: Active Output Set To "+activeOutput);
+        if(activeDriver!=null)
+	    activeDriver.setOutput(activeOutput);
+    }
+
+    /**
+     * @return the activeFormat
+     */
+    private AudioFormat getActiveFormat() {
+        return activeFormat;
+    }
+
+    /**
+     * @param activeFormat the activeFormat to set
+     */
+    private void setActiveFormat(AudioFormat activeFormat) {
+	//If unspecified, default to 44100
+	if(activeFormat!=null)
+	 if(activeFormat.getSampleRate()==AudioSystem.NOT_SPECIFIED)
+	    activeFormat = new AudioFormat(
+		    activeFormat.getEncoding(), 
+		    44100, 
+		    activeFormat.getSampleSizeInBits(), 
+		    activeFormat.getChannels(), 
+		    activeFormat.getFrameSize(), 
+		    44100, 
+		    activeFormat.isBigEndian());
+	
+        this.activeFormat = activeFormat;
+        System.out.println("SoundSystem: Active Format Set To "+activeFormat);
+        if(activeDriver!=null)
+	    activeDriver.setFormat(activeFormat);
     }
 }//end SoundSystem

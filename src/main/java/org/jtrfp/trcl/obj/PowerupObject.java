@@ -49,7 +49,7 @@ public class PowerupObject extends BillboardSprite{
 		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
 		powerupType=pt;
 		String [] bbFrames;
-		if(getTr().getTrConfig()[0].getGameVersion()!=GameVersion.TV)
+		if(getTr().config.getGameVersion()!=GameVersion.TV)
 		    bbFrames = pt.getF3BillboardFrames();
 		else
 		    bbFrames = pt.getTvBillboardFrames();
@@ -107,7 +107,7 @@ public class PowerupObject extends BillboardSprite{
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
 			tr.getGame().getUpfrontDisplay().submitMomentaryUpfrontMessage(
-				tr.getTrConfig()[0].getGameVersion()!=GameVersion.TV?
+				tr.config.getGameVersion()!=GameVersion.TV?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());
 			//SOUND FX

@@ -66,7 +66,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 		if(loop){
 		    if(bufferStartTimeFrames > nextLoopTimeFrames-SETUP_PADDING_FRAMES){
 			mod.apply(MusicPlaybackEvent.this.nextLoopTimeFrames,MusicPlaybackEvent.this,
-				getOrigin().getTR().getTrConfig()[0].getModStereoWidth());
+				getOrigin().getTR().config.getModStereoWidth());
 			MusicPlaybackEvent.this.nextLoopTimeFrames+=mod.getSongLengthInBufferFrames();
 		    }//end if(time to loop)
 		}//end if(loop)

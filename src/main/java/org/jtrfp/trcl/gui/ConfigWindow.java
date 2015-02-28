@@ -21,15 +21,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.DefaultPersistenceDelegate;
-import java.beans.Encoder;
 import java.beans.ExceptionListener;
-import java.beans.Statement;
 import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
@@ -44,7 +39,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
@@ -55,6 +49,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.PodFile;
@@ -62,19 +57,20 @@ import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
 
 public class ConfigWindow extends JFrame {
-    private TRConfiguration []config;
+    private TRConfiguration config;
     private JCheckBox chckbxLinearInterpolation;
     private JSlider modStereoWidthSlider;
     private JList podList,missionList;
     private DefaultListModel<String> podLM=new DefaultListModel<String>(), missionLM=new DefaultListModel<String>();
     private boolean needRestart=false;
     private final JFileChooser fileChooser = new JFileChooser();
+    private final SoundOutputSelectorGUI soundOutputSelectorGUI;
     
     public static void main(String [] args){
 	new ConfigWindow().setVisible(true);
     }//end main()
     
- public ConfigWindow(TRConfiguration []config){
+ public ConfigWindow(TRConfiguration config){
      this();
      this.config=config;
      readSettingsToPanel();
@@ -83,7 +79,7 @@ public class ConfigWindow extends JFrame {
  	setTitle("Settings");
  	setSize(340,540);
  	if(config==null)
- 	    config=new TRConfiguration[]{new TRConfiguration()};
+ 	    config=new TRConfiguration();
  	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
  	getContentPane().add(tabbedPane, BorderLayout.CENTER);
  	
@@ -280,9 +276,9 @@ public class ConfigWindow extends JFrame {
  	tabbedPane.addTab("Sound", null, soundTab, null);
  	GridBagLayout gbl_soundTab = new GridBagLayout();
  	gbl_soundTab.columnWidths = new int[]{0, 0};
- 	gbl_soundTab.rowHeights = new int[]{0, 0, 0};
+ 	gbl_soundTab.rowHeights = new int[]{0, 51, 132, 0, 0};
  	gbl_soundTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
- 	gbl_soundTab.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+ 	gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
  	soundTab.setLayout(gbl_soundTab);
  	
  	chckbxLinearInterpolation = new JCheckBox("Linear Filtering");
@@ -303,7 +299,9 @@ public class ConfigWindow extends JFrame {
  	flowLayout_2.setAlignment(FlowLayout.LEFT);
  	modStereoWidthPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "MOD Stereo Width", TitledBorder.LEADING, TitledBorder.TOP, null, null));
  	GridBagConstraints gbc_modStereoWidthPanel = new GridBagConstraints();
- 	gbc_modStereoWidthPanel.fill = GridBagConstraints.BOTH;
+ 	gbc_modStereoWidthPanel.anchor = GridBagConstraints.NORTH;
+ 	gbc_modStereoWidthPanel.insets = new Insets(0, 0, 5, 0);
+ 	gbc_modStereoWidthPanel.fill = GridBagConstraints.HORIZONTAL;
  	gbc_modStereoWidthPanel.gridx = 0;
  	gbc_modStereoWidthPanel.gridy = 1;
  	soundTab.add(modStereoWidthPanel, gbc_modStereoWidthPanel);
@@ -315,6 +313,16 @@ public class ConfigWindow extends JFrame {
  	
  	final JLabel modStereoWidthLbl = new JLabel("NN%");
  	modStereoWidthPanel.add(modStereoWidthLbl);
+ 	
+ 	soundOutputSelectorGUI = new SoundOutputSelectorGUI();
+ 	soundOutputSelectorGUI.setBorder(new TitledBorder(null, "Output Driver", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+ 	GridBagConstraints gbc_soundOutputSelectorGUI = new GridBagConstraints();
+ 	gbc_soundOutputSelectorGUI.anchor = GridBagConstraints.NORTH;
+ 	gbc_soundOutputSelectorGUI.insets = new Insets(0, 0, 5, 0);
+ 	gbc_soundOutputSelectorGUI.fill = GridBagConstraints.HORIZONTAL;
+ 	gbc_soundOutputSelectorGUI.gridx = 0;
+ 	gbc_soundOutputSelectorGUI.gridy = 2;
+ 	soundTab.add(soundOutputSelectorGUI, gbc_soundOutputSelectorGUI);
  	
  	modStereoWidthSlider.addChangeListener(new ChangeListener(){
 	    @Override
@@ -356,47 +364,49 @@ public class ConfigWindow extends JFrame {
  	}//end constructor
  
  private void applySettings(){
-     config[0].setVoxFile((String)missionList.getSelectedValue());
-     config[0].setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
-     config[0].setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
+     config.setVoxFile((String)missionList.getSelectedValue());
+     config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
+     config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
      {HashSet<String>pList=new HashSet<String>();
      for(int i=0; i<podLM.getSize();i++)
 	 pList.add((String)podLM.getElementAt(i));
-     config[0].getPodList().clear();
+     config.getPodList().clear();
      for(String pod:pList)
-	 config[0].getPodList().addElement(pod);
+	 config.getPodList().addElement(pod);
      
      HashSet<String>vxList=new HashSet<String>();
      for(int i=0; i<missionLM.getSize();i++)
 	 vxList.add((String)missionLM.getElementAt(i));
-     config[0].setMissionList(vxList);}
+     config.setMissionList(vxList);}
+     soundOutputSelectorGUI.applySettings(config);
      writeSettingsTo(TRConfiguration.getConfigFilePath());
      if(needRestart)
 	 notifyOfRestart();
  }//end applySettings()
  
  private void readSettingsToPanel(){
-     modStereoWidthSlider.setValue((int)(config[0].getModStereoWidth()*100.));
-     chckbxLinearInterpolation.setSelected(config[0].isAudioLinearFiltering());
+     modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
+     chckbxLinearInterpolation.setSelected(config.isAudioLinearFiltering());
      
      missionLM.removeAllElements();
-     for(String vox:config[0].getMissionList()){
+     for(String vox:config.getMissionList()){
 	 if(isBuiltinVOX(vox))
 	     missionLM.addElement(vox);
 	 else if(checkVOX(new File(vox)))
 	     missionLM.addElement(vox);
      }//end for(vox)
-     String missionSelection = config[0].getVoxFile();
+     String missionSelection = config.getVoxFile();
      for(int i=0; i<missionLM.getSize(); i++){
 	 if(missionLM.get(i).contentEquals(missionSelection))missionList.setSelectedIndex(i);}
      
      podLM.removeAllElements();
-     final DefaultListModel<String>podList = config[0].getPodList();
+     final DefaultListModel<String>podList = config.getPodList();
      for(int i=0; i<podList.size();i++){
 	 final String pod = podList.get(i);
 	 if(pod!=null)
 	  if(checkPOD(new File(pod)))
 	   podLM.addElement(pod);}
+     soundOutputSelectorGUI.readToPanel(config);
  }//end readSettings()
  
  private boolean isBuiltinVOX(String vox){
@@ -450,7 +460,7 @@ public class ConfigWindow extends JFrame {
     
     private boolean writeSettingsTo(File f){
 	try{
-	    config[0].saveConfig(f);
+	    config.saveConfig(f);
 	    return true;
     }catch(Exception e){JOptionPane.showMessageDialog(
 	    this,
@@ -497,8 +507,11 @@ public class ConfigWindow extends JFrame {
 		public void exceptionThrown(Exception e) {
 		    e.printStackTrace();
 		}});
-	    config[0]=(TRConfiguration)xmlDec.readObject();
+	    TRConfiguration src =(TRConfiguration)xmlDec.readObject();
 	    xmlDec.close();
+	    if(config!=null)
+		BeanUtils.copyProperties(config, src);
+	    else config=src;
 	}catch(Exception e){JOptionPane.showMessageDialog(
 		    this,
 		    "Failed to read the specified file:\n"
@@ -526,7 +539,8 @@ public class ConfigWindow extends JFrame {
     }//end exportSettings()
     
     private void defaultSettings(){
-	config[0]=new TRConfiguration();
+	 try{BeanUtils.copyProperties(config, new TRConfiguration());}
+	catch(Exception e){e.printStackTrace();}
 	readSettingsToPanel();
     }
  

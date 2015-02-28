@@ -78,9 +78,10 @@ public final class TR{
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
-	private TRConfiguration []				trConfig;
 	private final World 					world;
 	private final GameShell					gameShell;
+	
+	public final TRConfiguration 		config = TRConfiguration.getConfig();
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -118,7 +119,7 @@ public final class TR{
 	    	AutoInitializable.Initializer.initialize(this);
 	    	pcSupport = new PropertyChangeSupport(this);
 	    	rootWindow = new RootWindow();
-	    	if(getTrConfig()[0].isWaitForProfiler()){
+	    	if(config.isWaitForProfiler()){
 	    	    waitForProfiler();
 	    	}//end if(waitForProfiler)
 		keyStatus = new KeyStatus(rootWindow);
@@ -180,7 +181,7 @@ public final class TR{
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
-			try{trConfig[0].saveConfig();
+			try{config.saveConfig();
 		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"
 				    + e.getLocalizedMessage()+"\n");
@@ -240,16 +241,6 @@ public final class TR{
 	//Still alive? Great!
 	System.gc();
     }//end nuclearGC()
-
-	/**
-	 * @return the trConfig
-	 */
-	public TRConfiguration[] getTrConfig(){
-	    	if(trConfig==null){
-	    	    trConfig=new TRConfiguration[1]; 
-	    	    trConfig[0]=TRConfiguration.getConfig();}
-		return trConfig;
-		}
 
     /**
      * @return the resourceManager

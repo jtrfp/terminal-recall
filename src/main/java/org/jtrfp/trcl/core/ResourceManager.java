@@ -169,7 +169,7 @@ public class ResourceManager{
 	}//end ResourceManager
 	
 	private void setupPODListeners(){
-	    final TRConfiguration config = tr.getTrConfig()[0];
+	    final TRConfiguration config = tr.config;
 	    final DefaultListModel<String> podList = config.getPodList();
 	    new ListModelSetBridge<String>(podList,new SetModelListener<String>(){
 		@Override

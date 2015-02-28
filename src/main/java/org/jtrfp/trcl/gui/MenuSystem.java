@@ -75,7 +75,7 @@ public class MenuSystem {
 	view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
 	
 	fbsw = new FramebufferStateWindow(tr);
-	configWindow = new ConfigWindow(tr.getTrConfig());
+	configWindow = new ConfigWindow(tr.config);
 	levelSkipWindow = new LevelSkipWindow(tr);
 	
 	// Menu item behaviors

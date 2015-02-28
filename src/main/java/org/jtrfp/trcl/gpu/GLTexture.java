@@ -462,7 +462,7 @@ public final class GLTexture {
 		    final JFileChooser fc = new JFileChooser();
 		    fc.setSelectedFile(
 			    new File(gpu.getTr().
-				    getTrConfig()[0].
+				    config.
 				    getFileDialogStartDir()
 				    +"/"+parent.
 				    getDebugName()+".csv"));
@@ -480,7 +480,7 @@ public final class GLTexture {
 			final File selectedFile = fc.getSelectedFile();
 			if(selectedFile.isDirectory())
 			    return;//Abort
-			gpu.getTr().getTrConfig()[0].setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
+			gpu.getTr().config.setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
 			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()));}
 		}});
 	}//end constructor

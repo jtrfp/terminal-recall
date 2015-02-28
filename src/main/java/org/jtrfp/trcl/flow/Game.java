@@ -100,7 +100,7 @@ public class Game {
 	setVox(vox);
 	redFlash = new RedFlash(tr);
 	tr.getWorld().add(redFlash);
-	if (!tr.getTrConfig()[0].isDebugMode())
+	if (!tr.config.isDebugMode())
 	    setupNameWithUser();
     }// end constructor
 

@@ -62,7 +62,7 @@ public class ProjectileFactory {
    	 final int laserplaneLength = (int)(dims.getWidth()/TR.crossPlatformScalar);
    	 final int laserplaneWidth = (int)(dims.getHeight()/TR.crossPlatformScalar);
    	 t = tr.getResourceManager().getRAWAsTexture(
-   		tr.getTrConfig()[0].getGameVersion()!=GameVersion.TV?mt.getF3RawFileName():mt.getTvRawFileName(),
+   		tr.config.getGameVersion()!=GameVersion.TV?mt.getF3RawFileName():mt.getTvRawFileName(),
    		tr.getDarkIsClearPaletteVL(), null,
    		false);
    	 final double Y_SLANT=1024;

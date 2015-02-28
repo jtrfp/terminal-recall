@@ -22,5 +22,7 @@ public interface AudioDevice {
     AudioOutput getOutputByName(String uniqueName);
 
     String getUniqueName();
+    
+    AudioDriver getDriver();
 
 }//end AudioDevice

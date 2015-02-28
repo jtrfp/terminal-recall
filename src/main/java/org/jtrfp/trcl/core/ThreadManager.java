@@ -164,6 +164,10 @@ public final class ThreadManager {
 	    if(tr.gpu.get().getGl().getContext().isCurrent()){
 		result.run();
 		return result;
+	    }else{
+		tr.gpu.get().getGl().getContext().makeCurrent();
+		result.run();
+		tr.gpu.get().getGl().getContext().release();
 	    }
 	result.enqueue();
 	return result;

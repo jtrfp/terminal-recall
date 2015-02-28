@@ -116,13 +116,16 @@ public class SoundOutputSelector extends JPanel{
 	 if(ao!=null) activeDriver.setOutput(ao);
 	 else activeDriver.setOutput(ao = activeDriver.getDefaultOutput());
 	 
-	 String formatName = config.getActiveAudioFormat();
-	 AudioFormat fmt=null;
-	 if(formatName!=null)
-	     fmt = ao.getFormatFromUniqueName(formatName);
-	 if(fmt!=null)
-	     activeDriver.setFormat(fmt);
-	 else activeDriver.setFormat(ao.getFormats()[0]);
+	 if(ao!=null){
+	     String formatName = config.getActiveAudioFormat();
+	     AudioFormat fmt=null;
+	     if(formatName!=null)
+		 fmt = ao.getFormatFromUniqueName(formatName);
+	     if(fmt!=null)
+		 activeDriver.setFormat(fmt);
+	     else if(ao.getFormats().length>0)
+		 activeDriver.setFormat(ao.getFormats()[0]);
+	  }//end if(ao!=null)
 	 }//end if(activeDevice!=null)
     }//end loadFromTRConfig
 

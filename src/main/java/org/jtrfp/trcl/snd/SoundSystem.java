@@ -396,15 +396,14 @@ public final class SoundSystem {
 	if (firstRun)
 	    firstRun();
 	final GPU gpu = tr.gpu.get();
-	 // Read and export previous results to sound card.
-	gpu.defaultFrameBuffers();
-	playbackTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
-		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
+	
+	if(tr.config.isAudioBufferLag())
+	    readGLAudioBuffer(gpu,audioByteBuffer);
+	
+	// Render
 	playbackFrameBuffer.bindToDraw();
 	gl.glViewport(0, 0, BUFFER_SIZE_FRAMES, 1);
 	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
-	
-	// Render
 	for (SoundEvent ev : activeEvents) {// TODO: Replace with Factory calls
 	    if (ev.isActive()) {
 		final SoundEvent.Factory factory = ev.getOrigin();
@@ -418,6 +417,10 @@ public final class SoundSystem {
 	    factory.apply(gl, events, bufferFrameCounter);
 	    events.clear();
 	}//end for(keySet)
+	
+	if(!tr.config.isAudioBufferLag())
+	    readGLAudioBuffer(gpu,audioByteBuffer);
+	
 	bufferFrameCounter += BUFFER_SIZE_FRAMES;
 	// Cleanup
 	gpu.defaultFrameBuffers();
@@ -426,6 +429,14 @@ public final class SoundSystem {
 	gpu.defaultTexture();
 	gpu.defaultViewport();
     }// end process()
+    
+    private void readGLAudioBuffer(GPU gpu, ByteBuffer audioByteBuffer){
+	// Read and export previous results to sound card.
+	final GL3 gl = gpu.getGl();
+	gpu.defaultFrameBuffers();
+	playbackTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
+		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
+    }//end readGLAudioBuffer(...)
     
     private void pickupActiveEvents(long windowSizeInSamples){
 	final long currentTimeSamples = bufferFrameCounter;

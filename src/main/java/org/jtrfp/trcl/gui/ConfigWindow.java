@@ -21,6 +21,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.beans.ExceptionListener;
 import java.beans.XMLDecoder;
 import java.io.File;
@@ -58,7 +60,7 @@ import org.jtrfp.trcl.file.VOXFile;
 
 public class ConfigWindow extends JFrame {
     private TRConfiguration config;
-    private JCheckBox chckbxLinearInterpolation;
+    private JCheckBox chckbxLinearInterpolation, chckbxBufferLag;
     private JSlider modStereoWidthSlider;
     private JList podList,missionList;
     private DefaultListModel<String> podLM=new DefaultListModel<String>(), missionLM=new DefaultListModel<String>();
@@ -276,23 +278,33 @@ public class ConfigWindow extends JFrame {
  	tabbedPane.addTab("Sound", null, soundTab, null);
  	GridBagLayout gbl_soundTab = new GridBagLayout();
  	gbl_soundTab.columnWidths = new int[]{0, 0};
- 	gbl_soundTab.rowHeights = new int[]{0, 51, 132, 0, 0};
+ 	gbl_soundTab.rowHeights = new int[]{65, 51, 132, 0, 0, 0};
  	gbl_soundTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
- 	gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+ 	gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
  	soundTab.setLayout(gbl_soundTab);
  	
+ 	JPanel checkboxPanel = new JPanel();
+ 	GridBagConstraints gbc_checkboxPanel = new GridBagConstraints();
+ 	gbc_checkboxPanel.insets = new Insets(0, 0, 5, 0);
+ 	gbc_checkboxPanel.fill = GridBagConstraints.BOTH;
+ 	gbc_checkboxPanel.gridx = 0;
+ 	gbc_checkboxPanel.gridy = 0;
+ 	soundTab.add(checkboxPanel, gbc_checkboxPanel);
+ 	
  	chckbxLinearInterpolation = new JCheckBox("Linear Filtering");
- 	GridBagConstraints gbc_chckbxLinearInterpolation = new GridBagConstraints();
- 	gbc_chckbxLinearInterpolation.anchor = GridBagConstraints.WEST;
- 	gbc_chckbxLinearInterpolation.insets = new Insets(0, 0, 5, 0);
- 	gbc_chckbxLinearInterpolation.gridx = 0;
- 	gbc_chckbxLinearInterpolation.gridy = 0;
- 	soundTab.add(chckbxLinearInterpolation, gbc_chckbxLinearInterpolation);
- 	chckbxLinearInterpolation.addActionListener(new ActionListener(){
+ 	chckbxLinearInterpolation.setToolTipText("Use the GPU's hardware linear filtering support to smooth playback of low-rate samples.");
+ 	chckbxLinearInterpolation.setHorizontalAlignment(SwingConstants.LEFT);
+ 	checkboxPanel.add(chckbxLinearInterpolation);
+ 	
+ 	chckbxLinearInterpolation.addItemListener(new ItemListener(){
 	    @Override
-	    public void actionPerformed(ActionEvent action) {
+	    public void itemStateChanged(ItemEvent e) {
 		needRestart=true;
 	    }});
+ 	
+ 	chckbxBufferLag = new JCheckBox("Buffer Lag");
+ 	chckbxBufferLag.setToolTipText("Waits one buffer cycle before grabbing the framebuffer to reduce blocking of the GL thread. Incurs an additional buffer's worth of latency.");
+ 	checkboxPanel.add(chckbxBufferLag);
  	
  	JPanel modStereoWidthPanel = new JPanel();
  	FlowLayout flowLayout_2 = (FlowLayout) modStereoWidthPanel.getLayout();
@@ -367,6 +379,7 @@ public class ConfigWindow extends JFrame {
      config.setVoxFile((String)missionList.getSelectedValue());
      config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
      config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
+     config.setAudioBufferLag(chckbxBufferLag.isSelected());
      {HashSet<String>pList=new HashSet<String>();
      for(int i=0; i<podLM.getSize();i++)
 	 pList.add((String)podLM.getElementAt(i));
@@ -387,6 +400,7 @@ public class ConfigWindow extends JFrame {
  private void readSettingsToPanel(){
      modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
      chckbxLinearInterpolation.setSelected(config.isAudioLinearFiltering());
+     chckbxBufferLag.setSelected(config.isAudioBufferLag());
      
      missionLM.removeAllElements();
      for(String vox:config.getMissionList()){

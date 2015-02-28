@@ -37,7 +37,9 @@ public class TRConfiguration{
     		ACTIVE_AUDIO_DRIVER = "activeAudioDriver",
     		ACTIVE_AUDIO_DEVICE = "activeAudioDevice",
     		ACTIVE_AUDIO_OUTPUT = "activeAudioOutput",
-    		ACTIVE_AUDIO_FORMAT = "activeAudioFormat";
+    		ACTIVE_AUDIO_FORMAT = "activeAudioFormat",
+    		
+    		AUDIO_BUFFER_LAG    = "audioBufferLag";
     	
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
@@ -46,7 +48,7 @@ public class TRConfiguration{
     	private int targetFPS =60;
     	private String skipToLevel;
     	private String voxFile;
-    	private boolean audioLinearFiltering=false;
+    	private boolean audioLinearFiltering=false, audioBufferLag=true;
     	private HashSet<String> missionList = new HashSet<String>();
     	private String activeAudioDriver = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput",
     	               activeAudioDevice,
@@ -395,5 +397,20 @@ public class TRConfiguration{
 	public void removePropertyChangeListener(String propertyName,
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+
+	/**
+	 * @return the audioBufferLag
+	 */
+	public boolean isAudioBufferLag() {
+	    return audioBufferLag;
+	}
+
+	/**
+	 * @param audioBufferLag the audioBufferLag to set
+	 */
+	public void setAudioBufferLag(boolean audioBufferLag) {
+	    pcs.firePropertyChange(AUDIO_BUFFER_LAG, this.audioBufferLag, audioBufferLag);
+	    this.audioBufferLag = audioBufferLag;
 	}
 }//end TRConfiguration

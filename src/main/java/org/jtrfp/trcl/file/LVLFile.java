@@ -12,16 +12,25 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.jtrfp.jfdt.ClassInclusion;
 import org.jtrfp.jfdt.FailureBehavior;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.jtrfp.DataKey;
+import org.jtrfp.jtrfp.lvl.ILvlData;
 
-public class LVLFile extends SelfParsingFile {
+public class LVLFile extends SelfParsingFile implements ILvlData{
+    private static DataKey [] usedKeys; //jTRFP stuff.
+    
     LevelType levelType;
 
     String briefingTextFile;
@@ -549,5 +558,33 @@ public class LVLFile extends SelfParsingFile {
     public void setMissionEndTextFile(String missionEndTextFile) {
 	this.missionEndTextFile = missionEndTextFile;
     }
+    
+    //////// E X P E R I M E N T A L ///////////////////////////////////
+    @Override
+    public String getValue(DataKey key) {
+	try{return BeanUtils.getProperty(this, key.getIdentifier());}
+	catch(NoSuchMethodException e){return null;}
+	catch(InvocationTargetException e){return null;}
+	catch(IllegalAccessException e){return null;}
+    }//end getValue(...)
+    
+    private static DataKey [] getUsedKeysSingleton(){
+	if(usedKeys==null)
+	    usedKeys = generateUsedKeys();
+	return usedKeys;
+    }//end getUsedKeysSingleton()
+    
+    private static DataKey [] generateUsedKeys(){
+	ArrayList<DataKey> result = new ArrayList<DataKey>();
+	try{for(PropertyDescriptor pd:Introspector.getBeanInfo(LVLFile.class).getPropertyDescriptors())
+	    result.add(new DataKey(pd.getName(), pd.getDisplayName()));
+	}catch(Exception e){e.printStackTrace();}
+	return result.toArray(new DataKey[result.size()]);
+    }//end generateUsedKeys()
+
+    @Override
+    public DataKey[] getUsedKeys() {
+	return getUsedKeysSingleton();
+    }//end getUsedKeys()
 
 }// end LVLFile

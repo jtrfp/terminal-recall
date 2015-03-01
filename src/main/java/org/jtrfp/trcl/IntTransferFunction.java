@@ -14,4 +14,10 @@ package org.jtrfp.trcl;
 
 public interface IntTransferFunction {
     public int transfer(int input);
+    
+    public static final class Zero implements IntTransferFunction{
+	@Override
+	public int transfer(int input) {
+	    return 0;
+	}}
 }

@@ -244,6 +244,13 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	public AudioDevice getDevice() {
 	    return dev;
 	}
+	@Override
+	public AudioFormat getDefaultFormat() {
+	    final AudioFormat []formats = getFormats();
+	    if(formats.length==0)
+		return null;
+	    return getFormats()[0];
+	}
     }//end JavaSoundOutput
     
     private class JavaSoundDevice implements AudioDevice{
@@ -283,6 +290,13 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	public AudioDriver getDriver() {
 	    return driver;
 	}
+	@Override
+	public AudioOutput getDefaultOutput() {
+	    final Collection<? extends AudioOutput> outputs = getOutputs();
+	    if(outputs.size()<=0)
+		return null;
+	    return getOutputs().iterator().next();
+	}
     }//end JavaSoundDevice
 
     @Override
@@ -291,7 +305,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    if(dev.getUniqueName().contentEquals(name))
 		return dev;
 	System.err.println("Failed to find matching device for "+name);
-	return null;
+	return getDefaultDevice();
     }
 
     @Override
@@ -307,12 +321,6 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    JavaSoundOutput jso = (JavaSoundOutput)o;
 	    this.output = jso;
 	}else throw new RuntimeException("Unsupported AudioOutput type: "+o.getClass().getName()+" expecting JavaSoundOutput created by this driver.");
-    }
-
-    @Override
-    public synchronized AudioOutput getDefaultOutput() {
-	System.err.println("JavaSoundSystemAudioOutput.getDefaultOutput() not implemented.");
-	return null;
     }
     
     private void ensureSourceDataLineIsReleased(){
@@ -333,4 +341,11 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	super.finalize();
     }
 
+    @Override
+    public AudioDevice getDefaultDevice() {
+	final Collection<? extends AudioDevice> devices = getDevices();
+	if(devices.size()<=0)
+	    return null;
+	return devices.iterator().next();
+    }
 }//end JavaSoundSystemAudioOutput

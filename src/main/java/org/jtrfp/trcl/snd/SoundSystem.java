@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,14 +76,6 @@ public final class SoundSystem {
     
 
     public static final double DEFAULT_SFX_VOLUME = .3;
-    
-    public static final int  SAMPLE_RATE=44100;
-    //static final int         BUFFER_SIZE_FRAMES=4096*2;
-    public static final int  NUM_CHANNELS=2;
-    public static final int  BYTES_PER_SAMPLE=2;
-    private static final int SAMPLE_SIZE_BITS = BYTES_PER_SAMPLE*8;
-    public static final int  BYTES_PER_FRAME=BYTES_PER_SAMPLE*NUM_CHANNELS;
-    //private static final int BUFFER_SIZE_BYTES=BUFFER_SIZE_FRAMES*BYTES_PER_FRAME;
     private static final int NUM_BUFFER_ROWS=1;
     
     public SoundSystem(final TR tr) {
@@ -126,6 +117,10 @@ public final class SoundSystem {
 			    while(paused.get())
 				paused.wait();
 			}//end sync()
+			
+			while(getActiveFormat() == null || getActiveOutput() == null || getActiveDevice() == null)
+			    Thread.sleep(100);//Rolling loop waiting for valid state.
+			
 			renderPrep();
 			tr.getThreadManager().submitToGL(new Callable<Void>() {
 			    @Override
@@ -285,7 +280,7 @@ public final class SoundSystem {
     public SoundTexture newSoundTexture(final FloatBuffer samples, final int localSampleRate){
 	final GLTexture texture = tr.gpu.get().newTexture();
 	final int lengthInSamples = samples.remaining();
-	final double resamplingRatio = (double)SAMPLE_RATE / (double)localSampleRate;
+	final double resamplingRatio = (double)getActiveFormat().getFrameRate() / (double)localSampleRate;
 	final int numRows=(int)(Math.ceil((double)lengthInSamples / (double)SoundTexture.ROW_LENGTH_SAMPLES));
 	final int quantizedSize = numRows*SoundTexture.ROW_LENGTH_SAMPLES;
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
@@ -487,6 +482,10 @@ public final class SoundSystem {
      * @return the activeDriver
      */
     private AudioDriver getActiveDriver() {
+	if(activeDriver==null){
+            System.out.println("Overriding null driver to default...");
+            setActiveDriver(new JavaSoundSystemAudioOutput());
+        }//end if(null)
         return activeDriver;
     }
 
@@ -494,6 +493,8 @@ public final class SoundSystem {
      * @param activeDriver the activeDriver to set
      */
     private void setActiveDriver(AudioDriver activeDriver) {
+	if(this.activeDriver!=null)
+	    activeDriver.release();
         this.activeDriver = activeDriver;
         System.out.println("SoundSystem: Active Driver Set To "+activeDriver);
     }
@@ -502,6 +503,10 @@ public final class SoundSystem {
      * @return the activeDevice
      */
     private AudioDevice getActiveDevice() {
+	if(activeDevice==null){
+            System.out.println("Overriding null device to default...");
+            setActiveDevice(getActiveDriver().getDefaultDevice());
+        }//end if(null)
         return activeDevice;
     }
 
@@ -517,6 +522,8 @@ public final class SoundSystem {
      * @return the activeOutput
      */
     private AudioOutput getActiveOutput() {
+	if(activeOutput==null)
+	    activeOutput = getActiveDevice().getDefaultOutput();
         return activeOutput;
     }
 
@@ -526,14 +533,15 @@ public final class SoundSystem {
     private void setActiveOutput(AudioOutput activeOutput) {
         this.activeOutput = activeOutput;
         System.out.println("SoundSystem: Active Output Set To "+activeOutput);
-        if(activeDriver!=null)
-	    activeDriver.setOutput(activeOutput);
+	getActiveDriver().setOutput(activeOutput);
     }
 
     /**
      * @return the activeFormat
      */
-    private AudioFormat getActiveFormat() {
+    public AudioFormat getActiveFormat() {
+	if(activeFormat==null)
+	    getActiveOutput().getDefaultFormat();
         return activeFormat;
     }
 
@@ -652,14 +660,16 @@ public final class SoundSystem {
 	playbackTexture=null;
     }//end stalePlaybackTexture()
 
-    public ByteBuffer getGPUFloatBytes() {
+    private ByteBuffer getGPUFloatBytes() {
 	if(gpuFloatBytes==null)
-	    gpuFloatBytes = ByteBuffer.allocateDirect(
-		    getBufferSizeFrames()*4*getActiveFormat().getChannels()).order(ByteOrder.nativeOrder());
+	    setGPUFloatBytes(ByteBuffer.allocateDirect(
+		     getBufferSizeFrames()*4
+		     *getActiveFormat().getChannels())
+		    .order(ByteOrder.nativeOrder()));
 	return gpuFloatBytes;
     }
 
-    public void setGPUFloatBytes(ByteBuffer gpuFloatBytes) {
+    private void setGPUFloatBytes(ByteBuffer gpuFloatBytes) {
 	this.gpuFloatBytes = gpuFloatBytes;
     }
     

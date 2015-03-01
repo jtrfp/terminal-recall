@@ -19,6 +19,13 @@ public class LVLFileTest extends TestCase {
 	Assert.assertNotNull(subject);
 	is.close();
     }//end setUp()
+    
+    protected void tearDown() throws Exception {
+	/*Supposedly some testing suites keep a test object instantiated, 
+	 * meaning this stale ref could hang around for a while if not nulled.
+	 */
+	subject=null;
+    }
 
     public void testGetLevelEndVideoFile() {
 	Assert.assertEquals("leavingvideo.tvi", subject.getLevelEndVideoFile());

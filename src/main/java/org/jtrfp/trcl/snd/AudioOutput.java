@@ -20,4 +20,5 @@ public interface AudioOutput {
     public AudioFormat []getFormats();
     public AudioFormat getFormatFromUniqueName(String name);
     public AudioDevice getDevice();
+    public AudioFormat getDefaultFormat();
 }

@@ -114,7 +114,7 @@ public class SoundOutputSelector extends JPanel{
 	 AudioOutput ao = activeDevice.getOutputByName(outputName);
 	 System.out.println("activeOutput="+ao);
 	 if(ao!=null) activeDriver.setOutput(ao);
-	 else activeDriver.setOutput(ao = activeDriver.getDefaultOutput());
+	 else activeDriver.setOutput(ao = activeDevice.getDefaultOutput());
 	 
 	 if(ao!=null){
 	     String formatName = config.getActiveAudioFormat();

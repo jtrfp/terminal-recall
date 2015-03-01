@@ -24,7 +24,7 @@ public interface AudioDriver {
     public Collection<AudioDevice> getDevices();
     public AudioDevice getDeviceByName(String outputName);
     public void setOutput(AudioOutput o);
-    public AudioOutput getDefaultOutput();
     public void release();
     public void setBufferSizeFrames(int numFrames);
+    public AudioDevice getDefaultDevice();
 }

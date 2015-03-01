@@ -25,4 +25,6 @@ public interface AudioDevice {
     
     AudioDriver getDriver();
 
+    AudioOutput getDefaultOutput();
+
 }//end AudioDevice

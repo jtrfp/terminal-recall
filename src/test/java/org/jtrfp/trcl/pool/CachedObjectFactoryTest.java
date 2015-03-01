@@ -18,10 +18,6 @@ import junit.framework.TestCase;
 
 public class CachedObjectFactoryTest extends TestCase {
 
-    protected void setUp() throws Exception {
-	super.setUp();
-    }
-
     public void testGet() {
 	final boolean[] generated = new boolean[] { false };
 	CachedObjectFactory<String, String> subject = new CachedObjectFactory<String, String>() {

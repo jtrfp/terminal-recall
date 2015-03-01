@@ -24,6 +24,7 @@ public class LVLFileTest extends TestCase {
 	/*Supposedly some testing suites keep a test object instantiated, 
 	 * meaning this stale ref could hang around for a while if not nulled.
 	 */
+	super.tearDown();
 	subject=null;
     }
 

@@ -163,7 +163,7 @@ public class GPUResidentMOD {
     }
 
     private void recalculateRealtimeFramesPerRow() {
-	realtimeFramesPerRow = ((SoundSystem.SAMPLE_RATE*60) / bpm)/4;// 4 rows per beat (assuming 16th notes)
+	realtimeFramesPerRow = (int)(((tr.soundSystem.get().getActiveFormat().getFrameRate()*60) / bpm)/4);// 4 rows per beat (assuming 16th notes)
 	//TODO: 'speed'
     }
 

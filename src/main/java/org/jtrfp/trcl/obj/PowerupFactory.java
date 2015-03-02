@@ -28,7 +28,7 @@ public class PowerupFactory{
 	this.tr=tr;
 	parentGrid=new WeakReference<RenderableSpacePartitioningGrid>(pGrid);
 	for(int i=0; i<objects.length;i++){
-	    (objects[i]=new PowerupObject(type,tr.getWorld())).setVisible(false);
+	    (objects[i]=new PowerupObject(type,tr)).setVisible(false);
 	}//end for(objects)
     }//end constructor
     public PowerupObject spawn(double[] ds) {

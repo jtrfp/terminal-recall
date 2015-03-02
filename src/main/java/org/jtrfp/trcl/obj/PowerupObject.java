@@ -39,8 +39,8 @@ import org.jtrfp.trcl.snd.SoundTexture;
 public class PowerupObject extends BillboardSprite{
 	private final Powerup powerupType;
 	private final SoundTexture powerupSound;
-	public PowerupObject(Powerup pt, World world){
-		super(world.getTr());
+	public PowerupObject(Powerup pt, TR tr){
+		super(tr);
 		setBillboardSize(new Dimension(20000,20000));
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
@@ -66,7 +66,7 @@ public class PowerupObject extends BillboardSprite{
 			setTexture(desc,true);}//end try{}
 		catch(Exception e)
 			{e.printStackTrace();}
-		powerupSound=world.getTr().getResourceManager().soundTextures.get("POWER-1.WAV");
+		powerupSound=tr.getResourceManager().soundTextures.get("POWER-1.WAV");
 		}//end constructor
 
 	private class PowerupBehavior extends Behavior implements CollisionBehavior{

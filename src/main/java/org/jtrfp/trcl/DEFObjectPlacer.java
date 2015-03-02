@@ -34,18 +34,18 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class DEFObjectPlacer implements ObjectPlacer{
 	private DEFFile def;
-	private World world;
 	private List<DEFObject> defList;
 	private Vector3D headingOverride=null;
 	private final LoadingProgressReporter rootReporter;
 	private final ArrayList<EnemyIntro> enemyIntros = new ArrayList<EnemyIntro>();
 	private final HashMap<EnemyDefinition,WorldObject> enemyPlacementMap = new HashMap<EnemyDefinition,WorldObject>();
+	private final TR tr;
 	
-	public DEFObjectPlacer(DEFFile def, World world, LoadingProgressReporter reporter)
-		{this.def=def;this.world=world;this.rootReporter=reporter;}
-	public DEFObjectPlacer(DEFFile defFile, World w,
+	public DEFObjectPlacer(DEFFile def, TR tr, LoadingProgressReporter reporter)
+		{this.def=def;this.tr=tr;this.rootReporter=reporter;}
+	public DEFObjectPlacer(DEFFile defFile, TR tr,
 		List<DEFObject> defList, LoadingProgressReporter defObjectReporter) {
-	    this(defFile,w,defObjectReporter);
+	    this(defFile,tr,defObjectReporter);
 	    this.defList=defList;
 	}//end constructor
 	@Override
@@ -53,7 +53,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
 		final List<EnemyPlacement> places = def.getEnemyPlacements();
 		final Model [] models = new Model[defs.size()];
-		final TR tr = world.getTr();
+		//final TR tr = world.getTr();
 		final LoadingProgressReporter[] defReporters = rootReporter
 			.generateSubReporters(defs.size());
 		final LoadingProgressReporter[] placementReporters = rootReporter
@@ -84,7 +84,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				//USING  z,x coords
 				final double [] objPos = obj.getPosition();
 				objPos[0]= TR.legacy2Modern	(pl.getLocationOnMap().getZ())+positionOffset.getX();
-				objPos[1]=(TR.legacy2Modern	(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*world.sizeY+positionOffset.getY();
+				objPos[1]=(TR.legacy2Modern	(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*tr.getWorld().sizeY+positionOffset.getY();
 				objPos[2]= TR.legacy2Modern	(pl.getLocationOnMap().getX())+positionOffset.getZ();
 				obj.notifyPositionChange();
 				

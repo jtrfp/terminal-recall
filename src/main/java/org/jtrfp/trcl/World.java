@@ -16,18 +16,14 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.ObjectDirection;
 
 public final class World {
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize;
     private final Renderer renderer;
-    private static final int blockGranularity = 8;// Dim-Segments per diameter.
-						  // should
-    private final TR tr;
+    private static final int blockGranularity = 8;//Dim segs / diameter
 
     public World(double sizeX, double sizeY, double sizeZ,
 	    double cameraViewDepth, TR tr) {
-	this.tr = tr;
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 	this.sizeZ = sizeZ;
@@ -39,15 +35,4 @@ public final class World {
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 		sizeY / 3.15, camera.getCameraPosition().getZ()));
     }// end constructor
-
-    public void setCameraDirection(ObjectDirection dir) {
-	renderer.getCamera().setLookAtVector(dir.getHeading());
-	renderer.getCamera().setUpVector(dir.getTop());
-    }
-    /**
-     * @return the tr
-     */
-    public TR getTr() {
-	return tr;
-    }
 }// World

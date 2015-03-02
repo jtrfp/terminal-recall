@@ -26,7 +26,7 @@ public class PUPObjectPlacer implements ObjectPlacer {
     ArrayList<PowerupObject> objs = new ArrayList<PowerupObject>();
     private final LoadingProgressReporter []placementReporters;
 
-    public PUPObjectPlacer(PUPFile pupFile, World world, LoadingProgressReporter pupObjectReporter) {
+    public PUPObjectPlacer(PUPFile pupFile, TR tr, LoadingProgressReporter pupObjectReporter) {
 	final LoadingProgressReporter[] locationReporters = pupObjectReporter
 		.generateSubReporters(pupFile.getPowerupLocations().length);
 	placementReporters = pupObjectReporter
@@ -34,11 +34,11 @@ public class PUPObjectPlacer implements ObjectPlacer {
 	int pupIndex=0;
 	for (PowerupLocation loc : pupFile.getPowerupLocations()) {
 	    locationReporters[pupIndex++].complete();
-	    PowerupObject powerup = new PowerupObject(loc.getType(), world);
+	    PowerupObject powerup = new PowerupObject(loc.getType(), tr);
 	    final double[] pupPos = powerup.getPosition();
 	    pupPos[0] = TR.legacy2Modern(loc.getZ());
 	    pupPos[1] = (TR.legacy2Modern(loc.getY()) / TR.mapWidth) * 16.
-		    * world.sizeY;
+		    * tr.getWorld().sizeY;
 	    pupPos[2] = TR.legacy2Modern(loc.getX());
 	    powerup.notifyPositionChange();
 	    objs.add(powerup);

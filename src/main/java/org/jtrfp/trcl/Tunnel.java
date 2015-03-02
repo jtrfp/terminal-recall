@@ -97,7 +97,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	Vector3D tunnelEnd = null;
 	deactivate();// Sleep until activated by tunnel entrance
 	try {
-	    lvl = world.getTr().getResourceManager()
+	    lvl = tr.getResourceManager()
 		    .getLVL(sourceTunnel.getTunnelLVLFile());
 	    final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
 	    palette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
@@ -117,7 +117,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	add(exitObject);
 	// X is tunnel depth, Z is left-right
 	try {
-	    objectSystem = new ObjectSystem(this, world, lvl, null, Vector3D.MINUS_I,
+	    objectSystem = new ObjectSystem(this, tr, lvl, null, Vector3D.MINUS_I,
 		    TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET),
 		    reporters[1]);
 	} catch (Exception e) {
@@ -226,7 +226,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
 		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
 		    1, 1, tr);
-	    wo = new WorldObject(world.getTr(), m);
+	    wo = new WorldObject(tr, m);
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(top);

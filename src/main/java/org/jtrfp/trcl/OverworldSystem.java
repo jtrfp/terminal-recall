@@ -86,7 +86,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");
-	    objectSystem = new ObjectSystem(this, w, lvl, defList,
+	    objectSystem = new ObjectSystem(this, tr, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
 	    objectSystem.activate();
 	    terrainSystem.activate();

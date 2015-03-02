@@ -12,34 +12,28 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.awt.Color;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.ObjectDirection;
 
-public final class World extends RenderableSpacePartitioningGrid {
-    double sizeX;
-    public double sizeY;
-    double sizeZ;
+public final class World {
+    public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize;
     private final Renderer renderer;
-    //private final AtomicBoolean	visibilityRefreshAlreadyRequested = new AtomicBoolean();
     private static final int blockGranularity = 8;// Dim-Segments per diameter.
 						  // should
-    private Color fogColor = Color.black;
     private final TR tr;
 
     public World(double sizeX, double sizeY, double sizeZ,
 	    double cameraViewDepth, TR tr) {
-	super(sizeX, sizeY, sizeZ, cameraViewDepth / (double) blockGranularity,
-		cameraViewDepth);
 	this.tr = tr;
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 	this.sizeZ = sizeZ;
+	this.gridBlockSize = cameraViewDepth / (double) blockGranularity;
 	this.renderer=tr.mainRenderer.get();
+	this.viewDepth = cameraViewDepth;
 	renderer.getCamera().setViewDepth(cameraViewDepth);
 	Camera camera = renderer.getCamera();
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
@@ -50,34 +44,6 @@ public final class World extends RenderableSpacePartitioningGrid {
 	renderer.getCamera().setLookAtVector(dir.getHeading());
 	renderer.getCamera().setUpVector(dir.getTop());
     }
-    
-    @Override
-    public void notifyBranchAdded(SpacePartitioningGrid b){//TODO: Optimized branch append.
-	notifyBranchRemoved(b);
-    }//end notifyBranchAdded(...)
-    
-    @Override
-    public void notifyBranchRemoved(SpacePartitioningGrid b){
-	//tr.getThreadManager().visibilityCalc();
-	/*
-	if(!visibilityRefreshAlreadyRequested.getAndSet(true)){
-	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    tr.getThreadManager().visibilityCalc();
-		    return null;
-		}});
-	}//end if(!alreadyRequested)
-	*/
-    }//end notifyBranchRemoved(...)
-
-    /**
-     * @return the fogColor
-     */
-    public Color getFogColor() {
-	return fogColor;
-    }
-
     /**
      * @return the tr
      */

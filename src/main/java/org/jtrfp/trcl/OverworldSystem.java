@@ -48,9 +48,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private		ObjectSystem objectSystem;
     private            TerrainSystem terrainSystem;
 
-    public OverworldSystem(World w, final LoadingProgressReporter progressReporter) {
-	super(w);
-	this.tr = w.getTr();
+    public OverworldSystem(TR tr, final LoadingProgressReporter progressReporter) {
+	super(tr.getDefaultGrid());
+	this.tr = tr;
 	final LoadingProgressReporter []reporters = progressReporter.generateSubReporters(256);
 	terrainReporter	= reporters[0];
 	cloudReporter 	= reporters[1];

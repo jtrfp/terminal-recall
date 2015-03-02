@@ -29,6 +29,8 @@ import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.OutputDump;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.RootGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
@@ -80,6 +82,7 @@ public final class TR{
 	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
 	private final World 					world;
 	private final GameShell					gameShell;
+	private RenderableSpacePartitioningGrid			defaultGrid;
 	
 	public final TRConfiguration 		config = TRConfiguration.getConfig();
 	
@@ -171,7 +174,7 @@ public final class TR{
 				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		
 		final Renderer renderer = mainRenderer.get();
-		renderer.setRootGrid(world);//TODO: replace with Camera objects?
+		renderer.setRootGrid(getDefaultGrid());//TODO: replace with Camera objects?
 		renderer.setCollisionManager(getCollisionManager());
 		getThreadManager().addRepeatingGLTask(renderer.render);
 		
@@ -447,5 +450,14 @@ public final class TR{
      */
     public MenuSystem getMenuSystem() {
         return menuSystem;
+    }
+
+    /**
+     * @return the defaultGrid
+     */
+    public RenderableSpacePartitioningGrid getDefaultGrid() {
+	if(defaultGrid==null)
+	    defaultGrid = new RootGrid(world.sizeX,world.sizeY,world.sizeZ,world.gridBlockSize,world.viewDepth);
+        return defaultGrid;
     }
 }//end TR

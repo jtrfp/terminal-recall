@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 
 public class CollisionManager {
@@ -38,9 +38,9 @@ public class CollisionManager {
 	System.out.println("CollisionManager.updateCollisionList() "+collideable.size());
 	synchronized(collideable){
 	collideable.clear();
-	final World world = tr.getWorld();
-	    if (world != null) {
-		world.itemsWithinRadiusOf(tr.mainRenderer.get().getCamera()
+	final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
+	    if (grid != null) {
+		grid.itemsWithinRadiusOf(tr.mainRenderer.get().getCamera()
 			.getCameraPosition(),
 			new Submitter<PositionedRenderable>() {
 			    @Override

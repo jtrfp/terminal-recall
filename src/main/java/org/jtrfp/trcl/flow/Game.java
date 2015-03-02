@@ -99,7 +99,7 @@ public class Game {
 	setTr(tr);
 	setVox(vox);
 	redFlash = new RedFlash(tr);
-	tr.getWorld().add(redFlash);
+	tr.getDefaultGrid().add(redFlash);
 	if (!tr.config.isDebugMode())
 	    setupNameWithUser();
     }// end constructor
@@ -259,22 +259,22 @@ public class Game {
 		NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 		upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 			    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
-		earlyLoadingScreen = new EarlyLoadingScreen(tr.getWorld(), tr, greenFont);
+		earlyLoadingScreen = new EarlyLoadingScreen(tr.getDefaultGrid(), tr, greenFont);
 		earlyLoadingScreen.setStatusText("Reticulating Splines...");
 		earlyLoadingMode = new Object []{
 			earlyLoadingScreen
 		};
 		displayModes.setDisplayMode(earlyLoadingMode);
 		
-		upfrontDisplay = new UpfrontDisplay(tr.getWorld(),tr);
+		upfrontDisplay = new UpfrontDisplay(tr.getDefaultGrid(),tr);
 		
 		satDashboard = new SatelliteDashboard(tr);
 		satDashboard.setVisible(false);
-		tr.getWorld().add(satDashboard);
+		tr.getDefaultGrid().add(satDashboard);
 		
-		hudSystem = new HUDSystem(tr.getWorld(),greenFont);
+		hudSystem = new HUDSystem(tr,greenFont);
 		hudSystem.deactivate();
-		navSystem = new NAVSystem(tr.getWorld(), tr);
+		navSystem = new NAVSystem(tr.getDefaultGrid(), tr);
 		navSystem.deactivate();
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
@@ -311,10 +311,10 @@ public class Game {
 		    final Camera camera = tr.mainRenderer.get().getCamera();
 		    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 		    camera.probeForBehavior(MatchDirection.class).setTarget(player);
-		    tr.getWorld().add(player);
+		    tr.getDefaultGrid().add(player);
 		    System.out.println("\t...Done.");
-		    levelLoadingScreen	= new LevelLoadingScreen(tr.getWorld(),tr);
-		    briefingScreen	= new BriefingScreen(tr.getWorld(),tr,greenFont);
+		    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
+		    briefingScreen	= new BriefingScreen(tr.getDefaultGrid(),tr,greenFont);
 		    earlyLoadingScreen.setStatusText("Ready.");
 		    levelLoadingMode = new Object[]{
 			 levelLoadingScreen,
@@ -403,7 +403,7 @@ public class Game {
 	if(tr.getResourceManager().getExplosionFactory()!=null)
 	    tr.getResourceManager().getExplosionFactory().deactivate();
 	if(player!=null)
-	 tr.getWorld().remove(player);
+	 tr.getDefaultGrid().remove(player);
 	TR.nuclearGC();
     }
 

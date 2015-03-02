@@ -160,7 +160,7 @@ public class Mission {
 		return missionEnd[0]; 
 	    }
 	    
-	    overworldSystem = new OverworldSystem(world,
+	    overworldSystem = new OverworldSystem(tr,
 		    progressStages[LoadingStages.overworld.ordinal()]);
 	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
@@ -423,7 +423,7 @@ public class Mission {
 
     private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
 	    LoadingProgressReporter reporter) {
-	final Tunnel result = new Tunnel(tr.getWorld(), tun, reporter);
+	final Tunnel result = new Tunnel(tr, tun, reporter);
 	DirectionVector v = tun.getEntrance();
 	tunnelsRemaining.add(result);
 	addTunnelEntrance(new Point(

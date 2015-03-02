@@ -22,7 +22,7 @@ public class EngineTests {
 
     private static void preClean(TR tr){
 	tr.abortCurrentGame();
-	tr.getWorld().removeAll();
+	tr.getDefaultGrid().removeAll();
     }
     public static void singlet(TR tr, int numInstances) {
 	final TextureDescription test = tr.getResourceManager().getTestTexture();
@@ -35,7 +35,7 @@ public class EngineTests {
 	    wo.setPosition(new double[] { (i%sideLen)*diameter-1+off, (i/sideLen)*diameter-1+off, .01 });
 	    wo.setActive(true);
 	    wo.setVisible(true);
-	    tr.getWorld().add(wo);
+	    tr.getDefaultGrid().add(wo);
 	}//end for(numInstances)
     }//end singlet(tr)
     
@@ -51,7 +51,7 @@ public class EngineTests {
 	    wo.setPosition(new double[] { OFF+((double)i)*INCREMENT,OFF+((double)i)*INCREMENT, .01*(double)i });
 	    wo.setActive(true);
 	    wo.setVisible(true);
-	    tr.getWorld().add(wo);
+	    tr.getDefaultGrid().add(wo);
 	}//end for(numInstances)
     }
 }//end EngineTests

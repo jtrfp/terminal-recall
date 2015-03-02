@@ -84,13 +84,13 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     public static final Vector3D TUNNEL_OBJECT_POS_OFFSET = new Vector3D(0, 0,
 	    -2 * TR.mapSquareSize);
 
-    public Tunnel(World world, TDFFile.Tunnel sourceTunnel,
+    public Tunnel(TR tr, TDFFile.Tunnel sourceTunnel,
 	    LoadingProgressReporter rootReporter) {
-	super(world);
-	this.world	  = world;
+	super(tr.getDefaultGrid());
+	this.world	  = tr.getWorld();
 	reporters	  = rootReporter.generateSubReporters(2);
 	this.sourceTunnel = sourceTunnel;
-	tr 		  = world.getTr();
+	this.tr           = tr;
 	gl 		  = tr.gpu.get().getGl();
 	tunnelAssemblyReporter 
 	  		  = reporters[0];

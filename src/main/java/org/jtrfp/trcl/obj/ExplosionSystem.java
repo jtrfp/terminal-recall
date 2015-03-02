@@ -29,7 +29,7 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
     	private final int [] indices = new int[ExplosionType.values().length];
     	
 	public ExplosionSystem(TR tr){
-	    super(tr.getWorld());
+	    super(tr.getDefaultGrid());
 	    this.tr=tr;
 	    int i;
 	    for(ExplosionType t:ExplosionType.values()){

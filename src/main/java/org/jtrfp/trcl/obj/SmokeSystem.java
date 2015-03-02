@@ -28,7 +28,7 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
     	private final Smoke[][] allSmokes = new Smoke[SmokeType.values().length][];
     	private final int [] indices = new int[SmokeType.values().length];
 	public SmokeSystem(TR tr){
-	    super(tr.getWorld());
+	    super(tr.getDefaultGrid());
 	    this.tr=tr;
 	    int i;
 	    for(SmokeType t:SmokeType.values()){

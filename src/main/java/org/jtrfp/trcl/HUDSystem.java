@@ -40,10 +40,9 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final Crosshairs	  crosshairs;
     
 
-    public HUDSystem(World world, GLFont font) throws IOException {
-	super(world);
+    public HUDSystem(TR tr, GLFont font) throws IOException {
+	super(tr.getDefaultGrid());
 	// Dash Text
-	final TR tr = world.getTr();
 	final ResourceManager rm = tr.getResourceManager();
 	final double TOP_LINE_Y = .93;
 	final double BOTTOM_LINE_Y = .82;

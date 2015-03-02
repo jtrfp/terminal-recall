@@ -23,6 +23,8 @@ import java.util.WeakHashMap;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.Positionable;
 
+import com.ochafik.util.Adapter;
+
 public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
 	private int 				squaresX, squaresY, squaresZ;
@@ -39,6 +41,35 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 				rawDia,
 				rawDiaX,rawDiaY,rawDiaZ,
 				xProgression,yProgression,zProgression;
+	private final Adapter<Vector3D,Integer> cubeSpaceRasterizer = new Adapter<Vector3D,Integer>(){
+	    @Override
+	    public Integer adapt(Vector3D value) {
+		return (int)(
+			value.getX()+
+			value.getY()*squaresX+
+			value.getZ()*squaresX*squaresY);
+	    }//end adapt()
+
+	    @Override
+	    public Vector3D reAdapt(Integer value) {
+		// TODO Auto-generated method stub
+		return null;
+	    }};
+
+	    private final Adapter<Vector3D,Integer> worldSpaceRasterizer = new Adapter<Vector3D,Integer>(){
+		@Override
+		public Integer adapt(Vector3D value) {
+		    return (int)(
+			    (int)absMod(Math.round(value.getX()/getSquareSize()),squaresX)+
+			    (int)absMod(Math.round(value.getY()/getSquareSize()),squaresY)*squaresX+
+			    (int)absMod(Math.round(value.getZ()/getSquareSize()),squaresZ)*squaresX*squaresY);
+		}//end adapt()
+
+		@Override
+		public Vector3D reAdapt(Integer value) {
+		    // TODO Auto-generated method stub
+		    return null;
+		}};
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
 		{setParentGrid(parentGrid);}
@@ -50,6 +81,14 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		g.addBranch(this);
 	}
     }//end activate()
+    
+    public Adapter<Vector3D,Integer> getCubeSpaceRasterizer(){
+	return cubeSpaceRasterizer;
+    }
+    
+    public Adapter<Vector3D,Integer> getWorldSpaceRasterizer(){
+	return worldSpaceRasterizer;
+    }
 
     public void deactivate() {
 	if (parentGrid != null) {
@@ -124,8 +163,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		xProgression=1;
 		}//end allocateSquares()
 	
-	private int space2Flat(int x, int y ,int z)
-		{return (int)(x+y*squaresX+z*squaresX*squaresY);}
 	public synchronized void add(E objectWithPosition){
 	    	//Figure out where it goes
 	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
@@ -146,7 +183,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	public void cubesWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<List<E>> submitter){
 	    recursiveAlwaysVisibleGridCubeSubmit(submitter);
 	    final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
-		int startRaw = world2Flat(startPoint[0],startPoint[1],startPoint[2]);
+		int startRaw = worldSpaceRasterizer.adapt(new Vector3D(startPoint[0],startPoint[1],startPoint[2]));
 		
 		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
 		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
@@ -166,7 +203,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		recursiveAlwaysVisibleSubmit(submitter);
 		
 		final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
-		int startRaw = world2Flat(startPoint[0],startPoint[1],startPoint[2]);
+		int startRaw = worldSpaceRasterizer.adapt(new Vector3D(startPoint[0],startPoint[1],startPoint[2]));
 		
 		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
 		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
@@ -292,13 +329,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		this.viewingRadius = viewingRadius;
 		}
 
-	public int world2Flat(double x, double y, double z) {
-	    return space2Flat(
-		    (int)absMod(Math.round(x/getSquareSize()),squaresX),
-		    (int)absMod(Math.round(y/getSquareSize()),squaresY),
-		    (int)absMod(Math.round(z/getSquareSize()),squaresZ));
-	}
-
 	public void removeDirect(int flatPos, E objectWithPosition) {
 	    List<E> list = elements[flatPos];
 	    if(list==null)
@@ -320,7 +350,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 
 	public List<E> world2List(double x, double y,
 		double z, boolean newListIfNull) {
-	    final int pos = world2Flat(x,y,z);
+	    final int pos = worldSpaceRasterizer.adapt(new Vector3D(x,y,z));
 	    List<E> result = elements[pos];
 	    if(newListIfNull && result==null)
 		result = elements[pos] = new ArrayList<E>(8);

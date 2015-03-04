@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BriefingScreen;
+import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
@@ -33,7 +34,6 @@ import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
-import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;

@@ -13,13 +13,12 @@
 package org.jtrfp.trcl;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.Camera;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 
 public final class World {
-    public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize;
-    private final Renderer renderer;
+    public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
+    private final TR tr;
     private static final int blockGranularity = 8;//Dim segs / diameter
 
     public World(double sizeX, double sizeY, double sizeZ,
@@ -27,12 +26,22 @@ public final class World {
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 	this.sizeZ = sizeZ;
-	this.gridBlockSize = cameraViewDepth / (double) blockGranularity;
-	this.renderer=tr.mainRenderer.get();
-	this.viewDepth = cameraViewDepth;
-	renderer.getCamera().setViewDepth(cameraViewDepth);
-	Camera camera = renderer.getCamera();
+	this.tr    = tr;
+	this.cameraViewDepth = cameraViewDepth;
+	this.gridBlockSize   = cameraViewDepth / (double) blockGranularity;
+	this.viewDepth       = cameraViewDepth;
+	
+    }// end constructor
+    
+    public RootGrid newRootGrid(){
+	return new RootGrid(sizeX,sizeY,sizeZ,gridBlockSize,cameraViewDepth);
+    }
+    
+    public Camera newCamera(){
+	final Camera camera = new Camera(tr.gpu.get());
+	camera.setViewDepth(cameraViewDepth);
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 		sizeY / 3.15, camera.getCameraPosition().getZ()));
-    }// end constructor
+	return camera;
+    }
 }// World

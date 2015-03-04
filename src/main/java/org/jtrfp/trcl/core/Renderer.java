@@ -25,6 +25,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
@@ -73,7 +74,7 @@ public final class Renderer {
 	this.factory=factory;
 	this.gpu = factory.getGPU();
 	final TR tr = gpu.getTr();
-	this.camera = new Camera(gpu);
+	this.camera = tr.getWorld().newCamera();
 	final GL3 gl = gpu.getGl();
 	
 	System.out.println("...Done.");

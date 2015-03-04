@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl;
 
 import java.awt.Component;
 import java.beans.PropertyChangeSupport;
@@ -27,6 +27,7 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
@@ -37,7 +38,9 @@ import com.ochafik.util.listenable.ListenableCollection;
 
 public class Camera extends WorldObject implements RelevantEverywhere{
     	//// PROPERTIES
-    	public static final String FOG_ENABLED = "fogEnabled";
+    	public static final String FOG_ENABLED        = "fogEnabled";
+    	public static final String FLAT_CUBE_POSITION = "flatCubePosition";
+    	public static final String ROOT_GRID          = "rootGrid";
     
 	private volatile  RealMatrix completeMatrix;
 	private volatile  double viewDepth;
@@ -50,8 +53,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
 		new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
+	private SpacePartitioningGrid rootGrid;
 
-    public Camera(GPU gpu) {
+    Camera(GPU gpu) {
 	super(gpu.getTr());
 	this.gpu = gpu;
 	addBehavior(new MatchPosition().setEnable(true));
@@ -233,5 +237,20 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	 */
 	public void setRelevanceRadius(double relevanceRadius) {
 	    this.relevanceRadius = relevanceRadius;
+	}
+
+	/**
+	 * @return the rootGrid
+	 */
+	public SpacePartitioningGrid getRootGrid() {
+	    return rootGrid;
+	}
+
+	/**
+	 * @param rootGrid the rootGrid to set
+	 */
+	public void setRootGrid(SpacePartitioningGrid rootGrid) {
+	    pcs.firePropertyChange(ROOT_GRID, this.rootGrid, rootGrid);
+	    this.rootGrid = rootGrid;
 	}
 }//end Camera

@@ -335,10 +335,14 @@ if(color.a > ALPHA_THRESHOLD){
   vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
   vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(opaquePrimID)) ,true,_uvzw.w);
-  color = reverseBlend(oColor,color,oColor.a);
+  oColor = vec4(mix(texture(cubeTexture,norm).rgb,oColor.rgb,oColor.a),1);
+  color.rgb = reverseBlend(oColor,color,oColor.a).rgb;
   }//end if(written)
+ else{//Sky
+  color.rgb = mix(color.rgb,texture(cubeTexture,norm).rgb,color.a);
+  }
  }//end if(visible)
-if(color.a>ALPHA_THRESHOLD && bypassAlpha==0u)
+if(color.a>ALPHA_THRESHOLD && bypassAlpha==0u && color.a > 1234)//TODO: Is bypassAlpha being used anymore?
  gl_FragColor.rgb = mix(color.rgb,texture(cubeTexture,norm).rgb,color.a);
 else gl_FragColor.rgb = color.rgb;
 }//end main()

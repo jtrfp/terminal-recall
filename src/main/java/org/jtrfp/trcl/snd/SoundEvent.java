@@ -23,10 +23,10 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.core.TR;
 
 public interface SoundEvent {
-    public long getStartRealtimeSamples();
-    public long getEndRealtimeSamples();
-    public long getDurationRealtimeSamples();
-    public void apply(GL3 gl, long bufferStartTimeFrames);
+    public double getStartRealtimeSeconds();
+    public double getEndRealtimeSeconds();
+    public double getDurationRealtimeSeconds();
+    public void apply(GL3 gl, double bufferStartTimeSeconds);
     public Factory getOrigin();
     public boolean isActive();
     public void activate();
@@ -36,7 +36,7 @@ public interface SoundEvent {
     public boolean isDestroyed();
     
     public interface Factory{
-	public void apply(GL3 gl, Collection<SoundEvent> events, long bufferStartTimeFrames);
+	public void apply(GL3 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds);
 	public TR getTR();
     }//end Factory
 }//end PlaybackEvent

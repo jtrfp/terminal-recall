@@ -25,7 +25,7 @@ import javax.media.opengl.GL3;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.Camera;
+import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -41,15 +41,15 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final double[] pan;
     private final double playbackRatio;
     
-    private SamplePlaybackEvent(SoundTexture tex, long startTimeSamples,
+    private SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
 		double[] pan, Factory origin, SoundEvent parent) {
-	    this(tex,startTimeSamples,pan,origin,parent,1);
+	    this(tex,startTimeSeconds,pan,origin,parent,1);
 	}//end constructor
 
-    public SamplePlaybackEvent(SoundTexture tex, long startTimeSamples,
+    public SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
 	    double[] pan, Factory origin,
 	    SoundEvent parent, double playbackRatio) {
-	super(startTimeSamples, tex.getLengthInRealtimeSamples(), origin,
+	super(startTimeSeconds, tex.getLengthInRealtimeSeconds(), origin,
 		parent);
 	soundTexture = tex;
 	this.pan = pan;
@@ -71,16 +71,18 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     }
 
     @Override
-    public void apply(GL3 gl, long bufferStartTimeFrames) {
+    public void apply(GL3 gl, double bufferStartTimeSeconds) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
 	origin.getPanU().set((float)getPan()[0], (float)getPan()[1]);//Pan center
-	final int bufferSizeFrames = this.getOrigin().getTR().soundSystem.get().getBufferSizeFrames();
-	final double startTimeInBuffers=((double)(getStartRealtimeSamples()-bufferStartTimeFrames)/(double)bufferSizeFrames)*2-1;
-	origin.getNumRowsU().setui((int)getSoundTexture().getNumRows());
+	final SoundSystem ss           = this.getOrigin().getTR().soundSystem.get();
+	final double bufferSizeSeconds = ss.getBufferSizeSeconds(),
+	             startTimeInBuffers=((getStartRealtimeSeconds()-bufferStartTimeSeconds)/(double)bufferSizeSeconds)*2-1,
+	             lengthPerRow      = getSoundTexture().getLengthPerRowSeconds();
+	final int    lengthInSegments  = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
+	origin.getNumRowsU().setui(getSoundTexture().getNumRows());
 	origin.getStartU().set((float)startTimeInBuffers);
 	origin.getLengthPerRowU()
-	 .set(((float)((double)SoundTexture.ROW_LENGTH_SAMPLES/(double)bufferSizeFrames))*2*(float)getSoundTexture().getResamplingScalar()/(float)playbackRatio);
-	final int lengthInSegments = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
+	 .set((float)((2/playbackRatio)*(lengthPerRow/bufferSizeSeconds)));
 	getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
 	gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
     }//end apply(...)
@@ -116,7 +118,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	}//end constructor
 
 	@Override
-	public void apply(GL3 gl, Collection<SoundEvent> events, long bufferStartTimeFrames) {
+	public void apply(GL3 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds) {
 	    gl.glLineWidth(1);
 	    gl.glDisable(GL3.GL_LINE_SMOOTH);
 	    gl.glDisable(GL3.GL_CULL_FACE);
@@ -127,9 +129,8 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    gl.glBlendFunc(GL3.GL_ONE, GL3.GL_ONE);
 	    soundProgram.use();
 	    soundTextureU.set((int)0);
-	    for(SoundEvent ev:events){
-		ev.apply(gl, bufferStartTimeFrames);
-	    }
+	    for(SoundEvent ev:events)
+		ev.apply(gl, bufferStartTimeSeconds);
 	    //Cleanup
 	    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	    gl.glDisable(GL3.GL_BLEND);
@@ -138,25 +139,26 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar){
 	    final double UNIT_FACTOR = TR.mapSquareSize*8;
 	    final double dist = Vect3D.distance(source, dest.getPosition());
-	    final double unitDist = dist/UNIT_FACTOR;
+	    final double unitDist    = dist/UNIT_FACTOR;
 	    final double vol = Misc.clamp(1./Math.pow(unitDist, 2),
 		    0,1)*volumeScalar;
-	    final double [] work = new double[3];
-	    final double [] destPos = dest.getPosition();
+	    final double [] work     = new double[3];
+	    final double [] destPos  = dest.getPosition();
 	    Vect3D.subtract(source, destPos, work);
 	    Rotation rot;
 	    try{rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);}
 	    catch(MathArithmeticException e){rot = new Rotation(Vector3D.PLUS_K, 0);}//Default if given weird top/heading.
 	    final Vector3D localDir = rot.applyTo(new Vector3D(work)).normalize();
-	    final double pFactor = (localDir.getX()+1)/2;
+	    final double   pFactor  = (localDir.getX()+1)/2;
 	    assert !Vect3D.isAnyNaN(source);
-	    final double [] pan = new double[]{vol*pFactor,vol*(1-pFactor)};
-	    final SoundSystem ss = getTR().soundSystem.get();
-	    final double modSamples = (System.currentTimeMillis()*getTR().soundSystem.get().getSamplesPerMilli())%ss.getBufferSizeFrames();
-	    final long delay = (long)(dist*.01+Math.random()*10);// .01 ms per world unit, temporal dither to avoid phasiness
-	    final long startTime = (long)(ss.getCurrentBufferFrameCounter()+modSamples)+delay;
+	    final double [] pan     = new double[]{vol*pFactor,vol*(1-pFactor)};
+	    final SoundSystem ss    = getTR().soundSystem.get();
+	    final double modSamples = ((double)System.currentTimeMillis()%(ss.getBufferSizeSeconds()*1000.)) /1000.;
+	    // Temporal dither to avoid phasiness
+	    final long   delay      = (long)(dist*.000001+Math.random()*.0005);
+	    final double startTime  = ss.getCurrentFrameBufferTimeCounter()+modSamples+delay;
 	    return create(tex,startTime,pan);
-	}
+	}//end create(...)
 	
 	public SamplePlaybackEvent create(SoundTexture tex, WorldObject source, Camera dest, double volumeScalar){
 	    return create(tex,source.getPosition(),dest,volumeScalar);
@@ -164,21 +166,21 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] pan){
 	    final SoundSystem ss = getTR().soundSystem.get();
-	    final double modSamples = (System.currentTimeMillis()*ss.getSamplesPerMilli())%ss.getBufferSizeFrames();
-	    return create(tex,(long)(ss.getCurrentBufferFrameCounter()+modSamples),pan);
+	    final double modSeconds = (((double)System.currentTimeMillis())%(ss.getBufferSizeSeconds()*1000))/1000.;
+	    return create(tex,(ss.getCurrentFrameBufferTimeCounter()+modSeconds),pan);
 	}
 	
-	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
+	public SamplePlaybackEvent create(SoundTexture tex, double startTimeSeconds,
 		double[] pan){
-	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,this,null);
+	    return new SamplePlaybackEvent(tex,startTimeSeconds,pan,this,null);
 	}//end create(...)
-	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
+	public SamplePlaybackEvent create(SoundTexture tex, double startTimeSeconds,
 		double[] pan, SoundEvent parent){
-	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,this,parent);
+	    return new SamplePlaybackEvent(tex,startTimeSeconds,pan,this,parent);
 	}//end create(...)
-	public SamplePlaybackEvent create(SoundTexture tex, long startTimeSamples,
+	public SamplePlaybackEvent create(SoundTexture tex, double startTimeSeconds,
 		double[] pan, SoundEvent parent, double playbackRatio){
-	    return new SamplePlaybackEvent(tex,startTimeSamples,pan,this,parent,playbackRatio);
+	    return new SamplePlaybackEvent(tex,startTimeSeconds,pan,this,parent,playbackRatio);
 	}//end create(...)
 
 	/**
@@ -216,4 +218,11 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    return soundProgram;
 	}
     }//end Factory
+
+    /**
+     * @return the playbackRatio
+     */
+    public double getPlaybackRatio() {
+        return playbackRatio;
+    }
 }//end SamplePlaybackEvent

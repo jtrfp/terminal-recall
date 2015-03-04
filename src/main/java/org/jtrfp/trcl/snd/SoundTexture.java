@@ -22,7 +22,7 @@ public interface SoundTexture {
     
     public static final int ROW_LENGTH_SAMPLES = 1024;
 
-    int getLengthInRealtimeSamples();
+    double getLengthInRealtimeSeconds();
 
     GLTexture getGLTexture();
     
@@ -33,6 +33,6 @@ public interface SoundTexture {
      */
     int getNumRows();
 
-    double getResamplingScalar();
+    double getLengthPerRowSeconds();
 
 }//end SoundTexture

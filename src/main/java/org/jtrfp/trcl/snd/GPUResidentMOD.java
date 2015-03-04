@@ -32,12 +32,12 @@ public class GPUResidentMOD {
     private final TR tr;
     private final Module module;
     private SoundTexture [] samples;
-    private int realtimeFramesPerRow=-1;
+    private double realtimeSecondsPerRow=-1;
     private int speed=6;
     private int bpm=125;
     double []panStates = new double[32];// [-1,1]
     double []volumeStates = new double[32]; // [0,1]
-    private long songLengthInBufferFrames=-1;
+    private double songLengthInSeconds=-1;
     private static final double MUSIC_VOLUME = 2; 
     private final HashMap<PatternElement,Integer> durationInRows = new HashMap<PatternElement,Integer>();
     
@@ -85,10 +85,10 @@ public class GPUResidentMOD {
 	}catch(EndOfSongException e){}
     }//end calculateNoteLength()
 
-    public void apply(final long startOffsetInFrames, SoundEvent parent, double stereoWidth){
+    public void apply(final double startOffsetInSeconds, SoundEvent parent, double stereoWidth){
 	final Pattern []    patterns = module.getPatternContainer().getPattern();
 	final int []        arrangements = module.getArrangement();
-	long 		    frameOffsetCounter=0;
+	double 		    timeOffsetCounter=0;
 	setTempo(module.getBPMSpeed());
 	setInterruptLockedSpeed(module.getTempo());
 	try{
@@ -96,7 +96,7 @@ public class GPUResidentMOD {
 	    int arrangement = arrangements[arrIdx];
 	    final Pattern pattern = patterns[arrangement];
 	    for(PatternRow row:pattern.getPatternRow()){
-		frameOffsetCounter+=realtimeFramesPerRow;
+		timeOffsetCounter+=realtimeSecondsPerRow;
 		for(PatternElement element:row.getPatternElement()){
 		   final int instID = element.getInstrument()-1;
 		   final int fx = element.getEffekt();
@@ -123,7 +123,7 @@ public class GPUResidentMOD {
 			  final SoundEvent evt = tr.soundSystem.get().
 				  getPlaybackFactory().
 				  create(texture,
-					  (long)frameOffsetCounter+startOffsetInFrames, 
+					  timeOffsetCounter+startOffsetInSeconds, 
 					  panState,
 					  parent,
 					  playbackRatio);
@@ -134,7 +134,7 @@ public class GPUResidentMOD {
 	    }//end for(rows)
 	 }//end for(arrangements)
 	}catch(EndOfSongException e){}
-	songLengthInBufferFrames=frameOffsetCounter;
+	songLengthInSeconds=timeOffsetCounter;
     }//end startSequence()
 
     
@@ -153,17 +153,16 @@ public class GPUResidentMOD {
     
     private void setInterruptLockedSpeed(int speed){
 	this.speed=speed;
-	recalculateRealtimeFramesPerRow();
+	recalculateRealtimeSecondsPerRow();
     }
     
     private void setTempo(int tempo){
 	this.bpm=tempo;
-	//System.out.println("TEMPO="+bpm+" RAW="+tempoBPMMinus77);
-	recalculateRealtimeFramesPerRow();
+	recalculateRealtimeSecondsPerRow();
     }
 
-    private void recalculateRealtimeFramesPerRow() {
-	realtimeFramesPerRow = (int)(((tr.soundSystem.get().getActiveFormat().getFrameRate()*60) / bpm)/4);// 4 rows per beat (assuming 16th notes)
+    private void recalculateRealtimeSecondsPerRow() {
+	realtimeSecondsPerRow = ((60. / (double)bpm)/4.);// 4 rows per beat (assuming 16th notes)
 	//TODO: 'speed'
     }
 
@@ -172,7 +171,7 @@ public class GPUResidentMOD {
      * @return Song length in buffer frames, or -1 if apply() was not first invoked.
      * @since Nov 2, 2014
      */
-    public long getSongLengthInBufferFrames() {
-	return songLengthInBufferFrames;
+    public double getSongLengthInRealtimeSeconds() {
+	return songLengthInSeconds;
     }
 }//end MusicPlayer

@@ -28,8 +28,8 @@ import org.jtrfp.trcl.obj.RelevantEverywhere;
 public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEverywhere {
     private final GPUResidentMOD mod;
     private final boolean loop;
-    private static final int SETUP_PADDING_FRAMES = 1024*16;//Ample time to set up next loop.
-    private long nextLoopTimeFrames;
+    private static final int SETUP_PADDING_SECS = 2;//Ample time to set up next loop.
+    private double nextLoopTimeSeconds;
     private TRFutureTask<Void> lastApply;
     private volatile boolean isPlaying = false;
 
@@ -45,7 +45,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
     public void play(){
 	if(!isPlaying){
 	    activate();
-	    nextLoopTimeFrames=getOrigin().getTR().soundSystem.get().getCurrentBufferFrameCounter();
+	    nextLoopTimeSeconds=getOrigin().getTR().soundSystem.get().getCurrentFrameBufferTimeCounter();
 	    isPlaying=true;}
     }
     
@@ -55,7 +55,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
     }//end stop()
 
     @Override
-    public void apply(GL3 gl, final long bufferStartTimeFrames) {// Non-blocking.
+    public void apply(GL3 gl, final double bufferStartTimeSeconds) {// Non-blocking.
 	if(lastApply!=null)
 	    if(!lastApply.isDone())
 		return;
@@ -64,10 +64,10 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	    public Void call() throws Exception {
 		// Set the song up
 		if(loop){
-		    if(bufferStartTimeFrames > nextLoopTimeFrames-SETUP_PADDING_FRAMES){
-			mod.apply(MusicPlaybackEvent.this.nextLoopTimeFrames,MusicPlaybackEvent.this,
+		    if(bufferStartTimeSeconds > nextLoopTimeSeconds-SETUP_PADDING_SECS){
+			mod.apply(MusicPlaybackEvent.this.nextLoopTimeSeconds,MusicPlaybackEvent.this,
 				getOrigin().getTR().config.getModStereoWidth());
-			MusicPlaybackEvent.this.nextLoopTimeFrames+=mod.getSongLengthInBufferFrames();
+			MusicPlaybackEvent.this.nextLoopTimeSeconds+=mod.getSongLengthInRealtimeSeconds();
 		    }//end if(time to loop)
 		}//end if(loop)
 		return null;
@@ -83,9 +83,9 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 
 	@Override
 	public void apply(GL3 gl, Collection<SoundEvent> events,
-		long bufferStartTimeFrames) {
+		double bufferStartTimeSeconds) {
 	    for(SoundEvent event:events)
-		event.apply(gl, bufferStartTimeFrames);
+		event.apply(gl, bufferStartTimeSeconds);
 	}//end apply(...)
 	
 	

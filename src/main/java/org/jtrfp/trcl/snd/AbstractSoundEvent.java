@@ -19,42 +19,42 @@ package org.jtrfp.trcl.snd;
 import org.jtrfp.trcl.core.TR;
 
 public abstract class AbstractSoundEvent implements SoundEvent {
-    private final long startRealtimeSamples;
-    private final long endRealtimeSamples;
-    private final long durationRealtimeSamples;
+    private final double startRealtimeSeconds;
+    private final double endRealtimeSeconds;
+    private final double durationRealtimeSeconds;
     private final Factory origin;
-    private boolean active = true;
+    private boolean active    = true;
     private final SoundEvent parent;
-    private boolean destroyed=false;
+    private boolean destroyed = false;
     
-    public AbstractSoundEvent(long startTimeSamples,
-		long durationSamples, Factory origin, SoundEvent parent) {
-	    this.durationRealtimeSamples = durationSamples;
-	    this.startRealtimeSamples = startTimeSamples;
-	    endRealtimeSamples = startTimeSamples + durationSamples;
+    public AbstractSoundEvent(double startTimeSeconds,
+		double durationRealtimeSeconds, Factory origin, SoundEvent parent) {
+	    this.durationRealtimeSeconds = durationRealtimeSeconds;
+	    this.startRealtimeSeconds    = startTimeSeconds;
+	    endRealtimeSeconds           = startTimeSeconds + durationRealtimeSeconds;
 	    this.origin=origin;
 	    this.parent=parent;
 	}//end constructor
 
     /**
-     * @return the startRealtimeSamples
+     * @return the startRealtimeSeconds
      */
-    public long getStartRealtimeSamples() {
-        return startRealtimeSamples;
+    public double getStartRealtimeSeconds() {
+        return startRealtimeSeconds;
     }
 
     /**
-     * @return the endRealtimeSamples
+     * @return the endRealtimeSeconds
      */
-    public long getEndRealtimeSamples() {
-        return endRealtimeSamples;
+    public double getEndRealtimeSeconds() {
+        return endRealtimeSeconds;
     }
 
     /**
-     * @return the durationRealtimeSamples
+     * @return the durationRealtimeSeconds
      */
-    public long getDurationRealtimeSamples() {
-        return durationRealtimeSamples;
+    public double getDurationRealtimeSeconds() {
+        return durationRealtimeSeconds;
     }
 
     /**

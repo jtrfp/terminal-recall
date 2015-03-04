@@ -65,14 +65,14 @@ public final class SoundSystem {
     private final TreeSet<SoundEvent> pendingEvents = new TreeSet<SoundEvent>(new Comparator<SoundEvent>(){
 	@Override
 	public int compare(SoundEvent first, SoundEvent second) {
-	    final long result = first.getStartRealtimeSamples()-second.getStartRealtimeSamples();
-	    if(result==0L)return first.hashCode()-second.hashCode();
+	    final double result = 88200. * (first.getStartRealtimeSeconds()-second.getStartRealtimeSeconds());
+	    if(result==0)return first.hashCode()-second.hashCode();
 	    else if(result>0)return 1;
 	    else return -1;
 	}//end compare()
     });
     private final ArrayList<SoundEvent> activeEvents = new ArrayList<SoundEvent>();
-    private long bufferFrameCounter;
+    private double bufferTimeCounter;
     
 
     public static final double DEFAULT_SFX_VOLUME = .3;
@@ -108,9 +108,6 @@ public final class SoundSystem {
 		try {
 		    Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		    Thread.currentThread().setName("SoundSystem");
-		    //byte[] shortBytes = new byte[BUFFER_SIZE_BYTES];
-		    /*ShortBuffer sBuf = ByteBuffer.wrap(shortBytes)
-			    .order(ByteOrder.nativeOrder()).asShortBuffer();*/
 		    
 		    while (true) {
 			synchronized(paused){
@@ -278,11 +275,14 @@ public final class SoundSystem {
      * @since Oct 28, 2014
      */
     public SoundTexture newSoundTexture(final FloatBuffer samples, final int localSampleRate){
-	final GLTexture texture = tr.gpu.get().newTexture();
-	final int lengthInSamples = samples.remaining();
-	final double resamplingRatio = (double)getActiveFormat().getFrameRate() / (double)localSampleRate;
-	final int numRows=(int)(Math.ceil((double)lengthInSamples / (double)SoundTexture.ROW_LENGTH_SAMPLES));
-	final int quantizedSize = numRows*SoundTexture.ROW_LENGTH_SAMPLES;
+	final GLTexture texture      = tr.gpu.get().newTexture();
+	final int lengthInSamples    = samples.remaining();
+	final double lengthInSeconds = (double)lengthInSamples/(double)localSampleRate;
+	final int numRows            = (int)(Math.ceil((double)lengthInSamples / (double)SoundTexture.ROW_LENGTH_SAMPLES));
+	final int quantizedSize      = numRows*SoundTexture.ROW_LENGTH_SAMPLES;
+	final double quantizedSizeSeconds = (double)quantizedSize / (double)localSampleRate;
+	final double lengthPerRowSeconds
+	     = quantizedSizeSeconds / (double)numRows;
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -332,8 +332,8 @@ public final class SoundSystem {
 	    }});
 	return new SoundTexture(){
 	    @Override
-	    public int getLengthInRealtimeSamples() {
-		return (int)((double)lengthInSamples *(double)resamplingRatio);
+	    public double getLengthInRealtimeSeconds() {
+		return lengthInSeconds;
 	    }
 
 	    @Override
@@ -347,8 +347,8 @@ public final class SoundSystem {
 	    }
 
 	    @Override
-	    public double getResamplingScalar() {
-		return resamplingRatio;
+	    public double getLengthPerRowSeconds() {
+		return lengthPerRowSeconds;
 	    }
 	};//end new SoundTexture()
     }//end newSoundTexture
@@ -369,7 +369,7 @@ public final class SoundSystem {
     
     private synchronized void renderPrep(){
 	cleanActiveEvents();
-	pickupActiveEvents(getBufferSizeFrames());
+	pickupActiveEvents(getBufferSizeFrames()/getActiveFormat().getFrameRate());
     }
     
     private synchronized void render(GL3 gl, ByteBuffer audioByteBuffer) {
@@ -394,14 +394,14 @@ public final class SoundSystem {
 	}// end for(events)
 	for(Factory factory:eventMap.keySet()){
 	    final ArrayList<SoundEvent> events = eventMap.get(factory);
-	    factory.apply(gl, events, bufferFrameCounter);
+	    factory.apply(gl, events, bufferTimeCounter);
 	    events.clear();
 	}//end for(keySet)
 	
 	if(!tr.config.isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
-	bufferFrameCounter += getBufferSizeFrames();
+	bufferTimeCounter += getBufferSizeSeconds();
 	// Cleanup
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
@@ -410,6 +410,10 @@ public final class SoundSystem {
 	gpu.defaultViewport();
     }// end process()
     
+    public double getBufferSizeSeconds() {
+	return (double)getBufferSizeFrames() / (double)getActiveFormat().getFrameRate();
+    }
+
     private void readGLAudioBuffer(GPU gpu, ByteBuffer audioByteBuffer){
 	// Read and export previous results to sound card.
 	final GL3 gl = gpu.getGl();
@@ -418,30 +422,30 @@ public final class SoundSystem {
 		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
     }//end readGLAudioBuffer(...)
     
-    private void pickupActiveEvents(long windowSizeInSamples){
-	final long currentTimeSamples = bufferFrameCounter;
+    private void pickupActiveEvents(double windowSizeInSeconds){
+	final double playbackTimeSeconds = bufferTimeCounter;
 	final Iterator<SoundEvent> eI = pendingEvents.iterator();
 	while(eI.hasNext()){
 	    final SoundEvent event = eI.next();
 	    if(event.isDestroyed())
 		eI.remove();
-	    else if(event.getStartRealtimeSamples()<currentTimeSamples+windowSizeInSamples && event.getEndRealtimeSamples()>currentTimeSamples){
+	    else if(event.getStartRealtimeSeconds()<playbackTimeSeconds+windowSizeInSeconds && event.getEndRealtimeSeconds()>playbackTimeSeconds){
 		activeEvents.add(event);
 		eI.remove();
 	    }//end if(in range)
-	    if(event.getStartRealtimeSamples()>currentTimeSamples+windowSizeInSamples)
+	    if(event.getStartRealtimeSeconds()>playbackTimeSeconds+windowSizeInSeconds)
 		return;//Everything after this point is out of range.
 	}//end hashNext(...)
     }//end pickupActiveEvents()
     
     private void cleanActiveEvents(){
-	final long currentTimeSamples = bufferFrameCounter;
+	final double currentTimeSeconds = bufferTimeCounter;
 	final Iterator<SoundEvent> eI = activeEvents.iterator();
 	while(eI.hasNext()){
 	    final SoundEvent event = eI.next();
 	    if(event.isDestroyed())
 		eI.remove();
-	    else if(event.getEndRealtimeSamples()<currentTimeSamples && 
+	    else if(event.getEndRealtimeSeconds()<currentTimeSeconds && 
 		    !(event instanceof RelevantEverywhere))
 		eI.remove();
 	}//end while(hasNext)
@@ -461,8 +465,8 @@ public final class SoundSystem {
         return musicFactory;
     }
 
-    public long getCurrentBufferFrameCounter() {
-	return bufferFrameCounter;
+    public double getCurrentFrameBufferTimeCounter() {
+	return bufferTimeCounter;
     }
 
     public synchronized void dequeueSoundEvent(SoundEvent event) {

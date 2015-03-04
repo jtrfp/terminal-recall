@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2015 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -80,7 +80,7 @@ public final class TR{
 	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
 	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
-	private final World 					world;
+	private      World 					world;
 	private final GameShell					gameShell;
 	private RenderableSpacePartitioningGrid			defaultGrid;
 	
@@ -167,11 +167,6 @@ public final class TR{
 		    });threadManager.threadPool.submit(objectDefinitionWindow);
 		    System.out.println("...Done");
 		setResourceManager(new ResourceManager(this));
-		world = new World(
-				256*mapSquareSize,
-				24.*mapSquareSize,
-				256*mapSquareSize,
-				mapSquareSize*visibilityDiameterInMapSquares/2., this);
 		
 		final Renderer renderer = mainRenderer.get();
 		renderer.setRootGrid(getDefaultGrid());//TODO: replace with Camera objects?
@@ -330,6 +325,12 @@ public final class TR{
      * @return the world
      */
     public World getWorld() {
+	if(world==null)
+	    world = new World(
+			256*mapSquareSize,
+			24.*mapSquareSize,
+			256*mapSquareSize,
+			mapSquareSize*visibilityDiameterInMapSquares/2., this);
 	return world;
     }
 
@@ -457,7 +458,7 @@ public final class TR{
      */
     public RenderableSpacePartitioningGrid getDefaultGrid() {
 	if(defaultGrid==null)
-	    defaultGrid = new RootGrid(world.sizeX,world.sizeY,world.sizeZ,world.gridBlockSize,world.viewDepth);
+	    defaultGrid = world.newRootGrid();
         return defaultGrid;
     }
 }//end TR

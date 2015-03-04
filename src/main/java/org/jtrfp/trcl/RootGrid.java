@@ -15,7 +15,7 @@ package org.jtrfp.trcl;
 
 public class RootGrid extends RenderableSpacePartitioningGrid {
 
-    public RootGrid(double sizeX, double sizeY, double sizeZ,
+    RootGrid(double sizeX, double sizeY, double sizeZ,
 	    double gridBlockSize, double viewDepth) {
 	super(sizeX, sizeY, sizeZ, gridBlockSize, viewDepth);
     }//end constructor(...)

@@ -27,7 +27,7 @@ public class TXTMissionBriefFile implements ThirdPartyParseable {
 		false);
 	p.stringEndingWith("\r\n",
 		p.property("planetTextureFile", String.class), false);
-	p.stringEndingWith(null, p.property("missionText", String.class), false);
+	p.stringEndingWith((String)null, p.property("missionText", String.class), false);
     }
 
     /**

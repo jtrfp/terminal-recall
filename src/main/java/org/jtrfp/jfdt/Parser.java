@@ -787,7 +787,7 @@ public class Parser{
 			 */
 			public <CLASS>void stringEndingWith(final String ending,final PropertyDestination<CLASS> property,
 					final boolean includeEndingWhenReading){
-			    stringEndingWith(new String[]{ending},property,includeEndingWhenReading);
+			    stringEndingWith(ending!=null?new String[]{ending}:null,property,includeEndingWhenReading);
 			}
 
 	/**

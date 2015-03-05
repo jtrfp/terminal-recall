@@ -153,10 +153,9 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    assert !Vect3D.isAnyNaN(source);
 	    final double [] pan     = new double[]{vol*pFactor,vol*(1-pFactor)};
 	    final SoundSystem ss    = getTR().soundSystem.get();
-	    final double modSamples = ((double)System.currentTimeMillis()%(ss.getBufferSizeSeconds()*1000.)) /1000.;
 	    // Temporal dither to avoid phasiness
 	    final long   delay      = (long)(dist*.000001+Math.random()*.0005);
-	    final double startTime  = ss.getCurrentFrameBufferTimeCounter()+modSamples+delay;
+	    final double startTime  = ss.getCurrentFrameBufferTimeCounter()+delay;
 	    return create(tex,startTime,pan);
 	}//end create(...)
 	
@@ -166,8 +165,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] pan){
 	    final SoundSystem ss = getTR().soundSystem.get();
-	    final double modSeconds = (((double)System.currentTimeMillis())%(ss.getBufferSizeSeconds()*1000))/1000.;
-	    return create(tex,(ss.getCurrentFrameBufferTimeCounter()+modSeconds),pan);
+	    return create(tex,(ss.getCurrentFrameBufferTimeCounter()),pan);
 	}
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double startTimeSeconds,

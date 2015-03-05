@@ -11,10 +11,11 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import org.jtrfp.jtrfp.Vertex3f;
+
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
-import org.jtrfp.jtrfp.Vertex3f;
 
 /**
  * Abstract implementation of a Terminal Reality heading vector consisting of a triplet of signed ints 
@@ -30,7 +31,7 @@ public class AbstractTriplet implements ThirdPartyParseable {
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
 	prs.stringEndingWith(",", prs.property("x", Integer.class), false);
 	prs.stringEndingWith(",", prs.property("y", Integer.class), false);
-	prs.stringEndingWith("\r\n", prs.property("z", Integer.class), false);
+	prs.stringEndingWith(new String[]{"\r\n","\n"}, prs.property("z", Integer.class), false);
     }
 
     public static class EndingWithComma extends AbstractTriplet {

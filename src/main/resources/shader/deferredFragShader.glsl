@@ -335,8 +335,11 @@ if(color.a > ALPHA_THRESHOLD){
   vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
   vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(opaquePrimID)) ,true,_uvzw.w);
-  oColor = vec4(mix(texture(cubeTexture,norm).rgb,oColor.rgb,oColor.a),1);
-  color.rgb = reverseBlend(oColor,color,oColor.a).rgb;
+  if(bypassAlpha==0u){
+   oColor = vec4(mix(texture(cubeTexture,norm).rgb,oColor.rgb,oColor.a),1);
+   color.rgb = reverseBlend(oColor,color,oColor.a).rgb;}
+  else
+   color.rgb = oColor.rgb;
   }//end if(written)
  else{//Sky
   color.rgb = mix(color.rgb,texture(cubeTexture,norm).rgb,color.a);

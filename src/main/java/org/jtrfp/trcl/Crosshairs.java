@@ -65,7 +65,7 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	for (Triangle t : tris)
 	    t.setCentroidNormal(Vector3D.ZERO);
 	this.setRenderFlags((byte) 1);
-	setModel(crossModel.finalizeModel());
+	setModel(crossModel);
 	this.movePositionBy(new Vector3D(0, 0, -1));
     }//end constructor
 }// end Crosshairs

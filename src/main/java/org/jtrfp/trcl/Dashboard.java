@@ -43,7 +43,7 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 	    tris[1].setAlphaBlended(true);
 	    dashModel.addTriangles(tris);
 	}// end for(segs)
-	setModel(dashModel.finalizeModel());
+	setModel(dashModel);
 	}catch(Exception e){tr.showStopper(e);}
     }
 }// end Dashboard

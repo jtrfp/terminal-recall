@@ -39,7 +39,7 @@ public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
 	tris[0].setAlphaBlended(true);
 	tris[1].setAlphaBlended(true);
 	model.addTriangles(tris);
-	setModel(model.finalizeModel());
+	setModel(model);
     }// end constructor()
 
     public void setChar(char c) {

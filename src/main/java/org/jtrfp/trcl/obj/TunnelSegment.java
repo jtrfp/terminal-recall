@@ -322,7 +322,7 @@ public class TunnelSegment extends WorldObject {
 	 //if(numAnimFrames!=1)//Push frame if animated.
 	     mainModel.addFrame(m);
 	}//end for(frames)
-	return mainModel.finalizeModel();
+	return mainModel;
     }//end createModel()
 
     private static Vector3D segPoint(double angle, double z, double w,

@@ -181,6 +181,7 @@ public class WorldObject implements PositionedRenderable {
 	if (m == null)
 	    throw new RuntimeException("Passed model cannot be null.");
 	model = m;
+	model.finalizeModel();
 	int numObjDefs, sizeInVerts;
 	if (m.getTriangleList() == null)
 	    triangleObjectDefinitions = emptyIntArray;

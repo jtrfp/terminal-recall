@@ -46,6 +46,7 @@ public class Model {
     private static final long ANIMATION_UPDATE_INTERVAL = 10;
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
+    private boolean modelFinalized = false;
 
     public Model(boolean smoothAnimation, TR tr) {
 	this.tr = tr;
@@ -90,9 +91,11 @@ public class Model {
      * @return
      */
     public Model finalizeModel() {
-	if(animated){//Discard frame zero
+	if(modelFinalized)
+	    return this;
+	modelFinalized = true;
+	if(animated)//Discard frame zero
 	    tLists.remove(0);ttLists.remove(0);
-	}
 	Controller c = controller;
 	if (c == null)
 	    {if(frameDelay==0)frameDelay=1;
@@ -266,7 +269,6 @@ public class Model {
 		new double[] { u0, u1, u1, u0 },
 		new double[] { v0, v0, v1, v1 }, tunnelTexturePalette,
 		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.PLUS_K:Vector3D.ZERO,"Model.buildCube.back"));
-	m.finalizeModel();
 	return m;
     }// end buildCube
 

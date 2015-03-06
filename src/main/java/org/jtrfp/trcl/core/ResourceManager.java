@@ -358,7 +358,7 @@ public class ResourceManager{
 			for(int i=0; i<frames.length;i++)
 				{result.addFrame(frames[i]);}
 			result.setFrameDelayInMillis((int)(((double)ac.getDelay()/65535.)*1000.));
-			result.finalizeModel();
+			//result.finalizeModel();
 			if(cache)modelCache.put(name, result);
 			return result;
 			}//end try{}

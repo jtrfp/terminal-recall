@@ -112,7 +112,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		    m.addTriangle(tris[0]);
 		    m.addTriangle(tris[1]);
 		    final CloudCeiling rq = new CloudCeiling(tr,
-			    m.finalizeModel());
+			    m);
 		    
 		    final double[] rqPos = rq.getPosition();
 		    rqPos[0] = xPos;

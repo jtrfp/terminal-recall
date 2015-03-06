@@ -801,7 +801,7 @@ public class Mission {
 	    final Game game =  tr.getGame();
 	    final Camera cam = tr.mainRenderer.get().getCamera();
 	    if(satelliteView){//Switched on
-		tr.getGame().setPaused(true);
+		tr.getThreadManager().setPaused(true);
 		game.getNavSystem().deactivate();
 		game.getHUDSystem().deactivate();
 		cam.setFogEnabled(false);

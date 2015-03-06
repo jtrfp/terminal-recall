@@ -274,7 +274,9 @@ public class ConfigWindow extends JFrame {
 	    @Override
 	    public void valueChanged(ListSelectionEvent evt) {
 		final String val = (String)missionList.getSelectedValue();
-		if(isBuiltinVOX(val)){
+		if(val == null)
+		    missionList.setSelectedIndex(0);
+		else if(isBuiltinVOX(val)){
 		    removeVOXButton.setEnabled(false);
 		    editVOXButton.setEnabled(false);
 		}else{
@@ -455,7 +457,7 @@ public class ConfigWindow extends JFrame {
  }//end readSettings()
  
  private boolean isBuiltinVOX(String vox){
-     return vox.contentEquals(TRConfiguration.AUTO_DETECT) || 
+     return  vox.contentEquals(TRConfiguration.AUTO_DETECT) || 
 	     vox.contentEquals("Fury3") || vox.contentEquals("TV") || 
 	     vox.contentEquals("FurySE");
  }//end isBuiltinVOX

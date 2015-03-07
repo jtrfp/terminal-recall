@@ -36,6 +36,7 @@ public class CollidesWithTerrain extends Behavior {
     private boolean		recentlyCollided	= false;
     private boolean		tunnelEntryCapable	= false;
     private boolean		ignoreHeadingForImpact	= true;
+    private boolean		ignoreCeiling           = false;
 
     @Override
     public void _tick(long tickTimeMillis) {
@@ -79,7 +80,7 @@ public class CollidesWithTerrain extends Behavior {
 	final double thisY = thisPos[1];
 	boolean groundImpact = thisY < (groundHeight + (autoNudge ? nudgePadding
 		: 0));
-	final boolean ceilingImpact = (thisY > ceilingHeight && terrainMirror);
+	final boolean ceilingImpact = (thisY > ceilingHeight && terrainMirror && !ignoreCeiling);
 	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),
 		-groundNormal.getY(), groundNormal.getZ());
 	Vector3D surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
@@ -188,5 +189,17 @@ public class CollidesWithTerrain extends Behavior {
     public CollidesWithTerrain setIgnoreHeadingForImpact(boolean ignoreHeadingForImpact) {
         this.ignoreHeadingForImpact = ignoreHeadingForImpact;
         return this;
+    }
+
+    public CollidesWithTerrain setIgnoreCeiling(boolean ignoreCeiling) {
+	this.ignoreCeiling=ignoreCeiling;
+	return this;
+    }
+
+    /**
+     * @return the ignoreCeiling
+     */
+    public boolean isIgnoreCeiling() {
+        return ignoreCeiling;
     }
 }// end BouncesOffTerrain

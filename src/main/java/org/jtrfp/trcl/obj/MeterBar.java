@@ -78,8 +78,8 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	m2.addTriangles(tris);
 	m2.setController(controller);
 	m2.setAnimateUV(true);
-	m.addFrame(m1.finalizeModel());
-	m.addFrame(m2.finalizeModel());
+	m.addFrame(m1);
+	m.addFrame(m2);
 	m.setFrameDelayInMillis(1000);
 	m.setAnimateUV(true);
 	m.setController(controller);

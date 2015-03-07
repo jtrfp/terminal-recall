@@ -35,7 +35,6 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 		new double[]{0,1,1,0},
 		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.ZERO,"Sprite2D non-segmented");
 	m.addTriangles(tris);
-	m.finalizeModel();
 	setModel(m);
 	setTop(Vector3D.PLUS_J);
 	setActive(true);

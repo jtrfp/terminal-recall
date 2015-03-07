@@ -29,6 +29,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.jtrfp.trcl.core.RootWindow;
 import org.jtrfp.trcl.core.TR;
@@ -47,6 +49,7 @@ public class MenuSystem {
     private final PropertyChangeListener pausePCL;
     private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
     private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
+    private final JCheckBoxMenuItem	view_crosshairs = new JCheckBoxMenuItem("Crosshairs");
     
     public MenuSystem(final TR tr){
 	final RootWindow rw = tr.getRootWindow();
@@ -73,6 +76,7 @@ public class MenuSystem {
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
 	view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
+	view_crosshairs.setAccelerator(KeyStroke.getKeyStroke("X"));
 	
 	fbsw = new FramebufferStateWindow(tr);
 	configWindow = new ConfigWindow(tr.config);
@@ -135,6 +139,13 @@ public class MenuSystem {
 	view_sat.addActionListener(satelliteAction);
 	view_sat.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0), satKey);
 	view_sat.getActionMap().put(satKey, satelliteKeyAction);
+	
+	view_crosshairs.setSelected(tr.config.isCrosshairsEnabled());
+	view_crosshairs.addChangeListener(new ChangeListener(){
+	    @Override
+	    public void stateChanged(ChangeEvent evt) {
+		tr.config.setCrosshairsEnabled(view_crosshairs.isSelected());
+	    }});
 	
 	String pauseKey = "PAUSE_KEY";
 	game_pause.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), pauseKey);
@@ -261,6 +272,8 @@ public class MenuSystem {
             debugMenu.add(codePageDump);
             viewMenu.add(view_sat);
             view_sat.setEnabled(false);
+            viewMenu.add(view_crosshairs);
+            view_crosshairs.setEnabled(false);
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -305,6 +318,7 @@ public class MenuSystem {
 	    @Override
 	    public void propertyChange(PropertyChangeEvent pc) {
 		game_start.setEnabled(pc.getNewValue()!=null && pc.getNewValue()==Boolean.FALSE);
+		view_crosshairs.setEnabled((Boolean)pc.getNewValue());
 	    }});
 	currentMissionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
 	    @Override
@@ -332,4 +346,11 @@ public class MenuSystem {
 		    view_sat.setEnabled(tr.getGame().getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode);
 	    }});
     }//end constructor
+
+    /**
+     * @return the view_crosshairs
+     */
+    public JCheckBoxMenuItem getView_crosshairs() {
+        return view_crosshairs;
+    }
 }//end MenuSystem

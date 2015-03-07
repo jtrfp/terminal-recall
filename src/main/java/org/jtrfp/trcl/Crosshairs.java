@@ -13,12 +13,18 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TextureManager;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.IndirectProperty;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
@@ -67,5 +73,34 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	this.setRenderFlags((byte) 1);
 	setModel(crossModel);
 	this.movePositionBy(new Vector3D(0, 0, -1));
+	installReactiveListeners(tr);
     }//end constructor
+    
+    private void installReactiveListeners(final TR tr){
+	tr.config.addPropertyChangeListener(TRConfiguration.CROSSHAIRS_ENABLED,new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		updateCrosshairsVisibilityState(
+			(Boolean)evt.getNewValue(),
+			tr.getGame().getCurrentMission().isSatelliteView());
+	    }});
+	IndirectProperty<Mission> currentMission = new IndirectProperty<Mission>();
+	currentMission.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW,new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		updateCrosshairsVisibilityState(
+			tr.config.isCrosshairsEnabled(),
+			(Boolean)evt.getNewValue());
+	    }});
+	tr.getGame().addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
+    }//end installReactiveListeners
+    
+    private void updateCrosshairsVisibilityState(
+	    boolean isUserSetActiveCrosshairs,
+	    boolean isSatelliteViewMode ){
+	final boolean visible = 
+		isUserSetActiveCrosshairs &&
+		!isSatelliteViewMode;
+	setVisible(visible);
+    }//end updateCrosshairsVisibilityState()
 }// end Crosshairs

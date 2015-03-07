@@ -40,7 +40,9 @@ public class TRConfiguration{
     		ACTIVE_AUDIO_FORMAT = "activeAudioFormat",
     		
     		AUDIO_BUFFER_LAG    = "audioBufferLag",
-    		AUDIO_BUFFER_SIZE   = "audioBufferSize";
+    		AUDIO_BUFFER_SIZE   = "audioBufferSize",
+    		
+    		CROSSHAIRS_ENABLED  = "crosshairsEnabled";
     	
     	private GameVersion gameVersion=GameVersion.F3;
     	private Boolean usingTextureBufferUnmap,
@@ -49,7 +51,7 @@ public class TRConfiguration{
     	private int targetFPS =60, audioBufferSize = 4096;
     	private String skipToLevel;
     	private String voxFile;
-    	private boolean audioLinearFiltering=false, audioBufferLag=true;
+    	private boolean audioLinearFiltering=false, audioBufferLag=true, crosshairsEnabled = true;
     	private HashSet<String> missionList = new HashSet<String>();
     	private String activeAudioDriver = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput",
     	               activeAudioDevice,
@@ -428,5 +430,17 @@ public class TRConfiguration{
 	public void setAudioBufferSize(int audioBufferSize) {
 	    pcs.firePropertyChange(AUDIO_BUFFER_SIZE, this.audioBufferSize, audioBufferSize);
 	    this.audioBufferSize = audioBufferSize;
+	}
+
+	public boolean isCrosshairsEnabled() {
+	    return crosshairsEnabled;
+	}
+
+	/**
+	 * @param crosshairsEnabled the crosshairsEnabled to set
+	 */
+	public void setCrosshairsEnabled(boolean crosshairsEnabled) {
+	    pcs.firePropertyChange(CROSSHAIRS_ENABLED,this.crosshairsEnabled,crosshairsEnabled);
+	    this.crosshairsEnabled = crosshairsEnabled;
 	}
 }//end TRConfiguration

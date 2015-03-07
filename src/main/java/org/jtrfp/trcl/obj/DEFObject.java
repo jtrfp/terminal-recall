@@ -486,8 +486,8 @@ private void fallingObjectBehavior(){
     {final DEFObject thisObject = this;
     final TR thisTr = getTr();
     addBehavior(new ResetsRandomlyAfterDeath()
-    	.setMinWaitMillis(100)
-    	.setMaxWaitMillis(1000)
+    	.setMinWaitMillis(1000)
+    	.setMaxWaitMillis(5000)
     	.setRunOnReset(new Runnable(){
     	    @Override
     	    public void run(){

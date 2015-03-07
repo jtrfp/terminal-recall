@@ -182,7 +182,7 @@ public final class Renderer {
 		}
 	    relevanceUpdateFuture.get();
 	    }//end if(visibilityUpdateFuture!=null)
-	if(!getBackRenderList().isDone())return;//Not ready.
+	if(!getBackRenderList().isDone()||rootGrid==null)return;//Not ready.
 	relevanceUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() {

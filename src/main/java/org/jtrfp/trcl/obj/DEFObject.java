@@ -479,7 +479,7 @@ private void fallingObjectBehavior(){
     //addBehavior(new VelocityDragBehavior().setDragCoefficient(.99)); // For some reason it falls like pine tar
     addBehavior(new DamageableBehavior().setMaxHealth(10).setHealth(10));
     addBehavior(new DeathBehavior());
-    addBehavior(new CollidesWithTerrain());
+    addBehavior(new CollidesWithTerrain().setIgnoreCeiling(true));
     addBehavior(new DamagedByCollisionWithSurface());
     addBehavior(new RotationalMomentumBehavior()
     	.setEquatorialMomentum(.01).setLateralMomentum(.02).setPolarMomentum(.03));

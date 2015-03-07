@@ -95,7 +95,7 @@ public class Model {
 	    return this;
 	modelFinalized = true;
 	if(animated)//Discard frame zero
-	    tLists.remove(0);ttLists.remove(0);
+	    {tLists.remove(0);ttLists.remove(0);}
 	Controller c = controller;
 	if (c == null)
 	    {if(frameDelay==0)frameDelay=1;

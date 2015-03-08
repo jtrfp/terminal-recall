@@ -188,12 +188,14 @@ public final class Renderer {
 	    public Void call() {
 		try{
 		proximitySorter.setCenter(camera.getCameraPosition().toArray());
-		rootGrid.cubesWithinRadiusOf(
+		synchronized(gpu.getTr().getThreadManager().gameStateLock){
+		 rootGrid.cubesWithinRadiusOf(
 			camera.getCameraPosition().add(
 				camera.getLookAtVector().scalarMultiply(
 					getCamera().getViewDepth() / 2.1)),
 					proximitySorter
 			);
+		}//end sync(gameStateLock)
 		Renderer.this.gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    @Override
 		    public Void call() {//TODO: Everything up to "flushObjectDefsToGPU()" apparently doesn't need GPU mem access.

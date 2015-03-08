@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
@@ -125,15 +126,19 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	tr.getReporter().report("org.jtrfp.OverworldSystem.isInChamber?",
 		"" + mirrorTerrain);
 	chamberMode = mirrorTerrain;
-	final SkySystem cs = getCloudSystem();
+	final SkySystem clouds = getCloudSystem();
 	if (mirrorTerrain) {
 	    this.getTerrainMirror().activate();
-	    if (cs != null)
-		cs.deactivate();
+	    //No skycube updates in chamber
+	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
+	    if (clouds != null)
+		clouds.deactivate();
 	} else {
 	    this.getTerrainMirror().deactivate();
-	    if (cs != null)
-		cs.activate();
+	    //Turn skycube updates back on
+	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+	    if (clouds != null)
+		clouds.activate();
 	}
     }// end chamberMode
 

@@ -15,6 +15,7 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
@@ -66,9 +67,8 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	} catch (Exception e) {
 	    tr.showStopper(e);
 	}
-	final TriangleList tl = crossModel.getTriangleList();
-	Triangle[] tris = tl.getPrimitives()[0];
-	for (Triangle t : tris)
+	final List<Triangle> tl = crossModel.getRawTriangleLists().get(0);
+	for (Triangle t : tl)
 	    t.setCentroidNormal(Vector3D.ZERO);
 	this.setRenderFlags((byte) 1);
 	setModel(crossModel);

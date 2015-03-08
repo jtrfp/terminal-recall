@@ -37,6 +37,7 @@ public class CollidesWithTerrain extends Behavior {
     private boolean		tunnelEntryCapable	= false;
     private boolean		ignoreHeadingForImpact	= true;
     private boolean		ignoreCeiling           = false;
+    private static		TerrainChunk		dummyTerrainChunk;
 
     @Override
     public void _tick(long tickTimeMillis) {
@@ -125,7 +126,7 @@ public class CollidesWithTerrain extends Behavior {
     private final Submitter<SurfaceImpactListener> sub = new Submitter<SurfaceImpactListener>() {
 	@Override
 	public void submit(SurfaceImpactListener item) {
-	    item.collidedWithSurface(new TerrainChunk(getParent().getTr()), surfaceNormalVar.toArray());
+	    item.collidedWithSurface(getDummyTerrainChunk(getParent().getTr()), surfaceNormalVar.toArray());
 	}
 
 	@Override
@@ -201,5 +202,11 @@ public class CollidesWithTerrain extends Behavior {
      */
     public boolean isIgnoreCeiling() {
         return ignoreCeiling;
+    }
+    
+    private static TerrainChunk getDummyTerrainChunk(TR tr){
+	if (dummyTerrainChunk==null)
+	    dummyTerrainChunk = new TerrainChunk(tr);
+	return dummyTerrainChunk;
     }
 }// end BouncesOffTerrain

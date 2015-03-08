@@ -58,26 +58,18 @@ public class Model {
     }
 
     public TriangleList getTriangleList() {
-	try {
-	    return tpList;
-	} catch (IndexOutOfBoundsException e) {
-	    return null;
-	}
+	return tpList;
     }
 
     public TransparentTriangleList getTransparentTriangleList() {
-	try {
-	    return ttpList;
-	} catch (IndexOutOfBoundsException e) {
-	    return null;
-	}
+	return ttpList;
     }
 
-    ArrayList<ArrayList<Triangle>> getRawTriangleLists() {
+    public ArrayList<ArrayList<Triangle>> getRawTriangleLists() {
 	return tLists;
     }
 
-    ArrayList<ArrayList<Triangle>> getRawTransparentTriangleLists() {
+    public ArrayList<ArrayList<Triangle>> getRawTransparentTriangleLists() {
 	return ttLists;
     }
 

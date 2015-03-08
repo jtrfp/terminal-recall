@@ -353,7 +353,7 @@ public class ResourceManager{
 			Model [] frames = new Model[ac.getNumFrames()];
 			for(int i=0; i<frames.length;i++)
 				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette, ESTuTvPalette);}
-			result.setDebugName(name+" triangles: "+frames[0].getTriangleList().getNumElements());
+			result.setDebugName(name+" triangles: "+frames[0].getRawTriangleLists().get(0).size());
 			//Consolidate the frames to one model
 			for(int i=0; i<frames.length;i++)
 				{result.addFrame(frames[i]);}
@@ -522,10 +522,10 @@ public class ResourceManager{
 					else
 						{System.out.println("Failed to identify DataBlock: "+b.getClass().getName());}
 					}//end for(dataBlocks)
-				result.finalizeModel();
+				//result.finalizeModel();
 				result.setDebugName(name);
-				if(result.getTriangleList()==null && result.getTransparentTriangleList()==null)
-				    throw new RuntimeException("Resulting BIN has no triangleList");
+				//if(result.getTriangleList()==null && result.getTransparentTriangleList()==null)
+				//    throw new RuntimeException("Resulting BIN has no triangleList");
 				if(cache)modelCache.put(name, result);
 				return result;
 				}//end try{}

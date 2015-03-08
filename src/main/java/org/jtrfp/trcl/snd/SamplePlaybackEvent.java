@@ -154,7 +154,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    final double [] pan     = new double[]{vol*pFactor,vol*(1-pFactor)};
 	    final SoundSystem ss    = getTR().soundSystem.get();
 	    // Temporal dither to avoid phasiness
-	    final long   delay      = (long)(dist*.000001+Math.random()*.0005);
+	    final double delay      = dist*.000001+Math.random()*.005;
 	    final double startTime  = ss.getCurrentFrameBufferTimeCounter()+delay;
 	    return create(tex,startTime,pan);
 	}//end create(...)

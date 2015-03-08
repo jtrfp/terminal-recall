@@ -174,6 +174,7 @@ public abstract class NAVObjective {
 		    final BOS bos = (BOS)navSubObject;
 		    boolean first=true;
 		    final int [] bossTargs = bos.getTargets();
+		    final DEFObject bossObject = defs.get(bos.getBossIndex());
 		    if(bossTargs!=null){
 		     for(final int target:bos.getTargets()){
 			final WorldObject shieldGen = defs.get(target);
@@ -211,7 +212,17 @@ public abstract class NAVObjective {
 			indexedNAVObjectiveList.add(objective);
 		     }//end for(targets)
 		    }//end if(bos.targets() !=null))
-		    final DEFObject bossObject = defs.get(bos.getBossIndex());
+		    else {// No shield gens, just mark the boss.
+			bossChamberExitShutoffTrigger=bossObject;
+			    bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+				@Override
+				public void run(){
+				    wMission.get().enterBossMode(bos.getMusicFile());
+				    tr.getGame().getUpfrontDisplay()
+					.submitMomentaryUpfrontMessage("Mission Objective");
+				}//end run()
+			    }));
+		    }
 		    bossObject.addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 		    bossObject.setIgnoringProjectiles(true);
 		    final NAVObjective objective = new NAVObjective(this){

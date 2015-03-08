@@ -17,6 +17,8 @@
 package org.jtrfp.trcl.flow;
 
 import java.awt.Color;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,6 +34,8 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.EarlyLoadingScreen;
+import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
@@ -44,20 +48,49 @@ public class GameShell {
     private final TR tr;
     public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
 		(Color.darkGray,Color.black);
+    private EarlyLoadingScreen earlyLoadingScreen;
+    private GLFont             greenFont;
     
     public GameShell(TR tr){
 	this.tr=tr;
-    }
+	tr.addPropertyChangeListener(TR.GAME, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getNewValue()==null){
+		    earlyLoadingScreen.setStatusText("No game loaded.");
+		    showGameshellScreen();
+		}else{hideGameshellScreen();}
+	    }});
+    }//end constructor(TR)
+    
     public GameShell startShell(){
 	tr.gatherSysInfo();
 	registerPODs();
 	applyGFXState();
+	initLoadingScreen();
 	return this;
     }//end startShell()
     
+    public void showGameshellScreen(){
+	earlyLoadingScreen.activate();
+    }
+    
+    public void hideGameshellScreen(){
+	earlyLoadingScreen.deactivate();
+    }
+    
+    private void initLoadingScreen(){
+	System.out.println("Initializing general resources...");
+	try{greenFont          = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
+	    earlyLoadingScreen = new EarlyLoadingScreen(tr.getDefaultGrid(), tr, greenFont);
+	    earlyLoadingScreen.setStatusText("No game loaded.");
+	    earlyLoadingScreen.activate();
+	}catch(Exception e){gameFailure(e);}
+    }//end initLoadingScreen()
+    
     public void applyGFXState(){
 	final Renderer renderer = tr.mainRenderer.get();
-	final Camera camera = renderer.getCamera();
+	final Camera camera     = renderer.getCamera();
 	camera.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	renderer.getSkyCube().setSkyCubeGen(DEFAULT_GRADIENT);
 	camera.setHeading(Vector3D.PLUS_I);
@@ -218,4 +251,16 @@ public class GameShell {
 	    }//end if(!null)
 	}//end for(pods)
     }//end registerPODs
+    /**
+     * @return the greenFont
+     */
+    public GLFont getGreenFont() {
+        return greenFont;
+    }
+    /**
+     * @return the earlyLoadingScreen
+     */
+    public EarlyLoadingScreen getEarlyLoadingScreen() {
+        return earlyLoadingScreen;
+    }
 }//end GameShell

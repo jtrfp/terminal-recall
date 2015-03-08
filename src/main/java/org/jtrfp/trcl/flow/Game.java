@@ -48,6 +48,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
+import org.jtrfp.trcl.prop.IntroScreen;
 import org.jtrfp.trcl.prop.RedFlash;
 import org.jtrfp.trcl.snd.SoundSystem;
 
@@ -66,21 +67,22 @@ public class Game {
     private NAVSystem 	navSystem;
     private SatelliteDashboard satDashboard;
     private Player 	player;
-    private GLFont	greenFont,upfrontFont;
+    private GLFont	upfrontFont;
     private UpfrontDisplay
     			upfrontDisplay;
-    private EarlyLoadingScreen
-    			earlyLoadingScreen;
     private LevelLoadingScreen
     			levelLoadingScreen;
     private BriefingScreen
     			briefingScreen;
+    private IntroScreen
+    			introScreen;
     private final RedFlash
     			redFlash;
     private final DisplayModeHandler
     			displayModes =
     			new DisplayModeHandler();
     public Object[]	earlyLoadingMode,
+    			titleScreenMode,
     			levelLoadingMode,
     			briefingMode,
     			gameplayMode,
@@ -254,12 +256,11 @@ public class Game {
     public synchronized void boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 		// Set up player, HUD, fonts...
 		System.out.println("Booting...");
-		System.out.println("Initializing general resources...");
-		greenFont = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
 		NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 		upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 			    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
-		earlyLoadingScreen = new EarlyLoadingScreen(tr.getDefaultGrid(), tr, greenFont);
+		
+		final EarlyLoadingScreen earlyLoadingScreen = tr.getGameShell().getEarlyLoadingScreen();
 		earlyLoadingScreen.setStatusText("Reticulating Splines...");
 		earlyLoadingMode = new Object []{
 			earlyLoadingScreen
@@ -272,7 +273,7 @@ public class Game {
 		satDashboard.setVisible(false);
 		tr.getDefaultGrid().add(satDashboard);
 		
-		hudSystem = new HUDSystem(tr,greenFont);
+		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont());
 		hudSystem.deactivate();
 		navSystem = new NAVSystem(tr.getDefaultGrid(), tr);
 		navSystem.deactivate();
@@ -314,8 +315,12 @@ public class Game {
 		    tr.getDefaultGrid().add(player);
 		    System.out.println("\t...Done.");
 		    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
-		    briefingScreen	= new BriefingScreen(tr.getDefaultGrid(),tr,greenFont);
-		    earlyLoadingScreen.setStatusText("Ready.");
+		    briefingScreen	= new BriefingScreen(tr.getDefaultGrid(),tr,tr.getGameShell().getGreenFont());
+		    earlyLoadingScreen.setStatusText("Starting game...");
+		    
+		    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");
+		    earlyLoadingScreen.deactivate();
+		    
 		    levelLoadingMode = new Object[]{
 			 levelLoadingScreen,
 			 upfrontDisplay
@@ -333,6 +338,10 @@ public class Game {
 		    briefingMode = new Object[]{
 			 briefingScreen
 		    };
+		    titleScreenMode = new Object[]{
+			    introScreen
+		    };
+		    displayModes.setDisplayMode(titleScreenMode);
 		    setLevelIndex(0);
     }// end boot()
     
@@ -390,8 +399,8 @@ public class Game {
 	    navSystem.deactivate();
 	if(upfrontDisplay!=null)
 	    upfrontDisplay.deactivate();
-	if(earlyLoadingScreen!=null)
-	    earlyLoadingScreen.deactivate();
+	if(introScreen!=null)
+	    introScreen.deactivate();
 	if(levelLoadingScreen!=null)
 	    levelLoadingScreen.deactivate();
 	if(briefingScreen!=null)
@@ -427,10 +436,6 @@ public class Game {
     
     public Player getPlayer(){
 	return player;
-    }
-
-    public GLFont getGreenFont() {
-	return greenFont;
     }
     
     public GLFont getUpfrontFont() {

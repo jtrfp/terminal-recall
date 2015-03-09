@@ -22,6 +22,7 @@ import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.flow.NAVObjective;
 
 public class NavArrow extends Sprite2D {
 private static final double WIDTH=.16;
@@ -59,8 +60,9 @@ private final NAVSystem nav;
 	    final Mission mission    = game.getCurrentMission();
 	    final WorldObject player = game.getPlayer();
 	    final HUDSystem hudSystem= game.getHUDSystem();
-	    if(mission.currentNAVObjective()==null){setVisible(false);return;}
-	    if(mission.currentNAVObjective().getTarget()==null){setVisible(false);return;}
+	    final NAVObjective navObjective = mission.currentNAVObjective();
+	    if(navObjective==null)            {setVisible(false);return;}
+	    if(navObjective.getTarget()==null){setVisible(false);return;}
 	    counter++;counter%=Math.ceil(TEXT_UPDATE_INTERVAL_MS/(1000/ThreadManager.GAMEPLAY_FPS));
 
 	    final double [] playerPos = player.getPosition();

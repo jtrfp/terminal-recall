@@ -23,7 +23,7 @@ import com.ochafik.util.listenable.ListenableCollection;
 import com.ochafik.util.listenable.ListenableSupport;
 
 public class CompoundListenableCollection<T> implements ListenableCollection<T> {
-    private final ListenableSupport<T> ls = new ListenableSupport<T>();
+    private final ListenableSupport<T>  ls = new ListenableSupport<T>();
     private final CompoundCollection<T> delegate;
     private final CollectionListener<T> innerListener = new CollectionListener<T>(){
 	@Override

@@ -47,7 +47,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public PartitionedIndexPool<STORED_TYPE> removeAllPartitions();
     /**
      * Auto-updated access to the valid partitions in this pool.
-     * @return Read-only listenable collection representing the partitiongs of this pool.
+     * @return Read-only listenable collection representing the partitions of this pool.
      * @since Mar 10, 2015
      */
     public ListenableCollection<Partition<STORED_TYPE>> 
@@ -94,12 +94,12 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      */
     public UnusedIndexLimitBehavior     getTotalUnusedLimitBehavior();
     /**
-     * Set the backend used by this pool to handle 'set' and 'resize' events. 
-     * If the specified backend is non-null and old.equals(new)==false, the new backend will be considered
+     * Set the Backend used by this pool to handle 'set' and 'resize' events. 
+     * If the specified Backend is non-null and old.equals(new)==false, the new backend will be considered
      * completely stale and may be subject to a full flush, depending on the specified flush behavior of this pool.
      * @see org.jtrfp.trcl.pool.PartitionedIndexPool#BACKEND
-     * @param newBackend New backend for this pool. May be null.
-     * @return Original backend prior to the specified backend. May be null.
+     * @param newBackend New Backend for this pool. May be null.
+     * @return Original Backend prior to the specified Backend. May be null.
      * @throws NullPointerException
      * @since Mar 11, 2015
      */
@@ -184,7 +184,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public Partition           <STORED_TYPE> remove()                                        throws IllegalStateException;
 	/**
 	 * Remove and invalidate an entry from this Partition and mark its index as unused.
-	 * @param entry The non-null entry to invalidate and remove from this Parittion.
+	 * @param entry The non-null entry to invalidate and remove from this Partition.
 	 * @return The removed Entry.
 	 * @throws IllegalArgumentException if the specified Entry is not a member of this Partition.
 	 * @throws IllegalStateException if the specified Entry or this Partition are invalid. (removed)
@@ -225,7 +225,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 * @param maxNumUnusedIndices The maximum tolerable threshold of unused indices in this Partition by the time defragmentation completes.
 	 * @return this
 	 * @throws IllegalStateException if this Partition is invalid (removed from PartitionedIndexPool).
-	 * @throws IllegalArgumentException if maxNumUnusedIndices is not of the range [0,Integer.MAX_VALUE]
+	 * @throws IllegalArgumentException if maxNumUnusedIndices is not positive and of a value supported by the implementation.
 	 * @since Mar 11, 2015
 	 */
 	public Partition<STORED_TYPE>       defragment(int maxNumUnusedIndices)              throws IllegalStateException, IllegalArgumentException;

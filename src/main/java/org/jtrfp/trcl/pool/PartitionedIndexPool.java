@@ -34,7 +34,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     //// BEAN PROPERTIES
     public static final String TOT_UNUSED_INDICES     = "totalUnusedIndices",
 	                       UNUSED_LIMIT_BEHAVIOR  = "unusedLimitBehavior",
-	                       BACKEND                = "backend",
 	                       FLUSH_BEHAVIOR         = "flushBehavior";
     
     /**
@@ -128,8 +127,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      */
     public FlushBehavior<STORED_TYPE>   getFlushBehavior();
     /**
-     * Perform a flush of all partitions of this pool, notifying the currently-specified Backend of changes. 
-     * If the current Backend is null, this operation is ignored.
+     * Perform a flush of all partitions of this pool, notifying the flat Entry List of changes.
      * @return The total number of entries flushed.
      * @since Mar 11, 2015
      */
@@ -145,10 +143,10 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public boolean                      hasListeners(String propertyName);
     
     /**
-     * FlushBehavior is responsible for all calls to the pool's currently active Backend.
+     * FlushBehavior is responsible for all calls to the pool's currently active flat Entry List
      * @author Chuck Ritola
      *
-     * @param <STORED_TYPE> The stored type of the PartitionedIndexPool for which this FlushBehavior is to interact
+     * @param <STORED_TYPE> The stored type of the PartitionedIndexPool for which this FlushBehavior is to interact.
      */
     public static interface FlushBehavior<STORED_TYPE>{
 	/**

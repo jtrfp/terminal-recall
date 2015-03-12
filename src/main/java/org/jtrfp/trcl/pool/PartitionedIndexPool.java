@@ -118,13 +118,13 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      * @return The previously-used FlushBehavior of this pool or null if there was none.
      * @since Mar 11, 2015
      */
-    public FlushBehavior                setFlushBehavior(FlushBehavior behavior);
+    public FlushBehavior<STORED_TYPE>   setFlushBehavior(FlushBehavior<STORED_TYPE> behavior);
     /**
      * Query the currently-used FlushBehavior.
      * @return The currently-used FlushBehavior or null if there is none.
      * @since Mar 11, 2015
      */
-    public FlushBehavior                getFlushBehavior();
+    public FlushBehavior<STORED_TYPE>   getFlushBehavior();
     /**
      * Perform a flush of all partitions of this pool, notifying the currently-specified Backend of changes. 
      * If the current Backend is null, this operation is ignored.
@@ -142,8 +142,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
     public boolean                      hasListeners(String propertyName);
     
-    public static interface FlushBehavior{
-	//TODO
+    public static interface FlushBehavior<STORED_TYPE>{
     }//end FlushBehavior
     
     public static interface UnusedIndexLimitBehavior{
@@ -266,13 +265,13 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 * @return The previously-used FlushBehavior of this partition or null if there was none.
 	 * @since Mar 11, 2015
 	 */
-	public FlushBehavior                setFlushBehavior(FlushBehavior behavior);
+	public FlushBehavior<STORED_TYPE>   setFlushBehavior(FlushBehavior<STORED_TYPE> behavior);
 	/**
 	 * Query the currently-used FlushBehavior.
 	 * @return The currently-used FlushBehavior or null if there is none.
 	 * @since Mar 11, 2015
 	 */
-	public FlushBehavior                getFlushBehavior();
+	public FlushBehavior<STORED_TYPE>   getFlushBehavior();
 	/**
 	 * Perform a flush of all partitions of this partition, notifying the currently-specified Backend of changes. 
 	 * If the parent pool's Backend is null, this operation is ignored.

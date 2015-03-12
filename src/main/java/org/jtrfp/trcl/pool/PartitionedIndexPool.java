@@ -17,6 +17,17 @@ import java.beans.PropertyChangeListener;
 
 import com.ochafik.util.listenable.ListenableCollection;
 
+/**
+ * Handles entries in partitions which are organized in a sequential fashion such that all entries (used or unused) in a Partition
+ * are consecutive (i.e. they do not mix with entries from other partitions but may mix used/unused indices within each Partition)
+ * The Pool will automatically scale and reorganized the Pool in accordance to changes in enclosed Partitions. 
+ * Defragmentation (removal of unused indices) can be customized such that some degree of fragmentation is tolerated as it can result
+ * in performance improvements. A partition with no fragmentation tolerance could require the entire global pool to be
+ * shifted left or right to accommodate this change in size, depending on the fragmentation state of other said Partitions.
+ * @author Chuck Ritola
+ *
+ * @param <STORED_TYPE>
+ */
 public interface PartitionedIndexPool<STORED_TYPE> {
     //// BEAN PROPERTIES
     public static final String TOT_UNUSED_INDICES     = "totalUnusedIndices",
@@ -171,18 +182,35 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 */
 	public FlushBehavior<STORED_TYPE> notifyResize(PartitionedIndexPool<STORED_TYPE> pool, int newSize)                         throws NullPointerException, IndexOutOfBoundsException;
 	/**
-	 * Forces a flush regardless of the FlushBehavior implementation's volition.
+	 * This FlushBehavior must execute a flush when invoked.
 	 * @return this
 	 * @since Mar 12, 2015
 	 */
 	public FlushBehavior<STORED_TYPE> forceFlush();
     }//end FlushBehavior
     
+    /**
+     * Implementation determines when it is appropriate to defragment. May be shared between pools.
+     * @author Chuck Ritola
+     *
+     */
     public static interface UnusedIndexLimitBehavior{
+	/**
+	 * Notifies the implementation to check if the specified PartitionedIndexPool is ready to be flushed and
+	 * invokes that PartitionedIndexPool's flush() method if so.
+	 * @param poolToCheck The non-null pool for which to perform the check and potential flush.
+	 * @throws NullPointerException if the passed pool is null.
+	 * @since Mar 12, 2015
+	 */
 	public void proposeDefragmentation(PartitionedIndexPool<?> poolToCheck)                throws NullPointerException;
-	public void proposeDefragmentation(PartitionedIndexPool.Partition<?> partitionToCheck) throws NullPointerException;
     }//end UnusedIndexLimitBehavior
     
+    /**
+     * An auto-resizing subunit within the pool which may be invalidated (removed from the pool)
+     * @author Chuck Ritola
+     *
+     * @param <STORED_TYPE> The object type of this Pool
+     */
     public interface Partition<STORED_TYPE>{
 	//// BEAN PROPERTIES
 	public static final String GLOBAL_START_INDEX     ="globalStartIndex",
@@ -199,12 +227,13 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	                                         getParent();
 	/**
 	 * Create a new Entry from this partition.
-	 * @param value
+	 * @param value Immutable intended non-null value
 	 * @return A new Entry from this partition.
 	 * @throws IllegalStateException if this partition is no longer valid. (it was removed from the parent pool)
+	 * @throws NullPointerException if passed value is null.
 	 * @since Mar 11, 2015
 	 */
-	public Entry               <STORED_TYPE> newEntry(STORED_TYPE value) throws IllegalStateException;
+	public Entry               <STORED_TYPE> newEntry(STORED_TYPE value) throws IllegalStateException, NullPointerException;
 	/**
 	 * Removes all entries from this partition, removes this partition from the parent pool, and 
 	 * invalidates the partition such that isValid() returns false.

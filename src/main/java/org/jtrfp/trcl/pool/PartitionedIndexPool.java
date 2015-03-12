@@ -14,8 +14,10 @@
 package org.jtrfp.trcl.pool;
 
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import com.ochafik.util.listenable.ListenableCollection;
+import com.ochafik.util.listenable.ListenableList;
 
 /**
  * Handles entries in partitions which are organized in a sequential fashion such that all entries (used or unused) in a Partition
@@ -64,6 +66,13 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public ListenableCollection<Partition<STORED_TYPE>> 
                                         getPartitions();
     /**
+     * Auto-updated access to this entire pool's contents as a flat List of Entries. Unused locations are set to null.
+     * @return a read-only ListenableList of Entries.
+     * @since Mar 12, 2015
+     */
+    public ListenableList<STORED_TYPE>
+                                        getFlatEntries();
+    /**
      * Query quantity of free indices of the entire pool.<br>
      * @see org.jtrfp.trcl.pool.PartitionedIndexPool#TOT_UNUSED_INDICES
      * @return The total number of unused indices of all partitions within this pool.
@@ -105,24 +114,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      */
     public UnusedIndexLimitBehavior     getTotalUnusedLimitBehavior();
     /**
-     * Set the Backend used by this pool to handle 'set' and 'resize' events. 
-     * If the specified Backend is non-null and old.equals(new)==false, the new backend will be considered
-     * completely stale and may be subject to a full flush, depending on the specified flush behavior of this pool.
-     * @see org.jtrfp.trcl.pool.PartitionedIndexPool#BACKEND
-     * @param newBackend New Backend for this pool. May be null.
-     * @return Original Backend prior to the specified Backend. May be null.
-     * @throws NullPointerException
-     * @since Mar 11, 2015
-     */
-    public Backend<STORED_TYPE>         setBackend(Backend<STORED_TYPE> newBackend);
-    /**
-     * Query the currently-used backend.
-     * @return The currently-used backend or null if none was specified.
-     * @since Mar 11, 2015
-     */
-    public Backend<STORED_TYPE>		getBackend();
-    
-    /**
      * Sets the new FlushBehavior of this pool. The appropriate FlushBehavior methods will then be immediately 
      * invoked to propose flush operations, though none may necessarily occur.
      * @param behavior New FlushBehavior of this pool. 
@@ -163,6 +154,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	/**
 	 * Notify this FlushBehavior that an element is requested to be set..
 	 * @param pool The non-null originating pool for this notification.
+	 * @param output The destination flat List representation of the pool to which any actions are to be applied, if any.
 	 * @param object The value to apply to the specified globalIndex. May be null.
 	 * @param globalIndex The global (pool-level) index to which the object is to be applied.
 	 * @return this
@@ -170,18 +162,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 * @throws IndexOutOfBoundsException if globalIndex is less than zero or otherwise not supported by the implementation.
 	 * @since Mar 12, 2015
 	 */
-	public FlushBehavior<STORED_TYPE> notifySet   (PartitionedIndexPool<STORED_TYPE> pool, STORED_TYPE object, int globalIndex) throws NullPointerException, IndexOutOfBoundsException;
-	/**
-	 * Notify this FlushBehavior that a resize request has been made. 
-	 * @param pool The non-null originating pool for this notification.
-	 * @param newSize The requested new global size for this pool in elements. 
-	 * @return this
-	 * @throws NullPointerException if pool is null.
-	 * @throws IndexOutOfBoundsException if size is less than zero or unsupported by the implementation.
-	 * @since Mar 12, 2015
-	 */
-	public FlushBehavior<STORED_TYPE> notifyResize(PartitionedIndexPool<STORED_TYPE> pool, int newSize)                         throws NullPointerException, IndexOutOfBoundsException;
-	/**
+	public FlushBehavior<STORED_TYPE> notifySet   (PartitionedIndexPool<STORED_TYPE> pool, List<STORED_TYPE> output, STORED_TYPE object, int globalIndex) throws NullPointerException, IndexOutOfBoundsException;	/**
 	 * This FlushBehavior must execute a flush when invoked.
 	 * @return this
 	 * @since Mar 12, 2015
@@ -385,22 +366,4 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
 	public boolean                      hasListeners(String propertyName);
     }//end Entry
-    
-    public interface Backend<STORED_TYPE>{
-	/**
-	 * Requests this Backend to set an object at a given location.
-	 * @param index Global index at which to set this STORED_TYPE object.
-	 * @param object The STORED_TYPE to apply at the given index. May be null.
-	 * @throws IndexOutOfBoundsException If the index is outside the range of 0<=index<size
-	 * @since Mar 11, 2015
-	 */
-	public void set   (int index, STORED_TYPE object) throws IndexOutOfBoundsException;
-	/**
-	 * Request that the underlying implementation resize itself, discarding out-of-range entries.
-	 * @param newSizeInElements A positive integer representing the requested size.
-	 * @throws IndexOutOfBoundsException if the index is negative or otherwise incompatible with the implementation.
-	 * @since Mar 11, 2015
-	 */
-	public void resize(int newSizeInElements)         throws IndexOutOfBoundsException;
-    }//end Backend
 }//end PartitionedPool

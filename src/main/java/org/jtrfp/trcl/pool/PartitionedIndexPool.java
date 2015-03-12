@@ -142,7 +142,40 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
     public boolean                      hasListeners(String propertyName);
     
+    /**
+     * FlushBehavior is responsible for all calls to the pool's currently active Backend.
+     * @author Chuck Ritola
+     *
+     * @param <STORED_TYPE> The stored type of the PartitionedIndexPool for which this FlushBehavior is to interact
+     */
     public static interface FlushBehavior<STORED_TYPE>{
+	/**
+	 * Notify this FlushBehavior that an element is requested to be set..
+	 * @param pool The non-null originating pool for this notification.
+	 * @param object The value to apply to the specified globalIndex. May be null.
+	 * @param globalIndex The global (pool-level) index to which the object is to be applied.
+	 * @return this
+	 * @throws NullPointerException if pool is null
+	 * @throws IndexOutOfBoundsException if globalIndex is less than zero or otherwise not supported by the implementation.
+	 * @since Mar 12, 2015
+	 */
+	public FlushBehavior<STORED_TYPE> notifySet   (PartitionedIndexPool<STORED_TYPE> pool, STORED_TYPE object, int globalIndex) throws NullPointerException, IndexOutOfBoundsException;
+	/**
+	 * Notify this FlushBehavior that a resize request has been made. 
+	 * @param pool The non-null originating pool for this notification.
+	 * @param newSize The requested new global size for this pool in elements. 
+	 * @return this
+	 * @throws NullPointerException if pool is null.
+	 * @throws IndexOutOfBoundsException if size is less than zero or unsupported by the implementation.
+	 * @since Mar 12, 2015
+	 */
+	public FlushBehavior<STORED_TYPE> notifyResize(PartitionedIndexPool<STORED_TYPE> pool, int newSize)                         throws NullPointerException, IndexOutOfBoundsException;
+	/**
+	 * Forces a flush regardless of the FlushBehavior implementation's volition.
+	 * @return this
+	 * @since Mar 12, 2015
+	 */
+	public FlushBehavior<STORED_TYPE> forceFlush();
     }//end FlushBehavior
     
     public static interface UnusedIndexLimitBehavior{
@@ -155,8 +188,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public static final String GLOBAL_START_INDEX     ="globalStartIndex",
 		                   UNUSED_LIMIT_BEHAVIOR  ="unusedLimitBehavior",
 		                   LENGTH_INDICES         ="lengthInIndices",
-		                   VALID                  ="valid",
-		                   FLUSH_BEHAVIOR         ="flushBehavior";
+		                   VALID                  ="valid";
 	
 	/**
 	 * Query this Parition's parent pool. This value is to remain constant through the life of the Partition.
@@ -258,27 +290,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 * @since Mar 11, 2015
 	 */
 	public boolean                      isValid();
-	/**
-	 * Sets the new FlushBehavior of this partition. The appropriate FlushBehavior methods will then be immediately 
-	 * invoked to propose flush operations, though none may necessarily occur.
-	 * @param behavior New FlushBehavior of this partition.
-	 * @return The previously-used FlushBehavior of this partition or null if there was none.
-	 * @since Mar 11, 2015
-	 */
-	public FlushBehavior<STORED_TYPE>   setFlushBehavior(FlushBehavior<STORED_TYPE> behavior);
-	/**
-	 * Query the currently-used FlushBehavior.
-	 * @return The currently-used FlushBehavior or null if there is none.
-	 * @since Mar 11, 2015
-	 */
-	public FlushBehavior<STORED_TYPE>   getFlushBehavior();
-	/**
-	 * Perform a flush of all partitions of this partition, notifying the currently-specified Backend of changes. 
-	 * If the parent pool's Backend is null, this operation is ignored.
-	 * @return The total number of entries flushed.
-	 * @since Mar 11, 2015
-	 */
-	public int				flush();
 
 	//// PROPERTY CHANGE SUPPORT
 	public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);

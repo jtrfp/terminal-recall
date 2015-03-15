@@ -12,18 +12,18 @@
  ******************************************************************************/
 
 package org.jtrfp.trcl.pool;
-
-
+import org.junit.After;
+import org.junit.Before;
 
 public class PartitionedIndexPoolImplTest extends PartitionedIndexPoolTest {
     
+    @Before
     protected void setUp() throws Exception {
-	super.setUp();
 	subject = newSubject();
     }
-
+    
+    @After
     protected void tearDown() throws Exception {
-	super.tearDown();
     }
 
     @Override

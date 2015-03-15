@@ -13,12 +13,15 @@
 
 package org.jtrfp.trcl.pool;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.jtrfp.trcl.pool.PartitionedIndexPool.Entry;
 import org.jtrfp.trcl.pool.PartitionedIndexPool.FlushBehavior;
@@ -30,17 +33,9 @@ import com.ochafik.util.listenable.CollectionListener;
 import com.ochafik.util.listenable.ListenableCollection;
 import com.ochafik.util.listenable.ListenableList;
 
-public abstract class PartitionedIndexPoolTest extends TestCase {
+public abstract class PartitionedIndexPoolTest {
     
     protected PartitionedIndexPool<TestObject> subject;
-
-    protected void setUp() throws Exception {
-	super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-	super.tearDown();
-    }
     
     protected class TestObject{
     }//end TestObject
@@ -49,39 +44,39 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 
     public void testNewPartition() {
 	Partition<TestObject> tp = subject.newPartition();
-	Assert.assertNotNull(tp);
+	assertNotNull(tp);
     }
 
     public void testRemovePartition() {
 	Partition<TestObject> tp = subject.newPartition();
-	Assert.assertTrue(subject.getPartitions().contains(tp));
-	Assert.assertTrue(tp.isValid());
-	Assert.assertEquals(subject,subject.removePartition(tp));
-	Assert.assertFalse(subject.getPartitions().contains(tp));
-	Assert.assertFalse(tp.isValid());
+	assertTrue(subject.getPartitions().contains(tp));
+	assertTrue(tp.isValid());
+	assertEquals(subject,subject.removePartition(tp));
+	assertFalse(subject.getPartitions().contains(tp));
+	assertFalse(tp.isValid());
     }
 
     public void testRemoveAllPartitions() {
 	for(int i=0; i<10; i++)
 	    subject.newPartition();
-	Assert.assertEquals(10, subject.getPartitions().size());
+	assertEquals(10, subject.getPartitions().size());
 	Collection<Partition<TestObject>> parts = new ArrayList<Partition<TestObject>>();
 	parts.addAll(subject.getPartitions());
-	Assert.assertEquals(subject,subject.removeAllPartitions());
-	Assert.assertEquals(0, subject.getPartitions().size());
+	assertEquals(subject,subject.removeAllPartitions());
+	assertEquals(0, subject.getPartitions().size());
 	for(Partition<TestObject> p:parts)
-	    Assert.assertFalse(p.isValid());
+	    assertFalse(p.isValid());
     }
 
     public void testGetPartitions() {
 	for(int i=0; i<10; i++)
 	    subject.newPartition();
-	Assert.assertEquals(10,subject.getPartitions().size());
+	assertEquals(10,subject.getPartitions().size());
 	Partition<TestObject> np = subject.newPartition();
 	ListenableCollection<Partition<TestObject>> partitions;
 	partitions = subject.getPartitions();
-	Assert.assertNotNull(partitions);
-	Assert.assertTrue((partitions).contains(np));
+	assertNotNull(partitions);
+	assertTrue((partitions).contains(np));
 	final int [] added   = new int[]{0};
 	final int [] removed = new int[]{0};
 	partitions.addCollectionListener(new CollectionListener<Partition<TestObject>>(){
@@ -103,23 +98,23 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 		    break;
 		}
 	    }});
-	Assert.assertEquals(0, added[0]);
-	Assert.assertEquals(0, removed[0]);
+	assertEquals(0, added[0]);
+	assertEquals(0, removed[0]);
 	Partition<TestObject> np1 = subject.newPartition();
-	Assert.assertEquals(1, added[0]);
-	Assert.assertEquals(0, removed[0]);
+	assertEquals(1, added[0]);
+	assertEquals(0, removed[0]);
 	subject.removePartition(np1);
-	Assert.assertEquals(1, added[0]);
-	Assert.assertEquals(1, removed[0]);
+	assertEquals(1, added[0]);
+	assertEquals(1, removed[0]);
 	subject.removeAllPartitions();
-	Assert.assertEquals(1, added[0]);
-	Assert.assertEquals(12, removed[0]);
-	Assert.assertTrue(partitions.isEmpty());
+	assertEquals(1, added[0]);
+	assertEquals(12, removed[0]);
+	assertTrue(partitions.isEmpty());
     }//end testGetPartitions()
 
     public void testGetFlatEntries() {
 	final ListenableList<TestObject> flatEntries = subject.getFlatEntries();
-	Assert.assertNotNull(flatEntries);
+	assertNotNull(flatEntries);
 	final Partition<TestObject> [] parts = new Partition[2];
 	final TestObject [] to = new TestObject [] {new TestObject(),new TestObject()};
 	final Entry<TestObject> [] entries = new Entry[4];
@@ -146,44 +141,44 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 	parts[1] = subject.newPartition();
 	entries[0] = parts[0].newEntry(to[0]);
 	entries[1] = parts[1].newEntry(to[1]);
-	Assert.assertEquals(2,flatEntries.size());
-	Assert.assertTrue(flatEntries.contains(entries[0]));
-	Assert.assertTrue(flatEntries.contains(entries[1]));
+	assertEquals(2,flatEntries.size());
+	assertTrue(flatEntries.contains(entries[0]));
+	assertTrue(flatEntries.contains(entries[1]));
     }
 
     public void testGetTotalUnusedIndices() {
 	Partition<TestObject> p0 = subject.newPartition();
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	Partition<TestObject> p1 = subject.newPartition();
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	
 	Entry<TestObject> [] to = new Entry[2];
 	
 	p0.newEntry(new TestObject());
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	p0.newEntry(new TestObject());
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	to[0] = p0.newEntry(new TestObject());
 	
 	p1.newEntry(new TestObject());
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	p1.newEntry(new TestObject());
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	to[1] = p1.newEntry(new TestObject());
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
 	
 	to[0].remove();
-	Assert.assertEquals(1, subject.getTotalUnusedIndices());
+	assertEquals(1, subject.getTotalUnusedIndices());
 	to[1].remove();
-	Assert.assertEquals(2, subject.getTotalUnusedIndices());
+	assertEquals(2, subject.getTotalUnusedIndices());
 	
 	to[3] = p0.newEntry(new TestObject());
-	Assert.assertEquals(1, subject.getTotalUnusedIndices());
+	assertEquals(1, subject.getTotalUnusedIndices());
 	
 	subject.defragment(1);
-	Assert.assertEquals(1, subject.getTotalUnusedIndices());
+	assertEquals(1, subject.getTotalUnusedIndices());
 	subject.defragment(0);
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(0, subject.getTotalUnusedIndices());
     }
 
     public void testDefragment() {
@@ -206,25 +201,25 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 	int unused = 0;
 	for(TestObject obj:subject.getFlatEntries())
 	    if(obj==null)unused++;
-	Assert.assertEquals(2,unused);
+	assertEquals(2,unused);
 	
 	subject.defragment(1);
 	unused = 0;
 	for(TestObject obj:subject.getFlatEntries())
 	    if(obj==null)unused++;
-	Assert.assertEquals(1,unused);
+	assertEquals(1,unused);
 	
-	Assert.assertEquals(subject, subject.defragment(0));
-	Assert.assertEquals(0, subject.getTotalUnusedIndices());
+	assertEquals(subject, subject.defragment(0));
+	assertEquals(0, subject.getTotalUnusedIndices());
 	unused = 0;
 	for(TestObject obj:subject.getFlatEntries())
 	    if(obj==null)unused++;
-	Assert.assertEquals(0,unused);
+	assertEquals(0,unused);
     }
 
     public void testSetTotalUnusedLimitBehavior() {
 	final int [] defragInvokes = new int[1];
-	Assert.assertEquals(subject,subject.setTotalUnusedLimitBehavior(new UnusedIndexLimitBehavior(){
+	assertEquals(subject,subject.setTotalUnusedLimitBehavior(new UnusedIndexLimitBehavior(){
 	    @Override
 	    public void proposeDefragmentation(
 		    PartitionedIndexPool<?> poolToCheck)
@@ -235,9 +230,9 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 	Entry<TestObject> ent;
 	p.newEntry(new TestObject());
 	ent = p.newEntry(new TestObject());
-	Assert.assertEquals(0, defragInvokes[0]);
+	assertEquals(0, defragInvokes[0]);
 	ent.remove();
-	Assert.assertEquals(1, defragInvokes[0]);
+	assertEquals(1, defragInvokes[0]);
     }
 
     public void testGetTotalUnusedLimitBehavior() {
@@ -248,13 +243,13 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 		    PartitionedIndexPool<?> poolToCheck)
 		    throws NullPointerException {
 	    }});
-	Assert.assertEquals(uilb, subject.getTotalUnusedLimitBehavior());
+	assertEquals(uilb, subject.getTotalUnusedLimitBehavior());
     }
 
     public void testSetFlushBehavior() {
 	final int [] notifySet = new int[1];
 	final int [] forceFlush = new int[1];
-	Assert.assertEquals(subject, subject.setFlushBehavior(new FlushBehavior<TestObject>(){
+	assertEquals(subject, subject.setFlushBehavior(new FlushBehavior<TestObject>(){
 	    @Override
 	    public FlushBehavior<TestObject> notifySet(
 		    PartitionedIndexPool<TestObject> pool,
@@ -269,11 +264,11 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 		return null;
 	    }}));
 	Entry<TestObject> e = subject.newPartition().newEntry(new TestObject());
-	Assert.assertEquals(1, notifySet[0]);
-	Assert.assertEquals(0, forceFlush[0]);
+	assertEquals(1, notifySet[0]);
+	assertEquals(0, forceFlush[0]);
 	subject.flush();
-	Assert.assertEquals(1, notifySet[0]);
-	Assert.assertEquals(1, forceFlush[0]);
+	assertEquals(1, notifySet[0]);
+	assertEquals(1, forceFlush[0]);
     }
 
     public void testGetFlushBehavior() {
@@ -291,39 +286,197 @@ public abstract class PartitionedIndexPoolTest extends TestCase {
 	    public FlushBehavior<TestObject> forceFlush() {
 		return this;
 	    }});
-	Assert.assertEquals(fb,subject.getFlushBehavior());
+	assertEquals(fb,subject.getFlushBehavior());
     }
 
     public void testFlush() {
-	fail("Not yet implemented"); // TODO
+	Partition<TestObject> p = subject.newPartition();
+	final TestObject to = new TestObject();
+	p.newEntry(to);
+	assertEquals(0, subject.getFlatEntries().size());
+	assertEquals(1, subject.flush());
+	assertEquals(1, subject.getFlatEntries().size());
     }
 
-    public void testAddPropertyChangeListenerPropertyChangeListener() {
-	fail("Not yet implemented"); // TODO
+    /////////// PARTITION //////////////
+
+    public void testPartitionGetParent(){
+	assertEquals(subject,subject.newPartition().getParent());
     }
 
-    public void testAddPropertyChangeListenerStringPropertyChangeListener() {
-	fail("Not yet implemented"); // TODO
+    public void testPartitionNewEntry(){
+	Partition<TestObject> p;
+	Entry<TestObject> entry = (p=subject.newPartition()).newEntry(new TestObject());
+	assertNotNull(entry);
+	assertTrue(p.getEntries().contains(entry));
     }
 
-    public void testRemovePropertyChangeListenerPropertyChangeListener() {
-	fail("Not yet implemented"); // TODO
+    public void testPartitionRemove(){
+	Partition<TestObject> p;
+	p = subject.newPartition();
+	assertTrue(p.isValid());
+	assertEquals(p,p.remove());
+	assertFalse(p.isValid());
+	assertFalse(subject.getPartitions().contains(p));
     }
 
-    public void testRemovePropertyChangeListenerStringPropertyChangeListener() {
-	fail("Not yet implemented"); // TODO
+    public void testPartitionRemoveEntry(){
+	Partition<TestObject> p;
+	p = subject.newPartition();
+	Entry<TestObject> entry = p.newEntry(new TestObject());
+	assertTrue(p.getEntries().contains(entry));
+	assertEquals(entry,p.removeEntry(entry));
+	assertFalse(p.getEntries().contains(entry));
+    }
+    
+    public void testPartitionRemoveAllEntries(){
+	Partition<TestObject> p;
+	p = subject.newPartition();
+	Entry<TestObject> entry0 = p.newEntry(new TestObject());
+	Entry<TestObject> entry1 = p.newEntry(new TestObject());
+	assertTrue(entry0.isValid());
+	assertTrue(entry1.isValid());
+	assertEquals(p,p.removeAllEntries());
+	assertFalse(entry0.isValid());
+	assertFalse(entry1.isValid());
     }
 
-    public void testGetPropertyChangeListeners() {
-	fail("Not yet implemented"); // TODO
+    public void testPartitionGetEntries(){
+	Partition<TestObject> p;
+	p = subject.newPartition();
+	Entry<TestObject> entry0 = p.newEntry(new TestObject());
+	Entry<TestObject> entry1 = p.newEntry(new TestObject());
+	assertTrue(p.getEntries().contains(entry0));
+	assertTrue(p.getEntries().contains(entry1));
     }
 
-    public void testGetPropertyChangeListenersString() {
-	fail("Not yet implemented"); // TODO
+    public void testPartitionGetGlobalStartIndex(){
+	Partition<TestObject> p;
+	p = subject.newPartition();
+	assertEquals(0,p.getGlobalStartIndex());
+	// ???
     }
 
-    public void testHasListeners() {
-	fail("Not yet implemented"); // TODO
+    public void testPartitionGetLengthInIndices(){
+	Partition<TestObject> p;
+	p = subject.newPartition();
+	p.newEntry(new TestObject());
+	p.newEntry(new TestObject());
+	p.newEntry(new TestObject());
+	assertEquals(3,p.getLengthInIndices());
     }
 
-}
+    public void testPartitionDefragment(){
+	Partition<TestObject> p0 = subject.newPartition();
+	Partition<TestObject> p1 = subject.newPartition();
+	
+	Entry<TestObject> [] to = new Entry[2];
+	
+	p0.newEntry(new TestObject());
+	p0.newEntry(new TestObject());
+	to[0] = p0.newEntry(new TestObject());
+	
+	p1.newEntry(new TestObject());
+	p1.newEntry(new TestObject());
+	to[1] = p1.newEntry(new TestObject());
+	
+	assertEquals(0,subject.getTotalUnusedIndices());
+	to[0].remove();
+	to[1].remove();
+	assertEquals(2,subject.getTotalUnusedIndices());
+	
+	assertEquals(p0,p0.defragment(0));
+	assertEquals(1,subject.getTotalUnusedIndices());
+	
+	assertEquals(p1,p1.defragment(0));
+	assertEquals(0,subject.getTotalUnusedIndices());
+    }
+
+    public void testPartitionSetUnusedLimitBehavior(){
+	Partition<TestObject> p0 = subject.newPartition();
+	Entry<TestObject> [] to = new Entry[2];
+	
+	final int [] proposeDefragCounter = new int[1];
+	assertEquals(null,p0.setUnusedLimitBehavior(new UnusedIndexLimitBehavior(){
+	    @Override
+	    public void proposeDefragmentation(
+		    PartitionedIndexPool<?> poolToCheck)
+		    throws NullPointerException {
+		proposeDefragCounter[0]++;
+	    }}));
+	assertEquals(0,proposeDefragCounter[0]);
+	to[0] = p0.newEntry(new TestObject());
+	to[1] = p0.newEntry(new TestObject());
+	assertEquals(0,proposeDefragCounter[0]);
+	p0.removeEntry(to[0]);
+	assertEquals(1,proposeDefragCounter[0]);
+    }
+
+    public void testPartitionGetUnusedLimitBehavior(){
+	Partition<TestObject> p0 = subject.newPartition();
+	Entry<TestObject> [] to = new Entry[2];
+	
+	final int [] proposeDefragCounter = new int[1];
+	UnusedIndexLimitBehavior uilb;
+	assertEquals(null,p0.setUnusedLimitBehavior(uilb = new UnusedIndexLimitBehavior(){
+	    @Override
+	    public void proposeDefragmentation(
+		    PartitionedIndexPool<?> poolToCheck)
+		    throws NullPointerException {
+		proposeDefragCounter[0]++;
+	    }}));
+	assertEquals(uilb,p0.getUnusedLimitBehavior());
+    }
+
+    public void testPartitionIsValid(){
+	Partition<TestObject> p0 = subject.newPartition();
+	assertTrue(p0.isValid());
+	p0.remove();
+	assertFalse(p0.isValid());
+    }
+
+    ///////// ENTRY /////////////
+
+    public void testGetParent(){
+	Partition<TestObject> p0 = subject.newPartition();
+	Entry<TestObject> ent = p0.newEntry(new TestObject());
+	assertEquals(p0,ent.getParent());
+    }
+
+    public void testGet(){
+	Partition<TestObject> p0 = subject.newPartition();
+	TestObject         to = new TestObject();
+	Entry<TestObject> ent = p0.newEntry(to);
+	assertEquals(to,ent.get());
+    }
+
+    public void testGetLocalIndex(){
+	Partition<TestObject> p0 = subject.newPartition();
+	TestObject to = new TestObject();
+	Entry<TestObject> ent = p0.newEntry(to);
+	assertEquals(0,ent.getLocalIndex());
+    }
+
+    public void testGetGlobalIndex(){
+	Partition<TestObject> p0 = subject.newPartition();
+	TestObject to = new TestObject();
+	Entry<TestObject> ent = p0.newEntry(to);
+	assertEquals(0,ent.getGlobalIndex());
+    }
+
+    public void testRemove(){
+	Partition<TestObject> p0 = subject.newPartition();
+	TestObject to = new TestObject();
+	Entry<TestObject> ent = p0.newEntry(to);
+	assertEquals(ent,ent.remove());
+    }
+
+    public void testIsValid(){
+	Partition<TestObject> p0 = subject.newPartition();
+	TestObject            to = new TestObject();
+	Entry<TestObject>    ent = p0.newEntry(to);
+	assertTrue(ent.isValid());
+	ent.remove();
+	assertFalse(ent.isValid());
+    }
+}//end PartitionedIndexPoolTest

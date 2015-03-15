@@ -37,7 +37,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	                       FLUSH_BEHAVIOR         = "flushBehavior";
     
     /**
-     * Creates are new partition of zero size at an undefined index in the pool.
+     * Creates a new partition of zero size at an undefined index in the pool.
      * @return this
      * @since Mar 10, 2015
      */
@@ -112,26 +112,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      * @since Mar 10, 2015
      */
     public UnusedIndexLimitBehavior     getTotalUnusedLimitBehavior();
-    /**
-     * Sets the new FlushBehavior of this pool. The appropriate FlushBehavior methods will then be immediately 
-     * invoked to propose flush operations, though none may necessarily occur.
-     * @param behavior New FlushBehavior of this pool. 
-     * @return The previously-used FlushBehavior of this pool or null if there was none.
-     * @since Mar 11, 2015
-     */
-    public FlushBehavior<STORED_TYPE>   setFlushBehavior(FlushBehavior<STORED_TYPE> behavior);
-    /**
-     * Query the currently-used FlushBehavior.
-     * @return The currently-used FlushBehavior or null if there is none.
-     * @since Mar 11, 2015
-     */
-    public FlushBehavior<STORED_TYPE>   getFlushBehavior();
-    /**
-     * Perform a flush of all partitions of this pool, notifying the flat Entry List of changes.
-     * @return The total number of entries flushed.
-     * @since Mar 11, 2015
-     */
-    public int				flush();
     
     //// PROPERTY CHANGE SUPPORT
     public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);
@@ -141,32 +121,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public PropertyChangeListener[]     getPropertyChangeListeners();
     public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
     public boolean                      hasListeners(String propertyName);
-    
-    /**
-     * FlushBehavior is responsible for all calls to the pool's currently active flat Entry List
-     * @author Chuck Ritola
-     *
-     * @param <STORED_TYPE> The stored type of the PartitionedIndexPool for which this FlushBehavior is to interact.
-     */
-    public static interface FlushBehavior<STORED_TYPE>{
-	/**
-	 * Notify this FlushBehavior that an element is requested to be set..
-	 * @param pool The non-null originating pool for this notification.
-	 * @param output The destination flat List representation of the pool to which any actions are to be applied, if any.
-	 * @param object The value to apply to the specified globalIndex. May be null.
-	 * @param globalIndex The global (pool-level) index to which the object is to be applied.
-	 * @return this
-	 * @throws NullPointerException if pool is null
-	 * @throws IndexOutOfBoundsException if globalIndex is less than zero or otherwise not supported by the implementation.
-	 * @since Mar 12, 2015
-	 */
-	public FlushBehavior<STORED_TYPE> notifySet   (PartitionedIndexPool<STORED_TYPE> pool, List<STORED_TYPE> output, STORED_TYPE object, int globalIndex) throws NullPointerException, IndexOutOfBoundsException;	/**
-	 * This FlushBehavior must execute a flush when invoked.
-	 * @return this
-	 * @since Mar 12, 2015
-	 */
-	public FlushBehavior<STORED_TYPE> forceFlush();
-    }//end FlushBehavior
     
     /**
      * Implementation determines when it is appropriate to defragment. May be shared between pools.
@@ -309,6 +263,13 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public boolean                      hasListeners(String propertyName);
     }//end Partition
     
+    /**
+     * Immutable-contents element representing an Entry in the pool whose local and global indices may be changed
+     * by the pool. Entries are created by Partition.newEntry(...) and removed by Partition.remove() or Entry.remove()
+     * @author Chuck Ritola
+     *
+     * @param <STORED_TYPE>
+     */
     public interface Entry<STORED_TYPE>{
 	//// BEAN PROPERTIES
 	public static final String LOCAL_INDEX = "localIndex",
@@ -364,4 +325,4 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
 	public boolean                      hasListeners(String propertyName);
     }//end Entry
-}//end PartitionedPool
+}//end PartitionedIndexPool

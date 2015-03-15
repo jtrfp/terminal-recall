@@ -21,10 +21,8 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.jtrfp.trcl.pool.PartitionedIndexPool.Entry;
-import org.jtrfp.trcl.pool.PartitionedIndexPool.FlushBehavior;
 import org.jtrfp.trcl.pool.PartitionedIndexPool.Partition;
 import org.jtrfp.trcl.pool.PartitionedIndexPool.UnusedIndexLimitBehavior;
 
@@ -245,59 +243,7 @@ public abstract class PartitionedIndexPoolTest {
 	    }});
 	assertEquals(uilb, subject.getTotalUnusedLimitBehavior());
     }
-
-    public void testSetFlushBehavior() {
-	final int [] notifySet = new int[1];
-	final int [] forceFlush = new int[1];
-	assertEquals(subject, subject.setFlushBehavior(new FlushBehavior<TestObject>(){
-	    @Override
-	    public FlushBehavior<TestObject> notifySet(
-		    PartitionedIndexPool<TestObject> pool,
-		    List<TestObject> output, TestObject object, int globalIndex)
-		    throws NullPointerException, IndexOutOfBoundsException {
-		notifySet[0]++;
-		return this;
-	    }
-	    @Override
-	    public FlushBehavior<TestObject> forceFlush() {
-		forceFlush[0]++;
-		return null;
-	    }}));
-	Entry<TestObject> e = subject.newPartition().newEntry(new TestObject());
-	assertEquals(1, notifySet[0]);
-	assertEquals(0, forceFlush[0]);
-	subject.flush();
-	assertEquals(1, notifySet[0]);
-	assertEquals(1, forceFlush[0]);
-    }
-
-    public void testGetFlushBehavior() {
-	FlushBehavior<TestObject> fb;
-	subject.setFlushBehavior(fb = new FlushBehavior<TestObject>(){
-	    @Override
-	    public FlushBehavior<TestObject> notifySet(
-		    PartitionedIndexPool<TestObject> pool,
-		    List<TestObject> output, TestObject object, int globalIndex)
-		    throws NullPointerException, IndexOutOfBoundsException {
-		return this;
-	    }
-
-	    @Override
-	    public FlushBehavior<TestObject> forceFlush() {
-		return this;
-	    }});
-	assertEquals(fb,subject.getFlushBehavior());
-    }
-
-    public void testFlush() {
-	Partition<TestObject> p = subject.newPartition();
-	final TestObject to = new TestObject();
-	p.newEntry(to);
-	assertEquals(0, subject.getFlatEntries().size());
-	assertEquals(1, subject.flush());
-	assertEquals(1, subject.getFlatEntries().size());
-    }
-
+    
     /////////// PARTITION //////////////
 
     public void testPartitionGetParent(){

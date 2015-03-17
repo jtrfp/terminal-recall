@@ -111,16 +111,16 @@ public abstract class PartitionedIndexPoolTest {
     }//end testGetPartitions()
 
     public void testGetFlatEntries() {
-	final ListenableList<TestObject> flatEntries = subject.getFlatEntries();
+	final ListenableList<Entry<TestObject>> flatEntries = subject.getFlatEntries();
 	assertNotNull(flatEntries);
 	final Partition<TestObject> [] parts = new Partition[2];
 	final TestObject [] to = new TestObject [] {new TestObject(),new TestObject()};
 	final Entry<TestObject> [] entries = new Entry[4];
 	final int [] added   = new int[1];
 	final int [] removed = new int[1];
-	flatEntries.addCollectionListener(new CollectionListener<TestObject>(){
+	flatEntries.addCollectionListener(new CollectionListener<Entry<TestObject>>(){
 	    @Override
-	    public void collectionChanged(CollectionEvent<TestObject> evt) {
+	    public void collectionChanged(CollectionEvent<Entry<TestObject>> evt) {
 		switch(evt.getType()){
 		case ADDED:
 		    added[0]++;
@@ -197,20 +197,20 @@ public abstract class PartitionedIndexPoolTest {
 	to[1].remove();
 	
 	int unused = 0;
-	for(TestObject obj:subject.getFlatEntries())
+	for(Entry<TestObject> obj:subject.getFlatEntries())
 	    if(obj==null)unused++;
 	assertEquals(2,unused);
 	
 	subject.defragment(1);
 	unused = 0;
-	for(TestObject obj:subject.getFlatEntries())
+	for(Entry<TestObject> obj:subject.getFlatEntries())
 	    if(obj==null)unused++;
 	assertEquals(1,unused);
 	
 	assertEquals(subject, subject.defragment(0));
 	assertEquals(0, subject.getTotalUnusedIndices());
 	unused = 0;
-	for(TestObject obj:subject.getFlatEntries())
+	for(Entry<TestObject> obj:subject.getFlatEntries())
 	    if(obj==null)unused++;
 	assertEquals(0,unused);
     }

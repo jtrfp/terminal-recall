@@ -14,56 +14,90 @@
 package org.jtrfp.trcl.pool;
 
 import java.beans.PropertyChangeListener;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.NoSuchElementException;
 
+import com.ochafik.util.listenable.DefaultListenableCollection;
 import com.ochafik.util.listenable.ListenableCollection;
+import com.ochafik.util.listenable.ListenableCollections;
 import com.ochafik.util.listenable.ListenableList;
 
 public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	PartitionedIndexPool<STORED_TYPE> {
-
+	private final ListenableList<Partition<STORED_TYPE>> partitions 
+	    = ListenableCollections.asList(new DefaultListenableCollection<Partition<STORED_TYPE>>(new ArrayList<Partition<STORED_TYPE>>()));
+	private final ListenableCollection<Partition<STORED_TYPE>> partitionsRO = ListenableCollections.unmodifiableCollection(partitions);
+	private final ListenableList<Entry<STORED_TYPE>> flatEntries 
+	    = ListenableCollections.asList(new DefaultListenableCollection<Entry<STORED_TYPE>>(new ArrayList<Entry<STORED_TYPE>>()));
+	private final ListenableList<Entry<STORED_TYPE>> flatEntriesRO = ListenableCollections.unmodifiableList(flatEntries);
+	private final Deque<Integer>unusedIndices = new ArrayDeque<Integer>();
+	private int numUsedIndices=0;
+	
     @Override
     public org.jtrfp.trcl.pool.PartitionedIndexPool.Partition<STORED_TYPE> newPartition() {
-	// TODO Auto-generated method stub
-	return null;
+	Partition<STORED_TYPE> result;
+	//result = new PartitionImpl<STORED_TYPE>(this);//TODO
+	result = null;
+	partitions.add(result);
+	return result;
+    }
+    
+    private int newIndex(){
+	int result = 0;
+	try{result = unusedIndices.removeFirst();}
+	catch(NoSuchElementException e){
+	    result = numUsedIndices;
+	}
+	numUsedIndices++;
+	return result;
+    }//end newIndex()
+    
+    private void releaseIndex(int index){
+	unusedIndices.add(index);
+	numUsedIndices--;
     }
 
     @Override
     public PartitionedIndexPool<STORED_TYPE> removePartition(
 	    org.jtrfp.trcl.pool.PartitionedIndexPool.Partition<STORED_TYPE> toRemove)
 	    throws NullPointerException, IllegalArgumentException {
-	// TODO Auto-generated method stub
-	return null;
+	if(toRemove==null)
+	    throw new NullPointerException();
+	if(!partitions.contains(toRemove))
+	    throw new IllegalArgumentException();
+	toRemove.removeAllEntries();
+	partitions.remove(toRemove);
+	return this;
     }
 
     @Override
     public PartitionedIndexPool<STORED_TYPE> removeAllPartitions() {
-	// TODO Auto-generated method stub
-	return null;
+	for(Partition<STORED_TYPE> partition: partitions)
+	    partition.remove();
+	return this;
     }
 
     @Override
     public ListenableCollection<org.jtrfp.trcl.pool.PartitionedIndexPool.Partition<STORED_TYPE>> getPartitions() {
-	// TODO Auto-generated method stub
-	return null;
+	return partitionsRO;
     }
 
     @Override
-    public ListenableList<STORED_TYPE> getFlatEntries() {
-	// TODO Auto-generated method stub
-	return null;
+    public ListenableList<Entry<STORED_TYPE>> getFlatEntries() {
+	return flatEntriesRO;
     }
 
     @Override
     public int getTotalUnusedIndices() {
-	// TODO Auto-generated method stub
-	return 0;
+	return unusedIndices.size();
     }
 
     @Override
     public PartitionedIndexPool<STORED_TYPE> defragment(int maxNumUnusedIndices)
 	    throws IllegalArgumentException {
-	// TODO Auto-generated method stub
-	return null;
+	return this;//TODO
     }
 
     @Override
@@ -77,25 +111,6 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
     public org.jtrfp.trcl.pool.PartitionedIndexPool.UnusedIndexLimitBehavior getTotalUnusedLimitBehavior() {
 	// TODO Auto-generated method stub
 	return null;
-    }
-
-    @Override
-    public org.jtrfp.trcl.pool.PartitionedIndexPool.FlushBehavior<STORED_TYPE> setFlushBehavior(
-	    org.jtrfp.trcl.pool.PartitionedIndexPool.FlushBehavior<STORED_TYPE> behavior) {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    @Override
-    public org.jtrfp.trcl.pool.PartitionedIndexPool.FlushBehavior<STORED_TYPE> getFlushBehavior() {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    @Override
-    public int flush() {
-	// TODO Auto-generated method stub
-	return 0;
     }
 
     @Override

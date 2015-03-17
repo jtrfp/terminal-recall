@@ -69,7 +69,7 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      * @return a read-only ListenableList of Entries.
      * @since Mar 12, 2015
      */
-    public ListenableList<STORED_TYPE>
+    public ListenableList<Entry<STORED_TYPE>>
                                         getFlatEntries();
     /**
      * Query quantity of free indices of the entire pool.<br>
@@ -216,12 +216,12 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	/**
 	 * Executes a compacting/defragmentation of this Partition.
 	 * @param maxNumUnusedIndices The maximum tolerable threshold of unused indices in this Partition by the time defragmentation completes.
-	 * @return this
+	 * @return The number of unused indices removed from this Partition
 	 * @throws IllegalStateException if this Partition is invalid (removed from PartitionedIndexPool).
 	 * @throws IllegalArgumentException if maxNumUnusedIndices is not positive and of a value supported by the implementation.
 	 * @since Mar 11, 2015
 	 */
-	public Partition<STORED_TYPE>       defragment(int maxNumUnusedIndices)              throws IllegalStateException, IllegalArgumentException;
+	public int       defragment(int maxNumUnusedIndices)              throws IllegalStateException, IllegalArgumentException;
 	/**
 	 * Modify this Partition's management of unused indices.
 	 * This behavior gets invoked when the total number of unused indices of this Partition increases but 

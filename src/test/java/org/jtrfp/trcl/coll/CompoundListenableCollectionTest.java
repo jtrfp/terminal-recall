@@ -68,8 +68,8 @@ public class CompoundListenableCollectionTest extends TestCase {
 		    break;
 		}
 	    }});
-	Assert.assertFalse(added[0]);
-	Assert.assertFalse(removed[0]);
+	assertFalse(added[0]);
+	assertFalse(removed[0]);
     }//end testAddCollectionListener()
 
     public void testRemoveCollectionListener() {
@@ -91,21 +91,21 @@ public class CompoundListenableCollectionTest extends TestCase {
 		    break;
 		}
 	    }});
-	Assert.assertFalse(added[0]);
-	Assert.assertFalse(removed[0]);
+	assertFalse(added[0]);
+	assertFalse(removed[0]);
 	compoundListenableCollection.removeCollectionListener(listener);
-	Assert.assertFalse(added[0]);
-	Assert.assertFalse(removed[0]);
+	assertFalse(added[0]);
+	assertFalse(removed[0]);
 	listenableCollections.iterator().next().remove(Integer.valueOf(0));
 	listenableCollections.iterator().next().add(Integer.valueOf(1));
-	Assert.assertFalse(added[0]);
-	Assert.assertFalse(removed[0]);
+	assertFalse(added[0]);
+	assertFalse(removed[0]);
     }//end testRemoveCollectionListener()
     
     public void testClear() {
 	compoundListenableCollection.clear();
-	Assert.assertTrue(compoundListenableCollection.isEmpty());
-	Assert.assertEquals(0, compoundListenableCollection.size());
+	assertTrue(compoundListenableCollection.isEmpty());
+	assertEquals(0, compoundListenableCollection.size());
     }
 
     public void testAdd() {
@@ -118,19 +118,19 @@ public class CompoundListenableCollectionTest extends TestCase {
     public void testContains() {
 	final int totalVals = NUM_COLL_TO_TEST*SIZE_OF_COLL;
 	for(int i=0; i<totalVals;i++)
-	    Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(i)));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(totalVals)));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(totalVals+1234)));
+	    assertTrue(compoundListenableCollection.contains(Integer.valueOf(i)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(totalVals)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(totalVals+1234)));
 	compoundListenableCollection.remove(Integer.valueOf(5));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(5)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(5)));
 	listenableCollections.iterator().next().add(5);
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(5)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(5)));
 	Integer integer = new Integer(totalVals*3);
 	ListenableCollection<Integer> newColl = new DefaultListenableCollection<Integer>(new ArrayList<Integer>());
 	listenableCollections.add(newColl);
-	Assert.assertFalse(compoundListenableCollection.contains(integer));
+	assertFalse(compoundListenableCollection.contains(integer));
 	newColl.add(integer);
-	Assert.assertTrue(compoundListenableCollection.contains(integer));
+	assertTrue(compoundListenableCollection.contains(integer));
     }//end testContains()
 
     public void testAddAll() {
@@ -145,27 +145,27 @@ public class CompoundListenableCollectionTest extends TestCase {
 	final Collection<Integer> testVals = new ArrayList<Integer>();
 	for(int i=0; i<totalVals; i++)
 	    testVals.add(i);
-	Assert.assertTrue(compoundListenableCollection.containsAll(testVals));
+	assertTrue(compoundListenableCollection.containsAll(testVals));
 	for(int i=0; i<totalVals; i++)
 	    testVals.add(i+totalVals/2);
-	Assert.assertFalse(compoundListenableCollection.containsAll(testVals));
+	assertFalse(compoundListenableCollection.containsAll(testVals));
     }
 
     public void testSize() {
-	Assert.assertEquals(NUM_COLL_TO_TEST*SIZE_OF_COLL, compoundListenableCollection.size());
+	assertEquals(NUM_COLL_TO_TEST*SIZE_OF_COLL, compoundListenableCollection.size());
     }
 
     public void testIsEmpty() {
-	Assert.assertFalse(compoundListenableCollection.isEmpty());
+	assertFalse(compoundListenableCollection.isEmpty());
 	for(ListenableCollection<Integer> coll:listenableCollections)
 	    coll.clear();
-	Assert.assertTrue(compoundListenableCollection.isEmpty());
+	assertTrue(compoundListenableCollection.isEmpty());
     }
 
     public void testRemove() {
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
 	compoundListenableCollection.remove(Integer.valueOf(1));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(1)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(1)));
     }
 
     public void testRemoveAll() {
@@ -173,12 +173,12 @@ public class CompoundListenableCollectionTest extends TestCase {
 	removeThese.add(12);
 	removeThese.add(3);
 	removeThese.add(1);
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
 	compoundListenableCollection.removeAll(removeThese);
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(1)));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(3)));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(12)));
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(7)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(1)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(3)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(12)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(7)));
     }//end testRemoveAll
 
     public void testRetainAll() {
@@ -186,12 +186,12 @@ public class CompoundListenableCollectionTest extends TestCase {
 	retainThese.add(12);
 	retainThese.add(3);
 	retainThese.add(1);
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
 	compoundListenableCollection.retainAll(retainThese);
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(3)));
-	Assert.assertTrue(compoundListenableCollection.contains(Integer.valueOf(12)));
-	Assert.assertFalse(compoundListenableCollection.contains(Integer.valueOf(7)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(1)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(3)));
+	assertTrue(compoundListenableCollection.contains(Integer.valueOf(12)));
+	assertFalse(compoundListenableCollection.contains(Integer.valueOf(7)));
     }//end testRetainAll
 
 }//end CompoundListenableCollectionTest

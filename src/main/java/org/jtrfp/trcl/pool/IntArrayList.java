@@ -18,8 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 /**
  * Minimally-implemented fixed-limit List wrapper for primitive ints[] strictly for allowing processing
  * of int[] arrays in methods which expect Lists. Read code carefully before using as this is not a 
@@ -67,8 +65,8 @@ public final class IntArrayList implements List<Integer> {
     @Override
     public boolean addAll(int index, Collection<? extends Integer> c) {
 	for(Integer i:c)
-	    delegate[index++]=i;
-	return false;
+	    delegate[(counter++)+index]=i;
+	return true;
     }
 
     @Override
@@ -80,7 +78,10 @@ public final class IntArrayList implements List<Integer> {
     public boolean contains(Object o) {
 	if(o==null)return false;
 	final Integer v = (Integer)o;
-	return ArrayUtils.contains(delegate, v.intValue());
+	for(int i:delegate)
+	    if(i == v.intValue())
+		return true;
+        return false;
     }
 
     @Override

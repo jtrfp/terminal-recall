@@ -69,6 +69,9 @@ public class IndexPoolTest extends TestCase {
 	    @Override
 	    public int grow(int previousMaxCapacity) {
 		return previousMaxCapacity+1;
+	    }
+	    public int shrink(int minDesiredCapacity){
+		return minDesiredCapacity;
 	    }});
 	subject.pop();
 	subject.pop();

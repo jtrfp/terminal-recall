@@ -79,6 +79,22 @@ public final class MemoryManager {
 		try{return ft.get();}catch(Exception e){e.printStackTrace();}
 		return previousMaxCapacity;//Fail by maintaining original size
 	    }//end grow(...)
+	    @Override
+	    public int shrink(final int minDesiredMaxCapacity){
+		final int currentMaxCapacity = pageIndexPool.getMaxCapacity();
+		final int proposedMaxCapacity = currentMaxCapacity/2;//TODO: This adjusts by a single power of 2, take arbitrary power of 2 instead
+		if(proposedMaxCapacity >= minDesiredMaxCapacity){
+		    final TRFuture<Integer> ft = MemoryManager.this.gpu.getTr().getThreadManager().submitToGL(new Callable<Integer>(){
+			@Override
+			public Integer call(){
+			    glPhysicalMemory.reallocate(proposedMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES);
+			    physicalMemory[0] = glPhysicalMemory.map();
+			    return proposedMaxCapacity;
+			}//end call()
+		    });
+		    try{return ft.get();}catch(Exception e){e.printStackTrace();return currentMaxCapacity;}
+		}else return currentMaxCapacity;
+	    }//end shrink
 	});
     }//end constructor
     

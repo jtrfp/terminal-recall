@@ -26,8 +26,12 @@ public class IndexPool{
                                         usedIndices     = new PriorityBlockingQueue<Integer>();
 	private volatile int 		maxCapacity	= 1;
 	private volatile int 		highestIndex	= -1;
-	private GrowthBehavior 		growthBehavior	= new GrowthBehavior()
-		{public int grow(int index){return index*2;}};//Default is to double each time.
+	private GrowthBehavior 		growthBehavior	= new GrowthBehavior(){
+	    public int grow(int index)
+	     {return index*2;}
+	    public int shrink(int minDesiredSize)
+	     {return minDesiredSize;}
+	    };//Default is to double each time, and shrink to exact minimum.
 	private int hardLimit=Integer.MAX_VALUE;//Basically no hard limit by default
 	
 	public IndexPool(){
@@ -64,8 +68,8 @@ public class IndexPool{
 		    else run=false;
 		}else run=false;
 	    }//end while(run)
-	    //TODO: shrink
-	    //TODO: Adjust highest index
+	    final int proposedNewMaxCapacity = maxCapacity-removalTally;
+	    maxCapacity = growthBehavior.shrink(proposedNewMaxCapacity);
 	    return removalTally;
 	}//end compact()
 	
@@ -199,8 +203,17 @@ public class IndexPool{
 		    usedIndices.remove(index);
 		    return index;}
 	
-	public static interface GrowthBehavior
-		{int grow(int previousMaxCapacity);}
+	public static interface GrowthBehavior{
+	    int grow(int previousMaxCapacity);
+	    /**
+	     * Requests the backing implementation to shrink to an arbitrary size no smaller than the specified capacity.
+	     * The behavior may choose to not shrink at all.
+	     * @param minDesiredCapacity The minimum size allowable resulting from this shrink.
+	     * @return Positive quantity of the new size, no smaller than minDesiredCapacity.
+	     * @since Mar 19, 2015
+	     */
+	    int shrink(int minDesiredCapacity);
+	    }
 	public void setGrowthBehavior(GrowthBehavior gb){growthBehavior=gb;}
 
 	public synchronized int popConsecutive(int numNewItems) {

@@ -80,6 +80,20 @@ public abstract class MemoryWindow {
 				+ ".sizeInObjects", newSizeInObjects);
 		return newSizeInObjects;
 	    }
+
+	    @Override
+	    public int shrink(int minDesiredCapacity) {
+		//Attempt to shrink by one page
+		final int previousMaxCapacity = indexPool.getMaxCapacity();
+		final int objectsPerPage =  (int)Math.ceil((double)PagedByteBuffer.PAGE_SIZE_BYTES
+			/ (double)getObjectSizeInBytes());
+		final int proposedNewSizePages = (int)Math.ceil(((double)minDesiredCapacity)/((double)objectsPerPage));
+		final int proposedNewSizeInObjects = proposedNewSizePages * objectsPerPage;
+		if(proposedNewSizeInObjects != previousMaxCapacity){
+		    getBuffer().resize(proposedNewSizeInObjects * getObjectSizeInBytes());
+		    return proposedNewSizeInObjects;
+		}else return previousMaxCapacity;//No change.
+	    }//end shrink(...)
 	});
 	buffer.resize(getObjectSizeInBytes() * getNumObjects());
 	for (int p = 0; p < numPages(); p++) {

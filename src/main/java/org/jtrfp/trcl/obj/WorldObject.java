@@ -35,6 +35,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.mem.VEC4Address;
 
 public class WorldObject implements PositionedRenderable {
     
@@ -76,6 +77,9 @@ public class WorldObject implements PositionedRenderable {
     protected final double[] tMd 	= new double[16];
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
+    
+    private VEC4Address [] opaqueObjectDefinitionAddressesInVEC4;
+    private VEC4Address [] transparentObjectDefinitionAddressesInVEC4;
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
@@ -255,8 +259,14 @@ public class WorldObject implements PositionedRenderable {
 		ByteOrder order = getTr().gpu.get().getByteOrder();
 		opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
 			opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
+		opaqueObjectDefinitionAddressesInVEC4 = new VEC4Address[opaqueIndicesList.size()];
+		for(int i = 0; i < opaqueIndicesList.size(); i++)
+		    opaqueObjectDefinitionAddressesInVEC4[i]=new VEC4Address(opaqueIndicesList.get(i));
 		transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
 			transparentIndicesList.size() * 4).order(order);
+		transparentObjectDefinitionAddressesInVEC4 = new VEC4Address[transparentIndicesList.size()];
+		for(int i = 0; i < transparentIndicesList.size(); i++)
+		    transparentObjectDefinitionAddressesInVEC4[i]=new VEC4Address(transparentIndicesList.get(i));
 
 		IntBuffer trans = transparentObjectDefinitionAddressesInVec4
 			.asIntBuffer(), opaque = opaqueObjectDefinitionAddressesInVec4
@@ -514,6 +524,14 @@ public class WorldObject implements PositionedRenderable {
 	top[1] = nTop.getY();
 	top[2] = nTop.getZ();
 	needToRecalcMatrix=true;
+    }
+    
+    public final VEC4Address [] getOpaqueObjectDefinitionAddress(){
+	return opaqueObjectDefinitionAddressesInVEC4;
+    }
+    
+    public final VEC4Address [] getTransparentObjectDefinitionAddress(){
+	return transparentObjectDefinitionAddressesInVEC4;
     }
 
     public final ByteBuffer getOpaqueObjectDefinitionAddresses() {

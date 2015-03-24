@@ -37,10 +37,9 @@ public class IndexPool{
 	public IndexPool(){
 	}
 	/**
-	 * INCOMPLETE
 	 * Discard the trailing free indices of this pool. This is not defragmentation. Fragmentation will 
 	 * persist except for all unused indices between the greatest used index and the maxCapacity.
-	 * @return
+	 * @return Number of indices removed.
 	 * @since Mar 19, 2015
 	 */
 	public int compact(){
@@ -81,8 +80,6 @@ public class IndexPool{
     private int innerPop(){
 	try{return innerPopOrException();}
 	catch(OutOfIndicesException e){
-	    e.printStackTrace();
-	    assert false;
 	    return -1;
 	    }//Shouldn't happen.
     }//end pop()
@@ -234,7 +231,7 @@ public class IndexPool{
 	    return maxCapacity;
 	}
 	
-	public static class OutOfIndicesException extends Exception{}
+	public static class OutOfIndicesException extends Exception {}
 	/**
 	 * @return the hardLimit
 	 */

@@ -16,7 +16,6 @@ package org.jtrfp.trcl.coll;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import com.ochafik.util.listenable.CollectionEvent;

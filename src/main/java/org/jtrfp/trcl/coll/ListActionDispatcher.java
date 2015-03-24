@@ -126,7 +126,7 @@ public class ListActionDispatcher<E> implements List<E> {
     @Override
     public E remove(int index) {
 	for(List<E> targ:targets)
-	    try{targ.remove(index);}catch(IndexOutOfBoundsException e){}//Ignore.
+	    try{targ.remove(index);} catch(IndexOutOfBoundsException e){}//Ignore
 	return cache.remove(index);
     }
     @Override

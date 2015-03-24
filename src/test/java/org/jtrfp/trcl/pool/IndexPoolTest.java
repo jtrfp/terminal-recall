@@ -139,7 +139,7 @@ public class IndexPoolTest extends TestCase {
 	// f f 2
 	assertEquals(2, subject.getFreeIndices().size());
 	assertEquals(1, subject.getUsedIndices().size());
-	subject.pop();
+	assertEquals(0,subject.pop());
 	subject.free(2);
 	// 0 f f
 	assertEquals(2, subject.getFreeIndices().size());

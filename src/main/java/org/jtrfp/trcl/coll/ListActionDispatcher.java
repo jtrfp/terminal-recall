@@ -21,11 +21,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class ListActionDispatcher<E> implements List<E> {
-    private final List<E>      cache;
-    private final Map<List<E>,Object> targetsMap = new IdentityHashMap<List<E>,Object>();
-    private final Set<List<E>> targets = targetsMap.keySet();
+    protected final List<E>             cache;
+    protected final Map<List<E>,Object> targetsMap = new IdentityHashMap<List<E>,Object>();
+    protected final Set<List<E>>        targets = targetsMap.keySet();
     
     public ListActionDispatcher(List<E> cache){
+	if(cache==null)
+	    throw new NullPointerException("Supplied cache is intolerably null.");
 	this.cache=cache;
     }//end constructor
     

@@ -43,21 +43,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      */
     public Partition           <STORED_TYPE> newPartition();
     /**
-     * Removes the specified partition (and all enclosed entires) from this pool.
-     * @param toRemove Non-null partition to remove, belonging to this pool.
-     * @return this
-     * @throws NullPointerException If the specified partition is null.
-     * @throws IllegalArgumentException If the specified partition is not a member of this pool.
-     * @since Mar 10, 2015
-     */
-    public PartitionedIndexPool<STORED_TYPE> removePartition(Partition<STORED_TYPE> toRemove) throws NullPointerException, IllegalArgumentException;
-    /**
-     * Removes all partitions from this pool, if any.
-     * @return this
-     * @since Mar 10, 2015
-     */
-    public PartitionedIndexPool<STORED_TYPE> removeAllPartitions();
-    /**
      * Auto-updated access to the valid partitions in this pool.
      * @return Read-only listenable collection representing the partitions of this pool.
      * @since Mar 10, 2015
@@ -175,16 +160,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 * @since Mar 11, 2015
 	 */
 	public Partition           <STORED_TYPE> remove()                                        throws IllegalStateException;
-	/**
-	 * Remove and invalidate an entry from this Partition and mark its index as unused.
-	 * @param entry The non-null entry to invalidate and remove from this Partition.
-	 * @return The removed Entry.
-	 * @throws IllegalArgumentException if the specified Entry is not a member of this Partition.
-	 * @throws IllegalStateException if the specified Entry or this Partition are invalid. (removed)
-	 * @throws NullPointerException if the specified Entry is intolerably null.
-	 * @since Mar 11, 2015
-	 */
-	public Entry               <STORED_TYPE> removeEntry(Entry<STORED_TYPE> entry)           throws IllegalArgumentException, IllegalStateException, NullPointerException;
 	/**
 	 * Removes all Entries from this Partition, IFF this Partition is valid.
 	 * @return this

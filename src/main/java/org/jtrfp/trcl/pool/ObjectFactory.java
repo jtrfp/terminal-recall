@@ -13,16 +13,30 @@
 
 package org.jtrfp.trcl.pool;
 
-import org.jtrfp.trcl.SoftValueHashMap;
+import java.util.Map;
 
-public abstract class CachedObjectFactory<K,V> {
-    private final SoftValueHashMap<K,V> cache = new SoftValueHashMap<K,V>();
+import com.ochafik.util.Adapter;
+
+/**
+ * Not related to the JNDI, but likely to be replaced by it in the future.
+ * @author Chuck Ritola
+ *
+ * @param <K>
+ * @param <V>
+ */
+public class ObjectFactory<K,V> {
+    private final Map    <K,V> mapToUse;
+    private final Adapter<K,V> keyValueAdapter;
+    
+    public ObjectFactory(Map<K,V> mapToUse, Adapter<K,V> keyValueAdapter){
+	this.mapToUse        = mapToUse;
+	this.keyValueAdapter = keyValueAdapter;
+    }
+    
     public V get(K key){
-	V result = cache.get(key);
+	V result = mapToUse.get(key);
 	if(result==null)
-	    cache.put(key, result=generate(key));
+	    mapToUse.put(key, result=keyValueAdapter.adapt(key));
 	return result;
     }//end public(key)
-    
-    protected abstract V generate(K key);
 }//end CachedObjectFactory

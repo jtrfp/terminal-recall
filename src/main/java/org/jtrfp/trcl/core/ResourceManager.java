@@ -103,9 +103,11 @@ import org.jtrfp.trcl.obj.ExplosionSystem;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
-import org.jtrfp.trcl.pool.CachedObjectFactory;
+import org.jtrfp.trcl.pool.ObjectFactory;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.SoundTexture;
+
+import com.ochafik.util.Adapter;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
@@ -134,8 +136,8 @@ public class ResourceManager{
 	private final TR 					tr;
 	private TextureDescription				testTexture;
 	
-	public final CachedObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
-	public final CachedObjectFactory<String,SoundTexture>	soundTextures;
+	public final ObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
+	public final ObjectFactory<String,SoundTexture>	soundTextures;
 	
 	public ResourceManager(final TR tr){
 		this.tr=tr;
@@ -144,26 +146,38 @@ public class ResourceManager{
 		    }
 		catch(Exception e){tr.showStopper(e);}
 		gpuResidentMODs = 
-		 new CachedObjectFactory<String, GPUResidentMOD>(){
+		 new ObjectFactory<String, GPUResidentMOD>(new SoftValueHashMap<String,GPUResidentMOD>(),new Adapter<String,GPUResidentMOD>(){
+
 		    @Override
-		    protected GPUResidentMOD generate(String key) {
-			return new GPUResidentMOD(tr,getMOD(key));
-		    }//end generate(...)
-	 };
+		    public GPUResidentMOD adapt(String value) {
+			return new GPUResidentMOD(tr,getMOD(value));
+		    }
+
+		    @Override
+		    public String reAdapt(GPUResidentMOD value) {
+			// TODO Auto-generated method stub
+			return null;
+		    }});
 	 	soundTextures =
-	 	 new CachedObjectFactory<String,SoundTexture>(){
+	 	 new ObjectFactory<String,SoundTexture>(new SoftValueHashMap<String,SoundTexture>(),new Adapter<String,SoundTexture>(){
 		    @Override
-		    protected SoundTexture generate(String key) {
+		    public SoundTexture adapt(String key) {
 			try{
-			 final AudioInputStream ais = AudioSystem.getAudioInputStream(getInputStreamFromResource("SOUND\\"+key));
-			 final FloatBuffer fb       = ByteBuffer.allocateDirect((int)ais.getFrameLength()*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-		 	 int value;
-			 while((value=ais.read())!=-1){
-			    fb.put(((float)(value-128))/128f);
-			 }fb.clear();
-			 return tr.soundSystem.get().newSoundTexture(fb, (int)ais.getFormat().getFrameRate());
+			    final AudioInputStream ais = AudioSystem.getAudioInputStream(getInputStreamFromResource("SOUND\\"+key));
+			    final FloatBuffer fb       = ByteBuffer.allocateDirect((int)ais.getFrameLength()*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+			    int value;
+			    while((value=ais.read())!=-1){
+				fb.put(((float)(value-128))/128f);
+			    }fb.clear();
+			    return tr.soundSystem.get().newSoundTexture(fb, (int)ais.getFormat().getFrameRate());
 			}catch(Exception e){tr.showStopper(e);return null;}
-		    }};
+		    }//end adapt(...)
+
+		    @Override
+		    public String reAdapt(SoundTexture value) {
+			// TODO Auto-generated method stub
+			return null;
+		    }});
 		    
 		setupPODListeners();
 	}//end ResourceManager

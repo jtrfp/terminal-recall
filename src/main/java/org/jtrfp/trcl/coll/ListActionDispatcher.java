@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.coll;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -31,6 +32,10 @@ public class ListActionDispatcher<E> implements List<E> {
 	this.cache=cache;
     }//end constructor
     
+    public ListActionDispatcher() {
+	this(new ArrayList<E>());
+    }
+
     /**
      * Registers the List 
      * to be forwarded List operations given to this dispatcher. When prefilled, the supplied target is assumed

@@ -14,10 +14,9 @@
 package org.jtrfp.trcl.pool;
 
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
+import org.jtrfp.trcl.coll.ListActionDispatcher;
 import com.ochafik.util.listenable.ListenableCollection;
-import com.ochafik.util.listenable.ListenableList;
 
 /**
  * Handles entries in partitions which are organized in a sequential fashion such that all entries (used or unused) in a Partition
@@ -51,10 +50,10 @@ public interface PartitionedIndexPool<STORED_TYPE> {
                                         getPartitions();
     /**
      * Auto-updated access to this entire pool's contents as a flat List of Entries. Unused locations are set to null.
-     * @return a read-only ListenableList of Entries.
+     * @return a ListActionDispatcher of Entries.
      * @since Mar 12, 2015
      */
-    public ListenableList<Entry<STORED_TYPE>>
+    public ListActionDispatcher<Entry<STORED_TYPE>>
                                         getFlatEntries();
     /**
      * Query quantity of free indices of the entire pool.<br>
@@ -169,10 +168,10 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public Partition           <STORED_TYPE> removeAllEntries()                              throws IllegalStateException;
 	/**
 	 * Auto-updating query of all valid entries within this Partition.
-	 * @return A read-only listenable collection representing all entries of this Partition.
+	 * @return A ListActionDispatcher representing all entries of this Partition.
 	 * @since Mar 11, 2015
 	 */
-	public ListenableCollection<Entry<STORED_TYPE>> 
+	public ListActionDispatcher<org.jtrfp.trcl.pool.PartitionedIndexPool.Entry<STORED_TYPE>> 
 	                                    getEntries();
 	/**
 	 * Query this Parittion's global start index.

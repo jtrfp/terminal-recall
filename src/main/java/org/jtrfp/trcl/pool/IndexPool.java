@@ -98,7 +98,6 @@ public class IndexPool{
     public int pop(Collection<Integer> dest, int count){
 	final ArrayList<Integer> temp = new ArrayList<Integer>();
 	final int result = innerPop(temp,count);
-	assert temp.size()==count:"temp.size()="+temp.size()+" count="+count;
 	dest       .addAll(temp);
 	usedIndices.addAll(temp);
 	return result;
@@ -108,7 +107,7 @@ public class IndexPool{
 	try{popOrException(dest,count);return 0;}
 	catch(OutOfIndicesException e){
 	    return count;
-	    }//Shouldn't happen.
+	    }
     }//end pop(...)
     
     private void popOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.jtrfp.trcl.WeakValueHashMap;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.jtrfp.trcl.pool.ObjectFactory;
 
 import com.ochafik.util.Adapter;
@@ -29,7 +29,7 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
     protected final Adapter<IN,OUT>           adapter;
     protected final ListActionDispatcher<OUT> output;
     protected final List<IN>                  input;
-    protected final Map<IN,OUT>               inOutMap = new WeakValueHashMap<IN,OUT>();
+    protected final Map<IN,OUT>               inOutMap = new ReferenceMap<IN,OUT>();
     
     private final ObjectFactory<IN,OUT>       objectFactory;
     

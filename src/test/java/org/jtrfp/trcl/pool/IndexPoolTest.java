@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Queue;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import org.jtrfp.trcl.dbg.PropertyChangeQueue;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
@@ -148,6 +148,55 @@ public class IndexPoolTest extends TestCase {
 	// 0
 	assertEquals(0, subject.getFreeIndices().size());
 	assertEquals(1, subject.getUsedIndices().size());
+    }
+    
+    public void testGetNumUnusedIndices(){
+	final IndexPool subject = new IndexPool();
+	assertEquals(0,subject.getNumUnusedIndices());
+	subject.pop();
+	assertEquals(0,subject.getNumUnusedIndices());
+	subject.free(0);
+	assertEquals(1,subject.getNumUnusedIndices());
+	subject.pop();
+	assertEquals(0,subject.getNumUnusedIndices());
+    }
+    
+    public void testGetNumUsedIndices(){
+	final IndexPool subject = new IndexPool();
+	assertEquals(0,subject.getNumUsedIndices());
+	subject.pop();
+	assertEquals(1,subject.getNumUsedIndices());
+	subject.free(0);
+	assertEquals(0,subject.getNumUsedIndices());
+    }
+    
+    public void testNumUsedIndicesPropertyChange(){
+	final IndexPool         subject = new IndexPool();
+	final PropertyChangeQueue queue = new PropertyChangeQueue();
+	subject.addPropertyChangeListener(IndexPool.NUM_USED_INDICES,queue);
+	assertEquals(0,queue.size());
+	subject.pop();
+	assertEquals(1,queue.size());
+	assertEquals(1,queue.pop().getNewValue());
+	subject.pop();
+	assertEquals(1,queue.size());
+	assertEquals(2,queue.pop().getNewValue());
+    }
+    
+    public void testNumUnusedIndicesPropertyChange(){
+	final IndexPool         subject = new IndexPool();
+	final PropertyChangeQueue queue = new PropertyChangeQueue();
+	subject.addPropertyChangeListener(IndexPool.NUM_UNUSED_INDICES,queue);
+	subject.pop();
+	subject.pop();
+	subject.pop();
+	assertEquals(0,queue.size());
+	subject.free(0);
+	assertEquals(1,queue.size());
+	assertEquals(1,queue.pop().getNewValue());
+	subject.free(1);
+	assertEquals(1,queue.size());
+	assertEquals(2,queue.pop().getNewValue());
     }
 
 }//end IndexPoolTest

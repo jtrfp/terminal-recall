@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.pool;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,12 +22,17 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class IndexPool{
+        public static final String     NUM_UNUSED_INDICES = "numUnusedIndices",
+        	                       NUM_USED_INDICES   = "numUsedIndices";
+    
 	private final PriorityBlockingQueue<Integer>
 	                                freeIndices     = new PriorityBlockingQueue<Integer>();
 	private final PriorityBlockingQueue<Integer>
                                         usedIndices     = new PriorityBlockingQueue<Integer>();
 	private volatile int 		maxCapacity	= 1;
 	private volatile int 		highestIndex	= -1;
+	private volatile int            numUnusedIndices= 0;
+	private volatile int            numUsedIndices  = 0;
 	private GrowthBehavior 		growthBehavior	= new GrowthBehavior(){
 	    public int grow(int index)
 	     {return index*2;}
@@ -33,8 +40,18 @@ public class IndexPool{
 	     {return minDesiredSize;}
 	    };//Default is to double each time, and shrink to exact minimum.
 	private int hardLimit=Integer.MAX_VALUE;//Basically no hard limit by default
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	
 	public IndexPool(){
+	}
+	
+	private void updateNumUnusedIndices(){
+	    setNumUnusedIndices(freeIndices.size());
+	}
+	
+	private void setNumUnusedIndices(int numUnusedIndices){
+	    pcs.firePropertyChange(NUM_UNUSED_INDICES, this.numUnusedIndices, numUnusedIndices);
+	    this.numUnusedIndices=numUnusedIndices;
 	}
 	/**
 	 * Discard the trailing free indices of this pool. This is not defragmentation. Fragmentation will 
@@ -69,12 +86,16 @@ public class IndexPool{
 	    }//end while(run)
 	    final int proposedNewMaxCapacity = maxCapacity-removalTally;
 	    maxCapacity = growthBehavior.shrink(proposedNewMaxCapacity);
+	    updateNumUnusedIndices();
+	    updateNumUsedIndices();
 	    return removalTally;
 	}//end compact()
 	
     public int pop(){
 	final int result = innerPop();
 	usedIndices.add(result);
+	updateNumUnusedIndices();
+	updateNumUsedIndices();
 	return result;
     }
     private int innerPop(){
@@ -87,6 +108,8 @@ public class IndexPool{
     public int popOrException() throws OutOfIndicesException{
 	final int index = innerPopOrException();
 	usedIndices.add(index);
+	updateNumUnusedIndices();
+	updateNumUsedIndices();
 	return index;
     }
     
@@ -100,6 +123,8 @@ public class IndexPool{
 	final int result = innerPop(temp,count);
 	dest       .addAll(temp);
 	usedIndices.addAll(temp);
+	updateNumUnusedIndices();
+	updateNumUsedIndices();
 	return result;
     }
     
@@ -192,12 +217,14 @@ public class IndexPool{
 	}
 	
 	public int free(int index){
-	    	if(freeIndices.contains(index)){
-		    throw new RuntimeException("Double-release of resources: "+index);
-		}
-		    freeIndices.add(index);
-		    usedIndices.remove(index);
-		    return index;}
+	    if(freeIndices.contains(index))
+		throw new RuntimeException("Double-release of resources: "+index);
+	    freeIndices.add(index);
+	    usedIndices.remove(index);
+	    updateNumUnusedIndices();
+	    updateNumUsedIndices();
+	    return index;
+	}
 	
 	public static interface GrowthBehavior{
 	    int grow(int previousMaxCapacity);
@@ -214,12 +241,18 @@ public class IndexPool{
 
 	public synchronized int popConsecutive(int numNewItems) {
 	    //TODO This should use the freed pool instead of always allocating new
+	    int result;
 	    if(highestIndex+numNewItems<maxCapacity)
-		{final int result = highestIndex+1; highestIndex+=numNewItems;
+		{result = highestIndex+1; highestIndex+=numNewItems;
+		updateNumUnusedIndices();
+		updateNumUsedIndices();
 		return result;}
 	    else//Need to allocate a new block of indices
 		{maxCapacity = growthBehavior.grow(maxCapacity);
-		return popConsecutive(numNewItems);//Try again.
+		result = popConsecutive(numNewItems);
+		updateNumUnusedIndices();
+		updateNumUsedIndices();
+		return result;//Try again.
 		}
 	}//end popConsecutive(...)
 
@@ -249,5 +282,82 @@ public class IndexPool{
 	public void free(Collection<Integer> intArrayList) {
 	    freeIndices.addAll(intArrayList);
 	    usedIndices.removeAll(intArrayList);
+	}
+	/**
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
+	 */
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(listener);
+	}
+	/**
+	 * @param propertyName
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+	 */
+	public void addPropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(propertyName, listener);
+	}
+	/**
+	 * @return
+	 * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners()
+	 */
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+	    return pcs.getPropertyChangeListeners();
+	}
+	/**
+	 * @param propertyName
+	 * @return
+	 * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners(java.lang.String)
+	 */
+	public PropertyChangeListener[] getPropertyChangeListeners(
+		String propertyName) {
+	    return pcs.getPropertyChangeListeners(propertyName);
+	}
+	/**
+	 * @param propertyName
+	 * @return
+	 * @see java.beans.PropertyChangeSupport#hasListeners(java.lang.String)
+	 */
+	public boolean hasListeners(String propertyName) {
+	    return pcs.hasListeners(propertyName);
+	}
+	/**
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.beans.PropertyChangeListener)
+	 */
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(listener);
+	}
+	/**
+	 * @param propertyName
+	 * @param listener
+	 * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+	 */
+	public void removePropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+	/**
+	 * @return the numUnusedIndices
+	 */
+	public int getNumUnusedIndices() {
+	    return numUnusedIndices;
+	}
+
+	/**
+	 * @return the numUsedIndices
+	 */
+	public int getNumUsedIndices() {
+	    return numUsedIndices;
+	}
+
+	private void updateNumUsedIndices(){
+	    setNumUsedIndices(usedIndices.size());
+	}
+	private void setNumUsedIndices(int numUsedIndices) {
+	    pcs.firePropertyChange(NUM_USED_INDICES, this.numUsedIndices, numUsedIndices);
+	    this.numUsedIndices = numUsedIndices;
 	}
 }//end IndexPool

@@ -31,9 +31,7 @@ import com.ochafik.util.listenable.ListenableCollection;
  */
 public interface PartitionedIndexPool<STORED_TYPE> {
     //// BEAN PROPERTIES
-    public static final String TOT_UNUSED_INDICES     = "totalUnusedIndices",
-	                       UNUSED_LIMIT_BEHAVIOR  = "unusedLimitBehavior",
-	                       FLUSH_BEHAVIOR         = "flushBehavior";
+    public static final String TOT_UNUSED_INDICES     = "totalUnusedIndices";
     
     /**
      * Creates a new partition of zero size at an undefined index in the pool.
@@ -74,28 +72,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
      */
     public PartitionedIndexPool<STORED_TYPE>
                                         defragment(int maxNumUnusedIndices)         throws IllegalArgumentException;
-    /**
-     * Modify this pool's management of unused indices across all partitions belonging to this pool.
-     * This behavior gets invoked when the total number of unused indices of this pool's partitions increases but 
-     * may result in no action at all. Such a decision is by the behavior itself.
-     * Partitions which have their own UnusedIndexLimitBehavior specified (!=null) may be defragmented even if their own behavior does
-     * not require it. The decision as to which partitions are defragmented or or the number of total unused indices tolerated
-     * is determined by the specified behavior. The initial value is null.
-     * 
-     * @see org.jtrfp.trcl.pool.PartitionedIndexPool#UNUSED_LIMIT_BEHAVIOR
-     * @param behavior The new behavior to apply to this pool. If this behavior is null the result no management and it will never auto-defragment at the pool level.
-     * When set, the behavior will immediately be invoked for possible defragmentation.
-     * @return The previous UnusedIndexLimitBehavior for this pool, which may be null.
-     * @since Mar 10, 2015
-     */
-    public UnusedIndexLimitBehavior     setTotalUnusedLimitBehavior(UnusedIndexLimitBehavior behavior);
-    /**
-     * Query the current UnusedIndexLimitBehavior of this pool.
-     * @see org.jtrfp.trcl.pool.PartitionedIndexPool#UNUSED_LIMIT_BEHAVIOR
-     * @return The current UnusedIndexLimitBehavior for this pool, which may be null.
-     * @since Mar 10, 2015
-     */
-    public UnusedIndexLimitBehavior     getTotalUnusedLimitBehavior();
     
     //// PROPERTY CHANGE SUPPORT
     public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);
@@ -107,22 +83,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public boolean                      hasListeners(String propertyName);
     
     /**
-     * Implementation determines when it is appropriate to defragment. May be shared between pools.
-     * @author Chuck Ritola
-     *
-     */
-    public static interface UnusedIndexLimitBehavior{
-	/**
-	 * Notifies the implementation to check if the specified PartitionedIndexPool is ready to be flushed and
-	 * invokes that PartitionedIndexPool's flush() method if so.
-	 * @param poolToCheck The non-null pool for which to perform the check and potential flush.
-	 * @throws NullPointerException if the passed pool is null.
-	 * @since Mar 12, 2015
-	 */
-	public void proposeDefragmentation(PartitionedIndexPool<?> poolToCheck)                throws NullPointerException;
-    }//end UnusedIndexLimitBehavior
-    
-    /**
      * An auto-resizing subunit within the pool which may be invalidated (removed from the pool)
      * @author Chuck Ritola
      *
@@ -131,17 +91,17 @@ public interface PartitionedIndexPool<STORED_TYPE> {
     public interface Partition<STORED_TYPE>{
 	//// BEAN PROPERTIES
 	public static final String GLOBAL_START_INDEX     ="globalStartIndex",
-		                   UNUSED_LIMIT_BEHAVIOR  ="unusedLimitBehavior",
 		                   LENGTH_INDICES         ="lengthInIndices",
+		                   NUM_UNUSED_INDICES     ="numUnusedIndices",
+			           NUM_USED_INDICES       ="numUsedIndices",
 		                   VALID                  ="valid";
 	
 	/**
-	 * Query this Parition's parent pool. This value is to remain constant through the life of the Partition.
+	 * Query this Partition's parent pool. This value is to remain constant through the life of the Partition.
 	 * @return This partition's parent pool.
 	 * @since Mar 11, 2015
 	 */
-	public PartitionedIndexPool<STORED_TYPE> 
-	                                         getParent();
+	public PartitionedIndexPool<STORED_TYPE> getParent();
 	/**
 	 * Create a new Entry from this partition.
 	 * @param value Immutable intended non-null value
@@ -197,26 +157,6 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 */
 	public int       defragment(int maxNumUnusedIndices)              throws IllegalStateException, IllegalArgumentException;
 	/**
-	 * Modify this Partition's management of unused indices.
-	 * This behavior gets invoked when the total number of unused indices of this Partition increases but 
-	 * may result in no action at all. Such a decision is by the behavior itself.
-	 * The initial value is null.
-	 * 
-	 * @see org.jtrfp.trcl.pool.PartitionedIndexPool.Partition#UNUSED_LIMIT_BEHAVIOR
-	 * @param behavior The new behavior to apply to this pool. If this behavior is null the result no management and it will never auto-defragment at the pool level.
-	 * When set, the behavior will immediately be invoked for possible defragmentation.
-	 * @return The previous UnusedIndexLimitBehavior for this pool, which may be null.
-	 * @since Mar 10, 2015
-	 */
-	public UnusedIndexLimitBehavior     setUnusedLimitBehavior(UnusedIndexLimitBehavior mode);
-	/**
-	 * Query the current UnusedIndexLimitBehavior of this Partition.
-	 * @see org.jtrfp.trcl.pool.PartitionedIndexPool.Partition#UNUSED_LIMIT_BEHAVIOR
-	 * @return The current UnusedIndexLimitBehavior for this partition, which may be null.
-	 * @since Mar 10, 2015
-	 */
-	public UnusedIndexLimitBehavior     getUnusedLimitBehavior();
-	/**
 	 * Query if this Partition is still valid. A Partition is valid until it is invalidated by removal through
 	 * remove(), or the parent pools remove(Partition) method.
 	 * @see org.jtrfp.trcl.pool.PartitionedIndexPool.Partition#remove()
@@ -226,12 +166,19 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	 * @since Mar 11, 2015
 	 */
 	public boolean                      isValid();
+	/**
+	 * Query the current number of unused indices in this Partition, typically for defragmentation behavior.
+	 * @return Zero or a positive number representing the number of unused indices in this Partition.
+	 * @since Mar 31, 2015
+	 */
+	public int			    getNumUnusedIndices();
+	public int                          getNumUsedIndices();
 
 	//// PROPERTY CHANGE SUPPORT
-	public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);
-	public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(String propertyName, PropertyChangeListener l);
-	public PartitionedIndexPool<STORED_TYPE> removePropertyChangeListener(PropertyChangeListener l);
-	public PartitionedIndexPool<STORED_TYPE> removePropertyChangeListener(String propertyName, PropertyChangeListener l);
+	public PartitionedIndexPool.Partition<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);
+	public PartitionedIndexPool.Partition<STORED_TYPE> addPropertyChangeListener(String propertyName, PropertyChangeListener l);
+	public PartitionedIndexPool.Partition<STORED_TYPE> removePropertyChangeListener(PropertyChangeListener l);
+	public PartitionedIndexPool.Partition<STORED_TYPE> removePropertyChangeListener(String propertyName, PropertyChangeListener l);
 	public PropertyChangeListener[]     getPropertyChangeListeners();
 	public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
 	public boolean                      hasListeners(String propertyName);
@@ -291,10 +238,10 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public boolean isValid();
 	
 	//// PROPERTY CHANGE SUPPORT
-	public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);
-	public PartitionedIndexPool<STORED_TYPE> addPropertyChangeListener(String propertyName, PropertyChangeListener l);
-	public PartitionedIndexPool<STORED_TYPE> removePropertyChangeListener(PropertyChangeListener l);
-	public PartitionedIndexPool<STORED_TYPE> removePropertyChangeListener(String propertyName, PropertyChangeListener l);
+	public PartitionedIndexPool.Entry<STORED_TYPE> addPropertyChangeListener(PropertyChangeListener l);
+	public PartitionedIndexPool.Entry<STORED_TYPE> addPropertyChangeListener(String propertyName, PropertyChangeListener l);
+	public PartitionedIndexPool.Entry<STORED_TYPE> removePropertyChangeListener(PropertyChangeListener l);
+	public PartitionedIndexPool.Entry<STORED_TYPE> removePropertyChangeListener(String propertyName, PropertyChangeListener l);
 	public PropertyChangeListener[]     getPropertyChangeListeners();
 	public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
 	public boolean                      hasListeners(String propertyName);

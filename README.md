@@ -1,5 +1,6 @@
 terminal-recall
 ===============
+![build status](https://travis-ci.org/jtrfp/terminal-recall.svg?branch=master)
 
 An unofficial engine remake for Terminal Velocity and Fury3 written in Java. It aims to accept POD files for the original games or third-party creations and play them with updated graphics and sound, similar to the way Spring RTS enhances the Total Annihilation game.
 

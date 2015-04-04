@@ -15,13 +15,10 @@ package org.jtrfp.trcl.coll;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-
-import org.apache.commons.collections.ListUtils;
 
 /**
  * A List actor which combines the effects of several mutable sub-lists to a single destination List in a partitioned
@@ -31,9 +28,8 @@ import org.apache.commons.collections.ListUtils;
  * @param <T>
  */
 public class PartitionedList<T> {
-    private final List<T>                  dest;
-    private final ArrayList<ListPartition> partitionLists   = new ArrayList<ListPartition>();
-    private final List<ListPartition>      partitionListsRO = ListUtils.unmodifiableList(partitionLists);
+    private final List<T>                         dest;
+    private final ListActionDispatcher<Partition> partitions = new ListActionDispatcher<Partition>();
     
     public PartitionedList(List<T> dest) {
 	this.dest=dest;
@@ -44,18 +40,18 @@ public class PartitionedList<T> {
      * @return
      * @since Mar 18, 2015
      */
-    public ListPartition newSubList(){
-	ListPartition result = new ListPartition(this);
-	partitionLists.add(result);
+    public Partition newSubList(){
+	Partition result = new Partition(this);
+	partitions.add(result);
 	return result;
     }
     
-    public List<ListPartition> getPartitionLists(){
-	return partitionListsRO;
+    public ListActionDispatcher<Partition> getPartitions(){
+	return partitions;
     }
     
-    public void removeSubList(ListPartition l) throws IllegalArgumentException, IllegalStateException{
-	if(!partitionLists.contains(l))
+    public void removeSubList(Partition l) throws IllegalArgumentException, IllegalStateException{
+	if(!partitions.contains(l))
 	    if(l.getParent()==this)
 	     throw new IllegalStateException("This partition was already removed.");
 	    else
@@ -65,24 +61,29 @@ public class PartitionedList<T> {
 	dest.removeAll(dest.subList(start, start+l.size()));
 	//Clear from record.
 	l.setValid(false);
-	partitionLists.remove(l);
+	partitions.remove(l);
 	notifySizeAdjust();
     }
     
     protected void notifySizeAdjust(){
-	for(ListPartition p:partitionLists)
+	for(Partition p:partitions)
 	    p.staleSubList();
     }
     
-    protected int getStartIndex(ListPartition l){
-	final int index = partitionLists.indexOf(l);
+    protected int getStartIndex(Partition l){
+	if(!partitions.contains(l))
+	    if(l.getParent()==this)
+	     throw new IllegalStateException("This partition was removed.");
+	    else
+	     throw new IllegalArgumentException("This partition is not a member of this List.");
+	final int index = partitions.indexOf(l);
 	if(index==0)
 	    return 0;
-	ListPartition left = partitionLists.get(index-1);
+	Partition left = partitions.get(index-1);
 	return left.getStartIndex()+left.size();
     }
     
-    public class ListPartition implements List<T>{
+    public class Partition implements List<T>{
 	//// BEAN PROPERTIES
 	public static final String SIZE        = "size",
 		                   VALID       = "valid",
@@ -100,7 +101,7 @@ public class PartitionedList<T> {
 	    return parent;
 	}
 	
-	public ListPartition(PartitionedList<T> parent){
+	public Partition(PartitionedList<T> parent){
 	    this.parent=parent;
 	}
 	
@@ -120,7 +121,7 @@ public class PartitionedList<T> {
 	
 	protected void adjustSize(int amt){
 	    pcs.firePropertyChange(SIZE, size, size+amt);
-	    size+=amt;
+	    size += amt;
 	    parent.notifySizeAdjust();
 	}
 	
@@ -146,6 +147,8 @@ public class PartitionedList<T> {
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
+	    if(c==null)
+		throw new NullPointerException("Passed Collection is intolerably null.");
 	    getSubList().addAll(c);
 	    adjustSize(c.size());
 	    return false;
@@ -153,6 +156,10 @@ public class PartitionedList<T> {
 
 	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
+	    if(c==null)
+		throw new NullPointerException("Passed Collection is intolerably null.");
+	    if(index<-1)
+		throw new IllegalArgumentException("Passed index is intolerably negative.");
 	    getSubList().addAll(index,c);
 	    adjustSize(c.size());
 	    return false;
@@ -207,13 +214,15 @@ public class PartitionedList<T> {
 
 	@Override
 	public ListIterator<T> listIterator(int index) {
+	    if(index<0)
+		throw new IllegalArgumentException("Passed index is intolerably negative.");
 	    final int size  = this.size;
 	    final int offset = index;
 	    return new ListIterator<T>(){
-		int index = offset-1;
+		int index = offset-1;//TODO: Check for bugs
 		@Override
 		public void add(T arg0) {
-		    ListPartition.this.add(index,arg0);
+		    Partition.this.add(index,arg0);
 		}
 
 		@Override
@@ -228,7 +237,7 @@ public class PartitionedList<T> {
 
 		@Override
 		public T next() {
-		    return ListPartition.this.get(++index);
+		    return Partition.this.get(++index);
 		}
 
 		@Override
@@ -238,7 +247,7 @@ public class PartitionedList<T> {
 
 		@Override
 		public T previous() {
-		    return ListPartition.this.get(--index);
+		    return Partition.this.get(--index);
 		}
 
 		@Override
@@ -248,12 +257,12 @@ public class PartitionedList<T> {
 
 		@Override
 		public void remove() {
-		    ListPartition.this.remove(index);
+		    Partition.this.remove(index);
 		}
 
 		@Override
 		public void set(T element) {
-		    ListPartition.this.set(index,element);
+		    Partition.this.set(index,element);
 		}};
 	}
 
@@ -271,11 +280,13 @@ public class PartitionedList<T> {
 	    return result;
 	}
 
+	@Deprecated
 	@Override
 	public boolean removeAll(Collection<?> c) {
 	    throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public boolean retainAll(Collection<?> c) {
 	    throw new UnsupportedOperationException();

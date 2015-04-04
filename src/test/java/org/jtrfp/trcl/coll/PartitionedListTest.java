@@ -20,7 +20,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jtrfp.trcl.coll.PartitionedList.ListPartition;
+import org.jtrfp.trcl.coll.PartitionedList.Partition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,16 +87,16 @@ public class PartitionedListTest {
 	assertEquals(2,(int)list.get(2));
 	assertEquals(3,(int)list.get(3));
 	assertEquals(5,(int)list.get(5));
-	subject.removeSubList((ListPartition)pl0);
+	subject.removeSubList((Partition)pl0);
 	assertEquals(3,(int)list.size());
 	// 3 4 5
 	assertEquals(3,(int)list.get(0));
 	assertEquals(4,(int)list.get(1));
 	assertEquals(5,(int)list.get(2));
-	subject.removeSubList((ListPartition)pl1);
+	subject.removeSubList((Partition)pl1);
 	assertEquals(0,(int)list.size());
 	
-	try{ subject.removeSubList((ListPartition)pl1);}
+	try{ subject.removeSubList((Partition)pl1);}
 	catch(IllegalStateException e){return;}//Good
 	fail("Failed to throw expected IllegalStateException");
     }
@@ -113,16 +113,16 @@ public class PartitionedListTest {
 	pl1.add(4);
 	pl1.add(5);
 	// 0 1 2 3 4 5
-	assertEquals(0,((ListPartition)pl0).getStartIndex());
-	assertEquals(3,((ListPartition)pl1).getStartIndex());
+	assertEquals(0,((Partition)pl0).getStartIndex());
+	assertEquals(3,((Partition)pl1).getStartIndex());
 	pl0.remove(1);
 	// 0 2  3 4 5
-	assertEquals(0,((ListPartition)pl0).getStartIndex());
-	assertEquals(2,((ListPartition)pl1).getStartIndex());
+	assertEquals(0,((Partition)pl0).getStartIndex());
+	assertEquals(2,((Partition)pl1).getStartIndex());
 	pl1.remove(1);
 	// 0 2  3 5
-	assertEquals(0,((ListPartition)pl0).getStartIndex());
-	assertEquals(2,((ListPartition)pl1).getStartIndex());
+	assertEquals(0,((Partition)pl0).getStartIndex());
+	assertEquals(2,((Partition)pl1).getStartIndex());
     }//end testGetStartIndex()
 
 }//end PartitionedListTest

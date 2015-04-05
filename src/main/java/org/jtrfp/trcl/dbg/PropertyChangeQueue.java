@@ -16,6 +16,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayDeque;
 
+/**
+ * An ArrayDeque which implements PropertyChangeListener to queue property changes.
+ * New PropertyChangeEvents are added to the end of this Deque, such that a pop() invocation 
+ * retrieves the events in-order.
+ * @author Chuck Ritola
+ *
+ */
 public class PropertyChangeQueue extends ArrayDeque<PropertyChangeEvent>
 	implements PropertyChangeListener {
 
@@ -26,7 +33,7 @@ public class PropertyChangeQueue extends ArrayDeque<PropertyChangeEvent>
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-	push(evt);
+	add(evt);
     }
 
 }//end PropertyChangeQueue

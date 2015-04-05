@@ -19,9 +19,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
+import org.jtrfp.trcl.dbg.PropertyChangeQueue;
 import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 import org.junit.After;
@@ -109,6 +111,41 @@ public class EntryBasedIndexPoolTest {
 	assertFalse(target.contains(e0));
 	assertEquals(2,lad.size());
 	assertEquals(2,target.size());
+    }
+    
+    @Test
+    public void testGetNumUnusedIndices(){
+	subject.popEntry(5);
+	Entry<Integer> e1 = subject.popEntry(6);
+	assertEquals(0,subject.getNumUnusedIndices());
+	e1.free();
+	assertEquals(1,subject.getNumUnusedIndices());
+    }
+    
+    @Test
+    public void testGetNumUsedIndices(){
+	subject.popEntry(5);
+	Entry<Integer> e1 = subject.popEntry(6);
+	assertEquals(0,subject.getNumUnusedIndices());
+	e1.free();
+	assertEquals(1,subject.getNumUnusedIndices());
+    }
+    
+    @Test
+    public void testGetNumUnusedIndicesPropertyChangeSupport(){
+	PropertyChangeQueue queue = new PropertyChangeQueue();
+	subject.addPropertyChangeListener(EntryBasedIndexPool.NUM_UNUSED_INDICES,queue);
+	subject.popEntry(5);
+	Entry<Integer> e1 = subject.popEntry(6);
+	assertEquals(0,queue.size());
+	e1.free();
+	assertEquals(1,queue.size());
+	assertEquals(1,queue.pop().getNewValue());
+	subject.defragment();
+	assertEquals(3,queue.size());
+	assertEquals(2,queue.pop().getNewValue());
+	assertEquals(1,queue.pop().getNewValue());
+	assertEquals(0,queue.pop().getNewValue());
     }
 
 }//end EntryBasedIndexPoolTest

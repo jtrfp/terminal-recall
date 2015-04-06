@@ -38,12 +38,12 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	indexPool.addPropertyChangeListener(IndexPool.NUM_UNUSED_INDICES,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		pcs.firePropertyChange(NUM_UNUSED_INDICES, evt.getOldValue(), evt.getNewValue());
+		pcs.firePropertyChange(EntryBasedIndexPool.NUM_UNUSED_INDICES, evt.getOldValue(), evt.getNewValue());
 	    }});
 	indexPool.addPropertyChangeListener(IndexPool.NUM_USED_INDICES,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		pcs.firePropertyChange(NUM_USED_INDICES, evt.getOldValue(), evt.getNewValue());
+		pcs.firePropertyChange(EntryBasedIndexPool.NUM_USED_INDICES, evt.getOldValue(), evt.getNewValue());
 	    }});
     }//end constructor
     

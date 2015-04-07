@@ -56,13 +56,6 @@ public class CachedAdapterTest {
 	assertNotNull(uo1);
 	assertNotNull(vo1);
     }
-    
-    @Test
-    public void test_adaptNullPointerException() {
-	try{subject.adapt(null);}
-	catch(NullPointerException e){return;}
-	fail("Failed to throw NullPointerException.");
-    }
 
     @Test
     public void test_reAdapt() {
@@ -73,13 +66,6 @@ public class CachedAdapterTest {
 	
 	assertEquals(uo0,subject.reAdapt(vo0));
 	assertEquals(uo1,subject.reAdapt(vo1));
-    }
-    
-    @Test
-    public void test_reAdaptNullPointerException() {
-	try{subject.reAdapt(null);}
-	catch(NullPointerException e){return;}
-	fail("Failed to throw NullPointerException.");
     }
 
 }//end CachedAdapterTest

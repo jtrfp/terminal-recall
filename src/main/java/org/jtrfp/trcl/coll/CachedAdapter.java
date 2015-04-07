@@ -18,12 +18,20 @@ import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrengt
 import com.ochafik.util.Adapter;
 
 public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
-    private final BidiReferenceMap<U,V> cache = new BidiReferenceMap<U,V>(ReferenceStrength.WEAK);
+    private final BidiReferenceMap<U,V> cache;
+    
+    public CachedAdapter(){
+	this(new BidiReferenceMap<U,V>(ReferenceStrength.WEAK));
+    }
+    
+    public CachedAdapter(BidiReferenceMap<U,V> cache){
+	this.cache=cache;
+    }
 
     @Override
     public final V adapt(U key) {
 	if(key==null)
-	    throw new NullPointerException("key to adapt is intolerably null.");
+	    return null;
 	V result = cache.get(key);
 	if(result==null){
 	    V v = _adapt(key);
@@ -36,7 +44,7 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     @Override
     public final U reAdapt(V value) {
 	if(value==null)
-	    throw new NullPointerException("value to adapt is intolerably null.");
+	    return null;
 	U result = cache.getKey(value);
 	if(result==null){
 	    U key = _reAdapt(value);

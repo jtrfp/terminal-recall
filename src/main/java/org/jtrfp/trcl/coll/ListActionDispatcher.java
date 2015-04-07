@@ -160,7 +160,7 @@ public class ListActionDispatcher<E> implements List<E> {
     }
     @Override
     public ListIterator<E> listIterator(int index) {
-	return new ArrayListIterator<E>(index+startIndex);
+	return getCache().subList(index, size()).listIterator();
     }
     @Override
     public boolean remove(Object o) {

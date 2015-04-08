@@ -14,10 +14,22 @@
 package org.jtrfp.trcl.mem;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 public class HashTransparentWeakReference<T> extends WeakReference<T> {
     public HashTransparentWeakReference(T val){
 	super(val);
+    }
+    
+    public static void main(String [] args){
+	final String string = "content";
+	final WeakReference<String> ref = new WeakReference<String>(string);
+	System.out.println("equal? "+string.equals(ref));
+	System.out.println("string.hash="+string.hashCode()+" ref.hash="+ref.hashCode());
+	final HashMap<String,Object> map = new HashMap<String,Object>();
+	map.put(string, new Object());
+	System.out.println("Contains string? "+map.containsKey(string));
+	System.out.println("Contains ref? "+map.containsKey(ref));
     }
     
     @Override
@@ -32,7 +44,7 @@ public class HashTransparentWeakReference<T> extends WeakReference<T> {
     public boolean equals(Object other){
 	final Object thisObj = get();
 	if(thisObj!=null){
-	    return thisObj.equals(other);
+	    return thisObj.hashCode()==other.hashCode();
 	}return other==null;
     }
 }//end HashTransparentWeakReference

@@ -16,15 +16,14 @@ package org.jtrfp.trcl.pool;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.dbg.PropertyChangeQueue;
 import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry;
+import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry.DeadEntry;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 import org.junit.After;
 import org.junit.Before;
@@ -106,7 +105,7 @@ public class EntryBasedIndexPoolTest {
 	assertTrue(target.contains(e0));
 	assertEquals(e0,target.get(0));
 	e0.free();
-	assertNull(target.get(0));
+	assertTrue(target.get(0) instanceof DeadEntry);
 	subject.defragment();
 	assertFalse(target.contains(e0));
 	assertEquals(2,lad.size());

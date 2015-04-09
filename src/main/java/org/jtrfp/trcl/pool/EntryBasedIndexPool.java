@@ -150,8 +150,8 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 
 	protected Entry<CONTAINED_TYPE> setPoolIndex(int poolIndex){
 	    pcs.firePropertyChange(POOL_INDEX, this.poolIndex, poolIndex);
-	    getParent().setInDispatcher(this.poolIndex,null)//Remove old
-	    .setInDispatcher(poolIndex,this);
+	    getParent().setInDispatcher(this.poolIndex,new DeadEntry(getParent()))//Remove old
+	     .setInDispatcher(poolIndex,this);
 	    this.poolIndex=poolIndex;
 	    return this;
 	}
@@ -246,6 +246,13 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	public void removePropertyChangeListener(String propertyName,
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+	
+	public class DeadEntry extends Entry{
+
+	    protected DeadEntry(EntryBasedIndexPool parent) {
+		super(parent, null);
+	    }//end constructor
 	}
     }//end Entry
 

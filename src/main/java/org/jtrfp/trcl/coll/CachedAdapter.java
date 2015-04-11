@@ -30,8 +30,6 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
 
     @Override
     public final V adapt(U key) {
-	if(key==null)
-	    return null;
 	V result = cache.get(key);
 	if(result==null){
 	    V v = _adapt(key);
@@ -43,8 +41,6 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
 
     @Override
     public final U reAdapt(V value) {
-	if(value==null)
-	    return null;
 	U result = cache.getKey(value);
 	if(result==null){
 	    U key = _reAdapt(value);
@@ -54,7 +50,7 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
 	return result;
     }//end reAdapt(...)
     
-    protected abstract V _adapt(U value);
-    protected abstract U _reAdapt(V value);
+    protected abstract V _adapt  (U value) throws UnsupportedOperationException;
+    protected abstract U _reAdapt(V value) throws UnsupportedOperationException;
 
 }//end CachedAdapter

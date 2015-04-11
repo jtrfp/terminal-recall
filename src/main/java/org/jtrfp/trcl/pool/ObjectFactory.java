@@ -43,7 +43,9 @@ public class ObjectFactory<K,V> {
     public V get(K key){
 	V result = mapToUse.get(key);
 	if(result==null)
-	    mapToUse.put(key, result=keyValueAdapter.adapt(key));
+	    result=keyValueAdapter.adapt(key);
+	if(result!=null)
+	    mapToUse.put(key, result);
 	return result;
     }//end get(key)
     

@@ -70,11 +70,12 @@ public class IndexPool{
 	    for(Integer i:freeIndices)
 		unused.add(i);
 	    Collections.sort(unused,Collections.reverseOrder());
-	    final int greatestUsed = used.get(used.size()-1);
-	    final Iterator<Integer> unusedIterator = unused.iterator();
+	    
 	    int item, removalTally=0;
-	    boolean run = true;
-	    while(run){
+	     final int greatestUsed = !used.isEmpty()?used.get(used.size()-1):-1;
+	     final Iterator<Integer> unusedIterator = unused.iterator();
+	     boolean run = true;
+	     while(run){
 		if(unusedIterator.hasNext()){
 		    item = unusedIterator.next();
 		    if(item>greatestUsed){
@@ -83,7 +84,7 @@ public class IndexPool{
 			}
 		    else run=false;
 		}else run=false;
-	    }//end while(run)
+	     }//end while(run)
 	    final int proposedNewMaxCapacity = maxCapacity-removalTally;
 	    maxCapacity = growthBehavior.shrink(proposedNewMaxCapacity);
 	    updateNumUnusedIndices();

@@ -55,7 +55,7 @@ public class ListActionDispatcher<E> implements List<E> {
     private List<E> getCache(){
 	if(isRoot())
 	    return cache;
-	return getCache();
+	return cache.subList(startIndex, endIndex);
     }//end getCache()
     
     private List<E> getSubTarget(List<E> target){
@@ -204,8 +204,7 @@ public class ListActionDispatcher<E> implements List<E> {
     }
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-	return new ListActionDispatcher<E>(cache, targetsMap, startIndex+fromIndex, endIndex+toIndex);
-	//return cache.subList(fromIndex, toIndex);
+	return new ListActionDispatcher<E>(cache, targetsMap, startIndex+fromIndex, startIndex+toIndex);
     }
     @Override
     public Object[] toArray() {

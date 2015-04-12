@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
+import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry.DeadEntry;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
 public class EntryBasedIndexPool<CONTAINED_TYPE> {
@@ -86,15 +87,15 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	    used.add(i);
 	Collections.sort(used,Collections.reverseOrder());
 	final Iterator<Integer> usedIterator = used.iterator();
-
+	
 	//Loop until Unused Index > Used Index.
 	while(usedIterator.hasNext())//TODO: Do not need to go through entire list
 	    defragmentEntry(usedIterator.next());
 
 	/*Assuming defragmentation was properly executed, compaction should 
        discard an optimal number of unused indices.*/
-
 	indexPool.compact();
+	assert indexPool.getNumUnusedIndices()==0;
 	final int newSize = indexPool.getUsedIndices().size();
 	truncateDispatcher(newSize);
     }
@@ -104,6 +105,8 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	assert index<listActionDispatcher.size():"index "+index+" exceeds size of entry list "+listActionDispatcher.size();
 	Entry<CONTAINED_TYPE> entry = listActionDispatcher.get(index);
 	assert entry!=null:"entry at index"+index+" intolerably null";
+	if(((Entry)entry) instanceof DeadEntry)
+	   {return;}
 	indexPool.free(index);
 	final int newIndex = indexPool.pop();
 	entry.setPoolIndex(newIndex);
@@ -150,9 +153,9 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 
 	protected Entry<CONTAINED_TYPE> setPoolIndex(int poolIndex){
 	    pcs.firePropertyChange(POOL_INDEX, this.poolIndex, poolIndex);
-	    getParent().setInDispatcher(this.poolIndex,new DeadEntry(getParent()))//Remove old
-	     .setInDispatcher(poolIndex,this);
+	    getParent().setInDispatcher(this.poolIndex,new DeadEntry(getParent()));//Remove old
 	    this.poolIndex=poolIndex;
+	    getParent().setInDispatcher(poolIndex,this);
 	    return this;
 	}
 
@@ -249,7 +252,6 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	}
 	
 	public class DeadEntry extends Entry{
-
 	    protected DeadEntry(EntryBasedIndexPool parent) {
 		super(parent, null);
 	    }//end constructor

@@ -124,5 +124,17 @@ public class PartitionedListTest {
 	assertEquals(0,((Partition)pl0).getStartIndex());
 	assertEquals(2,((Partition)pl1).getStartIndex());
     }//end testGetStartIndex()
+    
+    @Test
+    public void testPartition() {
+	final PartitionedList<Integer>.Partition p = subject.newSubList();
+	p.add(0); p.add(1); p.add(2);
+	p.remove(Integer.valueOf(0));
+	p.remove(Integer.valueOf(1));
+	p.remove(Integer.valueOf(2));
+	assertEquals(0,list.size());
+    }
+    
+    
 
 }//end PartitionedListTest

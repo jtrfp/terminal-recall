@@ -66,6 +66,10 @@ public class EntryBasedIndexPoolTest {
 	assertEquals(3,(int)e3.getContained());
 	assertEquals(0,e0.getPoolIndex());
 	assertEquals(1,e3.getPoolIndex());
+	e0.free();
+	e3.free();
+	subject.defragment();
+	assertEquals(0,subject.getListActionDispatcher().size());
     }
 
     @Test

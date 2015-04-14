@@ -21,10 +21,10 @@ public class ObjectListWindow extends MemoryWindow {
 	init(tr,"ObjectListWindow");
     }// end constructor
 
-    public final ByteArrayVariable opaqueIDs = new ByteArrayVariable(
-	    OBJECT_LIST_SIZE_BYTES_PER_PASS);
-    public final ByteArrayVariable blendIDs = new ByteArrayVariable(
-	    OBJECT_LIST_SIZE_BYTES_PER_PASS);
+    public final IntArrayVariable opaqueIDs = new IntArrayVariable(
+	    RenderList.NUM_BLOCKS_PER_PASS);
+    public final IntArrayVariable blendIDs = new IntArrayVariable(
+	    RenderList.NUM_BLOCKS_PER_PASS);
     
     public final ByteArrayVariable pageFiller = new ByteArrayVariable(1024);
 

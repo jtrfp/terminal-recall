@@ -23,10 +23,8 @@ public class ObjectListWindow extends MemoryWindow {
 
     public final IntArrayVariable opaqueIDs = new IntArrayVariable(
 	    RenderList.NUM_BLOCKS_PER_PASS);
-    public final IntArrayVariable blendIDs = new IntArrayVariable(
-	    RenderList.NUM_BLOCKS_PER_PASS);
     
-    public final ByteArrayVariable pageFiller = new ByteArrayVariable(1024);
+    public final ByteArrayVariable pageFiller = new ByteArrayVariable(2048);
 
     public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = RenderList.NUM_BLOCKS_PER_PASS * 4;
 }// end GlobalObjectList

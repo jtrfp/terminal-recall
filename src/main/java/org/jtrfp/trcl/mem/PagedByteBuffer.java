@@ -169,7 +169,6 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	return this;
     }
 
-    @Override
     public int logical2PhysicalAddressBytes(int logicalAddressInBytes) {
 	return logicalIndex2PhysicalIndex(logicalAddressInBytes);
     }
@@ -191,10 +190,8 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     @Override
     public IByteBuffer putInts(int indexInBytes, int[] vals) {
-	final ByteBuffer bb = intrinsic[0].duplicate();
-	bb.order(ByteOrder.nativeOrder());
-	bb.position(indexInBytes);
-	bb.asIntBuffer().put(vals);
+	for(int i=0; i<vals.length; i++)
+	    putInt(4*i+indexInBytes, vals[i]);
 	return this;
     }
 }//end PageByteBuffer

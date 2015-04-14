@@ -107,23 +107,29 @@ public class RenderList {
 	 for(ByteBuffer bb:opaqueObjectDefs){
 	    synchronized(bb){
 	     bb.clear();
-	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex, bb);
+	     final int [] temp = new int[bb.capacity()/4];
+	     bb.asIntBuffer().get(temp);
+	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex/4, temp);
 	      byteIndex += bb.capacity();}
 	 }}
 	synchronized(transparentObjectDefs){
 	 for(ByteBuffer bb:transparentObjectDefs){
 	    synchronized(bb){
 	     bb.clear();
-	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex, bb);
+	     final int [] temp = new int[bb.capacity()/4];
+	     bb.asIntBuffer().get(temp);
+	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex/4, temp);
 	     byteIndex += bb.capacity();}
 	 }}
 	synchronized(unoccludedTObjectDefs){
-		 for(ByteBuffer bb:unoccludedTObjectDefs){
-		    synchronized(bb){
-		     bb.clear();
-		     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex, bb);
-		     byteIndex += bb.capacity();}
-		 }}
+	    for(ByteBuffer bb:unoccludedTObjectDefs){
+		synchronized(bb){
+		    bb.clear();
+		    final int [] temp = new int[bb.capacity()/4];
+		    bb.asIntBuffer().get(temp);
+		    tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex/4, temp);
+		    byteIndex += bb.capacity();}
+	    }}
     }//end flushObjectDefsToGPU()
 
     public RenderList(final GL3 gl, final Renderer renderer, final TR tr) {
@@ -165,7 +171,6 @@ public class RenderList {
 	for (int i = 0; i < size-1; i++) {
 	    hostRenderListPageTable[i+1] = olWindow.logicalPage2PhysicalPage(i);
 	}// end for(hostRenderListPageTable.length)
-	System.out.println();
 	final GLProgram objectProgram = rFactory.getObjectProgram();
 	objectProgram.use();
 	objectProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);

@@ -27,6 +27,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.mem.IntArrayVariableList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -50,6 +51,7 @@ public class RenderList {
     private final	RendererFactory		rFactory;
     private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	IntBuffer 		previousViewport;
+    private final	IntArrayVariableList    renderList;
     private final	ArrayList<ByteBuffer>	opaqueObjectDefs = new ArrayList<ByteBuffer>(),
 	    					transparentObjectDefs = new ArrayList<ByteBuffer>(),
 	    					unoccludedTObjectDefs = new ArrayList<ByteBuffer>();
@@ -102,34 +104,38 @@ public class RenderList {
     };
     
     void flushObjectDefsToGPU(){
-	int byteIndex=0;
 	synchronized(opaqueObjectDefs){
 	 for(ByteBuffer bb:opaqueObjectDefs){
 	    synchronized(bb){
 	     bb.clear();
-	     final int [] temp = new int[bb.capacity()/4];
-	     bb.asIntBuffer().get(temp);
-	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex/4, temp);
-	      byteIndex += bb.capacity();}
+	     final IntBuffer ib = bb.asIntBuffer();
+	     final int max      = bb.capacity()/4;
+	     for(int i=0; i<max; i++)
+		 renderList.add(ib.get());
+	      }
 	 }}
 	synchronized(transparentObjectDefs){
 	 for(ByteBuffer bb:transparentObjectDefs){
 	    synchronized(bb){
 	     bb.clear();
-	     final int [] temp = new int[bb.capacity()/4];
-	     bb.asIntBuffer().get(temp);
-	     tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex/4, temp);
-	     byteIndex += bb.capacity();}
+	     final IntBuffer ib = bb.asIntBuffer();
+	     final int max      = bb.capacity()/4;
+	     for(int i=0; i<max; i++)
+		 renderList.add(ib.get());
+	     }
 	 }}
 	synchronized(unoccludedTObjectDefs){
 	    for(ByteBuffer bb:unoccludedTObjectDefs){
 		synchronized(bb){
 		    bb.clear();
-		    final int [] temp = new int[bb.capacity()/4];
-		    bb.asIntBuffer().get(temp);
-		    tr.objectListWindow.get().opaqueIDs.set(renderListIdx, byteIndex/4, temp);
-		    byteIndex += bb.capacity();}
+		    final IntBuffer ib = bb.asIntBuffer();
+		    final int max      = bb.capacity()/4;
+		    for(int i=0; i<max; i++)
+			renderList.add(ib.get());
+		    }
 	    }}
+	renderList.flush();
+	renderList.clear();
     }//end flushObjectDefsToGPU()
 
     public RenderList(final GL3 gl, final Renderer renderer, final TR tr) {
@@ -140,6 +146,7 @@ public class RenderList {
 	this.rFactory = renderer.getRendererFactory();
 	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
 	this.renderListIdx		=tr.objectListWindow.get().create();
+	this.renderList                 = new IntArrayVariableList(tr.objectListWindow.get().opaqueIDs,renderListIdx);
 	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {

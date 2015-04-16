@@ -237,4 +237,20 @@ public class PartitionedIndexPoolImplTest {
 	p1.remove();
 	assertFalse(p1.isValid());
     }
+    
+    @Test
+    public void testPartitionRemoveAllEntries(){
+	Partition<Integer> p0 = subject.newPartition();
+	Partition<Integer> p1 = subject.newPartition();
+	Entry<Integer>     e0 = p0.newEntry(5);
+	Entry<Integer>     e1 = p0.newEntry(6);
+	Entry<Integer>     e2 = p1.newEntry(7);
+	
+	assertEquals(p0,p0.removeAllEntries());
+	assertEquals(0,p0.getNumUsedIndices());
+	e0 = p0.newEntry(5);
+	e1 = p0.newEntry(6);
+	assertEquals(p0,p0.removeAllEntries());
+	assertEquals(0,p0.getNumUsedIndices());
+    }
 }//end PartitionedIndexPool

@@ -35,7 +35,7 @@ public class IndexPool{
 	private volatile int            numUsedIndices  = 0;
 	private GrowthBehavior 		growthBehavior	= new GrowthBehavior(){
 	    public int grow(int index)
-	     {return index*2;}
+	     {return index!=0?index*2:4;}
 	    public int shrink(int minDesiredSize)
 	     {return minDesiredSize;}
 	    };//Default is to double each time, and shrink to exact minimum.
@@ -94,9 +94,11 @@ public class IndexPool{
 	
     public int pop(){
 	final int result = innerPop();
-	usedIndices.add(result);
-	updateNumUnusedIndices();
-	updateNumUsedIndices();
+	if(result!=-1){
+	    usedIndices.add(result);
+	    updateNumUnusedIndices();
+	    updateNumUsedIndices();
+	}
 	return result;
     }
     private int innerPop(){
@@ -165,6 +167,7 @@ public class IndexPool{
     
     private int pop(boolean throwException) throws OutOfIndicesException {
 	try {final int index = freeIndices.remove();
+	     assert index>=0:"Popped index from freeIndices is interolerably negative.";
 	     return index;
 	} catch (NoSuchElementException e) {
 	    synchronized (this) {
@@ -219,7 +222,9 @@ public class IndexPool{
 	
 	public int free(int index){
 	    if(freeIndices.contains(index))
-		throw new RuntimeException("Double-release of resources: "+index);
+		throw new IllegalArgumentException("Double-release of resources: "+index);
+	    if(index<0){
+		throw new IllegalArgumentException("Index is intolerably negative.");}
 	    freeIndices.add(index);
 	    usedIndices.remove(index);
 	    updateNumUnusedIndices();

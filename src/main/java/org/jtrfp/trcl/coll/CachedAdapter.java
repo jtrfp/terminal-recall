@@ -19,6 +19,7 @@ import com.ochafik.util.Adapter;
 
 public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     private final BidiReferenceMap<U,V> cache;
+    private volatile boolean tolerateNull = false;
     
     public CachedAdapter(){
 	this(new BidiReferenceMap<U,V>(ReferenceStrength.WEAK));
@@ -30,27 +31,94 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
 
     @Override
     public final V adapt(U key) {
-	V result = cache.get(key);
-	if(result==null){
+	if(key==null){
+	    if(tolerateNull)
+		return null;
+	    else throw new NullPointerException("Key is intolerably null.");
+	}//end if(key null)
+	synchronized(cache){
+	 V result = cache.get(key);
+	 if(!cache.containsKey(key)){
 	    V v = _adapt(key);
+	    if(v==null){
+		if(tolerateNull)
+		    return null;
+		else throw new NullPointerException("Adapted value is intolerably null.");
+	    }//end if(key null)
 	    cache.put(key, v);
 	    result = v;
-	}//end if(null)
-	return result;
-    }//end adaot()
+	 }//end if(null)
+	 return result;
+	}//end sync(cache)
+    }//end adapt()
 
     @Override
     public final U reAdapt(V value) {
-	U result = cache.getKey(value);
-	if(result==null){
+	if(value==null){
+	    if(tolerateNull)
+		return null;
+	    else throw new NullPointerException("Value is intolerably null.");
+	}//end if(key null)
+	synchronized(cache){
+	 U result = cache.getKey(value);
+	 if(!cache.containsValue(value)){
 	    U key = _reAdapt(value);
+	    if(key==null){
+		if(tolerateNull)
+		    return null;
+		else throw new NullPointerException("Re-Adapted key is intolerably null.");
+	    }//end if(key null)
 	    cache.put(key, value);
 	    result = key;
-	}//end if(null)
-	return result;
+	 }//end if(null)
+	 return result;
+	}//end sync(cache)
     }//end reAdapt(...)
     
     protected abstract V _adapt  (U value) throws UnsupportedOperationException;
     protected abstract U _reAdapt(V value) throws UnsupportedOperationException;
+    
+    public static <U,V> CachedAdapter<U,V> decorate(final Adapter<U,V> adapter, BidiReferenceMap<U,V> mapToUse){
+	return new CachedAdapter<U,V>(mapToUse){
+
+	    @Override
+	    protected V _adapt(U value) throws UnsupportedOperationException {
+		return adapter.adapt(value);
+	    }
+
+	    @Override
+	    protected U _reAdapt(V value) throws UnsupportedOperationException {
+		return adapter.reAdapt(value);
+	    }};
+    }
+    
+    public static <U,V> CachedAdapter<U,V> decorate(final Adapter<U,V> adapter){
+	return new CachedAdapter<U,V>(){
+
+	    @Override
+	    protected V _adapt(U value) throws UnsupportedOperationException {
+		return adapter.adapt(value);
+	    }
+
+	    @Override
+	    protected U _reAdapt(V value) throws UnsupportedOperationException {
+		return adapter.reAdapt(value);
+	    }};
+    }
+
+    /**
+     * @return the tolerateNull
+     */
+    public boolean isTolerateNull() {
+        return tolerateNull;
+    }
+
+    /**
+     * @param tolerateNull the tolerateNull to set
+     */
+    public CachedAdapter<U,V> setTolerateNull(boolean tolerateNull) {
+        this.tolerateNull = tolerateNull;
+        return this;
+    }
 
 }//end CachedAdapter

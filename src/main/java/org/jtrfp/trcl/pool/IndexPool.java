@@ -35,10 +35,10 @@ public class IndexPool{
 	private volatile int            numUsedIndices  = 0;
 	private GrowthBehavior 		growthBehavior	= new GrowthBehavior(){
 	    public int grow(int index)
-	     {return index!=0?index*2:4;}
+	     {return index+1;}
 	    public int shrink(int minDesiredSize)
 	     {return minDesiredSize;}
-	    };//Default is to double each time, and shrink to exact minimum.
+	    };//Default is to increment each time, and shrink to exact minimum.
 	private int hardLimit=Integer.MAX_VALUE;//Basically no hard limit by default
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	
@@ -86,7 +86,10 @@ public class IndexPool{
 		}else run=false;
 	     }//end while(run)
 	    final int proposedNewMaxCapacity = maxCapacity-removalTally;
-	    maxCapacity = growthBehavior.shrink(proposedNewMaxCapacity);
+	    assert proposedNewMaxCapacity<=maxCapacity;
+	    maxCapacity  = growthBehavior.shrink(proposedNewMaxCapacity);
+	    highestIndex = greatestUsed;
+	    //System.out.println("highestIndex="+highestIndex+" maxCap");
 	    updateNumUnusedIndices();
 	    updateNumUsedIndices();
 	    return removalTally;
@@ -224,9 +227,11 @@ public class IndexPool{
 	    if(freeIndices.contains(index))
 		throw new IllegalArgumentException("Double-release of resources: "+index);
 	    if(index<0){
-		throw new IllegalArgumentException("Index is intolerably negative.");}
+		throw new IllegalArgumentException("Index is intolerably negative: "+index);}
+	    if(!usedIndices.remove(index))
+		throw new IllegalArgumentException("Cannot free an index which is not in use: "+index);
 	    freeIndices.add(index);
-	    usedIndices.remove(index);
+	    //usedIndices.remove(index);
 	    updateNumUnusedIndices();
 	    updateNumUsedIndices();
 	    return index;
@@ -285,9 +290,9 @@ public class IndexPool{
 	    return this;
 	}
 
-	public void free(Collection<Integer> intArrayList) {
-	    freeIndices.addAll(intArrayList);
-	    usedIndices.removeAll(intArrayList);
+	public void free(Collection<Integer> indicesToFree) {
+	    freeIndices.addAll(indicesToFree);
+	    usedIndices.removeAll(indicesToFree);
 	}
 	/**
 	 * @param listener

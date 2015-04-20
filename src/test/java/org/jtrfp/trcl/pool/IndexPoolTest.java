@@ -15,6 +15,7 @@ package org.jtrfp.trcl.pool;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 
 import junit.framework.TestCase;
@@ -22,6 +23,7 @@ import junit.framework.TestCase;
 import org.jtrfp.trcl.dbg.PropertyChangeQueue;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
+import org.junit.Test;
 
 public class IndexPoolTest extends TestCase {
 
@@ -90,8 +92,8 @@ public class IndexPoolTest extends TestCase {
 	final IndexPool subject =  new IndexPool();
 	for(int i=0; i<60; i++)
 	    subject.pop();
-	//With default doubling growth, power-of-two behavior expected.
-	assertEquals(64, subject.getMaxCapacity());
+	//With default incremental growth.
+	assertEquals(60, subject.getMaxCapacity());
     }
 
     public void testGetHardLimit() {
@@ -148,6 +150,14 @@ public class IndexPoolTest extends TestCase {
 	// 0
 	assertEquals(0, subject.getFreeIndices().size());
 	assertEquals(1, subject.getUsedIndices().size());
+	// 0 1
+	assertEquals(1,subject.pop());
+	assertEquals(0, subject.getFreeIndices().size());
+	assertEquals(2, subject.getUsedIndices().size());
+	// 0 1 2
+	assertEquals(2,subject.pop());
+	assertEquals(0, subject.getFreeIndices().size());
+	assertEquals(3, subject.getUsedIndices().size());
     }
     
     public void testGetNumUnusedIndices(){
@@ -170,6 +180,7 @@ public class IndexPoolTest extends TestCase {
 	assertEquals(0,subject.getNumUsedIndices());
     }
     
+    @Test
     public void testNumUsedIndicesPropertyChange(){
 	final IndexPool         subject = new IndexPool();
 	final PropertyChangeQueue queue = new PropertyChangeQueue();
@@ -183,6 +194,7 @@ public class IndexPoolTest extends TestCase {
 	assertEquals(2,queue.pop().getNewValue());
     }
     
+    @Test
     public void testNumUnusedIndicesPropertyChange(){
 	final IndexPool         subject = new IndexPool();
 	final PropertyChangeQueue queue = new PropertyChangeQueue();
@@ -198,5 +210,44 @@ public class IndexPoolTest extends TestCase {
 	assertEquals(1,queue.size());
 	assertEquals(2,queue.pop().getNewValue());
     }
+    
+    private void populate(IndexPool subject, int qty, List<Integer> dest){
+	//System.out.println("Populate by "+qty);
+	for(int i=0; i<qty; i++){
+	    final int element = subject.pop();
+	    dest.add(element);
+	    assertTrue(subject.getUsedIndices().contains(element));
+	    assertEquals(i,element);
+	    }
+    }//end populate()
+    
+    private void testIndices(List<Integer> dest){
+	for(int i=0; i<dest.size(); i++)
+	    assertEquals(i,dest.get(i).intValue());
+    }
+    
+    private void depopulate(IndexPool subject, List<Integer> list){
+	for(int i:list)
+	    subject.free(i);
+	assertEquals(0,subject.getNumUsedIndices());
+    }
+    
+    @Test
+    public void testChangingState(){
+	final IndexPool subject = new IndexPool();
+	final int NUM_ITERATIONS = 50;
+	final ArrayList<Integer> indices = new ArrayList<Integer>();
+	for(int iteration=0; iteration<NUM_ITERATIONS; iteration++){
+	    //System.out.println("iteration "+iteration);
+	    final int size = (int)(Math.random()*250);
+	    indices.clear();
+	    populate(subject,size,indices);
+	    testIndices(indices);
+	    depopulate(subject,indices);
+	    assertEquals(size,subject.getNumUnusedIndices());
+	    subject.compact();
+	    assertEquals(0,subject.getNumUnusedIndices());
+	}
+    }//end testChangingState()
 
 }//end IndexPoolTest

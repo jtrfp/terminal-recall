@@ -135,6 +135,74 @@ public class PartitionedListTest {
 	assertEquals(0,list.size());
     }
     
+    private void populate(int size, PartitionedList<Object>.Partition p, ArrayList<Object> testDest){
+	//System.out.println("Populate "+size);
+	for(int i=0; i<size; i++){
+	    final Object obj = new Object();
+	    p.add(obj);
+	    testDest.add(obj);
+	}
+    }//end populate(...)
     
-
+    private void depopulate(int size, PartitionedList<Object>.Partition p, ArrayList<Object> testDest){
+	//System.out.println("Depopulate "+size);
+	for(int i=0; i<size; i++){
+	    final Object obj = testDest.get(0);
+	    p.remove(obj);
+	    testDest.remove(obj);
+	}
+    }//end depopulate(...)
+    
+    private void reset(PartitionedList<Object>.Partition part, ArrayList<Object> test){
+	final int numIndicesToChange = (int)(Math.random()*test.size());
+	for(int i = 0; i < numIndicesToChange; i++){
+	    final int index  = (int)(Math.random()*numIndicesToChange);
+	    final Object obj = new Object();
+	    part.set(index, obj);
+	    test.set(index, obj);
+	}
+    }//end reset(...)
+    
+    private Object partitionedGet(int i, PartitionedList<Object>.Partition ... parts){
+	int partIndex=0;
+	PartitionedList<Object>.Partition partition = parts[0];
+	while(partition.getStartIndex()+partition.getSize()<=i)
+	    partition = parts[++partIndex];
+	return partition.get(i-partition.getStartIndex());
+    }
+    
+    private void testValues(ArrayList<Object> intrinsic, PartitionedList<Object>.Partition ... parts){
+	int size=0;
+	for(Partition part:parts)
+	    size+=part.getSize();
+	assertEquals(size,intrinsic.size());
+	for(int i=0; i<intrinsic.size(); i++)
+	    assertEquals(partitionedGet(i,parts),intrinsic.get(i));
+	for(int i=0; i<intrinsic.size(); i++)
+	    assertEquals(partitionedGet(i,parts),intrinsic.get(i));
+    }
+    
+    @Test
+    public void testChangingState(){
+	final int NUM_ITERATIONS = 15;
+	final ArrayList<Object> subjectIntrinsic = new ArrayList<Object>();
+	final PartitionedList<Object> subject = new PartitionedList<Object>(subjectIntrinsic);
+	PartitionedList<Object>.Partition p0 = subject.newSubList();
+	PartitionedList<Object>.Partition p1 = subject.newSubList();
+	ArrayList<Object> test0 = new ArrayList<Object>();
+	ArrayList<Object> test1 = new ArrayList<Object>();
+	for(int iteration = 0; iteration < NUM_ITERATIONS; iteration++){
+	    //System.out.println("iteration "+iteration);
+	    final int popSize = (int)(Math.random()*10);
+	    populate(popSize,p0,test0);
+	    populate(popSize,p1,test1);
+	    reset(p0,test0);
+	    reset(p1,test1);
+	    final int depopSize0 = (int)(Math.random()*test0.size());
+	    final int depopSize1 = (int)(Math.random()*test1.size());
+	    depopulate(depopSize0,p0,test0);
+	    depopulate(depopSize1,p1,test1);
+	    testValues(subjectIntrinsic,p0,p1);
+	}//end for(NUM_ITERATIONS)
+    }//end testChangingState()
 }//end PartitionedListTest

@@ -122,6 +122,7 @@ public class PartitionedList<T> {
 	protected void adjustSize(int amt){
 	    pcs.firePropertyChange(SIZE, size, size+amt);
 	    size += amt;
+	    assert size>=0:"Size has shrunk to less than zero. Suspect excess removals without checking.";
 	    parent.notifySizeAdjust();
 	}
 	
@@ -158,7 +159,7 @@ public class PartitionedList<T> {
 	public boolean addAll(int index, Collection<? extends T> c) {
 	    if(c==null)
 		throw new NullPointerException("Passed Collection is intolerably null.");
-	    if(index<-1)
+	    if(index<0)
 		throw new IllegalArgumentException("Passed index is intolerably negative.");
 	    getSubList().addAll(index,c);
 	    adjustSize(c.size());
@@ -269,7 +270,7 @@ public class PartitionedList<T> {
 	@Override
 	public boolean remove(Object o) {
 	    final boolean result = getSubList().remove(o);
-	    adjustSize(-1);
+	    if(result)adjustSize(-1);
 	    return result;
 	}
 

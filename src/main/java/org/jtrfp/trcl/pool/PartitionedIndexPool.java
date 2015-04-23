@@ -16,6 +16,8 @@ package org.jtrfp.trcl.pool;
 import java.beans.PropertyChangeListener;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
+
+import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.ListenableCollection;
 
 /**
@@ -30,6 +32,7 @@ import com.ochafik.util.listenable.ListenableCollection;
  * @param <STORED_TYPE>
  */
 public interface PartitionedIndexPool<STORED_TYPE> {
+
     //// BEAN PROPERTIES
     public static final String TOT_UNUSED_INDICES     = "totalUnusedIndices";
     
@@ -246,4 +249,26 @@ public interface PartitionedIndexPool<STORED_TYPE> {
 	public PropertyChangeListener[]     getPropertyChangeListeners(String propertyName);
 	public boolean                      hasListeners(String propertyName);
     }//end Entry
+    
+    public class EntryAdapter<T> implements Adapter<Entry<T>, T> {
+	private final T nullValue;
+	public EntryAdapter(T nullValue){
+	    super();
+	    this.nullValue=nullValue;
+	}
+	@Override
+	public T adapt(Entry<T> value) {
+	    if(value==null)
+		return nullValue;
+	    T result = value.get();
+	    if(result==null)
+		return nullValue;
+	    return result;
+	}
+
+	@Override
+	public Entry<T> reAdapt(T value) {
+	    throw new UnsupportedOperationException();
+	}
+    }//end EntryAdapter<T>
 }//end PartitionedIndexPool

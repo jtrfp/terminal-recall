@@ -18,20 +18,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-
-import org.apache.commons.collections4.map.ReferenceMap;
-import org.jtrfp.trcl.pool.ObjectFactory;
 
 import com.ochafik.util.Adapter;
 
 public class ListActionAdapter<IN,OUT> implements List<IN> {
-    protected final Adapter<IN,OUT>           adapter;
+    //protected final Adapter<IN,OUT>           adapter;
     protected final ListActionDispatcher<OUT> output;
     protected final List<IN>                  input;
-    protected final Map<IN,OUT>               inOutMap = new ReferenceMap<IN,OUT>();
-    
-    private final ObjectFactory<IN,OUT>       objectFactory;
+    private final Adapter<IN,OUT>             cachedAdapter;
     
     public ListActionDispatcher<OUT> getOutput(){
 	return output;
@@ -40,22 +34,21 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
     public ListActionAdapter(Adapter<IN,OUT>adapter) {
 	if(adapter==null)
 	    throw new NullPointerException("Supplied Adapter is intolerably null.");
-	this.adapter = adapter;
 	this.output  = new ListActionDispatcher<OUT>();
 	this.input   = new ArrayList<IN>();
-	objectFactory= new ObjectFactory<IN,OUT>(inOutMap, adapter);
+	cachedAdapter = adapter;
     }//end constructor()
 
     @Override
     public boolean add(IN in) {
 	input.add(in);
-	return output.add(objectFactory.get(in));
+	return output.add(cachedAdapter.adapt(in));
     }
 
     @Override
     public void add(int index, IN in) {
 	input.add(index,in);
-	output.add(index, objectFactory.get(in));
+	output.add(index, cachedAdapter.adapt(in));
     }
 
     @Override
@@ -71,7 +64,7 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
 	List<IN> buffer = new ArrayList<IN>(c.size());
 	buffer.addAll(c);
 	while(!buffer.isEmpty())
-	    out.add(index, objectFactory.get(buffer.remove(buffer.size()-1)));
+	    out.add(index, cachedAdapter.adapt(buffer.remove(buffer.size()-1)));
 	
 	return output.addAll(index,out);
     }
@@ -79,7 +72,6 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
     @Override
     public void clear() {
 	input   .clear();
-	inOutMap.clear();
 	output  .clear();
     }
 
@@ -139,6 +131,7 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
 
     @Override
     public IN remove(int index) {
+	//System.out.println("ListActionAdapter.remove "+index);
 	final IN result = input.get(index);
 	input.remove(index);
 	output.remove(index);
@@ -147,11 +140,11 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-	boolean result = false;
+	Collection<Object> toRemove = new ArrayList<Object>(c.size());
 	for(Object o:c)
-	    while(input.contains(o))
-	     result |= remove(o);
-	return result;
+	    toRemove.add(this.cachedAdapter.adapt((IN)o));
+	output.removeAll(toRemove);
+	return input.removeAll(c);
     }
 
     @Override
@@ -173,7 +166,7 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
 
     @Override
     public IN set(int index, IN element) {
-	final OUT out = objectFactory.get(element);
+	final OUT out = cachedAdapter.adapt(element);
 	output.set(index, out);
 	return input.set(index, element);
     }
@@ -185,7 +178,7 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
 
     @Override
     public List<IN> subList(int fromIndex, int toIndex) {
-	return input.subList(fromIndex, toIndex);
+	return new IndexShiftingList<IN>(this,fromIndex,toIndex);
     }
 
     @Override

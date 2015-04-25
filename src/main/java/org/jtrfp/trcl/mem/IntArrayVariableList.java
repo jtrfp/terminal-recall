@@ -31,7 +31,7 @@ public class IntArrayVariableList implements List<Integer> {
      this.objectIndex = objectIndex;
  }
  
- public void flush(){
+ public synchronized void flush(){
      for(int i=0; i<cache.size(); i++)
 	 delegate.setAt(objectIndex, i, cache.get(i));
  }//end flush()
@@ -41,7 +41,9 @@ public class IntArrayVariableList implements List<Integer> {
  * @param element
  * @see java.util.ArrayList#add(int, java.lang.Object)
  */
-public void add(int index, Integer element) {
+public synchronized void add(int index, Integer element) {
+    if(element==null)
+	throw new NullPointerException("Element is intolerably null.");
     cache.add(index, element);
 }
 
@@ -50,7 +52,9 @@ public void add(int index, Integer element) {
  * @return
  * @see java.util.ArrayList#add(java.lang.Object)
  */
-public boolean add(Integer e) {
+public synchronized boolean add(Integer e) {
+    if(e==null)
+	throw new NullPointerException("Element is intolerably null.");
     return cache.add(e);
 }
 
@@ -59,7 +63,9 @@ public boolean add(Integer e) {
  * @return
  * @see java.util.ArrayList#addAll(java.util.Collection)
  */
-public boolean addAll(Collection<? extends Integer> c) {
+public synchronized boolean addAll(Collection<? extends Integer> c) {
+    if(c.contains(null))
+	throw new NullPointerException("Element is intolerably null.");
     return cache.addAll(c);
 }
 
@@ -69,7 +75,9 @@ public boolean addAll(Collection<? extends Integer> c) {
  * @return
  * @see java.util.ArrayList#addAll(int, java.util.Collection)
  */
-public boolean addAll(int index, Collection<? extends Integer> c) {
+public synchronized boolean addAll(int index, Collection<? extends Integer> c) {
+    if(c.contains(null))
+   	throw new NullPointerException("Element is intolerably null.");
     return cache.addAll(index, c);
 }
 
@@ -77,7 +85,7 @@ public boolean addAll(int index, Collection<? extends Integer> c) {
  * 
  * @see java.util.ArrayList#clear()
  */
-public void clear() {
+public synchronized void clear() {
     cache.clear();
 }
 
@@ -86,7 +94,7 @@ public void clear() {
  * @return
  * @see java.util.ArrayList#contains(java.lang.Object)
  */
-public boolean contains(Object o) {
+public synchronized boolean contains(Object o) {
     return cache.contains(o);
 }
 
@@ -95,7 +103,7 @@ public boolean contains(Object o) {
  * @return
  * @see java.util.AbstractCollection#containsAll(java.util.Collection)
  */
-public boolean containsAll(Collection<?> arg0) {
+public synchronized boolean containsAll(Collection<?> arg0) {
     return cache.containsAll(arg0);
 }
 
@@ -103,7 +111,7 @@ public boolean containsAll(Collection<?> arg0) {
  * @param minCapacity
  * @see java.util.ArrayList#ensureCapacity(int)
  */
-public void ensureCapacity(int minCapacity) {
+public synchronized void ensureCapacity(int minCapacity) {
     cache.ensureCapacity(minCapacity);
 }
 
@@ -112,7 +120,7 @@ public void ensureCapacity(int minCapacity) {
  * @return
  * @see java.util.ArrayList#get(int)
  */
-public Integer get(int index) {
+public synchronized Integer get(int index) {
     return cache.get(index);
 }
 
@@ -121,7 +129,7 @@ public Integer get(int index) {
  * @return
  * @see java.util.ArrayList#indexOf(java.lang.Object)
  */
-public int indexOf(Object o) {
+public synchronized int indexOf(Object o) {
     return cache.indexOf(o);
 }
 
@@ -129,7 +137,7 @@ public int indexOf(Object o) {
  * @return
  * @see java.util.ArrayList#isEmpty()
  */
-public boolean isEmpty() {
+public synchronized boolean isEmpty() {
     return cache.isEmpty();
 }
 
@@ -137,7 +145,7 @@ public boolean isEmpty() {
  * @return
  * @see java.util.ArrayList#iterator()
  */
-public Iterator<Integer> iterator() {
+public synchronized Iterator<Integer> iterator() {
     return cache.iterator();
 }
 
@@ -146,7 +154,7 @@ public Iterator<Integer> iterator() {
  * @return
  * @see java.util.ArrayList#lastIndexOf(java.lang.Object)
  */
-public int lastIndexOf(Object o) {
+public synchronized int lastIndexOf(Object o) {
     return cache.lastIndexOf(o);
 }
 
@@ -154,7 +162,7 @@ public int lastIndexOf(Object o) {
  * @return
  * @see java.util.ArrayList#listIterator()
  */
-public ListIterator<Integer> listIterator() {
+public synchronized ListIterator<Integer> listIterator() {
     return cache.listIterator();
 }
 
@@ -163,7 +171,7 @@ public ListIterator<Integer> listIterator() {
  * @return
  * @see java.util.ArrayList#listIterator(int)
  */
-public ListIterator<Integer> listIterator(int index) {
+public synchronized ListIterator<Integer> listIterator(int index) {
     return cache.listIterator(index);
 }
 
@@ -172,7 +180,7 @@ public ListIterator<Integer> listIterator(int index) {
  * @return
  * @see java.util.ArrayList#remove(int)
  */
-public Integer remove(int index) {
+public synchronized Integer remove(int index) {
     return cache.remove(index);
 }
 
@@ -181,7 +189,7 @@ public Integer remove(int index) {
  * @return
  * @see java.util.ArrayList#remove(java.lang.Object)
  */
-public boolean remove(Object o) {
+public synchronized boolean remove(Object o) {
     return cache.remove(o);
 }
 
@@ -190,7 +198,7 @@ public boolean remove(Object o) {
  * @return
  * @see java.util.ArrayList#removeAll(java.util.Collection)
  */
-public boolean removeAll(Collection<?> c) {
+public synchronized boolean removeAll(Collection<?> c) {
     return cache.removeAll(c);
 }
 
@@ -199,7 +207,7 @@ public boolean removeAll(Collection<?> c) {
  * @return
  * @see java.util.ArrayList#retainAll(java.util.Collection)
  */
-public boolean retainAll(Collection<?> c) {
+public synchronized boolean retainAll(Collection<?> c) {
     return cache.retainAll(c);
 }
 
@@ -209,7 +217,9 @@ public boolean retainAll(Collection<?> c) {
  * @return
  * @see java.util.ArrayList#set(int, java.lang.Object)
  */
-public Integer set(int index, Integer element) {
+public synchronized Integer set(int index, Integer element) {
+    if(element==null)
+	throw new NullPointerException("Element is intolerably null.");
     return cache.set(index, element);
 }
 
@@ -217,7 +227,7 @@ public Integer set(int index, Integer element) {
  * @return
  * @see java.util.ArrayList#size()
  */
-public int size() {
+public synchronized int size() {
     return cache.size();
 }
 
@@ -226,16 +236,17 @@ public int size() {
  * @param toIndex
  * @return
  * @see java.util.ArrayList#subList(int, int)
+ * @deprecated
  */
-public List<Integer> subList(int fromIndex, int toIndex) {
-    return cache.subList(fromIndex, toIndex);
+public synchronized List<Integer> subList(int fromIndex, int toIndex) {
+    throw new UnsupportedOperationException();
 }
 
 /**
  * @return
  * @see java.util.ArrayList#toArray()
  */
-public Object[] toArray() {
+public synchronized Object[] toArray() {
     return cache.toArray();
 }
 
@@ -244,7 +255,7 @@ public Object[] toArray() {
  * @return
  * @see java.util.ArrayList#toArray(T[])
  */
-public <T> T[] toArray(T[] a) {
+public synchronized <T> T[] toArray(T[] a) {
     return cache.toArray(a);
 }
 
@@ -252,7 +263,7 @@ public <T> T[] toArray(T[] a) {
  * 
  * @see java.util.ArrayList#trimToSize()
  */
-public void trimToSize() {
+public synchronized void trimToSize() {
     cache.trimToSize();
 }
  

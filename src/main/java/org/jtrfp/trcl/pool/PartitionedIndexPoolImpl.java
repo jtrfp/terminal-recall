@@ -54,27 +54,29 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 		@Override
 		public PartitionedList<EntryBasedIndexPool.Entry<STORED_TYPE>>.Partition _reAdapt(
 			PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl value) {
-		    return value.getWrappedPartition();
-		}};
+		    final PartitionedList<EntryBasedIndexPool.Entry<STORED_TYPE>>.Partition result = value.getWrappedPartition();
+		    assert result!=null;
+		    return result;
+		}}.setTolerateNull(true);
     private final Adapter<EntryBasedIndexPool.Entry<STORED_TYPE>,PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl> flatEntryAdapter =
 	     new CachedAdapter<EntryBasedIndexPool.Entry<STORED_TYPE>,PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl>(sharedEntryCache){
 		@Override
 		public PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl _adapt(
 			EntryBasedIndexPool.Entry<STORED_TYPE> value) {
 		    PartitionImpl partition = getPartitionFromEntryBasedIndexPool(value.getParent());
-		    final PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl result = partition.generateEntry(value); 
-		    return result;
+		    return partition.generateEntry(value);
 		}
 
 		@Override
 		public EntryBasedIndexPool.Entry<STORED_TYPE> _reAdapt(
 			PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl value) {
-		    return value.getWrappedEntry();
-		}};
+		    final EntryBasedIndexPool.Entry<STORED_TYPE> result = value.getWrappedEntry();
+		    return result;
+		}}.setTolerateNull(true);
 		
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     
-    public PartitionedIndexPoolImpl(){
+    public PartitionedIndexPoolImpl(){//TODO: ListActionDispatcher may not be dispatching remove(index)?
 	wrappedEntries    = new ListActionDispatcher<EntryBasedIndexPool.Entry<STORED_TYPE>>();
 	telemetry         = new ListActionTelemetry<EntryBasedIndexPool.Entry<STORED_TYPE>>();
 	wrappedList       = new PartitionedList    <EntryBasedIndexPool.Entry<STORED_TYPE>>(wrappedEntries);
@@ -98,6 +100,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
     public void propertyChange(PropertyChangeEvent arg0) {
 	if(arg0.getPropertyName()==Partition.NUM_UNUSED_INDICES){
 	    int delta = (Integer)arg0.getNewValue()-(Integer)arg0.getOldValue();
+	    //System.out.println("PartitionedIndexPoolImp.propertyChange NUM_UNUSED_INDICES delta="+delta);
 	    unusedIndicesDelta(delta);
 	}
     }//end propertyChange()
@@ -123,6 +126,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
     }
     
     private void setTotalUnusedIndices(int totalUnusedIndices){
+	//System.out.println("PartitionedIndexPoolImpl.setTotalUnusedIndices()" +totalUnusedIndices);
 	pcs.firePropertyChange(TOT_UNUSED_INDICES, this.totalUnusedIndices, totalUnusedIndices);
 	this.totalUnusedIndices=totalUnusedIndices;
     }
@@ -136,10 +140,12 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	return totalUnusedIndices;
     }
 
+  //TODO: Unfinished but should work. Need to accommodate maxNumUnusedIndices
     @Override
     public PartitionedIndexPool<STORED_TYPE> defragment(int maxNumUnusedIndices)
-	    throws IllegalArgumentException {//TODO: Unfinished.
-	for(PartitionedIndexPool.Partition<STORED_TYPE> part:partitionsList)
+	    throws IllegalArgumentException {
+	//System.out.println("PartitionedIndexPoolImpl.defragment()");
+	for(PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl part:partitionsList)
 	    part.defragment(0);
 	return this;
     }//end defragment()
@@ -205,14 +211,20 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 		@Override
 		protected PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl _adapt(
 			EntryBasedIndexPool.Entry<STORED_TYPE> value) {
+		    if(value==null)
+			throw new NullPointerException("Passed value intolerably null.");
+		    //PartitionImpl partition = getPartitionFromEntryBasedIndexPool(value.getParent());
+		    //return partition.generateEntry(value);
 		    throw new UnsupportedOperationException();
 		}//end _adapt()
 
 		@Override
 		protected EntryBasedIndexPool.Entry<STORED_TYPE> _reAdapt(
 			PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl value) {
-		    return value.getWrappedEntry();
-		}};
+		    EntryBasedIndexPool.Entry<STORED_TYPE> result = value.getWrappedEntry();
+		    assert result!=null;
+		    return result;
+		}}.setTolerateNull(true);
 	
 	public PartitionImpl(PartitionedList<EntryBasedIndexPool.Entry<STORED_TYPE>>.Partition listPartition) {
 	    ebip = new EntryBasedIndexPool<STORED_TYPE>();
@@ -241,6 +253,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	}//end propertyChange
 	
 	private void updateLengthInIndices(){
+	    //System.out.println("PartitionedIndexPoolImpl.updateLengthInIndices. numUnusedIndices="+getNumUnusedIndices()+" numUsedIndices="+getNumUsedIndices()+"\n\tTotal="+(getNumUnusedIndices()+getNumUsedIndices()));
 	    setLengthInIndices(getNumUnusedIndices()+getNumUsedIndices());
 	}
 	
@@ -248,6 +261,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	 * @param lengthInIndices the lengthInIndices to set
 	 */
 	private void setLengthInIndices(int lengthInIndices) {
+	    //System.out.println("PartitionedIndexPoolImpl.setLengthIndices "+lengthInIndices);
 	    pcs.firePropertyChange(LENGTH_INDICES, this.lengthInIndices, lengthInIndices);
 	    this.lengthInIndices = lengthInIndices;
 	}
@@ -257,6 +271,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	}
 	
 	private void setNumUnusedIndices(int newValue){
+	    //System.out.println("PartitionedIndexPoolImpl.PartitionImpl.setNumUnusedIndices "+newValue);
 	    pcs.firePropertyChange(Partition.NUM_UNUSED_INDICES, numUnusedIndices, newValue);
 	    numUnusedIndices=newValue;
 	    updateLengthInIndices();
@@ -282,7 +297,9 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 		NullPointerException {
 	    if(!isValid())
 		throw new IllegalStateException("Cannot create Entry in Partition which has been invalidated (removed).");
-	    PartitionedIndexPool.Entry<STORED_TYPE> result = partitionEntryAdapter.adapt(ebip.popEntry(value));
+	    EntryBasedIndexPool.Entry<STORED_TYPE> entry = ebip.popEntry(value);
+	    assert entry!=null:"popped entry intolerably null.";
+	    PartitionedIndexPool.Entry<STORED_TYPE> result = partitionEntryAdapter.adapt(entry);
 	    entries.add(result);
 	    return result;
 	}
@@ -335,6 +352,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	@Override
 	public int defragment(int maxNumUnusedIndices)
 		throws IllegalStateException, IllegalArgumentException {
+	    //System.out.println("PartitionedIndexPoolImpl.Partition.defragment()");
 	    if(!isValid())
 		throw new IllegalStateException("Cannot defragment Partition which has been invalidated (removed).");
 	    ebip.defragment();
@@ -394,7 +412,8 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	public int getNumUnusedIndices() {
 	    if(!isValid())
 		throw new IllegalStateException("Cannot defragment Partition which has been invalidated (removed).");
-	    return ebip.getNumUnusedIndices();
+	    //return ebip.getNumUnusedIndices();
+	    return numUnusedIndices;
 	}
 
 	@Override
@@ -407,9 +426,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	/**
 	 * @param numUsedIndices the numUsedIndices to set
 	 */
-	public void setNumUsedIndices(int numUsedIndices) {
-	    if(!isValid())
-		throw new IllegalStateException("Cannot defragment Partition which has been invalidated (removed).");
+	private void setNumUsedIndices(int numUsedIndices) {
 	    pcs.firePropertyChange(NUM_USED_INDICES, this.numUsedIndices, numUsedIndices);
 	    this.numUsedIndices = numUsedIndices;
 	    updateLengthInIndices();
@@ -562,6 +579,12 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 		    pcs.firePropertyChange(Entry.LOCAL_INDEX, this.localIndex, localIndex);
 		    this.localIndex = localIndex;
 		    updateGlobalIndex();
+		}
+		
+		@Override
+		public String toString(){
+		    return "E["+this.hashCode()+" value="+this.get()+
+			    " globalIdx="+this.getGlobalIndex()+" poolIdx="+this.getLocalIndex()+"]";
 		}
 	    }//end EntryImpl
     }//end PartitionImpl

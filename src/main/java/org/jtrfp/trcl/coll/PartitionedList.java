@@ -110,7 +110,7 @@ public class PartitionedList<T> {
 		throw new IllegalStateException("Attempting to perform List operation on an invalid (removed) Partition");
 	    if(subList==null){
 		final int start = getStartIndex();
-		subList = dest.subList(getStartIndex(), size+start);
+		subList         = dest.subList(start, size+start);
 		}
 	    return subList;
 	}//getSubList()
@@ -276,6 +276,7 @@ public class PartitionedList<T> {
 
 	@Override
 	public T remove(int index) {
+	    //System.out.println("PartitionedList.remove "+index);
 	    final T result = getSubList().remove(index);
 	    adjustSize(-1);
 	    return result;

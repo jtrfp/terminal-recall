@@ -34,11 +34,11 @@ public class IndexPool{
 	private volatile int            numUnusedIndices= 0;
 	private volatile int            numUsedIndices  = 0;
 	private GrowthBehavior 		growthBehavior	= new GrowthBehavior(){
-	    public int grow(int index)
-	     {return index+1;}
+	    public int grow(int index)//CAUTION: Never let this return zero.
+	     {return index==0?1:index*2;}
 	    public int shrink(int minDesiredSize)
 	     {return minDesiredSize;}
-	    };//Default is to increment each time, and shrink to exact minimum.
+	    };//Default is to double each time, and shrink to exact minimum.
 	private int hardLimit=Integer.MAX_VALUE;//Basically no hard limit by default
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	
@@ -370,5 +370,12 @@ public class IndexPool{
 	private void setNumUsedIndices(int numUsedIndices) {
 	    pcs.firePropertyChange(NUM_USED_INDICES, this.numUsedIndices, numUsedIndices);
 	    this.numUsedIndices = numUsedIndices;
+	}
+
+	public void freeAll() {//TODO: compactFreeAll() with clear() instead of drain()
+	    usedIndices.drainTo(freeIndices);
+	    growthBehavior.shrink(0);
+	    updateNumUnusedIndices();
+	    updateNumUsedIndices();
 	}
 }//end IndexPool

@@ -24,7 +24,7 @@ import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry.DeadEntry;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
-public class EntryBasedIndexPool<CONTAINED_TYPE> {
+public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListener {
     //// BEAN PROPERTIES
     public static final String    NUM_UNUSED_INDICES = "numUnusedIndices",
 	                          NUM_USED_INDICES   = "numUsedIndices";
@@ -36,17 +36,16 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     
     public EntryBasedIndexPool(){
-	indexPool.addPropertyChangeListener(IndexPool.NUM_UNUSED_INDICES,new PropertyChangeListener(){
-	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		pcs.firePropertyChange(EntryBasedIndexPool.NUM_UNUSED_INDICES, evt.getOldValue(), evt.getNewValue());
-	    }});
-	indexPool.addPropertyChangeListener(IndexPool.NUM_USED_INDICES,new PropertyChangeListener(){
-	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		pcs.firePropertyChange(EntryBasedIndexPool.NUM_USED_INDICES, evt.getOldValue(), evt.getNewValue());
-	    }});
+	indexPool.addPropertyChangeListener(this);
     }//end constructor
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+	if(evt.getPropertyName()==IndexPool.NUM_UNUSED_INDICES)
+	 {pcs.firePropertyChange(EntryBasedIndexPool.NUM_UNUSED_INDICES, evt.getOldValue(), evt.getNewValue());}
+	else if(evt.getPropertyName()==IndexPool.NUM_USED_INDICES)
+	 {pcs.firePropertyChange(EntryBasedIndexPool.NUM_USED_INDICES, evt.getOldValue(), evt.getNewValue());}
+    }
     
     /**
      * 
@@ -63,8 +62,6 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
     }
 
     private EntryBasedIndexPool<CONTAINED_TYPE> setInDispatcher(int index, Entry<CONTAINED_TYPE> entry){
-	if(index==-1)
-	    return this;
 	while(listActionDispatcher.size()<index)
 	    listActionDispatcher.add(null);
 	if(listActionDispatcher.size()==index)
@@ -105,8 +102,6 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	assert index<listActionDispatcher.size():"index "+index+" exceeds size of entry list "+listActionDispatcher.size();
 	Entry<CONTAINED_TYPE> entry = listActionDispatcher.get(index);
 	assert entry!=null:"entry at index"+index+" intolerably null";
-	if(((Entry)entry) instanceof DeadEntry)
-	   {return;}
 	indexPool.free(index);
 	final int newIndex = indexPool.pop();
 	entry.setPoolIndex(newIndex);
@@ -117,6 +112,13 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
     }
     public void setHardLimit(int hardLimit){
 	indexPool.setHardLimit(hardLimit);
+    }
+    
+    public void freeAll() {
+	for(Entry<CONTAINED_TYPE> entry:listActionDispatcher){
+	    if(entry!=null)/*{entry.setValid(false);entry.setPoolIndex(-1);}*/entry.free();}
+	//listActionDispatcher.clear();
+	//indexPool.freeAll();
     }
 
     public static class Entry<CONTAINED_TYPE>{
@@ -144,7 +146,7 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 
 	private void illegalIfInvalid(){
 	    if(!isValid())
-		throw new IllegalStateException();
+		throw new IllegalStateException("Cannot perform this operation on an freed Entry");
 	}
 
 	public EntryBasedIndexPool<CONTAINED_TYPE> getParent(){
@@ -153,9 +155,11 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 
 	protected Entry<CONTAINED_TYPE> setPoolIndex(int poolIndex){
 	    pcs.firePropertyChange(POOL_INDEX, this.poolIndex, poolIndex);
-	    getParent().setInDispatcher(this.poolIndex,new DeadEntry(getParent()));//Remove old
+	    if(this.poolIndex!=-1){
+	     getParent().setInDispatcher(this.poolIndex,null);}//Remove old
 	    this.poolIndex=poolIndex;
-	    getParent().setInDispatcher(poolIndex,this);
+	    if(poolIndex!=-1)
+	     getParent().setInDispatcher(poolIndex,this);
 	    return this;
 	}
 
@@ -255,6 +259,10 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> {
 	    protected DeadEntry(EntryBasedIndexPool parent) {
 		super(parent, null);
 	    }//end constructor
+	    @Override
+	    public boolean isValid(){
+		return false;
+	    }
 	}
     }//end Entry
 

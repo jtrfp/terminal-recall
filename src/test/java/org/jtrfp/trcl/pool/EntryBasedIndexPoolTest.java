@@ -19,11 +19,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.dbg.PropertyChangeQueue;
 import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry;
-import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry.DeadEntry;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 import org.junit.After;
 import org.junit.Before;
@@ -109,7 +110,7 @@ public class EntryBasedIndexPoolTest {
 	assertTrue(target.contains(e0));
 	assertEquals(e0,target.get(0));
 	e0.free();
-	assertTrue(target.get(0) instanceof DeadEntry);
+	assertTrue(target.get(0) == null);
 	subject.defragment();
 	assertFalse(target.contains(e0));
 	assertEquals(2,lad.size());
@@ -150,5 +151,58 @@ public class EntryBasedIndexPoolTest {
 	assertEquals(1,queue.pop().getNewValue());
 	assertEquals(0,queue.pop().getNewValue());
     }
+    
+    private void depopulate(){
+	List<Entry<Integer>> list = subject.getListActionDispatcher();
+	for(int i=0; i<list.size(); i++){
+	    final Entry<Integer> item = list.get(i);
+	    if(item!=null){
+		//System.out.print(item.getPoolIndex()+" ");
+		item.free();}
+	}//end while(hasNext)
+	for(Entry<Integer> entry:list){
+	    if(entry!=null)System.out.print("STILL HERE: "+entry+" ");
+	}
+	assertEquals(0,subject.getNumUsedIndices());
+	subject.defragment();
+	assertEquals(0,subject.getListActionDispatcher().size());
+    }//end depopulate()
+    
+    private int populate(){
+	final int size = (int)(Math.random() * 250);
+	for(int i=0; i<size; i++)
+	    subject.popEntry(new Integer((int)(Math.random()*10000)));
+	return size;
+    }//end populate()
+    
+    /* This test ended up being surprisingly important as some
+     * state-related bugs were found.
+     */
+    @Test
+    public void changingStateTest(){//Could use jUnitPerf but...
+	final int NUM_ITERATIONS = 50;
+	
+	for(int iteration=0; iteration<NUM_ITERATIONS; iteration++){
+	    //System.out.println("iteration "+iteration);
+	    //System.out.println("depopulate "+subject.getListActionDispatcher().size());
+	    depopulate();
+	    /*
+	    if(subject.getNumUsedIndices()!=0){
+		System.err.println("NUM USED INDICES !=0. LAD.size()="+subject.getListActionDispatcher().size());
+		for(Entry<Integer> entry : subject.getListActionDispatcher()){
+		    if(entry!=null)System.err.print(entry.getContained()+" "); else{System.err.print("NULL ");};
+		}//end for(...)
+	    }//end if()
+	    */
+	    assertEquals(0,subject.getNumUsedIndices());
+	    final int size = populate();
+	    //System.out.println("Populate to "+size+" got "+subject.getNumUsedIndices());
+	    assertEquals(size,subject.getNumUsedIndices());
+	    subject.defragment();
+	    //System.out.println("After defrag, used="+subject.getNumUsedIndices()+" unused="+subject.getNumUnusedIndices());
+	    assertEquals(size,subject.getListActionDispatcher().size());
+	    assertEquals(0,subject.getNumUnusedIndices());
+	}
+    }//end stressTest()
 
 }//end EntryBasedIndexPoolTest

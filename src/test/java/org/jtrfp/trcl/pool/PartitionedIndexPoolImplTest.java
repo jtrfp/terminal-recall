@@ -2,23 +2,19 @@ package org.jtrfp.trcl.pool;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.pool.PartitionedIndexPool.Entry;
 import org.jtrfp.trcl.pool.PartitionedIndexPool.Partition;
+import org.jtrfp.trcl.pool.PartitionedIndexPoolImpl.PartitionImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ochafik.util.listenable.DefaultListenableCollection;
 import com.ochafik.util.listenable.ListenableCollection;
 
 public class PartitionedIndexPoolImplTest {
-    private PartitionedIndexPool<Integer> subject;
+    private PartitionedIndexPoolImpl<Integer> subject;
 
     @Before
     public void setUp() throws Exception {
@@ -28,7 +24,7 @@ public class PartitionedIndexPoolImplTest {
     @After
     public void tearDown() throws Exception {
     }
-    
+   
     @Test
     public void testNewPartition() {
 	Partition<Integer> part = subject.newPartition();
@@ -253,4 +249,59 @@ public class PartitionedIndexPoolImplTest {
 	assertEquals(p0,p0.removeAllEntries());
 	assertEquals(0,p0.getNumUsedIndices());
     }
+    
+    private void depopulate(PartitionImpl ... parts ){
+	//System.out.println("depopulate()");
+	for(PartitionImpl p:parts)
+	    p.removeAllEntries();
+    }//end depopulate()
+    
+    private int populate(Partition ... parts){
+	final int size = (int)(Math.random() * 5)+1;
+	//System.out.println("populate size="+size+" parts.length="+parts.length);
+	for(Partition p:parts)
+	    for(int i=0; i<size; i++)
+		p.newEntry(new Integer((int)(Math.random()*10000)));
+	return size*parts.length;
+    }//end populate()
+    
+    @Test
+    public void testChangingState(){
+	final int NUM_ITERATIONS = 50;
+	
+	PartitionedIndexPoolImpl<Integer>.PartitionImpl p0 = (PartitionedIndexPoolImpl<Integer>.PartitionImpl)subject.newPartition();
+	PartitionedIndexPoolImpl<Integer>.PartitionImpl p1 = (PartitionedIndexPoolImpl<Integer>.PartitionImpl)subject.newPartition();
+	
+	for(int iteration=0; iteration<NUM_ITERATIONS; iteration++){
+	    //System.out.println("iteration "+iteration);//TODO: See if highestIndex is out of sync.
+	    depopulate(p0,p1);
+	    /*
+	    System.out.print("Contents after depopulate NO DEFRAG: \n\t");
+	    for(Entry<Integer> ent:subject.getFlatEntries()){
+		System.out.print(ent+" ");
+	    }System.out.println();
+	    */
+	    final int size = iteration==2?0:populate(p0,p1);
+	    /*
+	    System.out.print("Contents after populate NO DEFRAG: \n\t");
+	    for(Entry<Integer> ent:subject.getFlatEntries()){
+		System.out.print(ent+" ");
+	    }System.out.println();
+	    System.out.println("defragmenting...");
+	    */
+	    subject.defragment(0);
+	    assertEquals(0,subject.getTotalUnusedIndices());
+	    /*
+	    System.out.print("Contents after populate+defrag: \n\t");
+	    for(Entry<Integer> ent:subject.getFlatEntries()){
+		System.out.print(ent+" ");
+	    }System.out.println();
+	    */
+	    assertEquals(size/2,p0.getLengthInIndices());
+	    assertEquals(size/2,p1.getLengthInIndices());
+	    assertEquals(0,p0.getGlobalStartIndex());
+	    assertEquals(size/2,p1.getGlobalStartIndex());
+	    assertEquals(size,subject.getFlatEntries().size());
+	}
+    }//end stressTest()
 }//end PartitionedIndexPool

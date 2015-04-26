@@ -322,8 +322,8 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	    if(!isValid())
 		throw new IllegalStateException("Cannot remove all Entries of Partition which has been invalidated (removed).");
 	    List<Entry<STORED_TYPE>> entries = getEntries();
-	    while(!entries.isEmpty())
-		entries.get(0).remove();
+	    entries.clear();
+	    ebip.freeAll();
 	    return this;
 	}
 
@@ -459,6 +459,8 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 		    }//end if(POOL_INDEX)
 		    else if(evt.getPropertyName().contentEquals(Partition.GLOBAL_START_INDEX))
 			updateGlobalIndex();
+		    else if(evt.getPropertyName().contentEquals(EntryBasedIndexPool.Entry.VALID) && evt.getNewValue()==Boolean.FALSE && isValid())
+			invalidate();
 		}//end propertyChange(...)
 
 		@Override

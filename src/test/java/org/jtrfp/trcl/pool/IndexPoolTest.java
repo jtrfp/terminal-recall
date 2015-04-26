@@ -92,8 +92,8 @@ public class IndexPoolTest extends TestCase {
 	final IndexPool subject =  new IndexPool();
 	for(int i=0; i<60; i++)
 	    subject.pop();
-	//With default incremental growth.
-	assertEquals(60, subject.getMaxCapacity());
+	//With default power-of-2 growth.
+	assertEquals(64, subject.getMaxCapacity());
     }
 
     public void testGetHardLimit() {

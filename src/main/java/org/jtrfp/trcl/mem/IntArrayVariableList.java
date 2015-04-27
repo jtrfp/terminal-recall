@@ -13,7 +13,6 @@
 
 package org.jtrfp.trcl.mem;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -22,29 +21,21 @@ import java.util.ListIterator;
 import org.jtrfp.trcl.mem.MemoryWindow.IntArrayVariable;
 
 public class IntArrayVariableList implements List<Integer> {
- private final ArrayList<Integer> cache = new ArrayList<Integer>();
  private final IntArrayVariable   delegate;
  private final int                objectIndex;
+ private volatile int		  counter;
  
  public IntArrayVariableList(IntArrayVariable delegate, int objectIndex){
      this.delegate    = delegate;
      this.objectIndex = objectIndex;
  }
- 
- public synchronized void flush(){
-     for(int i=0; i<cache.size(); i++)
-	 delegate.setAt(objectIndex, i, cache.get(i));
- }//end flush()
-
 /**
  * @param index
  * @param element
  * @see java.util.ArrayList#add(int, java.lang.Object)
  */
 public synchronized void add(int index, Integer element) {
-    if(element==null)
-	throw new NullPointerException("Element is intolerably null.");
-    cache.add(index, element);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -55,7 +46,8 @@ public synchronized void add(int index, Integer element) {
 public synchronized boolean add(Integer e) {
     if(e==null)
 	throw new NullPointerException("Element is intolerably null.");
-    return cache.add(e);
+    delegate.setAt(objectIndex, counter++, e);
+    return true;
 }
 
 /**
@@ -66,7 +58,9 @@ public synchronized boolean add(Integer e) {
 public synchronized boolean addAll(Collection<? extends Integer> c) {
     if(c.contains(null))
 	throw new NullPointerException("Element is intolerably null.");
-    return cache.addAll(c);
+    delegate.setAt(objectIndex, counter, c);
+    counter+=c.size();
+    return !c.isEmpty();
 }
 
 /**
@@ -78,7 +72,9 @@ public synchronized boolean addAll(Collection<? extends Integer> c) {
 public synchronized boolean addAll(int index, Collection<? extends Integer> c) {
     if(c.contains(null))
    	throw new NullPointerException("Element is intolerably null.");
-    return cache.addAll(index, c);
+    delegate.setAt(objectIndex, this.counter+index, c);
+    this.counter+=c.size();
+    return !c.isEmpty();
 }
 
 /**
@@ -86,7 +82,12 @@ public synchronized boolean addAll(int index, Collection<? extends Integer> c) {
  * @see java.util.ArrayList#clear()
  */
 public synchronized void clear() {
-    cache.clear();
+    for(;counter>=0; counter--)
+     delegate.setAt(objectIndex, counter, 0);
+}
+
+public synchronized void rewind(){
+    counter=0;
 }
 
 /**
@@ -95,7 +96,7 @@ public synchronized void clear() {
  * @see java.util.ArrayList#contains(java.lang.Object)
  */
 public synchronized boolean contains(Object o) {
-    return cache.contains(o);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -104,15 +105,7 @@ public synchronized boolean contains(Object o) {
  * @see java.util.AbstractCollection#containsAll(java.util.Collection)
  */
 public synchronized boolean containsAll(Collection<?> arg0) {
-    return cache.containsAll(arg0);
-}
-
-/**
- * @param minCapacity
- * @see java.util.ArrayList#ensureCapacity(int)
- */
-public synchronized void ensureCapacity(int minCapacity) {
-    cache.ensureCapacity(minCapacity);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -121,7 +114,7 @@ public synchronized void ensureCapacity(int minCapacity) {
  * @see java.util.ArrayList#get(int)
  */
 public synchronized Integer get(int index) {
-    return cache.get(index);
+    return delegate.get(objectIndex, index);
 }
 
 /**
@@ -130,7 +123,7 @@ public synchronized Integer get(int index) {
  * @see java.util.ArrayList#indexOf(java.lang.Object)
  */
 public synchronized int indexOf(Object o) {
-    return cache.indexOf(o);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -138,7 +131,7 @@ public synchronized int indexOf(Object o) {
  * @see java.util.ArrayList#isEmpty()
  */
 public synchronized boolean isEmpty() {
-    return cache.isEmpty();
+    return counter==0;
 }
 
 /**
@@ -146,7 +139,7 @@ public synchronized boolean isEmpty() {
  * @see java.util.ArrayList#iterator()
  */
 public synchronized Iterator<Integer> iterator() {
-    return cache.iterator();
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -155,7 +148,7 @@ public synchronized Iterator<Integer> iterator() {
  * @see java.util.ArrayList#lastIndexOf(java.lang.Object)
  */
 public synchronized int lastIndexOf(Object o) {
-    return cache.lastIndexOf(o);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -163,7 +156,7 @@ public synchronized int lastIndexOf(Object o) {
  * @see java.util.ArrayList#listIterator()
  */
 public synchronized ListIterator<Integer> listIterator() {
-    return cache.listIterator();
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -172,7 +165,7 @@ public synchronized ListIterator<Integer> listIterator() {
  * @see java.util.ArrayList#listIterator(int)
  */
 public synchronized ListIterator<Integer> listIterator(int index) {
-    return cache.listIterator(index);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -181,7 +174,7 @@ public synchronized ListIterator<Integer> listIterator(int index) {
  * @see java.util.ArrayList#remove(int)
  */
 public synchronized Integer remove(int index) {
-    return cache.remove(index);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -190,7 +183,7 @@ public synchronized Integer remove(int index) {
  * @see java.util.ArrayList#remove(java.lang.Object)
  */
 public synchronized boolean remove(Object o) {
-    return cache.remove(o);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -199,7 +192,7 @@ public synchronized boolean remove(Object o) {
  * @see java.util.ArrayList#removeAll(java.util.Collection)
  */
 public synchronized boolean removeAll(Collection<?> c) {
-    return cache.removeAll(c);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -208,7 +201,7 @@ public synchronized boolean removeAll(Collection<?> c) {
  * @see java.util.ArrayList#retainAll(java.util.Collection)
  */
 public synchronized boolean retainAll(Collection<?> c) {
-    return cache.retainAll(c);
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -220,7 +213,9 @@ public synchronized boolean retainAll(Collection<?> c) {
 public synchronized Integer set(int index, Integer element) {
     if(element==null)
 	throw new NullPointerException("Element is intolerably null.");
-    return cache.set(index, element);
+    Integer previous = delegate.get(objectIndex, index);
+    delegate.setAt(objectIndex, index, element);
+    return previous;
 }
 
 /**
@@ -228,7 +223,7 @@ public synchronized Integer set(int index, Integer element) {
  * @see java.util.ArrayList#size()
  */
 public synchronized int size() {
-    return cache.size();
+    return counter;
 }
 
 /**
@@ -247,7 +242,7 @@ public synchronized List<Integer> subList(int fromIndex, int toIndex) {
  * @see java.util.ArrayList#toArray()
  */
 public synchronized Object[] toArray() {
-    return cache.toArray();
+    throw new UnsupportedOperationException();
 }
 
 /**
@@ -256,16 +251,7 @@ public synchronized Object[] toArray() {
  * @see java.util.ArrayList#toArray(T[])
  */
 public synchronized <T> T[] toArray(T[] a) {
-    return cache.toArray(a);
+    throw new UnsupportedOperationException();
 }
-
-/**
- * 
- * @see java.util.ArrayList#trimToSize()
- */
-public synchronized void trimToSize() {
-    cache.trimToSize();
-}
- 
  
 }//end IntArrayVariableList

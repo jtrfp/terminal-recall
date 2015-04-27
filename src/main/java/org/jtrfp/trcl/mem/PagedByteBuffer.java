@@ -15,6 +15,7 @@ package org.jtrfp.trcl.mem;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Collection;
 
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
@@ -189,9 +190,15 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     }
 
     @Override
-    public IByteBuffer putInts(int indexInBytes, int[] vals) {
+    public IByteBuffer putInts(int indexInBytes, int[] vals) {//TODO: Optimize, respecting page boundaries.
 	for(int i=0; i<vals.length; i++)
 	    putInt(4*i+indexInBytes, vals[i]);
+	return this;
+    }
+
+    public IByteBuffer putInts(int indexInBytes, Collection<? extends Integer> c) {//TODO: Optimize, respecting page boundaries.
+	for(Integer i:c)
+	    {putInt(indexInBytes,i);indexInBytes+=4;}
 	return this;
     }
 }//end PageByteBuffer

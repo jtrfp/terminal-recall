@@ -281,6 +281,13 @@ public abstract class MemoryWindow {
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 4 + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
+
+	public IntArrayVariable setAt(int objectIndex, int offsetInInts,
+		Collection<? extends Integer> c) {
+	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
+			* getParent().getObjectSizeInBytes(),c);
+	    return this;
+	}
     }// end IntArrayVariable
 
     public static final class VEC4ArrayVariable extends

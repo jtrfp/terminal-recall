@@ -293,6 +293,8 @@ public class IndexPool{
 	public void free(Collection<Integer> indicesToFree) {
 	    freeIndices.addAll(indicesToFree);
 	    usedIndices.removeAll(indicesToFree);
+	    updateNumUnusedIndices();
+	    updateNumUsedIndices();
 	}
 	/**
 	 * @param listener

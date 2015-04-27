@@ -50,6 +50,7 @@ public class GameShell {
 		(Color.darkGray,Color.black);
     private EarlyLoadingScreen earlyLoadingScreen;
     private GLFont             greenFont;
+    private boolean []	       initialized = new boolean[]{false};
     
     public GameShell(TR tr){
 	this.tr=tr;
@@ -68,14 +69,32 @@ public class GameShell {
 	registerPODs();
 	applyGFXState();
 	initLoadingScreen();
+	openInitializationFence();
 	return this;
     }//end startShell()
     
+    private void openInitializationFence(){
+	synchronized(initialized){
+	    initialized[0]=true;
+	    initialized.notifyAll();
+	}
+    }//end openInitializationFence()
+    
+    private void initializationFence(){
+	if(initialized[0]) return;
+	synchronized(initialized){
+	    while(!initialized[0])
+		try{initialized.wait();}catch(InterruptedException e){}
+	}//end sync(initialized)
+    }//end ensureInitialized()
+    
     public void showGameshellScreen(){
+	initializationFence();
 	earlyLoadingScreen.activate();
     }
     
     public void hideGameshellScreen(){
+	initializationFence();
 	earlyLoadingScreen.deactivate();
     }
     
@@ -98,6 +117,7 @@ public class GameShell {
     }
     
     public GameShell newGame(){
+	initializationFence();
 	GameVersion newGameVersion = determineGameVersion();
 	tr.config.setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
 	VOXFile vox;
@@ -112,6 +132,7 @@ public class GameShell {
     }//end newGame()
     
     public GameShell startGame(){
+	initializationFence();
 	try{tr.getGame().doGameplay();}
 	catch(Exception e){
 	    gameFailure(e);}
@@ -261,6 +282,7 @@ public class GameShell {
      * @return the earlyLoadingScreen
      */
     public EarlyLoadingScreen getEarlyLoadingScreen() {
+	initializationFence();
         return earlyLoadingScreen;
     }
 }//end GameShell

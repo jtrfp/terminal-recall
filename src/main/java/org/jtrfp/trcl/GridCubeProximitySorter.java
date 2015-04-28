@@ -23,6 +23,62 @@ import org.jtrfp.trcl.obj.RelevantEverywhere;
 public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRenderable>> {
     private double [] center = new double[]{0,0,0};
     
+    public static Comparator<List<PositionedRenderable>> getComparator(final double [] center){
+	return new Comparator<List<PositionedRenderable>>(){
+	@Override
+	public int compare(List<PositionedRenderable> _left, List<PositionedRenderable> _right) {
+	    synchronized(_left){
+	    synchronized(_right){
+	    if(_left.isEmpty()&&_right.isEmpty())
+		return 0;
+	    if(_left.isEmpty())
+		return -1;
+	    if(_right.isEmpty())
+		return 1;
+	    double [] left=_left.get(0).getPosition();
+	    double [] right=_right.get(0).getPosition();
+	    if((left==right)&&left==null)return Integer.MAX_VALUE;
+	    if(left==null)return Integer.MIN_VALUE;
+	    if(right==null)return Integer.MAX_VALUE;
+	    if(_left.get(0) instanceof RelevantEverywhere)
+		left=new double[]{center[0],center[1],center[2]+left[2]*1114112};
+	    if(_right.get(0) instanceof RelevantEverywhere)
+		right=new double[]{center[0],center[1],center[2]+right[2]*1114112};
+	    final int diff = (int)(Vect3D.taxicabDistance(center,left)-Vect3D.taxicabDistance(center,right));
+	    return diff!=0?diff:_left.hashCode()-_right.hashCode();
+	    }}//end sync()
+	}//end compare()
+	@Override
+	public boolean equals(Object o){
+	    return o.getClass()==this.getClass();
+	}//end equals
+    };//end new Comparator
+    }//end getComparator()
+    
+    public static Comparator<PositionedRenderable> getComparator(final Camera camera){
+   	return new Comparator<PositionedRenderable>(){
+   	@Override
+   	public int compare(PositionedRenderable _left, PositionedRenderable _right) {
+   	    final double [] cPos = camera.getPosition();
+   	    double [] left       = _left .getPosition();
+   	    double [] right      = _right.getPosition();
+   	    if((left==right)&&left==null)return Integer.MAX_VALUE;
+   	    if(left==null)return Integer.MIN_VALUE;
+   	    if(right==null)return Integer.MAX_VALUE;
+   	    if(_left instanceof RelevantEverywhere)
+   		left=new double[]{cPos[0],cPos[1],cPos[2]+left[2]*1114112};
+   	    if(_right instanceof RelevantEverywhere)
+   		right=new double[]{cPos[0],cPos[1],cPos[2]+right[2]*1114112};
+   	    final int diff = (int)(Vect3D.taxicabDistance(cPos,left)-Vect3D.taxicabDistance(cPos,right));
+   	    return diff!=0?diff:_left.hashCode()-_right.hashCode();
+   	}//end compare()
+   	@Override
+   	public boolean equals(Object o){
+   	    return o.getClass()==this.getClass();
+   	}//end equals
+       };//end new Comparator
+       }//end getComparator()
+    
     public GridCubeProximitySorter setCenter(double [] center){
 	this.center=center;
 	return this;

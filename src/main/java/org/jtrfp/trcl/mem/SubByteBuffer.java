@@ -92,12 +92,7 @@ public final class SubByteBuffer implements IByteBuffer {
         this.intrinsic = intrinsic;
         return this;
     }
-
-    @Override
-    public int logical2PhysicalAddressBytes(int logicalAddressInBytes) {
-	return logicalAddressInBytes+byteOffset;
-    }
-
+    
     @Override
     public double getFloat(int posInBytes) {
 	return intrinsic.getFloat(posInBytes);

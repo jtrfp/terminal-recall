@@ -68,12 +68,13 @@ public final class MemoryManager {
 	pageIndexPool.setGrowthBehavior(new GrowthBehavior(){
 	    @Override
 	    public int grow(final int previousMaxCapacity) {
+		final int newMaxCapacity = previousMaxCapacity!=0?previousMaxCapacity*2:1;
 		final TRFuture<Integer> ft = MemoryManager.this.gpu.getTr().getThreadManager().submitToGL(new Callable<Integer>(){
 		    @Override
 		    public Integer call(){
-			glPhysicalMemory.reallocate(previousMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES*2);
+			glPhysicalMemory.reallocate(newMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES);
 			physicalMemory[0] = glPhysicalMemory.map();
-			return previousMaxCapacity*2;
+			return newMaxCapacity;
 		    }//end call()
 		});
 		try{return ft.get();}catch(Exception e){e.printStackTrace();}

@@ -66,7 +66,7 @@ public class IndexPoolTest extends TestCase {
 
     public void testSetGrowthBehavior() {
 	final IndexPool subject = new IndexPool();
-	assertEquals(1, subject.getMaxCapacity());
+	assertEquals(0, subject.getMaxCapacity());
 	subject.setGrowthBehavior(new GrowthBehavior(){
 	    @Override
 	    public int grow(int previousMaxCapacity) {
@@ -158,6 +158,17 @@ public class IndexPoolTest extends TestCase {
 	assertEquals(2,subject.pop());
 	assertEquals(0, subject.getFreeIndices().size());
 	assertEquals(3, subject.getUsedIndices().size());
+	
+	subject.free(0);
+	subject.free(1);
+	subject.free(2);
+	// f f f
+	assertEquals(3, subject.getNumUnusedIndices());
+	assertEquals(0, subject.getNumUsedIndices());
+	assertEquals(3, subject.compact());
+	// 
+	assertEquals(0, subject.getNumUnusedIndices());
+	assertEquals(0, subject.getNumUsedIndices());
     }
     
     public void testGetNumUnusedIndices(){

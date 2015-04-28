@@ -57,7 +57,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return A ListState providing hints to accelerate changes based on those drained to dest.
      * @since Mar 24, 2015
      */
-    public synchronized ListState drainListStateTo(List<E> dest){
+    public synchronized ListState drainListStateTo(List<? super E> dest){
 	if(dest!=null)
 	 dest.addAll(delegate);
 	pcs.firePropertyChange(MODIFIED, this.modified, false);

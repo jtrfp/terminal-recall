@@ -29,14 +29,14 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
     public static final String    NUM_UNUSED_INDICES = "numUnusedIndices",
 	                          NUM_USED_INDICES   = "numUsedIndices";
     
-    private final IndexPool
-    indexPool = new IndexPool();
     private final ListActionDispatcher<Entry<CONTAINED_TYPE>> 
     listActionDispatcher = new ListActionDispatcher<Entry<CONTAINED_TYPE>>(new ArrayList<Entry<CONTAINED_TYPE>>());
+    private final IndexList<Entry<CONTAINED_TYPE>>
+    indexList = new IndexList<Entry<CONTAINED_TYPE>>(listActionDispatcher);
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     
     public EntryBasedIndexPool(){
-	indexPool.addPropertyChangeListener(this);
+	indexList.addPropertyChangeListener(this);
     }//end constructor
     
     @Override
@@ -55,12 +55,12 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
      */
     public Entry<CONTAINED_TYPE> popEntry(CONTAINED_TYPE immutableValue) {
 	final Entry<CONTAINED_TYPE> result = new Entry<CONTAINED_TYPE>(this, immutableValue);
-	final int index = indexPool.pop();
+	final int index = indexList.pop(result);
 	if(index!=-1)
 	    return result.setPoolIndex(index);
 	return null;
     }
-
+/*
     private EntryBasedIndexPool<CONTAINED_TYPE> setInDispatcher(int index, Entry<CONTAINED_TYPE> entry){
 	while(listActionDispatcher.size()<index)
 	    listActionDispatcher.add(null);
@@ -70,17 +70,11 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	    listActionDispatcher.set(index, entry);
 	return this;
     }//end setInDispatcher(...)
-
-    private void truncateDispatcher(int newSize){
-	while(listActionDispatcher.size()>newSize)
-	    listActionDispatcher.remove(newSize);
-	assert listActionDispatcher.size()==newSize;
-    }//end truncateDispatcher(...)
-
+*/
     public void defragment(){
 	//Used Indices, descending w/ Iterator
 	ArrayList<Integer> used = new ArrayList<Integer>();
-	for(Integer i:indexPool.getUsedIndices())
+	for(Integer i:indexList.getUsedIndices())
 	    used.add(i);
 	Collections.sort(used,Collections.reverseOrder());
 	final Iterator<Integer> usedIterator = used.iterator();
@@ -91,10 +85,7 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 
 	/*Assuming defragmentation was properly executed, compaction should 
        discard an optimal number of unused indices.*/
-	indexPool.compact();
-	assert indexPool.getNumUnusedIndices()==0;
-	final int newSize = indexPool.getUsedIndices().size();
-	truncateDispatcher(newSize);
+	indexList.compact();
     }
 
     private void defragmentEntry(int index){
@@ -102,16 +93,16 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	assert index<listActionDispatcher.size():"index "+index+" exceeds size of entry list "+listActionDispatcher.size();
 	Entry<CONTAINED_TYPE> entry = listActionDispatcher.get(index);
 	assert entry!=null:"entry at index"+index+" intolerably null";
-	indexPool.free(index);
-	final int newIndex = indexPool.pop();
+	indexList.free(index);
+	final int newIndex = indexList.pop(entry);
 	entry.setPoolIndex(newIndex);
     }
 
     public void setGrowthBehavior(GrowthBehavior gb){
-	indexPool.setGrowthBehavior(gb);
+	indexList.setGrowthBehavior(gb);
     }
     public void setHardLimit(int hardLimit){
-	indexPool.setHardLimit(hardLimit);
+	indexList.setHardLimit(hardLimit);
     }
     
     public void freeAll() {
@@ -140,7 +131,7 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	public void free() throws IllegalStateException{
 	    illegalIfInvalid();
 	    setValid(false);
-	    getParent().indexPool.free(getPoolIndex());
+	    getParent().indexList.free(getPoolIndex());
 	    setPoolIndex(-1);
 	}
 
@@ -155,11 +146,11 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 
 	protected Entry<CONTAINED_TYPE> setPoolIndex(int poolIndex){
 	    pcs.firePropertyChange(POOL_INDEX, this.poolIndex, poolIndex);
-	    if(this.poolIndex!=-1){
-	     getParent().setInDispatcher(this.poolIndex,null);}//Remove old
+	    //if(this.poolIndex!=-1){
+	    // getParent().setInDispatcher(this.poolIndex,null);}//Remove old
 	    this.poolIndex=poolIndex;
-	    if(poolIndex!=-1)
-	     getParent().setInDispatcher(poolIndex,this);
+	    //if(poolIndex!=-1)
+	    // getParent().setInDispatcher(poolIndex,this);
 	    return this;
 	}
 
@@ -279,7 +270,7 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
      * @since Mar 31, 2015
      */
     public int getNumUnusedIndices() {
-	return indexPool.getNumUnusedIndices();
+	return indexList.getNumUnusedIndices();
     }
     
     /**
@@ -288,7 +279,7 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
      * @since Mar 31, 2015
      */
     public int getNumUsedIndices() {
-	return indexPool.getNumUsedIndices();
+	return indexList.getNumUsedIndices();
     }
 
     /**

@@ -106,7 +106,7 @@ public class EntryBasedIndexPoolTest {
 	subject.popEntry(2);
 	final ArrayList<Entry<Integer>> target = new ArrayList<Entry<Integer>>();
 	lad.addTarget(target, true);
-	assertEquals(3,target.size());
+	assertEquals(4,target.size());//Power of two
 	assertTrue(target.contains(e0));
 	assertEquals(e0,target.get(0));
 	e0.free();

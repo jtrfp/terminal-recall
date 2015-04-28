@@ -78,8 +78,8 @@ public class WorldObject implements PositionedRenderable {
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
     
-    private VEC4Address [] opaqueObjectDefinitionAddressesInVEC4;
-    private VEC4Address [] transparentObjectDefinitionAddressesInVEC4;
+    private VEC4Address [] opaqueObjectDefinitionAddressesInVEC4 = new VEC4Address[0];
+    private VEC4Address [] transparentObjectDefinitionAddressesInVEC4 = new VEC4Address[0];
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);

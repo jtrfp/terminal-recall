@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -78,8 +79,8 @@ public class WorldObject implements PositionedRenderable {
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
     
-    private VEC4Address [] opaqueObjectDefinitionAddressesInVEC4 = new VEC4Address[0];
-    private VEC4Address [] transparentObjectDefinitionAddressesInVEC4 = new VEC4Address[0];
+    private Collection<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new ArrayList<VEC4Address>();
+    private Collection<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>();
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
@@ -259,14 +260,14 @@ public class WorldObject implements PositionedRenderable {
 		ByteOrder order = getTr().gpu.get().getByteOrder();
 		opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
 			opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
-		opaqueObjectDefinitionAddressesInVEC4 = new VEC4Address[opaqueIndicesList.size()];
+		opaqueObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>(opaqueIndicesList.size());
 		for(int i = 0; i < opaqueIndicesList.size(); i++)
-		    opaqueObjectDefinitionAddressesInVEC4[i]=new VEC4Address(opaqueIndicesList.get(i));
+		    opaqueObjectDefinitionAddressesInVEC4.add(new VEC4Address(opaqueIndicesList.get(i)));
 		transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
 			transparentIndicesList.size() * 4).order(order);
-		transparentObjectDefinitionAddressesInVEC4 = new VEC4Address[transparentIndicesList.size()];
+		transparentObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>(transparentIndicesList.size());
 		for(int i = 0; i < transparentIndicesList.size(); i++)
-		    transparentObjectDefinitionAddressesInVEC4[i]=new VEC4Address(transparentIndicesList.get(i));
+		    transparentObjectDefinitionAddressesInVEC4.add(new VEC4Address(transparentIndicesList.get(i)));
 
 		IntBuffer trans = transparentObjectDefinitionAddressesInVec4
 			.asIntBuffer(), opaque = opaqueObjectDefinitionAddressesInVec4
@@ -526,22 +527,12 @@ public class WorldObject implements PositionedRenderable {
 	needToRecalcMatrix=true;
     }
     
-    public final VEC4Address [] getOpaqueObjectDefinitionAddress(){
+    public final Collection<VEC4Address> getOpaqueObjectDefinitionAddresses(){
 	return opaqueObjectDefinitionAddressesInVEC4;
     }
     
-    public final VEC4Address [] getTransparentObjectDefinitionAddress(){
+    public final Collection<VEC4Address> getTransparentObjectDefinitionAddresses(){
 	return transparentObjectDefinitionAddressesInVEC4;
-    }
-
-    public final ByteBuffer getOpaqueObjectDefinitionAddresses() {
-	opaqueObjectDefinitionAddressesInVec4.clear();
-	return opaqueObjectDefinitionAddressesInVec4;
-    }
-
-    public final ByteBuffer getTransparentObjectDefinitionAddresses() {
-	transparentObjectDefinitionAddressesInVec4.clear();
-	return transparentObjectDefinitionAddressesInVec4;
     }
 
     /**

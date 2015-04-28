@@ -79,27 +79,27 @@ public class RenderList {
 		 {nearbyWorldObjects.add(wo);}
 		if(!wo.isVisible())return;
 		isUnoccluded = ((WorldObject)item).isImmuneToOpaqueDepthTest();
-		VEC4Address [] opOD = wo.getOpaqueObjectDefinitionAddress();
-		VEC4Address [] trOD = wo.getTransparentObjectDefinitionAddress();
+		final Collection<VEC4Address> opOD = wo.getOpaqueObjectDefinitionAddresses();
+		final Collection<VEC4Address> trOD = wo.getTransparentObjectDefinitionAddresses();
 		 if(isUnoccluded){
-			    numUnoccludedTBlocks += trOD.length;
-				if(trOD.length>0)
+			    numUnoccludedTBlocks += trOD.size();
+				if(trOD.size()>0)
 				     synchronized(unoccludedTPartition)
 				      {for(VEC4Address od:trOD)unoccludedTPartition.newEntry(od);}
-			    numUnoccludedTBlocks += opOD.length;
-				if(opOD.length>0)
+			    numUnoccludedTBlocks += opOD.size();
+				if(opOD.size()>0)
 				     synchronized(unoccludedTPartition)
 				      {for(VEC4Address od:opOD)unoccludedTPartition.newEntry(od);}
 			}//end if(trOD)
 		    else{
-			numTransparentBlocks += trOD.length;
-			if(trOD.length>0)
+			numTransparentBlocks += trOD.size();
+			if(trOD.size()>0)
 			     synchronized(transparentPartition)
 			      {for(VEC4Address od:trOD)transparentPartition.newEntry(od);}
-			numOpaqueBlocks += opOD.length;
-			if(opOD.length>0)
+			numOpaqueBlocks += opOD.size();
+			if(opOD.size()>0)
 			 synchronized(opaquePartition)
-			 {for(VEC4Address od:opOD)opaquePartition.newEntry(od);}
+			  {for(VEC4Address od:opOD)opaquePartition.newEntry(od);}
 		    }//end if(occluded)
 	    }//end if(WorldObject)
 	}// end submit(...)

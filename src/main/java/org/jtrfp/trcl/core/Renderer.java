@@ -15,28 +15,21 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.gpu.GLFragmentShader;
+import org.jtrfp.trcl.coll.CompoundListenableCollection;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
-import org.jtrfp.trcl.gpu.GLProgram;
-import org.jtrfp.trcl.gpu.GLTexture;
-import org.jtrfp.trcl.gpu.GLUniform;
-import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.GPU.GPUVendor;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -46,12 +39,13 @@ import com.ochafik.util.listenable.CollectionEvent;
 import com.ochafik.util.listenable.CollectionListener;
 import com.ochafik.util.listenable.DefaultListenableCollection;
 import com.ochafik.util.listenable.ListenableCollection;
+import com.ochafik.util.listenable.ListenableCollections;
+import com.ochafik.util.listenable.ListenableSet;
 
 public final class Renderer {
     private final	RendererFactory		factory;
     private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
-    private final 	Camera			camera;
     private		GLFrameBuffer		renderingTarget;
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
@@ -71,10 +65,10 @@ public final class Renderer {
     
 
     public Renderer(final RendererFactory factory) {
-	this.factory=factory;
-	this.gpu = factory.getGPU();
-	final TR tr = gpu.getTr();
-	this.camera = tr.getWorld().newCamera();
+	this.factory = factory;
+	this.gpu     = factory.getGPU();
+	final TR tr  = gpu.getTr();
+	addCamera(tr.getWorld().newCamera());//TODO: Remove after redesign.
 	final GL3 gl = gpu.getGl();
 	
 	System.out.println("...Done.");
@@ -146,8 +140,8 @@ public final class Renderer {
 			oneFrameLaggedRenderList.render(gl);
 			oneFrameLaggedRenderList   = currentRenderList().getRealtime();
 			oneFrameLaggedRenderList.sendToGPU(gl);
-			cameraMatrixAsFlatArray    = camera.getCompleteMatrixAsFlatArray();
-			camRotationProjectionMatrix= camera.getProjectionRotationMatrixAsFlatArray();
+			cameraMatrixAsFlatArray    = getCamera().getCompleteMatrixAsFlatArray();//TODO
+			camRotationProjectionMatrix= getCamera().getProjectionRotationMatrixAsFlatArray();//TODO
 			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
 			gpu.memoryManager.getRealtime().flushStalePages();
 			// Update texture codepages
@@ -164,11 +158,11 @@ public final class Renderer {
 	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
+		//$5 //TODO HOTSPOT
 		final RenderList rl = Renderer.this.currentRenderList().get();
 		final Submitter<PositionedRenderable> s = rl.getSubmitter();
 		synchronized(s){
 		 s.submit(pr);
-		 rl.flushObjectDefsToGPU();
 		 return null;}
 	      }
 	});
@@ -187,11 +181,11 @@ public final class Renderer {
 	    @Override
 	    public Void call() {
 		try{
-		proximitySorter.setCenter(camera.getCameraPosition().toArray());
+		proximitySorter.setCenter(getCamera().getCameraPosition().toArray());
 		synchronized(gpu.getTr().getThreadManager().gameStateLock){
 		 rootGrid.cubesWithinRadiusOf(
-			camera.getCameraPosition().add(
-				camera.getLookAtVector().scalarMultiply(
+			getCamera().getCameraPosition().add(
+				getCamera().getLookAtVector().scalarMultiply(
 					getCamera().getViewDepth() / 2.1)),
 					proximitySorter
 			);
@@ -204,7 +198,6 @@ public final class Renderer {
 			final Submitter<PositionedRenderable> s = rl.getSubmitter();
 			synchronized(s){
 			 proximitySorter.dumpPositionedRenderables(s);}
-			rl.flushObjectDefsToGPU();
 			toggleRenderList();
 			return null;
 		    }//end gl call()
@@ -234,13 +227,6 @@ public final class Renderer {
     }
 
     /**
-     * @return the camera
-     */
-    public Camera getCamera() {
-	return camera;
-    }
-
-    /**
      * @return the rootGrid
      */
     public RenderableSpacePartitioningGrid getRootGrid() {
@@ -253,9 +239,13 @@ public final class Renderer {
      */
     public void setRootGrid(RenderableSpacePartitioningGrid rootGrid) {
 	this.rootGrid = rootGrid;
-	if(camera.getContainingGrid()!=null)
-	    camera.getContainingGrid().remove(camera);
-	rootGrid.add(camera);
+	if(getCamera().getContainingGrid()!=null)
+	    getCamera().getContainingGrid().remove(getCamera());
+	rootGrid.add(getCamera());//TODO: Remove later
+    }
+    
+    public Camera getCamera(){//TODO: Remove, but a lot of outside invocations depend on it.
+	return cameras.iterator().next();
     }
 
     /**

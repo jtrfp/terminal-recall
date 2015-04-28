@@ -283,7 +283,7 @@ public abstract class MemoryWindow {
 	}
 
 	public IntArrayVariable setAt(int objectIndex, int offsetInInts,
-		Collection<? extends Integer> c) {
+		Collection<? extends Number> c) {
 	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
 			* getParent().getObjectSizeInBytes(),c);
 	    return this;

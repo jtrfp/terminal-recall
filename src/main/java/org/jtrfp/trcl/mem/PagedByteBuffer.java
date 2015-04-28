@@ -196,9 +196,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	return this;
     }
 
-    public IByteBuffer putInts(int indexInBytes, Collection<? extends Integer> c) {//TODO: Optimize, respecting page boundaries.
-	for(Integer i:c)
-	    {putInt(indexInBytes,i);indexInBytes+=4;}
+    public IByteBuffer putInts(int indexInBytes, Collection<? extends Number> c) {//TODO: Optimize, respecting page boundaries.
+	for(Number i:c)
+	    {putInt(indexInBytes,i.intValue());indexInBytes+=4;}
 	return this;
     }
 }//end PageByteBuffer

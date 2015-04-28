@@ -20,6 +20,8 @@ public class VEC4Address extends ModulusAddress {
      */
     private static final long serialVersionUID = 98913906815423207L;
     
+    public static final VEC4Address ZERO = new VEC4Address(0);
+    
     private final long addressInVEC4s;
     
     public VEC4Address(ByteAddress source){

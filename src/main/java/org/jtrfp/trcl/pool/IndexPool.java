@@ -29,7 +29,7 @@ public class IndexPool{
 	                                freeIndices     = new PriorityBlockingQueue<Integer>();
 	private final PriorityBlockingQueue<Integer>
                                         usedIndices     = new PriorityBlockingQueue<Integer>();
-	private volatile int 		maxCapacity	= 1;
+	private volatile int 		maxCapacity	= 0;
 	private volatile int 		highestIndex	= -1;
 	private volatile int            numUnusedIndices= 0;
 	private volatile int            numUsedIndices  = 0;
@@ -85,11 +85,10 @@ public class IndexPool{
 		    else run=false;
 		}else run=false;
 	     }//end while(run)
-	    final int proposedNewMaxCapacity = maxCapacity-removalTally;
+	    final int proposedNewMaxCapacity = Math.max(0,greatestUsed+1);//+1 since size()==maxIndex+1
 	    assert proposedNewMaxCapacity<=maxCapacity;
 	    maxCapacity  = growthBehavior.shrink(proposedNewMaxCapacity);
 	    highestIndex = greatestUsed;
-	    //System.out.println("highestIndex="+highestIndex+" maxCap");
 	    updateNumUnusedIndices();
 	    updateNumUsedIndices();
 	    return removalTally;
@@ -203,7 +202,10 @@ public class IndexPool{
     	}
     	
     	private int growthPop(Collection<Integer>dest, int count){
+    	    final int origMaxCapacity = maxCapacity;
     	    maxCapacity = growthBehavior.grow(maxCapacity);
+    	    if(maxCapacity==origMaxCapacity)
+    		throw new RuntimeException("GrowthBehavior will not grow past "+origMaxCapacity);
     	    return innerPop(dest,count);
     	}
 	

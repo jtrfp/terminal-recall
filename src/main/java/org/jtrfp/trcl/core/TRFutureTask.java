@@ -32,7 +32,7 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
     public void run(){
 	try{super.run();super.get();}
 	catch(Exception e)
-	 {if(handleException)tr.showStopper(e);
+	 {if(handleException)tr.showStopper(e.getCause());
 	    else throw new RuntimeException(e.getCause());}//Re=wrap
     }//end run()
     

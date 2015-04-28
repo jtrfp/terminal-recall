@@ -193,9 +193,9 @@ public final class TR{
 	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);
 	}
 
-    public void showStopper(final Exception e) {
+    public void showStopper(final Throwable throwable) {
 	System.err.println("==== SHOWSTOPPER ====");
-			    e.printStackTrace();
+			    throwable.printStackTrace();
 	System.err.println("======================");
 	System.err.println("\nIrrecoverable. Exiting...\n\n");
 	System.exit(-1);

@@ -16,6 +16,7 @@ import java.awt.Component;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -27,6 +28,7 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
+import org.jtrfp.trcl.coll.CompoundListenableCollection;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -35,6 +37,8 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 import com.ochafik.util.listenable.DefaultListenableCollection;
 import com.ochafik.util.listenable.ListenableCollection;
+import com.ochafik.util.listenable.ListenableCollections;
+import com.ochafik.util.listenable.ListenableSet;
 
 public class Camera extends WorldObject implements RelevantEverywhere{
     	//// PROPERTIES
@@ -53,11 +57,20 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
 		new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
+	private final	CompoundListenableCollection<PositionedRenderable> relevanceCollection 
+	     = new CompoundListenableCollection<PositionedRenderable>(relevantCubeCollection);
+	private final	ListenableSet<PositionedRenderable> sortedRelevanceSet;
 	private SpacePartitioningGrid rootGrid;
 
     Camera(GPU gpu) {
 	super(gpu.getTr());
 	this.gpu = gpu;
+	
+	sortedRelevanceSet = ListenableCollections.listenableSet(
+		new TreeSet<PositionedRenderable>(GridCubeProximitySorter.getComparator(this)));
+	
+	ListenableCollections.bind(relevanceCollection, sortedRelevanceSet);
+	
 	addBehavior(new MatchPosition().setEnable(true));
 	addBehavior(new MatchDirection()).setEnable(true);
 	addBehavior(new FacingObject().setEnable(false));
@@ -252,5 +265,12 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	public void setRootGrid(SpacePartitioningGrid rootGrid) {
 	    pcs.firePropertyChange(ROOT_GRID, this.rootGrid, rootGrid);
 	    this.rootGrid = rootGrid;
+	}
+
+	/**
+	 * @return the sortedRelevanceSet
+	 */
+	public ListenableSet<PositionedRenderable> getSortedRelevanceSet() {
+	    return sortedRelevanceSet;
 	}
 }//end Camera

@@ -20,7 +20,7 @@ import java.util.ListIterator;
 
 import org.jtrfp.trcl.mem.MemoryWindow.IntArrayVariable;
 
-public class IntArrayVariableList implements List<Integer> {
+public class IntArrayVariableList implements List<Number> {
  private final IntArrayVariable   delegate;
  private final int                objectIndex;
  private volatile int		  counter;
@@ -34,7 +34,7 @@ public class IntArrayVariableList implements List<Integer> {
  * @param element
  * @see java.util.ArrayList#add(int, java.lang.Object)
  */
-public synchronized void add(int index, Integer element) {
+public synchronized void add(int index, Number element) {
     throw new UnsupportedOperationException();
 }
 
@@ -43,10 +43,10 @@ public synchronized void add(int index, Integer element) {
  * @return
  * @see java.util.ArrayList#add(java.lang.Object)
  */
-public synchronized boolean add(Integer e) {
+public synchronized boolean add(Number e) {
     if(e==null)
 	throw new NullPointerException("Element is intolerably null.");
-    delegate.setAt(objectIndex, counter++, e);
+    delegate.setAt(objectIndex, counter++, e.intValue());
     return true;
 }
 
@@ -55,7 +55,7 @@ public synchronized boolean add(Integer e) {
  * @return
  * @see java.util.ArrayList#addAll(java.util.Collection)
  */
-public synchronized boolean addAll(Collection<? extends Integer> c) {
+public synchronized boolean addAll(Collection<? extends Number> c) {
     if(c.contains(null))
 	throw new NullPointerException("Element is intolerably null.");
     delegate.setAt(objectIndex, counter, c);
@@ -69,7 +69,7 @@ public synchronized boolean addAll(Collection<? extends Integer> c) {
  * @return
  * @see java.util.ArrayList#addAll(int, java.util.Collection)
  */
-public synchronized boolean addAll(int index, Collection<? extends Integer> c) {
+public synchronized boolean addAll(int index, Collection<? extends Number> c) {
     if(c.contains(null))
    	throw new NullPointerException("Element is intolerably null.");
     delegate.setAt(objectIndex, this.counter+index, c);
@@ -138,7 +138,7 @@ public synchronized boolean isEmpty() {
  * @return
  * @see java.util.ArrayList#iterator()
  */
-public synchronized Iterator<Integer> iterator() {
+public synchronized Iterator<Number> iterator() {
     throw new UnsupportedOperationException();
 }
 
@@ -155,7 +155,7 @@ public synchronized int lastIndexOf(Object o) {
  * @return
  * @see java.util.ArrayList#listIterator()
  */
-public synchronized ListIterator<Integer> listIterator() {
+public synchronized ListIterator<Number> listIterator() {
     throw new UnsupportedOperationException();
 }
 
@@ -164,7 +164,7 @@ public synchronized ListIterator<Integer> listIterator() {
  * @return
  * @see java.util.ArrayList#listIterator(int)
  */
-public synchronized ListIterator<Integer> listIterator(int index) {
+public synchronized ListIterator<Number> listIterator(int index) {
     throw new UnsupportedOperationException();
 }
 
@@ -210,11 +210,11 @@ public synchronized boolean retainAll(Collection<?> c) {
  * @return
  * @see java.util.ArrayList#set(int, java.lang.Object)
  */
-public synchronized Integer set(int index, Integer element) {
+public synchronized Integer set(int index, Number element) {
     if(element==null)
 	throw new NullPointerException("Element is intolerably null.");
     Integer previous = delegate.get(objectIndex, index);
-    delegate.setAt(objectIndex, index, element);
+    delegate.setAt(objectIndex, index, element.intValue());
     return previous;
 }
 
@@ -233,7 +233,7 @@ public synchronized int size() {
  * @see java.util.ArrayList#subList(int, int)
  * @deprecated
  */
-public synchronized List<Integer> subList(int fromIndex, int toIndex) {
+public synchronized List<Number> subList(int fromIndex, int toIndex) {
     throw new UnsupportedOperationException();
 }
 

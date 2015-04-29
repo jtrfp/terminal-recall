@@ -23,6 +23,7 @@ import javax.media.opengl.GLEventListener;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
+import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
@@ -106,13 +107,14 @@ public class RendererFactory {
 		skyCubeFragShader	  .setSourceFromResource("/shader/skyCubeFragShader.glsl");
 		skyCubeVertexShader	  .setSourceFromResource("/shader/skyCubeVertexShader.glsl");
 		
-		objectProgram		=gpu.newProgram().attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
-		vertexProgram		=gpu.newProgram().attachShader(fullScreenTriangleShader)  .attachShader(vertexFragShader).link();
-		opaqueProgram		=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
-		deferredProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)  	  .attachShader(deferredFragShader).link();
-		depthQueueProgram	=gpu.newProgram().attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
-		primitiveProgram	=gpu.newProgram().attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
-		skyCubeProgram		=gpu.newProgram().attachShader(skyCubeVertexShader)       .attachShader(skyCubeFragShader).link();
+		final ValidationHandler vh = new RFValidationHandler();
+		objectProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
+		vertexProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(fullScreenTriangleShader)  .attachShader(vertexFragShader).link();
+		opaqueProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
+		deferredProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(skyCubeVertexShader)  	  .attachShader(deferredFragShader).link();
+		depthQueueProgram	=gpu.newProgram().setValidationHandler(vh).attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
+		primitiveProgram	=gpu.newProgram().setValidationHandler(vh).attachShader(primitiveVertexShader)     .attachShader(primitiveFragShader).link();
+		skyCubeProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(skyCubeVertexShader)       .attachShader(skyCubeFragShader).link();
 		
 		skyCubeProgram.use();
 		skyCubeProgram.getUniform("cubeTexture").set((int)0);
@@ -612,4 +614,11 @@ public class RendererFactory {
     public GLProgram getSkyCubeProgram() {
         return skyCubeProgram;
     }
+    
+    private class RFValidationHandler implements ValidationHandler{
+	@Override
+	public void invalidProgram(GLProgram p) {
+	    //Ignore.
+	}
+    }//end RFValidationHandler
 }//end RendererFactory

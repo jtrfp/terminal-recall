@@ -12,12 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.nio.ByteBuffer;
+import java.util.Collection;
+
+import org.jtrfp.trcl.mem.VEC4Address;
 
 public interface Renderable {
-    ByteBuffer getOpaqueObjectDefinitionAddresses();
+    Collection<VEC4Address> getOpaqueObjectDefinitionAddresses();
 
-    ByteBuffer getTransparentObjectDefinitionAddresses();
+    Collection<VEC4Address> getTransparentObjectDefinitionAddresses();
 
     void updateStateToGPU();
 }

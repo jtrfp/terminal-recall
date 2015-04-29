@@ -111,8 +111,9 @@ public class GLProgram {
      * @param validationHandler
      *            the validationHandler to set
      */
-    public void setValidationHandler(ValidationHandler validationHandler) {
+    public GLProgram setValidationHandler(ValidationHandler validationHandler) {
 	this.validationHandler = validationHandler;
+	return this;
     }//end setValidationHandler()
 
 }// end GLPRogram

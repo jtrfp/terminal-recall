@@ -87,6 +87,7 @@ public class IndexPool{
 	     }//end while(run)
 	    final int proposedNewMaxCapacity = Math.max(0,greatestUsed+1);//+1 since size()==maxIndex+1
 	    assert proposedNewMaxCapacity<=maxCapacity;
+	    assert proposedNewMaxCapacity>=usedIndices.size();
 	    maxCapacity  = growthBehavior.shrink(proposedNewMaxCapacity);
 	    highestIndex = greatestUsed;
 	    updateNumUnusedIndices();
@@ -378,8 +379,8 @@ public class IndexPool{
 
 	public void freeAll() {//TODO: compactFreeAll() with clear() instead of drain()
 	    usedIndices.drainTo(freeIndices);
-	    growthBehavior.shrink(0);
 	    updateNumUnusedIndices();
 	    updateNumUsedIndices();
+	    //growthBehavior.shrink(0);
 	}
 }//end IndexPool

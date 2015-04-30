@@ -15,6 +15,7 @@ package org.jtrfp.trcl.coll;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.ListIterator;
  */
 public class PartitionedList<T> {
     private final List<T>                         dest;
-    private final ListActionDispatcher<Partition> partitions = new ListActionDispatcher<Partition>();
+    private final ListActionDispatcher<Partition> partitions = new ListActionDispatcher<Partition>(new ArrayList<Partition>());
     
     public PartitionedList(List<T> dest) {
 	this.dest=dest;

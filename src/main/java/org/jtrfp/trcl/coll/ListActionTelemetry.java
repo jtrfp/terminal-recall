@@ -203,7 +203,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @see java.util.ArrayList#listIterator()
      */
     public synchronized ListIterator<E> listIterator() {
-	return delegate.listIterator();
+	throw new UnsupportedOperationException();
     }
 
     /**
@@ -212,7 +212,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @see java.util.ArrayList#listIterator(int)
      */
     public synchronized ListIterator<E> listIterator(int index) {
-	return delegate.listIterator(index);
+	throw new UnsupportedOperationException();
     }
 
     /**
@@ -287,7 +287,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @see java.util.ArrayList#subList(int, int)
      */
     public synchronized List<E> subList(int fromIndex, int toIndex) {
-	return delegate.subList(fromIndex, toIndex);
+	return new IndexShiftingList<E>(this, fromIndex, toIndex);
     }
 
     /**

@@ -15,7 +15,7 @@ package org.jtrfp.trcl.core;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -34,6 +34,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -111,11 +112,13 @@ public final class ThreadManager {
 	start();
     }// end constructor
     
+    private final ArrayList<PositionedRenderable> visibilityListBuffer = new ArrayList<PositionedRenderable>();
+    
     private void gameplay() {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	try{// NotReadyException
-	final List<WorldObject> vl = 
+	final Collection<PositionedRenderable> vl = 
 		tr.mainRenderer.
 		getRealtime().
 		currentRenderList().
@@ -125,12 +128,14 @@ public final class ThreadManager {
 	final Game game = tr.getGame();
 	if(game==null)
 	    return;
+	visibilityListBuffer.clear();
+	synchronized(vl)
+	 {visibilityListBuffer.addAll(vl);}
 	synchronized(paused){
 	synchronized(gameStateLock){
-	for (int i = 0; i<vl.size(); i++) {
-	    final WorldObject wo;
-	    synchronized(vl){if(!vl.isEmpty())wo = vl.get(i);else break;}//TODO: This is slow.
+	    for (PositionedRenderable pr:visibilityListBuffer) {
 	    boolean multiplePlayer=false;
+	    final WorldObject wo = (WorldObject)pr;
 	    if (wo.isActive()
 		    && (TR.twosComplimentDistance(wo.getPosition(), game
 			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)

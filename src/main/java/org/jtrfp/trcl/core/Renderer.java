@@ -14,8 +14,7 @@ package org.jtrfp.trcl.core;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -27,7 +26,6 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.coll.CompoundListenableCollection;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.CollisionManager;
@@ -39,8 +37,6 @@ import com.ochafik.util.listenable.CollectionEvent;
 import com.ochafik.util.listenable.CollectionListener;
 import com.ochafik.util.listenable.DefaultListenableCollection;
 import com.ochafik.util.listenable.ListenableCollection;
-import com.ochafik.util.listenable.ListenableCollections;
-import com.ochafik.util.listenable.ListenableSet;
 
 public final class Renderer {
     private final	RendererFactory		factory;
@@ -119,10 +115,10 @@ public final class Renderer {
 	if ((frameNumber %= 20) == 0) {
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
-	    final List<WorldObject> list = renderList[renderListToggle.get() ? 0 : 1].get().getVisibleWorldObjectList();
-	    synchronized(list){
+	    final Collection<PositionedRenderable> coll = renderList[renderListToggle.get() ? 0 : 1].get().getVisibleWorldObjectList();
+	    synchronized(coll){
 	    gpu.getTr().getReporter()
-	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", list.size());}
+	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", coll.size());}
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
@@ -155,17 +151,19 @@ public final class Renderer {
 	if(pr instanceof WorldObject)
 	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
 	
+	currentRenderList().get().getSubmitter().submit((WorldObject)pr);//TODO: Refactor back to PositionedRenderable
+	/*
 	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		//$5 //TODO HOTSPOT
 		final RenderList rl = Renderer.this.currentRenderList().get();
 		final Submitter<PositionedRenderable> s = rl.getSubmitter();
-		synchronized(s){
+		//synchronized(s){
 		 s.submit(pr);
-		 return null;}
+		 return null;//}
 	      }
 	});
+	*/
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {
@@ -190,18 +188,24 @@ public final class Renderer {
 					proximitySorter
 			);
 		}//end sync(gameStateLock)
+		/*
 		Renderer.this.gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    @Override
 		    public Void call() {//TODO: Everything up to "flushObjectDefsToGPU()" apparently doesn't need GPU mem access.
 			final RenderList rl = getBackRenderList().get();
+			///// TODO: Replace with repopulate(). Figure out what to do with the submitter requirement.
 			rl.reset();
 			final Submitter<PositionedRenderable> s = rl.getSubmitter();
 			synchronized(s){
 			 proximitySorter.dumpPositionedRenderables(s);}
+			//////
 			toggleRenderList();
 			return null;
 		    }//end gl call()
 		}).get();
+		*/
+		getBackRenderList().get().repopulate(proximitySorter.getRenderables());
+		toggleRenderList();
 		proximitySorter.reset();
 		}catch(Exception e){e.printStackTrace();}
 		return null;

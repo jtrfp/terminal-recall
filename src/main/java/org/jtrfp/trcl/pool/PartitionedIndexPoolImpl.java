@@ -76,15 +76,15 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 		
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     
-    public PartitionedIndexPoolImpl(){//TODO: ListActionDispatcher may not be dispatching remove(index)?
-	wrappedEntries    = new ListActionDispatcher<EntryBasedIndexPool.Entry<STORED_TYPE>>();
+    public PartitionedIndexPoolImpl(){
+	wrappedEntries    = new ListActionDispatcher<EntryBasedIndexPool.Entry<STORED_TYPE>>(new ArrayList<EntryBasedIndexPool.Entry<STORED_TYPE>>());
 	telemetry         = new ListActionTelemetry<EntryBasedIndexPool.Entry<STORED_TYPE>>();
 	wrappedList       = new PartitionedList    <EntryBasedIndexPool.Entry<STORED_TYPE>>(wrappedEntries);
 	partitions        = new ListActionAdapter  <PartitionedList<EntryBasedIndexPool.Entry<STORED_TYPE>>.Partition,PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl>(partitionAdapter);
 	flatEntries       = new ListActionAdapter  <EntryBasedIndexPool.Entry<STORED_TYPE>,PartitionedIndexPoolImpl<STORED_TYPE>.PartitionImpl.EntryImpl>(flatEntryAdapter);
 	wrappedEntries    .addTarget(telemetry, true);
 	wrappedEntries    .addTarget(flatEntries, true);
-	partitions.getOutput().addTarget(partitionsList, true);
+	((ListActionDispatcher)partitions.getOutput()).addTarget(partitionsList, true);
 	wrappedList       .getPartitions().addTarget(partitions, true);
     }
 	
@@ -231,7 +231,7 @@ public class PartitionedIndexPoolImpl<STORED_TYPE> implements
 	    this.listPartition = listPartition;
 	    ebip2PartitionMap.put(ebip, this);
 	    ebip.getListActionDispatcher().addTarget(listPartition, true);
-	    entries = new ListActionDispatcher<PartitionedIndexPool.Entry<STORED_TYPE>>();
+	    entries = new ListActionDispatcher<PartitionedIndexPool.Entry<STORED_TYPE>>(new ArrayList<PartitionedIndexPool.Entry<STORED_TYPE>>());
 	    ebip           .addPropertyChangeListener(this);
 	    listPartition  .addPropertyChangeListener(this);
 	}//end constructor

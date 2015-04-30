@@ -106,7 +106,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testContains() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	assertTrue(out.contains("0"));
@@ -119,7 +119,7 @@ public class ListActionAdapterTest {
 	final List<String> coll = new ArrayList<String>();
 	coll.add("0");
 	coll.add("1");
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	assertTrue(out.containsAll(coll));
@@ -132,7 +132,7 @@ public class ListActionAdapterTest {
 	final List<String> coll = new ArrayList<String>();
 	coll.add("0");
 	coll.add("1");
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	assertEquals("0",out.get(0));
@@ -141,7 +141,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testIndexOf() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	assertEquals(1, out.indexOf("1"));
@@ -149,7 +149,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testIsEmpty() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	assertTrue(out.isEmpty());
 	subject.add(0);
 	subject.add(1);
@@ -158,7 +158,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testRemoveObject() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	assertTrue(out.contains("1"));
@@ -168,7 +168,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testRemoveInt() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	assertTrue(out.contains("1"));
@@ -180,7 +180,7 @@ public class ListActionAdapterTest {
     public void testRemoveAll() {
 	final List<Integer> coll = new ArrayList<Integer>();
 	coll.add(0); coll.add(1);
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	subject.add(0);
@@ -194,7 +194,7 @@ public class ListActionAdapterTest {
     public void testRetainAll() {
 	final List<Integer> coll = new ArrayList<Integer>();
 	coll.add(0);
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	subject.add(0);
@@ -206,7 +206,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testSet() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	subject.add(0);
@@ -218,7 +218,7 @@ public class ListActionAdapterTest {
 
     @Test
     public void testSize() {
-	final ListActionDispatcher<String> out = subject.getOutput();
+	final ListActionDispatcher<String> out = (ListActionDispatcher<String>)subject.getOutput();
 	subject.add(0);
 	subject.add(1);
 	subject.add(0);

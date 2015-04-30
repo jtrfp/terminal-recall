@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.coll;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.IteratorUtils;
-import org.apache.commons.collections4.iterators.ArrayListIterator;
 
 public class ListActionDispatcher<E> implements List<E> {
     protected final List<E>             cache;
@@ -40,12 +38,10 @@ public class ListActionDispatcher<E> implements List<E> {
     
     public ListActionDispatcher(List<E> cache){
 	this(cache,new IdentityHashMap<List<E>,Object>(), 0, Integer.MAX_VALUE);
-	if(cache==null)
-	    throw new NullPointerException("Supplied cache is intolerably null.");
     }//end constructor
     
     public ListActionDispatcher() {
-	this(new ArrayList<E>());
+	this(new DummyList<E>("This ListActionDispatcher has a dummylist."));
     }
     
     private boolean isRoot(){

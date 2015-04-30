@@ -22,21 +22,24 @@ import java.util.ListIterator;
 import com.ochafik.util.Adapter;
 
 public class ListActionAdapter<IN,OUT> implements List<IN> {
-    //protected final Adapter<IN,OUT>           adapter;
-    protected final ListActionDispatcher<OUT> output;
+    protected final List<OUT> 		      output;
     protected final List<IN>                  input;
     private final Adapter<IN,OUT>             cachedAdapter;
     
-    public ListActionDispatcher<OUT> getOutput(){
+    public List<OUT> getOutput(){
 	return output;
     }
     
-    public ListActionAdapter(Adapter<IN,OUT>adapter) {
+    public ListActionAdapter(Adapter<IN,OUT>adapter, List<OUT> output){
 	if(adapter==null)
 	    throw new NullPointerException("Supplied Adapter is intolerably null.");
-	this.output  = new ListActionDispatcher<OUT>();
+	this.output  = output;
 	this.input   = new ArrayList<IN>();
-	cachedAdapter = adapter;
+	cachedAdapter= adapter;
+    }
+    
+    public ListActionAdapter(Adapter<IN,OUT>adapter) {
+	this(adapter,new ListActionDispatcher<OUT>(new ArrayList<OUT>()));
     }//end constructor()
 
     @Override

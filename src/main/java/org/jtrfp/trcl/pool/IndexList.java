@@ -15,13 +15,16 @@ package org.jtrfp.trcl.pool;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
 
-public class IndexList<E> {
+public class IndexList<E> implements Collection<E> {
     public static final String NUM_USED_INDICES   = IndexPool.NUM_USED_INDICES;
     public static final String NUM_UNUSED_INDICES = IndexPool.NUM_UNUSED_INDICES;
     
@@ -49,25 +52,42 @@ public class IndexList<E> {
     
     public int pop(E element){
 	final int index = indexPool.pop();
-	assert index<delegate.size():"index="+index+" delegate.size()="+delegate.size();
+	assert index<delegate.size():
+	    "index="+index+" delegate.size()="+delegate.size()+" pool.unused="+indexPool.getNumUnusedIndices()+" used="+indexPool.getNumUsedIndices();
 	if(index!=-1)
 	 delegate.set(index, element);
 	return index;
     }//end pop(...)
     
-    public void free(int index){
+    public E free(int index){
 	indexPool.free(index);
-	delegate.set(index, null);
+	return delegate.set(index, null);
     }
     
-    private class ILPropertyChangeListener implements PropertyChangeListener{
+    public void defragment(){//TODO: Optimize. Remember: PriorityBlockingQueue iterator is not ordered!
+	for(int i:indexPool.getUsedIndices())
+	    defragmentEntry(i);
+	compact();
+	assert delegate.size()==indexPool.getNumUsedIndices():"Mismatch. delegate.size()="+delegate.size()+" usedIndices="+indexPool.getNumUsedIndices();
+	assert indexPool.getNumUnusedIndices()==0:"numUsedIndices="+indexPool.getNumUnusedIndices();
+    }//end defragment()
+    
+    private void defragmentEntry(int i){
+	E element = free(i);
+	if(element!=null)
+	    pop(element);
+	else
+	    throw new NullPointerException("Cannot defragment null entry.");
+    }//end defragmentEntry()
+    
+    private final class ILPropertyChangeListener implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 	    pcs.firePropertyChange(event);
 	}
     }//end ILPropertyChangeListener
     
-    private class WrappedGrowthBehavior implements GrowthBehavior{
+    private final class WrappedGrowthBehavior implements GrowthBehavior{
 	@Override
 	public int grow(int previousMaxCapacity) {
 	    final int result    = growthBehavior.grow(previousMaxCapacity);
@@ -75,12 +95,15 @@ public class IndexList<E> {
 	    for(int i=sizeDelta; i>0; i--)
 		delegate.add(null);
 	    assert delegate.size()==result:" delegate.size()="+delegate.size()+" "+result;
+	    assert delegate.size()>=indexPool.getNumUsedIndices();
 	    return result;
 	}
 	@Override
 	public int shrink(int minDesiredCapacity) {
 	    if(minDesiredCapacity<0)
 		throw new IllegalArgumentException("Min desired capacity intolerably negative: "+minDesiredCapacity);
+	    if(minDesiredCapacity<indexPool.getNumUsedIndices())
+		throw new IllegalArgumentException("Min desired capacity ("+minDesiredCapacity+") less than num used indices ("+indexPool.getNumUsedIndices()+")");
 	    final int result    = growthBehavior.shrink(minDesiredCapacity);
 	    final int sizeDelta = delegate.size() - result;
 	    assert delegate.size()>=sizeDelta:"sizeDelta>delegate.size() size="+delegate.size()+" delta="+sizeDelta;
@@ -88,6 +111,7 @@ public class IndexList<E> {
 	     for(int i=sizeDelta; i>0; i--)
 		delegate.remove(delegate.size()-1);
 	    assert delegate.size()==result:" delegate.size()="+delegate.size()+" "+result;
+	    assert delegate.size()>=indexPool.getNumUsedIndices():"delegate.size()="+delegate.size()+" used="+indexPool.getNumUsedIndices();
 	    return result;
 	}
     }//end WrappedGrowthBehavior
@@ -176,7 +200,7 @@ public class IndexList<E> {
     public int compact() {
 	final int result = indexPool.compact();
 	final int newSize = indexPool.getMaxCapacity();
-	truncate(newSize);
+	//truncate(newSize);
 	return result;
     }
     
@@ -241,5 +265,98 @@ public class IndexList<E> {
      */
     public int getNumUsedIndices() {
 	return indexPool.getNumUsedIndices();
+    }
+
+    @Override
+    public boolean add(E element) {
+	this.pop(element);
+	return true;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {//TODO: Optimize
+	for(E element:c)
+	    add(element);
+	return true;
+    }
+
+    @Override
+    public void clear() {
+	indexPool.freeAll();
+	//delegate.clear();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+	return delegate.contains(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+	return delegate.containsAll(c);
+    }
+
+    @Override
+    public boolean isEmpty() {
+	return indexPool.getNumUsedIndices()==0;
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+	return delegate.iterator();
+    }
+
+    @Override
+    public boolean remove(Object o) {
+	final int index = delegate.indexOf(o);
+	if(index!=-1)
+	    free(index);
+	else
+	    return false;
+	return true;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+	final ArrayList<Integer> toRemove = new ArrayList<Integer>();
+	for(int i=0; i<delegate.size(); i++)
+	    if(c.contains(delegate.get(i)))
+		toRemove.add(i);
+	for(int element:toRemove)
+	    free(element);
+	return !toRemove.isEmpty();
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+	final ArrayList<Integer> toRemove = new ArrayList<Integer>();
+	for(int i=0; i<delegate.size(); i++)
+	    if(!c.contains(delegate.get(i)))
+		toRemove.add(i);
+	for(int i:toRemove)
+	    free(i);
+	return !toRemove.isEmpty();
+    }
+
+    /**
+     * Returns the number of used indices, i.e. the size if this IndexList was defragmented.
+     */
+    @Override
+    public int size() {
+	return indexPool.getNumUsedIndices();
+    }
+    
+    public int delegateSize(){
+	return delegate.size();
+    }
+
+    @Override
+    public Object[] toArray() {
+	return delegate.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+	return delegate.toArray(a);
     }
 }//end IndexList

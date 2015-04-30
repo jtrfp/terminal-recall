@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
@@ -19,6 +20,7 @@ import java.util.TreeSet;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
+import org.jtrfp.trcl.obj.WorldObject;
 
 public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRenderable>> {
     private double [] center = new double[]{0,0,0};
@@ -136,5 +138,12 @@ public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRe
 	}//end sync(sortedSet)
 	return this;
     }//end dumpPositionedRenderables(...)
+    
+    public List<PositionedRenderable> getRenderables(){
+	ArrayList<PositionedRenderable> result = new ArrayList<PositionedRenderable>();
+	for(List<PositionedRenderable> list:sortedSet)
+	    result.addAll(list);
+	return result;
+    }
 
 }//end GridCubeProximitySorter

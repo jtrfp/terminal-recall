@@ -22,10 +22,13 @@ import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.coll.ListActionAdapter;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.ListActionTelemetry;
+import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GPU;
@@ -34,8 +37,10 @@ import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
-import org.jtrfp.trcl.pool.PartitionedIndexPool;
-import org.jtrfp.trcl.pool.PartitionedIndexPoolImpl;
+import org.jtrfp.trcl.pool.IndexList;
+
+import com.ochafik.util.Adapter;
+import com.ochafik.util.CollectionAdapter;
 
 public class RenderList {
     public static final int 	NUM_SUBPASSES 		= 4;
@@ -54,22 +59,34 @@ public class RenderList {
     private		long			rootBufferReadFinishedSync;
     private final	Renderer		renderer;
     private final	RendererFactory		rFactory;
-    private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
+    //private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	IntBuffer 		previousViewport;
     private final	IntArrayVariableList    renderList;
     private final	ListActionTelemetry<VEC4Address> renderListTelemetry 
     						= new ListActionTelemetry<VEC4Address>();
-    private final	PartitionedIndexPool<VEC4Address>renderListPool;
-    private final	PartitionedIndexPool.Partition<VEC4Address>
+    //private final	PartitionedIndexPool<VEC4Address>renderListPool;
+    /*private final	PartitionedIndexPool.Partition<VEC4Address>
     						opaquePartition,
     						transparentPartition,
-    						unoccludedTPartition;
-    private final	ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>	
-    						renderingIndices;
+    						unoccludedTPartition;*/
+    private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
+    private final	CollectionActionDispatcher<PositionedRenderable>
+    						relevantPositionedRenderables = new CollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>());
+    private final	PartitionedList<VEC4Address>
+    						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
+    private final	CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>
+    	opaqueODAddrsColl    = new CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new OpaqueODAddrAdapter()), 
+    	transODAddrsColl     = new CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new TransODAddrAdapter()), 
+    	unoccludedODAddrsColl= new CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(unoccludedIL= new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new UnoccludedODAddrAdapter());
+    /*private final	ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>	
+    						renderingIndices;*/
     private final 	Submitter<PositionedRenderable> 
     						submitter = new Submitter<PositionedRenderable>() {
 	@Override
 	public void submit(PositionedRenderable item) {
+	    synchronized(relevantPositionedRenderables)
+	     {relevantPositionedRenderables.add(item);}
+	    /*
 	    boolean isUnoccluded = false;
 	    if (item instanceof WorldObject) {
 		final WorldObject wo = (WorldObject)item;
@@ -102,6 +119,7 @@ public class RenderList {
 			  {for(VEC4Address od:opOD)opaquePartition.newEntry(od);}
 		    }//end if(occluded)
 	    }//end if(WorldObject)
+	    */
 	}// end submit(...)
 	
 	@Override
@@ -121,13 +139,17 @@ public class RenderList {
 	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
 	this.renderListIdx		=tr.objectListWindow.get().create();
 	this.renderList                 = new IntArrayVariableList(tr.objectListWindow.get().opaqueIDs,renderListIdx);
-	this.renderListPool		= new PartitionedIndexPoolImpl<VEC4Address>();
-	this.opaquePartition            = renderListPool.newPartition();
-	this.transparentPartition       = renderListPool.newPartition();
-	this.unoccludedTPartition       = renderListPool.newPartition();
-	this.renderingIndices		= new ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>(new PartitionedIndexPool.EntryAdapter<VEC4Address>(VEC4Address.ZERO));
-	renderListPool.getFlatEntries().addTarget(renderingIndices, true);//Convert entries to Integers
-	renderingIndices.getOutput().addTarget(renderListTelemetry, true);//Pipe Integers to renderList
+	//this.renderListPool		= new PartitionedIndexPoolImpl<VEC4Address>();
+	//this.opaquePartition            = renderListPool.newPartition();
+	//this.transparentPartition       = renderListPool.newPartition();
+	//this.unoccludedTPartition       = renderListPool.newPartition();
+	//this.renderingIndices		= new ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>(new PartitionedIndexPool.EntryAdapter<VEC4Address>(VEC4Address.ZERO));
+	//renderListPool.getFlatEntries().addTarget(renderingIndices, true);//Convert entries to Integers
+	//((ListActionDispatcher)renderingIndices.getOutput()).addTarget(renderListTelemetry, true);//Pipe Integers to renderList
+	
+	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, false);
+	relevantPositionedRenderables.addTarget(transODAddrsColl, false);
+	relevantPositionedRenderables.addTarget(unoccludedODAddrsColl, false);
 	
 	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
 	    @Override
@@ -178,19 +200,26 @@ public class RenderList {
 
     private void updateStatesToGPU() {
 	synchronized(tr.getThreadManager().gameStateLock){
-	synchronized(nearbyWorldObjects){
-	final int size=nearbyWorldObjects.size();
-	for (int i=0; i<size; i++) 
-	    nearbyWorldObjects.get(i).updateStateToGPU();
+	synchronized(relevantPositionedRenderables){
+	for (PositionedRenderable renderable:relevantPositionedRenderables) 
+	    renderable.updateStateToGPU();
 	}}
     }//end updateStatesToGPU
     
     private void updateRenderListToGPU(){
+	synchronized(relevantPositionedRenderables){
 	if(renderListTelemetry.isModified()){
-	    renderListPool.defragment(0);
+	    //Defragment
+	    opaqueIL    .defragment();
+	    transIL     .defragment();
+	    unoccludedIL.defragment();
+	    numOpaqueBlocks     = opaqueIL    .delegateSize();
+	    numTransparentBlocks= transIL     .delegateSize();
+	    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 	    renderList.rewind();
 	    renderListTelemetry.drainListStateTo(renderList);
 	}//end if(modified)
+     }//end sync(relevantObjects)
     }//end updateRenderingListToGPU()
 
     public void sendToGPU(GL3 gl) {
@@ -237,7 +266,7 @@ public class RenderList {
 	gl.glDisable(GL3.GL_CULL_FACE);
 	gl.glLineWidth(1);
 	{//Start variable scope
-	 int remainingBlocks = numOpaqueBlocks+numTransparentBlocks+numUnoccludedTBlocks;
+	 int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
     	 int numRows = (int)Math.ceil(remainingBlocks/256.);
     	 for(int i=0; i<numRows; i++){
     	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
@@ -330,16 +359,16 @@ public class RenderList {
 	if (frameCounter == 0) {
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.numOpaqueBlocks",
-		    "" + numOpaqueBlocks);
+		    "" + opaqueIL.size());
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.numTransparentBlocks",
-		    "" + numTransparentBlocks);
+		    "" + transIL.size());
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.numUnoccludedTransparentBlocks",
-		    "" + numUnoccludedTBlocks);
+		    "" + unoccludedIL.size());
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.core.RenderList.approxNumSceneTriangles",
-		    "" + ((numOpaqueBlocks+numTransparentBlocks)*GPU.GPU_VERTICES_PER_BLOCK)/3);
+		    "" + ((opaqueIL.size()+transIL.size()+unoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
 	}
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numOpaqueVertices);
 	
@@ -448,30 +477,68 @@ public class RenderList {
     }
 
     public void reset() {
-	numOpaqueBlocks 	= 0;
-	numTransparentBlocks 	= 0;
-	numUnoccludedTBlocks	= 0;
-	synchronized(nearbyWorldObjects)
-	 {nearbyWorldObjects.clear();}
-	/*synchronized(opaqueObjectDefs){
-	    opaqueObjectDefs.clear();}
-	synchronized(transparentObjectDefs){
-	    transparentObjectDefs.clear();}
-	synchronized(unoccludedTObjectDefs){
-	    unoccludedTObjectDefs.clear();}*/
-	synchronized(opaquePartition){
-	 opaquePartition.removeAllEntries();}//TODO: Further-optimize partitions' removeAllEntries...
-	synchronized(transparentPartition){
-	 transparentPartition.removeAllEntries();}
-	synchronized(unoccludedTPartition){
-	 unoccludedTPartition.removeAllEntries();}
+	synchronized(relevantPositionedRenderables){
+	 relevantPositionedRenderables.clear();
+	 }//end sync(relevantObjects)
     }//end reset()
     
-    public List<WorldObject> getVisibleWorldObjectList(){
-	return nearbyWorldObjects;
+    public void repopulate(List<PositionedRenderable> renderables){
+	synchronized(relevantPositionedRenderables){
+	    relevantPositionedRenderables.clear();
+	    relevantPositionedRenderables.addAll(renderables);
+	}//end sync(relevantObjects)
+    }
+    
+    public Collection<PositionedRenderable> getVisibleWorldObjectList(){
+	return relevantPositionedRenderables;
     }
 
     public int getAttribDummyID() {
 	return dummyBufferID;
     }
+    
+    final class OpaqueODAddrAdapter implements Adapter<Collection<VEC4Address>,PositionedRenderable>{
+	@Override
+	public Collection<VEC4Address> reAdapt(PositionedRenderable value) {
+	    if(((WorldObject)value).isImmuneToOpaqueDepthTest())
+		return CollectionUtils.EMPTY_COLLECTION;
+	    return value.getOpaqueObjectDefinitionAddresses();
+	}
+
+	@Override
+	public WorldObject adapt(Collection<VEC4Address> value) {
+	    throw new UnsupportedOperationException();
+	}
+    }//end OpaqueODAddrAdapter
+    
+    final class TransODAddrAdapter implements Adapter<Collection<VEC4Address>,PositionedRenderable>{
+	@Override
+	public Collection<VEC4Address> reAdapt(PositionedRenderable value) {
+	    if(((WorldObject)value).isImmuneToOpaqueDepthTest())
+		return CollectionUtils.EMPTY_COLLECTION;
+	    return value.getTransparentObjectDefinitionAddresses();
+	}
+
+	@Override
+	public WorldObject adapt(Collection<VEC4Address> value) {
+	    throw new UnsupportedOperationException();
+	}
+    }//end TransODAddrAdapter
+    
+    final class UnoccludedODAddrAdapter implements Adapter<Collection<VEC4Address>,PositionedRenderable>{
+	@Override
+	public Collection<VEC4Address> reAdapt(PositionedRenderable value) {
+	    final Collection<VEC4Address> result = new ArrayList<VEC4Address>();
+	    if(((WorldObject)value).isImmuneToOpaqueDepthTest()){
+		result.addAll(value.getOpaqueObjectDefinitionAddresses());
+		result.addAll(value.getTransparentObjectDefinitionAddresses());
+		}//end if(unoccluded)
+	    return result;
+	}
+
+	@Override
+	public WorldObject adapt(Collection<VEC4Address> value) {
+	    throw new UnsupportedOperationException();
+	}
+    }//end UnoccludedODAddrAdapter
 }// end RenderList

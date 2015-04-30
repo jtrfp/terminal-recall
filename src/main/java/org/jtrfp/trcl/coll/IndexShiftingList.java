@@ -117,9 +117,9 @@ public class IndexShiftingList<E> implements List<E> {
      * 
      * @see java.util.List#clear()
      */
-    public void clear() {
+    public void clear() {//TODO: Optimize
 	int remainingToRemove = size();
-	while(remainingToRemove-->=0)
+	while(remainingToRemove-->0)
 	    delegate.remove(getStartIndex());
     }
 

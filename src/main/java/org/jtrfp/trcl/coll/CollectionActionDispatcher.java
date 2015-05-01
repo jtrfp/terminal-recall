@@ -20,22 +20,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CollectionActionDispatcher<E> implements Collection<E> {
+import org.jtrfp.trcl.tools.Util;
+
+public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E> {
     protected final Collection<E>             cache;
     protected final Map<Collection<E>,Object> targetsMap;
     protected final Set<Collection<E>>        targets;
-    private final int                         startIndex, endIndex;
     
-    protected CollectionActionDispatcher(Collection<E> cache, Map<Collection<E>, Object> targetsMap, int startIndex, int endIndex){
+    protected CollectionActionDispatcher(Collection<E> cache, Map<Collection<E>, Object> targetsMap){
 	this.cache=cache;
 	this.targetsMap=targetsMap;
 	this.targets=targetsMap.keySet();
-	this.startIndex = startIndex;
-	this.endIndex = endIndex;
     }
     
     public CollectionActionDispatcher(List<E> cache){
-	this(cache,new IdentityHashMap<Collection<E>,Object>(), 0, Integer.MAX_VALUE);
+	this(cache,new IdentityHashMap<Collection<E>,Object>());
     }//end constructor
     
     public CollectionActionDispatcher() {
@@ -142,5 +141,12 @@ public class CollectionActionDispatcher<E> implements Collection<E> {
     @Override
     public boolean equals(Object o){
 	return cache.equals(o);
+    }
+
+    @Override
+    public void repopulate(Collection<E> c) {
+	Util.repopulate(cache,c);
+	for(Collection<E> targ:targets)
+	    Util.repopulate(targ, c);
     }
 }//end CollectionActionDispatcher

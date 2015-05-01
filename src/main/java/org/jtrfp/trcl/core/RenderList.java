@@ -489,7 +489,7 @@ public class RenderList {
 	}//end sync(relevantObjects)
     }
     
-    public Collection<PositionedRenderable> getVisibleWorldObjectList(){
+    public CollectionActionDispatcher<PositionedRenderable> getVisibleWorldObjectList(){
 	return relevantPositionedRenderables;
     }
 

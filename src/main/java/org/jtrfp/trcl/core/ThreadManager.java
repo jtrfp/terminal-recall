@@ -121,7 +121,7 @@ public final class ThreadManager {
 	final Collection<PositionedRenderable> vl = 
 		tr.mainRenderer.
 		getRealtime().
-		currentRenderList().
+		getRenderList().
 		getRealtime().
 		getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;

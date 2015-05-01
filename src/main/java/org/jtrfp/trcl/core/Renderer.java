@@ -25,7 +25,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.CollisionManager;
@@ -46,7 +46,7 @@ public final class Renderer {
     private 		boolean 		initialized = false;
     private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
-    public final 	TRFutureTask<RenderList>[]renderList = new TRFutureTask[2];
+    public final 	TRFutureTask<RenderList> renderList;
    
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
@@ -59,7 +59,6 @@ public final class Renderer {
     private		CollisionManager	collisionManager;
     private final	ListenableCollection<Camera>cameras = new DefaultListenableCollection<Camera>(new ArrayList<Camera>());
     
-
     public Renderer(final RendererFactory factory) {
 	this.factory = factory;
 	this.gpu     = factory.getGPU();
@@ -69,17 +68,11 @@ public final class Renderer {
 	
 	System.out.println("...Done.");
 	System.out.println("Initializing RenderList...");
-	renderList[0] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
+	renderList = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
 		return new RenderList(gl, Renderer.this, tr);
-	    }});tr.getThreadManager().threadPool.submit(renderList[0]);
-	    renderList[1] = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
-		    @Override
-		    public RenderList call() throws Exception {
-			return new RenderList(gl,Renderer.this, tr);
-		    }});tr.getThreadManager().threadPool.submit(renderList[1]);
-	
+	    }});tr.getThreadManager().threadPool.submit(renderList);
 	
 	cameras.addCollectionListener(new CollectionListener<Camera>(){
 	    @Override
@@ -115,7 +108,7 @@ public final class Renderer {
 	if ((frameNumber %= 20) == 0) {
 	    gpu.getTr().getReporter()
 		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
-	    final Collection<PositionedRenderable> coll = renderList[renderListToggle.get() ? 0 : 1].get().getVisibleWorldObjectList();
+	    final Collection<PositionedRenderable> coll = renderList.get().getVisibleWorldObjectList();
 	    synchronized(coll){
 	    gpu.getTr().getReporter()
 	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", coll.size());}
@@ -131,10 +124,10 @@ public final class Renderer {
 		final GL3 gl = gpu.getGl();
 		try{	ensureInit();
 			if(oneFrameLaggedRenderList==null)
-			 oneFrameLaggedRenderList = currentRenderList().getRealtime();
+			 oneFrameLaggedRenderList = renderList.getRealtime();
 			
 			oneFrameLaggedRenderList.render(gl);
-			oneFrameLaggedRenderList   = currentRenderList().getRealtime();
+			oneFrameLaggedRenderList   = renderList.getRealtime();
 			oneFrameLaggedRenderList.sendToGPU(gl);
 			cameraMatrixAsFlatArray    = getCamera().getCompleteMatrixAsFlatArray();//TODO
 			camRotationProjectionMatrix= getCamera().getProjectionRotationMatrixAsFlatArray();//TODO
@@ -151,19 +144,7 @@ public final class Renderer {
 	if(pr instanceof WorldObject)
 	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
 	
-	currentRenderList().get().getSubmitter().submit((WorldObject)pr);//TODO: Refactor back to PositionedRenderable
-	/*
-	gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		final RenderList rl = Renderer.this.currentRenderList().get();
-		final Submitter<PositionedRenderable> s = rl.getSubmitter();
-		//synchronized(s){
-		 s.submit(pr);
-		 return null;//}
-	      }
-	});
-	*/
+	renderList.get().getSubmitter().submit((WorldObject)pr);//TODO: Refactor back to PositionedRenderable
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {
@@ -174,7 +155,6 @@ public final class Renderer {
 		}
 	    relevanceUpdateFuture.get();
 	    }//end if(visibilityUpdateFuture!=null)
-	if(!getBackRenderList().isDone()||rootGrid==null)return;//Not ready.
 	relevanceUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() {
@@ -188,41 +168,14 @@ public final class Renderer {
 					proximitySorter
 			);
 		}//end sync(gameStateLock)
-		/*
-		Renderer.this.gpu.getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
-		    @Override
-		    public Void call() {//TODO: Everything up to "flushObjectDefsToGPU()" apparently doesn't need GPU mem access.
-			final RenderList rl = getBackRenderList().get();
-			///// TODO: Replace with repopulate(). Figure out what to do with the submitter requirement.
-			rl.reset();
-			final Submitter<PositionedRenderable> s = rl.getSubmitter();
-			synchronized(s){
-			 proximitySorter.dumpPositionedRenderables(s);}
-			//////
-			toggleRenderList();
-			return null;
-		    }//end gl call()
-		}).get();
-		*/
-		getBackRenderList().get().repopulate(proximitySorter.getRenderables());
-		toggleRenderList();
+		CollectionActionDispatcher<PositionedRenderable> visible = renderList.get().getVisibleWorldObjectList();
+		synchronized(visible){visible.repopulate(proximitySorter.getRenderables());}
 		proximitySorter.reset();
 		}catch(Exception e){e.printStackTrace();}
 		return null;
 	    }//end pool run()
 	});
     }// end updateRelevanceList()
-    
-    public TRFutureTask<RenderList> currentRenderList(){
-	return renderList[renderListToggle.get() ? 0 : 1];
-    }
-    public TRFutureTask<RenderList> getBackRenderList(){
-	return renderList[renderListToggle.get() ? 1 : 0];
-    }
-    private synchronized void toggleRenderList(){
-	//getBackRenderList().get().flushObjectDefsToGPU();
-	renderListToggle.set(!renderListToggle.get());
-    }
     
     public void setSunVector(Vector3D sv){
 	factory.getDeferredProgram().use();
@@ -374,5 +327,9 @@ public final class Renderer {
 
     public RendererFactory getRendererFactory() {
 	return factory;
+    }
+
+    public TRFutureTask<RenderList> getRenderList() {
+	return renderList;
     }
 }//end Renderer

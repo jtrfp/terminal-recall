@@ -13,6 +13,13 @@
 package org.jtrfp.trcl.tools;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
+import org.jtrfp.trcl.coll.Repopulatable;
 
 public class Util {
 public static final Color [] DEFAULT_PALETTE = new Color []{
@@ -273,4 +280,36 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
     new Color(0,0,0),
     new Color(0,0,0)
     };
+
+   public static <T>void repopulate(Collection<T> dest, Collection<T> src){
+       if(dest instanceof Repopulatable)
+	    ((Repopulatable<T>)dest).repopulate(src);
+       else if(dest instanceof List){
+	   final List<T> dst = (List<T>)dest;
+	   if(dest.size()>src.size()){
+	       Iterator<T> sIt = src.iterator();
+	       ListIterator<T> dIt = dst.listIterator();
+	       while(sIt.hasNext())
+		   {dIt.next();dIt.set(sIt.next());}
+	       dst.subList(src.size(), dst.size()).clear();//Truncate
+	   } else if(dest.size()<src.size()){
+	       Iterator<T> sIt = src.iterator();
+	       ListIterator<T> dIt = dst.listIterator();
+	       while(dIt.hasNext())
+		   {dIt.next();dIt.set(sIt.next());}
+	       final ArrayList<T> additional = new ArrayList<T>();
+	       while(sIt.hasNext())
+		   additional.add(sIt.next());
+	       dest.addAll(additional);
+	   }else {//Same size
+	       Iterator<T> sIt = src.iterator();
+	       ListIterator<T> dIt = dst.listIterator();
+	       while(sIt.hasNext())
+		   {dIt.next();dIt.set(sIt.next());}
+	   }
+       }else{
+	   dest.clear();
+	   dest.addAll(src);
+       }
+   }//end repopulate(...)
 }//end Util

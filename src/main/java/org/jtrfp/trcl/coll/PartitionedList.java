@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jtrfp.trcl.tools.Util;
+
 /**
  * A List actor which combines the effects of several mutable sub-lists to a single destination List in a partitioned
  * fashion such that resizing of a partition shifts the positions of all partitions to the right of resized partition.
@@ -84,7 +86,7 @@ public class PartitionedList<T> {
 	return left.getStartIndex()+left.size();
     }
     
-    public class Partition implements List<T>{
+    public class Partition implements List<T>, Repopulatable<T>{
 	//// BEAN PROPERTIES
 	public static final String SIZE        = "size",
 		                   VALID       = "valid",
@@ -410,6 +412,11 @@ public class PartitionedList<T> {
 	public void removePropertyChangeListener(String propertyName,
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+
+	@Override
+	public void repopulate(Collection<T> c) {
+	    Util.repopulate(getSubList(),c);
 	}
     }//end PartitionList
 }//end LsitenablePartitionedList

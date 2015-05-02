@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * A synchronized List delegate which tracks modifications for more efficient deferred updates based on
+ * A  List delegate which tracks modifications for more efficient deferred updates based on
  * this List's contents. The 'modified' property starts out as true by default.
  * @author Chuck Ritola
  *
@@ -60,7 +60,7 @@ public class ListActionTelemetry<E> implements List<E> {
 	this(delegate, root, true, startIndex, endIndex);
     }
     
-    public synchronized boolean isModified(){
+    public  boolean isModified(){
 	return modified;
     }
     
@@ -71,13 +71,13 @@ public class ListActionTelemetry<E> implements List<E> {
     /**
      * Drains this List's contents to the provided destination and resets all
      * modification hint flags. The entire List's state is added to the destination regardless
-     * of what has been changed. This is a synchronized operation which guarantees to be atomic of any
+     * of what has been changed. This is a  operation which guarantees to be atomic of any
      * changes to this List.
      * @param dest A usually-empty List to which to drain this ListActionTelemetry's current contents.
      * @return A ListState providing hints to accelerate changes based on those drained to dest.
      * @since Mar 24, 2015
      */
-    public synchronized ListState drainListStateTo(List<? super E> dest){
+    public ListState drainListStateTo(List<? super E> dest){
 	if(dest!=null)
 	 dest.addAll(getDelegate());
 	pcs.firePropertyChange(MODIFIED, this.modified, false);
@@ -95,7 +95,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#add(java.lang.Object)
      */
-    public synchronized boolean add(E e) {
+    public boolean add(E e) {
 	root.modified();
 	return getDelegate().add(e);
     }
@@ -105,7 +105,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @param element
      * @see java.util.ArrayList#add(int, java.lang.Object)
      */
-    public synchronized void add(int index, E element) {
+    public void add(int index, E element) {
 	root.modified();
 	getDelegate().add(index, element);
     }
@@ -115,7 +115,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#addAll(java.util.Collection)
      */
-    public synchronized boolean addAll(Collection<? extends E> c) {
+    public boolean addAll(Collection<? extends E> c) {
 	root.modified();
 	return getDelegate().addAll(c);
     }
@@ -126,7 +126,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#addAll(int, java.util.Collection)
      */
-    public synchronized boolean addAll(int index, Collection<? extends E> c) {
+    public boolean addAll(int index, Collection<? extends E> c) {
 	root.modified();
 	return getDelegate().addAll(index, c);
     }
@@ -135,7 +135,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * 
      * @see java.util.ArrayList#clear()
      */
-    public synchronized void clear() {
+    public void clear() {
 	root.modified();
 	getDelegate().clear();
     }
@@ -145,7 +145,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#contains(java.lang.Object)
      */
-    public synchronized boolean contains(Object o) {
+    public boolean contains(Object o) {
 	return getDelegate().contains(o);
     }
 
@@ -154,7 +154,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.AbstractCollection#containsAll(java.util.Collection)
      */
-    public synchronized boolean containsAll(Collection<?> arg0) {
+    public boolean containsAll(Collection<?> arg0) {
 	return getDelegate().containsAll(arg0);
     }
 
@@ -163,7 +163,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.AbstractList#equals(java.lang.Object)
      */
-    public synchronized boolean equals(Object arg0) {
+    public boolean equals(Object arg0) {
 	return getDelegate().equals(arg0);
     }
 
@@ -172,7 +172,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#get(int)
      */
-    public synchronized E get(int index) {
+    public E get(int index) {
 	return getDelegate().get(index);
     }
 
@@ -180,7 +180,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.AbstractList#hashCode()
      */
-    public synchronized int hashCode() {
+    public int hashCode() {
 	return getDelegate().hashCode();
     }
 
@@ -189,7 +189,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#indexOf(java.lang.Object)
      */
-    public synchronized int indexOf(Object arg0) {
+    public int indexOf(Object arg0) {
 	return getDelegate().indexOf(arg0);
     }
 
@@ -197,7 +197,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#isEmpty()
      */
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
 	return getDelegate().isEmpty();
     }
 
@@ -205,8 +205,8 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#iterator()
      */
-    public synchronized Iterator<E> iterator() {
-	return getDelegate().iterator();
+    public Iterator<E> iterator() {
+	throw new UnsupportedOperationException();
     }
 
     /**
@@ -214,7 +214,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#lastIndexOf(java.lang.Object)
      */
-    public synchronized int lastIndexOf(Object arg0) {
+    public int lastIndexOf(Object arg0) {
 	return getDelegate().lastIndexOf(arg0);
     }
 
@@ -222,7 +222,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#listIterator()
      */
-    public synchronized ListIterator<E> listIterator() {
+    public  ListIterator<E> listIterator() {
 	throw new UnsupportedOperationException();
     }
 
@@ -231,7 +231,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#listIterator(int)
      */
-    public synchronized ListIterator<E> listIterator(int index) {
+    public  ListIterator<E> listIterator(int index) {
 	throw new UnsupportedOperationException();
     }
 
@@ -240,7 +240,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#remove(int)
      */
-    public synchronized E remove(int index) {
+    public E remove(int index) {
 	root.modified();
 	return getDelegate().remove(index);
     }
@@ -250,7 +250,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#remove(java.lang.Object)
      */
-    public synchronized boolean remove(Object arg0) {
+    public boolean remove(Object arg0) {
 	final boolean result = getDelegate().remove(arg0);
 	if(result)
 	    root.modified();
@@ -262,7 +262,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#removeAll(java.util.Collection)
      */
-    public synchronized boolean removeAll(Collection<?> c) {
+    public boolean removeAll(Collection<?> c) {
 	final boolean result = getDelegate().removeAll(c);
 	if(result)
 	    root.modified();
@@ -274,7 +274,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#retainAll(java.util.Collection)
      */
-    public synchronized boolean retainAll(Collection<?> c) {
+    public boolean retainAll(Collection<?> c) {
 	final boolean result = getDelegate().retainAll(c);
 	if(result)
 	    root.modified();
@@ -287,7 +287,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#set(int, java.lang.Object)
      */
-    public synchronized E set(int index, E element) {
+    public E set(int index, E element) {
 	root.modified();
 	return getDelegate().set(index, element);
     }
@@ -296,7 +296,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#size()
      */
-    public synchronized int size() {
+    public int size() {
 	return getDelegate().size();
     }
 
@@ -306,7 +306,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#subList(int, int)
      */
-    public synchronized List<E> subList(int fromIndex, int toIndex) {
+    public List<E> subList(int fromIndex, int toIndex) {
 	if(isSubList)
 	    return new ListActionTelemetry<E>(delegate, this ,fromIndex+this.startIndex, toIndex+this.startIndex);
 	else
@@ -317,7 +317,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#toArray()
      */
-    public synchronized Object[] toArray() {
+    public Object[] toArray() {
 	return getDelegate().toArray();
     }
 
@@ -326,7 +326,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#toArray(T[])
      */
-    public synchronized <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(T[] a) {
 	return getDelegate().toArray(a);
     }
 
@@ -334,7 +334,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.AbstractCollection#toString()
      */
-    public synchronized String toString() {
+    public  String toString() {
 	return getDelegate().toString();
     }
     

@@ -18,7 +18,10 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
 
@@ -27,6 +30,7 @@ import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
+import org.jtrfp.trcl.coll.DecoupledCollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
@@ -70,8 +74,8 @@ public class RenderList {
     						transparentPartition,
     						unoccludedTPartition;*/
     private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
-    private final	CollectionActionDispatcher<PositionedRenderable>
-    						relevantPositionedRenderables = new CollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>());
+    private final	DecoupledCollectionActionDispatcher<PositionedRenderable>
+    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>(), Executors.newSingleThreadExecutor());
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
     private final	CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>
@@ -206,20 +210,25 @@ public class RenderList {
 	}}
     }//end updateStatesToGPU
     
+    private final CyclicBarrier renderListExecutorBarrier = new CyclicBarrier(2);
     private void updateRenderListToGPU(){
-	synchronized(relevantPositionedRenderables){
 	if(renderListTelemetry.isModified()){
-	    //Defragment
-	    opaqueIL    .defragment();
-	    transIL     .defragment();
-	    unoccludedIL.defragment();
-	    numOpaqueBlocks     = opaqueIL    .delegateSize();
-	    numTransparentBlocks= transIL     .delegateSize();
-	    numUnoccludedTBlocks= unoccludedIL.delegateSize();
-	    renderList.rewind();
-	    renderListTelemetry.drainListStateTo(renderList);
+	    relevantPositionedRenderables.getExecutor().execute(new Runnable(){
+		@Override
+		public void run() {
+		    //Defragment
+		    opaqueIL    .defragment();
+		    transIL     .defragment();
+		    unoccludedIL.defragment();
+		    numOpaqueBlocks     = opaqueIL    .delegateSize();
+		    numTransparentBlocks= transIL     .delegateSize();
+		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
+		    renderList.rewind();
+		    renderListTelemetry.drainListStateTo(renderList);
+		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
+		}});
+	    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
 	}//end if(modified)
-     }//end sync(relevantObjects)
     }//end updateRenderingListToGPU()
 
     public void sendToGPU(GL3 gl) {

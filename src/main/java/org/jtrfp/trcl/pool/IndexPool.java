@@ -59,7 +59,7 @@ public class IndexPool{
 	 * @return Number of indices removed.
 	 * @since Mar 19, 2015
 	 */
-	public int compact(){
+	public synchronized int compact(){
 	    //Used low to high
 	    ArrayList<Integer> used = new ArrayList<Integer>();
 	    for(Integer i:usedIndices)

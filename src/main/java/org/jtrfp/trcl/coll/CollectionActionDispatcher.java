@@ -28,12 +28,12 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     protected final Set<Collection<E>>        targets;
     
     protected CollectionActionDispatcher(Collection<E> cache, Map<Collection<E>, Object> targetsMap){
-	this.cache=cache;
+	this.cache     =cache;
 	this.targetsMap=targetsMap;
-	this.targets=targetsMap.keySet();
+	this.targets   =targetsMap.keySet();
     }
     
-    public CollectionActionDispatcher(List<E> cache){
+    public CollectionActionDispatcher(Collection<E> cache){
 	this(cache,new IdentityHashMap<Collection<E>,Object>());
     }//end constructor
     

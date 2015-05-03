@@ -18,7 +18,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
@@ -26,6 +25,7 @@ import java.util.concurrent.Executors;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
@@ -262,26 +262,32 @@ public class RenderList {
 	objectProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
 	
 	gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
-	objectProgram.getUniform("cameraMatrix").set4x4Matrix(renderer.getCameraMatrixAsFlatArray(), true);
-	rFactory.getObjectFrameBuffer().bindToDraw();
-	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
-	gl.glViewport(0, 0, 1024, 128);
-	gpu.memoryManager.get().bindToUniform(0, objectProgram,
-		objectProgram.getUniform("rootBuffer"));
-	gl.glDepthMask(false);
-	gl.glDisable(GL3.GL_BLEND);
-	gl.glDisable(GL3.GL_LINE_SMOOTH);
-	gl.glDisable(GL3.GL_DEPTH_TEST);
-	gl.glDisable(GL3.GL_CULL_FACE);
-	gl.glLineWidth(1);
-	{//Start variable scope
-	 int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
-    	 int numRows = (int)Math.ceil(remainingBlocks/256.);
-    	 for(int i=0; i<numRows; i++){
-    	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
-    	     remainingBlocks -= 256;
-    	 }
-    	}//end variable scope
+	Collection<Camera> cameras = renderer.getCameras();
+	for(Camera camera:cameras){
+	    //TODO: Base on each camera
+	    //objectProgram.getUniform("cameraMatrix").set4x4Matrix(renderer.getCameraMatrixAsFlatArray(), true);
+	    objectProgram.getUniform("cameraMatrix").set4x4Matrix(camera.getCompleteMatrixAsFlatArray(), true);
+	    rFactory.getObjectFrameBuffer().bindToDraw();
+	    gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
+	    gl.glViewport(0, 0, 1024, 128);
+	    gpu.memoryManager.get().bindToUniform(0, objectProgram,
+		    objectProgram.getUniform("rootBuffer"));
+	    gl.glDepthMask(false);
+	    gl.glDisable(GL3.GL_BLEND);
+	    gl.glDisable(GL3.GL_LINE_SMOOTH);
+	    gl.glDisable(GL3.GL_DEPTH_TEST);
+	    gl.glDisable(GL3.GL_CULL_FACE);
+	    gl.glLineWidth(1);
+	    {//Start variable scope
+		int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
+		int numRows = (int)Math.ceil(remainingBlocks/256.);
+		//TODO: Adjust offsets to camera
+		for(int i=0; i<numRows; i++){
+		    gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
+		    remainingBlocks -= 256;
+		}
+	    }//end variable scope
+	}//end for(cameras)
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
 	gpu.defaultTIU();
@@ -456,9 +462,11 @@ public class RenderList {
 	rFactory.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	rFactory.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
 	
+	//TODO: Use master-camera's TranslationRotationProjectionMatrix
+	//Skycube setup
 	deferredProgram.getUniform("bypassAlpha").setui(!renderer.getCamera().isFogEnabled()?1:0);
 	deferredProgram.getUniform("projectionRotationMatrix")
-		.set4x4Matrix(renderer.getCamRotationProjectionMatrix(), true);
+		.set4x4Matrix(renderer.getMasterCamera().getProjectionRotationMatrixAsFlatArray(), true);
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 36);
 	//Cleanup

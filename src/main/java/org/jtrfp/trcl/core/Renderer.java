@@ -58,6 +58,7 @@ public final class Renderer {
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
     private		CollisionManager	collisionManager;
     private final	ListenableCollection<Camera>cameras = new DefaultListenableCollection<Camera>(new ArrayList<Camera>());
+    private		Camera			masterCamera = null;
     
     public Renderer(final RendererFactory factory) {
 	this.factory = factory;
@@ -331,5 +332,22 @@ public final class Renderer {
 
     public TRFutureTask<RenderList> getRenderList() {
 	return renderList;
+    }
+
+    public Collection<Camera> getCameras() {
+	return cameras;
+    }
+
+    public Camera getMasterCamera() {
+	if(masterCamera==null && !cameras.isEmpty())
+	    masterCamera = cameras.iterator().next();
+	return masterCamera;
+    }
+
+    /**
+     * @param masterCamera the masterCamera to set
+     */
+    public void setMasterCamera(Camera masterCamera) {
+        this.masterCamera = masterCamera;
     }
 }//end Renderer

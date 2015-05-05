@@ -170,12 +170,16 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    RenderMode.STATIC,
 						    new Vector3D[] { norm0, norm1,
 							    norm2, norm3 }, cX + cZ % 4);
+				    if(points.containsKey(tpi)){
+					tris[0].setAlphaBlended(true);
+					tris[1].setAlphaBlended(true);
+				    }
 				    m.addTriangle(tris[0]);
 				    m.addTriangle(tris[1]);
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			    if (m.finalizeModel().getTriangleList() != null) {
+			    if (m.finalizeModel().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();

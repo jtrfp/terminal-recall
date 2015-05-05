@@ -35,8 +35,6 @@ import org.jtrfp.trcl.prop.SkyCube;
 
 import com.ochafik.util.listenable.CollectionEvent;
 import com.ochafik.util.listenable.CollectionListener;
-import com.ochafik.util.listenable.DefaultListenableCollection;
-import com.ochafik.util.listenable.ListenableCollection;
 
 public final class Renderer {
     private final	RendererFactory		factory;
@@ -44,7 +42,6 @@ public final class Renderer {
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private		GLFrameBuffer		renderingTarget;
     private 		boolean 		initialized = false;
-    private volatile	AtomicBoolean 		renderListToggle = new AtomicBoolean(false);
     private final 	GPU 			gpu;
     public final 	TRFutureTask<RenderList> renderList;
    
@@ -57,7 +54,7 @@ public final class Renderer {
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
     private		CollisionManager	collisionManager;
-    private final	ListenableCollection<Camera>cameras = new DefaultListenableCollection<Camera>(new ArrayList<Camera>());
+    private final	CollectionActionDispatcher<Camera>cameras = new CollectionActionDispatcher<Camera>(new ArrayList<Camera>());
     private		Camera			masterCamera = null;
     
     public Renderer(final RendererFactory factory) {
@@ -74,21 +71,6 @@ public final class Renderer {
 	    public RenderList call() throws Exception {
 		return new RenderList(gl, Renderer.this, tr);
 	    }});tr.getThreadManager().threadPool.submit(renderList);
-	
-	cameras.addCollectionListener(new CollectionListener<Camera>(){
-	    @Override
-	    public void collectionChanged(CollectionEvent<Camera> e) {
-		switch(e.getType()){
-		case ADDED://TODO
-		    break;
-		case REMOVED:
-		    break;
-		case UPDATED:
-		    break;
-		default:
-		    break;
-		};
-	    }});
 	
 	skyCube = new SkyCube(tr);
     }//end constructor

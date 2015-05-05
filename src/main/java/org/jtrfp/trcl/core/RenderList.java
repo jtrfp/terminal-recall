@@ -25,7 +25,6 @@ import java.util.concurrent.Executors;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
@@ -56,11 +55,9 @@ public class RenderList {
     private final 	TR 			tr;
     private 		int[] 			hostRenderListPageTable;
     private 	 	int 			dummyBufferID;
-    /*private 		int 			numOpaqueBlocks,
+    private 		int 			numOpaqueBlocks,
     						numTransparentBlocks,
-    						numUnoccludedTBlocks;*/
-    private static final int			OPAQUE=0,TRANSPARENT=1,UNOCCLUDED=2;
-    private final	int[]			numBlocks = new int[3];
+    						numUnoccludedTBlocks;
     private final	int			renderListIdx;
     private		long			rootBufferReadFinishedSync;
     private final	Renderer		renderer;
@@ -222,9 +219,9 @@ public class RenderList {
 		    opaqueIL    .defragment();
 		    transIL     .defragment();
 		    unoccludedIL.defragment();
-		    numBlocks[OPAQUE]     = opaqueIL    .delegateSize();
-		    numBlocks[TRANSPARENT]= transIL     .delegateSize();
-		    numBlocks[UNOCCLUDED] = unoccludedIL.delegateSize();
+		    numOpaqueBlocks     = opaqueIL    .delegateSize();
+		    numTransparentBlocks= transIL     .delegateSize();
+		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
 		    renderListTelemetry.drainListStateTo(renderList);
 		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
@@ -256,7 +253,7 @@ public class RenderList {
 	final ObjectListWindow olWindow = tr.objectListWindow.get();
 	final int opaqueRenderListLogicalVec4Offset = ((olWindow.getObjectSizeInBytes()*renderListIdx)/16);
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
-	final int numPrimitives = (numBlocks[TRANSPARENT]+numBlocks[OPAQUE]+numBlocks[UNOCCLUDED])*primsPerBlock;
+	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
 	
 	// OBJECT STAGE
 	final GLProgram objectProgram = rFactory.getObjectProgram();
@@ -264,7 +261,7 @@ public class RenderList {
 	objectProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
 	
 	gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
-	Collection<Camera> cameras = renderer.getCameras();
+	objectProgram.getUniform("cameraMatrix").set4x4Matrix(renderer.getCameraMatrixAsFlatArray(), true);
 	rFactory.getObjectFrameBuffer().bindToDraw();
 	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
 	gl.glViewport(0, 0, 1024, 128);
@@ -276,29 +273,14 @@ public class RenderList {
 	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_CULL_FACE);
 	gl.glLineWidth(1);
-	int startBlock = 0;
-	for(int renderingMode=0; renderingMode<numBlocks.length; renderingMode++){
-	    int remainingBlocks = numBlocks[renderingMode];
-	    for(Camera camera:cameras){
-		objectProgram.getUniform("cameraMatrix").set4x4Matrix(camera.getCompleteMatrixAsFlatArray(), true);
-		//TODO: Split to per-type, then per-camera
-		//int remainingBlocks   = numBlocks[TRANSPARENT]+numBlocks[OPAQUE]+numBlocks[UNOCCLUDED];
-		//final int startBlock  = 0;
-		final int startRow    = startBlock / 256;
-		final int startModulus= startBlock % 256;
-		final int endBlock    = remainingBlocks+startBlock;
-		final int endRow      = (int)Math.ceil(endBlock / 256f);
-		//int numRows = (int)Math.ceil(remainingBlocks/256f);
-		int startOffset = startModulus;
-		//TODO: Adjust offsets to camera
-		for(int i=startRow; i<endRow; i++){
-		    gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257+startOffset, (remainingBlocks<=256?remainingBlocks:(256-startOffset))+1);
-		    remainingBlocks -= (256-startOffset);
-		    startOffset=0;
-		}//end for(rows)
-		startBlock+=numBlocks[renderingMode];//TODO: Per-camera numBlocks
-	    }//end for(cameras)
-	}//end for(renderingMode)
+	{//Start variable scope
+	 int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
+    	 int numRows = (int)Math.ceil(remainingBlocks/256.);
+    	 for(int i=0; i<numRows; i++){
+    	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
+    	     remainingBlocks -= 256;
+    	 }
+    	}//end variable scope
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
 	gpu.defaultTIU();
@@ -349,7 +331,7 @@ public class RenderList {
 	gl.glDisable(GL3.GL_CULL_FACE);
 	
 	//Everything
-	gl.glDrawArrays(GL3.GL_POINTS, 0, (numBlocks[TRANSPARENT]+numBlocks[OPAQUE]+numBlocks[UNOCCLUDED])*primsPerBlock);
+	gl.glDrawArrays(GL3.GL_POINTS, 0, (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock);
 	//Cleanup
 	gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 	gl.glPointSize(1);
@@ -367,11 +349,11 @@ public class RenderList {
 	rFactory.getVertexNormXYTexture().bindToTextureUnit(6, gl);
 	rFactory.getVertexNormZTexture().bindToTextureUnit(7, gl);
 	rFactory.getOpaqueFrameBuffer().bindToDraw();
-	final int numOpaqueVertices = numBlocks[OPAQUE]
+	final int numOpaqueVertices = numOpaqueBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
-	final int numTransparentVertices = numBlocks[TRANSPARENT]
+	final int numTransparentVertices = numTransparentBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
-	final int numUnoccludedVertices = numBlocks[UNOCCLUDED]
+	final int numUnoccludedVertices = numUnoccludedTBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
@@ -473,11 +455,9 @@ public class RenderList {
 	rFactory.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	rFactory.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
 	
-	//TODO: Use master-camera's TranslationRotationProjectionMatrix
-	//Skycube setup
 	deferredProgram.getUniform("bypassAlpha").setui(!renderer.getCamera().isFogEnabled()?1:0);
 	deferredProgram.getUniform("projectionRotationMatrix")
-		.set4x4Matrix(renderer.getMasterCamera().getProjectionRotationMatrixAsFlatArray(), true);
+		.set4x4Matrix(renderer.getCamRotationProjectionMatrix(), true);
 	//Execute the draw to a screen quad
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 36);
 	//Cleanup

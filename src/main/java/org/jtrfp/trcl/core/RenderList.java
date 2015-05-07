@@ -446,7 +446,7 @@ public class RenderList {
 	gpu.memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
 	renderer.getSkyCube().getSkyCubeTexture().bindToTextureUnit(1,gl);
-	/// 2 UNUSED
+	renderer.getRendererFactory().getPortalTexture().bindToTextureUnit(2,gl);
 	gpu.textureManager.get().vqCodebookManager.get().getESTuTvTexture().bindToTextureUnit(3,gl);
 	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
 	rFactory.getOpaquePrimitiveIDTexture().bindToTextureUnit(5,gl);

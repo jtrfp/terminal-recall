@@ -36,6 +36,7 @@ public class RendererFactory {
     public static final int			VERTEX_BUFFER_HEIGHT    = 4096;
     public static final int			PRIMITIVE_BUFFER_WIDTH  = 512;
     public static final int			PRIMITIVE_BUFFER_HEIGHT = 512;
+    public static final int			NUM_PORTALS = 4;
     public static final int			PRIMITIVE_BUFFER_OVERSAMPLING = 4;
     public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
     
@@ -49,12 +50,14 @@ public class RendererFactory {
     /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
     /*					*/	vertexNormXYTexture,vertexNormZTexture,
     /*					*/	primitiveUVZWTexture,primitiveNormTexture,
-    /*					*/	layerAccumulatorTexture;
+    /*					*/	layerAccumulatorTexture,
+    /*					*/	portalTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
     /*					*/	depthQueueFrameBuffer,
     /*					*/	objectFrameBuffer,
     /*					*/	vertexFrameBuffer,
     /*					*/	primitiveFrameBuffer;
+    private final	GLFrameBuffer[]		portalFrameBuffers = new GLFrameBuffer[NUM_PORTALS];
     
     private            GLProgram 		objectProgram,
     /*					*/	opaqueProgram, 
@@ -158,7 +161,7 @@ public class RendererFactory {
 		sunVector 	= deferredProgram	.getUniform("sunVector");
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		deferredProgram.getUniform("cubeTexture").set((int)1);
-		// 2 UNUSED
+		deferredProgram.getUniform("portalTexture").set((int)2);
 		deferredProgram.getUniform("ESTuTvTiles").set((int) 3);
 		deferredProgram.getUniform("rgbaTiles").set((int) 4);
 		deferredProgram.getUniform("primitiveIDTexture").set((int) 5);
@@ -335,6 +338,8 @@ public class RendererFactory {
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Primitive framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
+		/////// PORTALS
+		allocatePortals(width,height);
 		/////// INTERMEDIATE
 		opaqueDepthTexture = gpu
 			.newTexture()
@@ -432,14 +437,39 @@ public class RendererFactory {
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		opaquePrimitiveIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
 		layerAccumulatorTexture.bind().setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null);
+		portalTexture.delete();
+		for(int i=0; i<NUM_PORTALS; i++)
+		    portalFrameBuffers[i].destroy();
+		allocatePortals(width,height);
 		gpu.defaultTexture();
-	    }
+	    }//end reshape(...)
 	});
 	
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");
 	}else backfaceCulling = true;
     }//end constructor
+    
+    private void allocatePortals(int width, int height){
+	portalTexture = gpu.
+		newTexture().
+		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
+		bind().
+		setInternalColorFormat(GL3.GL_RGBA4).
+		configure(new int[]{width,height,NUM_PORTALS}, 1).
+		setMagFilter(GL3.GL_NEAREST).
+		setMinFilter(GL3.GL_NEAREST).
+		setWrapS(GL3.GL_CLAMP_TO_EDGE).
+		setWrapT(GL3.GL_CLAMP_TO_EDGE).
+		unbind();
+	for(int i=0; i<NUM_PORTALS; i++)
+	    portalFrameBuffers[i]=gpu.
+	     newFrameBuffer().
+	     bindToDraw().
+	     attachDrawTexture(portalTexture, i, GL3.GL_COLOR_ATTACHMENT0).
+	     setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0).
+	     unbindFromDraw();
+    }//end allocatePortals()
     
     public Renderer newRenderer(){
 	return new Renderer(this);
@@ -621,4 +651,11 @@ public class RendererFactory {
 	    //Ignore.
 	}
     }//end RFValidationHandler
+
+    /**
+     * @return the portalTexture
+     */
+    public GLTexture getPortalTexture() {
+        return portalTexture;
+    }
 }//end RendererFactory

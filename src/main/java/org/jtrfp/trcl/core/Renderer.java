@@ -15,8 +15,8 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GL3;
@@ -27,14 +27,12 @@ import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
+import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.SkyCube;
-
-import com.ochafik.util.listenable.CollectionEvent;
-import com.ochafik.util.listenable.CollectionListener;
 
 public final class Renderer {
     private final	RendererFactory		factory;
@@ -44,7 +42,6 @@ public final class Renderer {
     private 		boolean 		initialized = false;
     private final 	GPU 			gpu;
     public final 	TRFutureTask<RenderList> renderList;
-   
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private		double			meanFPS;

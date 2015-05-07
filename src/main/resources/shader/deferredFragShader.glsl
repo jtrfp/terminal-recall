@@ -28,6 +28,7 @@ uniform sampler2DArray	ESTuTvTiles;
 uniform sampler2D		layerAccumulator;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform samplerCube 	cubeTexture;
+uniform sampler2DArray	portalTexture;
 smooth in vec3 			norm;
 
 uniform vec3			ambientLight;
@@ -88,6 +89,8 @@ const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
 const uint OVERSAMPLING				= 4u;
 const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 
+const int NUM_PORTALS				= 8;
+
 vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
 
 float warpFog(float z){
@@ -119,9 +122,14 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  return	result;
  }
  
+ vec4 portalFetch(uint textureID){
+ return texelFetch(portalTexture,ivec3(gl_FragCoord.xy,int(textureID)),0);
+ }
+ 
  vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
+ if(textureID<NUM_PORTALS+1u&&textureID>0u)return portalFetch(textureID);
  //uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  //if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.
  

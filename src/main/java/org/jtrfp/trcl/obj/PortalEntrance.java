@@ -27,21 +27,21 @@ public class PortalEntrance extends WorldObject {
     
     private static final double ACTIVATION_DISTANCE = TR.mapSquareSize*12;
     
-    private final PortalExit exit;
+    private final PortalExit portalExit;
     private final Camera     cameraToMonitor;
-    private boolean          isWithinRange  = false;
+    private boolean          withinRange    = false;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public PortalEntrance(TR tr, PortalExit exit, Camera cameraToMonitor) {
 	super(tr);
-	this.exit=exit;
+	this.portalExit=exit;
 	this.cameraToMonitor=cameraToMonitor;
 	addBehavior(new PortalEntranceBehavior());
     }
     
     public PortalEntrance(TR tr, Model model, PortalExit exit, Camera cameraToMonitor){
 	super(tr,model);
-	this.exit=exit;
+	this.portalExit=exit;
 	this.cameraToMonitor=cameraToMonitor;
 	addBehavior(new PortalEntranceBehavior());
     }
@@ -61,15 +61,15 @@ public class PortalEntrance extends WorldObject {
 	public void _tick(long tickTimeMillis){
 	    final double dist = Vect3D.distance(cameraToMonitor.getPositionWithOffset(),PortalEntrance.this.getPositionWithOffset());
 	    if(dist<ACTIVATION_DISTANCE){
-		pcs.firePropertyChange(WITHIN_RANGE, isWithinRange, true);
-		isWithinRange=true;
+		pcs.firePropertyChange(WITHIN_RANGE, withinRange, true);
+		withinRange=true;
 	    }else{
-		pcs.firePropertyChange(WITHIN_RANGE, isWithinRange, false);
-		isWithinRange=false;
+		pcs.firePropertyChange(WITHIN_RANGE, withinRange, false);
+		withinRange=false;
 	    }
 	    
-	    if(isWithinRange){
-		exit.updateObservationParams(getRelativePosition(relativePosition), getRelativeHeadingTop());
+	    if(withinRange){
+		portalExit.updateObservationParams(getRelativePosition(relativePosition), getRelativeHeadingTop());
 	    }//end if(isWithinRange)
 	}//end _tick(...)
     }//end PortalEntranceBehavior
@@ -126,6 +126,20 @@ public class PortalEntrance extends WorldObject {
     public void removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
 	pcs.removePropertyChangeListener(propertyName, listener);
+    }
+
+    /**
+     * @return the withinRange
+     */
+    public boolean isWithinRange() {
+        return withinRange;
+    }
+
+    /**
+     * @return the portalExit
+     */
+    public PortalExit getPortalExit() {
+        return portalExit;
     }
 
 }//end PortalEntrance

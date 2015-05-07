@@ -18,21 +18,28 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class PortalExit extends WorldObject {
-    private final Camera cameraToControl;
+    private final Camera controlledCamera;
 
     public PortalExit(TR tr, Camera cameraToControl) {
 	super(tr);
-	this.cameraToControl=cameraToControl;
+	this.controlledCamera=cameraToControl;
     }
     
     public void updateObservationParams(double [] relativePosition, Rotation relativeHeadingTop){
 	//Apply position
-	Vect3D.add(this.getPosition(), relativePosition, cameraToControl.getPosition());
+	Vect3D.add(this.getPosition(), relativePosition, controlledCamera.getPosition());
 	//Apply vector
-	cameraToControl.setHeading(relativeHeadingTop.applyTo(getHeading()));
-	cameraToControl.setTop    (relativeHeadingTop.applyTo(getTop()));
+	controlledCamera.setHeading(relativeHeadingTop.applyTo(getHeading()));
+	controlledCamera.setTop    (relativeHeadingTop.applyTo(getTop()));
 	//Update
-	cameraToControl.notifyPositionChange();
+	controlledCamera.notifyPositionChange();
     }//end updateObservationParams(...)
+
+    /**
+     * @return the controlledCamera
+     */
+    public Camera getControlledCamera() {
+        return controlledCamera;
+    }
 
 }//end PortalExit

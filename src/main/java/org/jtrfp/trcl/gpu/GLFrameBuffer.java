@@ -153,4 +153,10 @@ public final class GLFrameBuffer {
 	gl.glDeleteFramebuffers(1, IntBuffer.wrap(new int[]{getId()}));
 	return this;
     }
+
+    public GLFrameBuffer attachDrawTexture(GLTexture arrayTexture, int layer,
+	    int attachmentIndexEnum) {
+	gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, attachmentIndexEnum, arrayTexture.getId(), 0, layer);
+	return this;
+    }
 }//end GLFrameBuffer

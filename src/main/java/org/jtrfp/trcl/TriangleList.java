@@ -15,11 +15,8 @@ package org.jtrfp.trcl;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLRunnable;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
@@ -164,7 +161,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		System.err.println("\tat "+el.getClassName()+"."+el.getMethodName()+"("+el.getFileName()+":"+el.getLineNumber()+")");
 	    }//end for(stackTrace)
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
-	if (td instanceof Texture ) {// Static texture
+	else if (td instanceof PortalTexture){
+	    final int textureID = /*((PortalTexture)td).getPortalFramebufferNumber();*/3;
+	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
+	} if (td instanceof Texture ) {// Static texture
 	    final int sideScalar = ((Texture)td).getSideLength()-1;
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];

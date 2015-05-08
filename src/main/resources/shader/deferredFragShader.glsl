@@ -92,6 +92,7 @@ const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 const int NUM_PORTALS				= 8;
 
 vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
+vec3	fogCubeColor;
 
 float warpFog(float z){
  const float ZNEAR = 6554 * 32;
@@ -238,7 +239,7 @@ vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  vec3 	norm 		= nXnYnZ.xyz/w;
  vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
  if(disableAlpha)	texel.a=1;
- texel.a 			*=1-warpFog(vUVZI.z);
+ texel.rgb = mix(texel.rgb,fogCubeColor,warpFog(vUVZI.z));
  return texel;
 }
 
@@ -291,6 +292,7 @@ void main(){
 uint	primitiveID;
 vec4	color		= vec4(0,0,0,1);
 vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
+fogCubeColor	    = texture(cubeTexture,norm).rgb;
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
 vec3 pQuads[DEPTH_QUEUE_SIZE];
@@ -356,6 +358,6 @@ if(color.a > ALPHA_THRESHOLD){
   }
  }//end if(visible)
 if(color.a>ALPHA_THRESHOLD && bypassAlpha==0u && color.a > 1234)//TODO: Is bypassAlpha being used anymore?
- gl_FragColor.rgb = mix(color.rgb,texture(cubeTexture,norm).rgb,color.a);
+ gl_FragColor.rgb = mix(color.rgb,fogCubeColor,color.a);
 else gl_FragColor.rgb = color.rgb;
 }//end main()

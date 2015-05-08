@@ -12,13 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
@@ -27,6 +26,8 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.flow.LoadingProgressReporter;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.obj.PortalEntrance;
+import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TerrainChunk;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
@@ -141,6 +142,47 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						.normalAt(cX + .5, cZ + .5);
 
 				    final Integer tpi = cX + cZ * 256;
+				    
+				    if(points.containsKey(tpi)){
+					final Model portalModel = new Model(false, tr);
+					//Place a PortalEntrance
+					final int Y_OFFSET = -3000;
+					Triangle[] tris = Triangle
+						.quad2Triangles(
+							// COUNTER-CLOCKWISE
+							// //x
+							new double[] {
+								xPos - objectX,
+								xPos + gridSquareSize
+								- objectX,
+								xPos + gridSquareSize
+								- objectX,
+								xPos - objectX },
+								new double[] { (hBL - objectY),
+								(hBR - objectY),
+								(hTR - objectY),
+								(hTL - objectY)},
+								new double[] {
+								zPos + gridSquareSize
+								- objectZ,
+								zPos + gridSquareSize
+								- objectZ,
+								zPos - objectZ,
+								zPos - objectZ }, u, v, new PortalTexture(3),//TODO: Use a real index
+								RenderMode.STATIC,
+								new Vector3D[] { norm0, norm1,
+								norm2, norm3 }, cX + cZ % 4);
+					portalModel.addTriangles(tris);
+					final Camera tunnelCam = tr.getWorld().newCamera();
+					add(tunnelCam);//TODO: Place in tunnel and not world
+					final PortalExit exit = new PortalExit(tr, tunnelCam);
+					final PortalEntrance entrance;
+					entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
+					entrance.setPosition(new double[]{objectX,objectY+Y_OFFSET,objectZ});
+					entrance.notifyPositionChange();
+					add(entrance);
+				    }//end if(tunnel)
+				    
 				    TextureDescription td = (TextureDescription) (points
 					    .containsKey(tpi) ? points.get(tpi)
 					    .getTexture() : textureMesh.textureAt(cX,

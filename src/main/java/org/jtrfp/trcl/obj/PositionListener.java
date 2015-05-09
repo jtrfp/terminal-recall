@@ -13,5 +13,5 @@
 package org.jtrfp.trcl.obj;
 
 public interface PositionListener {
-    public void positionChanged(PositionListenable objectWithPosition);
+    public void positionChanged(PositionListenable objectWithPosition, double [] oldPos, double [] newPos);
 }

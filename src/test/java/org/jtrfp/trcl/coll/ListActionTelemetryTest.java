@@ -161,5 +161,10 @@ public class ListActionTelemetryTest {
 	subject.set(1, "SECOND");
 	assertTrue(subject.isModified());
     }
+    
+    @Test
+    public void testEquals(){
+	assertTrue(subject.equals(subject));
+    }
 
 }//end ListActionTelemetryTest

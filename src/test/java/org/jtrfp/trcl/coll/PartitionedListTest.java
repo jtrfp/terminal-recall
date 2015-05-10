@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.coll;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -205,4 +206,9 @@ public class PartitionedListTest {
 	    testValues(subjectIntrinsic,p0,p1);
 	}//end for(NUM_ITERATIONS)
     }//end testChangingState()
+    
+    @Test
+    public void testEquals(){
+	assertTrue(subject.equals(subject));
+    }
 }//end PartitionedListTest

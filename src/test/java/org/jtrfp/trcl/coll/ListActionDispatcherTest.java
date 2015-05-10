@@ -443,5 +443,10 @@ public class ListActionDispatcherTest {
 	assertEquals(0,(int)sA[0]);
 	assertEquals(2,(int)sA[2]);
     }//end testToArrayTArray()
+    
+    @Test
+    public void testEquals(){
+	assertTrue(this.equals(this));
+    }
 
 }//end ListActionDispatcherTest

@@ -159,12 +159,14 @@ public class ListActionTelemetry<E> implements List<E> {
     }
 
     /**
-     * @param arg0
+     * @param o
      * @return
      * @see java.util.AbstractList#equals(java.lang.Object)
      */
-    public boolean equals(Object arg0) {
-	return getDelegate().equals(arg0);
+    public boolean equals(Object o) {
+	if(o instanceof ListActionTelemetry)
+	    o=((ListActionTelemetry) o).getDelegate();
+	return getDelegate().equals(o);
     }
 
     /**

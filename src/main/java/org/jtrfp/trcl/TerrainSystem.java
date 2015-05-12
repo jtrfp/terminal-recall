@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -174,8 +175,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								norm2, norm3 }, cX + cZ % 4);
 					portalModel.addTriangles(tris);
 					final Camera tunnelCam = tr.getWorld().newCamera();
-					add(tunnelCam);//TODO: Place in tunnel and not world
 					final PortalExit exit = new PortalExit(tr, tunnelCam);
+					tr.getGame().getCurrentMission().registerTunnelEntrancePortal(new Point(cX,cZ), exit);
 					final PortalEntrance entrance;
 					entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
 					entrance.setPosition(new double[]{objectX,objectY+Y_OFFSET,objectZ});

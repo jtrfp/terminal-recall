@@ -15,6 +15,7 @@ package org.jtrfp.trcl.flow;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +52,8 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PortalEntrance;
+import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
@@ -71,6 +74,8 @@ public class Mission {
     private final LVLFile 	lvl;
     private final HashMap<String, Tunnel> 
     				tunnels = new HashMap<String, Tunnel>();
+    private final HashMap<Integer, PortalExit>
+    				tunnelPortals = new HashMap<Integer, PortalExit>();
     private double[] 		playerStartPosition 
     					= new double[3];
     private List<NAVSubObject> 	navSubObjects;
@@ -426,9 +431,13 @@ public class Mission {
 	final Tunnel result = new Tunnel(tr, tun, reporter);
 	DirectionVector v = tun.getEntrance();
 	tunnelsRemaining.add(result);
-	addTunnelEntrance(new Point(
+	final Point point = new Point(
 		(int)(TR.legacy2MapSquare(v.getZ())),
-		(int)(TR.legacy2MapSquare(v.getX()))),result);
+		(int)(TR.legacy2MapSquare(v.getX())));
+	addTunnelEntrance(point,result);
+	final PortalExit portalExit = getTunnelEntrancePortal(point);//TODO: Returning null
+	portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());
+	portalExit.getControlledCamera();//TODO: Add tunnel to camera
 	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
 	return result;
     }
@@ -630,6 +639,14 @@ public class Mission {
 	    System.out.print(" "+new Vector3D(teo.getPosition()).scalarMultiply(1/TR.mapSquareSize));
 	System.out.println();
 	return tunnelMap.get(key);
+    }
+    
+    public void registerTunnelEntrancePortal(Point mapSquareXZ, PortalExit exit){
+	tunnelPortals.put(pointToHash(mapSquareXZ),exit);
+    }
+    
+    PortalExit getTunnelEntrancePortal(Point mapSquareXZ){
+	return tunnelPortals.get(pointToHash(mapSquareXZ));
     }
     
     public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel){

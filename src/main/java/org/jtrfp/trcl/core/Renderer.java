@@ -51,14 +51,13 @@ public final class Renderer {
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
     private		CollisionManager	collisionManager;
-    private final	CollectionActionDispatcher<Camera>cameras = new CollectionActionDispatcher<Camera>(new ArrayList<Camera>());
-    private		Camera			masterCamera = null;
+    private		Camera			camera = null;
     
     public Renderer(final RendererFactory factory) {
 	this.factory = factory;
 	this.gpu     = factory.getGPU();
 	final TR tr  = gpu.getTr();
-	addCamera(tr.getWorld().newCamera());//TODO: Remove after redesign.
+	camera = tr.getWorld().newCamera();//TODO: Remove after redesign.
 	final GL3 gl = gpu.getGl();
 	
 	System.out.println("...Done.");
@@ -180,10 +179,6 @@ public final class Renderer {
 	    getCamera().getContainingGrid().remove(getCamera());
 	rootGrid.add(getCamera());//TODO: Remove later
     }
-    
-    public Camera getCamera(){//TODO: Remove, but a lot of outside invocations depend on it.
-	return cameras.iterator().next();
-    }
 
     /**
      * @return the cameraMatrixAsFlatArray
@@ -293,17 +288,6 @@ public final class Renderer {
         this.collisionManager = collisionManager;
         return this;
     }
-    
-    public Renderer addCamera(Camera c){
-	if(!cameras.contains(c))
-	 cameras.add(c);
-	return this;
-    }
-    
-    public Renderer removeCamera(Camera c){
-	cameras.remove(c);
-	return this;
-    }
 
     public RendererFactory getRendererFactory() {
 	return factory;
@@ -312,21 +296,8 @@ public final class Renderer {
     public TRFutureTask<RenderList> getRenderList() {
 	return renderList;
     }
-
-    public Collection<Camera> getCameras() {
-	return cameras;
-    }
-
-    public Camera getMasterCamera() {
-	if(masterCamera==null && !cameras.isEmpty())
-	    masterCamera = cameras.iterator().next();
-	return masterCamera;
-    }
-
-    /**
-     * @param masterCamera the masterCamera to set
-     */
-    public void setMasterCamera(Camera masterCamera) {
-        this.masterCamera = masterCamera;
+    
+    public Camera getCamera() {
+	return camera;
     }
 }//end Renderer

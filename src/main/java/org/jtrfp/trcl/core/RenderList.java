@@ -77,10 +77,10 @@ public class RenderList {
     						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>(), Executors.newSingleThreadExecutor());
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
-    private final	CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>
-    	opaqueODAddrsColl    = new CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new OpaqueODAddrAdapter()), 
-    	transODAddrsColl     = new CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new TransODAddrAdapter()), 
-    	unoccludedODAddrsColl= new CollectionAdapter<Collection<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(unoccludedIL= new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new UnoccludedODAddrAdapter());
+    private final	CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>
+    	opaqueODAddrsColl    = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new OpaqueODAddrAdapter()), 
+    	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new TransODAddrAdapter()), 
+    	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(unoccludedIL= new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new UnoccludedODAddrAdapter());
     /*private final	ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>	
     						renderingIndices;*/
     private final 	Submitter<PositionedRenderable> 
@@ -505,38 +505,38 @@ public class RenderList {
 	return dummyBufferID;
     }
     
-    final class OpaqueODAddrAdapter implements Adapter<Collection<VEC4Address>,PositionedRenderable>{
+    final class OpaqueODAddrAdapter implements Adapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>{
 	@Override
-	public Collection<VEC4Address> reAdapt(PositionedRenderable value) {
+	public CollectionActionDispatcher<VEC4Address> reAdapt(PositionedRenderable value) {
 	    if(((WorldObject)value).isImmuneToOpaqueDepthTest())
-		return CollectionUtils.EMPTY_COLLECTION;
-	    return value.getOpaqueObjectDefinitionAddresses();
+		return (CollectionActionDispatcher<VEC4Address>)CollectionActionDispatcher.EMPTY;
+	    return new CollectionActionDispatcher<VEC4Address>(value.getOpaqueObjectDefinitionAddresses());
 	}
 
 	@Override
-	public WorldObject adapt(Collection<VEC4Address> value) {
+	public WorldObject adapt(CollectionActionDispatcher<VEC4Address> value) {
 	    throw new UnsupportedOperationException();
 	}
     }//end OpaqueODAddrAdapter
     
-    final class TransODAddrAdapter implements Adapter<Collection<VEC4Address>,PositionedRenderable>{
+    final class TransODAddrAdapter implements Adapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>{
 	@Override
-	public Collection<VEC4Address> reAdapt(PositionedRenderable value) {
+	public CollectionActionDispatcher<VEC4Address> reAdapt(PositionedRenderable value) {
 	    if(((WorldObject)value).isImmuneToOpaqueDepthTest())
-		return CollectionUtils.EMPTY_COLLECTION;
-	    return value.getTransparentObjectDefinitionAddresses();
+		return (CollectionActionDispatcher<VEC4Address>)CollectionActionDispatcher.EMPTY;
+	    return new CollectionActionDispatcher<VEC4Address>(value.getTransparentObjectDefinitionAddresses());
 	}
 
 	@Override
-	public WorldObject adapt(Collection<VEC4Address> value) {
+	public WorldObject adapt(CollectionActionDispatcher<VEC4Address> value) {
 	    throw new UnsupportedOperationException();
 	}
     }//end TransODAddrAdapter
     
-    final class UnoccludedODAddrAdapter implements Adapter<Collection<VEC4Address>,PositionedRenderable>{
+    final class UnoccludedODAddrAdapter implements Adapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>{
 	@Override
-	public Collection<VEC4Address> reAdapt(PositionedRenderable value) {
-	    final Collection<VEC4Address> result = new ArrayList<VEC4Address>();
+	public CollectionActionDispatcher<VEC4Address> reAdapt(PositionedRenderable value) {
+	    final CollectionActionDispatcher<VEC4Address> result = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
 	    if(((WorldObject)value).isImmuneToOpaqueDepthTest()){
 		result.addAll(value.getOpaqueObjectDefinitionAddresses());
 		result.addAll(value.getTransparentObjectDefinitionAddresses());
@@ -545,7 +545,7 @@ public class RenderList {
 	}
 
 	@Override
-	public WorldObject adapt(Collection<VEC4Address> value) {
+	public WorldObject adapt(CollectionActionDispatcher<VEC4Address> value) {
 	    throw new UnsupportedOperationException();
 	}
     }//end UnoccludedODAddrAdapter

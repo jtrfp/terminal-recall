@@ -12,29 +12,34 @@
  ******************************************************************************/
 package org.jtrfp.trcl.coll;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class CollectionActionUnpacker<E> implements Collection<Collection<E>> {//TODO: ListActionUnpacker should extend this
+public class CollectionActionUnpacker<E> implements Collection<CollectionActionDispatcher<E>> {//TODO: ListActionUnpacker should extend this
     private final Collection<E> delegate;
+    private final Collection<CollectionActionDispatcher<E>> collections = new ArrayList<CollectionActionDispatcher<E>>();
     
     public CollectionActionUnpacker(Collection<E> delegate){
 	this.delegate=delegate;
     }
     @Override
-    public boolean add(Collection<E> e) {
-	return delegate.addAll(e);
+    public boolean add(CollectionActionDispatcher<E> e) {
+	collections.add(e);
+	return e.addTarget(delegate, true);
     }
     @Override
-    public boolean addAll(Collection<? extends Collection<E>> c) {
-	boolean result = false;
-	for(Collection<E> element:c)
-	    result |= delegate.addAll(element);
-	return result;
+    public boolean addAll(Collection<? extends CollectionActionDispatcher<E>> c) {
+	collections.addAll(c);
+	for(CollectionActionDispatcher<E> element:c)
+	    element.addTarget(delegate, true);
+	return !c.isEmpty();
     }
     @Override
     public void clear() {
-	delegate.clear();
+	for(CollectionActionDispatcher<E> cad:collections)
+	    cad.removeTarget(delegate, true);
+	collections.clear();
     }
     @Override
     public boolean contains(Object o) {
@@ -49,15 +54,16 @@ public class CollectionActionUnpacker<E> implements Collection<Collection<E>> {/
 	throw new UnsupportedOperationException();
     }
     @Override
-    public Iterator<Collection<E>> iterator() {
+    public Iterator<CollectionActionDispatcher<E>> iterator() {
 	throw new UnsupportedOperationException();
     }
     @Override
     public boolean remove(Object o) {
 	boolean result = false;
-	if(o instanceof Collection){
-	    Collection<E> coll = (Collection<E>)o;
-	    result |= delegate.removeAll(coll);
+	if(o instanceof CollectionActionDispatcher){
+	    CollectionActionDispatcher<E> coll = (CollectionActionDispatcher<E>)o;
+	    coll.removeTarget(delegate, true);
+	    result |= collections.remove(coll);
 	}
 	return result;
     }
@@ -65,28 +71,29 @@ public class CollectionActionUnpacker<E> implements Collection<Collection<E>> {/
     public boolean removeAll(Collection<?> c) {
 	boolean result = false;
 	for(Object e0:c)
-	    if(e0 instanceof Collection)
-		result |= remove(e0);
+	 result |= remove(e0);
 	return result;
     }
     @Override
     public boolean retainAll(Collection<?> c) {
-	boolean result = false;
-	for(Object e0:c)
-	    if(e0 instanceof Collection)
-		result |= delegate.retainAll((Collection)e0);
-	return result;
+	final ArrayList<CollectionActionDispatcher<E>>toRemove = new ArrayList<CollectionActionDispatcher<E>>();
+	for(CollectionActionDispatcher<E> cad:collections)
+	    if(!c.contains(cad))
+		toRemove.add(cad);
+	for(CollectionActionDispatcher<E> cad:toRemove)
+	    remove(cad);
+	return !toRemove.isEmpty();
     }
     @Override
     public int size() {
-	throw new UnsupportedOperationException();
+	return collections.size();
     }
     @Override
     public Object[] toArray() {
-	throw new UnsupportedOperationException();
+	return collections.toArray();
     }
     @Override
     public <T> T[] toArray(T[] a) {
-	throw new UnsupportedOperationException();
+	return collections.toArray(a);
     }
 }//end CollectionActionUnpacker

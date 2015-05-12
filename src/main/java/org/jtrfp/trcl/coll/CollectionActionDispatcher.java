@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jtrfp.trcl.mem.VEC4Address;
 import org.jtrfp.trcl.tools.Util;
 
 public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E> {
@@ -151,4 +152,12 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
 	for(Collection<E> targ:targets)
 	    Util.repopulate(targ, c);
     }
+    
+
+    public static final CollectionActionDispatcher<?> EMPTY = new CollectionActionDispatcher(){
+	@Override
+	public boolean addTarget(Collection c, boolean populate){return false;}
+	@Override
+	public boolean removeTarget(Collection c, boolean populate){return false;}
+    };
 }//end CollectionActionDispatcher

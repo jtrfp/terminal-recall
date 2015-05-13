@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * This file is part of TERMINAL RECALL
+ * Copyright (c) 2012-2015 Chuck Ritola
+ * Part of the jTRFP.org project
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributors:
+ *     chuck - initial API and implementation
+ ******************************************************************************/
+
 package org.jtrfp.trcl.coll;
 
 import static org.junit.Assert.assertEquals;
@@ -24,18 +37,21 @@ public class CollectionActionPackerTest {
     private CollectionActionDispatcher<CollectionActionDispatcher<Pair<Integer,String>>> subjectDelegate;
     Collection<String> flatCollection;
     Pair<Integer,String> zero,one,two,A,B,C;
-    Adapter<Pair<Integer,String>,String> strippingAdapter = new Adapter<Pair<Integer,String>,String>(){
+    
+    private static final CachedAdapter<Pair<Integer,String>,String> flatteningAdapter = new CachedAdapter<Pair<Integer,String>,String>(){
 	@Override
-	public String adapt(Pair<Integer, String> value) {
+	protected String _adapt(Pair<Integer, String> value)
+		throws UnsupportedOperationException {
 	    return value.getValue();
 	}
-    };
-    Adapter<String,Pair<Integer,String>> dummyAdapter = new  Adapter<String,Pair<Integer,String>>(){
+
 	@Override
-	public Pair<Integer, String> adapt(String value) {
+	protected Pair<Integer, String> _reAdapt(String value)
+		throws UnsupportedOperationException {
 	    throw new UnsupportedOperationException();
 	}
-    };
+    };//end flatteningAdapter
+    
     private CollectionActionUnpacker<Pair<Integer,String>> unpacker;
 
     @Before
@@ -52,7 +68,8 @@ public class CollectionActionPackerTest {
 	subject.add(C=new Pair<Integer,String>(1,"C"));
 	
 	flatCollection = new ArrayList<String>();
-	unpacker = new CollectionActionUnpacker<Pair<Integer,String>>(new AdaptedCollection<String,Pair<Integer,String>>(flatCollection, dummyAdapter,strippingAdapter));
+	unpacker = new CollectionActionUnpacker<Pair<Integer,String>>(new AdaptedCollection<String,Pair<Integer,String>>(flatCollection, flatteningAdapter.toBackward(),flatteningAdapter.toForward()));
+	subjectDelegate.addTarget(unpacker, true);
     }
 
     @After
@@ -70,7 +87,17 @@ public class CollectionActionPackerTest {
 	    if(first.getKey()==0 || first.getKey()==1){
 		//ok
 	    }else{fail("Got unexpected key: "+first.getKey());}
-	}//end testAdd()
+	}//end for(collection)
+	
+	assertEquals(6,flatCollection.size());
+	assertTrue(flatCollection.contains("zero"));
+	assertTrue(flatCollection.contains("one"));
+	assertTrue(flatCollection.contains("two"));
+	
+	assertTrue(flatCollection.contains("A"));
+	assertTrue(flatCollection.contains("B"));
+	assertTrue(flatCollection.contains("C"));
+	
     }//end testAdd()
 
     @Test
@@ -78,6 +105,7 @@ public class CollectionActionPackerTest {
 	assertEquals(2,subjectDelegate.size());//Control test
 	subject.clear();
 	assertEquals(0,subjectDelegate.size());
+	assertEquals(0,flatCollection.size());
     }
 
     @Test
@@ -95,18 +123,38 @@ public class CollectionActionPackerTest {
     public void testContainsAll() {
 	assertTrue(subject.containsAll(Arrays.asList(zero,one,two,A,B,C)));
     }
+    
+    @Test
+    public void testFlatContents(){
+	assertTrue(flatCollection.containsAll(Arrays.asList("zero","one","two","A","B","C")));
+    }
 
     @Test
     public void testIsEmpty() {
-	assertFalse(subject.isEmpty());
+	assertFalse(subject.isEmpty());//Control var
 	subject.clear();
 	assertTrue(subject.isEmpty());
+    }
+    
+    @Test
+    public void testFlatCollectionEmpty(){
+	assertFalse(flatCollection.isEmpty());//Control var
+	subject.clear();
+	assertTrue(flatCollection.isEmpty());
     }
 
     @Test
     public void testRemove() {
+	assertTrue(subject.contains(zero));//Control var
 	subject.remove(zero);
 	assertFalse(subject.contains(zero));
+    }
+    
+    @Test
+    public void testFlatCollectionRemove() {
+	assertTrue(subject.contains(zero));//Control var
+	subject.remove(zero);
+	assertFalse(flatCollection.contains(zero));
     }
 
     @Test
@@ -115,6 +163,14 @@ public class CollectionActionPackerTest {
 	assertFalse(subject.contains(one));
 	assertFalse(subject.contains(two));
 	assertEquals(4,subject.size());
+    }
+    
+    @Test
+    public void testFlatCollectionRemoveAll() {
+	assertTrue(subject.removeAll(Arrays.asList(one,two)));
+	assertFalse(flatCollection.contains(one));
+	assertFalse(flatCollection.contains(two));
+	assertEquals(4,flatCollection.size());
     }
 
     @Test
@@ -126,6 +182,11 @@ public class CollectionActionPackerTest {
     @Test
     public void testSize() {
 	assertEquals(6,subject.size());
+    }
+    
+    @Test
+    public void testFlatSize(){
+	assertEquals(6,flatCollection.size());
     }
 
     @Test
@@ -149,7 +210,18 @@ public class CollectionActionPackerTest {
 	temp.add(three=new Pair<Integer,String>(0,"three"));
 	temp.add(D    =new Pair<Integer,String>(1,"D"));
 	subject.addAll(temp);
-    }//end tsetAddAll()
+	assertTrue(subject.containsAll(temp));
+    }//end testAddAll()
+    
+    @Test
+    public void testFlatCollectionAddAll() {
+	Pair<Integer,String> three, D;
+	Collection<Pair<Integer,String>> temp = new ArrayList<Pair<Integer,String>>();
+	temp.add(three=new Pair<Integer,String>(0,"three"));
+	temp.add(D    =new Pair<Integer,String>(1,"D"));
+	subject.addAll(temp);
+	assertTrue(flatCollection.containsAll(Arrays.asList("three","D")));
+    }//end testFlatCollectionAddAll()
 
     @Test
     public void testIterator() {

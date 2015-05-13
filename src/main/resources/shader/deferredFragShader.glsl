@@ -89,7 +89,7 @@ const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
 const uint OVERSAMPLING				= 4u;
 const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 
-const int NUM_PORTALS				= 8;
+const uint NUM_PORTALS				= 8u;
 
 vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
 vec3	fogCubeColor;
@@ -124,7 +124,7 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  }
  
  vec4 portalFetch(uint textureID){
- if(textureID!=7) return vec4(1,0,0,1);
+ if(textureID!=7u) return vec4(1,0,0,1);
  return texelFetch(portalTexture,ivec3(gl_FragCoord.xy,int(textureID+1u)),0);
  }
  
@@ -239,7 +239,7 @@ vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  vec3 	norm 		= nXnYnZ.xyz/w;
  vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
  if(disableAlpha)	texel.a=1;
- if(bypassAlpha==0) texel.rgb = mix(texel.rgb,fogCubeColor,warpFog(vUVZI.z));
+ if(bypassAlpha==0u)texel.rgb = mix(texel.rgb,fogCubeColor,warpFog(vUVZI.z));
  return texel;
 }
 

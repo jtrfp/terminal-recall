@@ -12,11 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -39,11 +42,16 @@ import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public class WorldObject implements PositionedRenderable {
+    public static final String POSITION ="position";
+    public static final String HEADING  ="heading";
+    public static final String TOP      ="top";
     
     public static final boolean LOOP = true;
-    private double[] 	heading = new double[] { 0, 0, 1 };
-    private double[] 	top 	= new double[] { 0, 1, 0 };
-    protected volatile double[]  position = new double[3];
+    private double[] 	heading = new double[] { 0, 0, 1 }, oldHeading= new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
+    private double[] 	top 	= new double[] { 0, 1, 0 }, oldTop    = new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
+    protected volatile double[] 
+	    position = new double[3], 
+	    oldPosition = new double[]{Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     protected double[]  modelOffset= new double[3];
     private final double[]positionWithOffset 
     				= new double[3];
@@ -81,6 +89,8 @@ public class WorldObject implements PositionedRenderable {
     
     private Collection<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new ArrayList<VEC4Address>();
     private Collection<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>();
+    
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
@@ -453,6 +463,7 @@ public class WorldObject implements PositionedRenderable {
     public synchronized WorldObject notifyPositionChange(){
 	if(position[0]==Double.NaN)
 	    throw new RuntimeException("Invalid position.");
+	pcs.firePropertyChange(POSITION, oldPosition, position);
 	needToRecalcMatrix=true;
 	synchronized (position) {
 	    final SpacePartitioningGrid<PositionedRenderable> 
@@ -463,6 +474,7 @@ public class WorldObject implements PositionedRenderable {
 		     lastContainingList.remove(this);}
 		    lastContainingList=null;
 		}//end if(lastContainingList!=null)
+		updateOldPosition();
 		return this;
 	    }//end if(not in grid)
 	    //Possibly moved from cube-to-cube
@@ -482,8 +494,13 @@ public class WorldObject implements PositionedRenderable {
 		lastContainingList=newList;
 	    }//end if(posChange)
 	}//end sync(position)
+	updateOldPosition();
 	return this;
     }//end notifyPositionChange()
+    
+    private void updateOldPosition(){
+	System.arraycopy(position, 0, oldPosition, 0, 3);
+    }
 
     /**
      * @return the heading
@@ -497,6 +514,8 @@ public class WorldObject implements PositionedRenderable {
      *            the heading to set
      */
     public synchronized void setHeading(Vector3D nHeading) {
+	System.arraycopy(heading, 0, oldHeading, 0, 3);
+	pcs.firePropertyChange(HEADING, oldHeading, nHeading);
 	heading[0] = nHeading.getX();
 	heading[1] = nHeading.getY();
 	heading[2] = nHeading.getZ();
@@ -521,6 +540,8 @@ public class WorldObject implements PositionedRenderable {
      *            the top to set
      */
     public synchronized void setTop(Vector3D nTop) {
+	System.arraycopy(top, 0, oldTop, 0, 3);
+	pcs.firePropertyChange(TOP, oldTop, nTop);
 	top[0] = nTop.getX();
 	top[1] = nTop.getY();
 	top[2] = nTop.getZ();
@@ -726,6 +747,69 @@ public class WorldObject implements PositionedRenderable {
     public WorldObject setImmuneToOpaqueDepthTest(boolean immuneToDepthTest) {
         this.immuneToOpaqueDepthTest = immuneToDepthTest;
         return this;
+    }
+
+    /**
+     * @param arg0
+     * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
+     */
+    public void addPropertyChangeListener(PropertyChangeListener arg0) {
+	pcs.addPropertyChangeListener(arg0);
+    }
+
+    /**
+     * @param propertyName
+     * @param listener
+     * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+     */
+    public void addPropertyChangeListener(String propertyName,
+	    PropertyChangeListener listener) {
+	pcs.addPropertyChangeListener(propertyName, listener);
+    }
+
+    /**
+     * @return
+     * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners()
+     */
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+	return pcs.getPropertyChangeListeners();
+    }
+
+    /**
+     * @param propertyName
+     * @return
+     * @see java.beans.PropertyChangeSupport#getPropertyChangeListeners(java.lang.String)
+     */
+    public PropertyChangeListener[] getPropertyChangeListeners(
+	    String propertyName) {
+	return pcs.getPropertyChangeListeners(propertyName);
+    }
+
+    /**
+     * @param propertyName
+     * @return
+     * @see java.beans.PropertyChangeSupport#hasListeners(java.lang.String)
+     */
+    public boolean hasListeners(String propertyName) {
+	return pcs.hasListeners(propertyName);
+    }
+
+    /**
+     * @param arg0
+     * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.beans.PropertyChangeListener)
+     */
+    public void removePropertyChangeListener(PropertyChangeListener arg0) {
+	pcs.removePropertyChangeListener(arg0);
+    }
+
+    /**
+     * @param propertyName
+     * @param listener
+     * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+     */
+    public void removePropertyChangeListener(String propertyName,
+	    PropertyChangeListener listener) {
+	pcs.removePropertyChangeListener(propertyName, listener);
     }
 
     /*public void checkPositionSanity() {

@@ -13,6 +13,8 @@
 package org.jtrfp.trcl;
 
 import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,7 +45,7 @@ import com.ochafik.util.listenable.ListenableSet;
 public class Camera extends WorldObject implements RelevantEverywhere{
     	//// PROPERTIES
     	public static final String FOG_ENABLED        = "fogEnabled";
-    	public static final String FLAT_CUBE_POSITION = "flatCubePosition";
+    	public static final String CENTER_CUBE_ID     = "flatCubePosition";
     	public static final String ROOT_GRID          = "rootGrid";
     
 	private volatile  RealMatrix completeMatrix;
@@ -61,6 +63,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	     = new CompoundListenableCollection<PositionedRenderable>(relevantCubeCollection);
 	private final	ListenableSet<PositionedRenderable> sortedRelevanceSet;
 	private SpacePartitioningGrid rootGrid;
+	private int centerCubeID = -1;
 
     Camera(GPU gpu) {
 	super(gpu.getTr());
@@ -77,7 +80,26 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addBehavior(new RotateAroundObject().setEnable(false));
 	addBehavior(new TriggersVisCalcWithMovement().setEnable(true));
 	addBehavior(new SkyCubeCloudModeUpdateBehavior());
+	
+	addPropertyChangeListener(new CameraPositionHandler());
     }//end constructor
+    
+    private final class CameraPositionHandler implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final String propertyName = evt.getPropertyName();
+	    if(propertyName==WorldObject.POSITION){
+		if(getRootGrid()==null)
+		    return;
+		final int newCenterCubeID = (Integer)getRootGrid().
+			getWorldSpaceRasterizer().
+			reAdapt(new Vector3D(getPosition()));
+		getRootGrid().getWorldSpaceRasterizer();
+		pcs.firePropertyChange(CENTER_CUBE_ID, centerCubeID, newCenterCubeID);
+		centerCubeID=newCenterCubeID;
+	    }//end if(POSITION)
+	}//end if propertyChange()
+    }//end CameraPositionHandler
 
 	private void updateProjectionMatrix(){
 	    	final Component component = gpu.getTr().getRootWindow();

@@ -14,6 +14,7 @@
 package org.jtrfp.trcl.coll;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.jtrfp.trcl.tools.Util;
 
 import com.ochafik.util.Adapter;
 
@@ -27,6 +28,14 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     
     public CachedAdapter(BidiReferenceMap<U,V> cache){
 	this.cache=cache;
+    }
+    
+    public com.ochafik.util.listenable.Adapter<U,V> toForward(){
+	return Util.bidi2Forward(this);
+    }
+    
+    public com.ochafik.util.listenable.Adapter<V,U> toBackward(){
+	return Util.bidi2Backward(this);
     }
 
     @Override

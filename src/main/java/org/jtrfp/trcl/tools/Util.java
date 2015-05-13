@@ -21,6 +21,8 @@ import java.util.ListIterator;
 
 import org.jtrfp.trcl.coll.Repopulatable;
 
+import com.ochafik.util.listenable.Pair;
+
 public class Util {
 public static final Color [] DEFAULT_PALETTE = new Color []{
     new Color(0,0,0,0),
@@ -312,4 +314,22 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
 	   dest.addAll(src);
        }
    }//end repopulate(...)
+   
+   public static <U,V> com.ochafik.util.listenable.Adapter<U,V> bidi2Forward(final com.ochafik.util.Adapter<U,V> bidi){
+       return new com.ochafik.util.listenable.Adapter<U,V>(){
+
+	@Override
+	public V adapt(U value) {
+	    return bidi.adapt(value);
+	}
+       };
+   }//end bidi2Forward(...)
+   
+   public static <U,V> com.ochafik.util.listenable.Adapter<V,U> bidi2Backward(final com.ochafik.util.Adapter<U,V> bidi){
+       return new com.ochafik.util.listenable.Adapter<V,U>(){
+	@Override
+	public U adapt(V value) {
+	    return bidi.reAdapt(value);
+	}};
+   }//end bidi2Backward(...)
 }//end Util

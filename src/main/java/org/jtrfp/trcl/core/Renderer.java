@@ -36,7 +36,7 @@ import org.jtrfp.trcl.prop.SkyCube;
 
 public final class Renderer {
     private final	RendererFactory		factory;
-    private 		RenderableSpacePartitioningGrid rootGrid;
+    //private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private		GLFrameBuffer		renderingTarget;
     private 		boolean 		initialized = false;
@@ -139,8 +139,10 @@ public final class Renderer {
 	    public Void call() {
 		try{
 		proximitySorter.setCenter(getCamera().getCameraPosition().toArray());
+		if(camera.getRootGrid()==null)
+		    return null;
 		synchronized(gpu.getTr().getThreadManager().gameStateLock){
-		 rootGrid.cubesWithinRadiusOf(
+		 camera.getRootGrid().cubesWithinRadiusOf(
 			getCamera().getCameraPosition().add(
 				getCamera().getLookAtVector().scalarMultiply(
 					getCamera().getViewDepth() / 2.1)),
@@ -165,20 +167,23 @@ public final class Renderer {
     /**
      * @return the rootGrid
      */
+    /*
     public RenderableSpacePartitioningGrid getRootGrid() {
 	return rootGrid;
     }
-
+*/
     /**
      * @param rootGrid
      *            the rootGrid to set
      */
+    /*
     public void setRootGrid(RenderableSpacePartitioningGrid rootGrid) {
 	this.rootGrid = rootGrid;
 	if(getCamera().getContainingGrid()!=null)
 	    getCamera().getContainingGrid().remove(getCamera());
 	rootGrid.add(getCamera());//TODO: Remove later
     }
+    */
 
     /**
      * @return the cameraMatrixAsFlatArray

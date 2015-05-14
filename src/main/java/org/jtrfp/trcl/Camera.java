@@ -93,7 +93,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		    return;
 		final int newCenterCubeID = (Integer)getRootGrid().
 			getWorldSpaceRasterizer().
-			reAdapt(new Vector3D(getPosition()));
+			adapt(new Vector3D(getPosition()));
 		getRootGrid().getWorldSpaceRasterizer();
 		pcs.firePropertyChange(CENTER_CUBE_ID, centerCubeID, newCenterCubeID);
 		centerCubeID=newCenterCubeID;

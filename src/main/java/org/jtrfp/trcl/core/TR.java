@@ -169,7 +169,8 @@ public final class TR{
 		setResourceManager(new ResourceManager(this));
 		
 		final Renderer renderer = mainRenderer.get();
-		renderer.setRootGrid(getDefaultGrid());//TODO: replace with Camera objects?
+		renderer.getCamera().setRootGrid(getDefaultGrid());//TODO: Remove when conversion complete
+		//renderer.setRootGrid(getDefaultGrid());//TODO: replace with Camera objects?
 		renderer.setCollisionManager(getCollisionManager());
 		getThreadManager().addRepeatingGLTask(renderer.render);
 		

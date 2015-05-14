@@ -203,6 +203,7 @@ public class RenderList {
 
     private void updateStatesToGPU() {
 	synchronized(tr.getThreadManager().gameStateLock){
+	    renderer.getCamera().tick(System.currentTimeMillis());
 	synchronized(relevantPositionedRenderables){
 	for (PositionedRenderable renderable:relevantPositionedRenderables) 
 	    renderable.updateStateToGPU();

@@ -18,6 +18,8 @@ public interface PropertyListenable {
  public void addPropertyChangeListener   (PropertyChangeListener toAdd);
  public void addPropertyChangeListener   (String propertyName, PropertyChangeListener toAdd);
  public void removePropertyChangeListener(PropertyChangeListener toRemove);
+ public void removePropertyChangeListener(String propertyName,PropertyChangeListener listener);
  public PropertyChangeListener [] getPropertyChangeListeners();
  public PropertyChangeListener [] getPropertyChangeListeners(String propertyName);
+ public boolean hasListeners(String propertyName);
 }//end PropertyListenable

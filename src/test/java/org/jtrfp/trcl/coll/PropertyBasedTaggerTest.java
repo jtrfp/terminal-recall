@@ -13,7 +13,9 @@
 
 package org.jtrfp.trcl.coll;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.beans.PropertyChangeListener;
@@ -31,7 +33,6 @@ import com.ochafik.util.listenable.Pair;
 
 public class PropertyBasedTaggerTest {
     private final Adapter<TaggingElement,Integer> subjectAdapter = new Adapter<TaggingElement,Integer>(){
-
 	@Override
 	public Integer adapt(TaggingElement value) {
 	    return value.getValue().length();

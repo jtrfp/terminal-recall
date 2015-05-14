@@ -63,11 +63,6 @@ public class WorldObject implements PositionedRenderable {
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected Integer 	matrixID;
-    private ByteBuffer 	opaqueObjectDefinitionAddressesInVec4 = ByteBuffer
-	    .allocate(0);// defaults to empty
-    private ByteBuffer 	transparentObjectDefinitionAddressesInVec4 = ByteBuffer
-	    .allocate(0);// defaults to empty
-
     private WeakReference<SpacePartitioningGrid> containingGrid;
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
@@ -268,25 +263,12 @@ public class WorldObject implements PositionedRenderable {
 			return null;
 		    }}).get();//TODO: Make non-blocking
 		ByteOrder order = getTr().gpu.get().getByteOrder();
-		opaqueObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
-			opaqueIndicesList.size() * 4).order(order);// 4 bytes per int
 		opaqueObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>(opaqueIndicesList.size());
 		for(int i = 0; i < opaqueIndicesList.size(); i++)
 		    opaqueObjectDefinitionAddressesInVEC4.add(new VEC4Address(opaqueIndicesList.get(i)));
-		transparentObjectDefinitionAddressesInVec4 = ByteBuffer.allocateDirect(
-			transparentIndicesList.size() * 4).order(order);
 		transparentObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>(transparentIndicesList.size());
 		for(int i = 0; i < transparentIndicesList.size(); i++)
 		    transparentObjectDefinitionAddressesInVEC4.add(new VEC4Address(transparentIndicesList.get(i)));
-
-		IntBuffer trans = transparentObjectDefinitionAddressesInVec4
-			.asIntBuffer(), opaque = opaqueObjectDefinitionAddressesInVec4
-			.asIntBuffer();
-
-		for (Integer elm : transparentIndicesList)
-		    trans.put(elm);
-		for (Integer elm : opaqueIndicesList) 
-		    opaque.put(elm);
 		return null;
 	    }});
     }// end initializeObjectDefinitions()

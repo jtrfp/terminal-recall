@@ -123,7 +123,7 @@ public final class Renderer {
 	if(pr instanceof WorldObject)
 	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
 	
-	renderList.get().getSubmitter().submit((WorldObject)pr);//TODO: Refactor back to PositionedRenderable
+	renderList.get().getVisibleWorldObjectList().add(pr);
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {

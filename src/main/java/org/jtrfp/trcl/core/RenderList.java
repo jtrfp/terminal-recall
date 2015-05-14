@@ -81,57 +81,6 @@ public class RenderList {
     	opaqueODAddrsColl    = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new OpaqueODAddrAdapter()), 
     	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new TransODAddrAdapter()), 
     	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(unoccludedIL= new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new UnoccludedODAddrAdapter());
-    /*private final	ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>	
-    						renderingIndices;*/
-    private final 	Submitter<PositionedRenderable> 
-    						submitter = new Submitter<PositionedRenderable>() {
-	@Override
-	public void submit(PositionedRenderable item) {
-	    synchronized(relevantPositionedRenderables)
-	     {relevantPositionedRenderables.add(item);}
-	    /*
-	    boolean isUnoccluded = false;
-	    if (item instanceof WorldObject) {
-		final WorldObject wo = (WorldObject)item;
-		if (!wo.isActive())
-		    return;
-		synchronized(nearbyWorldObjects)
-		 {nearbyWorldObjects.add(wo);}
-		if(!wo.isVisible())return;
-		isUnoccluded = ((WorldObject)item).isImmuneToOpaqueDepthTest();
-		final Collection<VEC4Address> opOD = wo.getOpaqueObjectDefinitionAddresses();
-		final Collection<VEC4Address> trOD = wo.getTransparentObjectDefinitionAddresses();
-		 if(isUnoccluded){
-			    numUnoccludedTBlocks += trOD.size();
-				if(trOD.size()>0)
-				     synchronized(unoccludedTPartition)
-				      {for(VEC4Address od:trOD)unoccludedTPartition.newEntry(od);}
-			    numUnoccludedTBlocks += opOD.size();
-				if(opOD.size()>0)
-				     synchronized(unoccludedTPartition)
-				      {for(VEC4Address od:opOD)unoccludedTPartition.newEntry(od);}
-			}//end if(trOD)
-		    else{
-			numTransparentBlocks += trOD.size();
-			if(trOD.size()>0)
-			     synchronized(transparentPartition)
-			      {for(VEC4Address od:trOD)transparentPartition.newEntry(od);}
-			numOpaqueBlocks += opOD.size();
-			if(opOD.size()>0)
-			 synchronized(opaquePartition)
-			  {for(VEC4Address od:opOD)opaquePartition.newEntry(od);}
-		    }//end if(occluded)
-	    }//end if(WorldObject)
-	    */
-	}// end submit(...)
-	
-	@Override
-	public void submit(Collection<PositionedRenderable> items) {
-	    synchronized(items){
-		for(PositionedRenderable r:items){submit(r);}
-	    }//end for(items)
-	}//end submit(...)
-    };
 
     public RenderList(final GL3 gl, final Renderer renderer, final TR tr) {
 	// Build VAO
@@ -480,10 +429,6 @@ public class RenderList {
 	gl.glFlush();
 	gl.glWaitSync(rootBufferReadFinishedSync, 0, GL3.GL_TIMEOUT_IGNORED);
     }// end render()
-
-    public Submitter<PositionedRenderable> getSubmitter() {
-	return submitter;
-    }
 
     public void reset() {
 	synchronized(relevantPositionedRenderables){

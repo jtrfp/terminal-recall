@@ -32,10 +32,10 @@ import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 
 public class PropertyBasedTaggerTest {
-    private final Adapter<TaggingElement,Integer> subjectAdapter = new Adapter<TaggingElement,Integer>(){
+    private final Adapter<String,Integer> subjectAdapter = new Adapter<String,Integer>(){
 	@Override
-	public Integer adapt(TaggingElement value) {
-	    return value.getValue().length();
+	public Integer adapt(String value) {
+	    return value.length();
 	}};
     private ArrayList<Pair<Integer,TaggingElement>> delegate;
     private PropertyBasedTagger<TaggingElement,Integer,String> subject;
@@ -114,7 +114,7 @@ public class PropertyBasedTaggerTest {
 	Iterator<TaggingElement> iterator = subject.iterator();
 	iterator.next();
 	try{iterator.remove();fail("Removal failed to throw UnsupportedOperationException.");}
-	catch(UnsupportedOperationException e){}
+	catch(UnsupportedOperationException e){}//A good problem to have.
     }
 
     @Test
@@ -150,7 +150,21 @@ public class PropertyBasedTaggerTest {
 	assertEquals(1,subject.size());
     }
     
-    private static final class TaggingElement implements PropertyListenable{
+    @Test
+    public void testTags(){
+	subject.add(elements[0]);
+	subject.add(elements[1]);
+	subject.add(elements[2]);
+	
+	assertEquals(4,(int)delegate.get(0).getKey());
+	assertEquals(3,(int)delegate.get(1).getKey());
+	assertEquals(3,(int)delegate.get(2).getKey());
+	
+	elements[0].setValue("_zero");
+	assertEquals(5,(int)delegate.get(2).getKey());
+    }
+    
+    public static final class TaggingElement implements PropertyListenable{
 	public static final String VALUE       = "value";
 	private final PropertyChangeSupport pcs= new PropertyChangeSupport(this);
 	private String value = "";

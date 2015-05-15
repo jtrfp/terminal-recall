@@ -14,6 +14,7 @@ package org.jtrfp.trcl.coll;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,17 +22,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.beanutils.PropertyUtils;
+
 import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 
 public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE> implements Collection<E> {
     private final Collection<Pair<KEY,E>>    delegate;
-    private final Adapter<E,KEY> propertyAdapter;
+    private final Adapter<PROPERTY_TYPE,KEY> propertyAdapter;
     private final Map<E,PropertyChangeListener> listeners= new HashMap<E,PropertyChangeListener>();
     private final Map<E,Pair<KEY,E>> pairs               = new HashMap<E,Pair<KEY,E>>();
     private final String propertyName;
     
-    public PropertyBasedTagger(Collection<Pair<KEY,E>> delegate, Adapter<E,KEY> nonCachedPropertyAdapter, String propertyName){
+    public PropertyBasedTagger(Collection<Pair<KEY,E>> delegate, Adapter<PROPERTY_TYPE,KEY> nonCachedPropertyAdapter, String propertyName){
 	this.delegate       =delegate;
 	this.propertyAdapter=nonCachedPropertyAdapter;
 	this.propertyName   =propertyName;
@@ -42,11 +45,14 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 	Pair<KEY,E>pair= pairs.get(e);
 	if(pair!=null)
 	    return false;
-	pair= new Pair<KEY,E>(propertyAdapter.adapt(e),e);
+	try{pair= new Pair<KEY,E>(propertyAdapter.adapt((PROPERTY_TYPE)PropertyUtils.getProperty(e, propertyName)),e);}
+	catch(NoSuchMethodException     ex){throw new IllegalArgumentException("Supplied element (bean) does not expose method for property: `"+propertyName+"`.");}
+	catch(InvocationTargetException ex){throw new RuntimeException(ex);}
+	catch(IllegalAccessException    ex){throw new IllegalArgumentException("Supplied element (bean) does not allow access for property `"+propertyName+"`.",ex);}
 	PropertyChangeListener pcl = new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		final KEY newKey     = propertyAdapter.adapt(e);
+		final KEY newKey     = propertyAdapter.adapt((PROPERTY_TYPE)evt.getNewValue());
 		final Pair<KEY,E>pair= pairs.get(e);
 		final KEY oldKey     = pair.getKey();
 		if(!newKey.equals(oldKey)){
@@ -54,17 +60,19 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 		    delegate.remove(pair);
 		    pairs.remove(e);
 		    //Add new
-		    final Pair<KEY,E> newPair = new Pair<KEY,E>();
-		    delegate.add(newPair);
+		    final Pair<KEY,E> newPair = new Pair<KEY,E>(propertyAdapter.adapt((PROPERTY_TYPE)evt.getNewValue()),e);
+		    assert newPair!=null:"pair unexpectedly null.";
+		    assert delegate.add(newPair):"Failed to add pair to delegate.";
 		    pairs.put(e,newPair);
 		}//end if(changed key)
 	    }};
 	listeners.put(e,pcl);
 	e.addPropertyChangeListener(propertyName, pcl);
+	assert pair!=null:"pair unexpectedly null.";
 	delegate.add(pair);
 	pairs.put(e,pair);
 	return true;
-    }
+    }//end add(...)
 
     @Override
     public boolean addAll(Collection<? extends E> c) {

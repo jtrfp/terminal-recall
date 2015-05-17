@@ -36,8 +36,8 @@ public class PredicatedORListActionFilter<E> implements Collection<Predicate<E>>
     }
 
     @Override
-    public boolean add(Predicate<E> arg0) {
-	return addAll(Arrays.asList(arg0));
+    public boolean add(Predicate<E> predicatesToAdd) {
+	return addAll(Arrays.asList(predicatesToAdd));
     }
 
     @Override
@@ -71,10 +71,10 @@ public class PredicatedORListActionFilter<E> implements Collection<Predicate<E>>
 
     @Override
     public void clear() {
-	delegate.clear();
+	delegate  .clear();
 	predicates.clear();
-	unused.addAll(used);
-	used.clear();
+	unused    .addAll(used);
+	used      .clear();
     }
 
     @Override
@@ -246,4 +246,4 @@ public class PredicatedORListActionFilter<E> implements Collection<Predicate<E>>
 	    }
 	    return a;
 	}};
-}//end KeyBasedFilter
+}//end PredicatedORListActionFilter

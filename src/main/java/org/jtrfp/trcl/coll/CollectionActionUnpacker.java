@@ -62,7 +62,7 @@ public class CollectionActionUnpacker<E> implements Collection<CollectionActionD
 	boolean result = false;
 	if(o instanceof CollectionActionDispatcher){
 	    CollectionActionDispatcher<E> coll = (CollectionActionDispatcher<E>)o;
-	    coll.removeTarget(delegate, true);
+	    assert coll.removeTarget(delegate, true);
 	    result |= collections.remove(coll);
 	}
 	return result;

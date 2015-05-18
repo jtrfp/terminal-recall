@@ -37,8 +37,8 @@ public class PropertyBasedTaggerTest {
 	public Integer adapt(String value) {
 	    return value.length();
 	}};
-    private ArrayList<Pair<Integer,TaggingElement>> delegate;
-    private PropertyBasedTagger<TaggingElement,Integer,String> subject;
+    private ArrayList<Pair<Integer,TaggingElement>>           delegate;
+    private PropertyBasedTagger<TaggingElement,Integer,String>subject;
     private final TaggingElement [] elements = new TaggingElement[3];
 
     @Before

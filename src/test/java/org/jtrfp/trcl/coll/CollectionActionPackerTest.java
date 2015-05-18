@@ -29,34 +29,37 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ochafik.util.listenable.AdaptedCollection;
-import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 
 public class CollectionActionPackerTest {
     private CollectionActionPacker<String> subject;
-    private CollectionActionDispatcher<CollectionActionDispatcher<Pair<Integer,String>>> subjectDelegate;
+    private CollectionActionDispatcher<Pair<Integer,CollectionActionDispatcher<String>>> subjectDelegate;
     Collection<String> flatCollection;
     Pair<Integer,String> zero,one,two,A,B,C;
     
-    private static final CachedAdapter<Pair<Integer,String>,String> flatteningAdapter = new CachedAdapter<Pair<Integer,String>,String>(){
-	@Override
-	protected String _adapt(Pair<Integer, String> value)
-		throws UnsupportedOperationException {
-	    return value.getValue();
-	}
+    private static final CachedAdapter<CollectionActionDispatcher<String>,Pair<Integer,CollectionActionDispatcher<String>>> flatteningAdapter = new CachedAdapter<CollectionActionDispatcher<String>,Pair<Integer,CollectionActionDispatcher<String>>>(){
 
 	@Override
-	protected Pair<Integer, String> _reAdapt(String value)
+	protected Pair<Integer, CollectionActionDispatcher<String>> _adapt(
+		CollectionActionDispatcher<String> value)
 		throws UnsupportedOperationException {
 	    throw new UnsupportedOperationException();
 	}
+
+	@Override
+	protected CollectionActionDispatcher<String> _reAdapt(
+		Pair<Integer, CollectionActionDispatcher<String>> value)
+		throws UnsupportedOperationException {
+	    return value.getValue();
+	}
     };//end flatteningAdapter
     
-    private CollectionActionUnpacker<Pair<Integer,String>> unpacker;
+    private Collection<Pair<Integer,CollectionActionDispatcher<String>>> unpacker;
 
     @Before
     public void setUp() throws Exception {
-	subjectDelegate = new CollectionActionDispatcher<CollectionActionDispatcher<Pair<Integer,String>>>(new ArrayList<CollectionActionDispatcher<Pair<Integer,String>>>());
+	subjectDelegate = new CollectionActionDispatcher<Pair<Integer,CollectionActionDispatcher<String>>>(
+		        new ArrayList<Pair<Integer,CollectionActionDispatcher<String>>>());
 	subject         = new CollectionActionPacker<String>(subjectDelegate);
 	
 	subject.add(zero=new Pair<Integer,String>(0,"zero"));
@@ -68,27 +71,26 @@ public class CollectionActionPackerTest {
 	subject.add(C=new Pair<Integer,String>(1,"C"));
 	
 	flatCollection = new ArrayList<String>();
-	unpacker = new CollectionActionUnpacker<Pair<Integer,String>>(new AdaptedCollection<String,Pair<Integer,String>>(flatCollection, flatteningAdapter.toBackward(),flatteningAdapter.toForward()));
+	unpacker       = new AdaptedCollection<CollectionActionDispatcher<String>,Pair<Integer,CollectionActionDispatcher<String>>>(
+		       new CollectionActionUnpacker<String>(flatCollection),flatteningAdapter.toForward(),flatteningAdapter.toBackward());
 	subjectDelegate.addTarget(unpacker, true);
     }
 
     @After
     public void tearDown() throws Exception {
 	unpacker = null; flatCollection = null;
-	subject = null; subjectDelegate = null;
+	subject  = null; subjectDelegate= null;
     }
 
     @Test
     public void testAdd() {
 	assertEquals(2,subjectDelegate.size());
 	
-	for(CollectionActionDispatcher<Pair<Integer,String>> collection:subjectDelegate){
-	    Pair<Integer,String> first = collection.iterator().next();
-	    if(first.getKey()==0 || first.getKey()==1){
+	for(Pair<Integer,CollectionActionDispatcher<String>> pair:subjectDelegate){
+	    if(pair.getKey()==0 || pair.getKey()==1){
 		//ok
-	    }else{fail("Got unexpected key: "+first.getKey());}
+	    }else{fail("Got unexpected key: "+pair.getKey());}
 	}//end for(collection)
-	
 	assertEquals(6,flatCollection.size());
 	assertTrue(flatCollection.contains("zero"));
 	assertTrue(flatCollection.contains("one"));
@@ -97,7 +99,6 @@ public class CollectionActionPackerTest {
 	assertTrue(flatCollection.contains("A"));
 	assertTrue(flatCollection.contains("B"));
 	assertTrue(flatCollection.contains("C"));
-	
     }//end testAdd()
 
     @Test

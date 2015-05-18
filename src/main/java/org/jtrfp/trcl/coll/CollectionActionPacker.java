@@ -31,11 +31,11 @@ import com.ochafik.util.listenable.Pair;
  * @param <E>
  */
 public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
-    private final Map<Integer,CollectionActionDispatcher<Pair<Integer,E>>> map = new HashMap<Integer,CollectionActionDispatcher<Pair<Integer,E>>>();;
-    private final Collection<CollectionActionDispatcher<Pair<Integer,E>>> delegate;
+    private final Map<Integer,Pair<Integer,CollectionActionDispatcher<E>>> map = new HashMap<Integer,Pair<Integer,CollectionActionDispatcher<E>>>();;
+    private final Collection<Pair<Integer,CollectionActionDispatcher<E>>> delegate;
     private final Collection<Pair<Integer,E>> cache = new ArrayList<Pair<Integer,E>>();
     
-    public CollectionActionPacker(Collection<CollectionActionDispatcher<Pair<Integer,E>>> delegate){
+    public CollectionActionPacker(Collection<Pair<Integer,CollectionActionDispatcher<E>>> delegate){
 	this.delegate=delegate;
     }//end constructor
 
@@ -43,20 +43,19 @@ public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
     public boolean add(Pair<Integer,E> e) {
 	cache.add(e);
 	if(!map.containsKey(e.getKey())){
-	    final CollectionActionDispatcher<Pair<Integer,E>> newCollection;
-	    map.put(e.getKey(), newCollection = new CollectionActionDispatcher<Pair<Integer,E>>(new ArrayList<Pair<Integer,E>>()));
-	    delegate.add(newCollection);
+	    final CollectionActionDispatcher<E> newCollection = new CollectionActionDispatcher<E>(new ArrayList<E>());
+	    final Pair<Integer,CollectionActionDispatcher<E>> newPair = 
+		    new Pair<Integer,CollectionActionDispatcher<E>>(e.getKey(),newCollection);
+	    map.put(e.getKey(),newPair);
+	    delegate.add(newPair);
 	}//end (create new entry)
-	return map.get(e.getKey()).add(e);
+	return map.get(e.getKey()).getValue().add(e.getValue());
     }//end add()
     
     @Override
     public void clear() {
 	final Collection<Pair<Integer,E>> temp = new ArrayList<Pair<Integer,E>>(cache);
-	for(Pair<Integer,E> entry:temp){
-	    final boolean result = remove(entry);
-	    assert result:"All items in cache are expected to be present.";
-	}
+	assert removeAll(temp);
     }//end clear()
 
     @Override
@@ -82,13 +81,13 @@ public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
 	    return false;
 	Pair<Integer,E> element = (Pair<Integer,E>)o;
 	final int hash = element.getKey();
-	final CollectionActionDispatcher<Pair<Integer,E>> targetCollection = map.get(hash);
-	assert targetCollection.contains(element);
-	targetCollection.remove(element);
+	final Pair<Integer,CollectionActionDispatcher<E>> target = map.get(hash);
+	final CollectionActionDispatcher<E> targetCollection = target.getValue();
+	final E value = element.getValue();
+	assert targetCollection.remove(value);
 	if(targetCollection.isEmpty()){
-	    assert delegate.contains(targetCollection);
 	    map.remove(hash);
-	    delegate.remove(targetCollection);
+	    assert delegate.remove(target);//TODO: Target collection must be Pair<Integer,CAD>
 	    }
 	return true;
     }//end remove(...)

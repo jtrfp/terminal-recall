@@ -29,15 +29,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PredicatedORListActionFilterTest {
+public class PredicatedORCollectionActionFilterTest {
     protected static final Color [] entries = new Color[]{Color.red,Color.green,Color.blue,Color.yellow,Color.pink};
-    protected PredicatedORListActionFilter<Color> subject;
+    protected PredicatedORCollectionActionFilter<Color> subject;
     protected Collection<Color>                   delegate;
 
     @Before
     public void setUp() throws Exception {
 	delegate= new ArrayList<Color>();
-	subject = new PredicatedORListActionFilter<Color>(delegate);
+	subject = new PredicatedORCollectionActionFilter<Color>(delegate);
 	//Populate
 	subject.input.addAll(Arrays.asList(entries));
     }

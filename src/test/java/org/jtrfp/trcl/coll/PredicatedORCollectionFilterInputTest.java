@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PredicatedORListActionFilterInputTest extends PredicatedORListActionFilterTest{
+public class PredicatedORCollectionFilterInputTest extends PredicatedORCollectionActionFilterTest{
     protected Collection<Color> input;
 
     @Before
@@ -42,7 +42,7 @@ public class PredicatedORListActionFilterInputTest extends PredicatedORListActio
 
     @Test
     public void testContainsAll() {
-	assertTrue(input.containsAll(Arrays.asList(PredicatedORListActionFilterTest.entries)));
+	assertTrue(input.containsAll(Arrays.asList(PredicatedORCollectionActionFilterTest.entries)));
     }
     
     @Test

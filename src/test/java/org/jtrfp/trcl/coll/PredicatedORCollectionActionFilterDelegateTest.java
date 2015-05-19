@@ -24,8 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PredicatedORListActionFilterDelegateTest extends
-	PredicatedORListActionFilterTest {
+public class PredicatedORCollectionActionFilterDelegateTest extends
+	PredicatedORCollectionActionFilterTest {
 
     @Before
     public void setUp() throws Exception {

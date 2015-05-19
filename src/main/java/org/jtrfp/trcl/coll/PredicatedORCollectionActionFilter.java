@@ -24,14 +24,14 @@ import org.apache.commons.collections.iterators.UnmodifiableIterator;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.iterators.IteratorChain;
 
-public class PredicatedORListActionFilter<E> implements Collection<Predicate<E>> {
+public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>> {
     private Collection<E> 
     	    used  = new ArrayList<E>(),
 	    unused= new ArrayList<E>();
     private Set<Predicate<E>> predicates  = new HashSet<Predicate<E>>();
     private final Collection<E> delegate;
     
-    public PredicatedORListActionFilter(Collection<E> delegate){
+    public PredicatedORCollectionActionFilter(Collection<E> delegate){
 	this.delegate=delegate;
     }
 

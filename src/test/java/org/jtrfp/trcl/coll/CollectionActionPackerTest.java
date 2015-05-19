@@ -32,7 +32,7 @@ import com.ochafik.util.listenable.AdaptedCollection;
 import com.ochafik.util.listenable.Pair;
 
 public class CollectionActionPackerTest {
-    private CollectionActionPacker<String> subject;
+    private CollectionActionPacker<String,Integer> subject;
     private CollectionActionDispatcher<Pair<Integer,CollectionActionDispatcher<String>>> subjectDelegate;
     Collection<String> flatCollection;
     Pair<Integer,String> zero,one,two,A,B,C;
@@ -60,7 +60,7 @@ public class CollectionActionPackerTest {
     public void setUp() throws Exception {
 	subjectDelegate = new CollectionActionDispatcher<Pair<Integer,CollectionActionDispatcher<String>>>(
 		        new ArrayList<Pair<Integer,CollectionActionDispatcher<String>>>());
-	subject         = new CollectionActionPacker<String>(subjectDelegate);
+	subject         = new CollectionActionPacker<String,Integer>(subjectDelegate);
 	
 	subject.add(zero=new Pair<Integer,String>(0,"zero"));
 	subject.add(one =new Pair<Integer,String>(0,"one"));

@@ -30,22 +30,22 @@ import com.ochafik.util.listenable.Pair;
  *
  * @param <E>
  */
-public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
-    private final Map<Integer,Pair<Integer,CollectionActionDispatcher<E>>> map = new HashMap<Integer,Pair<Integer,CollectionActionDispatcher<E>>>();;
-    private final Collection<Pair<Integer,CollectionActionDispatcher<E>>> delegate;
-    private final Collection<Pair<Integer,E>> cache = new ArrayList<Pair<Integer,E>>();
+public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>> {
+    private final Map<KEY,Pair<KEY,CollectionActionDispatcher<E>>> map = new HashMap<KEY,Pair<KEY,CollectionActionDispatcher<E>>>();
+    private final Collection<Pair<KEY,CollectionActionDispatcher<E>>> delegate;
+    private final Collection<Pair<KEY,E>> cache = new ArrayList<Pair<KEY,E>>();
     
-    public CollectionActionPacker(Collection<Pair<Integer,CollectionActionDispatcher<E>>> delegate){
+    public CollectionActionPacker(Collection<Pair<KEY,CollectionActionDispatcher<E>>> delegate){
 	this.delegate=delegate;
     }//end constructor
 
     @Override
-    public boolean add(Pair<Integer,E> e) {
+    public boolean add(Pair<KEY,E> e) {
 	cache.add(e);
 	if(!map.containsKey(e.getKey())){
 	    final CollectionActionDispatcher<E> newCollection = new CollectionActionDispatcher<E>(new ArrayList<E>());
-	    final Pair<Integer,CollectionActionDispatcher<E>> newPair = 
-		    new Pair<Integer,CollectionActionDispatcher<E>>(e.getKey(),newCollection);
+	    final Pair<KEY,CollectionActionDispatcher<E>> newPair = 
+		    new Pair<KEY,CollectionActionDispatcher<E>>(e.getKey(),newCollection);
 	    map.put(e.getKey(),newPair);
 	    delegate.add(newPair);
 	}//end (create new entry)
@@ -54,7 +54,7 @@ public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
     
     @Override
     public void clear() {
-	final Collection<Pair<Integer,E>> temp = new ArrayList<Pair<Integer,E>>(cache);
+	final Collection<Pair<KEY,E>> temp = new ArrayList<Pair<KEY,E>>(cache);
 	assert removeAll(temp);
     }//end clear()
 
@@ -79,15 +79,15 @@ public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
 	    return false;
 	if(!cache.remove(o))
 	    return false;
-	Pair<Integer,E> element = (Pair<Integer,E>)o;
-	final int hash = element.getKey();
-	final Pair<Integer,CollectionActionDispatcher<E>> target = map.get(hash);
+	Pair<KEY,E> element = (Pair<KEY,E>)o;
+	final KEY key = element.getKey();
+	final Pair<KEY,CollectionActionDispatcher<E>> target = map.get(key);
 	final CollectionActionDispatcher<E> targetCollection = target.getValue();
 	final E value = element.getValue();
 	assert targetCollection.remove(value);
 	if(targetCollection.isEmpty()){
-	    map.remove(hash);
-	    assert delegate.remove(target);//TODO: Target collection must be Pair<Integer,CAD>
+	    map.remove(key);
+	    assert delegate.remove(target);
 	    }
 	return true;
     }//end remove(...)
@@ -103,7 +103,7 @@ public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
     @Override
     public boolean retainAll(Collection<?> c) {
 	ArrayList<Object> toRemove = new ArrayList<Object>();
-	for(Pair<Integer,E> element:this)
+	for(Pair<KEY,E> element:this)
 	    if(!c.contains(element))toRemove.add(element);
 	final int origSize = size();
 	boolean result = removeAll(toRemove);
@@ -127,24 +127,24 @@ public class CollectionActionPacker<E> implements Collection<Pair<Integer,E>> {
     }
 
     @Override
-    public boolean addAll(Collection<? extends Pair<Integer, E>> c) {
+    public boolean addAll(Collection<? extends Pair<KEY, E>> c) {
 	boolean result = false;
-	for(Pair<Integer, E> element:c)
+	for(Pair<KEY, E> element:c)
 	    result |= add(element);
 	return result;
     }
 
     @Override
-    public Iterator<Pair<Integer, E>> iterator() {
-	final Iterator<Pair<Integer,E>> iterator = cache.iterator();
-	return new Iterator<Pair<Integer,E>>(){
+    public Iterator<Pair<KEY, E>> iterator() {
+	final Iterator<Pair<KEY,E>> iterator = cache.iterator();
+	return new Iterator<Pair<KEY,E>>(){
 	    @Override
 	    public boolean hasNext() {
 		return iterator.hasNext();
 	    }
 
 	    @Override
-	    public Pair<Integer, E> next() {
+	    public Pair<KEY, E> next() {
 		return iterator.next();
 	    }
 

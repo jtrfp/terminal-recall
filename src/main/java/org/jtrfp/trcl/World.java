@@ -19,7 +19,9 @@ import org.jtrfp.trcl.core.TR;
 public final class World {
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
     private final TR tr;
-    private static final int blockGranularity = 8;//Dim segs / diameter
+    private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove
+    public static final int CUBE_GRANULARITY        = (int)(TR.mapSquareSize*5);
+    public static final Vector3D VISIBLE_EVERYWHERE = Vector3D.NaN;
 
     public World(double sizeX, double sizeY, double sizeZ,
 	    double cameraViewDepth, TR tr) {
@@ -43,5 +45,9 @@ public final class World {
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 		sizeY / 3.15, camera.getCameraPosition().getZ()));
 	return camera;
+    }
+
+    public int getCubeGranularity() {
+	return CUBE_GRANULARITY;
     }
 }// World

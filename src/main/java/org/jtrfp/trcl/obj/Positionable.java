@@ -13,8 +13,9 @@
 package org.jtrfp.trcl.obj;
 
 import org.jtrfp.trcl.SpacePartitioningGrid;
+import org.jtrfp.trcl.coll.PropertyListenable;
 
-public interface Positionable {
+public interface Positionable extends PropertyListenable {
     public double[] getPosition();
 
     public void setContainingGrid(SpacePartitioningGrid grid);

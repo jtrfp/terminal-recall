@@ -15,11 +15,8 @@ package org.jtrfp.trcl.obj;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -34,6 +31,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
+import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
@@ -41,7 +39,7 @@ import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.mem.VEC4Address;
 
-public class WorldObject implements PositionedRenderable {
+public class WorldObject implements PositionedRenderable, PropertyListenable {
     public static final String POSITION ="position";
     public static final String HEADING  ="heading";
     public static final String TOP      ="top";
@@ -445,7 +443,7 @@ public class WorldObject implements PositionedRenderable {
     public synchronized WorldObject notifyPositionChange(){
 	if(position[0]==Double.NaN)
 	    throw new RuntimeException("Invalid position.");
-	pcs.firePropertyChange(POSITION, oldPosition, position);
+	pcs.firePropertyChange(POSITION, new Vector3D(oldPosition), new Vector3D(position));
 	needToRecalcMatrix=true;
 	synchronized (position) {
 	    final SpacePartitioningGrid<PositionedRenderable> 

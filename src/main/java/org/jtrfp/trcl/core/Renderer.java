@@ -13,26 +13,29 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.collections4.collection.PredicatedCollection;
+import org.apache.commons.collections4.functors.InstanceofPredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
-import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.DummyAdapter;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
-import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.CollisionManager;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.SkyCube;
+
+import com.ochafik.util.listenable.AdaptedCollection;
+import com.ochafik.util.listenable.Adapter;
 
 public final class Renderer {
     private final	RendererFactory		factory;
@@ -45,19 +48,23 @@ public final class Renderer {
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private		double			meanFPS;
-    private		float[]			cameraMatrixAsFlatArray		= new float[16];
-    private volatile	float	[]		camRotationProjectionMatrix = new float[16];
+    private		float[]			cameraMatrixAsFlatArray	   = new float[16];
+    private volatile	float	[]		camRotationProjectionMatrix= new float[16];
     private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
     private		CollisionManager	collisionManager;
     private		Camera			camera = null;
+    private final	PredicatedCollection<Positionable> relevantPositioned;
+    private static final boolean NEW_MODE = false;
     
     public Renderer(final RendererFactory factory) {
 	this.factory = factory;
 	this.gpu     = factory.getGPU();
 	final TR tr  = gpu.getTr();
+	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
 	camera = tr.getWorld().newCamera();//TODO: Remove after redesign.
+	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
 	final GL3 gl = gpu.getGl();
 	
 	System.out.println("...Done.");
@@ -69,7 +76,19 @@ public final class Renderer {
 	    }});tr.getThreadManager().threadPool.submit(renderList);
 	
 	skyCube = new SkyCube(tr);
+	relevantPositioned =
+		    PredicatedCollection.predicatedCollection(
+			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),new DummyAdapter(),new CastingAdapter()),
+			    new InstanceofPredicate(PositionedRenderable.class));
+     setCamera(camera);//TODO: Remove after redesign
     }//end constructor
+    
+    private final class CastingAdapter implements Adapter<Positionable,PositionedRenderable>{
+	@Override
+	public PositionedRenderable adapt(Positionable value) {
+	    return (PositionedRenderable)value;
+	}
+    }//end CastingAdapter
 
     private void ensureInit() {
 	if (initialized)
@@ -94,6 +113,12 @@ public final class Renderer {
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
+    
+    public void setCamera(Camera toUse){
+	if(this.camera!=null)
+	    this.camera.getFlatRelevanceCollection().removeTarget(relevantPositioned, true);
+	toUse.getFlatRelevanceCollection().addTarget(relevantPositioned, true);
+    }
     
     private RenderList oneFrameLaggedRenderList;
     
@@ -122,11 +147,12 @@ public final class Renderer {
     public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
 	if(pr instanceof WorldObject)
 	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
-	
-	renderList.get().getVisibleWorldObjectList().add(pr);
+	if(!NEW_MODE)
+	 renderList.get().getVisibleWorldObjectList().add(pr);
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {
+	if(!NEW_MODE){
 	if(relevanceUpdateFuture!=null){
 	    if(!relevanceUpdateFuture.isDone()){
 		if(!mandatory){System.out.println("Renderer.updateVisibilityList() !done");return;}
@@ -156,6 +182,7 @@ public final class Renderer {
 		return null;
 	    }//end pool run()
 	});
+	}//end if(NEW_MODE)
     }// end updateRelevanceList()
     
     public void setSunVector(Vector3D sv){

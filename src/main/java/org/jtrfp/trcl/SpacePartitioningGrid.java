@@ -20,10 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.apache.commons.collections4.functors.TruePredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.CollectionActionPacker;
+import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
+import org.jtrfp.trcl.coll.PropertyBasedTagger;
+import org.jtrfp.trcl.coll.UnityAdapter;
 import org.jtrfp.trcl.obj.Positionable;
+import org.jtrfp.trcl.obj.WorldObject;
 
 import com.ochafik.util.Adapter;
+import com.ochafik.util.listenable.Pair;
 
 public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
@@ -34,6 +42,14 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
+	
+	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher = 
+		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
+	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
+		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);
+	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectValve.input);
+	private final PropertyBasedTagger<Positionable, Vector3D, Vector3D> localTagger
+	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, new UnityAdapter<Vector3D>(), "position");
 	
 	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;
@@ -67,8 +83,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 
 		@Override
 		public Vector3D reAdapt(Integer value) {
-		    // TODO Auto-generated method stub
-		    return null;
+		    throw new UnsupportedOperationException();
 		}};
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
@@ -163,12 +178,43 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		xProgression=1;
 		}//end allocateSquares()
 	
-	public synchronized void add(E objectWithPosition){
+	public synchronized void newActivate(){
+	    if(!packedObjectValve.contains(TruePredicate.INSTANCE))
+		packedObjectValve.add(TruePredicate.INSTANCE);
+	}
+	
+	public synchronized void newDeactivate(){
+	    packedObjectValve.clear();
+	}
+	
+	public synchronized void newAdd(E objectToAdd){//TODO: Enforce set instead?
+	    localTagger.add(objectToAdd);
+	}
+	
+	public synchronized void newRemove(E objectToRemove){
+	    localTagger.remove(objectToRemove);
+	}
+	
+	public synchronized void newAddBranch(SpacePartitioningGrid<E> toAdd){
+	    toAdd.getPackedObjectsDispatcher().addTarget(packedObjectValve.input, true);
+	}
+	
+	public synchronized void newRemoveBranch(SpacePartitioningGrid<E> toRemove){
+	    toRemove.getPackedObjectsDispatcher().removeTarget(packedObjectValve.input, true);
+	}
+	
+	public CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> getPackedObjectsDispatcher(){
+	    return packedObjectsDispatcher;
+	}
+	
+	public synchronized void add(E objectWithPosition){//TODO: Remove old
+	    newAdd(objectWithPosition);//TODO: Remove stub
 	    	//Figure out where it goes
 	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
 	    	objectWithPosition.setContainingGrid(this);
 		}
-	public synchronized void remove(E objectWithPosition){
+	public synchronized void remove(E objectWithPosition){//TODO Remove old
+	    newRemove(objectWithPosition);//TODO: Remove stub
 	    objectWithPosition.setContainingGrid(null);
 	}//end remove(...)
 	private static double absMod(double value, double mod){

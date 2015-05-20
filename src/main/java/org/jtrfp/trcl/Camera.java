@@ -17,9 +17,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.TreeSet;
 
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -30,22 +29,23 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
-import org.jtrfp.trcl.coll.CompoundListenableCollection;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.CollectionActionUnpacker;
+import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
-import com.ochafik.util.listenable.DefaultListenableCollection;
-import com.ochafik.util.listenable.ListenableCollection;
-import com.ochafik.util.listenable.ListenableCollections;
-import com.ochafik.util.listenable.ListenableSet;
+import com.ochafik.util.listenable.AdaptedCollection;
+import com.ochafik.util.listenable.Adapter;
+import com.ochafik.util.listenable.Pair;
 
 public class Camera extends WorldObject implements RelevantEverywhere{
     	//// PROPERTIES
     	public static final String FOG_ENABLED        = "fogEnabled";
-    	public static final String CENTER_CUBE_ID     = "flatCubePosition";
+    	public static final String CENTER_CUBE        = "centerCube";
     	public static final String ROOT_GRID          = "rootGrid";
     
 	private volatile  RealMatrix completeMatrix;
@@ -56,23 +56,52 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	private double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
-	private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
-		new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
-	private final	CompoundListenableCollection<PositionedRenderable> relevanceCollection 
-	     = new CompoundListenableCollection<PositionedRenderable>(relevantCubeCollection);
-	private final	ListenableSet<PositionedRenderable> sortedRelevanceSet;
+	private Adapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
+		new Adapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
+		    @Override
+		    public CollectionActionDispatcher<Positionable> adapt(
+			    Pair<Vector3D, CollectionActionDispatcher<Positionable>> value) {
+			return value.getValue();
+		    }};
+	private Adapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> dummyAdapter = 
+		new Adapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(){
+		    @Override
+		    public Pair<Vector3D, CollectionActionDispatcher<Positionable>> adapt(
+			    CollectionActionDispatcher<Positionable> value) {
+			throw new UnsupportedOperationException();
+		    }
+		};
+	private final CollectionActionDispatcher<CollectionActionDispatcher<Positionable>> relevanceCollections =
+		new CollectionActionDispatcher<CollectionActionDispatcher<Positionable>>(new ArrayList<CollectionActionDispatcher<Positionable>>());
+	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> relevancePairs = 
+		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
+	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> 
+	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevancePairs);
+	private final AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
+		new AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, dummyAdapter, strippingAdapter);
+	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
+	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
+	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
+	//private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
+	//	new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
+	//private final	CompoundListenableCollection<PositionedRenderable> relevanceCollection 
+	//     = new CompoundListenableCollection<PositionedRenderable>(relevantCubeCollection);
+	//private final	ListenableSet<PositionedRenderable> sortedRelevanceSet;
 	private SpacePartitioningGrid rootGrid;
-	private int centerCubeID = -1;
+	private Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
 
     Camera(GPU gpu) {
 	super(gpu.getTr());
 	this.gpu = gpu;
 	
-	sortedRelevanceSet = ListenableCollections.listenableSet(
-		new TreeSet<PositionedRenderable>(GridCubeProximitySorter.getComparator(this)));
+	visibilityFilter.add(new VisibilityPredicate());
+	relevancePairs.addTarget(pairStripper, true);
+	relevanceCollections.addTarget(new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
 	
-	ListenableCollections.bind(relevanceCollection, sortedRelevanceSet);
+	//sortedRelevanceSet = ListenableCollections.listenableSet(
+	//	new TreeSet<PositionedRenderable>(GridCubeProximitySorter.getComparator(this)));
+	
+	//ListenableCollections.bind(relevanceCollection, sortedRelevanceSet);
 	
 	addBehavior(new MatchPosition().setEnable(true));
 	addBehavior(new MatchDirection()).setEnable(true);
@@ -82,7 +111,26 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addBehavior(new SkyCubeCloudModeUpdateBehavior());
 	
 	addPropertyChangeListener(new CameraPositionHandler());
+	addPropertyChangeListener(CENTER_CUBE, new CenterCubeHandler());
     }//end constructor
+    
+    private final class VisibilityPredicate implements Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>{
+	@Override
+	public boolean evaluate(
+		Pair<Vector3D, CollectionActionDispatcher<Positionable>> object) {
+	    final Vector3D cubePosition = object.getKey();
+	    if(cubePosition==World.VISIBLE_EVERYWHERE)
+		return true;
+	    return cubePosition.distance(centerCube)<RELEVANCE_RADIUS_CUBES;
+	}//end evaluate()
+    }//end VisibilityPredicate
+    
+    public void addGrid(SpacePartitioningGrid<?> toAdd){
+	toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input, true);
+    }
+    public void removeGrid(SpacePartitioningGrid<?> toRemove){
+   	toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
+    }
     
     private final class CameraPositionHandler implements PropertyChangeListener{
 	@Override
@@ -91,15 +139,25 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    if(propertyName==WorldObject.POSITION){
 		if(getRootGrid()==null)
 		    return;
-		final int newCenterCubeID = (Integer)getRootGrid().
-			getWorldSpaceRasterizer().
-			adapt(new Vector3D(getPosition()));
-		getRootGrid().getWorldSpaceRasterizer();
-		pcs.firePropertyChange(CENTER_CUBE_ID, centerCubeID, newCenterCubeID);
-		centerCubeID=newCenterCubeID;
+		final Vector3D newValue = ((Vector3D)evt.getNewValue());
+		final int granularity = World.CUBE_GRANULARITY;
+		final Vector3D newCenterCube = new Vector3D(
+			Math.rint(newValue.getX()/granularity),
+			Math.rint(newValue.getY()/granularity),
+			Math.rint(newValue.getZ()/granularity));
+		pcs.firePropertyChange(CENTER_CUBE, centerCube, newCenterCube);
+		centerCube=newCenterCube;
 	    }//end if(POSITION)
 	}//end if propertyChange()
     }//end CameraPositionHandler
+    
+    private final class CenterCubeHandler implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    visibilityFilter.clear();
+	    visibilityFilter.add(new VisibilityPredicate());
+	}//end propertyChange(...)
+    }//end CenterCubeHandler
 
 	private void updateProjectionMatrix(){
 	    	final Component component = gpu.getTr().getRootWindow();
@@ -255,10 +313,10 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    this.fogEnabled = fogEnabled;
 	    return this;
 	}
-	
+	/*
 	public ListenableCollection<ListenableCollection<PositionedRenderable>> getRelevantCubeCollection(){
 	    return relevantCubeCollection;
-	}
+	}*/
 
 	/**
 	 * @return the relevanceRadius
@@ -286,13 +344,35 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	 */
 	public void setRootGrid(SpacePartitioningGrid rootGrid) {
 	    pcs.firePropertyChange(ROOT_GRID, this.rootGrid, rootGrid);
+	    if(this.rootGrid!=null)
+	     removeGrid(this.rootGrid);
+	    addGrid(rootGrid);
 	    this.rootGrid = rootGrid;
+	}
+	/**
+	 * @return the relevancePairs
+	 */
+	public CollectionActionDispatcher<Pair<Vector3D, CollectionActionDispatcher<Positionable>>> getRelevancePairs() {
+	    return relevancePairs;
+	}
+	/**
+	 * @return the relevanceCollections
+	 */
+	public CollectionActionDispatcher<CollectionActionDispatcher<Positionable>> getRelevanceCollections() {
+	    return relevanceCollections;
+	}
+	/**
+	 * @return the flatRelevanceCollection
+	 */
+	public CollectionActionDispatcher<Positionable> getFlatRelevanceCollection() {
+	    return flatRelevanceCollection;
 	}
 
 	/**
 	 * @return the sortedRelevanceSet
 	 */
+	/*
 	public ListenableSet<PositionedRenderable> getSortedRelevanceSet() {
 	    return sortedRelevanceSet;
-	}
+	}*/
 }//end Camera

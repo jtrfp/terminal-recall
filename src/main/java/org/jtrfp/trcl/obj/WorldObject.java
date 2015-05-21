@@ -27,6 +27,7 @@ import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
@@ -40,7 +41,6 @@ import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public class WorldObject implements PositionedRenderable, PropertyListenable {
-    public static final String POSITION ="position";
     public static final String HEADING  ="heading";
     public static final String TOP      ="top";
     
@@ -790,6 +790,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     public void removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
 	pcs.removePropertyChangeListener(propertyName, listener);
+    }
+
+    @Override
+    public Vector3D getPositionV3D() {
+	if(this instanceof RelevantEverywhere)
+	    return World.VISIBLE_EVERYWHERE;
+	return new Vector3D(getPosition());
     }
 
     /*public void checkPositionSanity() {

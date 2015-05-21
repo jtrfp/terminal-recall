@@ -12,11 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.coll.PropertyListenable;
 
 public interface Positionable extends PropertyListenable {
+    //BEAN PROPERTIES
+    public static final String POSITION    = "position";
+    public static final String POSITIONV3D = "positionV3D";
+    
     public double[] getPosition();
+    public Vector3D getPositionV3D();
 
     public void setContainingGrid(SpacePartitioningGrid grid);
-}
+}//end Positionable

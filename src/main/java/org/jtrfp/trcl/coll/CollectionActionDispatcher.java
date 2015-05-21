@@ -80,9 +80,9 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     }
     @Override
     public void clear() {
-	cache.clear();
 	for(Collection<E> targ:targets)
-	    targ.clear();
+	    targ.removeAll(cache);
+	cache.clear();
     }//end clear()
     @Override
     public boolean contains(Object o) {

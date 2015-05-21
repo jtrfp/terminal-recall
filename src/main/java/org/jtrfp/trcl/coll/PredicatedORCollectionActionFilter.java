@@ -71,7 +71,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
     @Override
     public void clear() {
-	delegate  .clear();
+	delegate  .removeAll(used);
 	predicates.clear();
 	unused    .addAll(used);
 	used      .clear();
@@ -98,12 +98,12 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
     }
 
     @Override
-    public boolean remove(Object element) {
+    public boolean remove(Object element) {//TODO: This is single instance
 	return removeAll(Arrays.asList(element));
     }
 
     @Override
-    public boolean removeAll(Collection<?> _toRemove) {
+    public boolean removeAll(Collection<?> _toRemove) {//TODO: This is multi-instance
 	final ArrayList<Predicate<E>> toRemove = new ArrayList<Predicate<E>>(_toRemove.size());
 	for(Object r:_toRemove)
 	    if(r instanceof Predicate) toRemove.add((Predicate<E>)r);
@@ -167,9 +167,9 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
 	@Override
 	public void clear() {
-	    used.clear();
-	    unused.clear();
-	    delegate.clear();
+	    delegate.removeAll(used);
+	    used    .clear();
+	    unused  .clear();
 	}
 
 	@Override

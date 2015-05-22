@@ -30,7 +30,7 @@ import com.ochafik.util.listenable.Pair;
  *
  * @param <E>
  */
-public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>> {
+public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>>, Decorator<Collection<Pair<KEY,E>>> {
     private final Map<KEY,Pair<KEY,CollectionActionDispatcher<E>>> map = new HashMap<KEY,Pair<KEY,CollectionActionDispatcher<E>>>();
     private final Collection<Pair<KEY,CollectionActionDispatcher<E>>> delegate;
     private final Collection<Pair<KEY,E>> cache = new ArrayList<Pair<KEY,E>>();
@@ -153,4 +153,9 @@ public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>> {
 		throw new UnsupportedOperationException();
 	    }};
     }//end iterator()
+
+    @Override
+    public Collection<Pair<KEY, E>> getDelegate() {
+	return cache;
+    }
 }//end CollectionActionPacker

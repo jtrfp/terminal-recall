@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class CollectionActionUnpacker<E> implements Collection<CollectionActionDispatcher<E>> {//TODO: ListActionUnpacker should extend this
+public class CollectionActionUnpacker<E> implements Collection<CollectionActionDispatcher<E>>, Decorator<Collection<E>> {//TODO: ListActionUnpacker should extend this
     private final Collection<E> delegate;
     private final Collection<CollectionActionDispatcher<E>> collections = new ArrayList<CollectionActionDispatcher<E>>();
     
@@ -95,5 +95,9 @@ public class CollectionActionUnpacker<E> implements Collection<CollectionActionD
     @Override
     public <T> T[] toArray(T[] a) {
 	return collections.toArray(a);
+    }
+    @Override
+    public Collection<E> getDelegate() {
+	return delegate;
     }
 }//end CollectionActionUnpacker

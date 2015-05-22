@@ -27,7 +27,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 
-public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE> implements Collection<E> {
+public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE> implements Collection<E>, Decorator<Collection<Pair<KEY,E>>> {
     private final Collection<Pair<KEY,E>>    delegate;
     private final Adapter<PROPERTY_TYPE,KEY> propertyAdapter;
     private final Map<E,PropertyChangeListener> listeners= new HashMap<E,PropertyChangeListener>();
@@ -175,6 +175,11 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     @Override
     public <T> T[] toArray(T[] a) {
 	return delegate.toArray(a);
+    }
+
+    @Override
+    public Collection<Pair<KEY,E>> getDelegate() {
+	return delegate;
     }
     
 }//end PropertyBasedTagger

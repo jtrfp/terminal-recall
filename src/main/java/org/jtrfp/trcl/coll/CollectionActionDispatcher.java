@@ -23,7 +23,7 @@ import java.util.Set;
 import org.jtrfp.trcl.mem.VEC4Address;
 import org.jtrfp.trcl.tools.Util;
 
-public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E> {
+public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E>, Decorator<Collection<E>> {
     protected final Collection<E>             cache;
     protected final Map<Collection<E>,Object> targetsMap;
     protected final Set<Collection<E>>        targets;
@@ -155,4 +155,9 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
 	@Override
 	public boolean removeTarget(Collection c, boolean populate){return false;}
     };
+
+    @Override
+    public Collection<E> getDelegate() {
+	return cache;
+    }
 }//end CollectionActionDispatcher

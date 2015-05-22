@@ -15,7 +15,7 @@ package org.jtrfp.trcl.coll;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class CollectionActionPrinter<E> implements Collection<E> {
+public class CollectionActionPrinter<E> implements Collection<E>, Decorator<Collection<E>> {
     private final String        prefix;
     private final Collection<E> delegate;
     private final boolean       stackTrace;
@@ -110,6 +110,11 @@ public class CollectionActionPrinter<E> implements Collection<E> {
     @Override
     public <T> T[] toArray(T[] a) {
 	return delegate.toArray(a);
+    }
+
+    @Override
+    public Collection<E> getDelegate() {
+	return delegate;
     }
 
 }//end CollectionActionPrinter

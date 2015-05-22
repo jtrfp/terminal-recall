@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.concurrent.Executor;
 
 public class DecoupledCollectionActionDispatcher<E> extends
-	CollectionActionDispatcher<E> {
+	CollectionActionDispatcher<E> implements Decorator<Collection<E>> {
     private final Executor executor;
     public DecoupledCollectionActionDispatcher(Collection<E> cache,Executor executor){
 	super(cache);
@@ -45,6 +45,11 @@ public class DecoupledCollectionActionDispatcher<E> extends
 
     public Executor getExecutor() {
 	return executor;
+    }
+
+    @Override
+    public Collection<E> getDelegate() {
+	return cache;
     }
 
 }//end DecoupledCollectionActionDispatcher

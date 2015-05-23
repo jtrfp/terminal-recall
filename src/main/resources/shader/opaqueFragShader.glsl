@@ -16,15 +16,11 @@
 
 #version 330
 
-// CONSTANTS
-
-// UNIFORMS
-
 // INPUTS
-flat in float  flatTextureID;
+flat in float  flatPrimitiveID;
 
 // OUTPUTS
 
 void main(){
-gl_FragColor.r = flatTextureID;
+ gl_FragColor.r = flatPrimitiveID;
 }//end main()

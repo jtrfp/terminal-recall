@@ -30,7 +30,7 @@ const int VTX_TEXTURE_USABLE_WIDTH = (VTX_TEXTURE_WIDTH/3)*3;
 const int VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3)*3;
 
 //OUT
-flat out float 			flatTextureID; //TODO: Nomenclature to primitiveID
+flat out float 			flatPrimitiveID;
 flat out vec4			flatDQPrimID;
 
 //IN
@@ -121,7 +121,7 @@ gl_Position.x+=dummy*.000000000000001;
  gl_Position.z	= texelFetch(zBuffer,fetchPos,0).x;
  gl_Position.w	= 1/texelFetch(wBuffer,fetchPos,0).x;
  float pid		= float(gl_VertexID/3 + 1); // Add 1 so that zero represents 'unwritten.'
- flatTextureID	= pid/65536;
+ flatPrimitiveID	= pid/65536;
  const vec4 DIVISOR = vec4(1,16,256,4096);
  flatDQPrimID = floor(mod(pid/DIVISOR,16))/65536;
 }//end main()

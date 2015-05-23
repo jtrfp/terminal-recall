@@ -128,7 +128,7 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  return texelFetch(portalTexture,ivec3(gl_FragCoord.xy,int(textureID+1u)),0);
  }
  
- vec4 intrinsicCodeTexel(uint textureID,vec3 norm,vec2 uv){
+ vec4 vqConstruct(uint textureID,vec3 norm,vec2 uv){
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
  if(textureID<=NUM_PORTALS*96u)return portalFetch(textureID);
@@ -231,13 +231,13 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  if(dot(norm.xyz,norm.xyz)>.01)illumination.rgb
  								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight) + cTexel.ESTuTv.x;
  return cTexel.rgba * illumination;
- }//end intrinsicCodeTexel
+ }//end vqConstruct
 
 vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  vec4	nXnYnZ		= textureProjLod(primitivenXnYnZTexture,pQuad,0);
  vec2	uv			= vUVZI.xy;
  vec3 	norm 		= nXnYnZ.xyz/w;
- vec4	texel		= intrinsicCodeTexel(uint(vUVZI[3u]),norm,uv);
+ vec4	texel		= vqConstruct(uint(vUVZI[3u]),norm,uv);
  if(disableAlpha)	texel.a=1;
  if(bypassAlpha==0u)texel.rgb = mix(texel.rgb,fogCubeColor,warpFog(vUVZI.z));
  return texel;

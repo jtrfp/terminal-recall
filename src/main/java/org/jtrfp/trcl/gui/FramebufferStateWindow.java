@@ -81,7 +81,7 @@ public class FramebufferStateWindow extends JFrame {
 	    if (desc.getPropertyType() == GLFrameBuffer.class) {
 		try{
 		   final GLFrameBuffer fb = (GLFrameBuffer)desc.getReadMethod().invoke(renderer);
-		    if (fb.getAttached2DDrawTextures().size() > 0) {
+		    if (fb != null && fb.getAttached2DDrawTextures().size() > 0) {
 			final PropertyEditor pe = TRBeanUtils
 				.getDefaultPropertyEditor(fb);
 			final Component ed = pe.getCustomEditor();

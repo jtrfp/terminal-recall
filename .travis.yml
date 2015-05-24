@@ -2,5 +2,4 @@ language: java
 notifications:
   email:
     - cjritola@gmail.com
-after_failure: 
-    -"./print_surefire_reports.sh"
+after_failure: /home/travis/build/jtrfp/terminal-recall/./print_surefire_reports.sh

@@ -13,11 +13,11 @@
 
 package org.jtrfp.trcl.gpu;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.awt.GraphicsEnvironment;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -45,6 +45,8 @@ public class OpenGLTest {
     protected GLCanvas  canvas;
     protected GLContext context;
     protected volatile boolean   success = false;
+    
+    static {GLProfile.initSingleton();}
     protected static final String VERTEX_SOURCE = 
 	    "#version 330\n" +
 	    "void main(){\n" +
@@ -60,6 +62,8 @@ public class OpenGLTest {
 
     @Before
     public void setUp() throws Exception {
+	if(GraphicsEnvironment.isHeadless())
+	    System.exit(0);
 	frame  = new JFrame("test");
 	canvas = new GLCanvas(new GLCapabilities(GLProfile.getGL2GL3()));
 	frame.getContentPane().add(canvas);

@@ -5,7 +5,7 @@ echo "\n=== SUREFIRE REPORTS ===\n"
 
 for F in target/surefire-reports/*.txt
 do
-    echo Report: $F
+    echo $F
     cat $F
     echo
 done

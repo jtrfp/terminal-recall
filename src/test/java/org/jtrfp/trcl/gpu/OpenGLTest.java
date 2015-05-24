@@ -76,7 +76,8 @@ public class OpenGLTest {
 
     @After
     public void tearDown() throws Exception {
-	frame.setVisible(false);
+	if(frame!=null)
+	 frame.setVisible(false);
     }
 
     @Test

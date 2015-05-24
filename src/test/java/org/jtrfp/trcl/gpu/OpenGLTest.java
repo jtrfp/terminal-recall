@@ -46,7 +46,9 @@ public class OpenGLTest {
     protected GLContext context;
     protected volatile boolean   success = false;
     
-    static {GLProfile.initSingleton();}
+    static {
+	if(!GraphicsEnvironment.isHeadless())
+	 GLProfile.initSingleton();}
     protected static final String VERTEX_SOURCE = 
 	    "#version 330\n" +
 	    "void main(){\n" +

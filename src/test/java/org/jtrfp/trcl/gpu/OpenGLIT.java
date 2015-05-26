@@ -40,7 +40,7 @@ import org.junit.Test;
  * @author Chuck Ritola
  *
  */
-public class OpenGLTest {
+public class OpenGLIT {
     protected JFrame    frame;
     protected GLCanvas  canvas;
     protected GLContext context;

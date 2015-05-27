@@ -103,16 +103,17 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
     }
 
     @Override
-    public boolean removeAll(Collection<?> _toRemove) {//TODO: This is multi-instance
+    public boolean removeAll(Collection<?> _toRemove) {
 	final ArrayList<Predicate<E>> toRemove = new ArrayList<Predicate<E>>(_toRemove.size());
+	//Remove only Predicates
 	for(Object r:_toRemove)
 	    if(r instanceof Predicate) toRemove.add((Predicate<E>)r);
 	Iterator<Predicate<E>> trIterator = toRemove.iterator();
 	//Don't remove what isn't present
 	while(trIterator.hasNext())
-	    if(!predicates.remove(trIterator.next()))
+	    if(!predicates.contains(trIterator.next()))
 		trIterator.remove();
-	
+	predicates.removeAll(toRemove);
 	final Iterator<E> usedIterator = used.iterator();
 	E element;
 	while(usedIterator.hasNext()){

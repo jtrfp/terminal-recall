@@ -24,11 +24,12 @@ import org.apache.commons.collections4.functors.TruePredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPacker;
+import org.jtrfp.trcl.coll.CollectionActionPrinter;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
 import org.jtrfp.trcl.coll.UnityAdapter;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.obj.Positionable;
-import org.jtrfp.trcl.obj.WorldObject;
 
 import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.Pair;
@@ -42,14 +43,24 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
-	
-	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher = 
+	private final com.ochafik.util.listenable.Adapter<Vector3D,Vector3D>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<Vector3D,Vector3D>(){
+	    @Override
+	    public Vector3D adapt(Vector3D value) {
+		final int granularity = World.CUBE_GRANULARITY;
+		final Vector3D newCenterCube = new Vector3D(
+			Math.rint(value.getX()/granularity),
+			Math.rint(value.getY()/granularity),
+			Math.rint(value.getZ()/granularity));
+		return newCenterCube;
+	    }
+	};
+	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher = //PASS
 		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
 		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);
 	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectValve.input);
 	private final PropertyBasedTagger<Positionable, Vector3D, Vector3D> localTagger
-	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, new UnityAdapter<Vector3D>(), "position");
+	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITIONV3D);
 	
 	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;
@@ -57,6 +68,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 				rawDia,
 				rawDiaX,rawDiaY,rawDiaZ,
 				xProgression,yProgression,zProgression;
+	
 	private final Adapter<Vector3D,Integer> cubeSpaceRasterizer = new Adapter<Vector3D,Integer>(){
 	    @Override
 	    public Integer adapt(Vector3D value) {
@@ -85,16 +97,22 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		public Vector3D reAdapt(Integer value) {
 		    throw new UnsupportedOperationException();
 		}};
-	
-	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
-		{setParentGrid(parentGrid);}
+		
+	protected SpacePartitioningGrid(){
+	    if(Renderer.NEW_MODE)
+		newActivate();
+	}
 	
     public void activate() {
-	if (parentGrid != null) {
-	    final SpacePartitioningGrid g = parentGrid.get();
-	    if (g != null)
-		g.addBranch(this);
-	}
+	if(Renderer.NEW_MODE)
+	    newActivate();
+	else{
+	    if (parentGrid != null) {
+		    final SpacePartitioningGrid g = parentGrid.get();
+		    if (g != null)
+			g.addBranch(this);
+		}
+	}//end(!NEW_MODE)
     }//end activate()
     
     public Adapter<Vector3D,Integer> getCubeSpaceRasterizer(){
@@ -106,6 +124,8 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
     }
 
     public void deactivate() {
+	if(Renderer.NEW_MODE){
+	    newDeactivate();return;}
 	if (parentGrid != null) {
 	    final SpacePartitioningGrid g = parentGrid.get();
 	    if (g != null)
@@ -125,8 +145,12 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		g.notifyBranchRemoved(b);
     }//end notifyBranchRemoved(...)
 
-	private void addBranch(SpacePartitioningGrid<E> branchToAdd)
-		{if(!branchGrids.containsKey(branchToAdd)){
+	private void addBranch(SpacePartitioningGrid<E> branchToAdd){
+	if(Renderer.NEW_MODE){
+	    newAddBranch(branchToAdd);
+	    return;
+	}
+		if(!branchGrids.containsKey(branchToAdd)){
 		    branchGrids.put(branchToAdd,"");
 		    if(parentGrid==null)return;
 		    final SpacePartitioningGrid<E> g = parentGrid.get();
@@ -134,8 +158,12 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 			g.notifyBranchAdded(branchToAdd);
 		    }//end if(!contains)
 		}//end addBranch(...)
-	private void removeBranch(SpacePartitioningGrid<E> branchToRemove)
-		{if(branchGrids.remove(branchToRemove)!=null){
+	private void removeBranch(SpacePartitioningGrid<E> branchToRemove){
+	if(Renderer.NEW_MODE){
+	    newRemoveBranch(branchToRemove);
+	    return;
+	}
+		if(branchGrids.remove(branchToRemove)!=null){
 		    if(parentGrid==null)return;
 		    final SpacePartitioningGrid<E> g = parentGrid.get();
 		    if (g != null)
@@ -144,6 +172,13 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		}//end removeBranch(...)
 	
 	private void setParentGrid(SpacePartitioningGrid<E> parentGrid){
+	    	if(Renderer.NEW_MODE){
+	    	    if(this.parentGrid!=null)
+	    		this.parentGrid.get().removeBranch(this);
+	    	    parentGrid.addBranch(this);
+	    	    this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);
+	    	    return;
+	    	}
 		this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);
 		setSquareSize(parentGrid.getSquareSize());
 		setSquaresX(parentGrid.getSquaresX());
@@ -155,14 +190,20 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		}//end setParentGrid(...)
 
 	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
+	    this();
+	    if(!Renderer.NEW_MODE){
 		setSquareSize(squareSize);
 		setSquaresX((int)(size.getX()/squareSize));
 		setSquaresY((int)(size.getY()/squareSize));
 		setSquaresZ((int)(size.getZ()/squareSize));
 		setViewingRadius(viewingRadius);
-		
+
 		allocateSquares();
-		}//end constructor
+	    }//end if(old mode)
+	}//end constructor
+	
+	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
+	 {this();setParentGrid(parentGrid);}
 	
 	private void allocateSquares(){
 		elements = new List[squaresX*squaresY*squaresZ];
@@ -197,10 +238,12 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	
 	public synchronized void newAddBranch(SpacePartitioningGrid<E> toAdd){
 	    toAdd.getPackedObjectsDispatcher().addTarget(packedObjectValve.input, true);
+	    branchGrids.put(toAdd, null);
 	}
 	
 	public synchronized void newRemoveBranch(SpacePartitioningGrid<E> toRemove){
 	    toRemove.getPackedObjectsDispatcher().removeTarget(packedObjectValve.input, true);
+	    branchGrids.remove(toRemove);
 	}
 	
 	public CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> getPackedObjectsDispatcher(){
@@ -208,14 +251,19 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	}
 	
 	public synchronized void add(E objectWithPosition){//TODO: Remove old
-	    newAdd(objectWithPosition);//TODO: Remove stub
+	    if(Renderer.NEW_MODE)
+	     newAdd(objectWithPosition);//TODO: Remove stub
+	    else{
 	    	//Figure out where it goes
 	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
 	    	objectWithPosition.setContainingGrid(this);
-		}
+	    }//end (!NEW_MODE)
+	}//end add()
 	public synchronized void remove(E objectWithPosition){//TODO Remove old
-	    newRemove(objectWithPosition);//TODO: Remove stub
-	    objectWithPosition.setContainingGrid(null);
+	    if(Renderer.NEW_MODE)
+	     newRemove(objectWithPosition);//TODO: Remove stub
+	    else
+	     objectWithPosition.setContainingGrid(null);
 	}//end remove(...)
 	private static double absMod(double value, double mod){
 		if(value>=-0.)
@@ -408,6 +456,15 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	}
 	
 	public void removeAll(){
+	    if(Renderer.NEW_MODE){
+		final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
+		for(SpacePartitioningGrid g:branchGrids.keySet())
+		    branches.add(g);
+		for(SpacePartitioningGrid g:branches)
+		    removeBranch(g);
+		final ArrayList<E> alwaysVisible = new ArrayList<E>();
+		return;
+	    }
 	    final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
 	    for(SpacePartitioningGrid g:branchGrids.keySet())
 		branches.add(g);

@@ -29,8 +29,11 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
+import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.CollectionActionPrinter;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
+import org.jtrfp.trcl.coll.DummyAdapter;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
@@ -39,7 +42,6 @@ import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 import com.ochafik.util.listenable.AdaptedCollection;
-import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 
 public class Camera extends WorldObject implements RelevantEverywhere{
@@ -56,29 +58,29 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	private Adapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
-		new Adapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
+	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
+		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
-		    public CollectionActionDispatcher<Positionable> adapt(
-			    Pair<Vector3D, CollectionActionDispatcher<Positionable>> value) {
+		    protected CollectionActionDispatcher<Positionable> _adapt(
+			    Pair<Vector3D, CollectionActionDispatcher<Positionable>> value)
+			    throws UnsupportedOperationException {
 			return value.getValue();
-		    }};
-	private Adapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> dummyAdapter = 
-		new Adapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(){
-		    @Override
-		    public Pair<Vector3D, CollectionActionDispatcher<Positionable>> adapt(
-			    CollectionActionDispatcher<Positionable> value) {
-			throw new UnsupportedOperationException();
 		    }
-		};
+
+		    @Override
+		    protected Pair<Vector3D, CollectionActionDispatcher<Positionable>> _reAdapt(
+			    CollectionActionDispatcher<Positionable> value)
+			    throws UnsupportedOperationException {
+			throw new UnsupportedOperationException();
+		    }};
 	private final CollectionActionDispatcher<CollectionActionDispatcher<Positionable>> relevanceCollections =
 		new CollectionActionDispatcher<CollectionActionDispatcher<Positionable>>(new ArrayList<CollectionActionDispatcher<Positionable>>());
 	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> relevancePairs = 
 		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> 
-	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevancePairs);
+	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new CollectionActionPrinter("relevancePairs",relevancePairs));//TODO: Predicate not right
 	private final AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
-		new AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, dummyAdapter, strippingAdapter);
+		new AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.toBackward(), strippingAdapter.toForward());//TODO: Need cached adapter
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
@@ -90,9 +92,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private SpacePartitioningGrid rootGrid;
 	private Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
 
-    Camera(GPU gpu) {
-	super(gpu.getTr());
-	this.gpu = gpu;
+    Camera(TR tr) {
+	super(tr);
+	this.gpu = tr.gpu.get();
 	
 	visibilityFilter.add(new VisibilityPredicate());
 	relevancePairs.addTarget(pairStripper, true);
@@ -118,15 +120,18 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	@Override
 	public boolean evaluate(
 		Pair<Vector3D, CollectionActionDispatcher<Positionable>> object) {
+	    return true;//TODO: Remove debug
+	    /*
 	    final Vector3D cubePosition = object.getKey();
 	    if(cubePosition==World.VISIBLE_EVERYWHERE)
 		return true;
 	    return cubePosition.distance(centerCube)<RELEVANCE_RADIUS_CUBES;
+	    */
 	}//end evaluate()
     }//end VisibilityPredicate
     
     public void addGrid(SpacePartitioningGrid<?> toAdd){
-	toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input, true);
+	toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input,true);
     }
     public void removeGrid(SpacePartitioningGrid<?> toRemove){
    	toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
@@ -160,7 +165,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     }//end CenterCubeHandler
 
 	private void updateProjectionMatrix(){
-	    	final Component component = gpu.getTr().getRootWindow();
+	    	final Component component = getTr().getRootWindow();
 		final float fov = 70f;// In degrees
 		final float aspect = (float) component.getWidth()
 				/ (float) component.getHeight();
@@ -264,9 +269,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		{//if(cameraMatrix==null){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
-			    gpu.getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
 			}//}
 		return completeMatrix;
 		}

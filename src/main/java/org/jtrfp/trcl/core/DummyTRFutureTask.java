@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Callable;
 
 
@@ -24,7 +25,11 @@ public class DummyTRFutureTask<T> extends TRFutureTask<T> {
 	}
     };
     public DummyTRFutureTask(T valueToReturn) {
-	super(null,CALLABLE);
+	super(CALLABLE);
+	this.valueToReturn=valueToReturn;
+    }
+    public DummyTRFutureTask(T valueToReturn, UncaughtExceptionHandler handler) {
+	super(CALLABLE,handler);
 	this.valueToReturn=valueToReturn;
     }
 

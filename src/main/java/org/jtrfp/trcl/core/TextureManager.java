@@ -15,6 +15,7 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.LineSegment;
+import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.Reporter;
 
 
 /**
@@ -31,29 +34,31 @@ import org.jtrfp.trcl.LineSegment;
  */
 
 public class TextureManager {
-    private final TR 				tr;
+    private final GPU				gpu;
+    private final ThreadManager			threadManager;
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
     public final TRFutureTask<VQCodebookManager>vqCodebookManager;
     private TextureDescription			fallbackTexture;
     private final ConcurrentHashMap<Integer,Texture>
     						colorCache = new ConcurrentHashMap<Integer,Texture>();
-    public TextureManager(final TR tr){
-	this.tr			= tr;
-	subTextureWindow 	= new SubTextureWindow(tr);
-	tocWindow 		= new TextureTOCWindow(tr);
-	vqCodebookManager=tr.getThreadManager().submitToGL(new Callable<VQCodebookManager>(){
+    public TextureManager(final GPU gpu, Reporter reporter, ThreadManager threadManager, final UncaughtExceptionHandler exceptionHandler){
+	this.gpu                = gpu;
+	this.threadManager      = threadManager;
+	subTextureWindow 	= new SubTextureWindow(gpu);
+	tocWindow 		= new TextureTOCWindow(gpu);
+	vqCodebookManager=gpu.submitToGL(new Callable<VQCodebookManager>(){
 	    @Override
 	    public VQCodebookManager call() throws Exception {
-		return new VQCodebookManager(tr);
+		return new VQCodebookManager(gpu, exceptionHandler);
 	    }});
     }//end constructor
     
     public Texture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping){
-	return new Texture(imageRGB8,imageESTuTv,debugName,tr, uvWrapping);
+	return new Texture(gpu,threadManager,imageRGB8,imageESTuTv,debugName, uvWrapping);
     }
     public Texture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping){
-	return new Texture(imgRGBA,imgESTuTv,debugName,tr, uvWrapping);
+	return new Texture(gpu,threadManager,imgRGBA,imgESTuTv,debugName,uvWrapping);
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;
@@ -65,8 +70,8 @@ public class TextureManager {
 	if(defaultTriPipeTexture==null){
 	 try{
 	  defaultTriPipeTexture = 
-	    		new Texture(ImageIO.read(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
-	    			"Default TriPipe Texture (grayNoise)",tr,true);}
+	    		new Texture(gpu,threadManager,ImageIO.read(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
+	    			"Default TriPipe Texture (grayNoise)",true);}
 	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
 	}
 	return defaultTriPipeTexture;
@@ -76,10 +81,10 @@ public class TextureManager {
 	if(fallbackTexture!=null)return fallbackTexture;
 	Texture t;
 	try{
-	 t = new Texture(
+	 t = new Texture(gpu,threadManager,
 		ImageIO.read(Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),null,
-		"Fallback",tr,true);}
+		"Fallback",true);}
 	catch(IOException e){throw new RuntimeException("Failure to load fallback texture. Is everything right with the resources directory?",e);}
 	fallbackTexture = t;
 	return fallbackTexture;
@@ -90,7 +95,7 @@ public class TextureManager {
 	Texture		result 	= colorCache.get(key);
 	if(result!=null)
 	    return result;
-	result = new Texture(color,tr);
+	result = new Texture(gpu,threadManager,color);
 	colorCache.put(key,result);
 	return result;
     }//end solidColor(...)

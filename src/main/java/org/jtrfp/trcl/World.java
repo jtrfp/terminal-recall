@@ -40,7 +40,7 @@ public final class World {
     }
     
     public Camera newCamera(){
-	final Camera camera = new Camera(tr.gpu.get());
+	final Camera camera = new Camera(tr);
 	camera.setViewDepth(cameraViewDepth);
 	camera.setPosition(new Vector3D(camera.getCameraPosition().getX(),
 		sizeY / 3.15, camera.getCameraPosition().getZ()));

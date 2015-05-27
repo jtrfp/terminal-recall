@@ -88,7 +88,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
 	this.tr = tr;
-	matrixID = tr.matrixWindow.get().create();
+	matrixID = tr.gpu.get().matrixWindow.get().create();
 	// Matrix constants setup
 	rMd[15] = 1;
 
@@ -200,7 +200,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 		numObjDefs++;
 	    triangleObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
-		triangleObjectDefinitions[i] = tr.objectDefinitionWindow.get()
+		triangleObjectDefinitions[i] = tr.gpu.get().objectDefinitionWindow.get()
 			.create();
 	    }
 	}
@@ -214,7 +214,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 		numObjDefs++;
 	    transparentTriangleObjectDefinitions = new int[numObjDefs];
 	    for (int i = 0; i < numObjDefs; i++) {
-		transparentTriangleObjectDefinitions[i] = tr
+		transparentTriangleObjectDefinitions[i] = tr.gpu.get()
 			.objectDefinitionWindow.get().create();
 	    }
 	}
@@ -280,13 +280,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	final int elementsPerBlock = GPU.GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
 	int gpuVerticesRemaining = primitiveList.getNumElements()*gpuVerticesPerElement;
 	// For each of the allocated-but-not-yet-initialized object definitions.
-	final ObjectDefinitionWindow odw = tr.objectDefinitionWindow.get();
+	final ObjectDefinitionWindow odw = tr.gpu.get().objectDefinitionWindow.get();
 	int odCounter=0;
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)
 		    /GPU.BYTES_PER_VEC4;
-	    final int matrixOffsetVec4s=tr.matrixWindow.get()
+	    final int matrixOffsetVec4s=tr.gpu.get().matrixWindow.get()
 		    .getPhysicalAddressInBytes(matrixID)
 		    / GPU.BYTES_PER_VEC4;
 	    odw.matrixOffset.set(index,matrixOffsetVec4s);
@@ -382,7 +382,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
-	    tr.matrixWindow.get().setTransposed(rotTransM, matrixID, scratchMatrixArray);//New version
+	    tr.gpu.get().matrixWindow.get().setTransposed(rotTransM, matrixID, scratchMatrixArray);//New version
 	} catch (MathArithmeticException e) {
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()
@@ -691,13 +691,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     @Override
     public void finalize() throws Throwable{
 	if(matrixID!=null)
-	 tr.matrixWindow.get().free(matrixID);
+	 tr.gpu.get().matrixWindow.get().free(matrixID);
 	if(transparentTriangleObjectDefinitions!=null)
 	 for(int def:transparentTriangleObjectDefinitions)
-	    tr.objectDefinitionWindow.get().free(def);
+	    tr.gpu.get().objectDefinitionWindow.get().free(def);
 	if(triangleObjectDefinitions!=null)
 	 for(int def:triangleObjectDefinitions)
-	    tr.objectDefinitionWindow.get().free(def);
+	    tr.gpu.get().objectDefinitionWindow.get().free(def);
 	super.finalize();
     }//end finalize()
 

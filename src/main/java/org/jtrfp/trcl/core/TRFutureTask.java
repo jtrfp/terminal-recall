@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2015 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -12,27 +12,34 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
-    protected final TR tr;
-    private boolean handleException=true;
+    private final UncaughtExceptionHandler handler;
 
-    public TRFutureTask(TR tr, Callable<V> callable) {
+    public TRFutureTask(Callable<V> callable, UncaughtExceptionHandler handler) {
 	super(callable);
-	this.tr=tr;
+	this.handler=handler;
     }//end constructor
-    public TRFutureTask(TR tr, Runnable runnable, V result) {
+    public TRFutureTask(Runnable runnable, V result) {
 	super(runnable,result);
-	this.tr=tr;
+	handler=null;
+    }//end constructor
+    public TRFutureTask(Runnable runnable, V result, UncaughtExceptionHandler handler) {
+	super(runnable,result);
+	this.handler=handler;
     }//end constructor
     
+    public TRFutureTask(Callable<V> callable) {
+	this(callable,null);
+    }
     @Override
     public void run(){
 	try{super.run();super.get();}
 	catch(Exception e)
-	 {if(handleException)tr.showStopper(e.getCause());
+	 {if(handler!=null)handler.uncaughtException(Thread.currentThread(),e.getCause());
 	    else throw new RuntimeException(e.getCause());}//Re=wrap
     }//end run()
     
@@ -50,12 +57,8 @@ public class TRFutureTask<V> extends FutureTask<V> implements TRFuture<V>{
 	}
 	catch(InterruptedException e){}
 	catch(Exception e){
-	    if(handleException)tr.showStopper(e);
+	    if(handler!=null)handler.uncaughtException(Thread.currentThread(), e);
 	    else throw new RuntimeException(e);}
 	return null;
     }//end get()
-    public void setHandleException(boolean handleException) {
-	this.handleException=handleException;
-    }
-    
 }//end TRFutureTask

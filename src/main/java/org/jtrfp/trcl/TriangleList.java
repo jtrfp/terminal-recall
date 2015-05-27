@@ -39,7 +39,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
-	super(debugName, triangles, new TriangleVertexWindow(tr, debugName), tr,m);
+	super(debugName, triangles, new TriangleVertexWindow(tr.gpu.get(),debugName), tr,m);
 	this.timeBetweenFramesMsec 	= timeBetweenFramesMsec;
 	this.animateUV 			= animateUV;
 	this.controller 		= controller;

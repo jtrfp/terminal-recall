@@ -60,6 +60,8 @@ private final NAVSystem nav;
 	    final Mission mission    = game.getCurrentMission();
 	    final WorldObject player = game.getPlayer();
 	    final HUDSystem hudSystem= game.getHUDSystem();
+	    if(mission==null || player == null || hudSystem == null)
+		return;
 	    final NAVObjective navObjective = mission.currentNAVObjective();
 	    if(navObjective==null)            {setVisible(false);return;}
 	    if(navObjective.getTarget()==null){setVisible(false);return;}

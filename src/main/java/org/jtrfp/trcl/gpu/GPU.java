@@ -12,67 +12,101 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.media.opengl.DebugGL3;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.awt.GLCanvas;
 
+import org.jtrfp.trcl.MatrixWindow;
+import org.jtrfp.trcl.ObjectDefinitionWindow;
+import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.RendererFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
+import org.jtrfp.trcl.obj.CollisionManager;
 
-public class GPU{
+public class GPU implements GLExecutor{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
     	private GLFutureTask<Integer>			defaultTIU;
 	
 	private ByteOrder 				byteOrder;
-	private final TR 				tr;
+	//private final TR 				tr;
 	private GL3 					gl;
 	public final TRFutureTask<MemoryManager> 	memoryManager;
 	public final TRFutureTask<TextureManager> 	textureManager;
 	private GPUVendor				vendor=null;
 	public final TRFutureTask<RendererFactory> 	rendererFactory;
+	private final GLExecutor			glExecutor;
+	private final GLCanvas				canvas;
+	public final TRFutureTask<MatrixWindow> 	matrixWindow ;
+	public final TRFutureTask<ObjectListWindow> 	objectListWindow;
+	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
 	
-	public GPU(final TR tr){
-	    this.tr=tr;
-	    memoryManager = new TRFutureTask<MemoryManager>(tr,new Callable<MemoryManager>(){
-
+	public GPU(final Reporter reporter, ExecutorService executorService, 
+		GLExecutor glExecutor, final ThreadManager threadManager, 
+		final UncaughtExceptionHandler exceptionHandler, final GLCanvas glCanvas,
+		final CollisionManager collisionManager, final World world){
+	    if(executorService==null)
+		executorService = Executors.newCachedThreadPool();
+	    this.glExecutor=glExecutor;
+	    this.canvas    = glCanvas;
+	    memoryManager  = new TRFutureTask<MemoryManager>(new Callable<MemoryManager>(){
 		@Override
 		public MemoryManager call() throws Exception {
-		    return new MemoryManager(GPU.this);
+		    return new MemoryManager(GPU.this, reporter, threadManager);
 		}
-		
 	    });
-	    tr.getThreadManager().threadPool.submit(memoryManager);
-	    textureManager = new TRFutureTask<TextureManager>(tr,new Callable<TextureManager>(){
-
+	    executorService.submit(memoryManager);
+	    textureManager = new TRFutureTask<TextureManager>(new Callable<TextureManager>(){
 		@Override
 		public TextureManager call() throws Exception {
-		    return new TextureManager(tr);
+		    return new TextureManager(GPU.this, reporter, threadManager, exceptionHandler);
 		}
-		
-	    });tr.getThreadManager().threadPool.submit(textureManager);
-	    defaultTIU = tr.getThreadManager().submitToGL(new Callable<Integer>(){
+	    });executorService.submit(textureManager);
+	    defaultTIU = glExecutor.submitToGL(new Callable<Integer>(){
 		@Override
 		public Integer call() throws Exception {
 		    return glGet(GL3.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
 		}});
-	    rendererFactory = new TRFutureTask<RendererFactory>(tr,new Callable<RendererFactory>(){
+	    matrixWindow=new TRFutureTask<MatrixWindow>(new Callable<MatrixWindow>(){
+		@Override
+		public MatrixWindow call() throws Exception {
+		    return new MatrixWindow(GPU.this);
+		}//end call()
+	    });threadManager.threadPool.submit(matrixWindow);
+	    objectListWindow=new TRFutureTask<ObjectListWindow>(new Callable<ObjectListWindow>(){
+		@Override
+		public ObjectListWindow call() throws Exception {
+		    return new ObjectListWindow(GPU.this);
+		}//end call()
+	    });threadManager.threadPool.submit(objectListWindow);
+	    objectDefinitionWindow=new TRFutureTask<ObjectDefinitionWindow>(new Callable<ObjectDefinitionWindow>(){
+		@Override
+		public ObjectDefinitionWindow call() throws Exception {
+		    return new ObjectDefinitionWindow(GPU.this);
+		}//end call()
+	    });threadManager.threadPool.submit(objectDefinitionWindow);
+	    rendererFactory = new TRFutureTask<RendererFactory>(new Callable<RendererFactory>(){
 		@Override
 		public RendererFactory call() throws Exception {
-		    return new RendererFactory(GPU.this);
+		    return new RendererFactory(GPU.this, threadManager, glCanvas, reporter, world, collisionManager,objectListWindow.get());
 		}
-		
-	    });tr.getThreadManager().threadPool.submit(rendererFactory);
+	    });executorService.submit(rendererFactory);
 	}//end constructor
 	
 	public int glGet(int key){
@@ -107,7 +141,6 @@ public class GPU{
 		if(gl==null)
 			{GL gl1;
 			//In case GL is not ready, wait and try again.
-			final GLCanvas canvas = tr.getRootWindow().getCanvas();
 			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
 				{gl=gl1.getGL3();
 				canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
@@ -118,9 +151,9 @@ public class GPU{
 		return gl;
 		}
 	
-	public TR getTr() {
+	/*public TR getTr() {
 	    	return tr;
-		}
+		}*/
 	public GLFrameBuffer newFrameBuffer() {
 	    return new GLFrameBuffer(gl);
 	}
@@ -149,8 +182,9 @@ public class GPU{
 	}
 
 	public void defaultViewport() {
-	    getGl().glViewport(0, 0, tr.getRootWindow().getCanvas().getWidth(), tr
-			.getRootWindow().getCanvas().getHeight());
+	    getGl().glViewport(0, 0, 
+		    canvas.getWidth(), 
+		    canvas.getHeight());
 	}
 	
 	public GPUVendor getGPUVendor(){
@@ -175,4 +209,9 @@ public class GPU{
 	    Mali,
 	    Unknown
 	    }//end GPUVendor
+
+	@Override
+	public <T> GLFutureTask<T> submitToGL(Callable<T> c) {
+	    return glExecutor.submitToGL(c);
+	}
 	}//end GPU

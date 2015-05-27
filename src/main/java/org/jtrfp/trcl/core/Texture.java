@@ -48,8 +48,7 @@ import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.pool.IntArrayList;
 
 public class Texture implements TextureDescription {
-    private final TR 			tr;
-    private final GPU 			gpu;
+    private final ThreadManager         threadManager;
     private final TextureManager 	tm ;
     private final VQCodebookManager 	cbm;
     private final TextureTOCWindow 	toc;
@@ -85,8 +84,8 @@ public class Texture implements TextureDescription {
 	super.finalize();
     }//end finalize()
     
-    Texture(Color c, TR tr){
-	this(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),tr,false);
+    Texture(GPU gpu, ThreadManager threadManager, Color c){
+	this(gpu,threadManager,new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false);
     }//end constructor
     
     private static VectorList colorZeroRasterVL(){
@@ -140,34 +139,28 @@ public class Texture implements TextureDescription {
 	    }};
     }//end colorVL(...)
     
-    private Texture(TR tr, String debugName, boolean uvWrapping){
-	this.tr=tr;
-	this.gpu	=tr.gpu.get();
-	this.tm		=gpu.textureManager.get();
-	this.cbm	=tm.vqCodebookManager.get();
-	this.toc	=tm.getTOCWindow();
-	this.stw	=tm.getSubTextureWindow();
-	this.debugName	=debugName.replace('.', '_');
-	this.uvWrapping =uvWrapping;
+    private Texture(GPU gpu, ThreadManager threadManager, String debugName, boolean uvWrapping){
+	this.threadManager=threadManager;
+	this.tm		  =gpu.textureManager.get();
+	this.cbm	  =tm.vqCodebookManager.get();
+	this.toc	  =tm.getTOCWindow();
+	this.stw	  =tm.getSubTextureWindow();
+	this.debugName	  =debugName.replace('.', '_');
+	this.uvWrapping   =uvWrapping;
     }//end constructor
 
-    private Texture(Texture parent, double uOff, double vOff, double uSize,
-	    double vSize, TR tr, boolean uvWrapping) {
-	this(tr,"subtexture: "+parent.debugName,uvWrapping);
+    private Texture(GPU gpu, ThreadManager threadManager, Texture parent, double uOff, double vOff, double uSize,
+	    double vSize, boolean uvWrapping) {
+	this(gpu, threadManager, "subtexture: "+parent.debugName,uvWrapping);
     }//end constructor
     
-    public Texture subTexture(double uOff, double vOff, double uSize,
-	    double vSize){
-	return new Texture(this,uOff,vOff,uSize,vSize,tr,false);
-    }
-    
-    Texture(PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, TR tr, boolean uvWrapping){
-	this(tr,debugName,uvWrapping);
+    Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
+	this(gpu,threadManager,debugName,uvWrapping);
 	vqCompress(vlRGBA,vlESTuTv);
     }//end constructor
 
-    Texture(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, TR tr, boolean uvWrapping) {
-	this(tr,debugName,uvWrapping);
+    Texture(GPU gpu, ThreadManager threadManager, ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, boolean uvWrapping) {
+	this(gpu,threadManager,debugName,uvWrapping);
 	if (imageRGBA8888.capacity() == 0) {
 	    throw new IllegalArgumentException(
 		    "Cannot create texture of zero size.");
@@ -224,7 +217,7 @@ public class Texture implements TextureDescription {
 	    if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
 		throw new RuntimeException("Physical GPU address not perfectly aligned with page interval."); 		
 	    
-	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    threadManager.submitToThreadPool(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		// Create subtextures
@@ -237,7 +230,7 @@ public class Texture implements TextureDescription {
 		    for(int off=0; off<6; off++){
 			codebookStartOffsetsAbsolute[i][off]*= 256;}
 		}//end for(subTextureIDs)
-		tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
+		threadManager.submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public final Void call() {
 			//Set magic
@@ -422,8 +415,8 @@ public class Texture implements TextureDescription {
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
     }//end calculateAverageColor(...)
 
-    Texture(BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, TR tr, boolean uvWrapping) {
-	this(tr,debugName,uvWrapping);
+    Texture(GPU gpu, ThreadManager threadManager, BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
+	this(gpu,threadManager,debugName,uvWrapping);
 	try{
 	    vqCompress(new BufferedImageRGBA8888VL(imgRGBA),
 		    imgESTuTv!=null?

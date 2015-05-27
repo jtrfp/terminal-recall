@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
@@ -24,9 +23,7 @@ import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.jtrfp.trcl.ObjectListWindow;
-import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.DecoupledCollectionActionDispatcher;
@@ -35,6 +32,7 @@ import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.IntArrayVariableList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
@@ -52,7 +50,6 @@ public class RenderList {
 	    						* NUM_SUBPASSES;
     public static final int	NUM_RENDER_PASSES 	= 2;// Opaque + transparent //TODO: This is no longer the case
 
-    private final 	TR 			tr;
     private 		int[] 			hostRenderListPageTable;
     private 	 	int 			dummyBufferID;
     private 		int 			numOpaqueBlocks,
@@ -60,8 +57,12 @@ public class RenderList {
     						numUnoccludedTBlocks;
     private final	int			renderListIdx;
     private		long			rootBufferReadFinishedSync;
+    private final	GPU			gpu;
     private final	Renderer		renderer;
     private final	RendererFactory		rFactory;
+    private final	ObjectListWindow	objectListWindow;
+    private final       ThreadManager           threadManager;
+    private final	Reporter		reporter;
     //private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	IntBuffer 		previousViewport;
     private final	IntArrayVariableList    renderList;
@@ -82,15 +83,18 @@ public class RenderList {
     	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new TransODAddrAdapter()), 
     	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(unoccludedIL= new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new UnoccludedODAddrAdapter());
 
-    public RenderList(final GL3 gl, final Renderer renderer, final TR tr) {
+    public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager, Reporter reporter) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
-	this.tr = tr;
-	this.renderer = renderer;
-	this.rFactory = renderer.getRendererFactory();
+	this.reporter        = reporter;
+	this.threadManager   = threadManager;
+	this.gpu             = gpu;
+	this.objectListWindow=objectListWindow;
+	this.renderer        = renderer;
+	this.rFactory        = renderer.getRendererFactory();
 	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
-	this.renderListIdx		=tr.objectListWindow.get().create();
-	this.renderList                 = new IntArrayVariableList(tr.objectListWindow.get().opaqueIDs,renderListIdx);
+	this.renderListIdx		=objectListWindow.create();
+	this.renderList                 = new IntArrayVariableList(objectListWindow.opaqueIDs,renderListIdx);
 	//this.renderListPool		= new PartitionedIndexPoolImpl<VEC4Address>();
 	//this.opaquePartition            = renderListPool.newPartition();
 	//this.transparentPartition       = renderListPool.newPartition();
@@ -103,9 +107,10 @@ public class RenderList {
 	relevantPositionedRenderables.addTarget(transODAddrsColl, false);
 	relevantPositionedRenderables.addTarget(unoccludedODAddrsColl, false);
 	
-	final TRFuture<Void> task0 = tr.getThreadManager().submitToGL(new Callable<Void>(){
+	final TRFuture<Void> task0 = gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
+		final GL3 gl = gpu.getGl();
 		gl.glGenBuffers(1, ib);
 		ib.clear();
 		dummyBufferID = ib.get();
@@ -126,13 +131,11 @@ public class RenderList {
     }// end constructor
     
     private void sendRenderListPageTable(){
-	final ObjectListWindow olWindow = RenderList.this.tr
-		    .objectListWindow.get();
 	//final Renderer renderer = tr.mainRenderer.get();
-	final int size = olWindow.numPages();
+	final int size = objectListWindow.numPages();
 	//////// Workaround for AMD bug where element zero always returns zero in frag. Shift up one.
 	for (int i = 0; i < size-1; i++) {
-	    hostRenderListPageTable[i+1] = olWindow.logicalPage2PhysicalPage(i);
+	    hostRenderListPageTable[i+1] = objectListWindow.logicalPage2PhysicalPage(i);
 	}// end for(hostRenderListPageTable.length)
 	final GLProgram objectProgram = rFactory.getObjectProgram();
 	objectProgram.use();
@@ -144,14 +147,14 @@ public class RenderList {
 	final GLProgram vertexProgram = rFactory.getVertexProgram();
 	vertexProgram.use();
 	vertexProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
-	tr.gpu.get().defaultProgram();
+	gpu.defaultProgram();
 	sentPageTable=true;
     }
 
     private static int frameCounter = 0;
 
     private void updateStatesToGPU() {
-	synchronized(tr.getThreadManager().gameStateLock){
+	synchronized(threadManager.gameStateLock){
 	    renderer.getCamera().tick(System.currentTimeMillis());
 	synchronized(relevantPositionedRenderables){
 	for (PositionedRenderable renderable:relevantPositionedRenderables) 
@@ -199,9 +202,7 @@ public class RenderList {
     
     public void render(final GL3 gl) throws NotReadyException {
 	if(!sentPageTable)sendRenderListPageTable();
-	final GPU gpu = tr.gpu.get();
-	final ObjectListWindow olWindow = tr.objectListWindow.get();
-	final int opaqueRenderListLogicalVec4Offset = ((olWindow.getObjectSizeInBytes()*renderListIdx)/16);
+	final int opaqueRenderListLogicalVec4Offset = ((objectListWindow.getObjectSizeInBytes()*renderListIdx)/16);
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
 	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
 	
@@ -315,16 +316,16 @@ public class RenderList {
 	if(rFactory.isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
 	
 	if (frameCounter == 0) {
-	    tr.getReporter().report(
+	    reporter.report(
 		    "org.jtrfp.trcl.core.RenderList.numOpaqueBlocks",
 		    "" + opaqueIL.size());
-	    tr.getReporter().report(
+	    reporter.report(
 		    "org.jtrfp.trcl.core.RenderList.numTransparentBlocks",
 		    "" + transIL.size());
-	    tr.getReporter().report(
+	    reporter.report(
 		    "org.jtrfp.trcl.core.RenderList.numUnoccludedTransparentBlocks",
 		    "" + unoccludedIL.size());
-	    tr.getReporter().report(
+	    reporter.report(
 		    "org.jtrfp.trcl.core.RenderList.approxNumSceneTriangles",
 		    "" + ((opaqueIL.size()+transIL.size()+unoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
 	}

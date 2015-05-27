@@ -31,8 +31,10 @@ import org.jtrfp.trcl.gpu.GPU;
 
 public class GPUMemDump {
 private final GPU gpu;
+private final TR tr;
     public GPUMemDump(TR tr) {
 	//Dump raw memory
+	this.tr=tr;
 	gpu = tr.gpu.get();
 	try{
 	System.out.println("Dumping root memory...");
@@ -47,7 +49,7 @@ private final GPU gpu;
 	final VQCodebookManager vq = gpu.textureManager.get().vqCodebookManager
 		.get();
 	
-	final ByteBuffer[] pagesRGBA8888 = gpu.getTr().getThreadManager().submitToGL(new Callable<ByteBuffer[]>(){
+	final ByteBuffer[] pagesRGBA8888 = tr.getThreadManager().submitToGL(new Callable<ByteBuffer[]>(){
 	    @Override
 	    public ByteBuffer[] call() throws Exception {
 		return vq.dumpPagesToBuffer();
@@ -83,7 +85,7 @@ private final GPU gpu;
 	raf.setLength(gpuMemSize);
 	FileChannel channel = raf.getChannel();
 	final MappedByteBuffer bb = channel.map(MapMode.READ_WRITE, 0, gpuMemSize);
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	tr.getThreadManager().submitToGL(new Callable<Void>(){
 
 	    @Override
 	    public Void call() throws Exception {

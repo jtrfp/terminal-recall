@@ -17,7 +17,8 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.Collection;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
@@ -26,11 +27,10 @@ public abstract class MemoryWindow {
     private int objectSizeInBytes;
     private final IndexPool indexPool = new IndexPool();
     private String debugName;
-    private TR tr;
+    private Reporter reporter;
 
-    protected final void init(TR tr, String debugName) {
+    protected final void init(GPU gpu, String debugName) {
 	this.debugName = debugName;
-	this.tr = tr;
 	int byteOffset = 0;
 	for (Field f : getClass().getFields()) {
 	    if (Variable.class.isAssignableFrom(f.getType())) {
@@ -45,8 +45,7 @@ public abstract class MemoryWindow {
 	    }// end if(Variable)
 	}// end for(fields)
 	objectSizeInBytes = byteOffset;
-	setBuffer(tr
-		.gpu.get()
+	setBuffer(gpu
 		.memoryManager.get()
 		.createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES,
 			"MemoryWindow " + this.getClass().getName()));
@@ -58,14 +57,15 @@ public abstract class MemoryWindow {
 			+ (int)Math.ceil((double)PagedByteBuffer.PAGE_SIZE_BYTES
 			/ (double)getObjectSizeInBytes());
 		getBuffer().resize(newSizeInObjects * getObjectSizeInBytes());
-		MemoryWindow.this.tr.getReporter().report(
+		if(MemoryWindow.this.reporter!=null)
+		 MemoryWindow.this.reporter.report(
 			"org.jtrfp.trcl.mem.MemoryWindow."
 				+ MemoryWindow.this.debugName
 				+ ".sizeInObjects", newSizeInObjects);
 
 		for (int p = 0; p < MemoryWindow.this.numPages(); p++) {
-		    MemoryWindow.this.tr
-			    .getReporter()
+		    if(MemoryWindow.this.reporter!=null)
+		     MemoryWindow.this.reporter
 			    .report("org.jtrfp.trcl.mem.MemoryWindow."
 				    + MemoryWindow.this.debugName + ".page" + p,
 				    String.format(
@@ -74,7 +74,8 @@ public abstract class MemoryWindow {
 						    .logicalPage2PhysicalPage(p)
 						    * PagedByteBuffer.PAGE_SIZE_BYTES));
 		}
-		MemoryWindow.this.tr.getReporter().report(
+		if(MemoryWindow.this.reporter!=null)
+		 MemoryWindow.this.reporter.report(
 			"org.jtrfp.trcl.mem.MemoryWindow."
 				+ MemoryWindow.this.debugName
 				+ ".sizeInObjects", newSizeInObjects);
@@ -97,7 +98,8 @@ public abstract class MemoryWindow {
 	});
 	buffer.resize(getObjectSizeInBytes() * getNumObjects());
 	for (int p = 0; p < numPages(); p++) {
-	    MemoryWindow.this.tr.getReporter().report(
+	    if(MemoryWindow.this.reporter!=null)
+	     MemoryWindow.this.reporter.report(
 		    "org.jtrfp.trcl.mem.MemoryWindow."
 			    + MemoryWindow.this.debugName + ".page" + p,
 		    String.format("%08x",
@@ -476,5 +478,20 @@ public abstract class MemoryWindow {
 
     public final int logicalPage2PhysicalPage(int logicalPage) {
 	return buffer.logicalPage2PhysicalPage(logicalPage);
+    }
+
+    /**
+     * @return the reporter
+     */
+    public Reporter getReporter() {
+        return reporter;
+    }
+
+    /**
+     * @param reporter the reporter to set
+     */
+    public MemoryWindow setReporter(Reporter reporter) {
+        this.reporter = reporter;
+        return this;
     }
 }// end ObjectWindow

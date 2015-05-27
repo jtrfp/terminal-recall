@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public final class MatrixWindow extends MemoryWindow {
@@ -20,8 +20,8 @@ public final class MatrixWindow extends MemoryWindow {
     public final Double2FloatArrayVariable matrix = new Double2FloatArrayVariable(
 	    16);
 
-    public MatrixWindow(TR tr) {
-	init(tr,"MatrixWindow");
+    public MatrixWindow(GPU gpu) {
+	init(gpu, "MatrixWindow");
     }
     public final void setTransposed(double[] vals, int id, double [] workArray) {
 	for (int index = 0; index < 16; index++) {

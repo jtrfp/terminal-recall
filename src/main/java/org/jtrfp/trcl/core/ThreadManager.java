@@ -32,6 +32,7 @@ import javax.media.opengl.GLEventListener;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -40,7 +41,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.Animator;
 
-public final class ThreadManager {
+public final class ThreadManager implements GLExecutor{
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= RENDER_FPS;
     public static final int RENDERLIST_REFRESH_FPS 	= 1;
@@ -157,14 +158,14 @@ public final class ThreadManager {
     }// end gameplay()
     
     public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){
-	final TRFutureTask<T> result = new TRFutureTask<T>(tr,c);
+	final TRFutureTask<T> result = new TRFutureTask<T>(c,tr);
 	synchronized(currentGPUMemAccessTaskSubmitter){
 	    currentGPUMemAccessTaskSubmitter.get().submit(result);}
 	return result;
     }//end submitToGPUMemAccess(...)
     
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
-	final GLFutureTask<T> result = new GLFutureTask<T>(tr,c);
+	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),tr.getThreadManager(),c);
 	if(isGLThread())
 	    if(tr.gpu.get().getGl().getContext().isCurrent()){
 		result.run();
@@ -306,8 +307,7 @@ public final class ThreadManager {
 
     public <T>TRFutureTask<T> submitToThreadPool(boolean handleException,
 	    Callable<T> callable) {
-	final TRFutureTask<T> result = new TRFutureTask<T>(tr,callable);
-	result.setHandleException(handleException);
+	final TRFutureTask<T> result = new TRFutureTask<T>(callable,handleException?tr:null);
 	threadPool.submit(result);
 	return result;
     }

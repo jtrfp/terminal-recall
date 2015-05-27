@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TextureTOCWindow extends MemoryWindow {
@@ -30,7 +32,7 @@ public class TextureTOCWindow extends MemoryWindow {
     //Tally: 1472B
     public final ByteArrayVariable 	filler1			= new ByteArrayVariable(64);//64B
     
-    public TextureTOCWindow(TR tr){
-	this.init(tr, "TextureTOCWindow");
+    public TextureTOCWindow(GPU gpu){
+	this.init(gpu, "TextureTOCWindow");
     }//end constructor
 }//end TextureTOCWindow

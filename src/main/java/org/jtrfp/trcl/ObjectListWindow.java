@@ -13,12 +13,12 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.RenderList;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class ObjectListWindow extends MemoryWindow {
-    public ObjectListWindow(TR tr) {
-	init(tr,"ObjectListWindow");
+    public ObjectListWindow(GPU gpu) {
+	init(gpu,"ObjectListWindow");
     }// end constructor
 
     public final IntArrayVariable opaqueIDs = new IntArrayVariable(

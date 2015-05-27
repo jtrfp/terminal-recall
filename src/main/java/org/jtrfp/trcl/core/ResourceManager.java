@@ -264,7 +264,7 @@ public class ResourceManager{
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new TextureDescription[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new Texture(segs[si],null,"name",tr,uvWrapping);}//TODO: ESTuTv support
+				{result[si] = new Texture(tr.gpu.get(),tr.getThreadManager(),segs[si],null,"name",uvWrapping);}
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
@@ -303,12 +303,12 @@ public class ResourceManager{
 						for(int i=0; i<tFrames.length;i++){
 						    PalettedVectorList pvlRGBA  = getRAWVectorList(frames.get(i),paletteRGBA);
 						    PalettedVectorList pvlESTuTv= getRAWVectorList(frames.get(i),paletteESTuTv);
-						    tFrames[i]=new Texture(pvlRGBA,pvlESTuTv,""+frames.get(i),tr,uvWrapping);}
+						    tFrames[i]=new Texture(tr.gpu.get(),tr.getThreadManager(),pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,tr,uvWrapping);
+				result = new Texture(tr.gpu.get(),tr.getThreadManager(),getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());

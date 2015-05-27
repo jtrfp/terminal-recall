@@ -21,52 +21,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.NotReadyException;
-import org.jtrfp.trcl.core.RenderList;
-import org.jtrfp.trcl.core.Renderer;
-import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 
 public class SkyCube {
-    private final TR tr;
-    private volatile GLTexture skyCubeTexture;
+    private final    GPU        gpu;
+    private volatile GLTexture  skyCubeTexture;
     private volatile SkyCubeGen skyCubeGen=null;
     private AtomicBoolean	skyCubeGenStale = new AtomicBoolean(true);
     
-    public SkyCube(TR tr){
-	this.tr=tr;
+    public SkyCube(GPU gpu){
+	this.gpu = gpu;
     }
-/*
-    public void render(RenderList rl, GL3 gl) throws NotReadyException {
-	final Renderer renderer = tr.renderer.getRealtime();
-	final GPU gpu = tr.gpu.getRealtime();
-	if(skyCubeGenStale.getAndSet(false)==true){
-	    buildSkyCubeTextureGL();
-	}
-	gl.glDepthMask(false);
-	gl.glDisable(GL3.GL_DEPTH_TEST);
-	gl.glDepthFunc(GL3.GL_ALWAYS);
-	gl.glDisable(GL3.GL_CULL_FACE);
-	gpu.defaultFrameBuffers();
-	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
-	renderer.getSkyCubeProgram().use()
-		.getUniform("projectionRotationMatrix")
-		.set4x4Matrix(renderer.getCamRotationProjectionMatrix(), true);
-	getSkyCubeTexture().bindToTextureUnit(0, gl);
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 36);
-	// Cleanup
-	gl.glDepthMask(true);
-	gl.glEnable(GL3.GL_CULL_FACE);
-	gl.glDepthFunc(GL3.GL_LESS);
-    }
-   */ 
+    
     private void buildSkyCubeTextureGL(){
 	final SkyCubeGen cubeGen = getSkyCubeGen();
 	final int sideWidth = cubeGen.getSideWidth();
 	final int colorMode = GL3.GL_RGB8;
 	if(skyCubeTexture==null)
-	    skyCubeTexture = tr.gpu.get()
+	    skyCubeTexture = gpu
 	    .newTexture()
 	    .setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP);
 	skyCubeTexture.bind()
@@ -108,7 +81,7 @@ public class SkyCube {
     @Override
     public void finalize() throws Throwable{
 	if(skyCubeTexture!=null)
-	    tr.getThreadManager().submitToGL(new Callable<Void>(){
+	    gpu.submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    skyCubeTexture.delete();

@@ -19,7 +19,10 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.awt.GLCanvas;
 
+import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -29,7 +32,8 @@ import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;
-import org.jtrfp.trcl.prop.SkyCube;
+import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.obj.CollisionManager;
 
 public class RendererFactory {
     public static final int			VERTEX_BUFFER_WIDTH     = 1024;
@@ -41,6 +45,9 @@ public class RendererFactory {
     public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
     
     private final GPU gpu;
+    private final World world;
+    private final Reporter reporter;
+    private final CollisionManager              collisionManager;
     private final	boolean			backfaceCulling;
     private 	 	GLUniform	    	sunVector;
     private 		GLTexture 		opaqueDepthTexture,
@@ -66,12 +73,18 @@ public class RendererFactory {
     /*					*/	vertexProgram,
     /*                                  */      primitiveProgram,
     /*					*/	skyCubeProgram;
+    private final ThreadManager			threadManager;
     
-    public RendererFactory(final GPU gpu){
+    public RendererFactory(final GPU gpu, final ThreadManager threadManager, 
+	    final GLCanvas canvas, Reporter reporter, final World world, 
+	    CollisionManager collisionManager, ObjectListWindow objectListWindow){
 	this.gpu=gpu;
-	final TR tr = gpu.getTr();
+	this.threadManager = threadManager;
+	this.reporter=reporter;
+	this.world=world;
+	this.collisionManager=collisionManager;
 	final GL3 gl = gpu.getGl();
-	tr.getThreadManager().submitToGL(new Callable<Void>(){
+	threadManager.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		// Fixed pipeline behavior
@@ -171,8 +184,8 @@ public class RendererFactory {
 		deferredProgram.getUniform("primitivenXnYnZTexture").set((int) 9);
 		deferredProgram.getUniform("ambientLight").set(.4f, .5f, .7f);
 		sunVector.set(.5774f,-.5774f,.5774f);
-		final int width = tr.getRootWindow().getWidth();
-		final int height = tr.getRootWindow().getHeight();
+		final int width  = canvas.getWidth();
+		final int height = canvas.getHeight();
 		gpu.defaultProgram();
 		gpu.defaultTIU();
 		
@@ -410,7 +423,7 @@ public class RendererFactory {
 	    }
 	}).get();
 	
-	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
+	canvas.addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(GLAutoDrawable drawable) {
 		drawable.getGL().setSwapInterval(0);
@@ -472,7 +485,7 @@ public class RendererFactory {
     }//end allocatePortals()
     
     public Renderer newRenderer(){
-	return new Renderer(this);
+	return new Renderer(this,world,threadManager,reporter,collisionManager,gpu.objectListWindow.get());
     }
 
     /**

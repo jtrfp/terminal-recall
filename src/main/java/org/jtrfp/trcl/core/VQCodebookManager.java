@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.core;
 
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Queue;
@@ -34,6 +35,8 @@ public class VQCodebookManager {
     private final	Queue<TileUpdate>tileUpdates	   = new LinkedBlockingQueue<TileUpdate>();
     private final	GPU		gpu;
     private final	GLFrameBuffer	fb;
+    private final	UncaughtExceptionHandler handler;
+    //private final	TR		tr;
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
     public static final int 		NUM_CODE_PAGES			=2048;
@@ -43,8 +46,9 @@ public class VQCodebookManager {
     public static final int 		CODE256_PER_PAGE 		= CODES_PER_PAGE/256;
     public static final int 		CODE256_HEIGHT_CODES		= 256 / NUM_CODES_PER_AXIS;
 
-    public VQCodebookManager(TR tr) {
-	gpu = tr.gpu.get();
+    public VQCodebookManager(GPU gpu, UncaughtExceptionHandler handler) {
+	this.handler=handler;
+	this.gpu    = gpu;
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
@@ -96,7 +100,7 @@ public class VQCodebookManager {
     private VQCodebookManager setNNNN(int codeID, RasterRowWriter []rowWriter, GLTexture texture) {
 	try{subImage(codeID,rowWriter,texture,2);}
 	catch(OutOfMemoryError e){
-	    gpu.getTr().showStopper(new RuntimeException(e));}
+	    handler.uncaughtException(Thread.currentThread(),new RuntimeException(e));}
 	return this;
     }// end setRGBA(...)
     

@@ -16,6 +16,7 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -45,7 +46,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.tools.Util;
 
-public final class TR{
+public final class TR implements UncaughtExceptionHandler{
     	//// BEAN PROPERTIES
     	public static final String	GAME				="game";
     
@@ -77,9 +78,7 @@ public final class TR{
 	private Game 				game;
 	private final PropertyChangeSupport	pcSupport;
 	
-	public final TRFutureTask<MatrixWindow> 		matrixWindow ;
-	public final TRFutureTask<ObjectListWindow> 		objectListWindow;
-	public final TRFutureTask<ObjectDefinitionWindow> 	objectDefinitionWindow;
+	
 	private      World 					world;
 	private final GameShell					gameShell;
 	private RenderableSpacePartitioningGrid			defaultGrid;
@@ -126,52 +125,38 @@ public final class TR{
 	    	    waitForProfiler();
 	    	}//end if(waitForProfiler)
 		keyStatus = new KeyStatus(rootWindow);
-		gpu = new TRFutureTask<GPU>(this,new Callable<GPU>(){
+		threadManager = new ThreadManager(this);
+		gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
 		    @Override
 		    public GPU call() throws Exception {
-			return new GPU(TR.this);
-		    }});
-		soundSystem = new TRFutureTask<SoundSystem>(this, new Callable<SoundSystem>(){
+			return new GPU(reporter, threadManager.threadPool, threadManager, threadManager, TR.this, rootWindow.getCanvas(),collisionManager,getWorld());
+		    }},TR.this);
+		soundSystem = new TRFutureTask<SoundSystem>(new Callable<SoundSystem>(){
 		    @Override
 		    public SoundSystem call() throws Exception {
 			return new SoundSystem(TR.this);
-		    }});
-		threadManager = new ThreadManager(this);
+		    }},TR.this);
 		threadManager.threadPool.submit(gpu);
 		threadManager.threadPool.submit(soundSystem);//TODO: Use new methods
 		System.out.println("Initializing graphics engine...");
-		    mainRenderer=new TRFutureTask<Renderer>(this,new Callable<Renderer>(){
+		    mainRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
 			@Override
 			public Renderer call() throws Exception {
 			    Thread.currentThread().setName("Renderer constructor.");
-			    return gpu.get().rendererFactory.get().newRenderer();
+			    return gpu.
+				    get().
+				    rendererFactory.
+				    get().
+				    newRenderer();
 			}//end call()
-		    });threadManager.threadPool.submit(mainRenderer);
-		    matrixWindow=new TRFutureTask<MatrixWindow>(this,new Callable<MatrixWindow>(){
-			@Override
-			public MatrixWindow call() throws Exception {
-			    return new MatrixWindow(TR.this);
-			}//end call()
-		    });threadManager.threadPool.submit(matrixWindow);
-		    objectListWindow=new TRFutureTask<ObjectListWindow>(this,new Callable<ObjectListWindow>(){
-			@Override
-			public ObjectListWindow call() throws Exception {
-			    return new ObjectListWindow(TR.this);
-			}//end call()
-		    });threadManager.threadPool.submit(objectListWindow);
-		    objectDefinitionWindow=new TRFutureTask<ObjectDefinitionWindow>(this,new Callable<ObjectDefinitionWindow>(){
-			@Override
-			public ObjectDefinitionWindow call() throws Exception {
-			    return new ObjectDefinitionWindow(TR.this);
-			}//end call()
-		    });threadManager.threadPool.submit(objectDefinitionWindow);
+		    },TR.this);threadManager.threadPool.submit(mainRenderer);
 		    System.out.println("...Done");
 		setResourceManager(new ResourceManager(this));
 		
 		final Renderer renderer = mainRenderer.get();
 		renderer.getCamera().setRootGrid(getDefaultGrid());//TODO: Remove when conversion complete
 		//renderer.setRootGrid(getDefaultGrid());//TODO: replace with Camera objects?
-		renderer.setCollisionManager(getCollisionManager());
+		//renderer.setCollisionManager(getCollisionManager());
 		getThreadManager().addRepeatingGLTask(renderer.render);
 		
 		gameShell  = new GameShell(this);
@@ -461,5 +446,10 @@ public final class TR{
 	if(defaultGrid==null)
 	    defaultGrid = world.newRootGrid();
         return defaultGrid;
+    }
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+	showStopper(e);
     }
 }//end TR

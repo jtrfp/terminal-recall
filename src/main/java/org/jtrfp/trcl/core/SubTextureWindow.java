@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class SubTextureWindow extends MemoryWindow {
@@ -27,7 +29,7 @@ public class SubTextureWindow extends MemoryWindow {
     //1480
     public final ByteArrayVariable unused 		= new ByteArrayVariable(56);
     
-    public SubTextureWindow(TR tr){
-	this.init(tr,"SubTextureWindow");
+    public SubTextureWindow(GPU gpu){
+	this.init(gpu,"SubTextureWindow");
     }
 }//end SubTextureWindow

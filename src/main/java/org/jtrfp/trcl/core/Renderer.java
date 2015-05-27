@@ -24,10 +24,13 @@ import org.apache.commons.collections4.functors.InstanceofPredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
+import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.DummyAdapter;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -53,36 +56,38 @@ public final class Renderer {
     private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
-    private		CollisionManager	collisionManager;
+    private final	CollisionManager        collisionManager;
     private		Camera			camera = null;
     private final	PredicatedCollection<Positionable> relevantPositioned;
-    private static final boolean NEW_MODE = false;
+    private final	Reporter		reporter;
+    private final	ThreadManager		threadManager;
+    public static final boolean NEW_MODE = false;
     
-    public Renderer(final RendererFactory factory) {
-	this.factory = factory;
-	this.gpu     = factory.getGPU();
-	final TR tr  = gpu.getTr();
+    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter, CollisionManager collisionManagerFuture, final ObjectListWindow objectListWindow) {
+	this.factory         = factory;
+	this.gpu             = factory.getGPU();
+	this.reporter        =reporter;
+	this.threadManager   =threadManager;
+	this.collisionManager=collisionManagerFuture;
 	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
-	camera = tr.getWorld().newCamera();//TODO: Remove after redesign.
+	camera = world.newCamera();//TODO: Remove after redesign.
 	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
-	final GL3 gl = gpu.getGl();
-	
 	System.out.println("...Done.");
 	System.out.println("Initializing RenderList...");
-	renderList = new TRFutureTask<RenderList>(tr,new Callable<RenderList>(){
+	renderList = new TRFutureTask<RenderList>(new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
-		return new RenderList(gl, Renderer.this, tr);
-	    }});tr.getThreadManager().threadPool.submit(renderList);
+		return new RenderList(gpu, Renderer.this, objectListWindow, threadManager, reporter);
+	    }});threadManager.threadPool.submit(renderList);
 	
-	skyCube = new SkyCube(tr);
+	skyCube = new SkyCube(gpu);
 	relevantPositioned =
 		    PredicatedCollection.predicatedCollection(
 			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),new DummyAdapter(),new CastingAdapter()),
 			    new InstanceofPredicate(PositionedRenderable.class));
      setCamera(camera);//TODO: Remove after redesign
     }//end constructor
-    
+
     private final class CastingAdapter implements Adapter<Positionable,PositionedRenderable>{
 	@Override
 	public PositionedRenderable adapt(Positionable value) {
@@ -104,12 +109,10 @@ public final class Renderer {
 	final int fps = (int)(1000L / dT);
 	meanFPS = meanFPS*.9+(double)fps*.1;
 	if ((frameNumber %= 20) == 0) {
-	    gpu.getTr().getReporter()
-		    .report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
+	    reporter.report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
 	    final Collection<PositionedRenderable> coll = renderList.get().getVisibleWorldObjectList();
 	    synchronized(coll){
-	    gpu.getTr().getReporter()
-	    	.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", coll.size());}
+	    reporter.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", coll.size());}
 	}
 	lastTimeMillis = System.currentTimeMillis();
     }//end fpsTracking()
@@ -146,13 +149,16 @@ public final class Renderer {
     
     public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
 	if(pr instanceof WorldObject)
-	    gpu.getTr().getCollisionManager().getCurrentlyActiveCollisionList().add((WorldObject)pr);
+	    try{collisionManager.getCurrentlyActiveCollisionList().add((WorldObject)pr);}
+	catch(Exception ex){throw new RuntimeException(ex);}
 	if(!NEW_MODE)
 	 renderList.get().getVisibleWorldObjectList().add(pr);
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {
-	if(!NEW_MODE){
+	System.out.println("relevanceCollections.size()="+camera.getRelevanceCollections().size());
+	if(NEW_MODE)
+	    return;
 	if(relevanceUpdateFuture!=null){
 	    if(!relevanceUpdateFuture.isDone()){
 		if(!mandatory){System.out.println("Renderer.updateVisibilityList() !done");return;}
@@ -160,14 +166,14 @@ public final class Renderer {
 		}
 	    relevanceUpdateFuture.get();
 	    }//end if(visibilityUpdateFuture!=null)
-	relevanceUpdateFuture = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	relevanceUpdateFuture = threadManager.submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() {
 		try{
 		proximitySorter.setCenter(getCamera().getCameraPosition().toArray());
 		if(camera.getRootGrid()==null)
 		    return null;
-		synchronized(gpu.getTr().getThreadManager().gameStateLock){
+		synchronized(threadManager.gameStateLock){
 		 camera.getRootGrid().cubesWithinRadiusOf(
 			getCamera().getCameraPosition().add(
 				getCamera().getLookAtVector().scalarMultiply(
@@ -182,7 +188,6 @@ public final class Renderer {
 		return null;
 	    }//end pool run()
 	});
-	}//end if(NEW_MODE)
     }// end updateRelevanceList()
     
     public void setSunVector(Vector3D sv){
@@ -241,7 +246,7 @@ public final class Renderer {
     }
 
     public Renderer setSunColor(final Color color) {
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		factory.getDeferredProgram().use();
@@ -254,7 +259,7 @@ public final class Renderer {
     }
 
     public Renderer setAmbientLight(final Color color) {
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		factory.getDeferredProgram().use();
@@ -288,7 +293,7 @@ public final class Renderer {
 	if(relevanceCalcTask!=null && !mandatory){
 	    if(!relevanceCalcTask.isDone())
 		{System.out.println("visiblityCalc() !done. Return...");return;}}
-	relevanceCalcTask = gpu.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	relevanceCalcTask = threadManager.submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		synchronized(relevanceUpdateLock){
@@ -311,14 +316,6 @@ public final class Renderer {
      */
     public CollisionManager getCollisionManager() {
         return collisionManager;
-    }
-
-    /**
-     * @param collisionManager the collisionManager to set
-     */
-    public Renderer setCollisionManager(CollisionManager collisionManager) {
-        this.collisionManager = collisionManager;
-        return this;
     }
 
     public RendererFactory getRendererFactory() {

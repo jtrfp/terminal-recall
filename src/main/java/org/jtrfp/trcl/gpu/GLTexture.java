@@ -44,6 +44,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 import org.jtrfp.trcl.core.RootWindow;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.mem.MemoryManager;
@@ -63,10 +64,10 @@ public final class GLTexture {
     private int preferredUpdateIntervalMillis = 500;
     private int width,height,numComponents;
 
-    public GLTexture(final GPU gpu) {
+    public GLTexture(final GPU gpu) {//TODO: Remove TR dependency
 	System.out.println("Creating GL Texture...");
-	this.gpu = gpu;
-	textureID = gpu.getTr().getThreadManager().submitToGL(new Callable<Integer>(){
+	this.gpu  = gpu;
+	textureID = gpu.submitToGL(new Callable<Integer>(){
 	    @Override
 	    public Integer call() throws Exception {
 		return gpu.newTextureID();
@@ -118,7 +119,7 @@ public final class GLTexture {
      * @since Dec 11, 2013
      */
     public void setTextureImageRGBA(final ByteBuffer buf) {
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
@@ -139,7 +140,7 @@ public final class GLTexture {
     }//end setTextureImageRGBA
     
     public void getTextureImageRGBA(final ByteBuffer buf) {
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
@@ -301,7 +302,7 @@ public final class GLTexture {
     
     @Override
     public void finalize() throws Throwable{
-	gpu.getTr().getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		delete();
@@ -321,7 +322,7 @@ public final class GLTexture {
 	return gpu;
     }
     
-    private static GLProgram getTextureRenderProgram(GPU gpu){
+    private static GLProgram getTextureRenderProgram(GPU gpu, TR tr){
 	if(textureRenderProgram!=null)
 	    return textureRenderProgram;
 	try{
@@ -331,17 +332,17 @@ public final class GLTexture {
 	    textureRenderProgram.validate();
 	    textureRenderProgram.use();
 	    textureRenderProgram.getUniform("textureToUse").set((int)0);
-	}catch(IOException e){gpu.getTr().showStopper(e);}
+	}catch(IOException e){tr.showStopper(e);}
 	return textureRenderProgram;
     }//end getTextureRenderProgram(...)
-    
+    /*
     public static final class PropertyEditor extends PropertyEditorSupport{
 	@Override
 	public Component getCustomEditor(){
 	    final GLTexture source = (GLTexture)getSource();
 	    final JPanel result = new JPanel();
 	    if(source.getBindingTarget()==GL3.GL_TEXTURE_2D){
-		result.add(new TextureViewingPanel(source, source.getGPU().getTr().getRootWindow()));
+		result.add(new TextureViewingPanel(source, source.tr.getRootWindow(),source.tr));
 	    }//TODO: Texture 1D
 	    return result;
 	}//end getCustomEditor()
@@ -350,10 +351,11 @@ public final class GLTexture {
     static{
 	PropertyEditorManager.registerEditor(GLTexture.class, GLTexture.PropertyEditor.class);
     }//end static{}
-    
+    */
+    /*
     private static class TextureViewingPanel extends JPanel{
 	private static final long serialVersionUID = 4580039742312228700L;
-	private final RootWindow frame;
+	//private final RootWindow frame;
 	private GLTexture colorTexture,targetTexture;
 	private GLFrameBuffer frameBuffer;
 	private static final Dimension PANEL_SIZE = new Dimension(200,100);
@@ -363,18 +365,18 @@ public final class GLTexture {
 	private final Thread updateThread;
 	private final JPopupMenu popupMenu = new JPopupMenu();
 	private final JMenuItem exportToCSV = new JMenuItem("Export To CSV");
-	private final ThreadManager threadManager;
-	public TextureViewingPanel(final GLTexture parent, RootWindow root){
+	//private final ThreadManager threadManager;
+	public TextureViewingPanel(final GLTexture parent, RootWindow root, final TR tr){
 	    super();
 	    this.targetTexture=parent;
 	    this.setSize(PANEL_SIZE);
 	    this.setPreferredSize(PANEL_SIZE);
 	    this.setMinimumSize(PANEL_SIZE);
 	    this.setAlignmentX(Component.LEFT_ALIGNMENT);
-	    frame = parent.getGPU().getTr().getRootWindow();
-	    threadManager = parent.getGPU().getTr().getThreadManager();
+	    //frame = parent.tr.getRootWindow();
+	    //threadManager = parent.tr.getThreadManager();
 	    final GPU gpu = parent.getGPU();
-	    final Canvas canvas = frame.getCanvas();
+	    //final Canvas canvas = frame.getCanvas();
 	    popupMenu.add(exportToCSV);
 	    updateThread = new Thread(){
 		@Override
@@ -385,7 +387,7 @@ public final class GLTexture {
 			Window ancestor = SwingUtilities.getWindowAncestor(TextureViewingPanel.this);
 			if(ancestor!=null)
 			    if(ancestor.isVisible()){
-			 threadManager.submitToGL(new Callable<Void>(){
+			 gpu.submitToGL(new Callable<Void>(){
 			    @Override
 			    public Void call() throws Exception {
 				GL3 gl = gpu.getGl();
@@ -394,7 +396,7 @@ public final class GLTexture {
 				gl.glDepthFunc(GL3.GL_ALWAYS);
 				final double [] min = parent.getExpectedMinValue();
 				final double [] max = parent.getExpectedMaxValue();
-				final GLProgram prg = getTextureRenderProgram(gpu);
+				final GLProgram prg = getTextureRenderProgram(gpu,tr);
 				prg.use();
 				prg.getUniform("scalar").set(
 					1f/(float)(max[0]-min[0]), 
@@ -422,7 +424,7 @@ public final class GLTexture {
 		    }//end while(true)
 		}//end run()
 	    };
-	    threadManager.submitToGL(new Callable<Void>(){
+	    gpu.submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    colorTexture = gpu
@@ -461,7 +463,7 @@ public final class GLTexture {
 		public void actionPerformed(ActionEvent evt) {
 		    final JFileChooser fc = new JFileChooser();
 		    fc.setSelectedFile(
-			    new File(gpu.getTr().
+			    new File(tr.
 				    config.
 				    getFileDialogStartDir()
 				    +"/"+parent.
@@ -480,7 +482,7 @@ public final class GLTexture {
 			final File selectedFile = fc.getSelectedFile();
 			if(selectedFile.isDirectory())
 			    return;//Abort
-			gpu.getTr().config.setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
+			tr.config.setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
 			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()));}
 		}});
 	}//end constructor
@@ -501,7 +503,7 @@ public final class GLTexture {
 		    final ByteBuffer dest = ByteBuffer.allocate(
 			    4*4*targetTexture.getNumComponents()*
 			    targetTexture.getWidth()*targetTexture.getHeight()).order(ByteOrder.nativeOrder());
-		    threadManager.submitToGL(new Callable<Void>(){
+		    gpu.submitToGL(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception {
 			    targetTexture.
@@ -561,7 +563,7 @@ public final class GLTexture {
 		    g.fillRect(x, y, 1, 1);}
 	}//end paint(...)
     }//end TextureViewingCanvas
-
+*/
     /**
      * @return the debugName
      */

@@ -34,8 +34,8 @@ public final class TriangleVertexWindow extends MemoryWindow {
     public final ByteVariable textureIDMid = new ByteVariable();
     public final ByteVariable textureIDHi  = new ByteVariable();
 
-    public TriangleVertexWindow(TR tr, String debugName) {
-	init(tr, "TriangleVertexWindow." + debugName);
+    public TriangleVertexWindow(GPU gpu, String debugName) {
+	init(gpu,"TriangleVertexWindow." + debugName);
     }//end constructor
 
     public synchronized final int createTriangle() {

@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public final class ObjectDefinitionWindow extends MemoryWindow {
@@ -27,7 +27,7 @@ public final class ObjectDefinitionWindow extends MemoryWindow {
     public final IntVariable 	unused11 	= new IntVariable();// 11
     public final ByteVariable 	unused15 	= new ByteVariable();// 15
 
-    public ObjectDefinitionWindow(TR tr) {
-	init(tr, "ObjectDefinitionWindow");
+    public ObjectDefinitionWindow(GPU gpu) {
+	init(gpu, "ObjectDefinitionWindow");
     }//end constructor
 }// end ObjectBlock

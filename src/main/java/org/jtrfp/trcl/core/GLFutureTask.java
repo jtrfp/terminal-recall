@@ -16,18 +16,23 @@ import java.util.concurrent.Callable;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
+import javax.media.opengl.awt.GLCanvas;
 
 public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
+    private final GLCanvas      canvas;
+    private final ThreadManager threadManager;
 
-    public GLFutureTask(TR tr, Callable<V> callable) {
-	super(tr, callable);
+    public GLFutureTask(GLCanvas canvas, ThreadManager threadManager, Callable<V> callable) {
+	super(callable);
+	this.canvas=canvas;
+	this.threadManager=threadManager;
     }
     @Override
     public void run(){
 	super.run();}
     
     public void enqueue(){
-	tr.getRootWindow().getCanvas().invoke(false, this);
+	canvas.invoke(false, this);
     }
 
     @Override
@@ -39,9 +44,8 @@ public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
     @Override
     public V get(){
 	if(!super.isDone())
-	    if(tr.getThreadManager().isGLThread())
+	    if(threadManager.isGLThread())
 	     run();
 	return super.get();
     }
-
 }//end GLFutureTask

@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 public class OriginTrackingTRFutureTask<V> extends TRFutureTask<V> {
     private final StackTraceElement [] stackTraceElements;
     public OriginTrackingTRFutureTask(TR tr, Callable<V> callable) {
-	super(tr, callable);
+	super(callable);
 	stackTraceElements = new Exception().getStackTrace();
     }
     

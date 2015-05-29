@@ -52,7 +52,8 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
      * @since Mar 20, 2015
      */
     public boolean addTarget(Collection<E> target, boolean prefill){
-	if(prefill) target.addAll(cache);
+	if(prefill && !cache.isEmpty())
+	    target.addAll(cache);
 	boolean result = !targets.contains(target);
 	targetsMap.put(target,null);
 	return result;

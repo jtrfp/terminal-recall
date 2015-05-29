@@ -149,6 +149,12 @@ public class CollectionActionPackerTest {
 	assertTrue(subject.contains(zero));//Control var
 	subject.remove(zero);
 	assertFalse(subject.contains(zero));
+	subject.remove(one);
+	subject.remove(two);
+	boolean contains = false;
+	for(Pair<Integer,CollectionActionDispatcher<String>> pair:subjectDelegate)
+	    contains |= pair.getKey()==zero.getKey();
+	assertFalse(contains);
     }
     
     @Test

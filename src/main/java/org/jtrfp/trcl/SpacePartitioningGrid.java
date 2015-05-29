@@ -463,6 +463,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		for(SpacePartitioningGrid g:branches)
 		    removeBranch(g);
 		final ArrayList<E> alwaysVisible = new ArrayList<E>();
+		localTagger.clear();
 		return;
 	    }
 	    final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();

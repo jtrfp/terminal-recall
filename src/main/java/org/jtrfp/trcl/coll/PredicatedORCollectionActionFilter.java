@@ -205,17 +205,29 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
 	@Override
 	public boolean remove(Object o) {
-	    return used.remove(o) || unused.remove(o) || delegate.remove(o);
+	    boolean result = false;
+	    result |= used.remove(o);
+	    result |= unused.remove(o);
+	    result |= delegate.remove(o);
+	    return result;
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-	    return used.removeAll(c) || unused.removeAll(c) || delegate.removeAll(c);
+	    boolean result = false;
+	    result |= used.removeAll(c);
+	    result |= unused.removeAll(c);
+	    result |= delegate.removeAll(c);
+	    return result;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-	    return used.retainAll(c) || unused.retainAll(c) || delegate.retainAll(c);
+	    boolean result = false;
+	    result |= used.retainAll(c);
+	    result |= unused.retainAll(c);
+	    result |= delegate.retainAll(c);
+	    return result;
 	}
 
 	@Override

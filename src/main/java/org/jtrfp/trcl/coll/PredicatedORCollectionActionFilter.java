@@ -71,9 +71,10 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
     @Override
     public void clear() {
-	delegate  .removeAll(used);
+	ArrayList<E> toRemove = new ArrayList<E>(used);
+	delegate  .removeAll(toRemove);
 	predicates.clear();
-	unused    .addAll(used);
+	unused    .addAll(toRemove);
 	used      .clear();
     }
 

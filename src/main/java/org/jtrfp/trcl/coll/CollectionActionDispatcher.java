@@ -161,4 +161,12 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     public Collection<E> getDelegate() {
 	return cache;
     }
+    
+    @Override
+    public String toString(){
+	StringBuilder sb = new StringBuilder();
+	for(E element:cache)
+	    sb.append(" "+element+"; ");
+	return "CollectionActionDispatcher ["+sb+"] ";
+    }
 }//end CollectionActionDispatcher

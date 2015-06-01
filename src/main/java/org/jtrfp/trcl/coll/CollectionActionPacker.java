@@ -55,7 +55,8 @@ public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>>, D
     @Override
     public void clear() {
 	final Collection<Pair<KEY,E>> temp = new ArrayList<Pair<KEY,E>>(cache);
-	assert removeAll(temp);
+	final boolean result = removeAll(temp); 
+	assert result;
     }//end clear()
 
     @Override
@@ -87,7 +88,8 @@ public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>>, D
 	assert targetCollection.remove(value);
 	if(targetCollection.isEmpty()){
 	    map.remove(key);
-	    assert delegate.remove(target);
+	    final boolean result = delegate.remove(target); 
+	    assert result;
 	    }
 	return true;
     }//end remove(...)

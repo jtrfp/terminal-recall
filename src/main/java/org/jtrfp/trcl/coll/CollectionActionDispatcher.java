@@ -13,14 +13,13 @@
 
 package org.jtrfp.trcl.coll;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jtrfp.trcl.mem.VEC4Address;
 import org.jtrfp.trcl.tools.Util;
 
 public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E>, Decorator<Collection<E>> {
@@ -62,7 +61,9 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     public boolean removeTarget(Collection<E> target, boolean removeAll){
 	if(removeAll && targets.contains(target))
 	    target.removeAll(cache);
-	return targets.remove(target);
+	final boolean success = targetsMap.containsKey(target);
+	targetsMap.remove(target);
+	return success;
     }
     
     @Override
@@ -99,7 +100,25 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     }
     @Override
     public Iterator<E> iterator() {
-	return cache.iterator();
+	final Iterator<E> iterator = new ArrayList<E>(cache).iterator();
+	return new Iterator<E>(){
+	    E lastReturned;
+
+	    @Override
+	    public boolean hasNext() {
+		return iterator.hasNext();
+	    }
+
+	    @Override
+	    public E next() {
+		return lastReturned = iterator.next();
+	    }
+
+	    @Override
+	    public void remove() {
+		iterator.remove();
+		CollectionActionDispatcher.this.remove(lastReturned);
+	    }};
     }
     @Override
     public boolean remove(Object o) {

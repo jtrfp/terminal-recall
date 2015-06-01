@@ -55,16 +55,35 @@ public class CollectionActionUnpacker<E> implements Collection<CollectionActionD
     }
     @Override
     public Iterator<CollectionActionDispatcher<E>> iterator() {
-	throw new UnsupportedOperationException();
-    }
+	final ArrayList<CollectionActionDispatcher<E>> colls = new ArrayList<CollectionActionDispatcher<E>>(collections);
+	final Iterator<CollectionActionDispatcher<E>> iterator = colls.iterator();
+	return new Iterator<CollectionActionDispatcher<E>>(){
+	    CollectionActionDispatcher<E> lastObject;
+	    @Override
+	    public boolean hasNext() {
+		return iterator.hasNext();
+	    }
+	    @Override
+	    public CollectionActionDispatcher<E> next() {
+		return lastObject=iterator.next();
+	    }
+	    @Override
+	    public void remove() {
+		CollectionActionUnpacker.this.remove(lastObject);
+	    }};
+    }//end iterator()
     @Override
     public boolean remove(Object o) {
 	boolean result = false;
 	if(o instanceof CollectionActionDispatcher){
 	    CollectionActionDispatcher<E> coll = (CollectionActionDispatcher<E>)o;
-	    assert coll.removeTarget(delegate, true);
 	    result |= collections.remove(coll);
-	}
+	    
+	    if(result){
+		final boolean removed = coll.removeTarget(delegate, true);
+		assert removed;
+	    }//end if(result)
+	}//end if(CollectionActionDispatcher)
 	return result;
     }
     @Override

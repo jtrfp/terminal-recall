@@ -42,7 +42,7 @@ public class CameraIT {
     @After
     public void tearDown() throws Exception {
     }
-/*
+
     @Test
     public void testEmpty() {
 	assertTrue(subject.getRelevancePairs()         .isEmpty());
@@ -58,7 +58,7 @@ public class CameraIT {
 	assertTrue(subject.getFlatRelevanceCollection().isEmpty());
 	assertTrue(subject.getRelevanceCollections()   .isEmpty());
     }
-    */
+    
     @Test
     public void testAddSingleCubeGridChangePosition(){
 	subject.setPosition(new Vector3D(0,0,0));
@@ -76,5 +76,28 @@ public class CameraIT {
 	assertTrue(subject.getRelevanceCollections()   .isEmpty());
 	assertTrue(subject.getFlatRelevanceCollection().isEmpty());
     }
+    
+    @Test
+    public void testAddSingleCubeGridVisibleEverywhere(){
+	SpacePartitioningGrid<Positionable> spg = new SpacePartitioningGrid<Positionable>(){};
+	Positionable[] vePositionables = new Positionable[2];
+	for(int i=0; i<2; i++){
+	    Positionable pos=mock(Positionable.class);
+	    when(pos.getPositionV3D()).thenReturn(World.VISIBLE_EVERYWHERE);
+	    vePositionables[i]=pos;
+	    }
+	spg.add(vePositionables[0]);spg.add(vePositionables[1]);
+	subject.addGrid(spg);
+	subject.setPosition(new Vector3D(0,0,0));
+	subject.notifyPositionChange();
+	assertFalse(subject.getRelevancePairs()         .isEmpty());
+	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
+	assertFalse(subject.getRelevanceCollections()   .isEmpty());
+	subject.setPosition(new Vector3D(TR.mapSquareSize*20*7,TR.mapSquareSize*20*7,TR.mapSquareSize*20*7));
+	subject.notifyPositionChange();
+	assertFalse(subject.getRelevancePairs()         .isEmpty());
+	assertFalse(subject.getRelevanceCollections()   .isEmpty());
+	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
+    }//end testAddSingleCubeGridVisibleEverywhere()
 
 }//end CameraTest

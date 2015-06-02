@@ -32,6 +32,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
@@ -80,15 +81,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
     
-    private Collection<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new ArrayList<VEC4Address>();
-    private Collection<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>();
+    private CollectionActionDispatcher<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
+    private CollectionActionDispatcher<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);
 	this.tr = tr;
-	matrixID = tr.gpu.get().matrixWindow.get().create();
+	if(tr!=null)
+	 matrixID = tr.gpu.get().matrixWindow.get().create();
 	// Matrix constants setup
 	rMd[15] = 1;
 
@@ -261,10 +263,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 			return null;
 		    }}).get();//TODO: Make non-blocking
 		ByteOrder order = getTr().gpu.get().getByteOrder();
-		opaqueObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>(opaqueIndicesList.size());
 		for(int i = 0; i < opaqueIndicesList.size(); i++)
 		    opaqueObjectDefinitionAddressesInVEC4.add(new VEC4Address(opaqueIndicesList.get(i)));
-		transparentObjectDefinitionAddressesInVEC4 = new ArrayList<VEC4Address>(transparentIndicesList.size());
 		for(int i = 0; i < transparentIndicesList.size(); i++)
 		    transparentObjectDefinitionAddressesInVEC4.add(new VEC4Address(transparentIndicesList.get(i)));
 		return null;
@@ -275,7 +275,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	    int[] objectDefinitions, ArrayList<Integer> indicesList) {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
-	//int vec4sRemaining = primitiveList.getTotalSizeInVec4s();
 	final int gpuVerticesPerElement = primitiveList.getGPUVerticesPerElement();
 	final int elementsPerBlock = GPU.GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
 	int gpuVerticesRemaining = primitiveList.getNumElements()*gpuVerticesPerElement;
@@ -528,11 +527,11 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	needToRecalcMatrix=true;
     }
     
-    public final Collection<VEC4Address> getOpaqueObjectDefinitionAddresses(){
+    public final CollectionActionDispatcher<VEC4Address> getOpaqueObjectDefinitionAddresses(){
 	return opaqueObjectDefinitionAddressesInVEC4;
     }
     
-    public final Collection<VEC4Address> getTransparentObjectDefinitionAddresses(){
+    public final CollectionActionDispatcher<VEC4Address> getTransparentObjectDefinitionAddresses(){
 	return transparentObjectDefinitionAddressesInVEC4;
     }
 
@@ -553,11 +552,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	}//end if(grid!=null)
 	containingGrid=null;
 	// Send it to the land of wind and ghosts.
-	//final double[] pos = getPosition();
 	setActive(false);
-	//pos[0] = Double.NEGATIVE_INFINITY;
-	//pos[1] = Double.NEGATIVE_INFINITY;
-	//pos[2] = Double.NEGATIVE_INFINITY;
 	notifyPositionChange();
     }
 

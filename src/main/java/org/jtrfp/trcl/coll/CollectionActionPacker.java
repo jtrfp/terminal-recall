@@ -55,8 +55,8 @@ public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>>, D
     @Override
     public void clear() {
 	final Collection<Pair<KEY,E>> temp = new ArrayList<Pair<KEY,E>>(cache);
-	final boolean result = removeAll(temp); 
-	assert result;
+	final boolean result = removeAll(temp);
+	assert result|temp.isEmpty();
     }//end clear()
 
     @Override

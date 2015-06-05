@@ -78,7 +78,7 @@ public class CollectionActionPrinter<E> implements Collection<E>, Decorator<Coll
 
     @Override
     public boolean remove(Object o) {
-	System.out.println(prefix+" remoev "+o);
+	System.out.println(prefix+" remove "+o);
 	proposeStackPrint();
 	return delegate.remove(o);
     }

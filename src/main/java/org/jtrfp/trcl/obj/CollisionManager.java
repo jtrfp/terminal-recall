@@ -35,7 +35,7 @@ public class CollisionManager {
 
     public void updateCollisionList() {
 	final List<WorldObject> collideable = getWriteCollisionList();
-	System.out.println("CollisionManager.updateCollisionList() "+collideable.size());
+	//System.out.println("CollisionManager.updateCollisionList() "+collideable.size());
 	synchronized(collideable){
 	collideable.clear();
 	final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
@@ -65,7 +65,7 @@ public class CollisionManager {
 		flip = !flip;
 	    }// end if(!null)
 	}//end sync(collideable)
-	System.out.println("Done.");
+	//System.out.println("Done.");
     }// end updateVisibilityList()
 
     public void performCollisionTests() {

@@ -57,7 +57,7 @@ public class GPU implements GLExecutor{
 	public final TRFutureTask<ObjectListWindow> 	objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
 	
-	public GPU(final Reporter reporter, ExecutorService executorService, 
+	public GPU(final Reporter reporter, ExecutorService executorService, //TODO: Remove dependency on collisionManager
 		GLExecutor glExecutor, final ThreadManager threadManager, 
 		final UncaughtExceptionHandler exceptionHandler, final GLCanvas glCanvas,
 		final CollisionManager collisionManager, final World world){

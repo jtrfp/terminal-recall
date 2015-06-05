@@ -12,19 +12,22 @@
  ******************************************************************************/
 package org.jtrfp.trcl.coll;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 public class DecoupledCollectionActionDispatcher<E> extends
 	CollectionActionDispatcher<E> implements Decorator<Collection<E>> {
-    private final Executor executor;
-    public DecoupledCollectionActionDispatcher(Collection<E> cache,Executor executor){
-	super(cache);
+    private final ExecutorService executor;
+    public DecoupledCollectionActionDispatcher(Collection<E> cache,ExecutorService executor){
+	super(Collections.synchronizedCollection(cache));
 	this.executor=executor;
     }
     
-    public DecoupledCollectionActionDispatcher(Executor executor){
-	super();
+    public DecoupledCollectionActionDispatcher(ExecutorService executor){
+	super(Collections.synchronizedCollection(new ArrayList<E>()));
 	this.executor=executor;
     }
     

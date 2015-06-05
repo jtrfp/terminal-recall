@@ -33,6 +33,7 @@ import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPrinter;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.Positionable;
@@ -108,7 +109,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addBehavior(new MatchDirection()).setEnable(true);
 	addBehavior(new FacingObject().setEnable(false));
 	addBehavior(new RotateAroundObject().setEnable(false));
-	addBehavior(new TriggersVisCalcWithMovement().setEnable(true));
+	if(!Renderer.NEW_MODE)
+	 addBehavior(new TriggersVisCalcWithMovement().setEnable(true));
 	addBehavior(new SkyCubeCloudModeUpdateBehavior());
 	
 	addPropertyChangeListener(CENTER_CUBE,new CenterCubeHandler());
@@ -156,10 +158,13 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     private final class CenterCubeHandler implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-	    System.out.println("CenterCubeHandler clearing visibility filter...");
-	    visibilityFilter.clear();
-	    System.out.println("Repopulating visibility filter....");
+	    System.out.println("CenterCubeHandler updating visibility filter...");
+	    ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>> oldPredicates 
+	     = new ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>>(visibilityFilter);
+	    //visibilityFilter.clear();
+	    //System.out.println("Repopulating visibility filter....");
 	    visibilityFilter.add(new VisibilityPredicate());
+	    visibilityFilter.removeAll(oldPredicates);
 	}//end propertyChange(...)
     }//end CenterCubeHandler
 

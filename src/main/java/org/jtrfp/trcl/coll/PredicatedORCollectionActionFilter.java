@@ -24,7 +24,7 @@ import org.apache.commons.collections.iterators.UnmodifiableIterator;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.iterators.IteratorChain;
 
-public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>> {
+public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>>, Repopulatable<E> {
     private Collection<E> 
     	    used  = new ArrayList<E>(),
 	    unused= new ArrayList<E>();
@@ -51,14 +51,18 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	
 	final Iterator<E> unusedIterator = unused.iterator();
 	E element;
+	final ArrayList<E> addToUsedAndDelegate = new ArrayList<E>(unusedIterator.hasNext()?8:0);
 	while(unusedIterator.hasNext()){
 	    element = unusedIterator.next();
 	    if(matchesPredicates(element,toAdd)){
 		unusedIterator.remove();
-		used.add(element);
-		delegate.add(element);
+		addToUsedAndDelegate.add(element);
 	    }//end if(matchesPredicates)
 	}//end while(hashNext())
+	if(!addToUsedAndDelegate.isEmpty()){
+	    used.addAll(addToUsedAndDelegate);
+	    delegate.addAll(addToUsedAndDelegate);
+	}
 	return !toAdd.isEmpty();
     }//end addAll(...)
     
@@ -114,6 +118,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	while(trIterator.hasNext())
 	    if(!predicates.contains(trIterator.next()))
 		trIterator.remove();
+	final ArrayList<E> addToUnusedAndDelegate = new ArrayList<E>(trIterator.hasNext()?8:0);
 	predicates.removeAll(toRemove);
 	final Iterator<E> usedIterator = used.iterator();
 	E element;
@@ -121,10 +126,13 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    element = usedIterator.next();
 	    if(!matchesPredicates(element,toRemove)){
 		usedIterator.remove();
-		unused.add(element);
-		delegate.remove(element);
+		addToUnusedAndDelegate.add(element);
 	    }//end if(matchesPredicates)
 	}//end while(hashNext())
+	if(!addToUnusedAndDelegate.isEmpty()){
+	    used.addAll(addToUnusedAndDelegate);
+	    delegate.addAll(addToUnusedAndDelegate);
+	}
 	return !toRemove.isEmpty();
     }//end removeAll(...)
 
@@ -260,4 +268,10 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    }
 	    return a;
 	}};
+
+    @Override
+    public void repopulate(Collection<E> c) {
+	// TODO Auto-generated method stub
+	throw new UnsupportedOperationException("Chuck forgot to implement.");
+    }
 }//end PredicatedORListActionFilter

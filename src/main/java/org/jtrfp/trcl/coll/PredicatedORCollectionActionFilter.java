@@ -24,7 +24,7 @@ import org.apache.commons.collections.iterators.UnmodifiableIterator;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.iterators.IteratorChain;
 
-public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>>, Repopulatable<E> {
+public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>> {
     private Collection<E> 
     	    used  = new ArrayList<E>(),
 	    unused= new ArrayList<E>();
@@ -118,7 +118,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	while(trIterator.hasNext())
 	    if(!predicates.contains(trIterator.next()))
 		trIterator.remove();
-	final ArrayList<E> addToUnusedAndDelegate = new ArrayList<E>(trIterator.hasNext()?8:0);
+	final ArrayList<E> addToUnusedAndRemoveFromDelegate = new ArrayList<E>(trIterator.hasNext()?8:0);
 	predicates.removeAll(toRemove);
 	final Iterator<E> usedIterator = used.iterator();
 	E element;
@@ -126,12 +126,12 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    element = usedIterator.next();
 	    if(!matchesPredicates(element,toRemove)){
 		usedIterator.remove();
-		addToUnusedAndDelegate.add(element);
+		addToUnusedAndRemoveFromDelegate.add(element);
 	    }//end if(matchesPredicates)
 	}//end while(hashNext())
-	if(!addToUnusedAndDelegate.isEmpty()){
-	    used.addAll(addToUnusedAndDelegate);
-	    delegate.addAll(addToUnusedAndDelegate);
+	if(!addToUnusedAndRemoveFromDelegate.isEmpty()){
+	    unused.addAll(addToUnusedAndRemoveFromDelegate);
+	    delegate.removeAll(addToUnusedAndRemoveFromDelegate);
 	}
 	return !toRemove.isEmpty();
     }//end removeAll(...)
@@ -268,10 +268,4 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    }
 	    return a;
 	}};
-
-    @Override
-    public void repopulate(Collection<E> c) {
-	// TODO Auto-generated method stub
-	throw new UnsupportedOperationException("Chuck forgot to implement.");
-    }
 }//end PredicatedORListActionFilter

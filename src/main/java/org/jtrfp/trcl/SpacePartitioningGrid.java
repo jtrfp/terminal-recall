@@ -97,8 +97,8 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		}};
 		
 	protected SpacePartitioningGrid(){
-	    if(Renderer.NEW_MODE)
-		newActivate();
+	    /*if(Renderer.NEW_MODE)
+		newActivate();*/
 	}
 	
     public void activate() {

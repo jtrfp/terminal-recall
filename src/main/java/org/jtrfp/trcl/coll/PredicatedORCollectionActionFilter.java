@@ -99,7 +99,8 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
     @Override
     public Iterator<Predicate<E>> iterator() {
-	return UnmodifiableIterator.decorate(predicates.iterator());
+	final ArrayList<Predicate> pCopy = new ArrayList<Predicate>(predicates);
+	return UnmodifiableIterator.decorate(pCopy.iterator());
     }
 
     @Override

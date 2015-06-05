@@ -26,8 +26,8 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
-import org.jtrfp.trcl.coll.DummyAdapter;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.Reporter;
@@ -38,7 +38,6 @@ import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.SkyCube;
 
 import com.ochafik.util.listenable.AdaptedCollection;
-import com.ochafik.util.listenable.Adapter;
 
 public final class Renderer {
     private final	RendererFactory		factory;
@@ -83,18 +82,24 @@ public final class Renderer {
 	skyCube = new SkyCube(gpu);
 	relevantPositioned =
 		    PredicatedCollection.predicatedCollection(
-			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),new DummyAdapter(),new CastingAdapter()),
+			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),castingAdapter.toBackward(),castingAdapter.toForward()),
 			    new InstanceofPredicate(PositionedRenderable.class));
      setCamera(camera);//TODO: Remove after redesign
     }//end constructor
-
-    private final class CastingAdapter implements Adapter<Positionable,PositionedRenderable>{
+    
+    private static final CachedAdapter<Positionable,PositionedRenderable> castingAdapter = new CachedAdapter<Positionable,PositionedRenderable>(){
 	@Override
-	public PositionedRenderable adapt(Positionable value) {
+	protected PositionedRenderable _adapt(Positionable value)
+		throws UnsupportedOperationException {
 	    return (PositionedRenderable)value;
 	}
-    }//end CastingAdapter
-
+	@Override
+	protected Positionable _reAdapt(PositionedRenderable value)
+		throws UnsupportedOperationException {
+	    throw new UnsupportedOperationException();
+	}
+    };//end castingAdapter
+    
     private void ensureInit() {
 	if (initialized)
 	    return;
@@ -156,7 +161,7 @@ public final class Renderer {
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {
-	System.out.println("relevanceCollections.size()="+camera.getRelevanceCollections().size());
+	//System.out.println("relevanceCollections.size()="+camera.getRelevanceCollections().size());
 	if(NEW_MODE)
 	    return;
 	if(relevanceUpdateFuture!=null){

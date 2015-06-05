@@ -24,10 +24,8 @@ import org.apache.commons.collections4.functors.TruePredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPacker;
-import org.jtrfp.trcl.coll.CollectionActionPrinter;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
-import org.jtrfp.trcl.coll.UnityAdapter;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.obj.Positionable;
 

@@ -12,14 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.Collection;
-
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public interface Renderable {
-    Collection<VEC4Address> getOpaqueObjectDefinitionAddresses();
+    CollectionActionDispatcher<VEC4Address> getOpaqueObjectDefinitionAddresses();
 
-    Collection<VEC4Address> getTransparentObjectDefinitionAddresses();
+    CollectionActionDispatcher<VEC4Address> getTransparentObjectDefinitionAddresses();
 
     void updateStateToGPU();
 }

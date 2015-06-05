@@ -26,7 +26,9 @@ import javax.media.opengl.GL3;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
+import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.DecoupledCollectionActionDispatcher;
+import org.jtrfp.trcl.coll.ImplicitBiDiAdapter;
 import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
@@ -78,10 +80,10 @@ public class RenderList {
     						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>(), Executors.newSingleThreadExecutor());
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
-    private final	CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>
-    	opaqueODAddrsColl    = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new OpaqueODAddrAdapter()), 
-    	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new TransODAddrAdapter()), 
-    	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(unoccludedIL= new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),new UnoccludedODAddrAdapter());
+    private final	CollectionAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>
+    	opaqueODAddrsColl    = new CollectionAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>(new CollectionActionUnpacker<CollectionActionDispatcher<VEC4Address>>(new CollectionThreadDecoupler(new CollectionActionUnpacker<VEC4Address>(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),relevantPositionedRenderables.getExecutor())),opaqueODAdapter),
+    	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>(new CollectionActionUnpacker<CollectionActionDispatcher<VEC4Address>>(new CollectionThreadDecoupler(new CollectionActionUnpacker<VEC4Address>(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),relevantPositionedRenderables.getExecutor())),transODAdapter ), 
+    	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>(new CollectionActionUnpacker<CollectionActionDispatcher<VEC4Address>>(new CollectionThreadDecoupler(new CollectionActionUnpacker<VEC4Address>(unoccludedIL = new IndexList<VEC4Address>(renderListPoolNEW.newSubList())),relevantPositionedRenderables.getExecutor())),unoccludedODAddrAdapter);
 
     public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager, Reporter reporter) {
 	// Build VAO
@@ -103,9 +105,9 @@ public class RenderList {
 	//renderListPool.getFlatEntries().addTarget(renderingIndices, true);//Convert entries to Integers
 	//((ListActionDispatcher)renderingIndices.getOutput()).addTarget(renderListTelemetry, true);//Pipe Integers to renderList
 	
-	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, false);
-	relevantPositionedRenderables.addTarget(transODAddrsColl, false);
-	relevantPositionedRenderables.addTarget(unoccludedODAddrsColl, false);
+	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, true);
+	relevantPositionedRenderables.addTarget(transODAddrsColl, true);
+	relevantPositionedRenderables.addTarget(unoccludedODAddrsColl, true);
 	
 	final TRFuture<Void> task0 = gpu.submitToGL(new Callable<Void>(){
 	    @Override
@@ -177,6 +179,7 @@ public class RenderList {
 		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
 		    renderListTelemetry.drainListStateTo(renderList);
+		    System.out.println("RenderList.updateRenderListToGPU() performing on-demand update... "+renderList.size());
 		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
 		}});
 	    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
@@ -451,49 +454,43 @@ public class RenderList {
     public int getAttribDummyID() {
 	return dummyBufferID;
     }
-    
-    final class OpaqueODAddrAdapter implements Adapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>{
-	@Override
-	public CollectionActionDispatcher<VEC4Address> reAdapt(PositionedRenderable value) {
-	    if(((WorldObject)value).isImmuneToOpaqueDepthTest())
-		return (CollectionActionDispatcher<VEC4Address>)CollectionActionDispatcher.EMPTY;
-	    return new CollectionActionDispatcher<VEC4Address>(value.getOpaqueObjectDefinitionAddresses());
-	}
+    static final Adapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>, PositionedRenderable> opaqueODAdapter =
+	    new ImplicitBiDiAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>(null,new com.ochafik.util.listenable.Adapter<PositionedRenderable,CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>>(){
+		@Override
+		public CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> adapt(
+			PositionedRenderable value) {
+		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new ArrayList<CollectionActionDispatcher<VEC4Address>>());
+		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest())
+			  {}//Nothing
+		    else {result.add(value.getOpaqueObjectDefinitionAddresses());}
+		    return result;
+		}
+	    });
+    static final Adapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>, PositionedRenderable> transODAdapter =
+	    new ImplicitBiDiAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>, PositionedRenderable>(null,new com.ochafik.util.listenable.Adapter<PositionedRenderable,CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>>(){
+		@Override
+		public CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> adapt(
+			PositionedRenderable value) {
+		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new ArrayList<CollectionActionDispatcher<VEC4Address>>());
+		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest())
+			 {}//Nothing
+		    else {result.add(value.getTransparentObjectDefinitionAddresses());}
+		    return result;
+		}
+		
+	    });
+    static final Adapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>, PositionedRenderable> unoccludedODAddrAdapter =
+	    new ImplicitBiDiAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>, PositionedRenderable>(null,new com.ochafik.util.listenable.Adapter<PositionedRenderable,CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>>(){
 
-	@Override
-	public WorldObject adapt(CollectionActionDispatcher<VEC4Address> value) {
-	    throw new UnsupportedOperationException();
-	}
-    }//end OpaqueODAddrAdapter
-    
-    final class TransODAddrAdapter implements Adapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>{
-	@Override
-	public CollectionActionDispatcher<VEC4Address> reAdapt(PositionedRenderable value) {
-	    if(((WorldObject)value).isImmuneToOpaqueDepthTest())
-		return (CollectionActionDispatcher<VEC4Address>)CollectionActionDispatcher.EMPTY;
-	    return new CollectionActionDispatcher<VEC4Address>(value.getTransparentObjectDefinitionAddresses());
-	}
-
-	@Override
-	public WorldObject adapt(CollectionActionDispatcher<VEC4Address> value) {
-	    throw new UnsupportedOperationException();
-	}
-    }//end TransODAddrAdapter
-    
-    final class UnoccludedODAddrAdapter implements Adapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>{
-	@Override
-	public CollectionActionDispatcher<VEC4Address> reAdapt(PositionedRenderable value) {
-	    final CollectionActionDispatcher<VEC4Address> result = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
-	    if(((WorldObject)value).isImmuneToOpaqueDepthTest()){
-		result.addAll(value.getOpaqueObjectDefinitionAddresses());
-		result.addAll(value.getTransparentObjectDefinitionAddresses());
-		}//end if(unoccluded)
-	    return result;
-	}
-
-	@Override
-	public WorldObject adapt(CollectionActionDispatcher<VEC4Address> value) {
-	    throw new UnsupportedOperationException();
-	}
-    }//end UnoccludedODAddrAdapter
+		@Override
+		public CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> adapt(
+			PositionedRenderable value) {
+		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new ArrayList<CollectionActionDispatcher<VEC4Address>>());
+		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest()){
+			result.add(value.getOpaqueObjectDefinitionAddresses());
+			result.add(value.getTransparentObjectDefinitionAddresses());
+			}//end if(unoccluded)
+		    return result;
+		}
+	    });
 }// end RenderList

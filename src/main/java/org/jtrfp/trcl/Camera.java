@@ -15,7 +15,6 @@ package org.jtrfp.trcl;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 
 import org.apache.commons.collections4.Predicate;
@@ -33,7 +32,6 @@ import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPrinter;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
-import org.jtrfp.trcl.coll.DummyAdapter;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
@@ -57,7 +55,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
-	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+	//private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
 		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
@@ -78,9 +76,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> relevancePairs = 
 		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> 
-	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new CollectionActionPrinter("relevancePairs",relevancePairs));//TODO: Predicate not right
+	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevancePairs);
 	private final AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
-		new AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.toBackward(), strippingAdapter.toForward());//TODO: Need cached adapter
+		new AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.toBackward(), strippingAdapter.toForward());
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
@@ -94,11 +92,12 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
     Camera(TR tr) {
 	super(tr);
-	this.gpu = tr.gpu.get();
+	this.gpu = tr!=null?tr.gpu.get():null;
 	
 	visibilityFilter.add(new VisibilityPredicate());
 	relevancePairs.addTarget(pairStripper, true);
-	relevanceCollections.addTarget(new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
+	relevanceCollections.addTarget(
+		new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
 	
 	//sortedRelevanceSet = ListenableCollections.listenableSet(
 	//	new TreeSet<PositionedRenderable>(GridCubeProximitySorter.getComparator(this)));
@@ -112,21 +111,18 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addBehavior(new TriggersVisCalcWithMovement().setEnable(true));
 	addBehavior(new SkyCubeCloudModeUpdateBehavior());
 	
-	addPropertyChangeListener(new CameraPositionHandler());
-	addPropertyChangeListener(CENTER_CUBE, new CenterCubeHandler());
+	addPropertyChangeListener(CENTER_CUBE,new CenterCubeHandler());
+	addPropertyChangeListener(WorldObject.POSITION,new CameraPositionHandler());
     }//end constructor
     
     private final class VisibilityPredicate implements Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>{
 	@Override
 	public boolean evaluate(
 		Pair<Vector3D, CollectionActionDispatcher<Positionable>> object) {
-	    return true;//TODO: Remove debug
-	    /*
 	    final Vector3D cubePosition = object.getKey();
-	    if(cubePosition==World.VISIBLE_EVERYWHERE)
+	    if(cubePosition.equals(World.VISIBLE_EVERYWHERE))
 		return true;
 	    return cubePosition.distance(centerCube)<RELEVANCE_RADIUS_CUBES;
-	    */
 	}//end evaluate()
     }//end VisibilityPredicate
     
@@ -142,16 +138,17 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	public void propertyChange(PropertyChangeEvent evt) {
 	    final String propertyName = evt.getPropertyName();
 	    if(propertyName==WorldObject.POSITION){
-		if(getRootGrid()==null)
-		    return;
+		//if(getRootGrid()==null)
+		//    return;
 		final Vector3D newValue = ((Vector3D)evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(
 			Math.rint(newValue.getX()/granularity),
 			Math.rint(newValue.getY()/granularity),
 			Math.rint(newValue.getZ()/granularity));
-		pcs.firePropertyChange(CENTER_CUBE, centerCube, newCenterCube);
+		final Vector3D oldCenterCube = centerCube;
 		centerCube=newCenterCube;
+		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)
 	}//end if propertyChange()
     }//end CameraPositionHandler
@@ -159,7 +156,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     private final class CenterCubeHandler implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+	    System.out.println("CenterCubeHandler clearing visibility filter...");
 	    visibilityFilter.clear();
+	    System.out.println("Repopulating visibility filter....");
 	    visibilityFilter.add(new VisibilityPredicate());
 	}//end propertyChange(...)
     }//end CenterCubeHandler

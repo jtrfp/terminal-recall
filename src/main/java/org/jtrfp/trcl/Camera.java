@@ -42,6 +42,7 @@ import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
+import com.ochafik.util.CollectionAdapter;
 import com.ochafik.util.listenable.AdaptedCollection;
 import com.ochafik.util.listenable.Pair;
 
@@ -80,8 +81,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> 
 	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevancePairs);
-	private final AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
-		new AdaptedCollection<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.toBackward(), strippingAdapter.toForward());
+	private final CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
+		new CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.inverse());
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;

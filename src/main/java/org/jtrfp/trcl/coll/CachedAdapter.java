@@ -14,9 +14,12 @@
 package org.jtrfp.trcl.coll;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.tools.Util;
 
 import com.ochafik.util.Adapter;
+import com.ochafik.util.listenable.Pair;
 
 public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     private final BidiReferenceMap<U,V> cache;
@@ -47,7 +50,7 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
 	}//end if(key null)
 	synchronized(cache){
 	 V result = cache.get(key);
-	 if(!cache.containsKey(key)){
+	 if(result==null){
 	    V v = _adapt(key);
 	    if(v==null){
 		if(tolerateNull)
@@ -70,7 +73,7 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
 	}//end if(key null)
 	synchronized(cache){
 	 U result = cache.getKey(value);
-	 if(!cache.containsValue(value)){
+	 if(result==null){
 	    U key = _reAdapt(value);
 	    if(key==null){
 		if(tolerateNull)
@@ -128,6 +131,10 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     public CachedAdapter<U,V> setTolerateNull(boolean tolerateNull) {
         this.tolerateNull = tolerateNull;
         return this;
+    }
+
+    public Adapter<V, U> inverse() {
+	return Util.inverse(this);
     }
 
 }//end CachedAdapter

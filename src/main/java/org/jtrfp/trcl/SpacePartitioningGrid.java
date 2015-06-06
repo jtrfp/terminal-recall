@@ -24,6 +24,7 @@ import org.apache.commons.collections4.functors.TruePredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPacker;
+import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
 import org.jtrfp.trcl.core.Renderer;
@@ -52,13 +53,13 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		return newCenterCube;
 	    }
 	};
-	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher = //PASS
+	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher =
 		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
 		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);
 	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectValve.input);
 	private final PropertyBasedTagger<Positionable, Vector3D, Vector3D> localTagger
-	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITIONV3D);
+	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(new CollectionThreadDecoupler(objectPacker,World.relevanceExecutor), cubeSpaceQuantizingAdapter, Positionable.POSITIONV3D);
 	
 	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;

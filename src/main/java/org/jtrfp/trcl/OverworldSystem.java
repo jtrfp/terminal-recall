@@ -27,9 +27,6 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
-import org.jtrfp.trcl.prop.HorizGradientCubeGen;
-import org.jtrfp.trcl.prop.SkyCube;
-import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private SkySystem 	     skySystem;
@@ -89,8 +86,13 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("Setting up objects...");
 	    objectSystem = new ObjectSystem(this, tr, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
-	    objectSystem.activate();
-	    terrainSystem.activate();
+	    World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    objectSystem.activate();
+		    terrainSystem.activate();
+		}});
+	    
 	    System.out.println("...Done.");
 	    // Tunnel activators
 	} catch (Exception e) {
@@ -128,17 +130,34 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	chamberMode = mirrorTerrain;
 	final SkySystem clouds = getCloudSystem();
 	if (mirrorTerrain) {
-	    this.getTerrainMirror().activate();
+	    World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    getTerrainMirror().activate();
+		}});
 	    //No skycube updates in chamber
 	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	    if (clouds != null)
-		clouds.deactivate();
+		World.relevanceExecutor.submit(new Runnable(){
+			@Override
+			public void run() {
+			    clouds.deactivate();
+			}});
+		
 	} else {
-	    this.getTerrainMirror().deactivate();
+	    World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    getTerrainMirror().deactivate();
+		}});
 	    //Turn skycube updates back on
 	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	    if (clouds != null)
-		clouds.activate();
+		World.relevanceExecutor.submit(new Runnable(){
+			@Override
+			public void run() {
+			    clouds.activate();
+			}});
 	}
     }// end chamberMode
 

@@ -16,6 +16,8 @@ import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.math3.exception.MathArithmeticException;
@@ -30,8 +32,8 @@ import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
 import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
-import org.jtrfp.trcl.coll.CollectionActionPrinter;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
+import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
@@ -99,7 +101,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	relevancePairs.addTarget(pairStripper, true);
 	relevanceCollections.addTarget(
 		new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
-	
 	//sortedRelevanceSet = ListenableCollections.listenableSet(
 	//	new TreeSet<PositionedRenderable>(GridCubeProximitySorter.getComparator(this)));
 	
@@ -159,12 +160,15 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 	    System.out.println("CenterCubeHandler updating visibility filter...");
-	    ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>> oldPredicates 
-	     = new ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>>(visibilityFilter);
-	    //visibilityFilter.clear();
-	    //System.out.println("Repopulating visibility filter....");
-	    visibilityFilter.add(new VisibilityPredicate());
-	    visibilityFilter.removeAll(oldPredicates);
+	    // ATOMIC
+	    World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    final ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>> oldPredicates 
+		     = new ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>>(visibilityFilter);
+		    visibilityFilter.add(new VisibilityPredicate());
+		    visibilityFilter.removeAll(oldPredicates);
+		}});
 	}//end propertyChange(...)
     }//end CenterCubeHandler
 

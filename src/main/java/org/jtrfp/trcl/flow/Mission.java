@@ -15,7 +15,6 @@ package org.jtrfp.trcl.flow;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,7 +51,6 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
@@ -660,16 +658,20 @@ public class Mission {
 	return key;
     }
     
-    public void enterTunnel(Tunnel tunnel) {
+    public void enterTunnel(final Tunnel tunnel) {
 	final Game game = tr.getGame();
 	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
 	currentTunnel = tunnel;
 	game.getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
-	//Turn off overworld
-	overworldSystem.deactivate();
-	//Turn on tunnel
-	tunnel.activate();
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		//Turn on tunnel
+		tunnel.activate();
+		//Turn off overworld
+		overworldSystem.deactivate();
+	    }});
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 	//Ensure chamber mode is off

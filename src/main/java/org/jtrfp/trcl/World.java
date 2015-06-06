@@ -12,11 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 
 public final class World {
+    public static final ExecutorService relevanceExecutor = Executors.newSingleThreadExecutor();
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
     private final TR tr;
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove

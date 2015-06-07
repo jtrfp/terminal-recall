@@ -23,6 +23,7 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.DestroysEverythingBehavior;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
@@ -179,7 +180,7 @@ public class ProjectileFactory {
 				     (WorldObject)result,
 				     tr.mainRenderer.get().getCamera(),
 				     (objectOfOrigin instanceof Player?.6:1)*SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead
-	final List<WorldObject> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
+	final List<Positionable> cL = tr.getCollisionManager().getCurrentlyActiveCollisionList();
 	 synchronized(cL){cL.add((WorldObject)result);}
 	projectileIndex++;
 	projectileIndex%=projectiles.length;

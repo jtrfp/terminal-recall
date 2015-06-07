@@ -23,6 +23,7 @@ import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -68,17 +69,17 @@ public class ProjectileBehavior extends Behavior implements
 	parent.setHeading(heading);
 	if (honing) {
 	    // Find target
-	    WorldObject closestObject = null;
+	    Positionable closestObject = null;
 	    double closestDistance = Double.POSITIVE_INFINITY;
-	    List<WorldObject> possibleTargets = getParent().getTr()
+	    List<Positionable> possibleTargets = getParent().getTr()
 		    .getCollisionManager().getCurrentlyActiveCollisionList();
 	    synchronized(possibleTargets){
-	    for (WorldObject possibleTarget : possibleTargets) {
+	    for (Positionable possibleTarget : possibleTargets) {
 		if (possibleTarget instanceof DEFObject) {
 		    DEFObject possibleDEFTarget = (DEFObject)possibleTarget;
 		    if (!possibleDEFTarget.isIgnoringProjectiles() && !possibleDEFTarget.isRuin()) {
 			final Vector3D targetPos = new Vector3D(
-				possibleTarget.getPositionWithOffset());
+				((WorldObject)possibleTarget).getPositionWithOffset());
 			final Vector3D delta = targetPos.subtract(new Vector3D(
 				getParent().getPosition()));
 			final double dist = delta.getNorm();
@@ -99,7 +100,7 @@ public class ProjectileBehavior extends Behavior implements
 		    }// end if(isIgnoringProjectiles)
 		}// end if(DEFObject)
 	    }}// end for(WorldObject others)
-	    honingTarget = new WeakReference<WorldObject>(closestObject);
+	    honingTarget = new WeakReference<WorldObject>((WorldObject)closestObject);
 	   // if(honingTarget==null){
 		getParent().getBehavior().probeForBehavior(AutoLeveling.class)
 		.setLevelingVector(heading);

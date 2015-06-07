@@ -36,7 +36,9 @@ import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.SkyCube;
+import org.jtrfp.trcl.tools.Util;
 
+import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.AdaptedCollection;
 
 public final class Renderer {
@@ -82,21 +84,21 @@ public final class Renderer {
 	skyCube = new SkyCube(gpu);
 	relevantPositioned =
 		    PredicatedCollection.predicatedCollection(
-			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),castingAdapter.toBackward(),castingAdapter.toForward()),
+			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),Util.bidi2Backward(castingAdapter),Util.bidi2Forward(castingAdapter)),
 			    new InstanceofPredicate(PositionedRenderable.class));
      setCamera(camera);//TODO: Remove after redesign
     }//end constructor
     
-    private static final CachedAdapter<Positionable,PositionedRenderable> castingAdapter = new CachedAdapter<Positionable,PositionedRenderable>(){
+    private static final Adapter<Positionable,PositionedRenderable> castingAdapter = new Adapter<Positionable,PositionedRenderable>(){
 	@Override
-	protected PositionedRenderable _adapt(Positionable value)
+	public PositionedRenderable adapt(Positionable value)
 		throws UnsupportedOperationException {
 	    return (PositionedRenderable)value;
 	}
 	@Override
-	protected Positionable _reAdapt(PositionedRenderable value)
+	public Positionable reAdapt(PositionedRenderable value)
 		throws UnsupportedOperationException {
-	    throw new UnsupportedOperationException();
+	    return (Positionable)value;
 	}
     };//end castingAdapter
     

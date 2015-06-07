@@ -26,7 +26,7 @@ public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     private volatile boolean tolerateNull = false;
     
     public CachedAdapter(){
-	this(new BidiReferenceMap<U,V>(ReferenceStrength.WEAK));
+	this(new BidiReferenceMap<U,V>(ReferenceStrength.WEAK,ReferenceStrength.WEAK, 128,.5f,true));
     }
     
     public CachedAdapter(BidiReferenceMap<U,V> cache){

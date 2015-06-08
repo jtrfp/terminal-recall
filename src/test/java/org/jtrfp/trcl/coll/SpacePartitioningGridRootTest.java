@@ -12,9 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.coll;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,14 +21,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.SpacePartitioningGrid;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.obj.Positionable;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +61,7 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,never()).add   (any(Pair.class));
 	verify(mockedTarget,never()).addAll(any(Collection.class));
 	verifyZeroInteractions(mockedTarget);
+	subject.activate();
     }
 
     @After
@@ -75,17 +77,77 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,times(0)).remove(any(Object.class));
     }//end testRemoveAndKeepCollection()
     
-  //Relevance executor breaks this test.
+    private void singleThreadExecutorBarrier(ExecutorService ex){
+	try{ex.submit(new Runnable(){public void run(){}}).get();}
+	catch(ExecutionException e){Assert.fail(e.getLocalizedMessage());}
+	catch(InterruptedException e){Assert.fail(e.getLocalizedMessage());}
+    }
     
-/*
     @Test
     public void testRemoveAndRemoveCollection() {
 	if(!Renderer.NEW_MODE) return;
 	subject.add(mockedPositionables[0]);
 	subject.remove(mockedPositionables[0]);
-	verify(mockedTarget,times(1)).remove(any(Object.class));
+	singleThreadExecutorBarrier(World.relevanceExecutor);
+	verify(mockedTarget,times(1)).add(any(Pair.class));
+	verify(mockedTarget,times(1)).removeAll(any(Collection.class));
     }//end testRemoveAndRemoveCollection
     
+    /// Below is a random benchmark written to test (prove?) performance advantages of using exceptions with iterators
+    /*
+    private static final int NUM_ITERATIONS = 100000;
+    
+    @Test
+    public void testLoopEscapePerformanceException(){
+	Collection<Integer> ints = new ArrayList<Integer>();
+	for(int i=0; i<NUM_ITERATIONS; i++)
+	    ints.add((int)(Math.random()*1000.));
+	
+	long startTime = System.nanoTime();
+	Iterator<Integer> iterator = ints.iterator();
+	try{while(true)
+	    if(iterator.next()>5000)throw new RuntimeException("This should never be thrown.");}
+	catch(NoSuchElementException e){}//Naughty escape.
+	long elapsed = System.nanoTime()-startTime;
+	
+	ints = new ArrayList<Integer>();
+	for(int i=0; i<NUM_ITERATIONS; i++)
+	    ints.add((int)(Math.random()*1000.));
+	
+	startTime = System.nanoTime();
+	iterator = ints.iterator();
+	try{while(true)
+	    if(iterator.next()>5000)throw new RuntimeException("This should never be thrown.");}
+	catch(NoSuchElementException e){}//Naughty escape.
+	elapsed = System.nanoTime()-startTime;
+	System.out.println("Exception Elapsed: "+elapsed);
+    }
+    
+    @Test
+    public void testLoopEscapePerformanceTraditional(){
+	// WARMUP
+	Collection<Integer> ints = new ArrayList<Integer>();
+	for(int i=0; i<NUM_ITERATIONS; i++)
+	    ints.add((int)(Math.random()*1000.));
+	
+	 long startTime = System.nanoTime();
+	for(Integer i:ints)
+	    if(i>5000)throw new RuntimeException("This should never be thrown.");
+	 long elapsed = System.nanoTime()-startTime;
+	// REAL
+	ints = new ArrayList<Integer>();
+	for(int i=0; i<NUM_ITERATIONS; i++)
+	    ints.add((int)(Math.random()*1000.));
+	
+	startTime = System.nanoTime();
+	for(Integer i:ints)
+	    if(i>5000)throw new RuntimeException("This should never be thrown.");
+	elapsed = System.nanoTime()-startTime;
+	System.out.println("Traditional Elapsed: "+elapsed);
+    }
+    */
+    
+ 
     @Test
     public void testRemoveAll() {
 	if(!Renderer.NEW_MODE) return;
@@ -93,17 +155,20 @@ public class SpacePartitioningGridRootTest {
 	subject.add(mockedPositionables[1]);
 	subject.add(mockedPositionables[2]);
 	subject.removeAll();
-	verify(mockedTarget,times(1)).remove(any(Object.class));
+	singleThreadExecutorBarrier(World.relevanceExecutor);
+	verify(mockedTarget,times(1)).removeAll(any(Collection.class));
     }//end testRemoveAll()
     
     @Test
     public void testEmptyAddNonEmptyBranch() {//Relevance executor breaks this test.
 	if(!Renderer.NEW_MODE) return;
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
+	branch.activate();
 	branch.add(mockedPositionables[0]);
 	branch.add(mockedPositionables[1]);
 	ArgumentCaptor<Pair> argument 
 	 = new ArgumentCaptor<Pair>();
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	verify(mockedTarget,times(1)).add(argument.capture());
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	 assertNotNull(pair);
@@ -119,14 +184,17 @@ public class SpacePartitioningGridRootTest {
 	if(!Renderer.NEW_MODE) return;
 	when(mockedTarget.removeAll(any(Collection.class))).thenReturn(true);
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
+	branch.activate();
 	branch.add(mockedPositionables[0]);
-	branch.add(mockedPositionables[1]);
+	singleThreadExecutorBarrier(World.relevanceExecutor);
+	assertEquals(1,subject.getPackedObjectsDispatcher().size());
 	branch.deactivate();
+	branch.add(mockedPositionables[1]);
 	assertEquals(0,subject.getPackedObjectsDispatcher().size());
 	ArgumentCaptor<Pair> argument 
 	 = new ArgumentCaptor<Pair>();
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	verify(mockedTarget,times(1)).add(argument.capture());
-	World.
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	CollectionActionDispatcher<Positionable> dispatcher = pair.getValue();
 	 ArgumentCaptor<Collection> argument2 
@@ -142,10 +210,12 @@ public class SpacePartitioningGridRootTest {
     public void testPopulatedAddNonEmptyBranchCommonTags(){
 	if(!Renderer.NEW_MODE) return;
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
+	branch.activate();
 	subject.add(mockedPositionables[2]);
 	subject.add(mockedPositionables[3]);
 	branch.add(mockedPositionables[0]);
 	branch.add(mockedPositionables[1]);
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	ArgumentCaptor<Pair> argument 
 	 = new ArgumentCaptor<Pair>();
 	verify(mockedTarget,times(2)).add(argument.capture());
@@ -157,5 +227,5 @@ public class SpacePartitioningGridRootTest {
 	 assertTrue(dispatcher.contains(mockedPositionables[0]));
 	 assertTrue(dispatcher.contains(mockedPositionables[1]));
     }
-*/
+
 }//end SpacePartitioningGridRootTest

@@ -32,6 +32,7 @@ import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.ResourceManager;
@@ -274,9 +275,13 @@ public class Game {
 		tr.getDefaultGrid().add(satDashboard);
 		
 		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont());
-		hudSystem.deactivate();
 		navSystem = new NAVSystem(tr.getDefaultGrid(), tr);
-		navSystem.deactivate();
+		World.relevanceExecutor.submit(new Runnable(){
+		    @Override
+		    public void run() {
+			hudSystem.deactivate();
+			navSystem.deactivate();
+		    }});
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
 		    final Color[] pal 	     = tr.getGlobalPalette();
@@ -393,26 +398,33 @@ public class Game {
     }
     
     private void cleanup() {
-	if(hudSystem!=null)
-	    hudSystem.deactivate();
-	if(navSystem!=null)
-	    navSystem.deactivate();
-	if(upfrontDisplay!=null)
-	    upfrontDisplay.deactivate();
-	if(introScreen!=null)
-	    introScreen.deactivate();
-	if(levelLoadingScreen!=null)
-	    levelLoadingScreen.deactivate();
-	if(briefingScreen!=null)
-	    briefingScreen.deactivate();
-	if(tr.getResourceManager().getPowerupSystem()!=null)
-	    tr.getResourceManager().getPowerupSystem().deactivate();
-	if(tr.getResourceManager().getSmokeSystem()!=null)
-	    tr.getResourceManager().getSmokeSystem().deactivate();
-	if(tr.getResourceManager().getExplosionFactory()!=null)
-	    tr.getResourceManager().getExplosionFactory().deactivate();
+	try{World.relevanceExecutor.submit(new Runnable(){
+
+	    @Override
+	    public void run() {
+		if(hudSystem!=null)
+		    hudSystem.deactivate();
+		if(navSystem!=null)
+		    navSystem.deactivate();
+		if(upfrontDisplay!=null)
+		    upfrontDisplay.deactivate();
+		if(introScreen!=null)
+		    introScreen.deactivate();
+		if(levelLoadingScreen!=null)
+		    levelLoadingScreen.deactivate();
+		if(briefingScreen!=null)
+		    briefingScreen.deactivate();
+		if(tr.getResourceManager().getPowerupSystem()!=null)
+		    tr.getResourceManager().getPowerupSystem().deactivate();
+		if(tr.getResourceManager().getSmokeSystem()!=null)
+		    tr.getResourceManager().getSmokeSystem().deactivate();
+		if(tr.getResourceManager().getExplosionFactory()!=null)
+		    tr.getResourceManager().getExplosionFactory().deactivate();
+	    }}).get();}catch(Exception e){e.printStackTrace();}
+	
 	if(player!=null)
 	 tr.getDefaultGrid().remove(player);
+	
 	TR.nuclearGC();
     }
 

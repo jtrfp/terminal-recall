@@ -195,14 +195,18 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
 	game.getCurrentMission().getOverworldSystem().activate();
 	planetDisplayMode(lvl);
-	briefingChars.activate();
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);
-	game.getCurrentMission().getOverworldSystem().deactivate();
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		briefingChars.activate();
+		game.getCurrentMission().getOverworldSystem().deactivate();
+	    }});
     }//end missionCompleteSummary()
 
     public void briefingSequence(LVLFile lvl) {

@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
@@ -59,7 +60,11 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
     
     @Override
     public void deactivate(){
-	super.deactivate();
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		IntroScreen.super.deactivate();
+	    }});
 	if(bgMusic!=null)
 	 bgMusic.stop();
     }

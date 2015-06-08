@@ -16,6 +16,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
@@ -101,10 +102,14 @@ public class TunnelExitObject extends WorldObject {
 		    // Heading
 		    other.setHeading(exitHeading);
 		    other.setTop(exitTop);
-		    // Tunnel off
-		    tun.deactivate();
-		    // World on
-		    overworldSystem.activate();
+		    World.relevanceExecutor.submit(new Runnable(){
+			@Override
+			public void run() {
+			    // Tunnel off
+			    tun.deactivate();
+			    // World on
+			    overworldSystem.activate();
+			}});
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
 		    final Player player = tr.getGame().getPlayer();

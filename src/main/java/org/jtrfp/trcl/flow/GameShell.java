@@ -36,6 +36,7 @@ import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
@@ -90,12 +91,20 @@ public class GameShell {
     
     public void showGameshellScreen(){
 	initializationFence();
-	earlyLoadingScreen.activate();
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		earlyLoadingScreen.activate();
+	    }});
     }
     
     public void hideGameshellScreen(){
 	initializationFence();
-	earlyLoadingScreen.deactivate();
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		earlyLoadingScreen.deactivate();
+	    }});
     }
     
     private void initLoadingScreen(){

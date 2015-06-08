@@ -290,7 +290,11 @@ public class Mission {
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
-	game.getNavSystem()	.activate();
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		game.getNavSystem()	.activate();
+	    }});
 	game.setDisplayMode(game.gameplayMode);
 	
 	game.getPlayer()	.setActive(true);
@@ -621,8 +625,13 @@ public class Mission {
     }//end abort()
 
     private void cleanup() {
-	if(overworldSystem!=null)
-	    overworldSystem.deactivate();
+	try{World.relevanceExecutor.submit(new Runnable(){
+
+	    @Override
+	    public void run() {
+		if(overworldSystem!=null)
+		    overworldSystem.deactivate();
+	    }}).get();}catch(Exception e){e.printStackTrace();}
     }
     /**
      * Find a tunnel at the given map square, if any.
@@ -834,8 +843,12 @@ public class Mission {
 		tr.getGame().getSatDashboard().setVisible(true);
 	    }else{//Switched off
 		tr.getThreadManager().setPaused(false);
-		tr.getGame().getNavSystem().activate();
-		game.getHUDSystem().activate();
+		World.relevanceExecutor.submit(new Runnable(){
+		    @Override
+		    public void run() {
+			tr.getGame().getNavSystem().activate();
+			game.getHUDSystem().activate();
+		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);
 		cam.probeForBehavior(MatchDirection.class).setEnable(true);

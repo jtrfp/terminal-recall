@@ -23,14 +23,18 @@ public class DisplayModeHandler {
     public void setDisplayMode(Object [] items){
 	newMode.clear();
 	recursiveNewDisplayModeImpl(items);
-	for(RenderableSpacePartitioningGrid grid:currentMode){
-	    if(!newMode.contains(grid))
-		grid.deactivate();
-	}//end for(grids)
-	for(RenderableSpacePartitioningGrid grid:newMode){
-	    if(!currentMode.contains(grid))
-		grid.activate();
-	}//end for(grids)
+	try{World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		for(RenderableSpacePartitioningGrid grid:currentMode){
+		    if(!newMode.contains(grid))
+			grid.deactivate();
+		}//end for(grids)
+		for(RenderableSpacePartitioningGrid grid:newMode){
+		    if(!currentMode.contains(grid))
+			grid.activate();
+		}//end for(grids)
+	    }}).get();}catch(Exception e){e.printStackTrace();}
 	currentMode.clear();
 	currentMode.addAll(newMode);
     }//end addDisplayMode()

@@ -43,8 +43,6 @@ private final NAVRadarBlipFactory blips;
 	//arrow.setPosition(new Vector3D(.825,.8,0));
 	add(arrow);
 	blips=new NAVRadarBlipFactory(tr,this);
-	activate();
-	
 	System.out.println("...Done.");
     }//end constructor
     

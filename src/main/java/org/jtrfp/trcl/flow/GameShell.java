@@ -112,7 +112,7 @@ public class GameShell {
 	try{greenFont          = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
 	    earlyLoadingScreen = new EarlyLoadingScreen(tr.getDefaultGrid(), tr, greenFont);
 	    earlyLoadingScreen.setStatusText("No game loaded.");
-	    earlyLoadingScreen.activate();
+	    earlyLoadingScreen.blockingActivate();
 	}catch(Exception e){gameFailure(e);}
     }//end initLoadingScreen()
     

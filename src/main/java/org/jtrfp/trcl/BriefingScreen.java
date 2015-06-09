@@ -77,7 +77,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	add(briefingScreen);
 	this.tr	      = tr;
 	briefingChars = new CharAreaDisplay(this,.047,WIDTH_CHARS,NUM_LINES,tr,font);
-	briefingChars.activate();
+	briefingChars.blockingActivate();
 	briefingChars.setPosition(-.7, -.45, TEXT_Z);
 	briefingScreen.setPosition(0,0,BRIEFING_SPRITE_Z);
 	briefingScreen.notifyPositionChange();
@@ -222,7 +222,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	planetDisplayMode(lvl);
 	setContent(
 		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
-	overworld.activate();
+	overworld.blockingActivate();
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};
 	addScrollFinishCallback(new Runnable(){

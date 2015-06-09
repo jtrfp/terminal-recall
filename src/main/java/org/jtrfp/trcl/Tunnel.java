@@ -95,7 +95,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	tunnelAssemblyReporter 
 	  		  = reporters[0];
 	Vector3D tunnelEnd = null;
-	deactivate();// Sleep until activated by tunnel entrance
+	blockingDeactivate();// Sleep until activated by tunnel entrance
 	try {
 	    lvl = tr.getResourceManager()
 		    .getLVL(sourceTunnel.getTunnelLVLFile());

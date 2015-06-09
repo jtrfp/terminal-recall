@@ -99,11 +99,6 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    e.printStackTrace();
 	}
     }// end constructor
-    
-    @Override
-    public void activate(){
-	super.activate();
-    }
 /*
     public Color getFogColor() {
 	return fogColor;

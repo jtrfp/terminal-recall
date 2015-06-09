@@ -348,7 +348,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    if(taskIdx>=rowTasks.length)
 		taskIdx=0;
 	}// end for(gZ)
-	terrainMirror.deactivate();
+	terrainMirror.blockingDeactivate();
     }// end constructor
 	
 	private class TunnelPoint{

@@ -284,7 +284,6 @@ public class Mission {
 	    game.getBriefingScreen().briefingSequence(lvl);
 	}
 	setMissionMode(new Mission.AboveGroundMode());
-	getOverworldSystem().activate();
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
 	tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
@@ -294,6 +293,7 @@ public class Mission {
 	    @Override
 	    public void run() {
 		game.getNavSystem()	.activate();
+		getOverworldSystem()    .activate();
 	    }});
 	game.setDisplayMode(game.gameplayMode);
 	
@@ -673,14 +673,14 @@ public class Mission {
 	currentTunnel = tunnel;
 	game.getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
-	World.relevanceExecutor.submit(new Runnable(){
+	try{World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		//Turn on tunnel
 		tunnel.activate();
 		//Turn off overworld
 		overworldSystem.deactivate();
-	    }});
+	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 	//Ensure chamber mode is off

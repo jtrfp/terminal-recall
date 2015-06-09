@@ -85,7 +85,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	    cloudTileReporters = cloudReporter.generateSubReporters(gridSideSizeInTiles);
 	    generateClouds(os);
 	}
-	activate();
+	blockingActivate();
     }// end constructor
 
     private void generateClouds(OverworldSystem os) {

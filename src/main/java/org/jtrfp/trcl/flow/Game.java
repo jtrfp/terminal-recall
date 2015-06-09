@@ -290,20 +290,25 @@ public class Game {
 		    // POWERUPS
 		    earlyLoadingScreen.setStatusText("Loading powerup assets...");
 		    rm.setPowerupSystem(new PowerupSystem(tr));
-		    rm.getPowerupSystem().activate();
 		    // EXPLOSIONS
 		    earlyLoadingScreen.setStatusText("Loading explosion assets...");
 		    rm.setExplosionFactory(new ExplosionSystem(tr));
-		    rm.getExplosionFactory().activate();
 		    // SMOKE
 		    earlyLoadingScreen.setStatusText("Loading smoke assets...");
 		    rm.setSmokeSystem(new SmokeSystem(tr));
-		    rm.getSmokeSystem().activate();
 		    // DEBRIS
 		    earlyLoadingScreen.setStatusText("Loading debris assets...");
 		    rm.setDebrisSystem(new DebrisSystem(tr));
-		    rm.getDebrisSystem().activate();
-
+		    // ACTIVATE
+		    try{World.relevanceExecutor.submit(new Runnable(){
+			@Override
+			public void run() {
+			    rm.getDebrisSystem()    .activate();
+			    rm.getSmokeSystem()     .activate();
+			    rm.getExplosionFactory().activate();
+			    rm.getPowerupSystem()   .activate();
+			}}).get();}
+		    catch(Exception e){throw new RuntimeException(e);}
 		    // SETUP PROJECTILE FACTORIES
 		    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
 		    Weapon[] w = Weapon.values();
@@ -324,7 +329,7 @@ public class Game {
 		    earlyLoadingScreen.setStatusText("Starting game...");
 		    
 		    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");
-		    earlyLoadingScreen.deactivate();
+		    earlyLoadingScreen.blockingDeactivate();
 		    
 		    levelLoadingMode = new Object[]{
 			 levelLoadingScreen,

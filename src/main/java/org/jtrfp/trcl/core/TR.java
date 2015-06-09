@@ -445,7 +445,12 @@ public final class TR implements UncaughtExceptionHandler{
      */
     public synchronized RenderableSpacePartitioningGrid getDefaultGrid() {
 	if(defaultGrid==null){
-	    defaultGrid = world.newRootGrid();defaultGrid.activate();}
+	    try{World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    defaultGrid = world.newRootGrid();defaultGrid.activate();
+		}}).get();}catch(Exception e){throw new RuntimeException(e);}
+	    }//end if(null)
         return defaultGrid;
     }
 

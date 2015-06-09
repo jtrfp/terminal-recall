@@ -16,9 +16,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.functors.TruePredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -37,6 +39,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
 	private int 				squaresX, squaresY, squaresZ;
 	private final List<E> 			alwaysVisible = new ArrayList<E>(300);
+	private final HashSet<E>		localTaggerSet = new HashSet<E>();
 	private WeakReference<SpacePartitioningGrid<E>> 	
 						parentGrid = null;
 	private Map<SpacePartitioningGrid<E>,String>
@@ -218,20 +221,51 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		xProgression=1;
 		}//end allocateSquares()
 	
+	public Future<?> nonBlockingActivate(){
+	    return World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    activate();
+		}});
+	}//end nonBlockingActivate()
+	
+	public void blockingActivate(){
+	    try  {nonBlockingActivate().get();}
+	    catch(Exception e){throw new RuntimeException(e);}
+	}//end blockingActivate()
+	
+	public void blockingDeactivate(){
+	    try  {nonBlockingDeactivate().get();}
+	    catch(Exception e){throw new RuntimeException(e);}
+	}//end blockingDeactivate()
+	
+	public Future<?> nonBlockingDeactivate(){
+	    return World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    deactivate();
+		}});
+	}//end nonBlockingActivate()
+	
 	public synchronized void newActivate(){
 	    if(!packedObjectValve.contains(TruePredicate.INSTANCE))
 		packedObjectValve.add(TruePredicate.INSTANCE);
 	}
 	
 	public synchronized void newDeactivate(){
-	    packedObjectValve.clear();
+	    if(packedObjectValve.contains(TruePredicate.INSTANCE))
+	     packedObjectValve.clear();
 	}
 	
 	public synchronized void newAdd(E objectToAdd){//TODO: Enforce set instead?
+	    if(!localTaggerSet.add(objectToAdd))
+		return;
 	    localTagger.add(objectToAdd);
 	}
 	
 	public synchronized void newRemove(E objectToRemove){
+	    if(!localTaggerSet.remove(objectToRemove))
+		return;
 	    localTagger.remove(objectToRemove);
 	}
 	

@@ -19,7 +19,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 
 public final class World {
-    public static final ExecutorService relevanceExecutor = Executors.newSingleThreadExecutor();
+    public static final ExecutorService relevanceExecutor = new VerboseExecutorService(Executors.newSingleThreadExecutor());
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
     private final TR tr;
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove

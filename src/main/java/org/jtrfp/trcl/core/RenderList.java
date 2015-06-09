@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.VerboseExecutorService;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
@@ -77,7 +78,7 @@ public class RenderList {
     						unoccludedTPartition;*/
     private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
     private final	DecoupledCollectionActionDispatcher<PositionedRenderable>
-    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>(), Executors.newSingleThreadExecutor());
+    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>(), new VerboseExecutorService(Executors.newSingleThreadExecutor()));
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
     private final	CollectionAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>

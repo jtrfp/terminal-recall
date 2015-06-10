@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -33,11 +34,13 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     private final Map<E,PropertyChangeListener> listeners= new HashMap<E,PropertyChangeListener>();
     private final Map<E,Pair<KEY,E>> pairs               = new HashMap<E,Pair<KEY,E>>();
     private final String propertyName;
+    private final ExecutorService executor;
     
-    public PropertyBasedTagger(Collection<Pair<KEY,E>> delegate, Adapter<PROPERTY_TYPE,KEY> nonCachedPropertyAdapter, String propertyName){
+    public PropertyBasedTagger(Collection<Pair<KEY,E>> delegate, Adapter<PROPERTY_TYPE,KEY> nonCachedPropertyAdapter, String propertyName, ExecutorService executor){
 	this.delegate       =delegate;
 	this.propertyAdapter=nonCachedPropertyAdapter;
 	this.propertyName   =propertyName;
+	this.executor       =executor;
     }
     
     @Override
@@ -51,20 +54,28 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 	catch(IllegalAccessException    ex){throw new IllegalArgumentException("Supplied element (bean) does not allow access for property `"+propertyName+"`.",ex);}
 	PropertyChangeListener pcl = new PropertyChangeListener(){
 	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		final KEY newKey     = propertyAdapter.adapt((PROPERTY_TYPE)evt.getNewValue());
-		final Pair<KEY,E>pair= pairs.get(e);
-		final KEY oldKey     = pair.getKey();
-		if(!newKey.equals(oldKey)){
-		    //Remove old
-		    delegate.remove(pair);
-		    pairs.remove(e);
-		    //Add new
-		    final Pair<KEY,E> newPair = new Pair<KEY,E>(propertyAdapter.adapt((PROPERTY_TYPE)evt.getNewValue()),e);
-		    assert newPair!=null:"pair unexpectedly null.";
-		    assert delegate.add(newPair):"Failed to add pair to delegate.";
-		    pairs.put(e,newPair);
-		}//end if(changed key)
+	    public void propertyChange(final PropertyChangeEvent evt) {
+		final Runnable r = new Runnable(){
+		    @Override
+		    public void run() {
+			final KEY newKey     = propertyAdapter.adapt((PROPERTY_TYPE)evt.getNewValue());
+			final Pair<KEY,E>pair= pairs.get(e);
+			final KEY oldKey     = pair.getKey();
+			if(!newKey.equals(oldKey)){
+			    //Remove old
+			    delegate.remove(pair);
+			    pairs   .remove(e);
+			    //Add new
+			    final Pair<KEY,E> newPair = new Pair<KEY,E>(propertyAdapter.adapt((PROPERTY_TYPE)evt.getNewValue()),e);
+			    assert newPair!=null:"pair unexpectedly null.";
+			    assert delegate.add(newPair):"Failed to add pair to delegate.";
+			    pairs.put(e,newPair);
+			}//end if(changed key)
+		    }};
+		if(executor==null)
+		    r.run();
+		else
+		    try{executor.submit(r).get();}catch(Exception e){throw new RuntimeException(e);}
 	    }};
 	listeners.put(e,pcl);
 	e.addPropertyChangeListener(propertyName, pcl);

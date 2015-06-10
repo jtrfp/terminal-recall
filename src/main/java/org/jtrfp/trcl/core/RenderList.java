@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
@@ -78,7 +79,7 @@ public class RenderList {
     						unoccludedTPartition;*/
     private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
     private final	DecoupledCollectionActionDispatcher<PositionedRenderable>
-    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new ArrayList<PositionedRenderable>(), new VerboseExecutorService(Executors.newSingleThreadExecutor()));
+    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new HashSet<PositionedRenderable>(), new VerboseExecutorService(Executors.newSingleThreadExecutor()));
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
     private final	CollectionAdapter<CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>,PositionedRenderable>
@@ -460,7 +461,7 @@ public class RenderList {
 		@Override
 		public CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> adapt(
 			PositionedRenderable value) {
-		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new ArrayList<CollectionActionDispatcher<VEC4Address>>());
+		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new HashSet<CollectionActionDispatcher<VEC4Address>>());
 		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest())
 			  {}//Nothing
 		    else {result.add(value.getOpaqueObjectDefinitionAddresses());}
@@ -472,7 +473,7 @@ public class RenderList {
 		@Override
 		public CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> adapt(
 			PositionedRenderable value) {
-		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new ArrayList<CollectionActionDispatcher<VEC4Address>>());
+		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new HashSet<CollectionActionDispatcher<VEC4Address>>());
 		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest())
 			 {}//Nothing
 		    else {result.add(value.getTransparentObjectDefinitionAddresses());}
@@ -486,7 +487,7 @@ public class RenderList {
 		@Override
 		public CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> adapt(
 			PositionedRenderable value) {
-		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new ArrayList<CollectionActionDispatcher<VEC4Address>>());
+		    final CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>> result = new CollectionActionDispatcher<CollectionActionDispatcher<VEC4Address>>(new HashSet<CollectionActionDispatcher<VEC4Address>>());
 		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest()){
 			result.add(value.getOpaqueObjectDefinitionAddresses());
 			result.add(value.getTransparentObjectDefinitionAddresses());

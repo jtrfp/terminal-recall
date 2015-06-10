@@ -16,8 +16,7 @@ import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.HashSet;
 
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.math3.exception.MathArithmeticException;
@@ -33,7 +32,6 @@ import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
 import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
-import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
@@ -43,7 +41,6 @@ import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 import com.ochafik.util.CollectionAdapter;
-import com.ochafik.util.listenable.AdaptedCollection;
 import com.ochafik.util.listenable.Pair;
 
 public class Camera extends WorldObject implements RelevantEverywhere{
@@ -76,14 +73,14 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 			throw new UnsupportedOperationException();
 		    }};
 	private final CollectionActionDispatcher<CollectionActionDispatcher<Positionable>> relevanceCollections =
-		new CollectionActionDispatcher<CollectionActionDispatcher<Positionable>>(new ArrayList<CollectionActionDispatcher<Positionable>>());
+		new CollectionActionDispatcher<CollectionActionDispatcher<Positionable>>(new HashSet<CollectionActionDispatcher<Positionable>>());
 	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> relevancePairs = 
-		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
+		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new HashSet<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> 
 	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevancePairs);
 	private final CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
 		new CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.inverse());
-	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
+	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new HashSet<Positionable>());
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
 	//private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
@@ -98,14 +95,14 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	super(tr);
 	this.gpu = tr!=null?tr.gpu.get():null;
 	
-	visibilityFilter.add(new VisibilityPredicate());
-	relevancePairs.addTarget(pairStripper, true);
-	relevanceCollections.addTarget(
-		new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
-	//sortedRelevanceSet = ListenableCollections.listenableSet(
-	//	new TreeSet<PositionedRenderable>(GridCubeProximitySorter.getComparator(this)));
-	
-	//ListenableCollections.bind(relevanceCollection, sortedRelevanceSet);
+	try{World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		visibilityFilter.add(new VisibilityPredicate());
+		relevancePairs.addTarget(pairStripper, true);
+		relevanceCollections.addTarget(
+			new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
+	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
 	
 	addBehavior(new MatchPosition().setEnable(true));
 	addBehavior(new MatchDirection()).setEnable(true);
@@ -160,15 +157,16 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     private final class CenterCubeHandler implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-	    System.out.println("CenterCubeHandler updating visibility filter...");
 	    // ATOMIC
 	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
 		    final ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>> oldPredicates 
 		     = new ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>>(visibilityFilter);
-		    visibilityFilter.add(new VisibilityPredicate());
-		    visibilityFilter.removeAll(oldPredicates);
+		    System.out.println("CenterCubeHandler updating visibility filter...");
+		    //visibilityFilter.add(new VisibilityPredicate());
+		    //visibilityFilter.removeAll(oldPredicates);
+		    visibilityFilter.reEvaluatePredicates();
 		}});
 	}//end propertyChange(...)
     }//end CenterCubeHandler

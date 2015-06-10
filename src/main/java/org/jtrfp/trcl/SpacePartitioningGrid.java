@@ -62,7 +62,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);
 	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectValve.input);
 	private final PropertyBasedTagger<Positionable, Vector3D, Vector3D> localTagger
-	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(new CollectionThreadDecoupler(objectPacker,World.relevanceExecutor), cubeSpaceQuantizingAdapter, Positionable.POSITIONV3D);
+	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITIONV3D,World.relevanceExecutor);
 	
 	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;

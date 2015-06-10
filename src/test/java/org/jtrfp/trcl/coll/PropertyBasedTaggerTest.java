@@ -44,7 +44,7 @@ public class PropertyBasedTaggerTest {
     @Before
     public void setUp() throws Exception {
 	delegate = new ArrayList<Pair<Integer,TaggingElement>>(); 
-	subject  = new PropertyBasedTagger<TaggingElement,Integer,String>(delegate, subjectAdapter, TaggingElement.VALUE);
+	subject  = new PropertyBasedTagger<TaggingElement,Integer,String>(delegate, subjectAdapter, TaggingElement.VALUE,null);
 	elements[0] = new TaggingElement("zero");
 	elements[1] = new TaggingElement("one");
 	elements[2] = new TaggingElement("two");

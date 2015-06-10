@@ -81,7 +81,7 @@ public class CollectionActionUnpacker<E> implements Collection<CollectionActionD
 	    
 	    if(result){
 		final boolean removed = coll.removeTarget(delegate, true);
-		assert removed;
+		assert removed|coll.isEmpty():"failed to remove contents of "+coll+" from "+delegate;
 	    }//end if(result)
 	}//end if(CollectionActionDispatcher)
 	return result;

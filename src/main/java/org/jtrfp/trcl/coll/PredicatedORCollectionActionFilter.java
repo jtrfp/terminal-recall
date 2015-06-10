@@ -18,11 +18,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.collections.iterators.UnmodifiableIterator;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.iterators.IteratorChain;
+import org.jtrfp.trcl.World;
 
 public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>> {
     private Collection<E> 
@@ -34,7 +36,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
     public PredicatedORCollectionActionFilter(Collection<E> delegate){
 	this.delegate=delegate;
     }
-
+    
     @Override
     public boolean add(Predicate<E> predicatesToAdd) {
 	return addAll(Arrays.asList(predicatesToAdd));
@@ -45,22 +47,26 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	final ArrayList<? extends Predicate<E>> toAdd = new ArrayList<Predicate<E>>(_toAdd);
 	Iterator<? extends Predicate<E>> taIterator = toAdd.iterator();
 	//Don't add what's already there.
-	while(taIterator.hasNext())
+	try{while(true){//Performance critical block
 	    if(!predicates.add(taIterator.next()))
 		taIterator.remove();
+	}}catch(NoSuchElementException e){}
 	
-	final Iterator<E> unusedIterator = unused.iterator();
+	final Iterator<E>  unusedIterator = unused.iterator();
 	E element;
 	final ArrayList<E> addToUsedAndDelegate = new ArrayList<E>(unusedIterator.hasNext()?8:0);
-	while(unusedIterator.hasNext()){
-	    element = unusedIterator.next();
-	    if(matchesPredicates(element,toAdd)){
-		unusedIterator.remove();
-		addToUsedAndDelegate.add(element);
-	    }//end if(matchesPredicates)
-	}//end while(hashNext())
+	try{//Performance-critical block.
+	    while(true){
+		element = unusedIterator.next();
+		if(matchesPredicates(element,toAdd)){
+		    unusedIterator      .remove();
+		    addToUsedAndDelegate.add(element);
+		}//end if(matchesPredicates)
+	    }//end while(true)
+	}catch(NoSuchElementException e){}
+	
 	if(!addToUsedAndDelegate.isEmpty()){
-	    used.addAll(addToUsedAndDelegate);
+	    used    .addAll(addToUsedAndDelegate);
 	    delegate.addAll(addToUsedAndDelegate);
 	}
 	return !toAdd.isEmpty();
@@ -78,7 +84,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	ArrayList<E> toRemove = new ArrayList<E>(used);
 	delegate  .removeAll(toRemove);
 	predicates.clear();
-	unused    .addAll(toRemove);
+	unused    .addAll   (toRemove);
 	used      .clear();
     }
 
@@ -104,7 +110,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
     }
 
     @Override
-    public boolean remove(Object element) {//TODO: This is single instance
+    public boolean remove(Object element) {//TODO: BUG - this is single instance
 	return removeAll(Arrays.asList(element));
     }
 
@@ -116,23 +122,33 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    if(r instanceof Predicate) toRemove.add((Predicate<E>)r);
 	Iterator<Predicate<E>> trIterator = toRemove.iterator();
 	//Don't remove what isn't present
-	while(trIterator.hasNext())
+	try{while(true){
 	    if(!predicates.contains(trIterator.next()))
 		trIterator.remove();
-	final ArrayList<E> addToUnusedAndRemoveFromDelegate = new ArrayList<E>(trIterator.hasNext()?8:0);
+	}//end while(true)
+	}catch(NoSuchElementException e){}
 	predicates.removeAll(toRemove);
-	final Iterator<E> usedIterator = used.iterator();
-	E element;
-	while(usedIterator.hasNext()){
-	    element = usedIterator.next();
-	    if(!matchesPredicates(element,toRemove)){
-		usedIterator.remove();
-		addToUnusedAndRemoveFromDelegate.add(element);
-	    }//end if(matchesPredicates)
-	}//end while(hashNext())
-	if(!addToUnusedAndRemoveFromDelegate.isEmpty()){
-	    unused.addAll(addToUnusedAndRemoveFromDelegate);
-	    delegate.removeAll(addToUnusedAndRemoveFromDelegate);
+	final ArrayList<E> addToUnusedAndRemoveFromDelegate = new ArrayList<E>(trIterator.hasNext()?8:0);
+	final Iterator<E>  usedIterator = used.iterator();
+	if(!predicates.isEmpty()){
+	  //Re-Evaluate against the predicates
+		E element;
+		try{while(true){
+		    element = usedIterator.next();//Performance-critical block
+		    if(!matchesPredicates(element,predicates)){
+			usedIterator.remove();
+			addToUnusedAndRemoveFromDelegate.add(element);
+		    }//end if(matchesPredicates)
+		}//end while(true)
+		}catch(NoSuchElementException e){}
+		if(!addToUnusedAndRemoveFromDelegate.isEmpty()){
+		    unused  .addAll(addToUnusedAndRemoveFromDelegate);
+		    delegate.removeAll(addToUnusedAndRemoveFromDelegate);
+		}//end if(!empty)
+	}else{//No predicates
+	    unused  .addAll   (used);
+	    delegate.clear();
+	    used    .clear();
 	}
 	return !toRemove.isEmpty();
     }//end removeAll(...)
@@ -215,19 +231,29 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
 	@Override
 	public boolean remove(Object o) {
-	    boolean result = false;
-	    result |= used.remove(o);
-	    result |= unused.remove(o);
-	    result |= delegate.remove(o);
-	    return result;
+	    return removeAll(Arrays.asList(o));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean removeAll(Collection<?> c) {
 	    boolean result = false;
-	    result |= used.removeAll(c);
 	    result |= unused.removeAll(c);
-	    result |= delegate.removeAll(c);
+	    if(predicates.isEmpty())
+		return result;
+	    final Collection<?> toRemove = new ArrayList<Object>(c);
+	    final Iterator<?> trIterator = toRemove.iterator();
+	    
+	    try{
+	    while(true){//This naughty optimization is being used because this code is very performance-critical
+		if(!matchesPredicates((E)trIterator.next(),predicates))
+			trIterator.remove();
+	    }}catch(NoSuchElementException e){}
+	    
+	    if(toRemove.isEmpty())
+		return result;
+	    result |= used    .removeAll(toRemove);
+	    result |= delegate.removeAll(toRemove);
 	    return result;
 	}
 
@@ -269,4 +295,45 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    }
 	    return a;
 	}};
+
+	public void reEvaluatePredicates() {
+	    final boolean pEmpty = predicates.isEmpty();
+	    if(pEmpty && !used.isEmpty()){
+		delegate.removeAll(used);
+		unused   .addAll(used);
+	    }else if(!pEmpty){
+		final Collection<E> addToUnusedAndRemoveFromDelegate = new ArrayList<E>(20);
+		final Iterator<E>   usedIterator = used.iterator();
+		E element;
+		try{while(true){
+		    element = usedIterator.next();//Performance-critical block
+		    if(!matchesPredicates(element,predicates)){
+			usedIterator.remove();
+			addToUnusedAndRemoveFromDelegate.add(element);
+		    }//end if(matchesPredicates)
+		}//end while(true)
+		}catch(NoSuchElementException e){}
+		if(!addToUnusedAndRemoveFromDelegate.isEmpty()){
+		    unused  .addAll(addToUnusedAndRemoveFromDelegate);
+		    delegate.removeAll(addToUnusedAndRemoveFromDelegate);
+		}//end if(addtoUnusedAndRemoveFromDelegate)
+		
+		final Iterator<E>  unusedIterator       = unused.iterator();
+		final ArrayList<E> addToUsedAndDelegate = new ArrayList<E>(unusedIterator.hasNext()?8:0);
+		try{//Performance-critical block.
+		    while(true){
+			element = unusedIterator.next();
+			if(matchesPredicates(element,predicates)){
+			    unusedIterator      .remove();
+			    addToUsedAndDelegate.add(element);
+			}//end if(matchesPredicates)
+		    }//end while(true)
+		}catch(NoSuchElementException e){}
+
+		if(!addToUsedAndDelegate.isEmpty()){
+		    used    .addAll(addToUsedAndDelegate);
+		    delegate.addAll(addToUsedAndDelegate);
+		}
+	    }//end if(!pEmpty)
+	}//end reEvaluatePredicates()
 }//end PredicatedORListActionFilter

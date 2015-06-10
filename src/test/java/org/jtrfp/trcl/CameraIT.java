@@ -15,12 +15,17 @@ package org.jtrfp.trcl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Positionable;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,20 +63,30 @@ public class CameraIT {
 	assertTrue(subject.getFlatRelevanceCollection().isEmpty());
 	assertTrue(subject.getRelevanceCollections()   .isEmpty());
     }
-    /*
+    
+    private void singleThreadExecutorBarrier(ExecutorService ex){
+	try{ex.submit(new Runnable(){public void run(){}}).get();}
+	catch(ExecutionException e){Assert.fail(e.getLocalizedMessage());}
+	catch(InterruptedException e){Assert.fail(e.getLocalizedMessage());}
+    }
+    
     @Test
     public void testAddSingleCubeGridChangePosition(){//Use of Executors has broken this test.
 	subject.setPosition(new Vector3D(0,0,0));
 	SpacePartitioningGrid<Positionable> spg = new SpacePartitioningGrid<Positionable>(){};
+	spg.activate();
 	spg.add(zeroPositionables[0]);spg.add(zeroPositionables[1]);
 	subject.addGrid(spg);
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	subject.setPosition(new Vector3D(0,0,0));
 	subject.notifyPositionChange();
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertFalse(subject.getRelevancePairs()         .isEmpty());
 	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
 	assertFalse(subject.getRelevanceCollections()   .isEmpty());
 	subject.setPosition(new Vector3D(TR.mapSquareSize*20*7,TR.mapSquareSize*20*7,TR.mapSquareSize*20*7));
 	subject.notifyPositionChange();
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertTrue(subject.getRelevancePairs()         .isEmpty());
 	assertTrue(subject.getRelevanceCollections()   .isEmpty());
 	assertTrue(subject.getFlatRelevanceCollection().isEmpty());
@@ -80,6 +95,7 @@ public class CameraIT {
     @Test
     public void testAddSingleCubeGridVisibleEverywhere(){//Use of Executors has broken this test
 	SpacePartitioningGrid<Positionable> spg = new SpacePartitioningGrid<Positionable>(){};
+	spg.activate();
 	Positionable[] vePositionables = new Positionable[2];
 	for(int i=0; i<2; i++){
 	    Positionable pos=mock(Positionable.class);
@@ -90,14 +106,15 @@ public class CameraIT {
 	subject.addGrid(spg);
 	subject.setPosition(new Vector3D(0,0,0));
 	subject.notifyPositionChange();
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertFalse(subject.getRelevancePairs()         .isEmpty());
 	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
 	assertFalse(subject.getRelevanceCollections()   .isEmpty());
 	subject.setPosition(new Vector3D(TR.mapSquareSize*20*7,TR.mapSquareSize*20*7,TR.mapSquareSize*20*7));
 	subject.notifyPositionChange();
+	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertFalse(subject.getRelevancePairs()         .isEmpty());
 	assertFalse(subject.getRelevanceCollections()   .isEmpty());
 	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
     }//end testAddSingleCubeGridVisibleEverywhere()
-*/
 }//end CameraTest

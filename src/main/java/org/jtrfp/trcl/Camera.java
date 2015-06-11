@@ -83,13 +83,14 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new HashSet<Positionable>());
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
+	private static final double RELEVANCE_RADIUS_TAXICAB_CUBES = 1.414 * RELEVANCE_RADIUS_CUBES; // 1.414 is radical-2
 	//private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
 	//	new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
 	//private final	CompoundListenableCollection<PositionedRenderable> relevanceCollection 
 	//     = new CompoundListenableCollection<PositionedRenderable>(relevantCubeCollection);
 	//private final	ListenableSet<PositionedRenderable> sortedRelevanceSet;
 	private SpacePartitioningGrid rootGrid;
-	private Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
+	private volatile Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
 
     Camera(TR tr) {
 	super(tr);
@@ -123,7 +124,13 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    final Vector3D cubePosition = object.getKey();
 	    if(cubePosition.equals(World.VISIBLE_EVERYWHERE))
 		return true;
-	    return cubePosition.distance(centerCube)<RELEVANCE_RADIUS_CUBES;
+	    //Rollover taxicab distance
+	    final double rollover = World.WORLD_WIDTH_CUBES-(RELEVANCE_RADIUS_CUBES/2.25);
+	    final double rolloverDistance = 
+		    (Math.abs(cubePosition.getX()-centerCube.getX()) % rollover)+
+		    (Math.abs(cubePosition.getY()-centerCube.getY()) % rollover)+
+		    (Math.abs(cubePosition.getZ()-centerCube.getZ()) % rollover);
+	    return rolloverDistance < RELEVANCE_RADIUS_TAXICAB_CUBES;
 	}//end evaluate()
     }//end VisibilityPredicate
     
@@ -148,7 +155,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 			Math.rint(newValue.getY()/granularity),
 			Math.rint(newValue.getZ()/granularity));
 		final Vector3D oldCenterCube = centerCube;
-		centerCube=newCenterCube;
 		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)
 	}//end if propertyChange()
@@ -156,7 +162,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     
     private final class CenterCubeHandler implements PropertyChangeListener{
 	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
+	public void propertyChange(final PropertyChangeEvent evt) {
 	    // ATOMIC
 	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
@@ -166,6 +172,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		    System.out.println("CenterCubeHandler updating visibility filter...");
 		    //visibilityFilter.add(new VisibilityPredicate());
 		    //visibilityFilter.removeAll(oldPredicates);
+		    centerCube=(Vector3D)evt.getNewValue();
 		    visibilityFilter.reEvaluatePredicates();
 		}});
 	}//end propertyChange(...)

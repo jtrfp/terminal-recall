@@ -24,6 +24,7 @@ public final class World {
     private final TR tr;
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove
     public static final int CUBE_GRANULARITY        = (int)(TR.mapSquareSize*5);
+    public static final int WORLD_WIDTH_CUBES       = (int)Math.round(TR.mapWidth / CUBE_GRANULARITY);
     public static final Vector3D VISIBLE_EVERYWHERE = Vector3D.NaN;
 
     public World(double sizeX, double sizeY, double sizeZ,

@@ -127,4 +127,8 @@ public class CollisionManager {
     public Collection<Positionable> getInputRelevanceCollection() {
         return inputCollection;
     }
+    
+    public Collection<Positionable> getInputRelevanceList() {
+        return inputRelevanceList;
+    }
 }// end CollisionManager

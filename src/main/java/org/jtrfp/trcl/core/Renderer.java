@@ -62,7 +62,7 @@ public final class Renderer {
     private final	PredicatedCollection<Positionable> relevantPositioned;
     private final	Reporter		reporter;
     private final	ThreadManager		threadManager;
-    public static final boolean NEW_MODE = false;
+    public static final boolean NEW_MODE = true;
     
     public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter, CollisionManager collisionManagerFuture, final ObjectListWindow objectListWindow) {
 	this.factory         = factory;
@@ -156,7 +156,7 @@ public final class Renderer {
     
     public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
 	if(pr instanceof WorldObject)
-	    try{collisionManager.getCurrentlyActiveCollisionList().add((WorldObject)pr);}
+	    try{if(!NEW_MODE)collisionManager.getCurrentlyActiveCollisionList().add((WorldObject)pr);}
 	catch(Exception ex){throw new RuntimeException(ex);}
 	if(!NEW_MODE)
 	 renderList.get().getVisibleWorldObjectList().add(pr);

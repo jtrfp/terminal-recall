@@ -673,14 +673,9 @@ public class Mission {
 	currentTunnel = tunnel;
 	game.getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
-	try{World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		//Turn on tunnel
-		tunnel.activate();
-		//Turn off overworld
-		overworldSystem.deactivate();
-	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
+	tunnel.blockingActivate();
+	overworldSystem.nonBlockingDeactivate();
+	
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 	//Ensure chamber mode is off
@@ -721,6 +716,16 @@ public class Mission {
 	}//end if(have NAV to remove
 	*/
 	player.setActive(true);
+	/*
+	try{World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		//Turn off overworld
+		//overworldSystem.deactivate();
+		//Turn on tunnel
+		//tunnel.activate();
+	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
+	*/
     }//end enterTunnel()
     /**
      * @param listener

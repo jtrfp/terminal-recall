@@ -261,6 +261,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	    if(!localTaggerSet.add(objectToAdd))
 		return;
 	    localTagger.add(objectToAdd);
+	    objectToAdd.setContainingGrid(this);
 	}
 	
 	public synchronized void newRemove(E objectToRemove){

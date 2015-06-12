@@ -13,9 +13,10 @@
 
 package org.jtrfp.trcl.coll;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.jtrfp.trcl.tools.Util;
@@ -41,7 +42,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public boolean addAll(final Collection<? extends E> elements) {
-	final ArrayList<E> toAdd = new ArrayList<E>(elements);
+	final List<E> toAdd = (List<E>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
 	    public void run() {
@@ -95,7 +96,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public boolean removeAll(final Collection<?> elements) {
-	final ArrayList<?> toRemove = new ArrayList<Object>(elements);
+	final List<?> toRemove = (List<?>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
 	    public void run() {
@@ -106,7 +107,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public boolean retainAll(final Collection<?> elements) {
-	final ArrayList<?> toRetain = new ArrayList<Object>(elements);
+	final List<?> toRetain = (List<?>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
 	    public void run() {
@@ -135,7 +136,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public void repopulate(final Collection<E> c) {
-	final ArrayList<E> toRepopulate = new ArrayList<E>(c);
+	final List<E> toRepopulate = (List<E>)Arrays.asList(c.toArray());
 	executor.execute(new Runnable(){
 	    @Override
 	    public void run() {

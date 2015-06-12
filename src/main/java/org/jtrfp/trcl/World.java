@@ -12,18 +12,25 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 
 public final class World {
     public static final ExecutorService relevanceExecutor = new VerboseExecutorService(Executors.newSingleThreadExecutor());
+    protected static Future<Thread> relevanceThread = relevanceExecutor.submit(new Callable<Thread>(){
+	@Override
+	public Thread call() throws Exception {
+	    return Thread.currentThread();
+	}});
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
     private final TR tr;
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove
-    public static final int CUBE_GRANULARITY        = (int)(TR.mapSquareSize*5);
+    public static final int CUBE_GRANULARITY        = (int)(TR.mapSquareSize*12);
     public static final int WORLD_WIDTH_CUBES       = (int)Math.round(TR.mapWidth / CUBE_GRANULARITY);
     public static final Vector3D VISIBLE_EVERYWHERE = Vector3D.NaN;
 

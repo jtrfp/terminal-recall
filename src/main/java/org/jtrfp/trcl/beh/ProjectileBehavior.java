@@ -13,13 +13,18 @@
 package org.jtrfp.trcl.beh;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.core.Renderer;
+import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Player;
@@ -71,8 +76,17 @@ public class ProjectileBehavior extends Behavior implements
 	    // Find target
 	    Positionable closestObject = null;
 	    double closestDistance = Double.POSITIVE_INFINITY;
-	    List<Positionable> possibleTargets = getParent().getTr()
-		    .getCollisionManager().getCurrentlyActiveCollisionList();
+	    final CollisionManager cm = getParent().getTr().getCollisionManager();
+	    Collection<Positionable> possibleTargets;
+	    try{
+	     possibleTargets =
+	     World.relevanceExecutor.submit(new Callable<Collection<Positionable>>(){
+		@Override
+		public Collection<Positionable> call() {
+		    return Renderer.NEW_MODE?new ArrayList<Positionable>(cm.getInputRelevanceList()):
+				new ArrayList<Positionable>(cm.getCurrentlyActiveCollisionList());
+		}
+	    }).get();}catch(Exception e){throw new RuntimeException(e);}
 	    synchronized(possibleTargets){
 	    for (Positionable possibleTarget : possibleTargets) {
 		if (possibleTarget instanceof DEFObject) {

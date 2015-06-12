@@ -15,13 +15,11 @@ package org.jtrfp.trcl.obj;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 
@@ -32,8 +30,7 @@ public class CollisionManager {
     public static final int SHIP_COLLISION_DISTANCE = 15000;
     private volatile boolean flip = false;
     private final List<Positionable> inputRelevanceList = new ArrayList<Positionable>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final CollectionThreadDecoupler<Positionable> inputCollection = new CollectionThreadDecoupler(inputRelevanceList, executor);
+    //private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public CollisionManager(TR tr) {
 	this.tr = tr;
@@ -77,19 +74,27 @@ public class CollisionManager {
 	}//end sync(collideable)
 	//System.out.println("Done.");
     }// end updateVisibilityList()
+    
+    private final Positionable [] positionableWorkArray = new Positionable[4096];
+    private volatile int numPositionables =0;
 
     public void performCollisionTests() {
-	final Future<?> future = executor.submit(new Runnable(){
+	try{World.relevanceExecutor.submit(new Callable<List<Positionable>>(){
 	    @Override
-	    public void run() {
-		List<Positionable> collideable = Renderer.NEW_MODE?inputRelevanceList:getCurrentlyActiveCollisionList();
-		synchronized(collideable){
-		for (int i = 0; i < collideable.size(); i++) {
+	    public List<Positionable> call() {
+		List<Positionable> list = Renderer.NEW_MODE?inputRelevanceList:getCurrentlyActiveCollisionList();
+		numPositionables = list.size();
+		if(numPositionables<=positionableWorkArray.length)
+		 list.toArray(positionableWorkArray);
+		return list;
+	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
+	    
+		for (int i = 0; i < numPositionables; i++) {
 		  //Lock occurs inside one loop-level to reduce render pauses.
 		    synchronized(tr.getThreadManager().gameStateLock){
-		    final WorldObject left = (WorldObject)collideable.get(i);
-		    for (int j = i + 1; j < collideable.size(); j++) {
-			final WorldObject right = (WorldObject)collideable.get(j);
+		    final WorldObject left = (WorldObject)positionableWorkArray[i];
+		    for (int j = i + 1; j < numPositionables; j++) {
+			final WorldObject right = (WorldObject)positionableWorkArray[j];
 			if (left!=null && right!=null){
 			 if (left.isActive()&& right.isActive()){
 			  if(TR.sloppyTwosComplimentTaxicabDistanceXZ(left.getPosition(),
@@ -102,9 +107,6 @@ public class CollisionManager {
 		    }// end for(j)
 		}// end sync(gameStateLock)
 		}// end for(i)
-		}//end sync(collideable)
-	    }});
-	try{future.get();}catch(Exception e){e.printStackTrace();}
     }//end performCollisionTests
 
     public void remove(WorldObject worldObject) {
@@ -124,8 +126,8 @@ public class CollisionManager {
     /**
      * @return the inputRelevanceList
      */
-    public Collection<Positionable> getInputRelevanceCollection() {
-        return inputCollection;
+    public Collection<Positionable> getInputRelevanceCollection() {//TODO: Remove redundancy
+        return inputRelevanceList;
     }
     
     public Collection<Positionable> getInputRelevanceList() {

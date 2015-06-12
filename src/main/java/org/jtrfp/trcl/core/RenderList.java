@@ -181,7 +181,7 @@ public class RenderList {
 		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
 		    renderListTelemetry.drainListStateTo(renderList);
-		    System.out.println("RenderList.updateRenderListToGPU() performing on-demand update... "+renderList.size());
+		    //System.out.println("RenderList.updateRenderListToGPU() performing on-demand update... "+renderList.size());
 		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
 		}});
 	    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}

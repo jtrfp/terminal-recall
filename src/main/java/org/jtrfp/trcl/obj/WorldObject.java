@@ -17,7 +17,6 @@ import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -34,6 +33,7 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
@@ -62,7 +62,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected Integer 	matrixID;
-    private WeakReference<SpacePartitioningGrid> containingGrid;
+    private volatile WeakReference<SpacePartitioningGrid> containingGrid;
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
     private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
@@ -442,9 +442,11 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     public synchronized WorldObject notifyPositionChange(){
 	if(position[0]==Double.NaN)
 	    throw new RuntimeException("Invalid position.");
-	pcs.firePropertyChange(POSITION, new Vector3D(oldPosition), new Vector3D(position));
+	//pcs.firePropertyChange(POSITIONV3D, null, new Vector3D(position));
+	pcs.firePropertyChange(POSITION, null, position);
 	needToRecalcMatrix=true;
-	synchronized (position) {
+	if(!Renderer.NEW_MODE){
+	 synchronized (position) {
 	    final SpacePartitioningGrid<PositionedRenderable> 
 	    	containingGrid = getContainingGrid();
 	    if(containingGrid==null){//Not in grid
@@ -473,6 +475,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 		lastContainingList=newList;
 	    }//end if(posChange)
 	}//end sync(position)
+    }//end !Renderer.NEW_MODE
 	updateOldPosition();
 	return this;
     }//end notifyPositionChange()
@@ -543,18 +546,25 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     }
 
     public synchronized void destroy() {
-	if (containingGrid != null){
+	if (containingGrid != null && !Renderer.NEW_MODE){
 	    SpacePartitioningGrid g = getContainingGrid();
 	    if(g!=null)
 		if(lastContainingList!=null)
 		    synchronized(lastContainingList){
-		     lastContainingList.remove(this);}
+			lastContainingList.remove(this);}
 	}//end if(grid!=null)
+	else if(containingGrid !=null){
+	    try{World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    getContainingGrid().remove(WorldObject.this);
+		}}).get();}catch(Exception e){throw new RuntimeException(e);}
+	}//end if(NEW MODE and have grid)
 	containingGrid=null;
 	// Send it to the land of wind and ghosts.
 	setActive(false);
 	notifyPositionChange();
-    }
+    }//end destroy()
 
     @Override
     public void setContainingGrid(SpacePartitioningGrid grid) {
@@ -785,13 +795,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     public void removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
 	pcs.removePropertyChangeListener(propertyName, listener);
-    }
-
-    @Override
-    public Vector3D getPositionV3D() {
-	if(this instanceof RelevantEverywhere)
-	    return World.VISIBLE_EVERYWHERE;
-	return new Vector3D(getPosition());
     }
 
     /*public void checkPositionSanity() {

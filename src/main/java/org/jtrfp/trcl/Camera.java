@@ -15,7 +15,6 @@ package org.jtrfp.trcl;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.apache.commons.collections4.Predicate;
@@ -33,6 +32,7 @@ import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
+import org.jtrfp.trcl.coll.ThreadEnforcementCollection;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
@@ -95,14 +95,14 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     Camera(TR tr) {
 	super(tr);
 	this.gpu = tr!=null?tr.gpu.get():null;
-	
-	try{World.relevanceExecutor.submit(new Runnable(){
+	try{final Thread rt = World.relevanceThread.get();
+	    World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		visibilityFilter.add(new VisibilityPredicate());
 		relevancePairs.addTarget(pairStripper, true);
 		relevanceCollections.addTarget(
-			new CollectionActionUnpacker<Positionable>(flatRelevanceCollection), true);
+			new ThreadEnforcementCollection(new CollectionActionUnpacker<Positionable>(flatRelevanceCollection),rt), true);
 	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
 	
 	addBehavior(new MatchPosition().setEnable(true));
@@ -148,13 +148,14 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    if(propertyName==WorldObject.POSITION){
 		//if(getRootGrid()==null)
 		//    return;
-		final Vector3D newValue = ((Vector3D)evt.getNewValue());
+		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(
-			Math.rint(newValue.getX()/granularity),
-			Math.rint(newValue.getY()/granularity),
-			Math.rint(newValue.getZ()/granularity));
+			Math.rint(newValue[0]/granularity),
+			Math.rint(newValue[1]/granularity),
+			Math.rint(newValue[2]/granularity));
 		final Vector3D oldCenterCube = centerCube;
+		//centerCube = newCenterCube;
 		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)
 	}//end if propertyChange()
@@ -167,11 +168,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    final ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>> oldPredicates 
-		     = new ArrayList<Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>>(visibilityFilter);
-		    System.out.println("CenterCubeHandler updating visibility filter...");
-		    //visibilityFilter.add(new VisibilityPredicate());
-		    //visibilityFilter.removeAll(oldPredicates);
 		    centerCube=(Vector3D)evt.getNewValue();
 		    visibilityFilter.reEvaluatePredicates();
 		}});

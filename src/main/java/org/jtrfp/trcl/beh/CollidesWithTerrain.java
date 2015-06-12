@@ -15,20 +15,20 @@ package org.jtrfp.trcl.beh;
 import java.awt.Point;
 import java.util.Collection;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.InterpolatingAltitudeMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {
     private boolean 		groundLock 		= false;
-    private Vector3D 		surfaceNormalVar;
+    private double[] 		surfaceNormalVar;
     public static final double 	CEILING_Y_NUDGE 	= -5000;
     private int 		tickCounter 		= 0;
     private boolean 		autoNudge 		= false;
@@ -38,7 +38,10 @@ public class CollidesWithTerrain extends Behavior {
     private boolean		ignoreHeadingForImpact	= true;
     private boolean		ignoreCeiling           = false;
     private static		TerrainChunk		dummyTerrainChunk;
-
+    // WORK VARS
+    private final double[]      groundNormal            = new double[3];
+    private final double[]      downhillDirectionXZ     = new double[3];
+    private final double[]      ceilingNormal           = new double[3];
     @Override
     public void _tick(long tickTimeMillis) {
 	if (tickCounter++ % 2 == 0 && !recentlyCollided)
@@ -66,15 +69,17 @@ public class CollidesWithTerrain extends Behavior {
 		(thisPos[0] / TR.mapSquareSize),
 		(thisPos[2] / TR.mapSquareSize)))
 		* (world.sizeY / 2) + CEILING_Y_NUDGE;
-	final Vector3D groundNormal = (aMap.normalAt(
-		(thisPos[0] / TR.mapSquareSize),
-		(thisPos[2] / TR.mapSquareSize)));
-	Vector3D downhillDirectionXZ = new Vector3D(groundNormal.getX(), 0,
-		groundNormal.getZ());
-	if (downhillDirectionXZ.getNorm() != 0)
-	    downhillDirectionXZ = downhillDirectionXZ.normalize();
+	
+	aMap.normalAt(thisPos[0], thisPos[1], groundNormal);
+	downhillDirectionXZ[0] = groundNormal[0];
+	downhillDirectionXZ[1] = 0;
+	downhillDirectionXZ[2] = groundNormal[2];
+	
+	if (Vect3D.norm(downhillDirectionXZ) != 0)
+	    Vect3D.normalize(downhillDirectionXZ, downhillDirectionXZ);
 	else
-	    downhillDirectionXZ = Vector3D.PLUS_J;
+	    {downhillDirectionXZ[0]=0;downhillDirectionXZ[1]=1;downhillDirectionXZ[2]=0;}
+	
 	final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
 	if(overworldSystem==null)return;
 	final boolean terrainMirror = overworldSystem.isChamberMode();
@@ -82,10 +87,14 @@ public class CollidesWithTerrain extends Behavior {
 	boolean groundImpact = thisY < (groundHeight + (autoNudge ? nudgePadding
 		: 0));
 	final boolean ceilingImpact = (thisY > ceilingHeight && terrainMirror && !ignoreCeiling);
-	final Vector3D ceilingNormal = new Vector3D(groundNormal.getX(),
-		-groundNormal.getY(), groundNormal.getZ());
-	Vector3D surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
-	final double dot = surfaceNormal.dotProduct(getParent().getHeading());
+	
+	ceilingNormal[0] = groundNormal[0];
+	ceilingNormal[1] = -groundNormal[1];
+	ceilingNormal[2] = groundNormal[2];
+	
+	double [] surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
+	final double dot = Vect3D.dot3(surfaceNormal,getParent().getHeading().toArray());
+	//final double dot = surfaceNormal.dotProduct(getParent().getHeading());
 	if (terrainMirror && groundHeightNorm > .97) {
 	    groundImpact = true;
 	    surfaceNormal = downhillDirectionXZ;
@@ -126,7 +135,7 @@ public class CollidesWithTerrain extends Behavior {
     private final Submitter<SurfaceImpactListener> sub = new Submitter<SurfaceImpactListener>() {
 	@Override
 	public void submit(SurfaceImpactListener item) {
-	    item.collidedWithSurface(getDummyTerrainChunk(getParent().getTr()), surfaceNormalVar.toArray());
+	    item.collidedWithSurface(getDummyTerrainChunk(getParent().getTr()), surfaceNormalVar);
 	}
 
 	@Override

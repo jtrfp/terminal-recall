@@ -39,7 +39,7 @@ public class CameraIT {
 	zeroPositionables = new Positionable[2];
 	for(int i=0; i<2; i++){
 	    Positionable pos = mock(Positionable.class);
-	    when(pos.getPositionV3D()).thenReturn(new Vector3D(0,0,0));
+	    when(pos.getPosition()).thenReturn(new double[]{0,0,0});
 	    zeroPositionables[i]=pos;
 	    }
     }
@@ -99,7 +99,7 @@ public class CameraIT {
 	Positionable[] vePositionables = new Positionable[2];
 	for(int i=0; i<2; i++){
 	    Positionable pos=mock(Positionable.class);
-	    when(pos.getPositionV3D()).thenReturn(World.VISIBLE_EVERYWHERE);
+	    when(pos.getPosition()).thenReturn(new double[]{Double.NaN,Double.NaN,Double.NaN});
 	    vePositionables[i]=pos;
 	    }
 	spg.add(vePositionables[0]);spg.add(vePositionables[1]);

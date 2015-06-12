@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.beans.PropertyChangeEvent;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +32,7 @@ import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.obj.Positionable;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
 
 import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.Pair;
@@ -45,14 +47,17 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
-	private final com.ochafik.util.listenable.Adapter<Vector3D,Vector3D>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<Vector3D,Vector3D>(){
+	private final com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>(){
 	    @Override
-	    public Vector3D adapt(Vector3D value) {
+	    public Vector3D adapt(PropertyChangeEvent evt) {
 		final int granularity = World.CUBE_GRANULARITY;
+		if(evt.getSource() instanceof RelevantEverywhere)
+		    return World.VISIBLE_EVERYWHERE;
+		final double[] newPos = (double[])evt.getNewValue();
 		final Vector3D newCenterCube = new Vector3D(
-			Math.rint(value.getX()/granularity),
-			Math.rint(value.getY()/granularity),
-			Math.rint(value.getZ()/granularity));
+			Math.rint(newPos[0]/granularity),
+			Math.rint(newPos[1]/granularity),
+			Math.rint(newPos[2]/granularity));
 		return newCenterCube;
 	    }
 	};
@@ -61,8 +66,8 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
 		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);
 	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectValve.input);
-	private final PropertyBasedTagger<Positionable, Vector3D, Vector3D> localTagger
-	 = new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITIONV3D,World.relevanceExecutor);
+	private final Collection<Positionable> localTagger
+	 = new CollectionThreadDecoupler<Positionable>(new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITION,World.relevanceExecutor),World.relevanceExecutor);
 	
 	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;

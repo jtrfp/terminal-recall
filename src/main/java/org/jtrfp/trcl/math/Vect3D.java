@@ -192,5 +192,9 @@ public final class Vect3D {
 	checkValues(dest);
 	return dest;
     }//end scalarMultiply()
+
+    public static double dot3(double[] l, double[] r) {
+	return l[0]*r[0]+l[1]*r[1]+l[2]*r[2];
+    }
     
 }//end Vect3D

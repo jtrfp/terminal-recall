@@ -835,8 +835,12 @@ public class Mission {
 	    final Camera cam = tr.mainRenderer.get().getCamera();
 	    if(satelliteView){//Switched on
 		tr.getThreadManager().setPaused(true);
-		game.getNavSystem().deactivate();
-		game.getHUDSystem().deactivate();
+		World.relevanceExecutor.submit(new Runnable(){
+		    @Override
+		    public void run() {
+			game.getNavSystem().deactivate();
+			game.getHUDSystem().deactivate();
+		    }});
 		cam.setFogEnabled(false);
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
 		cam.probeForBehavior(MatchDirection.class).setEnable(false);

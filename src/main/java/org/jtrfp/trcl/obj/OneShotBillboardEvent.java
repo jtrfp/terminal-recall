@@ -45,6 +45,7 @@ public abstract class OneShotBillboardEvent extends BillboardSprite {
     public int getMillisPerFrame(){return millisPerFrame;}
     
     public void reset() {
+	destroy();
 	eventBehavior.reset();
 	setVisible(true);
 	setActive(true);

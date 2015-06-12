@@ -55,7 +55,7 @@ public class SpacePartitioningGridRootTest {
 	for(int index=0; index<5; index++){
 	    Positionable pos = mock(Positionable.class);
 	    mockedPositionables[index] = pos;
-	    when(pos.getPositionV3D()).thenReturn(new Vector3D(1000*index,1000*index,1000*index));
+	    when(pos.getPosition()).thenReturn(new double[]{1000*index,1000*index,1000*index});
 	}//end for(positionables)
 	subject.getPackedObjectsDispatcher().addTarget(mockedTarget, true);
 	verify(mockedTarget,never()).add   (any(Pair.class));

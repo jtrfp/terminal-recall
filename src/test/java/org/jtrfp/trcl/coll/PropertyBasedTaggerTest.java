@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -32,10 +33,10 @@ import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
 
 public class PropertyBasedTaggerTest {
-    private final Adapter<String,Integer> subjectAdapter = new Adapter<String,Integer>(){
+    private final Adapter<PropertyChangeEvent,Integer> subjectAdapter = new Adapter<PropertyChangeEvent,Integer>(){
 	@Override
-	public Integer adapt(String value) {
-	    return value.length();
+	public Integer adapt(PropertyChangeEvent value) {
+	    return ((String)value.getNewValue()).length();
 	}};
     private ArrayList<Pair<Integer,TaggingElement>>           delegate;
     private PropertyBasedTagger<TaggingElement,Integer,String>subject;

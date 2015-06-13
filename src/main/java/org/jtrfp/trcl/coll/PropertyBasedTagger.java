@@ -45,8 +45,6 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     
     @Override
     public boolean add(final E e) {
-	if(e==null)
-	    throw new NullPointerException("Passed element intolerably null.");
 	Pair<KEY,E>pair= pairs.get(e);
 	if(pair!=null)
 	    return false;
@@ -61,8 +59,12 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 		final Runnable r = new Runnable(){
 		    @Override
 		    public void run() {
-			final KEY newKey     = propertyAdapter.adapt(evt);
 			final Pair<KEY,E>pair= pairs.get(e);
+			//If the listener thread has populated relevance Runnables before the pair is removed
+			//and they aren't consumed before 
+			if(pair==null)
+			    return;//This listener is likely no longer valid.
+			final KEY newKey     = propertyAdapter.adapt(evt);
 			assert pair!=null:"pair unexpectedly null.";
 			final KEY oldKey     = pair.getKey();
 			if(!newKey.equals(oldKey)){
@@ -83,10 +85,10 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 		    try{executor.submit(r);}catch(Exception e){throw new RuntimeException(e);}
 	    }};
 	listeners.put(e,pcl);
+	pairs.put(e,pair);
 	e.addPropertyChangeListener(propertyName, pcl);
 	assert pair!=null:"pair unexpectedly null.";
 	delegate.add(pair);
-	pairs.put(e,pair);
 	return true;
     }//end add(...)
 
@@ -154,11 +156,12 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     public boolean remove(Object o) {
 	final PropertyChangeListener pcl = listeners.remove(o);
 	if(pcl!=null){
-	    final Pair<KEY,E> pair = pairs.remove(o);
+	    final Pair<KEY,E> pair = pairs.get(o);
 	    pair.getValue().removePropertyChangeListener(pcl);
+	    pairs.remove(o);
 	    delegate.remove(pair);
 	    return true;
-	}return false;
+	}else{System.err.println("Warning: PropertyBasedTagger failed to find item "+o);return false;}
     }//end remove(...)
 
     @Override

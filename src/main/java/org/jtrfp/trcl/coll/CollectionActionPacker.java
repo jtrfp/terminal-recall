@@ -85,7 +85,8 @@ public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>>, D
 	final Pair<KEY,CollectionActionDispatcher<E>> target = map.get(key);
 	final CollectionActionDispatcher<E> targetCollection = target.getValue();
 	final E value = element.getValue();
-	assert targetCollection.remove(value);
+	final boolean removeResult = targetCollection.remove(value);
+	assert removeResult;
 	if(targetCollection.isEmpty()){
 	    map.remove(key);
 	    final boolean result = delegate.remove(target); 

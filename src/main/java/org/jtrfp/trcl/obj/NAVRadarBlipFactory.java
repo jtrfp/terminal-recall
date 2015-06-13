@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.io.InputStream;
+
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
@@ -33,12 +35,14 @@ public class NAVRadarBlipFactory {
 	this.tr=tr;
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
+	    InputStream is = null;
 	    try{
-	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
+	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		blipPool[ti][pi]=new Blip(tex,g);
     	     }//end for(pi)
 	    }catch(Exception e){e.printStackTrace();}
+	    finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
 	}//end for(ti)
     }//end constructor
     

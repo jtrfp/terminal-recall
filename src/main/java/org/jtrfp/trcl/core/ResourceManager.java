@@ -659,13 +659,13 @@ public class ResourceManager{
 		}
 
     public Font getFont(String zipName, String fontFileName) {
-	try {
 	    zipName = "/fonts/" + zipName;
 	    if (zipName.toUpperCase().endsWith(".ZIP")) {// Search the zip
+		InputStream is = ResourceManager.class.getResourceAsStream(zipName); 
 		ZipInputStream zip = new ZipInputStream(
-			ResourceManager.class.getResourceAsStream(zipName));
+			is);
 		ZipEntry entry;
-
+		try{
 		while ((entry = zip.getNextEntry()) != null) {
 		    System.out.println("ZIP ENTRY: " + entry.getName());
 		    if (entry.getName().toUpperCase()
@@ -676,12 +676,13 @@ public class ResourceManager{
 			return font;
 		    }
 		}// end while(elements)
+		}catch(Exception e){e.printStackTrace();}
+		try{zip.closeEntry();}catch(Exception e){e.printStackTrace();}
+		try{zip.close();}     catch(Exception e){e.printStackTrace();}
+		try{is.close();}      catch(Exception e){e.printStackTrace();}
 	    }// end if(zip)
 	    else {
 	    }// TODO: Handle non-zipped fonts?
-	} catch (Exception e) {
-	    tr.showStopper(e);
-	}
 	return null;
     }// end getFont(...)
 
@@ -806,8 +807,10 @@ public class ResourceManager{
 	public TextureDescription getTestTexture(){
 	    if(testTexture!=null)
 		return testTexture;
-	    return testTexture = tr.gpu.get().textureManager.get().newTexture(
-		    Texture.RGBA8FromPNG(this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);
+	    InputStream is = null;
+	    try{return testTexture = tr.gpu.get().textureManager.get().newTexture(
+		    Texture.RGBA8FromPNG(is = this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);}
+	    finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	}//end getTestTexture()
 	
 	public LTEFile getLTE(String resourceNameWithDirectoryPrefix) throws IOException, IllegalAccessException, UnrecognizedFormatException, FileLoadException{

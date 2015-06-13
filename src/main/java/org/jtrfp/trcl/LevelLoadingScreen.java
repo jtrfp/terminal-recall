@@ -14,6 +14,7 @@
 package org.jtrfp.trcl;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -31,11 +32,13 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
 
     public LevelLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) throws IOException {
 	super(parent);
-	add(loadingMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
+	InputStream is = null;
+	try{add(loadingMeterBar = new MeterBar(tr, 
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = Texture.class
 			.getResourceAsStream("/BlueWhiteGradient.png")),null,
 			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,
-		true));
+		true));}
+	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	loadingMeterBar.setPosition(LOADING_POS);
 	loadingMeter = loadingMeterBar.getController();
     }//end constructor

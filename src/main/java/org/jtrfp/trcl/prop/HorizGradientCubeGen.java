@@ -16,6 +16,7 @@
 package org.jtrfp.trcl.prop;
 
 import java.awt.Color;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -41,7 +42,9 @@ public class HorizGradientCubeGen implements SkyCubeGen {
 	if(resourceMap.get(resourceName)!=null)
 	 bb = resourceMap.get(resourceName).get();
 	if(bb==null){
-	    bb = Texture.RGBA8FromPNG(Class.class.getResourceAsStream(resourceName));
+	    InputStream is = null;
+	    try    {bb = Texture.RGBA8FromPNG(is = Class.class.getResourceAsStream(resourceName));}
+	    finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
 	    if(bb==null) throw new NullPointerException("Failed to get resource "+resourceName);
 	    resourceMap.put(resourceName, new WeakReference<ByteBuffer>(bb));
 	}//end if(null)

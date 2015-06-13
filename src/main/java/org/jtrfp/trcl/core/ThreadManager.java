@@ -31,6 +31,7 @@ import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.obj.CollisionManager;
@@ -149,7 +150,7 @@ public final class ThreadManager implements GLExecutor{
 		if(!multiplePlayer&&!paused[0])
 		    wo.tick(tickTimeInMillis);
 	 }// end for(worldObjects)
-	}//end sync(gameStateLock)
+	}//end sync(gameStateLock)//relevance changes outside of this cause errors!
 	if(game.getPlayer()!=null && !paused[0])
 	    tr.getCollisionManager().performCollisionTests();
 	}// end sync(paused)

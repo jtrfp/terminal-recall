@@ -15,6 +15,7 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
@@ -68,11 +69,14 @@ public class TextureManager {
     
     public TextureDescription getDefaultTriPipeTexture(){
 	if(defaultTriPipeTexture==null){
+	    InputStream is=null;
 	 try{
 	  defaultTriPipeTexture = 
-	    		new Texture(gpu,threadManager,ImageIO.read(LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
+	    		new Texture(gpu,threadManager,ImageIO.read(is = LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
 	    			"Default TriPipe Texture (grayNoise)",true);}
 	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
+	finally{if(is!=null)
+	    try{is.close();}catch(Exception e){e.printStackTrace();}}
 	}
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
@@ -80,12 +84,14 @@ public class TextureManager {
     public synchronized TextureDescription getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
 	Texture t;
+	InputStream is=null;
 	try{
 	 t = new Texture(gpu,threadManager,
-		ImageIO.read(Texture.class
+		ImageIO.read(is = Texture.class
 			.getResourceAsStream("/fallbackTexture.png")),null,
 		"Fallback",true);}
 	catch(IOException e){throw new RuntimeException("Failure to load fallback texture. Is everything right with the resources directory?",e);}
+	finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
 	fallbackTexture = t;
 	return fallbackTexture;
     }//end getFallbackTexture()

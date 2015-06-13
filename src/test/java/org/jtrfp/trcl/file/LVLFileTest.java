@@ -12,11 +12,12 @@ public class LVLFileTest extends TestCase {
     protected void setUp() throws Exception {
 	super.setUp();
 	//Load the test file
-	final InputStream is = LVLFileTest.class.getResourceAsStream("/test.LVL");
-	assertNotNull(is);
-	subject = new LVLFile(is);
-	assertNotNull(subject);
-	is.close();
+	InputStream is = null;
+	try{is = LVLFileTest.class.getResourceAsStream("/test.LVL");
+	 assertNotNull(is);
+	 subject = new LVLFile(is);
+	 assertNotNull(subject);}
+	finally{if(is!=null)is.close();}
     }//end setUp()
     
     protected void tearDown() throws Exception {

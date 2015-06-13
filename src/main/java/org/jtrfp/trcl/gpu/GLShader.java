@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
@@ -40,7 +41,9 @@ public abstract class GLShader {
 
     public GLShader setSourceFromResource(String resourceURI)
 	    throws IOException {
-	setSource(IOUtils.toString(getClass().getResourceAsStream(resourceURI)));
+	InputStream is = null;
+	try    {setSource(IOUtils.toString(is = getClass().getResourceAsStream(resourceURI)));}
+	finally{if(is!=null)is.close();}
 	return this;
     }// end setSourceFromResource(...)
 

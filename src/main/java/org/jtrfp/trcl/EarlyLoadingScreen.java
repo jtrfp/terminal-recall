@@ -14,6 +14,7 @@
 package org.jtrfp.trcl;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -31,9 +32,11 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
 
     public EarlyLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) throws IOException {
 	super(parent);
-	startupLogo = new Sprite2D(tr, .000000001, 2, 2, 
-		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
-			.getResourceAsStream("/TrclLogo.png")),null, "logoImage", false), true);
+	InputStream is = null;
+	try{startupLogo = new Sprite2D(tr, .000000001, 2, 2, 
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is=Texture.class
+			.getResourceAsStream("/TrclLogo.png")),null, "logoImage", false), true);}
+	finally{if(is!=null)is.close();}
 	
 	startupText = new CharLineDisplay(tr,this,FONT_SIZE, 32, font);
 	startupText.setCentered(true);

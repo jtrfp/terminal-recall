@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
+import java.io.InputStream;
+
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
@@ -41,17 +43,20 @@ public class EngineTests {
     
     public static void depthQueueTest(TR tr){
 	preClean(tr);
-	final TextureDescription test = tr.gpu.get().textureManager.get().newTexture(
-		    Texture.RGBA8FromPNG(tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
-	final int NUM_LAYERS=8;
-	final double INCREMENT = .1;
-	final double OFF=-.5;
-	for (int i = 0; i < NUM_LAYERS; i++) {
+	InputStream is = null;
+	try{
+	 final TextureDescription test = tr.gpu.get().textureManager.get().newTexture(
+		    Texture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
+	 final int NUM_LAYERS=8;
+	 final double INCREMENT = .1;
+	 final double OFF=-.5;
+	 for (int i = 0; i < NUM_LAYERS; i++) {
 	    WorldObject wo = new Sprite2D(tr, 0, 1, 1, test, true);
 	    wo.setPosition(new double[] { OFF+((double)i)*INCREMENT,OFF+((double)i)*INCREMENT, .01*(double)i });
 	    wo.setActive(true);
 	    wo.setVisible(true);
 	    tr.getDefaultGrid().add(wo);
 	}//end for(numInstances)
+	}finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
     }
 }//end EngineTests

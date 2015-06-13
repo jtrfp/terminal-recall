@@ -13,6 +13,7 @@
 package org.jtrfp.trcl;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -69,21 +70,24 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
 	ammo.setContent("---");
 	ammo.setPosition(.01, BOTTOM_LINE_Y, Z);
-	
+	InputStream is = null;
 	add(crosshairs=new Crosshairs(tr));
-	add(healthMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(Texture.class
+	try{add(healthMeterBar = new MeterBar(tr, 
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = Texture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),null,
 			"HealthBar orangeOrange",false), METER_WIDTH, METER_HEIGHT,
-		false));
+		false));}
+	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	
 	healthMeterBar.setPosition(HEALTH_POS);
 	healthMeter = healthMeterBar.getController();
-	add(throttleMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(Texture.class
+	
+	try{add(throttleMeterBar = new MeterBar(tr, 
+		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(is = Texture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),null,
 			"ThrottleBar blackBlue",false), METER_WIDTH, METER_HEIGHT,
-		false));
+		false));}
+	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	throttleMeterBar.setPosition(THROTTLE_POS);
 	throttleMeter = throttleMeterBar.getController();
 	

@@ -82,7 +82,7 @@ public final class TR implements UncaughtExceptionHandler{
 	private GameShell			gameShell;
 	private RenderableSpacePartitioningGrid	defaultGrid;
 	
-	public TRConfiguration 		        config = TRConfiguration.getConfig();
+	public final TRConfiguration 		config;
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -114,7 +114,8 @@ public final class TR implements UncaughtExceptionHandler{
 	    return v;
 	}
 	
-	public TR(){
+	public TR(TRConfiguration config){
+	    this.config=config;
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
@@ -159,10 +160,9 @@ public final class TR implements UncaughtExceptionHandler{
 		getThreadManager().addRepeatingGLTask(renderer.render);
 		
 		
-		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
-			try{config.saveConfig();
+			try{TR.this.config.saveConfig();
 		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"
 				    + e.getLocalizedMessage()+"\n");

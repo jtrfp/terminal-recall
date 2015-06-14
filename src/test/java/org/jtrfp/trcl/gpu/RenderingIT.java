@@ -13,8 +13,9 @@
 
 package org.jtrfp.trcl.gpu;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.awt.Color;
 import java.io.File;
@@ -23,16 +24,14 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.Random;
 
 import javax.media.opengl.GL3;
-
-import junit.framework.Assert;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -54,7 +53,7 @@ public class RenderingIT{
     
     @Before
     public void setUp() throws Exception{
-	tr = new TR();
+	tr = new TR(new TRConfiguration());
 	tr.getDefaultGrid().removeAll();
 	tr.getThreadManager().setPaused(false);
 	final Renderer renderer = tr.mainRenderer.get();

@@ -26,6 +26,7 @@ import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
@@ -40,7 +41,7 @@ public final class MemoryManager {
     private final ByteBuffer [] 		physicalMemory 	= new ByteBuffer[1];
     private final ReallocatableGLTextureBuffer 	glPhysicalMemory;
     private final GPU				gpu;
-    private final ThreadManager			threadManager;
+    //private final ThreadManager			threadManager;
     private final BlockingQueue<WeakReference<PagedByteBuffer>>		
     						newPagedByteBuffers             = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
     						newPagedByteBuffersOverflow     = new LinkedBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
@@ -48,16 +49,17 @@ public final class MemoryManager {
     						deletedPagedByteBuffersOverflow = new LinkedBlockingQueue<WeakReference<PagedByteBuffer>>(1024);
     private final ArrayList<WeakReference<PagedByteBuffer>>	
     						pagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
+    private final GLExecutor                    glExecutor;
     /**
      * 16MB of zeroes. Don't forget to sync to avoid co-modification of the position.
      */
     public static final ByteBuffer		ZEROES = ByteBuffer.allocate(1024*1024*16);
     
-    public MemoryManager(GPU gpu, final Reporter reporter, final ThreadManager threadManager){
+    public MemoryManager(GPU gpu, final Reporter reporter, final GLExecutor glExecutor){
 	this.gpu=gpu;
-	this.threadManager = threadManager;
+	this.glExecutor=glExecutor;
 	try{
-	glPhysicalMemory = threadManager.submitToGL(new Callable<ReallocatableGLTextureBuffer>(){
+	glPhysicalMemory = glExecutor.submitToGL(new Callable<ReallocatableGLTextureBuffer>(){
 	    @Override
 	    public ReallocatableGLTextureBuffer call() throws Exception {
 		ReallocatableGLTextureBuffer tb;
@@ -73,7 +75,7 @@ public final class MemoryManager {
 	    @Override
 	    public int grow(final int previousMaxCapacity) {
 		final int newMaxCapacity = previousMaxCapacity!=0?previousMaxCapacity*2:1;
-		final TRFuture<Integer> ft = threadManager.submitToGL(new Callable<Integer>(){
+		final TRFuture<Integer> ft = glExecutor.submitToGL(new Callable<Integer>(){
 		    @Override
 		    public Integer call(){
 			glPhysicalMemory.reallocate(newMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES);
@@ -89,7 +91,7 @@ public final class MemoryManager {
 		final int currentMaxCapacity = pageIndexPool.getMaxCapacity();
 		final int proposedMaxCapacity = currentMaxCapacity/2;//TODO: This adjusts by a single power of 2, take arbitrary power of 2 instead
 		if(proposedMaxCapacity >= minDesiredMaxCapacity){
-		    final TRFuture<Integer> ft = threadManager.submitToGL(new Callable<Integer>(){
+		    final TRFuture<Integer> ft = glExecutor.submitToGL(new Callable<Integer>(){
 			@Override
 			public Integer call(){
 			    glPhysicalMemory.reallocate(proposedMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES);
@@ -165,7 +167,7 @@ public final class MemoryManager {
     }
 
     public void dumpAllGPUMemTo(final ByteBuffer dest) throws IOException{
-	threadManager.submitToGL(new Callable<Void>(){
+	glExecutor.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		final GL3 gl = gpu.getGl();

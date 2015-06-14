@@ -141,9 +141,9 @@ public class RenderList {
 	for (int i = 0; i < size-1; i++) {
 	    hostRenderListPageTable[i+1] = objectListWindow.logicalPage2PhysicalPage(i);
 	}// end for(hostRenderListPageTable.length)
-	final GLProgram objectProgram = rFactory.getObjectProgram();
-	objectProgram.use();
-	objectProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
+	rFactory.getObjectProcessingStage().sendRenderListPageTable(hostRenderListPageTable);
+	//final GLProgram objectProgram = rFactory.getObjectProgram();
+	
 	final GLProgram depthQueueProgram = rFactory.getDepthQueueProgram();
 	depthQueueProgram.use();
 	final GLProgram primaryProgram = rFactory.getOpaqueProgram();
@@ -197,6 +197,10 @@ public class RenderList {
     
     private boolean sentPageTable=false;
     
+    private void saveWindowViewportState(GL3 gl){
+	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
+    }
+    
     private void revertViewportToWindow(GL3 gl){
 	gl.glViewport(
 	 previousViewport.get(0), 
@@ -210,37 +214,12 @@ public class RenderList {
 	final int opaqueRenderListLogicalVec4Offset = ((objectListWindow.getObjectSizeInBytes()*renderListIdx)/16);
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
 	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
-	
+	saveWindowViewportState(gl);
 	// OBJECT STAGE
-	final GLProgram objectProgram = rFactory.getObjectProgram();
-	objectProgram.use();
-	objectProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
 	
-	gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
-	objectProgram.getUniform("cameraMatrix").set4x4Matrix(renderer.getCameraMatrixAsFlatArray(), true);
-	rFactory.getObjectFrameBuffer().bindToDraw();
-	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
-	gl.glViewport(0, 0, 1024, 128);
-	gpu.memoryManager.get().bindToUniform(0, objectProgram,
-		objectProgram.getUniform("rootBuffer"));
-	gl.glDepthMask(false);
-	gl.glDisable(GL3.GL_BLEND);
-	gl.glDisable(GL3.GL_LINE_SMOOTH);
-	gl.glDisable(GL3.GL_DEPTH_TEST);
-	gl.glDisable(GL3.GL_CULL_FACE);
-	gl.glLineWidth(1);
-	{//Start variable scope
-	 int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
-    	 int numRows = (int)Math.ceil(remainingBlocks/256.);
-    	 for(int i=0; i<numRows; i++){
-    	     gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
-    	     remainingBlocks -= 256;
-    	 }
-    	}//end variable scope
-	gpu.defaultFrameBuffers();
-	gpu.defaultProgram();
-	gpu.defaultTIU();
-	gpu.defaultTexture();
+	rFactory.getObjectProcessingStage().process(gl,renderer.getCameraMatrixAsFlatArray(),
+		opaqueRenderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numUnoccludedTBlocks);
+	
 	///// VERTEX STAGE
 	final int relevantVertexBufferWidth = ((int)(RendererFactory.VERTEX_BUFFER_WIDTH/3))*3;
 	final GLProgram vertexProgram = rFactory.getVertexProgram();
@@ -249,8 +228,8 @@ public class RenderList {
 	vertexProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
 	gpu.memoryManager.get().bindToUniform(0, vertexProgram,
 		vertexProgram.getUniform("rootBuffer"));
-	rFactory.getCamMatrixTexture().bindToTextureUnit(1, gl);
-	rFactory.getNoCamMatrixTexture().bindToTextureUnit(2, gl);
+	rFactory.getObjectProcessingStage().getCamMatrixTexture().bindToTextureUnit(1, gl);
+	rFactory.getObjectProcessingStage().getNoCamMatrixTexture().bindToTextureUnit(2, gl);
 	gl.glDepthMask(false);
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDisable(GL3.GL_DEPTH_TEST);

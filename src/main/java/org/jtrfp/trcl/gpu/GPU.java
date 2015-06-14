@@ -57,10 +57,10 @@ public class GPU implements GLExecutor{
 	public final TRFutureTask<ObjectListWindow> 	objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
 	
-	public GPU(final Reporter reporter, ExecutorService executorService, //TODO: Remove dependency on collisionManager
+	public GPU(final Reporter reporter, ExecutorService executorService,
 		GLExecutor glExecutor, final ThreadManager threadManager, 
 		final UncaughtExceptionHandler exceptionHandler, final GLCanvas glCanvas,
-		final CollisionManager collisionManager, final World world){
+		final World world) {
 	    if(executorService==null)
 		executorService = Executors.newCachedThreadPool();
 	    this.glExecutor=glExecutor;
@@ -104,7 +104,7 @@ public class GPU implements GLExecutor{
 	    rendererFactory = new TRFutureTask<RendererFactory>(new Callable<RendererFactory>(){
 		@Override
 		public RendererFactory call() throws Exception {
-		    return new RendererFactory(GPU.this, threadManager, glCanvas, reporter, world, collisionManager,objectListWindow.get());
+		    return new RendererFactory(GPU.this, threadManager, glCanvas, reporter, world, objectListWindow.get());
 		}
 	    });executorService.submit(rendererFactory);
 	}//end constructor
@@ -143,7 +143,7 @@ public class GPU implements GLExecutor{
 			//In case GL is not ready, wait and try again.
 			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
 				{gl=gl1.getGL3();
-				canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
+				//canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
 				break;
 				} Thread.sleep(2000);}}
 			catch(InterruptedException e){e.printStackTrace();}

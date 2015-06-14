@@ -32,6 +32,7 @@ import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;
+import org.jtrfp.trcl.gpu.ObjectProcessingStage;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.obj.CollisionManager;
 
@@ -47,13 +48,12 @@ public class RendererFactory {
     private final GPU gpu;
     private final World world;
     private final Reporter reporter;
-    private final CollisionManager              collisionManager;
+    //private final CollisionManager              collisionManager;
     private final	boolean			backfaceCulling;
     private 	 	GLUniform	    	sunVector;
     private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
     /*					*/	depthQueueTexture,
-    /*					*/	camMatrixTexture,noCamMatrixTexture,
     /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
     /*					*/	vertexNormXYTexture,vertexNormZTexture,
     /*					*/	primitiveUVZWTexture,primitiveNormTexture,
@@ -66,7 +66,7 @@ public class RendererFactory {
     /*					*/	primitiveFrameBuffer;
     private final	GLFrameBuffer[]		portalFrameBuffers = new GLFrameBuffer[NUM_PORTALS];
     
-    private            GLProgram 		objectProgram,
+    private            GLProgram 		
     /*					*/	opaqueProgram, 
     /*					*/	deferredProgram, 
     /*					*/	depthQueueProgram, 
@@ -74,16 +74,18 @@ public class RendererFactory {
     /*                                  */      primitiveProgram,
     /*					*/	skyCubeProgram;
     private final ThreadManager			threadManager;
+    private  ObjectProcessingStage              objectProcessingStage;
     
     public RendererFactory(final GPU gpu, final ThreadManager threadManager, 
 	    final GLCanvas canvas, Reporter reporter, final World world, 
-	    CollisionManager collisionManager, ObjectListWindow objectListWindow){
+	    /*CollisionManager collisionManager, */ObjectListWindow objectListWindow){
 	this.gpu=gpu;
 	this.threadManager = threadManager;
 	this.reporter=reporter;
 	this.world=world;
-	this.collisionManager=collisionManager;
+	//this.collisionManager=collisionManager;
 	final GL3 gl = gpu.getGl();
+	
 	threadManager.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -95,14 +97,17 @@ public class RendererFactory {
 		gl.glDepthRange(0, 1);
 		gl.glEnable(GL3.GL_DEPTH_CLAMP);
 		
+		final ValidationHandler vh = new RFValidationHandler();
+		objectProcessingStage      = new ObjectProcessingStage(gpu,vh);
+		
 		// VERTEX SHADERS
-		GLVertexShader		objectVertexShader		= gpu.newVertexShader(),
+		GLVertexShader		
 					traditionalVertexShader		= gpu.newVertexShader(),
 					fullScreenQuadVertexShader	= gpu.newVertexShader(),
 					primitiveVertexShader		= gpu.newVertexShader(),
 					skyCubeVertexShader		= gpu.newVertexShader(),
 					fullScreenTriangleShader	= gpu.newVertexShader();
-		GLFragmentShader	objectFragShader		= gpu.newFragmentShader(),
+		GLFragmentShader	
 					opaqueFragShader		= gpu.newFragmentShader(),
 					deferredFragShader		= gpu.newFragmentShader(),
 					depthQueueFragShader		= gpu.newFragmentShader(),
@@ -110,8 +115,6 @@ public class RendererFactory {
 					primitiveFragShader		= gpu.newFragmentShader(),
 					skyCubeFragShader		= gpu.newFragmentShader();
 		fullScreenTriangleShader  .setSourceFromResource("/shader/fullScreenTriangleVertexShader.glsl");
-		objectVertexShader	  .setSourceFromResource("/shader/objectVertexShader.glsl");
-		objectFragShader	  .setSourceFromResource("/shader/objectFragShader.glsl");
 		traditionalVertexShader	  .setSourceFromResource("/shader/traditionalVertexShader.glsl");
 		fullScreenQuadVertexShader.setSourceFromResource("/shader/fullScreenQuadVertexShader.glsl");
 		opaqueFragShader	  .setSourceFromResource("/shader/opaqueFragShader.glsl");
@@ -123,8 +126,6 @@ public class RendererFactory {
 		skyCubeFragShader	  .setSourceFromResource("/shader/skyCubeFragShader.glsl");
 		skyCubeVertexShader	  .setSourceFromResource("/shader/skyCubeVertexShader.glsl");
 		
-		final ValidationHandler vh = new RFValidationHandler();
-		objectProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(objectFragShader)	  .attachShader(objectVertexShader).link();
 		vertexProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(fullScreenTriangleShader)  .attachShader(vertexFragShader).link();
 		opaqueProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
 		deferredProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(skyCubeVertexShader)  	  .attachShader(deferredFragShader).link();
@@ -148,11 +149,6 @@ public class RendererFactory {
 		opaqueProgram.getUniform("wBuffer").set((int)5);
 		/// 6 UNUSED
 		/// 7 UNUSED
-		
-		objectProgram.use();
-		objectProgram.getUniform("rootBuffer").set((int)0);
-		objectProgram.getUniform("rowTweak").setui((int)
-			(gpu.getGPUVendor()==GPUVendor.AMD?1:0));//AMD needs a tweak. Not yet sure why.
 		
 		primitiveProgram.use();
 		primitiveProgram.getUniform("xyVBuffer").set((int)0);
@@ -189,36 +185,6 @@ public class RendererFactory {
 		gpu.defaultProgram();
 		gpu.defaultTIU();
 		
-		/////// OBJECT
-		camMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RGBA32F, 1024, 128, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("camMatrixTexture");
-		noCamMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RGBA32F, 1024, 128, 
-				GL3.GL_RGBA, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("noCamMatrixTexture");
-		objectFrameBuffer = gpu
-			.newFrameBuffer()
-			.bindToDraw()
-			.attachDrawTexture(camMatrixTexture, GL3.GL_COLOR_ATTACHMENT0)
-			.attachDrawTexture(noCamMatrixTexture, GL3.GL_COLOR_ATTACHMENT1)
-			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
-		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
-		    throw new RuntimeException("Object frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
-		}
 		/////// VERTEX
 		vertexXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
@@ -485,7 +451,7 @@ public class RendererFactory {
     }//end allocatePortals()
     
     public Renderer newRenderer(){
-	return new Renderer(this,world,threadManager,reporter,collisionManager,gpu.objectListWindow.get());
+	return new Renderer(this,world,threadManager,reporter,gpu.objectListWindow.get());
     }
 
     /**
@@ -502,14 +468,7 @@ public class RendererFactory {
     public GLTexture getDepthQueueTexture() {
         return depthQueueTexture;
     }
-
-    /**
-     * @return the objectTexture
-     */
-    public GLTexture getCamMatrixTexture() {
-        return camMatrixTexture;
-    }
-
+    
     /**
      * @return the depthQueueFrameBuffer
      */
@@ -571,10 +530,6 @@ public class RendererFactory {
     public GLTexture getVertexNormZTexture() {
         return vertexNormZTexture;
     }
-    
-    public GLTexture getNoCamMatrixTexture() {
-        return noCamMatrixTexture;
-    }
 
     /**
      * @return the primitiveUVZWTexture
@@ -623,13 +578,6 @@ public class RendererFactory {
     }
 
     /**
-     * @return the objectProgram
-     */
-    public GLProgram getObjectProgram() {
-        return objectProgram;
-    }
-
-    /**
      * @return the depthQueueProgram
      */
     public GLProgram getDepthQueueProgram() {
@@ -670,5 +618,9 @@ public class RendererFactory {
      */
     public GLTexture getPortalTexture() {
         return portalTexture;
+    }
+
+    public ObjectProcessingStage getObjectProcessingStage() {
+	return objectProcessingStage;
     }
 }//end RendererFactory

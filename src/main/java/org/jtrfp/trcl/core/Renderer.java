@@ -57,19 +57,19 @@ public final class Renderer {
     private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
-    private final	CollisionManager        collisionManager;
+    //private final	CollisionManager        collisionManager;
     private		Camera			camera = null;
     private final	PredicatedCollection<Positionable> relevantPositioned;
     private final	Reporter		reporter;
     private final	ThreadManager		threadManager;
     public static final boolean NEW_MODE = true;
     
-    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter, CollisionManager collisionManagerFuture, final ObjectListWindow objectListWindow) {
+    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow) {
 	this.factory         = factory;
 	this.gpu             = factory.getGPU();
 	this.reporter        =reporter;
 	this.threadManager   =threadManager;
-	this.collisionManager=collisionManagerFuture;
+	//this.collisionManager=collisionManagerFuture;
 	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
 	camera = world.newCamera();//TODO: Remove after redesign.
 	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
@@ -155,11 +155,11 @@ public final class Renderer {
 	}};
     
     public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
-	if(pr instanceof WorldObject)
-	    try{if(!NEW_MODE)collisionManager.getCurrentlyActiveCollisionList().add((WorldObject)pr);}
-	catch(Exception ex){throw new RuntimeException(ex);}
-	if(!NEW_MODE)
-	 renderList.get().getVisibleWorldObjectList().add(pr);
+	//if(pr instanceof WorldObject)
+	//    try{if(!NEW_MODE)collisionManager.getCurrentlyActiveCollisionList().add((WorldObject)pr);}
+	//catch(Exception ex){throw new RuntimeException(ex);}
+	//if(!NEW_MODE)
+	// renderList.get().getVisibleWorldObjectList().add(pr);
     }//end temporarilyMakeImmediatelyRelevant(...)
     
     public void updateRelevanceList(boolean mandatory) {
@@ -305,8 +305,8 @@ public final class Renderer {
 	    public Void call() throws Exception {
 		synchronized(relevanceUpdateLock){
 		 updateRelevanceList(mandatory);
-		 if(collisionManager!=null)
-		  collisionManager.updateCollisionList();
+		 //if(collisionManager!=null)
+		 // collisionManager.updateCollisionList();
 		 //Nudge of 10ms to compensate for drift of the timer task
 		 nextRelevanceCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
 		 }//end sync(visibilityUpdateLock)
@@ -316,13 +316,6 @@ public final class Renderer {
     
     public void relevanceCalc(){
 	relevanceCalc(false);
-    }
-
-    /**
-     * @return the collisionManager
-     */
-    public CollisionManager getCollisionManager() {
-        return collisionManager;
     }
 
     public RendererFactory getRendererFactory() {

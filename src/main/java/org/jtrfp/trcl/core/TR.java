@@ -64,7 +64,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public final TRFutureTask<SoundSystem>	soundSystem;
 	private Player 				player;
 	public final RootWindow 		rootWindow;
-	private final MenuSystem		menuSystem;
+	private MenuSystem       		menuSystem;
 	private Color [] 			globalPalette, 
 						darkIsClearPalette;
 	private ColorPaletteVectorList		globalPaletteVL,
@@ -78,12 +78,11 @@ public final class TR implements UncaughtExceptionHandler{
 	private Game 				game;
 	private final PropertyChangeSupport	pcSupport;
 	
+	private World 				world;
+	private GameShell			gameShell;
+	private RenderableSpacePartitioningGrid	defaultGrid;
 	
-	private      World 					world;
-	private final GameShell					gameShell;
-	private RenderableSpacePartitioningGrid			defaultGrid;
-	
-	public final TRConfiguration 		config = TRConfiguration.getConfig();
+	public TRConfiguration 		        config = TRConfiguration.getConfig();
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -129,7 +128,7 @@ public final class TR implements UncaughtExceptionHandler{
 		gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
 		    @Override
 		    public GPU call() throws Exception {
-			return new GPU(reporter, threadManager.threadPool, threadManager, threadManager, TR.this, rootWindow.getCanvas(),collisionManager,getWorld());
+			return new GPU(reporter, threadManager.threadPool, threadManager, threadManager, TR.this, rootWindow.getCanvas(),getWorld());
 		    }},TR.this);
 		soundSystem = new TRFutureTask<SoundSystem>(new Callable<SoundSystem>(){
 		    @Override
@@ -159,9 +158,7 @@ public final class TR implements UncaughtExceptionHandler{
 		//renderer.setCollisionManager(getCollisionManager());
 		getThreadManager().addRepeatingGLTask(renderer.render);
 		
-		gameShell  = new GameShell(this);
-		menuSystem = new MenuSystem(this);
-		gameShell.startShell();
+		
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
@@ -175,6 +172,13 @@ public final class TR implements UncaughtExceptionHandler{
 		 });
 		renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 		}//end constructor
+	
+	public TR startShell(){
+	    gameShell  = new GameShell(this);
+	    menuSystem = new MenuSystem(this);
+	    gameShell.startShell();
+	    return this;
+	}
 	
     private void waitForProfiler() {
 	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);

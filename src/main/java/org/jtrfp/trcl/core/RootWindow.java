@@ -12,13 +12,18 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.util.concurrent.Callable;
+
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-public class RootWindow extends JFrame {
+import org.jtrfp.trcl.gpu.GLExecutor;
+
+public class RootWindow extends JFrame implements GLExecutor {
     /**
      * 
      */
@@ -28,7 +33,10 @@ public class RootWindow extends JFrame {
     private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
     private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
 
-    public RootWindow() {
+    public RootWindow(){
+	this("Terminal Recall");
+    }
+    public RootWindow(String title) {
 	try {
 	    SwingUtilities.invokeAndWait(new Runnable() {
 		@Override
@@ -44,10 +52,27 @@ public class RootWindow extends JFrame {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}//end try/catch Exception
-	setTitle("Terminal Recall");
+	setTitle(title);
     }//end constructor
 
     public GLCanvas getCanvas() {
 	return canvas;
     }
+    
+    public <T> GLFutureTask<T> submitToGL(Callable<T> c){
+	final GLCanvas canvas = getCanvas();
+	final GLContext context = canvas.getContext();
+	final GLFutureTask<T> result = new GLFutureTask<T>(canvas,c);
+	if(context.isCurrent())
+	    if(context.isCurrent()){
+		result.run();
+		return result;
+	    }else{
+		context.makeCurrent();
+		result.run();
+		context.release();
+	    }
+	result.enqueue();
+	return result;
+    }//end submitToGL(...)
 }// end RootWindow

@@ -13,8 +13,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.util.ArrayList;
-
-import javax.media.opengl.GL3;
+import java.util.HashSet;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Controller;
@@ -26,7 +25,6 @@ import org.jtrfp.trcl.TransparentTriangleList;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class Model {
@@ -47,6 +45,8 @@ public class Model {
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
     private boolean modelFinalized = false;
+    //Keeps hard references to Textures to keep them from getting gobbled.
+    private final HashSet<TextureDescription> textures = new HashSet<TextureDescription>();
 
     public Model(boolean smoothAnimation, TR tr) {
 	this.tr = tr;
@@ -95,6 +95,8 @@ public class Model {
 	Triangle[][] tris = new Triangle[tLists.size()][];
 	for (int i = 0; i < tLists.size(); i++) {
 	    tris[i] = tLists.get(i).toArray(new Triangle[] {});
+	    for(Triangle triangle:tLists.get(i))
+		textures.add(triangle.texture);
 	}// Get all frames for each triangle
 	if (tris[0].length != 0) {
 	    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
@@ -107,6 +109,8 @@ public class Model {
 	Triangle[][] ttris = new Triangle[ttLists.size()][];
 	for (int i = 0; i < ttLists.size(); i++) {
 	    ttris[i] = ttLists.get(i).toArray(new Triangle[] {});
+	    for(Triangle triangle:ttLists.get(i))
+		textures.add(triangle.texture);
 	}// Get all frames for each triangle
 	if (ttris[0].length != 0) {
 	    ttpList = new TransparentTriangleList(ttris,
@@ -115,6 +119,9 @@ public class Model {
 	}// end if(length!=0)
 	else
 	    ttpList = null;
+	tLists =null;
+	ttLists=null;
+	lsLists=null;
 	return this;
     }// end finalizeModel()
 
@@ -221,6 +228,24 @@ public class Model {
 	    TextureDescription tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, boolean hasNorm, TR tr) {
 	Model m = new Model(false, tr);
+	// Top
+	m.addTriangles(Triangle.quad2Triangles(
+		new double[] { 0 - origin[0], w - origin[0], w - origin[0], 0 - origin[0] }, 
+		new double[] { 0 - origin[1], 0 - origin[1], 0 - origin[1], 0 - origin[1] },
+		new double[] { 0 - origin[2], 0 - origin[2], d - origin[2], d - origin[2] },
+		new double[] { u0, u1, u1, u0 },
+		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
+		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.MINUS_K:Vector3D.ZERO,"Model.buildCube.front"));
+	
+	// Bottom
+	m.addTriangles(Triangle.quad2Triangles(
+		new double[] { 0 - origin[0], w - origin[0], w - origin[0], 0 - origin[0] }, 
+		new double[] { h - origin[1], h - origin[1], h - origin[1], h - origin[1] },
+		new double[] { d - origin[2], d - origin[2], 0 - origin[2], 0 - origin[2] },
+		new double[] { u0, u1, u1, u0 },
+		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
+		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.MINUS_K:Vector3D.ZERO,"Model.buildCube.front"));
+	
 	// Front
 	m.addTriangles(Triangle.quad2Triangles(
 		new double[] { 0 - origin[0],w - origin[0], w - origin[0], 0 - origin[0] }, 
@@ -232,12 +257,11 @@ public class Model {
 		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
 		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.MINUS_K:Vector3D.ZERO,"Model.buildCube.front"));
 	// Left
-	m.addTriangles(Triangle.quad2Triangles(new double[] { 0 - origin[0],
-		0 - origin[0], 0 - origin[0], 0 - origin[0] }, new double[] {
-		h - origin[1], h - origin[1], 0 - origin[1], 0 - origin[1] },
-		new double[] { 0 - origin[2], d - origin[2], d - origin[2],
-			0 - origin[2] },
-
+	m.addTriangles(Triangle.quad2Triangles(
+		new double[] {  0 - origin[0], 0 - origin[0],0 - origin[0], 0 - origin[0]}, 
+		new double[] { 0 - origin[1], 0 - origin[1], h - origin[1], h - origin[1] },
+		new double[] { 0 - origin[2], d - origin[2],  d - origin[2],  0 - origin[2] },
+		
 		new double[] { u0, u1, u1, u0 },
 		new double[] { v1, v1, v0, v0 }, tunnelTexturePalette,
 		RenderMode.STATIC, hasAlpha, hasNorm?Vector3D.MINUS_I:Vector3D.ZERO,"Model.buildCube.left"));

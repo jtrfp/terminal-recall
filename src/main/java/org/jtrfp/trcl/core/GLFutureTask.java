@@ -20,12 +20,10 @@ import javax.media.opengl.awt.GLCanvas;
 
 public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
     private final GLCanvas      canvas;
-    private final ThreadManager threadManager;
 
-    public GLFutureTask(GLCanvas canvas, ThreadManager threadManager, Callable<V> callable) {
+    public GLFutureTask(GLCanvas canvas, Callable<V> callable) {
 	super(callable);
 	this.canvas=canvas;
-	this.threadManager=threadManager;
     }
     @Override
     public void run(){
@@ -44,7 +42,7 @@ public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
     @Override
     public V get(){
 	if(!super.isDone())
-	    if(threadManager.isGLThread())
+	    if(canvas.getContext().isCurrent())
 	     run();
 	return super.get();
     }

@@ -83,7 +83,6 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	m.setFrameDelayInMillis(1000);
 	m.setAnimateUV(true);
 	m.setController(controller);
-	m.finalizeModel();
 	setModel(m);
 	}//end orientation
     /**

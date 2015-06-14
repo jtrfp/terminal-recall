@@ -139,7 +139,7 @@ public final class GLTexture {
 	    }}).get();
     }//end setTextureImageRGBA
     
-    public void getTextureImageRGBA(final ByteBuffer buf) {
+    public void getTextureImage(final ByteBuffer buf, final int components, final int componentType) {
 	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -147,8 +147,8 @@ public final class GLTexture {
 		buf.rewind();
 		GL3 gl = gpu.getGl();
 		gl.glBindTexture(bindingTarget, textureID.get());
-		System.out.println("Downloading texture...");
-		gl.glGetTexImage(bindingTarget, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
+		System.out.println("Getting texture...");
+		gl.glGetTexImage(bindingTarget, 0, components, componentType, buf);
 		System.out.println("\t...Done.");
 		return null;
 	    }}).get();

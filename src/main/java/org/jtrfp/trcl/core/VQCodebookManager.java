@@ -258,7 +258,7 @@ public class VQCodebookManager {
 	    result[pg]=buf.slice();
 	    result[pg].clear();
 	}
-	rgbaTexture.getTextureImageRGBA(buf);
+	rgbaTexture.getTextureImage(buf,GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE);
 	return result;
     }//end dumpPageToPNG(...)
 

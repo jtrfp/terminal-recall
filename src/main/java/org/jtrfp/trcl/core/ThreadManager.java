@@ -128,8 +128,8 @@ public final class ThreadManager implements GLExecutor{
 		getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	final Game game = tr.getGame();
-	if(game==null)
-	    return;
+	//if(game==null)
+	//    return;
 	visibilityListBuffer.clear();
 	synchronized(vl)
 	 {visibilityListBuffer.addAll(vl);}
@@ -138,10 +138,7 @@ public final class ThreadManager implements GLExecutor{
 	    for (PositionedRenderable pr:visibilityListBuffer) {
 	    boolean multiplePlayer=false;
 	    final WorldObject wo = (WorldObject)pr;
-	    if (wo.isActive()
-		    && (TR.twosComplimentDistance(wo.getPosition(), game
-			    .getPlayer().getPosition()) < CollisionManager.MAX_CONSIDERATION_DISTANCE)
-		    || wo instanceof RelevantEverywhere)
+	    if (wo.isActive() || wo instanceof RelevantEverywhere)
 		if(wo instanceof Player){
 		    if(alreadyVisitedPlayer)
 			multiplePlayer=true;
@@ -151,7 +148,7 @@ public final class ThreadManager implements GLExecutor{
 		    wo.tick(tickTimeInMillis);
 	 }// end for(worldObjects)
 	}//end sync(gameStateLock)//relevance changes outside of this cause errors!
-	if(game.getPlayer()!=null && !paused[0])
+	//if(game.getPlayer()!=null && !paused[0])
 	    tr.getCollisionManager().performCollisionTests();
 	}// end sync(paused)
 	}catch(NotReadyException e){System.out.println("ThreadManager: Not ready");}
@@ -166,7 +163,7 @@ public final class ThreadManager implements GLExecutor{
     }//end submitToGPUMemAccess(...)
     
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
-	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),tr.getThreadManager(),c);
+	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),c);
 	if(isGLThread())
 	    if(tr.gpu.get().getGl().getContext().isCurrent()){
 		result.run();
@@ -202,8 +199,9 @@ public final class ThreadManager implements GLExecutor{
 			 nextRelevanceCalcTime.get())
 		     return;
 		 tr.mainRenderer.get().relevanceCalc();}
-		if(tr.getGame()!=null)
-		 if(tr.getGame().getPlayer()!=null)gameplay();
+		//if(tr.getGame()!=null)
+		// if(tr.getGame().getPlayer()!=null)
+		gameplay();
 		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
 	animator = new Animator(tr.getRootWindow().getCanvas());

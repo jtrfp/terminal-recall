@@ -111,7 +111,7 @@ public class RenderingIT{
 	int matrixError=0;
 	while(bb.hasRemaining()){
 	    float res = bb.getFloat();
-	    if(res!=0)System.out.println("res="+res+" pos="+bb.position());
+	    //if(res!=0)System.out.println("res="+res+" pos="+bb.position());
 	    matrixError+=res;
 	    }
 	assertEquals(0,matrixError);

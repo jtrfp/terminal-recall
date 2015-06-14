@@ -131,7 +131,7 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  vec4 vqConstruct(uint textureID,vec3 norm,vec2 uv){
  if(textureID==0u)return vec4(0,1,0,1);//Green means textureID=zero
  if(textureID==DEAD_BEEF)return vec4(1,1,0,1);//Yellow means 0xDEADBEEF (unwritten) reverse[4022250974][3735928559u]
- if(textureID<=NUM_PORTALS*96u && textureID >= 555)return portalFetch(textureID);//Dummy-disabled
+ if(textureID<=NUM_PORTALS*96u && textureID >= 555u)return portalFetch(textureID);//Dummy-disabled
  //if(textureID<NUM_PORTALS+1u&&textureID>0u)return portalFetch(textureID);
  //uvec4 	tocHeader 	= texelFetch(rootBuffer,int(textureID+TOC_OFFSET_VEC4_HEADER));
  //if(tocHeader[TOC_HEADER_OFFSET_QUADS_MAGIC]!=1337u)return vec4(1,0,1,1);//Magenta means invalid texture.

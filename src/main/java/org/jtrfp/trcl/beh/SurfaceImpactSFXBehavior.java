@@ -41,7 +41,6 @@ public class SurfaceImpactSFXBehavior extends Behavior implements
 	final double collDot = Math.abs(
 		getParent().getHeading().normalize().
 		dotProduct(new Vector3D(surfaceNormal).normalize()));
-	System.err.println("Surface collision detected "+collDot);
 	if(System.currentTimeMillis()<timeOfLastSFXMillis+500)
 	    return;
 	timeOfLastSFXMillis=System.currentTimeMillis();

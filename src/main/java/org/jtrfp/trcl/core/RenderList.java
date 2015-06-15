@@ -15,7 +15,6 @@ package org.jtrfp.trcl.core;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -36,6 +35,7 @@ import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.VertexProcessingStage;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.IntArrayVariableList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
@@ -148,7 +148,7 @@ public class RenderList {
 	depthQueueProgram.use();
 	final GLProgram primaryProgram = rFactory.getOpaqueProgram();
 	primaryProgram.use();
-	final GLProgram vertexProgram = rFactory.getVertexProgram();
+	final GLProgram vertexProgram = rFactory.getVertexProcessingStage().getVertexProgram();
 	vertexProgram.use();
 	vertexProgram.getUniform("renderListPageTable").setArrayui(hostRenderListPageTable);
 	gpu.defaultProgram();
@@ -221,39 +221,19 @@ public class RenderList {
 		opaqueRenderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numUnoccludedTBlocks);
 	
 	///// VERTEX STAGE
-	final int relevantVertexBufferWidth = ((int)(RendererFactory.VERTEX_BUFFER_WIDTH/3))*3;
-	final GLProgram vertexProgram = rFactory.getVertexProgram();
-	vertexProgram.use();
-	rFactory.getVertexFrameBuffer().bindToDraw();
-	vertexProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
-	gpu.memoryManager.get().bindToUniform(0, vertexProgram,
-		vertexProgram.getUniform("rootBuffer"));
-	rFactory.getObjectProcessingStage().getCamMatrixTexture().bindToTextureUnit(1, gl);
-	rFactory.getObjectProcessingStage().getNoCamMatrixTexture().bindToTextureUnit(2, gl);
-	gl.glDepthMask(false);
-	gl.glDisable(GL3.GL_BLEND);
-	gl.glDisable(GL3.GL_DEPTH_TEST);
-	gl.glDisable(GL3.GL_CULL_FACE);
-	gl.glViewport(0, 0, 
-		relevantVertexBufferWidth, 
-		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);//Opaque
-	//Cleanup
-	gpu.defaultFrameBuffers();
-	gpu.defaultProgram();
-	gpu.defaultTIU();
-	gpu.defaultTexture();
+	VertexProcessingStage vps = rFactory.getVertexProcessingStage();
+	vps.process(gl, opaqueRenderListLogicalVec4Offset, numPrimitives);
 	
 	///// PRIMITIVE STAGE
 	//Almost like a geometry shader, except writing lookup textures for each primitive.
 	rFactory.getPrimitiveProgram().use();
 	rFactory.getPrimitiveFrameBuffer().bindToDraw();
-	rFactory.getVertexXYTexture().bindToTextureUnit(0, gl);
-	rFactory.getVertexWTexture().bindToTextureUnit(1, gl);
-	rFactory.getVertexZTexture().bindToTextureUnit(2, gl);
-	rFactory.getVertexUVTexture().bindToTextureUnit(3, gl);
-	rFactory.getVertexNormXYTexture().bindToTextureUnit(4, gl);
-	rFactory.getVertexNormZTexture().bindToTextureUnit(5, gl);
+	vps.getVertexXYTexture().bindToTextureUnit(0, gl);
+	vps.getVertexWTexture().bindToTextureUnit(1, gl);
+	vps.getVertexZTexture().bindToTextureUnit(2, gl);
+	vps.getVertexUVTexture().bindToTextureUnit(3, gl);
+	vps.getVertexNormXYTexture().bindToTextureUnit(4, gl);
+	vps.getVertexNormZTexture().bindToTextureUnit(5, gl);
 	gl.glDisable(GL3.GL_PROGRAM_POINT_SIZE);//Asserts that point size is set only from CPU
 	gl.glPointSize(2*RendererFactory.PRIMITIVE_BUFFER_OVERSAMPLING);//2x2 frags
 	gl.glViewport(0, 0, 
@@ -276,13 +256,13 @@ public class RenderList {
 	// OPAQUE.DRAW STAGE
 	final GLProgram primaryProgram = rFactory.getOpaqueProgram();
 	primaryProgram.use();
-	rFactory.getVertexXYTexture().bindToTextureUnit(1, gl);
-	rFactory.getVertexUVTexture().bindToTextureUnit(2, gl);
-	rFactory.getVertexTextureIDTexture().bindToTextureUnit(3, gl);
-	rFactory.getVertexZTexture().bindToTextureUnit(4, gl);
-	rFactory.getVertexWTexture().bindToTextureUnit(5, gl);
-	rFactory.getVertexNormXYTexture().bindToTextureUnit(6, gl);
-	rFactory.getVertexNormZTexture().bindToTextureUnit(7, gl);
+	vps.getVertexXYTexture().bindToTextureUnit(1, gl);
+	vps.getVertexUVTexture().bindToTextureUnit(2, gl);
+	vps.getVertexTextureIDTexture().bindToTextureUnit(3, gl);
+	vps.getVertexZTexture().bindToTextureUnit(4, gl);
+	vps.getVertexWTexture().bindToTextureUnit(5, gl);
+	vps.getVertexNormXYTexture().bindToTextureUnit(6, gl);
+	vps.getVertexNormZTexture().bindToTextureUnit(7, gl);
 	rFactory.getOpaqueFrameBuffer().bindToDraw();
 	final int numOpaqueVertices = numOpaqueBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
@@ -342,13 +322,13 @@ public class RenderList {
 	
 	//object, root, depth, xy
 	rFactory.getOpaqueDepthTexture().bindToTextureUnit(1,gl);
-	rFactory.getVertexXYTexture().bindToTextureUnit(2, gl);
+	vps.getVertexXYTexture().bindToTextureUnit(2, gl);
 	//renderer.getVertexUVTexture().bindToTextureUnit(3, gl);
-	rFactory.getVertexTextureIDTexture().bindToTextureUnit(4, gl);
-	rFactory.getVertexZTexture().bindToTextureUnit(5, gl);
-	rFactory.getVertexWTexture().bindToTextureUnit(6, gl);
-	rFactory.getVertexNormXYTexture().bindToTextureUnit(7, gl);
-	rFactory.getVertexNormZTexture().bindToTextureUnit(8, gl);
+	vps.getVertexTextureIDTexture().bindToTextureUnit(4, gl);
+	vps.getVertexZTexture().bindToTextureUnit(5, gl);
+	vps.getVertexWTexture().bindToTextureUnit(6, gl);
+	vps.getVertexNormXYTexture().bindToTextureUnit(7, gl);
+	vps.getVertexNormZTexture().bindToTextureUnit(8, gl);
 	
 	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices, numTransparentVertices);
 	//UNOCCLUDED TRANSPARENT
@@ -386,7 +366,7 @@ public class RenderList {
 	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
 	rFactory.getOpaquePrimitiveIDTexture().bindToTextureUnit(5,gl);
 	rFactory.getLayerAccumulatorTexture().bindToTextureUnit(6,gl);
-	rFactory.getVertexTextureIDTexture().bindToTextureUnit(7,gl);
+	vps.getVertexTextureIDTexture   ().bindToTextureUnit(7,gl);
 	rFactory.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	rFactory.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
 	

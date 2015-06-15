@@ -31,14 +31,12 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.GPU.GPUVendor;
 import org.jtrfp.trcl.gpu.ObjectProcessingStage;
+import org.jtrfp.trcl.gpu.VertexProcessingStage;
 import org.jtrfp.trcl.gui.Reporter;
-import org.jtrfp.trcl.obj.CollisionManager;
 
 public class RendererFactory {
-    public static final int			VERTEX_BUFFER_WIDTH     = 1024;
-    public static final int			VERTEX_BUFFER_HEIGHT    = 4096;
+    
     public static final int			PRIMITIVE_BUFFER_WIDTH  = 512;
     public static final int			PRIMITIVE_BUFFER_HEIGHT = 512;
     public static final int			NUM_PORTALS = 4;
@@ -54,8 +52,6 @@ public class RendererFactory {
     private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
     /*					*/	depthQueueTexture,
-    /*					*/	vertexXYTexture,vertexUVTexture,vertexWTexture,vertexZTexture,vertexTextureIDTexture,
-    /*					*/	vertexNormXYTexture,vertexNormZTexture,
     /*					*/	primitiveUVZWTexture,primitiveNormTexture,
     /*					*/	layerAccumulatorTexture,
     /*					*/	portalTexture;
@@ -70,11 +66,11 @@ public class RendererFactory {
     /*					*/	opaqueProgram, 
     /*					*/	deferredProgram, 
     /*					*/	depthQueueProgram, 
-    /*					*/	vertexProgram,
     /*                                  */      primitiveProgram,
     /*					*/	skyCubeProgram;
     private final ThreadManager			threadManager;
     private  ObjectProcessingStage              objectProcessingStage;
+    private VertexProcessingStage               vertexProcessingStage;
     
     public RendererFactory(final GPU gpu, final ThreadManager threadManager, 
 	    final GLCanvas canvas, Reporter reporter, final World world, 
@@ -99,6 +95,7 @@ public class RendererFactory {
 		
 		final ValidationHandler vh = new RFValidationHandler();
 		objectProcessingStage      = new ObjectProcessingStage(gpu,vh);
+		vertexProcessingStage      = new VertexProcessingStage(gpu,objectProcessingStage,vh);
 		
 		// VERTEX SHADERS
 		GLVertexShader		
@@ -126,7 +123,7 @@ public class RendererFactory {
 		skyCubeFragShader	  .setSourceFromResource("/shader/skyCubeFragShader.glsl");
 		skyCubeVertexShader	  .setSourceFromResource("/shader/skyCubeVertexShader.glsl");
 		
-		vertexProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(fullScreenTriangleShader)  .attachShader(vertexFragShader).link();
+		
 		opaqueProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(traditionalVertexShader)	  .attachShader(opaqueFragShader).link();
 		deferredProgram		=gpu.newProgram().setValidationHandler(vh).attachShader(skyCubeVertexShader)  	  .attachShader(deferredFragShader).link();
 		depthQueueProgram	=gpu.newProgram().setValidationHandler(vh).attachShader(traditionalVertexShader)	  .attachShader(depthQueueFragShader).link();
@@ -135,11 +132,6 @@ public class RendererFactory {
 		
 		skyCubeProgram.use();
 		skyCubeProgram.getUniform("cubeTexture").set((int)0);
-		
-		vertexProgram.use();
-		vertexProgram.getUniform("rootBuffer").set((int)0);
-		vertexProgram.getUniform("camMatrixBuffer").set((int)1);
-		vertexProgram.getUniform("noCamMatrixBuffer").set((int)2);
 		
 		opaqueProgram.use();
 		opaqueProgram.getUniform("xyBuffer").set((int)1);
@@ -185,100 +177,6 @@ public class RendererFactory {
 		gpu.defaultProgram();
 		gpu.defaultTIU();
 		
-		/////// VERTEX
-		vertexXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RG32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RG, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("vertexXYTexture");
-		vertexNormXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RG, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("vertexNormXYTexture");
-		vertexNormZTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("vertexNormZTexture");
-		vertexUVTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RG, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("vertexUVTexture");
-		vertexZTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("vertexZTexture");
-		vertexWTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()//// This is actually W-reciprocal.
-			.bind()
-			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("vertexWTexture");
-		vertexTextureIDTexture = gpu //Does not need to be in reshape() since it is off-screen.
-			.newTexture()
-			.bind()
-			.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-				GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setExpectedMaxValue(.001, .001, .001, .001)
-			.setDebugName("vertexTextureIDTexture")
-			.unbind();
-		vertexFrameBuffer = gpu
-			.newFrameBuffer()
-			.bindToDraw()
-			.attachDrawTexture(vertexXYTexture, GL3.GL_COLOR_ATTACHMENT0)
-			.attachDrawTexture(vertexUVTexture, GL3.GL_COLOR_ATTACHMENT1)
-			.attachDrawTexture(vertexZTexture, GL3.GL_COLOR_ATTACHMENT2)
-			.attachDrawTexture(vertexWTexture, GL3.GL_COLOR_ATTACHMENT3)
-			.attachDrawTexture(vertexTextureIDTexture, GL3.GL_COLOR_ATTACHMENT4)
-			.attachDrawTexture(vertexNormXYTexture, GL3.GL_COLOR_ATTACHMENT5)
-			.attachDrawTexture(vertexNormZTexture, GL3.GL_COLOR_ATTACHMENT6)
-			.setDrawBufferList(
-				GL3.GL_COLOR_ATTACHMENT0,
-				GL3.GL_COLOR_ATTACHMENT1,
-				GL3.GL_COLOR_ATTACHMENT2,
-				GL3.GL_COLOR_ATTACHMENT3,
-				GL3.GL_COLOR_ATTACHMENT4,
-				GL3.GL_COLOR_ATTACHMENT5,
-				GL3.GL_COLOR_ATTACHMENT6);
-		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
-		    throw new RuntimeException("Vertex frame buffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
-		}
 		/////// PRIMITIVE
 		primitiveNormTexture = gpu  //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
@@ -495,40 +393,8 @@ public class RendererFactory {
         return opaquePrimitiveIDTexture;
     }
     
-    public GLProgram getVertexProgram() {
-        return vertexProgram;
-    }
-    
-    public GLTexture getVertexXYTexture() {
-        return vertexXYTexture;
-    }
-    
-    public GLTexture getVertexUVTexture() {
-        return vertexUVTexture;
-    }
-    
-    public GLTexture getVertexWTexture() {
-        return vertexWTexture;
-    }
-    
-    public GLTexture getVertexZTexture() {
-        return vertexZTexture;
-    }
-    
-    public GLTexture getVertexTextureIDTexture() {
-        return vertexTextureIDTexture;
-    }
-    
     public GLFrameBuffer getVertexFrameBuffer() {
         return vertexFrameBuffer;
-    }
-
-    public GLTexture getVertexNormXYTexture() {
-        return vertexNormXYTexture;
-    }
-    
-    public GLTexture getVertexNormZTexture() {
-        return vertexNormZTexture;
     }
 
     /**
@@ -622,5 +488,9 @@ public class RendererFactory {
 
     public ObjectProcessingStage getObjectProcessingStage() {
 	return objectProcessingStage;
+    }
+
+    public VertexProcessingStage getVertexProcessingStage() {
+	return vertexProcessingStage;
     }
 }//end RendererFactory

@@ -210,6 +210,7 @@ public final class ThreadManager implements GLExecutor{
 	    @Override
 	    public void windowClosing(WindowEvent e){
 		System.out.println("WindowClosing...");
+		gameplayTimer.cancel();
 		animator.stop();
 		System.out.println("glExecutorThread.join()...");
 		System.out.println("ThreadManager: WindowClosing Done.");

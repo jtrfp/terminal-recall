@@ -159,9 +159,9 @@ public final class TR implements UncaughtExceptionHandler{
 		//renderer.setCollisionManager(getCollisionManager());
 		getThreadManager().addRepeatingGLTask(renderer.render);
 		
-		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
+			soundSystem.get().setPaused(true);
 			try{TR.this.config.saveConfig();
 		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"

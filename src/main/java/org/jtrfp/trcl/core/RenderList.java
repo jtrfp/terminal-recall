@@ -211,18 +211,18 @@ public class RenderList {
     
     public void render(final GL3 gl) throws NotReadyException {
 	if(!sentPageTable)sendRenderListPageTable();
-	final int opaqueRenderListLogicalVec4Offset = ((objectListWindow.getObjectSizeInBytes()*renderListIdx)/16);
+	final int renderListLogicalVec4Offset = ((objectListWindow.getObjectSizeInBytes()*renderListIdx)/16);
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
 	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
 	saveWindowViewportState(gl);
 	// OBJECT STAGE
 	
 	rFactory.getObjectProcessingStage().process(gl,renderer.getCameraMatrixAsFlatArray(),
-		opaqueRenderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numUnoccludedTBlocks);
+		renderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numUnoccludedTBlocks);
 	
 	///// VERTEX STAGE
 	VertexProcessingStage vps = rFactory.getVertexProcessingStage();
-	vps.process(gl, opaqueRenderListLogicalVec4Offset, numPrimitives);
+	vps.process(gl, renderListLogicalVec4Offset, numPrimitives);
 	
 	///// PRIMITIVE STAGE
 	//Almost like a geometry shader, except writing lookup textures for each primitive.

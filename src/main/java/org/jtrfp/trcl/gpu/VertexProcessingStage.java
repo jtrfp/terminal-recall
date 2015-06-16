@@ -146,11 +146,11 @@ public class VertexProcessingStage {
 	gpu.getGl().glClear(GL3.GL_COLOR_BUFFER_BIT);
     }//end constructor
     
- public void process(GL3 gl, int opaqueRenderListLogicalVec4Offset, int numPrimitives){
+ public void process(GL3 gl, int renderListLogicalVec4Offset, int numPrimitives){
      final int relevantVertexBufferWidth = ((int)(VERTEX_BUFFER_WIDTH/3))*3;
 	vertexProgram.use();
 	vertexFrameBuffer.bindToDraw();
-	vertexProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
+	vertexProgram.getUniform("logicalVec4Offset").setui(renderListLogicalVec4Offset);
 	gpu.memoryManager.get().bindToUniform(0, vertexProgram,
 		vertexProgram.getUniform("rootBuffer"));
 	objectProcessingStage.getCamMatrixTexture()  .bindToTextureUnit(1, gl);
@@ -162,7 +162,7 @@ public class VertexProcessingStage {
 	gl.glViewport(0, 0, 
 		relevantVertexBufferWidth, 
 		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);//Opaque
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);
 	//Cleanup
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();

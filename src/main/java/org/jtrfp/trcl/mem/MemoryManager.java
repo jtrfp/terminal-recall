@@ -166,7 +166,9 @@ public final class MemoryManager {
 	glPhysicalMemory.bindToUniform(textureUnit, shaderProgram, uniform);
     }
 
-    public void dumpAllGPUMemTo(final ByteBuffer dest) throws IOException{
+    public void dumpAllGPUMemTo(final ByteBuffer dest) {
+	if(dest==null)
+	    throw new NullPointerException("Destination intolerably null.");
 	glExecutor.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {

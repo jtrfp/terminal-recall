@@ -14,6 +14,11 @@ package org.jtrfp.trcl;
 import static org.junit.Assert.*;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Renderer;
@@ -29,6 +34,7 @@ import org.junit.Test;
 
 public class TRIT {
     protected TR tr;
+    protected double errorThreshold = 0;
 
     @Before
     public void setUp() throws Exception{
@@ -79,10 +85,61 @@ public class TRIT {
 	obj.setActive (true);
 	tr.getDefaultGrid().add(obj);
     }//end spawnCubes()
-
-    @Test
-    public void test() {
-	fail("Not yet implemented");
+    
+    protected boolean testFloatResults(ByteBuffer bb, ByteBuffer refBB){
+	double matrixError=0;
+	while(bb.hasRemaining()){
+	    float ref = refBB.getFloat();
+	    float res = bb.getFloat();
+	    if(ref!=res) System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
+	    matrixError+=Math.abs(ref-res);
+	    }
+	return matrixError<=errorThreshold;
+    }
+    
+    protected boolean testByteResults(ByteBuffer bb, ByteBuffer refBB){
+	double matrixError=0;
+	while(bb.hasRemaining()){
+	    byte ref = refBB.get();
+	    byte res = bb.get();
+	    if(ref!=res) System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
+	    matrixError+=Math.abs(ref-res);
+	    }
+	return matrixError<=errorThreshold;
+    }
+    
+    protected void clearOldResult(String file){
+	File f = new File(file+".result");
+	if(f.exists())f.delete();
+    }
+    
+    protected void dumpContentsToFile(ByteBuffer bb, String file) throws Exception{
+	bb.clear();
+	final File f = new File(file);
+	if(f.exists())f.delete();
+	FileOutputStream fos = new FileOutputStream(file);
+	FileChannel channel = fos.getChannel();
+	channel.write(bb);
+	channel.close();
+	fos    .close();
+	System.out.println("Dumped contents to "+file);
+    }
+    
+    /**
+     * The target ByteBuffer's position is cleared after writing.
+     * @param bb
+     * @param file
+     * @throws Exception
+     * @since Jun 14, 2015
+     */
+    protected void readContentsFromResource(ByteBuffer bb, String file) throws Exception{
+	InputStream is = Class.class.getResourceAsStream("/"+file);
+	assertNotNull("Failed to load resource /"+file,is);
+	int val;
+	while((val=is.read())!=-1)
+	    bb.put((byte)val);
+	is.close();
+	bb.clear();
     }
 
 }//end TRIT

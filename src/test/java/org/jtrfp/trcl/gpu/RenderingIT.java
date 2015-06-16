@@ -29,6 +29,7 @@ import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.TRIT;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
@@ -37,13 +38,21 @@ import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-public class RenderingIT{
-    protected static final String NO_CAM_MATRIX_REF  = "noCamMatrixRef.dat";
-    protected static final String YES_CAM_MATRIX_REF = "yesCamMatrixRef.dat";
-    protected static final int MATRIX_ERROR_THRESH = 0;
-    protected TR tr;
+@Ignore
+public class RenderingIT extends TRIT{
+    protected static final String NO_CAM_MATRIX_REF = "noCamMatrixRef.dat";
+    protected static final String YES_CAM_MATRIX_REF= "yesCamMatrixRef.dat";
+    protected static final String VERTEX_NORMXY_REF = "vertexNormXYRef.dat";
+    protected static final String VERTEX_NORMZ_REF  = "vertexNormZRef.dat";
+    protected static final String VERTEX_W_REF= "vertexWRef.dat";
+    protected static final String VERTEX_Z_REF= "vertexZRef.dat";
+    protected static final String VERTEX_XY_REF= "vertexXYRef.dat";
+    protected static final String VERTEX_UV_REF= "vertexUVRef.dat";
+    protected static final String VERTEX_TEXTUREID_REF= "vertexTextureIDRef.dat";
+    protected static final double MATRIX_ERROR_THRESH  = 0;
     private static final ValidationHandler vh = new ValidationHandler(){
 	@Override
 	public void invalidProgram(GLProgram p) {
@@ -53,50 +62,14 @@ public class RenderingIT{
     
     @Before
     public void setUp() throws Exception{
-	tr = new TR(new TRConfiguration());
-	tr.getDefaultGrid().removeAll();
-	tr.getThreadManager().setPaused(false);
-	final Renderer renderer = tr.mainRenderer.get();
-	renderer.setAmbientLight(Color.gray);
-	renderer.setSunVector(new Vector3D(1,2,.25).normalize());
-	Camera c = tr.mainRenderer.get().getCamera();
-	c.setHeading(Vector3D.PLUS_K);
-	c.setTop(Vector3D.PLUS_J);
-	c.setPosition(new double[]{0,0,-50000});
-	c.notifyPositionChange();
-	c.setActive(true);
+	super.setUp();
     }
     
-    private void spawnCubes(){//Ordering not guaranteed so we will keep it at one cube per primitive type
-	final TextureDescription texture = tr.gpu.get().textureManager.get().getFallbackTexture();
-	//OPAQUE
-	WorldObject obj;
-	obj = new WorldObject(tr);
-	obj.setModel(Model.buildCube(10000, 10000, 10000, texture, new double[]{5000,5000,5000}, false, tr));
-	obj.setHeading(new Vector3D(1,1,1).normalize());
-	obj.setTop(new Vector3D(-1,1,1).normalize());
-	obj.setPosition(new double[]
-		{-10000,0,0});
-	obj.notifyPositionChange();
-	obj.setVisible(true);
-	obj.setActive (true);
-	tr.getDefaultGrid().add(obj);
-	//TRANSPARENT
-	obj = new WorldObject(tr);
-	obj.setModel(Model.buildCube(10000, 10000, 10000, texture, new double[]{5000,5000,5000}, true, tr));
-	obj.setHeading(new Vector3D(1,1,1).normalize());
-	obj.setTop(new Vector3D(-1,1,1).normalize());
-	obj.setPosition(new double[]
-		{10000,0,0});
-	obj.notifyPositionChange();
-	obj.setVisible(true);
-	obj.setActive (true);
-	tr.getDefaultGrid().add(obj);
-    }//end spawnCubes()
+    
     
     @After
     public void tearDown() throws Exception{
-	tr.getRootWindow().setVisible(false);
+	super.tearDown();
     }
     
     @Test
@@ -116,52 +89,6 @@ public class RenderingIT{
 	assertEquals(0,matrixError);
     }//end emptyRendereTest
     
-    
-    private void dumpContentsToFile(ByteBuffer bb, String file) throws Exception{
-	bb.clear();
-	final File f = new File(file);
-	if(f.exists())f.delete();
-	FileOutputStream fos = new FileOutputStream(file);
-	FileChannel channel = fos.getChannel();
-	channel.write(bb);
-	channel.close();
-	fos    .close();
-	System.out.println("Dumped contents to "+file);
-    }
-    
-    /**
-     * The target ByteBuffer's position is cleared after writing.
-     * @param bb
-     * @param file
-     * @throws Exception
-     * @since Jun 14, 2015
-     */
-    private void readContentsFromResource(ByteBuffer bb, String file) throws Exception{
-	InputStream is = Class.class.getResourceAsStream("/"+file);
-	assertNotNull("Failed to load resource /"+file,is);
-	int val;
-	while((val=is.read())!=-1)
-	    bb.put((byte)val);
-	is.close();
-	bb.clear();
-    }
-    
-    private boolean testResults(ByteBuffer bb, ByteBuffer refBB){
-	int matrixError=0;
-	while(bb.hasRemaining()){
-	    float ref = refBB.getFloat();
-	    float res = bb.getFloat();
-	    if(ref!=0) System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
-	    matrixError+=Math.abs(ref-res);
-	    }
-	return matrixError<=MATRIX_ERROR_THRESH;
-    }
-    
-    private void clearOldResult(String file){
-	File f = new File(file+".result");
-	if(f.exists())f.delete();
-    }
-    
     @Test
     public void cubeRendererMatrixTestNoCam() throws Exception {
 	clearOldResult(NO_CAM_MATRIX_REF);
@@ -172,13 +99,13 @@ public class RenderingIT{
 	tr.mainRenderer.get().getRendererFactory().getObjectProcessingStage().getNoCamMatrixTexture().
 	 getTextureImage(bb,GL3.GL_RGBA,GL3.GL_FLOAT);
 	bb.clear();
-	/*
-	dumpContentsToFile(bb,NO_CAM_MATRIX_REF);
-	*/
+	
+	//dumpContentsToFile(bb,NO_CAM_MATRIX_REF);
+	
 	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
 	readContentsFromResource(refBB,NO_CAM_MATRIX_REF);
 	
-	if(!testResults(bb,refBB))
+	if(!testFloatResults(bb,refBB))
 	    {dumpContentsToFile(bb,NO_CAM_MATRIX_REF+".result");fail("");}
     }//end cubeRendererTest
     
@@ -192,14 +119,167 @@ public class RenderingIT{
 	tr.mainRenderer.get().getRendererFactory().getObjectProcessingStage().getCamMatrixTexture().
 	 getTextureImage(bb,GL3.GL_RGBA,GL3.GL_FLOAT);
 	bb.clear();
-	/*
-	dumpContentsToFile(bb,YES_CAM_MATRIX_REF);
-	*/
+	
+	//dumpContentsToFile(bb,YES_CAM_MATRIX_REF);
+	
 	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
 	readContentsFromResource(refBB,YES_CAM_MATRIX_REF);
 	
-	if(!testResults(bb,refBB))
+	if(!testFloatResults(bb,refBB))
 	    {dumpContentsToFile(bb,YES_CAM_MATRIX_REF+".result");fail("");}
     }//end cubeRendererTest
+    
+    @Test
+    public void cubeRendererVertexNormXYTest() throws Exception {
+	clearOldResult(VERTEX_NORMXY_REF);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexNormXYTexture().
+	 getTextureImage(bb,GL3.GL_RG,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,VERTEX_NORMXY_REF);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,VERTEX_NORMXY_REF);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,VERTEX_NORMXY_REF+".result");fail("");}
+    }//end cubeRendererVertexTest()
+    
+    @Test
+    public void cubeRendererVertexNormZTest() throws Exception {
+	final String referenceFilename = VERTEX_NORMZ_REF;
+	clearOldResult(referenceFilename);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexNormZTexture().
+	 getTextureImage(bb,GL3.GL_RED,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,referenceFilename);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,referenceFilename);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
+    }//end cubeRendererVertexNormZTest()
+    
+    @Test
+    public void cubeRendererVertexTextureIDTest() throws Exception {
+	final String referenceFilename = VERTEX_TEXTUREID_REF;
+	clearOldResult(referenceFilename);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexTextureIDTexture().
+	 getTextureImage(bb,GL3.GL_RED,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,referenceFilename);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,referenceFilename);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
+    }//end cubeRendererVertexNormZTest()
+    
+    @Test
+    public void cubeRendererVertexZTest() throws Exception {
+	final String referenceFilename = VERTEX_Z_REF;
+	clearOldResult(referenceFilename);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexZTexture().
+	 getTextureImage(bb,GL3.GL_RED,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,referenceFilename);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,referenceFilename);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
+    }//end cubeRendererVertexZTest()
+    
+    @Test
+    public void cubeRendererVertexWTest() throws Exception {
+	final String referenceFilename = VERTEX_W_REF;
+	clearOldResult(referenceFilename);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*1*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexWTexture().
+	 getTextureImage(bb,GL3.GL_RED,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,referenceFilename);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,referenceFilename);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
+    }//end cubeRendererVertexWTest()
 
+    @Test
+    public void cubeRendererVertexXYTest() throws Exception {
+	final String referenceFilename = VERTEX_XY_REF;
+	clearOldResult(referenceFilename);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexXYTexture().
+	 getTextureImage(bb,GL3.GL_RG,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,referenceFilename);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,referenceFilename);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
+    }//end cubeRendererVertexXYTest()
+    
+    @Test
+    public void cubeRendererVertexUVTest() throws Exception {
+	final String referenceFilename = VERTEX_UV_REF;
+	clearOldResult(referenceFilename);
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(
+		VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexUVTexture().
+	 getTextureImage(bb,GL3.GL_RG,GL3.GL_FLOAT);
+	bb.clear();
+	
+	//dumpContentsToFile(bb,referenceFilename);
+	
+	ByteBuffer refBB = ByteBuffer.allocate(bb.capacity()).order(ByteOrder.nativeOrder());
+	readContentsFromResource(refBB,referenceFilename);
+	
+	if(!testFloatResults(bb,refBB))
+	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
+    }//end cubeRendererVertexUVTest()
+    
 }//end RendererIT

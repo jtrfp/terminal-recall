@@ -13,35 +13,23 @@
 
 package org.jtrfp.trcl.gpu;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 
 import javax.media.opengl.GL3;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.TRIT;
-import org.jtrfp.trcl.core.Renderer;
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRConfiguration;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
-import org.jtrfp.trcl.obj.WorldObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
+//@Ignore
 public class RenderingIT extends TRIT{
     protected static final String NO_CAM_MATRIX_REF = "noCamMatrixRef.dat";
     protected static final String YES_CAM_MATRIX_REF= "yesCamMatrixRef.dat";
@@ -63,6 +51,7 @@ public class RenderingIT extends TRIT{
     @Before
     public void setUp() throws Exception{
 	super.setUp();
+	errorThreshold=.1;
     }
     
     
@@ -73,7 +62,94 @@ public class RenderingIT extends TRIT{
     }
     
     @Test
-    public void emptyRendererTest() throws Exception {
+    public void populatedRendererYesCamMatrixTest() throws Exception {
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(1024*128*4*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	tr.mainRenderer.get().getRendererFactory().getObjectProcessingStage().getCamMatrixTexture().
+	 getTextureImage(bb,GL3.GL_RGBA,GL3.GL_FLOAT);
+	bb.clear();
+	
+	boolean result = false;
+	while(bb.hasRemaining()){
+	    float res = bb.getFloat();
+	    if(res!=0) result = true;
+	    }
+	assertTrue(result);
+    }//end populatedRendererTest
+    
+    @Test
+    public void populatedRendererNoCamMatrixTest() throws Exception {
+	spawnCubes();
+	ByteBuffer bb = ByteBuffer.allocateDirect(1024*128*4*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	tr.mainRenderer.get().getRendererFactory().getObjectProcessingStage().getNoCamMatrixTexture().
+	 getTextureImage(bb,GL3.GL_RGBA,GL3.GL_FLOAT);
+	bb.clear();
+	
+	boolean result = false;
+	while(bb.hasRemaining()){
+	    float res = bb.getFloat();
+	    if(res!=0) result = true;
+	    }
+	assertTrue(result);
+    }//end populatedRendererTest
+    
+    @Test
+    public void emptyRendererUVVertexTest() throws Exception {
+	ByteBuffer bb = ByteBuffer.allocateDirect(VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4)
+		.order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexUVTexture().
+	 getTextureImage(bb,GL3.GL_RG,GL3.GL_FLOAT);
+	bb.clear();
+	
+	int matrixError=0;
+	while(bb.hasRemaining()){
+	    float res = bb.getFloat();
+	    //if(res!=0)System.out.println("res="+res+" pos="+bb.position());
+	    matrixError+=res;
+	    }
+	assertEquals(0,matrixError);
+    }//end emptyRendereTest
+   
+    @Test
+    public void emptyRendererXYVertexTest() throws Exception {
+	ByteBuffer bb = ByteBuffer.allocateDirect(VertexProcessingStage.VERTEX_BUFFER_WIDTH*VertexProcessingStage.VERTEX_BUFFER_HEIGHT*2*4)
+		.order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	tr.mainRenderer.get().getRendererFactory().getVertexProcessingStage().getVertexXYTexture().
+	 getTextureImage(bb,GL3.GL_RG,GL3.GL_FLOAT);
+	bb.clear();
+	
+	int matrixError=0;
+	while(bb.hasRemaining()){
+	    float res = bb.getFloat();
+	    //if(res!=0)System.out.println("res="+res+" pos="+bb.position());
+	    matrixError+=res;
+	    }
+	assertEquals(0,matrixError);
+    }//end emptyRendereTest
+    
+    @Test
+    public void emptyRendererYesCamMatrixTest() throws Exception {
+	ByteBuffer bb = ByteBuffer.allocateDirect(1024*128*4*4).order(ByteOrder.nativeOrder());
+	Thread.sleep(1000);
+	tr.mainRenderer.get().getRendererFactory().getObjectProcessingStage().getCamMatrixTexture().
+	 getTextureImage(bb,GL3.GL_RGBA,GL3.GL_FLOAT);
+	bb.clear();
+	
+	int matrixError=0;
+	while(bb.hasRemaining()){
+	    float res = bb.getFloat();
+	    //if(res!=0)System.out.println("res="+res+" pos="+bb.position());
+	    matrixError+=res;
+	    }
+	assertEquals(0,matrixError);
+    }//end emptyRendereTest
+    
+    @Test
+    public void emptyRendererNoCamMatrixTest() throws Exception {
 	ByteBuffer bb = ByteBuffer.allocateDirect(1024*128*4*4).order(ByteOrder.nativeOrder());
 	Thread.sleep(1000);
 	tr.mainRenderer.get().getRendererFactory().getObjectProcessingStage().getNoCamMatrixTexture().
@@ -87,8 +163,9 @@ public class RenderingIT extends TRIT{
 	    matrixError+=res;
 	    }
 	assertEquals(0,matrixError);
-    }//end emptyRendereTest
+    }//end emptyRendererTest
     
+    @Ignore
     @Test
     public void cubeRendererMatrixTestNoCam() throws Exception {
 	clearOldResult(NO_CAM_MATRIX_REF);
@@ -109,6 +186,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,NO_CAM_MATRIX_REF+".result");fail("");}
     }//end cubeRendererTest
     
+    @Ignore
     @Test
     public void cubeRendererMatrixTestYesCam() throws Exception {
 	clearOldResult(YES_CAM_MATRIX_REF);
@@ -129,6 +207,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,YES_CAM_MATRIX_REF+".result");fail("");}
     }//end cubeRendererTest
     
+    @Ignore
     @Test
     public void cubeRendererVertexNormXYTest() throws Exception {
 	clearOldResult(VERTEX_NORMXY_REF);
@@ -150,6 +229,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,VERTEX_NORMXY_REF+".result");fail("");}
     }//end cubeRendererVertexTest()
     
+    @Ignore
     @Test
     public void cubeRendererVertexNormZTest() throws Exception {
 	final String referenceFilename = VERTEX_NORMZ_REF;
@@ -172,6 +252,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
     }//end cubeRendererVertexNormZTest()
     
+    @Ignore
     @Test
     public void cubeRendererVertexTextureIDTest() throws Exception {
 	final String referenceFilename = VERTEX_TEXTUREID_REF;
@@ -194,6 +275,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
     }//end cubeRendererVertexNormZTest()
     
+    @Ignore
     @Test
     public void cubeRendererVertexZTest() throws Exception {
 	final String referenceFilename = VERTEX_Z_REF;
@@ -216,6 +298,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
     }//end cubeRendererVertexZTest()
     
+    @Ignore
     @Test
     public void cubeRendererVertexWTest() throws Exception {
 	final String referenceFilename = VERTEX_W_REF;
@@ -237,7 +320,8 @@ public class RenderingIT extends TRIT{
 	if(!testFloatResults(bb,refBB))
 	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
     }//end cubeRendererVertexWTest()
-
+    
+    @Ignore
     @Test
     public void cubeRendererVertexXYTest() throws Exception {
 	final String referenceFilename = VERTEX_XY_REF;
@@ -260,6 +344,7 @@ public class RenderingIT extends TRIT{
 	    {dumpContentsToFile(bb,referenceFilename+".result");fail("");}
     }//end cubeRendererVertexXYTest()
     
+    @Ignore
     @Test
     public void cubeRendererVertexUVTest() throws Exception {
 	final String referenceFilename = VERTEX_UV_REF;

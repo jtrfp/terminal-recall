@@ -31,20 +31,19 @@ import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GLExecutor;
-import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.FPSAnimator;
 
 public final class ThreadManager implements GLExecutor{
     public static final int RENDER_FPS 			= 60;
-    public static final int GAMEPLAY_FPS 		= RENDER_FPS;
+    public static final int GAMEPLAY_FPS 		= 60;
     public static final int RENDERLIST_REFRESH_FPS 	= 1;
     private final TR 			tr;
     private final Timer 		lightweightTimer 	= new Timer("LightweightTimer");
@@ -53,7 +52,7 @@ public final class ThreadManager implements GLExecutor{
     private long 			timeInMillisSinceLastGameTick 	= 0L;
     private int 			counter 			= 0;
     private Thread 			renderingThread;
-    private Animator			animator;
+    private FPSAnimator			animator;
     private boolean[] 			paused = new boolean[]{false};
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
@@ -204,7 +203,7 @@ public final class ThreadManager implements GLExecutor{
 		gameplay();
 		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
-	animator = new Animator(tr.getRootWindow().getCanvas());
+	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);
 	animator.start();
 	tr.getRootWindow().addWindowListener(new WindowAdapter(){
 	    @Override

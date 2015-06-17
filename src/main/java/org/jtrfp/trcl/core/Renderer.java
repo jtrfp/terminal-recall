@@ -111,17 +111,17 @@ public final class Renderer {
 
     private void fpsTracking() {
 	frameNumber++;
-	final long dT = (long) (System.currentTimeMillis() - lastTimeMillis);
-	if(dT<=0)return;
-	final int fps = (int)(1000L / dT);
-	meanFPS = meanFPS*.9+(double)fps*.1;
 	if ((frameNumber %= 20) == 0) {
-	    reporter.report("org.jtrfp.trcl.core.Renderer.FPS", "" + meanFPS);
+	    final long dT = System.currentTimeMillis() - lastTimeMillis;
+		if(dT<=0)return;
+		final int fps = (int)(20.*(1000. / (double)dT));
+	    reporter.report("org.jtrfp.trcl.core.Renderer.FPS", "" + fps);
 	    final Collection<PositionedRenderable> coll = renderList.get().getVisibleWorldObjectList();
 	    synchronized(coll){
 	    reporter.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", coll.size());}
+	    lastTimeMillis = System.currentTimeMillis();
 	}
-	lastTimeMillis = System.currentTimeMillis();
+	
     }//end fpsTracking()
     
     public void setCamera(Camera toUse){

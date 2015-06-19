@@ -27,5 +27,6 @@ noperspective out vec2 screenLoc;
 void main(){
 vec2 pos = vec2((gl_VertexID%2),gl_VertexID/2)*3;
 gl_Position.xy 	= pos*2-1;
+gl_Position.w   = 1;
 screenLoc 		= pos;
 }//end main()

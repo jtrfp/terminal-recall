@@ -73,5 +73,7 @@ void main(){
  						uintBitsToFloat(texelFetch(rootBuffer,matrixOffset+3)));
  uint 	skipCameraMatrix= UNibble(renderMode,1u);
  camMatrix = skipCameraMatrix==0u?cameraMatrix * noCamMatrix:noCamMatrix;
+ gl_Position.w=1;
+ gl_Position.z=0;
  }
  

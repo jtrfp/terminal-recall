@@ -40,8 +40,8 @@ public class AutoFiring extends Behavior {
 	final WorldObject thisObject = getParent();
 	final Player player = thisObject.getTr().getGame().getPlayer();
 	if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
-	final double [] thisPos = thisObject.getPosition();
-	final double [] playerPos = player.getPosition();
+	final double [] thisPos = thisObject.getPositionWithOffset();
+	final double [] playerPos = player.getPositionWithOffset();
 	final double dist = Vect3D.distance(thisPos, playerPos);
 	if(dist<maxFiringDistance||dist>minFiringDistance){
 	    final int patIndex=(int)(((timeMillis+patternOffsetMillis)%totalFiringPatternTimeMillis)/timePerPatternEntry);

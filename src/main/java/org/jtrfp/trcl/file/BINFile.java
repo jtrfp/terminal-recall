@@ -67,6 +67,53 @@ public abstract class BINFile implements ThirdPartyParseable {
 	}// end describeFormat(Parser prs)
 
 	public static class DataBlock {
+	    public static class VertexColorBlock implements ThirdPartyParseable {
+		private int  zero;
+		private long numVertices;
+		private final ArrayList<Long> paletteIndices = new ArrayList<Long>();
+		@Override
+		public void describeFormat(Parser parser)
+			throws UnrecognizedFormatException {
+		    parser.littleEndian();
+		    parser.expectBytes(new byte[]{0,0,0,0x1F}, FailureBehavior.UNRECOGNIZED_FORMAT);
+		    parser.int4s(parser.property("zero"       , int.class));
+		    parser.int4u(parser.property("numVertices", long.class));
+		    System.out.println("NumVertices="+getNumVertices()+" zero="+zero);
+		    for(int i=0; i<getNumVertices(); i++)
+			parser.int4u(parser.indexedProperty("paletteIndices", Long.class, i));
+		}//end describeFormat(...)
+		/**
+		 * @return the zero
+		 */
+		public int getZero() {
+		    return zero;
+		}
+		/**
+		 * @param zero the zero to set
+		 */
+		public void setZero(int zero) {
+		    this.zero = zero;
+		}
+		/**
+		 * @return the numVertices
+		 */
+		public long getNumVertices() {
+		    return numVertices;
+		}
+		/**
+		 * @param numVertices the numVertices to set
+		 */
+		public void setNumVertices(long numVertices) {
+		    this.numVertices = numVertices;
+		}
+		/**
+		 * @return the paletteIndices
+		 */
+		public ArrayList<Long> getPaletteIndices() {
+		    return paletteIndices;
+		}
+	    }// end FaceBlockXXX
+	    
 	    /**
 	     * Added 12/21/2012
 	     * 
@@ -253,6 +300,21 @@ public abstract class BINFile implements ThirdPartyParseable {
 		}
 
 	    }// end FaceBlockXXX
+	    
+	    /**
+	     * "Like 0x19 but follows always after 0x1F and is needed to interpolate the color 
+	     * indexes between vertices as defined in the preceding 0x1F block. Found only in 4 BINs, 
+	     * which are the red, green, blue and pink rectangular lasers. Note: The indexes are interpolated, 
+	     * NOT the colors." -REWiki
+	     * @author Chuck Ritola
+	     *
+	     */
+	    public static class FaceBlock06 extends FaceBlock19{
+		@Override
+		protected byte getBlockID() {
+		    return 0x06;
+		}
+	    }//end FaceBlock06
 
 	    public static class FaceBlock19 extends FaceBlock {
 /*

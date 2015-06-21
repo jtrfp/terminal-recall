@@ -67,6 +67,7 @@ import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.BillboardTexCoords0x04;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.ColorBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.EOFBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock;
@@ -77,6 +78,7 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
+import org.jtrfp.trcl.file.BINFile.Model.DataBlock.VertexColorBlock;
 import org.jtrfp.trcl.file.CLRFile;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LTEFile;
@@ -343,6 +345,30 @@ public class ResourceManager{
 	private static final double [] BOX_U = new double[]{0,1,1,0};
 	private static final double [] BOX_V = new double[]{0,0,1,1};
 	
+	public BINFile.AnimationControl getAnimationControlBIN(String name) throws FileNotFoundException, FileLoadException, IOException, IllegalAccessException{
+	    BINFile.AnimationControl result;
+	    result = aniBinNameMap.get(name);
+	    if(result!=null)
+		    return result;
+	    InputStream is = getInputStreamFromResource("MODELS\\"+name);
+	    //TODO: InputStream not guaranteed to close when exception is thrown. Wrap in try{}, close it, and re-throw.
+	    result = new BINFile.AnimationControl(is);//This will throw an exception on and escape to the static model block
+	    is.close();
+	    aniBinNameMap.put(name, result);
+	    return result;
+	}
+	
+	public BINFile.Model getBinFileModel(String name) throws FileNotFoundException, FileLoadException, IOException, IllegalAccessException{
+	    BINFile.Model result;
+	    result = modBinNameMap.get(name);
+	    if(result==null){
+		InputStream is = getInputStreamFromResource("MODELS\\"+name);
+		result = new BINFile.Model(is);
+		modBinNameMap.put(name, result);
+	    }//end if(null)
+	    return result;
+	}//end getBinFileModel()
+	
 	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, ColorPaletteVectorList ESTuTvPalette) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
@@ -351,17 +377,11 @@ public class ResourceManager{
 		//This set is for identifying and culling redundant segs.
 		final HashSet<Integer>alreadyVisitedLineSegs = new HashSet<Integer>();
 		boolean hasAlpha=false;
+		boolean skipLighting=false;
 		try {
 			BINFile.AnimationControl ac=null;
 			Model result = new Model(true,tr);
-			ac = aniBinNameMap.get(name);
-			if(ac==null){
-				InputStream is = getInputStreamFromResource("MODELS\\"+name);
-				//TODO: InputStream not guaranteed to close when exception is thrown. Wrap in try{}, close it, and re-throw.
-				ac = new BINFile.AnimationControl(is);//This will throw an exception on and escape to the static model block
-				is.close();
-				aniBinNameMap.put(name, ac);
-				}
+			ac = getAnimationControlBIN(name);
 			System.out.println("Recognized as animation control file.");
 			//Build the Model from the BINFile.Model
 			Model [] frames = new Model[ac.getNumFrames()];
@@ -381,12 +401,8 @@ public class ResourceManager{
 				BINFile.Model m=null;
 				Model result = new Model(false,tr);
 				result.setDebugName(name);
-				m = modBinNameMap.get(name);
-				if(m==null){
-					InputStream is = getInputStreamFromResource("MODELS\\"+name);
-					m = new BINFile.Model(is);
-					modBinNameMap.put(name, m);
-					}//end if(null)
+				m = getBinFileModel(name);
+				
 				final double cpScalar=(scale*TR.crossPlatformScalar*256.)/(double)m.getScale();
 				System.out.println("Recognized as model file.");
 				List<org.jtrfp.trcl.gpu.Vertex> vertices = new ArrayList<org.jtrfp.trcl.gpu.Vertex>();
@@ -463,6 +479,10 @@ public class ResourceManager{
 									currentTexture,
 									RenderMode.DYNAMIC,hasAlpha,
 									blockNormal.normalize(),"quad.BINmodel"+name);
+							if(skipLighting){
+							    tris[0].setCentroidNormal(Vector3D.ZERO);
+							    tris[1].setCentroidNormal(Vector3D.ZERO);
+							}
 							result.addTriangle(tris[0]);
 							result.addTriangle(tris[1]);
 							}
@@ -486,6 +506,8 @@ public class ResourceManager{
 							}//end for(vi)
 							if(currentTexture==null)
 								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=tr.gpu.get().textureManager.get().getFallbackTexture();}
+							if(skipLighting)
+							    t.setCentroidNormal(Vector3D.ZERO);
 							result.addTriangle(t);
 							}//end if(3 vertices)
 						else
@@ -500,13 +522,24 @@ public class ResourceManager{
 					else if(b instanceof FaceBlock19){
 					    System.out.println(b.getClass().getSimpleName()+" (solid colored faces) not yet implemented. Skipping...");}
 					else if(b instanceof FaceBlock05){}//TODO
-					else if(b instanceof LineSegmentBlock){
+					else if(b instanceof BillboardTexCoords0x04){
+					    hasAlpha=true;
+					    skipLighting=true;
+					    System.out.println("0x04 tag billboard/sprite.");
+					}else if(b instanceof VertexColorBlock){
+					    //TODO: finish implementation.
+					    System.out.println("Found Vertex Color Block. Note: Implementation not complete.");
+					    final VertexColorBlock vcb = (VertexColorBlock)b;
+					    List<Long> indices = vcb.getPaletteIndices();
+					    if(!indices.isEmpty())
+						currentTexture = tr.gpu.get().textureManager.get().solidColor(tr.getGlobalPalette()[indices.get(0).intValue()]);
+					}else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
 						org.jtrfp.trcl.gpu.Vertex v1 = vertices.get(block.getVertexID1());
 						org.jtrfp.trcl.gpu.Vertex v2 = vertices.get(block.getVertexID2());
 						if(!alreadyVisitedLineSegs.contains(v1.hashCode()*v2.hashCode())){
 						    Triangle [] newTris = new Triangle[6];
-						   
+						    
 						    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(), 
 							    tr.gpu.get().textureManager.get().getDefaultTriPipeTexture(), 
 							    200, newTris, 0);
@@ -517,6 +550,7 @@ public class ResourceManager{
 					else if(b instanceof Unknown12){
 					    System.out.println("Found unknown12. Assuming this is a tag for a transparent texture...");
 					    hasAlpha=true;
+					    skipLighting=true;
 					}
 					else if(b instanceof AnimatedTextureBlock){
 						System.out.println("Found animated texture block.");

@@ -18,123 +18,70 @@ import java.awt.Dimension;
 import org.jtrfp.trcl.tools.Util;
 
 public enum Powerup {
-    RTL(Weapon.RTL, 100, 0, 0, 0, 0, true, Integer.MAX_VALUE, new String[] {
-	    "LASE0000.RAW", "LASE0001.RAW", "LASE0002.RAW", "LASE0003.RAW",
-	    "LASE0004.RAW", "LASE0005.RAW", "LASE0006.RAW", "LASE0007.RAW" },
-	    new String[]{"LASER00.RAW","LASER04.RAW","LASER08.RAW","LASER12.RAW"},
-	    "Rapid Targeting Laser", "Rapid Fire Laser"), 
+    RTL(Weapon.RTL, 100, 0, 0, 0, 0, true, Integer.MAX_VALUE,
+	    "Rapid Targeting Laser", "Rapid Fire Laser","POWERLAS.BIN"), 
     PAC(Weapon.PAC, 100,
-	    0, 0, 0, 0, false, Integer.MAX_VALUE, new String[] {
-		    "PLAS0000.RAW", "PLAS0001.RAW", "PLAS0002.RAW",
-		    "PLAS0003.RAW", "PLAS0004.RAW", "PLAS0005.RAW",
-		    "PLAS0006.RAW", "PLAS0007.RAW" },
-		    new String[]{"LASER00.RAW","LASER04.RAW","LASER08.RAW","LASER12.RAW"}, 
+	    0, 0, 0, 0, false, Integer.MAX_VALUE, 
 		    "Plasma Assault Cannon",
-	    	    "Servo-Kinetic Lasers"), 
+	    	    "Servo-Kinetic Lasers","POWERPLA.BIN"), 
     ION(Weapon.ION, 100, 0, 0, 0, 0, true,
-	    Integer.MAX_VALUE, new String[] { "ANTI0000.RAW", "ANTI0001.RAW",
-		    "ANTI0002.RAW", "ANTI0003.RAW", "ANTI0004.RAW",
-		    "ANTI0005.RAW", "ANTI0006.RAW", "ANTI0007.RAW" },
-		    new String[]{ "ANT0004.RAW",
-			    "ANT0008.RAW", "ANT0012.RAW" },
-	    "Ion Burst Cannon", "Dispersion Cannon"), 
+	    Integer.MAX_VALUE,
+	    "Ion Burst Cannon", "Dispersion Cannon", "POWERANT.BIN"), 
     MAM(Weapon.MAM, 40, 0, 0,
-	    0, 0, false, Integer.MAX_VALUE, new String[] { "MISS0000.RAW",
-		    "MISS0001.RAW", "MISS0002.RAW", "MISS0003.RAW",
-		    "MISS0004.RAW", "MISS0005.RAW", "MISS0006.RAW",
-		    "MISS0007.RAW" },
-		    new String[]{ "MISS0000.RAW",
-			    "MISS0002.RAW", 
-			    "MISS0004.RAW", "MISS0006.RAW"}, "Manually-Aimed Missiles",
-	    "Dead-On Missiles"), 
+	    0, 0, false, Integer.MAX_VALUE, "Manually-Aimed Missiles",
+	    "Dead-On Missiles","POWERMIS.BIN"), 
     SAD(Weapon.SAD, 20, 0, 0, 0, 0, false,
-	    Integer.MAX_VALUE, new String[] { "GMIS0000.RAW", "GMIS0001.RAW",
-		    "GMIS0002.RAW", "GMIS0003.RAW", "GMIS0004.RAW",
-		    "GMIS0005.RAW", "GMIS0006.RAW", "GMIS0007.RAW" },
-		    new String[]{ "GMIS00.RAW", "GMIS04.RAW",
-			    "GMIS08.RAW", "GMIS12.RAW" },
-	    "Seek-and-Destroy Missiles", "Vipers"), 
+	    Integer.MAX_VALUE,
+	    "Seek-and-Destroy Missiles", "Vipers","POWERGMI.BIN"), 
     SWT(Weapon.SWT, 20, 0, 0,
-	    0, 0, false, Integer.MAX_VALUE, new String[] { "SUPM0000.RAW",
-		    "SUPM0001.RAW", "SUPM0002.RAW", "SUPM0003.RAW",
-		    "SUPM0004.RAW", "SUPM0005.RAW", "SUPM0006.RAW",
-		    "SUPM0007.RAW" },
-		    new String[]{ "SPRMIS00.RAW", "SPRMIS04.RAW",
-			    "SPRMIS08.RAW", "SPRMIS12.RAW" }, "ShockWave Torpedoes",
-	    "Bion Fury Missiles"), 
+	    0, 0, false, Integer.MAX_VALUE,
+		    "ShockWave Torpedoes",
+	    "Bion Fury Missiles", "POWERSUP.BIN"), 
     shieldRestore(null, 0, 65535, 0, 0, 0,
-	    false, Integer.MAX_VALUE, new String[] { "SHEI0000.RAW",
-		    "SHEI0001.RAW", "SHEI0002.RAW", "SHEI0003.RAW",
-		    "SHEI0004.RAW", "SHEI0005.RAW", "SHEI0006.RAW",
-		    "SHEI0007.RAW" },
-		    new String[]{ "SHEI0000.RAW",
-			    "SHEI0004.RAW", "SHEI0008.RAW", "SHEI0012.RAW"}, 
-			    "Shields Restored", "Shields Restored"), 
+	    false, Integer.MAX_VALUE,
+			    "Shields Restored", "Shields Restored", "POWERSHE.BIN"), 
     invisibility(null, 0, 0, 1000 * 30, 0, 0, false, Integer.MAX_VALUE,
-	    new String[] { "INVI0000.RAW", "INVI0001.RAW", "INVI0002.RAW",
-		    "INVI0003.RAW", "INVI0004.RAW", "INVI0005.RAW",
-		    "INVI0006.RAW", "INVI0007.RAW" },
-		    new String[]{ "INVI0000.RAW", "INVI0004.RAW", "INVI0008.RAW",
-			    "INVI0012.RAW"}, "Invisibility",
-	    "Invisiblity"), 
+		     "Invisibility",
+	    "Invisiblity","POWERVIS.BIN"), 
     invincibility(null, 0, 0, 0, 1000 * 30, 0, false,
-	    Integer.MAX_VALUE, new String[] { "INVN0000.RAW", "INVN0001.RAW",
-		    "INVN0002.RAW", "INVN0003.RAW", "INVN0004.RAW",
-		    "INVN0005.RAW", "INVN0006.RAW", "INVN0007.RAW" },
-		    new String[]{ "INVIN00.RAW", "INVIN04.RAW",
-			    "INVIN08.RAW", "INVIN12.RAW" },
-	    "Invincibility", "Invincibility"), 
+	    Integer.MAX_VALUE,
+	    "Invincibility", "Invincibility","POWERINV.BIN"), 
     DAM(Weapon.DAM, 1, 0, 0, 0, 0,
-	    false, 1, new String[] { "MEGA0000.RAW", "MEGA0001.RAW",
-		    "MEGA0002.RAW", "MEGA0003.RAW", "MEGA0004.RAW",
-		    "MEGA0005.RAW", "MEGA0006.RAW", "MEGA0007.RAW" },
-		    new String[]{ "INVIN00.RAW", "INVIN04.RAW",
-			    "INVIN08.RAW", "INVIN12.RAW" },//TODO: What's the real billboard for this?
-	    "Discrete Annihilation Missile", "FFF"), 
+	    false, 1,
+		    //TODO: What's the real billboard for this?
+	    "Discrete Annihilation Missile", "FFF","POWERFIR.BIN"), 
     Afterburner(null, 0, 0, 0,
-	    0, 120, false, Integer.MAX_VALUE, new String[] { "AFTR0000.RAW",
-		    "AFTR0001.RAW", "AFTR0002.RAW", "AFTR0003.RAW",
-		    "AFTR0004.RAW", "AFTR0005.RAW", "AFTR0006.RAW",
-		    "AFTR0007.RAW" },
-		    new String[]{
-			    "ENCA0000.RAW", "ENCA0001.RAW", "ENCA0002.RAW",
-			    "ENCA0003.RAW"}, "Afterburner", "Turbo!"), //TODO: What's the real billboard for this?
+	    0, 120, false, Integer.MAX_VALUE,
+		    "Afterburner", "Turbo!","POWERZAP.BIN"), //TODO: What's the real billboard for this?
     PowerCore(null,
-	    0, 6554, 0, 0, 0, false, Integer.MAX_VALUE, new String[] {
-		    "ENCA0000.RAW", "ENCA0001.RAW", "ENCA0002.RAW",
-		    "ENCA0003.RAW", "ENCA0004.RAW", "ENCA0005.RAW",
-		    "ENCA0006.RAW", "ENCA0007.RAW" },
-		    new String[]{
-			    "ENCA0000.RAW", "ENCA0001.RAW", "ENCA0002.RAW",
-			    "ENCA0003.RAW"}, "Shield Boost",
-	    "Shield Boost!"), 
+	    0, 6554, 0, 0, 0, false, Integer.MAX_VALUE,
+		    "Shield Boost",
+	    "Shield Boost!", "POWERCAN.BIN"), 
     Random(null, 0, 0, 0, 0, 0, false,
-	    Integer.MAX_VALUE, null, null, "???", "???"); // Not for use in TV
+	    Integer.MAX_VALUE,"???", "???","POWER1.BIN"); // Not for use in TV
     private final int	   shieldDelta, invisibiltyTimeDeltaMillis,
 	    invincibilityTimeDeltaMillis, afterburnerDelta, weaponSupplyDelta;
-    private final String[] f3BillboardFrames, tvBillboardFrames;
     private final boolean  doublesFiringMultiplex;
     private final int 	   quantityLimit;
-    private final String   tvDescription, f3Description;
+    private final String   tvDescription, f3Description, model;
     private final Weapon   weapon;
 
     Powerup(Weapon weapon, int weaponSupplyDelta, int shieldDelta,
 	    int invisibilityTimeDeltaMillis, int invincibilityTimeDeltaMillis,
 	    int afterburnerDelta, boolean doublesFiringMultiplex,
-	    int quantityLimit, String[] f3BillboardFrames, String[] tvBillboardFrames, String tvDescription,
-	    String f3Description) {
+	    int quantityLimit, String tvDescription,
+	    String f3Description, String model) {
 	this.shieldDelta 		  = shieldDelta;
 	this.invisibiltyTimeDeltaMillis   = invisibilityTimeDeltaMillis;
 	this.invincibilityTimeDeltaMillis = invincibilityTimeDeltaMillis;
 	this.afterburnerDelta 		  = afterburnerDelta;
-	this.f3BillboardFrames 		  = f3BillboardFrames;
-	this.tvBillboardFrames 		  = tvBillboardFrames;
 	this.doublesFiringMultiplex 	  = doublesFiringMultiplex;
 	this.quantityLimit 		  = quantityLimit;
 	this.tvDescription 		  = tvDescription;
 	this.f3Description 		  = f3Description;
 	this.weapon 			  = weapon;
 	this.weaponSupplyDelta 		  = weaponSupplyDelta;
+	this.model                        = model;
     }// end constructor
 
     public static final int 	  TIME_PER_FRAME_MILLIS = 500;
@@ -169,13 +116,6 @@ public enum Powerup {
      */
     public int getAfterburnerDelta() {
 	return afterburnerDelta;
-    }
-
-    /**
-     * @return the billboardFrames
-     */
-    public String[] getF3BillboardFrames() {
-	return f3BillboardFrames;
     }
 
     /**
@@ -221,9 +161,9 @@ public enum Powerup {
     }
 
     /**
-     * @return the tvBillboardFrames
+     * @return the model
      */
-    public String[] getTvBillboardFrames() {
-        return tvBillboardFrames;
+    public String getModel() {
+        return model;
     }
 }//end Powerup

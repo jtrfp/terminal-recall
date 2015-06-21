@@ -17,37 +17,38 @@ import java.awt.Dimension;
 import org.jtrfp.trcl.file.ModelingType.BINModelingType;
 import org.jtrfp.trcl.file.ModelingType.BillboardModelingType;
 import org.jtrfp.trcl.file.ModelingType.FlatModelingType;
-
+/**
+ * LASER6.BIN - fireball == FIREBALL.BIN
+ * TV-style colored Jenga pieces:
+ * LASER.BIN - purple
+ * LASER7.BIN - Green
+ * LASER8.BIN - Orange-red
+ * LASER9.BIN - Blue
+ * @author Chuck Ritola
+ *
+ */
 public enum Weapon {
     // / THESE ARE LISTED REPRESENTATIVE OF THE ORDINAL ORDER IN A DEF FILE. DO
     // NOT RE-ORDER!!
-    purpleLaser(null, null, new FlatModelingType("PURFRIN2.RAW","PURFRIN2.RAW", new Dimension(
-	    80000, 560000)), 4096, ModelingType.MAP_SQUARE_SIZE * 6, -1, 2048,
+    purpleLaser(null, null,new BINModelingType("LASER.BIN"), 4096, ModelingType.MAP_SQUARE_SIZE * 6, -1, 2048,
 	    false, false), 
-    PAC("PAC", "SKL", new FlatModelingType("SQGLSR.RAW","SQGLSR.RAW",
-	    new Dimension(120000, 560000)), 4096,
+    PAC("PAC", "SKL", new BINModelingType("LASER3.BIN"), 4096, //LASER3.BIN
 	    ModelingType.MAP_SQUARE_SIZE * 6, 1, 2048, true, false), 
     ION("ION",
-	    "DC1", new BillboardModelingType(new String[] { "PULSE0.RAW",
-		    "PULSE1.RAW", "PULSE2.RAW", "PULSE3.RAW" }, 70,
-		    new Dimension(320000, 320000)), 8192,
+	    "DC1", new BINModelingType("LASER4.BIN"), 8192,
 	    ModelingType.MAP_SQUARE_SIZE * 6, 2, 2048, false, false), 
     RTL(
-	    "RTL", "RFL20", new FlatModelingType("NEWLASER.RAW","SQGLSR.RAW", new Dimension(
-		    100000, 560000)), 4096, ModelingType.MAP_SQUARE_SIZE * 8,
+	    "RTL", "RFL20", new BINModelingType("LASER5.BIN"), 4096, ModelingType.MAP_SQUARE_SIZE * 8,
 	    3, 2048, true, false), 
     fireBall(null, null, new BINModelingType(
 	    "FIREBALL.BIN"), 8192, ModelingType.MAP_SQUARE_SIZE * 8, -1, 1024,
 	    false, false), 
-    greenLaser(null, null, new FlatModelingType(
-	    "GIDMIS.RAW","SQGLSR.RAW", new Dimension(80000, 560000)), 8192,
+    greenLaser(null, null, new BINModelingType("LASER7.BIN"), 8192,
 	    ModelingType.MAP_SQUARE_SIZE * 6, -1, 2048, false, false), 
     redLaser(
-	    null, null, new FlatModelingType("SQGLSR.RAW","SQGLSR.RAW", new Dimension(80000,
-		    560000)), 4096, ModelingType.MAP_SQUARE_SIZE * 7, -1, 2048,
+	    null, null, new BINModelingType("LASER8.BIN"), 4096, ModelingType.MAP_SQUARE_SIZE * 7, -1, 2048,
 	    false, false), 
-    blueLaser(null, null, new FlatModelingType(
-	    "BFIRJ0.RAW","SQGLSR.RAW", new Dimension(80000, 560000)), 4096,
+    blueLaser(null, null, new BINModelingType("LASER9.BIN"), 4096,
 	    ModelingType.MAP_SQUARE_SIZE * 7, -1, 2048, false, false), 
     bullet(
 	    null, null, new BINModelingType("BULLET.BIN"), 6554,
@@ -74,15 +75,13 @@ public enum Weapon {
 		    "PURFRIN3.RAW" }, 45, new Dimension(320000, 320000)),
 	    8192, ModelingType.MAP_SQUARE_SIZE * 3, -1, 2048, false, false), 
     bossW6(
-	    null, null, new BINModelingType("BRADMIS.BIN"), 6554,
+	    null, null, new BINModelingType("WBOSS6.BIN"), 6554,
 	    ModelingType.MAP_SQUARE_SIZE * 7, -1, 2048, false, false), 
     bossW7(
-	    null, null, new BillboardModelingType(new String[] { "BFIRJ0.RAW",
-		    "BFIRJ1.RAW", "BFIRJ2.RAW", "BFIRJ3.RAW" }, 100,
-		    new Dimension(320000, 320000)), 25,
+	    null, null, new BINModelingType("WBOSS7.BIN"), 25,
 	    ModelingType.MAP_SQUARE_SIZE * 4, -1, 2048, false, false), 
     bossW8(
-	    null, null, new BINModelingType("FIREBALL.BIN"), 8192,
+	    null, null, new BINModelingType("WBOSS8.BIN"), 8192,
 	    ModelingType.MAP_SQUARE_SIZE * 6, -1, 2048, false, false), 
     enemyMissile(
 	    null, null, new BINModelingType("BRADMIS.BIN"), 8192,

@@ -73,7 +73,8 @@ public class ProjectileFactory {
    	 tris[0].setAlphaBlended(true);
    	 tris[1].setAlphaBlended(true);
    	 modelToUse.addTriangles(tris);
- 	 modelToUse.finalizeModel();
+ 	 //modelToUse.finalizeModel();
+   	 //modelToUse = tr.getResourceManager().getBINModel("LASER3.BIN", tr.getGlobalPaletteVL(), null, null);
    	 for(int i=0; i<projectiles.length; i++){
    	    projectiles[i]=new ProjectileObject3D(tr,modelToUse, weapon, explosionType);}
     	}//end if(isLaser)

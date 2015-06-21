@@ -12,60 +12,39 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.awt.Dimension;
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.jtrfp.jtrfp.FileLoadException;
-import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
+import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
-public class PowerupObject extends BillboardSprite{
+public class PowerupObject extends WorldObject{
 	private final Powerup powerupType;
 	private final SoundTexture powerupSound;
 	public PowerupObject(Powerup pt, TR tr){
 		super(tr);
-		setBillboardSize(new Dimension(20000,20000));
+		this.powerupType=pt;
+		try{setModel(tr.getResourceManager().getBINModel(powerupType.getModel(), tr.getGlobalPaletteVL(), null, null));}
+		catch(Exception e){e.printStackTrace();}
+		
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
-		TextureDescription desc=getTr().gpu.get().textureManager.get().getFallbackTexture();
-		if(pt==Powerup.Random)
-		    pt=Powerup.values()[(int)Math.random()*(Powerup.values().length-1)];
-		powerupType=pt;
-		String [] bbFrames;
-		if(getTr().config.getGameVersion()!=GameVersion.TV)
-		    bbFrames = pt.getF3BillboardFrames();
-		else
-		    bbFrames = pt.getTvBillboardFrames();
-		Sequencer s = new Sequencer(Powerup.TIME_PER_FRAME_MILLIS,bbFrames.length,false);
-		try {
-		    Texture [] t;
-			t = new Texture[bbFrames.length];
-		    
-			for(int i=0; i<t.length;i++){
-			    t[i]=frame(bbFrames[i]);
-			}
-			desc=new AnimatedTexture(s,t);
-			//Do something with desc
-			setTexture(desc,true);}//end try{}
-		catch(Exception e)
-			{e.printStackTrace();}
+		addBehavior(new FacingObject().setTarget(getTr().mainRenderer.get().getCamera()));
+		
 		powerupSound=tr.getResourceManager().soundTextures.get("POWER-1.WAV");
 		}//end constructor
 

@@ -273,8 +273,9 @@ public class Parser{
 	
 	private static void invokeSet(Object obj, String mName, Object value, Class argClass){
 		if(argClass==Integer.class)argClass=int.class;
-		if(argClass==Double.class)argClass=double.class;
+		if(argClass==Double.class) argClass=double.class;
 		if(argClass==Boolean.class)argClass=boolean.class;
+		if(argClass==Long.class)   argClass=long.class;
 		try{obj.getClass().getMethod(mName, argClass).invoke(obj, value);}
 		catch(NoSuchMethodException e){
 			if(argClass==Object.class)
@@ -446,13 +447,15 @@ public class Parser{
 				@Override
 				public void read(EndianAwareDataInputStream is, 
 						ThirdPartyParseable bean) throws IOException{
-					dest.set((long)is.readInt()-Integer.MIN_VALUE, bean);
+				        long val = is.readInt();
+				        if(val<0)val+=Integer.MAX_VALUE;
+					dest.set(val, bean);
 					}
 
 				@Override
 				public void write(EndianAwareDataOutputStream os, 
 						ThirdPartyParseable bean) throws IOException{
-					os.writeInt((int)(dest.get(bean)+Integer.MIN_VALUE));
+					os.writeInt(dest.get(bean).intValue());
 					}
 			}.go();
 		}//end int4s

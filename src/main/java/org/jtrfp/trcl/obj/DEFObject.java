@@ -411,7 +411,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     }
     if(foliage){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Billow));
-    }else if((!mobile || anchoring == Anchoring.terrain) && !customExplosion){
+    }else if((anchoring == Anchoring.terrain) && !customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion,BIG_EXP_SOUNDS[(int)(Math.random()*3)]));
     }else if(!customExplosion){
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast,MED_EXP_SOUNDS[(int)(Math.random()*2)]));

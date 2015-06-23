@@ -162,7 +162,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    }//end for(stackTrace)
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
 	else if (td instanceof PortalTexture){
-	    final int textureID = /*((PortalTexture)td).getPortalFramebufferNumber();*/3;
+	    final int textureID = 65536-((PortalTexture)td).getPortalFramebufferNumber();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));

@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -29,13 +30,16 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
 	else if(model.getTransparentTriangleList()!=null)
 	    maxVertexValue=model.getTransparentTriangleList().getMaximumVertexValue();
 	else return;//Give up
+	Vector3D velocity = Vector3D.ZERO;
+	try{velocity = p.probeForBehavior(MovesByVelocity.class).getVelocity().scalarMultiply(.75);}
+	catch(BehaviorNotFoundException e){}
 	for(int i=0; i<MIN_FRAGS+maxVertexValue/4000; i++){
 	    final Vector3D oldPos = p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();
 	    p.getTr().getResourceManager().getDebrisSystem().spawn(oldPos, 
 	    new Vector3D(
-		Math.random()*MAX_SPEED-MAX_SPEED/2.,
-		Math.random()*MAX_SPEED+60000,
-		Math.random()*MAX_SPEED-MAX_SPEED/2.));
+		velocity.getX()+Math.random()*MAX_SPEED-MAX_SPEED/2.,
+		velocity.getY()+Math.random()*MAX_SPEED+60000,
+		velocity.getZ()+Math.random()*MAX_SPEED-MAX_SPEED/2.));
 	}//end for(NUM_FRAGS)
     }//end constructor
 }//end DebrisOnDeathBehavior

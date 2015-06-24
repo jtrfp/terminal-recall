@@ -135,9 +135,11 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     }//end VisibilityPredicate
     
     public void addGrid(SpacePartitioningGrid<?> toAdd){
+	if(toAdd==null) throw new NullPointerException("toAdd intolerably null.");
 	toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input,true);
     }
     public void removeGrid(SpacePartitioningGrid<?> toRemove){
+	if(toRemove==null) throw new NullPointerException("toRemove intolerably null.");
    	toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
     }
     

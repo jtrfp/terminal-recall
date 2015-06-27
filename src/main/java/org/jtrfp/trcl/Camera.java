@@ -363,7 +363,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    pcs.firePropertyChange(ROOT_GRID, this.rootGrid, rootGrid);
 	    if(this.rootGrid!=null)
 	     removeGrid(this.rootGrid);
-	    addGrid(rootGrid);
+	    if(rootGrid!=null)
+	     addGrid(rootGrid);
 	    this.rootGrid = rootGrid;
 	}
 	/**

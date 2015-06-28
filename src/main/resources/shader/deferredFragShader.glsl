@@ -124,8 +124,8 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  }
  
  vec4 portalFetch(uint textureID){
- if(textureID!=7u) return vec4(1,0,0,1);
- return texelFetch(portalTexture,ivec3(gl_FragCoord.xy,int(textureID+1u)),0);
+ //if(textureID!=7u) return vec4(1,0,0,1);
+ return texelFetch(portalTexture,ivec3(gl_FragCoord.xy,-1*int(65536u-(textureID/96u))),0);
  }
  
  vec4 vqConstruct(uint textureID,vec3 norm,vec2 uv){

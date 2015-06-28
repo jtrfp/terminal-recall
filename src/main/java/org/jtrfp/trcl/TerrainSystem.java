@@ -33,7 +33,7 @@ import org.jtrfp.trcl.obj.TerrainChunk;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
-	final double heightScalar;
+	//final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
 	public static final double Y_NUDGE = -10000;
@@ -48,7 +48,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	     * down the road.
 	     */
 	
-    public TerrainSystem(final InterpolatingAltitudeMap altitude,
+    public TerrainSystem(final AltitudeMap altitude,
 	    final TextureMesh textureMesh, final double gridSquareSize,
 	    final SpacePartitioningGrid parent,
 	    final RenderableSpacePartitioningGrid terrainMirror, final TR tr,
@@ -60,13 +60,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final int width = (int) altitude.getWidth();
 	int height = (int) altitude.getHeight();
 	this.gridSquareSize = gridSquareSize;
-	this.heightScalar = tr.getWorld().sizeY / 2;
+	//this.heightScalar = tr.getWorld().sizeY / 2;
 	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };
 	final double v[] = { 0, 0, 1, 1 };
 	final double cu[] = { 0, 1, 1, 0 };
 	final double cv[] = { 1, 1, 0, 0 };
-	
+	final NormalMap normalMap = new NormalMap(altitude);
 	// Come up with a point list for tunnel entrances and exits
 	TDFFile.Tunnel[] tunnels = tdf.getTunnels();
 	final HashMap<Integer, TunnelPoint> points = new HashMap<Integer, TunnelPoint>();
@@ -90,6 +90,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		.generateSubReporters(256/chunkSideLength);
 	int reporterIndex=0;
 	TRFutureTask<Void> [] rowTasks = new TRFutureTask[numCores*2];
+	final double worldCeiling = tr.getWorld().sizeY;
 	int taskIdx=0;
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
@@ -108,78 +109,77 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    .round(((double) _gZ + ((double) chunkSideLength / 2.))
 					    * gridSquareSize);
 			    final double objectY = Math.round(altitude
-				    .heightAt(gX, _gZ) * heightScalar);
+				    .heightAt(gX*gridSquareSize, _gZ*gridSquareSize));
 			    final Model m = new Model(false, tr);
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
 				for (int cX = gX; cX < gX + chunkSideLength; cX++) {
-				    final double hTL = altitude.heightAt(cX, cZ)
-					    * heightScalar;
-				    final double hTR = altitude.heightAt((cX + 1), cZ)
-					    * heightScalar;
-				    final double hBR = altitude.heightAt((cX + 1),
-					    (cZ + 1)) * heightScalar;
-				    final double hBL = altitude.heightAt(cX, (cZ + 1))
-					    * heightScalar;
 				    final double xPos = cX * gridSquareSize;
 				    final double zPos = cZ * gridSquareSize;
-
+				    final double hTL = altitude.heightAt(xPos, cZ* gridSquareSize);
+				    final double hTR = altitude.heightAt((cX + 1)* gridSquareSize, cZ* gridSquareSize);
+				    final double hBR = altitude.heightAt((cX + 1)* gridSquareSize,
+					    (cZ + 1)* gridSquareSize);
+				    final double hBL = altitude.heightAt(xPos, (cZ + 1)* gridSquareSize);
+				    
+				    
 				    Vector3D norm0, norm1, norm2, norm3;
-				    Vector3D norm = altitude.normalAt(cX, cZ);
-				    norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
-				    norm = altitude.normalAt(cX + 1, cZ);
-				    norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
-				    norm = altitude.normalAt(cX + 1, cZ + 1);
-				    norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
-				    norm = altitude.normalAt(cX, cZ + 1);
-				    norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();
+				    norm3 = normalMap.normalAt(xPos, cZ* gridSquareSize);
+				    /*norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();*/
+				    norm2 = normalMap.normalAt((cX + 1)* gridSquareSize, cZ* gridSquareSize);
+				    /*norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();*/
+				    norm1 = normalMap.normalAt((cX + 1)* gridSquareSize, (cZ + 1)* gridSquareSize);
+				    /*norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();*/
+				    norm0 = normalMap.normalAt(xPos, (cZ + 1)* gridSquareSize);
+				    /*norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
+					    norm.getZ() * 3).normalize();*/
 
 				    if (flatShading)
-					norm0 = norm1 = norm2 = norm3 = altitude
-						.normalAt(cX + .5, cZ + .5);
+					norm0 = norm1 = norm2 = norm3 = normalMap
+						.normalAt((cX + .5)* gridSquareSize, (cZ + .5)* gridSquareSize);
 
 				    final Integer tpi = cX + cZ * 256;
 				    
 				    if(points.containsKey(tpi)){
 					final Model portalModel = new Model(false, tr);
 					//Place a PortalEntrance
-					final int Y_OFFSET = -3000;
+					final int Y_OFFSET = -300;
+					final double portalX = xPos+gridSquareSize/2.;
+					final double portalY = (hBL+hBR+hTR+hTL)/4.;
+					final double portalZ = zPos+gridSquareSize/2.;
 					Triangle[] tris = Triangle
 						.quad2Triangles(
 							// COUNTER-CLOCKWISE
 							// //x
 							new double[] {
-								xPos - objectX,
-								xPos + gridSquareSize
-								- objectX,
-								xPos + gridSquareSize
-								- objectX,
-								xPos - objectX },
-								new double[] { (hBL - objectY),
-								(hBR - objectY),
-								(hTR - objectY),
-								(hTL - objectY)},
+								gridSquareSize/2,
+								-gridSquareSize/2,
+								-gridSquareSize/2,
+								gridSquareSize/2 },
+								new double[] {-gridSquareSize/2,-gridSquareSize/2,gridSquareSize/2,gridSquareSize/2},
 								new double[] {
-								zPos + gridSquareSize
-								- objectZ,
-								zPos + gridSquareSize
-								- objectZ,
-								zPos - objectZ,
-								zPos - objectZ }, u, v, new PortalTexture(3),//TODO: Use a real index
+								0,
+								0,
+								0,
+								0 }, u, v, new PortalTexture(0),
 								RenderMode.STATIC,
 								new Vector3D[] { norm0, norm1,
 								norm2, norm3 }, cX + cZ % 4);
 					portalModel.addTriangles(tris);
-					final Camera tunnelCam = tr.getWorld().newCamera();
+					final Camera tunnelCam = tr.secondaryRenderer.get().getCamera();
 					final PortalExit exit = new PortalExit(tr, tunnelCam);
 					tr.getGame().getCurrentMission().registerTunnelEntrancePortal(new Point(cX,cZ), exit);
 					final PortalEntrance entrance;
 					entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
-					entrance.setPosition(new double[]{objectX,objectY+Y_OFFSET,objectZ});
+					Vector3D heading = normalMap.normalAt(xPos, cZ* gridSquareSize).normalize().negate();
+					entrance.setHeading(heading);
+					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
+					 entrance.setTop(Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
+					else entrance.setTop(Vector3D.PLUS_I);// ... so we create a clause for that.
+					entrance.setPosition(new Vector3D(portalX,portalY,portalZ).add(heading.scalarMultiply(2000)).toArray());
 					entrance.notifyPositionChange();
 					add(entrance);
 				    }//end if(tunnel)
@@ -245,26 +245,26 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    .round(((double) _gZ + ((double) chunkSideLength / 2.))
 					    * gridSquareSize);
 			    final double objectY = Math.round((2. - altitude.heightAt(
-				    gX, _gZ)) * heightScalar + Y_NUDGE);
+				    gX* gridSquareSize, _gZ* gridSquareSize)) + Y_NUDGE);
 			    final Model m = new Model(false, tr);
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
 				for (int cX = gX; cX < gX + chunkSideLength; cX++) {
-				    final double hTL = (2. - altitude.heightAt(cX, cZ))
-					    * heightScalar + Y_NUDGE;
-				    final double hTR = (2. - altitude.heightAt(
-					    (cX + 1), cZ)) * heightScalar + Y_NUDGE;
-				    final double hBR = (2. - altitude.heightAt(
-					    (cX + 1), (cZ + 1)))
-					    * heightScalar
-					    + Y_NUDGE;
-				    final double hBL = (2. - altitude.heightAt(cX,
-					    (cZ + 1))) * heightScalar + Y_NUDGE;
 				    final double xPos = cX * gridSquareSize;
 				    final double zPos = cZ * gridSquareSize;
+				    final double hTL = (worldCeiling - altitude.heightAt(xPos, cZ* gridSquareSize))
+					    + Y_NUDGE;
+				    final double hTR = (worldCeiling - altitude.heightAt(
+					    (cX + 1)* gridSquareSize, cZ* gridSquareSize)) + Y_NUDGE;
+				    final double hBR = (worldCeiling - altitude.heightAt(
+					    (cX + 1)* gridSquareSize, (cZ + 1)* gridSquareSize))
+					    + Y_NUDGE;
+				    final double hBL = (worldCeiling - altitude.heightAt(xPos,
+					    (cZ + 1)* gridSquareSize)) + Y_NUDGE;
 
 				    Vector3D norm0, norm1, norm2, norm3;
-				    Vector3D norm = altitude.normalAt(cX, cZ);
+				    norm3=norm2=norm1=norm0 = normalMap.normalAt(xPos, cZ* gridSquareSize);
+				    /*
 				    norm3 = altitude.heightAt(cX, cZ)<.9?
 					    new Vector3D(norm.getX() * 3, norm.getY()*-1,
 					    norm.getZ() * 3).normalize():
@@ -288,18 +288,13 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    norm.getZ() * 3).normalize():
 						new Vector3D(norm.getX() * 3, norm.getY(),
 						norm.getZ() * 3).normalize();
-
-				    if (flatShading)
-					norm0 = norm1 = norm2 = norm3 = altitude
-						.normalAt(cX + .5, cZ + .5);
-
+				    */
+				    norm0 = norm1 = norm2 = norm3 = Vector3D.ZERO;
 				    // Ceiling texture cell X (Z in this engine) value
 				    // is offset by 10.
 				    // No tunnelpoints on ceiling
 				    TextureDescription td = (TextureDescription) (textureMesh
 					    .textureAt(cX, cZ + 10));
-				    norm = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();// Exaggerate
 									 // features.
 				    Triangle[] tris = Triangle.quad2Triangles(
 					    // CLOCKWISE (else backface culling will eat
@@ -327,7 +322,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			    if (m.finalizeModel().getTriangleList() != null) {
+			    if (m.finalizeModel().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();
@@ -348,7 +343,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    if(taskIdx>=rowTasks.length)
 		taskIdx=0;
 	}// end for(gZ)
-	terrainMirror.blockingDeactivate();
+	//terrainMirror.blockingDeactivate();
     }// end constructor
 	
 	private class TunnelPoint{
@@ -379,12 +374,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	 */
 	public double getGridSquareSize(){
 		return gridSquareSize;
-		}
-	/**
-	 * @return the heightScalar
-	 */
-	public double getHeightScalar(){
-		return heightScalar;
 		}
 	/**
 	 * @return the renderingCubes

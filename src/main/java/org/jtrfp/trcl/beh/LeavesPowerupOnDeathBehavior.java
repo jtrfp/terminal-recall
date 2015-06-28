@@ -12,8 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.InterpolatingAltitudeMap;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -30,14 +29,14 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	final WorldObject p=getParent();
 	final double [] thisPos=p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath().toArray();
 	double height;
-	final InterpolatingAltitudeMap map=
+	final AltitudeMap map=
 		p.getTr().
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().
 		getAltitudeMap();
-	if(map!=null)height= map.heightAt((thisPos[0]/TR.mapSquareSize), 
-		    (thisPos[2]/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
+	if(map!=null)height= map.heightAt((thisPos[0]), 
+		    (thisPos[2]));
 	else{height=Double.NEGATIVE_INFINITY;}
 	final double [] yFudge=thisPos[1]<height+OVER_TERRAIN_PAD?new double[]{0,OVER_TERRAIN_PAD,0}:new double[3];
 	getParent().getTr().getResourceManager().getPowerupSystem().

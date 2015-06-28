@@ -15,7 +15,7 @@ package org.jtrfp.trcl.beh;
 import java.awt.Point;
 import java.util.Collection;
 
-import org.jtrfp.trcl.InterpolatingAltitudeMap;
+import org.jtrfp.trcl.NormalMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
@@ -42,6 +42,8 @@ public class CollidesWithTerrain extends Behavior {
     private final double[]      groundNormal            = new double[3];
     private final double[]      downhillDirectionXZ     = new double[3];
     private final double[]      ceilingNormal           = new double[3];
+    private OverworldSystem     lastOWS;
+    private NormalMap           normalMap;
     @Override
     public void _tick(long tickTimeMillis) {
 	if (tickCounter++ % 2 == 0 && !recentlyCollided)
@@ -50,27 +52,26 @@ public class CollidesWithTerrain extends Behavior {
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
-	final InterpolatingAltitudeMap aMap;
 	final Mission mission = tr.getGame().getCurrentMission();
-	try{
-	aMap =  mission.
-		getOverworldSystem().
-		getAltitudeMap();
+	if(mission.getOverworldSystem()!=lastOWS){
+	    normalMap=null;
+	    lastOWS=mission.getOverworldSystem();
+	}
+	try{if(normalMap==null)
+		normalMap=new NormalMap(mission.getOverworldSystem().getAltitudeMap());
 	}catch(NullPointerException e){return;}
-	if(mission.getOverworldSystem().isTunnelMode())
+	final OverworldSystem ows = mission.getOverworldSystem();
+	if(ows==null)
+	    return;
+	if(ows.isTunnelMode())
 	    return;//No terrain to collide with while in tunnel mode.
-	if(aMap==null)return;
+	if(normalMap==null)return;
 	final double[] thisPos = p.getPosition();
-	final double groundHeightNorm = aMap.heightAt(
-		(thisPos[0] / TR.mapSquareSize),
-		(thisPos[2] / TR.mapSquareSize));
-	final double groundHeight = groundHeightNorm * (world.sizeY / 2);
-	final double ceilingHeight = (1.99 - aMap.heightAt(
-		(thisPos[0] / TR.mapSquareSize),
-		(thisPos[2] / TR.mapSquareSize)))
-		* (world.sizeY / 2) + CEILING_Y_NUDGE;
+	final double groundHeight= normalMap.heightAt(thisPos[0],thisPos[2]);
+	final double ceilingHeight = (tr.getWorld().sizeY - groundHeight)
+		+ CEILING_Y_NUDGE;
 	
-	aMap.normalAt(thisPos[0], thisPos[1], groundNormal);
+	normalMap.normalAt(thisPos[0], thisPos[1], groundNormal);
 	downhillDirectionXZ[0] = groundNormal[0];
 	downhillDirectionXZ[1] = 0;
 	downhillDirectionXZ[2] = groundNormal[2];
@@ -95,7 +96,7 @@ public class CollidesWithTerrain extends Behavior {
 	double [] surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
 	final double dot = Vect3D.dot3(surfaceNormal,getParent().getHeading().toArray());
 	//final double dot = surfaceNormal.dotProduct(getParent().getHeading());
-	if (terrainMirror && groundHeightNorm > .97) {
+	if (terrainMirror && groundHeight/(tr.getWorld().sizeY/2) > .97) {
 	    groundImpact = true;
 	    surfaceNormal = downhillDirectionXZ;
 	}//end if(smushed between floor and ceiling)

@@ -35,8 +35,7 @@ public class TerrainLocked extends Behavior {
 		getCurrentMission().
 		getOverworldSystem().
 		getAltitudeMap().
-		 heightAt((thisPos[0]/TR.mapSquareSize), 
-		    (thisPos[2]/TR.mapSquareSize))*(p.getTr().getWorld().sizeY/2);
+		 heightAt(thisPos[0],thisPos[2]);
 	final double [] pPos = p.getPosition();
 	pPos[0]=thisPos[0];
 	pPos[1]=height+pad;

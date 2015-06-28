@@ -332,7 +332,7 @@ public class RendererFactory {
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
-		setInternalColorFormat(GL3.GL_RGBA4).
+		setInternalColorFormat(GL3.GL_RGB565).
 		configure(new int[]{width,height,NUM_PORTALS}, 1).
 		setMagFilter(GL3.GL_NEAREST).
 		setMinFilter(GL3.GL_NEAREST).
@@ -492,5 +492,12 @@ public class RendererFactory {
 
     public VertexProcessingStage getVertexProcessingStage() {
 	return vertexProcessingStage;
+    }
+
+    /**
+     * @return the portalFrameBuffers
+     */
+    public GLFrameBuffer[] getPortalFrameBuffers() {
+        return portalFrameBuffers;
     }
 }//end RendererFactory

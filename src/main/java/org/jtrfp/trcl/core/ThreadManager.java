@@ -21,6 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,6 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
-import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public final class ThreadManager implements GLExecutor{
@@ -118,34 +118,38 @@ public final class ThreadManager implements GLExecutor{
     private void gameplay() {
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
-	try{// NotReadyException
-	final Collection<PositionedRenderable> vl = 
-		tr.mainRenderer.
-		getRealtime().
-		getRenderList().
-		getRealtime().
-		getVisibleWorldObjectList();
 	boolean alreadyVisitedPlayer=false;
 	final Game game = tr.getGame();
-	//if(game==null)
-	//    return;
+	TRFuture [] renderers = new TRFuture[]{tr.mainRenderer/* ,tr.secondaryRenderer*/ };//TODO: This is hacky.
+	try{// NotReadyException
 	visibilityListBuffer.clear();
-	synchronized(vl)
-	 {visibilityListBuffer.addAll(vl);}
 	synchronized(paused){
 	synchronized(gameStateLock){
-	    for (PositionedRenderable pr:visibilityListBuffer) {
-	    boolean multiplePlayer=false;
-	    final WorldObject wo = (WorldObject)pr;
-	    if (wo.isActive() || wo instanceof RelevantEverywhere)
-		if(wo instanceof Player){
-		    if(alreadyVisitedPlayer)
-			multiplePlayer=true;
-		    else alreadyVisitedPlayer=true;
-		}//end if(Player)
-		if(!multiplePlayer&&!paused[0])
-		    wo.tick(tickTimeInMillis);
-	 }// end for(worldObjects)
+	    for(TRFuture<Renderer> r:renderers){
+		if(r==null)return;
+		Renderer renderer = r.getRealtime();
+		if(!renderer.isOneShotBehavior() || renderer.isKeepAlive()){
+		    final Collection<PositionedRenderable> vl = 
+				renderer.
+				getRenderList().
+				getRealtime().
+				getVisibleWorldObjectList();
+		    synchronized(vl)
+			 {visibilityListBuffer.addAll(vl);}
+			    for (PositionedRenderable pr:visibilityListBuffer) {
+			    boolean multiplePlayer=false;
+			    final WorldObject wo = (WorldObject)pr;
+			    if (wo.isActive() || wo instanceof RelevantEverywhere)
+				if(wo instanceof Player){
+				    if(alreadyVisitedPlayer)
+					multiplePlayer=true;
+				    else alreadyVisitedPlayer=true;
+				}//end if(Player)
+				if(!multiplePlayer&&!paused[0])
+				    wo.tick(tickTimeInMillis);
+			 }// end for(worldObjects)
+		}//end if(renderer active)
+	    }//end for(renderers)
 	}//end sync(gameStateLock)//relevance changes outside of this cause errors!
 	//if(game.getPlayer()!=null && !paused[0])
 	    tr.getCollisionManager().performCollisionTests();

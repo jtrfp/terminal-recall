@@ -51,6 +51,8 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
      * @since Mar 20, 2015
      */
     public boolean addTarget(Collection<E> target, boolean prefill){
+	if(targetsMap.containsKey(target))
+	    throw new RuntimeException("Redundant add: "+target);
 	if(prefill && !cache.isEmpty())
 	    target.addAll(cache);
 	boolean result = !targets.contains(target);
@@ -59,6 +61,8 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     }
     
     public boolean removeTarget(Collection<E> target, boolean removeAll){
+	if(!targetsMap.containsKey(target))
+	    throw new RuntimeException("Target not present: "+target);
 	if(removeAll && targets.contains(target))
 	    target.removeAll(cache);
 	final boolean success = targetsMap.containsKey(target);

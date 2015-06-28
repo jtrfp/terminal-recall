@@ -13,8 +13,12 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.InterpolatingAltitudeMap;
+import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.NormalMap;
 import org.jtrfp.trcl.OverworldSystem;
+import org.jtrfp.trcl.RenderMode;
+import org.jtrfp.trcl.SpacePartitioningGrid;
+import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
@@ -25,14 +29,16 @@ import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
+import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.gpu.Model;
 
-public class TunnelExitObject extends WorldObject {
+public class TunnelExitObject extends PortalEntrance {
     private 		Vector3D 	exitLocation, exitHeading, exitTop;
     private final 	Tunnel 		tun;
     private final 	TR 		tr;
@@ -41,15 +47,17 @@ public class TunnelExitObject extends WorldObject {
     private		boolean		onlyRemoveIfTargeted=false;
 
     public TunnelExitObject(TR tr, Tunnel tun) {
-	super(tr);
+	super(tr, tr.mainRenderer.get().getCamera());
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
 	final double EXIT_Y_NUDGE = 0;
-	final InterpolatingAltitudeMap map = tr.
+	final NormalMap map = 
+		new NormalMap(
+		tr.
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().
-		getAltitudeMap();
+		getAltitudeMap());
 	final double exitY = 
 		map.heightAt(TR.legacy2Modern(v.getZ()), TR.legacy2Modern(v
 		.getX()))+EXIT_Y_NUDGE;
@@ -60,25 +68,27 @@ public class TunnelExitObject extends WorldObject {
 	this.tun = tun;
 	exitHeading = map.
 		normalAt(
-		exitLocation.getZ() / TR.mapSquareSize,
-		exitLocation.getX() / TR.mapSquareSize);
-	Vector3D horiz = exitHeading.crossProduct(Vector3D.MINUS_J);
-	if (horiz.getNorm() == 0) {
-	    horiz = Vector3D.PLUS_I;
-	} else
-	    horiz = horiz.normalize();
-	exitTop = exitHeading.crossProduct(horiz.negate()).normalize().negate();
-	exitLocation = exitLocation.add(exitHeading.scalarMultiply(10000));
+		exitLocation.getX(),
+		exitLocation.getZ());
+	
+	if(exitHeading.getY()<.99&&exitHeading.getNorm()>0)//If the ground is flat this doesn't work.
+		 exitTop = (Vector3D.PLUS_J.crossProduct(exitHeading).crossProduct(exitHeading));
+		else exitTop = (Vector3D.PLUS_I);// ... so we create a clause for that.
 	this.tr = tr;
-	setVisible(false);
-	try {
-	    Model m = tr.getResourceManager().getBINModel("SHIP.BIN",
-		    tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
-	    setModel(m);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
-    }
+	PortalExit pExit = new PortalExit(tr, tr.secondaryRenderer.get().getCamera());
+	pExit.setPosition(exitLocation.toArray());
+	pExit.setHeading(exitHeading);
+	pExit.setTop(exitTop);
+	pExit.setRootGrid(tr.getGame().getCurrentMission().getOverworldSystem());
+	pExit.notifyPositionChange();
+	this.setPortalExit(pExit);
+	setVisible(true);
+	Triangle [] tris = Triangle.quad2Triangles(new double[]{-50000,50000,50000,-50000}, new double[]{50000,50000,-50000,-50000}, new double[]{0,0,0,0}, new double[]{0,1,1,0}, new double[]{1,1,0,0}, new PortalTexture(0), RenderMode.STATIC, false, Vector3D.ZERO, "TunnelExitObject.portalModel");
+	//Model m = Model.buildCube(100000, 100000, 200, new PortalTexture(0), new double[]{50000,50000,100},false,tr);
+	Model m = new Model(false, tr);
+	m.addTriangles(tris);
+	setModel(m);
+    }//end constructor
 
     private class TunnelExitBehavior extends Behavior implements
 	    CollisionBehavior, NAVTargetableBehavior {
@@ -96,19 +106,27 @@ public class TunnelExitObject extends WorldObject {
 		    }else mission.setMissionMode(new Mission.AboveGroundMode());
 		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
 		    
-		    tr.mainRenderer.get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
+		    //tr.getDefaultGrid().nonBlockingAddBranch(overworldSystem);
+		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)
+		    
+		    tr.mainRenderer     .get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
+		    tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
 		    // Teleport
-		    other.setPosition(exitLocation.toArray());
-		    // Heading
-		    other.setHeading(exitHeading);
-		    other.setTop(exitTop);
+		    final Camera secondaryCam = tr.secondaryRenderer.get().getCamera();
+			other.setPosition(secondaryCam.getPosition());
+			other.setHeading (secondaryCam.getHeading());
+			other.setTop     (secondaryCam.getTop());
+			other.notifyPositionChange();
 		    World.relevanceExecutor.submit(new Runnable(){
 			@Override
 			public void run() {
+			    final SpacePartitioningGrid grid = tr.getDefaultGrid();
 			    // Tunnel off
-			    tun.deactivate();
+			    grid.removeBranch(tun);
 			    // World on
-			    overworldSystem.activate();
+			    grid.addBranch(overworldSystem);
+			    // Nav
+			    //grid.addBranch(game.getNavSystem());
 			}});
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior

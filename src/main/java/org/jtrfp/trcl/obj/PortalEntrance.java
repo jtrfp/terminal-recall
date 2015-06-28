@@ -25,11 +25,11 @@ import org.jtrfp.trcl.math.Vect3D;
 public class PortalEntrance extends WorldObject {
     public static final String WITHIN_RANGE         = "withinRange";
     
-    private static final double ACTIVATION_DISTANCE = TR.mapSquareSize*12;
+    private static final double ACTIVATION_DISTANCE = TR.mapSquareSize*8;
     
-    private final PortalExit portalExit;
-    private final Camera     cameraToMonitor;
-    private boolean          withinRange    = false;
+    private PortalExit portalExit;
+    private Camera     cameraToMonitor;
+    private boolean    withinRange          = false;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public PortalEntrance(TR tr, PortalExit exit, Camera cameraToMonitor) {
@@ -45,14 +45,18 @@ public class PortalEntrance extends WorldObject {
 	this.cameraToMonitor=cameraToMonitor;
 	addBehavior(new PortalEntranceBehavior());
     }
-    
+
+    public PortalEntrance(TR tr, Camera camera) {
+	this(tr,null,camera);
+    }
+
     public double[] getRelativePosition(double [] dest){
 	Vect3D.subtract(cameraToMonitor.getPosition(), PortalEntrance.this.getPosition(), dest);
 	return dest;
     }
     
     public Rotation getRelativeHeadingTop(){
-	return new Rotation(PortalEntrance.this.getHeading(),PortalEntrance.this.getTop(),cameraToMonitor.getHeading(),cameraToMonitor.getTop());
+	return new Rotation(getHeading(),getTop(),portalExit.getHeading(),portalExit.getTop());
     }
     
     private class PortalEntranceBehavior extends Behavior{
@@ -60,18 +64,30 @@ public class PortalEntrance extends WorldObject {
 	@Override
 	public void _tick(long tickTimeMillis){
 	    final double dist = Vect3D.distance(cameraToMonitor.getPositionWithOffset(),PortalEntrance.this.getPositionWithOffset());
-	    if(dist<ACTIVATION_DISTANCE){
-		pcs.firePropertyChange(WITHIN_RANGE, withinRange, true);
-		withinRange=true;
-	    }else{
-		pcs.firePropertyChange(WITHIN_RANGE, withinRange, false);
-		withinRange=false;
-	    }
+	    if(dist<ACTIVATION_DISTANCE && !withinRange)
+		activation();
+	    else if(withinRange && dist>=ACTIVATION_DISTANCE)
+		deactivation();
 	    
 	    if(withinRange){
-		portalExit.updateObservationParams(getRelativePosition(relativePosition), getRelativeHeadingTop());
+		portalExit.updateObservationParams(getRelativePosition(relativePosition), getRelativeHeadingTop(),cameraToMonitor.getHeading(),cameraToMonitor.getTop());
+		getTr().secondaryRenderer.get().keepAlive();
 	    }//end if(isWithinRange)
 	}//end _tick(...)
+	
+	private void activation(){
+	    System.out.println("PORTAL ENTRANCE ACTIVATED");
+	    pcs.firePropertyChange(WITHIN_RANGE, withinRange, true);
+	    portalExit.activate();
+	    withinRange=true;
+	}
+	
+	private void deactivation(){
+	    System.out.println("PORTAL ENTRANCE DE-ACTIVATED");
+	    pcs.firePropertyChange(WITHIN_RANGE, withinRange, false);
+	    portalExit.deactivate();
+	    withinRange=false;
+	}
     }//end PortalEntranceBehavior
 
     /**
@@ -140,6 +156,27 @@ public class PortalEntrance extends WorldObject {
      */
     public PortalExit getPortalExit() {
         return portalExit;
+    }
+
+    /**
+     * @return the cameraToMonitor
+     */
+    public Camera getCameraToMonitor() {
+        return cameraToMonitor;
+    }
+
+    /**
+     * @param cameraToMonitor the cameraToMonitor to set
+     */
+    public void setCameraToMonitor(Camera cameraToMonitor) {
+        this.cameraToMonitor = cameraToMonitor;
+    }
+
+    /**
+     * @param portalExit the portalExit to set
+     */
+    public void setPortalExit(PortalExit portalExit) {
+        this.portalExit = portalExit;
     }
 
 }//end PortalEntrance

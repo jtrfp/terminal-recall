@@ -219,11 +219,9 @@ public class RenderList {
 	
 	rFactory.getObjectProcessingStage().process(gl,renderer.getCameraMatrixAsFlatArray(),
 		renderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numUnoccludedTBlocks);
-	
-	///// VERTEX STAGE
+	//// VERTEX STAGE
 	VertexProcessingStage vps = rFactory.getVertexProcessingStage();
 	vps.process(gl, renderListLogicalVec4Offset, numPrimitives);
-	
 	///// PRIMITIVE STAGE
 	//Almost like a geometry shader, except writing lookup textures for each primitive.
 	rFactory.getPrimitiveProgram().use();

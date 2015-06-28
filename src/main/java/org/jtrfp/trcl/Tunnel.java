@@ -51,6 +51,7 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ForceField;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectSystem;
+import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -95,7 +96,6 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	tunnelAssemblyReporter 
 	  		  = reporters[0];
 	Vector3D tunnelEnd = null;
-	blockingDeactivate();// Sleep until activated by tunnel entrance
 	try {
 	    lvl = tr.getResourceManager()
 		    .getLVL(sourceTunnel.getTunnelLVLFile());
@@ -111,8 +111,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	exitObject = new TunnelExitObject(tr, this);
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
-	exitObject.setPosition(tunnelEnd.add(new Vector3D(50000, 0, 0))
-		.toArray());
+	exitObject.setPosition(tunnelEnd.add(new Vector3D(10000,0,0)).toArray());
+	exitObject.setDirection(TUNNEL_START_DIRECTION);
 	exitObject.notifyPositionChange();
 	add(exitObject);
 	// X is tunnel depth, Z is left-right
@@ -123,6 +123,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
+	nonBlockingAddBranch(objectSystem);
 	/*tr.getGame().getCurrentMission().getOverworldSystem().add(
 		entranceObject = new TunnelEntranceObject(tr, this));*/
     }// end constructor
@@ -167,8 +168,16 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	// CONSTRUCT AND INSTALL SEGMENTS
 	int segIndex = 0;
 	Vector3D finalPos = TUNNEL_START_POS;
-	for (Segment s : segs) {
+	boolean isLastSegment=false;
+	for (int i=0; i<segs.size(); i++) {
+	    final Segment s = segs.get(i);
 	    reporters[segIndex].complete();
+	    
+	    //Apparently the third-to-last segment is the true last segment.
+	    isLastSegment=i>segs.size()-3;
+	    if(isLastSegment){
+		s.setEndWidth(800);s.setEndHeight(800);}
+	    
 	    tr.getReporter().report(
 		    "org.jtrfp.trcl.Tunnel." + _tun.getTunnelLVLFile()
 			    + ".segment" + (segIndex++) + "",

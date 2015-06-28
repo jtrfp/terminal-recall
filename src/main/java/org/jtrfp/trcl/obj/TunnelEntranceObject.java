@@ -41,17 +41,18 @@ public class TunnelEntranceObject extends BillboardSprite {
 	    public void proposeCollision(WorldObject other) {}
 	    });
 	this.sourceTunnel=tunnel;
-	setVisible(tunnel.getSourceTunnel().getEntranceLogic()!=TunnelLogic.invisible);
+	//setVisible(tunnel.getSourceTunnel().getEntranceLogic()!=TunnelLogic.invisible);
+	setVisible(true);
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
 	final double [] position = getPosition();
 	position[0]=TR.legacy2Modern(entrance.getZ());
 	position[1]=TR.legacy2Modern(entrance.getY()+GROUND_HEIGHT_PAD);
 	position[2]=TR.legacy2Modern(entrance.getX());
-	double height = (tr.getWorld().sizeY / 2) * tr.getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
-		position[0]/TR.mapSquareSize, position[2]/TR.mapSquareSize);
+	double height = tr.getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
+		position[0], position[2]);
 	position[1]=height+GROUND_HEIGHT_PAD;
 	notifyPositionChange();
-	this.setBillboardSize(new Dimension(10000,10000));
+	this.setBillboardSize(new Dimension(100,100));
 	try {this.setTexture(
 		    tr.getResourceManager().getRAWAsTexture("TARG1.RAW",
 			    tr.getGlobalPaletteVL(),null,false), true);

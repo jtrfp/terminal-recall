@@ -42,8 +42,8 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private int 				squaresX, squaresY, squaresZ;
 	private final List<E> 			alwaysVisible = new ArrayList<E>(300);
 	private final HashSet<E>		localTaggerSet = new HashSet<E>();
-	private WeakReference<SpacePartitioningGrid<E>> 	
-						parentGrid = null;
+	/*private WeakReference<SpacePartitioningGrid<E>> 	
+						parentGrid = null;*/
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
@@ -106,10 +106,9 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		}};
 		
 	protected SpacePartitioningGrid(){
-	    /*if(Renderer.NEW_MODE)
-		newActivate();*/
+	    packedObjectValve.add(TruePredicate.INSTANCE);
 	}
-	
+	/*
     public void activate() {
 	if(Renderer.NEW_MODE)
 	    newActivate();
@@ -121,7 +120,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		}
 	}//end(!NEW_MODE)
     }//end activate()
-    
+    */
     public Adapter<Vector3D,Integer> getCubeSpaceRasterizer(){
 	return cubeSpaceRasterizer;
     }
@@ -129,7 +128,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
     public Adapter<Vector3D,Integer> getWorldSpaceRasterizer(){
 	return worldSpaceRasterizer;
     }
-
+/*
     public void deactivate() {
 	if(Renderer.NEW_MODE){
 	    newDeactivate();return;}
@@ -151,42 +150,54 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	    if (g != null)
 		g.notifyBranchRemoved(b);
     }//end notifyBranchRemoved(...)
-
-	private void addBranch(SpacePartitioningGrid<E> branchToAdd){
+*/
+    public void addBranch(SpacePartitioningGrid<E> branchToAdd){
+	System.out.println("SPG add "+branchToAdd);
 	if(Renderer.NEW_MODE){
 	    newAddBranch(branchToAdd);
 	    return;
 	}
-		if(!branchGrids.containsKey(branchToAdd)){
-		    branchGrids.put(branchToAdd,"");
-		    if(parentGrid==null)return;
-		    final SpacePartitioningGrid<E> g = parentGrid.get();
-		    if (g != null)
-			g.notifyBranchAdded(branchToAdd);
-		    }//end if(!contains)
-		}//end addBranch(...)
-	private void removeBranch(SpacePartitioningGrid<E> branchToRemove){
-	if(Renderer.NEW_MODE){
+
+    }//end addBranch(...)
+    public void removeBranch(SpacePartitioningGrid<E> branchToRemove){
+	    System.out.println("SPG remove "+branchToRemove);
 	    newRemoveBranch(branchToRemove);
-	    return;
-	}
-		if(branchGrids.remove(branchToRemove)!=null){
-		    if(parentGrid==null)return;
-		    final SpacePartitioningGrid<E> g = parentGrid.get();
-		    if (g != null)
-			g.notifyBranchRemoved(branchToRemove);
-		    }//end if(!contains)
-		}//end removeBranch(...)
+    }//end removeBranch(...)
+    
+    public Future<?> nonBlockingAddBranch(final SpacePartitioningGrid<E> branchToAdd){
+	return World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		addBranch(branchToAdd);
+	    }});
+    }//end nonBlockingAddBranch
+    
+    public void blockingAddBranch(SpacePartitioningGrid<E> branchToAdd){
+	try{nonBlockingAddBranch(branchToAdd).get();}catch(Exception e){}
+    }
+    
+    public Future<?> nonBlockingRemoveBranch(final SpacePartitioningGrid<E> branchToRemove){
+	return World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		removeBranch(branchToRemove);
+	    }});
+    }//end nonBlockingAddBranch
+    
+    public void blockingRemoveBranch(SpacePartitioningGrid<E> branchToRemove){
+	try{nonBlockingRemoveBranch(branchToRemove).get();}catch(Exception e){}
+    }
 	
-	private void setParentGrid(SpacePartitioningGrid<E> parentGrid){
-	    	if(Renderer.NEW_MODE){
+	private void baseOnGridMetrics(SpacePartitioningGrid<E> parentGrid){
+	    	/*if(Renderer.NEW_MODE){
 	    	    if(this.parentGrid!=null)
 	    		this.parentGrid.get().removeBranch(this);
 	    	    parentGrid.addBranch(this);
 	    	    this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);
 	    	    return;
 	    	}
-		this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);
+		this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);*/
+	    /*
 		setSquareSize(parentGrid.getSquareSize());
 		setSquaresX(parentGrid.getSquaresX());
 		setSquaresY(parentGrid.getSquaresY());
@@ -194,6 +205,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		setViewingRadius(parentGrid.getViewingRadius());
 		
 		allocateSquares();
+		*/
 		}//end setParentGrid(...)
 
 	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
@@ -210,7 +222,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	}//end constructor
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
-	 {this();setParentGrid(parentGrid);}
+	 {this();baseOnGridMetrics(parentGrid);}
 	
 	private void allocateSquares(){
 		elements = new List[squaresX*squaresY*squaresZ];
@@ -225,7 +237,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		yProgression		=getSquaresX()-rawDiaX;
 		xProgression=1;
 		}//end allocateSquares()
-	
+	/*
 	public Future<?> nonBlockingActivate(){
 	    return World.relevanceExecutor.submit(new Runnable(){
 		@Override
@@ -261,7 +273,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	    if(packedObjectValve.contains(TruePredicate.INSTANCE))
 	     packedObjectValve.clear();
 	}
-	
+	*/
 	public synchronized void newAdd(E objectToAdd){//TODO: Enforce set instead?
 	    if(!localTaggerSet.add(objectToAdd))
 		return;

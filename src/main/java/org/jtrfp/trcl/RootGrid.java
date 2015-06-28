@@ -19,13 +19,5 @@ public class RootGrid extends RenderableSpacePartitioningGrid {
 	    double gridBlockSize, double viewDepth) {
 	super(sizeX, sizeY, sizeZ, gridBlockSize, viewDepth);
     }//end constructor(...)
-    
-    @Override
-    public void notifyBranchAdded(SpacePartitioningGrid b){
-    }//end notifyBranchAdded(...)
-    
-    @Override
-    public void notifyBranchRemoved(SpacePartitioningGrid b){
-    }//end notifyBranchRemoved(...)
 
 }//end RootGrid

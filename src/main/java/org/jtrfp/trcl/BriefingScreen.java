@@ -77,7 +77,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	add(briefingScreen);
 	this.tr	      = tr;
 	briefingChars = new CharAreaDisplay(this,.047,WIDTH_CHARS,NUM_LINES,tr,font);
-	briefingChars.blockingActivate();
+	blockingAddBranch(briefingChars);
 	briefingChars.setPosition(-.7, -.45, TEXT_Z);
 	briefingScreen.setPosition(0,0,BRIEFING_SPRITE_Z);
 	briefingScreen.notifyPositionChange();
@@ -182,7 +182,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	renderer.getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
 	renderer.setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
 	renderer.setSunColor(SkySystem.SPACE_SUN_COLOR);
-	game.setDisplayMode(game.briefingMode);
+	//game.setDisplayMode(game.briefingMode);
     }//end planetDisplayMode()
     
     public void missionCompleteSummary(LVLFile lvl, Result r){
@@ -193,7 +193,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
-	game.getCurrentMission().getOverworldSystem().activate();
+	//tr.getDefaultGrid().nonBlockingAddBranch(game.getCurrentMission().getOverworldSystem());
 	planetDisplayMode(lvl);
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
@@ -201,12 +201,12 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);
-	World.relevanceExecutor.submit(new Runnable(){
+	/*World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
-		briefingChars.activate();
-		game.getCurrentMission().getOverworldSystem().deactivate();
-	    }});
+		//BriefingScreen.this.addBranch(briefingChars);
+		tr.getDefaultGrid().removeBranch(game.getCurrentMission().getOverworldSystem());
+	    }});*/
     }//end missionCompleteSummary()
 
     public void briefingSequence(LVLFile lvl) {
@@ -222,7 +222,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	planetDisplayMode(lvl);
 	setContent(
 		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
-	overworld.blockingActivate();
+	//tr.getDefaultGrid().nonBlockingAddBranch(overworld);
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};
 	addScrollFinishCallback(new Runnable(){

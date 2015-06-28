@@ -13,26 +13,38 @@
 
 package org.jtrfp.trcl;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DisplayModeHandler {
-    private ArrayList<RenderableSpacePartitioningGrid> currentMode 
-    	= new ArrayList<RenderableSpacePartitioningGrid>();
-    private ArrayList<RenderableSpacePartitioningGrid> newMode
-    	= new ArrayList<RenderableSpacePartitioningGrid>();
+    private Set<RenderableSpacePartitioningGrid> currentMode 
+    	= new HashSet<RenderableSpacePartitioningGrid>();
+    private Set<RenderableSpacePartitioningGrid> newMode
+    	= new HashSet<RenderableSpacePartitioningGrid>();
+    
+    private final SpacePartitioningGrid defaultGrid;
+    
+    public DisplayModeHandler(SpacePartitioningGrid defaultGrid){
+	this.defaultGrid=defaultGrid;
+    }
+    
     public void setDisplayMode(Object [] items){
 	newMode.clear();
 	recursiveNewDisplayModeImpl(items);
+	System.out.println("DisplayModeHandler.setDisplayMode()");
+	for(Object o:items)
+	    System.out.print(" "+o.getClass().getName());
+	System.out.println();
 	try{World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		for(RenderableSpacePartitioningGrid grid:currentMode){
 		    if(!newMode.contains(grid))
-			grid.deactivate();
+			defaultGrid.removeBranch(grid);
 		}//end for(grids)
 		for(RenderableSpacePartitioningGrid grid:newMode){
 		    if(!currentMode.contains(grid))
-			grid.activate();
+			defaultGrid.addBranch(grid);
 		}//end for(grids)
 	    }}).get();}catch(Exception e){e.printStackTrace();}
 	currentMode.clear();

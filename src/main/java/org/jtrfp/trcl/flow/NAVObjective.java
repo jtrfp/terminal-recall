@@ -12,10 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
+import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
@@ -37,6 +39,8 @@ import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Jumpzone;
+import org.jtrfp.trcl.obj.PortalEntrance;
+import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -149,8 +153,17 @@ public abstract class NAVObjective {
 				return tunnelExit;
 			    }
 		    };//end new NAVObjective tunnelExit
+		    final Point tunnelPoint = new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX()));
+		    if(mission.getTunnelEntrancePortal(new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX())))==null){
+			//TODO
+			//final Camera tunnelCam = tr.secondaryRenderer.get().getCamera();
+			//final PortalExit exit = new PortalExit(tr, tunnelCam);
+			//final PortalEntrance entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
+			//mission.registerTunnelEntrancePortal(tunnelPoint, exit);
+		    }
 		    indexedNAVObjectiveList.add(exitObjective);
 		    tunnelExit.setNavObjectiveToRemove(exitObjective,true);
+		    
 		    tunnelExit.setMirrorTerrain(currentTunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
 		    
 		    //if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){

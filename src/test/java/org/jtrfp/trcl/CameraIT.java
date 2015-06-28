@@ -74,7 +74,7 @@ public class CameraIT {
     public void testAddSingleCubeGridChangePosition(){//Use of Executors has broken this test.
 	subject.setPosition(new Vector3D(0,0,0));
 	SpacePartitioningGrid<Positionable> spg = new SpacePartitioningGrid<Positionable>(){};
-	spg.activate();
+	//spg.activate();
 	spg.add(zeroPositionables[0]);spg.add(zeroPositionables[1]);
 	subject.addGrid(spg);
 	singleThreadExecutorBarrier(World.relevanceExecutor);
@@ -95,7 +95,7 @@ public class CameraIT {
     @Test
     public void testAddSingleCubeGridVisibleEverywhere(){//Use of Executors has broken this test
 	SpacePartitioningGrid<Positionable> spg = new SpacePartitioningGrid<Positionable>(){};
-	spg.activate();
+	//spg.activate();
 	Positionable[] vePositionables = new Positionable[2];
 	for(int i=0; i<2; i++){
 	    Positionable pos=mock(Positionable.class);

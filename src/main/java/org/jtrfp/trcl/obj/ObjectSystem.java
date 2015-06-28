@@ -45,7 +45,7 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
 	defPlacer.placeObjects(this, positionOffset);
 	PUPObjectPlacer pupPlacer = new PUPObjectPlacer(pupFile, tr,pupObjectReporter);
 	pupPlacer.placeObjects(this, positionOffset);
-	blockingActivate();
+	//tr.getDefaultGrid().blockingAddBranch(this);
     }// end ObjectSystem(...)
     /**
      * @return the defPlacer

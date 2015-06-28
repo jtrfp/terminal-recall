@@ -64,30 +64,26 @@ public class Game {
     private String 	playerName="DEBUG";
     private Difficulty 	difficulty;
     private Mission 	currentMission;
-    private HUDSystem 	hudSystem;
-    private NAVSystem 	navSystem;
+    HUDSystem 	hudSystem;
+    NAVSystem 	navSystem;
     private SatelliteDashboard satDashboard;
     private Player 	player;
     private GLFont	upfrontFont;
-    private UpfrontDisplay
+    UpfrontDisplay
     			upfrontDisplay;
-    private LevelLoadingScreen
+    LevelLoadingScreen
     			levelLoadingScreen;
-    private BriefingScreen
+    BriefingScreen
     			briefingScreen;
     private IntroScreen
     			introScreen;
     private final RedFlash
     			redFlash;
     private final DisplayModeHandler
-    			displayModes =
-    			new DisplayModeHandler();
-    public Object[]	earlyLoadingMode,
+    			displayModes;
+    private Object[]	earlyLoadingMode,
     			titleScreenMode,
-    			levelLoadingMode,
-    			briefingMode,
-    			gameplayMode,
-    			performanceReportMode;
+    			missionMode;
     private final PropertyChangeSupport
     			pcSupport = new PropertyChangeSupport(this);
     private boolean paused=false;
@@ -100,11 +96,13 @@ public class Game {
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
+	displayModes = new DisplayModeHandler(tr.getDefaultGrid());
 	setVox(vox);
 	redFlash = new RedFlash(tr);
 	tr.getDefaultGrid().add(redFlash);
 	if (!tr.config.isDebugMode())
 	    setupNameWithUser();
+	missionMode = new Object[]{};
     }// end constructor
 
     private void setupNameWithUser() {
@@ -276,12 +274,12 @@ public class Game {
 		
 		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont());
 		navSystem = new NAVSystem(tr.getDefaultGrid(), tr);
-		World.relevanceExecutor.submit(new Runnable(){
+		/*World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			hudSystem.deactivate();
-			navSystem.deactivate();
-		    }});
+			tr.getDefaultGrid().removeBranch(hudSystem);
+			tr.getDefaultGrid().removeBranch(navSystem);
+		    }});*/
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
 		    final Color[] pal 	     = tr.getGlobalPalette();
@@ -300,15 +298,15 @@ public class Game {
 		    earlyLoadingScreen.setStatusText("Loading debris assets...");
 		    rm.setDebrisSystem(new DebrisSystem(tr));
 		    // ACTIVATE
-		    try{World.relevanceExecutor.submit(new Runnable(){
+		    /*try{World.relevanceExecutor.submit(new Runnable(){
 			@Override
 			public void run() {
-			    rm.getDebrisSystem()    .activate();
-			    rm.getSmokeSystem()     .activate();
-			    rm.getExplosionFactory().activate();
-			    rm.getPowerupSystem()   .activate();
+			    tr.getDefaultGrid().addBranch(rm.getDebrisSystem());
+			    tr.getDefaultGrid().addBranch(rm.getSmokeSystem());
+			    tr.getDefaultGrid().addBranch(rm.getExplosionFactory());
+			    tr.getDefaultGrid().addBranch(rm.getPowerupSystem());
 			}}).get();}
-		    catch(Exception e){throw new RuntimeException(e);}
+		    catch(Exception e){throw new RuntimeException(e);}*/
 		    // SETUP PROJECTILE FACTORIES
 		    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
 		    Weapon[] w = Weapon.values();
@@ -329,29 +327,14 @@ public class Game {
 		    earlyLoadingScreen.setStatusText("Starting game...");
 		    
 		    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");
-		    earlyLoadingScreen.blockingDeactivate();
+		    //tr.getDefaultGrid().blockingRemoveBranch(earlyLoadingScreen);
 		    
-		    levelLoadingMode = new Object[]{
-			 levelLoadingScreen,
-			 upfrontDisplay
-		    };
-		    gameplayMode = new Object[]{
-			 navSystem,
-			 hudSystem,
-			 upfrontDisplay,
-			 rm.getDebrisSystem(),
-			 rm.getPowerupSystem(),
-			 rm.getProjectileFactories(),
-			 rm.getExplosionFactory(),
-			 rm.getSmokeSystem()
-		    };
-		    briefingMode = new Object[]{
-			 briefingScreen
-		    };
+		    
 		    titleScreenMode = new Object[]{
 			    introScreen
 		    };
 		    displayModes.setDisplayMode(titleScreenMode);
+		    introScreen.activate();//TODO: Change nomenclature to reflect that music is being started
 		    setLevelIndex(0);
     }// end boot()
     
@@ -365,8 +348,9 @@ public class Game {
 		final Mission mission = getCurrentMission();
 		if (mission == null)
 		    break;
-		while (result == null)
-		    result = getCurrentMission().go();
+		while (result == null){
+		    displayModes.setDisplayMode(missionMode);
+		    result = getCurrentMission().go();}
 		if (result.isAbort())
 		    break;
 		// Rube Goldberg style increment
@@ -408,23 +392,23 @@ public class Game {
 	    @Override
 	    public void run() {
 		if(hudSystem!=null)
-		    hudSystem.deactivate();
+		    tr.getDefaultGrid().removeBranch(hudSystem);
 		if(navSystem!=null)
-		    navSystem.deactivate();
+		    tr.getDefaultGrid().removeBranch(navSystem);
 		if(upfrontDisplay!=null)
-		    upfrontDisplay.deactivate();
+		    tr.getDefaultGrid().removeBranch(upfrontDisplay);
 		if(introScreen!=null)
 		    introScreen.deactivate();
 		if(levelLoadingScreen!=null)
-		    levelLoadingScreen.deactivate();
+		    tr.getDefaultGrid().removeBranch(levelLoadingScreen);
 		if(briefingScreen!=null)
-		    briefingScreen.deactivate();
+		    tr.getDefaultGrid().removeBranch(briefingScreen);
 		if(tr.getResourceManager().getPowerupSystem()!=null)
-		    tr.getResourceManager().getPowerupSystem().deactivate();
+		    tr.getDefaultGrid().removeBranch(tr.getResourceManager().getPowerupSystem());
 		if(tr.getResourceManager().getSmokeSystem()!=null)
-		    tr.getResourceManager().getSmokeSystem().deactivate();
+		    tr.getDefaultGrid().removeBranch(tr.getResourceManager().getSmokeSystem());
 		if(tr.getResourceManager().getExplosionFactory()!=null)
-		    tr.getResourceManager().getExplosionFactory().deactivate();
+		    tr.getDefaultGrid().removeBranch(tr.getResourceManager().getExplosionFactory());
 	    }}).get();}catch(Exception e){e.printStackTrace();}
 	
 	if(player!=null)
@@ -534,5 +518,9 @@ public class Game {
      */
     public RedFlash getRedFlash() {
         return redFlash;
+    }
+
+    public void levelLoadingMode() {
+	introScreen.deactivate();
     }
 }// end Game

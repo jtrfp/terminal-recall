@@ -30,7 +30,7 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private SkySystem 	     skySystem;
-    private InterpolatingAltitudeMap altitudeMap;
+    private AltitudeMap              altitudeMap;
     private Color 		     fogColor = Color.black;
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid 
@@ -62,8 +62,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), new ColorPaletteVectorList(globalPalette),null,false);
 	    System.out.println("Loading height map...");
-	    altitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
-		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile()));
+	    altitudeMap = new ScalingAltitudeMap(new InterpolatingAltitudeMap(tr.getResourceManager()
+		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile())),new Vector3D(TR.mapSquareSize,tr.getWorld().sizeY / 2,TR.mapSquareSize));
 	    System.out.println("... Done");
 	    final TextureMesh textureMesh = tr.getResourceManager().getTerrainTextureMesh(
 		    lvl.getTexturePlacementFile(), texturePalette);
@@ -86,12 +86,15 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("Setting up objects...");
 	    objectSystem = new ObjectSystem(this, tr, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
-	    World.relevanceExecutor.submit(new Runnable(){
+	    System.out.println("Adding terrain and object system to OverworldSystem...");
+	    this.blockingAddBranch(terrainSystem);
+	    this.blockingAddBranch(objectSystem);
+	    /*World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    objectSystem.activate();
-		    terrainSystem.activate();
-		}});
+		    OverworldSystem.this.addBranch(objectSystem);
+		    OverworldSystem.this.addBranch(terrainSystem);
+		}});*/
 	    
 	    System.out.println("...Done.");
 	    // Tunnel activators
@@ -120,39 +123,25 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     }
 
     public void setChamberMode(boolean mirrorTerrain) {
+	System.out.println("setChamberMode from "+chamberMode+" to "+mirrorTerrain);
 	tr.getReporter().report("org.jtrfp.OverworldSystem.isInChamber?",
 		"" + mirrorTerrain);
+	if(chamberMode == mirrorTerrain)
+	    return;//Nothing to change.
 	chamberMode = mirrorTerrain;
 	final SkySystem clouds = getCloudSystem();
 	if (mirrorTerrain) {
-	    World.relevanceExecutor.submit(new Runnable(){
-		@Override
-		public void run() {
-		    getTerrainMirror().activate();
-		}});
+	    OverworldSystem.this.nonBlockingAddBranch(getTerrainMirror());
 	    //No skycube updates in chamber
 	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	    if (clouds != null)
-		World.relevanceExecutor.submit(new Runnable(){
-			@Override
-			public void run() {
-			    clouds.deactivate();
-			}});
-		
+		OverworldSystem.this.nonBlockingRemoveBranch(clouds);
 	} else {
-	    World.relevanceExecutor.submit(new Runnable(){
-		@Override
-		public void run() {
-		    getTerrainMirror().deactivate();
-		}});
+	    OverworldSystem.this.nonBlockingRemoveBranch(getTerrainMirror());
 	    //Turn skycube updates back on
 	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	    if (clouds != null)
-		World.relevanceExecutor.submit(new Runnable(){
-			@Override
-			public void run() {
-			    clouds.activate();
-			}});
+		OverworldSystem.this.nonBlockingAddBranch(clouds);
 	}
     }// end chamberMode
 
@@ -187,7 +176,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     public ObjectSystem getObjectSystem() {
         return objectSystem;
     }
-    public InterpolatingAltitudeMap getAltitudeMap() {
+    public AltitudeMap getAltitudeMap() {
 	return altitudeMap;
     }
     public SkySystem getSkySystem() {

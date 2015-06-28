@@ -61,7 +61,7 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,never()).add   (any(Pair.class));
 	verify(mockedTarget,never()).addAll(any(Collection.class));
 	verifyZeroInteractions(mockedTarget);
-	subject.activate();
+	//subject.activate();
     }
 
     @After
@@ -163,7 +163,8 @@ public class SpacePartitioningGridRootTest {
     public void testEmptyAddNonEmptyBranch() {//Relevance executor breaks this test.
 	if(!Renderer.NEW_MODE) return;
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
-	branch.activate();
+	//branch.activate();
+	subject.blockingAddBranch(branch);
 	branch.add(mockedPositionables[0]);
 	branch.add(mockedPositionables[1]);
 	ArgumentCaptor<Pair> argument 
@@ -184,11 +185,13 @@ public class SpacePartitioningGridRootTest {
 	if(!Renderer.NEW_MODE) return;
 	when(mockedTarget.removeAll(any(Collection.class))).thenReturn(true);
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
-	branch.activate();
+	//branch.activate();
+	subject.blockingAddBranch(branch);
 	branch.add(mockedPositionables[0]);
 	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertEquals(1,subject.getPackedObjectsDispatcher().size());
-	branch.deactivate();
+	//branch.deactivate();
+	subject.blockingRemoveBranch(branch);
 	branch.add(mockedPositionables[1]);
 	assertEquals(0,subject.getPackedObjectsDispatcher().size());
 	ArgumentCaptor<Pair> argument 
@@ -201,7 +204,8 @@ public class SpacePartitioningGridRootTest {
 	  = new ArgumentCaptor<Collection>();
 	verify(mockedTarget,times(1)).removeAll(argument2.capture());
 	assertEquals(1,argument2.getValue().size());
-	branch.activate();
+	subject.blockingAddBranch(branch);
+	//branch.activate();
 	verify(mockedTarget,times(2)).add(any(Pair.class));
 	assertEquals(1,subject.getPackedObjectsDispatcher().size());
     }//end testEmptyAddNonEmptyBranchThenActivate()
@@ -210,7 +214,8 @@ public class SpacePartitioningGridRootTest {
     public void testPopulatedAddNonEmptyBranchCommonTags(){
 	if(!Renderer.NEW_MODE) return;
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
-	branch.activate();
+	//branch.activate();
+	subject.blockingAddBranch(branch);
 	subject.add(mockedPositionables[2]);
 	subject.add(mockedPositionables[3]);
 	branch.add(mockedPositionables[0]);

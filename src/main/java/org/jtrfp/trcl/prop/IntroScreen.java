@@ -26,9 +26,11 @@ import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 
 public class IntroScreen extends RenderableSpacePartitioningGrid {
     private final MusicPlaybackEvent bgMusic;
+    private final TR tr;
     
     public IntroScreen(TR tr, String backdropResource, String musicResource) throws IllegalAccessException, IOException, FileLoadException {
 	super(tr.getDefaultGrid());
+	this.tr=tr;
 	add(new BackdropSprite(tr,backdropResource,musicResource));
 	if(musicResource!=null)
 	 bgMusic = tr.soundSystem.get().
@@ -51,20 +53,18 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
 	return rm.getSpecialRAWAsTextures(resourceName, rm.getPalette("VGA.ACT"), tr.gpu.get().getGl(), 1, true);
     }//end genTexture
     
-    @Override
     public void activate(){
-	super.activate();
+	//tr.getDefaultGrid().addBranch(this);
 	if(bgMusic!=null)
 	 bgMusic.play();
     }
     
-    @Override
     public void deactivate(){
-	World.relevanceExecutor.submit(new Runnable(){
+	/*World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
-		IntroScreen.super.deactivate();
-	    }});
+		tr.getDefaultGrid().removeBranch(IntroScreen.this);
+	    }});*/
 	if(bgMusic!=null)
 	 bgMusic.stop();
     }

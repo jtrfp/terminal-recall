@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.SkySystem;
@@ -51,6 +52,7 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
@@ -98,6 +100,8 @@ public class Mission {
     private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private Tunnel		currentTunnel;
+    private final DisplayModeHandler displayHandler;
+    private Object [] levelLoadingMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -109,6 +113,12 @@ public class Mission {
 	this.game 	= game;
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
+	this.displayHandler = new DisplayModeHandler(tr.getDefaultGrid());
+	ResourceManager rm = tr.getResourceManager();
+	levelLoadingMode = new Object[]{
+		 game.levelLoadingScreen,
+		 game.upfrontDisplay
+	    };
     }// end Mission
     /*
     public TRFutureTask<Result> go(){
@@ -149,7 +159,9 @@ public class Mission {
 	final Camera camera = renderer.getCamera();
 	camera.setHeading(Vector3D.PLUS_I);
 	camera.setTop(Vector3D.PLUS_J);
-	game.setDisplayMode(game.levelLoadingMode);
+	game.levelLoadingMode();
+	displayHandler.setDisplayMode(levelLoadingMode);
+	//game.setDisplayMode(game.levelLoadingMode);
 	game.getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
@@ -165,6 +177,25 @@ public class Mission {
 	    
 	    overworldSystem = new OverworldSystem(tr,
 		    progressStages[LoadingStages.overworld.ordinal()]);
+	    briefingMode = new Object[]{
+			 game.briefingScreen,
+			 overworldSystem
+		    };
+	    gameplayMode = new Object[]{
+			 game.navSystem,
+			 game.hudSystem,
+			 game.upfrontDisplay,
+			 overworldSystem,
+			 rm.getDebrisSystem(),
+			 rm.getPowerupSystem(),
+			 rm.getProjectileFactories(),
+			 rm.getExplosionFactory(),
+			 rm.getSmokeSystem()
+		    };
+	    summaryMode = new Object[]{
+		    game.getBriefingScreen(),
+		    overworldSystem
+	    };
 	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
@@ -177,9 +208,9 @@ public class Mission {
 	    playerStartPosition[0] = TR.legacy2Modern(l3d.getZ());
 	    playerStartPosition[2] = TR.legacy2Modern(l3d.getX());
 	    final double HEIGHT_PADDING = 10000;
-	    playerStartPosition[1] = Math.max(HEIGHT_PADDING + (world.sizeY/2) * getOverworldSystem().getAltitudeMap().heightAt(
-		    TR.legacy2MapSquare(l3d.getZ()),
-		    TR.legacy2MapSquare(l3d.getX())),TR.legacy2Modern(l3d.getY()));
+	    playerStartPosition[1] = Math.max(HEIGHT_PADDING + getOverworldSystem().getAltitudeMap().heightAt(
+		    TR.legacy2Modern(l3d.getZ()),
+		    TR.legacy2Modern(l3d.getX())),TR.legacy2Modern(l3d.getY()));
 	    playerStartDirection = new ObjectDirection(s.getRoll(),
 		    s.getPitch(), s.getYaw());
 	    // ////// INITIAL HEADING
@@ -281,6 +312,7 @@ public class Mission {
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
 	    setMissionMode(new Mission.IntroMode());
+	    displayHandler.setDisplayMode(briefingMode);
 	    game.getBriefingScreen().briefingSequence(lvl);
 	}
 	setMissionMode(new Mission.AboveGroundMode());
@@ -289,13 +321,14 @@ public class Mission {
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
-	World.relevanceExecutor.submit(new Runnable(){
+	game.getNavSystem() .activate();
+	/*World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
-		game.getNavSystem()	.activate();
-		getOverworldSystem()    .activate();
-	    }});
-	game.setDisplayMode(game.gameplayMode);
+		//game.getNavSystem() .activate();
+		tr.getDefaultGrid() .removeBranch(getOverworldSystem());
+	    }});*/
+	displayHandler.setDisplayMode(gameplayMode);
 	
 	game.getPlayer()	.setActive(true);
 	tr.getGame().setPaused(false);
@@ -306,6 +339,7 @@ public class Mission {
 	//Completion summary
 	if(missionEnd[0]!=null)
 	    if(!missionEnd[0].isAbort()){
+		displayHandler.setDisplayMode(summaryMode);
 		setMissionMode(new Mission.MissionSummaryMode());
 		game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
 	    }//end if(proper ending)
@@ -428,20 +462,38 @@ public class Mission {
 	totalNumTunnels = tunnelsRemaining.size();
     }//end installTunnels()
 
-    private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tun,
+    private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tdfTun,
 	    LoadingProgressReporter reporter) {
-	final Tunnel result = new Tunnel(tr, tun, reporter);
-	DirectionVector v = tun.getEntrance();
-	tunnelsRemaining.add(result);
-	final Point point = new Point(
-		(int)(TR.legacy2MapSquare(v.getZ())),
-		(int)(TR.legacy2MapSquare(v.getX())));
-	addTunnelEntrance(point,result);
-	final PortalExit portalExit = getTunnelEntrancePortal(point);//TODO: Returning null
+	final Tunnel tunnel = new Tunnel(tr, tdfTun, reporter);
+	tunnelsRemaining.add(tunnel);
+	DirectionVector tunnelEntranceLegacyPos = tdfTun.getEntrance();
+	final Point tunnelEntranceMapSquarePos = new Point(
+		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getZ())),
+		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
+	addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel);
+	PortalExit portalExit = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
+	portalExit.setHeading(Tunnel.TUNNEL_START_DIRECTION.getHeading());
+	portalExit.setTop(Tunnel.TUNNEL_START_DIRECTION.getTop());
 	portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());
-	portalExit.getControlledCamera();//TODO: Add tunnel to camera
-	tunnels.put(tun.getTunnelLVLFile().toUpperCase(), result);
-	return result;
+	portalExit.notifyPositionChange();
+	portalExit.setRootGrid(tunnel);
+	
+	DirectionVector tunnelExitLegacyPos = tdfTun.getExit();
+	final Point tunnelExitMapSquarePos = new Point(
+		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
+		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
+	System.out.println("Tunnel exit at sector "+tunnelExitMapSquarePos);
+	portalExit = getTunnelEntrancePortal(tunnelExitMapSquarePos);
+	if(portalExit!=null){
+	 portalExit.setHeading(tunnel.getExitObject().getHeading().negate());
+	 portalExit.setTop(tunnel.getExitObject().getTop());
+	 portalExit.setPosition(tunnel.getExitObject().getPosition());
+	 portalExit.notifyPositionChange();
+	 portalExit.setRootGrid(tunnel);
+	}else System.err.println("Null exit.");
+	
+	tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
+	return tunnel;
     }
 
     public Tunnel getTunnelByFileName(String tunnelFileName) {
@@ -625,13 +677,10 @@ public class Mission {
     }//end abort()
 
     private void cleanup() {
-	try{World.relevanceExecutor.submit(new Runnable(){
-
-	    @Override
-	    public void run() {
-		if(overworldSystem!=null)
-		    overworldSystem.deactivate();
-	    }}).get();}catch(Exception e){e.printStackTrace();}
+	if(overworldSystem!=null)
+	    tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
+	displayHandler.setDisplayMode(emptyMode);
+	tr.secondaryRenderer.get().getCamera().setRootGrid(null);
     }
     /**
      * Find a tunnel at the given map square, if any.
@@ -673,8 +722,8 @@ public class Mission {
 	currentTunnel = tunnel;
 	game.getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
-	tunnel.blockingActivate();
-	overworldSystem.nonBlockingDeactivate();
+	tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
+	tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
 	
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
@@ -705,9 +754,19 @@ public class Mission {
 	playerBehavior.probeForBehavior(CollidesWithTerrain.class).setEnable(false);
 	//entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 	tunnel.dispatchTunnelEntryNotifications();
-	player.setPosition(Tunnel.TUNNEL_START_POS.toArray());
-	player.setDirection(Tunnel.TUNNEL_START_DIRECTION);
+	final Camera secondaryCam = tr.secondaryRenderer.get().getCamera();
+	player.setPosition(secondaryCam.getPosition());
+	player.setHeading (secondaryCam.getHeading());
+	player.setTop     (secondaryCam.getTop());
 	player.notifyPositionChange();
+	//Move the secondary cam to the overworld.
+	secondaryCam.setRootGrid(overworldSystem);
+	tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(tr.getGame().
+		      getCurrentMission().
+		      getOverworldSystem().
+		      getSkySystem().
+		      getBelowCloudsSkyCubeGen());
+	//Set the skycube appropriately
 	/*
 	final NAVObjective navObjective = getNavObjectiveToRemove();
 	if(navObjective!=null && navTargeted){
@@ -838,8 +897,8 @@ public class Mission {
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			game.getNavSystem().deactivate();
-			game.getHUDSystem().deactivate();
+			tr.getDefaultGrid().removeBranch(game.getNavSystem());
+			tr.getDefaultGrid().removeBranch(game.getHUDSystem());
 		    }});
 		cam.setFogEnabled(false);
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
@@ -856,7 +915,8 @@ public class Mission {
 		    @Override
 		    public void run() {
 			tr.getGame().getNavSystem().activate();
-			game.getHUDSystem().activate();
+			tr.getDefaultGrid().addBranch(game.getNavSystem());
+			tr.getDefaultGrid().addBranch(game.getHUDSystem());
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);

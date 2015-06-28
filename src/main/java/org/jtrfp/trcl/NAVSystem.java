@@ -86,9 +86,8 @@ private final NAVRadarBlipFactory blips;
 	return arrow.getTopArray();
     }
     
-    @Override
     public void activate(){
-	super.activate();
+	//tr.getDefaultGrid().addBranch(this);
 	updateNAVState();
     }
 }//end NAVSystem

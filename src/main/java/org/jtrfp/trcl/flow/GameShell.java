@@ -91,20 +91,12 @@ public class GameShell {
     
     public void showGameshellScreen(){
 	initializationFence();
-	World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		earlyLoadingScreen.activate();
-	    }});
+	tr.getDefaultGrid().nonBlockingAddBranch(earlyLoadingScreen);
     }
     
     public void hideGameshellScreen(){
 	initializationFence();
-	World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		earlyLoadingScreen.deactivate();
-	    }});
+	tr.getDefaultGrid().nonBlockingRemoveBranch(earlyLoadingScreen);
     }
     
     private void initLoadingScreen(){
@@ -112,7 +104,7 @@ public class GameShell {
 	try{greenFont          = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
 	    earlyLoadingScreen = new EarlyLoadingScreen(tr.getDefaultGrid(), tr, greenFont);
 	    earlyLoadingScreen.setStatusText("No game loaded.");
-	    earlyLoadingScreen.blockingActivate();
+	    tr.getDefaultGrid().nonBlockingAddBranch(earlyLoadingScreen);
 	}catch(Exception e){gameFailure(e);}
     }//end initLoadingScreen()
     

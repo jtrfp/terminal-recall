@@ -72,7 +72,7 @@ public final class TR implements UncaughtExceptionHandler{
 	private final KeyStatus 		keyStatus;
 	private ResourceManager 		resourceManager;
 	public final ThreadManager 		threadManager;
-	public final TRFutureTask<Renderer> 	mainRenderer;
+	public final TRFutureTask<Renderer> 	mainRenderer, secondaryRenderer;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter		= new Reporter();
 	private Game 				game;
@@ -139,25 +139,43 @@ public final class TR implements UncaughtExceptionHandler{
 		threadManager.threadPool.submit(gpu);
 		threadManager.threadPool.submit(soundSystem);//TODO: Use new methods
 		System.out.println("Initializing graphics engine...");
-		    mainRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
+		secondaryRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
 			@Override
 			public Renderer call() throws Exception {
 			    Thread.currentThread().setName("Renderer constructor.");
-			    return gpu.
+			    Renderer renderer = gpu.
 				    get().
 				    rendererFactory.
 				    get().
 				    newRenderer();
+			    renderer.setOneShotBehavior(true);
+			    return renderer;
+			}//end call()
+		    },TR.this);threadManager.threadPool.submit(secondaryRenderer);
+		    mainRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
+			@Override
+			public Renderer call() throws Exception {
+			    Thread.currentThread().setName("Renderer constructor.");
+			    Renderer renderer = gpu.
+				    get().
+				    rendererFactory.
+				    get().
+				    newRenderer();
+			    renderer.setOneShotBehavior(false);
+			    return renderer;
 			}//end call()
 		    },TR.this);threadManager.threadPool.submit(mainRenderer);
 		    System.out.println("...Done");
 		setResourceManager(new ResourceManager(this));
 		
 		final Renderer renderer = mainRenderer.get();
-		renderer.getCamera().setRootGrid(getDefaultGrid());//TODO: Remove when conversion complete
-		//renderer.setRootGrid(getDefaultGrid());//TODO: replace with Camera objects?
-		//renderer.setCollisionManager(getCollisionManager());
+		renderer.getCamera().setRootGrid(getDefaultGrid());
 		getThreadManager().addRepeatingGLTask(renderer.render);
+		/////// SECONDARY RENDERER //////////////
+		secondaryRenderer.get().getCamera().setRootGrid(getDefaultGrid());//TODO: Stub
+		secondaryRenderer.get().getCamera().setPosition(0, TR.mapSquareSize*5, 0);//TODO: Stub
+		secondaryRenderer.get().setRenderingTarget(gpu.get().rendererFactory.get().getPortalFrameBuffers()[0]);
+		getThreadManager().addRepeatingGLTask(secondaryRenderer.get().render);
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
@@ -452,7 +470,7 @@ public final class TR implements UncaughtExceptionHandler{
 	    try{World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    defaultGrid = world.newRootGrid();defaultGrid.activate();
+		    defaultGrid = world.newRootGrid();
 		}}).get();}catch(Exception e){throw new RuntimeException(e);}
 	    }//end if(null)
         return defaultGrid;

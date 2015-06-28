@@ -42,6 +42,11 @@ public class TunnelSegment extends WorldObject {
 	this.segment = s;
 	addBehavior(new TunnelSegmentBehavior());
     }
+    
+    @Override
+    public boolean supportsLoop(){
+	return false;
+    }
 
     private static class TunnelSegmentBehavior extends Behavior implements
 	    CollisionBehavior {

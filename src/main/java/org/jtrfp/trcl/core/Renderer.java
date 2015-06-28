@@ -15,6 +15,7 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GL3;
@@ -62,7 +63,9 @@ public final class Renderer {
     private final	PredicatedCollection<Positionable> relevantPositioned;
     private final	Reporter		reporter;
     private final	ThreadManager		threadManager;
+    private volatile boolean			oneShotBehavior = false;
     public static final boolean NEW_MODE = true;
+    private volatile boolean keepAlive = false;
     
     public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow) {
 	this.factory         = factory;
@@ -71,7 +74,7 @@ public final class Renderer {
 	this.threadManager   =threadManager;
 	//this.collisionManager=collisionManagerFuture;
 	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
-	camera = world.newCamera();//TODO: Remove after redesign.
+	Camera camera = world.newCamera();//TODO: Remove after redesign.
 	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
 	System.out.println("...Done.");
 	System.out.println("Initializing RenderList...");
@@ -86,7 +89,8 @@ public final class Renderer {
 		    PredicatedCollection.predicatedCollection(
 			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),Util.bidi2Backward(castingAdapter),Util.bidi2Forward(castingAdapter)),
 			    new InstanceofPredicate(PositionedRenderable.class));
-     setCamera(camera);//TODO: Remove after redesign
+     assert camera!=null;
+	setCamera(camera);//TODO: Remove after redesign
     }//end constructor
     
     private static final Adapter<Positionable,PositionedRenderable> castingAdapter = new Adapter<Positionable,PositionedRenderable>(){
@@ -127,6 +131,7 @@ public final class Renderer {
     public void setCamera(Camera toUse){
 	if(this.camera!=null)
 	    this.camera.getFlatRelevanceCollection().removeTarget(relevantPositioned, true);
+	this.camera=toUse;
 	toUse.getFlatRelevanceCollection().addTarget(relevantPositioned, true);
     }
     
@@ -140,6 +145,11 @@ public final class Renderer {
 			if(oneFrameLaggedRenderList==null)
 			 oneFrameLaggedRenderList = renderList.getRealtime();
 			
+			if(oneShotBehavior){
+			    if(!keepAlive)
+				return null;
+			    keepAlive=false;
+			    }
 			oneFrameLaggedRenderList.render(gl);
 			oneFrameLaggedRenderList   = renderList.getRealtime();
 			oneFrameLaggedRenderList.sendToGPU(gl);
@@ -328,5 +338,27 @@ public final class Renderer {
     
     public Camera getCamera() {
 	return camera;
+    }
+
+    public void keepAlive() {
+	keepAlive=true;
+    }
+
+    /**
+     * @return the oneShotBehavior
+     */
+    public boolean isOneShotBehavior() {
+        return oneShotBehavior;
+    }
+
+    /**
+     * @param oneShotBehavior the oneShotBehavior to set
+     */
+    public void setOneShotBehavior(boolean oneShotBehavior) {
+        this.oneShotBehavior = oneShotBehavior;
+    }
+
+    public boolean isKeepAlive() {
+	return keepAlive;
     }
 }//end Renderer

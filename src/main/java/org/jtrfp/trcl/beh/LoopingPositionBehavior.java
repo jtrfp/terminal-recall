@@ -21,7 +21,7 @@ public class LoopingPositionBehavior extends Behavior {
 	// Loop correction
 	double [] oldPos = getParent().getPosition();
 	boolean _transient=false;
-	if (WorldObject.LOOP){
+	if (getParent().supportsLoop()){
 		if (oldPos[0] > TR.mapWidth)
 			//oldPos = oldPos.subtract(new Vector3D(TR.mapWidth, 0, 0));
 			{oldPos[0]-=TR.mapWidth;_transient=true;}

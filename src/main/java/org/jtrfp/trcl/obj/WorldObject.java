@@ -45,7 +45,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     public static final String HEADING  ="heading";
     public static final String TOP      ="top";
     
-    public static final boolean LOOP = true;
     private double[] 	heading = new double[] { 0, 0, 1 }, oldHeading= new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     private double[] 	top 	= new double[] { 0, 1, 0 }, oldTop    = new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     protected volatile double[] 
@@ -317,8 +316,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	if(model!=null)model.proposeAnimationUpdate();
     }//end updateStateToGPU()
     
+    public boolean supportsLoop(){
+	return true;
+    }
+    
     protected void attemptLoop(){
-	if (LOOP) {
+	if (supportsLoop()) {
 	    final Vector3D camPos = tr.mainRenderer.get().getCamera().getCameraPosition();
 	    double delta = position[0]
 		    - camPos.getX();

@@ -109,8 +109,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addBehavior(new MatchDirection()).setEnable(true);
 	addBehavior(new FacingObject().setEnable(false));
 	addBehavior(new RotateAroundObject().setEnable(false));
-	if(!Renderer.NEW_MODE)
-	 addBehavior(new TriggersVisCalcWithMovement().setEnable(true));
 	addBehavior(new SkyCubeCloudModeUpdateBehavior());
 	
 	addPropertyChangeListener(CENTER_CUBE,new CenterCubeHandler());
@@ -134,13 +132,21 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	}//end evaluate()
     }//end VisibilityPredicate
     
-    public void addGrid(SpacePartitioningGrid<?> toAdd){
+    public void addGrid(final SpacePartitioningGrid<?> toAdd){
 	if(toAdd==null) throw new NullPointerException("toAdd intolerably null.");
-	toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input,true);
+	try{World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input, true);
+	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
     }
-    public void removeGrid(SpacePartitioningGrid<?> toRemove){
+    public void removeGrid(final SpacePartitioningGrid<?> toRemove){
 	if(toRemove==null) throw new NullPointerException("toRemove intolerably null.");
-   	toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
+	try{World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
+	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
     }
     
     private final class CameraPositionHandler implements PropertyChangeListener{

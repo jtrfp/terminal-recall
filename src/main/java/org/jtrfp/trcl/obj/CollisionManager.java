@@ -37,44 +37,6 @@ public class CollisionManager {
 	collisionList[0] = new ArrayList<Positionable>(1024);
 	collisionList[1] = new ArrayList<Positionable>(1024);
     }
-
-    public void updateCollisionList() {
-	if(Renderer.NEW_MODE)
-	    return;
-	final List<Positionable> collideable = getWriteCollisionList();
-	//System.out.println("CollisionManager.updateCollisionList() "+collideable.size());
-	synchronized(collideable){
-	collideable.clear();
-	final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
-	    if (grid != null) {
-		grid.itemsWithinRadiusOf(tr.mainRenderer.get().getCamera()
-			.getCameraPosition(),
-			new Submitter<PositionedRenderable>() {
-			    @Override
-			    public void submit(PositionedRenderable item) {
-				if (item instanceof WorldObject) {
-				    final WorldObject wo = (WorldObject) item;
-				    if (wo.isCollideable())
-					collideable.add(wo);
-				}
-			    }
-
-			    @Override
-			    public void submit(
-				    Collection<PositionedRenderable> items) {
-				synchronized (items) {
-				    for (PositionedRenderable pr : items) {
-					submit(pr);
-				    }
-				}// end synchronized(...)
-			    }
-			});
-		flip = !flip;
-	    }// end if(!null)
-	}//end sync(collideable)
-	//System.out.println("Done.");
-    }// end updateVisibilityList()
-    
     private final Positionable [] positionableWorkArray = new Positionable[4096];
     private volatile int numPositionables =0;
 
@@ -82,7 +44,7 @@ public class CollisionManager {
 	try{World.relevanceExecutor.submit(new Callable<List<Positionable>>(){
 	    @Override
 	    public List<Positionable> call() {
-		List<Positionable> list = Renderer.NEW_MODE?inputRelevanceList:getCurrentlyActiveCollisionList();
+		List<Positionable> list = inputRelevanceList;
 		numPositionables = list.size();
 		if(numPositionables<=positionableWorkArray.length)
 		 list.toArray(positionableWorkArray);

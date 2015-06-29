@@ -64,7 +64,6 @@ public final class Renderer {
     private final	Reporter		reporter;
     private final	ThreadManager		threadManager;
     private volatile boolean			oneShotBehavior = false;
-    public static final boolean NEW_MODE = true;
     private volatile boolean keepAlive = false;
     
     public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow) {
@@ -172,41 +171,6 @@ public final class Renderer {
 	// renderList.get().getVisibleWorldObjectList().add(pr);
     }//end temporarilyMakeImmediatelyRelevant(...)
     
-    public void updateRelevanceList(boolean mandatory) {
-	//System.out.println("relevanceCollections.size()="+camera.getRelevanceCollections().size());
-	if(NEW_MODE)
-	    return;
-	if(relevanceUpdateFuture!=null){
-	    if(!relevanceUpdateFuture.isDone()){
-		if(!mandatory){System.out.println("Renderer.updateVisibilityList() !done");return;}
-		else {}
-		}
-	    relevanceUpdateFuture.get();
-	    }//end if(visibilityUpdateFuture!=null)
-	relevanceUpdateFuture = threadManager.submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() {
-		try{
-		proximitySorter.setCenter(getCamera().getCameraPosition().toArray());
-		if(camera.getRootGrid()==null)
-		    return null;
-		synchronized(threadManager.gameStateLock){
-		 camera.getRootGrid().cubesWithinRadiusOf(
-			getCamera().getCameraPosition().add(
-				getCamera().getLookAtVector().scalarMultiply(
-					getCamera().getViewDepth() / 2.1)),
-					proximitySorter
-			);
-		}//end sync(gameStateLock)
-		CollectionActionDispatcher<PositionedRenderable> visible = renderList.get().getVisibleWorldObjectList();
-		synchronized(visible){visible.repopulate(proximitySorter.getRenderables());}
-		proximitySorter.reset();
-		}catch(Exception e){e.printStackTrace();}
-		return null;
-	    }//end pool run()
-	});
-    }// end updateRelevanceList()
-    
     public void setSunVector(Vector3D sv){
 	factory.getDeferredProgram().use();
 	factory.getSunVectorUniform().set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
@@ -305,28 +269,6 @@ public final class Renderer {
     
     private final Object relevanceUpdateLock = new Object();
     
-    public void relevanceCalc(final boolean mandatory) {
-	final long currTimeMillis = System.currentTimeMillis();
-	if(relevanceCalcTask!=null && !mandatory){
-	    if(!relevanceCalcTask.isDone())
-		{System.out.println("visiblityCalc() !done. Return...");return;}}
-	relevanceCalcTask = threadManager.submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		synchronized(relevanceUpdateLock){
-		 updateRelevanceList(mandatory);
-		 //if(collisionManager!=null)
-		 // collisionManager.updateCollisionList();
-		 //Nudge of 10ms to compensate for drift of the timer task
-		 nextRelevanceCalcTime.set((currTimeMillis-10L)+(1000/ThreadManager.RENDERLIST_REFRESH_FPS));
-		 }//end sync(visibilityUpdateLock)
-		return null;
-	    }});
-    }//end visibilityCalc()
-    
-    public void relevanceCalc(){
-	relevanceCalc(false);
-    }
 
     public RendererFactory getRendererFactory() {
 	return factory;

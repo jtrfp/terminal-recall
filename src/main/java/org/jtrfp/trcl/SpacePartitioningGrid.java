@@ -153,10 +153,7 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 */
     public void addBranch(SpacePartitioningGrid<E> branchToAdd){
 	System.out.println("SPG add "+branchToAdd);
-	if(Renderer.NEW_MODE){
-	    newAddBranch(branchToAdd);
-	    return;
-	}
+	newAddBranch(branchToAdd);
 
     }//end addBranch(...)
     public void removeBranch(SpacePartitioningGrid<E> branchToRemove){
@@ -210,15 +207,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 
 	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
 	    this();
-	    if(!Renderer.NEW_MODE){
-		setSquareSize(squareSize);
-		setSquaresX((int)(size.getX()/squareSize));
-		setSquaresY((int)(size.getY()/squareSize));
-		setSquaresZ((int)(size.getZ()/squareSize));
-		setViewingRadius(viewingRadius);
-
-		allocateSquares();
-	    }//end if(old mode)
 	}//end constructor
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
@@ -302,19 +290,10 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	}
 	
 	public synchronized void add(E objectWithPosition){//TODO: Remove old
-	    if(Renderer.NEW_MODE)
 	     newAdd(objectWithPosition);//TODO: Remove stub
-	    else{
-	    	//Figure out where it goes
-	    	if(objectWithPosition==null)throw new NullPointerException("Passed objectWithPosition is intolerably null.");
-	    	objectWithPosition.setContainingGrid(this);
-	    }//end (!NEW_MODE)
 	}//end add()
 	public synchronized void remove(E objectWithPosition){//TODO Remove old
-	    if(Renderer.NEW_MODE)
 	     newRemove(objectWithPosition);//TODO: Remove stub
-	    else
-	     objectWithPosition.setContainingGrid(null);
 	}//end remove(...)
 	private static double absMod(double value, double mod){
 		if(value>=-0.)
@@ -507,7 +486,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	}
 	
 	public void removeAll(){
-	    if(Renderer.NEW_MODE){
 		final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
 		for(SpacePartitioningGrid g:branchGrids.keySet())
 		    branches.add(g);
@@ -516,23 +494,5 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 		final ArrayList<E> alwaysVisible = new ArrayList<E>();
 		localTagger.clear();
 		return;
-	    }
-	    final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
-	    for(SpacePartitioningGrid g:branchGrids.keySet())
-		branches.add(g);
-	    for(SpacePartitioningGrid g:branches)
-		removeBranch(g);
-	    final ArrayList<E> alwaysVisible = new ArrayList<E>();
-	    for(E e:getAlwaysVisibleList())
-		alwaysVisible.add(e);
-	    for(E e:alwaysVisible)
-		remove(e);
-	    final ArrayList<E> everythingElse = new ArrayList<E>();
-	    for(List<E> l:elements)
-		if(l!=null)
-		 for(E e:l)
-		  everythingElse.add(e);
-	    for(E e:everythingElse)
-		remove(e);
 	}//end removeAll()
 }//end SpacePartitionGrid

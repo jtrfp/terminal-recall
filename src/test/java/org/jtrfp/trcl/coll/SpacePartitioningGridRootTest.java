@@ -70,7 +70,6 @@ public class SpacePartitioningGridRootTest {
 
     @Test
     public void testRemoveAndKeepCollection() {
-	if(!Renderer.NEW_MODE) return;
 	subject.add(mockedPositionables[0]);
 	subject.add(mockedPositionables[1]);//Leave this dangling
 	subject.remove(mockedPositionables[0]);
@@ -85,7 +84,6 @@ public class SpacePartitioningGridRootTest {
     
     @Test
     public void testRemoveAndRemoveCollection() {
-	if(!Renderer.NEW_MODE) return;
 	subject.add(mockedPositionables[0]);
 	subject.remove(mockedPositionables[0]);
 	singleThreadExecutorBarrier(World.relevanceExecutor);
@@ -150,7 +148,6 @@ public class SpacePartitioningGridRootTest {
  
     @Test
     public void testRemoveAll() {
-	if(!Renderer.NEW_MODE) return;
 	subject.add(mockedPositionables[0]);
 	subject.add(mockedPositionables[1]);
 	subject.add(mockedPositionables[2]);
@@ -161,7 +158,6 @@ public class SpacePartitioningGridRootTest {
     
     @Test
     public void testEmptyAddNonEmptyBranch() {//Relevance executor breaks this test.
-	if(!Renderer.NEW_MODE) return;
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
 	//branch.activate();
 	subject.blockingAddBranch(branch);
@@ -182,7 +178,6 @@ public class SpacePartitioningGridRootTest {
     
     @Test
     public void testEmptyDeactivateNonEmptyBranchThenActivate() {//Relevance executor breaks this test.
-	if(!Renderer.NEW_MODE) return;
 	when(mockedTarget.removeAll(any(Collection.class))).thenReturn(true);
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
 	//branch.activate();
@@ -212,7 +207,6 @@ public class SpacePartitioningGridRootTest {
     
     @Test
     public void testPopulatedAddNonEmptyBranchCommonTags(){
-	if(!Renderer.NEW_MODE) return;
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
 	//branch.activate();
 	subject.blockingAddBranch(branch);

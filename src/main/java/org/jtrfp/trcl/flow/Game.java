@@ -456,7 +456,6 @@ public class Game {
 
     public Game setDisplayMode(Object[] mode) {
 	displayModes.setDisplayMode(mode);
-	tr.mainRenderer.get().relevanceCalc(true);
 	return this;
     }
     

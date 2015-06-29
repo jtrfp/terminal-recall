@@ -194,17 +194,7 @@ public final class ThreadManager implements GLExecutor{
 	    public void run() {
 		if(tr.mainRenderer==null)
 		    return;
-		try{
-		if (counter++ % Math.ceil(RENDER_FPS / RENDERLIST_REFRESH_FPS ) == 0){
-		 if(System.currentTimeMillis()<
-			 tr.
-			 mainRenderer.get().
-			 nextRelevanceCalcTime.get())
-		     return;
-		 tr.mainRenderer.get().relevanceCalc();}
-		//if(tr.getGame()!=null)
-		// if(tr.getGame().getPlayer()!=null)
-		gameplay();
+		try{gameplay();
 		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
 	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);

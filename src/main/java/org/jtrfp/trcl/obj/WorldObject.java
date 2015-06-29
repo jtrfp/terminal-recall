@@ -448,37 +448,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	//pcs.firePropertyChange(POSITIONV3D, null, new Vector3D(position));
 	pcs.firePropertyChange(POSITION, null, position);
 	needToRecalcMatrix=true;
-	if(!Renderer.NEW_MODE){
-	 synchronized (position) {
-	    final SpacePartitioningGrid<PositionedRenderable> 
-	    	containingGrid = getContainingGrid();
-	    if(containingGrid==null){//Not in grid
-		if(lastContainingList!=null){//Removed from grid
-		    synchronized(lastContainingList){
-		     lastContainingList.remove(this);}
-		    lastContainingList=null;
-		}//end if(lastContainingList!=null)
-		updateOldPosition();
-		return this;
-	    }//end if(not in grid)
-	    //Possibly moved from cube-to-cube
-	    final List<PositionedRenderable> newList = 
-	     (this instanceof RelevantEverywhere)?
-	      containingGrid.getAlwaysVisibleList():containingGrid.world2List(position[0],position[1],position[2],true);
-	    if(lastContainingList!=newList){//Definitely moved from cube-to-cube
-		if(lastContainingList!=null){
-		    synchronized(newList){
-		    synchronized(lastContainingList){
-			     lastContainingList.remove(this);
-			     newList.add(this);
-			     }}//end sync(new and last)
-		}//end (moved)
-		else synchronized(newList){
-		    newList.add(this);}
-		lastContainingList=newList;
-	    }//end if(posChange)
-	}//end sync(position)
-    }//end !Renderer.NEW_MODE
 	updateOldPosition();
 	return this;
     }//end notifyPositionChange()
@@ -549,14 +518,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
     }
 
     public synchronized void destroy() {
-	if (containingGrid != null && !Renderer.NEW_MODE){
-	    SpacePartitioningGrid g = getContainingGrid();
-	    if(g!=null)
-		if(lastContainingList!=null)
-		    synchronized(lastContainingList){
-			lastContainingList.remove(this);}
-	}//end if(grid!=null)
-	else if(containingGrid !=null){
+	if(containingGrid !=null){
 	    try{World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {

@@ -83,8 +83,7 @@ public class ProjectileBehavior extends Behavior implements
 	     World.relevanceExecutor.submit(new Callable<Collection<Positionable>>(){
 		@Override
 		public Collection<Positionable> call() {
-		    return Renderer.NEW_MODE?new ArrayList<Positionable>(cm.getInputRelevanceList()):
-				new ArrayList<Positionable>(cm.getCurrentlyActiveCollisionList());
+		    return new ArrayList<Positionable>(cm.getInputRelevanceList());
 		}
 	    }).get();}catch(Exception e){throw new RuntimeException(e);}
 	    synchronized(possibleTargets){

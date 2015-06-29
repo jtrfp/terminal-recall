@@ -88,11 +88,7 @@ public class CollisionManager {
     /**
      * @return the inputRelevanceList
      */
-    public Collection<Positionable> getInputRelevanceCollection() {//TODO: Remove redundancy
-        return inputRelevanceList;
-    }
-    
-    public Collection<Positionable> getInputRelevanceList() {
+    public Collection<Positionable> getInputRelevanceCollection() {
         return inputRelevanceList;
     }
 }// end CollisionManager

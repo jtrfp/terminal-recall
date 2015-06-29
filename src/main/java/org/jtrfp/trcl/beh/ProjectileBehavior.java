@@ -24,6 +24,7 @@ import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Renderer;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -83,7 +84,7 @@ public class ProjectileBehavior extends Behavior implements
 	     World.relevanceExecutor.submit(new Callable<Collection<Positionable>>(){
 		@Override
 		public Collection<Positionable> call() {
-		    return new ArrayList<Positionable>(cm.getInputRelevanceList());
+		    return new ArrayList<Positionable>(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
 		}
 	    }).get();}catch(Exception e){throw new RuntimeException(e);}
 	    synchronized(possibleTargets){

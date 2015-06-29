@@ -23,8 +23,10 @@ import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
+    
     private ProjectileFiringBehavior [] behaviors;
     private ProjectileFiringBehavior activeBehavior;
+    private ProjectileFiringBehavior defaultBehavior;
     private int ammoDisplayUpdateCounter=0;
     public static final int AMMO_DISPLAY_UPDATE_INTERVAL_MS=80;
     private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
@@ -33,35 +35,44 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	final WorldObject parent = getParent();
 	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
-	    final int ammo = activeBehavior.getAmmo();
+	    final int ammo = getActiveBehavior().getAmmo();
 	    parent.getTr().getGame().getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
-		final ProjectileFiringBehavior newBehavior = behaviors[k];
-		if(activeBehavior!=newBehavior){
-		    activeBehavior=behaviors[k];
-		    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
-		    final TR tr = parent.getTr();
-		    String content="???";
-		    switch(tr.config.getGameVersion()){
-		    case F3:{
-			content=w.getF3DisplayName();
-			break;
-		       }
-		    case TV:{
-			content=w.getTvDisplayName();
-			break;
-		        }
-		    }//end switch(game version)
-		    tr.getGame().getHUDSystem().getWeapon().setContent(content);
-		}//end if(New Behavior)
+		final ProjectileFiringBehavior proposed = behaviors[k];
+		if(proposed!=null)
+		 setActiveBehavior(proposed,false);
 	    }//end if (selection key is pressed)
 	}//end for(keys)
 	if(keyStatus.isPressed(KeyEvent.VK_SPACE)){
-	    activeBehavior.requestFire();
+	    getActiveBehavior().requestFire();
 	}//end if(SPACE)
+	if(getActiveBehavior().getAmmo()<=0)
+	    setActiveBehavior(getDefaultBehavior(),false);
     }//end _tick(...)
+    
+    public boolean setActiveBehavior(ProjectileFiringBehavior newBehavior, boolean force){
+	if(activeBehavior!=newBehavior && (newBehavior.getAmmo()>0 || newBehavior == getDefaultBehavior()) ){
+	    activeBehavior=newBehavior;
+	    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
+	    final TR tr = getParent().getTr();
+	    String content="???";
+	    switch(tr.config.getGameVersion()){//TODO: Get from Game object instead.
+	    case F3:{
+		content=w.getF3DisplayName();
+		break;
+	       }
+	    case TV:{
+		content=w.getTvDisplayName();
+		break;
+	        }
+	    }//end switch(game version)
+	    tr.getGame().getHUDSystem().getWeapon().setContent(content);
+	    return true;
+	}//end if(New Behavior)
+	return false;
+    }//end proposeSwitchTo(...)
     /**
      * @return the behaviors
      */
@@ -73,7 +84,32 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
      */
     public UserInputWeaponSelectionBehavior setBehaviors(ProjectileFiringBehavior[] behaviors) {
         this.behaviors = behaviors;
-        activeBehavior=behaviors[0];
         return this;
+    }
+
+    /**
+     * @return the defaultBehavior
+     */
+    public ProjectileFiringBehavior getDefaultBehavior() {
+	if(defaultBehavior==null)
+	    setDefaultBehavior(behaviors[0]);
+        return defaultBehavior;
+    }
+
+    /**
+     * @param defaultBehavior the defaultBehavior to set
+     */
+    public UserInputWeaponSelectionBehavior setDefaultBehavior(ProjectileFiringBehavior defaultBehavior) {
+        this.defaultBehavior = defaultBehavior;
+        return this;
+    }
+
+    /**
+     * @return the activeBehavior
+     */
+    public ProjectileFiringBehavior getActiveBehavior() {
+	if(activeBehavior==null)
+	    setActiveBehavior(getDefaultBehavior(),true);
+        return activeBehavior;
     }
 }//end WeaponSelectionBehavior

@@ -39,7 +39,7 @@ import org.jtrfp.trcl.beh.ui.UpdatesHealthMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UpdatesThrottleMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
-import org.jtrfp.trcl.beh.ui.WeaponSelectionBehavior;
+import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
@@ -146,7 +146,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		}//end if(allAmmo)
 	    }// end if(hasButton)
 	}
-	addBehavior(new WeaponSelectionBehavior().setBehaviors(weapons));
+	addBehavior(new UserInputWeaponSelectionBehavior().setBehaviors(weapons));
 	//camera = tr.renderer.get().getCamera();
 	getBehavior().probeForBehavior(VelocityDragBehavior.class)
 		.setDragCoefficient(.86);

@@ -22,7 +22,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class WeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
+public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
     private ProjectileFiringBehavior [] behaviors;
     private ProjectileFiringBehavior activeBehavior;
     private int ammoDisplayUpdateCounter=0;
@@ -71,7 +71,7 @@ public class WeaponSelectionBehavior extends Behavior implements PlayerControlBe
     /**
      * @param behaviors the behaviors to set
      */
-    public WeaponSelectionBehavior setBehaviors(ProjectileFiringBehavior[] behaviors) {
+    public UserInputWeaponSelectionBehavior setBehaviors(ProjectileFiringBehavior[] behaviors) {
         this.behaviors = behaviors;
         activeBehavior=behaviors[0];
         return this;

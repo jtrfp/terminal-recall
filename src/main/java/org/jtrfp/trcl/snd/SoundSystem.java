@@ -54,6 +54,7 @@ public final class SoundSystem {
     private AtomicBoolean paused = new AtomicBoolean(false);
     private int bufferSizeFrames = 4096;
     private ByteBuffer gpuFloatBytes;
+    private static final AudioProcessor SILENCE = new Silence();
     
    ////VARS
    private AudioDriver          activeDriver;
@@ -111,7 +112,11 @@ public final class SoundSystem {
 		    
 		    while (true) {
 			synchronized(paused){
-			    while(paused.get())
+			    if(paused.get()){
+				final AudioDriver driver = getActiveDriver();
+				driver.setSource(SILENCE);
+				driver.flush();
+			    }while(paused.get())
 				paused.wait();
 			}//end sync()
 			

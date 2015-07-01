@@ -159,4 +159,33 @@ public final class GLFrameBuffer {
 	gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, attachmentIndexEnum, arrayTexture.getId(), 0, layer);
 	return this;
     }
+    
+    public GLFrameBuffer validate(){
+	final int status=gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER);
+	if(status!=GL3.GL_FRAMEBUFFER_COMPLETE){
+	    switch(status){
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+		throw new RuntimeException("Framebuffer Incomplete: Layer targets.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		throw new RuntimeException("Framebuffer Incomplete: Attachment.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+		throw new RuntimeException("Framebuffer Incomplete: Dimensions.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		throw new RuntimeException("Framebuffer Incomplete: Draw Buffer.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
+		throw new RuntimeException("Framebuffer Incomplete: Formats.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_COUNT_ARB:
+		throw new RuntimeException("Framebuffer Incomplete: Layer ccount (ARB).");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		throw new RuntimeException("Framebuffer Incomplete: Missing attachment.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		throw new RuntimeException("Framebuffer Incomplete: Multisample.");
+	    case GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		throw new RuntimeException("Framebuffer Incomplete: Read Buffer.");
+		default:
+		    System.out.println("Framebuffer incomplete. glCheckFramebufferStatus returned "+status);
+	    }//end switch(status)
+	}else System.out.println("Framebuffer OK.");
+	return this;
+    }
 }//end GLFrameBuffer

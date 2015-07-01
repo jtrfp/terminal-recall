@@ -134,24 +134,20 @@ public final class Renderer {
 	toUse.getFlatRelevanceCollection().addTarget(relevantPositioned, true);
     }
     
-    private RenderList oneFrameLaggedRenderList;
-    
     public final Callable<?> render = new Callable<Void>(){
 	@Override
 	public Void call() throws Exception {
 		final GL3 gl = gpu.getGl();
 		try{	ensureInit();
-			if(oneFrameLaggedRenderList==null)
-			 oneFrameLaggedRenderList = renderList.getRealtime();
+			 final RenderList rl = renderList.getRealtime();
 			
 			if(oneShotBehavior){
 			    if(!keepAlive)
 				return null;
 			    keepAlive=false;
 			    }
-			oneFrameLaggedRenderList.render(gl);
-			oneFrameLaggedRenderList   = renderList.getRealtime();
-			oneFrameLaggedRenderList.sendToGPU(gl);
+			rl.render(gl);
+			rl.sendToGPU(gl);
 			cameraMatrixAsFlatArray    = getCamera().getCompleteMatrixAsFlatArray();//TODO
 			camRotationProjectionMatrix= getCamera().getProjectionRotationMatrixAsFlatArray();//TODO
 			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.

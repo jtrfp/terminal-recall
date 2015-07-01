@@ -143,7 +143,9 @@ public class GPU implements GLExecutor{
 			//In case GL is not ready, wait and try again.
 			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
 				{gl=gl1.getGL3();
-				//canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
+				final String debug = System.getProperty("org.jtrfp.trcl.debugGL"); 
+				if(debug!=null&&debug.toUpperCase().contentEquals("TRUE"))
+				 canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
 				break;
 				} Thread.sleep(2000);}}
 			catch(InterruptedException e){e.printStackTrace();}

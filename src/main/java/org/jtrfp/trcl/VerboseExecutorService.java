@@ -156,7 +156,7 @@ public class VerboseExecutorService implements ExecutorService {
 
 	@Override
 	public void run() {
-	    try{delegate.run();}catch(Exception e){e.printStackTrace();}
+	    try{delegate.run();}catch(Exception e){e.printStackTrace(); throw new RuntimeException(e);}
 	}
     }//end VerboseRunnable
     

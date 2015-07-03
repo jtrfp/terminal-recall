@@ -17,6 +17,7 @@ import java.awt.event.KeyEvent;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
@@ -41,19 +42,22 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
 		final ProjectileFiringBehavior proposed = behaviors[k];
+		boolean force = false;
+		//if(proposed instanceof UpgradeableProjectileFiringBehavior)
+		//    force = ((UpgradeableProjectileFiringBehavior)proposed).isLimitlessBottomLevel() && proposed.canFire();
 		if(proposed!=null)
-		 setActiveBehavior(proposed,false);
+		 setActiveBehavior(proposed,force);
 	    }//end if (selection key is pressed)
 	}//end for(keys)
 	if(keyStatus.isPressed(KeyEvent.VK_SPACE)){
-	    getActiveBehavior().requestFire();
+	    if(!getActiveBehavior().canFire())
+		setActiveBehavior(getDefaultBehavior(),true);
+	   getActiveBehavior().requestFire();
 	}//end if(SPACE)
-	if(getActiveBehavior().getAmmo()<=0)
-	    setActiveBehavior(getDefaultBehavior(),false);
     }//end _tick(...)
     
     public boolean setActiveBehavior(ProjectileFiringBehavior newBehavior, boolean force){
-	if(force || (activeBehavior!=newBehavior && (newBehavior.getAmmo()>0 || newBehavior == getDefaultBehavior()) )){
+	if(force || (activeBehavior!=newBehavior && (newBehavior.canFire() || newBehavior == getDefaultBehavior()) )){
 	    activeBehavior=newBehavior;
 	    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
 	    final TR tr = getParent().getTr();

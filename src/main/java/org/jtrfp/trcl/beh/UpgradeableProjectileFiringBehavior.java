@@ -35,13 +35,21 @@ public class UpgradeableProjectileFiringBehavior extends
     
     @Override
     protected boolean takeAmmo(){
-	if(capabilityLevel==0&&limitlessBottomLevel())return true;
+	if(capabilityLevel==0&&limitlessBottomLevel()){return true;}
 	boolean result = super.takeAmmo();
 	if(!result)resetCapabilityLevel();
 	return result;
     }
     
+    @Override
+    public boolean canFire(){
+	if(limitlessBottomLevel&&capabilityLevel>-1)
+	    return true;
+	else return super.canFire();
+    }
+    
     protected void raiseCapabilityLevel(){
+	if(capabilityLevel<0)capabilityLevel=0;
 	capabilityLevel++;
 	capabilityLevel=Math.min(capabilityLevel,maxCapabilityLevel);
 	super.setFiringPositions(firingMultiplexMap[capabilityLevel]);

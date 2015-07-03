@@ -53,7 +53,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     }//end _tick(...)
     
     public boolean setActiveBehavior(ProjectileFiringBehavior newBehavior, boolean force){
-	if(activeBehavior!=newBehavior && (newBehavior.getAmmo()>0 || newBehavior == getDefaultBehavior()) ){
+	if(force || (activeBehavior!=newBehavior && (newBehavior.getAmmo()>0 || newBehavior == getDefaultBehavior()) )){
 	    activeBehavior=newBehavior;
 	    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
 	    final TR tr = getParent().getTr();

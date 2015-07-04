@@ -64,13 +64,15 @@ public final class Renderer {
     private final	Reporter		reporter;
     private final	ThreadManager		threadManager;
     private volatile boolean			oneShotBehavior = false;
+    private final       String                  debugName;
     private volatile boolean keepAlive = false;
     
-    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow) {
+    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow, String debugName) {
 	this.factory         = factory;
 	this.gpu             = factory.getGPU();
 	this.reporter        =reporter;
 	this.threadManager   =threadManager;
+	this.debugName       =debugName;
 	//this.collisionManager=collisionManagerFuture;
 	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
 	Camera camera = world.newCamera();//TODO: Remove after redesign.
@@ -118,10 +120,12 @@ public final class Renderer {
 	    final long dT = System.currentTimeMillis() - lastTimeMillis;
 		if(dT<=0)return;
 		final int fps = (int)(20.*(1000. / (double)dT));
-	    reporter.report("org.jtrfp.trcl.core.Renderer.FPS", "" + fps);
+	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" FPS", "" + fps);
 	    final Collection<PositionedRenderable> coll = renderList.get().getVisibleWorldObjectList();
 	    synchronized(coll){
-	    reporter.report("org.jtrfp.trcl.core.Renderer.numVisibleObjects", coll.size());}
+	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" numVisibleObjects", coll.size());
+	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", getCamera().getRootGrid());
+	    }
 	    lastTimeMillis = System.currentTimeMillis();
 	}
 	

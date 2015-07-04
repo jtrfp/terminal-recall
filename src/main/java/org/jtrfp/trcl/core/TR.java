@@ -147,7 +147,7 @@ public final class TR implements UncaughtExceptionHandler{
 				    get().
 				    rendererFactory.
 				    get().
-				    newRenderer();
+				    newRenderer("secondaryRenderer");
 			    renderer.setOneShotBehavior(true);
 			    return renderer;
 			}//end call()
@@ -155,12 +155,11 @@ public final class TR implements UncaughtExceptionHandler{
 		    mainRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
 			@Override
 			public Renderer call() throws Exception {
-			    Thread.currentThread().setName("Renderer constructor.");
 			    Renderer renderer = gpu.
 				    get().
 				    rendererFactory.
 				    get().
-				    newRenderer();
+				    newRenderer("mainRenderer");
 			    renderer.setOneShotBehavior(false);
 			    return renderer;
 			}//end call()

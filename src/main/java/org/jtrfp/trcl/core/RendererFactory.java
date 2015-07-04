@@ -348,8 +348,8 @@ public class RendererFactory {
 	     unbindFromDraw();
     }//end allocatePortals()
     
-    public Renderer newRenderer(){
-	return new Renderer(this,world,threadManager,reporter,gpu.objectListWindow.get());
+    public Renderer newRenderer(String debugName){
+	return new Renderer(this,world,threadManager,reporter,gpu.objectListWindow.get(),debugName);
     }
 
     /**

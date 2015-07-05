@@ -27,7 +27,6 @@ import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTerrain extends Behavior {
-    private boolean 		groundLock 		= false;
     private double[] 		surfaceNormalVar;
     public static final double 	CEILING_Y_NUDGE 	= -5000;
     private int 		tickCounter 		= 0;
@@ -100,13 +99,7 @@ public class CollidesWithTerrain extends Behavior {
 	    groundImpact = true;
 	    surfaceNormal = downhillDirectionXZ;
 	}//end if(smushed between floor and ceiling)
-
-	if (groundLock) {
-	    recentlyCollided=true;
-	    thisPos[1] = groundHeight;
-	    p.notifyPositionChange();
-	    return;
-	}//end if(groundLock)
+	
 	if (tunnelEntryCapable && groundImpact && dot < 0){
 		final OverworldSystem os = mission.getOverworldSystem();
 		if(!os.isTunnelMode() ){

@@ -89,7 +89,9 @@ private final NAVSystem nav;
 	    }//end no tunnel
 
 	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
-	    final Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
+	    Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
+	    if(player2NavVectorXY.getNorm()==0)
+		player2NavVectorXY=Vector3D.PLUS_I;
 	    final double modernDistance = player2NavVectorXY.getNorm();
 
 	    if(counter==0){

@@ -366,6 +366,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	 * @param rootGrid the rootGrid to set
 	 */
 	public void setRootGrid(SpacePartitioningGrid rootGrid) {
+	    if(this.rootGrid==rootGrid)
+		return;
 	    pcs.firePropertyChange(ROOT_GRID, this.rootGrid, rootGrid);
 	    if(this.rootGrid!=null)
 	     removeGrid(this.rootGrid);

@@ -103,6 +103,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 				    .getProjectileFactories()[w.ordinal()]);
 		    ((UpgradeableProjectileFiringBehavior) pfb)
 			    .setMaxCapabilityLevel(2)
+			    .setCapabilityLevel(i==0?0:-1)
 			    .setFiringMultiplexMap(
 				    new Vector3D[][] {
 					    new Vector3D[] {

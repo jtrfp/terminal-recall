@@ -45,12 +45,12 @@ public class TunnelExitObject extends PortalEntrance {
     private 		NAVObjective 	navObjectiveToRemove;
     private 		boolean 	mirrorTerrain = false;
     private		boolean		onlyRemoveIfTargeted=false;
+    private static final int            NUDGE = 5000;
 
     public TunnelExitObject(TR tr, Tunnel tun) {
 	super(tr, tr.mainRenderer.get().getCamera());
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
-	final double EXIT_Y_NUDGE = 0;
 	final NormalMap map = 
 		new NormalMap(
 		tr.
@@ -60,7 +60,7 @@ public class TunnelExitObject extends PortalEntrance {
 		getAltitudeMap());
 	final double exitY = 
 		map.heightAt(TR.legacy2Modern(v.getZ()), TR.legacy2Modern(v
-		.getX()))+EXIT_Y_NUDGE;
+		.getX()));
 	this.exitLocation = new Vector3D(TR.legacy2Modern(v.getZ()),
 		exitY, TR.legacy2Modern(v
 			.getX()));
@@ -71,8 +71,10 @@ public class TunnelExitObject extends PortalEntrance {
 		exitLocation.getX(),
 		exitLocation.getZ());
 	
+	this.exitLocation = exitLocation.add(exitHeading.scalarMultiply(NUDGE));
+	
 	if(exitHeading.getY()<.99&&exitHeading.getNorm()>0)//If the ground is flat this doesn't work.
-		 exitTop = (Vector3D.PLUS_J.crossProduct(exitHeading).crossProduct(exitHeading));
+		 exitTop = (Vector3D.PLUS_J.crossProduct(exitHeading).crossProduct(exitHeading)).negate();
 		else exitTop = (Vector3D.PLUS_I);// ... so we create a clause for that.
 	this.tr = tr;
 	PortalExit pExit = new PortalExit(tr, tr.secondaryRenderer.get().getCamera());
@@ -101,6 +103,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    final Game game = tr.getGame();
 		    final Mission mission = game.getCurrentMission();
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
+		    System.out.println("TunnelExitObject leaving tunnel "+tun);
 		    if(mirrorTerrain){
 			mission.setMissionMode(new Mission.ChamberMode());
 		    }else mission.setMissionMode(new Mission.AboveGroundMode());

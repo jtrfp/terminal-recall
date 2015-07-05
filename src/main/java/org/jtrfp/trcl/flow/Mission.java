@@ -484,13 +484,14 @@ public class Mission {
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
 	System.out.println("Tunnel exit at sector "+tunnelExitMapSquarePos);
 	portalExit = getTunnelEntrancePortal(tunnelExitMapSquarePos);
-	if(portalExit!=null){
+	
+	/*if(portalExit!=null){
 	 portalExit.setHeading(tunnel.getExitObject().getHeading().negate());
 	 portalExit.setTop(tunnel.getExitObject().getTop());
 	 portalExit.setPosition(tunnel.getExitObject().getPosition());
 	 portalExit.notifyPositionChange();
 	 portalExit.setRootGrid(tunnel);
-	}else System.err.println("Null exit.");
+	}else System.err.println("Null exit.");*/
 	
 	tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
 	return tunnel;
@@ -716,12 +717,14 @@ public class Mission {
 	return key;
     }
     
-    public void enterTunnel(final Tunnel tunnel) {
+    public synchronized void enterTunnel(final Tunnel tunnel) {
+	System.out.println("Entering tunnel "+tunnel);
 	final Game game = tr.getGame();
 	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
 	currentTunnel = tunnel;
 	game.getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
+	
 	tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
 	tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
 	
@@ -760,13 +763,14 @@ public class Mission {
 	player.setTop     (secondaryCam.getTop());
 	player.notifyPositionChange();
 	//Move the secondary cam to the overworld.
+	overworldSystem.setChamberMode(tunnel.getExitObject().isMirrorTerrain());
 	secondaryCam.setRootGrid(overworldSystem);
+	//Set the skycube appropriately
 	tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(tr.getGame().
 		      getCurrentMission().
 		      getOverworldSystem().
 		      getSkySystem().
 		      getBelowCloudsSkyCubeGen());
-	//Set the skycube appropriately
 	/*
 	final NAVObjective navObjective = getNavObjectiveToRemove();
 	if(navObjective!=null && navTargeted){

@@ -307,8 +307,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)
 
-    public synchronized final void updateStateToGPU() {
-	attemptLoop();
+    public synchronized final void updateStateToGPU(Renderer renderer) {
+	attemptLoop(renderer);
 	if(needToRecalcMatrix){
 	    recalculateTransRotMBuffer();
 	    needToRecalcMatrix=recalcMatrixWithEachFrame();
@@ -320,9 +320,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	return true;
     }
     
-    protected void attemptLoop(){
+    protected void attemptLoop(Renderer renderer){
 	if (supportsLoop()) {
-	    final Vector3D camPos = tr.mainRenderer.get().getCamera().getCameraPosition();
+	    final Vector3D camPos = renderer.getCamera().getCameraPosition();
 	    double delta = position[0]
 		    - camPos.getX();
 	    if (delta > TR.mapWidth / 2.) {
@@ -414,13 +414,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	    this.visible = true;
 	    tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant(this);
 	}else this.visible = visible;
-	tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
+	/*tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    WorldObject.this.updateStateToGPU();
 		    return null;
 		}
-	    });
+	    });*/
     }//end setvisible()
 
     /**
@@ -567,13 +567,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	if(!this.active && active && isVisible()){
 	    this.active=true;
 	    tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant(this);
-	    tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
+	    /*tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    WorldObject.this.updateStateToGPU();
 		    return null;
 		}
-	    });
+	    });*/
 	}
 	this.active = active;
     }//end setActive(...)

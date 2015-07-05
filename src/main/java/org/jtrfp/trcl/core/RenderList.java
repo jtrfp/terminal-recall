@@ -162,7 +162,7 @@ public class RenderList {
 	    renderer.getCamera().tick(System.currentTimeMillis());
 	synchronized(relevantPositionedRenderables){
 	for (PositionedRenderable renderable:relevantPositionedRenderables) 
-	    renderable.updateStateToGPU();
+	    renderable.updateStateToGPU(renderer);
 	}}
     }//end updateStatesToGPU
     

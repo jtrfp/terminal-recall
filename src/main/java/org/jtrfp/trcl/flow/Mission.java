@@ -343,13 +343,14 @@ public class Mission {
 		setMissionMode(new Mission.MissionSummaryMode());
 		game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
 	    }//end if(proper ending)
-	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	/*tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
 		bgMusic.stop();
 		return null;
 	    }// end call()
-	});
+	});*/
+	bgMusic.stop();
 	cleanup();
 	return missionEnd[0];
 	}//end sync
@@ -678,8 +679,8 @@ public class Mission {
     }//end abort()
 
     private void cleanup() {
-	if(overworldSystem!=null)
-	    tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
+	//if(overworldSystem!=null)
+	//    tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
 	displayHandler.setDisplayMode(emptyMode);
 	tr.secondaryRenderer.get().getCamera().setRootGrid(null);
     }

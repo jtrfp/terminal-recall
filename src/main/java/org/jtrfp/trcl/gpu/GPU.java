@@ -30,14 +30,12 @@ import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.RendererFactory;
-import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
-import org.jtrfp.trcl.obj.CollisionManager;
 
 public class GPU implements GLExecutor{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
@@ -107,6 +105,22 @@ public class GPU implements GLExecutor{
 		    return new RendererFactory(GPU.this, threadManager, glCanvas, reporter, world, objectListWindow.get());
 		}
 	    });executorService.submit(rendererFactory);
+	    
+	    glExecutor.submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    System.out.println("GPU info:");
+		    System.out.println("\tVendor: "+gl.glGetString(GL3.GL_VENDOR));
+		    System.out.println("\tRenderer: "+gl.glGetString(GL3.GL_RENDERER));
+		    System.out.println("\tVer: "+gl.glGetString(GL3.GL_VERSION));
+		    System.out.println("\tGLSL: "+gl.glGetString(GL3.GL_SHADING_LANGUAGE_VERSION));
+		    System.out.println("System info:");
+		    System.out.println("\tVendor: "+System.getProperty("java.vendor"));
+		    System.out.println("\tArch: "+System.getProperty("os.arch"));
+		    System.out.println("\tOS: "+System.getProperty("os.name"));
+		    System.out.println("\tVer:"+System.getProperty("os.version"));
+		    return null;
+		}});
 	}//end constructor
 	
 	public int glGet(int key){

@@ -22,8 +22,8 @@ import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.DestroysEverythingBehavior;
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
@@ -168,7 +168,16 @@ public class ProjectileFactory {
 	
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
-	result.reset(newPosition, heading.scalarMultiply(projectileSpeed), objectOfOrigin);
+	final Vector3D newVelocity;
+	if(weapon.isSumWithProjector()){
+	    Vector3D originVelocity = Vector3D.ZERO;
+	    try{final Velocible vel = objectOfOrigin.probeForBehavior(Velocible.class);
+	    originVelocity = vel.getVelocity();
+	    }catch(BehaviorNotFoundException e){}
+	    newVelocity = heading.scalarMultiply(projectileSpeed).add(originVelocity);
+	}else// !sumWithProjector
+	    newVelocity = heading.scalarMultiply(projectileSpeed);
+	result.reset(newPosition, newVelocity, objectOfOrigin);
 	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getDefaultGrid().add((WorldObject)result);
 	tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant((PositionedRenderable)result);

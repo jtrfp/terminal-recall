@@ -31,83 +31,83 @@ import org.jtrfp.trcl.file.ModelingType.FlatModelingType;
 public enum Weapon {
     // / THESE ARE LISTED REPRESENTATIVE OF THE ORDINAL ORDER IN A DEF FILE. DO
     // NOT RE-ORDER!!
-    purpleLaser(null, null,new BINModelingType("LASER.BIN"), 4096, 4456448, -1, 2048,
+    purpleLaser(null, null,new BINModelingType("LASER.BIN"), 4096, 4456448, true,-1, 2048,
 	    false, false), 
     PAC("PAC", "SKL", new BINModelingType("LASER3.BIN"), 4096, //LASER3.BIN
-	    2359296, 1, 2048, true, false), 
+	    2359296, true,1, 2048, true, false), 
     ION("ION",
 	    "DC1", new BINModelingType("LASER4.BIN"), 8192,
-	    1835008, 2, 2048, false, false), 
+	    1835008, true,2, 2048, false, false), 
     RTL(
 	    "RTL", "RFL20", new BINModelingType("LASER5.BIN"), 4096, 4456448,
-	    3, 2048, true, false), 
+	    true,3, 2048, true, false), 
     fireBall(null, null, new BINModelingType(
-	    "FIREBALL.BIN"), 8192, ModelingType.MAP_SQUARE_SIZE * 8, -1, 1024,
+	    "FIREBALL.BIN"), 8192, ModelingType.MAP_SQUARE_SIZE * 8, true,-1, 1024,
 	    false, false), 
     greenLaser(null, null, new BINModelingType("LASER7.BIN"), 8192,
-	    1835008, -1, 2048, false, false), 
+	    1835008, true,-1, 2048, false, false), 
     redLaser(
-	    null, null, new BINModelingType("LASER8.BIN"), 4096, 2359296, -1, 2048,
+	    null, null, new BINModelingType("LASER8.BIN"), 4096, 2359296, true, -1, 2048,
 	    false, false), 
     blueLaser(null, null, new BINModelingType("LASER9.BIN"), 4096,
-	    4456448, -1, 2048, false, false), 
+	    4456448, true,-1, 2048, false, false), 
     bullet(
 	    null, null, new BINModelingType("BULLET.BIN"), 6554,
-	    4456448, -1, 2048, false, false), 
+	    4456448, true,-1, 2048, false, false), 
     purpleBall(
 	    null, null, new BillboardModelingType(new String[] { "PBALL1.RAW",
 		    "PBALL3.RAW", "PBALL4.RAW" }, 70, new Dimension(320000,
-		    320000)), 6554, 4456448, -1, 2048,
+		    320000)), 6554, 4456448, false,-1, 2048,
 	    false, false), 
     blueFireBall(null, null, new BillboardModelingType(
 	    new String[] { "BFIRJ0.RAW", "BFIRJ1.RAW", "BFIRJ2.RAW",
 		    "BFIRJ3.RAW" }, 100, new Dimension(320000, 320000)), 6554,
-		    4456448, -1, 2048, false, false), 
+		    4456448, false,-1, 2048, false, false), 
     goldBall(
 	    null, null, new BINModelingType("FIREBALL.BIN"), 8000,
-	    4456448, -1, 2048, false, false), 
+	    4456448, true, -1, 2048, false, false), 
     atomWeapon(
 	    null, null, new BillboardModelingType(new String[] { "ATM2.RAW",
 		    "ATM3.RAW" }, 70, new Dimension(320000, 320000)), 10000,
-		    4456448, -1, 2048, false, false), 
+		    4456448, false,-1, 2048, false, false), 
     purpleRing(
 	    null, null, new BillboardModelingType(new String[] {
 		    "PURFRIN0.RAW", "PURFRIN1.RAW", "PURFRIN2.RAW",
 		    "PURFRIN3.RAW" }, 45, new Dimension(320000, 320000)),
-	    8192, 4456448, -1, 2048, false, false), 
+	    8192, 4456448, false,-1, 2048, false, false), 
     bossW6(
 	    null, null, new BINModelingType("WBOSS6.BIN"), 6554,
-	    4456448, -1, 2048, false, false), 
+	    4456448, false,-1, 2048, false, false), 
     bossW7(
 	    null, null, new BINModelingType("WBOSS7.BIN"), 25,
-	    4456448, -1, 2048, false, false), 
+	    4456448, false,-1, 2048, false, false), 
     bossW8(
 	    null, null, new BINModelingType("WBOSS8.BIN"), 8192,
-	    4456448, -1, 2048, false, false), 
+	    4456448, false,-1, 2048, false, false), 
     enemyMissile(
 	    null, null, new BINModelingType("BRADMIS.BIN"), 8192,
-	    4194304, -1, 2048, false, false), 
+	    4194304, false,-1, 2048, false, false), 
     MAM(
 	    "MAM", "DOM", new BINModelingType("BRADMIS.BIN"), 16384,
-	    4194304, 4, 2048, false, false),
+	    4194304, false,4, 2048, false, false),
     // ////// THESE ARE NOT PART OF THE ORDINAL ORDER OF A DEF FILE AND MAY BE
     // RE-ORDERED
     SAD("SAD", "VIP", new BINModelingType("BRADMIS.BIN"), 32768,
-	    4194304, 5, 2048, false, true), 
+	    4194304, false, 5, 2048, false, true), 
     SWT("SWT",
 	    "BFM", new BINModelingType("BRADMIS.BIN"), 65536,
-	    4194304, 6, 2048, false, true), 
+	    4194304, false, 6, 2048, false, true), 
     DAM("DAM",
 	    "FFF", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
-		    560000)), Integer.MAX_VALUE, 0, 7,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
 		    4194304, false, false);
     private final String       tvDisplayName, f3DisplayName;
     private final int 	       damage, speed, buttonToSelect;
     private final ModelingType modelingType;
-    private final boolean      laser, honing;
+    private final boolean      laser, honing, sumWithProjectorVel;
 
     Weapon(String tvDisplayName, String f3DisplayName,
-	    ModelingType modelingType, int damage, int speed,
+	    ModelingType modelingType, int damage, int speed, boolean sumWithProjectorVel,
 	    int buttonToSelect, int hitRadius, boolean laser, boolean honing) {
 	this.modelingType 	= modelingType;
 	this.damage 		= damage;
@@ -117,6 +117,7 @@ public enum Weapon {
 	this.f3DisplayName 	= f3DisplayName;
 	this.laser 		= laser;
 	this.honing 		= honing;
+	this.sumWithProjectorVel= sumWithProjectorVel;
     }// end constructor
 
     /**
@@ -181,5 +182,12 @@ public enum Weapon {
      */
     public boolean isHoning() {
 	return honing;
+    }
+
+    /**
+     * @return the sumWithProjector
+     */
+    public boolean isSumWithProjector() {
+        return sumWithProjectorVel;
     }
 }// end Weapon

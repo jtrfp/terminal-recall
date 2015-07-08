@@ -163,4 +163,19 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
         this.ammoLimit = ammoLimit;
         ammo=(int)(Math.min(getSupply(), ammoLimit));
     }
+
+    /**
+     * @return the timeBetweenFiringsMillis
+     */
+    public long getTimeBetweenFiringsMillis() {
+        return timeBetweenFiringsMillis;
+    }
+
+    /**
+     * @param timeBetweenFiringsMillis the timeBetweenFiringsMillis to set
+     */
+    public ProjectileFiringBehavior setTimeBetweenFiringsMillis(long timeBetweenFiringsMillis) {
+        this.timeBetweenFiringsMillis = timeBetweenFiringsMillis;
+        return this;
+    }
 }//end ProjectileFiringBehavior

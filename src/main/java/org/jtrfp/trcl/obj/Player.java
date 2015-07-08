@@ -121,9 +121,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
 						    new Vector3D(-5000, -3000,
 							    0),// Level 2 quad
 						    new Vector3D(5000, 3000, 0),
-						    new Vector3D(-5000, 3000, 0) } });// Level
-										      // 2
-										      // cont'd
+						    new Vector3D(-5000, 3000, 0) } })//Level 2 cont'd
+				.setTimeBetweenFiringsMillis(1000/6);
 		}// end if(isLaser)
 		else {// NOT LASER
 		    pfb = new ProjectileFiringBehavior().setFiringPositions(
@@ -132,7 +131,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
 			    .setProjectileFactory(
 				    tr.getResourceManager()
 					    .getProjectileFactories()[w
-					    .ordinal()]);
+					    .ordinal()])
+		            .setTimeBetweenFiringsMillis(1000/2);
 		    if (w == Weapon.DAM)
 			pfb.setAmmoLimit(1);
 		}

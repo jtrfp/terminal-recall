@@ -34,12 +34,12 @@ public enum Weapon {
     purpleLaser(null, null,new BINModelingType("LASER.BIN"), 4096, 4456448, true,-1, 2048,
 	    false, false), 
     PAC("PAC", "SKL", new BINModelingType("LASER3.BIN"), 4096, //LASER3.BIN
-	    2359296, true,1, 2048, true, false), 
+	    0x200000, true,1, 2048, true, false), 
     ION("ION",
 	    "DC1", new BINModelingType("LASER4.BIN"), 8192,
-	    1835008, true,2, 2048, false, false), 
+	    0x180000, true,2, 2048, false, false), 
     RTL(
-	    "RTL", "RFL20", new BINModelingType("LASER5.BIN"), 4096, 4456448,
+	    "RTL", "RFL20", new BINModelingType("LASER5.BIN"), 4096, 0x400000,
 	    true,3, 2048, true, false), 
     fireBall(null, null, new BINModelingType(
 	    "FIREBALL.BIN"), 8192, ModelingType.MAP_SQUARE_SIZE * 8, true,-1, 1024,
@@ -89,14 +89,14 @@ public enum Weapon {
 	    4194304, false,-1, 2048, false, false), 
     MAM(
 	    "MAM", "DOM", new BINModelingType("BRADMIS.BIN"), 16384,
-	    4194304, false,4, 2048, false, false),
+	    0x400000, false,4, 2048, false, false),
     // ////// THESE ARE NOT PART OF THE ORDINAL ORDER OF A DEF FILE AND MAY BE
     // RE-ORDERED
     SAD("SAD", "VIP", new BINModelingType("BRADMIS.BIN"), 32768,
-	    4194304, false, 5, 2048, false, true), 
+	    0x400000, false, 5, 2048, false, true), 
     SWT("SWT",
 	    "BFM", new BINModelingType("BRADMIS.BIN"), 65536,
-	    4194304, false, 6, 2048, false, true), 
+	    0x400000, false, 6, 2048, false, true), 
     DAM("DAM",
 	    "FFF", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
 		    560000)), Integer.MAX_VALUE, 0, false, 7,

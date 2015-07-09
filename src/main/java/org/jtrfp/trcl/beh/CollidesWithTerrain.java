@@ -61,7 +61,8 @@ public class CollidesWithTerrain extends Behavior {
 	    lastOWS=new WeakReference<OverworldSystem>(mission.getOverworldSystem());
 	}
 	try{if(normalMap==null)
-		normalMap=new NormalMap(new WallOffAltitudeMap(mission.getOverworldSystem().getAltitudeMap(),tr.getWorld().sizeY/2.1,tr.getWorld().sizeY*2));
+		//normalMap=new NormalMap(new WallOffAltitudeMap(mission.getOverworldSystem().getAltitudeMap(),tr.getWorld().sizeY/2.1,tr.getWorld().sizeY*2));
+	    normalMap=new NormalMap(mission.getOverworldSystem().getAltitudeMap());
 	}catch(NullPointerException e){return;}
 	ows = mission.getOverworldSystem();
 	if(ows==null)

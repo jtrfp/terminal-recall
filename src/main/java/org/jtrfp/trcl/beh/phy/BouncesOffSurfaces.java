@@ -32,7 +32,7 @@ public class BouncesOffSurfaces extends Behavior implements
 	final Vector3D _surfaceNormal = new Vector3D(surfaceNormal);
 	if(oldHeading==null)throw new NullPointerException("Parent heading is null.");
 	if(surfaceNormal==null)throw new NullPointerException("Surface normal is null.");
-	if(reflectHeading && new Rotation(oldHeading,_surfaceNormal).getAngle()>Math.PI/2.){
+	if(reflectHeading /*&& new Rotation(oldHeading,_surfaceNormal).getAngle()>Math.PI/2.*/){
 	    Vector3D newHeading = (_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldHeading)*-2).add(oldHeading));
 	    parent.setHeading(newHeading);
 	    final Rotation resultingRotation = new Rotation(oldHeading,newHeading);
@@ -47,7 +47,7 @@ public class BouncesOffSurfaces extends Behavior implements
 	    if(new Rotation(oldVelocity.normalize(),_surfaceNormal).getAngle()>Math.PI/2.){
 		velocible.setVelocity((_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)).scalarMultiply(velocityRetainmentCoefficient));
 		//Nudge
-		parent.setPosition(new Vector3D(parent.getPosition()).add(_surfaceNormal.scalarMultiply(1000.)).toArray());
+		parent.setPosition(new Vector3D(parent.getPosition()).add(_surfaceNormal.scalarMultiply(5.)).toArray());
 	    }//end if(should bounce)
 	//}//end if(Velocible)
     }//end collidedWithSurface(...)

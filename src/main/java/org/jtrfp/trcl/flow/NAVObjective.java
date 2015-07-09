@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.NormalMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
@@ -36,10 +37,10 @@ import org.jtrfp.trcl.file.NAVFile.TGT;
 import org.jtrfp.trcl.file.NAVFile.TUN;
 import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
+import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Jumpzone;
-import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelExitObject;
@@ -154,33 +155,61 @@ public abstract class NAVObjective {
 			    }
 		    };//end new NAVObjective tunnelExit
 		    final Point tunnelPoint = new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX()));
-		    if(mission.getTunnelEntrancePortal(new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX())))==null){
+		    /*
+		    //if(mission.getTunnelEntrancePortal(new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX())))==null){
 			//TODO
-			//final Camera tunnelCam = tr.secondaryRenderer.get().getCamera();
-			//final PortalExit exit = new PortalExit(tr, tunnelCam);
+			final Camera tunnelCam = tr.secondaryRenderer.get().getCamera();
+			final PortalExit portalExit = tunnelExit.getPortalExit();
+			//if(tunnelExit.isMirrorTerrain())
+			// portalExit.setRootGrid(tr.getGame().getCurrentMission().getOverworldSystem().getMirroredTerrainGrid());
+			//else
+			 //portalExit.setRootGrid(tr.getGame().getCurrentMission().getOverworldSystem());
+			portalExit.setRootGrid(currentTunnel);//DEBUG
+			final Vector3D exitLocation = tunnelExit.getExitLocation();
+			//portalExit.setPosition(exitLocation.toArray());
+			System.out.println("NAVObjective setPosition="+exitLocation);
+			//portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());//DEBUG
+			Vector3D heading = new NormalMap(tr.getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()).normalAt(exitLocation.getX(), exitLocation.getZ());
+			//Vector3D heading = Tunnel.TUNNEL_START_DIRECTION.getHeading();//DEBUG
+			//portalExit.setHeading(heading);
+			
+			if(heading.getY()<.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
+				 portalExit.setTop(Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
+			portalExit.notifyPositionChange();
+			//tunnelExit.setPortalExit(portalExit);
 			//final PortalEntrance entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
 			//mission.registerTunnelEntrancePortal(tunnelPoint, exit);
-		    }
+		    //}
+			*/
 		    indexedNAVObjectiveList.add(exitObjective);
 		    tunnelExit.setNavObjectiveToRemove(exitObjective,true);
 		    
 		    tunnelExit.setMirrorTerrain(currentTunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
 		    
-		    //if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
-			/*
+		    if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visibleUnlessBoss){
+			teo.setVisible(true);
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
 			    public void run() {
-				tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(false);
-				tunnelEntrance.setVisible(false);}
+				//tunnelEntrance.getBehavior().probeForBehavior(TunnelEntranceBehavior.class).setEnable(false);
+				teo.setVisible(false);}
 			}));
+			//Avoid memory leaks
+			final WeakReference<Mission> weakMission = new WeakReference<Mission>(mission);
 			worldBossObject.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
-				//mission.setBossFight(false);
+				final Mission mission = weakMission.get();
+				if(mission!=null)
+				 mission.setBossFight(false);
+				teo.setActive(true);
+				teo.setVisible(true);
 			    }
-			}));*/
-		    //}//end if(visibleUnlessBoss)
+			}));
+		    }else if(currentTunnel.getSourceTunnel().getEntranceLogic()==TunnelLogic.visible){//end if(visibleUnlessBoss)
+			teo.setActive(true);
+			teo.setVisible(true);
+		    }
 		} else if(navSubObject instanceof BOS){///////////////////////////////////////////
 		    final Mission mission = tr.getGame().getCurrentMission();
 		    final WeakReference<Mission> wMission = new WeakReference<Mission>(mission);

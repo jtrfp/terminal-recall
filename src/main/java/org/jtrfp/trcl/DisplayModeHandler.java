@@ -28,7 +28,7 @@ public class DisplayModeHandler {
 	this.defaultGrid=defaultGrid;
     }
     
-    public void setDisplayMode(Object [] items){
+    public synchronized void setDisplayMode(Object [] items){
 	newMode.clear();
 	recursiveNewDisplayModeImpl(items);
 	System.out.println("DisplayModeHandler.setDisplayMode()");

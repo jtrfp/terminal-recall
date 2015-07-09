@@ -13,15 +13,19 @@
 package org.jtrfp.trcl.beh;
 
 import java.awt.Point;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.NormalMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.WallOffAltitudeMap;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -39,9 +43,8 @@ public class CollidesWithTerrain extends Behavior {
     private static		TerrainChunk		dummyTerrainChunk;
     // WORK VARS
     private final double[]      groundNormal            = new double[3];
-    private final double[]      downhillDirectionXZ     = new double[3];
     private final double[]      ceilingNormal           = new double[3];
-    private OverworldSystem     lastOWS;
+    private WeakReference<OverworldSystem>lastOWS;
     private NormalMap           normalMap;
     @Override
     public void _tick(long tickTimeMillis) {
@@ -52,14 +55,15 @@ public class CollidesWithTerrain extends Behavior {
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
 	final Mission mission = tr.getGame().getCurrentMission();
-	if(mission.getOverworldSystem()!=lastOWS){
+	OverworldSystem ows = lastOWS!=null?lastOWS.get():null;
+	if(mission.getOverworldSystem()!=ows){
 	    normalMap=null;
-	    lastOWS=mission.getOverworldSystem();
+	    lastOWS=new WeakReference<OverworldSystem>(mission.getOverworldSystem());
 	}
 	try{if(normalMap==null)
-		normalMap=new NormalMap(mission.getOverworldSystem().getAltitudeMap());
+		normalMap=new NormalMap(new WallOffAltitudeMap(mission.getOverworldSystem().getAltitudeMap(),tr.getWorld().sizeY/2.1,tr.getWorld().sizeY*2));
 	}catch(NullPointerException e){return;}
-	final OverworldSystem ows = mission.getOverworldSystem();
+	ows = mission.getOverworldSystem();
 	if(ows==null)
 	    return;
 	if(ows.isTunnelMode())
@@ -70,16 +74,7 @@ public class CollidesWithTerrain extends Behavior {
 	final double ceilingHeight = (tr.getWorld().sizeY - groundHeight)
 		+ CEILING_Y_NUDGE;
 	
-	normalMap.normalAt(thisPos[0], thisPos[1], groundNormal);
-	downhillDirectionXZ[0] = groundNormal[0];
-	downhillDirectionXZ[1] = 0;
-	downhillDirectionXZ[2] = groundNormal[2];
-	
-	if (Vect3D.norm(downhillDirectionXZ) != 0)
-	    Vect3D.normalize(downhillDirectionXZ, downhillDirectionXZ);
-	else
-	    {downhillDirectionXZ[0]=0;downhillDirectionXZ[1]=1;downhillDirectionXZ[2]=0;}
-	
+	normalMap.normalAt(thisPos[0], thisPos[2], groundNormal);
 	final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
 	if(overworldSystem==null)return;
 	final boolean terrainMirror = overworldSystem.isChamberMode();
@@ -95,11 +90,12 @@ public class CollidesWithTerrain extends Behavior {
 	double [] surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
 	final double dot = Vect3D.dot3(surfaceNormal,getParent().getHeading().toArray());
 	//final double dot = surfaceNormal.dotProduct(getParent().getHeading());
+	/*
 	if (terrainMirror && groundHeight/(tr.getWorld().sizeY/2) > .97) {
 	    groundImpact = true;
 	    surfaceNormal = downhillDirectionXZ;
 	}//end if(smushed between floor and ceiling)
-	
+	*/
 	if (tunnelEntryCapable && groundImpact && dot < 0){
 		final OverworldSystem os = mission.getOverworldSystem();
 		if(!os.isTunnelMode() ){
@@ -111,14 +107,15 @@ public class CollidesWithTerrain extends Behavior {
 		}//end if(above ground)
 	}//end if(tunnelEntryCapable())
 
-	if (groundImpact || ceilingImpact) {// detect collision
+	if (groundImpact || ceilingImpact && dot < 0) {// detect collision
+	    if(getParent() instanceof Player)
+		System.err.println(new Vector3D(surfaceNormal));
 	    recentlyCollided=true;
 	    double padding = autoNudge ? nudgePadding : 0;
 	    padding *= groundImpact ? 1 : -1;
-	    thisPos[1] = (groundImpact ? groundHeight : ceilingHeight)
-		    + padding;
+	    thisPos[1] = (groundImpact ? groundHeight + padding: ceilingHeight - padding);
 	    p.notifyPositionChange();
-	    if(dot < 0 || ignoreHeadingForImpact){//If toward ground, call impact listeners.
+	   /* if(dot < 0 || ignoreHeadingForImpact)*/{//If toward ground, call impact listeners.
 		surfaceNormalVar = surfaceNormal;
 		final Behavior behavior = p.getBehavior();
 		behavior.probeForBehaviors(sub, SurfaceImpactListener.class);

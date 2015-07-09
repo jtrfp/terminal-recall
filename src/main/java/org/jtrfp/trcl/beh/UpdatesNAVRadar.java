@@ -31,11 +31,9 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
 		    getNavSystem().
 		    getBlips();
 	    blips.clearRadarBlips();
-	    if(game.getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode)
-		performRefresh=true;
-	}else if(counter%REFRESH_INTERVAL==1){
+	    performRefresh=!(game.getCurrentMission().getMissionMode() instanceof Mission.TunnelMode);
+	}else
 	    performRefresh=false;
-	}
     }//end _tick(...)
     @Override
     public void proposeCollision(WorldObject other){

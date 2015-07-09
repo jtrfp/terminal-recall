@@ -473,12 +473,13 @@ public class Mission {
 		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
 	addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel);
 	PortalExit portalExit = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
-	portalExit.setHeading(Tunnel.TUNNEL_START_DIRECTION.getHeading());
-	portalExit.setTop(Tunnel.TUNNEL_START_DIRECTION.getTop());
-	portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());
-	portalExit.notifyPositionChange();
-	portalExit.setRootGrid(tunnel);
-	
+	if(portalExit!=null){
+	    portalExit.setHeading(Tunnel.TUNNEL_START_DIRECTION.getHeading());
+	    portalExit.setTop(Tunnel.TUNNEL_START_DIRECTION.getTop());
+	    portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());
+	    portalExit.notifyPositionChange();
+	    portalExit.setRootGrid(tunnel);
+	}
 	DirectionVector tunnelExitLegacyPos = tdfTun.getExit();
 	final Point tunnelExitMapSquarePos = new Point(
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),

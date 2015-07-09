@@ -169,7 +169,7 @@ public class ProjectileFactory {
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
 	final Vector3D newVelocity;
-	if(weapon.isSumWithProjector()){
+	if(weapon.isSumWithProjectorVel()){
 	    Vector3D originVelocity = Vector3D.ZERO;
 	    try{final Velocible vel = objectOfOrigin.probeForBehavior(Velocible.class);
 	    originVelocity = vel.getVelocity();

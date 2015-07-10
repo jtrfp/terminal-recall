@@ -510,6 +510,8 @@ private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefiniti
 	public void healthBelowThreshold(){// Spinout and crash
 	    final WorldObject 	parent 	= getParent();
 	    final Behavior 	beh 	= parent.getBehavior();
+	    if(beh.probeForBehavior(DamageableBehavior.class).getHealth()<1)
+		return;//No point; already dying.
 	    //Trigger small boom
 	    final TR tr = parent.getTr();
 	    tr.soundSystem.get().getPlaybackFactory().

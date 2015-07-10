@@ -19,7 +19,7 @@ import org.jtrfp.trcl.file.Powerup;
 public class PowerupSystem extends RenderableSpacePartitioningGrid{
     private final PowerupFactory [] factories = new PowerupFactory[Powerup.values().length];
     public PowerupSystem(TR tr){
-	super(tr.getDefaultGrid());
+	super();
 	for(Powerup p:Powerup.values()){
 	    factories[p.ordinal()]=new PowerupFactory(tr, p, this);
 	}//end for(Powerups)

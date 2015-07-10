@@ -87,7 +87,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 
     public Tunnel(TR tr, TDFFile.Tunnel sourceTunnel,
 	    LoadingProgressReporter rootReporter) {
-	super(tr.getDefaultGrid());
+	super();
 	this.world	  = tr.getWorld();
 	reporters	  = rootReporter.generateSubReporters(2);
 	this.sourceTunnel = sourceTunnel;
@@ -117,7 +117,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	add(exitObject);
 	// X is tunnel depth, Z is left-right
 	try {
-	    objectSystem = new ObjectSystem(this, tr, lvl, null, Vector3D.MINUS_I,
+	    objectSystem = new ObjectSystem(tr, lvl, null, Vector3D.MINUS_I,
 		    TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET),
 		    reporters[1]);
 	} catch (Exception e) {

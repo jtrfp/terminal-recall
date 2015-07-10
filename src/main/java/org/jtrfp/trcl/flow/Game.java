@@ -323,7 +323,7 @@ public class Game {
 		    tr.getDefaultGrid().add(player);
 		    System.out.println("\t...Done.");
 		    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
-		    briefingScreen	= new BriefingScreen(tr.getDefaultGrid(),tr,tr.getGameShell().getGreenFont());
+		    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont());
 		    earlyLoadingScreen.setStatusText("Starting game...");
 		    
 		    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");

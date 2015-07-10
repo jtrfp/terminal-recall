@@ -27,8 +27,8 @@ public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
     private double 		startString;
     private double		positionX,positionY,positionZ;
     
-    public CharAreaDisplay(SpacePartitioningGrid<PositionedRenderable> parent, double fontSize, int widthChars, int heightChars, TR tr, GLFont font) {
-	super(parent);
+    public CharAreaDisplay(double fontSize, int widthChars, int heightChars, TR tr, GLFont font) {
+	super();
 	this.heightChars=heightChars;
 	this.widthChars=widthChars;
 	lines = new CharLineDisplay[heightChars];

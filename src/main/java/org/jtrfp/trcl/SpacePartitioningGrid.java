@@ -37,7 +37,7 @@ import org.jtrfp.trcl.obj.RelevantEverywhere;
 import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.Pair;
 
-public abstract class SpacePartitioningGrid<E extends Positionable>{
+public class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
 	private int 				squaresX, squaresY, squaresZ;
 	private final List<E> 			alwaysVisible  = new ArrayList<E>(300);
@@ -102,9 +102,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
 	    this();
 	}//end constructor
-	
-	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
-	 {this();}
 	
 	public synchronized void add(E objectToAdd){//TODO: Enforce set instead?
 	    if(!localTaggerSet.add(objectToAdd))

@@ -31,7 +31,7 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
     MeterBar		  loadingMeterBar;
 
     public LevelLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) throws IOException {
-	super(parent);
+	super();
 	InputStream is = null;
 	try{add(loadingMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = Texture.class

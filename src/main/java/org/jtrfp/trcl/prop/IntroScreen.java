@@ -29,7 +29,7 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
     private final TR tr;
     
     public IntroScreen(TR tr, String backdropResource, String musicResource) throws IllegalAccessException, IOException, FileLoadException {
-	super(tr.getDefaultGrid());
+	super();
 	this.tr=tr;
 	add(new BackdropSprite(tr,backdropResource,musicResource));
 	if(musicResource!=null)

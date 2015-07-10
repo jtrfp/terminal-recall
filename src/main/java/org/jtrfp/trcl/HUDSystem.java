@@ -42,9 +42,8 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     
 
     public HUDSystem(TR tr, GLFont font) throws IOException {
-	super(tr.getDefaultGrid());
+	super();
 	// Dash Text
-	final ResourceManager rm = tr.getResourceManager();
 	final double TOP_LINE_Y = .93;
 	final double BOTTOM_LINE_Y = .82;
 	final double FONT_SIZE = .04;

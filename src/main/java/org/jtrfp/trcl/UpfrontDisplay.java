@@ -23,7 +23,7 @@ public class UpfrontDisplay extends RenderableSpacePartitioningGrid {
     private final CharLineDisplay upfrontBillboard;
     private int upfrontDisplayCountdown = 0;
     public UpfrontDisplay(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) {
-	super(parent);
+	super();
 	upfrontBillboard = new CharLineDisplay(tr, this, .2, 35, tr.getGame().getUpfrontFont());
 	upfrontBillboard.setPosition(0, .2, Z);
 	upfrontBillboard.setVisible(false);

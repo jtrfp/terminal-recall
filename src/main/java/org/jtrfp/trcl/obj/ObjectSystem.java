@@ -28,11 +28,11 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter;
 
 public class ObjectSystem extends RenderableSpacePartitioningGrid {
     private final DEFObjectPlacer defPlacer;
-    public ObjectSystem(RenderableSpacePartitioningGrid parentGrid, TR tr,
+    public ObjectSystem(TR tr,
 	    LVLFile lvl, List<DEFObject> defList,
 	    Vector3D headingOverride, Vector3D positionOffset, LoadingProgressReporter objectReporter)
 	    throws IllegalAccessException, IOException, FileLoadException {
-	super(parentGrid);
+	super();
 	final LoadingProgressReporter [] reporters 	= objectReporter.generateSubReporters(2);
 	final LoadingProgressReporter defObjectReporter = reporters[0];
 	final LoadingProgressReporter pupObjectReporter = reporters[1];

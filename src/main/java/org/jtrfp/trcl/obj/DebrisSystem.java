@@ -23,7 +23,7 @@ public class DebrisSystem extends RenderableSpacePartitioningGrid{
     private final TR tr;
     private final ObjectPool<Debris> pool;
     public DebrisSystem(TR tr){
-	super(tr.getDefaultGrid());
+	super();
 	this.tr=tr;
 	this.pool=new ObjectPool<Debris>(
 		new ObjectPool.RoundRobin<Debris>(DEBRIS_POOL_SIZE), 

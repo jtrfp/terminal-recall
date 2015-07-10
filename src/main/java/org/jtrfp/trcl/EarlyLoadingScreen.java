@@ -30,8 +30,8 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
 				startupText;
     private final Sprite2D	startupLogo;
 
-    public EarlyLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) throws IOException {
-	super(parent);
+    public EarlyLoadingScreen(final TR tr, GLFont font) throws IOException {
+	super();
 	InputStream is = null;
 	try{startupLogo = new Sprite2D(tr, .000000001, 2, 2, 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is=Texture.class

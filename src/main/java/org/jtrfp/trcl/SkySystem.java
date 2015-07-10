@@ -65,7 +65,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	    double cloudTileSideSize, int gridSideSizeInTiles,
 	    double ceilingHeight, final LoadingProgressReporter cloudReporter) throws IllegalAccessException,
 	    FileLoadException, IOException {
-	super(grid);
+	super();
 	this.tr = tr;
 	final int transpose = 48;
 	this.ceilingHeight 	= ceilingHeight;

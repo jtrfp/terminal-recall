@@ -50,11 +50,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	
     public TerrainSystem(final AltitudeMap altitude,
 	    final TextureMesh textureMesh, final double gridSquareSize,
-	    final SpacePartitioningGrid parent,
 	    final RenderableSpacePartitioningGrid terrainMirror, final TR tr,
 	    final TDFFile tdf, final boolean flatShading, 
 	    final LoadingProgressReporter terrainReporter) {
-	super(parent);
+	super();
 	final int numCores = Runtime.getRuntime().availableProcessors();
 	this.tr = tr;
 	final int width = (int) altitude.getWidth();

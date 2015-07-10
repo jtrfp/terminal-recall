@@ -102,7 +102,7 @@ public class GameShell {
     private void initLoadingScreen(){
 	System.out.println("Initializing general resources...");
 	try{greenFont          = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
-	    earlyLoadingScreen = new EarlyLoadingScreen(tr.getDefaultGrid(), tr, greenFont);
+	    earlyLoadingScreen = new EarlyLoadingScreen(tr, greenFont);
 	    earlyLoadingScreen.setStatusText("No game loaded.");
 	    tr.getDefaultGrid().nonBlockingAddBranch(earlyLoadingScreen);
 	}catch(Exception e){gameFailure(e);}

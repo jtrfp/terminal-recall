@@ -31,7 +31,7 @@ private final NAVRadarBlipFactory blips;
 
     public NAVSystem(SpacePartitioningGrid<PositionedRenderable> parent, 
 	    TR tr) {
-	super(parent);
+	super();
 	this.tr=tr;
 	System.out.println("Setting up NAV system...");
 	arrow = new NavArrow(tr,this);

@@ -15,7 +15,7 @@ package org.jtrfp.trcl;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
-public abstract class RenderableSpacePartitioningGrid extends
+public class RenderableSpacePartitioningGrid extends
 	SpacePartitioningGrid<PositionedRenderable> {
 
     public RenderableSpacePartitioningGrid(double sizeX, double sizeY,
@@ -23,8 +23,7 @@ public abstract class RenderableSpacePartitioningGrid extends
 	super(new Vector3D(sizeX, sizeY, sizeZ), gridBlockSize, viewDepth * 1.2);
     }
 
-    public RenderableSpacePartitioningGrid(
-	    SpacePartitioningGrid<PositionedRenderable> parent) {
-	super(parent);
+    public RenderableSpacePartitioningGrid() {
+	super();
     }
 }//end RenderableSpacePartitioningGrid

@@ -35,7 +35,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid 
     				     terrainMirror = 
-    new RenderableSpacePartitioningGrid(this) {};
+    new RenderableSpacePartitioningGrid() {};
     private boolean 		     chamberMode = false;
     private boolean 		     tunnelMode = false;
     private final TR 		     tr;
@@ -47,7 +47,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private            TerrainSystem terrainSystem;
 
     public OverworldSystem(TR tr, final LoadingProgressReporter progressReporter) {
-	super(tr.getDefaultGrid());
+	super();
 	this.tr = tr;
 	final LoadingProgressReporter []reporters = progressReporter.generateSubReporters(256);
 	terrainReporter	= reporters[0];
@@ -72,7 +72,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
 		    .toUpperCase().contains("BORG");//TODO: This should be in a config file.
 	    terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
-		    TR.mapSquareSize, this, terrainMirror, tr, tdf,
+		    TR.mapSquareSize, terrainMirror, tr, tdf,
 		    flatShadedTerrain, terrainReporter);
 	    System.out.println("...Done.");
 	    // Clouds
@@ -84,7 +84,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");
-	    objectSystem = new ObjectSystem(this, tr, lvl, defList,
+	    objectSystem = new ObjectSystem(tr, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
 	    System.out.println("Adding terrain and object system to OverworldSystem...");
 	    this.blockingAddBranch(terrainSystem);

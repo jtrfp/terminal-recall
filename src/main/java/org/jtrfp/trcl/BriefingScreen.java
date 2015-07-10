@@ -69,14 +69,14 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     
     private final LazyTRFuture<TXTMissionBriefFile> missionTXT;
 
-    public BriefingScreen(SpacePartitioningGrid<PositionedRenderable> parent, final TR tr, GLFont font) {
-	super(parent);
+    public BriefingScreen(final TR tr, GLFont font) {
+	super();
 	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		tr.gpu.get().getGl(), 0,false),true);
 	add(briefingScreen);
 	this.tr	      = tr;
-	briefingChars = new CharAreaDisplay(this,.047,WIDTH_CHARS,NUM_LINES,tr,font);
+	briefingChars = new CharAreaDisplay(.047,WIDTH_CHARS,NUM_LINES,tr,font);
 	blockingAddBranch(briefingChars);
 	briefingChars.setPosition(-.7, -.45, TEXT_Z);
 	briefingScreen.setPosition(0,0,BRIEFING_SPRITE_Z);

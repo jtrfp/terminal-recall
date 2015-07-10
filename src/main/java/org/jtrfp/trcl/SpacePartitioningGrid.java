@@ -72,7 +72,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	private int 		rawDia,
 				rawDiaX,rawDiaY;
 		
-	protected SpacePartitioningGrid(){
+	public SpacePartitioningGrid(){
 	    packedObjectValve.add(TruePredicate.INSTANCE);
 	}
     public Future<?> nonBlockingAddBranch(final SpacePartitioningGrid<E> branchToAdd){

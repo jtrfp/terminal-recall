@@ -158,7 +158,7 @@ public class SpacePartitioningGridRootTest {
     
     @Test
     public void testEmptyAddNonEmptyBranch() {//Relevance executor breaks this test.
-	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
+	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>();
 	//branch.activate();
 	subject.blockingAddBranch(branch);
 	branch.add(mockedPositionables[0]);
@@ -179,7 +179,7 @@ public class SpacePartitioningGridRootTest {
     @Test
     public void testEmptyDeactivateNonEmptyBranchThenActivate() {//Relevance executor breaks this test.
 	when(mockedTarget.removeAll(any(Collection.class))).thenReturn(true);
-	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
+	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>();
 	//branch.activate();
 	subject.blockingAddBranch(branch);
 	branch.add(mockedPositionables[0]);
@@ -207,7 +207,7 @@ public class SpacePartitioningGridRootTest {
     
     @Test
     public void testPopulatedAddNonEmptyBranchCommonTags(){
-	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>(subject){};
+	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>();
 	//branch.activate();
 	subject.blockingAddBranch(branch);
 	subject.add(mockedPositionables[2]);

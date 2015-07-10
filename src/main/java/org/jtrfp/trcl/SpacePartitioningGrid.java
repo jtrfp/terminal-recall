@@ -40,10 +40,8 @@ import com.ochafik.util.listenable.Pair;
 public abstract class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
 	private int 				squaresX, squaresY, squaresZ;
-	private final List<E> 			alwaysVisible = new ArrayList<E>(300);
+	private final List<E> 			alwaysVisible  = new ArrayList<E>(300);
 	private final HashSet<E>		localTaggerSet = new HashSet<E>();
-	/*private WeakReference<SpacePartitioningGrid<E>> 	
-						parentGrid = null;*/
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
@@ -71,96 +69,12 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	
 	private  List<E> []     elements;
 	private double 		radiusInWorldUnits;
-	private int 		rolloverPoint,
-				rawDia,
-				rawDiaX,rawDiaY,rawDiaZ,
-				xProgression,yProgression,zProgression;
-	
-	private final Adapter<Vector3D,Integer> cubeSpaceRasterizer = new Adapter<Vector3D,Integer>(){
-	    @Override
-	    public Integer adapt(Vector3D value) {
-		return (int)(
-			value.getX()+
-			value.getY()*squaresX+
-			value.getZ()*squaresX*squaresY);
-	    }//end adapt()
-
-	    @Override
-	    public Vector3D reAdapt(Integer value) {
-		// TODO Auto-generated method stub
-		return null;
-	    }};
-
-	    private final Adapter<Vector3D,Integer> worldSpaceRasterizer = new Adapter<Vector3D,Integer>(){
-		@Override
-		public Integer adapt(Vector3D value) {
-		    return (int)(
-			    (int)absMod(Math.round(value.getX()/getSquareSize()),squaresX)+
-			    (int)absMod(Math.round(value.getY()/getSquareSize()),squaresY)*squaresX+
-			    (int)absMod(Math.round(value.getZ()/getSquareSize()),squaresZ)*squaresX*squaresY);
-		}//end adapt()
-
-		@Override
-		public Vector3D reAdapt(Integer value) {
-		    throw new UnsupportedOperationException();
-		}};
+	private int 		rawDia,
+				rawDiaX,rawDiaY;
 		
 	protected SpacePartitioningGrid(){
 	    packedObjectValve.add(TruePredicate.INSTANCE);
 	}
-	/*
-    public void activate() {
-	if(Renderer.NEW_MODE)
-	    newActivate();
-	else{
-	    if (parentGrid != null) {
-		    final SpacePartitioningGrid g = parentGrid.get();
-		    if (g != null)
-			g.addBranch(this);
-		}
-	}//end(!NEW_MODE)
-    }//end activate()
-    */
-    public Adapter<Vector3D,Integer> getCubeSpaceRasterizer(){
-	return cubeSpaceRasterizer;
-    }
-    
-    public Adapter<Vector3D,Integer> getWorldSpaceRasterizer(){
-	return worldSpaceRasterizer;
-    }
-/*
-    public void deactivate() {
-	if(Renderer.NEW_MODE){
-	    newDeactivate();return;}
-	if (parentGrid != null) {
-	    final SpacePartitioningGrid g = parentGrid.get();
-	    if (g != null)
-		g.removeBranch(this);
-	}
-    }//end deactivate()
-    
-    public void notifyBranchAdded(SpacePartitioningGrid b){
-	final SpacePartitioningGrid<E> g = parentGrid.get();
-	    if (g != null)
-		g.notifyBranchAdded(b);
-    }//end notifyBranchAdded(...)
-    
-    public void notifyBranchRemoved(SpacePartitioningGrid b){
-	final SpacePartitioningGrid<E> g = parentGrid.get();
-	    if (g != null)
-		g.notifyBranchRemoved(b);
-    }//end notifyBranchRemoved(...)
-*/
-    public void addBranch(SpacePartitioningGrid<E> branchToAdd){
-	System.out.println("SPG add "+branchToAdd);
-	newAddBranch(branchToAdd);
-
-    }//end addBranch(...)
-    public void removeBranch(SpacePartitioningGrid<E> branchToRemove){
-	    System.out.println("SPG remove "+branchToRemove);
-	    newRemoveBranch(branchToRemove);
-    }//end removeBranch(...)
-    
     public Future<?> nonBlockingAddBranch(final SpacePartitioningGrid<E> branchToAdd){
 	return World.relevanceExecutor.submit(new Runnable(){
 	    @Override
@@ -184,103 +98,33 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
     public void blockingRemoveBranch(SpacePartitioningGrid<E> branchToRemove){
 	try{nonBlockingRemoveBranch(branchToRemove).get();}catch(Exception e){}
     }
-	
-	private void baseOnGridMetrics(SpacePartitioningGrid<E> parentGrid){
-	    	/*if(Renderer.NEW_MODE){
-	    	    if(this.parentGrid!=null)
-	    		this.parentGrid.get().removeBranch(this);
-	    	    parentGrid.addBranch(this);
-	    	    this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);
-	    	    return;
-	    	}
-		this.parentGrid=new WeakReference<SpacePartitioningGrid<E>>(parentGrid);*/
-	    /*
-		setSquareSize(parentGrid.getSquareSize());
-		setSquaresX(parentGrid.getSquaresX());
-		setSquaresY(parentGrid.getSquaresY());
-		setSquaresZ(parentGrid.getSquaresZ());
-		setViewingRadius(parentGrid.getViewingRadius());
-		
-		allocateSquares();
-		*/
-		}//end setParentGrid(...)
 
 	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
 	    this();
 	}//end constructor
 	
 	public SpacePartitioningGrid(SpacePartitioningGrid<E> parentGrid)
-	 {this();baseOnGridMetrics(parentGrid);}
+	 {this();}
 	
-	private void allocateSquares(){
-		elements = new List[squaresX*squaresY*squaresZ];
-		//Fudge factor to fix suddenly appearing terrain at distance
-		radiusInWorldUnits	=getViewingRadius()*1.25;
-		rolloverPoint		=elements.length;
-		rawDia			=(int)((radiusInWorldUnits*2)/getSquareSize());
-		rawDiaX			=rawDia<getSquaresX()?rawDia:getSquaresX();
-		rawDiaY			=rawDia<getSquaresY()?rawDia:getSquaresY();
-		rawDiaZ			=rawDia<getSquaresZ()?rawDia:getSquaresZ();
-		zProgression		=getSquaresX()*getSquaresY()-rawDiaY*getSquaresX();
-		yProgression		=getSquaresX()-rawDiaX;
-		xProgression=1;
-		}//end allocateSquares()
-	/*
-	public Future<?> nonBlockingActivate(){
-	    return World.relevanceExecutor.submit(new Runnable(){
-		@Override
-		public void run() {
-		    activate();
-		}});
-	}//end nonBlockingActivate()
-	
-	public void blockingActivate(){
-	    try  {nonBlockingActivate().get();}
-	    catch(Exception e){throw new RuntimeException(e);}
-	}//end blockingActivate()
-	
-	public void blockingDeactivate(){
-	    try  {nonBlockingDeactivate().get();}
-	    catch(Exception e){throw new RuntimeException(e);}
-	}//end blockingDeactivate()
-	
-	public Future<?> nonBlockingDeactivate(){
-	    return World.relevanceExecutor.submit(new Runnable(){
-		@Override
-		public void run() {
-		    deactivate();
-		}});
-	}//end nonBlockingActivate()
-	
-	public synchronized void newActivate(){
-	    if(!packedObjectValve.contains(TruePredicate.INSTANCE))
-		packedObjectValve.add(TruePredicate.INSTANCE);
-	}
-	
-	public synchronized void newDeactivate(){
-	    if(packedObjectValve.contains(TruePredicate.INSTANCE))
-	     packedObjectValve.clear();
-	}
-	*/
-	public synchronized void newAdd(E objectToAdd){//TODO: Enforce set instead?
+	public synchronized void add(E objectToAdd){//TODO: Enforce set instead?
 	    if(!localTaggerSet.add(objectToAdd))
 		return;
 	    localTagger.add(objectToAdd);
 	    objectToAdd.setContainingGrid(this);
 	}
 	
-	public synchronized void newRemove(E objectToRemove){
+	public synchronized void remove(E objectToRemove){
 	    if(!localTaggerSet.remove(objectToRemove))
 		return;
 	    localTagger.remove(objectToRemove);
 	}
 	
-	public synchronized void newAddBranch(SpacePartitioningGrid<E> toAdd){
+	public synchronized void addBranch(SpacePartitioningGrid<E> toAdd){
 	    toAdd.getPackedObjectsDispatcher().addTarget(packedObjectValve.input, true);
 	    branchGrids.put(toAdd, null);
 	}
 	
-	public synchronized void newRemoveBranch(SpacePartitioningGrid<E> toRemove){
+	public synchronized void removeBranch(SpacePartitioningGrid<E> toRemove){
 	    toRemove.getPackedObjectsDispatcher().removeTarget(packedObjectValve.input, true);
 	    branchGrids.remove(toRemove);
 	}
@@ -288,60 +132,14 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	public CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> getPackedObjectsDispatcher(){
 	    return packedObjectsDispatcher;
 	}
-	
-	public synchronized void add(E objectWithPosition){//TODO: Remove old
-	     newAdd(objectWithPosition);//TODO: Remove stub
-	}//end add()
-	public synchronized void remove(E objectWithPosition){//TODO Remove old
-	     newRemove(objectWithPosition);//TODO: Remove stub
-	}//end remove(...)
 	private static double absMod(double value, double mod){
-		if(value>=-0.)
-			{return value%mod;}
-		value*=-1;
-		value%=mod;
-		if(value==0)return 0;
-		return mod-value;
-		}//end absMod
-	
-	public void cubesWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<List<E>> submitter){
-	    recursiveAlwaysVisibleGridCubeSubmit(submitter);
-	    final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
-		int startRaw = worldSpaceRasterizer.adapt(new Vector3D(startPoint[0],startPoint[1],startPoint[2]));
-		
-		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
-		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
-			final int yEnd=point+getSquaresX()*rawDiaY;
-			for(;point<yEnd; point+=yProgression){//Y
-				final int xEnd=point+rawDiaX;
-				for(;point<xEnd; point+=xProgression){//X
-					final int wrappedPoint=point%rolloverPoint;
-					recursiveGridCubeSubmit(submitter,wrappedPoint);
-					}//end for(X)
-				}//end for(Y)
-			}//end for(Z)
-	}//end cubesWithRadiusOf(...)
-	
-	@SuppressWarnings("unchecked")
-	public void itemsWithinRadiusOf(Vector3D centerInWorldUnits, Submitter<E> submitter){
-		recursiveAlwaysVisibleSubmit(submitter);
-		
-		final double [] startPoint=centerInWorldUnits.subtract(new Vector3D(radiusInWorldUnits,radiusInWorldUnits,radiusInWorldUnits)).toArray();
-		int startRaw = worldSpaceRasterizer.adapt(new Vector3D(startPoint[0],startPoint[1],startPoint[2]));
-		
-		final int zEnd=startRaw+getSquaresX()*getSquaresY()*rawDiaZ + (rawDiaY*getSquaresX()) + (rawDiaX);
-		for(int point=startRaw; point<zEnd; point+=zProgression){//Z
-			final int yEnd=point+getSquaresX()*rawDiaY;
-			for(;point<yEnd; point+=yProgression){//Y
-				final int xEnd=point+rawDiaX;
-				for(;point<xEnd; point+=xProgression){//X
-					final int wrappedPoint=point%rolloverPoint;
-					recursiveBlockSubmit(submitter,wrappedPoint);
-					}//end for(X)
-				}//end for(Y)
-			}//end for(Z)
-		}//end itemsInRadiusOf(...)
-	
+	    if(value>=-0.)
+	    {return value%mod;}
+	    value*=-1;
+	    value%=mod;
+	    if(value==0)return 0;
+	    return mod-value;
+	}//end absMod
     private void recursiveAlwaysVisibleSubmit(Submitter<E> sub) {
 	sub.submit(alwaysVisible);
 	synchronized(branchGrids){
@@ -471,19 +269,6 @@ public abstract class SpacePartitioningGrid<E extends Positionable>{
 	    synchronized(list){
 	     list.add(objectWithPosition);}
 	}//end addDirect(...)
-
-	public List<E> world2List(double x, double y,
-		double z, boolean newListIfNull) {
-	    final int pos = worldSpaceRasterizer.adapt(new Vector3D(x,y,z));
-	    List<E> result = elements[pos];
-	    if(newListIfNull && result==null)
-		result = elements[pos] = new ArrayList<E>(8);
-	    return result;
-	}//end world2List
-	
-	public List<E> getAlwaysVisibleList(){
-	    return alwaysVisible;
-	}
 	
 	public void removeAll(){
 		final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();

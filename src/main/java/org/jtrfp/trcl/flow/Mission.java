@@ -287,9 +287,9 @@ public class Mission {
 	    if (missionEnd[0] != null)
 		return missionEnd[0];
 	}//end sync(missionEnd)
-	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	/*tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
-	    public Void call() throws Exception {
+	    public Void call() throws Exception {*/
 		final SoundSystem ss = Mission.this.tr.soundSystem.get();
 		MusicPlaybackEvent evt;
 		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
@@ -300,14 +300,15 @@ public class Mission {
 						lvl.getBackgroundMusicFile())),
 					 true));
 		synchronized(Mission.this){
-		 if(bgMusic!=null)
-		  return null;
-		 bgMusic=evt;
-		 bgMusic.play();
+		 if(bgMusic==null){
+		  bgMusic=evt;
+		  bgMusic.play();   
+		 }
+		 
 		 }//end sync(Mission.this)
-		return null;
-	    }// end call()
-	});
+		//return null;
+	/*    }// end call()
+	});*/
 	game.getUpfrontDisplay().removePersistentMessage();
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){

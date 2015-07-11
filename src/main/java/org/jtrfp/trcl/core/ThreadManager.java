@@ -155,7 +155,7 @@ public final class ThreadManager implements GLExecutor{
 	//if(game.getPlayer()!=null && !paused[0])
 	    tr.getCollisionManager().performCollisionTests();
 	}// end sync(paused)
-	}catch(NotReadyException e){System.out.println("ThreadManager: Not ready");}
+	}catch(NotReadyException e){/*System.out.println("ThreadManager: Not ready");*/}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
     
@@ -249,8 +249,9 @@ public final class ThreadManager implements GLExecutor{
 	     ///////// activeGPUMemAccessTasks should be empty beyond this
 	    assert activeGPUMemAccessTasks.isEmpty() : "ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
 	    //// GL ONLY
-	    for(Callable<?> c:repeatingGLTasks)
-		c.call();
+	    synchronized(repeatingGLTasks){
+	     for(Callable<?> c:repeatingGLTasks)
+		c.call();}
 	    synchronized (currentGPUMemAccessTaskSubmitter) {
 		currentGPUMemAccessTaskSubmitter
 			.set(activeGPUMemAccessTaskSubmitter);
@@ -308,9 +309,10 @@ public final class ThreadManager implements GLExecutor{
     public void addRepeatingGLTask(Callable<?> task){
 	if(task==null)
 	    throw new NullPointerException("Passed task intolerably null.");
-	if(repeatingGLTasks.contains(task))
+	synchronized(repeatingGLTasks){
+	 if(repeatingGLTasks.contains(task))
 	    return;
-	repeatingGLTasks.add(task);
+	 repeatingGLTasks.add(task);}
     }//end addRepeatingGLTask(...)
     
     public void removeRepeatingGLTask(Callable<?> task){

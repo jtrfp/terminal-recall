@@ -27,13 +27,11 @@ import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
-import org.jtrfp.trcl.beh.TriggersVisCalcWithMovement;
 import org.jtrfp.trcl.coll.CachedAdapter;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.ThreadEnforcementCollection;
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.Positionable;
@@ -56,7 +54,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
-	//private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
 		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
@@ -84,11 +81,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
 	private static final double RELEVANCE_RADIUS_TAXICAB_CUBES = 1.414 * RELEVANCE_RADIUS_CUBES; // 1.414 is radical-2
-	//private final ListenableCollection<ListenableCollection<PositionedRenderable>> relevantCubeCollection = 
-	//	new DefaultListenableCollection<ListenableCollection<PositionedRenderable>>(new ArrayList<ListenableCollection<PositionedRenderable>>());
-	//private final	CompoundListenableCollection<PositionedRenderable> relevanceCollection 
-	//     = new CompoundListenableCollection<PositionedRenderable>(relevantCubeCollection);
-	//private final	ListenableSet<PositionedRenderable> sortedRelevanceSet;
 	private SpacePartitioningGrid rootGrid;
 	private volatile Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
 
@@ -154,8 +146,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	public void propertyChange(PropertyChangeEvent evt) {
 	    final String propertyName = evt.getPropertyName();
 	    if(propertyName==WorldObject.POSITION){
-		//if(getRootGrid()==null)
-		//    return;
 		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(
@@ -163,7 +153,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 			Math.rint(newValue[1]/granularity),
 			Math.rint(newValue[2]/granularity));
 		final Vector3D oldCenterCube = centerCube;
-		//centerCube = newCenterCube;
 		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)
 	}//end if propertyChange()
@@ -393,12 +382,4 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	public CollectionActionDispatcher<Positionable> getFlatRelevanceCollection() {
 	    return flatRelevanceCollection;
 	}
-
-	/**
-	 * @return the sortedRelevanceSet
-	 */
-	/*
-	public ListenableSet<PositionedRenderable> getSortedRelevanceSet() {
-	    return sortedRelevanceSet;
-	}*/
 }//end Camera

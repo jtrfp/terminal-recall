@@ -31,7 +31,6 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private SkySystem 	     skySystem;
     private AltitudeMap              altitudeMap;
-    private Color 		     fogColor = Color.black;
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid 
     				     terrainMirror = 
@@ -102,18 +101,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    e.printStackTrace();
 	}
     }// end constructor
-/*
-    public Color getFogColor() {
-	return fogColor;
-    }
-
-    public void setFogColor(Color c) {
-	fogColor = c;
-	if (fogColor == null)
-	    throw new NullPointerException("Passed color is intolerably null.");
-	tr.renderer.get().getSkyCube().setSkyCubeGen(new HorizGradientCubeGen(c,new Color(c.getRed(),c.getGreen(),255)));
-    }
-*/
+    
     public List<DEFObject> getDefList() {
 	return defList;
     }

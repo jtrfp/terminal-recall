@@ -13,7 +13,6 @@
 package org.jtrfp.trcl;
 
 import java.beans.PropertyChangeEvent;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,17 +29,14 @@ import org.jtrfp.trcl.coll.CollectionActionPacker;
 import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 
-import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.Pair;
 
 public class SpacePartitioningGrid<E extends Positionable>{
 	private double 				squareSize, viewingRadius;
 	private int 				squaresX, squaresY, squaresZ;
-	private final List<E> 			alwaysVisible  = new ArrayList<E>(300);
 	private final HashSet<E>		localTaggerSet = new HashSet<E>();
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
@@ -68,9 +64,6 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	 = new CollectionThreadDecoupler<Positionable>(new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITION,World.relevanceExecutor),World.relevanceExecutor);
 	
 	private  List<E> []     elements;
-	private double 		radiusInWorldUnits;
-	private int 		rawDia,
-				rawDiaX,rawDiaY;
 		
 	public SpacePartitioningGrid(){
 	    packedObjectValve.add(TruePredicate.INSTANCE);
@@ -137,50 +130,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    if(value==0)return 0;
 	    return mod-value;
 	}//end absMod
-    private void recursiveAlwaysVisibleSubmit(Submitter<E> sub) {
-	sub.submit(alwaysVisible);
-	synchronized(branchGrids){
-	 for(SpacePartitioningGrid<E> g:branchGrids.keySet())
-	     g.recursiveAlwaysVisibleSubmit(sub);
-	 }//end sync(branchGrids)
-    }// end recursiveAlwaysVisisbleSubmit(...)
-
-    private void recursiveAlwaysVisibleGridCubeSubmit(Submitter<List<E>> sub) {
-	sub.submit(alwaysVisible);
-	synchronized(branchGrids){
 	
-	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
-	     g.recursiveAlwaysVisibleGridCubeSubmit(sub);
-	}//end sync(branchGrids)
-    }// end recursiveAlwaysVisisbleSubmit(...)
-	
-    private void recursiveBlockSubmit(Submitter<E> sub, int blockID) {
-	final List<E> elements = this.elements[blockID];
-	if (elements != null) {
-	    synchronized (elements) {
-		final int size = elements.size();
-		for (int i = 0; i < size; i++) {
-		    sub.submit(elements.get(i));
-		}// end for(size)
-	    }// end sync(elements)
-	}// end if(!null)
-	synchronized(branchGrids){
-	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
-	     g.recursiveBlockSubmit(sub, blockID);
-	}//end sync(branchGrids)
-    }// end recusiveBlockSubmit(...)
-
-    private void recursiveGridCubeSubmit(Submitter<List<E>> sub, int blockID) {
-	sub.submit(elements[blockID]);
-	synchronized(branchGrids){
-	for(SpacePartitioningGrid<E> g:branchGrids.keySet())
-	     g.recursiveGridCubeSubmit(sub, blockID);
-	}//end sync(branchGrids)
-    }// end recusiveGridCubeSubmit(...)
-
-	private Collection<E> getAlwaysVisible()
-		{return alwaysVisible;}
-
 	/**
 	 * @return the squareSize
 	 */

@@ -41,7 +41,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
-	private final com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>(){
+	private static final com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>(){
 	    @Override
 	    public Vector3D adapt(PropertyChangeEvent evt) {
 		final int granularity = World.CUBE_GRANULARITY;

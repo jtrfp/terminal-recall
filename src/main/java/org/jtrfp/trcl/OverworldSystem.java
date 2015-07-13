@@ -34,7 +34,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid 
     				     terrainMirror = 
-    new RenderableSpacePartitioningGrid() {};
+    new RenderableSpacePartitioningGrid();
     private boolean 		     chamberMode = false;
     private boolean 		     tunnelMode = false;
     private final TR 		     tr;

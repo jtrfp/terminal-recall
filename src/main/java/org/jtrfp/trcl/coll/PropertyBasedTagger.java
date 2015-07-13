@@ -21,9 +21,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections4.map.ReferenceMap;
 
 import com.ochafik.util.listenable.Adapter;
 import com.ochafik.util.listenable.Pair;
@@ -31,8 +33,8 @@ import com.ochafik.util.listenable.Pair;
 public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE> implements Collection<E>, Decorator<Collection<Pair<KEY,E>>> {
     private final Collection<Pair<KEY,E>>    delegate;
     private final Adapter<PropertyChangeEvent,KEY> propertyAdapter;
-    private final Map<E,PropertyChangeListener> listeners= new HashMap<E,PropertyChangeListener>();
-    private final Map<E,Pair<KEY,E>> pairs               = new HashMap<E,Pair<KEY,E>>();
+    private final Map<E,PropertyChangeListener> listeners= new ReferenceMap<E,PropertyChangeListener>();
+    private final Map<E,Pair<KEY,E>> pairs               = new ReferenceMap<E,Pair<KEY,E>>();
     private final String propertyName;
     private final ExecutorService executor;
     

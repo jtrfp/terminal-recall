@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.lang.ref.WeakReference;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
@@ -20,7 +22,7 @@ import org.jtrfp.trcl.core.TR;
 
 public class PortalExit extends WorldObject {
     private final Camera controlledCamera;
-    private SpacePartitioningGrid rootGrid;
+    private WeakReference<SpacePartitioningGrid> rootGrid;
 
     public PortalExit(TR tr, Camera cameraToControl) {
 	super(tr);
@@ -33,7 +35,6 @@ public class PortalExit extends WorldObject {
 	//Apply vector
 	controlledCamera.setHeading(rotation.applyTo(controllingHeading));
 	controlledCamera.setTop    (rotation.applyTo(controllingTop));
-	
 	//Update
 	controlledCamera.notifyPositionChange();
     }//end updateObservationParams(...)
@@ -46,23 +47,25 @@ public class PortalExit extends WorldObject {
     }
 
     public void activate() {
-	controlledCamera.setRootGrid(rootGrid);
-	//else
-	    //System.err.println("WARNING: PortalExit rootGrid==null!");
+	if(rootGrid==null)
+	    return;
+	SpacePartitioningGrid grid = rootGrid.get();
+	if(grid!=null)
+	 controlledCamera.setRootGrid(grid);
     }
 
     /**
      * @return the rootGrid
      */
     public SpacePartitioningGrid getRootGrid() {
-        return rootGrid;
+        return rootGrid.get();
     }
 
     /**
      * @param rootGrid the rootGrid to set
      */
     public void setRootGrid(SpacePartitioningGrid rootGrid) {
-        this.rootGrid = rootGrid;
+        this.rootGrid = new WeakReference<SpacePartitioningGrid>(rootGrid);
     }
 
     public void deactivate() {

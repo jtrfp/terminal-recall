@@ -57,16 +57,16 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	};
 	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher =
 		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
-	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
-		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);
-	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectValve.input);
+	/*private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
+		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);*/
+	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectsDispatcher);
 	private final Collection<Positionable> localTagger
 	 = new CollectionThreadDecoupler<Positionable>(new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITION,World.relevanceExecutor),World.relevanceExecutor);
 	
 	private  List<E> []     elements;
 		
 	public SpacePartitioningGrid(){
-	    packedObjectValve.add(TruePredicate.INSTANCE);
+	    //packedObjectValve.add(TruePredicate.INSTANCE);
 	}
     public Future<?> nonBlockingAddBranch(final SpacePartitioningGrid<E> branchToAdd){
 	return World.relevanceExecutor.submit(new Runnable(){
@@ -110,12 +110,12 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	}
 	
 	public synchronized void addBranch(SpacePartitioningGrid<E> toAdd){
-	    toAdd.getPackedObjectsDispatcher().addTarget(packedObjectValve.input, true);
+	    toAdd.getPackedObjectsDispatcher().addTarget(packedObjectsDispatcher, true);
 	    branchGrids.put(toAdd, null);
 	}
 	
 	public synchronized void removeBranch(SpacePartitioningGrid<E> toRemove){
-	    toRemove.getPackedObjectsDispatcher().removeTarget(packedObjectValve.input, true);
+	    toRemove.getPackedObjectsDispatcher().removeTarget(packedObjectsDispatcher, true);
 	    branchGrids.remove(toRemove);
 	}
 	

@@ -89,7 +89,19 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
     }// end constructor
 
     private void generateClouds(OverworldSystem os) {
-	// Set fog
+	Triangle[] tris = Triangle.quad2Triangles(new double[] { 0,
+		0 + cloudTileSideSize, 0 + cloudTileSideSize, 0 },
+		new double[] { 0, 0,
+		0, 0 },
+		new double[] { 0, 0, 0 + cloudTileSideSize,
+		0 + cloudTileSideSize },
+		new double[] { 0, 1, 1, 0 },// u
+		new double[] { 1, 1, 0, 0 }, cloudTexture,
+		RenderMode.STATIC, Vector3D.ZERO,"CloudSystem");
+	final Model m = new Model(false, tr);
+	m.setDebugName("CloudSystem.cloudQuad");
+	m.addTriangle(tris[0]);
+	m.addTriangle(tris[1]);
 	try {
 	    // Create a grid
 	    for (int z = 0; z < gridSideSizeInTiles; z++) {
@@ -98,19 +110,6 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		    double xPos = x * cloudTileSideSize;
 		    double zPos = z * cloudTileSideSize;
 		    
-		    Triangle[] tris = Triangle.quad2Triangles(new double[] { 0,
-			    0 + cloudTileSideSize, 0 + cloudTileSideSize, 0 },
-			    new double[] { ceilingHeight, ceilingHeight,
-				    ceilingHeight, ceilingHeight },
-			    new double[] { 0, 0, 0 + cloudTileSideSize,
-				    0 + cloudTileSideSize },
-			    new double[] { 0, 1, 1, 0 },// u
-			    new double[] { 1, 1, 0, 0 }, cloudTexture,
-			    RenderMode.STATIC, Vector3D.ZERO,"CloudSystem");
-		    final Model m = new Model(false, tr);
-		    m.setDebugName("CloudSystem.cloudQuad");
-		    m.addTriangle(tris[0]);
-		    m.addTriangle(tris[1]);
 		    final CloudCeiling rq = new CloudCeiling(tr,
 			    m);
 		    

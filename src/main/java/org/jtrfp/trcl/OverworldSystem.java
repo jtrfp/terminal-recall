@@ -79,7 +79,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    skySystem = new SkySystem(this, tr, this, lvl,
 			TR.mapSquareSize * 8,
 			(int) (TR.mapWidth / (TR.mapSquareSize * 8)),
-			w.sizeY/4, cloudReporter);
+			w.sizeY/2, cloudReporter);
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");

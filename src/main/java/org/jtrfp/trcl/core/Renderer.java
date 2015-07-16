@@ -163,14 +163,6 @@ public final class Renderer {
 	    return null;
 	}};
     
-    public void temporarilyMakeImmediatelyRelevant(final PositionedRenderable pr){
-	//if(pr instanceof WorldObject)
-	//    try{if(!NEW_MODE)collisionManager.getCurrentlyActiveCollisionList().add((WorldObject)pr);}
-	//catch(Exception ex){throw new RuntimeException(ex);}
-	//if(!NEW_MODE)
-	// renderList.get().getVisibleWorldObjectList().add(pr);
-    }//end temporarilyMakeImmediatelyRelevant(...)
-    
     public void setSunVector(Vector3D sv){
 	factory.getDeferredProgram().use();
 	factory.getSunVectorUniform().set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());

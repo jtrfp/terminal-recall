@@ -301,6 +301,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 		throw new RuntimeException("Ran out of vec4s.");
 	    }
 	    gpuVerticesRemaining -= GPU.GPU_VERTICES_PER_BLOCK;
+	    //TODO: getPhysicalAddressesInVEC4 ListActionDispatcher
 	    indicesList.add(odw.getPhysicalAddressInBytes(index)
 		    / GPU.BYTES_PER_VEC4);
 	    odCounter++;
@@ -412,15 +413,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	needToRecalcMatrix=true;
 	if(!this.visible && visible){
 	    this.visible = true;
-	    tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant(this);
 	}else this.visible = visible;
-	/*tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    WorldObject.this.updateStateToGPU();
-		    return null;
-		}
-	    });*/
     }//end setvisible()
 
     /**
@@ -566,14 +559,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	    needToRecalcMatrix=true;
 	if(!this.active && active && isVisible()){
 	    this.active=true;
-	    tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant(this);
-	    /*tr.threadManager.submitToGPUMemAccess(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    WorldObject.this.updateStateToGPU();
-		    return null;
-		}
-	    });*/
 	}
 	this.active = active;
     }//end setActive(...)

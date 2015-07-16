@@ -180,7 +180,6 @@ public class ProjectileFactory {
 	result.reset(newPosition, newVelocity, objectOfOrigin);
 	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getDefaultGrid().add((WorldObject)result);
-	tr.mainRenderer.get().temporarilyMakeImmediatelyRelevant((PositionedRenderable)result);
 	if(soundTexture!=null)
 	    tr.soundSystem.get().enqueuePlaybackEvent(
 		    tr.soundSystem

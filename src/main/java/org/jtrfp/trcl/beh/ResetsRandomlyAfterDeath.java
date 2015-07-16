@@ -43,7 +43,7 @@ public void notifyDeath() {
 		    thisObject.probeForBehavior(DeathBehavior.class).reset();
 		    if(grid!=null)grid.add(thisObject);
 		    else throw new NullPointerException();
-		    thisObject.setActive(true);//Is this really needed?
+		    thisObject.setActive(true);
 		    thisObject.setVisible(true);
 		    _runOnReset.run();
 		    return null;

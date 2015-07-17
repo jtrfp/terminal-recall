@@ -29,27 +29,41 @@ public void notifyDeath() {
     final WorldObject thisObject = getParent();
     final Runnable _runOnReset = runOnReset;
     final long waitTime = (long)(minWaitMillis+Math.random()*(maxWaitMillis-minWaitMillis));
-    new Thread(){
+    thisObject.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
 	@Override
-	public void run(){
+	public Void call() throws Exception {
 	    try{Thread.currentThread().sleep(waitTime);}
 	    catch(InterruptedException e){e.printStackTrace();}
 	    getParent().getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
+		    unDamage();
+		    reset();
+		    reIntroduce();
+		    runOnReset();
+		    return null;
+		}
+		private void unDamage(){
 		    try{thisObject.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
-		    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!    
+		    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!
+		}
+		
+		private void reset(){
 		    SpacePartitioningGrid grid = thisObject.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
 		    thisObject.probeForBehavior(DeathBehavior.class).reset();
 		    if(grid!=null)grid.add(thisObject);
 		    else throw new NullPointerException();
+		}
+		private void reIntroduce(){
 		    thisObject.setActive(true);
 		    thisObject.setVisible(true);
+		}
+		private void runOnReset(){
 		    _runOnReset.run();
-		    return null;
-		}}).get();
-	}//end run()
-    }.start();
+		}
+	    }).get();
+	    return null;
+	}});
  }//end notifyDeath
 
 /**

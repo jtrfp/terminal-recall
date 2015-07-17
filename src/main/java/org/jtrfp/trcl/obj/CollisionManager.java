@@ -39,13 +39,16 @@ public class CollisionManager {
     }
     private final Positionable [] positionableWorkArray = new Positionable[4096];
     private volatile int numPositionables =0;
+    private int numPositionablesToClear=0;
 
     public void performCollisionTests() {
 	try{World.relevanceExecutor.submit(new Callable<List<Positionable>>(){
 	    @Override
 	    public List<Positionable> call() {
 		List<Positionable> list = inputRelevanceList;
+		final int prevNumPositionables = numPositionables;
 		numPositionables = list.size();
+		numPositionablesToClear = Math.max(0, prevNumPositionables-numPositionables);
 		if(numPositionables<=positionableWorkArray.length)
 		 list.toArray(positionableWorkArray);
 		return list;
@@ -69,6 +72,10 @@ public class CollisionManager {
 		    }// end for(j)
 		}// end sync(gameStateLock)
 		}// end for(i)
+		//Erase removed items
+		final int endPoint = numPositionables+numPositionablesToClear;
+		for(int i=numPositionables; i<endPoint; i++)
+		    positionableWorkArray[i]=null;
     }//end performCollisionTests
 
     public void remove(WorldObject worldObject) {

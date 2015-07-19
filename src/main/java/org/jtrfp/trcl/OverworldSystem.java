@@ -72,7 +72,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		    .toUpperCase().contains("BORG");//TODO: This should be in a config file.
 	    terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
 		    TR.mapSquareSize, terrainMirror, tr, tdf,
-		    flatShadedTerrain, terrainReporter);
+		    flatShadedTerrain, terrainReporter, lvl.getHeightMapOrTunnelFile());
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");

@@ -52,7 +52,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    final TextureMesh textureMesh, final double gridSquareSize,
 	    final RenderableSpacePartitioningGrid terrainMirror, final TR tr,
 	    final TDFFile tdf, final boolean flatShading, 
-	    final LoadingProgressReporter terrainReporter) {
+	    final LoadingProgressReporter terrainReporter, final String debugName) {
 	super();
 	final int numCores = Runtime.getRuntime().availableProcessors();
 	this.tr = tr;
@@ -110,6 +110,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			    final double objectY = Math.round(altitude
 				    .heightAt(gX*gridSquareSize, _gZ*gridSquareSize));
 			    final Model m = new Model(false, tr);
+			    m.setDebugName(debugName);
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
 				for (int cX = gX; cX < gX + chunkSideLength; cX++) {

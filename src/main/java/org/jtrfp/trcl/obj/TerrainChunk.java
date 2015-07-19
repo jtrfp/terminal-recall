@@ -34,7 +34,7 @@ public class TerrainChunk extends WorldObject{
 	public TerrainChunk(TR tr, Model m, AltitudeMap map){
 		super(tr,m);
 		this.map=map;
-		m.setDebugName("TerrainChunk");
+		m.setDebugName("TerrainChunk: "+m.getDebugName());
 		}
 	
 	public AltitudeMap getAltitudeMap(){return map;}

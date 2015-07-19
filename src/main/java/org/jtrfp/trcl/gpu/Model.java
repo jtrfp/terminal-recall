@@ -36,7 +36,8 @@ public class Model {
     private TriangleList tpList;
     private int frameDelay;
     private boolean smoothAnimation;
-    private String debugName = "[unnamed]";
+    public static final String UNNAMED = "[unnamed]";
+    private String debugName = UNNAMED;
     private boolean animateUV = false;
     private Controller controller;
     private final TR tr;

@@ -22,7 +22,7 @@ import java.util.Map;
 import com.ochafik.util.listenable.Pair;
 
 /**
- * Packs actions to this Collection according to the supplied Integer key in each Pair,
+ * Packs actions to this Collection according to the supplied KEY key in each Pair,
  * creating new CollectionActionDispatchers when new keys are introduced and removing them when they become 
  * empty. This is typically fed the results of an adapted list which analyzes each element and converts it
  * to a Pair with a computed Integer key.

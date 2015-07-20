@@ -12,10 +12,15 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
 import org.jtrfp.trcl.AbstractSubmitter;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.obj.DEFObject;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DestroysEverythingBehavior extends Behavior implements CollisionBehavior {
@@ -37,6 +42,23 @@ public class DestroysEverythingBehavior extends Behavior implements CollisionBeh
 	if(counter==1&&isReplenishingPlayerHealth()){
 	    try{getParent().getTr().getGame().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
 	    catch(SupplyNotNeededException e){}//Ok, whatever.
+	    //Destoy everything
+	    final ArrayList<Positionable>[] positionables = new ArrayList[1];
+	    try{World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    positionables[0] = new ArrayList<Positionable>(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
+		}}).get();}catch(Exception e){e.printStackTrace();}
+	    for(Positionable pos:positionables[0]){
+		if(pos instanceof DEFObject){
+		    final DEFObject dObj = (DEFObject)pos;
+		    dObj.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
+			    @Override
+			    public void submit(DamageableBehavior item) {
+				item.proposeDamage(new ProjectileDamage(65536));
+			    }}, DamageableBehavior.class);
+		}//end for(positionables)
+	    }//end if(counter==1)
 	}
 	if(counter==0){//We can't stick around for long. Not with all this destroying going on.
 	    getParent().destroy();counter=2;

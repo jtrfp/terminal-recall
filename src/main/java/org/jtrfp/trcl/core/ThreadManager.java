@@ -153,7 +153,8 @@ public final class ThreadManager implements GLExecutor{
 	    }//end for(renderers)
 	}//end sync(gameStateLock)//relevance changes outside of this cause errors!
 	//if(game.getPlayer()!=null && !paused[0])
-	    tr.getCollisionManager().performCollisionTests();
+	    //tr.getCollisionManager().performCollisionTests();
+	    tr.getCollisionManager().newPerformCollisionTests();
 	}// end sync(paused)
 	}catch(NotReadyException e){/*System.out.println("ThreadManager: Not ready");*/}
 	lastGameplayTickTime = tickTimeInMillis;

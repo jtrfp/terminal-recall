@@ -187,7 +187,8 @@ public final class TR implements UncaughtExceptionHandler{
 			System.err.println("Great work, Guys!");
 			}//end run()
 		 });
-		renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
+		//renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
+		renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 		}//end constructor
 	
 	public TR startShell(){

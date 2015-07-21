@@ -87,25 +87,31 @@ public class TRIT {
     }//end spawnCubes()
     
     protected boolean testFloatResults(ByteBuffer bb, ByteBuffer refBB){
-	double matrixError=0;
+	double error=0;
+	boolean result = true;
 	while(bb.hasRemaining()){
 	    float ref = refBB.getFloat();
 	    float res = bb.getFloat();
-	    if(ref!=res) System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
-	    matrixError+=Math.abs(ref-res);
+	    error = Math.abs(ref-res);
+	    if(error > errorThreshold){
+		System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
+		result = false;
+		}
 	    }
-	return matrixError<=errorThreshold;
+	return result;
     }
     
     protected boolean testByteResults(ByteBuffer bb, ByteBuffer refBB){
-	double matrixError=0;
+	boolean result = true;
 	while(bb.hasRemaining()){
 	    byte ref = refBB.get();
 	    byte res = bb.get();
-	    if(ref!=res) System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
-	    matrixError+=Math.abs(ref-res);
+	    if(ref!=res){
+		System.out.println("ref="+ref+" res="+res+" pos="+bb.position());
+		result = false;
+		}
 	    }
-	return matrixError<=errorThreshold;
+	return result;
     }
     
     protected void clearOldResult(String file){

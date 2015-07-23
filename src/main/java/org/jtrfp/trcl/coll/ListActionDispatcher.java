@@ -48,16 +48,24 @@ public class ListActionDispatcher<E> implements List<E> {
 	return startIndex==0 && endIndex==Integer.MAX_VALUE;
     }
     
+    private int getEndIndex(){
+	return Math.min(endIndex, cache.size());
+    }
+    
+    private int getStartIndex(){
+	return Math.min(startIndex, cache.size());
+    }
+    
     private List<E> getCache(){
 	if(isRoot())
 	    return cache;
-	return cache.subList(Math.min(startIndex, size()), Math.min(endIndex,cache.size()));
+	return cache.subList(getStartIndex(), getEndIndex());
     }//end getCache()
     
     private List<E> getSubTarget(List<E> target){
 	if(isRoot())
 	    return target;
-	return target.subList(startIndex, endIndex);
+	return target.subList(getStartIndex(), getEndIndex());
     }
 
     /**
@@ -70,7 +78,7 @@ public class ListActionDispatcher<E> implements List<E> {
      * @since Mar 20, 2015
      */
     public boolean addTarget(List<E> target, boolean prefill){
-	if(prefill) target.addAll(cache);
+	if(prefill) target.addAll(getCache());
 	boolean result = !targets.contains(target);
 	targetsMap.put(target,null);
 	return result;
@@ -78,47 +86,43 @@ public class ListActionDispatcher<E> implements List<E> {
     
     public boolean removeTarget(List<E> target, boolean removeAll){
 	if(removeAll && targets.contains(target))
-	    target.removeAll(cache);
+	    target.removeAll(getCache());
 	return targets.remove(target);
     }
     
     @Override
     public boolean add(E e) {
-	final boolean result = cache.add(e);
+	final boolean result = getCache().add(e);
 	for(List<E> targ:targets)
-	    targ.add(e);
+	    getSubTarget(targ).add(e);
 	return result;
     }
     @Override
     public void add(int index, E element) {
-	index+=startIndex;
-	cache.add(index,element);
+	getCache().add(index,element);
 	for(List<E> targ:targets)
-	    targ.add(index,element);
+	    getSubTarget(targ).add(index,element);
     }
     @Override
     public boolean addAll(Collection<? extends E> c) {
-	return addAll(startIndex, c);
+	return addAll(0, c);
     }
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-	index += startIndex;
-	final boolean result = cache.addAll(index,c);
+	final boolean result = getCache().addAll(index,c);
 	for(List<E> targ:targets)
-	    targ.addAll(index,c);
+	    getSubTarget(targ).addAll(index,c);
 	return result;
     }
     @Override
     public void clear() {
+	getCache().clear();
 	if(isRoot()){
-	    cache.clear();
 	    for(List<E> targ:targets)
 		targ.clear();
 	}//end if(root)
-	else{
-	    final int n = endIndex - startIndex;
-	    for(int i=0; i<n; i++)
-	     cache.remove(startIndex);
+	else{for(List<E> targ:targets)
+		getSubTarget(targ).clear();
 	}//end if(!root)
     }//end clear()
     @Override
@@ -131,8 +135,7 @@ public class ListActionDispatcher<E> implements List<E> {
     }
     @Override
     public E get(int index) {
-	index+=startIndex;
-	return cache.get(index);
+	return getCache().get(index);
     }
     @Override
     public int indexOf(Object o) {
@@ -144,7 +147,22 @@ public class ListActionDispatcher<E> implements List<E> {
     }
     @Override
     public Iterator<E> iterator() {
-	return getCache().iterator();
+	final Iterator<E> ci = getCache().iterator();
+	return new Iterator<E>(){
+	    @Override
+	    public boolean hasNext() {
+		return ci.hasNext();
+	    }
+
+	    @Override
+	    public E next() {
+		return ci.next();
+	    }
+
+	    @Override
+	    public void remove() {
+		throw new UnsupportedOperationException();
+	    }};
     }
     @Override
     public int lastIndexOf(Object o) {
@@ -188,36 +206,35 @@ public class ListActionDispatcher<E> implements List<E> {
     }
     @Override
     public E set(int index, E element) {
-	index += startIndex;
-	final E result = cache.set(index, element);
+	final E result = getCache().set(index, element);
 	for(List<E> targ:targets)
-	    targ.set(index,element);
+	    getSubTarget(targ).set(index,element);
 	return result;
     }
     @Override
     public int size() {
-	return isRoot()?cache.size():endIndex-startIndex;
+	return isRoot()?cache.size():getEndIndex()-getStartIndex();
     }
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-	return new ListActionDispatcher<E>(cache, targetsMap, startIndex+fromIndex, startIndex+toIndex);
+	return new ListActionDispatcher<E>(cache, targetsMap, getStartIndex()+fromIndex, getStartIndex()+toIndex);
     }
     @Override
     public Object[] toArray() {
-	return cache.toArray();
+	return getCache().toArray();
     }
     @Override
     public <T> T[] toArray(T[] a) {
-	return cache.toArray(a);
+	return getCache().toArray(a);
     }
     
     @Override
     public int hashCode(){
-	return cache.hashCode();
+	return super.hashCode();
     }
     
     @Override
     public boolean equals(Object o){
-	return cache.equals(o);
+	return super.equals(o);
     }
 }//end ListActionDispatcher

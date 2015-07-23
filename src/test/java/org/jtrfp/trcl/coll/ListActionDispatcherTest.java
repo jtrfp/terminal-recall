@@ -390,13 +390,40 @@ public class ListActionDispatcherTest {
     public void testSubList() {
 	final List<Integer> l0 = new ArrayList<Integer>();
 	subject.addTarget(l0, true);
-	subject.add(0);
-	subject.add(1);
-	subject.add(2);
-	List<Integer> sl = subject.subList(1, 2);
+	subject.add(0);subject.add(1);
+	subject.add(2);subject.add(3);
+	subject.add(4);subject.add(5);
+	List<Integer> sl = subject.subList(1, 3);
 	assertNotNull(sl);
 	assertEquals(1,(int)sl.get(0));
+	assertEquals(2,(int)sl.get(1));
+	assertEquals(2,sl.size());
     }//end testSubList()
+    
+    @Test(expected=IndexOutOfBoundsException.class)
+    public void testSubListIndexOutOfBoundsException(){
+	final List<Integer> l0 = new ArrayList<Integer>();
+	subject.addTarget(l0, true);
+	subject.add(0);subject.add(1);
+	subject.add(2);subject.add(3);
+	subject.add(4);subject.add(5);
+	List<Integer> sl = subject.subList(1, 3);
+	sl.get(2);//Expect exception
+    }
+    
+    @Test
+    public void testSubListSet(){
+	final List<Integer> l0 = new ArrayList<Integer>();
+	subject.addTarget(l0, true);
+	subject.add(0);subject.add(1);
+	subject.add(2);subject.add(3);
+	subject.add(4);subject.add(5);
+	List<Integer> sl = subject.subList(1, 3);
+	sl.set(0, 5);
+	assertEquals(5,(int)sl.get(0));
+	assertEquals(5,(int)l0.get(1));
+	assertEquals(0,(int)l0.get(0));
+    }
 
     @Test
     public void testToArray() {

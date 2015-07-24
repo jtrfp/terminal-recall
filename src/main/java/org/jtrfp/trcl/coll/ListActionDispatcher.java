@@ -105,7 +105,10 @@ public class ListActionDispatcher<E> implements List<E> {
     }
     @Override
     public boolean addAll(Collection<? extends E> c) {
-	return addAll(0, c);
+	final boolean result = getCache().addAll(c);
+	for(List<E> targ:targets)
+	    getSubTarget(targ).addAll(c);
+	return result;
     }
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {

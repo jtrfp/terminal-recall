@@ -14,23 +14,23 @@ package org.jtrfp.trcl.mem;
 
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
-import org.jtrfp.trcl.pool.IntArrayList;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
     public static final int 		PAGE_SIZE_BYTES=GPU.BYTES_PER_VEC4*GPU.GPU_VERTICES_PER_BLOCK*1;//Anchored to number of triangle vertices per block
-    private 		int [] 		pageTable;//Using array since performance is crucial
+    private final       ListActionDispatcher<Integer>      pageTable = new ListActionDispatcher<Integer>(new ArrayList<Integer>());
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;
-    //private		boolean[]	stalePages;
-    private             CollectionActionDispatcher<Integer> stalePages = new CollectionActionDispatcher<Integer>(new HashSet<Integer>());
+    private final       CollectionActionDispatcher<Integer>stalePages = new CollectionActionDispatcher<Integer>(new HashSet<Integer>());
     private final	GPU		gpu;
     private final	WeakReference<PagedByteBuffer> weakThis;
     
@@ -39,19 +39,17 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	this.pageIndexPool=pageIndexPool;
 	this.debugName=debugName;
 	final int sizeInPages = sizeInPages(initialSizeInBytes);
-	pageTable = new int[sizeInPages];
-	//stalePages= new boolean[sizeInPages];
-	pageIndexPool.pop(new IntArrayList(pageTable),pageTable.length);
+	pageIndexPool.pop(pageTable,sizeInPages);
 	this.gpu=gpu;
 	weakThis = new WeakReference<PagedByteBuffer>(this);
 	gpu.memoryManager.get().registerPagedByteBuffer(weakThis);
     }//end constructor
     
     public int sizeInPages(){
-	return pageTable.length;
+	return pageTable.size();
     }
     public int logicalPage2PhysicalPage(int logicalPage){
-	return pageTable[logicalPage];
+	return pageTable.get(logicalPage);
     }
     
     private static int sizeInPages(int sizeInBytes){
@@ -64,35 +62,29 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	return indexInBytes%PAGE_SIZE_BYTES;
     }
     private int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
-	return (PAGE_SIZE_BYTES*pageTable[index2Page(logicalIndexInBytes)])+pageModulus(logicalIndexInBytes);
+	return (PAGE_SIZE_BYTES*pageTable.get(index2Page(logicalIndexInBytes)))+pageModulus(logicalIndexInBytes);
     }
 
     @Override
     public void resize(int newSizeInBytes) {
 	final int newNumPages=sizeInPages(newSizeInBytes);
-	final int pageNumDelta=newNumPages-pageTable.length;
+	final int pageNumDelta=newNumPages-pageTable.size();
 	if(pageNumDelta==0)return;
-	int [] newTable;
 	if(pageNumDelta>0){	//GROW
-	    newTable = new int[newNumPages];
-	    System.arraycopy(pageTable, 0, newTable, 0, pageTable.length);
-	pageIndexPool.pop(new IntArrayList(newTable,pageTable.length),newNumPages-pageTable.length);
+	    pageIndexPool.pop(pageTable,newNumPages-pageTable.size());
 	}else{			//SHRINK
-	    newTable = new int[newNumPages];
-	    System.arraycopy(pageTable, 0, newTable, 0, newTable.length);
-	    pageIndexPool.free(new IntArrayList(pageTable,newTable.length).setRepresentFullSize(true));
+	    pageIndexPool.free(pageTable.subList(newNumPages,pageTable.size()-1));
+	    for(int i=0; i<-pageNumDelta; i++)
+		pageTable.remove(pageTable.size()-1);
 	}//end if(pageNumDelta...)
-	pageTable = newTable;
-	//stalePages = new boolean[newTable.length];
     }//end resize()
     
     private void deallocate(){
-	pageIndexPool.free(new IntArrayList(pageTable).setRepresentFullSize(true));
+	pageIndexPool.free(pageTable);
     }//end deallocate()
     
     private void markPageStale(int indexInBytes){
 	stalePages.add(new Integer(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES));
-	//stalePages[indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES]=true;
     }
     
     /**
@@ -162,18 +154,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	
 	while(iterator.hasNext()){
 	    final Integer value = iterator.next();
-	    gpu.memoryManager.get().flushRange(pageTable[value]*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
+	    gpu.memoryManager.get().flushRange(pageTable.get(value)*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
 	    iterator.remove();
 	}
-	/*
-	final int size = stalePages.length;
-	for(int i=0; i<size; i++){
-	    if(stalePages[i]){
-		gpu.memoryManager.get().flushRange(pageTable[i]*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
-	    stalePages[i]=false;
-	    }//end if(stalePageSet.get(i))
-	}//end for(size)
-	*/
     }//end flushStalePages()
 
     @Override
@@ -213,5 +196,12 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	for(Number i:c)
 	    {putInt(indexInBytes,i.intValue());indexInBytes+=4;}
 	return this;
+    }
+
+    /**
+     * @return the pageTable
+     */
+    public ListActionDispatcher<Integer> getPageTable() {
+        return pageTable;
     }
 }//end PageByteBuffer

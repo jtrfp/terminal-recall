@@ -86,5 +86,14 @@ public class SubList<E> extends AbstractList<E> {
 	    throw new IllegalArgumentException("End index must be less than total size. Got "+end);
 	return new SubList<E>(delegate,startIndex+start,startIndex+end);
     }//end subList(...)
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public void clear(){
+	if(delegate instanceof RangeClearable)
+	    ((RangeClearable<E>)delegate).clearRange(startIndex,endIndex);
+	else
+	    super.clear();
+    }//end clear()
 
 }//end SubList<E>()

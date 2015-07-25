@@ -56,7 +56,7 @@ public class RootMemoryIT extends TRIT{
     public void matrixWindowTest() throws Exception {
 	final MatrixWindow mw = tr.gpu.get().matrixWindow.get();
 	final int id = mw.create();
-	final int addressBytes = mw.getPhysicalAddressInBytes(id);
+	final int addressBytes = mw.getPhysicalAddressInBytes(id).intValue();
 	double [] doubles = new double[16];
 	for(int i=0; i<16; i++)
 	    doubles[i]=i;

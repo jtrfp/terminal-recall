@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.IteratorUtils;
 
-public class ListActionDispatcher<E> implements List<E> {
+public class ListActionDispatcher<E> implements List<E>, RangeClearable<E> {
     protected final List<E>             cache;
     protected final Map<List<E>,Object> targetsMap;
     protected final Set<List<E>>        targets;
@@ -204,4 +204,11 @@ public class ListActionDispatcher<E> implements List<E> {
     public boolean equals(Object o){
 	return super.equals(o);
     }
+
+    @Override
+    public void clearRange(int startIndex, int endIndex) {
+	cache.subList(startIndex, endIndex).clear();
+	for(List<E> targ:targets)
+	    targ.subList(startIndex, endIndex).clear();
+    }//end clearRange(...)
 }//end ListActionDispatcher

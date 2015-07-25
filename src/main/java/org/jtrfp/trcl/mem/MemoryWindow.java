@@ -462,9 +462,9 @@ public abstract class MemoryWindow {
 	return objectSizeInBytes;
     }
 
-    public final int getPhysicalAddressInBytes(int objectIndex) {
-	return buffer.logical2PhysicalAddressBytes(objectIndex
-		* objectSizeInBytes);
+    public final ByteAddress getPhysicalAddressInBytes(int objectIndex) {
+	return new ByteAddress(buffer.logical2PhysicalAddressBytes(objectIndex
+		* objectSizeInBytes));
     }
 
     public final double numObjectsPerPage() {

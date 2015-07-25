@@ -17,7 +17,6 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +44,7 @@ import org.jtrfp.trcl.img.vq.VectorListND;
 import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
+import org.jtrfp.trcl.mem.VEC4Address;
 import org.jtrfp.trcl.pool.IntArrayList;
 
 public class Texture implements TextureDescription {
@@ -213,8 +213,8 @@ public class Texture implements TextureDescription {
 	    calulateAverageColor(rbvlRGBA);
 	    // Get a TOC
 	    tocIndex = toc.create();
-	    setTexturePage((toc.getPhysicalAddressInBytes(tocIndex)/PagedByteBuffer.PAGE_SIZE_BYTES));
-	    if(toc.getPhysicalAddressInBytes(tocIndex)%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
+	    setTexturePage((toc.getPhysicalAddressInBytes(tocIndex).intValue()/PagedByteBuffer.PAGE_SIZE_BYTES));
+	    if(toc.getPhysicalAddressInBytes(tocIndex).intValue()%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
 		throw new RuntimeException("Physical GPU address not perfectly aligned with page interval."); 		
 	    
 	    threadManager.submitToThreadPool(new Callable<Void>(){
@@ -240,7 +240,7 @@ public class Texture implements TextureDescription {
 			 //Convert subtexture index to index of TOC
 			 final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 			 //Load subtexture ID into TOC
-			 toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,stw.getPhysicalAddressInBytes(id)/GPU.BYTES_PER_VEC4);
+			 toc.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,new VEC4Address(stw.getPhysicalAddressInBytes(id)).intValue());
 			 //Render Flags
 			 toc.renderFlags.set(tocIndex, 
 				(uvWrapping?0x1:0x0)

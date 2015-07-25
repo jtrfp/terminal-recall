@@ -247,8 +247,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it?");
-	final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
-	final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
+	//final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
+	//final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -256,22 +256,22 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 		    @Override
 		    public Void call() throws Exception {
 			processPrimitiveList(model.getTriangleList(),
-				triangleObjectDefinitions, opaqueIndicesList);
+				triangleObjectDefinitions, opaqueObjectDefinitionAddressesInVEC4);
 			processPrimitiveList(model.getTransparentTriangleList(),
-				transparentTriangleObjectDefinitions, transparentIndicesList);
+				transparentTriangleObjectDefinitions, transparentObjectDefinitionAddressesInVEC4);
 			return null;
-		    }}).get();//TODO: Make non-blocking
-		ByteOrder order = getTr().gpu.get().getByteOrder();
-		for(int i = 0; i < opaqueIndicesList.size(); i++)
+		    }}).get();
+		/*for(int i = 0; i < opaqueIndicesList.size(); i++)
 		    opaqueObjectDefinitionAddressesInVEC4.add(new VEC4Address(opaqueIndicesList.get(i)));
 		for(int i = 0; i < transparentIndicesList.size(); i++)
 		    transparentObjectDefinitionAddressesInVEC4.add(new VEC4Address(transparentIndicesList.get(i)));
+		*/
 		return null;
 	    }});
     }// end initializeObjectDefinitions()
 
     private void processPrimitiveList(PrimitiveList<?> primitiveList,
-	    int[] objectDefinitions, ArrayList<Integer> indicesList) {
+	    int[] objectDefinitions, CollectionActionDispatcher<VEC4Address> objectDefinitionAddressesInVEC4) {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	final int gpuVerticesPerElement = primitiveList.getGPUVerticesPerElement();
@@ -282,11 +282,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	int odCounter=0;
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
 	for (final int index : objectDefinitions) {
-	    final int vertexOffsetVec4s=primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)
-		    /GPU.BYTES_PER_VEC4;
-	    final int matrixOffsetVec4s=tr.gpu.get().matrixWindow.get()
-		    .getPhysicalAddressInBytes(matrixID)
-		    / GPU.BYTES_PER_VEC4;
+	    final int vertexOffsetVec4s=new VEC4Address(primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)).intValue();
+	    final int matrixOffsetVec4s=new VEC4Address(tr.gpu.get().matrixWindow.get()
+		    .getPhysicalAddressInBytes(matrixID)).intValue();
 	    odw.matrixOffset.set(index,matrixOffsetVec4s);
 	    odw.vertexOffset.set(index,vertexOffsetVec4s);
 	    odw.mode.set(index, (byte)(primitiveList.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
@@ -301,9 +299,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 		throw new RuntimeException("Ran out of vec4s.");
 	    }
 	    gpuVerticesRemaining -= GPU.GPU_VERTICES_PER_BLOCK;
-	    //TODO: getPhysicalAddressesInVEC4 ListActionDispatcher
-	    indicesList.add(odw.getPhysicalAddressInBytes(index)
-		    / GPU.BYTES_PER_VEC4);
+	    objectDefinitionAddressesInVEC4.add(new VEC4Address(odw.getPhysicalAddressInBytes(index)));
 	    odCounter++;
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)

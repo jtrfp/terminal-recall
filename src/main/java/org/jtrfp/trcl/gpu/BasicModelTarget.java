@@ -12,26 +12,23 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import java.util.Iterator;
-
 import org.jtrfp.trcl.core.TextureDescription;
 
-public interface BasicModel {
+public interface BasicModelTarget {
     /**
      * 
      * @param index
      * @param target X,Y,Z,nX,nY,nZ
      * @since Jul 26, 2015
      */
-    public void getVertex(int index, double [] target);
+    public void addVertex(int index, double [] target);
     
-    public Iterator<TriangleData> getOpaqueTriangleIterator (int index, TriangleData target);
-    
-    public Iterator<TriangleData> getTransparentTriangleData(int index, TriangleData target);
+    public void addPrimitive(TriangleData data);
     
     public static class TriangleData{
 	private final int []       vertices = new int[3];
 	private TextureDescription texture;
+	private PrimitiveType      primitiveType;
 
 	/**
 	 * @return the texture
@@ -53,5 +50,21 @@ public interface BasicModel {
 	public int[] getVertices() {
 	    return vertices;
 	}
+
+	/**
+	 * @return the primitiveType
+	 */
+	public PrimitiveType getPrimitiveType() {
+	    return primitiveType;
+	}
+
+	/**
+	 * @param primitiveType the primitiveType to set
+	 */
+	public void setPrimitiveType(PrimitiveType primitiveType) {
+	    this.primitiveType = primitiveType;
+	}
     }//end TriangleData
+    
+    public interface PrimitiveType{}
 }//end IModel

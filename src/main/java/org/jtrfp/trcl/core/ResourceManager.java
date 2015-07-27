@@ -853,4 +853,8 @@ public class ResourceManager{
 	    is.close();
 	    return result;
 	}
+
+	public TextureDescription solidColor(Color color) {
+	    return tr.gpu.get().textureManager.get().solidColor(color);
+	}
 }//end ResourceManager

@@ -14,8 +14,9 @@ package org.jtrfp.trcl;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.gpu.BasicModelTarget;
+import org.jtrfp.trcl.gpu.BasicModelTarget.WriterState;
 import org.jtrfp.trcl.gpu.Vertex;
 
 public class Triangle {
@@ -302,6 +303,34 @@ public class Triangle {
      */
     public StackTraceElement[] getCreationStackTrace() {
 	return creationStackTrace;
+    }
+    
+    public static void quad2Triangles(double[] x, double[] y, double[] z,
+	    double[] u, double[] v,
+	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal,
+	    int destOffset, String debugName, BasicModelTarget target, 
+	    WriterState primitiveData) {
+	final int [] vertices = new int[4];
+	final double [] workArray = new double[8];
+	for(int i=0; i<4; i++){
+	    workArray[0] = x[i];workArray[1] = y[i];workArray[2] = z[i];
+	    workArray[3] = u[i];workArray[4] = v[i];
+	    target.addVertex(workArray);
+	    vertices[i]=primitiveData.getVertexIndex();
+	    }
+	quad2Triangles(vertices, mode, hasAlpha,
+		centroidNormal, destOffset, debugName, target, primitiveData);
+    }// end quad2Triangles(...)
+    
+    public static void quad2Triangles(int[] vertices,
+	    RenderMode mode,
+	    boolean hasAlpha, Vector3D centroidNormal,
+	    int destOffset, String debugName, BasicModelTarget target, WriterState primitiveData) {
+	int [] vTarg = primitiveData.getVertices();
+	vTarg[0]=vertices[0];vTarg[1]=vertices[1];vTarg[2]=vertices[2];
+	target.addPrimitive(primitiveData);
+	vTarg[0]=vertices[2];vTarg[1]=vertices[3];vTarg[2]=vertices[0];
+	target.addPrimitive(primitiveData);
     }
 }// Triangle
 

@@ -25,11 +25,13 @@ public interface BasicModelTarget {
     
     public void addPrimitive(WriterState data);
     
+    public int getLastVertexIndex();
+    public int getLastPrimitiveIndex();
+    
     public static class WriterState{
 	private final int []       vertices = new int[3];
 	private TextureDescription texture;
 	private PrimitiveType      primitiveType;
-	private int                vertexIndex, primitiveIndex;
 
 	/**
 	 * @return the texture
@@ -64,34 +66,6 @@ public interface BasicModelTarget {
 	 */
 	public void setPrimitiveType(PrimitiveType primitiveType) {
 	    this.primitiveType = primitiveType;
-	}
-
-	/**
-	 * @return the vertexIndex
-	 */
-	public int getVertexIndex() {
-	    return vertexIndex;
-	}
-
-	/**
-	 * @param vertexIndex the vertexIndex to set
-	 */
-	public void setVertexIndex(int vertexIndex) {
-	    this.vertexIndex = vertexIndex;
-	}
-
-	/**
-	 * @return the primitiveIndex
-	 */
-	public int getPrimitiveIndex() {
-	    return primitiveIndex;
-	}
-
-	/**
-	 * @param primitiveIndex the primitiveIndex to set
-	 */
-	public void setPrimitiveIndex(int primitiveIndex) {
-	    this.primitiveIndex = primitiveIndex;
 	}
     }//end TriangleData
     

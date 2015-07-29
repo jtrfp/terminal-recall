@@ -316,7 +316,7 @@ public class Triangle {
 	    workArray[0] = x[i];workArray[1] = y[i];workArray[2] = z[i];
 	    workArray[3] = u[i];workArray[4] = v[i];
 	    target.addVertex(workArray);
-	    vertices[i]=primitiveData.getVertexIndex();
+	    vertices[i]=target.getLastVertexIndex();
 	    }
 	quad2Triangles(vertices, mode, hasAlpha,
 		centroidNormal, destOffset, debugName, target, primitiveData);

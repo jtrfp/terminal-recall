@@ -13,8 +13,10 @@
 package org.jtrfp.trcl.obj;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
@@ -52,11 +54,20 @@ import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.file.BINFile.AnimationControl;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.gpu.BINFileExtractor;
+import org.jtrfp.trcl.gpu.BasicModelSource;
+import org.jtrfp.trcl.gpu.BasicModelTarget;
+import org.jtrfp.trcl.gpu.BufferedModelTarget;
+import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.RotatedModelSource;
+import org.jtrfp.trcl.gpu.TranslatedModelSource;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.snd.SoundSystem;
 
@@ -68,8 +79,10 @@ public class DEFObject extends WorldObject {
     private boolean mobile,canTurn,foliage,boss,
     		    shieldGen,isRuin,spinCrash,ignoringProjectiles;
     private Anchoring anchoring;
+    private RotatedModelSource              rotatedModelSource;
     private static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
     private static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
+    
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
@@ -97,13 +110,12 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    {mobile=false;
     	    canTurn=true;
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
-    	    //TODO: def.getFiringVertices() needs actual vertex lookup.
     	 ProjectileFiringBehavior pfb;
+    	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
 	    addBehavior(pfb=new ProjectileFiringBehavior().
 		    setProjectileFactory(tr.getResourceManager().
 			    getProjectileFactories()[def.getWeapon().ordinal()]).
-			    setFiringPositions(new Vector3D[]{new Vector3D(0,0,0)
-	    }));
+			    setFiringPositions(getModelSource(),firingVertices));
 	    try{pfb.addSupply(9999999);}catch(SupplyNotNeededException e){}
 	    addBehavior(new AutoFiring().
 	     setProjectileFiringBehavior(pfb).
@@ -168,13 +180,17 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
     	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
-    	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
+    	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
+    	    pfb.
+    	     setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]).
+    	     setFiringPositions(getModelSource(),firingVertices);
     	    addBehavior(pfb);
     	    addBehavior(new AutoFiring().
     		    setProjectileFiringBehavior(pfb).
     		    setPatternOffsetMillis((int)(Math.random()*2000)).
     		    setMaxFiringDistance(TR.mapSquareSize*8).
     		    setSmartFiring(true));
+    	    
     	    mobile=false;
     	    canTurn=false;
     	    break;}
@@ -185,7 +201,9 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	case tunnelAttack:{
 	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior();
 	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
-	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
+	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
+	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]).
+	     setFiringPositions(getModelSource(),firingVertices);
 	    addBehavior(pfb);
 	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    addBehavior(new AutoFiring().
@@ -316,6 +334,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
     	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
+    	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
+    	    pfb.setFiringPositions(getModelSource(),firingVertices);
     	    addBehavior(pfb);//Bob and attack don't have the advantage of movement, so give them the advantage of range.
     	    addBehavior(new AutoFiring().
     		    setProjectileFiringBehavior(pfb).
@@ -448,11 +468,11 @@ public void destroy(){
 
 private void projectileFiringBehavior(){
     ProjectileFiringBehavior pfb;
+    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
 	    addBehavior(pfb=new ProjectileFiringBehavior().
 		    setProjectileFactory(getTr().getResourceManager().
-			    getProjectileFactories()[def.getWeapon().ordinal()]).setFiringPositions(new Vector3D[]{
-		    new Vector3D(0,0,0)
-	    }));
+			    getProjectileFactories()[def.getWeapon().ordinal()]).setFiringPositions(getModelSource(),firingVertices)
+	    );
 	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     final AutoFiring af;
     addBehavior(af=new AutoFiring().
@@ -576,6 +596,8 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     addBehavior(aatpb);
     final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
+    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
+	    pfb.setFiringPositions(getModelSource(),firingVertices);
     addBehavior(pfb);
     
     possibleSpinAndCrashOnDeath(.4,def);
@@ -733,4 +755,34 @@ enum Anchoring{
     public boolean isLocked()
      {return locked;}
  }//end Anchoring
+
+private BasicModelSource getModelSource(){
+    if(rotatedModelSource==null){//Assemble our decorator sandwich.
+	final String complexModel = def.getComplexModelFile();
+	if(complexModel==null)
+	    return null;
+	final ResourceManager rm = getTr().getResourceManager();
+	BasicModelSource      bmt = null;
+	final BINFileExtractor bfe   = new BINFileExtractor(rm);
+	bfe.setDefaultTexture(getTr().gpu.get().textureManager.get().getFallbackTexture());
+	try{bmt= new BufferedModelTarget();
+	    bfe.extract(rm.getBinFileModel(def.getComplexModelFile()), (BufferedModelTarget)bmt);}
+	catch(UnrecognizedFormatException e){//Animated BIN
+	    try{final AnimationControl ac = rm.getAnimationControlBIN(def.getComplexModelFile());
+	        List<String> bins = ac.getBinFiles();
+	        bmt = new InterpolatedAnimatedModelSource();
+	        for(String name:bins){
+	            BufferedModelTarget bufferedTarget = new BufferedModelTarget();
+	            bfe.extract(rm.getBinFileModel(name),bufferedTarget);
+	            ((InterpolatedAnimatedModelSource)bmt).addModelFrame(bufferedTarget);}
+	        ((InterpolatedAnimatedModelSource)bmt).setDelayBetweenFramesMillis(ac.getDelay());
+		}
+	    catch(Exception ee){ee.printStackTrace();}
+	}
+	catch(Exception e){e.printStackTrace();}
+	rotatedModelSource           = new RotatedModelSource(bmt);
+	rotatedModelSource.setRotatableSource  (this);
+	}
+    return rotatedModelSource;
+}
 }//end DEFObject

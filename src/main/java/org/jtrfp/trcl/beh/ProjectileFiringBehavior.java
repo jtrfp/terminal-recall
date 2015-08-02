@@ -15,6 +15,7 @@ package org.jtrfp.trcl.beh;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
+import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -31,6 +32,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private int 		multiplexLevel			 =1;
     private int 		ammoLimit			 =Integer.MAX_VALUE;
     private int 		ammo				 =0;
+    private Integer []          firingVertices;
+    private BasicModelSource    modelSource;
     @Override
     public void _tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
@@ -39,8 +42,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	Vector3D heading=this.firingHeading;
 	    	if(this.firingHeading==null)heading = p.getHeading();
 	    	for(int mi=0; mi<multiplexLevel;mi++){
-	    	    final Vector3D firingPosition = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
-	    		heading,p.getTop()).applyTo(getNextFiringPosition());
+	    	    final Vector3D firingPosition = getNextFiringPosition();
 	    	    resetFiringTimer();
 	    	    projectileFactory.
 	    	      fire(Vect3D.add(
@@ -55,6 +57,10 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	pendingFiring=false;
 	}//end timeWhenNextfiringPermitted
     }//end _tick
+    
+    private boolean isAbsoluteFiringPositions(){
+	return firingVertices==null || modelSource==null;
+    }
     
     public boolean requestFire(){
 	if(System.currentTimeMillis()>timeWhenNextFiringPermittedMillis)
@@ -82,9 +88,30 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	timeWhenNextFiringPermittedMillis = System.currentTimeMillis()+timeBetweenFiringsMillis;}
 
     private Vector3D getNextFiringPosition(){
+	if(isAbsoluteFiringPositions())
+	 return new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
+	    		getParent().getHeading(),getParent().getTop()).applyTo(getNextAbsoluteFiringPosition());
+	else{
+	    final double [] vtx = modelSource.getVertex(getNextFiringVertex());
+	    return new Vector3D(vtx[0],vtx[1],vtx[2]);
+	}
+	 
+    }//end getNextFiringPosition()
+    
+    private Vector3D getNextAbsoluteFiringPosition(){
+	return firingPositions[getNextRawFiringPositionIndex()];
+    }
+    
+    private int getNextFiringVertex(){
+	firingPositionIndex++;
+	firingPositionIndex%=firingVertices.length;
+	return firingVertices[firingPositionIndex];
+    }
+    
+    private int getNextRawFiringPositionIndex(){
 	firingPositionIndex++;
 	firingPositionIndex%=firingPositions.length;
-	return firingPositions[firingPositionIndex];
+	return firingPositionIndex;
     }
     /**
      * @return the firingPositions
@@ -177,5 +204,14 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     public ProjectileFiringBehavior setTimeBetweenFiringsMillis(long timeBetweenFiringsMillis) {
         this.timeBetweenFiringsMillis = timeBetweenFiringsMillis;
         return this;
+    }
+
+    public ProjectileFiringBehavior setFiringPositions(
+	    BasicModelSource modelSource, Integer[] firingVertices) {
+	if(firingVertices.length==0)
+	    return this;//Nothing to do; empty.
+	this.modelSource=modelSource;
+	this.firingVertices=firingVertices;
+	return this;
     }
 }//end ProjectileFiringBehavior

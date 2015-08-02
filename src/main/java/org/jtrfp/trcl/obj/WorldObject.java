@@ -41,7 +41,7 @@ import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.mem.VEC4Address;
 
-public class WorldObject implements PositionedRenderable, PropertyListenable {
+public class WorldObject implements PositionedRenderable, PropertyListenable, Rotatable {
     public static final String HEADING  ="heading";
     public static final String TOP      ="top";
     
@@ -275,8 +275,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	final int gpuVerticesPerElement = primitiveList.getGPUVerticesPerElement();
-	final int elementsPerBlock = GPU.GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
-	int gpuVerticesRemaining = primitiveList.getNumElements()*gpuVerticesPerElement;
+	final int elementsPerBlock      = GPU.GPU_VERTICES_PER_BLOCK / gpuVerticesPerElement;
+	int gpuVerticesRemaining        = primitiveList.getNumElements()*gpuVerticesPerElement;
 	// For each of the allocated-but-not-yet-initialized object definitions.
 	final ObjectDefinitionWindow odw = tr.gpu.get().objectDefinitionWindow.get();
 	int odCounter=0;

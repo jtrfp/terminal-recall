@@ -76,17 +76,17 @@ public class PortalEntrance extends WorldObject {
 	}//end _tick(...)
 	
 	private void activation(){
-	    System.out.println("PORTAL ENTRANCE ACTIVATED");
 	    pcs.firePropertyChange(WITHIN_RANGE, withinRange, true);
 	    portalExit.activate();
 	    withinRange=true;
+	    System.out.println("PORTAL ENTRANCE ACTIVATED");
 	}
 	
 	private void deactivation(){
-	    System.out.println("PORTAL ENTRANCE DE-ACTIVATED");
 	    pcs.firePropertyChange(WITHIN_RANGE, withinRange, false);
 	    portalExit.deactivate();
 	    withinRange=false;
+	    System.out.println("PORTAL ENTRANCE DE-ACTIVATED");
 	}
     }//end PortalEntranceBehavior
 

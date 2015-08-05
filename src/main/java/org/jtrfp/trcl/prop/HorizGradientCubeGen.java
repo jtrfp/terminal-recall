@@ -26,14 +26,14 @@ import org.jtrfp.trcl.math.Misc;
 
 public class HorizGradientCubeGen implements SkyCubeGen {
     private static final HashMap<String,WeakReference<ByteBuffer>> resourceMap = new HashMap<String,WeakReference<ByteBuffer>>();
-    private ByteBuffer top,bottom,east,west,north,south;
+    private ByteBuffer  top,bottom,east,west,north,south;
     private static final String NULL = ""; // This is to make sure null has a hashcode.
-    private String topTexture=NULL,bottomTexture=NULL,eastTexture=NULL,westTexture=NULL,northTexture=NULL,southTexture=NULL;
+    private String      topTexture=NULL,bottomTexture=NULL,eastTexture=NULL,westTexture=NULL,northTexture=NULL,southTexture=NULL;
     private final Color topColor,bottomColor;
-    private float verticalBias = 0;
+    private float       verticalBias = 0;
 
     public HorizGradientCubeGen(Color bottomColor, Color topColor) {
-	this.topColor=topColor;
+	this.topColor   =topColor;
 	this.bottomColor=bottomColor;
     }
     

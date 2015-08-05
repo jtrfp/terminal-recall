@@ -55,8 +55,8 @@ import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Game {
     //// PROPERTIES
-    public static final String PAUSED = "paused";
-    public static final String CURRENT_MISSION = "currentMission";
+    public static final String PAUSED         = "paused";
+    public static final String CURRENT_MISSION= "currentMission";
     
     private TR 		tr;
     private VOXFile 	vox;
@@ -64,8 +64,8 @@ public class Game {
     private String 	playerName="DEBUG";
     private Difficulty 	difficulty;
     private Mission 	currentMission;
-    HUDSystem 	hudSystem;
-    NAVSystem 	navSystem;
+    HUDSystem 	        hudSystem;
+    NAVSystem 	        navSystem;
     private SatelliteDashboard satDashboard;
     private Player 	player;
     private GLFont	upfrontFont;
@@ -274,12 +274,6 @@ public class Game {
 		
 		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont());
 		navSystem = new NAVSystem(tr.getDefaultGrid(), tr);
-		/*World.relevanceExecutor.submit(new Runnable(){
-		    @Override
-		    public void run() {
-			tr.getDefaultGrid().removeBranch(hudSystem);
-			tr.getDefaultGrid().removeBranch(navSystem);
-		    }});*/
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
 		    final Color[] pal 	     = tr.getGlobalPalette();
@@ -297,16 +291,6 @@ public class Game {
 		    // DEBRIS
 		    earlyLoadingScreen.setStatusText("Loading debris assets...");
 		    rm.setDebrisSystem(new DebrisSystem(tr));
-		    // ACTIVATE
-		    /*try{World.relevanceExecutor.submit(new Runnable(){
-			@Override
-			public void run() {
-			    tr.getDefaultGrid().addBranch(rm.getDebrisSystem());
-			    tr.getDefaultGrid().addBranch(rm.getSmokeSystem());
-			    tr.getDefaultGrid().addBranch(rm.getExplosionFactory());
-			    tr.getDefaultGrid().addBranch(rm.getPowerupSystem());
-			}}).get();}
-		    catch(Exception e){throw new RuntimeException(e);}*/
 		    // SETUP PROJECTILE FACTORIES
 		    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
 		    Weapon[] w = Weapon.values();
@@ -327,14 +311,12 @@ public class Game {
 		    earlyLoadingScreen.setStatusText("Starting game...");
 		    
 		    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");
-		    //tr.getDefaultGrid().blockingRemoveBranch(earlyLoadingScreen);
-		    
 		    
 		    titleScreenMode = new Object[]{
 			    introScreen
 		    };
 		    displayModes.setDisplayMode(titleScreenMode);
-		    introScreen.activate();//TODO: Change nomenclature to reflect that music is being started
+		    introScreen.startMusic();
 		    setLevelIndex(0);
     }// end boot()
     
@@ -398,7 +380,7 @@ public class Game {
 		if(upfrontDisplay!=null)
 		    tr.getDefaultGrid().removeBranch(upfrontDisplay);
 		if(introScreen!=null)
-		    introScreen.deactivate();
+		    introScreen.stopMusic();
 		if(levelLoadingScreen!=null)
 		    tr.getDefaultGrid().removeBranch(levelLoadingScreen);
 		if(briefingScreen!=null)
@@ -429,9 +411,6 @@ public class Game {
     }//end abortCurrentMission()
     
     public Mission getCurrentMission() {
-	/*if(currentMission==null){
-	    setLevelIndex(getLevelIndex());
-	}*/
 	return currentMission;
     }//end getCurrentMission
     
@@ -520,6 +499,6 @@ public class Game {
     }
 
     public void levelLoadingMode() {
-	introScreen.deactivate();
+	introScreen.stopMusic();
     }
 }// end Game

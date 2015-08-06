@@ -18,8 +18,6 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 
@@ -95,8 +93,6 @@ public class Game {
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
     private boolean inGameplay	=false;
-    
-    public static final ExecutorService flowExecutor = Executors.newSingleThreadExecutor();
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);

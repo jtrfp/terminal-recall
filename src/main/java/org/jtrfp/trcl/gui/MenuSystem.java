@@ -46,23 +46,22 @@ public class MenuSystem {
     private final FramebufferStateWindow fbsw;
     private final ConfigWindow		configWindow;
     private final LevelSkipWindow	levelSkipWindow;
-    private final PropertyChangeListener pausePCL;
     private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
     private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
     private final JCheckBoxMenuItem	view_crosshairs = new JCheckBoxMenuItem("Crosshairs");
+    final JMenu file = new JMenu("File"), 
+	    gameMenu = new JMenu("Game"),
+	    debugMenu = new JMenu("Debug"),
+	    viewMenu = new JMenu("View");
     
     public MenuSystem(final TR tr){
 	final RootWindow rw = tr.getRootWindow();
-	final JMenu file = new JMenu("File"), 
-		    gameMenu = new JMenu("Game"),
-		    debugMenu = new JMenu("Debug"),
-		    viewMenu = new JMenu("View");
+	
 	// And items to menus
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
 	final JMenuItem game_new = new JMenuItem("New Game");
 	final JMenuItem game_start = new JMenuItem("Start Game");
-	final JMenuItem game_pause = new JMenuItem("Pause");
 	final JMenuItem game_skip = new JMenuItem("Skip To Level...");
 	final JMenuItem game_abort= new JMenuItem("Abort Game");
 	final JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
@@ -74,7 +73,7 @@ public class MenuSystem {
 	final JMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
-	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
+	
 	view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
 	view_crosshairs.setAccelerator(KeyStroke.getKeyStroke("X"));
 	
@@ -103,23 +102,7 @@ public class MenuSystem {
 			return null;
 		    }});
 	    }});
-	final Action pauseAction = new AbstractAction("Pause Button"){
-	    private static final long serialVersionUID = -5172325691052703896L;
-	    @Override
-	    public void actionPerformed(ActionEvent arg0) {
-		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-		    @Override
-		    public Void call() throws Exception {
-			final Game game = tr.getGame();
-			game.setPaused(!game.isPaused());
-			return null;
-		    }});
-	    }};
-	game_pause.addActionListener(new ActionListener(){
-	    @Override
-	    public void actionPerformed(ActionEvent evt) {
-		pauseAction.actionPerformed(evt);
-	    }});
+	
 	
 	Action satelliteAction = new AbstractAction("SATELLITE_VIEW"){
 	    private static final long serialVersionUID = -6843605846847411702L;
@@ -146,10 +129,6 @@ public class MenuSystem {
 	    public void stateChanged(ChangeEvent evt) {
 		tr.config.setCrosshairsEnabled(view_crosshairs.isSelected());
 	    }});
-	
-	String pauseKey = "PAUSE_KEY";
-	game_pause.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), pauseKey);
-	game_pause.getActionMap().put(pauseKey, pauseAction);
 	game_skip.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent evt) {
@@ -258,12 +237,10 @@ public class MenuSystem {
 	    debugMenu.add(debugStatesMenuItem);
 	    debugMenu.add(frameBufferStatesMenuItem);
             gameMenu.add(game_new);
-            game_pause.setEnabled(false);
             game_start.setEnabled(false);
             game_skip.setEnabled(false);
             game_abort.setEnabled(false);
             gameMenu.add(game_start);
-            gameMenu.add(game_pause);
             gameMenu.add(game_skip);
             gameMenu.add(game_abort);
             debugMenu.add(debugSinglet);
@@ -287,18 +264,11 @@ public class MenuSystem {
 		}});
 	}catch(Exception e){tr.showStopper(e);}
 	
-	pausePCL = new PropertyChangeListener(){
-	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getPropertyName().contentEquals("paused"))
-		    game_pause.setText((Boolean)evt.getNewValue()==true?"Unpause":"Pause");
-	    }//end if(paused)
-	};//end gamePCL
+	
 	
 	tr.addPropertyChangeListener("game", new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		game_pause.setEnabled(evt.getNewValue()!=null);
 		game_new.setEnabled(evt.getNewValue()==null);
 		game_skip.setEnabled(evt.getNewValue()!=null);
 		game_abort.setEnabled(evt.getNewValue()!=null);
@@ -308,7 +278,7 @@ public class MenuSystem {
 	IndirectProperty<Mission>currentMissionIP = new IndirectProperty<Mission>();
 	tr.addPropertyChangeListener(TR.GAME, gameIP);
 	gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, currentMissionIP);
-	gameIP.addTargetPropertyChangeListener(Game.PAUSED, pausePCL);
+	
 	gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent pc) {
@@ -329,14 +299,7 @@ public class MenuSystem {
 		}//end if(null)
 		view_sat.setEnabled(evt.getNewValue() instanceof Mission.AboveGroundMode);
 	    }});
-	currentMissionIP.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW, new PropertyChangeListener(){
-	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getNewValue()==Boolean.TRUE)
-		    game_pause.setEnabled(false);
-		if(evt.getNewValue()==Boolean.FALSE && tr.getGame().getCurrentMission().getMissionMode() instanceof Mission.GameplayMode)
-		    game_pause.setEnabled(true);
-	    }});
+	
 	gameIP.addTargetPropertyChangeListener(Game.PAUSED, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -352,5 +315,12 @@ public class MenuSystem {
      */
     public JCheckBoxMenuItem getView_crosshairs() {
         return view_crosshairs;
+    }
+
+    /**
+     * @return the gameMenu
+     */
+    public JMenu getGameMenu() {
+        return gameMenu;
     }
 }//end MenuSystem

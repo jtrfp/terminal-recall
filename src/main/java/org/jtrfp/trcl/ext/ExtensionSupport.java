@@ -57,7 +57,7 @@ public class ExtensionSupport<PARENT> {
  public void loadBuiltInExtensions(){
      for(Class<? extends Extension> eClass:Extensions.builtInExtensions){
 	 try{if(parent.getClass().isAssignableFrom(((Extension)(eClass.newInstance())).getExtendedClass()) || eClass.equals(parent.getClass()))
-	     getExtension(eClass);}catch(Exception e){e.printStackTrace();}
+	     ((Extension<PARENT>)getExtension(eClass)).apply(parent);}catch(Exception e){e.printStackTrace();}
      }
  }
 }//end ExtensionSupport

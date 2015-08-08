@@ -19,6 +19,6 @@ package org.jtrfp.trcl.ext;
 public class Extensions {
  @SuppressWarnings("unchecked")
 public static final Class<? extends Extension<?>> [] builtInExtensions = new Class[]{
-     //GamePause.class
+     GamePause.class
  };
 }//end Extension

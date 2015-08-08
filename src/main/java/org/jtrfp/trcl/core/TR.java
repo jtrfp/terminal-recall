@@ -26,13 +26,11 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.KeyStatus;
-import org.jtrfp.trcl.MatrixWindow;
-import org.jtrfp.trcl.ObjectDefinitionWindow;
-import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.RootGrid;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.ext.Extension;
+import org.jtrfp.trcl.ext.ExtensionSupport;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.GameShell;
@@ -83,6 +81,7 @@ public final class TR implements UncaughtExceptionHandler{
 	private RenderableSpacePartitioningGrid	defaultGrid;
 	
 	public final TRConfiguration 		config;
+	private final ExtensionSupport<TR>      extensionSupport = new ExtensionSupport<TR>(this);
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -189,11 +188,13 @@ public final class TR implements UncaughtExceptionHandler{
 		 });
 		//renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 		renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
-		}//end constructor
+		
+		menuSystem = new MenuSystem(this);
+		extensionSupport.loadBuiltInExtensions();
+	}//end constructor
 	
 	public TR startShell(){
 	    gameShell  = new GameShell(this);
-	    menuSystem = new MenuSystem(this);
 	    gameShell.startShell();
 	    return this;
 	}
@@ -479,5 +480,15 @@ public final class TR implements UncaughtExceptionHandler{
     @Override
     public void uncaughtException(Thread t, Throwable e) {
 	showStopper(e);
+    }
+
+    /**
+     * @param extensionClass
+     * @return
+     * @see org.jtrfp.trcl.ext.ExtensionSupport#getExtension(java.lang.Class)
+     */
+    public <CLASS extends Extension<?>> Extension<?> getExtension(
+	    Class<CLASS> extensionClass) {
+	return extensionSupport.getExtension(extensionClass);
     }
 }//end TR

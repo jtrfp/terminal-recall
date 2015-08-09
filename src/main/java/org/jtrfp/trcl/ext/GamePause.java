@@ -30,6 +30,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.flow.Mission.GameplayMode;
 
 import com.jogamp.newt.event.KeyEvent;
 
@@ -38,7 +39,7 @@ public class GamePause implements Extension<TR> {
     IndirectProperty<Mission>currentMissionIP;
     ActionListener pauseAL;
     JMenuItem game_pause;
-    PropertyChangeListener gamePCL, pausePCL, satViewPCL;
+    PropertyChangeListener gamePCL, pausePCL, satViewPCL, gameplayModePCL;
     
     @Override
     public void init(TR tr) {
@@ -108,11 +109,6 @@ public class GamePause implements Extension<TR> {
 		    game_pause.setText((Boolean)evt.getNewValue()==true?"Unpause":"Pause");
 	    }//end if(paused)
 	};//end pausePCL
-	tr.addPropertyChangeListener("game", gamePCL = new PropertyChangeListener(){
-	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		game_pause.setEnabled(evt.getNewValue()!=null);
-	    }});
 	gameIP.addTargetPropertyChangeListener(Game.PAUSED, pausePCL);
 	
 	currentMissionIP.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW, satViewPCL = new PropertyChangeListener(){
@@ -122,6 +118,15 @@ public class GamePause implements Extension<TR> {
 		    game_pause.setEnabled(false);
 		if(evt.getNewValue()==Boolean.FALSE && tr.getGame().getCurrentMission().getMissionMode() instanceof Mission.GameplayMode)
 		    game_pause.setEnabled(true);
+	    }});
+	
+	currentMissionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, gameplayModePCL = new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final Object newValue = evt.getNewValue();
+		if(newValue!=null)
+		    game_pause.setEnabled(newValue instanceof GameplayMode);
+		else game_pause.setEnabled(false);
 	    }});
     }//end apply(...)
 
@@ -151,6 +156,7 @@ public class GamePause implements Extension<TR> {
 	gamePCL         =null;
 	pausePCL        =null;
 	satViewPCL      =null;
+	gameplayModePCL =null;
     }
 
 }//end GamePause

@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.ext;
+package org.jtrfp.trcl.ext.tr;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +27,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.ext.Extension;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;

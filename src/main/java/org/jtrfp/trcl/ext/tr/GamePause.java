@@ -150,6 +150,7 @@ public class GamePause implements Extension<TR> {
 	tr.removePropertyChangeListener(gamePCL);
 	gameIP.removeTargetPropertyChangeListener(pausePCL);
 	currentMissionIP.removeTargetPropertyChangeListener(satViewPCL);
+	currentMissionIP.removeTargetPropertyChangeListener(gameplayModePCL);
 	gameIP          =null;
 	currentMissionIP=null;
 	pauseAL         =null;

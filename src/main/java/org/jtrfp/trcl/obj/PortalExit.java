@@ -71,5 +71,10 @@ public class PortalExit extends WorldObject {
     public void deactivate() {
 	//Do nothing.
     }
+    
+    @Override
+    public boolean supportsLoop(){
+	return false;
+    }
 
 }//end PortalExit

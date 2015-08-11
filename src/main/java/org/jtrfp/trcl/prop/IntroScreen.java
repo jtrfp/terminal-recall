@@ -60,4 +60,10 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
 	if(bgMusic!=null)
 	 bgMusic.stop();
     }
+
+    public boolean isMusicPlaying() {
+	if(bgMusic==null)
+	    return false;
+	return bgMusic.isActive();
+    }
 }//end IntroScreen

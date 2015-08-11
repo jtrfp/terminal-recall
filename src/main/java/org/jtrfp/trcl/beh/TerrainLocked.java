@@ -13,7 +13,8 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.TerrainSystem;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class TerrainLocked extends Behavior {
@@ -23,6 +24,12 @@ public class TerrainLocked extends Behavior {
     public void _tick(long tickTimeMillis){
 	final WorldObject p = getParent();
 	final double[] thisPos=p.getPosition();
+	final Game game = p.getTr().getGame();
+	if(game==null)
+	    return;
+	final Mission currentMission = game.getCurrentMission();
+	if(currentMission==null)
+	    return;
 	if(p.getTr().getGame().getCurrentMission().getOverworldSystem()==null)
 	    return;
 	if(p.getTr().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()==null)

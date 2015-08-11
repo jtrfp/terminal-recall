@@ -14,6 +14,8 @@ package org.jtrfp.trcl.ext.tr;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
@@ -41,6 +43,7 @@ public class GamePause implements Extension<TR> {
     ActionListener pauseAL;
     JMenuItem game_pause;
     PropertyChangeListener gamePCL, pausePCL, satViewPCL, gameplayModePCL;
+    WindowListener rootWindowWL;
     
     @Override
     public void init(TR tr) {
@@ -129,6 +132,32 @@ public class GamePause implements Extension<TR> {
 		    game_pause.setEnabled(newValue instanceof GameplayMode);
 		else game_pause.setEnabled(false);
 	    }});
+	
+	//PAUSE OUT OF FOCUS
+	tr.getRootWindow().addWindowListener(rootWindowWL = new WindowListener(){
+	    @Override
+	    public void windowOpened(WindowEvent e) {}
+
+	    @Override
+	    public void windowClosing(WindowEvent e) {}
+
+	    @Override
+	    public void windowClosed(WindowEvent e) {}
+
+	    @Override
+	    public void windowIconified(WindowEvent e) {}
+
+	    @Override
+	    public void windowDeiconified(WindowEvent e) {}
+
+	    @Override
+	    public void windowActivated(WindowEvent e) {}
+
+	    @Override
+	    public void windowDeactivated(WindowEvent e) {
+		if(game_pause.isEnabled())
+		 pauseAction.actionPerformed(new ActionEvent(this, 0, pauseKey));
+	    }});
     }//end apply(...)
 
     @Override
@@ -159,6 +188,7 @@ public class GamePause implements Extension<TR> {
 	pausePCL        =null;
 	satViewPCL      =null;
 	gameplayModePCL =null;
+	rootWindowWL    =null;
     }
 
 }//end GamePause

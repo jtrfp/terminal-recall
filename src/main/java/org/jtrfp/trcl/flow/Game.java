@@ -83,7 +83,8 @@ public class Game {
     			displayModes;
     private Object[]	earlyLoadingMode,
     			titleScreenMode,
-    			missionMode;
+    			missionMode,
+    			emptyMode;
     private final PropertyChangeSupport
     			pcSupport = new PropertyChangeSupport(this);
     private boolean paused=false;
@@ -102,7 +103,7 @@ public class Game {
 	tr.getDefaultGrid().add(redFlash);
 	if (!tr.config.isDebugMode())
 	    setupNameWithUser();
-	missionMode = new Object[]{};
+	emptyMode = missionMode = new Object[]{};
     }// end constructor
 
     private void setupNameWithUser() {
@@ -365,38 +366,15 @@ public class Game {
 	catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 	abortCurrentMission();
 	cleanup();
+	displayModes.setDisplayMode(emptyMode);
 	tr.getGameShell().applyGFXState();
     }
     
     private void cleanup() {
-	try{World.relevanceExecutor.submit(new Runnable(){
-
-	    @Override
-	    public void run() {
-		if(hudSystem!=null)
-		    tr.getDefaultGrid().removeBranch(hudSystem);
-		if(navSystem!=null)
-		    tr.getDefaultGrid().removeBranch(navSystem);
-		if(upfrontDisplay!=null)
-		    tr.getDefaultGrid().removeBranch(upfrontDisplay);
-		if(introScreen!=null)
-		    introScreen.stopMusic();
-		if(levelLoadingScreen!=null)
-		    tr.getDefaultGrid().removeBranch(levelLoadingScreen);
-		if(briefingScreen!=null)
-		    tr.getDefaultGrid().removeBranch(briefingScreen);
-		if(tr.getResourceManager().getPowerupSystem()!=null)
-		    tr.getDefaultGrid().removeBranch(tr.getResourceManager().getPowerupSystem());
-		if(tr.getResourceManager().getSmokeSystem()!=null)
-		    tr.getDefaultGrid().removeBranch(tr.getResourceManager().getSmokeSystem());
-		if(tr.getResourceManager().getExplosionFactory()!=null)
-		    tr.getDefaultGrid().removeBranch(tr.getResourceManager().getExplosionFactory());
-	    }}).get();}catch(Exception e){e.printStackTrace();}
-	
+	if(introScreen.isMusicPlaying())
+	 introScreen.stopMusic();
 	if(player!=null)
 	 tr.getDefaultGrid().remove(player);
-	
-	TR.nuclearGC();
     }
 
     public void abortCurrentMission(){

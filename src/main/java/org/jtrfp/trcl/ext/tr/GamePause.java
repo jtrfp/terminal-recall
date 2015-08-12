@@ -14,6 +14,7 @@ package org.jtrfp.trcl.ext.tr;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
@@ -82,7 +83,8 @@ public class GamePause implements Extension<TR> {
 		    @Override
 		    public Void call() throws Exception {
 			final Game game = tr.getGame();
-			game.setPaused(!game.isPaused());
+			if(game!=null)
+			 game.setPaused(!game.isPaused());
 			return null;
 		    }});
 	    }};
@@ -109,8 +111,10 @@ public class GamePause implements Extension<TR> {
 	pausePCL = new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
+		Boolean newValue = (Boolean)evt.getNewValue();
+		if(newValue==null) newValue=false;
 		if(evt.getPropertyName().contentEquals("paused"))
-		    game_pause.setText((Boolean)evt.getNewValue()==true?"Unpause":"Pause");
+		    game_pause.setText(newValue==true?"Unpause":"Pause");
 	    }//end if(paused)
 	};//end pausePCL
 	gameIP.addTargetPropertyChangeListener(Game.PAUSED, pausePCL);
@@ -132,27 +136,8 @@ public class GamePause implements Extension<TR> {
 		    game_pause.setEnabled(newValue instanceof GameplayMode);
 		else game_pause.setEnabled(false);
 	    }});
-	
 	//PAUSE OUT OF FOCUS
-	tr.getRootWindow().addWindowListener(rootWindowWL = new WindowListener(){
-	    @Override
-	    public void windowOpened(WindowEvent e) {}
-
-	    @Override
-	    public void windowClosing(WindowEvent e) {}
-
-	    @Override
-	    public void windowClosed(WindowEvent e) {}
-
-	    @Override
-	    public void windowIconified(WindowEvent e) {}
-
-	    @Override
-	    public void windowDeiconified(WindowEvent e) {}
-
-	    @Override
-	    public void windowActivated(WindowEvent e) {}
-
+	tr.getRootWindow().addWindowListener(rootWindowWL = new WindowAdapter(){
 	    @Override
 	    public void windowDeactivated(WindowEvent e) {
 		if(game_pause.isEnabled())

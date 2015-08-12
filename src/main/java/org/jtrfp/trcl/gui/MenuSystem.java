@@ -288,7 +288,9 @@ public class MenuSystem {
 	    @Override
 	    public void propertyChange(PropertyChangeEvent pc) {
 		game_start.setEnabled(pc.getNewValue()!=null && pc.getNewValue()==Boolean.FALSE);
-		view_crosshairs.setEnabled((Boolean)pc.getNewValue());
+		Boolean newValue = (Boolean)pc.getNewValue();
+		if(newValue==null) newValue=false;
+		view_crosshairs.setEnabled(newValue);
 	    }});
 	currentMissionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
 	    @Override
@@ -303,10 +305,13 @@ public class MenuSystem {
 	gameIP.addTargetPropertyChangeListener(Game.PAUSED, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
+		final Game game = tr.getGame();
+		if(game==null)
+		    return;
 		if(evt.getNewValue()==Boolean.TRUE)
 		    view_sat.setEnabled(false);
 		else if(tr.getGame().getCurrentMission()!=null)
-		    view_sat.setEnabled(tr.getGame().getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode);
+		    view_sat.setEnabled(game.getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode);
 	    }});
     }//end constructor
 

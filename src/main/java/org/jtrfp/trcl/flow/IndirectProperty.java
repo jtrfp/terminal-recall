@@ -98,10 +98,12 @@ public IndirectProperty<PROPERTY_TYPE> removeTargetPropertyChangeListener(Proper
 	return this;
 }
 
+private void fireAllNullProperties(){
+    
+}
+
 private void fireAllPropertiesChanged(){
     PROPERTY_TYPE target = this.target.get();
-    if(target==null)
-	return;
     HashSet<String> propertiesToFireChanged = new HashSet<String>();
     PropertyChangeListener []listeners = targetPCS.getPropertyChangeListeners();
     for(PropertyChangeListener l:listeners){
@@ -111,7 +113,7 @@ private void fireAllPropertiesChanged(){
 	}//end if(...)
     }//end for(listener)
     for(String propertyName:propertiesToFireChanged){
-	try{targetPCS.firePropertyChange(propertyName, null, PropertyUtils.getProperty(target, propertyName));}
+	try{targetPCS.firePropertyChange(propertyName, null, target!=null?PropertyUtils.getProperty(target, propertyName):null);}
 	catch(NoSuchMethodException e){e.printStackTrace();}
 	catch(InvocationTargetException e){e.printStackTrace();}
 	catch(IllegalAccessException e){e.printStackTrace();}
@@ -120,8 +122,7 @@ private void fireAllPropertiesChanged(){
 @Override
 public void propertyChange(PropertyChangeEvent evt) {
     final Object newVal = evt.getNewValue();
-    if(newVal!=null)
-     setTarget((PROPERTY_TYPE)newVal);
+    setTarget((PROPERTY_TYPE)newVal);
 }//end propertyChange(...)
  
 }//end IndirectBean

@@ -88,9 +88,11 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	currentMission.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
+		Boolean newValue = (Boolean)evt.getNewValue();
+		if(newValue==null) newValue=false;
 		updateCrosshairsVisibilityState(
 			tr.config.isCrosshairsEnabled(),
-			(Boolean)evt.getNewValue());
+			newValue);
 	    }});
 	tr.getGame().addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
     }//end installReactiveListeners

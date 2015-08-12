@@ -15,7 +15,6 @@ package org.jtrfp.trcl.obj;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -26,6 +25,7 @@ import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.WeakPropertyChangeSupport;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
@@ -83,7 +83,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private CollectionActionDispatcher<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     private CollectionActionDispatcher<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     
-    protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(new PropertyChangeSupport(this));
 
     public WorldObject(TR tr) {
 	this.nullBehavior = new NullBehavior(this);

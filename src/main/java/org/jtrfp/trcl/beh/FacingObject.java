@@ -13,12 +13,14 @@
 
 package org.jtrfp.trcl.beh;
 
+import java.lang.ref.WeakReference;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class FacingObject extends Behavior {
-    private WorldObject target;
+    private WeakReference<WorldObject> target;
     private final double [] work = new double[3];
     private final double [] perp = new double[3];
     private final double [] UP = new double[]{0,1,0};
@@ -26,26 +28,26 @@ public class FacingObject extends Behavior {
     public void _tick(long tickTimeMillis){
 	if(target!=null){
 	    final WorldObject parent = getParent();
-	    final double [] tPos = target.getPosition();
+	    final double [] tPos = target.get().getPosition();
 	    final double [] pPos = parent.getPosition();
 	    Vect3D.subtract(tPos, pPos, work);
 	    parent.setHeading(new Vector3D(Vect3D.normalize(work,work)));
 	    Vect3D.cross(work, UP, perp);
 	    Vect3D.cross(perp, work, perp);
-	    parent.setTop(target.getTop());
+	    parent.setTop(target.get().getTop());
 	}//end if(!null)
     }//end _tick(...)
     /**
      * @return the target
      */
     public WorldObject getTarget() {
-        return target;
+        return target.get();
     }
     /**
      * @param target the target to set
      */
     public FacingObject setTarget(WorldObject target) {
-        this.target = target;
+        this.target = new WeakReference<WorldObject>(target);
         return this;
     }
 }//end FacingObject

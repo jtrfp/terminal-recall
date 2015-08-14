@@ -83,6 +83,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private static final double RELEVANCE_RADIUS_TAXICAB_CUBES = 1.414 * RELEVANCE_RADIUS_CUBES; // 1.414 is radical-2
 	private SpacePartitioningGrid rootGrid;
 	private volatile Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
+	// HARD REFERENCES - DO NOT REMOVE
+	private final CenterCubeHandler     centerCubeHandler;
+	private final CameraPositionHandler cameraPositionHandler;
 
     Camera(TR tr) {
 	super(tr);
@@ -103,8 +106,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addBehavior(new RotateAroundObject().setEnable(false));
 	addBehavior(new SkyCubeCloudModeUpdateBehavior());
 	
-	addPropertyChangeListener(CENTER_CUBE,new CenterCubeHandler());
-	addPropertyChangeListener(WorldObject.POSITION,new CameraPositionHandler());
+	addPropertyChangeListener(CENTER_CUBE, centerCubeHandler = new CenterCubeHandler());
+	addPropertyChangeListener(WorldObject.POSITION,cameraPositionHandler = new CameraPositionHandler());
     }//end constructor
     
     private final class VisibilityPredicate implements Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>{

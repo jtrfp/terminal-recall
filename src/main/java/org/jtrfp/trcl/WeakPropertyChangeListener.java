@@ -25,18 +25,18 @@ import java.lang.ref.WeakReference;
  */
 
 public class WeakPropertyChangeListener implements PropertyChangeListener {
-    private final PropertyChangeListener                delegate;
-    private final WeakReference<PropertyChangeSupport>  listened;
+    private final WeakReference<PropertyChangeListener> delegate;
+    private final PropertyChangeSupport                 listened;
     
     public WeakPropertyChangeListener(PropertyChangeListener delegate, PropertyChangeSupport source){
-	this.delegate=delegate;
-	this.listened=new WeakReference<PropertyChangeSupport> (source);
+	this.delegate=new WeakReference<PropertyChangeListener>(delegate);
+	this.listened=source;
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-	final PropertyChangeListener pcl   = delegate;
-	final PropertyChangeSupport source = this.listened.get();
+	final PropertyChangeListener pcl   = delegate.get();
+	final PropertyChangeSupport source = listened;
 	if(pcl==null){
 	    if(source!=null)//Shouldn't be null since the source is expected to invoke this but just in case...
 		source.removePropertyChangeListener(this);

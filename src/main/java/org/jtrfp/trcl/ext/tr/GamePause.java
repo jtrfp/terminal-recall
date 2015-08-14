@@ -141,7 +141,8 @@ public class GamePause implements Extension<TR> {
 	    @Override
 	    public void windowDeactivated(WindowEvent e) {
 		if(game_pause.isEnabled())
-		 pauseAction.actionPerformed(new ActionEvent(this, 0, pauseKey));
+		 if(tr.getGame()!=null && !tr.getGame().isPaused())
+		  pauseAction.actionPerformed(new ActionEvent(this, 0, pauseKey));
 	    }});
     }//end apply(...)
 

@@ -681,10 +681,12 @@ public class Mission {
     }//end abort()
 
     private void cleanup() {
-	//if(overworldSystem!=null)
-	//    tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
 	displayHandler.setDisplayMode(emptyMode);
 	tr.secondaryRenderer.get().getCamera().setRootGrid(null);
+	// Remove projectile factories
+	for(ProjectileFactory pf:tr.getResourceManager().getProjectileFactories())
+	    for(Projectile projectile:pf.getProjectiles())
+		projectile.destroy();
     }
     /**
      * Find a tunnel at the given map square, if any.

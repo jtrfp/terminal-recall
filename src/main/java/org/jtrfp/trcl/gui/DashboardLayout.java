@@ -17,7 +17,11 @@ public interface DashboardLayout {
  public Point2D.Double getAmmoPosition();
  public Point2D.Double getWeaponNamePosition();
  public Point2D.Double getObjectivePosition();
+ public double         getThrottleBarLength();
+ public boolean        isThrottleHorizontal();
  public Point2D.Double getThrottlePosition();
+ public double         getShieldBarLength();
+ public boolean        isShieldHorizontal();
  public Point2D.Double getShieldPosition();
  public Point2D.Double getDistancePosition();
  public Point2D.Double getSectorPosition();

@@ -12,16 +12,20 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.geom.Point2D;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gui.DashboardLayout;
+import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
 
 public class Dashboard extends WorldObject2DVisibleEverywhere {
     private static final double Z = .5;
 
-    public Dashboard(TR tr) {
+    public Dashboard(TR tr, DashboardLayout layout) {
 	super(tr);
 	setImmuneToOpaqueDepthTest(true);
 	try{
@@ -33,9 +37,10 @@ public class Dashboard extends WorldObject2DVisibleEverywhere {
 	for (int seg = 0; seg < 5; seg++) {
 	    final double segWidth = 2. / 5.;
 	    final double x = -1 + segWidth * seg;
+	    final Point2D.Double dims = layout.getDashboardDimensions();
 
 	    Triangle[] tris = Triangle.quad2Triangles(new double[] { x,
-		    x + segWidth, x + segWidth, x }, new double[] { .36, .36,
+		    x + segWidth, x + segWidth, x }, new double[] { dims.getY(), dims.getY(),
 		    1, 1 }, new double[] { Z, Z, Z, Z }, new double[] { 0, 1,
 		    1, 0 }, new double[] { 0, 0, 1, 1 }, dashTexture[seg],
 		    RenderMode.DYNAMIC, Vector3D.ZERO,"Dashboard");

@@ -41,15 +41,15 @@ public class F3DashboardLayout implements DashboardLayout {
     public Double getObjectivePosition() {
 	return OBJ_POS;
     }
+    private static final Point2D.Double THROT_POS = new Point2D.Double(.18875 - 1, 1 - .205);
     @Override
     public Double getThrottlePosition() {
-	// TODO Auto-generated method stub
-	return null;
+	return THROT_POS;
     }
+    private static final Point2D.Double SHIELD_POS = new Point2D.Double(.13000 - 1, 1 - .205);
     @Override
     public Double getShieldPosition() {
-	// TODO Auto-generated method stub
-	return null;
+	return SHIELD_POS;
     }
     private static final Point2D.Double DIST_POS = new Point2D.Double(.42, TOP_LINE_Y);
     @Override
@@ -70,6 +70,22 @@ public class F3DashboardLayout implements DashboardLayout {
     @Override
     public Double getMiniMapPosition() {
 	return MM_POS;
+    }
+    @Override
+    public boolean isThrottleHorizontal() {
+	return false;
+    }
+    @Override
+    public boolean isShieldHorizontal() {
+	return false;
+    }
+    @Override
+    public double getThrottleBarLength() {
+	return .16;
+    }
+    @Override
+    public double getShieldBarLength() {
+	return .16;
     }
 
 }//end F3DashboardLayout

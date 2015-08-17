@@ -45,15 +45,15 @@ public class TVDashboardLayout implements DashboardLayout {
     public Double getObjectivePosition() {
 	return OBJ_POS;
     }
+    private static final Point2D.Double THROT_POS = new Point2D.Double(.32, .857);
     @Override
     public Double getThrottlePosition() {
-	// TODO Auto-generated method stub
-	return null;
+	return THROT_POS;
     }
+    private static final Point2D.Double SHIELD_POS = new Point2D.Double(.32, .94);
     @Override
     public Double getShieldPosition() {
-	// TODO Auto-generated method stub
-	return null;
+	return SHIELD_POS;
     }
     private static final Point2D.Double DIST_POS = new Point2D.Double(LEFT_MARGIN, BOTTOM_LINE_Y);
     @Override
@@ -75,5 +75,21 @@ public class TVDashboardLayout implements DashboardLayout {
     public Double getMiniMapPosition() {
 	return MM_POS;
     }
+    @Override
+    public boolean isThrottleHorizontal() {
+	return true;
+    }
+    @Override
+    public boolean isShieldHorizontal() {
+	return true;
+    }
+    @Override
+    public double getThrottleBarLength() {
+	return .22;
+    }
+    @Override
+    public double getShieldBarLength() {
+	return .22;
+    }
 
-}
+}//end TVDashboardLayout

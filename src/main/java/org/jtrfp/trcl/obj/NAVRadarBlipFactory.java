@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.awt.geom.Point2D;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
@@ -20,6 +21,7 @@ import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class NAVRadarBlipFactory {
@@ -30,9 +32,11 @@ public class NAVRadarBlipFactory {
     private final Blip [][] blipPool = new Blip[BlipType.values().length][POOL_SIZE];
     private final int []poolIndices = new int[POOL_SIZE];
     private final TR tr;
+    private final DashboardLayout layout;
     
-    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g){
-	this.tr=tr;
+    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout){
+	this.tr    =tr;
+	this.layout=layout;
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
@@ -128,10 +132,11 @@ public class NAVRadarBlipFactory {
 		double newY=blipPos[0]*hX+blipPos[1]*hY;
 		
 		blipPos[0]=-newX;
-		blipPos[1]=newY;
+		blipPos[1]= newY;
 		
-		blipPos[0]+=.825;
-		blipPos[1]+=.8;
+		final Point2D.Double bp = layout.getMiniMapPosition();
+		blipPos[0]+=bp.getX();
+		blipPos[1]+=bp.getY();
 		
 		blip.notifyPositionChange();
 	    }

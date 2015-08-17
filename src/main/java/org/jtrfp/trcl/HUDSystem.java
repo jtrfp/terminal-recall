@@ -12,14 +12,16 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gui.DashboardLayout;
+import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.obj.MeterBar;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid {
@@ -41,53 +43,61 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     private final Crosshairs	  crosshairs;
     
 
-    public HUDSystem(TR tr, GLFont font) throws IOException {
+    public HUDSystem(TR tr, GLFont font, DashboardLayout layout) throws IOException {
 	super();
 	// Dash Text
 	final double TOP_LINE_Y = .93;
 	final double BOTTOM_LINE_Y = .82;
 	final double FONT_SIZE = .04;
+	Point2D.Double pos;
 	
-	add(dashboard=new Dashboard(tr));
+	add(dashboard=new Dashboard(tr,layout));
 	
+	pos = layout.getObjectivePosition();
 	objective = new CharLineDisplay(tr, this, FONT_SIZE, 16, font);
 	objective.setContent("LOADING...");
-	objective.setPosition(-.45, TOP_LINE_Y, Z);
+	objective.setPosition(pos.getX(), pos.getY(), Z);
 
+	pos = layout.getDistancePosition();
 	distance = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
 	distance.setContent("---");
-	distance.setPosition(.42, TOP_LINE_Y, Z);
+	distance.setPosition(pos.getX(),pos.getY(), Z);
 
+	pos = layout.getWeaponNamePosition();
 	weapon = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
 	weapon.setContent("---");
-	weapon.setPosition(-.44, BOTTOM_LINE_Y, Z);
+	weapon.setPosition(pos.getX(),pos.getY(), Z);
 
+	pos = layout.getSectorPosition();
 	sector = new CharLineDisplay(tr, this, FONT_SIZE, 7, font);
 	sector.setContent("---");
-	sector.setPosition(.38, BOTTOM_LINE_Y, Z);
+	sector.setPosition(pos.getX(),pos.getY(), Z);
 
+	pos = layout.getAmmoPosition();
 	ammo = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
 	ammo.setContent("---");
-	ammo.setPosition(.01, BOTTOM_LINE_Y, Z);
+	ammo.setPosition(pos.getX(), pos.getY(), Z);
 	InputStream is = null;
 	add(crosshairs=new Crosshairs(tr));
 	try{add(healthMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = Texture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),null,
-			"HealthBar orangeOrange",false), METER_WIDTH, METER_HEIGHT,
-		false));}
+			"HealthBar orangeOrange",false), METER_WIDTH, layout.getShieldBarLength(),
+		layout.isShieldHorizontal()));}
 	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	
-	healthMeterBar.setPosition(HEALTH_POS);
+	pos = layout.getShieldPosition();
+	healthMeterBar.setPosition(new double[]{pos.getX(),pos.getY(),0});
 	healthMeter = healthMeterBar.getController();
 	
 	try{add(throttleMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(is = Texture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),null,
-			"ThrottleBar blackBlue",false), METER_WIDTH, METER_HEIGHT,
-		false));}
+			"ThrottleBar blackBlue",false), METER_WIDTH, layout.getThrottleBarLength(),
+		layout.isThrottleHorizontal()));}
 	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
-	throttleMeterBar.setPosition(THROTTLE_POS);
+	pos = layout.getThrottlePosition();
+	throttleMeterBar.setPosition(new double[]{pos.getX(),pos.getY(),0});
 	throttleMeter = throttleMeterBar.getController();
 	
 	//Set all to invisible

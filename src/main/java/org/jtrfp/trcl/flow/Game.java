@@ -32,7 +32,6 @@ import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.ResourceManager;
@@ -42,6 +41,9 @@ import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.gui.DashboardLayout;
+import org.jtrfp.trcl.gui.F3DashboardLayout;
+import org.jtrfp.trcl.gui.TVDashboardLayout;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -273,8 +275,11 @@ public class Game {
 		satDashboard.setVisible(false);
 		tr.getDefaultGrid().add(satDashboard);
 		
-		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont());
-		navSystem = new NAVSystem(tr.getDefaultGrid(), tr);
+		final DashboardLayout layout = 
+			tr.config.getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
+		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
+		System.out.println("GameVersion="+tr.config.getGameVersion());
+		navSystem = new NAVSystem(tr.getDefaultGrid(), tr,layout);
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
 		    final Color[] pal 	     = tr.getGlobalPalette();

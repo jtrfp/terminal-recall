@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.geom.Point2D;
 import java.util.Collection;
 
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
@@ -19,6 +20,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -30,19 +32,20 @@ private final TR tr;
 private final NAVRadarBlipFactory blips;
 
     public NAVSystem(SpacePartitioningGrid<PositionedRenderable> parent, 
-	    TR tr) {
+	    TR tr, DashboardLayout layout) {
 	super();
 	this.tr=tr;
 	System.out.println("Setting up NAV system...");
 	arrow = new NavArrow(tr,this);
+	final Point2D.Double pos = layout.getMiniMapPosition();
 	final double [] aPos = arrow.getPosition();
-	aPos[0]=.825;
-	aPos[1]=.8;
+	aPos[0]=pos.getX();
+	aPos[1]=pos.getY();
 	aPos[2]=.00001;
 	arrow.notifyPositionChange();
 	//arrow.setPosition(new Vector3D(.825,.8,0));
 	add(arrow);
-	blips=new NAVRadarBlipFactory(tr,this);
+	blips=new NAVRadarBlipFactory(tr,this,layout);
 	System.out.println("...Done.");
     }//end constructor
     

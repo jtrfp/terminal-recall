@@ -15,6 +15,8 @@ package org.jtrfp.trcl.gui;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
+import org.jtrfp.trcl.flow.NAVObjective;
+
 public class F3DashboardLayout implements DashboardLayout {
     private static final double TOP_LINE_Y    = .93;
     private static final double BOTTOM_LINE_Y = .82;
@@ -86,6 +88,10 @@ public class F3DashboardLayout implements DashboardLayout {
     @Override
     public double getShieldBarLength() {
 	return .16;
+    }
+    @Override
+    public String getHumanReadableObjective(NAVObjective obj) {
+	return obj.getDescription();
     }
 
 }//end F3DashboardLayout

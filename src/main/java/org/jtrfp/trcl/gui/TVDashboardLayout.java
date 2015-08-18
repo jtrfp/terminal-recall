@@ -15,6 +15,8 @@ package org.jtrfp.trcl.gui;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
+import org.jtrfp.trcl.flow.NAVObjective;
+
 public class TVDashboardLayout implements DashboardLayout {
     private static final double TOP_LINE_Y    = .89;
     private static final double BOTTOM_LINE_Y = .79;
@@ -90,6 +92,26 @@ public class TVDashboardLayout implements DashboardLayout {
     @Override
     public double getShieldBarLength() {
 	return .22;
+    }
+    @Override
+    public String getHumanReadableObjective(NAVObjective obj) {
+	//Abbreviate. A little hacky, but it should work well into version 2 when something better is figured out.
+	final String desc = obj.getDescription();
+	if(desc.contentEquals("Enter Tunnel"))
+	    return "TUN";
+	else if(desc.contentEquals("Exit Tunnel"))
+	    return "EXT";
+	else if(desc.contentEquals("Fly To Jump Zone"))
+	    return "DUN";
+	else if(desc.contains("Destroy Shield"))
+	    return "SHD";
+	else if(desc.contentEquals("Destroy Boss"))
+	    return "BOS";
+	else if(desc.contentEquals("Checkpoint"))
+	    return "CHK";
+	else if(desc.contentEquals("Destroy Target"))
+	    return "TGT";
+	else return "???";
     }
 
 }//end TVDashboardLayout

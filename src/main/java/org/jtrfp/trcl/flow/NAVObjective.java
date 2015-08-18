@@ -51,10 +51,13 @@ public abstract class NAVObjective {
     public abstract String getDescription();
     public abstract WorldObject getTarget();
     protected NAVObjective(Factory f){
-	f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
-	final double [] loc = getTarget().getPosition();
-	if(getTarget()!=null)f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
-	f.counter++;
+	if(f!=null)
+	 f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
+	
+	if(getTarget()!=null && f!=null){
+	    final double [] loc = getTarget().getPosition();
+	    f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
+	    f.counter++;}
     }
     public static class Factory{
 	private final TR tr;//for debug

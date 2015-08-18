@@ -23,6 +23,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.gui.DashboardLayout;
 
 public class NavArrow extends Sprite2D {
 private static final double WIDTH=.16;
@@ -30,12 +31,14 @@ private static final double HEIGHT=.16;
 private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final NAVSystem nav;
-    public NavArrow(TR tr, NAVSystem navSystem) {
+private final DashboardLayout layout;
+    public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout) {
 	super(tr, Z, 
 		WIDTH, 
 		HEIGHT, 
 		getTexture(tr), true);
 	this.nav=navSystem;
+	this.layout=layout;
 	setImmuneToOpaqueDepthTest(true);
 	try{
 	addBehavior(new NavArrowBehavior());
@@ -77,7 +80,17 @@ private final NAVSystem nav;
 		    final TunnelExitObject eo = mission.getCurrentTunnel().getExitObject();
 		    final double [] eoPos = eo.getPosition();
 		    navLocXY = new Vector3D(eoPos[0],eoPos[2],0);
-		    hudSystem.getObjective().setContent("Exit Tunnel");
+		    hudSystem.getObjective().setContent(layout.getHumanReadableObjective(new NAVObjective(null){
+
+			@Override
+			public String getDescription() {
+			    return "Exit Tunnel";
+			}
+
+			@Override
+			public WorldObject getTarget() {
+			    return null;
+			}}));
 		    sectorMsg = "???.???";
 		}
 	    }else{//No Tunnel

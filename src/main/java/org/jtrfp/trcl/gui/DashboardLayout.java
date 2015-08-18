@@ -13,6 +13,8 @@
 package org.jtrfp.trcl.gui;
 import java.awt.geom.Point2D;
 
+import org.jtrfp.trcl.flow.NAVObjective;
+
 public interface DashboardLayout {
  public Point2D.Double getAmmoPosition();
  public Point2D.Double getWeaponNamePosition();
@@ -28,4 +30,5 @@ public interface DashboardLayout {
  public Point2D.Double getDashboardPosition();
  public Point2D.Double getDashboardDimensions();
  public Point2D.Double getMiniMapPosition();
+ public String         getHumanReadableObjective(NAVObjective obj);
 }//end DashboardLayout

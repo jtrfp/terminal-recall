@@ -30,13 +30,15 @@ public class NAVSystem extends RenderableSpacePartitioningGrid {
 private final NavArrow arrow;
 private final TR tr;
 private final NAVRadarBlipFactory blips;
+private final DashboardLayout layout;
 
     public NAVSystem(SpacePartitioningGrid<PositionedRenderable> parent, 
 	    TR tr, DashboardLayout layout) {
 	super();
 	this.tr=tr;
+	this.layout=layout;
 	System.out.println("Setting up NAV system...");
-	arrow = new NavArrow(tr,this);
+	arrow = new NavArrow(tr,this,layout);
 	final Point2D.Double pos = layout.getMiniMapPosition();
 	final double [] aPos = arrow.getPosition();
 	aPos[0]=pos.getX();
@@ -58,7 +60,7 @@ private final NAVRadarBlipFactory blips;
 	if(obj==null)return;
 	tr.getGame().getHUDSystem().
 		getObjective().
-		setContent(obj.getDescription());
+		setContent(layout.getHumanReadableObjective(obj));
 	final WorldObject target = obj.getTarget();
 	if(target!=null)
 	    target.getBehavior().probeForBehaviors(ntbSubmitter, NAVTargetableBehavior.class);

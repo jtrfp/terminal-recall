@@ -15,6 +15,7 @@ package org.jtrfp.trcl;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -36,10 +37,10 @@ import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission.Result;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.EnemyIntro;
-import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -58,27 +59,28 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private final Sprite2D	  blackRectangle;
     private volatile double  	  scrollPos = 0;
     private double		  scrollIncrement=.01;
-    private final int		  NUM_LINES=10;
-    private final int		  WIDTH_CHARS=36;
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
     //private TXTMissionBriefFile missionTXT;
     private ColorPaletteVectorList palette;
     private LVLFile		lvl;
     private TimerTask	  scrollTimer;
     private WorldObject	  planetObject;
+    private final BriefingLayout layout;
     
     private final LazyTRFuture<TXTMissionBriefFile> missionTXT;
 
-    public BriefingScreen(final TR tr, GLFont font) {
+    public BriefingScreen(final TR tr, GLFont font, BriefingLayout layout) {
 	super();
+	this.layout=layout;
 	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		tr.gpu.get().getGl(), 0,false),true);
 	add(briefingScreen);
 	this.tr	      = tr;
-	briefingChars = new CharAreaDisplay(.047,WIDTH_CHARS,NUM_LINES,tr,font);
+	briefingChars = new CharAreaDisplay(layout.getFontSizeGL(),layout.getNumCharsPerLine(),layout.getNumLines(),tr,font);
 	blockingAddBranch(briefingChars);
-	briefingChars.setPosition(-.7, -.45, TEXT_Z);
+	final Point2D.Double textPos = layout.getTextPosition();
+	briefingChars.setPosition(textPos.getX(), textPos.getY(), TEXT_Z);
 	briefingScreen.setPosition(0,0,BRIEFING_SPRITE_Z);
 	briefingScreen.notifyPositionChange();
 	briefingScreen.setImmuneToOpaqueDepthTest(true);
@@ -125,7 +127,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    public void run() {
 		scrollPos+=scrollIncrement;
 		briefingChars.setScrollPosition(scrollPos);
-		if(scrollPos>briefingChars.getNumActiveLines()+NUM_LINES){
+		if(scrollPos>briefingChars.getNumActiveLines()+layout.getNumLines()){
 		    BriefingScreen.this.stopScroll();
 		    notifyScrollFinishCallbacks();
 		    scrollFinishCallbacks.clear();
@@ -163,6 +165,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	 add(planetObject);
 	 planetObject.setVisible(true);
 	 camera.probeForBehavior(FacingObject.class)	  .setTarget(planetObject);
+	 camera.probeForBehavior(FacingObject.class)      .setHeadingOffset(layout.cameraHeadingAdjust());
 	 camera.probeForBehavior(RotateAroundObject.class).setTarget(planetObject);
 	 camera.probeForBehavior(RotateAroundObject.class).setAngularVelocityRPS(.05);
 	 camera.probeForBehavior(RotateAroundObject.class).setOffset(
@@ -188,7 +191,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     public void missionCompleteSummary(LVLFile lvl, Result r){
 	final Game   game 	 = tr.getGame();
 	game.getPlayer().setActive(false);
-	briefingChars.setScrollPosition(NUM_LINES-2);
+	briefingChars.setScrollPosition(layout.getNumLines()-2);
 	setContent("Air targets destroyed: "+r.getAirTargetsDestroyed()+
 		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
@@ -256,6 +259,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.setActive(true);
 	    wo.setVisible(true);
 	    camera.probeForBehavior(FacingObject.class).setTarget(wo);
+	    camera.probeForBehavior(FacingObject.class).setHeadingOffset(layout.cameraHeadingAdjust());
 	    camera.probeForBehavior(RotateAroundObject.class).setTarget(wo);
 	    camera.probeForBehavior(RotateAroundObject.class).setAngularVelocityRPS(.3);
 	    //Roughly center the object (ground objects have their bottom at Y=0)
@@ -266,7 +270,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			    wo.getModel().
 			     getTriangleList().
 			     getMaximumVertexDims().
-			     getY()/2,
+			     getY(),
 			    0});
 	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
 			    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);}
@@ -277,7 +281,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			 wo.getModel().
 			 getTransparentTriangleList().
 			 getMaximumVertexDims().
-			 getY()/2,
+			 getY(),
 			 0});
 	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
 			    wo.getModel().getTransparentTriangleList().getMaximumVertexDims().getX()*6);}
@@ -292,7 +296,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze
-	    briefingChars.setScrollPosition(NUM_LINES-2);
+	    briefingChars.setScrollPosition(layout.getNumLines()-2);
 	    setContent(intro.getDescriptionString());
 	    tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	    //Restore previous state.

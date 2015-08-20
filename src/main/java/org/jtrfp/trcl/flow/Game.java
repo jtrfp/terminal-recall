@@ -41,8 +41,11 @@ import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.gui.DashboardLayout;
+import org.jtrfp.trcl.gui.F3BriefingLayout;
 import org.jtrfp.trcl.gui.F3DashboardLayout;
+import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -313,7 +316,9 @@ public class Game {
 		    tr.getDefaultGrid().add(player);
 		    System.out.println("\t...Done.");
 		    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
-		    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont());
+		    final BriefingLayout briefingLayout = tr.config.getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
+		    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont(), 
+			    briefingLayout);
 		    earlyLoadingScreen.setStatusText("Starting game...");
 		    
 		    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");

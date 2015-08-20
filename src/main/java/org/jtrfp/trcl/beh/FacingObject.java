@@ -15,6 +15,7 @@ package org.jtrfp.trcl.beh;
 
 import java.lang.ref.WeakReference;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -24,17 +25,26 @@ public class FacingObject extends Behavior {
     private final double [] work = new double[3];
     private final double [] perp = new double[3];
     private final double [] UP = new double[]{0,1,0};
+    private final double [] newTop = new double[3];
+    private Rotation        readingOffset = Rotation.IDENTITY;
+    private static final Vector3D DEFAULT_HEADING = Vector3D.PLUS_K;
+    private static final Vector3D DEFAULT_TOP = Vector3D.PLUS_J;
     @Override
     public void _tick(long tickTimeMillis){
 	if(target!=null){
 	    final WorldObject parent = getParent();
 	    final double [] tPos = target.get().getPosition();
 	    final double [] pPos = parent.getPosition();
+	    
 	    Vect3D.subtract(tPos, pPos, work);
-	    parent.setHeading(new Vector3D(Vect3D.normalize(work,work)));
+	    final Vector3D newHeading = new Vector3D(Vect3D.normalize(work,work));
 	    Vect3D.cross(work, UP, perp);
-	    Vect3D.cross(perp, work, perp);
-	    parent.setTop(target.get().getTop());
+	    Vect3D.cross(perp, work, newTop);
+	    final Rotation facingRot = 
+		    new Rotation(DEFAULT_HEADING,DEFAULT_TOP,newHeading,new Vector3D(newTop));
+	    
+	    parent.setHeading(facingRot.applyTo(readingOffset).applyTo(DEFAULT_HEADING));
+	    parent.setTop    (facingRot.applyTo(readingOffset).applyTo(DEFAULT_TOP));
 	}//end if(!null)
     }//end _tick(...)
     /**
@@ -49,5 +59,17 @@ public class FacingObject extends Behavior {
     public FacingObject setTarget(WorldObject target) {
         this.target = new WeakReference<WorldObject>(target);
         return this;
+    }
+    /**
+     * @return the readingOffset
+     */
+    public Rotation getHeadingOffset() {
+        return readingOffset;
+    }
+    /**
+     * @param readingOffset the readingOffset to set
+     */
+    public void setHeadingOffset(Rotation readingOffset) {
+        this.readingOffset = readingOffset;
     }
 }//end FacingObject

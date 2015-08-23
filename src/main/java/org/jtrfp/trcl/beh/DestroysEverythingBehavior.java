@@ -14,18 +14,25 @@ package org.jtrfp.trcl.beh;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
+import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Positionable;
+import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DestroysEverythingBehavior extends Behavior implements CollisionBehavior {
-    private volatile int counter=2;
-    private boolean replenishingPlayerHealth=true;
+    private volatile int counter=3;
+    private volatile boolean replenishingPlayerHealth=true;
+    private volatile Future<?> future;
+    private volatile int destructionRadius = (int)TR.mapSquareSize*15;
+    final ArrayList<Positionable>[] positionables = new ArrayList[1];
     @Override
     public void proposeCollision(WorldObject other){
 	if(other instanceof DEFObject){
@@ -39,29 +46,31 @@ public class DestroysEverythingBehavior extends Behavior implements CollisionBeh
     @Override
     public void _tick(long timeMillis){
 	counter--;
-	if(counter==1&&isReplenishingPlayerHealth()){
-	    try{getParent().getTr().getGame().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
-	    catch(SupplyNotNeededException e){}//Ok, whatever.
-	    //Destoy everything
-	    final ArrayList<Positionable>[] positionables = new ArrayList[1];
-	    try{World.relevanceExecutor.submit(new Runnable(){
+	if(counter==2){
+	    //Populate the relevance collection
+	    try{future = World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
 		    positionables[0] = new ArrayList<Positionable>(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
-		}}).get();}catch(Exception e){e.printStackTrace();}
+		}});}catch(Exception e){e.printStackTrace();}
+	}else if(counter==1&&isReplenishingPlayerHealth()){
+	    try{future.get();}catch(Exception e){throw new RuntimeException(e);}
+	    try{getParent().getTr().getGame().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
+	    catch(SupplyNotNeededException e){}//Ok, whatever.
+	    final double [] parentPos = getParent().getPosition();
+	    final int destructionRadius = getDestructionRadius();
+	    //Destroy everything
 	    for(Positionable pos:positionables[0]){
-		if(pos instanceof DEFObject){
-		    final DEFObject dObj = (DEFObject)pos;
-		    dObj.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
-			    @Override
-			    public void submit(DamageableBehavior item) {
-				item.proposeDamage(new ProjectileDamage(65536));
-			    }}, DamageableBehavior.class);
-		}//end for(positionables)
-	    }//end if(counter==1)
+		final int distance = (int)Vect3D.distance(pos.getPosition(),parentPos);
+		if(pos instanceof DEFObject && !(pos instanceof TerrainChunk) && distance < destructionRadius){
+		 final DEFObject dObj = (DEFObject)pos;
+		 final DamageableBehavior beh = dObj.probeForBehavior(DamageableBehavior.class);
+		 beh.proposeDamage(new ProjectileDamage(beh.getHealth()+1));
+		}//end if(DEFObject)
+	    }//end for(positionables[0])
 	}
 	if(counter==0){//We can't stick around for long. Not with all this destroying going on.
-	    getParent().destroy();counter=2;
+	    getParent().destroy();counter=3;
 	}//end if(counter<=0)
     }//end _tick(...)
     /**
@@ -76,5 +85,17 @@ public class DestroysEverythingBehavior extends Behavior implements CollisionBeh
     public DestroysEverythingBehavior setReplenishingPlayerHealth(boolean replenishingPlayerHealth) {
         this.replenishingPlayerHealth = replenishingPlayerHealth;
         return this;
+    }
+    /**
+     * @return the destructionRadius
+     */
+    public int getDestructionRadius() {
+        return destructionRadius;
+    }
+    /**
+     * @param destructionRadius the destructionRadius to set
+     */
+    public void setDestructionRadius(int destructionRadius) {
+        this.destructionRadius = destructionRadius;
     }
 }//end DestroyesEverythinBehavior

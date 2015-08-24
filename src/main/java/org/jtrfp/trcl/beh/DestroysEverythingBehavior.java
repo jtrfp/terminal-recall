@@ -13,10 +13,8 @@
 package org.jtrfp.trcl.beh;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
@@ -25,24 +23,14 @@ import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.TerrainChunk;
-import org.jtrfp.trcl.obj.WorldObject;
 
-public class DestroysEverythingBehavior extends Behavior implements CollisionBehavior {
-    private volatile int counter=3;
-    private volatile boolean replenishingPlayerHealth=true;
-    private volatile Future<?> future;
-    private volatile int destructionRadius = (int)TR.mapSquareSize*15;
-    final ArrayList<Positionable>[] positionables = new ArrayList[1];
-    @Override
-    public void proposeCollision(WorldObject other){
-	if(other instanceof DEFObject){
-	    other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
-		    @Override
-		    public void submit(DamageableBehavior item) {
-			item.proposeDamage(new ProjectileDamage(65536));
-		    }}, DamageableBehavior.class);
-	}//end if(DEFObject)
-    }//end proposeCollision()
+public class DestroysEverythingBehavior extends Behavior {
+    private volatile int           counter=3;
+    private volatile boolean       replenishingPlayerHealth=true;
+    private volatile Future<?>     future;
+    private volatile int           destructionRadius = (int)TR.mapSquareSize*15;
+    final ArrayList<Positionable>[]positionables = new ArrayList[1];
+    
     @Override
     public void _tick(long timeMillis){
 	counter--;

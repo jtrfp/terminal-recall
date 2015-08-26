@@ -17,6 +17,7 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.concurrent.Executor;
@@ -205,14 +206,14 @@ public class Reporter extends JFrame {
 
     private class TreeEntry{
 	private final String label;
-	private Object stored;
+	private WeakReference<Object> stored;
 	public TreeEntry(String label, Object stored){
 	    this.label=label;
-	    this.stored=stored;
+	    this.stored= new WeakReference<Object>(stored);
 	}
 	public String getLabel(){return label;}
 	public Object getStored(){return stored;}
-	public void setStored(Object o){stored=o;}
+	public void setStored(Object o){stored= new WeakReference<Object>(o);}
 	@Override
 	public String toString(){return label;}
     }//end TreeEntry

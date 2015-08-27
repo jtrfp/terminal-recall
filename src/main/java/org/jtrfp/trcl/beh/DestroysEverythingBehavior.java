@@ -29,7 +29,7 @@ public class DestroysEverythingBehavior extends Behavior {
     private volatile boolean       replenishingPlayerHealth=true;
     private volatile Future<?>     future;
     private volatile int           destructionRadius = (int)TR.mapSquareSize*15;
-    final ArrayList<Positionable>[]positionables = new ArrayList[1];
+    final ArrayList<Positionable>[]positionables = new ArrayList[]{new ArrayList<Positionable>(100)};
     
     @Override
     public void _tick(long timeMillis){
@@ -39,7 +39,7 @@ public class DestroysEverythingBehavior extends Behavior {
 	    try{future = World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    positionables[0] = new ArrayList<Positionable>(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
+		    positionables[0].addAll(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
 		}});}catch(Exception e){e.printStackTrace();}
 	}else if(counter==1&&isReplenishingPlayerHealth()){
 	    try{future.get();}catch(Exception e){throw new RuntimeException(e);}
@@ -56,6 +56,7 @@ public class DestroysEverythingBehavior extends Behavior {
 		 beh.proposeDamage(new ProjectileDamage(beh.getHealth()+1));
 		}//end if(DEFObject)
 	    }//end for(positionables[0])
+	    positionables[0].clear();
 	}
 	if(counter==0){//We can't stick around for long. Not with all this destroying going on.
 	    getParent().destroy();counter=3;

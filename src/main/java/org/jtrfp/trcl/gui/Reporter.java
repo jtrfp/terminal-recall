@@ -212,7 +212,7 @@ public class Reporter extends JFrame {
 	    this.stored= new WeakReference<Object>(stored);
 	}
 	public String getLabel(){return label;}
-	public Object getStored(){return stored;}
+	public Object getStored(){return stored.get();}
 	public void setStored(Object o){stored= new WeakReference<Object>(o);}
 	@Override
 	public String toString(){return label;}

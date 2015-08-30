@@ -137,7 +137,13 @@ public class GamePause implements Extension<TR> {
 		else game_pause.setEnabled(false);
 	    }});
 	//PAUSE OUT OF FOCUS
-	tr.getRootWindow().addWindowListener(rootWindowWL = new WindowAdapter(){
+	final String pauseProperty = System.getProperty("org.jtrfp.trcl.ext.tr.GamePause.pauseOutOfFocus");
+	boolean pauseOutOfFocus = true;
+	if(pauseProperty!=null)
+	    pauseOutOfFocus = !pauseProperty.toUpperCase().contentEquals("FALSE");
+	
+	if(pauseOutOfFocus)
+	 tr.getRootWindow().addWindowListener(rootWindowWL = new WindowAdapter(){
 	    @Override
 	    public void windowDeactivated(WindowEvent e) {
 		if(game_pause.isEnabled())

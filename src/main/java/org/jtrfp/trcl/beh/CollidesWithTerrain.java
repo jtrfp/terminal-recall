@@ -68,16 +68,19 @@ public class CollidesWithTerrain extends Behavior {
 	    return;
 	if(ows.isTunnelMode())
 	    return;//No terrain to collide with while in tunnel mode.
-	if(normalMap==null)return;
+	if(normalMap==null)
+	    return;
+	final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
+	if(overworldSystem==null)return;
+	final boolean terrainMirror = overworldSystem.isChamberMode();
 	final double[] thisPos = p.getPosition();
+	if(ows.getNormalizedAltitudeMap().heightAt(thisPos[0],thisPos[2])>.9 && terrainMirror)
+	    return;//Stuck in wall. Don't bother.
 	final double groundHeight= normalMap.heightAt(thisPos[0],thisPos[2]);
 	final double ceilingHeight = (tr.getWorld().sizeY - groundHeight)
 		+ CEILING_Y_NUDGE;
 	
 	normalMap.normalAt(thisPos[0], thisPos[2], groundNormal);
-	final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
-	if(overworldSystem==null)return;
-	final boolean terrainMirror = overworldSystem.isChamberMode();
 	final double thisY = thisPos[1];
 	boolean groundImpact = thisY < (groundHeight + (autoNudge ? nudgePadding
 		: 0));
@@ -89,13 +92,6 @@ public class CollidesWithTerrain extends Behavior {
 	
 	double [] surfaceNormal = groundImpact ? groundNormal : ceilingNormal;
 	final double dot = Vect3D.dot3(surfaceNormal,getParent().getHeading().toArray());
-	//final double dot = surfaceNormal.dotProduct(getParent().getHeading());
-	/*
-	if (terrainMirror && groundHeight/(tr.getWorld().sizeY/2) > .97) {
-	    groundImpact = true;
-	    surfaceNormal = downhillDirectionXZ;
-	}//end if(smushed between floor and ceiling)
-	*/
 	if (tunnelEntryCapable && groundImpact && dot < 0){
 		final OverworldSystem os = mission.getOverworldSystem();
 		if(!os.isTunnelMode() ){

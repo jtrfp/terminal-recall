@@ -30,7 +30,7 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private SkySystem 	     skySystem;
-    private AltitudeMap              altitudeMap;
+    private AltitudeMap              altitudeMap, normalizedAltitudeMap;
     private final List<DEFObject>    defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid 
     				     terrainMirror = 
@@ -61,7 +61,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), new ColorPaletteVectorList(globalPalette),null,false);
 	    System.out.println("Loading height map...");
-	    altitudeMap = new ScalingAltitudeMap(new InterpolatingAltitudeMap(tr.getResourceManager()
+	    altitudeMap = new ScalingAltitudeMap(normalizedAltitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
 		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile())),new Vector3D(TR.mapSquareSize,tr.getWorld().sizeY / 2,TR.mapSquareSize));
 	    System.out.println("... Done");
 	    final TextureMesh textureMesh = tr.getResourceManager().getTerrainTextureMesh(
@@ -172,5 +172,11 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     }
     public TerrainSystem getTerrainSystem(){
 	return terrainSystem;
+    }
+    /**
+     * @return the normalizedAltitudeMap
+     */
+    public AltitudeMap getNormalizedAltitudeMap() {
+        return normalizedAltitudeMap;
     }
 }// end OverworldSystem

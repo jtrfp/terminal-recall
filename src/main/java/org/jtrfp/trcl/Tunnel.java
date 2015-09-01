@@ -147,32 +147,21 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	List<Segment> segs = tun.getSegments();
 	final LoadingProgressReporter[] reporters = tunnelAssemblyReporter
 		.generateSubReporters(segs.size());
-	// Vector3D tunnelEnd = TUNNEL_START_POS;
 	Rotation rotation = entrance ? new Rotation(new Vector3D(0, 0, 1),
 		groundVector) : new Rotation(new Vector3D(0, 0, 1),
 		new Vector3D(1, 0, 0));
 	Vector3D startPoint = TUNNEL_START_POS;
 
-	Vector3D segPos = Vector3D.ZERO;
+	Vector3D tunnelSpaceSegPos = Vector3D.ZERO;
 	
 	final Vector3D top = rotation.applyTo(new Vector3D(0, 1, 0));
-	/*
-	if (entrance) {
-	    // Entrance is just a stub so we only need a few of the segments
-	    List<Segment> newSegs = new ArrayList<Segment>();
-	    for (int i = 0; i < 10; i++) {
-		newSegs.add(segs.get(i));
-	    }
-	    segs = newSegs;
-	}*/
 	// CONSTRUCT AND INSTALL SEGMENTS
 	int segIndex = 0;
-	Vector3D finalPos = TUNNEL_START_POS;
+	Vector3D currentPos = TUNNEL_START_POS;
 	boolean isLastSegment=false;
 	for (int i=0; i<segs.size(); i++) {
 	    final Segment s = segs.get(i);
 	    reporters[segIndex].complete();
-	    
 	    //Apparently the third-to-last segment is the true last segment.
 	    isLastSegment=i>segs.size()-3;
 	    if(isLastSegment){
@@ -187,25 +176,24 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    (double) (s.getEndX() - s.getStartX()) * bendiness * -1,
 		    (double) (s.getEndY() - s.getStartY()) * bendiness, segLen);
 	    // Create the segment
-	    Vector3D position = startPoint.add(rotation.applyTo(segPos));
+	    currentPos = startPoint.add(rotation.applyTo(tunnelSpaceSegPos));
 	    TunnelSegment ts = new TunnelSegment(tr, s, tunnelTexturePalette,
 		    segLen, positionDelta.getX(), positionDelta.getY());
-	    ts.setPosition(position.toArray());
+	    ts.setPosition(currentPos.toArray());
 	    ts.setHeading(entrance ? groundVector : Vector3D.PLUS_I);
 	    ts.setTop(entrance ? top : Vector3D.PLUS_J);
 	    // Install the segment
 	    add(ts);
 	    installObstacles(s, tunnelColorPalette, ESTuTvPalette, tunnelTexturePalette, entrance ? groundVector
 		    : Vector3D.PLUS_I, entrance ? top : Vector3D.PLUS_J,
-		    position, TR.legacy2Modern(s.getStartWidth()
+		    currentPos, TR.legacy2Modern(s.getStartWidth()
 			    * TunnelSegment.TUNNEL_DIA_SCALAR),
 		    TR.legacy2Modern(s.getStartWidth()
 			    * TunnelSegment.TUNNEL_DIA_SCALAR), tr);
 	    // Move origin to next segment
-	    segPos = segPos.add(positionDelta);
-	    finalPos = position;
+	    tunnelSpaceSegPos = tunnelSpaceSegPos.add(positionDelta);
 	}// end for(segments)
-	return finalPos;
+	return currentPos;
     }// end buildTunnel(...)
 
     /**

@@ -452,7 +452,7 @@ public class Mission {
 		tr
 		 .getReporter()
 		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
-				+ tIndex + ".entrance", tun.getEntrance());
+				+ tIndex + ".entrance", tun.getEntrance().toString());
 		tr
 		 .getReporter()
 		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
@@ -480,7 +480,7 @@ public class Mission {
 	    portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());
 	    portalExit.notifyPositionChange();
 	    portalExit.setRootGrid(tunnel);
-	}
+	}else throw new NullPointerException("Null portal exit! "+tunnelEntranceMapSquarePos);
 	DirectionVector tunnelExitLegacyPos = tdfTun.getExit();
 	final Point tunnelExitMapSquarePos = new Point(
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
@@ -704,11 +704,13 @@ public class Mission {
     }
     
     public void registerTunnelEntrancePortal(Point mapSquareXZ, PortalExit exit){
-	tunnelPortals.put(pointToHash(mapSquareXZ),exit);
+	synchronized(tunnelPortals){
+	 tunnelPortals.put(pointToHash(mapSquareXZ),exit);}
     }
     
     PortalExit getTunnelEntrancePortal(Point mapSquareXZ){
-	return tunnelPortals.get(pointToHash(mapSquareXZ));
+	synchronized(tunnelPortals){
+	 return tunnelPortals.get(pointToHash(mapSquareXZ));}
     }
     
     public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel){

@@ -15,9 +15,10 @@ package org.jtrfp.trcl.core;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.opengl.GL3;
 
@@ -32,7 +33,7 @@ public class VQCodebookManager {
     private final 	GLTexture 	rgbaTexture,
     					esTuTvTexture,
     					indentationTexture;
-    private final	Queue<TileUpdate>tileUpdates	   = new LinkedBlockingQueue<TileUpdate>();
+    private final	Collection<TileUpdate>tileUpdates	       = new ArrayList<TileUpdate>(1024);
     private final	GPU		gpu;
     private final	GLFrameBuffer	fb;
     private final	UncaughtExceptionHandler handler;
@@ -49,6 +50,14 @@ public class VQCodebookManager {
     public VQCodebookManager(GPU gpu, UncaughtExceptionHandler handler) {
 	this.handler=handler;
 	this.gpu    = gpu;
+	
+	//Check if we can make enough codepages
+	final IntBuffer ib = ByteBuffer.allocateDirect(4).asIntBuffer();
+	gpu.getGl().glGetIntegerv(GL3.GL_MAX_ARRAY_TEXTURE_LAYERS, ib);
+	if(ib.get(0)<NUM_CODE_PAGES)
+	    throw new RuntimeException("Insufficient support for number of array texture layers: "+ib.get(0));
+	else System.out.println("GL implementation supports "+ib.get(0)+" array texture layers.");
+	
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
@@ -133,7 +142,8 @@ public class VQCodebookManager {
 	final int page = blockID / CODE256_PER_PAGE;
 	if(page >= NUM_CODE_PAGES)
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+page+" max: "+NUM_CODE_PAGES);
-	tileUpdates.add(new TileUpdate(texels,0,y,page));
+	synchronized(tileUpdates){
+	 tileUpdates.add(new TileUpdate(texels,0,y,page));}
     }
     
     private void subImage(final int codeID, final RasterRowWriter []texels,
@@ -146,7 +156,8 @@ public class VQCodebookManager {
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+z+" max: "+NUM_CODE_PAGES);
 	if(x>=CODE_PAGE_SIDE_LENGTH_TEXELS || y >= CODE_PAGE_SIDE_LENGTH_TEXELS )
 	    throw new RuntimeException("One or more texel coords intolerably out of range: x="+x+" y="+y);
-	tileUpdates.add(new TileUpdate(new RasterRowWriter[][]{texels},x,y,z));
+	synchronized(tileUpdates){
+	 tileUpdates.add(new TileUpdate(new RasterRowWriter[][]{texels},x,y,z));}
     }// end subImage(...)
     
     private final ByteBuffer workTile = ByteBuffer.allocateDirect(4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
@@ -155,15 +166,17 @@ public class VQCodebookManager {
     public void refreshStaleCodePages(){
 	refreshStaleCodePages(rgbaTexture,0);
 	refreshStaleCodePages(esTuTvTexture,1);
-	tileUpdates.clear();
+	synchronized(tileUpdates){
+	 tileUpdates.clear();}
     }
     
     private void refreshStaleCodePages(GLTexture texture, int channelArrayIndex){
-	texture.bind();
-	for(TileUpdate tu:tileUpdates){
-	    final RasterRowWriter [][]rw2 = tu.getRowWriters();
-	    if(rw2.length>channelArrayIndex){
-		final RasterRowWriter []rowWriters = tu.getRowWriters()[channelArrayIndex];
+	synchronized(tileUpdates){
+	    texture.bind();
+	    for(TileUpdate tu:tileUpdates){
+		final RasterRowWriter [][]rw2 = tu.getRowWriters();
+		if(rw2.length>channelArrayIndex){
+		    final RasterRowWriter []rowWriters = tu.getRowWriters()[channelArrayIndex];
 		    if(rowWriters!=null){
 			if(rowWriters.length==1){
 			    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
@@ -198,8 +211,9 @@ public class VQCodebookManager {
 			}//end code256
 			else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
 		    }//end if(rw!=null)
-	    }//end if(channelArrayIndex)
-	}//end for(tileUpdates)
+		}//end if(channelArrayIndex)
+	    }//end for(tileUpdates)
+	}//end sync(tileUpdates)
 	gpu.defaultTexture();
     }//end refreshStaleCodePages()
     

@@ -148,11 +148,6 @@ public class Texture implements TextureDescription {
 	this.debugName	  =debugName.replace('.', '_');
 	this.uvWrapping   =uvWrapping;
     }//end constructor
-
-    private Texture(GPU gpu, ThreadManager threadManager, Texture parent, double uOff, double vOff, double uSize,
-	    double vSize, boolean uvWrapping) {
-	this(gpu, threadManager, "subtexture: "+parent.debugName,uvWrapping);
-    }//end constructor
     
     Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
 	this(gpu,threadManager,debugName,uvWrapping);
@@ -401,7 +396,7 @@ public class Texture implements TextureDescription {
 		    cbm.setESTuTvBlock256(entry.getKey(),entry.getValue());
 		}//end for(entries)
 	    }//end flushRGBACodeblock256()
-	});// end pool thread
+	}).get();// end pool thread
     }//end vqCompress(...)
 
     private void calulateAverageColor(RasterizedBlockVectorList rbvl) {

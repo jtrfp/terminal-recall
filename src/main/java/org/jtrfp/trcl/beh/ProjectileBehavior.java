@@ -23,9 +23,6 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
-import org.jtrfp.trcl.core.Renderer;
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Player;
@@ -71,13 +68,11 @@ public class ProjectileBehavior extends Behavior implements
 	this.speed = speed;
 	honingTarget=null;
 	final WorldObject parent = getParent();
-	final Behavior beh = parent.getBehavior();
 	parent.setHeading(heading);
 	if (honing) {
 	    // Find target
 	    Positionable closestObject = null;
 	    double closestDistance = Double.POSITIVE_INFINITY;
-	    final CollisionManager cm = getParent().getTr().getCollisionManager();
 	    Collection<Positionable> possibleTargets;
 	    try{
 	     possibleTargets =
@@ -107,7 +102,7 @@ public class ProjectileBehavior extends Behavior implements
 				closestDistance = dist;
 				closestObject = possibleTarget;
 				parent.setHeading(proposedHeading);
-				getParent().getBehavior().probeForBehavior(AutoLeveling.class)
+				probeForBehavior(AutoLeveling.class)
 				.setLevelingVector(heading);
 			    }// end if(closesObject)
 			}// end if(headingDelta<1)
@@ -115,15 +110,13 @@ public class ProjectileBehavior extends Behavior implements
 		}// end if(DEFObject)
 	    }}// end for(WorldObject others)
 	    honingTarget = new WeakReference<WorldObject>((WorldObject)closestObject);
-	   // if(honingTarget==null){
-		getParent().getBehavior().probeForBehavior(AutoLeveling.class)
+		probeForBehavior(AutoLeveling.class)
 		.setLevelingVector(heading);
 		movesByVelocity.setVelocity(getParent().getHeading()
 			.scalarMultiply(speed));
-	 //   }//end if(honingTarget==null)
 	}// end if(honingTarget)
-	beh.probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
-	beh.probeForBehavior(DeathBehavior.class).reset();
+	probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
+	probeForBehavior(DeathBehavior.class).reset();
     }// end reset()
 
     @Override
@@ -140,7 +133,7 @@ public class ProjectileBehavior extends Behavior implements
 		if(Double.isNaN(honingVector.getX()))return;
 		if(Double.isNaN(honingVector.getY()))return;
 		if(Double.isNaN(honingVector.getZ()))return;
-		getParent().getBehavior().probeForBehavior(AutoLeveling.class)
+		probeForBehavior(AutoLeveling.class)
 			.setLevelingVector(honingVector);
 		movesByVelocity.setVelocity(getParent().getHeading()
 			.scalarMultiply(speed));
@@ -161,7 +154,7 @@ public class ProjectileBehavior extends Behavior implements
 	    return;// Don't shoot yourself.
 	if (parent.getObjectOfOrigin() instanceof DEFObject)
 	    return;// Don't shoot your buddy.
-	other.getBehavior().probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
+	other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
 		item.proposeDamage(new ProjectileDamage(damageOnImpact));
@@ -170,7 +163,7 @@ public class ProjectileBehavior extends Behavior implements
     }//end collidedWithDEFObject
 
     public void forceCollision(WorldObject other) {
-	other.getBehavior().probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
+	other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
 		item.proposeDamage(new ProjectileDamage(damageOnImpact));
@@ -182,16 +175,11 @@ public class ProjectileBehavior extends Behavior implements
     public void collidedWithPlayer(Player other) {
 	if (other == parent.getObjectOfOrigin())
 	    return;// Don't shoot yourself.
-	other.getBehavior().probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
+	other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
 		item.proposeDamage(new ProjectileDamage(damageOnImpact));
 	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }
-    /*
-     * if(other instanceof DEFObject){
-     * 
-     * }//end if(DEFObject)
-     */
 }// end ProjectileBehavior

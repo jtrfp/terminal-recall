@@ -24,7 +24,7 @@ public class RotationalDragBehavior extends Behavior {
     	if(timeProgressedInFrames<=0)return;
     	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);
 	final WorldObject p = getParent();
-	final RotationalMomentumBehavior rmb = (RotationalMomentumBehavior)p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+	final RotationalMomentumBehavior rmb = (RotationalMomentumBehavior)p.probeForBehavior(RotationalMomentumBehavior.class);
 	rmb.setEquatorialMomentum(rmb.getEquatorialMomentum()*finalCoeff);
 	rmb.setLateralMomentum(rmb.getLateralMomentum()*finalCoeff);
 	rmb.setPolarMomentum(rmb.getPolarMomentum()*finalCoeff);

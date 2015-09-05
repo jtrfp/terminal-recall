@@ -30,7 +30,7 @@ public class CollidesWithPlayer extends Behavior implements CollisionBehavior {
 	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
 	    player=(Player)other;
 	    if(distance<(boundingRadius+2048)){
-		getParent().getBehavior().probeForBehaviors(sub, PlayerCollisionListener.class);
+		getParent().probeForBehaviors(sub, PlayerCollisionListener.class);
 	    }//end if(close enough)
 	}//end if(player)
     }//end _proposeCollision()

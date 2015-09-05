@@ -33,7 +33,7 @@ public class DeathBehavior extends Behavior {
 	locationOfDeath= new Vector3D(wo.getPositionWithOffset());
 	spgOfLastDeath = new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(wo.getContainingGrid());
 	wo.destroy();
-	wo.getBehavior().probeForBehaviors(sub,DeathListener.class);
+	wo.probeForBehaviors(sub,DeathListener.class);
     }
     private final Submitter<DeathListener> sub = new Submitter<DeathListener>(){
 

@@ -40,7 +40,7 @@ public class DestructibleWallBehavior extends Behavior implements CollisionBehav
 		    }}, DamageableBehavior.class);
     	        }//end if(Player)
     	    else if(other instanceof Projectile)
-    		other.getBehavior().probeForBehavior(ProjectileBehavior.class).forceCollision(p);
+    		other.probeForBehavior(ProjectileBehavior.class).forceCollision(p);
     	}//end if(in range)
     }//end _proposeCollision(...)
 }//end DestructibleAllBehavior

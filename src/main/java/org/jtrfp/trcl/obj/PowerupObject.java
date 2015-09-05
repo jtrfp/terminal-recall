@@ -12,10 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.io.IOException;
 import java.util.Arrays;
 
-import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
@@ -25,7 +23,6 @@ import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
@@ -63,18 +60,18 @@ public class PowerupObject extends WorldObject{
 		
 		public void applyToPlayer(Player p) throws SupplyNotNeededException{
 			if(powerupType.getAfterburnerDelta()!=0){
-			    AfterburnerBehavior ab = p.getBehavior().probeForBehavior(AfterburnerBehavior.class);
+			    AfterburnerBehavior ab = p.probeForBehavior(AfterburnerBehavior.class);
 			    ab.addSupply(powerupType.getAfterburnerDelta());
 			}
 			if(powerupType.getInvincibilityTimeDeltaMillis()!=0){
-			    DamageableBehavior db = p.getBehavior().probeForBehavior(DamageableBehavior.class);
+			    DamageableBehavior db = p.probeForBehavior(DamageableBehavior.class);
 			    db.addInvincibility(powerupType.getInvincibilityTimeDeltaMillis());
 			}
 			if(powerupType.getInvisibiltyTimeDeltaMillis()!=0){
-			    p.getBehavior().probeForBehavior(Cloakable.class).addSupply(powerupType.getInvisibiltyTimeDeltaMillis());
+			    p.probeForBehavior(Cloakable.class).addSupply(powerupType.getInvisibiltyTimeDeltaMillis());
 			}
 			if(powerupType.getShieldDelta()!=0){
-			    DamageableBehavior db = p.getBehavior().probeForBehavior(DamageableBehavior.class);
+			    DamageableBehavior db = p.probeForBehavior(DamageableBehavior.class);
 			    db.unDamage(powerupType.getShieldDelta());
 			}
 			//wEAPON DELTAS
@@ -96,12 +93,6 @@ public class PowerupObject extends WorldObject{
 				 .create(powerupSound, new double []{.5*SoundSystem.DEFAULT_SFX_VOLUME*3,.5*SoundSystem.DEFAULT_SFX_VOLUME*3}));
 		}//end applyToPlayer()
 	}//end PowerupBehavior
-
-    private Texture frame(String name) throws IllegalAccessException,
-	    IOException, FileLoadException {
-	return (Texture) getTr().getResourceManager().getRAWAsTexture(name,
-		getTr().getGlobalPaletteVL(),null, false);
-    }
 
 	public Powerup getPowerupType()
 		{return powerupType;}

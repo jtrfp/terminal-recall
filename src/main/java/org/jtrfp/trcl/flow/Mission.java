@@ -748,7 +748,6 @@ public class Mission {
 	    Projectile [] projectiles = pf.getProjectiles();
 	    for(Projectile proj:projectiles){
 		((WorldObject)proj).
-		getBehavior().
 		probeForBehavior(LoopingPositionBehavior.class).
 		setEnable(false);
 	    }//end for(projectiles)
@@ -756,12 +755,11 @@ public class Mission {
 	final Player player = tr.getGame().getPlayer();
 	player.setActive(false);
 	player.resetVelocityRotMomentum();
-	final Behavior playerBehavior = player.getBehavior();
-	playerBehavior.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
-	playerBehavior.probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
-	playerBehavior.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
-	playerBehavior.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
-	playerBehavior.probeForBehavior(CollidesWithTerrain.class).setEnable(false);
+	player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
+	player.probeForBehavior(MovesByVelocity.class)        .setVelocity(Vector3D.ZERO);
+	player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
+	player.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
+	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
 	//entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 	tunnel.dispatchTunnelEntryNotifications();
 	final Camera secondaryCam = tr.secondaryRenderer.get().getCamera();

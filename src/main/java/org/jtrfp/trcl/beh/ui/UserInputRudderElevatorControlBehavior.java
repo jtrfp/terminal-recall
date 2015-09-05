@@ -25,7 +25,7 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
     public void _tick(long tickTimeMillis){
 	final Player p = (Player)getParent();
 	final KeyStatus keyStatus = p.getTr().getKeyStatus();
-	final RotationalMomentumBehavior rmb = p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+	final RotationalMomentumBehavior rmb = p.probeForBehavior(RotationalMomentumBehavior.class);
 	if (keyStatus.isPressed(KeyEvent.VK_UP)){
 		rmb.accelleratePolarMomentum(-2.*Math.PI*accellerationFactor*1.2);
 		}

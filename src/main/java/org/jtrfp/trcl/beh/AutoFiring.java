@@ -39,7 +39,7 @@ public class AutoFiring extends Behavior {
     public void _tick(long timeMillis){
 	final WorldObject thisObject = getParent();
 	final Player player = thisObject.getTr().getGame().getPlayer();
-	if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
+	if(player.probeForBehavior(Cloakable.class).isCloaked())return;
 	final double [] thisPos = thisObject.getPositionWithOffset();
 	final double [] playerPos = player.getPositionWithOffset();
 	final double dist = Vect3D.distance(thisPos, playerPos);
@@ -49,7 +49,7 @@ public class AutoFiring extends Behavior {
 		if(firingPattern[patIndex]){
 		    Vector3D result;
 		    if(smartFiring){
-			final Vector3D playerVelocity = player.getBehavior().probeForBehavior(Velocible.class).getVelocity();
+			final Vector3D playerVelocity = player.probeForBehavior(Velocible.class).getVelocity();
 			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TR.crossPlatformScalar; 
 			Vector3D virtualPlayerPos = interceptOf(new Vector3D(playerPos),playerVelocity,new Vector3D(thisPos),projectileSpeed);
 			if(virtualPlayerPos==null)virtualPlayerPos=new Vector3D(playerPos);

@@ -44,7 +44,7 @@ public void notifyDeath() {
 		    return null;
 		}
 		private void unDamage(){
-		    try{thisObject.getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
+		    try{thisObject.probeForBehavior(DamageableBehavior.class).unDamage();}
 		    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!
 		}
 		

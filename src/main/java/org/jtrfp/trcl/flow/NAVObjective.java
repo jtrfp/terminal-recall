@@ -250,7 +250,7 @@ public abstract class NAVObjective {
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
 			    public void run() {
-				shieldGen.getBehavior().probeForBehavior(DamageableBehavior.class).setEnable(true);
+				shieldGen.probeForBehavior(DamageableBehavior.class).setEnable(true);
 				shieldGen.setActive(true);
 			    }
 			}));

@@ -78,16 +78,16 @@ private static final String [] TYPES = new String[]{
     }
     
     public void reset(Vector3D pos, Vector3D newVelocity){
-	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(lifespan());
+	probeForBehavior(LimitedLifeSpan.class).reset(lifespan());
 	setHeading(newVelocity.normalize());
 	setPosition(pos.toArray());
 	setVisible(true);
 	setActive(true);
-	getBehavior().probeForBehavior(RotationalMomentumBehavior.class)
+	probeForBehavior(RotationalMomentumBehavior.class)
 		.setEquatorialMomentum(.2*Math.random())
 		.setLateralMomentum(.2*Math.random())
 		.setPolarMomentum(.2*Math.random());
-	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
-	getBehavior().probeForBehavior(DeathBehavior.class).reset();
+	probeForBehavior(Velocible.class).setVelocity(newVelocity);
+	probeForBehavior(DeathBehavior.class).reset();
     }//end reset()
 }//end Debris

@@ -138,18 +138,14 @@ public class TunnelExitObject extends PortalEntrance {
 		    player.resetVelocityRotMomentum();
 		    player.probeForBehavior(CollidesWithTunnelWalls.class)
 		    	    .setEnable(false);
-		    player.getBehavior()
-			    .probeForBehavior(DamageableBehavior.class)
+		    player.probeForBehavior(DamageableBehavior.class)
 			    .addInvincibility(250);// Safety kludge when near
 						   // walls.
-		    player.getBehavior()
-			    .probeForBehavior(CollidesWithTerrain.class)
+		    player.probeForBehavior(CollidesWithTerrain.class)
 			    .setEnable(true);
-		    player.getBehavior()
-			    .probeForBehavior(LoopingPositionBehavior.class)
+		    player.probeForBehavior(LoopingPositionBehavior.class)
 			    .setEnable(true);
-		    player.getBehavior()
-			    .probeForBehavior(
+		    player.probeForBehavior(
 				    HeadingXAlwaysPositiveBehavior.class)
 			    .setEnable(false);
 		    // Update debug data
@@ -162,7 +158,6 @@ public class TunnelExitObject extends PortalEntrance {
 			Projectile[] projectiles = pf.getProjectiles();
 			for (Projectile proj : projectiles) {
 			    ((WorldObject) proj)
-				    .getBehavior()
 				    .probeForBehavior(
 					    LoopingPositionBehavior.class)
 				    .setEnable(true);

@@ -32,7 +32,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 		fuelRemaining-=((double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/
 			(double)Powerup.AFTERBURNER_TIME_PER_UNIT_MILLIS);
 	    }//end if(firstDetected)
-	    p.getBehavior().probeForBehavior(Propelled.class).setPropulsion(newMax).setMaxPropulsion(newMax);
+	    p.probeForBehavior(Propelled.class).setPropulsion(newMax).setMaxPropulsion(newMax);
 	}//end if(F)
 	else{
 	    if(firstDetected==false)
@@ -44,7 +44,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private void afterburnerOnTransient(WorldObject p){
 	//Save former max, former propulsion
 	//TODO: Ignition SFX, start sustain SFX
-	Propelled prop = p.getBehavior().probeForBehavior(Propelled.class);
+	Propelled prop = p.probeForBehavior(Propelled.class);
 	formerMax=prop.getMaxPropulsion();
 	formerProp=prop.getPropulsion();
 	newMax=formerMax*3;
@@ -52,7 +52,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     
     private void afterburnerOffTransient(WorldObject p){
 	//TODO: De-Ignition SFX, end sustain SFX
-	Propelled prop = p.getBehavior().probeForBehavior(Propelled.class);
+	Propelled prop = p.probeForBehavior(Propelled.class);
 	prop.setMaxPropulsion(formerMax);
 	prop.setPropulsion(formerProp);
     }//end afterburnerOffTransient(...)

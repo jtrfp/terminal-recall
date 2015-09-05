@@ -65,7 +65,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
     private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
-    private final NullBehavior 		nullBehavior;
+    //private final NullBehavior 		nullBehavior;
     private boolean 			active 		   = true;
     private byte 			renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;
@@ -86,7 +86,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(new PropertyChangeSupport(this));
 
     public WorldObject(TR tr) {
-	this.nullBehavior = new NullBehavior(this);
 	this.tr = tr;
 	if(tr!=null)
 	 matrixID = tr.gpu.get().matrixWindow.get().create();
@@ -533,10 +532,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public Model getModel() {
 	return model;
-    }
-
-    public Behavior getBehavior() {
-	return nullBehavior;
     }
 
     /**

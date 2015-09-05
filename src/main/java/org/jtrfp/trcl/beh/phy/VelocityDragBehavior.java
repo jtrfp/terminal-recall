@@ -30,7 +30,7 @@ public class VelocityDragBehavior extends Behavior
 	    	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
 	    	if(timeProgressedInFrames<=0)return;
 	    	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);
-	    	Velocible v=getParent().getBehavior().probeForBehavior(Velocible.class);
+	    	Velocible v=getParent().probeForBehavior(Velocible.class);
 	    	v.setVelocity(v.getVelocity().scalarMultiply(finalCoeff));
 		}
 

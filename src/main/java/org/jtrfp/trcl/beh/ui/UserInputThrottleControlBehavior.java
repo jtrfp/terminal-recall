@@ -24,11 +24,11 @@ public class UserInputThrottleControlBehavior extends Behavior implements Player
     public void _tick(long timeInMillis){
 	final KeyStatus keyStatus=getParent().getTr().getKeyStatus(); 
 	if (keyStatus.isPressed(KeyEvent.VK_A)){
-	    	Propelled p=getParent().getBehavior().probeForBehavior(Propelled.class);
+	    	Propelled p=getParent().probeForBehavior(Propelled.class);
 	    	p.deltaPropulsion(nudgeUnit);
 		}
 	if (keyStatus.isPressed(KeyEvent.VK_Z)){
-	    	Propelled p=getParent().getBehavior().probeForBehavior(Propelled.class);
+	    	Propelled p=getParent().probeForBehavior(Propelled.class);
 	    	p.deltaPropulsion(-nudgeUnit);
 		}
     }//end _tick(...)

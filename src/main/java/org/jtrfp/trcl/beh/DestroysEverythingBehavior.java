@@ -43,7 +43,7 @@ public class DestroysEverythingBehavior extends Behavior {
 		}});}catch(Exception e){e.printStackTrace();}
 	}else if(counter==1&&isReplenishingPlayerHealth()){
 	    try{future.get();}catch(Exception e){throw new RuntimeException(e);}
-	    try{getParent().getTr().getGame().getPlayer().getBehavior().probeForBehavior(DamageableBehavior.class).unDamage();}
+	    try{getParent().getTr().getGame().getPlayer().probeForBehavior(DamageableBehavior.class).unDamage();}
 	    catch(SupplyNotNeededException e){}//Ok, whatever.
 	    final double [] parentPos = getParent().getPosition();
 	    final int destructionRadius = getDestructionRadius();

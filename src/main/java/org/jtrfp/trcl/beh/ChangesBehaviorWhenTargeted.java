@@ -29,7 +29,7 @@ public class ChangesBehaviorWhenTargeted extends Behavior implements
     @Override
     public void notifyBecomingCurrentTarget() {
 	for(Class<? extends Behavior> c:behaviorsToChange){
-	    getParent().getBehavior().probeForBehaviors(bcSubmitter, (Class<Behavior>)c);
+	    getParent().probeForBehaviors(bcSubmitter, (Class<Behavior>)c);
 	}//end for(behaviors)
     }//end notifyBecomingCurrentTarget()
     

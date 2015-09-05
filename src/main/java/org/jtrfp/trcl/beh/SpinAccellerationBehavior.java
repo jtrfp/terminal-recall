@@ -21,8 +21,7 @@ public class SpinAccellerationBehavior extends Behavior {
     
     @Override
     public void _tick(long millis){
-	final WorldObject p = getParent();
-	final RotationalMomentumBehavior rmb = p.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+	final RotationalMomentumBehavior rmb = probeForBehavior(RotationalMomentumBehavior.class);
 	switch(spinMode){
 	 case LATERAL:rmb.accellerateLateralMomentum(spinAccelleration);break;
 	 case POLAR:rmb.accelleratePolarMomentum(spinAccelleration);break;

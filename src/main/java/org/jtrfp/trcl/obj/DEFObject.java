@@ -227,7 +227,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    addBehavior(new CustomPlayerWithinRangeBehavior(){
     		@Override
     		public void withinRange(){
-    		    DEFObject.this.getBehavior().
+    		    DEFObject.this.
     		     probeForBehavior(AccelleratedByPropulsion.class).
     		     setThrustVector(Vector3D.PLUS_J).
     		     setEnable(true);
@@ -446,9 +446,9 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	else 	{//addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 	    	addBehavior(new CollidesWithTerrain().setAutoNudge(true).setNudgePadding(40000));
 	    	}
-	getBehavior().probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
-	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
-	getBehavior().probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/1.2);
+	probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
+	probeForBehavior(Propelled.class).setMinPropulsion(0);
+	probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/1.2);
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
@@ -529,8 +529,7 @@ private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefiniti
 	@Override
 	public void healthBelowThreshold(){// Spinout and crash
 	    final WorldObject 	parent 	= getParent();
-	    final Behavior 	beh 	= parent.getBehavior();
-	    if(beh.probeForBehavior(DamageableBehavior.class).getHealth()<1)
+	    if(probeForBehavior(DamageableBehavior.class).getHealth()<1)
 		return;//No point; already dying.
 	    //Trigger small boom
 	    final TR tr = parent.getTr();
@@ -538,13 +537,13 @@ private void possibleSpinAndCrashOnDeath(double probability, final EnemyDefiniti
 	     create(tr.getResourceManager().soundTextures.get("EXP2.WAV"), new double[]{.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2});
 	    
 	    addBehavior(new PulledDownByGravityBehavior().setEnable(true));
-	    beh.probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
-	    beh.probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
-	    beh.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
-	    beh.probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion).setExplosionSound(BIG_EXP_SOUNDS[(int)(Math.random()*3)]);
+	    probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
+	    probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
+	    probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
+	    probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion).setExplosionSound(BIG_EXP_SOUNDS[(int)(Math.random()*3)]);
 	    if(def.getThrustSpeed()<800000){
-		beh.probeForBehavior(HasPropulsion.class).setPropulsion(0);
-		beh.probeForBehavior(VelocityDragBehavior.class).setEnable(false);
+		probeForBehavior(HasPropulsion.class).setPropulsion(0);
+		probeForBehavior(VelocityDragBehavior.class).setEnable(false);
 		}
 	    //Catastrophy
 	    final double spinSpeedCoeff=Math.max(def.getThrustSpeed()!=0?def.getThrustSpeed()/1600000:.3,.4);
@@ -574,14 +573,14 @@ private void possibleBobbingSpinAndCrashOnDeath(double probability, EnemyDefinit
 		@Override
 		public void healthBelowThreshold(){
 		    final WorldObject 	parent 	= getParent();
-		    parent.getBehavior().probeForBehavior(MovesByVelocity.class).setEnable(true);
-		parent.getBehavior().probeForBehavior(HasPropulsion.class).setEnable(true);
-		parent.getBehavior().probeForBehavior(AccelleratedByPropulsion.class).setEnable(true);
-		parent.getBehavior().probeForBehavior(VelocityDragBehavior.class).setEnable(true);
-		parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class).setEnable(true);
+		    parent.probeForBehavior(MovesByVelocity.class).setEnable(true);
+		parent.probeForBehavior(HasPropulsion.class).setEnable(true);
+		parent.probeForBehavior(AccelleratedByPropulsion.class).setEnable(true);
+		parent.probeForBehavior(VelocityDragBehavior.class).setEnable(true);
+		parent.probeForBehavior(RotationalMomentumBehavior.class).setEnable(true);
 		
-		    parent.getBehavior().probeForBehavior(SteadilyRotating.class).setEnable(false);
-		    parent.getBehavior().probeForBehavior(Bobbing.class).setEnable(false);
+		    parent.probeForBehavior(SteadilyRotating.class).setEnable(false);
+		    parent.probeForBehavior(Bobbing.class).setEnable(false);
 		   // parent.getBehavior().probeForBehavior(AutoFiring.class).setBerzerk(true)
 		   // 	.setFiringPattern(new boolean[]{true}).setTimePerPatternEntry(100);
 		}};
@@ -606,10 +605,9 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 		@Override
 		public void healthBelowThreshold(){
 		    final WorldObject 	parent 	= getParent();
-		    final Behavior	beh	= parent.getBehavior();
-		    final HasPropulsion hp 	= beh.probeForBehavior(HasPropulsion.class);
+		    final HasPropulsion hp 	= probeForBehavior(HasPropulsion.class);
 		    hp.setPropulsion(hp.getPropulsion()/1);
-		    beh.probeForBehavior(AutoLeveling.class).
+		    probeForBehavior(AutoLeveling.class).
 		    	setLevelingAxis(LevelingAxis.HEADING).
 		    	setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985,.985,.985);
 		}};

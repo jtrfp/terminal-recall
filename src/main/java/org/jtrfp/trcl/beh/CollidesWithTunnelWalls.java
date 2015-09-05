@@ -37,7 +37,7 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
     }
 	public void proposeCollision(WorldObject other){
 		final WorldObject parent = getParent();
-		final Velocible velocible = getParent().getBehavior().probeForBehavior(Velocible.class);
+		final Velocible velocible = getParent().probeForBehavior(Velocible.class);
 		if(other instanceof TunnelSegment){
 		    	final TunnelSegment seg = (TunnelSegment)other;
 		    	segmt = new WeakReference<TunnelSegment>((TunnelSegment)other);
@@ -76,7 +76,7 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
 				    	final double[]inwardNormal = Vect3D.normalize(delta);
 					surfaceNormalVar = inwardNormal;
 					//Notify listeners
-					parent.getBehavior().probeForBehaviors(sub, SurfaceImpactListener.class);
+					parent.probeForBehaviors(sub, SurfaceImpactListener.class);
 					//final RotationalMomentumBehavior rmb = parent.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
 					/*
 					if(rmb!=null){//If this is a spinning object, reverse its spin momentum

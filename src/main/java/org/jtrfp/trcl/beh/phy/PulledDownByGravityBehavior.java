@@ -22,6 +22,6 @@ public class PulledDownByGravityBehavior extends Behavior {
     @Override
     public void _tick(long tickTimeMillis){
 	final WorldObject p = getParent();
-	p.getBehavior().probeForBehavior(Velocible.class).accellerate(G);
+	p.probeForBehavior(Velocible.class).accellerate(G);
     }
 }//end PulledDownByGravityBehavior

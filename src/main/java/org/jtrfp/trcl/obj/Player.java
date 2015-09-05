@@ -149,12 +149,12 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	}
 	addBehavior(new UserInputWeaponSelectionBehavior().setBehaviors(weapons));
 	//camera = tr.renderer.get().getCamera();
-	getBehavior().probeForBehavior(VelocityDragBehavior.class)
+	probeForBehavior(VelocityDragBehavior.class)
 		.setDragCoefficient(.86);
-	getBehavior().probeForBehavior(Propelled.class).setMinPropulsion(0);
-	getBehavior().probeForBehavior(Propelled.class)
+	probeForBehavior(Propelled.class).setMinPropulsion(0);
+	probeForBehavior(Propelled.class)
 		.setMaxPropulsion(900000);
-	getBehavior().probeForBehavior(RotationalDragBehavior.class)
+	probeForBehavior(RotationalDragBehavior.class)
 		.setDragCoefficient(.86);
 	setActive(false);
     }//end constructor

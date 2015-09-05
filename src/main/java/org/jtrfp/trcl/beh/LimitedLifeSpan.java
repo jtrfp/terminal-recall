@@ -21,7 +21,7 @@ public class LimitedLifeSpan extends Behavior {
 	final WorldObject p = getParent();
 	timeRemainingMillis-=p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick();
 	if(timeRemainingMillis<=0){
-	    p.getBehavior().probeForBehavior(DeathBehavior.class).die();
+	    p.probeForBehavior(DeathBehavior.class).die();
 	}//end if(remainign)
     }
     

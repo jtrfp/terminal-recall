@@ -34,8 +34,8 @@ public class HorizAimAtPlayerBehavior extends Behavior {
 	if(chaseTarget!=null){
 	    WorldObject thisObject = getParent();
 	    final Player player = thisObject.getTr().getGame().getPlayer();
-	    if(player.getBehavior().probeForBehavior(Cloakable.class).isCloaked())return;
-	    final RotationalMomentumBehavior rmb = thisObject.getBehavior().probeForBehavior(RotationalMomentumBehavior.class);
+	    if(player.probeForBehavior(Cloakable.class).isCloaked())return;
+	    final RotationalMomentumBehavior rmb = thisObject.probeForBehavior(RotationalMomentumBehavior.class);
 
 	    assert !Vect3D.isAnyEqual(chaseTarget.getPosition(), Double.POSITIVE_INFINITY);
 	    assert !Vect3D.isAnyEqual(thisObject.getPosition(), Double.NEGATIVE_INFINITY);

@@ -36,13 +36,13 @@ public class ProjectileBillboard extends BillboardSprite implements Projectile {
     }
     public void reset(double [] newPos, Vector3D newVelocity, WorldObject objectOfOrigin){
 	this.objectOfOrigin= new WeakReference<WorldObject>(objectOfOrigin);
-	getBehavior().probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
+	probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	setHeading(newVelocity.normalize());
 	setPosition(newPos[0],newPos[1],newPos[2]);
 	setVisible(true);
 	setActive(true);
-	getBehavior().probeForBehavior(Velocible.class).setVelocity(newVelocity);
-	getBehavior().probeForBehavior(ProjectileBehavior.class).reset(newVelocity.normalize(),newVelocity.getNorm());
+	probeForBehavior(Velocible.class).setVelocity(newVelocity);
+	probeForBehavior(ProjectileBehavior.class).reset(newVelocity.normalize(),newVelocity.getNorm());
     }//end reset()
     @Override
     public WorldObject getObjectOfOrigin() {

@@ -51,7 +51,7 @@ private final boolean retreatAboveSky;
 	    final Player player = thisObject.getTr().getGame().getPlayer();
 	    final double [] thisPos = thisObject.getPosition();
 	    final double [] playerPos = player.getPosition();
-	    boolean cloakedPlayer = player.getBehavior().probeForBehavior(Cloakable.class).isCloaked();
+	    boolean cloakedPlayer = player.probeForBehavior(Cloakable.class).isCloaked();
 	    final double distFromPlayer = cloakedPlayer?Double.POSITIVE_INFINITY:Vect3D.distance(thisPos, playerPos);
 	    if(distFromPlayer>ignorePlayerDistanceMin){
 		ignorePlayer();
@@ -65,7 +65,6 @@ private final boolean retreatAboveSky;
     }//end _tick(...)
     
     private void retreat(){
-	//System.out.println("SmartPlaneBehavior: Retreat.");
 	aimAtPlayer.setEnable(true);
 	aimAtPlayer.setReverse(true);
 	autoFiring.setEnable(false);

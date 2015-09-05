@@ -63,7 +63,7 @@ private final DashboardLayout layout;
 		setContent(layout.getHumanReadableObjective(obj));
 	final WorldObject target = obj.getTarget();
 	if(target!=null)
-	    target.getBehavior().probeForBehaviors(ntbSubmitter, NAVTargetableBehavior.class);
+	    target.probeForBehaviors(ntbSubmitter, NAVTargetableBehavior.class);
     }//end updateNAVState()
     
     private final Submitter<NAVTargetableBehavior> ntbSubmitter = new Submitter<NAVTargetableBehavior>(){

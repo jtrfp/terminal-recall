@@ -20,7 +20,7 @@ public class UpdatesHealthMeterBehavior extends Behavior implements GUIUpdateBeh
     private ManuallySetController controller;
     @Override
     public void _tick(long tickTimeMillis){
-	    DamageableBehavior dmg = getParent().getBehavior().probeForBehavior(DamageableBehavior.class);
+	    DamageableBehavior dmg = getParent().probeForBehavior(DamageableBehavior.class);
 	    controller.setFrame(1.-((dmg.getHealth())/65535.));
     }
     /**

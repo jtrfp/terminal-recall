@@ -27,7 +27,7 @@ public class AdjustAltitudeToPlayerBehavior extends Behavior {
     
     public AdjustAltitudeToPlayerBehavior(Player player){
 	this.player=player;
-	this.playerCloakability=player.getBehavior().probeForBehavior(Cloakable.class);
+	this.playerCloakability=player.probeForBehavior(Cloakable.class);
     }//end AdjustAltitudeToPlayerBehavior
     
     @Override
@@ -37,7 +37,7 @@ public class AdjustAltitudeToPlayerBehavior extends Behavior {
 	if(!reverse&&Math.abs(player.getPosition()[1]-thisObject.getPosition()[1])<hysteresis)
 	    return;
 	final boolean up=(player.getPosition()[1]>thisObject.getPosition()[1])!=reverse;
-	    thisObject.getBehavior().probeForBehavior(MovesByVelocity.class).accellerate(up?UP:DOWN);
+	    thisObject.probeForBehavior(MovesByVelocity.class).accellerate(up?UP:DOWN);
     }//end _tick(...)
 
     public AdjustAltitudeToPlayerBehavior setAccelleration(int accelleration) {

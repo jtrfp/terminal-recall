@@ -113,8 +113,7 @@ public class CollidesWithTerrain extends Behavior {
 	    p.notifyPositionChange();
 	   /* if(dot < 0 || ignoreHeadingForImpact)*/{//If toward ground, call impact listeners.
 		surfaceNormalVar = surfaceNormal;
-		final Behavior behavior = p.getBehavior();
-		behavior.probeForBehaviors(sub, SurfaceImpactListener.class);
+		p.probeForBehaviors(sub, SurfaceImpactListener.class);
 	    }//end if(pointedTowardGround)
 	}// end if(collision)
     }// end _tick

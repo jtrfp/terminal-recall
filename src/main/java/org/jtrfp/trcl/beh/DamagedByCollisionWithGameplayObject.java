@@ -29,7 +29,7 @@ public class DamagedByCollisionWithGameplayObject extends Behavior implements
 		p.getPosition());
 	if (distance < CollisionManager.SHIP_COLLISION_DISTANCE) {
 	    if (other instanceof Player && getParent() instanceof DEFObject) {
-		p.getBehavior().probeForBehaviors(
+		p.probeForBehaviors(
 			new AbstractSubmitter<DamageableBehavior>() {
 			    @Override
 			    public void submit(DamageableBehavior item) {
@@ -37,7 +37,7 @@ public class DamagedByCollisionWithGameplayObject extends Behavior implements
 					65535 / 30));
 			    }
 			}, DamageableBehavior.class);
-		other.getBehavior().probeForBehaviors(
+		other.probeForBehaviors(
 			new AbstractSubmitter<DamageableBehavior>() {
 			    @Override
 			    public void submit(DamageableBehavior item) {

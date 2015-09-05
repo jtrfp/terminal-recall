@@ -30,7 +30,6 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.beh.NullBehavior;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.Renderer;
@@ -65,7 +64,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
     private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
-    //private final NullBehavior 		nullBehavior;
     private boolean 			active 		   = true;
     private byte 			renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;

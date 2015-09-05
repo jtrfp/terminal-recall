@@ -164,14 +164,13 @@ public class VQCodebookManager {
     private final ByteBuffer workTile256=ByteBuffer.allocateDirect(256*4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
     
     public void refreshStaleCodePages(){
-	refreshStaleCodePages(rgbaTexture,0);
-	refreshStaleCodePages(esTuTvTexture,1);
 	synchronized(tileUpdates){
+	 refreshStaleCodePages(rgbaTexture,0);
+	 refreshStaleCodePages(esTuTvTexture,1);
 	 tileUpdates.clear();}
     }
     
     private void refreshStaleCodePages(GLTexture texture, int channelArrayIndex){
-	synchronized(tileUpdates){
 	    texture.bind();
 	    for(TileUpdate tu:tileUpdates){
 		final RasterRowWriter [][]rw2 = tu.getRowWriters();
@@ -213,7 +212,6 @@ public class VQCodebookManager {
 		    }//end if(rw!=null)
 		}//end if(channelArrayIndex)
 	    }//end for(tileUpdates)
-	}//end sync(tileUpdates)
 	gpu.defaultTexture();
     }//end refreshStaleCodePages()
     

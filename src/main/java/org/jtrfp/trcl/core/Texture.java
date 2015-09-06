@@ -287,6 +287,11 @@ public class Texture implements TextureDescription {
 		setRGBACodebookTexelsAt(vlrRGBA, codeX,codeY,diameterInCodes, globalCodeIndex);
 		if(vlrESTuTv!=null)
 		 setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex);
+		else{
+		    final VectorList blackVL = new ConstantVectorList(0, sideLength*sideLength, 4);
+		    final VectorListND blackVLR = new RasterizedBlockVectorList(
+			    new VectorListRasterizer(blackVL, new int[]{sideLength,sideLength}), 4);
+		 setESTuTvCodebookTexelsAt(blackVLR, codeX,codeY,diameterInCodes, globalCodeIndex);}
 		}//end for(codeX)
 	}//end for(codeY)
 	flushRGBACodeblock256();

@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL3;
-
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -31,11 +29,11 @@ import org.jtrfp.trcl.core.LazyTRFuture;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.Mission.Result;
-import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -62,7 +60,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
     //private TXTMissionBriefFile missionTXT;
     private ColorPaletteVectorList palette;
-    private LVLFile		lvl;
+    private volatile LVLFile	   lvl;
     private TimerTask	  scrollTimer;
     private WorldObject	  planetObject;
     private final BriefingLayout layout;
@@ -140,12 +138,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     }
     
     private void planetDisplayMode(LVLFile lvl){
-	final Game   game 	 = tr.getGame();
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
-	final GPU 	gpu 	 = tr.gpu.get();
-	final GL3	gl	 = gpu.getGl();
 	this.lvl		 = lvl;
+	missionTXT.reset();
 	
 	//TODO: Depth range
 	
@@ -155,9 +151,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    planetObject=null;
 	}
 	try{
+	 TextureDescription rawTex;
 	 final Model planetModel = rm.getBINModel(
 		 missionTXT.get().getPlanetModelFile(),
-		 rm.getRAWAsTexture(missionTXT.get().getPlanetTextureFile(), 
+		 rawTex = rm.getRAWAsTexture(missionTXT.get().getPlanetTextureFile(), 
 			 getPalette(), null, false, true),
 		 8,false,getPalette(),null);
 	 	     planetObject = new WorldObject(tr,planetModel);
@@ -214,12 +211,9 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 
     public void briefingSequence(LVLFile lvl) {
 	final Game   game 	 = tr.getGame();
-	final ResourceManager rm = tr.getResourceManager();
 	final Renderer renderer  = tr.mainRenderer.get();
 	final Camera camera 	 = renderer.getCamera();
-	final OverworldSystem overworld
-				= game.getCurrentMission().getOverworldSystem();
-	//missionTXT		 = rm.getMissionText(lvl.getBriefingTextFile());
+	this.lvl                 = lvl;
 	missionTXT.reset();
 	game.getPlayer().setActive(false);
 	planetDisplayMode(lvl);

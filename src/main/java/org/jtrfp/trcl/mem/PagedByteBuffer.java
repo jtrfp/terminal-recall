@@ -84,7 +84,8 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     }//end deallocate()
     
     private void markPageStale(int indexInBytes){
-	stalePages.add(new Integer(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES));
+	synchronized(stalePages){
+	 stalePages.add(new Integer(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES));}
     }
     
     /**
@@ -149,14 +150,16 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	return this;
     }//end put(...)
     
+    private final ArrayList<Integer> spBuffer = new ArrayList<Integer>(1024);
+    
     void flushStalePages(){
-	final Iterator<Integer> iterator = stalePages.iterator();
-	
-	while(iterator.hasNext()){
-	    final Integer value = iterator.next();
+	synchronized(stalePages){
+	 spBuffer.addAll(stalePages);
+	 stalePages.clear();
+	}//end sync()
+	 for(int value:spBuffer)
 	    gpu.memoryManager.get().flushRange(pageTable.get(value)*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
-	    iterator.remove();
-	}
+	 spBuffer.clear();
     }//end flushStalePages()
 
     @Override

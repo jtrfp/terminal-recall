@@ -12,20 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl.mem;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFuture;
-import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
@@ -41,12 +38,10 @@ public final class MemoryManager {
     private final ByteBuffer [] 		physicalMemory 	= new ByteBuffer[1];
     private final ReallocatableGLTextureBuffer 	glPhysicalMemory;
     private final GPU				gpu;
-    //private final ThreadManager			threadManager;
-    private final BlockingQueue<WeakReference<PagedByteBuffer>>		
-    						newPagedByteBuffers             = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
-    						newPagedByteBuffersOverflow     = new LinkedBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
-    						deletedPagedByteBuffers         = new ArrayBlockingQueue<WeakReference<PagedByteBuffer>>(1024),
-    						deletedPagedByteBuffersOverflow = new LinkedBlockingQueue<WeakReference<PagedByteBuffer>>(1024);
+    //WARNING: Don't forget to lock these before access!
+    private final Collection<WeakReference<PagedByteBuffer>>
+                                                newPagedByteBuffers     = new ArrayList<WeakReference<PagedByteBuffer>>(1024),
+                                                deletedPagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
     private final ArrayList<WeakReference<PagedByteBuffer>>	
     						pagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
     private final GLExecutor                    glExecutor;
@@ -123,43 +118,38 @@ public final class MemoryManager {
     }
     
     void registerPagedByteBuffer(WeakReference<PagedByteBuffer> b){
-	try{newPagedByteBuffers.add(b);}
-	catch(IllegalStateException e){
-	    newPagedByteBuffersOverflow.offer(b);
+	synchronized(newPagedByteBuffers){
+	    newPagedByteBuffers.add(b);
 	}
-    }
+    }//end registerPagedByteBuffer(...)
     
     void deRegisterPagedByteBuffer(WeakReference<PagedByteBuffer> b){
-	try{deletedPagedByteBuffers.add(b);}
-	catch(IllegalStateException e){
-	    deletedPagedByteBuffersOverflow.offer(b);
+	synchronized(deletedPagedByteBuffers){
+	    deletedPagedByteBuffers.add(b);
 	}
     }
-    
-    private final ArrayList<WeakReference<PagedByteBuffer>> toRemove = new ArrayList<WeakReference<PagedByteBuffer>>();
     
     public void flushStalePages(){
 	if(!glPhysicalMemory.isMapped())
 	    return;
 	
-	deletedPagedByteBuffers.drainTo(toRemove);
-	deletedPagedByteBuffersOverflow.drainTo(toRemove);
-	
-	pagedByteBuffers.removeAll(toRemove);
-	toRemove.clear();
-	
-	newPagedByteBuffers.drainTo(pagedByteBuffers);
-	newPagedByteBuffersOverflow.drainTo(pagedByteBuffers);
-	
-	final Iterator<WeakReference<PagedByteBuffer>> it = pagedByteBuffers.iterator();
-	while(it.hasNext()){
-	    final WeakReference<PagedByteBuffer> r = it.next();
-	    if(r.get()==null)
-		it.remove();
-	    else{
-		r.get().flushStalePages();
-	    }//end else{}
-	}//end while(hasNext)
+	synchronized(deletedPagedByteBuffers){synchronized(newPagedByteBuffers){synchronized(pagedByteBuffers){
+    	 
+    	 pagedByteBuffers.removeAll(deletedPagedByteBuffers);
+    	 deletedPagedByteBuffers.clear();
+    	 
+    	 pagedByteBuffers.addAll(newPagedByteBuffers);
+    	 newPagedByteBuffers.clear();
+    	 
+    	 final Iterator<WeakReference<PagedByteBuffer>> it = pagedByteBuffers.iterator();
+    	 while(it.hasNext()){
+    	    final WeakReference<PagedByteBuffer> r = it.next();
+    	    if(r.get()==null)
+    		it.remove();
+    	    else
+    		r.get().flushStalePages();
+    	 }//end while(hasNext)
+	}}}//end syncs()
     }//end flushStalePages()
     
     public void bindToUniform(int textureUnit, GLProgram shaderProgram, GLUniform uniform) {

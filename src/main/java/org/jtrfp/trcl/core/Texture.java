@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,7 +46,6 @@ import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
-import org.jtrfp.trcl.pool.IntArrayList;
 
 public class Texture implements TextureDescription {
     private final ThreadManager         threadManager;
@@ -56,8 +56,8 @@ public class Texture implements TextureDescription {
     private 	  Color 		averageColor;
     private final String 		debugName;
     private	  Integer		tocIndex;
-    private	  int[]			subTextureIDs;
-    private	  int[][]		codebookStartOffsetsAbsolute;
+    private	  ArrayList<Integer>	subTextureIDs = new ArrayList<Integer>();
+    private	  ArrayList<Integer>	codebookStartOffsets256 = new ArrayList<Integer>();
     private final boolean		uvWrapping;
     private volatile int		texturePage;
     private int				sideLength;
@@ -72,15 +72,7 @@ public class Texture implements TextureDescription {
 	 for(int stID:subTextureIDs)
 	    stw.free(stID);
 	//Codebook entries
-	if(codebookStartOffsetsAbsolute!=null)
-	 for(int [] array:codebookStartOffsetsAbsolute){
-	    //for(int entry:array){
-	//	tm.vqCodebookManager.get().freeCodebook256(entry/256);
-	     for(int i=0; i<array.length;i++)
-		 array[i]/=256;//WARNING: This corrupts the original data
-	    tm.vqCodebookManager.get().freeCodebook256(new IntArrayList(array).setRepresentFullSize(true));
-	   // }//end for(entries)
-	 }//end for(arrays)
+	tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
 	super.finalize();
     }//end finalize()
     
@@ -216,22 +208,19 @@ public class Texture implements TextureDescription {
 		@Override
 		public Void call() throws Exception {
 		// Create subtextures
-		subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
-		codebookStartOffsetsAbsolute		= new int[diameterInSubtextures*diameterInSubtextures][6];
-		for(int i=0; i<subTextureIDs.length; i++){
+		//subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
+		for(int i=0; i<diameterInSubtextures*diameterInSubtextures; i++){
 		    //Create subtexture ID
-		    subTextureIDs[i]=stw.create();
-		    tm.vqCodebookManager.get().newCodebook256(new IntArrayList(codebookStartOffsetsAbsolute[i]), 6);
-		    for(int off=0; off<6; off++){
-			codebookStartOffsetsAbsolute[i][off]*= 256;}
+		    subTextureIDs.add(stw.create());
+		    tm.vqCodebookManager.get().newCodebook256(codebookStartOffsets256, 6);
 		}//end for(subTextureIDs)
 		threadManager.submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public final Void call() {
 			//Set magic
 			toc.magic.set(tocIndex, 1337);
-			for(int i=0; i<subTextureIDs.length; i++){
-			 final int id = subTextureIDs[i];
+			for(int i=0; i<subTextureIDs.size(); i++){
+			 final int id = subTextureIDs.get(i);
 			 //Convert subtexture index to index of TOC
 			 final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 			 //Load subtexture ID into TOC
@@ -242,7 +231,7 @@ public class Texture implements TextureDescription {
 				);
 			 //Fill the subtexture code start offsets
 			 for(int off=0; off<6; off++)
-			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsetsAbsolute[i][off]);
+			    stw.codeStartOffsetTable.setAt(id, off, codebookStartOffsets256.get(i*6+off)*256);
 		    }//end for(subTextureIDs)
 		// Set the TOC vars
 		toc.height	 .set(tocIndex, sideLength);
@@ -268,7 +257,7 @@ public class Texture implements TextureDescription {
 		final int subtextureCodeY = codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int subTextureIdx   = subtextureX + subtextureY * diameterInSubtextures;
-		final int subtextureID    = subTextureIDs[subTextureIdx];
+		final int subtextureID    = subTextureIDs.get(subTextureIdx);
 		new SubtextureVL(stw, subtextureID).setComponentAt(codeIdx, 0, (byte)(codeIdx%256));//TODO: Could make a lot of garbage.
             }//end setCodeAt()
 	 }).get();//end gpuMemThread
@@ -283,7 +272,7 @@ public class Texture implements TextureDescription {
 		final int subtextureCodeY = codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int globalCodeIndex = codeIdx%256
-			+ codebookStartOffsetsAbsolute[subTextureIdx][codeIdx/256];
+			+ codebookStartOffsets256.get(subTextureIdx*6+codeIdx/256)*256;
 		setRGBACodebookTexelsAt(vlrRGBA, codeX,codeY,diameterInCodes, globalCodeIndex);
 		if(vlrESTuTv!=null)
 		 setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex);

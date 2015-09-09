@@ -23,26 +23,26 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 
 public class SmokeSystem extends RenderableSpacePartitioningGrid{
-    	private final TR tr;
     	private final int MAX_SMOKE_PER_POOL=80;
     	private final Smoke[][] allSmokes = new Smoke[SmokeType.values().length][];
     	private final int [] indices = new int[SmokeType.values().length];
 	public SmokeSystem(TR tr){
 	    super();
-	    this.tr=tr;
 	    int i;
 	    for(SmokeType t:SmokeType.values()){
-		allSmokes[t.ordinal()]=new Smoke[MAX_SMOKE_PER_POOL];
+		final int ordinal = t.ordinal();
+		allSmokes[ordinal]=new Smoke[MAX_SMOKE_PER_POOL];
 		for(i=0; i<MAX_SMOKE_PER_POOL; i++){
-			allSmokes[t.ordinal()][i]=new Smoke(tr,t);
+			allSmokes[ordinal][i]=new Smoke(tr,t);
 		    }//end for(MAX_SMOKE_PER_POOL)
 	    }//end for(SmokeType s)
 	}//end constructor()
 	public Smoke triggerSmoke(Vector3D pos, SmokeType type) {
 	    if(!isNewSmokeFeasible(pos,type))
 		return null;
-	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_SMOKE_PER_POOL;
-	    Smoke result = allSmokes[type.ordinal()][indices[type.ordinal()]];
+	    final int ordinal = type.ordinal();
+	    indices[ordinal]++;indices[ordinal]%=MAX_SMOKE_PER_POOL;
+	    Smoke result = allSmokes[ordinal][indices[ordinal]];
 	    result.destroy();
 	    result.reset();
 	    result.setPosition(pos.toArray());

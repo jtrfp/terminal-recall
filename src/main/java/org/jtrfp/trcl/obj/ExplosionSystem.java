@@ -33,17 +33,19 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 	    this.tr=tr;
 	    int i;
 	    for(ExplosionType t:ExplosionType.values()){
-		allExplosions[t.ordinal()]=new Explosion[MAX_EXPLOSIONS_PER_POOL];
+		final int ordinal = t.ordinal();
+		allExplosions[ordinal]=new Explosion[MAX_EXPLOSIONS_PER_POOL];
 		for(i=0; i<MAX_EXPLOSIONS_PER_POOL; i++)
-			allExplosions[t.ordinal()][i]=new Explosion(tr,t);
+			allExplosions[ordinal][i]=new Explosion(tr,t);
 	    }//end for(explosionTypes)
 	}//end constructor()
 	
 	public Explosion triggerExplosion(Vector3D loc, ExplosionType type) {
 	    if(!isNewExplosionFeasible(loc,type))
 		return null;
-	    indices[type.ordinal()]++;indices[type.ordinal()]%=MAX_EXPLOSIONS_PER_POOL;
-	    Explosion result = allExplosions[type.ordinal()][indices[type.ordinal()]];
+	    final int ordinal = type.ordinal();
+	    indices[ordinal]++;indices[ordinal]%=MAX_EXPLOSIONS_PER_POOL;
+	    Explosion result = allExplosions[ordinal][indices[ordinal]];
 	    result.destroy();
 	    result.reset();
 	    result.setPosition(loc.getX(), loc.getY(), loc.getZ());

@@ -17,11 +17,9 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -33,7 +31,6 @@ import com.ochafik.util.listenable.Pair;
 public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE> implements Collection<E>, Decorator<Collection<Pair<KEY,E>>> {
     private final Collection<Pair<KEY,E>>    delegate;
     private final Adapter<PropertyChangeEvent,KEY> propertyAdapter;
-    private final Map<E,PropertyChangeListener> listeners= new ReferenceMap<E,PropertyChangeListener>();
     private final Map<E,Pair<KEY,E>> pairs               = new ReferenceMap<E,Pair<KEY,E>>();
     private final String propertyName;
     private final ExecutorService executor;
@@ -55,40 +52,9 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 	catch(InvocationTargetException ex){throw new RuntimeException(ex);}
 	catch(IllegalAccessException    ex){throw new IllegalArgumentException("Supplied element (bean) does not allow access for property `"+propertyName+"`.",ex);}
 	
-	PropertyChangeListener pcl = new PropertyChangeListener(){
-	    @Override
-	    public void propertyChange(final PropertyChangeEvent evt) {
-		final Runnable r = new Runnable(){
-		    @Override
-		    public void run() {
-			final Pair<KEY,E>pair= pairs.get(e);
-			//If the listener thread has populated relevance Runnables before the pair is removed
-			//and they aren't consumed before 
-			if(pair==null)
-			    return;//This listener is likely no longer valid.
-			final KEY newKey     = propertyAdapter.adapt(evt);
-			assert pair!=null:"pair unexpectedly null.";
-			final KEY oldKey     = pair.getKey();
-			if(!newKey.equals(oldKey)){
-			    //Remove old
-			    delegate.remove(pair);
-			    pairs   .remove(e);
-			    //Add new
-			    final Pair<KEY,E> newPair = new Pair<KEY,E>(newKey,e);
-			    assert newPair!=null:"pair unexpectedly null.";
-			    final boolean addResult = delegate.add(newPair); 
-			    assert addResult:"Failed to add pair to delegate.";
-			    pairs.put(e,newPair);
-			}//end if(changed key)
-		    }};
-		if(executor==null)
-		    r.run();
-		else
-		    try{executor.submit(r);}catch(Exception e){throw new RuntimeException(e);}
-	    }};
-	listeners.put(e,pcl);
+	//listeners.put(e,propertyChangeListener);
 	pairs.put(e,pair);
-	e.addPropertyChangeListener(propertyName, pcl);
+	e.addPropertyChangeListener(propertyName, elementPCL);
 	assert pair!=null:"pair unexpectedly null.";
 	delegate.add(pair);
 	return true;
@@ -104,9 +70,9 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     @Override
     public void clear() {
 	//Remove all listeners
-	for(Entry<E,PropertyChangeListener> entry:listeners.entrySet())
-	    entry.getKey().removePropertyChangeListener(entry.getValue());
-	listeners.clear();
+	for(Entry<E,Pair<KEY,E>> entry:pairs.entrySet())
+	    entry.getKey().removePropertyChangeListener(elementPCL);
+	//listeners.clear();
 	pairs.clear();
 	delegate.clear();
     }
@@ -156,14 +122,11 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 
     @Override
     public boolean remove(Object o) {
-	final PropertyChangeListener pcl = listeners.remove(o);
-	if(pcl!=null){
-	    final Pair<KEY,E> pair = pairs.get(o);
-	    pair.getValue().removePropertyChangeListener(pcl);
-	    pairs.remove(o);
-	    delegate.remove(pair);
-	    return true;
-	}else{System.err.println("Warning: PropertyBasedTagger failed to find item "+o);return false;}
+	final Pair<KEY,E> pair = pairs.get(o);
+	pair.getValue().removePropertyChangeListener(elementPCL);
+	pairs.remove(o);
+	delegate.remove(pair);
+	return true;
     }//end remove(...)
 
     @Override
@@ -202,5 +165,38 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     public Collection<Pair<KEY,E>> getDelegate() {
 	return delegate;
     }
+    
+    private final PropertyChangeListener elementPCL = new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(final PropertyChangeEvent evt) {
+		final Runnable r = new Runnable(){
+		    @Override
+		    public void run() {
+			final Object source = evt.getSource();
+			final Pair<KEY,E>pair= pairs.get(source);
+			//If the listener thread has populated relevance Runnables before the pair is removed
+			//and they aren't consumed before 
+			if(pair==null)
+			    return;//This listener is likely no longer valid.
+			final KEY newKey     = propertyAdapter.adapt(evt);
+			assert pair!=null:"pair unexpectedly null.";
+			final KEY oldKey     = pair.getKey();
+			if(!newKey.equals(oldKey)){
+			    //Remove old
+			    delegate.remove(pair);
+			    pairs   .remove(source);
+			    //Add new
+			    final Pair<KEY,E> newPair = new Pair<KEY,E>(newKey,(E)source);
+			    assert newPair!=null:"pair unexpectedly null.";
+			    final boolean addResult = delegate.add(newPair); 
+			    assert addResult:"Failed to add pair to delegate.";
+			    pairs.put((E)source,newPair);
+			}//end if(changed key)
+		    }};
+		if(executor==null)
+		    r.run();
+		else
+		    try{executor.submit(r);}catch(Exception e){throw new RuntimeException(e);}
+	    }};
     
 }//end PropertyBasedTagger

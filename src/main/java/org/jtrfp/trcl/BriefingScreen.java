@@ -58,14 +58,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private volatile double  	  scrollPos = 0;
     private double		  scrollIncrement=.01;
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
-    //private TXTMissionBriefFile missionTXT;
     private ColorPaletteVectorList palette;
-    private volatile LVLFile	   lvl;
     private TimerTask	  scrollTimer;
     private WorldObject	  planetObject;
     private final BriefingLayout layout;
-    
-    private final LazyTRFuture<TXTMissionBriefFile> missionTXT;
 
     public BriefingScreen(final TR tr, GLFont font, BriefingLayout layout) {
 	super();
@@ -91,13 +87,14 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);
 	blackRectangle.setVisible(true);
 	blackRectangle.setActive(true);
-	
+	/*
 	missionTXT = new LazyTRFuture<TXTMissionBriefFile>(tr,new Callable<TXTMissionBriefFile>(){
 	    @Override
 	    public TXTMissionBriefFile call(){
 		return tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
 	    }//end call()
 	});
+	*/
     }//end constructor
 
     protected void notifyScrollFinishCallbacks() {
@@ -137,11 +134,9 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	scrollTimer.cancel();
     }
     
-    private void planetDisplayMode(LVLFile lvl){
+    private void planetDisplayMode(String planetModelFile, String planetTextureFile, LVLFile lvl){
 	final ResourceManager rm = tr.getResourceManager();
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
-	this.lvl		 = lvl;
-	missionTXT.reset();
 	
 	//TODO: Depth range
 	
@@ -151,13 +146,11 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    planetObject=null;
 	}
 	try{
-	 TextureDescription rawTex;
-	 final Model planetModel = rm.getBINModel(
-		 missionTXT.get().getPlanetModelFile(),
-		 rawTex = rm.getRAWAsTexture(missionTXT.get().getPlanetTextureFile(), 
-			 getPalette(), null, false, true),
-		 8,false,getPalette(),null);
-	 	     planetObject = new WorldObject(tr,planetModel);
+	 final Model planetModel = rm.getBINModel(planetModelFile,
+		 rm.getRAWAsTexture(planetTextureFile, 
+			 getPalette(lvl), null, false, true),
+		 8,false,getPalette(lvl),null);
+	 planetObject = new WorldObject(tr,planetModel);
 	 planetObject.setPosition(0, TR.mapSquareSize*20, 0);
 	 add(planetObject);
 	 planetObject.setVisible(true);
@@ -194,7 +187,9 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
 	//tr.getDefaultGrid().nonBlockingAddBranch(game.getCurrentMission().getOverworldSystem());
-	planetDisplayMode(lvl);
+	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
+	
+	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(),lvl);
 	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
@@ -213,12 +208,11 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final Game   game 	 = tr.getGame();
 	final Renderer renderer  = tr.mainRenderer.get();
 	final Camera camera 	 = renderer.getCamera();
-	this.lvl                 = lvl;
-	missionTXT.reset();
 	game.getPlayer().setActive(false);
-	planetDisplayMode(lvl);
+	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
+	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(), lvl);
 	setContent(
-		missionTXT.get().getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
+		txtMBF.getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
 	//tr.getDefaultGrid().nonBlockingAddBranch(overworld);
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};
@@ -306,7 +300,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	camera.probeForBehavior(MatchDirection.class).setEnable(true);
     }//end briefingSequence
     
-    private ColorPaletteVectorList getPalette(){
+    private ColorPaletteVectorList getPalette(LVLFile lvl){
 	if(palette==null){
 	    try{palette = new ColorPaletteVectorList(tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile()));}
 	    catch(Exception e){tr.showStopper(e);}

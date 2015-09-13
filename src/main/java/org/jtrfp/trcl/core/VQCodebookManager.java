@@ -37,7 +37,6 @@ public class VQCodebookManager {
     private final	GPU		gpu;
     private final	GLFrameBuffer	fb;
     private final	UncaughtExceptionHandler handler;
-    //private final	TR		tr;
     public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
     public static final int 		CODE_SIDE_LENGTH		=4;
     public static final int 		NUM_CODE_PAGES			=2048;
@@ -101,8 +100,8 @@ public class VQCodebookManager {
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	    fb.unbindFromDraw();
 	}//end for(i)
-	
     }//end constructor
+    
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter []rowWriter) {
 	return setNNNN(codeID,rowWriter,rgbaTexture);
     }
@@ -226,15 +225,6 @@ public class VQCodebookManager {
 	    count=codebook256Indices.pop(list,count);
 	    System.err.println("New count="+count+" list="+list);
 	}//end while(count>0)
-	/*
-	try{codebook256Indices.popOrException(list,count);}
-	catch(OutOfIndicesException e){
-	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
-	    TR.nuclearGC();
-	    System.err.println("Still alive. Attempting blocking texture codebook256...");
-	    codebook256Indices.pop(list,count);
-	}//end catch()
-	*/
     }
     
     public synchronized int newCodebook256() {

@@ -16,8 +16,8 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public abstract class Behavior{
-	private WorldObject parent;
-	private boolean enable=true;
+	private volatile WorldObject parent;
+	private volatile boolean     enabled=true;
 	
 	public WorldObject getParent(){return parent;}
 	public <T> T probeForBehavior(Class<T> type){
@@ -26,7 +26,7 @@ public abstract class Behavior{
 	protected void tick(long tickTimeInMillis){}
 	
 	public final void proposeTick(long tickTimeInMillis){
-	    if(enable) tick(tickTimeInMillis);}
+	    if(enabled) tick(tickTimeInMillis);}
 
 	public void setParent(WorldObject newParent){
 	    this.parent=newParent;}
@@ -34,11 +34,11 @@ public abstract class Behavior{
 	public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
 	    	parent.probeForBehaviors(sub, type);}
 	
-	public Behavior setEnable(boolean doIt){
+	public Behavior setEnable(boolean proposedState){
 	    if(parent!=null){
-		if(!doIt&&enable)parent.disableBehavior(this);
-	    	if(doIt&&!enable)parent.enableBehavior(this);}
-	    enable=doIt;
+		if(!proposedState&&enabled)parent.disableBehavior(this);
+	    	if(proposedState&&!enabled)parent.enableBehavior(this);}
+	    enabled=proposedState;
 	    return this;}
-	public boolean isEnabled(){return enable;}
-	}//end ObjectBehavior
+	public boolean isEnabled(){return enabled;}
+	}//end Behavior

@@ -36,7 +36,7 @@ public class AutoFiring extends Behavior {
     private boolean 	    berzerk	 	= false;
     private double 	    aimRandomness	= 0;
     @Override
-    public void _tick(long timeMillis){
+    public void tick(long timeMillis){
 	final WorldObject thisObject = getParent();
 	final Player player = thisObject.getTr().getGame().getPlayer();
 	if(player.probeForBehavior(Cloakable.class).isCloaked())return;

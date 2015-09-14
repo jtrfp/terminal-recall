@@ -45,7 +45,7 @@ private final boolean retreatAboveSky;
     }//end constructor(...)
     
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	if(timeInMillis>=nextUpdateTimeMillis){
 	    final WorldObject thisObject = getParent();
 	    final Player player = thisObject.getTr().getGame().getPlayer();

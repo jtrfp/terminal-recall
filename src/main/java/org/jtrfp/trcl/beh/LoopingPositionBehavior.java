@@ -17,7 +17,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class LoopingPositionBehavior extends Behavior {
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	// Loop correction
 	double [] oldPos = getParent().getPosition();
 	boolean _transient=false;

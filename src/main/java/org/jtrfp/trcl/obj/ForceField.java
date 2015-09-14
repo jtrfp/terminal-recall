@@ -60,7 +60,7 @@ public class ForceField extends WorldObject {
 	    st = getTr().getResourceManager().soundTextures.get("ELECTRIC.WAV");
 	}
 	@Override
-	public void _tick(long tickTimeMillis){
+	public void tick(long tickTimeMillis){
 	    tickTimeMillis+=timeOffset;
 	    tickTimeMillis%=FLASH_INTERVAL;
 	    if(isVisible() && tickTimeMillis<FLASH_ON_THRESH){

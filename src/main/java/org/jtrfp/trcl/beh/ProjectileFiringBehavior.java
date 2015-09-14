@@ -35,7 +35,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private Integer []          firingVertices;
     private BasicModelSource    modelSource;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
 	    if(takeAmmo()){
 	    	final WorldObject p = getParent();

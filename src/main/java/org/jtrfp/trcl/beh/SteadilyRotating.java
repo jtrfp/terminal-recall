@@ -19,7 +19,7 @@ public class SteadilyRotating extends Behavior {
     private double rotationPeriodMillis=10*1000;
     private double rotationPhase=0;
     @Override
-    public void _tick(long tickTime){
+    public void tick(long tickTime){
 	final WorldObject thisObject=getParent();
 	final double theta=((double)tickTime/rotationPeriodMillis)*Math.PI*2+rotationPhase;
 	thisObject.setHeading(new Vector3D(

@@ -22,7 +22,7 @@ public class RotationalMomentumBehavior extends Behavior {
     private double polarMomentum=0;//Axis is getHeading().crossProduct(getTop())
     private double lateralMomentum=0;//Axis is getHeading()
     @Override
-    public void _tick(long tickTimeInMillis){
+    public void tick(long tickTimeInMillis){
 	final WorldObject p = getParent();
 	Rotation rot;
 	try{

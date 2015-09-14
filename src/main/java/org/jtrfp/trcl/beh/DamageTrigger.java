@@ -17,7 +17,7 @@ private boolean triggered=false;
 private int threshold=2048;
 
 	@Override
-	public void _tick(long timeInMillis){
+	public void tick(long timeInMillis){
 	    if(!triggered){
 		if(getParent().probeForBehavior(DamageableBehavior.class).getHealth()<threshold){
 		    triggered=true;//Just in case disabling has latency

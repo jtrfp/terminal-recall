@@ -18,7 +18,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class MatchPosition extends Behavior {
     private WorldObject target;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	if(target!=null){
 	    double [] pos = target.getPosition();
 	    getParent().setPosition(pos[0], pos[1], pos[2]);

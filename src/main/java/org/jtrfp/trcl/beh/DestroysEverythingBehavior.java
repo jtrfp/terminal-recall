@@ -32,7 +32,7 @@ public class DestroysEverythingBehavior extends Behavior {
     final ArrayList<Positionable>[]positionables = new ArrayList[]{new ArrayList<Positionable>(100)};
     
     @Override
-    public void _tick(long timeMillis){
+    public void tick(long timeMillis){
 	counter--;
 	if(counter==2){
 	    //Populate the relevance collection

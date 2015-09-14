@@ -19,7 +19,7 @@ import org.jtrfp.trcl.obj.Propelled;
 public class UpdatesThrottleMeterBehavior extends Behavior implements GUIUpdateBehavior{
     private ManuallySetController controller;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	    Propelled prop = getParent().probeForBehavior(Propelled.class);
 	    controller.setFrame(1.-((prop.getPropulsion()-prop.getMinPropulsion())/prop.getMaxPropulsion()));
     }

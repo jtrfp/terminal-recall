@@ -22,7 +22,7 @@ public class RollLevelingBehavior extends Behavior {
     private final double retainment = .93;
     private final double [] imgHdng = new double[3];
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	WorldObject p = getParent();
 	final double [] initHdng= p.getHeadingArray();
 	final double [] initTop	= p.getTopArray();

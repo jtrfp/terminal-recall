@@ -62,7 +62,7 @@ public class PortalEntrance extends WorldObject {
     private class PortalEntranceBehavior extends Behavior{
 	private final double [] relativePosition = new double[3];
 	@Override
-	public void _tick(long tickTimeMillis){
+	public void tick(long tickTimeMillis){
 	    final double dist = Vect3D.distance(cameraToMonitor.getPositionWithOffset(),PortalEntrance.this.getPositionWithOffset());
 	    if(dist<ACTIVATION_DISTANCE && !withinRange)
 		activation();

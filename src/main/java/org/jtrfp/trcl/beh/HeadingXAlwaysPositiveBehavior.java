@@ -17,7 +17,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class HeadingXAlwaysPositiveBehavior extends Behavior {
     @Override
-    public void _tick(long tickTime){
+    public void tick(long tickTime){
 	final WorldObject p = getParent();
 	final Vector3D heading = p.getHeading();
 	if(heading.getX()<0){

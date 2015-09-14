@@ -22,7 +22,7 @@ public class TriggersVisCalcWithMovement extends Behavior {
     private double		distanceThreshold = TR.mapSquareSize*10;
     
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	final WorldObject parent = getParent();
 	final double [] pPos = parent.getPosition();
 	final double dist = Vect3D.taxicabDistance(pPos, positionOfLastVisCalc);

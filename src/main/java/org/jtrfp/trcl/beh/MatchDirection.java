@@ -19,7 +19,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class MatchDirection extends Behavior {
     private WorldObject target;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	if(target!=null){
 	    final double [] hdg = target.getHeadingArray();
 	    getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]));

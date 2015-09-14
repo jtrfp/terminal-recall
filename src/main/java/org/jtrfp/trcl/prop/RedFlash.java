@@ -52,7 +52,7 @@ public class RedFlash extends Sprite2D {
     
     private class RedFlashBehavior extends Behavior{
 	@Override
-	public void _tick(long tickTimeMillis){
+	public void tick(long tickTimeMillis){
 	    if(tickTimeMillis<endTimeOfLastFlash){
 		if(!isVisible())setVisible(true);
 		final SelectableTexture st = (SelectableTexture)RedFlash.this.getTexture();

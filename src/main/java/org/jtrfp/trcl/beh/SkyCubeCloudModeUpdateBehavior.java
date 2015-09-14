@@ -22,7 +22,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class SkyCubeCloudModeUpdateBehavior extends Behavior {
     private boolean over=false;
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	final WorldObject parent = getParent();
 	double [] pos = parent.getPosition();
 	final TR tr = parent.getTr();

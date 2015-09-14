@@ -24,7 +24,7 @@ public class RotateAroundObject extends Behavior {
     final double [] delta = new double[3];
     private double []offset = new double[]{0,0,0};
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	if(target!=null){
 	    final WorldObject parent	= getParent();
 	    final double []tPos	= target.getPosition();

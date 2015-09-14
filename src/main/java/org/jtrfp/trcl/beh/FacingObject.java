@@ -30,7 +30,7 @@ public class FacingObject extends Behavior {
     private static final Vector3D DEFAULT_HEADING = Vector3D.PLUS_K;
     private static final Vector3D DEFAULT_TOP = Vector3D.PLUS_J;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	if(target!=null){
 	    final WorldObject parent = getParent();
 	    final double [] tPos = target.get().getPosition();

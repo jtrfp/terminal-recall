@@ -44,7 +44,7 @@ public class RotatingObjectBehavior extends Behavior
 		}
 	
 	@Override
-	protected void _tick(long tickTimeInMillis)
+	protected void tick(long tickTimeInMillis)
 		{
 		angleAnimator.updateAnimation();
 		super.getParent().setTop(new Rotation(rotationAxisTop,angle.get()).applyTo(originalTop));

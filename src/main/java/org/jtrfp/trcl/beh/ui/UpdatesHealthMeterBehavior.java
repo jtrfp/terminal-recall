@@ -19,7 +19,7 @@ import org.jtrfp.trcl.beh.DamageableBehavior;
 public class UpdatesHealthMeterBehavior extends Behavior implements GUIUpdateBehavior {
     private ManuallySetController controller;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	    DamageableBehavior dmg = getParent().probeForBehavior(DamageableBehavior.class);
 	    controller.setFrame(1.-((dmg.getHealth())/65535.));
     }

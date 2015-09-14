@@ -22,7 +22,7 @@ import org.jtrfp.trcl.obj.Player;
 public class UserInputRudderElevatorControlBehavior extends Behavior implements PlayerControlBehavior {
     private  double accellerationFactor=.0005;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	final Player p = (Player)getParent();
 	final KeyStatus keyStatus = p.getTr().getKeyStatus();
 	final RotationalMomentumBehavior rmb = p.probeForBehavior(RotationalMomentumBehavior.class);

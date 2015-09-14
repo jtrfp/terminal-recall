@@ -21,7 +21,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class MovesByVelocity extends Behavior implements Velocible {
 	private Vector3D velocity=Vector3D.ZERO;
 	@Override
-	public void _tick(long tickTimeMillis){
+	public void tick(long tickTimeMillis){
 		final WorldObject p = getParent();
 		double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
 		if(progressionInSeconds>.25)progressionInSeconds=.25;

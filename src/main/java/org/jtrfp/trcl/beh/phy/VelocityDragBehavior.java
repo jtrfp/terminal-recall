@@ -26,7 +26,7 @@ public class VelocityDragBehavior extends Behavior
 		{return dragCoeff;}
 	
 	@Override
-	public void _tick(long tickTimeMillis){
+	public void tick(long tickTimeMillis){
 	    	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
 	    	if(timeProgressedInFrames<=0)return;
 	    	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);

@@ -19,7 +19,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class RotationalDragBehavior extends Behavior {
     private double dragCoeff=.86;
     @Override
-    public void _tick(long tickTimeInMillis){
+    public void tick(long tickTimeInMillis){
 	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
     	if(timeProgressedInFrames<=0)return;
     	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);

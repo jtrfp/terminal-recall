@@ -24,7 +24,7 @@ public class AutoLeveling extends Behavior {
     private Vector3D levelingVector = new Vector3D(0, 1, 0);
 
     @Override
-    public void _tick(long timeInMillis) {
+    public void tick(long timeInMillis) {
 	final WorldObject parent = getParent();
 	final Vector3D oldHeading = parent.getHeading();
 	final Vector3D oldTop = parent.getTop();

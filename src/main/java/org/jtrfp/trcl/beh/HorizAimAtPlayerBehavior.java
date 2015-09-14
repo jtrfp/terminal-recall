@@ -30,7 +30,7 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     private double hysteresis=.05;//Prevents gimbal shake.
     public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	if(chaseTarget!=null){
 	    WorldObject thisObject = getParent();
 	    final Player player = thisObject.getTr().getGame().getPlayer();

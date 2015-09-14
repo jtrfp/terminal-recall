@@ -23,10 +23,10 @@ public abstract class Behavior{
 	public <T> T probeForBehavior(Class<T> type){
 	    	return parent.probeForBehavior(type);}
 	
-	protected void _tick(long tickTimeInMillis){}
+	protected void tick(long tickTimeInMillis){}
 	
-	public final void tick(long tickTimeInMillis){
-	    if(enable)_tick(tickTimeInMillis);}
+	public final void proposeTick(long tickTimeInMillis){
+	    if(enable) tick(tickTimeInMillis);}
 
 	public void setParent(WorldObject newParent){
 	    this.parent=newParent;}

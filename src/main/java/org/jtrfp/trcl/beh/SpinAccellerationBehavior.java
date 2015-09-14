@@ -20,7 +20,7 @@ public class SpinAccellerationBehavior extends Behavior {
     private SpinMode spinMode=SpinMode.EQUATORIAL;
     
     @Override
-    public void _tick(long millis){
+    public void tick(long millis){
 	final RotationalMomentumBehavior rmb = probeForBehavior(RotationalMomentumBehavior.class);
 	switch(spinMode){
 	 case LATERAL:rmb.accellerateLateralMomentum(spinAccelleration);break;

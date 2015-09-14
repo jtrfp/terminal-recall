@@ -22,7 +22,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class AccelleratedByPropulsion extends Behavior{
     	private Vector3D thrustVector = null;
 	@Override
-	public void _tick(long timeInMillis)
+	public void tick(long timeInMillis)
 		{WorldObject wo = getParent();
 		Propelled p = wo.probeForBehavior(Propelled.class);
 		Velocible v = wo.probeForBehavior(Velocible.class);

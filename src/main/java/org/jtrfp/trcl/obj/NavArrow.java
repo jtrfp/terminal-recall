@@ -57,7 +57,7 @@ private final DashboardLayout layout;
     private class NavArrowBehavior extends Behavior{
 	private int counter=0;
 	@Override
-	public void _tick(long time){
+	public void tick(long time){
 	    final TR tr              = getTr();
 	    final Game game          = tr.getGame();
 	    final Mission mission    = game.getCurrentMission();

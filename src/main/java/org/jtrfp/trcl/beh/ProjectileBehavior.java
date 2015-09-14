@@ -120,7 +120,7 @@ public class ProjectileBehavior extends Behavior implements
     }// end reset()
 
     @Override
-    public void _tick(long tickTimeMillis) {
+    public void tick(long tickTimeMillis) {
 	if (honingTarget != null) {
 	    if(honingTarget.get()==null)return;
 	    if (honingAdjustmentUpdate++ % 5 == 0) {

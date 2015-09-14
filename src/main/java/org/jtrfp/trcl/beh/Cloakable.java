@@ -20,7 +20,7 @@ public class Cloakable extends Behavior implements HasQuantifiableSupply {
     private byte updateCounter=0;
     
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	if(updateCounter++==0){
 	    if(isCloaked())
 		{if(System.currentTimeMillis()>cloakExpirationTimeMillis)cloaked=false;}

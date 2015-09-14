@@ -21,7 +21,7 @@ public abstract class CustomPlayerWithinRangeBehavior extends Behavior {
     public abstract void withinRange();
     
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	    final WorldObject thisObject=getParent();
 	    final WorldObject other=thisObject.getTr().getGame().getPlayer();
 	    if(Vect3D.distance(thisObject.getPosition(), other.getPosition())<=range){

@@ -56,7 +56,7 @@ public abstract class OneShotBillboardEvent extends BillboardSprite {
     private class OneShotBillboardEventBehavior extends Behavior{
 	private long timeoutTimeInMillis=0;
 	@Override
-	public void _tick(long tickTimeMillis){
+	public void tick(long tickTimeMillis){
 	    if(tickTimeMillis>=timeoutTimeInMillis){
 		destroy();
 	    }//end if(timeout)

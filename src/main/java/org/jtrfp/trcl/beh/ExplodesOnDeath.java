@@ -48,7 +48,7 @@ private String explosionSound;
 			    SoundSystem.DEFAULT_SFX_VOLUME*2));
     }
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	
     }//end _tick()
     public ExplodesOnDeath setExplosionType(ExplosionType type) {

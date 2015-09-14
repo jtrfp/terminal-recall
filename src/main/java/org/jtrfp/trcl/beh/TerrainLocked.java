@@ -21,7 +21,7 @@ public class TerrainLocked extends Behavior {
     private double  pad            =0;
     private boolean lockedToCeiling=false;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	final WorldObject p = getParent();
 	final double[] thisPos=p.getPosition();
 	final Game game = p.getTr().getGame();

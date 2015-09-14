@@ -18,7 +18,7 @@ public class PositionLimit extends Behavior {
     private final double [] positionMaxima = new double[]{Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
     private final double [] positionMinima = new double[]{Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     @Override
-    public void _tick(long timeInMillis){//I'm in the mood to use ASM coding style...
+    public void tick(long timeInMillis){//I'm in the mood to use ASM coding style...
 	final 	WorldObject 	thisObject	=	getParent();
 	final 	double [] 	thisPos 	=	thisObject.getPosition();
 		boolean 	changed		=	false;

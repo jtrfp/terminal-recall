@@ -177,7 +177,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(!respondToTick)return;
 	synchronized(tickBehaviors){
 	for (int i = 0; i < tickBehaviors.size() && isActive(); i++)
-	    tickBehaviors.get(i).tick(time);
+	    tickBehaviors.get(i).proposeTick(time);
 	}//end sync(tickBehaviors)
     }// end tick(...)
     

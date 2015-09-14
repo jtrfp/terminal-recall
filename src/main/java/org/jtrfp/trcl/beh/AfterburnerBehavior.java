@@ -23,7 +23,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private double fuelRemaining=0;
     private double formerMax,formerProp,newMax;
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	WorldObject p = getParent();
 	if(p.getTr().getKeyStatus().isPressed(KeyEvent.VK_F)){
 	    if(firstDetected){

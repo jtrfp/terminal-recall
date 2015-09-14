@@ -46,7 +46,7 @@ public class CollidesWithTerrain extends Behavior {
     private WeakReference<OverworldSystem>lastOWS;
     private NormalMap           normalMap;
     @Override
-    public void _tick(long tickTimeMillis) {
+    public void tick(long tickTimeMillis) {
 	if (tickCounter++ % 2 == 0 && !recentlyCollided)
 	    return;
 	recentlyCollided=false;

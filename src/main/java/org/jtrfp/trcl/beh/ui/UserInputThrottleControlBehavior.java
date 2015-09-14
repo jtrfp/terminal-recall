@@ -21,7 +21,7 @@ import org.jtrfp.trcl.obj.Propelled;
 public class UserInputThrottleControlBehavior extends Behavior implements PlayerControlBehavior {
     private double nudgeUnit = 40000;
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	final KeyStatus keyStatus=getParent().getTr().getKeyStatus(); 
 	if (keyStatus.isPressed(KeyEvent.VK_A)){
 	    	Propelled p=getParent().probeForBehavior(Propelled.class);

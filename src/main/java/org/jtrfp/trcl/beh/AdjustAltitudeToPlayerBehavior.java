@@ -31,7 +31,7 @@ public class AdjustAltitudeToPlayerBehavior extends Behavior {
     }//end AdjustAltitudeToPlayerBehavior
     
     @Override
-    public void _tick(long tickTimeInMillis){
+    public void tick(long tickTimeInMillis){
 	if(playerCloakability.isCloaked())return;
 	final WorldObject thisObject = getParent();
 	if(!reverse&&Math.abs(player.getPosition()[1]-thisObject.getPosition()[1])<hysteresis)

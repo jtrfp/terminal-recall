@@ -32,7 +32,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     public static final int AMMO_DISPLAY_UPDATE_INTERVAL_MS=80;
     private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
     @Override
-    public void _tick(long tickTimeMillis){
+    public void tick(long tickTimeMillis){
 	final WorldObject parent = getParent();
 	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){

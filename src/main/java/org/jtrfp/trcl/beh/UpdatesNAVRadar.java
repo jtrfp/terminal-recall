@@ -23,7 +23,7 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
     public static final int REFRESH_INTERVAL=5;
     private NAVRadarBlipFactory blips;
     @Override
-    public void _tick(long timeInMillis){
+    public void tick(long timeInMillis){
 	counter++;
 	if(counter%REFRESH_INTERVAL==0){
 	    final Game game = getParent().getTr().getGame();

@@ -36,7 +36,7 @@ public class ShiftingObjectBehavior extends Behavior
 		zAnimator=new AttribAnimator(zPos,seq,new double [] {startPos.getZ(),endPos.getZ()});
 		}
 	@Override
-	public void _tick(long tickTimeInMillis){
+	public void tick(long tickTimeInMillis){
 		xAnimator.updateAnimation();
 		yAnimator.updateAnimation();
 		zAnimator.updateAnimation();

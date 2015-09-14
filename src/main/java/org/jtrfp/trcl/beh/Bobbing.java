@@ -23,7 +23,7 @@ public class Bobbing extends Behavior {
     private double initialY=0;
     private boolean first=true;
     @Override
-    public void _tick(long timeMillis){
+    public void tick(long timeMillis){
 	final WorldObject thisObject = getParent();
 	double [] thisPos=thisObject.getPosition();
 	if(first)initialY=thisPos[1];

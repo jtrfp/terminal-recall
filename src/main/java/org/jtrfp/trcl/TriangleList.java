@@ -281,6 +281,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	Vector3D 	result 	= Vector3D.ZERO;
 	Triangle[][] 	t 	= getPrimitives();
 	for (Triangle[] frame : t) {
+	    assert (frame != null):"Frame intolerably null.";//Verify null frame is a race condition.
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
 		    double v;

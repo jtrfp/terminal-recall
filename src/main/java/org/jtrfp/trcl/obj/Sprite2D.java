@@ -61,7 +61,7 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 	    tris[1].setAlphaBlended(true);
 	    m.addTriangles(tris);
 	}// end for(segs)
-	setModel(m.finalizeModel());
+	setModel(m);
 	setTop(Vector3D.PLUS_J);
 	setHeading(Vector3D.PLUS_K);
 	setActive(true);

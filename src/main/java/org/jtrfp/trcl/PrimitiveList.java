@@ -13,6 +13,7 @@
 package org.jtrfp.trcl;
 
 import java.util.Arrays;
+import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
@@ -89,7 +90,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     public String getDebugName() {
 	return debugName;
     }
-    public abstract void uploadToGPU();
+    public abstract Future<Void> uploadToGPU();
     /**
      * @param scale
      *            the scale to set

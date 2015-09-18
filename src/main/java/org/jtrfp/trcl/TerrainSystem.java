@@ -16,11 +16,13 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
@@ -36,6 +38,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	//final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
+	private final ExecutorService executor;
 	public static final double Y_NUDGE = -10000;
 	    /*
 	     * Y_NUDGE is a kludge. There is a tiny sliver of space
@@ -59,6 +62,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final int width = (int) altitude.getWidth();
 	int height = (int) altitude.getHeight();
 	this.gridSquareSize = gridSquareSize;
+	executor = Executors.newFixedThreadPool(numCores*2);
 	//this.heightScalar = tr.getWorld().sizeY / 2;
 	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };
@@ -70,6 +74,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	TDFFile.Tunnel[] tunnels = tdf.getTunnels();
 	final HashMap<Integer, TunnelPoint> points = new HashMap<Integer, TunnelPoint>();
 	final HashMap<String, TDFFile.Tunnel> tunnelsByName = new HashMap<String, TDFFile.Tunnel>();
+	final ArrayList<Future<Void>> rowTasks = new ArrayList<Future<Void>>();
 	if (tunnels != null) {// Null means no tunnels
 	    for (int i = 0; i < tunnels.length; i++) {
 		final TDFFile.Tunnel tun = tunnels[i];
@@ -88,14 +93,14 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final LoadingProgressReporter[] reporters = terrainReporter
 		.generateSubReporters(256/chunkSideLength);
 	int reporterIndex=0;
-	TRFutureTask<Void> [] rowTasks = new TRFutureTask[numCores*2];
+	//TRFutureTask<Void> [] rowTasks = new TRFutureTask[numCores*2];
 	final double worldCeiling = tr.getWorld().sizeY;
 	int taskIdx=0;
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
 	    reporters[reporterIndex++].complete();
 	    final int _gZ = gZ;
-	    rowTasks[taskIdx++]=tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    rowTasks.add(executor.submit(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    for (int gX = 0; gX < width; gX += chunkSideLength) {
@@ -222,7 +227,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			    if (m.finalizeModel().getTriangleList() != null || m.getTransparentTriangleList() != null) {
+			    if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();
@@ -322,7 +327,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			    if (m.finalizeModel().getTriangleList() != null || m.getTransparentTriangleList() != null) {
+			    if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();
@@ -339,13 +344,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			}// end scope(CEILING)
 		    }// end for(gX)
 		    return null;
-		}});
-	    if(taskIdx>=rowTasks.length)
-		taskIdx=0;
+		}}));
 	}// end for(gZ)
 	//terrainMirror.blockingDeactivate();
-	for(int i=rowTasks.length-1; i>=0; i--)
-	    rowTasks[i].get();
+	for(Future<Void> task:rowTasks)
+	    try{task.get();}catch(Exception e){throw new RuntimeException(e);}
     }// end constructor
 	
 	private class TunnelPoint{

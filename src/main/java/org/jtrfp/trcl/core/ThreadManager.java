@@ -57,8 +57,8 @@ public final class ThreadManager implements GLExecutor{
     private boolean[] 			paused = new boolean[]{false};
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
-		    30,
-		    65,
+		    20,
+		    45,
 		    1,
 		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
     public final ThreadPoolExecutor	gpuMemAccessThreadPool 		= 

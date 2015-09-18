@@ -56,7 +56,7 @@ public class BillboardSprite extends WorldObject{
 				RenderMode.DYNAMIC,true,Vector3D.ZERO,"BillboardSprite");
 		Model m = new Model(false,getTr());
 		m.addTriangles(tris);
-		setModel(m.finalizeModel());
+		setModel(m);
 		}
 	
 	public void setRotation(double angle){

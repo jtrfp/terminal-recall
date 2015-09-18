@@ -92,7 +92,7 @@ public class VQCodebookManager {
 	final GL3 gl = gpu.getGl();
 	
 	fb = gpu.newFrameBuffer();
-	
+	/*
 	for(int i=0; i<NUM_CODE_PAGES; i++){
 	    fb.bindToDraw();
 	    gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, GL3.GL_COLOR_ATTACHMENT0, esTuTvTexture.getId(), 0, i);
@@ -100,6 +100,7 @@ public class VQCodebookManager {
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	    fb.unbindFromDraw();
 	}//end for(i)
+	*/
     }//end constructor
     
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter []rowWriter) {

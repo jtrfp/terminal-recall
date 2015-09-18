@@ -18,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -187,7 +188,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if (m == null)
 	    throw new RuntimeException("Passed model cannot be null.");
 	model = m;
-	model.finalizeModel();
+	try{model.finalizeModel().get();}catch(Exception e){throw new RuntimeException(e);}
 	int numObjDefs, sizeInVerts;
 	if (m.getTriangleList() == null)
 	    triangleObjectDefinitions = emptyIntArray;

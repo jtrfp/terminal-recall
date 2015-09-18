@@ -14,6 +14,7 @@ package org.jtrfp.trcl;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.PortalTexture;
@@ -238,7 +239,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}//end for(triangleVertexIndices)
     }//end finalize()
 
-    public void uploadToGPU() {
+    public Future<Void> uploadToGPU() {
 	final int nPrimitives = getNumElements();
 	triangleVertexIndices = new int[nPrimitives*3];
 	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
@@ -247,15 +248,19 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    triangleVertexIndices[vIndex]=mw.create();
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
-	tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
+	cachedMinimumVertexDims = getMinimumVertexDims();
+	cachedMaximumVertexDims = getMaximumVertexDims();
+	cachedMaximumVertexValue= getMaximumVertexValue();
+	final Future<Void> result = tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
 		for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
 		    setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
-		finalizePrimitives();//This may break max vertex values
+		finalizePrimitives();
 		return null;
 	    }//end Call()
 	});
+	return result;
     }// end allocateIndices(...)
 
     @Override
@@ -355,14 +360,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    flatTVWindow = new TriangleVertex2FlatDoubleWindow(
 		    (TriangleVertexWindow) this.getMemoryWindow());
 	return flatTVWindow;
-    }
-    
-    @Override
-    protected void finalizePrimitives(){
-	cachedMinimumVertexDims = getMinimumVertexDims();
-	cachedMaximumVertexDims = getMaximumVertexDims();
-	cachedMaximumVertexValue= getMaximumVertexValue();
-	super.finalizePrimitives();
     }
 
     @Override

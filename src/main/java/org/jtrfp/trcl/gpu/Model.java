@@ -14,6 +14,8 @@ package org.jtrfp.trcl.gpu;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Controller;
@@ -83,47 +85,59 @@ public class Model {
      * 
      * @return
      */
-    public Model finalizeModel() {
-	if(modelFinalized)
-	    return this;
-	modelFinalized = true;
-	if(animated)//Discard frame zero
-	    {tLists.remove(0);ttLists.remove(0);}
-	Controller c = controller;
-	if (c == null)
-	    {if(frameDelay==0)frameDelay=1;
-	    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);}
-	Triangle[][] tris = new Triangle[tLists.size()][];
-	for (int i = 0; i < tLists.size(); i++) {
-	    tris[i] = tLists.get(i).toArray(new Triangle[] {});
-	    for(Triangle triangle:tLists.get(i))
-		textures.add(triangle.texture);
-	}// Get all frames for each triangle
-	if (tris[0].length != 0) {
-	    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
-		    animateUV, c, tr, this);
-	    tpList.uploadToGPU();
-	}// end if(length!=0)
-	else
-	    tpList = null;
+    public Future<Model> finalizeModel() {
+	return tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
+	    @Override
+	    public Model call() throws Exception {
+		Future<Void> tpFuture=null, ttpFuture=null;
+		if(modelFinalized)
+		    return Model.this;
+		modelFinalized = true;
+		if(animated)//Discard frame zero
+		    {tLists.remove(0);ttLists.remove(0);}
+		Controller c = controller;
+		if (c == null)
+		    {if(frameDelay==0)frameDelay=1;
+		    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);}
+		Triangle[][] tris = new Triangle[tLists.size()][];
+		for (int i = 0; i < tLists.size(); i++) {
+		    tris[i] = tLists.get(i).toArray(new Triangle[] {});
+		    assert tris[i]!=null:"tris intolerably null";//Verify poss. race condition.
+		    for(Triangle triangle:tLists.get(i))
+			textures.add(triangle.texture);
+		}// Get all frames for each triangle
+		if (tris[0].length != 0) {
+		    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
+			    animateUV, c, tr, Model.this);
+		    tpFuture = tpList.uploadToGPU();
+		}// end if(length!=0)
+		else
+		    tpList = null;
 
-	Triangle[][] ttris = new Triangle[ttLists.size()][];
-	for (int i = 0; i < ttLists.size(); i++) {
-	    ttris[i] = ttLists.get(i).toArray(new Triangle[] {});
-	    for(Triangle triangle:ttLists.get(i))
-		textures.add(triangle.texture);
-	}// Get all frames for each triangle
-	if (ttris[0].length != 0) {
-	    ttpList = new TransparentTriangleList(ttris,
-		    getFrameDelayInMillis(), debugName, animateUV, c, tr, this);
-	    ttpList.uploadToGPU();
-	}// end if(length!=0)
-	else
-	    ttpList = null;
-	tLists =null;
-	ttLists=null;
-	lsLists=null;
-	return this;
+		Triangle[][] ttris = new Triangle[ttLists.size()][];
+		for (int i = 0; i < ttLists.size(); i++) {
+		    ttris[i] = ttLists.get(i).toArray(new Triangle[] {});
+		    for(Triangle triangle:ttLists.get(i))
+			textures.add(triangle.texture);
+		}// Get all frames for each triangle
+		if (ttris[0].length != 0) {
+		    ttpList = new TransparentTriangleList(ttris,
+			    getFrameDelayInMillis(), debugName, animateUV, c, tr, Model.this);
+		    ttpFuture = ttpList.uploadToGPU();
+		}// end if(length!=0)
+		else
+		    ttpList = null;
+		tLists =null;
+		ttLists=null;
+		lsLists=null;
+		/*
+		if(tpFuture!=null)
+		    tpFuture.get();
+		if(ttpFuture!=null)
+		    ttpFuture.get();
+		*/
+		return Model.this;
+	    }});
     }// end finalizeModel()
 
     public void addFrame(Model m) {

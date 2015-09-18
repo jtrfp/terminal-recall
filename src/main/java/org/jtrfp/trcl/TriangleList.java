@@ -124,34 +124,34 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    float[] nxFrames = new float[numFrames];
 	    float[] nyFrames = new float[numFrames];
 	    float[] nzFrames = new float[numFrames];
-	    for (int i = 0; i < numFrames; i++) {
+	    for (int i = 0; i < numFrames; i++) 
 		xFrames[i] = (float)applyScale(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getX());
-	    }
+	    
 	    xyzAnimator.addFrames(xFrames);
 
-	    for (int i = 0; i < numFrames; i++) {
+	    for (int i = 0; i < numFrames; i++) 
 		yFrames[i] = (float)applyScale(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getY());
-	    }
+	    
 	    xyzAnimator.addFrames(yFrames);
 
-	    for (int i = 0; i < numFrames; i++) {
+	    for (int i = 0; i < numFrames; i++) 
 		zFrames[i] = (float)applyScale(triangleAt(i, triangleIndex).getVertices()[vIndex].getPosition().getZ());
-	    }
+	    
 	    xyzAnimator.addFrames(zFrames);
 	    
-	    for (int i = 0; i < numFrames; i++) {
+	    for (int i = 0; i < numFrames; i++) 
 		nxFrames[i] = (float)Math.rint(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getX()*127);
-	    }
+	    
 	    xyzAnimator.addFrames(nxFrames);
 
-	    for (int i = 0; i < numFrames; i++) {
+	    for (int i = 0; i < numFrames; i++) 
 		nyFrames[i] = (float)Math.rint(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getY()*127);
-	    }
+	    
 	    xyzAnimator.addFrames(nyFrames);
 
-	    for (int i = 0; i < numFrames; i++) {
+	    for (int i = 0; i < numFrames; i++) 
 		nzFrames[i] = (float)Math.rint(triangleAt(i, triangleIndex).getVertices()[vIndex].getNormal().getZ()*127);
-	    }
+	    
 	    xyzAnimator.addFrames(nzFrames);
 	}//end else(frames!=1)
 	//////////////// T E X T U R E ///////////////////////////
@@ -243,21 +243,19 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	triangleVertexIndices = new int[nPrimitives*3];
 	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
 	final MemoryWindow mw = getMemoryWindow();
-	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++) {
+	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++)
 	    triangleVertexIndices[vIndex]=mw.create();
-	}
-	for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
+	for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
-	}
-	    tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
-		    @Override
-		    public Void call() throws Exception {
-			for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
-				setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
-			finalizePrimitives();//This may break max vertex values
-			return null;
-		    }//end Call()
-		});
+	tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
+	    @Override
+	    public Void call() throws Exception {
+		for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
+		    setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
+		finalizePrimitives();//This may break max vertex values
+		return null;
+	    }//end Call()
+	});
     }// end allocateIndices(...)
 
     @Override

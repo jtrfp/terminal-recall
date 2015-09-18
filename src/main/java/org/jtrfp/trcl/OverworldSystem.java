@@ -15,6 +15,8 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
@@ -43,7 +45,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     				     cloudReporter, 
     				     objectReporter;
     private		ObjectSystem objectSystem;
-    private            TerrainSystem terrainSystem;
+    private Future<TerrainSystem>    terrainSystem;
 
     public OverworldSystem(TR tr, final LoadingProgressReporter progressReporter) {
 	super();
@@ -68,11 +70,14 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 		    lvl.getTexturePlacementFile(), texturePalette);
 	    // Terrain
 	    System.out.println("Building terrain...");
-	    boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
+	    final boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
 		    .toUpperCase().contains("BORG");//TODO: This should be in a config file.
-	    terrainSystem = new TerrainSystem(altitudeMap, textureMesh,
-		    TR.mapSquareSize, terrainMirror, tr, tdf,
-		    flatShadedTerrain, terrainReporter, lvl.getHeightMapOrTunnelFile());
+	    terrainSystem = tr.getThreadManager().submitToThreadPool(new Callable<TerrainSystem>(){
+		@Override
+		public TerrainSystem call() throws Exception {
+		    return new TerrainSystem(altitudeMap, textureMesh,TR.mapSquareSize, terrainMirror, tr, tdf,
+			    flatShadedTerrain, terrainReporter, lvl.getHeightMapOrTunnelFile());
+		}});
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");
@@ -86,8 +91,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    objectSystem = new ObjectSystem(tr, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
 	    System.out.println("Adding terrain and object system to OverworldSystem...");
-	    this.blockingAddBranch(terrainSystem);
-	    this.blockingAddBranch(objectSystem);
+	    this.nonBlockingAddBranch(objectSystem);
+	    this.blockingAddBranch(terrainSystem.get());
+	    
 	    /*World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
@@ -171,7 +177,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	return skySystem;
     }
     public TerrainSystem getTerrainSystem(){
-	return terrainSystem;
+	try{return terrainSystem.get();}catch(Exception e){throw new RuntimeException(e);}
     }
     /**
      * @return the normalizedAltitudeMap

@@ -261,7 +261,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    }//end Call()
 	});
 	return result;
-    }// end allocateIndices(...)
+    }// end uploadToGPU(...)
 
     @Override
     public int getElementSizeInVec4s() {

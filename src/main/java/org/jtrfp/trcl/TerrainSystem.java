@@ -63,7 +63,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	int height = (int) altitude.getHeight();
 	this.gridSquareSize = gridSquareSize;
 	executor = Executors.newFixedThreadPool(numCores*2);
-	//this.heightScalar = tr.getWorld().sizeY / 2;
 	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };
 	final double v[] = { 0, 0, 1, 1 };
@@ -93,9 +92,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final LoadingProgressReporter[] reporters = terrainReporter
 		.generateSubReporters(256/chunkSideLength);
 	int reporterIndex=0;
-	//TRFutureTask<Void> [] rowTasks = new TRFutureTask[numCores*2];
 	final double worldCeiling = tr.getWorld().sizeY;
-	int taskIdx=0;
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
 	    reporters[reporterIndex++].complete();
@@ -346,7 +343,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		    return null;
 		}}));
 	}// end for(gZ)
-	//terrainMirror.blockingDeactivate();
 	for(Future<Void> task:rowTasks)
 	    try{task.get();}catch(Exception e){throw new RuntimeException(e);}
     }// end constructor

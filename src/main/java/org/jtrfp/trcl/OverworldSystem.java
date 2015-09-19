@@ -91,15 +91,12 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    objectSystem = new ObjectSystem(tr, lvl, defList,
 		    null, Vector3D.ZERO, objectReporter);
 	    System.out.println("Adding terrain and object system to OverworldSystem...");
-	    this.nonBlockingAddBranch(objectSystem);
-	    this.blockingAddBranch(terrainSystem.get());
-	    
-	    /*World.relevanceExecutor.submit(new Runnable(){
+	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
 		    OverworldSystem.this.addBranch(objectSystem);
-		    OverworldSystem.this.addBranch(terrainSystem);
-		}});*/
+		    try{OverworldSystem.this.addBranch(terrainSystem.get());}catch(Exception e){e.printStackTrace();}
+		}}).get();
 	    
 	    System.out.println("...Done.");
 	    // Tunnel activators

@@ -35,6 +35,7 @@ import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.gpu.GLExecutor;
+import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
@@ -213,15 +214,18 @@ public final class ThreadManager implements GLExecutor{
 	});
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
+	    @ProvidesGLThread
 	    public void init(final GLAutoDrawable drawable) {
 		System.out.println("GLEventListener.init()");
 	    }//end init()
 
 	    @Override
+	    @ProvidesGLThread
 	    public void dispose(GLAutoDrawable drawable) {
 	    }
 	    
 	    @Override
+	    @ProvidesGLThread
 	    public void display(GLAutoDrawable drawable) {
 		renderingThread=Thread.currentThread();
 		renderingThread.setName("display()");
@@ -229,6 +233,7 @@ public final class ThreadManager implements GLExecutor{
 	    }//end display()
 
 	    @Override
+	    @ProvidesGLThread
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
 		    int width, int height) {
 	    }

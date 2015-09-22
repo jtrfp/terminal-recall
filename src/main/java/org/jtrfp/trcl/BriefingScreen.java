@@ -210,9 +210,12 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final Camera camera 	 = renderer.getCamera();
 	game.getPlayer().setActive(false);
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
+	String  content = txtMBF.getMissionText().replace("\r","");
 	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(), lvl);
-	setContent(
-		txtMBF.getMissionText().replace("\r","").replace("$C", ""+game.getPlayerName()));
+	final String playerName = game.getPlayerName();
+	for(String token:layout.getNameTokens())
+	    content=content.replace(token, playerName);
+	setContent(content);
 	//tr.getDefaultGrid().nonBlockingAddBranch(overworld);
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};

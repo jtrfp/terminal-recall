@@ -14,6 +14,8 @@ package org.jtrfp.trcl.gui;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -45,6 +47,11 @@ public class F3BriefingLayout implements BriefingLayout {
     @Override
     public double getFontSizeGL() {
 	return .047;
+    }
+
+    @Override
+    public Collection<String> getNameTokens() {
+	return Arrays.asList("$C");
     }
 
 }//end F3BriefingLayout

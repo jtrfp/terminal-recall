@@ -13,13 +13,15 @@
 package org.jtrfp.trcl.gui;
 
 import java.awt.geom.Point2D;
+import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 
 public interface BriefingLayout {
- public Point2D.Double getTextPosition();
- public int            getNumCharsPerLine();
- public int            getNumLines();
- public double         getFontSizeGL();
- public Rotation       cameraHeadingAdjust();
+ public Point2D.Double     getTextPosition();
+ public int                getNumCharsPerLine();
+ public int                getNumLines();
+ public double             getFontSizeGL();
+ public Rotation           cameraHeadingAdjust();
+ public Collection<String> getNameTokens();
 }//end BriefingLayout

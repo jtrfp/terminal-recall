@@ -12,13 +12,20 @@
  ******************************************************************************/
 package org.jtrfp.trcl.ext;
 
+import java.util.HashSet;
+
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.jtrfp.trcl.coll.BidiReferenceMap;
 import org.jtrfp.trcl.coll.CachedAdapter;
 
 public class ExtensionSupport<PARENT> {
     private final PARENT parent;
+    private final HashSet<Extension> applied = new HashSet<Extension>();
     
     private final CachedAdapter<Class<? extends Extension<?>>,Extension<?>> extensionFactory = 
-	    new CachedAdapter<Class<? extends Extension<?>>,Extension<?>>(){
+	    new CachedAdapter<Class<? extends Extension<?>>,Extension<?>>(
+	     new BidiReferenceMap<Class<? extends Extension<?>>,Extension<?>>
+              (ReferenceStrength.HARD,ReferenceStrength.HARD, 64,.75f,true)){
 	@Override
 	protected Extension<?> _adapt(
 		Class<? extends Extension<?>> value)
@@ -50,14 +57,21 @@ public class ExtensionSupport<PARENT> {
      this.parent=parent;
  }
  
- public<CLASS extends Extension<?>> Extension<?> getExtension(Class<CLASS> extensionClass){
+ public<CLASS extends Extension<?>> Extension<?> peekExtension(Class<CLASS> extensionClass){
      return extensionFactory.adapt(extensionClass);
  }
+ 
+ public<CLASS extends Extension<?>> Extension<?> getExtension(Class<CLASS> extensionClass){
+     final Extension result = extensionFactory.adapt(extensionClass);
+     if(applied.add(result))
+	 result.apply(parent);
+     return result;
+ }//end getExtension(...)
  
  public void loadBuiltInExtensions(){
      for(Class<? extends Extension> eClass:Extensions.builtInExtensions){
 	 try{if(parent.getClass().isAssignableFrom(((Extension)(eClass.newInstance())).getExtendedClass()) || eClass.equals(parent.getClass()))
-	     ((Extension<PARENT>)getExtension(eClass)).apply(parent);}catch(Exception e){e.printStackTrace();}
+	     getExtension(eClass);}catch(Exception e){e.printStackTrace();}
      }
  }
 }//end ExtensionSupport

@@ -245,9 +245,10 @@ public final class TR implements UncaughtExceptionHandler{
 	    while(true){
 		spaceHog.add(new byte[1024*1024*16]);//16MB
 	    }
-	}catch(OutOfMemoryError e){}
+	}catch(OutOfMemoryError e){
+	    System.runFinalization();
+	}
 	//Still alive? Great!
-	System.gc();
     }//end nuclearGC()
 
     /**

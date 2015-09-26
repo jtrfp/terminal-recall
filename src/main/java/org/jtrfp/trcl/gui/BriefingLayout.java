@@ -24,4 +24,5 @@ public interface BriefingLayout {
  public double             getFontSizeGL();
  public Rotation           cameraHeadingAdjust();
  public Collection<String> getNameTokens();
+ public double             getScrollIncrement();
 }//end BriefingLayout

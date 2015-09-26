@@ -54,4 +54,9 @@ public class TVBriefingLayout implements BriefingLayout {
 	return Arrays.asList("$NAME");
     }
 
+    @Override
+    public double getScrollIncrement() {
+	return .02;
+    }
+
 }//end F3BriefingLayout

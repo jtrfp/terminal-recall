@@ -54,4 +54,9 @@ public class F3BriefingLayout implements BriefingLayout {
 	return Arrays.asList("$C");
     }
 
+    @Override
+    public double getScrollIncrement() {
+	return .01;
+    }
+
 }//end F3BriefingLayout

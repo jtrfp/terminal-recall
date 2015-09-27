@@ -243,8 +243,8 @@ public class VQCodebookManager {
 	codebook256Indices.free(codebook256ToRelease);
     }// end freeCodebook256(...)
     
-    public void freeCodebook256(List<Integer> list) {
-	System.out.println("VQCodebookManager.freeCodebook256(list) "+list.get(0));
+    public void freeCodebook256(Collection<Integer> list) {
+	System.out.println("VQCodebookManager.freeCodebook256(list) "+list.iterator().next());
 	codebook256Indices.free(list);
     }// end freeCodebook256(...)
     

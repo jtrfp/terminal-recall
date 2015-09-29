@@ -56,7 +56,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private final CharAreaDisplay briefingChars;
     private final Sprite2D	  blackRectangle;
     private volatile double  	  scrollPos = 0;
-    private double		  scrollIncrement=.01;
+    private final double	  scrollIncrement;
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
     private ColorPaletteVectorList palette;
     private TimerTask	  scrollTimer;
@@ -87,6 +87,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);
 	blackRectangle.setVisible(true);
 	blackRectangle.setActive(true);
+	
+	scrollIncrement = layout.getScrollIncrement();
 	/*
 	missionTXT = new LazyTRFuture<TXTMissionBriefFile>(tr,new Callable<TXTMissionBriefFile>(){
 	    @Override

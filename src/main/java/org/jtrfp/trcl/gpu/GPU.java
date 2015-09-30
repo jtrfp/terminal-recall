@@ -34,6 +34,8 @@ import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
+import org.jtrfp.trcl.ext.Extension;
+import org.jtrfp.trcl.ext.ExtensionSupport;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
 
@@ -51,9 +53,11 @@ public class GPU implements GLExecutor{
 	public final TRFutureTask<RendererFactory> 	rendererFactory;
 	private final GLExecutor			glExecutor;
 	private final GLCanvas				canvas;
-	public final TRFutureTask<MatrixWindow> 	matrixWindow ;
+	public final TRFutureTask<MatrixWindow> 	matrixWindow;
 	public final TRFutureTask<ObjectListWindow> 	objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
+	private final ThreadManager                     threadManager;
+	private final ExtensionSupport<GPU>             extensionSupport = new ExtensionSupport<GPU>(this);
 	
 	public GPU(final Reporter reporter, ExecutorService executorService,
 		GLExecutor glExecutor, final ThreadManager threadManager, 
@@ -61,8 +65,9 @@ public class GPU implements GLExecutor{
 		final World world) {
 	    if(executorService==null)
 		executorService = Executors.newCachedThreadPool();
-	    this.glExecutor=glExecutor;
-	    this.canvas    = glCanvas;
+	    this.glExecutor    = glExecutor;
+	    this.canvas        = glCanvas;
+	    this.threadManager = threadManager;
 	    memoryManager  = new TRFutureTask<MemoryManager>(new Callable<MemoryManager>(){
 		@Override
 		public MemoryManager call() throws Exception {
@@ -121,6 +126,7 @@ public class GPU implements GLExecutor{
 		    System.out.println("\tVer:"+System.getProperty("os.version"));
 		    return null;
 		}});
+	    extensionSupport.loadBuiltInExtensions();
 	}//end constructor
 	
 	public int glGet(int key){
@@ -231,5 +237,22 @@ public class GPU implements GLExecutor{
 	@Override
 	public <T> GLFutureTask<T> submitToGL(Callable<T> c) {
 	    return glExecutor.submitToGL(c);
+	}
+
+	/**
+	 * @return the threadManager
+	 */
+	public ThreadManager getThreadManager() {
+	    return threadManager;
+	}
+
+	/**
+	 * @param extensionClass
+	 * @return
+	 * @see org.jtrfp.trcl.ext.ExtensionSupport#getExtension(java.lang.Class)
+	 */
+	public <CLASS extends Extension<?>> CLASS getExtension(
+		Class<CLASS> extensionClass) {
+	    return (CLASS)extensionSupport.getExtension(extensionClass);
 	}
 	}//end GPU

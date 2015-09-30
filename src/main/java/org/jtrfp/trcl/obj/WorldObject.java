@@ -18,7 +18,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -35,6 +34,7 @@ import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Mat4x4;
@@ -635,16 +635,39 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     @Override
     public void finalize() throws Throwable{
-	if(matrixID!=null)
-	 tr.gpu.get().matrixWindow.get().free(matrixID);
-	if(transparentTriangleObjectDefinitions!=null)
-	 for(int def:transparentTriangleObjectDefinitions)
-	    tr.gpu.get().objectDefinitionWindow.get().free(def);
-	if(triangleObjectDefinitions!=null)
-	 for(int def:triangleObjectDefinitions)
-	    tr.gpu.get().objectDefinitionWindow.get().free(def);
+	tr.gpu.get().getExtension(GPUResourceFinalizer.class).
+	 submitFinalizationAction(
+	  new WorldObjectFinalizerTask(tr,matrixID,triangleObjectDefinitions,transparentTriangleObjectDefinitions));
+	
+	
 	super.finalize();
     }//end finalize()
+    
+    private static final class WorldObjectFinalizerTask implements Callable<Void>{
+	private final Integer matrixID;
+	private final int[] triangleObjectDefinitions, transparentTriangleObjectDefinitions;
+	private final TR tr;
+	
+	public WorldObjectFinalizerTask(TR tr, Integer matrixID, int [] triangleObjectDefinitions, int [] transparentTriangleObjectDefinitions){
+	    this.matrixID                             = matrixID;
+	    this.triangleObjectDefinitions            = triangleObjectDefinitions;
+	    this.transparentTriangleObjectDefinitions = transparentTriangleObjectDefinitions;
+	    this.tr                                   = tr;
+	}
+	@Override
+	public Void call() throws Exception {
+	    if(matrixID!=null)
+		 tr.gpu.get().matrixWindow.get().free(matrixID);
+		if(transparentTriangleObjectDefinitions!=null)
+		 for(int def:transparentTriangleObjectDefinitions)
+		    tr.gpu.get().objectDefinitionWindow.get().free(def);
+		if(triangleObjectDefinitions!=null)
+		 for(int def:triangleObjectDefinitions)
+		    tr.gpu.get().objectDefinitionWindow.get().free(def);
+	    return null;
+	}
+	
+    }//end WorldObjectFinalizerTask
 
     /**
      * @param modelOffset the modelOffset to set

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2015 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,6 +33,7 @@ import org.jtrfp.trcl.TextureBehavior;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
+import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
@@ -62,23 +64,51 @@ public class Texture implements TextureDescription {
     private volatile int		texturePage;
     private int				sideLength;
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
-    @Override
-    public void finalize() throws Throwable{
-	//TOC ID
-	if(tocIndex!=null)
-	    toc.free(tocIndex);
-	//Subtexture IDs
-	if(subTextureIDs!=null)
-	 for(int stID:subTextureIDs)
-	    stw.free(stID);
-	//Codebook entries
-	tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
-	super.finalize();
-    }//end finalize()
+    private final GPU                   gpu;
     
     Texture(GPU gpu, ThreadManager threadManager, Color c){
 	this(gpu,threadManager,new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false);
     }//end constructor
+    
+    @Override
+    public void finalize() throws Throwable{
+	gpu.getExtension(GPUResourceFinalizer.class).
+	 submitFinalizationAction(
+	  new TextureFinalizerTask(tm,stw,toc,tocIndex,subTextureIDs,codebookStartOffsets256));
+	super.finalize();
+    }//end finalize()
+    
+    private static final class TextureFinalizerTask implements Callable<Void>{
+	final TextureManager      tm;
+	final SubTextureWindow    stw;
+	final TextureTOCWindow    toc;
+	final Integer             tocIndex;
+	final Collection<Integer> subTextureIDs;
+	final Collection<Integer> codebookStartOffsets256;
+	
+	public TextureFinalizerTask(final TextureManager tm, final SubTextureWindow stw, final TextureTOCWindow toc, final Integer tocIndex, final Collection<Integer> subTextureIDs, final Collection<Integer> codebookStartOffsets256){
+	    this.tm=tm;
+	    this.stw=stw;
+	    this.toc=toc;
+	    this.tocIndex=tocIndex;
+	    this.subTextureIDs=subTextureIDs;
+	    this.codebookStartOffsets256=codebookStartOffsets256;
+	}
+	
+	@Override
+	public Void call() throws Exception {
+	    //TOC ID
+	    if(tocIndex!=null)
+		toc.free(tocIndex);
+	    //Subtexture IDs
+	    if(subTextureIDs!=null)
+		for(int stID:subTextureIDs)
+		    stw.free(stID);
+	    //Codebook entries
+	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
+	    return null;
+	}
+    }//end TextureFinalizer
     
     private static VectorList colorZeroRasterVL(){
 	return new VectorList(){
@@ -139,6 +169,7 @@ public class Texture implements TextureDescription {
 	this.stw	  =tm.getSubTextureWindow();
 	this.debugName	  =debugName.replace('.', '_');
 	this.uvWrapping   =uvWrapping;
+	this.gpu          =gpu;
     }//end constructor
     
     Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
@@ -207,16 +238,17 @@ public class Texture implements TextureDescription {
 	    threadManager.submitToThreadPool(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-		// Create subtextures
-		//subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
-		for(int i=0; i<diameterInSubtextures*diameterInSubtextures; i++){
-		    //Create subtexture ID
-		    subTextureIDs.add(stw.create());
-		    tm.vqCodebookManager.get().newCodebook256(codebookStartOffsets256, 6);
-		}//end for(subTextureIDs)
+		
 		threadManager.submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public final Void call() {
+			// Create subtextures
+			//subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
+			for(int i=0; i<diameterInSubtextures*diameterInSubtextures; i++){
+			    //Create subtexture ID
+			    subTextureIDs.add(stw.create());
+			    tm.vqCodebookManager.get().newCodebook256(codebookStartOffsets256, 6);
+			}//end for(subTextureIDs)
 			//Set magic
 			toc.magic.set(tocIndex, 1337);
 			for(int i=0; i<subTextureIDs.size(); i++){

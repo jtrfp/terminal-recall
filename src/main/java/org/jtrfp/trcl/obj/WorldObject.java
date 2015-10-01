@@ -78,6 +78,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected final double[] tMd 	= new double[16];
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
+    private final GPUResourceFinalizer  gpuResourceFinalizer;
     
     private CollectionActionDispatcher<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     private CollectionActionDispatcher<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
@@ -95,6 +96,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	tMd[5] = 1;
 	tMd[10] = 1;
 	tMd[15] = 1;
+	
+	gpuResourceFinalizer = tr.gpu.get().getExtension(GPUResourceFinalizer.class);
     }
 
     public WorldObject(TR tr, Model m) {
@@ -635,7 +638,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     @Override
     public void finalize() throws Throwable{
-	tr.gpu.get().getExtension(GPUResourceFinalizer.class).
+	gpuResourceFinalizer.
 	 submitFinalizationAction(
 	  new WorldObjectFinalizerTask(tr,matrixID,triangleObjectDefinitions,transparentTriangleObjectDefinitions));
 	

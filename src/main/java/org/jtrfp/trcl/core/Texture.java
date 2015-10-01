@@ -65,6 +65,7 @@ public class Texture implements TextureDescription {
     private int				sideLength;
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
     private final GPU                   gpu;
+    private final GPUResourceFinalizer  gpuResourceFinalizer;
     
     Texture(GPU gpu, ThreadManager threadManager, Color c){
 	this(gpu,threadManager,new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false);
@@ -72,7 +73,7 @@ public class Texture implements TextureDescription {
     
     @Override
     public void finalize() throws Throwable{
-	gpu.getExtension(GPUResourceFinalizer.class).
+	gpuResourceFinalizer.
 	 submitFinalizationAction(
 	  new TextureFinalizerTask(tm,stw,toc,tocIndex,subTextureIDs,codebookStartOffsets256));
 	super.finalize();
@@ -170,6 +171,7 @@ public class Texture implements TextureDescription {
 	this.debugName	  =debugName.replace('.', '_');
 	this.uvWrapping   =uvWrapping;
 	this.gpu          =gpu;
+	this.gpuResourceFinalizer = gpu.getExtension(GPUResourceFinalizer.class);
     }//end constructor
     
     Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){

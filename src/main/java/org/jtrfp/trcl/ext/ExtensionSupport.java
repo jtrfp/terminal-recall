@@ -23,9 +23,7 @@ public class ExtensionSupport<PARENT> {
     private final HashSet<Extension> applied = new HashSet<Extension>();
     
     private final CachedAdapter<Class<? extends Extension<?>>,Extension<?>> extensionFactory = 
-	    new CachedAdapter<Class<? extends Extension<?>>,Extension<?>>(
-	     new BidiReferenceMap<Class<? extends Extension<?>>,Extension<?>>
-              (ReferenceStrength.HARD,ReferenceStrength.HARD, 64,.75f,true)){
+	    new CachedAdapter<Class<? extends Extension<?>>,Extension<?>>(){
 	@Override
 	protected Extension<?> _adapt(
 		Class<? extends Extension<?>> value)

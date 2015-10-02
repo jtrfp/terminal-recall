@@ -13,8 +13,11 @@
 package org.jtrfp.trcl.ext.tr;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +26,19 @@ import org.jtrfp.trcl.gpu.GPU;
 
 public class GPUResourceFinalizer implements Extension<GPU> {
     private ExecutorService      finalizationExecutor;
+    private LinkedBlockingQueue<Future<Void>>    finalizationFutures = new LinkedBlockingQueue<Future<Void>>();
+    
+    private final Thread finalizationFutureCheckerThread = new Thread(){
+	@Override
+	public void run(){
+	    try{
+		while(true)
+		    {finalizationFutures.take().get();}
+	    }//end try{}
+	    catch(ExecutionException e){e.printStackTrace();}
+	    catch(InterruptedException e){}
+	}//end run()
+    };
 
     @Override
     public void init(GPU extended) {
@@ -30,12 +46,14 @@ public class GPUResourceFinalizer implements Extension<GPU> {
 
     @Override
     public void apply(GPU extended) {
-	 finalizationExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*3, new GPURFThreadFactory());
+	finalizationFutureCheckerThread.start();
+	finalizationExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*3, new GPURFThreadFactory());
     }//end apply(...)
 
     @Override
     public void remove(GPU extended) {
 	finalizationExecutor = null;
+	finalizationFutureCheckerThread.interrupt();//UNTESTED
     }
 
     @Override
@@ -54,7 +72,7 @@ public class GPUResourceFinalizer implements Extension<GPU> {
     }
     
     public void submitFinalizationAction(Callable<Void> c){
-	finalizationExecutor.submit(c);
+	finalizationFutures.add(finalizationExecutor.submit(c));
     }//end submitFinalizationAction(...)
     
     private final AtomicInteger threadID = new AtomicInteger();

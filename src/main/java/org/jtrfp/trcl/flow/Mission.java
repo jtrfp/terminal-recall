@@ -29,7 +29,6 @@ import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.SkySystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
@@ -52,7 +51,6 @@ import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
@@ -114,24 +112,12 @@ public class Mission {
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
 	this.displayHandler = new DisplayModeHandler(tr.getDefaultGrid());
-	ResourceManager rm = tr.getResourceManager();
 	levelLoadingMode = new Object[]{
 		 game.levelLoadingScreen,
 		 game.upfrontDisplay
 	    };
     }// end Mission
-    /*
-    public TRFutureTask<Result> go(){
-	synchronized(missionTask){
-	 missionTask[0] = tr.getThreadManager().submitToThreadPool(new Callable<Result>(){
-	    @Override
-	    public Result call() throws Exception {
-		return _go();
-	    }});
-	}//end sync{}
-	return missionTask[0];
-    }//end go()
-*/
+    
     public Result go() {
 	setMissionMode(new Mission.LoadingMode());
 	synchronized(missionLock){
@@ -166,7 +152,6 @@ public class Mission {
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
 	    final Player player      = tr.getGame().getPlayer();
-	    final World world 	     = tr.getWorld();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check
@@ -278,18 +263,13 @@ public class Mission {
 			.println("Invalid format for property \"org.jtrfp.trcl.flow.Mission.skipNavs\". Must be integer.");
 	    }
 	}// end if(containsKey)
-	//System.out.println("Invoking JVM's garbage collector...");
-	//TR.nuclearGC();
-	//System.out.println("Mission.go() complete.");
 	// Transition to gameplay mode.
 	// Abort check
 	synchronized (missionEnd) {
 	    if (missionEnd[0] != null)
 		return missionEnd[0];
 	}//end sync(missionEnd)
-	/*tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
-	    @Override
-	    public Void call() throws Exception {*/
+	
 		final SoundSystem ss = Mission.this.tr.soundSystem.get();
 		MusicPlaybackEvent evt;
 		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
@@ -306,9 +286,6 @@ public class Mission {
 		 }
 		 
 		 }//end sync(Mission.this)
-		//return null;
-	/*    }// end call()
-	});*/
 	game.getUpfrontDisplay().removePersistentMessage();
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
@@ -323,12 +300,6 @@ public class Mission {
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
 	game.getNavSystem() .activate();
-	/*World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		//game.getNavSystem() .activate();
-		tr.getDefaultGrid() .removeBranch(getOverworldSystem());
-	    }});*/
 	displayHandler.setDisplayMode(gameplayMode);
 	
 	game.getPlayer()	.setActive(true);
@@ -344,13 +315,6 @@ public class Mission {
 		setMissionMode(new Mission.MissionSummaryMode());
 		game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
 	    }//end if(proper ending)
-	/*tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
-	    @Override
-	    public Void call() throws Exception {
-		bgMusic.stop();
-		return null;
-	    }// end call()
-	});*/
 	bgMusic.stop();
 	cleanup();
 	return missionEnd[0];
@@ -760,7 +724,6 @@ public class Mission {
 	player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 	player.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
-	//entranceObject.getBehavior().probeForBehaviors(TELsubmitter, TunnelEntryListener.class);
 	tunnel.dispatchTunnelEntryNotifications();
 	final Camera secondaryCam = tr.secondaryRenderer.get().getCamera();
 	player.setPosition(secondaryCam.getPosition());
@@ -776,24 +739,7 @@ public class Mission {
 		      getOverworldSystem().
 		      getSkySystem().
 		      getBelowCloudsSkyCubeGen());
-	/*
-	final NAVObjective navObjective = getNavObjectiveToRemove();
-	if(navObjective!=null && navTargeted){
-	    final Mission m = game.getCurrentMission();
-	    if(!(onlyRemoveIfCurrent&&navObjective!=m.currentNAVObjective()))m.removeNAVObjective(navObjective);
-	}//end if(have NAV to remove
-	*/
 	player.setActive(true);
-	/*
-	try{World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		//Turn off overworld
-		//overworldSystem.deactivate();
-		//Turn on tunnel
-		//tunnel.activate();
-	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
-	*/
     }//end enterTunnel()
     /**
      * @param listener

@@ -176,7 +176,7 @@ public class Texture implements TextureDescription {
     
     Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
 	this(gpu,threadManager,debugName,uvWrapping);
-	vqCompress(vlRGBA,vlESTuTv);
+	assemble(vlRGBA,vlESTuTv);
     }//end constructor
 
     Texture(GPU gpu, ThreadManager threadManager, ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, boolean uvWrapping) {
@@ -186,20 +186,20 @@ public class Texture implements TextureDescription {
 		    "Cannot create texture of zero size.");
 	}//end if capacity==0
 	imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
-	vqCompress(imageRGBA8888,imageESTuTv8888);
+	assemble(imageRGBA8888,imageESTuTv8888);
     }// end constructor
     
-    private void vqCompress(PalettedVectorList squareImageIndexedRGBA,PalettedVectorList squareImageIndexedESTuTv){
+    private void assemble(PalettedVectorList squareImageIndexedRGBA,PalettedVectorList squareImageIndexedESTuTv){
 	final double	fuzzySideLength = Math.sqrt(squareImageIndexedRGBA.getNumVectors());
 	final int 	sideLength	= (int)Math.floor(fuzzySideLength);
 	if(!SpecialRAWDimensions.isPowerOfTwo(sideLength))
 	    System.err.println("WARNING: Calculated dimensions are not power-of-two. Trouble ahead.");
 	if(Math.abs(fuzzySideLength-sideLength)>.001)
 	    System.err.println("WARNING: Calculated dimensions are not perfectly square. Trouble ahead.");
-	vqCompress(squareImageIndexedRGBA, squareImageIndexedESTuTv,sideLength);
+	assemble(squareImageIndexedRGBA, squareImageIndexedESTuTv,sideLength);
     }
     
-    private void vqCompress(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888){
+    private void assemble(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888){
 	final double	fuzzySideLength = Math.sqrt((imageRGBA8888.capacity() / 4));
 	final int 	sideLength	= (int)Math.floor(fuzzySideLength);
 	if(!SpecialRAWDimensions.isPowerOfTwo(sideLength))
@@ -212,10 +212,10 @@ public class Texture implements TextureDescription {
 	 
 	 final VectorList	 	bbvlESTuTv 	= imageESTuTv8888!=null?new ByteBufferVectorList(imageESTuTv8888):new ConstantVectorList(0,bbvl);
 	 final RGBA8888VectorList 	esTuTv8888vl 	= bbvlESTuTv!=null?new RGBA8888VectorList(bbvlESTuTv):null;
-	 vqCompress(rgba8888vl,esTuTv8888vl,sideLength);
+	 assemble(rgba8888vl,esTuTv8888vl,sideLength);
     }
     
-    private final void vqCompress(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength){
+    private final void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength){
 	    this.sideLength=sideLength;
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
@@ -245,7 +245,6 @@ public class Texture implements TextureDescription {
 		    @Override
 		    public final Void call() {
 			// Create subtextures
-			//subTextureIDs 				= new int[diameterInSubtextures*diameterInSubtextures];
 			for(int i=0; i<diameterInSubtextures*diameterInSubtextures; i++){
 			    //Create subtexture ID
 			    subTextureIDs.add(stw.create());
@@ -311,9 +310,7 @@ public class Texture implements TextureDescription {
 		if(vlrESTuTv!=null)
 		 setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex);
 		else{
-		    final VectorList blackVL = new ConstantVectorList(0, sideLength*sideLength, 4);
-		    final VectorListND blackVLR = new RasterizedBlockVectorList(
-			    new VectorListRasterizer(blackVL, new int[]{sideLength,sideLength}), 4);
+		    final VectorListND blackVLR = generateBlackVectorList(sideLength);
 		 setESTuTvCodebookTexelsAt(blackVLR, codeX,codeY,diameterInCodes, globalCodeIndex);}
 		}//end for(codeX)
 	}//end for(codeY)
@@ -321,6 +318,11 @@ public class Texture implements TextureDescription {
 	flushESTuTvCodeblock256();
 	return null;
 	}//end threadPool call()
+	    private VectorListND generateBlackVectorList(int sideLength) {
+		final VectorList blackVL = new ConstantVectorList(0, sideLength*sideLength, 4);
+		return new RasterizedBlockVectorList(
+		    new VectorListRasterizer(blackVL, new int[]{sideLength,sideLength}), 4);
+		}
 	    private void setRGBACodebookTexelsAt(final VectorListND vlrRGBA, int codeX, int codeY,
 		    int diameterInCodes, int globalCodeIndex) {
 		final int coord[] = new int[]{codeX,codeY};
@@ -441,7 +443,7 @@ public class Texture implements TextureDescription {
     Texture(GPU gpu, ThreadManager threadManager, BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
 	this(gpu,threadManager,debugName,uvWrapping);
 	try{
-	    vqCompress(new BufferedImageRGBA8888VL(imgRGBA),
+	    assemble(new BufferedImageRGBA8888VL(imgRGBA),
 		    imgESTuTv!=null?
 			    new BufferedImageRGBA8888VL(imgESTuTv):
 			    null,imgRGBA.getWidth());

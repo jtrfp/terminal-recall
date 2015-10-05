@@ -122,10 +122,7 @@ public class VQCodebookManager {
     }
     
     private VQCodebookManager setNNNNBlock256(int blockID, RasterRowWriter [][] rowWriters, GLTexture texture){
-	try{subImage256(blockID,rowWriters,texture,2);}
-	catch(OutOfMemoryError e){
-	    
-	}
+	subImage256(blockID,rowWriters,texture,2);
 	return this;
     }
     

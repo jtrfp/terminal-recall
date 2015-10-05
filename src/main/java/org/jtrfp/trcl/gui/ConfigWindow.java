@@ -495,7 +495,7 @@ public class ConfigWindow extends JFrame {
 
 	    @Override
 	    public String getDescription() {
-		return "Terminal Reality .POD files";
+		return "Terminal Reality .VOX files";
 	    }
 	});
 	if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)

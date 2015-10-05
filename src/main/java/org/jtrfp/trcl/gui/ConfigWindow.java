@@ -536,15 +536,19 @@ public class ConfigWindow extends JFrame {
     
     private void editVOXPath(){
 	final String result = JOptionPane.showInputDialog(this, "Edit VOX Path", missionLM.get(missionList.getSelectedIndex()));
+	if(result==null)// Clicked Cancel
+	    return;// Do nothing
 	if(checkVOX(new File(result)))
 	    missionLM.set(missionList.getSelectedIndex(), result);
     }//end editVOXPath()
     
     private void editPODPath(){
 	final String result = JOptionPane.showInputDialog(this, "Edit POD Path", podLM.get(missionList.getSelectedIndex()));
+	if(result==null)// Clicked Cancel
+	    return;// Do nothing
 	if(checkPOD(new File(result)))
 	    podLM.set(podList.getSelectedIndex(), result);
-    }//end editVOXPath()
+    }//end editPODPath()
     
     private boolean readSettingsFromFile(File f){
 	try{FileInputStream is = new FileInputStream(f);

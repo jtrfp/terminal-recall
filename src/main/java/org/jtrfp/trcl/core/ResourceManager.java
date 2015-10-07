@@ -393,7 +393,6 @@ public class ResourceManager{
 			for(int i=0; i<frames.length;i++)
 				{result.addFrame(frames[i]);}
 			result.setFrameDelayInMillis((int)(((double)ac.getDelay()/65535.)*1000.));
-			//result.finalizeModel();
 			if(cache)modelCache.put(name, result);
 			return result;
 			}//end try{}
@@ -520,9 +519,6 @@ public class ResourceManager{
 					    final Color color = new Color(bytes[0]&0xFF,bytes[1]&0xFF,bytes[2]&0xFF);
 					    currentTexture = tr.gpu.get().textureManager.get().solidColor(color);
 					}
-					else if(b instanceof FaceBlock19){
-					    System.out.println(b.getClass().getSimpleName()+" (solid colored faces) not yet implemented. Skipping...");}
-					else if(b instanceof FaceBlock05){}//TODO
 					else if(b instanceof BillboardTexCoords0x04){
 					    hasAlpha=true;
 					    skipLighting=true;
@@ -571,19 +567,14 @@ public class ResourceManager{
 					else
 						{System.out.println("Failed to identify DataBlock: "+b.getClass().getName());}
 					}//end for(dataBlocks)
-				//result.finalizeModel();
 				result.setDebugName(name);
-				//if(result.getTriangleList()==null && result.getTransparentTriangleList()==null)
-				//    throw new RuntimeException("Resulting BIN has no triangleList");
 				if(cache)modelCache.put(name, result);
 				return result;
 				}//end try{}
-			catch(UnrecognizedFormatException ee){
-				//Not-good fail
+			catch(UnrecognizedFormatException ee){//Bad fail
 				throw new UnrecognizedFormatException("Can't figure out what this is: "+name+". Giving up. Expect trouble ahead.");
-				}
+				}//end catch(bad fail)
 			}//end catch(ok fail)
-		//Bad fail.
 		}//end getBINModel()
 	
 	private BufferedImage [] getSpecialRAWImage(String name, Color [] palette, int upscalePowerOfTwo) throws IllegalAccessException, FileLoadException, IOException{
@@ -797,13 +788,12 @@ public class ResourceManager{
 	    if(fileName==null)throw new NullPointerException("Passed VOX file name String is intolerably null.");
 	    //Special cases: Fury3, TV, fZone
 	    if(fileName.contentEquals("Fury3"))
-	    	return new Fury3().getDefaultMission();
+	    	return Fury3.getDefaultMission();
 	    if(fileName.contentEquals("TV"))
-	    	return new TV().getDefaultMission();
+	    	return TV.getDefaultMission();
 	    if(fileName.contentEquals("FurySE"))
-	    	return new FZone().getDefaultMission();
+	    	return FZone.getDefaultMission();
 	    final InputStream is = new FileInputStream(new File(fileName));
-	    //InputStream is = getInputStreamFromResource("DATA\\"+fileName);
 		VOXFile result = new Parser().readToNewBean(is, VOXFile.class);
 		is.close();
 		return result;

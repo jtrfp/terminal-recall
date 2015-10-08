@@ -96,46 +96,45 @@ public class Model {
 		if(animated)//Discard frame zero
 		    {tLists.remove(0);ttLists.remove(0);}
 		Controller c = controller;
-		if (c == null)
+		{//Start scope numFrames
+		 final int numFrames = tLists.size();
+		 if (c == null)
 		    {if(frameDelay==0)frameDelay=1;
-		    c = new Sequencer(getFrameDelayInMillis(), tLists.size(), true);}
-		Triangle[][] tris = new Triangle[tLists.size()][];
-		for (int i = 0; i < tLists.size(); i++) {
+		    c = new Sequencer(getFrameDelayInMillis(), numFrames, true);}
+		 Triangle[][] tris = new Triangle[numFrames][];
+		 for (int i = 0; i < numFrames; i++) {
 		    tris[i] = tLists.get(i).toArray(new Triangle[] {});
 		    assert tris[i]!=null:"tris intolerably null";//Verify poss. race condition.
 		    for(Triangle triangle:tLists.get(i))
 			textures.add(triangle.texture);
-		}// Get all frames for each triangle
-		if (tris[0].length != 0) {
+		 }// Get all frames for each triangle
+		 if (tris[0].length != 0) {
 		    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
 			    animateUV, c, tr, Model.this);
 		    tpFuture = tpList.uploadToGPU();
-		}// end if(length!=0)
-		else
+		 }// end if(length!=0)
+		 else
 		    tpList = null;
-
-		Triangle[][] ttris = new Triangle[ttLists.size()][];
-		for (int i = 0; i < ttLists.size(); i++) {
+	        }//end scope numFrames
+		{//start scope numFrames
+		 final int numFrames = ttLists.size();
+		 Triangle[][] ttris = new Triangle[numFrames][];
+		 for (int i = 0; i < numFrames; i++) {
 		    ttris[i] = ttLists.get(i).toArray(new Triangle[] {});
 		    for(Triangle triangle:ttLists.get(i))
 			textures.add(triangle.texture);
-		}// Get all frames for each triangle
-		if (ttris[0].length != 0) {
+		 }// Get all frames for each triangle
+		 if (ttris[0].length != 0) {
 		    ttpList = new TransparentTriangleList(ttris,
 			    getFrameDelayInMillis(), debugName, animateUV, c, tr, Model.this);
 		    ttpFuture = ttpList.uploadToGPU();
-		}// end if(length!=0)
-		else
+		 }// end if(length!=0)
+		 else
 		    ttpList = null;
-		tLists =null;
-		ttLists=null;
-		lsLists=null;
-		/*
-		if(tpFuture!=null)
-		    tpFuture.get();
-		if(ttpFuture!=null)
-		    ttpFuture.get();
-		*/
+		 tLists =null;
+		 ttLists=null;
+		 lsLists=null;
+		}//end scope numframes
 		return Model.this;
 	    }});
     }// end finalizeModel()

@@ -46,7 +46,9 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	this.primitives = primitives;
 	this.model = model;
 	setScale((getMaximumVertexValue() / 2048.));
-	//addList(this);
+	//Sanity
+	for(int i=0; i<primitives.length; i++)
+	    assert primitives[i]!=null:"Frame intolerably null at index "+i+".";
     }
 
     protected int packScale(double scaleToPack) {

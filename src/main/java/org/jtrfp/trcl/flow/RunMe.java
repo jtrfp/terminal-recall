@@ -61,7 +61,7 @@ public class RunMe{
 	    String cmd = "java -server -Dorg.jtrfp.trcl.bypassConfigure=true -Dcom.sun.management.jmxremote "
 		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
-		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx768m "
+		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx512m "
 		    + "-XX:+UseCompressedOops "
 		    /*+ "-XX:+UseLargePages"*/+" ";
 	    if(useAssertions)

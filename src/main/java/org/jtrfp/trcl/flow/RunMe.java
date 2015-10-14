@@ -63,6 +63,7 @@ public class RunMe{
 		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
 		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx512m "
 		    + "-XX:+UseCompressedOops "
+		    + "-XX:MaxDirectMemorySize=32m "
 		    /*+ "-XX:+UseLargePages"*/+" ";
 	    if(useAssertions)
 		cmd+="-ea ";

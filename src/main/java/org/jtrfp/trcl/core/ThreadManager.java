@@ -59,13 +59,13 @@ public final class ThreadManager implements GLExecutor{
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
 		    20,
-		    45,
+		    20,
 		    1,
 		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
     public final ThreadPoolExecutor	gpuMemAccessThreadPool 		= 
 	    new ThreadPoolExecutor(
 		    30,
-		    65,
+		    30,
 		    1,
 		    TimeUnit.DAYS,new ArrayBlockingQueue<Runnable>(30000,true));
     

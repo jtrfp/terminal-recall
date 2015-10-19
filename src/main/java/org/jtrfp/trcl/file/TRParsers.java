@@ -28,6 +28,10 @@ import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 public class TRParsers {
+    
+    public static final String [] LINE_DELIMITERS =
+	    new String [] {"\r\n","\n\r","\n"};
+    
     /**
      * Untested.
      * 

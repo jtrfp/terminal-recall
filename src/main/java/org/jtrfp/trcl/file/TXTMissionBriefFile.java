@@ -23,9 +23,9 @@ public class TXTMissionBriefFile implements ThirdPartyParseable {
 
     @Override
     public void describeFormat(Parser p) throws UnrecognizedFormatException {
-	p.stringEndingWith("\r\n", p.property("planetModelFile", String.class),
+	p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("planetModelFile", String.class),
 		false);
-	p.stringEndingWith("\r\n",
+	p.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		p.property("planetTextureFile", String.class), false);
 	p.stringEndingWith((String)null, p.property("missionText", String.class), false);
     }

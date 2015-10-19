@@ -29,7 +29,7 @@ public class PUPFile implements ThirdPartyParseable {
 	    p.stringEndingWith(",", p.property("x", int.class), false);
 	    p.stringEndingWith(",", p.property("y", int.class), false);
 	    p.stringEndingWith(",", p.property("z", int.class), false);
-	    p.stringEndingWith("\r\n", p.property("type", Powerup.class), false);
+	    p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("type", Powerup.class), false);
 	}// end describeFormat()
 
 	/**
@@ -111,7 +111,7 @@ public class PUPFile implements ThirdPartyParseable {
 
     @Override
     public void describeFormat(Parser p) throws UnrecognizedFormatException {
-	p.stringEndingWith("\r\n", p.property("numPowerups", int.class), false);
+	p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("numPowerups", int.class), false);
 	p.arrayOf(getNumPowerups(), "powerupLocations", PowerupLocation.class);
     }
 

@@ -38,11 +38,11 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 
     @Override
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("numEnemyDefinitions", int.class), false);
 	prs.arrayOf(getNumEnemyDefinitions(), "enemyDefinitions",
 		EnemyDefinition.class);
-	prs.stringEndingWith("\r\n", prs.property("numPlacements", int.class),
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("numPlacements", int.class),
 		false);
 	prs.arrayOf(getNumPlacements(), "enemyPlacements", EnemyPlacement.class);
     }
@@ -85,12 +85,12 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		    "boundingBoxRadius", "pivotX", "pivotY", "pivotZ");
 	    prs.stringEndingWith(",",
 		    prs.property("complexModelFile", String.class), false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("simpleModel", String.class), false);
 	    // LINE 2 (5 entries)
 	    prs.stringCSVEndingWith(",", int.class, false, "thrustSpeed",
 		    "rotationSpeed", "fireSpeed", "fireStrength");
-	    prs.stringEndingWith("\r\n", prs.property("weapon", Weapon.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("weapon", Weapon.class),
 		    false);
 	    // LINE 3 (4 entries)
 	    prs.stringEndingWith(",",
@@ -99,7 +99,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		    prs.property("createRandomly", boolean.class), false);
 	    prs.stringEndingWith(",",
 		    prs.property("powerupProbability", int.class), false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("powerup", Powerup.class), false);
 	    // LINE 4 (9 entries) / (5 entries)
 	    // TODO: This needs to adjust accordingly
@@ -111,7 +111,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	    /*
 	     * for(int i=0; i<7;i++) {prs.stringEndingWith(",",
 	     * prs.indexedProperty("firingVertices", int.class, i), false);}
-	     * prs.stringEndingWith("\r\n",
+	     * prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 	     * prs.indexedProperty("firingVertices",int.class,7), false);
 	     */
 	    try {
@@ -124,7 +124,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 			    prs.indexedProperty("hboxVertices", int.class, i),
 			    false);
 		}
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.indexedProperty("hboxVertices", int.class, 15),
 			false);// last one, ending in newline.
 	    } catch (UnrecognizedFormatException e) {
@@ -140,13 +140,13 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 			prs.property("retreatDistance", int.class), false);
 		prs.stringEndingWith(",",
 			prs.property("objectIsBoss", boolean.class), false);
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("unknown", int.class), false);
 	    } catch (UnrecognizedFormatException e) {
 		System.out.println("NewAttackRet not given for this def");
 	    }
 
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
 
 	    try {
@@ -158,7 +158,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 			prs.property("secondaryWeapon", Weapon.class), false);
 		prs.stringEndingWith(",",
 			prs.property("secondWeaponDistance", int.class), false);
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("fireVelocity", int.class), false);
 	    } catch (UnrecognizedFormatException e) {
 		System.out.println("2nd Weapon not given for this def");
@@ -167,9 +167,9 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		prs.ignoreEOF = true;
 		prs.expectString("%SFX\r\n",
 			FailureBehavior.UNRECOGNIZED_FORMAT);
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("bossFireSFXFile", String.class), false);
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("bossYellSFXFile", String.class), false);
 	    } catch (UnrecognizedFormatException e) {
 		System.out.println("SFX not given for this def.");

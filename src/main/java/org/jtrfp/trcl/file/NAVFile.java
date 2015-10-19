@@ -27,7 +27,7 @@ public class NAVFile implements ThirdPartyParseable {
 
     @Override
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("numNavigationPoints", int.class), false);
 	for (int i = 0; i < getNumNavigationPoints(); i++) {
 	    prs.subParseProposedClasses(
@@ -83,7 +83,7 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
 	    prs.stringCSVEndingWith("\r\n", int.class, false, "pitch", "roll",
 		    "yaw");
@@ -151,19 +151,19 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("bossIndex", int.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("bossIndex", int.class),
 		    false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("musicFile", String.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("unused", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("unused", String.class),
 		    false);
 	    prs.expectString("!NewH\r\n", FailureBehavior.IGNORE);
-	    prs.stringEndingWith("\r\n", prs.property("numTargets", int.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("numTargets", int.class),
 		    false);
 	    for (int i = 0; i < getNumTargets(); i++) {
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.indexedProperty("targets", int.class, i), false);
 	    }
 	}
@@ -256,11 +256,11 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("unused1", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("unused1", String.class),
 		    false);
-	    prs.stringEndingWith("\r\n", prs.property("unused2", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("unused2", String.class),
 		    false);
 	}
 
@@ -303,7 +303,7 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
 	}
 
@@ -317,7 +317,7 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
 	}
 
@@ -330,7 +330,7 @@ public class NAVFile implements ThirdPartyParseable {
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
 	    prs.expectString(";", FailureBehavior.UNRECOGNIZED_FORMAT);
-	    prs.stringEndingWith("\r\n", prs.property("tagName", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("tagName", String.class),
 		    false);
 	}
 
@@ -361,11 +361,11 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("tunnelFileName", String.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("unused", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("unused", String.class),
 		    false);
 	}
 
@@ -412,12 +412,12 @@ public class NAVFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("numTargets", int.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("numTargets", int.class),
 		    false);
 	    for (int i = 0; i < getNumTargets(); i++) {
-		prs.stringEndingWith("\r\n",
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.indexedProperty("targets", int.class, i), false);
 	    }
 	}// end descriptionFormat()

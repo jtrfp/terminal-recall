@@ -70,68 +70,68 @@ public class LVLFile extends SelfParsingFile implements ILvlData{
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
 	// REMEMBER: use \r\n because TR files use carriage-return-line-feed and
 	// not just the line-feed \n that java uses.
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("levelType", LevelType.class), false);
 
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("briefingTextFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("heightMapOrTunnelFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("texturePlacementFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("globalPaletteFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("levelTextureListFile", String.class), false);
-	prs.stringEndingWith("\r\n", prs.property("qkeFile", String.class),
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("qkeFile", String.class),
 		false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("powerupPlacementFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("textureAnimationFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("tunnelDefinitionFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("cloudTextureFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("backgroundGradientPaletteFile", String.class),
 		false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("enemyDefinitionAndPlacementFile", String.class),
 		false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("navigationFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("backgroundMusicFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("precalculatedFogFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("luminanceMapFile", String.class), false);
 
 	prs.subParseProposedClasses(
 		prs.property("sunlightDirectionVector", AbstractTriplet.class),
 		ClassInclusion.classOf(AbstractTriplet.class));
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("ambientLight", Integer.class), false);
 	prs.subParseProposedClasses(prs.property("chamberLightDirectionVector",
 		AbstractTriplet.class), ClassInclusion
 		.classOf(AbstractTriplet.class));
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("chamberAmbientLight", Integer.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("unknownInt1", Integer.class), false);
 
 	prs.ignoreEOF(true);
 	prs.expectString(";New story stuff\r\n", FailureBehavior.IGNORE);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("introVideoFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("levelEndVideoFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("transitionVideoFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("missionStartTextFile", String.class), false);
-	prs.stringEndingWith("\r\n",
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("missionEndTextFile", String.class), false);
 	// EOF
     }

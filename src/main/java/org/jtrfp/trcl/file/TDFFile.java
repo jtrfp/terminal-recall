@@ -23,7 +23,7 @@ public class TDFFile implements ThirdPartyParseable {
 
     @Override
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
-	prs.stringEndingWith("\r\n", prs.property("numTunnels", int.class),
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("numTunnels", int.class),
 		false);
 	for (int i = 0; i < getNumTunnels(); i++) {
 	    prs.subParseProposedClasses(
@@ -47,7 +47,7 @@ public class TDFFile implements ThirdPartyParseable {
 	@Override
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("tunnelLVLFile", String.class), false);
 	    prs.subParseProposedClasses(
 		    prs.property("entrance", DirectionVector.class),
@@ -55,20 +55,20 @@ public class TDFFile implements ThirdPartyParseable {
 	    prs.subParseProposedClasses(
 		    prs.property("exit", DirectionVector.class),
 		    ClassInclusion.classOf(DirectionVector.class));
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("entranceLogic", TunnelLogic.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("unused1", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("unused1", String.class),
 		    false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("entranceTerrainTextureFile", String.class),
 		    false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("exitLogic", TunnelLogic.class), false);
-	    prs.stringEndingWith("\r\n", prs.property("unused2", String.class),
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("unused2", String.class),
 		    false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("exitTerrainTextureFile", String.class), false);
-	    prs.stringEndingWith("\r\n",
+	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("exitMode", ExitMode.class), false);
 	}
 

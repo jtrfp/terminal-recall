@@ -24,8 +24,8 @@ public class VOXFile implements ThirdPartyParseable {
 
     @Override
     public void describeFormat(Parser p) throws UnrecognizedFormatException {
-	p.stringEndingWith("\r\n", p.property("numEntries", int.class), false);
-	p.stringEndingWith("\r\n", p.property("missionName", String.class),
+	p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("numEntries", int.class), false);
+	p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("missionName", String.class),
 		false);
 	for (int i = 0; i < getNumEntries(); i++) {
 	    p.subParseProposedClasses(
@@ -42,7 +42,7 @@ public class VOXFile implements ThirdPartyParseable {
 	public void describeFormat(Parser p) throws UnrecognizedFormatException {
 	    p.stringCSVEndingWith(",", int.class, false, "planetNumber",
 		    "stageNumber");
-	    p.stringEndingWith("\r\n", p.property("lvlFile", String.class),
+	    p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("lvlFile", String.class),
 		    false);
 	}// end describeFormat()
 

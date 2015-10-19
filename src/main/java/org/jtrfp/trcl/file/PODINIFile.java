@@ -42,7 +42,7 @@ public class PODINIFile extends SelfParsingFile {
 	@Override
 	public void describeFormat(Parser p)
 		throws UnrecognizedFormatException {
-	    p.stringEndingWith("\r\n", p.property("podName", String.class), false);
+	    p.stringEndingWith(TRParsers.LINE_DELIMITERS, p.property("podName", String.class), false);
 	}
 
 	/**

@@ -283,8 +283,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    return cachedMaximumVertexDims;
 	Vector3D 	result 	= Vector3D.ZERO;
 	Triangle[][] 	t 	= getPrimitives();
-	for (Triangle[] frame : t) {
-	    assert (frame != null):"Frame intolerably null.";//Verify null frame is a race condition.
+	for (int index=0; index<t.length; index++) {
+	    final Triangle []frame = t[index];
+	    assert (frame != null):"Frame intolerably null at index "+index+".";//Verify null frame is a race condition.
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
 		    double v;

@@ -98,6 +98,8 @@ public class Texture implements TextureDescription {
 	
 	@Override
 	public Void call() throws Exception {
+	    //Undo the magic
+	    toc.magic.set(tocIndex, 0000);
 	    //TOC ID
 	    if(tocIndex!=null)
 		toc.free(tocIndex);

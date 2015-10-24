@@ -235,6 +235,10 @@ public class Texture implements TextureDescription {
 	    // Get a TOC
 	    tocIndex = toc.create();
 	    setTexturePage((toc.getPhysicalAddressInBytes(tocIndex).intValue()/PagedByteBuffer.PAGE_SIZE_BYTES));
+	    if(getTexturePage()>=65536)
+		throw new RuntimeException("Texture TOC page out of acceptable range: "+getTexturePage()+"." +
+				"\n This is to report anomalies relating to issue #112." +
+				"\n ( https://github.com/jtrfp/terminal-recall/issues/112 )");
 	    if(toc.getPhysicalAddressInBytes(tocIndex).intValue()%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
 		throw new RuntimeException("Physical GPU address not perfectly aligned with page interval."); 		
 	    

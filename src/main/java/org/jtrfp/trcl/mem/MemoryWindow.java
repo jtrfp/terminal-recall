@@ -119,6 +119,10 @@ public abstract class MemoryWindow {
     public final int free(int objectIDToFree){
 	return indexPool.free(objectIDToFree);
     }//end free(...)
+    
+    public final void free(Collection<Integer> objectIdsToFree){
+	indexPool.free(objectIdsToFree);
+    }
 
     public final int getNumObjects() {
 	return indexPool.getMaxCapacity();

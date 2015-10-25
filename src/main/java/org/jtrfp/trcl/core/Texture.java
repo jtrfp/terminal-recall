@@ -104,8 +104,9 @@ public class Texture implements TextureDescription {
 	    if(tocIndex!=null)
 		toc.free(tocIndex);
 	    //Subtexture IDs
-	    for(int stID:subTextureIDs)
-		 stw.free(stID);
+	    //for(int stID:subTextureIDs)
+		// stw.free(stID);
+	    stw.free(subTextureIDs);
 	    //Codebook entries
 	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
 	    return null;

@@ -38,7 +38,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private		Vector3D			cachedMinimumVertexDims,
     							cachedMaximumVertexDims;
     private		double				cachedMaximumVertexValue;
-    private final       GPUResourceFinalizer            gpuResourceFinalizer;
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
@@ -60,7 +59,6 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	} else {
 	    this.xyzAnimator = null;
 	}
-	this.gpuResourceFinalizer = tr.gpu.get().getExtension(GPUResourceFinalizer.class);
     }//end constructor
 
     private static class XYZXferFunc implements IntTransferFunction {
@@ -233,31 +231,15 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		setupVertex(1, vertexIndices[tIndex+1], triangleIndex,textureDescription);
 		setupVertex(2, vertexIndices[tIndex+2], triangleIndex,textureDescription);
     }//setupTriangle
-    
-    private static final class TriangleListFinalizer implements Callable<Void>{
-	private final MemoryWindow mw;
-	private final int []       triangleVertexIndices;
-	
-	public TriangleListFinalizer(MemoryWindow memoryWindow, int [] triangleVertexIndices){
-	    this.mw=memoryWindow;
-	    this.triangleVertexIndices = triangleVertexIndices;
-	}
-
-	@Override
-	public Void call() throws Exception {
-	    for(int i=0; i<triangleVertexIndices.length;i++)
-		mw.free(triangleVertexIndices[i]);
-	    return null;
-	}
-    }//end TriangleListFinalizer
-    
+    /*
     @Override
-    public void finalize() throws Throwable{
-	gpuResourceFinalizer.submitFinalizationAction(
-		new TriangleListFinalizer(getMemoryWindow(),triangleVertexIndices));
-	super.finalize();
+    public void finalize(){
+	final MemoryWindow mw = getMemoryWindow();
+	for(int i=0; i<triangleVertexIndices.length;i++){
+	    mw.free(triangleVertexIndices[i]);
+	}//end for(triangleVertexIndices)
     }//end finalize()
-
+*/
     public Future<Void> uploadToGPU() {
 	final int nPrimitives = getNumElements();
 	triangleVertexIndices = new int[nPrimitives*3];

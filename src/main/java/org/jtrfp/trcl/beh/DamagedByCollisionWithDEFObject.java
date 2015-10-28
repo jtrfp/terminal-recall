@@ -20,7 +20,7 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
-public class DamagedByCollisionWithGameplayObject extends Behavior implements
+public class DamagedByCollisionWithDEFObject extends Behavior implements
 	CollisionBehavior {
     @Override
     public void proposeCollision(WorldObject other) {

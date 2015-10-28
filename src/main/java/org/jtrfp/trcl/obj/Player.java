@@ -19,7 +19,7 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
-import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
+import org.jtrfp.trcl.beh.DamagedByCollisionWithDEFObject;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
@@ -83,7 +83,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		.getGame().getHUDSystem().getThrottleMeter()));
 	addBehavior(new UpdatesHealthMeterBehavior().setController(tr
 		.getGame().getHUDSystem().getHealthMeter()));
-	addBehavior(new DamagedByCollisionWithGameplayObject());
+	addBehavior(new DamagedByCollisionWithDEFObject());
 	addBehavior(new DamagedByCollisionWithSurface());
 	addBehavior(new BouncesOffSurfaces());
 	addBehavior(new UpdatesNAVRadar());

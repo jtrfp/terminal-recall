@@ -21,36 +21,33 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DamagedByCollisionWithDEFObject extends Behavior implements
-	CollisionBehavior {
+    DEFObjectCollisionListener {
+
     @Override
-    public void proposeCollision(WorldObject other) {
+    public void collidedWithDEFObject(DEFObject other) {
 	final WorldObject p = getParent();
-	final double distance = Vect3D.distance(other.getPosition(),
-		p.getPosition());
-	if (distance < CollisionManager.SHIP_COLLISION_DISTANCE) {
-	    if (other instanceof Player && getParent() instanceof DEFObject) {
-		p.probeForBehaviors(
-			new AbstractSubmitter<DamageableBehavior>() {
-			    @Override
-			    public void submit(DamageableBehavior item) {
-				item.proposeDamage(new DamageListener.ProjectileDamage(
-					65535 / 30));
-			    }
-			}, DamageableBehavior.class);
-		other.probeForBehaviors(
-			new AbstractSubmitter<DamageableBehavior>() {
-			    @Override
-			    public void submit(DamageableBehavior item) {
-				item.proposeDamage(new DamageListener.ProjectileDamage(
-					65535 / 10));
-			    }
-			}, DamageableBehavior.class);
-		p.getTr()
-			.getResourceManager()
-			.getDebrisSystem()
-			.spawn(new Vector3D(p.getPosition()),
-				new Vector3D(0, 1000, 0));
-	    }//end if(Player & this is DEFObject)
-	}// end if(nearby)
-    }// end proposeCollision
+	p.probeForBehaviors(
+		new AbstractSubmitter<DamageableBehavior>() {
+		    @Override
+		    public void submit(DamageableBehavior item) {
+			item.proposeDamage(new DamageListener.ProjectileDamage(
+				65535 / 30));
+		    }
+		}, DamageableBehavior.class);
+	other.probeForBehaviors(
+		new AbstractSubmitter<DamageableBehavior>() {
+		    @Override
+		    public void submit(DamageableBehavior item) {
+			item.proposeDamage(new DamageListener.ProjectileDamage(
+				65535 / 10));
+		    }
+		}, DamageableBehavior.class);
+	p.getTr()
+		.getResourceManager()
+		.getDebrisSystem()
+		.spawn(new Vector3D(p.getPosition()),
+			new Vector3D(0, 1000, 0));
+    }
+    
+    
 }// end DamagedByCollisionWithGameplayObject

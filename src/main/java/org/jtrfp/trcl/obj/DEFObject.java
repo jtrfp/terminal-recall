@@ -23,13 +23,15 @@ import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Bobbing;
+import org.jtrfp.trcl.beh.CollidesWithPlayer;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
 import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
-import org.jtrfp.trcl.beh.DamagedByCollisionWithGameplayObject;
+import org.jtrfp.trcl.beh.DamagedByCollisionWithDEFObject;
+import org.jtrfp.trcl.beh.DamagedByCollisionWithPlayer;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
@@ -62,17 +64,15 @@ import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.gpu.BINFileExtractor;
 import org.jtrfp.trcl.gpu.BasicModelSource;
-import org.jtrfp.trcl.gpu.BasicModelTarget;
 import org.jtrfp.trcl.gpu.BufferedModelTarget;
 import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
-import org.jtrfp.trcl.gpu.TranslatedModelSource;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class DEFObject extends WorldObject {
-    private final double boundingRadius;
+    private final double boundingHeight, boundingWidth;
     private WorldObject ruinObject;
     private final EnemyLogic logic;
     private final EnemyDefinition def;
@@ -86,7 +86,12 @@ public class DEFObject extends WorldObject {
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
-    boundingRadius = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
+    if(model!=null){
+	final Vector3D max = model.getTriangleList().getMaximumVertexDims();
+	boundingWidth =max.getX();
+	boundingHeight=max.getY();
+    }else
+	boundingWidth = boundingHeight = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
     anchoring=Anchoring.floating;
     logic = def.getLogic();
     mobile=true;
@@ -417,7 +422,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     addBehavior(new DeathBehavior());
     addBehavior(new DamageableBehavior().setHealth(pl.getStrength()+(spinCrash?16:0)).setMaxHealth(pl.getStrength()+(spinCrash?16:0)).setEnable(!boss));
     setActive(!boss);
-    addBehavior(new DamagedByCollisionWithGameplayObject());
+    addBehavior(new DamagedByCollisionWithDEFObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
     else{addBehavior(new CustomDeathBehavior(new Runnable(){
 	@Override
@@ -454,6 +459,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	}//end if(mobile)
     if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){
 	addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
+    addBehavior(new CollidesWithPlayer());
+    addBehavior(new DamagedByCollisionWithPlayer(8024,250));
     }//end DEFObject
 
 @Override
@@ -634,12 +641,6 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 public void setTop(Vector3D top){
     super.setTop(top);
 }
-/**
- * @return the boundingRadius
- */
-public double getBoundingRadius() {
-    return boundingRadius;
-}
 public void setRuinObject(DEFObject ruin) {
     ruinObject=ruin;
 }
@@ -782,5 +783,19 @@ private BasicModelSource getModelSource(){
 	rotatedModelSource.setRotatableSource  (this);
 	}
     return rotatedModelSource;
+}
+
+/**
+ * @return the boundingHeight
+ */
+public double getBoundingHeight() {
+    return boundingHeight;
+}
+
+/**
+ * @return the boundingWidth
+ */
+public double getBoundingWidth() {
+    return boundingWidth;
 }
 }//end DEFObject

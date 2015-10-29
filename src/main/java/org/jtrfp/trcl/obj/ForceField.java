@@ -46,7 +46,7 @@ public class ForceField extends WorldObject {
 		    new double[] { tunnelDia / 4., tunnelDia / 4., 0 }, 0, 0,
 		    1, 1, true, false, tr));
 	    addBehavior(new ForceFieldBehavior());
-	    addBehavior(cwp = new CollidesWithPlayer(20000));
+	    addBehavior(cwp = new CollidesWithPlayer());
     }//end constructor
     
     private final class ForceFieldBehavior extends Behavior implements PlayerCollisionListener{

@@ -12,24 +12,41 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithPlayer extends Behavior implements CollisionBehavior {
-    private final double boundingRadius;
     private Player player;
-    public CollidesWithPlayer(double boundingRadius){
-	this.boundingRadius=boundingRadius;
+    public CollidesWithPlayer(){
     }
     @Override
     public void proposeCollision(WorldObject other){
 	if(other instanceof Player){
-	    final double distance=TR.twosComplimentDistance(other.getPosition(), getParent().getPosition());
+	    if(other.getModel()==null)
+		return;
+	    if(other.getModel().getTriangleList()==null)
+		return;
+	    final WorldObject parent = getParent();
+	    if(parent.getModel()==null)
+		return;
+	    if(parent.getModel().getTriangleList()==null)
+		return;
+	    final Vector3D pMax = parent.getModel().getTriangleList().getMaximumVertexDims();
+	    final Vector3D oMax = other .getModel().getTriangleList().getMaximumVertexDims();
+	    
+	    final double dXZ = Vect3D.distanceXZ(parent.getPositionWithOffset(), other.getPositionWithOffset());
+	    final double dY  = Math.abs(parent.getPositionWithOffset()[1]-other.getPositionWithOffset()[1]);
+	    //final double distance=TR.twosComplimentDistance(other.getPositionWithOffset(), getParent().getPositionWithOffset());
+	    final boolean cXZ = dXZ < Math.sqrt(Math.pow(pMax.getX()+oMax.getX(),2) + Math.pow(pMax.getZ()+oMax.getZ(),2)) % TR.mapWidth;
+	    //final boolean cXZ = false;
+	    final boolean cY = dY   < (pMax.getY() + oMax.getY()) % TR.mapWidth;
 	    player=(Player)other;
-	    if(distance<(boundingRadius+2048)){
+	    if(cXZ && cY){
 		getParent().probeForBehaviors(sub, PlayerCollisionListener.class);
 	    }//end if(close enough)
 	}//end if(player)

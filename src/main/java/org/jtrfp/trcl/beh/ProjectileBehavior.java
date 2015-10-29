@@ -55,7 +55,7 @@ public class ProjectileBehavior extends Behavior implements
 	deathBehavior = parent.addBehavior(new DeathBehavior());
 	parent.addBehavior(new ExplodesOnDeath(explosionType));
 	parent.addBehavior(new CollidesWithDEFObjects(2000));
-	parent.addBehavior(new CollidesWithPlayer(2000));
+	parent.addBehavior(new CollidesWithPlayer());
 	parent.addBehavior(new LimitedLifeSpan().reset(LIFESPAN_MILLIS));
 	parent.addBehavior(new LoopingPositionBehavior());
 	if (honing) {

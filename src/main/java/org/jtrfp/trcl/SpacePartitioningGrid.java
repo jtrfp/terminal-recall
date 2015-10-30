@@ -217,6 +217,18 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	     list.add(objectWithPosition);}
 	}//end addDirect(...)
 	
+	public Future<?> nonBlockingRemoveAll(){
+		return World.relevanceExecutor.submit(new Runnable(){
+		    @Override
+		    public void run() {
+			removeAll();
+		    }});
+	    }//end nonBlockingAddBranch
+	    
+	    public void blockingRemoveAll(){
+		try{nonBlockingRemoveAll().get();}catch(Exception e){}
+	    }
+	
 	public void removeAll(){
 		final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
 		for(SpacePartitioningGrid g:branchGrids.keySet())

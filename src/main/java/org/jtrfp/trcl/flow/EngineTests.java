@@ -24,9 +24,10 @@ public class EngineTests {
 
     private static void preClean(TR tr){
 	tr.abortCurrentGame();
-	tr.getDefaultGrid().removeAll();
+	tr.getDefaultGrid().blockingRemoveAll();
     }
     public static void singlet(TR tr, int numInstances) {
+	try{
 	final TextureDescription test = tr.getResourceManager().getTestTexture();
 	preClean(tr);
 	final int sideLen = (int)Math.ceil(Math.sqrt(numInstances));
@@ -39,6 +40,7 @@ public class EngineTests {
 	    wo.setVisible(true);
 	    tr.getDefaultGrid().add(wo);
 	}//end for(numInstances)
+	}catch(Exception e){e.printStackTrace();}
     }//end singlet(tr)
     
     public static void depthQueueTest(TR tr){

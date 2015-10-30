@@ -39,12 +39,10 @@ public class CollidesWithPlayer extends Behavior implements CollisionBehavior {
 	    final Vector3D pMax = parent.getModel().getTriangleList().getMaximumVertexDims();
 	    final Vector3D oMax = other .getModel().getTriangleList().getMaximumVertexDims();
 	    
-	    final double dXZ = Vect3D.distanceXZ(parent.getPositionWithOffset(), other.getPositionWithOffset());
+	    double dXZ       = TR.rolloverDistance(Vect3D.distanceXZ(parent.getPositionWithOffset(), other.getPositionWithOffset()));
 	    final double dY  = Math.abs(parent.getPositionWithOffset()[1]-other.getPositionWithOffset()[1]);
-	    //final double distance=TR.twosComplimentDistance(other.getPositionWithOffset(), getParent().getPositionWithOffset());
-	    final boolean cXZ = dXZ < Math.sqrt(Math.pow(pMax.getX()+oMax.getX(),2) + Math.pow(pMax.getZ()+oMax.getZ(),2)) % TR.mapWidth;
-	    //final boolean cXZ = false;
-	    final boolean cY = dY   < (pMax.getY() + oMax.getY()) % TR.mapWidth;
+	    final boolean cXZ = dXZ < Math.sqrt(Math.pow(pMax.getX()+oMax.getX(),2) + Math.pow(pMax.getZ()+oMax.getZ(),2));
+	    final boolean cY = dY   < (pMax.getY() + oMax.getY());
 	    player=(Player)other;
 	    if(cXZ && cY){
 		getParent().probeForBehaviors(sub, PlayerCollisionListener.class);

@@ -492,4 +492,10 @@ public final class TR implements UncaughtExceptionHandler{
 	    Class<CLASS> extensionClass) {
 	return extensionSupport.getExtension(extensionClass);
     }
+
+    public static double rolloverDistance(double distance) {
+	if(distance > TR.mapWidth/2)
+	    distance = TR.mapWidth-distance;
+	return distance;
+    }
 }//end TR

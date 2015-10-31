@@ -498,4 +498,8 @@ public abstract class MemoryWindow {
         this.reporter = reporter;
         return this;
     }
+    
+    public void compact(){
+	indexPool.compact();
+    }
 }// end ObjectWindow

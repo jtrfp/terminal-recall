@@ -27,13 +27,19 @@ import org.jtrfp.trcl.gpu.GPU;
 public class GPUResourceFinalizer implements Extension<GPU> {
     private ExecutorService      finalizationExecutor;
     private LinkedBlockingQueue<Future<Void>>    finalizationFutures = new LinkedBlockingQueue<Future<Void>>();
+    private GPU gpu;
+    private int rootBufferCompactionInterval = 1024;
     
     private final Thread finalizationFutureCheckerThread = new Thread(){
+	private int finalizationCount = 0;
 	@Override
 	public void run(){
-	    try{
-		while(true)
-		    {finalizationFutures.take().get();}
+	    try{while(true){
+		    finalizationFutures.take().get();
+		    //Every once in a while, compact he Root Buffer to keep things tight.
+		    if(finalizationCount++%getRootBufferCompactionInterval() == 0)
+			gpu.compactRootBuffer();
+		    }
 	    }//end try{}
 	    catch(ExecutionException e){e.printStackTrace();}
 	    catch(InterruptedException e){}
@@ -48,12 +54,14 @@ public class GPUResourceFinalizer implements Extension<GPU> {
     public void apply(GPU extended) {
 	finalizationFutureCheckerThread.start();
 	finalizationExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*3, new GPURFThreadFactory());
+	gpu = extended;
     }//end apply(...)
 
     @Override
     public void remove(GPU extended) {
 	finalizationExecutor = null;
 	finalizationFutureCheckerThread.interrupt();//UNTESTED
+	gpu = null;
     }
 
     @Override
@@ -84,5 +92,19 @@ public class GPUResourceFinalizer implements Extension<GPU> {
 	    return result;
 	}
     }//end GPURFThreadFactory
+
+    /**
+     * @return the rootBufferCompactionInterval
+     */
+    public int getRootBufferCompactionInterval() {
+        return rootBufferCompactionInterval;
+    }
+
+    /**
+     * @param rootBufferCompactionInterval the rootBufferCompactionInterval to set
+     */
+    public void setRootBufferCompactionInterval(int rootBufferCompactionInterval) {
+        this.rootBufferCompactionInterval = rootBufferCompactionInterval;
+    }
 
 }//end GPUResourceFinalizer

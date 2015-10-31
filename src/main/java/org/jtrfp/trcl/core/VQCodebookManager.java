@@ -218,6 +218,7 @@ public class VQCodebookManager {
 	    System.err.println("Warning: Codepages running low. Attempting a nuclear GC. Hold on to your hats...");
 	    System.err.println("Remaining indices needed: "+count+" list="+list);
 	    TR.nuclearGC();
+	    gpu.compactRootBuffer();
 	    System.err.println("Still alive. Waiting 250ms and reattempting pop codebook256...");
 	    try{Thread.sleep(3000);}catch(InterruptedException e){}
 	    count=codebook256Indices.pop(list,count);
@@ -230,6 +231,7 @@ public class VQCodebookManager {
 	catch(OutOfIndicesException e){
 	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
 	    TR.nuclearGC();
+	    gpu.compactRootBuffer();
 	    System.err.println("Still alive. Attempting blocking texture codebook256...");
 	    return codebook256Indices.pop();
 	}//end catch()

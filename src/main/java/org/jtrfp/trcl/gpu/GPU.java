@@ -15,6 +15,7 @@ package org.jtrfp.trcl.gpu;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,6 +31,7 @@ import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.RendererFactory;
+import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -38,6 +40,7 @@ import org.jtrfp.trcl.ext.Extension;
 import org.jtrfp.trcl.ext.ExtensionSupport;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
+import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class GPU implements GLExecutor{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
@@ -58,6 +61,7 @@ public class GPU implements GLExecutor{
 	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
 	private final ThreadManager                     threadManager;
 	private final ExtensionSupport<GPU>             extensionSupport = new ExtensionSupport<GPU>(this);
+	private final ArrayList<TRFuture<? extends MemoryWindow>>		memoryWindows = new ArrayList<TRFuture<? extends MemoryWindow>>();
 	
 	public GPU(final Reporter reporter, ExecutorService executorService,
 		GLExecutor glExecutor, final ThreadManager threadManager, 
@@ -92,18 +96,21 @@ public class GPU implements GLExecutor{
 		    return new MatrixWindow(GPU.this);
 		}//end call()
 	    });threadManager.threadPool.submit(matrixWindow);
+	    memoryWindows.add(matrixWindow);
 	    objectListWindow=new TRFutureTask<ObjectListWindow>(new Callable<ObjectListWindow>(){
 		@Override
 		public ObjectListWindow call() throws Exception {
 		    return new ObjectListWindow(GPU.this);
 		}//end call()
 	    });threadManager.threadPool.submit(objectListWindow);
+	    memoryWindows.add(objectListWindow);
 	    objectDefinitionWindow=new TRFutureTask<ObjectDefinitionWindow>(new Callable<ObjectDefinitionWindow>(){
 		@Override
 		public ObjectDefinitionWindow call() throws Exception {
 		    return new ObjectDefinitionWindow(GPU.this);
 		}//end call()
 	    });threadManager.threadPool.submit(objectDefinitionWindow);
+	    memoryWindows.add(objectDefinitionWindow);
 	    rendererFactory = new TRFutureTask<RendererFactory>(new Callable<RendererFactory>(){
 		@Override
 		public RendererFactory call() throws Exception {
@@ -128,6 +135,12 @@ public class GPU implements GLExecutor{
 		}});
 	    extensionSupport.loadBuiltInExtensions();
 	}//end constructor
+	
+	public void compactRootBuffer(){
+	    for(TRFuture<? extends MemoryWindow> mw:memoryWindows)
+		mw.get().compact();
+	    memoryManager.get().compactRootBuffer();
+	}
 	
 	public int glGet(int key){
 		IntBuffer buf = IntBuffer.wrap(new int[1]);

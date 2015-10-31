@@ -177,4 +177,8 @@ public final class MemoryManager {
 	    }}).get();
 	dest.clear();
     }//end dumpAllGPUMemTo(...)
+
+    public void compactRootBuffer() {
+	pageIndexPool.compact();
+    }
 }//end MemmoryManager

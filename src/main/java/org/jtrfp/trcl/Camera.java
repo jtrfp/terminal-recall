@@ -118,14 +118,20 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    if(cubePosition.equals(World.VISIBLE_EVERYWHERE))
 		return true;
 	    //Rollover taxicab distance
-	    final double rollover = World.WORLD_WIDTH_CUBES-(RELEVANCE_RADIUS_CUBES/2.25);
-	    final double rolloverDistance = 
-		    (Math.abs(cubePosition.getX()-centerCube.getX()) % rollover)+
-		    (Math.abs(cubePosition.getY()-centerCube.getY()) % rollover)+
-		    (Math.abs(cubePosition.getZ()-centerCube.getZ()) % rollover);
-	    return rolloverDistance < RELEVANCE_RADIUS_TAXICAB_CUBES;
+	    final double rolloverDistance = Math.sqrt(
+		    Math.pow(cubeRolloverDistance(cubePosition.getX()-centerCube.getX()),2)+
+		    Math.pow(cubeRolloverDistance(cubePosition.getZ()-centerCube.getZ()),2));
+	    return rolloverDistance < RELEVANCE_RADIUS_CUBES;
 	}//end evaluate()
     }//end VisibilityPredicate
+    
+    public static double cubeRolloverDistance(double distance){
+	distance = Math.abs(distance);
+	final double rolloverPoint = World.WORLD_WIDTH_CUBES/2.;
+	if(distance>rolloverPoint)
+	    distance = World.WORLD_WIDTH_CUBES - distance;
+	return distance;
+    }//end cubeRolloverDistance(...)
     
     public void addGrid(final SpacePartitioningGrid<?> toAdd){
 	if(toAdd==null) throw new NullPointerException("toAdd intolerably null.");
@@ -280,8 +286,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
 			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt());
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop());
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt().toString());
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop().toString());
 			}//}
 		return completeMatrix;
 		}

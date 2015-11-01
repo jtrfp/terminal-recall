@@ -420,7 +420,7 @@ public class Mission {
 		tr
 		 .getReporter()
 		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
-				+ tIndex + ".exit", tun.getExit());
+				+ tIndex + ".exit", tun.getExit().toString());
 		newTunnel(tun,reporters[tIndex]);
 		tIndex++;
 	    }//end if(tuns!=null)
@@ -860,7 +860,7 @@ public class Mission {
 		cam.probeForBehavior(MatchDirection.class).setEnable(false);
 		final Vector3D pPos = new Vector3D(game.getPlayer().getPosition());
 		final Vector3D pHeading = tr.getGame().getPlayer().getHeading();
-		cam.setPosition(new Vector3D(pPos.getX(),TR.mapSquareSize*25,pPos.getZ()));
+		cam.setPosition(new Vector3D(pPos.getX(),TR.visibilityDiameterInMapSquares*TR.mapSquareSize*.65,pPos.getZ()));
 		cam.setHeading(Vector3D.MINUS_J);
 		cam.setTop(new Vector3D(pHeading.getX(),.0000000001,pHeading.getZ()).normalize());
 		tr.getGame().getSatDashboard().setVisible(true);

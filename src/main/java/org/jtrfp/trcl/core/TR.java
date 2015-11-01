@@ -53,7 +53,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public static final double 	mapSquareSize			=Math.pow(2, 20)/crossPlatformScalar;
 	public static final double 	mapWidth			=mapSquareSize*256;
 	public static final double 	mapCartOffset			=mapWidth/2.;//This is the scaled-down version, not the full version
-	public static final double 	visibilityDiameterInMapSquares	=35;
+	public static final double 	visibilityDiameterInMapSquares	=25;
 	public static final int 	terrainChunkSideLengthInSquares	=4;//Keep at power of two for now. 4x4 = 16. 16x6 = 96. 96 vertices per GLSL block means 1 chunk per block.
 	public static final double 	antiGamma			=1.6;
 	public static final boolean 	ANIMATED_TERRAIN		=false;
@@ -381,10 +381,10 @@ public final class TR implements UncaughtExceptionHandler{
 		r.report("org.jtrfp.trcl.flow.RunMe.glVersion",
 			_gpu.glGetString(GL3.GL_VERSION));
 		r.report("org.jtrfp.trcl.flow.RunMe.availableProcs", Runtime
-			.getRuntime().availableProcessors());
+			.getRuntime().availableProcessors()+"");
 		for (Entry<Object, Object> prop : System.getProperties()
 			.entrySet()) {
-		    r.report((String) prop.getKey(), prop.getValue());
+		    r.report((String) prop.getKey(), prop.getValue().toString());
 		}
 		return null;
 	    }// end call()

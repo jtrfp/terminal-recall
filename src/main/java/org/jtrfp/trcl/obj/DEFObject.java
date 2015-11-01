@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.trcl.TransparentTriangleList;
+import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
@@ -86,12 +88,14 @@ public class DEFObject extends WorldObject {
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);
     this.def=def;
-    if(model!=null){
-	final Vector3D max = model.getTriangleList().getMaximumVertexDims();
-	boundingWidth =max.getX();
-	boundingHeight=max.getY();
-    }else
-	boundingWidth = boundingHeight = TR.legacy2Modern(def.getBoundingBoxRadius())/1.5;
+    Vector3D max = Vector3D.ZERO;
+    if(model!=null)
+	max = model.getMaximumVertexDims();
+    else
+	max = new Vector3D(TR.legacy2Modern(def.getBoundingBoxRadius()),TR.legacy2Modern(def.getBoundingBoxRadius()),0)
+		.scalarMultiply(1./1.5);
+    boundingWidth =max.getX();
+    boundingHeight=max.getY();
     anchoring=Anchoring.floating;
     logic = def.getLogic();
     mobile=true;
@@ -469,7 +473,7 @@ public void destroy(){
 	//Give the ruinObject is own position because it is sharing positions with the original WorldObject, 
 	//which is going to be sent to xyz=Double.INFINITY soon.
 	ruinObject.setPosition(Arrays.copyOf(ruinObject.getPosition(), 3));
-	ruinObject.setVisible(true);}
+	ruinObject.setActive(true);}
     super.destroy();
 }
 

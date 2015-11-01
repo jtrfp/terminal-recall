@@ -67,7 +67,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
 			final Reporter reporter = tr.getReporter();
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
-			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic());
+			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic().toString());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
 			}//end for(i:defs)
 		int placementReporterIndex=0;
@@ -99,7 +99,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    ed.setPowerupProbability(0);
 				    EnemyPlacement simplePlacement = pl.clone();
 				    final DEFObject ruin = new DEFObject(tr,simpleModel,ed,simplePlacement);
-				    ruin.setVisible(false);
+				    ruin.setActive(false);
 				    ruin.setIsRuin(true);
 				    obj.setRuinObject(ruin);
 				    ruin.setPosition(obj.getPosition());

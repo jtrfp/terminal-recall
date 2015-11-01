@@ -79,6 +79,25 @@ public class Model {
     ArrayList<ArrayList<LineSegment>> getRawLineSegmentLists() {
 	return lsLists;
     }
+    
+    public Vector3D getMaximumVertexDims(){
+	double maxX=0,maxY=0,maxZ = 0;
+	final TransparentTriangleList ttList = getTransparentTriangleList();
+	if(ttList != null){
+	    final Vector3D mV = ttList.getMaximumVertexDims();
+	    maxX = mV.getX();
+	    maxY = mV.getY();
+	    maxZ = mV.getZ();
+	    }
+	final TriangleList tList = getTriangleList();
+	if(tList != null){
+	    final Vector3D mV = tList.getMaximumVertexDims();
+	    maxX = Math.max(mV.getX(),maxX);
+	    maxY = Math.max(mV.getY(),maxY);
+	    maxZ = Math.max(mV.getZ(),maxZ);
+	    }
+	return new Vector3D(maxX,maxY,maxZ);
+    }//end getMaximumVertexValue()
 
     /**
      * Sets up formal GPU primitive lists
@@ -366,4 +385,12 @@ public class Model {
     public void addTickableAnimator(Tickable t) {
 	tickableAnimators.add(t);
     }
+
+    public double getMaximumVertexValue() {
+	final Vector3D maxDims = getMaximumVertexDims();
+	double             max = maxDims.getX();
+	max = Math.max(max,maxDims.getY());
+	max = Math.max(max,maxDims.getZ());
+	return max;
+    }//end getMaximumVertexValue()
 }// end Model

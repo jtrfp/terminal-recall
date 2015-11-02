@@ -57,12 +57,12 @@ public class CollisionManager {
 		    processCubes(cube.getValue(),cube.getValue());
 		else everywhere = cube.getValue();
 	    }//end for(relevanceCubes)
-	}synchronized(tr.getThreadManager().gameStateLock){//Process "everywhere" items.
+	}if(everywhere!=null){synchronized(tr.getThreadManager().gameStateLock){//Process "everywhere" items.
 	    for(Pair<Vector3D,Collection<Positionable>> cube:pairBuffer){
 		processCubes(everywhere,cube.getValue());
 		processCubes(cube.getValue(),everywhere);
 	    }//end for(relevanceCubes) (relevant everywhere)
-	}//end sync(gameStateLock)
+	}}//end sync(gameStateLock)
 	for(Pair<Vector3D,Collection<Positionable>> cube:pairBuffer){
 	    Collection<Positionable> col = cube.getValue();
 	    col.clear();

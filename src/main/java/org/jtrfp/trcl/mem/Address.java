@@ -32,5 +32,10 @@ public abstract class Address extends Number {
     public PageAddress asPageAddress(){
 	return new PageAddress(asByteAddress());
     }
+    
+    @Override
+    public int hashCode(){
+	return asByteAddress().intValue();
+    }
 
 }//end Address

@@ -123,8 +123,8 @@ public final class Renderer {
 	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" FPS", "" + fps);
 	    final Collection<PositionedRenderable> coll = renderList.get().getVisibleWorldObjectList();
 	    synchronized(coll){
-	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" numVisibleObjects", coll.size());
-	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", getCamera().getRootGrid());
+	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" numVisibleObjects", coll.size()+"");
+	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", getCamera().getRootGrid().toString());
 	    }
 	    lastTimeMillis = System.currentTimeMillis();
 	}

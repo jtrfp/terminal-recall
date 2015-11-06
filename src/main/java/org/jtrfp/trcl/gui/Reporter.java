@@ -140,7 +140,7 @@ public class Reporter extends JFrame {
 	tree.updateUI();
     }//end refreshModeDetails()
     
-    public Reporter report(final String path, final Object item){
+    public Reporter report(final String path, final String item){
 	reportExecutor.execute(new Runnable(){
 	    @Override
 	    public void run() {
@@ -206,14 +206,15 @@ public class Reporter extends JFrame {
 
     private class TreeEntry{
 	private final String label;
-	private WeakReference<Object> stored;
-	public TreeEntry(String label, Object stored){
+	//private WeakReference<Object> stored;
+	String stored;
+	public TreeEntry(String label, String stored){
 	    this.label=label;
-	    this.stored= new WeakReference<Object>(stored);
+	    this.stored = stored;
 	}
 	public String getLabel(){return label;}
-	public Object getStored(){return stored.get();}
-	public void setStored(Object o){stored= new WeakReference<Object>(o);}
+	public Object getStored(){return stored;}
+	public void setStored(String o){stored= o;}
 	@Override
 	public String toString(){return label;}
     }//end TreeEntry

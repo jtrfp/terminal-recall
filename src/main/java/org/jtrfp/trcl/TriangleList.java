@@ -35,9 +35,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private final 	boolean 			animateUV;
     private final 	WindowAnimator 			xyzAnimator;
     private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
-    private		Vector3D			cachedMinimumVertexDims,
+    private volatile	Vector3D			cachedMinimumVertexDims,
     							cachedMaximumVertexDims;
-    private		double				cachedMaximumVertexValue;
+    private volatile	Double				cachedMaximumVertexValue;
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
@@ -249,9 +249,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    triangleVertexIndices[vIndex]=mw.create();
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
-	cachedMinimumVertexDims = getMinimumVertexDims();
-	cachedMaximumVertexDims = getMaximumVertexDims();
-	cachedMaximumVertexValue= getMaximumVertexValue();
+	//calculateDims();
 	final Future<Void> result = tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -280,10 +278,64 @@ public class TriangleList extends PrimitiveList<Triangle> {
     }
 
     public Vector3D getMaximumVertexDims() {
-	if(isPrimitivesFinalized())
+	if(cachedMaximumVertexDims!=null)
 	    return cachedMaximumVertexDims;
-	Vector3D 	result 	= Vector3D.ZERO;
-	Triangle[][] 	t 	= getPrimitives();
+	throw new IllegalStateException("Primitives must first be finalized.");
+    }// end getMaximumVertexDims()
+
+    public Vector3D getMinimumVertexDims() {
+	if(cachedMinimumVertexDims!=null)
+	    return cachedMinimumVertexDims;
+	throw new IllegalStateException("Primitives must first be finalized.");
+    }// end getMaximumVertexDims()
+
+    public double getMaximumVertexValue() {
+	if(cachedMaximumVertexValue!=null)
+	    return cachedMaximumVertexValue;
+	throw new IllegalStateException("Primitives must first be finalized.");
+    }// end getMaximumVertexValue()
+    
+    @Override
+    protected void calculateDims(){
+	Triangle[][] t = getPrimitives();
+	{double result = 0;
+	for (Triangle[] frame : t) {
+	    for (Triangle tri : frame) {
+		for (int i = 0; i < 3; i++) {
+		    double v;
+		    final Vector3D pos = tri.getVertices()[i].getPosition();
+		    v = Math.abs(pos.getX());
+		    result = result < v ? v : result;
+		    v = Math.abs(pos.getY());
+		    result = result < v ? v : result;
+		    v = Math.abs(pos.getZ());
+		    result = result < v ? v : result;
+		}// end for(vertex)
+	    }// end for(triangle)
+	}// end for(triangles)
+	cachedMaximumVertexValue=result;
+	}
+	Vector3D result = new Vector3D(Double.POSITIVE_INFINITY,
+		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+	for (Triangle[] frame : t) {
+	    for (Triangle tri : frame) {
+		for (int i = 0; i < 3; i++) {
+		    double v;
+		    final Vector3D pos = tri.getVertices()[i].getPosition();
+		    v = pos.getX();
+		    result = result.getX() > v ? new Vector3D(v, result.getY(),
+			    result.getZ()) : result;
+		    v = pos.getY();
+		    result = result.getY() > v ? new Vector3D(result.getX(), v,
+			    result.getZ()) : result;
+		    v = pos.getZ();
+		    result = result.getZ() > v ? new Vector3D(result.getX(),
+			    result.getY(), v) : result;
+		}// end for(vertex)
+	    }// end for(triangle)
+	}// end for(triangles)
+	cachedMinimumVertexDims=result;
+	
 	for (int index=0; index<t.length; index++) {
 	    final Triangle []frame = t[index];
 	    assert (frame != null):"Frame intolerably null at index "+index+".";//Verify null frame is a race condition.
@@ -303,56 +355,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		}// end for(vertex)
 	    }// end for(triangle)
 	}// end for(triangles)
-	return result;
-    }// end getMaximumVertexDims()
-
-    public Vector3D getMinimumVertexDims() {
-	if(isPrimitivesFinalized())
-	    return cachedMinimumVertexDims;
-	Vector3D result = new Vector3D(Double.POSITIVE_INFINITY,
-		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-	Triangle[][] t = getPrimitives();
-	for (Triangle[] frame : t) {
-	    for (Triangle tri : frame) {
-		for (int i = 0; i < 3; i++) {
-		    double v;
-		    final Vector3D pos = tri.getVertices()[i].getPosition();
-		    v = pos.getX();
-		    result = result.getX() > v ? new Vector3D(v, result.getY(),
-			    result.getZ()) : result;
-		    v = pos.getY();
-		    result = result.getY() > v ? new Vector3D(result.getX(), v,
-			    result.getZ()) : result;
-		    v = pos.getZ();
-		    result = result.getZ() > v ? new Vector3D(result.getX(),
-			    result.getY(), v) : result;
-		}// end for(vertex)
-	    }// end for(triangle)
-	}// end for(triangles)
-	return result;
-    }// end getMaximumVertexDims()
-
-    public double getMaximumVertexValue() {
-	if(isPrimitivesFinalized())
-	    return cachedMaximumVertexValue;
-	double result = 0;
-	Triangle[][] t = getPrimitives();
-	for (Triangle[] frame : t) {
-	    for (Triangle tri : frame) {
-		for (int i = 0; i < 3; i++) {
-		    double v;
-		    final Vector3D pos = tri.getVertices()[i].getPosition();
-		    v = Math.abs(pos.getX());
-		    result = result < v ? v : result;
-		    v = Math.abs(pos.getY());
-		    result = result < v ? v : result;
-		    v = Math.abs(pos.getZ());
-		    result = result < v ? v : result;
-		}// end for(vertex)
-	    }// end for(triangle)
-	}// end for(triangles)
-	return result;
-    }// end getMaximumVertexValue()
+	cachedMaximumVertexDims=result;
+    }//calculateMaxDims()
 
     /**
      * @return the flatTVWindow

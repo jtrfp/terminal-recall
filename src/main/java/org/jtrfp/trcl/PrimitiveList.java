@@ -45,6 +45,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	this.debugName = debugName;
 	this.primitives = primitives;
 	this.model = model;
+	calculateDims();
 	setScale((getMaximumVertexValue() / 2048.));
 	//Sanity
 	for(int i=0; i<primitives.length; i++)
@@ -60,6 +61,8 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected double applyScale(double value) {
 	return value / Math.pow(2, packedScale - 16);
     }
+    
+    protected abstract void calculateDims();
 
     protected abstract double getMaximumVertexValue();
 
@@ -128,7 +131,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
         return model;
     }
     
-    protected void finalizePrimitives(){//TODO: Factor this out if switching completely to MemoryWindow
+    protected void finalizePrimitives(){//TODO: Factor this out if switching completely to MemoryWindow from Triangle[][]
 	cachedNumElements = getNumElements();
 	primitivesFinalized=true;
 	Arrays.fill(primitives, null);

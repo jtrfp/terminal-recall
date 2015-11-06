@@ -61,7 +61,7 @@ public abstract class MemoryWindow {
 		 MemoryWindow.this.reporter.report(
 			"org.jtrfp.trcl.mem.MemoryWindow."
 				+ MemoryWindow.this.debugName
-				+ ".sizeInObjects", newSizeInObjects);
+				+ ".sizeInObjects", newSizeInObjects+"");
 
 		for (int p = 0; p < MemoryWindow.this.numPages(); p++) {
 		    if(MemoryWindow.this.reporter!=null)
@@ -78,7 +78,7 @@ public abstract class MemoryWindow {
 		 MemoryWindow.this.reporter.report(
 			"org.jtrfp.trcl.mem.MemoryWindow."
 				+ MemoryWindow.this.debugName
-				+ ".sizeInObjects", newSizeInObjects);
+				+ ".sizeInObjects", newSizeInObjects+"");
 		return newSizeInObjects;
 	    }
 

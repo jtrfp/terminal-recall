@@ -33,7 +33,8 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 		    other.getPositionWithOffset(), 
 		    getParent().getPositionWithOffset());
 	    otherDEF=new WeakReference<DEFObject>((DEFObject)other);
-	    if(distance<(boundingRadius+otherDEF.get().getModel().getTriangleList().getMaximumVertexValue())){
+	    final double maxVtx = otherDEF.get().getModel().getMaximumVertexValue();
+	    if(distance<(boundingRadius+maxVtx)){
 		getParent().probeForBehaviors(sub, DEFObjectCollisionListener.class);
 	    }
 	}//end if(DEFObject)

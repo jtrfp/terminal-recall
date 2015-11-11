@@ -12,15 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class KeyStatus implements KeyEventDispatcher{
 	boolean [] keyStates = new boolean[256];
 	
-	public KeyStatus(Component c){
+	public KeyStatus(){
 	    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);}
 	
 	@Override

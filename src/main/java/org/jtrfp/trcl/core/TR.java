@@ -43,6 +43,7 @@ import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.tools.Util;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -69,7 +70,7 @@ public final class TR implements UncaughtExceptionHandler{
 						darkIsClearPalette;
 	private ColorPaletteVectorList		globalPaletteVL,
 						darkIsClearPaletteVL;
-	private final KeyStatus 		keyStatus;
+	//private final KeyStatus 		keyStatus;
 	private ResourceManager 		resourceManager;
 	public final ThreadManager 		threadManager;
 	public final TRFutureTask<Renderer> 	mainRenderer, secondaryRenderer;
@@ -84,6 +85,9 @@ public final class TR implements UncaughtExceptionHandler{
 	
 	public final TRConfiguration 		config;
 	private final ExtensionSupport<TR>      extensionSupport = new ExtensionSupport<TR>(this);
+	
+	@Autowired
+	private KeyStatus keyStatus;
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -129,7 +133,7 @@ public final class TR implements UncaughtExceptionHandler{
 	    	if(config.isWaitForProfiler()){
 	    	    waitForProfiler();
 	    	}//end if(waitForProfiler)
-		keyStatus = new KeyStatus(rootWindow);
+		//keyStatus = new KeyStatus(rootWindow);
 		threadManager = new ThreadManager(this);
 		gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
 		    @Override
@@ -306,13 +310,6 @@ public final class TR implements UncaughtExceptionHandler{
 	if(newGame==null)
 	 getThreadManager().setPaused(true);
 	pcSupport.firePropertyChange("game", oldGame, newGame);
-    }
-
-    /**
-     * @return the keyStatus
-     */
-    public KeyStatus getKeyStatus() {
-	return keyStatus;
     }
 
     public Color[] getGlobalPalette() {
@@ -503,5 +500,9 @@ public final class TR implements UncaughtExceptionHandler{
 	if(distance > TR.mapWidth/2)
 	    distance = TR.mapWidth-distance;
 	return distance;
+    }
+
+    public KeyStatus getKeyStatus() {
+        return keyStatus;
     }
 }//end TR

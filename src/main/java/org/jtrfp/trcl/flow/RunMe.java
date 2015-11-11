@@ -13,14 +13,18 @@
 package org.jtrfp.trcl.flow;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Map.Entry;
 
-import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRConfiguration;
-import org.jtrfp.trcl.file.VOXFile;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
+@Component
+@Configuration
+@ComponentScan("org.jtrfp.trcl")
 public class RunMe{
 	public static void main(String [] args){
 		ensureJVMIsProperlyConfigured(args);
@@ -44,7 +48,10 @@ public class RunMe{
 				"	Bring any issues to the Terminal Recall GitHub page.\n" +
 				"	www.jtrfp.org\n"
 				);
-		new TR(TRConfiguration.getConfig()).startShell();
+		ApplicationContext context = 
+		          new AnnotationConfigApplicationContext(RunMe.class);
+		      TR tr = context.getBean(TR.class);
+		tr.startShell();
 		}//end main()
 	
     private static void ensureJVMIsProperlyConfigured(String[] args) {//Skip if using 32-bit.

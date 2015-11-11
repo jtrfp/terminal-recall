@@ -43,7 +43,9 @@ import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.tools.Util;
+import org.springframework.stereotype.Component;
 
+@Component
 public final class TR implements UncaughtExceptionHandler{
     	//// BEAN PROPERTIES
     	public static final String	GAME				="game";
@@ -112,6 +114,10 @@ public final class TR implements UncaughtExceptionHandler{
 	    else if(v<-mapCartOffset)return v+mapWidth;
 	    return v;
 	}
+	
+	public TR(){
+	    this(TRConfiguration.getConfig());
+	}//end constructor
 	
 	public TR(TRConfiguration config){
 	    this.config=config;

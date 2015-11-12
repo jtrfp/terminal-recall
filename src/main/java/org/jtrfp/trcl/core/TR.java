@@ -75,7 +75,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public final ThreadManager 		threadManager;
 	public final TRFutureTask<Renderer> 	mainRenderer, secondaryRenderer;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
-	private final Reporter 			reporter		= new Reporter();
+	private final Reporter 			reporter;
 	private Game 				game;
 	private final PropertyChangeSupport	pcSupport;
 	
@@ -119,12 +119,14 @@ public final class TR implements UncaughtExceptionHandler{
 	    return v;
 	}
 	
-	public TR(){
-	    this(TRConfiguration.getConfig());
+	@Autowired
+	public TR(Reporter reporter){
+	    this(TRConfiguration.getConfig(), reporter);
 	}//end constructor
 	
-	public TR(TRConfiguration config){
+	public TR(TRConfiguration config, final Reporter reporter){
 	    this.config=config;
+	    this.reporter = reporter;
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);

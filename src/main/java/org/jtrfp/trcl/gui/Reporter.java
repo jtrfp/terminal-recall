@@ -17,7 +17,6 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.concurrent.Executor;
@@ -37,6 +36,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Reporter extends JFrame {
     
     /**

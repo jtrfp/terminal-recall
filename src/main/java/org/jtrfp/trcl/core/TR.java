@@ -88,6 +88,8 @@ public final class TR implements UncaughtExceptionHandler{
 	
 	@Autowired
 	private KeyStatus keyStatus;
+	@Autowired
+	private ControllerInputs controllerInputs;
 	
 	/**
 	 * Converts legacy coordinate to modern coordinate
@@ -506,5 +508,9 @@ public final class TR implements UncaughtExceptionHandler{
 
     public KeyStatus getKeyStatus() {
         return keyStatus;
+    }
+
+    public ControllerInputs getControllerInputs() {
+        return controllerInputs;
     }
 }//end TR

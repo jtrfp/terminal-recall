@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2015 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -12,38 +12,36 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.ui;
 
-import java.awt.event.KeyEvent;
-
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
+import org.jtrfp.trcl.core.ControllerInput;
+import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.obj.Player;
 
 public class UserInputRudderElevatorControlBehavior extends Behavior implements PlayerControlBehavior {
+    public static final String RUDDER   = "Rudder";
+    public static final String ELEVATOR = "Elevator";
+    
+    private final ControllerInput rudder, elevator;
+    
     private  double accellerationFactor=.0005;
+    public UserInputRudderElevatorControlBehavior(ControllerInputs controllerInputs){
+	super();
+	rudder =   controllerInputs.getInput(RUDDER);
+	elevator = controllerInputs.getInput(ELEVATOR);
+    }
     @Override
     public void tick(long tickTimeMillis){
 	final Player p = (Player)getParent();
-	final KeyStatus keyStatus = p.getTr().getKeyStatus();
 	final RotationalMomentumBehavior rmb = p.probeForBehavior(RotationalMomentumBehavior.class);
-	if (keyStatus.isPressed(KeyEvent.VK_UP)){
-		rmb.accelleratePolarMomentum(-2.*Math.PI*accellerationFactor*1.2);
-		}
-	if (keyStatus.isPressed(KeyEvent.VK_DOWN)){
-	    	rmb.accelleratePolarMomentum(2.*Math.PI*accellerationFactor*1.2);
-		}
-	if (keyStatus.isPressed(KeyEvent.VK_LEFT)){
-	    	//Tilt
-		rmb.accellerateLateralMomentum(-2.*Math.PI*accellerationFactor*.8);
-		//Turn
-		rmb.accellerateEquatorialMomentum(2*Math.PI*accellerationFactor);
-		}
-	if (keyStatus.isPressed(KeyEvent.VK_RIGHT)){
-	    	//Tilt
-		rmb.accellerateLateralMomentum(2.*Math.PI*accellerationFactor*.8);
-		//Turn
-		rmb.accellerateEquatorialMomentum(-2*Math.PI*accellerationFactor);
-		}
+	final double elevatorState = elevator.getState();
+	final double rudderState   = rudder.getState();
+	rmb.accelleratePolarMomentum(-2.*Math.PI*accellerationFactor*1.2*elevatorState);
+	//Tilt
+	rmb.accellerateLateralMomentum(rudderState*-2.*Math.PI*accellerationFactor*.8);
+	//Turn
+	rmb.accellerateEquatorialMomentum(rudderState*2*Math.PI*accellerationFactor);
     }//end UserInputRudderElevatorControlBehavior
     /**
      * @return the accellerationFactor

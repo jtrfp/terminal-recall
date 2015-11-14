@@ -21,7 +21,8 @@ public class HasPropulsion extends Behavior implements Propelled {
     private double min=Double.NEGATIVE_INFINITY;
     @Override
     public Propelled setPropulsion(double magnitude) {
-	propulsion=magnitude;return this;
+	propulsion=Math.max(min,Math.min(magnitude,max));
+	return this;
     }
 
     @Override

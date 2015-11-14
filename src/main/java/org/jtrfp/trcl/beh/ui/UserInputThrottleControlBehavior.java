@@ -12,25 +12,34 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.ui;
 
-import java.awt.event.KeyEvent;
-
-import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.core.ControllerInput;
+import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.obj.Propelled;
 
 public class UserInputThrottleControlBehavior extends Behavior implements PlayerControlBehavior {
     private double nudgeUnit = 40000;
+    public static final String THROTTLE_DELTA= "Throttle Delta";
+    public static final String THROTTLE      = "Throttle";
+    private final ControllerInput throttleDelta,throttle;
+    
+    public UserInputThrottleControlBehavior(ControllerInputs controllerInputs){
+	throttleDelta= controllerInputs.getInput(THROTTLE_DELTA);
+	throttle     = controllerInputs.getInput(THROTTLE);
+    }
+    
     @Override
     public void tick(long timeInMillis){
-	final KeyStatus keyStatus=getParent().getTr().getKeyStatus(); 
-	if (keyStatus.isPressed(KeyEvent.VK_A)){
-	    	Propelled p=getParent().probeForBehavior(Propelled.class);
-	    	p.deltaPropulsion(nudgeUnit);
-		}
-	if (keyStatus.isPressed(KeyEvent.VK_Z)){
-	    	Propelled p=getParent().probeForBehavior(Propelled.class);
-	    	p.deltaPropulsion(-nudgeUnit);
-		}
+	Propelled p=getParent().probeForBehavior(Propelled.class);
+	final double range = p.getMaxPropulsion()-p.getMinPropulsion();
+	double propulsion = p.getPropulsion();
+	double throt = throttle.getState();
+	if(throt!=0)
+	    propulsion = range*throt+p.getMinPropulsion();
+	else{
+	    propulsion += nudgeUnit*throttleDelta.getState();
+	}
+	p.setPropulsion(propulsion);
     }//end _tick(...)
     /**
      * @return the nudgeUnit

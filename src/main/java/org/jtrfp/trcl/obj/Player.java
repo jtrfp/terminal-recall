@@ -69,7 +69,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
 	addBehavior(new CollidesWithTunnelWalls(true, true));
-	addBehavior(new UserInputThrottleControlBehavior());
+	addBehavior(new UserInputThrottleControlBehavior(tr.getControllerInputs()));
 	addBehavior(new VelocityDragBehavior());
 	addBehavior(new RollLevelingBehavior());
 	addBehavior(new UserInputRudderElevatorControlBehavior(tr.getControllerInputs()));
@@ -147,7 +147,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		}//end if(allAmmo)
 	    }// end if(hasButton)
 	}
-	addBehavior(new UserInputWeaponSelectionBehavior().setBehaviors(weapons));
+	addBehavior(new UserInputWeaponSelectionBehavior(tr.getControllerInputs()).setBehaviors(weapons));
 	//camera = tr.renderer.get().getCamera();
 	probeForBehavior(VelocityDragBehavior.class)
 		.setDragCoefficient(.86);

@@ -16,6 +16,7 @@ package org.jtrfp.trcl.core;
 import java.awt.event.KeyEvent;
 
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
+import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,5 +32,10 @@ public class Inputs {
      final ControllerInput rudder = tr.getControllerInputs().getInput(UserInputRudderElevatorControlBehavior.RUDDER);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_LEFT) , rudder, 1, 0);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_RIGHT), rudder, -1, 0);
+     
+     final ControllerInput throttleKeys = tr.getControllerInputs().getInput(UserInputThrottleControlBehavior.THROTTLE_DELTA);
+     mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_A) , throttleKeys, 1, 0);
+     mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_Z), throttleKeys, -1, 0);
+     
  }//end constructor
 }//end Inputs

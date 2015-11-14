@@ -75,13 +75,13 @@ public class KeyboardInputDevice implements InputDevice {
 	}//end constructor
 
 	@Override
-	public void addStateListener(StateListener stateListener) {
-	    sls.addStateListener(stateListener);
+	public boolean addStateListener(StateListener stateListener) {
+	    return sls.addStateListener(stateListener);
 	}
 
 	@Override
-	public void removeStateListener(StateListener stateListener) {
-	    sls.removeStateListener(stateListener);
+	public boolean removeStateListener(StateListener stateListener) {
+	    return sls.removeStateListener(stateListener);
 	}
 
 	@Override

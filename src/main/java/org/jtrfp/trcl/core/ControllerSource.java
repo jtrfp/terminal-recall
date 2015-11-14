@@ -15,8 +15,8 @@ package org.jtrfp.trcl.core;
 import java.util.Collection;
 
 public interface ControllerSource {
-    public void addStateListener(StateListener stateListener);
-    public void removeStateListener(StateListener stateListener);
+    public boolean addStateListener(StateListener stateListener);
+    public boolean removeStateListener(StateListener stateListener);
     public Collection<StateListener> getStateListeners();
     public String getName();
 }//end ControllerSource

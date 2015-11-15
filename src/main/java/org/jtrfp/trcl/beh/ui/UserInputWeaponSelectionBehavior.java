@@ -17,13 +17,17 @@ import java.awt.event.KeyEvent;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
-import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
+import org.jtrfp.trcl.core.ControllerInput;
+import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
+    public static final String FIRE = "Fire";
+    
+    private final ControllerInput fire;
     
     private ProjectileFiringBehavior [] behaviors;
     private ProjectileFiringBehavior activeBehavior;
@@ -31,6 +35,12 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     private int ammoDisplayUpdateCounter=0;
     public static final int AMMO_DISPLAY_UPDATE_INTERVAL_MS=80;
     private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
+    
+    
+    public UserInputWeaponSelectionBehavior(ControllerInputs controllerInputs){
+	fire = controllerInputs.getInput(FIRE);
+    }//end constuctor
+    
     @Override
     public void tick(long tickTimeMillis){
 	final WorldObject parent = getParent();
@@ -49,7 +59,8 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 		 setActiveBehavior(proposed,force);
 	    }//end if (selection key is pressed)
 	}//end for(keys)
-	if(keyStatus.isPressed(KeyEvent.VK_SPACE)){
+	if(fire.getState()>.75){
+	//if(keyStatus.isPressed(KeyEvent.VK_SPACE)){
 	    if(!getActiveBehavior().canFire())
 		setActiveBehavior(getDefaultBehavior(),true);
 	   getActiveBehavior().requestFire();

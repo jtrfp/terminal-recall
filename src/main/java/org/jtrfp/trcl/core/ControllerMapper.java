@@ -13,32 +13,28 @@
 
 package org.jtrfp.trcl.core;
 
-import java.beans.PropertyChangeEvent;
-import java.util.HashMap;
+import java.util.Collection;
 
-import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ControllerMapper {
-    private final ControllerInputs controllerInputs;
-    private HashMap<ControllerSource,ControllerInput> controllerMap = new HashMap<ControllerSource,ControllerInput>();
-    private final CollectionActionDispatcher<InputDevice> inputDevices = new CollectionActionDispatcher<InputDevice>();
+    private final Collection<InputDevice> inputDevices;
     
     @Autowired
-    public ControllerMapper(ControllerInputs controllerInputs){
-	this.controllerInputs = controllerInputs;
+    public ControllerMapper(Collection<InputDevice> inputDevices){
+	this.inputDevices = inputDevices;
     }//end constructor
     
-    public CollectionActionDispatcher<InputDevice> getInputDevices(){
+    public Collection<InputDevice> getInputDevices(){
 	return inputDevices;
     }//end getInputDevices()
-    
+    /*
     public void registerInputDevice(InputDevice toRegister){
 	inputDevices.add(toRegister);
     }//end registerInputDevice
-    
+    */
     /**
      * Multiple sources may feed the same input, though their behavior is undefined if they are of different types
      * i.e. button vs trigger vs axis

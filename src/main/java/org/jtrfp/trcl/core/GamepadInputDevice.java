@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GamepadInputDevice implements InputDevice {
-    private final ControllerMapper mapper;
     private final ArrayList<GamepadControllerSource> controllerSources;
     private final ControllerEnvironment controllerEnvironment;
     private final Controller controller;
@@ -39,8 +38,8 @@ public class GamepadInputDevice implements InputDevice {
             = new HashMap<net.java.games.input.Component,GamepadControllerSource>();
     private final HashMap<String,GamepadControllerSource>    nameMap = new HashMap<String,GamepadControllerSource>();
     private final GamepadEventThread gamepadEventThread = new GamepadEventThread();
-    @Autowired
-    public GamepadInputDevice(ControllerMapper mapper){
+    
+    public GamepadInputDevice(){
 	net.java.games.input.EventQueue eq = null;
 	try{final JVM jvm = new JVM();//TODO: windows, os x
 	    final File file = jvm.loadFromJarToFile("/libjinput-linux64.so");
@@ -69,10 +68,8 @@ public class GamepadInputDevice implements InputDevice {
 	}//end for(controller types)
 	this.controller = c;
 	this.controllerSources = newControllerSources;
-	this.mapper = mapper;
 	this.eventQueue = eq;
 	//controllerSourceMap.put(f.getInt(null),new GamepadControllerSource(stripVKPrefix(f.getName())));
-	mapper.registerInputDevice(this);
 	if(controller!=null)
 	 gamepadEventThread.start();
     }//end constructor

@@ -26,18 +26,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class KeyboardInputDevice implements InputDevice {
-    private final ControllerMapper mapper;
     private final Map<Integer,KeyControllerSource> controllerSourceMap = new HashMap<Integer,KeyControllerSource>();
     
-    @Autowired
-    public KeyboardInputDevice(ControllerMapper mapper){
-	this  .mapper = mapper;
+    public KeyboardInputDevice(){
 	final Field [] fields = KeyEvent.class.getDeclaredFields();
 	for(Field f:fields)
 	    if(Modifier.isStatic(f.getModifiers()) && f.getName().startsWith("VK_"))
 		try{controllerSourceMap.put(f.getInt(null),new KeyControllerSource(stripVKPrefix(f.getName())));}
 	catch(Exception e){e.printStackTrace();}
-	mapper.registerInputDevice(this);
 	KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new DefaultKeyEventListener());
     }//end constructor
     

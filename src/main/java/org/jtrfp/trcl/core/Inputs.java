@@ -29,21 +29,29 @@ public class Inputs {
      final ControllerInput elevator = tr.getControllerInputs().getInput(UserInputRudderElevatorControlBehavior.ELEVATOR);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_UP)  , elevator, 1, 0);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_DOWN), elevator, -1, 0);
-     mapper.mapControllerSourceToInput(gid.getGamepadControllerSource("y"), elevator, -1, 0);
+     final ControllerSource yCtrl = gid.getGamepadControllerSource("y");
+     if(yCtrl!=null)
+      mapper.mapControllerSourceToInput(yCtrl, elevator, -1, 0);
      
      final ControllerInput rudder = tr.getControllerInputs().getInput(UserInputRudderElevatorControlBehavior.RUDDER);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_LEFT) , rudder, 1, 0);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_RIGHT), rudder, -1, 0);
-     mapper.mapControllerSourceToInput(gid.getGamepadControllerSource("x"), rudder, -1, 0);
+     final ControllerSource xCtrl = gid.getGamepadControllerSource("x");
+     if(xCtrl!=null)
+      mapper.mapControllerSourceToInput(gid.getGamepadControllerSource("x"), rudder, -1, 0);
      
      final ControllerInput throttleDelta = tr.getControllerInputs().getInput(UserInputThrottleControlBehavior.THROTTLE_DELTA);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_A) , throttleDelta, 1, 0);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_Z), throttleDelta, -1, 0);
      final ControllerInput throttle = tr.getControllerInputs().getInput(UserInputThrottleControlBehavior.THROTTLE_DELTA);
-     mapper.mapControllerSourceToInput(gid.getGamepadControllerSource("z"), throttle, -1, 0);
+     final ControllerSource zCtrl = gid.getGamepadControllerSource("z");
+     if(zCtrl!=null)
+      mapper.mapControllerSourceToInput(gid.getGamepadControllerSource("z"), throttle, -1, 0);
      
      final ControllerInput fire = tr.getControllerInputs().getInput(UserInputWeaponSelectionBehavior.FIRE);
-     mapper.mapControllerSourceToInput(gid.getGamepadControllerSource("A"), fire, 1, 0);
+     final ControllerSource Actrl = gid.getGamepadControllerSource("A");
+     if(Actrl!=null)
+      mapper.mapControllerSourceToInput(Actrl, fire, 1, 0);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_SPACE), fire, 1, 0);
  }//end constructor
 }//end Inputs

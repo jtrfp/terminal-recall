@@ -63,7 +63,7 @@ public class GamepadInputDevice implements InputDevice {
 		    newControllerSources.add(gcs);
 		    controllerSourceMap.put(comp, gcs);
 		    nameMap.put(comp.getName(),gcs);
-		    System.out.println("Component="+comp.getName()+" controller="+controller.getName());
+		    System.out.println("Component found: "+comp.getName());
 		    }
 	    }//end if(GAMEPAD)
 	}//end for(controller types)
@@ -73,7 +73,8 @@ public class GamepadInputDevice implements InputDevice {
 	this.eventQueue = eq;
 	//controllerSourceMap.put(f.getInt(null),new GamepadControllerSource(stripVKPrefix(f.getName())));
 	mapper.registerInputDevice(this);
-	gamepadEventThread.start();
+	if(controller!=null)
+	 gamepadEventThread.start();
     }//end constructor
     
     private class GamepadControllerSource implements ControllerSource {

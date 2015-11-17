@@ -19,4 +19,5 @@ public interface InputDevice {
  public String getName();
  public String getVendor();
  public String getDetailedDescription();
+ public ControllerSource getSourceByName(String name);
 }//end InputDevice

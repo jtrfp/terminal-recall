@@ -25,7 +25,6 @@ import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 
 import org.jtrfp.trcl.flow.JVM;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,12 +37,25 @@ public class GamepadInputDevice implements InputDevice {
             = new HashMap<net.java.games.input.Component,GamepadControllerSource>();
     private final HashMap<String,GamepadControllerSource>    nameMap = new HashMap<String,GamepadControllerSource>();
     private final GamepadEventThread gamepadEventThread = new GamepadEventThread();
+    private static final String operatingSystem = System.getProperty("os.name").toLowerCase();
     
     public GamepadInputDevice(){
 	net.java.games.input.EventQueue eq = null;
-	try{final JVM jvm = new JVM();//TODO: windows, os x
-	    final File file = jvm.loadFromJarToFile("/libjinput-linux64.so");
-	    System.setProperty("net.java.games.input.librarypath", file.getParentFile().getAbsolutePath());
+	try{final JVM jvm = new JVM();
+	    if(operatingSystem.contains("win")){
+		jvm.loadFromJarToFile("/jinput-dx8_64.dll");
+		jvm.loadFromJarToFile("/jinput-dx8.dll");
+		jvm.loadFromJarToFile("/jinput-raw_64.dll");
+		jvm.loadFromJarToFile("/jinput-raw.dll");
+		jvm.loadFromJarToFile("/jinput-wintab.dll");
+	    } else if(operatingSystem.contains("linux")){
+		jvm.loadFromJarToFile("/libjinput-linux64.so");
+		jvm.loadFromJarToFile("/libjinput-linux.so");
+	    } else if(operatingSystem.contains("mac")){
+		jvm.loadFromJarToFile("/libjinput-osx.jnilib");
+	    } else
+		System.err.println("Warning: Couldn't determine OS; jInput will likely fail to load.");
+	    System.setProperty("net.java.games.input.librarypath", new File("DeleteMe").getAbsolutePath());
 	}catch(Exception e){e.printStackTrace();}
 	ArrayList<GamepadControllerSource> newControllerSources = null;
 	this.controllerEnvironment = ControllerEnvironment.getDefaultEnvironment();
@@ -142,9 +154,10 @@ public class GamepadInputDevice implements InputDevice {
 	    }//end while(true)
 	}//end run()
     }//end GamepadEventThread
-
-    public ControllerSource getGamepadControllerSource(String string) {
-	return nameMap.get(string);
+    
+    @Override
+    public ControllerSource getSourceByName(String name) {
+	return nameMap.get(name);
     }
 
 }//end GamepadInputDevice

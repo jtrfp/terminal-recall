@@ -21,18 +21,22 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KeyboardInputDevice implements InputDevice {
     private final Map<Integer,KeyControllerSource> controllerSourceMap = new HashMap<Integer,KeyControllerSource>();
+    private final HashMap<String,KeyControllerSource> nameMap          = new HashMap<String,KeyControllerSource>();
     
     public KeyboardInputDevice(){
 	final Field [] fields = KeyEvent.class.getDeclaredFields();
 	for(Field f:fields)
 	    if(Modifier.isStatic(f.getModifiers()) && f.getName().startsWith("VK_"))
-		try{controllerSourceMap.put(f.getInt(null),new KeyControllerSource(stripVKPrefix(f.getName())));}
+		try{final String strippedName = stripVKPrefix(f.getName());
+		    final KeyControllerSource kcs = new KeyControllerSource(strippedName);
+		    controllerSourceMap.put(f.getInt(null),kcs);
+		    nameMap            .put(strippedName  ,kcs);
+		}
 	catch(Exception e){e.printStackTrace();}
 	KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new DefaultKeyEventListener());
     }//end constructor
@@ -117,5 +121,10 @@ public class KeyboardInputDevice implements InputDevice {
     @Override
     public String getDetailedDescription() {
 	return "Adds keyboard control support using AWT.";
+    }
+
+    @Override
+    public ControllerSource getSourceByName(String name) {
+	return nameMap.get(name);
     }
 }//end KeyboardInputDevice

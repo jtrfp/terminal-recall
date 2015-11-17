@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL 
- * Copyright (c) 2012-2014 Chuck Ritola.
+ * Copyright (c) 2012-2015 Chuck Ritola.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@
  *      chuck - initial API and implementation
  ******************************************************************************/
 
-// Blended fragment rendering for stencil-routed A-buffer referred internally as a 'depth queue'.
+// Blended fragment rendering for float-shift queue.
 #version 330
 
 // UNIFORMS

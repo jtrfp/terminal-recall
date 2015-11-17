@@ -21,9 +21,10 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.gpu.CanvasProvider;
 import org.jtrfp.trcl.gpu.GLExecutor;
 
-public class RootWindow extends JFrame implements GLExecutor {
+public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
     /**
      * 
      */

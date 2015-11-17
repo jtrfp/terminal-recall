@@ -44,7 +44,6 @@ import com.jogamp.newt.event.KeyEvent;
 
 public class MenuSystem {
     private final FramebufferStateWindow fbsw;
-    private final ConfigWindow		configWindow;
     private final LevelSkipWindow	levelSkipWindow;
     private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
     private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
@@ -78,7 +77,6 @@ public class MenuSystem {
 	view_crosshairs.setAccelerator(KeyStroke.getKeyStroke("X"));
 	
 	fbsw = new FramebufferStateWindow(tr);
-	configWindow = new ConfigWindow(tr.config);
 	levelSkipWindow = new LevelSkipWindow(tr);
 	
 	// Menu item behaviors
@@ -155,7 +153,7 @@ public class MenuSystem {
 	file_config.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
-		configWindow.setVisible(true);
+		tr.getConfigWindow().setVisible(true);
 	    }});
 	file_quit.addActionListener(new ActionListener() {
 	    @Override

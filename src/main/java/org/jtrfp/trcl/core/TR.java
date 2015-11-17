@@ -35,6 +35,7 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -85,6 +86,7 @@ public final class TR implements UncaughtExceptionHandler{
 	
 	public final TRConfiguration 		config;
 	private final ExtensionSupport<TR>      extensionSupport = new ExtensionSupport<TR>(this);
+	private final ConfigWindow              configWindow;
 	
 	@Autowired
 	private KeyStatus keyStatus;
@@ -122,13 +124,10 @@ public final class TR implements UncaughtExceptionHandler{
 	}
 	
 	@Autowired
-	public TR(Reporter reporter){
-	    this(TRConfiguration.getConfig(), reporter);
-	}//end constructor
-	
-	public TR(TRConfiguration config, final Reporter reporter){
-	    this.config=config;
-	    this.reporter = reporter;
+	public TR(ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow){
+	    this.config       = configManager.getConfig();
+	    this.configWindow = configWindow;
+	    this.reporter     = reporter;
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	AutoInitializable.Initializer.initialize(this);
@@ -512,5 +511,9 @@ public final class TR implements UncaughtExceptionHandler{
 
     public ControllerInputs getControllerInputs() {
         return controllerInputs;
+    }
+
+    public ConfigWindow getConfigWindow() {
+        return configWindow;
     }
 }//end TR

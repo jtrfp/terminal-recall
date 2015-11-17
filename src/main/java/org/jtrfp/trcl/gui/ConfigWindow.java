@@ -27,6 +27,8 @@ import java.beans.ExceptionListener;
 import java.beans.XMLDecoder;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 import javax.swing.DefaultComboBoxModel;
@@ -58,9 +60,13 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.PodFile;
+import org.jtrfp.trcl.core.ConfigManager;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ConfigWindow extends JFrame {
     private TRConfiguration config;
     private JCheckBox chckbxLinearInterpolation, chckbxBufferLag;
@@ -76,14 +82,21 @@ public class ConfigWindow extends JFrame {
 	new ConfigWindow().setVisible(true);
     }//end main()
     
- public ConfigWindow(TRConfiguration config){
-     this();
-     this.config=config;
-     readSettingsToPanel();
- }
  public ConfigWindow(){
+     this(null,new ArrayList<ConfigurationTab>());
+ }
+ 
+ @Autowired(required=false)
+ public ConfigWindow(ConfigManager cMgr){
+     this(cMgr,new ArrayList<ConfigurationTab>(0));
+ }
+ 
+ @Autowired(required=false)
+public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
  	setTitle("Settings");
  	setSize(340,540);
+ 	if(cMgr!=null)
+ 	 this.config=cMgr.getConfig();
  	if(config==null)
  	    config=new TRConfiguration();
  	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -400,6 +413,14 @@ public class ConfigWindow extends JFrame {
 	    public void actionPerformed(ActionEvent arg0) {
 		ConfigWindow.this.setVisible(false);
 	    }});
+ 	
+ 	for(ConfigurationTab tab:tabs){
+	    System.out.println("Adding config tab: "+tab.getTabName());
+	    tabbedPane.addTab(tab.getTabName(),tab.getTabIcon(),tab.getContent());
+	}//end for(tabs)
+ 	
+ 	if(config!=null)
+ 	   readSettingsToPanel();
  	}//end constructor
  
  private void applySettings(){

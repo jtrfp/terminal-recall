@@ -27,7 +27,9 @@ import org.springframework.stereotype.Component;
 @ComponentScan("org.jtrfp.trcl")
 public class RunMe{
 	public static void main(String [] args){
-		ensureJVMIsProperlyConfigured(args);
+	        final JVM jvm = new JVM();
+	        jvm.setArgs(args);
+	        jvm.ensureProperlyConfigured();
 		System.out.println(
 				"\t\t\t***TERMINAL RECALL***\n"+
 				"	An unofficial enhancement engine for Terminal Velocity and Fury3.\n"+
@@ -53,80 +55,6 @@ public class RunMe{
 		context.registerShutdownHook();
 		      TR tr = context.getBean(TR.class);
 		tr.startShell();
+		context.close();
 		}//end main()
-	
-    private static void ensureJVMIsProperlyConfigured(String[] args) {//Skip if using 32-bit.
-	if (!isAlreadyConfigured()&& System.getProperty("os.arch").toUpperCase().contains("64")) {
-	    //http://stackoverflow.com/questions/13029915/how-to-programmatically-test-if-assertions-are-enabled
-	    //Seems to work better than the official way of querying assertion ability.
-	    boolean useAssertions = false;
-	    assert useAssertions = true;
-	    System.out
-		    .println("Overriding the default JVM settings. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
-	    String executable = new File("RunMe.jar").exists() ? "-jar RunMe.jar"
-		    : "-cp " + System.getProperty("java.class.path")
-			    + " org.jtrfp.trcl.flow.RunMe";
-	    String cmd = "java -server -Dorg.jtrfp.trcl.bypassConfigure=true -Dcom.sun.management.jmxremote "
-		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
-		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
-		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx512m "
-		    + "-XX:+UseCompressedOops "
-		    + "-XX:MaxDirectMemorySize=32m "
-		    /*+ "-XX:+UseLargePages"*/+" ";
-	    if(useAssertions)
-		cmd+="-ea ";
-	    for (Entry<Object,Object> property:System.getProperties().entrySet()){
-		if(property.getKey().toString().startsWith("org.jtrfp")&&!property.getKey().toString().toLowerCase().contains("org.jtrfp.trcl.bypassconfigure"))
-		    cmd += " -D"+property.getKey()+"="+property.getValue()+" ";
-	    }//end for(properties)
-	    cmd		+= executable;
-	    for (String arg : args) {
-		cmd += " " + arg;
-	    }
-	    try {
-		System.out.println("Restarting JVM with: \n\t" + cmd);
-		final Process proc = Runtime.getRuntime().exec(cmd);
-		Thread tOut = new Thread() {
-		    public void run() {
-			int bytesRead;
-			byte[] buffer = new byte[1024];
-			try {
-			    while ((bytesRead = proc.getInputStream().read(
-				    buffer)) != -1) {
-				System.out.write(buffer, 0, bytesRead);
-			    }
-			} catch (Exception e) {
-			    e.printStackTrace();
-			}
-		    }// end run()
-		};
-		Thread tErr = new Thread() {
-		    public void run() {
-			int bytesRead;
-			byte[] buffer = new byte[1024];
-			try {
-			    while ((bytesRead = proc.getErrorStream().read(
-				    buffer)) != -1) {
-				System.err.write(buffer, 0, bytesRead);
-			    }
-			} catch (Exception e) {
-			    e.printStackTrace();
-			}
-		    }// end run()
-		};
-		tOut.start();
-		tErr.start();
-		tOut.join();
-		tErr.join();
-	    }// end try{}
-	    catch (Exception e) {
-		e.printStackTrace();
-	    }
-	    System.exit(0);
-	}
-    }// end Ensure...Configured(...)
-
-    private static boolean isAlreadyConfigured() {
-	return System.getProperty("org.jtrfp.trcl.bypassConfigure") != null?System.getProperty("org.jtrfp.trcl.bypassConfigure").toUpperCase().contentEquals("TRUE"):false;
-    }
 }// end RunMe

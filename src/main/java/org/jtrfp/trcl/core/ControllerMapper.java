@@ -14,6 +14,11 @@
 package org.jtrfp.trcl.core;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +26,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ControllerMapper {
     private final Collection<InputDevice> inputDevices;
+    private final Set<MappingListener<ControllerSource,ControllerMapping>> mappingListeners = new HashSet<MappingListener<ControllerSource,ControllerMapping>>();
+    private final Map<ControllerSource,ControllerMapping> map = new HashMap<ControllerSource,ControllerMapping>();
     
     @Autowired
     public ControllerMapper(Collection<InputDevice> inputDevices){
@@ -30,11 +37,6 @@ public class ControllerMapper {
     public Collection<InputDevice> getInputDevices(){
 	return inputDevices;
     }//end getInputDevices()
-    /*
-    public void registerInputDevice(InputDevice toRegister){
-	inputDevices.add(toRegister);
-    }//end registerInputDevice
-    */
     /**
      * Multiple sources may feed the same input, though their behavior is undefined if they are of different types
      * i.e. button vs trigger vs axis
@@ -43,23 +45,40 @@ public class ControllerMapper {
      * @since Nov 12, 2015
      */
     public void mapControllerSourceToInput(ControllerSource controllerSource, ControllerInput controllerInput, double scale, double offset){
-	controllerSource.addStateListener(new ControllerInputStateChangeSetter(controllerInput,scale,offset));
+	final ControllerMapping mapping = new ControllerMapping(controllerSource,controllerInput,scale,offset);
+	map.put(controllerSource, mapping);
+	controllerSource.addStateListener(mapping);
+	fireMappedEvent(controllerSource, mapping);
     }//end mapControllerSourceToInput
     
-    private class ControllerInputStateChangeSetter implements StateListener{
-	private final ControllerInput controllerInput;
-	private final double scale;
-	private final double offset;
-	public ControllerInputStateChangeSetter(ControllerInput controllerInput, double scale, double offset) {
-	    this.controllerInput = controllerInput;
-	    this.scale           = scale;
-	    this.offset          = offset;
-	}
+    public boolean unmapControllerSource(ControllerSource controllerSource){
+	final ControllerMapping controllerMapping = map.get(controllerSource);
+	if(controllerMapping==null)
+	    return false; //Was never here to begin with
+	map.remove(controllerSource);
+	controllerSource.removeStateListener(controllerMapping);
+	return true;
+    }
+    
+    private void fireMappedEvent(ControllerSource cs, ControllerMapping mapping){
+	for(MappingListener<ControllerSource,ControllerMapping> l:mappingListeners)
+	    l.mapped(cs, mapping);
+    }// end fireMappedEvent(...)
+    
 
-	@Override
-	public void stateChanged(ControllerSource source, double value) {
-		controllerInput.setState(value*scale+offset);
-	}
-    }//end ControllerInputStateChangeSetter
+    public boolean addMappingListener(MappingListener<ControllerSource,ControllerMapping> l, boolean populate) {
+	boolean result =  mappingListeners.add(l);
+	if(populate){
+	    for(Entry<ControllerSource,ControllerMapping> entry:map.entrySet()){
+		l.mapped(entry.getKey(), entry.getValue());
+	    }//end for(entries)
+	}//end if(populate)
+	return result;
+    }//end addMappingListener(...)
+    
+    public boolean removeMappingListener(MappingListener<ControllerSource,ControllerMapping> l){
+	boolean result = mappingListeners.remove(l);
+	return result;
+    }//end removeMappingListener(...)
  
 }//end ControllerMapper

@@ -121,6 +121,11 @@ public class GamepadInputDevice implements InputDevice {
 		    sls.fireStateChange(value);
 		}});
 	}//end notifyStateChange(...)
+
+	@Override
+	public InputDevice getInputDevice() {
+	    return GamepadInputDevice.this;
+	}
     }//end GamepadControllerSource
     
     @Override

@@ -19,4 +19,5 @@ public interface ControllerSource {
     public boolean removeStateListener(StateListener stateListener);
     public Collection<StateListener> getStateListeners();
     public String getName();
+    public InputDevice getInputDevice();
 }//end ControllerSource

@@ -101,6 +101,11 @@ public class KeyboardInputDevice implements InputDevice {
 	public void notifyReleased(){
 	    sls.fireStateChange(0);
 	}
+
+	@Override
+	public InputDevice getInputDevice() {
+	    return KeyboardInputDevice.this;
+	}
     }//end KeyControllerSource
     
     @Override

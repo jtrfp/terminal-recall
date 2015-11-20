@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -48,6 +47,7 @@ public class MenuSystem {
     private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
     private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
     private final JCheckBoxMenuItem	view_crosshairs = new JCheckBoxMenuItem("Crosshairs");
+    private final JCheckBoxMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
     final JMenu file = new JMenu("File"), 
 	    gameMenu = new JMenu("Game"),
 	    debugMenu = new JMenu("Debug"),
@@ -69,7 +69,7 @@ public class MenuSystem {
 	final JMenuItem codePageDump = new JMenuItem("Dump Code Pages");
 	final JMenuItem debugSinglet = new JMenuItem("Singlet (fill)");
 	final JMenuItem debugDQ = new JMenuItem("Depth Queue Test");
-	final JMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
+	//final JMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	
@@ -109,17 +109,9 @@ public class MenuSystem {
 		final Mission mission = tr.getGame().getCurrentMission();
 		mission.setSatelliteView(view_sat.isSelected());
 	    }};
-	    Action satelliteKeyAction = new AbstractAction("SATELLITE_VIEW_KEY"){
-		private static final long serialVersionUID = -6843605846847411702L;
-		@Override
-		public void actionPerformed(ActionEvent l) {
-		    if(view_sat.isEnabled())
-			view_sat.doClick();
-		}};
-	String satKey = "SATELLITE_KEY";
+	    
 	view_sat.addActionListener(satelliteAction);
-	view_sat.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0), satKey);
-	view_sat.getActionMap().put(satKey, satelliteKeyAction);
+	
 	
 	view_crosshairs.setSelected(tr.config.isCrosshairsEnabled());
 	view_crosshairs.addChangeListener(new ChangeListener(){
@@ -325,5 +317,9 @@ public class MenuSystem {
      */
     public JMenu getGameMenu() {
         return gameMenu;
+    }
+
+    public JCheckBoxMenuItem getView_sat() {
+        return view_sat;
     }
 }//end MenuSystem

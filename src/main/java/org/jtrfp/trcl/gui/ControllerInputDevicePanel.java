@@ -49,7 +49,20 @@ public class ControllerInputDevicePanel extends JPanel {
     private ArrayList<Object[]> rowData;
     private volatile boolean dispatching = false;
     
-    private static final int SOURCE_COL=0,DEST_COL=1,SCALAR_COL=2,OFFSET_COL=3;
+    private enum Columns{
+	SOURCE("Source"),
+	DEST("Destination"),
+	SCALAR("Scalar"),
+	OFFSET("Offset");
+	
+	private String title;
+	Columns(String title){
+	    this.title=title;
+	}
+	public String getTitle(){
+	    return title;
+	}
+    }//end Columns
     
     private class MonitorCollection implements Collection<String>{
 
@@ -140,10 +153,10 @@ public class ControllerInputDevicePanel extends JPanel {
 	    final int row = e.getFirstRow();
 	    if(e.getType()==TableModelEvent.UPDATE && e.getSource() != ControllerInputDevicePanel.this){
 		final TableModel model = table.getModel();
-		final String inputString = (String)model.getValueAt(row,1);
-		final String srcString = (String)model.getValueAt(row, 0);
-		final double scale  = Double.parseDouble((String)model.getValueAt(row, 2));
-		final double offset = Double.parseDouble((String)model.getValueAt(row, 3));
+		final String inputString = (String)model.getValueAt(row,Columns.DEST.ordinal());
+		final String srcString   = (String)model.getValueAt(row, Columns.SOURCE.ordinal());
+		final double scale  = Double.parseDouble((String)model.getValueAt(row, Columns.SCALAR.ordinal()));
+		final double offset = Double.parseDouble((String)model.getValueAt(row, Columns.OFFSET.ordinal()));
 		final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
 		final ControllerInput  controllerInput  = controllerInputs.getInput(inputString);
 		setDispatching(true);
@@ -182,11 +195,11 @@ public class ControllerInputDevicePanel extends JPanel {
 	if(row==-1)
 	    return; //Not found in this table. Ignore.
 	//Set destination
-	model.setValueAt(NONE, row, DEST_COL);
+	model.setValueAt(NONE, row, Columns.DEST.ordinal());
 	//Set scalar
-	model.setValueAt("1.0", row, SCALAR_COL);
+	model.setValueAt("1.0", row, Columns.SCALAR.ordinal());
 	//Set offset
-	model.setValueAt("0.0", row, OFFSET_COL);
+	model.setValueAt("0.0", row, Columns.OFFSET.ordinal());
     }//end fireControllerSourceUnmapped()
     
     private void fireControllerSourceMapped(ControllerSource cSource, ControllerMapping value){
@@ -205,11 +218,11 @@ public class ControllerInputDevicePanel extends JPanel {
 	if(row==-1)
 	    return; //Not found in this table. Ignore.
 	//Set destination
-	model.setValueAt(value.getControllerInput().getName(), row, DEST_COL);
+	model.setValueAt(value.getControllerInput().getName(), row, Columns.DEST.ordinal());
 	//Set scalar
-	model.setValueAt(value.getScale()+"", row, SCALAR_COL);
+	model.setValueAt(value.getScale()+"", row, Columns.SCALAR.ordinal());
 	//Set offset
-	model.setValueAt(value.getOffset()+"", row, OFFSET_COL);
+	model.setValueAt(value.getOffset()+"", row, Columns.OFFSET.ordinal());
     }//end fireControllerSourceMapped(...)
     
     private final Collection<String> monitoringCollection = new MonitorCollection();
@@ -222,14 +235,16 @@ public class ControllerInputDevicePanel extends JPanel {
 	rowData = new ArrayList<Object[]>(id.getControllerSources().size());
 	for(ControllerSource cs: id.getControllerSources())
 	    rowData.add(new String[]{cs.getName(),NONE,"1.0","0.0"});
-	final String [] columns = new String[]{"Source","Destination","Scalar","Offset"};
-	table = new JTable(rowData.toArray(new Object[rowData.size()][]),columns);
+	final String [] columns = new String[Columns.values().length];
+	for(int i=0; i<columns.length; i++)
+	    columns[i]=Columns.values()[i].getTitle();
+	table   = new JTable(rowData.toArray(new Object[rowData.size()][]),columns);
 	destBox = new JComboBox<String>();
 	destBox.addItem(NONE);
 	final TableColumnModel cModel = table.getColumnModel();
-	cModel.getColumn(1).setCellEditor(new DefaultCellEditor(destBox));
-	cModel.getColumn(SCALAR_COL).setPreferredWidth(20);
-	cModel.getColumn(OFFSET_COL).setPreferredWidth(20);
+	cModel.getColumn(Columns.DEST  .ordinal()).setCellEditor(new DefaultCellEditor(destBox));
+	cModel.getColumn(Columns.SCALAR.ordinal()).setPreferredWidth(20);
+	cModel.getColumn(Columns.OFFSET.ordinal()).setPreferredWidth(20);
 	table.getModel().addTableModelListener(new ControllerTableModelListener());
 	mapper.addMappingListener(new ControllerMappingListener(), true);
 	JScrollPane tableScrollPane = new JScrollPane(table);
@@ -237,7 +252,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	this.add(tableScrollPane);
 	ci.getInputNames().addTarget(monitoringCollection, true);
     }//end ControllerInputDevicePanel
-
+    
     public boolean isDispatching() {
         return dispatching;
     }

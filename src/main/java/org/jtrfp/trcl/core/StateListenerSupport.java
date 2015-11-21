@@ -16,6 +16,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
+import javax.swing.SwingUtilities;
+
 public class StateListenerSupport {
     private double oldState;
     private final ControllerSource controllerSource;
@@ -24,16 +26,16 @@ public class StateListenerSupport {
     public StateListenerSupport(ControllerSource controllerSource){
 	this.controllerSource = controllerSource;
     }
- public boolean addStateListener(StateListener stateListener){
+ public synchronized boolean addStateListener(StateListener stateListener){
      return stateListeners.add(stateListener);
  }//end addStateListener(...)
- public boolean removeStateListener(StateListener stateListener){
+ public synchronized boolean removeStateListener(StateListener stateListener){
      return stateListeners.remove(stateListener);
  }//end removeStateListener()
  public Collection<StateListener> getStateListeners(){
      return Collections.unmodifiableCollection(stateListeners);
  }//end getStateListeners()
- public void fireStateChange(double newState){
+ public synchronized void fireStateChange(double newState){
      if(newState==oldState)
 	 return;
      for(StateListener sl:stateListeners)

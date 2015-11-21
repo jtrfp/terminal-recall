@@ -73,7 +73,7 @@ public class MenuSystem {
 	// Accellerator keys
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	
-	view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
+	//view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
 	view_crosshairs.setAccelerator(KeyStroke.getKeyStroke("X"));
 	
 	fbsw = new FramebufferStateWindow(tr);

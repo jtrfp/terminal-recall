@@ -13,36 +13,42 @@
 
 package org.jtrfp.trcl.gui;
 
-import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.core.ControllerInput;
+import org.jtrfp.trcl.core.ControllerInputs;
+import org.jtrfp.trcl.core.ControllerMapper;
 import org.jtrfp.trcl.core.TR;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jogamp.newt.event.KeyEvent;
-
 @Component
 public class SatelliteViewToggle {
-    private static final String satKey = "SATELLITE_KEY";
+    public static final String SATELLITE_TOGGLE = "Sat View";
+    private final ControllerInput satelliteToggleInput;
+    private final JCheckBoxMenuItem view_sat;
 
     @Autowired
-    public SatelliteViewToggle(TR tr){
+    public SatelliteViewToggle(TR tr, ControllerMapper mapper, ControllerInputs inputs){
+	satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
+	satelliteToggleInput.addPropertyChangeListener(new SatelliteToggleListener());
 	final MenuSystem menuSystem = tr.getMenuSystem();
-	final JCheckBoxMenuItem view_sat = menuSystem.getView_sat();
-	Action satelliteKeyAction = new AbstractAction("SATELLITE_VIEW_KEY"){
-	    private static final long serialVersionUID = -6843605846847411702L;
-	    @Override
-	    public void actionPerformed(ActionEvent l) {
-		if(view_sat.isEnabled())
-		    view_sat.doClick();
-	    }};
-	    view_sat.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,0), satKey);
-	    view_sat.getActionMap().put(satKey, satelliteKeyAction);
+	view_sat = menuSystem.getView_sat();
     }//end constructor
+    
+    private class SatelliteToggleListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(final PropertyChangeEvent evt) {
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    if(view_sat.isEnabled() && ((Double)evt.getNewValue())>.9)
+			    view_sat.doClick();
+		}});
+	}//end propertyChange(...)
+    }//end SatelliteToggleListener
 }//end SatelliteViewToggle

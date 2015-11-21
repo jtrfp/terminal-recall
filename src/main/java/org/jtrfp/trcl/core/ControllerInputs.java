@@ -68,6 +68,7 @@ public class ControllerInputs {
     }//end getName()
     @Override
     public void setState(double newState) {
+	pcs.firePropertyChange(ControllerInput.STATE, this.state, newState);
 	this.state = newState;
     }//end setState(...)
     @Override

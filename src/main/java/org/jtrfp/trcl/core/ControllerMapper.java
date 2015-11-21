@@ -47,7 +47,7 @@ public class ControllerMapper {
     public void mapControllerSourceToInput(ControllerSource controllerSource, ControllerInput controllerInput, double scale, double offset){
 	final ControllerMapping mapping = new ControllerMapping(controllerSource,controllerInput,scale,offset);
 	map.put(controllerSource, mapping);
-	controllerSource.addStateListener(mapping);
+	controllerSource.addPropertyChangeListener(mapping);
 	fireMappedEvent(controllerSource, mapping);
     }//end mapControllerSourceToInput
     
@@ -56,7 +56,7 @@ public class ControllerMapper {
 	if(controllerMapping==null)
 	    return false; //Was never here to begin with
 	map.remove(controllerSource);
-	controllerSource.removeStateListener(controllerMapping);
+	controllerSource.removePropertyChangeListener(controllerMapping);
 	return true;
     }
     

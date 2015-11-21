@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.core;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -52,6 +54,7 @@ public class ControllerInputs {
  private class DefaultControllerInput implements ControllerInput{
      private final String controllerName;
      private       double state = 0;
+     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
      public DefaultControllerInput(String controllerName){
 	 this.controllerName=controllerName;
      }//end constructor
@@ -67,5 +70,13 @@ public class ControllerInputs {
     public void setState(double newState) {
 	this.state = newState;
     }//end setState(...)
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+	pcs.addPropertyChangeListener(l);
+    }
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+	pcs.removePropertyChangeListener(l);
+    }
  }//end DefaultControllerInput
 }//end ControllerInputs

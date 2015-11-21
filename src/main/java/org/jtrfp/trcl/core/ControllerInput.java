@@ -12,8 +12,11 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
+import java.beans.PropertyChangeListener;
+
 
 public interface ControllerInput {
+    public static String STATE = "State";
     /**
      * One-dimensional value. Buttons are 0 or 1. A joystick axis is [-1,1] where zero is center.
      * Triggers are [0,1] where 0 is relaxed.
@@ -29,4 +32,6 @@ public interface ControllerInput {
   */
  public void setState(double newState);
  public String getName();
+ public void addPropertyChangeListener   (PropertyChangeListener ls);
+ public void removePropertyChangeListener(PropertyChangeListener l);
 }//end ControllerInput

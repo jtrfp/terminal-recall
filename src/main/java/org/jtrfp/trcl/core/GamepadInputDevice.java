@@ -13,6 +13,9 @@
 
 package org.jtrfp.trcl.core;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,8 +90,9 @@ public class GamepadInputDevice implements InputDevice {
     }//end constructor
     
     private class GamepadControllerSource implements ControllerSource {
-	private final StateListenerSupport sls = new StateListenerSupport(this);
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	private final net.java.games.input.Component component;
+	private double currentState = 0;
 	
 	public GamepadControllerSource(net.java.games.input.Component component){
 	    this.component=component;
@@ -99,32 +103,28 @@ public class GamepadInputDevice implements InputDevice {
 	    return component.getName();
 	}
 
-	@Override
-	public boolean addStateListener(StateListener stateListener) {
-	    return sls.addStateListener(stateListener);
-	}
-
-	@Override
-	public boolean removeStateListener(StateListener stateListener) {
-	    return sls.removeStateListener(stateListener);
-	}
-
-	@Override
-	public Collection<StateListener> getStateListeners() {
-	    return sls.getStateListeners();
-	}
-	
-	void notifyStateChange(final double value){
+	void notifyPropertyChange(final double value){
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-		    sls.fireStateChange(value);
+		    pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, currentState, value));
 		}});
-	}//end notifyStateChange(...)
+	    currentState=value;
+	}//end notifyPropertyChange(...)
 
 	@Override
 	public InputDevice getInputDevice() {
 	    return GamepadInputDevice.this;
+	}
+
+	@Override
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+	    pcs.addPropertyChangeListener(l);
+	}
+
+	@Override
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+	    pcs.removePropertyChangeListener(l);
 	}
     }//end GamepadControllerSource
     
@@ -155,7 +155,7 @@ public class GamepadInputDevice implements InputDevice {
 		    try{Thread.sleep(20);
 		    controller.poll();
 		    }catch(InterruptedException e){}
-		controllerSourceMap.get(event.getComponent()).notifyStateChange(event.getValue());
+		controllerSourceMap.get(event.getComponent()).notifyPropertyChange(event.getValue());
 	    }//end while(true)
 	}//end run()
     }//end GamepadEventThread

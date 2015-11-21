@@ -13,7 +13,10 @@
 
 package org.jtrfp.trcl.core;
 
-public class ControllerMapping implements StateListener{
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+public class ControllerMapping implements PropertyChangeListener{
     private ControllerInput controllerInput;
     private ControllerSource controllerSource;
     private double scale, offset;
@@ -28,8 +31,8 @@ public class ControllerMapping implements StateListener{
     }
 
 	@Override
-	public void stateChanged(ControllerSource source, double value) {
-		controllerInput.setState(value*scale+offset);
+	public void propertyChange(PropertyChangeEvent evt) {
+		controllerInput.setState((Double)evt.getNewValue()*scale+offset);
 	}
     
     public ControllerInput getControllerInput() {

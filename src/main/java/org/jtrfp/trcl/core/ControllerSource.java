@@ -12,12 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
-import java.util.Collection;
+import java.beans.PropertyChangeListener;
 
 public interface ControllerSource {
-    public boolean addStateListener(StateListener stateListener);
-    public boolean removeStateListener(StateListener stateListener);
-    public Collection<StateListener> getStateListeners();
+    public static final String STATE = "State";
+    public void addPropertyChangeListener(PropertyChangeListener l);
+    public void removePropertyChangeListener(PropertyChangeListener l);
     public String getName();
     public InputDevice getInputDevice();
 }//end ControllerSource

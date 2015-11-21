@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,7 +36,6 @@ import org.jtrfp.trcl.core.ControllerMapping;
 import org.jtrfp.trcl.core.ControllerSource;
 import org.jtrfp.trcl.core.InputDevice;
 import org.jtrfp.trcl.core.MappingListener;
-import org.jtrfp.trcl.core.StateListener;
 
 public class ControllerInputDevicePanel extends JPanel {
     /**
@@ -227,14 +228,14 @@ public class ControllerInputDevicePanel extends JPanel {
 	return row;
     }//end getRowFor(...)
     
-    private class InputStateFeedbackMonitor implements StateListener {
+    private class InputStateFeedbackMonitor implements PropertyChangeListener {
 	@Override
-	public void stateChanged(ControllerSource source, double newValue) {
+	public void propertyChange(PropertyChangeEvent evt) {
 	    final TableModel model = table.getModel();
-	    final int row = getRowFor(source);
+	    final int row = getRowFor((ControllerSource)evt.getSource());
 	    if(row!=-1)
-	      model.setValueAt(newValue+"", row, Columns.VALUE.ordinal());
-	}//end stateChanged()
+	      model.setValueAt(evt.getNewValue()+"", row, Columns.VALUE.ordinal());
+	}
     }//end InputStateFeedbackMonitor
     
     private final Collection<String> monitoringCollection = new MonitorCollection();
@@ -248,7 +249,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	rowData = new ArrayList<Object[]>(id.getControllerSources().size());
 	for(ControllerSource cs: id.getControllerSources()){
 	    rowData.add(new String[]{cs.getName(),"?",NONE,"1.0","0.0"});
-	    cs.addStateListener(inputStateFeedbackMonitor);}
+	    cs.addPropertyChangeListener(inputStateFeedbackMonitor);}
 	final String [] columns = new String[Columns.values().length];
 	for(int i=0; i<columns.length; i++)
 	    columns[i]=Columns.values()[i].getTitle();

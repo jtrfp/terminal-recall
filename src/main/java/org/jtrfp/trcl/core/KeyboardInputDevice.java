@@ -15,8 +15,13 @@ package org.jtrfp.trcl.core;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,26 +72,22 @@ public class KeyboardInputDevice implements InputDevice {
     }//end DefaultKeyEventListener
     
     private class KeyControllerSource implements ControllerSource{
-	private final StateListenerSupport sls = new StateListenerSupport(this);
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	private final String name;
+	private boolean pressed = false;
 	
 	public KeyControllerSource(String name){
 	    this.name=name;
 	}//end constructor
 
 	@Override
-	public boolean addStateListener(StateListener stateListener) {
-	    return sls.addStateListener(stateListener);
+	public void addPropertyChangeListener(PropertyChangeListener stateListener) {
+	    pcs.addPropertyChangeListener(stateListener);
 	}
 
 	@Override
-	public boolean removeStateListener(StateListener stateListener) {
-	    return sls.removeStateListener(stateListener);
-	}
-
-	@Override
-	public Collection<StateListener> getStateListeners() {
-	    return sls.getStateListeners();
+	public void removePropertyChangeListener(PropertyChangeListener stateListener) {
+	    removePropertyChangeListener(stateListener);
 	}
 
 	@Override
@@ -95,11 +96,15 @@ public class KeyboardInputDevice implements InputDevice {
 	}
 	
 	public void notifyPressed(){
-	    sls.fireStateChange(1);
+	    if(!pressed)
+	     pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 0, 1));
+	    pressed=true;
 	}
 	
 	public void notifyReleased(){
-	    sls.fireStateChange(0);
+	    if(pressed)
+		pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 1, 0));
+	    pressed=false;
 	}
 
 	@Override

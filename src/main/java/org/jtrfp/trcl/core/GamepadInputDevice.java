@@ -92,7 +92,7 @@ public class GamepadInputDevice implements InputDevice {
     private class GamepadControllerSource implements ControllerSource {
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 	private final net.java.games.input.Component component;
-	private double currentState = 0;
+	private volatile double currentState = 0;
 	
 	public GamepadControllerSource(net.java.games.input.Component component){
 	    this.component=component;
@@ -107,9 +107,10 @@ public class GamepadInputDevice implements InputDevice {
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-		    pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, currentState, value));
+		    pcs.firePropertyChange(new PropertyChangeEvent(GamepadControllerSource.this, ControllerSource.STATE, currentState, value));
+		    currentState=value;
 		}});
-	    currentState=value;
+	    
 	}//end notifyPropertyChange(...)
 
 	@Override

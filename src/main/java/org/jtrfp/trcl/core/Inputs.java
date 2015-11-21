@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
+import org.jtrfp.trcl.gui.SatelliteViewToggle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,5 +54,12 @@ public class Inputs {
      if(Actrl!=null)
       mapper.mapControllerSourceToInput(Actrl, fire, 1, 0);
      mapper.mapControllerSourceToInput(kid.getKeyControllerSource(KeyEvent.VK_SPACE), fire, 1, 0);
+     
+     final ControllerInput  sat     = tr.getControllerInputs().getControllerInput(SatelliteViewToggle.SATELLITE_TOGGLE);
+     final ControllerSource backCtrl = gid.getSourceByName("Select");
+     if(backCtrl!=null)
+      mapper.mapControllerSourceToInput(backCtrl, sat, 1, 0);
+     final ControllerSource tabCtrl = kid.getKeyControllerSource(KeyEvent.VK_TAB);
+     mapper.mapControllerSourceToInput(tabCtrl, sat, 1, 0);
  }//end constructor
 }//end Inputs

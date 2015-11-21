@@ -87,7 +87,7 @@ public class KeyboardInputDevice implements InputDevice {
 
 	@Override
 	public void removePropertyChangeListener(PropertyChangeListener stateListener) {
-	    removePropertyChangeListener(stateListener);
+	    pcs.removePropertyChangeListener(stateListener);
 	}
 
 	@Override
@@ -97,13 +97,13 @@ public class KeyboardInputDevice implements InputDevice {
 	
 	public void notifyPressed(){
 	    if(!pressed)
-	     pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 0, 1));
+	     pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 0., 1.));
 	    pressed=true;
 	}
 	
 	public void notifyReleased(){
 	    if(pressed)
-		pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 1, 0));
+		pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 1., 0.));
 	    pressed=false;
 	}
 

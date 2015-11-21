@@ -34,6 +34,7 @@ import org.jtrfp.trcl.core.ControllerMapping;
 import org.jtrfp.trcl.core.ControllerSource;
 import org.jtrfp.trcl.core.InputDevice;
 import org.jtrfp.trcl.core.MappingListener;
+import org.jtrfp.trcl.core.StateListener;
 
 public class ControllerInputDevicePanel extends JPanel {
     /**
@@ -51,6 +52,7 @@ public class ControllerInputDevicePanel extends JPanel {
     
     private enum Columns{
 	SOURCE("Source"),
+	VALUE("Value"),
 	DEST("Destination"),
 	SCALAR("Scalar"),
 	OFFSET("Offset");
@@ -151,7 +153,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	    if(isDispatching())
 		return;
 	    final int row = e.getFirstRow();
-	    if(e.getType()==TableModelEvent.UPDATE && e.getSource() != ControllerInputDevicePanel.this){
+	    if(e.getType()==TableModelEvent.UPDATE && e.getSource() != ControllerInputDevicePanel.this && e.getColumn() != Columns.VALUE.ordinal()){
 		final TableModel model = table.getModel();
 		final String inputString = (String)model.getValueAt(row,Columns.DEST.ordinal());
 		final String srcString   = (String)model.getValueAt(row, Columns.SOURCE.ordinal());
@@ -181,19 +183,10 @@ public class ControllerInputDevicePanel extends JPanel {
 
     private void fireControllerSourceUnmapped(ControllerSource cSource){
 	//Check for relevance to this panel
-	if(cSource.getInputDevice() != inputDevice)
-	    return;
-	final String sourceString = cSource.getName();
-	int row = -1;
-	final TableModel model = table.getModel();
-	final int col = 0;
-	//Find the row containing this sourceString
-	for(int i=0; i<model.getRowCount(); i++){
-	    if(((String)model.getValueAt(i, col)).contentEquals(sourceString))
-		row=i;
-	}//end for(model rows)
+	final int row = getRowFor(cSource);
 	if(row==-1)
-	    return; //Not found in this table. Ignore.
+	    return;//Ignore
+	final TableModel model = table.getModel();
 	//Set destination
 	model.setValueAt(NONE, row, Columns.DEST.ordinal());
 	//Set scalar
@@ -204,9 +197,23 @@ public class ControllerInputDevicePanel extends JPanel {
     
     private void fireControllerSourceMapped(ControllerSource cSource, ControllerMapping value){
 	//Check for relevance to this panel
+	final int row = getRowFor(cSource);
+	if(row==-1)
+	    return;//Ignore
+	final TableModel model = table.getModel();
+	//Set destination
+	model.setValueAt(value.getControllerInput().getName(), row, Columns.DEST.ordinal());
+	//Set scalar
+	model.setValueAt(value.getScale()+"", row, Columns.SCALAR.ordinal());
+	//Set offset
+	model.setValueAt(value.getOffset()+"", row, Columns.OFFSET.ordinal());
+    }//end fireControllerSourceMapped(...)
+    
+    private int getRowFor(ControllerSource cSource){
+	//Check for relevance to this panel
 	if(cSource.getInputDevice() != inputDevice)
-	    return;
-	final int col = 0;
+	    return -1;
+	final int col = Columns.SOURCE.ordinal();
 	final String sourceString = cSource.getName();
 	int row = -1;
 	final TableModel model = table.getModel();
@@ -216,16 +223,22 @@ public class ControllerInputDevicePanel extends JPanel {
 		row=i;
 	}//end for(model rows)
 	if(row==-1)
-	    return; //Not found in this table. Ignore.
-	//Set destination
-	model.setValueAt(value.getControllerInput().getName(), row, Columns.DEST.ordinal());
-	//Set scalar
-	model.setValueAt(value.getScale()+"", row, Columns.SCALAR.ordinal());
-	//Set offset
-	model.setValueAt(value.getOffset()+"", row, Columns.OFFSET.ordinal());
-    }//end fireControllerSourceMapped(...)
+	    return -1; //Not found in this table. Ignore.
+	return row;
+    }//end getRowFor(...)
+    
+    private class InputStateFeedbackMonitor implements StateListener {
+	@Override
+	public void stateChanged(ControllerSource source, double newValue) {
+	    final TableModel model = table.getModel();
+	    final int row = getRowFor(source);
+	    if(row!=-1)
+	      model.setValueAt(newValue+"", row, Columns.VALUE.ordinal());
+	}//end stateChanged()
+    }//end InputStateFeedbackMonitor
     
     private final Collection<String> monitoringCollection = new MonitorCollection();
+    private final InputStateFeedbackMonitor inputStateFeedbackMonitor = new InputStateFeedbackMonitor();
 
     public ControllerInputDevicePanel(InputDevice id, ControllerInputs ci, ControllerMapper mapper) {
 	this.inputDevice = id;
@@ -233,8 +246,9 @@ public class ControllerInputDevicePanel extends JPanel {
 	this.controllerMapper = mapper;
 	this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 	rowData = new ArrayList<Object[]>(id.getControllerSources().size());
-	for(ControllerSource cs: id.getControllerSources())
-	    rowData.add(new String[]{cs.getName(),NONE,"1.0","0.0"});
+	for(ControllerSource cs: id.getControllerSources()){
+	    rowData.add(new String[]{cs.getName(),"?",NONE,"1.0","0.0"});
+	    cs.addStateListener(inputStateFeedbackMonitor);}
 	final String [] columns = new String[Columns.values().length];
 	for(int i=0; i<columns.length; i++)
 	    columns[i]=Columns.values()[i].getTitle();
@@ -243,6 +257,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	destBox.addItem(NONE);
 	final TableColumnModel cModel = table.getColumnModel();
 	cModel.getColumn(Columns.DEST  .ordinal()).setCellEditor(new DefaultCellEditor(destBox));
+	cModel.getColumn(Columns.VALUE .ordinal()).setPreferredWidth(20);
 	cModel.getColumn(Columns.SCALAR.ordinal()).setPreferredWidth(20);
 	cModel.getColumn(Columns.OFFSET.ordinal()).setPreferredWidth(20);
 	table.getModel().addTableModelListener(new ControllerTableModelListener());

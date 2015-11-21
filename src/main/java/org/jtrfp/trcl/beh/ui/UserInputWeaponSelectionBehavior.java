@@ -38,7 +38,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     
     
     public UserInputWeaponSelectionBehavior(ControllerInputs controllerInputs){
-	fire = controllerInputs.getInput(FIRE);
+	fire = controllerInputs.getControllerInput(FIRE);
     }//end constuctor
     
     @Override

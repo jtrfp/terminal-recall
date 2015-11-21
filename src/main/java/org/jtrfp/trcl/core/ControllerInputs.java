@@ -33,7 +33,7 @@ public class ControllerInputs {
   * @return
   * @since Nov 12, 2015
   */
-    public ControllerInput getInput(final String name){
+    public ControllerInput getControllerInput(final String name){
      ControllerInput result;
      if(!inputs.containsKey(name)){
 	 result = new DefaultControllerInput(name);

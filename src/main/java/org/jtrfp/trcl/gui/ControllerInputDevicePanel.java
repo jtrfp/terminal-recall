@@ -161,7 +161,7 @@ public class ControllerInputDevicePanel extends JPanel {
 		final double scale  = Double.parseDouble((String)model.getValueAt(row, Columns.SCALAR.ordinal()));
 		final double offset = Double.parseDouble((String)model.getValueAt(row, Columns.OFFSET.ordinal()));
 		final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
-		final ControllerInput  controllerInput  = controllerInputs.getInput(inputString);
+		final ControllerInput  controllerInput  = controllerInputs.getControllerInput(inputString);
 		setDispatching(true);
 		controllerMapper.unmapControllerSource(controllerSource);
 		controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);

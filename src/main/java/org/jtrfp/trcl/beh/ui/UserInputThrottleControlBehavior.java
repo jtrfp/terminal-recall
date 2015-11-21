@@ -24,8 +24,8 @@ public class UserInputThrottleControlBehavior extends Behavior implements Player
     private final ControllerInput throttleDelta,throttle;
     
     public UserInputThrottleControlBehavior(ControllerInputs controllerInputs){
-	throttleDelta= controllerInputs.getInput(THROTTLE_DELTA);
-	throttle     = controllerInputs.getInput(THROTTLE);
+	throttleDelta= controllerInputs.getControllerInput(THROTTLE_DELTA);
+	throttle     = controllerInputs.getControllerInput(THROTTLE);
     }
     
     @Override

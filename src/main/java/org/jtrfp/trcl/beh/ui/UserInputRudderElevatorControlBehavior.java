@@ -28,8 +28,8 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
     private  double accellerationFactor=.0005;
     public UserInputRudderElevatorControlBehavior(ControllerInputs controllerInputs){
 	super();
-	rudder =   controllerInputs.getInput(RUDDER);
-	elevator = controllerInputs.getInput(ELEVATOR);
+	rudder =   controllerInputs.getControllerInput(RUDDER);
+	elevator = controllerInputs.getControllerInput(ELEVATOR);
     }
     @Override
     public void tick(long tickTimeMillis){

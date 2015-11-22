@@ -30,15 +30,17 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.ext.Extension;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.Mission.GameplayMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class GamePause implements Extension<TR> {
+@Component
+public class GamePause  {
     IndirectProperty<Game> gameIP;
     IndirectProperty<Mission>currentMissionIP;
     ActionListener pauseAL;
@@ -46,26 +48,11 @@ public class GamePause implements Extension<TR> {
     PropertyChangeListener gamePCL, pausePCL, satViewPCL, gameplayModePCL;
     WindowListener rootWindowWL;
     
-    @Override
-    public void init(TR tr) {
+    @Autowired
+    public GamePause(TR tr){
+	apply(tr);
     }
-
-    @Override
-    public Class<TR> getExtendedClass() {
-	return TR.class;
-    }
-
-    @Override
-    public String getHumanReadableName() {
-	return "Game Pause";
-    }
-
-    @Override
-    public String getDescription() {
-	return "Adds Game->Pause menu item, F3 pause, and pause when minimized.";
-    }
-
-    @Override
+    
     public void apply(final TR tr) {
 	game_pause = new JMenuItem("Pause");
 	
@@ -152,7 +139,6 @@ public class GamePause implements Extension<TR> {
 	    }});
     }//end apply(...)
 
-    @Override
     public void remove(final TR tr) {//UNTESTED
 	tr.removePropertyChangeListener(gameIP);
 	gameIP    .removeTargetPropertyChangeListener(currentMissionIP);

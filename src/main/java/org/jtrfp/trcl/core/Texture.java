@@ -173,7 +173,7 @@ public class Texture implements TextureDescription {
 	this.debugName	  =debugName.replace('.', '_');
 	this.uvWrapping   =uvWrapping;
 	this.gpu          =gpu;
-	this.gpuResourceFinalizer = gpu.getExtension(GPUResourceFinalizer.class);
+	this.gpuResourceFinalizer = gpu.getGPUResourceFinalizer();
     }//end constructor
     
     Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){

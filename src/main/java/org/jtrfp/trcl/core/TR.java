@@ -29,8 +29,6 @@ import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.ext.Extension;
-import org.jtrfp.trcl.ext.ExtensionSupport;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.GameShell;
@@ -85,7 +83,6 @@ public final class TR implements UncaughtExceptionHandler{
 	private RenderableSpacePartitioningGrid	defaultGrid;
 	
 	public final TRConfiguration 		config;
-	private final ExtensionSupport<TR>      extensionSupport = new ExtensionSupport<TR>(this);
 	private final ConfigWindow              configWindow;
 	
 	@Autowired
@@ -203,7 +200,6 @@ public final class TR implements UncaughtExceptionHandler{
 		renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 		
 		menuSystem = new MenuSystem(this);
-		extensionSupport.loadBuiltInExtensions();
 	}//end constructor
 	
 	public TR startShell(){
@@ -487,16 +483,6 @@ public final class TR implements UncaughtExceptionHandler{
     @Override
     public void uncaughtException(Thread t, Throwable e) {
 	showStopper(e);
-    }
-
-    /**
-     * @param extensionClass
-     * @return
-     * @see org.jtrfp.trcl.ext.ExtensionSupport#getExtension(java.lang.Class)
-     */
-    public <CLASS extends Extension<?>> Extension<?> getExtension(
-	    Class<CLASS> extensionClass) {
-	return extensionSupport.getExtension(extensionClass);
     }
 
     public static double rolloverDistance(double distance) {

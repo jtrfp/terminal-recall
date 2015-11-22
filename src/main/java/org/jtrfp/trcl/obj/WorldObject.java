@@ -97,7 +97,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	tMd[10] = 1;
 	tMd[15] = 1;
 	
-	gpuResourceFinalizer = tr.gpu.get().getExtension(GPUResourceFinalizer.class);
+	gpuResourceFinalizer = tr.gpu.get().getGPUResourceFinalizer();
     }
 
     public WorldObject(TR tr, Model m) {

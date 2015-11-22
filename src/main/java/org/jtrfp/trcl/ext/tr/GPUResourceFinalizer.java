@@ -21,14 +21,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jtrfp.trcl.ext.Extension;
 import org.jtrfp.trcl.gpu.GPU;
 
-public class GPUResourceFinalizer implements Extension<GPU> {
+public class GPUResourceFinalizer {
     private ExecutorService      finalizationExecutor;
     private LinkedBlockingQueue<Future<Void>>    finalizationFutures = new LinkedBlockingQueue<Future<Void>>();
     private GPU gpu;
     private int rootBufferCompactionInterval = 1024;
+    
+    public GPUResourceFinalizer(GPU gpu){
+	apply(gpu);
+    }
     
     private final Thread finalizationFutureCheckerThread = new Thread(){
 	private int finalizationCount = 0;
@@ -46,39 +49,18 @@ public class GPUResourceFinalizer implements Extension<GPU> {
 	}//end run()
     };
 
-    @Override
-    public void init(GPU extended) {
-    }
-
-    @Override
     public void apply(GPU extended) {
 	finalizationFutureCheckerThread.start();
 	finalizationExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*3, new GPURFThreadFactory());
 	gpu = extended;
     }//end apply(...)
 
-    @Override
     public void remove(GPU extended) {
 	finalizationExecutor = null;
 	finalizationFutureCheckerThread.interrupt();//UNTESTED
 	gpu = null;
     }
 
-    @Override
-    public Class<GPU> getExtendedClass() {
-	return GPU.class;
-    }
-
-    @Override
-    public String getHumanReadableName() {
-	return "GPU Resource Finalizer.";
-    }
-
-    @Override
-    public String getDescription() {
-	return "Handles the release of GPU resources while decoupled from the GC's finalizer thread.";
-    }
-    
     public void submitFinalizationAction(Callable<Void> c){
 	finalizationFutures.add(finalizationExecutor.submit(c));
     }//end submitFinalizationAction(...)

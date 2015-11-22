@@ -15,6 +15,7 @@ package org.jtrfp.trcl.gpu;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.security.cert.Extension;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -36,8 +37,7 @@ import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
-import org.jtrfp.trcl.ext.Extension;
-import org.jtrfp.trcl.ext.ExtensionSupport;
+import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
@@ -60,7 +60,7 @@ public class GPU implements GLExecutor{
 	public final TRFutureTask<ObjectListWindow> 	objectListWindow;
 	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
 	private final ThreadManager                     threadManager;
-	private final ExtensionSupport<GPU>             extensionSupport = new ExtensionSupport<GPU>(this);
+	private final GPUResourceFinalizer              gpuResourceFinalizer;
 	private final ArrayList<TRFuture<? extends MemoryWindow>>		memoryWindows = new ArrayList<TRFuture<? extends MemoryWindow>>();
 	
 	public GPU(final Reporter reporter, ExecutorService executorService,
@@ -133,7 +133,7 @@ public class GPU implements GLExecutor{
 		    System.out.println("\tVer:"+System.getProperty("os.version"));
 		    return null;
 		}});
-	    extensionSupport.loadBuiltInExtensions();
+	    gpuResourceFinalizer = new GPUResourceFinalizer(this);
 	}//end constructor
 	
 	public void compactRootBuffer(){
@@ -259,13 +259,7 @@ public class GPU implements GLExecutor{
 	    return threadManager;
 	}
 
-	/**
-	 * @param extensionClass
-	 * @return
-	 * @see org.jtrfp.trcl.ext.ExtensionSupport#getExtension(java.lang.Class)
-	 */
-	public <CLASS extends Extension<?>> CLASS getExtension(
-		Class<CLASS> extensionClass) {
-	    return (CLASS)extensionSupport.getExtension(extensionClass);
+	public GPUResourceFinalizer getGPUResourceFinalizer() {
+	    return gpuResourceFinalizer;
 	}
 	}//end GPU

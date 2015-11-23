@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,10 +31,18 @@ public class ControllerMapper {
     private final Collection<InputDevice> inputDevices;
     private final Set<MappingListener<ControllerSource,ControllerMapping>> mappingListeners = new HashSet<MappingListener<ControllerSource,ControllerMapping>>();
     private final Map<ControllerSource,ControllerMapping> map = new HashMap<ControllerSource,ControllerMapping>();
+    private final Map<String,ControllerConfiguration> recommendedDefaultConfigurations = new HashMap<String,ControllerConfiguration>();
     
-    @Autowired
+    @Autowired(required=false)
     public ControllerMapper(Collection<InputDevice> inputDevices){
+	this(inputDevices, new ArrayList<ControllerConfiguration>(0));
+    }
+    
+    @Autowired(required=false)
+    public ControllerMapper(Collection<InputDevice> inputDevices, Collection<ControllerConfiguration> recommendedDefConfigs){
 	this.inputDevices = inputDevices;
+	for(ControllerConfiguration config:recommendedDefConfigs)
+	    recommendedDefaultConfigurations.put(config.getIntendedController(), config);
     }//end constructor
     
     public Collection<InputDevice> getInputDevices(){
@@ -80,5 +91,15 @@ public class ControllerMapper {
 	boolean result = mappingListeners.remove(l);
 	return result;
     }//end removeMappingListener(...)
+
+    public ControllerConfiguration getRecommendedDefaultConfiguration(
+	    InputDevice inputDevice) {
+	ControllerConfiguration result = recommendedDefaultConfigurations.get(inputDevice.getName());
+	if(result!=null){
+	    try{result = (ControllerConfiguration)BeanUtils.cloneBean(result);}
+	    catch(Exception e){e.printStackTrace();}
+	}//end if(!null)
+	return result;
+    }//end getRecommendedDefaultConfiguration()
  
 }//end ControllerMapper

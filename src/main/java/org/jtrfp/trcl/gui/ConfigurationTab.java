@@ -16,8 +16,11 @@ package org.jtrfp.trcl.gui;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
-public interface ConfigurationTab {
+public interface ConfigurationTab<CONFIG_BEAN> {
  public String     getTabName();
  public JComponent getContent();
  public ImageIcon  getTabIcon();
+ public Class<CONFIG_BEAN>   getConfigBeanClass();
+ public void                 setConfigBean(CONFIG_BEAN cfg);
+ public CONFIG_BEAN          getConfigBean();
 }//end configurationTab

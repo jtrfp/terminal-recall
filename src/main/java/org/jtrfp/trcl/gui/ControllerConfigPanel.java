@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.gui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.JPanel;
@@ -24,6 +25,7 @@ import org.jtrfp.trcl.core.InputDevice;
 
 public class ControllerConfigPanel extends JPanel {
     private static final long serialVersionUID = -7100861763976731950L;
+    private final Collection<ControllerInputDevicePanel> controllerInputDevicePanels = new ArrayList<ControllerInputDevicePanel>();
     
     public ControllerConfigPanel(Collection<InputDevice> inputs, ControllerMapper mapper, ControllerInputs ci){
 	super();
@@ -31,7 +33,13 @@ public class ControllerConfigPanel extends JPanel {
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	add(tabbedPane, BorderLayout.CENTER);
 	for(InputDevice id:inputs){
-	    tabbedPane.addTab(id.getName(), null, new ControllerInputDevicePanel(id,ci,mapper), id.getDetailedDescription());
+	    final ControllerInputDevicePanel panel = new ControllerInputDevicePanel(id,ci,mapper);
+	    controllerInputDevicePanels.add(panel);
+	    tabbedPane.addTab(id.getName(), null, panel, id.getDetailedDescription());
 	}//end for(inputs)
     }//end constructor
+
+    public Collection<ControllerInputDevicePanel> getControllerInputDevicePanels() {
+        return controllerInputDevicePanels;
+    }
 }//end ControllerConfigPanel

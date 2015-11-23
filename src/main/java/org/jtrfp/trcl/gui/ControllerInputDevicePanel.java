@@ -14,8 +14,8 @@ package org.jtrfp.trcl.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.swing.BoxLayout;
@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -36,6 +37,7 @@ import org.jtrfp.trcl.core.ControllerMapping;
 import org.jtrfp.trcl.core.ControllerSource;
 import org.jtrfp.trcl.core.InputDevice;
 import org.jtrfp.trcl.core.MappingListener;
+import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration.ConfEntry;
 
 public class ControllerInputDevicePanel extends JPanel {
     /**
@@ -48,8 +50,39 @@ public class ControllerInputDevicePanel extends JPanel {
     private JComboBox<String>      destBox;
     private JTable table;
     private ControllerMapper       controllerMapper;
-    private ArrayList<Object[]> rowData;
     private volatile boolean dispatching = false;
+    private ControllerConfiguration controllerConfiguration;
+    
+    private final Collection<String> monitoringCollection = new MonitorCollection();
+    private final InputStateFeedbackMonitor inputStateFeedbackMonitor = new InputStateFeedbackMonitor();
+
+    public ControllerInputDevicePanel(InputDevice id, ControllerInputs ci, ControllerMapper mapper) {
+	this.inputDevice = id;
+	this.controllerInputs = ci;
+	this.controllerMapper = mapper;
+	this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+	table   = new JTable();
+	for(Columns col:Columns.values())
+	    ((DefaultTableModel)table.getModel()).addColumn(col.getTitle());
+	for(ControllerSource cs: inputDevice.getControllerSources())
+	    cs.addPropertyChangeListener(inputStateFeedbackMonitor);
+	destBox = new JComboBox<String>();
+	destBox.addItem(NONE);
+	final TableColumnModel cModel = table.getColumnModel();
+	cModel.getColumn(Columns.DEST  .ordinal()).setCellEditor(new DefaultCellEditor(destBox));
+	cModel.getColumn(Columns.VALUE .ordinal()).setPreferredWidth(20);
+	cModel.getColumn(Columns.SCALAR.ordinal()).setPreferredWidth(20);
+	cModel.getColumn(Columns.OFFSET.ordinal()).setPreferredWidth(20);
+	
+	table.getModel().addTableModelListener(new ControllerTableModelListener());
+	
+	mapper.addMappingListener(new ControllerMappingListener(), true);
+	JScrollPane tableScrollPane = new JScrollPane(table);
+	table.setFillsViewportHeight(true);
+	this.add(tableScrollPane);
+	ci.getInputNames().addTarget(monitoringCollection, true);
+	getControllerConfiguration();
+    }//end ControllerInputDevicePanel
     
     private enum Columns{
 	SOURCE("Source"),
@@ -66,6 +99,74 @@ public class ControllerInputDevicePanel extends JPanel {
 	    return title;
 	}
     }//end Columns
+    
+    public static class ControllerConfiguration {
+	private String intendedController = "[unnamed]";
+	private HashMap<String,ConfEntry> entryMap = new HashMap<String,ConfEntry>();
+	public ConfEntry getEntry(String controllerSourceName){
+	    ConfEntry result = entryMap.get(controllerSourceName);
+	    if( result == null ){
+		result = new ConfEntry();
+		result.setName(controllerSourceName);
+		}
+	    return result;
+	}//end getEntry(...)
+	
+	public static class ConfEntry{
+	    private double scale = 1, offset = 0;
+	    private String name = "[unnamed]", dest = NONE;
+	    
+	    public ConfEntry(){super();}
+	    
+	    public ConfEntry(String dest, String name, double scale, double offset){
+		setDest(dest);
+		setName(name);
+		setScale(scale);
+		setOffset(offset);
+	    }//end constructor(...)
+	    
+	    public double getScale() {
+	        return scale;
+	    }
+	    public void setScale(double scale) {
+	        this.scale = scale;
+	    }
+	    public double getOffset() {
+	        return offset;
+	    }
+	    public void setOffset(double offset) {
+	        this.offset = offset;
+	    }
+	    public String getName() {
+	        return name;
+	    }
+	    public void setName(String name) {
+	        this.name = name;
+	    }
+	    public String getDest() {
+	        return dest;
+	    }
+	    public void setDest(String dest) {
+	        this.dest = dest;
+	    }
+	}//end ConfEntry
+
+	public HashMap<String, ConfEntry> getEntryMap() {
+	    return entryMap;
+	}
+
+	public void setEntryMap(HashMap<String, ConfEntry> entryMap) {
+	    this.entryMap = entryMap;
+	}
+
+	public String getIntendedController() {
+	    return intendedController;
+	}
+
+	public void setIntendedController(String intendedController) {
+	    this.intendedController = intendedController;
+	}
+    }//end ControllerConfiguration
     
     private class MonitorCollection implements Collection<String>{
 
@@ -154,18 +255,38 @@ public class ControllerInputDevicePanel extends JPanel {
 	    if(isDispatching())
 		return;
 	    final int row = e.getFirstRow();
-	    if(e.getType()==TableModelEvent.UPDATE && e.getSource() != ControllerInputDevicePanel.this && e.getColumn() != Columns.VALUE.ordinal()){
+	    if((e.getType()==TableModelEvent.UPDATE || e.getType()==TableModelEvent.INSERT) /*&& e.getSource() != ControllerInputDevicePanel.this */&& e.getColumn() != Columns.VALUE.ordinal()){
 		final TableModel model = table.getModel();
 		final String inputString = (String)model.getValueAt(row,Columns.DEST.ordinal());
-		final String srcString   = (String)model.getValueAt(row, Columns.SOURCE.ordinal());
+		final String srcString   = (String)model.getValueAt(row,Columns.SOURCE.ordinal());
 		final double scale  = Double.parseDouble((String)model.getValueAt(row, Columns.SCALAR.ordinal()));
 		final double offset = Double.parseDouble((String)model.getValueAt(row, Columns.OFFSET.ordinal()));
+		//Update config
+		final ControllerConfiguration config = getControllerConfiguration();
+		final ConfEntry entry = config.getEntry(srcString);
 		final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
-		final ControllerInput  controllerInput  = controllerInputs.getControllerInput(inputString);
 		setDispatching(true);
-		controllerMapper.unmapControllerSource(controllerSource);
-		controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);
+		if(e.getColumn() == Columns.DEST.ordinal() || e.getType() == TableModelEvent.INSERT){
+		    controllerMapper.unmapControllerSource(controllerSource);
+		    if(!inputString.contentEquals(NONE)){
+			entry.setDest  (inputString);
+			//Update the actual settings
+			final ControllerInput  controllerInput  = controllerInputs.getControllerInput(inputString);
+			controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);
+		    }//end if(!NONE)
+		}//end if(DEST||INSERT)
+		if(e.getColumn() == Columns.SCALAR.ordinal() || e.getType() == TableModelEvent.INSERT){
+		    entry.setScale (scale);
+		}
+		if(e.getColumn() == Columns.OFFSET.ordinal() || e.getType() == TableModelEvent.INSERT){
+		    entry.setOffset(offset);
+		}
 		setDispatching(false);
+	    } else if(e.getType()==TableModelEvent.DELETE){
+		final TableModel model = table.getModel();
+		final String srcString   = (String)model.getValueAt(row,Columns.SOURCE.ordinal());
+		final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
+		controllerMapper.unmapControllerSource(controllerSource);
 	    }
 	}//end tableChanged(...)
     }//end ControllerTableModelListener
@@ -188,7 +309,15 @@ public class ControllerInputDevicePanel extends JPanel {
 	if(row==-1)
 	    return;//Ignore
 	final TableModel model = table.getModel();
-	//Set destination
+	
+	//Update config
+	final ControllerConfiguration config = getControllerConfiguration();
+	final ConfEntry entry = config.getEntry(cSource.getName());
+	entry.setDest  (NONE);
+	entry.setOffset(0);
+	entry.setScale (1.0);
+	
+	//Set actual settings
 	model.setValueAt(NONE, row, Columns.DEST.ordinal());
 	//Set scalar
 	model.setValueAt("1.0", row, Columns.SCALAR.ordinal());
@@ -238,37 +367,6 @@ public class ControllerInputDevicePanel extends JPanel {
 	}
     }//end InputStateFeedbackMonitor
     
-    private final Collection<String> monitoringCollection = new MonitorCollection();
-    private final InputStateFeedbackMonitor inputStateFeedbackMonitor = new InputStateFeedbackMonitor();
-
-    public ControllerInputDevicePanel(InputDevice id, ControllerInputs ci, ControllerMapper mapper) {
-	this.inputDevice = id;
-	this.controllerInputs = ci;
-	this.controllerMapper = mapper;
-	this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-	rowData = new ArrayList<Object[]>(id.getControllerSources().size());
-	for(ControllerSource cs: id.getControllerSources()){
-	    rowData.add(new String[]{cs.getName(),"?",NONE,"1.0","0.0"});
-	    cs.addPropertyChangeListener(inputStateFeedbackMonitor);}
-	final String [] columns = new String[Columns.values().length];
-	for(int i=0; i<columns.length; i++)
-	    columns[i]=Columns.values()[i].getTitle();
-	table   = new JTable(rowData.toArray(new Object[rowData.size()][]),columns);
-	destBox = new JComboBox<String>();
-	destBox.addItem(NONE);
-	final TableColumnModel cModel = table.getColumnModel();
-	cModel.getColumn(Columns.DEST  .ordinal()).setCellEditor(new DefaultCellEditor(destBox));
-	cModel.getColumn(Columns.VALUE .ordinal()).setPreferredWidth(20);
-	cModel.getColumn(Columns.SCALAR.ordinal()).setPreferredWidth(20);
-	cModel.getColumn(Columns.OFFSET.ordinal()).setPreferredWidth(20);
-	table.getModel().addTableModelListener(new ControllerTableModelListener());
-	mapper.addMappingListener(new ControllerMappingListener(), true);
-	JScrollPane tableScrollPane = new JScrollPane(table);
-	table.setFillsViewportHeight(true);
-	this.add(tableScrollPane);
-	ci.getInputNames().addTarget(monitoringCollection, true);
-    }//end ControllerInputDevicePanel
-    
     public boolean isDispatching() {
         return dispatching;
     }
@@ -276,5 +374,44 @@ public class ControllerInputDevicePanel extends JPanel {
     public void setDispatching(boolean dispatching) {
         this.dispatching = dispatching;
     }
+
+    public InputDevice getInputDevice() {
+        return inputDevice;
+    }
+
+    public ControllerConfiguration getControllerConfiguration() {
+	if(controllerConfiguration==null)
+	    setControllerConfiguration(null);
+        return controllerConfiguration;
+    }
+
+    public void setControllerConfiguration(
+    	ControllerConfiguration controllerConfiguration) {
+	if(controllerConfiguration==null){
+	    controllerConfiguration = controllerMapper.getRecommendedDefaultConfiguration(inputDevice);
+	    if(controllerConfiguration==null){
+		controllerConfiguration = new ControllerConfiguration();
+		controllerConfiguration.setIntendedController(inputDevice.getName());
+		}
+	    }//end if(null)
+        this.controllerConfiguration = controllerConfiguration;
+        clearControllerConfiguration();
+        applyControllerConfiguration();
+    }
+    
+    private void clearControllerConfiguration(){
+	((DefaultTableModel)table.getModel()).setRowCount(0);
+    }
+    
+    private void applyControllerConfiguration(){
+	for(ControllerSource cs: inputDevice.getControllerSources()){
+	    final String name = cs.getName();
+	    final ConfEntry entry = getControllerConfiguration().getEntry(name);
+	    final double scale    = entry.getScale();
+	    final double offset   = entry.getOffset();
+	    final String dest     = entry.getDest();
+	    ((DefaultTableModel)table.getModel()).addRow(new String[]{name,"?",dest+"",scale+"",offset+""});
+	}//end for(ControllerSources)
+    }//end applyControllerConfiguration()
     
 }//end ControllerInputDevicePanel

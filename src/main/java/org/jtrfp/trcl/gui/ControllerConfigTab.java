@@ -30,10 +30,12 @@ import org.springframework.stereotype.Component;
 public class ControllerConfigTab implements ConfigurationTab<ControllerConfigTabConf> {
     private final ControllerConfigPanel panel;
     private ControllerConfigTabConf conf;
+    private final ControllerMapper mapper;
     
     @Autowired(required=false)
     public ControllerConfigTab(Collection<InputDevice> inputs, ControllerMapper mapper, ControllerInputs cInputs){
 	this.panel = new ControllerConfigPanel(inputs,mapper,cInputs);
+	this.mapper = mapper;
     }
 
     @Override
@@ -81,10 +83,21 @@ public class ControllerConfigTab implements ConfigurationTab<ControllerConfigTab
 	if(conf==null)
 	    conf = new ControllerConfigTabConf();
 	final ControllerConfigTabConf config = getConfigBean();
+	
 	for(ControllerInputDevicePanel p: panel.getControllerInputDevicePanels()){
 	    final InputDevice id = p.getInputDevice();
-	    ControllerConfiguration cConf = config.getControllerConfigurations().get(id.getName());
-	    p.setControllerConfiguration(cConf);
+	    ControllerConfiguration controllerConfiguration = config.getControllerConfigurations().get(id.getName());
+	    //No config present. Create a new one.
+	    if(controllerConfiguration==null){
+		    controllerConfiguration = mapper.getRecommendedDefaultConfiguration(p.getInputDevice());
+		    if(controllerConfiguration==null){
+			controllerConfiguration = new ControllerConfiguration();
+			controllerConfiguration.setIntendedController(p.getInputDevice().getName());
+			}
+		    //Add the new config
+		    config.getControllerConfigurations().put(id.getName(), controllerConfiguration);
+		    }//end if(null)
+	    p.setControllerConfiguration(controllerConfiguration);
 	}//end for(ControllerInputDevicePanels)
     }//end readFromConfigBean()
 

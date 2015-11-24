@@ -30,6 +30,8 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -63,6 +65,7 @@ import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.core.ConfigManager;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.gui.ControllerConfigTab.ControllerConfigTabConf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -77,6 +80,7 @@ public class ConfigWindow extends JFrame {
     private boolean needRestart=false;
     private final JFileChooser fileChooser = new JFileChooser();
     private final SoundOutputSelectorGUI soundOutputSelectorGUI;
+    private final Collection<ConfigurationTab> tabs;
     
     public static void main(String [] args){
 	new ConfigWindow().setVisible(true);
@@ -95,6 +99,7 @@ public class ConfigWindow extends JFrame {
 public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
  	setTitle("Settings");
  	setSize(340,540);
+ 	this.tabs = tabs;
  	if(cMgr!=null)
  	 this.config=cMgr.getConfig();
  	if(config==null)
@@ -411,12 +416,15 @@ public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
  	btnCancel.addActionListener(new ActionListener(){
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
+		dispatchComponentConfigs();//Revert to original
 		ConfigWindow.this.setVisible(false);
 	    }});
  	
  	for(ConfigurationTab tab:tabs){
 	    System.out.println("Adding config tab: "+tab.getTabName());
 	    tabbedPane.addTab(tab.getTabName(),tab.getTabIcon(),tab.getContent());
+	    
+	dispatchComponentConfigs();
 	}//end for(tabs)
  	
  	if(config!=null)
@@ -445,7 +453,27 @@ public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
 	 notifyOfRestart();
      final AudioBufferSize abs = (AudioBufferSize)audioBufferSizeCB.getSelectedItem();
      config.setAudioBufferSize(abs.getSizeInFrames());
+     //Apply the component configs
+     gatherComponentConfigs();
  }//end applySettings()
+ 
+ private void gatherComponentConfigs(){
+     Map<String,Object> configs = config.getComponentConfigs();
+     for(ConfigurationTab tab:tabs){
+	 System.out.println("Putting tab "+tab.getTabName()+" With entries:");
+	 System.out.print("\t");
+	 ControllerConfigTabConf conf = (ControllerConfigTabConf)tab.getConfigBean();
+	 for(Entry ent: conf.getControllerConfigurations().entrySet()){
+	     System.out.print(" "+ent.getKey());
+	 } System.out.println();
+	 configs.put(tab.getConfigBeanClass().getName(), tab.getConfigBean());}
+ }//end gatherComponentConfigs()
+ 
+ private void dispatchComponentConfigs(){
+     Map<String,Object> configs = config.getComponentConfigs();
+     for(ConfigurationTab tab:tabs)
+	 tab.setConfigBean(configs.get(tab.getConfigBeanClass().getName()));
+ }//end dispatchComponentConfigs()
  
  private void readSettingsToPanel(){
      modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));

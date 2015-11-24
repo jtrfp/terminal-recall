@@ -81,7 +81,6 @@ public class ControllerInputDevicePanel extends JPanel {
 	table.setFillsViewportHeight(true);
 	this.add(tableScrollPane);
 	ci.getInputNames().addTarget(monitoringCollection, true);
-	getControllerConfiguration();
     }//end ControllerInputDevicePanel
     
     private enum Columns{
@@ -108,6 +107,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	    if( result == null ){
 		result = new ConfEntry();
 		result.setName(controllerSourceName);
+		entryMap.put(controllerSourceName, result);
 		}
 	    return result;
 	}//end getEntry(...)
@@ -274,6 +274,7 @@ public class ControllerInputDevicePanel extends JPanel {
 			final ControllerInput  controllerInput  = controllerInputs.getControllerInput(inputString);
 			controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);
 		    }//end if(!NONE)
+		    else config.getEntryMap().remove(srcString);//Remove if routed to NONE
 		}//end if(DEST||INSERT)
 		if(e.getColumn() == Columns.SCALAR.ordinal() || e.getType() == TableModelEvent.INSERT){
 		    entry.setScale (scale);
@@ -283,10 +284,12 @@ public class ControllerInputDevicePanel extends JPanel {
 		}
 		setDispatching(false);
 	    } else if(e.getType()==TableModelEvent.DELETE){
+		/*
 		final TableModel model = table.getModel();
 		final String srcString   = (String)model.getValueAt(row,Columns.SOURCE.ordinal());
 		final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
 		controllerMapper.unmapControllerSource(controllerSource);
+		*/
 	    }
 	}//end tableChanged(...)
     }//end ControllerTableModelListener
@@ -380,26 +383,25 @@ public class ControllerInputDevicePanel extends JPanel {
     }
 
     public ControllerConfiguration getControllerConfiguration() {
-	if(controllerConfiguration==null)
-	    setControllerConfiguration(null);
         return controllerConfiguration;
     }
 
     public void setControllerConfiguration(
     	ControllerConfiguration controllerConfiguration) {
-	if(controllerConfiguration==null){
-	    controllerConfiguration = controllerMapper.getRecommendedDefaultConfiguration(inputDevice);
-	    if(controllerConfiguration==null){
-		controllerConfiguration = new ControllerConfiguration();
-		controllerConfiguration.setIntendedController(inputDevice.getName());
-		}
-	    }//end if(null)
+	if(controllerConfiguration==null)
+	    throw new NullPointerException("Controller config intolerably null");
         this.controllerConfiguration = controllerConfiguration;
         clearControllerConfiguration();
         applyControllerConfiguration();
     }
     
     private void clearControllerConfiguration(){
+	final TableModel model = table.getModel();
+	for(int ri=0; ri<model.getRowCount(); ri++){
+	    final String srcString   = (String)model.getValueAt(ri,Columns.SOURCE.ordinal());
+	    final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
+	    controllerMapper.unmapControllerSource(controllerSource);
+	}//end for(rows)
 	((DefaultTableModel)table.getModel()).setRowCount(0);
     }
     

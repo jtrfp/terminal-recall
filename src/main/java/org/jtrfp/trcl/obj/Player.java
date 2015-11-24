@@ -25,6 +25,7 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RollLevelingBehavior;
+import org.jtrfp.trcl.beh.RollNudgeOnDamage;
 import org.jtrfp.trcl.beh.SurfaceImpactSFXBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
@@ -90,6 +91,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new Cloakable());
 	addBehavior(new SurfaceImpactSFXBehavior(tr));
 	addBehavior(new RedFlashOnDamage());
+	addBehavior(new RollNudgeOnDamage());
 	
 	final Weapon[] allWeapons = Weapon.values();
 	

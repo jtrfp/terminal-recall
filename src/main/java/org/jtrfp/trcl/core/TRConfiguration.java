@@ -26,7 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import javax.swing.DefaultListModel;
 
@@ -62,6 +64,7 @@ public class TRConfiguration{
     	private double modStereoWidth=.3;
     	public static final String AUTO_DETECT = "Auto-detect";
     	private String fileDialogStartDir;
+    	private Map<String,Object> componentConfigs;
     	
     	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     	
@@ -442,5 +445,15 @@ public class TRConfiguration{
 	public void setCrosshairsEnabled(boolean crosshairsEnabled) {
 	    pcs.firePropertyChange(CROSSHAIRS_ENABLED,this.crosshairsEnabled,crosshairsEnabled);
 	    this.crosshairsEnabled = crosshairsEnabled;
+	}
+
+	public Map<String, Object> getComponentConfigs() {
+	    if(componentConfigs==null)
+		componentConfigs = new HashMap<String,Object>();
+	    return componentConfigs;
+	}
+
+	public void setComponentConfigs(Map<String, Object> componentConfigs) {
+	    this.componentConfigs = componentConfigs;
 	}
 }//end TRConfiguration

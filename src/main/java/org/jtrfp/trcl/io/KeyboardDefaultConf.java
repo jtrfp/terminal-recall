@@ -16,6 +16,7 @@ package org.jtrfp.trcl.io;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
+import org.jtrfp.trcl.ext.tr.GamePause;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 import org.jtrfp.trcl.gui.SatelliteViewToggle;
 import org.springframework.stereotype.Component;
@@ -43,5 +44,6 @@ public class KeyboardDefaultConf extends ControllerConfiguration {
 	this.getEntryMap().put("DOWN" , new ConfEntry(UserInputRudderElevatorControlBehavior.ELEVATOR,"DOWN" ,-1,0));
 	this.getEntryMap().put("A"    , new ConfEntry(UserInputThrottleControlBehavior.THROTTLE_DELTA,"A"    ,1,0 ));
 	this.getEntryMap().put("Z"    , new ConfEntry(UserInputThrottleControlBehavior.THROTTLE_DELTA,"Z"    ,-1,0));
+	this.getEntryMap().put("P"    , new ConfEntry(GamePause.PAUSE                                ,"P"    ,1,0 ));
     }//end constructor
 }//end KeyboardDefaultConf

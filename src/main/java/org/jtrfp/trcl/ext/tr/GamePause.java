@@ -29,6 +29,8 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.core.ControllerInput;
+import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
@@ -47,13 +49,20 @@ public class GamePause  {
     JMenuItem game_pause;
     PropertyChangeListener gamePCL, pausePCL, satViewPCL, gameplayModePCL;
     WindowListener rootWindowWL;
+    private final TR tr;
+    private Action pauseAction;
+    private static final String pauseKey = "PAUSE_KEY";
+    public static final String PAUSE = "Pause";
+    private final ControllerInput pause;
     
     @Autowired
-    public GamePause(TR tr){
-	apply(tr);
-    }
+    public GamePause(TR tr, ControllerInputs inputs){
+	this.tr     = tr;
+	pause       = inputs.getControllerInput(PAUSE);
+	apply();
+    }//end constructor
     
-    public void apply(final TR tr) {
+    public void apply() {
 	game_pause = new JMenuItem("Pause");
 	
 	gameIP = new IndirectProperty<Game>();
@@ -62,7 +71,7 @@ public class GamePause  {
 	gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, currentMissionIP);
 	
 	game_pause.setAccelerator(KeyStroke.getKeyStroke("F3"));
-	final Action pauseAction = new AbstractAction("Pause Button"){
+	pauseAction = new AbstractAction("Pause Button"){
 	    private static final long serialVersionUID = -5172325691052703896L;
 	    @Override
 	    public void actionPerformed(ActionEvent arg0) {
@@ -80,9 +89,8 @@ public class GamePause  {
 	    public void actionPerformed(ActionEvent evt) {
 		pauseAction.actionPerformed(evt);
 	    }});
-	final String pauseKey = "PAUSE_KEY";
-	game_pause.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), pauseKey);
-	game_pause.getActionMap().put(pauseKey, pauseAction);
+	//game_pause.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P,0), pauseKey);
+	//game_pause.getActionMap().put(pauseKey, pauseAction);
 	game_pause.setEnabled(false);
 	try {
 	    SwingUtilities.invokeAndWait(new Runnable(){
@@ -133,11 +141,36 @@ public class GamePause  {
 	 tr.getRootWindow().addWindowListener(rootWindowWL = new WindowAdapter(){
 	    @Override
 	    public void windowDeactivated(WindowEvent e) {
-		if(game_pause.isEnabled())
-		 if(tr.getGame()!=null && !tr.getGame().isPaused())
-		  pauseAction.actionPerformed(new ActionEvent(this, 0, pauseKey));
+		proposePause();
 	    }});
+	
+	pause.addPropertyChangeListener(new GamePausePropertyChangeListener());
     }//end apply(...)
+    
+    public void proposePause(){
+	if(game_pause.isEnabled())
+	    if(tr.getGame()!=null && !tr.getGame().isPaused())
+		pauseAction.actionPerformed(new ActionEvent(this, 0, pauseKey));
+    }
+    
+    public void proposePauseToggle(){
+	if(game_pause.isEnabled())
+	    if(tr.getGame()!=null)
+		pauseAction.actionPerformed(new ActionEvent(this, 0, pauseKey));
+    }
+    
+    private class GamePausePropertyChangeListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    if((Double)evt.getNewValue()> .7){//Pressed
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			proposePauseToggle();
+		    }});
+	    }//end if(.7)
+	}//end propertyChange(...)
+    }//end PropertyChangeListener
 
     public void remove(final TR tr) {//UNTESTED
 	tr.removePropertyChangeListener(gameIP);

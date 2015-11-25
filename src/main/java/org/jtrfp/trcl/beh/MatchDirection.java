@@ -14,17 +14,27 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class MatchDirection extends Behavior {
     private WorldObject target;
+    private RealMatrix lookAtMatrix4x4 = MatrixUtils.createRealIdentityMatrix(4);
+    private RealMatrix topMatrix4x4    = MatrixUtils.createRealIdentityMatrix(4);
     @Override
     public void tick(long tickTimeMillis){
 	if(target!=null){
-	    final double [] hdg = target.getHeadingArray();
-	    getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]));
-	    final double [] top = target.getTopArray();
-	    getParent().setTop(new Vector3D(top[0], top[1], top[2]));
+	    double [] hdg = target.getHeadingArray();
+	    final RealVector newHeading = lookAtMatrix4x4.operate(new ArrayRealVector(new double [] {hdg[0],hdg[1],hdg[2],1.}));
+	    hdg = newHeading.toArray();
+	    getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]).normalize());
+	    double [] top = target.getTopArray();
+	    final RealVector newTop = topMatrix4x4.operate(new ArrayRealVector(new double [] {top[0],top[1],top[2],1.}));
+	    top = newTop.toArray();
+	    getParent().setTop(new Vector3D(top[0], top[1], top[2]).normalize());
 	}//end if(!null)
     }//end _tick(...)
     /**
@@ -39,4 +49,17 @@ public class MatchDirection extends Behavior {
     public void setTarget(WorldObject target) {
         this.target = target;
     }
+    public RealMatrix getLookAtMatrix4x4() {
+        return lookAtMatrix4x4;
+    }
+    public void setLookAtMatrix4x4(RealMatrix lookAtMatrix4x4) {
+        this.lookAtMatrix4x4 = lookAtMatrix4x4;
+    }
+    public RealMatrix getTopMatrix4x4() {
+        return topMatrix4x4;
+    }
+    public void setTopMatrix4x4(RealMatrix topMatrix4x4) {
+        this.topMatrix4x4 = topMatrix4x4;
+    }
+    
 }//end MatchDirection

@@ -308,8 +308,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public synchronized final void updateStateToGPU(Renderer renderer) {
 	attemptLoop(renderer);
 	if(needToRecalcMatrix){
-	    recalculateTransRotMBuffer();
 	    needToRecalcMatrix=recalcMatrixWithEachFrame();
+	    recalculateTransRotMBuffer();
 	}
 	if(model!=null)model.proposeAnimationUpdate();
     }//end updateStateToGPU()
@@ -436,7 +436,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(position[0]==Double.NaN)
 	    throw new RuntimeException("Invalid position.");
 	//pcs.firePropertyChange(POSITIONV3D, null, new Vector3D(position));
-	pcs.firePropertyChange(POSITION, null, position);
+	pcs.firePropertyChange(POSITION, oldPosition, position);
 	needToRecalcMatrix=true;
 	updateOldPosition();
 	return this;

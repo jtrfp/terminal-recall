@@ -94,10 +94,11 @@ public class ViewSelect {
      missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-	    if(evt.getNewValue()!=null && evt.getNewValue() instanceof Mission.GameplayMode)
-		setViewMode(viewModes[0]);
-	    else
-		{setViewMode(null);}
+	    if(evt.getNewValue()!=null && evt.getNewValue() instanceof Mission.GameplayMode 
+		    && !(evt.getOldValue() instanceof Mission.GameplayMode))
+		setViewMode(getViewMode());
+	    else if(evt.getNewValue()==null)
+		{noViewMode();}
 	}});
  }//end constructor
  

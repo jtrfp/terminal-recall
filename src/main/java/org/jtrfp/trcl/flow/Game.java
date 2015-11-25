@@ -62,6 +62,7 @@ public class Game {
     //// PROPERTIES
     public static final String PAUSED         = "paused";
     public static final String CURRENT_MISSION= "currentMission";
+    public static final String PLAYER         = "player";
     
     private TR 		tr;
     private VOXFile 	vox;
@@ -308,8 +309,8 @@ public class Game {
 			pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast);
 		    }// end for(weapons)
 		    rm.setProjectileFactories(pf);
-		    player = new Player(tr, tr.getResourceManager().getBINModel(
-			    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));
+		    setPlayer(new Player(tr, tr.getResourceManager().getBINModel(
+			    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl())));
 		    final Camera camera = tr.mainRenderer.get().getCamera();
 		    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 		    camera.probeForBehavior(MatchDirection.class).setTarget(player);
@@ -331,6 +332,12 @@ public class Game {
 		    setLevelIndex(0);
     }// end boot()
     
+    public void setPlayer(Player player) {
+	final Player oldPlayer = this.player;
+	this.player = player;
+	pcSupport.firePropertyChange(PLAYER, oldPlayer, player);
+    }
+
     public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 	setInGameplay(true);
 	try {

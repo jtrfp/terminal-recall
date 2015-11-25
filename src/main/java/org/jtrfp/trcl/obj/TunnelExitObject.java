@@ -98,7 +98,9 @@ public class TunnelExitObject extends PortalEntrance {
 	@Override
 	public void proposeCollision(WorldObject other) {
 	    if (other instanceof Player) {
-		if (other.getPosition()[0] > TunnelExitObject.this
+		//We want to track the camera's crossing in deciding when to move the player.
+		final Camera camera = tr.mainRenderer.get().getCamera();
+		if (camera.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
 		    final Game game = tr.getGame();
 		    final Mission mission = game.getCurrentMission();

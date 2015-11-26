@@ -52,14 +52,16 @@ public class MatchDirection extends Behavior {
     public RealMatrix getLookAtMatrix4x4() {
         return lookAtMatrix4x4;
     }
-    public void setLookAtMatrix4x4(RealMatrix lookAtMatrix4x4) {
+    public MatchDirection setLookAtMatrix4x4(RealMatrix lookAtMatrix4x4) {
         this.lookAtMatrix4x4 = lookAtMatrix4x4;
+        return this;
     }
     public RealMatrix getTopMatrix4x4() {
         return topMatrix4x4;
     }
-    public void setTopMatrix4x4(RealMatrix topMatrix4x4) {
+    public MatchDirection setTopMatrix4x4(RealMatrix topMatrix4x4) {
         this.topMatrix4x4 = topMatrix4x4;
+        return this;
     }
     
 }//end MatchDirection

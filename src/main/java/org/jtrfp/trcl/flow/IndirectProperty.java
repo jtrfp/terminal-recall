@@ -35,6 +35,7 @@ import org.apache.commons.beanutils.PropertyUtils;
  *
  */
 public class IndirectProperty<PROPERTY_TYPE> implements PropertyChangeListener{
+    public static final String TARGET = "target";
  private final PropertyChangeSupport
   targetPCS = new PropertyChangeSupport(this),
   thisPCS   = new PropertyChangeSupport(this);
@@ -54,7 +55,7 @@ public void setTarget(PROPERTY_TYPE target) {
 	    disconnectAllFrom(this.target.get());
 	if(target!=null)
 	    connectAllTo(target);
-	thisPCS.firePropertyChange("target", this.target, target);
+	thisPCS.firePropertyChange(TARGET, this.target, target);
 	this.target = new WeakReference<PROPERTY_TYPE>(target);
 	fireAllPropertiesChanged();
     }//end if(changed)

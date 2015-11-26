@@ -58,7 +58,7 @@ public class ViewSelect {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private ViewMode viewMode;
     private InstrumentMode instrumentMode;
-    private TRFuture<Model> cockpitModel;
+    private Model cockpitModel;
     private final ViewMode [] viewModes = new ViewMode[]{
 	new CockpitView(),
 	new OutsideView(),
@@ -76,20 +76,11 @@ public class ViewSelect {
      this.tr = tr;
      view .addPropertyChangeListener(new ViewSelectPropertyChangeListener());
      iView.addPropertyChangeListener(new InstrumentViewSelectPropertyChangeListener());
-     cockpitModel = tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
-	@Override
-	public Model call() throws Exception {
-	    final GPU gpu = tr.gpu.get();
-		     final GL3 gl = gpu.getGl();
-		     final ColorPaletteVectorList cpvl = tr.getGlobalPaletteVL();
-		     try{return tr.getResourceManager().getBINModel("COCKMDL.BIN", cpvl, null, gl);}
-		     catch(Exception e){e.printStackTrace();}
-		     return null;
-	}});
      final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
      tr.addPropertyChangeListener(TR.GAME, gameIP);
      final IndirectProperty<Mission> missionIP = new IndirectProperty<Mission>();
      gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, missionIP);
+     gameIP.setTarget(tr.getGame());
      //Install when in gameplay
      missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
 	@Override
@@ -338,7 +329,7 @@ public void noViewMode(){
 public WorldObject getCockpit() {
     if(cockpit == null){
 	cockpit = new Cockpit(tr);
-	cockpit.setModel(cockpitModel.get());
+	cockpit.setModel(getCockpitModel());
 	cockpit.addBehavior(new MatchPosition());
 	cockpit.addBehavior(new MatchDirection());
 	tr.mainRenderer.get().getCamera().getRootGrid().add(cockpit);
@@ -377,5 +368,20 @@ public void setInstrumentMode(InstrumentMode instrumentMode) {
 	instrumentMode.apply();
     else
 	new NoInstruments().apply();
+}
+
+public Model getCockpitModel() {
+    if(cockpitModel==null){
+	final GPU gpu = tr.gpu.get();
+	final GL3 gl = gpu.getGl();
+	final ColorPaletteVectorList cpvl = tr.getGlobalPaletteVL();
+	try{cockpitModel = tr.getResourceManager().getBINModel("COCKMDL.BIN", cpvl, null, gl);}
+	catch(Exception e){e.printStackTrace();}
+    }//end if(null)
+    return cockpitModel;
+}//end getCockpitModel()
+
+public void setCockpitModel(Model cockpitModel) {
+    this.cockpitModel = cockpitModel;
 }
 }//end ViewChange

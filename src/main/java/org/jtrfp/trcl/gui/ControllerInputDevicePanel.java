@@ -57,6 +57,12 @@ public class ControllerInputDevicePanel extends JPanel {
     private final InputStateFeedbackMonitor inputStateFeedbackMonitor = new InputStateFeedbackMonitor();
 
     public ControllerInputDevicePanel(InputDevice id, ControllerInputs ci, ControllerMapper mapper) {
+	if(id     == null)
+	    throw new NullPointerException("Passed InputDevice intolerably null.");
+	if(ci     == null)
+	    throw new NullPointerException("Passed ControllerInputs intolerably null.");
+	if(mapper == null)
+	    throw new NullPointerException("Passed ControllerMapper intolerably null.");
 	this.inputDevice = id;
 	this.controllerInputs = ci;
 	this.controllerMapper = mapper;

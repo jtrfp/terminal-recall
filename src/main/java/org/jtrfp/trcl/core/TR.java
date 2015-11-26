@@ -199,12 +199,11 @@ public final class TR implements UncaughtExceptionHandler{
 		//renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 		renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 		
-		menuSystem = new MenuSystem(this);
+		getMenuSystem();
 	}//end constructor
 	
 	public TR startShell(){
-	    gameShell  = new GameShell(this);
-	    gameShell.startShell();
+	    getGameShell().startShell();
 	    return this;
 	}
 	
@@ -308,7 +307,7 @@ public final class TR implements UncaughtExceptionHandler{
 	game=newGame;
 	if(newGame==null)
 	 getThreadManager().setPaused(true);
-	pcSupport.firePropertyChange("game", oldGame, newGame);
+	pcSupport.firePropertyChange(GAME, oldGame, newGame);
     }
 
     public Color[] getGlobalPalette() {
@@ -439,6 +438,8 @@ public final class TR implements UncaughtExceptionHandler{
     }
 
     public GameShell getGameShell() {
+	if(gameShell==null)
+	    gameShell = new GameShell(this);
 	return gameShell;
     }
     
@@ -463,6 +464,8 @@ public final class TR implements UncaughtExceptionHandler{
      * @return the menuSystem
      */
     public MenuSystem getMenuSystem() {
+	if(menuSystem == null)
+	    menuSystem = new MenuSystem(this);
         return menuSystem;
     }
 

@@ -10,10 +10,12 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.beh;
+package org.jtrfp.trcl.beh.ui;
 
 import java.awt.event.KeyEvent;
 
+import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.HasQuantifiableSupply;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.WorldObject;

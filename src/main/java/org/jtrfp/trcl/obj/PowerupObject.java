@@ -14,12 +14,12 @@ package org.jtrfp.trcl.obj;
 
 import java.util.Arrays;
 
-import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
+import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.core.TR;

@@ -13,7 +13,6 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.beh.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
@@ -36,6 +35,7 @@ import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
+import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.ui.UpdatesHealthMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UpdatesThrottleMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;

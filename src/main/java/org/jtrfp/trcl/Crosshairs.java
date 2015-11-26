@@ -18,6 +18,9 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.jtrfp.trcl.beh.MatchDirection;
+import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.core.Texture;
@@ -27,9 +30,11 @@ import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
+import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.RelevantEverywhere;
+import org.jtrfp.trcl.obj.WorldObject;
 
-public class Crosshairs extends WorldObject2DVisibleEverywhere {
+public class Crosshairs extends WorldObject implements RelevantEverywhere {
 
     public Crosshairs(TR tr) {
 	super(tr);
@@ -63,18 +68,45 @@ public class Crosshairs extends WorldObject2DVisibleEverywhere {
 	 */
 	try {
 	    crossModel = tr.getResourceManager().getBINModel("TARGET.BIN",
-		    greenThrob, 1. / 204800., false, tr.getGlobalPaletteVL(),null);
+		    greenThrob, 1./TR.crossPlatformScalar, false, tr.getGlobalPaletteVL(),null);
+	    //crossModel = tr.getResourceManager().getBINModel("TARGET.BIN", tr.getGlobalPaletteVL(), null,tr.gpu.get().getGl());
 	} catch (Exception e) {
 	    tr.showStopper(e);
 	}
 	final List<Triangle> tl = crossModel.getRawTriangleLists().get(0);
 	for (Triangle t : tl)
 	    t.setCentroidNormal(Vector3D.ZERO);
-	this.setRenderFlags((byte) 1);
 	setModel(crossModel);
-	this.movePositionBy(new Vector3D(0, 0, -1));
 	installReactiveListeners(tr);
+	//Install to Player
+	addBehavior(new MatchPosition());
+	addBehavior(new MatchDirection());
+	final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
+	tr.addPropertyChangeListener(TR.GAME, gameIP);
+	gameIP.addTargetPropertyChangeListener(Game.PLAYER, new PlayerListener());
+	gameIP.setTarget(tr.getGame());
+	this.setRespondToTick(true);
+	setActive(true);
+	setVisible(true);
     }//end constructor
+    
+    @Override
+    public boolean supportsLoop(){return false;}
+    
+    private void registerPlayer(Player player){
+	System.out.println("Found player: "+player);
+	Crosshairs.this.probeForBehavior(MatchPosition.class) .setTarget(player);
+	Crosshairs.this.probeForBehavior(MatchDirection.class).setTarget(player);
+    }//end registerPlayer()
+    
+    private class PlayerListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final Player player = (Player)evt.getNewValue();
+	    if(player != null)
+		registerPlayer(player);
+	}//end propertyChange(...)
+    }//end PlayerListener
     
     private void installReactiveListeners(final TR tr){
 	tr.config.addPropertyChangeListener(TRConfiguration.CROSSHAIRS_ENABLED,new PropertyChangeListener(){

@@ -33,9 +33,11 @@ public class ControllerConfigPanel extends JPanel {
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	add(tabbedPane, BorderLayout.CENTER);
 	for(InputDevice id:inputs){
-	    final ControllerInputDevicePanel panel = new ControllerInputDevicePanel(id,ci,mapper);
-	    controllerInputDevicePanels.add(panel);
-	    tabbedPane.addTab(id.getName(), null, panel, id.getDetailedDescription());
+	    if(!id.getControllerSources().isEmpty()){
+		final ControllerInputDevicePanel panel = new ControllerInputDevicePanel(id,ci,mapper);
+		controllerInputDevicePanels.add(panel);
+		tabbedPane.addTab(id.getName(), null, panel, id.getDetailedDescription());
+	    }//end if(present)
 	}//end for(inputs)
     }//end constructor
 

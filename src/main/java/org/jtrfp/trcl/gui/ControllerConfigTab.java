@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gui;
 
-import java.util.Collection;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -21,6 +20,7 @@ import javax.swing.JComponent;
 import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.ControllerMapper;
 import org.jtrfp.trcl.core.InputDevice;
+import org.jtrfp.trcl.core.InputDevices;
 import org.jtrfp.trcl.gui.ControllerConfigTab.ControllerConfigTabConf;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +32,9 @@ public class ControllerConfigTab implements ConfigurationTab<ControllerConfigTab
     private ControllerConfigTabConf conf;
     private final ControllerMapper mapper;
     
-    @Autowired(required=false)
-    public ControllerConfigTab(Collection<InputDevice> inputs, ControllerMapper mapper, ControllerInputs cInputs){
-	this.panel = new ControllerConfigPanel(inputs,mapper,cInputs);
+    @Autowired
+    public ControllerConfigTab(InputDevices inputDevices, ControllerMapper mapper, ControllerInputs cInputs){
+	this.panel = new ControllerConfigPanel(inputDevices,mapper,cInputs);
 	this.mapper = mapper;
     }
 

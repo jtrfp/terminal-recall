@@ -34,8 +34,13 @@ public class ControllerMapper {
     private final Map<String,ControllerConfiguration> recommendedDefaultConfigurations = new HashMap<String,ControllerConfiguration>();
     
     @Autowired(required=false)
-    public ControllerMapper(Collection<InputDevice> inputDevices){
+    public ControllerMapper(InputDevices inputDevices){
 	this(inputDevices, new ArrayList<ControllerConfiguration>(0));
+    }
+    
+    @Autowired(required=false)
+    public ControllerMapper(InputDevices inputDevices, Collection<ControllerConfiguration> recommendedDefConfigs){
+	this((Collection<InputDevice>)inputDevices, recommendedDefConfigs);
     }
     
     @Autowired(required=false)

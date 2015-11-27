@@ -12,10 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.ui;
 
-import java.awt.event.KeyEvent;
-
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.HasQuantifiableSupply;
+import org.jtrfp.trcl.core.ControllerInput;
+import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -24,10 +24,16 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     boolean firstDetected=true;
     private double fuelRemaining=0;
     private double formerMax,formerProp,newMax;
+    private final ControllerInput afterburnerCtl;
+    public static final String AFTERBURNER = "Afterburner";
+    
+    public AfterburnerBehavior(ControllerInputs inputs){
+	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
+    }
     @Override
     public void tick(long tickTimeMillis){
 	WorldObject p = getParent();
-	if(p.getTr().getKeyStatus().isPressed(KeyEvent.VK_F)){
+	if(afterburnerCtl.getState()>.7){
 	    if(firstDetected){
 		afterburnerOnTransient(p);
 		firstDetected=false;

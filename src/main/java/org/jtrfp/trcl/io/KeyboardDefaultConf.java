@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.io;
 
+import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
@@ -35,7 +36,7 @@ public class KeyboardDefaultConf extends ControllerConfiguration {
 
     public KeyboardDefaultConf(){
 	super();
-	this.setIntendedController("Keyboard Input");
+	this.setIntendedController("Keyboard");
 	
 	this.getEntryMap().put("SPACE", new ConfEntry(UserInputWeaponSelectionBehavior.FIRE          ,"SPACE",1,0 ));
 	this.getEntryMap().put("TAB"  , new ConfEntry(SatelliteViewToggle.SATELLITE_TOGGLE           ,"TAB"  ,1,0 ));
@@ -47,5 +48,6 @@ public class KeyboardDefaultConf extends ControllerConfiguration {
 	this.getEntryMap().put("Z"    , new ConfEntry(UserInputThrottleControlBehavior.THROTTLE_DELTA,"Z"    ,-1,0));
 	this.getEntryMap().put("P"    , new ConfEntry(GamePause.PAUSE                                ,"P"    ,1,0 ));
 	this.getEntryMap().put("V"    , new ConfEntry(ViewSelect.VIEW                                ,"V"    ,1,0 ));
+	this.getEntryMap().put("F"    , new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"F"    ,1,0 ));
     }//end constructor
 }//end KeyboardDefaultConf

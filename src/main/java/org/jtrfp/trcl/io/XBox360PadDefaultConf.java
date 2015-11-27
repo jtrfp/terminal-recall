@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.io;
 
+import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
@@ -35,6 +36,7 @@ public class XBox360PadDefaultConf extends ControllerConfiguration {
 	super();
 	this.setIntendedController("Microsoft X-Box 360 pad");
 	this.getEntryMap().put ("A"     ,new ConfEntry(UserInputWeaponSelectionBehavior.FIRE          ,"A"     ,1,0 ));
+	this.getEntryMap().put ("X"     ,new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"X"     ,1,0 ));
 	this.getEntryMap() .put("Mode"  ,new ConfEntry(SatelliteViewToggle.SATELLITE_TOGGLE           ,"Mode"  ,1,0 ));
 	this.getEntryMap() .put("Select",new ConfEntry(ViewSelect.VIEW                                ,"Select",1,0 ));
 	this.getEntryMap() .put("Start" ,new ConfEntry(GamePause.PAUSE                                ,"Start" ,1,0 ));

@@ -77,7 +77,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());
 	addBehavior(new CollidesWithTerrain().setTunnelEntryCapable(true).setIgnoreHeadingForImpact(false));
-	addBehavior(new AfterburnerBehavior());
+	addBehavior(new AfterburnerBehavior(tr.getControllerInputs()));
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
 	addBehavior(new UpdatesThrottleMeterBehavior().setController(tr

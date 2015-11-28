@@ -100,6 +100,7 @@ public class Game {
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
     private boolean inGameplay	=false;
+    private DashboardLayout dashboardLayout;
 
     public Game(TR tr, VOXFile vox) {
 	setTr(tr);
@@ -256,6 +257,9 @@ public class Game {
     }// end setLevel()
     
     public HUDSystem getHUDSystem(){
+	if(hudSystem==null)
+	    try{hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),getDashboardLayout());}
+	catch(Exception e){e.printStackTrace();return null;}
 	return hudSystem;
     }
 
@@ -279,11 +283,9 @@ public class Game {
 		satDashboard.setVisible(false);
 		tr.getDefaultGrid().add(satDashboard);
 		
-		final DashboardLayout layout = 
-			tr.config.getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
-		hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
+		//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
 		System.out.println("GameVersion="+tr.config.getGameVersion());
-		navSystem = new NAVSystem(tr.getDefaultGrid(), tr,layout);
+		navSystem = new NAVSystem(tr.getDefaultGrid(), tr,getDashboardLayout());
 		    // Make color zero translucent.
 		    final ResourceManager rm = tr.getResourceManager();
 		    final Color[] pal 	     = tr.getGlobalPalette();
@@ -386,6 +388,13 @@ public class Game {
 	displayModes.setDisplayMode(emptyMode);
 	tr.getGameShell().applyGFXState();
     }
+    
+    public DashboardLayout getDashboardLayout(){
+	if(dashboardLayout==null)
+	    dashboardLayout = 
+		tr.config.getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
+	return dashboardLayout;
+    }//end getDashboardLayout()
     
     private void cleanup() {
 	if(introScreen.isMusicPlaying())

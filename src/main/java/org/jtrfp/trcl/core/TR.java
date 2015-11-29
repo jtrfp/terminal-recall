@@ -200,6 +200,7 @@ public final class TR implements UncaughtExceptionHandler{
 		renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 		
 		getMenuSystem();
+		Features.init(this);
 	}//end constructor
 	
 	public TR startShell(){

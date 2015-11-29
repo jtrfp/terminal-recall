@@ -34,6 +34,7 @@ import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
@@ -111,6 +112,7 @@ public class Game {
 	if (!tr.config.isDebugMode())
 	    setupNameWithUser();
 	emptyMode = missionMode = new Object[]{};
+	Features.init(this);
     }// end constructor
 
     private void setupNameWithUser() {

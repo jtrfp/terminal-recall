@@ -37,6 +37,7 @@ import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -116,6 +117,7 @@ public class Mission {
 		 game.levelLoadingScreen,
 		 game.upfrontDisplay
 	    };
+	Features.init(this);
     }// end Mission
     
     public Result go() {

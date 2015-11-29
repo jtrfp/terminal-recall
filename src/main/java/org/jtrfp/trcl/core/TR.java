@@ -127,7 +127,7 @@ public final class TR implements UncaughtExceptionHandler{
 	    this.reporter     = reporter;
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
-	    	AutoInitializable.Initializer.initialize(this);
+	    	//AutoInitializable.Initializer.initialize(this);
 	    	pcSupport = new PropertyChangeSupport(this);
 	    	rootWindow = new RootWindow();
 	    	if(config.isWaitForProfiler()){

@@ -61,7 +61,7 @@ public class VQCodebookManager {
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
-		setInternalColorFormat(GL3.GL_RGBA4).
+		setInternalColorFormat(GL3.GL_RGBA8).
 		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, 1).
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
@@ -71,7 +71,7 @@ public class VQCodebookManager {
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
-		setInternalColorFormat(GL3.GL_RGBA4).
+		setInternalColorFormat(GL3.GL_RGBA8).
 		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, 1).
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
@@ -81,7 +81,7 @@ public class VQCodebookManager {
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
-		setInternalColorFormat(GL3.GL_RGBA4).
+		setInternalColorFormat(GL3.GL_RGBA8).
 		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, 1).
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).

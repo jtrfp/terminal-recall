@@ -55,7 +55,7 @@ public final class GLTexture {
     private int rawSideLength;
     private final GL3 gl;
     private int bindingTarget = GL3.GL_TEXTURE_2D;
-    private int internalColorFormat = GL3.GL_RGBA4;
+    private int internalColorFormat = GL3.GL_RGBA8;
     private boolean deleted=false;
     private static GLProgram textureRenderProgram;
     private String debugName="UNNAMED";

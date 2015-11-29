@@ -157,13 +157,19 @@ public final class GLTexture {
     public GLTexture configure(int [] sideLengthsInTexels, int numLevels ){
 	switch(sideLengthsInTexels.length){
 	case 3:{
-	 gl.glTexStorage3D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2]);
+	    for(int level = 0; level < numLevels; level++)
+	     gl.glTexImage3D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	 //gl.glTexStorage3D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2]);
 	    break;
 	}case 2:{
-	    gl.glTexStorage2D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1]);
+	    for(int level = 0; level < numLevels; level++)
+		     gl.glTexImage2D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	    //gl.glTexStorage2D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1]);
 	    break;
 	}case 1:{
-	    gl.glTexStorage1D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0]);
+	    for(int level = 0; level < numLevels; level++)
+		     gl.glTexImage1D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	    //gl.glTexStorage1D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0]);
 	    break;
 	}
 	default:{

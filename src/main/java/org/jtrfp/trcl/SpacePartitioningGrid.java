@@ -109,6 +109,10 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    localTagger.remove(objectToRemove);
 	}
 	
+	public synchronized boolean containsBranch(SpacePartitioningGrid<E> toFind){
+	    return branchGrids.containsKey(toFind);
+	}
+	
 	public synchronized void addBranch(SpacePartitioningGrid<E> toAdd){
 	    toAdd.getPackedObjectsDispatcher().addTarget(packedObjectsDispatcher, true);
 	    branchGrids.put(toAdd, null);

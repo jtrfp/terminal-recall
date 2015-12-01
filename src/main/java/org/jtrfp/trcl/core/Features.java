@@ -67,7 +67,7 @@ public class Features {
      for(FeatureFactory ff:ent.getFactories()){
 	 Feature feature;
 	 ent.getFeatures().put(obj,feature = ff.newInstance(obj));
-	 feature.init(obj);
+	 feature.apply(obj);
 	 }
     }//end init(...)
 

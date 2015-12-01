@@ -16,20 +16,20 @@ package org.jtrfp.trcl.ext.tr;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.HUDSystem;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
 import org.jtrfp.trcl.core.ControllerInput;
 import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
@@ -49,6 +49,7 @@ public class ViewSelect {
 	                       INSTRUMENTS_VIEW = "Instruments View",
 	                       VIEW_MODE        = "View Mode",
 	                       INSTRUMENT_MODE  = "Instrument Mode";
+    private static final boolean INS_ENABLE = false;
     private final ControllerInput view, iView;
     private int viewModeItr = 1, instrumentModeItr = 1;
     private final TR tr;
@@ -59,14 +60,15 @@ public class ViewSelect {
     private ViewMode viewMode;
     private InstrumentMode instrumentMode;
     private Model cockpitModel;
+    private boolean hudVisibility = false;
     private final ViewMode [] viewModes = new ViewMode[]{
 	new CockpitView(),
 	new OutsideView(),
 	new ChaseView()
     };
     private final InstrumentMode [] instrumentModes = new InstrumentMode[]{
-	//new FullCockpitInstruments(),
-	//new HeadsUpDisplayInstruments(),
+	new FullCockpitInstruments(),
+	new HeadsUpDisplayInstruments(),
 	new NoInstruments()
     };
  @Autowired
@@ -86,25 +88,63 @@ public class ViewSelect {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 	    if(evt.getNewValue()!=null && evt.getNewValue() instanceof Mission.GameplayMode 
-		    && !(evt.getOldValue() instanceof Mission.GameplayMode))
+		    && !(evt.getOldValue() instanceof Mission.GameplayMode)){
 		setViewMode(getViewMode());
-	    else if(evt.getNewValue()==null)
-		{noViewMode();}
+		setInstrumentMode(getInstrumentMode());
+		verifyInstrumentIndexValidity();
+		}
+	    else if(evt.getNewValue()==null){
+		noViewMode();
+		setInstrumentMode(new NoInstruments());
+		}
 	}});
  }//end constructor
  
+ private void setHUDVisibility(boolean visible){
+     if(hudVisibility==visible)
+	 return;
+     this.hudVisibility=visible;
+     final Game game = tr.getGame();
+     if(game==null)
+	 return;
+     final HUDSystem hud = game.getHUDSystem();
+     final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
+     if(!visible)
+      grid.nonBlockingRemoveBranch (hud);
+     else
+      grid.nonBlockingAddBranch    (hud);
+ }//end setHUDVisibility(...)
+ 
  private class NoInstruments implements InstrumentMode{
     @Override
-    public void apply() {
-	final Game game = tr.getGame();
-	if(game==null)
-	    return;
-	//game.getHUDSystem().
+    public boolean apply() {
+	setHUDVisibility(false);
+	getCockpit().setVisible(false);
+	return true;
     }
  }//end NoInstruments
  
+ private class FullCockpitInstruments implements InstrumentMode{
+    @Override
+    public boolean apply() {
+	if(!(getViewMode() instanceof CockpitView))
+	    return false;
+	getCockpit().setVisible(true);
+	setHUDVisibility(true);
+	return true;
+    }
+ }//end FullCockpitInstruments
+ 
+ private class HeadsUpDisplayInstruments implements InstrumentMode{
+    @Override
+    public boolean apply() {
+	getCockpit().setVisible(false);
+	setHUDVisibility(true);
+	return true;
+    }//end HeadsUpDisplayInstruments
+ }//end HeadsUpDisplayInstruments
+ 
  private class InstrumentViewSelectPropertyChangeListener implements PropertyChangeListener {
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 	final Game game = tr.getGame();
@@ -118,9 +158,20 @@ public class ViewSelect {
 	if(!(getViewMode() instanceof CockpitView))
 	    return;
 	if((Double)evt.getNewValue()>.7)
-	 setInstrumentMode(instrumentModes[instrumentModeItr++%instrumentModes.length]);
+	    proposeInstrumentIndex(++instrumentModeItr);
     }
  }//end InstrumentViewSelectPropertyChangeListener
+ 
+ private void verifyInstrumentIndexValidity(){
+     proposeInstrumentIndex(instrumentModeItr);
+ }
+ 
+ public void proposeInstrumentIndex(int index){
+     index%=instrumentModes.length;
+     instrumentModeItr=index;
+     if(!setInstrumentMode(instrumentModes[index]))
+	 proposeInstrumentIndex(++index);
+ }
  
  private class ViewSelectPropertyChangeListener implements PropertyChangeListener {
     @Override
@@ -143,7 +194,7 @@ public class ViewSelect {
  }
  
  private interface InstrumentMode{
-     public void apply();
+     public boolean apply();
  }
  
  public class CockpitView implements ViewMode{
@@ -317,6 +368,7 @@ public void setViewMode(ViewMode viewMode) {
      viewMode.apply();
     else//Remove the state
 	noViewMode();
+    verifyInstrumentIndexValidity();
 }//end setViewMode
 
 public void noViewMode(){
@@ -360,15 +412,16 @@ public InstrumentMode getInstrumentMode() {
     return instrumentMode;
 }
 
-public void setInstrumentMode(InstrumentMode instrumentMode) {
+public boolean setInstrumentMode(InstrumentMode instrumentMode) {
+    if(!INS_ENABLE)return true;
     final InstrumentMode oldInstrumentMode = instrumentMode;
     this.instrumentMode = instrumentMode;
     pcs.firePropertyChange(INSTRUMENT_MODE, oldInstrumentMode, instrumentMode);
     if(instrumentMode!=null)
-	instrumentMode.apply();
+	return instrumentMode.apply();
     else
-	new NoInstruments().apply();
-}
+	return new HeadsUpDisplayInstruments().apply();
+}//end setInstrumentMode()
 
 public Model getCockpitModel() {
     if(cockpitModel==null){

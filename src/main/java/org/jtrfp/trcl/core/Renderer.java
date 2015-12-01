@@ -53,8 +53,8 @@ public final class Renderer {
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private		double			meanFPS;
-    private		float[]			cameraMatrixAsFlatArray	   = new float[16];
-    private volatile	float	[]		camRotationProjectionMatrix= new float[16];
+                        float[]			cameraMatrixAsFlatArray	   = new float[16];
+                        float	[]		camRotationProjectionMatrix= new float[16];
     private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
@@ -152,8 +152,6 @@ public final class Renderer {
 			    }
 			rl.render(gl);
 			rl.sendToGPU(gl);
-			cameraMatrixAsFlatArray    = getCamera().getCompleteMatrixAsFlatArray();//TODO
-			camRotationProjectionMatrix= getCamera().getProjectionRotationMatrixAsFlatArray();//TODO
 			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
 			gpu.memoryManager.getRealtime().flushStalePages();
 			// Update texture codepages

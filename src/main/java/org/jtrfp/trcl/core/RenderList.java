@@ -159,10 +159,11 @@ public class RenderList {
 
     private void updateStatesToGPU() {
 	synchronized(threadManager.gameStateLock){
-	    renderer.getCamera().tick(System.currentTimeMillis());
 	synchronized(relevantPositionedRenderables){
 	for (PositionedRenderable renderable:relevantPositionedRenderables) 
 	    renderable.updateStateToGPU(renderer);
+	    renderer.cameraMatrixAsFlatArray    = renderer.getCamera().getCompleteMatrixAsFlatArray();//TODO
+	    renderer.camRotationProjectionMatrix= renderer.getCamera().getProjectionRotationMatrixAsFlatArray();//TODO
 	}}
     }//end updateStatesToGPU
     

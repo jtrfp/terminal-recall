@@ -151,6 +151,7 @@ public final class ThreadManager implements GLExecutor{
 				    wo.tick(tickTimeInMillis);
 			 }// end for(worldObjects)
 		}//end if(renderer active)
+		renderer.getCamera().tick(tickTimeInMillis);
 	    }//end for(renderers)
 	}//end sync(gameStateLock)//relevance changes outside of this cause errors!
 	//if(game.getPlayer()!=null && !paused[0])

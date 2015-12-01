@@ -24,6 +24,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     private GPU gpu;
     private MemoryUsageHint usageHint;
     private final Reporter reporter;
+    private static final MapMode [] DEFAULT_MAP_FLAGS = new MapMode[]{MapMode.FLUSH_EXPLICIT,MapMode.WRITE,MapMode.UNSYNCHRONIZED};
 
     public ReallocatableGLTextureBuffer(GPU gpu, Reporter reporter) {
 	this.gpu = gpu;
@@ -37,7 +38,7 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 
     @Override
     public ByteBuffer map() {
-	buffer.map(gpu.getGl(),MapMode.FLUSH_EXPLICIT,MapMode.WRITE,MapMode.UNSYNCHRONIZED);
+	buffer.map(gpu.getGl(),DEFAULT_MAP_FLAGS);
 	return buffer.getDuplicateReferenceOfUnderlyingBuffer();
     }
 

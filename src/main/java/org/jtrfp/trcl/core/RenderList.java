@@ -162,8 +162,8 @@ public class RenderList {
 	synchronized(relevantPositionedRenderables){
 	for (PositionedRenderable renderable:relevantPositionedRenderables) 
 	    renderable.updateStateToGPU(renderer);
-	    renderer.cameraMatrixAsFlatArray    = renderer.getCamera().getCompleteMatrixAsFlatArray();//TODO
-	    renderer.camRotationProjectionMatrix= renderer.getCamera().getProjectionRotationMatrixAsFlatArray();//TODO
+	    renderer.getCamera().getCompleteMatrixAsFlatArray(renderer.cameraMatrixAsFlatArray);//TODO
+	    renderer.getCamera().getProjectionRotationMatrixAsFlatArray(renderer.camRotationProjectionMatrix);//TODO
 	}}
     }//end updateStatesToGPU
     

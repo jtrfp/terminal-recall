@@ -300,23 +300,19 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    return dest;
 	}// end getRotationMatrixAsFlatArray(...)
 	
-	public float [] getProjectionRotationMatrixAsFlatArray(){
+	public void getProjectionRotationMatrixAsFlatArray(float [] dest){
 	    applyMatrix();//getProjectionMatrix() doesn't implicitly apply matrix since it would cause a recursion loop
-	    final float [] result = new float[16];
 	    final RealMatrix mat = getProjectionMatrix().multiply(rotationMatrix);
 	    for(int i=0; i<16; i++){
-		result[i]=(float)mat.getEntry(i/4, i%4);
+		dest[i]=(float)mat.getEntry(i/4, i%4);
 	    }//end for(16)
-	    return result;
 	}
 	
-	public float [] getCompleteMatrixAsFlatArray(){
-	    final float [] result = new float[16];
+	public void getCompleteMatrixAsFlatArray(float [] dest){
 	    final RealMatrix mat = getCompleteMatrix();
 	    for(int i=0; i<16; i++){
-		result[i]=(float)mat.getEntry(i/4, i%4);
+		dest[i]=(float)mat.getEntry(i/4, i%4);
 	    }//end for(16)
-	    return result;
 	}
 
 	/**

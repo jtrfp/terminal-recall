@@ -23,6 +23,11 @@ const float COORD_DOWNSCALER		=512+1;
 
 const uint PACKED_DATA_RENDER_MODE	=0u;	//UNibble
 
+const int OBJECT_TEXTURE_WIDTH_TEX  =1024;
+const int OBJECT_TEXTURE_HEIGHT_TEX =128;
+const int OBJECT_TEXTURE_BOTTOM     =OBJECT_TEXTURE_HEIGHT_TEX-1;
+const int TEXELS_PER_OBJECT         =4;
+const int OBJECTS_PER_ROW           =OBJECT_TEXTURE_WIDTH_TEX/TEXELS_PER_OBJECT;
 const int GPU_VERTICES_PER_BLOCK	=96;
 const uint PAGE_SIZE_VEC4			=96u;
 
@@ -139,7 +144,7 @@ void main(){
 			int matrixOffset 	= int(objectDef[0]);
 			int vertexOffset 	= int(objectDef[1]);
 			int modelScalar 	= int(UByte(objectDef[2],2u))-16;//Numerical domain offset for negatives
-			ivec2 mOff			= ivec2((objectIndex%256)*4,127-(objectIndex/256));
+			ivec2 mOff			= ivec2((objectIndex%OBJECTS_PER_ROW)*TEXELS_PER_OBJECT,OBJECT_TEXTURE_BOTTOM-(objectIndex/OBJECTS_PER_ROW));
 			mat4 matrix			= mat4(
 								texelFetch(camMatrixBuffer,mOff,0),
 								texelFetch(camMatrixBuffer,mOff+ivec2(1,0),0),

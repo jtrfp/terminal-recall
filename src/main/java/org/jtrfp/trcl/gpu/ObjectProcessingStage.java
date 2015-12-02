@@ -21,6 +21,9 @@ import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;
 
 public class ObjectProcessingStage {
+    public static final int OBJECT_TEXTURE_WIDTH  = 1024;
+    public static final int OBJECT_TEXTURE_HEIGHT = 128;
+    
     private final GLFrameBuffer    objectProcessingFrameBuffer;
     private GPU                    gpu;
     private final GLProgram        objectProgram;
@@ -43,7 +46,7 @@ public class ObjectProcessingStage {
 	camMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
 		.bind()
-		.setImage(GL3.GL_RGBA32F, 1024, 128, 
+		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_WIDTH, OBJECT_TEXTURE_HEIGHT, 
 			GL3.GL_RGBA, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
@@ -53,7 +56,7 @@ public class ObjectProcessingStage {
 	noCamMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
 		.bind()
-		.setImage(GL3.GL_RGBA32F, 1024, 128, 
+		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_WIDTH, OBJECT_TEXTURE_HEIGHT, 
 			GL3.GL_RGBA, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
@@ -89,7 +92,7 @@ public class ObjectProcessingStage {
 	//rFactory.getObjectFrameBuffer().bindToDraw();
 	objectProcessingFrameBuffer.bindToDraw();
 	//gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
-	gl.glViewport(0, 0, 1024, 128);
+	gl.glViewport(0, 0, OBJECT_TEXTURE_WIDTH, OBJECT_TEXTURE_HEIGHT);
 	gpu.memoryManager.get().bindToUniform(0, objectProgram,
 		objectProgram.getUniform("rootBuffer"));
 	gl.glDepthMask(false);
@@ -99,11 +102,12 @@ public class ObjectProcessingStage {
 	gl.glDisable(GL3.GL_CULL_FACE);
 	gl.glLineWidth(1);
 	{//Start variable scope
+	    final int blocksPerRow = OBJECT_TEXTURE_WIDTH / 4;
 	    int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
-	    int numRows = (int)Math.ceil(remainingBlocks/256.);
+	    int numRows = (int)Math.ceil(remainingBlocks/(double)blocksPerRow);
 	    for(int i=0; i<numRows; i++){
-		gl.glDrawArrays(GL3.GL_LINE_STRIP, i*257, (remainingBlocks<=256?remainingBlocks:256)+1);
-		remainingBlocks -= 256;
+		gl.glDrawArrays(GL3.GL_LINE_STRIP, i*(blocksPerRow+1), (remainingBlocks<=blocksPerRow?remainingBlocks:blocksPerRow)+1);
+		remainingBlocks -= blocksPerRow;
 	    }
 	}//end variable scope
 	gpu.defaultFrameBuffers();

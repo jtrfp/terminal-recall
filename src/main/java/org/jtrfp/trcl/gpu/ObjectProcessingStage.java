@@ -21,8 +21,7 @@ import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;
 
 public class ObjectProcessingStage {
-    public static final int OBJECT_TEXTURE_WIDTH  = 1024;
-    public static final int OBJECT_TEXTURE_HEIGHT = 128;
+    public static final int OBJECT_TEXTURE_SIDE_LEN  = 512;
     
     private final GLFrameBuffer    objectProcessingFrameBuffer;
     private GPU                    gpu;
@@ -46,7 +45,7 @@ public class ObjectProcessingStage {
 	camMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
 		.bind()
-		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_WIDTH, OBJECT_TEXTURE_HEIGHT, 
+		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_SIDE_LEN, OBJECT_TEXTURE_SIDE_LEN, 
 			GL3.GL_RGBA, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
@@ -56,7 +55,7 @@ public class ObjectProcessingStage {
 	noCamMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
 		.bind()
-		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_WIDTH, OBJECT_TEXTURE_HEIGHT, 
+		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_SIDE_LEN, OBJECT_TEXTURE_SIDE_LEN, 
 			GL3.GL_RGBA, GL3.GL_FLOAT, null)
 			.setMinFilter(GL3.GL_NEAREST)
 			.setMagFilter(GL3.GL_NEAREST)
@@ -92,7 +91,7 @@ public class ObjectProcessingStage {
 	//rFactory.getObjectFrameBuffer().bindToDraw();
 	objectProcessingFrameBuffer.bindToDraw();
 	//gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
-	gl.glViewport(0, 0, OBJECT_TEXTURE_WIDTH, OBJECT_TEXTURE_HEIGHT);
+	gl.glViewport(0, 0, OBJECT_TEXTURE_SIDE_LEN, OBJECT_TEXTURE_SIDE_LEN);
 	gpu.memoryManager.get().bindToUniform(0, objectProgram,
 		objectProgram.getUniform("rootBuffer"));
 	gl.glDepthMask(false);
@@ -102,7 +101,7 @@ public class ObjectProcessingStage {
 	gl.glDisable(GL3.GL_CULL_FACE);
 	gl.glLineWidth(1);
 	{//Start variable scope
-	    final int blocksPerRow = OBJECT_TEXTURE_WIDTH / 4;
+	    final int blocksPerRow = OBJECT_TEXTURE_SIDE_LEN / 4;
 	    int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
 	    int numRows = (int)Math.ceil(remainingBlocks/(double)blocksPerRow);
 	    for(int i=0; i<numRows; i++){

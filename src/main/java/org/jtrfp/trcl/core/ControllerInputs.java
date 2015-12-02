@@ -51,7 +51,7 @@ public class ControllerInputs {
      return inputNames;
  }
  
- private class DefaultControllerInput implements ControllerInput{
+ private static class DefaultControllerInput implements ControllerInput{
      private final String controllerName;
      private       double state = 0;
      private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);

@@ -24,6 +24,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
@@ -97,13 +98,15 @@ public class ViewSelect implements FeatureFactory<Game> {
 		new HeadsUpDisplayInstruments(),
 		new NoInstruments()
 	    };
+	    
+     private final PropertyChangeListener viewSelectPropertyChangeListener          = new ViewSelectPropertyChangeListener();
+     private final PropertyChangeListener instrumentViewSelectPropertyChangeListener= new InstrumentViewSelectPropertyChangeListener();
+     private PropertyChangeListener weakVSPCL, weakIVSPCL;//HARD REFERENCES. DO NOT REMOVE
      
      @Override
      public void apply(Game game) {
-         System.out.println("ViewSelect apply()");
-         
-         view .addPropertyChangeListener(new ViewSelectPropertyChangeListener());
-         iView.addPropertyChangeListener(new InstrumentViewSelectPropertyChangeListener());
+         view .addPropertyChangeListener(weakVSPCL  = new WeakPropertyChangeListener(viewSelectPropertyChangeListener,view));
+         iView.addPropertyChangeListener(weakIVSPCL = new WeakPropertyChangeListener(instrumentViewSelectPropertyChangeListener,iView));
          ///final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
          //tr.addPropertyChangeListener(TR.GAME, gameIP);
          final IndirectProperty<Mission> missionIP = new IndirectProperty<Mission>();
@@ -125,7 +128,7 @@ public class ViewSelect implements FeatureFactory<Game> {
      		}
      	}});
      }//end apply(...)
-
+     
      public ViewMode getViewMode() {
 	    return viewMode;
 	}

@@ -17,6 +17,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 
 /**
  * Special thanks to <a href="http://www.jroller.com/santhosh/entry/use_weak_listeners_to_avoid">this page.</a>
@@ -26,23 +27,33 @@ import java.lang.ref.WeakReference;
 
 public class WeakPropertyChangeListener implements PropertyChangeListener {
     private final WeakReference<PropertyChangeListener> delegate;
-    private final PropertyChangeSupport                 listened;
+    private final Object                                listened;
     
-    public WeakPropertyChangeListener(PropertyChangeListener delegate, PropertyChangeSupport source){
+    public WeakPropertyChangeListener(PropertyChangeListener delegate, Object listened){
 	this.delegate=new WeakReference<PropertyChangeListener>(delegate);
-	this.listened=source;
+	this.listened=listened;
     }
+    
+    private void remove(Object source){
+	if(source instanceof PropertyChangeSupport)
+	  ((PropertyChangeSupport)source).removePropertyChangeListener(this);
+	else{//do it the sketchy way.
+	    try{
+	     Method mth = source.getClass().getMethod("removePropertyChangeListener", new Class [] {PropertyChangeListener.class});
+	     mth.invoke(source, new Object[]{this});}
+	    catch(Exception e){e.printStackTrace();}
+	}
+    }//end remove(...)
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 	final PropertyChangeListener pcl   = delegate.get();
-	final PropertyChangeSupport source = listened;
+	final Object                source = listened;
 	if(pcl==null){
 	    if(source!=null)//Shouldn't be null since the source is expected to invoke this but just in case...
-		source.removePropertyChangeListener(this);
+		remove(source);
 	    }
 	else
 	    pcl.propertyChange(evt);
     }//end propertyChange
-
 }//end WeakPropertyChangeListener

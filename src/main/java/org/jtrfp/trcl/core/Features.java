@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,18 +26,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class Features {
     // Key represents target-class
-    private static final HashMap<Class<?>,FactoryEntry> factories = new HashMap<Class<?>,FactoryEntry>();
-    
-    private static class FactoryEntry{
-	private final Collection<FeatureFactory> factories  = new ArrayList<FeatureFactory>();
-	private final Map<Object,Feature>        features   = new WeakHashMap<Object,Feature>();
-	public Collection<FeatureFactory> getFactories() {
-	    return factories;
-	}
-	public Map<Object, Feature> getFeatures() {
-	    return features;
-	}
-    }//end FactoryEntry
+    private static final Map<Object,Map<Class<? extends Feature>,Feature>> targetMap = new HashMap<Object,Map<Class<? extends Feature>,Feature>>();
+    private static final HashMap<Class<?>,Collection<FeatureFactory>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory>>();
+    private static final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
+
     
     public Features(){
 	this(Collections.EMPTY_LIST);
@@ -51,28 +43,44 @@ public class Features {
 
     private static void registerFeature(FeatureFactory<?> factory){
 	System.out.println("Registering feature factory: "+factory.getClass().getName());
-	final FactoryEntry entry = getFactoryEntry(factory.getTargetClass());
-	entry.getFactories().add(factory);
+	Collection<FeatureFactory> factoryCollection = getFactoryCollection(factory.getTargetClass());
+	factoryCollection.add(factory);
+	featureFactoriesByFeature.put(factory.getFeatureClass(),factory);
     }
     
-    private static FactoryEntry getFactoryEntry(Class targetClass){
-	FactoryEntry fe = factories.get(targetClass);
-	if(fe==null)
-	    factories.put(targetClass, fe = new FactoryEntry());
-	return fe;
+    private static Collection<FeatureFactory> getFactoryCollection(Class targetClass){
+	Collection<FeatureFactory> result = featureFactoriesByTargetClass.get(targetClass);
+	if(result==null)
+	    featureFactoriesByTargetClass.put(targetClass, result = new ArrayList<FeatureFactory>());
+	return result;
     }
-
+    
     public static void init(Object obj){
-     FactoryEntry ent = getFactoryEntry(obj.getClass());
-     for(FeatureFactory ff:ent.getFactories()){
-	 Feature feature;
-	 ent.getFeatures().put(obj,feature = ff.newInstance(obj));
-	 feature.apply(obj);
-	 }
+	for(FeatureFactory ff:getFactoryCollection(obj.getClass()))
+	    get(obj,ff.getFeatureClass());
     }//end init(...)
+    
+    private static Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){
+	Map<Class<? extends Feature>,Feature> result = targetMap.get(targ);
+	if(result==null)
+	    targetMap.put(targ, result = new HashMap<Class<? extends Feature>,Feature>());
+	assert result!=null;
+	return result;
+    }//end getFeatureMap()
+    
+    private static Feature getFeature(Map<Class<? extends Feature>,Feature> map, Class<? extends Feature> featureClass, Object target){
+	Feature result = map.get(featureClass);
+	if(result==null){
+	    final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
+	    assert ff!=null;
+	    map.put(featureClass, result = ff.newInstance(target));
+	    result.apply(target);
+	    }
+	return result;
+    }//end getFeature()
 
-    public static <T extends Feature> T get(Object target, Class<T> featureClass){
-     final FactoryEntry fe = getFactoryEntry(featureClass);
-     return (T)fe.getFeatures().get(target);
-    }
+    public static Feature get(Object target, Class<? extends Feature> featureClass){
+     final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
+     return getFeature(fMap,featureClass,target);
+    }//end get(...)
 }//end Features

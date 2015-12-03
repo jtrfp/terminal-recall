@@ -64,6 +64,7 @@ public class Game {
     public static final String PAUSED         = "paused";
     public static final String CURRENT_MISSION= "currentMission";
     public static final String PLAYER         = "player";
+    public static final String RUN_MODE       = "runMode";
     
     private TR 		tr;
     private VOXFile 	vox;
@@ -97,22 +98,32 @@ public class Game {
     private boolean paused=false;
     private volatile boolean aborting=false;
     private TRFutureTask<Void>[] startupTask = new TRFutureTask[]{null};
+    private RunMode runMode;
     
     private static final int UPFRONT_HEIGHT = 23;
     private final double 	FONT_SIZE=.07;
     private boolean inGameplay	=false;
     private DashboardLayout dashboardLayout;
+    
+    public interface RunMode{}
+    public interface GameConstructingMode extends RunMode{}
+    public interface GameConstructedMode  extends RunMode{}
+    public interface GameDestructingMode  extends RunMode{}
+    public interface GameDestructedMode   extends RunMode{}
 
     public Game(TR tr, VOXFile vox) {
+	Features.init(this);
+	setRunMode(new GameConstructingMode(){});
 	setTr(tr);
 	displayModes = new DisplayModeHandler(tr.getDefaultGrid());
 	setVox(vox);
+	setRunMode(new GameConstructingMode(){});
 	redFlash = new RedFlash(tr);
 	tr.getDefaultGrid().add(redFlash);
 	if (!tr.config.isDebugMode())
 	    setupNameWithUser();
 	emptyMode = missionMode = new Object[]{};
-	Features.init(this);
+	setRunMode(new GameConstructedMode(){});
     }// end constructor
 
     private void setupNameWithUser() {
@@ -383,12 +394,14 @@ public class Game {
     }
     
     public void abort(){
+	setRunMode(new GameDestructingMode(){});
 	try{setLevelIndex(-1);}
 	catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 	abortCurrentMission();
 	cleanup();
 	displayModes.setDisplayMode(emptyMode);
 	tr.getGameShell().applyGFXState();
+	setRunMode(new GameDestructedMode(){});
     }
     
     public DashboardLayout getDashboardLayout(){
@@ -405,7 +418,7 @@ public class Game {
 	 tr.getDefaultGrid().remove(player);
     }
 
-    public void abortCurrentMission(){
+    public void abortCurrentMission(){//TODO: Replace with RunMode PCL
 	tr.getThreadManager().setPaused(true);
 	synchronized(startupTask){
 	    if(startupTask[0]!=null)
@@ -458,7 +471,7 @@ public class Game {
     /**
      * @param paused the paused to set
      */
-    public Game setPaused(boolean paused) {
+    public Game setPaused(boolean paused) {//TODO: This feature should be in Mission
 	if(paused==this.paused)
 	    return this;//nothing to do.
 	pcSupport.firePropertyChange(PAUSED, this.paused, paused);
@@ -506,5 +519,15 @@ public class Game {
 
     public void levelLoadingMode() {
 	introScreen.stopMusic();
+    }
+
+    public RunMode getRunMode() {
+        return runMode;
+    }
+
+    public void setRunMode(RunMode runMode) {
+	final RunMode oldRunMode = this.runMode;
+        this.runMode = runMode;
+        pcSupport.firePropertyChange(RUN_MODE, oldRunMode, runMode);
     }
 }// end Game

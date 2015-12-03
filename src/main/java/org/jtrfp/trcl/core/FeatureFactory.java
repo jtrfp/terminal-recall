@@ -14,6 +14,7 @@
 package org.jtrfp.trcl.core;
 
 public interface FeatureFactory<T> {
- public Feature<T> newInstance(T target);
- public Class<T>   getTargetClass();
+ public Feature<T>               newInstance(T target);
+ public Class<T>                 getTargetClass();
+ public Class<? extends Feature> getFeatureClass();
 }//end FeatureFactory

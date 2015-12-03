@@ -162,7 +162,7 @@ public class ViewSelect implements FeatureFactory<Game> {
 		cockpit.notifyPositionChange();
 	    }
 	    return cockpit;
-	}
+	}//end getCockpit()
 
 	private void setHUDVisibility(boolean visible){
 	    if(hudVisibility==visible)
@@ -440,4 +440,9 @@ public Class<Game> getTargetClass() {
     return Game.class;
 }
 
-}//end ViewChange
+@Override
+public Class<? extends Feature> getFeatureClass() {
+    return ViewSelectFeature.class;
+}
+
+}//end ViewSelect

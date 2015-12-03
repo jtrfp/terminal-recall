@@ -328,7 +328,7 @@ public final class GLTexture {
 	return gpu;
     }
     
-    private static GLProgram getTextureRenderProgram(GPU gpu, TR tr){
+    private static GLProgram getTextureRenderProgram(GPU gpu){
 	if(textureRenderProgram!=null)
 	    return textureRenderProgram;
 	try{
@@ -338,17 +338,17 @@ public final class GLTexture {
 	    textureRenderProgram.validate();
 	    textureRenderProgram.use();
 	    textureRenderProgram.getUniform("textureToUse").set((int)0);
-	}catch(IOException e){tr.showStopper(e);}
+	}catch(IOException e){e.printStackTrace();}
 	return textureRenderProgram;
     }//end getTextureRenderProgram(...)
-    /*
+    
     public static final class PropertyEditor extends PropertyEditorSupport{
 	@Override
 	public Component getCustomEditor(){
 	    final GLTexture source = (GLTexture)getSource();
 	    final JPanel result = new JPanel();
 	    if(source.getBindingTarget()==GL3.GL_TEXTURE_2D){
-		result.add(new TextureViewingPanel(source, source.tr.getRootWindow(),source.tr));
+		result.add(new TextureViewingPanel(source));
 	    }//TODO: Texture 1D
 	    return result;
 	}//end getCustomEditor()
@@ -357,8 +357,7 @@ public final class GLTexture {
     static{
 	PropertyEditorManager.registerEditor(GLTexture.class, GLTexture.PropertyEditor.class);
     }//end static{}
-    */
-    /*
+    
     private static class TextureViewingPanel extends JPanel{
 	private static final long serialVersionUID = 4580039742312228700L;
 	//private final RootWindow frame;
@@ -372,7 +371,7 @@ public final class GLTexture {
 	private final JPopupMenu popupMenu = new JPopupMenu();
 	private final JMenuItem exportToCSV = new JMenuItem("Export To CSV");
 	//private final ThreadManager threadManager;
-	public TextureViewingPanel(final GLTexture parent, RootWindow root, final TR tr){
+	public TextureViewingPanel(final GLTexture parent){
 	    super();
 	    this.targetTexture=parent;
 	    this.setSize(PANEL_SIZE);
@@ -402,7 +401,7 @@ public final class GLTexture {
 				gl.glDepthFunc(GL3.GL_ALWAYS);
 				final double [] min = parent.getExpectedMinValue();
 				final double [] max = parent.getExpectedMaxValue();
-				final GLProgram prg = getTextureRenderProgram(gpu,tr);
+				final GLProgram prg = getTextureRenderProgram(gpu);
 				prg.use();
 				prg.getUniform("scalar").set(
 					1f/(float)(max[0]-min[0]), 
@@ -469,9 +468,7 @@ public final class GLTexture {
 		public void actionPerformed(ActionEvent evt) {
 		    final JFileChooser fc = new JFileChooser();
 		    fc.setSelectedFile(
-			    new File(tr.
-				    config.
-				    getFileDialogStartDir()
+			    new File(System.getProperty("java.user.dir")
 				    +"/"+parent.
 				    getDebugName()+".csv"));
 		    fc.setFileFilter(new FileFilter(){
@@ -488,8 +485,8 @@ public final class GLTexture {
 			final File selectedFile = fc.getSelectedFile();
 			if(selectedFile.isDirectory())
 			    return;//Abort
-			tr.config.setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
-			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()));}
+			//tr.config.setFileDialogStartDir(selectedFile.getParentFile().getAbsolutePath());
+			writeTextureToCSV(ensureEndsWithCSV(fc.getSelectedFile()), gpu);}
 		}});
 	}//end constructor
 	
@@ -501,10 +498,11 @@ public final class GLTexture {
 	    else return new File(f.getAbsolutePath()+".csv");
 	}//end ensureEndsWithCSV(...)
 	
-	private void writeTextureToCSV(final File destFile){
-	    threadManager.submitToThreadPool(new Callable<Void>(){
+	private void writeTextureToCSV(final File destFile, final GPU gpu){
+	    new Thread(){
 		@Override
-		public Void call() throws Exception {
+		public void run() {
+		    try{
 		    final boolean intFormat = targetTexture.internalColorFormat==GL3.GL_UNSIGNED_INT;
 		    final ByteBuffer dest = ByteBuffer.allocate(
 			    4*4*targetTexture.getNumComponents()*
@@ -554,8 +552,8 @@ public final class GLTexture {
 		    
 		    printStream.close();
 		    fos.close();
-		    return null;
-		}});
+		    }catch(Exception e){e.printStackTrace();}
+		}}.start();
 	}//end writeTextureToCSV(...)
 	
 	@Override
@@ -569,7 +567,7 @@ public final class GLTexture {
 		    g.fillRect(x, y, 1, 1);}
 	}//end paint(...)
     }//end TextureViewingCanvas
-*/
+
     /**
      * @return the debugName
      */

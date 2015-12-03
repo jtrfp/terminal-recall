@@ -37,9 +37,9 @@ public class VQCodebookManager {
     private final	GPU		gpu;
     private final	GLFrameBuffer	fb;
     private final	UncaughtExceptionHandler handler;
-    public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=128;
+    public static final int 		CODE_PAGE_SIDE_LENGTH_TEXELS	=512;
     public static final int 		CODE_SIDE_LENGTH		=4;
-    public static final int 		NUM_CODE_PAGES			=2048;
+    public static final int 		NUM_CODE_PAGES			=512;
     public static final int		MIP_DEPTH			=1;
     public static final int 		NUM_CODES_PER_AXIS		=CODE_PAGE_SIDE_LENGTH_TEXELS/CODE_SIDE_LENGTH;
     public static final int 		CODES_PER_PAGE 			=NUM_CODES_PER_AXIS*NUM_CODES_PER_AXIS;

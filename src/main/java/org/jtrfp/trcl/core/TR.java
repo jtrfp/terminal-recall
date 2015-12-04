@@ -31,6 +31,8 @@ import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ConfigWindow;
@@ -49,6 +51,7 @@ import org.springframework.stereotype.Component;
 public final class TR implements UncaughtExceptionHandler{
     	//// BEAN PROPERTIES
     	public static final String	GAME				="game";
+    	public static final String      RUN_STATE                       ="runState";
     
 	public static final double 	unitCircle			=65535;
 	public static final double 	crossPlatformScalar		=16;//Shrinks everything so that we can use floats instead of ints
@@ -84,6 +87,13 @@ public final class TR implements UncaughtExceptionHandler{
 	
 	public final TRConfiguration 		config;
 	private final ConfigWindow              configWindow;
+	private TRRunState                      runState;
+	
+	public interface TRRunState{}
+	public interface TRConstructing extends TRRunState{}
+	public interface TRConstructed  extends TRRunState{}
+	public interface TRDestructing  extends TRRunState{}
+	public interface TRDestructed   extends TRRunState{}
 	
 	@Autowired
 	private KeyStatus keyStatus;
@@ -121,15 +131,15 @@ public final class TR implements UncaughtExceptionHandler{
 	}
 	
 	@Autowired
-	public TR(ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow){
+	public TR(ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow){
 	    this.config       = configManager.getConfig();
 	    this.configWindow = configWindow;
 	    this.reporter     = reporter;
+	    this.rootWindow   = rootWindow;
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	//AutoInitializable.Initializer.initialize(this);
 	    	pcSupport = new PropertyChangeSupport(this);
-	    	rootWindow = new RootWindow();
 	    	if(config.isWaitForProfiler()){
 	    	    waitForProfiler();
 	    	}//end if(waitForProfiler)
@@ -295,8 +305,9 @@ public final class TR implements UncaughtExceptionHandler{
 	return false;
     }
 
-    public Game newGame(VOXFile mission) {
-	final Game newGame = new Game(this,mission);
+    public Game newGame(VOXFile mission) {//TODO: Refactor this out
+	final TVF3Game newGame = Features.get(getGameShell(), TVF3Game.class);;
+	newGame.setVox(mission);
 	setGame(newGame);
 	return newGame;
     }// end newGame(...)
@@ -505,5 +516,15 @@ public final class TR implements UncaughtExceptionHandler{
 
     public ConfigWindow getConfigWindow() {
         return configWindow;
+    }
+
+    public TRRunState getRunState() {
+        return runState;
+    }
+
+    public void setRunState(TRRunState runState) {
+	final TRRunState oldRunState = this.runState;
+        this.runState                = runState;
+        pcSupport.firePropertyChange(RUN_STATE, oldRunState, runState);
     }
 }//end TR

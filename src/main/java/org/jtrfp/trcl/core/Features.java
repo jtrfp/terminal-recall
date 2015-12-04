@@ -56,8 +56,14 @@ public class Features {
     }
     
     public static void init(Object obj){
-	for(FeatureFactory ff:getFactoryCollection(obj.getClass()))
-	    get(obj,ff.getFeatureClass());
+	//Traverse the type hierarchy
+	Class tClass = obj.getClass();
+	while(tClass!=Object.class){
+	    for(Class iFace:tClass.getInterfaces())
+		for(FeatureFactory ff:getFactoryCollection(iFace))
+		    get(obj,ff.getFeatureClass());
+	    tClass=tClass.getSuperclass();
+	}//end while(hierarchy)
     }//end init(...)
     
     private static Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){
@@ -79,8 +85,8 @@ public class Features {
 	return result;
     }//end getFeature()
 
-    public static Feature get(Object target, Class<? extends Feature> featureClass){
+    public static <T extends Feature> T get(Object target, Class<T> featureClass){
      final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
-     return getFeature(fMap,featureClass,target);
+     return (T)getFeature(fMap,featureClass,target);
     }//end get(...)
 }//end Features

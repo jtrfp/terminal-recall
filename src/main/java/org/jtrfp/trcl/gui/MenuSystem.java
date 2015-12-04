@@ -35,6 +35,7 @@ import org.jtrfp.trcl.core.RootWindow;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.EngineTests;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.mem.GPUMemDump;
@@ -86,7 +87,7 @@ public class MenuSystem {
 		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
-			tr.getGameShell().newGame();
+			tr.getGameShell().newGame(null);
 			return null;
 		    }});
 	    }});
@@ -106,7 +107,7 @@ public class MenuSystem {
 	    private static final long serialVersionUID = -6843605846847411702L;
 	    @Override
 	    public void actionPerformed(ActionEvent l) {
-		final Mission mission = tr.getGame().getCurrentMission();
+		final Mission mission = ((TVF3Game)tr.getGame()).getCurrentMission();
 		mission.setSatelliteView(view_sat.isSelected());
 	    }};
 	    
@@ -272,7 +273,7 @@ public class MenuSystem {
 	gameIP.addTargetPropertyChangeListener(Game.CURRENT_MISSION, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent pc) {
-		game_start.setEnabled(pc.getNewValue()!=null && !tr.getGame().isInGameplay());
+		game_start.setEnabled(pc.getNewValue()!=null && !((TVF3Game)tr.getGame()).isInGameplay());
 	    }});
 	gameIP.addTargetPropertyChangeListener("inGameplay", new PropertyChangeListener(){
 	    @Override
@@ -295,12 +296,12 @@ public class MenuSystem {
 	gameIP.addTargetPropertyChangeListener(Game.PAUSED, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		final Game game = tr.getGame();
+		final Game game = ((TVF3Game)tr.getGame());
 		if(game==null)
 		    return;
 		if(evt.getNewValue()==Boolean.TRUE)
 		    view_sat.setEnabled(false);
-		else if(tr.getGame().getCurrentMission()!=null)
+		else if(((TVF3Game)tr.getGame()).getCurrentMission()!=null)
 		    view_sat.setEnabled(game.getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode);
 	    }});
     }//end constructor

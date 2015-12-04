@@ -18,7 +18,6 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.MatrixUtils;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.TR;
@@ -27,6 +26,7 @@ import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.Model;
@@ -126,7 +126,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 			tr.config.isCrosshairsEnabled(),
 			newValue);
 	    }});
-	tr.getGame().addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
+	((TVF3Game)tr.getGame()).addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
     }//end installReactiveListeners
     
     private void updateCrosshairsVisibilityState(

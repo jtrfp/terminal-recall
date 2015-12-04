@@ -19,12 +19,13 @@ import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
-import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.TunnelRailed;
+import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
@@ -82,7 +83,7 @@ public class PowerupObject extends WorldObject{
 			    addSupply(powerupType.
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
-			tr.getGame().getUpfrontDisplay().submitMomentaryUpfrontMessage(
+			((TVF3Game)tr.getGame()).getUpfrontDisplay().submitMomentaryUpfrontMessage(
 				tr.config.getGameVersion()!=GameVersion.TV?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());

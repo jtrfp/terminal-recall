@@ -21,6 +21,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.gui.DashboardLayout;
@@ -62,7 +63,7 @@ private final DashboardLayout layout;
 	    final Game game          = tr.getGame();
 	    final Mission mission    = game.getCurrentMission();
 	    final WorldObject player = game.getPlayer();
-	    final HUDSystem hudSystem= game.getHUDSystem();
+	    final HUDSystem hudSystem= ((TVF3Game)game).getHUDSystem();
 	    if(mission==null || player == null || hudSystem == null)
 		return;
 	    final NAVObjective navObjective = mission.currentNAVObjective();

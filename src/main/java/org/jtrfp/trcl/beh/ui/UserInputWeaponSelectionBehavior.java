@@ -22,6 +22,7 @@ import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
@@ -47,7 +48,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
 	    final int ammo = getActiveBehavior().getAmmo();
-	    parent.getTr().getGame().getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
+	    ((TVF3Game)parent.getTr().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
@@ -83,7 +84,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 		break;
 	        }
 	    }//end switch(game version)
-	    tr.getGame().getHUDSystem().getWeapon().setContent(content);
+	    ((TVF3Game)tr.getGame()).getHUDSystem().getWeapon().setContent(content);
 	    return true;
 	}//end if(New Behavior)
 	return false;

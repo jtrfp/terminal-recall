@@ -48,6 +48,7 @@ import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -114,8 +115,8 @@ public class Mission {
 	this.showIntro	= showIntro;
 	this.displayHandler = new DisplayModeHandler(tr.getDefaultGrid());
 	levelLoadingMode = new Object[]{
-		 game.levelLoadingScreen,
-		 game.upfrontDisplay
+		 ((TVF3Game)game).levelLoadingScreen,
+		 ((TVF3Game)game).upfrontDisplay
 	    };
 	Features.init(this);
     }// end Mission
@@ -136,7 +137,7 @@ public class Mission {
 		.createRoot(new UpdateHandler() {
 		    @Override
 		    public void update(double unitProgress) {
-			game.getLevelLoadingScreen().setLoadingProgress(unitProgress);
+			((TVF3Game)game).getLevelLoadingScreen().setLoadingProgress(unitProgress);
 		    }
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
@@ -147,13 +148,13 @@ public class Mission {
 	final Camera camera = renderer.getCamera();
 	camera.setHeading(Vector3D.PLUS_I);
 	camera.setTop(Vector3D.PLUS_J);
-	game.levelLoadingMode();
+	((TVF3Game)game).levelLoadingMode();
 	displayHandler.setDisplayMode(levelLoadingMode);
-	//game.setDisplayMode(game.levelLoadingMode);
-	game.getUpfrontDisplay().submitPersistentMessage(levelName);
+	//((TVF3Game)game).setDisplayMode(((TVF3Game)game).levelLoadingMode);
+	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Player player      = tr.getGame().getPlayer();
+	    final Player player      = ((TVF3Game)tr.getGame()).getPlayer();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check
@@ -165,13 +166,13 @@ public class Mission {
 	    overworldSystem = new OverworldSystem(tr,
 		    progressStages[LoadingStages.overworld.ordinal()]);
 	    briefingMode = new Object[]{
-			 game.briefingScreen,
+			 ((TVF3Game)game).briefingScreen,
 			 overworldSystem
 		    };
 	    gameplayMode = new Object[]{
-			 game.navSystem,
-			 game.hudSystem,
-			 game.upfrontDisplay,
+			 ((TVF3Game)game).navSystem,
+			 ((TVF3Game)game).hudSystem,
+			 ((TVF3Game)game).upfrontDisplay,
 			 overworldSystem,
 			 rm.getDebrisSystem(),
 			 rm.getPowerupSystem(),
@@ -180,13 +181,13 @@ public class Mission {
 			 rm.getSmokeSystem()
 		    };
 	    summaryMode = new Object[]{
-		    game.getBriefingScreen(),
+		    ((TVF3Game)game).getBriefingScreen(),
 		    overworldSystem
 	    };
 	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
-	    final NAVSystem navSystem = tr.getGame().getNavSystem();
+	    final NAVSystem navSystem = ((TVF3Game)tr.getGame()).getNavSystem();
 	    navSubObjects = rm.getNAVData(lvl.getNavigationFile())
 		    .getNavObjects();
 
@@ -288,12 +289,12 @@ public class Mission {
 		 }
 		 
 		 }//end sync(Mission.this)
-	game.getUpfrontDisplay().removePersistentMessage();
+	((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
 	    setMissionMode(new Mission.IntroMode());
 	    displayHandler.setDisplayMode(briefingMode);
-	    game.getBriefingScreen().briefingSequence(lvl);
+	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);
 	}
 	setMissionMode(new Mission.AboveGroundMode());
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
@@ -301,11 +302,11 @@ public class Mission {
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
-	game.getNavSystem() .activate();
+	((TVF3Game)game).getNavSystem() .activate();
 	displayHandler.setDisplayMode(gameplayMode);
 	
-	game.getPlayer()	.setActive(true);
-	tr.getGame().setPaused(false);
+	((TVF3Game)game).getPlayer()	.setActive(true);
+	((TVF3Game)tr.getGame()).setPaused(false);
 	//Wait for mission end
 	synchronized(missionEnd){
 	 while(missionEnd[0]==null){try{missionEnd.wait();}
@@ -315,7 +316,7 @@ public class Mission {
 	    if(!missionEnd[0].isAbort()){
 		displayHandler.setDisplayMode(summaryMode);
 		setMissionMode(new Mission.MissionSummaryMode());
-		game.getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+		((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
 	    }//end if(proper ending)
 	bgMusic.stop();
 	cleanup();
@@ -334,7 +335,7 @@ public class Mission {
 	if (navs.size() == 0) {
 	    missionCompleteSequence();
 	} else
-	    tr.getGame().getNavSystem().updateNAVState();
+	    ((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
     }// end removeNAVObjective(...)
 
     public static class Result {
@@ -692,10 +693,10 @@ public class Mission {
     
     public synchronized void enterTunnel(final Tunnel tunnel) {
 	System.out.println("Entering tunnel "+tunnel);
-	final Game game = tr.getGame();
-	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
+	final Game game = ((TVF3Game)tr.getGame());
+	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
 	currentTunnel = tunnel;
-	game.getCurrentMission().notifyTunnelFound(tunnel);
+	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnel);
 	setMissionMode(new TunnelMode());
 	
 	tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
@@ -718,7 +719,7 @@ public class Mission {
 		setEnable(false);
 	    }//end for(projectiles)
 	}//end for(projectileFactories)
-	final Player player = tr.getGame().getPlayer();
+	final Player player = ((TVF3Game)tr.getGame()).getPlayer();
 	player.setActive(false);
 	player.resetVelocityRotMomentum();
 	player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
@@ -736,7 +737,7 @@ public class Mission {
 	overworldSystem.setChamberMode(tunnel.getExitObject().isMirrorTerrain());
 	secondaryCam.setRootGrid(overworldSystem);
 	//Set the skycube appropriately
-	tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(tr.getGame().
+	tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGame()).
 		      getCurrentMission().
 		      getOverworldSystem().
 		      getSkySystem().
@@ -843,42 +844,42 @@ public class Mission {
     public void setSatelliteView(boolean satelliteView) {
 	if(!(getMissionMode() instanceof AboveGroundMode)&&satelliteView)
 	    throw new IllegalArgumentException("Cannot activate satellite view while mission mode is "+getMissionMode().getClass().getSimpleName());
-	if(satelliteView && tr.getGame().isPaused())
+	if(satelliteView && ((TVF3Game)tr.getGame()).isPaused())
 	    throw new IllegalArgumentException("Cannot activate satellite view while paused.");
 	pcs.firePropertyChange(SATELLITE_VIEW, this.satelliteView, satelliteView);
 	if(satelliteView!=this.satelliteView){
-	    final Game game =  tr.getGame();
+	    final Game game =  ((TVF3Game)tr.getGame());
 	    final Camera cam = tr.mainRenderer.get().getCamera();
 	    if(satelliteView){//Switched on
 		tr.getThreadManager().setPaused(true);
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			tr.getDefaultGrid().removeBranch(game.getNavSystem());
-			tr.getDefaultGrid().removeBranch(game.getHUDSystem());
+			tr.getDefaultGrid().removeBranch(((TVF3Game)game).getNavSystem());
+			tr.getDefaultGrid().removeBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(false);
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
 		cam.probeForBehavior(MatchDirection.class).setEnable(false);
-		final Vector3D pPos = new Vector3D(game.getPlayer().getPosition());
-		final Vector3D pHeading = tr.getGame().getPlayer().getHeading();
+		final Vector3D pPos = new Vector3D(((TVF3Game)game).getPlayer().getPosition());
+		final Vector3D pHeading = ((TVF3Game)tr.getGame()).getPlayer().getHeading();
 		cam.setPosition(new Vector3D(pPos.getX(),TR.visibilityDiameterInMapSquares*TR.mapSquareSize*.65,pPos.getZ()));
 		cam.setHeading(Vector3D.MINUS_J);
 		cam.setTop(new Vector3D(pHeading.getX(),.0000000001,pHeading.getZ()).normalize());
-		tr.getGame().getSatDashboard().setVisible(true);
+		((TVF3Game)tr.getGame()).getSatDashboard().setVisible(true);
 	    }else{//Switched off
 		tr.getThreadManager().setPaused(false);
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			tr.getGame().getNavSystem().activate();
-			tr.getDefaultGrid().addBranch(game.getNavSystem());
-			tr.getDefaultGrid().addBranch(game.getHUDSystem());
+			((TVF3Game)tr.getGame()).getNavSystem().activate();
+			tr.getDefaultGrid().addBranch(((TVF3Game)game).getNavSystem());
+			tr.getDefaultGrid().addBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);
 		cam.probeForBehavior(MatchDirection.class).setEnable(true);
-		tr.getGame().getSatDashboard().setVisible(false);
+		((TVF3Game)tr.getGame()).getSatDashboard().setVisible(false);
 	    }//end !satelliteView
 	}//end if(change)
 	this.satelliteView=satelliteView;

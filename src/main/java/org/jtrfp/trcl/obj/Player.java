@@ -44,6 +44,7 @@ import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 
 public class Player extends WorldObject implements RelevantEverywhere{
@@ -80,10 +81,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new AfterburnerBehavior(tr.getControllerInputs()));
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
-	addBehavior(new UpdatesThrottleMeterBehavior().setController(tr
-		.getGame().getHUDSystem().getThrottleMeter()));
-	addBehavior(new UpdatesHealthMeterBehavior().setController(tr
-		.getGame().getHUDSystem().getHealthMeter()));
+	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getThrottleMeter()));
+	addBehavior(new UpdatesHealthMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getHealthMeter()));
 	addBehavior(new DamagedByCollisionWithDEFObject());
 	addBehavior(new DamagedByCollisionWithSurface());
 	addBehavior(new BouncesOffSurfaces());

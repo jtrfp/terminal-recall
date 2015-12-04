@@ -32,9 +32,8 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Window.Type;
 
 public class LevelSkipWindow extends JFrame {
     /**
@@ -109,9 +108,9 @@ public class LevelSkipWindow extends JFrame {
 		    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception {
-			    tr.getGame().abortCurrentMission();
-			    tr.getGame().setLevelIndex(levelList.getSelectedIndex());
-			    tr.getGame().doGameplay();
+			    ((TVF3Game)tr.getGame()).abortCurrentMission();
+			    ((TVF3Game)tr.getGame()).setLevelIndex(levelList.getSelectedIndex());
+			    ((TVF3Game)tr.getGame()).doGameplay();
 			    return null;
 			}});
 		}});

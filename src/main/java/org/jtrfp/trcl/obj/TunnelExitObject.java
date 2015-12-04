@@ -33,6 +33,7 @@ import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
@@ -81,7 +82,7 @@ public class TunnelExitObject extends PortalEntrance {
 	pExit.setPosition(exitLocation.toArray());
 	pExit.setHeading(exitHeading);
 	pExit.setTop(exitTop);
-	pExit.setRootGrid(tr.getGame().getCurrentMission().getOverworldSystem());
+	pExit.setRootGrid(((TVF3Game)tr.getGame()).getCurrentMission().getOverworldSystem());
 	pExit.notifyPositionChange();
 	this.setPortalExit(pExit);
 	setVisible(true);
@@ -102,7 +103,7 @@ public class TunnelExitObject extends PortalEntrance {
 		final Camera camera = tr.mainRenderer.get().getCamera();
 		if (camera.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
-		    final Game game = tr.getGame();
+		    final Game game = ((TVF3Game)tr.getGame());
 		    final Mission mission = game.getCurrentMission();
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
 		    System.out.println("TunnelExitObject leaving tunnel "+tun);
@@ -135,7 +136,7 @@ public class TunnelExitObject extends PortalEntrance {
 			}});
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
-		    final Player player = tr.getGame().getPlayer();
+		    final Player player = ((TVF3Game)tr.getGame()).getPlayer();
 		    player.setActive(false);
 		    player.resetVelocityRotMomentum();
 		    player.probeForBehavior(CollidesWithTunnelWalls.class)
@@ -167,9 +168,9 @@ public class TunnelExitObject extends PortalEntrance {
 		    }// end for(projectileFactories)
 		    final NAVObjective navObjective = getNavObjectiveToRemove();
 		    if (navObjective != null && (navTargeted|!onlyRemoveIfTargeted)) {
-			tr.getGame().getCurrentMission().removeNAVObjective(navObjective);
+			((TVF3Game)tr.getGame()).getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
-		    tr.getGame().getNavSystem().updateNAVState();
+		    ((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
 		    player.setActive(true);
 		}// end if(x past threshold)
 	    }// end if(Player)

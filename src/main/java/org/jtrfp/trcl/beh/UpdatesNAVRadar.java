@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -27,7 +28,7 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
 	counter++;
 	if(counter%REFRESH_INTERVAL==0){
 	    final Game game = getParent().getTr().getGame();
-	    blips = game.
+	    blips = ((TVF3Game)game).
 		    getNavSystem().
 		    getBlips();
 	    blips.clearRadarBlips();

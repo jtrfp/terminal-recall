@@ -18,6 +18,7 @@ import java.util.Collection;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.gui.DashboardLayout;
@@ -58,7 +59,7 @@ private final DashboardLayout layout;
 	if(mission==null)return;
 	final NAVObjective obj = mission.currentNAVObjective();
 	if(obj==null)return;
-	tr.getGame().getHUDSystem().
+	((TVF3Game)tr.getGame()).getHUDSystem().
 		getObjective().
 		setContent(layout.getHumanReadableObjective(obj));
 	final WorldObject target = obj.getTarget();

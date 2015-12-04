@@ -23,7 +23,9 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.gpu.CanvasProvider;
 import org.jtrfp.trcl.gpu.GLExecutor;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
     /**
      * 

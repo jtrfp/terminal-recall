@@ -34,6 +34,7 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.gpu.GPU;
@@ -110,7 +111,7 @@ public class ViewSelect implements FeatureFactory<Game> {
          ///final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
          //tr.addPropertyChangeListener(TR.GAME, gameIP);
          final IndirectProperty<Mission> missionIP = new IndirectProperty<Mission>();
-         game.addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);
+         ((TVF3Game)game).addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);
          //gameIP.setTarget(tr.getGame());
          //Install when in gameplay
          missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
@@ -171,7 +172,7 @@ public class ViewSelect implements FeatureFactory<Game> {
 	    final Game game = tr.getGame();
 	    if(game==null)
 		 return;
-	    final HUDSystem hud = game.getHUDSystem();
+	    final HUDSystem hud = ((TVF3Game)game).getHUDSystem();
 	    final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
 	    if(!visible)
 	     grid.nonBlockingRemoveBranch (hud);

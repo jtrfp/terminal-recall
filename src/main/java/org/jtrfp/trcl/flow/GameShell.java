@@ -38,6 +38,7 @@ import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
@@ -53,9 +54,17 @@ public class GameShell {
     private GLFont             greenFont;
     private boolean []	       initialized = new boolean[]{false};
     
+    public interface GameShellRunState     extends TR.TRConstructed{}
+    public interface GameShellConstructing extends GameShellRunState{}
+    public interface GameShellConstructed  extends GameShellRunState{}
+    public interface GameShellDestructing  extends GameShellRunState{}
+    public interface GameShellDestructed   extends GameShellRunState{}
+    
     public GameShell(TR tr){
 	this.tr=tr;
-	tr.addPropertyChangeListener(TR.GAME, new PropertyChangeListener(){
+	Features.init(this);
+	tr.setRunState(new GameShellConstructing(){});
+	tr.addPropertyChangeListener(TR.GAME, new PropertyChangeListener(){//TODO: Redesign then remove
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		if(evt.getNewValue()==null){
@@ -63,6 +72,7 @@ public class GameShell {
 		    showGameshellScreen();
 		}else{hideGameshellScreen();}
 	    }});
+	tr.setRunState(new GameShellConstructed(){});
     }//end constructor(TR)
     
     public GameShell startShell(){
@@ -117,11 +127,10 @@ public class GameShell {
 	camera.setTop(Vector3D.PLUS_J);
     }
     
-    public GameShell newGame(){
+    public GameShell newGame(VOXFile vox){
 	initializationFence();
 	GameVersion newGameVersion = determineGameVersion();
 	tr.config.setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
-	VOXFile vox;
 	vox = determineVOXFile();
 	if(vox==null)
 	    return this;//Abort

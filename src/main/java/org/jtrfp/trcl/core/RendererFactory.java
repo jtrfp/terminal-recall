@@ -190,7 +190,8 @@ public class RendererFactory {
 			.setMinFilter(GL3.GL_NEAREST)
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
 			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
-			.setDebugName("primitiveNormTexture");
+			.setDebugName("primitiveNormTexture")
+			.unbind();
 		primitiveUVZWTexture = gpu  //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()

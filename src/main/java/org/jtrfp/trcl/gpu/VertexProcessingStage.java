@@ -21,7 +21,7 @@ import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 
 public class VertexProcessingStage {
     public static final int	VERTEX_BUFFER_WIDTH     = 1024;
-    public static final int	VERTEX_BUFFER_HEIGHT    = 4096;
+    public static final int	VERTEX_BUFFER_HEIGHT    = 1024;
     
     private final GPU                   gpu;
     private final ObjectProcessingStage objectProcessingStage;
@@ -159,6 +159,7 @@ public class VertexProcessingStage {
 	gl.glDisable(GL3.GL_BLEND);
 	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_CULL_FACE);
+	gl.glDisable(GL3.GL_MULTISAMPLE);
 	gl.glViewport(0, 0, 
 		relevantVertexBufferWidth, 
 		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.

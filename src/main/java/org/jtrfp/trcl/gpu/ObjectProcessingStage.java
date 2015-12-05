@@ -99,6 +99,7 @@ public class ObjectProcessingStage {
 	gl.glDisable(GL3.GL_LINE_SMOOTH);
 	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_CULL_FACE);
+	gl.glDisable(GL3.GL_MULTISAMPLE);
 	gl.glLineWidth(1);
 	{//Start variable scope
 	    final int blocksPerRow = OBJECT_TEXTURE_SIDE_LEN / 4;

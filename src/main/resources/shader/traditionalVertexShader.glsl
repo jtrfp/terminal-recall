@@ -115,7 +115,8 @@ int firstSShort(uint _input){
 /////////////// MAIN ////////////////////////////////
 
 void main(){
-gl_Position.x+=dummy*.000000000000001;
+gl_Position.xy = vec2(0);
+gl_Position.x+=dummy==1234?.0000000001:0;
  ivec2 fetchPos	= ivec2(gl_VertexID%VTX_TEXTURE_USABLE_WIDTH,gl_VertexID/VTX_TEXTURE_USABLE_WIDTH);
  gl_Position.xy	+=texelFetch(xyBuffer,fetchPos,0).xy;
  gl_Position.z	= texelFetch(zBuffer,fetchPos,0).x;

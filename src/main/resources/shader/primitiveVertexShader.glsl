@@ -63,7 +63,8 @@ mat3 affine(vec2 u, vec2 v, vec2 off){
  }//end affine()
 
 void main(){
- gl_Position.x			= dummy*.00000001;
+ gl_Position            = vec4(0,0,0,1);
+ gl_Position.x			= dummy==1234?.00000001:0;
  uint	pid				= uint(gl_VertexID);
  uint	row				= pid/PRIMS_PER_ROW;
  uint	col				= pid%PRIMS_PER_ROW;

@@ -15,4 +15,5 @@ package org.jtrfp.trcl.core;
 
 public interface Feature<T> {
  void apply(T target);
+ void destruct(T target);
 }//end Feature

@@ -414,6 +414,12 @@ public class ViewSelect implements FeatureFactory<Game> {
 	public ViewMode[] getViewModes() {
 	    return viewModes;
 	}
+
+	@Override
+	public void destruct(Game target) {
+	    // TODO Auto-generated method stub
+	    
+	}
  }//end ViewSelectFeature
  
 public Model getCockpitModel() {

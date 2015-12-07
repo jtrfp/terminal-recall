@@ -66,6 +66,12 @@ public class Features {
 	}//end while(hierarchy)
     }//end init(...)
     
+    public static void destruct(Object obj){
+	for(Feature f : targetMap.get(obj).values())
+	    f.destruct(obj);
+	targetMap.put(obj, null);
+    }//end destruct()
+    
     private static Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){
 	Map<Class<? extends Feature>,Feature> result = targetMap.get(targ);
 	if(result==null)

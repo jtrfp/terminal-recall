@@ -46,7 +46,5 @@ void main(){
  
  panLR = pan;
  gl_Position.x= (dummy==1234?.0000000001:0) + start+rowsX*lengthPerRow;
- gl_Position.y=0;
- gl_Position.z=1;
- gl_Position.w=1;
+ gl_Position.yzw=vec3(0,1,1);
 }

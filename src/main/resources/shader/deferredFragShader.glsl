@@ -289,6 +289,8 @@ vec4 reverseBlend(in vec4 src, in vec4 dest, in float alpha){
 }
 
 void main(){
+gl_FragColor = vec4(0,0,0,1);
+
 uint	primitiveID;
 vec4	color		= vec4(0,0,0,1);
 vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;

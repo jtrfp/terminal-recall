@@ -45,7 +45,8 @@ vec2 screenLocation[6] = vec2[]
 	);
 
 void main(){
-gl_Position.x 	= dummy*0;
-gl_Position.xy 	= pos[gl_VertexID];
+gl_Position.w   = 1;
+gl_Position.xy 	= dummy==1234?vec2(0,0):pos[gl_VertexID];
+//gl_Position.xy 	= pos[gl_VertexID];
 screenLoc 		= screenLocation[gl_VertexID];
 }//end main()

@@ -14,12 +14,14 @@ package org.jtrfp.trcl.obj;
 
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageListener;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
+import org.jtrfp.trcl.prop.RedFlashFactory.RedFlash;
 
 public class RedFlashOnDamage extends Behavior implements DamageListener {
     
     private void flash(){
-	((TVF3Game)getParent().getTr().getGame()).getRedFlash().flash();
+	Features.get(((TVF3Game)getParent().getTr().getGame()), RedFlash.class).flash();
     }
 
     @Override

@@ -44,7 +44,6 @@ import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.flow.GameShell.GameShellConstructed;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.gui.F3BriefingLayout;
@@ -59,7 +58,6 @@ import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
 import org.jtrfp.trcl.prop.IntroScreen;
-import org.jtrfp.trcl.prop.RedFlash;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -94,8 +92,6 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    			briefingScreen;
 	    private IntroScreen
 	    			introScreen;
-	    private final RedFlash
-	    			redFlash;
 	    private final DisplayModeHandler
 	    			displayModes;
 	    private Object[]	earlyLoadingMode,
@@ -119,8 +115,6 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 		setRunMode(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(tr.getDefaultGrid());
 		setRunMode(new GameConstructingMode(){});
-		redFlash = new RedFlash(tr);
-		tr.getDefaultGrid().add(redFlash);
 		if (!tr.config.isDebugMode())
 		    setupNameWithUser();
 		emptyMode = missionMode = new Object[]{};
@@ -381,6 +375,7 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    
 	    public void abort(){
 		setRunMode(new GameDestructingMode(){});
+		Features.destruct(this);
 		try{setLevelIndex(-1);}
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 		abortCurrentMission();
@@ -496,13 +491,6 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	        this.satDashboard = satDashboard;
 	    }
 
-	    /**
-	     * @return the redFlash
-	     */
-	    public RedFlash getRedFlash() {
-	        return redFlash;
-	    }
-
 	    public void levelLoadingMode() {
 		introScreen.stopMusic();
 	    }
@@ -521,6 +509,12 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    public void apply(GameShell target) {
 		// TODO Auto-generated method stub
 	    }//end apply()
+
+	    @Override
+	    public void destruct(GameShell target) {
+		// TODO Auto-generated method stub
+		
+	    }
     }//end TVF3Game
     
     /**

@@ -16,35 +16,54 @@ import java.awt.Color;
 
 import org.jtrfp.trcl.SelectableTexture;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.core.Feature;
+import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TextureManager;
+import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.obj.Sprite2D;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class RedFlash extends Sprite2D {
+@Component
+public class RedFlashFactory implements FeatureFactory<TVF3Game>{
+    private final TR tr;
+    private TextureDescription texture; 
+    
+    @Autowired
+    public RedFlashFactory(TR tr){
+	this.tr = tr;
+	getRedTexture(tr);
+    }//end constructor
+    
+    private TextureDescription getRedTexture(TR tr){
+	if(texture==null){
+	    final TextureManager tm = tr.gpu.get().textureManager.get();
+	    return new SelectableTexture(
+		    new Texture[]{
+			    (Texture)tm.solidColor(new Color(255,0,0,255)),
+			    (Texture)tm.solidColor(new Color(255,0,0,200)),
+			    (Texture)tm.solidColor(new Color(255,0,0,155)),
+			    (Texture)tm.solidColor(new Color(255,0,0,100)),
+			    (Texture)tm.solidColor(new Color(255,0,0,55)),
+			    (Texture)tm.solidColor(new Color(255,0,0,1))}
+		    );
+	}return texture;
+    }//end genTexture(...)
+    
+public class RedFlash extends Sprite2D implements Feature<TVF3Game> {
     private volatile long endTimeOfLastFlash;
     private static final long FRAME_INTERVAL_MS=50L;
     private static final long NUM_FRAMES=5;
-    public RedFlash(TR tr){
-	super(tr, .000000001, 2, 2,genTexture(tr), true);
+    
+    private RedFlash(TR tr){
+	super(tr, .000000001, 2, 2,getRedTexture(tr), true);
 	setVisible(false);
 	addBehavior(new RedFlashBehavior());
 	setImmuneToOpaqueDepthTest(true);
     }//end constructor
-    
-    private static TextureDescription genTexture(TR tr){
-	final TextureManager tm = tr.gpu.get().textureManager.get();
-	return new SelectableTexture(
-		new Texture[]{
-		(Texture)tm.solidColor(new Color(255,0,0,255)),
-		(Texture)tm.solidColor(new Color(255,0,0,200)),
-		(Texture)tm.solidColor(new Color(255,0,0,155)),
-		(Texture)tm.solidColor(new Color(255,0,0,100)),
-		(Texture)tm.solidColor(new Color(255,0,0,55)),
-		(Texture)tm.solidColor(new Color(255,0,0,1))}
-		);
-    }//end genTexture(...)
     
     public void flash(){
 	endTimeOfLastFlash = System.currentTimeMillis()+FRAME_INTERVAL_MS*(NUM_FRAMES-1);
@@ -61,4 +80,30 @@ public class RedFlash extends Sprite2D {
 	    else if(isVisible())setVisible(false);
 	}//end _tick(...)
     }//end RedFlashBehavior
+
+    @Override
+    public void apply(TVF3Game target) {
+	tr.getDefaultGrid().add(this);
+    }//end apply(...)
+    
+    @Override
+    public void destruct(TVF3Game target) {
+	tr.getDefaultGrid().remove(this);
+    }
 }//end RedFlash
+
+@Override
+public Feature<TVF3Game> newInstance(TVF3Game target) {
+    return new RedFlash(tr);
+}
+
+@Override
+public Class<TVF3Game> getTargetClass() {
+    return TVF3Game.class;
+}
+
+@Override
+public Class<? extends Feature> getFeatureClass() {
+    return RedFlash.class;
+}
+}//end RedFlashFactory

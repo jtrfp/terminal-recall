@@ -15,7 +15,7 @@ You will need:
 * Java JDK 6 or later (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 * Git (http://git-scm.com/downloads)
 * Maven (https://maven.apache.org/download.cgi)
-* nVIDIA or AMD video card with drivers capable of OpenGL 3.3.
+* nVIDIA, Intel, or AMD video card with drivers capable of OpenGL 3.3.
 * Windows or Linux.
 
 In a folder/directory of your choice run:

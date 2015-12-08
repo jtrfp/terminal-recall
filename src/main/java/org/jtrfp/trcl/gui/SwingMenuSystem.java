@@ -42,7 +42,7 @@ import org.jtrfp.trcl.mem.GPUMemDump;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class MenuSystem {
+public class SwingMenuSystem {
     private final FramebufferStateWindow fbsw;
     private final LevelSkipWindow	levelSkipWindow;
     private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
@@ -54,7 +54,7 @@ public class MenuSystem {
 	    debugMenu = new JMenu("Debug"),
 	    viewMenu = new JMenu("View");
     
-    public MenuSystem(final TR tr){
+    public SwingMenuSystem(final TR tr){
 	final RootWindow rw = tr.getRootWindow();
 	
 	// And items to menus

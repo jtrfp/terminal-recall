@@ -36,7 +36,7 @@ public class SatelliteViewToggle {
     public SatelliteViewToggle(TR tr, ControllerMapper mapper, ControllerInputs inputs){
 	satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
 	satelliteToggleInput.addPropertyChangeListener(new SatelliteToggleListener());
-	final MenuSystem menuSystem = tr.getMenuSystem();
+	final SwingMenuSystem menuSystem = tr.getMenuSystem();
 	view_sat = menuSystem.getView_sat();
     }//end constructor
     

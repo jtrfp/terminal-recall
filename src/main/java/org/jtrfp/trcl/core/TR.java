@@ -36,7 +36,7 @@ import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ConfigWindow;
-import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.gui.SwingMenuSystem;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
@@ -67,7 +67,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public final TRFutureTask<SoundSystem>	soundSystem;
 	private Player 				player;
 	public final RootWindow 		rootWindow;
-	private MenuSystem       		menuSystem;
+	private SwingMenuSystem       		menuSystem;
 	private Color [] 			globalPalette, 
 						darkIsClearPalette;
 	private ColorPaletteVectorList		globalPaletteVL,
@@ -475,9 +475,9 @@ public final class TR implements UncaughtExceptionHandler{
     /**
      * @return the menuSystem
      */
-    public MenuSystem getMenuSystem() {
+    public SwingMenuSystem getMenuSystem() {
 	if(menuSystem == null)
-	    menuSystem = new MenuSystem(this);
+	    menuSystem = new SwingMenuSystem(this);
         return menuSystem;
     }
 

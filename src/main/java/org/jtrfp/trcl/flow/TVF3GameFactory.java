@@ -19,8 +19,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.Camera;
@@ -65,8 +63,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class TVF3GameFactory implements FeatureFactory<GameShell> {
     enum Difficulty {
-	EASY, NORMAL, HARD, FURIOUS
-    }
+	EASY, NORMAL, HARD, FURIOUS;
+	
+	@Override
+	public String toString(){
+	    String low = this.name().toLowerCase();
+	    return Character.toUpperCase(low.charAt(0))+low.substring(1);
+	}
+    }//end TVF3GameFactory
     
     public TVF3GameFactory(){}
     
@@ -115,13 +119,17 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 		setRunMode(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(tr.getDefaultGrid());
 		setRunMode(new GameConstructingMode(){});
-		if (!tr.config.isDebugMode())
-		    setupNameWithUser();
+		//if (!tr.config.isDebugMode())
+		//    setupNameWithUser();
 		emptyMode = missionMode = new Object[]{};
 		setRunMode(new GameConstructedMode(){});
 	    }// end constructor
 
-	    private void setupNameWithUser() {
+	    public void setupNameWithUser() throws CanceledException {
+		GameSetupDialog gsd = new GameSetupDialog();
+		gsd.setModal(true);
+		gsd.setVisible(true);
+		/*
 		setPlayerName((String) JOptionPane.showInputDialog(tr.getRootWindow(),
 			"Callsign:", "Pilot Registration", JOptionPane.PLAIN_MESSAGE,
 			null, null, "Councilor"));
@@ -129,6 +137,7 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 			tr.getRootWindow(), "Difficulty:", "Pilot Registration",
 			JOptionPane.PLAIN_MESSAGE, null, new String[] { "Easy",
 				"Normal", "Hard", "Furious" }, "Normal");
+		
 		if (difficulty.contentEquals("Easy")) {
 		    setDifficulty(Difficulty.EASY);
 		}
@@ -141,8 +150,13 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 		if (difficulty.contentEquals("Furious")) {
 		    setDifficulty(Difficulty.FURIOUS);
 		}
+		*/
+		if(!gsd.isBeginMission())
+		    throw new CanceledException();
+		setPlayerName(gsd.getCallSign());
+		setDifficulty(gsd.getDifficulty());
 	    }// end setupNameWithUser()
-
+	    
 	    public void save(File fileToSaveTo) {
 		// TODO
 	    }
@@ -333,7 +347,9 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 		pcSupport.firePropertyChange(PLAYER, oldPlayer, player);
 	    }
 
-	    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+	    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException, CanceledException {
+		if (!tr.config.isDebugMode())
+		    setupNameWithUser();
 		setInGameplay(true);
 		try {
 		    MissionLevel[] levels = vox.getLevels();

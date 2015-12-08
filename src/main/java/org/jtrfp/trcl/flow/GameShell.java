@@ -36,13 +36,13 @@ import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.flow.Game.CanceledException;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
@@ -144,6 +144,8 @@ public class GameShell {
     public GameShell startGame(){
 	initializationFence();
 	try{tr.getGame().doGameplay();}
+	catch(CanceledException e){
+	    return this;}
 	catch(Exception e){
 	    gameFailure(e);}
 	return this;

@@ -34,12 +34,15 @@ public interface Game {
    public interface GameDestructedMode   extends GameRunMode{}
     
     public void    boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException;
-    public void    doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException;
+    public void    doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException, CanceledException;
     public boolean isPaused();
     public Game    setPaused(boolean paused);
     public Mission getCurrentMission();
     public Player  getPlayer();
     public String  getPlayerName();
     public void    abort();
+    
+    public class CanceledException extends Exception{
+	private static final long serialVersionUID = 1L;}
 
 }//end Game

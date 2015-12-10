@@ -15,48 +15,43 @@ package org.jtrfp.trcl.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.concurrent.Callable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.jtrfp.trcl.core.RootWindow;
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.EngineTests;
-import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
-import org.jtrfp.trcl.flow.IndirectProperty;
-import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.mem.GPUMemDump;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class SwingMenuSystem {
-    private final FramebufferStateWindow fbsw;
-    private final LevelSkipWindow	levelSkipWindow;
-    private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
-    private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
-    private final JCheckBoxMenuItem	view_crosshairs = new JCheckBoxMenuItem("Crosshairs");
-    private final JCheckBoxMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
+@Component
+public class SwingMenuSystem implements MenuSystem {
+    private final SubMenu rootNode;
+    private final RootWindow rw;
+    
+    //private final FramebufferStateWindow fbsw;
+    //private final LevelSkipWindow	levelSkipWindow;
+    //private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
+    //private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
+    //private final JCheckBoxMenuItem	view_crosshairs = new JCheckBoxMenuItem("Crosshairs");
+    //private final JCheckBoxMenuItem view_sat = new JCheckBoxMenuItem("Satellite");
     final JMenu file = new JMenu("File"), 
 	    gameMenu = new JMenu("Game"),
 	    debugMenu = new JMenu("Debug"),
 	    viewMenu = new JMenu("View");
     
-    public SwingMenuSystem(final TR tr){
-	final RootWindow rw = tr.getRootWindow();
-	
+    @Autowired
+    public SwingMenuSystem(RootWindow rw){
+	rootNode = new SubMenu(rw.getJMenuBar());
+	this.rw = rw;
 	// And items to menus
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
@@ -75,6 +70,7 @@ public class SwingMenuSystem {
 	file_quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_MASK));
 	
 	//view_sat.setAccelerator(KeyStroke.getKeyStroke("TAB"));
+	/*
 	view_crosshairs.setAccelerator(KeyStroke.getKeyStroke("X"));
 	
 	fbsw = new FramebufferStateWindow(tr);
@@ -304,14 +300,16 @@ public class SwingMenuSystem {
 		else if(((TVF3Game)tr.getGame()).getCurrentMission()!=null)
 		    view_sat.setEnabled(game.getCurrentMission().getMissionMode() instanceof Mission.AboveGroundMode);
 	    }});
+	    */
     }//end constructor
 
     /**
      * @return the view_crosshairs
      */
+    /*
     public JCheckBoxMenuItem getView_crosshairs() {
         return view_crosshairs;
-    }
+    }*/
 
     /**
      * @return the gameMenu
@@ -319,8 +317,235 @@ public class SwingMenuSystem {
     public JMenu getGameMenu() {
         return gameMenu;
     }
-
+/*
     public JCheckBoxMenuItem getView_sat() {
         return view_sat;
+    }*/
+
+    @Override
+    public void addMenuItem(String... path) throws IllegalArgumentException {
+	rootNode.addMenuItem(0, path);
     }
+
+    @Override
+    public void removeMenuItem(String... path) throws IllegalArgumentException {
+	rootNode.removeMenuItem(0, path);
+    }
+
+    @Override
+    public void addMenuItemListener(ActionListener l, String... path)
+	    throws IllegalArgumentException {
+	rootNode.addMenuItemListener(l, 0, path);
+    }
+
+    @Override
+    public void removeMeuItemListener(ActionListener l, String... path)
+	    throws IllegalArgumentException {
+	rootNode.removeMenuItemListener(l, 0, path);
+    }
+
+    @Override
+    public void setMenuItemEnabled(boolean enabled, String... path)
+	    throws IllegalArgumentException {
+	rootNode.setMenuItemEnabled(enabled, 0, path);
+    }
+    
+    private MenuNode getRootNode(){
+	return rootNode;
+    }
+    
+    private abstract class MenuNode{
+	private final String name;
+	public MenuNode(String name){
+	    this.name=name;
+	}//end constructor
+	public String getName() {
+	    return name;
+	}
+	
+	public abstract void addMenuItem   (int index, String ... path) throws IllegalArgumentException;
+	public abstract void removeMenuItem(int index, String ... path) throws IllegalArgumentException;
+	public abstract void addMenuItemListener   (ActionListener l, int index, String ... path)    throws IllegalArgumentException;
+	public abstract void removeMenuItemListener(ActionListener l, int index, String ... path) throws IllegalArgumentException;
+	public abstract void setMenuItemEnabled    (boolean enabled,  int index, String ... path)      throws IllegalArgumentException;
+	public abstract boolean isEmpty();
+	public abstract void destroy();
+    }//end MenuNode
+    
+    private class SubMenu extends MenuNode{
+	private final Map<String,MenuNode> nameMap = new HashMap<String,MenuNode>();
+	private final JComponent item;
+	private JComponent parent;
+	
+	protected SubMenu(String name){
+	    super(name);
+	    this.item = new JMenu(name);
+	}
+	
+	public SubMenu(String name, JComponent parent) {
+	    this(name);
+	    parent.add(item);
+	    rw.revalidate();
+	    this.parent = parent;
+	}
+
+	public SubMenu(JComponent delegate) {
+	    super("root");
+	    item = delegate;
+	}
+
+	@Override
+	public void addMenuItem(int index, String... path)
+		throws IllegalArgumentException {
+	    final String thisName = path[index];
+	    MenuNode node = nameMap.get(thisName);
+	    if(node==null){
+		if(index==path.length-1){//Leaf
+		    node = new MenuItem(thisName, this.item);
+		}else{//Stem
+		    node = new SubMenu(thisName, this.item);
+		    node.addMenuItem(index+1, path);
+		}
+	    }//end if(node==null)
+	    nameMap.put(thisName, node);
+	}//end addMenuItem(...)
+
+	@Override
+	public void removeMenuItem(int index, String... path)
+		throws IllegalArgumentException {
+	    final String thisName = path[index];
+	    MenuNode node = nameMap.get(thisName);
+	    System.out.println(getName()+" removeMenuItem index="+index+" path[index]="+path[index]+" node="+node);
+	    if(node!=null){
+		if(index==path.length-2){//Leaf
+		    System.out.println("PATH A");
+		    node.destroy();
+		    nameMap.remove(thisName);
+		}else{//Stem
+		    System.out.println("PATH B");
+		    node.removeMenuItem(index+1, path);
+		    System.out.println("Removal result: "+nameMap.remove(thisName));
+		    System.out.println("PATH b - post-removal size: "+nameMap.size());
+		    }
+		}//end if(stem)
+	    if(isEmpty()){
+		System.out.println("PATH C");
+		destroy();
+	    }//end if(node!=null)
+	    else
+		throw new IllegalArgumentException("Could not find leaf menu item `"+thisName+"`");
+	}
+
+	@Override
+	public void addMenuItemListener(ActionListener l, int index,
+		String... path) throws IllegalArgumentException {
+	    nameMap.get(path[index]).addMenuItemListener(l, index+1, path);
+	}
+
+	@Override
+	public void removeMenuItemListener(ActionListener l, int index,
+		String... path) throws IllegalArgumentException {
+	    nameMap.get(path[index]).removeMenuItemListener(l, index+1, path);
+	}
+
+	@Override
+	public void setMenuItemEnabled(boolean enabled, int index,
+		String... path) throws IllegalArgumentException {
+	    nameMap.get(path[index]).setMenuItemEnabled(enabled, index+1, path);
+	}
+	
+	private void checkNonLeafRequest(int index, String ... path){
+	    if(!path[index].contentEquals(getName()))
+		throw new IllegalArgumentException("Supplied path non-leaf name `"+path[index]+"` doesn't match name of this non-leaf `"+getName()+"`");
+	    if(index>=path.length-1)
+		throw new IllegalArgumentException("Requested a leaf but this is not a leaf. Index="+index+" path="+path[index]);
+	}
+
+	@Override
+	public boolean isEmpty() {
+	    return nameMap.isEmpty();
+	}
+
+	@Override
+	public void destroy() {
+	    System.out.println("SubMentu.destroy() name= "+getName()+" Parent="+parent+" item="+item);
+	    if(parent!=null){
+	     parent.remove(item);
+	     rw.revalidate();
+	     }
+	}//end destroy()
+    }//end SubMenu
+    
+    private class MenuItem extends MenuNode{
+	private final JComponent parent;
+	private final JMenuItem item;
+	//private final Collection<ActionListener> menuItemListeners = new HashSet<ActionListener>();
+	
+	public MenuItem(String name, JComponent parent) {
+	    super(name);
+	    this.parent= parent;
+	    item       = new JMenuItem(name);
+	    item.setEnabled(false);
+	    parent.add(item);
+	    rw.revalidate();
+	}//end constructor
+
+	@Override
+	public void addMenuItem(int index, String... path)
+		throws IllegalArgumentException {
+	    throw new UnsupportedOperationException("Cannot add item to Menu item. Path="+path+" index="+index);
+	}
+
+	@Override
+	public void removeMenuItem(int index, String... path)
+		throws IllegalArgumentException {
+	    if(index != path.length-1)
+	      throw new UnsupportedOperationException("Cannot remove item from Menu item. Path="+path+" index="+index);
+	    if(!path[index].contentEquals(getName()))
+		throw new IllegalArgumentException("Name mismatch. Got "+path[index]+" expected "+getName());
+	    parent.remove(item);
+	}
+
+	@Override
+	public void addMenuItemListener(ActionListener l, int index,
+		String... path) throws IllegalArgumentException {
+	    checkLeafRequest(index, path);
+	    item.addActionListener(l);
+	}
+
+	@Override
+	public void removeMenuItemListener(ActionListener l, int index,
+		String... path) throws IllegalArgumentException {
+	    checkLeafRequest(index, path);
+	    item.removeActionListener(l);
+	}
+
+	@Override
+	public void setMenuItemEnabled(boolean enabled, int index,
+		String... path) throws IllegalArgumentException {
+	    checkLeafRequest(index,path);
+	    item.setEnabled(enabled);
+	}
+	
+	private void checkLeafRequest(int index, String ... path){
+	    if(!path[path.length-1].contentEquals(getName()))
+		throw new IllegalArgumentException("Supplied path leaf name `"+path[path.length-1]+"` doesn't match name of this leaf `"+getName()+"`");
+	    if(!path[path.length-1].contentEquals(getName()))
+		throw new IllegalArgumentException("Supplied path leaf name `"+path[path.length-1]+"` doesn't match name of this leaf `"+getName()+"`");
+	}
+
+	@Override
+	public boolean isEmpty() {
+	    return true;
+	}
+
+	@Override
+	public void destroy() {
+	    if(parent!=null && item !=null){
+		parent.remove(item);
+		System.out.println("MenuItem.destroy() name= "+getName()+" Parent="+parent+" item="+item);
+		rw.revalidate();
+		}
+	}//end destroy()
+    }//end MenuItem
 }//end MenuSystem

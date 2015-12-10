@@ -96,7 +96,7 @@ public class GamePause  {
 	    SwingUtilities.invokeAndWait(new Runnable(){
 		@Override
 		public void run() {
-		    tr.getMenuSystem().getGameMenu().add(game_pause);
+		    //tr.getMenuSystem().getGameMenu().add(game_pause);
 		}});
 	} catch (InvocationTargetException e) {
 	    e.printStackTrace();
@@ -180,7 +180,7 @@ public class GamePause  {
 	    SwingUtilities.invokeAndWait(new Runnable(){
 	        @Override
 	        public void run() {
-	    	tr.getMenuSystem().getGameMenu().remove(game_pause);
+	    	//tr.getMenuSystem().getGameMenu().remove(game_pause);
 	        }});
 	} catch (InvocationTargetException e) {
 	    e.printStackTrace();

@@ -30,16 +30,17 @@ import org.springframework.stereotype.Component;
 public class SatelliteViewToggle {
     public static final String SATELLITE_TOGGLE = "Sat View";
     private final ControllerInput satelliteToggleInput;
-    private final JCheckBoxMenuItem view_sat;
+    //private final JCheckBoxMenuItem view_sat;
 
     @Autowired
     public SatelliteViewToggle(TR tr, ControllerMapper mapper, ControllerInputs inputs){
 	satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
-	satelliteToggleInput.addPropertyChangeListener(new SatelliteToggleListener());
-	final SwingMenuSystem menuSystem = tr.getMenuSystem();
-	view_sat = menuSystem.getView_sat();
+	//satelliteToggleInput.addPropertyChangeListener(new SatelliteToggleListener());
+	final MenuSystem menuSystem = tr.getMenuSystem();
+	//view_sat = menuSystem.getView_sat();
     }//end constructor
     
+    /*
     private class SatelliteToggleListener implements PropertyChangeListener{
 	@Override
 	public void propertyChange(final PropertyChangeEvent evt) {
@@ -51,4 +52,5 @@ public class SatelliteViewToggle {
 		}});
 	}//end propertyChange(...)
     }//end SatelliteToggleListener
+    */
 }//end SatelliteViewToggle

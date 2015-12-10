@@ -14,6 +14,8 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -52,6 +54,8 @@ public final class TR implements UncaughtExceptionHandler{
     	public static final String	GAME				="game";
     	public static final String      RUN_STATE                       ="runState";
     
+    	public static final String []   EXIT_MENU_PATH = new String[]  {"File","Exit"};
+    	public static final String []   CONFIG_MENU_PATH = new String[]{"File","Configure..."};
 	public static final double 	unitCircle			=65535;
 	public static final double 	crossPlatformScalar		=16;//Shrinks everything so that we can use floats instead of ints
 	public static final double 	mapSquareSize			=Math.pow(2, 20)/crossPlatformScalar;
@@ -87,6 +91,8 @@ public final class TR implements UncaughtExceptionHandler{
 	public final TRConfiguration 		config;
 	private final ConfigWindow              configWindow;
 	private TRRunState                      runState;
+	private final ExitMenuItemListener	exitMenuItemListener   = new ExitMenuItemListener();
+	private final ConfigMenuItemListener	configMenuItemListener = new ConfigMenuItemListener();
 	
 	public interface TRRunState{}
 	public interface TRConstructing extends TRRunState{}
@@ -130,11 +136,20 @@ public final class TR implements UncaughtExceptionHandler{
 	}
 	
 	@Autowired
-	public TR(ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow){
+	public TR(ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow, MenuSystem menuSystem){
 	    this.config       = configManager.getConfig();
 	    this.configWindow = configWindow;
 	    this.reporter     = reporter;
 	    this.rootWindow   = rootWindow;
+	    
+	    menuSystem.addMenuItem(CONFIG_MENU_PATH);
+	    menuSystem.setMenuItemEnabled(true, CONFIG_MENU_PATH);
+	    menuSystem.addMenuItemListener(configMenuItemListener, CONFIG_MENU_PATH);
+	    
+	    menuSystem.addMenuItem(EXIT_MENU_PATH);
+	    menuSystem.setMenuItemEnabled(true, EXIT_MENU_PATH);
+	    menuSystem.addMenuItemListener(exitMenuItemListener, EXIT_MENU_PATH);
+	    
 	    	try{new OutputDump();}
 	    	catch(Exception e){e.printStackTrace();}
 	    	//AutoInitializable.Initializer.initialize(this);
@@ -216,6 +231,20 @@ public final class TR implements UncaughtExceptionHandler{
 	    getGameShell().startShell();
 	    return this;
 	}
+	
+	private class ExitMenuItemListener implements ActionListener{
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		System.exit(0);
+	    }
+	}//end ExitMenuItemListener
+	
+	private class ConfigMenuItemListener implements ActionListener{
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		getConfigWindow().setVisible(true);
+	    }
+	}//end ConfigMenuItemListener
 	
     private void waitForProfiler() {
 	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);

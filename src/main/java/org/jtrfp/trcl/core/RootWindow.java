@@ -19,6 +19,7 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.gpu.CanvasProvider;
@@ -39,23 +40,25 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
     public RootWindow(){
 	this("Terminal Recall");
     }
-    public RootWindow(String title) {
+    public RootWindow(final String title) {
 	try {
 	    SwingUtilities.invokeAndWait(new Runnable() {
 		@Override
 		public void run() {
+		    setVisible(false);
 		    canvas.setFocusTraversalKeysEnabled(false);
 		    getContentPane().add(canvas);
-		    setVisible(true);
 		    setSize(800, 600);
 		    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    setFocusTraversalKeysEnabled(false);
+		    setJMenuBar(new JMenuBar());
+		    setTitle(title);
+		    setVisible(true);
 		}
 	    });
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}//end try/catch Exception
-	setTitle(title);
     }//end constructor
 
     public GLCanvas getCanvas() {

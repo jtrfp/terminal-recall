@@ -17,6 +17,8 @@
 package org.jtrfp.trcl.flow;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -43,16 +45,22 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game.CanceledException;
+import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class GameShell {
     private final TR tr;
+    public static final String [] END_GAME_MENU_PATH = new String [] {"Game","End Game"};
     public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
 		(Color.darkGray,Color.black);
     private EarlyLoadingScreen earlyLoadingScreen;
     private GLFont             greenFont;
     private boolean []	       initialized = new boolean[]{false};
+    private final EndGameMenuItemListener
+                               endGameMenuItemListener = new EndGameMenuItemListener();
+    private final RunStateListener
+                               runStateListener = new RunStateListener();
     
     public interface GameShellRunState     extends TR.TRConstructed{}
     public interface GameShellConstructing extends GameShellRunState{}
@@ -72,8 +80,28 @@ public class GameShell {
 		    showGameshellScreen();
 		}else{hideGameshellScreen();}
 	    }});
+	final MenuSystem menuSystem = tr.getMenuSystem();
+	menuSystem.addMenuItem(END_GAME_MENU_PATH);
+	menuSystem.addMenuItemListener(endGameMenuItemListener, END_GAME_MENU_PATH);
+	tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	tr.setRunState(new GameShellConstructed(){});
     }//end constructor(TR)
+    
+    private class EndGameMenuItemListener implements ActionListener{
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    tr.abortCurrentGame();
+	}
+    }//end EndGameMenuItmListener
+    
+    private class RunStateListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    tr.getMenuSystem().setMenuItemEnabled(
+		    evt.getNewValue() instanceof Game.GameRunMode, 
+		    END_GAME_MENU_PATH);
+	}//end RunStateListener
+    }//end RunStateListener
     
     public GameShell startShell(){
 	tr.gatherSysInfo();

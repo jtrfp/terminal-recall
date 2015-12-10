@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ViewSelect implements FeatureFactory<Game> {
+public class ViewSelectFactory implements FeatureFactory<Game> {
     //PROPERTIES
     public static final String HUD_VISIBLE      = "hudVisible";
     //CONSTANTS
@@ -74,12 +74,12 @@ public class ViewSelect implements FeatureFactory<Game> {
 	}
    
 	@Autowired
- public ViewSelect(ControllerInputs inputs){
+ public ViewSelectFactory(ControllerInputs inputs){
      view    = inputs.getControllerInput(VIEW);
      iView   = inputs.getControllerInput(INSTRUMENTS_VIEW);
  }//end constructor
  
- private class ViewSelectFeature implements Feature<Game>{
+ private class ViewSelect implements Feature<Game>{
      private boolean hudVisible = false;
      private WorldObject cockpit;
      private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -439,7 +439,7 @@ public void setCockpitModel(Model cockpitModel) {
 
 @Override
 public Feature<Game> newInstance(Game target) {
-    return new ViewSelectFeature();
+    return new ViewSelect();
 }
 
 @Override
@@ -449,7 +449,7 @@ public Class<Game> getTargetClass() {
 
 @Override
 public Class<? extends Feature> getFeatureClass() {
-    return ViewSelectFeature.class;
+    return ViewSelect.class;
 }
 
 }//end ViewSelect

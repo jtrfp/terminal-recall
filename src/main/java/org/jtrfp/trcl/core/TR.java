@@ -469,6 +469,7 @@ public final class TR implements UncaughtExceptionHandler{
 	if (game != null)
 	    game.abort();
 	setGame(null);
+	setRunState(new GameShell.GameShellConstructed(){});
     }// end abortCurrentGame()
 
     /**

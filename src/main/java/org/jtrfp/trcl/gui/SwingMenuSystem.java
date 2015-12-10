@@ -407,8 +407,14 @@ public class SwingMenuSystem implements MenuSystem {
 		    node = new SubMenu(thisName, this.item);
 		    node.addMenuItem(index+1, path);
 		}
+		nameMap.put(thisName, node);
 	    }//end if(node==null)
-	    nameMap.put(thisName, node);
+	    else{// !null
+		if(index!=path.length-1)
+		    node.addMenuItem(index+1, path);
+		else
+		    throw new IllegalArgumentException("Cannot add item as there is a submenu already in its place. Path[index]="+path[index]+" index="+index);
+	    }//end !null
 	}//end addMenuItem(...)
 
 	@Override
@@ -440,7 +446,12 @@ public class SwingMenuSystem implements MenuSystem {
 	@Override
 	public void addMenuItemListener(ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
-	    nameMap.get(path[index]).addMenuItemListener(l, index+1, path);
+	    final MenuNode node = nameMap.get(path[index]); 
+	    for(String s:nameMap.keySet())
+		System.out.println("key: "+s);
+	    if(node == null)
+		throw new IllegalArgumentException("Failed to find node: `"+path[index]+"` at index "+index);
+	    node.addMenuItemListener(l, index+1, path);
 	}
 
 	@Override

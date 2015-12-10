@@ -22,7 +22,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TextureManager;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
+import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

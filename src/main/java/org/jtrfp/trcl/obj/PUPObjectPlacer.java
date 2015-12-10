@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;

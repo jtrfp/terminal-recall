@@ -21,7 +21,6 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
-import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.flow.Mission;
 
 public class TunnelEntranceObject extends BillboardSprite {

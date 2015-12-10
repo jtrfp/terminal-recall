@@ -22,7 +22,7 @@ import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
+import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{

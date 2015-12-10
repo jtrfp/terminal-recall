@@ -32,7 +32,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.GameShell;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
+import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
@@ -305,7 +305,7 @@ public final class TR implements UncaughtExceptionHandler{
     }
 
     public Game newGame(VOXFile mission) {//TODO: Refactor this out
-	final TVF3Game newGame = Features.get(getGameShell(), TVF3Game.class);;
+	final TVF3Game newGame = new TVF3Game(this);
 	newGame.setVox(mission);
 	setGame(newGame);
 	return newGame;
@@ -522,6 +522,7 @@ public final class TR implements UncaughtExceptionHandler{
     public void setRunState(TRRunState runState) {
 	final TRRunState oldRunState = this.runState;
         this.runState                = runState;
+        System.out.println("setRunState "+runState+" old="+oldRunState);
         pcSupport.firePropertyChange(RUN_STATE, oldRunState, runState);
     }
 

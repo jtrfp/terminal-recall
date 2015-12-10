@@ -32,8 +32,6 @@ import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
-import org.jtrfp.trcl.core.Feature;
-import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
@@ -57,11 +55,8 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
 import org.jtrfp.trcl.prop.IntroScreen;
 import org.jtrfp.trcl.snd.SoundSystem;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
-public class TVF3GameFactory implements FeatureFactory<GameShell> {
+public class TVF3Game implements Game {
     enum Difficulty {
 	EASY, NORMAL, HARD, FURIOUS;
 	
@@ -70,14 +65,9 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    String low = this.name().toLowerCase();
 	    return Character.toUpperCase(low.charAt(0))+low.substring(1);
 	}
-    }//end TVF3GameFactory
+    }//end Difficulty
     
-    public TVF3GameFactory(){}
-    
-    @Autowired
-    private TR 		tr;
-    
-    public class TVF3Game implements Game, Feature<GameShell>{
+	private TR              tr;
 	private VOXFile 	vox;
 	    private int 	levelIndex = 0;
 	    private String 	playerName="DEBUG";
@@ -107,22 +97,21 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    private boolean paused=false;
 	    private volatile boolean aborting=false;
 	    private TRFutureTask<Void>[] startupTask = new TRFutureTask[]{null};
-	    private GameRunMode runMode;
 	    
 	    private static final int UPFRONT_HEIGHT = 23;
 	    private final double 	FONT_SIZE=.07;
 	    private boolean inGameplay	=false;
 	    private DashboardLayout dashboardLayout;
 	    
-	    public TVF3Game() {
+	    public TVF3Game(TR tr) {
+		this.tr = tr;
 		Features.init(this);
-		setRunMode(new GameConstructingMode(){});
+		tr.setRunState(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(tr.getDefaultGrid());
-		setRunMode(new GameConstructingMode(){});
 		//if (!tr.config.isDebugMode())
 		//    setupNameWithUser();
 		emptyMode = missionMode = new Object[]{};
-		setRunMode(new GameConstructedMode(){});
+		tr.setRunState(new GameConstructedMode(){});
 	    }// end constructor
 
 	    public void setupNameWithUser() throws CanceledException {
@@ -390,7 +379,7 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    }
 	    
 	    public void abort(){
-		setRunMode(new GameDestructingMode(){});
+		tr.setRunState(new GameDestructingMode(){});
 		Features.destruct(this);
 		try{setLevelIndex(-1);}
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
@@ -398,7 +387,7 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 		cleanup();
 		displayModes.setDisplayMode(emptyMode);
 		tr.getGameShell().applyGFXState();
-		setRunMode(new GameDestructedMode(){});
+		tr.setRunState(new GameDestructedMode(){});
 	    }
 	    
 	    public DashboardLayout getDashboardLayout(){
@@ -510,28 +499,6 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
 	    public void levelLoadingMode() {
 		introScreen.stopMusic();
 	    }
-
-	    public GameRunMode getRunMode() {
-	        return runMode;
-	    }
-
-	    public void setRunMode(GameRunMode runMode) {
-		final GameRunMode oldRunMode = this.runMode;
-	        this.runMode = runMode;
-	        pcSupport.firePropertyChange(RUN_MODE, oldRunMode, runMode);
-	    }
-
-	    @Override
-	    public void apply(GameShell target) {
-		// TODO Auto-generated method stub
-	    }//end apply()
-
-	    @Override
-	    public void destruct(GameShell target) {
-		// TODO Auto-generated method stub
-		
-	    }
-    }//end TVF3Game
     
     /**
      * @return the tr
@@ -546,20 +513,5 @@ public class TVF3GameFactory implements FeatureFactory<GameShell> {
      */
     public synchronized void setTr(TR tr) {
 	this.tr = tr;
-    }
-
-    @Override
-    public Feature<GameShell> newInstance(GameShell target) {
-	return new TVF3Game();
-    }
-
-    @Override
-    public Class<GameShell> getTargetClass() {
-	return GameShell.class;
-    }
-
-    @Override
-    public Class<? extends Feature> getFeatureClass() {
-	return TVF3Game.class;
     }
 }// end Game

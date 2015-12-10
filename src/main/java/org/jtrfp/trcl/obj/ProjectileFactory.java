@@ -13,7 +13,6 @@
 package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
-import java.util.List;
 
 import javax.media.opengl.GL3;
 

@@ -347,6 +347,7 @@ public class SwingMenuSystem implements MenuSystem {
     @Override
     public void setMenuItemEnabled(boolean enabled, String... path)
 	    throws IllegalArgumentException {
+	System.out.println("SwingMenuSystem.seMenuItemEnabled() "+enabled+" path[end]="+path[path.length-1]);
 	rootNode.setMenuItemEnabled(enabled, 0, path);
     }
     

@@ -19,7 +19,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.math.Vect3D;

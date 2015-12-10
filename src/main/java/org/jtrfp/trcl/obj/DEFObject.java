@@ -17,8 +17,6 @@ import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
-import org.jtrfp.trcl.TransparentTriangleList;
-import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;

@@ -13,8 +13,8 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 

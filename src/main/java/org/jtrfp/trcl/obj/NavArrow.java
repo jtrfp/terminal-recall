@@ -21,9 +21,9 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.gui.DashboardLayout;
 
 public class NavArrow extends Sprite2D {

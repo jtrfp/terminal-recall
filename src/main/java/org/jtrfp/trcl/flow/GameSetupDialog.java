@@ -20,7 +20,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import org.jtrfp.trcl.flow.TVF3GameFactory.Difficulty;
+import org.jtrfp.trcl.flow.TVF3Game.Difficulty;
 
 public class GameSetupDialog extends JDialog {
 

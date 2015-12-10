@@ -48,7 +48,6 @@ import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.flow.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;

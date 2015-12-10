@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.util.Arrays;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;

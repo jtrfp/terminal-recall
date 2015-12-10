@@ -36,7 +36,6 @@ import org.jtrfp.trcl.file.NAVFile.TUN;
 import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
-import org.jtrfp.trcl.flow.TVF3GameFactory.TVF3Game;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Jumpzone;

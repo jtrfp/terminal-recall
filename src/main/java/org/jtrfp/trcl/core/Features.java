@@ -58,9 +58,13 @@ public class Features {
     public static void init(Object obj){
 	//Traverse the type hierarchy
 	Class tClass = obj.getClass();
+	//For its interfaces
+	for(Class iFace:tClass.getInterfaces())
+	    for(FeatureFactory ff:getFactoryCollection(iFace))
+		get(obj,ff.getFeatureClass());
 	while(tClass!=Object.class){
-	    for(Class iFace:tClass.getInterfaces())
-		for(FeatureFactory ff:getFactoryCollection(iFace))
+	    //First for the class itself
+	    for(FeatureFactory ff:getFactoryCollection(tClass))
 		    get(obj,ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)

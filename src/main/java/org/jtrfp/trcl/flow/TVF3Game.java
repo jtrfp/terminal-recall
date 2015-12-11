@@ -201,6 +201,7 @@ public class TVF3Game implements Game {
 		if (levelIndex != -1) {// -1 means 'abort'
 		    MissionLevel lvl = vox.getLevels()[getLevelIndex()];
 		    final String lvlFileName = lvl.getLvlFile();
+		        setCurrentMission(null);
 			setCurrentMission(new Mission(tr, this, tr.getResourceManager()
 				.getLVL(lvlFileName), lvlFileName.substring(0,
 				lvlFileName.lastIndexOf('.')), getLevelIndex() % 3 == 0));
@@ -377,8 +378,12 @@ public class TVF3Game implements Game {
 	    }// end beginGameplay()
 
 	    public void setCurrentMission(Mission mission) {
-		pcSupport.firePropertyChange("currentMission", this.currentMission, mission);
+		final Mission oldMission = this.currentMission;
+		if(oldMission!=null)
+		 oldMission.destruct();
 		this.currentMission=mission;
+		pcSupport.firePropertyChange("currentMission", oldMission, mission);
+		
 	    }
 	    
 	    public void abort(){

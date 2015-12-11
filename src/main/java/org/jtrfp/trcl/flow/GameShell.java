@@ -24,6 +24,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultListModel;
@@ -51,7 +52,8 @@ import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class GameShell {
     private final TR tr;
-    public static final String [] END_GAME_MENU_PATH = new String [] {"Game","End Game"};
+    public static final String [] ABORT_GAME_MENU_PATH   = new String [] {"Game","Abort Game"};
+    public static final String [] START_GAME_MENU_PATH = new String [] {"Game","Start Game"};
     public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
 		(Color.darkGray,Color.black);
     private EarlyLoadingScreen earlyLoadingScreen;
@@ -59,6 +61,8 @@ public class GameShell {
     private boolean []	       initialized = new boolean[]{false};
     private final EndGameMenuItemListener
                                endGameMenuItemListener = new EndGameMenuItemListener();
+    private final StartGameMenuItemListener
+                               startGameMenuItemListener = new StartGameMenuItemListener();
     private final RunStateListener
                                runStateListener = new RunStateListener();
     
@@ -81,8 +85,13 @@ public class GameShell {
 		}else{hideGameshellScreen();}
 	    }});
 	final MenuSystem menuSystem = tr.getMenuSystem();
-	menuSystem.addMenuItem(END_GAME_MENU_PATH);
-	menuSystem.addMenuItemListener(endGameMenuItemListener, END_GAME_MENU_PATH);
+	
+	menuSystem.addMenuItem(START_GAME_MENU_PATH);
+	menuSystem.addMenuItemListener(startGameMenuItemListener, START_GAME_MENU_PATH);
+	
+	menuSystem.addMenuItem(ABORT_GAME_MENU_PATH);
+	menuSystem.addMenuItemListener(endGameMenuItemListener, ABORT_GAME_MENU_PATH);
+	
 	tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	tr.setRunState(new GameShellConstructed(){});
     }//end constructor(TR)
@@ -94,12 +103,28 @@ public class GameShell {
 	}
     }//end EndGameMenuItmListener
     
+    private class StartGameMenuItemListener implements ActionListener{
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    startGame();
+		    return null;
+		}});
+	}//end actionPerformed(...)
+    }//end StartGameMenuItmListener
+    
     private class RunStateListener implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+	    final Object newValue = evt.getNewValue();
 	    tr.getMenuSystem().setMenuItemEnabled(
-		    evt.getNewValue() instanceof Game.GameRunMode, 
-		    END_GAME_MENU_PATH);
+		    newValue instanceof Game.GameRunningMode,
+		    ABORT_GAME_MENU_PATH);
+	    tr.getMenuSystem().setMenuItemEnabled(
+		    (newValue instanceof Game.GameLoadedMode), 
+		        START_GAME_MENU_PATH);
 	}//end RunStateListener
     }//end RunStateListener
     

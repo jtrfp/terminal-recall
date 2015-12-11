@@ -347,7 +347,6 @@ public class SwingMenuSystem implements MenuSystem {
     @Override
     public void setMenuItemEnabled(boolean enabled, String... path)
 	    throws IllegalArgumentException {
-	System.out.println("SwingMenuSystem.seMenuItemEnabled() "+enabled+" path[end]="+path[path.length-1]);
 	rootNode.setMenuItemEnabled(enabled, 0, path);
     }
     
@@ -400,7 +399,7 @@ public class SwingMenuSystem implements MenuSystem {
 		throws IllegalArgumentException {
 	    final String thisName = path[index];
 	    MenuNode node = nameMap.get(thisName);
-	    if(node==null){
+	    if(node==null){//No pre-existing node
 		if(index==path.length-1){//Leaf
 		    node = new MenuItem(thisName, this.item);
 		}else{//Stem
@@ -413,7 +412,7 @@ public class SwingMenuSystem implements MenuSystem {
 		if(index!=path.length-1)
 		    node.addMenuItem(index+1, path);
 		else
-		    throw new IllegalArgumentException("Cannot add item as there is a submenu already in its place. Path[index]="+path[index]+" index="+index);
+		    throw new IllegalArgumentException("Cannot add item as there is a submenu already in its place. Path[index]="+path[index]+" index="+index+" this="+getName());
 	    }//end !null
 	}//end addMenuItem(...)
 
@@ -422,33 +421,28 @@ public class SwingMenuSystem implements MenuSystem {
 		throws IllegalArgumentException {
 	    final String thisName = path[index];
 	    MenuNode node = nameMap.get(thisName);
-	    System.out.println(getName()+" removeMenuItem index="+index+" path[index]="+path[index]+" node="+node);
 	    if(node!=null){
-		if(index==path.length-2){//Leaf
-		    System.out.println("PATH A");
+		if(index==path.length-1){// thisName is Leaf
 		    node.destroy();
 		    nameMap.remove(thisName);
 		}else{//Stem
-		    System.out.println("PATH B");
+		    assert !(node instanceof MenuItem);
 		    node.removeMenuItem(index+1, path);
-		    System.out.println("Removal result: "+nameMap.remove(thisName));
-		    System.out.println("PATH b - post-removal size: "+nameMap.size());
+		    if(node.isEmpty())
+			nameMap.remove(thisName);
 		    }
 		}//end if(stem)
+	    else
+		throw new IllegalArgumentException("Could not find leaf menu item `"+thisName+"` in "+getName());
 	    if(isEmpty()){
-		System.out.println("PATH C");
 		destroy();
 	    }//end if(node!=null)
-	    else
-		throw new IllegalArgumentException("Could not find leaf menu item `"+thisName+"`");
 	}
 
 	@Override
 	public void addMenuItemListener(ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
-	    final MenuNode node = nameMap.get(path[index]); 
-	    for(String s:nameMap.keySet())
-		System.out.println("key: "+s);
+	    final MenuNode node = nameMap.get(path[index]);
 	    if(node == null)
 		throw new IllegalArgumentException("Failed to find node: `"+path[index]+"` at index "+index);
 	    node.addMenuItemListener(l, index+1, path);
@@ -463,7 +457,11 @@ public class SwingMenuSystem implements MenuSystem {
 	@Override
 	public void setMenuItemEnabled(boolean enabled, int index,
 		String... path) throws IllegalArgumentException {
-	    nameMap.get(path[index]).setMenuItemEnabled(enabled, index+1, path);
+	    final MenuNode node = nameMap.get(path[index]);
+	    if(node!=null)
+	     node.setMenuItemEnabled(enabled, index+1, path);
+	    else
+		throw new IllegalArgumentException("Cannot find subnode "+path[index]+" inside of submenu "+getName());
 	}
 	
 	private void checkNonLeafRequest(int index, String ... path){
@@ -480,7 +478,6 @@ public class SwingMenuSystem implements MenuSystem {
 
 	@Override
 	public void destroy() {
-	    System.out.println("SubMentu.destroy() name= "+getName()+" Parent="+parent+" item="+item);
 	    if(parent!=null){
 	     parent.remove(item);
 	     rw.revalidate();
@@ -555,7 +552,6 @@ public class SwingMenuSystem implements MenuSystem {
 	public void destroy() {
 	    if(parent!=null && item !=null){
 		parent.remove(item);
-		System.out.println("MenuItem.destroy() name= "+getName()+" Parent="+parent+" item="+item);
 		rw.revalidate();
 		}
 	}//end destroy()

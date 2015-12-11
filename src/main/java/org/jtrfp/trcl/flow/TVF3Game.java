@@ -328,6 +328,7 @@ public class TVF3Game implements Game {
 			    displayModes.setDisplayMode(titleScreenMode);
 			    introScreen.startMusic();
 			    setLevelIndex(0);
+			    tr.setRunState(new Game.GameLoadedMode(){});
 	    }// end boot()
 	    
 	    public void setPlayer(Player player) {
@@ -339,6 +340,7 @@ public class TVF3Game implements Game {
 	    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException, CanceledException {
 		if (!tr.config.isDebugMode())
 		    setupNameWithUser();
+		tr.setRunState(new Game.GameRunningMode(){});
 		setInGameplay(true);
 		try {
 		    MissionLevel[] levels = vox.getLevels();
@@ -369,6 +371,7 @@ public class TVF3Game implements Game {
 		    throw e;
 		} finally {
 		    tr.getThreadManager().setPaused(true);
+		    tr.setRunState(new Game.GameLoadedMode() {});
 		    setInGameplay(false);
 		}//end finally{}
 	    }// end beginGameplay()

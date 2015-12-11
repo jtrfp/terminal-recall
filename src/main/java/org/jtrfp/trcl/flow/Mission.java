@@ -922,4 +922,8 @@ public class Mission {
     public Game getGame() {
 	return game;
     }
+
+    public void destruct() {
+	Features.destruct(this);
+    }
 }// end Mission

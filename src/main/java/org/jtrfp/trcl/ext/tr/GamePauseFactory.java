@@ -14,54 +14,96 @@ package org.jtrfp.trcl.ext.tr;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.Callable;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.ControllerInput;
 import org.jtrfp.trcl.core.ControllerInputs;
+import org.jtrfp.trcl.core.Feature;
+import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.flow.Mission.GameplayMode;
+import org.jtrfp.trcl.flow.TVF3Game;
+import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jogamp.newt.event.KeyEvent;
-
 @Component
-public class GamePause  {
-    IndirectProperty<Game> gameIP;
-    IndirectProperty<Mission>currentMissionIP;
-    ActionListener pauseAL;
-    JMenuItem game_pause;
-    PropertyChangeListener gamePCL, pausePCL, satViewPCL, gameplayModePCL;
-    WindowListener rootWindowWL;
+public class GamePauseFactory implements FeatureFactory<Mission>  {
     private final TR tr;
-    private Action pauseAction;
-    private static final String pauseKey = "PAUSE_KEY";
     public static final String PAUSE = "Pause";
+    public static final String [] PAUSE_MENU_PATH = new String[] {"Game","Pause"}; 
     private final ControllerInput pause;
+    private final MenuSystem menuSystem;
     
     @Autowired
-    public GamePause(TR tr, ControllerInputs inputs){
-	this.tr     = tr;
-	pause       = inputs.getControllerInput(PAUSE);
-	apply();
-    }//end constructor
+    public GamePauseFactory(TR tr, ControllerInputs inputs, MenuSystem menuSystem){
+	this.tr         = tr;
+	pause           = inputs.getControllerInput(PAUSE);
+	this.menuSystem = menuSystem;
+    }//end constructor'
     
+    public class GamePause implements Feature<Mission>{
+	private boolean paused = false;
+	private final ControllerListener controllerListener       = new ControllerListener();
+	private final MenuSelectionListener menuSelectionListener = new MenuSelectionListener();
+	private WeakReference<Mission> mission;
+
+	@Override
+	public void apply(Mission mission) {
+	    pause.addPropertyChangeListener(controllerListener);
+	    menuSystem.addMenuItem(PAUSE_MENU_PATH);
+	    menuSystem.addMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
+	    this.mission = new WeakReference<Mission>(mission);
+	}
+
+	@Override
+	public void destruct(Mission target) {
+	    menuSystem.removeMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
+	    menuSystem.removeMenuItem(PAUSE_MENU_PATH);
+	    pause.removePropertyChangeListener(controllerListener);
+	}
+	
+	private class ControllerListener implements PropertyChangeListener{
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		if((Double)(evt.getNewValue())>.7)
+		    proposePause(!paused);
+	    }
+	}//end ControllerListener
+	
+	private class MenuSelectionListener implements ActionListener{
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		proposePause(!paused);
+	    }
+	}//end MenuSelectionListener
+	
+	private void proposePause(boolean newState){
+	    if(tr.getRunState() instanceof Mission.PlayerActivity){
+		setPaused(newState);
+	    }//end if(PlayerActivity)
+	}//end proposePauseToggle()
+
+	public boolean isPaused() {
+	    return paused;
+	}
+
+	public void setPaused(boolean paused) {
+	    this.paused = paused;
+	    Mission mission = this.mission.get();
+	    if(mission!=null)
+		if(paused)
+		 ((TVF3Game)mission.getGame()).getUpfrontDisplay().submitPersistentMessage("Paused--F3 to Resume ");
+		else
+		    ((TVF3Game)mission.getGame()).getUpfrontDisplay().removePersistentMessage();
+	    tr.getThreadManager().setPaused(paused);
+	    tr.soundSystem.get() .setPaused(paused);
+	}
+	
+    }//end GamePause
+    /*
     public void apply() {
 	game_pause = new JMenuItem("Pause");
 	
@@ -171,35 +213,21 @@ public class GamePause  {
 	    }//end if(.7)
 	}//end propertyChange(...)
     }//end PropertyChangeListener
+    }
+*/
 
-    public void remove(final TR tr) {//UNTESTED
-	tr.removePropertyChangeListener(gameIP);
-	gameIP    .removeTargetPropertyChangeListener(currentMissionIP);
-	game_pause.removeActionListener(pauseAL);
-	try {
-	    SwingUtilities.invokeAndWait(new Runnable(){
-	        @Override
-	        public void run() {
-	    	//tr.getMenuSystem().getGameMenu().remove(game_pause);
-	        }});
-	} catch (InvocationTargetException e) {
-	    e.printStackTrace();
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	}
-	tr.removePropertyChangeListener(gamePCL);
-	gameIP.removeTargetPropertyChangeListener(pausePCL);
-	currentMissionIP.removeTargetPropertyChangeListener(satViewPCL);
-	currentMissionIP.removeTargetPropertyChangeListener(gameplayModePCL);
-	gameIP          =null;
-	currentMissionIP=null;
-	pauseAL         =null;
-	game_pause      =null;
-	gamePCL         =null;
-	pausePCL        =null;
-	satViewPCL      =null;
-	gameplayModePCL =null;
-	rootWindowWL    =null;
+    @Override
+    public Feature<Mission> newInstance(Mission target) {
+	return new GamePause();
     }
 
+    @Override
+    public Class<Mission> getTargetClass() {
+	return Mission.class;
+    }
+
+    @Override
+    public Class<? extends Feature> getFeatureClass() {
+	return GamePause.class;
+    }
 }//end GamePause

@@ -106,6 +106,23 @@ public class Mission {
 	navs, tunnels, overworld
     }// end LoadingStages
     
+    //ROOT STATES
+    public interface MissionState       extends Game.GameRunningMode{}
+    public interface ConstructingState  extends MissionState{}
+    public interface ConstructedState   extends MissionState{}
+    public interface ActiveMissionState extends ConstructedState{}
+    
+     public interface LoadingState      extends ActiveMissionState{}
+     public interface GameplayState     extends ActiveMissionState{}
+      public interface Briefing        extends GameplayState{}
+       public interface PlanetBrief     extends Briefing{}
+       public interface EnemyBrief      extends Briefing{}
+       public interface MissionSummary  extends Briefing{}
+      public interface PlayerActivity  extends GameplayState{}
+       public interface OverworldState  extends PlayerActivity{}
+       public interface ChamberState    extends OverworldState{}
+       public interface TunnelState     extends PlayerActivity{}
+    
     public Mission(TR tr, Game game, LVLFile lvl, String levelName, boolean showIntro) {
 	this.tr 	= tr;
 	this.lvl 	= lvl;
@@ -113,14 +130,17 @@ public class Mission {
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
 	this.displayHandler = new DisplayModeHandler(tr.getDefaultGrid());
+	Features.init(this);
+	tr.setRunState(new ConstructingState(){});
 	levelLoadingMode = new Object[]{
 		 ((TVF3Game)game).levelLoadingScreen,
 		 ((TVF3Game)game).upfrontDisplay
 	    };
-	Features.init(this);
+	tr.setRunState(new ConstructedState(){});
     }// end Mission
     
     public Result go() {
+	tr.setRunState(new LoadingState(){});
 	setMissionMode(new Mission.LoadingMode());
 	synchronized(missionLock){
 	synchronized(missionEnd){
@@ -291,9 +311,10 @@ public class Mission {
 	((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
+	    tr.setRunState(new Briefing(){});
 	    setMissionMode(new Mission.IntroMode());
 	    displayHandler.setDisplayMode(briefingMode);
-	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);
+	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
 	}
 	setMissionMode(new Mission.AboveGroundMode());
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
@@ -306,11 +327,13 @@ public class Mission {
 	
 	((TVF3Game)game).getPlayer()	.setActive(true);
 	((TVF3Game)tr.getGame()).setPaused(false);
+	tr.setRunState(new PlayerActivity(){});
 	//Wait for mission end
 	synchronized(missionEnd){
 	 while(missionEnd[0]==null){try{missionEnd.wait();}
 		catch(InterruptedException e){break;}}}
 	//Completion summary
+	tr.setRunState(new Briefing(){});
 	if(missionEnd[0]!=null)
 	    if(!missionEnd[0].isAbort()){
 		displayHandler.setDisplayMode(summaryMode);
@@ -893,5 +916,9 @@ public class Mission {
     public Tunnel getCurrentTunnel() {
 	if(!(getMissionMode() instanceof TunnelMode))return null;
 	return currentTunnel;
+    }
+
+    public Game getGame() {
+	return game;
     }
 }// end Mission

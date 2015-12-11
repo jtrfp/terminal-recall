@@ -339,7 +339,7 @@ public class SwingMenuSystem implements MenuSystem {
     }
 
     @Override
-    public void removeMeuItemListener(ActionListener l, String... path)
+    public void removeMenuItemListener(ActionListener l, String... path)
 	    throws IllegalArgumentException {
 	rootNode.removeMenuItemListener(l, 0, path);
     }

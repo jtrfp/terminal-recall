@@ -19,6 +19,6 @@ public interface MenuSystem {
  public void addMenuItem   (String ... path) throws IllegalArgumentException;
  public void removeMenuItem(String ... path) throws IllegalArgumentException;
  public void addMenuItemListener  (ActionListener l, String ... path) throws IllegalArgumentException;
- public void removeMeuItemListener(ActionListener l, String ... path) throws IllegalArgumentException;
+ public void removeMenuItemListener(ActionListener l, String ... path) throws IllegalArgumentException;
  public void setMenuItemEnabled(boolean enabled, String ... path)     throws IllegalArgumentException;
 }//end MenuSystem

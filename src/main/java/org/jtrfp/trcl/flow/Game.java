@@ -17,8 +17,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
-import org.jtrfp.trcl.flow.GameShell.GameShellConstructed;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.shell.GameShell.GameShellConstructed;
 
 public interface Game {
 ////PROPERTIES

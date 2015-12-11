@@ -58,6 +58,7 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;

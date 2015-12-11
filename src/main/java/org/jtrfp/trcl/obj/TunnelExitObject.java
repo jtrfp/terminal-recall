@@ -33,11 +33,11 @@ import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.GameShell;
 import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.shell.GameShell;
 
 public class TunnelExitObject extends PortalEntrance {
     private 		Vector3D 	exitLocation, exitHeading, exitTop;

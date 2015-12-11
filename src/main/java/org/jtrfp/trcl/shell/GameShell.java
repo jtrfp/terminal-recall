@@ -14,7 +14,7 @@
  *      chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.flow;
+package org.jtrfp.trcl.shell;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -45,7 +45,14 @@ import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.flow.FZone;
+import org.jtrfp.trcl.flow.Fury3;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.GameVersion;
+import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.flow.Game.CanceledException;
+import org.jtrfp.trcl.flow.Game.GameLoadedMode;
+import org.jtrfp.trcl.flow.Game.GameRunningMode;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;

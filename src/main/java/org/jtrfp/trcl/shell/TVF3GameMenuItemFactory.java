@@ -11,7 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.gui;
+package org.jtrfp.trcl.shell;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,7 +23,7 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.GameShell;
+import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

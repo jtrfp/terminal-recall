@@ -18,21 +18,19 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
 
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
-import org.jtrfp.trcl.core.LazyTRFuture;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.Mission.Result;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.BriefingLayout;
@@ -213,6 +211,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	game.getPlayer().setActive(false);
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
 	String  content = txtMBF.getMissionText().replace("\r","");
+	tr.setRunState(new Mission.PlanetBrief(){});
 	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(), lvl);
 	final String playerName = game.getPlayerName();
 	for(String token:layout.getNameTokens())
@@ -240,6 +239,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	spacebarWaitThread.interrupt();
 	
 	//Enemy introduction
+	tr.setRunState(new Mission.EnemyBrief() {});
 	final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
 	renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());

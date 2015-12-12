@@ -18,15 +18,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Features {
     // Key represents target-class
-    private static final Map<Object,Map<Class<? extends Feature>,Feature>> targetMap = new HashMap<Object,Map<Class<? extends Feature>,Feature>>();
+    private static final Map<Object,Map<Class<? extends Feature>,Feature>> targetMap 
+    	= new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
     private static final HashMap<Class<?>,Collection<FeatureFactory>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory>>();
     private static final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
 
@@ -72,8 +74,9 @@ public class Features {
     
     public static void destruct(Object obj){
 	for(Feature f : targetMap.get(obj).values())
-	    f.destruct(obj);
-	targetMap.put(obj, null);
+	    if(f!=null)
+	     f.destruct(obj);
+	targetMap.remove(obj);
     }//end destruct()
     
     private static Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){

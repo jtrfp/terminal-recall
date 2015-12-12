@@ -765,6 +765,7 @@ public class Mission {
 		      getOverworldSystem().
 		      getSkySystem().
 		      getBelowCloudsSkyCubeGen());
+	tr.setRunState(new TunnelState(){});
 	player.setActive(true);
     }//end enterTunnel()
     /**

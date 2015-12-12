@@ -560,4 +560,22 @@ public final class TR implements UncaughtExceptionHandler{
     public void setMenuSystem(MenuSystem menuSystem) {
         this.menuSystem = menuSystem;
     }
+
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+	return pcSupport.getPropertyChangeListeners();
+    }
+
+    public void removePropertyChangeListener(String propertyName,
+	    PropertyChangeListener listener) {
+	pcSupport.removePropertyChangeListener(propertyName, listener);
+    }
+
+    public PropertyChangeListener[] getPropertyChangeListeners(
+	    String propertyName) {
+	return pcSupport.getPropertyChangeListeners(propertyName);
+    }
+
+    public boolean hasListeners(String propertyName) {
+	return pcSupport.hasListeners(propertyName);
+    }
 }//end TR

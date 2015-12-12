@@ -19,8 +19,8 @@ import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
+import org.jtrfp.trcl.flow.SatelliteViewFactory;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
-import org.jtrfp.trcl.gui.SatelliteViewToggle;
 import org.springframework.stereotype.Component;
 
 
@@ -39,7 +39,7 @@ public class KeyboardDefaultConf extends ControllerConfiguration {
 	this.setIntendedController("Keyboard");
 	
 	this.getEntryMap().put("SPACE", new ConfEntry(UserInputWeaponSelectionBehavior.FIRE          ,"SPACE",1,0 ));
-	this.getEntryMap().put("TAB"  , new ConfEntry(SatelliteViewToggle.SATELLITE_TOGGLE           ,"TAB"  ,1,0 ));
+	this.getEntryMap().put("TAB"  , new ConfEntry(SatelliteViewFactory.SATELLITE_TOGGLE           ,"TAB"  ,1,0 ));
 	this.getEntryMap().put("LEFT" , new ConfEntry(UserInputRudderElevatorControlBehavior.RUDDER  ,"LEFT" ,1,0 ));
 	this.getEntryMap().put("RIGHT", new ConfEntry(UserInputRudderElevatorControlBehavior.RUDDER  ,"RIGHT",-1,0));
 	this.getEntryMap().put("UP"   , new ConfEntry(UserInputRudderElevatorControlBehavior.ELEVATOR,"UP"   ,1,0 ));

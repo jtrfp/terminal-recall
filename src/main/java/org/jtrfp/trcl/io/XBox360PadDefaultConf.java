@@ -19,8 +19,8 @@ import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
+import org.jtrfp.trcl.flow.SatelliteViewFactory;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
-import org.jtrfp.trcl.gui.SatelliteViewToggle;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,7 +37,7 @@ public class XBox360PadDefaultConf extends ControllerConfiguration {
 	this.setIntendedController("Microsoft X-Box 360 pad");
 	this.getEntryMap().put ("A"     ,new ConfEntry(UserInputWeaponSelectionBehavior.FIRE          ,"A"     ,1,0 ));
 	this.getEntryMap().put ("X"     ,new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"X"     ,1,0 ));
-	this.getEntryMap() .put("Mode"  ,new ConfEntry(SatelliteViewToggle.SATELLITE_TOGGLE           ,"Mode"  ,1,0 ));
+	this.getEntryMap() .put("Mode"  ,new ConfEntry(SatelliteViewFactory.SATELLITE_TOGGLE           ,"Mode"  ,1,0 ));
 	this.getEntryMap() .put("Select",new ConfEntry(ViewSelectFactory.VIEW                          ,"Select",1,0 ));
 	this.getEntryMap() .put("Start" ,new ConfEntry(GamePauseFactory.PAUSE                         ,"Start" ,1,0 ));
 	this.getEntryMap() .put("x"     ,new ConfEntry(UserInputRudderElevatorControlBehavior.RUDDER  ,"x"     ,-1,0));

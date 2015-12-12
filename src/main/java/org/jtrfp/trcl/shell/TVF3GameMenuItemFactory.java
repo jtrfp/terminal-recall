@@ -53,7 +53,6 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 
 	@Override
 	public void apply(GameShell target) {
-	    System.out.println("TVF3GameMenuItem.apply()");
 	    setTarget(target);
 	    installMenuItems();
 	    installMenuItemListeners();

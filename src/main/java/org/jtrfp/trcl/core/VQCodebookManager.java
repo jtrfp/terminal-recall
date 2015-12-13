@@ -31,8 +31,8 @@ import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 public class VQCodebookManager {
     private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODE256_PER_PAGE*NUM_CODE_PAGES);
     private final 	GLTexture 	rgbaTexture,
-    					esTuTvTexture,
-    					indentationTexture;
+    					esTuTvTexture/*,
+    					indentationTexture*/;
     private final	Collection<TileUpdate>tileUpdates	       = new ArrayList<TileUpdate>(1024);
     private final	GPU		gpu;
     private final	GLFrameBuffer	fb;
@@ -76,8 +76,9 @@ public class VQCodebookManager {
 		setMagFilter(GL3.GL_LINEAR).
 		setMinFilter(GL3.GL_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
-		setWrapT(GL3.GL_CLAMP_TO_EDGE);
-	indentationTexture = gpu.
+		setWrapT(GL3.GL_CLAMP_TO_EDGE).
+		unbind();
+	/*indentationTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
@@ -87,7 +88,7 @@ public class VQCodebookManager {
 		setMinFilter(GL3.GL_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE).
-		unbind();
+		unbind();*/
 	
 	final GL3 gl = gpu.getGl();
 	
@@ -249,7 +250,7 @@ public class VQCodebookManager {
     
     public GLTexture getRGBATexture()		{return rgbaTexture;}
     public GLTexture getESTuTvTexture()		{return esTuTvTexture;}
-    public GLTexture getIndentationTexture()	{return indentationTexture;}
+    //public GLTexture getIndentationTexture()	{return indentationTexture;}
 
     public ByteBuffer []dumpPagesToBuffer() throws IOException {
 	ByteBuffer buf = ByteBuffer.allocate(4 * CODE_PAGE_SIDE_LENGTH_TEXELS * CODE_PAGE_SIDE_LENGTH_TEXELS * NUM_CODE_PAGES);

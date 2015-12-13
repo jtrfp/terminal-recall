@@ -111,6 +111,10 @@ public class TunnelExitObject extends PortalEntrance {
 			mission.setMissionMode(new Mission.ChamberMode());
 		    }else mission.setMissionMode(new Mission.AboveGroundMode());
 		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
+		    if(mirrorTerrain)
+		     tr.setRunState(new Mission.ChamberState(){});
+		    else
+		     tr.setRunState(new Mission.PlayerActivity(){});
 		    
 		    //tr.getDefaultGrid().nonBlockingAddBranch(overworldSystem);
 		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)

@@ -155,12 +155,17 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	public void propertyChange(PropertyChangeEvent evt) {
 	    final String propertyName = evt.getPropertyName();
 	    if(propertyName==WorldObject.POSITION){
+		final Object src = evt.getSource();
+		if(!(src instanceof WorldObject))
+		    throw new IllegalArgumentException("Source is not a WorldObject. Got "+src);
+		final WorldObject wo = (WorldObject)src;
+		final Vector3D pHeading = wo.getHeading().scalarMultiply(TR.visibilityDiameterInMapSquares*TR.mapSquareSize/2);
 		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(
-			Math.rint(newValue[0]/granularity),
-			Math.rint(newValue[1]/granularity),
-			Math.rint(newValue[2]/granularity));
+			Math.rint((newValue[0]+pHeading.getX())/granularity),
+			Math.rint((newValue[1]+pHeading.getY())/granularity),
+			Math.rint((newValue[2]+pHeading.getZ())/granularity));
 		final Vector3D oldCenterCube = centerCube;
 		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)

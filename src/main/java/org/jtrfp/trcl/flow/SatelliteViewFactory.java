@@ -81,10 +81,10 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 
 	@Override
 	public void destruct(Mission target) {
+	    tr.removePropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    menuSystem.removeMenuItemListener(menuItemListener, VIEW_MENU_PATH);
-	    menuSystem.removeMenuItem(VIEW_MENU_PATH);
-	    tr.removePropertyChangeListener(runStateListener);
 	    satelliteToggleInput.removePropertyChangeListener(satelliteControl);
+	    menuSystem.removeMenuItem(VIEW_MENU_PATH);
 	}
 	
 	private class SatelliteViewMenuItemListener implements ActionListener{

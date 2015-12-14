@@ -16,8 +16,7 @@ package org.jtrfp.trcl.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
 
 import javax.swing.DefaultListModel;
@@ -31,8 +30,8 @@ import javax.swing.ListSelectionModel;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
-import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
 
 public class LevelSkipWindow extends JFrame {
@@ -45,6 +44,7 @@ public class LevelSkipWindow extends JFrame {
     private final JButton btnCancel;
     private final JList<String> levelList;
     private final DefaultListModel<String> levelLM = new DefaultListModel<String>();
+    private WeakReference<Game> game = null;
     	
     	public LevelSkipWindow(){
     	    this(null);
@@ -82,6 +82,7 @@ public class LevelSkipWindow extends JFrame {
 	}//end constructor
 
 	private void setupListeners(){
+	    /*
 	    final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
 	    tr.addPropertyChangeListener("game", gameIP);
 	    gameIP.addTargetPropertyChangeListener("vox", new PropertyChangeListener(){
@@ -100,7 +101,7 @@ public class LevelSkipWindow extends JFrame {
 		    public void propertyChange(PropertyChangeEvent evt) {
 			    levelList.setSelectedValue(evt.getNewValue(), true);
 		    }});
-	    
+	    */
 	    btnGo.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent evt) {
@@ -108,9 +109,11 @@ public class LevelSkipWindow extends JFrame {
 		    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 			@Override
 			public Void call() throws Exception {
+			    try{
 			    ((TVF3Game)tr.getGame()).abortCurrentMission();
 			    ((TVF3Game)tr.getGame()).setLevelIndex(levelList.getSelectedIndex());
 			    ((TVF3Game)tr.getGame()).doGameplay();
+			    }catch(CanceledException e){}//Do nothing.
 			    return null;
 			}});
 		}});
@@ -121,4 +124,19 @@ public class LevelSkipWindow extends JFrame {
 		    LevelSkipWindow.this.setVisible(false);
 		}});
 	}//end setupListeners()
+
+	public Game getGame() {
+	    return game.get();
+	}
+
+	public void setGame(Game game) {
+	    this.game = new WeakReference<Game>(game);
+	    levelLM.clear();
+	    if(!(game instanceof TVF3Game))
+		throw new IllegalStateException("Expected TVF3Game. Got "+game.getClass().getName());
+	    final TVF3Game g = (TVF3Game)game;
+	    final VOXFile vox = g.getVox();
+	    for(MissionLevel ml:vox.getLevels())
+		levelLM.addElement(ml.getLvlFile());
+	}//end setGame(...)
 }//end LevelSkipWindow

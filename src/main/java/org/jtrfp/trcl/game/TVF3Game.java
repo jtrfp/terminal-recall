@@ -67,6 +67,7 @@ import org.jtrfp.trcl.prop.IntroScreen;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class TVF3Game implements Game {
+    public static final String VOX = "vox";
     enum Difficulty {
 	EASY, NORMAL, HARD, FURIOUS;
 	
@@ -176,8 +177,9 @@ public class TVF3Game implements Game {
 	    public synchronized void setVox(VOXFile vox) {
 		if(this.vox==vox)
 		    return;//No change.
-		pcSupport.firePropertyChange("vox", this.vox, vox);
+		final VOXFile oldVox = this.vox;
 		this.vox = vox;
+		pcSupport.firePropertyChange(VOX, oldVox, vox);
 	    }
 
 	    /**
@@ -533,5 +535,23 @@ public class TVF3Game implements Game {
      */
     public synchronized void setTr(TR tr) {
 	this.tr = tr;
+    }
+
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+	return pcSupport.getPropertyChangeListeners();
+    }
+
+    public void removePropertyChangeListener(String propertyName,
+	    PropertyChangeListener listener) {
+	pcSupport.removePropertyChangeListener(propertyName, listener);
+    }
+
+    public PropertyChangeListener[] getPropertyChangeListeners(
+	    String propertyName) {
+	return pcSupport.getPropertyChangeListeners(propertyName);
+    }
+
+    public boolean hasListeners(String propertyName) {
+	return pcSupport.hasListeners(propertyName);
     }
 }// end Game

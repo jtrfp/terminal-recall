@@ -31,8 +31,8 @@ public interface Game {
    public interface GameRunMode extends GameShellConstructed{}
    public interface GameConstructingMode extends GameRunMode{}
    public interface GameConstructedMode  extends GameRunMode{}
-   public interface GameLoadedMode       extends GameConstructedMode{}
-   public interface GameRunningMode      extends GameConstructedMode{}
+    public interface GameLoadedMode       extends GameConstructedMode{}
+     public interface GameRunningMode      extends GameLoadedMode{}
    public interface GameDestructingMode  extends GameRunMode{}
    public interface GameDestructedMode   extends GameRunMode{}
     

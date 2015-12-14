@@ -314,6 +314,7 @@ public class Mission {
 		 
 		 }//end sync(Mission.this)
 	((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
+	tr.soundSystem.get().setPaused(false);
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
 	    tr.setRunState(new Briefing(){});

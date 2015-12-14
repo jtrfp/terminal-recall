@@ -159,7 +159,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		if(!(src instanceof WorldObject))
 		    throw new IllegalArgumentException("Source is not a WorldObject. Got "+src);
 		final WorldObject wo = (WorldObject)src;
-		final Vector3D pHeading = wo.getHeading().scalarMultiply(TR.visibilityDiameterInMapSquares*TR.mapSquareSize/2);
+		final Vector3D pHeading = wo.getHeading().scalarMultiply(TR.visibilityDiameterInMapSquares*TR.mapSquareSize/3);
 		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(

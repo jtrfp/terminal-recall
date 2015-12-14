@@ -206,6 +206,8 @@ public class TVF3Game implements Game {
 				.getLVL(lvlFileName), lvlFileName.substring(0,
 				lvlFileName.lastIndexOf('.')), getLevelIndex() % 3 == 0));
 		}//end if(levelIndex!=-1)
+		else // Make sure the Mission is destroyed
+		    setCurrentMission(null);
 	    }// end setLevelIndex(...)
 
 	    /**
@@ -388,10 +390,10 @@ public class TVF3Game implements Game {
 	    
 	    public void abort(){
 		tr.setRunState(new GameDestructingMode(){});
+		abortCurrentMission();
 		Features.destruct(this);
 		try{setLevelIndex(-1);}
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
-		abortCurrentMission();
 		cleanup();
 		displayModes.setDisplayMode(emptyMode);
 		tr.getGameShell().applyGFXState();

@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.gui;
 import java.awt.geom.Point2D;
 
-import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.miss.NAVObjective;
 
 public interface DashboardLayout {
  public Point2D.Double getAmmoPosition();

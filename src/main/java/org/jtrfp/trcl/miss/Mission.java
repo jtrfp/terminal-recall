@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.flow;
+package org.jtrfp.trcl.miss;
 
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
@@ -48,8 +48,12 @@ import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
 import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
-import org.jtrfp.trcl.flow.LoadingProgressReporter.UpdateHandler;
-import org.jtrfp.trcl.flow.NAVObjective.Factory;
+import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.flow.TVF3Game;
+import org.jtrfp.trcl.flow.Game.GameRunningMode;
+import org.jtrfp.trcl.miss.LoadingProgressReporter.Impl;
+import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
+import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PortalExit;

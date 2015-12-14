@@ -15,7 +15,7 @@ package org.jtrfp.trcl.gui;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 
-import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.miss.NAVObjective;
 
 public class F3DashboardLayout implements DashboardLayout {
     private static final double TOP_LINE_Y    = .93;

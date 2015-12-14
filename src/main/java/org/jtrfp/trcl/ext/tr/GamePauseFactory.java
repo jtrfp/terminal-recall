@@ -23,9 +23,9 @@ import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.Mission;
 import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.miss.Mission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -14,8 +14,8 @@ package org.jtrfp.trcl.beh;
 
 import java.lang.ref.WeakReference;
 
-import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.NAVObjective;
 
 public class RemovesNAVObjectiveOnDeath extends Behavior implements
 	DeathListener {

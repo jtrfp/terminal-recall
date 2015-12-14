@@ -21,7 +21,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
-import org.jtrfp.trcl.flow.Mission;
+import org.jtrfp.trcl.miss.Mission;
 
 public class TunnelEntranceObject extends BillboardSprite {
     public static final double GROUND_HEIGHT_PAD=3500;

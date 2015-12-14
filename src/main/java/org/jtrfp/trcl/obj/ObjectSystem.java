@@ -23,7 +23,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile;
-import org.jtrfp.trcl.flow.LoadingProgressReporter;
+import org.jtrfp.trcl.miss.LoadingProgressReporter;
 
 public class ObjectSystem extends RenderableSpacePartitioningGrid {
     private final DEFObjectPlacer defPlacer;

@@ -18,8 +18,8 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.flow.NAVObjective;
+import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.NAVObjective;
 
 
 public class Checkpoint extends BillboardSprite {

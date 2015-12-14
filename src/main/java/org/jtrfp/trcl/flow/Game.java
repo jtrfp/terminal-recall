@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.shell.GameShell.GameShellConstructed;
 

@@ -21,10 +21,10 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.Mission;
-import org.jtrfp.trcl.flow.NAVObjective;
 import org.jtrfp.trcl.flow.TVF3Game;
 import org.jtrfp.trcl.gui.DashboardLayout;
+import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.NAVObjective;
 
 public class NavArrow extends Sprite2D {
 private static final double WIDTH=.16;

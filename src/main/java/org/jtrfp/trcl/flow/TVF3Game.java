@@ -46,6 +46,8 @@ import org.jtrfp.trcl.gui.F3BriefingLayout;
 import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
+import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.Mission.Result;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -73,16 +75,16 @@ public class TVF3Game implements Game {
 	    private String 	playerName="DEBUG";
 	    private Difficulty 	difficulty;
 	    private Mission 	currentMission;
-	    HUDSystem 	        hudSystem;
-	    NAVSystem 	        navSystem;
+	    public HUDSystem 	        hudSystem;
+	    public NAVSystem 	        navSystem;
 	    private SatelliteDashboard satDashboard;
 	    private Player 	player;
 	    private GLFont	upfrontFont;
-	    UpfrontDisplay
+	    public UpfrontDisplay
 	    			upfrontDisplay;
-	    LevelLoadingScreen
+	    public LevelLoadingScreen
 	    			levelLoadingScreen;
-	    BriefingScreen
+	    public BriefingScreen
 	    			briefingScreen;
 	    private IntroScreen
 	    			introScreen;

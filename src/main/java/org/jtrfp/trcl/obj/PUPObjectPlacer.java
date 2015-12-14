@@ -19,7 +19,7 @@ import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
-import org.jtrfp.trcl.flow.LoadingProgressReporter;
+import org.jtrfp.trcl.miss.LoadingProgressReporter;
 
 public class PUPObjectPlacer implements ObjectPlacer {
     ArrayList<PowerupObject> objs = new ArrayList<PowerupObject>();

@@ -48,6 +48,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	private boolean paused = false;
 	private final ControllerListener controllerListener       = new ControllerListener();
 	private final MenuSelectionListener menuSelectionListener = new MenuSelectionListener();
+	private final RunStateListener           runStateListener = new RunStateListener();
 	private WeakReference<Mission> mission;
 
 	@Override
@@ -55,11 +56,13 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	    pause.addPropertyChangeListener(controllerListener);
 	    menuSystem.addMenuItem(PAUSE_MENU_PATH);
 	    menuSystem.addMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
+	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    this.mission = new WeakReference<Mission>(mission);
 	}
 
 	@Override
 	public void destruct(Mission target) {
+	    tr.removePropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    menuSystem.removeMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
 	    menuSystem.removeMenuItem(PAUSE_MENU_PATH);
 	    pause.removePropertyChangeListener(controllerListener);
@@ -79,6 +82,16 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 		proposePause(!paused);
 	    }
 	}//end MenuSelectionListener
+	
+	private class RunStateListener implements PropertyChangeListener{
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final Object newValue = evt.getNewValue();
+		menuSystem.setMenuItemEnabled(
+			newValue instanceof Mission.GameplayState
+			, PAUSE_MENU_PATH);
+	    }
+	}//end RunStateListener
 	
 	private void proposePause(boolean newState){
 	    if(tr.getRunState() instanceof Mission.PlayerActivity){

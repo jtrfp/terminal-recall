@@ -1,4 +1,4 @@
-package org.jtrfp.trcl.flow;
+package org.jtrfp.trcl.game;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -20,7 +20,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import org.jtrfp.trcl.flow.TVF3Game.Difficulty;
+import org.jtrfp.trcl.game.TVF3Game.Difficulty;
+
 
 public class GameSetupDialog extends JDialog {
 

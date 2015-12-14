@@ -16,7 +16,7 @@ package org.jtrfp.trcl;
 import java.util.TimerTask;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.TVF3Game;
+import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
 public class UpfrontDisplay extends RenderableSpacePartitioningGrid {

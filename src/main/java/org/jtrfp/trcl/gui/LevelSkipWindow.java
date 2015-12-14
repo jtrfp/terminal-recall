@@ -31,9 +31,9 @@ import javax.swing.ListSelectionModel;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
-import org.jtrfp.trcl.flow.Game;
 import org.jtrfp.trcl.flow.IndirectProperty;
-import org.jtrfp.trcl.flow.TVF3Game;
+import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.game.TVF3Game;
 
 public class LevelSkipWindow extends JFrame {
     /**

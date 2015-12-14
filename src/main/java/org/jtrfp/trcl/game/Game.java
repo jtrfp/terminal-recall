@@ -11,7 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.flow;
+package org.jtrfp.trcl.game;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.flow;
+package org.jtrfp.trcl.game;
 
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
@@ -40,6 +40,14 @@ import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.GameVersion;
+import org.jtrfp.trcl.game.Game.CanceledException;
+import org.jtrfp.trcl.game.Game.GameConstructedMode;
+import org.jtrfp.trcl.game.Game.GameConstructingMode;
+import org.jtrfp.trcl.game.Game.GameDestructedMode;
+import org.jtrfp.trcl.game.Game.GameDestructingMode;
+import org.jtrfp.trcl.game.Game.GameLoadedMode;
+import org.jtrfp.trcl.game.Game.GameRunningMode;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.gui.F3BriefingLayout;

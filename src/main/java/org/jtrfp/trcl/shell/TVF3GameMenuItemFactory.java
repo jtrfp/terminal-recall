@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -29,7 +29,7 @@ import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
-import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;

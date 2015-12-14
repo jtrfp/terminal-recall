@@ -17,8 +17,8 @@ import java.util.Collection;
 
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.flow.Game;
-import org.jtrfp.trcl.flow.TVF3Game;
+import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;

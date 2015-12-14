@@ -33,7 +33,7 @@ import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.obj.Player;

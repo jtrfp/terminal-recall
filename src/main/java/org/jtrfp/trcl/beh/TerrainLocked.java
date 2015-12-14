@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.TerrainSystem;
-import org.jtrfp.trcl.flow.Game;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.WorldObject;
 

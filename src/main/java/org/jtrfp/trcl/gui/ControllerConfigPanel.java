@@ -19,9 +19,9 @@ import java.util.Collection;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.jtrfp.trcl.core.ControllerInputs;
-import org.jtrfp.trcl.core.ControllerMapper;
-import org.jtrfp.trcl.core.InputDevice;
+import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapper;
+import org.jtrfp.trcl.ctl.InputDevice;
 
 public class ControllerConfigPanel extends JPanel {
     private static final long serialVersionUID = -7100861763976731950L;

@@ -30,13 +30,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jtrfp.trcl.core.ControllerInput;
-import org.jtrfp.trcl.core.ControllerInputs;
-import org.jtrfp.trcl.core.ControllerMapper;
-import org.jtrfp.trcl.core.ControllerMapping;
-import org.jtrfp.trcl.core.ControllerSource;
-import org.jtrfp.trcl.core.InputDevice;
-import org.jtrfp.trcl.core.MappingListener;
+import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapper;
+import org.jtrfp.trcl.ctl.ControllerMapping;
+import org.jtrfp.trcl.ctl.ControllerSource;
+import org.jtrfp.trcl.ctl.InputDevice;
+import org.jtrfp.trcl.ctl.MappingListener;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration.ConfEntry;
 
 public class ControllerInputDevicePanel extends JPanel {

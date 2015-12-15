@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.ctl;
 
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;

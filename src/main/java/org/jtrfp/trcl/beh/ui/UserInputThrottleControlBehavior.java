@@ -13,8 +13,8 @@
 package org.jtrfp.trcl.beh.ui;
 
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.core.ControllerInput;
-import org.jtrfp.trcl.core.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.obj.Propelled;
 
 public class UserInputThrottleControlBehavior extends Behavior implements PlayerControlBehavior {

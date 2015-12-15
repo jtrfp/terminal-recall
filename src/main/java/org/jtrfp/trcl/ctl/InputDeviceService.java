@@ -10,14 +10,13 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+
+package org.jtrfp.trcl.ctl;
 
 import java.util.Collection;
 
-public interface InputDevice {
- public Collection<? extends ControllerSource> getControllerSources();
- public String getName();
- public String getVendor();
- public String getDetailedDescription();
- public ControllerSource getSourceByName(String name);
-}//end InputDevice
+public interface InputDeviceService {
+    public String getAuthor();
+    public String getDescription();
+    public Collection<InputDevice> getInputDevices();
+}//end InputDeviceService()

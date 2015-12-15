@@ -17,10 +17,10 @@ import java.util.HashMap;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
-import org.jtrfp.trcl.core.ControllerInputs;
-import org.jtrfp.trcl.core.ControllerMapper;
-import org.jtrfp.trcl.core.InputDevice;
-import org.jtrfp.trcl.core.InputDevices;
+import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapper;
+import org.jtrfp.trcl.ctl.InputDevice;
+import org.jtrfp.trcl.ctl.InputDevices;
 import org.jtrfp.trcl.gui.ControllerConfigTab.ControllerConfigTabConf;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;

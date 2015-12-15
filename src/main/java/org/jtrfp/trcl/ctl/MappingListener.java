@@ -11,7 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.ctl;
 
 public interface MappingListener<K,V> {
  public void mapped(K key, V value);

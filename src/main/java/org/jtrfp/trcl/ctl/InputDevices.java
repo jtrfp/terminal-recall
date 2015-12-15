@@ -11,7 +11,7 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.ctl;
 
 import java.util.ArrayList;
 import java.util.Collection;

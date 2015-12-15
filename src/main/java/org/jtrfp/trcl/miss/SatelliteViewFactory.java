@@ -19,11 +19,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.ref.WeakReference;
 
-import org.jtrfp.trcl.core.ControllerInput;
-import org.jtrfp.trcl.core.ControllerInputs;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

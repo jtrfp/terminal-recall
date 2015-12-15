@@ -130,7 +130,8 @@ public class GameShell {
 		    newValue instanceof Game.GameRunningMode,
 		    ABORT_GAME_MENU_PATH);
 	    tr.getMenuSystem().setMenuItemEnabled(
-		    (newValue instanceof Game.GameLoadedMode), 
+		    (newValue instanceof Game.GameLoadedMode) &&
+		    !(newValue instanceof Game.GameRunningMode), 
 		        START_GAME_MENU_PATH);
 	}//end RunStateListener
     }//end RunStateListener

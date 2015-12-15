@@ -311,10 +311,37 @@ public class RendererFactory {
 		gpu.defaultProgram();
 		gpu.defaultFrameBuffers();
 		gpu.defaultTIU();
+		opaqueFrameBuffer    .bindToDraw().destroy();
+		depthQueueFrameBuffer.bindToDraw().destroy();
+		gpu.defaultFrameBuffers();
+		
 		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
 			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
 		opaquePrimitiveIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
+		opaqueFrameBuffer = gpu
+			.newFrameBuffer()
+			.bindToDraw()
+			.attachDepthTexture(opaqueDepthTexture)
+			.attachDrawTexture(opaquePrimitiveIDTexture, 
+				GL3.GL_COLOR_ATTACHMENT0)
+			.attachDepthTexture(opaqueDepthTexture)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0)
+			.unbindFromDraw();
+		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Intermediate framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
+		
 		layerAccumulatorTexture.bind().setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null);
+		depthQueueFrameBuffer = gpu
+			.newFrameBuffer()
+			.bindToDraw()
+			.attachDrawTexture(layerAccumulatorTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDepthTexture(opaqueDepthTexture)
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
+		
 		portalTexture.delete();
 		for(int i=0; i<NUM_PORTALS; i++)
 		    portalFrameBuffers[i].destroy();

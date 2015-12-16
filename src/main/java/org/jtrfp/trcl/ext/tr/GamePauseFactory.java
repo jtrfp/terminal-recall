@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.Feature;
@@ -46,10 +47,11 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
     
     public class GamePause implements Feature<Mission>{
 	private boolean paused = false;
-	private final ControllerListener controllerListener       = new ControllerListener();
-	private final MenuSelectionListener menuSelectionListener = new MenuSelectionListener();
-	private final RunStateListener           runStateListener = new RunStateListener();
-	private WeakReference<Mission> mission;
+	private final ControllerListener    controllerListener       = new ControllerListener();
+	private final MenuSelectionListener menuSelectionListener    = new MenuSelectionListener();
+	private final RunStateListener      runStateListener         = new RunStateListener();
+	private WeakReference<Mission>      mission;
+	private final PropertyChangeSupport pcs                      = new PropertyChangeSupport(this);
 
 	@Override
 	public void apply(Mission mission) {
@@ -104,7 +106,11 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	}
 
 	public void setPaused(boolean paused) {
+	    if(this.paused==paused)
+		return;
+	    final boolean oldValue = this.paused;
 	    this.paused = paused;
+	    pcs.firePropertyChange(PAUSE, oldValue, paused);
 	    Mission mission = this.mission.get();
 	    if(mission!=null)
 		if(paused)
@@ -113,6 +119,37 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 		    ((TVF3Game)mission.getGame()).getUpfrontDisplay().removePersistentMessage();
 	    tr.getThreadManager().setPaused(paused);
 	    tr.soundSystem.get() .setPaused(paused);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(listener);
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+	    return pcs.getPropertyChangeListeners();
+	}
+
+	public void addPropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(propertyName, listener);
+	}
+
+	public void removePropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners(
+		String propertyName) {
+	    return pcs.getPropertyChangeListeners(propertyName);
+	}
+
+	public boolean hasListeners(String propertyName) {
+	    return pcs.hasListeners(propertyName);
 	}
 	
     }//end GamePause

@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.Feature;
@@ -27,8 +28,6 @@ import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
-import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,7 +66,9 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
         return menuSystem;
     }
     
-    class SatelliteView implements Feature<Mission> {
+    public class SatelliteView implements Feature<Mission> {
+	public static final String SATELLITE_VIEW = "satelliteView";
+	
 	private final   SatelliteViewMenuItemListener menuItemListener = new SatelliteViewMenuItemListener();
 	private final   RunStateListener              runStateListener = new RunStateListener();
 	private final   SatelliteControlInputListener satelliteControl = new SatelliteControlInputListener();
@@ -75,6 +76,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private         WeakReference<Mission>        mission;
 	private boolean                               satelliteView    = false;
 	private boolean                               enabled          = false;
+	private final   PropertyChangeSupport         pcs = new PropertyChangeSupport(this);
 	
 	@Override
 	public void apply(Mission target) {
@@ -150,7 +152,9 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	}
 
 	public void setSatelliteView(boolean satelliteView) {
+	    final boolean oldValue = this.satelliteView;
 	    this.satelliteView = satelliteView;
+	    pcs.firePropertyChange(SATELLITE_VIEW,oldValue,satelliteView);
 	    getMission().setSatelliteView(satelliteView);
 	}
 
@@ -163,6 +167,33 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 		return;
 	    this.enabled = enabled;
 	    menuSystem.setMenuItemEnabled(enabled, VIEW_MENU_PATH);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(listener);
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+	    return pcs.getPropertyChangeListeners();
+	}
+
+	public void addPropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(propertyName, listener);
+	}
+
+	public void removePropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners(
+		String propertyName) {
+	    return pcs.getPropertyChangeListeners(propertyName);
 	}
     }//end SatelliteView
 

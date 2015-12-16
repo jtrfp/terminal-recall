@@ -21,9 +21,14 @@ import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ext.tr.GamePauseFactory;
+import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
+import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,6 +71,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private final   SatelliteViewMenuItemListener menuItemListener = new SatelliteViewMenuItemListener();
 	private final   RunStateListener              runStateListener = new RunStateListener();
 	private final   SatelliteControlInputListener satelliteControl = new SatelliteControlInputListener();
+	private final   PausePropertyChangeListener   pausePropertyChangeListener = new PausePropertyChangeListener();
 	private         WeakReference<Mission>        mission;
 	private boolean                               satelliteView    = false;
 	private boolean                               enabled          = false;
@@ -73,14 +79,18 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	@Override
 	public void apply(Mission target) {
 	    setMission(target);
+	    Features.get(target, GamePause.class).addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    menuSystem.addMenuItem(VIEW_MENU_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, VIEW_MENU_PATH);
 	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    //((TVF3Game)target.getGame()).addPropertyChangeListener(Game.PAUSED, pausePropertyChangeListener);
 	    satelliteToggleInput.addPropertyChangeListener(satelliteControl);
 	}
 
 	@Override
 	public void destruct(Mission target) {
+	    //((TVF3Game)target.getGame()).removePropertyChangeListener(Game.PAUSED, pausePropertyChangeListener);
+	    Features.get(target, GamePause.class).removePropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    tr.removePropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    menuSystem.removeMenuItemListener(menuItemListener, VIEW_MENU_PATH);
 	    satelliteToggleInput.removePropertyChangeListener(satelliteControl);
@@ -106,14 +116,26 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private class RunStateListener implements PropertyChangeListener{
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		Object newValue = evt.getNewValue();
-		boolean enabled;
-		enabled  = !(newValue instanceof Mission.TunnelState);
-		enabled &= !(newValue instanceof Mission.ChamberState);
-		enabled &= newValue   instanceof Mission.PlayerActivity;
-		setEnabled(enabled);
+		reEvaluateEnabledState();
 	    }//end propertyChange(...)
 	}//end PropertyChangeListener
+	
+	private class PausePropertyChangeListener implements PropertyChangeListener{
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		reEvaluateEnabledState();
+	    }
+	}//end PausePropertyChangeListener
+	
+	private void reEvaluateEnabledState(){
+	    Object runState = tr.getRunState();
+	    boolean enabled;
+	     enabled  = !(runState instanceof Mission.TunnelState);
+	     enabled &= !(runState instanceof Mission.ChamberState);
+	     enabled &= runState   instanceof Mission.PlayerActivity;
+	     enabled &= !Features.get(getMission(), GamePause.class).isPaused();
+	    setEnabled(enabled);
+	}//end reEvaluateEnabledState()
 
 	public Mission getMission() {
 	    return mission.get();
@@ -137,10 +159,12 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	}
 
 	public void setEnabled(boolean enabled) {
+	    if(this.enabled==enabled)
+		return;
 	    this.enabled = enabled;
 	    menuSystem.setMenuItemEnabled(enabled, VIEW_MENU_PATH);
 	}
-    }//end Mission
+    }//end SatelliteView
 
     public TR getTr() {
         return tr;

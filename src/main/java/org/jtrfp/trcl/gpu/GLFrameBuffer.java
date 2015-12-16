@@ -154,9 +154,14 @@ public final class GLFrameBuffer {
 	return this;
     }
 
-    public GLFrameBuffer attachDrawTexture(GLTexture arrayTexture, int layer,
+    public GLFrameBuffer attachDrawTexture(GLTexture texture, int layer,
 	    int attachmentIndexEnum) {
-	gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, attachmentIndexEnum, arrayTexture.getId(), 0, layer);
+	int id;
+	if(texture == null)
+	    id = 0;
+	else
+	    id = texture.getId();
+	gl.glFramebufferTextureLayer(GL3.GL_DRAW_FRAMEBUFFER, attachmentIndexEnum, id, 0, layer);
 	return this;
     }
     

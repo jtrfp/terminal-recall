@@ -315,9 +315,14 @@ public class RendererFactory {
 		depthQueueFrameBuffer.bindToDraw().destroy();
 		gpu.defaultFrameBuffers();
 		
-		opaqueDepthTexture.bind().setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
-			GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null);
-		opaquePrimitiveIDTexture.bind().setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null);
+		opaqueDepthTexture.
+		        bind().
+		        setImage(GL3.GL_DEPTH_COMPONENT16, width, height,GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null).
+			unbind();
+		opaquePrimitiveIDTexture.
+		    bind().
+		    setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null).
+		    unbind();
 		opaqueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -331,7 +336,10 @@ public class RendererFactory {
 		    throw new RuntimeException("Intermediate framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		
-		layerAccumulatorTexture.bind().setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null);
+		layerAccumulatorTexture.
+		 bind().
+		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null).
+		 unbind();
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -342,10 +350,18 @@ public class RendererFactory {
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		
+		for(int i=0; i<NUM_PORTALS; i++){
+		    portalFrameBuffers[i].
+		    bindToDraw().
+		    attachDrawTexture(null, i, GL3.GL_COLOR_ATTACHMENT0).
+		    setDrawBufferList()//Empty
+		    //portalFrameBuffers[i].destroy();
+		    .unbindFromDraw();}
 		portalTexture.delete();
-		for(int i=0; i<NUM_PORTALS; i++)
-		    portalFrameBuffers[i].destroy();
+		portalTexture = null;
+		gpu.defaultTexture();
 		allocatePortals(width,height);
+		gpu.defaultFrameBuffers();
 		gpu.defaultTexture();
 	    }//end reshape(...)
 	});
@@ -356,9 +372,11 @@ public class RendererFactory {
     }//end constructor
     
     private void allocatePortals(int width, int height){
-	portalTexture = gpu.
+	if(portalTexture == null)
+	 portalTexture = gpu.
 		newTexture().
-		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
+		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY);
+	portalTexture.
 		bind().
 		setInternalColorFormat(GL3.GL_RGB565).
 		configure(new int[]{width,height,NUM_PORTALS}, 1).
@@ -367,13 +385,20 @@ public class RendererFactory {
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE).
 		unbind();
-	for(int i=0; i<NUM_PORTALS; i++)
-	    portalFrameBuffers[i]=gpu.
-	     newFrameBuffer().
-	     bindToDraw().
-	     attachDrawTexture(portalTexture, i, GL3.GL_COLOR_ATTACHMENT0).
-	     setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0).
-	     unbindFromDraw();
+	for(int i=0; i<NUM_PORTALS; i++){
+	    if(portalFrameBuffers[i]==null)
+	      portalFrameBuffers[i]=gpu.
+	      newFrameBuffer();
+	    portalFrameBuffers[i].
+	      bindToDraw().
+	      attachDrawTexture(portalTexture, i, GL3.GL_COLOR_ATTACHMENT0).
+	      setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+	    final GL3 gl = gpu.getGl();
+	    if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
+		    throw new RuntimeException("Portal framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
+		}
+	    }//end for(NUM_PORTALS)
+	gpu.defaultFrameBuffers();
     }//end allocatePortals()
     
     public Renderer newRenderer(String debugName){

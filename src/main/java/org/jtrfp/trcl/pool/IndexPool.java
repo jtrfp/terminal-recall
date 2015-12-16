@@ -126,12 +126,12 @@ public class IndexPool{
     
     public int pop(Collection<Integer> dest, int count){
 	final ArrayList<Integer> temp = new ArrayList<Integer>();
-	final int result = innerPop(temp,count);
+	final int remaining = innerPop(temp,count);
 	dest       .addAll(temp);
 	usedIndices.addAll(temp);
 	updateNumUnusedIndices();
 	updateNumUsedIndices();
-	return result;
+	return remaining;
     }
     
     private int innerPop(Collection<Integer> dest, int count){
@@ -155,12 +155,12 @@ public class IndexPool{
 			return count;}
 		    }//end if()
 		if (highestIndex + count < maxCapacity){
-		     int result = availablePop(dest,count);
-		     return result;
+		     int remaining = availablePop(dest,count);
+		     return remaining;
 		     }
 		else {
-		    int result = growthPop(dest,count); 
-		    return result;
+		    int remaining = growthPop(dest,count); 
+		    return remaining;
 		}
 	    }//end sync(this)
 	}//end catch{no element}

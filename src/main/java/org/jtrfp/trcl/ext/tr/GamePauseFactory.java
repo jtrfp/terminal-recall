@@ -21,12 +21,14 @@ import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.SatelliteViewFactory.SatelliteView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
     public static final String [] PAUSE_MENU_PATH = new String[] {"Game","Pause"}; 
     private final ControllerInput pause;
     private final MenuSystem menuSystem;
+    public interface PauseDisabledState{}
     
     @Autowired
     public GamePauseFactory(TR tr, ControllerInputs inputs, MenuSystem menuSystem){
@@ -96,7 +99,9 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	}//end RunStateListener
 	
 	private void proposePause(boolean newState){
-	    if(tr.getRunState() instanceof Mission.PlayerActivity){
+	    final Object runState = tr.getRunState();
+	    if(runState instanceof Mission.PlayerActivity &&
+		    !(runState instanceof PauseDisabledState)){
 		setPaused(newState);
 	    }//end if(PlayerActivity)
 	}//end proposePauseToggle()

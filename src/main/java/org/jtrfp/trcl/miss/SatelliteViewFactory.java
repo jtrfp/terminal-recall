@@ -39,6 +39,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
     private final ControllerInput satelliteToggleInput;
     private final MenuSystem menuSystem;
     private final TR tr;
+    public interface SatelliteViewState extends Mission.OverworldState, GamePauseFactory.PauseDisabledState{};
     
     @Autowired
     public SatelliteViewFactory(TR tr, MenuSystem menuSystem, ControllerInputs inputs){
@@ -153,7 +154,13 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 
 	public void setSatelliteView(boolean satelliteView) {
 	    final boolean oldValue = this.satelliteView;
+	    if(satelliteView == oldValue)
+		return;
 	    this.satelliteView = satelliteView;
+	    if(satelliteView)
+	     tr.setRunState(new SatelliteViewState(){});
+	    else
+	     tr.setRunState(new Mission.OverworldState(){});
 	    pcs.firePropertyChange(SATELLITE_VIEW,oldValue,satelliteView);
 	    getMission().setSatelliteView(satelliteView);
 	}

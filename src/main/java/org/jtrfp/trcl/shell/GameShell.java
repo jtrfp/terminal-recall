@@ -204,7 +204,6 @@ public class GameShell {
 	initializationFence();
 	try{tr.getGame().doGameplay();}
 	catch(CanceledException e){
-	    System.out.println("Canceled.");
 	    return this;}
 	catch(Exception e){
 	    gameFailure(e);}

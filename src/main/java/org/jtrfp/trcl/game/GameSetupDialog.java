@@ -129,7 +129,7 @@ public class GameSetupDialog extends JDialog {
 			    setCallSign(txtCallsign.getText());
 			    setBeginMission(true);
 			    setVisible(false);
-			    dispose();
+			    //dispose();
 			}//end if(OK)
 		    }//end actionPerformed(...)
 		});
@@ -169,7 +169,7 @@ public class GameSetupDialog extends JDialog {
 		    public void actionPerformed(ActionEvent e) {
 			setBeginMission(false);
 			setVisible(false);
-			dispose();
+			//dispose();
 		    }});
 		}
 	}

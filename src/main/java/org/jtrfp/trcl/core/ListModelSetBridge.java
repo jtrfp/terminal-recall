@@ -22,16 +22,16 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 public class ListModelSetBridge<E> {
-    private final ListModel<E> listModel;
+    private final ListModel listModel;
     private final Set<E> checkerSet = new HashSet<E>();
     private final SetModelListener<E> setML;
     private final ArrayList<E> list = new ArrayList<E>();
-    public ListModelSetBridge(ListModel<E> _listModel, SetModelListener<E> _set){
+    public ListModelSetBridge(ListModel _listModel, SetModelListener<E> _set){
 	this.listModel=_listModel;
 	this.setML=_set;
 	//Initial setup
 	for(int i=0; i<listModel.getSize();i++){
-	    final E element = listModel.getElementAt(i);
+	    final E element = (E)listModel.getElementAt(i);
 	    list.add(element);
 	    checkerSet.add(element);
 	}//end for(i)
@@ -41,7 +41,7 @@ public class ListModelSetBridge<E> {
 	    @Override
 	    public void contentsChanged(ListDataEvent evt) {
 		for(int i=evt.getIndex0(); i<=evt.getIndex1(); i++){
-		    E newE = listModel.getElementAt(i);
+		    E newE = (E)listModel.getElementAt(i);
 		    E oldE = list.set(i, newE);
 		    if(!list.contains(oldE)){
 			if(checkerSet.remove(oldE)){
@@ -55,7 +55,7 @@ public class ListModelSetBridge<E> {
 	    @Override
 	    public void intervalAdded(ListDataEvent evt) {
 		for(int i=evt.getIndex0(); i<=evt.getIndex1(); i++){
-		    E newE = listModel.getElementAt(i);
+		    E newE = (E)listModel.getElementAt(i);
 		    list.add(newE);
 		    if(checkerSet.add(newE))
 		     setML.added(newE);

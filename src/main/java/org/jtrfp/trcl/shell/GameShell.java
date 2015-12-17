@@ -51,8 +51,6 @@ import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.Game.CanceledException;
-import org.jtrfp.trcl.game.Game.GameLoadedMode;
-import org.jtrfp.trcl.game.Game.GameRunningMode;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
@@ -191,7 +189,7 @@ public class GameShell {
     public GameShell newGame(VOXFile vox){
 	initializationFence();
 	GameVersion newGameVersion = determineGameVersion();
-	tr.config.setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
+	tr.config._setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
 	vox = determineVOXFile();
 	if(vox==null)
 	    return this;//Abort
@@ -206,6 +204,7 @@ public class GameShell {
 	initializationFence();
 	try{tr.getGame().doGameplay();}
 	catch(CanceledException e){
+	    System.out.println("Canceled.");
 	    return this;}
 	catch(Exception e){
 	    gameFailure(e);}
@@ -266,7 +265,7 @@ public class GameShell {
     private GameVersion determineGameVersion(){
 	String voxName = tr.config.getVoxFile();
 	if(voxName==null)
-	    return tr.config.getGameVersion();
+	    return tr.config._getGameVersion();
 	else if(voxName.contentEquals(TRConfiguration.AUTO_DETECT))
 	    {return guessGameVersionFromPods();}
 	else if(voxName.contentEquals("Fury3"))
@@ -275,7 +274,7 @@ public class GameShell {
 	    return GameVersion.TV;
 	else if(voxName.contentEquals("FurySE"))
 	    return GameVersion.FURYSE;
-	else return tr.config.getGameVersion();
+	else return tr.config._getGameVersion();
     }
     
     private GameVersion guessGameVersionFromPods(){
@@ -328,9 +327,9 @@ public class GameShell {
     }//end attemptGetVOX()
     
     private void registerPODs(){
-	DefaultListModel<String> podList = tr.config.getPodList();
+	DefaultListModel podList = tr.config.getPodList();
 	for(int i=0; i<podList.size(); i++){
-	    final String podPath = podList.get(i);
+	    final String podPath = (String)podList.get(i);
 	    if(podPath!=null){
 		final File file = new File(podPath);
 		PodFile pod = new PodFile(file);

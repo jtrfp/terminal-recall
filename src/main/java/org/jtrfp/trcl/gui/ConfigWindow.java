@@ -76,7 +76,7 @@ public class ConfigWindow extends JFrame {
     private JComboBox audioBufferSizeCB;
     private JSlider modStereoWidthSlider;
     private JList podList,missionList;
-    private DefaultListModel<String> podLM=new DefaultListModel<String>(), missionLM=new DefaultListModel<String>();
+    private DefaultListModel podLM=new DefaultListModel(), missionLM=new DefaultListModel();
     private boolean needRestart=false;
     private final JFileChooser fileChooser = new JFileChooser();
     private final SoundOutputSelectorGUI soundOutputSelectorGUI;
@@ -493,12 +493,12 @@ public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
      }//end for(vox)
      String missionSelection = config.getVoxFile();
      for(int i=0; i<missionLM.getSize(); i++){
-	 if(missionLM.get(i).contentEquals(missionSelection))missionList.setSelectedIndex(i);}
+	 if(((String)missionLM.get(i)).contentEquals(missionSelection))missionList.setSelectedIndex(i);}
      
      podLM.removeAllElements();
-     final DefaultListModel<String>podList = config.getPodList();
+     final DefaultListModel podList = config.getPodList();
      for(int i=0; i<podList.size();i++){
-	 final String pod = podList.get(i);
+	 final String pod = (String)podList.get(i);
 	 if(pod!=null)
 	  if(checkPOD(new File(pod)))
 	   podLM.addElement(pod);}

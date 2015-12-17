@@ -385,7 +385,9 @@ public class SwingMenuSystem implements MenuSystem {
 	public SubMenu(String name, JComponent parent) {
 	    this(name);
 	    parent.add(item);
-	    rw.revalidate();
+	    rw.invalidate();
+	    rw.validate();
+	    //rw.revalidate();
 	    this.parent = parent;
 	}
 
@@ -480,7 +482,9 @@ public class SwingMenuSystem implements MenuSystem {
 	public void destroy() {
 	    if(parent!=null){
 	     parent.remove(item);
-	     rw.revalidate();
+	     rw.invalidate();
+	     rw.validate();
+	     //rw.revalidate();
 	     }
 	}//end destroy()
     }//end SubMenu
@@ -496,7 +500,9 @@ public class SwingMenuSystem implements MenuSystem {
 	    item       = new JMenuItem(name);
 	    item.setEnabled(false);
 	    parent.add(item);
-	    rw.revalidate();
+	    rw.invalidate();
+	    rw.validate();
+	    //rw.revalidate();
 	}//end constructor
 
 	@Override
@@ -552,7 +558,9 @@ public class SwingMenuSystem implements MenuSystem {
 	public void destroy() {
 	    if(parent!=null && item !=null){
 		parent.remove(item);
-		rw.revalidate();
+		rw.invalidate();
+		rw.validate();
+		//rw.revalidate();
 		}
 	}//end destroy()
     }//end MenuItem

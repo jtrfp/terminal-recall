@@ -42,8 +42,8 @@ public class LevelSkipWindow extends JFrame {
     private final TR tr;
     private final JButton btnGo;
     private final JButton btnCancel;
-    private final JList<String> levelList;
-    private final DefaultListModel<String> levelLM = new DefaultListModel<String>();
+    private final JList levelList;
+    private final DefaultListModel levelLM = new DefaultListModel();
     private WeakReference<Game> game = null;
     	
     	public LevelSkipWindow(){
@@ -71,7 +71,7 @@ public class LevelSkipWindow extends JFrame {
 		JScrollPane levelListSP = new JScrollPane();
 		getContentPane().add(levelListSP, BorderLayout.CENTER);
 		
-		levelList = new JList<String>();
+		levelList = new JList();
 		levelList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		levelList.setToolTipText("Select a level");
 		levelList.setModel(levelLM);
@@ -113,7 +113,7 @@ public class LevelSkipWindow extends JFrame {
 			    ((TVF3Game)tr.getGame()).abortCurrentMission();
 			    ((TVF3Game)tr.getGame()).setLevelIndex(levelList.getSelectedIndex());
 			    ((TVF3Game)tr.getGame()).doGameplay();
-			    }catch(CanceledException e){}//Do nothing.
+			    }catch(CanceledException e){System.out.println("Canceled.");}//Do nothing.
 			    return null;
 			}});
 		}});

@@ -18,7 +18,6 @@ import java.beans.ExceptionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.Statement;
-import java.beans.Transient;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.File;
@@ -60,7 +59,7 @@ public class TRConfiguration{
     	               activeAudioOutput,
     	               activeAudioFormat;
     	//private HashSet<String> podList     = new HashSet<String>();
-    	private DefaultListModel<String> podList=new DefaultListModel<String>();
+    	private DefaultListModel podList=new DefaultListModel();
     	private double modStereoWidth=.3;
     	public static final String AUTO_DETECT = "Auto-detect";
     	private String fileDialogStartDir;
@@ -75,13 +74,13 @@ public class TRConfiguration{
 	    missionList.add("FurySE");
 	}
 
-	@Transient
-	public GameVersion getGameVersion() {
+	//@Transient
+	public GameVersion _getGameVersion() {
 	    return gameVersion;
 	}
 	
-	@Transient
-	public void setGameVersion(GameVersion gameVersion){
+	//@Transient
+	public void _setGameVersion(GameVersion gameVersion){
 	    this.gameVersion=gameVersion;
 	}
 	

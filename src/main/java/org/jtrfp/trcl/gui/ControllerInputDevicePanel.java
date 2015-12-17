@@ -47,7 +47,7 @@ public class ControllerInputDevicePanel extends JPanel {
     private final InputDevice                  inputDevice;
     private static final String                NONE = "[none]";
     private final ControllerInputs controllerInputs;
-    private JComboBox<String>      destBox;
+    private JComboBox              destBox;
     private JTable table;
     private ControllerMapper       controllerMapper;
     private volatile boolean dispatching = false;
@@ -72,7 +72,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	    ((DefaultTableModel)table.getModel()).addColumn(col.getTitle());
 	for(ControllerSource cs: inputDevice.getControllerSources())
 	    cs.addPropertyChangeListener(inputStateFeedbackMonitor);
-	destBox = new JComboBox<String>();
+	destBox = new JComboBox();
 	destBox.addItem(NONE);
 	final TableColumnModel cModel = table.getColumnModel();
 	cModel.getColumn(Columns.DEST  .ordinal()).setCellEditor(new DefaultCellEditor(destBox));

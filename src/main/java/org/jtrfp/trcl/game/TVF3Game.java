@@ -263,7 +263,7 @@ public class TVF3Game implements Game {
 			tr.getDefaultGrid().add(satDashboard);
 			
 			//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
-			System.out.println("GameVersion="+tr.config.getGameVersion());
+			System.out.println("GameVersion="+tr.config._getGameVersion());
 			navSystem = new NAVSystem(tr.getDefaultGrid(), tr,getDashboardLayout());
 			    // Make color zero translucent.
 			    final ResourceManager rm = tr.getResourceManager();
@@ -298,7 +298,7 @@ public class TVF3Game implements Game {
 			    tr.getDefaultGrid().add(player);
 			    System.out.println("\t...Done.");
 			    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
-			    final BriefingLayout briefingLayout = tr.config.getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
+			    final BriefingLayout briefingLayout = tr.config._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
 			    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont(), 
 				    briefingLayout);
 			    earlyLoadingScreen.setStatusText("Starting game...");
@@ -383,7 +383,7 @@ public class TVF3Game implements Game {
 	    public DashboardLayout getDashboardLayout(){
 		if(dashboardLayout==null)
 		    dashboardLayout = 
-			tr.config.getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
+			tr.config._getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
 		return dashboardLayout;
 	    }//end getDashboardLayout()
 	    

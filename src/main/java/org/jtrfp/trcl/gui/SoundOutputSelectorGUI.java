@@ -42,20 +42,20 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 	super();
     	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     	
-    	final DefaultComboBoxModel<AudioDriver> driverSelectCBM = new DefaultComboBoxModel<AudioDriver>();
-    	final JComboBox<AudioDriver> driverSelectCB = new JComboBox<AudioDriver>(driverSelectCBM);
+    	final DefaultComboBoxModel driverSelectCBM = new DefaultComboBoxModel();
+    	final JComboBox driverSelectCB = new JComboBox(driverSelectCBM);
     	add(driverSelectCB);
     	
-    	final DefaultComboBoxModel<AudioDevice> deviceSelectCBM = new DefaultComboBoxModel<AudioDevice>();
-    	final JComboBox<AudioDevice> deviceSelectCB = new JComboBox<AudioDevice>(deviceSelectCBM);
+    	final DefaultComboBoxModel deviceSelectCBM = new DefaultComboBoxModel();
+    	final JComboBox deviceSelectCB = new JComboBox(deviceSelectCBM);
     	add(deviceSelectCB);
     	
-    	final DefaultComboBoxModel<AudioOutput> audioOutputCBM = new DefaultComboBoxModel<AudioOutput>();
-    	final JComboBox<AudioOutput> audioOutputCB = new JComboBox<AudioOutput>(audioOutputCBM);
+    	final DefaultComboBoxModel audioOutputCBM = new DefaultComboBoxModel();
+    	final JComboBox audioOutputCB = new JComboBox(audioOutputCBM);
     	add(audioOutputCB);
     	
-    	final DefaultComboBoxModel<AudioFormat> audioFormatCBM = new DefaultComboBoxModel<AudioFormat>();
-    	final JComboBox<AudioFormat> audioFormatCB = new JComboBox<AudioFormat>(audioFormatCBM);
+    	final DefaultComboBoxModel audioFormatCBM = new DefaultComboBoxModel();
+    	final JComboBox audioFormatCB = new JComboBox(audioFormatCBM);
     	add(audioFormatCB);
     	
     	JButton testButton = new JButton("Test");
@@ -64,7 +64,7 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
     	//add(testButton);//TODO: Implement
     	
     	for(AudioDriver ao:SoundOutputSelector.outputDrivers)
-    	    ((DefaultComboBoxModel<AudioDriver>)(driverSelectCB.getModel())).addElement(ao);
+    	    ((DefaultComboBoxModel)(driverSelectCB.getModel())).addElement(ao);
     	SoundOutputSelector.outputDrivers.addCollectionListener(new CollectionListener<AudioDriver>(){
 	    @Override
 	    public void collectionChanged(CollectionEvent<AudioDriver> evt) {

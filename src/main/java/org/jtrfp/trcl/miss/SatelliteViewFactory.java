@@ -86,13 +86,11 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	    menuSystem.addMenuItem(VIEW_MENU_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, VIEW_MENU_PATH);
 	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
-	    //((TVF3Game)target.getGame()).addPropertyChangeListener(Game.PAUSED, pausePropertyChangeListener);
 	    satelliteToggleInput.addPropertyChangeListener(satelliteControl);
 	}
 
 	@Override
 	public void destruct(Mission target) {
-	    //((TVF3Game)target.getGame()).removePropertyChangeListener(Game.PAUSED, pausePropertyChangeListener);
 	    Features.get(target, GamePause.class).removePropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    tr.removePropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    menuSystem.removeMenuItemListener(menuItemListener, VIEW_MENU_PATH);

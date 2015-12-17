@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2015 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -41,13 +41,6 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
-import org.jtrfp.trcl.game.Game.CanceledException;
-import org.jtrfp.trcl.game.Game.GameConstructedMode;
-import org.jtrfp.trcl.game.Game.GameConstructingMode;
-import org.jtrfp.trcl.game.Game.GameDestructedMode;
-import org.jtrfp.trcl.game.Game.GameDestructingMode;
-import org.jtrfp.trcl.game.Game.GameLoadedMode;
-import org.jtrfp.trcl.game.Game.GameRunningMode;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.gui.F3BriefingLayout;
@@ -55,7 +48,6 @@ import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
-import org.jtrfp.trcl.miss.Mission.Result;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -119,8 +111,6 @@ public class TVF3Game implements Game {
 		Features.init(this);
 		tr.setRunState(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(tr.getDefaultGrid());
-		//if (!tr.config.isDebugMode())
-		//    setupNameWithUser();
 		emptyMode = missionMode = new Object[]{};
 		tr.setRunState(new GameConstructedMode(){});
 	    }// end constructor
@@ -129,28 +119,6 @@ public class TVF3Game implements Game {
 		GameSetupDialog gsd = new GameSetupDialog();
 		gsd.setModal(true);
 		gsd.setVisible(true);
-		/*
-		setPlayerName((String) JOptionPane.showInputDialog(tr.getRootWindow(),
-			"Callsign:", "Pilot Registration", JOptionPane.PLAIN_MESSAGE,
-			null, null, "Councilor"));
-		String difficulty = (String) JOptionPane.showInputDialog(
-			tr.getRootWindow(), "Difficulty:", "Pilot Registration",
-			JOptionPane.PLAIN_MESSAGE, null, new String[] { "Easy",
-				"Normal", "Hard", "Furious" }, "Normal");
-		
-		if (difficulty.contentEquals("Easy")) {
-		    setDifficulty(Difficulty.EASY);
-		}
-		if (difficulty.contentEquals("Normal")) {
-		    setDifficulty(Difficulty.NORMAL);
-		}
-		if (difficulty.contentEquals("Hard")) {
-		    setDifficulty(Difficulty.HARD);
-		}
-		if (difficulty.contentEquals("Furious")) {
-		    setDifficulty(Difficulty.FURIOUS);
-		}
-		*/
 		if(!gsd.isBeginMission())
 		    throw new CanceledException();
 		setPlayerName(gsd.getCallSign());

@@ -22,6 +22,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 import javax.swing.JOptionPane;
@@ -289,6 +290,11 @@ public final class TR implements UncaughtExceptionHandler{
      */
     public static void nuclearGC(){
 	try{
+	    synchronized(isInNuclearGC){
+		if(isInNuclearGC.get())
+		    try{isInNuclearGC.wait();return;}catch(Exception e){e.printStackTrace();}
+		isInNuclearGC.set(true);
+	    }
 	    final ArrayList<byte[]> spaceHog = new ArrayList<byte[]>();
 	    while(true){
 		spaceHog.add(new byte[1024*1024*16]);//16MB
@@ -297,7 +303,13 @@ public final class TR implements UncaughtExceptionHandler{
 	    System.runFinalization();
 	}
 	//Still alive? Great!
+	synchronized(isInNuclearGC){
+	    isInNuclearGC.set(false);
+	    isInNuclearGC.notifyAll();
+	}
     }//end nuclearGC()
+    
+    private static AtomicBoolean isInNuclearGC = new AtomicBoolean(false);
 
     /**
      * @return the resourceManager

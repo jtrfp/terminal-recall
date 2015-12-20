@@ -17,6 +17,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -71,8 +72,17 @@ public class IndexPool{
 		unused.add(i);
 	    Collections.sort(unused,Collections.reverseOrder());
 	    
+	    //Checks
+	    HashSet<Integer> redundancyChecker  = new HashSet<Integer>();
+	    for(Integer i:usedIndices)
+		assert redundancyChecker.add(i):"Duplicate entry: "+i;
+	    redundancyChecker.clear();
+	    for(Integer i:freeIndices)
+		assert redundancyChecker.add(i):"Duplicate entry: "+i;
+	    
 	    int item, removalTally=0;
 	     final int greatestUsed = !used.isEmpty()?used.get(used.size()-1):-1;
+	     
 	     final Iterator<Integer> unusedIterator = unused.iterator();
 	     boolean run = true;
 	     while(run){
@@ -86,8 +96,8 @@ public class IndexPool{
 		}else run=false;
 	     }//end while(run)
 	    final int proposedNewMaxCapacity = Math.max(0,greatestUsed+1);//+1 since size()==maxIndex+1
-	    assert proposedNewMaxCapacity<=maxCapacity;
-	    assert proposedNewMaxCapacity>=usedIndices.size();
+	    assert proposedNewMaxCapacity<=maxCapacity:"proposedNewMaxCapacity="+proposedNewMaxCapacity+" maxCapacity="+maxCapacity;
+	    assert proposedNewMaxCapacity>=usedIndices.size():"proposedNewMaxCapacity="+proposedNewMaxCapacity+" usedIndices.size()="+usedIndices.size();
 	    maxCapacity  = growthBehavior.shrink(proposedNewMaxCapacity);
 	    highestIndex = greatestUsed;
 	    updateNumUnusedIndices();
@@ -95,7 +105,7 @@ public class IndexPool{
 	    return removalTally;
 	}//end compact()
 	
-    public int pop(){
+    public synchronized int pop(){
 	final int result = innerPop();
 	if(result!=-1){
 	    usedIndices.add(result);
@@ -111,7 +121,7 @@ public class IndexPool{
 	    }//Shouldn't happen.
     }//end pop()
     
-    public int popOrException() throws OutOfIndicesException{
+    public synchronized int popOrException() throws OutOfIndicesException{
 	final int index = innerPopOrException();
 	usedIndices.add(index);
 	updateNumUnusedIndices();
@@ -124,7 +134,7 @@ public class IndexPool{
 	return index;
     }
     
-    public int pop(Collection<Integer> dest, int count){
+    public synchronized int pop(Collection<Integer> dest, int count){
 	final ArrayList<Integer> temp = new ArrayList<Integer>();
 	final int remaining = innerPop(temp,count);
 	dest       .addAll(temp);
@@ -141,7 +151,7 @@ public class IndexPool{
 	    }
     }//end pop(...)
     
-    private void popOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{
+    public synchronized void popOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{
 	pop(dest,count,true);//Narrow point
     }//end pop(...)
     
@@ -178,6 +188,7 @@ public class IndexPool{
 		    if(throwException)throw new OutOfIndicesException();
 		    else try{
 			     final int index = freeIndices.take();
+			     assert !usedIndices.contains(index):index;
 			     return index;}
 			catch(InterruptedException ex){
 			    ex.printStackTrace(); 
@@ -186,10 +197,12 @@ public class IndexPool{
 			    }
 		if (highestIndex + 1 < maxCapacity){
 		    final int index = availablePop();
+		    assert !usedIndices.contains(index):index;
 		    return index;
 		}
 		else {
 		    final int index = growthPop();
+		    assert !usedIndices.contains(index):index;
 		    return index;
 		    }
 	    }//end sync(this)
@@ -198,7 +211,7 @@ public class IndexPool{
     
     	private int availablePop(Collection<Integer>dest, int count){
     	    while(count-->0)
-    		dest.add(++highestIndex);
+    		dest.add(availablePop());
     	    return 0;
     	}
     	
@@ -210,8 +223,11 @@ public class IndexPool{
     	    return innerPop(dest,count);
     	}
 	
-	private int availablePop()
-	    {return (++highestIndex);}
+	private int availablePop(){
+	    int result = ++highestIndex;
+	    assert !usedIndices.contains(result):result;
+	    return result;
+	    }
 	
 	private int growthPop(){
 	    maxCapacity = growthBehavior.grow(maxCapacity);
@@ -226,7 +242,7 @@ public class IndexPool{
 	    return usedIndices;
 	}
 	
-	public int free(int index){
+	public synchronized int free(int index){
 	    if(freeIndices.contains(index))
 		throw new IllegalArgumentException("Double-release of resources: "+index);
 	    if(index<0){
@@ -252,7 +268,7 @@ public class IndexPool{
 	    int shrink(int minDesiredCapacity);
 	    }
 	public void setGrowthBehavior(GrowthBehavior gb){growthBehavior=gb;}
-
+/*
 	public synchronized int popConsecutive(int numNewItems) {
 	    //TODO This should use the freed pool instead of always allocating new
 	    int result;
@@ -269,7 +285,7 @@ public class IndexPool{
 		return result;//Try again.
 		}
 	}//end popConsecutive(...)
-
+*/
 	/**
 	 * @return the maxCapacity
 	 */
@@ -293,7 +309,7 @@ public class IndexPool{
 	    return this;
 	}
 
-	public void free(Collection<Integer> indicesToFree) {
+	public synchronized void free(Collection<Integer> indicesToFree) {
 	    freeIndices.addAll(indicesToFree);
 	    usedIndices.removeAll(indicesToFree);
 	    updateNumUnusedIndices();
@@ -377,7 +393,7 @@ public class IndexPool{
 	    this.numUsedIndices = numUsedIndices;
 	}
 
-	public void freeAll() {//TODO: compactFreeAll() with clear() instead of drain()
+	public synchronized void freeAll() {//TODO: compactFreeAll() with clear() instead of drain()
 	    usedIndices.drainTo(freeIndices);
 	    updateNumUnusedIndices();
 	    updateNumUsedIndices();

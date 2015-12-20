@@ -62,8 +62,10 @@ public abstract class NAVObjective {
 	private Tunnel currentTunnel;
 	int counter;
 	private WorldObject worldBossObject,bossChamberExitShutoffTrigger;
-	public Factory(TR tr){
+	private final String debugName;
+	public Factory(TR tr, String debugName){
 	    this.tr=tr;
+	    this.debugName = debugName;
 	}//end constructor
 	
 	public void create(final TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
@@ -307,7 +309,7 @@ public abstract class NAVObjective {
 		} else if(navSubObject instanceof CHK){///////////////////////////////////////////
 		    final CHK cp = (CHK)navSubObject;
 		    final Location3D loc3d = cp.getLocationOnMap();
-		    final Checkpoint chk = new Checkpoint(tr);
+		    final Checkpoint chk = new Checkpoint(tr,"NAVObjective."+debugName);
 		    final double [] chkPos = chk.getPosition();
 		    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
 		    chkPos[1]=TR.legacy2Modern(loc3d.getY()+CHECKPOINT_HEIGHT_PADDING);

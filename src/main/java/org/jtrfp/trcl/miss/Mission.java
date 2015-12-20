@@ -235,7 +235,7 @@ public class Mission {
 	    propelled.setPropulsion(propelled.getMinPropulsion());
 	    
 	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
-	    Factory f = new NAVObjective.Factory(tr);
+	    Factory f = new NAVObjective.Factory(tr, getLevelName());
 
 	    final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
 		    .ordinal()].generateSubReporters(navSubObjects.size());
@@ -461,7 +461,7 @@ public class Mission {
 
     private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tdfTun,
 	    LoadingProgressReporter reporter) {
-	final Tunnel tunnel = new Tunnel(tr, tdfTun, reporter);
+	final Tunnel tunnel = new Tunnel(tr, tdfTun, reporter, tdfTun.getTunnelLVLFile());
 	tunnelsRemaining.add(tunnel);
 	DirectionVector tunnelEntranceLegacyPos = tdfTun.getEntrance();
 	final Point tunnelEntranceMapSquarePos = new Point(
@@ -931,5 +931,9 @@ public class Mission {
 
     public void destruct() {
 	Features.destruct(this);
+    }
+
+    public String getLevelName() {
+        return levelName;
     }
 }// end Mission

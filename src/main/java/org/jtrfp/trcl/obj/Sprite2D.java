@@ -22,12 +22,12 @@ import org.jtrfp.trcl.gpu.Model;
 public class Sprite2D extends WorldObject2DVisibleEverywhere {
     private final TextureDescription texture;
 
-    public Sprite2D(TR tr, double z, double width, double height, TextureDescription tex, boolean useAlpha) {
+    public Sprite2D(TR tr, double z, double width, double height, TextureDescription tex, boolean useAlpha,String debugName) {
 	super(tr);
 	if(tex==null)
 	    throw new NullPointerException("Supplied texture intolerably null.");
 	this.texture=tex;
-	final Model m = new Model(false,tr);
+	final Model m = new Model(false,tr,debugName);
 	Triangle [] tris = Triangle.quad2Triangles(
 		new double[]{-width/2,width/2,width/2,-width/2}, 
 		new double[]{-height/2,-height/2,height/2,height/2}, 
@@ -41,12 +41,12 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 	setVisible(true);
     }//end constructor
     
-    public Sprite2D(TR tr, double z, double width, double height, TextureDescription [] tex, boolean useAlpha){
+    public Sprite2D(TR tr, double z, double width, double height, TextureDescription [] tex, boolean useAlpha,String debugName){
 	super(tr);
 	if(tex==null)
 	    throw new NullPointerException("Supplied texture intolerably null.");
 	this.texture=tex[0];
-	final Model m = new Model(false,tr);
+	final Model m = new Model(false,tr,debugName);
 	final int numSegs = tex.length;
 	for (int seg = 0; seg < numSegs; seg++) {
 	    final double segWidth = width / numSegs;

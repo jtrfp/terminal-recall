@@ -98,7 +98,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		new double[] { 0, 1, 1, 0 },// u
 		new double[] { 1, 1, 0, 0 }, cloudTexture,
 		RenderMode.STATIC, Vector3D.ZERO,"CloudSystem");
-	final Model m = new Model(false, tr);
+	final Model m = new Model(false, tr,"SkySystem.generateClouds()");
 	m.setDebugName("CloudSystem.cloudQuad");
 	m.addTriangle(tris[0]);
 	m.addTriangle(tris[1]);

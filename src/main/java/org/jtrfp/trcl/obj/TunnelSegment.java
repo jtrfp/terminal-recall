@@ -34,8 +34,8 @@ public class TunnelSegment extends WorldObject {
 
     public TunnelSegment(TR tr, Segment s,
 	    TextureDescription[] tunnelTexturePalette, double segLen,
-	    double endX, double endY) {
-	super(tr, createModel(s, segLen, tunnelTexturePalette, endX, endY, tr));
+	    double endX, double endY, String debugName) {
+	super(tr, createModel(s, segLen, tunnelTexturePalette, endX, endY, tr,debugName));
 	segmentLength = segLen;
 	this.endX = endX;
 	this.endY = endY;
@@ -77,8 +77,8 @@ public class TunnelSegment extends WorldObject {
 
     private static Model createModel(Segment s, double segLen,
 	    TextureDescription[] tunnelTexturePalette, double endX,
-	    double endY, final TR tr) {
-	Model mainModel = new Model(true, tr);
+	    double endY, final TR tr, String debugName) {
+	Model mainModel = new Model(true, tr, debugName);
 	mainModel.setDebugName("tunnelSegment main.");
 	final int numPolys = s.getNumPolygons();
 	double startWidth = getStartWidth(s);
@@ -171,7 +171,7 @@ public class TunnelSegment extends WorldObject {
 		:0;
 	//FRAME LOOP
 	for(int frameIndex=0; frameIndex<numAnimFrames; frameIndex++){
-	 final Model m = new Model(false,tr);
+	 final Model m = new Model(false,tr,debugName);
 	 m.setDebugName("TunnelSegment frame "+frameIndex+" of "+numAnimFrames);
 	 final double frameAngleDeltaRadians = animationDeltaRadians * (double)frameIndex;
 	 double frameStartAngle = startAngle + frameAngleDeltaRadians;

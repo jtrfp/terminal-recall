@@ -22,14 +22,14 @@ import org.jtrfp.trcl.gpu.Model;
 
 public class MeterBar extends WorldObject2DVisibleEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
-    public MeterBar(TR tr, TextureDescription tex, double height, double length, boolean horizontal) {
+    public MeterBar(TR tr, TextureDescription tex, double height, double length, boolean horizontal, String debugName) {
 	super(tr);
 	setImmuneToOpaqueDepthTest(true);
 	//height*=.5;
 	//length*=.5;
-	Model m = new Model(true,tr);
-	Model m1 = new Model(true,tr);
-	Model m2 = new Model(true,tr);
+	Model m = new Model(true,tr,debugName);
+	Model m1 = new Model(true,tr,debugName);
+	Model m2 = new Model(true,tr,debugName);
 	Triangle [] tris;
 	if(horizontal){
 	tris = Triangle.quad2Triangles(
@@ -62,7 +62,7 @@ public class MeterBar extends WorldObject2DVisibleEverywhere {
 	    tris[1].setAlphaBlended(true);
 	    m1.addTriangles(tris);
 		
-	    m2 = new Model(true,tr);
+	    m2 = new Model(true,tr,debugName);
 		tris = Triangle.quad2Triangles(
 		new double[]{height,-height,-height,height}, //X
 		new double []{-length,-length,-length,-length}, //Y

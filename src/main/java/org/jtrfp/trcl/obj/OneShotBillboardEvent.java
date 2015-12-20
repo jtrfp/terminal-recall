@@ -25,8 +25,8 @@ public abstract class OneShotBillboardEvent extends BillboardSprite {
     private final OneShotBillboardEventBehavior eventBehavior;
     private final int numFrames, millisPerFrame;
 
-    public OneShotBillboardEvent(TR tr, int millisPerFrame, int numFrames) {
-	super(tr);
+    public OneShotBillboardEvent(TR tr, int millisPerFrame, int numFrames, String debugName) {
+	super(tr,debugName);
 	this.numFrames     =numFrames;
 	this.millisPerFrame=millisPerFrame;
 	addBehavior(eventBehavior = new OneShotBillboardEventBehavior());

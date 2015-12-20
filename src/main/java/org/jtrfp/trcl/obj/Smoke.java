@@ -27,8 +27,8 @@ public class Smoke extends OneShotBillboardEvent {
 	    private final Sequencer sequencer;
 	    private static final int NUM_FRAMES=4;
 	    private final SmokeType type;
-	    public Smoke(TR tr, SmokeType type) {
-		super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length);
+	    public Smoke(TR tr, SmokeType type, String debugName) {
+		super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length,debugName);
 		this.type=type;
 		setBillboardSize(type.getBillboardSize());
 		if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());

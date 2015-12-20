@@ -77,6 +77,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     					   tunnelEntryListeners = new HashSet<TunnelEntryListener>();
     public static final SkyCubeGen	   TUNNEL_SKYCUBE_GEN = new HorizGradientCubeGen
 		(Color.darkGray,Color.black);
+    private String                         debugName;
 
     public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
 	    TR.mapSquareSize * 5, TR.mapSquareSize*15);
@@ -86,7 +87,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    -2 * TR.mapSquareSize);
 
     public Tunnel(TR tr, TDFFile.Tunnel sourceTunnel,
-	    LoadingProgressReporter rootReporter) {
+	    LoadingProgressReporter rootReporter, String debugName) {
 	super();
 	this.world	  = tr.getWorld();
 	reporters	  = rootReporter.generateSubReporters(2);
@@ -95,6 +96,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	gl 		  = tr.gpu.get().getGl();
 	tunnelAssemblyReporter 
 	  		  = reporters[0];
+	this.debugName    = debugName;
 	Vector3D tunnelEnd = null;
 	try {
 	    lvl = tr.getResourceManager()
@@ -108,7 +110,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	exitObject = new TunnelExitObject(tr, this);
+	exitObject = new TunnelExitObject(tr, this,"Tunnel."+debugName);
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
 	exitObject.setPosition(tunnelEnd.add(new Vector3D(10000,0,0)).toArray());
@@ -178,7 +180,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    // Create the segment
 	    currentPos = startPoint.add(rotation.applyTo(tunnelSpaceSegPos));
 	    TunnelSegment ts = new TunnelSegment(tr, s, tunnelTexturePalette,
-		    segLen, positionDelta.getX(), positionDelta.getY());
+		    segLen, positionDelta.getX(), positionDelta.getY(),debugName);
 	    ts.setPosition(currentPos.toArray());
 	    ts.setHeading(entrance ? groundVector : Vector3D.PLUS_I);
 	    ts.setTop(entrance ? top : Vector3D.PLUS_J);
@@ -605,4 +607,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	for(TunnelEntryListener l:tunnelEntryListeners)
 	    l.notifyTunnelEntered(this);
     }//end dispatchTunnelEntryNotifications()
+
+    public String getDebugName() {
+	return debugName;
+    }
 }// end Tunnel

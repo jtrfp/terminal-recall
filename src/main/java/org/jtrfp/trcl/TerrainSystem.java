@@ -111,7 +111,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    * gridSquareSize);
 			    final double objectY = Math.round(altitude
 				    .heightAt(gX*gridSquareSize, _gZ*gridSquareSize));
-			    final Model m = new Model(false, tr);
+			    final Model m = new Model(false, tr,"Terrain Chunk");
 			    m.setDebugName(debugName);
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
@@ -146,7 +146,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    final Integer tpi = cX + cZ * 256;
 				    
 				    if(points.containsKey(tpi)){
-					final Model portalModel = new Model(false, tr);
+					final Model portalModel = new Model(false, tr,"PortalEntrance");
 					//Place a PortalEntrance
 					final int Y_OFFSET = -300;
 					final double portalX = xPos+gridSquareSize/2.;
@@ -248,7 +248,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    * gridSquareSize);
 			    final double objectY = Math.round((2. - altitude.heightAt(
 				    gX* gridSquareSize, _gZ* gridSquareSize)) + Y_NUDGE);
-			    final Model m = new Model(false, tr);
+			    final Model m = new Model(false, tr,"CeilingChunk");
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
 				for (int cX = gX; cX < gX + chunkSideLength; cX++) {

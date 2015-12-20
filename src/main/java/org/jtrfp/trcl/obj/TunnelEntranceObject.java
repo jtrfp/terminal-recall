@@ -27,7 +27,7 @@ public class TunnelEntranceObject extends BillboardSprite {
     public static final double GROUND_HEIGHT_PAD=3500;
     private final Tunnel sourceTunnel;
     public TunnelEntranceObject(TR tr, Tunnel tunnel) {
-	super(tr);
+	super(tr,"TunnelEntranceObject."+tunnel.getDebugName());
 	final Mission mission = tr.getGame().getCurrentMission();
 	mission.addPropertyChangeListener(new PropertyChangeListener(){
 	    @Override

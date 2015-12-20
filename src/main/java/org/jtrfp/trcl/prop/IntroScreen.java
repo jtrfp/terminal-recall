@@ -27,9 +27,9 @@ import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 public class IntroScreen extends RenderableSpacePartitioningGrid {
     private final MusicPlaybackEvent bgMusic;
     
-    public IntroScreen(TR tr, String backdropResource, String musicResource) throws IllegalAccessException, IOException, FileLoadException {
+    public IntroScreen(TR tr, String backdropResource, String musicResource, String debugName) throws IllegalAccessException, IOException, FileLoadException {
 	super();
-	add(new BackdropSprite(tr,backdropResource,musicResource));
+	add(new BackdropSprite(tr,backdropResource,musicResource,"IntroScreen."+debugName));
 	if(musicResource!=null)
 	 bgMusic = tr.soundSystem.get().
 	  getMusicFactory().
@@ -41,8 +41,8 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
     }//end IntroScreen(...)
 
     private class BackdropSprite extends Sprite2D{
-	public BackdropSprite(TR tr, String backdropResource, String musicResource) throws IllegalAccessException, IOException, FileLoadException{
-		super(tr, .000001, 2, 2, genTexture(backdropResource, tr), false);
+	public BackdropSprite(TR tr, String backdropResource, String musicResource, String debugName) throws IllegalAccessException, IOException, FileLoadException{
+		super(tr, .000001, 2, 2, genTexture(backdropResource, tr), false,"BackdropSprite."+debugName);
 	    }
     }//end BackdropSprite(...)
     

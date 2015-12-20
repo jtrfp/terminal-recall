@@ -27,8 +27,9 @@ import org.jtrfp.trcl.gpu.Model;
 public class BillboardSprite extends WorldObject{
 	private Dimension dim;
 	private double rotation=0;
+	private final String debugName;
 	
-	public BillboardSprite(TR tr){super(tr);}
+	public BillboardSprite(TR tr, String debugName){super(tr);this.debugName=debugName;}
 	@Override
 	protected void recalculateTransRotMBuffer(){
 	    	final Camera camera = getTr().mainRenderer.get().getCamera();
@@ -53,7 +54,7 @@ public class BillboardSprite extends WorldObject{
 				new double[]{0,0,1,1}, 
 				desc, 
 				RenderMode.DYNAMIC,true,Vector3D.ZERO,"BillboardSprite");
-		Model m = new Model(false,getTr());
+		Model m = new Model(false,getTr(), "BillboardSprite."+getDebugName());
 		m.addTriangles(tris);
 		setModel(m);
 		}
@@ -65,5 +66,8 @@ public class BillboardSprite extends WorldObject{
 	@Override
 	protected boolean recalcMatrixWithEachFrame(){
 	    return true;
+	}
+	public String getDebugName() {
+	    return debugName;
 	}
 }//end BillboardSprite

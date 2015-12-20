@@ -45,7 +45,7 @@ public class ProjectileFactory {
     private final Weapon weapon;
     private final SoundTexture soundTexture;
     
-    public ProjectileFactory(TR tr, Weapon weapon, ExplosionType explosionType){
+    public ProjectileFactory(TR tr, Weapon weapon, ExplosionType explosionType, String debugName){
     	this.tr=tr;
     	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
@@ -54,7 +54,7 @@ public class ProjectileFactory {
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
-    	 modelToUse = new Model(false,tr);
+    	 modelToUse = new Model(false,tr,"ProjectileFactory."+debugName);
    	 final ModelingType modelingType = weapon.getModelingType();
    	 if(modelingType instanceof ModelingType.FlatModelingType){
    	 ModelingType.FlatModelingType mt = (ModelingType.FlatModelingType)modelingType;
@@ -89,7 +89,7 @@ public class ProjectileFactory {
    	     }//end for(frames)
    	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){
-	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow);}
+	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow,debugName);}
    	 }//end (billboard)
    	 else if(modelingType instanceof ModelingType.BINModelingType){
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;

@@ -26,7 +26,7 @@ public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid,
 	    double glSize, GLFont font) {
 	super(tr);
-	final Model model = new Model(false, tr);
+	final Model model = new Model(false, tr,"CharDisplay");
 	tex = new SelectableTexture(font.getTextures());
 	Triangle[] tris = Triangle.quad2Triangles(
 		new double[] { 0., glSize, glSize, 0. },// x

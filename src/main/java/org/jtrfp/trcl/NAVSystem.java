@@ -39,7 +39,7 @@ private final DashboardLayout layout;
 	this.tr=tr;
 	this.layout=layout;
 	System.out.println("Setting up NAV system...");
-	arrow = new NavArrow(tr,this,layout);
+	arrow = new NavArrow(tr,this,layout,"NAVSystem");
 	final Point2D.Double pos = layout.getMiniMapPosition();
 	final double [] aPos = arrow.getPosition();
 	aPos[0]=pos.getX();
@@ -48,7 +48,7 @@ private final DashboardLayout layout;
 	arrow.notifyPositionChange();
 	//arrow.setPosition(new Vector3D(.825,.8,0));
 	add(arrow);
-	blips=new NAVRadarBlipFactory(tr,this,layout);
+	blips=new NAVRadarBlipFactory(tr,this,layout,"NAVSystem");
 	System.out.println("...Done.");
     }//end constructor
     

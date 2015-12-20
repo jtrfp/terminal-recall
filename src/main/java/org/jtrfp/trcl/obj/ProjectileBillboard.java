@@ -27,8 +27,8 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 public class ProjectileBillboard extends BillboardSprite implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
     private WeakReference<WorldObject> objectOfOrigin = new WeakReference<WorldObject>(null);
-    public ProjectileBillboard(TR tr,Weapon w,TextureDescription textureToUse,ExplosionType explosionType) {
-	super(tr);
+    public ProjectileBillboard(TR tr,Weapon w,TextureDescription textureToUse,ExplosionType explosionType,String debugName) {
+	super(tr,debugName);
 	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType,w.isHoning()));
 	ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)w.getModelingType();
 	this.setBillboardSize(new Dimension((int)(mt.getBillboardSize().getWidth()/TR.crossPlatformScalar),(int)(mt.getBillboardSize().getHeight()/TR.crossPlatformScalar)));

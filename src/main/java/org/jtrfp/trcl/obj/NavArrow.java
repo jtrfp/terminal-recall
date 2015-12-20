@@ -33,11 +33,13 @@ private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final NAVSystem nav;
 private final DashboardLayout layout;
-    public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout) {
+    public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout, String debugName) {
 	super(tr, Z, 
 		WIDTH, 
 		HEIGHT, 
-		getTexture(tr), true);
+		getTexture(tr), 
+		true,
+		debugName);
 	this.nav=navSystem;
 	this.layout=layout;
 	setImmuneToOpaqueDepthTest(true);

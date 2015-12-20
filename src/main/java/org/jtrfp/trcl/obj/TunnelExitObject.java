@@ -48,7 +48,7 @@ public class TunnelExitObject extends PortalEntrance {
     private		boolean		onlyRemoveIfTargeted=false;
     private static final int            NUDGE = 5000;
 
-    public TunnelExitObject(TR tr, Tunnel tun) {
+    public TunnelExitObject(TR tr, Tunnel tun, String debugName) {
 	super(tr, tr.mainRenderer.get().getCamera());
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
@@ -88,7 +88,7 @@ public class TunnelExitObject extends PortalEntrance {
 	setVisible(true);
 	Triangle [] tris = Triangle.quad2Triangles(new double[]{-50000,50000,50000,-50000}, new double[]{50000,50000,-50000,-50000}, new double[]{0,0,0,0}, new double[]{0,1,1,0}, new double[]{1,1,0,0}, new PortalTexture(0), RenderMode.STATIC, false, Vector3D.ZERO, "TunnelExitObject.portalModel");
 	//Model m = Model.buildCube(100000, 100000, 200, new PortalTexture(0), new double[]{50000,50000,100},false,tr);
-	Model m = new Model(false, tr);
+	Model m = new Model(false, tr,"TunnelExitObject."+debugName);
 	m.addTriangles(tris);
 	setModel(m);
     }//end constructor

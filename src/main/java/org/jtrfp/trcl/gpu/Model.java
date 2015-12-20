@@ -51,9 +51,10 @@ public class Model {
     //Keeps hard references to Textures to keep them from getting gobbled.
     private final HashSet<TextureDescription> textures = new HashSet<TextureDescription>();
 
-    public Model(boolean smoothAnimation, TR tr) {
+    public Model(boolean smoothAnimation, TR tr, String debugName) {
 	this.tr = tr;
 	this.smoothAnimation = smoothAnimation;
+	this.debugName = debugName;
 	// Frame zero
 	tLists.add(new ArrayList<Triangle>());
 	lsLists.add(new ArrayList<LineSegment>());
@@ -128,7 +129,7 @@ public class Model {
 			textures.add(triangle.texture);
 		 }// Get all frames for each triangle
 		 if (tris[0].length != 0) {
-		    tpList = new TriangleList(tris, getFrameDelayInMillis(), debugName,
+		    tpList = new TriangleList(tris, getFrameDelayInMillis(), "Model."+debugName,
 			    animateUV, c, tr, Model.this);
 		    tpFuture = tpList.uploadToGPU();
 		 }// end if(length!=0)
@@ -260,7 +261,7 @@ public class Model {
     public static Model buildCube(double w, double h, double d,
 	    TextureDescription tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, boolean hasNorm, TR tr) {
-	Model m = new Model(false, tr);
+	Model m = new Model(false, tr, "Model.buildCube");
 	// Top
 	m.addTriangles(Triangle.quad2Triangles(
 		new double[] { 0 - origin[0], w - origin[0], w - origin[0], 0 - origin[0] }, 

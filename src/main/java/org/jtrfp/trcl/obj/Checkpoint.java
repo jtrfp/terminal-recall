@@ -25,8 +25,8 @@ import org.jtrfp.trcl.miss.NAVObjective;
 public class Checkpoint extends BillboardSprite {
 private NAVObjective objective;
 private boolean includeYAxisInCollision=true;
-    public Checkpoint(TR tr) {
-	super(tr);
+    public Checkpoint(TR tr, String debugName) {
+	super(tr, "Checkpoint."+debugName);
 	super.setModelOffset(0, 80000, 0);
 	addBehavior(new CheckpointBehavior());
 	addBehavior(new TerrainLocked());

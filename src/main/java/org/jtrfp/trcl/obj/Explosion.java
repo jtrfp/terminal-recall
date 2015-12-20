@@ -24,8 +24,8 @@ import org.jtrfp.trcl.core.Texture;
 public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;
     private final ExplosionType type;
-    public Explosion(TR tr, ExplosionType type) {
-	super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length);
+    public Explosion(TR tr, ExplosionType type, String debugName) {
+	super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length, debugName);
 	final Vector3D origin = type.getOrigin();
 	this.setModelOffset(
 		origin.getX()*type.getBillboardSize().getWidth()*-.5, 

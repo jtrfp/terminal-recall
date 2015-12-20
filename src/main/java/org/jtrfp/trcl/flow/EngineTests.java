@@ -34,7 +34,7 @@ public class EngineTests {
 	final double diameter = 2./(double)sideLen;
 	final double off = diameter/2;
 	for (int i = 0; i < numInstances; i++) {
-	    WorldObject wo = new Sprite2D(tr, 0, diameter, diameter, test, false);
+	    WorldObject wo = new Sprite2D(tr, 0, diameter, diameter, test, false,"EngineTest.singlet");
 	    wo.setPosition(new double[] { (i%sideLen)*diameter-1+off, (i/sideLen)*diameter-1+off, .01 });
 	    wo.setActive(true);
 	    wo.setVisible(true);
@@ -53,7 +53,7 @@ public class EngineTests {
 	 final double INCREMENT = .1;
 	 final double OFF=-.5;
 	 for (int i = 0; i < NUM_LAYERS; i++) {
-	    WorldObject wo = new Sprite2D(tr, 0, 1, 1, test, true);
+	    WorldObject wo = new Sprite2D(tr, 0, 1, 1, test, true,"EngineTest.depthQueueTest");
 	    wo.setPosition(new double[] { OFF+((double)i)*INCREMENT,OFF+((double)i)*INCREMENT, .01*(double)i });
 	    wo.setActive(true);
 	    wo.setVisible(true);

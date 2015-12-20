@@ -28,7 +28,7 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
     	private final Explosion[][] allExplosions = new Explosion[ExplosionType.values().length][];
     	private final int [] indices = new int[ExplosionType.values().length];
     	
-	public ExplosionSystem(TR tr){
+	public ExplosionSystem(TR tr, String debugName){
 	    super();
 	    this.tr=tr;
 	    int i;
@@ -36,7 +36,7 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 		final int ordinal = t.ordinal();
 		allExplosions[ordinal]=new Explosion[MAX_EXPLOSIONS_PER_POOL];
 		for(i=0; i<MAX_EXPLOSIONS_PER_POOL; i++)
-			allExplosions[ordinal][i]=new Explosion(tr,t);
+			allExplosions[ordinal][i]=new Explosion(tr,t,"ExplosionSystem."+debugName);
 	    }//end for(explosionTypes)
 	}//end constructor()
 	

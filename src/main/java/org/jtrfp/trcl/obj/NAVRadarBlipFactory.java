@@ -34,7 +34,7 @@ public class NAVRadarBlipFactory {
     private final TR tr;
     private final DashboardLayout layout;
     
-    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout){
+    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout, String debugName){
 	this.tr    =tr;
 	this.layout=layout;
 	final BlipType [] types = BlipType.values();
@@ -43,7 +43,7 @@ public class NAVRadarBlipFactory {
 	    try{
 	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
-    		blipPool[ti][pi]=new Blip(tex,g);
+    		blipPool[ti][pi]=new Blip(tex,g,debugName);
     	     }//end for(pi)
 	    }catch(Exception e){e.printStackTrace();}
 	    finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
@@ -67,8 +67,8 @@ public class NAVRadarBlipFactory {
     }//end BlipType
     
     private class Blip extends Sprite2D{
-	public Blip(TextureDescription tex, RenderableSpacePartitioningGrid g) {
-	    super(tr,-1,.04,.04,tex,true);
+	public Blip(TextureDescription tex, RenderableSpacePartitioningGrid g, String debugName) {
+	    super(tr,-1,.04,.04,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    g.add(this);
 	}//end constructor

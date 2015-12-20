@@ -48,7 +48,7 @@ public abstract class MemoryWindow {
 	setBuffer(gpu
 		.memoryManager.get()
 		.createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES,
-			"MemoryWindow " + this.getClass().getName()));
+			"MemoryWindow " + this.getDebugName()));
 	indexPool.setGrowthBehavior(new GrowthBehavior() {
 	    @Override
 	    public int grow(int previousMaxCapacity) {
@@ -501,5 +501,13 @@ public abstract class MemoryWindow {
     
     public void compact(){
 	indexPool.compact();
+    }
+
+    public String getDebugName() {
+        return debugName;
+    }
+
+    public void setDebugName(String debugName) {
+        this.debugName = debugName;
     }
 }// end ObjectWindow

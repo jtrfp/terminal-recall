@@ -275,10 +275,10 @@ public class TVF3Game implements Game {
 			    rm.setPowerupSystem(new PowerupSystem(tr));
 			    // EXPLOSIONS
 			    earlyLoadingScreen.setStatusText("Loading explosion assets...");
-			    rm.setExplosionFactory(new ExplosionSystem(tr));
+			    rm.setExplosionFactory(new ExplosionSystem(tr, "Game"));
 			    // SMOKE
 			    earlyLoadingScreen.setStatusText("Loading smoke assets...");
-			    rm.setSmokeSystem(new SmokeSystem(tr));
+			    rm.setSmokeSystem(new SmokeSystem(tr,"Game"));
 			    // DEBRIS
 			    earlyLoadingScreen.setStatusText("Loading debris assets...");
 			    rm.setDebrisSystem(new DebrisSystem(tr));
@@ -287,7 +287,7 @@ public class TVF3Game implements Game {
 			    Weapon[] w = Weapon.values();
 			    ProjectileFactory[] pf = new ProjectileFactory[w.length];
 			    for (int i = 0; i < w.length; i++) {
-				pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast);
+				pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast,"Game");
 			    }// end for(weapons)
 			    rm.setProjectileFactories(pf);
 			    setPlayer(new Player(tr, tr.getResourceManager().getBINModel(
@@ -300,10 +300,10 @@ public class TVF3Game implements Game {
 			    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
 			    final BriefingLayout briefingLayout = tr.config._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
 			    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont(), 
-				    briefingLayout);
+				    briefingLayout,"TVF3Game");
 			    earlyLoadingScreen.setStatusText("Starting game...");
 			    
-			    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD");
+			    introScreen = new IntroScreen(tr,"TITLE.RAW","SEX.MOD","Game");
 			    
 			    titleScreenMode = new Object[]{
 				    introScreen

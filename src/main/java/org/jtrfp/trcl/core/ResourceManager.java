@@ -381,7 +381,7 @@ public class ResourceManager{
 		boolean skipLighting=false;
 		try {
 			BINFile.AnimationControl ac=null;
-			Model result = new Model(true,tr);
+			Model result = new Model(true,tr,"BINModel."+name);
 			ac = getAnimationControlBIN(name);
 			System.out.println("Recognized as animation control file.");
 			//Build the Model from the BINFile.Model
@@ -399,7 +399,7 @@ public class ResourceManager{
 		catch(UnrecognizedFormatException e){//ok fail. Static model
 			try	{
 				BINFile.Model m=null;
-				Model result = new Model(false,tr);
+				Model result = new Model(false,tr,"StaticBinModel."+name);
 				result.setDebugName(name);
 				m = getBinFileModel(name);
 				

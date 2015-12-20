@@ -17,12 +17,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ListActionDispatcher;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
+import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
@@ -64,6 +66,8 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
 	return (PAGE_SIZE_BYTES*pageTable.get(index2Page(logicalIndexInBytes)))+pageModulus(logicalIndexInBytes);
     }
+    
+    private AtomicLong lastRootBufferNuclearGCMillis = new AtomicLong(0);
 
     @Override
     public void resize(int newSizeInBytes) {
@@ -71,9 +75,20 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	final int pageNumDelta=newNumPages-pageTable.size();
 	if(pageNumDelta==0)return;
 	if(pageNumDelta>0){	//GROW
-	    pageIndexPool.pop(pageTable,newNumPages-pageTable.size());
+	    final int newSize    = newNumPages-pageTable.size();
+	    try{pageIndexPool.popOrException(pageTable,newSize);}
+	    catch(OutOfIndicesException e){
+		System.err.println("Out of root pages. Performing Nuclear GC and trying again.");
+		TR.nuclearGC();
+		try{Thread.sleep(2000);}catch(InterruptedException ee){}
+		gpu.compactRootBuffer();
+		if(System.currentTimeMillis()-lastRootBufferNuclearGCMillis.get()<10000)
+			 gpu.memoryManager.get().dumpAllocationTable();
+		lastRootBufferNuclearGCMillis.set(System.currentTimeMillis());
+		resize(newSizeInBytes);
+	    }
 	}else{			//SHRINK
-	    pageIndexPool.free(pageTable.subList(newNumPages,pageTable.size()-1));
+	    pageIndexPool.free(pageTable.subList(newNumPages,pageTable.size()));//This had the -1 offset originally
 	    for(int i=0; i<-pageNumDelta; i++)
 		pageTable.remove(pageTable.size()-1);
 	}//end if(pageNumDelta...)
@@ -206,5 +221,13 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
      */
     public ListActionDispatcher<Integer> getPageTable() {
         return pageTable;
+    }
+
+    IndexPool getPageIndexPool() {
+        return pageIndexPool;
+    }
+
+    public String getDebugName() {
+        return debugName;
     }
 }//end PageByteBuffer

@@ -268,7 +268,7 @@ public class IndexPool{
 	    int shrink(int minDesiredCapacity);
 	    }
 	public void setGrowthBehavior(GrowthBehavior gb){growthBehavior=gb;}
-/*
+
 	public synchronized int popConsecutive(int numNewItems) {
 	    //TODO This should use the freed pool instead of always allocating new
 	    int result;
@@ -285,7 +285,7 @@ public class IndexPool{
 		return result;//Try again.
 		}
 	}//end popConsecutive(...)
-*/
+
 	/**
 	 * @return the maxCapacity
 	 */

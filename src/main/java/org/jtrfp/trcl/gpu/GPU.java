@@ -15,7 +15,6 @@ package org.jtrfp.trcl.gpu;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.security.cert.Extension;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;

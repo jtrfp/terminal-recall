@@ -16,8 +16,9 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL3;
@@ -65,6 +66,8 @@ public final class MemoryManager {
 		return tb;
 	    }}).get();
 	}catch(Exception e){throw new RuntimeException(e);}
+	
+	pageIndexPool.setHardLimit(65535);
 	
 	pageIndexPool.setGrowthBehavior(new GrowthBehavior(){
 	    @Override
@@ -180,5 +183,48 @@ public final class MemoryManager {
 
     public void compactRootBuffer() {
 	pageIndexPool.compact();
+    }
+    
+    public synchronized void dumpAllocationTable(){
+	HashMap<Integer,PageEntry> pageMap = new HashMap<Integer,PageEntry>();
+	final ArrayList<WeakReference<PagedByteBuffer>> buffers = new ArrayList<WeakReference<PagedByteBuffer>>(pagedByteBuffers);
+	for(WeakReference<PagedByteBuffer> wr:buffers){
+	    PagedByteBuffer pbb = wr.get();
+	    if(pbb !=null){
+		final List<Integer> pageTable = pbb.getPageTable();
+		for(int logicalPageIndex=0; logicalPageIndex<pageTable.size(); logicalPageIndex++){
+		    final int physicalPage = pageTable.get(logicalPageIndex);
+		    PageEntry pe = new PageEntry();
+		    pe.pagedByteBuffer = pbb;
+		    pe.logicalPage     = logicalPageIndex;
+		    pageMap.put(physicalPage, pe);
+		}//end for(logicalPageIndices)
+	    }//end pbb != null
+	}//end for(pagedByteBuffers)
+	
+	System.out.println("Total allocated pages: "+pageMap.size());
+	
+	for(int physicalPageIndex=0; physicalPageIndex<65535; physicalPageIndex++){
+	    System.out.print("==== PHYSICAL PAGE "+physicalPageIndex);
+	    final PageEntry entry = pageMap.get(physicalPageIndex);
+	    if(entry!=null){
+		System.out.println(" "+entry.pagedByteBuffer.getDebugName());
+		//HashMap<Integer,String> indexMap = new HashMap<Integer,String>();
+	    }else {
+		System.out.print("\t[empty page]");
+		if(!pageIndexPool.getFreeIndices().contains(physicalPageIndex))
+		    System.out.print("   ***UNACCOUNTED-FOR as free page!!***");
+		System.out.print("");
+		System.out.println();
+		}
+	}//end for(physicalPageIndex)
+	
+	System.out.println("Terminal Recall has aborted due to a problem re-allocating pages.");
+	System.exit(0);
+    }//end dumpAllocationTable()
+    
+    class PageEntry{
+	PagedByteBuffer pagedByteBuffer;
+	int logicalPage;
     }
 }//end MemmoryManager

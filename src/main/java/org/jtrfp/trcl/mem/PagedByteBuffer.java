@@ -41,11 +41,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	this.pageIndexPool=pageIndexPool;
 	this.debugName=debugName;
 	final int sizeInPages = sizeInPages(initialSizeInBytes);
-	for(int i=0; i<sizeInPages; i++){
+	/*for(int i=0; i<sizeInPages; i++){
 	    final int pIndex = pageIndexPool.pop();
 	    pageTable.add(pIndex);
-	}
-	//pageIndexPool.pop(pageTable,sizeInPages);
+	}*/
+	pageIndexPool.pop(pageTable,sizeInPages);
 	this.gpu=gpu;
 	weakThis = new WeakReference<PagedByteBuffer>(this);
 	gpu.memoryManager.get().registerPagedByteBuffer(weakThis);
@@ -81,11 +81,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	if(pageNumDelta>0){	//GROW
 	    //final int newSize    = newNumPages-pageTable.size();
 	    try{
-		for(int i=0; i<pageNumDelta; i++){
+		/*for(int i=0; i<pageNumDelta; i++){
 		    final int idx = pageIndexPool.popOrException();
 		    pageTable.add(idx);
-		}
-		//pageIndexPool.popOrException(pageTable,pageNumDelta);
+		}*/
+		pageIndexPool.popOrException(pageTable,pageNumDelta);
 		}
 	    catch(OutOfIndicesException e){
 		System.err.println("Out of root pages. Performing Nuclear GC and trying again.");
@@ -98,10 +98,10 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 		resize(newSizeInBytes);
 	    }
 	}else{			//SHRINK
-	    for(int i=newNumPages; i<pageTable.size(); i++){
+	    /*for(int i=newNumPages; i<pageTable.size(); i++){
 		pageIndexPool.free(pageTable.get(i));
-	    }
-	    //pageIndexPool.free(pageTable.subList(newNumPages,pageTable.size()));//This had the -1 offset originally
+	    }*/
+	    pageIndexPool.free(pageTable.subList(newNumPages,pageTable.size()));//This had the -1 offset originally
 	    final int numPagesToRemove = pageTable.size()-newNumPages;
 	    for(int i=0; i<numPagesToRemove; i++){
 		pageTable.remove(pageTable.size()-1);

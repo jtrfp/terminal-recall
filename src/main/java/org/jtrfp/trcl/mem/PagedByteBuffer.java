@@ -102,10 +102,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 		pageIndexPool.free(pageTable.get(i));
 	    }*/
 	    pageIndexPool.free(pageTable.subList(newNumPages,pageTable.size()));//This had the -1 offset originally
-	    final int numPagesToRemove = pageTable.size()-newNumPages;
-	    for(int i=0; i<numPagesToRemove; i++){
+	    //final int numPagesToRemove = pageTable.size()-newNumPages;
+	    pageTable.subList(newNumPages, pageTable.size()).clear();
+	    /*for(int i=0; i<numPagesToRemove; i++){
 		pageTable.remove(pageTable.size()-1);
-	    }
+	    }*/
 	}//end if(pageNumDelta...)
     }//end resize()
     

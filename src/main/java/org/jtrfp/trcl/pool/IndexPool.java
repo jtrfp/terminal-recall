@@ -99,6 +99,10 @@ public class IndexPool{
 	    assert proposedNewMaxCapacity<=maxCapacity:"proposedNewMaxCapacity="+proposedNewMaxCapacity+" maxCapacity="+maxCapacity;
 	    assert proposedNewMaxCapacity>=usedIndices.size():"proposedNewMaxCapacity="+proposedNewMaxCapacity+" usedIndices.size()="+usedIndices.size();
 	    maxCapacity  = growthBehavior.shrink(proposedNewMaxCapacity);
+	    //Checks
+	    for(Integer i:usedIndices)
+		assert i<=greatestUsed:"index: "+i+" greatestUsed: "+greatestUsed;
+	    
 	    highestIndex = greatestUsed;
 	    updateNumUnusedIndices();
 	    updateNumUsedIndices();
@@ -145,13 +149,22 @@ public class IndexPool{
     }
     
     private int innerPop(Collection<Integer> dest, int count){
-	try{popOrException(dest,count);return 0;}
+	try{innerPopOrException(dest,count);return 0;}
 	catch(OutOfIndicesException e){
 	    return count;
 	    }
     }//end pop(...)
     
     public synchronized void popOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{
+	final ArrayList<Integer> temp = new ArrayList<Integer>();
+	innerPopOrException(temp, count);
+	dest       .addAll(temp);
+	usedIndices.addAll(temp);
+	updateNumUnusedIndices();
+	updateNumUsedIndices();
+    }//end popOrException()
+    
+    private void innerPopOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{
 	pop(dest,count,true);//Narrow point
     }//end pop(...)
     
@@ -166,15 +179,17 @@ public class IndexPool{
 		    }//end if()
 		if (highestIndex + count < maxCapacity){
 		     int remaining = availablePop(dest,count);
+		     assert remaining==0:remaining;
 		     return remaining;
 		     }
 		else {
-		    int remaining = growthPop(dest,count); 
+		    int remaining = growthPop(dest,count);
+		    assert remaining==0:remaining;
 		    return remaining;
 		}
 	    }//end sync(this)
 	}//end catch{no element}
-	assert count>=0;
+	assert count>=0:count;
 	return count;
     }//end pop(...)
     
@@ -210,7 +225,7 @@ public class IndexPool{
     }// end pop()
     
     	private int availablePop(Collection<Integer>dest, int count){
-    	    while(count-->0)
+    	    for(int i=0; i<count; i++)
     		dest.add(availablePop());
     	    return 0;
     	}

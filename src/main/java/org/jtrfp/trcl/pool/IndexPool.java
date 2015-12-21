@@ -42,6 +42,7 @@ public class IndexPool{
 	    };//Default is to double each time, and shrink to exact minimum.
 	private int hardLimit=Integer.MAX_VALUE;//Basically no hard limit by default
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+	private final ArrayList<Integer> workList = new ArrayList<Integer>();
 	
 	public IndexPool(){
 	}
@@ -139,10 +140,11 @@ public class IndexPool{
     }
     
     public synchronized int pop(Collection<Integer> dest, int count){
-	final ArrayList<Integer> temp = new ArrayList<Integer>();
-	final int remaining = innerPop(temp,count);
-	dest       .addAll(temp);
-	usedIndices.addAll(temp);
+	workList.clear();
+	//final ArrayList<Integer> temp = new ArrayList<Integer>();
+	final int remaining = innerPop(workList,count);
+	dest       .addAll(workList);
+	usedIndices.addAll(workList);
 	updateNumUnusedIndices();
 	updateNumUsedIndices();
 	return remaining;
@@ -156,10 +158,11 @@ public class IndexPool{
     }//end pop(...)
     
     public synchronized void popOrException(Collection<Integer> dest, int count) throws OutOfIndicesException{
-	final ArrayList<Integer> temp = new ArrayList<Integer>();
-	innerPopOrException(temp, count);
-	dest       .addAll(temp);
-	usedIndices.addAll(temp);
+	//final ArrayList<Integer> temp = new ArrayList<Integer>();
+	workList.clear();
+	innerPopOrException(workList, count);
+	dest       .addAll(workList);
+	usedIndices.addAll(workList);
 	updateNumUnusedIndices();
 	updateNumUsedIndices();
     }//end popOrException()

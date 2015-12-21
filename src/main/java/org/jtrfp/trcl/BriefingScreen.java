@@ -14,19 +14,23 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
-import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
 
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
+import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.game.Game;
@@ -60,10 +64,12 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private TimerTask	  scrollTimer;
     private WorldObject	  planetObject;
     private final BriefingLayout layout;
+    private final ControllerBarrier fireBarrier;
 
     public BriefingScreen(final TR tr, GLFont font, BriefingLayout layout, String debugName) {
 	super();
 	this.layout=layout;
+	fireBarrier = new ControllerBarrier(tr.getControllerInputs().getControllerInput(UserInputWeaponSelectionBehavior.FIRE));
 	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		tr.gpu.get().getGl(), 0,false),true,"BriefingScreen."+debugName);
@@ -190,7 +196,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
 	
 	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(),lvl);
-	tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
+	fireBarrier.waitForEvent();
+	//tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
@@ -225,6 +232,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    public void run() {
 		synchronized(mWait){mWait[0] = true; mWait.notifyAll();}
 	    }});
+	/*
 	final Thread spacebarWaitThread;
 	(spacebarWaitThread = new Thread(){
 	    @Override
@@ -235,8 +243,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	}).start();
 	try{synchronized(mWait){while(!mWait[0])mWait.wait();}}
 	catch(InterruptedException e){}
+	*/
+	fireBarrier.waitForEvent();
 	stopScroll();
-	spacebarWaitThread.interrupt();
+	//spacebarWaitThread.interrupt();
 	
 	//Enemy introduction
 	tr.setRunState(new Mission.EnemyBrief() {});
@@ -291,7 +301,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.setRespondToTick(false);//freeze
 	    briefingChars.setScrollPosition(layout.getNumLines()-2);
 	    setContent(intro.getDescriptionString());
-	    tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
+	    //tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
+	    fireBarrier.waitForEvent();
 	    //Restore previous state.
 	    wo.setVisible(vis);
 	    wo.setActive(act);
@@ -312,4 +323,40 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	}//end if(null)
 	return palette;
     }//end ColorPaletteVectorList
+    
+    private class ControllerBarrier implements PropertyChangeListener{
+	private CountDownLatch        latch;
+	private final ControllerInput input;
+	private final PropertyChangeListener wpl;//Hard reference; do not remove!
+	
+	public ControllerBarrier(ControllerInput input){
+	    this.input = input;
+	    wpl = new WeakPropertyChangeListener(this,input);
+	    input.addPropertyChangeListener(wpl);
+	}
+	
+	public void release(){
+	    input.removePropertyChangeListener(this);
+	}
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent arg0) {
+	    if(latch == null)
+		return;
+	    Object nV = arg0.getNewValue();
+	    if(nV instanceof Double){
+		final double newValue = (Double)nV;
+		if(newValue > .75){
+		    latch.countDown();
+		}//end if(>.75)
+	    }//end if(instanceof Double)
+	}//end propertyChange(...)
+	
+	public void waitForEvent(){
+	    latch = new CountDownLatch(1);
+	    try{latch.await();}
+	    catch(Exception e){e.printStackTrace();}
+	    latch = null;
+	}//end waitForFire()
+    }//end WaitForFireButton
 }//end BriefingScreen

@@ -89,10 +89,12 @@ public final class Vect3D {
     
     public static double[] normalize(double[] src, double [] dest) {
 	final double norm = norm(src);
+	if(norm==0)
+	    throw new IllegalArgumentException("Cannot normalize zero-norm vector.");
+	checkValues(src);
 	dest[0]=src[0]/norm;
 	dest[1]=src[1]/norm;
 	dest[2]=src[2]/norm;
-	checkValues(src);
 	checkValues(dest);
 	return dest;
     }

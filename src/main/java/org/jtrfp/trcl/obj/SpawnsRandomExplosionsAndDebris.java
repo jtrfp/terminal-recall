@@ -26,9 +26,9 @@ public class SpawnsRandomExplosionsAndDebris extends Behavior {
     }
     @Override
     public void tick(long timeMillis){
-	if(Math.random()<.05){
+	if(Math.random()<.07){
 	    explosions.triggerExplosion(new Vector3D(getParent().getPosition()), ExplosionType.Blast);}
-	if(Math.random()<.05){
+	if(Math.random()<.07){
 	    explosions.triggerExplosion(new Vector3D(getParent().getPosition()), ExplosionType.Billow);}
 	if(Math.random()<.1){
 	    debris.spawn(new Vector3D(getParent().getPosition()), new Vector3D(

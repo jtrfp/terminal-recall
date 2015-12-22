@@ -24,7 +24,7 @@ public class SpawnsRandomSmoke extends Behavior {
     }
     @Override
     public void tick(long timeMillis){
-	if(Math.random()<.6){
+	if(Math.random()<.2){
 	    Vector3D pos = new Vector3D(getParent().getPositionWithOffset());
 	    Smokes.triggerSmoke(
 		    pos.add(new Vector3D(Math.random()*2000-1000,

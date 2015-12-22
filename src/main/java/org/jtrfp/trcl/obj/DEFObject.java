@@ -80,8 +80,8 @@ public class DEFObject extends WorldObject {
     		    shieldGen,isRuin,spinCrash,ignoringProjectiles;
     private Anchoring anchoring;
     private RotatedModelSource              rotatedModelSource;
-    private static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
-    private static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
+    public static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
+    public static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
     
 public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
     super(tr,model);

@@ -148,6 +148,8 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    Rotation rot;
 	    try{rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);}
 	    catch(MathArithmeticException e){rot = new Rotation(Vector3D.PLUS_K, 0);}//Default if given weird top/heading.
+	    if((work[0]==0)&&(work[1]==0)&&(work[2]==0))
+		work[0]=1;
 	    final Vector3D localDir = rot.applyTo(new Vector3D(work)).normalize();
 	    final double   pFactor  = (localDir.getX()+1)/2;
 	    assert !Vect3D.isAnyNaN(source);

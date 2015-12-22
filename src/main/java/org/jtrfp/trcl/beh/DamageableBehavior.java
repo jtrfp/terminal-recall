@@ -30,6 +30,9 @@ public class DamageableBehavior extends Behavior {
 	    if(!isEnabled())return;
 	    if(isInvincible())return;
 	    if(health<=0)return;
+	    if(evt instanceof DamageListener.ProjectileDamage && !isAcceptsProjectileDamage())
+		return;
+		
 	    probeForBehaviors(new AbstractSubmitter<DamageListener>(){
 		@Override
 		public void submit(DamageListener item) {

@@ -193,7 +193,7 @@ public class TVF3Game implements Game {
 	    /**
 	     * @return the playerName
 	     */
-	    public synchronized String getPlayerName() {
+	    public String getPlayerName() {
 		return playerName;
 	    }
 

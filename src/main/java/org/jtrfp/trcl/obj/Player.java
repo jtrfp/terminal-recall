@@ -12,7 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
@@ -20,11 +25,19 @@ import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithDEFObject;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
+import org.jtrfp.trcl.beh.DeathBehavior;
+import org.jtrfp.trcl.beh.DeathListener;
+import org.jtrfp.trcl.beh.ExplodesOnDeath;
+import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.MatchDirection;
+import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RollLevelingBehavior;
 import org.jtrfp.trcl.beh.RollNudgeOnDamage;
+import org.jtrfp.trcl.beh.RotateAroundObject;
+import org.jtrfp.trcl.beh.SpinCrashDeathBehavior;
 import org.jtrfp.trcl.beh.SurfaceImpactSFXBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
@@ -46,6 +59,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class Player extends WorldObject implements RelevantEverywhere{
     //private final Camera 	camera;
@@ -91,6 +105,12 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new SurfaceImpactSFXBehavior(tr));
 	addBehavior(new RedFlashOnDamage());
 	addBehavior(new RollNudgeOnDamage());
+	final SpinCrashDeathBehavior scb = new SpinCrashDeathBehavior();
+	scb.addPropertyChangeListener(SpinCrashDeathBehavior.TRIGGERED, new SpinCrashTriggerBehaviorListener());
+	addBehavior(scb);
+	addBehavior(new DeathBehavior());
+	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	addBehavior(new PlayerDeathListener());
 	
 	final Weapon[] allWeapons = Weapon.values();
 	
@@ -168,6 +188,14 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		setPolarMomentum(0);
 	probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
     }
+    
+    private class PlayerDeathListener extends Behavior implements DeathListener{
+	@Override
+	public void notifyDeath() {
+	    System.out.println("THOU ART DEAD.\n" +
+	    		"Reset not yet implemented. Close and restart the game to continue.");
+	}
+    }//end PlayerDeathListener
 
     @Override
     public void setHeading(Vector3D lookAt) {
@@ -195,4 +223,25 @@ public class Player extends WorldObject implements RelevantEverywhere{
     public ProjectileFiringBehavior[] getWeapons() {
 	return weapons;
     }
+    
+    private class SpinCrashTriggerBehaviorListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent pce) {
+	    if(pce.getNewValue()==Boolean.TRUE){
+		System.out.println("Player death sequence triggered.");
+		final Camera camera = Player.this.getTr().mainRenderer.get().getCamera(); 
+		Player.this.setVisible(true);
+		    camera.probeForBehavior(MatchPosition.class) .setEnable(false);
+		    camera.probeForBehavior(MatchDirection.class).setEnable(false);
+		    camera.probeForBehavior(RotateAroundObject.class).
+		            setTarget(Player.this).
+		    	    setDistance(TR.mapSquareSize*1).
+			    setAngularVelocityRPS(.1).
+			    setEnable(true);
+		    camera.probeForBehavior(FacingObject.class).
+		      setTarget(Player.this).
+		      setEnable(true);
+	    }//end if(triggered)
+	}//end propertyChange(...)
+    }//end PropertyChangeListener
 }// end Player

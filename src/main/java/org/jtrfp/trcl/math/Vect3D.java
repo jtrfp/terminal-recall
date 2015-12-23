@@ -90,7 +90,7 @@ public final class Vect3D {
     public static double[] normalize(double[] src, double [] dest) {
 	final double norm = norm(src);
 	if(norm==0)
-	    throw new IllegalArgumentException("Cannot normalize zero-norm vector.");
+	    throw new ZeroNormException();
 	checkValues(src);
 	dest[0]=src[0]/norm;
 	dest[1]=src[1]/norm;
@@ -171,6 +171,8 @@ public final class Vect3D {
     public static float [] normalize(float[] val) {
 	checkValues(val);
 	final double norm = norm(val);
+	if(norm == 0)
+	    throw new ZeroNormException();
 	val[0]/=norm;
 	val[1]/=norm;
 	val[2]/=norm;
@@ -198,5 +200,7 @@ public final class Vect3D {
     public static double dot3(double[] l, double[] r) {
 	return l[0]*r[0]+l[1]*r[1]+l[2]*r[2];
     }
+    
+    public static class ZeroNormException extends RuntimeException{}
     
 }//end Vect3D

@@ -18,6 +18,7 @@ import java.lang.ref.WeakReference;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.math.Vect3D.ZeroNormException;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class FacingObject extends Behavior {
@@ -37,7 +38,11 @@ public class FacingObject extends Behavior {
 	    final double [] pPos = parent.getPosition();
 	    
 	    Vect3D.subtract(tPos, pPos, work);
-	    final Vector3D newHeading = new Vector3D(Vect3D.normalize(work,work));
+	    
+	    Vector3D newHeading;
+	    try{newHeading = new Vector3D(Vect3D.normalize(work,work));}
+	    catch(ZeroNormException e){return;}
+	    
 	    Vect3D.cross(work, UP, perp);
 	    Vect3D.cross(perp, work, newTop);
 	    final Rotation facingRot = 

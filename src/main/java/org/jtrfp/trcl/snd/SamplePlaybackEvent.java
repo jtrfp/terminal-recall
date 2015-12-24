@@ -40,6 +40,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final SoundTexture soundTexture;
     private final double[] pan;
     private final double playbackRatio;
+    private Double lengthInSeconds = null;
     
     private SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
 		double[] pan, Factory origin, SoundEvent parent) {
@@ -49,11 +50,18 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     public SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
 	    double[] pan, Factory origin,
 	    SoundEvent parent, double playbackRatio) {
-	super(startTimeSeconds, tex.getLengthInRealtimeSeconds(), origin,
+	this(tex,startTimeSeconds,pan,origin,parent,playbackRatio,tex.getLengthInRealtimeSeconds());
+    }
+
+    public SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
+	    double[] pan, Factory factory, SoundEvent parent,
+	    double playbackRatio, double lengthInSeconds) {
+	super(startTimeSeconds, lengthInSeconds, factory,
 		parent);
 	soundTexture = tex;
 	this.pan = pan;
 	this.playbackRatio = playbackRatio;
+	this.lengthInSeconds = lengthInSeconds;
     }
 
     /**
@@ -181,6 +189,11 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	public SamplePlaybackEvent create(SoundTexture tex, double startTimeSeconds,
 		double[] pan, SoundEvent parent, double playbackRatio){
 	    return new SamplePlaybackEvent(tex,startTimeSeconds,pan,this,parent,playbackRatio);
+	}//end create(...)
+	
+	public SamplePlaybackEvent create(SoundTexture tex, double startTimeSeconds,
+		double[] pan, SoundEvent parent, double playbackRatio, double lengthSeconds){
+	    return new SamplePlaybackEvent(tex,startTimeSeconds,pan,this,parent,playbackRatio,lengthSeconds);
 	}//end create(...)
 
 	/**

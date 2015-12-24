@@ -62,23 +62,33 @@ public class GPUResidentMOD {
     
     private void calculateNoteLengths() {
 	final Pattern []    patterns = module.getPatternContainer().getPattern();
-	final int []        arrangements = module.getArrangement();
+	final int []        patternRequests = module.getArrangement();
 	final int []	    rowOfPreviousNote = new int[32];
+	PatternElement[]      previousElement   = new PatternElement[32];
 	int 		    rowCounter=0;
 	setTempo(module.getBPMSpeed());
 	setInterruptLockedSpeed(module.getTempo());
 	try{
 	 for(int arrIdx=0; arrIdx<module.getSongLength(); arrIdx++){
-	    int arrangement = arrangements[arrIdx];
-	    final Pattern pattern = patterns[arrangement];
+	    int patternIDToUse = patternRequests[arrIdx];
+	    final Pattern pattern = patterns[patternIDToUse];
 	    for(PatternRow row:pattern.getPatternRow()){
 		rowCounter++;
+		System.out.print("\nROW "+rowCounter+"\n");
 		for(PatternElement element:row.getPatternElement()){
-		   if(element.getEffekt()==0x0B)
-		       throw new EndOfSongException();
-		   final int lengthInRows = rowCounter-rowOfPreviousNote[element.getChannel()];
-		   durationInRows.put(element, lengthInRows);
-		   rowOfPreviousNote[element.getChannel()]=rowCounter;
+		    if(element.getInstrument()!=0){
+			final int channel = element.getChannel();
+			System.out.print(" ["+channel+":"+element.getInstrument()+"]");
+			if(element.getEffekt()==0x0B)
+			    throw new EndOfSongException();
+			final int lengthInRows = rowCounter-rowOfPreviousNote[channel];
+			if(previousElement[channel]!=null)
+			    durationInRows.put(previousElement[channel], lengthInRows);//Write length of previous note
+			else
+			    durationInRows.put(element, lengthInRows);// This is the first note. Base on zero.
+			rowOfPreviousNote[channel]=rowCounter;
+			previousElement[channel]  =element;
+		    }//end if(not empty)
 		}//end for(patternElements)
 	    }//end for(rows)
 	 }//end for(arrangements)
@@ -120,13 +130,18 @@ public class GPUResidentMOD {
 			  panState[0]= (1-ps)*volumeStates[element.getChannel()];
 			  panState[1]= ps*volumeStates[element.getChannel()];
 			  final double playbackRatio = 428./Helpers.noteValues[element.getNoteIndex()-1];
+			  Integer noteLengthRows = durationInRows.get(element);
+			  Double noteLengthRealtimeSeconds = texture.getLengthInRealtimeSeconds();
+			  if(noteLengthRows!=null)
+			      noteLengthRealtimeSeconds = Math.min(noteLengthRealtimeSeconds,noteLengthRows*realtimeSecondsPerRow);
 			  final SoundEvent evt = tr.soundSystem.get().
 				  getPlaybackFactory().
 				  create(texture,
 					  timeOffsetCounter+startOffsetInSeconds, 
 					  panState,
 					  parent,
-					  playbackRatio);
+					  playbackRatio,
+					  noteLengthRealtimeSeconds);
 			  tr.soundSystem.get().enqueuePlaybackEvent(evt);
 			}//end if(null)
 		   }//end if(>-1)

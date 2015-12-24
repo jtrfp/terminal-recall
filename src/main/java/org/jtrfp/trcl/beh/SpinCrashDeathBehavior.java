@@ -33,7 +33,7 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 
     public SpinCrashDeathBehavior(){
 	super();
-	this.setThreshold(1024*16);
+	this.setThreshold(1024*8);
     }//end constructor
 
     @Override

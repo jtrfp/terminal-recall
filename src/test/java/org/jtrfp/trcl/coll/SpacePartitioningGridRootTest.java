@@ -47,6 +47,7 @@ public class SpacePartitioningGridRootTest {
     protected Positionable [] mockedPositionables;
     protected Collection<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> mockedTarget;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
 	subject             = new SpacePartitioningGrid<Positionable>(new Vector3D(10000, 10000, 10000), 1000, 5000){};
@@ -83,6 +84,7 @@ public class SpacePartitioningGridRootTest {
 	catch(InterruptedException e){Assert.fail(e.getLocalizedMessage());}
     }
     
+    @SuppressWarnings("unchecked")
     @Test
     public void testRemoveAndRemoveCollection() {
 	subject.add(mockedPositionables[0]);
@@ -154,6 +156,7 @@ public class SpacePartitioningGridRootTest {
 	singleThreadExecutorBarrier(World.relevanceExecutor);
     }//end testRemoveAll()
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testEmptyAddNonEmptyBranch() {//Relevance executor breaks this test.
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>();
@@ -173,6 +176,7 @@ public class SpacePartitioningGridRootTest {
 	 assertTrue(dispatcher.contains(mockedPositionables[1]));
     }//end testEmptyAddNonEmptyBranch()
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testEmptyDeactivateNonEmptyBranchThenActivate() {//Relevance executor breaks this test.
 	when(mockedTarget.removeAll(any(Collection.class))).thenReturn(true);
@@ -196,6 +200,7 @@ public class SpacePartitioningGridRootTest {
 	assertEquals(1,subject.getPackedObjectsDispatcher().size());
     }//end testEmptyAddNonEmptyBranchThenActivate()
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testPopulatedAddNonEmptyBranchCommonTags(){
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>();

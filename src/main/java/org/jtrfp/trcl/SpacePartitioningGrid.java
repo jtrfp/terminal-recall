@@ -22,12 +22,10 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Future;
 
-import org.apache.commons.collections4.functors.TruePredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPacker;
 import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
-import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
@@ -126,14 +124,6 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	public CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> getPackedObjectsDispatcher(){
 	    return packedObjectsDispatcher;
 	}
-	private static double absMod(double value, double mod){
-	    if(value>=-0.)
-	    {return value%mod;}
-	    value*=-1;
-	    value%=mod;
-	    if(value==0)return 0;
-	    return mod-value;
-	}//end absMod
 	
 	/**
 	 * @return the squareSize
@@ -234,12 +224,11 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    }
 	
 	public void removeAll(){
-		final ArrayList<SpacePartitioningGrid> branches = new ArrayList<SpacePartitioningGrid>();
-		for(SpacePartitioningGrid g:branchGrids.keySet())
+		final ArrayList<SpacePartitioningGrid<E>> branches = new ArrayList<SpacePartitioningGrid<E>>();
+		for(SpacePartitioningGrid<E> g:branchGrids.keySet())
 		    branches.add(g);
-		for(SpacePartitioningGrid g:branches)
+		for(SpacePartitioningGrid<E> g:branches)
 		    removeBranch(g);
-		final ArrayList<E> alwaysVisible = new ArrayList<E>();
 		localTagger.clear();
 		return;
 	}//end removeAll()

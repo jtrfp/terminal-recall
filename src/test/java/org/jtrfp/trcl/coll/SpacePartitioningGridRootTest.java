@@ -161,7 +161,7 @@ public class SpacePartitioningGridRootTest {
 	branch.add(mockedPositionables[0]);
 	branch.add(mockedPositionables[1]);
 	ArgumentCaptor<Pair> argument 
-	 = new ArgumentCaptor<Pair>();
+	 = ArgumentCaptor.forClass(Pair.class);
 	singleThreadExecutorBarrier(World.relevanceExecutor);
 	verify(mockedTarget,times(1)).add(argument.capture());
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
@@ -185,11 +185,11 @@ public class SpacePartitioningGridRootTest {
 	branch.add(mockedPositionables[1]);
 	assertEquals(0,subject.getPackedObjectsDispatcher().size());
 	ArgumentCaptor<Pair> argument 
-	 = new ArgumentCaptor<Pair>();
+	 = ArgumentCaptor.forClass(Pair.class);
 	singleThreadExecutorBarrier(World.relevanceExecutor);
 	verify(mockedTarget,times(1)).add(argument.capture());
 	 ArgumentCaptor<Collection> argument2 
-	  = new ArgumentCaptor<Collection>();
+	   = ArgumentCaptor.forClass(Collection.class);
 	verify(mockedTarget,times(1)).removeAll(argument2.capture());
 	assertEquals(1,argument2.getValue().size());
 	subject.blockingAddBranch(branch);
@@ -206,7 +206,7 @@ public class SpacePartitioningGridRootTest {
 	branch.add(mockedPositionables[1]);
 	singleThreadExecutorBarrier(World.relevanceExecutor);
 	ArgumentCaptor<Pair> argument 
-	 = new ArgumentCaptor<Pair>();
+	 = ArgumentCaptor.forClass(Pair.class);
 	verify(mockedTarget,times(2)).add(argument.capture());
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	 assertNotNull(pair);

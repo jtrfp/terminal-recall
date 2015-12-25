@@ -229,24 +229,27 @@ public class Parser{
 		try{new PropertyDescriptor(property,obj.getClass()).getWriteMethod().invoke(obj,value);}
 		catch(Exception e){throw new RuntimeException(e);}
 		}*/
+	@SuppressWarnings("unchecked")
 	private <CLASS> CLASS get(ThirdPartyParseable obj, String property, Class <? extends CLASS> propertyReturnClass){
 		//System.out.println(clazz.getName()+" object="+obj.getClass());
 		try {
-			Method meth = obj.getClass().getMethod("get"+Character.toUpperCase(property.charAt(0))+property.substring(1), null);
+		        final Class<?>[] nullClasses = null;
+			Method meth = obj.getClass().getMethod("get"+Character.toUpperCase(property.charAt(0))+property.substring(1), nullClasses);
 			if(propertyReturnClass==String.class){
 				//Object result = new PropertyDescriptor(property,obj.getClass()).getReadMethod().invoke(obj, null);
-				Object result = meth.invoke(obj, null);
+				Object result = meth.invoke(obj, (Object[])null);
 				if(!result.getClass().isEnum())return (CLASS)new String(""+result);
-				else return (CLASS)(((Enum)result).ordinal()+"");
+				else return (CLASS)(((Enum<?>)result).ordinal()+"");
 				}
-			return (CLASS)meth.invoke(obj, null);
+			return (CLASS)meth.invoke(obj, (Object[])null);
 			}
 		catch(Exception e){throw new RuntimeException(e);}
 		}
 	
-	private Class getPropertyReturnType(ThirdPartyParseable obj, String property) throws NoSuchMethodException
+	private Class<?> getPropertyReturnType(ThirdPartyParseable obj, String property) throws NoSuchMethodException
 		{
-		return obj.getClass().getMethod("get"+Character.toUpperCase(property.charAt(0))+property.substring(1), null).getReturnType();
+	        final Class<?>[] nullClasses = null;
+		return obj.getClass().getMethod("get"+Character.toUpperCase(property.charAt(0))+property.substring(1), nullClasses).getReturnType();
 		}
 	
 	private void set(ThirdPartyParseable obj, String property, Object value, Class <?> targetClass){
@@ -271,7 +274,7 @@ public class Parser{
 		invokeSet(obj,"set"+Character.toUpperCase(property.charAt(0))+property.substring(1),value,value.getClass());
 		}
 	
-	private static void invokeSet(Object obj, String mName, Object value, Class argClass){
+	private static void invokeSet(Object obj, String mName, Object value, Class<?> argClass){
 		if(argClass==Integer.class)argClass=int.class;
 		if(argClass==Double.class) argClass=double.class;
 		if(argClass==Boolean.class)argClass=boolean.class;
@@ -363,8 +366,9 @@ public class Parser{
 	 * @param dest			Bean property to which this data is to be mapped.
 	 * @since Sep 17, 2012
 	 */
-	public void bytesOfCount(final int count, final PropertyDestination dest){
+	public void bytesOfCount(final int count, @SuppressWarnings("rawtypes") final PropertyDestination dest){
 		new RWHelper(){
+				@SuppressWarnings("unchecked")
 				@Override
 				public void read(EndianAwareDataInputStream is,
 						ThirdPartyParseable bean) throws IOException{
@@ -611,8 +615,9 @@ public class Parser{
 	 * @param includeEndingWhenReading
 	 * @since Sep 17, 2012
 	 */
-	public void bytesEndingWith(final byte [] ending, final PropertyDestination targetProperty, final boolean includeEndingWhenReading){
+	public void bytesEndingWith(final byte [] ending, @SuppressWarnings("rawtypes") final PropertyDestination targetProperty, final boolean includeEndingWhenReading){
 		new RWHelper(){
+				@SuppressWarnings("unchecked")
 				@Override
 				public void read(EndianAwareDataInputStream is,
 						 ThirdPartyParseable bean)
@@ -646,6 +651,7 @@ public class Parser{
 			}.go();
 		}
 	
+	@SuppressWarnings("unchecked")
 	protected static <CLASS> CLASS convertFromString(String s,Class<CLASS>targetClass) throws NumberFormatException{
 		Object result=null;
 
@@ -680,7 +686,7 @@ public class Parser{
 		 */
 		public String getAsString(ThirdPartyParseable bean){
 			Object result = get(bean);
-			if(result.getClass().isEnum())return (((Enum)result).ordinal()+"");
+			if(result.getClass().isEnum())return (((Enum<?>)result).ordinal()+"");
 			else if(result.getClass()==boolean.class || result.getClass()==Boolean.class)return ((Boolean)result)?"1":"0";
 			return result.toString();
 			}
@@ -726,16 +732,17 @@ public class Parser{
 							//System.out.println("elementType="+elementType);
 							Object nilArray = Array.newInstance(elementType, 0);//TODO: Move this allocation to later branch
 							Object array = Parser.this.get(bean, propertyName, nilArray.getClass());
-							Class indexingClass=null;
+							Class<?> indexingClass=null;
 							try{indexingClass=Parser.this.getPropertyReturnType(bean, propertyName);}
 							catch(NoSuchMethodException e){e.printStackTrace();System.exit(1);}
 							if(List.class.isAssignableFrom(indexingClass))
 								{//Lists scale up far better than arrays.
 								if(array==null)
 									{//Not yet initialized
-									array=new ArrayList();
+									array=new ArrayList<PROPERTY_CLASS>();
 									Parser.this.set(bean,propertyName, array, indexingClass);//Install new
 									}
+								@SuppressWarnings("unchecked")
 								final List<PROPERTY_CLASS> list = (List<PROPERTY_CLASS>)array;
 								list.add(index,value);
 								}
@@ -764,14 +771,17 @@ public class Parser{
 						@Override
 						public PROPERTY_CLASS get(ThirdPartyParseable bean)
 							{
-							Class indexingClass=null;
+							Class<?> indexingClass=null;
 							try{indexingClass=Parser.this.getPropertyReturnType(bean, propertyName);}
 							catch(NoSuchMethodException e){e.printStackTrace();System.exit(1);}
 							if(List.class.isAssignableFrom(indexingClass))
-								{List<PROPERTY_CLASS> list = (List<PROPERTY_CLASS>)Parser.this.get(bean, propertyName,indexingClass);
+								{@SuppressWarnings("unchecked")
+								List<PROPERTY_CLASS> list = (List<PROPERTY_CLASS>)Parser.this.get(bean, propertyName,indexingClass);
 								return list.get(index);
 								}
-							else{final Class<PROPERTY_CLASS> arrayClass = (Class<PROPERTY_CLASS>)(Array.newInstance(elementType, 0).getClass());
+							else{@SuppressWarnings("unchecked")
+							final Class<PROPERTY_CLASS> arrayClass = (Class<PROPERTY_CLASS>)(Array.newInstance(elementType, 0).getClass());
+								@SuppressWarnings("unchecked")
 								PROPERTY_CLASS result = (PROPERTY_CLASS)Array.get((Parser.this.get(bean, propertyName,arrayClass)),index);
 								//System.out.println("indexedProperty.get("+arrayIndex+") returning "+result);
 								return result;
@@ -867,6 +877,7 @@ public class Parser{
 	public <CLASS>void stringEndingWith(final String ending,final StringParser sParser,final PropertyDestination<CLASS> property,
 			final boolean includeEndingWhenReading){
 		new RWHelper(){
+				@SuppressWarnings("unchecked")
 				@Override
 				public void read(EndianAwareDataInputStream is, 
 						ThirdPartyParseable bean) throws IOException{
@@ -912,16 +923,17 @@ public class Parser{
 	 */
 	public <CLASS extends ThirdPartyParseable>void subParseProposedClasses(final PropertyDestination<CLASS> pDest, final ClassInclusion ... inclusions){
 		new RWHelper(){
+			@SuppressWarnings("unchecked")
 			@Override
 			public void read(EndianAwareDataInputStream is, 
 					ThirdPartyParseable bean) throws IOException{
-				ArrayList<Class> classes = new ArrayList<Class>();
+				ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
 				//System.out.println("read()...");
 				for(ClassInclusion inc:inclusions)
-					{Collections.addAll(classes, inc.propose());}
+					{Collections.addAll(classes, (Class<?>[])inc.propose());}
 				if(classes.size()==0)throw new RuntimeException("No inclusion classes given. Need at least one. Trouble ahead...");
 				CLASS obj=null;
-				for(Class c:classes){
+				for(Class<?> c:classes){
 					//System.out.println("Parser.subParseProposedClasses() trying class "+c.getName());
 					try{obj=(CLASS)readToNewBean(is, (Class<? extends ThirdPartyParseable>)c);break;}//break from the loop if successful.
 					catch(IllegalAccessException e){e.printStackTrace();}
@@ -1193,13 +1205,14 @@ public class Parser{
 	 */
 	public <CLASS extends ThirdPartyParseable> void arrayOf(final int count, final String arrayOrListPropertyName, final Class <CLASS> elementClass){
 		new RWHelper(){
+				@SuppressWarnings("unchecked")
 				@Override
 				public void read(EndianAwareDataInputStream is, 
 						ThirdPartyParseable bean) throws IOException{
 					//final int count = get(bean,countProperty,Integer.class);
 					ArrayList<CLASS>objectsToMake = new ArrayList<CLASS>();
 
-					Class indexingClass=null;
+					Class<?> indexingClass=null;
 					try{indexingClass=Parser.this.getPropertyReturnType(bean, arrayOrListPropertyName);}
 					catch(NoSuchMethodException e){e.printStackTrace();System.exit(1);}
 					
@@ -1216,16 +1229,18 @@ public class Parser{
 				public void write(EndianAwareDataOutputStream os, 
 						ThirdPartyParseable bean) throws IOException{
 					
-					Class indexingClass=null;
+					Class<?> indexingClass=null;
 					try{indexingClass=Parser.this.getPropertyReturnType(bean, arrayOrListPropertyName);}
 					catch(NoSuchMethodException e){e.printStackTrace();System.exit(1);}
 					
 					if(List.class.isAssignableFrom(indexingClass)) 
-						{List<CLASS> list = (List<CLASS>)get(bean,arrayOrListPropertyName, indexingClass);
+						{@SuppressWarnings("unchecked")
+						List<CLASS> list = (List<CLASS>)get(bean,arrayOrListPropertyName, indexingClass);
 						for(CLASS item:list)
 							{writeBean(item,os);}
 						}
 					else{
+						@SuppressWarnings("unchecked")
 						CLASS [] array = get(bean,arrayOrListPropertyName, (Class<CLASS []>)Array.newInstance(elementClass, 0).getClass());
 						for(CLASS item:array)
 							{writeBean(item,os);}

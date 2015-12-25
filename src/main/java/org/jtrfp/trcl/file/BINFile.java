@@ -23,6 +23,7 @@ import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.jtrfp.bin.IBinData;
 
 public abstract class BINFile implements ThirdPartyParseable {
 
@@ -41,7 +42,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
 	    prs.littleEndian();
-	    prs.expectBytes(new byte[] { 0x00, 0x00, 0x00, 0x14 },
+	    prs.expectBytes(new byte[] { 0x00, 0x00, 0x00, IBinData.ID_MODEL },
 		    FailureBehavior.UNRECOGNIZED_FORMAT);
 
 	    prs.int4s(prs.property("scale", int.class));
@@ -1218,7 +1219,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
 	    prs.littleEndian();
-	    prs.expectBytes(new byte[] { 0x00, 0x00, 0x00, 0x20 },
+	    prs.expectBytes(new byte[] { 0x00, 0x00, 0x00, IBinData.ID_ANIMATION_CONTROL },
 		    FailureBehavior.UNRECOGNIZED_FORMAT);
 	    prs.int4s(prs.property("unknown1", int.class));
 	    prs.int4s(prs.property("numFrames", int.class));

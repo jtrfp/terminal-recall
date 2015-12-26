@@ -30,6 +30,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
+import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.Renderer;
@@ -156,25 +157,27 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end probeForBehavior
 
     public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
+	final ArrayList<T> result = new ArrayList<T>();
 	synchronized(collisionBehaviors){
 	if (type.isAssignableFrom(CollisionBehavior.class)) {
 	    for (int i = 0; i < collisionBehaviors.size(); i++) {
 		if (type.isAssignableFrom(collisionBehaviors.get(i).getClass())) {
-		    sub.submit((T) collisionBehaviors.get(i));
+		    result.add((T) collisionBehaviors.get(i));
 		}
 	    }// end if(instanceof)
 	}// end isAssignableFrom(CollisionBehavior.class)
 	}synchronized(inactiveBehaviors){
 	for (int i = 0; i < inactiveBehaviors.size(); i++) {
 	    if (type.isAssignableFrom(inactiveBehaviors.get(i).getClass()))
-		sub.submit((T) inactiveBehaviors.get(i));
+		result.add((T) inactiveBehaviors.get(i));
 	}// end if(instanceof)
 	}synchronized(tickBehaviors){
 	for (int i = 0; i < tickBehaviors.size(); i++) {
 	    if (type.isAssignableFrom(tickBehaviors.get(i).getClass()))
-		sub.submit((T) tickBehaviors.get(i));
+		result.add((T) tickBehaviors.get(i));
 	}// end for (tickBehaviors)
      }//end sync(tickBehaviors)
+     sub.submit(result);
     }// end probeForBehaviors(...)
 
     public void tick(long time) {
@@ -761,6 +764,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
 	pcs.removePropertyChangeListener(propertyName, listener);
+    }
+
+    public boolean hasBehavior(Class<? extends Behavior> behaviorClass) {
+	try{probeForBehavior(behaviorClass);}
+	catch(BehaviorNotFoundException e){return false;}
+	return true;
     }
 
     /*public void checkPositionSanity() {

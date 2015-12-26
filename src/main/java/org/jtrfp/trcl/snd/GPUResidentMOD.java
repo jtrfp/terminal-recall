@@ -74,11 +74,9 @@ public class GPUResidentMOD {
 	    final Pattern pattern = patterns[patternIDToUse];
 	    for(PatternRow row:pattern.getPatternRow()){
 		rowCounter++;
-		System.out.print("\nROW "+rowCounter+"\n");
 		for(PatternElement element:row.getPatternElement()){
 		    if(element.getInstrument()!=0){
 			final int channel = element.getChannel();
-			System.out.print(" ["+channel+":"+element.getInstrument()+"]");
 			if(element.getEffekt()==0x0B)
 			    throw new EndOfSongException();
 			final int lengthInRows = rowCounter-rowOfPreviousNote[channel];

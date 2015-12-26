@@ -17,6 +17,7 @@ import java.beans.PropertyChangeListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -54,11 +55,14 @@ import org.jtrfp.trcl.beh.ui.UpdatesThrottleMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class Player extends WorldObject implements RelevantEverywhere{
@@ -167,18 +171,22 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    }//end if(property=true)
 		}//end if(allAmmo)
 	    }// end if(hasButton)
-	}
+	}//end for(Weapons)
 	addBehavior(new UserInputWeaponSelectionBehavior(tr.getControllerInputs()).setBehaviors(weapons));
-	//camera = tr.renderer.get().getCamera();
-	probeForBehavior(VelocityDragBehavior.class)
-		.setDragCoefficient(.86);
-	probeForBehavior(Propelled.class).setMinPropulsion(0);
-	probeForBehavior(Propelled.class)
-		.setMaxPropulsion(900000);
-	probeForBehavior(RotationalDragBehavior.class)
-		.setDragCoefficient(.86);
-	setActive(false);
+	
+	defaultConfiguration();
     }//end constructor
+    
+    private void defaultConfiguration(){
+		probeForBehavior(VelocityDragBehavior.class)
+			.setDragCoefficient(.86);
+		probeForBehavior(Propelled.class).setMinPropulsion(0);
+		probeForBehavior(Propelled.class)
+			.setMaxPropulsion(900000);
+		probeForBehavior(RotationalDragBehavior.class)
+			.setDragCoefficient(.86);
+		setActive(false);
+    }//end defaultConfiguration()
     
     public void resetVelocityRotMomentum(){
 	//probeForBehavior(HasPropulsion.class).setPropulsion(0);
@@ -192,9 +200,46 @@ public class Player extends WorldObject implements RelevantEverywhere{
     private class PlayerDeathListener extends Behavior implements DeathListener{
 	@Override
 	public void notifyDeath() {
-	    System.out.println("THOU ART DEAD.\n" +
-	    		"Reset not yet implemented. Close and restart the game to continue.");
-	}
+	    new Thread(){
+		@Override
+		public void run(){
+		    final Player thisPlayer = Player.this;
+		    setName("Player Death Sequence Thread");
+		    System.out.println("Player has died.");
+		    try{Thread.sleep(3000);}
+		    catch(InterruptedException e){}
+		    //Reset player
+		    final DamageableBehavior db = Player.this.probeForBehavior(DamageableBehavior.class);
+		    db.setHealth(db.getMaxHealth());
+		    Player.this.defaultConfiguration();
+		    thisPlayer.probeForBehavior(SpinCrashDeathBehavior.class).
+		      reset().
+		      setEnable(true);
+		    thisPlayer.probeForBehavior(DeathBehavior.class).reset();
+		    //Reset camera
+		    final Camera camera = Player.this.getTr().mainRenderer.get().getCamera(); 
+		    Player.this.setVisible(false);
+		    camera.probeForBehavior(MatchPosition.class) .setEnable(true);
+		    camera.probeForBehavior(MatchDirection.class).setEnable(true);
+		    camera.probeForBehavior(RotateAroundObject.class).
+		     setEnable(false);
+		    camera.probeForBehavior(FacingObject.class).
+		     setEnable(false);
+		    //Reset game
+	            final TVF3Game game = (TVF3Game)Player.this.getTr().getGame();
+	            final Mission mission = game.getCurrentMission();
+	            Features.get(mission, GamePause.class).setPaused(true);
+		    mission.abort();
+		    final SpacePartitioningGrid grid = thisPlayer.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
+		    grid.add(thisPlayer);
+		    thisPlayer.setActive(true);
+		    
+		    try{game.setLevelIndex(game.getLevelIndex());
+		        game.getCurrentMission().go();
+		    }catch(Exception e){e.printStackTrace();}
+		}//end run()
+	    }.start();
+	}//end notifyDeath()
     }//end PlayerDeathListener
 
     @Override

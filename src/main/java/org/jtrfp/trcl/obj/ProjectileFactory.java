@@ -161,14 +161,19 @@ public class ProjectileFactory {
     	}//end case()
     	soundTexture = soundFile!=null?tr.getResourceManager().soundTextures.get(soundFile):null;
        }//end constructor(...)
+    
     public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin) {
+	return fire(newPosition, heading, objectOfOrigin, true);
+    }
+    
+    public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin, boolean sumWithProjectorVel) {
 	assert !Vect3D.isAnyNaN(newPosition);
 	assert heading.getNorm()!=0 && heading.getNorm()!=Double.NaN;
 	
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
 	final Vector3D newVelocity;
-	if(weapon.isSumWithProjectorVel()){
+	if(weapon.isSumWithProjectorVel() && sumWithProjectorVel){
 	    Vector3D originVelocity = Vector3D.ZERO;
 	    try{final Velocible vel = objectOfOrigin.probeForBehavior(Velocible.class);
 	    originVelocity = vel.getVelocity();

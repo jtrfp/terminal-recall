@@ -34,6 +34,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private int 		ammo				 =0;
     private Integer []          firingVertices;
     private BasicModelSource    modelSource;
+    private boolean             sumProjectorVelocity             = false;
     @Override
     public void tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
@@ -42,7 +43,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	Vector3D heading=this.firingHeading;
 	    	if(this.firingHeading==null)heading = p.getHeading();
 	    	for(int mi=0; mi<multiplexLevel;mi++){
-	    	    final Vector3D firingPosition = getNextFiringPosition();
+	    	    final Vector3D firingPosition = getNextModelViewFiringPosition();
 	    	    resetFiringTimer();
 	    	    projectileFactory.
 	    	      fire(Vect3D.add(
@@ -50,7 +51,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    		      firingPosition.toArray(),
 	    		      new double[3]), 
 	    		      heading, 
-	    		      getParent());
+	    		      getParent(),
+	    		      isSumProjectorVelocity());
 	    	}//for(multiplex)
 	    	heading = p.getHeading();
 	    }//end if(ammo)
@@ -87,31 +89,54 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private void resetFiringTimer(){
 	timeWhenNextFiringPermittedMillis = System.currentTimeMillis()+timeBetweenFiringsMillis;}
 
-    private Vector3D getNextFiringPosition(){
+    public Vector3D getNextModelViewFiringPosition(){
 	if(isAbsoluteFiringPositions())
 	 return new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
-	    		getParent().getHeading(),getParent().getTop()).applyTo(getNextAbsoluteFiringPosition());
+	    		getParent().getHeading(),getParent().getTop()).applyTo(getNextAbsoluteModelViewFiringPosition());
 	else{
 	    final double [] vtx = modelSource.getVertex(getNextFiringVertex());
 	    return new Vector3D(vtx[0],vtx[1],vtx[2]);
 	}
-	 
     }//end getNextFiringPosition()
     
-    private Vector3D getNextAbsoluteFiringPosition(){
+    public Vector3D peekNextModelViewFiringPosition(){
+	if(isAbsoluteFiringPositions())
+	 return new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
+	    		getParent().getHeading(),getParent().getTop()).applyTo(peekNextAbsoluteModelViewFiringPosition());
+	else{
+	    final double [] vtx = modelSource.getVertex(peekNextFiringVertex());
+	    return new Vector3D(vtx[0],vtx[1],vtx[2]);
+	}
+    }//end peekNextFiringPosition()
+    
+    private Vector3D getNextAbsoluteModelViewFiringPosition(){
 	return firingPositions[getNextRawFiringPositionIndex()];
     }
     
+    private Vector3D peekNextAbsoluteModelViewFiringPosition(){
+   	return firingPositions[peekNextRawFiringPositionIndex()];
+       }
+    
     private int getNextFiringVertex(){
+	final int result = peekNextFiringVertex();
 	firingPositionIndex++;
 	firingPositionIndex%=firingVertices.length;
-	return firingVertices[firingPositionIndex];
+	return result;
+    }
+    
+    private int peekNextFiringVertex(){
+	return firingVertices[(firingPositionIndex+1)%firingVertices.length];
     }
     
     private int getNextRawFiringPositionIndex(){
+	final int result = peekNextRawFiringPositionIndex(); 
 	firingPositionIndex++;
 	firingPositionIndex%=firingPositions.length;
-	return firingPositionIndex;
+	return result;
+    }
+    
+    private int peekNextRawFiringPositionIndex(){
+	return (firingPositionIndex+1)%firingPositions.length;
     }
     /**
      * @return the firingPositions
@@ -213,5 +238,14 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	this.modelSource=modelSource;
 	this.firingVertices=firingVertices;
 	return this;
+    }
+
+    public boolean isSumProjectorVelocity() {
+        return sumProjectorVelocity;
+    }
+
+    public ProjectileFiringBehavior setSumProjectorVelocity(boolean sumProjectorVelocity) {
+        this.sumProjectorVelocity = sumProjectorVelocity;
+        return this;
     }
 }//end ProjectileFiringBehavior

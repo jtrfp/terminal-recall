@@ -35,14 +35,17 @@ public class AutoFiring extends Behavior {
     private double 	    maxFireVectorDeviation=1.1;
     private boolean 	    berzerk	 	= false;
     private double 	    aimRandomness	= 0;
+    private final double [] firingPos           = new double[3];
     @Override
     public void tick(long timeMillis){
 	final WorldObject thisObject = getParent();
 	final Player player = thisObject.getTr().getGame().getPlayer();
 	if(player.probeForBehavior(Cloakable.class).isCloaked())return;
-	final double [] thisPos = thisObject.getPositionWithOffset();
+	final double [] thisPos   = thisObject.getPositionWithOffset();
+	Vect3D.add(projectileFiringBehavior.peekNextModelViewFiringPosition().toArray(),thisPos, firingPos);
+	//final double [] firingPos = thisObject.getPositionWithOffset();
 	final double [] playerPos = player.getPositionWithOffset();
-	final double dist = Vect3D.distance(thisPos, playerPos);
+	final double dist = Vect3D.distance(firingPos, playerPos);
 	if(dist<maxFiringDistance||dist>minFiringDistance){
 	    final int patIndex=(int)(((timeMillis+patternOffsetMillis)%totalFiringPatternTimeMillis)/timePerPatternEntry);
 	    if(patIndex!=lastIndexVisited){//end if(lastVisited)
@@ -51,10 +54,10 @@ public class AutoFiring extends Behavior {
 		    if(smartFiring){
 			final Vector3D playerVelocity = player.probeForBehavior(Velocible.class).getVelocity();
 			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TR.crossPlatformScalar; 
-			Vector3D virtualPlayerPos = interceptOf(new Vector3D(playerPos),playerVelocity,new Vector3D(thisPos),projectileSpeed);
+			Vector3D virtualPlayerPos = interceptOf(new Vector3D(playerPos),playerVelocity,new Vector3D(firingPos),projectileSpeed);
 			if(virtualPlayerPos==null)virtualPlayerPos=new Vector3D(playerPos);
-			Vect3D.subtract(virtualPlayerPos.toArray(), thisPos, firingVector);}
-		    else{Vect3D.subtract(playerPos, thisPos, firingVector); }
+			Vect3D.subtract(virtualPlayerPos.toArray(), firingPos, firingVector);}
+		    else{Vect3D.subtract(playerPos, firingPos, firingVector); }
 		    result = new Vector3D(Vect3D.normalize(firingVector,firingVector));
 		    final double [] objectHeading = thisObject.getHeadingArray();
 		    Vect3D.subtract(objectHeading, result.toArray(), headingDelta);

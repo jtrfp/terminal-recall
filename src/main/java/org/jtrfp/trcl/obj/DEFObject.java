@@ -488,7 +488,7 @@ private void projectileFiringBehavior(){
 	    setProjectileFiringBehavior(pfb).
 	    setPatternOffsetMillis((int)(Math.random()*2000)).
 	    setMaxFiringDistance(TR.mapSquareSize*5).
-	    setSmartFiring(false).
+	    setSmartFiring(true).
 	    setMaxFireVectorDeviation(2.).
 	    setTimePerPatternEntry(!boss?2000:350));
     if(boss)af.setFiringPattern(new boolean []{true,true,true,true,false,false,true,false}).setAimRandomness(.07);

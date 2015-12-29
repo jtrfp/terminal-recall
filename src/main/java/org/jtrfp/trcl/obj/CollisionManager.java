@@ -15,6 +15,7 @@ package org.jtrfp.trcl.obj;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -40,27 +41,37 @@ public class CollisionManager {
     }
     
     public void newPerformCollisionTests(){
+	//Obtain a thread-local copy
 	try{World.relevanceExecutor.submit(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		for(Pair<Vector3D,CollectionActionDispatcher<Positionable>> cube:relevancePairs){
-		    Collection<Positionable> col = newCube(); col.addAll(cube.getValue());
-		    pairBuffer.add(new Pair<Vector3D,Collection<Positionable>>(cube.getKey(),col));
+		for(Pair<Vector3D,CollectionActionDispatcher<Positionable>> relevancePair:relevancePairs){
+		    Collection<Positionable> newCube = newCube(); newCube.addAll(relevancePair.getValue());
+		    pairBuffer.add(new Pair<Vector3D,Collection<Positionable>>(relevancePair.getKey(),newCube));
 		}//end for(relevanceCubes)
 		return null;
 	    }}).get();}catch(Exception e){e.printStackTrace();}
-	
-	Collection<Positionable> everywhere=null;
+	//Process non-everywhere cubes
+	Pair<Vector3D,Collection<Positionable>> everywhere=null;
 	synchronized(tr.getThreadManager().gameStateLock){//Process cubes
 	    for(Pair<Vector3D,Collection<Positionable>> cube:pairBuffer){
 		if(!cube.getKey().equals(World.VISIBLE_EVERYWHERE))
 		    processCubes(cube.getValue(),cube.getValue());
-		else everywhere = cube.getValue();
+		else {//EVERYWHERE
+		    if(everywhere==null)
+		     everywhere = cube;
+		    else
+			throw new RuntimeException("Intolerable multiple 'everywhere' cubes.");
+		    }//end EVERYWHERE
 	    }//end for(relevanceCubes)
 	}if(everywhere!=null){synchronized(tr.getThreadManager().gameStateLock){//Process "everywhere" items.
+	    final boolean wasPresent = pairBuffer.remove(everywhere);
+	    assert wasPresent;
+	    assert !pairBuffer.contains(everywhere);
+	    processCubes(everywhere.getValue(),everywhere.getValue());
 	    for(Pair<Vector3D,Collection<Positionable>> cube:pairBuffer){
-		processCubes(everywhere,cube.getValue());
-		processCubes(cube.getValue(),everywhere);
+		processCubes(everywhere.getValue(),cube.getValue());
+		processCubes(cube.getValue(),everywhere.getValue());
 	    }//end for(relevanceCubes) (relevant everywhere)
 	}}//end sync(gameStateLock)
 	for(Pair<Vector3D,Collection<Positionable>> cube:pairBuffer){

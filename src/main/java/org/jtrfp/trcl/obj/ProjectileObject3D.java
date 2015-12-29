@@ -26,10 +26,12 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 public class ProjectileObject3D extends WorldObject implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
     private WeakReference<WorldObject> objectOfOrigin = new WeakReference<WorldObject>(null);
+    private Weapon weapon;
     public ProjectileObject3D(TR tr,Model m, Weapon w, ExplosionType explosionType){
 	super(tr,m);
 	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType,w.isHoning()));
 	addBehavior(new ReportsCollisionsToStdout().setEnable(false));
+	setWeapon(w);
     }
 
     @Override
@@ -48,5 +50,13 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
     @Override
     public WorldObject getObjectOfOrigin() {
 	return objectOfOrigin.get();
+    }
+
+    public Weapon getWeapon() {
+	return weapon;
+    }
+
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
     }
 }//end ProjectilObject3D

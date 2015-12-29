@@ -40,13 +40,13 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
 
     @Override
     public boolean add(Pair<KEY,CollectionActionDispatcher<E>> e) {
-	cache.add(e);
 	if(!map.containsKey(e.getKey())){
 	    final CollectionActionDispatcher<E> newCollection = new CollectionActionDispatcher<E>(new ArrayList<E>());
 	    final Pair<KEY,CollectionActionDispatcher<E>> newPair = 
 		    new Pair<KEY,CollectionActionDispatcher<E>>(e.getKey(),newCollection);
 	    map.put(e.getKey(),newPair);
 	    delegate.add(newPair);
+	    cache.add(newPair);
 	}//end (create new entry)
 	return e.getValue().addTarget(map.get(e.getKey()).getValue(), true);
     }//end add()
@@ -58,14 +58,31 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
 	assert result|temp.isEmpty();
     }//end clear()
 
+    /**
+     * Note: Based on the KEY component of Pair<KEY,VALUE>
+     * Different VALUEs have no effect.
+     */
     @Override
     public boolean contains(Object o) {
-	return cache.contains(o);
+	if(! (o instanceof Pair))
+	    return false;
+	final Pair<KEY,CollectionActionDispatcher<E>> pair = (Pair<KEY,CollectionActionDispatcher<E>>)o;
+	return map.containsKey(pair.getKey());
+	//return cache.contains(o);
     }
 
+
+    /**
+     * Note: Based on the KEY component of Pair<KEY,VALUE>
+     * Different VALUEs have no effect.
+     */
     @Override
     public boolean containsAll(Collection<?> c) {
-	return cache.containsAll(c);
+	for(Object o:c)
+	    if(!contains(o))
+		return false;
+	return true;
+	//return cache.containsAll(c);
     }
 
     @Override
@@ -77,8 +94,8 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
     public boolean remove(Object o) {
 	if(! (o instanceof Pair))
 	    return false;
-	if(!cache.remove(o))
-	    return false;
+	//if(!cache.remove(o))
+	//    return false;
 	Pair<KEY,CollectionActionDispatcher<E>> element = (Pair<KEY,CollectionActionDispatcher<E>>)o;
 	final KEY key = element.getKey();
 	final Pair<KEY,CollectionActionDispatcher<E>> target = map.get(key);
@@ -90,6 +107,7 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
 	if(targetCollection.isEmpty()){
 	    map.remove(key);
 	    final boolean result = delegate.remove(target);
+	    cache.remove(target);
 	    assert result;
 	    }
 	return true;
@@ -116,6 +134,7 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
 
     @Override
     public int size() {
+	assert cache.size() == map.size();
 	return cache.size();
     }
 
@@ -159,6 +178,6 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
 
     @Override
     public Collection<Pair<KEY, CollectionActionDispatcher<E>>> getDelegate() {
-	return cache;
+	return delegate;
     }
 }//end CollectionActionPacker

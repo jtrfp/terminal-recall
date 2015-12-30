@@ -44,7 +44,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    public Vector3D adapt(PropertyChangeEvent evt) {
 		final int granularity = World.CUBE_GRANULARITY;
 		if(evt.getSource() instanceof RelevantEverywhere)
-		    return World.VISIBLE_EVERYWHERE;
+		    return World.RELEVANT_EVERYWHERE;
 		final double[] newPos = (double[])evt.getNewValue();
 		final Vector3D newCenterCube = new Vector3D(
 			Math.rint(newPos[0]/granularity),

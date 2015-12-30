@@ -55,7 +55,7 @@ public class CollisionManager {
 	Pair<Vector3D,Collection<Positionable>> everywhere=null;
 	synchronized(tr.getThreadManager().gameStateLock){//Process cubes
 	    for(Pair<Vector3D,Collection<Positionable>> cube:pairBuffer){
-		if(!cube.getKey().equals(World.VISIBLE_EVERYWHERE))
+		if(!cube.getKey().equals(World.RELEVANT_EVERYWHERE))
 		    processCubes(cube.getValue(),cube.getValue());
 		else {//EVERYWHERE
 		    if(everywhere==null)

@@ -63,7 +63,6 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 		     localDoCollision &= TR.rolloverDistance(workTriplet[i]) < limit;
 		    doCollision |= localDoCollision;
 		}//end for(hitBoxes)
-		System.out.println("Custom hitbox: ");
 		if(doCollision)
 		 parent.probeForBehaviors(sub, DEFObjectCollisionListener.class);
 	    }//end if(custom hitboxes)

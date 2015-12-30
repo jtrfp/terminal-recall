@@ -73,6 +73,7 @@ import org.jtrfp.trcl.snd.SoundSystem;
 
 public class DEFObject extends WorldObject {
     private final double boundingHeight, boundingWidth;
+    private HitBox [] hitBoxes;
     private WorldObject ruinObject;
     private final EnemyLogic logic;
     private final EnemyDefinition def;
@@ -95,11 +96,23 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     boundingWidth =max.getX();
     boundingHeight=max.getY();
     anchoring=Anchoring.floating;
-    logic = def.getLogic();
-    mobile=true;
+    logic  =def.getLogic();
+    mobile =true;
     canTurn=true;
     foliage=false;
-    boss=def.isObjectIsBoss();
+    boss   =def.isObjectIsBoss();
+    final int    numHitBoxes = def.getNumNewHBoxes();
+    final int [] rawHBoxData = def.getHboxVertices();
+    if(numHitBoxes!=0){
+	final HitBox [] boxes = new HitBox[numHitBoxes];
+	for(int i=0; i<numHitBoxes; i++){
+		final HitBox hb = new HitBox();
+		hb.setVertexID(rawHBoxData[i*2]);
+		hb.setSize    (rawHBoxData[i*2+1] / TR.crossPlatformScalar);
+		boxes[i]=hb;
+	    }//end for(boxes)
+	setHitBoxes(boxes);
+    }//end if(hitboxes)
     //Default Direction
     setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));
     boolean customExplosion=false;
@@ -757,7 +770,7 @@ enum Anchoring{
      {return locked;}
  }//end Anchoring
 
-private BasicModelSource getModelSource(){
+public BasicModelSource getModelSource(){
     if(rotatedModelSource==null){//Assemble our decorator sandwich.
 	final String complexModel = def.getComplexModelFile();
 	if(complexModel==null)
@@ -799,5 +812,30 @@ public double getBoundingHeight() {
  */
 public double getBoundingWidth() {
     return boundingWidth;
+}
+
+public static class HitBox{
+    private int vertexID;
+    private double size;
+    public int getVertexID() {
+        return vertexID;
+    }
+    public void setVertexID(int vertexID) {
+        this.vertexID = vertexID;
+    }
+    public double getSize() {
+        return size;
+    }
+    public void setSize(double size) {
+        this.size = size;
+    }
+ }//end HitBox
+
+public HitBox[] getHitBoxes() {
+    return hitBoxes;
+}
+
+public void setHitBoxes(HitBox[] hitBoxes) {
+    this.hitBoxes = hitBoxes;
 }
 }//end DEFObject

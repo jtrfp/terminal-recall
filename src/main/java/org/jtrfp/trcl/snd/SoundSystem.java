@@ -103,7 +103,7 @@ public final class SoundSystem {
 	musicFactory   = new MusicPlaybackEvent.Factory(tr);
 	
 	new Thread() {
-	    private final AudioCompressor compressor = new AudioCompressor();
+	    private final DynamicCompressor compressor = new DynamicCompressor();
 	    @Override
 	    public void run() {
 		try {

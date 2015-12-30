@@ -20,7 +20,7 @@ import java.nio.FloatBuffer;
 
 import org.jtrfp.trcl.math.Misc;
 
-public final class AudioCompressor implements AudioProcessor {
+public final class DynamicCompressor implements AudioProcessor {
 private FloatBuffer source;
 private double release = .01f;
 private double scalar = 1f;

@@ -202,5 +202,12 @@ public final class Vect3D {
     }
     
     public static class ZeroNormException extends RuntimeException{}
+
+    public static double [] abs(double[] input, double [] output) {
+	final int len = input.length;
+	for(int i=0; i<len; i++)
+	    output[i]=Math.abs(input[i]);
+	return output;
+    }//end abs(...)
     
 }//end Vect3D

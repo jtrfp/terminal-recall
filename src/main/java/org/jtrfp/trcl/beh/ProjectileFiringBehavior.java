@@ -19,6 +19,7 @@ import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 public class ProjectileFiringBehavior extends Behavior implements HasQuantifiableSupply{
     private static final Vector3D [] DEFAULT_POS=new Vector3D[]{Vector3D.ZERO};
@@ -35,6 +36,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private Integer []          firingVertices;
     private BasicModelSource    modelSource;
     private boolean             sumProjectorVelocity             = false;
+    private SoundTexture        firingSFX;
+    
     @Override
     public void tick(long tickTimeMillis){
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
@@ -45,7 +48,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	for(int mi=0; mi<multiplexLevel;mi++){
 	    	    final Vector3D firingPosition = getNextModelViewFiringPosition();
 	    	    resetFiringTimer();
-	    	    projectileFactory.
+	    	    if(firingSFX==null)
+	    	     projectileFactory.
 	    	      fire(Vect3D.add(
 	    		      p.getPositionWithOffset(),
 	    		      firingPosition.toArray(),
@@ -53,6 +57,16 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    		      heading, 
 	    		      getParent(),
 	    		      isSumProjectorVelocity());
+	    	    else
+	    	     projectileFactory.
+		    	fire(Vect3D.add(
+		    	      p.getPositionWithOffset(),
+		    	      firingPosition.toArray(),
+		    	      new double[3]), 
+		    	      heading, 
+		    	      getParent(),
+		    	      isSumProjectorVelocity(),
+		    	      firingSFX);
 	    	}//for(multiplex)
 	    	heading = p.getHeading();
 	    }//end if(ammo)
@@ -247,5 +261,13 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     public ProjectileFiringBehavior setSumProjectorVelocity(boolean sumProjectorVelocity) {
         this.sumProjectorVelocity = sumProjectorVelocity;
         return this;
+    }
+
+    public SoundTexture getFiringSFX() {
+        return firingSFX;
+    }
+
+    public void setFiringSFX(SoundTexture firingSFX) {
+        this.firingSFX = firingSFX;
     }
 }//end ProjectileFiringBehavior

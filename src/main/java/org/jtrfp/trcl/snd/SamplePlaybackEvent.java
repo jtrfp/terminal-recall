@@ -145,6 +145,10 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	}//end apply(...)
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar){
+	    return create(tex, source, dest, volumeScalar, 1);
+	}
+	
+	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar, double samplePlaybackRatio){
 	    final double UNIT_FACTOR = TR.mapSquareSize*8;
 	    final double dist = Vect3D.distance(source, dest.getPosition());
 	    final double unitDist    = dist/UNIT_FACTOR;
@@ -166,7 +170,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    // Temporal dither to avoid phasiness
 	    final double delay      = dist*.000001+Math.random()*.005;
 	    final double startTime  = ss.getCurrentFrameBufferTimeCounter()+delay;
-	    return create(tex,startTime,pan);
+	    return create(tex,startTime,pan, null, samplePlaybackRatio);
 	}//end create(...)
 	
 	public SamplePlaybackEvent create(SoundTexture tex, WorldObject source, Camera dest, double volumeScalar){

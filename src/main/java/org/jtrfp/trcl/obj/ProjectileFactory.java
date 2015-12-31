@@ -166,7 +166,12 @@ public class ProjectileFactory {
 	return fire(newPosition, heading, objectOfOrigin, true);
     }
     
-    public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin, boolean sumWithProjectorVel) {
+    public Projectile fire(double[] add, Vector3D heading, WorldObject parent,
+	    boolean sumProjectorVelocity) {
+	return fire(add,heading,parent,sumProjectorVelocity,soundTexture);
+    }
+    
+    public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin, boolean sumWithProjectorVel, SoundTexture firingSFX) {
 	assert !Vect3D.isAnyNaN(newPosition);
 	assert heading.getNorm()!=0 && heading.getNorm()!=Double.NaN;
 	
@@ -184,12 +189,12 @@ public class ProjectileFactory {
 	result.reset(newPosition, newVelocity, objectOfOrigin);
 	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getDefaultGrid().add((WorldObject)result);
-	if(soundTexture!=null)
+	if(firingSFX!=null)
 	    tr.soundSystem.get().enqueuePlaybackEvent(
 		    tr.soundSystem
 			    .get()
 			    .getPlaybackFactory()
-			    .create(soundTexture,
+			    .create(firingSFX,
 				     (WorldObject)result,
 				     tr.mainRenderer.get().getCamera(),
 				     (objectOfOrigin instanceof Player?.6:1)*SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead

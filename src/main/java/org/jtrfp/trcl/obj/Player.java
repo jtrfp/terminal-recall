@@ -56,6 +56,7 @@ import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
@@ -64,6 +65,8 @@ import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.pool.ObjectFactory;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 public class Player extends WorldObject implements RelevantEverywhere{
     //private final Camera 	camera;
@@ -85,6 +88,9 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	    }
 	}
 	
+	final ResourceManager rm = tr.getResourceManager();
+	final ObjectFactory<String,SoundTexture> soundTextures = rm.soundTextures;
+	
 	addBehavior(new AccelleratedByPropulsion());
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
@@ -96,7 +102,9 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());
 	addBehavior(new CollidesWithTerrain().setTunnelEntryCapable(true).setIgnoreHeadingForImpact(false));
-	addBehavior(new AfterburnerBehavior(tr.getControllerInputs()));
+	addBehavior(new AfterburnerBehavior(tr.getControllerInputs()).
+		setIgnitionSound  (soundTextures.get(AfterburnerBehavior.IGNITION_SOUND)).
+		setExtinguishSound(soundTextures.get(AfterburnerBehavior.EXTINGUISH_SOUND)));
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
 	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getThrottleMeter()));

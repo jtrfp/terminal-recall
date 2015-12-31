@@ -41,6 +41,7 @@ import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.beh.RandomSFXPlayback;
 import org.jtrfp.trcl.beh.ResetsRandomlyAfterDeath;
 import org.jtrfp.trcl.beh.SmartPlaneBehavior;
 import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
@@ -70,6 +71,7 @@ import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.snd.SoundSystem;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 public class DEFObject extends WorldObject {
     private final double boundingHeight, boundingWidth;
@@ -101,6 +103,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     canTurn=true;
     foliage=false;
     boss   =def.isObjectIsBoss();
+    
     final int    numHitBoxes = def.getNumNewHBoxes();
     final int [] rawHBoxData = def.getHboxVertices();
     if(numHitBoxes!=0){
@@ -476,6 +479,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
     addBehavior(new CollidesWithPlayer());
     addBehavior(new DamagedByCollisionWithPlayer(8024,250));
+    
+    proposeRandomYell();
     }//end DEFObject
 
 @Override
@@ -488,6 +493,18 @@ public void destroy(){
     super.destroy();
 }
 
+private void proposeRandomYell(){
+    final String sfxFile = def.getBossYellSFXFile();
+    if(sfxFile != null && !sfxFile.toUpperCase().contentEquals("NULL")){
+	final SoundTexture soundTexture = getTr().getResourceManager().soundTextures.get(sfxFile);
+	final RandomSFXPlayback randomSFXPlayback = new RandomSFXPlayback()
+	    .setSoundTexture(soundTexture)
+	    .setDisableOnDeath(true)
+	    .setVolumeScalar(SoundSystem.DEFAULT_SFX_VOLUME*1.5);
+	addBehavior(randomSFXPlayback);
+    }//end if(!NULL)
+}//end proposeRandomYell()
+
 private void projectileFiringBehavior(){
     ProjectileFiringBehavior pfb;
     Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
@@ -495,6 +512,10 @@ private void projectileFiringBehavior(){
 		    setProjectileFactory(getTr().getResourceManager().
 			    getProjectileFactories()[def.getWeapon().ordinal()]).setFiringPositions(getModelSource(),firingVertices)
 	    );
+
+	    final String fireSfxFile = def.getBossFireSFXFile();
+	    if(!fireSfxFile.toUpperCase().contentEquals("NULL"))
+		pfb.setFiringSFX(getTr().getResourceManager().soundTextures.get(fireSfxFile));
 	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     final AutoFiring af;
     addBehavior(af=new AutoFiring().

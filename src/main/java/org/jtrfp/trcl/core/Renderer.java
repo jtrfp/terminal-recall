@@ -15,7 +15,6 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.media.opengl.GL3;
@@ -26,16 +25,13 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.coll.CachedAdapter;
-import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.Reporter;
-import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
-import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.SkyCube;
 import org.jtrfp.trcl.tools.Util;
 
@@ -124,7 +120,9 @@ public final class Renderer {
 	    final Collection<PositionedRenderable> coll = renderList.get().getVisibleWorldObjectList();
 	    synchronized(coll){
 	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" numVisibleObjects", coll.size()+"");
-	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", getCamera().getRootGrid().toString());
+	    SpacePartitioningGrid spg = getCamera().getRootGrid();
+	    if(spg!=null)
+	     reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", spg.toString());
 	    }
 	    lastTimeMillis = System.currentTimeMillis();
 	}

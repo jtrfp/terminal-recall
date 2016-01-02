@@ -18,6 +18,7 @@ package org.jtrfp.trcl.snd;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 
@@ -32,6 +33,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
     private double nextLoopTimeSeconds;
     private TRFutureTask<Void> lastApply;
     private volatile boolean isPlaying = false;
+    private AtomicBoolean firstRun = new AtomicBoolean(true);
 
     private MusicPlaybackEvent(
 	    Factory origin, GPUResidentMOD mod, boolean loop, SoundEvent parent) {
@@ -45,6 +47,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
     public void play(){
 	if(!isPlaying){
 	    activate();
+	    firstRun.set(true);
 	    nextLoopTimeSeconds=getOrigin().getTR().soundSystem.get().getCurrentFrameBufferTimeCounter();
 	    isPlaying=true;}
     }
@@ -59,20 +62,19 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	if(lastApply!=null)
 	    if(!lastApply.isDone())
 		return;
-	lastApply = getOrigin().getTR().getThreadManager().submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
+	if(loop || firstRun.get())
+	  if(bufferStartTimeSeconds > nextLoopTimeSeconds-SETUP_PADDING_SECS)
+	     lastApply = getOrigin().getTR().getThreadManager().submitToThreadPool(new Callable<Void>(){
+	     @Override
+	     public Void call() throws Exception {
 		// Set the song up
-		if(loop){
-		    if(bufferStartTimeSeconds > nextLoopTimeSeconds-SETUP_PADDING_SECS){
-			mod.apply(MusicPlaybackEvent.this.nextLoopTimeSeconds,MusicPlaybackEvent.this,
-				getOrigin().getTR().config.getModStereoWidth());
-			MusicPlaybackEvent.this.nextLoopTimeSeconds+=mod.getSongLengthInRealtimeSeconds();
-		    }//end if(time to loop)
-		}//end if(loop)
+		mod.apply(MusicPlaybackEvent.this.nextLoopTimeSeconds,MusicPlaybackEvent.this,
+			getOrigin().getTR().config.getModStereoWidth());
+		MusicPlaybackEvent.this.nextLoopTimeSeconds+=mod.getSongLengthInRealtimeSeconds();
+		firstRun.set(false);
 		return null;
-	    }//end call()
-	});//end submit()
+	     }//end call()
+	    });//end submit()
     }//end apply()
     
     public static class Factory extends AbstractSoundEvent.Factory{

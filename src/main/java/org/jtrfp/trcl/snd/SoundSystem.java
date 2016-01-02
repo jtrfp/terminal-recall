@@ -50,6 +50,7 @@ public final class SoundSystem {
      = new HashMap<SoundEvent.Factory,ArrayList<SoundEvent>>();
     private final SamplePlaybackEvent.Factory playbackFactory;
     private final MusicPlaybackEvent.Factory musicFactory;
+    private final LoopingSoundEvent.Factory loopFactory;
     private long soundRenderingFinishedSync;
     private AtomicBoolean paused = new AtomicBoolean(false);
     private int bufferSizeFrames = 4096;
@@ -101,6 +102,7 @@ public final class SoundSystem {
 	
 	playbackFactory= new SamplePlaybackEvent.Factory(tr);
 	musicFactory   = new MusicPlaybackEvent.Factory(tr);
+	loopFactory    = new LoopingSoundEvent.Factory(tr);
 	
 	new Thread() {
 	    private final DynamicCompressor compressor = new DynamicCompressor();
@@ -684,5 +686,9 @@ public final class SoundSystem {
     
     private void staleFloatBytes(){
 	gpuFloatBytes=null;
+    }
+
+    public LoopingSoundEvent.Factory getLoopFactory() {
+        return loopFactory;
     }
 }//end SoundSystem

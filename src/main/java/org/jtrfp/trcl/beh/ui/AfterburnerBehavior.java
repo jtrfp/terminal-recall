@@ -20,6 +20,7 @@ import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.snd.LoopingSoundEvent;
 import org.jtrfp.trcl.snd.SamplePlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
@@ -27,12 +28,14 @@ import org.jtrfp.trcl.snd.SoundTexture;
 public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupply {
     public static final String IGNITION_SOUND   = "BLAST7.WAV";
     public static final String EXTINGUISH_SOUND = "SHUT-DN7.WAV";
+    public static final String LOOP_SOUND       = "ENGINE4.WAV";
     boolean firstDetected=true;
     private double fuelRemaining=0;
     private double formerMax,formerProp,newMax;
     private final ControllerInput afterburnerCtl;
     public static final String AFTERBURNER = "Afterburner";
-    private SoundTexture ignitionSound, extinguishSound;
+    private SoundTexture ignitionSound, extinguishSound, loopSound;
+    private LoopingSoundEvent afterburnerLoop;
     
     public AfterburnerBehavior(ControllerInputs inputs){
 	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
@@ -58,8 +61,8 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     
     private void afterburnerOnTransient(WorldObject p){
 	//Save former max, former propulsion
-	//TODO: Ignition SFX, start sustain SFX
 	ignitionSFX();
+	startLoop();
 	Propelled prop = p.probeForBehavior(Propelled.class);
 	formerMax=prop.getMaxPropulsion();
 	formerProp=prop.getPropulsion();
@@ -97,12 +100,39 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     }//end ignitionSFX()
     
     private void afterburnerOffTransient(WorldObject p){
-	//TODO: De-Ignition SFX, end sustain SFX
+	stopLoop();
 	extinguishSFX();
 	Propelled prop = p.probeForBehavior(Propelled.class);
 	prop.setMaxPropulsion(formerMax);
 	prop.setPropulsion(formerProp);
     }//end afterburnerOffTransient(...)
+    
+    private void startLoop(){
+	if(loopSound == null)
+	    return;
+	final WorldObject parent = getParent();
+	    final TR              tr = parent.getTr();
+	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    if(afterburnerLoop != null)
+		destroyLoop();
+	    afterburnerLoop 
+	        = soundSystem.getLoopFactory().
+	            create(loopSound, new double[]{
+	        	    SoundSystem.DEFAULT_SFX_VOLUME,
+	        	    SoundSystem.DEFAULT_SFX_VOLUME});
+	    soundSystem.enqueuePlaybackEvent(afterburnerLoop);
+    }//end startLoop()
+	    
+    private void destroyLoop(){
+	if(afterburnerLoop == null)
+	    return;
+	afterburnerLoop.destroy();
+	afterburnerLoop = null;
+    }
+    
+    private void stopLoop(){
+	destroyLoop();
+    }
 
     @Override
     public void addSupply(double amount) {
@@ -125,6 +155,13 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     }
     public AfterburnerBehavior setExtinguishSound(SoundTexture extinguishSound) {
         this.extinguishSound = extinguishSound;
+        return this;
+    }
+    public SoundTexture getLoopSound() {
+        return loopSound;
+    }
+    public AfterburnerBehavior setLoopSound(SoundTexture loopSound) {
+        this.loopSound = loopSound;
         return this;
     }
 }//end AfterburnerBehavior

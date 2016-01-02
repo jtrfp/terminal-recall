@@ -104,7 +104,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new CollidesWithTerrain().setTunnelEntryCapable(true).setIgnoreHeadingForImpact(false));
 	addBehavior(new AfterburnerBehavior(tr.getControllerInputs()).
 		setIgnitionSound  (soundTextures.get(AfterburnerBehavior.IGNITION_SOUND)).
-		setExtinguishSound(soundTextures.get(AfterburnerBehavior.EXTINGUISH_SOUND)));
+		setExtinguishSound(soundTextures.get(AfterburnerBehavior.EXTINGUISH_SOUND)).
+		setLoopSound      (soundTextures.get(AfterburnerBehavior.LOOP_SOUND)));
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
 	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getThrottleMeter()));

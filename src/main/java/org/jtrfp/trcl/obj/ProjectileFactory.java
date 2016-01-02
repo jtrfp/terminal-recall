@@ -141,21 +141,26 @@ public class ProjectileFactory {
     	case enemyMissile:
     	case SWT:
     	case MAM:
-    	case SAD:
-    	{
+    	case SAD:{
     	    soundFile="MISSILE.WAV";
     	    break;
     	}
-    	//SILENT
+    	//CANNON
+    	case bossW8:
+    	case bossW7:
+    	case bossW6:
     	case purpleBall:
     	case goldBall:
     	case fireBall:
     	case blueFireBall:
-    	case bullet:
-    	case bossW8:
-    	case bossW7:
-    	case bossW6:
-    	case atomWeapon:
+    	case bullet:{
+    	    soundFile="KNOCK.WAV";
+    	    break;
+    	}
+    	//SILENT
+    	case atomWeapon:{
+    	    soundFile="BLAST7.WAV";
+    	}
     	default:
     	    break;
     	}//end case()

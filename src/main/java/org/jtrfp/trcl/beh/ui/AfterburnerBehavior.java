@@ -12,12 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.ui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.HasQuantifiableSupply;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.Powerup;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.LoopingSoundEvent;
@@ -36,10 +41,31 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     public static final String AFTERBURNER = "Afterburner";
     private SoundTexture ignitionSound, extinguishSound, loopSound;
     private LoopingSoundEvent afterburnerLoop;
+    private final RunStateListener runStateListener = new RunStateListener();
+    private PropertyChangeListener weakRunStateListener;
     
     public AfterburnerBehavior(ControllerInputs inputs){
 	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
     }
+    
+    private class RunStateListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final Object newValue = evt.getNewValue();
+	    //Ensure the afterburner sound isn't looping on completion of mission.
+	    if(!(newValue instanceof Mission.PlayerActivity))
+		ensureLoopDestroyed();
+	}
+    }//end RunModeListener
+    
+    @Override
+    public void setParent(WorldObject newParent){
+	super.setParent(newParent);
+	final TR tr = newParent.getTr();
+	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
+	tr.addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
+    }//end setParent(...)
+    
     @Override
     public void tick(long tickTimeMillis){
 	WorldObject p = getParent();
@@ -114,7 +140,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	    final TR              tr = parent.getTr();
 	    final SoundSystem soundSystem = tr.soundSystem.get();
 	    if(afterburnerLoop != null)
-		destroyLoop();
+		ensureLoopDestroyed();
 	    afterburnerLoop 
 	        = soundSystem.getLoopFactory().
 	            create(loopSound, new double[]{
@@ -122,8 +148,8 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	        	    SoundSystem.DEFAULT_SFX_VOLUME});
 	    soundSystem.enqueuePlaybackEvent(afterburnerLoop);
     }//end startLoop()
-	    
-    private void destroyLoop(){
+    
+    private void ensureLoopDestroyed(){
 	if(afterburnerLoop == null)
 	    return;
 	afterburnerLoop.destroy();
@@ -131,7 +157,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     }
     
     private void stopLoop(){
-	destroyLoop();
+	ensureLoopDestroyed();
     }
 
     @Override

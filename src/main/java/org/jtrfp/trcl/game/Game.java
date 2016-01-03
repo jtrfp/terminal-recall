@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.game;
 
+import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -44,6 +45,12 @@ public interface Game {
     public Player  getPlayer();
     public String  getPlayerName();
     public void    abort();
+    public Game    addPropertyChangeListener(String property, PropertyChangeListener listener);
+    public Game    removePropertyChangeListener(String property, PropertyChangeListener listener);
+    public PropertyChangeListener[] getPropertyChangeListeners();
+    public boolean hasListeners(String propertyName);
+    public PropertyChangeListener[] getPropertyChangeListeners(
+	    String propertyName);
     
     public class CanceledException extends Exception{
 	private static final long serialVersionUID = 1L;}

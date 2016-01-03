@@ -509,9 +509,10 @@ public class TVF3Game implements Game {
 	return pcSupport.getPropertyChangeListeners();
     }
 
-    public void removePropertyChangeListener(String propertyName,
+    public Game removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
 	pcSupport.removePropertyChangeListener(propertyName, listener);
+	return this;
     }
 
     public PropertyChangeListener[] getPropertyChangeListeners(

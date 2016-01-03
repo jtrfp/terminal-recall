@@ -23,6 +23,7 @@ import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Bobbing;
+import org.jtrfp.trcl.beh.BuzzByPlayerSFX;
 import org.jtrfp.trcl.beh.CollidesWithPlayer;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
@@ -671,7 +672,9 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
     final SpinAccellerationBehavior sab = (SpinAccellerationBehavior)new SpinAccellerationBehavior().setEnable(false);
     addBehavior(sab);
     addBehavior(new SmartPlaneBehavior(haapb,afb,sab,aatpb,escapeProp,retreatAboveSky));
-}
+    addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
+		    "FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
+}//end smartPlaneBehavior()
 
 @Override
 public void setTop(Vector3D top){

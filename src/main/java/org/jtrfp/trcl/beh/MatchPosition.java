@@ -50,17 +50,20 @@ public class MatchPosition extends Behavior {
     /**
      * @param target the target to set
      */
-    public void setTarget(WorldObject target) {
+    public MatchPosition setTarget(WorldObject target) {
 	final WorldObject oldTarget = this.target;
 	if(oldTarget!=null)
 	    oldTarget.removePropertyChangeListener(positionListener);
         this.target = target;
         target.addPropertyChangeListener(WorldObject.POSITION,positionListener);
-    }
+        return this;
+    }//end setTarget(...)
     
     private class PositionListener implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+	    if(!isEnabled())
+		return;
 	    final WorldObject parent = getParent();
 	    double [] pPos = parent.getPosition();
 	    double [] tPos = target.getPosition();

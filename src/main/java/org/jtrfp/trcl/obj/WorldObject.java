@@ -30,7 +30,6 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.Renderer;
@@ -128,6 +127,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	ob.setParent(this);
 	return ob;
     }
+    
+    public <T extends Behavior> T removeBehavior(T beh) {
+	if (beh.isEnabled()) {
+	    if (beh instanceof CollisionBehavior)
+		collisionBehaviors.remove((CollisionBehavior) beh);
+	    tickBehaviors.remove(beh);
+	} else 
+	    inactiveBehaviors.remove(beh);
+	return beh;
+    }//end removeBehavior()
     
     protected boolean recalcMatrixWithEachFrame(){
 	return false;

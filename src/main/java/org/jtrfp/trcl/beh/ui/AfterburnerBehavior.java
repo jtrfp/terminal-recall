@@ -30,7 +30,7 @@ import org.jtrfp.trcl.snd.SamplePlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
-public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupply {
+public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupply, PlayerControlBehavior {
     public static final String IGNITION_SOUND   = "BLAST7.WAV";
     public static final String EXTINGUISH_SOUND = "SHUT-DN7.WAV";
     public static final String LOOP_SOUND       = "ENGINE4.WAV";

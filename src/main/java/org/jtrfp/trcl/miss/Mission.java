@@ -15,6 +15,8 @@ package org.jtrfp.trcl.miss;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,8 +52,6 @@ import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.game.Game.GameRunningMode;
-import org.jtrfp.trcl.miss.LoadingProgressReporter.Impl;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -71,6 +71,7 @@ public class Mission {
     // PROPERTIES
     public static final String MISSION_MODE = "missionMode";
     public static final String SATELLITE_VIEW = "satelliteView";
+    public static final String CURRENT_NAV_TARGET = "currentNavTarget";
     
     private final TR 		tr;
     private final List<NAVObjective> 
@@ -106,6 +107,7 @@ public class Mission {
     private Tunnel		currentTunnel;
     private final DisplayModeHandler displayHandler;
     private Object [] levelLoadingMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
+    private NAVObjective currentNavTarget;
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -360,11 +362,14 @@ public class Mission {
 
     public void removeNAVObjective(NAVObjective o) {
 	navs.remove(o);
-	if (navs.size() == 0) {
-	    missionCompleteSequence();
-	} else
-	    ((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
+	updateNavState();
+	((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
     }// end removeNAVObjective(...)
+    
+    private void updateNavState(){
+	try{this.setCurrentNavTarget(navs.get(0));}
+	catch(IndexOutOfBoundsException e){setCurrentNavTarget(null);}
+    }
 
     public static class Result {
 	private final int airTargetsDestroyed, groundTargetsDestroyed,foliageDestroyed;
@@ -521,50 +526,17 @@ public class Mission {
 	return result;
     }// end getTunnelWhoseEntranceClosestTo(...)
 
-    private void missionCompleteSequence() {
-	new Thread() {
-	    @Override
-	    public void run() {
-		// TODO: Behavior change: Camera XZ static, lag Y by ~16
-		// squares, heading/top affix toward player
-		// TODO: Turn off all player control behavior
-		// TODO: Behavior change: Player turns upward, top rolls on
-		// heading, speed at full throttle
-		// TODO: Wait 3 seconds
-		// TODO: Lightning shell on
-		// TODO: Wait 1 second
-		// TODO: Turbo forward
-		// TODO: Wait 500ms
-		// TODO: Jet thrust noise
-		// TODO: Player invisible.
-		System.out.println("MISSION COMPLETE.");
-		notifyMissionEnd(
-			new Result(
-				airTargetsDestroyed,
-				groundTargetsDestroyed,
-				foliageDestroyed,
-				1.-(double)tunnelsRemaining.size()/(double)totalNumTunnels));
-	    }// end run()
-	}.start();
-    }//end missionCompleteSequence()
-
     public void playerDestroyed() {
 	new Thread() {
 	    @Override
 	    public void run() {
-		// TODO Behavior change: Camera XYZ static, heading/top affix
-		// toward player
-		// TODO: Turn off all player control behavior
-		// TODO Player behavior change: Slow spin along heading axis,
-		// slow downward drift of heading
-		// TODO: Add behavior: explode and destroy on impact with ground
 		System.out.println("MISSION FAILED.");
 		notifyMissionEnd(null);
 	    }// end run()
 	}.start();
     }// end playerDestroyed()
     
-    private void notifyMissionEnd(Result r){
+    public void notifyMissionEnd(Result r){
 	synchronized(missionEnd){
 	 missionEnd[0]=r;
 	 missionEnd.notifyAll();}
@@ -587,10 +559,6 @@ public class Mission {
      */
     public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
 	this.navSubObjects = navSubObjects;
-    }
-
-    public void missionComplete() {
-	missionCompleteSequence();
     }
 
     public OverworldSystem getOverworldSystem() {
@@ -935,5 +903,52 @@ public class Mission {
 
     public String getLevelName() {
         return levelName;
+    }
+
+    public int getGroundTargetsDestroyed() {
+        return groundTargetsDestroyed;
+    }
+
+    public void setGroundTargetsDestroyed(int groundTargetsDestroyed) {
+        this.groundTargetsDestroyed = groundTargetsDestroyed;
+    }
+
+    public int getAirTargetsDestroyed() {
+        return airTargetsDestroyed;
+    }
+
+    public void setAirTargetsDestroyed(int airTargetsDestroyed) {
+        this.airTargetsDestroyed = airTargetsDestroyed;
+    }
+
+    public int getFoliageDestroyed() {
+        return foliageDestroyed;
+    }
+
+    public void setFoliageDestroyed(int foliageDestroyed) {
+        this.foliageDestroyed = foliageDestroyed;
+    }
+
+    public Collection<Tunnel> getTunnelsRemaining() {
+        return Collections.unmodifiableCollection(tunnelsRemaining);
+    }
+
+    public int getTotalNumTunnels() {
+        return totalNumTunnels;
+    }
+
+    public void setTotalNumTunnels(int totalNumTunnels) {
+        this.totalNumTunnels = totalNumTunnels;
+    }
+
+    public NAVObjective getCurrentNavTarget() {
+        return currentNavTarget;
+    }
+
+    public Mission setCurrentNavTarget(NAVObjective newTarget) {
+	final NAVObjective oldTarget = this.currentNavTarget;
+	this.currentNavTarget = newTarget;
+	pcs.firePropertyChange(CURRENT_NAV_TARGET, oldTarget, newTarget);
+        return this;
     }
 }// end Mission

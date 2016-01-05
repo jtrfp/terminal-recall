@@ -65,7 +65,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
     private static final int TAIL_DISTANCE = 15000,
 	                     FLOAT_HEIGHT  = 5000;
     
-    private interface ViewMode{
+    public interface ViewMode{
 	    public void apply();
 	}
 
@@ -79,7 +79,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      iView   = inputs.getControllerInput(INSTRUMENTS_VIEW);
  }//end constructor
  
- private class ViewSelect implements Feature<Game>{
+ public class ViewSelect implements Feature<Game>{
      private boolean hudVisible = false;
      private WorldObject cockpit;
      private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -89,15 +89,25 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      
      private int viewModeItr = 1, instrumentModeItr = 1;
      
+     public final InstrumentMode 
+      FULL_COCKPIT    = new FullCockpitInstruments(),
+      HUD_INSTRUMENTS = new HeadsUpDisplayInstruments(),
+      NO_INSTRUMENTS  = new NoInstruments();
+     
+     public final ViewMode
+      COCKPIT_VIEW = new CockpitView(),
+      OUTSIDE_VIEW = new OutsideView(),
+      CHASE_VIEW   = new ChaseView();
+     
      private final ViewMode [] viewModes = new ViewMode[]{
 		new CockpitView(),
 		new OutsideView(),
 		new ChaseView()
 	    };
 	    private final InstrumentMode [] instrumentModes = new InstrumentMode[]{
-		new FullCockpitInstruments(),
-		new HeadsUpDisplayInstruments(),
-		new NoInstruments()
+		FULL_COCKPIT,
+		HUD_INSTRUMENTS,
+		NO_INSTRUMENTS
 	    };
 	    
      private final PropertyChangeListener viewSelectPropertyChangeListener          = new ViewSelectPropertyChangeListener();

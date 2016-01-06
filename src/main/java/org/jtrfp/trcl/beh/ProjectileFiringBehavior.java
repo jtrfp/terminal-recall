@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
+import java.beans.VetoableChangeSupport;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
@@ -23,6 +27,9 @@ import org.jtrfp.trcl.snd.SoundTexture;
 
 public class ProjectileFiringBehavior extends Behavior implements HasQuantifiableSupply{
     private static final Vector3D [] DEFAULT_POS=new Vector3D[]{Vector3D.ZERO};
+    
+    public static final String PENDING_FIRING = "pendingFiring";
+    
     long 			timeWhenNextFiringPermittedMillis=0;
     long 			timeBetweenFiringsMillis	 =130;
     private Vector3D [] 	firingPositions			 =DEFAULT_POS;
@@ -37,10 +44,11 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private BasicModelSource    modelSource;
     private boolean             sumProjectorVelocity             = false;
     private SoundTexture        firingSFX;
+    private final VetoableChangeSupport vcs = new VetoableChangeSupport(this);
     
     @Override
     public void tick(long tickTimeMillis){
-	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && pendingFiring){
+	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && isPendingFiring()){
 	    if(takeAmmo()){
 	    	final WorldObject p = getParent();
 	    	Vector3D heading=this.firingHeading;
@@ -70,7 +78,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	}//for(multiplex)
 	    	heading = p.getHeading();
 	    }//end if(ammo)
-	    	pendingFiring=false;
+	    	try{setPendingFiring(false);}catch(PropertyVetoException e){}
 	}//end timeWhenNextfiringPermitted
     }//end _tick
     
@@ -80,21 +88,20 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     
     public boolean requestFire(){
 	if(System.currentTimeMillis()>timeWhenNextFiringPermittedMillis)
-	 pendingFiring=true;
-	return pendingFiring;
-    }
+	 try{setPendingFiring(true);}
+	  catch(PropertyVetoException e){return false;}
+	return true;
+    }//end requestFire()
     
     public boolean canFire(){
 	return getAmmo()>0;
     }
     
     public ProjectileFiringBehavior requestFire(Vector3D heading){
-	//System.out.println("Firing requested.");
-	pendingFiring=true;
-	firingHeading=heading;
+	if(requestFire())
+	 firingHeading=heading;
 	return this;
     }
-    
     
     protected boolean takeAmmo(){
 	if(ammo<=0)return false; ammo--; return true;
@@ -269,5 +276,42 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 
     public void setFiringSFX(SoundTexture firingSFX) {
         this.firingSFX = firingSFX;
+    }
+
+    public boolean isPendingFiring() {
+        return pendingFiring;
+    }
+
+    public void setPendingFiring(boolean pendingFiring) throws PropertyVetoException {
+	final boolean oldPending = this.pendingFiring;
+	vcs.fireVetoableChange(PENDING_FIRING, oldPending, pendingFiring);
+        this.pendingFiring = pendingFiring;
+    }
+
+    public void addVetoableChangeListener(String propertyName,
+	    VetoableChangeListener listener) {
+	vcs.addVetoableChangeListener(propertyName, listener);
+    }
+
+    public void addVetoableChangeListener(VetoableChangeListener arg0) {
+	vcs.addVetoableChangeListener(arg0);
+    }
+
+    public VetoableChangeListener[] getVetoableChangeListeners() {
+	return vcs.getVetoableChangeListeners();
+    }
+
+    public VetoableChangeListener[] getVetoableChangeListeners(
+	    String propertyName) {
+	return vcs.getVetoableChangeListeners(propertyName);
+    }
+
+    public void removeVetoableChangeListener(String propertyName,
+	    VetoableChangeListener listener) {
+	vcs.removeVetoableChangeListener(propertyName, listener);
+    }
+
+    public void removeVetoableChangeListener(VetoableChangeListener arg0) {
+	vcs.removeVetoableChangeListener(arg0);
     }
 }//end ProjectileFiringBehavior

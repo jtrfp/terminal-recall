@@ -258,6 +258,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    return;
 		if(mission.isSatelliteView())
 		    return;
+		if(!(tr.getRunState() instanceof Mission.PlayerActivity))
+		    return;
 		if((Double)evt.getNewValue()>.7)
 		 setViewMode(viewModes[viewModeItr++%viewModes.length]);
 	   }//end propertyChange(...)

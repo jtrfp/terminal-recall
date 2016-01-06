@@ -69,7 +69,7 @@ import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Mission {
     // PROPERTIES
-    public static final String MISSION_MODE = "missionMode";
+    //public static final String MISSION_MODE = "missionMode";
     public static final String SATELLITE_VIEW = "satelliteView";
     public static final String CURRENT_NAV_TARGET = "currentNavTarget";
     
@@ -102,7 +102,7 @@ public class Mission {
     private final Map<Integer,TunnelEntranceObject>
     				tunnelMap = new HashMap<Integer,TunnelEntranceObject>();
     private boolean 		bossFight = false, satelliteView = false;
-    private MissionMode		missionMode = new Mission.LoadingMode();
+    //private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private Tunnel		currentTunnel;
     private final DisplayModeHandler displayHandler;
@@ -148,7 +148,6 @@ public class Mission {
     
     public Result go() {
 	tr.setRunState(new LoadingState(){});
-	setMissionMode(new Mission.LoadingMode());
 	synchronized(missionLock){
 	synchronized(missionEnd){
 	    if(missionEnd[0]!=null)
@@ -318,12 +317,12 @@ public class Mission {
 	tr.soundSystem.get().setPaused(false);
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
-	    tr.setRunState(new Briefing(){});
-	    setMissionMode(new Mission.IntroMode());
+	    tr.setRunState(new EnemyBrief(){});
+	    //setMissionMode(new Mission.IntroMode());
 	    displayHandler.setDisplayMode(briefingMode);
 	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
 	}
-	setMissionMode(new Mission.AboveGroundMode());
+	tr.setRunState(new OverworldState(){});
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
 	tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
@@ -340,11 +339,10 @@ public class Mission {
 	 while(missionEnd[0]==null){try{missionEnd.wait();}
 		catch(InterruptedException e){break;}}}
 	//Completion summary
-	tr.setRunState(new Briefing(){});
 	if(missionEnd[0]!=null)
 	    if(!missionEnd[0].isAbort()){
 		displayHandler.setDisplayMode(summaryMode);
-		setMissionMode(new Mission.MissionSummaryMode());
+		tr.setRunState(new MissionSummary(){});
 		((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
 	    }//end if(proper ending)
 	bgMusic.stop();
@@ -692,7 +690,7 @@ public class Mission {
 	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
 	currentTunnel = tunnel;
 	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnel);
-	setMissionMode(new TunnelMode());
+	tr.setRunState(new TunnelState(){});
 	
 	tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
 	tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
@@ -797,33 +795,6 @@ public class Mission {
 	pcs.removePropertyChangeListener(propertyName, listener);
     }
     
-    public static interface MissionMode{}
-    public static class LoadingMode implements MissionMode{}
-    
-    public static class BriefingMode implements MissionMode{}
-    public static class IntroMode extends BriefingMode{}
-    public static class EnemyIntroMode extends IntroMode{}
-    public static class PlanetIntroMode extends IntroMode{}
-    public static class MissionSummaryMode extends BriefingMode{}
-    
-    public static class GameplayMode implements MissionMode{}
-    public static class TunnelMode extends GameplayMode{}
-    public static class ChamberMode extends GameplayMode{}
-    public static class AboveGroundMode extends GameplayMode{}
-
-    /**
-     * @return the missionMode
-     */
-    public MissionMode getMissionMode() {
-        return missionMode;
-    }
-    /**
-     * @param missionMode the missionMode to set
-     */
-    public void setMissionMode(MissionMode missionMode) {
-	pcs.firePropertyChange(MISSION_MODE, this.missionMode, missionMode);
-        this.missionMode = missionMode;
-    }
     /**
      * @return the bossFight
      */
@@ -838,8 +809,8 @@ public class Mission {
         this.bossFight = bossFight;
     }
     public void setSatelliteView(boolean satelliteView) {
-	if(!(getMissionMode() instanceof AboveGroundMode)&&satelliteView)
-	    throw new IllegalArgumentException("Cannot activate satellite view while mission mode is "+getMissionMode().getClass().getSimpleName());
+	if(!(tr.getRunState() instanceof OverworldState)&&satelliteView)
+	    throw new IllegalArgumentException("Cannot activate satellite view while runState is "+tr.getRunState().getClass().getSimpleName());
 	if(satelliteView && ((TVF3Game)tr.getGame()).isPaused())
 	    throw new IllegalArgumentException("Cannot activate satellite view while paused.");
 	pcs.firePropertyChange(SATELLITE_VIEW, this.satelliteView, satelliteView);
@@ -888,7 +859,7 @@ public class Mission {
         return satelliteView;
     }
     public Tunnel getCurrentTunnel() {
-	if(!(getMissionMode() instanceof TunnelMode))return null;
+	if(!(tr.getRunState() instanceof TunnelState))return null;
 	return currentTunnel;
     }
 

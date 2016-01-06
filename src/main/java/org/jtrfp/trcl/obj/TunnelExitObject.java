@@ -108,8 +108,8 @@ public class TunnelExitObject extends PortalEntrance {
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
 		    System.out.println("TunnelExitObject leaving tunnel "+tun);
 		    if(mirrorTerrain){
-			mission.setMissionMode(new Mission.ChamberMode());
-		    }else mission.setMissionMode(new Mission.AboveGroundMode());
+			tr.setRunState(new Mission.ChamberState(){});
+		    }else tr.setRunState(new Mission.OverworldState(){});
 		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
 		    if(mirrorTerrain)
 		     tr.setRunState(new Mission.ChamberState(){});

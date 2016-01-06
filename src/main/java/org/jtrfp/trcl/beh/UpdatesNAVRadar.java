@@ -32,7 +32,7 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
 		    getNavSystem().
 		    getBlips();
 	    blips.clearRadarBlips();
-	    performRefresh=!(game.getCurrentMission().getMissionMode() instanceof Mission.TunnelMode);
+	    performRefresh=!(getParent().getTr().getRunState() instanceof Mission.TunnelState);
 	}else
 	    performRefresh=false;
     }//end _tick(...)

@@ -77,7 +77,7 @@ private final DashboardLayout layout;
 	    Vector3D navLocXY=Vector3D.ZERO;
 	    String sectorMsg="";
 	    //Tunnel
-	    if(mission.getMissionMode() instanceof Mission.TunnelMode){
+	    if(tr.getRunState() instanceof Mission.TunnelState){
 		if(counter==0){
 		    setVisible(false);
 		    final TunnelExitObject eo = mission.getCurrentTunnel().getExitObject();

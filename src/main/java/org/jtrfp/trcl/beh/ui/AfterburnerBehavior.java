@@ -14,10 +14,13 @@ package org.jtrfp.trcl.beh.ui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
 
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.HasQuantifiableSupply;
+import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
@@ -41,12 +44,25 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     public static final String AFTERBURNER = "Afterburner";
     private SoundTexture ignitionSound, extinguishSound, loopSound;
     private LoopingSoundEvent afterburnerLoop;
-    private final RunStateListener runStateListener = new RunStateListener();
+    private final RunStateListener   runStateListener   = new RunStateListener();
+    private final FiringVetoListener firingVetoListener = new FiringVetoListener();
     private PropertyChangeListener weakRunStateListener;
+    private boolean afterburning = false;
+    private boolean installedFiringVeto = false;
     
     public AfterburnerBehavior(ControllerInputs inputs){
 	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
     }
+    
+    private class FiringVetoListener implements VetoableChangeListener{
+	@Override
+	public void vetoableChange(PropertyChangeEvent evt)
+		throws PropertyVetoException {
+	    final Object newValue = evt.getNewValue();
+	    if(isAfterburning() && newValue == Boolean.TRUE)
+		throw new PropertyVetoException(null, evt);
+	}//end vetoableChange(...)
+    }//end FiringVetoListener
     
     private class RunStateListener implements PropertyChangeListener{
 	@Override
@@ -68,10 +84,12 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     
     @Override
     public void tick(long tickTimeMillis){
-	WorldObject p = getParent();
+	if(!installedFiringVeto)
+	    installFiringVeto();
+	final WorldObject p = getParent();
 	if(afterburnerCtl.getState()>.7){
 	    if(firstDetected){
-		afterburnerOnTransient(p);
+		setAfterburning(true);
 		firstDetected=false;
 		fuelRemaining-=((double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/
 			(double)Powerup.AFTERBURNER_TIME_PER_UNIT_MILLIS);
@@ -80,10 +98,15 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	}//end if(F)
 	else{
 	    if(firstDetected==false)
-	    	{afterburnerOffTransient(p);}
+	    	setAfterburning(false);
 	    firstDetected=true;
 	}//end else{}
     }//end _tick
+    
+    private void installFiringVeto(){
+	probeForBehavior(ProjectileFiringBehavior.class).addVetoableChangeListener(firingVetoListener);
+	installedFiringVeto = true;
+    }
     
     private void afterburnerOnTransient(WorldObject p){
 	//Save former max, former propulsion
@@ -190,4 +213,22 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
         this.loopSound = loopSound;
         return this;
     }
+
+    public boolean isAfterburning() {
+        return afterburning;
+    }
+
+    public void setAfterburning(boolean afterburning) {
+	final boolean oldValue = this.afterburning;
+	if(afterburning == oldValue)
+	    return;
+	final WorldObject parent = getParent();
+	
+	if(afterburning)
+	    afterburnerOnTransient(parent);
+	else
+	    afterburnerOffTransient(parent);
+	
+        this.afterburning = afterburning;
+    }//end setAfterburning(...)
 }//end AfterburnerBehavior

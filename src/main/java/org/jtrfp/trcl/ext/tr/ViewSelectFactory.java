@@ -118,12 +118,10 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      public void apply(Game game) {
          view .addPropertyChangeListener(weakVSPCL  = new WeakPropertyChangeListener(viewSelectPropertyChangeListener,view));
          iView.addPropertyChangeListener(weakIVSPCL = new WeakPropertyChangeListener(instrumentViewSelectPropertyChangeListener,iView));
-         ///final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
-         //tr.addPropertyChangeListener(TR.GAME, gameIP);
+         
          final IndirectProperty<Mission> missionIP = new IndirectProperty<Mission>();
          ((TVF3Game)game).addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);
-         //gameIP.setTarget(tr.getGame());
-         //Install when in gameplay
+         
          missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, new PropertyChangeListener(){
      	@Override
      	public void propertyChange(PropertyChangeEvent evt) {

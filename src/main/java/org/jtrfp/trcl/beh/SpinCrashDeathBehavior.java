@@ -45,13 +45,14 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	//Trigger small boom
 	final TR tr = parent.getTr();
 	tr.soundSystem.get().getPlaybackFactory().
-	create(tr.getResourceManager().soundTextures.get("EXP2.WAV"), new double[]{.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2});
+	create(
+		tr.getResourceManager().soundTextures.get("EXP2.WAV"), 
+		new double[] {.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2} );
 
 	if(!parent.hasBehavior(PulledDownByGravityBehavior.class))
 	    parent.addBehavior(new PulledDownByGravityBehavior());
 	parent.probeForBehavior(PulledDownByGravityBehavior.class).setEnable(true);
 	
-	//parent.probeForBehavior(Propelled.class).setMaxPropulsion(4096).setPropulsion(4096);
 	probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
 	probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
 	probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
@@ -65,10 +66,6 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	 parent.addBehavior(new AutoLeveling().setLevelingAxis(LevelingAxis.HEADING).setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.98, .98, .98));
 	parent.probeForBehavior(AutoLeveling.class).setEnable(true);
 	
-	/*if(def.getThrustSpeed()<800000){
-	    probeForBehavior(HasPropulsion.class).setPropulsion(0);
-	    probeForBehavior(VelocityDragBehavior.class).setEnable(false);
-	}*/
 	//Catastrophy
 	final double spinSpeedCoeff=.5;
 	if(!parent.hasBehavior(SpinAccellerationBehavior.class)){
@@ -110,7 +107,6 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	probeForBehavior(UserInputThrottleControlBehavior.class).setEnable(true);
 	final Propelled propelled = probeForBehavior(Propelled.class);
 	propelled.setPropulsion(0);
-	//parent.addBehavior(new AutoLeveling().setLevelingAxis(LevelingAxis.HEADING).setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.98, .98, .98));
 	
 	parent.probeForBehavior(AutoLeveling.class).setEnable(false);
 	

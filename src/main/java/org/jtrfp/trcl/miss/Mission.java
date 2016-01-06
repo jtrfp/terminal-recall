@@ -176,7 +176,6 @@ public class Mission {
 	camera.setTop(Vector3D.PLUS_J);
 	((TVF3Game)game).levelLoadingMode();
 	displayHandler.setDisplayMode(levelLoadingMode);
-	//((TVF3Game)game).setDisplayMode(((TVF3Game)game).levelLoadingMode);
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();

@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
@@ -81,6 +85,9 @@ public class KeyboardInputDeviceService implements InputDeviceService {
 		private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 		private final String name;
 		private boolean pressed = false;
+		private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+		private final KeyReleaseDispatcher keyReleaseDispatcher = new KeyReleaseDispatcher();
+		private Future<?> timerFuture;
 		
 		public KeyControllerSource(String name){
 		    this.name=name;
@@ -102,21 +109,34 @@ public class KeyboardInputDeviceService implements InputDeviceService {
 		}
 		
 		public void notifyPressed(){
-		    if(!pressed)
+		    if(!pressed){
+	             if(timerFuture!=null)
+		      timerFuture.cancel(false);
 		     pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 0., 1.));
+		     }
 		    pressed=true;
-		}
+		}//end notifyPressed()
 		
 		public void notifyReleased(){
-		    if(pressed)
-			pcs.firePropertyChange(new PropertyChangeEvent(this, ControllerSource.STATE, 1., 0.));
+		    if(pressed){
+			if(timerFuture!=null)
+			 timerFuture.cancel(false);
+			timerFuture = timer.schedule(keyReleaseDispatcher, 10, TimeUnit.MILLISECONDS);
+			}
 		    pressed=false;
-		}
+		}//end notifyReleased()
 
 		@Override
 		public InputDevice getInputDevice() {
 		    return KeyboardInputDevice.this;
 		}
+		
+		private class KeyReleaseDispatcher implements Runnable{
+		    @Override
+		    public void run() {
+			pcs.firePropertyChange(new PropertyChangeEvent(KeyControllerSource.this, ControllerSource.STATE, 1., 0.));
+		    }
+		}//end KeypressDispatcher
 	    }//end KeyControllerSource
 	    
 	    @Override

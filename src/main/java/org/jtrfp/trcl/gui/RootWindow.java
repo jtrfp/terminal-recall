@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gui;
 
 import java.util.concurrent.Callable;
 
@@ -22,6 +22,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.SwingUtilities;
 
+import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.gpu.CanvasProvider;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.springframework.stereotype.Component;

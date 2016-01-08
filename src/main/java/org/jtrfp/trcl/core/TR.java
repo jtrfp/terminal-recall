@@ -40,6 +40,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.RootWindow;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.CollisionManager;

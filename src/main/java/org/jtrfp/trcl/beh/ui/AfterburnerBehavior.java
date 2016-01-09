@@ -17,6 +17,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.HasQuantifiableSupply;
@@ -118,10 +119,17 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     }//end tick
     
     private void installVetoListeners(){
-	probeForBehavior(ProjectileFiringBehavior.class)        .addVetoableChangeListener(ProjectileFiringBehavior.PENDING_FIRING            ,firingVetoListener);
+	probeForBehaviors(new ProjectileFiringBehaviorSubmitter(), ProjectileFiringBehavior.class);
 	probeForBehavior(UserInputThrottleControlBehavior.class).addVetoableChangeListener(UserInputThrottleControlBehavior.THROTTLE_CTL_STATE,throttleVetoListener);
 	installedVetoListeners = true;
     }//end installVetoListeners()
+    
+    private class ProjectileFiringBehaviorSubmitter extends AbstractSubmitter<ProjectileFiringBehavior>{
+	@Override
+	public void submit(ProjectileFiringBehavior item) {
+	    item.addVetoableChangeListener(ProjectileFiringBehavior.PENDING_FIRING,firingVetoListener);
+	}
+    }//end ProjectileFiringBehaviorSubmitter
     
     private void afterburnerOnTransient(WorldObject p){
 	//Save former max, former propulsion

@@ -39,28 +39,33 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
     private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
 
     public RootWindow(){
-	this("Terminal Recall");
-    }
-    public RootWindow(final String title) {
-	try {
-	    SwingUtilities.invokeAndWait(new Runnable() {
+	super();
+	try {SwingUtilities.invokeLater(new Runnable() {
 		@Override
 		public void run() {
-		    setVisible(false);
 		    canvas.setFocusTraversalKeysEnabled(false);
 		    getContentPane().add(canvas);
-		    setSize(800, 600);
 		    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    setFocusTraversalKeysEnabled(false);
-		    setJMenuBar(new JMenuBar());
-		    setTitle(title);
+		    setTitle("Terminal Recall");
+		}
+	    });
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}//end try/catch Exception
+    }
+    
+    public void initialize(){
+	try {SwingUtilities.invokeAndWait(new Runnable() {
+		@Override
+		public void run() {
 		    setVisible(true);
 		}
 	    });
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}//end try/catch Exception
-    }//end constructor
+    }
 
     public GLCanvas getCanvas() {
 	return canvas;

@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gui;
 
+import java.awt.Dimension;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GLCapabilities;
@@ -19,7 +20,6 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
-import javax.swing.JMenuBar;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.GLFutureTask;
@@ -48,6 +48,7 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
 		    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    setFocusTraversalKeysEnabled(false);
 		    setTitle("Terminal Recall");
+		    RootWindow.this.setMinimumSize(new Dimension(100,100));
 		}
 	    });
 	} catch (Exception e) {

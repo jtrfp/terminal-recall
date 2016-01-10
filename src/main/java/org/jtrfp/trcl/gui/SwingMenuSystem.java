@@ -13,11 +13,9 @@
 
 package org.jtrfp.trcl.gui;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collection;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -25,6 +23,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,8 +47,23 @@ public class SwingMenuSystem implements MenuSystem {
 	    viewMenu = new JMenu("View");
     
     @Autowired
-    public SwingMenuSystem(RootWindow rw){
-	rootNode = new SubMenu(rw.getJMenuBar());
+    public SwingMenuSystem(final RootWindow rw){
+	final JMenuBar [] menuBar = new JMenuBar[] {rw.getJMenuBar()};
+	try {
+	    if(menuBar[0] == null)
+	     SwingUtilities.invokeAndWait(new Runnable(){
+		@Override
+		public void run() {
+			rw.setJMenuBar(menuBar[0] = new JMenuBar()); 
+			rw.invalidate();
+			rw.validate();
+		}});
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	} catch (InvocationTargetException e) {
+	    e.printStackTrace();
+	}
+	rootNode = new SubMenu(menuBar[0]);
 	this.rw = rw;
 	// And items to menus
 	final JMenuItem file_quit = new JMenuItem("Quit");

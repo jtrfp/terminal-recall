@@ -189,7 +189,7 @@ public class GameShell {
     public GameShell newGame(VOXFile vox){
 	initializationFence();
 	GameVersion newGameVersion = determineGameVersion();
-	tr.config._setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
+	tr.configManager.getConfig()._setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
 	vox = determineVOXFile();
 	if(vox==null)
 	    return this;//Abort
@@ -247,7 +247,7 @@ public class GameShell {
     }
     
     private VOXFile determineVOXFile() {
-	String voxName = tr.config.getVoxFile();
+	String voxName = tr.configManager.getConfig().getVoxFile();
 	if(voxName==null)
 	    return autoDetermineVOXFile();
 	else if(voxName.contentEquals(TRConfiguration.AUTO_DETECT))
@@ -262,9 +262,9 @@ public class GameShell {
     }//end determineVOXFile()
     
     private GameVersion determineGameVersion(){
-	String voxName = tr.config.getVoxFile();
+	String voxName = tr.configManager.getConfig().getVoxFile();
 	if(voxName==null)
-	    return tr.config._getGameVersion();
+	    return tr.configManager.getConfig()._getGameVersion();
 	else if(voxName.contentEquals(TRConfiguration.AUTO_DETECT))
 	    {return guessGameVersionFromPods();}
 	else if(voxName.contentEquals("Fury3"))
@@ -273,7 +273,7 @@ public class GameShell {
 	    return GameVersion.TV;
 	else if(voxName.contentEquals("FurySE"))
 	    return GameVersion.FURYSE;
-	else return tr.config._getGameVersion();
+	else return tr.configManager.getConfig()._getGameVersion();
     }
     
     private GameVersion guessGameVersionFromPods(){
@@ -326,7 +326,7 @@ public class GameShell {
     }//end attemptGetVOX()
     
     private void registerPODs(){
-	DefaultListModel podList = tr.config.getPodList();
+	DefaultListModel podList = tr.configManager.getConfig().getPodList();
 	for(int i=0; i<podList.size(); i++){
 	    final String podPath = (String)podList.get(i);
 	    if(podPath!=null){

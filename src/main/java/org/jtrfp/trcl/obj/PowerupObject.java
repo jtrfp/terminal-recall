@@ -84,7 +84,7 @@ public class PowerupObject extends WorldObject{
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
 			((TVF3Game)tr.getGame()).getUpfrontDisplay().submitMomentaryUpfrontMessage(
-				tr.config._getGameVersion()!=GameVersion.TV?
+				tr.configManager.getConfig()._getGameVersion()!=GameVersion.TV?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());
 			//SOUND FX

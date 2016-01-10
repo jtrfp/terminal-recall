@@ -263,7 +263,7 @@ public class TVF3Game implements Game {
 			tr.getDefaultGrid().add(satDashboard);
 			
 			//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
-			System.out.println("GameVersion="+tr.config._getGameVersion());
+			System.out.println("GameVersion="+tr.configManager.getConfig()._getGameVersion());
 			navSystem = new NAVSystem(tr.getDefaultGrid(), tr,getDashboardLayout());
 			    // Make color zero translucent.
 			    final ResourceManager rm = tr.getResourceManager();
@@ -298,7 +298,7 @@ public class TVF3Game implements Game {
 			    tr.getDefaultGrid().add(player);
 			    System.out.println("\t...Done.");
 			    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
-			    final BriefingLayout briefingLayout = tr.config._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
+			    final BriefingLayout briefingLayout = tr.configManager.getConfig()._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
 			    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont(), 
 				    briefingLayout,"TVF3Game");
 			    earlyLoadingScreen.setStatusText("Starting game...");
@@ -321,7 +321,7 @@ public class TVF3Game implements Game {
 	    }
 
 	    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException, CanceledException {
-		if (!tr.config.isDebugMode())
+		if (!tr.configManager.getConfig().isDebugMode())
 		    setupNameWithUser();
 		tr.setRunState(new Game.GameRunningMode(){});
 		setInGameplay(true);
@@ -383,7 +383,7 @@ public class TVF3Game implements Game {
 	    public DashboardLayout getDashboardLayout(){
 		if(dashboardLayout==null)
 		    dashboardLayout = 
-			tr.config._getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
+			tr.configManager.getConfig()._getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
 		return dashboardLayout;
 	    }//end getDashboardLayout()
 	    

@@ -69,7 +69,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	     public Void call() throws Exception {
 		// Set the song up
 		mod.apply(MusicPlaybackEvent.this.nextLoopTimeSeconds,MusicPlaybackEvent.this,
-			getOrigin().getTR().config.getModStereoWidth());
+			getOrigin().getTR().configManager.getConfig().getModStereoWidth());
 		MusicPlaybackEvent.this.nextLoopTimeSeconds+=mod.getSongLengthInRealtimeSeconds();
 		firstRun.set(false);
 		return null;

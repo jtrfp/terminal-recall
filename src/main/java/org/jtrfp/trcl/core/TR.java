@@ -91,11 +91,11 @@ public final class TR implements UncaughtExceptionHandler{
 	private GameShell			gameShell;
 	private RenderableSpacePartitioningGrid	defaultGrid;
 	
-	public final TRConfiguration 		config;
 	private final ConfigWindow              configWindow;
 	private TRRunState                      runState;
 	private final ExitMenuItemListener	exitMenuItemListener   = new ExitMenuItemListener();
 	private final ConfigMenuItemListener	configMenuItemListener = new ConfigMenuItemListener();
+	public final ConfigManager configManager;
 	
 	public interface TRRunState{}
 	public interface TRConstructing extends TRRunState{}
@@ -139,11 +139,14 @@ public final class TR implements UncaughtExceptionHandler{
 	}
 	
 	@Autowired
-	public TR(ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow, MenuSystem menuSystem){
-	    this.config       = configManager.getConfig();
+	public TR(final ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow, MenuSystem menuSystem){
+	    //this.config       = configManager;
 	    this.configWindow = configWindow;
 	    this.reporter     = reporter;
 	    this.rootWindow   = rootWindow;
+	    this.configManager= configManager;
+	    
+	    rootWindow.initialize();
 	    
 	    menuSystem.addMenuItem(CONFIG_MENU_PATH);
 	    menuSystem.setMenuItemEnabled(true, CONFIG_MENU_PATH);
@@ -157,9 +160,6 @@ public final class TR implements UncaughtExceptionHandler{
 	    	catch(Exception e){e.printStackTrace();}
 	    	//AutoInitializable.Initializer.initialize(this);
 	    	pcSupport = new PropertyChangeSupport(this);
-	    	if(config.isWaitForProfiler()){
-	    	    waitForProfiler();
-	    	}//end if(waitForProfiler)
 		//keyStatus = new KeyStatus(rootWindow);
 		threadManager = new ThreadManager(this);
 		gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
@@ -201,7 +201,7 @@ public final class TR implements UncaughtExceptionHandler{
 			}//end call()
 		    },TR.this);threadManager.threadPool.submit(mainRenderer);
 		    System.out.println("...Done");
-		setResourceManager(new ResourceManager(this));
+		setResourceManager(new ResourceManager(this,configManager));
 		
 		final Renderer renderer = mainRenderer.get();
 		renderer.getCamera().setRootGrid(getDefaultGrid());
@@ -215,10 +215,11 @@ public final class TR implements UncaughtExceptionHandler{
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){
 			soundSystem.get().setPaused(true);
-			try{TR.this.config.saveConfig();
+			try{configManager.saveConfigurations();
 		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"
 				    + e.getLocalizedMessage()+"\n");
+		            e.printStackTrace();
 				}//end catch(Exception)
 			System.err.println("Great work, Guys!");
 			}//end run()

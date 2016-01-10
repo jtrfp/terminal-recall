@@ -75,7 +75,6 @@ import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertex;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock05;
-import org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock19;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.LineSegmentBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.TextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.Unknown12;
@@ -141,8 +140,10 @@ public class ResourceManager{
 	
 	public final ObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
 	public final ObjectFactory<String,SoundTexture>	soundTextures;
+	private ConfigManager configManager;
 	
-	public ResourceManager(final TR tr){
+	public ResourceManager(final TR tr, ConfigManager configManager){
+	        this.configManager = configManager;
 		this.tr=tr;
 		try{Class.forName("de.quippy.javamod.multimedia.mod.loader.tracker.ProTrackerMod");
 		    Class.forName("de.quippy.javamod.multimedia.mod.ModContainer"); // ModContainer uses the ModFactory!!
@@ -186,8 +187,8 @@ public class ResourceManager{
 	}//end ResourceManager
 	
 	private void setupPODListeners(){
-	    final TRConfiguration config = tr.config;
-	    final DefaultListModel podList = config.getPodList();
+	    //final TRConfiguration config = tr.config;
+	    final DefaultListModel podList = configManager.getConfig().getPodList();
 	    new ListModelSetBridge<String>(podList,new SetModelListener<String>(){
 		@Override
 		public void added(String item) {

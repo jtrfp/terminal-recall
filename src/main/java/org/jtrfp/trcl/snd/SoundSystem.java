@@ -153,7 +153,7 @@ public final class SoundSystem {
     }// end constructor
     
     private void loadConfigAndAttachListeners() {
-	final TRConfiguration config = tr.config;
+	final TRConfiguration config = tr.configManager.getConfig();
 	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_DRIVER,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -361,7 +361,7 @@ public final class SoundSystem {
     }//end newSoundTexture
     
     private int getFilteringParm(){
-	return tr.config.isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
+	return tr.configManager.getConfig().isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
     }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
@@ -384,7 +384,7 @@ public final class SoundSystem {
 	    firstRun();
 	final GPU gpu = tr.gpu.get();
 	
-	if(tr.config.isAudioBufferLag())
+	if(tr.configManager.getConfig().isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	// Render
@@ -405,7 +405,7 @@ public final class SoundSystem {
 	    events.clear();
 	}//end for(keySet)
 	
-	if(!tr.config.isAudioBufferLag())
+	if(!tr.configManager.getConfig().isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	bufferTimeCounter += getBufferSizeSeconds();

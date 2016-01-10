@@ -109,7 +109,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
     }//end PlayerListener
     
     private void installReactiveListeners(final TR tr){
-	tr.config.addPropertyChangeListener(TRConfiguration.CROSSHAIRS_ENABLED,new PropertyChangeListener(){
+	tr.configManager.getConfig().addPropertyChangeListener(TRConfiguration.CROSSHAIRS_ENABLED,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		updateCrosshairsVisibilityState(
@@ -123,7 +123,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 		Boolean newValue = (Boolean)evt.getNewValue();
 		if(newValue==null) newValue=false;
 		updateCrosshairsVisibilityState(
-			tr.config.isCrosshairsEnabled(),
+			tr.configManager.getConfig().isCrosshairsEnabled(),
 			newValue);
 	    }});
 	((TVF3Game)tr.getGame()).addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);

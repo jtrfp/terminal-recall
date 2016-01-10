@@ -74,7 +74,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
 	    final TR tr = getParent().getTr();
 	    String content="???";
-	    switch(tr.config._getGameVersion()){//TODO: Get from Game object instead.
+	    switch(tr.configManager.getConfig()._getGameVersion()){//TODO: Get from Game object instead.
 	    case F3:{
 		content=w.getF3DisplayName();
 		break;

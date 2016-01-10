@@ -81,6 +81,7 @@ public class ConfigWindow extends JFrame {
     private final JFileChooser fileChooser = new JFileChooser();
     private final SoundOutputSelectorGUI soundOutputSelectorGUI;
     private final Collection<ConfigurationTab> tabs;
+    private final ConfigManager cMgr;
     
     public static void main(String [] args){
 	new ConfigWindow().setVisible(true);
@@ -99,6 +100,7 @@ public class ConfigWindow extends JFrame {
 public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
  	setTitle("Settings");
  	setSize(340,540);
+ 	this.cMgr = cMgr;
  	this.tabs = tabs;
  	if(cMgr!=null)
  	 this.config=cMgr.getConfig();
@@ -407,7 +409,7 @@ public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
  	btnCancel.setToolTipText("Close the window without applying settings");
  	okCancelPanel.add(btnCancel, BorderLayout.EAST);
  	
- 	JLabel lblConfigpath = new JLabel(TRConfiguration.getConfigFilePath().getAbsolutePath());
+ 	JLabel lblConfigpath = new JLabel(cMgr.getConfigFilePath().getAbsolutePath());
  	lblConfigpath.setIcon(null);
  	lblConfigpath.setToolTipText("Default config file path");
  	lblConfigpath.setHorizontalAlignment(SwingConstants.CENTER);
@@ -448,7 +450,7 @@ public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
 	 vxList.add((String)missionLM.getElementAt(i));
      config.setMissionList(vxList);}
      soundOutputSelectorGUI.applySettings(config);
-     writeSettingsTo(TRConfiguration.getConfigFilePath());
+     writeSettingsTo(cMgr.getConfigFilePath());
      if(needRestart)
 	 notifyOfRestart();
      final AudioBufferSize abs = (AudioBufferSize)audioBufferSizeCB.getSelectedItem();
@@ -556,7 +558,7 @@ public ConfigWindow(ConfigManager cMgr, Collection<ConfigurationTab> tabs){
     
     private boolean writeSettingsTo(File f){
 	try{
-	    config.saveConfig(f);
+	    cMgr.saveConfigurations(f);
 	    return true;
     }catch(Exception e){JOptionPane.showMessageDialog(
 	    this,

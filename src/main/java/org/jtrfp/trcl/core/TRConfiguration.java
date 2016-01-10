@@ -12,19 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
-import java.beans.DefaultPersistenceDelegate;
-import java.beans.Encoder;
-import java.beans.ExceptionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.beans.Statement;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,7 +21,9 @@ import java.util.Map;
 import javax.swing.DefaultListModel;
 
 import org.jtrfp.trcl.flow.GameVersion;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TRConfiguration{
     	public static final String
     		ACTIVE_AUDIO_DRIVER = "activeAudioDriver",
@@ -187,73 +178,7 @@ public class TRConfiguration{
 	    this.modStereoWidth = modStereoWidth;
 	}
 	
-	public static File getConfigFilePath(){
-	     String homeProperty = System.getProperty("user.home");
-	     if(homeProperty==null)homeProperty="";
-	     return new File(homeProperty+File.separator+"settings.config.trcl.xml");
-	 }
 	
-	public static TRConfiguration getConfig(){
-	     TRConfiguration result=null;
-	     File fp = TRConfiguration.getConfigFilePath();
-	     if(fp.exists()){
-		 try{FileInputStream is = new FileInputStream(fp);
-		    XMLDecoder xmlDec = new XMLDecoder(is);
-		    result=(TRConfiguration)xmlDec.readObject();
-		    xmlDec.close();
-		    is.close();
-		}catch(Exception e){e.printStackTrace();}
-	     }//end if(exists)
-	     if(result==null)
-		result = new TRConfiguration();
-	     return result;
-	 }//end getConfig()
-	
-	public void saveConfig() throws IOException{
-	    saveConfig(TRConfiguration.getConfigFilePath());
-	}
-	
-	public void saveConfig(File finalDest) throws IOException{
-	    final File temp = File.createTempFile("temp.org.trcl.", "config.xml");
-		    FileOutputStream os = new FileOutputStream(temp);
-		    XMLEncoder xmlEnc   = new XMLEncoder(os);
-		    xmlEnc.setExceptionListener(new ExceptionListener(){
-			@Override
-			public void exceptionThrown(Exception e) {
-			    e.printStackTrace();
-			}});
-		    xmlEnc.setPersistenceDelegate(DefaultListModel.class,
-			    new DefaultPersistenceDelegate() {
-				protected void initialize(Class clazz,
-					Object oldInst, Object newInst,
-					Encoder out) {
-				    super.initialize(clazz, oldInst, newInst,
-					    out);
-				    DefaultListModel oldLM = (DefaultListModel) oldInst;
-				    DefaultListModel newLM = (DefaultListModel) newInst;
-				    for (int i = 0; i < oldLM.getSize(); i++){
-					final Object value = oldLM.getElementAt(i);
-				    	if(value!=null)//When a DLM is initialized it contains a single null element. )X
-					 out.writeStatement(new Statement(oldInst,"addElement",
-						new Object[] { value }));
-				    }//end for(elements)
-				}//end DefaultPersistenceDelegate()
-			    });
-		    xmlEnc.writeObject(this);
-		    xmlEnc.close();
-		    
-		    FileChannel srcCh = null, dstCh = null;
-		    try {
-		        srcCh = new FileInputStream(temp).getChannel();
-		        dstCh = new FileOutputStream(finalDest).getChannel();
-		        dstCh.transferFrom(srcCh, 0, srcCh.size());
-		       }catch(Exception e){e.printStackTrace();}
-		    	finally{
-		           srcCh.close();
-		           dstCh.close();
-		       }
-	}//end saveConfig(...)
-
 	/**
 	 * @return the podList
 	 */

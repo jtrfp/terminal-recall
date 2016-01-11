@@ -40,6 +40,7 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
 
     public RootWindow(){
 	super();
+	setSize(800,600);
 	try {SwingUtilities.invokeLater(new Runnable() {
 		@Override
 		public void run() {

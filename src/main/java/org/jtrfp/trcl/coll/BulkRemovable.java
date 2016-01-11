@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.coll;
 
+import java.util.Collection;
+
 public interface BulkRemovable<E> {
- public void bulkRemove(int [] indices);
+ public void bulkRemove(Collection<E> items);
 }

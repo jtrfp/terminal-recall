@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jtrfp.trcl.coll.BulkRemovable;
 import org.jtrfp.trcl.coll.Repopulatable;
 
 import com.ochafik.util.Adapter;
@@ -346,4 +347,18 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
 	    return adapter.adapt(value);
 	}};
    }
+   
+   /**
+    * Remove a single instance (or none) of each supplied element in given Collection.
+    * Not the same as removeAll - only one instance removed.
+    * @param toRemove
+    * @since Jan 11, 2016
+    */
+   public static <E> void bulkRemove(Collection<E> toRemove, Collection<E> target){
+       if(target instanceof BulkRemovable)
+	   ((BulkRemovable)target).bulkRemove(toRemove);
+       else
+        for(E e:toRemove)
+	   target.remove(e);
+   }//end bulkRemove(...)
 }//end Util

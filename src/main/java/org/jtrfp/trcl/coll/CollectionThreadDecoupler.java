@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 
 import org.jtrfp.trcl.tools.Util;
 
-public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatable<E>, Decorator<Collection<E>> {
+public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatable<E>, Decorator<Collection<E>>, BulkRemovable<E> {
     private final Executor 	executor;
     private final Collection<E>	delegate;
     
@@ -146,5 +146,14 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
     
     public Collection<E> getDelegate(){
 	return delegate;
+    }
+
+    @Override
+    public void bulkRemove(final Collection<E> items) {
+	executor.execute(new Runnable(){
+	    @Override
+	    public void run() {
+		Util.bulkRemove(items, delegate);
+	    }});
     }
 }//end CollectionActionSource

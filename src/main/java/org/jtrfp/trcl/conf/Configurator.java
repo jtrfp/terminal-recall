@@ -15,6 +15,7 @@ package org.jtrfp.trcl.conf;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,13 +66,40 @@ public abstract class Configurator<T> {
 	for(Method m:methods){
 	    if(m.getName().contentEquals(name)){
 		final Class<?>[] params = m.getParameterTypes();
-		if(params.length == 1)
-		    if(params[0].isAssignableFrom(objClass))
+		if(params.length == 1){
+		    if(isCompatible(params[0],objClass))
 			return m;
+		}//end if(1)
 	    }//end if(types == 1)
 	}//end for(methods)
 	return null;
     }//end findMethodCompatibleWith(...)
+    
+    private boolean isCompatible(Class class1, Class class2){
+	class1 = objectify(class1);
+	class2 = objectify(class2);
+	if(class1 == class2)
+	    return true;
+	if(class1.isAssignableFrom(class2))
+	    return true;
+	return false;
+    }//end isCompatible(...)
+    
+    private Class objectify(Class original){
+	if(original == boolean.class)
+	    original = Boolean.class;
+	if(original == int.class)
+	    original = Integer.class;
+	if(original == float.class)
+	    original = Float.class;
+	if(original == double.class)
+	    original = Double.class;
+	if(original == long.class)
+	    original = Long.class;
+	if(original == byte.class)
+	    original = Byte.class;
+	return original;
+    }//end objectify(...)
     
     public Map<String,Object> storeToMap(Map<String,Object> dest){
 	final T configured = getConfigured();

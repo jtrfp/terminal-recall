@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.jtrfp.trcl.tools.Util;
 
-public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E>, Decorator<Collection<E>> {
+public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E>, BulkRemovable<E>, Decorator<Collection<E>> {
     protected final Collection<E>             cache;
     protected final Map<Collection<E>,Object> targetsMap;
     protected final Set<Collection<E>>        targets;
@@ -60,11 +60,11 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
 	return result;
     }
     
-    public boolean removeTarget(Collection<E> target, boolean removeAll){
+    public boolean removeTarget(Collection<E> target, boolean unfill){
 	if(!targetsMap.containsKey(target))
 	    throw new RuntimeException("Target not present: "+target);
-	if(removeAll && targets.contains(target))
-	    target.removeAll(cache);
+	if(unfill && targets.contains(target))
+	    Util.bulkRemove(cache, target);
 	final boolean success = targetsMap.containsKey(target);
 	targetsMap.remove(target);
 	return success;
@@ -191,5 +191,12 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
 	for(E element:cache)
 	    sb.append(" "+element+"; ");
 	return "CollectionActionDispatcher ["+sb+"] ";
+    }
+
+    @Override
+    public void bulkRemove(Collection<E> c) {
+	Util.bulkRemove(c,cache);
+	for(Collection<E> targ:targets)
+	    Util.bulkRemove(c, targ);
     }
 }//end CollectionActionDispatcher

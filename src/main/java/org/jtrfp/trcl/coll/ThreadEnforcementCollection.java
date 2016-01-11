@@ -16,13 +16,15 @@ package org.jtrfp.trcl.coll;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.jtrfp.trcl.tools.Util;
+
 /**
  * Debugging helper to catch if an unauthorized thread 
  * @author Chuck Ritola
  *
  * @param <E>
  */
-public final class ThreadEnforcementCollection<E> implements Collection<E> {
+public final class ThreadEnforcementCollection<E> implements Collection<E>, BulkRemovable<E>, Repopulatable<E> {
     private final Collection<E> delegate;
     private final Thread threadToEnforce;
     
@@ -177,5 +179,17 @@ public final class ThreadEnforcementCollection<E> implements Collection<E> {
     public int hashCode() {
 	enforceThread();
 	return delegate.hashCode();
+    }
+
+    @Override
+    public void bulkRemove(Collection<E> items) {
+	enforceThread();
+	Util.bulkRemove(items, delegate);
+    }
+
+    @Override
+    public void repopulate(Collection<E> c) {
+	enforceThread();
+	Util.repopulate(delegate, c);
     }
 }//end ThreadEnforcementCollection

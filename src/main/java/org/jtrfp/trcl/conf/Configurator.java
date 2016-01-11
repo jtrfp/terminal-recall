@@ -42,20 +42,36 @@ public abstract class Configurator<T> {
 	final T configured = getConfigured();
 	if(configured == null)
 	    throw new IllegalStateException("Configured object intolerably null.");
+	final Method [] methods = configured.getClass().getMethods();
 	for(String propertyName:getPersistentProperties()){
 	    try{
 	    final Object value = map.get(propertyName);
 	    if(value != null){
 		final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
-		final Method setMethod         = configured.getClass().getMethod("set"+camelPropertyName, value.getClass());
-		setMethod.invoke(configured, value);
+		final Method setMethod         = findMethodCompatibleWith(methods,"set"+camelPropertyName, value);
+		if(setMethod != null)
+		 setMethod.invoke(configured, value);
+		else
+		 System.err.println("Warning: Could not find a method matching set"+camelPropertyName+" with value "+value);
 	    }//end if(!null)
-	    }catch(NoSuchMethodException e)   {e.printStackTrace();}
-	    catch(InvocationTargetException e){e.printStackTrace();}
+	    }catch(InvocationTargetException e){e.printStackTrace();}
 	    catch(IllegalAccessException e)   {e.printStackTrace();}
 	}//end for(propertyNames)
 	return getConfigured();
     }//end applyFromMap()
+    
+    private Method findMethodCompatibleWith(Method [] methods, String name, Object argument){
+	final Class<?> objClass = argument.getClass();
+	for(Method m:methods){
+	    if(m.getName().contentEquals(name)){
+		final Class<?>[] params = m.getParameterTypes();
+		if(params.length == 1)
+		    if(params[0].isAssignableFrom(objClass))
+			return m;
+	    }//end if(types == 1)
+	}//end for(methods)
+	return null;
+    }//end findMethodCompatibleWith(...)
     
     public Map<String,Object> storeToMap(Map<String,Object> dest){
 	final T configured = getConfigured();

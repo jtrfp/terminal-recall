@@ -179,7 +179,7 @@ public class SpacePartitioningGridRootTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testEmptyDeactivateNonEmptyBranchThenActivate() {//Relevance executor breaks this test.
-	when(mockedTarget.removeAll(any(Collection.class))).thenReturn(true);
+	when(mockedTarget.remove(any(Collection.class))).thenReturn(true);
 	SpacePartitioningGrid<Positionable> branch = new SpacePartitioningGrid<Positionable>();
 	subject.blockingAddBranch(branch);
 	branch.add(mockedPositionables[0]);
@@ -194,8 +194,8 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,times(1)).add(argument.capture());
 	 ArgumentCaptor<Collection> argument2 
 	   = ArgumentCaptor.forClass(Collection.class);
-	verify(mockedTarget,times(1)).removeAll(argument2.capture());
-	assertEquals(1,argument2.getValue().size());
+	verify(mockedTarget,times(1)).remove(argument2.capture());
+	assertEquals(argument.getValue(),argument2.getValue());
 	subject.blockingAddBranch(branch);
 	assertEquals(1,subject.getPackedObjectsDispatcher().size());
     }//end testEmptyAddNonEmptyBranchThenActivate()

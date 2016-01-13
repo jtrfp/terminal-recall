@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -43,10 +42,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
-import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFuture;
-import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.gui.RootWindow;
 import org.jtrfp.trcl.mem.MemoryManager;
 
 public final class GLTexture {

@@ -25,6 +25,7 @@ import org.apache.commons.collections.iterators.UnmodifiableIterator;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.iterators.IteratorChain;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.tools.Util;
 
 public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>> {
     private Collection<E> 
@@ -82,7 +83,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
     @Override
     public void clear() {
 	ArrayList<E> toRemove = new ArrayList<E>(used);
-	delegate  .removeAll(toRemove);
+	Util.bulkRemove(toRemove, delegate);
 	predicates.clear();
 	unused    .addAll   (toRemove);
 	used      .clear();
@@ -194,7 +195,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 
 	@Override
 	public void clear() {
-	    delegate.removeAll(used);
+	    Util.bulkRemove(used, delegate);
 	    used    .clear();
 	    unused  .clear();
 	}

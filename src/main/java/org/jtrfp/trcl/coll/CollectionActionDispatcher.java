@@ -86,8 +86,8 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     }
     @Override
     public void clear() {
-	for(Collection<E> targ:targets)
-	    targ.removeAll(cache);
+	for(Collection<E> target:targets)
+	    Util.bulkRemove(cache, target);
 	cache.clear();
     }//end clear()
     @Override

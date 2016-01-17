@@ -31,86 +31,86 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
     }
 
     @Override
-    public boolean add(final E element) {
+    public synchronized boolean add(final E element) {
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		delegate.add(element);
 	    }});
 	return true;
     }//end add(E)
 
     @Override
-    public boolean addAll(final Collection<? extends E> elements) {
+    public synchronized boolean addAll(final Collection<? extends E> elements) {
 	final List<E> toAdd = (List<E>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		delegate.addAll(toAdd);
 	    }});
 	return true;
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		delegate.clear();
 	    }});
     }
 
     @Override
     @Deprecated
-    public boolean contains(Object arg0) {
+    public synchronized boolean contains(Object arg0) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
     @Deprecated
-    public boolean containsAll(Collection<?> arg0) {
+    public synchronized boolean containsAll(Collection<?> arg0) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
     @Deprecated
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
 	throw new UnsupportedOperationException();
     }
 
     @Override
     @Deprecated
-    public Iterator<E> iterator() {
+    public synchronized Iterator<E> iterator() {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean remove(final Object element) {
+    public synchronized boolean remove(final Object element) {
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		delegate.remove(element);
 	    }});
 	return true;
     }
 
     @Override
-    public boolean removeAll(final Collection<?> elements) {
+    public synchronized boolean removeAll(final Collection<?> elements) {
 	final List<?> toRemove = (List<?>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		delegate.removeAll(toRemove);
 	    }});
 	return true;
     }
 
     @Override
-    public boolean retainAll(final Collection<?> elements) {
+    public synchronized boolean retainAll(final Collection<?> elements) {
 	final List<?> toRetain = (List<?>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		delegate.retainAll(toRetain);
 	    }});
 	return true;
@@ -135,11 +135,11 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
     }
 
     @Override
-    public void repopulate(final Collection<E> c) {
+    public synchronized void repopulate(final Collection<E> c) {
 	final List<E> toRepopulate = (List<E>)Arrays.asList(c.toArray());
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		Util.repopulate(delegate,toRepopulate);
 	    }});
     }
@@ -149,10 +149,10 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
     }
 
     @Override
-    public void bulkRemove(final Collection<E> items) {
+    public synchronized void bulkRemove(final Collection<E> items) {
 	executor.execute(new Runnable(){
 	    @Override
-	    public void run() {
+	    public synchronized void run() {
 		Util.bulkRemove(items, delegate);
 	    }});
     }

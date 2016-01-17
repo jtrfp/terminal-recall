@@ -19,9 +19,9 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
-import org.jtrfp.trcl.pool.EntryBasedIndexPool.Entry.DeadEntry;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
 public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListener {
@@ -34,6 +34,12 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
     private final IndexList<Entry<CONTAINED_TYPE>>
     indexList = new IndexList<Entry<CONTAINED_TYPE>>(listActionDispatcher);
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    
+    //// Work objects
+    final ArrayList<Integer> indicesToRemove = new ArrayList<Integer>(128);
+    final ArrayList<Entry<CONTAINED_TYPE>> entriesToReallocate = new ArrayList<Entry<CONTAINED_TYPE>>(128);
+    final ArrayList<Integer> newIndices = new ArrayList<Integer>(128);
+    final ArrayList<Integer> temp = new ArrayList<Integer>(128);
     
     public EntryBasedIndexPool(){
 	indexList.addPropertyChangeListener(this);
@@ -81,21 +87,33 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	
 	//Loop until Unused Index > Used Index.
 	while(usedIterator.hasNext())//TODO: Do not need to go through entire list
-	    defragmentEntry(usedIterator.next());
+	    defragmentEntry(usedIterator.next(),indicesToRemove,entriesToReallocate);
 
+	indexList.free(indicesToRemove);
+	indexList.pop(entriesToReallocate,newIndices,temp);
+	for(int i=0; i<entriesToReallocate.size(); i++)
+	    entriesToReallocate.get(i).setPoolIndex(newIndices.get(i));
 	/*Assuming defragmentation was properly executed, compaction should 
        discard an optimal number of unused indices.*/
 	indexList.compact();
+	//Cleanup
+	indicesToRemove    .clear();
+	entriesToReallocate.clear();
+	newIndices         .clear();
+	temp               .clear();
     }
 
-    private void defragmentEntry(int index){
+    private void defragmentEntry(int index, List<Integer> indicesToFree, List<Entry<CONTAINED_TYPE>> entriesToReallocate){
 	assert index>=0:"Index is intolerably negative";
 	assert index<listActionDispatcher.size():"index "+index+" exceeds size of entry list "+listActionDispatcher.size();
 	Entry<CONTAINED_TYPE> entry = listActionDispatcher.get(index);
 	assert entry!=null:"entry at index"+index+" intolerably null";
-	indexList.free(index);
-	final int newIndex = indexList.pop(entry);
-	entry.setPoolIndex(newIndex);
+	indicesToFree.add(index);
+	//indexList.free(index);
+	
+	//final int newIndex = indexList.pop(entry);
+	//entry.setPoolIndex(newIndex);
+	entriesToReallocate.add(entry);
     }
 
     public void setGrowthBehavior(GrowthBehavior gb){

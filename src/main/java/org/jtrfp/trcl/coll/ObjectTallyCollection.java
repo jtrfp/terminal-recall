@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.coll;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,9 +23,12 @@ import java.util.Map;
 import java.util.Set;
 
 public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<Collection<T>>{
+    //PROPERTIES
+    public static final String OBJECT_TALLY = "objectTally";
+    
     private final Collection<T> delegate;
     private final Map<T,Integer> tallies = new HashMap<T,Integer>();
-    private Map<T,Set<ObjectTallyListener<T>>> objectTallyListeners = new HashMap<T,Set<ObjectTallyListener<T>>>();
+    private Map<T,Set<PropertyChangeListener>> objectTallyListeners = new HashMap<T,Set<PropertyChangeListener>>();
     
     public ObjectTallyCollection(Collection<T> delegate){
 	this.delegate = delegate;
@@ -52,18 +57,19 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
 	tallies.put(e,tally);
     }
     
-    private Set<ObjectTallyListener<T>> getObjectTallyListeners(T object){
-	Set<ObjectTallyListener<T>> listenerSet = objectTallyListeners.get(object);
+    private Set<PropertyChangeListener> getObjectTallyListeners(T object){
+	Set<PropertyChangeListener> listenerSet = objectTallyListeners.get(object);
 	if(listenerSet == null)
-	    objectTallyListeners.put(object, listenerSet = new HashSet<ObjectTallyListener<T>>());
+	    objectTallyListeners.put(object, listenerSet = new HashSet<PropertyChangeListener>());
 	return listenerSet;
     }
     
     private void fireObjectTallyChange(T object, int oldValue, int newValue){
-	final Set<ObjectTallyListener<T>> listenerSet = getObjectTallyListeners(object);
-	for(ObjectTallyListener<T> l:listenerSet)
-	    l.tallyChanged(object, oldValue, newValue);
-    }
+	final Set<PropertyChangeListener> listenerSet = getObjectTallyListeners(object);
+	final PropertyChangeEvent evt = new PropertyChangeEvent(this, OBJECT_TALLY, oldValue, newValue);
+	for(PropertyChangeListener l:listenerSet)
+	    l.propertyChange(evt);
+    }//end fireObjectTallyChange
     
     public boolean add(T e) {
 	increment(e);
@@ -89,11 +95,11 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
     public boolean containsAll(Collection<?> c) {
 	return delegate.containsAll(c);
     }
-
+/*
     public boolean equals(Object o) {
 	return delegate.equals(o);
     }
-
+*/
 
     public int hashCode() {
 	return delegate.hashCode();
@@ -139,19 +145,15 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
 	return delegate;
     }
     
-    public void addObjectTallyListener(T object, ObjectTallyListener<T> listener){
+    public void addObjectTallyListener(T object, PropertyChangeListener listener){
 	getObjectTallyListeners(object).add(listener);
     }
     
-    public void removeObjectTallyListener(T object, ObjectTallyListener<T> listener){
+    public void removeObjectTallyListener(T object, PropertyChangeListener listener){
 	getObjectTallyListeners(object).remove(listener);
     }
     
     public static final class NegativeTallyException extends IllegalStateException{
 	public NegativeTallyException(){super();}
-    }
-    
-    public static interface ObjectTallyListener<T> {
-	public void tallyChanged(T object, int oldTally, int newTally);
     }
 }//end ObjectTallyList

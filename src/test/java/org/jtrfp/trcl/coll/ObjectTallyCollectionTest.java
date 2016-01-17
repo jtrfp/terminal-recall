@@ -17,17 +17,19 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.jtrfp.trcl.coll.ObjectTallyCollection.ObjectTallyListener;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 public class ObjectTallyCollectionTest {
@@ -190,14 +192,33 @@ public class ObjectTallyCollectionTest {
     }
     
     @Test
+    public void testEquals(){
+	assertEquals(subject,subject);
+    }
+    
+    @Test
     public void testListener(){
-	ObjectTallyListener<Object> listener = Mockito.mock(ObjectTallyListener.class);
+	ArgumentCaptor<PropertyChangeEvent> eventCaptor;
+	PropertyChangeListener listener = Mockito.mock(PropertyChangeListener.class);
 	final Object object = new Object();
 	subject.addObjectTallyListener(object, listener);
 	subject.add(object);
-	verify(listener).tallyChanged(object, 0, 1);
+	eventCaptor = ArgumentCaptor.forClass(PropertyChangeEvent.class);
+	verify(listener).propertyChange(eventCaptor.capture());
+	PropertyChangeEvent evt;
+	evt = eventCaptor.getValue();
+	assertEquals(ObjectTallyCollection.OBJECT_TALLY,evt.getPropertyName());
+	assertEquals(0,evt.getOldValue());
+	assertEquals(1,evt.getNewValue());
+	assertEquals(subject,evt.getSource());
 	subject.add(object);
-	verify(listener).tallyChanged(object, 1, 2);
+	eventCaptor = ArgumentCaptor.forClass(PropertyChangeEvent.class);
+	verify(listener,Mockito.times(2)).propertyChange(eventCaptor.capture());
+	evt = eventCaptor.getValue();
+	assertEquals(ObjectTallyCollection.OBJECT_TALLY,evt.getPropertyName());
+	assertEquals(1,evt.getOldValue());
+	assertEquals(2,evt.getNewValue());
+	assertEquals(subject,evt.getSource());
     }//end testListener
 
 }//end ObjectTallyCollectionTest

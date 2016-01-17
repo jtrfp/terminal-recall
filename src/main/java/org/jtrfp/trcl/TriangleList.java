@@ -110,6 +110,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	final Triangle 	t 		= triangleAt(0, triangleIndex);
 	final Vector3D 	pos 		= t.getVertices()[vIndex].getPosition();
 	final TriangleVertexWindow vw 	= (TriangleVertexWindow) getMemoryWindow();
+	
 	////////////////////// V E R T E X //////////////////////////////
 	if (numFrames == 1) {
 	    vw.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
@@ -159,15 +160,21 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	//////////////// T E X T U R E ///////////////////////////
 	if(td==null){
 	    System.err.println("Stack trace of triangle creation below. NullPointerException follows.");
-	    for(StackTraceElement el:t.getCreationStackTrace()){
+	    final StackTraceElement [] elements = t.getCreationStackTrace();
+	    if(elements == null)
+		throw new NullPointerException("Stack trace elements null! Did you remember to turn on Triangle.debugTriangles?");
+	    for(StackTraceElement el:elements){
 		System.err.println("\tat "+el.getClassName()+"."+el.getMethodName()+"("+el.getFileName()+":"+el.getLineNumber()+")");
 	    }//end for(stackTrace)
 	    throw new NullPointerException("Texture for triangle in "+debugName+" intolerably null.");}
 	else if (td instanceof PortalTexture){
-	    final int textureID = 65536-((PortalTexture)td).getPortalFramebufferNumber();
-	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
-	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
+	    PortalTexture portalTexture = (PortalTexture)td;
+	    portalTexture.addRelevantVertexIndex(gpuTVIndex);
+	    portalTexture.setTriangleVertexWindow(vw);
+	    //final int textureID = 65536-((PortalTexture)td).getPortalFramebufferNumber();
+	    //vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    //vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    //vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	} if (td instanceof Texture ) {// Static texture
 	    final int sideScalar = ((Texture)td).getSideLength()-1;
 	    if (animateUV && numFrames > 1) {// Animated UV

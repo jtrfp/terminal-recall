@@ -59,9 +59,23 @@ public class IndexList<E> implements Collection<E> {
 	return index;
     }//end pop(...)
     
+    public void pop(List<E> elements, List<Integer> poppedIndices, List<Integer> temp){
+	//final ArrayList<Integer> temp = new ArrayList<Integer>(elements.size());
+	indexPool.pop(temp, temp.size());
+	for(Integer i:temp)
+	    delegate.set(i, null);
+	poppedIndices.addAll(poppedIndices);
+    }
+    
     public E free(int index){
 	indexPool.free(index);
 	return delegate.set(index, null);
+    }
+    
+    public void free(ArrayList<Integer> indicesToRemove) {
+	indexPool.free(indicesToRemove);
+	for(Integer i:indicesToRemove)
+	    delegate.set(i, null);
     }
     
     public void defragment(){//TODO: Optimize. Remember: PriorityBlockingQueue iterator is not ordered!

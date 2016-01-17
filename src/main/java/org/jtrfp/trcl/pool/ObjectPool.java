@@ -12,7 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.pool;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.NoSuchElementException;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
@@ -122,6 +125,88 @@ public class ObjectPool<TYPE> {
 	 */
 	public TYPE reactivate(TYPE obj);
     }
+    
+    public static final class LazyAllocate<TYPE> implements PoolingMethod<TYPE>{
+	private final Deque<TYPE> unused      = new ArrayDeque<TYPE>();
+	private final Deque<TYPE> used        = new ArrayDeque<TYPE>();
+	private GenerativeMethod <TYPE> generativeMethod;
+	private final PopulationTarget populationTarget = new PopulationTarget();
+	private int maxSize = Integer.MAX_VALUE;
+	
+	@Override
+	public PoolingMethod<TYPE> initialize(ObjectPool<TYPE> parent,
+		PreparationMethod<TYPE> preparationMethod,
+		GenerativeMethod<TYPE> generativeMethod) {
+	    this.generativeMethod  = generativeMethod;
+	    return this;
+	}//end initialize()
+
+	@Override
+	public TYPE notifyExpiration(TYPE obj) {
+	    if(!used.contains(obj))
+		throw new IllegalStateException("Cannot expire; records show this isn't checked out: "+obj);
+	    assert !unused.contains(obj);
+	    unused.add(obj);
+	    used.remove(obj);
+	    return obj;
+	}
+
+	@Override
+	public TYPE pop() {
+	    TYPE result;
+	    //First try unused pool
+	    try{result = unused.pop();
+		used.push(result);
+	    }catch(NoSuchElementException e){
+		//Not available. Create new
+		generateBlock();
+		result = pop();
+	    }
+	    return result;
+	}//end pop()
+	
+	private void generateBlock(){
+	    final int size = used.size()+unused.size();
+	    if(size+generativeMethod.getAtomicBlockSize() > getMaxSize())
+		throw new IllegalStateException("Reached max size. Cannot generate more. Size="+size+" Blocksize="+generativeMethod.getAtomicBlockSize());
+	    generativeMethod.generateConsecutive(1, getPopulationTarget());
+	}
+
+	@Override
+	public Submitter<TYPE> pop(Submitter<TYPE> target, int numItems) {
+	    for(int i=0; i<numItems; i++)
+		target.submit(pop());
+	    return target;
+	}
+
+	@Override
+	public Submitter<TYPE> popConsective(Submitter<TYPE> target,
+		int numItems) {
+	    throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Submitter<TYPE> getPopulationTarget() {
+	    return populationTarget;
+	}
+	
+	private class PopulationTarget extends AbstractSubmitter<TYPE>{
+	    @Override
+	    public void submit(TYPE item) {
+		unused.push(item);
+	    }
+	}//end PopulationTarget
+
+	public int getMaxSize() {
+	    return maxSize;
+	}
+
+	public LazyAllocate setMaxSize(int maxSize) {
+	    this.maxSize = maxSize;
+	    return this;
+	}
+	
+    }//end LazyAllocate
     
     public static final class FillThenDrain<TYPE> implements PoolingMethod<TYPE>{
 	private final ArrayList<TYPE> pool = new ArrayList<TYPE>();

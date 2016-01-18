@@ -62,6 +62,7 @@ public final class Renderer {
     private volatile boolean			oneShotBehavior = false;
     private final       String                  debugName;
     private volatile boolean keepAlive = false;
+    private boolean                             enabled = false;
     
     public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow, String debugName) {
 	this.factory         = factory;
@@ -71,6 +72,8 @@ public final class Renderer {
 	this.debugName       =debugName;
 	//this.collisionManager=collisionManagerFuture;
 	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
+	if(world==null)
+	    throw new NullPointerException("World intolerably null.");
 	Camera camera = world.newCamera();//TODO: Remove after redesign.
 	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
 	System.out.println("...Done.");
@@ -290,5 +293,20 @@ public final class Renderer {
 
     public boolean isKeepAlive() {
 	return keepAlive;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+	if(this.enabled == enabled)
+	    return;
+        this.enabled = enabled;
+        if(isEnabled())
+         threadManager.addRepeatingGLTask(render);
+        else
+         threadManager.removeRepeatingGLTask(render);
+        getCamera().setActive(isEnabled());
     }
 }//end Renderer

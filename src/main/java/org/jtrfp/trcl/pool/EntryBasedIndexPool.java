@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
@@ -40,6 +41,7 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
     final ArrayList<Entry<CONTAINED_TYPE>> entriesToReallocate = new ArrayList<Entry<CONTAINED_TYPE>>(128);
     final ArrayList<Integer> newIndices = new ArrayList<Integer>(128);
     final ArrayList<Integer> temp = new ArrayList<Integer>(128);
+    final TreeSet<Integer> usedIndices = new TreeSet<Integer>(Collections.reverseOrder());
     
     public EntryBasedIndexPool(){
 	indexList.addPropertyChangeListener(this);
@@ -79,20 +81,28 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 */
     public void defragment(){
 	//Used Indices, descending w/ Iterator
-	ArrayList<Integer> used = new ArrayList<Integer>();
-	for(Integer i:indexList.getUsedIndices())
-	    used.add(i);
-	Collections.sort(used,Collections.reverseOrder());
-	final Iterator<Integer> usedIterator = used.iterator();
+	//ArrayList<Integer> used = new ArrayList<Integer>();
+	usedIndices.addAll(indexList.getUsedIndices());
+	//for(Integer i:indexList.getUsedIndices())
+	//    used.add(i);
+	//Collections.sort(used,Collections.reverseOrder());
+	final Iterator<Integer> usedIterator = usedIndices.iterator();
+	boolean moreToDefrag = true;
 	
 	//Loop until Unused Index > Used Index.
-	while(usedIterator.hasNext())//TODO: Do not need to go through entire list
-	    defragmentEntry(usedIterator.next(),indicesToRemove,entriesToReallocate);
+	while(usedIterator.hasNext() && moreToDefrag)
+	    moreToDefrag = defragmentEntry(usedIterator.next(),indicesToRemove,entriesToReallocate);
 
 	indexList.free(indicesToRemove);
+	//System.out.println(entriesToReallocate.size()+" ::: "+newIndices.size());
 	indexList.pop(entriesToReallocate,newIndices,temp);
-	for(int i=0; i<entriesToReallocate.size(); i++)
-	    entriesToReallocate.get(i).setPoolIndex(newIndices.get(i));
+	//System.out.println(entriesToReallocate.size()+" ||| "+newIndices.size());
+	final int size = entriesToReallocate.size();
+	//Re-add in reverse order
+	final int off  = size - 1;
+	for(int i=0; i<size; i++)
+	    entriesToReallocate.get(i).
+	     setPoolIndex(newIndices.get(off-i));
 	/*Assuming defragmentation was properly executed, compaction should 
        discard an optimal number of unused indices.*/
 	indexList.compact();
@@ -101,9 +111,10 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	entriesToReallocate.clear();
 	newIndices         .clear();
 	temp               .clear();
+	usedIndices        .clear();
     }
 
-    private void defragmentEntry(int index, List<Integer> indicesToFree, List<Entry<CONTAINED_TYPE>> entriesToReallocate){
+    private boolean defragmentEntry(int index, List<Integer> indicesToFree, List<Entry<CONTAINED_TYPE>> entriesToReallocate){
 	assert index>=0:"Index is intolerably negative";
 	assert index<listActionDispatcher.size():"index "+index+" exceeds size of entry list "+listActionDispatcher.size();
 	Entry<CONTAINED_TYPE> entry = listActionDispatcher.get(index);
@@ -114,6 +125,9 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	//final int newIndex = indexList.pop(entry);
 	//entry.setPoolIndex(newIndex);
 	entriesToReallocate.add(entry);
+	
+	//return index>indexList.getNumUsedIndices();
+	return true;//TODO: Early abort not working yet.
     }
 
     public void setGrowthBehavior(GrowthBehavior gb){

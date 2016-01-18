@@ -121,7 +121,7 @@ public class KeyboardInputDeviceService implements InputDeviceService {
 		    if(pressed){
 			if(timerFuture!=null)
 			 timerFuture.cancel(false);
-			timerFuture = timer.schedule(keyReleaseDispatcher, 10, TimeUnit.MILLISECONDS);
+			timerFuture = timer.schedule(keyReleaseDispatcher, 20, TimeUnit.MILLISECONDS);
 			}
 		    pressed=false;
 		}//end notifyReleased()

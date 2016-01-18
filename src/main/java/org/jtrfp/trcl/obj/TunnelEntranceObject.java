@@ -26,8 +26,11 @@ import org.jtrfp.trcl.miss.Mission;
 public class TunnelEntranceObject extends BillboardSprite {
     public static final double GROUND_HEIGHT_PAD=3500;
     private final Tunnel sourceTunnel;
-    public TunnelEntranceObject(TR tr, Tunnel tunnel) {
+    private final PortalEntrance portalEntrance;
+    
+    public TunnelEntranceObject(TR tr, Tunnel tunnel, final PortalEntrance portalEntrance) {
 	super(tr,"TunnelEntranceObject."+tunnel.getDebugName());
+	this.portalEntrance = portalEntrance;
 	final Mission mission = tr.getGame().getCurrentMission();
 	mission.addPropertyChangeListener(new PropertyChangeListener(){
 	    @Override
@@ -148,5 +151,8 @@ public class TunnelEntranceObject extends BillboardSprite {
      */
     public Tunnel getSourceTunnel() {
         return sourceTunnel;
+    }
+    public PortalEntrance getPortalEntrance() {
+        return portalEntrance;
     }
 }//end TunnelEntrance

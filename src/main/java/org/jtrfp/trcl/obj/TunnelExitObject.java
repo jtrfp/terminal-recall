@@ -30,6 +30,7 @@ import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.PortalTexture;
+import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.game.Game;
@@ -48,8 +49,8 @@ public class TunnelExitObject extends PortalEntrance {
     private		boolean		onlyRemoveIfTargeted=false;
     private static final int            NUDGE = 5000;
 
-    public TunnelExitObject(TR tr, Tunnel tun, String debugName) {
-	super(tr, tr.mainRenderer.get().getCamera());
+    public TunnelExitObject(TR tr, Tunnel tun, String debugName, WorldObject approachingObject) {
+	super(tr,new PortalExit(tr),approachingObject);
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
 	final NormalMap map = 
@@ -78,15 +79,16 @@ public class TunnelExitObject extends PortalEntrance {
 		 exitTop = (Vector3D.PLUS_J.crossProduct(exitHeading).crossProduct(exitHeading)).negate();
 		else exitTop = (Vector3D.PLUS_I);// ... so we create a clause for that.
 	this.tr = tr;
-	PortalExit pExit = new PortalExit(tr, tr.secondaryRenderer.get().getCamera());
+	final PortalExit pExit = getPortalExit();
 	pExit.setPosition(exitLocation.toArray());
 	pExit.setHeading(exitHeading);
 	pExit.setTop(exitTop);
 	pExit.setRootGrid(((TVF3Game)tr.getGame()).getCurrentMission().getOverworldSystem());
 	pExit.notifyPositionChange();
 	this.setPortalExit(pExit);
+	setPortalTexture(new PortalTexture());
 	setVisible(true);
-	Triangle [] tris = Triangle.quad2Triangles(new double[]{-50000,50000,50000,-50000}, new double[]{50000,50000,-50000,-50000}, new double[]{0,0,0,0}, new double[]{0,1,1,0}, new double[]{1,1,0,0}, new PortalTexture(0), RenderMode.STATIC, false, Vector3D.ZERO, "TunnelExitObject.portalModel");
+	Triangle [] tris = Triangle.quad2Triangles(new double[]{-50000,50000,50000,-50000}, new double[]{50000,50000,-50000,-50000}, new double[]{0,0,0,0}, new double[]{0,1,1,0}, new double[]{1,1,0,0}, getPortalTexture(), RenderMode.STATIC, false, Vector3D.ZERO, "TunnelExitObject.portalModel");
 	//Model m = Model.buildCube(100000, 100000, 200, new PortalTexture(0), new double[]{50000,50000,100},false,tr);
 	Model m = new Model(false, tr,"TunnelExitObject."+debugName);
 	m.addTriangles(tris);
@@ -99,8 +101,10 @@ public class TunnelExitObject extends PortalEntrance {
 	@Override
 	public void proposeCollision(WorldObject other) {
 	    if (other instanceof Player) {
+		//System.out.println("TunnelExitObject relevance tally="+tr.gpu.get().rendererFactory.get().getRelevanceTallyOf(getParent())+" within range? "+TunnelExitObject.this.isWithinRange());
 		//We want to track the camera's crossing in deciding when to move the player.
 		final Camera camera = tr.mainRenderer.get().getCamera();
+		//System.out.println("hash: "+super.hashCode()+" Cam pos = "+camera.getPosition()[0]+" thisPos="+TunnelExitObject.this.getPosition()[0]);
 		if (camera.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
 		    final Game game = ((TVF3Game)tr.getGame());
@@ -120,9 +124,12 @@ public class TunnelExitObject extends PortalEntrance {
 		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)
 		    
 		    tr.mainRenderer     .get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
-		    tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
+		    final Renderer portalRenderer = TunnelExitObject.this.getPortalRenderer();
+		    if(portalRenderer == null)
+			throw new IllegalStateException("PortalRenderer intolerably null.");
+		    portalRenderer.getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
 		    // Teleport
-		    final Camera secondaryCam = tr.secondaryRenderer.get().getCamera();
+		    final Camera secondaryCam = portalRenderer.getCamera();
 			other.setPosition(secondaryCam.getPosition());
 			other.setHeading (secondaryCam.getHeading());
 			other.setTop     (secondaryCam.getTop());

@@ -56,6 +56,7 @@ import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
@@ -79,8 +80,8 @@ public class Mission {
     private final LVLFile 	lvl;
     private final HashMap<String, Tunnel> 
     				tunnels = new HashMap<String, Tunnel>();
-    private final HashMap<Integer, PortalExit>
-    				tunnelPortals = new HashMap<Integer, PortalExit>();
+    private final HashMap<Integer, PortalEntrance>
+    				tunnelPortals = new HashMap<Integer, PortalEntrance>();
     private double[] 		playerStartPosition 
     					= new double[3];
     private List<NAVSubObject> 	navSubObjects;
@@ -469,8 +470,9 @@ public class Mission {
 	final Point tunnelEntranceMapSquarePos = new Point(
 		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getZ())),
 		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
-	addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel);
-	PortalExit portalExit = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
+	final PortalEntrance portalEntrance = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
+	final PortalExit portalExit = portalEntrance.getPortalExit();
+	addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel,portalEntrance);
 	if(portalExit!=null){
 	    portalExit.setHeading(Tunnel.TUNNEL_START_DIRECTION.getHeading());
 	    portalExit.setTop(Tunnel.TUNNEL_START_DIRECTION.getTop());
@@ -483,7 +485,7 @@ public class Mission {
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
 	System.out.println("Tunnel exit at sector "+tunnelExitMapSquarePos);
-	portalExit = getTunnelEntrancePortal(tunnelExitMapSquarePos);
+	//portalExit = getTunnelEntrancePortal(tunnelExitMapSquarePos);
 	
 	/*if(portalExit!=null){
 	 portalExit.setHeading(tunnel.getExitObject().getHeading().negate());
@@ -642,7 +644,6 @@ public class Mission {
 
     private void cleanup() {
 	displayHandler.setDisplayMode(emptyMode);
-	tr.secondaryRenderer.get().getCamera().setRootGrid(null);
 	// Remove projectile factories
 	for(ProjectileFactory pf:tr.getResourceManager().getProjectileFactories())
 	    for(Projectile projectile:pf.getProjectiles())
@@ -663,19 +664,19 @@ public class Mission {
 	return tunnelMap.get(key);
     }
     
-    public void registerTunnelEntrancePortal(Point mapSquareXZ, PortalExit exit){
+    public void registerTunnelEntrancePortal(Point mapSquareXZ, PortalEntrance entrance){
 	synchronized(tunnelPortals){
-	 tunnelPortals.put(pointToHash(mapSquareXZ),exit);}
+	 tunnelPortals.put(pointToHash(mapSquareXZ),entrance);}
     }
     
-    PortalExit getTunnelEntrancePortal(Point mapSquareXZ){
+    PortalEntrance getTunnelEntrancePortal(Point mapSquareXZ){
 	synchronized(tunnelPortals){
 	 return tunnelPortals.get(pointToHash(mapSquareXZ));}
     }
     
-    public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel){
+    public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel, PortalEntrance entrance){
 	TunnelEntranceObject teo;
-	overworldSystem.add(teo = new TunnelEntranceObject(tr,tunnel));
+	overworldSystem.add(teo = new TunnelEntranceObject(tr,tunnel,entrance));
 	tunnelMap.put(pointToHash(mapSquareXZ),teo);
     }
     
@@ -684,7 +685,8 @@ public class Mission {
 	return key;
     }
     
-    public synchronized void enterTunnel(final Tunnel tunnel) {
+    public synchronized void enterTunnel(final TunnelEntranceObject teo) {
+	final Tunnel tunnel = teo.getSourceTunnel();
 	System.out.println("Entering tunnel "+tunnel);
 	final Game game = ((TVF3Game)tr.getGame());
 	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
@@ -721,20 +723,22 @@ public class Mission {
 	player.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
 	tunnel.dispatchTunnelEntryNotifications();
-	final Camera secondaryCam = tr.secondaryRenderer.get().getCamera();
-	player.setPosition(secondaryCam.getPosition());
+	final Renderer portalRenderer = teo.getPortalEntrance().getPortalRenderer();
+	final Camera secondaryCam = /*tr.secondaryRenderer.get().getCamera()*/portalRenderer.getCamera();
+	//player.setPosition(Tunnel.TUNNEL_START_POS.toArray());//TODO: remove debug code
+	player.setPosition(secondaryCam.getPosition()); //TODO: Uncomment
 	player.setHeading (secondaryCam.getHeading());
 	player.setTop     (secondaryCam.getTop());
 	player.notifyPositionChange();
 	//Move the secondary cam to the overworld.
 	overworldSystem.setChamberMode(tunnel.getExitObject().isMirrorTerrain());
-	secondaryCam.setRootGrid(overworldSystem);
 	//Set the skycube appropriately
-	tr.secondaryRenderer.get().getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGame()).
+	portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGame()).
 		      getCurrentMission().
 		      getOverworldSystem().
 		      getSkySystem().
 		      getBelowCloudsSkyCubeGen());
+	
 	tr.setRunState(new TunnelState(){});
 	player.setActive(true);
     }//end enterTunnel()

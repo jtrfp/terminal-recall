@@ -152,6 +152,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					final double portalX = xPos+gridSquareSize/2.;
 					final double portalY = (hBL+hBR+hTR+hTL)/4.;
 					final double portalZ = zPos+gridSquareSize/2.;
+					final PortalTexture portalTexture = new PortalTexture();
 					Triangle[] tris = Triangle
 						.quad2Triangles(
 							// COUNTER-CLOCKWISE
@@ -166,16 +167,17 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								0,
 								0,
 								0,
-								0 }, u, v, new PortalTexture(0),
+								0 }, u, v, portalTexture,
 								RenderMode.STATIC,
 								new Vector3D[] { norm0, norm1,
 								norm2, norm3 }, cX + cZ % 4);
 					portalModel.addTriangles(tris);
-					final Camera tunnelCam = tr.secondaryRenderer.get().getCamera();
-					final PortalExit exit = new PortalExit(tr, tunnelCam);
-					tr.getGame().getCurrentMission().registerTunnelEntrancePortal(new Point(cX,cZ), exit);
+					final PortalExit exit = new PortalExit(tr);
 					final PortalEntrance entrance;
-					entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
+					entrance = new PortalEntrance(tr,portalModel,exit,tr.getGame().getPlayer());
+					tr.getGame().getCurrentMission().registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
+					
+					entrance.setPortalTexture(portalTexture);
 					Vector3D heading = normalMap.normalAt(xPos, cZ* gridSquareSize).normalize().negate();
 					entrance.setHeading(heading);
 					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.

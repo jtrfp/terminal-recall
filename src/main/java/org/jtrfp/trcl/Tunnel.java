@@ -110,7 +110,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	exitObject = new TunnelExitObject(tr, this,"Tunnel."+debugName);
+	exitObject = new TunnelExitObject(tr, this,"Tunnel."+debugName,tr.getGame().getPlayer());
+	exitObject.setSkyCubeGen(tr.getGame().getCurrentMission().getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
 	exitObject.setPosition(tunnelEnd.add(new Vector3D(10000,0,0)).toArray());

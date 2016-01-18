@@ -12,46 +12,115 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.coll.ObjectTallyCollection;
+import org.jtrfp.trcl.core.PortalTexture;
+import org.jtrfp.trcl.core.Renderer;
+import org.jtrfp.trcl.core.RendererFactory.PortalNotAvailableException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.prop.SkyCubeGen;
+import org.jtrfp.trcl.shell.GameShell;
+
+import com.ochafik.util.listenable.Pair;
 
 public class PortalEntrance extends WorldObject {
+    //// PROPERTIES
     public static final String WITHIN_RANGE         = "withinRange";
-    
-    private static final double ACTIVATION_DISTANCE = TR.mapSquareSize*8;
+    public static final String PORTAL_TEXTURE_ID    = "portalTextureID";
     
     private PortalExit portalExit;
-    private Camera     cameraToMonitor;
+    private Renderer   portalRenderer;
     private boolean    withinRange          = false;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private final PropertyChangeListener relevanceTallyListener = new RelevanceTallyListener();
+    //private final PropertyChangeListener weakRelevanceTallyListener;
+    private int        portalTextureID = -1;
+    private PortalTexture
+                       portalTexture = null;
+    private WorldObject approachingObject;
+    private SkyCubeGen skyCubeGen = GameShell.DEFAULT_GRADIENT;
+    private boolean    portalUnavailable = false;
 
-    public PortalEntrance(TR tr, PortalExit exit, Camera cameraToMonitor) {
-	super(tr);
-	this.portalExit=exit;
-	this.cameraToMonitor=cameraToMonitor;
-	addBehavior(new PortalEntranceBehavior());
+    public PortalEntrance(TR tr, Model model, PortalExit exit, WorldObject approachingObject){
+	this(tr,exit,approachingObject);
+	setModel(model);
     }
     
-    public PortalEntrance(TR tr, Model model, PortalExit exit, Camera cameraToMonitor){
-	super(tr,model);
+    public PortalEntrance(TR tr, PortalExit exit, WorldObject approachingObject) {
+	this(tr);
 	this.portalExit=exit;
-	this.cameraToMonitor=cameraToMonitor;
 	addBehavior(new PortalEntranceBehavior());
+	setApproachingObject(approachingObject);
+    }//end constructor
+    
+    private PortalEntrance(TR tr) {
+	super(tr);
+	final ObjectTallyCollection<Positionable> allRelevant = tr.gpu.get().rendererFactory.get().getAllRelevant();
+	//weakRelevanceTallyListener = new WeakPropertyChangeListener(relevanceTallyListener, allRelevant);
+	allRelevant.addObjectTallyListener(this, relevanceTallyListener);
+    }
+    
+    private class RelevanceTallyListener implements PropertyChangeListener {
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final int newTally = (Integer)evt.getNewValue();
+	    final int oldTally = (Integer)evt.getOldValue();
+	    if(newTally == 0 && oldTally != 0)
+		becameIrrelevant();
+	    else if(newTally != 0 && oldTally == 0)
+		becameRelevant();
+	}//end propertyChange(...)
+    }//end RelevanceTallyListener
+    
+    private void becameIrrelevant(){
+	if(isPortalUnavailable())
+	    return;//Do nothing, failed to get portal in the first place.
+	final Renderer portalRenderer = getPortalRenderer();
+	if(portalRenderer == null)
+	    throw new IllegalStateException("cameraToMonitor is intolerably null.");
+	System.out.println("De-activating portal entrance...");
+	//Release the Camera
+	getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
+	portalExit.deactivate();
+	getPortalExit().setControlledCamera(null);
+	setPortalRenderer(null);
+	setWithinRange(false);
+	System.out.println("Done de-activing portal entrance.");
     }
 
-    public PortalEntrance(TR tr, Camera camera) {
-	this(tr,null,camera);
-    }
+    private void becameRelevant() {
+	if (getPortalRenderer() != null)
+	    throw new IllegalStateException(
+		    "portalRenderer is intolerably non-null.");
+	try {
+	    final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
+		    .get().acquirePortalRenderer();
+	    System.out.println("Activating portal entrance...");
+	    getPortalExit().setControlledCamera(
+		    newRendererPair.getFirst().getCamera());
+	    newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
+	    setPortalRenderer(newRendererPair.getFirst());
+	    setWithinRange(true);
+	    setPortalTextureID(newRendererPair.getSecond());
+	    portalExit.activate();
+	    setPortalUnavailable(false);
+	    System.out.println("Done activating portal entrance.");
+	} catch (PortalNotAvailableException e) {
+	    System.out.println("Portal acquisition rejected: All are in use. PortalEntrance hash="+this.hashCode());
+	    setPortalUnavailable(true);
+	}// end catch(PortalNotAvailableException)
+    }// end becameRelevant()
 
     public double[] getRelativePosition(double [] dest){
-	Vect3D.subtract(cameraToMonitor.getPosition(), PortalEntrance.this.getPosition(), dest);
+	Vect3D.subtract(getApproachingObject().getPosition(), PortalEntrance.this.getPosition(), dest);
 	return dest;
     }
     
@@ -59,35 +128,25 @@ public class PortalEntrance extends WorldObject {
 	return new Rotation(getHeading(),getTop(),portalExit.getHeading(),portalExit.getTop());
     }
     
+    @Override
+    public WorldObject notifyPositionChange(){
+	final double [] pos = getPosition();
+	//System.out.println("PortalEntrance. "+hashCode()+" notifyPositionChange() "+pos[0]+" "+pos[1]+" "+pos[2]);
+	super.notifyPositionChange();
+	return this;
+    }
+    
     private class PortalEntranceBehavior extends Behavior{
 	private final double [] relativePosition = new double[3];
 	@Override
 	public void tick(long tickTimeMillis){
-	    final double dist = Vect3D.distance(cameraToMonitor.getPositionWithOffset(),PortalEntrance.this.getPositionWithOffset());
-	    if(dist<ACTIVATION_DISTANCE && !withinRange)
-		activation();
-	    else if(withinRange && dist>=ACTIVATION_DISTANCE)
-		deactivation();
-	    
-	    if(withinRange){
-		portalExit.updateObservationParams(getRelativePosition(relativePosition), getRelativeHeadingTop(),cameraToMonitor.getHeading(),cameraToMonitor.getTop());
-		getTr().secondaryRenderer.get().keepAlive();
+	    if(isWithinRange()){
+		getRelativePosition(relativePosition);
+		final WorldObject approachingObject = getApproachingObject();
+		portalExit.updateObservationParams(relativePosition, getRelativeHeadingTop(),approachingObject.getHeading(),approachingObject.getTop());
 	    }//end if(isWithinRange)
+	    
 	}//end _tick(...)
-	
-	private void activation(){
-	    pcs.firePropertyChange(WITHIN_RANGE, withinRange, true);
-	    portalExit.activate();
-	    withinRange=true;
-	    System.out.println("PORTAL ENTRANCE ACTIVATED");
-	}
-	
-	private void deactivation(){
-	    pcs.firePropertyChange(WITHIN_RANGE, withinRange, false);
-	    portalExit.deactivate();
-	    withinRange=false;
-	    System.out.println("PORTAL ENTRANCE DE-ACTIVATED");
-	}
     }//end PortalEntranceBehavior
 
     /**
@@ -159,24 +218,67 @@ public class PortalEntrance extends WorldObject {
     }
 
     /**
-     * @return the cameraToMonitor
-     */
-    public Camera getCameraToMonitor() {
-        return cameraToMonitor;
-    }
-
-    /**
-     * @param cameraToMonitor the cameraToMonitor to set
-     */
-    public void setCameraToMonitor(Camera cameraToMonitor) {
-        this.cameraToMonitor = cameraToMonitor;
-    }
-
-    /**
      * @param portalExit the portalExit to set
      */
     public void setPortalExit(PortalExit portalExit) {
         this.portalExit = portalExit;
+    }
+
+    public void setWithinRange(boolean withinRange) {
+	final boolean oldValue = this.withinRange;
+        this.withinRange = withinRange;
+        pcs.firePropertyChange(WITHIN_RANGE, withinRange, oldValue);
+    }
+
+    public Renderer getPortalRenderer() {
+        return portalRenderer;
+    }
+
+    public void setPortalRenderer(Renderer rendererToUse) {
+        this.portalRenderer = rendererToUse;
+    }
+
+    public int getPortalTextureID() {
+        return portalTextureID;
+    }
+
+    public void setPortalTextureID(int portalTextureID) {//TODO: This needs to be set!
+	final int oldValue = this.portalTextureID;
+	this.portalTextureID = portalTextureID;
+	pcs.firePropertyChange(PORTAL_TEXTURE_ID, oldValue, portalTextureID);
+	getPortalTexture().setPortalFramebufferNumber(portalTextureID);
+    }
+
+    public PortalTexture getPortalTexture() {
+        return portalTexture;
+    }
+
+    public void setPortalTexture(PortalTexture portalTexture) {
+        this.portalTexture = portalTexture;
+    }
+
+    public WorldObject getApproachingObject() {
+        return approachingObject;
+    }
+
+    public void setApproachingObject(WorldObject objectToMonitor) {
+        this.approachingObject = objectToMonitor;
+    }
+
+    public SkyCubeGen getSkyCubeGen() {
+        return skyCubeGen;
+    }
+
+    public void setSkyCubeGen(SkyCubeGen skyCubeGen) {
+        this.skyCubeGen = skyCubeGen;
+    }
+
+    private boolean isPortalUnavailable() {
+        return portalUnavailable;
+    }
+
+    private void setPortalUnavailable(boolean portalWasUnavailable) {
+        this.portalUnavailable = portalWasUnavailable;
     }
 
 }//end PortalEntrance

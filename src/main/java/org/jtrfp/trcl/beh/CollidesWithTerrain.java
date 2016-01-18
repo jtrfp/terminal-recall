@@ -99,7 +99,7 @@ public class CollidesWithTerrain extends Behavior {
 				(int)(thisPos[0] / TR.mapSquareSize),
 				(int)(thisPos[2] / TR.mapSquareSize)));
 		    if(teo!=null && !mission.isBossFight())
-			{mission.enterTunnel(teo.getSourceTunnel());return;}
+			{mission.enterTunnel(teo);return;}
 		}//end if(above ground)
 	}//end if(tunnelEntryCapable())
 

@@ -21,12 +21,11 @@ import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 
 public class PortalExit extends WorldObject {
-    private final Camera controlledCamera;
+    private Camera controlledCamera;
     private WeakReference<SpacePartitioningGrid> rootGrid;
 
-    public PortalExit(TR tr, Camera cameraToControl) {
+    public PortalExit(TR tr) {
 	super(tr);
-	this.controlledCamera=cameraToControl;
     }
     
     public void updateObservationParams(double [] relativePosition, Rotation rotation, Vector3D controllingHeading, Vector3D controllingTop){
@@ -52,6 +51,8 @@ public class PortalExit extends WorldObject {
 	SpacePartitioningGrid grid = rootGrid.get();
 	if(grid!=null)
 	 controlledCamera.setRootGrid(grid);
+	else
+	    throw new IllegalStateException("RootGrid intolerably null.");
     }
 
     /**
@@ -69,12 +70,17 @@ public class PortalExit extends WorldObject {
     }
 
     public void deactivate() {
+	controlledCamera.setRootGrid(null);
 	//Do nothing.
     }
     
     @Override
     public boolean supportsLoop(){
 	return false;
+    }
+
+    public void setControlledCamera(Camera controlledCamera) {
+        this.controlledCamera = controlledCamera;
     }
 
 }//end PortalExit

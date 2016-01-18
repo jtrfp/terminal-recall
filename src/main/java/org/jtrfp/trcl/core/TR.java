@@ -81,7 +81,7 @@ public final class TR implements UncaughtExceptionHandler{
 	//private final KeyStatus 		keyStatus;
 	private ResourceManager 		resourceManager;
 	public final ThreadManager 		threadManager;
-	public final TRFutureTask<Renderer> 	mainRenderer, secondaryRenderer;
+	public final TRFutureTask<Renderer> 	mainRenderer/*, secondaryRenderer*/;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter;
 	private Game 				game;
@@ -175,7 +175,7 @@ public final class TR implements UncaughtExceptionHandler{
 		threadManager.threadPool.submit(gpu);
 		threadManager.threadPool.submit(soundSystem);//TODO: Use new methods
 		System.out.println("Initializing graphics engine...");
-		secondaryRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
+		/*secondaryRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
 			@Override
 			public Renderer call() throws Exception {
 			    Thread.currentThread().setName("Renderer constructor.");
@@ -188,6 +188,7 @@ public final class TR implements UncaughtExceptionHandler{
 			    return renderer;
 			}//end call()
 		    },TR.this);threadManager.threadPool.submit(secondaryRenderer);
+		    */
 		    mainRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
 			@Override
 			public Renderer call() throws Exception {
@@ -206,11 +207,11 @@ public final class TR implements UncaughtExceptionHandler{
 		final Renderer renderer = mainRenderer.get();
 		renderer.getCamera().setRootGrid(getDefaultGrid());
 		getThreadManager().addRepeatingGLTask(renderer.render);
+		
 		/////// SECONDARY RENDERER //////////////
-		secondaryRenderer.get().getCamera().setRootGrid(getDefaultGrid());//TODO: Stub
-		secondaryRenderer.get().getCamera().setPosition(0, TR.mapSquareSize*5, 0);//TODO: Stub
-		secondaryRenderer.get().setRenderingTarget(gpu.get().rendererFactory.get().getPortalFrameBuffers()[0]);
-		getThreadManager().addRepeatingGLTask(secondaryRenderer.get().render);
+		//secondaryRenderer.get().getCamera().setRootGrid(getDefaultGrid());//TODO: Stub
+		//secondaryRenderer.get().getCamera().setPosition(0, TR.mapSquareSize*5, 0);//TODO: Stub
+		//secondaryRenderer.get().setRenderingTarget(gpu.get().rendererFactory.get().getPortalFrameBuffers()[0]);
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 		    public void run(){

@@ -13,7 +13,13 @@
 
 package org.jtrfp.trcl.core;
 
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
@@ -22,7 +28,12 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.ObjectListWindow;
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.jtrfp.trcl.coll.CollectionActionUnpacker;
+import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
+import org.jtrfp.trcl.coll.ObjectTallyCollection;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLProgram;
@@ -34,6 +45,13 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.ObjectProcessingStage;
 import org.jtrfp.trcl.gpu.VertexProcessingStage;
 import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.obj.Positionable;
+import org.jtrfp.trcl.pool.IndexPool;
+import org.jtrfp.trcl.pool.ObjectPool;
+import org.jtrfp.trcl.pool.ObjectPool.GenerativeMethod;
+import org.jtrfp.trcl.pool.ObjectPool.PreparationMethod;
+
+import com.ochafik.util.listenable.Pair;
 
 public class RendererFactory {
     
@@ -46,6 +64,8 @@ public class RendererFactory {
     private final GPU gpu;
     private final World world;
     private final Reporter reporter;
+    private final ObjectTallyCollection<Positionable>allRelevant = new ObjectTallyCollection<Positionable>(new ArrayList<Positionable>());
+    private final CollectionThreadDecoupler<Positionable> allRelevantDecoupled = new CollectionThreadDecoupler<Positionable>(allRelevant, Executors.newSingleThreadExecutor());
     //private final CollisionManager              collisionManager;
     private final	boolean			backfaceCulling;
     private 	 	GLUniform	    	sunVector;
@@ -71,6 +91,41 @@ public class RendererFactory {
     private final ThreadManager			threadManager;
     private  ObjectProcessingStage              objectProcessingStage;
     private VertexProcessingStage               vertexProcessingStage;
+    private final ObjectPool<Renderer>          rendererPool;
+    private final IndexPool                     portalFrameBufferIndexPool = new IndexPool().setHardLimit(NUM_PORTALS);
+    private final HashMap<Renderer,Integer>     rendererPortalIndexMap = new HashMap<Renderer,Integer>();
+    private final ObjectListWindow              objectListWindow;
+    
+    private class RendererPreparationMethod implements PreparationMethod<Renderer>{
+	@Override
+	public Renderer deactivate(Renderer obj) {
+	    obj.setEnabled(false);
+	    obj.setRenderingTarget(null);
+	    obj.getCamera().setRootGrid(null);
+	    return obj;
+	}
+
+	@Override
+	public Renderer reactivate(Renderer obj) {
+	    obj.setEnabled(true);
+	    return obj;
+	}
+    }//end RendererPoolingMethod
+    
+    private class RendererGenerativeMethod implements GenerativeMethod<Renderer>{
+	@Override
+	public int getAtomicBlockSize() {
+	    return 1;
+	}
+
+	@Override
+	public Submitter<Renderer> generateConsecutive(int numBlocks,
+		Submitter<Renderer> populationTarget) {
+	    for(int i=0; i<numBlocks; i++)
+		populationTarget.submit(RendererFactory.this.newRenderer("RendererFactory.rendererPool"));
+	    return populationTarget;
+	}
+    }// end RendererGenerativeMethod
     
     public RendererFactory(final GPU gpu, final ThreadManager threadManager, 
 	    final GLCanvas canvas, Reporter reporter, final World world, 
@@ -79,7 +134,10 @@ public class RendererFactory {
 	this.threadManager = threadManager;
 	this.reporter=reporter;
 	this.world=world;
+	this.objectListWindow = objectListWindow;
 	//this.collisionManager=collisionManager;
+	if(world == null)
+	    throw new NullPointerException("World intolerably null.");
 	final GL3 gl = gpu.getGl();
 	
 	threadManager.submitToGL(new Callable<Void>(){
@@ -369,6 +427,9 @@ public class RendererFactory {
 	if(System.getProperties().containsKey("org.jtrfp.trcl.core.RenderList.backfaceCulling")){
 	    backfaceCulling = System.getProperty("org.jtrfp.trcl.core.RenderList.backfaceCulling").toUpperCase().contains("TRUE");
 	}else backfaceCulling = true;
+	
+	rendererPool = new ObjectPool<Renderer>(
+                new ObjectPool.LazyAllocate<Renderer>().setMaxSize(NUM_PORTALS), new RendererPreparationMethod(), new RendererGenerativeMethod());
     }//end constructor
     
     private void allocatePortals(int width, int height){
@@ -402,7 +463,23 @@ public class RendererFactory {
     }//end allocatePortals()
     
     public Renderer newRenderer(String debugName){
-	return new Renderer(this,world,threadManager,reporter,gpu.objectListWindow.get(),debugName);
+	Renderer result = new Renderer(this,world,threadManager,reporter,objectListWindow,debugName);
+	//Need a buffer because else the unpacker will cause redundant adds!
+	final CollectionActionDispatcher<Positionable>
+	 buffer = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
+	final CollectionActionUnpacker<Positionable>
+         relevantUnpacker = new CollectionActionUnpacker<Positionable>(buffer);
+	result.getCamera().getRelevanceCollections().addTarget(relevantUnpacker, true);
+	buffer.addTarget(allRelevantDecoupled, true);
+	return result;
+    }
+    
+    public void addRelevanceTallyListener(Positionable pos, PropertyChangeListener l){
+	allRelevant.addObjectTallyListener(pos, l);
+    }
+    
+    public void removeRelevanceTallyListener(Positionable pos, PropertyChangeListener l){
+	allRelevant.removeObjectTallyListener(pos, l);
     }
 
     /**
@@ -552,5 +629,65 @@ public class RendererFactory {
      */
     public GLFrameBuffer[] getPortalFrameBuffers() {
         return portalFrameBuffers;
+    }
+    
+    private void printPortalState(){
+	System.out.println("Active portals: "+portalFrameBufferIndexPool.getNumUsedIndices());
+	Set<Integer> used = new HashSet<Integer>();
+	used.addAll(portalFrameBufferIndexPool.getUsedIndices());
+	System.out.print("PORTAL STATUS:\n    ");
+	for(int i=0; i<NUM_PORTALS; i++)
+	    System.out.print(""+(used.contains(i)?"X":""+i));
+	System.out.println();
+    }//end printPortalState()
+
+    public Renderer acquireRenderer() {
+	return rendererPool.pop();
+    }
+
+    public void releaseRenderer(Renderer cameraToRelease) {
+	rendererPool.expire(cameraToRelease);
+    }
+    
+    public synchronized Pair<Renderer,Integer> acquirePortalRenderer() throws PortalNotAvailableException {
+	final int index = portalFrameBufferIndexPool.pop();
+	if(index == -1)
+	    throw new PortalNotAvailableException();
+	final Renderer result = acquireRenderer();
+	assert !rendererPortalIndexMap.containsKey(result);
+	rendererPortalIndexMap.put(result, index);
+	result.setRenderingTarget(portalFrameBuffers[index]);
+	printPortalState();
+	return new Pair<Renderer,Integer>(result,index);
+    }//end acquirePortalRenderer()
+    
+    public synchronized void releasePortalRenderer(Renderer rendererToRelease) {
+	portalFrameBufferIndexPool.free(getPortalTextureIDOf(rendererToRelease));
+	releaseRenderer(rendererToRelease);
+	rendererPortalIndexMap.remove(rendererToRelease);
+	printPortalState();
+    }//end releasePortalRenderer(...)
+    
+    public synchronized int getPortalTextureIDOf(Renderer renderer){
+	if(renderer == null)
+	    throw new NullPointerException("Supplied renderer argument intolerably null.");
+	final Integer result = rendererPortalIndexMap.get(renderer);
+	if(result == null)
+	    throw new IllegalArgumentException("Specified renderer "+renderer+" not found in rendererPortalIndexMap.");
+	return result;
+    }//end getPortalTextureIDOf(...)
+
+    public synchronized int getRelevanceTallyOf(Positionable positionableToTally) {
+	return allRelevant.getTallyOf(positionableToTally);
+    }
+    
+    public static class PortalNotAvailableException extends IllegalStateException {
+	public PortalNotAvailableException(){
+	    super();
+	}
+    }
+
+    public ObjectTallyCollection<Positionable> getAllRelevant() {
+        return allRelevant;
     }
 }//end RendererFactory

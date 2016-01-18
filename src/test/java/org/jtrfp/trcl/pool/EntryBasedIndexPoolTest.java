@@ -16,10 +16,10 @@ package org.jtrfp.trcl.pool;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jtrfp.trcl.coll.ListActionDispatcher;
@@ -153,16 +153,15 @@ public class EntryBasedIndexPoolTest {
     }
     
     private void depopulate(){
-	List<Entry<Integer>> list = subject.getListActionDispatcher();
-	for(int i=0; i<list.size(); i++){
-	    final Entry<Integer> item = list.get(i);
+	List<Entry<Integer>> list = new ArrayList<Entry<Integer>>(subject.getListActionDispatcher());
+	for(Entry<Integer> entry:list){
+	    final Entry<Integer> item = entry;
 	    if(item!=null){
 		//System.out.print(item.getPoolIndex()+" ");
 		item.free();}
 	}//end while(hasNext)
-	for(Entry<Integer> entry:list){
-	    if(entry!=null)System.out.print("STILL HERE: "+entry+" ");
-	}
+	for(Entry<Integer> entry:subject.getListActionDispatcher())
+	    assertNull(entry);
 	assertEquals(0,subject.getNumUsedIndices());
 	subject.defragment();
 	assertEquals(0,subject.getListActionDispatcher().size());

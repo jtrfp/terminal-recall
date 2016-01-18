@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.core;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;
@@ -20,11 +21,16 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 
 public class PortalTexture implements TextureDescription {
-    private final int portalFramebufferNumber;
+    private int                       portalFramebufferNumber;
+    private final ArrayList<Integer>  relevantVertexIndices = new ArrayList<Integer>();
+    private TriangleVertexWindow      triangleVertexWindow;
     
-    public PortalTexture(int portalFrameBufferNumber){
-	this.portalFramebufferNumber=portalFrameBufferNumber;
-    }
+    public PortalTexture(){}
+    
+    public PortalTexture(TriangleVertexWindow triangleVertexWindow){
+	this();
+	setTriangleVertexWindow(triangleVertexWindow);
+    }//end constructor
 
     @Override
     public Color getAverageColor() {
@@ -54,6 +60,29 @@ public class PortalTexture implements TextureDescription {
      */
     public int getPortalFramebufferNumber() {
         return portalFramebufferNumber;
+    }
+    
+    public void addRelevantVertexIndex(int idx){
+	relevantVertexIndices.add(idx);
+    }
+
+    public void setPortalFramebufferNumber(int portalFramebufferNumber) {
+        this.portalFramebufferNumber = portalFramebufferNumber;
+        final int textureID = 65536-getPortalFramebufferNumber();
+        final TriangleVertexWindow vw = getTriangleVertexWindow();
+        for(int i:relevantVertexIndices){
+            vw.textureIDLo .set(i, (byte)(textureID & 0xFF));
+    	    vw.textureIDMid.set(i, (byte)((textureID >> 8) & 0xFF));
+    	    vw.textureIDHi .set(i, (byte)((textureID >> 16) & 0xFF));
+        }//end for(relevantVertexIndices)
+    }//end setPortalFramebufferNumber(...)
+
+    public TriangleVertexWindow getTriangleVertexWindow() {
+        return triangleVertexWindow;
+    }
+
+    public void setTriangleVertexWindow(TriangleVertexWindow triangleVertexWindow) {
+        this.triangleVertexWindow = triangleVertexWindow;
     }
  
 }//end PortalTexture

@@ -61,10 +61,10 @@ public class IndexList<E> implements Collection<E> {
     
     public void pop(List<E> elements, List<Integer> poppedIndices, List<Integer> temp){
 	//final ArrayList<Integer> temp = new ArrayList<Integer>(elements.size());
-	indexPool.pop(temp, temp.size());
+	indexPool.pop(temp, elements.size());
 	for(Integer i:temp)
-	    delegate.set(i, null);
-	poppedIndices.addAll(poppedIndices);
+	    delegate.set(i, elements.get(i));
+	poppedIndices.addAll(temp);
     }
     
     public E free(int index){

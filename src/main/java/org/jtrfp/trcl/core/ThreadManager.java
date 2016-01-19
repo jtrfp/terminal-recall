@@ -130,7 +130,7 @@ public final class ThreadManager implements GLExecutor{
 	    for(TRFuture<Renderer> r:renderers){
 		if(r==null)return;
 		Renderer renderer = r.getRealtime();
-		if(!renderer.isOneShotBehavior() || renderer.isKeepAlive()){
+		if(renderer.isEnabled()){
 		    final Collection<PositionedRenderable> vl = 
 				renderer.
 				getRenderList().

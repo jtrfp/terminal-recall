@@ -197,7 +197,7 @@ public final class TR implements UncaughtExceptionHandler{
 				    rendererFactory.
 				    get().
 				    newRenderer("mainRenderer");
-			    renderer.setOneShotBehavior(false);
+			    renderer.setEnabled(true);
 			    return renderer;
 			}//end call()
 		    },TR.this);threadManager.threadPool.submit(mainRenderer);

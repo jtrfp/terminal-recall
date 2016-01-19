@@ -59,9 +59,7 @@ public final class Renderer {
     private final	PredicatedCollection<Positionable> relevantPositioned;
     private final	Reporter		reporter;
     private final	ThreadManager		threadManager;
-    private volatile boolean			oneShotBehavior = false;
     private final       String                  debugName;
-    private volatile boolean keepAlive = false;
     private boolean                             enabled = false;
     
     public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow, String debugName) {
@@ -145,12 +143,6 @@ public final class Renderer {
 		final GL3 gl = gpu.getGl();
 		try{	ensureInit();
 			 final RenderList rl = renderList.getRealtime();
-			
-			if(oneShotBehavior){
-			    if(!keepAlive)
-				return null;
-			    keepAlive=false;
-			    }
 			rl.render(gl);
 			rl.sendToGPU(gl);
 			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
@@ -271,28 +263,6 @@ public final class Renderer {
     
     public Camera getCamera() {
 	return camera;
-    }
-
-    public void keepAlive() {
-	keepAlive=true;
-    }
-
-    /**
-     * @return the oneShotBehavior
-     */
-    public boolean isOneShotBehavior() {
-        return oneShotBehavior;
-    }
-
-    /**
-     * @param oneShotBehavior the oneShotBehavior to set
-     */
-    public void setOneShotBehavior(boolean oneShotBehavior) {
-        this.oneShotBehavior = oneShotBehavior;
-    }
-
-    public boolean isKeepAlive() {
-	return keepAlive;
     }
 
     public boolean isEnabled() {

@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashSet;
@@ -33,8 +32,8 @@ import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.ThreadEnforcementCollection;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.Positionable;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -50,7 +49,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  RealMatrix completeMatrix;
 	private volatile  double viewDepth;
 	private volatile  RealMatrix projectionMatrix;
-	private final	  GPU gpu;
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
@@ -82,16 +80,16 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new HashSet<Positionable>());
 	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
-	private static final double RELEVANCE_RADIUS_TAXICAB_CUBES = 1.414 * RELEVANCE_RADIUS_CUBES; // 1.414 is radical-2
-	private SpacePartitioningGrid rootGrid;
+	private SpacePartitioningGrid<PositionedRenderable> rootGrid;
 	private volatile Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
 	// HARD REFERENCES - DO NOT REMOVE
+	@SuppressWarnings("unused")
 	private final CenterCubeHandler     centerCubeHandler;
+	@SuppressWarnings("unused")
 	private final CameraPositionHandler cameraPositionHandler;
 
     Camera(TR tr) {
 	super(tr);
-	this.gpu = tr!=null?tr.gpu.get():null;
 	try{final Thread rt = World.relevanceThread.get();
 	    World.relevanceExecutor.submit(new Runnable(){
 	    @Override
@@ -99,7 +97,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		visibilityFilter.add(new VisibilityPredicate());
 		relevancePairs.addTarget(pairStripper, true);
 		relevanceCollections.addTarget(
-			new ThreadEnforcementCollection(new CollectionActionUnpacker<Positionable>(flatRelevanceCollection),rt), true);
+			new ThreadEnforcementCollection<CollectionActionDispatcher<Positionable>>(new CollectionActionUnpacker<Positionable>(flatRelevanceCollection),rt), true);
 	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
 	
 	addBehavior(new MatchPosition().setEnable(true));
@@ -188,9 +186,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
     }//end CenterCubeHandler
 
 	private void updateProjectionMatrix(){
-	    	final Component component = getTr().getRootWindow();
-		final float aspect = (float) component.getWidth()
-				/ (float) component.getHeight();
 		final float zF = (float) (viewDepth * 1.5);
 		final float zN = (float) (TR.mapSquareSize / 10);
 		final float fH = (float) (1. / Math.tan(getHorizontalFOVDegrees() * Math.PI / 360.));
@@ -285,17 +280,16 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		return projectionMatrix;
 		}
 	
-	public double getViewDepth()
-		{return viewDepth;}
+	public double getViewDepth(){
+	    return viewDepth;}
 	
-	private synchronized RealMatrix getCompleteMatrix()
-		{//if(cameraMatrix==null){
+	private synchronized RealMatrix getCompleteMatrix(){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
 			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
 			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt().toString());
 			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop().toString());
-			}//}
+			}
 		return completeMatrix;
 		}
 	public synchronized float [] getRotationMatrixAsFlatArray(float [] dest){
@@ -337,10 +331,6 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    this.fogEnabled = fogEnabled;
 	    return this;
 	}
-	/*
-	public ListenableCollection<ListenableCollection<PositionedRenderable>> getRelevantCubeCollection(){
-	    return relevantCubeCollection;
-	}*/
 
 	/**
 	 * @return the relevanceRadius
@@ -350,23 +340,16 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	}
 
 	/**
-	 * @param relevanceRadius the relevanceRadius to set
-	 */
-	public void setRelevanceRadius(double relevanceRadius) {
-	    this.relevanceRadius = relevanceRadius;
-	}
-
-	/**
 	 * @return the rootGrid
 	 */
-	public SpacePartitioningGrid getRootGrid() {
+	public SpacePartitioningGrid<PositionedRenderable> getRootGrid() {
 	    return rootGrid;
 	}
 
 	/**
 	 * @param rootGrid the rootGrid to set
 	 */
-	public void setRootGrid(SpacePartitioningGrid rootGrid) {
+	public void setRootGrid(SpacePartitioningGrid<PositionedRenderable> rootGrid) {
 	    if(this.rootGrid==rootGrid)
 		return;
 	    pcs.firePropertyChange(ROOT_GRID, this.rootGrid, rootGrid);

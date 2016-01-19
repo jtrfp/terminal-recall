@@ -167,7 +167,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	 camera.probeForBehavior(RotateAroundObject.class).setOffset(
 		    new double []{0,-planetModel.getTriangleList().getMaximumVertexDims().getY(),0});
 	    camera.probeForBehavior(RotateAroundObject.class).setDistance(
-		    planetModel.getTriangleList().getMaximumVertexDims().getX()*4);
+		    planetModel.getTriangleList().getMaximumVertexDims().getX()*2);
 	 }catch(Exception e){tr.showStopper(e);}
 	// Turn the camera to the planet
 	camera.probeForBehavior(MatchPosition.class).setEnable(false);
@@ -276,7 +276,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			     getY(),
 			    0});
 	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
-			    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*6);}
+			    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*3);}
 	    else if(wo.getModel().getTransparentTriangleList()!=null){
 	     camera.probeForBehavior(RotateAroundObject.class).setOffset(
 		    new double []{

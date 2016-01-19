@@ -28,7 +28,10 @@ public class PortalExit extends WorldObject {
 	super(tr);
     }
     
-    public void updateObservationParams(double [] relativePosition, Rotation rotation, Vector3D controllingHeading, Vector3D controllingTop){
+    public synchronized void updateObservationParams(double [] relativePosition, Rotation rotation, Vector3D controllingHeading, Vector3D controllingTop){
+	final Camera controlledCamera = getControlledCamera();
+	if(controlledCamera == null)
+	    return;
 	//Apply position
 	controlledCamera.setPosition(rotation.applyTo(new Vector3D(relativePosition)).add(new Vector3D(getPosition())));
 	//Apply vector
@@ -45,7 +48,7 @@ public class PortalExit extends WorldObject {
         return controlledCamera;
     }
 
-    public void activate() {
+    public synchronized void activate() {
 	if(rootGrid==null)
 	    return;
 	SpacePartitioningGrid grid = rootGrid.get();
@@ -65,11 +68,11 @@ public class PortalExit extends WorldObject {
     /**
      * @param rootGrid the rootGrid to set
      */
-    public void setRootGrid(SpacePartitioningGrid rootGrid) {
+    public synchronized void setRootGrid(SpacePartitioningGrid rootGrid) {
         this.rootGrid = new WeakReference<SpacePartitioningGrid>(rootGrid);
     }
 
-    public void deactivate() {
+    public synchronized void deactivate() {
 	controlledCamera.setRootGrid(null);
 	//Do nothing.
     }
@@ -79,7 +82,7 @@ public class PortalExit extends WorldObject {
 	return false;
     }
 
-    public void setControlledCamera(Camera controlledCamera) {
+    public synchronized void setControlledCamera(Camera controlledCamera) {
         this.controlledCamera = controlledCamera;
     }
 

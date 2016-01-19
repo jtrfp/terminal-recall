@@ -183,12 +183,18 @@ public class TVF3Game implements Game {
 		    final String lvlFileName = lvl.getLvlFile();
 		        setCurrentMission(null);
 			setCurrentMission(new Mission(tr, this, tr.getResourceManager()
-				.getLVL(lvlFileName), lvlFileName.substring(0,
-				lvlFileName.lastIndexOf('.')), getLevelIndex() % 3 == 0));
+				.getLVL(lvlFileName), prepareLevelName(lvlFileName), getLevelIndex() % 3 == 0));
 		}//end if(levelIndex!=-1)
 		else // Make sure the Mission is destroyed
 		    setCurrentMission(null);
 	    }// end setLevelIndex(...)
+	    
+	    private String prepareLevelName(String rawName){
+		String result;
+		result = rawName.substring(0,
+			 rawName.lastIndexOf('.'));
+		return result.charAt(0)+result.toLowerCase().substring(1);
+	    }//end prepareLevelName
 
 	    /**
 	     * @return the playerName

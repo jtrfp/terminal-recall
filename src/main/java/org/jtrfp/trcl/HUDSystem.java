@@ -93,7 +93,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	try{add(throttleMeterBar = new MeterBar(tr, 
 		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(is = Texture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),null,
-			"ThrottleBar blackBlue",false), METER_WIDTH, layout.getThrottleBarLength(),
+			"ThrottleBar blackBlue",false), -METER_WIDTH, layout.getThrottleBarLength(),
 		layout.isThrottleHorizontal(), "HUDSystem"));}
 	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	pos = layout.getThrottlePosition();

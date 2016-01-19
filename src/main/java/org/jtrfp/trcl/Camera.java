@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -54,6 +54,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix;
 	private boolean	  fogEnabled = true;
+	private float horizontalFOVDegrees = 100f;// In degrees
+	private float verticalFOVDegrees   = 100f;
 	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
 		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
@@ -187,16 +189,16 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
 	private void updateProjectionMatrix(){
 	    	final Component component = getTr().getRootWindow();
-		final float fov = 70f;// In degrees
 		final float aspect = (float) component.getWidth()
 				/ (float) component.getHeight();
 		final float zF = (float) (viewDepth * 1.5);
 		final float zN = (float) (TR.mapSquareSize / 10);
-		final float f = (float) (1. / Math.tan(fov * Math.PI / 360.));
+		final float fH = (float) (1. / Math.tan(getHorizontalFOVDegrees() * Math.PI / 360.));
+		final float fV = (float) (1. / Math.tan(getVerticalFOVDegrees() * Math.PI / 360.));
 		projectionMatrix = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
-				{ f / aspect, 0, 0, 0 }, new double[]
-				{ 0, f, 0, 0 }, new double[]
+				{ fH , 0, 0, 0 }, new double[]
+				{ 0, fV, 0, 0 }, new double[]
 				{ 0, 0, (zF + zN) / (zN - zF), -1f }, new double[]
 				{ 0, 0, (2f * zF * zN) / (zN - zF), 0 } }).transpose();
 		}
@@ -391,5 +393,21 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	 */
 	public CollectionActionDispatcher<Positionable> getFlatRelevanceCollection() {
 	    return flatRelevanceCollection;
+	}
+
+	public float getHorizontalFOVDegrees() {
+	    return horizontalFOVDegrees;
+	}
+
+	public void setHorizontalFOVDegrees(float horizontalFOVDegrees) {
+	    this.horizontalFOVDegrees = horizontalFOVDegrees;
+	}
+
+	public float getVerticalFOVDegrees() {
+	    return verticalFOVDegrees;
+	}
+
+	public void setVerticalFOVDegrees(float verticalFOVDegrees) {
+	    this.verticalFOVDegrees = verticalFOVDegrees;
 	}
 }//end Camera

@@ -70,5 +70,5 @@ vec3 coords[] = vec3[36](
  );
 
 void main(){
- gl_Position = projectionRotationMatrix * vec4(10000 * (norm = coords[uint(gl_VertexID)]),1);
+ gl_Position = projectionRotationMatrix * vec4(20000 * (norm = coords[uint(gl_VertexID)]),1);
 }

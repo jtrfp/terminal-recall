@@ -17,12 +17,12 @@ import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
+import org.jtrfp.trcl.snd.SoundSystem;
 
 public class IntroScreen extends RenderableSpacePartitioningGrid {
     private final MusicPlaybackEvent bgMusic;
@@ -36,8 +36,11 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
 	  create(tr.getResourceManager().gpuResidentMODs.get(musicResource), true);
 	else
 	 bgMusic = null;
-	if(bgMusic!=null)
-	    tr.soundSystem.get().enqueuePlaybackEvent(bgMusic);
+	if(bgMusic!=null){
+	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    soundSystem.enqueuePlaybackEvent(bgMusic);
+	    soundSystem.setPaused(false);
+	    }
     }//end IntroScreen(...)
 
     private class BackdropSprite extends Sprite2D{

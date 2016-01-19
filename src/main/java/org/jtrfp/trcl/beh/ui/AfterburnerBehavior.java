@@ -60,6 +60,8 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private class ABControlListener implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+	    if(!isEnabled())
+		return;
 	    final double newValue = (Double)evt.getNewValue();
 	    final double oldValue = (Double)evt.getOldValue();
 	    if(newValue == oldValue)
@@ -257,4 +259,12 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	else
 	    afterburnerOffTransient(parent);
     }//end setAfterburning(...)
+    
+    @Override
+    public Behavior setEnable(boolean enable){
+	if(isAfterburning() && this.isEnabled() && !enable)
+	    setAfterburning(false);
+	super.setEnable(enable);
+	return this;
+    }
 }//end AfterburnerBehavior

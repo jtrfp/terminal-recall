@@ -92,6 +92,9 @@ const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 
 const uint NUM_PORTALS				= 8u;
 
+const vec4 LO_ACC_MULTIPLIER        = vec4(1,4,16,64);// 2 bits each
+const vec4 HI_ACC_MULTIPLIER        = LO_ACC_MULTIPLIER * 256;
+
 vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
 vec3	fogCubeColor;
 
@@ -245,11 +248,10 @@ vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
 }
 
 uint getPrimitiveIDFromQueue(vec4 layerAccumulator0, vec4 layerAccumulator1, float level){//TODO: Clean and optmize
- const vec4 ACC_MULTIPLIER   = vec4(1,4,16,64);// 2 bits each
- const float BLOCK_MULTIPLIER = 256;
- float result = 0;// Must be zeroed else it will persist to future calls!!!!  D:
- result +=  dot(mod( floor(layerAccumulator0/pow(4.,level)),4 )*ACC_MULTIPLIER,vec4(1));
- result +=  dot(mod( floor(layerAccumulator1/pow(4.,level)),4 )*ACC_MULTIPLIER * BLOCK_MULTIPLIER,vec4(1));
+ float bitShifter = pow(4,level);
+ float result     = 0;// Must be zeroed else it will persist to future calls!!!!  D:
+ result +=  dot(mod( floor(layerAccumulator0/bitShifter),4 ),LO_ACC_MULTIPLIER);
+ result +=  dot(mod( floor(layerAccumulator1/bitShifter),4 ),HI_ACC_MULTIPLIER);
  return uint(result);
 }
 

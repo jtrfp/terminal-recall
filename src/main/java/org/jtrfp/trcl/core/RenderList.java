@@ -317,7 +317,7 @@ public class RenderList {
 	gl.glEnable(GL3.GL_BLEND);
 	gl.glBlendFunc(GL3.GL_ONE, GL3.GL_CONSTANT_COLOR);
 	gl.glBlendEquation(GL3.GL_FUNC_ADD);
-	gl.glBlendColor(16f, 16f, 16f, 16f);// upshift 4 bits
+	gl.glBlendColor(4f, 4f, 4f, 4f);// upshift 2 bits
 	
 	//object, root, depth, xy
 	rFactory.getOpaqueDepthTexture().bindToTextureUnit(1,gl);
@@ -364,10 +364,11 @@ public class RenderList {
 	gpu.textureManager.get().vqCodebookManager.get().getESTuTvTexture().bindToTextureUnit(3,gl);
 	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
 	rFactory.getOpaquePrimitiveIDTexture().bindToTextureUnit(5,gl);
-	rFactory.getLayerAccumulatorTexture().bindToTextureUnit(6,gl);
+	rFactory.getLayerAccumulatorTexture0().bindToTextureUnit(6,gl);
 	vps.getVertexTextureIDTexture   ().bindToTextureUnit(7,gl);
 	rFactory.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
 	rFactory.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
+	rFactory.getLayerAccumulatorTexture1().bindToTextureUnit(10,gl);
 	
 	deferredProgram.getUniform("bypassAlpha").setui(!renderer.getCamera().isFogEnabled()?1:0);
 	deferredProgram.getUniform("projectionRotationMatrix")

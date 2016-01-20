@@ -71,9 +71,9 @@ public class RendererFactory {
     private 	 	GLUniform	    	sunVector;
     private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
-    /*					*/	depthQueueTexture,
     /*					*/	primitiveUVZWTexture,primitiveNormTexture,
-    /*					*/	layerAccumulatorTexture,
+    /*					*/	layerAccumulatorTexture0,
+    /*					*/	layerAccumulatorTexture1,
     /*					*/	portalTexture;
     private 		GLFrameBuffer 		opaqueFrameBuffer,
     /*					*/	depthQueueFrameBuffer,
@@ -224,10 +224,11 @@ public class RendererFactory {
 		deferredProgram.getUniform("ESTuTvTiles").set((int) 3);
 		deferredProgram.getUniform("rgbaTiles").set((int) 4);
 		deferredProgram.getUniform("primitiveIDTexture").set((int) 5);
-		deferredProgram.getUniform("layerAccumulator").set((int)6);
+		deferredProgram.getUniform("layerAccumulator0").set((int)6);
 		deferredProgram.getUniform("vertexTextureIDTexture").set((int) 7);
 		deferredProgram.getUniform("primitiveUVZWTexture").set((int) 8);
 		deferredProgram.getUniform("primitivenXnYnZTexture").set((int) 9);
+		deferredProgram.getUniform("layerAccumulator1").set((int)10);
 		deferredProgram.getUniform("ambientLight").set(.4f, .5f, .7f);
 		sunVector.set(.5774f,-.5774f,.5774f);
 		final int width  = canvas.getWidth();
@@ -311,8 +312,8 @@ public class RendererFactory {
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Intermediate framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
-		/////// DEPTH QUEUE
-		layerAccumulatorTexture = gpu
+		/////// LAYER ACCUMULATOR
+		layerAccumulatorTexture0 = gpu
 			.newTexture()
 			.bind()
 			.setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null)
@@ -321,12 +322,24 @@ public class RendererFactory {
 			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
 			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
 			.setExpectedMaxValue(65536, 65536, 65536, 65536)
-			.setDebugName("floatShiftQueueTexture")
+			.setDebugName("layerAccumulatorTexture0")
+			.unbind();
+		layerAccumulatorTexture1 = gpu
+			.newTexture()
+			.bind()
+			.setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.setExpectedMaxValue(65536, 65536, 65536, 65536)
+			.setDebugName("layerAccumulatorTexture1")
 			.unbind();
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
-			.attachDrawTexture(layerAccumulatorTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(layerAccumulatorTexture0, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(layerAccumulatorTexture1, GL3.GL_COLOR_ATTACHMENT1)
 			.attachDepthTexture(opaqueDepthTexture)
 			/*
 			.attachDrawTexture2D(depthQueueTexture, 
@@ -334,7 +347,7 @@ public class RendererFactory {
 			.attachDepthTexture2D(depthQueueStencil)
 			.attachStencilTexture2D(depthQueueStencil)
 			*/
-			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0, GL3.GL_COLOR_ATTACHMENT1);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
@@ -394,16 +407,21 @@ public class RendererFactory {
 		    throw new RuntimeException("Intermediate framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		
-		layerAccumulatorTexture.
+		layerAccumulatorTexture0.
+		 bind().
+		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null).
+		 unbind();
+		layerAccumulatorTexture1.
 		 bind().
 		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null).
 		 unbind();
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
-			.attachDrawTexture(layerAccumulatorTexture, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(layerAccumulatorTexture0, GL3.GL_COLOR_ATTACHMENT0)
+			.attachDrawTexture(layerAccumulatorTexture1, GL3.GL_COLOR_ATTACHMENT1)
 			.attachDepthTexture(opaqueDepthTexture)
-			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
+			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
@@ -487,14 +505,6 @@ public class RendererFactory {
      */
     public GPU getGPU() {
         return gpu;
-    }
-    
-
-    /**
-     * @return the depthQueueTexture
-     */
-    public GLTexture getDepthQueueTexture() {
-        return depthQueueTexture;
     }
     
     /**
@@ -587,12 +597,13 @@ public class RendererFactory {
     public GLProgram getPrimitiveProgram() {
         return primitiveProgram;
     }
-
-    /**
-     * @return the floatShiftQueueTexture
-     */
-    public GLTexture getLayerAccumulatorTexture() {
-        return layerAccumulatorTexture;
+    
+    public GLTexture getLayerAccumulatorTexture0() {
+        return layerAccumulatorTexture0;
+    }
+    
+    public GLTexture getLayerAccumulatorTexture1() {
+        return layerAccumulatorTexture1;
     }
 
     /**

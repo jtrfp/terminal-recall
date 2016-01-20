@@ -21,11 +21,14 @@
 //uniform		sampler2D	depthTexture;
 
 // INPUTS
-flat in vec4 flatDQPrimID;
+flat in vec4 flatDQPrimID0;
+flat in vec4 flatDQPrimID1;
 
 // OUTPUTS
-layout(location=0) out vec4 pushToDepthQueue;
+layout(location=0) out vec4 pushToDepthQueue0;
+layout(location=1) out vec4 pushToDepthQueue1;
 
 void main(){
- pushToDepthQueue = flatDQPrimID;
+ pushToDepthQueue0 = flatDQPrimID0;
+ pushToDepthQueue1 = flatDQPrimID1;
 }//end main()

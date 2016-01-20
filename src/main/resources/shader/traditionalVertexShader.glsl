@@ -31,7 +31,8 @@ const int VTX_TEXTURE_USABLE_HEIGHT= (VTX_TEXTURE_HEIGHT/3)*3;
 
 //OUT
 flat out float 			flatPrimitiveID;
-flat out vec4			flatDQPrimID;
+flat out vec4			flatDQPrimID0;
+flat out vec4			flatDQPrimID1;
 
 //IN
 uniform uint 			renderListPageTable[256];
@@ -123,6 +124,9 @@ gl_Position.x+=dummy==1234?.0000000001:0;
  gl_Position.w	= 1/texelFetch(wBuffer,fetchPos,0).x;
  float pid		= float(gl_VertexID/3 + 1); // Add 1 so that zero represents 'unwritten.'
  flatPrimitiveID	= pid/65536;
- const vec4 DIVISOR = vec4(1,16,256,4096);
- flatDQPrimID = floor(mod(pid/DIVISOR,16))/65536;
+ const vec4 LO_DIVISOR = vec4(1,4,16,64);
+ const vec4 HI_DIVISOR = vec4(256,1024,4096,16384);
+ 
+ flatDQPrimID0 = floor(mod(pid/LO_DIVISOR,4))/65536;
+ flatDQPrimID1 = floor(mod(pid/HI_DIVISOR,4))/65536;
 }//end main()

@@ -25,7 +25,8 @@ uniform sampler2D		primitiveUVZWTexture;
 uniform sampler2D		primitivenXnYnZTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform sampler2DArray	ESTuTvTiles;
-uniform sampler2D		layerAccumulator;
+uniform sampler2D		layerAccumulator0;
+uniform sampler2D		layerAccumulator1;
 uniform usamplerBuffer 	rootBuffer; 	//Global memory, as a set of uint vec4s.
 uniform samplerCube 	cubeTexture;
 uniform sampler2DArray	portalTexture;
@@ -73,7 +74,7 @@ const uint SUBTEXTURE_SIDE_WIDTH_TEXELS = SUBTEXTURE_SIDE_WIDTH_CODES_WITH_BORDE
 const uint SUBTEXTURE_START_CODE_TABLE_OFFSET_VEC4
 										= 91u;
 
-const int DEPTH_QUEUE_SIZE				= 5;
+const int DEPTH_QUEUE_SIZE				= 11; // floor(23b / 2b) = 11
 const float DEAD_BEEF					= 100024;
 const uint PAGE_SIZE_VEC4				= 96u;
 
@@ -243,9 +244,13 @@ vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  return texel;
 }
 
-uint getPrimitiveIDFromQueue(vec4 layerAccumulator, float level){
- const vec4 ACC_MULTIPLIER = vec4(1,16,256,4096);
- return uint(dot(mod(floor(layerAccumulator/pow(16.,level)),16)*ACC_MULTIPLIER,vec4(1)));
+uint getPrimitiveIDFromQueue(vec4 layerAccumulator0, vec4 layerAccumulator1, float level){//TODO: Clean and optmize
+ const vec4 ACC_MULTIPLIER   = vec4(1,4,16,64);// 2 bits each
+ const float BLOCK_MULTIPLIER = 256;
+ float result = 0;// Must be zeroed else it will persist to future calls!!!!  D:
+ result +=  dot(mod( floor(layerAccumulator0/pow(4.,level)),4 )*ACC_MULTIPLIER,vec4(1));
+ result +=  dot(mod( floor(layerAccumulator1/pow(4.,level)),4 )*ACC_MULTIPLIER * BLOCK_MULTIPLIER,vec4(1));
+ return uint(result);
 }
 
 //UNTESTED
@@ -254,8 +259,8 @@ float logn(float value, float base){
 }
 
 //DOES NOT WORK
-uint depthOfFloatShiftQueue(vec4 fsq){
- return uint(logn(fsq.x,16));
+uint depthOfFloatShiftQueue(vec4 fsq0){
+ return uint(logn(fsq0.x,16));
 }
 
 vec3 getPQuad(uint primitiveID){
@@ -293,9 +298,10 @@ gl_FragColor = vec4(0,0,0,1);
 
 uint	primitiveID;
 vec4	color		= vec4(0,0,0,1);
-vec4	fsq			= texelFetch(layerAccumulator,ivec2(gl_FragCoord),0)*65536;
+vec4	fsq0			= texelFetch(layerAccumulator0,ivec2(gl_FragCoord),0)*65536;
+vec4	fsq1			= texelFetch(layerAccumulator1,ivec2(gl_FragCoord),0)*65536;
 fogCubeColor	    = texture(cubeTexture,norm).rgb;
-uint relevantSize=0u/*depthOfFloatShiftQueue(fsq)*/;
+uint relevantSize=0u/*depthOfFloatShiftQueue(fsq0)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
 vec3 pQuads[DEPTH_QUEUE_SIZE];
 float _w[DEPTH_QUEUE_SIZE];
@@ -303,7 +309,7 @@ int ordering[DEPTH_QUEUE_SIZE];
 
 // D E P T H   P O P U L A T E
 for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
- primitiveID = getPrimitiveIDFromQueue(fsq,i);
+ primitiveID = getPrimitiveIDFromQueue(fsq0,fsq1,i);
  if(primitiveID==0u || primitiveID>65535u)
   break;
  primitiveID--; //Compensate for zero representing "unwritten."

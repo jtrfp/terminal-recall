@@ -32,11 +32,13 @@ public class CharLineDisplay {
 	displays = new CharDisplay[lengthInChars];
 	this.font = font;
 	for (int i = 0; i < lengthInChars; i++) {
+	    final CharDisplay charDisplay = new CharDisplay(tr, grid, glSize, font);
 	    content[i] = 'X';
-	    displays[i] = new CharDisplay(tr, grid, glSize, font);
-	    displays[i].setChar('X');
-	    displays[i].setImmuneToOpaqueDepthTest(true);
-	    grid.add(displays[i]);
+	    charDisplay.setVisible(false);
+	    charDisplay.setChar('X');
+	    charDisplay.setImmuneToOpaqueDepthTest(true);
+	    grid.add(charDisplay);
+	    displays[i] = charDisplay;
 	}// end for(lengthInChars)
 
 	this.glSize = glSize;
@@ -48,8 +50,8 @@ public class CharLineDisplay {
 	    char newContent=0;
 	    if (i < content.length()) {
 		final char c = content.charAt(i);
-		if(c>31 || c<127)
-		    newContent = content.charAt(i);
+		if(c>31 && c<127)
+		    newContent = c;
 	    }
 	    this.content[i] = newContent;
 	    displays[i].setChar(newContent);
@@ -75,9 +77,16 @@ public class CharLineDisplay {
 	    charPosition[0] -= totGlLen / 2.;
 	for (int i = 0; i < displays.length; i++) {
 	    final double[] dispPos = displays[i].getPosition();
-	    dispPos[0] = charPosition[0];
-	    dispPos[1] = charPosition[1];
-	    dispPos[2] = charPosition[2];
+	    if(content[i]!=0){
+		 dispPos[0] = charPosition[0];
+		 dispPos[1] = charPosition[1];
+		 dispPos[2] = charPosition[2];
+	    }else{
+		displays[i].setVisible(false);
+		dispPos[0]= Math.random();
+		dispPos[1]= Math.random();
+		dispPos[2]= Math.random();
+	    }
 	    displays[i].notifyPositionChange();
 	    char _content = content[i];
 	    final double progress = ((double) glSize)
@@ -126,8 +135,9 @@ public class CharLineDisplay {
     }
 
     public void setVisible(boolean b) {
-	for (CharDisplay disp : displays) {
-	    disp.setVisible(b);
+	for (int i = 0; i<displays.length; i++) {
+	    if(content[i]!=0)displays[i].setVisible(b);
+	    else displays[i].setVisible(false);
 	}// end for(displays)
     }// end setVisible(...)
 

@@ -15,7 +15,10 @@ package org.jtrfp.trcl.mem;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Queue;
 
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.Reporter;
@@ -28,7 +31,60 @@ public abstract class MemoryWindow {
     private final IndexPool indexPool = new IndexPool();
     private String debugName;
     private Reporter reporter;
+    private static final MemoryWindowFreeingService freeingService = new MemoryWindowFreeingService();
+    static {freeingService.start();}//TODO: Static vars are trouble around the corner.
+    private ArrayList<Integer> freeLater = new ArrayList<Integer>();
+    private int minFreeDelayMillis = 100, maxFreeDelayMillis = 500;
+    private volatile long bulkFreeDeadline;
+    
+    static class MemoryWindowFreeingService extends Thread {
+	private final Queue<MemoryWindow> stale = new ArrayDeque<MemoryWindow>();
+	private final ArrayList<Integer>  freeLaterBuffer = new ArrayList<Integer>();
+	private int loopTally = 0;
+	
+	MemoryWindowFreeingService(){
+	    super("MemoryWindowFreeingService");
+	}//end constructor
+	
+	@Override
+	public void run(){
+	    while(true){
+		final MemoryWindow nextWindowToFree;
+		synchronized(stale){
+		    while(stale.isEmpty())
+			try{stale.wait();}
+		    catch(InterruptedException e){e.printStackTrace();}//Shouldn't happen.
+		    nextWindowToFree = stale.poll();
+		}//end sync(stale)
+		assert nextWindowToFree!=null;
+		final long now = System.currentTimeMillis();
+		final long timeUntilNextFree = nextWindowToFree.bulkFreeDeadline - now;
+		if(timeUntilNextFree > 0)
+		    try{Thread.sleep(timeUntilNextFree);}
+		catch(InterruptedException e){e.printStackTrace();}
+		final ArrayList<Integer> origFreeAll = nextWindowToFree.freeLater;
+		synchronized(origFreeAll){
+		    freeLaterBuffer.addAll(origFreeAll);
+		    origFreeAll.clear();
+		}
+		loopTally++;
+		if(loopTally % 32 == 0)//Don't overload the console
+		 System.out.println("MemoryWindow.MemoryWindowFreeingService freeing "+freeLaterBuffer.size()+" elements.");
+		nextWindowToFree.indexPool.free(freeLaterBuffer);
+		freeLaterBuffer.clear();
+	    }//end while(true)
+	}//end run()
 
+	public void notifyStale(MemoryWindow memoryWindow) {
+	    synchronized(stale){
+		boolean wasEmpty = stale.isEmpty();
+		stale.add(memoryWindow);
+		if(wasEmpty)
+		 stale.notifyAll();
+	    }
+	}//end notifyStale()
+    }//end MemoryWindowFreeingService
+    
     protected final void init(GPU gpu, String debugName) {
 	this.debugName = debugName;
 	int byteOffset = 0;
@@ -106,8 +162,9 @@ public abstract class MemoryWindow {
 			    MemoryWindow.this.logicalPage2PhysicalPage(p)
 				    * PagedByteBuffer.PAGE_SIZE_BYTES));
 	}
+	
     }// end init()
-
+    
     public final int create() {
 	return indexPool.pop();
     }//end create()
@@ -119,6 +176,29 @@ public abstract class MemoryWindow {
     public final int free(int objectIDToFree){
 	return indexPool.free(objectIDToFree);
     }//end free(...)
+    
+    public final void freeLater(int objectIDToFree){
+	synchronized(freeLater){
+	    kickFreeLaterListForward();
+	    freeLater.add(objectIDToFree);
+	}//end sync(...)
+    }//end freeLater(...)
+    
+    public final void freeLater(Collection<Integer> objectIdsToFree){
+	synchronized(freeLater){
+	    kickFreeLaterListForward();
+	    freeLater.addAll(objectIdsToFree);
+	}//end sync(...)
+    }//end freeLater(...)
+
+    private void kickFreeLaterListForward(){
+	final long now = System.currentTimeMillis();
+	if(freeLater.isEmpty()){
+	    bulkFreeDeadline   = now + this.getMaxFreeDelayMillis();
+	    getFreeingService().notifyStale(this);
+	}else
+	    bulkFreeDeadline = now + this.getMinFreeDelayMillis();
+    }//end kickFreeLaterListForward()
     
     public final void free(Collection<Integer> objectIdsToFree){
 	indexPool.free(objectIdsToFree);
@@ -509,5 +589,25 @@ public abstract class MemoryWindow {
 
     public void setDebugName(String debugName) {
         this.debugName = debugName;
+    }
+
+    public int getMinFreeDelayMillis() {
+        return minFreeDelayMillis;
+    }
+
+    public void setMinFreeDelayMillis(int minFreeDelayMillis) {
+        this.minFreeDelayMillis = minFreeDelayMillis;
+    }
+
+    public int getMaxFreeDelayMillis() {
+        return maxFreeDelayMillis;
+    }
+
+    public void setMaxFreeDelayMillis(int maxFreeDelayMillis) {
+        this.maxFreeDelayMillis = maxFreeDelayMillis;
+    }
+
+    public MemoryWindowFreeingService getFreeingService() {
+        return freeingService;
     }
 }// end ObjectWindow

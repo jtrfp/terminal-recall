@@ -240,7 +240,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			    if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
+			   // if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();
@@ -249,10 +249,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				chunkPos[2] = objectZ;
 				chunkToAdd.notifyPositionChange();
 				add(chunkToAdd);
-			    } else {
+			    /*} else {
 				System.out.println("Rejected chunk: "
 					+ m.getDebugName());
-			    }
+			    }*/
 			}// end scope
 
 			{// start scope ///// CEILING
@@ -340,7 +340,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			    if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
+			    //if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();
@@ -350,10 +350,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				chunkToAdd.notifyPositionChange();
 				chunkToAdd.setCeiling(true);
 				terrainMirror.add(chunkToAdd);
-			    } else {
+			    /*} else {
 				System.out.println("Rejected chunk: "
 					+ m.getDebugName());
-			    }
+			    }*/
 			}// end scope(CEILING)
 		    }// end for(gX)
 		    return null;

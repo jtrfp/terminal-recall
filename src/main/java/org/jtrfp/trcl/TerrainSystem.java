@@ -17,8 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.PortalTexture;
@@ -62,7 +65,18 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final int width = (int) altitude.getWidth();
 	int height = (int) altitude.getHeight();
 	this.gridSquareSize = gridSquareSize;
-	executor = Executors.newFixedThreadPool(numCores*2);
+	
+	executor = new ThreadPoolExecutor(numCores * 2, numCores * 2, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), 
+		new ThreadFactory(){
+		    @Override
+		    public Thread newThread(final Runnable runnable) {
+			final Thread result = new Thread("TerrainSystem "+hashCode()){
+			    public void run(){
+				runnable.run();}
+			};
+			return result;
+		    }});
+	
 	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };
 	final double v[] = { 0, 0, 1, 1 };

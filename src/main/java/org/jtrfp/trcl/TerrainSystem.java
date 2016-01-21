@@ -43,6 +43,18 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	private final TR tr;
 	private final ExecutorService executor;
 	public static final double Y_NUDGE = -10000;
+	
+	private static class TSThreadFactory implements ThreadFactory{
+	    @Override
+	    public Thread newThread(final Runnable runnable) {
+		final Thread result = new Thread("TerrainSystem "+hashCode()){
+		    public void run(){
+			runnable.run();}
+		};
+		return result;
+	    }
+	}//end TSThreadFactory
+	
 	    /*
 	     * Y_NUDGE is a kludge. There is a tiny sliver of space
 	     * between the ceiling and ground, likely caused by model
@@ -67,15 +79,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	this.gridSquareSize = gridSquareSize;
 	
 	executor = new ThreadPoolExecutor(numCores * 2, numCores * 2, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), 
-		new ThreadFactory(){
-		    @Override
-		    public Thread newThread(final Runnable runnable) {
-			final Thread result = new Thread("TerrainSystem "+hashCode()){
-			    public void run(){
-				runnable.run();}
-			};
-			return result;
-		    }});
+		new TSThreadFactory());
 	
 	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };

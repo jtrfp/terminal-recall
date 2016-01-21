@@ -73,9 +73,22 @@ public class Texture implements TextureDescription {
     
     @Override
     public void finalize() throws Throwable{
+	//Undo the magic
+	    toc.magic.set(tocIndex, 0000);
+	    //TOC ID
+	    if(tocIndex!=null)
+		toc.freeLater(tocIndex);
+	    //Subtexture IDs
+	    //for(int stID:subTextureIDs)
+		// stw.free(stID);
+	    stw.freeLater(subTextureIDs);
+	    //Codebook entries
+	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
+	/*
 	gpuResourceFinalizer.
 	 submitFinalizationAction(
 	  new TextureFinalizerTask(tm,stw,toc,tocIndex,subTextureIDs,codebookStartOffsets256));
+	*/
 	super.finalize();
     }//end finalize()
     
@@ -102,11 +115,11 @@ public class Texture implements TextureDescription {
 	    toc.magic.set(tocIndex, 0000);
 	    //TOC ID
 	    if(tocIndex!=null)
-		toc.free(tocIndex);
+		toc.freeLater(tocIndex);
 	    //Subtexture IDs
 	    //for(int stID:subTextureIDs)
 		// stw.free(stID);
-	    stw.free(subTextureIDs);
+	    stw.freeLater(subTextureIDs);
 	    //Codebook entries
 	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
 	    return null;

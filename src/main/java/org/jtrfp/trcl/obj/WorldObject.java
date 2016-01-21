@@ -650,10 +650,19 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     @Override
     public void finalize() throws Throwable{
+	/*
 	gpuResourceFinalizer.
 	 submitFinalizationAction(
 	  new WorldObjectFinalizerTask(tr,matrixID,triangleObjectDefinitions,transparentTriangleObjectDefinitions));
-	
+	*/
+	if(matrixID!=null)
+		 tr.gpu.get().matrixWindow.get().freeLater(matrixID);
+		if(transparentTriangleObjectDefinitions!=null)
+		 for(int def:transparentTriangleObjectDefinitions)
+		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
+		if(triangleObjectDefinitions!=null)
+		 for(int def:triangleObjectDefinitions)
+		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
 	
 	super.finalize();
     }//end finalize()
@@ -672,13 +681,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	@Override
 	public Void call() throws Exception {
 	    if(matrixID!=null)
-		 tr.gpu.get().matrixWindow.get().free(matrixID);
+		 tr.gpu.get().matrixWindow.get().freeLater(matrixID);
 		if(transparentTriangleObjectDefinitions!=null)
 		 for(int def:transparentTriangleObjectDefinitions)
-		    tr.gpu.get().objectDefinitionWindow.get().free(def);
+		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
 		if(triangleObjectDefinitions!=null)
 		 for(int def:triangleObjectDefinitions)
-		    tr.gpu.get().objectDefinitionWindow.get().free(def);
+		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
 	    return null;
 	}
 	

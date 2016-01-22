@@ -74,7 +74,7 @@ public class WorldObject2D extends WorldObject{
 		    for(int i=0; i<16; i++)
 			rotTransM[i]=Double.NaN;
 		
-		getTr().gpu.get().matrixWindow.get().setTransposed(rotTransM,matrixID, scratchMatrixArray);
+		getTr().gpu.get().matrixWindow.get().setTransposed(rotTransM,getMatrixID(), scratchMatrixArray);
 		}//end recalculateTransRotMBuffer()
 	
 	@Override

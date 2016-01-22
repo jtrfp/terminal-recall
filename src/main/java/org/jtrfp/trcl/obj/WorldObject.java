@@ -18,6 +18,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -56,7 +58,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean	needToRecalcMatrix=true;
     private final TR 	tr;
     private boolean 	visible = true;
-    private Model 	model;
+    private Future<Model>model;
     private List<PositionedRenderable>lastContainingList;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
@@ -68,6 +70,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean 			active 		   = true;
     private byte 			renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;
+    private boolean                     objectDefsInitialized = false;
 
     protected final double[] aX 	= new double[3];
     protected final double[] aY 	= new double[3];
@@ -87,8 +90,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public WorldObject(TR tr) {
 	this.tr = tr;
-	if(tr!=null)
-	 matrixID = tr.gpu.get().matrixWindow.get().create();
+	//if(tr!=null)
+	// matrixID = tr.gpu.get().matrixWindow.get().create();
 	// Matrix constants setup
 	rMd[15] = 1;
 
@@ -202,37 +205,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void setModel(Model m) {
 	if (m == null)
 	    throw new RuntimeException("Passed model cannot be null.");
-	model = m;
-	try{model.finalizeModel().get();}catch(Exception e){throw new RuntimeException(e);}
-	int numObjDefs, sizeInVerts;
-	if (m.getTriangleList() == null)
-	    triangleObjectDefinitions = emptyIntArray;
-	else {
-	    sizeInVerts = m.getTriangleList().getTotalSizeInGPUVertices();
-	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
-	    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
-		numObjDefs++;
-	    triangleObjectDefinitions = new int[numObjDefs];
-	    for (int i = 0; i < numObjDefs; i++) {
-		triangleObjectDefinitions[i] = tr.gpu.get().objectDefinitionWindow.get()
-			.create();
-	    }
-	}
-	if (m.getTransparentTriangleList() == null)
-	    transparentTriangleObjectDefinitions = emptyIntArray;
-	else {
-	    sizeInVerts = m.getTransparentTriangleList()
-		    .getTotalSizeInGPUVertices();
-	    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
-	    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
-		numObjDefs++;
-	    transparentTriangleObjectDefinitions = new int[numObjDefs];
-	    for (int i = 0; i < numObjDefs; i++) {
-		transparentTriangleObjectDefinitions[i] = tr.gpu.get()
-			.objectDefinitionWindow.get().create();
-	    }
-	}
-	initializeObjectDefinitions();
+	try{this.model = m.finalizeModel();}catch(Exception e){throw new RuntimeException(e);}
+	
     }// end setModel(...)
 
     public synchronized void setDirection(ObjectDirection dir) {
@@ -250,16 +224,20 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     @Override
     public String toString() {
 	final String modelDebugName;
-	if(model!=null)modelDebugName=model.getDebugName();
+	if(model!=null)modelDebugName=getModel().getDebugName();
 	else modelDebugName="[null model]";
 	return "WorldObject Model=" + modelDebugName + " pos="
 		+ this.getPosition() + " class=" + getClass().getName()+" hash="+hashCode();
     }
 
     public final void initializeObjectDefinitions() {
+	if(objectDefsInitialized)
+	    return;
+	objectDefsInitialized = true;
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it?");
+	final Model model = getModel();
 	//final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
 	//final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
@@ -269,9 +247,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		    @Override
 		    public Void call() throws Exception {
 			processPrimitiveList(model.getTriangleList(),
-				triangleObjectDefinitions, opaqueObjectDefinitionAddressesInVEC4);
+				getTriangleObjectDefinitions(), getOpaqueObjectDefinitionAddressesInVEC4());
 			processPrimitiveList(model.getTransparentTriangleList(),
-				transparentTriangleObjectDefinitions, transparentObjectDefinitionAddressesInVEC4);
+				getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4());
 			return null;
 		    }}).get();
 		/*for(int i = 0; i < opaqueIndicesList.size(); i++)
@@ -294,6 +272,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	final ObjectDefinitionWindow odw = tr.gpu.get().objectDefinitionWindow.get();
 	int odCounter=0;
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
+	final Integer matrixID = getMatrixID();
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=new VEC4Address(primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)).intValue();
 	    final int matrixOffsetVec4s=new VEC4Address(tr.gpu.get().matrixWindow.get()
@@ -318,12 +297,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end processPrimitiveList(...)
 
     public synchronized final void updateStateToGPU(Renderer renderer) {
+	initializeObjectDefinitions();
 	attemptLoop(renderer);
 	if(needToRecalcMatrix){
 	    needToRecalcMatrix=recalcMatrixWithEachFrame();
 	    recalculateTransRotMBuffer();
 	}
-	if(model!=null)model.proposeAnimationUpdate();
+	if(model!=null)getModel().proposeAnimationUpdate();
     }//end updateStateToGPU()
     
     public boolean supportsLoop(){
@@ -394,7 +374,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
-	    tr.gpu.get().matrixWindow.get().setTransposed(rotTransM, matrixID, scratchMatrixArray);//New version
+	    tr.gpu.get().matrixWindow.get().setTransposed(rotTransM, getMatrixID(), scratchMatrixArray);//New version
 	} catch (MathArithmeticException e) {
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()
@@ -545,7 +525,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     public Model getModel() {
-	return model;
+	try{return model.get();}
+	catch(Exception e){throw new RuntimeException(e);}
     }
 
     /**
@@ -788,6 +769,72 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	try{probeForBehavior(behaviorClass);}
 	catch(BehaviorNotFoundException e){return false;}
 	return true;
+    }
+
+    protected int[] getTriangleObjectDefinitions() {
+	if(triangleObjectDefinitions == null){
+	    int numObjDefs, sizeInVerts;
+	    final Model m = getModel();
+	    if (m.getTriangleList() == null)
+		triangleObjectDefinitions = emptyIntArray;
+	    else {
+		sizeInVerts = m.getTriangleList().getTotalSizeInGPUVertices();
+		numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
+		if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
+		    numObjDefs++;
+		triangleObjectDefinitions = new int[numObjDefs];
+		for (int i = 0; i < numObjDefs; i++) {
+		    triangleObjectDefinitions[i] = tr.gpu.get().objectDefinitionWindow.get()
+			    .create();
+		}//end for(numObjDefs)
+	    }//end if(!null)
+	}//end if(null)
+	
+        return triangleObjectDefinitions;
+    }
+
+    protected int[] getTransparentTriangleObjectDefinitions() {
+	if(transparentTriangleObjectDefinitions == null){
+	    int numObjDefs, sizeInVerts;
+	    final Model m = getModel();
+		if (m.getTransparentTriangleList() == null)
+		    transparentTriangleObjectDefinitions = emptyIntArray;
+		else {
+		    sizeInVerts = m.getTransparentTriangleList()
+			    .getTotalSizeInGPUVertices();
+		    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
+		    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
+			numObjDefs++;
+		    transparentTriangleObjectDefinitions = new int[numObjDefs];
+		    for (int i = 0; i < numObjDefs; i++) {
+			transparentTriangleObjectDefinitions[i] = tr.gpu.get()
+				.objectDefinitionWindow.get().create();
+		    }//end for(numObjDefs)
+		}//end if(!null)
+	}//end if(null)
+        return transparentTriangleObjectDefinitions;//TODO: Lazy-load
+    }
+
+    protected CollectionActionDispatcher<VEC4Address> getOpaqueObjectDefinitionAddressesInVEC4() {
+	if(opaqueObjectDefinitionAddressesInVEC4==null)
+	    opaqueObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
+        return opaqueObjectDefinitionAddressesInVEC4;
+    }
+
+    protected CollectionActionDispatcher<VEC4Address> getTransparentObjectDefinitionAddressesInVEC4() {
+        if(transparentObjectDefinitionAddressesInVEC4==null)
+            transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
+	return transparentObjectDefinitionAddressesInVEC4;
+    }
+
+    protected Integer getMatrixID() {
+	if(matrixID == null)
+	    matrixID = tr.gpu.get().matrixWindow.get().create();
+        return matrixID;
+    }
+
+    public void setMatrixID(Integer matrixID) {
+        this.matrixID = matrixID;
     }
 
     /*public void checkPositionSanity() {

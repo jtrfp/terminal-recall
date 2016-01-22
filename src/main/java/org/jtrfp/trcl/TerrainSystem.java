@@ -77,7 +77,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final int width = (int) altitude.getWidth();
 	int height = (int) altitude.getHeight();
 	this.gridSquareSize = gridSquareSize;
-	
 	executor = new ThreadPoolExecutor(numCores * 2, numCores * 2, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), 
 		new TSThreadFactory());
 	
@@ -111,6 +110,14 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		.generateSubReporters(256/chunkSideLength);
 	int reporterIndex=0;
 	final double worldCeiling = tr.getWorld().sizeY;
+	
+	final int widthInChunks  = width / chunkSideLength;
+	final int heightInChunks = height / chunkSideLength;
+	final int numChunks = widthInChunks * heightInChunks;
+	//Bulk-allocate ahead of time
+	final ArrayList<Integer> matrixIDs = new ArrayList<Integer>(numChunks);
+	tr.gpu.get().matrixWindow.get().create(matrixIDs,numChunks);
+	
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {
 	    reporters[reporterIndex++].complete();

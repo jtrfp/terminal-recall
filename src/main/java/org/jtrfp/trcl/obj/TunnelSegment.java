@@ -151,7 +151,7 @@ public class TunnelSegment extends WorldObject {
 	    }
 	}//end (has light)
 	final double[] noLightU=new double[] { 1, 1, 0, 0 };
-	final double[] noLightV=new double[] { 0, 1, 1, 0 };
+	final double[] noLightV=new double[] { 1, 0, 0, 1 };
 	final double[] lightOffU=new double[] { 1, 1, .5, .5 };
 	final double[] lightOffV=new double[] { .5, 1, 1, .5 };
 	final double[] lightOnU=new double[] { .5, .5, 0, 0 };

@@ -27,7 +27,10 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
 	p.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
-		item.proposeDamage(new DamageListener.ShearDamage(collisionDamage));
+		final DamageListener.ShearDamage dmg = 
+			new DamageListener.ShearDamage();
+		dmg.setDamageAmount(collisionDamage);
+		item.proposeDamage(dmg);
 	    }
 	    }, DamageableBehavior.class);
 	for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){

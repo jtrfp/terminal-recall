@@ -37,7 +37,10 @@ public class DamagedByCollisionWithPlayer extends Behavior implements PlayerColl
     private final AbstractSubmitter<DamageableBehavior> damageableSubmitter = new AbstractSubmitter<DamageableBehavior>(){
 	@Override
 	public void submit(DamageableBehavior item) {
-	    item.proposeDamage(new DamageListener.Event(damageAmount){});
+	    final DamageListener.Event dmg = 
+			new DamageListener.Event(){};
+		dmg.setDamageAmount(damageAmount);
+		item.proposeDamage(dmg);
 	}//end damageableSubmitter
     };
 

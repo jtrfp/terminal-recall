@@ -53,7 +53,10 @@ public class DestroysEverythingBehavior extends Behavior {
 		if(pos instanceof DEFObject && !(pos instanceof TerrainChunk) && distance < destructionRadius){
 		 final DEFObject dObj = (DEFObject)pos;
 		 final DamageableBehavior beh = dObj.probeForBehavior(DamageableBehavior.class);
-		 beh.proposeDamage(new ProjectileDamage(beh.getHealth()+1));
+		 final DamageListener.ProjectileDamage dmg = 
+				new DamageListener.ProjectileDamage();
+			dmg.setDamageAmount(beh.getHealth()+1);
+			beh.proposeDamage(dmg);
 		}//end if(DEFObject)
 	    }//end for(positionables[0])
 	    positionables[0].clear();

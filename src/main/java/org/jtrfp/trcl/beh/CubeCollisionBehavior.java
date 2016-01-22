@@ -15,7 +15,6 @@ package org.jtrfp.trcl.beh;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.beh.DamageListener.GroundCollisionDamage;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.BarrierCube;
@@ -27,6 +26,7 @@ private double [] dims;
 private double [] origin;
 private final double [] rotTransPosVar = new double[3];
 private int damageOnImpact= 6554;
+private Class<? extends DamageListener.Event> damageEventClass = DamageListener.GroundCollisionDamage.class;
 	public CubeCollisionBehavior(){super();}
 	public CubeCollisionBehavior(BarrierCube bc){
 	    super();
@@ -52,10 +52,16 @@ private int damageOnImpact= 6554;
 		if(	rotTransPos[0]>0 && rotTransPos[0]<dims[0] &&
 			rotTransPos[1]>0 && rotTransPos[1]<dims[1] &&
 			rotTransPos[2]>0 && rotTransPos[2]<dims[2]){
+		    DamageListener.Event damageEvent = null;
+		    try{
+		    damageEvent = (DamageListener.Event)(this.damageEventClass.newInstance());}
+		    catch(Exception e){e.printStackTrace();}
+		    damageEvent.setDamageAmount(damageOnImpact);
+		    final DamageListener.Event finalDamageEvent = damageEvent;
 		    obj.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 			@Override
 			public void submit(DamageableBehavior item) {
-			    item.proposeDamage(new GroundCollisionDamage(damageOnImpact));
+			    item.proposeDamage(finalDamageEvent);
 			}}, DamageableBehavior.class);
 		    }//end if(withinRange)
 	    }//end if(Player)
@@ -100,5 +106,12 @@ private int damageOnImpact= 6554;
 	public CubeCollisionBehavior setDamageOnImpact(int damageOnImpact) {
 	    this.damageOnImpact = damageOnImpact;
 	    return this;
+	}
+	protected Class<? extends DamageListener.Event> getDamageEventClass() {
+	    return damageEventClass;
+	}
+	protected void setDamageEventClass(
+		Class<? extends DamageListener.Event> damageEventClass) {
+	    this.damageEventClass = damageEventClass;
 	}
 }//end CubeCollisionBehavior

@@ -157,7 +157,10 @@ public class ProjectileBehavior extends Behavior implements
 	other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
-		item.proposeDamage(new ProjectileDamage(damageOnImpact));
+		final DamageListener.ProjectileDamage dmg = 
+			new DamageListener.ProjectileDamage();
+		dmg.setDamageAmount(damageOnImpact);
+		item.proposeDamage(dmg);
 	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }//end collidedWithDEFObject
@@ -166,7 +169,10 @@ public class ProjectileBehavior extends Behavior implements
 	other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
-		item.proposeDamage(new ProjectileDamage(damageOnImpact));
+		final DamageListener.ProjectileDamage dmg = 
+			new DamageListener.ProjectileDamage();
+		dmg.setDamageAmount(damageOnImpact);
+		item.proposeDamage(dmg);
 	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }//end forceCollision(...)
@@ -178,7 +184,10 @@ public class ProjectileBehavior extends Behavior implements
 	other.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
-		item.proposeDamage(new ProjectileDamage(damageOnImpact));
+		final DamageListener.ProjectileDamage dmg = 
+			new DamageListener.ProjectileDamage();
+		dmg.setDamageAmount(damageOnImpact);
+		item.proposeDamage(dmg);
 	    }}, DamageableBehavior.class);
 	deathBehavior.die();
     }

@@ -15,6 +15,7 @@ package org.jtrfp.trcl.beh.tun;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
+import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.beh.DamageListener.CollisionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
@@ -36,7 +37,10 @@ public class DestructibleWallBehavior extends Behavior implements CollisionBehav
     	        player.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 		    @Override
 		    public void submit(DamageableBehavior item) {
-			item.proposeDamage(new CollisionDamage(DAMAGE_ON_IMPACT));
+			final DamageListener.CollisionDamage dmg = 
+				new DamageListener.CollisionDamage();
+			dmg.setDamageAmount(DAMAGE_ON_IMPACT);
+			item.proposeDamage(dmg);
 		    }}, DamageableBehavior.class);
     	        }//end if(Player)
     	    else if(other instanceof Projectile)

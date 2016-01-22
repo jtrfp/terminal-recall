@@ -20,6 +20,7 @@ import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithPlayer;
+import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.beh.DamageListener.ElectrocutionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.PlayerCollisionListener;
@@ -83,7 +84,10 @@ public class ForceField extends WorldObject {
 	}//end _tick()
 	@Override
 	public void collidedWithPlayer(Player player) {
-	    player.probeForBehavior(DamageableBehavior.class).proposeDamage(new ElectrocutionDamage(2048));
+	    final DamageListener.ElectrocutionDamage dmg = 
+			new DamageListener.ElectrocutionDamage();
+		dmg.setDamageAmount(2048);
+		player.probeForBehavior(DamageableBehavior.class).proposeDamage(dmg);
 	}
     }//end ForceFieldBehavior
 }//end ForceField

@@ -30,16 +30,20 @@ public class DamagedByCollisionWithDEFObject extends Behavior implements
 		new AbstractSubmitter<DamageableBehavior>() {
 		    @Override
 		    public void submit(DamageableBehavior item) {
-			item.proposeDamage(new DamageListener.ProjectileDamage(
-				65535 / 30));
+			final DamageListener.ProjectileDamage dmg = 
+				new DamageListener.ProjectileDamage();
+			dmg.setDamageAmount(65535 / 30);
+			item.proposeDamage(dmg);
 		    }
 		}, DamageableBehavior.class);
 	other.probeForBehaviors(
 		new AbstractSubmitter<DamageableBehavior>() {
 		    @Override
 		    public void submit(DamageableBehavior item) {
-			item.proposeDamage(new DamageListener.ProjectileDamage(
-				65535 / 10));
+			final DamageListener.ProjectileDamage dmg = 
+				new DamageListener.ProjectileDamage();
+			dmg.setDamageAmount(65535 / 30);
+			item.proposeDamage(dmg);
 		    }
 		}, DamageableBehavior.class);
 	p.getTr()

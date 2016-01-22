@@ -47,7 +47,10 @@ private final double     maxRadius;
 		    wo.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 			    @Override
 			    public void submit(DamageableBehavior item) {
-				item.proposeDamage(new DamageListener.ShearDamage(DAMAGE_ON_IMPACT));
+				final DamageListener.ShearDamage dmg = 
+					new DamageListener.ShearDamage();
+				dmg.setDamageAmount(DAMAGE_ON_IMPACT);
+				item.proposeDamage(dmg);
 			    }}, DamageableBehavior.class);
 		}//end if(crushed)
 	    }//end if(in range)

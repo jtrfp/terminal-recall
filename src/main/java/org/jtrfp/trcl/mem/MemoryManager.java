@@ -136,14 +136,15 @@ public final class MemoryManager {
 	if(!glPhysicalMemory.isMapped())
 	    return;
 	
-	synchronized(deletedPagedByteBuffers){synchronized(newPagedByteBuffers){synchronized(pagedByteBuffers){
+	synchronized(pagedByteBuffers){synchronized(deletedPagedByteBuffers){
     	 
     	 pagedByteBuffers.removeAll(deletedPagedByteBuffers);
     	 deletedPagedByteBuffers.clear();
     	 
+    	synchronized(newPagedByteBuffers){
     	 pagedByteBuffers.addAll(newPagedByteBuffers);
     	 newPagedByteBuffers.clear();
-    	 
+    	}//end sync(newPagedByteBuffers,deletedPagedBytedBuffers)
     	 final Iterator<WeakReference<PagedByteBuffer>> it = pagedByteBuffers.iterator();
     	 while(it.hasNext()){
     	    final WeakReference<PagedByteBuffer> r = it.next();
@@ -152,7 +153,7 @@ public final class MemoryManager {
     	    else
     		r.get().flushStalePages();
     	 }//end while(hasNext)
-	}}}//end syncs()
+	}}//end syncs()
     }//end flushStalePages()
     
     public void bindToUniform(int textureUnit, GLProgram shaderProgram, GLUniform uniform) {

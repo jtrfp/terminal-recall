@@ -48,6 +48,7 @@ public class Model {
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
     private boolean modelFinalized = false;
+    private Future<Model> finalizedModel;
     //Keeps hard references to Textures to keep them from getting gobbled.
     private final HashSet<TextureDescription> textures = new HashSet<TextureDescription>();
 
@@ -62,10 +63,14 @@ public class Model {
     }
 
     public TriangleList getTriangleList() {
+	try{finalizedModel.get();}
+	catch(Exception e){throw new RuntimeException(e);}
 	return tpList;
     }
 
     public TransparentTriangleList getTransparentTriangleList() {
+	try{finalizedModel.get();}
+	catch(Exception e){throw new RuntimeException(e);}
 	return ttpList;
     }
 
@@ -106,7 +111,7 @@ public class Model {
      * @return
      */
     public Future<Model> finalizeModel() {
-	return tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
+	return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
 	    @Override
 	    public Model call() throws Exception {
 		Future<Void> tpFuture=null, ttpFuture=null;

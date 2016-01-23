@@ -12,12 +12,16 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 
 public interface DamageListener {
     public void damageEvent(Event ev);
     
     public static abstract class Event{
 	private int damageAmount;
+	private ArrayList<String> suggestedSFX = new ArrayList<String>();
 	public Event(){
 	}
 	/**
@@ -30,12 +34,18 @@ public interface DamageListener {
 	public void setDamageAmount(int damageAmount){
 	    this.damageAmount=damageAmount;
 	}
+	protected Collection<String> getSuggestedSFX() {
+	    return suggestedSFX;
+	}
+	protected void setSuggestedSFX(Collection<String> suggestedSFX) {
+	    this.suggestedSFX.clear();
+	    this.suggestedSFX.addAll(suggestedSFX);	}
     }//end Event
-    public static class ProjectileDamage extends Event{public ProjectileDamage(){super();}}
-    public static class CollisionDamage extends Event{public CollisionDamage(){super();}}
-    public static class SurfaceCollisionDamage extends Event{public SurfaceCollisionDamage(){super();}}
-    public static class GroundCollisionDamage extends Event{public GroundCollisionDamage(){super();}}
-    public static class ElectrocutionDamage extends Event{public ElectrocutionDamage(){super();}}
-    public static class ShearDamage extends SurfaceCollisionDamage{public ShearDamage(){super();}}
-    public static class AirCollisionDamage extends CollisionDamage{public AirCollisionDamage(){super();}}
+    public static class ProjectileDamage extends Event{public ProjectileDamage(){super();getSuggestedSFX().add("EXP1.WAV");}}
+    public static class CollisionDamage extends Event{public CollisionDamage(){super();getSuggestedSFX().add("EXP4.WAV");}}
+    public static class SurfaceCollisionDamage extends CollisionDamage{public SurfaceCollisionDamage(){super();}}
+    public static class GroundCollisionDamage extends CollisionDamage{public GroundCollisionDamage(){super();getSuggestedSFX().clear();getSuggestedSFX().add("GROUND.WAV");}}
+    public static class ElectrocutionDamage extends Event{public ElectrocutionDamage(){super();getSuggestedSFX().add("EXP3.WAV");}}
+    public static class ShearDamage extends SurfaceCollisionDamage{public ShearDamage(){super();getSuggestedSFX().add("SCRAPE.WAV");}}
+    public static class AirCollisionDamage extends CollisionDamage{public AirCollisionDamage(){super();getSuggestedSFX().add("EXP5.WAV");}}
 }//end DamageListener

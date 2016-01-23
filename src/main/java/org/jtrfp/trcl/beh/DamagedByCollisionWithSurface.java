@@ -14,6 +14,8 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
+import org.jtrfp.trcl.obj.TerrainChunk;
+import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DamagedByCollisionWithSurface extends Behavior implements SurfaceImpactListener {
@@ -24,15 +26,27 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
     public void collidedWithSurface(WorldObject wo, double[] surfaceNormal) {
 	if(!isEnabled())return;
 	final WorldObject p = getParent();
-	p.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
+	if(wo instanceof TerrainChunk)
+	 p.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {
-		final DamageListener.ShearDamage dmg = 
-			new DamageListener.ShearDamage();
+		final DamageListener.GroundCollisionDamage dmg = 
+			new DamageListener.GroundCollisionDamage();
 		dmg.setDamageAmount(collisionDamage);
 		item.proposeDamage(dmg);
 	    }
 	    }, DamageableBehavior.class);
+	else if(wo instanceof TunnelSegment)
+	    p.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
+		@Override
+		public void submit(DamageableBehavior item) {
+		    final DamageListener.ShearDamage dmg = 
+			    new DamageListener.ShearDamage();
+		    dmg.setDamageAmount(collisionDamage);
+		    item.proposeDamage(dmg);
+		}
+	    }, DamageableBehavior.class);
+	
 	for(int i=0; i<MIN_FRAGS+p.getModel().getTriangleList().getMaximumVertexValue()/6000; i++){
 	    p.getTr().getResourceManager().getDebrisSystem().spawn(new Vector3D(p.getPosition()), 
 	    new Vector3D(

@@ -65,7 +65,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public static final double 	mapWidth			=mapSquareSize*256;
 	public static final double 	mapCartOffset			=mapWidth/2.;//This is the scaled-down version, not the full version
 	public static final double 	visibilityDiameterInMapSquares	=22;
-	public static final int 	terrainChunkSideLengthInSquares	=4;//Keep at power of two for now. 4x4 = 16. 16x6 = 96. 96 vertices per GLSL block means 1 chunk per block.
+	public static final int 	terrainChunkSideLengthInSquares	=16;//Keep at multiple of 4 which divides into 256 for now. 4x4 = 16. 16x6 = 96. 96 vertices per GLSL block means 1 chunk per block.
 	public static final double 	antiGamma			=1.6;
 	public static final boolean 	ANIMATED_TERRAIN		=false;
 	

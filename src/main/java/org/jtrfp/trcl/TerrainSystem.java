@@ -55,6 +55,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    }
 	}//end TSThreadFactory
 	
+	
 	    /*
 	     * Y_NUDGE is a kludge. There is a tiny sliver of space
 	     * between the ceiling and ground, likely caused by model
@@ -409,4 +410,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	public ArrayList<TerrainChunk> getRenderingCubes(){
 		return renderingCubes;
 		}
+	
+
+	@Override
+	public void finalize() throws Throwable{
+	    super.finalize();
+	    executor.shutdown();
+	}//end finalize()
 	}//end TerrainSystem

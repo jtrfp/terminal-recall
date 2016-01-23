@@ -23,7 +23,8 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class IrisBehavior extends Behavior implements CollisionBehavior {
 public static final int     DAMAGE_ON_IMPACT=6554;
-private static final double X_FLUFF         =80000;
+private static final double X_FLUFF         =20000;
+private static final double RADIUS_SKEW     =1.75;
 private final Controller controller;
 private final double     maxRadius;
 
@@ -42,7 +43,7 @@ private final double     maxRadius;
 		final double dY=thisPos[1]-playerPos[1];
 		final double dZ=thisPos[2]-playerPos[2];
 		final double dist=Math.sqrt(dY*dY+dZ*dZ);
-		final double currentRadius=maxRadius*(1.-Math.abs(1-controller.getCurrentFrame()));
+		final double currentRadius=maxRadius*(1.-Math.abs(1-controller.getCurrentFrame()))*RADIUS_SKEW;
 		if(dist>currentRadius){
 		    wo.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 			    @Override

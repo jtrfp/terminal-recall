@@ -60,13 +60,35 @@ import org.jtrfp.trcl.snd.SoundSystem;
 
 public class TVF3Game implements Game {
     public static final String VOX = "vox";
-    enum Difficulty {
-	EASY, NORMAL, HARD, FURIOUS;
+    public enum Difficulty {
+	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1.5), FURIOUS(2,3,2);
+	
+	private final double firingRateScalar;
+	private final double shieldScalar;
+	private final double defSpeedScalar;
+	
+	Difficulty(double firingRateScalar, double shieldScalar, double defSpeedScalar){
+	    this.firingRateScalar= firingRateScalar;
+	    this.shieldScalar    = shieldScalar;
+	    this.defSpeedScalar  = defSpeedScalar;
+	}
 	
 	@Override
 	public String toString(){
 	    String low = this.name().toLowerCase();
 	    return Character.toUpperCase(low.charAt(0))+low.substring(1);
+	}
+	
+	public double getFiringRateScalar(){
+	    return firingRateScalar;
+	}
+
+	public double getShieldScalar() {
+	    return shieldScalar;
+	}
+
+	public double getDefSpeedScalar() {
+	    return defSpeedScalar;
 	}
     }//end Difficulty
     

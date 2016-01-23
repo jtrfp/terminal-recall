@@ -14,6 +14,7 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Velocible;
@@ -53,9 +54,10 @@ public class AutoFiring extends Behavior {
 		    Vector3D result;
 		    if(smartFiring){
 			final Vector3D playerVelocity = player.probeForBehavior(Velocible.class).getVelocity();
+			final Vector3D playerPosV3D = new Vector3D(playerPos).add(playerVelocity.scalarMultiply(.5));//Look ahead one frame
 			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TR.crossPlatformScalar; 
-			Vector3D virtualPlayerPos = interceptOf(new Vector3D(playerPos),playerVelocity,new Vector3D(firingPos),projectileSpeed);
-			if(virtualPlayerPos==null)virtualPlayerPos=new Vector3D(playerPos);
+			Vector3D virtualPlayerPos = interceptOf(playerPosV3D,playerVelocity,new Vector3D(firingPos),projectileSpeed);
+			if(virtualPlayerPos==null)virtualPlayerPos=playerPosV3D;
 			Vect3D.subtract(virtualPlayerPos.toArray(), firingPos, firingVector);}
 		    else{Vect3D.subtract(playerPos, firingPos, firingVector); }
 		    result = new Vector3D(Vect3D.normalize(firingVector,firingVector));

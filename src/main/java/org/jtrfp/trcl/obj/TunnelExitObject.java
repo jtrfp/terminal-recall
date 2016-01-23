@@ -159,9 +159,9 @@ public class TunnelExitObject extends PortalEntrance {
 			    .setEnable(true);
 		    player.probeForBehavior(LoopingPositionBehavior.class)
 			    .setEnable(true);
-		    player.probeForBehavior(
+		   /* player.probeForBehavior(
 				    HeadingXAlwaysPositiveBehavior.class)
-			    .setEnable(false);
+			    .setEnable(false);*/
 		    // Update debug data
 		    tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?",
 			    "false");

@@ -443,7 +443,6 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    false, palette,ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos.add(top
 		    .scalarMultiply(tunnelDia / 2))));
-	    wo.addBehavior(new CubeCollisionBehavior(wo));
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(heading.crossProduct(top).negate());

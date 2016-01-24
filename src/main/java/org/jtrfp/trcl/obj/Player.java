@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.SpacePartitioningGrid;
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -38,8 +39,8 @@ import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RollLevelingBehavior;
 import org.jtrfp.trcl.beh.RollNudgeOnDamage;
 import org.jtrfp.trcl.beh.RotateAroundObject;
+import org.jtrfp.trcl.beh.SFXOnDamage;
 import org.jtrfp.trcl.beh.SpinCrashDeathBehavior;
-import org.jtrfp.trcl.beh.SurfaceImpactSFXBehavior;
 import org.jtrfp.trcl.beh.UpdatesNAVRadar;
 import org.jtrfp.trcl.beh.UpgradeableProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
@@ -61,6 +62,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.miss.Mission;
@@ -75,6 +77,9 @@ public class Player extends WorldObject implements RelevantEverywhere{
     public static final int 	INVINCIBILITY_COUNTDOWN_START 	= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
     private final 		ProjectileFiringBehavior[] weapons = new ProjectileFiringBehavior[Weapon
                   		                                   .values().length];
+    private final RunModeListener               runStateListener = new RunModeListener();
+    private final WeakPropertyChangeListener    weakRunStateListener;
+    private final HeadingXAlwaysPositiveBehavior headingXAlwaysPositiveBehavior;
 
     public Player(final TR tr, final Model model) {
 	super(tr, model);
@@ -107,7 +112,11 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		setExtinguishSound(soundTextures.get(AfterburnerBehavior.EXTINGUISH_SOUND)).
 		setLoopSound      (soundTextures.get(AfterburnerBehavior.LOOP_SOUND)));
 	addBehavior(new LoopingPositionBehavior());
-	addBehavior(new HeadingXAlwaysPositiveBehavior().setEnable(false));
+	addBehavior(headingXAlwaysPositiveBehavior = (HeadingXAlwaysPositiveBehavior)new HeadingXAlwaysPositiveBehavior().setEnable(false));
+	//Add a listener to control HeadingXAlwaysPositive
+	//final Game game = tr.getGame();
+	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
+	tr.addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
 	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getThrottleMeter()));
 	addBehavior(new UpdatesHealthMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getHealthMeter()));
 	addBehavior(new DamagedByCollisionWithDEFObject());
@@ -115,7 +124,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new BouncesOffSurfaces());
 	addBehavior(new UpdatesNAVRadar());
 	addBehavior(new Cloakable());
-	addBehavior(new SurfaceImpactSFXBehavior(tr));
+	//addBehavior(new SurfaceImpactSFXBehavior(tr));
 	addBehavior(new RedFlashOnDamage());
 	addBehavior(new RollNudgeOnDamage());
 	final SpinCrashDeathBehavior scb = new SpinCrashDeathBehavior();
@@ -124,6 +133,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new DeathBehavior());
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
 	addBehavior(new PlayerDeathListener());
+	addBehavior(new SFXOnDamage());
 	
 	final Weapon[] allWeapons = Weapon.values();
 	
@@ -187,6 +197,18 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	
 	defaultConfiguration();
     }//end constructor
+    
+    private class RunModeListener implements PropertyChangeListener {
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final Object newValue = evt.getNewValue();
+	    final Object oldValue = evt.getOldValue();
+	    if(newValue instanceof Mission.TunnelState         && !(oldValue instanceof Mission.TunnelState))
+		headingXAlwaysPositiveBehavior.setEnable(true);
+	    else if(!(newValue instanceof Mission.TunnelState) && (oldValue instanceof Mission.TunnelState))
+		headingXAlwaysPositiveBehavior.setEnable(false);
+	}//end propertyChange(...)
+    }//end RunModeListener
     
     private void defaultConfiguration(){
 		probeForBehavior(VelocityDragBehavior.class)

@@ -177,9 +177,6 @@ public class ProjectileFactory {
     }
     
     public Projectile fire(double[] newPosition, Vector3D heading, WorldObject objectOfOrigin, boolean sumWithProjectorVel, SoundTexture firingSFX) {
-	assert !Vect3D.isAnyNaN(newPosition);
-	assert heading.getNorm()!=0 && heading.getNorm()!=Double.NaN;
-	
 	final Projectile result = projectiles[projectileIndex];
 	result.destroy();
 	final Vector3D newVelocity;

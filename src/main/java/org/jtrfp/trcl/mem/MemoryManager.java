@@ -140,11 +140,11 @@ public final class MemoryManager {
     	 
     	 pagedByteBuffers.removeAll(deletedPagedByteBuffers);
     	 deletedPagedByteBuffers.clear();
-    	 
+	}//end sync(deletedPageDByteBuffers)
     	synchronized(newPagedByteBuffers){
     	 pagedByteBuffers.addAll(newPagedByteBuffers);
     	 newPagedByteBuffers.clear();
-    	}//end sync(newPagedByteBuffers,deletedPagedBytedBuffers)
+    	}//end sync(newPagedByteBuffers)
     	 final Iterator<WeakReference<PagedByteBuffer>> it = pagedByteBuffers.iterator();
     	 while(it.hasNext()){
     	    final WeakReference<PagedByteBuffer> r = it.next();
@@ -153,7 +153,7 @@ public final class MemoryManager {
     	    else
     		r.get().flushStalePages();
     	 }//end while(hasNext)
-	}}//end syncs()
+	}//end sync(pagedByteBuffers)
     }//end flushStalePages()
     
     public void bindToUniform(int textureUnit, GLProgram shaderProgram, GLUniform uniform) {

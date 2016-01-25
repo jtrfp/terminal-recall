@@ -250,6 +250,7 @@ public class Mission {
 	    ///////// STATE
 	    final Propelled propelled = player.probeForBehavior(Propelled.class); 
 	    propelled.setPropulsion(propelled.getMinPropulsion());
+	    player.probeForBehavior(CollidesWithTerrain.class).setEnable(true);
 	    
 	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
 	    Factory f = new NAVObjective.Factory(tr, getLevelName());

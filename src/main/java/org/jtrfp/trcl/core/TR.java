@@ -22,12 +22,14 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
@@ -356,15 +358,37 @@ public final class TR implements UncaughtExceptionHandler{
 	return newGame;
     }// end newGame(...)
 
-    private void setGame(Game newGame) {
+    /**
+     * 
+     * @param newGame
+     * @return Future containing the old Game or containing null if no previous Game
+     * @since Jan 23, 2016
+     */
+    private Future<Game> setGame(final Game newGame) {
 	if(newGame==game)
-	    return;
+	    return new DummyFuture<Game>(game);
 	final Game oldGame=game;
 	game=newGame;
+	Future<Game> result = null;
+	final RenderableSpacePartitioningGrid defaultGrid = getDefaultGrid();
+	if(oldGame instanceof TVF3Game || newGame instanceof TVF3Game){
+	    result = World.relevanceExecutor.submit(new Callable<Game>(){
+		@Override
+		public Game call() throws Exception {
+		    if(oldGame instanceof TVF3Game)
+			defaultGrid.removeBranch(((TVF3Game)oldGame).getPartitioningGrid());
+		    if(newGame instanceof TVF3Game)
+			defaultGrid.addBranch(((TVF3Game)newGame).getPartitioningGrid());
+		    return oldGame;
+		}});
+	}//end if(TVF3Game)
 	if(newGame==null)
 	 getThreadManager().setPaused(true);
 	pcSupport.firePropertyChange(GAME, oldGame, newGame);
-    }
+	if(result == null)
+	    result = new DummyFuture<Game>(oldGame);
+	return result;
+    }//end setGame()
 
     public Color[] getGlobalPalette() {
 	if (globalPalette == null)

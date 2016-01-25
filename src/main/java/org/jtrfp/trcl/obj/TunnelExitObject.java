@@ -137,14 +137,18 @@ public class TunnelExitObject extends PortalEntrance {
 		    World.relevanceExecutor.submit(new Runnable(){
 			@Override
 			public void run() {
-			    final SpacePartitioningGrid grid = tr.getDefaultGrid();
+			    //final SpacePartitioningGrid grid = tr.getDefaultGrid();
 			    // Tunnel off
-			    grid.removeBranch(tun);
+			    //grid.removeBranch(tun);
 			    // World on
-			    grid.addBranch(overworldSystem);
+			    //grid.addBranch(overworldSystem);
+			    //Switch to overworld mode
+			    //try{mission.setDisplayMode(mission.overworldMode);}
+			    //catch(Exception e){e.printStackTrace();}
 			    // Nav
 			    //grid.addBranch(game.getNavSystem());
 			}});
+		    mission.setDisplayMode(mission.overworldMode);
 		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
 		    final Player player = ((TVF3Game)tr.getGame()).getPlayer();

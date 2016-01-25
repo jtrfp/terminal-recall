@@ -28,12 +28,12 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SkySystem;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
-import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
@@ -107,8 +107,10 @@ public class Mission {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private Tunnel		currentTunnel;
     private final DisplayModeHandler displayHandler;
-    private Object [] levelLoadingMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
+    public Object [] levelLoadingMode, tunnelMode, overworldMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
     private NAVObjective currentNavTarget;
+    private final RenderableSpacePartitioningGrid tunnelGrid       = new RenderableSpacePartitioningGrid();
+    private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
 
     private enum LoadingStages {
 	navs, tunnels, overworld
@@ -137,7 +139,7 @@ public class Mission {
 	this.game 	= game;
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
-	this.displayHandler = new DisplayModeHandler(tr.getDefaultGrid());
+	this.displayHandler = new DisplayModeHandler(this.getPartitioningGrid());
 	Features.init(this);
 	tr.setRunState(new ConstructingState(){});
 	levelLoadingMode = new Object[]{
@@ -198,13 +200,27 @@ public class Mission {
 			 ((TVF3Game)game).navSystem,
 			 ((TVF3Game)game).hudSystem,
 			 ((TVF3Game)game).upfrontDisplay,
-			 overworldSystem,
 			 rm.getDebrisSystem(),
 			 rm.getPowerupSystem(),
 			 rm.getProjectileFactories(),
 			 rm.getExplosionFactory(),
 			 rm.getSmokeSystem()
 		    };
+	    overworldMode = new Object[]{
+		    gameplayMode,
+		    overworldSystem
+	    };
+	    tunnelMode = new Object[]{
+		    ((TVF3Game)game).navSystem,
+			 ((TVF3Game)game).hudSystem,
+			 ((TVF3Game)game).upfrontDisplay,
+			 rm.getDebrisSystem(),
+			 rm.getPowerupSystem(),
+			 rm.getProjectileFactories(),
+			 rm.getExplosionFactory(),
+			 rm.getSmokeSystem(),
+			 tunnelGrid
+		};
 	    summaryMode = new Object[]{
 		    ((TVF3Game)game).getBriefingScreen(),
 		    overworldSystem
@@ -330,7 +346,7 @@ public class Mission {
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
 	((TVF3Game)game).getNavSystem() .activate();
-	displayHandler.setDisplayMode(gameplayMode);
+	displayHandler.setDisplayMode(overworldMode);
 	
 	((TVF3Game)game).getPlayer()	.setActive(true);
 	((TVF3Game)tr.getGame()).setPaused(false);
@@ -686,16 +702,17 @@ public class Mission {
     }
     
     public synchronized void enterTunnel(final TunnelEntranceObject teo) {
-	final Tunnel tunnel = teo.getSourceTunnel();
-	System.out.println("Entering tunnel "+tunnel);
+	final Tunnel tunnelToEnter = teo.getSourceTunnel();
+	System.out.println("Entering tunnel "+tunnelToEnter);
 	final Game game = ((TVF3Game)tr.getGame());
 	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
-	currentTunnel = tunnel;
-	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnel);
+	setCurrentTunnel(tunnelToEnter);
+	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnelToEnter);
 	tr.setRunState(new TunnelState(){});
 	
-	tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
-	tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
+	//tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
+	//tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
+	setDisplayMode(tunnelMode);
 	
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
@@ -720,10 +737,11 @@ public class Mission {
 	player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
 	player.probeForBehavior(MovesByVelocity.class)        .setVelocity(Vector3D.ZERO);
 	player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
-	player.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
+	//player.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
-	tunnel.dispatchTunnelEntryNotifications();
+	tunnelToEnter.dispatchTunnelEntryNotifications();
 	final Renderer portalRenderer = teo.getPortalEntrance().getPortalRenderer();
+	//TODO: NPE bug on this line v
 	final Camera secondaryCam = /*tr.secondaryRenderer.get().getCamera()*/portalRenderer.getCamera();
 	//player.setPosition(Tunnel.TUNNEL_START_POS.toArray());//TODO: remove debug code
 	player.setPosition(secondaryCam.getPosition()); //TODO: Uncomment
@@ -731,7 +749,7 @@ public class Mission {
 	player.setTop     (secondaryCam.getTop());
 	player.notifyPositionChange();
 	//Move the secondary cam to the overworld.
-	overworldSystem.setChamberMode(tunnel.getExitObject().isMirrorTerrain());
+	overworldSystem.setChamberMode(tunnelToEnter.getExitObject().isMirrorTerrain());
 	//Set the skycube appropriately
 	portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGame()).
 		      getCurrentMission().
@@ -866,6 +884,26 @@ public class Mission {
 	if(!(tr.getRunState() instanceof TunnelState))return null;
 	return currentTunnel;
     }
+    
+    /**
+     * 
+     * @param newTunnel
+     * @return The old tunnel, or null if none.
+     * @since Jan 23, 2016
+     */
+    public Tunnel setCurrentTunnel(final Tunnel newTunnel){
+	final Tunnel oldTunnel = getCurrentTunnel();
+	this.currentTunnel = newTunnel;
+	World.relevanceExecutor.submit(new Runnable(){
+	    @Override
+	    public void run() {
+		tunnelGrid.removeAll();
+		//if(oldTunnel != null)
+		//    tunnelGrid.removeBranch(oldTunnel);
+		tunnelGrid.addBranch(newTunnel);
+	    }});
+	return oldTunnel;
+    }//end setCurrentTunnel
 
     public Game getGame() {
 	return game;
@@ -924,5 +962,13 @@ public class Mission {
 	this.currentNavTarget = newTarget;
 	pcs.firePropertyChange(CURRENT_NAV_TARGET, oldTarget, newTarget);
         return this;
+    }
+
+    public void setDisplayMode(Object [] newMode){//TODO: Refactor this to follow tr's run state instead
+	displayHandler.setDisplayMode(newMode);
+    }
+
+    public RenderableSpacePartitioningGrid getPartitioningGrid() {
+        return partitioningGrid;
     }
 }// end Mission

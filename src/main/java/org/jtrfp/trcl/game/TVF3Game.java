@@ -18,6 +18,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BriefingScreen;
@@ -28,8 +29,10 @@ import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.UpfrontDisplay;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.core.Features;
@@ -60,6 +63,7 @@ import org.jtrfp.trcl.snd.SoundSystem;
 
 public class TVF3Game implements Game {
     public static final String VOX = "vox";
+    private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     public enum Difficulty {
 	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1.5), FURIOUS(2,3,2);
 	
@@ -132,7 +136,7 @@ public class TVF3Game implements Game {
 		this.tr = tr;
 		Features.init(this);
 		tr.setRunState(new GameConstructingMode(){});
-		displayModes = new DisplayModeHandler(tr.getDefaultGrid());
+		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};
 		tr.setRunState(new GameConstructedMode(){});
 	    }// end constructor
@@ -387,14 +391,25 @@ public class TVF3Game implements Game {
 		}//end finally{}
 	    }// end beginGameplay()
 
-	    public void setCurrentMission(Mission mission) {
+	    public void setCurrentMission(final Mission newMission) {
 		final Mission oldMission = this.currentMission;
+		if(newMission == oldMission)
+		    return;
+		this.currentMission=newMission;
+		World.relevanceExecutor.submit(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			final RenderableSpacePartitioningGrid grid = getPartitioningGrid();
+			if(oldMission!=null)
+			 grid.removeBranch(oldMission.getPartitioningGrid());
+			if(newMission!=null)
+			 grid.addBranch(newMission.getPartitioningGrid());
+			return null;
+		    }});
 		if(oldMission!=null)
 		 oldMission.destruct();
-		this.currentMission=mission;
-		pcSupport.firePropertyChange("currentMission", oldMission, mission);
-		
-	    }
+		pcSupport.firePropertyChange("currentMission", oldMission, newMission);
+	    }//end setCurrentMission
 	    
 	    public void abort(){
 		tr.setRunState(new GameDestructingMode(){});
@@ -550,5 +565,9 @@ public class TVF3Game implements Game {
 
     public boolean hasListeners(String propertyName) {
 	return pcSupport.hasListeners(propertyName);
+    }
+
+    public RenderableSpacePartitioningGrid getPartitioningGrid() {
+        return partitioningGrid;
     }
 }// end Game

@@ -64,6 +64,8 @@ import org.jtrfp.trcl.file.BINFile.AnimationControl;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.game.TVF3Game.Difficulty;
 import org.jtrfp.trcl.gpu.BINFileExtractor;
 import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.gpu.BufferedModelTarget;
@@ -146,8 +148,8 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	     setPatternOffsetMillis((int)(Math.random()*2000)).
 	     setMaxFiringDistance(TR.mapSquareSize*3).
 	     setSmartFiring(false).
-	     setMaxFireVectorDeviation(.5).
-	     setTimePerPatternEntry(500));
+	     setMaxFireVectorDeviation(.7).
+	     setTimePerPatternEntry((int)(getFiringRateScalar()*(250*getFiringRateScalar()))));
 	    anchoring=Anchoring.terrain;
     	    break;}
     	case flyingDumb:
@@ -236,7 +238,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 		    setMaxFiringDistance(TR.mapSquareSize*.2).
 		    setSmartFiring(false).
 		    setMaxFireVectorDeviation(.3).
-		    setTimePerPatternEntry(2000));
+		    setTimePerPatternEntry((int)(500*getFiringRateScalar())));
 	    /*addBehavior(new Bobbing().
 		    setPhase(Math.random()).
 		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000).
@@ -439,7 +441,11 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     //Misc
     addBehavior(new TunnelRailed(tr));//Centers in tunnel when appropriate
     addBehavior(new DeathBehavior());
-    addBehavior(new DamageableBehavior().setHealth(pl.getStrength()+(spinCrash?16:0)).setMaxHealth(pl.getStrength()+(spinCrash?16:0)).setEnable(!boss));
+    final int newHealth = (int)(getShieldScalar()*(pl.getStrength()+(spinCrash?16:0)));
+    addBehavior(new DamageableBehavior().
+	    setHealth(newHealth).
+	    setMaxHealth(newHealth).
+	    setEnable(!boss));
     setActive(!boss);
     addBehavior(new DamagedByCollisionWithDEFObject());
     if(!foliage)addBehavior(new DebrisOnDeathBehavior());
@@ -472,7 +478,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    	}
 	probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	probeForBehavior(Propelled.class).setMinPropulsion(0);
-	probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/1.2);
+	probeForBehavior(Propelled.class).setPropulsion(getDEFSpeedScalar()*def.getThrustSpeed()/1.2);
 	
 	addBehavior(new LoopingPositionBehavior());
     	}//end if(mobile)
@@ -525,7 +531,7 @@ private void projectileFiringBehavior(){
 	    setMaxFiringDistance(TR.mapSquareSize*5).
 	    setSmartFiring(true).
 	    setMaxFireVectorDeviation(2.).
-	    setTimePerPatternEntry(!boss?2000:350));
+	    setTimePerPatternEntry((int)(getFiringRateScalar()*(!boss?500:350))));
     if(boss)af.setFiringPattern(new boolean []{true,true,true,true,false,false,true,false}).setAimRandomness(.07);
 }
 
@@ -663,11 +669,16 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
       escapeProp.setThrustVector(new Vector3D(0,.1,0)).setEnable(false);
       addBehavior(escapeProp);}
     final AutoFiring afb = new AutoFiring();
-    afb.setMaxFireVectorDeviation(.3);
+    afb.setMaxFireVectorDeviation(.7);
     afb.setFiringPattern(new boolean [] {true,false,false,false,true,true,false});
-    afb.setTimePerPatternEntry((int)(400+Math.random()*300));
+    afb.setTimePerPatternEntry((int)(getFiringRateScalar()*(200+Math.random()*200)));
     afb.setPatternOffsetMillis((int)(Math.random()*1000));
     afb.setProjectileFiringBehavior(pfb);
+    try{
+    final TVF3Game tvf3 = (TVF3Game)tr.getGame();
+    if(tvf3.getDifficulty() != Difficulty.EASY)
+     afb.setSmartFiring(true);
+    }catch(ClassCastException e){}//Not a TVF3 Game
     addBehavior(afb);
     final SpinAccellerationBehavior sab = (SpinAccellerationBehavior)new SpinAccellerationBehavior().setEnable(false);
     addBehavior(sab);
@@ -861,5 +872,26 @@ public HitBox[] getHitBoxes() {
 
 public void setHitBoxes(HitBox[] hitBoxes) {
     this.hitBoxes = hitBoxes;
+}
+
+private double getFiringRateScalar(){
+    try{
+	final TVF3Game tvf3 = (TVF3Game)getTr().getGame();
+	return tvf3.getDifficulty().getFiringRateScalar();
+    }catch(ClassCastException e){return 1;}
+}
+
+private double getShieldScalar(){
+    try{
+	final TVF3Game tvf3 = (TVF3Game)getTr().getGame();
+	return tvf3.getDifficulty().getShieldScalar();
+    }catch(ClassCastException e){return 1;}
+}
+
+private double getDEFSpeedScalar(){
+    try{
+	final TVF3Game tvf3 = (TVF3Game)getTr().getGame();
+	return tvf3.getDifficulty().getDefSpeedScalar();
+    }catch(ClassCastException e){return 1;}
 }
 }//end DEFObject

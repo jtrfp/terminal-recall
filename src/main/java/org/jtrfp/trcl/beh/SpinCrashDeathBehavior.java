@@ -60,6 +60,12 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	probeForBehavior(AfterburnerBehavior.class).setEnable(false);
 	probeForBehavior(UserInputRudderElevatorControlBehavior.class).setEnable(false);
 	probeForBehavior(UserInputThrottleControlBehavior.class).setEnable(false);
+	this.probeForBehaviors(new AbstractSubmitter<ProjectileFiringBehavior>(){
+	    @Override
+	    public void submit(ProjectileFiringBehavior item) {
+		item.setEnable(false);
+	    }
+	}, ProjectileFiringBehavior.class);
 	final Propelled propelled = probeForBehavior(Propelled.class);
 	propelled.setPropulsion(propelled.getMaxPropulsion());
 	if(!parent.hasBehavior(AutoLeveling.class))

@@ -16,6 +16,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
@@ -62,7 +63,6 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.miss.Mission;
@@ -248,6 +248,12 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    thisPlayer.probeForBehavior(SpinCrashDeathBehavior.class).
 		      reset().
 		      setEnable(true);
+		    probeForBehaviors(new AbstractSubmitter<ProjectileFiringBehavior>(){
+			@Override
+			public void submit(ProjectileFiringBehavior item) {
+			    item.setEnable(true);
+			}}, ProjectileFiringBehavior.class);
+		    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
 		    thisPlayer.probeForBehavior(DeathBehavior.class).reset();
 		    //Reset camera
 		    final Camera camera = Player.this.getTr().mainRenderer.get().getCamera(); 

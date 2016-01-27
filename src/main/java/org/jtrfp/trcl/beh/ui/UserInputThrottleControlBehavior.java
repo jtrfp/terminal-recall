@@ -48,6 +48,8 @@ public class UserInputThrottleControlBehavior extends Behavior implements Player
     private class ThrottleControlListener implements PropertyChangeListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+	    if(!isEnabled())
+		return;
 	    final double newState = (Double)evt.getNewValue();
 	    final Propelled p = getParent().probeForBehavior(Propelled.class);
 	    final double range = p.getMaxPropulsion()-p.getMinPropulsion();

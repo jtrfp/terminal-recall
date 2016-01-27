@@ -446,7 +446,7 @@ public class ResourceManager{
 							if(vertIndices.get(0) instanceof FaceBlockVertexWithUV){
 							    for(int i=0; i<4; i++){
 								final FaceBlockVertexWithUV fbvi = (FaceBlockVertexWithUV)vertIndices.get(i);
-								u[i]=(double)(fbvi).
+								u[i]=1.-(double)(fbvi).
 									getTextureCoordinateU()/(double)0xFF0000;
 								v[i]=(double)(fbvi).
 									getTextureCoordinateV()/(double)0xFF0000;

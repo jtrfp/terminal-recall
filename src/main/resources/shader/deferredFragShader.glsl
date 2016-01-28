@@ -301,7 +301,12 @@ gl_FragColor = vec4(0,0,0,1);
 uint	primitiveID;
 vec4	color		= vec4(0,0,0,1);
 vec4	fsq0			= texelFetch(layerAccumulator0,ivec2(gl_FragCoord),0)*65536;
-vec4	fsq1			= texelFetch(layerAccumulator1,ivec2(gl_FragCoord),0)*65536;
+bool    populatedFSQ    = dot(fsq0,vec4(1))!=0;
+vec4	fsq1;
+if(populatedFSQ){
+ fsq1 = texelFetch(layerAccumulator1,ivec2(gl_FragCoord),0)*65536;
+ }
+                          
 fogCubeColor	    = texture(cubeTexture,norm).rgb;
 uint relevantSize=0u/*depthOfFloatShiftQueue(fsq0)*/;
 vec4 vUVZI[DEPTH_QUEUE_SIZE]; // U,V, depth, texture ID
@@ -310,19 +315,20 @@ float _w[DEPTH_QUEUE_SIZE];
 int ordering[DEPTH_QUEUE_SIZE];
 
 // D E P T H   P O P U L A T E
-for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
+if(populatedFSQ){
+ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
  primitiveID = getPrimitiveIDFromQueue(fsq0,fsq1,i);
- if(primitiveID==0u || primitiveID>65535u)
-  break;
- primitiveID--; //Compensate for zero representing "unwritten."
- vec3 pQuad = pQuads[i]= getPQuad(primitiveID);
- vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pQuad,0);
- _uvzw.xyz /= _uvzw.w;
- vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
- _w[i]		= _uvzw.w;
- ordering[i]=i;
- relevantSize++;
- }//end for(DEPTH_QUEUE_SIZE)
+   if(primitiveID==0u || primitiveID>65535u)
+   break;
+  primitiveID--; //Compensate for zero representing "unwritten."
+  vec3 pQuad = pQuads[i]= getPQuad(primitiveID);
+  vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pQuad,0);
+  _uvzw.xyz /= _uvzw.w;
+  vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
+  _w[i]		= _uvzw.w;
+  ordering[i]=i;
+  relevantSize++;
+  }//end for(DEPTH_QUEUE_SIZE)
  
  // D E P T H   S O R T
  if(relevantSize>0u){
@@ -338,7 +344,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
     }//end if(new deepest)
    }//end for(lower end)
   }//end for(relevantSize)
-  }//end if(relevantSize>0)
+ }//end if(relevantSize>0)
   
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){
@@ -347,6 +353,7 @@ for(int i=0; i<DEPTH_QUEUE_SIZE; i++){
    if(color.a < ALPHA_THRESHOLD)
     break;
   }//end for(relevantSize)
+ }//end if(!emptyFSQ)
 
 if(color.a > ALPHA_THRESHOLD){
  // S O L I D   B A C K D R O P

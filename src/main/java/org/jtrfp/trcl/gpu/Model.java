@@ -27,6 +27,7 @@ import org.jtrfp.trcl.TransparentTriangleList;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TextureDescription;
 
 public class Model {
@@ -48,7 +49,7 @@ public class Model {
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
     private boolean modelFinalized = false;
-    private Future<Model> finalizedModel;
+    private TRFuture<Model> finalizedModel;
     //Keeps hard references to Textures to keep them from getting gobbled.
     private final HashSet<TextureDescription> textures = new HashSet<TextureDescription>();
 
@@ -110,7 +111,7 @@ public class Model {
      * 
      * @return
      */
-    public Future<Model> finalizeModel() {
+    public TRFuture<Model> finalizeModel() {
 	return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
 	    @Override
 	    public Model call() throws Exception {

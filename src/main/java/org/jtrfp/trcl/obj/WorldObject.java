@@ -18,8 +18,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -34,8 +32,10 @@ import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
+import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
@@ -58,7 +58,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean	needToRecalcMatrix=true;
     private final TR 	tr;
     private boolean 	visible = true;
-    private Future<Model>model;
+    private TRFuture<Model>model;
     private List<PositionedRenderable>lastContainingList;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
@@ -82,6 +82,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
     private final GPUResourceFinalizer  gpuResourceFinalizer;
+    private double scale                = 1.;
     
     private CollectionActionDispatcher<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     private CollectionActionDispatcher<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
@@ -230,14 +231,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		+ this.getPosition() + " class=" + getClass().getName()+" hash="+hashCode();
     }
 
-    public final void initializeObjectDefinitions() {
+    public final void initializeObjectDefinitions() throws NotReadyException {
 	if(objectDefsInitialized)
 	    return;
-	objectDefsInitialized = true;
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it?");
-	final Model model = getModel();
+	final Model model = getModelRealtime();
 	//final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
 	//final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
@@ -257,6 +257,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		for(int i = 0; i < transparentIndicesList.size(); i++)
 		    transparentObjectDefinitionAddressesInVEC4.add(new VEC4Address(transparentIndicesList.get(i)));
 		*/
+		objectDefsInitialized = true;
 		return null;
 	    }});
     }// end initializeObjectDefinitions()
@@ -296,7 +297,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	}// end for(ObjectDefinition)
     }// end processPrimitiveList(...)
 
-    public synchronized final void updateStateToGPU(Renderer renderer) {
+    public synchronized final void updateStateToGPU(Renderer renderer) throws NotReadyException {
 	initializeObjectDefinitions();
 	attemptLoop(renderer);
 	if(needToRecalcMatrix){
@@ -348,6 +349,11 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    Vect3D.normalize(heading, aZ);
 	    Vect3D.cross(top, aZ, aX);
 	    Vect3D.cross(aZ, aX, aY);
+	    
+	    //Scale
+	    Vect3D.scalarMultiply(aX, getScale(), aX);
+	    Vect3D.scalarMultiply(aY, getScale(), aY);
+	    Vect3D.scalarMultiply(aZ, getScale(), aZ);
 
 	    rMd[0] = aX[0];
 	    rMd[1] = aY[0];
@@ -527,6 +533,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public Model getModel() {
 	try{return model.get();}
 	catch(Exception e){throw new RuntimeException(e);}
+    }
+    
+    public Model getModelRealtime() throws NotReadyException{
+	return model.getRealtime();
     }
 
     /**
@@ -835,6 +845,14 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public void setMatrixID(Integer matrixID) {
         this.matrixID = matrixID;
+    }
+
+    protected double getScale() {
+        return scale;
+    }
+
+    protected void setScale(double scale) {
+        this.scale = scale;
     }
 
     /*public void checkPositionSanity() {

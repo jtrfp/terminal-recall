@@ -452,14 +452,8 @@ public class ResourceManager{
 									getTextureCoordinateV()/(double)0xFF0000;
 							    }//end for(4)
 							}else{
-							    u[0]=BOX_U[0];
-							    v[0]=BOX_V[0];
-							    u[1]=BOX_U[1];
-							    v[1]=BOX_V[1];
-							    u[2]=BOX_U[2];
-							    v[2]=BOX_V[2];
-							    u[3]=BOX_U[3];
-							    v[3]=BOX_V[3];
+							    System.arraycopy(BOX_U, 0, u, 0, 4);
+							    System.arraycopy(BOX_V, 0, v, 0, 4);
 							}
 							Triangle [] tris = Triangle.quad2Triangles(
 									vtx,

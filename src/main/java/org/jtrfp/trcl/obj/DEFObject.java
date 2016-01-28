@@ -12,11 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
@@ -89,17 +92,11 @@ public class DEFObject extends WorldObject {
     public static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
     public static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
     
-public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl){
-    super(tr,model);
+public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
+    super(tr);
     this.def=def;
     Vector3D max = Vector3D.ZERO;
-    if(model!=null)
-	max = model.getMaximumVertexDims();
-    else
-	max = new Vector3D(TR.legacy2Modern(def.getBoundingBoxRadius()),TR.legacy2Modern(def.getBoundingBoxRadius()),0)
-		.scalarMultiply(1./1.5);
-    boundingWidth =max.getX();
-    boundingHeight=max.getY();
+    
     anchoring=Anchoring.floating;
     logic  =def.getLogic();
     mobile =true;
@@ -131,6 +128,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    mobile=false;
     	    canTurn=false;
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case groundTargeting://Ground turrets
     	    {mobile=false;
@@ -151,56 +149,70 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	     setMaxFireVectorDeviation(.7).
 	     setTimePerPatternEntry((int)(getFiringRateScalar()*(250*getFiringRateScalar()))));
 	    anchoring=Anchoring.terrain;
+	    defaultModelAssignment();
     	    break;}
     	case flyingDumb:
     	    canTurn=false;
+    	    defaultModelAssignment();
     	    break;
     	case groundTargetingDumb:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case flyingSmart:
     	    smartPlaneBehavior(tr,def,false);
+    	    defaultModelAssignment();
     	    break;
     	case bankSpinDrill:
     	    unhandled(def);
+    	    defaultModelAssignment();
     	    break;
     	case sphereBoss:
     	    projectileFiringBehavior();
     	    mobile=true;
+    	    defaultModelAssignment();
     	    break;
     	case flyingAttackRetreatSmart:
     	    smartPlaneBehavior(tr,def,false);
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
+    	    defaultModelAssignment();
     	    break;
     	case splitShipSmart://TODO
     	    smartPlaneBehavior(tr,def,false);
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
+    	    defaultModelAssignment();
     	    break;
     	case groundStaticRuin://Destroyed object is replaced with another using SimpleModel i.e. weapons bunker
     	    mobile=false;
     	    canTurn=false;
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
+    	    defaultRuinObject(pl);
     	    break;
     	case targetHeadingSmart:
     	    mobile=false;//Belazure's crane bots
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case targetPitchSmart:
     	    mobile=false;
 	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
 	    break;
     	case coreBossSmart:
     	    mobile=false;
     	    projectileFiringBehavior();
+    	    defaultModelAssignment();
     	    break;
     	case cityBossSmart:
     	    mobile=false;
     	    projectileFiringBehavior();
+    	    defaultModelAssignment();
     	    break;
     	case staticFiringSmart:{
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
@@ -219,10 +231,12 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    
     	    mobile=false;
     	    canTurn=false;
+    	    defaultModelAssignment();
     	    break;}
     	case sittingDuck:
     	    canTurn=false;
     	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case tunnelAttack:{
 	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior();
@@ -244,6 +258,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000).
 		    setAdditionalHeight(0));*/ //Conflicts with TunnelRailed
 	    mobile=false;
+    	    defaultModelAssignment();
 	    break;}
     	case takeoffAndEscape:
     	    addBehavior(new MovesByVelocity());
@@ -264,6 +279,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    customExplosion=true;
     	    canTurn=false;
     	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case fallingAsteroid:
     	    anchoring=Anchoring.floating;
@@ -272,37 +288,45 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion,MED_EXP_SOUNDS[(int)(Math.random()*2)]));
     	    //setVisible(false);
     	    //addBehavior(new FallingDebrisBehavior(tr,model));
+    	    defaultModelAssignment();
     	    break;
     	case cNome://Walky bot?
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case cNomeLegs://Walky bot?
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case cNomeFactory:
     	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case geigerBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    anchoring=Anchoring.terrain;
     	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case volcanoBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    anchoring=Anchoring.terrain;
     	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case volcano://Wat.
     	    unhandled(def);
     	    canTurn=false;
     	    mobile=false;
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case missile://Silo?
     	    mobile=false;//TODO
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case bob:
     	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*1));
@@ -313,26 +337,31 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    anchoring=Anchoring.floating;
     	    mobile=false;
     	    canTurn=false;//ironic?
+    	    defaultModelAssignment();
     	    break;
     	case alienBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
+	    //TODO: Model
     	    break;
     	case canyonBoss1:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case canyonBoss2:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case lavaMan://Also terraform-o-bot
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
+    	    defaultModelAssignment();
     	    break;
     	case arcticBoss:
     	    //ARTIC / Ymir. Hangs from ceiling.
@@ -340,6 +369,7 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    projectileFiringBehavior();
 	    mobile=false;
 	    anchoring=Anchoring.ceiling;
+    	    defaultModelAssignment();
     	    break;
     	case helicopter://TODO
     	    break;
@@ -348,12 +378,14 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    mobile=false;
     	    foliage=true;
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case ceilingStatic:
     	    canTurn=false;
     	    mobile=false;
     	    setTop(Vector3D.MINUS_J);
     	    anchoring=Anchoring.ceiling;
+    	    defaultModelAssignment();
     	    break;
     	case bobAndAttack:{
     	    addBehavior(new SteadilyRotating().setRotationPhase(2*Math.PI*Math.random()));
@@ -378,10 +410,12 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    mobile=false;
     	    canTurn=false;
     	    anchoring=Anchoring.floating;
+    	    defaultModelAssignment();
     	    break;}
     	case forwardDrive:
     	    canTurn=false;
     	    anchoring=Anchoring.terrain;
+    	    defaultModelAssignment();
     	    break;
     	case fallingStalag:
     	    fallingObjectBehavior();
@@ -390,14 +424,17 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
     	    //canTurn=false;
     	    //mobile=false;
     	    anchoring=Anchoring.floating;
+    	    defaultModelAssignment();
     	    break;
     	case attackRetreatBelowSky:
     	    smartPlaneBehavior(tr,def,false);
     	    anchoring=Anchoring.floating;
+    	    defaultModelAssignment();
     	    break;
     	case attackRetreatAboveSky:
     	    smartPlaneBehavior(tr,def,true);
     	    anchoring=Anchoring.floating;
+    	    defaultModelAssignment();
     	    break;
     	case bobAboveSky:
     	    addBehavior(new Bobbing().setAdditionalHeight(TR.mapSquareSize*5));
@@ -406,14 +443,26 @@ public DEFObject(final TR tr,Model model, EnemyDefinition def, EnemyPlacement pl
 	    mobile=false;
 	    canTurn=false;
 	    anchoring=Anchoring.floating;
+    	    defaultModelAssignment();
 	    break;
     	case factory:
     	    canTurn=false;
     	    mobile=false;
     	    anchoring=Anchoring.floating;
+    	    defaultModelAssignment();
     	    break;
     	}//end switch(logic)
     ///////////////////////////////////////////////////////////
+    
+    final Model model = getModel();
+    if(model!=null)
+	max = model.getMaximumVertexDims();
+    else
+	max = new Vector3D(TR.legacy2Modern(def.getBoundingBoxRadius()),TR.legacy2Modern(def.getBoundingBoxRadius()),0)
+		.scalarMultiply(1./1.5);
+    boundingWidth =max.getX();
+    boundingHeight=max.getY();
+    
     //Position Limit
      {final PositionLimit posLimit = new PositionLimit();
      posLimit.getPositionMaxima()[1]=tr.getWorld().sizeY;
@@ -495,10 +544,41 @@ public void destroy(){
     if(ruinObject!=null){
 	//Give the ruinObject is own position because it is sharing positions with the original WorldObject, 
 	//which is going to be sent to xyz=Double.INFINITY soon.
-	ruinObject.setPosition(Arrays.copyOf(ruinObject.getPosition(), 3));
+	ruinObject.setPosition(Arrays.copyOf(getPosition(), 3));
+	ruinObject.setVisible(true);
 	ruinObject.setActive(true);}
     super.destroy();
 }
+
+private void defaultModelAssignment() throws IllegalAccessException, FileLoadException, IOException{
+    setModel(getTr().getResourceManager().getBINModel(
+	    def.getComplexModelFile(), 
+	    getTr().getGlobalPaletteVL(), null, null));
+}
+
+private void defaultRuinObject(EnemyPlacement pl) throws IOException, IllegalArgumentException, IllegalAccessException, FileLoadException{
+  //Spawn a second, powerup-free model using the simplemodel
+    //Model simpleModel=null;
+    //try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPaletteVL(),null,tr.gpu.get().getGl());}
+    //catch(Exception e){e.printStackTrace();}
+    EnemyDefinition ed = new EnemyDefinition();
+    ed.setLogic(EnemyLogic.groundDumb);
+    ed.setDescription("auto-generated enemy rubble def");
+    ed.setPowerupProbability(0);
+    ed.setComplexModelFile(def.getSimpleModel());
+    EnemyPlacement simplePlacement = pl.clone();
+    
+   // if(ed.getComplexModelFile()!=null){
+    final DEFObject ruin = new DEFObject(getTr(),ed,simplePlacement);
+    ruin.setActive(false);
+    ruin.setRuin(true);
+    setRuinObject(ruin);
+    ruin.setPosition(getPosition());
+    ruin.notifyPositionChange();
+    try{ruin.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
+    catch(MathArithmeticException e){e.printStackTrace();}
+    //}//end if(!null)
+}//end setRuinObject(...)
 
 private void proposeRandomYell(){
     final String sfxFile = def.getBossYellSFXFile();
@@ -695,6 +775,10 @@ public void setRuinObject(DEFObject ruin) {
     ruinObject=ruin;
 }
 
+public WorldObject getRuinObject(){
+    return ruinObject;
+}
+
 /**
  * @return the logic
  */
@@ -749,10 +833,6 @@ public boolean isIgnoringProjectiles() {
  */
 public void setIgnoringProjectiles(boolean ignoringProjectiles) {
     this.ignoringProjectiles = ignoringProjectiles;
-}
-
-public void setIsRuin(boolean b) {
-    isRuin=b;
 }
 
 /**

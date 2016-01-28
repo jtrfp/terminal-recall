@@ -21,7 +21,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
-import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.Reporter;
@@ -76,7 +75,8 @@ public class DEFObjectPlacer implements ObjectPlacer{
 			Model model =models[pl.getDefIndex()];
 			if(model!=null){
 			    final EnemyDefinition def = defs.get(pl.getDefIndex());
-				final DEFObject obj =new DEFObject(tr,model,def,pl);
+			    try{
+				final DEFObject obj =new DEFObject(tr,def,pl);
 				if(defList!=null)defList.add(obj);
 				if(def.isShowOnBriefing()&&!enemyPlacementMap.containsKey(def)){
 					enemyPlacementMap.put(def, obj);
@@ -88,25 +88,6 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				objPos[2]= TR.legacy2Modern	(pl.getLocationOnMap().getX())+positionOffset.getZ();
 				obj.notifyPositionChange();
 				
-				if(def.getLogic()==EnemyLogic.groundStaticRuin){
-				    //Spawn a second, powerup-free model using the simplemodel
-				    Model simpleModel=null;
-				    try{simpleModel = tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPaletteVL(),null,tr.gpu.get().getGl());}
-				    catch(Exception e){e.printStackTrace();}
-				    EnemyDefinition ed = new EnemyDefinition();
-				    ed.setLogic(EnemyLogic.groundDumb);
-				    ed.setDescription("auto-generated enemy rubble def");
-				    ed.setPowerupProbability(0);
-				    EnemyPlacement simplePlacement = pl.clone();
-				    final DEFObject ruin = new DEFObject(tr,simpleModel,ed,simplePlacement);
-				    ruin.setActive(false);
-				    ruin.setIsRuin(true);
-				    obj.setRuinObject(ruin);
-				    ruin.setPosition(obj.getPosition());
-				    try{ruin.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
-					catch(MathArithmeticException e){e.printStackTrace();}
-				    target.add(ruin);
-				}//end if(groundStaticRuin)
 				if(pl.getRoll()!=0||pl.getPitch()!=0||pl.getYaw()!=0)//Only set if not 0,0,0
 				 try{obj.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
 				catch(MathArithmeticException e){e.printStackTrace();}
@@ -116,7 +97,9 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    headingArray[1]=headingOverride.getY();
 				    headingArray[2]=headingOverride.getZ();
 				  }//end if(headingOverride)
-				target.add(obj);
+				addWithRuins(obj,target);
+				//target.add(obj);
+			    }catch(Exception e){e.printStackTrace();}
 				}//end if(model!=null)
 			else{System.out.println("Skipping triangle list at index "+pl.getDefIndex());}
 			}//end for(places)
@@ -124,6 +107,20 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		    enemyIntros.add(new EnemyIntro(enemyPlacementMap.get(ed),ed.getDescription()));
 		}
 		}//end placeObjects
+	
+	/**
+	 * Yo dawg, we heard you like ruin objects, so we put ruin objects in your ruin objects
+	 * so you can have ruins from your ruins after they are ruined.
+	 * @param object
+	 * @since Jan 28, 2016
+	 */
+	private void addWithRuins(DEFObject object, RenderableSpacePartitioningGrid target){
+	    target.add(object);
+	    System.out.println("Added DEF "+object);
+	    final WorldObject ruin = object.getRuinObject();
+	    if(ruin instanceof DEFObject)
+		addWithRuins((DEFObject)ruin, target);
+	}//end addWithRuins(...)
 	/**
 	 * @return the headingOverride
 	 */

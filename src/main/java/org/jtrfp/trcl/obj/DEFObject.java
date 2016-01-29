@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.obj;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import org.jtrfp.trcl.beh.BuzzByPlayerSFX;
 import org.jtrfp.trcl.beh.CollidesWithPlayer;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
+import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
 import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
@@ -82,7 +84,8 @@ import org.jtrfp.trcl.snd.SoundTexture;
 public class DEFObject extends WorldObject {
     private final double boundingHeight, boundingWidth;
     private HitBox [] hitBoxes;
-    private WorldObject ruinObject;
+    //private WorldObject ruinObject;
+    private ArrayList<WorldObject> subObjects = null;
     private final EnemyLogic logic;
     private final EnemyDefinition def;
     private boolean mobile,canTurn,foliage,boss,
@@ -340,10 +343,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    defaultModelAssignment();
     	    break;
     	case alienBoss:
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
-	    projectileFiringBehavior();
 	    mobile=false;
-	    //TODO: Model
     	    break;
     	case canyonBoss1:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
@@ -538,7 +538,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     
     proposeRandomYell();
     }//end DEFObject
-
+/*
 @Override
 public void destroy(){
     if(ruinObject!=null){
@@ -548,7 +548,7 @@ public void destroy(){
 	ruinObject.setVisible(true);
 	ruinObject.setActive(true);}
     super.destroy();
-}
+}*/
 
 private void defaultModelAssignment() throws IllegalAccessException, FileLoadException, IOException{
     setModel(getTr().getResourceManager().getBINModel(
@@ -571,10 +571,19 @@ private void defaultRuinObject(EnemyPlacement pl) throws IOException, IllegalArg
    // if(ed.getComplexModelFile()!=null){
     final DEFObject ruin = new DEFObject(getTr(),ed,simplePlacement);
     ruin.setActive(false);
+    ruin.setVisible(false);
     ruin.setRuin(true);
-    setRuinObject(ruin);
+    getSubObjects().add(ruin);
     ruin.setPosition(getPosition());
     ruin.notifyPositionChange();
+    addBehavior(new CustomDeathBehavior(new Runnable(){
+	@Override
+	public void run() {
+	    ruin.setPosition(Arrays.copyOf(getPosition(), 3));
+	    ruin.notifyPositionChange();
+	    ruin.setActive(true);
+	    ruin.setVisible(true);
+	}}));
     try{ruin.setDirection(new ObjectDirection(pl.getRoll(),pl.getPitch(),pl.getYaw()+65536));}
     catch(MathArithmeticException e){e.printStackTrace();}
     //}//end if(!null)
@@ -771,13 +780,6 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 public void setTop(Vector3D top){
     super.setTop(top);
 }
-public void setRuinObject(DEFObject ruin) {
-    ruinObject=ruin;
-}
-
-public WorldObject getRuinObject(){
-    return ruinObject;
-}
 
 /**
  * @return the logic
@@ -865,10 +867,15 @@ public void setShieldGen(boolean shieldGen) {
 
 @Override
 public String toString(){
+    final StringBuilder attachedObjects = new StringBuilder();
+    attachedObjects.append("\n\tAttached objects: ");
+    for(WorldObject wo:getSubObjects())
+	attachedObjects.append("\n\t "+wo.toString()+" ");
+	
     return "DEFObject Model="+getModel().getDebugName()+" Logic="+logic+" Anchoring="+anchoring+
 	    "\n\tmobile="+mobile+" isRuin="+isRuin+" foliage="+foliage+" boss="+boss+" spinCrash="+spinCrash+
 	    "\n\tignoringProjectiles="+ignoringProjectiles+"\n"+
-	    "\tRuinObject="+ruinObject;
+	    "\tRuinObject="+attachedObjects.toString();
 }
 
 enum Anchoring{
@@ -973,5 +980,15 @@ private double getDEFSpeedScalar(){
 	final TVF3Game tvf3 = (TVF3Game)getTr().getGame();
 	return tvf3.getDifficulty().getDefSpeedScalar();
     }catch(ClassCastException e){return 1;}
+}
+
+public ArrayList<WorldObject> getSubObjects() {
+    if(subObjects==null)
+	subObjects = new ArrayList<WorldObject>();
+    return subObjects;
+}
+
+protected void setSubObjects(ArrayList<WorldObject> attachedObjects) {
+    this.subObjects = attachedObjects;
 }
 }//end DEFObject

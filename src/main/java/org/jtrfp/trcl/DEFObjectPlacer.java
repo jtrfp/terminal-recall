@@ -97,7 +97,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    headingArray[1]=headingOverride.getY();
 				    headingArray[2]=headingOverride.getZ();
 				  }//end if(headingOverride)
-				addWithRuins(obj,target);
+				addWithSubObjects(obj,target);
 				//target.add(obj);
 			    }catch(Exception e){e.printStackTrace();}
 				}//end if(model!=null)
@@ -109,17 +109,16 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		}//end placeObjects
 	
 	/**
-	 * Yo dawg, we heard you like ruin objects, so we put ruin objects in your ruin objects
-	 * so you can have ruins from your ruins after they are ruined.
+	 * Yo dawg, we heard you like subObject objects, so we put subObject objects in your subObject objects
+	 * so you can have subObjects from your subObjects after they are subObjected.
 	 * @param object
 	 * @since Jan 28, 2016
 	 */
-	private void addWithRuins(DEFObject object, RenderableSpacePartitioningGrid target){
+	private void addWithSubObjects(WorldObject object, RenderableSpacePartitioningGrid target){
 	    target.add(object);
-	    System.out.println("Added DEF "+object);
-	    final WorldObject ruin = object.getRuinObject();
-	    if(ruin instanceof DEFObject)
-		addWithRuins((DEFObject)ruin, target);
+	    if(object instanceof DEFObject)
+	     for(WorldObject subObject:((DEFObject)object).getSubObjects())
+	      addWithSubObjects(subObject, target);
 	}//end addWithRuins(...)
 	/**
 	 * @return the headingOverride

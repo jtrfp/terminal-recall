@@ -574,7 +574,7 @@ private void defaultRuinObject(EnemyPlacement pl) throws IOException, IllegalArg
     ruin.setVisible(false);
     ruin.setRuin(true);
     getSubObjects().add(ruin);
-    ruin.setPosition(getPosition());
+    ruin.setPosition(new double[]{-999999999999999999.,-9999999999999999999.,-999999999999999999.});//Relevant nowhere
     ruin.notifyPositionChange();
     addBehavior(new CustomDeathBehavior(new Runnable(){
 	@Override

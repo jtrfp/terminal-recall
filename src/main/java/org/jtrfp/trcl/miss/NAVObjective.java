@@ -268,7 +268,6 @@ public abstract class NAVObjective {
 				}//end run()
 			    }));
 		    }
-		    bossObject.addBehavior(new HorizAimAtPlayerBehavior(((TVF3Game)tr.getGame()).getPlayer()));
 		    bossObject.setIgnoringProjectiles(true);
 		    final NAVObjective objective = new NAVObjective(this){
 			    @Override

@@ -845,8 +845,8 @@ public class Mission {
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			tr.getDefaultGrid().removeBranch(((TVF3Game)game).getNavSystem());
-			tr.getDefaultGrid().removeBranch(((TVF3Game)game).getHUDSystem());
+			getPartitioningGrid().removeBranch(((TVF3Game)game).getNavSystem());
+			getPartitioningGrid().removeBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(false);
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
@@ -863,8 +863,8 @@ public class Mission {
 		    @Override
 		    public void run() {
 			((TVF3Game)tr.getGame()).getNavSystem().activate();
-			tr.getDefaultGrid().addBranch(((TVF3Game)game).getNavSystem());
-			tr.getDefaultGrid().addBranch(((TVF3Game)game).getHUDSystem());
+			getPartitioningGrid().addBranch(((TVF3Game)game).getNavSystem());
+			getPartitioningGrid().addBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);

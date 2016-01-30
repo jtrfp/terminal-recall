@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +84,7 @@ import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
 public class DEFObject extends WorldObject {
-    private final double boundingHeight, boundingWidth;
+    private Double boundingHeight, boundingWidth;
     private HitBox [] hitBoxes;
     //private WorldObject ruinObject;
     private ArrayList<WorldObject> subObjects = null;
@@ -94,12 +96,15 @@ public class DEFObject extends WorldObject {
     private RotatedModelSource              rotatedModelSource;
     public static final String [] BIG_EXP_SOUNDS = new String[]{"EXP3.WAV","EXP4.WAV","EXP5.WAV"};
     public static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
+    private final ArrayList<Object> hardReferences = new ArrayList<Object>();
     
 public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
     super(tr);
     this.def=def;
-    Vector3D max = Vector3D.ZERO;
-    
+    if(def==null){
+	logic = null;
+	return;
+	}
     anchoring=Anchoring.floating;
     logic  =def.getLogic();
     mobile =true;
@@ -126,6 +131,8 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
 	    TR.legacy2Modern(def.getPivotX()), 
 	    TR.legacy2Modern(def.getPivotY()), 
 	    TR.legacy2Modern(def.getPivotZ()));
+    if(logic == null)
+	return;
     switch(logic){
     	case groundDumb:
     	    mobile=false;
@@ -211,11 +218,13 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    mobile=false;
     	    projectileFiringBehavior();
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case cityBossSmart:
     	    mobile=false;
     	    projectileFiringBehavior();
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case staticFiringSmart:{
     	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
@@ -311,6 +320,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    anchoring=Anchoring.terrain;
     	    mobile=false;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case volcanoBoss:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
@@ -318,6 +328,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    anchoring=Anchoring.terrain;
     	    mobile=false;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case volcano://Wat.
     	    unhandled(def);
@@ -325,6 +336,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    mobile=false;
     	    anchoring=Anchoring.terrain;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case missile://Silo?
     	    mobile=false;//TODO
@@ -344,24 +356,29 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    break;
     	case alienBoss:
 	    mobile=false;
+	    defaultModelAssignment();
+	    alienBoss(pl);
     	    break;
     	case canyonBoss1:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case canyonBoss2:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case lavaMan://Also terraform-o-bot
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
 	    projectileFiringBehavior();
 	    mobile=false;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	case arcticBoss:
     	    //ARTIC / Ymir. Hangs from ceiling.
@@ -370,8 +387,10 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
 	    mobile=false;
 	    anchoring=Anchoring.ceiling;
     	    defaultModelAssignment();
+    	    defaultBossNAVTargetingResponse();
     	    break;
-    	case helicopter://TODO
+    	case helicopter:
+    	    defaultModelAssignment();
     	    break;
     	case tree:
     	    canTurn=false;
@@ -453,15 +472,6 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    break;
     	}//end switch(logic)
     ///////////////////////////////////////////////////////////
-    
-    final Model model = getModel();
-    if(model!=null)
-	max = model.getMaximumVertexDims();
-    else
-	max = new Vector3D(TR.legacy2Modern(def.getBoundingBoxRadius()),TR.legacy2Modern(def.getBoundingBoxRadius()),0)
-		.scalarMultiply(1./1.5);
-    boundingWidth =max.getX();
-    boundingHeight=max.getY();
     
     //Position Limit
      {final PositionLimit posLimit = new PositionLimit();
@@ -555,6 +565,12 @@ private void defaultModelAssignment() throws IllegalAccessException, FileLoadExc
 	    def.getComplexModelFile(), 
 	    getTr().getGlobalPaletteVL(), null, null));
 }
+
+/*private void alienModelAssignment() throws FileLoadException, IOException, IllegalAccessException{
+    setModel(getTr().getResourceManager().getBINModel(
+	    def.getSimpleModel(), 
+	    getTr().getGlobalPaletteVL(), null, null));
+}*/
 
 private void defaultRuinObject(EnemyPlacement pl) throws IOException, IllegalArgumentException, IllegalAccessException, FileLoadException{
   //Spawn a second, powerup-free model using the simplemodel
@@ -776,6 +792,63 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 		    "FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
 }//end smartPlaneBehavior()
 
+private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
+    addBehavior(new HorizAimAtPlayerBehavior(getTr().getGame().getPlayer()));
+    projectileFiringBehavior();
+    setVisible(false);
+    final TR tr = getTr();
+    final DEFObject alienTower = new DEFObject(tr,null,null);//TODO: Collision stuff expects DEFObject!!!
+    alienTower.setModel(tr.getResourceManager().getBINModel(def.getSimpleModel(), tr.getGlobalPaletteVL(), null, null));
+    alienTower.addBehavior(new DamageableBehavior().setMaxHealth(def.getThrustSpeed()).setAcceptsProjectileDamage(true));
+    alienTower.addBehavior(new DeathBehavior());
+    alienTower.addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
+    alienTower.addBehavior(new DebrisOnDeathBehavior());
+    getSubObjects().add(alienTower);
+    
+    alienTower.addBehavior(new CustomDeathBehavior(new Runnable(){
+	@Override
+	public void run() {
+	    System.out.println("ALIEN TOWER HAS DIED");
+	    DEFObject.this.setVisible(true);
+	    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
+	    probeForBehavior(DamageableBehavior.class).setEnable(true);
+	}}){});
+    
+    final PropertyChangeListener alienPCL;
+    addPropertyChangeListener(ACTIVE, alienPCL = new PropertyChangeListener(){//TODO: Something (probably NAVObjective.Factory) is making this take damage again
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    System.out.println("Alien boss. Enable old="+evt.getOldValue()+" new="+evt.getNewValue());
+	    if(evt.getNewValue() == Boolean.TRUE){
+		System.out.println("TOWER ACTIVATED");
+		probeForBehavior(ProjectileFiringBehavior.class).setEnable(false);
+		probeForBehavior(DamageableBehavior.class).setEnable(false);
+		DEFObject.this.setVisible(false);
+		alienTower.setPosition(Arrays.copyOf(getPosition(),3));
+		alienTower.setVisible(true);
+		alienTower.setActive(true);
+	    }
+	}});
+    
+    addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+	    @Override
+	    public void run() {
+		System.out.println("ALIEN boss NAV targetable behavior triggered. Turning on DamageableBehavior.");
+		alienTower.probeForBehavior(DamageableBehavior.class).setEnable(true);
+		}}));
+    
+    hardReferences.add(alienPCL);
+}//end alienBoss(...)
+
+private void defaultBossNAVTargetingResponse(){
+    addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
+	    @Override
+	    public void run() {
+		probeForBehavior(DamageableBehavior.class).setEnable(true);
+		setIgnoringProjectiles(false);}
+		}));
+}//end defaultBossNAVTargetingResponse()
+
 @Override
 public void setTop(Vector3D top){
     super.setTop(top);
@@ -872,7 +945,7 @@ public String toString(){
     for(WorldObject wo:getSubObjects())
 	attachedObjects.append("\n\t "+wo.toString()+" ");
 	
-    return "DEFObject Model="+getModel().getDebugName()+" Logic="+logic+" Anchoring="+anchoring+
+    return "DEFObject Model="+getModel()+" Logic="+logic+" Anchoring="+anchoring+
 	    "\n\tmobile="+mobile+" isRuin="+isRuin+" foliage="+foliage+" boss="+boss+" spinCrash="+spinCrash+
 	    "\n\tignoringProjectiles="+ignoringProjectiles+"\n"+
 	    "\tRuinObject="+attachedObjects.toString();
@@ -926,15 +999,32 @@ public BasicModelSource getModelSource(){
  * @return the boundingHeight
  */
 public double getBoundingHeight() {
+    if(boundingHeight == null){
+	calcBoundingDims();
+    }
     return boundingHeight;
-}
+}//end getBoundingHeight()
 
-/**
- * @return the boundingWidth
- */
 public double getBoundingWidth() {
+    if(boundingWidth == null){
+	calcBoundingDims();
+    }
     return boundingWidth;
-}
+}//end getBoundingHeight()
+
+private void calcBoundingDims(){
+    final Model model = getModel();
+    Vector3D max = Vector3D.ZERO;
+    if(model!=null)
+	max = model.getMaximumVertexDims();
+    else{
+	max = new Vector3D(TR.legacy2Modern(def.getBoundingBoxRadius()),TR.legacy2Modern(def.getBoundingBoxRadius()),0)
+		.scalarMultiply(1./1.5);
+	max = Vector3D.ZERO;
+	}
+    boundingWidth =max.getX();
+    boundingHeight=max.getY();
+}//end calcBoundingDims()
 
 public static class HitBox{
     private int vertexID;

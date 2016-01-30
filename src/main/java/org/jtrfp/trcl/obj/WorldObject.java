@@ -46,6 +46,7 @@ import org.jtrfp.trcl.mem.VEC4Address;
 public class WorldObject implements PositionedRenderable, PropertyListenable, Rotatable {
     public static final String HEADING  ="heading";
     public static final String TOP      ="top";
+    public static final String ACTIVE   ="active";
     
     private double[] 	heading = new double[] { 0, 0, 1 }, oldHeading= new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     private double[] 	top 	= new double[] { 0, 1, 0 }, oldTop    = new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
@@ -236,7 +237,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    return;
 	if (model == null)
 	    throw new NullPointerException(
-		    "Model is null. Did you forget to set it?");
+		    "Model is null. Did you forget to set it? Object in question is: \n"+this.toString());
 	final Model model = getModelRealtime();
 	//final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
 	//final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
@@ -551,12 +552,14 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      *            the active to set
      */
     public void setActive(boolean active) {
+	final boolean oldState = this.active;
 	if(this.active!=active)
 	    needToRecalcMatrix=true;
 	if(!this.active && active && isVisible()){
 	    this.active=true;
 	}
 	this.active = active;
+	pcs.firePropertyChange(ACTIVE,oldState,active);
     }//end setActive(...)
 
     public synchronized void movePositionBy(Vector3D delta) {

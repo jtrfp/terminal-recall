@@ -288,12 +288,6 @@ public abstract class NAVObjective {
 				wMission.get().exitBossMode();
 			    }//end run()
 			}));
-			bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
-			    @Override
-			    public void run() {
-				bossObject.probeForBehavior(DamageableBehavior.class).setEnable(true);
-				bossObject.setIgnoringProjectiles(false);}
-				}));
 			
 			if(bossTargs!=null){
 			 if(bossTargs.length==0){

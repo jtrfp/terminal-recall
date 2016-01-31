@@ -109,6 +109,7 @@ public class DamageableBehavior extends Behavior {
 	 */
 	public DamageableBehavior setMaxHealth(int maxHealth) {
 	    this.maxHealth = maxHealth;
+	    this.health = Math.min(health, maxHealth);
 	    return this;
 	}
 	

@@ -18,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -207,9 +208,26 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void setModel(Model m) {
 	if (m == null)
 	    throw new RuntimeException("Passed model cannot be null.");
+	final TRFuture<Model> thisModelFuture = this.model;
+	if(thisModelFuture != null)
+	    releaseCurrentModel();
 	try{this.model = m.finalizeModel();}catch(Exception e){throw new RuntimeException(e);}
-	
     }// end setModel(...)
+    
+    private void releaseCurrentModel(){
+	if(transparentTriangleObjectDefinitions!=null)
+	    for(int def:transparentTriangleObjectDefinitions)
+		tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
+	if(triangleObjectDefinitions!=null)
+	    for(int def:triangleObjectDefinitions)
+		tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
+	getOpaqueObjectDefinitionAddressesInVEC4()     .clear();
+	getTransparentObjectDefinitionAddressesInVEC4().clear();
+	transparentTriangleObjectDefinitions = null;
+	triangleObjectDefinitions            = null;
+	this.model            = null;
+	objectDefsInitialized = false;
+    }//end releaseCurrentModel()
 
     public synchronized void setDirection(ObjectDirection dir) {
 	if (dir.getHeading().getNorm() == 0 || dir.getTop().getNorm() == 0) {
@@ -533,6 +551,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public Model getModel() {
 	try{return model.get();}
+	catch(NullPointerException e){return null;}
 	catch(Exception e){throw new RuntimeException(e);}
     }
     

@@ -356,7 +356,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    break;
     	case alienBoss:
 	    mobile=false;
-	    defaultModelAssignment();
+	    alienModelAssignment();
 	    alienBoss(pl);
     	    break;
     	case canyonBoss1:
@@ -566,11 +566,11 @@ private void defaultModelAssignment() throws IllegalAccessException, FileLoadExc
 	    getTr().getGlobalPaletteVL(), null, null));
 }
 
-/*private void alienModelAssignment() throws FileLoadException, IOException, IllegalAccessException{
+private void alienModelAssignment() throws FileLoadException, IOException, IllegalAccessException{
     setModel(getTr().getResourceManager().getBINModel(
 	    def.getSimpleModel(), 
 	    getTr().getGlobalPaletteVL(), null, null));
-}*/
+}
 
 private void defaultRuinObject(EnemyPlacement pl) throws IOException, IllegalArgumentException, IllegalAccessException, FileLoadException{
   //Spawn a second, powerup-free model using the simplemodel
@@ -796,15 +796,52 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
     addBehavior(new HorizAimAtPlayerBehavior(getTr().getGame().getPlayer()));
     projectileFiringBehavior();
     setVisible(false);
+    final ResourceManager rm = getTr().getResourceManager();
+    setModel(rm.getBINModel(def.getSimpleModel(), getTr().getGlobalPaletteVL(), null, null));
     final TR tr = getTr();
-    final DEFObject alienTower = new DEFObject(tr,null,null);//TODO: Collision stuff expects DEFObject!!!
+    final int towerShields = def.getThrustSpeed();
+    final int alienShields = pl.getStrength();
+    final int totalShields = towerShields + alienShields;
+    // BOSS
+    final DamageTrigger damageTrigger = new DamageTrigger(){
+	@Override
+	public void healthBelowThreshold() {
+	    final Model oldModel = getModel();
+	    try{setModel(rm.getBINModel(def.getComplexModelFile(), getTr().getGlobalPaletteVL(), null, null));}
+	    catch(Exception e){e.printStackTrace();}
+	    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
+	    final Vector3D pos = new Vector3D(getPosition());
+	    getTr().getResourceManager().getExplosionFactory().triggerExplosion(pos, Explosion.ExplosionType.Blast);
+	    final Vector3D dims = oldModel.getMaximumVertexDims();
+	    final DebrisSystem debrisSystem = getTr().getResourceManager().getDebrisSystem();
+	    for(int i=0; i<200; i++){
+		final Vector3D rPos = new Vector3D(
+			Math.random()*dims.getX(),
+			Math.random()*dims.getY(),
+			Math.random()*dims.getZ()).
+			 subtract(dims.scalarMultiply(.5)).
+			 scalarMultiply(2);
+		final double velocity = 1000;
+		final Vector3D rVel = new Vector3D(
+			(Math.random()-.5)*velocity,
+			(Math.random()-.5)*velocity,
+			(Math.random()-.5)*velocity).
+			 scalarMultiply(2);
+		debrisSystem.spawn(rPos, rVel);
+	    }//end for(200)
+	    getTr().getResourceManager().getDebrisSystem().spawn(pos, new Vector3D(Math.random()*10000,Math.random()*10000,Math.random()*10000));
+	}};
+    damageTrigger.setThreshold(towerShields);
+    addBehavior(damageTrigger);
+    /*final DEFObject alienTower = new DEFObject(tr,null,null);//TODO: Collision stuff expects DEFObject!!!
     alienTower.setModel(tr.getResourceManager().getBINModel(def.getSimpleModel(), tr.getGlobalPaletteVL(), null, null));
     alienTower.addBehavior(new DamageableBehavior().setMaxHealth(def.getThrustSpeed()).setAcceptsProjectileDamage(true));
     alienTower.addBehavior(new DeathBehavior());
     alienTower.addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
     alienTower.addBehavior(new DebrisOnDeathBehavior());
-    getSubObjects().add(alienTower);
+    getSubObjects().add(alienTower);*/
     
+    /*
     alienTower.addBehavior(new CustomDeathBehavior(new Runnable(){
 	@Override
 	public void run() {
@@ -813,28 +850,27 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
 	    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
 	    probeForBehavior(DamageableBehavior.class).setEnable(true);
 	}}){});
-    
+    */
+    //TOWER
     final PropertyChangeListener alienPCL;
-    addPropertyChangeListener(ACTIVE, alienPCL = new PropertyChangeListener(){//TODO: Something (probably NAVObjective.Factory) is making this take damage again
+    addPropertyChangeListener(ACTIVE, alienPCL = new PropertyChangeListener(){
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-	    System.out.println("Alien boss. Enable old="+evt.getOldValue()+" new="+evt.getNewValue());
 	    if(evt.getNewValue() == Boolean.TRUE){
-		System.out.println("TOWER ACTIVATED");
+		probeForBehavior(DamageableBehavior.class).setMaxHealth(totalShields);
+		probeForBehavior(DamageableBehavior.class).setHealth(totalShields);
 		probeForBehavior(ProjectileFiringBehavior.class).setEnable(false);
-		probeForBehavior(DamageableBehavior.class).setEnable(false);
-		DEFObject.this.setVisible(false);
-		alienTower.setPosition(Arrays.copyOf(getPosition(),3));
-		alienTower.setVisible(true);
-		alienTower.setActive(true);
+		//probeForBehavior(DamageableBehavior.class).setEnable(false);
+		DEFObject.this.setVisible(true);
 	    }
 	}});
     
+    //DAMAGEABLE TOOWER
     addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 	    @Override
 	    public void run() {
-		System.out.println("ALIEN boss NAV targetable behavior triggered. Turning on DamageableBehavior.");
-		alienTower.probeForBehavior(DamageableBehavior.class).setEnable(true);
+		probeForBehavior(DamageableBehavior.class).setEnable(true);
+		DEFObject.this.setIgnoringProjectiles(false);
 		}}));
     
     hardReferences.add(alienPCL);
@@ -1018,9 +1054,9 @@ private void calcBoundingDims(){
     if(model!=null)
 	max = model.getMaximumVertexDims();
     else{
-	max = new Vector3D(TR.legacy2Modern(def.getBoundingBoxRadius()),TR.legacy2Modern(def.getBoundingBoxRadius()),0)
+	max = new Vector3D((def.getBoundingBoxRadius()/TR.crossPlatformScalar),(def.getBoundingBoxRadius()/TR.crossPlatformScalar),0)
 		.scalarMultiply(1./1.5);
-	max = Vector3D.ZERO;
+	//max = Vector3D.ZERO;
 	}
     boundingWidth =max.getX();
     boundingHeight=max.getY();

@@ -793,7 +793,7 @@ private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAbove
 }//end smartPlaneBehavior()
 
 private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
-    addBehavior(new HorizAimAtPlayerBehavior(getTr().getGame().getPlayer()));
+    addBehavior(new HorizAimAtPlayerBehavior(getTr().getGame().getPlayer())).setEnable(false);
     projectileFiringBehavior();
     setVisible(false);
     final ResourceManager rm = getTr().getResourceManager();
@@ -810,17 +810,18 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
 	    try{setModel(rm.getBINModel(def.getComplexModelFile(), getTr().getGlobalPaletteVL(), null, null));}
 	    catch(Exception e){e.printStackTrace();}
 	    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
+	    probeForBehavior(HorizAimAtPlayerBehavior.class).setEnable(true);
 	    final Vector3D pos = new Vector3D(getPosition());
 	    getTr().getResourceManager().getExplosionFactory().triggerExplosion(pos, Explosion.ExplosionType.Blast);
 	    final Vector3D dims = oldModel.getMaximumVertexDims();
 	    final DebrisSystem debrisSystem = getTr().getResourceManager().getDebrisSystem();
-	    for(int i=0; i<200; i++){
+	    for(int i=0; i<20; i++){
 		final Vector3D rPos = new Vector3D(
-			Math.random()*dims.getX(),
-			Math.random()*dims.getY(),
-			Math.random()*dims.getZ()).
-			 subtract(dims.scalarMultiply(.5)).
-			 scalarMultiply(2);
+			(Math.random()-.5)*dims.getX(),
+			(Math.random()-.5)*dims.getY(),
+			(Math.random()-.5)*dims.getZ()).
+			 scalarMultiply(2).
+			 add(new Vector3D(getPosition()));
 		final double velocity = 1000;
 		final Vector3D rVel = new Vector3D(
 			(Math.random()-.5)*velocity,
@@ -831,26 +832,8 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
 	    }//end for(200)
 	    getTr().getResourceManager().getDebrisSystem().spawn(pos, new Vector3D(Math.random()*10000,Math.random()*10000,Math.random()*10000));
 	}};
-    damageTrigger.setThreshold(towerShields);
+    damageTrigger.setThreshold(alienShields);
     addBehavior(damageTrigger);
-    /*final DEFObject alienTower = new DEFObject(tr,null,null);//TODO: Collision stuff expects DEFObject!!!
-    alienTower.setModel(tr.getResourceManager().getBINModel(def.getSimpleModel(), tr.getGlobalPaletteVL(), null, null));
-    alienTower.addBehavior(new DamageableBehavior().setMaxHealth(def.getThrustSpeed()).setAcceptsProjectileDamage(true));
-    alienTower.addBehavior(new DeathBehavior());
-    alienTower.addBehavior(new ExplodesOnDeath(ExplosionType.BigExplosion));
-    alienTower.addBehavior(new DebrisOnDeathBehavior());
-    getSubObjects().add(alienTower);*/
-    
-    /*
-    alienTower.addBehavior(new CustomDeathBehavior(new Runnable(){
-	@Override
-	public void run() {
-	    System.out.println("ALIEN TOWER HAS DIED");
-	    DEFObject.this.setVisible(true);
-	    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
-	    probeForBehavior(DamageableBehavior.class).setEnable(true);
-	}}){});
-    */
     //TOWER
     final PropertyChangeListener alienPCL;
     addPropertyChangeListener(ACTIVE, alienPCL = new PropertyChangeListener(){
@@ -860,7 +843,6 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
 		probeForBehavior(DamageableBehavior.class).setMaxHealth(totalShields);
 		probeForBehavior(DamageableBehavior.class).setHealth(totalShields);
 		probeForBehavior(ProjectileFiringBehavior.class).setEnable(false);
-		//probeForBehavior(DamageableBehavior.class).setEnable(false);
 		DEFObject.this.setVisible(true);
 	    }
 	}});

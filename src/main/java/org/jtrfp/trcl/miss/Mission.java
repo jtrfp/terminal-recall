@@ -38,6 +38,8 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
+import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
+import org.jtrfp.trcl.beh.SpinCrashDeathBehavior;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.Renderer;
@@ -61,6 +63,7 @@ import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
+import org.jtrfp.trcl.obj.SpawnsRandomExplosionsAndDebris;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShell;
@@ -250,7 +253,12 @@ public class Mission {
 	    ///////// STATE
 	    final Propelled propelled = player.probeForBehavior(Propelled.class); 
 	    propelled.setPropulsion(propelled.getMinPropulsion());
-	    player.probeForBehavior(CollidesWithTerrain.class).setEnable(true);
+	    player.probeForBehavior(CollidesWithTerrain.class)   .setEnable(true);
+	    if(player.hasBehavior(SpawnsRandomSmoke.class))
+	     player.probeForBehavior(SpawnsRandomSmoke.class)    .setEnable(false);
+	    if(player.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
+	     player.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
+	    player.probeForBehavior(SpinCrashDeathBehavior.class).setEnable(false);
 	    
 	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
 	    Factory f = new NAVObjective.Factory(tr, getLevelName());

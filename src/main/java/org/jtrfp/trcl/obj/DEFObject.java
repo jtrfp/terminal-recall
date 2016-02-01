@@ -800,7 +800,7 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
     setVisible(false);
     final ResourceManager rm = getTr().getResourceManager();
     setModel(rm.getBINModel(def.getSimpleModel(), getTr().getGlobalPaletteVL(), null, null));
-    final int towerShields = def.getThrustSpeed();
+    final int towerShields = pl.getStrength();//Not sure exactly what should go here.
     final int alienShields = pl.getStrength();
     final int totalShields = towerShields + alienShields;
     // BOSS

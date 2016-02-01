@@ -80,6 +80,7 @@ import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
+import org.jtrfp.trcl.snd.SoundEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
@@ -358,6 +359,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
 	    mobile=false;
 	    alienModelAssignment();
 	    alienBoss(pl);
+	    bossWarningSiren();
     	    break;
     	case canyonBoss1:
     	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
@@ -798,7 +800,6 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
     setVisible(false);
     final ResourceManager rm = getTr().getResourceManager();
     setModel(rm.getBINModel(def.getSimpleModel(), getTr().getGlobalPaletteVL(), null, null));
-    final TR tr = getTr();
     final int towerShields = def.getThrustSpeed();
     final int alienShields = pl.getStrength();
     final int totalShields = towerShields + alienShields;
@@ -858,6 +859,22 @@ private void alienBoss(EnemyPlacement pl) throws FileLoadException, IllegalAcces
     hardReferences.add(alienPCL);
 }//end alienBoss(...)
 
+private void bossWarningSiren(){
+    final PropertyChangeListener alienPCL;
+    addPropertyChangeListener(ACTIVE, alienPCL = new PropertyChangeListener(){
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    if(evt.getNewValue() == Boolean.TRUE){
+		final TR tr = getTr();
+		SoundSystem ss = getTr().soundSystem.get();
+		final SoundTexture st = tr.getResourceManager().soundTextures.get("WARNING.WAV");
+		final SoundEvent se   = ss.getPlaybackFactory().create(st, new double[]{SoundSystem.DEFAULT_SFX_VOLUME,SoundSystem.DEFAULT_SFX_VOLUME});
+		ss.enqueuePlaybackEvent(se);
+	    }
+	}});
+    hardReferences.add(alienPCL);
+}//end bossWarningSiren()
+
 private void defaultBossNAVTargetingResponse(){
     addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 	    @Override
@@ -865,6 +882,7 @@ private void defaultBossNAVTargetingResponse(){
 		probeForBehavior(DamageableBehavior.class).setEnable(true);
 		setIgnoringProjectiles(false);}
 		}));
+    bossWarningSiren();
 }//end defaultBossNAVTargetingResponse()
 
 @Override

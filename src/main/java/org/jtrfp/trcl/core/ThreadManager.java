@@ -325,8 +325,6 @@ public final class ThreadManager implements GLExecutor{
     public void removeRepeatingGLTask(Callable<?> task){
 	if(task==null)
 	    throw new NullPointerException("Passed task intolerably null.");
-	if(!repeatingGLTasks.contains(task))
-	    return;
 	repeatingGLTasks.remove(task);
     }//end removeRepeatingGLTask(...)
     
@@ -341,8 +339,6 @@ public final class ThreadManager implements GLExecutor{
     public void removeRepeatingGPUMemTask(Callable<?> task){
 	if(task==null)
 	    throw new NullPointerException("Passed task intolerably null.");
-	if(!repeatingGPUMemAccessTasks.contains(task))
-	    return;
 	repeatingGPUMemAccessTasks.remove(task);
     }//end removeRepeatingGPUMemTask(...)
 }// end ThreadManager

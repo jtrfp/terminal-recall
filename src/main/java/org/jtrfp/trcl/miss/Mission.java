@@ -669,11 +669,12 @@ public class Mission {
 
     private void cleanup() {
 	displayHandler.setDisplayMode(emptyMode);
+	tr.getResourceManager().getPowerupSystem().removeAll();
 	// Remove projectile factories
 	for(ProjectileFactory pf:tr.getResourceManager().getProjectileFactories())
 	    for(Projectile projectile:pf.getProjectiles())
 		projectile.destroy();
-    }
+    }//end cleanup()
     /**
      * Find a tunnel at the given map square, if any.
      * @param mapSquareXZ Position in cells, not world coords.
@@ -715,13 +716,11 @@ public class Mission {
 	System.out.println("Entering tunnel "+tunnelToEnter);
 	final Game game = ((TVF3Game)tr.getGame());
 	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
-	setCurrentTunnel(tunnelToEnter);
+	
 	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnelToEnter);
-	tr.setRunState(new TunnelState(){});
 	
 	//tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
 	//tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
-	setDisplayMode(tunnelMode);
 	
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
@@ -750,10 +749,9 @@ public class Mission {
 	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
 	tunnelToEnter.dispatchTunnelEntryNotifications();
 	final Renderer portalRenderer = teo.getPortalEntrance().getPortalRenderer();
-	//TODO: NPE bug on this line v
 	final Camera secondaryCam = /*tr.secondaryRenderer.get().getCamera()*/portalRenderer.getCamera();
 	//player.setPosition(Tunnel.TUNNEL_START_POS.toArray());//TODO: remove debug code
-	player.setPosition(secondaryCam.getPosition()); //TODO: Uncomment
+	player.setPosition(secondaryCam.getPosition());
 	player.setHeading (secondaryCam.getHeading());
 	player.setTop     (secondaryCam.getTop());
 	player.notifyPositionChange();
@@ -767,6 +765,9 @@ public class Mission {
 		      getBelowCloudsSkyCubeGen());
 	
 	tr.setRunState(new TunnelState(){});
+	setCurrentTunnel(tunnelToEnter);
+	tr.setRunState(new TunnelState(){});
+	setDisplayMode(tunnelMode);
 	player.setActive(true);
     }//end enterTunnel()
     /**

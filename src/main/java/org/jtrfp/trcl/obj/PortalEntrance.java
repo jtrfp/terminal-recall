@@ -15,15 +15,17 @@ package org.jtrfp.trcl.obj;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
-import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.coll.ObjectTallyCollection;
 import org.jtrfp.trcl.core.PortalTexture;
 import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.RendererFactory.PortalNotAvailableException;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFuture;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.prop.SkyCubeGen;
@@ -33,12 +35,12 @@ import com.ochafik.util.listenable.Pair;
 
 public class PortalEntrance extends WorldObject {
     //// PROPERTIES
-    public static final String WITHIN_RANGE         = "withinRange";
+    public static final String RELEVANT         = "withinRange";
     public static final String PORTAL_TEXTURE_ID    = "portalTextureID";
     
     private PortalExit portalExit;
     private Renderer   portalRenderer;
-    private boolean    withinRange          = false;
+    private boolean    relevant          = false;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final PropertyChangeListener relevanceTallyListener = new RelevanceTallyListener();
     //private final PropertyChangeListener weakRelevanceTallyListener;
@@ -48,6 +50,8 @@ public class PortalEntrance extends WorldObject {
     private WorldObject approachingObject;
     private SkyCubeGen skyCubeGen = GameShell.DEFAULT_GRADIENT;
     private boolean    portalUnavailable = false;
+    private volatile long timeOfLastTick = 0L;
+    private TRFuture<Void> relevanceFuture;
 
     public PortalEntrance(TR tr, Model model, PortalExit exit, WorldObject approachingObject){
 	this(tr,exit,approachingObject);
@@ -81,42 +85,60 @@ public class PortalEntrance extends WorldObject {
     }//end RelevanceTallyListener
     
     private void becameIrrelevant(){
-	if(isPortalUnavailable())
-	    return;//Do nothing, failed to get portal in the first place.
-	final Renderer portalRenderer = getPortalRenderer();
-	if(portalRenderer == null)
-	    throw new IllegalStateException("cameraToMonitor is intolerably null.");
-	System.out.println("De-activating portal entrance...");
-	//Release the Camera
-	getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
-	portalExit.deactivate();
-	getPortalExit().setControlledCamera(null);
-	setPortalRenderer(null);
-	setWithinRange(false);
-	System.out.println("Done de-activing portal entrance.");
+	final ThreadManager tm = getTr().getThreadManager();
+	final TRFuture<Void> oldRelevanceFuture = relevanceFuture;
+	relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
+	    @Override
+	    public Void call() throws Exception {
+		if(oldRelevanceFuture!=null)
+		    oldRelevanceFuture.get();//Don't double-access
+		if(isPortalUnavailable())
+		    return null;//Do nothing, failed to get portal in the first place.
+		final Renderer portalRenderer = getPortalRenderer();
+		if(portalRenderer == null)
+		    throw new IllegalStateException("portalRenderer is intolerably null.");
+		System.out.println("De-activating portal entrance...");
+		//Release the Camera
+		getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
+		portalExit.deactivate();
+		getPortalExit().setControlledCamera(null);
+		setPortalRenderer(null);
+		setRelevant(false);
+		System.out.println("Done de-activating portal entrance.");
+		return null;
+	    }});
     }
 
     private void becameRelevant() {
-	if (getPortalRenderer() != null)
-	    throw new IllegalStateException(
-		    "portalRenderer is intolerably non-null.");
-	try {
-	    final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
-		    .get().acquirePortalRenderer();
-	    System.out.println("Activating portal entrance...");
-	    getPortalExit().setControlledCamera(
-		    newRendererPair.getFirst().getCamera());
-	    newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
-	    setPortalRenderer(newRendererPair.getFirst());
-	    setWithinRange(true);
-	    setPortalTextureID(newRendererPair.getSecond());
-	    portalExit.activate();
-	    setPortalUnavailable(false);
-	    System.out.println("Done activating portal entrance.");
-	} catch (PortalNotAvailableException e) {
-	    System.out.println("Portal acquisition rejected: All are in use. PortalEntrance hash="+this.hashCode());
-	    setPortalUnavailable(true);
-	}// end catch(PortalNotAvailableException)
+	final ThreadManager tm = getTr().getThreadManager();
+	final TRFuture<Void> oldRelevanceFuture = relevanceFuture;
+	relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
+	    @Override
+	    public Void call() throws Exception {
+		try {
+		    if(oldRelevanceFuture!=null)
+			    oldRelevanceFuture.get();
+		    if (getPortalRenderer() != null)
+			    throw new IllegalStateException(
+				    "portalRenderer is intolerably non-null.");
+		    final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
+			    .get().acquirePortalRenderer();
+		    System.out.println("Activating portal entrance...");
+		    getPortalExit().setControlledCamera(
+			    newRendererPair.getFirst().getCamera());
+		    newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
+		    setPortalRenderer(newRendererPair.getFirst());
+		    setRelevant(true);
+		    setPortalTextureID(newRendererPair.getSecond());
+		    portalExit.activate();
+		    setPortalUnavailable(false);
+		    System.out.println("Done activating portal entrance.");
+		} catch (PortalNotAvailableException e) {
+		    System.out.println("Portal acquisition rejected: All are in use. PortalEntrance hash="+this.hashCode());
+		    setPortalUnavailable(true);
+		}// end catch(PortalNotAvailableException)
+		return null;
+	    }});
     }// end becameRelevant()
 
     public double[] getRelativePosition(double [] dest){
@@ -140,7 +162,8 @@ public class PortalEntrance extends WorldObject {
 	private final double [] relativePosition = new double[3];
 	@Override
 	public void tick(long tickTimeMillis){
-	    if(isWithinRange()){
+	    timeOfLastTick = tickTimeMillis;
+	    if(isRelevant()){
 		getRelativePosition(relativePosition);
 		final WorldObject approachingObject = getApproachingObject();
 		portalExit.updateObservationParams(relativePosition, getRelativeHeadingTop(),approachingObject.getHeading(),approachingObject.getTop());
@@ -206,8 +229,8 @@ public class PortalEntrance extends WorldObject {
     /**
      * @return the withinRange
      */
-    public boolean isWithinRange() {
-        return withinRange;
+    public boolean isRelevant() {
+        return relevant;
     }
 
     /**
@@ -224,13 +247,25 @@ public class PortalEntrance extends WorldObject {
         this.portalExit = portalExit;
     }
 
-    public void setWithinRange(boolean withinRange) {
-	final boolean oldValue = this.withinRange;
-        this.withinRange = withinRange;
-        pcs.firePropertyChange(WITHIN_RANGE, withinRange, oldValue);
+    public void setRelevant(boolean relevant) {
+	final boolean oldValue = this.relevant;
+        this.relevant = relevant;
+        pcs.firePropertyChange(RELEVANT, relevant, oldValue);
     }
 
     public Renderer getPortalRenderer() {
+	if(portalRenderer == null){
+	    System.out.println("WARNING: Portal renderer is null. isRelevant? "+isRelevant()+" RelevanceTally: "+getTr().gpu.get().rendererFactory.get().getRelevanceTallyOf(this));
+	    final Player player = getTr().getGame().getPlayer();
+	    final int dist = (int)Vect3D.distance(getPosition(), player.getPosition());
+	    final double [] posMapSq = new double[3];
+	    Vect3D.scalarMultiply(getPosition(), 1./TR.mapSquareSize, posMapSq);
+	    System.out.println("Portal position in mapSquares: "+posMapSq[0]+" "+posMapSq[1]+" "+posMapSq[2]+" ");
+	    Vect3D.scalarMultiply(player.getPosition(), 1./TR.mapSquareSize, posMapSq);
+	    System.out.println("Player position in mapSquares: "+posMapSq[0]+" "+posMapSq[1]+" "+posMapSq[2]+" ");
+	    System.out.println("Distance from player in mapSquares "+(dist/TR.mapSquareSize));
+	    System.out.println("Millis since last tick: "+(System.currentTimeMillis()-timeOfLastTick));
+	}
         return portalRenderer;
     }
 

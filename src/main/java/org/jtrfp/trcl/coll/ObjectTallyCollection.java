@@ -55,7 +55,7 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
 	fireObjectTallyChange(e, tally, tally-1);
 	tally--;
 	if(tally<0)
-	    throw new NegativeTallyException();
+	    throw new NegativeTallyException(e);
 	if(tally == 0)
 	    tallies.remove(e);
 	else
@@ -160,5 +160,9 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
     
     public static final class NegativeTallyException extends IllegalStateException{
 	public NegativeTallyException(){super();}
+
+	public NegativeTallyException(Object e) {
+	    super("Element in question: "+e);
+	}
     }
 }//end ObjectTallyList

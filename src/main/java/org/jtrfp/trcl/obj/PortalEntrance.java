@@ -72,6 +72,11 @@ public class PortalEntrance extends WorldObject {
 	allRelevant.addObjectTallyListener(this, relevanceTallyListener);
     }
     
+    @Override
+    public boolean supportsLoop(){
+	return false;
+    }
+    
     private class RelevanceTallyListener implements PropertyChangeListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -90,21 +95,23 @@ public class PortalEntrance extends WorldObject {
 	relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
 	    @Override
 	    public Void call() throws Exception {
-		if(oldRelevanceFuture!=null)
-		    oldRelevanceFuture.get();//Don't double-access
-		if(isPortalUnavailable())
-		    return null;//Do nothing, failed to get portal in the first place.
-		final Renderer portalRenderer = getPortalRenderer();
-		if(portalRenderer == null)
-		    throw new IllegalStateException("portalRenderer is intolerably null.");
-		System.out.println("De-activating portal entrance...");
-		//Release the Camera
-		getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
-		portalExit.deactivate();
-		getPortalExit().setControlledCamera(null);
-		setPortalRenderer(null);
-		setRelevant(false);
-		System.out.println("Done de-activating portal entrance.");
+		try{
+		    if(oldRelevanceFuture!=null)
+			oldRelevanceFuture.get();//Don't double-access
+		    if(isPortalUnavailable())
+			return null;//Do nothing, failed to get portal in the first place.
+		    final Renderer portalRenderer = getPortalRenderer();
+		    if(portalRenderer == null)
+			throw new IllegalStateException("portalRenderer is intolerably null.");
+		    System.out.println("De-activating portal entrance: "+PortalEntrance.this);
+		    //Release the Camera
+		    getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
+		    portalExit.deactivate();
+		    getPortalExit().setControlledCamera(null);
+		    setPortalRenderer(null);
+		    setRelevant(false);
+		    System.out.println("Done de-activating portal entrance.");
+		}catch(Exception e){e.printStackTrace();}
 		return null;
 	    }});
     }
@@ -123,7 +130,7 @@ public class PortalEntrance extends WorldObject {
 				    "portalRenderer is intolerably non-null.");
 		    final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
 			    .get().acquirePortalRenderer();
-		    System.out.println("Activating portal entrance...");
+		    System.out.println("Activating portal entrance... "+PortalEntrance.this);
 		    getPortalExit().setControlledCamera(
 			    newRendererPair.getFirst().getCamera());
 		    newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
@@ -137,6 +144,7 @@ public class PortalEntrance extends WorldObject {
 		    System.out.println("Portal acquisition rejected: All are in use. PortalEntrance hash="+this.hashCode());
 		    setPortalUnavailable(true);
 		}// end catch(PortalNotAvailableException)
+		catch(Exception e){e.printStackTrace();}
 		return null;
 	    }});
     }// end becameRelevant()

@@ -40,6 +40,7 @@ public class WeakPropertyChangeListener implements PropertyChangeListener {
 	else{//do it the sketchy way.
 	    try{
 	     Method mth = source.getClass().getMethod("removePropertyChangeListener", new Class [] {PropertyChangeListener.class});
+	     mth.setAccessible(true);
 	     mth.invoke(source, new Object[]{this});}
 	    catch(Exception e){e.printStackTrace();}
 	}

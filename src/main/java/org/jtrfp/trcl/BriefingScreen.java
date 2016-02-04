@@ -45,14 +45,13 @@ import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class BriefingScreen extends RenderableSpacePartitioningGrid {
-    private static final double Z_INCREMENT = .00001;
-    private static final double Z_START = -.99999;
+    private static final double Z_INCREMENT       = .00001;
+    private static final double Z_START           = -.99999;
     private static final double BRIEFING_SPRITE_Z = Z_START;
     private static final double TEXT_Z = BRIEFING_SPRITE_Z + Z_INCREMENT;
-    private static final double TEXT_BG_Z = TEXT_Z + Z_INCREMENT;
+    private static final double TEXT_BG_Z         = TEXT_Z + Z_INCREMENT;
     
     public static final double MAX_Z_DEPTH = TEXT_BG_Z + Z_INCREMENT;
-    //private static final double Z = .000000001;
     private final TR 		  tr;
     private final Sprite2D	  briefingScreen;
     private final CharAreaDisplay briefingChars;
@@ -60,10 +59,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private volatile double  	  scrollPos = 0;
     private final double	  scrollIncrement;
     private ArrayList<Runnable>	  scrollFinishCallbacks = new ArrayList<Runnable>();
-    private ColorPaletteVectorList palette;
-    private TimerTask	  scrollTimer;
-    private WorldObject	  planetObject;
-    private final BriefingLayout layout;
+    private ColorPaletteVectorList  palette;
+    private TimerTask	            scrollTimer;
+    private WorldObject	            planetObject;
+    private final BriefingLayout    layout;
     private final ControllerBarrier fireBarrier;
 
     public BriefingScreen(final TR tr, GLFont font, BriefingLayout layout, String debugName) {
@@ -93,14 +92,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	blackRectangle.setActive(true);
 	
 	scrollIncrement = layout.getScrollIncrement();
-	/*
-	missionTXT = new LazyTRFuture<TXTMissionBriefFile>(tr,new Callable<TXTMissionBriefFile>(){
-	    @Override
-	    public TXTMissionBriefFile call(){
-		return tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
-	    }//end call()
-	});
-	*/
     }//end constructor
 
     protected void notifyScrollFinishCallbacks() {
@@ -181,7 +172,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	renderer.getSkyCube().setSkyCubeGen(SkySystem.SPACE_STARS);
 	renderer.setAmbientLight(SkySystem.SPACE_AMBIENT_LIGHT);
 	renderer.setSunColor(SkySystem.SPACE_SUN_COLOR);
-	//game.setDisplayMode(game.briefingMode);
     }//end planetDisplayMode()
     
     public void missionCompleteSummary(LVLFile lvl, Result r){
@@ -192,23 +182,15 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
 		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
-	//tr.getDefaultGrid().nonBlockingAddBranch(game.getCurrentMission().getOverworldSystem());
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
 	
 	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(),lvl);
 	fireBarrier.waitForEvent();
-	//tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	final Camera camera 	 = tr.mainRenderer.get().getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);
-	/*World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		//BriefingScreen.this.addBranch(briefingChars);
-		tr.getDefaultGrid().removeBranch(game.getCurrentMission().getOverworldSystem());
-	    }});*/
     }//end missionCompleteSummary()
 
     public void briefingSequence(LVLFile lvl) {
@@ -224,7 +206,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	for(String token:layout.getNameTokens())
 	    content=content.replace(token, playerName);
 	setContent(content);
-	//tr.getDefaultGrid().nonBlockingAddBranch(overworld);
 	startScroll();
 	final boolean [] mWait = new boolean[]{false};
 	addScrollFinishCallback(new Runnable(){
@@ -232,22 +213,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    public void run() {
 		synchronized(mWait){mWait[0] = true; mWait.notifyAll();}
 	    }});
-	/*
-	final Thread spacebarWaitThread;
-	(spacebarWaitThread = new Thread(){
-	    @Override
-	    public void run(){
-		tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
-		synchronized(mWait){mWait[0] = true; mWait.notifyAll();}
-	    }//end run()
-	}).start();
-	try{synchronized(mWait){while(!mWait[0])mWait.wait();}}
-	catch(InterruptedException e){}
-	*/
 	fireBarrier.waitForEvent();
 	stopScroll();
-	//spacebarWaitThread.interrupt();
-	
 	//Enemy introduction
 	tr.setRunState(new Mission.EnemyBrief() {});
 	final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
@@ -301,7 +268,6 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.setRespondToTick(false);//freeze
 	    briefingChars.setScrollPosition(layout.getNumLines()-2);
 	    setContent(intro.getDescriptionString());
-	    //tr.getKeyStatus().waitForSequenceTyped(KeyEvent.VK_SPACE);
 	    fireBarrier.waitForEvent();
 	    //Restore previous state.
 	    wo.setVisible(vis);

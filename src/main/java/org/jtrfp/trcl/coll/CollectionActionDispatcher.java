@@ -15,27 +15,20 @@ package org.jtrfp.trcl.coll;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.SetUtils;
 import org.jtrfp.trcl.tools.Util;
 
 public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatable<E>, BulkRemovable<E>, Decorator<Collection<E>> {
     protected final Collection<E>             cache;
-    protected final Map<Collection<E>,Object> targetsMap;
     protected final Set<Collection<E>>        targets;
     
-    protected CollectionActionDispatcher(Collection<E> cache, Map<Collection<E>, Object> targetsMap){
-	this.cache     =cache;
-	this.targetsMap=targetsMap;
-	this.targets   =targetsMap.keySet();
-    }
-    
     public CollectionActionDispatcher(Collection<E> cache){
-	this(cache,new IdentityHashMap<Collection<E>,Object>());
-    }//end constructor
+	this.cache     =cache;
+	this.targets   =SetUtils.newIdentityHashSet();
+    }
     
     public CollectionActionDispatcher() {
 	this(new DummyList<E>("This CollectionActionDispatcher has a DummyList as a cache. Instantiate it with a real list to make this work."));
@@ -51,22 +44,22 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
      * @since Mar 20, 2015
      */
     public boolean addTarget(Collection<E> target, boolean prefill){
-	if(targetsMap.containsKey(target))
+	if(targets.contains(target))
 	    throw new RuntimeException("Redundant add: "+target);
 	if(prefill && !cache.isEmpty())
 	    target.addAll(cache);
 	boolean result = !targets.contains(target);
-	targetsMap.put(target,null);
+	targets.add(target);
 	return result;
     }
     
     public boolean removeTarget(Collection<E> target, boolean unfill){
-	if(!targetsMap.containsKey(target))
+	if(!targets.contains(target))
 	    throw new RuntimeException("Target not present: "+target);
 	if(unfill && targets.contains(target))
 	    Util.bulkRemove(cache, target);
-	final boolean success = targetsMap.containsKey(target);
-	targetsMap.remove(target);
+	final boolean success = targets.contains(target);
+	targets.remove(target);
 	return success;
     }
     

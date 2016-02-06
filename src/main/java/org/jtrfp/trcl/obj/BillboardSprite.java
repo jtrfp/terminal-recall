@@ -96,6 +96,24 @@ public class BillboardSprite extends WorldObject{
 	        this.rotationAngleRadians = rotationAngleRadians;
 	    }
 	}//end StaticRotationDelegate
+	
+	public static class UpAlwaysCameraTopDelegate implements RotationDelegate {
+	    private final Camera camera;
+	    
+	    public UpAlwaysCameraTopDelegate(Camera camera){
+		this.camera = camera;
+	    }
+
+	    @Override
+	    public void updateRotation(WorldObject target) {
+	    	final Vector3D cLookAt = camera.getLookAtVector();
+		target.setHeading(cLookAt.negate());
+		final Vector3D cHeading = camera.getHeading();
+		final Vector3D side = cHeading.crossProduct(Vector3D.PLUS_J);
+		final Vector3D newTop = side.crossProduct(cHeading);
+		target.setTop(newTop);
+	    }
+	}//end UpAlwaysCameraTopDelegate
 
 	protected RotationDelegate getRotationDelegate() {
 	    return rotationDelegate;

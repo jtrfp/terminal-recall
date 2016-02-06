@@ -20,6 +20,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.obj.BillboardSprite.StaticRotationDelegate;
 
 public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;
@@ -33,7 +34,9 @@ public class Explosion extends OneShotBillboardEvent {
 		origin.getZ());
 	this.type=type;
 	setBillboardSize(type.getBillboardSize());
-	if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
+	StaticRotationDelegate del = (StaticRotationDelegate)getRotationDelegate();
+	if(type.isRandomRotate())
+	    del.setRotationAngleRadians(2*Math.PI*Math.random());
 	String [] aniFiles = type.getAnimationFiles();
 	Texture [] frames = new Texture[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){

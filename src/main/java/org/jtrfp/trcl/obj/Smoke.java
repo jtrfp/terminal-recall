@@ -31,7 +31,9 @@ public class Smoke extends OneShotBillboardEvent {
 		super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length,debugName);
 		this.type=type;
 		setBillboardSize(type.getBillboardSize());
-		if(type.isRandomRotate())setRotation(2*Math.PI*Math.random());
+		StaticRotationDelegate del = (StaticRotationDelegate)getRotationDelegate();
+		if(type.isRandomRotate())
+		    del.setRotationAngleRadians(2*Math.PI*Math.random());
 		String [] aniFiles = type.getAnimationFiles();
 		Texture [] frames = new Texture[aniFiles.length];
 		try{for(int i=0; i<aniFiles.length;i++)

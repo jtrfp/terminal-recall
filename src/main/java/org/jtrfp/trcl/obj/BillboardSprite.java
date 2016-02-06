@@ -26,17 +26,17 @@ import org.jtrfp.trcl.gpu.Model;
 
 public class BillboardSprite extends WorldObject{
 	private Dimension dim;
-	private double rotation=0;
 	private final String debugName;
+	private RotationDelegate rotationDelegate;
 	
-	public BillboardSprite(TR tr, String debugName){super(tr);this.debugName=debugName;}
+	public BillboardSprite(TR tr, String debugName){
+	    super(tr);
+	    this.debugName=debugName;
+	    rotationDelegate = new StaticRotationDelegate(tr);
+	    }
 	@Override
 	protected void recalculateTransRotMBuffer(){
-	    	final Camera camera = getTr().mainRenderer.get().getCamera();
-	    	final Vector3D cLookAt = camera.getLookAtVector();
-	    	final Rotation rot = new Rotation(cLookAt,rotation);
-		this.setHeading(rot.applyTo(cLookAt.negate()));
-		this.setTop(rot.applyTo(camera.getUpVector()));
+	    	rotationDelegate.updateRotation(this);
 		super.recalculateTransRotMBuffer();
 		}//end recalculateTransRotMBuffer()
 	
@@ -59,15 +59,48 @@ public class BillboardSprite extends WorldObject{
 		setModel(m);
 		}
 	
-	public void setRotation(double angle){
-	    rotation=angle;
-	}
-	
 	@Override
 	protected boolean recalcMatrixWithEachFrame(){
 	    return true;
 	}
 	public String getDebugName() {
 	    return debugName;
+	}
+	
+	public interface RotationDelegate{
+	    public void updateRotation(WorldObject target);
+	}
+	
+	public static class StaticRotationDelegate implements RotationDelegate{
+	    private double rotationAngleRadians;
+	    private final TR tr;
+	    
+	    public StaticRotationDelegate(TR tr){
+		this.tr=tr;
+	    }
+
+	    @Override
+	    public void updateRotation(WorldObject target) {
+		final Camera camera = tr.mainRenderer.get().getCamera();
+	    	final Vector3D cLookAt = camera.getLookAtVector();
+	    	final Rotation rot = new Rotation(cLookAt,rotationAngleRadians);
+		target.setHeading(rot.applyTo(cLookAt.negate()));
+		target.setTop(rot.applyTo(camera.getUpVector()));
+	    }//end updateRotation(...)
+
+	    protected double getRotationAngleRadians() {
+	        return rotationAngleRadians;
+	    }
+
+	    protected void setRotationAngleRadians(double rotationAngleRadians) {
+	        this.rotationAngleRadians = rotationAngleRadians;
+	    }
+	}//end StaticRotationDelegate
+
+	protected RotationDelegate getRotationDelegate() {
+	    return rotationDelegate;
+	}
+	protected void setRotationDelegate(RotationDelegate rotationDelegate) {
+	    this.rotationDelegate = rotationDelegate;
 	}
 }//end BillboardSprite

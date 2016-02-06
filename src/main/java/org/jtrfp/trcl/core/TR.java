@@ -39,6 +39,7 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.Reporter;

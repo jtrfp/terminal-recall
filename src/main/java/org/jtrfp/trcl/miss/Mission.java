@@ -42,7 +42,6 @@ import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
 import org.jtrfp.trcl.beh.SpinCrashDeathBehavior;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.AbstractTriplet;
@@ -54,6 +53,7 @@ import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -519,7 +519,7 @@ public class Mission {
 	 portalExit.notifyPositionChange();
 	 portalExit.setRootGrid(tunnel);
 	}else System.err.println("Null exit.");*/
-	
+	assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
 	tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
 	return tunnel;
     }
@@ -716,6 +716,8 @@ public class Mission {
 	System.out.println("Entering tunnel "+tunnelToEnter);
 	final Game game = ((TVF3Game)tr.getGame());
 	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
+	
+	assert tunnelToEnter.getExitObject().getPosition()[0]>0:""+tunnelToEnter.getExitObject().getPosition()[0];//TODO: Remove
 	
 	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnelToEnter);
 	

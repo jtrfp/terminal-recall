@@ -36,6 +36,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;

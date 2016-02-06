@@ -196,6 +196,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    // Move origin to next segment
 	    tunnelSpaceSegPos = tunnelSpaceSegPos.add(positionDelta);
 	}// end for(segments)
+	if(currentPos.getX() < 0){
+	    System.err.println("Too short: "+currentPos);
+	    System.exit(1);}
 	return currentPos;
     }// end buildTunnel(...)
 

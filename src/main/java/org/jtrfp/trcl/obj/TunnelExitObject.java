@@ -12,12 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.util.ArrayList;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.NormalMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.RenderMode;
-import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
@@ -26,16 +27,15 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
-import org.jtrfp.trcl.beh.HeadingXAlwaysPositiveBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
-import org.jtrfp.trcl.core.PortalTexture;
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.PortalTexture;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
 import org.jtrfp.trcl.shell.GameShell;
@@ -48,6 +48,24 @@ public class TunnelExitObject extends PortalEntrance {
     private 		boolean 	mirrorTerrain = false;
     private		boolean		onlyRemoveIfTargeted=false;
     private static final int            NUDGE = 5000;
+    
+    private static ArrayList<TunnelExitObject> allObjects = new ArrayList<TunnelExitObject>();
+    private static final Thread checkerThread = new Thread("CheckerThread"){
+	@Override
+	public void run(){
+	    while(true){
+		try{Thread.sleep(10);}
+		catch(Exception e){e.printStackTrace();}
+		synchronized(allObjects){
+		for(TunnelExitObject o:allObjects)
+		    if(o.getPosition()[0]<0)
+			System.out.println("******  NEGATIVE X! "+o.getPosition()[0]+" obj="+o);
+		}//end sync
+	    }
+	}//end run
+    };
+    
+    static {checkerThread.start();}
 
     public TunnelExitObject(TR tr, Tunnel tun, String debugName, WorldObject approachingObject) {
 	super(tr,new PortalExit(tr),approachingObject);
@@ -93,6 +111,8 @@ public class TunnelExitObject extends PortalEntrance {
 	Model m = new Model(false, tr,"TunnelExitObject."+debugName);
 	m.addTriangles(tris);
 	setModel(m);
+	synchronized(allObjects){
+	 allObjects.add(this);}
     }//end constructor
 
     private class TunnelExitBehavior extends Behavior implements
@@ -101,25 +121,19 @@ public class TunnelExitObject extends PortalEntrance {
 	@Override
 	public void proposeCollision(WorldObject other) {
 	    if (other instanceof Player) {
+		if(getParent().getPosition()[0]<0)
+		    throw new RuntimeException("Negative X coord! "+getParent().getPosition()[0]);
 		//System.out.println("TunnelExitObject relevance tally="+tr.gpu.get().rendererFactory.get().getRelevanceTallyOf(getParent())+" within range? "+TunnelExitObject.this.isWithinRange());
 		//We want to track the camera's crossing in deciding when to move the player.
 		final Camera camera = tr.mainRenderer.get().getCamera();
 		//System.out.println("hash: "+super.hashCode()+" Cam pos = "+camera.getPosition()[0]+" thisPos="+TunnelExitObject.this.getPosition()[0]);
 		if (camera.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
+		    System.out.println("Escaping tunnel at exit.X="+getPosition()[0]+" camera.X="+camera.getPosition()[0]);
 		    final Game game = ((TVF3Game)tr.getGame());
 		    final Mission mission = game.getCurrentMission();
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
 		    System.out.println("TunnelExitObject leaving tunnel "+tun);
-		    if(mirrorTerrain){
-			tr.setRunState(new Mission.ChamberState(){});
-		    }else tr.setRunState(new Mission.OverworldState(){});
-		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
-		    if(mirrorTerrain)
-		     tr.setRunState(new Mission.ChamberState(){});
-		    else
-		     tr.setRunState(new Mission.PlayerActivity(){});
-		    
 		    //tr.getDefaultGrid().nonBlockingAddBranch(overworldSystem);
 		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)
 		    
@@ -148,8 +162,6 @@ public class TunnelExitObject extends PortalEntrance {
 			    // Nav
 			    //grid.addBranch(game.getNavSystem());
 			}});
-		    mission.setDisplayMode(mission.overworldMode);
-		    overworldSystem.setTunnelMode(false);
 		    // Reset player behavior
 		    final Player player = ((TVF3Game)tr.getGame()).getPlayer();
 		    player.setActive(false);
@@ -185,7 +197,19 @@ public class TunnelExitObject extends PortalEntrance {
 		    if (navObjective != null && (navTargeted|!onlyRemoveIfTargeted)) {
 			((TVF3Game)tr.getGame()).getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
+		    
+		    if(mirrorTerrain){
+			tr.setRunState(new Mission.ChamberState(){});
+		    }else tr.setRunState(new Mission.OverworldState(){});
+		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
+		    if(mirrorTerrain)
+		     tr.setRunState(new Mission.ChamberState(){});
+		    else
+		     tr.setRunState(new Mission.PlayerActivity(){});
+		    
 		    ((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
+		    mission.setDisplayMode(mission.overworldMode);
+		    overworldSystem.setTunnelMode(false);
 		    player.setActive(true);
 		}// end if(x past threshold)
 	    }// end if(Player)

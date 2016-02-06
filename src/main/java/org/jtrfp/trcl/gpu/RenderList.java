@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -32,10 +32,9 @@ import org.jtrfp.trcl.coll.DecoupledCollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ImplicitBiDiAdapter;
 import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
-import org.jtrfp.trcl.gpu.GLFrameBuffer;
-import org.jtrfp.trcl.gpu.GLProgram;
-import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.VertexProcessingStage;
+import org.jtrfp.trcl.core.NotReadyException;
+import org.jtrfp.trcl.core.TRFuture;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.IntArrayVariableList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;

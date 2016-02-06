@@ -28,9 +28,9 @@ import javax.swing.border.Border;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 
-import org.jtrfp.trcl.core.Renderer;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
+import org.jtrfp.trcl.gpu.Renderer;
 
 public class FramebufferStateWindow extends JFrame {
     private final JPanel rootPanel = new JPanel();

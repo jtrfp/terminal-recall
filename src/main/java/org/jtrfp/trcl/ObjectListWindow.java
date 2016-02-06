@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.RenderList;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.RenderList;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class ObjectListWindow extends MemoryWindow {

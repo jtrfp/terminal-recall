@@ -110,6 +110,11 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	addPropertyChangeListener(WorldObject.POSITION,cameraPositionHandler = new CameraPositionHandler());
     }//end constructor
     
+    @Override
+    public boolean supportsLoop(){
+	return false;
+    }
+    
     private final class VisibilityPredicate implements Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>{
 	@Override
 	public boolean evaluate(

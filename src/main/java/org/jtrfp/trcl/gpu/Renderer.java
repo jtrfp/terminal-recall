@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
 import java.util.Collection;
@@ -27,8 +27,9 @@ import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.gpu.GLFrameBuffer;
-import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.core.NotReadyException;
+import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;

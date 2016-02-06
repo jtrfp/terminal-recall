@@ -14,7 +14,7 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.core.NotReadyException;
-import org.jtrfp.trcl.core.Renderer;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public interface Renderable {

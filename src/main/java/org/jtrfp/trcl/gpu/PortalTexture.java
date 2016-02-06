@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -19,6 +19,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
+import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.core.TriangleVertexWindow;
 
 public class PortalTexture implements TextureDescription {
     private int                       portalFramebufferNumber;

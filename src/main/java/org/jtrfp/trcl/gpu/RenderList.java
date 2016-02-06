@@ -135,7 +135,7 @@ public class RenderList {
     
     private void sendRenderListPageTable(){
 	//final Renderer renderer = tr.mainRenderer.get();
-	final int size = objectListWindow.numPages();
+	final int size = Math.min(objectListWindow.numPages(),hostRenderListPageTable.length);
 	//////// Workaround for AMD bug where element zero always returns zero in frag. Shift up one.
 	for (int i = 0; i < size-1; i++) {
 	    hostRenderListPageTable[i+1] = objectListWindow.logicalPage2PhysicalPage(i);

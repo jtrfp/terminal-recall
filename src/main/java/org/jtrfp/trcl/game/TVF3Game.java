@@ -207,13 +207,17 @@ public class TVF3Game implements Game {
 		if (levelIndex != -1) {// -1 means 'abort'
 		    MissionLevel lvl = vox.getLevels()[getLevelIndex()];
 		    final String lvlFileName = lvl.getLvlFile();
-		        setCurrentMission(null);
-			setCurrentMission(new Mission(tr, this, tr.getResourceManager()
-				.getLVL(lvlFileName), prepareLevelName(lvlFileName), getLevelIndex() % 3 == 0));
+		        setLevelDirect(lvlFileName);
 		}//end if(levelIndex!=-1)
 		else // Make sure the Mission is destroyed
 		    setCurrentMission(null);
 	    }// end setLevelIndex(...)
+	    
+	    public void setLevelDirect(String lvlFileName) throws FileNotFoundException, IllegalAccessException, IOException, FileLoadException{
+		setCurrentMission(null);
+		setCurrentMission(new Mission(tr, this, tr.getResourceManager()
+			.getLVL(lvlFileName), prepareLevelName(lvlFileName), getLevelIndex() % 3 == 0));
+	    }
 	    
 	    private String prepareLevelName(String rawName){
 		String result;

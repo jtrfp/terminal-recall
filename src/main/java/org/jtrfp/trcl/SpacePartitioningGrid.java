@@ -75,7 +75,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
     }//end nonBlockingAddBranch
     
     public void blockingAddBranch(SpacePartitioningGrid<E> branchToAdd){
-	try{nonBlockingAddBranch(branchToAdd).get();}catch(Exception e){}
+	try{nonBlockingAddBranch(branchToAdd).get();}catch(Exception e){e.printStackTrace();}
     }
     
     public Future<?> nonBlockingRemoveBranch(final SpacePartitioningGrid<E> branchToRemove){
@@ -87,7 +87,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
     }//end nonBlockingAddBranch
     
     public void blockingRemoveBranch(SpacePartitioningGrid<E> branchToRemove){
-	try{nonBlockingRemoveBranch(branchToRemove).get();}catch(Exception e){}
+	try{nonBlockingRemoveBranch(branchToRemove).get();}catch(Exception e){e.printStackTrace();}
     }
 
 	public SpacePartitioningGrid(Vector3D size, double squareSize, double viewingRadius){
@@ -95,6 +95,9 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	}//end constructor
 	
 	public synchronized void add(E objectToAdd){//TODO: Enforce set instead?
+	    final SpacePartitioningGrid spg = objectToAdd.getContainingGrid();
+	    if(spg!=null)
+		throw new IllegalStateException("Passed element "+objectToAdd+" has non-null containing grid: "+spg+". Object should only be in one grid at a time.");
 	    if(!localTaggerSet.add(objectToAdd))
 		return;
 	    localTagger.add(objectToAdd);
@@ -220,7 +223,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    }//end nonBlockingAddBranch
 	    
 	    public void blockingRemoveAll(){
-		try{nonBlockingRemoveAll().get();}catch(Exception e){}
+		try{nonBlockingRemoveAll().get();}catch(Exception e){e.printStackTrace();}
 	    }
 	
 	public void removeAll(){

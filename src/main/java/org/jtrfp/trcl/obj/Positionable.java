@@ -22,4 +22,5 @@ public interface Positionable extends PropertyListenable {
     public double[] getPosition();
 
     public void setContainingGrid(SpacePartitioningGrid grid);
+    public SpacePartitioningGrid getContainingGrid();
 }//end Positionable

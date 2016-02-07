@@ -76,6 +76,7 @@ private static final String [] TYPES = new String[]{
     }
     
     public void reset(Vector3D pos, Vector3D newVelocity){
+	destroy();
 	probeForBehavior(LimitedLifeSpan.class).reset(lifespan());
 	setHeading(newVelocity.normalize());
 	setPosition(pos.toArray());

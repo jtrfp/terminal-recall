@@ -27,6 +27,7 @@ import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.SatelliteViewFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.LoopingSoundEvent;
@@ -60,7 +61,11 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private class ABControlListener implements PropertyChangeListener{
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-	    if(!isEnabled())
+	    final Object runState = getParent().getTr().getRunState();
+	    if(!isEnabled() || 
+		    !(runState instanceof Mission.GameplayState) || 
+		    runState instanceof SatelliteViewFactory.SatelliteViewState ||
+		    runState instanceof Mission.Briefing)
 		return;
 	    final double newValue = (Double)evt.getNewValue();
 	    final double oldValue = (Double)evt.getOldValue();

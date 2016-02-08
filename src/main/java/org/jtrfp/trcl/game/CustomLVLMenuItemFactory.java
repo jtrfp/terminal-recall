@@ -6,8 +6,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.JOptionPane;
-
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
@@ -39,17 +38,21 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	private final CustomLVLListener customLVLListener = new CustomLVLListener();
 	private TVF3Game target;
 	private RunStateListener runStateListener = new RunStateListener();
+	private WeakPropertyChangeListener weakRunStateListener;
 
 	@Override
 	public void apply(TVF3Game target) {
 	    menuSystem.addMenuItem(CUSTOM_LVL_PATH);
 	    menuSystem.addMenuItemListener(customLVLListener, CUSTOM_LVL_PATH);
 	    setTarget(target);
-	    target.getTr().addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    final TR tr = target.getTr();
+	    weakRunStateListener = new WeakPropertyChangeListener(runStateListener,tr);
+	    target.getTr().addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
 	}
 
 	@Override
 	public void destruct(TVF3Game target) {
+	    getTarget().getTr().removePropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
 	    menuSystem.removeMenuItem(CUSTOM_LVL_PATH);
 	    setTarget(null);
 	}

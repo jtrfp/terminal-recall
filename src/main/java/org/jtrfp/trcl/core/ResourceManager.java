@@ -226,10 +226,17 @@ public class ResourceManager{
 	private InputStream getInputStreamFromResource(String name) throws FileNotFoundException, FileLoadException, IOException{
 		System.out.println("Getting resource: "+name);
 		IPodFileEntry ent;
-		for(IPodData p:pods.values()){
+		String localPath = name;
+		if(name.startsWith("java:\\"))
+		    return new BufferedInputStream(this.getClass().getResourceAsStream(name.substring(7)));
+		if(File.separatorChar != '\\' )
+		    localPath = localPath.replace('\\', File.separatorChar);
+		final File localPathAttempt = new File(localPath.toLowerCase());
+		if(localPathAttempt.exists())
+		    return new BufferedInputStream(new FileInputStream(localPathAttempt));
+		for(IPodData p:pods.values())
 			if((ent=p.findEntry(name))!=null)
-				{return new BufferedInputStream(ent.getInputStreamFromPod());}
-			}//end for(podFiles)
+				return new BufferedInputStream(ent.getInputStreamFromPod());
 		throw new FileNotFoundException(name);
 		}//end getInputStreamFromResource(...)
 	

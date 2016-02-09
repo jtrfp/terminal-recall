@@ -525,14 +525,15 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     public synchronized void destroy() {
-	if(containingGrid !=null){
+	final SpacePartitioningGrid grid = getContainingGrid();
+	if(grid !=null){
 	    try{World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    getContainingGrid().remove(WorldObject.this);
+		    grid.remove(WorldObject.this);
 		}}).get();}catch(Exception e){throw new RuntimeException(e);}
 	}//end if(NEW MODE and have grid)
-	containingGrid=null;
+	setContainingGrid(null);
 	// Send it to the land of wind and ghosts.
 	setActive(false);
 	notifyPositionChange();

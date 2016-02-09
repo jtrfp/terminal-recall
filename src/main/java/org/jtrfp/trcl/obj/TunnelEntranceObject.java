@@ -30,6 +30,8 @@ public class TunnelEntranceObject extends BillboardSprite {
     
     public TunnelEntranceObject(TR tr, Tunnel tunnel, final PortalEntrance portalEntrance) {
 	super(tr,"TunnelEntranceObject."+tunnel.getDebugName());
+	if(portalEntrance == null)
+	    throw new IllegalArgumentException("PortalEntrance intolerably null.");
 	this.portalEntrance = portalEntrance;
 	final Mission mission = tr.getGame().getCurrentMission();
 	mission.addPropertyChangeListener(new PropertyChangeListener(){

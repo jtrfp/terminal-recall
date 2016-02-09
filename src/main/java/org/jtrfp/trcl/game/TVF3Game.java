@@ -281,6 +281,7 @@ public class TVF3Game implements Game {
 	    public synchronized void boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 			// Set up player, HUD, fonts...
 			System.out.println("Booting...");
+			tr.getThreadManager().setPaused(true);
 			NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 			upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 				    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);

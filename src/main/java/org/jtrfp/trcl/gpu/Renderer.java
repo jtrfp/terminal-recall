@@ -280,4 +280,9 @@ public final class Renderer {
          threadManager.removeRepeatingGLTask(render);
         getCamera().setActive(isEnabled());
     }
+    
+    @Override
+    public String toString(){
+	return "Renderer debugName="+debugName+" hash="+hashCode();
+    }
 }//end Renderer

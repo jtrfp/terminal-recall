@@ -109,6 +109,7 @@ public class PortalEntrance extends WorldObject {
 		    portalExit.deactivate();
 		    getPortalExit().setControlledCamera(null);
 		    setPortalRenderer(null);
+		    setPortalTextureID(-1);
 		    setRelevant(false);
 		    System.out.println("Done de-activating portal entrance.");
 		}catch(Exception e){e.printStackTrace();}
@@ -285,7 +286,7 @@ public class PortalEntrance extends WorldObject {
         return portalTextureID;
     }
 
-    public void setPortalTextureID(int portalTextureID) {//TODO: This needs to be set!
+    public void setPortalTextureID(int portalTextureID) {
 	final int oldValue = this.portalTextureID;
 	this.portalTextureID = portalTextureID;
 	pcs.firePropertyChange(PORTAL_TEXTURE_ID, oldValue, portalTextureID);

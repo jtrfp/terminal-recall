@@ -70,7 +70,7 @@ public class PortalTexture implements TextureDescription {
 
     public void setPortalFramebufferNumber(int portalFramebufferNumber) {
         this.portalFramebufferNumber = portalFramebufferNumber;
-        final int textureID = 65536-getPortalFramebufferNumber();
+        final int textureID = 65535-getPortalFramebufferNumber();
         final TriangleVertexWindow vw = getTriangleVertexWindow();
         for(int i:relevantVertexIndices){
             vw.textureIDLo .set(i, (byte)(textureID & 0xFF));

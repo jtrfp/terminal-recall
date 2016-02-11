@@ -341,9 +341,6 @@ public class RenderList {
 	gpu.defaultTIU();
 	gpu.defaultTexture();
 	
-	// FENCE
-	rootBufferReadFinishedSync = gl.glFenceSync(GL3.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-	
 	// DEFERRED STAGE
 	if(rFactory.isBackfaceCulling())gl.glDisable(GL3.GL_CULL_FACE);
 	final GLProgram deferredProgram = rFactory.getDeferredProgram();
@@ -391,8 +388,6 @@ public class RenderList {
 	//INTERMEDIATE ERASE
 	rFactory.getOpaqueFrameBuffer().bindToDraw();
 	gl.glClear(GL3.GL_DEPTH_BUFFER_BIT|GL3.GL_COLOR_BUFFER_BIT);
-	gl.glFlush();
-	gl.glWaitSync(rootBufferReadFinishedSync, 0, GL3.GL_TIMEOUT_IGNORED);
     }// end render()
 
     public void reset() {

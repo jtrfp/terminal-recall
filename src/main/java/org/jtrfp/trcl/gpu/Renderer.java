@@ -141,17 +141,17 @@ public final class Renderer {
     public final Callable<?> render = new Callable<Void>(){
 	@Override
 	public Void call() throws Exception {
-		final GL3 gl = gpu.getGl();
-		try{	ensureInit();
-			 final RenderList rl = renderList.getRealtime();
-			rl.render(gl);
-			rl.sendToGPU(gl);
-			//Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
-			gpu.memoryManager.getRealtime().flushStalePages();
-			// Update texture codepages
-			gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
-			fpsTracking();
-		}catch(NotReadyException e){}
+	    final GL3 gl = gpu.getGl();
+	    try{ensureInit();
+	        final RenderList rl = renderList.getRealtime();
+	        rl.sendToGPU(gl);
+	        //Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
+	        gpu.memoryManager.getRealtime().flushStalePages();
+	        rl.render(gl);
+	        // Update texture codepages
+	        gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
+	        fpsTracking();
+	    }catch(NotReadyException e){}
 	    return null;
 	}};
     

@@ -316,7 +316,8 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 		}catch(NoSuchElementException e){}
 		if(!addToUnusedAndRemoveFromDelegate.isEmpty()){
 		    unused  .addAll(addToUnusedAndRemoveFromDelegate);
-		    delegate.removeAll(addToUnusedAndRemoveFromDelegate);
+		    Util.bulkRemove(addToUnusedAndRemoveFromDelegate, delegate);
+		    //delegate.removeAll(addToUnusedAndRemoveFromDelegate);
 		}//end if(addtoUnusedAndRemoveFromDelegate)
 		
 		final Iterator<E>  unusedIterator       = unused.iterator();

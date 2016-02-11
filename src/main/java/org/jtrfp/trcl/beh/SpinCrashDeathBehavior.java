@@ -114,7 +114,8 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	final Propelled propelled = probeForBehavior(Propelled.class);
 	propelled.setPropulsion(0);
 	
-	parent.probeForBehavior(AutoLeveling.class).setEnable(false);
+	if(parent.hasBehavior(AutoLeveling.class))
+	 parent.probeForBehavior(AutoLeveling.class).setEnable(false);
 	
 	parent.probeForBehaviors(new AbstractSubmitter<SpinAccellerationBehavior>(){
 	    @Override

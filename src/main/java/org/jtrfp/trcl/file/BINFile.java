@@ -288,7 +288,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 
 	    }// end FaceBlockXXX
 
-	    public static class FaceBlockOE extends FaceBlock {
+	    public static class FaceBlock0E extends FaceBlock {
 
 		@Override
 		protected byte getBlockID() {

@@ -23,6 +23,7 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.HUDSystem;
+import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.MatchDirection;
@@ -33,7 +34,6 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
-import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -56,7 +56,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	                       INSTRUMENTS_VIEW = "Instruments View",
 	                       VIEW_MODE        = "View Mode",
 	                       INSTRUMENT_MODE  = "Instrument Mode";
-    private static final boolean INS_ENABLE = false;
+    private static final boolean INS_ENABLE = true;
     private final ControllerInput view, iView;
     
     @Autowired
@@ -87,7 +87,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private InstrumentMode instrumentMode;
      private boolean hudVisibility = false;
      
-     private int viewModeItr = 1, instrumentModeItr = 1;
+     private int viewModeItr = 0, instrumentModeItr = 1;
      
      public final InstrumentMode 
       FULL_COCKPIT    = new FullCockpitInstruments(),
@@ -100,9 +100,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
       CHASE_VIEW   = new ChaseView();
      
      private final ViewMode [] viewModes = new ViewMode[]{
-		new CockpitView(),
-		new OutsideView(),
-		new ChaseView()
+		COCKPIT_VIEW,
+		OUTSIDE_VIEW,
+		CHASE_VIEW
 	    };
 	    private final InstrumentMode [] instrumentModes = new InstrumentMode[]{
 		FULL_COCKPIT,
@@ -126,16 +126,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
         tr.addPropertyChangeListener(TR.RUN_STATE, new PropertyChangeListener(){
      	@Override
      	public void propertyChange(PropertyChangeEvent evt) {
-     	    if(evt.getNewValue()!=null && evt.getNewValue() instanceof Mission.GameplayState 
-     		    && !(evt.getOldValue() instanceof Mission.GameplayState)){
-     		setViewMode(getViewMode());
-     		setInstrumentMode(getInstrumentMode());
-     		verifyInstrumentIndexValidity();
-     		}
-     	    else if(evt.getNewValue()==null){
-     		noViewMode();
-     		setInstrumentMode(new NoInstruments());
-     		}
+     	    reEvaluateState();
      	}});
      }//end apply(...)
      
@@ -146,12 +137,11 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public void setViewMode(ViewMode viewMode) {
 	    final ViewMode oldViewMode = viewMode;
 	    this.viewMode = viewMode;
-	    pcs.firePropertyChange(VIEW_MODE, oldViewMode, viewMode);
 	    if(viewMode!=null)
 	     viewMode.apply();
 	    else//Remove the state
 		noViewMode();
-	    verifyInstrumentIndexValidity();
+	    pcs.firePropertyChange(VIEW_MODE, oldViewMode, viewMode);
 	}//end setViewMode
 
 	public void noViewMode(){
@@ -165,6 +155,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    if(cockpit == null){
 		cockpit = new Cockpit(tr);
 		cockpit.setModel(getCockpitModel());
+		cockpit.setModelOffset(0, -100, 0);
 		cockpit.addBehavior(new MatchPosition());
 		cockpit.addBehavior(new MatchDirection());
 		tr.mainRenderer.get().getCamera().getRootGrid().add(cockpit);
@@ -179,14 +170,17 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		 return;
 	    this.hudVisibility=visible;
 	    final Game game = tr.getGame();
-	    if(game==null)
-		 return;
 	    final HUDSystem hud = ((TVF3Game)game).getHUDSystem();
+	    final NAVSystem nav = ((TVF3Game)game).navSystem;
 	    final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
-	    if(!visible)
+	    if(!visible){
 	     grid.nonBlockingRemoveBranch (hud);
-	    else
+	     grid.nonBlockingRemoveBranch (nav);
+	     }
+	    else{
 	     grid.nonBlockingAddBranch    (hud);
+	     grid.nonBlockingAddBranch    (nav);
+	     }
 	}//end setHUDVisibility(...)
 
 	private class NoInstruments implements InstrumentMode{
@@ -229,23 +223,12 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    return;
 		if(mission.isSatelliteView())
 		    return;
-		if(!(getViewMode() instanceof CockpitView))
-		    return;
-		if((Double)evt.getNewValue()>.7)
-		    proposeInstrumentIndex(++instrumentModeItr);
+		if((Double)evt.getNewValue()>.7){
+		    incrementInstrumentMode();
+		    reEvaluateState();
+		    }
 	   }
 	}//end InstrumentViewSelectPropertyChangeListener
-
-	private void verifyInstrumentIndexValidity(){
-	    proposeInstrumentIndex(instrumentModeItr);
-	}
-
-	public void proposeInstrumentIndex(int index){
-	    index%=instrumentModes.length;
-	    instrumentModeItr=index;
-	    if(!setInstrumentMode(instrumentModes[index]))
-		 proposeInstrumentIndex(++index);
-	}
 
 	private class ViewSelectPropertyChangeListener implements PropertyChangeListener {
 	   @Override
@@ -260,8 +243,10 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    return;
 		if(!(tr.getRunState() instanceof Mission.PlayerActivity))
 		    return;
-		if((Double)evt.getNewValue()>.7)
-		 setViewMode(viewModes[viewModeItr++%viewModes.length]);
+		if((Double)evt.getNewValue()>.7){
+		    incrementViewMode();
+		    reEvaluateState();
+		    }
 	   }//end propertyChange(...)
 	}//end ViewSelectPropertyChangeListener
 
@@ -431,6 +416,41 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    // TODO Auto-generated method stub
 	    
 	}
+	
+	private void incrementViewMode(){
+	    viewModeItr++;
+	    viewModeItr%=viewModes.length;
+	}
+	
+	private void incrementInstrumentMode(){
+	    instrumentModeItr++;
+	    instrumentModeItr%=instrumentModes.length;
+	}
+	
+	private void reEvaluateState(){
+	    if(!isAppropriateToDisplay()){
+		setInstrumentMode(new NoInstruments());
+		return;
+	    }//end if(!isAppropriateToDisplay()
+	    if(getViewMode()!=viewModes[viewModeItr]){
+		setViewMode(viewModes[viewModeItr]);
+		if(getViewMode()!=COCKPIT_VIEW && getInstrumentMode() == FULL_COCKPIT){
+		    incrementInstrumentMode();
+		}//end if(cockpit not compatible with instrument mode)
+	    }//end if(viewModeTransient)
+	    if(getInstrumentMode()!=instrumentModes[instrumentModeItr]){
+		setInstrumentMode(instrumentModes[instrumentModeItr]);
+	    }
+	}//end reEvaluateState()
+	
+	private boolean isAppropriateToDisplay(){
+	    if(tr.getRunState() instanceof Mission.PlayerActivity){
+		if(tr.getGame().getCurrentMission().isSatelliteView())
+		    return false;
+		return true;
+	    }//end if(PlayerActivity)
+	    return false;
+	}//end isAppropriateToDisplay()
  }//end ViewSelectFeature
  
 public Model getCockpitModel() {

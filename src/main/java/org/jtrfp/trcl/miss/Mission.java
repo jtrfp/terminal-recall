@@ -133,6 +133,7 @@ public class Mission {
        public interface MissionSummary  extends Briefing{}
       public interface PlayerActivity  extends GameplayState{}
        public interface OverworldState  extends PlayerActivity{}
+       public interface SatelliteState   extends OverworldState{}
        public interface ChamberState    extends OverworldState{}
        public interface TunnelState     extends PlayerActivity{}
     
@@ -200,8 +201,6 @@ public class Mission {
 			 overworldSystem
 		    };
 	    gameplayMode = new Object[]{
-			 ((TVF3Game)game).navSystem,
-			 ((TVF3Game)game).hudSystem,
 			 ((TVF3Game)game).upfrontDisplay,
 			 rm.getDebrisSystem(),
 			 rm.getPowerupSystem(),
@@ -214,8 +213,6 @@ public class Mission {
 		    overworldSystem
 	    };
 	    tunnelMode = new Object[]{
-		    ((TVF3Game)game).navSystem,
-			 ((TVF3Game)game).hudSystem,
 			 ((TVF3Game)game).upfrontDisplay,
 			 rm.getDebrisSystem(),
 			 rm.getPowerupSystem(),
@@ -847,17 +844,21 @@ public class Mission {
 	    throw new IllegalArgumentException("Cannot activate satellite view while runState is "+tr.getRunState().getClass().getSimpleName());
 	if(satelliteView && ((TVF3Game)tr.getGame()).isPaused())
 	    throw new IllegalArgumentException("Cannot activate satellite view while paused.");
-	pcs.firePropertyChange(SATELLITE_VIEW, this.satelliteView, satelliteView);
-	if(satelliteView!=this.satelliteView){
+	final boolean oldValue = this.satelliteView;
+	
+	if(satelliteView!=oldValue){
 	    final Game game =  ((TVF3Game)tr.getGame());
 	    final Camera cam = tr.mainRenderer.get().getCamera();
+	    this.satelliteView=satelliteView;
+	    pcs.firePropertyChange(SATELLITE_VIEW, oldValue, satelliteView);
+	    tr.setRunState(satelliteView?new SatelliteState(){}:new OverworldState(){});
 	    if(satelliteView){//Switched on
 		tr.getThreadManager().setPaused(true);
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			getPartitioningGrid().removeBranch(((TVF3Game)game).getNavSystem());
-			getPartitioningGrid().removeBranch(((TVF3Game)game).getHUDSystem());
+			//getPartitioningGrid().removeBranch(((TVF3Game)game).getNavSystem());
+			//getPartitioningGrid().removeBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(false);
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
@@ -874,8 +875,8 @@ public class Mission {
 		    @Override
 		    public void run() {
 			((TVF3Game)tr.getGame()).getNavSystem().activate();
-			getPartitioningGrid().addBranch(((TVF3Game)game).getNavSystem());
-			getPartitioningGrid().addBranch(((TVF3Game)game).getHUDSystem());
+			//getPartitioningGrid().addBranch(((TVF3Game)game).getNavSystem());
+			//getPartitioningGrid().addBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);
@@ -883,7 +884,6 @@ public class Mission {
 		((TVF3Game)tr.getGame()).getSatDashboard().setVisible(false);
 	    }//end !satelliteView
 	}//end if(change)
-	this.satelliteView=satelliteView;
     }
     /**
      * @return the satelliteView

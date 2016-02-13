@@ -447,7 +447,7 @@ public class ResourceManager{
 						if(vertIndices.size()==4){//Quads
 						    	org.jtrfp.trcl.gpu.Vertex [] vtx = new org.jtrfp.trcl.gpu.Vertex[4];
 							for(int i=0; i<4; i++)
-								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex()%(b instanceof FaceBlock05?10:Integer.MAX_VALUE));}
+								{vtx[i]=vertices.get(vertIndices.get(i).getVertexIndex()%(b instanceof FaceBlock05?100:Integer.MAX_VALUE));}
 							Vector3D blockNormal = new Vector3D(block.getNormalX(),block.getNormalY(),block.getNormalZ());
 							if(blockNormal.getNorm()==0)blockNormal = new Vector3D(1,0,0);//Use filler if zero norm.
 							if(vertIndices.get(0) instanceof FaceBlockVertexWithUV){
@@ -518,7 +518,10 @@ public class ResourceManager{
 					else if(b instanceof ColorBlock){
 					    final ColorBlock cb = (ColorBlock)b;
 					    final byte [] bytes = cb.getBytes();
-					    final Color color = new Color(bytes[0]&0xFF,bytes[1]&0xFF,bytes[2]&0xFF);
+					    final int colorID = 16+(bytes[0]&0xFF);
+					    
+					    final Color color = new Color((float)palette.componentAt(colorID, 0),(float)palette.componentAt(colorID, 1),(float)palette.componentAt(colorID, 2),.5f);
+					    System.out.println("Color block: "+color+" colorID="+colorID);
 					    currentTexture = tr.gpu.get().textureManager.get().solidColor(color);
 					}
 					else if(b instanceof BillboardTexCoords0x04){

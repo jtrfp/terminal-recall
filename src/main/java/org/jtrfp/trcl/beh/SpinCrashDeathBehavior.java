@@ -122,9 +122,10 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	    public void submit(SpinAccellerationBehavior item) {
 		item.setEnable(false);
 	    }}, SpinAccellerationBehavior.class);
-	
-	parent.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
-	parent.probeForBehavior(SpawnsRandomSmoke.class).setEnable(false);
+	if(parent.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
+	 parent.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
+	if(parent.hasBehavior(SpawnsRandomSmoke.class))
+	 parent.probeForBehavior(SpawnsRandomSmoke.class).setEnable(false);
 	//Set up for ground explosion
 	parent.probeForBehavior(DamagedByCollisionWithSurface.class).setCollisionDamage(6554);
 	parent.probeForBehavior(RedFlashOnDamage.class).setEnable(true);

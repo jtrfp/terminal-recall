@@ -46,7 +46,6 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 	    final int ordinal = type.ordinal();
 	    indices[ordinal]++;indices[ordinal]%=MAX_EXPLOSIONS_PER_POOL;
 	    Explosion result = allExplosions[ordinal][indices[ordinal]];
-	    result.destroy();
 	    result.reset();
 	    result.setPosition(loc.getX(), loc.getY(), loc.getZ());
 	    result.notifyPositionChange();

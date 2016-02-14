@@ -42,7 +42,6 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
 	    final int ordinal = type.ordinal();
 	    indices[ordinal]++;indices[ordinal]%=MAX_SMOKE_PER_POOL;
 	    Smoke result = allSmokes[ordinal][indices[ordinal]];
-	    result.destroy();
 	    result.reset();
 	    result.setPosition(pos.toArray());
 	    add(result);

@@ -49,24 +49,6 @@ public class TunnelExitObject extends PortalEntrance {
     private		boolean		onlyRemoveIfTargeted=false;
     private static final int            NUDGE = 5000;
     
-    private static ArrayList<TunnelExitObject> allObjects = new ArrayList<TunnelExitObject>();
-    private static final Thread checkerThread = new Thread("CheckerThread"){
-	@Override
-	public void run(){
-	    while(true){
-		try{Thread.sleep(10);}
-		catch(Exception e){e.printStackTrace();}
-		synchronized(allObjects){
-		for(TunnelExitObject o:allObjects)
-		    if(o.getPosition()[0]<0)
-			System.out.println("******  NEGATIVE X! "+o.getPosition()[0]+" obj="+o);
-		}//end sync
-	    }
-	}//end run
-    };
-    
-    static {checkerThread.start();}
-
     public TunnelExitObject(TR tr, Tunnel tun, String debugName, WorldObject approachingObject) {
 	super(tr,new PortalExit(tr),approachingObject);
 	addBehavior(new TunnelExitBehavior());
@@ -111,8 +93,6 @@ public class TunnelExitObject extends PortalEntrance {
 	Model m = new Model(false, tr,"TunnelExitObject."+debugName);
 	m.addTriangles(tris);
 	setModel(m);
-	synchronized(allObjects){
-	 allObjects.add(this);}
     }//end constructor
 
     private class TunnelExitBehavior extends Behavior implements

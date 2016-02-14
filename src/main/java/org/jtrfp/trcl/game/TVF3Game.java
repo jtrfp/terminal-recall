@@ -301,7 +301,7 @@ public class TVF3Game implements Game {
 			
 			//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
 			System.out.println("GameVersion="+tr.configManager.getConfig()._getGameVersion());
-			navSystem = new NAVSystem(tr.getDefaultGrid(), tr,getDashboardLayout());
+			navSystem = new NAVSystem(tr,getDashboardLayout());
 			    // Make color zero translucent.
 			    final ResourceManager rm = tr.getResourceManager();
 			    final Color[] pal 	     = tr.getGlobalPalette();

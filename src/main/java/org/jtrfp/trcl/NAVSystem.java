@@ -33,8 +33,7 @@ private final TR tr;
 private final NAVRadarBlipFactory blips;
 private final DashboardLayout layout;
 
-    public NAVSystem(SpacePartitioningGrid<PositionedRenderable> parent, 
-	    TR tr, DashboardLayout layout) {
+    public NAVSystem(TR tr, DashboardLayout layout) {
 	super();
 	this.tr=tr;
 	this.layout=layout;

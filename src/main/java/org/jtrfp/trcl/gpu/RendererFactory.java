@@ -421,7 +421,7 @@ public class RendererFactory {
 		for(int i=0; i<NUM_PORTALS; i++){
 		    portalFrameBuffers[i].
 		    bindToDraw().
-		    attachDrawTexture(null, i, GL3.GL_COLOR_ATTACHMENT0).
+		    //attachDrawTexture(null, i, GL3.GL_COLOR_ATTACHMENT0).
 		    setDrawBufferList()//Empty
 		    //portalFrameBuffers[i].destroy();
 		    .unbindFromDraw();}

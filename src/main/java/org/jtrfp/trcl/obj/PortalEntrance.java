@@ -50,7 +50,6 @@ public class PortalEntrance extends WorldObject {
     private WorldObject approachingObject;
     private SkyCubeGen skyCubeGen = GameShell.DEFAULT_GRADIENT;
     private boolean    portalUnavailable = false;
-    private volatile long timeOfLastTick = 0L;
     private TRFuture<Void> relevanceFuture;
 
     public PortalEntrance(TR tr, Model model, PortalExit exit, WorldObject approachingObject){
@@ -161,8 +160,6 @@ public class PortalEntrance extends WorldObject {
     
     @Override
     public WorldObject notifyPositionChange(){
-	final double [] pos = getPosition();
-	//System.out.println("PortalEntrance. "+hashCode()+" notifyPositionChange() "+pos[0]+" "+pos[1]+" "+pos[2]);
 	super.notifyPositionChange();
 	return this;
     }
@@ -171,13 +168,11 @@ public class PortalEntrance extends WorldObject {
 	private final double [] relativePosition = new double[3];
 	@Override
 	public void tick(long tickTimeMillis){
-	    timeOfLastTick = tickTimeMillis;
 	    if(isRelevant()){
 		getRelativePosition(relativePosition);
 		final WorldObject approachingObject = getApproachingObject();
 		portalExit.updateObservationParams(relativePosition, getRelativeHeadingTop(),approachingObject.getHeading(),approachingObject.getTop());
 	    }//end if(isWithinRange)
-	    
 	}//end _tick(...)
     }//end PortalEntranceBehavior
 
@@ -263,18 +258,6 @@ public class PortalEntrance extends WorldObject {
     }
 
     public Renderer getPortalRenderer() {
-	if(portalRenderer == null){
-	    System.out.println("WARNING: Portal renderer is null. isRelevant? "+isRelevant()+" RelevanceTally: "+getTr().gpu.get().rendererFactory.get().getRelevanceTallyOf(this));
-	    final Player player = getTr().getGame().getPlayer();
-	    final int dist = (int)Vect3D.distance(getPosition(), player.getPosition());
-	    final double [] posMapSq = new double[3];
-	    Vect3D.scalarMultiply(getPosition(), 1./TR.mapSquareSize, posMapSq);
-	    System.out.println("Portal position in mapSquares: "+posMapSq[0]+" "+posMapSq[1]+" "+posMapSq[2]+" ");
-	    Vect3D.scalarMultiply(player.getPosition(), 1./TR.mapSquareSize, posMapSq);
-	    System.out.println("Player position in mapSquares: "+posMapSq[0]+" "+posMapSq[1]+" "+posMapSq[2]+" ");
-	    System.out.println("Distance from player in mapSquares "+(dist/TR.mapSquareSize));
-	    System.out.println("Millis since last tick: "+(System.currentTimeMillis()-timeOfLastTick));
-	}
         return portalRenderer;
     }
 

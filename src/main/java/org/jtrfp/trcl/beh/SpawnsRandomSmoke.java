@@ -18,15 +18,15 @@ import org.jtrfp.trcl.obj.Smoke.SmokeType;
 import org.jtrfp.trcl.obj.SmokeSystem;
 
 public class SpawnsRandomSmoke extends Behavior {
-    private final SmokeSystem Smokes;
+    private final SmokeSystem smokeSystem;
     public SpawnsRandomSmoke(TR tr){
-	this.Smokes=tr.getResourceManager().getSmokeSystem();
+	this.smokeSystem=tr.getResourceManager().getSmokeSystem();
     }
     @Override
     public void tick(long timeMillis){
 	if(Math.random()<.2){
 	    Vector3D pos = new Vector3D(getParent().getPositionWithOffset());
-	    Smokes.triggerSmoke(
+	    smokeSystem.triggerSmoke(
 		    pos.add(new Vector3D(Math.random()*2000-1000,
 			    0,
 			    Math.random()*2000-1000)), 

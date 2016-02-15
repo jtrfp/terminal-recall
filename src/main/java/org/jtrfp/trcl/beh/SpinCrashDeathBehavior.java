@@ -30,7 +30,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 
-public class SpinCrashDeathBehavior extends DamageTrigger {
+public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of all added behaviors and use lazy alloc
 
     public SpinCrashDeathBehavior(){
 	super();
@@ -40,6 +40,7 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
     @Override
     public void healthBelowThreshold(){// Spinout and crash
 	final WorldObject 	parent 	= getParent();
+	System.out.println("healthBelowThreshold() "+probeForBehavior(DamageableBehavior.class).getHealth());
 	if(probeForBehavior(DamageableBehavior.class).getHealth()<1)
 	    return;//No point; already dying.
 	//Trigger small boom
@@ -88,8 +89,13 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	//TODO: Sparks, and other fun stuff.
 	if(!parent.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
 	    parent.addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
+	else
+	    parent.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(true);
+	if(!parent.hasBehavior(SpawnsRandomSmoke.class))
+	 parent.addBehavior(new SpawnsRandomSmoke(parent.getTr()));
+	else
+	 parent.probeForBehavior(SpawnsRandomSmoke.class).setEnable(true);
 	
-	parent.addBehavior(new SpawnsRandomSmoke(parent.getTr()));
 	//Set up for ground explosion
 	parent.probeForBehavior(DamagedByCollisionWithSurface.class).getCollisionDamage();
 	parent.probeForBehavior(DamagedByCollisionWithSurface.class).setCollisionDamage(65535);

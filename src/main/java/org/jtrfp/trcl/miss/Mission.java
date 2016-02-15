@@ -255,7 +255,7 @@ public class Mission {
 	     player.probeForBehavior(SpawnsRandomSmoke.class)    .setEnable(false);
 	    if(player.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
 	     player.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
-	    player.probeForBehavior(SpinCrashDeathBehavior.class).setEnable(false);
+	    //player.probeForBehavior(SpinCrashDeathBehavior.class).setEnable(false);
 	    
 	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
 	    Factory f = new NAVObjective.Factory(tr, getLevelName());

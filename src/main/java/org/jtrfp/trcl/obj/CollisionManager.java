@@ -63,16 +63,16 @@ public class CollisionManager {
 		    
 		    Collection<Positionable> other;
 		    final Vector3D orig = cube.getKey();
-		    //X,Y+1
-		    other = pairBuffer.get(new Vector3D(orig.getX(),Math.rint(orig.getY()+1),orig.getZ()));
+		    //X,Z+1
+		    other = pairBuffer.get(new Vector3D(orig.getX(),orig.getY(),Math.rint(orig.getZ()+1)));
 		    if(other != null)
 		     bidiProcessCubes(thisCube,other);
-		    //X+1,Y
+		    //X+1,Z
 		    other = pairBuffer.get(new Vector3D(Math.rint(orig.getX()+1),orig.getY(),orig.getZ()));
 		    if(other != null)
 		     bidiProcessCubes(thisCube,other);
-		    //X+1, Y+1
-		    other = pairBuffer.get(new Vector3D(Math.rint(orig.getX()+1),Math.rint(orig.getY()+1),orig.getZ()));
+		    //X+1, Z+1
+		    other = pairBuffer.get(new Vector3D(Math.rint(orig.getX()+1),orig.getY(),Math.rint(orig.getZ()+1)));
 		    if(other != null)
 		     bidiProcessCubes(thisCube,other);
 		    }

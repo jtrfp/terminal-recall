@@ -187,10 +187,17 @@ public class Player extends WorldObject implements RelevantEverywhere{
 				new Vector3D(-.5,0,1).normalize(),//LEFT
 				Vector3D.PLUS_K, //CENTER
 				new Vector3D(.5,0,1).normalize(),//RIGHT
-				new Vector3D(0,.5,1).normalize(),//DOWN
-				new Vector3D(0,-.5,1).normalize() //UP
+				new Vector3D(0,-.3,1).normalize(),//DOWN
+				new Vector3D(0,.3,1).normalize() //UP
 			});
-		    }
+			pfb.setFiringPositions(new Vector3D[]{
+				new Vector3D(0,-3000,0),
+				new Vector3D(0,-3000,0),
+				new Vector3D(0,-3000,0),
+				new Vector3D(0,-3000,0),
+				new Vector3D(0,-3000,0)
+				});
+		    }//end if(ION)
 		}
 		addBehavior(pfb);
 		weapons[w.getButtonToSelect() - 1] = pfb;

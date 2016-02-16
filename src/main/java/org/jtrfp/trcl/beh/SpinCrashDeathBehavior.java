@@ -30,8 +30,13 @@ import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 
-public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of all added behaviors and use lazy alloc
-
+public class SpinCrashDeathBehavior extends DamageTrigger {
+    private SpinAccellerationBehavior lateralSAB,equatorialSAB,polarSAB;
+    private SpawnsRandomExplosionsAndDebris explosionDebris;
+    private SpawnsRandomSmoke randomSmoke;
+    private PulledDownByGravityBehavior gravity;
+    private AutoLeveling autoLeveling;
+    
     public SpinCrashDeathBehavior(){
 	super();
 	this.setThreshold(1024*8);
@@ -50,9 +55,7 @@ public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of
 		tr.getResourceManager().soundTextures.get("EXP2.WAV"), 
 		new double[] {.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2} );
 
-	if(!parent.hasBehavior(PulledDownByGravityBehavior.class))
-	    parent.addBehavior(new PulledDownByGravityBehavior());
-	parent.probeForBehavior(PulledDownByGravityBehavior.class).setEnable(true);
+	getGravity().setEnable(true);
 	
 	probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
 	probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
@@ -69,17 +72,14 @@ public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of
 	}, ProjectileFiringBehavior.class);
 	final Propelled propelled = probeForBehavior(Propelled.class);
 	propelled.setPropulsion(propelled.getMaxPropulsion());
-	if(!parent.hasBehavior(AutoLeveling.class))
-	 parent.addBehavior(new AutoLeveling().setLevelingAxis(LevelingAxis.HEADING).setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.98, .98, .98));
-	parent.probeForBehavior(AutoLeveling.class).setEnable(true);
+	getAutoLeveling().setEnable(true);
 	
 	//Catastrophy
 	final double spinSpeedCoeff=.5;
-	if(!parent.hasBehavior(SpinAccellerationBehavior.class)){
-	    parent.addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL).setSpinAccelleration(.009*spinSpeedCoeff));
-	    parent.addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL).setSpinAccelleration(.006*spinSpeedCoeff));
-	    parent.addBehavior(new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR).setSpinAccelleration(.007*spinSpeedCoeff));
-	}
+	getLateralSAB()   .setSpinAccelleration(.009*spinSpeedCoeff).setEnable(true);
+	getEquatorialSAB().setSpinAccelleration(.006*spinSpeedCoeff).setEnable(true);
+	getPolarSAB()     .setSpinAccelleration(.007*spinSpeedCoeff).setEnable(true);
+	
 	parent.probeForBehaviors(new AbstractSubmitter<SpinAccellerationBehavior>(){
 	    @Override
 	    public void submit(SpinAccellerationBehavior item) {
@@ -87,14 +87,8 @@ public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of
 	    }}, SpinAccellerationBehavior.class);
 	
 	//TODO: Sparks, and other fun stuff.
-	if(!parent.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
-	    parent.addBehavior(new SpawnsRandomExplosionsAndDebris(parent.getTr()));
-	else
-	    parent.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(true);
-	if(!parent.hasBehavior(SpawnsRandomSmoke.class))
-	 parent.addBehavior(new SpawnsRandomSmoke(parent.getTr()));
-	else
-	 parent.probeForBehavior(SpawnsRandomSmoke.class).setEnable(true);
+	getExplosionDebris().setEnable(true);
+	getRandomSmoke().setEnable(true);
 	
 	//Set up for ground explosion
 	parent.probeForBehavior(DamagedByCollisionWithSurface.class).getCollisionDamage();
@@ -107,8 +101,7 @@ public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of
 	//Undo the results of damage triggering
 	final WorldObject 	parent 	= getParent();
 	
-	if(parent.hasBehavior(PulledDownByGravityBehavior.class))
-	 parent.probeForBehavior(PulledDownByGravityBehavior.class).setEnable(false);
+	getGravity().setEnable(false);
 	
 	probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
 	probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
@@ -120,23 +113,61 @@ public class SpinCrashDeathBehavior extends DamageTrigger {//TODO: Keep track of
 	final Propelled propelled = probeForBehavior(Propelled.class);
 	propelled.setPropulsion(0);
 	
-	if(parent.hasBehavior(AutoLeveling.class))
-	 parent.probeForBehavior(AutoLeveling.class).setEnable(false);
+	getAutoLeveling().setEnable(false);
 	
-	parent.probeForBehaviors(new AbstractSubmitter<SpinAccellerationBehavior>(){
-	    @Override
-	    public void submit(SpinAccellerationBehavior item) {
-		item.setEnable(false);
-	    }}, SpinAccellerationBehavior.class);
-	if(parent.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
-	 parent.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
-	if(parent.hasBehavior(SpawnsRandomSmoke.class))
-	 parent.probeForBehavior(SpawnsRandomSmoke.class).setEnable(false);
+	getLateralSAB()   .setEnable(false);
+	getPolarSAB()     .setEnable(false);
+	getEquatorialSAB().setEnable(false);
+	getExplosionDebris().setEnable(false);
+	getRandomSmoke()    .setEnable(false);
 	//Set up for ground explosion
 	parent.probeForBehavior(DamagedByCollisionWithSurface.class).setCollisionDamage(6554);
 	parent.probeForBehavior(RedFlashOnDamage.class).setEnable(true);
 	super.setTriggered(false);
 	return this;
     }//end reset()
+
+    protected SpinAccellerationBehavior getLateralSAB() {
+	if(lateralSAB == null)
+	    getParent().addBehavior(lateralSAB = new SpinAccellerationBehavior().setSpinMode(SpinMode.LATERAL));
+        return lateralSAB;
+    }
+
+    protected SpinAccellerationBehavior getEquatorialSAB() {
+	if(equatorialSAB == null)
+	    getParent().addBehavior(equatorialSAB = new SpinAccellerationBehavior().setSpinMode(SpinMode.EQUATORIAL));
+        return equatorialSAB;
+    }
+
+    protected SpinAccellerationBehavior getPolarSAB() {
+	if(polarSAB == null)
+	    getParent().addBehavior(polarSAB = new SpinAccellerationBehavior().setSpinMode(SpinMode.POLAR));
+        return polarSAB;
+    }
+
+    protected SpawnsRandomExplosionsAndDebris getExplosionDebris() {
+	if(explosionDebris == null)
+	    getParent().addBehavior(explosionDebris = new SpawnsRandomExplosionsAndDebris(getParent().getTr()));
+        return explosionDebris;
+    }
+
+    protected SpawnsRandomSmoke getRandomSmoke() {
+	if(randomSmoke == null)
+	    getParent().addBehavior(randomSmoke = new SpawnsRandomSmoke(getParent().getTr()));
+        return randomSmoke;
+    }
+
+    protected PulledDownByGravityBehavior getGravity() {
+	if(gravity == null)
+	    getParent().addBehavior(gravity = new PulledDownByGravityBehavior());
+        return gravity;
+    }
+
+    protected AutoLeveling getAutoLeveling() {
+	if(autoLeveling == null)
+	    getParent().addBehavior(autoLeveling = 
+	     new AutoLeveling().setLevelingAxis(LevelingAxis.HEADING).setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.98, .98, .98));
+        return autoLeveling;
+    }
 
 }//end SpinCrashBehavior

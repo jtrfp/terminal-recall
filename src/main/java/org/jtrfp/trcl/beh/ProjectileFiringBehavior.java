@@ -41,6 +41,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private int 		ammoLimit			 =Integer.MAX_VALUE;
     private int 		ammo				 =0;
     private Integer []          firingVertices;
+    private Rotation []         firingDirections;
     private BasicModelSource    modelSource;
     private boolean             sumProjectorVelocity             = false;
     private SoundTexture        firingSFX;
@@ -53,8 +54,11 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	final WorldObject p = getParent();
 	    	Vector3D heading=this.firingHeading;
 	    	if(this.firingHeading==null)heading = p.getHeading();
+	    	final Rotation headingRot = new Rotation(Vector3D.PLUS_K, heading);
+	    	
 	    	for(int mi=0; mi<multiplexLevel;mi++){
-	    	    final Vector3D firingPosition = getNextModelViewFiringPosition();
+	    	    final Vector3D firingPosition  = getNextModelViewFiringPosition();
+	    	    final Vector3D firingDirection = headingRot.applyTo(getFiringDirectionForPosition(getFiringPositionIndex())).applyTo(Vector3D.PLUS_K);
 	    	    resetFiringTimer();
 	    	    if(firingSFX==null)
 	    	     projectileFactory.
@@ -62,7 +66,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    		      p.getPositionWithOffset(),
 	    		      firingPosition.toArray(),
 	    		      new double[3]), 
-	    		      heading, 
+	    		      firingDirection, 
 	    		      getParent(),
 	    		      isSumProjectorVelocity());
 	    	    else
@@ -71,7 +75,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 		    	      p.getPositionWithOffset(),
 		    	      firingPosition.toArray(),
 		    	      new double[3]), 
-		    	      heading, 
+		    	      firingDirection, 
 		    	      getParent(),
 		    	      isSumProjectorVelocity(),
 		    	      firingSFX);
@@ -313,5 +317,29 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 
     public void removeVetoableChangeListener(VetoableChangeListener arg0) {
 	vcs.removeVetoableChangeListener(arg0);
+    }
+    
+    public Rotation getFiringDirectionForPosition(int index){
+	final Rotation [] firingVectors = getFiringVectors();
+	if(firingVectors == null)
+	    return Rotation.IDENTITY;
+	else
+	    return firingDirections[index];
+    }//end getFiringVectorForPosition()
+
+    public Rotation[] getFiringVectors() {
+        return firingDirections;
+    }
+
+    public void setFiringDirections(Rotation[] firingRotations) {
+        this.firingDirections = firingRotations;
+    }
+
+    protected int getFiringPositionIndex() {
+        return firingPositionIndex;
+    }
+
+    protected void setFiringPositionIndex(int firingPositionIndex) {
+        this.firingPositionIndex = firingPositionIndex;
     }
 }//end ProjectileFiringBehavior

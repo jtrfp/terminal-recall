@@ -70,7 +70,7 @@ public class AutoFiring extends Behavior {
 			    (Math.random()*2.-1.)*aimRandomness,
 			    (Math.random()*2.-1.)*aimRandomness);
 		    result=result.add(rand).normalize();
-		    projectileFiringBehavior.requestFire(result);}}
+		    projectileFiringBehavior.requestFire(result,getParent().getTop());}}
 	    lastIndexVisited=patIndex;
 	}//end in range
     }//end _tick(...)

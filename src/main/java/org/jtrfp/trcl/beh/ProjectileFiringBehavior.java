@@ -33,7 +33,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     long 			timeWhenNextFiringPermittedMillis=0;
     long 			timeBetweenFiringsMillis	 =130;
     private Vector3D [] 	firingPositions			 =DEFAULT_POS;
-    private Vector3D 		firingHeading;
+    //private Vector3D 		firingHeading;
+    private Rotation		firingRotation;
     private int 		firingPositionIndex		 =0;
     private ProjectileFactory 	projectileFactory;
     private boolean 		pendingFiring			 =false;
@@ -41,7 +42,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private int 		ammoLimit			 =Integer.MAX_VALUE;
     private int 		ammo				 =0;
     private Integer []          firingVertices;
-    private Rotation []         firingDirections;
+    private Vector3D []         firingDirections;
     private BasicModelSource    modelSource;
     private boolean             sumProjectorVelocity             = false;
     private SoundTexture        firingSFX;
@@ -52,13 +53,13 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	if(tickTimeMillis>timeWhenNextFiringPermittedMillis && isPendingFiring()){
 	    if(takeAmmo()){
 	    	final WorldObject p = getParent();
-	    	Vector3D heading=this.firingHeading;
-	    	if(this.firingHeading==null)heading = p.getHeading();
-	    	final Rotation headingRot = new Rotation(Vector3D.PLUS_K, heading);
+	    	final Rotation firingRot = getFiringRotation();
 	    	
 	    	for(int mi=0; mi<multiplexLevel;mi++){
-	    	    final Vector3D firingPosition  = getNextModelViewFiringPosition();
-	    	    final Vector3D firingDirection = headingRot.applyTo(getFiringDirectionForPosition(getFiringPositionIndex())).applyTo(Vector3D.PLUS_K);
+	    	    final Vector3D firingPosition     = getNextModelViewFiringPosition();
+	    	    Vector3D rawFiringDirection = getFiringDirectionForPosition(getFiringPositionIndex());
+	    	    rawFiringDirection          = new Vector3D(-rawFiringDirection.getX(),rawFiringDirection.getY(), rawFiringDirection.getZ());
+	    	    final Vector3D firingDirection    = firingRot.applyTo(rawFiringDirection);
 	    	    resetFiringTimer();
 	    	    if(firingSFX==null)
 	    	     projectileFactory.
@@ -80,7 +81,6 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 		    	      isSumProjectorVelocity(),
 		    	      firingSFX);
 	    	}//for(multiplex)
-	    	heading = p.getHeading();
 	    }//end if(ammo)
 	    	try{setPendingFiring(false);}catch(PropertyVetoException e){}
 	}//end timeWhenNextfiringPermitted
@@ -92,7 +92,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     
     public boolean requestFire(){
 	if(System.currentTimeMillis()>timeWhenNextFiringPermittedMillis)
-	 try{setPendingFiring(true);}
+	 try{setPendingFiring(true);setFiringRotation(null);}
 	  catch(PropertyVetoException e){return false;}
 	return true;
     }//end requestFire()
@@ -101,9 +101,9 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	return getAmmo()>0;
     }
     
-    public ProjectileFiringBehavior requestFire(Vector3D heading){
+    public ProjectileFiringBehavior requestFire(Vector3D heading, Vector3D top){
 	if(requestFire())
-	 firingHeading=heading;
+	 firingRotation = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,heading,top);
 	return this;
     }
     
@@ -319,19 +319,21 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	vcs.removeVetoableChangeListener(arg0);
     }
     
-    public Rotation getFiringDirectionForPosition(int index){
-	final Rotation [] firingVectors = getFiringVectors();
+    public Vector3D getFiringDirectionForPosition(int index){
+	final Vector3D [] firingVectors = getFiringVectors();
 	if(firingVectors == null)
-	    return Rotation.IDENTITY;
+	    return Vector3D.PLUS_K;
 	else
 	    return firingDirections[index];
     }//end getFiringVectorForPosition()
 
-    public Rotation[] getFiringVectors() {
+    public Vector3D[] getFiringVectors() {
         return firingDirections;
     }
 
-    public void setFiringDirections(Rotation[] firingRotations) {
+    /**
+     */
+    public void setFiringDirections(Vector3D[] firingRotations) {
         this.firingDirections = firingRotations;
     }
 
@@ -341,5 +343,17 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 
     protected void setFiringPositionIndex(int firingPositionIndex) {
         this.firingPositionIndex = firingPositionIndex;
+    }
+
+    protected Rotation getFiringRotation() {
+	if(firingRotation == null){
+	    final WorldObject parent = getParent();
+	    firingRotation = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,parent.getHeading(),parent.getTop());
+	    }
+        return firingRotation;
+    }
+
+    protected void setFiringRotation(Rotation firingRotation) {
+        this.firingRotation = firingRotation;
     }
 }//end ProjectileFiringBehavior

@@ -15,6 +15,7 @@ package org.jtrfp.trcl.obj;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Camera;
@@ -181,6 +182,15 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		            .setSumProjectorVelocity(w.isSumWithProjectorVel());
 		    if (w == Weapon.DAM)
 			pfb.setAmmoLimit(1);
+		    if(w == Weapon.ION){
+			pfb.setFiringDirections( new Vector3D [] {
+				new Vector3D(-.5,0,1).normalize(),//LEFT
+				Vector3D.PLUS_K, //CENTER
+				new Vector3D(.5,0,1).normalize(),//RIGHT
+				new Vector3D(0,.5,1).normalize(),//DOWN
+				new Vector3D(0,-.5,1).normalize() //UP
+			});
+		    }
 		}
 		addBehavior(pfb);
 		weapons[w.getButtonToSelect() - 1] = pfb;

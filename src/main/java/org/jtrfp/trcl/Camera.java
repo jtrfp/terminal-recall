@@ -168,14 +168,24 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(
-			Math.rint((newValue[0]+pHeading.getX())/granularity),
-			Math.rint((newValue[1]+pHeading.getY())/granularity),
-			Math.rint((newValue[2]+pHeading.getZ())/granularity));
+			posZero(Math.rint((newValue[0]+pHeading.getX())/granularity)),
+			posZero(Math.rint((newValue[1]+pHeading.getY())/granularity)),
+			posZero(Math.rint((newValue[2]+pHeading.getZ())/granularity)));
 		final Vector3D oldCenterCube = centerCube;
 		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)
 	}//end if propertyChange()
     }//end CameraPositionHandler
+    
+    /**
+     * Replace negative zero with positive zero. 
+     * @param in
+     * @return
+     * @since Feb 17, 2016
+     */
+    public static double posZero(double in){
+	return in==0?0:in;
+    }
     
     private final class CenterCubeHandler implements PropertyChangeListener{
 	@Override

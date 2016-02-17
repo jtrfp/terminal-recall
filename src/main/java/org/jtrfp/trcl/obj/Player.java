@@ -81,6 +81,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
     private final RunModeListener               runStateListener = new RunModeListener();
     private final WeakPropertyChangeListener    weakRunStateListener;
     private final HeadingXAlwaysPositiveBehavior headingXAlwaysPositiveBehavior;
+    
+    private static final double LEFT_X = -5000, RIGHT_X = 5000, TOP_Y = 2000, BOT_Y=-2000;
 
     public Player(final TR tr, final Model model) {
 	super(tr, model);
@@ -152,28 +154,28 @@ public class Player extends WorldObject implements RelevantEverywhere{
 			    .setFiringMultiplexMap(
 				    new Vector3D[][] {
 					    new Vector3D[] {
-						    new Vector3D(5000, -3000, 0),
-						    new Vector3D(-5000, -3000,
+						    new Vector3D(RIGHT_X, BOT_Y, 0),
+						    new Vector3D(LEFT_X, BOT_Y,
 							    0) },// Level 0,
 								 // single
 					    new Vector3D[] {
-						    new Vector3D(5000, -3000, 0),
-						    new Vector3D(-5000, -3000,
+						    new Vector3D(RIGHT_X, BOT_Y, 0),
+						    new Vector3D(LEFT_X, BOT_Y,
 							    0) },// Level 1,
 								 // double
 					    new Vector3D[] {
-						    new Vector3D(5000, -3000, 0),
-						    new Vector3D(-5000, -3000,
+						    new Vector3D(RIGHT_X, BOT_Y, 0),
+						    new Vector3D(LEFT_X, BOT_Y,
 							    0),// Level 2 quad
-						    new Vector3D(5000, 3000, 0),
-						    new Vector3D(-5000, 3000, 0) } })//Level 2 cont'd
+						    new Vector3D(RIGHT_X, TOP_Y, 0),
+						    new Vector3D(LEFT_X, TOP_Y, 0) } })//Level 2 cont'd
 				.setTimeBetweenFiringsMillis(w.getFiringIntervalMS())
 				.setSumProjectorVelocity(w.isSumWithProjectorVel());
 		}// end if(isLaser)
 		else {// NOT LASER
 		    pfb = new ProjectileFiringBehavior().setFiringPositions(
-			    new Vector3D[] { new Vector3D(5000, -3000, 0),
-				    new Vector3D(-5000, -3000, 0) })
+			    new Vector3D[] { new Vector3D(RIGHT_X, BOT_Y, 0),
+				    new Vector3D(LEFT_X, BOT_Y, 0) })
 			    .setProjectileFactory(
 				    tr.getResourceManager()
 					    .getProjectileFactories()[w
@@ -191,11 +193,11 @@ public class Player extends WorldObject implements RelevantEverywhere{
 				new Vector3D(0,.3,1).normalize() //UP
 			});
 			pfb.setFiringPositions(new Vector3D[]{
-				new Vector3D(0,-3000,0),
-				new Vector3D(0,-3000,0),
-				new Vector3D(0,-3000,0),
-				new Vector3D(0,-3000,0),
-				new Vector3D(0,-3000,0)
+				new Vector3D(0,BOT_Y,0),
+				new Vector3D(0,BOT_Y,0),
+				new Vector3D(0,BOT_Y,0),
+				new Vector3D(0,BOT_Y,0),
+				new Vector3D(0,BOT_Y,0)
 				});
 		    }//end if(ION)
 		}

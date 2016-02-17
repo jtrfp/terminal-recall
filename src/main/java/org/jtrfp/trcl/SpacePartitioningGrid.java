@@ -47,9 +47,9 @@ public class SpacePartitioningGrid<E extends Positionable>{
 		    return World.RELEVANT_EVERYWHERE;
 		final double[] newPos = (double[])evt.getNewValue();
 		final Vector3D newCenterCube = new Vector3D(
-			Math.rint(newPos[0]/granularity),
-			Math.rint(newPos[1]/granularity),
-			Math.rint(newPos[2]/granularity));
+			Camera.posZero(Math.rint(newPos[0]/granularity)),
+			Camera.posZero(Math.rint(newPos[1]/granularity)),
+			Camera.posZero(Math.rint(newPos[2]/granularity)));
 		return newCenterCube;
 	    }
 	};

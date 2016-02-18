@@ -432,15 +432,14 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		setInstrumentMode(new NoInstruments());
 		return;
 	    }//end if(!isAppropriateToDisplay()
-	    if(getViewMode()!=viewModes[viewModeItr]){
+	    if(getViewMode()!=viewModes[viewModeItr])
 		setViewMode(viewModes[viewModeItr]);
-		if(getViewMode()!=COCKPIT_VIEW && getInstrumentMode() == FULL_COCKPIT){
-		    incrementInstrumentMode();
-		}//end if(cockpit not compatible with instrument mode)
-	    }//end if(viewModeTransient)
-	    if(getInstrumentMode()!=instrumentModes[instrumentModeItr]){
+	    if(getInstrumentMode()!=instrumentModes[instrumentModeItr])
 		setInstrumentMode(instrumentModes[instrumentModeItr]);
-	    }
+	    if(getViewMode()!=COCKPIT_VIEW && getInstrumentMode() == FULL_COCKPIT){
+		    incrementInstrumentMode();
+		    reEvaluateState();//Recursive
+		    }
 	}//end reEvaluateState()
 	
 	private boolean isAppropriateToDisplay(){

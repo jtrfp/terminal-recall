@@ -30,6 +30,7 @@ import com.ochafik.util.listenable.Pair;
 public class CollisionManager {
     public static final double MAX_CONSIDERATION_DISTANCE = TR.mapSquareSize * 15;
     public static final int    SHIP_COLLISION_DISTANCE    = 15000;
+    private static final double ROLLOVER_POINT            = World.WORLD_WIDTH_CUBES/2.;
     private final TR tr;
     private final ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>relevancePairs = new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>();
     private final ConsolidatingCollectionActionPacker<Positionable, Vector3D>       inputRelevancePairCollection = 
@@ -60,21 +61,10 @@ public class CollisionManager {
 		    final Collection<Positionable> thisCube = cube.getValue();
 		    //Intra-cube
 		    processCubes(thisCube,thisCube);
-		    
-		    Collection<Positionable> other;
-		    final Vector3D orig = cube.getKey();
-		    //X,Z+1
-		    other = pairBuffer.get(new Vector3D(orig.getX(),orig.getY(),Math.rint(orig.getZ()+1)));
-		    if(other != null)
-		     bidiProcessCubes(thisCube,other);
-		    //X+1,Z
-		    other = pairBuffer.get(new Vector3D(Math.rint(orig.getX()+1),orig.getY(),orig.getZ()));
-		    if(other != null)
-		     bidiProcessCubes(thisCube,other);
-		    //X+1, Z+1
-		    other = pairBuffer.get(new Vector3D(Math.rint(orig.getX()+1),orig.getY(),Math.rint(orig.getZ()+1)));
-		    if(other != null)
-		     bidiProcessCubes(thisCube,other);
+		    Vector3D orig = cube.getKey();
+		    processNeighbors(orig,thisCube);
+		    orig = new Vector3D(orig.getX(),incLoop(orig.getY()),orig.getZ());
+		    processNeighbors(orig,thisCube);
 		    }
 		else {//EVERYWHERE
 		    if(everywhere==null)
@@ -99,6 +89,29 @@ public class CollisionManager {
 	    collectionPool.add(col);
 	}pairBuffer.clear();
     }//end newPerformCollisionTests()
+    
+    private void processNeighbors(Vector3D orig, Collection<Positionable> thisCube){
+	    Collection<Positionable> other;
+	    //X,Z+1
+	    other = pairBuffer.get(new Vector3D(orig.getX(),orig.getY(),incLoop(orig.getZ())));
+	    if(other != null)
+	     bidiProcessCubes(thisCube,other);
+	    //X+1,Z
+	    other = pairBuffer.get(new Vector3D(incLoop(orig.getX()),orig.getY(),orig.getZ()));
+	    if(other != null)
+	     bidiProcessCubes(thisCube,other);
+	    //X+1, Z+1
+	    other = pairBuffer.get(new Vector3D(incLoop(orig.getX()),orig.getY(),incLoop(orig.getZ())));
+	    if(other != null)
+	     bidiProcessCubes(thisCube,other);
+    }
+    
+    private double incLoop(double coord){
+	coord++;
+	while(coord >= ROLLOVER_POINT)
+	    coord -= World.WORLD_WIDTH_CUBES;
+	return Math.rint(coord);
+    }//end incLoop(...)
     
     private Collection<Positionable> newCube(){
 	Collection<Positionable> result = collectionPool.poll();

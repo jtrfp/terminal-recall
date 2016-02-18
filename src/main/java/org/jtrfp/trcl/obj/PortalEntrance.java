@@ -51,6 +51,7 @@ public class PortalEntrance extends WorldObject {
     private SkyCubeGen skyCubeGen = GameShell.DEFAULT_GRADIENT;
     private boolean    portalUnavailable = false;
     private TRFuture<Void> relevanceFuture;
+    private boolean dotRelevant = false, rendering = false;
 
     public PortalEntrance(TR tr, Model model, PortalExit exit, WorldObject approachingObject){
 	this(tr,exit,approachingObject);
@@ -89,65 +90,19 @@ public class PortalEntrance extends WorldObject {
     }//end RelevanceTallyListener
     
     private void becameIrrelevant(){
-	final ThreadManager tm = getTr().getThreadManager();
-	final TRFuture<Void> oldRelevanceFuture = relevanceFuture;
-	relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
-	    @Override
-	    public Void call() throws Exception {
-		try{
-		    if(oldRelevanceFuture!=null)
-			oldRelevanceFuture.get();//Don't double-access
-		    if(isPortalUnavailable())
-			return null;//Do nothing, failed to get portal in the first place.
-		    final Renderer portalRenderer = getPortalRenderer();
-		    if(portalRenderer == null)
-			throw new IllegalStateException("portalRenderer is intolerably null.");
-		    System.out.println("De-activating portal entrance: "+PortalEntrance.this);
-		    //Release the Camera
-		    getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
-		    portalExit.deactivate();
-		    getPortalExit().setControlledCamera(null);
-		    setPortalRenderer(null);
-		    setPortalTextureID(-1);
-		    setRelevant(false);
-		    System.out.println("Done de-activating portal entrance.");
-		}catch(Exception e){e.printStackTrace();}
-		return null;
-	    }});
+	setRelevant(false);
     }
 
     private void becameRelevant() {
-	final ThreadManager tm = getTr().getThreadManager();
-	final TRFuture<Void> oldRelevanceFuture = relevanceFuture;
-	relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
-	    @Override
-	    public Void call() throws Exception {
-		try {
-		    if(oldRelevanceFuture!=null)
-			    oldRelevanceFuture.get();
-		    if (getPortalRenderer() != null)
-			    throw new IllegalStateException(
-				    "portalRenderer is intolerably non-null.");
-		    final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
-			    .get().acquirePortalRenderer();
-		    System.out.println("Activating portal entrance... "+PortalEntrance.this);
-		    getPortalExit().setControlledCamera(
-			    newRendererPair.getFirst().getCamera());
-		    newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
-		    setPortalRenderer(newRendererPair.getFirst());
-		    setRelevant(true);
-		    setPortalTextureID(newRendererPair.getSecond());
-		    portalExit.activate();
-		    setPortalUnavailable(false);
-		    System.out.println("Done activating portal entrance.");
-		} catch (PortalNotAvailableException e) {
-		    System.out.println("Portal acquisition rejected: All are in use. PortalEntrance hash="+this.hashCode());
-		    setPortalUnavailable(true);
-		}// end catch(PortalNotAvailableException)
-		catch(Exception e){e.printStackTrace();}
-		return null;
-	    }});
+	setRelevant(true);
     }// end becameRelevant()
+    
+    private void reEvaluatePortalState(){
+	if(isRelevant() && isDotRelevant())
+	    setRendering(true);
+	else
+	    setRendering(false);
+    }
 
     public double[] getRelativePosition(double [] dest){
 	Vect3D.subtract(getApproachingObject().getPosition(), PortalEntrance.this.getPosition(), dest);
@@ -164,13 +119,19 @@ public class PortalEntrance extends WorldObject {
 	return this;
     }
     
+    private void updateDotState(double dot){
+	setDotRelevant(dot>=0);
+    }
+    
     private class PortalEntranceBehavior extends Behavior{
 	private final double [] relativePosition = new double[3];
 	@Override
 	public void tick(long tickTimeMillis){
 	    if(isRelevant()){
-		getRelativePosition(relativePosition);
 		final WorldObject approachingObject = getApproachingObject();
+		final double dot = PortalEntrance.this.getHeading().dotProduct(approachingObject.getHeading());
+		updateDotState(dot);
+		getRelativePosition(relativePosition);
 		portalExit.updateObservationParams(relativePosition, getRelativeHeadingTop(),approachingObject.getHeading(),approachingObject.getTop());
 	    }//end if(isWithinRange)
 	}//end _tick(...)
@@ -252,9 +213,12 @@ public class PortalEntrance extends WorldObject {
     }
 
     public void setRelevant(boolean relevant) {
+	if(relevant == this.relevant)
+	    return;
 	final boolean oldValue = this.relevant;
         this.relevant = relevant;
         pcs.firePropertyChange(RELEVANT, relevant, oldValue);
+        reEvaluatePortalState();
     }
 
     public Renderer getPortalRenderer() {
@@ -308,4 +272,80 @@ public class PortalEntrance extends WorldObject {
         this.portalUnavailable = portalWasUnavailable;
     }
 
+    protected boolean isDotRelevant() {
+        return dotRelevant;
+    }
+
+    protected void setDotRelevant(boolean dotRelevant) {
+	if(this.dotRelevant == dotRelevant)
+	    return;
+        this.dotRelevant = dotRelevant;
+        reEvaluatePortalState();
+    }
+
+    protected boolean isRendering() {
+        return rendering;
+    }
+
+    protected void setRendering(boolean rendering) {
+	if(this.rendering == rendering)
+	    return;
+	this.rendering = rendering;
+	if(rendering){
+	    final ThreadManager tm = getTr().getThreadManager();
+	    final TRFuture<Void> oldRelevanceFuture = relevanceFuture;
+	    relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
+		@Override
+		public Void call() throws Exception {
+		    try {
+			if(oldRelevanceFuture!=null)
+			    oldRelevanceFuture.get();
+			if (getPortalRenderer() != null)
+			    throw new IllegalStateException(
+				    "portalRenderer is intolerably non-null.");
+			final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
+				.get().acquirePortalRenderer();
+			System.out.println("Activating portal entrance... "+PortalEntrance.this);
+			getPortalExit().setControlledCamera(
+				newRendererPair.getFirst().getCamera());
+			newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
+			setPortalRenderer(newRendererPair.getFirst());
+			setPortalTextureID(newRendererPair.getSecond());
+			portalExit.activate();
+			setPortalUnavailable(false);
+			System.out.println("Done activating portal entrance.");
+		    } catch (PortalNotAvailableException e) {
+			System.out.println("Portal acquisition rejected: All are in use. PortalEntrance hash="+this.hashCode());
+			setPortalUnavailable(true);
+		    }// end catch(PortalNotAvailableException)
+		    catch(Exception e){e.printStackTrace();}
+		    return null;
+		}});
+	}else{//Not rendering
+	    final ThreadManager tm = getTr().getThreadManager();
+	    final TRFuture<Void> oldRelevanceFuture = relevanceFuture;
+	    relevanceFuture = tm.submitToThreadPool(new Callable<Void>(){//Cannot call GPU ops directly from a realtime thread; use a pool thread.
+		@Override
+		public Void call() throws Exception {
+		    try{
+			if(oldRelevanceFuture!=null)
+			    oldRelevanceFuture.get();//Don't double-access
+			if(isPortalUnavailable())
+			    return null;//Do nothing, failed to get portal in the first place.
+			final Renderer portalRenderer = getPortalRenderer();
+			if(portalRenderer == null)
+			    throw new IllegalStateException("portalRenderer is intolerably null.");
+			System.out.println("De-activating portal entrance: "+PortalEntrance.this);
+			//Release the Camera
+			getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
+			portalExit.deactivate();
+			getPortalExit().setControlledCamera(null);
+			setPortalRenderer(null);
+			setPortalTextureID(-1);
+			System.out.println("Done de-activating portal entrance.");
+		    }catch(Exception e){e.printStackTrace();}
+		    return null;
+		}});
+	}//end if(!rendering)
+    }//end setRendering(...)
 }//end PortalEntrance

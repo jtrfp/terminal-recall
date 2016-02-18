@@ -39,7 +39,6 @@ import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
-import org.jtrfp.trcl.beh.SpinCrashDeathBehavior;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
@@ -73,7 +72,6 @@ import org.jtrfp.trcl.snd.SoundSystem;
 
 public class Mission {
     // PROPERTIES
-    //public static final String MISSION_MODE = "missionMode";
     public static final String SATELLITE_VIEW = "satelliteView";
     public static final String CURRENT_NAV_TARGET = "currentNavTarget";
     
@@ -341,7 +339,6 @@ public class Mission {
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
 	    tr.setRunState(new EnemyBrief(){});
-	    //setMissionMode(new Mission.IntroMode());
 	    displayHandler.setDisplayMode(briefingMode);
 	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
 	}
@@ -507,15 +504,6 @@ public class Mission {
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
 		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
 	System.out.println("Tunnel exit at sector "+tunnelExitMapSquarePos);
-	//portalExit = getTunnelEntrancePortal(tunnelExitMapSquarePos);
-	
-	/*if(portalExit!=null){
-	 portalExit.setHeading(tunnel.getExitObject().getHeading().negate());
-	 portalExit.setTop(tunnel.getExitObject().getTop());
-	 portalExit.setPosition(tunnel.getExitObject().getPosition());
-	 portalExit.notifyPositionChange();
-	 portalExit.setRootGrid(tunnel);
-	}else System.err.println("Null exit.");*/
 	assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
 	tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
 	return tunnel;
@@ -718,9 +706,6 @@ public class Mission {
 	
 	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnelToEnter);
 	
-	//tr.getDefaultGrid().nonBlockingAddBranch(tunnel);
-	//tr.getDefaultGrid().blockingRemoveBranch(overworldSystem);
-	
 	//Move player to tunnel
 	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 	//Ensure chamber mode is off
@@ -744,12 +729,10 @@ public class Mission {
 	player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
 	player.probeForBehavior(MovesByVelocity.class)        .setVelocity(Vector3D.ZERO);
 	player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
-	//player.probeForBehavior(HeadingXAlwaysPositiveBehavior.class).setEnable(true);
 	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
 	tunnelToEnter.dispatchTunnelEntryNotifications();
 	final Renderer portalRenderer = teo.getPortalEntrance().getPortalRenderer();
-	final Camera secondaryCam = /*tr.secondaryRenderer.get().getCamera()*/portalRenderer.getCamera();
-	//player.setPosition(Tunnel.TUNNEL_START_POS.toArray());//TODO: remove debug code
+	final Camera secondaryCam = portalRenderer.getCamera();
 	player.setPosition(secondaryCam.getPosition());
 	player.setHeading (secondaryCam.getHeading());
 	player.setTop     (secondaryCam.getTop());
@@ -854,12 +837,6 @@ public class Mission {
 	    tr.setRunState(satelliteView?new SatelliteState(){}:new OverworldState(){});
 	    if(satelliteView){//Switched on
 		tr.getThreadManager().setPaused(true);
-		World.relevanceExecutor.submit(new Runnable(){
-		    @Override
-		    public void run() {
-			//getPartitioningGrid().removeBranch(((TVF3Game)game).getNavSystem());
-			//getPartitioningGrid().removeBranch(((TVF3Game)game).getHUDSystem());
-		    }});
 		cam.setFogEnabled(false);
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
 		cam.probeForBehavior(MatchDirection.class).setEnable(false);
@@ -875,8 +852,6 @@ public class Mission {
 		    @Override
 		    public void run() {
 			((TVF3Game)tr.getGame()).getNavSystem().activate();
-			//getPartitioningGrid().addBranch(((TVF3Game)game).getNavSystem());
-			//getPartitioningGrid().addBranch(((TVF3Game)game).getHUDSystem());
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);
@@ -889,7 +864,6 @@ public class Mission {
      * @return the satelliteView
      */
     public boolean isSatelliteView() {
-	System.out.println("isSatelliteView="+satelliteView);
         return satelliteView;
     }
     public Tunnel getCurrentTunnel() {
@@ -910,8 +884,6 @@ public class Mission {
 	    @Override
 	    public void run() {
 		tunnelGrid.removeAll();
-		//if(oldTunnel != null)
-		//    tunnelGrid.removeBranch(oldTunnel);
 		tunnelGrid.addBranch(newTunnel);
 	    }});
 	return oldTunnel;

@@ -17,6 +17,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -25,6 +26,7 @@ import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
+import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 
 public class NavArrow extends Sprite2D {
 private static final double WIDTH=.16;
@@ -80,7 +82,8 @@ private final DashboardLayout layout;
 	    if(tr.getRunState() instanceof Mission.TunnelState){
 		if(counter==0){
 		    setVisible(false);
-		    final TunnelExitObject eo = mission.getCurrentTunnel().getExitObject();
+		    final TunnelSystem ts = Features.get(mission, TunnelSystem.class);
+		    final TunnelExitObject eo = ts.getCurrentTunnel().getExitObject();
 		    final double [] eoPos = eo.getPosition();
 		    navLocXY = new Vector3D(eoPos[0],eoPos[2],0);
 		    hudSystem.getObjective().setContent(layout.getHumanReadableObjective(new NAVObjective(null){

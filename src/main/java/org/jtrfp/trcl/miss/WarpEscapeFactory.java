@@ -199,8 +199,8 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 		    new Mission.Result(
 			    mission.getAirTargetsDestroyed(),
 			    mission.getGroundTargetsDestroyed(),
-			    mission.getFoliageDestroyed(),
-			    1.-(double)mission.getTunnelsRemaining().size()/(double)mission.getTotalNumTunnels()));
+			    mission.getFoliageDestroyed()/*,
+			    1.-(double)mission.getTunnelsRemaining().size()/(double)mission.getTotalNumTunnels()*/));
 	}//end warpEscapeSequence()
 
 	public Mission getMission() {

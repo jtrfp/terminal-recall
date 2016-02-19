@@ -12,15 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.miss;
 
-import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -30,21 +25,16 @@ import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SkySystem;
-import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
-import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
-import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
-import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.AbstractTriplet;
-import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -55,16 +45,13 @@ import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
+import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.PortalEntrance;
-import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.SpawnsRandomExplosionsAndDebris;
-import org.jtrfp.trcl.obj.TunnelEntranceObject;
-import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
@@ -79,10 +66,6 @@ public class Mission {
     private final List<NAVObjective> 
     				navs	= new LinkedList<NAVObjective>();
     private final LVLFile 	lvl;
-    private final HashMap<String, Tunnel> 
-    				tunnels = new HashMap<String, Tunnel>();
-    private final HashMap<Integer, PortalEntrance>
-    				tunnelPortals = new HashMap<Integer, PortalEntrance>();
     private double[] 		playerStartPosition 
     					= new double[3];
     private List<NAVSubObject> 	navSubObjects;
@@ -94,26 +77,19 @@ public class Mission {
     private int			groundTargetsDestroyed=0,
 	    			airTargetsDestroyed=0,
 	    			foliageDestroyed=0;
-    private int			totalNumTunnels;
-    private final LinkedList<Tunnel>
-    				tunnelsRemaining = new LinkedList<Tunnel>();
     private final boolean	showIntro;
     private volatile MusicPlaybackEvent
     				bgMusic;
     private final Object	missionLock = new Object();
-    private final Map<Integer,TunnelEntranceObject>
-    				tunnelMap = new HashMap<Integer,TunnelEntranceObject>();
     private boolean 		bossFight = false, satelliteView = false;
     //private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private Tunnel		currentTunnel;
     private final DisplayModeHandler displayHandler;
-    public Object [] levelLoadingMode, tunnelMode, overworldMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
+    public Object [] levelLoadingMode, overworldMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
     private NAVObjective currentNavTarget;
-    private final RenderableSpacePartitioningGrid tunnelGrid       = new RenderableSpacePartitioningGrid();
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
 
-    private enum LoadingStages {
+    enum LoadingStages {
 	navs, tunnels, overworld
     }// end LoadingStages
     
@@ -210,15 +186,6 @@ public class Mission {
 		    gameplayMode,
 		    overworldSystem
 	    };
-	    tunnelMode = new Object[]{
-			 ((TVF3Game)game).upfrontDisplay,
-			 rm.getDebrisSystem(),
-			 rm.getPowerupSystem(),
-			 rm.getProjectileFactories(),
-			 rm.getExplosionFactory(),
-			 rm.getSmokeSystem(),
-			 tunnelGrid
-		};
 	    summaryMode = new Object[]{
 		    ((TVF3Game)game).getBriefingScreen(),
 		    overworldSystem
@@ -254,8 +221,9 @@ public class Mission {
 	    if(player.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
 	     player.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
 	    //player.probeForBehavior(SpinCrashDeathBehavior.class).setEnable(false);
-	    
-	    installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
+	    //TODO: TunnelSystem should be isolated from Mission
+	    final TunnelSystem ts = Features.get(this, TunnelSystem.class);
+	    ts.installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
 	    Factory f = new NAVObjective.Factory(tr, getLevelName());
 
 	    final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
@@ -390,14 +358,12 @@ public class Mission {
 
     public static class Result {
 	private final int airTargetsDestroyed, groundTargetsDestroyed,foliageDestroyed;
-	private final double tunnelsFoundPctNorm;
 	private boolean abort=false;
 
-	public Result(int airTargetsDestroyed, int groundTargetsDestroyed, int foliageDestroyed, double tunnelsFoundPctNorm) {
+	public Result(int airTargetsDestroyed, int groundTargetsDestroyed, int foliageDestroyed) {
 	    this.airTargetsDestroyed	=airTargetsDestroyed;
 	    this.groundTargetsDestroyed	=groundTargetsDestroyed;
 	    this.foliageDestroyed	=foliageDestroyed;
-	    this.tunnelsFoundPctNorm	=tunnelsFoundPctNorm;
 	}//end constructor
 
 	/**
@@ -419,13 +385,6 @@ public class Mission {
 	 */
 	public int getFoliageDestroyed() {
 	    return foliageDestroyed;
-	}
-
-	/**
-	 * @return the tunnelsFoundPctNorm
-	 */
-	public double getTunnelsFoundPctNorm() {
-	    return tunnelsFoundPctNorm;
 	}
 
 	/**
@@ -457,83 +416,6 @@ public class Mission {
 	return playerStartDirection;
     }
     
-    private void installTunnels(TDFFile tdf, LoadingProgressReporter reporter){
-	TDFFile.Tunnel[] tuns = tdf.getTunnels();
-	tuns = tuns == null?new TDFFile.Tunnel[0]:tuns;//Null means no tunnels.
-	final LoadingProgressReporter[] reporters = reporter
-		.generateSubReporters(tuns.length);
-	if (tuns != null) {
-	    int tIndex = 0;
-	    // Build tunnels
-	    for (TDFFile.Tunnel tun : tuns) {
-		tr
-		 .getReporter()
-		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
-				+ tIndex + ".entrance", tun.getEntrance().toString());
-		tr
-		 .getReporter()
-		  .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
-				+ tIndex + ".exit", tun.getExit().toString());
-		newTunnel(tun,reporters[tIndex]);
-		tIndex++;
-	    }//end if(tuns!=null)
-	}// end if(tuns!=null)
-	totalNumTunnels = tunnelsRemaining.size();
-    }//end installTunnels()
-
-    private Tunnel newTunnel(org.jtrfp.trcl.file.TDFFile.Tunnel tdfTun,
-	    LoadingProgressReporter reporter) {
-	final Tunnel tunnel = new Tunnel(tr, tdfTun, reporter, tdfTun.getTunnelLVLFile());
-	tunnelsRemaining.add(tunnel);
-	DirectionVector tunnelEntranceLegacyPos = tdfTun.getEntrance();
-	final Point tunnelEntranceMapSquarePos = new Point(
-		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getZ())),
-		(int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
-	final PortalEntrance portalEntrance = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
-	final PortalExit portalExit = portalEntrance.getPortalExit();
-	addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel,portalEntrance);
-	if(portalExit!=null){
-	    portalExit.setHeading(Tunnel.TUNNEL_START_DIRECTION.getHeading());
-	    portalExit.setTop(Tunnel.TUNNEL_START_DIRECTION.getTop());
-	    portalExit.setPosition(Tunnel.TUNNEL_START_POS.toArray());
-	    portalExit.notifyPositionChange();
-	    portalExit.setRootGrid(tunnel);
-	}else throw new NullPointerException("Null portal exit! "+tunnelEntranceMapSquarePos);
-	DirectionVector tunnelExitLegacyPos = tdfTun.getExit();
-	final Point tunnelExitMapSquarePos = new Point(
-		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
-		(int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
-	System.out.println("Tunnel exit at sector "+tunnelExitMapSquarePos);
-	assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
-	tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
-	return tunnel;
-    }
-
-    public Tunnel getTunnelByFileName(String tunnelFileName) {
-	return tunnels.get(tunnelFileName.toUpperCase());
-    }
-
-    public TunnelEntranceObject getNearestTunnelEntrance(double xInLegacyUnits,
-	    double yInLegacyUnits, double zInLegacyUnits) {
-	TunnelEntranceObject result = null;
-	double closestDistance = Double.POSITIVE_INFINITY;
-	final Vector3D entPos = new Vector3D(
-		    TR.legacy2Modern(zInLegacyUnits),//Intentionally backwards
-		    TR.legacy2Modern(yInLegacyUnits),
-		    TR.legacy2Modern(xInLegacyUnits)
-		    );
-	System.out.println("Requested entry pos="+entPos);
-	for (TunnelEntranceObject teo : tunnelMap.values()) {
-	    final Vector3D pos = new Vector3D(teo.getPosition());
-	    System.out.println("Found tunnel at "+pos);
-	    final double distance = pos.distance(entPos);
-	    if (distance < closestDistance) {
-		closestDistance = distance;
-		result = teo;
-	    }
-	}// end for(tunnels)
-	return result;
-    }// end getTunnelWhoseEntranceClosestTo(...)
 
     public void playerDestroyed() {
 	new Thread() {
@@ -581,11 +463,6 @@ public class Mission {
     
     public Mission notifyGroundTargetDestroyed(){
 	groundTargetsDestroyed++;
-	return this;
-    }
-    
-    public Mission notifyTunnelFound(Tunnel tun){
-	tunnelsRemaining.remove(tun);
 	return this;
     }
     
@@ -642,8 +519,8 @@ public class Mission {
 	final Result result = new Result(
 		airTargetsDestroyed,
 		groundTargetsDestroyed,
-		foliageDestroyed,
-		1.-(double)tunnelsRemaining.size()/(double)totalNumTunnels);
+		foliageDestroyed/*,
+		1.-(double)tunnelsRemaining.size()/(double)totalNumTunnels*/);
 	result.setAbort(true);
 	notifyMissionEnd(result);
 	//Wait for mission to end
@@ -660,98 +537,7 @@ public class Mission {
 	    for(Projectile projectile:pf.getProjectiles())
 		projectile.destroy();
     }//end cleanup()
-    /**
-     * Find a tunnel at the given map square, if any.
-     * @param mapSquareXZ Position in cells, not world coords.
-     * @return The Tunnel at this map square, or null if none here.
-     * @since Jan 13, 2015
-     */
-    public TunnelEntranceObject getTunnelEntranceObject(Point mapSquareXZ){
-	final int key = pointToHash(mapSquareXZ);
-	System.out.println("getTunnelEntranceObject "+mapSquareXZ);
-	for(TunnelEntranceObject teo:tunnelMap.values())
-	    System.out.print(" "+new Vector3D(teo.getPosition()).scalarMultiply(1/TR.mapSquareSize));
-	System.out.println();
-	return tunnelMap.get(key);
-    }
     
-    public void registerTunnelEntrancePortal(Point mapSquareXZ, PortalEntrance entrance){
-	synchronized(tunnelPortals){
-	 tunnelPortals.put(pointToHash(mapSquareXZ),entrance);}
-    }
-    
-    PortalEntrance getTunnelEntrancePortal(Point mapSquareXZ){
-	synchronized(tunnelPortals){
-	 return tunnelPortals.get(pointToHash(mapSquareXZ));}
-    }
-    
-    public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel, PortalEntrance entrance){
-	TunnelEntranceObject teo;
-	overworldSystem.add(teo = new TunnelEntranceObject(tr,tunnel,entrance));
-	tunnelMap.put(pointToHash(mapSquareXZ),teo);
-    }
-    
-    private int pointToHash(Point point){
-	final int key =(int)point.getX()+(int)point.getY()*65536;
-	return key;
-    }
-    
-    public synchronized void enterTunnel(final TunnelEntranceObject teo) {
-	final Tunnel tunnelToEnter = teo.getSourceTunnel();
-	System.out.println("Entering tunnel "+tunnelToEnter);
-	final Game game = ((TVF3Game)tr.getGame());
-	final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
-	
-	assert tunnelToEnter.getExitObject().getPosition()[0]>0:""+tunnelToEnter.getExitObject().getPosition()[0];//TODO: Remove
-	
-	((TVF3Game)game).getCurrentMission().notifyTunnelFound(tunnelToEnter);
-	
-	//Move player to tunnel
-	tr.mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
-	//Ensure chamber mode is off
-	overworldSystem.setChamberMode(false);
-	overworldSystem.setTunnelMode(true);
-	//Update debug data
-	tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "true");
-
-	final ProjectileFactory [] pfs = tr.getResourceManager().getProjectileFactories();
-	for(ProjectileFactory pf:pfs){
-	    Projectile [] projectiles = pf.getProjectiles();
-	    for(Projectile proj:projectiles){
-		((WorldObject)proj).
-		probeForBehavior(LoopingPositionBehavior.class).
-		setEnable(false);
-	    }//end for(projectiles)
-	}//end for(projectileFactories)
-	final Player player = ((TVF3Game)tr.getGame()).getPlayer();
-	player.setActive(false);
-	player.resetVelocityRotMomentum();
-	player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
-	player.probeForBehavior(MovesByVelocity.class)        .setVelocity(Vector3D.ZERO);
-	player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
-	player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
-	tunnelToEnter.dispatchTunnelEntryNotifications();
-	final Renderer portalRenderer = teo.getPortalEntrance().getPortalRenderer();
-	final Camera secondaryCam = portalRenderer.getCamera();
-	player.setPosition(secondaryCam.getPosition());
-	player.setHeading (secondaryCam.getHeading());
-	player.setTop     (secondaryCam.getTop());
-	player.notifyPositionChange();
-	//Move the secondary cam to the overworld.
-	overworldSystem.setChamberMode(tunnelToEnter.getExitObject().isMirrorTerrain());
-	//Set the skycube appropriately
-	portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGame()).
-		      getCurrentMission().
-		      getOverworldSystem().
-		      getSkySystem().
-		      getBelowCloudsSkyCubeGen());
-	
-	tr.setRunState(new TunnelState(){});
-	setCurrentTunnel(tunnelToEnter);
-	tr.setRunState(new TunnelState(){});
-	setDisplayMode(tunnelMode);
-	player.setActive(true);
-    }//end enterTunnel()
     /**
      * @param listener
      * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
@@ -866,29 +652,7 @@ public class Mission {
     public boolean isSatelliteView() {
         return satelliteView;
     }
-    public Tunnel getCurrentTunnel() {
-	if(!(tr.getRunState() instanceof TunnelState))return null;
-	return currentTunnel;
-    }
     
-    /**
-     * 
-     * @param newTunnel
-     * @return The old tunnel, or null if none.
-     * @since Jan 23, 2016
-     */
-    public Tunnel setCurrentTunnel(final Tunnel newTunnel){
-	final Tunnel oldTunnel = getCurrentTunnel();
-	this.currentTunnel = newTunnel;
-	World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
-		tunnelGrid.removeAll();
-		tunnelGrid.addBranch(newTunnel);
-	    }});
-	return oldTunnel;
-    }//end setCurrentTunnel
-
     public Game getGame() {
 	return game;
     }
@@ -923,18 +687,6 @@ public class Mission {
 
     public void setFoliageDestroyed(int foliageDestroyed) {
         this.foliageDestroyed = foliageDestroyed;
-    }
-
-    public Collection<Tunnel> getTunnelsRemaining() {
-        return Collections.unmodifiableCollection(tunnelsRemaining);
-    }
-
-    public int getTotalNumTunnels() {
-        return totalNumTunnels;
-    }
-
-    public void setTotalNumTunnels(int totalNumTunnels) {
-        this.totalNumTunnels = totalNumTunnels;
     }
 
     public NAVObjective getCurrentNavTarget() {

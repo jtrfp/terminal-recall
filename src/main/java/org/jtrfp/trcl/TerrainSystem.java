@@ -24,6 +24,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.DirectionVector;
@@ -32,6 +33,7 @@ import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
+import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TerrainChunk;
@@ -201,7 +203,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					final PortalExit exit = new PortalExit(tr);
 					final PortalEntrance entrance;
 					entrance = new PortalEntrance(tr,portalModel,exit,tr.getGame().getPlayer());
-					tr.getGame().getCurrentMission().registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
+					final TunnelSystem ts = Features.get(tr.getGame().getCurrentMission(),TunnelSystem.class);
+					ts.registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
 					
 					entrance.setPortalTexture(portalTexture);
 					Vector3D heading = normalMap.normalAt(xPos, cZ* gridSquareSize).normalize().negate();

@@ -25,6 +25,7 @@ import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.RemovesNAVObjectiveOnDeath;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.BOS;
@@ -37,6 +38,7 @@ import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Jumpzone;
@@ -108,7 +110,8 @@ public abstract class NAVObjective {
 			    new Point((int)(modernLoc.getX()/TR.mapSquareSize),(int)(modernLoc.getZ()/TR.mapSquareSize)));
 		    */
 		    final Mission mission = ((TVF3Game)tr.getGame()).getCurrentMission();
-		    final TunnelEntranceObject teo = mission.getNearestTunnelEntrance(loc3d.getX(),loc3d.getY(),loc3d.getZ());
+		    final TunnelSystem ts = Features.get(mission, TunnelSystem.class);
+		    final TunnelEntranceObject teo = ts.getNearestTunnelEntrance(loc3d.getX(),loc3d.getY(),loc3d.getZ());
 		    currentTunnel=teo.getSourceTunnel();
 		    		/*final TunnelEntranceObject tunnelEntrance 
 		    				= currentTunnel.getEntranceObject();

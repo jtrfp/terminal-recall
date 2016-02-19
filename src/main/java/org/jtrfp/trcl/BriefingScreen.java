@@ -27,6 +27,7 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
@@ -39,6 +40,7 @@ import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.Mission.Result;
+import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.EnemyIntro;
 import org.jtrfp.trcl.obj.Sprite2D;
@@ -176,12 +178,14 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     
     public void missionCompleteSummary(LVLFile lvl, Result r){
 	final Game   game 	 = tr.getGame();
+	final Mission mission    = game.getCurrentMission();
+	final TunnelSystem ts    = Features.get(mission, TunnelSystem.class);
 	game.getPlayer().setActive(false);
 	briefingChars.setScrollPosition(layout.getNumLines()-2);
 	setContent("Air targets destroyed: "+r.getAirTargetsDestroyed()+
 		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
 		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
-		"\nTunnels found: "+(int)(r.getTunnelsFoundPctNorm()*100.)+"%");
+		"\nTunnels found: "+(int)((1.-(double)ts.getTunnelsRemaining().size()/(double)ts.getTotalNumTunnels())*100.)+"%");
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
 	
 	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(),lvl);

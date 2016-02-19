@@ -21,9 +21,11 @@ import org.jtrfp.trcl.NormalMap;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
@@ -95,11 +97,12 @@ public class CollidesWithTerrain extends Behavior {
 	if (tunnelEntryCapable && groundImpact && dot < 0){
 		final OverworldSystem os = mission.getOverworldSystem();
 		if(!os.isTunnelMode() ){
-		    TunnelEntranceObject teo = mission.getTunnelEntranceObject(new Point(
+		    final TunnelSystem ts = Features.get(mission,TunnelSystem.class);
+		    TunnelEntranceObject teo = ts.getTunnelEntranceObject(new Point(
 				(int)(thisPos[0] / TR.mapSquareSize),
 				(int)(thisPos[2] / TR.mapSquareSize)));
 		    if(teo!=null && !mission.isBossFight())
-			{mission.enterTunnel(teo);return;}
+			{ts.enterTunnel(teo);return;}
 		}//end if(above ground)
 	}//end if(tunnelEntryCapable())
 

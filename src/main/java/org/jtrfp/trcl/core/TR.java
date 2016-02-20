@@ -447,7 +447,11 @@ public final class TR implements UncaughtExceptionHandler{
     }
 
     public static double legacy2MapSquare(double z) {
-	return legacy2Modern(z)/TR.mapSquareSize;
+	return ((legacy2Modern(z)/TR.mapSquareSize)+256)%256;
+    }
+    
+    public static int modernToMapSquare(double z){
+	return (int)(((z/TR.mapSquareSize)+256)%256);
     }
 
     public void gatherSysInfo() {

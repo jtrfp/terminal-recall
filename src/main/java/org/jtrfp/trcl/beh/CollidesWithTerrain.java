@@ -99,8 +99,10 @@ public class CollidesWithTerrain extends Behavior {
 		if(!os.isTunnelMode() ){
 		    final TunnelSystem ts = Features.get(mission,TunnelSystem.class);
 		    TunnelEntranceObject teo = ts.getTunnelEntranceObject(new Point(
-				(int)(thisPos[0] / TR.mapSquareSize),
-				(int)(thisPos[2] / TR.mapSquareSize)));
+				TR.modernToMapSquare((thisPos[0])),
+				TR.modernToMapSquare( thisPos[2])));
+		    if(teo==null)
+			new Exception("TEO is null!").printStackTrace();
 		    if(teo!=null && !mission.isBossFight())
 			{ts.enterTunnel(teo);return;}
 		}//end if(above ground)

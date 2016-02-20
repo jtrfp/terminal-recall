@@ -44,6 +44,7 @@ import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
+import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
@@ -410,7 +411,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    break;
     	case bobAndAttack:{
     	    addBehavior(new SteadilyRotating().setRotationPhase(2*Math.PI*Math.random()));
-    	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
+    	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior();
     	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    pfb.setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
     	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
@@ -471,6 +472,15 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    mobile=false;
     	    anchoring=Anchoring.floating;
     	    defaultModelAssignment();
+    	    break;
+    	case shootOnThrustFrame:
+    	    defaultModelAssignment();
+    	    projectileFiringBehavior();
+    	    addBehavior(new FireOnFrame().
+		    setController(getModel().getController()).
+		    setFrame(def.getThrustSpeed()).
+		    setNumShots(5).
+		    setTimeBetweenShotsMillis(200));
     	    break;
     	}//end switch(logic)
     ///////////////////////////////////////////////////////////

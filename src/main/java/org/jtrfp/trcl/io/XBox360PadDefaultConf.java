@@ -37,6 +37,7 @@ public class XBox360PadDefaultConf extends ControllerConfiguration {
 	this.setIntendedController("Microsoft X-Box 360 pad");
 	this.getEntryMap().put ("A"     ,new ConfEntry(UserInputWeaponSelectionBehavior.FIRE          ,"A"     ,1,0 ));
 	this.getEntryMap().put ("X"     ,new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"X"     ,1,0 ));
+	this.getEntryMap().put ("Y"     ,new ConfEntry(ViewSelectFactory.INSTRUMENTS_VIEW             ,"Y"     ,1,0 ));
 	this.getEntryMap() .put("Mode"  ,new ConfEntry(SatelliteViewFactory.SATELLITE_TOGGLE           ,"Mode"  ,1,0 ));
 	this.getEntryMap() .put("Select",new ConfEntry(ViewSelectFactory.VIEW                          ,"Select",1,0 ));
 	this.getEntryMap() .put("Start" ,new ConfEntry(GamePauseFactory.PAUSE                         ,"Start" ,1,0 ));

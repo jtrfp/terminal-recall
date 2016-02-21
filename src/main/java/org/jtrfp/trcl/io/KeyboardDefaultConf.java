@@ -49,6 +49,7 @@ public class KeyboardDefaultConf extends ControllerConfiguration {
 	this.getEntryMap().put("P"    , new ConfEntry(GamePauseFactory.PAUSE                                ,"P"    ,1,0 ));
 	this.getEntryMap().put("F3"    , new ConfEntry(GamePauseFactory.PAUSE                                ,"F3"  ,1,0 ));
 	this.getEntryMap().put("V"    , new ConfEntry(ViewSelectFactory.VIEW                                ,"V"    ,1,0 ));
+	this.getEntryMap().put("C"    , new ConfEntry(ViewSelectFactory.INSTRUMENTS_VIEW                    ,"C"    ,1,0 ));
 	this.getEntryMap().put("F"    , new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"F"    ,1,0 ));
     }//end constructor
 }//end KeyboardDefaultConf

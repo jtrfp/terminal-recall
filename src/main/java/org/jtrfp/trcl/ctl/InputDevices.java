@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Collects all InputDevices from all InputDeviceServices and presents them
+ * Collects all InputDevices and presents them
  * as a single unmodifiable Collection.
  * @author Chuck Ritola
  *

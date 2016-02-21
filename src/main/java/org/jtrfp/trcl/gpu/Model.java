@@ -126,7 +126,7 @@ public class Model {
 		 final int numFrames = tLists.size();
 		 if (c == null)
 		    {if(frameDelay==0)frameDelay=1;
-		    c = new Sequencer(getFrameDelayInMillis(), numFrames, true);}
+		    setController(new Sequencer(getFrameDelayInMillis(), numFrames, true));}
 		 Triangle[][] tris = new Triangle[numFrames][];
 		 for (int i = 0; i < numFrames; i++) {
 		    tris[i] = tLists.get(i).toArray(new Triangle[] {});
@@ -136,7 +136,7 @@ public class Model {
 		 }// Get all frames for each triangle
 		 if (tris[0].length != 0) {
 		    tpList = new TriangleList(tris, getFrameDelayInMillis(), "Model."+debugName,
-			    animateUV, c, tr, Model.this);
+			    animateUV, getController(), tr, Model.this);
 		    tpFuture = tpList.uploadToGPU();
 		 }// end if(length!=0)
 		 else
@@ -152,7 +152,7 @@ public class Model {
 		 }// Get all frames for each triangle
 		 if (ttris[0].length != 0) {
 		    ttpList = new TransparentTriangleList(ttris,
-			    getFrameDelayInMillis(), debugName, animateUV, c, tr, Model.this);
+			    getFrameDelayInMillis(), debugName, animateUV, getController(), tr, Model.this);
 		    ttpFuture = ttpList.uploadToGPU();
 		 }// end if(length!=0)
 		 else

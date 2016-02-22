@@ -481,6 +481,8 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
 		    setFrame(def.getThrustSpeed()).
 		    setNumShots(5).
 		    setTimeBetweenShotsMillis(200));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
+    	    defaultBossNAVTargetingResponse();
     	    break;
     	}//end switch(logic)
     ///////////////////////////////////////////////////////////

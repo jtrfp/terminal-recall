@@ -106,6 +106,8 @@ public class PortalEntrance extends WorldObject {
 
     public double[] getRelativePosition(double [] dest){
 	Vect3D.subtract(getApproachingObject().getPosition(), PortalEntrance.this.getPosition(), dest);
+	for(int i=0; i<3; i++)
+	 dest[i] = TR.deltaRollover(dest[i]);
 	return dest;
     }
     

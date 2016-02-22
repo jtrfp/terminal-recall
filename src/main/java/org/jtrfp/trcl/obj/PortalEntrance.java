@@ -71,12 +71,12 @@ public class PortalEntrance extends WorldObject {
 	//weakRelevanceTallyListener = new WeakPropertyChangeListener(relevanceTallyListener, allRelevant);
 	allRelevant.addObjectTallyListener(this, relevanceTallyListener);
     }
-    
+  /*  
     @Override
     public boolean supportsLoop(){
 	return false;
     }
-    
+    */
     private class RelevanceTallyListener implements PropertyChangeListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {

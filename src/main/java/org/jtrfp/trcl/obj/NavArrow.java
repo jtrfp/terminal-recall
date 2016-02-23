@@ -103,8 +103,8 @@ private final DashboardLayout layout;
 		setVisible(true);
 		final double [] loc =mission.currentNAVObjective().getTarget().getPosition();
 		navLocXY = new Vector3D(loc[0],loc[2],0);
-		sectorMsg = ((byte)((playerPos[2])/TR.mapSquareSize)&0xFF)+"."+
-			((int)((playerPos[0])/TR.mapSquareSize)&0xFF);
+		sectorMsg = TR.modernToMapSquare(playerPos[2])+"."+
+			TR.modernToMapSquare(playerPos[0]);
 	    }//end no tunnel
 
 	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);

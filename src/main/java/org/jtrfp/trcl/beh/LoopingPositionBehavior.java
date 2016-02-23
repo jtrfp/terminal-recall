@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.obj.Player;
 
 public class LoopingPositionBehavior extends Behavior {
     private static final double THRESHOLD = TR.mapCartOffset;
@@ -23,19 +24,12 @@ public class LoopingPositionBehavior extends Behavior {
 	boolean _transient=false;
 	if (getParent().supportsLoop()){
 		if (oldPos[0] > THRESHOLD)
-			//oldPos = oldPos.subtract(new Vector3D(TR.mapWidth, 0, 0));
 			{oldPos[0]-=TR.mapWidth;_transient=true;}
-		/*if (oldPos[1] > THRESHOLD)
-			//oldPos = oldPos.subtract(new Vector3D(0, TR.mapWidth, 0));
-		    	{oldPos[1]-=TR.mapWidth;_transient=true;}*/
 		if (oldPos[2] > THRESHOLD)
-			//oldPos = oldPos.subtract(new Vector3D(0, 0, TR.mapWidth));
 		    	{oldPos[2]-=TR.mapWidth;_transient=true;}
 		if (oldPos[0] < -THRESHOLD)
-			//oldPos = oldPos.add(new Vector3D(TR.mapWidth, 0, 0));
 			{oldPos[0]+=TR.mapWidth;_transient=true;}
 		if (oldPos[2] < -THRESHOLD)
-			//oldPos = oldPos.add(new Vector3D(0, 0, TR.mapWidth));
 		    	{oldPos[2]+=TR.mapWidth;_transient=true;}
 	if(_transient)getParent().notifyPositionChange();
 	}//end if(LOOP)

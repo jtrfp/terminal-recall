@@ -40,7 +40,6 @@ import org.jtrfp.trcl.obj.TerrainChunk;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
-	//final double heightScalar;
 	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
 	private final ExecutorService executor;
@@ -56,7 +55,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		return result;
 	    }
 	}//end TSThreadFactory
-	
 	
 	    /*
 	     * Y_NUDGE is a kludge. There is a tiny sliver of space
@@ -155,17 +153,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    
 				    Vector3D norm0, norm1, norm2, norm3;
 				    norm3 = normalMap.normalAt(xPos, cZ* gridSquareSize);
-				    /*norm3 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();*/
 				    norm2 = normalMap.normalAt((cX + 1)* gridSquareSize, cZ* gridSquareSize);
-				    /*norm2 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();*/
 				    norm1 = normalMap.normalAt((cX + 1)* gridSquareSize, (cZ + 1)* gridSquareSize);
-				    /*norm1 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();*/
 				    norm0 = normalMap.normalAt(xPos, (cZ + 1)* gridSquareSize);
-				    /*norm0 = new Vector3D(norm.getX() * 3, norm.getY(),
-					    norm.getZ() * 3).normalize();*/
 
 				    if (flatShading)
 					norm0 = norm1 = norm2 = norm3 = normalMap
@@ -176,7 +166,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    if(points.containsKey(tpi)){
 					final Model portalModel = new Model(false, tr,"PortalEntrance");
 					//Place a PortalEntrance
-					final int Y_OFFSET = -300;
 					final double portalX = xPos+gridSquareSize/2.;
 					final double portalY = (hBL+hBR+hTR+hTL)/4.;
 					final double portalZ = zPos+gridSquareSize/2.;
@@ -190,7 +179,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								-gridSquareSize/2,
 								-gridSquareSize/2,
 								gridSquareSize/2 },
-								new double[] {-gridSquareSize/2,-gridSquareSize/2,gridSquareSize/2,gridSquareSize/2},
+								new double[] {
+								-gridSquareSize/2,
+								-gridSquareSize/2,
+								gridSquareSize/2,
+								gridSquareSize/2},
 								new double[] {
 								0,
 								0,
@@ -255,7 +248,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-			   // if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
 				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
 					altitude);
 				final double[] chunkPos = chunkToAdd.getPosition();
@@ -264,10 +256,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				chunkPos[2] = objectZ;
 				chunkToAdd.notifyPositionChange();
 				add(chunkToAdd);
-			    /*} else {
-				System.out.println("Rejected chunk: "
-					+ m.getDebugName());
-			    }*/
 			}// end scope
 
 			{// start scope ///// CEILING
@@ -354,21 +342,16 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    m.addTriangle(tris[1]);
 				}// end for(cX)
 			    }// end for(cZ)
-			     // Add to grid
-			    //if (m.finalizeModel().get().getTriangleList() != null || m.getTransparentTriangleList() != null) {
-				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
-					altitude);
-				final double[] chunkPos = chunkToAdd.getPosition();
-				chunkPos[0] = objectX;
-				chunkPos[1] = objectY;
-				chunkPos[2] = objectZ;
-				chunkToAdd.notifyPositionChange();
-				chunkToAdd.setCeiling(true);
-				terrainMirror.add(chunkToAdd);
-			    /*} else {
-				System.out.println("Rejected chunk: "
-					+ m.getDebugName());
-			    }*/
+			    // Add to grid
+			    final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
+				    altitude);
+			    final double[] chunkPos = chunkToAdd.getPosition();
+			    chunkPos[0] = objectX;
+			    chunkPos[1] = objectY;
+			    chunkPos[2] = objectZ;
+			    chunkToAdd.notifyPositionChange();
+			    chunkToAdd.setCeiling(true);
+			    terrainMirror.add(chunkToAdd);
 			}// end scope(CEILING)
 		    }// end for(gX)
 		    return null;
@@ -377,47 +360,46 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	for(Future<Void> task:rowTasks)
 	    try{task.get();}catch(Exception e){throw new RuntimeException(e);}
     }// end constructor
-	
-	private class TunnelPoint{
-	    final int x,z;
-	    TextureDescription textureToInsert;
-	    
-	    public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
-		try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
-		textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),null,false);}
-		catch(Exception e){e.printStackTrace();}
-		DirectionVector v = entrance?tun.getEntrance():tun.getExit();
-		x = (int)TR.legacy2MapSquare(v.getZ());
-		z = (int)TR.legacy2MapSquare(v.getX());
-	    }
-	    public TextureDescription getTexture(){return textureToInsert;}
-	    
-	    @Override
-	    public boolean equals(Object other){
-		return other.hashCode()==this.hashCode();
-	    }
-	    @Override
-	    public int hashCode(){
-		return (int)(x+z*256);
-	    }
+
+    private class TunnelPoint{
+	final int x,z;
+	TextureDescription textureToInsert;
+
+	public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
+	    try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
+	    textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),null,false);}
+	    catch(Exception e){e.printStackTrace();}
+	    DirectionVector v = entrance?tun.getEntrance():tun.getExit();
+	    x = (int)TR.legacy2MapSquare(v.getZ());
+	    z = (int)TR.legacy2MapSquare(v.getX());
 	}
-	/**
-	 * @return the gridSquareSize
-	 */
-	public double getGridSquareSize(){
-		return gridSquareSize;
-		}
-	/**
-	 * @return the renderingCubes
-	 */
-	public ArrayList<TerrainChunk> getRenderingCubes(){
-		return renderingCubes;
-		}
-	
+	public TextureDescription getTexture(){return textureToInsert;}
 
 	@Override
-	public void finalize() throws Throwable{
-	    super.finalize();
-	    executor.shutdown();
-	}//end finalize()
-	}//end TerrainSystem
+	public boolean equals(Object other){
+	    return other.hashCode()==this.hashCode();
+	}
+	@Override
+	public int hashCode(){
+	    return (int)(x+z*256);
+	}
+    }//end TunnelPoint
+    /**
+     * @return the gridSquareSize
+     */
+    public double getGridSquareSize(){
+	return gridSquareSize;
+    }
+    /**
+     * @return the renderingCubes
+     */
+    public ArrayList<TerrainChunk> getRenderingCubes(){
+	return renderingCubes;
+    }
+
+    @Override
+    public void finalize() throws Throwable{
+	super.finalize();
+	executor.shutdown();
+    }//end finalize()
+}//end TerrainSystem

@@ -14,13 +14,12 @@
 package org.jtrfp.trcl.miss;
 
 import java.awt.Point;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
@@ -154,7 +153,6 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    final Point tunnelExitMapSquarePos = new Point(
 		    (int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
 		    (int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
-	    System.out.println("Tunnel exit at sector "+tunnelExitMapSquarePos);
 	    assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
 	    tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
 	    return tunnel;
@@ -173,10 +171,8 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		    TR.legacy2Modern(yInLegacyUnits),
 		    TR.legacy2Modern(xInLegacyUnits)
 		    );
-	    System.out.println("Requested entry pos="+entPos);
 	    for (TunnelEntranceObject teo : tunnelMap.values()) {
 		final Vector3D pos = new Vector3D(teo.getPosition());
-		System.out.println("Found tunnel at "+pos);
 		final double distance = pos.distance(entPos);
 		if (distance < closestDistance) {
 		    closestDistance = distance;
@@ -209,12 +205,12 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel, PortalEntrance entrance){
 	    TunnelEntranceObject teo;
 	    getTarget().getOverworldSystem().add(teo = new TunnelEntranceObject(tr,tunnel,entrance));
-	    tunnelMap.put(pointToHash(mapSquareXZ),teo);
+	    final int key = pointToHash(mapSquareXZ);
+	    tunnelMap.put(key,teo);
 	}
 
 	public synchronized void enterTunnel(final TunnelEntranceObject teo) {
 	    final Tunnel tunnelToEnter = teo.getSourceTunnel();
-	    System.out.println("Entering tunnel "+tunnelToEnter);
 	    final Game game = ((TVF3Game)tr.getGame());
 	    final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
 
@@ -313,10 +309,6 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	 */
 	public TunnelEntranceObject getTunnelEntranceObject(Point mapSquareXZ){
 	    final int key = pointToHash(mapSquareXZ);
-	    System.out.println("getTunnelEntranceObject "+mapSquareXZ);
-	    for(TunnelEntranceObject teo:tunnelMap.values())
-		System.out.print(" "+new Vector3D(teo.getPosition()).scalarMultiply(1/TR.mapSquareSize));
-	    System.out.println();
 	    return tunnelMap.get(key);
 	}
 

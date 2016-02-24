@@ -155,16 +155,19 @@ public final class GLTexture {
 	case 3:{
 	    for(int level = 0; level < numLevels; level++)
 	     gl.glTexImage3D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	   gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
 	 //gl.glTexStorage3D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2]);
 	    break;
 	}case 2:{
 	    for(int level = 0; level < numLevels; level++)
 		     gl.glTexImage2D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
 	    //gl.glTexStorage2D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1]);
 	    break;
 	}case 1:{
 	    for(int level = 0; level < numLevels; level++)
 		     gl.glTexImage1D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
 	    //gl.glTexStorage1D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0]);
 	    break;
 	}
@@ -865,5 +868,10 @@ public final class GLTexture {
 
     public int getId() {
 	return textureID.get();
+    }
+
+    public GLTexture generateMipMaps() {
+	gl.glGenerateMipmap(getBindingTarget());
+	return this;
     }
 }// end GLTexture

@@ -19,7 +19,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gpu.Texture;
 
 public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;

@@ -19,8 +19,8 @@ import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.math.Vect3D;
 

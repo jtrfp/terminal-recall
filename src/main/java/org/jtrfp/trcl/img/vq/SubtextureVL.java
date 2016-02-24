@@ -13,7 +13,7 @@
 
 package org.jtrfp.trcl.img.vq;
 
-import org.jtrfp.trcl.core.SubTextureWindow;
+import org.jtrfp.trcl.gpu.SubTextureWindow;
 
 public final class SubtextureVL implements VectorList {
     private final SubTextureWindow stw;

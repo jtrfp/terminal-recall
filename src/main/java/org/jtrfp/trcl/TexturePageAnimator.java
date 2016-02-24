@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.Texture;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
+import org.jtrfp.trcl.gpu.Texture;
 
 public class TexturePageAnimator implements Tickable{
     private final TriangleVertexWindow 	vertexWindow;

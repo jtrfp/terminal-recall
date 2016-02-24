@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.CLRFile;
+import org.jtrfp.trcl.gpu.TextureDescription;
 
 public class RawTextureMeshWrapper implements TextureMesh {
     private static final int WIDTH = 256;

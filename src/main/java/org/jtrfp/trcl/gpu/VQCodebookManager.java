@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -22,9 +22,7 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.gpu.GLFrameBuffer;
-import org.jtrfp.trcl.gpu.GLTexture;
-import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 

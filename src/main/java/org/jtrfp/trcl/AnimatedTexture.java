@@ -15,9 +15,9 @@ package org.jtrfp.trcl;
 import java.awt.Color;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
+import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.TextureDescription;
 
 public class AnimatedTexture implements TextureDescription {
     private Texture[]  frames;

@@ -17,7 +17,6 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.Texture;
 
 /**
  * Partial wrap implementation of OpenGL 1D RGBA32UI CPU-write-optimized Texture

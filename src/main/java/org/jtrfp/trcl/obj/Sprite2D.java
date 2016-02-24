@@ -16,8 +16,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.TextureDescription;
 
 public class Sprite2D extends WorldObject2DVisibleEverywhere {
     private final TextureDescription texture;

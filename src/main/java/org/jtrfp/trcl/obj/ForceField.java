@@ -25,9 +25,9 @@ import org.jtrfp.trcl.beh.DamageListener.ElectrocutionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.PlayerCollisionListener;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 

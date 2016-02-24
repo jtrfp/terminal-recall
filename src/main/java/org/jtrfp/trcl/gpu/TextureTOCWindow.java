@@ -10,9 +10,8 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
-import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryWindow;
 

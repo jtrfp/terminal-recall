@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -24,7 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.LineSegment;
-import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gui.Reporter;
 
 

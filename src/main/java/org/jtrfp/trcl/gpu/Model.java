@@ -28,7 +28,6 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TRFuture;
-import org.jtrfp.trcl.core.TextureDescription;
 
 public class Model {
     // [FRAME][LIST]

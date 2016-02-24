@@ -19,7 +19,7 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.Sprite2D;
 

@@ -16,8 +16,8 @@ package org.jtrfp.trcl;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
+import org.jtrfp.trcl.gpu.TextureDescription;
 
 public interface TextureBehavior {
  public void apply(TriangleList triangleList, int gpuTVIndex, int numFrames, Triangle thisTriangle, Vector3D pos, TriangleVertexWindow vw);

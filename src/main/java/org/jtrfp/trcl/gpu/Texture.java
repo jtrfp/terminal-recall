@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -32,9 +32,10 @@ import org.jtrfp.trcl.SpecialRAWDimensions;
 import org.jtrfp.trcl.TextureBehavior;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
-import org.jtrfp.trcl.core.VQCodebookManager.RasterRowWriter;
+import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
-import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gpu.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.ConstantVectorList;
@@ -67,7 +68,7 @@ public class Texture implements TextureDescription {
     private final GPU                   gpu;
     private final GPUResourceFinalizer  gpuResourceFinalizer;
     
-    Texture(GPU gpu, ThreadManager threadManager, Color c){
+    public Texture(GPU gpu, ThreadManager threadManager, Color c){
 	this(gpu,threadManager,new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false);
     }//end constructor
     
@@ -189,7 +190,7 @@ public class Texture implements TextureDescription {
 	this.gpuResourceFinalizer = gpu.getGPUResourceFinalizer();
     }//end constructor
     
-    Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
+    public Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
 	this(gpu,threadManager,debugName,uvWrapping);
 	assemble(vlRGBA,vlESTuTv);
     }//end constructor
@@ -459,7 +460,7 @@ public class Texture implements TextureDescription {
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
     }//end calculateAverageColor(...)
 
-    Texture(GPU gpu, ThreadManager threadManager, BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
+    public Texture(GPU gpu, ThreadManager threadManager, BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
 	this(gpu,threadManager,debugName,uvWrapping);
 	try{
 	    assemble(new BufferedImageRGBA8888VL(imgRGBA),

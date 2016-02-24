@@ -96,6 +96,8 @@ import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RAWVectorList;

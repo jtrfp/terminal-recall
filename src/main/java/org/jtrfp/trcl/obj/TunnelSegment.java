@@ -19,10 +19,10 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.math.IntRandomTransferFunction;
 
 public class TunnelSegment extends WorldObject {

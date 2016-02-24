@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gpu.Texture;
 
 public class GLFont{
 	private final 		Texture[] textures;

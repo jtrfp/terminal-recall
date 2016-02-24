@@ -32,7 +32,6 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
-import org.jtrfp.trcl.core.TextureManager;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;

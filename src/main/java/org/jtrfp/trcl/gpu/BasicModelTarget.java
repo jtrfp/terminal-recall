@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import org.jtrfp.trcl.core.TextureDescription;
 
 public interface BasicModelTarget {
     /**

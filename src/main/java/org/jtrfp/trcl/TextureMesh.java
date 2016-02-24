@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.TextureDescription;
+import org.jtrfp.trcl.gpu.TextureDescription;
 
 public interface TextureMesh {
     /**

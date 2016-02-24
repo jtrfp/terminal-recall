@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.math.Misc;
 
 public class HorizGradientCubeGen implements SkyCubeGen {

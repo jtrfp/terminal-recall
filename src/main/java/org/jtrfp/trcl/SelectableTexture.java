@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gpu.Texture;
 
 public class SelectableTexture extends AnimatedTexture{
 	public SelectableTexture(Texture[] frames)

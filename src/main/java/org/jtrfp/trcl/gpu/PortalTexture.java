@@ -19,7 +19,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 
 public class PortalTexture implements TextureDescription {

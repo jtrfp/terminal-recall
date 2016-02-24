@@ -14,8 +14,8 @@ package org.jtrfp.trcl;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.BasicModelTarget;
+import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.gpu.BasicModelTarget.WriterState;
 import org.jtrfp.trcl.gpu.Vertex;
 

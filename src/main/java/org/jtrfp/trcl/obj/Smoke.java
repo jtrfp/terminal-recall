@@ -20,7 +20,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.Texture;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class Smoke extends OneShotBillboardEvent {

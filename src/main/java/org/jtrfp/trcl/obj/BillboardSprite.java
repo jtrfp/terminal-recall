@@ -20,8 +20,8 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TextureDescription;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.TextureDescription;
 
 
 public class BillboardSprite extends WorldObject{

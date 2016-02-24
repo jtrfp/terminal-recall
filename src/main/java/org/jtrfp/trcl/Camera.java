@@ -54,6 +54,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private boolean	  fogEnabled = true;
 	private float horizontalFOVDegrees = 100f;// In degrees
 	private float verticalFOVDegrees   = 100f;
+	private double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
 		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
@@ -78,8 +79,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private final CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
 		new CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.inverse());
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new HashSet<Positionable>());
-	private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
-	private static final double RELEVANCE_RADIUS_CUBES = relevanceRadius/World.CUBE_GRANULARITY;
+	//private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
+	private int relevanceRadiusCubes = (int)(relevanceRadius/World.CUBE_GRANULARITY);
 	private SpacePartitioningGrid<PositionedRenderable> rootGrid;
 	private volatile Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
 	// HARD REFERENCES - DO NOT REMOVE
@@ -126,7 +127,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    final double rolloverDistance = Math.sqrt(
 		    Math.pow(cubeRolloverDistance(cubePosition.getX()-centerCube.getX()),2)+
 		    Math.pow(cubeRolloverDistance(cubePosition.getZ()-centerCube.getZ()),2));
-	    return rolloverDistance < RELEVANCE_RADIUS_CUBES;
+	    return rolloverDistance < getRelevanceRadiusCubes();
 	}//end evaluate()
     }//end VisibilityPredicate
     
@@ -408,5 +409,17 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
 	public void setVerticalFOVDegrees(float verticalFOVDegrees) {
 	    this.verticalFOVDegrees = verticalFOVDegrees;
+	}
+
+	public void setRelevanceRadius(double relevanceRadius) {
+	    this.relevanceRadius = relevanceRadius;
+	}
+
+	public int getRelevanceRadiusCubes() {
+	    return relevanceRadiusCubes;
+	}
+
+	public void setRelevanceRadiusCubes(int relevanceRadiusCubes) {
+	    this.relevanceRadiusCubes = relevanceRadiusCubes;
 	}
 }//end Camera

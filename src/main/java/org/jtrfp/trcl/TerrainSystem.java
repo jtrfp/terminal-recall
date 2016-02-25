@@ -196,20 +196,20 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							// COUNTER-CLOCKWISE
 							// //x
 							new double[] {
-								gridSquareSize/2,
-								-gridSquareSize/2,
-								-gridSquareSize/2,
-								gridSquareSize/2 },
+								rtL.getX(),//gridSquareSize/2,
+								rtR.getX(),//-gridSquareSize/2,
+								rbR.getX(),//-gridSquareSize/2,
+								rbL.getX()},//gridSquareSize/2 },
 								new double[] {
-								-gridSquareSize/2,
-								-gridSquareSize/2,
-								gridSquareSize/2,
-								gridSquareSize/2},
+								rtL.getY(),//-gridSquareSize/2,
+								rtR.getY(),//-gridSquareSize/2,
+								rbR.getY(),//gridSquareSize/2,
+								rbL.getY()},//gridSquareSize/2},
 								new double[] {
-								0,
-								0,
-								0,
-								0 }, u, v, portalTexture,
+								rtL.getZ(),
+								rtR.getZ(),
+								rbR.getZ(),
+								rbL.getZ() }, u, v, portalTexture,
 								RenderMode.STATIC,
 								new Vector3D[] { norm0, norm1,
 								norm2, norm3 }, cX + cZ % 4);

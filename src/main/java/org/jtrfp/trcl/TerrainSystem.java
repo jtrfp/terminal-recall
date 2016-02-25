@@ -150,6 +150,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					    (cZ + 1)* gridSquareSize);
 				    final double hBL = altitude.heightAt(xPos, (cZ + 1)* gridSquareSize);
 				    
+				    final Vector3D
+				     tL = new Vector3D(xPos,hTL,zPos + gridSquareSize),
+				     tR = new Vector3D(xPos + gridSquareSize,hTR,zPos + gridSquareSize),
+				     bR = new Vector3D(xPos + gridSquareSize,hBR,zPos),
+				     bL = new Vector3D(xPos, hBL, zPos);
 				    
 				    Vector3D norm0, norm1, norm2, norm3;
 				    norm3 = normalMap.normalAt(xPos, cZ* gridSquareSize);
@@ -166,9 +171,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    if(points.containsKey(tpi)){
 					final Model portalModel = new Model(false, tr,"PortalEntrance");
 					//Place a PortalEntrance
-					final double portalX = xPos+gridSquareSize/2.;
-					final double portalY = (hBL+hBR+hTR+hTL)/4.;
-					final double portalZ = zPos+gridSquareSize/2.;
+					final Vector3D centroid = tL.add(tR).add(bR).add(bL).scalarMultiply(1./4.);
+					//final double portalX = xPos+gridSquareSize/2.;
+					//final double portalY = (hBL+hBR+hTR+hTL)/4.;
+					//final double portalZ = zPos+gridSquareSize/2.;
 					final PortalTexture portalTexture = new PortalTexture();
 					Triangle[] tris = Triangle
 						.quad2Triangles(
@@ -205,7 +211,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
 					 entrance.setTop(Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
 					else entrance.setTop(Vector3D.PLUS_I);// ... so we create a clause for that.
-					entrance.setPosition(new Vector3D(portalX,portalY,portalZ).add(heading.scalarMultiply(2000)).toArray());
+					entrance.setPosition(centroid.add(heading.scalarMultiply(2000)).toArray());
 					entrance.notifyPositionChange();
 					add(entrance);
 				    }//end if(tunnel)
@@ -219,23 +225,20 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						    // COUNTER-CLOCKWISE
 						    // //x
 						    new double[] {
-							    xPos - objectX,
-							    xPos + gridSquareSize
-								    - objectX,
-							    xPos + gridSquareSize
-								    - objectX,
-							    xPos - objectX },
-						    new double[] { hBL - objectY,
-							    hBR - objectY,
-							    hTR - objectY,
-							    hTL - objectY },
+							    tL.getX() - objectX,
+							    tR.getX() - objectX,
+							    bR.getX() - objectX,
+							    bL.getX() - objectX },
+						    new double[] { 
+							    bL.getY() - objectY,
+							    bR.getY() - objectY,
+							    tR.getY() - objectY,
+							    tL.getY() - objectY },
 						    new double[] {
-							    zPos + gridSquareSize
-								    - objectZ,
-							    zPos + gridSquareSize
-								    - objectZ,
-							    zPos - objectZ,
-							    zPos - objectZ }, u, v, td,
+							    tL.getZ() - objectZ,
+							    tR.getZ() - objectZ,
+							    bR.getZ() - objectZ,
+							    bL.getZ() - objectZ }, u, v, td,
 						    RenderMode.STATIC,
 						    new Vector3D[] { norm0, norm1,
 							    norm2, norm3 }, cX + cZ % 4);

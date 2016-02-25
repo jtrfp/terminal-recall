@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
@@ -172,6 +173,20 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					final Model portalModel = new Model(false, tr,"PortalEntrance");
 					//Place a PortalEntrance
 					final Vector3D centroid = tL.add(tR).add(bR).add(bL).scalarMultiply(1./4.);
+					final Vector3D ltR = tR.subtract(centroid),
+						       lbR = bR.subtract(centroid),
+						       ltL = tL.subtract(centroid),
+						       lbL = bL.subtract(centroid);
+					final Vector3D heading = ltL.subtract(ltR).crossProduct(lbR.subtract(ltR)).normalize();
+					Vector3D top;
+					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
+					     top = (Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
+					else top = (Vector3D.PLUS_I);// ... so we create a clause for that.
+					final Rotation headingRot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,heading,top);
+					final Vector3D rtR = headingRot.applyInverseTo(ltR);
+					final Vector3D rtL = headingRot.applyInverseTo(ltL);
+					final Vector3D rbR = headingRot.applyInverseTo(lbR);
+					final Vector3D rbL = headingRot.applyInverseTo(lbL);
 					//final double portalX = xPos+gridSquareSize/2.;
 					//final double portalY = (hBL+hBR+hTR+hTL)/4.;
 					//final double portalZ = zPos+gridSquareSize/2.;
@@ -206,11 +221,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					ts.registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
 					
 					entrance.setPortalTexture(portalTexture);
-					Vector3D heading = normalMap.normalAt(xPos, cZ* gridSquareSize).normalize().negate();
+					//Vector3D heading = normalMap.normalAt(xPos, cZ* gridSquareSize).normalize().negate();
 					entrance.setHeading(heading);
-					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
-					 entrance.setTop(Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
-					else entrance.setTop(Vector3D.PLUS_I);// ... so we create a clause for that.
+					entrance.setTop(top);
 					entrance.setPosition(centroid.add(heading.scalarMultiply(2000)).toArray());
 					entrance.notifyPositionChange();
 					add(entrance);

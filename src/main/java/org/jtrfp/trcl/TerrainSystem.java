@@ -177,7 +177,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						       lbR = bR.subtract(centroid),
 						       ltL = tL.subtract(centroid),
 						       lbL = bL.subtract(centroid);
-					final Vector3D heading = ltL.subtract(ltR).crossProduct(lbR.subtract(ltR)).normalize();
+					Vector3D heading = ltL.subtract(ltR).crossProduct(lbR.subtract(ltR)).normalize();
+					//BUG: Z is inverted.
+					heading = new Vector3D(heading.getX(),heading.getY(),-heading.getZ());
 					Vector3D top;
 					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
 					     top = (Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());

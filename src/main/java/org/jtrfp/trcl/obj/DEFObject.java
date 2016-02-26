@@ -177,6 +177,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    defaultModelAssignment();
     	    break;
     	case bankSpinDrill:
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    unhandled(def);
     	    defaultModelAssignment();
     	    break;
@@ -218,6 +219,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
 	    break;
     	case coreBossSmart:
     	    mobile=false;
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
     	    projectileFiringBehavior();
     	    defaultModelAssignment();
     	    defaultBossNAVTargetingResponse();
@@ -227,9 +229,10 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    projectileFiringBehavior();
     	    defaultModelAssignment();
     	    defaultBossNAVTargetingResponse();
+    	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(1000));
     	    break;
     	case staticFiringSmart:{
-    	    //addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));
+    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));//ATMOS Boss uses this!
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
     	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
@@ -242,7 +245,8 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     		    setPatternOffsetMillis((int)(Math.random()*2000)).
     		    setMaxFiringDistance(TR.mapSquareSize*8).
     		    setSmartFiring(true));
-    	    
+    	    if(def.isObjectIsBoss())
+    		defaultBossNAVTargetingResponse();
     	    mobile=false;
     	    canTurn=false;
     	    defaultModelAssignment();

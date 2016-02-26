@@ -178,8 +178,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 						       ltL = tL.subtract(centroid),
 						       lbL = bL.subtract(centroid);
 					Vector3D heading = ltL.subtract(ltR).crossProduct(lbR.subtract(ltR)).normalize();
-					//BUG: Z is inverted.
-					heading = new Vector3D(heading.getX(),heading.getY(),-heading.getZ());
 					Vector3D top;
 					if(heading.getY()>-.99&heading.getNorm()>0)//If the ground is flat this doesn't work.
 					     top = (Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
@@ -189,6 +187,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					final Vector3D rtL = headingRot.applyInverseTo(ltL);
 					final Vector3D rbR = headingRot.applyInverseTo(lbR);
 					final Vector3D rbL = headingRot.applyInverseTo(lbL);
+					//BUG: Z is inverted when drawn at model level
+					heading = new Vector3D(heading.getX(),heading.getY(),-heading.getZ());
 					//final double portalX = xPos+gridSquareSize/2.;
 					//final double portalY = (hBL+hBR+hTR+hTL)/4.;
 					//final double portalZ = zPos+gridSquareSize/2.;

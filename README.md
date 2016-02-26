@@ -10,6 +10,9 @@ Terminal Recall (TRCL) is part of the Java Terminal Reality File Parsers project
 
 TRCL is currently in a playable development phase. Because it is not yet close to being released (it changes too much), it must be built from source.
 
+##Not A Source-Port
+This is a [cleanroom](https://en.wikipedia.org/wiki/Clean_room_design) re-implementation of the engine based on reverse-engineering specs.
+
 ##Build Instructions
 You will need:
 * Java JDK 6 or later (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)

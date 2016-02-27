@@ -248,7 +248,7 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    if(def.isObjectIsBoss())
     		defaultBossNAVTargetingResponse();
     	    mobile=false;
-    	    canTurn=false;
+    	    canTurn=true;
     	    defaultModelAssignment();
     	    break;}
     	case sittingDuck:

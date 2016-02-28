@@ -104,6 +104,25 @@ public class Model {
 	    }
 	return new Vector3D(maxX,maxY,maxZ);
     }//end getMaximumVertexValue()
+    
+    public Vector3D getMinimumVertexDims(){
+	double maxX=0,maxY=0,maxZ = 0;
+	final TransparentTriangleList ttList = getTransparentTriangleList();
+	if(ttList != null){
+	    final Vector3D mV = ttList.getMaximumVertexDims();
+	    maxX = mV.getX();
+	    maxY = mV.getY();
+	    maxZ = mV.getZ();
+	    }
+	final TriangleList tList = getTriangleList();
+	if(tList != null){
+	    final Vector3D mV = tList.getMaximumVertexDims();
+	    maxX = Math.min(mV.getX(),maxX);
+	    maxY = Math.min(mV.getY(),maxY);
+	    maxZ = Math.min(mV.getZ(),maxZ);
+	    }
+	return new Vector3D(maxX,maxY,maxZ);
+    }//end getMinimumVertexValue()
 
     /**
      * Sets up formal GPU primitive lists
@@ -399,4 +418,23 @@ public class Model {
 	max = Math.max(max,maxDims.getZ());
 	return max;
     }//end getMaximumVertexValue()
+    
+    public double getMinimumVertexValue() {
+	final Vector3D minDims = getMinimumVertexDims();
+	double             min = minDims.getX();
+	min = Math.min(min,minDims.getY());
+	min = Math.min(min,minDims.getZ());
+	return min;
+    }//end getMaximumVertexValue()
+    
+    public double getMaximumVertexValueAbs(){
+	return Math.max(getMaximumVertexValue(),Math.abs(getMinimumVertexValue()));
+    }//end getMaximumVertexVAlueAbs()
+    
+    @Override
+    public String toString(){
+	if(getDebugName()==null)
+	    return super.toString();
+	return "["+this.getClass().getName()+" debugName="+debugName+" hash="+hashCode()+"]";
+    }
 }// end Model

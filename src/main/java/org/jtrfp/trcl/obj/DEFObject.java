@@ -232,7 +232,8 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(1000));
     	    break;
     	case staticFiringSmart:{
-    	    addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));//ATMOS Boss uses this!
+    	    if(boss)
+    	     addBehavior(new HorizAimAtPlayerBehavior(tr.getGame().getPlayer()));//ATMOS Boss uses this!
     	    final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior(); 
     	    try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
     	    Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());

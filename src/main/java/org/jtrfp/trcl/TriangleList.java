@@ -343,6 +343,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}// end for(triangles)
 	cachedMinimumVertexDims=result;
 	
+	result = Vector3D.ZERO;
 	for (int index=0; index<t.length; index++) {
 	    final Triangle []frame = t[index];
 	    assert (frame != null):"Frame intolerably null at index "+index+".";//Verify null frame is a race condition.

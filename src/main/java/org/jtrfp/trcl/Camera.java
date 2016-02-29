@@ -123,7 +123,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    final Vector3D cubePosition = object.getKey();
 	    if(cubePosition.equals(World.RELEVANT_EVERYWHERE))
 		return true;
-	    //Rollover taxicab distance
+	    //Rollover distance
 	    final double rolloverDistance = Math.sqrt(
 		    Math.pow(cubeRolloverDistance(cubePosition.getX()-centerCube.getX()),2)+
 		    Math.pow(cubeRolloverDistance(cubePosition.getZ()-centerCube.getZ()),2));

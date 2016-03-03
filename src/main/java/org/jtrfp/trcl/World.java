@@ -30,7 +30,7 @@ public final class World {
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
     private final TR tr;
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove
-    public static final int CUBE_GRANULARITY        = (int)(TR.mapSquareSize*12);
+    public static final int CUBE_GRANULARITY        = (int)(TR.mapSquareSize*8);
     public static final int WORLD_WIDTH_CUBES       = (int)Math.round(TR.mapWidth / CUBE_GRANULARITY);
     public static final Vector3D RELEVANT_EVERYWHERE= Vector3D.NaN;
 

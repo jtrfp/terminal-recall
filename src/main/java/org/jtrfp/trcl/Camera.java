@@ -51,6 +51,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  RealMatrix projectionMatrix;
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix;
+	private String debugName;
 	private boolean	  fogEnabled = true;
 	private float horizontalFOVDegrees = 100f;// In degrees
 	private float verticalFOVDegrees   = 100f;
@@ -302,9 +303,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private synchronized RealMatrix getCompleteMatrix(){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.lookAt", getLookAt().toString());
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera.up", getTop().toString());
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".lookAt", getLookAt().toString());
+			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".up", getTop().toString());
 			}
 		return completeMatrix;
 		}
@@ -421,5 +422,15 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
 	public void setRelevanceRadiusCubes(int relevanceRadiusCubes) {
 	    this.relevanceRadiusCubes = relevanceRadiusCubes;
+	}
+
+	public String getDebugName() {
+	    if(debugName==null)
+		debugName = toString();
+	    return debugName;
+	}
+
+	public void setDebugName(String debugName) {
+	    this.debugName = debugName;
 	}
 }//end Camera

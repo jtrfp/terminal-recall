@@ -74,6 +74,7 @@ public final class Renderer {
 	if(world==null)
 	    throw new NullPointerException("World intolerably null.");
 	Camera camera = world.newCamera();//TODO: Remove after redesign.
+	camera.setDebugName(getDebugName());
 	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
 	System.out.println("...Done.");
 	System.out.println("Initializing RenderList...");
@@ -284,5 +285,9 @@ public final class Renderer {
     @Override
     public String toString(){
 	return "Renderer debugName="+debugName+" hash="+hashCode();
+    }
+
+    public String getDebugName() {
+        return debugName;
     }
 }//end Renderer

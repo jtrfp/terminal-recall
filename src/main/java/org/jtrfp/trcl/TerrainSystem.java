@@ -268,8 +268,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
-					altitude);
+				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m);
 				final double[] chunkPos = chunkToAdd.getPosition();
 				chunkPos[0] = objectX;
 				chunkPos[1] = objectY;
@@ -363,8 +362,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			    // Add to grid
-			    final TerrainChunk chunkToAdd = new TerrainChunk(tr, m,
-				    altitude);
+			    final TerrainChunk chunkToAdd = new TerrainChunk(tr, m);
 			    final double[] chunkPos = chunkToAdd.getPosition();
 			    chunkPos[0] = objectX;
 			    chunkPos[1] = objectY;

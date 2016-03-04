@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 
@@ -23,25 +22,20 @@ import org.jtrfp.trcl.gpu.Model;
  *
  */
 public class TerrainChunk extends WorldObject{
-    	private boolean isCeiling=false;
-    	private final AltitudeMap map;
-    	
-    	public TerrainChunk(TR tr){
-    	    super(tr);
-    	    map=null;
-    	}
-    	
-	public TerrainChunk(TR tr, Model m, AltitudeMap map){
-		super(tr,m);
-		this.map=map;
-		m.setDebugName("TerrainChunk: "+m.getDebugName());
-		}
-	
-	public AltitudeMap getAltitudeMap(){return map;}
-	
-	public boolean isCeiling(){return isCeiling;}
-	
-	public void setCeiling(boolean b) {
-	    isCeiling=b;
-	}
+    private boolean isCeiling=false;
+
+    public TerrainChunk(TR tr){
+	super(tr);
+    }
+
+    public TerrainChunk(TR tr, Model m){
+	super(tr,m);
+	m.setDebugName("TerrainChunk: "+m.getDebugName());
+    }
+
+    public boolean isCeiling(){return isCeiling;}
+
+    public void setCeiling(boolean b) {
+	isCeiling=b;
+    }
 }//end TerrainChunk

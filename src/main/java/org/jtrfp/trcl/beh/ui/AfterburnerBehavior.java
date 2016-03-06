@@ -65,8 +65,9 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	    if(!isEnabled() || 
 		    !(runState instanceof Mission.GameplayState) || 
 		    runState instanceof SatelliteViewFactory.SatelliteViewState ||
+		    runState instanceof Mission.SatelliteState ||//TODO: Supports old system, remove later
 		    runState instanceof Mission.Briefing)
-		return;
+		{setAfterburning(false);return;}
 	    final double newValue = (Double)evt.getNewValue();
 	    final double oldValue = (Double)evt.getOldValue();
 	    if(newValue == oldValue)

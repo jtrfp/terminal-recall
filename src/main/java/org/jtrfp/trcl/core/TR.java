@@ -421,7 +421,7 @@ public final class TR implements UncaughtExceptionHandler{
 	if(world==null)
 	    world = new World(
 			256*mapSquareSize,
-			24.*mapSquareSize,
+			16.*mapSquareSize,
 			256*mapSquareSize,
 			mapSquareSize*visibilityDiameterInMapSquares/2., this);
 	return world;

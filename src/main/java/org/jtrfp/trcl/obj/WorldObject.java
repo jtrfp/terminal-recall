@@ -53,7 +53,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private double[] 	top 	= new double[] { 0, 1, 0 }, oldTop    = new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     protected volatile double[] 
 	    position = new double[3], 
+	    positionAfterLoop = new double[3],
 	    oldPosition = new double[]{Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
+    private boolean loopedBefore = false;
     protected double[]  modelOffset= new double[3];
     private final double[]positionWithOffset 
     				= new double[3];
@@ -317,13 +319,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end processPrimitiveList(...)
 
     public synchronized final void updateStateToGPU(Renderer renderer) throws NotReadyException {
+	try{
 	initializeObjectDefinitions();
+	System.arraycopy(position, 0, positionAfterLoop, 0, 3);
 	attemptLoop(renderer);
 	if(needToRecalcMatrix){
 	    needToRecalcMatrix=recalcMatrixWithEachFrame();
 	    recalculateTransRotMBuffer();
 	}
 	if(model!=null)getModel().proposeAnimationUpdate();
+	}catch(Exception e){e.printStackTrace();}
     }//end updateStateToGPU()
     
     public boolean supportsLoop(){
@@ -332,33 +337,46 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     protected void attemptLoop(Renderer renderer){
 	if (supportsLoop()) {
+	    boolean change = false;
 	    final Vector3D camPos = renderer.getCamera().getCameraPosition();
-	    double delta = position[0]
-		    - camPos.getX();
-	    if (delta > TR.mapWidth / 2.) {
-		position[0] -= TR.mapWidth;
+	    final double [] delta = new double[]{
+		    positionAfterLoop[0] - camPos.getX(), 
+		    positionAfterLoop[1] - camPos.getY(), 
+		    positionAfterLoop[2] - camPos.getZ()};
+	    if (delta[0] > TR.mapWidth / 2.) {
+		positionAfterLoop[0] -= TR.mapWidth;
+		change = true;
 		needToRecalcMatrix=true;
-	    } else if (delta < -TR.mapWidth / 2.) {
-		position[0] += TR.mapWidth;
-		needToRecalcMatrix=true;
-	    }
-	    delta = position[1]
-		    - camPos.getY();
-	    if (delta > TR.mapWidth / 2.) {
-		position[1] -= TR.mapWidth;
-		needToRecalcMatrix=true;
-	    } else if (delta < -TR.mapWidth / 2.) {
-		position[1] += TR.mapWidth;
+	    } else if (delta[0] < -TR.mapWidth / 2.) {
+		positionAfterLoop[0] += TR.mapWidth;
+		change = true;
 		needToRecalcMatrix=true;
 	    }
-	    delta = position[2]
-		    - camPos.getZ();
-	    if (delta > TR.mapWidth / 2.) {
-		position[2] -= TR.mapWidth;
+	    if (delta[1] > TR.mapWidth / 2.) {
+		positionAfterLoop[1] -= TR.mapWidth;
+		change = true;
 		needToRecalcMatrix=true;
-	    } else if (delta < -TR.mapWidth / 2.) {
-		position[2] += TR.mapWidth;
+	    } else if (delta[1] < -TR.mapWidth / 2.) {
+		positionAfterLoop[1] += TR.mapWidth;
+		change = true;
 		needToRecalcMatrix=true;
+	    }
+	    if (delta[2] > TR.mapWidth / 2.) {
+		positionAfterLoop[2] -= TR.mapWidth;
+		change = true;
+		needToRecalcMatrix=true;
+	    } else if (delta[2] < -TR.mapWidth / 2.) {
+		positionAfterLoop[2] += TR.mapWidth;
+		change = true;
+		needToRecalcMatrix=true;
+	    }
+	    if(change){
+		needToRecalcMatrix = true;
+		loopedBefore = true;
+	    }else{
+		if(loopedBefore)
+		    needToRecalcMatrix = true;
+		loopedBefore = false;
 	    }
 	}//end if(LOOP)
     }//end attemptLoop()
@@ -386,9 +404,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    rMd[9] = aY[2];
 	    rMd[10] = aZ[2];
 	    if(isVisible() && isActive()){
-		tMd[3] = position[0]+modelOffset[0];
-		tMd[7] = position[1]+modelOffset[1];
-		tMd[11]= position[2]+modelOffset[2];
+		tMd[3] = positionAfterLoop[0]+modelOffset[0];
+		tMd[7] = positionAfterLoop[1]+modelOffset[1];
+		tMd[11]= positionAfterLoop[2]+modelOffset[2];
 	    }else{
 		tMd[3] = Double.POSITIVE_INFINITY;
 		tMd[7] = Double.POSITIVE_INFINITY;
@@ -400,7 +418,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
 	    tr.gpu.get().matrixWindow.get().setTransposed(rotTransM, getMatrixID(), scratchMatrixArray);//New version
-	} catch (MathArithmeticException e) {
+	} catch (MathArithmeticException e) {e.printStackTrace();
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()
     

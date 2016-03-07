@@ -16,7 +16,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.obj.Player;
 
 public class LoopingPositionBehavior extends Behavior {
-    private static final double THRESHOLD = TR.mapCartOffset;
+    private static final double THRESHOLD = TR.mapWidth;
     @Override
     public void tick(long timeInMillis){
 	// Loop correction
@@ -27,9 +27,9 @@ public class LoopingPositionBehavior extends Behavior {
 			{oldPos[0]-=TR.mapWidth;_transient=true;}
 		if (oldPos[2] > THRESHOLD)
 		    	{oldPos[2]-=TR.mapWidth;_transient=true;}
-		if (oldPos[0] < -THRESHOLD)
+		if (oldPos[0] < 0)
 			{oldPos[0]+=TR.mapWidth;_transient=true;}
-		if (oldPos[2] < -THRESHOLD)
+		if (oldPos[2] < 0)
 		    	{oldPos[2]+=TR.mapWidth;_transient=true;}
 	if(_transient)getParent().notifyPositionChange();
 	}//end if(LOOP)

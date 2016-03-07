@@ -145,11 +145,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				for (int cX = gX; cX < gX + chunkSideLength; cX++) {
 				    final double xPos = cX * gridSquareSize;
 				    final double zPos = cZ * gridSquareSize;
-				    final double hTL = altitude.heightAt(xPos, cZ* gridSquareSize);
-				    final double hTR = altitude.heightAt((cX + 1)* gridSquareSize, cZ* gridSquareSize);
-				    final double hBR = altitude.heightAt((cX + 1)* gridSquareSize,
+				    final double hBL = altitude.heightAt(xPos, cZ* gridSquareSize);
+				    final double hBR = altitude.heightAt((cX + 1)* gridSquareSize, cZ* gridSquareSize);
+				    final double hTR = altitude.heightAt((cX + 1)* gridSquareSize,
 					    (cZ + 1)* gridSquareSize);
-				    final double hBL = altitude.heightAt(xPos, (cZ + 1)* gridSquareSize);
+				    final double hTL = altitude.heightAt(xPos, (cZ + 1)* gridSquareSize);
 				    
 				    final Vector3D
 				     tL = new Vector3D(xPos,hTL,zPos + gridSquareSize),
@@ -190,7 +190,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					final Vector3D rbR = headingRot.applyInverseTo(lbR);
 					final Vector3D rbL = headingRot.applyInverseTo(lbL);
 					//BUG: Z is inverted when drawn at model level
-					heading = new Vector3D(heading.getX(),heading.getY(),-heading.getZ());
+					heading = new Vector3D(heading.getX(),heading.getY(),heading.getZ());
 					//final double portalX = xPos+gridSquareSize/2.;
 					//final double portalY = (hBL+hBR+hTR+hTL)/4.;
 					//final double portalZ = zPos+gridSquareSize/2.;
@@ -200,20 +200,20 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							// COUNTER-CLOCKWISE
 							// //x
 							new double[] {
-								rtL.getX(),//gridSquareSize/2,
-								rtR.getX(),//-gridSquareSize/2,
-								rbR.getX(),//-gridSquareSize/2,
-								rbL.getX()},//gridSquareSize/2 },
+								rbR.getX(),//gridSquareSize/2,
+								rbL.getX(),//-gridSquareSize/2,
+								rtL.getX(),//-gridSquareSize/2,
+								rtR.getX()},//gridSquareSize/2 },
 								new double[] {
-								rtL.getY(),//-gridSquareSize/2,
-								rtR.getY(),//-gridSquareSize/2,
-								rbR.getY(),//gridSquareSize/2,
-								rbL.getY()},//gridSquareSize/2},
+								rbR.getY(),//-gridSquareSize/2,
+								rbL.getY(),//-gridSquareSize/2,
+								rtL.getY(),//gridSquareSize/2,
+								rtR.getY()},//gridSquareSize/2},
 								new double[] {
-								rtL.getZ(),
-								rtR.getZ(),
 								rbR.getZ(),
-								rbL.getZ() }, u, v, portalTexture,
+								rbL.getZ(),
+								rtL.getZ(),
+								rtR.getZ() }, u, v, portalTexture,
 								RenderMode.STATIC,
 								new Vector3D[] { norm0, norm1,
 								norm2, norm3 }, cX + cZ % 4);
@@ -247,10 +247,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 							    bR.getX() - objectX,
 							    bL.getX() - objectX },
 						    new double[] { 
-							    bL.getY() - objectY,
-							    bR.getY() - objectY,
+							    tL.getY() - objectY,
 							    tR.getY() - objectY,
-							    tL.getY() - objectY },
+							    bR.getY() - objectY,
+							    bL.getY() - objectY },
 						    new double[] {
 							    tL.getZ() - objectZ,
 							    tR.getZ() - objectZ,

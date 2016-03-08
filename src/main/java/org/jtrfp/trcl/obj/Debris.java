@@ -24,6 +24,7 @@ import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
+import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;

@@ -17,11 +17,11 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.jtrfp.trcl.Submitter;
+import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.TunnelSegment;
-import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavior{//TODO: Cleanup

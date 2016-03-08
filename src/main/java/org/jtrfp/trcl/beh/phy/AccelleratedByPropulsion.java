@@ -15,7 +15,6 @@ package org.jtrfp.trcl.beh.phy;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.obj.Propelled;
-import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
 

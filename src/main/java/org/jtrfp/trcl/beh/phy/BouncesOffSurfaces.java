@@ -16,7 +16,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.SurfaceImpactListener;
-import org.jtrfp.trcl.obj.Velocible;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class BouncesOffSurfaces extends Behavior implements

@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.obj;
+package org.jtrfp.trcl.beh.phy;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 

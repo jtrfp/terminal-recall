@@ -101,6 +101,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	private void proposePause(boolean newState){
 	    final Object runState = tr.getRunState();
 	    if(runState instanceof Mission.PlayerActivity &&
+		    !(runState instanceof Mission.SatelliteState) &&
 		    !(runState instanceof PauseDisabledState)){
 		setPaused(newState);
 	    }//end if(PlayerActivity)

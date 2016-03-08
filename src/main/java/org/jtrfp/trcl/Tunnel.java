@@ -219,6 +219,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    throws IllegalAccessException, FileLoadException, IOException {
 	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();
 	Obstacle    obs = s.getObstacle();
+	final double upScalar = 5 * tunnelDia / TR.mapSquareSize;
 	WorldObject wo;
 	Model       m;
 	switch (obs) {
@@ -253,7 +254,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(bc);
 	    break;
 	}
-	case blownOpenDoor://TODO: This is not displaying alpha
+	case blownOpenDoor:
 	    BarrierCube bc = new BarrierCube(tr, tunnelDia, tunnelDia,
 		    wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
@@ -495,7 +496,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	case metalBeamUp:
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
 		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(0, tunnelDia / 6, 0))
 		    .toArray());
@@ -507,7 +508,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	case metalBeamDown:
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
 		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(0, -tunnelDia / 6, 0))
 		    .toArray());
@@ -519,7 +520,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	case metalBeamLeft:
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
 		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(-tunnelDia / 6, 0, 0))
 		    .toArray());
@@ -531,7 +532,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	case metalBeamRight:
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
 		    false, palette, ESTuTvPalette));
 	    wo.setPosition(wPos.add(new Vector3D(tunnelDia / 6, 0, 0))
 		    .toArray());

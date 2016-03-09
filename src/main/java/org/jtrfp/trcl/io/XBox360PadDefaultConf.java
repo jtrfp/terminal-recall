@@ -14,12 +14,14 @@
 package org.jtrfp.trcl.io;
 
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
+import org.jtrfp.trcl.beh.ui.RollBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.ext.tr.GamePauseFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
+import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration.ConfEntry;
 import org.jtrfp.trcl.miss.SatelliteViewFactory;
 import org.springframework.stereotype.Component;
 
@@ -44,5 +46,7 @@ public class XBox360PadDefaultConf extends ControllerConfiguration {
 	this.getEntryMap() .put("x"     ,new ConfEntry(UserInputRudderElevatorControlBehavior.RUDDER  ,"x"     ,-1,0));
 	this.getEntryMap() .put("y"     ,new ConfEntry(UserInputRudderElevatorControlBehavior.ELEVATOR,"y"     ,-1,0));
 	this.getEntryMap() .put("z"     ,new ConfEntry(UserInputThrottleControlBehavior.THROTTLE      ,"z"     ,-1,0));
+	this.getEntryMap().put("Left Thumb"    , new ConfEntry(RollBehavior.ROLL                ,"Left Thumb"  ,-1,0 ));
+	this.getEntryMap().put("Right Thumb"   , new ConfEntry(RollBehavior.ROLL                ,"Right Thumb" ,1,0 ));
     }//end constructor
 }//end XBox360PadDefaultConf

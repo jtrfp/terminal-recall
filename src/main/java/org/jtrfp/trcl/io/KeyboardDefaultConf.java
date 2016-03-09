@@ -14,6 +14,7 @@
 package org.jtrfp.trcl.io;
 
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
+import org.jtrfp.trcl.beh.ui.RollBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
@@ -51,5 +52,7 @@ public class KeyboardDefaultConf extends ControllerConfiguration {
 	this.getEntryMap().put("V"    , new ConfEntry(ViewSelectFactory.VIEW                                ,"V"    ,1,0 ));
 	this.getEntryMap().put("C"    , new ConfEntry(ViewSelectFactory.INSTRUMENTS_VIEW                    ,"C"    ,1,0 ));
 	this.getEntryMap().put("F"    , new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"F"    ,1,0 ));
+	this.getEntryMap().put("HOME"    , new ConfEntry(RollBehavior.ROLL                ,"HOME"    ,-1,0 ));
+	this.getEntryMap().put("PAGE_UP" , new ConfEntry(RollBehavior.ROLL                ,"PAGE_UP"    ,1,0 ));
     }//end constructor
 }//end KeyboardDefaultConf

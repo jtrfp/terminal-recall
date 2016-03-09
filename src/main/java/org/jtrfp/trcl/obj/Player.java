@@ -15,7 +15,6 @@ package org.jtrfp.trcl.obj;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Camera;
@@ -53,6 +52,7 @@ import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
+import org.jtrfp.trcl.beh.ui.RollBehavior;
 import org.jtrfp.trcl.beh.ui.UpdatesHealthMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UpdatesThrottleMeterBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
@@ -137,6 +137,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
 	addBehavior(new PlayerDeathListener());
 	addBehavior(new SFXOnDamage());
+	addBehavior(new RollBehavior(tr.getControllerInputs()));
 	
 	final Weapon[] allWeapons = Weapon.values();
 	

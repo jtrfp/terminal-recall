@@ -14,6 +14,8 @@ package org.jtrfp.trcl.beh;
 
 import java.lang.ref.WeakReference;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TR;
@@ -37,17 +39,19 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 	    final HitBox [] hitBoxes = def.getHitBoxes();
 	    final WorldObject parent = getParent();
 	   
-	    final double [] defPos = def.getPositionWithOffset();
-	    final double [] pPos   = parent.getPositionWithOffset();
+	    final double [] defPos = def.getPosition();
+	    final double [] pPos   = parent.getPosition();
 	    
-	    otherDEF=new WeakReference<DEFObject>((DEFObject)other);
+	    otherDEF=new WeakReference<DEFObject>(def);
 	    if(hitBoxes == null){// No custom hitboxes
-		final double maxVtx = otherDEF.get().getModel().getMaximumVertexValue();
-		 final double distance=TR.twosComplimentDistance(
-			    other.getPositionWithOffset(), 
-			    parent.getPositionWithOffset());
-		    if(distance<(boundingRadius+maxVtx))
-			parent.probeForBehaviors(sub, DEFObjectCollisionListener.class);
+		final Vector3D max = def.getModel().getMaximumVertexDims(),
+			       min = def.getModel().getMinimumVertexDims();
+		if(boxCollision(
+			parent.getPositionWithOffset(), 
+			other.getPositionWithOffset(),
+			min,max, boundingRadius,
+			other.getHeading(),other.getTop()))
+		            parent.probeForBehaviors(sub, DEFObjectCollisionListener.class);
 	    }else{//Custom hitboxes
 		boolean doCollision = false;
 		BasicModelSource mSource = def.getModelSource();
@@ -68,6 +72,29 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 	    }//end if(custom hitboxes)
 	}//end if(DEFObject)
     }//end _proposeCollision()
+    
+    private static boolean boxCollision(double [] testSpherePos, double [] boxPos, Vector3D min, Vector3D max, double boundingRadius, Vector3D boxHeading, Vector3D boxTop){
+	//Calculate other object to parent's space.
+	Vector3D relPosThis = new Vector3D(testSpherePos).
+		subtract(new Vector3D(boxPos));
+	//Factor in rollover
+	relPosThis = new Vector3D(
+		TR.rolloverDistance(relPosThis.getX()),
+		TR.rolloverDistance(relPosThis.getY()),
+		TR.rolloverDistance(relPosThis.getZ())
+		);
+	Rotation rot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J,boxHeading,boxTop);
+	//Rotate the other position relative to the parent's heading/top.
+	relPosThis = rot.applyInverseTo(relPosThis);
+	final boolean withinRange = 
+		relPosThis.getX()<max.getX() + boundingRadius &&
+		relPosThis.getX()>min.getX() - boundingRadius &&
+		relPosThis.getY()<max.getY() + boundingRadius &&
+		relPosThis.getY()>min.getY() - boundingRadius &&
+		relPosThis.getZ()<max.getZ() + boundingRadius &&
+		relPosThis.getZ()>min.getZ() - boundingRadius;
+	return withinRange;
+    }//end boxCollision(...)
     
     private final Submitter<DEFObjectCollisionListener> sub = new AbstractSubmitter<DEFObjectCollisionListener>(){
 	@Override

@@ -433,6 +433,8 @@ public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws Fil
     	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,BIG_EXP_SOUNDS[(int)(Math.random()*3)]));
     	    
     	    possibleBobbingSpinAndCrashOnDeath(.5,def);
+    	    if(isBoss())
+    		defaultBossNAVTargetingResponse();
 	    customExplosion=true;
     	    mobile=false;
     	    canTurn=false;

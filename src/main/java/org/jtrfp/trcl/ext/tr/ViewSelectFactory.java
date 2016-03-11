@@ -105,9 +105,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		CHASE_VIEW
 	    };
 	    private final InstrumentMode [] instrumentModes = new InstrumentMode[]{
-		FULL_COCKPIT,
+		NO_INSTRUMENTS,
 		HUD_INSTRUMENTS,
-		NO_INSTRUMENTS
+		FULL_COCKPIT
 	    };
 	    
      private final PropertyChangeListener viewSelectPropertyChangeListener          = new ViewSelectPropertyChangeListener();

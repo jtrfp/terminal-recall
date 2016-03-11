@@ -150,13 +150,13 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar, double samplePlaybackRatio){
 	    final double UNIT_FACTOR = TR.mapSquareSize*8;
-	    final double dist = Vect3D.distance(source, dest.getPosition());
+	    final double dist = TR.rolloverDistance(Vect3D.distance(source, dest.getPosition()));
 	    final double unitDist    = dist/UNIT_FACTOR;
 	    final double vol = Misc.clamp(1./Math.pow(unitDist, 2),
 		    0,1)*volumeScalar;
 	    final double [] work     = new double[3];
 	    final double [] destPos  = dest.getPosition();
-	    Vect3D.subtract(source, destPos, work);
+	    TR.twosComplimentSubtract(source, destPos, work);
 	    Rotation rot;
 	    try{rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);}
 	    catch(MathArithmeticException e){rot = new Rotation(Vector3D.PLUS_K, 0);}//Default if given weird top/heading.

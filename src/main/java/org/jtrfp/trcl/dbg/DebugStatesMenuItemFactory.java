@@ -11,11 +11,12 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.dbg;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.Reporter;
 import org.springframework.beans.factory.annotation.Autowired;

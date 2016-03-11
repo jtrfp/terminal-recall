@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.awt.Color;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.HUDSystem;
@@ -35,6 +37,9 @@ private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final NAVSystem nav;
 private final DashboardLayout layout;
+private Color backgroundColor;
+private static final int BACKGROUND_INDEX = 10;
+
     public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout, String debugName) {
 	super(tr, Z, 
 		WIDTH, 
@@ -50,6 +55,12 @@ private final DashboardLayout layout;
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
+    
+    public Color getBackgroundColor(){
+	if(backgroundColor == null)
+	    backgroundColor = getTr().getGlobalPalette()[BACKGROUND_INDEX];
+	return backgroundColor;
+    }//end getBackgroundColor()
     
     private static TextureDescription getTexture(TR tr){
 	try{

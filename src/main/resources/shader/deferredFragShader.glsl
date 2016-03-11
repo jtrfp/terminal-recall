@@ -90,7 +90,7 @@ const uint PRIMS_PER_ROW			= PRIM_TEXTURE_WIDTH/PQUAD_SIDE_WIDTH;
 const uint OVERSAMPLING				= 4u;
 const float PQUAD_DENOM				= (float(PRIM_TEXTURE_WIDTH)/2);
 
-const uint NUM_PORTALS				= 8u;
+const uint NUM_PORTALS				= 4u;
 
 const vec4 LO_ACC_MULTIPLIER        = vec4(1,4,16,64);// 2 bits each
 const vec4 HI_ACC_MULTIPLIER        = LO_ACC_MULTIPLIER * 256;

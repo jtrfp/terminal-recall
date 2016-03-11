@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.core;
+package org.jtrfp.trcl.conf;
 
 import java.beans.DefaultPersistenceDelegate;
 import java.beans.Encoder;
@@ -30,7 +30,6 @@ import java.util.Map;
 
 import javax.swing.DefaultListModel;
 
-import org.jtrfp.trcl.conf.Configurator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

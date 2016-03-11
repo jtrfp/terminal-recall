@@ -32,8 +32,8 @@ import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 
+import org.jtrfp.trcl.conf.TRConfiguration;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.TRConfiguration;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;

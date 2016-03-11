@@ -66,6 +66,7 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.SoftValueHashMap;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
+import org.jtrfp.trcl.conf.ConfigManager;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.BillboardTexCoords0x04;

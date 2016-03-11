@@ -13,19 +13,18 @@
 
 package org.jtrfp.trcl.conf;
 
-import static org.jtrfp.trcl.core.TRConfiguration.ACTIVE_AUDIO_DEVICE;
-import static org.jtrfp.trcl.core.TRConfiguration.ACTIVE_AUDIO_DRIVER;
-import static org.jtrfp.trcl.core.TRConfiguration.ACTIVE_AUDIO_FORMAT;
-import static org.jtrfp.trcl.core.TRConfiguration.ACTIVE_AUDIO_OUTPUT;
-import static org.jtrfp.trcl.core.TRConfiguration.AUDIO_BUFFER_LAG;
-import static org.jtrfp.trcl.core.TRConfiguration.AUDIO_BUFFER_SIZE;
-import static org.jtrfp.trcl.core.TRConfiguration.CROSSHAIRS_ENABLED;
+import static org.jtrfp.trcl.conf.TRConfiguration.ACTIVE_AUDIO_DEVICE;
+import static org.jtrfp.trcl.conf.TRConfiguration.ACTIVE_AUDIO_DRIVER;
+import static org.jtrfp.trcl.conf.TRConfiguration.ACTIVE_AUDIO_FORMAT;
+import static org.jtrfp.trcl.conf.TRConfiguration.ACTIVE_AUDIO_OUTPUT;
+import static org.jtrfp.trcl.conf.TRConfiguration.AUDIO_BUFFER_LAG;
+import static org.jtrfp.trcl.conf.TRConfiguration.AUDIO_BUFFER_SIZE;
+import static org.jtrfp.trcl.conf.TRConfiguration.CROSSHAIRS_ENABLED;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jtrfp.trcl.core.TRConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 /**

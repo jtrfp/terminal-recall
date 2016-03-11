@@ -34,6 +34,7 @@ import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.conf.ConfigManager;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.game.Game;

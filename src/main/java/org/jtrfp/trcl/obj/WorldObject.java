@@ -319,7 +319,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end processPrimitiveList(...)
 
     public synchronized final void updateStateToGPU(Renderer renderer) throws NotReadyException {
-	try{
 	initializeObjectDefinitions();
 	System.arraycopy(position, 0, positionAfterLoop, 0, 3);
 	attemptLoop(renderer);
@@ -328,7 +327,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    recalculateTransRotMBuffer();
 	}
 	if(model!=null)getModel().proposeAnimationUpdate();
-	}catch(Exception e){e.printStackTrace();}
     }//end updateStateToGPU()
     
     public boolean supportsLoop(){

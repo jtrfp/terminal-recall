@@ -79,53 +79,11 @@ public class Texture implements TextureDescription {
 	    //TOC ID
 	    if(tocIndex!=null)
 		toc.freeLater(tocIndex);
-	    //Subtexture IDs
-	    //for(int stID:subTextureIDs)
-		// stw.free(stID);
 	    stw.freeLater(subTextureIDs);
 	    //Codebook entries
 	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
-	/*
-	gpuResourceFinalizer.
-	 submitFinalizationAction(
-	  new TextureFinalizerTask(tm,stw,toc,tocIndex,subTextureIDs,codebookStartOffsets256));
-	*/
 	super.finalize();
     }//end finalize()
-    
-    private static final class TextureFinalizerTask implements Callable<Void>{
-	final TextureManager      tm;
-	final SubTextureWindow    stw;
-	final TextureTOCWindow    toc;
-	final Integer             tocIndex;
-	final Collection<Integer> subTextureIDs;
-	final Collection<Integer> codebookStartOffsets256;
-	
-	public TextureFinalizerTask(final TextureManager tm, final SubTextureWindow stw, final TextureTOCWindow toc, final Integer tocIndex, final Collection<Integer> subTextureIDs, final Collection<Integer> codebookStartOffsets256){
-	    this.tm=tm;
-	    this.stw=stw;
-	    this.toc=toc;
-	    this.tocIndex=tocIndex;
-	    this.subTextureIDs=subTextureIDs;
-	    this.codebookStartOffsets256=codebookStartOffsets256;
-	}
-	
-	@Override
-	public Void call() throws Exception {
-	    //Undo the magic
-	    toc.magic.set(tocIndex, 0000);
-	    //TOC ID
-	    if(tocIndex!=null)
-		toc.freeLater(tocIndex);
-	    //Subtexture IDs
-	    //for(int stID:subTextureIDs)
-		// stw.free(stID);
-	    stw.freeLater(subTextureIDs);
-	    //Codebook entries
-	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
-	    return null;
-	}
-    }//end TextureFinalizer
     
     private static VectorList colorZeroRasterVL(){
 	return new VectorList(){
@@ -451,7 +409,6 @@ public class Texture implements TextureDescription {
 
     private void calulateAverageColor(RasterizedBlockVectorList rbvl) {
 	float redA=0,greenA=0,blueA=0;
-	    final double size = rbvl.getNumVectors();
 	    final int [] dims = rbvl.getDimensions();
 	    for(int i=0; i<10; i++){
 		redA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,0);

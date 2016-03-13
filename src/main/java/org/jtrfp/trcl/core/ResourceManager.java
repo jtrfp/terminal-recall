@@ -98,7 +98,7 @@ import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RAWVectorList;
@@ -119,12 +119,12 @@ import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
 
 public class ResourceManager{
 	private final Map<String,IPodData> pods = new HashMap<String,IPodData>();
-	private SoftValueHashMap<Integer, TextureDescription> 
+	private SoftValueHashMap<Integer, Texture> 
 	/*						*/	 rawCache 
-		= new SoftValueHashMap<Integer,TextureDescription>();
-    	private SoftValueHashMap<String, TextureDescription[]> 
+		= new SoftValueHashMap<Integer,Texture>();
+    	private SoftValueHashMap<String, Texture[]> 
     								specialTextureNameMap 	
-    		= new SoftValueHashMap<String,TextureDescription[]>();
+    		= new SoftValueHashMap<String,Texture[]>();
 	private SoftValueHashMap<String, BINFile.AnimationControl>aniBinNameMap 	
 		= new SoftValueHashMap<String,BINFile.AnimationControl>();
 	private SoftValueHashMap<String, BINFile.Model> 	modBinNameMap 		
@@ -139,7 +139,7 @@ public class ResourceManager{
 	private DebrisSystem 					debrisSystem;
 	private ProjectileFactory [] 				projectileFactories;
 	private final TR 					tr;
-	private TextureDescription				testTexture;
+	private Texture				testTexture;
 	
 	public final ObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
 	public final ObjectFactory<String,SoundTexture>	soundTextures;
@@ -259,24 +259,24 @@ public class ResourceManager{
 		registerPOD(fileToRegister.getAbsolutePath(),new PodFile(fileToRegister));
 		}
 	
-	public TextureDescription [] getTextures(String texFileName, ColorPaletteVectorList paletteRGBA, ColorPaletteVectorList paletteESTuTv,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public Texture [] getTextures(String texFileName, ColorPaletteVectorList paletteRGBA, ColorPaletteVectorList paletteESTuTv,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 		if(texFileName==null)
 		    throw new NullPointerException("texFileName is intolerably null");
 		if(paletteRGBA==null)
 		    throw new NullPointerException("paletteRGBA is intolerably null");
 	    	String [] files = getTEXListFile(texFileName);
-		TextureDescription [] result = new TextureDescription[files.length];
+		Texture [] result = new Texture[files.length];
 		for(int i=0; i<files.length;i++)
 			{result[i]=getRAWAsTexture(files[i],paletteRGBA,paletteESTuTv,uvWrapping);}
 		return result;
 		}//end loadTextures(...)
 	
-	public TextureDescription[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) {
+	public Texture[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) {
 		try{
-	    	TextureDescription [] result = specialTextureNameMap.get(name);
+	    	Texture [] result = specialTextureNameMap.get(name);
 		if(result==null){
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
-			result=new TextureDescription[segs.length];
+			result=new Texture[segs.length];
 			for(int si=0; si<segs.length; si++)
 				{result[si] = new VQTexture(tr.gpu.get(),tr.getThreadManager(),segs[si],null,"name",uvWrapping);}
 			specialTextureNameMap.put(name,result);
@@ -286,18 +286,18 @@ public class ResourceManager{
 		return null;//never happens.
 		}//end getSpecialRAWAsTextures
 	
-	public TextureDescription getRAWAsTexture(String name, final ColorPaletteVectorList paletteRGBA, final ColorPaletteVectorList paletteESTuTv, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public Texture getRAWAsTexture(String name, final ColorPaletteVectorList paletteRGBA, final ColorPaletteVectorList paletteESTuTv, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    return getRAWAsTexture(name,paletteRGBA,paletteESTuTv,true,uvWrapping);
 	}
 	
-	public TextureDescription getRAWAsTexture(final String name, final ColorPaletteVectorList paletteRGBA,
+	public Texture getRAWAsTexture(final String name, final ColorPaletteVectorList paletteRGBA,
 			ColorPaletteVectorList paletteESTuTv, final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
 	    if(name==null)
 		throw new NullPointerException("Name is intolerably null.");
 	    if(paletteRGBA==null)
 		throw new NullPointerException("paletteRGBA is intolerably null.");
 	    final int hash=name.hashCode()*paletteRGBA.hashCode();
-	        TextureDescription result=rawCache.get(hash);
+	        Texture result=rawCache.get(hash);
 	    	if(result!=null&&useCache)return result;
 			try {
 				if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
@@ -381,7 +381,7 @@ public class ResourceManager{
 	    return result;
 	}//end getBinFileModel()
 	
-	public Model getBINModel(String name,TextureDescription defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, ColorPaletteVectorList ESTuTvPalette) throws FileLoadException, IOException, IllegalAccessException{
+	public Model getBINModel(String name,Texture defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, ColorPaletteVectorList ESTuTvPalette) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
@@ -424,7 +424,7 @@ public class ResourceManager{
 						    binVtx.getZ()*cpScalar)));
 				}//end try{}
 				
-				TextureDescription currentTexture=null;
+				Texture currentTexture=null;
 				final double [] u = new double[4];
 				final double [] v = new double[4];
 				for(ThirdPartyParseable b:m.getDataBlocks()){
@@ -650,7 +650,7 @@ public class ResourceManager{
 	    	return new RawAltitudeMapWrapper(new RAWFile(getInputStreamFromResource("DATA\\"+name)));
 		}//end getRAWAltitude
 	
-	public TextureMesh getTerrainTextureMesh(String name, TextureDescription[] texturePalette) throws IOException, FileLoadException, IllegalAccessException{
+	public TextureMesh getTerrainTextureMesh(String name, Texture[] texturePalette) throws IOException, FileLoadException, IllegalAccessException{
 		final CLRFile	dat = new CLRFile(getInputStreamFromResource("DATA\\"+name));
 		return new RawTextureMeshWrapper(dat,texturePalette);
 		}//end getRAWAltitude
@@ -838,7 +838,7 @@ public class ResourceManager{
 	    return pods.values();
 	}
 	
-	public TextureDescription getTestTexture(){
+	public Texture getTestTexture(){
 	    if(testTexture!=null)
 		return testTexture;
 	    InputStream is = null;
@@ -854,7 +854,7 @@ public class ResourceManager{
 	    return result;
 	}
 
-	public TextureDescription solidColor(Color color) {
+	public Texture solidColor(Color color) {
 	    return tr.gpu.get().textureManager.get().solidColor(color);
 	}
 }//end ResourceManager

@@ -31,7 +31,7 @@ import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -51,7 +51,7 @@ public class ProjectileFactory {
     	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
     	Model modelToUse;
-    	TextureDescription t;
+    	Texture t;
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
@@ -88,7 +88,7 @@ public class ProjectileFactory {
    	     for(int i=0; i<frames.length;i++){
    		 frames[i]=(VQTexture)mgr.getRAWAsTexture(fileNames[i], pal, null, false);
    	     }//end for(frames)
-   	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
+   	  Texture tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){
 	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow,debugName);}
    	 }//end (billboard)

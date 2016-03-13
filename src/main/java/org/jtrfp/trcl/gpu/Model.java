@@ -50,7 +50,7 @@ public class Model {
     private boolean modelFinalized = false;
     private TRFuture<Model> finalizedModel;
     //Keeps hard references to Textures to keep them from getting gobbled.
-    private final HashSet<TextureDescription> textures = new HashSet<TextureDescription>();
+    private final HashSet<Texture> textures = new HashSet<Texture>();
 
     public Model(boolean smoothAnimation, TR tr, String debugName) {
 	this.tr = tr;
@@ -257,33 +257,33 @@ public class Model {
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TextureDescription tunnelTexturePalette, double[] origin,
+	    Texture tunnelTexturePalette, double[] origin,
 	    boolean hasAlpha, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1,
 		hasAlpha, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TextureDescription tunnelTexturePalette, double[] origin,
+	    Texture tunnelTexturePalette, double[] origin,
 	    TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1, tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TextureDescription tunnelTexturePalette, double[] origin,
+	    Texture tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, u0, v0, u1, v1,
 		false, tr);
     }
     
     public static Model buildCube(double w, double h, double d,
-	    TextureDescription tunnelTexturePalette, double[] origin,
+	    Texture tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr) {
 	return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,hasAlpha,true,tr);
     }
 
     public static Model buildCube(double w, double h, double d,
-	    TextureDescription tunnelTexturePalette, double[] origin,
+	    Texture tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, boolean hasNorm, TR tr) {
 	Model m = new Model(false, tr, "Model.buildCube");
 	// Top

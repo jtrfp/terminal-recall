@@ -27,7 +27,7 @@ import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Player;
@@ -53,7 +53,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 			    (int)(f * LUM_STEP), 
 			    (int)(f * LUM_STEP*.8), 170));
 	}//end for(NUM_FRAMES)
-	TextureDescription greenThrob = new AnimatedTexture(new Sequencer(80,
+	Texture greenThrob = new AnimatedTexture(new Sequencer(80,
 		greenThrobFrames.length, false), greenThrobFrames);/*tr.gpu.get().textureManager.get().getFallbackTexture();*/
 	// TODO: Set crosshairs as a player-tracking object
 	/*

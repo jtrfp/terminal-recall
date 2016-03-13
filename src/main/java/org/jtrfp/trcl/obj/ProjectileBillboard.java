@@ -22,13 +22,13 @@ import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
 public class ProjectileBillboard extends BillboardSprite implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
     private WeakReference<WorldObject> objectOfOrigin = new WeakReference<WorldObject>(null);
-    public ProjectileBillboard(TR tr,Weapon w,TextureDescription textureToUse,ExplosionType explosionType,String debugName) {
+    public ProjectileBillboard(TR tr,Weapon w,Texture textureToUse,ExplosionType explosionType,String debugName) {
 	super(tr,debugName);
 	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType,w.isHoning()));
 	ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)w.getModelingType();

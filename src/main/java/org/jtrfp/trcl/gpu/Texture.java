@@ -20,7 +20,7 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 
-public interface TextureDescription {
+public interface Texture {
     public Color getAverageColor();
 
     public void apply(TriangleList triangleList, int gpuTVIndex, int numFrames, Triangle thisTriangle, Vector3D pos, TriangleVertexWindow vw);

@@ -25,7 +25,7 @@ import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TriangleList extends PrimitiveList<Triangle> {
@@ -104,7 +104,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	return getPrimitives()[frame][tIndex];
     }
 
-    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, TextureDescription td)
+    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, Texture td)
 	    throws ExecutionException, InterruptedException {
 	final int 	numFrames	= getPrimitives().length;
 	final Triangle 	t 		= triangleAt(0, triangleIndex);
@@ -231,7 +231,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}//end if(animated texture)
     }// end setupVertex
 
-    private void setupTriangle(final int triangleIndex, final TextureDescription textureDescription,final int [] vertexIndices) throws ExecutionException,
+    private void setupTriangle(final int triangleIndex, final Texture textureDescription,final int [] vertexIndices) throws ExecutionException,
 	    InterruptedException {
 		int tIndex = triangleIndex*3;
 		setupVertex(0, vertexIndices[tIndex], triangleIndex,textureDescription);
@@ -250,7 +250,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
     public Future<Void> uploadToGPU() {
 	final int nPrimitives = getNumElements();
 	triangleVertexIndices = new int[nPrimitives*3];
-	final TextureDescription [] textureDescriptions = new TextureDescription[nPrimitives];
+	final Texture [] textureDescriptions = new Texture[nPrimitives];
 	final MemoryWindow mw = getMemoryWindow();
 	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++)
 	    triangleVertexIndices[vIndex]=mw.create();

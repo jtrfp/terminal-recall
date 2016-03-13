@@ -40,7 +40,7 @@ public class BINFileExtractor {
     private final HashSet<Integer>alreadyVisitedLineSegs = new HashSet<Integer>();
     private ColorPaletteVectorList palette, ESTuTvPalette;
     private final ResourceManager rm;
-    private TextureDescription defaultTexture, triPipeTexture;
+    private Texture defaultTexture, triPipeTexture;
     private Color [] globalPalette;
     
     public BINFileExtractor(ResourceManager rm){
@@ -245,28 +245,28 @@ public class BINFileExtractor {
     /**
      * @return the defaultTexture
      */
-    public TextureDescription getDefaultTexture() {
+    public Texture getDefaultTexture() {
         return defaultTexture;
     }
 
     /**
      * @param defaultTexture the defaultTexture to set
      */
-    public void setDefaultTexture(TextureDescription defaultTexture) {
+    public void setDefaultTexture(Texture defaultTexture) {
         this.defaultTexture = defaultTexture;
     }
 
     /**
      * @return the triPipeTexture
      */
-    public TextureDescription getTriPipeTexture() {
+    public Texture getTriPipeTexture() {
         return triPipeTexture;
     }
 
     /**
      * @param triPipeTexture the triPipeTexture to set
      */
-    public void setTriPipeTexture(TextureDescription triPipeTexture) {
+    public void setTriPipeTexture(Texture triPipeTexture) {
         this.triPipeTexture = triPipeTexture;
     }
     

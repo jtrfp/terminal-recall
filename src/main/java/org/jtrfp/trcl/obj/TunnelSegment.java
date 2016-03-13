@@ -22,7 +22,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.math.IntRandomTransferFunction;
 
 public class TunnelSegment extends WorldObject {
@@ -33,7 +33,7 @@ public class TunnelSegment extends WorldObject {
     private final double endX, endY;
 
     public TunnelSegment(TR tr, Segment s,
-	    TextureDescription[] tunnelTexturePalette, double segLen,
+	    Texture[] tunnelTexturePalette, double segLen,
 	    double endX, double endY, String debugName) {
 	super(tr, createModel(s, segLen, tunnelTexturePalette, endX, endY, tr,debugName));
 	segmentLength = segLen;
@@ -76,7 +76,7 @@ public class TunnelSegment extends WorldObject {
     private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();
 
     private static Model createModel(Segment s, double segLen,
-	    TextureDescription[] tunnelTexturePalette, double endX,
+	    Texture[] tunnelTexturePalette, double endX,
 	    double endY, final TR tr, String debugName) {
 	Model mainModel = new Model(true, tr, debugName);
 	mainModel.setDebugName("tunnelSegment main.");
@@ -191,7 +191,7 @@ public class TunnelSegment extends WorldObject {
 	     Vector3D p3 = segPoint(frameStartAngle + dAngleStart, zStart,
 		    startWidth, startHeight, startX, startY);
 
-	     TextureDescription tex = tunnelTexturePalette
+	     Texture tex = tunnelTexturePalette
 		     [s.getPolyTextureIndices().get(pi)];
 
 	     if (pi == lightPoly && lightType != FlickerLightType.noLight) {

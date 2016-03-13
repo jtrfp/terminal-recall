@@ -15,7 +15,7 @@ package org.jtrfp.trcl;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.gpu.BasicModelTarget;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.BasicModelTarget.WriterState;
 import org.jtrfp.trcl.gpu.Vertex;
 
@@ -27,10 +27,10 @@ public class Triangle {
     private Vector3D centroidNormal;
     private final StackTraceElement[] creationStackTrace;
 
-    public final TextureDescription texture;
+    public final Texture texture;
     public static boolean debugTriangles = false;
 
-    public Triangle(TextureDescription texture) {
+    public Triangle(Texture texture) {
 	if (debugTriangles)
 	    creationStackTrace = new Exception().getStackTrace();
 	else
@@ -38,7 +38,7 @@ public class Triangle {
 	this.texture=texture;
     }
 
-    public Triangle(Vertex[] vertices, TextureDescription texture) {
+    public Triangle(Vertex[] vertices, Texture texture) {
 	this(texture);
 	setVertex(vertices[0], 0);
 	setVertex(vertices[1], 1);
@@ -46,14 +46,14 @@ public class Triangle {
     }
 
     public static Triangle[] quad2Triangles(Vertex[] vertices, Vector2D[] uvs,
-	    TextureDescription texture, RenderMode mode,
+	    Texture texture, RenderMode mode,
 	    boolean hasAlpha, Vector3D centroidNormal, String debugName) {
 	return quad2Triangles(vertices, uvs, texture, mode, hasAlpha,
 		centroidNormal, new Triangle[2], 0, debugName);
     }
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode mode, Vector3D[] normals, int ringRotation,
 	    Triangle[] dest, int destOffset) {
 	return quad2Triangles(x, y, z, u, v, texture, mode, false, normals,
@@ -87,7 +87,7 @@ public class Triangle {
     }
 
     public static Triangle[] quad2Triangles(Vertex[] vertices, Vector2D[] uv,
-	    TextureDescription texture, RenderMode mode,
+	    Texture texture, RenderMode mode,
 	    boolean hasAlpha, Triangle[] dest, int destOffset) {
 	Triangle t;
 	t = new Triangle(texture);
@@ -115,7 +115,7 @@ public class Triangle {
     }
 
     public static Triangle[] quad2Triangles(Vertex[] vertices, Vector2D[] uv,
-	    TextureDescription texture, RenderMode mode,
+	    Texture texture, RenderMode mode,
 	    boolean hasAlpha, Vector3D centroidNormal, Triangle[] dest,
 	    int destOffset, String debugName) {
 	Triangle t;
@@ -146,7 +146,7 @@ public class Triangle {
     }
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal,
 	    String debugName) {
 	return quad2Triangles(x, y, z, u, v, texture, mode, hasAlpha,
@@ -159,7 +159,7 @@ public class Triangle {
      * 
      */
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode mode, boolean hasAlpha, Vector3D centroidNormal,
 	    Triangle[] dest, int destOffset, String debugName) {
 	final Vertex[] vertices = new Vertex[] {
@@ -176,7 +176,7 @@ public class Triangle {
     }// end quad2Triangles(...)
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode mode, boolean hasAlpha, Vector3D[] normals,
 	    int ringRotation) {
 	return quad2Triangles(x, y, z, u, v, texture, mode, hasAlpha, normals,
@@ -191,7 +191,7 @@ public class Triangle {
      * 
      */
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode mode, boolean hasAlpha, Vector3D[] normals,
 	    int ringRotation, Triangle[] dest, int destOffset) {
 	final Vertex[] vertices = new Vertex[] {
@@ -285,14 +285,14 @@ public class Triangle {
     }
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode renderMode, Vector3D[] normals, int ringRotation) {
 	return quad2Triangles(x, y, z, u, v, texture, renderMode, normals,
 		ringRotation, new Triangle[2], 0);
     }
 
     public static Triangle[] quad2Triangles(double[] x, double[] y, double[] z,
-	    double[] u, double[] v, TextureDescription texture,
+	    double[] u, double[] v, Texture texture,
 	    RenderMode renderMode, Vector3D centroidNormal, String debugName) {
 	return quad2Triangles(x, y, z, u, v, texture, renderMode, false,
 		centroidNormal, new Triangle[2], 0, debugName);

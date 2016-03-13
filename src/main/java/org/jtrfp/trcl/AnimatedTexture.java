@@ -17,9 +17,9 @@ import java.awt.Color;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 
-public class AnimatedTexture implements TextureDescription {
+public class AnimatedTexture implements Texture {
     private VQTexture[]  frames;
     private Controller textureSequencer;
     private final TextureBehavior.Support tbs = new TextureBehavior.Support();

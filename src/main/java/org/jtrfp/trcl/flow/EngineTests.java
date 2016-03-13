@@ -16,7 +16,7 @@ import java.io.InputStream;
 
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -28,7 +28,7 @@ public class EngineTests {
     }
     public static void singlet(TR tr, int numInstances) {
 	try{
-	final TextureDescription test = tr.getResourceManager().getTestTexture();
+	final Texture test = tr.getResourceManager().getTestTexture();
 	preClean(tr);
 	final int sideLen = (int)Math.ceil(Math.sqrt(numInstances));
 	final double diameter = 2./(double)sideLen;
@@ -47,7 +47,7 @@ public class EngineTests {
 	preClean(tr);
 	InputStream is = null;
 	try{
-	 final TextureDescription test = tr.gpu.get().textureManager.get().newTexture(
+	 final Texture test = tr.gpu.get().textureManager.get().newTexture(
 		    VQTexture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
 	 final int NUM_LAYERS=8;
 	 final double INCREMENT = .1;

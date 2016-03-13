@@ -21,7 +21,7 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 
-public class PortalTexture implements TextureDescription {
+public class PortalTexture implements Texture {
     private int                       portalFramebufferNumber;
     private final ArrayList<Integer>  relevantVertexIndices = new ArrayList<Integer>();
     private TriangleVertexWindow      triangleVertexWindow;

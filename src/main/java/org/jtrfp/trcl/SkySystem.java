@@ -20,7 +20,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.ColorUtils;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
@@ -30,7 +30,7 @@ import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class SkySystem extends RenderableSpacePartitioningGrid {
     double 		ceilingHeight;
-    TextureDescription 	cloudTexture;
+    Texture 	cloudTexture;
     double 		cloudTileSideSize;
     int 		gridSideSizeInTiles;
     private final TR 	tr;

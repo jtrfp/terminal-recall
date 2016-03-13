@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 
 public interface TextureMesh {
     /**
@@ -25,5 +25,5 @@ public interface TextureMesh {
      * @return
      * @since Oct 14, 2012
      */
-    public TextureDescription textureAt(double x, double z);
+    public Texture textureAt(double x, double z);
 }

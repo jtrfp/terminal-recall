@@ -32,7 +32,7 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.PortalEntrance;
@@ -233,7 +233,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					add(entrance);
 				    }//end if(tunnel)
 				    
-				    TextureDescription td = (TextureDescription) (points
+				    Texture td = (Texture) (points
 					    .containsKey(tpi) ? points.get(tpi)
 					    .getTexture() : textureMesh.textureAt(cX,
 					    cZ));
@@ -333,7 +333,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    // Ceiling texture cell X (Z in this engine) value
 				    // is offset by 10.
 				    // No tunnelpoints on ceiling
-				    TextureDescription td = (TextureDescription) (textureMesh
+				    Texture td = (Texture) (textureMesh
 					    .textureAt(cX, cZ + 10));
 									 // features.
 				    Triangle[] tris = Triangle.quad2Triangles(
@@ -381,7 +381,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 
     private class TunnelPoint{
 	final int x,z;
-	TextureDescription textureToInsert;
+	Texture textureToInsert;
 
 	public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
 	    try{final String texFile = entrance?tun.getEntranceTerrainTextureFile():tun.getExitTerrainTextureFile();
@@ -391,7 +391,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    x = (int)TR.legacy2MapSquare(v.getZ());
 	    z = (int)TR.legacy2MapSquare(v.getX());
 	}
-	public TextureDescription getTexture(){return textureToInsert;}
+	public Texture getTexture(){return textureToInsert;}
 
 	@Override
 	public boolean equals(Object other){

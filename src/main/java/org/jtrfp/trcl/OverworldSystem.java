@@ -23,7 +23,7 @@ import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -59,7 +59,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	try {
 	    final World w = tr.getWorld();
 	    Color[] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
-	    TextureDescription[] texturePalette = tr
+	    Texture[] texturePalette = tr
 		    .getResourceManager().getTextures(
 			    lvl.getLevelTextureListFile(), new ColorPaletteVectorList(globalPalette),null,false);
 	    System.out.println("Loading height map...");

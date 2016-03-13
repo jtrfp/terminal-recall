@@ -15,12 +15,12 @@ package org.jtrfp.trcl;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.gpu.BasicModelTarget;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.BasicModelTarget.WriterState;
 
 public abstract class LineSegment {
     public static Triangle[] buildTriPipe(Vector3D start, Vector3D end,
-	    TextureDescription texture, int thickness, Triangle[] dest,
+	    Texture texture, int thickness, Triangle[] dest,
 	    int destOffset) {
 	Rotation rot = new Rotation(Vector3D.PLUS_K, end.subtract(start)
 		.normalize());

@@ -24,7 +24,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
@@ -62,7 +62,7 @@ private static final int BACKGROUND_INDEX = 10;
 	return backgroundColor;
     }//end getBackgroundColor()
     
-    private static TextureDescription getTexture(TR tr){
+    private static Texture getTexture(TR tr){
 	try{
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
 		tr.getGlobalPaletteVL(),null,false);}

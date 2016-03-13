@@ -50,7 +50,7 @@ import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
 
-public class VQTexture implements TextureDescription {
+public class VQTexture implements Texture {
     private final ThreadManager         threadManager;
     private final TextureManager 	tm ;
     private final VQCodebookManager 	cbm;

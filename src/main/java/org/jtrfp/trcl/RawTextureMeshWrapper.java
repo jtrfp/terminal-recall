@@ -13,23 +13,23 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.file.CLRFile;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 
 public class RawTextureMeshWrapper implements TextureMesh {
     private static final int WIDTH = 256;
     CLRFile file;
-    TextureDescription[] palette;
+    Texture[] palette;
 
     // Texture [][] textures = new Texture[WIDTH][WIDTH];
 
     public RawTextureMeshWrapper(CLRFile f,
-	    TextureDescription[] texturePalette) {
+	    Texture[] texturePalette) {
 	file = f;
 	palette = texturePalette;
     }
 
     @Override
-    public TextureDescription textureAt(double x, double z) {
+    public Texture textureAt(double x, double z) {
 	if (x < 0)
 	    x += WIDTH;
 	if (z < 0)

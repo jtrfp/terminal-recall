@@ -19,7 +19,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -49,7 +49,7 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
 	    }
     }//end BackdropSprite(...)
     
-    private static TextureDescription [] genTexture(String resourceName, TR tr) throws IllegalAccessException, IOException, FileLoadException{
+    private static Texture [] genTexture(String resourceName, TR tr) throws IllegalAccessException, IOException, FileLoadException{
 	final ResourceManager rm = tr.getResourceManager();
 	return rm.getSpecialRAWAsTextures(resourceName, rm.getPalette("VGA.ACT"), tr.gpu.get().getGl(), 1, true);
     }//end genTexture

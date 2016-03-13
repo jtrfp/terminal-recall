@@ -41,7 +41,7 @@ public class TextureManager {
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
     public final TRFutureTask<VQCodebookManager>vqCodebookManager;
-    private TextureDescription			fallbackTexture;
+    private Texture			fallbackTexture;
     private final ConcurrentHashMap<Integer,VQTexture>
     						colorCache = new ConcurrentHashMap<Integer,VQTexture>();
     public TextureManager(final GPU gpu, Reporter reporter, ThreadManager threadManager, final UncaughtExceptionHandler exceptionHandler){
@@ -66,9 +66,9 @@ public class TextureManager {
 	return subTextureWindow;
     }
     
-    private TextureDescription defaultTriPipeTexture;
+    private Texture defaultTriPipeTexture;
     
-    public TextureDescription getDefaultTriPipeTexture(){
+    public Texture getDefaultTriPipeTexture(){
 	if(defaultTriPipeTexture==null){
 	    InputStream is=null;
 	 try{
@@ -82,7 +82,7 @@ public class TextureManager {
 	return defaultTriPipeTexture;
     }//end getDefaultTriPipeTexture()
     
-    public synchronized TextureDescription getFallbackTexture(){
+    public synchronized Texture getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
 	VQTexture t;
 	InputStream is=null;
@@ -97,7 +97,7 @@ public class TextureManager {
 	return fallbackTexture;
     }//end getFallbackTexture()
     
-    public synchronized TextureDescription solidColor(Color color) {
+    public synchronized Texture solidColor(Color color) {
 	final int	key 	= color.hashCode();
 	VQTexture		result 	= colorCache.get(key);
 	if(result!=null)

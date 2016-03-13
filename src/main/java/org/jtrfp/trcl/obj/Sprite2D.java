@@ -17,12 +17,12 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 
 public class Sprite2D extends WorldObject2DVisibleEverywhere {
-    private final TextureDescription texture;
+    private final Texture texture;
 
-    public Sprite2D(TR tr, double z, double width, double height, TextureDescription tex, boolean useAlpha,String debugName) {
+    public Sprite2D(TR tr, double z, double width, double height, Texture tex, boolean useAlpha,String debugName) {
 	super(tr);
 	if(tex==null)
 	    throw new NullPointerException("Supplied texture intolerably null.");
@@ -41,7 +41,7 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
 	setVisible(true);
     }//end constructor
     
-    public Sprite2D(TR tr, double z, double width, double height, TextureDescription [] tex, boolean useAlpha,String debugName){
+    public Sprite2D(TR tr, double z, double width, double height, Texture [] tex, boolean useAlpha,String debugName){
 	super(tr);
 	if(tex==null)
 	    throw new NullPointerException("Supplied texture intolerably null.");
@@ -71,7 +71,7 @@ public class Sprite2D extends WorldObject2DVisibleEverywhere {
     /**
      * @return the texture
      */
-    public TextureDescription getTexture() {
+    public Texture getTexture() {
         return texture;
     }
 }//end Sprite2D

@@ -43,7 +43,7 @@ import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.obj.BarrierCube;
@@ -140,7 +140,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	ResourceManager rm = tr.getResourceManager();
 	LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
 	final ColorPaletteVectorList tunnelColorPalette = new ColorPaletteVectorList(tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile()));
-	TextureDescription[] tunnelTexturePalette = rm.getTextures(
+	Texture[] tunnelTexturePalette = rm.getTextures(
 		tlvl.getLevelTextureListFile(), paletteVL, ESTuTvPalette, true);
 	TNLFile tun = tr.getResourceManager().getTNLData(
 		tlvl.getHeightMapOrTunnelFile());
@@ -214,7 +214,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
      */
 
     private void installObstacles(Segment s, ColorPaletteVectorList tunnelColorPalette, ColorPaletteVectorList ESTuTvPalette,
-	    TextureDescription[] tunnelTexturePalette, Vector3D heading,
+	    Texture[] tunnelTexturePalette, Vector3D heading,
 	    Vector3D top, Vector3D wPos, double width, double height, TR tr)
 	    throws IllegalAccessException, FileLoadException, IOException {
 	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();

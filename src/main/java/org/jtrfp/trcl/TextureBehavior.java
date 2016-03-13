@@ -17,17 +17,17 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 
 public interface TextureBehavior {
  public void apply(TriangleList triangleList, int gpuTVIndex, int numFrames, Triangle thisTriangle, Vector3D pos, TriangleVertexWindow vw);
- public void init(TextureDescription parent);
+ public void init(Texture parent);
  public static abstract class Abstract implements TextureBehavior{
-	 private TextureDescription parent;
-	 public void init(TextureDescription parent){
+	 private Texture parent;
+	 public void init(Texture parent){
 	     this.parent=parent;
 	 }//end init()
-	 protected TextureDescription getParent(){
+	 protected Texture getParent(){
 	     return parent;
 	 }
  }//end Abstract

@@ -29,20 +29,20 @@ public interface BasicModelTarget {
     
     public static class WriterState{
 	private final int []       vertices = new int[3];
-	private TextureDescription texture;
+	private Texture texture;
 	private PrimitiveType      primitiveType;
 
 	/**
 	 * @return the texture
 	 */
-	public TextureDescription getTexture() {
+	public Texture getTexture() {
 	    return texture;
 	}
 
 	/**
 	 * @param texture the texture to set
 	 */
-	public void setTexture(TextureDescription texture) {
+	public void setTexture(Texture texture) {
 	    this.texture = texture;
 	}
 

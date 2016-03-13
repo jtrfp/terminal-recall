@@ -20,7 +20,7 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RedFlashFactory implements FeatureFactory<TVF3Game>{
     private final TR tr;
-    private TextureDescription texture; 
+    private Texture texture; 
     
     @Autowired
     public RedFlashFactory(TR tr){
@@ -37,7 +37,7 @@ public class RedFlashFactory implements FeatureFactory<TVF3Game>{
 	getRedTexture(tr);
     }//end constructor
     
-    private TextureDescription getRedTexture(TR tr){
+    private Texture getRedTexture(TR tr){
 	if(texture==null){
 	    final TextureManager tm = tr.gpu.get().textureManager.get();
 	    return new SelectableTexture(

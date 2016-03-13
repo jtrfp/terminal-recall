@@ -20,7 +20,7 @@ import javax.imageio.ImageIO;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gpu.TextureDescription;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.math.Vect3D;
 
@@ -67,7 +67,7 @@ public class NAVRadarBlipFactory {
     }//end BlipType
     
     private class Blip extends Sprite2D{
-	public Blip(TextureDescription tex, RenderableSpacePartitioningGrid g, String debugName) {
+	public Blip(Texture tex, RenderableSpacePartitioningGrid g, String debugName) {
 	    super(tr,-1,.04,.04,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    g.add(this);

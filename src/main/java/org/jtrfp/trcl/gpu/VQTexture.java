@@ -50,7 +50,7 @@ import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
 
-public class Texture implements TextureDescription {
+public class VQTexture implements TextureDescription {
     private final ThreadManager         threadManager;
     private final TextureManager 	tm ;
     private final VQCodebookManager 	cbm;
@@ -68,7 +68,7 @@ public class Texture implements TextureDescription {
     private final GPU                   gpu;
     private final GPUResourceFinalizer  gpuResourceFinalizer;
     
-    public Texture(GPU gpu, ThreadManager threadManager, Color c){
+    public VQTexture(GPU gpu, ThreadManager threadManager, Color c){
 	this(gpu,threadManager,new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false);
     }//end constructor
     
@@ -136,7 +136,7 @@ public class Texture implements TextureDescription {
 	    }};
     }//end colorVL(...)
     
-    private Texture(GPU gpu, ThreadManager threadManager, String debugName, boolean uvWrapping){
+    private VQTexture(GPU gpu, ThreadManager threadManager, String debugName, boolean uvWrapping){
 	this.threadManager=threadManager;
 	this.tm		  =gpu.textureManager.get();
 	this.cbm	  =tm.vqCodebookManager.get();
@@ -148,12 +148,12 @@ public class Texture implements TextureDescription {
 	this.gpuResourceFinalizer = gpu.getGPUResourceFinalizer();
     }//end constructor
     
-    public Texture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
+    public VQTexture(GPU gpu, ThreadManager threadManager, PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
 	this(gpu,threadManager,debugName,uvWrapping);
 	assemble(vlRGBA,vlESTuTv);
     }//end constructor
 
-    Texture(GPU gpu, ThreadManager threadManager, ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, boolean uvWrapping) {
+    VQTexture(GPU gpu, ThreadManager threadManager, ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, boolean uvWrapping) {
 	this(gpu,threadManager,debugName,uvWrapping);
 	if (imageRGBA8888.capacity() == 0) {
 	    throw new IllegalArgumentException(
@@ -309,7 +309,7 @@ public class Texture implements TextureDescription {
 		    registerRGBAToBlock256(globalCodeIndex, rw);
 		} catch (ArrayIndexOutOfBoundsException e) {
 		    throw new RuntimeException("this="
-			    + Texture.this.toString(), e);
+			    + VQTexture.this.toString(), e);
 		}//end catch(ArrayIndexOutOfBoundsException)
 	    }// end setCodebookTexelsAt
 	    
@@ -321,7 +321,7 @@ public class Texture implements TextureDescription {
 		    registerESTuTvToBlock256(globalCodeIndex, rw);
 		} catch (ArrayIndexOutOfBoundsException e) {
 		    throw new RuntimeException("this="
-			    + Texture.this.toString(), e);
+			    + VQTexture.this.toString(), e);
 		}//end catch(ArrayIndexOutOfBoundsException)
 	    }// end setCodebookTexelsAt
 	    
@@ -417,7 +417,7 @@ public class Texture implements TextureDescription {
 	    }averageColor = new Color(redA/10f,greenA/10f,blueA/10f);
     }//end calculateAverageColor(...)
 
-    public Texture(GPU gpu, ThreadManager threadManager, BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
+    public VQTexture(GPU gpu, ThreadManager threadManager, BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
 	this(gpu,threadManager,debugName,uvWrapping);
 	try{
 	    assemble(new BufferedImageRGBA8888VL(imgRGBA),

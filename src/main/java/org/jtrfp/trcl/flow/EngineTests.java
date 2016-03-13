@@ -15,7 +15,7 @@ package org.jtrfp.trcl.flow;
 import java.io.InputStream;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -48,7 +48,7 @@ public class EngineTests {
 	InputStream is = null;
 	try{
 	 final TextureDescription test = tr.gpu.get().textureManager.get().newTexture(
-		    Texture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
+		    VQTexture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
 	 final int NUM_LAYERS=8;
 	 final double INCREMENT = .1;
 	 final double OFF=-.5;

@@ -12,10 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 
 public class SelectableTexture extends AnimatedTexture{
-	public SelectableTexture(Texture[] frames)
+	public SelectableTexture(VQTexture[] frames)
 		{super(new Selector(), frames);}
 	
 	public void setFrame(int frame){((Selector)getTextureSequencer()).set(frame);}

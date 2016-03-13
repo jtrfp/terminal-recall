@@ -30,7 +30,7 @@ import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
@@ -80,13 +80,13 @@ public class ProjectileFactory {
     	}//end if(isLaser)
    	 else if(modelingType instanceof ModelingType.BillboardModelingType){
    	     final ModelingType.BillboardModelingType mt = (ModelingType.BillboardModelingType)modelingType;
-   	     final Texture [] frames = new Texture[mt.getRawFileNames().length];
+   	     final VQTexture [] frames = new VQTexture[mt.getRawFileNames().length];
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
    	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
    	     GL3 gl = tr.gpu.get().getGl();
    	     for(int i=0; i<frames.length;i++){
-   		 frames[i]=(Texture)mgr.getRAWAsTexture(fileNames[i], pal, null, false);
+   		 frames[i]=(VQTexture)mgr.getRAWAsTexture(fileNames[i], pal, null, false);
    	     }//end for(frames)
    	  TextureDescription tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){

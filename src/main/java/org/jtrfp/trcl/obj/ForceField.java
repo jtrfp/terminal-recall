@@ -26,7 +26,7 @@ import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.PlayerCollisionListener;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
@@ -36,11 +36,11 @@ public class ForceField extends WorldObject {
     public ForceField(TR tr, int tunnelDia, int wallThickness) throws IOException, FileLoadException, IllegalAccessException {
 	super(tr);
 	final TextureDescription eTex = new AnimatedTexture(new Sequencer(100, 4, false).setTimeOffset((long)(Math.random()*500)), 
-		    new Texture[]{
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(),null, false),
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI1.RAW", tr.getDarkIsClearPaletteVL(),null, false),
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(),null, false),
-		    (Texture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(),null, false)}
+		    new VQTexture[]{
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(),null, false),
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI1.RAW", tr.getDarkIsClearPaletteVL(),null, false),
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(),null, false),
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(),null, false)}
 		    );
 	    setModel(Model.buildCube(tunnelDia, tunnelDia, wallThickness,
 		    eTex,

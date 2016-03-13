@@ -19,7 +19,7 @@ import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.math.Vect3D;
@@ -41,7 +41,7 @@ public class NAVRadarBlipFactory {
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
 	    try{
-	     final Texture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
+	     final VQTexture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		blipPool[ti][pi]=new Blip(tex,g,debugName);
     	     }//end for(pi)

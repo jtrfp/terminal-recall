@@ -13,14 +13,14 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TriangleVertexWindow;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 
 public class TexturePageAnimator implements Tickable{
     private final TriangleVertexWindow 	vertexWindow;
     private final int 			gpuTVIndex;
     private 	  String 		debugName = "[not set]";
     private final Controller		controller;
-    private final Texture[]		frames;
+    private final VQTexture[]		frames;
     
     public TexturePageAnimator(AnimatedTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
 	this.vertexWindow	=vw;

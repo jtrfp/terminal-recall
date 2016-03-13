@@ -97,7 +97,7 @@ import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
@@ -278,7 +278,7 @@ public class ResourceManager{
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new TextureDescription[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new Texture(tr.gpu.get(),tr.getThreadManager(),segs[si],null,"name",uvWrapping);}
+				{result[si] = new VQTexture(tr.gpu.get(),tr.getThreadManager(),segs[si],null,"name",uvWrapping);}
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
@@ -313,16 +313,16 @@ public class ResourceManager{
 						newName=name.substring(0,name.length()-5)+""+frameNumber+".RAW";
 						}
 					if(frames.size()>1){
-						Texture [] tFrames = new Texture[frames.size()];
+						VQTexture [] tFrames = new VQTexture[frames.size()];
 						for(int i=0; i<tFrames.length;i++){
 						    PalettedVectorList pvlRGBA  = getRAWVectorList(frames.get(i),paletteRGBA);
 						    PalettedVectorList pvlESTuTv= getRAWVectorList(frames.get(i),paletteESTuTv);
-						    tFrames[i]=new Texture(tr.gpu.get(),tr.getThreadManager(),pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping);}
+						    tFrames[i]=new VQTexture(tr.gpu.get(),tr.getThreadManager(),pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new Texture(tr.gpu.get(),tr.getThreadManager(),getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping);
+				result = new VQTexture(tr.gpu.get(),tr.getThreadManager(),getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
@@ -562,10 +562,10 @@ public class ResourceManager{
 						AnimatedTextureBlock block = (AnimatedTextureBlock)b;
 						List<String> frames = block.getFrameNames();
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
-						Texture [] subTextures = new Texture[frames.size()];
+						VQTexture [] subTextures = new VQTexture[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							if(!hasAlpha)subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
-							else subTextures[ti]=(Texture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);
+							if(!hasAlpha)subTextures[ti]=(VQTexture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
+							else subTextures[ti]=(VQTexture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);
 							//subTextures[ti]=tex instanceof Texture?new DummyTRFutureTask<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							}//end for(frames) //fDelay, nFrames,interp
 						currentTexture = new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures);
@@ -843,7 +843,7 @@ public class ResourceManager{
 		return testTexture;
 	    InputStream is = null;
 	    try{return testTexture = tr.gpu.get().textureManager.get().newTexture(
-		    Texture.RGBA8FromPNG(is = this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);}
+		    VQTexture.RGBA8FromPNG(is = this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);}
 	    finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	}//end getTestTexture()
 	

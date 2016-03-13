@@ -19,7 +19,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.obj.Sprite2D;
@@ -41,13 +41,13 @@ public class RedFlashFactory implements FeatureFactory<TVF3Game>{
 	if(texture==null){
 	    final TextureManager tm = tr.gpu.get().textureManager.get();
 	    return new SelectableTexture(
-		    new Texture[]{
-			    (Texture)tm.solidColor(new Color(255,0,0,255)),
-			    (Texture)tm.solidColor(new Color(255,0,0,200)),
-			    (Texture)tm.solidColor(new Color(255,0,0,155)),
-			    (Texture)tm.solidColor(new Color(255,0,0,100)),
-			    (Texture)tm.solidColor(new Color(255,0,0,55)),
-			    (Texture)tm.solidColor(new Color(255,0,0,1))}
+		    new VQTexture[]{
+			    (VQTexture)tm.solidColor(new Color(255,0,0,255)),
+			    (VQTexture)tm.solidColor(new Color(255,0,0,200)),
+			    (VQTexture)tm.solidColor(new Color(255,0,0,155)),
+			    (VQTexture)tm.solidColor(new Color(255,0,0,100)),
+			    (VQTexture)tm.solidColor(new Color(255,0,0,55)),
+			    (VQTexture)tm.solidColor(new Color(255,0,0,1))}
 		    );
 	}return texture;
     }//end genTexture(...)

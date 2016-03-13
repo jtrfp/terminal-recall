@@ -26,7 +26,7 @@ import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.miss.Mission;
@@ -45,9 +45,9 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	// Fallback
 	final int NUM_FRAMES = 16;
 	final double LUM_STEP = 200./NUM_FRAMES;
-	Texture[] greenThrobFrames = new Texture[NUM_FRAMES];
+	VQTexture[] greenThrobFrames = new VQTexture[NUM_FRAMES];
 	for (int f = 0; f < NUM_FRAMES; f++) {
-	    greenThrobFrames[f] = greenThrobFrames[(NUM_FRAMES-1) - f] = (Texture) tm
+	    greenThrobFrames[f] = greenThrobFrames[(NUM_FRAMES-1) - f] = (VQTexture) tm
 		    .solidColor(new Color(
 			    (int)(f * LUM_STEP * .8), 
 			    (int)(f * LUM_STEP), 

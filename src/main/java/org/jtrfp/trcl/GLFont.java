@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 
 public class GLFont{
-	private final 		Texture[] textures;
+	private final 		VQTexture[] textures;
 	private double 		maxAdvance=-1;
 	private final int [] 	widths = new int[256];
 	private final double [] glWidths=new double[256];
@@ -35,7 +35,7 @@ public class GLFont{
 	private final TR	tr;
 	
 	public GLFont(ByteBuffer []indexedPixels, Color [] palette, int imgHeight, List<Integer> widths, int asciiOffset, TR tr){
-	    this(Texture.indexed2RGBA8888(indexedPixels,palette),imgHeight,widths,asciiOffset,tr);
+	    this(VQTexture.indexed2RGBA8888(indexedPixels,palette),imgHeight,widths,asciiOffset,tr);
 	}
 	
 	public GLFont(ByteBuffer []rgba8888, int imgHeight, List<Integer> widths, int asciiOffset, TR tr){
@@ -50,8 +50,8 @@ public class GLFont{
 	    //Scale maxDim up to next power of 2 and use as sideLength
 	    sideLength = (int)Math.pow(2, Math.ceil(Math.log(maxDim)/Math.log(2)));
 	    maxAdvance=imgHeight;
-	    textures = new Texture[256];
-	Texture empty = (tr
+	    textures = new VQTexture[256];
+	VQTexture empty = (tr
 		.gpu.get()
 		.textureManager.get()
 		.newTexture(
@@ -90,15 +90,15 @@ public class GLFont{
 	    	sideLength=64;
 		final Font font=realFont.deriveFont((float)sideLength)/*.deriveFont(Font.BOLD)*/;
 		//Generate the textures
-		textures = new Texture[256];
-		Texture empty=renderToTexture(' ',realFont);
+		textures = new VQTexture[256];
+		VQTexture empty=renderToTexture(' ',realFont);
 		for(int c=0; c<256; c++)
 			{textures[c]=realFont.canDisplay(c)?renderToTexture(c,font):empty;}
 		}//end constructor
-	public Texture[] getTextures()
+	public VQTexture[] getTextures()
 		{return textures;}
 	
-	private Texture renderToTexture(int c, Font font){
+	private VQTexture renderToTexture(int c, Font font){
 		BufferedImage img = new BufferedImage(sideLength, sideLength, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g=img.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);

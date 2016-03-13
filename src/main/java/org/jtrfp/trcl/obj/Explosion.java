@@ -19,7 +19,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 
 public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;
@@ -39,7 +39,7 @@ public class Explosion extends OneShotBillboardEvent {
 	else
 	    setRotationDelegate(new UpAlwaysCameraTopDelegate(tr.mainRenderer.get().getCamera()));
 	String [] aniFiles = type.getAnimationFiles();
-	Texture [] frames = new Texture[aniFiles.length];
+	VQTexture [] frames = new VQTexture[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){
 	        frames[i]=frame(aniFiles[i]);
 	    }
@@ -143,9 +143,9 @@ public class Explosion extends OneShotBillboardEvent {
 	}
     }//end ExplosionType
 
-    private Texture frame(String name) throws IllegalAccessException,
+    private VQTexture frame(String name) throws IllegalAccessException,
 	    IOException, FileLoadException {
-	return (Texture) getTr().getResourceManager().getRAWAsTexture(name,
+	return (VQTexture) getTr().getResourceManager().getRAWAsTexture(name,
 		getTr().getDarkIsClearPaletteVL(),null,
 		false);
     }

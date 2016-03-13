@@ -16,15 +16,15 @@ import java.awt.Color;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 
 public class AnimatedTexture implements TextureDescription {
-    private Texture[]  frames;
+    private VQTexture[]  frames;
     private Controller textureSequencer;
     private final TextureBehavior.Support tbs = new TextureBehavior.Support();
 
-    public AnimatedTexture(Controller textureSequencer, Texture[] frames2) {
+    public AnimatedTexture(Controller textureSequencer, VQTexture[] frames2) {
 	this.frames 	      = frames2;
 	this.textureSequencer = textureSequencer;
     }//end constructor
@@ -32,7 +32,7 @@ public class AnimatedTexture implements TextureDescription {
     /**
      * @return the frames
      */
-    public Texture[] getFrames() {
+    public VQTexture[] getFrames() {
 	return frames;
     }//end getFrames()
 
@@ -40,7 +40,7 @@ public class AnimatedTexture implements TextureDescription {
      * @param frames
      *            the frames to set
      */
-    public void setFrames(Texture[] frames) {
+    public void setFrames(VQTexture[] frames) {
 	this.frames = frames;
     }//end setFrames()
 

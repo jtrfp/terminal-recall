@@ -221,10 +221,10 @@ public class BINFileExtractor {
 				    AnimatedTextureBlock block = (AnimatedTextureBlock)b;
 					List<String> frames = block.getFrameNames();
 					double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
-					Texture [] subTextures = new Texture[frames.size()];
+					VQTexture [] subTextures = new VQTexture[frames.size()];
 					for(int ti=0; ti<frames.size(); ti++){
-						try{if(!hasAlpha)subTextures[ti]=(Texture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
-						else subTextures[ti]=(Texture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);}catch(Exception e){e.printStackTrace();}
+						try{if(!hasAlpha)subTextures[ti]=(VQTexture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
+						else subTextures[ti]=(VQTexture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);}catch(Exception e){e.printStackTrace();}
 						}//end for(frames) //fDelay, nFrames,interp
 					triangleData.setTexture(new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures));
 				}else{triangleData.setTexture(defaultTexture);}

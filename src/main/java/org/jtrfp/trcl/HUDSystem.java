@@ -19,7 +19,7 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.obj.MeterBar;
@@ -80,7 +80,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	InputStream is = null;
 	add(crosshairs=new Crosshairs(tr));
 	try{add(healthMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = Texture.class
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),null,
 			"HealthBar orangeOrange",false), METER_WIDTH, layout.getShieldBarLength(),
 		layout.isShieldHorizontal(), "HUDSystem"));}
@@ -91,7 +91,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	healthMeter = healthMeterBar.getController();
 	
 	try{add(throttleMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(Texture.RGBA8FromPNG(is = Texture.class
+		tr.gpu.get().textureManager.get().newTexture(VQTexture.RGBA8FromPNG(is = VQTexture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),null,
 			"ThrottleBar blackBlue",false), -METER_WIDTH, layout.getThrottleBarLength(),
 		layout.isThrottleHorizontal(), "HUDSystem"));}

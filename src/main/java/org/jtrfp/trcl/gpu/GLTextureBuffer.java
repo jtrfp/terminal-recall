@@ -42,7 +42,7 @@ public class GLTextureBuffer extends RawGLBuffer {
 	super(roundToNextKB(sizeInBytes), gpu);
 	// Allocate a texture id
 	final GL3 gl = gpu.getGl();
-	textureID = Texture.createTextureID(gl);
+	textureID = VQTexture.createTextureID(gl);
 	this.gpu=gpu;
 	gl.glBindTexture(getBindingTarget(), getTextureID());
 	gl.glTexBuffer(getBindingTarget(), GL2.GL_RGBA32UI, this.getBufferID());

@@ -24,7 +24,7 @@ import org.jtrfp.trcl.core.WindowAnimator;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.TextureDescription;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
@@ -175,8 +175,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    //vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    //vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    //vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
-	} if (td instanceof Texture ) {// Static texture
-	    final int sideScalar = ((Texture)td).getSideLength()-1;
+	} if (td instanceof VQTexture ) {// Static texture
+	    final int sideScalar = ((VQTexture)td).getSideLength()-1;
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
@@ -197,7 +197,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		vw.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
 		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
-	    final int textureID = ((Texture)td).getTexturePage();
+	    final int textureID = ((VQTexture)td).getTexturePage();
 	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));

@@ -19,7 +19,7 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.obj.MeterBar;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
@@ -34,7 +34,7 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
 	super();
 	InputStream is = null;
 	try{add(loadingMeterBar = new MeterBar(tr, 
-		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = Texture.class
+		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/BlueWhiteGradient.png")),null,
 			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,
 		true, "LevelLoadingScreen"));}

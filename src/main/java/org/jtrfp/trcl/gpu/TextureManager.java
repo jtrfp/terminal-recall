@@ -42,8 +42,8 @@ public class TextureManager {
     private final TextureTOCWindow 		tocWindow;
     public final TRFutureTask<VQCodebookManager>vqCodebookManager;
     private TextureDescription			fallbackTexture;
-    private final ConcurrentHashMap<Integer,Texture>
-    						colorCache = new ConcurrentHashMap<Integer,Texture>();
+    private final ConcurrentHashMap<Integer,VQTexture>
+    						colorCache = new ConcurrentHashMap<Integer,VQTexture>();
     public TextureManager(final GPU gpu, Reporter reporter, ThreadManager threadManager, final UncaughtExceptionHandler exceptionHandler){
 	this.gpu                = gpu;
 	this.threadManager      = threadManager;
@@ -56,11 +56,11 @@ public class TextureManager {
 	    }});
     }//end constructor
     
-    public Texture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping){
-	return new Texture(gpu,threadManager,imageRGB8,imageESTuTv,debugName, uvWrapping);
+    public VQTexture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping){
+	return new VQTexture(gpu,threadManager,imageRGB8,imageESTuTv,debugName, uvWrapping);
     }
-    public Texture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping){
-	return new Texture(gpu,threadManager,imgRGBA,imgESTuTv,debugName,uvWrapping);
+    public VQTexture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping){
+	return new VQTexture(gpu,threadManager,imgRGBA,imgESTuTv,debugName,uvWrapping);
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;
@@ -73,7 +73,7 @@ public class TextureManager {
 	    InputStream is=null;
 	 try{
 	  defaultTriPipeTexture = 
-	    		new Texture(gpu,threadManager,ImageIO.read(is = LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
+	    		new VQTexture(gpu,threadManager,ImageIO.read(is = LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
 	    			"Default TriPipe Texture (grayNoise)",true);}
 	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
 	finally{if(is!=null)
@@ -84,11 +84,11 @@ public class TextureManager {
     
     public synchronized TextureDescription getFallbackTexture(){
 	if(fallbackTexture!=null)return fallbackTexture;
-	Texture t;
+	VQTexture t;
 	InputStream is=null;
 	try{
-	 t = new Texture(gpu,threadManager,
-		ImageIO.read(is = Texture.class
+	 t = new VQTexture(gpu,threadManager,
+		ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/fallbackTexture.png")),null,
 		"Fallback",true);}
 	catch(IOException e){throw new RuntimeException("Failure to load fallback texture. Is everything right with the resources directory?",e);}
@@ -99,10 +99,10 @@ public class TextureManager {
     
     public synchronized TextureDescription solidColor(Color color) {
 	final int	key 	= color.hashCode();
-	Texture		result 	= colorCache.get(key);
+	VQTexture		result 	= colorCache.get(key);
 	if(result!=null)
 	    return result;
-	result = new Texture(gpu,threadManager,color);
+	result = new VQTexture(gpu,threadManager,color);
 	colorCache.put(key,result);
 	return result;
     }//end solidColor(...)

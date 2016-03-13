@@ -20,7 +20,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class Smoke extends OneShotBillboardEvent {
@@ -35,7 +35,7 @@ public class Smoke extends OneShotBillboardEvent {
 		if(type.isRandomRotate())
 		    del.setRotationAngleRadians(2*Math.PI*Math.random());
 		String [] aniFiles = type.getAnimationFiles();
-		Texture [] frames = new Texture[aniFiles.length];
+		VQTexture [] frames = new VQTexture[aniFiles.length];
 		try{for(int i=0; i<aniFiles.length;i++)
 		        frames[i]=frame(aniFiles[i]);
 		}catch(Exception e){e.printStackTrace();}
@@ -89,6 +89,6 @@ public class Smoke extends OneShotBillboardEvent {
 		}
 	    }//end SmokeType
 	    
-	    private Texture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (Texture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), null, false);}
+	    private VQTexture frame(String name) throws IllegalAccessException, IOException, FileLoadException
+		{return (VQTexture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), null, false);}
 }//end Smoke

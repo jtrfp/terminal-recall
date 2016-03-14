@@ -66,7 +66,7 @@ public class UncompressedVQTextureFactory {
     }//end newUncompressedVQTexture
     
     VQTexture newUncompressedVQTexture(String debugName){
-	return new VQTexture(gpu, threadManager, this.debugName+"."+debugName);
+	return new VQTexture(gpu, this.debugName+"."+debugName);
     }//end newUncompressedVQTexture()
     
  public VQTexture newUncompressedVQTexture(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength){

@@ -32,7 +32,6 @@ import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 
 public class VQTexture implements Texture {
-    private final ThreadManager         threadManager;
     private final TextureManager 	tm ;
     private final VQCodebookManager 	cbm;
     private       TextureTOCWindow 	tocWindow;
@@ -45,18 +44,13 @@ public class VQTexture implements Texture {
     private boolean	         	uvWrapping;
     private int				sideLength;
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
-    private final GPU                   gpu;
-    private final GPUResourceFinalizer  gpuResourceFinalizer;
     
-    VQTexture(GPU gpu, ThreadManager threadManager, String debugName){
-   	this.threadManager=threadManager;
+    VQTexture(GPU gpu, String debugName){
    	this.tm		  =gpu.textureManager.get();
    	this.cbm	  =tm.vqCodebookManager.get();
    	this.tocWindow	  =tm.getTOCWindow();
    	this.stw	  =tm.getSubTextureWindow();
    	this.debugName	  =debugName.replace('.', '_');
-   	this.gpu          =gpu;
-   	this.gpuResourceFinalizer = gpu.getGPUResourceFinalizer();
     }//end constructor
     
     @Override

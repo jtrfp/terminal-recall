@@ -44,6 +44,9 @@ public class TextureManager {
     private Texture			fallbackTexture;
     private final ConcurrentHashMap<Integer,VQTexture>
     						colorCache = new ConcurrentHashMap<Integer,VQTexture>();
+    private  SolidColorTextureFactory solidColorTextureFactory;
+    private  UncompressedVQTextureFactory uncompressedVQTextureFactory;
+    
     public TextureManager(final GPU gpu, Reporter reporter, ThreadManager threadManager, final UncaughtExceptionHandler exceptionHandler){
 	this.gpu                = gpu;
 	this.threadManager      = threadManager;
@@ -57,10 +60,10 @@ public class TextureManager {
     }//end constructor
     
     public VQTexture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping){
-	return new VQTexture(gpu,threadManager,imageRGB8,imageESTuTv,debugName, uvWrapping);
+	return getUncompressedVQTextureFactory().newUncompressedVQTexture(imageRGB8,imageESTuTv,debugName, uvWrapping);
     }
     public VQTexture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping){
-	return new VQTexture(gpu,threadManager,imgRGBA,imgESTuTv,debugName,uvWrapping);
+	return getUncompressedVQTextureFactory().newUncompressedVQTexture(imgRGBA,imgESTuTv,debugName,uvWrapping);
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;
@@ -73,7 +76,7 @@ public class TextureManager {
 	    InputStream is=null;
 	 try{
 	  defaultTriPipeTexture = 
-	    		new VQTexture(gpu,threadManager,ImageIO.read(is = LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
+		  newTexture(ImageIO.read(is = LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
 	    			"Default TriPipe Texture (grayNoise)",true);}
 	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
 	finally{if(is!=null)
@@ -87,7 +90,7 @@ public class TextureManager {
 	VQTexture t;
 	InputStream is=null;
 	try{
-	 t = new VQTexture(gpu,threadManager,
+	 t = newTexture(
 		ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/fallbackTexture.png")),null,
 		"Fallback",true);}
@@ -102,12 +105,34 @@ public class TextureManager {
 	VQTexture		result 	= colorCache.get(key);
 	if(result!=null)
 	    return result;
-	result = new VQTexture(gpu,threadManager,color);
+	result = getSolidColorTextureFactory().newSolidColorTexture(color);
 	colorCache.put(key,result);
 	return result;
     }//end solidColor(...)
     
     public TextureTOCWindow getTOCWindow(){
 	return tocWindow;
+    }
+
+    public SolidColorTextureFactory getSolidColorTextureFactory() {
+	if(solidColorTextureFactory == null)
+	    solidColorTextureFactory= new SolidColorTextureFactory(gpu, threadManager);//Temporary until they are fully separated
+        return solidColorTextureFactory;
+    }
+
+    public void setSolidColorTextureFactory(
+    	SolidColorTextureFactory solidColorTextureFactory) {
+        this.solidColorTextureFactory = solidColorTextureFactory;
+    }
+
+    public UncompressedVQTextureFactory getUncompressedVQTextureFactory() {
+	if(uncompressedVQTextureFactory == null)
+	    uncompressedVQTextureFactory= new UncompressedVQTextureFactory(gpu, threadManager, "TextureManager");
+        return uncompressedVQTextureFactory;
+    }
+
+    public void setUncompressedVQTextureFactory(
+    	UncompressedVQTextureFactory uncompressedVQTextureFactory) {
+        this.uncompressedVQTextureFactory = uncompressedVQTextureFactory;
     }
 }//end TextureSystem

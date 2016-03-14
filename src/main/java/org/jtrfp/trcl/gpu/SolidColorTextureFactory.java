@@ -20,8 +20,20 @@ import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.VectorList;
 
 public class SolidColorTextureFactory {
- public VQTexture newSolidColorTexture(GPU gpu, ThreadManager threadManager, Color c){
-     return new VQTexture(gpu,threadManager,new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false);
+    private final GPU gpu;
+    private final ThreadManager threadManager;
+    private final UncompressedVQTextureFactory vqtf;
+    
+    public SolidColorTextureFactory(GPU gpu, ThreadManager threadManager){
+	this.gpu = gpu;
+	this.threadManager = threadManager;
+	vqtf = new UncompressedVQTextureFactory(gpu, threadManager, "SolidColorTextureFactory");
+    }//end constructor
+    
+ public VQTexture newSolidColorTexture(Color c){
+     final VQTexture result = vqtf.newUncompressedVQTexture(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false); 
+     result.setAverageColor(c);
+     return result;
  }//end newSolidColorTexture
  
  private static VectorList colorZeroRasterVL(){

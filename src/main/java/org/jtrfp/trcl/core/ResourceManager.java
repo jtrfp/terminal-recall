@@ -97,8 +97,9 @@ import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.UncompressedVQTextureFactory;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RAWVectorList;
@@ -144,6 +145,7 @@ public class ResourceManager{
 	public final ObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
 	public final ObjectFactory<String,SoundTexture>	soundTextures;
 	private ConfigManager configManager;
+	private UncompressedVQTextureFactory uncompressedVQTextureFactory;
 	
 	public ResourceManager(final TR tr, ConfigManager configManager){
 	        this.configManager = configManager;
@@ -278,7 +280,7 @@ public class ResourceManager{
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new Texture[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = new VQTexture(tr.gpu.get(),tr.getThreadManager(),segs[si],null,"name",uvWrapping);}
+				{result[si] = getUncompressedVQTextureFactory().newUncompressedVQTexture(segs[si],null,"name",uvWrapping);}
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
@@ -299,8 +301,7 @@ public class ResourceManager{
 	    final int hash=name.hashCode()*paletteRGBA.hashCode();
 	        Texture result=rawCache.get(hash);
 	    	if(result!=null&&useCache)return result;
-			try {
-				if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
+			try {    if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
 					{//ends in number
 					System.out.println("RAW "+name+" ends in a zero. Testing if it is animated...");
 					ArrayList<String> frames = new ArrayList<String>();
@@ -317,12 +318,12 @@ public class ResourceManager{
 						for(int i=0; i<tFrames.length;i++){
 						    PalettedVectorList pvlRGBA  = getRAWVectorList(frames.get(i),paletteRGBA);
 						    PalettedVectorList pvlESTuTv= getRAWVectorList(frames.get(i),paletteESTuTv);
-						    tFrames[i]=new VQTexture(tr.gpu.get(),tr.getThreadManager(),pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping);}
+						    tFrames[i]=getUncompressedVQTextureFactory().newUncompressedVQTexture(pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = new VQTexture(tr.gpu.get(),tr.getThreadManager(),getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping);
+				result = getUncompressedVQTextureFactory().newUncompressedVQTexture(getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
@@ -856,5 +857,16 @@ public class ResourceManager{
 
 	public Texture solidColor(Color color) {
 	    return tr.gpu.get().textureManager.get().solidColor(color);
+	}
+
+	public UncompressedVQTextureFactory getUncompressedVQTextureFactory() {
+	    if(uncompressedVQTextureFactory == null)
+		setUncompressedVQTextureFactory(new UncompressedVQTextureFactory(tr.gpu.get(), tr.threadManager, "ResourceManager"));
+	    return uncompressedVQTextureFactory;
+	}
+
+	public void setUncompressedVQTextureFactory(
+		UncompressedVQTextureFactory uncompressedVQTextureFactory) {
+	    this.uncompressedVQTextureFactory = uncompressedVQTextureFactory;
 	}
 }//end ResourceManager

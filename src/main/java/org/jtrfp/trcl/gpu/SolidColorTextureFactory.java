@@ -14,10 +14,13 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.nio.ByteBuffer;
 
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.img.vq.PalettedVectorList;
+import org.jtrfp.trcl.gpu.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.img.vq.VectorList;
+import org.jtrfp.trcl.mem.VEC4Address;
 
 public class SolidColorTextureFactory {
     private final GPU gpu;
@@ -31,10 +34,45 @@ public class SolidColorTextureFactory {
     }//end constructor
     
  public VQTexture newSolidColorTexture(Color c){
-     final VQTexture result = vqtf.newUncompressedVQTexture(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false); 
+     //final VQTexture result = vqtf.newUncompressedVQTexture(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false); 
+     final VQTexture result = new VQTexture(gpu, "Solid Color: "+c.toString());
+     result.setSize(new Dimension(4,4));
      result.setAverageColor(c);
+     //Allocate a codebook256
+     final int codebook256 = gpu.textureManager.get().vqCodebookManager.get().newCodebook256();
+     result.getCodebookStartOffsets256().add(codebook256);
+     //Assign to subtexture 0 (we can assume there is only one)
+     final int stid = result.getSubTextureIDs().get(0);
+     final SubTextureWindow stw = result.getSubTextureWindow();
+     result.getSubTextureWindow().codeStartOffsetTable.setAt(stid, 0, codebook256*256);
+     //Write the color to the codebook
+     RasterRowWriter [] writers = new RasterRowWriter[256];
+     //TODO: Use a tile pool for solid colors
+     final SolidColorRowWriter rw = new SolidColorRowWriter(c);
+     for(int i=0; i<256; i++)
+	 writers[i] = rw;
+     new VEC4Address(stw.getPhysicalAddressInBytes(stid)).intValue();
+     gpu.textureManager.get().vqCodebookManager.get().setRGBABlock256(codebook256, writers);
      return result;
  }//end newSolidColorTexture
+ 
+ private final class SolidColorRowWriter implements RasterRowWriter {
+     private final Color color;
+     
+     public SolidColorRowWriter(Color color){
+	 this.color = color;
+     }
+
+    @Override
+    public void applyRow(int row, ByteBuffer dest) {
+	for(int i=0; i<4; i++){
+	    dest.put((byte)color.getRed());
+	    dest.put((byte)color.getGreen());
+	    dest.put((byte)color.getBlue());
+	    dest.put((byte)color.getAlpha());
+	}//end for(4)
+    }//end applyRow
+ }//end SolidColorRowWriter
  
  private static VectorList colorZeroRasterVL(){
 	return new VectorList(){

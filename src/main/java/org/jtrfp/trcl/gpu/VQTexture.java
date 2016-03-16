@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -314,5 +315,25 @@ public class VQTexture implements Texture {
 
     protected SubTextureWindow getSubTextureWindow() {
         return stw;
+    }
+
+    int newCodebook256() {
+	final int codebook256 = tm.vqCodebookManager.get().newCodebook256();
+	getCodebookStartOffsets256().add(codebook256);
+	return codebook256;
+    }
+    
+    void newCodebook256(Collection<Integer> dest, int numberOfCodeblocksToCreate){
+	final List<Integer> result = new ArrayList<Integer>(numberOfCodeblocksToCreate);
+	tm.vqCodebookManager.get().newCodebook256(result, numberOfCodeblocksToCreate);
+	getCodebookStartOffsets256().addAll(result);
+	if(dest!=null)
+	    dest.addAll(result);
+    }//end newCodebook256
+    
+    void freeCodebook256(int codebook256){
+	tm.vqCodebookManager.get().freeCodebook256(codebook256);
+	if(!getCodebookStartOffsets256().remove(new Integer(codebook256)))
+	    throw new IllegalStateException("Specified codebook256 index was not found: "+codebook256);
     }
 }// end Texture

@@ -14,6 +14,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -187,14 +188,16 @@ public class UncompressedVQTextureFactory {
 		threadManager.submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public final Void call() {
+			tex.setSize(new Dimension(sideLength,sideLength));
 			final List<Integer>  subTextureIDs = tex.getSubTextureIDs();
 			// Create subtextures
 			final int numSubtextures = diameterInSubtextures*diameterInSubtextures;
-			for(int i=0; i<diameterInSubtextures*diameterInSubtextures; i++){
+			for(int i=0; i<numSubtextures; i++){
 			    //Create subtexture ID
-			    subTextureIDs.add(stw.create());
+			    //subTextureIDs.add(stw.create());
 			    tm.vqCodebookManager.get().newCodebook256(tex.getCodebookStartOffsets256(), 6);
 			}//end for(subTextureIDs)
+			
 			final TextureTOCWindow tocWindow = tex.getTocWindow();
 			final int tocIndex = tex.getTocIndex();
 			//Set magic

@@ -13,11 +13,13 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
@@ -26,10 +28,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
-import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
-import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
+import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
+import org.jtrfp.trcl.mem.VEC4Address;
 
 public class VQTexture implements Texture {
     private final TextureManager 	tm ;
@@ -44,6 +46,7 @@ public class VQTexture implements Texture {
     private boolean	         	uvWrapping;
     private int				sideLength;
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
+    private Dimension                   size;
     
     VQTexture(GPU gpu, String debugName){
    	this.tm		  =gpu.textureManager.get();
@@ -58,7 +61,7 @@ public class VQTexture implements Texture {
 	//Undo the magic
 	    getTocWindow().magic.set(tocIndex, 0000);
 	    //TOC ID
-	    if(getTocIndex()!=null)
+	    if(tocIndex!=null)
 		tocWindow.freeLater(tocIndex);
 	    stw.freeLater(subTextureIDs);
 	    //Codebook entries
@@ -211,6 +214,8 @@ public class VQTexture implements Texture {
     }
 
     public Integer getTocIndex() {
+	if(tocIndex == null)
+	    tocIndex = getTocWindow().create();
         return tocIndex;
     }
 
@@ -244,5 +249,70 @@ public class VQTexture implements Texture {
 
     public void setAverageColor(Color averageColor) {
         this.averageColor = averageColor;
+    }
+
+    protected Dimension getSize() {
+        return size;
+    }
+
+    protected void setSize(Dimension size) {
+	if(size.equals(this.size))
+	    return;
+        this.size = size;
+        setSideLength((int)size.getWidth());//TODO: Remove sideLength
+        final int diameterInSubtextures = getDiameterInSubtextures();
+        setNumNeededSubtextureIDs(diameterInSubtextures*diameterInSubtextures);
+    }//end setSize(...)
+    
+    protected void setNumNeededSubtextureIDs(int num){
+	if(num <0)
+	    throw new IllegalArgumentException("Quantity intolerably negative: "+num);
+	final List<Integer>  subTextureIDs = getSubTextureIDs();
+	int sizeDelta = num-subTextureIDs.size();
+	if(sizeDelta == 0)
+	    return;
+	if(sizeDelta > 0)
+	    increaseSubtextureIDs(sizeDelta);
+	else
+	    decreaseSubtextureIDs(-sizeDelta);
+	reEvaluateSubTextureTOCAssignments();
+    }//end setNumNeededSubtextureIDs(...)
+    
+    private void reEvaluateSubTextureTOCAssignments(){
+	final int tocIndex = getTocIndex();
+	final List<Integer> stids = getSubTextureIDs();
+	final int size = stids.size();
+	final int [] buf = new int[size];
+	for(int i=0; i<size; i++)
+	    buf[i]=new VEC4Address(stw.getPhysicalAddressInBytes(stids.get(i))).intValue();
+	getTocWindow().subtextureAddrsVec4.set(tocIndex, buf);
+    }//end reEvaluateSubTextureTOCAssignments()
+    
+    protected void increaseSubtextureIDs(int num){
+	for(int i=0; i<num; i++)
+	    subTextureIDs.add(stw.create());
+    }//end increaseSubtextureIDs(...)
+    
+    protected void decreaseSubtextureIDs(int num){
+	final int size = subTextureIDs.size();
+	final List<Integer> subList = subTextureIDs.subList(size-num, size);
+	final List<Integer> toRemove = new ArrayList<Integer>(subList);
+	for(int i=0; i<num; i++)
+	    stw.free(toRemove);
+	subList.clear();
+    }//end increaseSubtextureIDs(...)
+    
+    public int getDiameterInSubtextures(){
+	final double diameterInCodes = (double)getDiameterInCodes();
+	return (int)Math.ceil(diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
+    }
+    
+    public int getDiameterInCodes(){
+	final double sideLength = (double)getSize().getWidth();//TODO: Only works for square textures
+	return (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
+    }
+
+    protected SubTextureWindow getSubTextureWindow() {
+        return stw;
     }
 }// end Texture

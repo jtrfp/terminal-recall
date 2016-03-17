@@ -30,6 +30,7 @@ import org.jtrfp.trcl.TextureBehavior;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
+import org.jtrfp.trcl.img.vq.SubtextureVL;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
@@ -43,6 +44,7 @@ public class VQTexture implements Texture {
     private final String 		debugName;
     private	  Integer		tocIndex;
     private final ArrayList<Integer>	subTextureIDs = new ArrayList<Integer>();
+    private final ArrayList<SubtextureVL>subTextureVLs= new ArrayList<SubtextureVL>();
     private final ArrayList<Integer>	codebookStartOffsets256 = new ArrayList<Integer>();
     private boolean	         	uvWrapping;
     private int				sideLength;
@@ -290,8 +292,11 @@ public class VQTexture implements Texture {
     }//end reEvaluateSubTextureTOCAssignments()
     
     protected void increaseSubtextureIDs(int num){
-	for(int i=0; i<num; i++)
-	    subTextureIDs.add(stw.create());
+	for(int i=0; i<num; i++){
+	    final int id = stw.create();
+	    subTextureIDs.add(id);
+	    subTextureVLs.add(new SubtextureVL(stw,id));
+	    }
     }//end increaseSubtextureIDs(...)
     
     protected void decreaseSubtextureIDs(int num){
@@ -301,6 +306,7 @@ public class VQTexture implements Texture {
 	for(int i=0; i<num; i++)
 	    stw.free(toRemove);
 	subList.clear();
+	subTextureVLs.subList(size-num, size).clear();
     }//end increaseSubtextureIDs(...)
     
     public int getDiameterInSubtextures(){
@@ -323,6 +329,24 @@ public class VQTexture implements Texture {
 	return codebook256;
     }
     
+    public final void setCodeAt(int codeX, int codeY, byte value){
+	final int subtextureX     = codeX / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int subtextureY     = codeY / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int subTextureIdx   = subtextureX + subtextureY * getDiameterInSubtextures();
+	setCodeAt(codeX, codeY, value, subTextureIdx);
+    }//end setCodeAt(...)
+    
+    public final void setCodeAt(int codeX, int codeY, byte value, int subTextureIdx){
+	setCodeAt(codeX, codeY, value, getSubTextureVLs().get(subTextureIdx));
+    }//end setCodeAt(...)
+    
+    public final void setCodeAt(int globalCodeX, int globalCodeY, byte value, SubtextureVL vl){
+	final int subtextureCodeX = globalCodeX % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int subtextureCodeY = globalCodeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	vl.setComponentAt(codeIdx, 0, value);
+    }//end setCodeAt(...)
+    
     void newCodebook256(Collection<Integer> dest, int numberOfCodeblocksToCreate){
 	final List<Integer> result = new ArrayList<Integer>(numberOfCodeblocksToCreate);
 	tm.vqCodebookManager.get().newCodebook256(result, numberOfCodeblocksToCreate);
@@ -335,5 +359,9 @@ public class VQTexture implements Texture {
 	tm.vqCodebookManager.get().freeCodebook256(codebook256);
 	if(!getCodebookStartOffsets256().remove(new Integer(codebook256)))
 	    throw new IllegalStateException("Specified codebook256 index was not found: "+codebook256);
+    }
+
+    protected ArrayList<SubtextureVL> getSubTextureVLs() {
+        return subTextureVLs;
     }
 }// end Texture

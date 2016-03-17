@@ -240,8 +240,7 @@ public class UncompressedVQTextureFactory {
 		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int subTextureIdx   = subtextureX + subtextureY * diameterInSubtextures;
 		tex.setCodeAt(subtextureCodeX, subtextureCodeY, (byte)(codeIdx%256), subTextureIdx);
-		//new SubtextureVL(stw, subtextureID).setComponentAt(codeIdx, 0, (byte)(codeIdx%256));//TODO: Could make a lot of garbage.
-     }//end setCodeAt()
+          }//end setCodeAt()
 	 }).get();//end gpuMemThread
 		
 	// Push texels to codebook

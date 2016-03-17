@@ -51,6 +51,8 @@ public class SolidColorTextureFactory {
 	 writers[i] = rw;
      new VEC4Address(stw.getPhysicalAddressInBytes(stid)).intValue();
      gpu.textureManager.get().vqCodebookManager.get().setRGBABlock256(codebook256, writers);
+     final byte codeID = 0x0;
+     result.setCodeAt(0,0,codeID);
      return result;
  }//end newSolidColorTexture
  

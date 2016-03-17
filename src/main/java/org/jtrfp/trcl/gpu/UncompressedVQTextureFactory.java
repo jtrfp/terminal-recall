@@ -194,8 +194,7 @@ public class UncompressedVQTextureFactory {
 			final int numSubtextures = diameterInSubtextures*diameterInSubtextures;
 			for(int i=0; i<numSubtextures; i++){
 			    //Create subtexture ID
-			    //subTextureIDs.add(stw.create());
-			    tm.vqCodebookManager.get().newCodebook256(tex.getCodebookStartOffsets256(), 6);
+			    tex.newCodebook256(null,6);
 			}//end for(subTextureIDs)
 			
 			final TextureTOCWindow tocWindow = tex.getTocWindow();

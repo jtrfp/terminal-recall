@@ -34,13 +34,11 @@ public class SolidColorTextureFactory {
     }//end constructor
     
  public VQTexture newSolidColorTexture(Color c){
-     //final VQTexture result = vqtf.newUncompressedVQTexture(new PalettedVectorList(colorZeroRasterVL(), colorVL(c)),null,"SolidColor r="+c.getRed()+" g="+c.getGreen()+" b="+c.getBlue(),false); 
      final VQTexture result = new VQTexture(gpu, "Solid Color: "+c.toString());
      result.setSize(new Dimension(4,4));
      result.setAverageColor(c);
      //Allocate a codebook256
-     final int codebook256 = gpu.textureManager.get().vqCodebookManager.get().newCodebook256();
-     result.getCodebookStartOffsets256().add(codebook256);
+     final int codebook256 = result.newCodebook256();
      //Assign to subtexture 0 (we can assume there is only one)
      final int stid = result.getSubTextureIDs().get(0);
      final SubTextureWindow stw = result.getSubTextureWindow();

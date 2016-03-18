@@ -347,6 +347,34 @@ public class VQTexture implements Texture {
 	vl.setComponentAt(codeIdx, 0, value);
     }//end setCodeAt(...)
     
+    /**
+     * Returns the index of the subtexture as stored in the List returned by getSubTextureIDs()
+     * @param globalCodeX
+     * @param globalCodeY
+     * @return
+     * @since Mar 17, 2016
+     */
+    public int getSubtextureIdxFor(int globalCodeX, int globalCodeY){
+	final int subtextureX     = globalCodeX / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int subtextureY     = globalCodeY / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	return subtextureX + subtextureY * getDiameterInSubtextures();
+    }
+    
+    public VEC4Address getPhysicalVEC4OfSubtextureFor(int globalCodeX, int globalCodeY){
+	return getPhysicalVEC4OfSubtextureIdx(getSubtextureIdxFor(globalCodeX, globalCodeY));
+    }
+    
+    /**
+     * Takes the index as used when reading the List returned by getSubTextureIDs()
+     * @param subtextureIdx
+     * @return
+     * @since Mar 17, 2016
+     */
+    public VEC4Address getPhysicalVEC4OfSubtextureIdx(int subtextureIdx){
+	final int objectIndex = getSubTextureIDs().get(subtextureIdx);
+	return getSubTextureWindow().getPhysicalAddressInBytes(objectIndex).asVEC4Address();
+    }
+    
     void newCodebook256(Collection<Integer> dest, int numberOfCodeblocksToCreate){
 	final List<Integer> result = new ArrayList<Integer>(numberOfCodeblocksToCreate);
 	tm.vqCodebookManager.get().newCodebook256(result, numberOfCodeblocksToCreate);
@@ -363,5 +391,9 @@ public class VQTexture implements Texture {
 
     protected ArrayList<SubtextureVL> getSubTextureVLs() {
         return subTextureVLs;
+    }
+    
+    public void setMagic(int magic){
+	getTocWindow().magic.set(getTocIndex(), magic);
     }
 }// end Texture

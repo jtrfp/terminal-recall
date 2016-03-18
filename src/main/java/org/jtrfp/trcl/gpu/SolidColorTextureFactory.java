@@ -30,6 +30,7 @@ public class SolidColorTextureFactory {
      final VQTexture result = new VQTexture(gpu, "Solid Color: "+c.toString());
      result.setSize(new Dimension(4,4));
      result.setAverageColor(c);
+     result.setMagic(1337);
      //Allocate a codebook256
      final int codebook256 = result.newCodebook256();
      //Assign to subtexture 0 (we can assume there is only one)

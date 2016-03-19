@@ -17,11 +17,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.nio.ByteBuffer;
 
+import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.VQCodebookManager.RasterRowWriter;
+import org.jtrfp.trcl.pool.ObjectPool;
+import org.jtrfp.trcl.pool.ObjectPool.GenerativeMethod;
+import org.jtrfp.trcl.pool.ObjectPool.PreparationMethod;
 
 public class SolidColorTextureFactory {
     private final GPU gpu;
+    private final TileGeneratingMethod tileGeneratingMethod = new TileGeneratingMethod();
+    private final TilePreparationMethod tilePreparationMethod = new TilePreparationMethod();
+    private final ObjectPool<Integer> tilePool = new ObjectPool<Integer>(new ObjectPool.LazyAllocate<Integer>(), tilePreparationMethod, tileGeneratingMethod);
     public SolidColorTextureFactory(GPU gpu, ThreadManager threadManager){
 	this.gpu = gpu;
     }//end constructor
@@ -32,23 +39,64 @@ public class SolidColorTextureFactory {
      result.setAverageColor(c);
      result.setMagic(1337);
      //Allocate a codebook256
-     final int codebook256 = result.newCodebook256();
+     final int codebookID = obtainTile();
      //Assign to subtexture 0 (we can assume there is only one)
      final int stid = result.getSubTextureIDs().get(0);
      final SubTextureWindow stw = result.getSubTextureWindow();
      //Set the code-start offset
-     stw.codeStartOffsetTable.setAt(stid, 0, codebook256*256);
+     stw.codeStartOffsetTable.setAt(stid, 0, codebookID);
      //Write the color to the codebook
-     RasterRowWriter [] writers = new RasterRowWriter[256];
-     //TODO: Use a tile pool for solid colors
      final SolidColorRowWriter rw = new SolidColorRowWriter(c);
-     for(int i=0; i<256; i++)
-	 writers[i] = rw;
-     gpu.textureManager.get().vqCodebookManager.get().setRGBABlock256(codebook256, writers);
+     gpu.textureManager.get().vqCodebookManager.get().setRGBA(codebookID, new RasterRowWriter[]{rw});
      final byte codeID = 0x0;
      result.setCodeAt(0,0,codeID);
+     result.addFinalizationHook(new Runnable(){
+	@Override
+	public void run() {
+	    releaseTile(codebookID);
+	}});
      return result;
  }//end newSolidColorTexture
+ 
+ private int obtainTile(){
+     return tilePool.pop();
+ }
+ 
+ private void releaseTile(int codebookID){
+     tilePool.expire(codebookID);
+ }
+ 
+ private class TilePreparationMethod implements PreparationMethod<Integer>{
+
+    @Override
+    public Integer deactivate(Integer obj) {
+	return obj;
+    }
+
+    @Override
+    public Integer reactivate(Integer obj) {
+	return obj;
+    }
+     
+ }//end TilePreparationMethod
+ 
+ private class TileGeneratingMethod implements GenerativeMethod<Integer> {
+    @Override
+    public int getAtomicBlockSize() {
+	return 256;
+    }
+
+    @Override
+    public Submitter<Integer> generateConsecutive(int numBlocks,
+	    Submitter<Integer> populationTarget) {
+	for(int i=0; i<numBlocks; i++){
+	    int startID = gpu.textureManager.get().vqCodebookManager.get().newCodebook256()*256;
+	    for(int j=0; j<256; j++)
+		populationTarget.submit(startID+j);
+	}//end for(blockID)
+	return populationTarget;
+    }//end generateConsecutive(...)
+ }//end TileGeneratingMethod
  
  private final class SolidColorRowWriter implements RasterRowWriter {
      private final Color color;

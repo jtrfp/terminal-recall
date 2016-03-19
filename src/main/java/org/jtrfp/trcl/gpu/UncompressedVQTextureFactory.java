@@ -233,13 +233,10 @@ public class UncompressedVQTextureFactory {
 		}//end setCodes()
      //REQUIRES GPU MEM ACCESS
      private final void setCodeAt(int codeX, int codeY){
- 	final int subtextureX     = codeX / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subtextureY     = codeY / SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int subtextureCodeX = codeX % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int subtextureCodeY = codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subTextureIdx   = subtextureX + subtextureY * diameterInSubtextures;
-		tex.setCodeAt(subtextureCodeX, subtextureCodeY, (byte)(codeIdx%256), subTextureIdx);
+		tex.setCodeAt(codeX, codeY, (byte)(codeIdx%256));
           }//end setCodeAt()
 	 }).get();//end gpuMemThread
 		

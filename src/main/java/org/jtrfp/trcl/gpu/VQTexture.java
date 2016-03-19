@@ -47,13 +47,13 @@ public class VQTexture implements Texture {
     private final String 		debugName;
     private	  Integer		tocIndex;
     private final ArrayList<Integer>	subTextureIDs = new ArrayList<Integer>();
-    //private final ArrayList<SubtextureVL>subTextureVLs= new ArrayList<SubtextureVL>();
     private final CompositeVectorListND subtextureVectorList = new CompositeVectorListND();
     private final ArrayList<Integer>	codebookStartOffsets256 = new ArrayList<Integer>();
     private boolean	         	uvWrapping;
     private int				sideLength;
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
     private Dimension                   size;
+    private final Collection<Runnable>  finalizationHooks = new ArrayList<Runnable>();
     
     VQTexture(GPU gpu, String debugName){
    	this.tm		  =gpu.textureManager.get();
@@ -66,13 +66,15 @@ public class VQTexture implements Texture {
     @Override
     public void finalize() throws Throwable{
 	//Undo the magic
-	    getTocWindow().magic.set(tocIndex, 0000);
-	    //TOC ID
-	    if(tocIndex!=null)
-		tocWindow.freeLater(tocIndex);
-	    stw.freeLater(subTextureIDs);
-	    //Codebook entries
-	    tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
+	getTocWindow().magic.set(tocIndex, 0000);
+	//TOC ID
+	if(tocIndex!=null)
+	    tocWindow.freeLater(tocIndex);
+	stw.freeLater(subTextureIDs);
+	//Codebook entries
+	tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
+	for(Runnable h:finalizationHooks)
+	    h.run();
 	super.finalize();
     }//end finalize()
     
@@ -394,5 +396,9 @@ public class VQTexture implements Texture {
     
     public void setMagic(int magic){
 	getTocWindow().magic.set(getTocIndex(), magic);
+    }
+    
+    public void addFinalizationHook(Runnable r){
+	finalizationHooks.add(r);
     }
 }// end Texture

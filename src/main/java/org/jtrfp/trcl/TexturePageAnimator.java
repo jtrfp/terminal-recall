@@ -20,6 +20,7 @@ public class TexturePageAnimator implements Tickable{
     private final int 			gpuTVIndex;
     private 	  String 		debugName = "[not set]";
     private final AnimatedTexture       animatedTexture;
+    private int                         currentTexturePage;
     
     public TexturePageAnimator(AnimatedTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
 	this.vertexWindow	=vw;
@@ -29,12 +30,14 @@ public class TexturePageAnimator implements Tickable{
 
     @Override
     public void tick() {
-	try{
-	int texturePage = animatedTexture.getCurrentTexturePage();
-	vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(texturePage & 0xFF));
-	vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((texturePage >> 8) & 0xFF));
-	vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((texturePage >> 16) & 0xFF));}
-	catch(Exception e){e.printStackTrace();}
+	try{final int newTexturePage = animatedTexture.getCurrentTexturePage();
+	    if(currentTexturePage != newTexturePage){
+		vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(newTexturePage & 0xFF));
+		vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((newTexturePage >> 8) & 0xFF));
+		vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((newTexturePage >> 16) & 0xFF));
+		currentTexturePage = newTexturePage;
+		}
+	    }catch(Exception e){e.printStackTrace();}
     }//end tick()
 
     public TexturePageAnimator setDebugName(String debugName) {
@@ -48,5 +51,4 @@ public class TexturePageAnimator implements Tickable{
     public String getDebugName() {
         return debugName;
     }//end getDebugName()
-
 }//end TextureIDAnimator

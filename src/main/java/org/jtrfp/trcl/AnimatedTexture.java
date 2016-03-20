@@ -87,4 +87,8 @@ public class AnimatedTexture implements Texture {
 	    Triangle thisTriangle, Vector3D pos, TriangleVertexWindow vw) {
 	tbs.apply(triangleList, gpuTVIndex, numFrames, thisTriangle, pos, vw);
     }
+
+    public int getCurrentTexturePage() {
+	return getFrames()[(int)getTextureSequencer().getCurrentFrame()].getTexturePage();
+    }
 }// end AnimatedTexture

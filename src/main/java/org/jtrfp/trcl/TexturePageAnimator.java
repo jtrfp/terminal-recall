@@ -19,22 +19,18 @@ public class TexturePageAnimator implements Tickable{
     private final TriangleVertexWindow 	vertexWindow;
     private final int 			gpuTVIndex;
     private 	  String 		debugName = "[not set]";
-    private final Controller		controller;
-    private final VQTexture[]		frames;
+    private final AnimatedTexture       animatedTexture;
     
     public TexturePageAnimator(AnimatedTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
 	this.vertexWindow	=vw;
 	this.gpuTVIndex		=gpuTVIndex;
-	this.controller		=at.getTextureSequencer();
-	frames 			=at.getFrames();
+	animatedTexture         =at;
     }//end constructor
 
     @Override
     public void tick() {
 	try{
-	int texturePage = frames[
-	 (int)controller.getCurrentFrame()].
-	  getTexturePage();
+	int texturePage = animatedTexture.getCurrentTexturePage();
 	vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(texturePage & 0xFF));
 	vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((texturePage >> 8) & 0xFF));
 	vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((texturePage >> 16) & 0xFF));}

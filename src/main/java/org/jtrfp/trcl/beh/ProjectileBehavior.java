@@ -34,6 +34,7 @@ public class ProjectileBehavior extends Behavior implements
 	SurfaceImpactListener, DEFObjectCollisionListener,
 	PlayerCollisionListener {
     public static final long LIFESPAN_MILLIS = 4500;
+    public static final int BOUNDING_RADIUS = 6000;
     private final int damageOnImpact;
     private final DeathBehavior deathBehavior;
     private final Projectile parent;
@@ -54,7 +55,7 @@ public class ProjectileBehavior extends Behavior implements
 	parent.addBehavior(new CollidesWithTerrain());
 	deathBehavior = parent.addBehavior(new DeathBehavior());
 	parent.addBehavior(new ExplodesOnDeath(explosionType));
-	parent.addBehavior(new CollidesWithDEFObjects(2000));
+	parent.addBehavior(new CollidesWithDEFObjects(BOUNDING_RADIUS));
 	parent.addBehavior(new CollidesWithPlayer());
 	parent.addBehavior(new LimitedLifeSpan().reset(LIFESPAN_MILLIS));
 	parent.addBehavior(new LoopingPositionBehavior());

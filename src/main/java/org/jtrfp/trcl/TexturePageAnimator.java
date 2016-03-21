@@ -13,16 +13,16 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TriangleVertexWindow;
-import org.jtrfp.trcl.gpu.VQTexture;
+import org.jtrfp.trcl.gpu.DynamicTexture;
 
 public class TexturePageAnimator implements Tickable{
     private final TriangleVertexWindow 	vertexWindow;
     private final int 			gpuTVIndex;
     private 	  String 		debugName = "[not set]";
-    private final AnimatedTexture       animatedTexture;
+    private final DynamicTexture        animatedTexture;
     private int                         currentTexturePage;
     
-    public TexturePageAnimator(AnimatedTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
+    public TexturePageAnimator(DynamicTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
 	this.vertexWindow	=vw;
 	this.gpuTVIndex		=gpuTVIndex;
 	animatedTexture         =at;

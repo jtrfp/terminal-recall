@@ -21,11 +21,11 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
-import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
+import org.jtrfp.trcl.gpu.DynamicTexture;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
-import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TriangleList extends PrimitiveList<Triangle> {
@@ -202,9 +202,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
-	if(td instanceof AnimatedTexture){//Animated texture
-	    final AnimatedTexture at = (AnimatedTexture)td;
-	    if (animateUV && numFrames > 1) {// Animated UV
+	if(td instanceof DynamicTexture){//Animated texture
+	    final DynamicTexture dt = (AnimatedTexture)td;
+	    if (animateUV && numFrames > 1 && dt instanceof AnimatedTexture) {// Animated UV
+		final AnimatedTexture at = (AnimatedTexture)dt;
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
 		final WindowAnimator uvAnimator = new WindowAnimator(
@@ -220,12 +221,13 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		}// end for(numFrames)
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
-	    } else {// end if(animateUV)
+	    } else if(dt instanceof AnimatedTexture) {// end if(animateUV)
+		final AnimatedTexture at = (AnimatedTexture)dt;
 		final int sideScalar = at.getFrames()[0].getSideLength()-1;
 		vw.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
 		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
-	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(at,vw,gpuTVIndex);
+	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(dt,vw,gpuTVIndex);
 	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");
 	    getModel().addTickableAnimator(texturePageAnimator);
 	}//end if(animated texture)

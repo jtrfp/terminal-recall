@@ -21,7 +21,7 @@ public class SettableTexture extends DynamicTexture {
 	return currentTexturePage;
     }
 
-    protected void setCurrentTexturePage(int currentTexturePage) {
+    public void setCurrentTexturePage(int currentTexturePage) {
         this.currentTexturePage = currentTexturePage;
     }
 

@@ -15,14 +15,14 @@ package org.jtrfp.trcl.obj;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 
-public abstract class WorldObject2DVisibleEverywhere extends WorldObject2D implements
+public abstract class WorldObject2DRelevantEverywhere extends WorldObject2D implements
 	RelevantEverywhere {
 
-    public WorldObject2DVisibleEverywhere(TR tr) {
+    public WorldObject2DRelevantEverywhere(TR tr) {
 	super(tr);
     }
 
-    public WorldObject2DVisibleEverywhere(TR tr, Model model) {
+    public WorldObject2DRelevantEverywhere(TR tr, Model model) {
 	super(tr,model);
     }
     

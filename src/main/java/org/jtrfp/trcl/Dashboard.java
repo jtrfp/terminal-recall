@@ -20,9 +20,9 @@ import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.gui.F3DashboardLayout;
-import org.jtrfp.trcl.obj.WorldObject2DVisibleEverywhere;
+import org.jtrfp.trcl.obj.WorldObject2DRelevantEverywhere;
 
-public class Dashboard extends WorldObject2DVisibleEverywhere {
+public class Dashboard extends WorldObject2DRelevantEverywhere {
     private static final double Z = .5;
 
     public Dashboard(TR tr, DashboardLayout layout) {

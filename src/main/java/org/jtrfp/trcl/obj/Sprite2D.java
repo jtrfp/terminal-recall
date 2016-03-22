@@ -19,7 +19,7 @@ import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
 
-public class Sprite2D extends WorldObject2DVisibleEverywhere {
+public class Sprite2D extends WorldObject2DRelevantEverywhere {
     private final Texture texture;
 
     public Sprite2D(TR tr, double z, double width, double height, Texture tex, boolean useAlpha,String debugName) {

@@ -40,7 +40,7 @@ public class WorldObject2D extends WorldObject{
 	    tMd[10]=1;
 	    tMd[15]=1;
 	    
-	    setRenderFlags((byte)1);
+	    setRenderFlag(RenderFlags.IgnoreCamera);
 	    }
 	public WorldObject2D(TR tr, Model m){
 		super(tr, m);

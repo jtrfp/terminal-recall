@@ -385,32 +385,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    Vect3D.cross(top, aZ, aX);
 	    Vect3D.cross(aZ, aX, aY);
 	    
-	    //Scale
-	    Vect3D.scalarMultiply(aX, getScale(), aX);
-	    Vect3D.scalarMultiply(aY, getScale(), aY);
-	    Vect3D.scalarMultiply(aZ, getScale(), aZ);
-
-	    rMd[0] = aX[0];
-	    rMd[1] = aY[0];
-	    rMd[2] = aZ[0];
-
-	    rMd[4] = aX[1];
-	    rMd[5] = aY[1];
-	    rMd[6] = aZ[1];
-
-	    rMd[8] = aX[2];
-	    rMd[9] = aY[2];
-	    rMd[10] = aZ[2];
-	    if(isVisible() && isActive()){
-		tMd[3] = positionAfterLoop[0]+modelOffset[0];
-		tMd[7] = positionAfterLoop[1]+modelOffset[1];
-		tMd[11]= positionAfterLoop[2]+modelOffset[2];
-	    }else{
-		tMd[3] = Double.POSITIVE_INFINITY;
-		tMd[7] = Double.POSITIVE_INFINITY;
-		tMd[11]= Double.POSITIVE_INFINITY;
-	    }//end (!visible)
+	    recalculateRotBuffer();
 	    if (translate()) {
+		recalculateTransBuffer();
 		Mat4x4.mul(tMd, rMd, rotTransM);
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
@@ -419,6 +396,37 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	} catch (MathArithmeticException e) {e.printStackTrace();
 	}// Don't crash.
     }// end recalculateTransRotMBuffer()
+    
+    protected void recalculateRotBuffer(){
+	//Scale
+	Vect3D.scalarMultiply(aX, getScale(), aX);
+	Vect3D.scalarMultiply(aY, getScale(), aY);
+	Vect3D.scalarMultiply(aZ, getScale(), aZ);
+
+	rMd[0] = aX[0];
+	rMd[1] = aY[0];
+	rMd[2] = aZ[0];
+
+	rMd[4] = aX[1];
+	rMd[5] = aY[1];
+	rMd[6] = aZ[1];
+
+	rMd[8] = aX[2];
+	rMd[9] = aY[2];
+	rMd[10] = aZ[2];
+    }//end recalculateRotBuffer
+    
+    protected void recalculateTransBuffer(){
+	if(isVisible() && isActive()){
+	    tMd[3] = positionAfterLoop[0]+modelOffset[0];
+	    tMd[7] = positionAfterLoop[1]+modelOffset[1];
+	    tMd[11]= positionAfterLoop[2]+modelOffset[2];
+	}else{
+	    tMd[3] = Double.POSITIVE_INFINITY;
+	    tMd[7] = Double.POSITIVE_INFINITY;
+	    tMd[11]= Double.POSITIVE_INFINITY;
+	}//end (!visible)
+    }//end recalculateTransBuffer()
     
     protected final double [] scratchMatrixArray = new double[16];
 

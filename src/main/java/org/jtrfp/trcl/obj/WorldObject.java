@@ -18,7 +18,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -93,6 +92,18 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(new PropertyChangeSupport(this));
 
+    public enum RenderFlags{
+	IgnoreCamera((byte)0x1);
+	
+	private final byte mask;
+	private RenderFlags(byte mask){
+	    this.mask=mask;
+	}
+	public byte getMask() {
+	    return mask;
+	}
+    };
+    
     public WorldObject(TR tr) {
 	this.tr = tr;
 	//if(tr!=null)
@@ -906,4 +917,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(position[0]==Double.NaN||position[1]==Double.NaN||position[2]==Double.NaN)
 	    throw new RuntimeException("Invalid position");
     }*/
+    
+    public void setRenderFlag(RenderFlags flag){
+	setRenderFlags((byte)(getRenderFlags() | flag.getMask()));
+    }
+    
+    public void unsetRenderFlag(RenderFlags flag){
+	setRenderFlags((byte)(getRenderFlags() & ~flag.getMask()));
+    }
+    
+    public boolean getRenderFlag(RenderFlags flag){
+	return ((getRenderFlags()&0xFF) & flag.getMask()) != 0;
+    }
 }// end WorldObject

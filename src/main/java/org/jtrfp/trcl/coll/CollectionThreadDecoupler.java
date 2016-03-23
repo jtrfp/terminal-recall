@@ -13,20 +13,23 @@
 
 package org.jtrfp.trcl.coll;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import org.jtrfp.trcl.TracingExecutor;
 import org.jtrfp.trcl.tools.Util;
 
 public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatable<E>, Decorator<Collection<E>>, BulkRemovable<E> {
     private final Executor 	executor;
     private final Collection<E>	delegate;
+    private static final boolean DEBUG = true;
     
     public CollectionThreadDecoupler(Collection<E> delegate, Executor executor){
-	this.executor=executor;
+	this.executor=DEBUG?new TracingExecutor(executor):executor;
 	this.delegate=delegate;
     }
 
@@ -149,7 +152,8 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
     }
 
     @Override
-    public synchronized void bulkRemove(final Collection<E> items) {
+    public synchronized void bulkRemove(final Collection<E> it) {
+	final Collection<E> items = (Collection<E>)Arrays.asList(it.toArray());
 	executor.execute(new Runnable(){
 	    @Override
 	    public synchronized void run() {

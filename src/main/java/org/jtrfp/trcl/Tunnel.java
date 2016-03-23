@@ -219,7 +219,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    throws IllegalAccessException, FileLoadException, IOException {
 	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();
 	Obstacle    obs = s.getObstacle();
-	final double upScalar = 5 * tunnelDia / TR.mapSquareSize;
+	final double upScalar = 10 * tunnelDia / TR.mapSquareSize;
 	WorldObject wo;
 	Model       m;
 	switch (obs) {

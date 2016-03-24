@@ -46,6 +46,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     				     objectReporter;
     private		ObjectSystem objectSystem;
     private Future<TerrainSystem>    terrainSystem;
+    private TextureMesh              textureMesh;
 
     public OverworldSystem(TR tr, final LoadingProgressReporter progressReporter) {
 	super();
@@ -66,7 +67,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    altitudeMap = new ScalingAltitudeMap(normalizedAltitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
 		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile())),new Vector3D(TR.mapSquareSize,tr.getWorld().sizeY / 2,TR.mapSquareSize));
 	    System.out.println("... Done");
-	    final TextureMesh textureMesh = tr.getResourceManager().getTerrainTextureMesh(
+	    textureMesh = tr.getResourceManager().getTerrainTextureMesh(
 		    lvl.getTexturePlacementFile(), texturePalette);
 	    // Terrain
 	    System.out.println("Building terrain...");
@@ -181,5 +182,8 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
      */
     public AltitudeMap getNormalizedAltitudeMap() {
         return normalizedAltitudeMap;
+    }
+    public TextureMesh getTextureMesh() {
+	return textureMesh;
     }
 }// end OverworldSystem

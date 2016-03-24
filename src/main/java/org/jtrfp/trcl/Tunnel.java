@@ -220,6 +220,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();
 	Obstacle    obs = s.getObstacle();
 	final double upScalar = 10 * tunnelDia / TR.mapSquareSize;
+	final double jawScalar = 10 * tunnelDia / TR.mapSquareSize;
 	WorldObject wo;
 	Model       m;
 	switch (obs) {
@@ -443,7 +444,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    // Up jaw
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
 		    false, palette,ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos.add(top
 		    .scalarMultiply(tunnelDia / 2))));
@@ -455,7 +456,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    // Down jaw
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
 		    false, palette,ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .subtract(top.scalarMultiply(tunnelDia / 2))));
@@ -469,7 +470,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    // Left jaw
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
 		    false, palette, ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .add(heading.crossProduct(top)
@@ -482,7 +483,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    // Right jaw
 	    wo = new WorldObject(tr, tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
-		    tunnelTexturePalette[s.getObstacleTextureIndex()], 8,
+		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
 		    false, palette, ESTuTvPalette));
 	    wo.addBehavior(new ShiftingObjectBehavior(3000, wPos, wPos
 		    .subtract(heading.crossProduct(top).scalarMultiply(

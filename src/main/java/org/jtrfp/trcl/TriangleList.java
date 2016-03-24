@@ -203,7 +203,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
 	if(td instanceof DynamicTexture){//Animated texture
-	    final DynamicTexture dt = (AnimatedTexture)td;
+	    final DynamicTexture dt = (DynamicTexture)td;
 	    if (animateUV && numFrames > 1 && dt instanceof AnimatedTexture) {// Animated UV
 		final AnimatedTexture at = (AnimatedTexture)dt;
 		float[] uFrames = new float[numFrames];

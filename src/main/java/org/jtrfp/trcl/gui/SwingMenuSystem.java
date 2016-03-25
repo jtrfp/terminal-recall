@@ -395,12 +395,18 @@ public class SwingMenuSystem implements MenuSystem {
 	    this.item = new JMenu(name);
 	}
 	
-	public SubMenu(String name, JComponent parent) {
+	public SubMenu(String name, final JComponent parent) {
 	    this(name);
-	    parent.add(item);
-	    rw.invalidate();
-	    rw.validate();
-	    //rw.revalidate();
+	    final JComponent it = item;
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    if(it!=null)
+		     parent.add(it);
+		    rw.invalidate();
+		    rw.validate();
+		    //rw.revalidate();
+		}});
 	    this.parent = parent;
 	}
 
@@ -494,11 +500,17 @@ public class SwingMenuSystem implements MenuSystem {
 	@Override
 	public void destroy() {
 	    if(parent!=null){
-	     parent.remove(item);
-	     rw.invalidate();
-	     rw.validate();
-	     //rw.revalidate();
-	     }
+		final JComponent it = item;
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			if(it!=null)
+			 parent.remove(it);
+			rw.invalidate();
+			rw.validate();
+			//rw.revalidate();
+		    }});
+	    }//end if(!null)
 	}//end destroy()
     }//end SubMenu
     
@@ -507,15 +519,23 @@ public class SwingMenuSystem implements MenuSystem {
 	private final JMenuItem item;
 	//private final Collection<ActionListener> menuItemListeners = new HashSet<ActionListener>();
 	
-	public MenuItem(String name, JComponent parent) {
+	public MenuItem(String name, final JComponent parent) {
 	    super(name);
 	    this.parent= parent;
-	    item       = new JMenuItem(name);
-	    item.setEnabled(false);
-	    parent.add(item);
-	    rw.invalidate();
-	    rw.validate();
-	    //rw.revalidate();
+	    item  = new JMenuItem(name);
+	    final JComponent it = item;
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    //TODO: NPE, item==null!
+		    if(it!=null){
+		     it.setEnabled(false);
+		     parent.add(it);
+		     }
+		    rw.invalidate();
+		    rw.validate();
+		    //rw.revalidate();
+		}});
 	}//end constructor
 
 	@Override
@@ -531,29 +551,53 @@ public class SwingMenuSystem implements MenuSystem {
 	      throw new UnsupportedOperationException("Cannot remove item from Menu item. Path="+path+" index="+index);
 	    if(!path[index].contentEquals(getName()))
 		throw new IllegalArgumentException("Name mismatch. Got "+path[index]+" expected "+getName());
-	    parent.remove(item);
+	    final JComponent it = item;
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    if(it!=null)
+		     parent.remove(it);
+		}});
 	}
 
 	@Override
-	public void addMenuItemListener(ActionListener l, int index,
+	public void addMenuItemListener(final ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
 	    checkLeafRequest(index, path);
-	    item.addActionListener(l);
+	    final JMenuItem it = item;
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    if(it!=null)
+		     it.addActionListener(l);
+		}});
 	}
 
 	@Override
-	public void removeMenuItemListener(ActionListener l, int index,
+	public void removeMenuItemListener(final ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
 	    checkLeafRequest(index, path);
-	    item.removeActionListener(l);
+	    final JMenuItem it = item;
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    if(it!=null)
+		     item.removeActionListener(l);
+		}});
 	}
 
 	@Override
-	public void setMenuItemEnabled(boolean enabled, int index,
+	public void setMenuItemEnabled(final boolean enabled, int index,
 		String... path) throws IllegalArgumentException {
 	    checkLeafRequest(index,path);
-	    item.setEnabled(enabled);
-	}
+	    final JMenuItem it = item;
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    if(it!=null)
+		     it.setEnabled(enabled);
+		}});
+	}//end seMenuItemEnabled(...)
 	
 	private void checkLeafRequest(int index, String ... path){
 	    if(!path[path.length-1].contentEquals(getName()))
@@ -570,11 +614,17 @@ public class SwingMenuSystem implements MenuSystem {
 	@Override
 	public void destroy() {
 	    if(parent!=null && item !=null){
-		parent.remove(item);
-		rw.invalidate();
-		rw.validate();
-		//rw.revalidate();
-		}
+		final JMenuItem it = item;
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			if(it!=null)
+			 parent.remove(it);
+			rw.invalidate();
+			rw.validate();
+			//rw.revalidate();
+		    }});
+		}//end invokeLater
 	}//end destroy()
     }//end MenuItem
 }//end MenuSystem

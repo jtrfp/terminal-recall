@@ -24,65 +24,19 @@ import org.jtrfp.trcl.gpu.Model;
  *
  */
 public class WorldObject2D extends WorldObject{
-    
-	public WorldObject2D(TR tr){
-	    super(tr);
-	    setTop(Vector3D.PLUS_J);
-	    setHeading(Vector3D.PLUS_K);
-	    /*
-	    //Setup matrices
-	    rMd[15]=1;
 
-	    tMd[0]=1;
-	    tMd[5]=1;
-	    tMd[10]=1;
-	    tMd[15]=1;
-	    */
-	    setRenderFlag(RenderFlags.IgnoreCamera);
-	    }
-	public WorldObject2D(TR tr, Model m){
-		super(tr, m);
-		setRenderFlag(RenderFlags.IgnoreCamera);
-		}//end WorldObject2D
-	/*
-	@Override
-	protected void recalculateTransRotMBuffer(){
-		final double [] tV = position;
-		if(isVisible()){
-		 Vect3D.normalize(getHeadingArray(), aZ);
-		 Vect3D.cross(getTopArray(),aZ,aX);
-		 Vect3D.cross(aZ,aX,aY);
-		 
-		 rMd[0]=aX[0];
-		 rMd[1]=aY[0];
-		 rMd[2]=aZ[0];
-	 	 
-		 rMd[4]=aX[1];
-		 rMd[5]=aY[1];
-		 rMd[6]=aZ[1];
-	 	 
-		 rMd[8]=aX[2];
-		 rMd[9]=aY[2];
-		 rMd[10]=aZ[2];
-		 
-		 tMd[3]=tV[0];
-		 tMd[7]=tV[1];
-		 tMd[11]=tV[2];
-		 Mat4x4.mul(tMd, rMd, rotTransM);
-		 }else
-		    for(int i=0; i<16; i++)
-			rotTransM[i]=Double.NaN;
-		
-		getTr().gpu.get().matrixWindow.get().setTransposed(rotTransM,getMatrixID(), scratchMatrixArray);
-		}//end recalculateTransRotMBuffer()
-	
-	@Override
-	public void setModel(Model m){
-	    super.setModel(m);
-	}
-	*/
-	@Override
-	public boolean supportsLoop(){
-	    return false;
-	}
+    public WorldObject2D(TR tr){
+	super(tr);
+	setTop(Vector3D.PLUS_J);
+	setHeading(Vector3D.PLUS_K);
+	setRenderFlag(RenderFlags.IgnoreCamera);
+    }
+    public WorldObject2D(TR tr, Model m){
+	super(tr, m);
+	setRenderFlag(RenderFlags.IgnoreCamera);
+    }//end WorldObject2D
+    @Override
+    public boolean supportsLoop(){
+	return false;
+    }
 }//end WorldObject2D

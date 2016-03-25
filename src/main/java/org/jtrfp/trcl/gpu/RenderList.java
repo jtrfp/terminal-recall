@@ -280,16 +280,16 @@ public class RenderList {
 	
 	if (frameCounter == 0) {
 	    reporter.report(
-		    "org.jtrfp.trcl.core.RenderList.numOpaqueBlocks",
+		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numOpaqueBlocks",
 		    "" + opaqueIL.size());
 	    reporter.report(
-		    "org.jtrfp.trcl.core.RenderList.numTransparentBlocks",
+		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numTransparentBlocks",
 		    "" + transIL.size());
 	    reporter.report(
-		    "org.jtrfp.trcl.core.RenderList.numUnoccludedTransparentBlocks",
+		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numUnoccludedTransparentBlocks",
 		    "" + unoccludedIL.size());
 	    reporter.report(
-		    "org.jtrfp.trcl.core.RenderList.approxNumSceneTriangles",
+		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.approxNumSceneTriangles",
 		    "" + ((opaqueIL.size()+transIL.size()+unoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
 	}
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numOpaqueVertices);

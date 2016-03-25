@@ -15,9 +15,6 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.Renderer;
-import org.jtrfp.trcl.math.Mat4x4;
-import org.jtrfp.trcl.math.Vect3D;
 
 
 /**
@@ -32,6 +29,7 @@ public class WorldObject2D extends WorldObject{
 	    super(tr);
 	    setTop(Vector3D.PLUS_J);
 	    setHeading(Vector3D.PLUS_K);
+	    /*
 	    //Setup matrices
 	    rMd[15]=1;
 
@@ -39,13 +37,14 @@ public class WorldObject2D extends WorldObject{
 	    tMd[5]=1;
 	    tMd[10]=1;
 	    tMd[15]=1;
-	    
+	    */
 	    setRenderFlag(RenderFlags.IgnoreCamera);
 	    }
 	public WorldObject2D(TR tr, Model m){
 		super(tr, m);
-		setRenderFlags((byte)1);
+		setRenderFlag(RenderFlags.IgnoreCamera);
 		}//end WorldObject2D
+	/*
 	@Override
 	protected void recalculateTransRotMBuffer(){
 		final double [] tV = position;
@@ -81,7 +80,9 @@ public class WorldObject2D extends WorldObject{
 	public void setModel(Model m){
 	    super.setModel(m);
 	}
-	
+	*/
 	@Override
-	protected void attemptLoop(Renderer renderer){}
+	public boolean supportsLoop(){
+	    return false;
+	}
 }//end WorldObject2D

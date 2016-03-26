@@ -130,6 +130,8 @@ public class Model {
      * @return
      */
     public TRFuture<Model> finalizeModel() {
+	if(tr  == null)
+	    return null;//Mock tolerance.
 	return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
 	    @Override
 	    public Model call() throws Exception {

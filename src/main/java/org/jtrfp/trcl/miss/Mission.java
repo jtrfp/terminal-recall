@@ -321,7 +321,7 @@ public class Mission {
 	
 	((TVF3Game)game).getPlayer()	.setActive(true);
 	((TVF3Game)tr.getGame()).setPaused(false);
-	tr.setRunState(new PlayerActivity(){});
+	//tr.setRunState(new PlayerActivity(){});
 	//Wait for mission end
 	synchronized(missionEnd){
 	 while(missionEnd[0]==null){try{missionEnd.wait();}

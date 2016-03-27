@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -169,12 +170,12 @@ public class RenderList {
 	}}
     }//end updateStatesToGPU
     
-    private final CyclicBarrier renderListExecutorBarrier = new CyclicBarrier(2);
     private void updateRenderListToGPU(){
 	if(renderListTelemetry.isModified()){
-	    RENDER_LIST_EXECUTOR.execute(new Runnable(){
+	    try{
+	    RENDER_LIST_EXECUTOR.submit(new Callable<Void>(){
 		@Override
-		public void run() {
+		public Void call() {
 		    //Defragment
 		    opaqueIL    .defragment();
 		    transIL     .defragment();
@@ -184,9 +185,9 @@ public class RenderList {
 		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
 		    renderListTelemetry.drainListStateTo(renderList);
-		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}//TODO: Remove barrier, use go()
-		}});
-	    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
+		    return null;
+		}}).get();
+	    }catch(Exception e){e.printStackTrace();}
 	}//end if(modified)
     }//end updateRenderingListToGPU()
 

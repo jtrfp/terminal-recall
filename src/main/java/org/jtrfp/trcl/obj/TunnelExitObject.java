@@ -182,11 +182,12 @@ public class TunnelExitObject extends PortalEntrance {
 			tr.setRunState(new Mission.ChamberState(){});
 		    }else tr.setRunState(new Mission.OverworldState(){});
 		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
+		   /*
 		    if(mirrorTerrain)
 		     tr.setRunState(new Mission.ChamberState(){});
 		    else
 		     tr.setRunState(new Mission.PlayerActivity(){});
-		    
+		    */
 		    ((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
 		    mission.setDisplayMode(mission.overworldMode);
 		    overworldSystem.setTunnelMode(false);

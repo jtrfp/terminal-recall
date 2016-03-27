@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
@@ -71,6 +72,7 @@ public class RenderList {
     private final	IntArrayVariableList    renderList;
     private final	ListActionTelemetry<VEC4Address> renderListTelemetry 
     						= new ListActionTelemetry<VEC4Address>();
+    public static final ExecutorService         RENDER_LIST_EXECUTOR = new VerboseExecutorService(Executors.newSingleThreadExecutor());
     //private final	PartitionedIndexPool<VEC4Address>renderListPool;
     /*private final	PartitionedIndexPool.Partition<VEC4Address>
     						opaquePartition,
@@ -78,13 +80,13 @@ public class RenderList {
     						unoccludedTPartition;*/
     private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
     private final	DecoupledCollectionActionDispatcher<PositionedRenderable>
-    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new HashSet<PositionedRenderable>(), new VerboseExecutorService(Executors.newSingleThreadExecutor()));
+    						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new HashSet<PositionedRenderable>(), RENDER_LIST_EXECUTOR);
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<VEC4Address>(renderListTelemetry);
     private final	CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>
-    	opaqueODAddrsColl    = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),relevantPositionedRenderables.getExecutor())),opaqueODAdapter),
-    	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),relevantPositionedRenderables.getExecutor())),transODAdapter ), 
-    	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(unoccludedIL = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),relevantPositionedRenderables.getExecutor())),unoccludedODAddrAdapter);
+    	opaqueODAddrsColl    = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL     = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
+    	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
+    	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(unoccludedIL = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),unoccludedODAddrAdapter);
 
     public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager, Reporter reporter) {
 	// Build VAO
@@ -170,7 +172,7 @@ public class RenderList {
     private final CyclicBarrier renderListExecutorBarrier = new CyclicBarrier(2);
     private void updateRenderListToGPU(){
 	if(renderListTelemetry.isModified()){
-	    relevantPositionedRenderables.getExecutor().execute(new Runnable(){
+	    RENDER_LIST_EXECUTOR.execute(new Runnable(){
 		@Override
 		public void run() {
 		    //Defragment
@@ -182,8 +184,7 @@ public class RenderList {
 		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
 		    renderListTelemetry.drainListStateTo(renderList);
-		    //System.out.println("RenderList.updateRenderListToGPU() performing on-demand update... "+renderList.size());
-		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
+		    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}//TODO: Remove barrier, use go()
 		}});
 	    try{renderListExecutorBarrier.await();}catch(Exception e){e.printStackTrace();}
 	}//end if(modified)

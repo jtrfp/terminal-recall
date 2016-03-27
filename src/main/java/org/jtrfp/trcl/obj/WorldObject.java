@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -62,7 +62,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private final TR 	tr;
     private boolean 	visible = true;
     private TRFuture<Model>model;
-    private List<PositionedRenderable>lastContainingList;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected Integer 	matrixID;
@@ -105,8 +104,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     public WorldObject(TR tr) {
 	this.tr = tr;
-	//if(tr!=null)
-	// matrixID = tr.gpu.get().matrixWindow.get().create();
 	// Matrix constants setup
 	rMd[15] = 1;
 
@@ -267,8 +264,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it? Object in question is: \n"+this.toString());
 	final Model model = getModelRealtime();
-	//final ArrayList<Integer> opaqueIndicesList = new ArrayList<Integer>();
-	//final ArrayList<Integer> transparentIndicesList = new ArrayList<Integer>();
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
@@ -281,11 +276,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 				getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4());
 			return null;
 		    }}).get();
-		/*for(int i = 0; i < opaqueIndicesList.size(); i++)
-		    opaqueObjectDefinitionAddressesInVEC4.add(new VEC4Address(opaqueIndicesList.get(i)));
-		for(int i = 0; i < transparentIndicesList.size(); i++)
-		    transparentObjectDefinitionAddressesInVEC4.add(new VEC4Address(transparentIndicesList.get(i)));
-		*/
 		objectDefsInitialized = true;
 		return null;
 	    }});
@@ -484,7 +474,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public synchronized WorldObject notifyPositionChange(){
 	if(position[0]==Double.NaN)
 	    throw new RuntimeException("Invalid position.");
-	//pcs.firePropertyChange(POSITIONV3D, null, new Vector3D(position));
 	pcs.firePropertyChange(POSITION, oldPosition, position);
 	needToRecalcMatrix=true;
 	updateOldPosition();
@@ -696,49 +685,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     @Override
     public void finalize() throws Throwable{
-	/*
-	gpuResourceFinalizer.
-	 submitFinalizationAction(
-	  new WorldObjectFinalizerTask(tr,matrixID,triangleObjectDefinitions,transparentTriangleObjectDefinitions));
-	*/
 	if(matrixID!=null)
-		 tr.gpu.get().matrixWindow.get().freeLater(matrixID);
-		if(transparentTriangleObjectDefinitions!=null)
-		 for(int def:transparentTriangleObjectDefinitions)
-		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
-		if(triangleObjectDefinitions!=null)
-		 for(int def:triangleObjectDefinitions)
-		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
-	
+	    tr.gpu.get().matrixWindow.get().freeLater(matrixID);
+	if(transparentTriangleObjectDefinitions!=null)
+	    for(int def:transparentTriangleObjectDefinitions)
+		tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
+	if(triangleObjectDefinitions!=null)
+	    for(int def:triangleObjectDefinitions)
+		tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
+
 	super.finalize();
     }//end finalize()
-    
-    private static final class WorldObjectFinalizerTask implements Callable<Void>{
-	private final Integer matrixID;
-	private final int[] triangleObjectDefinitions, transparentTriangleObjectDefinitions;
-	private final TR tr;
-	
-	public WorldObjectFinalizerTask(TR tr, Integer matrixID, int [] triangleObjectDefinitions, int [] transparentTriangleObjectDefinitions){
-	    this.matrixID                             = matrixID;
-	    this.triangleObjectDefinitions            = triangleObjectDefinitions;
-	    this.transparentTriangleObjectDefinitions = transparentTriangleObjectDefinitions;
-	    this.tr                                   = tr;
-	}
-	@Override
-	public Void call() throws Exception {
-	    if(matrixID!=null)
-		 tr.gpu.get().matrixWindow.get().freeLater(matrixID);
-		if(transparentTriangleObjectDefinitions!=null)
-		 for(int def:transparentTriangleObjectDefinitions)
-		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
-		if(triangleObjectDefinitions!=null)
-		 for(int def:triangleObjectDefinitions)
-		    tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
-	    return null;
-	}
-	
-    }//end WorldObjectFinalizerTask
-
     /**
      * @param modelOffset the modelOffset to set
      */
@@ -837,48 +794,35 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     protected int[] getTriangleObjectDefinitions() {
-	if(triangleObjectDefinitions == null){
-	    int numObjDefs, sizeInVerts;
-	    final Model m = getModel();
-	    if (m.getTriangleList() == null)
-		triangleObjectDefinitions = emptyIntArray;
-	    else {
-		sizeInVerts = m.getTriangleList().getTotalSizeInGPUVertices();
-		numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
-		if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
-		    numObjDefs++;
-		triangleObjectDefinitions = new int[numObjDefs];
-		for (int i = 0; i < numObjDefs; i++) {
-		    triangleObjectDefinitions[i] = tr.gpu.get().objectDefinitionWindow.get()
-			    .create();
-		}//end for(numObjDefs)
-	    }//end if(!null)
-	}//end if(null)
-	
-        return triangleObjectDefinitions;
+        return triangleObjectDefinitions = 
+        	getObjectDefinitions(triangleObjectDefinitions, getModel().getTriangleList());
     }
 
     protected int[] getTransparentTriangleObjectDefinitions() {
-	if(transparentTriangleObjectDefinitions == null){
-	    int numObjDefs, sizeInVerts;
-	    final Model m = getModel();
-		if (m.getTransparentTriangleList() == null)
-		    transparentTriangleObjectDefinitions = emptyIntArray;
-		else {
-		    sizeInVerts = m.getTransparentTriangleList()
-			    .getTotalSizeInGPUVertices();
-		    numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
-		    if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
-			numObjDefs++;
-		    transparentTriangleObjectDefinitions = new int[numObjDefs];
-		    for (int i = 0; i < numObjDefs; i++) {
-			transparentTriangleObjectDefinitions[i] = tr.gpu.get()
-				.objectDefinitionWindow.get().create();
-		    }//end for(numObjDefs)
-		}//end if(!null)
-	}//end if(null)
-        return transparentTriangleObjectDefinitions;//TODO: Lazy-load
+        return transparentTriangleObjectDefinitions = 
+        	getObjectDefinitions(transparentTriangleObjectDefinitions, getModel().getTransparentTriangleList());
     }
+    
+    protected int[] getObjectDefinitions(int [] originalObjectDefs, PrimitiveList pList){
+	if(originalObjectDefs == null){
+	    int numObjDefs, sizeInVerts;
+	    if (pList == null)
+		originalObjectDefs = emptyIntArray;
+	    else {
+		sizeInVerts = pList
+			.getTotalSizeInGPUVertices();
+		numObjDefs = sizeInVerts / GPU.GPU_VERTICES_PER_BLOCK;
+		if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
+		    numObjDefs++;
+		originalObjectDefs = new int[numObjDefs];
+		for (int i = 0; i < numObjDefs; i++) {
+		    originalObjectDefs[i] = tr.gpu.get()
+			    .objectDefinitionWindow.get().create();
+		}//end for(numObjDefs)
+	    }//end if(!null)
+	}//end if(null)
+	return originalObjectDefs;
+    }//end getObjectDefinitions(...)
 
     protected CollectionActionDispatcher<VEC4Address> getOpaqueObjectDefinitionAddressesInVEC4() {
 	if(opaqueObjectDefinitionAddressesInVEC4==null)
@@ -909,11 +853,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected void setScale(double scale) {
         this.scale = scale;
     }
-
-    /*public void checkPositionSanity() {
-	if(position[0]==Double.NaN||position[1]==Double.NaN||position[2]==Double.NaN)
-	    throw new RuntimeException("Invalid position");
-    }*/
     
     public void setRenderFlag(RenderFlags flag){
 	setRenderFlags((byte)(getRenderFlags() | flag.getMask()));

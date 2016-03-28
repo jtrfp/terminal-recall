@@ -18,8 +18,6 @@ import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -61,24 +59,17 @@ public class RenderList {
     						numTransparentBlocks,
     						numUnoccludedTBlocks;
     private final	int			renderListIdx;
-    private		long			rootBufferReadFinishedSync;
     private final	GPU			gpu;
     private final	Renderer		renderer;
     private final	RendererFactory		rFactory;
     private final	ObjectListWindow	objectListWindow;
     private final       ThreadManager           threadManager;
     private final	Reporter		reporter;
-    //private final	ArrayList<WorldObject>	nearbyWorldObjects = new ArrayList<WorldObject>();
     private final 	IntBuffer 		previousViewport;
     private final	IntArrayVariableList    renderList;
     private final	ListActionTelemetry<VEC4Address> renderListTelemetry 
     						= new ListActionTelemetry<VEC4Address>();
     public static final ExecutorService         RENDER_LIST_EXECUTOR = new VerboseExecutorService(Executors.newSingleThreadExecutor());
-    //private final	PartitionedIndexPool<VEC4Address>renderListPool;
-    /*private final	PartitionedIndexPool.Partition<VEC4Address>
-    						opaquePartition,
-    						transparentPartition,
-    						unoccludedTPartition;*/
     private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
     private final	DecoupledCollectionActionDispatcher<PositionedRenderable>
     						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<PositionedRenderable>(new HashSet<PositionedRenderable>(), RENDER_LIST_EXECUTOR);
@@ -101,13 +92,6 @@ public class RenderList {
 	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
 	this.renderListIdx		=objectListWindow.create();
 	this.renderList                 = new IntArrayVariableList(objectListWindow.opaqueIDs,renderListIdx);
-	//this.renderListPool		= new PartitionedIndexPoolImpl<VEC4Address>();
-	//this.opaquePartition            = renderListPool.newPartition();
-	//this.transparentPartition       = renderListPool.newPartition();
-	//this.unoccludedTPartition       = renderListPool.newPartition();
-	//this.renderingIndices		= new ListActionAdapter<PartitionedIndexPool.Entry<VEC4Address>,VEC4Address>(new PartitionedIndexPool.EntryAdapter<VEC4Address>(VEC4Address.ZERO));
-	//renderListPool.getFlatEntries().addTarget(renderingIndices, true);//Convert entries to Integers
-	//((ListActionDispatcher)renderingIndices.getOutput()).addTarget(renderListTelemetry, true);//Pipe Integers to renderList
 	
 	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(transODAddrsColl, true);
@@ -144,7 +128,6 @@ public class RenderList {
 	    hostRenderListPageTable[i+1] = objectListWindow.logicalPage2PhysicalPage(i);
 	}// end for(hostRenderListPageTable.length)
 	rFactory.getObjectProcessingStage().sendRenderListPageTable(hostRenderListPageTable);
-	//final GLProgram objectProgram = rFactory.getObjectProgram();
 	
 	final GLProgram depthQueueProgram = rFactory.getDepthQueueProgram();
 	depthQueueProgram.use();

@@ -13,6 +13,8 @@
 package org.jtrfp.trcl;
 
 import java.awt.geom.Point2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
@@ -22,13 +24,15 @@ import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
+import org.jtrfp.trcl.obj.MiniMap;
 import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.NavArrow;
-import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.obj.WorldObject.RenderFlags;
 
 public class NAVSystem extends RenderableSpacePartitioningGrid {
 private final NavArrow arrow;
+private final MiniMap miniMap;
 private final TR tr;
 private final NAVRadarBlipFactory blips;
 private final DashboardLayout layout;
@@ -39,17 +43,44 @@ private final DashboardLayout layout;
 	this.layout=layout;
 	System.out.println("Setting up NAV system...");
 	arrow = new NavArrow(tr,this,layout,"NAVSystem");
+	miniMap = new MiniMap(tr);
+	miniMap.setPosition(0,0,.00001);
+	miniMap.setImmuneToOpaqueDepthTest(true);
+	miniMap.setRenderFlag(RenderFlags.IgnoreCamera);
+	miniMap.setActive(true);
+	miniMap.setVisible(true);
+	tr.addPropertyChangeListener(TR.RUN_STATE, new RunStateListener());
+	miniMap.setModelSize(new double[]{.15,.15});
 	final Point2D.Double pos = layout.getMiniMapPosition();
 	final double [] aPos = arrow.getPosition();
 	aPos[0]=pos.getX();
 	aPos[1]=pos.getY();
 	aPos[2]=.00001;
+	System.arraycopy(aPos, 0, miniMap.getPosition(), 0, 3);
+	miniMap.getPosition()[2]=.001;
+	miniMap.notifyPositionChange();
+	miniMap.setMapPositionFromTile(0, 0);
 	arrow.notifyPositionChange();
-	//arrow.setPosition(new Vector3D(.825,.8,0));
 	add(arrow);
+	add(miniMap);
 	blips=new NAVRadarBlipFactory(tr,this,layout,"NAVSystem");
 	System.out.println("...Done.");
     }//end constructor
+    
+    private class RunStateListener implements PropertyChangeListener{
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final Object runState = evt.getNewValue();
+	    final MiniMap miniMap = getMiniMap();
+	    if(runState instanceof Mission.OverworldState){
+		  miniMap.setTextureMesh(tr.getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
+		  miniMap.setVisible(true);
+	    }else {
+		miniMap.setVisible(false);
+		miniMap.setTextureMesh(null);
+		}
+	}//end propertyChange(...)
+    }//end RunStateListener
     
     public void updateNAVState(){
 	final Game game = tr.getGame();
@@ -94,5 +125,9 @@ private final DashboardLayout layout;
     public void activate(){
 	//tr.getDefaultGrid().addBranch(this);
 	updateNAVState();
+    }
+
+    public MiniMap getMiniMap() {
+        return miniMap;
     }
 }//end NAVSystem

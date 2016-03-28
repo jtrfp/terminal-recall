@@ -22,6 +22,7 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -75,6 +76,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	    final TR tr = getParent().getTr();
 	    String content="???";
 	    switch(tr.configManager.getConfig()._getGameVersion()){//TODO: Get from Game object instead.
+	    case FURYSE://Same as F3
 	    case F3:{
 		content=w.getF3DisplayName();
 		break;

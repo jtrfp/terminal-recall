@@ -49,13 +49,16 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private final FiringVetoListener   firingVetoListener   = new FiringVetoListener();
     private final ABControlListener    abControlListener    = new ABControlListener();
     private final ThrottleVetoListener throttleVetoListener = new ThrottleVetoListener();
-    private PropertyChangeListener     weakRunStateListener;
+    
+    // HARD REFERENCES; DO NOT REMOVE
+    private PropertyChangeListener weakRunStateListener, weakAbControlListener, weakThrottleVetoListener;
+    
     private boolean afterburning = false;
     private boolean installedVetoListeners = false;
     
     public AfterburnerBehavior(ControllerInputs inputs){
 	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
-	afterburnerCtl.addPropertyChangeListener(abControlListener);
+	afterburnerCtl.addPropertyChangeListener(weakAbControlListener = new WeakPropertyChangeListener(abControlListener,afterburnerCtl));
     }//end constructor
     
     private class ABControlListener implements PropertyChangeListener{

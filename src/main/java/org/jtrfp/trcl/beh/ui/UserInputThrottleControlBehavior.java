@@ -18,6 +18,7 @@ import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
 
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
@@ -38,11 +39,14 @@ public class UserInputThrottleControlBehavior extends Behavior implements Player
     private double throttleCtlState;
     private ThrottleControlListener throttleControlListener = new ThrottleControlListener();
     
+    //HARD REFERENCE; DO NOT REMOVE
+    private final PropertyChangeListener weakThrottleControlListener;
+    
     public UserInputThrottleControlBehavior(ControllerInputs controllerInputs){
 	throttleDelta= controllerInputs.getControllerInput(THROTTLE_DELTA);
 	throttleCtl  = controllerInputs.getControllerInput(THROTTLE);
 	
-	throttleCtl  .addPropertyChangeListener(throttleControlListener);
+	throttleCtl  .addPropertyChangeListener(weakThrottleControlListener = new WeakPropertyChangeListener(throttleControlListener,throttleCtl));
     }//end constructor
     
     private class ThrottleControlListener implements PropertyChangeListener {

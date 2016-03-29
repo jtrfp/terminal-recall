@@ -16,6 +16,7 @@ package org.jtrfp.trcl.beh.ui;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.TR;
@@ -29,10 +30,12 @@ public class RollBehavior extends Behavior implements ControlBehavior {
     private double rollDelta    = 0;
     private final ControllerInput rollInput;
     private final RollInputChangeListener rollInputChangeListener = new RollInputChangeListener();
+    // HARD REFERENCES; DO NOT REMIOVE
+    private PropertyChangeListener weakRollInputChangeListener;
     
     public RollBehavior(ControllerInputs inputs){
 	rollInput = inputs.getControllerInput(ROLL);
-	rollInput.addPropertyChangeListener(rollInputChangeListener);
+	rollInput.addPropertyChangeListener(weakRollInputChangeListener = new WeakPropertyChangeListener(rollInputChangeListener,rollInput));
     }
     
     private class RollInputChangeListener implements PropertyChangeListener{

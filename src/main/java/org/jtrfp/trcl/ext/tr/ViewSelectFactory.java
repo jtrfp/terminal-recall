@@ -112,7 +112,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    
      private final PropertyChangeListener viewSelectPropertyChangeListener          = new ViewSelectPropertyChangeListener();
      private final PropertyChangeListener instrumentViewSelectPropertyChangeListener= new InstrumentViewSelectPropertyChangeListener();
-     private PropertyChangeListener weakVSPCL, weakIVSPCL;//HARD REFERENCES. DO NOT REMOVE
+     private final PropertyChangeListener runStateListener                          = new RunStatePropertyChangeListener();
+     private PropertyChangeListener weakVSPCL, weakIVSPCL, weakRSPCL;//HARD REFERENCES. DO NOT REMOVE
      
      @Override
      public void apply(Game game) {
@@ -123,11 +124,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
          ((TVF3Game)game).addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);*/
          
          /*missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, */
-        tr.addPropertyChangeListener(TR.RUN_STATE, new PropertyChangeListener(){
-     	@Override
-     	public void propertyChange(PropertyChangeEvent evt) {
-     	    reEvaluateState();
-     	}});
+        tr.addPropertyChangeListener(TR.RUN_STATE, weakRSPCL = new WeakPropertyChangeListener(runStateListener,tr));
      }//end apply(...)
      
      public ViewMode getViewMode() {
@@ -229,6 +226,14 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    }
 	   }
 	}//end InstrumentViewSelectPropertyChangeListener
+	
+	private class RunStatePropertyChangeListener implements PropertyChangeListener {
+	    @Override
+	    public void propertyChange(PropertyChangeEvent arg0) {
+		reEvaluateState();
+	    }
+	    
+	}//end RunStatePropertyChangeListener
 
 	private class ViewSelectPropertyChangeListener implements PropertyChangeListener {
 	   @Override
@@ -413,8 +418,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 
 	@Override
 	public void destruct(Game target) {
-	    // TODO Auto-generated method stub
-	    
+	    if(cockpit != null)
+	     tr.mainRenderer.get().getCamera().getRootGrid().remove(cockpit);
 	}
 	
 	private void incrementViewMode(){

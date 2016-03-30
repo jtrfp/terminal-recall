@@ -36,7 +36,6 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     
     public MiniMap(TR tr) {
 	super(tr);
-	//sprite2Dconf();
 	setTop(Vector3D.PLUS_J);
 	setHeading(Vector3D.MINUS_K);
 	configureCircle();
@@ -103,12 +102,14 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     
     protected Model buildModel(){
 	final Model result = new Model(false, getTr(), "MiniMap "+hashCode());
+	final int diameterInTiles = getDiameterInTiles();
+	final double halfwayPoint = getHalfwayPoint();
 	final double [] modelSize= getModelSize();
-	final double [] diaTiles = new double[]{getDiameterInTiles(),getDiameterInTiles()};
-	final double [] tileSize = new double[]{2*modelSize[0]  / diaTiles[0],2*modelSize[1] / diaTiles[1]};
-	for(int y=0; y<getDiameterInTiles(); y++){
-	    final double percentY = 2*(y-getHalfwayPoint())/getDiameterInTiles();
-	    for(int x=0; x<getDiameterInTiles(); x++){
+	final double [] diaTiles = new double[]{diameterInTiles,diameterInTiles};
+	final double [] tileSize = new double[]{2*modelSize[0] / diaTiles[0],2*modelSize[1] / diaTiles[1]};
+	for(int y=0; y<diameterInTiles; y++){
+	    final double percentY = 2*(y-halfwayPoint)/diameterInTiles;
+	    for(int x=0; x<diameterInTiles; x++){
 		setupTileAt(x,y,percentY, tileSize, modelSize, result);
 	    }//end for(x)
 	}//end for(y)
@@ -121,7 +122,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	    final double percentX = 2*(x-getHalfwayPoint())/getDiameterInTiles();
 	    final double cX = percentX * modelSize[0];
 	    final double cY = percentY * modelSize[1];
-	    final double cZ = .00001;//TODO: try with zero
+	    final double cZ = 0;
 	    final double tileWidth = tileSize[0];
 	    final double tileHeight= tileSize[1];
 	    final Triangle [] tris = Triangle.quad2Triangles(
@@ -169,7 +170,11 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     }//end setModelSize(...)
     
     public void setMapPositionFromTile(int tileX, int tileY){
-	if(prevTileX != null && prevTileY != null && tileX == prevTileX && tileY == prevTileY || getTextureMesh() == null)
+	if(     prevTileX != null && 
+		prevTileY != null && 
+		tileX == prevTileX && 
+		tileY == prevTileY || 
+		getTextureMesh() == null)
 	    return;
 	setTileX(tileX);
 	setTileY(tileY);

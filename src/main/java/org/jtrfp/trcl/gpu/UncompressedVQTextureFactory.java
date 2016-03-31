@@ -14,7 +14,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -33,7 +33,6 @@ import org.jtrfp.trcl.img.vq.ConstantVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
-import org.jtrfp.trcl.img.vq.SubtextureVL;
 import org.jtrfp.trcl.img.vq.VectorList;
 import org.jtrfp.trcl.img.vq.VectorListND;
 import org.jtrfp.trcl.img.vq.VectorListRasterizer;
@@ -188,7 +187,7 @@ public class UncompressedVQTextureFactory {
 		threadManager.submitToGPUMemAccess(new Callable<Void>() {
 		    @Override
 		    public final Void call() {
-			tex.setSize(new Dimension(sideLength,sideLength));
+			tex.setSize(new Point2D.Double(sideLength,sideLength));
 			final List<Integer>  subTextureIDs = tex.getSubTextureIDs();
 			// Create subtextures
 			final int numSubtextures = diameterInSubtextures*diameterInSubtextures;

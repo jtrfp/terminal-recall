@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -84,6 +85,11 @@ public class PortalTexture implements Texture {
 
     public void setTriangleVertexWindow(TriangleVertexWindow triangleVertexWindow) {
         this.triangleVertexWindow = triangleVertexWindow;
+    }
+
+    @Override
+    public Point2D.Double getSize() {
+	return new Point2D.Double(0,0);
     }
  
 }//end PortalTexture

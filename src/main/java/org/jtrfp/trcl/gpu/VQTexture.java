@@ -14,6 +14,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -52,7 +53,7 @@ public class VQTexture implements Texture {
     private boolean	         	uvWrapping;
     private int				sideLength;
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
-    private Dimension                   size;
+    private Point2D.Double              size;
     private final Collection<Runnable>  finalizationHooks = new ArrayList<Runnable>();
     
     VQTexture(GPU gpu, String debugName){
@@ -260,15 +261,16 @@ public class VQTexture implements Texture {
         this.averageColor = averageColor;
     }
 
-    protected Dimension getSize() {
+    @Override
+    public Point2D.Double getSize() {
         return size;
     }
 
-    protected void setSize(Dimension size) {
+    protected void setSize(Point2D.Double size) {
 	if(size.equals(this.size))
 	    return;
         this.size = size;
-        setSideLength((int)size.getWidth());//TODO: Remove sideLength
+        setSideLength((int)size.getX());//TODO: Remove sideLength
         subtextureVectorList.setDimensions(getSizeInCodes());
         final int diameterInSubtextures = getDiameterInSubtextures();
         setNumNeededSubtextureIDs(diameterInSubtextures*diameterInSubtextures);
@@ -323,14 +325,14 @@ public class VQTexture implements Texture {
     }
     
     public int getDiameterInCodes(){
-	final double sideLength = (double)getSize().getWidth();//TODO: Only works for square textures
+	final double sideLength = (double)getSize().getX();//TODO: Only works for square textures
 	return (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
     }
     
     public int [] getSizeInCodes(){
 	return new int[]{
-        	(int)Math.ceil(size.getWidth()/VQCodebookManager.CODE_SIDE_LENGTH),
-        	(int)Math.ceil(size.getHeight()/VQCodebookManager.CODE_SIDE_LENGTH)
+        	(int)Math.ceil(size.getX()/VQCodebookManager.CODE_SIDE_LENGTH),
+        	(int)Math.ceil(size.getY()/VQCodebookManager.CODE_SIDE_LENGTH)
         	};
     }
 

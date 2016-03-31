@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;
@@ -26,4 +27,5 @@ public interface Texture {
     public void apply(TriangleList triangleList, int gpuTVIndex, int numFrames, Triangle thisTriangle, Vector3D pos, TriangleVertexWindow vw);
     public void addBehavior(TextureBehavior beh);
     public void removeBehavior(TextureBehavior beh);
+    public Point2D.Double getSize();
 }//end TextureDescription

@@ -14,7 +14,7 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.geom.Point2D;
 import java.nio.ByteBuffer;
 
 import org.jtrfp.trcl.Submitter;
@@ -35,7 +35,7 @@ public class SolidColorTextureFactory {
     
  public VQTexture newSolidColorTexture(Color c){
      final VQTexture result = new VQTexture(gpu, "Solid Color: "+c.toString());
-     result.setSize(new Dimension(4,4));
+     result.setSize(new Point2D.Double(4,4));
      result.setAverageColor(c);
      result.setMagic(1337);
      //Allocate a codebook256

@@ -228,6 +228,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(dt,vw,gpuTVIndex);
+	    texturePageAnimator.setU(t.getUV(vIndex).getX());
+	    texturePageAnimator.setV((1-t.getUV(vIndex).getY()));
 	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");
 	    getModel().addTickableAnimator(texturePageAnimator);
 	}//end if(animated texture)

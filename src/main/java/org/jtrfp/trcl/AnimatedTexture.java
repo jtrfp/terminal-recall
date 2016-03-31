@@ -13,6 +13,7 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
 import org.jtrfp.trcl.gpu.DynamicTexture;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -54,8 +55,17 @@ public class AnimatedTexture extends DynamicTexture {
 	}
 	return null;
     }//end getAverageColor()
+    
+    public VQTexture getCurrentFrame(){
+	return getFrames()[(int)getTextureSequencer().getCurrentFrame()];
+    }
 
     public int getCurrentTexturePage() {
-	return getFrames()[(int)getTextureSequencer().getCurrentFrame()].getTexturePage();
+	return getCurrentFrame().getTexturePage();
+    }
+
+    @Override
+    public Point2D.Double getSize() {
+	return getCurrentFrame().getSize();
     }
 }// end AnimatedTexture

@@ -20,7 +20,7 @@ public class SelectableTexture extends AnimatedTexture{
 	
 	public void setFrame(int frame){((Selector)getTextureSequencer()).set(frame);}
 
-	public int getCurrentFrame() {
+	public int getCurrentFrameNumber() {
 	    return (int)((Selector)getTextureSequencer()).getCurrentFrame();
 	}
 }//end SelectableTexture

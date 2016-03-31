@@ -192,7 +192,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 		if(tex != null){
 		    final Texture meshTex = mesh.textureAt(tileX+x-getHalfwayPoint(), tileY+y-getHalfwayPoint());
 		    if(meshTex instanceof VQTexture)
-			tex.setCurrentTexturePage(((VQTexture)meshTex).getTexturePage());
+			tex.setCurrentTexture(((VQTexture)meshTex));
 		}//end if(!null)
 	    }//end for(x)
     }

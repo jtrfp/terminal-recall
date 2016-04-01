@@ -26,9 +26,8 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
-import org.jtrfp.trcl.ext.tr.GamePauseFactory;
-import org.jtrfp.trcl.ext.tr.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

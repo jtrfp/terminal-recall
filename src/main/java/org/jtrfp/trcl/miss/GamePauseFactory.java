@@ -10,7 +10,7 @@
  * Contributors:
  *     chuck - initial API and implementation
  ******************************************************************************/
-package org.jtrfp.trcl.ext.tr;
+package org.jtrfp.trcl.miss;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,8 +27,6 @@ import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.jtrfp.trcl.miss.Mission;
-import org.jtrfp.trcl.miss.SatelliteViewFactory.SatelliteView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

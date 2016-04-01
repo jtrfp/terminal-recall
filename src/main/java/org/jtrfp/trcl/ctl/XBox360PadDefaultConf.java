@@ -18,10 +18,10 @@ import org.jtrfp.trcl.beh.ui.RollBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
-import org.jtrfp.trcl.ext.tr.GamePauseFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration.ConfEntry;
+import org.jtrfp.trcl.miss.GamePauseFactory;
 import org.jtrfp.trcl.miss.SatelliteViewFactory;
 import org.springframework.stereotype.Component;
 

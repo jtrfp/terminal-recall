@@ -34,6 +34,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private Integer tileX=0,tileY=0;
     private boolean supportsLoop = false;
     private double [] uCoords, vCoords;
+    private double tileTextureUVScalar = .00001;
     
     public MiniMap(TR tr) {
 	super(tr);
@@ -242,8 +243,10 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     }
 
     protected double[] getuCoords() {
-	if(uCoords == null)
-	    setuCoords(new double[]{0,1,1,0});
+	if(uCoords == null){
+	    final double scalar = getTileTextureUVScalar();
+	    setuCoords(new double[]{0,scalar,scalar,0});
+	    }
         return uCoords;
     }
 
@@ -252,12 +255,22 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     }
 
     protected double[] getvCoords() {
-	if(vCoords == null)
-	    setvCoords(new double[]{1,1,0,0});
+	if(vCoords == null){
+	    final double scalar = getTileTextureUVScalar();
+	    setvCoords(new double[]{scalar,scalar,0,0});
+	    }
         return vCoords;
     }
 
     protected void setvCoords(double[] vCoords) {
         this.vCoords = vCoords;
+    }
+
+    public double getTileTextureUVScalar() {
+        return tileTextureUVScalar;
+    }
+
+    public void setTileTextureUVScalar(double tileTextureUVScalar) {
+        this.tileTextureUVScalar = tileTextureUVScalar;
     }
 }//end MiniMap

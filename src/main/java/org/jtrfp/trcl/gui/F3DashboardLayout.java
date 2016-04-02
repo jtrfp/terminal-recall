@@ -22,7 +22,7 @@ public class F3DashboardLayout implements DashboardLayout {
     private static final double BOTTOM_LINE_Y = .85;
     private static final double FONT_SIZE     = .04;
 
-    private static final Point2D.Double DASH_DIMS = new Point2D.Double(2,.45);//TODO: Why does making this larger make the dash smaller?!
+    private static final Point2D.Double DASH_DIMS = new Point2D.Double(2,.55);
     @Override
     public Double getDashboardDimensions() {
 	return DASH_DIMS;

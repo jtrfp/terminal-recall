@@ -40,7 +40,7 @@ public class Dashboard extends WorldObject2DRelevantEverywhere {
 	    final Point2D.Double dims = layout.getDashboardDimensions();
 
 	    Triangle[] tris = Triangle.quad2Triangles(new double[] { x,
-		    x + segWidth, x + segWidth, x }, new double[] { dims.getY(), dims.getY(),
+		    x + segWidth, x + segWidth, x }, new double[] { 1 - dims.getY(), 1 - dims.getY(),
 		    1, 1 }, new double[] { Z, Z, Z, Z }, new double[] { 0, 1,
 		    1, 0 }, new double[] { 0, 0, 1, 1 }, dashTexture[seg],
 		    RenderMode.DYNAMIC, Vector3D.ZERO,"Dashboard");

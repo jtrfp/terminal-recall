@@ -26,7 +26,7 @@ public class TVDashboardLayout implements DashboardLayout {
     private static final double WEPN_MARGIN   = -.14;
     private static final double OBJ_LINE      = .67;
 
-    private static final Point2D.Double DASH_DIMS = new Point2D.Double(2,.36);
+    private static final Point2D.Double DASH_DIMS = new Point2D.Double(2,.64);
     @Override
     public Double getDashboardDimensions() {
 	return DASH_DIMS;

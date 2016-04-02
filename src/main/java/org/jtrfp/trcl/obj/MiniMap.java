@@ -13,8 +13,8 @@
 
 package org.jtrfp.trcl.obj;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
@@ -35,6 +35,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private boolean supportsLoop = false;
     private double [] uCoords, vCoords;
     private double tileTextureUVScalar = .00001;
+    private Vector3D topOrigin = Vector3D.PLUS_J;
     
     public MiniMap(TR tr) {
 	super(tr);
@@ -55,8 +56,9 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	
 	private void updateHeading(Player player){
 	    final Vector3D playerHdg = player.getHeading();
-	    final Vector2D topDir = new Vector2D(playerHdg.getX(),playerHdg.getZ()).normalize();
-	    setTop(new Vector3D(topDir.getX(),topDir.getY(),0));
+	    final Vector3D topDir = new Vector3D(playerHdg.getX(),playerHdg.getZ(),0).normalize();
+	    final Rotation rot = new Rotation(Vector3D.MINUS_K,Vector3D.PLUS_J, getHeading(), getTopOrigin());
+	    setTop(rot.applyTo(topDir));
 	}
     }//end MiniMapBehavior
     
@@ -272,5 +274,13 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 
     public void setTileTextureUVScalar(double tileTextureUVScalar) {
         this.tileTextureUVScalar = tileTextureUVScalar;
+    }
+
+    public Vector3D getTopOrigin() {
+        return topOrigin;
+    }
+
+    public void setTopOrigin(Vector3D topOrigin) {
+        this.topOrigin = topOrigin;
     }
 }//end MiniMap

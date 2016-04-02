@@ -39,6 +39,7 @@ private final NAVSystem nav;
 private final DashboardLayout layout;
 private Color backgroundColor;
 private static final int BACKGROUND_INDEX = 10;
+private Vector3D topOrigin = Vector3D.PLUS_J;
 
     public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout, String debugName) {
 	super(tr, Z, 
@@ -131,11 +132,23 @@ private static final int BACKGROUND_INDEX = 10;
 
 	    final Vector3D playerHeading = player.getHeading();
 	    final Vector3D playerHeadingXY = new Vector3D(playerHeading.getX(),playerHeading.getZ(),0);
+	    if(playerHeadingXY.getNorm() == 0)
+		return;
 	    final Vector3D normPlayer2NavVector = player2NavVectorXY.normalize();
+	    
 	    //Kludge to correct negative X bug in engine. (mirrored world)
 	    final Vector3D correctedNormPlayer2NavVector = new Vector3D(-normPlayer2NavVector.getX(),normPlayer2NavVector.getY(),0);
-	    final Rotation rot = new Rotation(Vector3D.PLUS_J,playerHeadingXY.getNorm()!=0?playerHeadingXY:Vector3D.PLUS_I);
-	    setTop(rot.applyTo(correctedNormPlayer2NavVector).normalize());
+	    final Rotation camRot    = new Rotation(Vector3D.PLUS_J,playerHeadingXY);
+	    final Rotation renderRot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J,getHeading(),getTopOrigin());
+	    setTop(renderRot.applyTo(camRot.applyTo(correctedNormPlayer2NavVector)).normalize());
 	}//_ticks(...)
     }//end NavArrowBehavior
+
+    public Vector3D getTopOrigin() {
+        return topOrigin;
+    }
+
+    public void setTopOrigin(Vector3D topOrigin) {
+        this.topOrigin = topOrigin;
+    }
 }//end NavArrow

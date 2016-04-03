@@ -29,6 +29,7 @@ import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
+import org.jtrfp.trcl.beh.MatchPosition.TailOffsetMode;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
@@ -38,6 +39,7 @@ import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gui.CockpitLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
@@ -58,6 +60,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	                       INSTRUMENT_MODE  = "Instrument Mode";
     private static final boolean INS_ENABLE = true;
     private final ControllerInput view, iView;
+    private CockpitLayout cockpitLayout;
     
     @Autowired
     private TR tr;
@@ -346,21 +349,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     getCockpit().setVisible(false);
 		     final Camera cam = tr.mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
-		     mp.setOffsetMode(new OffsetMode(){
-			 private double [] workArray = new double[3];
-			@Override
-			public void processPosition(double[] position, MatchPosition mp) {
-			    final double [] lookAt    = player.getHeadingArray();
-			    System.arraycopy(lookAt, 0, workArray, 0, 3);
-			    Vect3D.normalize(workArray, workArray);
-			    //Need to take care of y before x and z due to dependency order.
-			    workArray[1]*=-TAIL_DISTANCE;
-			    workArray[1]+= FLOAT_HEIGHT*Math.sqrt(workArray[0]*workArray[0]+workArray[2]*workArray[2]);
-			    
-			    workArray[0]*=-TAIL_DISTANCE;
-			    workArray[2]*=-TAIL_DISTANCE;
-			    Vect3D.add(position, workArray, position);
-			}});
+		     mp.setOffsetMode(new TailOffsetMode(TAIL_DISTANCE, FLOAT_HEIGHT));
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Flat to horizon
 			     new double [] {1, 0, 0, 0},
 			     new double [] {0, 1, 0, 0},
@@ -485,6 +474,16 @@ public Class<Game> getTargetClass() {
 @Override
 public Class<? extends Feature> getFeatureClass() {
     return ViewSelect.class;
+}
+
+protected CockpitLayout getCockpitLayout() {
+    if(cockpitLayout == null)
+	cockpitLayout = new CockpitLayout.Default();
+    return cockpitLayout;
+}
+
+protected void setCockpitLayout(CockpitLayout cockpitLayout) {
+    this.cockpitLayout = cockpitLayout;
 }
 
 }//end ViewSelect

@@ -93,5 +93,9 @@ public class F3DashboardLayout implements DashboardLayout {
     public String getHumanReadableObjective(NAVObjective obj) {
 	return obj.getDescription();
     }
+    @Override
+    public double getMiniMapRadius() {
+	return .15;
+    }
 
 }//end F3DashboardLayout

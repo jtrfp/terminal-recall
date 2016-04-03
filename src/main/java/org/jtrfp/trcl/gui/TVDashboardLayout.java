@@ -113,5 +113,9 @@ public class TVDashboardLayout implements DashboardLayout {
 	    return "TGT";
 	else return "???";
     }
+    @Override
+    public double getMiniMapRadius() {
+	return .2;
+    }
 
 }//end TVDashboardLayout

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2015 Chuck Ritola
+ * Copyright (c) 2015-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -30,5 +30,6 @@ public interface DashboardLayout {
  public Point2D.Double getDashboardPosition();
  public Point2D.Double getDashboardDimensions();
  public Point2D.Double getMiniMapPosition();
+ public double         getMiniMapRadius();
  public String         getHumanReadableObjective(NAVObjective obj);
 }//end DashboardLayout

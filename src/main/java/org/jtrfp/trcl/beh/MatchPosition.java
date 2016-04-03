@@ -85,20 +85,43 @@ public class MatchPosition extends Behavior {
     }//end NullOffsetMode
     
     public static class TailOffsetMode implements OffsetMode {
-	private final RealMatrix tailMatrix4x4;
+	private double [] workArray = new double[3];
+	private double tailDistance, floatHeight;
 	
-	public TailOffsetMode(RealMatrix tailMatrix4x4){
-	    if(tailMatrix4x4==null)
-		throw new NullPointerException("tailMatrix intolerably null.");
-	    this.tailMatrix4x4 = tailMatrix4x4;
-	}//end constructor
+	public TailOffsetMode(double tailDistance, double floatHeight){
+	    setTailDistance(tailDistance);
+	    setFloatHeight(floatHeight);
+	}
 	
 	@Override
 	public void processPosition(double[] position, MatchPosition mp) {
-	   final double [] lookAt = mp.getTarget().getHeadingArray();
-	   final double [] tail   = tailMatrix4x4.operate(new double[]{lookAt[0],lookAt[1],lookAt[2],1});
-	   Vect3D.add(position, tail, position);
-	}//end processPosition(...)
+	    final double [] lookAt    = mp.getParent().getHeadingArray();
+	    System.arraycopy(lookAt, 0, workArray, 0, 3);
+	    Vect3D.normalize(workArray, workArray);
+	    //Need to take care of y before x and z due to dependency order.
+	    workArray[1]*=-tailDistance;
+	    workArray[1]+= floatHeight*Math.sqrt(workArray[0]*workArray[0]+workArray[2]*workArray[2]);
+	    
+	    workArray[0]*=-tailDistance;
+	    workArray[2]*=-tailDistance;
+	    Vect3D.add(position, workArray, position);
+	}
+
+	protected double getTailDistance() {
+	    return tailDistance;
+	}
+
+	protected void setTailDistance(double tailDistance) {
+	    this.tailDistance = tailDistance;
+	}
+
+	protected double getFloatHeight() {
+	    return floatHeight;
+	}
+
+	protected void setFloatHeight(double floatHeight) {
+	    this.floatHeight = floatHeight;
+	}
     }//end TailOffsetMode
     
     public OffsetMode getOffsetMode() {

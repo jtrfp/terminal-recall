@@ -19,6 +19,7 @@ import java.beans.PropertyChangeSupport;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
@@ -306,17 +307,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     getCockpit().setVisible(false);
 		     final Camera cam = tr.mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
-		     mp.setOffsetMode(new OffsetMode(){
-			 private double [] workArray = new double[3];
-			@Override
-			public void processPosition(double[] position, MatchPosition mp) {
-			    final double [] lookAt    = player.getHeadingArray();
-			    System.arraycopy(lookAt, 0, workArray, 0, 3);
-			    workArray[1]= workArray[0]!=0&&workArray[2]!=0?0:1;
-			    Vect3D.normalize(workArray, workArray);
-			    Vect3D.scalarMultiply(workArray, -TAIL_DISTANCE, workArray);
-			    Vect3D.add(position, workArray, position);
-			}});
+		     mp.setOffsetMode(new TailOffsetMode(new Vector3D(0,0,-TAIL_DISTANCE), Vector3D.ZERO));
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Flat to horizon
 			     new double [] {1, 0, 0, 0},
 			     new double [] {0, 0, 0, 0},
@@ -349,7 +340,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     getCockpit().setVisible(false);
 		     final Camera cam = tr.mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
-		     mp.setOffsetMode(new TailOffsetMode(TAIL_DISTANCE, FLOAT_HEIGHT));
+		     mp.setOffsetMode(new TailOffsetMode(new Vector3D(0,0,-TAIL_DISTANCE), new Vector3D(0,FLOAT_HEIGHT,0)));
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Flat to horizon
 			     new double [] {1, 0, 0, 0},
 			     new double [] {0, 1, 0, 0},

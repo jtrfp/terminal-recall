@@ -16,8 +16,8 @@ package org.jtrfp.trcl.beh;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -86,16 +86,20 @@ public class MatchPosition extends Behavior {
     
     public static class TailOffsetMode implements OffsetMode {
 	private double [] workArray = new double[3];
-	private double tailDistance, floatHeight;
+	private Vector3D tailVector, offsetVector;
 	
-	public TailOffsetMode(double tailDistance, double floatHeight){
-	    setTailDistance(tailDistance);
-	    setFloatHeight(floatHeight);
+	public TailOffsetMode(Vector3D tailVector, Vector3D offsetVector){
+	    setTailVector(tailVector);
+	    setOffsetVector(offsetVector);
 	}
 	
 	@Override
 	public void processPosition(double[] position, MatchPosition mp) {
-	    final double [] lookAt    = mp.getParent().getHeadingArray();
+	    final WorldObject parent = mp.getParent();
+	    final Rotation rot       = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J, parent.getHeading(), parent.getTop());
+	    final Vector3D newPos    = rot.applyTo(tailVector).add(new Vector3D(position).add(offsetVector));
+	    System.arraycopy(newPos.toArray(), 0, position, 0, 3);
+	    /*
 	    System.arraycopy(lookAt, 0, workArray, 0, 3);
 	    Vect3D.normalize(workArray, workArray);
 	    //Need to take care of y before x and z due to dependency order.
@@ -105,22 +109,23 @@ public class MatchPosition extends Behavior {
 	    workArray[0]*=-tailDistance;
 	    workArray[2]*=-tailDistance;
 	    Vect3D.add(position, workArray, position);
+	    */
 	}
 
-	protected double getTailDistance() {
-	    return tailDistance;
+	public Vector3D getTailVector() {
+	    return tailVector;
 	}
 
-	protected void setTailDistance(double tailDistance) {
-	    this.tailDistance = tailDistance;
+	public void setTailVector(Vector3D tailVector) {
+	    this.tailVector = tailVector;
 	}
 
-	protected double getFloatHeight() {
-	    return floatHeight;
+	public Vector3D getOffsetVector() {
+	    return offsetVector;
 	}
 
-	protected void setFloatHeight(double floatHeight) {
-	    this.floatHeight = floatHeight;
+	public void setOffsetVector(Vector3D offsetVector) {
+	    this.offsetVector = offsetVector;
 	}
     }//end TailOffsetMode
     

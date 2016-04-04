@@ -20,6 +20,7 @@ import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.SettableTexture;
 import org.jtrfp.trcl.gpu.Texture;
@@ -48,7 +49,10 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private class MiniMapBehavior extends Behavior {
 	@Override
 	public void tick(long tickTimeMillis){
-	    final Player player = getTr().getGame().getPlayer();
+	    final Game game = getTr().getGame();
+	    if(game == null)
+		return;
+	    final Player player = game.getPlayer();
 	    final double [] pos = player.getPosition();
 	    setMapPositionFromModern(pos[0],pos[2]);
 	    updateHeading(player);

@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import org.jtrfp.trcl.Renderable;
 
 public interface PositionedRenderable extends Renderable, Positionable {
 }

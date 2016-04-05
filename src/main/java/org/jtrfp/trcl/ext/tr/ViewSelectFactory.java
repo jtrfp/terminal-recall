@@ -26,10 +26,10 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
-import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
 import org.jtrfp.trcl.beh.MatchPosition.TailOffsetMode;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
@@ -42,10 +42,12 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.CockpitLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
-import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.obj.MiniMap;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
+import org.jtrfp.trcl.obj.Renderable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,6 +64,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
     private static final boolean INS_ENABLE = true;
     private final ControllerInput view, iView;
     private CockpitLayout cockpitLayout;
+    private RenderableSpacePartitioningGrid grid;
     
     @Autowired
     private TR tr;
@@ -90,6 +93,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private ViewMode viewMode;
      private InstrumentMode instrumentMode;
      private boolean hudVisibility = false;
+     private MiniMap miniMap;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
      
@@ -159,7 +163,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		cockpit.setModelOffset(0, -100, 0);
 		cockpit.addBehavior(new MatchPosition());
 		cockpit.addBehavior(new MatchDirection());
-		tr.mainRenderer.get().getCamera().getRootGrid().add(cockpit);
+		final SpacePartitioningGrid<PositionedRenderable> grid = getGrid();
+		grid.add(cockpit);
+		//grid.add(getMiniMap()); //TODO: Cockpit Minimap isn't ready yet.
 		cockpit.setVisible(false);
 		cockpit.notifyPositionChange();
 	    }
@@ -413,10 +419,18 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}
 	
 	private void reEvaluateState(){
+	    final SpacePartitioningGrid<PositionedRenderable> rootGrid = tr.mainRenderer.get().getCamera().getRootGrid();
+            final RenderableSpacePartitioningGrid grid = getGrid();
 	    if(!isAppropriateToDisplay()){
 		setInstrumentMode(new NoInstruments());
+		if(rootGrid.containsBranch(grid))
+		    rootGrid.nonBlockingRemoveBranch(grid);
 		return;
 	    }//end if(!isAppropriateToDisplay()
+	    if(!rootGrid.containsBranch(grid)){
+		getMiniMap().setTextureMesh(tr.getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
+		rootGrid.nonBlockingAddBranch(grid);
+	    }//end if(!containsBranch)
 	    if(getViewMode()!=viewModes[viewModeItr])
 		setViewMode(viewModes[viewModeItr]);
 	    if(getInstrumentMode()!=instrumentModes[instrumentModeItr])
@@ -435,6 +449,20 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    }//end if(PlayerActivity)
 	    return false;
 	}//end isAppropriateToDisplay()
+	
+	public MiniMap getMiniMap() {
+	    if(miniMap == null){
+		miniMap = new MiniMap(tr);
+		miniMap.setModelSize(new double[]{50000,50000});
+		final MatchPosition mp;
+		miniMap.addBehavior( mp = new MatchPosition());
+		mp.setTarget(getCockpit());
+		//RealMatrix matrix = new Array2DRowRealMatrix();
+		mp.setOffsetMode(new MatchPosition.TailOffsetMode(Vector3D.ZERO, Vector3D.ZERO));
+		//TODO:
+	    }//end if(null)
+	    return miniMap;
+	}//end getMiniMap()
  }//end ViewSelectFeature
  
 public Model getCockpitModel() {
@@ -475,6 +503,16 @@ protected CockpitLayout getCockpitLayout() {
 
 protected void setCockpitLayout(CockpitLayout cockpitLayout) {
     this.cockpitLayout = cockpitLayout;
+}
+
+protected RenderableSpacePartitioningGrid getGrid() {
+    if(grid == null)
+	grid = new RenderableSpacePartitioningGrid();
+    return grid;
+}
+
+protected void setGrid(RenderableSpacePartitioningGrid grid) {
+    this.grid = grid;
 }
 
 }//end ViewSelect

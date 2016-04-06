@@ -27,14 +27,18 @@ public class MatchDirection extends Behavior {
     @Override
     public void tick(long tickTimeMillis){
 	if(target!=null){
-	    double [] hdg = target.getHeadingArray();
-	    final RealVector newHeading = lookAtMatrix4x4.operate(new ArrayRealVector(new double [] {hdg[0],hdg[1],hdg[2],1.}));
-	    hdg = newHeading.toArray();
-	    getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]).normalize());
-	    double [] top = target.getTopArray();
-	    final RealVector newTop = topMatrix4x4.operate(new ArrayRealVector(new double [] {top[0],top[1],top[2],1.}));
-	    top = newTop.toArray();
-	    getParent().setTop(new Vector3D(top[0], top[1], top[2]).normalize());
+	    if(lookAtMatrix4x4 != null){
+		double [] hdg = target.getHeadingArray();
+		final RealVector newHeading = lookAtMatrix4x4.operate(new ArrayRealVector(new double [] {hdg[0],hdg[1],hdg[2],1.}));
+		hdg = newHeading.toArray();
+		getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]).normalize());
+	    }//end lookAt
+	    if(topMatrix4x4 != null){
+		double [] top = target.getTopArray();
+		final RealVector newTop = topMatrix4x4.operate(new ArrayRealVector(new double [] {top[0],top[1],top[2],1.}));
+		top = newTop.toArray();
+		getParent().setTop(new Vector3D(top[0], top[1], top[2]).normalize());
+	    }//end top
 	}//end if(!null)
     }//end _tick(...)
     /**

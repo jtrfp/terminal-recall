@@ -37,6 +37,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private double [] uCoords, vCoords;
     private double tileTextureUVScalar = .00001;
     private Vector3D topOrigin = Vector3D.PLUS_J;
+    private static final double [] ZERO = new double [] {0,0,0,0};
     
     public MiniMap(TR tr) {
 	super(tr);
@@ -130,13 +131,12 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	    final double percentX = 2*(x-getHalfwayPoint())/getDiameterInTiles();
 	    final double cX = percentX * modelSize[0];
 	    final double cY = percentY * modelSize[1];
-	    final double cZ = 0;
 	    final double tileWidth = tileSize[0];
 	    final double tileHeight= tileSize[1];
 	    final Triangle [] tris = Triangle.quad2Triangles(
 		    new double[]{cX, cX + tileWidth, cX + tileWidth, cX}, 
 		    new double[]{cY - tileHeight, cY - tileHeight, cY, cY}, 
-		    new double[]{cZ,cZ,cZ,cZ}, 
+		    ZERO, //cZ 
 		    getuCoords(), 
 		    getvCoords(), 
 		    texture, 

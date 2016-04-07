@@ -95,8 +95,8 @@ public class MatchPosition extends Behavior {
 	
 	@Override
 	public void processPosition(double[] position, MatchPosition mp) {
-	    final WorldObject parent = mp.getParent();
-	    final Rotation rot       = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J, parent.getHeading(), parent.getTop());
+	    final WorldObject target = mp.getTarget();
+	    final Rotation rot       = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J, target.getHeading(), target.getTop());
 	    final Vector3D newPos    = rot.applyTo(tailVector).add(new Vector3D(position).add(offsetVector));
 	    System.arraycopy(newPos.toArray(), 0, position, 0, 3);
 	    /*

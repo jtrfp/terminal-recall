@@ -391,8 +391,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected void recalculateTransRotMBuffer() {
 	try {
 	    Vect3D.normalize(heading, aZ);
+	    Vect3D.normalize(top,aY);
 	    Vect3D.cross(top, aZ, aX);
-	    Vect3D.cross(aZ, aX, aY);
 	    
 	    recalculateRotBuffer();
 	    if (translate()) {

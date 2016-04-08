@@ -38,6 +38,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private double tileTextureUVScalar = .00001;
     private Vector3D topOrigin = Vector3D.PLUS_J;
     private static final double [] ZERO = new double [] {0,0,0,0};
+    private Rotation mapHack = Rotation.IDENTITY;
     
     public MiniMap(TR tr) {
 	super(tr);
@@ -63,7 +64,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	    final Vector3D playerHdg = player.getHeading();
 	    final Vector3D topDir = new Vector3D(playerHdg.getX(),playerHdg.getZ(),0).normalize();
 	    final Rotation rot = new Rotation(Vector3D.MINUS_K,Vector3D.PLUS_J, getHeading(), getTopOrigin());
-	    setTop(rot.applyTo(topDir));
+	    setTop(rot.applyTo(getMapHack().applyTo(topDir)));
 	}
     }//end MiniMapBehavior
     
@@ -192,13 +193,16 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     
     protected void refreshTileTextures(){
 	final TextureMesh mesh = getTextureMesh();
+	final Rotation mapHack = getMapHack();
+	final double hwp = getHalfwayPoint();
 	if(mesh == null)
 	    throw new IllegalStateException("Cannot refresh tile textures while mesh is null.");
 	for(int y=0; y < getDiameterInTiles(); y++)
 	    for(int x=0; x < getDiameterInTiles(); x++){
 		final SettableTexture tex = getGrid()[x][y];
 		if(tex != null){
-		    final Texture meshTex = mesh.textureAt(tileX+x-getHalfwayPoint(), tileY+y-getHalfwayPoint());
+		    final Vector3D meshXYz = mapHack.applyTo(new Vector3D(x-hwp,y-hwp,0));
+		    final Texture meshTex = mesh.textureAt(tileX+meshXYz.getX(), tileY+meshXYz.getY());
 		    if(meshTex instanceof VQTexture)
 			tex.setCurrentTexture(((VQTexture)meshTex));
 		}//end if(!null)
@@ -286,5 +290,18 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 
     public void setTopOrigin(Vector3D topOrigin) {
         this.topOrigin = topOrigin;
+    }
+
+    public Rotation getMapHack() {
+        return mapHack;
+    }
+
+    /**
+     * This is to get around discrepancies between world and GUI coords
+     * @param mapHack
+     * @since Apr 7, 2016
+     */
+    public void setMapHack(Rotation mapHack) {
+        this.mapHack = mapHack;
     }
 }//end MiniMap

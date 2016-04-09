@@ -13,21 +13,25 @@
 
 package org.jtrfp.trcl.ext.tr;
 
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.media.opengl.GL3;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.HUDSystem;
+import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
+import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.MatchPosition.TailOffsetMode;
@@ -42,12 +46,12 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.CockpitLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.MiniMap;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
-import org.jtrfp.trcl.obj.Renderable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -71,7 +75,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
     private Model cockpitModel;
     private static final int TAIL_DISTANCE = 15000,
 	                     FLOAT_HEIGHT  = 5000;
-    
+
     public interface ViewMode{
 	    public void apply();
 	}
@@ -94,6 +98,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private InstrumentMode instrumentMode;
      private boolean hudVisibility = false;
      private MiniMap miniMap;
+     private MatchPosition.TailOffsetMode tailOffsetMode;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
      
@@ -160,12 +165,12 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    if(cockpit == null){
 		cockpit = new Cockpit(tr);
 		cockpit.setModel(getCockpitModel());
-		cockpit.setModelOffset(0, -100, 0);
+		//cockpit.setModelOffset(0, -100, 0);
 		cockpit.addBehavior(new MatchPosition());
 		cockpit.addBehavior(new MatchDirection());
 		final SpacePartitioningGrid<PositionedRenderable> grid = getGrid();
 		grid.add(cockpit);
-		//grid.add(getMiniMap()); //TODO: Cockpit Minimap isn't ready yet.
+		//grid.add(getMiniMap());//TODO: Uncomment when miniMap is ready
 		cockpit.setVisible(false);
 		cockpit.notifyPositionChange();
 	    }
@@ -367,7 +372,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}//end BehindAbove
 
 	private class Cockpit extends WorldObject implements RelevantEverywhere{
-
+	    
 	    public Cockpit(TR tr) {
 		super(tr);
 	    }
@@ -453,16 +458,75 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public MiniMap getMiniMap() {
 	    if(miniMap == null){
 		miniMap = new MiniMap(tr);
-		miniMap.setModelSize(new double[]{50000,50000});
+		miniMap.setImmuneToOpaqueDepthTest(true);
+		miniMap.setModelSize(new double[]{1200,1200});
 		final MatchPosition mp;
-		miniMap.addBehavior( mp = new MatchPosition());
-		mp.setTarget(getCockpit());
-		//RealMatrix matrix = new Array2DRowRealMatrix();
-		mp.setOffsetMode(new MatchPosition.TailOffsetMode(Vector3D.ZERO, Vector3D.ZERO));
-		//TODO:
+		miniMap.addBehavior(mp = new MatchPosition());
+		final WorldObject cockpit = getCockpit();
+		miniMap.addBehavior(new MiniMapCockpitBehavior(cockpit));
+		//Sorry, I'm just not smart enough to fix it the right way at this moment. - Chuck
+		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
+		mp.setTarget(cockpit);
+		mp.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8454), Vector3D.ZERO));
 	    }//end if(null)
 	    return miniMap;
 	}//end getMiniMap()
+	
+	private class MiniMapCockpitBehavior extends Behavior {
+	    private final WorldObject cockpit;
+	    private final KeyStatus keyStatus = new KeyStatus();
+	    private static final double INCREMENT = 50;
+	    //private Rotation offsetRot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J, 
+	//	    new Vector3D(0.8958871503, 0.1646309237, -0.4126534537),new Vector3D(-0.2201229509, 0.9712743572, -0.0903991674));
+	    private Rotation offsetRot = Rotation.IDENTITY;
+	    
+	    public MiniMapCockpitBehavior(WorldObject cockpit){
+		this.cockpit = cockpit;
+	    }
+	    
+	    @Override
+	    public void tick(long tickTimeMillis){
+		placerTick();
+		final MiniMap parent = (MiniMap)getParent();
+		//HEADING
+		//Vect3D.scalarMultiply(cockpit.getHeadingArray(), -1., parent.getHeadingArray());
+		//TODO: Apply top/heading as rotation to offsetRot. Make offsetRot a vector
+		Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,cockpit.getHeading().negate(),cockpit.getTop());
+		parent.setHeading(rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_K)));
+		//TOP ORIGIN
+		parent.setTopOrigin(rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_J)));
+		parent.notifyPositionChange();
+	    }
+	    
+	    private void placerTick(){
+		final MiniMap parent = (MiniMap)getParent();
+		if(keyStatus.isPressed(KeyEvent.VK_U))
+		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(0,INCREMENT,0)));
+		if(keyStatus.isPressed(KeyEvent.VK_D))
+		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(0,-INCREMENT,0)));
+		if(keyStatus.isPressed(KeyEvent.VK_G))
+		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(0,0,INCREMENT)));
+		if(keyStatus.isPressed(KeyEvent.VK_B))
+		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(0,0,-INCREMENT)));
+		if(keyStatus.isPressed(KeyEvent.VK_L))
+		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(-INCREMENT,0,0)));
+		if(keyStatus.isPressed(KeyEvent.VK_R))
+		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(INCREMENT,0,0)));
+		if(keyStatus.isPressed(KeyEvent.VK_COMMA))
+		    rotate(2*Math.PI*.001);
+		if(keyStatus.isPressed(KeyEvent.VK_PERIOD))
+		    rotate(-2*Math.PI*.001);
+		System.out.println("TAIL OFF= "+tailOffsetMode.getTailVector()+" ROT TOP="+parent.getTopOrigin()+" ROT HED="+parent.getHeading());
+	    }//end placerTick()
+		
+		private void rotate(double theta){
+		    final MiniMap parent = (MiniMap)getParent();
+		    final Rotation rot = new Rotation(Vector3D.PLUS_I, theta);
+		    offsetRot = rot.applyTo(offsetRot);
+		    parent.setHeading(rot.applyTo(parent.getHeading()));
+		    parent.setTopOrigin(rot.applyTo(parent.getTopOrigin()));
+		}
+	}//end MiniMapCockpitBehavior
  }//end ViewSelectFeature
  
 public Model getCockpitModel() {
@@ -470,7 +534,9 @@ public Model getCockpitModel() {
 	final GPU gpu = tr.gpu.get();
 	final GL3 gl = gpu.getGl();
 	final ColorPaletteVectorList cpvl = tr.getGlobalPaletteVL();
-	try{cockpitModel = tr.getResourceManager().getBINModel("COCKMDL.BIN", cpvl, null, gl);}
+	try{
+	    cockpitModel = tr.getResourceManager().getBINModel("COCKMDL.BIN", cpvl, null, gl);
+	}
 	catch(Exception e){e.printStackTrace();}
     }//end if(null)
     return cockpitModel;

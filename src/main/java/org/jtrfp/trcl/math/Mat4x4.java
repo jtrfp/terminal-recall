@@ -24,43 +24,45 @@ public final class Mat4x4 {
 	return dest;
     }//end set(...)
     
-    public static float [] mul4x42Vect(float [] fourXfour, float [] vect, float [] dest){
-	dest[0]=vect[0]*fourXfour[0*4+0]+
-		vect[0]*fourXfour[0*4+1]+
-		vect[0]*fourXfour[0*4+2]+
-		vect[0]*fourXfour[0*4+3];
-	dest[1]=vect[1]*fourXfour[1*4+0]+
-		vect[1]*fourXfour[1*4+1]+
-		vect[1]*fourXfour[1*4+2]+
-		vect[1]*fourXfour[1*4+3];
-	dest[2]=vect[2]*fourXfour[2*4+0]+
-		vect[2]*fourXfour[2*4+1]+
-		vect[2]*fourXfour[2*4+2]+
-		vect[2]*fourXfour[2*4+3];
-	dest[3]=vect[3]*fourXfour[3*4+0]+
-		vect[3]*fourXfour[3*4+1]+
-		vect[3]*fourXfour[3*4+2]+
-		vect[3]*fourXfour[3*4+3];
+    public static double [] mul4x42VectRowMajor(double [] fourXfour, double [] vect, double [] dest){
+	final double x = vect[0], y = vect[1], z = vect[2], w = vect[3];
+	dest[0]=x*fourXfour[0*4+0]+
+		y*fourXfour[0*4+1]+
+		z*fourXfour[0*4+2]+
+		w*fourXfour[0*4+3];
+	dest[1]=x*fourXfour[1*4+0]+
+		y*fourXfour[1*4+1]+
+		z*fourXfour[1*4+2]+
+		w*fourXfour[1*4+3];
+	dest[2]=x*fourXfour[2*4+0]+
+		y*fourXfour[2*4+1]+
+		z*fourXfour[2*4+2]+
+		w*fourXfour[2*4+3];
+	dest[3]=x*fourXfour[3*4+0]+
+		y*fourXfour[3*4+1]+
+		z*fourXfour[3*4+2]+
+		w*fourXfour[3*4+3];
 	return dest;
     }//end mul4x42Vect(...)
     
     public static double [] mul4x42VectColumnMajor(double [] fourXfour, double [] vect, double [] dest){
-	dest[0]=vect[0]*fourXfour[0*4+0]+
-		vect[0]*fourXfour[1*4+0]+
-		vect[0]*fourXfour[2*4+0]+
-		vect[0]*fourXfour[3*4+0];
-	dest[1]=vect[1]*fourXfour[0*4+1]+
-		vect[1]*fourXfour[1*4+1]+
-		vect[1]*fourXfour[2*4+1]+
-		vect[1]*fourXfour[3*4+1];
-	dest[2]=vect[2]*fourXfour[0*4+2]+
-		vect[2]*fourXfour[1*4+2]+
-		vect[2]*fourXfour[2*4+2]+
-		vect[2]*fourXfour[3*4+2];
-	dest[3]=vect[3]*fourXfour[0*4+3]+
-		vect[3]*fourXfour[1*4+3]+
-		vect[3]*fourXfour[2*4+3]+
-		vect[3]*fourXfour[3*4+3];
+	final double x = vect[0], y = vect[1], z = vect[2], w = vect[3];
+	dest[0]=x*fourXfour[0*4+0]+
+		y*fourXfour[1*4+0]+
+		z*fourXfour[2*4+0]+
+		w*fourXfour[3*4+0];
+	dest[1]=x*fourXfour[0*4+1]+
+		y*fourXfour[1*4+1]+
+		z*fourXfour[2*4+1]+
+		w*fourXfour[3*4+1];
+	dest[2]=x*fourXfour[0*4+2]+
+		y*fourXfour[1*4+2]+
+		z*fourXfour[2*4+2]+
+		w*fourXfour[3*4+2];
+	dest[3]=x*fourXfour[0*4+3]+
+		y*fourXfour[1*4+3]+
+		z*fourXfour[2*4+3]+
+		w*fourXfour[3*4+3];
 	return dest;
     }//end mul4x42Vect(...)
     

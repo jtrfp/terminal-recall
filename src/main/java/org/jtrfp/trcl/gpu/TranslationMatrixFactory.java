@@ -14,5 +14,5 @@
 package org.jtrfp.trcl.gpu;
 
 public interface TranslationMatrixFactory {
- public void newTranslationMatrix(double [] pos, double [] dest);
+ public void applyTranslationMatrix(double [] pos, double [] dest);
 }//end TranslationMatrixFactory

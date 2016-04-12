@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -40,6 +40,26 @@ public final class Mat4x4 {
 	dest[3]=vect[3]*fourXfour[3*4+0]+
 		vect[3]*fourXfour[3*4+1]+
 		vect[3]*fourXfour[3*4+2]+
+		vect[3]*fourXfour[3*4+3];
+	return dest;
+    }//end mul4x42Vect(...)
+    
+    public static double [] mul4x42VectColumnMajor(double [] fourXfour, double [] vect, double [] dest){
+	dest[0]=vect[0]*fourXfour[0*4+0]+
+		vect[0]*fourXfour[1*4+0]+
+		vect[0]*fourXfour[2*4+0]+
+		vect[0]*fourXfour[3*4+0];
+	dest[1]=vect[1]*fourXfour[0*4+1]+
+		vect[1]*fourXfour[1*4+1]+
+		vect[1]*fourXfour[2*4+1]+
+		vect[1]*fourXfour[3*4+1];
+	dest[2]=vect[2]*fourXfour[0*4+2]+
+		vect[2]*fourXfour[1*4+2]+
+		vect[2]*fourXfour[2*4+2]+
+		vect[2]*fourXfour[3*4+2];
+	dest[3]=vect[3]*fourXfour[0*4+3]+
+		vect[3]*fourXfour[1*4+3]+
+		vect[3]*fourXfour[2*4+3]+
 		vect[3]*fourXfour[3*4+3];
 	return dest;
     }//end mul4x42Vect(...)
@@ -115,4 +135,23 @@ public final class Mat4x4 {
 		l[3*4+3]*r[3*4+3];
 	return dest;
     }//end mul(...)
+    
+    public static void identity(double [] dest4x4){
+	dest4x4[0]=1;
+	dest4x4[1]=0;
+	dest4x4[2]=0;
+	dest4x4[3]=0;
+	dest4x4[4]=0;
+	dest4x4[5]=1;
+	dest4x4[6]=0;
+	dest4x4[7]=0;
+	dest4x4[8]=0;
+	dest4x4[9]=0;
+	dest4x4[10]=1;
+	dest4x4[11]=0;
+	dest4x4[12]=0;
+	dest4x4[13]=0;
+	dest4x4[14]=0;
+	dest4x4[15]=1;
+    }
 }//end Mat4x4

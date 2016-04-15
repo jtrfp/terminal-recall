@@ -17,6 +17,7 @@ import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -227,12 +228,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(triangleObjectDefinitions!=null)
 	    for(int def:triangleObjectDefinitions)
 		tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
-	RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
+	try{RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		getOpaqueObjectDefinitionAddressesInVEC4()     .clear();
 		getTransparentObjectDefinitionAddressesInVEC4().clear();
-	    }});
+	    }}).get();}
+	catch(Exception e){e.printStackTrace();}
 	
 	transparentTriangleObjectDefinitions = null;
 	triangleObjectDefinitions            = null;
@@ -391,8 +393,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected void recalculateTransRotMBuffer() {
 	try {
 	    Vect3D.normalize(heading, aZ);
-	    Vect3D.normalize(top,aY);
 	    Vect3D.cross(top, aZ, aX);
+	    Vect3D.cross(aZ, aX, aY);
 	    
 	    recalculateRotBuffer();
 	    if (translate()) {

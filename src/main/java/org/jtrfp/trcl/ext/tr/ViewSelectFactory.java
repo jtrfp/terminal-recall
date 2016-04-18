@@ -33,6 +33,7 @@ import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
 import org.jtrfp.trcl.beh.MatchPosition.TailOffsetMode;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
@@ -45,6 +46,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.CockpitLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.MiniMap;
 import org.jtrfp.trcl.obj.Player;
@@ -344,7 +346,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public class OutsideView implements ViewMode{
 	    @Override
 	    public void apply(){
-		     final Game game = tr.getGame();
+		final Game game = tr.getGame();
 		     if(game==null)
 			 return;
 		     final Player player = game.getPlayer();
@@ -352,10 +354,19 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 			 return;
 		     player.setVisible(true);
 		     getCockpit().setVisible(false);
-		     getCockpit().setVisible(false);
 		     final Camera cam = tr.mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
-		     mp.setOffsetMode(new TailOffsetMode(new Vector3D(0,0,-TAIL_DISTANCE), Vector3D.ZERO));
+		     mp.setOffsetMode(new OffsetMode(){
+			 private double [] workArray = new double[3];
+			@Override
+			public void processPosition(double[] position, MatchPosition mp) {
+			    final double [] lookAt    = player.getHeadingArray();
+			    System.arraycopy(lookAt, 0, workArray, 0, 3);
+			    workArray[1]= workArray[0]!=0&&workArray[2]!=0?0:1;
+			    Vect3D.normalize(workArray, workArray);
+			    Vect3D.scalarMultiply(workArray, -TAIL_DISTANCE, workArray);
+			    Vect3D.add(position, workArray, position);
+			}});
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Flat to horizon
 			     new double [] {1, 0, 0, 0},
 			     new double [] {0, 0, 0, 0},

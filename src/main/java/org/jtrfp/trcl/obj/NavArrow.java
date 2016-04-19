@@ -40,6 +40,7 @@ private final DashboardLayout layout;
 private Color backgroundColor;
 private static final int BACKGROUND_INDEX = 10;
 private Vector3D topOrigin = Vector3D.PLUS_J;
+private Rotation vectorHack = Rotation.IDENTITY;
 
     public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout, String debugName) {
 	super(tr, Z, 
@@ -140,7 +141,7 @@ private Vector3D topOrigin = Vector3D.PLUS_J;
 	    final Vector3D correctedNormPlayer2NavVector = new Vector3D(-normPlayer2NavVector.getX(),normPlayer2NavVector.getY(),0);
 	    final Rotation camRot    = new Rotation(Vector3D.PLUS_J,playerHeadingXY);
 	    final Rotation renderRot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J,getHeading(),getTopOrigin());
-	    setTop(renderRot.applyTo(camRot.applyTo(correctedNormPlayer2NavVector)).normalize());
+	    setTop(renderRot.applyTo(vectorHack.applyTo(camRot.applyTo(correctedNormPlayer2NavVector))).normalize());
 	}//_ticks(...)
     }//end NavArrowBehavior
 
@@ -150,5 +151,13 @@ private Vector3D topOrigin = Vector3D.PLUS_J;
 
     public void setTopOrigin(Vector3D topOrigin) {
         this.topOrigin = topOrigin;
+    }
+
+    public Rotation getVectorHack() {
+        return vectorHack;
+    }
+
+    public void setVectorHack(Rotation vectorHack) {
+        this.vectorHack = vectorHack;
     }
 }//end NavArrow

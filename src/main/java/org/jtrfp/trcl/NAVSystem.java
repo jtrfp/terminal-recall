@@ -42,7 +42,7 @@ private final DashboardLayout layout;
 	this.tr=tr;
 	this.layout=layout;
 	System.out.println("Setting up NAV system...");
-	arrow = new NavArrow(tr,this,layout,"NAVSystem");
+	arrow = new NavArrow(tr,layout,"NAVSystem");
 	miniMap = new MiniMap(tr);
 	miniMap.setPosition(0,0,.00001);
 	miniMap.setImmuneToOpaqueDepthTest(true);

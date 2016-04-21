@@ -17,7 +17,6 @@ import java.awt.Color;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.HUDSystem;
-import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
@@ -35,21 +34,19 @@ private static final double WIDTH=.16;
 private static final double HEIGHT=.16;
 private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
-private final NAVSystem nav;
 private final DashboardLayout layout;
 private Color backgroundColor;
 private static final int BACKGROUND_INDEX = 10;
 private Vector3D topOrigin = Vector3D.PLUS_J;
 private Rotation vectorHack = Rotation.IDENTITY;
 
-    public NavArrow(TR tr, NAVSystem navSystem, DashboardLayout layout, String debugName) {
+    public NavArrow(TR tr, DashboardLayout layout, String debugName) {
 	super(tr, Z, 
 		WIDTH, 
 		HEIGHT, 
 		getTexture(tr), 
 		true,
 		debugName);
-	this.nav=navSystem;
 	this.layout=layout;
 	setImmuneToOpaqueDepthTest(true);
 	try{
@@ -99,7 +96,8 @@ private Rotation vectorHack = Rotation.IDENTITY;
 		    final TunnelExitObject eo = ts.getCurrentTunnel().getExitObject();
 		    final double [] eoPos = eo.getPosition();
 		    navLocXY = new Vector3D(eoPos[0],eoPos[2],0);
-		    hudSystem.getObjective().setContent(layout.getHumanReadableObjective(new NAVObjective(null){
+		    if(layout != null)
+		     hudSystem.getObjective().setContent(layout.getHumanReadableObjective(new NAVObjective(null){
 
 			@Override
 			public String getDescription() {

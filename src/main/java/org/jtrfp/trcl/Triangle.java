@@ -12,11 +12,13 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.Collection;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.gpu.BasicModelTarget;
-import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.BasicModelTarget.WriterState;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.Vertex;
 
 public class Triangle {
@@ -332,5 +334,18 @@ public class Triangle {
 	vTarg[0]=vertices[2];vTarg[1]=vertices[3];vTarg[2]=vertices[0];
 	target.addPrimitive(primitiveData);
     }
+    
+    public static Triangle [] quad2Triangles(double width, double height, double offX, double offY, double offZ, boolean useAlpha, Texture tex){
+	final double loY = -height/2+offY;
+	final double hiY = height/2+offY;
+	final double loX = -width/2+offX;
+	final double hiX = width/2+offX;
+	return Triangle.quad2Triangles(
+		new double[]{loX,hiX,hiX,loX}, 
+		new double[]{loY,loY,hiY,hiY}, 
+		new double[]{offZ,offZ,offZ,offZ},
+		new double[]{0,1,1,0},
+		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.ZERO,"Sprite2D non-segmented");
+    }//end quadFrom
 }// Triangle
 

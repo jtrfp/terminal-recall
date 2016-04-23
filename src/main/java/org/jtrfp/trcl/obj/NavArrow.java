@@ -17,19 +17,21 @@ import java.awt.Color;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.HUDSystem;
+import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 
-public class NavArrow extends Sprite2D {
+public class NavArrow extends WorldObject implements RelevantEverywhere {
 private static final double WIDTH=.16;
 private static final double HEIGHT=.16;
 private static final double Z=.0001;
@@ -41,19 +43,31 @@ private Vector3D topOrigin = Vector3D.PLUS_J;
 private Rotation vectorHack = Rotation.IDENTITY;
 
     public NavArrow(TR tr, DashboardLayout layout, String debugName) {
+	super(tr);
+	final Model m = new Model(false, tr, debugName);
+	m.addTriangles(Triangle.quad2Triangles(WIDTH,HEIGHT,0,0,Z, true, getTexture(tr)));
+	this.setRenderFlag(RenderFlags.IgnoreCamera);
+	setImmuneToOpaqueDepthTest(true);
+	setModel(m);
+	/*
 	super(tr, Z, 
 		WIDTH, 
 		HEIGHT, 
 		getTexture(tr), 
 		true,
 		debugName);
+	*/
 	this.layout=layout;
-	setImmuneToOpaqueDepthTest(true);
 	try{
 	addBehavior(new NavArrowBehavior());
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
+    
+    @Override
+    public boolean supportsLoop(){
+	return false;
+    }
     
     public Color getBackgroundColor(){
 	if(backgroundColor == null)

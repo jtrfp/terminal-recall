@@ -28,12 +28,14 @@ public class Sprite2D extends WorldObject2DRelevantEverywhere {
 	    throw new NullPointerException("Supplied texture intolerably null.");
 	this.texture=tex;
 	final Model m = new Model(false,tr,debugName);
-	Triangle [] tris = Triangle.quad2Triangles(
+	Triangle [] tris = Triangle.quad2Triangles(width, height, 0, 0, 0, useAlpha, tex);
+	/*Triangle [] tris = Triangle.quad2Triangles(
 		new double[]{-width/2,width/2,width/2,-width/2}, 
 		new double[]{-height/2,-height/2,height/2,height/2}, 
 		new double[]{z,z,z,z},
 		new double[]{0,1,1,0},
 		new double[]{0,0,1,1}, tex, RenderMode.DYNAMIC, useAlpha,Vector3D.ZERO,"Sprite2D non-segmented");
+	*/
 	m.addTriangles(tris);
 	setModel(m);
 	setTop(Vector3D.PLUS_J);

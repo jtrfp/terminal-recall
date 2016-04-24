@@ -17,7 +17,6 @@ import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -228,13 +227,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(triangleObjectDefinitions!=null)
 	    for(int def:triangleObjectDefinitions)
 		tr.gpu.get().objectDefinitionWindow.get().freeLater(def);
-	try{RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
+	RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		getOpaqueObjectDefinitionAddressesInVEC4()     .clear();
 		getTransparentObjectDefinitionAddressesInVEC4().clear();
-	    }}).get();}
-	catch(Exception e){e.printStackTrace();}
+	    }});
 	
 	transparentTriangleObjectDefinitions = null;
 	triangleObjectDefinitions            = null;
@@ -282,6 +280,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 				getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4());
 			return null;
 		    }}).get();
+		updateAllRenderFlagStates();
 		objectDefsInitialized = true;
 		return null;
 	    }});
@@ -307,7 +306,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		    .getPhysicalAddressInBytes(matrixID)).intValue();
 	    odw.matrixOffset.set(index,matrixOffsetVec4s);
 	    odw.vertexOffset.set(index,vertexOffsetVec4s);
-	    odw.mode.set(index, (byte)(primitiveList.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
 	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
 	    if (gpuVerticesRemaining >= GPU.GPU_VERTICES_PER_BLOCK) {
 		odw.numVertices.set(index,
@@ -328,6 +326,20 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		objectDefinitionAddressesInVEC4.addAll(addressesToAdd);
 	    }});
     }// end processPrimitiveList(...)
+    
+    protected void updateAllRenderFlagStates(){
+	final Model model = getModel();
+	if(model == null)
+	    return;
+	updateRenderFlagStatesPL(model.getTriangleList(),getTriangleObjectDefinitions());
+	updateRenderFlagStatesPL(model.getTransparentTriangleList(),getTransparentTriangleObjectDefinitions());
+    }
+    
+    protected void updateRenderFlagStatesPL(PrimitiveList<?> pl, int [] objectDefinitionIndices){
+	final ObjectDefinitionWindow odw = tr.gpu.get().objectDefinitionWindow.get();
+	for(int index : objectDefinitionIndices)
+	    odw.mode.set(index, (byte)(pl.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
+    }//end updateRenderFlagStatesPL
 
     public synchronized final void updateStateToGPU(Renderer renderer) throws NotReadyException {
 	initializeObjectDefinitions();
@@ -393,8 +405,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected void recalculateTransRotMBuffer() {
 	try {
 	    Vect3D.normalize(heading, aZ);
+	    Vect3D.normalize(top,aY);
 	    Vect3D.cross(top, aZ, aX);
-	    Vect3D.cross(aZ, aX, aY);
 	    
 	    recalculateRotBuffer();
 	    if (translate()) {
@@ -680,6 +692,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      */
     public void setRenderFlags(byte renderFlags) {
         this.renderFlags = renderFlags;
+        updateAllRenderFlagStates();
     }
 
     /**

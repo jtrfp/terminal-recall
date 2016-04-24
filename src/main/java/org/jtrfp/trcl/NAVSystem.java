@@ -62,6 +62,7 @@ private final DashboardLayout layout;
 	miniMap.notifyPositionChange();
 	miniMap.setMapPositionFromTile(0, 0);
 	arrow.notifyPositionChange();
+	arrow.setRenderFlag(RenderFlags.IgnoreCamera);
 	add(arrow);
 	add(miniMap);
 	blips=new NAVRadarBlipFactory(tr,this,layout,"NAVSystem");

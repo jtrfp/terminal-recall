@@ -42,11 +42,11 @@ private static final int BACKGROUND_INDEX = 10;
 private Vector3D topOrigin = Vector3D.PLUS_J;
 private Rotation vectorHack = Rotation.IDENTITY;
 
-    public NavArrow(TR tr, DashboardLayout layout, String debugName) {
+    public NavArrow(TR tr, DashboardLayout layout, String debugName) {//TODO: Accept outside width/height parms
 	super(tr);
 	final Model m = new Model(false, tr, debugName);
 	m.addTriangles(Triangle.quad2Triangles(WIDTH,HEIGHT,0,0,Z, true, getTexture(tr)));
-	this.setRenderFlag(RenderFlags.IgnoreCamera);
+	//this.setRenderFlag(RenderFlags.IgnoreCamera);
 	setImmuneToOpaqueDepthTest(true);
 	setModel(m);
 	/*

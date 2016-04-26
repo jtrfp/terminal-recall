@@ -13,6 +13,7 @@
 package org.jtrfp.trcl;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
@@ -42,7 +43,7 @@ private final DashboardLayout layout;
 	this.tr=tr;
 	this.layout=layout;
 	System.out.println("Setting up NAV system...");
-	arrow = new NavArrow(tr,layout,"NAVSystem");
+	arrow = new NavArrow(tr,layout, new Point2D.Double(.16,.16), "NAVSystem");
 	miniMap = new MiniMap(tr);
 	miniMap.setPosition(0,0,.00001);
 	miniMap.setImmuneToOpaqueDepthTest(true);

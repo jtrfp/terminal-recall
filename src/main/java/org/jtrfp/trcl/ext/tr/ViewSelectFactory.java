@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.ext.tr;
 
+import java.awt.event.KeyEvent;
+import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -49,10 +51,12 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.MiniMap;
+import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.obj.WorldObject.RenderFlags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -99,8 +103,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private boolean hudVisibility = false;
      private MiniMap miniMap;
      private MatchPosition.TailOffsetMode tailOffsetMode;
-     private MatchPosition miniMapPositionMatch;
-     private Rotation offsetRot = Rotation.IDENTITY;
+     private MatchPosition miniMapPositionMatch, navArrowPositionMatch;
+     private Rotation offsetRot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, new Vector3D(0, 0.7417417727, -0.6706855765), new Vector3D(0, 0.6706855765, 0.7417417727));
+     private NavArrow navArrow;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
      
@@ -158,19 +163,26 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public void propertyChange(PropertyChangeEvent evt) {
 	    final String propertyName = evt.getPropertyName();
 	    if(propertyName == Player.HEADING || propertyName == Player.TOP || propertyName == Player.POSITION)
-		updateMiniMapPosition((Player)evt.getSource());
+		updateConsolePosition((Player)evt.getSource());
 	}//end propertyChange
      }//end PlayerPropertyChangeListener
      
-     private void updateMiniMapPosition(Player player) {
-	 final MiniMap parent = getMiniMap();
+     private void updateConsolePosition(Player player) {
+	 final MiniMap miniMap   = getMiniMap();
+	 final NavArrow navArrow = getNavArrow();
 	 //HEADING
 	 Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,player.getHeading().negate(),player.getTop());
-	 parent.setHeading(rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_K)));
+	 final Vector3D heading = rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_K));
+	 miniMap.setHeading(heading);
+	 navArrow.setHeading(heading.negate());
 	 //TOP ORIGIN
-	 parent.setTopOrigin(rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_J)));
-	 parent.notifyPositionChange();
-     }
+	 final Vector3D topOrigin = rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_J));
+	 miniMap.setTopOrigin(topOrigin);
+	 miniMap.notifyPositionChange();
+	 
+	 navArrow.setTopOrigin(topOrigin);
+	 navArrow.notifyPositionChange();
+     }//end updateConsolePosition
      
      public ViewMode getViewMode() {
 	    return viewMode;
@@ -202,7 +214,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		cockpit.addBehavior(new MatchDirection());
 		final SpacePartitioningGrid<PositionedRenderable> grid = getGrid();
 		grid.add(cockpit);
-		grid.add(getMiniMap());
+		//grid.add(getMiniMap());
+		grid.add(getNavArrow());
 		cockpit.setVisible(false);
 		cockpit.notifyPositionChange();
 	    }
@@ -233,6 +246,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		setHUDVisibility(false);
 		getCockpit().setVisible(false);
 		getMiniMap().setVisible(false);
+		getNavArrow().setVisible(false);
 		return true;
 	   }
 	}//end NoInstruments
@@ -247,6 +261,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		if(!(runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState))
 		 getMiniMap().setVisible(true);
 		setHUDVisibility(true);
+		getNavArrow().setVisible(true);
 		return true;
 	   }
 	}//end FullCockpitInstruments
@@ -256,6 +271,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	   public boolean apply() {
 		getCockpit().setVisible(false);
 		getMiniMap().setVisible(false);
+		getNavArrow().setVisible(false);
 		setHUDVisibility(true);
 		return true;
 	   }//end HeadsUpDisplayInstruments
@@ -321,6 +337,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     cockpit.probeForBehavior(MatchPosition.class) .setTarget(player);
 		     cockpit.probeForBehavior(MatchDirection.class).setTarget(player);
 		     miniMapPositionMatch.setTarget(player);
+		     navArrowPositionMatch.setTarget(player);
 		     //cockpit.setVisible(true);//TODO: Depend on "C" value
 		     final Camera cam = tr.mainRenderer.get().getCamera();
 		     cam.probeForBehavior(MatchPosition.class).setOffsetMode(MatchPosition.NULL);
@@ -398,6 +415,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     player.setVisible(true);
 		     getCockpit().setVisible(false);
 		     getMiniMap().setVisible(false);
+		     getNavArrow().setVisible(false);
 		     final Camera cam = tr.mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
 		     mp.setOffsetMode(new TailOffsetMode(new Vector3D(0,0,-TAIL_DISTANCE), new Vector3D(0,FLOAT_HEIGHT,0)));
@@ -509,6 +527,18 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    return false;
 	}//end isAppropriateToDisplay()
 	
+	public NavArrow getNavArrow() {
+	    if(navArrow == null){
+		navArrow = new NavArrow(tr, null, new Point2D.Double(500,500), "ViewSelectFactory.Cockpit.NavArrow");
+		navArrow.unsetRenderFlag(RenderFlags.IgnoreCamera);
+		navArrow.setVectorHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
+		navArrow.addBehavior(navArrowPositionMatch = new MatchPosition());
+		navArrowPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8454), Vector3D.ZERO));
+
+	    }
+	    return navArrow;
+	}//end getNavArrow()
+	
 	public MiniMap getMiniMap() {
 	    if(miniMap == null){
 		miniMap = new MiniMap(tr);
@@ -516,7 +546,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		miniMap.setModelSize(new double[]{1200,1200});
 		miniMap.addBehavior(miniMapPositionMatch = new MatchPosition());
 		final WorldObject cockpit = getCockpit();
-		//miniMap.addBehavior(new MiniMapCockpitBehavior());
+		miniMap.addBehavior(new MiniMapCockpitBehavior());
 		//Sorry, I'm just not smart enough to fix it the right way at this moment. - Chuck
 		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		//miniMapPositionMatch.setTarget(cockpit);//TODO: Refactor to cam mode
@@ -533,9 +563,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    
 	    @Override
 	    public void tick(long tickTimeMillis){
-		
+		placerTick();
 	    }
-	    /*
+	    
 	    //Originally used to find the position for the miniMap
 	    private void placerTick(){
 		if(keyStatus.isPressed(KeyEvent.VK_U))
@@ -554,7 +584,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    rotate(2*Math.PI*.001);
 		if(keyStatus.isPressed(KeyEvent.VK_PERIOD))
 		    rotate(-2*Math.PI*.001);
-		//System.out.println("TAIL OFF= "+tailOffsetMode.getTailVector()+" ROT TOP="+parent.getTopOrigin()+" ROT HED="+parent.getHeading());
+		final Vector3D rotTop = offsetRot.applyTo(Vector3D.PLUS_J);
+		final Vector3D rotHed = offsetRot.applyTo(Vector3D.PLUS_K);
+		System.out.println("TOP = "+rotTop+"  HED="+rotHed);
 	    }//end placerTick()
 		
 		private void rotate(double theta){
@@ -564,7 +596,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    parent.setHeading(rot.applyTo(parent.getHeading()));
 		    parent.setTopOrigin(rot.applyTo(parent.getTopOrigin()));
 		}
-		*/
+		
 	}//end MiniMapCockpitBehavior
  }//end ViewSelectFeature
  

@@ -42,6 +42,7 @@ private Color backgroundColor;
 private static final int BACKGROUND_INDEX = 10;
 private Vector3D topOrigin = Vector3D.PLUS_J;
 private Rotation vectorHack = Rotation.IDENTITY;
+private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
 
     public NavArrow(TR tr, DashboardLayout layout, Point2D.Double size, String debugName) {//TODO: Accept outside width/height parms
 	super(tr);
@@ -61,9 +62,14 @@ private Rotation vectorHack = Rotation.IDENTITY;
 	this.layout=layout;
 	try{
 	addBehavior(new NavArrowBehavior());
+	addBehavior(visibilitySwitchingBehavior = new VisibilitySwitchingBehavior());
 	}//end try{}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
+    
+    public void setAutoVisibilityBehavior(boolean enable){
+	visibilitySwitchingBehavior.setEnable(enable);
+    }
     
     @Override
     public boolean supportsLoop(){
@@ -83,6 +89,13 @@ private Rotation vectorHack = Rotation.IDENTITY;
 	catch(Exception e){e.printStackTrace();}
 	return null;
     }
+    
+    private class VisibilitySwitchingBehavior extends Behavior{
+	@Override
+	public void tick(long time){
+	    setVisible(!(getTr().getRunState() instanceof Mission.TunnelState));
+	}
+    }//end VisibilitySwitchingBehavior
     
     private class NavArrowBehavior extends Behavior{
 	private int counter=0;
@@ -106,7 +119,6 @@ private Rotation vectorHack = Rotation.IDENTITY;
 	    //Tunnel
 	    if(tr.getRunState() instanceof Mission.TunnelState){
 		if(counter==0){
-		    setVisible(false);
 		    final TunnelSystem ts = Features.get(mission, TunnelSystem.class);
 		    final TunnelExitObject eo = ts.getCurrentTunnel().getExitObject();
 		    final double [] eoPos = eo.getPosition();
@@ -126,7 +138,6 @@ private Rotation vectorHack = Rotation.IDENTITY;
 		    sectorMsg = "???.???";
 		}
 	    }else{//No Tunnel
-		setVisible(true);
 		final double [] loc =mission.currentNAVObjective().getTarget().getPosition();
 		navLocXY = new Vector3D(loc[0],loc[2],0);
 		sectorMsg = TR.modernToMapSquare(playerPos[2])+"."+

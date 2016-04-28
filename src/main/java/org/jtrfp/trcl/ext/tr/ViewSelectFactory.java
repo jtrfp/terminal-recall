@@ -214,7 +214,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		cockpit.addBehavior(new MatchDirection());
 		final SpacePartitioningGrid<PositionedRenderable> grid = getGrid();
 		grid.add(cockpit);
-		//grid.add(getMiniMap());
+		grid.add(getMiniMap());
 		grid.add(getNavArrow());
 		cockpit.setVisible(false);
 		cockpit.notifyPositionChange();
@@ -529,12 +529,12 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	public NavArrow getNavArrow() {
 	    if(navArrow == null){
-		navArrow = new NavArrow(tr, null, new Point2D.Double(500,500), "ViewSelectFactory.Cockpit.NavArrow");
+		navArrow = new NavArrow(tr, null, new Point2D.Double(1000,1000), "ViewSelectFactory.Cockpit.NavArrow");
 		navArrow.unsetRenderFlag(RenderFlags.IgnoreCamera);
 		navArrow.setVectorHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		navArrow.addBehavior(navArrowPositionMatch = new MatchPosition());
 		navArrowPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8454), Vector3D.ZERO));
-
+		navArrow.setAutoVisibilityBehavior(false);
 	    }
 	    return navArrow;
 	}//end getNavArrow()
@@ -546,11 +546,11 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		miniMap.setModelSize(new double[]{1200,1200});
 		miniMap.addBehavior(miniMapPositionMatch = new MatchPosition());
 		final WorldObject cockpit = getCockpit();
-		miniMap.addBehavior(new MiniMapCockpitBehavior());
+		//miniMap.addBehavior(new MiniMapCockpitBehavior());
 		//Sorry, I'm just not smart enough to fix it the right way at this moment. - Chuck
 		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		//miniMapPositionMatch.setTarget(cockpit);//TODO: Refactor to cam mode
-		miniMapPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8454), Vector3D.ZERO));
+		miniMapPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8800), Vector3D.ZERO));
 	    }//end if(null)
 	    return miniMap;
 	}//end getMiniMap()
@@ -596,7 +596,6 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    parent.setHeading(rot.applyTo(parent.getHeading()));
 		    parent.setTopOrigin(rot.applyTo(parent.getTopOrigin()));
 		}
-		
 	}//end MiniMapCockpitBehavior
  }//end ViewSelectFeature
  

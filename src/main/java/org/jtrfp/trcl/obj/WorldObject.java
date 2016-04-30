@@ -522,10 +522,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      */
     public synchronized void setHeading(Vector3D nHeading) {
 	System.arraycopy(heading, 0, oldHeading, 0, 3);
-	pcs.firePropertyChange(HEADING, oldHeading, nHeading);
 	heading[0] = nHeading.getX();
 	heading[1] = nHeading.getY();
 	heading[2] = nHeading.getZ();
+	pcs.firePropertyChange(HEADING, oldHeading, nHeading);
 	needToRecalcMatrix=true;
     }
 
@@ -548,10 +548,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      */
     public synchronized void setTop(Vector3D nTop) {
 	System.arraycopy(top, 0, oldTop, 0, 3);
-	pcs.firePropertyChange(TOP, oldTop, nTop);
 	top[0] = nTop.getX();
 	top[1] = nTop.getY();
 	top[2] = nTop.getZ();
+	pcs.firePropertyChange(TOP, oldTop, nTop);
 	needToRecalcMatrix=true;
     }
     

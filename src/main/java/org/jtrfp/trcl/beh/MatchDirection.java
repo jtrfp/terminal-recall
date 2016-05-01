@@ -13,6 +13,9 @@
 
 package org.jtrfp.trcl.beh;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -24,34 +27,44 @@ public class MatchDirection extends Behavior {
     private WorldObject target;
     private RealMatrix lookAtMatrix4x4 = MatrixUtils.createRealIdentityMatrix(4);
     private RealMatrix topMatrix4x4    = MatrixUtils.createRealIdentityMatrix(4);
-    @Override
-    public void tick(long tickTimeMillis){
-	if(target!=null){
-	    if(lookAtMatrix4x4 != null){
-		double [] hdg = target.getHeadingArray();
-		final RealVector newHeading = lookAtMatrix4x4.operate(new ArrayRealVector(new double [] {hdg[0],hdg[1],hdg[2],1.}));
-		hdg = newHeading.toArray();
-		getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]).normalize());
-	    }//end lookAt
-	    if(topMatrix4x4 != null){
-		double [] top = target.getTopArray();
-		final RealVector newTop = topMatrix4x4.operate(new ArrayRealVector(new double [] {top[0],top[1],top[2],1.}));
-		top = newTop.toArray();
-		getParent().setTop(new Vector3D(top[0], top[1], top[2]).normalize());
-	    }//end top
-	}//end if(!null)
-    }//end _tick(...)
+    private PropertyChangeListener directionListener;
     /**
      * @return the target
      */
     public WorldObject getTarget() {
         return target;
     }
+    
+    private class DirectionListener implements PropertyChangeListener {
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    if(target!=null){
+		if(lookAtMatrix4x4 != null){
+		    double [] hdg = target.getHeadingArray();
+		    final RealVector newHeading = lookAtMatrix4x4.operate(new ArrayRealVector(new double [] {hdg[0],hdg[1],hdg[2],1.}));
+		    hdg = newHeading.toArray();
+		    getParent().setHeading(new Vector3D(hdg[0], hdg[1], hdg[2]).normalize());
+		}//end lookAt
+		if(topMatrix4x4 != null){
+		    double [] top = target.getTopArray();
+		    final RealVector newTop = topMatrix4x4.operate(new ArrayRealVector(new double [] {top[0],top[1],top[2],1.}));
+		    top = newTop.toArray();
+		    getParent().setTop(new Vector3D(top[0], top[1], top[2]).normalize());
+		}//end top
+	    }//end if(!null)
+	}//end propertyChange(...)
+    }//end DirectionListener
+    
     /**
      * @param target the target to set
      */
     public void setTarget(WorldObject target) {
+	final PropertyChangeListener directionListener = getDirectionListener();
+	if(this.target != null)
+	    this.target.removePropertyChangeListener(directionListener);
         this.target = target;
+        if(this.target != null)
+         this.target.addPropertyChangeListener(directionListener);
     }
     public RealMatrix getLookAtMatrix4x4() {
         return lookAtMatrix4x4;
@@ -66,6 +79,14 @@ public class MatchDirection extends Behavior {
     public MatchDirection setTopMatrix4x4(RealMatrix topMatrix4x4) {
         this.topMatrix4x4 = topMatrix4x4;
         return this;
+    }
+    protected PropertyChangeListener getDirectionListener() {
+	if(directionListener == null)
+	    directionListener = new DirectionListener();
+        return directionListener;
+    }
+    protected void setDirectionListener(PropertyChangeListener directionListener) {
+        this.directionListener = directionListener;
     }
     
 }//end MatchDirection

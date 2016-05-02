@@ -55,6 +55,8 @@ public class WeakPropertyChangeSupport {
      * @see java.beans.PropertyChangeSupport#addPropertyChangeListener(java.beans.PropertyChangeListener)
      */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
+	if(listener == null)
+	    throw new NullPointerException("Listener intolerably null.");
 	delegate.addPropertyChangeListener(pclAdapter.adapt(listener));
     }
 
@@ -72,6 +74,8 @@ public class WeakPropertyChangeSupport {
      * @see java.beans.PropertyChangeSupport#removePropertyChangeListener(java.beans.PropertyChangeListener)
      */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
+	if(listener == null)
+	    throw new NullPointerException("Listener intolerably null.");
 	delegate.removePropertyChangeListener(pclAdapter.adapt(listener));
     }
 
@@ -90,6 +94,10 @@ public class WeakPropertyChangeSupport {
      */
     public void addPropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
+	if(listener == null)
+	    throw new NullPointerException("Listener intolerably null.");
+	if(propertyName == null)
+	    throw new NullPointerException("PropertyName intolerably null.");
 	delegate.addPropertyChangeListener(propertyName, pclAdapter.adapt(listener));
     }
 
@@ -100,6 +108,10 @@ public class WeakPropertyChangeSupport {
      */
     public void removePropertyChangeListener(String propertyName,
 	    PropertyChangeListener listener) {
+	if(listener == null)
+	    throw new NullPointerException("Listener intolerably null.");
+	if(propertyName == null)
+	    throw new NullPointerException("PropertyName intolerably null.");
 	delegate.removePropertyChangeListener(propertyName, pclAdapter.adapt(listener));
     }
 

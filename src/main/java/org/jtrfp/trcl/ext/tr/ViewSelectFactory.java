@@ -163,11 +163,11 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public void propertyChange(PropertyChangeEvent evt) {
 	    final String propertyName = evt.getPropertyName();
 	    if(propertyName == Player.HEADING || propertyName == Player.TOP || propertyName == Player.POSITION)
-		updateConsolePosition((Player)evt.getSource());
+		updateCockpit((Player)evt.getSource());
 	}//end propertyChange
      }//end PlayerPropertyChangeListener
      
-     private void updateConsolePosition(Player player) {
+     private void updateCockpit(Player player) {
 	 final MiniMap miniMap   = getMiniMap();
 	 final NavArrow navArrow = getNavArrow();
 	 //HEADING
@@ -258,8 +258,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    return false;
 		getCockpit().setVisible(true);
 		final Object runState = tr.getRunState();
-		if(!(runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState))
+		if(!(runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState)){
 		 getMiniMap().setVisible(true);
+		 getNavArrow().setVisible(true);}
 		setHUDVisibility(true);
 		getNavArrow().setVisible(true);
 		return true;
@@ -512,10 +513,14 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    reEvaluateState();//Recursive
 		    }
 	    final Object runState = tr.getRunState();
-	    if((runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState))
+	    if((runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState)){
+		 getNavArrow().setVisible(false);
 		 getMiniMap().setVisible(false);
-	    else if(runState instanceof Mission.OverworldState && getInstrumentMode() instanceof FullCockpitInstruments)
-		getMiniMap().setVisible(true);
+		 }
+	    else if(runState instanceof Mission.OverworldState && getInstrumentMode() instanceof FullCockpitInstruments){
+		getMiniMap() .setVisible(true);
+		getNavArrow().setVisible(true);
+		}
 	}//end reEvaluateState()
 	
 	private boolean isAppropriateToDisplay(){

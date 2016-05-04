@@ -18,15 +18,15 @@ import java.awt.geom.Point2D.Double;
 import org.jtrfp.trcl.miss.NAVObjective;
 
 public class TVDashboardLayout implements DashboardLayout {
-    private static final double TOP_LINE_Y    = .89;
-    private static final double BOTTOM_LINE_Y = .79;
+    private static final double TOP_LINE_Y    = .9;
+    private static final double BOTTOM_LINE_Y = .81;
     private static final double FONT_SIZE     = .04;
     private static final double LEFT_MARGIN   = -.73;
     private static final double AMMO_MARGIN   = -.25;
     private static final double WEPN_MARGIN   = -.14;
-    private static final double OBJ_LINE      = .67;
+    private static final double OBJ_LINE      = .71;
 
-    private static final Point2D.Double DASH_DIMS = new Point2D.Double(2,.64);
+    private static final Point2D.Double DASH_DIMS = new Point2D.Double(2,.55);
     @Override
     public Double getDashboardDimensions() {
 	return DASH_DIMS;
@@ -72,7 +72,7 @@ public class TVDashboardLayout implements DashboardLayout {
 	// TODO Auto-generated method stub
 	return null;
     }
-    private static final Point2D.Double MM_POS = new Point2D.Double(.77,.7);
+    private static final Point2D.Double MM_POS = new Point2D.Double(.77,.73);
     @Override
     public Double getMiniMapPosition() {
 	return MM_POS;

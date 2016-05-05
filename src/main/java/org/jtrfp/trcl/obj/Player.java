@@ -72,8 +72,6 @@ import org.jtrfp.trcl.pool.ObjectFactory;
 import org.jtrfp.trcl.snd.SoundTexture;
 
 public class Player extends WorldObject implements RelevantEverywhere{
-    //private final Camera 	camera;
-    //private int 		cameraDistance 			= 0;
     public static final int 	CLOAK_COUNTDOWN_START 		= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
     public static final int 	INVINCIBILITY_COUNTDOWN_START 	= ThreadManager.GAMEPLAY_FPS * 30;// 30sec
     private final 		ProjectileFiringBehavior[] weapons = new ProjectileFiringBehavior[Weapon
@@ -116,8 +114,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		setLoopSound      (soundTextures.get(AfterburnerBehavior.LOOP_SOUND)));
 	addBehavior(new LoopingPositionBehavior());
 	addBehavior(headingXAlwaysPositiveBehavior = (HeadingXAlwaysPositiveBehavior)new HeadingXAlwaysPositiveBehavior().setEnable(false));
-	//Add a listener to control HeadingXAlwaysPositive
-	//final Game game = tr.getGame();
+	//Add a listener to control HeadingXAlwaysPositive\
 	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
 	tr.addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
 	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getThrottleMeter()));
@@ -127,7 +124,6 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new BouncesOffSurfaces());
 	addBehavior(new UpdatesNAVRadar());
 	addBehavior(new Cloakable());
-	//addBehavior(new SurfaceImpactSFXBehavior(tr));
 	addBehavior(new RedFlashOnDamage());
 	addBehavior(new RollNudgeOnDamage());
 	final SpinCrashDeathBehavior scb = new SpinCrashDeathBehavior();
@@ -242,7 +238,6 @@ public class Player extends WorldObject implements RelevantEverywhere{
     }//end defaultConfiguration()
     
     public void resetVelocityRotMomentum(){
-	//probeForBehavior(HasPropulsion.class).setPropulsion(0);
 	probeForBehavior(RotationalMomentumBehavior.class).
 		setEquatorialMomentum(0).
 		setLateralMomentum(0).
@@ -300,26 +295,6 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	    }.start();
 	}//end notifyDeath()
     }//end PlayerDeathListener
-
-    @Override
-    public void setHeading(Vector3D lookAt) {
-	/*camera.setLookAtVector(lookAt);
-	camera.setPosition(new Vector3D(getPosition()).subtract(lookAt
-		.scalarMultiply(cameraDistance)));*/
-	super.setHeading(lookAt);
-    }
-
-    @Override
-    public void setTop(Vector3D top) {
-	//camera.setUpVector(top);
-	super.setTop(top);
-    }
-
-    @Override
-    public Player setPosition(double[] pos) {
-	super.setPosition(pos);
-	return this;
-    }
 
     /**
      * @return the weapons

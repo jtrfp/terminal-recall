@@ -55,7 +55,7 @@ public class MatchPosition extends Behavior {
 	if(oldTarget!=null)
 	    oldTarget.removePropertyChangeListener(positionListener);
         this.target = target;
-        target.addPropertyChangeListener(WorldObject.POSITION,positionListener);
+        target.addPropertyChangeListener(positionListener);
         return this;
     }//end setTarget(...)
     

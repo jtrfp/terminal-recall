@@ -15,6 +15,7 @@ package org.jtrfp.trcl.gui;
 import java.awt.Dimension;
 import java.util.concurrent.Callable;
 
+import javax.imageio.ImageIO;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
@@ -37,6 +38,7 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
     private final GLProfile 		glProfile 	= GLProfile.get(GLProfile.GL2GL3);
     private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
     private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
+    private static final String         ICON_PATH       = "/CyanPlus.png";
 
     public RootWindow(){
 	super();
@@ -49,6 +51,8 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
 		    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    setFocusTraversalKeysEnabled(false);
 		    setTitle("Terminal Recall");
+		    try{RootWindow.this.setIconImage(ImageIO.read(this.getClass().getResource(ICON_PATH)));}
+		    catch(Exception e){e.printStackTrace();}
 		    RootWindow.this.setMinimumSize(new Dimension(100,100));
 		}
 	    });

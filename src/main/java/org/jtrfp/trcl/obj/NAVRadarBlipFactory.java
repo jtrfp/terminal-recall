@@ -14,13 +14,17 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.geom.Point2D;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.math.Vect3D;
 
@@ -33,6 +37,10 @@ public class NAVRadarBlipFactory {
     private final int []poolIndices = new int[POOL_SIZE];
     private final TR tr;
     private final DashboardLayout layout;
+    private Vector3D topOrigin  = Vector3D.PLUS_J, headingOrigin = Vector3D.PLUS_K;
+    private Vector3D positionOrigin = Vector3D.ZERO;
+    private Rotation vectorHack = Rotation.IDENTITY;
+    private Collection<Blip> activeBlips = new ArrayList<Blip>();
     
     public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout, String debugName, boolean ignoreCamera){
 	this.tr    =tr;
@@ -69,13 +77,52 @@ public class NAVRadarBlipFactory {
     }//end BlipType
     
     private class Blip extends Sprite2D{
+	private WorldObject representativeObject;
 	public Blip(Texture tex, String debugName, boolean ignoreCamera) {
 	    super(tr,-1,.04,.04,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    if(!ignoreCamera)
 	     unsetRenderFlag(RenderFlags.IgnoreCamera);
 	}//end constructor
+
+	public void setRepresentativeObject(WorldObject wo) {
+	    this.representativeObject = wo;
+	}
+
+	public void refreshPosition() {
+	    final double []blipPos = getPosition();
+	    final double [] playerPos=tr.getGame().getPlayer().getPosition();
+	    Vect3D.subtract(representativeObject.getPosition(), playerPos, blipPos);
+	    Vect3D.scalarMultiply(blipPos, RADAR_SCALAR, blipPos);
+	    final double [] heading = tr.getGame().getPlayer().getHeadingArray();
+	    double hX=heading[0];
+	    double hY=heading[2];
+	    double norm = Math.sqrt(hX*hX+hY*hY);
+	    if(norm!=0){
+		hX/=norm;hY/=norm;
+	    }else{hX=1;hY=0;}
+
+	    blipPos[1]=blipPos[2];
+	    blipPos[2]=0;
+
+	    double newX=blipPos[0]*hY-blipPos[1]*hX;
+	    double newY=blipPos[0]*hX+blipPos[1]*hY;
+
+	    blipPos[0]=-newX;
+	    blipPos[1]= newY;
+
+	    final Point2D.Double bp = layout.getMiniMapPosition();
+	    blipPos[0]+=bp.getX();
+	    blipPos[1]+=bp.getY();
+
+	    notifyPositionChange();
+	}//end refreshPosition()
     }//end Blip
+    
+    public void refreshActiveBlips(){
+	for(Blip b: activeBlips)
+	    b.refreshPosition();
+    }//end refreshActiveBlips()
     
     public void submitRadarBlip(WorldObject wo){
 	if(! (wo instanceof DEFObject || wo instanceof PowerupObject || wo instanceof TunnelEntranceObject) )return;
@@ -117,34 +164,11 @@ public class NAVRadarBlipFactory {
 	    }//end lower
 	    if(type!=null){
 		final Blip blip = newBlip(type);
-		final double []blipPos = blip.getPosition();
-		Vect3D.subtract(otherPos, playerPos, blipPos);
-		Vect3D.scalarMultiply(blipPos, RADAR_SCALAR, blipPos);
-		final double [] heading = tr.getGame().getPlayer().getHeadingArray();
-		double hX=heading[0];
-		double hY=heading[2];
-		double norm = Math.sqrt(hX*hX+hY*hY);
-		if(norm!=0){
-		    hX/=norm;hY/=norm;
-		}else{hX=1;hY=0;}
-		
-		blipPos[1]=blipPos[2];
-		blipPos[2]=0;
-		
-		double newX=blipPos[0]*hY-blipPos[1]*hX;
-		double newY=blipPos[0]*hX+blipPos[1]*hY;
-		
-		blipPos[0]=-newX;
-		blipPos[1]= newY;
-		
-		final Point2D.Double bp = layout.getMiniMapPosition();
-		blipPos[0]+=bp.getX();
-		blipPos[1]+=bp.getY();
-		
-		blip.notifyPositionChange();
-	    }
+		getActiveBlips().add(blip);
+		blip.setRepresentativeObject(wo);
+		blip.refreshPosition();//TODO: Use listeners instead?
+	    }//end if(type == null)
 	}//end if(RADAR_RANGE)
-	
     }//end submitRadarBlip(...)
     
     private Blip newBlip(BlipType t){
@@ -154,6 +178,7 @@ public class NAVRadarBlipFactory {
     }
     
     public void clearRadarBlips(){
+	getActiveBlips().clear();
 	int i=0;
 	for(Blip [] pool:blipPool){
 	    poolIndices[i++]=0;//reset index
@@ -163,4 +188,40 @@ public class NAVRadarBlipFactory {
 	    }//end for(blip)
 	}//end for(pool)
     }//end clearRadarBlips()
+
+    public Vector3D getTopOrigin() {
+        return topOrigin;
+    }
+
+    public void setTopOrigin(Vector3D topOrigin) {
+        this.topOrigin = topOrigin;
+    }
+
+    public Vector3D getHeadingOrigin() {
+        return headingOrigin;
+    }
+
+    public void setHeadingOrigin(Vector3D headingOrigin) {
+        this.headingOrigin = headingOrigin;
+    }
+
+    public Rotation getVectorHack() {
+        return vectorHack;
+    }
+
+    public void setVectorHack(Rotation vectorHack) {
+        this.vectorHack = vectorHack;
+    }
+
+    protected Collection<Blip> getActiveBlips() {
+        return activeBlips;
+    }
+
+    protected Vector3D getPositionOrigin() {
+        return positionOrigin;
+    }
+
+    protected void setPositionOrigin(Vector3D positionOrigin) {
+        this.positionOrigin = positionOrigin;
+    }
 }//end NAVRadarBlipFactory

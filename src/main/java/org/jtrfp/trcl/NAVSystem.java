@@ -66,7 +66,7 @@ private final DashboardLayout layout;
 	arrow.setRenderFlag(RenderFlags.IgnoreCamera);
 	add(arrow);
 	add(miniMap);
-	blips=new NAVRadarBlipFactory(tr,this,layout,"NAVSystem");
+	blips=new NAVRadarBlipFactory(tr,this,layout,"NAVSystem", true);
 	System.out.println("...Done.");
     }//end constructor
     

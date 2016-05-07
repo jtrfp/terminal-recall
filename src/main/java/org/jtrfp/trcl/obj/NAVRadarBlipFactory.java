@@ -34,7 +34,7 @@ public class NAVRadarBlipFactory {
     private final TR tr;
     private final DashboardLayout layout;
     
-    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout, String debugName){
+    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout, String debugName, boolean ignoreCamera){
 	this.tr    =tr;
 	this.layout=layout;
 	final BlipType [] types = BlipType.values();
@@ -43,7 +43,9 @@ public class NAVRadarBlipFactory {
 	    try{
 	     final VQTexture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
-    		blipPool[ti][pi]=new Blip(tex,g,debugName);
+    		final Blip blip = new Blip(tex,debugName, ignoreCamera);
+    		blipPool[ti][pi]= blip;
+    		g.add(blip);
     	     }//end for(pi)
 	    }catch(Exception e){e.printStackTrace();}
 	    finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
@@ -67,10 +69,11 @@ public class NAVRadarBlipFactory {
     }//end BlipType
     
     private class Blip extends Sprite2D{
-	public Blip(Texture tex, RenderableSpacePartitioningGrid g, String debugName) {
+	public Blip(Texture tex, String debugName, boolean ignoreCamera) {
 	    super(tr,-1,.04,.04,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
-	    g.add(this);
+	    if(!ignoreCamera)
+	     unsetRenderFlag(RenderFlags.IgnoreCamera);
 	}//end constructor
     }//end Blip
     

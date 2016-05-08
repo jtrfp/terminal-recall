@@ -36,15 +36,15 @@ public class NAVRadarBlipFactory {
     private final Blip [][] blipPool = new Blip[BlipType.values().length][POOL_SIZE];
     private final int []poolIndices = new int[POOL_SIZE];
     private final TR tr;
-    private final DashboardLayout layout;
+    //private final DashboardLayout layout;
     private Vector3D topOrigin  = Vector3D.PLUS_J, headingOrigin = Vector3D.PLUS_K;
     private Vector3D positionOrigin = Vector3D.ZERO;
     private Rotation vectorHack = Rotation.IDENTITY;
     private Collection<Blip> activeBlips = new ArrayList<Blip>();
     
-    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, DashboardLayout layout, String debugName, boolean ignoreCamera){
+    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, String debugName, boolean ignoreCamera){
 	this.tr    =tr;
-	this.layout=layout;
+	//this.layout=layout;
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
@@ -111,7 +111,7 @@ public class NAVRadarBlipFactory {
 	    blipPos[0]=-newX;
 	    blipPos[1]= newY;
 
-	    final Point2D.Double bp = layout.getMiniMapPosition();
+	    final Vector3D bp = getPositionOrigin();
 	    blipPos[0]+=bp.getX();
 	    blipPos[1]+=bp.getY();
 
@@ -221,7 +221,7 @@ public class NAVRadarBlipFactory {
         return positionOrigin;
     }
 
-    protected void setPositionOrigin(Vector3D positionOrigin) {
+    public void setPositionOrigin(Vector3D positionOrigin) {
         this.positionOrigin = positionOrigin;
     }
 }//end NAVRadarBlipFactory

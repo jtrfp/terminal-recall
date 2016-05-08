@@ -13,11 +13,11 @@
 package org.jtrfp.trcl;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.game.Game;
@@ -66,7 +66,9 @@ private final DashboardLayout layout;
 	arrow.setRenderFlag(RenderFlags.IgnoreCamera);
 	add(arrow);
 	add(miniMap);
-	blips=new NAVRadarBlipFactory(tr,this,layout,"NAVSystem", true);
+	blips=new NAVRadarBlipFactory(tr,this,"NAVSystem", true);
+	final Point2D.Double mmPos = layout.getMiniMapPosition();
+	blips.setPositionOrigin(new Vector3D(mmPos.getX(), mmPos.getY(), 0.));
 	System.out.println("...Done.");
     }//end constructor
     

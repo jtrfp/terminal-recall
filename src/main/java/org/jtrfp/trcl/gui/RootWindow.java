@@ -38,7 +38,7 @@ public class RootWindow extends JFrame implements GLExecutor, CanvasProvider {
     private final GLProfile 		glProfile 	= GLProfile.get(GLProfile.GL2GL3);
     private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
     private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
-    private static final String         ICON_PATH       = "/CyanPlus.png";
+    private static final String         ICON_PATH       = "/ProgramIcon.png";
 
     public RootWindow(){
 	super();

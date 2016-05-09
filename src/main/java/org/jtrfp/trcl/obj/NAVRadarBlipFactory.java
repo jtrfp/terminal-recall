@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.awt.geom.Point2D;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +24,6 @@ import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
-import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class NAVRadarBlipFactory {
@@ -101,20 +99,29 @@ public class NAVRadarBlipFactory {
 	    if(norm!=0){
 		hX/=norm;hY/=norm;
 	    }else{hX=1;hY=0;}
-
+	    
 	    blipPos[1]=blipPos[2];
 	    blipPos[2]=0;
-
+	    
 	    double newX=blipPos[0]*hY-blipPos[1]*hX;
 	    double newY=blipPos[0]*hX+blipPos[1]*hY;
-
+	    
 	    blipPos[0]=-newX;
 	    blipPos[1]= newY;
-
+	    
+	    Rotation rot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, getTopOrigin(), getHeadingOrigin());
+	    final Vector3D rotationResult = rot.applyTo(getVectorHack().applyTo(new Vector3D(blipPos)));
+	    blipPos[0] = rotationResult.getX();
+	    blipPos[1] = rotationResult.getY();
+	    blipPos[2] = rotationResult.getZ();
+	    
+	    setHeading(getHeadingOrigin());
+	    setTop(getTopOrigin());
+	    
 	    final Vector3D bp = getPositionOrigin();
 	    blipPos[0]+=bp.getX();
 	    blipPos[1]+=bp.getY();
-
+	    
 	    notifyPositionChange();
 	}//end refreshPosition()
     }//end Blip

@@ -17,6 +17,7 @@ import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -83,6 +84,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     protected 	    double[] cMd 	= new double[16];
     private boolean respondToTick	= true;
     private double scale                = 1.;
+    private final ReentrantLock         lock = new ReentrantLock();
     
     private CollectionActionDispatcher<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     private CollectionActionDispatcher<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
@@ -240,17 +242,20 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	objectDefsInitialized = false;
     }//end releaseCurrentModel()
 
-    public synchronized void setDirection(ObjectDirection dir) {
-	if (dir.getHeading().getNorm() == 0 || dir.getTop().getNorm() == 0) {
+    public /*synchronized*/ void setDirection(ObjectDirection dir) {
+	lock.lock();
+	try{
+	 if (dir.getHeading().getNorm() == 0 || dir.getTop().getNorm() == 0) {
 	    System.err
 		    .println("Warning: Rejecting zero-norm for object direction. "
 			    + dir);
 	    new Exception().printStackTrace();
 	    return;
-	}
-	setHeading(dir.getHeading());
-	setTop(dir.getTop());
-    }
+	 }
+	 setHeading(dir.getHeading());
+	 setTop(dir.getTop());
+	}finally {lock.unlock();}
+    }//end setDirection(...)
 
     @Override
     public String toString() {
@@ -341,15 +346,19 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    odw.mode.set(index, (byte)(pl.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
     }//end updateRenderFlagStatesPL
 
-    public synchronized final void updateStateToGPU(Renderer renderer) throws NotReadyException {
-	initializeObjectDefinitions();
-	System.arraycopy(position, 0, positionAfterLoop, 0, 3);
-	attemptLoop(renderer);
-	if(needToRecalcMatrix){
-	    needToRecalcMatrix=recalcMatrixWithEachFrame();
-	    recalculateTransRotMBuffer();
-	}
-	if(model!=null)getModel().proposeAnimationUpdate();
+    public /*synchronized*/ final void updateStateToGPU(Renderer renderer) throws NotReadyException {
+	if(!lock.tryLock())
+	    throw new NotReadyException();
+	try{
+	    initializeObjectDefinitions();
+	    System.arraycopy(position, 0, positionAfterLoop, 0, 3);
+	    attemptLoop(renderer);
+	    if(needToRecalcMatrix){
+		needToRecalcMatrix=recalcMatrixWithEachFrame();
+		recalculateTransRotMBuffer();
+	    }
+	    if(model!=null)getModel().proposeAnimationUpdate();
+	}finally{lock.unlock();}
     }//end updateStateToGPU()
     
     public boolean supportsLoop(){
@@ -496,12 +505,15 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	return this;
     }// end setPosition()
     
-    public synchronized WorldObject notifyPositionChange(){
-	if(position[0]==Double.NaN)
-	    throw new RuntimeException("Invalid position.");
-	pcs.firePropertyChange(POSITION, oldPosition, position);
-	needToRecalcMatrix=true;
-	updateOldPosition();
+    public /*synchronized*/ WorldObject notifyPositionChange(){
+	lock.lock();
+	try{
+	    if(position[0]==Double.NaN)
+		throw new RuntimeException("Invalid position.");
+	    pcs.firePropertyChange(POSITION, oldPosition, position);
+	    needToRecalcMatrix=true;
+	    updateOldPosition();
+	}finally{lock.unlock();}
 	return this;
     }//end notifyPositionChange()
     
@@ -520,13 +532,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      * @param heading
      *            the heading to set
      */
-    public synchronized void setHeading(Vector3D nHeading) {
-	System.arraycopy(heading, 0, oldHeading, 0, 3);
-	heading[0] = nHeading.getX();
-	heading[1] = nHeading.getY();
-	heading[2] = nHeading.getZ();
-	pcs.firePropertyChange(HEADING, oldHeading, nHeading);
-	needToRecalcMatrix=true;
+    public /*synchronized*/ void setHeading(Vector3D nHeading) {
+	lock.lock();
+	try{
+	    System.arraycopy(heading, 0, oldHeading, 0, 3);
+	    heading[0] = nHeading.getX();
+	    heading[1] = nHeading.getY();
+	    heading[2] = nHeading.getZ();
+	    pcs.firePropertyChange(HEADING, oldHeading, nHeading);
+	    needToRecalcMatrix=true;
+	}finally{lock.unlock();}
     }
 
     public Vector3D getHeading() {
@@ -546,14 +561,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      * @param top
      *            the top to set
      */
-    public synchronized void setTop(Vector3D nTop) {
-	System.arraycopy(top, 0, oldTop, 0, 3);
-	top[0] = nTop.getX();
-	top[1] = nTop.getY();
-	top[2] = nTop.getZ();
-	pcs.firePropertyChange(TOP, oldTop, nTop);
-	needToRecalcMatrix=true;
-    }
+    public /*synchronized*/ void setTop(Vector3D nTop) {
+	lock.lock();
+	try{
+	    System.arraycopy(top, 0, oldTop, 0, 3);
+	    top[0] = nTop.getX();
+	    top[1] = nTop.getY();
+	    top[2] = nTop.getZ();
+	    pcs.firePropertyChange(TOP, oldTop, nTop);
+	    needToRecalcMatrix=true;
+	}finally{lock.unlock();}
+    }//end setTop(...)
     
     public final CollectionActionDispatcher<VEC4Address> getOpaqueObjectDefinitionAddresses(){
 	return opaqueObjectDefinitionAddressesInVEC4;
@@ -570,19 +588,22 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	return tr;
     }
 
-    public synchronized void destroy() {
-	final SpacePartitioningGrid grid = getContainingGrid();
-	if(grid !=null){
-	    try{World.relevanceExecutor.submit(new Runnable(){
-		@Override
-		public void run() {
-		    grid.remove(WorldObject.this);
-		}}).get();}catch(Exception e){throw new RuntimeException(e);}
-	}//end if(NEW MODE and have grid)
-	setContainingGrid(null);
-	// Send it to the land of wind and ghosts.
-	setActive(false);
-	notifyPositionChange();
+    public /*synchronized*/ void destroy() {
+	lock.lock();
+	try{
+	    final SpacePartitioningGrid grid = getContainingGrid();
+	    if(grid !=null){
+		try{World.relevanceExecutor.submit(new Runnable(){
+		    @Override
+		    public void run() {
+			grid.remove(WorldObject.this);
+		    }}).get();}catch(Exception e){throw new RuntimeException(e);}
+	    }//end if(NEW MODE and have grid)
+	    setContainingGrid(null);
+	    // Send it to the land of wind and ghosts.
+	    setActive(false);
+	    notifyPositionChange();
+	}finally{lock.unlock();}
     }//end destroy()
 
     @Override
@@ -628,18 +649,24 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	pcs.firePropertyChange(ACTIVE,oldState,active);
     }//end setActive(...)
 
-    public synchronized void movePositionBy(Vector3D delta) {
-	position[0] += delta.getX();
-	position[1] += delta.getY();
-	position[2] += delta.getZ();
-	notifyPositionChange();
-    }
+    public /*synchronized*/ void movePositionBy(Vector3D delta) {
+	lock.lock();
+	try{
+	    position[0] += delta.getX();
+	    position[1] += delta.getY();
+	    position[2] += delta.getZ();
+	    notifyPositionChange();
+	}finally{lock.unlock();}
+    }//end movePositionBy(...)
 
-    public synchronized void setPosition(double x, double y, double z) {
-	position[0] = x;
-	position[1] = y;
-	position[2] = z;
-	notifyPositionChange();
+    public /*synchronized*/ void setPosition(double x, double y, double z) {
+	lock.lock();
+	try{
+	    position[0] = x;
+	    position[1] = y;
+	    position[2] = z;
+	    notifyPositionChange();}
+	finally{lock.unlock();}
     }
 
     public double[] getHeadingArray() {

@@ -29,8 +29,9 @@ import org.jtrfp.trcl.math.Vect3D;
 public class NAVRadarBlipFactory {
     private static final int POOL_SIZE=15;
     private static final int RADAR_RANGE=800000;
-    private static final double RADAR_GUI_RADIUS=.17;
-    private static final double RADAR_SCALAR=RADAR_GUI_RADIUS/RADAR_RANGE;
+    private static final double DEFAULT_RADAR_GUI_RADIUS=.17;
+    private Double radarGUIRadius;
+    //private static final double RADAR_SCALAR=RADAR_GUI_RADIUS/RADAR_RANGE;
     private final Blip [][] blipPool = new Blip[BlipType.values().length][POOL_SIZE];
     private final int []poolIndices = new int[POOL_SIZE];
     private final TR tr;
@@ -41,7 +42,12 @@ public class NAVRadarBlipFactory {
     private Collection<Blip> activeBlips = new ArrayList<Blip>();
     
     public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, String debugName, boolean ignoreCamera){
+	this(tr,g,null,debugName,ignoreCamera);
+    }
+    
+    public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, Double radarGUIRadius, String debugName, boolean ignoreCamera){
 	this.tr    =tr;
+	setRadarGUIRadius(radarGUIRadius);
 	//this.layout=layout;
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
@@ -49,7 +55,7 @@ public class NAVRadarBlipFactory {
 	    try{
 	     final VQTexture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
-    		final Blip blip = new Blip(tex,debugName, ignoreCamera);
+    		final Blip blip = new Blip(tex,debugName, ignoreCamera, .04*(getRadarGUIRadius()/DEFAULT_RADAR_GUI_RADIUS));
     		blipPool[ti][pi]= blip;
     		g.add(blip);
     	     }//end for(pi)
@@ -76,8 +82,8 @@ public class NAVRadarBlipFactory {
     
     private class Blip extends Sprite2D{
 	private WorldObject representativeObject;
-	public Blip(Texture tex, String debugName, boolean ignoreCamera) {
-	    super(tr,-1,.04,.04,tex,true,debugName);
+	public Blip(Texture tex, String debugName, boolean ignoreCamera, double diameter) {
+	    super(tr,-1,diameter,diameter,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    if(!ignoreCamera)
 	     unsetRenderFlag(RenderFlags.IgnoreCamera);
@@ -91,7 +97,7 @@ public class NAVRadarBlipFactory {
 	    final double []blipPos = getPosition();
 	    final double [] playerPos=tr.getGame().getPlayer().getPosition();
 	    Vect3D.subtract(representativeObject.getPosition(), playerPos, blipPos);
-	    Vect3D.scalarMultiply(blipPos, RADAR_SCALAR, blipPos);
+	    Vect3D.scalarMultiply(blipPos, getRadarScalar(), blipPos);
 	    final double [] heading = tr.getGame().getPlayer().getHeadingArray();
 	    double hX=heading[0];
 	    double hY=heading[2];
@@ -230,5 +236,19 @@ public class NAVRadarBlipFactory {
 
     public void setPositionOrigin(Vector3D positionOrigin) {
         this.positionOrigin = positionOrigin;
+    }
+
+    public Double getRadarGUIRadius() {
+	if(radarGUIRadius == null)
+	    radarGUIRadius = DEFAULT_RADAR_GUI_RADIUS;
+        return radarGUIRadius;
+    }
+
+    protected void setRadarGUIRadius(Double radarGUIRadius) {
+        this.radarGUIRadius = radarGUIRadius;
+    }
+    
+    protected double getRadarScalar(){
+	return getRadarGUIRadius()/RADAR_RANGE;
     }
 }//end NAVRadarBlipFactory

@@ -425,8 +425,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
 	    tr.gpu.get().matrixWindow.get().setTransposed(rotTransM, getMatrixID(), scratchMatrixArray);//New version
-	} catch (MathArithmeticException e) {e.printStackTrace();
-	}// Don't crash.
+	} catch (MathArithmeticException e) {}// Don't crash.
     }// end recalculateTransRotMBuffer()
     
     protected void recalculateRotBuffer(){

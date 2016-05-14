@@ -26,7 +26,7 @@ import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.math.Vect3D;
 
-public class NAVRadarBlipFactory {
+public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private static final int POOL_SIZE=15;
     private static final int RADAR_RANGE=800000;
     private static final double DEFAULT_RADAR_GUI_RADIUS=.17;
@@ -40,6 +40,7 @@ public class NAVRadarBlipFactory {
     private Vector3D positionOrigin = Vector3D.ZERO;
     private Rotation vectorHack = Rotation.IDENTITY;
     private Collection<Blip> activeBlips = new ArrayList<Blip>();
+    private Collection<NAVRadarBlipFactoryListener> listeners = new ArrayList<NAVRadarBlipFactoryListener>();
     
     public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, String debugName, boolean ignoreCamera){
 	this(tr,g,null,debugName,ignoreCamera);
@@ -137,6 +138,7 @@ public class NAVRadarBlipFactory {
 	    b.refreshPosition();
     }//end refreshActiveBlips()
     
+    @Override
     public void submitRadarBlip(WorldObject wo){
 	if(! (wo instanceof DEFObject || wo instanceof PowerupObject || wo instanceof TunnelEntranceObject) )return;
 	final double [] otherPos = wo.getPosition();
@@ -182,6 +184,8 @@ public class NAVRadarBlipFactory {
 		blip.refreshPosition();//TODO: Use listeners instead?
 	    }//end if(type == null)
 	}//end if(RADAR_RANGE)
+	for(NAVRadarBlipFactoryListener l:listeners)
+	    l.submitRadarBlip(wo);
     }//end submitRadarBlip(...)
     
     private Blip newBlip(BlipType t){
@@ -190,6 +194,7 @@ public class NAVRadarBlipFactory {
 	return result;
     }
     
+    @Override
     public void clearRadarBlips(){
 	getActiveBlips().clear();
 	int i=0;
@@ -200,6 +205,8 @@ public class NAVRadarBlipFactory {
 		pos[0]=2; pos[1]=2;blip.notifyPositionChange();
 	    }//end for(blip)
 	}//end for(pool)
+	for(NAVRadarBlipFactoryListener l:listeners)
+	    l.clearRadarBlips();
     }//end clearRadarBlips()
 
     public Vector3D getTopOrigin() {
@@ -250,5 +257,13 @@ public class NAVRadarBlipFactory {
     
     protected double getRadarScalar(){
 	return getRadarGUIRadius()/RADAR_RANGE;
+    }
+
+    public void addBlipListener(NAVRadarBlipFactoryListener listener) {
+	listeners.add(listener);
+    }
+    
+    public void removeBlipListener(NAVRadarBlipFactoryListener listener) {
+	listeners.remove(listener);
     }
 }//end NAVRadarBlipFactory

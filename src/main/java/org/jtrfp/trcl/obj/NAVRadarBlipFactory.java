@@ -84,7 +84,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private class Blip extends Sprite2D{
 	private WorldObject representativeObject;
 	public Blip(Texture tex, String debugName, boolean ignoreCamera, double diameter) {
-	    super(tr,-1,diameter,diameter,tex,true,debugName);
+	    super(tr,.1,diameter,diameter,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    if(!ignoreCamera)
 	     unsetRenderFlag(RenderFlags.IgnoreCamera);
@@ -116,18 +116,20 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    blipPos[0]=-newX;
 	    blipPos[1]= newY;
 	    
-	    Rotation rot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, getTopOrigin(), getHeadingOrigin());
+	    //Rotation rot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, getTopOrigin(), getHeadingOrigin());//TODO: Uncomment
+	    Rotation rot = Rotation.IDENTITY;
 	    final Vector3D rotationResult = rot.applyTo(getVectorHack().applyTo(new Vector3D(blipPos)));
 	    blipPos[0] = rotationResult.getX();
 	    blipPos[1] = rotationResult.getY();
 	    blipPos[2] = rotationResult.getZ();
 	    
-	    setHeading(getHeadingOrigin());
+	    setHeading(getHeadingOrigin().negate());
 	    setTop(getTopOrigin());
 	    
 	    final Vector3D bp = getPositionOrigin();
 	    blipPos[0]+=bp.getX();
 	    blipPos[1]+=bp.getY();
+	    blipPos[2]+=bp.getZ();
 	    
 	    notifyPositionChange();
 	}//end refreshPosition()

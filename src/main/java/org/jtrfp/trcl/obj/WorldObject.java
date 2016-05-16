@@ -41,6 +41,7 @@ import org.jtrfp.trcl.gpu.RenderList;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.math.Vect3D.ZeroNormException;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public class WorldObject implements PositionedRenderable, PropertyListenable, Rotatable {
@@ -426,6 +427,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    }
 	    tr.gpu.get().matrixWindow.get().setTransposed(rotTransM, getMatrixID(), scratchMatrixArray);//New version
 	} catch (MathArithmeticException e) {}// Don't crash.
+	  catch (ZeroNormException e) {}
     }// end recalculateTransRotMBuffer()
     
     protected void recalculateRotBuffer(){

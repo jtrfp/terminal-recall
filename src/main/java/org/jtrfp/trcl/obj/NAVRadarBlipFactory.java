@@ -49,7 +49,6 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, Double radarGUIRadius, String debugName, boolean ignoreCamera){
 	this.tr    =tr;
 	setRadarGUIRadius(radarGUIRadius);
-	//this.layout=layout;
 	final BlipType [] types = BlipType.values();
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
@@ -116,8 +115,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    blipPos[0]=-newX;
 	    blipPos[1]= newY;
 	    
-	    //Rotation rot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, getTopOrigin(), getHeadingOrigin());//TODO: Uncomment
-	    Rotation rot = Rotation.IDENTITY;
+	    Rotation rot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, getTopOrigin(), getHeadingOrigin());
 	    final Vector3D rotationResult = rot.applyTo(getVectorHack().applyTo(new Vector3D(blipPos)));
 	    blipPos[0] = rotationResult.getX();
 	    blipPos[1] = rotationResult.getY();

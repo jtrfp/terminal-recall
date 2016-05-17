@@ -243,7 +243,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	objectDefsInitialized = false;
     }//end releaseCurrentModel()
 
-    public /*synchronized*/ void setDirection(ObjectDirection dir) {
+    public void setDirection(ObjectDirection dir) {
 	lock.lock();
 	try{
 	 if (dir.getHeading().getNorm() == 0 || dir.getTop().getNorm() == 0) {
@@ -347,7 +347,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    odw.mode.set(index, (byte)(pl.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
     }//end updateRenderFlagStatesPL
 
-    public /*synchronized*/ final void updateStateToGPU(Renderer renderer) throws NotReadyException {
+    public final void updateStateToGPU(Renderer renderer) throws NotReadyException {
 	if(!lock.tryLock())
 	    throw new NotReadyException();
 	try{
@@ -506,7 +506,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	return this;
     }// end setPosition()
     
-    public /*synchronized*/ WorldObject notifyPositionChange(){
+    public WorldObject notifyPositionChange(){
 	lock.lock();
 	try{
 	    if(position[0]==Double.NaN)
@@ -533,7 +533,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      * @param heading
      *            the heading to set
      */
-    public /*synchronized*/ void setHeading(Vector3D nHeading) {
+    public void setHeading(Vector3D nHeading) {
 	lock.lock();
 	try{
 	    System.arraycopy(heading, 0, oldHeading, 0, 3);
@@ -562,7 +562,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      * @param top
      *            the top to set
      */
-    public /*synchronized*/ void setTop(Vector3D nTop) {
+    public void setTop(Vector3D nTop) {
 	lock.lock();
 	try{
 	    System.arraycopy(top, 0, oldTop, 0, 3);
@@ -589,7 +589,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	return tr;
     }
 
-    public /*synchronized*/ void destroy() {
+    public void destroy() {
 	lock.lock();
 	try{
 	    final SpacePartitioningGrid grid = getContainingGrid();
@@ -650,7 +650,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	pcs.firePropertyChange(ACTIVE,oldState,active);
     }//end setActive(...)
 
-    public /*synchronized*/ void movePositionBy(Vector3D delta) {
+    public void movePositionBy(Vector3D delta) {
 	lock.lock();
 	try{
 	    position[0] += delta.getX();
@@ -660,7 +660,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	}finally{lock.unlock();}
     }//end movePositionBy(...)
 
-    public /*synchronized*/ void setPosition(double x, double y, double z) {
+    public void setPosition(double x, double y, double z) {
 	lock.lock();
 	try{
 	    position[0] = x;

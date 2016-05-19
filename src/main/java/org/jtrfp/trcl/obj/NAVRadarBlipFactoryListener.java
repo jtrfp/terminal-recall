@@ -15,5 +15,5 @@ package org.jtrfp.trcl.obj;
 
 public interface NAVRadarBlipFactoryListener {
 	public void clearRadarBlips();
-	public void submitRadarBlip(WorldObject wo);
+	public void submitRadarBlip(Positionable positionable);
 }//end NAVRadarBlipFactory

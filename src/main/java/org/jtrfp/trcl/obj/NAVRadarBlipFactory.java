@@ -81,7 +81,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     }//end BlipType
     
     private class Blip extends Sprite2D{
-	private WorldObject representativeObject;
+	private Positionable representativeObject;
 	public Blip(Texture tex, String debugName, boolean ignoreCamera, double diameter) {
 	    super(tr,.1,diameter,diameter,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
@@ -89,8 +89,8 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	     unsetRenderFlag(RenderFlags.IgnoreCamera);
 	}//end constructor
 
-	public void setRepresentativeObject(WorldObject wo) {
-	    this.representativeObject = wo;
+	public void setRepresentativeObject(Positionable representativeObject) {
+	    this.representativeObject = representativeObject;
 	}
 
 	public void refreshPosition() {
@@ -139,53 +139,53 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     }//end refreshActiveBlips()
     
     @Override
-    public void submitRadarBlip(WorldObject wo){
-	if(! (wo instanceof DEFObject || wo instanceof PowerupObject || wo instanceof TunnelEntranceObject) )return;
-	final double [] otherPos = wo.getPosition();
+    public void submitRadarBlip(Positionable positionable){
+	if(! (positionable instanceof DEFObject || positionable instanceof PowerupObject || positionable instanceof TunnelEntranceObject) )return;
+	final double [] otherPos = positionable.getPosition();
 	final double [] playerPos=tr.getGame().getPlayer().getPosition();
 	BlipType type=null;
 	if(Vect3D.distance(playerPos, otherPos)<RADAR_RANGE){
-	    if(wo instanceof TunnelEntranceObject){
-		if(!((TunnelEntranceObject)wo).isVisible())return;//Invisible entrances are no-go.
+	    if(positionable instanceof TunnelEntranceObject){
+		if(!((TunnelEntranceObject)positionable).isVisible())return;//Invisible entrances are no-go.
 	    }
 	    if(otherPos[1]>playerPos[1]){
 		//Higher
-		if(wo instanceof DEFObject){
-		    final DEFObject def = (DEFObject)wo;
+		if(positionable instanceof DEFObject){
+		    final DEFObject def = (DEFObject)positionable;
 		    if(!def.isFoliage() && (!def.isMobile())||(def.isGroundLocked())){
 			type=BlipType.GRND_ABOVE;
 		    }else if(def.isMobile()&&!def.isGroundLocked()){
 			type=BlipType.AIR_ABOVE;
 		    }
-		}else if(wo instanceof PowerupObject || wo instanceof Jumpzone || wo instanceof Checkpoint){
+		}else if(positionable instanceof PowerupObject || positionable instanceof Jumpzone || positionable instanceof Checkpoint){
 		    type=BlipType.PWR_ABOVE;
-		    }else if(wo instanceof TunnelEntranceObject){
+		    }else if(positionable instanceof TunnelEntranceObject){
 			type=BlipType.TUN_ABOVE;
 		    }//end if(TunnelEntranceObject)
 	    }else{
 		//Lower
-		if(wo instanceof DEFObject){
-		final DEFObject def = (DEFObject)wo;
+		if(positionable instanceof DEFObject){
+		final DEFObject def = (DEFObject)positionable;
 		if(!def.isFoliage() && (!def.isMobile())||(def.isGroundLocked())){
 		  type=BlipType.GRND_BELOW;
 		}else if(def.isMobile()&&!def.isGroundLocked()){
 		 type=BlipType.AIR_BELOW;
 		}
-		}else if(wo instanceof PowerupObject || wo instanceof Jumpzone || wo instanceof Checkpoint){
+		}else if(positionable instanceof PowerupObject || positionable instanceof Jumpzone || positionable instanceof Checkpoint){
 		type=BlipType.PWR_BELOW;
-		 }else if(wo instanceof TunnelEntranceObject){
+		 }else if(positionable instanceof TunnelEntranceObject){
 		  type=BlipType.TUN_BELOW;
 		}//end if(TunnelEntranceObject)
 	    }//end lower
 	    if(type!=null){
 		final Blip blip = newBlip(type);
 		getActiveBlips().add(blip);
-		blip.setRepresentativeObject(wo);
+		blip.setRepresentativeObject(positionable);
 		blip.refreshPosition();//TODO: Use listeners instead?
 	    }//end if(type == null)
 	}//end if(RADAR_RANGE)
 	for(NAVRadarBlipFactoryListener l:listeners)
-	    l.submitRadarBlip(wo);
+	    l.submitRadarBlip(positionable);
     }//end submitRadarBlip(...)
     
     private Blip newBlip(BlipType t){

@@ -21,8 +21,9 @@ import org.jtrfp.trcl.mem.MemoryWindow;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     
-    protected static final double coordDownScaler = 512;
-    protected static final double uvUpScaler = 4096;
+    protected static final int MAX_PACKED_COORD_VALUE = 127;
+    //protected static final double coordDownScaler = 512;
+    //protected static final double uvUpScaler = 4096;
     private final PRIMITIVE_TYPE[][] primitives;
     private final Model model;
     private int cachedNumElements=-1;
@@ -46,16 +47,17 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
 	this.primitives = primitives;
 	this.model = model;
 	calculateDims();
-	setScale((getMaximumVertexValue() / 2048.));
-	//Sanity
+	setScale((getMaximumVertexValue() / (double)MAX_PACKED_COORD_VALUE));
+	//Sanity //TODO: Using assert to sanity-check input is a no-no.
 	for(int i=0; i<primitives.length; i++)
 	    assert primitives[i]!=null:"Frame intolerably null at index "+i+".";
     }
 
-    protected int packScale(double scaleToPack) {
-	int result = (int) Math.round(Math.log(scaleToPack) / Math.log(2));// Base-2
-									   // log
-	return result + 16;
+    protected int packScale(double scaleToPack) {//Base-2 log
+	int result = (int) Math.round(Math.log(scaleToPack) / Math.log(2)) 
+		+ 16;
+	assert result >= 0:"result="+result+" scaleToPack="+scaleToPack+" debugName="+debugName+" maxVertexValue="+getMaximumVertexValue();
+	return result;
     }
 
     protected double applyScale(double value) {

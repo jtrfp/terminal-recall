@@ -38,6 +38,7 @@ import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TerrainChunk;
+import org.jtrfp.trcl.tools.Util;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
@@ -131,13 +132,14 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			// GROUND
 			{// Start scope
 			    final double objectX = Math
-				    .round(((double) gX + ((double) chunkSideLength / 2.))
-					    * gridSquareSize);
+				    .round(((double) gX + ((double) chunkSideLength / 2.)))
+					    * gridSquareSize;
 			    final double objectZ = Math
-				    .round(((double) _gZ + ((double) chunkSideLength / 2.))
-					    * gridSquareSize);
-			    final double objectY = Math.round(altitude
-				    .heightAt(gX*gridSquareSize, _gZ*gridSquareSize));
+				    .round(((double) _gZ + ((double) chunkSideLength / 2.)))
+					    * gridSquareSize;
+			    /*final double objectY = Util.quantize(altitude
+				    .heightAt(gX*gridSquareSize, _gZ*gridSquareSize),128);*/
+			    final double objectY = 1024*16;//TODO: Remove debug code
 			    final Model m = new Model(false, tr,"Terrain Chunk");
 			    m.setDebugName(debugName);
 			    // for each square
@@ -284,8 +286,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			    final double objectZ = Math
 				    .round(((double) _gZ + ((double) chunkSideLength / 2.))
 					    * gridSquareSize);
-			    final double objectY = Math.round((2. - altitude.heightAt(
-				    gX* gridSquareSize, _gZ* gridSquareSize)) + Y_NUDGE);
+			    /*final double objectY = Math.round((2. - altitude.heightAt(
+				    gX* gridSquareSize, _gZ* gridSquareSize)) + Y_NUDGE);*/
+			    final double objectY = altitude.getHeight()/2;
 			    final Model m = new Model(false, tr,"CeilingChunk");
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {

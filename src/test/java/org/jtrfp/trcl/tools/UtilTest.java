@@ -85,5 +85,35 @@ public class UtilTest {
 	assertTrue(destColl.containsAll(srcColl));
 	assertTrue(srcColl.containsAll(destColl));
     }
+    
+    @Test
+    public void testQuantizeZeroEight(){
+	assertEquals(0,Util.quantize(0,8),.0000001);
+    }
+    
+    @Test
+    public void testQuantizeZeroNegativeOne(){
+	assertEquals(0,Util.quantize(0,-1),.0000001);
+    }
+    
+    @Test
+    public void testQuantize254Eight(){
+	assertEquals(256,Util.quantize(254,8),.0000001);
+    }
+    
+    @Test
+    public void testQuantize257Eight(){
+	assertEquals(256,Util.quantize(254,8),.0000001);
+    }
+    
+    @Test
+    public void testQuantizeNeg254Eight(){
+	assertEquals(-256,Util.quantize(-254,8),.0000001);
+    }
+    
+    @Test
+    public void testQuantizeNeg257Eight(){
+	assertEquals(-256,Util.quantize(-257,8),.0000001);
+    }
 
 }//end UtilTest

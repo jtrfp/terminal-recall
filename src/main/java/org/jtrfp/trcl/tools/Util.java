@@ -361,4 +361,8 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
         for(E e:toRemove)
 	   target.remove(e);
    }//end bulkRemove(...)
+   
+   public static double quantize(double value, double interval){
+        return Math.rint(value / interval)*interval;
+   }
 }//end Util

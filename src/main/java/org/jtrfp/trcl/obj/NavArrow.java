@@ -35,7 +35,6 @@ import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 public class NavArrow extends WorldObject implements RelevantEverywhere {
 private static final double WIDTH=.16;
 private static final double HEIGHT=.16;
-private static final double Z=.0001;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final DashboardLayout layout;
 private Color backgroundColor;
@@ -47,7 +46,7 @@ private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
     public NavArrow(TR tr, DashboardLayout layout, Point2D.Double size, String debugName) {//TODO: Accept outside width/height parms
 	super(tr);
 	final Model m = new Model(false, tr, debugName);
-	m.addTriangles(Triangle.quad2Triangles(size.getX(),size.getY(),0,0,Z, true, getTexture(tr)));
+	m.addTriangles(Triangle.quad2Triangles(size.getX(),size.getY(),0,0,0, true, getTexture(tr)));
 	//this.setRenderFlag(RenderFlags.IgnoreCamera);
 	setImmuneToOpaqueDepthTest(true);
 	setModel(m);

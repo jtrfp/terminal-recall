@@ -83,7 +83,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private class Blip extends Sprite2D{
 	private Positionable representativeObject;
 	public Blip(Texture tex, String debugName, boolean ignoreCamera, double diameter) {
-	    super(tr,.1,diameter,diameter,tex,true,debugName);
+	    super(tr,0,diameter,diameter,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    if(!ignoreCamera)
 	     unsetRenderFlag(RenderFlags.IgnoreCamera);
@@ -243,6 +243,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 
     public void setPositionOrigin(Vector3D positionOrigin) {
         this.positionOrigin = positionOrigin;
+        refreshActiveBlips();
     }
 
     public Double getRadarGUIRadius() {

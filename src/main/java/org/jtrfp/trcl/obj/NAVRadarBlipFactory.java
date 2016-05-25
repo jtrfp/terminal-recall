@@ -41,6 +41,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private Rotation vectorHack = Rotation.IDENTITY;
     private Collection<Blip> activeBlips = new ArrayList<Blip>();
     private Collection<NAVRadarBlipFactoryListener> listeners = new ArrayList<NAVRadarBlipFactoryListener>();
+    private boolean radarEnabled = true;
     
     public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, String debugName, boolean ignoreCamera){
 	this(tr,g,null,debugName,ignoreCamera);
@@ -94,6 +95,9 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	}
 
 	public void refreshPosition() {
+	    setVisible(isRadarEnabled());
+	    if(!isRadarEnabled())
+		return;
 	    final double []blipPos = getPosition();
 	    final double [] playerPos=tr.getGame().getPlayer().getPosition();
 	    Vect3D.subtract(representativeObject.getPosition(), playerPos, blipPos);
@@ -266,5 +270,14 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     
     public void removeBlipListener(NAVRadarBlipFactoryListener listener) {
 	listeners.remove(listener);
+    }
+
+    public boolean isRadarEnabled() {
+        return radarEnabled;
+    }
+
+    public void setRadarEnabled(boolean radarEnabled) {
+        this.radarEnabled = radarEnabled;
+        refreshActiveBlips();
     }
 }//end NAVRadarBlipFactory

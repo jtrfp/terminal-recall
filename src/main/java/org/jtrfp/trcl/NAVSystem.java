@@ -35,7 +35,7 @@ public class NAVSystem extends RenderableSpacePartitioningGrid {
 private final NavArrow arrow;
 private final MiniMap miniMap;
 private final TR tr;
-private final NAVRadarBlipFactory blips;
+private NAVRadarBlipFactory blips;
 private final DashboardLayout layout;
 
     public NAVSystem(TR tr, DashboardLayout layout) {
@@ -43,7 +43,7 @@ private final DashboardLayout layout;
 	this.tr=tr;
 	this.layout=layout;
 	System.out.println("Setting up NAV system...");
-	arrow = new NavArrow(tr,layout, new Point2D.Double(.16,.16), "NAVSystem");
+	arrow = new NavArrow(tr,layout, new Point2D.Double(.16,.16), "NAVSystem.arrow");
 	miniMap = new MiniMap(tr);
 	miniMap.setPosition(0,0,.00001);
 	miniMap.setImmuneToOpaqueDepthTest(true);
@@ -66,9 +66,8 @@ private final DashboardLayout layout;
 	arrow.setRenderFlag(RenderFlags.IgnoreCamera);
 	add(arrow);
 	add(miniMap);
-	blips=new NAVRadarBlipFactory(tr,this,"NAVSystem", true);
 	final Point2D.Double mmPos = layout.getMiniMapPosition();
-	blips.setPositionOrigin(new Vector3D(mmPos.getX(), mmPos.getY(), 0.));
+	getBlips().setPositionOrigin(new Vector3D(mmPos.getX(), mmPos.getY(), 0.));
 	System.out.println("...Done.");
     }//end constructor
     
@@ -120,8 +119,14 @@ private final DashboardLayout layout;
      * @return the blips
      */
     public NAVRadarBlipFactory getBlips() {
+	if(blips == null)
+	    blips = generateBlips();
         return blips;
-    }
+    }//end getBlips()
+    
+    protected NAVRadarBlipFactory generateBlips(){
+	return new NAVRadarBlipFactory(tr,this,"NAVSystem.blips", true);
+    }//end generateBlips()
 
     public double[] getHeadingXY() {
 	return arrow.getTopArray();

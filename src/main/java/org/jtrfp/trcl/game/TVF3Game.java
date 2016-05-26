@@ -259,7 +259,13 @@ public class TVF3Game implements Game {
 	    }
 
 	    public NAVSystem getNavSystem(){
+		if(navSystem == null)
+		    navSystem = generateNavSystem();
 		return navSystem;
+	    }
+	    
+	    protected NAVSystem generateNavSystem(){
+		return new NAVSystem(tr,getDashboardLayout());
 	    }
 	    
 	    public synchronized void setLevel(String skipToLevel) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
@@ -301,7 +307,6 @@ public class TVF3Game implements Game {
 			
 			//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
 			System.out.println("GameVersion="+tr.configManager.getConfig()._getGameVersion());
-			navSystem = new NAVSystem(tr,getDashboardLayout());
 			    // Make color zero translucent.
 			    final ResourceManager rm = tr.getResourceManager();
 			    final Color[] pal 	     = tr.getGlobalPalette();

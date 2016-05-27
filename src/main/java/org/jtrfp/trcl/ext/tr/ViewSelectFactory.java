@@ -18,6 +18,7 @@ import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.lang.ref.WeakReference;
 
 import javax.media.opengl.GL3;
 
@@ -51,6 +52,7 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.MiniMap;
+import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -106,6 +108,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private MatchPosition miniMapPositionMatch, navArrowPositionMatch;
      private Rotation offsetRot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, new Vector3D(0, 0.7417417727, -0.6706855765), new Vector3D(0, 0.6706855765, 0.7417417727));
      private NavArrow navArrow;
+     private NAVRadarBlipFactory blipFactory;
+     private WeakReference<Game> game;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
      
@@ -140,7 +144,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      public void apply(Game game) {
          view .addPropertyChangeListener(weakVSPCL  = new WeakPropertyChangeListener(viewSelectPropertyChangeListener,view));
          iView.addPropertyChangeListener(weakIVSPCL = new WeakPropertyChangeListener(instrumentViewSelectPropertyChangeListener,iView));
-         
+         this.game = new WeakReference<Game>(game);
          /*final IndirectProperty<Mission> missionIP = new IndirectProperty<Mission>();
          ((TVF3Game)game).addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);*/
          
@@ -168,13 +172,15 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      }//end PlayerPropertyChangeListener
      
      private void updateCockpit(Player player) {
-	 final MiniMap miniMap   = getMiniMap();
-	 final NavArrow navArrow = getNavArrow();
+	 final MiniMap               miniMap   = getMiniMap();
+	 final NavArrow               navArrow = getNavArrow();
+	 final NAVRadarBlipFactory blipFactory = getBlipFactory();
 	 //HEADING
 	 Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,player.getHeading().negate(),player.getTop());
 	 final Vector3D heading = rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_K));
 	 miniMap.setHeading(heading);
 	 navArrow.setHeading(heading.negate());
+	 blipFactory.setHeadingOrigin(heading);
 	 //TOP ORIGIN
 	 final Vector3D topOrigin = rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_J));
 	 miniMap.setTopOrigin(topOrigin);
@@ -182,7 +188,21 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	 
 	 navArrow.setTopOrigin(topOrigin);
 	 navArrow.notifyPositionChange();
+	 
+	 blipFactory.setTopOrigin(topOrigin);
+	 
+	 //POSITION
+	 blipFactory.setPositionOrigin(new Vector3D(navArrow.getPosition()));
      }//end updateConsolePosition
+     
+     public void setCockpitVisibility(boolean visible){
+	 final Object runState = tr.getRunState();
+	 final boolean showNavInstruments = visible && !(runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState); 
+	 getCockpit    ().setVisible     (visible);
+	 getMiniMap    ().setVisible     (showNavInstruments);
+	 getNavArrow   ().setVisible     (showNavInstruments);
+	 getBlipFactory().setRadarEnabled(showNavInstruments);
+     }//end setCockpitVisibility(...)
      
      public ViewMode getViewMode() {
 	    return viewMode;
@@ -199,8 +219,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}//end setViewMode
 
 	public void noViewMode(){
-	    final WorldObject cockpit = getCockpit();
-	    cockpit.setVisible(false);
+	    //final WorldObject cockpit = getCockpit();
+	    setCockpitVisibility(false);
+	    //cockpit.setVisible(false);
 	    final Camera cam = tr.mainRenderer.get().getCamera();
 	    cam.probeForBehavior(MatchPosition.class).setOffsetMode(MatchPosition.NULL);
 	}
@@ -216,7 +237,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		grid.add(cockpit);
 		grid.add(getMiniMap());
 		grid.add(getNavArrow());
-		cockpit.setVisible(false);
+		setCockpitVisibility(false);
+		//cockpit.setVisible(false);
 		cockpit.notifyPositionChange();
 	    }
 	    return cockpit;
@@ -226,7 +248,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    if(hudVisibility==visible)
 		 return;
 	    this.hudVisibility=visible;
-	    final Game game = tr.getGame();
+	    final Game game = this.game.get();
 	    final HUDSystem hud = ((TVF3Game)game).getHUDSystem();
 	    final NAVSystem nav = ((TVF3Game)game).navSystem;
 	    final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
@@ -244,9 +266,10 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	   @Override
 	   public boolean apply() {
 		setHUDVisibility(false);
-		getCockpit().setVisible(false);
-		getMiniMap().setVisible(false);
-		getNavArrow().setVisible(false);
+		setCockpitVisibility(false);
+		//getCockpit().setVisible(false);
+		//getMiniMap().setVisible(false);
+		//getNavArrow().setVisible(false);
 		return true;
 	   }
 	}//end NoInstruments
@@ -256,13 +279,10 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	   public boolean apply() {
 		if(!(getViewMode() instanceof CockpitView))
 		    return false;
-		getCockpit().setVisible(true);
-		final Object runState = tr.getRunState();
-		if(!(runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState)){
-		 getMiniMap().setVisible(true);
-		 getNavArrow().setVisible(true);}
+		//getCockpit().setVisible(true);
+		setCockpitVisibility(true);
 		setHUDVisibility(true);
-		getNavArrow().setVisible(true);
+		//getNavArrow().setVisible(true);
 		return true;
 	   }
 	}//end FullCockpitInstruments
@@ -281,7 +301,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	private class InstrumentViewSelectPropertyChangeListener implements PropertyChangeListener {
 	   @Override
 	   public void propertyChange(PropertyChangeEvent evt) {
-		final Game game = tr.getGame();
+		final Game game = ViewSelect.this.game.get();
 		if(game==null)
 		    return;
 		final Mission mission = game.getCurrentMission();
@@ -307,7 +327,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	private class ViewSelectPropertyChangeListener implements PropertyChangeListener {
 	   @Override
 	   public void propertyChange(PropertyChangeEvent evt) {
-		final Game game = tr.getGame();
+		final Game game = ViewSelect.this.game.get();
 		if(game==null)
 		    return;
 		final Mission mission = game.getCurrentMission();
@@ -327,7 +347,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public class CockpitView implements ViewMode{
 	    @Override
 	    public void apply(){
-		     final Game game = tr.getGame();
+		     final Game game = ViewSelect.this.game.get();
 		     if(game==null)
 			 return;
 		     final Player player = game.getPlayer();
@@ -364,7 +384,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public class OutsideView implements ViewMode{
 	    @Override
 	    public void apply(){
-		final Game game = tr.getGame();
+		final Game game = ViewSelect.this.game.get();
 		     if(game==null)
 			 return;
 		     final Player player = game.getPlayer();
@@ -407,7 +427,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public class ChaseView implements ViewMode{
 	    @Override
 	    public void apply(){
-		     final Game game = tr.getGame();
+		     final Game game = ViewSelect.this.game.get();
 		     if(game==null)
 			 return;
 		     final Player player = game.getPlayer();
@@ -501,7 +521,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		return;
 	    }//end if(!isAppropriateToDisplay()
 	    if(!rootGrid.containsBranch(grid)){
-		getMiniMap().setTextureMesh(tr.getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
+		getMiniMap().setTextureMesh(this.game.get().getCurrentMission().getOverworldSystem().getTextureMesh());
 		rootGrid.nonBlockingAddBranch(grid);
 	    }//end if(!containsBranch)
 	    if(getViewMode()!=viewModes[viewModeItr])
@@ -525,7 +545,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	private boolean isAppropriateToDisplay(){
 	    if(tr.getRunState() instanceof Mission.PlayerActivity){
-		if(tr.getGame().getCurrentMission().isSatelliteView())
+		if(ViewSelect.this.game.get().getCurrentMission().isSatelliteView())
 		    return false;
 		return true;
 	    }//end if(PlayerActivity)
@@ -602,6 +622,21 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    parent.setTopOrigin(rot.applyTo(parent.getTopOrigin()));
 		}
 	}//end MiniMapCockpitBehavior
+
+	public NAVRadarBlipFactory getBlipFactory() {
+	    if(blipFactory == null){
+		blipFactory = new NAVRadarBlipFactory(tr, getGrid(), 1200., "ViewSelect.NavRadarBlipFactory", false);
+	    	final TVF3Game game = (TVF3Game)ViewSelect.this.game.get();
+	    	game.getNavSystem().
+	    	 getBlips().
+	    	 addBlipListener(blipFactory);
+	    	}
+	    return blipFactory;
+	}
+
+	public void setBlipFactory(NAVRadarBlipFactory blipFactory) {
+	    this.blipFactory = blipFactory;
+	}
  }//end ViewSelectFeature
  
 public Model getCockpitModel() {

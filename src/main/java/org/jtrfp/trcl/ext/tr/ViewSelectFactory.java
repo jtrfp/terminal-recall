@@ -73,7 +73,6 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	                       INSTRUMENT_MODE  = "Instrument Mode";
     private static final boolean INS_ENABLE = true;
     private final ControllerInput view, iView;
-    private CockpitLayout cockpitLayout;
     private RenderableSpacePartitioningGrid grid;
     
     @Autowired
@@ -106,10 +105,11 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private MiniMap miniMap;
      private MatchPosition.TailOffsetMode tailOffsetMode;
      private MatchPosition miniMapPositionMatch, navArrowPositionMatch;
-     private Rotation offsetRot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, new Vector3D(0, 0.7417417727, -0.6706855765), new Vector3D(0, 0.6706855765, 0.7417417727));
+     private Rotation offsetRot;
      private NavArrow navArrow;
      private NAVRadarBlipFactory blipFactory;
      private WeakReference<Game> game;
+     private CockpitLayout cockpitLayout;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
      
@@ -177,6 +177,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	 final NAVRadarBlipFactory blipFactory = getBlipFactory();
 	 //HEADING
 	 Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,player.getHeading().negate(),player.getTop());
+	 final Rotation offsetRot = getOffsetRot();
 	 final Vector3D heading = rot.applyTo(offsetRot.applyTo(Vector3D.PLUS_K));
 	 miniMap.setHeading(heading);
 	 navArrow.setHeading(heading.negate());
@@ -568,14 +569,16 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    if(miniMap == null){
 		miniMap = new MiniMap(tr);
 		miniMap.setImmuneToOpaqueDepthTest(true);
-		miniMap.setModelSize(new double[]{1200,1200});
+		final CockpitLayout layout = getCockpitLayout();
+		final double mmSize = layout.getMiniMapRadius();
+		miniMap.setModelSize(new double[]{mmSize,mmSize});
 		miniMap.addBehavior(miniMapPositionMatch = new MatchPosition());
 		final WorldObject cockpit = getCockpit();
 		//miniMap.addBehavior(new MiniMapCockpitBehavior());
 		//Sorry, I'm just not smart enough to fix it the right way at this moment. - Chuck
 		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		//miniMapPositionMatch.setTarget(cockpit);//TODO: Refactor to cam mode
-		miniMapPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8800), Vector3D.ZERO));
+		miniMapPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(layout.getMiniMapPosition(), Vector3D.ZERO));
 	    }//end if(null)
 	    return miniMap;
 	}//end getMiniMap()
@@ -617,7 +620,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		private void rotate(double theta){
 		    final MiniMap parent = (MiniMap)getParent();
 		    final Rotation rot = new Rotation(Vector3D.PLUS_I, theta);
-		    offsetRot = rot.applyTo(offsetRot);
+		    offsetRot = rot.applyTo(getOffsetRot());
 		    parent.setHeading(rot.applyTo(parent.getHeading()));
 		    parent.setTopOrigin(rot.applyTo(parent.getTopOrigin()));
 		}
@@ -636,6 +639,29 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 
 	public void setBlipFactory(NAVRadarBlipFactory blipFactory) {
 	    this.blipFactory = blipFactory;
+	}
+
+	public Rotation getOffsetRot() {
+	    if(offsetRot == null){
+		 final CockpitLayout layout = getCockpitLayout();
+		 offsetRot = new Rotation(Vector3D.PLUS_J, Vector3D.PLUS_K, layout.getMiniMapTopOrigin(), layout.getMiniMapNormal());
+		 }
+	    return offsetRot;
+	}
+
+	public void setOffsetRot(Rotation offsetRot) {
+	    this.offsetRot = offsetRot;
+	}
+	
+	protected CockpitLayout getCockpitLayout() {
+	    if(cockpitLayout == null)
+		cockpitLayout = new CockpitLayout.Default();
+	    return cockpitLayout;
+	}
+
+	protected void setCockpitLayout(CockpitLayout cockpitLayout) {
+	    this.cockpitLayout = cockpitLayout;
+	    setOffsetRot(null);
 	}
  }//end ViewSelectFeature
  
@@ -669,16 +695,6 @@ public Class<Game> getTargetClass() {
 @Override
 public Class<? extends Feature> getFeatureClass() {
     return ViewSelect.class;
-}
-
-protected CockpitLayout getCockpitLayout() {
-    if(cockpitLayout == null)
-	cockpitLayout = new CockpitLayout.Default();
-    return cockpitLayout;
-}
-
-protected void setCockpitLayout(CockpitLayout cockpitLayout) {
-    this.cockpitLayout = cockpitLayout;
 }
 
 protected RenderableSpacePartitioningGrid getGrid() {

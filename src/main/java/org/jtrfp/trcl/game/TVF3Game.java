@@ -64,6 +64,7 @@ import org.jtrfp.trcl.snd.SoundSystem;
 public class TVF3Game implements Game {
     public static final String VOX = "vox";
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
+    private final GameVersion gameVersion;
     public enum Difficulty {
 	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1.5), FURIOUS(2,3,2);
 	
@@ -132,8 +133,9 @@ public class TVF3Game implements Game {
 	    private boolean inGameplay	=false;
 	    private DashboardLayout dashboardLayout;
 	    
-	    public TVF3Game(TR tr) {
+	    public TVF3Game(TR tr, GameVersion gameVersion) {
 		this.tr = tr;
+		this.gameVersion = gameVersion;
 		Features.init(this);
 		tr.setRunState(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
@@ -579,5 +581,9 @@ public class TVF3Game implements Game {
 
     public RenderableSpacePartitioningGrid getPartitioningGrid() {
         return partitioningGrid;
+    }
+
+    public GameVersion getGameVersion() {
+        return gameVersion;
     }
 }// end Game

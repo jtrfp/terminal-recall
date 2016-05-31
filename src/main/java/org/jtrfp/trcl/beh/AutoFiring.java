@@ -40,7 +40,7 @@ public class AutoFiring extends Behavior {
     @Override
     public void tick(long timeMillis){
 	final WorldObject thisObject = getParent();
-	final Player player = thisObject.getTr().getGame().getPlayer();
+	final Player player = thisObject.getTr().getGameShell().getGame().getPlayer();
 	if(player.probeForBehavior(Cloakable.class).isCloaked())return;
 	final double [] thisPos   = thisObject.getPositionWithOffset();
 	Vect3D.add(projectileFiringBehavior.peekNextModelViewFiringPosition().toArray(),thisPos, firingPos);

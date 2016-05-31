@@ -21,11 +21,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
@@ -37,8 +39,11 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
+import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.conf.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
@@ -50,13 +55,19 @@ import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.Game.CanceledException;
+import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
 public class GameShell {
-    private final TR tr;
+    private final TR   tr;
+    private       Game game;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    //// PROPERTIES ////
+    public static final String	GAME				="game";
+    
     public static final String [] ABORT_GAME_MENU_PATH   = new String [] {"Game","Abort Game"};
     public static final String [] START_GAME_MENU_PATH = new String [] {"Game","Start Game"};
     public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
@@ -81,14 +92,14 @@ public class GameShell {
 	this.tr=tr;
 	Features.init(this);
 	tr.setRunState(new GameShellConstructing(){});
-	tr.addPropertyChangeListener(TR.GAME, new PropertyChangeListener(){//TODO: Redesign then remove
+	/*tr.addPropertyChangeListener(GAME, new PropertyChangeListener(){//TODO: Redesign then remove
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		if(evt.getNewValue()==null){
 		    earlyLoadingScreen.setStatusText("No game loaded.");
 		    showGameshellScreen();
 		}else{hideGameshellScreen();}
-	    }});
+	    }});*/
 	final MenuSystem menuSystem = tr.getMenuSystem();
 	
 	menuSystem.addMenuItem(START_GAME_MENU_PATH);
@@ -104,7 +115,7 @@ public class GameShell {
     private class EndGameMenuItemListener implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
-	    tr.abortCurrentGame();
+	    abortCurrentGame();
 	}
     }//end EndGameMenuItmListener
     
@@ -193,16 +204,48 @@ public class GameShell {
 	vox = determineVOXFile();
 	if(vox==null)
 	    return this;//Abort
-	final Game game = tr.newGame(vox, newGameVersion);
+	//final Game game = tr.newGame(vox, newGameVersion);
+	final TVF3Game newGame = new TVF3Game(tr, newGameVersion);
+	newGame.setVox(vox);
+	setGame(newGame);
 	try{game.boot();}
 	catch(Exception e){
 	    gameFailure(e);}
 	return this;
     }//end newGame()
     
+    private Future<Game> setGame(final Game newGame) {
+	if(newGame==game)
+	    return new DummyFuture<Game>(game);
+	final Game oldGame=game;
+	game=newGame;
+	Future<Game> result = null;
+	final RenderableSpacePartitioningGrid defaultGrid = tr.getDefaultGrid();
+	if(oldGame instanceof TVF3Game || newGame instanceof TVF3Game){
+	    result = World.relevanceExecutor.submit(new Callable<Game>(){
+		@Override
+		public Game call() throws Exception {
+		    if(oldGame instanceof TVF3Game)
+			defaultGrid.removeBranch(((TVF3Game)oldGame).getPartitioningGrid());
+		    if(newGame instanceof TVF3Game)
+			defaultGrid.addBranch(((TVF3Game)newGame).getPartitioningGrid());
+		    return oldGame;
+		}});
+	}//end if(TVF3Game)
+	if(newGame==null){
+	    tr.getThreadManager().setPaused(true);
+	    earlyLoadingScreen.setStatusText("No game loaded.");
+	    showGameshellScreen();
+	}else{hideGameshellScreen();}
+	pcs.firePropertyChange(GAME, oldGame, newGame);
+	if(result == null)
+	    result = new DummyFuture<Game>(oldGame);
+	return result;
+    }//end setGame()
+    
     public GameShell startGame(){
 	initializationFence();
-	try{tr.getGame().doGameplay();}
+	try{getGame().doGameplay();}
 	catch(CanceledException e){
 	    return this;}
 	catch(Exception e){
@@ -212,8 +255,16 @@ public class GameShell {
     
     private void gameFailure(Exception e){
 	handleLoadFailureException(e);
-	tr.abortCurrentGame();
+	abortCurrentGame();
     }
+    
+    public void abortCurrentGame() {
+	final Game game = getGame();
+	if (game != null)
+	    game.abort();
+	setGame(null);
+	tr.setRunState(new GameShell.GameShellConstructed(){});
+    }// end abortCurrentGame()
     
     private void handleLoadFailureException(Throwable th){
 	assert th!=null;
@@ -355,5 +406,9 @@ public class GameShell {
     public EarlyLoadingScreen getEarlyLoadingScreen() {
 	initializationFence();
         return earlyLoadingScreen;
+    }
+
+    public Game getGame() {
+        return game;
     }
 }//end GameShell

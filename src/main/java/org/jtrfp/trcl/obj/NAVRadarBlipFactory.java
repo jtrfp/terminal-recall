@@ -22,6 +22,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.math.Vect3D;
@@ -99,10 +100,11 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    if(!isRadarEnabled())
 		return;
 	    final double []blipPos = getPosition();
-	    final double [] playerPos=tr.getGame().getPlayer().getPosition();
+	    final Game game = tr.getGameShell().getGame();
+	    final double [] playerPos=game.getPlayer().getPosition();
 	    Vect3D.subtract(representativeObject.getPosition(), playerPos, blipPos);
 	    Vect3D.scalarMultiply(blipPos, getRadarScalar(), blipPos);
-	    final double [] heading = tr.getGame().getPlayer().getHeadingArray();
+	    final double [] heading = game.getPlayer().getHeadingArray();
 	    double hX=heading[0];
 	    double hY=heading[2];
 	    double norm = Math.sqrt(hX*hX+hY*hY);
@@ -137,16 +139,21 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	}//end refreshPosition()
     }//end Blip
     
+    private final Collection<Blip> activeBlipBuffer = new ArrayList<Blip>();
+    
     public void refreshActiveBlips(){
-	for(Blip b: activeBlips)
+	synchronized(activeBlips){
+	 activeBlipBuffer.addAll(activeBlips);}
+	for(Blip b: activeBlipBuffer)
 	    b.refreshPosition();
+	activeBlipBuffer.clear();
     }//end refreshActiveBlips()
     
     @Override
     public void submitRadarBlip(Positionable positionable){
 	if(! (positionable instanceof DEFObject || positionable instanceof PowerupObject || positionable instanceof TunnelEntranceObject) )return;
 	final double [] otherPos = positionable.getPosition();
-	final double [] playerPos=tr.getGame().getPlayer().getPosition();
+	final double [] playerPos=tr.getGameShell().getGame().getPlayer().getPosition();
 	BlipType type=null;
 	if(Vect3D.distance(playerPos, otherPos)<RADAR_RANGE){
 	    if(positionable instanceof TunnelEntranceObject){
@@ -183,7 +190,10 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    }//end lower
 	    if(type!=null){
 		final Blip blip = newBlip(type);
-		getActiveBlips().add(blip);
+		final Collection<Blip> activeBlips = getActiveBlips();
+		synchronized(activeBlips){
+		    activeBlips.add(blip);
+		}
 		blip.setRepresentativeObject(positionable);
 		blip.refreshPosition();//TODO: Use listeners instead?
 	    }//end if(type == null)
@@ -200,7 +210,10 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     
     @Override
     public void clearRadarBlips(){
-	getActiveBlips().clear();
+	final Collection<Blip> activeBlips = getActiveBlips();
+	synchronized(activeBlips){
+	    activeBlips.clear();
+	}
 	int i=0;
 	for(Blip [] pool:blipPool){
 	    poolIndices[i++]=0;//reset index

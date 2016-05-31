@@ -211,7 +211,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 
 	public synchronized void enterTunnel(final TunnelEntranceObject teo) {
 	    final Tunnel tunnelToEnter = teo.getSourceTunnel();
-	    final Game game = ((TVF3Game)tr.getGame());
+	    final Game game = ((TVF3Game)tr.getGameShell().getGame());
 	    final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
 
 	    assert tunnelToEnter.getExitObject().getPosition()[0]>0:""+tunnelToEnter.getExitObject().getPosition()[0];//TODO: Remove
@@ -235,7 +235,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		    setEnable(false);
 		}//end for(projectiles)
 	    }//end for(projectileFactories)
-	    final Player player = ((TVF3Game)tr.getGame()).getPlayer();
+	    final Player player = ((TVF3Game)tr.getGameShell().getGame()).getPlayer();
 	    player.setActive(false);
 	    player.resetVelocityRotMomentum();
 	    player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
@@ -252,7 +252,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    //Move the secondary cam to the overworld.
 	    overworldSystem.setChamberMode(tunnelToEnter.getExitObject().isMirrorTerrain());
 	    //Set the skycube appropriately
-	    portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGame()).
+	    portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)tr.getGameShell().getGame()).
 		    getCurrentMission().
 		    getOverworldSystem().
 		    getSkySystem().

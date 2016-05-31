@@ -33,7 +33,7 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     public void tick(long timeInMillis){
 	if(chaseTarget!=null){
 	    WorldObject thisObject = getParent();
-	    final Player player = thisObject.getTr().getGame().getPlayer();
+	    final Player player = thisObject.getTr().getGameShell().getGame().getPlayer();
 	    if(player.probeForBehavior(Cloakable.class).isCloaked())return;
 	    final RotationalMomentumBehavior rmb = thisObject.probeForBehavior(RotationalMomentumBehavior.class);
 

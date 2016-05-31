@@ -21,7 +21,7 @@ import org.jtrfp.trcl.game.RedFlashFactory.RedFlash;
 public class RedFlashOnDamage extends Behavior implements DamageListener {
     
     private void flash(){
-	Features.get(((TVF3Game)getParent().getTr().getGame()), RedFlash.class).flash();
+	Features.get(((TVF3Game)getParent().getTr().getGameShell().getGame()), RedFlash.class).flash();
     }
 
     @Override

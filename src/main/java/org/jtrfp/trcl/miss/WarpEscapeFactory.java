@@ -82,7 +82,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 		  new Thread() {
 		    @Override
 		    public void run() {
-			Features.get(getTr().getGame().getCurrentMission(), WarpEscape.class).
+			Features.get(getTr().getGameShell().getGame().getCurrentMission(), WarpEscape.class).
 			    missionComplete(null);
 		    }// end run()
 		  }.start();
@@ -93,7 +93,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    if(missionAlreadyCompleted.get())
 		return;
 	    missionAlreadyCompleted.set(true);
-	    final Game game = getTr().getGame();
+	    final Game game = getTr().getGameShell().getGame();
 	    final ViewSelect viewSelect = Features.get(game, ViewSelect.class);
 	    final ViewSelectFactory.ViewMode currentViewMode = viewSelect.getViewMode();
 	    final TR tr = getTr();

@@ -117,8 +117,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	//Add a listener to control HeadingXAlwaysPositive\
 	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
 	tr.addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
-	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getThrottleMeter()));
-	addBehavior(new UpdatesHealthMeterBehavior().setController(((TVF3Game)tr.getGame()).getHUDSystem().getHealthMeter()));
+	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().getThrottleMeter()));
+	addBehavior(new UpdatesHealthMeterBehavior().setController(((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().getHealthMeter()));
 	addBehavior(new DamagedByCollisionWithDEFObject());
 	addBehavior(new DamagedByCollisionWithSurface());
 	addBehavior(new BouncesOffSurfaces());
@@ -280,7 +280,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    camera.probeForBehavior(FacingObject.class).
 		     setEnable(false);
 		    //Reset game
-	            final TVF3Game game = (TVF3Game)Player.this.getTr().getGame();
+	            final TVF3Game game = (TVF3Game)Player.this.getTr().getGameShell().getGame();
 	            final Mission mission = game.getCurrentMission();
 	            Features.get(mission, GamePause.class).setPaused(true);
 		    mission.abort();

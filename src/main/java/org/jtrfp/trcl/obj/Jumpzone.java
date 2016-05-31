@@ -55,7 +55,7 @@ public interface FinishingRunState extends Mission.GameplayState{}
 		if(TR.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4&&navTargeted){
 		    handlePlayerCollision();
 		    destroy();
-		    getTr().getGame().getCurrentMission().removeNAVObjective(objective);
+		    getTr().getGameShell().getGame().getCurrentMission().removeNAVObjective(objective);
 		}//end if(collided)
 	    }//end if(Player)
 	}//end proposeCollision()
@@ -70,7 +70,7 @@ public interface FinishingRunState extends Mission.GameplayState{}
 	new Thread() {
 	    @Override
 	    public void run() {
-		Features.get(getTr().getGame().getCurrentMission(), WarpEscape.class).
+		Features.get(getTr().getGameShell().getGame().getCurrentMission(), WarpEscape.class).
 		    missionComplete(Jumpzone.this);
 	    }// end run()
 	}.start();

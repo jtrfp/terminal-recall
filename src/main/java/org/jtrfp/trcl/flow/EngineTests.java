@@ -23,7 +23,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class EngineTests {
 
     private static void preClean(TR tr){
-	tr.abortCurrentGame();
+	tr.getGameShell().abortCurrentGame();
 	tr.getDefaultGrid().blockingRemoveAll();
     }
     public static void singlet(TR tr, int numInstances) {

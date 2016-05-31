@@ -31,7 +31,7 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	double height;
 	final AltitudeMap map=
 		p.getTr().
-		getGame().
+		getGameShell().getGame().
 		getCurrentMission().
 		getOverworldSystem().
 		getAltitudeMap();

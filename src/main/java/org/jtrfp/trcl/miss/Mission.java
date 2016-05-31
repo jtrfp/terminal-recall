@@ -159,7 +159,7 @@ public class Mission {
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Player player      = ((TVF3Game)tr.getGame()).getPlayer();
+	    final Player player      = ((TVF3Game)tr.getGameShell().getGame()).getPlayer();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check
@@ -193,7 +193,7 @@ public class Mission {
 	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
-	    final NAVSystem navSystem = ((TVF3Game)tr.getGame()).getNavSystem();
+	    final NAVSystem navSystem = ((TVF3Game)tr.getGameShell().getGame()).getNavSystem();
 	    navSubObjects = rm.getNAVData(lvl.getNavigationFile())
 		    .getNavObjects();
 
@@ -320,7 +320,7 @@ public class Mission {
 	displayHandler.setDisplayMode(overworldMode);
 	
 	((TVF3Game)game).getPlayer()	.setActive(true);
-	((TVF3Game)tr.getGame()).setPaused(false);
+	((TVF3Game)tr.getGameShell().getGame()).setPaused(false);
 	//tr.setRunState(new PlayerActivity(){});
 	//Wait for mission end
 	synchronized(missionEnd){
@@ -348,7 +348,7 @@ public class Mission {
     public void removeNAVObjective(NAVObjective o) {
 	navs.remove(o);
 	updateNavState();
-	((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
+	((TVF3Game)tr.getGameShell().getGame()).getNavSystem().updateNAVState();
     }// end removeNAVObjective(...)
     
     private void updateNavState(){
@@ -611,12 +611,12 @@ public class Mission {
     public void setSatelliteView(boolean satelliteView) {
 	if(!(tr.getRunState() instanceof OverworldState)&&satelliteView)
 	    throw new IllegalArgumentException("Cannot activate satellite view while runState is "+tr.getRunState().getClass().getSimpleName());
-	if(satelliteView && ((TVF3Game)tr.getGame()).isPaused())
+	if(satelliteView && ((TVF3Game)tr.getGameShell().getGame()).isPaused())
 	    throw new IllegalArgumentException("Cannot activate satellite view while paused.");
 	final boolean oldValue = this.satelliteView;
 	
 	if(satelliteView!=oldValue){
-	    final Game game =  ((TVF3Game)tr.getGame());
+	    final Game game =  ((TVF3Game)tr.getGameShell().getGame());
 	    final Camera cam = tr.mainRenderer.get().getCamera();
 	    this.satelliteView=satelliteView;
 	    pcs.firePropertyChange(SATELLITE_VIEW, oldValue, satelliteView);
@@ -627,22 +627,22 @@ public class Mission {
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
 		cam.probeForBehavior(MatchDirection.class).setEnable(false);
 		final Vector3D pPos = new Vector3D(((TVF3Game)game).getPlayer().getPosition());
-		final Vector3D pHeading = ((TVF3Game)tr.getGame()).getPlayer().getHeading();
+		final Vector3D pHeading = ((TVF3Game)tr.getGameShell().getGame()).getPlayer().getHeading();
 		cam.setPosition(new Vector3D(pPos.getX(),TR.visibilityDiameterInMapSquares*TR.mapSquareSize*.65,pPos.getZ()));
 		cam.setHeading(Vector3D.MINUS_J);
 		cam.setTop(new Vector3D(pHeading.getX(),.0000000001,pHeading.getZ()).normalize());
-		((TVF3Game)tr.getGame()).getSatDashboard().setVisible(true);
+		((TVF3Game)tr.getGameShell().getGame()).getSatDashboard().setVisible(true);
 	    }else{//Switched off
 		tr.getThreadManager().setPaused(false);
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			((TVF3Game)tr.getGame()).getNavSystem().activate();
+			((TVF3Game)tr.getGameShell().getGame()).getNavSystem().activate();
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);
 		cam.probeForBehavior(MatchDirection.class).setEnable(true);
-		((TVF3Game)tr.getGame()).getSatDashboard().setVisible(false);
+		((TVF3Game)tr.getGameShell().getGame()).getSatDashboard().setVisible(false);
 	    }//end !satelliteView
 	}//end if(change)
     }

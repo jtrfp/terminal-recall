@@ -83,7 +83,7 @@ public class PowerupObject extends WorldObject{
 			    addSupply(powerupType.
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
-			((TVF3Game)tr.getGame()).getUpfrontDisplay().submitMomentaryUpfrontMessage(
+			((TVF3Game)tr.getGameShell().getGame()).getUpfrontDisplay().submitMomentaryUpfrontMessage(
 				tr.configManager.getConfig()._getGameVersion()!=GameVersion.TV?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());

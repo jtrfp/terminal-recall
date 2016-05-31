@@ -177,7 +177,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     }//end planetDisplayMode()
     
     public void missionCompleteSummary(LVLFile lvl, Result r){
-	final Game   game 	 = tr.getGame();
+	final Game   game 	 = tr.getGameShell().getGame();
 	final Mission mission    = game.getCurrentMission();
 	final TunnelSystem ts    = Features.get(mission, TunnelSystem.class);
 	game.getPlayer().setActive(false);
@@ -198,7 +198,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     }//end missionCompleteSummary()
 
     public void briefingSequence(LVLFile lvl) {
-	final Game   game 	 = tr.getGame();
+	final Game   game 	 = tr.getGameShell().getGame();
 	final Renderer renderer  = tr.mainRenderer.get();
 	final Camera camera 	 = renderer.getCamera();
 	game.getPlayer().setActive(false);
@@ -266,7 +266,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		chamberMode = def.isShieldGen() || def.isBoss();
 	    }
 	    if(chamberMode)
-		tr.getGame().getCurrentMission().getOverworldSystem().setChamberMode(true);
+		tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().setChamberMode(true);
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze
@@ -278,7 +278,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.setActive(act);
 	    wo.setRespondToTick(true);//unfreeze
 	    if(chamberMode)
-		tr.getGame().getCurrentMission().getOverworldSystem().setChamberMode(false);
+		tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().setChamberMode(false);
 	}//end for(enemyIntros)
 	camera.probeForBehavior(FacingObject.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);

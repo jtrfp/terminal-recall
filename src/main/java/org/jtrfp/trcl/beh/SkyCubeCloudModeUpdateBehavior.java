@@ -33,7 +33,7 @@ public class SkyCubeCloudModeUpdateBehavior extends Behavior {
 	    tr.mainRenderer.get().
 	     getSkyCube().
 	     setSkyCubeGen(
-	      tr.getGame().
+	      tr.getGameShell().getGame().
 	      getCurrentMission().
 	      getOverworldSystem().
 	      getSkySystem().
@@ -46,7 +46,7 @@ public class SkyCubeCloudModeUpdateBehavior extends Behavior {
 	    tr.mainRenderer.get().
 	     getSkyCube().
 	     setSkyCubeGen(
-	      tr.getGame().
+	      tr.getGameShell().getGame().
 	      getCurrentMission().
 	      getOverworldSystem().
 	      getSkySystem().

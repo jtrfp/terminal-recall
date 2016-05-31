@@ -59,7 +59,6 @@ import org.springframework.stereotype.Component;
 @Component
 public final class TR implements UncaughtExceptionHandler{
     	//// BEAN PROPERTIES
-    	public static final String	GAME				="game";
     	public static final String      RUN_STATE                       ="runState";
     
     	public static final String []   EXIT_MENU_PATH = new String[]  {"File","Exit"};
@@ -89,7 +88,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public final TRFutureTask<Renderer> 	mainRenderer/*, secondaryRenderer*/;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	private final Reporter 			reporter;
-	private Game 				game;
+	//private Game 				game;
 	private final PropertyChangeSupport	pcSupport;
 	
 	private World 				world;
@@ -353,7 +352,7 @@ public final class TR implements UncaughtExceptionHandler{
     public boolean isStampingTextures() {
 	return false;
     }
-
+/*
     public Game newGame(VOXFile mission, GameVersion gameVersion) {//TODO: Refactor this out
 	final TVF3Game newGame = new TVF3Game(this, gameVersion);
 	newGame.setVox(mission);
@@ -361,12 +360,6 @@ public final class TR implements UncaughtExceptionHandler{
 	return newGame;
     }// end newGame(...)
 
-    /**
-     * 
-     * @param newGame
-     * @return Future containing the old Game or containing null if no previous Game
-     * @since Jan 23, 2016
-     */
     private Future<Game> setGame(final Game newGame) {
 	if(newGame==game)
 	    return new DummyFuture<Game>(game);
@@ -392,7 +385,7 @@ public final class TR implements UncaughtExceptionHandler{
 	    result = new DummyFuture<Game>(oldGame);
 	return result;
     }//end setGame()
-
+*/
     public Color[] getGlobalPalette() {
 	if (globalPalette == null)
 	    globalPalette = Util.DEFAULT_PALETTE;
@@ -442,10 +435,6 @@ public final class TR implements UncaughtExceptionHandler{
      */
     public Reporter getReporter() {
 	return reporter;
-    }
-
-    public Game getGame() {
-	return game;
     }
 
     public static double legacy2MapSquare(double z) {
@@ -540,13 +529,7 @@ public final class TR implements UncaughtExceptionHandler{
 	return this;
     }
 
-    public void abortCurrentGame() {
-	final Game game = getGame();
-	if (game != null)
-	    game.abort();
-	setGame(null);
-	setRunState(new GameShell.GameShellConstructed(){});
-    }// end abortCurrentGame()
+    
 
     /**
      * @return the menuSystem

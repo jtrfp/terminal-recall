@@ -77,7 +77,7 @@ private final DashboardLayout layout;
 	    final Object runState = evt.getNewValue();
 	    final MiniMap miniMap = getMiniMap();
 	    if(runState instanceof Mission.OverworldState){
-		  miniMap.setTextureMesh(tr.getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
+		  miniMap.setTextureMesh(tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
 		  miniMap.setVisible(true);
 	    }else {
 		miniMap.setVisible(false);
@@ -87,13 +87,13 @@ private final DashboardLayout layout;
     }//end RunStateListener
     
     public void updateNAVState(){
-	final Game game = tr.getGame();
+	final Game game = tr.getGameShell().getGame();
 	if(game==null)return;
 	final Mission mission = game.getCurrentMission();
 	if(mission==null)return;
 	final NAVObjective obj = mission.currentNAVObjective();
 	if(obj==null)return;
-	((TVF3Game)tr.getGame()).getHUDSystem().
+	((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().
 		getObjective().
 		setContent(layout.getHumanReadableObjective(obj));
 	final WorldObject target = obj.getTarget();

@@ -26,13 +26,14 @@ import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShell;
 
 public class Crosshairs extends WorldObject implements RelevantEverywhere {
 
@@ -82,9 +83,9 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	addBehavior(new MatchPosition());
 	addBehavior(new MatchDirection());
 	final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
-	tr.addPropertyChangeListener(TR.GAME, gameIP);
+	tr.addPropertyChangeListener(GameShell.GAME, gameIP);
 	gameIP.addTargetPropertyChangeListener(Game.PLAYER, new PlayerListener());
-	gameIP.setTarget(tr.getGame());
+	gameIP.setTarget(tr.getGameShell().getGame());
 	this.setRespondToTick(true);
 	setActive(true);
 	setVisible(true);
@@ -114,7 +115,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	    public void propertyChange(PropertyChangeEvent evt) {
 		updateCrosshairsVisibilityState(
 			(Boolean)evt.getNewValue(),
-			tr.getGame().getCurrentMission().isSatelliteView());
+			tr.getGameShell().getGame().getCurrentMission().isSatelliteView());
 	    }});
 	IndirectProperty<Mission> currentMission = new IndirectProperty<Mission>();
 	currentMission.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW,new PropertyChangeListener(){
@@ -126,7 +127,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 			tr.configManager.getConfig().isCrosshairsEnabled(),
 			newValue);
 	    }});
-	((TVF3Game)tr.getGame()).addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
+	((TVF3Game)tr.getGameShell().getGame()).addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
     }//end installReactiveListeners
     
     private void updateCrosshairsVisibilityState(

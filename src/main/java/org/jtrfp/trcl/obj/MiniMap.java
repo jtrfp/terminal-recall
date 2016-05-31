@@ -51,7 +51,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private class MiniMapBehavior extends Behavior {
 	@Override
 	public void tick(long tickTimeMillis){
-	    final Game game = getTr().getGame();
+	    final Game game = getTr().getGameShell().getGame();
 	    if(game == null)
 		return;
 	    final Player player = game.getPlayer();

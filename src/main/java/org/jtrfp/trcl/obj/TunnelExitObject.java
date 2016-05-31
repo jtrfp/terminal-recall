@@ -56,6 +56,7 @@ public class TunnelExitObject extends PortalEntrance {
 	final NormalMap map = 
 		new NormalMap(
 		tr.
+		getGameShell().
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().
@@ -83,7 +84,7 @@ public class TunnelExitObject extends PortalEntrance {
 	pExit.setPosition(exitLocation.toArray());
 	pExit.setHeading(exitHeading);
 	pExit.setTop(exitTop);
-	pExit.setRootGrid(((TVF3Game)tr.getGame()).getCurrentMission().getOverworldSystem());
+	pExit.setRootGrid(((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().getOverworldSystem());
 	pExit.notifyPositionChange();
 	this.setPortalExit(pExit);
 	setPortalTexture(new PortalTexture());
@@ -110,7 +111,7 @@ public class TunnelExitObject extends PortalEntrance {
 		if (camera.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
 		    System.out.println("Escaping tunnel at exit.X="+getPosition()[0]+" camera.X="+camera.getPosition()[0]);
-		    final Game game = ((TVF3Game)tr.getGame());
+		    final Game game = ((TVF3Game)tr.getGameShell().getGame());
 		    final Mission mission = game.getCurrentMission();
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
 		    System.out.println("TunnelExitObject leaving tunnel "+tun);
@@ -143,7 +144,7 @@ public class TunnelExitObject extends PortalEntrance {
 			    //grid.addBranch(game.getNavSystem());
 			}});
 		    // Reset player behavior
-		    final Player player = ((TVF3Game)tr.getGame()).getPlayer();
+		    final Player player = ((TVF3Game)tr.getGameShell().getGame()).getPlayer();
 		    player.setActive(false);
 		    player.resetVelocityRotMomentum();
 		    player.probeForBehavior(CollidesWithTunnelWalls.class)
@@ -175,7 +176,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    }// end for(projectileFactories)
 		    final NAVObjective navObjective = getNavObjectiveToRemove();
 		    if (navObjective != null && (navTargeted|!onlyRemoveIfTargeted)) {
-			((TVF3Game)tr.getGame()).getCurrentMission().removeNAVObjective(navObjective);
+			((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
 		    
 		    if(mirrorTerrain){
@@ -188,7 +189,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    else
 		     tr.setRunState(new Mission.PlayerActivity(){});
 		    */
-		    ((TVF3Game)tr.getGame()).getNavSystem().updateNAVState();
+		    ((TVF3Game)tr.getGameShell().getGame()).getNavSystem().updateNAVState();
 		    mission.setDisplayMode(mission.overworldMode);
 		    overworldSystem.setTunnelMode(false);
 		    player.setActive(true);

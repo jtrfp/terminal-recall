@@ -55,7 +55,7 @@ public class CollidesWithTerrain extends Behavior {
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
-	final Mission mission = tr.getGame().getCurrentMission();
+	final Mission mission = tr.getGameShell().getGame().getCurrentMission();
 	OverworldSystem ows = lastOWS!=null?lastOWS.get():null;
 	if(mission.getOverworldSystem()!=ows){
 	    normalMap=null;
@@ -72,7 +72,7 @@ public class CollidesWithTerrain extends Behavior {
 	    return;//No terrain to collide with while in tunnel mode.
 	if(normalMap==null)
 	    return;
-	final OverworldSystem overworldSystem = tr.getGame().getCurrentMission().getOverworldSystem();
+	final OverworldSystem overworldSystem = tr.getGameShell().getGame().getCurrentMission().getOverworldSystem();
 	if(overworldSystem==null)return;
 	final boolean terrainMirror = overworldSystem.isChamberMode();
 	final double[] thisPos = p.getPosition();

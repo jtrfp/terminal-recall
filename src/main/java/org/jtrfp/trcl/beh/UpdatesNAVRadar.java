@@ -27,7 +27,7 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
     public void tick(long timeInMillis){
 	counter++;
 	if(counter%REFRESH_INTERVAL==0){
-	    final Game game = getParent().getTr().getGame();
+	    final Game game = getParent().getTr().getGameShell().getGame();
 	    blips = ((TVF3Game)game).
 		    getNavSystem().
 		    getBlips();

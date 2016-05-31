@@ -222,8 +222,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					portalModel.addTriangles(tris);
 					final PortalExit exit = new PortalExit(tr);
 					final PortalEntrance entrance;
-					entrance = new PortalEntrance(tr,portalModel,exit,tr.getGame().getPlayer());
-					final TunnelSystem ts = Features.get(tr.getGame().getCurrentMission(),TunnelSystem.class);
+					entrance = new PortalEntrance(tr,portalModel,exit,tr.getGameShell().getGame().getPlayer());
+					final TunnelSystem ts = Features.get(tr.getGameShell().getGame().getCurrentMission(),TunnelSystem.class);
 					ts.registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
 					
 					entrance.setPortalTexture(portalTexture);

@@ -101,7 +101,7 @@ private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
 	@Override
 	public void tick(long time){
 	    final TR tr              = getTr();
-	    final Game game          = tr.getGame();
+	    final Game game          = tr.getGameShell().getGame();
 	    final Mission mission    = game.getCurrentMission();
 	    final WorldObject player = game.getPlayer();
 	    final HUDSystem hudSystem= ((TVF3Game)game).getHUDSystem();

@@ -24,20 +24,21 @@ public class TerrainLocked extends Behavior {
     public void tick(long tickTimeMillis){
 	final WorldObject p = getParent();
 	final double[] thisPos=p.getPosition();
-	final Game game = p.getTr().getGame();
+	final Game game = p.getTr().getGameShell().getGame();
 	if(game==null)
 	    return;
 	final Mission currentMission = game.getCurrentMission();
 	if(currentMission==null)
 	    return;
-	if(p.getTr().getGame().getCurrentMission().getOverworldSystem()==null)
+	if(p.getTr().getGameShell().getGame().getCurrentMission().getOverworldSystem()==null)
 	    return;
-	if(p.getTr().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()==null)
+	if(p.getTr().getGameShell().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()==null)
 	    return;
 	final double height = 
 		(lockedToCeiling?TerrainSystem.Y_NUDGE:0)+
 		(lockedToCeiling?p.getTr().getWorld().sizeY:0)+(lockedToCeiling?-1:1)*
 		p.getTr().
+		getGameShell().
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().

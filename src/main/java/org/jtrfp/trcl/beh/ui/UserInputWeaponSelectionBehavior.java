@@ -49,7 +49,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
 	    final int ammo = getActiveBehavior().getAmmo();
-	    ((TVF3Game)parent.getTr().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
+	    ((TVF3Game)parent.getTr().getGameShell().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
@@ -86,7 +86,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 		break;
 	        }
 	    }//end switch(game version)
-	    ((TVF3Game)tr.getGame()).getHUDSystem().getWeapon().setContent(content);
+	    ((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().getWeapon().setContent(content);
 	    return true;
 	}//end if(New Behavior)
 	return false;

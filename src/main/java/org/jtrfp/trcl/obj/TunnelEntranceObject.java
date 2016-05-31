@@ -33,7 +33,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 	if(portalEntrance == null)
 	    throw new IllegalArgumentException("PortalEntrance intolerably null.");
 	this.portalEntrance = portalEntrance;
-	final Mission mission = tr.getGame().getCurrentMission();
+	final Mission mission = tr.getGameShell().getGame().getCurrentMission();
 	mission.addPropertyChangeListener(new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -52,7 +52,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 	position[0]=TR.legacy2Modern(entrance.getZ());
 	position[1]=TR.legacy2Modern(entrance.getY()+GROUND_HEIGHT_PAD);
 	position[2]=TR.legacy2Modern(entrance.getX());
-	double height = tr.getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
+	double height = tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
 		position[0], position[2]);
 	position[1]=height+GROUND_HEIGHT_PAD;
 	notifyPositionChange();
@@ -76,7 +76,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 		 WorldObject entranceObject = getParent();
 		final TR tr	  = entranceObject.getTr();
 		final World world = tr.getWorld();
-		final Game game   = tr.getGame();
+		final Game game   = tr.getGameShell().getGame();
 		if(game==null)return;
 		final Mission mission = game.getCurrentMission();
 		if(mission.getOverworldSystem()==null) return;
@@ -118,7 +118,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 			  setEnable(false);
 		     }//end for(projectiles)
 		 }//end for(projectileFactories)
-		 final Player player = tr.getGame().getPlayer();
+		 final Player player = tr.getGameShell().getGame().getPlayer();
 		 final Behavior playerBehavior = player.getBehavior();
 		 playerBehavior.probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
 		 playerBehavior.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);

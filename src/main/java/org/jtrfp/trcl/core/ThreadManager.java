@@ -122,7 +122,6 @@ public final class ThreadManager implements GLExecutor{
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	boolean alreadyVisitedPlayer=false;
-	final Game game = tr.getGame();
 	TRFuture [] renderers = new TRFuture[]{tr.mainRenderer/* ,tr.secondaryRenderer*/ };//TODO: This is hacky.
 	try{// NotReadyException
 	visibilityListBuffer.clear();

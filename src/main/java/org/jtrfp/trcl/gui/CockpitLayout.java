@@ -25,26 +25,22 @@ public interface CockpitLayout {
 
     @Override
     public Vector3D getMiniMapPosition() {
-	// TODO Auto-generated method stub
-	return null;
+	return new Vector3D(0, -1450, 8800);
     }
 
     @Override
     public double getMiniMapRadius() {
-	// TODO Auto-generated method stub
-	return 0;
+	return 1200;
     }
 
     @Override
     public Vector3D getMiniMapNormal() {
-	// TODO Auto-generated method stub
-	return null;
+	return new Vector3D(0, 0.6706855765, 0.7417417727);
     }
 
     @Override
     public Vector3D getMiniMapTopOrigin() {
-	// TODO Auto-generated method stub
-	return null;
+	return new Vector3D(0, 0.7417417727, -0.6706855765);
     }
  }//end Default
 }//end CockpitLayout

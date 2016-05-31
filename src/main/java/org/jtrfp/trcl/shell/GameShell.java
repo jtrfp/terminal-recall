@@ -193,7 +193,7 @@ public class GameShell {
 	vox = determineVOXFile();
 	if(vox==null)
 	    return this;//Abort
-	final Game game = tr.newGame(vox);
+	final Game game = tr.newGame(vox, newGameVersion);
 	try{game.boot();}
 	catch(Exception e){
 	    gameFailure(e);}

@@ -37,6 +37,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.conf.ConfigManager;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
@@ -353,8 +354,8 @@ public final class TR implements UncaughtExceptionHandler{
 	return false;
     }
 
-    public Game newGame(VOXFile mission) {//TODO: Refactor this out
-	final TVF3Game newGame = new TVF3Game(this);
+    public Game newGame(VOXFile mission, GameVersion gameVersion) {//TODO: Refactor this out
+	final TVF3Game newGame = new TVF3Game(this, gameVersion);
 	newGame.setVox(mission);
 	setGame(newGame);
 	return newGame;

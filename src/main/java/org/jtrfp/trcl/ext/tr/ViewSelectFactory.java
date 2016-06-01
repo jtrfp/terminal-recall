@@ -43,11 +43,14 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.CockpitLayout;
+import org.jtrfp.trcl.gui.CockpitLayoutF3;
+import org.jtrfp.trcl.gui.CockpitLayoutTV;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
@@ -628,7 +631,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 
 	public NAVRadarBlipFactory getBlipFactory() {
 	    if(blipFactory == null){
-		blipFactory = new NAVRadarBlipFactory(tr, getGrid(), 1200., "ViewSelect.NavRadarBlipFactory", false);
+		final double radius = getCockpitLayout().getMiniMapRadius();
+		blipFactory = new NAVRadarBlipFactory(tr, getGrid(), radius, "ViewSelect.NavRadarBlipFactory", false);
 	    	final TVF3Game game = (TVF3Game)ViewSelect.this.game.get();
 	    	game.getNavSystem().
 	    	 getBlips().
@@ -654,8 +658,15 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}
 	
 	protected CockpitLayout getCockpitLayout() {
-	    if(cockpitLayout == null)
-		cockpitLayout = new CockpitLayout.Default();
+	    if(cockpitLayout == null){
+		final Game thisGame = game.get();
+		if(thisGame instanceof TVF3Game){
+		    final TVF3Game tvf3 = (TVF3Game)thisGame;
+		    if(tvf3.getGameVersion() == GameVersion.TV)
+			 cockpitLayout = new CockpitLayoutTV();
+		    else cockpitLayout = new CockpitLayoutF3();
+		}else cockpitLayout = new CockpitLayout.Default();
+	    }
 	    return cockpitLayout;
 	}
 

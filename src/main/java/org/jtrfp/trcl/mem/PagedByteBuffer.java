@@ -175,8 +175,9 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	    put(startIndexInBytes+bytesRemainingInPage,src);
 	}else{//Do it
 	    markPageStale(startIndexInBytes);
-	    intrinsic[0].position(logicalIndex2PhysicalIndex(startIndexInBytes));
-	    intrinsic[0].put(src);
+	    final ByteBuffer bb = intrinsic[0].duplicate();
+	    bb.position(logicalIndex2PhysicalIndex(startIndexInBytes));
+	    bb.put(src);
 	}
 	return this;
     }//end put(...)

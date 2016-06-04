@@ -29,7 +29,6 @@ public class FeaturesImpl {
        final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
     
       void registerFeature(FeatureFactory<?> factory){
-	System.out.println("Registering feature factory: "+factory.getClass().getName());
 	Collection<FeatureFactory> factoryCollection = getFactoryCollection(factory.getTargetClass());
 	factoryCollection.add(factory);
 	registerFeatureRecursive(factory.getFeatureClass(),factory);
@@ -39,7 +38,6 @@ public class FeaturesImpl {
        void registerFeatureRecursive(Class featureClass, FeatureFactory factory){
 	if(featureClass == Object.class || featureClass == null)
 	    return;
-	System.out.println("Register featureFactoriesByFeature "+featureClass.getName());
 	featureFactoriesByFeature.put(featureClass,factory);
 	for(Class iface:featureClass.getInterfaces())
 	    registerFeatureRecursive(iface,factory);
@@ -54,7 +52,6 @@ public class FeaturesImpl {
     }
     
     public  void init(Object obj){
-	System.out.println("init "+obj);
 	//Traverse the type hierarchy
 	Class tClass = obj.getClass();
 	//For its interfaces
@@ -67,7 +64,6 @@ public class FeaturesImpl {
 		    get(obj,ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
-	System.out.println("end init");
     }//end init(...)
     
     public  void destruct(Object obj){
@@ -85,21 +81,19 @@ public class FeaturesImpl {
 	return result;
     }//end getFeatureMap()
     
-       Feature getFeature(Map<Class<? extends Feature>,Feature> map, Class<?> featureClass, Object target){
+       Feature getFeature(Map<Class<? extends Feature>,Feature> map, Class<? extends Feature> featureClass, Object target){
 	Feature result = map.get(featureClass);
-	System.out.println("getFeature map="+map+" featureClass="+featureClass+" target="+target);
 	if(result==null){
 	    final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
 	    assert ff!=null:""+featureClass.getName();
-	    map.put(ff.getFeatureClass(), result = ff.newInstance(target));
+	    map.put(featureClass, result = ff.newInstance(target));
 	    result.apply(target);
 	    }
 	return result;
     }//end getFeature()
 
     public  <T> T get(Object target, Class<T> featureClass){
-     System.out.println("get target="+target+" class="+featureClass);
      final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
-     return (T)getFeature(fMap,featureClass,target);
+     return (T)getFeature(fMap,(Class<Feature>)featureClass,target);
     }//end get(...)
 }//end FeaturesImpl

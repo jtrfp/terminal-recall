@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.miss;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -32,18 +33,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GamePauseFactory implements FeatureFactory<Mission>  {
-    private final TR tr;
     public static final String PAUSE = "Pause";
     public static final String [] PAUSE_MENU_PATH = new String[] {"Game","Pause"}; 
     private final ControllerInput pause;
-    private final MenuSystem menuSystem;
     public interface PauseDisabledState{}
     
     @Autowired
-    public GamePauseFactory(TR tr, ControllerInputs inputs, MenuSystem menuSystem){
-	this.tr         = tr;
+    public GamePauseFactory(ControllerInputs inputs){
 	pause           = inputs.getControllerInput(PAUSE);
-	this.menuSystem = menuSystem;
     }//end constructor'
     
     public class GamePause implements Feature<Mission>{
@@ -56,18 +53,18 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 
 	@Override
 	public void apply(Mission mission) {
-	    pause.addPropertyChangeListener(controllerListener);
-	    menuSystem.addMenuItem(PAUSE_MENU_PATH);
-	    menuSystem.addMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
-	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    this.mission = new WeakReference<Mission>(mission);
+	    pause.addPropertyChangeListener(controllerListener);
+	    getMenuSystem().addMenuItem(PAUSE_MENU_PATH);
+	    getMenuSystem().addMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
+	    getTr().addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	}
 
 	@Override
 	public void destruct(Mission target) {
-	    tr.removePropertyChangeListener(TR.RUN_STATE, runStateListener);
-	    menuSystem.removeMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
-	    menuSystem.removeMenuItem(PAUSE_MENU_PATH);
+	    getTr().removePropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    getMenuSystem().removeMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
+	    getMenuSystem().removeMenuItem(PAUSE_MENU_PATH);
 	    pause.removePropertyChangeListener(controllerListener);
 	}
 	
@@ -90,14 +87,14 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final Object newValue = evt.getNewValue();
-		menuSystem.setMenuItemEnabled(
+		getMenuSystem().setMenuItemEnabled(
 			newValue instanceof Mission.GameplayState
 			, PAUSE_MENU_PATH);
 	    }
 	}//end RunStateListener
 	
 	private void proposePause(boolean newState){
-	    final Object runState = tr.getRunState();
+	    final Object runState = getTr().getRunState();
 	    if(runState instanceof Mission.PlayerActivity &&
 		    !(runState instanceof Mission.SatelliteState) &&
 		    !(runState instanceof PauseDisabledState)){
@@ -121,8 +118,8 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 		 ((TVF3Game)mission.getGame()).getUpfrontDisplay().submitPersistentMessage("Paused--F3 to Resume ");
 		else
 		    ((TVF3Game)mission.getGame()).getUpfrontDisplay().removePersistentMessage();
-	    tr.getThreadManager().setPaused(paused);
-	    tr.soundSystem.get() .setPaused(paused);
+	    getTr().getThreadManager().setPaused(paused);
+	    getTr().soundSystem.get() .setPaused(paused);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -154,6 +151,15 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 
 	public boolean hasListeners(String propertyName) {
 	    return pcs.hasListeners(propertyName);
+	}
+	
+	public MenuSystem getMenuSystem(){
+	    final Frame frame = getTr().getRootWindow();
+	    return Features.get(frame, MenuSystem.class);
+	}
+	
+	public TR getTr(){
+	    return mission.get().getTr();
 	}
 	
     }//end GamePause

@@ -14,6 +14,7 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
@@ -22,24 +23,18 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.conf.ConfigManager;
 import org.jtrfp.trcl.ctl.ControllerInputs;
-import org.jtrfp.trcl.file.VOXFile;
-import org.jtrfp.trcl.flow.GameVersion;
-import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ConfigWindow;
@@ -143,7 +138,7 @@ public final class TR implements UncaughtExceptionHandler{
 	}
 	
 	@Autowired
-	public TR(final ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow, MenuSystem menuSystem){
+	public TR(final ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow, final Features features){
 	    //this.config       = configManager;
 	    this.configWindow = configWindow;
 	    this.reporter     = reporter;
@@ -151,6 +146,8 @@ public final class TR implements UncaughtExceptionHandler{
 	    this.configManager= configManager;
 	    
 	    rootWindow.initialize();
+	    
+	    menuSystem = Features.get(rootWindow, MenuSystem.class);
 	    
 	    menuSystem.addMenuItem(CONFIG_MENU_PATH);
 	    menuSystem.setMenuItemEnabled(true, CONFIG_MENU_PATH);
@@ -232,7 +229,6 @@ public final class TR implements UncaughtExceptionHandler{
 		//renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 		renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 		
-		getMenuSystem();
 		Features.init(this);
 	}//end constructor
 	
@@ -534,8 +530,9 @@ public final class TR implements UncaughtExceptionHandler{
     /**
      * @return the menuSystem
      */
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
+    public MenuSystem getMenuSystem() {//TODO: Remove this. TR is not supposed to be aware of MenuSystem so there's no point.
+        final Frame frame = getRootWindow();
+        return Features.get(frame, MenuSystem.class);
     }
 
     /**
@@ -584,11 +581,6 @@ public final class TR implements UncaughtExceptionHandler{
         this.runState                = runState;
         System.out.println("setRunState "+runState+" old="+oldRunState);
         pcSupport.firePropertyChange(RUN_STATE, oldRunState, runState);
-    }
-
-    @Autowired
-    public void setMenuSystem(MenuSystem menuSystem) {
-        this.menuSystem = menuSystem;
     }
 
     public PropertyChangeListener[] getPropertyChangeListeners() {

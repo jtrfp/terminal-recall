@@ -19,23 +19,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jtrfp.trcl.core.Feature;
+import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.springframework.stereotype.Component;
 
 import com.jogamp.newt.event.KeyEvent;
 
 @Component
-public class SwingMenuSystem implements MenuSystem {
-    private final SubMenu rootNode;
-    private final RootWindow rw;
+public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
     
-    //private final FramebufferStateWindow fbsw;
+    public class SwingMenuSystem implements Feature<JFrame>, MenuSystem {
+    private SubMenu rootNode;
+    private JFrame rw;
+    
+    //private final JFramebufferStateWindow fbsw;
     //private final LevelSkipWindow	levelSkipWindow;
     //private final IndirectProperty<Game>game      = new IndirectProperty<Game>();
     //private final IndirectProperty<Boolean>paused = new IndirectProperty<Boolean>();
@@ -46,25 +51,9 @@ public class SwingMenuSystem implements MenuSystem {
 	    debugMenu = new JMenu("Debug"),
 	    viewMenu = new JMenu("View");
     
-    @Autowired
-    public SwingMenuSystem(final RootWindow rw){
-	final JMenuBar [] menuBar = new JMenuBar[] {rw.getJMenuBar()};
-	try {
-	    if(menuBar[0] == null)
-	     SwingUtilities.invokeAndWait(new Runnable(){
-		@Override
-		public void run() {
-			rw.setJMenuBar(menuBar[0] = new JMenuBar()); 
-			rw.invalidate();
-			rw.validate();
-		}});
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	} catch (InvocationTargetException e) {
-	    e.printStackTrace();
-	}
-	rootNode = new SubMenu(menuBar[0]);
-	this.rw = rw;
+    public SwingMenuSystem(){
+	System.out.println("SwingMenuSystem() constructor");
+	new Exception("Not an error").printStackTrace();
 	// And items to menus
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
@@ -73,7 +62,7 @@ public class SwingMenuSystem implements MenuSystem {
 	final JMenuItem game_skip = new JMenuItem("Skip To Level...");
 	final JMenuItem game_abort= new JMenuItem("Abort Game");
 	final JMenuItem debugStatesMenuItem = new JMenuItem("Debug States");
-	final JMenuItem frameBufferStatesMenuItem = new JMenuItem("Framebuffer States");
+	final JMenuItem frameBufferStatesMenuItem = new JMenuItem("JFramebuffer States");
 	final JMenuItem gpuMemDump = new JMenuItem("Dump GPU Memory");
 	final JMenuItem codePageDump = new JMenuItem("Dump Code Pages");
 	final JMenuItem debugSinglet = new JMenuItem("Singlet (fill)");
@@ -86,7 +75,7 @@ public class SwingMenuSystem implements MenuSystem {
 	/*
 	view_crosshairs.setAccelerator(KeyStroke.getKeyStroke("X"));
 	
-	fbsw = new FramebufferStateWindow(tr);
+	fbsw = new JFramebufferStateWindow(tr);
 	levelSkipWindow = new LevelSkipWindow(tr);
 	
 	// Menu item behaviors
@@ -254,7 +243,7 @@ public class SwingMenuSystem implements MenuSystem {
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-	            rw.setVisible(false);//Frame must be invisible to modify.
+	            rw.setVisible(false);//JFrame must be invisible to modify.
 		    rw.setJMenuBar(mb);
 		    mb.add(file);
 		    mb.add(gameMenu);
@@ -336,29 +325,29 @@ public class SwingMenuSystem implements MenuSystem {
     }*/
 
     @Override
-    public void addMenuItem(String... path) throws IllegalArgumentException {
+    public synchronized void addMenuItem(String... path) throws IllegalArgumentException {
 	rootNode.addMenuItem(0, path);
     }
 
     @Override
-    public void removeMenuItem(String... path) throws IllegalArgumentException {
+    public synchronized void removeMenuItem(String... path) throws IllegalArgumentException {
 	rootNode.removeMenuItem(0, path);
     }
 
     @Override
-    public void addMenuItemListener(ActionListener l, String... path)
+    public synchronized void addMenuItemListener(ActionListener l, String... path)
 	    throws IllegalArgumentException {
 	rootNode.addMenuItemListener(l, 0, path);
     }
 
     @Override
-    public void removeMenuItemListener(ActionListener l, String... path)
+    public synchronized void removeMenuItemListener(ActionListener l, String... path)
 	    throws IllegalArgumentException {
 	rootNode.removeMenuItemListener(l, 0, path);
     }
 
     @Override
-    public void setMenuItemEnabled(boolean enabled, String... path)
+    public synchronized void setMenuItemEnabled(boolean enabled, String... path)
 	    throws IllegalArgumentException {
 	rootNode.setMenuItemEnabled(enabled, 0, path);
     }
@@ -435,6 +424,14 @@ public class SwingMenuSystem implements MenuSystem {
 		else
 		    throw new IllegalArgumentException("Cannot add item as there is a submenu already in its place. Path[index]="+path[index]+" index="+index+" this="+getName());
 	    }//end !null
+	    System.out.println("addMenuItem(...) thisName: "+thisName);
+	    System.out.print("PATH: ");
+	    for(String s : path)
+		System.out.print("|"+s);
+	    System.out.println("\nnameMap "+nameMap.hashCode()+" KEYS: ");
+	    for(String s : nameMap.keySet())
+		System.out.print("|"+s);
+	    System.out.println();
 	}//end addMenuItem(...)
 
 	@Override
@@ -463,7 +460,16 @@ public class SwingMenuSystem implements MenuSystem {
 	@Override
 	public void addMenuItemListener(ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
+	    System.out.println("addMenuItemListener(...) thisName: "+path[index]);
+	    System.out.print("PATH: ");
+	    for(String s : path)
+		System.out.print("|"+s);
+	    System.out.println("\nnameMap "+nameMap.hashCode()+" KEYS: ");
+	    for(String s : nameMap.keySet())
+		System.out.print("|"+s);
+	    System.out.println();
 	    final MenuNode node = nameMap.get(path[index]);
+	    System.out.println("node = "+node);
 	    if(node == null)
 		throw new IllegalArgumentException("Failed to find node: `"+path[index]+"` at index "+index);
 	    node.addMenuItemListener(l, index+1, path);
@@ -627,4 +633,47 @@ public class SwingMenuSystem implements MenuSystem {
 		}//end invokeLater
 	}//end destroy()
     }//end MenuItem
-}//end MenuSystem
+
+    @Override
+    public void apply(JFrame target) {
+	rw = target;
+	final JMenuBar [] menuBar = new JMenuBar[] {rw.getJMenuBar()};
+	try {
+	    if(menuBar[0] == null)
+	     SwingUtilities.invokeAndWait(new Runnable(){
+		@Override
+		public void run() {
+			rw.setJMenuBar(menuBar[0] = new JMenuBar()); 
+			rw.invalidate();
+			rw.validate();
+		}});
+	} catch (InterruptedException e) {
+	    e.printStackTrace();
+	} catch (InvocationTargetException e) {
+	    e.printStackTrace();
+	}
+	rootNode = new SubMenu(menuBar[0]);
+	Features.init(this);
+    }//end apply(...)
+
+    @Override
+    public void destruct(JFrame target) {
+	// TODO Auto-generated method stub
+    }
+    }//end SwingMenuSystem
+
+    @Override
+    public Feature<JFrame> newInstance(JFrame target) {
+	return new SwingMenuSystem();
+    }
+
+    @Override
+    public Class<JFrame> getTargetClass() {
+	return JFrame.class;
+    }
+
+    @Override
+    public Class<? extends Feature> getFeatureClass() {
+	return SwingMenuSystem.class;
+    }
+}//end SwingMenuSystemFactory

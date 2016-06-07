@@ -1,6 +1,7 @@
 package org.jtrfp.trcl.game;
 
 import java.awt.Dialog.ModalExclusionType;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -9,9 +10,9 @@ import java.beans.PropertyChangeListener;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,16 +43,17 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 
 	@Override
 	public void apply(TVF3Game target) {
+	    setTarget(target);
+	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(CUSTOM_LVL_PATH);
 	    menuSystem.addMenuItemListener(customLVLListener, CUSTOM_LVL_PATH);
-	    setTarget(target);
 	    final TR tr = target.getTr();
 	    weakRunStateListener = new WeakPropertyChangeListener(runStateListener,tr);
 	    target.getTr().addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
 	}
 
-	@Override
 	public void destruct(TVF3Game target) {
+	    final MenuSystem menuSystem = getMenuSystem();
 	    getTarget().getTr().removePropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
 	    menuSystem.removeMenuItem(CUSTOM_LVL_PATH);
 	    setTarget(null);
@@ -84,18 +86,18 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final Object newValue = evt.getNewValue();
-		menuSystem.setMenuItemEnabled(newValue instanceof Game.GameLoadedMode,CUSTOM_LVL_PATH);
+		getMenuSystem().setMenuItemEnabled(newValue instanceof Game.GameLoadedMode,CUSTOM_LVL_PATH);
 	    }//end propertyChange(...)
 	}//end RunStateListener()
+	
+	public MenuSystem getMenuSystem() {
+	    if(menuSystem == null){
+	        final Frame frame = getTarget().
+	        	                getTr().
+	        	                getRootWindow();
+	        menuSystem = Features.get(frame, MenuSystem.class);
+	        }
+	    return menuSystem;
+	    }
     }//end CustomLVLMenuItem
-
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
-    }
-
-    @Autowired
-    public void setMenuSystem(MenuSystem menuSystem) {
-        this.menuSystem = menuSystem;
-    }
-
 }//end CustomLVLMenuItemFactory

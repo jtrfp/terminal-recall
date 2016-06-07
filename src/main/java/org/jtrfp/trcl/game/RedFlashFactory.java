@@ -28,13 +28,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RedFlashFactory implements FeatureFactory<TVF3Game>{
-    private final TR tr;
     private Texture texture; 
     
-    @Autowired
-    public RedFlashFactory(TR tr){
-	this.tr = tr;
-	getRedTexture(tr);
+    public RedFlashFactory(){
     }//end constructor
     
     private Texture getRedTexture(TR tr){
@@ -82,18 +78,18 @@ public class RedFlash extends Sprite2D implements Feature<TVF3Game> {
 
     @Override
     public void apply(TVF3Game target) {
-	tr.getDefaultGrid().add(this);
+	getTr().getDefaultGrid().add(this);
     }//end apply(...)
     
     @Override
     public void destruct(TVF3Game target) {
-	tr.getDefaultGrid().remove(this);
+	getTr().getDefaultGrid().remove(this);
     }
 }//end RedFlash
 
 @Override
 public Feature<TVF3Game> newInstance(TVF3Game target) {
-    return new RedFlash(tr);
+    return new RedFlash(target.getTr());
 }
 
 @Override

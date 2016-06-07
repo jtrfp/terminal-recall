@@ -76,11 +76,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	                       INSTRUMENT_MODE  = "Instrument Mode";
     private static final boolean INS_ENABLE = true;
     private final ControllerInput view, iView;
-    private RenderableSpacePartitioningGrid grid;
     
-    @Autowired
-    private TR tr;
-    private Model cockpitModel;
     private static final int TAIL_DISTANCE = 15000,
 	                     FLOAT_HEIGHT  = 5000;
 
@@ -115,6 +111,10 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private CockpitLayout cockpitLayout;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
+     
+     private RenderableSpacePartitioningGrid grid;
+     
+     private Model cockpitModel;
      
      public final InstrumentMode 
       FULL_COCKPIT    = new FullCockpitInstruments(),
@@ -152,9 +152,13 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
          ((TVF3Game)game).addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);*/
          
          /*missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, */
-        tr.addPropertyChangeListener(TR.RUN_STATE, weakRSPCL = new WeakPropertyChangeListener(runStateListener,tr));
+        getTr().addPropertyChangeListener(TR.RUN_STATE, weakRSPCL = new WeakPropertyChangeListener(runStateListener,getTr()));
         game.addPropertyChangeListener(Game.PLAYER, new GamePropertyChangeListener());
      }//end apply(...)
+     
+     protected TR getTr(){
+	 return ((TVF3Game)(game.get())).getTr();
+     }
      
      private class GamePropertyChangeListener implements PropertyChangeListener {
 	@Override
@@ -200,7 +204,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      }//end updateConsolePosition
      
      public void setCockpitVisibility(boolean visible){
-	 final Object runState = tr.getRunState();
+	 final Object runState = getTr().getRunState();
 	 final boolean showNavInstruments = visible && !(runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState); 
 	 getCockpit    ().setVisible     (visible);
 	 getMiniMap    ().setVisible     (showNavInstruments);
@@ -226,13 +230,13 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    //final WorldObject cockpit = getCockpit();
 	    setCockpitVisibility(false);
 	    //cockpit.setVisible(false);
-	    final Camera cam = tr.mainRenderer.get().getCamera();
+	    final Camera cam = getTr().mainRenderer.get().getCamera();
 	    cam.probeForBehavior(MatchPosition.class).setOffsetMode(MatchPosition.NULL);
 	}
 
 	public WorldObject getCockpit() {
 	    if(cockpit == null){
-		cockpit = new Cockpit(tr);
+		cockpit = new Cockpit(getTr());
 		cockpit.setModel(getCockpitModel());
 		//cockpit.setModelOffset(0, -100, 0);
 		cockpit.addBehavior(new MatchPosition());
@@ -255,7 +259,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    final Game game = this.game.get();
 	    final HUDSystem hud = ((TVF3Game)game).getHUDSystem();
 	    final NAVSystem nav = ((TVF3Game)game).navSystem;
-	    final RenderableSpacePartitioningGrid grid = tr.getDefaultGrid();
+	    final RenderableSpacePartitioningGrid grid = getTr().getDefaultGrid();
 	    if(!visible){
 	     grid.nonBlockingRemoveBranch (hud);
 	     grid.nonBlockingRemoveBranch (nav);
@@ -339,7 +343,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    return;
 		if(mission.isSatelliteView())
 		    return;
-		if(!(tr.getRunState() instanceof Mission.PlayerActivity))
+		if(!(getTr().getRunState() instanceof Mission.PlayerActivity))
 		    return;
 		if((Double)evt.getNewValue()>.7){
 		    incrementViewMode();
@@ -364,7 +368,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     miniMapPositionMatch.setTarget(player);
 		     navArrowPositionMatch.setTarget(player);
 		     //cockpit.setVisible(true);//TODO: Depend on "C" value
-		     final Camera cam = tr.mainRenderer.get().getCamera();
+		     final Camera cam = getTr().mainRenderer.get().getCamera();
 		     cam.probeForBehavior(MatchPosition.class).setOffsetMode(MatchPosition.NULL);
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Identity
 			     new double [] {1, 0, 0, 0},
@@ -396,7 +400,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 			 return;
 		     player.setVisible(true);
 		     getCockpit().setVisible(false);
-		     final Camera cam = tr.mainRenderer.get().getCamera();
+		     final Camera cam = getTr().mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
 		     mp.setOffsetMode(new OffsetMode(){
 			 private double [] workArray = new double[3];
@@ -441,7 +445,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     getCockpit().setVisible(false);
 		     getMiniMap().setVisible(false);
 		     getNavArrow().setVisible(false);
-		     final Camera cam = tr.mainRenderer.get().getCamera();
+		     final Camera cam = getTr().mainRenderer.get().getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
 		     mp.setOffsetMode(new TailOffsetMode(new Vector3D(0,0,-TAIL_DISTANCE), new Vector3D(0,FLOAT_HEIGHT,0)));
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Flat to horizon
@@ -502,7 +506,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	@Override
 	public void destruct(Game target) {
 	    if(cockpit != null)
-	     tr.mainRenderer.get().getCamera().getRootGrid().remove(cockpit);
+	     getTr().mainRenderer.get().getCamera().getRootGrid().remove(cockpit);
 	}
 	
 	private void incrementViewMode(){
@@ -516,7 +520,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}
 	
 	private void reEvaluateState(){
-	    final SpacePartitioningGrid<PositionedRenderable> rootGrid = tr.mainRenderer.get().getCamera().getRootGrid();
+	    final SpacePartitioningGrid<PositionedRenderable> rootGrid = getTr().mainRenderer.get().getCamera().getRootGrid();
             final RenderableSpacePartitioningGrid grid = getGrid();
 	    if(!isAppropriateToDisplay()){
 		setInstrumentMode(new NoInstruments());
@@ -536,7 +540,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    incrementInstrumentMode();
 		    reEvaluateState();//Recursive
 		    }
-	    final Object runState = tr.getRunState();
+	    final Object runState = getTr().getRunState();
 	    if((runState instanceof Mission.TunnelState || runState instanceof Mission.ChamberState)){
 		 getNavArrow().setVisible(false);
 		 getMiniMap().setVisible(false);
@@ -548,7 +552,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}//end reEvaluateState()
 	
 	private boolean isAppropriateToDisplay(){
-	    if(tr.getRunState() instanceof Mission.PlayerActivity){
+	    if(getTr().getRunState() instanceof Mission.PlayerActivity){
 		if(ViewSelect.this.game.get().getCurrentMission().isSatelliteView())
 		    return false;
 		return true;
@@ -558,7 +562,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	public NavArrow getNavArrow() {
 	    if(navArrow == null){
-		navArrow = new NavArrow(tr, null, new Point2D.Double(1000,1000), "ViewSelectFactory.Cockpit.NavArrow");
+		navArrow = new NavArrow(getTr(), null, new Point2D.Double(1000,1000), "ViewSelectFactory.Cockpit.NavArrow");
 		navArrow.unsetRenderFlag(RenderFlags.IgnoreCamera);
 		navArrow.setVectorHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		navArrow.addBehavior(navArrowPositionMatch = new MatchPosition());
@@ -570,7 +574,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	public MiniMap getMiniMap() {
 	    if(miniMap == null){
-		miniMap = new MiniMap(tr);
+		miniMap = new MiniMap(getTr());
 		miniMap.setImmuneToOpaqueDepthTest(true);
 		final CockpitLayout layout = getCockpitLayout();
 		final double mmSize = layout.getMiniMapRadius();
@@ -632,7 +636,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	public NAVRadarBlipFactory getBlipFactory() {
 	    if(blipFactory == null){
 		final double radius = getCockpitLayout().getMiniMapRadius();
-		blipFactory = new NAVRadarBlipFactory(tr, getGrid(), radius, "ViewSelect.NavRadarBlipFactory", false);
+		blipFactory = new NAVRadarBlipFactory(getTr(), getGrid(), radius, "ViewSelect.NavRadarBlipFactory", false);
 	    	final TVF3Game game = (TVF3Game)ViewSelect.this.game.get();
 	    	game.getNavSystem().
 	    	 getBlips().
@@ -674,24 +678,36 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    this.cockpitLayout = cockpitLayout;
 	    setOffsetRot(null);
 	}
+	
+	public Model getCockpitModel() {
+	    if(cockpitModel==null){
+		final GPU gpu = getTr().gpu.get();
+		final GL3 gl = gpu.getGl();
+		final ColorPaletteVectorList cpvl = getTr().getGlobalPaletteVL();
+		try{
+		    cockpitModel = getTr().getResourceManager().getBINModel("COCKMDL.BIN", cpvl, null, gl);
+		}
+		catch(Exception e){e.printStackTrace();}
+	    }//end if(null)
+	    return cockpitModel;
+	}//end getCockpitModel()
+
+	public void setCockpitModel(Model cockpitModel) {
+	    this.cockpitModel = cockpitModel;
+	}
+	
+	protected RenderableSpacePartitioningGrid getGrid() {
+	    if(grid == null)
+		grid = new RenderableSpacePartitioningGrid();
+	    return grid;
+	}
+
+	protected void setGrid(RenderableSpacePartitioningGrid grid) {
+	    this.grid = grid;
+	}
  }//end ViewSelectFeature
  
-public Model getCockpitModel() {
-    if(cockpitModel==null){
-	final GPU gpu = tr.gpu.get();
-	final GL3 gl = gpu.getGl();
-	final ColorPaletteVectorList cpvl = tr.getGlobalPaletteVL();
-	try{
-	    cockpitModel = tr.getResourceManager().getBINModel("COCKMDL.BIN", cpvl, null, gl);
-	}
-	catch(Exception e){e.printStackTrace();}
-    }//end if(null)
-    return cockpitModel;
-}//end getCockpitModel()
 
-public void setCockpitModel(Model cockpitModel) {
-    this.cockpitModel = cockpitModel;
-}
 
 @Override
 public Feature<Game> newInstance(Game target) {
@@ -706,16 +722,6 @@ public Class<Game> getTargetClass() {
 @Override
 public Class<? extends Feature> getFeatureClass() {
     return ViewSelect.class;
-}
-
-protected RenderableSpacePartitioningGrid getGrid() {
-    if(grid == null)
-	grid = new RenderableSpacePartitioningGrid();
-    return grid;
-}
-
-protected void setGrid(RenderableSpacePartitioningGrid grid) {
-    this.grid = grid;
 }
 
 }//end ViewSelect

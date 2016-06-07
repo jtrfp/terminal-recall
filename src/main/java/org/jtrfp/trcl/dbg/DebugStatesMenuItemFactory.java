@@ -16,6 +16,8 @@ package org.jtrfp.trcl.dbg;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import org.jtrfp.trcl.core.Feature;
+import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.Reporter;
@@ -23,22 +25,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DebugStatesMenuItemFactory {
+public class DebugStatesMenuItemFactory implements FeatureFactory<MenuSystem> {
     private static final String [] MENU_PATH = new String[]{"Debug","Debug States..."};
     private Reporter reporter;
-    private TR tr;
 
     private ActionListener menuItemListener;
+    
+    public class DebugStatesMenuItemFeature implements Feature<MenuSystem> {
 
-    private void proposeInit(){
-	if(getReporter() == null || getTr() == null || getMenuItemListener() != null)
-	    return;
-	setMenuItemListener(new MenuItemListener());
-	final MenuSystem ms = getTr().getMenuSystem();
-	ms.addMenuItem(MENU_PATH);
-	ms.addMenuItemListener(menuItemListener, MENU_PATH);
-	ms.setMenuItemEnabled(true, MENU_PATH);
-    }//end proposeInit()
+	@Override
+	public void apply(MenuSystem target) {
+	    setMenuItemListener(new MenuItemListener());
+	    final MenuSystem ms = target;
+	    ms.addMenuItem(MENU_PATH);
+	    ms.addMenuItemListener(menuItemListener, MENU_PATH);
+	    ms.setMenuItemEnabled(true, MENU_PATH);
+	}
+
+	@Override
+	public void destruct(MenuSystem target) {
+	    // TODO Auto-generated method stub
+	}
+	
+    }//end DebugStatesMenuItemFeature
 
     private class MenuItemListener implements ActionListener {
 	@Override
@@ -55,17 +64,6 @@ public class DebugStatesMenuItemFactory {
     @Autowired
     public void setReporter(Reporter reporter) {
 	this.reporter = reporter;
-	proposeInit();
-    }
-
-    public TR getTr() {
-	return tr;
-    }
-
-    @Autowired
-    public void setTr(TR tr) {
-	this.tr = tr;
-	proposeInit();
     }
 
     public ActionListener getMenuItemListener() {
@@ -74,5 +72,21 @@ public class DebugStatesMenuItemFactory {
 
     public void setMenuItemListener(ActionListener menuItemListener) {
 	this.menuItemListener = menuItemListener;
+    }
+
+    @Override
+    public Feature<MenuSystem> newInstance(
+	    MenuSystem target) {
+	return new DebugStatesMenuItemFeature();
+    }
+
+    @Override
+    public Class<MenuSystem> getTargetClass() {
+	return MenuSystem.class;
+    }
+
+    @Override
+    public Class<? extends Feature> getFeatureClass() {
+	return DebugStatesMenuItemFeature.class;
     }
 }//end DebugStatesMenuItemFactory

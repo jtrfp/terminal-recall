@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.game;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -21,16 +22,15 @@ import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gui.LevelSkipWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
     private MenuSystem      menuSystem;
-    private TR              tr;
     private LevelSkipWindow levelSkipWindow;
     
     protected static final String [] MENU_ITEM_PATH = new String [] {"Game","Skip To Level"};
@@ -62,13 +62,14 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(MENU_ITEM_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, MENU_ITEM_PATH);
-	    getTr().addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    final TR tr = target.getTr();
+	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    target.addPropertyChangeListener(TVF3Game.VOX, voxListener);
 	}
 
 	@Override
 	public void destruct(TVF3Game target) {
-	    getTr().removePropertyChangeListener(TR.RUN_STATE,runStateListener);
+	    target.getTr().removePropertyChangeListener(TR.RUN_STATE,runStateListener);
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.removeMenuItemListener(menuItemListener, MENU_ITEM_PATH);
 	    menuSystem.removeMenuItem(MENU_ITEM_PATH);
@@ -100,30 +101,16 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	    }
 	    
 	}//end VoxListener
+	
+	public MenuSystem getMenuSystem() {
+	    final Frame frame = ((TVF3Game)(target.get())).getTr().getRootWindow();
+	    return Features.get(frame, MenuSystem.class);
+	}
+
+	private LevelSkipWindow getLevelSkipWindow(){
+	    if(levelSkipWindow==null)
+		levelSkipWindow = new LevelSkipWindow(((TVF3Game)(target.get())).getTr());
+	    return levelSkipWindow;
+	}//end getLevelSkipWindow()
     }//end LevelSkipMenuItem
-
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
-    }
-
-    @Autowired
-    public void setMenuSystem(MenuSystem menuSystem) {
-        this.menuSystem = menuSystem;
-    }
-
-    public TR getTr() {
-        return tr;
-    }
-
-    @Autowired
-    public void setTr(TR tr) {
-        this.tr = tr;
-    }
-    
-    private LevelSkipWindow getLevelSkipWindow(){
-	if(levelSkipWindow==null)
-	    levelSkipWindow = new LevelSkipWindow(getTr());
-	return levelSkipWindow;
-    }//end getLevelSkipWindow()
-
 }//end LevelSkipMenuItemFactory

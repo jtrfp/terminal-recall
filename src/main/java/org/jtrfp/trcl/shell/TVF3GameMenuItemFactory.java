@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.shell;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -21,17 +22,17 @@ import java.util.concurrent.Callable;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
     public static final String [] NEW_GAME_PATH = new String[]{"Game","New TV/F3 Game"};
-    private MenuSystem menuSystem;
-    private TR         tr;
+    //private MenuSystem menuSystem;
+    //private TR         tr;
     
     @Override
     public Feature<GameShell> newInstance(GameShell target) {
@@ -108,25 +109,15 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	    private void uninstallMenuItems(){
 		getMenuSystem().removeMenuItem(NEW_GAME_PATH);
 	    }
+	    
+	    public TR getTr(){
+		return target.getTr();
+	    }
+	    
+	    public MenuSystem getMenuSystem() {
+		final Frame frame = getTr().getRootWindow();
+	        return Features.get(frame, MenuSystem.class);
+	    }
 	
     }//end TVF3GameMenuItem
-    
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
-    }
-
-    @Autowired
-    public void setMenuSystem(MenuSystem menuSystem) {
-        this.menuSystem = menuSystem;
-    }
-
-    public TR getTr() {
-        return tr;
-    }
-
-    @Autowired
-    public void setTr(TR tr) {
-        this.tr = tr;
-    }
-    
 }//end TVF3GameMenuItemFactory

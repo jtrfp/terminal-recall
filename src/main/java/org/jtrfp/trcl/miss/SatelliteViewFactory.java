@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.miss;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -36,14 +37,10 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
     public static final String SATELLITE_TOGGLE = "Sat View";
     public static final String [] VIEW_MENU_PATH = new String [] {"View","Satellite"};
     private final ControllerInput satelliteToggleInput;
-    private final MenuSystem menuSystem;
-    private final TR tr;
     public interface SatelliteViewState extends Mission.OverworldState, GamePauseFactory.PauseDisabledState{};
     
     @Autowired
-    public SatelliteViewFactory(TR tr, MenuSystem menuSystem, ControllerInputs inputs){
-	this.menuSystem=menuSystem;
-	this.tr = tr;
+    public SatelliteViewFactory(ControllerInputs inputs){
 	satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
     }
 
@@ -61,10 +58,6 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
     public Class<? extends Feature> getFeatureClass() {
 	return SatelliteView.class;
     }
-
-    public MenuSystem getMenuSystem() {
-        return menuSystem;
-    }
     
     public class SatelliteView implements Feature<Mission> {
 	public static final String SATELLITE_VIEW = "satelliteView";
@@ -78,20 +71,27 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private boolean                               enabled          = false;
 	private final   PropertyChangeSupport         pcs = new PropertyChangeSupport(this);
 	
+	public MenuSystem getMenuSystem() {
+	        final Frame frame = getTr().getRootWindow();
+	        return Features.get(frame, MenuSystem.class);
+	    }
+	
 	@Override
 	public void apply(Mission target) {
 	    setMission(target);
 	    Features.get(target, GamePause.class).addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
+	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(VIEW_MENU_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, VIEW_MENU_PATH);
-	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    getTr().addPropertyChangeListener(TR.RUN_STATE, runStateListener);
 	    satelliteToggleInput.addPropertyChangeListener(satelliteControl);
 	}
 
 	@Override
 	public void destruct(Mission target) {
 	    Features.get(target, GamePause.class).removePropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
-	    tr.removePropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    getTr().removePropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.removeMenuItemListener(menuItemListener, VIEW_MENU_PATH);
 	    satelliteToggleInput.removePropertyChangeListener(satelliteControl);
 	    menuSystem.removeMenuItem(VIEW_MENU_PATH);
@@ -128,7 +128,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	}//end PausePropertyChangeListener
 	
 	private void reEvaluateEnabledState(){
-	    Object runState = tr.getRunState();
+	    Object runState = getTr().getRunState();
 	    boolean enabled;
 	     enabled  = !(runState instanceof Mission.TunnelState);
 	     enabled &= !(runState instanceof Mission.ChamberState);
@@ -155,9 +155,9 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 		return;
 	    this.satelliteView = satelliteView;
 	    if(satelliteView)
-	     tr.setRunState(new SatelliteViewState(){});
+	     getTr().setRunState(new SatelliteViewState(){});
 	    else
-	     tr.setRunState(new Mission.OverworldState(){});
+	     getTr().setRunState(new Mission.OverworldState(){});
 	    pcs.firePropertyChange(SATELLITE_VIEW,oldValue,satelliteView);
 	    getMission().setSatelliteView(satelliteView);
 	}
@@ -170,7 +170,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	    if(this.enabled==enabled)
 		return;
 	    this.enabled = enabled;
-	    menuSystem.setMenuItemEnabled(enabled, VIEW_MENU_PATH);
+	    getMenuSystem().setMenuItemEnabled(enabled, VIEW_MENU_PATH);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -199,10 +199,11 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 		String propertyName) {
 	    return pcs.getPropertyChangeListeners(propertyName);
 	}
-    }//end SatelliteView
+	
 
-    public TR getTr() {
-        return tr;
-    }
+	    public TR getTr() {
+	        return getMission().getTr();
+	    }
+    }//end SatelliteView
 
 }//end SatelliteViewFactory

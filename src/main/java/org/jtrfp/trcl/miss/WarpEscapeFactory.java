@@ -210,6 +210,10 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	public void setMission(Mission mission) {
 	    this.mission = new WeakReference<Mission>(mission);
 	}
+	
+	public TR getTr(){
+	    return getMission().getTr();
+	}
     }//end WarpEscape
 
     @Override
@@ -225,14 +229,5 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
     @Override
     public Class<? extends Feature<Mission>> getFeatureClass() {
 	return WarpEscape.class;
-    }
-
-    public TR getTr() {
-        return tr;
-    }
-
-    @Autowired
-    public void setTr(TR tr) {
-        this.tr = tr;
     }
 }//end WarpEscapeFactory

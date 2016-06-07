@@ -707,4 +707,8 @@ public class Mission {
     public RenderableSpacePartitioningGrid getPartitioningGrid() {
         return partitioningGrid;
     }
+
+    public TR getTr() {
+        return tr;
+    }
 }// end Mission

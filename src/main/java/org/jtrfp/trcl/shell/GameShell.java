@@ -411,4 +411,8 @@ public class GameShell {
     public Game getGame() {
         return game;
     }
+
+    public TR getTr() {
+        return tr;
+    }
 }//end GameShell

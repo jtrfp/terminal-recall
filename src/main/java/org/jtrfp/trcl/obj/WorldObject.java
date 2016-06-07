@@ -305,7 +305,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
 	final Integer matrixID = getMatrixID();
 	//Cache to hold new addresses for submission in bulk
-	final ArrayList<VEC4Address> addressesToAdd = new ArrayList<VEC4Address>();
+	final ArrayList<VEC4Address> addressesToAdd = new ArrayList<VEC4Address>(objectDefinitions.length);
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=new VEC4Address(primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)).intValue();
 	    final int matrixOffsetVec4s=new VEC4Address(tr.gpu.get().matrixWindow.get()

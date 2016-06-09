@@ -15,6 +15,7 @@ package org.jtrfp.trcl.obj;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -139,7 +140,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	}//end refreshPosition()
     }//end Blip
     
-    private final Collection<Blip> activeBlipBuffer = new ArrayList<Blip>();
+    private final Collection<Blip> activeBlipBuffer = new CopyOnWriteArrayList<Blip>();
     
     public void refreshActiveBlips(){
 	synchronized(activeBlips){

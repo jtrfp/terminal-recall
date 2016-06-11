@@ -14,15 +14,15 @@ package org.jtrfp.trcl.beh.ui;
 
 import java.awt.event.KeyEvent;
 
-import org.jtrfp.trcl.KeyStatus;
+import org.jtrfp.trcl.KeyStatusFactory.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -30,6 +30,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     public static final String FIRE = "Fire";
     
     private final ControllerInput fire;
+    private       KeyStatus       keyStatus;
     
     private ProjectileFiringBehavior [] behaviors;
     private ProjectileFiringBehavior activeBehavior;
@@ -46,7 +47,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     @Override
     public void tick(long tickTimeMillis){
 	final WorldObject parent = getParent();
-	final KeyStatus keyStatus = parent.getTr().getKeyStatus();
+	final KeyStatus keyStatus = getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
 	    final int ammo = getActiveBehavior().getAmmo();
 	    ((TVF3Game)parent.getTr().getGameShell().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
@@ -68,6 +69,12 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	   getActiveBehavior().requestFire();
 	}//end if(SPACE)
     }//end _tick(...)
+    
+    protected KeyStatus getKeyStatus(){
+	if(keyStatus == null)
+	    keyStatus = Features.get(getParent().getTr(), KeyStatus.class);
+	return keyStatus;
+    }//end getKeyStatus
     
     public boolean setActiveBehavior(ProjectileFiringBehavior newBehavior, boolean force){
 	if(force || (activeBehavior!=newBehavior && (newBehavior.canFire() || newBehavior == getDefaultBehavior()) )){

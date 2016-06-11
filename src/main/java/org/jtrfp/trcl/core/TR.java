@@ -29,7 +29,6 @@ import javax.media.opengl.GL3;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
@@ -102,8 +101,6 @@ public final class TR implements UncaughtExceptionHandler{
 	public interface TRDestructing  extends TRRunState{}
 	public interface TRDestructed   extends TRRunState{}
 	
-	@Autowired
-	private KeyStatus keyStatus;
 	@Autowired
 	private ControllerInputs controllerInputs;
 	
@@ -558,10 +555,6 @@ public final class TR implements UncaughtExceptionHandler{
 	if(distance > TR.mapWidth/2)
 	    distance = TR.mapWidth-distance;
 	return distance;
-    }
-
-    public KeyStatus getKeyStatus() {
-        return keyStatus;
     }
 
     public ControllerInputs getControllerInputs() {

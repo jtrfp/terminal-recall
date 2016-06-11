@@ -28,7 +28,7 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.HUDSystem;
-import org.jtrfp.trcl.KeyStatus;
+import org.jtrfp.trcl.KeyStatusFactory.KeyStatus;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SpacePartitioningGrid;
@@ -40,6 +40,7 @@ import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
 import org.jtrfp.trcl.beh.MatchPosition.TailOffsetMode;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputs;
@@ -591,7 +592,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}//end getMiniMap()
 	
 	private class MiniMapCockpitBehavior extends Behavior {
-	    private final KeyStatus keyStatus = new KeyStatus();
+	    private KeyStatus keyStatus;
 	    private static final double INCREMENT = 50;
 	    //private Rotation offsetRot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J, 
 	//	    new Vector3D(0.8958871503, 0.1646309237, -0.4126534537),new Vector3D(-0.2201229509, 0.9712743572, -0.0903991674));
@@ -601,8 +602,15 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		placerTick();
 	    }
 	    
+	    private KeyStatus getKeyStatus(){
+		if(keyStatus == null)
+		    keyStatus = Features.get(getTr(), KeyStatus.class);
+		return keyStatus;
+	    }
+	    
 	    //Originally used to find the position for the miniMap
 	    private void placerTick(){
+		final KeyStatus keyStatus = getKeyStatus();
 		if(keyStatus.isPressed(KeyEvent.VK_U))
 		    tailOffsetMode.setTailVector(tailOffsetMode.getTailVector().add(new Vector3D(0,INCREMENT,0)));
 		if(keyStatus.isPressed(KeyEvent.VK_D))

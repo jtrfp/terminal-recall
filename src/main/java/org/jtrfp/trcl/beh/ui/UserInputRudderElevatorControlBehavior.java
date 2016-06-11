@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.ui;
 
-import org.jtrfp.trcl.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.ctl.ControllerInput;

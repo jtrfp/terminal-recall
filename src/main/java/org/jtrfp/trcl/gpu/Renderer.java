@@ -30,7 +30,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.prop.SkyCube;
@@ -58,15 +58,14 @@ public final class Renderer {
     //private final	CollisionManager        collisionManager;
     private		Camera			camera = null;
     private final	PredicatedCollection<Positionable> relevantPositioned;
-    private final	Reporter		reporter;
+    private      	Reporter		reporter;
     private final	ThreadManager		threadManager;
     private final       String                  debugName;
     private boolean                             enabled = false;
     
-    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager, final Reporter reporter/*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow, String debugName) {
+    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager /*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow, String debugName) {
 	this.factory         = factory;
 	this.gpu             = factory.getGPU();
-	this.reporter        =reporter;
 	this.threadManager   =threadManager;
 	this.debugName       =debugName;
 	//this.collisionManager=collisionManagerFuture;
@@ -81,7 +80,7 @@ public final class Renderer {
 	renderList = new TRFutureTask<RenderList>(new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
-		return new RenderList(gpu, Renderer.this, objectListWindow, threadManager, reporter);
+		return new RenderList(gpu, Renderer.this, objectListWindow, threadManager);
 	    }});threadManager.threadPool.submit(renderList);
 	
 	skyCube = new SkyCube(gpu);
@@ -114,8 +113,12 @@ public final class Renderer {
     }// end ensureInit()
 
     private void fpsTracking() {
+	final Reporter reporter = getReporter();
+	if(reporter == null)
+	    return;
 	frameNumber++;
-	if ((frameNumber %= 20) == 0) {
+	final boolean isKeyFrame = (frameNumber % 20) == 0;
+	if (isKeyFrame) {
 	    final long dT = System.currentTimeMillis() - lastTimeMillis;
 		if(dT<=0)return;
 		final int fps = (int)(20.*(1000. / (double)dT));
@@ -128,8 +131,7 @@ public final class Renderer {
 	     reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", spg.toString());
 	    }
 	    lastTimeMillis = System.currentTimeMillis();
-	}
-	
+	}//end if(key frame)
     }//end fpsTracking()
     
     public void setCamera(Camera toUse){
@@ -289,5 +291,13 @@ public final class Renderer {
 
     public String getDebugName() {
         return debugName;
+    }
+
+    public Reporter getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(Reporter reporter) {
+        this.reporter = reporter;
     }
 }//end Renderer

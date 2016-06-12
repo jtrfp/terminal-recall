@@ -30,7 +30,6 @@ import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.MemoryUsageHint;
 import org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer;
-import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
@@ -51,7 +50,7 @@ public final class MemoryManager {
      */
     public static final ByteBuffer		ZEROES = ByteBuffer.allocate(1024*1024*16);
     
-    public MemoryManager(GPU gpu, final Reporter reporter, final GLExecutor glExecutor){
+    public MemoryManager(GPU gpu, final GLExecutor glExecutor){
 	this.gpu=gpu;
 	this.glExecutor=glExecutor;
 	try{
@@ -59,7 +58,8 @@ public final class MemoryManager {
 	    @Override
 	    public ReallocatableGLTextureBuffer call() throws Exception {
 		ReallocatableGLTextureBuffer tb;
-		tb=new ReallocatableGLTextureBuffer(MemoryManager.this.gpu,reporter);
+		//TODO: Set reporter in thread agnostic manner
+		tb=new ReallocatableGLTextureBuffer(MemoryManager.this.gpu);
 		tb.reallocate(PagedByteBuffer.PAGE_SIZE_BYTES);
 		physicalMemory[0] = tb.map();
 		tb.setUsageHint(MemoryUsageHint.DymamicDraw);

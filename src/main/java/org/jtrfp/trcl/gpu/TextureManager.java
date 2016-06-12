@@ -26,7 +26,6 @@ import javax.imageio.ImageIO;
 import org.jtrfp.trcl.LineSegment;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.gui.Reporter;
 
 
 /**
@@ -47,7 +46,7 @@ public class TextureManager {
     private  SolidColorTextureFactory solidColorTextureFactory;
     private  UncompressedVQTextureFactory uncompressedVQTextureFactory;
     
-    public TextureManager(final GPU gpu, Reporter reporter, ThreadManager threadManager, final UncaughtExceptionHandler exceptionHandler){
+    public TextureManager(final GPU gpu, ThreadManager threadManager, final UncaughtExceptionHandler exceptionHandler){
 	this.gpu                = gpu;
 	this.threadManager      = threadManager;
 	subTextureWindow 	= new SubTextureWindow(gpu);

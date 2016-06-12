@@ -37,7 +37,7 @@ import org.jtrfp.trcl.coll.ObjectTallyCollection;
 import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.ObjectPool;
@@ -47,7 +47,6 @@ import org.jtrfp.trcl.pool.ObjectPool.PreparationMethod;
 import com.ochafik.util.listenable.Pair;
 
 public class RendererFactory {
-    
     public static final int			PRIMITIVE_BUFFER_WIDTH  = 512;
     public static final int			PRIMITIVE_BUFFER_HEIGHT = 512;
     public static final int			NUM_PORTALS = 4;
@@ -56,7 +55,7 @@ public class RendererFactory {
     
     private final GPU gpu;
     private final World world;
-    private final Reporter reporter;
+    private Reporter reporter;
     private final ObjectTallyCollection<Positionable>allRelevant = new ObjectTallyCollection<Positionable>(new ArrayList<Positionable>());
     private final CollectionThreadDecoupler<Positionable> allRelevantDecoupled = new CollectionThreadDecoupler<Positionable>(allRelevant, Executors.newSingleThreadExecutor());
     //private final CollisionManager              collisionManager;
@@ -123,11 +122,10 @@ public class RendererFactory {
     }// end RendererGenerativeMethod
     
     public RendererFactory(final GPU gpu, final ThreadManager threadManager, 
-	    final GLCanvas canvas, Reporter reporter, final World world, 
+	    final GLCanvas canvas, final World world, 
 	    /*CollisionManager collisionManager, */ObjectListWindow objectListWindow){
 	this.gpu=gpu;
 	this.threadManager = threadManager;
-	this.reporter=reporter;
 	this.world=world;
 	this.objectListWindow = objectListWindow;
 	//this.collisionManager=collisionManager;
@@ -476,7 +474,8 @@ public class RendererFactory {
     }//end allocatePortals()
     
     public Renderer newRenderer(String debugName){
-	Renderer result = new Renderer(this,world,threadManager,reporter,objectListWindow,debugName);
+	Renderer result = new Renderer(this,world,threadManager ,objectListWindow,debugName);
+	result.setReporter(getReporter());
 	//Need a buffer because else the unpacker will cause redundant adds!
 	final CollectionActionDispatcher<Positionable>
 	 buffer = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());
@@ -695,5 +694,13 @@ public class RendererFactory {
 
     public ObjectTallyCollection<Positionable> getAllRelevant() {
         return allRelevant;
+    }
+
+    public Reporter getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(Reporter reporter) {
+        this.reporter = reporter;
     }
 }//end RendererFactory

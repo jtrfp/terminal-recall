@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class TextureTOCWindow extends MemoryWindow {

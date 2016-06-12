@@ -32,10 +32,11 @@ import org.jtrfp.trcl.coll.DecoupledCollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ImplicitBiDiAdapter;
 import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.mem.IntArrayVariableList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
@@ -64,7 +65,7 @@ public class RenderList {
     private final	RendererFactory		rFactory;
     private final	ObjectListWindow	objectListWindow;
     private final       ThreadManager           threadManager;
-    private final	Reporter		reporter;
+    private         	Reporter		reporter;
     private final 	IntBuffer 		previousViewport;
     private final	IntArrayVariableList    renderList;
     private final	ListActionTelemetry<VEC4Address> renderListTelemetry 
@@ -80,10 +81,9 @@ public class RenderList {
     	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
     	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(unoccludedIL = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),unoccludedODAddrAdapter);
 
-    public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager, Reporter reporter) {
+    public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
-	this.reporter        = reporter;
 	this.threadManager   = threadManager;
 	this.gpu             = gpu;
 	this.objectListWindow=objectListWindow;
@@ -195,8 +195,13 @@ public class RenderList {
 	 previousViewport.get(3));
     }//end revertViewportToWindow()
     
+    protected Reporter getReporter(){
+	return reporter;
+    }
+    
     public void render(final GL3 gl) throws NotReadyException {
 	if(!sentPageTable)sendRenderListPageTable();
+	final Reporter reporter = getReporter();
 	final int renderListLogicalVec4Offset = ((objectListWindow.getObjectSizeInBytes()*renderListIdx)/16);
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
 	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
@@ -263,7 +268,7 @@ public class RenderList {
 	
 	if(rFactory.isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
 	
-	if (frameCounter == 0) {
+	if (frameCounter == 0 && reporter != null) {
 	    reporter.report(
 		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numOpaqueBlocks",
 		    "" + opaqueIL.size());
@@ -429,4 +434,8 @@ public class RenderList {
 		    return result;
 		}
 	    });
+
+    public void setReporter(Reporter reporter) {
+        this.reporter = reporter;
+    }
 }// end RenderList

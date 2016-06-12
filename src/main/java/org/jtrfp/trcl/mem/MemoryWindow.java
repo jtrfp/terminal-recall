@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Queue;
 
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 

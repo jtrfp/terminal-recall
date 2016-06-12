@@ -38,7 +38,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.gui.RootWindow;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
@@ -81,7 +81,7 @@ public final class TR implements UncaughtExceptionHandler{
 	public final ThreadManager 		threadManager;
 	public final TRFutureTask<Renderer> 	mainRenderer/*, secondaryRenderer*/;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
-	private final Reporter 			reporter;
+	private Reporter 			reporter;
 	//private Game 				game;
 	private final PropertyChangeSupport	pcSupport;
 	
@@ -135,10 +135,9 @@ public final class TR implements UncaughtExceptionHandler{
 	}
 	
 	@Autowired
-	public TR(final ConfigManager configManager, final Reporter reporter, ConfigWindow configWindow, final RootWindow rootWindow, final Features features){
+	public TR(final ConfigManager configManager,  ConfigWindow configWindow, final RootWindow rootWindow, final Features features){
 	    //this.config       = configManager;
 	    this.configWindow = configWindow;
-	    this.reporter     = reporter;
 	    this.rootWindow   = rootWindow;
 	    this.configManager= configManager;
 	    
@@ -163,7 +162,7 @@ public final class TR implements UncaughtExceptionHandler{
 		gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
 		    @Override
 		    public GPU call() throws Exception {
-			return new GPU(reporter, threadManager.threadPool, threadManager, threadManager, TR.this, rootWindow.getCanvas(),getWorld());
+			return new GPU(threadManager.threadPool, threadManager, threadManager, TR.this, rootWindow.getCanvas(),getWorld());
 		    }},TR.this);
 		soundSystem = new TRFutureTask<SoundSystem>(new Callable<SoundSystem>(){
 		    @Override
@@ -427,6 +426,8 @@ public final class TR implements UncaughtExceptionHandler{
      * @return the reporter
      */
     public Reporter getReporter() {
+	if(reporter == null)
+	    reporter = Features.get(this, Reporter.class);
 	return reporter;
     }
 

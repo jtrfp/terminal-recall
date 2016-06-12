@@ -35,7 +35,6 @@ import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
-import org.jtrfp.trcl.gui.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
@@ -60,7 +59,7 @@ public class GPU implements GLExecutor{
 	private final GPUResourceFinalizer              gpuResourceFinalizer;
 	private final ArrayList<TRFuture<? extends MemoryWindow>>		memoryWindows = new ArrayList<TRFuture<? extends MemoryWindow>>();
 	
-	public GPU(final Reporter reporter, ExecutorService executorService,
+	public GPU(ExecutorService executorService,
 		GLExecutor glExecutor, final ThreadManager threadManager, 
 		final UncaughtExceptionHandler exceptionHandler, final GLCanvas glCanvas,
 		final World world) {
@@ -72,14 +71,14 @@ public class GPU implements GLExecutor{
 	    memoryManager  = new TRFutureTask<MemoryManager>(new Callable<MemoryManager>(){
 		@Override
 		public MemoryManager call() throws Exception {
-		    return new MemoryManager(GPU.this, reporter, threadManager);
+		    return new MemoryManager(GPU.this, threadManager);
 		}
 	    });
 	    executorService.submit(memoryManager);
 	    textureManager = new TRFutureTask<TextureManager>(new Callable<TextureManager>(){
-		@Override
+		@Override//TODO: Set reporter in thread-agnostic manner
 		public TextureManager call() throws Exception {
-		    return new TextureManager(GPU.this, reporter, threadManager, exceptionHandler);
+		    return new TextureManager(GPU.this, threadManager, exceptionHandler);
 		}
 	    });executorService.submit(textureManager);
 	    defaultTIU = glExecutor.submitToGL(new Callable<Integer>(){
@@ -110,8 +109,8 @@ public class GPU implements GLExecutor{
 	    memoryWindows.add(objectDefinitionWindow);
 	    rendererFactory = new TRFutureTask<RendererFactory>(new Callable<RendererFactory>(){
 		@Override
-		public RendererFactory call() throws Exception {
-		    return new RendererFactory(GPU.this, threadManager, glCanvas, reporter, world, objectListWindow.get());
+		public RendererFactory call() throws Exception {//TODO: set Reporter in result in thread-agnostic way
+		    return new RendererFactory(GPU.this, threadManager, glCanvas, world, objectListWindow.get());
 		}
 	    });executorService.submit(rendererFactory);
 	    

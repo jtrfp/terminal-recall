@@ -18,9 +18,8 @@ import java.awt.event.ActionListener;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,17 +52,14 @@ public class DebugStatesMenuItemFactory implements FeatureFactory<MenuSystem> {
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 	    final Reporter rep = getReporter();
-	    rep.setVisible(true);
+	    if(rep != null)
+	     rep.setVisible(true);
 	}
     }//end MenuItemListener
 
     public Reporter getReporter() {
+	//TODO: Init reporter
 	return reporter;
-    }
-
-    @Autowired
-    public void setReporter(Reporter reporter) {
-	this.reporter = reporter;
     }
 
     public ActionListener getMenuItemListener() {

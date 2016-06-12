@@ -17,18 +17,17 @@ import java.nio.ByteBuffer;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.RawGLBuffer.MapMode;
-import org.jtrfp.trcl.gui.Reporter;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 
 public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     private GLTextureBuffer buffer;
     private GPU gpu;
     private MemoryUsageHint usageHint;
-    private final Reporter reporter;
+    private Reporter reporter;
     private static final MapMode [] DEFAULT_MAP_FLAGS = new MapMode[]{MapMode.FLUSH_EXPLICIT,MapMode.WRITE,MapMode.UNSYNCHRONIZED};
 
-    public ReallocatableGLTextureBuffer(GPU gpu, Reporter reporter) {
+    public ReallocatableGLTextureBuffer(GPU gpu) {
 	this.gpu = gpu;
-	this.reporter = reporter;
 	buffer = new GLTextureBuffer(1, gpu);
     }
     
@@ -99,7 +98,9 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
 	final GL3 gl = gpu.getGl();
 	ByteBuffer oldBuffer,newBuffer;
 	GLTextureBuffer oldTextureBuffer, newTextureBuffer;
-	reporter.report("org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer."+hashCode()+".sizeInBytes", ""+sizeInBytes);
+	final Reporter reporter = getReporter();
+	if(reporter != null)
+	 reporter.report("org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer."+hashCode()+".sizeInBytes", ""+sizeInBytes);
 	oldTextureBuffer=buffer;
 	oldTextureBuffer.unmap(gl);
 	oldTextureBuffer.map(gl, MapMode.READ);
@@ -132,6 +133,14 @@ public class ReallocatableGLTextureBuffer implements ReallocatableGLMemory {
     
     public GLTextureBuffer getGLTextureBuffer(){
 	return buffer;
+    }
+
+    public Reporter getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(Reporter reporter) {
+        this.reporter = reporter;
     }
 
 }// end ReallocatableGLTextureBuffer

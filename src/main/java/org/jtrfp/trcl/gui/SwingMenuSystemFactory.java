@@ -52,8 +52,6 @@ public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
 	    viewMenu = new JMenu("View");
     
     public SwingMenuSystem(){
-	System.out.println("SwingMenuSystem() constructor");
-	new Exception("Not an error").printStackTrace();
 	// And items to menus
 	final JMenuItem file_quit = new JMenuItem("Quit");
 	final JMenuItem file_config = new JMenuItem("Configure");
@@ -424,14 +422,6 @@ public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
 		else
 		    throw new IllegalArgumentException("Cannot add item as there is a submenu already in its place. Path[index]="+path[index]+" index="+index+" this="+getName());
 	    }//end !null
-	    System.out.println("addMenuItem(...) thisName: "+thisName);
-	    System.out.print("PATH: ");
-	    for(String s : path)
-		System.out.print("|"+s);
-	    System.out.println("\nnameMap "+nameMap.hashCode()+" KEYS: ");
-	    for(String s : nameMap.keySet())
-		System.out.print("|"+s);
-	    System.out.println();
 	}//end addMenuItem(...)
 
 	@Override
@@ -460,16 +450,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
 	@Override
 	public void addMenuItemListener(ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
-	    System.out.println("addMenuItemListener(...) thisName: "+path[index]);
-	    System.out.print("PATH: ");
-	    for(String s : path)
-		System.out.print("|"+s);
-	    System.out.println("\nnameMap "+nameMap.hashCode()+" KEYS: ");
-	    for(String s : nameMap.keySet())
-		System.out.print("|"+s);
-	    System.out.println();
 	    final MenuNode node = nameMap.get(path[index]);
-	    System.out.println("node = "+node);
 	    if(node == null)
 		throw new IllegalArgumentException("Failed to find node: `"+path[index]+"` at index "+index);
 	    node.addMenuItemListener(l, index+1, path);

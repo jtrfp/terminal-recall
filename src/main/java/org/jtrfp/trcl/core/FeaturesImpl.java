@@ -85,6 +85,8 @@ public class FeaturesImpl {
 	Feature result = map.get(featureClass);
 	if(result==null){
 	    final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
+	    if(ff == null)
+		throw new RuntimeException("Could not find Feature of type "+featureClass.getName());
 	    assert ff!=null:""+featureClass.getName();
 	    map.put(featureClass, result = ff.newInstance(target));
 	    result.apply(target);

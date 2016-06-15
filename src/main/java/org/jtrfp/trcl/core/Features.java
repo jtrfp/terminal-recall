@@ -21,7 +21,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Features {
-    private static final FeaturesImpl impl = new FeaturesImpl();
+    private static FeaturesImpl impl = new FeaturesImpl();
+    private static Features singleton;
     
     public Features(){
 	this(Collections.EMPTY_LIST);
@@ -31,9 +32,18 @@ public class Features {
     public Features(Collection<FeatureFactory> features){
 	for(FeatureFactory ff:features)
 	    registerFeature(ff);
+	singleton = this;
+    }
+    
+    public static FeaturesImpl getSingleton(){
+	return impl;
+    }
+    
+    public static void resetImpl(){
+	impl = new FeaturesImpl();
     }
 
-    private static void registerFeature(FeatureFactory<?> factory){
+    public static void registerFeature(FeatureFactory<?> factory){
 	impl.registerFeature(factory);
     }
     

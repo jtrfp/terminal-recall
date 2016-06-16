@@ -58,4 +58,8 @@ public class Features {
     public synchronized static <T> T get(Object target, Class<T> featureClass){
      return impl.get(target, featureClass);
     }//end get(...)
+    
+    public synchronized static void getAllFeaturesOf(Object target, Collection dest){
+	impl.getAllFeaturesOf(target,dest);
+    }
 }//end Features

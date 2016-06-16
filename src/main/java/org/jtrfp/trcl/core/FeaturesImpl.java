@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -98,4 +99,10 @@ public class FeaturesImpl {
      final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
      return (T)getFeature(fMap,(Class<Feature>)featureClass,target);
     }//end get(...)
+
+    public void getAllFeaturesOf(Object target, Collection dest) {
+	final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
+	for(Entry<Class<? extends Feature>,Feature> entry:fMap.entrySet())
+	    dest.add(entry.getValue());
+    }//end getAllFeaturesOf(...)
 }//end FeaturesImpl

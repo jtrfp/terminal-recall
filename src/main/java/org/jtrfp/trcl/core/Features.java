@@ -35,27 +35,27 @@ public class Features {
 	singleton = this;
     }
     
-    public static FeaturesImpl getSingleton(){
+    public synchronized static FeaturesImpl getSingleton(){
 	return impl;
     }
     
-    public static void resetImpl(){
+    public synchronized static void resetImpl(){
 	impl = new FeaturesImpl();
     }
 
-    public static void registerFeature(FeatureFactory<?> factory){
+    public synchronized static void registerFeature(FeatureFactory<?> factory){
 	impl.registerFeature(factory);
     }
     
-    public static void init(Object obj){
+    public synchronized static void init(Object obj){
 	impl.init(obj);
     }//end init(...)
     
-    public static void destruct(Object obj){
+    public synchronized static void destruct(Object obj){
 	impl.destruct(obj);
     }//end destruct()
 
-    public static <T> T get(Object target, Class<T> featureClass){
+    public synchronized static <T> T get(Object target, Class<T> featureClass){
      return impl.get(target, featureClass);
     }//end get(...)
 }//end Features

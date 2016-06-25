@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.obj.Positionable;
 import org.junit.After;
 import org.junit.Assert;
@@ -84,7 +84,7 @@ public class CameraIT {
 	assertFalse(subject.getRelevancePairs()         .isEmpty());
 	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
 	assertFalse(subject.getRelevanceCollections()   .isEmpty());
-	subject.setPosition(new Vector3D(TR.mapSquareSize*20*7,TR.mapSquareSize*20*7,TR.mapSquareSize*20*7));
+	subject.setPosition(new Vector3D(TRFactory.mapSquareSize*20*7,TRFactory.mapSquareSize*20*7,TRFactory.mapSquareSize*20*7));
 	subject.notifyPositionChange();
 	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertTrue(subject.getRelevancePairs()         .isEmpty());
@@ -110,7 +110,7 @@ public class CameraIT {
 	assertFalse(subject.getRelevancePairs()         .isEmpty());
 	assertFalse(subject.getFlatRelevanceCollection().isEmpty());
 	assertFalse(subject.getRelevanceCollections()   .isEmpty());
-	subject.setPosition(new Vector3D(TR.mapSquareSize*20*7,TR.mapSquareSize*20*7,TR.mapSquareSize*20*7));
+	subject.setPosition(new Vector3D(TRFactory.mapSquareSize*20*7,TRFactory.mapSquareSize*20*7,TRFactory.mapSquareSize*20*7));
 	subject.notifyPositionChange();
 	singleThreadExecutorBarrier(World.relevanceExecutor);
 	assertFalse(subject.getRelevancePairs()         .isEmpty());

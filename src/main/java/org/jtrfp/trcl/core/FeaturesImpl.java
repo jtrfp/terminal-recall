@@ -52,17 +52,17 @@ public class FeaturesImpl {
 	return result;
     }
     
-    public  void init(Object obj){
+    public  void init(Object target){
 	//Traverse the type hierarchy
-	Class tClass = obj.getClass();
+	Class tClass = target.getClass();
 	//For its interfaces
 	for(Class iFace:tClass.getInterfaces())
 	    for(FeatureFactory ff:getFactoryCollection(iFace))
-		get(obj,ff.getFeatureClass());
+		get(target,ff.getFeatureClass());
 	while(tClass!=Object.class){
 	    //First for the class itself
 	    for(FeatureFactory ff:getFactoryCollection(tClass))
-		    get(obj,ff.getFeatureClass());
+		    get(target,ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
     }//end init(...)
@@ -82,18 +82,36 @@ public class FeaturesImpl {
 	return result;
     }//end getFeatureMap()
     
-       Feature getFeature(Map<Class<? extends Feature>,Feature> map, Class<? extends Feature> featureClass, Object target){
-	Feature result = map.get(featureClass);
-	if(result==null){
-	    final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
-	    if(ff == null)
-		throw new RuntimeException("Could not find Feature of type "+featureClass.getName());
-	    assert ff!=null:""+featureClass.getName();
-	    map.put(featureClass, result = ff.newInstance(target));
-	    result.apply(target);
-	    }
+       Feature getFeature(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target){
+	Feature result = featuresByClass.get(featureClass);
+	if(result==null)
+	    result = newFeatureInstance(featuresByClass, featureClass, target);
 	return result;
     }//end getFeature()
+
+       private Feature newFeatureInstance(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target){
+	   final Feature result;
+	   final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
+	   if(ff == null)
+	       throw new RuntimeException("Could not find Feature of type "+featureClass.getName());
+	   assert ff!=null:""+featureClass.getName();
+	   registerFeatureByClassRecursively(featureClass, result = ff.newInstance(target), featuresByClass);
+	   result.apply(target);
+	   init(result);
+	   return result;
+       }//end newFeatureInstance()
+
+       private void registerFeatureByClassRecursively(Class featureClass, Feature toRegister, Map<Class<? extends Feature>,Feature> featuresByClass){
+	   featuresByClass.put(featureClass, toRegister);
+	   for(Class iFace:featureClass.getInterfaces())
+	       registerFeatureByClassRecursively(iFace, toRegister, featuresByClass);
+	   Class fc = featureClass.getSuperclass();
+	   if(fc != null)
+	    while(fc != Object.class){
+	       registerFeatureByClassRecursively(fc, toRegister, featuresByClass);
+	       fc = fc.getSuperclass();
+	    }//end while(!Object.class)
+       }//end registerFeatureByClassRecursively()
 
     public  <T> T get(Object target, Class<T> featureClass){
      final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);

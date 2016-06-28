@@ -75,6 +75,8 @@ public class FeaturesImpl {
     }//end destruct()
     
        Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){
+	if(targ == null)
+	    throw new NullPointerException("Target intolerably null.");
 	Map<Class<? extends Feature>,Feature> result = targetMap.get(targ);
 	if(result==null)
 	    targetMap.put(targ, result = new HashMap<Class<? extends Feature>,Feature>());

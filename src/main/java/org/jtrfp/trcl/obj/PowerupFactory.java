@@ -15,7 +15,7 @@ package org.jtrfp.trcl.obj;
 import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Powerup;
 
 public class PowerupFactory{

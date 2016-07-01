@@ -14,15 +14,16 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.phy.Velocible;
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class AutoFiring extends Behavior {
-    private double 	    maxFiringDistance	= TR.mapSquareSize*10;
-    private double 	    minFiringDistance	= TR.mapSquareSize*0;
+    private double 	    maxFiringDistance	= TRFactory.mapSquareSize*10;
+    private double 	    minFiringDistance	= TRFactory.mapSquareSize*0;
     private int 	    lastIndexVisited	= 0;
     private boolean 	    smartFiring	  	= false;
     private boolean []      firingPattern = new boolean []
@@ -37,10 +38,11 @@ public class AutoFiring extends Behavior {
     private boolean 	    berzerk	 	= false;
     private double 	    aimRandomness	= 0;
     private final double [] firingPos           = new double[3];
+    private GameShell       gameShell;
     @Override
     public void tick(long timeMillis){
 	final WorldObject thisObject = getParent();
-	final Player player = thisObject.getTr().getGameShell().getGame().getPlayer();
+	final Player player = getGameShell().getGame().getPlayer();
 	if(player.probeForBehavior(Cloakable.class).isCloaked())return;
 	final double [] thisPos   = thisObject.getPositionWithOffset();
 	Vect3D.add(projectileFiringBehavior.peekNextModelViewFiringPosition().toArray(),thisPos, firingPos);
@@ -55,7 +57,7 @@ public class AutoFiring extends Behavior {
 		    if(smartFiring){
 			final Vector3D playerVelocity = player.probeForBehavior(Velocible.class).getVelocity();
 			final Vector3D playerPosV3D = new Vector3D(playerPos).add(playerVelocity.scalarMultiply(.5));//Look ahead one frame
-			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TR.crossPlatformScalar; 
+			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TRFactory.crossPlatformScalar; 
 			Vector3D virtualPlayerPos = interceptOf(playerPosV3D,playerVelocity,new Vector3D(firingPos),projectileSpeed);
 			if(virtualPlayerPos==null)virtualPlayerPos=playerPosV3D;
 			Vect3D.subtract(virtualPlayerPos.toArray(), firingPos, firingVector);}
@@ -235,5 +237,15 @@ public class AutoFiring extends Behavior {
     public AutoFiring setAimRandomness(double randomnessCoeff) {
 	aimRandomness=randomnessCoeff;
 	return this;
+    }
+
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end AutoFiring

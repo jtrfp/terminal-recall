@@ -18,7 +18,7 @@ import java.io.IOException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
 
 public class Explosion extends OneShotBillboardEvent {
@@ -37,7 +37,7 @@ public class Explosion extends OneShotBillboardEvent {
 	if(type.isRandomRotate())
 	    del.setRotationAngleRadians(2*Math.PI*Math.random());
 	else
-	    setRotationDelegate(new UpAlwaysCameraTopDelegate(tr.mainRenderer.get().getCamera()));
+	    setRotationDelegate(new UpAlwaysCameraTopDelegate(tr.mainRenderer.getCamera()));
 	String [] aniFiles = type.getAnimationFiles();
 	VQTexture [] frames = new VQTexture[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){

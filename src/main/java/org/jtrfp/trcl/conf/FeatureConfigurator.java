@@ -36,7 +36,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	// TODO Auto-generated method stub
 	
     }
-
+/*
     public ConfigManager getConfigManager() {
 	if(configManager == null)
 	    Features.get(Features.getSingleton(), ConfigManager.class);
@@ -46,7 +46,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
     public void setConfigManager(ConfigManager configManager) {
         this.configManager = configManager;
     }//end destruct(...)
-    
+    */
     public Map<String,Object> storeToMap(final Map<String,Object> propertiesToStore){
 	final TARGET_CLASS target = getTarget();
 	if(target == null)
@@ -87,7 +87,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	    catch(InvocationTargetException e){e.printStackTrace();}
 	    catch(IllegalAccessException e)   {e.printStackTrace();}
 	}//for(propertyNames)
-	getConfigManager().setConfiguration(targetClass,outputMap);
+	//getConfigManager().setConfiguration(targetClass,outputMap);
 	return propertiesToStore;
     }//end store()
     

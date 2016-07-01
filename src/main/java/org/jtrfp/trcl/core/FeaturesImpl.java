@@ -16,8 +16,10 @@ package org.jtrfp.trcl.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -55,23 +57,31 @@ public class FeaturesImpl {
     public  void init(Object target){
 	//Traverse the type hierarchy
 	Class tClass = target.getClass();
+	Set<Class> featureClassSet = new HashSet<Class>();
 	//For its interfaces
 	for(Class iFace:tClass.getInterfaces())
 	    for(FeatureFactory ff:getFactoryCollection(iFace))
-		get(target,ff.getFeatureClass());
+		featureClassSet.add(ff.getFeatureClass());
 	while(tClass!=Object.class){
 	    //First for the class itself
 	    for(FeatureFactory ff:getFactoryCollection(tClass))
-		    get(target,ff.getFeatureClass());
+		    featureClassSet.add(ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
+	
+	for(Class c:featureClassSet)
+	    get(target,c);
     }//end init(...)
     
     public  void destruct(Object obj){
-	for(Feature f : targetMap.get(obj).values())
+	final Collection<Feature> rawFeatures = targetMap.get(obj).values();
+	final Set<Feature> featureSet = new HashSet<Feature>();
+	featureSet.addAll(rawFeatures);
+	for(Feature f:featureSet){
 	    if(f!=null)
-	     f.destruct(obj);
-	targetMap.remove(obj);
+		f.destruct(obj);
+	    targetMap.remove(obj);   
+	}//end for(entries)
     }//end destruct()
     
        Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){

@@ -22,7 +22,8 @@ import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
@@ -30,6 +31,7 @@ import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class CollidesWithTerrain extends Behavior {
     private double[] 		surfaceNormalVar;
@@ -47,6 +49,7 @@ public class CollidesWithTerrain extends Behavior {
     private final double[]      ceilingNormal           = new double[3];
     private WeakReference<OverworldSystem>lastOWS;
     private NormalMap           normalMap;
+    private GameShell           gameShell;
     @Override
     public void tick(long tickTimeMillis) {
 	if (tickCounter++ % 2 == 0 && !recentlyCollided)
@@ -55,7 +58,7 @@ public class CollidesWithTerrain extends Behavior {
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
 	final World world = tr.getWorld();
-	final Mission mission = tr.getGameShell().getGame().getCurrentMission();
+	final Mission mission = getGameShell().getGame().getCurrentMission();
 	OverworldSystem ows = lastOWS!=null?lastOWS.get():null;
 	if(mission.getOverworldSystem()!=ows){
 	    normalMap=null;
@@ -72,7 +75,7 @@ public class CollidesWithTerrain extends Behavior {
 	    return;//No terrain to collide with while in tunnel mode.
 	if(normalMap==null)
 	    return;
-	final OverworldSystem overworldSystem = tr.getGameShell().getGame().getCurrentMission().getOverworldSystem();
+	final OverworldSystem overworldSystem = getGameShell().getGame().getCurrentMission().getOverworldSystem();
 	if(overworldSystem==null)return;
 	final boolean terrainMirror = overworldSystem.isChamberMode();
 	final double[] thisPos = p.getPosition();
@@ -99,8 +102,8 @@ public class CollidesWithTerrain extends Behavior {
 		if(!os.isTunnelMode() ){
 		    final TunnelSystem ts = Features.get(mission,TunnelSystem.class);
 		    TunnelEntranceObject teo = ts.getTunnelEntranceObject(new Point(
-				TR.modernToMapSquare((thisPos[0])),
-				TR.modernToMapSquare( thisPos[2])));
+				TRFactory.modernToMapSquare((thisPos[0])),
+				TRFactory.modernToMapSquare( thisPos[2])));
 		    if(teo!=null && !mission.isBossFight())
 			{ts.enterTunnel(teo);return;}
 		}//end if(above ground)
@@ -206,5 +209,15 @@ public class CollidesWithTerrain extends Behavior {
 	if (dummyTerrainChunk==null)
 	    dummyTerrainChunk = new TerrainChunk(tr);
 	return dummyTerrainChunk;
+    }
+
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }// end BouncesOffTerrain

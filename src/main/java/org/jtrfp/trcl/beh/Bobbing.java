@@ -12,12 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class Bobbing extends Behavior {
-    private double amplitude=TR.mapSquareSize/5;
-    private double additionalHeight=TR.mapSquareSize;
+    private double amplitude=TRFactory.mapSquareSize/5;
+    private double additionalHeight=TRFactory.mapSquareSize;
     private double bobPeriodMillis=10*1000;
     private double phase=0;
     private double initialY=0;

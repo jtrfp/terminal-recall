@@ -19,12 +19,15 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.SettableTexture;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class MiniMap extends WorldObject implements RelevantEverywhere {
     private TextureMesh textureMesh;
@@ -39,6 +42,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private Vector3D topOrigin = Vector3D.PLUS_J;
     private static final double [] ZERO = new double [] {0,0,0,0};
     private Rotation mapHack = Rotation.IDENTITY;
+    private GameShell gameShell;
     
     public MiniMap(TR tr) {
 	super(tr);
@@ -51,7 +55,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private class MiniMapBehavior extends Behavior {
 	@Override
 	public void tick(long tickTimeMillis){
-	    final Game game = getTr().getGameShell().getGame();
+	    final Game game = getGameShell().getGame();
 	    if(game == null)
 		return;
 	    final Player player = game.getPlayer();
@@ -210,7 +214,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     }
     
     public void setMapPositionFromModern(double modernX, double modernY){
-	setMapPositionFromTile(TR.modernToMapSquare(modernX),TR.modernToMapSquare(modernY));
+	setMapPositionFromTile(TRFactory.modernToMapSquare(modernX),TRFactory.modernToMapSquare(modernY));
     }
 
     public SettableTexture[][] getGrid() {
@@ -303,5 +307,14 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
      */
     public void setMapHack(Rotation mapHack) {
         this.mapHack = mapHack;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
     }
 }//end MiniMap

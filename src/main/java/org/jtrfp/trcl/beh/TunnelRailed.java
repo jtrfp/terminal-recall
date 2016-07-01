@@ -12,17 +12,21 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class TunnelRailed extends Behavior implements CollisionBehavior {
     private final double[] circleCenter = new double[3];
     private final double[] pprtt = new double[3];
     private TR tr;
+    private GameShell gameShell;
 
     public TunnelRailed(TR tr) {
 	this.tr = tr;
@@ -30,10 +34,10 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 
     @Override
     public void proposeCollision(WorldObject other) {
-	if(tr.getGameShell().getGame()==null)return;
-	if(tr.getGameShell().getGame().getCurrentMission()==null)return;
-	if(tr.getGameShell().getGame().getCurrentMission().getOverworldSystem()==null)return;
-	if (!tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().isTunnelMode())
+	if(getGameShell().getGame()==null)return;
+	if(getGameShell().getGame().getCurrentMission()==null)return;
+	if(getGameShell().getGame().getCurrentMission().getOverworldSystem()==null)return;
+	if (!getGameShell().getGame().getCurrentMission().getOverworldSystem().isTunnelMode())
 	    return;
 	final WorldObject parent = getParent();
 	if (other instanceof TunnelSegment) {
@@ -47,7 +51,7 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 		final double[] start = segPos;
 		final double[] end = Vect3D.add(start, segLen, seg.getEndY(),
 			-seg.getEndX(), new double[3]);// ZYX
-		final double[] tunnelSpineNoNorm = TR.twosComplimentSubtract(
+		final double[] tunnelSpineNoNorm = TRFactory.twosComplimentSubtract(
 			end, start, new double[3]);
 		final double[] tunnelSpineNorm = Vect3D
 			.normalize(tunnelSpineNoNorm);
@@ -55,7 +59,7 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 		final double depthDownSeg = start[0] - pPos[0];
 		final double pctDownSeg = depthDownSeg / segLen;
 		Vect3D.scalarMultiply(tunnelSpineNorm,
-			TR.deltaRollover(pPos[0] - start[0]), circleCenter);
+			TRFactory.deltaRollover(pPos[0] - start[0]), circleCenter);
 		Vect3D.add(start, circleCenter, circleCenter);
 		final double startHeight = TunnelSegment.getStartHeight(s);
 		final double endHeight = TunnelSegment.getEndHeight(s);
@@ -74,4 +78,13 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 	    }// end if(in range of segment)
 	}// end if(TunnelSegment)
     }// end proposeCollision
-}
+    
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
+    }
+}//end TunnelRailed

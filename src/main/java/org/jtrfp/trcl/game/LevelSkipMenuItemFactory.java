@@ -23,7 +23,8 @@ import java.lang.ref.WeakReference;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.LevelSkipWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.stereotype.Component;
@@ -63,13 +64,13 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	    menuSystem.addMenuItem(MENU_ITEM_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, MENU_ITEM_PATH);
 	    final TR tr = target.getTr();
-	    tr.addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    tr.addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	    target.addPropertyChangeListener(TVF3Game.VOX, voxListener);
 	}
 
 	@Override
 	public void destruct(TVF3Game target) {
-	    target.getTr().removePropertyChangeListener(TR.RUN_STATE,runStateListener);
+	    target.getTr().removePropertyChangeListener(TRFactory.RUN_STATE,runStateListener);
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.removeMenuItemListener(menuItemListener, MENU_ITEM_PATH);
 	    menuSystem.removeMenuItem(MENU_ITEM_PATH);

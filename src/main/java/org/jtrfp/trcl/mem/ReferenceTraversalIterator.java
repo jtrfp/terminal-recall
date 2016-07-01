@@ -19,7 +19,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -28,7 +27,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public class ReferenceTraversalIterator implements Iterator<Object> {
     //private final Set<Object>	 	      alreadyVisited    = Collections.synchronizedSet(new HashSet<Object>());

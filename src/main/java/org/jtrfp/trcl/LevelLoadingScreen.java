@@ -18,7 +18,7 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.obj.MeterBar;
 import org.jtrfp.trcl.obj.PositionedRenderable;

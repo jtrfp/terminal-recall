@@ -80,7 +80,7 @@ public class ProjectileBehavior extends Behavior implements
 	     World.relevanceExecutor.submit(new Callable<Collection<Positionable>>(){
 		@Override
 		public Collection<Positionable> call() {
-		    return new ArrayList<Positionable>(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
+		    return new ArrayList<Positionable>(getParent().getTr().mainRenderer.getCamera().getFlatRelevanceCollection());
 		}
 	    }).get();}catch(Exception e){throw new RuntimeException(e);}
 	    synchronized(possibleTargets){

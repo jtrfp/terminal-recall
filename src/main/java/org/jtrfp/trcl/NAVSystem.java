@@ -19,7 +19,9 @@ import java.util.Collection;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.DashboardLayout;
@@ -30,6 +32,7 @@ import org.jtrfp.trcl.obj.NAVRadarBlipFactory;
 import org.jtrfp.trcl.obj.NavArrow;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.WorldObject.RenderFlags;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class NAVSystem extends RenderableSpacePartitioningGrid {
 private final NavArrow arrow;
@@ -37,6 +40,7 @@ private final MiniMap miniMap;
 private final TR tr;
 private NAVRadarBlipFactory blips;
 private final DashboardLayout layout;
+private GameShell gameShell;
 
     public NAVSystem(TR tr, DashboardLayout layout) {
 	super();
@@ -50,7 +54,7 @@ private final DashboardLayout layout;
 	miniMap.setRenderFlag(RenderFlags.IgnoreCamera);
 	miniMap.setActive(true);
 	miniMap.setVisible(true);
-	tr.addPropertyChangeListener(TR.RUN_STATE, new RunStateListener());
+	tr.addPropertyChangeListener(TRFactory.RUN_STATE, new RunStateListener());
 	final double mmRadius = layout.getMiniMapRadius();
 	miniMap.setModelSize(new double[]{mmRadius,mmRadius});
 	final Point2D.Double pos = layout.getMiniMapPosition();
@@ -77,7 +81,7 @@ private final DashboardLayout layout;
 	    final Object runState = evt.getNewValue();
 	    final MiniMap miniMap = getMiniMap();
 	    if(runState instanceof Mission.OverworldState){
-		  miniMap.setTextureMesh(tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
+		  miniMap.setTextureMesh(getGameShell().getGame().getCurrentMission().getOverworldSystem().getTextureMesh());
 		  miniMap.setVisible(true);
 	    }else {
 		miniMap.setVisible(false);
@@ -87,13 +91,13 @@ private final DashboardLayout layout;
     }//end RunStateListener
     
     public void updateNAVState(){
-	final Game game = tr.getGameShell().getGame();
+	final Game game = getGameShell().getGame();
 	if(game==null)return;
 	final Mission mission = game.getCurrentMission();
 	if(mission==null)return;
 	final NAVObjective obj = mission.currentNAVObjective();
 	if(obj==null)return;
-	((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().
+	((TVF3Game)getGameShell().getGame()).getHUDSystem().
 		getObjective().
 		setContent(layout.getHumanReadableObjective(obj));
 	final WorldObject target = obj.getTarget();
@@ -139,5 +143,19 @@ private final DashboardLayout layout;
 
     public MiniMap getMiniMap() {
         return miniMap;
+    }
+
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getTr(),GameShell.class);
+        return gameShell;
+    }
+
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
+    }
+
+    public TR getTr() {
+        return tr;
     }
 }//end NAVSystem

@@ -20,10 +20,13 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -65,7 +68,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 			    lvl.getLevelTextureListFile(), new ColorPaletteVectorList(globalPalette),null,false);
 	    System.out.println("Loading height map...");
 	    altitudeMap = new ScalingAltitudeMap(normalizedAltitudeMap = new InterpolatingAltitudeMap(tr.getResourceManager()
-		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile())),new Vector3D(TR.mapSquareSize,tr.getWorld().sizeY / 2,TR.mapSquareSize));
+		    .getRAWAltitude(lvl.getHeightMapOrTunnelFile())),new Vector3D(TRFactory.mapSquareSize,tr.getWorld().sizeY / 2,TRFactory.mapSquareSize));
 	    System.out.println("... Done");
 	    textureMesh = tr.getResourceManager().getTerrainTextureMesh(
 		    lvl.getTexturePlacementFile(), texturePalette);
@@ -76,15 +79,15 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    terrainSystem = tr.getThreadManager().submitToThreadPool(new Callable<TerrainSystem>(){
 		@Override
 		public TerrainSystem call() throws Exception {
-		    return new TerrainSystem(altitudeMap, textureMesh,TR.mapSquareSize, terrainMirror, tr, tdf,
+		    return new TerrainSystem(altitudeMap, textureMesh,TRFactory.mapSquareSize, terrainMirror, tr, tdf,
 			    flatShadedTerrain, terrainReporter, lvl.getHeightMapOrTunnelFile());
 		}});
 	    System.out.println("...Done.");
 	    // Clouds
 	    System.out.println("Setting up sky...");
 	    skySystem = new SkySystem(this, tr, this, lvl,
-			TR.mapSquareSize * 8,
-			(int) (TR.mapWidth / (TR.mapSquareSize * 8)),
+			TRFactory.mapSquareSize * 8,
+			(int) (TRFactory.mapWidth / (TRFactory.mapSquareSize * 8)),
 			w.sizeY/2, cloudReporter);
 	    System.out.println("...Done.");
 	    // Objects
@@ -116,7 +119,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 
     public void setChamberMode(boolean mirrorTerrain) {
 	System.out.println("setChamberMode from "+chamberMode+" to "+mirrorTerrain);
-	tr.getReporter().report("org.jtrfp.OverworldSystem.isInChamber?",
+	Features.get(tr, Reporter.class).report("org.jtrfp.OverworldSystem.isInChamber?",
 		"" + mirrorTerrain);
 	if(chamberMode == mirrorTerrain)
 	    return;//Nothing to change.
@@ -125,13 +128,13 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	if (mirrorTerrain) {
 	    OverworldSystem.this.nonBlockingAddBranch(getTerrainMirror());
 	    //No skycube updates in chamber
-	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
+	    tr.mainRenderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
 	    if (clouds != null)
 		OverworldSystem.this.nonBlockingRemoveBranch(clouds);
 	} else {
 	    OverworldSystem.this.nonBlockingRemoveBranch(getTerrainMirror());
 	    //Turn skycube updates back on
-	    tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+	    tr.mainRenderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	    if (clouds != null)
 		OverworldSystem.this.nonBlockingAddBranch(clouds);
 	}

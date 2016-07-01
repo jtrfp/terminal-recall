@@ -21,7 +21,7 @@ import java.beans.VetoableChangeSupport;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.prop.VetoableChangeListenable;
 

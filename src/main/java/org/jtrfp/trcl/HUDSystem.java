@@ -18,10 +18,9 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gui.DashboardLayout;
-import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.obj.MeterBar;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid {

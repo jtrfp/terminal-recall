@@ -22,17 +22,22 @@ import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.beh.FacingObject;
 import org.jtrfp.trcl.beh.TunnelRailed;
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
 public class PowerupObject extends WorldObject{
 	private final Powerup powerupType;
 	private final SoundTexture powerupSound;
+	private GameShell gameShell;
 	public PowerupObject(Powerup pt, TR tr){
 		super(tr);
 		this.powerupType=pt;
@@ -41,7 +46,7 @@ public class PowerupObject extends WorldObject{
 		
 		addBehavior(new PowerupBehavior());
 		addBehavior(new TunnelRailed(getTr()));
-		addBehavior(new FacingObject().setTarget(getTr().mainRenderer.get().getCamera()));
+		addBehavior(new FacingObject().setTarget(getTr().mainRenderer.getCamera()));
 		
 		powerupSound=tr.getResourceManager().soundTextures.get("POWER-1.WAV");
 		}//end constructor
@@ -49,7 +54,7 @@ public class PowerupObject extends WorldObject{
 	private class PowerupBehavior extends Behavior implements CollisionBehavior{
 		@Override
 		public void proposeCollision(WorldObject other){
-			if(TR.twosComplimentDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
+			if(TRFactory.twosComplimentDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{if(other instanceof Player){
 				    	Player p=(Player)other;
 					try{applyToPlayer(p);
@@ -83,8 +88,8 @@ public class PowerupObject extends WorldObject{
 			    addSupply(powerupType.
 				    getWeaponSupplyDelta());}}
 			final TR tr = getParent().getTr();
-			((TVF3Game)tr.getGameShell().getGame()).getUpfrontDisplay().submitMomentaryUpfrontMessage(
-				tr.configManager.getConfig()._getGameVersion()!=GameVersion.TV?
+			((TVF3Game)getGameShell().getGame()).getUpfrontDisplay().submitMomentaryUpfrontMessage(
+				Features.get(tr, TRConfiguration.class)._getGameVersion()!=GameVersion.TV?
 					powerupType.getF3Description():
 					powerupType.getTvDescription());
 			//SOUND FX
@@ -103,4 +108,13 @@ public class PowerupObject extends WorldObject{
 		setActive(true);
 		setVisible(true);
 	    }//end reset()
+	
+	public GameShell getGameShell() {
+		if(gameShell == null){
+		    gameShell = Features.get(getTr(), GameShell.class);}
+		return gameShell;
+	    }
+	    public void setGameShell(GameShell gameShell) {
+		this.gameShell = gameShell;
+	    }
 	}//end PowerupObject

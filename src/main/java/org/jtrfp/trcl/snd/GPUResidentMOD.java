@@ -19,7 +19,7 @@ package org.jtrfp.trcl.snd;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.instrument.Sample;

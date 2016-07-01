@@ -26,7 +26,7 @@ import org.jtrfp.trcl.Tickable;
 import org.jtrfp.trcl.TransparentTriangleList;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 
 public class Model {

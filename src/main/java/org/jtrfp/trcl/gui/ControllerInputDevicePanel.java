@@ -31,8 +31,8 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
-import org.jtrfp.trcl.ctl.ControllerMapper;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerMapping;
 import org.jtrfp.trcl.ctl.ControllerSource;
 import org.jtrfp.trcl.ctl.InputDevice;

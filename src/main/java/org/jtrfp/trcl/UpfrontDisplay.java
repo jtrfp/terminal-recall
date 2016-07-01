@@ -15,9 +15,11 @@ package org.jtrfp.trcl;
 
 import java.util.TimerTask;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class UpfrontDisplay extends RenderableSpacePartitioningGrid {
     private static final double Z = -1;
@@ -25,7 +27,7 @@ public class UpfrontDisplay extends RenderableSpacePartitioningGrid {
     private int upfrontDisplayCountdown = 0;
     public UpfrontDisplay(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) {
 	super();
-	upfrontBillboard = new CharLineDisplay(tr, this, .2, 35, ((TVF3Game)tr.getGameShell().getGame()).getUpfrontFont());
+	upfrontBillboard = new CharLineDisplay(tr, this, .2, 35, ((TVF3Game)Features.get(tr, GameShell.class).getGame()).getUpfrontFont());
 	upfrontBillboard.setPosition(0, .2, Z);
 	upfrontBillboard.setVisible(false);
 	upfrontBillboard.setCentered(true);

@@ -121,7 +121,7 @@ public class RenderList {
     }// end constructor
     
     private void sendRenderListPageTable(){
-	//final Renderer renderer = tr.mainRenderer.get();
+	//final Renderer renderer = tr.mainRenderer;
 	final int size = Math.min(objectListWindow.numPages(),hostRenderListPageTable.length);
 	//////// Workaround for AMD bug where element zero always returns zero in frag. Shift up one.
 	for (int i = 0; i < size-1; i++) {

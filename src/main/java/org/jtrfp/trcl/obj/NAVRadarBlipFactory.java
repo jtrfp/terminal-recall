@@ -22,11 +22,13 @@ import javax.imageio.ImageIO;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.math.Vect3D;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private static final int POOL_SIZE=15;
@@ -44,6 +46,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private Collection<Blip> activeBlips = new ArrayList<Blip>();
     private Collection<NAVRadarBlipFactoryListener> listeners = new ArrayList<NAVRadarBlipFactoryListener>();
     private boolean radarEnabled = true;
+    private GameShell gameShell;
     
     public NAVRadarBlipFactory(TR tr, RenderableSpacePartitioningGrid g, String debugName, boolean ignoreCamera){
 	this(tr,g,null,debugName,ignoreCamera);
@@ -101,7 +104,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    if(!isRadarEnabled())
 		return;
 	    final double []blipPos = getPosition();
-	    final Game game = tr.getGameShell().getGame();
+	    final Game game = getGameShell().getGame();
 	    final double [] playerPos=game.getPlayer().getPosition();
 	    Vect3D.subtract(representativeObject.getPosition(), playerPos, blipPos);
 	    Vect3D.scalarMultiply(blipPos, getRadarScalar(), blipPos);
@@ -154,7 +157,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     public void submitRadarBlip(Positionable positionable){
 	if(! (positionable instanceof DEFObject || positionable instanceof PowerupObject || positionable instanceof TunnelEntranceObject) )return;
 	final double [] otherPos = positionable.getPosition();
-	final double [] playerPos=tr.getGameShell().getGame().getPlayer().getPosition();
+	final double [] playerPos=getGameShell().getGame().getPlayer().getPosition();
 	BlipType type=null;
 	if(Vect3D.distance(playerPos, otherPos)<RADAR_RANGE){
 	    if(positionable instanceof TunnelEntranceObject){
@@ -293,5 +296,18 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     public void setRadarEnabled(boolean radarEnabled) {
         this.radarEnabled = radarEnabled;
         refreshActiveBlips();
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
+    }
+
+    public TR getTr(){
+	return tr;
     }
 }//end NAVRadarBlipFactory

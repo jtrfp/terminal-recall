@@ -20,9 +20,8 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.Future;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
 
 public class GLFont{

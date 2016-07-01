@@ -15,7 +15,7 @@ package org.jtrfp.trcl.beh;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.BarrierCube;
 import org.jtrfp.trcl.obj.Player;
@@ -44,11 +44,11 @@ private Class<? extends DamageListener.Event> damageEventClass = DamageListener.
 	public void proposeCollision(WorldObject obj){
 	    if(obj instanceof Player){
 		final WorldObject p = getParent();
-		final double [] relPos=TR.twosComplimentSubtract(obj.getPosition(), p.getPosition(), new double[3]);
+		final double [] relPos=TRFactory.twosComplimentSubtract(obj.getPosition(), p.getPosition(), new double[3]);
 		final Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,p.getHeading(),p.getTop());
 		final double[] rotPos=rot.applyInverseTo(new Vector3D(relPos)).toArray();
 		final double [] rotTransPos=Vect3D.add(rotPos,origin,rotTransPosVar);
-		if(TR.twosComplimentDistance(obj.getPosition(), p.getPosition())<80000)
+		if(TRFactory.twosComplimentDistance(obj.getPosition(), p.getPosition())<80000)
 		if(	rotTransPos[0]>0 && rotTransPos[0]<dims[0] &&
 			rotTransPos[1]>0 && rotTransPos[1]<dims[1] &&
 			rotTransPos[2]>0 && rotTransPos[2]<dims[2]){

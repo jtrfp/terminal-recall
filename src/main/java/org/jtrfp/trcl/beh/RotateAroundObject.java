@@ -13,13 +13,13 @@
 
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class RotateAroundObject extends Behavior {
     private WorldObject target;
-    private double distance=TR.mapSquareSize;
+    private double distance=TRFactory.mapSquareSize;
     private double angularVelocityRPS = .25;
     final double [] delta = new double[3];
     private double []offset = new double[]{0,0,0};

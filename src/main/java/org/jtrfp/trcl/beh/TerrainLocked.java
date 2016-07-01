@@ -13,31 +13,33 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.TerrainSystem;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class TerrainLocked extends Behavior {
     private double  pad            =0;
     private boolean lockedToCeiling=false;
+    private GameShell gameShell;
     @Override
     public void tick(long tickTimeMillis){
 	final WorldObject p = getParent();
 	final double[] thisPos=p.getPosition();
-	final Game game = p.getTr().getGameShell().getGame();
+	final Game game = getGameShell().getGame();
 	if(game==null)
 	    return;
 	final Mission currentMission = game.getCurrentMission();
 	if(currentMission==null)
 	    return;
-	if(p.getTr().getGameShell().getGame().getCurrentMission().getOverworldSystem()==null)
+	if(getGameShell().getGame().getCurrentMission().getOverworldSystem()==null)
 	    return;
-	if(p.getTr().getGameShell().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()==null)
+	if(getGameShell().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap()==null)
 	    return;
 	final double height = 
 		(lockedToCeiling?TerrainSystem.Y_NUDGE:0)+
 		(lockedToCeiling?p.getTr().getWorld().sizeY:0)+(lockedToCeiling?-1:1)*
-		p.getTr().
 		getGameShell().
 		getGame().
 		getCurrentMission().
@@ -63,5 +65,13 @@ public class TerrainLocked extends Behavior {
     public TerrainLocked setLockedToCeiling(boolean lockedToCeiling) {
         this.lockedToCeiling = lockedToCeiling;
         return this;
+    }
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end TerrainLocked

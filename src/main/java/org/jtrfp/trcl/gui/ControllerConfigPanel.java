@@ -19,19 +19,21 @@ import java.util.Collection;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.jtrfp.trcl.ctl.ControllerInputs;
-import org.jtrfp.trcl.ctl.ControllerMapper;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.InputDevice;
 
 public class ControllerConfigPanel extends JPanel {
     private static final long serialVersionUID = -7100861763976731950L;
     private final Collection<ControllerInputDevicePanel> controllerInputDevicePanels = new ArrayList<ControllerInputDevicePanel>();
     
-    public ControllerConfigPanel(Collection<InputDevice> inputs, ControllerMapper mapper, ControllerInputs ci){
+    public ControllerConfigPanel(ControllerMapper mapper, ControllerInputs ci){
 	super();
 	setLayout(new BorderLayout(0, 0));
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	add(tabbedPane, BorderLayout.CENTER);
+	
+	final Collection<InputDevice> inputs = mapper.getInputDevices();
 	for(InputDevice id:inputs){
 	    if(!id.getControllerSources().isEmpty()){
 		final ControllerInputDevicePanel panel = new ControllerInputDevicePanel(id,ci,mapper);

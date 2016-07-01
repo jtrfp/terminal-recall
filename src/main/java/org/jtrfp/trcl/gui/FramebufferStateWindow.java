@@ -28,7 +28,7 @@ import javax.swing.border.Border;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.Renderer;
 
@@ -68,7 +68,7 @@ public class FramebufferStateWindow extends JFrame {
 	    subPanel.setBorder(border);
 	    rootPanel.add(subPanel);
 	}// end if(size>0)
-	final Renderer renderer = tr.mainRenderer.get();
+	final Renderer renderer = tr.mainRenderer;
 	BeanInfo rendererBeanInfo = null;
 	try {
 	    rendererBeanInfo = Introspector.getBeanInfo(Renderer.class);

@@ -23,9 +23,12 @@ import java.util.concurrent.Callable;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.core.TRFactory.TRRunState;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -57,6 +60,7 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	    setTarget(target);
 	    installMenuItems();
 	    installMenuItemListeners();
+	    reEvaluateRunState();
 	}
 
 	@Override
@@ -87,12 +91,16 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	private class TRStateListener implements PropertyChangeListener{
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		getMenuSystem().setMenuItemEnabled(
-			!(evt.getNewValue() instanceof Game.GameRunMode) &&
-			evt.getNewValue() instanceof GameShell.GameShellConstructed, 
-			NEW_GAME_PATH);
+		reEvaluateRunState();
 	    }//end propertyChange(...)
 	}//end PropertyChangeListener
+
+	private void reEvaluateRunState(){
+	    final TRRunState runState = getTr().getRunState();
+	    getMenuSystem().setMenuItemEnabled(!(runState instanceof Game.GameRunMode) &&
+		    runState instanceof GameShellFactory.GameShellConstructed, 
+		    NEW_GAME_PATH);
+	}//end reEvaluateRunState()
 	
 	private final NewGameListener newGameListener  = new NewGameListener();
 	private final TRStateListener trStateListener  = new TRStateListener();
@@ -103,7 +111,7 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	    
 	    private void installMenuItemListeners(){
 		getMenuSystem().addMenuItemListener(newGameListener, NEW_GAME_PATH);
-		getTr().addPropertyChangeListener(TR.RUN_STATE, trStateListener);
+		getTr().addPropertyChangeListener(TRFactory.RUN_STATE, trStateListener);
 	    }
 	    
 	    private void uninstallMenuItems(){

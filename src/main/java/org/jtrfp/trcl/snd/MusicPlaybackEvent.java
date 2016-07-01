@@ -22,7 +22,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 
@@ -69,7 +71,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	     public Void call() throws Exception {
 		// Set the song up
 		mod.apply(MusicPlaybackEvent.this.nextLoopTimeSeconds,MusicPlaybackEvent.this,
-			getOrigin().getTR().configManager.getConfig().getModStereoWidth());
+			Features.get(getOrigin().getTR(),TRConfiguration.class).getModStereoWidth());
 		MusicPlaybackEvent.this.nextLoopTimeSeconds+=mod.getSongLengthInRealtimeSeconds();
 		firstRun.set(false);
 		return null;

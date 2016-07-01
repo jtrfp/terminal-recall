@@ -15,7 +15,7 @@ package org.jtrfp.trcl.beh;
 
 import java.util.Collection;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class SFXOnDamage extends Behavior implements DamageListener {

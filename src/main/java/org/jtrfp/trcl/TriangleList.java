@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
@@ -120,6 +120,9 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    vw.normX.set(gpuTVIndex, (byte)(normal.getX()*127));
 	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
 	    vw.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
+	    if(debugName.contains("MiniMap"))
+		    if(pos.getZ() != 0)
+			new Exception().printStackTrace();
 	} else {
 	    float[] xFrames = new float[numFrames];
 	    float[] yFrames = new float[numFrames];
@@ -253,11 +256,11 @@ public class TriangleList extends PrimitiveList<Triangle> {
 */
     public Future<Void> uploadToGPU() {
 	final int nPrimitives = getNumElements();
-	triangleVertexIndices = new int[nPrimitives*3];
+	final int [] vertexIndices = new int[nPrimitives*3];
 	final Texture [] textureDescriptions = new Texture[nPrimitives];
 	final MemoryWindow mw = getMemoryWindow();
 	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++)
-	    triangleVertexIndices[vIndex]=mw.create();
+	    vertexIndices[vIndex]=mw.create();
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
 	//calculateDims();
@@ -265,11 +268,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    @Override
 	    public Void call() throws Exception {
 		for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
-		    setupTriangle(tIndex,textureDescriptions[tIndex],triangleVertexIndices);}
+		    setupTriangle(tIndex,textureDescriptions[tIndex],vertexIndices);}
 		finalizePrimitives();
 		return null;
 	    }//end Call()
 	});
+	triangleVertexIndices = vertexIndices;
 	return result;
     }// end uploadToGPU(...)
 

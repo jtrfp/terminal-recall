@@ -15,6 +15,8 @@ package org.jtrfp.trcl.core;
 
 import java.util.concurrent.Callable;
 
+import org.jtrfp.trcl.core.TRFactory.TR;
+
 public class LazyTRFuture<V> implements TRFuture<V> {
     private final Callable<V> callable;
     private final TR tr;

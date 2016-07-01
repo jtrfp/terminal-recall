@@ -13,15 +13,21 @@
 
 package org.jtrfp.trcl.conf;
 
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DEVICE;
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DRIVER;
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_FORMAT;
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_OUTPUT;
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_LAG;
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_SIZE;
+import static org.jtrfp.trcl.conf.TRConfigurationFactory.CROSSHAIRS_ENABLED;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.springframework.stereotype.Component;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.*;
 
 /**
  * Temporary class to allow the deprecated TRConfiguration to be used in the new scheme of
@@ -31,7 +37,7 @@ import static org.jtrfp.trcl.conf.TRConfigurationFactory.*;
  */
 
 @Component
-public class TRConfiguratorFactory implements FeatureFactory<TR> {
+public class TRConfiguratorFactory implements FeatureFactory<TRConfigurationFactory> {
     private static final String [] PERSISTENT_PROPERTIES = 
 	    new String [] {
 	    ACTIVE_AUDIO_DRIVER,
@@ -56,7 +62,7 @@ public class TRConfiguratorFactory implements FeatureFactory<TR> {
     private static final Set<String> PERSISTENT_PROPERTIES_SET = 
 	    new HashSet<String>(Arrays.asList(PERSISTENT_PROPERTIES));
     
-    public class TRConfigurator extends FeatureConfigurator<TR>{
+    public class TRConfigurator extends FeatureConfigurator<TRConfigurationFactory>{
 	@Override
 	    protected Set<String> getPersistentProperties() {
 		return PERSISTENT_PROPERTIES_SET;
@@ -64,13 +70,13 @@ public class TRConfiguratorFactory implements FeatureFactory<TR> {
     }//end TRConfiguration
 
     @Override
-    public Feature<TR> newInstance(TR target) {
+    public Feature<TRConfigurationFactory> newInstance(TRConfigurationFactory target) {
 	return new TRConfigurator();
     }
 
     @Override
-    public Class<TR> getTargetClass() {
-	return TR.class;
+    public Class<TRConfigurationFactory> getTargetClass() {
+	return TRConfigurationFactory.class;
     }
 
     @Override

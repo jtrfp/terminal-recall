@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.obj.Smoke.SmokeType;
 import org.jtrfp.trcl.obj.SmokeSystem;
 

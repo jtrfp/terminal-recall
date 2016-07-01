@@ -23,6 +23,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +34,7 @@ import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.gpu.Renderer;
@@ -74,7 +75,7 @@ public final class ThreadManager implements GLExecutor{
     public final Queue<TRFutureTask<?>>    pendingGPUMemAccessTasks= new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
     public final Queue<TRFutureTask<?>>    activeGPUMemAccessTasks = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
     public final ArrayList<Callable<?>>repeatingGPUMemAccessTasks  = new ArrayList<Callable<?>>();
-    public final List<Callable<?>>repeatingGLTasks	           = Collections.synchronizedList(new ArrayList<Callable<?>>());
+    public final List<Callable<?>>repeatingGLTasks	           = new CopyOnWriteArrayList<Callable<?>>();
     
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
@@ -122,14 +123,12 @@ public final class ThreadManager implements GLExecutor{
 	final long tickTimeInMillis = System.currentTimeMillis();
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	boolean alreadyVisitedPlayer=false;
-	TRFuture [] renderers = new TRFuture[]{tr.mainRenderer/* ,tr.secondaryRenderer*/ };//TODO: This is hacky.
+	Renderer [] renderers = new Renderer[]{tr.mainRenderer/* ,tr.secondaryRenderer*/ };//TODO: This is hacky.
 	try{// NotReadyException
 	visibilityListBuffer.clear();
 	synchronized(paused){
 	synchronized(gameStateLock){
-	    for(TRFuture<Renderer> r:renderers){
-		if(r==null)return;
-		Renderer renderer = r.getRealtime();
+	    for(Renderer renderer:renderers){
 		if(renderer.isEnabled()){
 		    final Collection<PositionedRenderable> vl = 
 				renderer.

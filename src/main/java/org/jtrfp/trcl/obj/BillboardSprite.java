@@ -19,7 +19,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
 
@@ -81,7 +81,7 @@ public class BillboardSprite extends WorldObject{
 
 	    @Override
 	    public void updateRotation(WorldObject target) {
-		final Camera camera = tr.mainRenderer.get().getCamera();
+		final Camera camera = tr.mainRenderer.getCamera();
 	    	final Vector3D cLookAt = camera.getLookAtVector();
 	    	final Rotation rot = new Rotation(cLookAt,rotationAngleRadians);
 		target.setHeading(rot.applyTo(cLookAt.negate()));

@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -44,7 +44,7 @@ private String explosionSound;
 	      enqueuePlaybackEvent(tr.soundSystem.get().getPlaybackFactory().
 		    create(tr.getResourceManager().soundTextures.get(explosionSound),
 			    loc.toArray(),
-			    tr.mainRenderer.get().getCamera(),
+			    tr.mainRenderer.getCamera(),
 			    SoundSystem.DEFAULT_SFX_VOLUME*2));
     }
     @Override

@@ -22,9 +22,10 @@ import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.HasQuantifiableSupply;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.SatelliteViewFactory;
@@ -116,7 +117,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	super.setParent(newParent);
 	final TR tr = newParent.getTr();
 	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
-	tr.addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
+	tr.addPropertyChangeListener(TRFactory.RUN_STATE, weakRunStateListener);
     }//end setParent(...)
     
     @Override

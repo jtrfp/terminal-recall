@@ -21,7 +21,8 @@ import org.jtrfp.trcl.HUDSystem;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -31,6 +32,7 @@ import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class NavArrow extends WorldObject implements RelevantEverywhere {
 private static final double WIDTH=.16;
@@ -42,6 +44,7 @@ private static final int BACKGROUND_INDEX = 10;
 private Vector3D topOrigin = Vector3D.PLUS_J;
 private Rotation vectorHack = Rotation.IDENTITY;
 private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
+private GameShell gameShell;
 
     public NavArrow(TR tr, DashboardLayout layout, Point2D.Double size, String debugName) {//TODO: Accept outside width/height parms
 	super(tr);
@@ -101,7 +104,7 @@ private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
 	@Override
 	public void tick(long time){
 	    final TR tr              = getTr();
-	    final Game game          = tr.getGameShell().getGame();
+	    final Game game          = getGameShell().getGame();
 	    final Mission mission    = game.getCurrentMission();
 	    final WorldObject player = game.getPlayer();
 	    final HUDSystem hudSystem= ((TVF3Game)game).getHUDSystem();
@@ -139,18 +142,18 @@ private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
 	    }else{//No Tunnel
 		final double [] loc =mission.currentNAVObjective().getTarget().getPosition();
 		navLocXY = new Vector3D(loc[0],loc[2],0);
-		sectorMsg = TR.modernToMapSquare(playerPos[2])+"."+
-			TR.modernToMapSquare(playerPos[0]);
+		sectorMsg = TRFactory.modernToMapSquare(playerPos[2])+"."+
+			TRFactory.modernToMapSquare(playerPos[0]);
 	    }//end no tunnel
 
 	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
-	    Vector3D player2NavVectorXY = TR.twosComplimentSubtract(navLocXY, playerPosXY);
+	    Vector3D player2NavVectorXY = TRFactory.twosComplimentSubtract(navLocXY, playerPosXY);
 	    if(player2NavVectorXY.getNorm()==0)
 		player2NavVectorXY=Vector3D.PLUS_I;
 	    final double modernDistance = player2NavVectorXY.getNorm();
 
 	    if(counter==0){
-		hudSystem.getDistance().setContent(""+(int)((modernDistance*16)/TR.mapSquareSize));
+		hudSystem.getDistance().setContent(""+(int)((modernDistance*16)/TRFactory.mapSquareSize));
 		hudSystem.getSector().setContent(sectorMsg);
 	    }
 
@@ -182,5 +185,14 @@ private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
 
     public void setVectorHack(Rotation vectorHack) {
         this.vectorHack = vectorHack;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
     }
 }//end NavArrow

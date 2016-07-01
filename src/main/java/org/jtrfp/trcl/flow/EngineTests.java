@@ -14,16 +14,18 @@ package org.jtrfp.trcl.flow;
 
 import java.io.InputStream;
 
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.VQTexture;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class EngineTests {
 
     private static void preClean(TR tr){
-	tr.getGameShell().abortCurrentGame();
+	Features.get(tr, GameShell.class).abortCurrentGame();
 	tr.getDefaultGrid().blockingRemoveAll();
     }
     public static void singlet(TR tr, int numInstances) {

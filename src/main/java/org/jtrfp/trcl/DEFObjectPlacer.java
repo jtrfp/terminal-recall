@@ -18,7 +18,9 @@ import java.util.List;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
@@ -64,7 +66,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPaletteVL(),null,tr.gpu.get().getGl());}
 					catch(Exception e){e.printStackTrace();}
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
-			final Reporter reporter = tr.getReporter();
+			final Reporter reporter = Features.get(tr, Reporter.class);
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic().toString());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
@@ -83,9 +85,9 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    }//end 
 				//USING  z,x coords
 				final double [] objPos = obj.getPosition();
-				objPos[0]= TR.legacy2Modern	(pl.getLocationOnMap().getZ())+positionOffset.getX();
-				objPos[1]=(TR.legacy2Modern	(pl.getLocationOnMap().getY())/TR.mapWidth)*16.*tr.getWorld().sizeY+positionOffset.getY();
-				objPos[2]= TR.legacy2Modern	(pl.getLocationOnMap().getX())+positionOffset.getZ();
+				objPos[0]= TRFactory.legacy2Modern	(pl.getLocationOnMap().getZ())+positionOffset.getX();
+				objPos[1]=(TRFactory.legacy2Modern	(pl.getLocationOnMap().getY())/TRFactory.mapWidth)*16.*tr.getWorld().sizeY+positionOffset.getY();
+				objPos[2]= TRFactory.legacy2Modern	(pl.getLocationOnMap().getX())+positionOffset.getZ();
 				obj.notifyPositionChange();
 				
 				if(pl.getRoll()!=0||pl.getPitch()!=0||pl.getYaw()!=0)//Only set if not 0,0,0

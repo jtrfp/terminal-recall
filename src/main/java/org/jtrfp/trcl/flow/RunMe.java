@@ -12,10 +12,9 @@
  ******************************************************************************/
 package org.jtrfp.trcl.flow;
 
-import java.io.File;
-import java.util.Map.Entry;
-
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +32,7 @@ public class RunMe{
 		System.out.println(
 				"\t\t\t***TERMINAL RECALL***\n"+
 				"	An unofficial enhancement engine for Terminal Velocity and Fury3.\n"+
-				"	Copyright (c) 2012-2015 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
+				"	Copyright (c) 2012-2016 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
 				"	Part of the Java Terminal Reality File Parsers Project.\n\n"+
 				"		This program is free software; you can redistribute it and/or modify\n"+
 				"	it under the terms of the GNU General Public License as published by\n"+
@@ -53,8 +52,11 @@ public class RunMe{
 		AbstractApplicationContext context = 
 		          new AnnotationConfigApplicationContext(RunMe.class);
 		context.registerShutdownHook();
-		      TR tr = context.getBean(TR.class);
-		tr.startShell();
+		Features features = context.getBean(Features.class);
+		Features.setSingleton(features);
+		Features.init(features);
+		final TR tr = Features.get(Features.getSingleton(), TR.class);
+		Features.get(tr, GameShell.class).startShell();
 		context.close();
 		}//end main()
 }// end RunMe

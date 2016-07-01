@@ -32,8 +32,10 @@ import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 
-import org.jtrfp.trcl.conf.TRConfiguration;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.conf.TRConfigurationFactory;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
@@ -56,6 +58,7 @@ public final class SoundSystem {
     private int bufferSizeFrames = 4096;
     private ByteBuffer gpuFloatBytes;
     private static final AudioProcessor SILENCE = new Silence();
+    private TRConfiguration trConfiguration;
     
    ////VARS
    private AudioDriver          activeDriver;
@@ -153,22 +156,22 @@ public final class SoundSystem {
     }// end constructor
     
     private void loadConfigAndAttachListeners() {
-	final TRConfiguration config = tr.configManager.getConfig();
-	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_DRIVER,new PropertyChangeListener(){
+	final TRConfiguration config = getTrConfiguration();
+	config.addPropertyChangeListener(TRConfigurationFactory.ACTIVE_AUDIO_DRIVER,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final String driver = (String)evt.getNewValue();
 		if(driver!=null)
 		    setDriverByName(driver);
 	    }});
-	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_DEVICE,new PropertyChangeListener(){
+	config.addPropertyChangeListener(TRConfigurationFactory.ACTIVE_AUDIO_DEVICE,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final String device = (String)evt.getNewValue();
 		if(device!=null)
 		    setDeviceByName(device);
 	    }});
-	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_OUTPUT,new PropertyChangeListener(){
+	config.addPropertyChangeListener(TRConfigurationFactory.ACTIVE_AUDIO_OUTPUT,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final String output = (String)evt.getNewValue();
@@ -176,14 +179,14 @@ public final class SoundSystem {
 		if(output!=null)
 		    setOutputByName(output);
 	    }});
-	config.addPropertyChangeListener(TRConfiguration.ACTIVE_AUDIO_FORMAT,new PropertyChangeListener(){
+	config.addPropertyChangeListener(TRConfigurationFactory.ACTIVE_AUDIO_FORMAT,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final String format = (String)evt.getNewValue();
 		if(format!=null)
 		    setFormatByName(format);
 	    }});
-	config.addPropertyChangeListener(TRConfiguration.AUDIO_BUFFER_SIZE, new PropertyChangeListener(){
+	config.addPropertyChangeListener(TRConfigurationFactory.AUDIO_BUFFER_SIZE, new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		if(evt.getNewValue()!=null)
@@ -361,7 +364,7 @@ public final class SoundSystem {
     }//end newSoundTexture
     
     private int getFilteringParm(){
-	return tr.configManager.getConfig().isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
+	return getTrConfiguration().isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
     }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
@@ -384,7 +387,7 @@ public final class SoundSystem {
 	    firstRun();
 	final GPU gpu = tr.gpu.get();
 	
-	if(tr.configManager.getConfig().isAudioBufferLag())
+	if(getTrConfiguration().isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	// Render
@@ -405,7 +408,7 @@ public final class SoundSystem {
 	    events.clear();
 	}//end for(keySet)
 	
-	if(!tr.configManager.getConfig().isAudioBufferLag())
+	if(!getTrConfiguration().isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	bufferTimeCounter += getBufferSizeSeconds();
@@ -690,5 +693,15 @@ public final class SoundSystem {
 
     public LoopingSoundEvent.Factory getLoopFactory() {
         return loopFactory;
+    }
+
+    public TRConfiguration getTrConfiguration() {
+	if(trConfiguration == null)
+	    trConfiguration = Features.get(tr, TRConfiguration.class);
+        return trConfiguration;
+    }
+
+    public void setTrConfiguration(TRConfiguration trConfiguration) {
+        this.trConfiguration = trConfiguration;
     }
 }//end SoundSystem

@@ -30,6 +30,7 @@ import java.util.Map;
 
 import javax.swing.DefaultListModel;
 
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,12 +46,12 @@ public class ConfigManager {
 	    config=getConfigurations();
 	return config;
     }//end getConfig()
-    
+    /*
     @Autowired
     public void setConfigurators(Collection<Configurator> configurators){
 	this.configurators=configurators;
     }//end setPersistents
-    
+    */
 
     public File getConfigFilePath(){
 	String homeProperty = System.getProperty("user.home");
@@ -142,9 +143,9 @@ public class ConfigManager {
     public TRConfiguration getTrConfiguration() {
         return trConfiguration;
     }
-
+/*
     @Autowired
     public void setTrConfiguration(TRConfiguration trConfiguration) {
         this.trConfiguration = trConfiguration;
-    }
+    }*/
 }//end ConfigManager

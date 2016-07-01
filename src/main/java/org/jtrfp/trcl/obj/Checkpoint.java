@@ -17,14 +17,18 @@ import java.awt.Dimension;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.TerrainLocked;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 
 public class Checkpoint extends BillboardSprite {
 private NAVObjective objective;
 private boolean includeYAxisInCollision=true;
+private GameShell gameShell;
     public Checkpoint(TR tr, String debugName) {
 	super(tr, "Checkpoint."+debugName);
 	super.setModelOffset(0, 80000, 0);
@@ -50,9 +54,9 @@ private boolean includeYAxisInCollision=true;
 		final WorldObject parent = getParent();
 		double [] playerPos = includeYAxisInCollision?player.getPosition():new double []{player.getPosition()[0],0,player.getPosition()[2]};
 		double [] parentPos = includeYAxisInCollision?parent.getPosition():new double []{parent.getPosition()[0],0,parent.getPosition()[2]};
-		if(TR.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
+		if(TRFactory.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
 		    destroy();
-		    getTr().getGameShell().getGame().getCurrentMission().removeNAVObjective(objective);
+		    getGameShell().getGame().getCurrentMission().removeNAVObjective(objective);
 		}//end if(collided)
 	    }//end if(Player)
 	}//end _proposeCollision()
@@ -71,5 +75,15 @@ private boolean includeYAxisInCollision=true;
     public Checkpoint setIncludeYAxisInCollision(boolean includeYAxisInCollision) {
         this.includeYAxisInCollision = includeYAxisInCollision;
         return this;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    final TR tr = Features.get(Features.getSingleton(),TR.class);
+	    gameShell = Features.get(tr, GameShell.class);}
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end Checkpoint

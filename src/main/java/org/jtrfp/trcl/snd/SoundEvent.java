@@ -20,7 +20,7 @@ import java.util.Collection;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public interface SoundEvent {
     public double getStartRealtimeSeconds();

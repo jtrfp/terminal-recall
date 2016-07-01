@@ -16,20 +16,22 @@ import java.util.ArrayList;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.TerrainChunk;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class DestroysEverythingBehavior extends Behavior {
     private volatile int           counter=3;
     private volatile boolean       replenishingPlayerHealth=true;
     private volatile Future<?>     future;
-    private volatile int           destructionRadius = (int)TR.mapSquareSize*15;
+    private volatile int           destructionRadius = (int)TRFactory.mapSquareSize*15;
     final ArrayList<Positionable>[]positionables = new ArrayList[]{new ArrayList<Positionable>(100)};
+    private GameShell              gameShell;
     
     @Override
     public void tick(long timeMillis){
@@ -39,11 +41,11 @@ public class DestroysEverythingBehavior extends Behavior {
 	    try{future = World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    positionables[0].addAll(getParent().getTr().mainRenderer.get().getCamera().getFlatRelevanceCollection());
+		    positionables[0].addAll(getParent().getTr().mainRenderer.getCamera().getFlatRelevanceCollection());
 		}});}catch(Exception e){e.printStackTrace();}
 	}else if(counter==1&&isReplenishingPlayerHealth()){
 	    try{future.get();}catch(Exception e){throw new RuntimeException(e);}
-	    try{getParent().getTr().getGameShell().getGame().getPlayer().probeForBehavior(DamageableBehavior.class).unDamage();}
+	    try{getGameShell().getGame().getPlayer().probeForBehavior(DamageableBehavior.class).unDamage();}
 	    catch(SupplyNotNeededException e){}//Ok, whatever.
 	    final double [] parentPos = getParent().getPosition();
 	    final int destructionRadius = getDestructionRadius();
@@ -89,5 +91,13 @@ public class DestroysEverythingBehavior extends Behavior {
      */
     public void setDestructionRadius(int destructionRadius) {
         this.destructionRadius = destructionRadius;
+    }
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end DestroyesEverythinBehavior

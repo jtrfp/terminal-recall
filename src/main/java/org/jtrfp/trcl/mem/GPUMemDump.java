@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.VQCodebookManager;
 

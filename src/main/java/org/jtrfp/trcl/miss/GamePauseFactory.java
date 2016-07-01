@@ -23,25 +23,23 @@ import java.lang.ref.WeakReference;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GamePauseFactory implements FeatureFactory<Mission>  {
     public static final String PAUSE = "Pause";
     public static final String [] PAUSE_MENU_PATH = new String[] {"Game","Pause"}; 
-    private final ControllerInput pause;
     public interface PauseDisabledState{}
     
-    @Autowired
-    public GamePauseFactory(ControllerInputs inputs){
-	pause           = inputs.getControllerInput(PAUSE);
-    }//end constructor'
+    public GamePauseFactory(){
+    }//end constructor
     
     public class GamePause implements Feature<Mission>{
 	private boolean paused = false;
@@ -50,19 +48,24 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	private final RunStateListener      runStateListener         = new RunStateListener();
 	private WeakReference<Mission>      mission;
 	private final PropertyChangeSupport pcs                      = new PropertyChangeSupport(this);
+	private       ControllerInput       pause;
 
 	@Override
 	public void apply(Mission mission) {
+	    final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
+	    final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
+	    pause           = inputs.getControllerInput(PAUSE);
 	    this.mission = new WeakReference<Mission>(mission);
 	    pause.addPropertyChangeListener(controllerListener);
 	    getMenuSystem().addMenuItem(PAUSE_MENU_PATH);
 	    getMenuSystem().addMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
-	    getTr().addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    getTr().addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	}
 
 	@Override
 	public void destruct(Mission target) {
-	    getTr().removePropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    new Exception("destruct()").printStackTrace();
+	    getTr().removePropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	    getMenuSystem().removeMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
 	    getMenuSystem().removeMenuItem(PAUSE_MENU_PATH);
 	    pause.removePropertyChangeListener(controllerListener);

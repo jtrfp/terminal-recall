@@ -13,7 +13,7 @@
 
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SamplePlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -63,7 +63,7 @@ public class RandomSFXPlayback extends Behavior implements DeathListener {
 	//Play the sound
 	SamplePlaybackEvent playbackEvent = soundSystem.
 	  getPlaybackFactory().
-	  create(soundTexture, getParent().getPositionWithOffset(), tr.mainRenderer.get().getCamera(), SoundSystem.DEFAULT_SFX_VOLUME,playbackRatio);
+	  create(soundTexture, getParent().getPositionWithOffset(), tr.mainRenderer.getCamera(), SoundSystem.DEFAULT_SFX_VOLUME,playbackRatio);
 	soundSystem.enqueuePlaybackEvent(playbackEvent);
     }//end playSound()
 

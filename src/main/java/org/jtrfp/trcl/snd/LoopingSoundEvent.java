@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 

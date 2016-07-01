@@ -18,9 +18,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jtrfp.trcl.conf.Configurator;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
 public class RootWindowConfigurator extends Configurator<RootWindow> {
     private static final HashSet<String> PERSISTENT_PROPERTIES = 
 	    new HashSet<String>(Arrays.asList(

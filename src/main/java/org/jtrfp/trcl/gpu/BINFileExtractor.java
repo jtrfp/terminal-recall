@@ -16,7 +16,7 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.BillboardTexCoords0x04;
@@ -53,7 +53,7 @@ public class BINFileExtractor {
 	boolean skipLighting= false;
 	WriterState triangleData = new WriterState();
 	try	{
-		final double cpScalar=(SCALE*TR.crossPlatformScalar*256.)/(double)from.getScale();
+		final double cpScalar=(SCALE*TRFactory.crossPlatformScalar*256.)/(double)from.getScale();
 		System.out.println("Recognized as model file.");
 		List<org.jtrfp.trcl.gpu.Vertex> vertices = new ArrayList<org.jtrfp.trcl.gpu.Vertex>();
 		final double [] pos = new double[8];

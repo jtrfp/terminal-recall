@@ -17,14 +17,16 @@ import java.awt.event.KeyEvent;
 import org.jtrfp.trcl.KeyStatusFactory.KeyStatus;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
     public static final String FIRE = "Fire";
@@ -38,7 +40,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     private int ammoDisplayUpdateCounter=0;
     public static final int AMMO_DISPLAY_UPDATE_INTERVAL_MS=80;
     private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
-    
+    private GameShell gameShell;
     
     public UserInputWeaponSelectionBehavior(ControllerInputs controllerInputs){
 	fire = controllerInputs.getControllerInput(FIRE);
@@ -50,7 +52,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	final KeyStatus keyStatus = getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
 	    final int ammo = getActiveBehavior().getAmmo();
-	    ((TVF3Game)parent.getTr().getGameShell().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
+	    ((TVF3Game)getGameShell().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
@@ -82,7 +84,8 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	    final Weapon w = activeBehavior.getProjectileFactory().getWeapon();
 	    final TR tr = getParent().getTr();
 	    String content="???";
-	    switch(tr.configManager.getConfig()._getGameVersion()){//TODO: Get from Game object instead.
+	    final TRConfiguration trConfig = Features.get(tr, TRConfiguration.class);
+	    switch(trConfig._getGameVersion()){//TODO: Get from Game object instead.
 	    case FURYSE://Same as F3
 	    case F3:{
 		content=w.getF3DisplayName();
@@ -93,7 +96,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 		break;
 	        }
 	    }//end switch(game version)
-	    ((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().getWeapon().setContent(content);
+	    ((TVF3Game)getGameShell().getGame()).getHUDSystem().getWeapon().setContent(content);
 	    return true;
 	}//end if(New Behavior)
 	return false;
@@ -136,5 +139,14 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	if(activeBehavior==null)
 	    setActiveBehavior(getDefaultBehavior(),true);
         return activeBehavior;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end WeaponSelectionBehavior

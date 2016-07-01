@@ -14,10 +14,12 @@ package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.beh.SpinAccellerationBehavior.SpinMode;
 import org.jtrfp.trcl.beh.phy.AccelleratedByPropulsion;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class SmartPlaneBehavior extends Behavior {
 private final HorizAimAtPlayerBehavior aimAtPlayer;
@@ -27,11 +29,12 @@ private final AdjustAltitudeToPlayerBehavior adjustAlt;
 private final AccelleratedByPropulsion escapeProp;
 private int sequenceUpdateIntervalMillis = 2000;
 private long nextUpdateTimeMillis = 0;
-private double ignorePlayerDistanceMin = TR.mapSquareSize*15;
-private double attackPlayerDistanceMin = TR.mapSquareSize*5;//Any closer is retreat mode
+private double ignorePlayerDistanceMin = TRFactory.mapSquareSize*15;
+private double attackPlayerDistanceMin = TRFactory.mapSquareSize*5;//Any closer is retreat mode
 private BehaviorMode behaviorMode = null;
 private int behaviorSubSequence = 0;
 private final boolean retreatAboveSky;
+private GameShell gameShell;
 
     public SmartPlaneBehavior(HorizAimAtPlayerBehavior haapb,
 	    AutoFiring afb, SpinAccellerationBehavior sahb, AdjustAltitudeToPlayerBehavior aatpb, 
@@ -48,7 +51,7 @@ private final boolean retreatAboveSky;
     public void tick(long timeInMillis){
 	if(timeInMillis>=nextUpdateTimeMillis){
 	    final WorldObject thisObject = getParent();
-	    final Player player = thisObject.getTr().getGameShell().getGame().getPlayer();
+	    final Player player = getGameShell().getGame().getPlayer();
 	    final double [] thisPos = thisObject.getPosition();
 	    final double [] playerPos = player.getPosition();
 	    boolean cloakedPlayer = player.probeForBehavior(Cloakable.class).isCloaked();
@@ -132,5 +135,14 @@ private final boolean retreatAboveSky;
 	ignore,
 	attack,
 	retreat
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end SmartPlaneBehavior

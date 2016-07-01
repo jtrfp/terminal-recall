@@ -15,7 +15,7 @@ package org.jtrfp.trcl.beh;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
@@ -40,7 +40,7 @@ public class CollidesWithPlayer extends Behavior implements CollisionBehavior {
 	    final Vector3D pMax = parent.getModel().getMaximumVertexDims();
 	    final Vector3D oMax = other .getModel().getMaximumVertexDims();
 	    
-	    double dXZ       = TR.rolloverDistance(Vect3D.distanceXZ(parent.getPositionWithOffset(), other.getPositionWithOffset()));
+	    double dXZ       = TRFactory.rolloverDistance(Vect3D.distanceXZ(parent.getPositionWithOffset(), other.getPositionWithOffset()));
 	    final double dY  = Math.abs(parent.getPositionWithOffset()[1]-other.getPositionWithOffset()[1]);
 	    //System.out.println("INSTANCE="+getParent().getClass().getName());
 	    /*if(getParent() instanceof ProjectileObject3D){

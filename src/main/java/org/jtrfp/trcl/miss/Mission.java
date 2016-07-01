@@ -33,7 +33,8 @@ import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.SpawnsRandomSmoke;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
@@ -52,7 +53,8 @@ import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.SpawnsRandomExplosionsAndDebris;
-import org.jtrfp.trcl.shell.GameShell;
+import org.jtrfp.trcl.shell.GameShellFactory;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -88,6 +90,7 @@ public class Mission {
     public Object [] levelLoadingMode, overworldMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
     private NAVObjective currentNavTarget;
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
+    private GameShell gameShell;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -118,13 +121,13 @@ public class Mission {
 	this.levelName 	= levelName;
 	this.showIntro	= showIntro;
 	this.displayHandler = new DisplayModeHandler(this.getPartitioningGrid());
-	Features.init(this);
 	tr.setRunState(new ConstructingState(){});
 	levelLoadingMode = new Object[]{
 		 ((TVF3Game)game).levelLoadingScreen,
 		 ((TVF3Game)game).upfrontDisplay
 	    };
 	tr.setRunState(new ConstructedState(){});
+	Features.init(this);//TODO: Remove when Mission becomes a Feature
     }// end Mission
     
     public Result go() {
@@ -148,9 +151,9 @@ public class Mission {
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
-	final Renderer renderer = tr.mainRenderer.get();
+	final Renderer renderer = tr.mainRenderer;
 	renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
-	renderer.getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
+	renderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);
 	final Camera camera = renderer.getCamera();
 	camera.setHeading(Vector3D.PLUS_I);
 	camera.setTop(Vector3D.PLUS_J);
@@ -159,7 +162,7 @@ public class Mission {
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Player player      = ((TVF3Game)tr.getGameShell().getGame()).getPlayer();
+	    final Player player      = ((TVF3Game)getGameShell().getGame()).getPlayer();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check
@@ -193,18 +196,18 @@ public class Mission {
 	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
-	    final NAVSystem navSystem = ((TVF3Game)tr.getGameShell().getGame()).getNavSystem();
+	    final NAVSystem navSystem = ((TVF3Game)getGameShell().getGame()).getNavSystem();
 	    navSubObjects = rm.getNAVData(lvl.getNavigationFile())
 		    .getNavObjects();
 
 	    START s = (START) navSubObjects.get(0);
 	    Location3D l3d = s.getLocationOnMap();
-	    playerStartPosition[0] = TR.legacy2Modern(l3d.getZ());
-	    playerStartPosition[2] = TR.legacy2Modern(l3d.getX());
+	    playerStartPosition[0] = TRFactory.legacy2Modern(l3d.getZ());
+	    playerStartPosition[2] = TRFactory.legacy2Modern(l3d.getX());
 	    final double HEIGHT_PADDING = 10000;
 	    playerStartPosition[1] = Math.max(HEIGHT_PADDING + getOverworldSystem().getAltitudeMap().heightAt(
-		    TR.legacy2Modern(l3d.getZ()),
-		    TR.legacy2Modern(l3d.getX())),TR.legacy2Modern(l3d.getY()));
+		    TRFactory.legacy2Modern(l3d.getZ()),
+		    TRFactory.legacy2Modern(l3d.getX())),TRFactory.legacy2Modern(l3d.getY()));
 	    playerStartDirection = new ObjectDirection(s.getRoll(),
 		    s.getPitch(), s.getYaw());
 	    // ////// INITIAL HEADING
@@ -255,7 +258,7 @@ public class Mission {
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {
 		@Override
 		public Void call() throws Exception {
-		    tr.mainRenderer.get().setSunVector(
+		    tr.mainRenderer.setSunVector(
 			    new Vector3D(sunVector.getX(), sunVector.getY(),
 				    sunVector.getZ()).normalize());
 		    return null;
@@ -312,7 +315,7 @@ public class Mission {
 	}
 	tr.setRunState(new OverworldState(){});
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
-	tr.mainRenderer.get().getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+	tr.mainRenderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
@@ -320,7 +323,7 @@ public class Mission {
 	displayHandler.setDisplayMode(overworldMode);
 	
 	((TVF3Game)game).getPlayer()	.setActive(true);
-	((TVF3Game)tr.getGameShell().getGame()).setPaused(false);
+	((TVF3Game)getGameShell().getGame()).setPaused(false);
 	//tr.setRunState(new PlayerActivity(){});
 	//Wait for mission end
 	synchronized(missionEnd){
@@ -348,7 +351,7 @@ public class Mission {
     public void removeNAVObjective(NAVObjective o) {
 	navs.remove(o);
 	updateNavState();
-	((TVF3Game)tr.getGameShell().getGame()).getNavSystem().updateNAVState();
+	((TVF3Game)getGameShell().getGame()).getNavSystem().updateNAVState();
     }// end removeNAVObjective(...)
     
     private void updateNavState(){
@@ -611,13 +614,13 @@ public class Mission {
     public void setSatelliteView(boolean satelliteView) {
 	if(!(tr.getRunState() instanceof OverworldState)&&satelliteView)
 	    throw new IllegalArgumentException("Cannot activate satellite view while runState is "+tr.getRunState().getClass().getSimpleName());
-	if(satelliteView && ((TVF3Game)tr.getGameShell().getGame()).isPaused())
+	if(satelliteView && ((TVF3Game)getGameShell().getGame()).isPaused())
 	    throw new IllegalArgumentException("Cannot activate satellite view while paused.");
 	final boolean oldValue = this.satelliteView;
 	
 	if(satelliteView!=oldValue){
-	    final Game game =  ((TVF3Game)tr.getGameShell().getGame());
-	    final Camera cam = tr.mainRenderer.get().getCamera();
+	    final Game game =  ((TVF3Game)getGameShell().getGame());
+	    final Camera cam = tr.mainRenderer.getCamera();
 	    this.satelliteView=satelliteView;
 	    pcs.firePropertyChange(SATELLITE_VIEW, oldValue, satelliteView);
 	    tr.setRunState(satelliteView?new SatelliteState(){}:new OverworldState(){});
@@ -627,22 +630,22 @@ public class Mission {
 		cam.probeForBehavior(MatchPosition.class).setEnable(false);
 		cam.probeForBehavior(MatchDirection.class).setEnable(false);
 		final Vector3D pPos = new Vector3D(((TVF3Game)game).getPlayer().getPosition());
-		final Vector3D pHeading = ((TVF3Game)tr.getGameShell().getGame()).getPlayer().getHeading();
-		cam.setPosition(new Vector3D(pPos.getX(),TR.visibilityDiameterInMapSquares*TR.mapSquareSize*.65,pPos.getZ()));
+		final Vector3D pHeading = ((TVF3Game)getGameShell().getGame()).getPlayer().getHeading();
+		cam.setPosition(new Vector3D(pPos.getX(),TRFactory.visibilityDiameterInMapSquares*TRFactory.mapSquareSize*.65,pPos.getZ()));
 		cam.setHeading(Vector3D.MINUS_J);
 		cam.setTop(new Vector3D(pHeading.getX(),.0000000001,pHeading.getZ()).normalize());
-		((TVF3Game)tr.getGameShell().getGame()).getSatDashboard().setVisible(true);
+		((TVF3Game)getGameShell().getGame()).getSatDashboard().setVisible(true);
 	    }else{//Switched off
 		tr.getThreadManager().setPaused(false);
 		World.relevanceExecutor.submit(new Runnable(){
 		    @Override
 		    public void run() {
-			((TVF3Game)tr.getGameShell().getGame()).getNavSystem().activate();
+			((TVF3Game)getGameShell().getGame()).getNavSystem().activate();
 		    }});
 		cam.setFogEnabled(true);
 		cam.probeForBehavior(MatchPosition.class).setEnable(true);
 		cam.probeForBehavior(MatchDirection.class).setEnable(true);
-		((TVF3Game)tr.getGameShell().getGame()).getSatDashboard().setVisible(false);
+		((TVF3Game)getGameShell().getGame()).getSatDashboard().setVisible(false);
 	    }//end !satelliteView
 	}//end if(change)
     }
@@ -710,5 +713,14 @@ public class Mission {
 
     public TR getTr() {
         return tr;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }// end Mission

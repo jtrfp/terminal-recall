@@ -22,7 +22,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
 import javax.swing.JPanel;
 
-import org.jtrfp.trcl.conf.TRConfiguration;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.snd.AudioDevice;
 import org.jtrfp.trcl.snd.AudioDriver;
 import org.jtrfp.trcl.snd.AudioOutput;

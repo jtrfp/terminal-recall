@@ -33,7 +33,8 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.PropertyListenable;
 import org.jtrfp.trcl.core.NotReadyException;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
@@ -374,30 +375,30 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		    positionAfterLoop[0] - camPos.getX(), 
 		    positionAfterLoop[1] - camPos.getY(), 
 		    positionAfterLoop[2] - camPos.getZ()};
-	    if (delta[0] > TR.mapWidth / 2.) {
-		positionAfterLoop[0] -= TR.mapWidth;
+	    if (delta[0] > TRFactory.mapWidth / 2.) {
+		positionAfterLoop[0] -= TRFactory.mapWidth;
 		change = true;
 		needToRecalcMatrix=true;
-	    } else if (delta[0] < -TR.mapWidth / 2.) {
-		positionAfterLoop[0] += TR.mapWidth;
-		change = true;
-		needToRecalcMatrix=true;
-	    }
-	    if (delta[1] > TR.mapWidth / 2.) {
-		positionAfterLoop[1] -= TR.mapWidth;
-		change = true;
-		needToRecalcMatrix=true;
-	    } else if (delta[1] < -TR.mapWidth / 2.) {
-		positionAfterLoop[1] += TR.mapWidth;
+	    } else if (delta[0] < -TRFactory.mapWidth / 2.) {
+		positionAfterLoop[0] += TRFactory.mapWidth;
 		change = true;
 		needToRecalcMatrix=true;
 	    }
-	    if (delta[2] > TR.mapWidth / 2.) {
-		positionAfterLoop[2] -= TR.mapWidth;
+	    if (delta[1] > TRFactory.mapWidth / 2.) {
+		positionAfterLoop[1] -= TRFactory.mapWidth;
 		change = true;
 		needToRecalcMatrix=true;
-	    } else if (delta[2] < -TR.mapWidth / 2.) {
-		positionAfterLoop[2] += TR.mapWidth;
+	    } else if (delta[1] < -TRFactory.mapWidth / 2.) {
+		positionAfterLoop[1] += TRFactory.mapWidth;
+		change = true;
+		needToRecalcMatrix=true;
+	    }
+	    if (delta[2] > TRFactory.mapWidth / 2.) {
+		positionAfterLoop[2] -= TRFactory.mapWidth;
+		change = true;
+		needToRecalcMatrix=true;
+	    } else if (delta[2] < -TRFactory.mapWidth / 2.) {
+		positionAfterLoop[2] += TRFactory.mapWidth;
 		change = true;
 		needToRecalcMatrix=true;
 	    }

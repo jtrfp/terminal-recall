@@ -18,7 +18,8 @@ import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
 import org.jtrfp.trcl.gpu.Model;
@@ -58,19 +59,19 @@ public class TunnelSegment extends WorldObject {
     }
 
     public static double getStartWidth(Segment s) {
-	return TR.legacy2Modern(s.getStartWidth() * TUNNEL_DIA_SCALAR * 3);
+	return TRFactory.legacy2Modern(s.getStartWidth() * TUNNEL_DIA_SCALAR * 3);
     }
 
     public static double getEndWidth(Segment s) {
-	return TR.legacy2Modern(s.getEndWidth() * TUNNEL_DIA_SCALAR * 3);
+	return TRFactory.legacy2Modern(s.getEndWidth() * TUNNEL_DIA_SCALAR * 3);
     }
 
     public static double getStartHeight(Segment s) {
-	return TR.legacy2Modern(s.getStartHeight() * TUNNEL_DIA_SCALAR * 3);
+	return TRFactory.legacy2Modern(s.getStartHeight() * TUNNEL_DIA_SCALAR * 3);
     }
 
     public static double getEndHeight(Segment s) {
-	return TR.legacy2Modern(s.getEndHeight() * TUNNEL_DIA_SCALAR * 3);
+	return TRFactory.legacy2Modern(s.getEndHeight() * TUNNEL_DIA_SCALAR * 3);
     }
 
     private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();

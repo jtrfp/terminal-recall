@@ -35,8 +35,8 @@ public class Features {
 	singleton = this;
     }
     
-    public synchronized static FeaturesImpl getSingleton(){
-	return impl;
+    public synchronized static Features getSingleton(){
+	return singleton;
     }
     
     public synchronized static void resetImpl(){
@@ -61,5 +61,9 @@ public class Features {
     
     public synchronized static void getAllFeaturesOf(Object target, Collection dest){
 	impl.getAllFeaturesOf(target,dest);
+    }
+
+    public static void setSingleton(Features singleton) {
+        Features.singleton = singleton;
     }
 }//end Features

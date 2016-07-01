@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
@@ -38,7 +39,7 @@ import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TerrainChunk;
-import org.jtrfp.trcl.tools.Util;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
@@ -83,7 +84,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	executor = new ThreadPoolExecutor(numCores * 2, numCores * 2, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), 
 		new TSThreadFactory());
 	
-	final int chunkSideLength = TR.terrainChunkSideLengthInSquares;
+	final int chunkSideLength = TRFactory.terrainChunkSideLengthInSquares;
 	final double u[] = { 0, 1, 1, 0 };
 	final double v[] = { 0, 0, 1, 1 };
 	final double cu[] = { 0, 1, 1, 0 };
@@ -222,8 +223,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					portalModel.addTriangles(tris);
 					final PortalExit exit = new PortalExit(tr);
 					final PortalEntrance entrance;
-					entrance = new PortalEntrance(tr,portalModel,exit,tr.getGameShell().getGame().getPlayer());
-					final TunnelSystem ts = Features.get(tr.getGameShell().getGame().getCurrentMission(),TunnelSystem.class);
+					final GameShell gameShell = Features.get(tr, GameShell.class);
+					entrance = new PortalEntrance(tr,portalModel,exit,gameShell.getGame().getPlayer());
+					final TunnelSystem ts = Features.get(gameShell.getGame().getCurrentMission(),TunnelSystem.class);
 					ts.registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
 					
 					entrance.setPortalTexture(portalTexture);
@@ -391,8 +393,8 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    textureToInsert = tr.getResourceManager().getRAWAsTexture(texFile, tr.getGlobalPaletteVL(),null,false);}
 	    catch(Exception e){e.printStackTrace();}
 	    DirectionVector v = entrance?tun.getEntrance():tun.getExit();
-	    x = (int)TR.legacy2MapSquare(v.getZ());
-	    z = (int)TR.legacy2MapSquare(v.getX());
+	    x = (int)TRFactory.legacy2MapSquare(v.getZ());
+	    z = (int)TRFactory.legacy2MapSquare(v.getX());
 	}
 	public Texture getTexture(){return textureToInsert;}
 

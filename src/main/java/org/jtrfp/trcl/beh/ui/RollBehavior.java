@@ -19,9 +19,9 @@ import java.beans.PropertyChangeListener;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.miss.Mission;
 
 public class RollBehavior extends Behavior implements ControlBehavior {

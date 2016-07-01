@@ -14,7 +14,8 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -24,7 +25,7 @@ import org.jtrfp.trcl.snd.SoundTexture;
 
 public class BuzzByPlayerSFX extends Behavior implements CollisionBehavior {
     private int             minTimeBetweenBuzzesMillis = 1000;
-    private double          promixityThreshold = TR.mapSquareSize*2;
+    private double          promixityThreshold = TRFactory.mapSquareSize*2;
     private long            timeOfLastBuzzMillis = 0L;
     private double          previousDot = 0;
     private final double [] workDouble = new double[3];
@@ -63,7 +64,7 @@ public class BuzzByPlayerSFX extends Behavior implements CollisionBehavior {
      final SoundSystem     ss = tr.soundSystem.get();
      final ResourceManager rm = tr.getResourceManager();
      final SoundTexture texture = rm.soundTextures.get(sfxToUse);
-     final SamplePlaybackEvent evt = ss.getPlaybackFactory().create(texture, parent, tr.mainRenderer.get().getCamera(), SoundSystem.DEFAULT_SFX_VOLUME);
+     final SamplePlaybackEvent evt = ss.getPlaybackFactory().create(texture, parent, tr.mainRenderer.getCamera(), SoundSystem.DEFAULT_SFX_VOLUME);
      ss.enqueuePlaybackEvent(evt);
  }//end performBuzz
 

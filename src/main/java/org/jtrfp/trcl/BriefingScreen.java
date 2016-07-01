@@ -29,7 +29,8 @@ import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
@@ -45,6 +46,7 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.EnemyIntro;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class BriefingScreen extends RenderableSpacePartitioningGrid {
     private static final double Z_INCREMENT       = .00001;
@@ -135,7 +137,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     
     private void planetDisplayMode(String planetModelFile, String planetTextureFile, LVLFile lvl){
 	final ResourceManager rm = tr.getResourceManager();
-	final Camera camera 	 = tr.mainRenderer.get().getCamera();
+	final Camera camera 	 = tr.mainRenderer.getCamera();
 	
 	//TODO: Depth range
 	
@@ -150,7 +152,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			 getPalette(lvl), null, false, true),
 		 8,false,getPalette(lvl),null);
 	 planetObject = new WorldObject(tr,planetModel);
-	 planetObject.setPosition(0, TR.mapSquareSize*20, 0);
+	 planetObject.setPosition(0, TRFactory.mapSquareSize*20, 0);
 	 add(planetObject);
 	 planetObject.setVisible(true);
 	 camera.probeForBehavior(FacingObject.class)	  .setTarget(planetObject);
@@ -167,7 +169,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	camera.probeForBehavior(MatchDirection.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(true);
 	camera.probeForBehavior(FacingObject.class).setEnable(true);
-	final Renderer renderer = tr.mainRenderer.get();
+	final Renderer renderer = tr.mainRenderer;
 	renderer.getCamera()
 		.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class)
 		.setEnable(false);
@@ -177,7 +179,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     }//end planetDisplayMode()
     
     public void missionCompleteSummary(LVLFile lvl, Result r){
-	final Game   game 	 = tr.getGameShell().getGame();
+	final Game   game 	 = Features.get(tr,GameShell.class).getGame();
 	final Mission mission    = game.getCurrentMission();
 	final TunnelSystem ts    = Features.get(mission, TunnelSystem.class);
 	game.getPlayer().setActive(false);
@@ -190,7 +192,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	
 	planetDisplayMode(txtMBF.getPlanetModelFile(),txtMBF.getPlanetTextureFile(),lvl);
 	fireBarrier.waitForEvent();
-	final Camera camera 	 = tr.mainRenderer.get().getCamera();
+	final Camera camera 	 = tr.mainRenderer.getCamera();
 	camera.probeForBehavior(MatchPosition.class) 	 .setEnable(true);
 	camera.probeForBehavior(MatchDirection.class)	 .setEnable(true);
 	camera.probeForBehavior(FacingObject.class)  	 .setEnable(false);
@@ -198,8 +200,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     }//end missionCompleteSummary()
 
     public void briefingSequence(LVLFile lvl) {
-	final Game   game 	 = tr.getGameShell().getGame();
-	final Renderer renderer  = tr.mainRenderer.get();
+	final Game   game 	 = Features.get(tr,GameShell.class).getGame();
+	final Renderer renderer  = tr.mainRenderer;
 	final Camera camera 	 = renderer.getCamera();
 	game.getPlayer().setActive(false);
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
@@ -266,7 +268,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		chamberMode = def.isShieldGen() || def.isBoss();
 	    }
 	    if(chamberMode)
-		tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().setChamberMode(true);
+		Features.get(tr,GameShell.class).getGame().getCurrentMission().getOverworldSystem().setChamberMode(true);
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze
@@ -278,7 +280,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.setActive(act);
 	    wo.setRespondToTick(true);//unfreeze
 	    if(chamberMode)
-		tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().setChamberMode(false);
+		Features.get(tr,GameShell.class).getGame().getCurrentMission().getOverworldSystem().setChamberMode(false);
 	}//end for(enemyIntros)
 	camera.probeForBehavior(FacingObject.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);

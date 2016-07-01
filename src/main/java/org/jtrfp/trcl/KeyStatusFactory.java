@@ -18,7 +18,7 @@ import java.awt.event.KeyEvent;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.springframework.stereotype.Component;
 
 @Component

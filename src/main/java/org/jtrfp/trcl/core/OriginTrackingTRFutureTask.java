@@ -14,6 +14,8 @@ package org.jtrfp.trcl.core;
 
 import java.util.concurrent.Callable;
 
+import org.jtrfp.trcl.core.TRFactory.TR;
+
 public class OriginTrackingTRFutureTask<V> extends TRFutureTask<V> {
     private final StackTraceElement [] stackTraceElements;
     public OriginTrackingTRFutureTask(TR tr, Callable<V> callable) {

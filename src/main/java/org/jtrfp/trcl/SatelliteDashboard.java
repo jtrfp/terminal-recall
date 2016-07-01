@@ -15,7 +15,7 @@ package org.jtrfp.trcl;
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.obj.Sprite2D;
 
 public class SatelliteDashboard extends Sprite2D {

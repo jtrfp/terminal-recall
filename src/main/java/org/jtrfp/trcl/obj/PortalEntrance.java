@@ -20,7 +20,8 @@ import java.util.concurrent.Callable;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.coll.ObjectTallyCollection;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.Model;
@@ -29,7 +30,7 @@ import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gpu.RendererFactory.PortalNotAvailableException;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.prop.SkyCubeGen;
-import org.jtrfp.trcl.shell.GameShell;
+import org.jtrfp.trcl.shell.GameShellFactory;
 
 import com.ochafik.util.listenable.Pair;
 
@@ -48,7 +49,7 @@ public class PortalEntrance extends WorldObject {
     private PortalTexture
                        portalTexture = null;
     private WorldObject approachingObject;
-    private SkyCubeGen skyCubeGen = GameShell.DEFAULT_GRADIENT;
+    private SkyCubeGen skyCubeGen = GameShellFactory.DEFAULT_GRADIENT;
     private boolean    portalUnavailable = false;
     private TRFuture<Void> relevanceFuture;
     private boolean dotRelevant = false, rendering = false;
@@ -107,7 +108,7 @@ public class PortalEntrance extends WorldObject {
     public double[] getRelativePosition(double [] dest){
 	Vect3D.subtract(getApproachingObject().getPosition(), PortalEntrance.this.getPosition(), dest);
 	for(int i=0; i<3; i++)
-	 dest[i] = TR.deltaRollover(dest[i]);
+	 dest[i] = TRFactory.deltaRollover(dest[i]);
 	return dest;
     }
     

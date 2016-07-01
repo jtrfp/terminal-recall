@@ -24,16 +24,18 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.DestroysEverythingBehavior;
 import org.jtrfp.trcl.beh.phy.Velocible;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
-import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
@@ -49,7 +51,7 @@ public class ProjectileFactory {
     public ProjectileFactory(TR tr, Weapon weapon, ExplosionType explosionType, String debugName){
     	this.tr=tr;
     	this.weapon=weapon;
-    	this.projectileSpeed=weapon.getSpeed()/TR.crossPlatformScalar;
+    	this.projectileSpeed=weapon.getSpeed()/TRFactory.crossPlatformScalar;
     	Model modelToUse;
     	Texture t;
   	 Triangle [] tris;
@@ -60,10 +62,10 @@ public class ProjectileFactory {
    	 if(modelingType instanceof ModelingType.FlatModelingType){
    	 ModelingType.FlatModelingType mt = (ModelingType.FlatModelingType)modelingType;
    	 Dimension dims = mt.getSegmentSize();
-   	 final int laserplaneLength = (int)(dims.getWidth()/TR.crossPlatformScalar);
-   	 final int laserplaneWidth = (int)(dims.getHeight()/TR.crossPlatformScalar);
+   	 final int laserplaneLength = (int)(dims.getWidth()/TRFactory.crossPlatformScalar);
+   	 final int laserplaneWidth = (int)(dims.getHeight()/TRFactory.crossPlatformScalar);
    	 t = tr.getResourceManager().getRAWAsTexture(
-   		tr.configManager.getConfig()._getGameVersion()!=GameVersion.TV?mt.getF3RawFileName():mt.getTvRawFileName(),
+   		Features.get(tr, TRConfiguration.class)._getGameVersion()!=GameVersion.TV?mt.getF3RawFileName():mt.getTvRawFileName(),
    		tr.getDarkIsClearPaletteVL(), null,
    		false);
    	 final double Y_SLANT=1024;
@@ -199,7 +201,7 @@ public class ProjectileFactory {
 			    .getPlaybackFactory()
 			    .create(firingSFX,
 				     (WorldObject)result,
-				     tr.mainRenderer.get().getCamera(),
+				     tr.mainRenderer.getCamera(),
 				     (objectOfOrigin instanceof Player?.6:1)*SoundSystem.DEFAULT_SFX_VOLUME));//TODO: Use configuration volume instead
 	projectileIndex++;
 	projectileIndex%=projectiles.length;

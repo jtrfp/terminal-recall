@@ -18,15 +18,18 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
 import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
 import org.jtrfp.trcl.miss.WarpEscapeFactory.WarpEscape;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class Jumpzone extends WorldObject {
 
 private NAVObjective objective;
 private boolean includeYAxisInCollision=true;
+private GameShell gameShell;
 
 public interface FinishingRunState extends Mission.GameplayState{}
 
@@ -52,10 +55,10 @@ public interface FinishingRunState extends Mission.GameplayState{}
 		final WorldObject parent = getParent();
 		double [] playerPos = includeYAxisInCollision?player.getPosition():new double []{player.getPosition()[0],0,player.getPosition()[2]};
 		double [] parentPos = includeYAxisInCollision?parent.getPosition():new double []{parent.getPosition()[0],0,parent.getPosition()[2]};
-		if(TR.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4&&navTargeted){
+		if(TRFactory.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4&&navTargeted){
 		    handlePlayerCollision();
 		    destroy();
-		    getTr().getGameShell().getGame().getCurrentMission().removeNAVObjective(objective);
+		    getGameShell().getGame().getCurrentMission().removeNAVObjective(objective);
 		}//end if(collided)
 	    }//end if(Player)
 	}//end proposeCollision()
@@ -70,7 +73,7 @@ public interface FinishingRunState extends Mission.GameplayState{}
 	new Thread() {
 	    @Override
 	    public void run() {
-		Features.get(getTr().getGameShell().getGame().getCurrentMission(), WarpEscape.class).
+		Features.get(getGameShell().getGame().getCurrentMission(), WarpEscape.class).
 		    missionComplete(Jumpzone.this);
 	    }// end run()
 	}.start();
@@ -89,6 +92,15 @@ public interface FinishingRunState extends Mission.GameplayState{}
     public Jumpzone setIncludeYAxisInCollision(boolean includeYAxisInCollision) {
         this.includeYAxisInCollision = includeYAxisInCollision;
         return this;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
     }
 
 }//end Jumpzone

@@ -21,13 +21,12 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollidesWithPlayer;
 import org.jtrfp.trcl.beh.DamageListener;
-import org.jtrfp.trcl.beh.DamageListener.ElectrocutionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.PlayerCollisionListener;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
@@ -77,7 +76,7 @@ public class ForceField extends WorldObject {
 		 create(st, 
 			ForceField.this, 
 			getTr().
-			 mainRenderer.get().
+			 mainRenderer.
 			 getCamera(), 
 		SoundSystem.DEFAULT_SFX_VOLUME));
 	    }//end turned on

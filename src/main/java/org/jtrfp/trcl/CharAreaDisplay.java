@@ -16,8 +16,7 @@ package org.jtrfp.trcl;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
     private final int 		heightChars,widthChars;

@@ -22,14 +22,14 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
 public class VQCodebookManager {
     private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODE256_PER_PAGE*NUM_CODE_PAGES);
     private final 	GLTexture 	rgbaTexture,
-    					esTuTvTexture/*,
+    esTuTvTexture/*,
     					indentationTexture*/;
     private final	Collection<TileUpdate>tileUpdates	       = new ArrayList<TileUpdate>(1024);
     private final	GPU		gpu;
@@ -47,14 +47,14 @@ public class VQCodebookManager {
     public VQCodebookManager(GPU gpu, UncaughtExceptionHandler handler) {
 	this.handler=handler;
 	this.gpu    = gpu;
-	
+
 	//Check if we can make enough codepages
 	final IntBuffer ib = ByteBuffer.allocateDirect(4).asIntBuffer();
 	gpu.getGl().glGetIntegerv(GL3.GL_MAX_ARRAY_TEXTURE_LAYERS, ib);
 	if(ib.get(0)<NUM_CODE_PAGES)
 	    throw new RuntimeException("Insufficient support for number of array texture layers: "+ib.get(0));
 	else System.out.println("GL implementation supports "+ib.get(0)+" array texture layers.");
-	
+
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
@@ -87,9 +87,9 @@ public class VQCodebookManager {
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE).
 		unbind();*/
-	
+
 	final GL3 gl = gpu.getGl();
-	
+
 	fb = gpu.newFrameBuffer();
 	/*
 	for(int i=0; i<NUM_CODE_PAGES; i++){
@@ -99,9 +99,9 @@ public class VQCodebookManager {
 	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	    fb.unbindFromDraw();
 	}//end for(i)
-	*/
+	 */
     }//end constructor
-    
+
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter []rowWriter) {
 	return setNNNN(codeID,rowWriter,rgbaTexture);
     }
@@ -111,112 +111,112 @@ public class VQCodebookManager {
 	    handler.uncaughtException(Thread.currentThread(),new RuntimeException(e));}
 	return this;
     }// end setRGBA(...)
-    
+
     public VQCodebookManager setRGBABlock256(int blockID, RasterRowWriter [] rowWriters){
 	return setNNNNBlock256(blockID, new RasterRowWriter[][]{rowWriters},rgbaTexture);
     }
-    
+
     public VQCodebookManager setESTuTvBlock256(int blockID, RasterRowWriter [] rowWriters){
 	return setNNNNBlock256(blockID, new RasterRowWriter[][]{null,rowWriters},esTuTvTexture);
     }
-    
+
     private VQCodebookManager setNNNNBlock256(int blockID, RasterRowWriter [][] rowWriters, GLTexture texture){
 	subImage256(blockID,rowWriters,texture,2);
 	return this;
     }
-    
+
     private static final int [] codeDims 	= new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 };
     private static final int [] codePageDims 	= new int[] { CODE_PAGE_SIDE_LENGTH_TEXELS, CODE_PAGE_SIDE_LENGTH_TEXELS, 1 };
     private static final int [] code256Dims	= new int[] {CODE_PAGE_SIDE_LENGTH_TEXELS,CODE256_HEIGHT_CODES*CODE_SIDE_LENGTH, 1};
-    
+
     public static interface RasterRowWriter{
 	public void applyRow(int row, ByteBuffer dest);
     }//end RasterRowWriter
-    
+
     private void subImage256(final int blockID, final RasterRowWriter[][] texels, GLTexture texture, int mipLevel) throws OutOfMemoryError{
 	final int y = (blockID % CODE256_PER_PAGE) * CODE256_HEIGHT_CODES * CODE_SIDE_LENGTH;
 	final int page = blockID / CODE256_PER_PAGE;
 	if(page >= NUM_CODE_PAGES)
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+page+" max: "+NUM_CODE_PAGES);
 	synchronized(tileUpdates){
-	 tileUpdates.add(new TileUpdate(texels,0,y,page));}
+	    tileUpdates.add(new TileUpdate(texels,0,y,page));}
     }
-    
+
     private void subImage(final int codeID, final RasterRowWriter []texels,
 	    final GLTexture tex, int mipLevel) throws OutOfMemoryError {
 	final int x = (codeID % NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
 	final int z = codeID / CODES_PER_PAGE;
 	final int y = ((codeID % CODES_PER_PAGE) / NUM_CODES_PER_AXIS)*CODE_SIDE_LENGTH;
-	
+
 	if(z >= NUM_CODE_PAGES)
 	    throw new OutOfMemoryError("Ran out of codebook pages. Requested index to write: "+z+" max: "+NUM_CODE_PAGES);
 	if(x>=CODE_PAGE_SIDE_LENGTH_TEXELS || y >= CODE_PAGE_SIDE_LENGTH_TEXELS )
 	    throw new RuntimeException("One or more texel coords intolerably out of range: x="+x+" y="+y);
 	synchronized(tileUpdates){
-	 tileUpdates.add(new TileUpdate(new RasterRowWriter[][]{texels},x,y,z));}
+	    tileUpdates.add(new TileUpdate(new RasterRowWriter[][]{texels},x,y,z));}
     }// end subImage(...)
-    
+
     private final ByteBuffer workTile = ByteBuffer.allocateDirect(4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
     private final ByteBuffer workTile256=ByteBuffer.allocateDirect(256*4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
-    
+
     public void refreshStaleCodePages(){
 	synchronized(tileUpdates){
-	 refreshStaleCodePages(rgbaTexture,0);
-	 refreshStaleCodePages(esTuTvTexture,1);
-	 tileUpdates.clear();}
+	    refreshStaleCodePages(rgbaTexture,0);
+	    refreshStaleCodePages(esTuTvTexture,1);
+	    tileUpdates.clear();}
     }
-    
+
     private void refreshStaleCodePages(GLTexture texture, int channelArrayIndex){
-	    texture.bind();
-	    for(TileUpdate tu:tileUpdates){
-		final RasterRowWriter [][]rw2 = tu.getRowWriters();
-		if(rw2.length>channelArrayIndex){
-		    final RasterRowWriter []rowWriters = tu.getRowWriters()[channelArrayIndex];
-		    if(rowWriters!=null){
-			if(rowWriters.length==1){
-			    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
-				workTile.position(row * 4 * CODE_SIDE_LENGTH);
-				rowWriters[0].applyRow(row, workTile);
-			    }// end for(rows)
-			    workTile.clear();
-			    texture.subImage(
-				    new int[]{tu.getX(),tu.getY(),tu.getZ()},
-				    codeDims,
-				    GL3.GL_RGBA, 0, workTile);
-			}//end if(single code)
-			else if(rowWriters.length==256){
-			    for (int y = 0; y < CODE256_HEIGHT_CODES; y++) {
-				for (int x = 0; x < NUM_CODES_PER_AXIS; x++) {
-				    final RasterRowWriter rw = rowWriters[x+y*NUM_CODES_PER_AXIS];
-				    if(rw!=null){
-					for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
-					    workTile256.position((row+y*CODE_SIDE_LENGTH) * 4
-						    * CODE_PAGE_SIDE_LENGTH_TEXELS + x * 4 * CODE_SIDE_LENGTH);
-					    assert workTile256!=null;
-					    rw.applyRow(row, workTile256);
-					}// end for(rows)
-				    }//end if(!null)
-				}// end for(x)
-			    }// end for(y)
-			    workTile256.clear();
-			    texture.subImage(
-				    new int[]{tu.getX(),tu.getY(),tu.getZ()},
-				    code256Dims,
-				    GL3.GL_RGBA, 0, workTile256);
-			}//end code256
-			else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
-		    }//end if(rw!=null)
-		}//end if(channelArrayIndex)
-	    }//end for(tileUpdates)
+	texture.bind();
+	for(TileUpdate tu:tileUpdates){
+	    final RasterRowWriter [][]rw2 = tu.getRowWriters();
+	    if(rw2.length>channelArrayIndex){
+		final RasterRowWriter []rowWriters = tu.getRowWriters()[channelArrayIndex];
+		if(rowWriters!=null){
+		    if(rowWriters.length==1){
+			for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
+			    workTile.position(row * 4 * CODE_SIDE_LENGTH);
+			    rowWriters[0].applyRow(row, workTile);
+			}// end for(rows)
+			workTile.clear();
+			texture.subImage(
+				new int[]{tu.getX(),tu.getY(),tu.getZ()},
+				codeDims,
+				GL3.GL_RGBA, 0, workTile);
+		    }//end if(single code)
+		    else if(rowWriters.length==256){
+			for (int y = 0; y < CODE256_HEIGHT_CODES; y++) {
+			    for (int x = 0; x < NUM_CODES_PER_AXIS; x++) {
+				final RasterRowWriter rw = rowWriters[x+y*NUM_CODES_PER_AXIS];
+				if(rw!=null){
+				    for (int row = 0; row < CODE_SIDE_LENGTH; row++) {
+					workTile256.position((row+y*CODE_SIDE_LENGTH) * 4
+						* CODE_PAGE_SIDE_LENGTH_TEXELS + x * 4 * CODE_SIDE_LENGTH);
+					assert workTile256!=null;
+					rw.applyRow(row, workTile256);
+				    }// end for(rows)
+				}//end if(!null)
+			    }// end for(x)
+			}// end for(y)
+			workTile256.clear();
+			texture.subImage(
+				new int[]{tu.getX(),tu.getY(),tu.getZ()},
+				code256Dims,
+				GL3.GL_RGBA, 0, workTile256);
+		    }//end code256
+		    else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
+		}//end if(rw!=null)
+	    }//end if(channelArrayIndex)
+	}//end for(tileUpdates)
 	gpu.defaultTexture();
     }//end refreshStaleCodePages()
-    
+
     public synchronized void newCodebook256(List<Integer> list, int count){
 	count=codebook256Indices.pop(list,count);
 	while(count > 0){
 	    System.err.println("Warning: Codepages running low. Attempting a nuclear GC. Hold on to your hats...");
 	    System.err.println("Remaining indices needed: "+count+" list="+list);
-	    TR.nuclearGC();
+	    TRFactory.nuclearGC();
 	    gpu.compactRootBuffer();
 	    System.err.println("Still alive. Waiting 250ms and reattempting pop codebook256...");
 	    try{Thread.sleep(3000);}catch(InterruptedException e){}
@@ -224,12 +224,12 @@ public class VQCodebookManager {
 	    System.err.println("New count="+count+" list="+list);
 	}//end while(count>0)
     }
-    
+
     public synchronized int newCodebook256() {
 	try{return codebook256Indices.popOrException();}
 	catch(OutOfIndicesException e){
 	    System.err.println("Warning: Codepages running low. Attemping a nuclear GC. Hold on to your hats...");
-	    TR.nuclearGC();
+	    TRFactory.nuclearGC();
 	    gpu.compactRootBuffer();
 	    System.err.println("Still alive. Attempting blocking texture codebook256...");
 	    return codebook256Indices.pop();
@@ -240,12 +240,12 @@ public class VQCodebookManager {
 	System.out.println("VQCodebookManager.freeCodebook256() "+codebook256ToRelease);
 	codebook256Indices.free(codebook256ToRelease);
     }// end freeCodebook256(...)
-    
+
     public void freeCodebook256(Collection<Integer> list) {
 	System.out.println("VQCodebookManager.freeCodebook256(list) "+list.iterator().next());
 	codebook256Indices.free(list);
     }// end freeCodebook256(...)
-    
+
     public GLTexture getRGBATexture()		{return rgbaTexture;}
     public GLTexture getESTuTvTexture()		{return esTuTvTexture;}
     //public GLTexture getIndentationTexture()	{return indentationTexture;}
@@ -296,6 +296,6 @@ public class VQCodebookManager {
 	public int getZ() {
 	    return z;
 	}
-	
+
     }//end TileUpdate
 }// end VQCodebookManager

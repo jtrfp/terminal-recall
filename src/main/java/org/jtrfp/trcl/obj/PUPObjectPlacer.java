@@ -16,7 +16,8 @@ import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
@@ -35,10 +36,10 @@ public class PUPObjectPlacer implements ObjectPlacer {
 	    locationReporters[pupIndex++].complete();
 	    PowerupObject powerup = new PowerupObject(loc.getType(), tr);
 	    final double[] pupPos = powerup.getPosition();
-	    pupPos[0] = TR.legacy2Modern(loc.getZ());
-	    pupPos[1] = (TR.legacy2Modern(loc.getY()) / TR.mapWidth) * 16.
+	    pupPos[0] = TRFactory.legacy2Modern(loc.getZ());
+	    pupPos[1] = (TRFactory.legacy2Modern(loc.getY()) / TRFactory.mapWidth) * 16.
 		    * tr.getWorld().sizeY;
-	    pupPos[2] = TR.legacy2Modern(loc.getX());
+	    pupPos[2] = TRFactory.legacy2Modern(loc.getX());
 	    powerup.notifyPositionChange();
 	    objs.add(powerup);
 	}// end for(locations)

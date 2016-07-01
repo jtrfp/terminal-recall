@@ -16,7 +16,7 @@
 
 package org.jtrfp.trcl.snd;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public abstract class AbstractSoundEvent implements SoundEvent {
     private final double startRealtimeSeconds;

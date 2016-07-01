@@ -60,15 +60,17 @@ import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
-import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.pool.ObjectFactory;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundTexture;
 
 public class Player extends WorldObject implements RelevantEverywhere{
@@ -79,6 +81,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
     private final RunModeListener               runStateListener = new RunModeListener();
     private final WeakPropertyChangeListener    weakRunStateListener;
     private final HeadingXAlwaysPositiveBehavior headingXAlwaysPositiveBehavior;
+    private GameShell gameShell;
     
     private static final double LEFT_X = -5000, RIGHT_X = 5000, TOP_Y = 2000, BOT_Y=-2000;
 
@@ -116,9 +119,9 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(headingXAlwaysPositiveBehavior = (HeadingXAlwaysPositiveBehavior)new HeadingXAlwaysPositiveBehavior().setEnable(false));
 	//Add a listener to control HeadingXAlwaysPositive\
 	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
-	tr.addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
-	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().getThrottleMeter()));
-	addBehavior(new UpdatesHealthMeterBehavior().setController(((TVF3Game)tr.getGameShell().getGame()).getHUDSystem().getHealthMeter()));
+	tr.addPropertyChangeListener(TRFactory.RUN_STATE, weakRunStateListener);
+	addBehavior(new UpdatesThrottleMeterBehavior().setController(((TVF3Game)getGameShell().getGame()).getHUDSystem().getThrottleMeter()));
+	addBehavior(new UpdatesHealthMeterBehavior().setController(((TVF3Game)getGameShell().getGame()).getHUDSystem().getHealthMeter()));
 	addBehavior(new DamagedByCollisionWithDEFObject());
 	addBehavior(new DamagedByCollisionWithSurface());
 	addBehavior(new BouncesOffSurfaces());
@@ -271,7 +274,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
 		    thisPlayer.probeForBehavior(DeathBehavior.class).reset();
 		    //Reset camera
-		    final Camera camera = Player.this.getTr().mainRenderer.get().getCamera(); 
+		    final Camera camera = Player.this.getTr().mainRenderer.getCamera(); 
 		    Player.this.setVisible(false);
 		    camera.probeForBehavior(MatchPosition.class) .setEnable(true);
 		    camera.probeForBehavior(MatchDirection.class).setEnable(true);
@@ -280,7 +283,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    camera.probeForBehavior(FacingObject.class).
 		     setEnable(false);
 		    //Reset game
-	            final TVF3Game game = (TVF3Game)Player.this.getTr().getGameShell().getGame();
+	            final TVF3Game game = (TVF3Game)Player.this.getGameShell().getGame();
 	            final Mission mission = game.getCurrentMission();
 	            Features.get(mission, GamePause.class).setPaused(true);
 		    mission.abort();
@@ -308,13 +311,13 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	public void propertyChange(PropertyChangeEvent pce) {
 	    if(pce.getNewValue()==Boolean.TRUE){
 		System.out.println("Player death sequence triggered.");
-		final Camera camera = Player.this.getTr().mainRenderer.get().getCamera(); 
+		final Camera camera = Player.this.getTr().mainRenderer.getCamera(); 
 		Player.this.setVisible(true);
 		    camera.probeForBehavior(MatchPosition.class) .setEnable(false);
 		    camera.probeForBehavior(MatchDirection.class).setEnable(false);
 		    camera.probeForBehavior(RotateAroundObject.class).
 		            setTarget(Player.this).
-		    	    setDistance(TR.mapSquareSize*1).
+		    	    setDistance(TRFactory.mapSquareSize*1).
 			    setAngularVelocityRPS(.1).
 			    setEnable(true);
 		    camera.probeForBehavior(FacingObject.class).
@@ -323,4 +326,13 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	    }//end if(triggered)
 	}//end propertyChange(...)
     }//end PropertyChangeListener
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
+    }
 }// end Player

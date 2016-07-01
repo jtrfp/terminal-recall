@@ -12,14 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class TriggersVisCalcWithMovement extends Behavior {
     private volatile double [] 	positionOfLastVisCalc = new double[]{//Init to The Land Of Wind And Ghosts
 	    Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY};
-    private double		distanceThreshold = TR.mapSquareSize*10;
+    private double		distanceThreshold = TRFactory.mapSquareSize*10;
     
     @Override
     public void tick(long tickTimeMillis){

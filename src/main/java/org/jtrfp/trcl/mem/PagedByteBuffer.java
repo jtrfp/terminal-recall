@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ListActionDispatcher;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
@@ -89,7 +89,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 		}
 	    catch(OutOfIndicesException e){
 		System.err.println("Out of root pages. Performing Nuclear GC and trying again.");
-		TR.nuclearGC();
+		TRFactory.nuclearGC();
 		try{Thread.sleep(2000);}catch(InterruptedException ee){}
 		gpu.compactRootBuffer();
 		if(System.currentTimeMillis()-lastRootBufferNuclearGCMillis.get()<10000)

@@ -66,7 +66,9 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.SoftValueHashMap;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
-import org.jtrfp.trcl.conf.ConfigManager;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
+import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.BillboardTexCoords0x04;
@@ -144,11 +146,10 @@ public class ResourceManager{
 	
 	public final ObjectFactory<String,GPUResidentMOD>	gpuResidentMODs;
 	public final ObjectFactory<String,SoundTexture>	soundTextures;
-	private ConfigManager configManager;
+	private TRConfigRoot configManager;
 	private UncompressedVQTextureFactory uncompressedVQTextureFactory;
 	
-	public ResourceManager(final TR tr, ConfigManager configManager){
-	        this.configManager = configManager;
+	public ResourceManager(final TR tr){
 		this.tr=tr;
 		try{Class.forName("de.quippy.javamod.multimedia.mod.loader.tracker.ProTrackerMod");
 		    Class.forName("de.quippy.javamod.multimedia.mod.ModContainer"); // ModContainer uses the ModFactory!!
@@ -193,7 +194,8 @@ public class ResourceManager{
 	
 	private void setupPODListeners(){
 	    //final TRConfiguration config = tr.config;
-	    final DefaultListModel podList = configManager.getConfig().getPodList();
+	    final TRConfiguration trConfig = Features.get(tr, TRConfiguration.class);
+	    final DefaultListModel podList = trConfig.getPodList();
 	    new ListModelSetBridge<String>(podList,new SetModelListener<String>(){
 		@Override
 		public void added(String item) {
@@ -301,7 +303,7 @@ public class ResourceManager{
 	    final int hash=name.hashCode()*paletteRGBA.hashCode();
 	        Texture result=rawCache.get(hash);
 	    	if(result!=null&&useCache)return result;
-			try {    if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TR.ANIMATED_TERRAIN)
+			try {    if(name.substring(name.length()-5, name.length()-4).contentEquals("0") && TRFactory.ANIMATED_TERRAIN)
 					{//ends in number
 					System.out.println("RAW "+name+" ends in a zero. Testing if it is animated...");
 					ArrayList<String> frames = new ArrayList<String>();
@@ -415,7 +417,7 @@ public class ResourceManager{
 				result.setDebugName(name);
 				m = getBinFileModel(name);
 				
-				final double cpScalar=(scale*TR.crossPlatformScalar*256.)/(double)m.getScale();
+				final double cpScalar=(scale*TRFactory.crossPlatformScalar*256.)/(double)m.getScale();
 				System.out.println("Recognized as model file.");
 				List<org.jtrfp.trcl.gpu.Vertex> vertices = new ArrayList<org.jtrfp.trcl.gpu.Vertex>();
 				for(BINFile.Model.Vertex binVtx:m.getVertices()){
@@ -868,5 +870,15 @@ public class ResourceManager{
 	public void setUncompressedVQTextureFactory(
 		UncompressedVQTextureFactory uncompressedVQTextureFactory) {
 	    this.uncompressedVQTextureFactory = uncompressedVQTextureFactory;
+	}
+
+	public TRConfigRoot getConfigManager() {
+	    if(configManager == null)
+		configManager = Features.get(tr, TRConfigRoot.class);
+	    return configManager;
+	}
+
+	public void setConfigManager(TRConfigRoot configManager) {
+	    this.configManager = configManager;
 	}
 }//end ResourceManager

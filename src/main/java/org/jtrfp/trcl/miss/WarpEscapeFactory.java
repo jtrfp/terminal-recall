@@ -24,7 +24,7 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory.ViewSelect;
 import org.jtrfp.trcl.game.Game;
@@ -33,9 +33,9 @@ import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.Jumpzone.FinishingRunState;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -43,6 +43,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
     private final DisablePlayerControlSubmitter disablePlayerControlSubmitter = new DisablePlayerControlSubmitter();
     private final EnablePlayerControlSubmitter  enablePlayerControlSubmitter = new EnablePlayerControlSubmitter();
     private TR tr;
+    private GameShell gameShell;
     
     private class DisablePlayerControlSubmitter extends AbstractSubmitter<PlayerControlBehavior>{
    	@Override
@@ -82,7 +83,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 		  new Thread() {
 		    @Override
 		    public void run() {
-			Features.get(getTr().getGameShell().getGame().getCurrentMission(), WarpEscape.class).
+			Features.get(getGameShell().getGame().getCurrentMission(), WarpEscape.class).
 			    missionComplete(null);
 		    }// end run()
 		  }.start();
@@ -93,7 +94,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    if(missionAlreadyCompleted.get())
 		return;
 	    missionAlreadyCompleted.set(true);
-	    final Game game = getTr().getGameShell().getGame();
+	    final Game game = getGameShell().getGame();
 	    final ViewSelect viewSelect = Features.get(game, ViewSelect.class);
 	    final ViewSelectFactory.ViewMode currentViewMode = viewSelect.getViewMode();
 	    final TR tr = getTr();
@@ -148,7 +149,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    }catch(Exception e){e.printStackTrace();}
 
 	    lightningShell.addBehavior(new MatchPosition().setTarget(player));
-	    final Camera mainCamera = tr.mainRenderer.get().getCamera();
+	    final Camera mainCamera = tr.mainRenderer.getCamera();
 	    mainCamera.getRootGrid().add(lightningShell);
 	    lightningShell.setVisible(true);
 	    // Wait 1/2 second
@@ -165,7 +166,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    //Lightning shell off
 	    lightningShell.setVisible(false);
 	    //Decouple Camera
-	    tr.mainRenderer.get().getCamera().probeForBehavior(MatchPosition.class).setEnable(false);
+	    tr.mainRenderer.getCamera().probeForBehavior(MatchPosition.class).setEnable(false);
 	    //Turbo forward
 	    final double prevMaxPropulsion = hp.getMaxPropulsion();
 	    final double newMaxPropulsion  = prevMaxPropulsion * 8;
@@ -184,10 +185,10 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    System.out.println("MISSION COMPLETE.");
 	    //Cleanup
 	    player.removeBehavior(autoLeveling);
-	    tr.mainRenderer.get().getCamera().probeForBehavior(MatchPosition.class).setEnable(true);
+	    tr.mainRenderer.getCamera().probeForBehavior(MatchPosition.class).setEnable(true);
 	    player.probeForBehaviors(enablePlayerControlSubmitter, PlayerControlBehavior.class);
 	    player.probeForBehavior(HasPropulsion.class).setMaxPropulsion(prevMaxPropulsion).setPropulsion(0);
-	    tr.mainRenderer.get().getCamera().getRootGrid().remove(lightningShell);
+	    tr.mainRenderer.getCamera().getRootGrid().remove(lightningShell);
 	    player.probeForBehavior(RotationalDragBehavior.class).setEnable(true);
 	    player.probeForBehavior(RotationalMomentumBehavior.class).setLateralMomentum(.0);
 	    player.setVisible(false);//Avoid the flicker
@@ -229,5 +230,15 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
     @Override
     public Class<? extends Feature<Mission>> getFeatureClass() {
 	return WarpEscape.class;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    final TR tr = Features.get(Features.getSingleton(),TR.class);
+	    gameShell = Features.get(tr, GameShell.class);}
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end WarpEscapeFactory

@@ -15,7 +15,7 @@ package org.jtrfp.trcl;
 import java.util.Arrays;
 import java.util.concurrent.Future;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.mem.MemoryWindow;
 

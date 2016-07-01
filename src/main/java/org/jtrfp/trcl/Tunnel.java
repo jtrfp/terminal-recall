@@ -34,8 +34,10 @@ import org.jtrfp.trcl.beh.phy.ShiftingObjectBehavior;
 import org.jtrfp.trcl.beh.tun.DestructibleWallBehavior;
 import org.jtrfp.trcl.beh.tun.IrisBehavior;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
@@ -44,6 +46,7 @@ import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.obj.BarrierCube;
@@ -51,12 +54,12 @@ import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ForceField;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectSystem;
-import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class Tunnel extends RenderableSpacePartitioningGrid {
     private LVLFile 	lvl;
@@ -80,11 +83,11 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     private String                         debugName;
 
     public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
-	    TR.mapSquareSize * 5, TR.mapSquareSize*15);
+	    TRFactory.mapSquareSize * 5, TRFactory.mapSquareSize*15);
     public static final ObjectDirection TUNNEL_START_DIRECTION = new ObjectDirection(
 	    new Vector3D(1, 0, 0), new Vector3D(0, 1, 0));
     public static final Vector3D TUNNEL_OBJECT_POS_OFFSET = new Vector3D(0, 0,
-	    -2 * TR.mapSquareSize);
+	    -2 * TRFactory.mapSquareSize);
 
     public Tunnel(TR tr, TDFFile.Tunnel sourceTunnel,
 	    LoadingProgressReporter rootReporter, String debugName) {
@@ -110,8 +113,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	exitObject = new TunnelExitObject(tr, this,"Tunnel."+debugName,tr.getGameShell().getGame().getPlayer());
-	exitObject.setSkyCubeGen(tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
+	final GameShell gameShell = Features.get(tr, GameShell.class);
+	exitObject = new TunnelExitObject(tr, this,"Tunnel."+debugName,gameShell.getGame().getPlayer());
+	exitObject.setSkyCubeGen(gameShell.getGame().getCurrentMission().getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
 	exitObject.setPosition(tunnelEnd.add(new Vector3D(10000,0,0)).toArray());
@@ -170,7 +174,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    if(isLastSegment){
 		s.setEndWidth(800);s.setEndHeight(800);}
 	    
-	    tr.getReporter().report(
+	    Features.get(tr,Reporter.class).report(
 		    "org.jtrfp.trcl.Tunnel." + _tun.getTunnelLVLFile()
 			    + ".segment" + (segIndex++) + "",
 		    s.getObstacle().name());
@@ -189,9 +193,9 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(ts);
 	    installObstacles(s, tunnelColorPalette, ESTuTvPalette, tunnelTexturePalette, entrance ? groundVector
 		    : Vector3D.PLUS_I, entrance ? top : Vector3D.PLUS_J,
-		    currentPos, TR.legacy2Modern(s.getStartWidth()
+		    currentPos, TRFactory.legacy2Modern(s.getStartWidth()
 			    * TunnelSegment.TUNNEL_DIA_SCALAR),
-		    TR.legacy2Modern(s.getStartWidth()
+		    TRFactory.legacy2Modern(s.getStartWidth()
 			    * TunnelSegment.TUNNEL_DIA_SCALAR), tr);
 	    // Move origin to next segment
 	    tunnelSpaceSegPos = tunnelSpaceSegPos.add(positionDelta);
@@ -219,8 +223,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    throws IllegalAccessException, FileLoadException, IOException {
 	final ColorPaletteVectorList palette = tr.getGlobalPaletteVL();
 	Obstacle    obs = s.getObstacle();
-	final double upScalar = 10 * tunnelDia / TR.mapSquareSize;
-	final double jawScalar = 10 * tunnelDia / TR.mapSquareSize;
+	final double upScalar = 10 * tunnelDia / TRFactory.mapSquareSize;
+	final double jawScalar = 10 * tunnelDia / TRFactory.mapSquareSize;
 	WorldObject wo;
 	Model       m;
 	switch (obs) {

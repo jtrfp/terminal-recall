@@ -18,12 +18,11 @@ import org.jtrfp.trcl.SelectableTexture;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.gpu.VQTexture;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
+import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.obj.Sprite2D;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component

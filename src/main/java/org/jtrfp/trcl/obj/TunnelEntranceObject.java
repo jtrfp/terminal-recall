@@ -19,21 +19,25 @@ import java.beans.PropertyChangeListener;
 import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class TunnelEntranceObject extends BillboardSprite {
     public static final double GROUND_HEIGHT_PAD=3500;
     private final Tunnel sourceTunnel;
     private final PortalEntrance portalEntrance;
+    private GameShell gameShell;
     
     public TunnelEntranceObject(TR tr, Tunnel tunnel, final PortalEntrance portalEntrance) {
 	super(tr,"TunnelEntranceObject."+tunnel.getDebugName());
 	if(portalEntrance == null)
 	    throw new IllegalArgumentException("PortalEntrance intolerably null.");
 	this.portalEntrance = portalEntrance;
-	final Mission mission = tr.getGameShell().getGame().getCurrentMission();
+	final Mission mission = getGameShell().getGame().getCurrentMission();
 	mission.addPropertyChangeListener(new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -49,10 +53,10 @@ public class TunnelEntranceObject extends BillboardSprite {
 	setVisible(true);
 	DirectionVector entrance = tunnel.getSourceTunnel().getEntrance();
 	final double [] position = getPosition();
-	position[0]=TR.legacy2Modern(entrance.getZ());
-	position[1]=TR.legacy2Modern(entrance.getY()+GROUND_HEIGHT_PAD);
-	position[2]=TR.legacy2Modern(entrance.getX());
-	double height = tr.getGameShell().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
+	position[0]=TRFactory.legacy2Modern(entrance.getZ());
+	position[1]=TRFactory.legacy2Modern(entrance.getY()+GROUND_HEIGHT_PAD);
+	position[2]=TRFactory.legacy2Modern(entrance.getX());
+	double height = getGameShell().getGame().getCurrentMission().getOverworldSystem().getAltitudeMap().heightAt(
 		position[0], position[2]);
 	position[1]=height+GROUND_HEIGHT_PAD;
 	notifyPositionChange();
@@ -88,8 +92,8 @@ public class TunnelEntranceObject extends BillboardSprite {
 		if(map==null)return;
 		double [] playerPos = other.getPosition();
 		double [] thisPos   = entranceObject.getPosition();
-		final double groundHeightNorm = map.heightAt((thisPos[0]/TR.mapSquareSize), 
-			    (thisPos[2]/TR.mapSquareSize));
+		final double groundHeightNorm = map.heightAt((thisPos[0]/TRFactory.mapSquareSize), 
+			    (thisPos[2]/TRFactory.mapSquareSize));
 		final double groundHeight = groundHeightNorm*(world.sizeY/2);
 		//Ignore ground height with chambers because entrances don't behave themselves with this.
 		final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
@@ -156,5 +160,14 @@ public class TunnelEntranceObject extends BillboardSprite {
     }
     public PortalEntrance getPortalEntrance() {
         return portalEntrance;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
     }
 }//end TunnelEntrance

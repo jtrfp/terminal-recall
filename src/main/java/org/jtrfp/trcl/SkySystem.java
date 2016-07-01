@@ -17,7 +17,8 @@ import java.io.IOException;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
@@ -78,7 +79,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 	    Color[] cloudPalette= new Color[256];
 	    // Transpose palette by 48
 	    for (int i = 0; i < 256; i++) {
-		cloudPalette[TR.bidiMod((i + transpose), 256)] = gradientPalette[i];
+		cloudPalette[TRFactory.bidiMod((i + transpose), 256)] = gradientPalette[i];
 	    }
 	    cloudTexture = tr.getResourceManager().getRAWAsTexture(
 		    cloudTextureFileName, new ColorPaletteVectorList(cloudPalette),null,true);

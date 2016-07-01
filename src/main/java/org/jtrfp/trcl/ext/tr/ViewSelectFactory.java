@@ -41,9 +41,11 @@ import org.jtrfp.trcl.beh.MatchPosition.TailOffsetMode;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -63,7 +65,6 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.WorldObject.RenderFlags;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -76,7 +77,6 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	                       VIEW_MODE        = "View Mode",
 	                       INSTRUMENT_MODE  = "Instrument Mode";
     private static final boolean INS_ENABLE = true;
-    private final ControllerInput view, iView;
     
     private static final int TAIL_DISTANCE = 15000,
 	                     FLOAT_HEIGHT  = 5000;
@@ -89,10 +89,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    public boolean apply();
 	}
    
-	@Autowired
- public ViewSelectFactory(ControllerInputs inputs){
-     view    = inputs.getControllerInput(VIEW);
-     iView   = inputs.getControllerInput(INSTRUMENTS_VIEW);
+ public ViewSelectFactory(){
  }//end constructor
  
  public class ViewSelect implements Feature<Game>{
@@ -143,9 +140,14 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private final PropertyChangeListener runStateListener                          = new RunStatePropertyChangeListener();
      private final PropertyChangeListener playerPCL                                 = new PlayerPropertyChangeListener();
      private PropertyChangeListener weakVSPCL, weakIVSPCL, weakRSPCL, weakPlayerPCL;//HARD REFERENCES. DO NOT REMOVE
+     private ControllerInput view, iView;
      
      @Override
      public void apply(Game game) {
+	 final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
+	 final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
+	 view    = inputs.getControllerInput(VIEW);
+	 iView   = inputs.getControllerInput(INSTRUMENTS_VIEW);
          view .addPropertyChangeListener(weakVSPCL  = new WeakPropertyChangeListener(viewSelectPropertyChangeListener,view));
          iView.addPropertyChangeListener(weakIVSPCL = new WeakPropertyChangeListener(instrumentViewSelectPropertyChangeListener,iView));
          this.game = new WeakReference<Game>(game);
@@ -153,7 +155,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
          ((TVF3Game)game).addPropertyChangeListener(Game.CURRENT_MISSION, missionIP);*/
          
          /*missionIP.addTargetPropertyChangeListener(Mission.MISSION_MODE, */
-        getTr().addPropertyChangeListener(TR.RUN_STATE, weakRSPCL = new WeakPropertyChangeListener(runStateListener,getTr()));
+        getTr().addPropertyChangeListener(TRFactory.RUN_STATE, weakRSPCL = new WeakPropertyChangeListener(runStateListener,getTr()));
         game.addPropertyChangeListener(Game.PLAYER, new GamePropertyChangeListener());
      }//end apply(...)
      
@@ -231,7 +233,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    //final WorldObject cockpit = getCockpit();
 	    setCockpitVisibility(false);
 	    //cockpit.setVisible(false);
-	    final Camera cam = getTr().mainRenderer.get().getCamera();
+	    final Camera cam = getTr().mainRenderer.getCamera();
 	    cam.probeForBehavior(MatchPosition.class).setOffsetMode(MatchPosition.NULL);
 	}
 
@@ -369,7 +371,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     miniMapPositionMatch.setTarget(player);
 		     navArrowPositionMatch.setTarget(player);
 		     //cockpit.setVisible(true);//TODO: Depend on "C" value
-		     final Camera cam = getTr().mainRenderer.get().getCamera();
+		     final Camera cam = getTr().mainRenderer.getCamera();
 		     cam.probeForBehavior(MatchPosition.class).setOffsetMode(MatchPosition.NULL);
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Identity
 			     new double [] {1, 0, 0, 0},
@@ -401,7 +403,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 			 return;
 		     player.setVisible(true);
 		     getCockpit().setVisible(false);
-		     final Camera cam = getTr().mainRenderer.get().getCamera();
+		     final Camera cam = getTr().mainRenderer.getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
 		     mp.setOffsetMode(new OffsetMode(){
 			 private double [] workArray = new double[3];
@@ -446,7 +448,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		     getCockpit().setVisible(false);
 		     getMiniMap().setVisible(false);
 		     getNavArrow().setVisible(false);
-		     final Camera cam = getTr().mainRenderer.get().getCamera();
+		     final Camera cam = getTr().mainRenderer.getCamera();
 		     final MatchPosition mp = cam.probeForBehavior(MatchPosition.class);
 		     mp.setOffsetMode(new TailOffsetMode(new Vector3D(0,0,-TAIL_DISTANCE), new Vector3D(0,FLOAT_HEIGHT,0)));
 		     final RealMatrix lookAtMatrix = new Array2DRowRealMatrix( new double[][]{//Flat to horizon
@@ -507,7 +509,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	@Override
 	public void destruct(Game target) {
 	    if(cockpit != null)
-	     getTr().mainRenderer.get().getCamera().getRootGrid().remove(cockpit);
+	     getTr().mainRenderer.getCamera().getRootGrid().remove(cockpit);
 	}
 	
 	private void incrementViewMode(){
@@ -521,7 +523,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	}
 	
 	private void reEvaluateState(){
-	    final SpacePartitioningGrid<PositionedRenderable> rootGrid = getTr().mainRenderer.get().getCamera().getRootGrid();
+	    final SpacePartitioningGrid<PositionedRenderable> rootGrid = getTr().mainRenderer.getCamera().getRootGrid();
             final RenderableSpacePartitioningGrid grid = getGrid();
 	    if(!isAppropriateToDisplay()){
 		setInstrumentMode(new NoInstruments());

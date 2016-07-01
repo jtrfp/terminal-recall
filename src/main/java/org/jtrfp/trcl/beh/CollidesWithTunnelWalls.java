@@ -18,7 +18,7 @@ import java.util.Collection;
 
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.beh.phy.Velocible;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.TunnelSegment;
@@ -70,7 +70,7 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
 				    	Vect3D.scalarMultiply(circleCenter, .01, pPos);
 				    	Vect3D.add(pPos, Vect3D.scalarMultiply(oldPosition, .99, new double[3]), pPos);
 				    	//parent.setPosition(circleCenter.scalarMultiply(.01).add(oldPosition.scalarMultiply(.99)));
-				    	final double[]delta = TR.twosComplimentSubtract(circleCenter, oldPosition, new double[3]);
+				    	final double[]delta = TRFactory.twosComplimentSubtract(circleCenter, oldPosition, new double[3]);
 				    	if(delta[0]==0 && delta[1]==0 && delta[2]==0)
 				    	    return;
 				    	final double[]inwardNormal = Vect3D.normalize(delta);

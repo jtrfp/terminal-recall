@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import java.util.ArrayList;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.NormalMap;
@@ -29,16 +27,20 @@ import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.gpu.Renderer;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
-import org.jtrfp.trcl.shell.GameShell;
+import org.jtrfp.trcl.shell.GameShellFactory;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class TunnelExitObject extends PortalEntrance {
     private 		Vector3D 	exitLocation, exitHeading, exitTop;
@@ -48,6 +50,7 @@ public class TunnelExitObject extends PortalEntrance {
     private 		boolean 	mirrorTerrain = false;
     private		boolean		onlyRemoveIfTargeted=false;
     private static final int            NUDGE = 5000;
+    private GameShell                   gameShell;
     
     public TunnelExitObject(TR tr, Tunnel tun, String debugName, WorldObject approachingObject) {
 	super(tr,new PortalExit(tr),approachingObject);
@@ -55,17 +58,16 @@ public class TunnelExitObject extends PortalEntrance {
 	final DirectionVector v = tun.getSourceTunnel().getExit();
 	final NormalMap map = 
 		new NormalMap(
-		tr.
 		getGameShell().
 		getGame().
 		getCurrentMission().
 		getOverworldSystem().
 		getAltitudeMap());
 	final double exitY = 
-		map.heightAt(TR.legacy2Modern(v.getZ()), TR.legacy2Modern(v
+		map.heightAt(TRFactory.legacy2Modern(v.getZ()), TRFactory.legacy2Modern(v
 		.getX()));
-	this.exitLocation = new Vector3D(TR.legacy2Modern(v.getZ()),
-		exitY, TR.legacy2Modern(v
+	this.exitLocation = new Vector3D(TRFactory.legacy2Modern(v.getZ()),
+		exitY, TRFactory.legacy2Modern(v
 			.getX()));
 	
 	this.tun = tun;
@@ -84,7 +86,7 @@ public class TunnelExitObject extends PortalEntrance {
 	pExit.setPosition(exitLocation.toArray());
 	pExit.setHeading(exitHeading);
 	pExit.setTop(exitTop);
-	pExit.setRootGrid(((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().getOverworldSystem());
+	pExit.setRootGrid(((TVF3Game)getGameShell().getGame()).getCurrentMission().getOverworldSystem());
 	pExit.notifyPositionChange();
 	this.setPortalExit(pExit);
 	setPortalTexture(new PortalTexture());
@@ -106,23 +108,23 @@ public class TunnelExitObject extends PortalEntrance {
 		    throw new RuntimeException("Negative X coord! "+getParent().getPosition()[0]);
 		//System.out.println("TunnelExitObject relevance tally="+tr.gpu.get().rendererFactory.get().getRelevanceTallyOf(getParent())+" within range? "+TunnelExitObject.this.isWithinRange());
 		//We want to track the camera's crossing in deciding when to move the player.
-		final Camera camera = tr.mainRenderer.get().getCamera();
+		final Camera camera = tr.mainRenderer.getCamera();
 		//System.out.println("hash: "+super.hashCode()+" Cam pos = "+camera.getPosition()[0]+" thisPos="+TunnelExitObject.this.getPosition()[0]);
 		if (camera.getPosition()[0] > TunnelExitObject.this
 			.getPosition()[0]) {
 		    System.out.println("Escaping tunnel at exit.X="+getPosition()[0]+" camera.X="+camera.getPosition()[0]);
-		    final Game game = ((TVF3Game)tr.getGameShell().getGame());
+		    final Game game = ((TVF3Game)getGameShell().getGame());
 		    final Mission mission = game.getCurrentMission();
 		    final OverworldSystem overworldSystem = mission.getOverworldSystem();
 		    System.out.println("TunnelExitObject leaving tunnel "+tun);
 		    //tr.getDefaultGrid().nonBlockingAddBranch(overworldSystem);
 		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)
 		    
-		    tr.mainRenderer     .get().getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
+		    tr.mainRenderer.getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
 		    final Renderer portalRenderer = TunnelExitObject.this.getPortalRenderer();
 		    if(portalRenderer == null)
 			throw new IllegalStateException("PortalRenderer intolerably null.");
-		    portalRenderer.getSkyCube().setSkyCubeGen(GameShell.DEFAULT_GRADIENT);
+		    portalRenderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);
 		    // Teleport
 		    final Camera secondaryCam = portalRenderer.getCamera();
 			other.setPosition(secondaryCam.getPosition());
@@ -144,7 +146,7 @@ public class TunnelExitObject extends PortalEntrance {
 			    //grid.addBranch(game.getNavSystem());
 			}});
 		    // Reset player behavior
-		    final Player player = ((TVF3Game)tr.getGameShell().getGame()).getPlayer();
+		    final Player player = ((TVF3Game)getGameShell().getGame()).getPlayer();
 		    player.setActive(false);
 		    player.resetVelocityRotMomentum();
 		    player.probeForBehavior(CollidesWithTunnelWalls.class)
@@ -160,7 +162,7 @@ public class TunnelExitObject extends PortalEntrance {
 				    HeadingXAlwaysPositiveBehavior.class)
 			    .setEnable(false);*/
 		    // Update debug data
-		    tr.getReporter().report("org.jtrfp.Tunnel.isInTunnel?",
+		    Features.get(tr, Reporter.class).report("org.jtrfp.Tunnel.isInTunnel?",
 			    "false");
 		    // Reset projectile behavior
 		    final ProjectileFactory[] pfs = tr.getResourceManager()
@@ -176,7 +178,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    }// end for(projectileFactories)
 		    final NAVObjective navObjective = getNavObjectiveToRemove();
 		    if (navObjective != null && (navTargeted|!onlyRemoveIfTargeted)) {
-			((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().removeNAVObjective(navObjective);
+			((TVF3Game)getGameShell().getGame()).getCurrentMission().removeNAVObjective(navObjective);
 		    }// end if(have NAV to remove
 		    
 		    if(mirrorTerrain){
@@ -189,7 +191,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    else
 		     tr.setRunState(new Mission.PlayerActivity(){});
 		    */
-		    ((TVF3Game)tr.getGameShell().getGame()).getNavSystem().updateNAVState();
+		    ((TVF3Game)getGameShell().getGame()).getNavSystem().updateNAVState();
 		    mission.setDisplayMode(mission.overworldMode);
 		    overworldSystem.setTunnelMode(false);
 		    player.setActive(true);
@@ -244,6 +246,15 @@ public class TunnelExitObject extends PortalEntrance {
      */
     public boolean isMirrorTerrain() {
 	return mirrorTerrain;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    gameShell = Features.get(getTr(), GameShell.class);}
+	return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+	this.gameShell = gameShell;
     }
 
 }// end TunnelExitObject

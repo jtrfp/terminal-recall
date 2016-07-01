@@ -15,7 +15,7 @@ package org.jtrfp.trcl.beh.ui;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.obj.Player;
 
 public class UserInputRudderElevatorControlBehavior extends Behavior implements PlayerControlBehavior {

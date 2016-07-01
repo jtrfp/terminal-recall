@@ -13,10 +13,23 @@
 
 package org.jtrfp.trcl.conf;
 
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.Encoder;
+import java.beans.ExceptionListener;
+import java.beans.Statement;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.DefaultListModel;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.Features;
@@ -29,16 +42,72 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	setTarget(target);
     }
     private String configSaveURI = null;
-    public void saveConfigurations(){
+    public void saveConfigurations() throws IOException{
 	//First save data from all local configurators
 	final FeatureTreeElement configurationTreeElement = new FeatureTreeElement.Default();
 	saveConfigurationsOfTargetRecursive(getTarget(), configurationTreeElement);
-	//TODO :Write to file
+	final File temp = File.createTempFile("org.jtrfp.trcl.", "config.xml");
+	//for(Configurator conf:configurators)
+	    //configurations.put(conf.getConfiguredClass(),conf.storeToMap(new HashMap<String,Object>()));
+	
+	    FileOutputStream os = new FileOutputStream(temp);
+	    XMLEncoder xmlEnc   = new XMLEncoder(os);
+	    xmlEnc.setExceptionListener(new ExceptionListener(){
+		@Override
+		public void exceptionThrown(Exception e) {
+		    e.printStackTrace();
+		}});
+	    xmlEnc.setPersistenceDelegate(DefaultListModel.class,
+		    new DefaultPersistenceDelegate() {
+			protected void initialize(Class clazz,
+				Object oldInst, Object newInst,
+				Encoder out) {
+			    super.initialize(clazz, oldInst, newInst,
+				    out);
+			    DefaultListModel oldLM = (DefaultListModel) oldInst;
+			    DefaultListModel newLM = (DefaultListModel) newInst;
+			    for (int i = 0; i < oldLM.getSize(); i++){
+				final Object value = oldLM.getElementAt(i);
+			    	if(value!=null)//When a DLM is initialized it contains a single null element. )X
+				 out.writeStatement(new Statement(oldInst,"addElement",
+					new Object[] { value }));
+			    }//end for(elements)
+			}//end DefaultPersistenceDelegate()
+		    });
+	    xmlEnc.writeObject(configurationTreeElement);
+	    xmlEnc.close();
+	    
+	    FileChannel srcCh = null, dstCh = null;
+	    try {
+	        srcCh = new FileInputStream(temp).getChannel();
+	        dstCh = new FileOutputStream(getConfigSaveURI()).getChannel();
+	        dstCh.transferFrom(srcCh, 0, srcCh.size());
+	       }catch(Exception e){e.printStackTrace();}
+	    	finally{
+	           srcCh.close();
+	           dstCh.close();
+	       }
     }//end saveConfigurations()
     
     public void loadConfigurations(){
-	final FeatureTreeElement root = null;//TODO: Load from file
-	loadConfigurationsOfTargetRecursive(getTarget(), root);
+	FeatureTreeElement root = null;
+	File fp = new File(getConfigSaveURI());
+	    if(fp.exists()){
+		try{FileInputStream is = new FileInputStream(fp);
+		XMLDecoder xmlDec = new XMLDecoder(is);
+		final Object deserializedObject = xmlDec.readObject();
+		if(deserializedObject instanceof FeatureTreeElement)
+		    root = (FeatureTreeElement)deserializedObject;
+		else {
+		    System.err.println("WARNING: Loaded expected configuration map is of intolerable type "+deserializedObject.getClass().getName()+".");
+		    System.err.println("Creating a new configuration instead. This could happen if there is a change in config parsing. If this happens repeatedly there may be a bug.");
+		}//end if(invalid)
+		xmlDec.close();
+		is.close();
+		}catch(Exception e){e.printStackTrace();}
+	    }//end if(exists)
+	if(root != null)
+	 loadConfigurationsOfTargetRecursive(getTarget(), root);
     }//end loadConfigurations()
     
     protected void saveConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){

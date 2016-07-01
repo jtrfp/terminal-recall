@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
@@ -33,13 +32,16 @@ import org.jtrfp.trcl.beh.LoopingPositionBehavior;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Renderer;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.Mission.TunnelState;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PortalEntrance;
@@ -48,11 +50,12 @@ import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TunnelSystemFactory implements FeatureFactory<Mission> {
+    private GameShell gameShell;
 
     @Override
     public Feature<Mission> newInstance(Mission target) {
@@ -113,15 +116,12 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		    .generateSubReporters(tuns.length);
 	    if (tuns != null) {
 		int tIndex = 0;
+		final Reporter r = Features.get(getTr(), Reporter.class);
 		// Build tunnels
 		for (TDFFile.Tunnel tun : tuns) {
-		    getTr()
-		    .getReporter()
-		    .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
+		    r.report("org.jtrfp.trcl.TunnelInstaller.tunnel."
 			    + tIndex + ".entrance", tun.getEntrance().toString());
-		    getTr()
-		    .getReporter()
-		    .report("org.jtrfp.trcl.TunnelInstaller.tunnel."
+		    r.report("org.jtrfp.trcl.TunnelInstaller.tunnel."
 			    + tIndex + ".exit", tun.getExit().toString());
 		    newTunnel(tun,reporters[tIndex]);
 		    tIndex++;
@@ -136,8 +136,8 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    tunnelsRemaining.add(tunnel);
 	    DirectionVector tunnelEntranceLegacyPos = tdfTun.getEntrance();
 	    final Point tunnelEntranceMapSquarePos = new Point(
-		    (int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getZ())),
-		    (int)(TR.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
+		    (int)(TRFactory.legacy2MapSquare(tunnelEntranceLegacyPos.getZ())),
+		    (int)(TRFactory.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
 	    final PortalEntrance portalEntrance = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
 	    final PortalExit portalExit = portalEntrance.getPortalExit();
 	    addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel,portalEntrance);
@@ -150,8 +150,8 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    }else throw new NullPointerException("Null portal exit! "+tunnelEntranceMapSquarePos);
 	    DirectionVector tunnelExitLegacyPos = tdfTun.getExit();
 	    final Point tunnelExitMapSquarePos = new Point(
-		    (int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
-		    (int)(TR.legacy2MapSquare(tunnelExitLegacyPos.getX())));
+		    (int)(TRFactory.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
+		    (int)(TRFactory.legacy2MapSquare(tunnelExitLegacyPos.getX())));
 	    assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
 	    tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
 	    return tunnel;
@@ -166,9 +166,9 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    TunnelEntranceObject result = null;
 	    double closestDistance = Double.POSITIVE_INFINITY;
 	    final Vector3D entPos = new Vector3D(
-		    TR.legacy2Modern(zInLegacyUnits),//Intentionally backwards
-		    TR.legacy2Modern(yInLegacyUnits),
-		    TR.legacy2Modern(xInLegacyUnits)
+		    TRFactory.legacy2Modern(zInLegacyUnits),//Intentionally backwards
+		    TRFactory.legacy2Modern(yInLegacyUnits),
+		    TRFactory.legacy2Modern(xInLegacyUnits)
 		    );
 	    for (TunnelEntranceObject teo : tunnelMap.values()) {
 		final Vector3D pos = new Vector3D(teo.getPosition());
@@ -210,7 +210,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 
 	public synchronized void enterTunnel(final TunnelEntranceObject teo) {
 	    final Tunnel tunnelToEnter = teo.getSourceTunnel();
-	    final Game game = ((TVF3Game)getTr().getGameShell().getGame());
+	    final Game game = ((TVF3Game)getGameShell().getGame());
 	    final OverworldSystem overworldSystem = ((TVF3Game)game).getCurrentMission().getOverworldSystem();
 
 	    assert tunnelToEnter.getExitObject().getPosition()[0]>0:""+tunnelToEnter.getExitObject().getPosition()[0];//TODO: Remove
@@ -218,12 +218,13 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    notifyTunnelFound(tunnelToEnter);
 
 	    //Move player to tunnel
-	    getTr().mainRenderer.get().getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
+	    getTr().mainRenderer.getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
 	    //Ensure chamber mode is off
 	    overworldSystem.setChamberMode(false);
 	    overworldSystem.setTunnelMode(true);
 	    //Update debug data
-	    getTr().getReporter().report("org.jtrfp.Tunnel.isInTunnel?", "true");
+	    final Reporter r = Features.get(getTr(), Reporter.class);
+	    r.report("org.jtrfp.Tunnel.isInTunnel?", "true");
 
 	    final ProjectileFactory [] pfs = getTr().getResourceManager().getProjectileFactories();
 	    for(ProjectileFactory pf:pfs){
@@ -234,7 +235,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		    setEnable(false);
 		}//end for(projectiles)
 	    }//end for(projectileFactories)
-	    final Player player = ((TVF3Game)getTr().getGameShell().getGame()).getPlayer();
+	    final Player player = ((TVF3Game)getGameShell().getGame()).getPlayer();
 	    player.setActive(false);
 	    player.resetVelocityRotMomentum();
 	    player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
@@ -251,7 +252,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    //Move the secondary cam to the overworld.
 	    overworldSystem.setChamberMode(tunnelToEnter.getExitObject().isMirrorTerrain());
 	    //Set the skycube appropriately
-	    portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)getTr().getGameShell().getGame()).
+	    portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)getGameShell().getGame()).
 		    getCurrentMission().
 		    getOverworldSystem().
 		    getSkySystem().
@@ -324,4 +325,13 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	}
     }//end TunnelSystem
 
+    public GameShell getGameShell() {
+	if(gameShell == null){
+	    final TR tr = Features.get(Features.getSingleton(),TR.class);
+	    gameShell = Features.get(tr, GameShell.class);}
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
+    }
 }//end TunnelSystemFactory

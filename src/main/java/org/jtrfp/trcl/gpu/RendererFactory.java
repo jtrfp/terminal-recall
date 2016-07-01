@@ -34,7 +34,7 @@ import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.ObjectTallyCollection;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
@@ -115,7 +115,7 @@ public class RendererFactory {
 		Submitter<Renderer> populationTarget) {
 	    for(int i=0; i<numBlocks; i++){
 		final Renderer renderer = RendererFactory.this.newRenderer("RendererFactory.rendererPool");
-		renderer.getCamera().setRelevanceRadius(TR.visibilityDiameterInMapSquares*TR.mapSquareSize/4.);
+		renderer.getCamera().setRelevanceRadius(TRFactory.visibilityDiameterInMapSquares*TRFactory.mapSquareSize/4.);
 		populationTarget.submit(renderer);}
 	    return populationTarget;
 	}

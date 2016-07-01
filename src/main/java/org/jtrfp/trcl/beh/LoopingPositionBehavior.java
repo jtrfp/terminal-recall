@@ -12,11 +12,10 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
-import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.core.TRFactory;
 
 public class LoopingPositionBehavior extends Behavior {
-    private static final double THRESHOLD = TR.mapWidth;
+    private static final double THRESHOLD = TRFactory.mapWidth;
     @Override
     public void tick(long timeInMillis){
 	// Loop correction
@@ -24,13 +23,13 @@ public class LoopingPositionBehavior extends Behavior {
 	boolean _transient=false;
 	if (getParent().supportsLoop()){
 		if (oldPos[0] > THRESHOLD)
-			{oldPos[0]-=TR.mapWidth;_transient=true;}
+			{oldPos[0]-=TRFactory.mapWidth;_transient=true;}
 		if (oldPos[2] > THRESHOLD)
-		    	{oldPos[2]-=TR.mapWidth;_transient=true;}
+		    	{oldPos[2]-=TRFactory.mapWidth;_transient=true;}
 		if (oldPos[0] < 0)
-			{oldPos[0]+=TR.mapWidth;_transient=true;}
+			{oldPos[0]+=TRFactory.mapWidth;_transient=true;}
 		if (oldPos[2] < 0)
-		    	{oldPos[2]+=TR.mapWidth;_transient=true;}
+		    	{oldPos[2]+=TRFactory.mapWidth;_transient=true;}
 	if(_transient)getParent().notifyPositionChange();
 	}//end if(LOOP)
     }//end _tick(...)

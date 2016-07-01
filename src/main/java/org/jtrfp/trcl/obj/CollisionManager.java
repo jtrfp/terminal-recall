@@ -23,12 +23,13 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ConsolidatingCollectionActionPacker;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 import com.ochafik.util.listenable.Pair;
 
 public class CollisionManager {
-    public static final double MAX_CONSIDERATION_DISTANCE = TR.mapSquareSize * 15;
+    public static final double MAX_CONSIDERATION_DISTANCE = TRFactory.mapSquareSize * 15;
     public static final int    SHIP_COLLISION_DISTANCE    = 15000;
     private static final double ROLLOVER_POINT            = World.WORLD_WIDTH_CUBES/2.;
     private final TR tr;

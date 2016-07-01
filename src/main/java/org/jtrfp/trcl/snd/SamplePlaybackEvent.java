@@ -26,7 +26,8 @@ import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
@@ -149,14 +150,14 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	}
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar, double samplePlaybackRatio){
-	    final double UNIT_FACTOR = TR.mapSquareSize*8;
-	    final double dist = TR.rolloverDistance(Vect3D.distance(source, dest.getPosition()));
+	    final double UNIT_FACTOR = TRFactory.mapSquareSize*8;
+	    final double dist = TRFactory.rolloverDistance(Vect3D.distance(source, dest.getPosition()));
 	    final double unitDist    = dist/UNIT_FACTOR;
 	    final double vol = Misc.clamp(1./Math.pow(unitDist, 2),
 		    0,1)*volumeScalar;
 	    final double [] work     = new double[3];
 	    final double [] destPos  = dest.getPosition();
-	    TR.twosComplimentSubtract(source, destPos, work);
+	    TRFactory.twosComplimentSubtract(source, destPos, work);
 	    Rotation rot;
 	    try{rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);}
 	    catch(MathArithmeticException e){rot = new Rotation(Vector3D.PLUS_K, 0);}//Default if given weird top/heading.

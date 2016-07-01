@@ -14,7 +14,6 @@ package org.jtrfp.trcl.file;
 
 import java.awt.Dimension;
 
-import org.jtrfp.trcl.core.TR;
 import org.jtrfp.trcl.file.ModelingType.BINModelingType;
 import org.jtrfp.trcl.file.ModelingType.BillboardModelingType;
 import org.jtrfp.trcl.file.ModelingType.FlatModelingType;

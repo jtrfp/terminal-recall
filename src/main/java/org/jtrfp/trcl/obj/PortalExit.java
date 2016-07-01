@@ -18,7 +18,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.SpacePartitioningGrid;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public class PortalExit extends WorldObject {
     private Camera controlledCamera;

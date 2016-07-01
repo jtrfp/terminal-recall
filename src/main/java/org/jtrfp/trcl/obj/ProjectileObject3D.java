@@ -18,7 +18,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
 import org.jtrfp.trcl.beh.ReportsCollisionsToStdout;
 import org.jtrfp.trcl.beh.phy.Velocible;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.math.Vect3D;

@@ -35,9 +35,10 @@ import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
@@ -59,12 +60,14 @@ import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
 import org.jtrfp.trcl.prop.IntroScreen;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class TVF3Game implements Game {
     public static final String VOX = "vox";
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private final GameVersion gameVersion;
+    private GameShell gameShell;
     public enum Difficulty {
 	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1.5), FURIOUS(2,3,2);
 	
@@ -136,11 +139,11 @@ public class TVF3Game implements Game {
 	    public TVF3Game(TR tr, GameVersion gameVersion) {
 		this.tr = tr;
 		this.gameVersion = gameVersion;
-		Features.init(this);
 		tr.setRunState(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};
 		tr.setRunState(new GameConstructedMode(){});
+		Features.init(this);//TODO: Remove after Featurization
 	    }// end constructor
 
 	    public void setupNameWithUser() throws CanceledException {
@@ -281,7 +284,7 @@ public class TVF3Game implements Game {
 	    
 	    public HUDSystem getHUDSystem(){
 		if(hudSystem==null)
-		    try{hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),getDashboardLayout());}
+		    try{hudSystem = new HUDSystem(tr,getGameShell().getGreenFont(),getDashboardLayout());}
 		catch(Exception e){e.printStackTrace();return null;}
 		return hudSystem;
 	    }
@@ -294,7 +297,7 @@ public class TVF3Game implements Game {
 			upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 				    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
 			
-			final EarlyLoadingScreen earlyLoadingScreen = tr.getGameShell().getEarlyLoadingScreen();
+			final EarlyLoadingScreen earlyLoadingScreen = getGameShell().getEarlyLoadingScreen();
 			earlyLoadingScreen.setStatusText("Reticulating Splines...");
 			earlyLoadingMode = new Object []{
 				earlyLoadingScreen
@@ -308,7 +311,8 @@ public class TVF3Game implements Game {
 			tr.getDefaultGrid().add(satDashboard);
 			
 			//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
-			System.out.println("GameVersion="+tr.configManager.getConfig()._getGameVersion());
+			final TRConfiguration trConfig = Features.get(tr,TRConfiguration.class);
+			System.out.println("GameVersion="+trConfig._getGameVersion());
 			    // Make color zero translucent.
 			    final ResourceManager rm = tr.getResourceManager();
 			    final Color[] pal 	     = tr.getGlobalPalette();
@@ -336,14 +340,14 @@ public class TVF3Game implements Game {
 			    rm.setProjectileFactories(pf);
 			    setPlayer(new Player(tr, tr.getResourceManager().getBINModel(
 				    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl())));
-			    final Camera camera = tr.mainRenderer.get().getCamera();
+			    final Camera camera = tr.mainRenderer.getCamera();
 			    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 			    camera.probeForBehavior(MatchDirection.class).setTarget(player);
 			    tr.getDefaultGrid().add(player);
 			    System.out.println("\t...Done.");
 			    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
-			    final BriefingLayout briefingLayout = tr.configManager.getConfig()._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
-			    briefingScreen	= new BriefingScreen(tr,tr.getGameShell().getGreenFont(), 
+			    final BriefingLayout briefingLayout = trConfig._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
+			    briefingScreen	= new BriefingScreen(tr,getGameShell().getGreenFont(), 
 				    briefingLayout,"TVF3Game");
 			    earlyLoadingScreen.setStatusText("Starting game...");
 			    
@@ -365,7 +369,8 @@ public class TVF3Game implements Game {
 	    }
 
 	    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException, CanceledException {
-		if (!tr.configManager.getConfig().isDebugMode())
+		final TRConfiguration trConfig = Features.get(tr,TRConfiguration.class);
+		if (!trConfig.isDebugMode())
 		    setupNameWithUser();
 		tr.setRunState(new Game.GameRunningMode(){});
 		setInGameplay(true);
@@ -431,14 +436,14 @@ public class TVF3Game implements Game {
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 		cleanup();
 		displayModes.setDisplayMode(emptyMode);
-		tr.getGameShell().applyGFXState();
+		getGameShell().applyGFXState();
 		tr.setRunState(new GameDestructedMode(){});
 	    }
 	    
 	    public DashboardLayout getDashboardLayout(){
 		if(dashboardLayout==null)
 		    dashboardLayout = 
-			tr.configManager.getConfig()._getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
+			    Features.get(tr,TRConfiguration.class)._getGameVersion()==GameVersion.TV?new TVDashboardLayout():new F3DashboardLayout();
 		return dashboardLayout;
 	    }//end getDashboardLayout()
 	    
@@ -585,5 +590,14 @@ public class TVF3Game implements Game {
 
     public GameVersion getGameVersion() {
         return gameVersion;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }// end Game

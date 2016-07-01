@@ -24,24 +24,22 @@ import java.lang.ref.WeakReference;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SatelliteViewFactory implements FeatureFactory<Mission> {
     public static final String SATELLITE_TOGGLE = "Sat View";
     public static final String [] VIEW_MENU_PATH = new String [] {"View","Satellite"};
-    private final ControllerInput satelliteToggleInput;
     public interface SatelliteViewState extends Mission.OverworldState, GamePauseFactory.PauseDisabledState{};
     
-    @Autowired
-    public SatelliteViewFactory(ControllerInputs inputs){
-	satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
+    public SatelliteViewFactory(){
     }
 
     @Override
@@ -70,6 +68,8 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private boolean                               satelliteView    = false;
 	private boolean                               enabled          = false;
 	private final   PropertyChangeSupport         pcs = new PropertyChangeSupport(this);
+	private         ControllerInput               satelliteToggleInput;
+	private         GamePause                     gamePause;
 	
 	public MenuSystem getMenuSystem() {
 	        final Frame frame = getTr().getRootWindow();
@@ -78,19 +78,23 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	
 	@Override
 	public void apply(Mission target) {
+	    final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
+	    final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
+	    satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
 	    setMission(target);
-	    Features.get(target, GamePause.class).addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
+	    gamePause = Features.get(target, GamePause.class);
+	    gamePause.addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(VIEW_MENU_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, VIEW_MENU_PATH);
-	    getTr().addPropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    getTr().addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	    satelliteToggleInput.addPropertyChangeListener(satelliteControl);
 	}
 
 	@Override
 	public void destruct(Mission target) {
-	    Features.get(target, GamePause.class).removePropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
-	    getTr().removePropertyChangeListener(TR.RUN_STATE, runStateListener);
+	    gamePause.removePropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
+	    getTr().removePropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.removeMenuItemListener(menuItemListener, VIEW_MENU_PATH);
 	    satelliteToggleInput.removePropertyChangeListener(satelliteControl);

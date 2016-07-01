@@ -15,10 +15,11 @@ package org.jtrfp.trcl.obj;
 
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public abstract class OneShotBillboardEvent extends BillboardSprite {
-    public static final int PROXIMITY_TEST_DIST = (int)TR.mapSquareSize/3;
+    public static final int PROXIMITY_TEST_DIST = (int)TRFactory.mapSquareSize/3;
     public static final int MAX_PROXIMAL_EVENTS       = 3;
     private final Sequencer sequencer;
     private long timeOfLastReset = 0L;

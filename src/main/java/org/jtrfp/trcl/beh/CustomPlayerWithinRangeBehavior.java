@@ -12,18 +12,21 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public abstract class CustomPlayerWithinRangeBehavior extends Behavior {
-    private double range = TR.mapSquareSize*10;
+    private double range = TRFactory.mapSquareSize*10;
     public abstract void withinRange();
+    private GameShell gameShell;
     
     @Override
     public void tick(long timeInMillis){
 	    final WorldObject thisObject=getParent();
-	    final WorldObject other=thisObject.getTr().getGameShell().getGame().getPlayer();
+	    final WorldObject other=getGameShell().getGame().getPlayer();
 	    if(Vect3D.distance(thisObject.getPosition(), other.getPosition())<=range){
 		withinRange();
 	    }//end if(close)
@@ -41,5 +44,14 @@ public abstract class CustomPlayerWithinRangeBehavior extends Behavior {
      */
     public void setRange(double range) {
         this.range = range;
+    }
+    
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end CustomPlayerWithinRangeBehavior

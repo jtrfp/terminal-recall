@@ -13,14 +13,17 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.AltitudeMap;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	DeathListener {
     private static final int OVER_TERRAIN_PAD=20000;
     private final Powerup pup;
+    private GameShell gameShell;
     public LeavesPowerupOnDeathBehavior(Powerup p){
 	this.pup=p;
     }
@@ -30,7 +33,6 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	final double [] thisPos=p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath().toArray();
 	double height;
 	final AltitudeMap map=
-		p.getTr().
 		getGameShell().getGame().
 		getCurrentMission().
 		getOverworldSystem().
@@ -42,4 +44,12 @@ public class LeavesPowerupOnDeathBehavior extends Behavior implements
 	getParent().getTr().getResourceManager().getPowerupSystem().
 		spawn(Vect3D.add(thisPos, yFudge, yFudge), pup);
     }//end notifyDeath()
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
+    }
 }//end LeavesPowerupOnDeathBehavior

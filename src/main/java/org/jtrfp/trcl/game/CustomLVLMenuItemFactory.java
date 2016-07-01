@@ -11,7 +11,8 @@ import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.stereotype.Component;
 
@@ -49,12 +50,12 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	    menuSystem.addMenuItemListener(customLVLListener, CUSTOM_LVL_PATH);
 	    final TR tr = target.getTr();
 	    weakRunStateListener = new WeakPropertyChangeListener(runStateListener,tr);
-	    target.getTr().addPropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
+	    target.getTr().addPropertyChangeListener(TRFactory.RUN_STATE, weakRunStateListener);
 	}
 
 	public void destruct(TVF3Game target) {
 	    final MenuSystem menuSystem = getMenuSystem();
-	    getTarget().getTr().removePropertyChangeListener(TR.RUN_STATE, weakRunStateListener);
+	    getTarget().getTr().removePropertyChangeListener(TRFactory.RUN_STATE, weakRunStateListener);
 	    menuSystem.removeMenuItem(CUSTOM_LVL_PATH);
 	    setTarget(null);
 	}

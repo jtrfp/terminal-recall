@@ -31,7 +31,10 @@ import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.ThreadEnforcementCollection;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
@@ -55,7 +58,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private boolean	  fogEnabled = true;
 	private float horizontalFOVDegrees = 100f;// In degrees
 	private float verticalFOVDegrees   = 100f;
-	private double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
+	private double relevanceRadius = TRFactory.visibilityDiameterInMapSquares*TRFactory.mapSquareSize;
 	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
 		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
@@ -89,6 +92,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private final CenterCubeHandler     centerCubeHandler;
 	@SuppressWarnings("unused")
 	private final CameraPositionHandler cameraPositionHandler;
+	private final Reporter reporter;
 
     Camera(TR tr) {
 	super(tr);
@@ -110,6 +114,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	
 	addPropertyChangeListener(CENTER_CUBE, centerCubeHandler = new CenterCubeHandler());
 	addPropertyChangeListener(WorldObject.POSITION,cameraPositionHandler = new CameraPositionHandler());
+	reporter = Features.get(tr, Reporter.class);
     }//end constructor
     
     @Override
@@ -166,7 +171,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		if(!(src instanceof WorldObject))
 		    throw new IllegalArgumentException("Source is not a WorldObject. Got "+src);
 		final WorldObject wo = (WorldObject)src;
-		final Vector3D pHeading = wo.getHeading().scalarMultiply(TR.visibilityDiameterInMapSquares*TR.mapSquareSize/5);
+		final Vector3D pHeading = wo.getHeading().scalarMultiply(TRFactory.visibilityDiameterInMapSquares*TRFactory.mapSquareSize/5);
 		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
 		final Vector3D newCenterCube = new Vector3D(
@@ -204,7 +209,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
 	private void updateProjectionMatrix(){
 		final float zF = (float) (viewDepth * 1.5);
-		final float zN = (float) (TR.mapSquareSize / 10);
+		final float zN = (float) (TRFactory.mapSquareSize / 10);
 		final float fH = (float) (1. / Math.tan(getHorizontalFOVDegrees() * Math.PI / 360.));
 		final float fV = (float) (1. / Math.tan(getVerticalFOVDegrees() * Math.PI / 360.));
 		projectionMatrix = new Array2DRowRealMatrix(new double[][]
@@ -303,9 +308,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private synchronized RealMatrix getCompleteMatrix(){
 		    applyMatrix();
 		    if(updateDebugStateCounter++ % 30 ==0){
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".lookAt", getLookAt().toString());
-			    getTr().getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".up", getTop().toString());
+			    getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".position", getPosition()[0]+" "+getPosition()[1]+" "+getPosition()[2]+" ");
+			    getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".lookAt", getLookAt().toString());
+			    getReporter().report("org.jtrfp.trcl.core.Camera."+getDebugName()+".up", getTop().toString());
 			}
 		return completeMatrix;
 		}
@@ -432,5 +437,9 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
 	public void setDebugName(String debugName) {
 	    this.debugName = debugName;
+	}
+
+	public Reporter getReporter() {
+	    return reporter;
 	}
 }//end Camera

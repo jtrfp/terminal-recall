@@ -20,7 +20,7 @@ import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Propelled;

@@ -18,7 +18,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -64,7 +64,7 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 		    Vect3D.abs(workTriplet, workTriplet);
 		    boolean localDoCollision = true;
 		    for(int i=0; i<3; i++)
-		     localDoCollision &= TR.rolloverDistance(workTriplet[i]) < limit;
+		     localDoCollision &= TRFactory.rolloverDistance(workTriplet[i]) < limit;
 		    doCollision |= localDoCollision;
 		}//end for(hitBoxes)
 		if(doCollision)
@@ -79,9 +79,9 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 		subtract(new Vector3D(boxPos));
 	//Factor in rollover
 	relPosThis = new Vector3D(
-		TR.rolloverDistance(relPosThis.getX()),
-		TR.rolloverDistance(relPosThis.getY()),
-		TR.rolloverDistance(relPosThis.getZ())
+		TRFactory.rolloverDistance(relPosThis.getX()),
+		TRFactory.rolloverDistance(relPosThis.getY()),
+		TRFactory.rolloverDistance(relPosThis.getZ())
 		);
 	Rotation rot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J,boxHeading,boxTop);
 	//Rotate the other position relative to the parent's heading/top.

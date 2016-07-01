@@ -14,7 +14,7 @@ package org.jtrfp.trcl;
 
 import java.util.Arrays;
 
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 
 public class CharLineDisplay {
     private char[] 		content;

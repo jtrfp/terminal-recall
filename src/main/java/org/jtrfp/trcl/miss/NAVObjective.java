@@ -22,11 +22,11 @@ import org.jtrfp.trcl.Tunnel;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
 import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior;
-import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.RemovesNAVObjectiveOnDeath;
 import org.jtrfp.trcl.beh.tun.TunnelEntryListener;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.BOS;
 import org.jtrfp.trcl.file.NAVFile.CHK;
@@ -38,6 +38,7 @@ import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.Checkpoint;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -45,18 +46,21 @@ import org.jtrfp.trcl.obj.Jumpzone;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.TunnelExitObject;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public abstract class NAVObjective {
     private static final double CHECKPOINT_HEIGHT_PADDING=70000;
     public abstract String getDescription();
     public abstract WorldObject getTarget();
     protected NAVObjective(Factory f){
+	final TR tr = Features.get(Features.getSingleton(), TR.class);
+	final Reporter reporter = Features.get(tr,Reporter.class);
 	if(f!=null)
-	 f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
+	 reporter.report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
 	
 	if(getTarget()!=null && f!=null){
 	    final double [] loc = getTarget().getPosition();
-	    f.tr.getReporter().report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
+	    reporter.report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
 	    f.counter++;}
     }
     public static class Factory{
@@ -71,7 +75,8 @@ public abstract class NAVObjective {
 	}//end constructor
 	
 	public void create(final TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
-		final OverworldSystem overworld=((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().getOverworldSystem();
+	        final GameShell gameShell = Features.get(tr,GameShell.class);
+		final OverworldSystem overworld=((TVF3Game)gameShell.getGame()).getCurrentMission().getOverworldSystem();
 		final List<DEFObject> defs = overworld.getDefList();
 		if(navSubObject instanceof TGT){///////////////////////////////////////////
 		    TGT tgt = (TGT)navSubObject;
@@ -89,11 +94,11 @@ public abstract class NAVObjective {
 			    }
 			};//end new NAVObjective
 			indexedNAVObjectiveList.add(objective);
-			targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,((TVF3Game)tr.getGameShell().getGame()).getCurrentMission()));
+			targ.addBehavior(new RemovesNAVObjectiveOnDeath(objective,((TVF3Game)gameShell.getGame()).getCurrentMission()));
 			targ.addBehavior(new CustomDeathBehavior(new Runnable(){
 			    @Override
 			    public void run(){
-				((TVF3Game)((TVF3Game)tr.getGameShell().getGame())).getUpfrontDisplay()
+				((TVF3Game)((TVF3Game)gameShell.getGame())).getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Target Destroyed");
 			    }//end run()
 			}));
@@ -103,29 +108,29 @@ public abstract class NAVObjective {
 		    //Entrance and exit locations are already set up.
 		    final Location3D 	loc3d 	= tun.getLocationOnMap();
 		    final Vector3D modernLoc = new Vector3D(
-				    TR.legacy2Modern(loc3d.getX()),
-				    TR.legacy2Modern(loc3d.getY()),
-				    TR.legacy2Modern(loc3d.getZ()));
+				    TRFactory.legacy2Modern(loc3d.getX()),
+				    TRFactory.legacy2Modern(loc3d.getY()),
+				    TRFactory.legacy2Modern(loc3d.getZ()));
 		    /*final TunnelEntranceObject teo = ((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().getTunnelEntranceObject(
-			    new Point((int)(modernLoc.getX()/TR.mapSquareSize),(int)(modernLoc.getZ()/TR.mapSquareSize)));
+			    new Point((int)(modernLoc.getX()/TRFactory.mapSquareSize),(int)(modernLoc.getZ()/TRFactory.mapSquareSize)));
 		    */
-		    final Mission mission = ((TVF3Game)tr.getGameShell().getGame()).getCurrentMission();
+		    final Mission mission = ((TVF3Game)gameShell.getGame()).getCurrentMission();
 		    final TunnelSystem ts = Features.get(mission, TunnelSystem.class);
 		    final TunnelEntranceObject teo = ts.getNearestTunnelEntrance(loc3d.getX(),loc3d.getY(),loc3d.getZ());
 		    currentTunnel=teo.getSourceTunnel();
 		    		/*final TunnelEntranceObject tunnelEntrance 
 		    				= currentTunnel.getEntranceObject();
 		    final double [] entPos=tunnelEntrance.getPosition();
-		    entPos[0]=TR.legacy2Modern(loc3d.getZ());
-		    entPos[1]=TR.legacy2Modern(loc3d.getY());
-		    entPos[2]=TR.legacy2Modern(loc3d.getX());
+		    entPos[0]=TRFactory.legacy2Modern(loc3d.getZ());
+		    entPos[1]=TRFactory.legacy2Modern(loc3d.getY());
+		    entPos[2]=TRFactory.legacy2Modern(loc3d.getX());
 		    entPos[1]=((TVF3Game)tr.getGameShell().getGame()).
 			    getCurrentMission().
 			    getOverworldSystem().
 			    getAltitudeMap().
 			    heightAt(
-				TR.legacy2MapSquare(loc3d.getZ()), 
-				TR.legacy2MapSquare(loc3d.getX()))*(tr.getWorld().sizeY/2)+TunnelEntranceObject.GROUND_HEIGHT_PAD;
+				TRFactory.legacy2MapSquare(loc3d.getZ()), 
+				TRFactory.legacy2MapSquare(loc3d.getX()))*(tr.getWorld().sizeY/2)+TunnelEntranceObject.GROUND_HEIGHT_PAD;
 		    tunnelEntrance.notifyPositionChange();
 		    */
 		    final NAVObjective enterObjective = new NAVObjective(this){
@@ -143,8 +148,8 @@ public abstract class NAVObjective {
 		    currentTunnel.addTunnelEntryListener(new TunnelEntryListener(){
 			@Override
 			public void notifyTunnelEntered(Tunnel tunnel) {
-			    if(((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().getRemainingNAVObjectives().get(0).getTarget()==tunnelEntranceObject){
-				((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().removeNAVObjective(enterObjective);
+			    if(((TVF3Game)gameShell.getGame()).getCurrentMission().getRemainingNAVObjectives().get(0).getTarget()==tunnelEntranceObject){
+				((TVF3Game)gameShell.getGame()).getCurrentMission().removeNAVObjective(enterObjective);
 				tunnel.removeTunnelEntryListener(this);
 			    }
 			}});
@@ -160,9 +165,9 @@ public abstract class NAVObjective {
 				return tunnelExit;
 			    }
 		    };//end new NAVObjective tunnelExit
-		    final Point tunnelPoint = new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX()));
+		    final Point tunnelPoint = new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX()));
 		    /*
-		    //if(mission.getTunnelEntrancePortal(new Point((int)TR.legacy2MapSquare(loc3d.getZ()),(int)TR.legacy2MapSquare(loc3d.getX())))==null){
+		    //if(mission.getTunnelEntrancePortal(new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX())))==null){
 			//TODO
 			final Camera tunnelCam = tr.secondaryRenderer.get().getCamera();
 			final PortalExit portalExit = tunnelExit.getPortalExit();
@@ -183,7 +188,7 @@ public abstract class NAVObjective {
 				 portalExit.setTop(Vector3D.PLUS_J.crossProduct(heading).crossProduct(heading).negate());
 			portalExit.notifyPositionChange();
 			//tunnelExit.setPortalExit(portalExit);
-			//final PortalEntrance entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.get().getCamera());
+			//final PortalEntrance entrance = new PortalEntrance(tr,portalModel,exit,tr.mainRenderer.getCamera());
 			//mission.registerTunnelEntrancePortal(tunnelPoint, exit);
 		    //}
 			*/
@@ -217,7 +222,7 @@ public abstract class NAVObjective {
 			teo.setVisible(true);
 		    }
 		} else if(navSubObject instanceof BOS){///////////////////////////////////////////
-		    final Mission mission = ((TVF3Game)tr.getGameShell().getGame()).getCurrentMission();
+		    final Mission mission = ((TVF3Game)gameShell.getGame()).getCurrentMission();
 		    final WeakReference<Mission> wMission = new WeakReference<Mission>(mission);
 		    final BOS bos = (BOS)navSubObject;
 		    boolean first=true;
@@ -243,7 +248,7 @@ public abstract class NAVObjective {
 				@Override
 				public void run(){
 				    wMission.get().enterBossMode(bos.getMusicFile());
-				    ((TVF3Game)tr.getGameShell().getGame()).getUpfrontDisplay()
+				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()
 			    }));
@@ -266,7 +271,7 @@ public abstract class NAVObjective {
 				@Override
 				public void run(){
 				    wMission.get().enterBossMode(bos.getMusicFile());
-				    ((TVF3Game)tr.getGameShell().getGame()).getUpfrontDisplay()
+				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()
 			    }));
@@ -307,9 +312,9 @@ public abstract class NAVObjective {
 		    final Location3D loc3d = cp.getLocationOnMap();
 		    final Checkpoint chk = new Checkpoint(tr,"NAVObjective."+debugName);
 		    final double [] chkPos = chk.getPosition();
-		    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
-		    chkPos[1]=TR.legacy2Modern(loc3d.getY()+CHECKPOINT_HEIGHT_PADDING);
-		    chkPos[2]=TR.legacy2Modern(loc3d.getX());
+		    chkPos[0]=TRFactory.legacy2Modern(loc3d.getZ());
+		    chkPos[1]=TRFactory.legacy2Modern(loc3d.getY()+CHECKPOINT_HEIGHT_PADDING);
+		    chkPos[2]=TRFactory.legacy2Modern(loc3d.getX());
 		    chk.notifyPositionChange();
 		    chk.setIncludeYAxisInCollision(false);
 		    final NAVObjective objective = new NAVObjective(this){
@@ -322,22 +327,22 @@ public abstract class NAVObjective {
 				return chk;
 			    }
 		    };//end new NAVObjective
-		    chk.setObjectiveToRemove(objective,((TVF3Game)tr.getGameShell().getGame()).getCurrentMission());
+		    chk.setObjectiveToRemove(objective,((TVF3Game)gameShell.getGame()).getCurrentMission());
 		    overworld.add(chk);
 		    indexedNAVObjectiveList.add(objective);
 		} else if(navSubObject instanceof XIT){///////////////////////////////////////////
 		    XIT xit = (XIT)navSubObject;
 		    Location3D loc3d = xit.getLocationOnMap();
 		    currentTunnel.getExitObject().setExitLocation(
-			    new Vector3D(TR.legacy2Modern(loc3d.getZ()),TR.legacy2Modern(loc3d.getY()),TR.legacy2Modern(loc3d.getX())));
+			    new Vector3D(TRFactory.legacy2Modern(loc3d.getZ()),TRFactory.legacy2Modern(loc3d.getY()),TRFactory.legacy2Modern(loc3d.getX())));
 		} else if(navSubObject instanceof DUN){///////////////////////////////////////////
 		    final DUN xit = (DUN)navSubObject;
 		    final Location3D loc3d = xit.getLocationOnMap();
 		    final Jumpzone chk = new Jumpzone(tr);
 		    final double [] chkPos = chk.getPosition();
-		    chkPos[0]=TR.legacy2Modern(loc3d.getZ());
-		    chkPos[1]=TR.legacy2Modern(loc3d.getY());
-		    chkPos[2]=TR.legacy2Modern(loc3d.getX());
+		    chkPos[0]=TRFactory.legacy2Modern(loc3d.getZ());
+		    chkPos[1]=TRFactory.legacy2Modern(loc3d.getY());
+		    chkPos[2]=TRFactory.legacy2Modern(loc3d.getX());
 		    chk.notifyPositionChange();
 		    chk.setVisible(false);
 		    try{//Start placing the jump zone.
@@ -355,7 +360,7 @@ public abstract class NAVObjective {
 				return chk;
 			    }
 		    };//end new NAVObjective
-		    chk.setObjectiveToRemove(objective,((TVF3Game)tr.getGameShell().getGame()).getCurrentMission());
+		    chk.setObjectiveToRemove(objective,((TVF3Game)gameShell.getGame()).getCurrentMission());
 		    chk.setIncludeYAxisInCollision(false);
 		    overworld.add(chk);
 		    indexedNAVObjectiveList.add(objective);

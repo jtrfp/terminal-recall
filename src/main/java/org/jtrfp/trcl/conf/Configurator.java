@@ -15,7 +15,6 @@ package org.jtrfp.trcl.conf;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +32,7 @@ public abstract class Configurator<T> {
 	return configManager;
     }
     
-    @Autowired
+    //@Autowired
     public void setConfigManager(ConfigManager configManager) {
 	this.configManager = configManager;
     }
@@ -147,7 +146,7 @@ public abstract class Configurator<T> {
     public T getConfigured() {
         return configured;
     }
-    @Autowired
+    //@Autowired
     public void setConfigured(T configured) {
         this.configured = configured;
     }//end store()

@@ -15,10 +15,12 @@ package org.jtrfp.trcl.beh;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class HorizAimAtPlayerBehavior extends Behavior {
     private WorldObject chaseTarget;
@@ -29,17 +31,18 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     private boolean leftHanded = true;
     private double hysteresis=.05;//Prevents gimbal shake.
     public HorizAimAtPlayerBehavior(WorldObject chaseTarget){super();this.chaseTarget=chaseTarget;}
+    private GameShell gameShell;
     @Override
     public void tick(long timeInMillis){
 	if(chaseTarget!=null){
 	    WorldObject thisObject = getParent();
-	    final Player player = thisObject.getTr().getGameShell().getGame().getPlayer();
+	    final Player player = getGameShell().getGame().getPlayer();
 	    if(player.probeForBehavior(Cloakable.class).isCloaked())return;
 	    final RotationalMomentumBehavior rmb = thisObject.probeForBehavior(RotationalMomentumBehavior.class);
 
 	    assert !Vect3D.isAnyEqual(chaseTarget.getPosition(), Double.POSITIVE_INFINITY);
 	    assert !Vect3D.isAnyEqual(thisObject.getPosition(), Double.NEGATIVE_INFINITY);
-	    TR.twosComplimentSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar);
+	    TRFactory.twosComplimentSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar);
 	    assert !Vect3D.isAnyNaN(vectorToTargetVar);
 	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.POSITIVE_INFINITY);
 	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.NEGATIVE_INFINITY);
@@ -98,5 +101,13 @@ public class HorizAimAtPlayerBehavior extends Behavior {
     public HorizAimAtPlayerBehavior setHysteresis(double hysteresis) {
         this.hysteresis = hysteresis;
         return this;
+    }
+    public GameShell getGameShell() {
+	if(gameShell == null)
+	    gameShell = Features.get(getParent().getTr(), GameShell.class);
+        return gameShell;
+    }
+    public void setGameShell(GameShell gameShell) {
+        this.gameShell = gameShell;
     }
 }//end ChaseBehavior

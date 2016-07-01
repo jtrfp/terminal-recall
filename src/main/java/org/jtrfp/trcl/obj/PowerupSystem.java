@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.obj;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.core.TR;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Powerup;
 
 public class PowerupSystem extends RenderableSpacePartitioningGrid{

@@ -28,15 +28,15 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
 
 import com.jogamp.newt.event.KeyEvent;
 
 @Component
-public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
+public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     
-    public class SwingMenuSystem implements Feature<JFrame>, MenuSystem {
+    public static class SwingMenuSystem implements Feature<RootWindow>, MenuSystem {
     private SubMenu rootNode;
     private JFrame rw;
     
@@ -459,7 +459,10 @@ public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
 	@Override
 	public void removeMenuItemListener(ActionListener l, int index,
 		String... path) throws IllegalArgumentException {
-	    nameMap.get(path[index]).removeMenuItemListener(l, index+1, path);
+	    final MenuNode node = nameMap.get(path[index]);
+	    if(node == null)
+		throw new RuntimeException("Node of name `"+path[index]+"` not found.");
+	    node.removeMenuItemListener(l, index+1, path);
 	}
 
 	@Override
@@ -616,7 +619,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
     }//end MenuItem
 
     @Override
-    public void apply(JFrame target) {
+    public void apply(RootWindow target) {
 	rw = target;
 	final JMenuBar [] menuBar = new JMenuBar[] {rw.getJMenuBar()};
 	try {
@@ -634,23 +637,22 @@ public class SwingMenuSystemFactory implements FeatureFactory<JFrame> {
 	    e.printStackTrace();
 	}
 	rootNode = new SubMenu(menuBar[0]);
-	Features.init(this);
     }//end apply(...)
 
     @Override
-    public void destruct(JFrame target) {
+    public void destruct(RootWindow target) {
 	// TODO Auto-generated method stub
     }
     }//end SwingMenuSystem
 
     @Override
-    public Feature<JFrame> newInstance(JFrame target) {
+    public Feature<RootWindow> newInstance(RootWindow target) {
 	return new SwingMenuSystem();
     }
 
     @Override
-    public Class<JFrame> getTargetClass() {
-	return JFrame.class;
+    public Class<RootWindow> getTargetClass() {
+	return RootWindow.class;
     }
 
     @Override

@@ -24,12 +24,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class TRConfigRootFactory implements FeatureFactory<TR>{
     public class TRConfigRoot extends ConfigRootFeature<TR> {
-	private final Map<Class,Map<String,Object>> configurations = new HashMap<Class,Map<String,Object>>();
+	//private final Map<Class,Map<String,Object>> configurations = new HashMap<Class,Map<String,Object>>();
 
 	@Override
 	public void destruct(TR target) {
 	    // TODO Auto-generated method stub
 
+	}
+	
+	@Override
+	public void apply(TR target){
+	    super.apply(target);
+	    getConfigurations();
 	}
 
 	@Override

@@ -45,7 +45,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 
 	CROSSHAIRS_ENABLED  = "crosshairsEnabled";
     
-    public class TRConfiguration implements Feature<TR>{
+    public static class TRConfiguration implements Feature<TR>{
 	
 	private GameVersion gameVersion=GameVersion.F3;
 	private Boolean usingTextureBufferUnmap,

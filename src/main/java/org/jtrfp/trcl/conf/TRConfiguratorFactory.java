@@ -13,18 +13,11 @@
 
 package org.jtrfp.trcl.conf;
 
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DEVICE;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DRIVER;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_FORMAT;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_OUTPUT;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_LAG;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_SIZE;
-import static org.jtrfp.trcl.conf.TRConfigurationFactory.CROSSHAIRS_ENABLED;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jtrfp.trcl.conf.TRConfigurationFactory.*;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.springframework.stereotype.Component;
@@ -37,16 +30,16 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class TRConfiguratorFactory implements FeatureFactory<TRConfigurationFactory> {
+public class TRConfiguratorFactory implements FeatureFactory<TRConfiguration> {
     private static final String [] PERSISTENT_PROPERTIES = 
 	    new String [] {
-	    ACTIVE_AUDIO_DRIVER,
-	    ACTIVE_AUDIO_DEVICE,
-	    ACTIVE_AUDIO_OUTPUT,
-	    ACTIVE_AUDIO_FORMAT,
-	    AUDIO_BUFFER_LAG,
-	    AUDIO_BUFFER_SIZE,
-	    CROSSHAIRS_ENABLED,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DRIVER,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DEVICE,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_OUTPUT,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_FORMAT,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_LAG,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_SIZE,
+	    org.jtrfp.trcl.conf.TRConfigurationFactory.CROSSHAIRS_ENABLED,
 	    "usingTextureBufferUnmap",
 	    "debugMode",
 	    "targetFPS",
@@ -57,12 +50,12 @@ public class TRConfiguratorFactory implements FeatureFactory<TRConfigurationFact
 	    "modStereoWidth",
 	    "podList",
 	    "fileDialogStartDir",
-	    "componentConfigs"
+	    //"componentConfigs"
     };
     private static final Set<String> PERSISTENT_PROPERTIES_SET = 
 	    new HashSet<String>(Arrays.asList(PERSISTENT_PROPERTIES));
     
-    public class TRConfigurator extends FeatureConfigurator<TRConfigurationFactory>{
+    public class TRConfigurator extends FeatureConfigurator<TRConfiguration>{
 	@Override
 	    protected Set<String> getPersistentProperties() {
 		return PERSISTENT_PROPERTIES_SET;
@@ -70,13 +63,13 @@ public class TRConfiguratorFactory implements FeatureFactory<TRConfigurationFact
     }//end TRConfiguration
 
     @Override
-    public Feature<TRConfigurationFactory> newInstance(TRConfigurationFactory target) {
+    public Feature<TRConfiguration> newInstance(TRConfiguration target) {
 	return new TRConfigurator();
     }
 
     @Override
-    public Class<TRConfigurationFactory> getTargetClass() {
-	return TRConfigurationFactory.class;
+    public Class<TRConfiguration> getTargetClass() {
+	return TRConfiguration.class;
     }
 
     @Override

@@ -319,10 +319,11 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    Runtime.getRuntime().addShutdownHook(new Thread(){
 		public void run(){
 		    soundSystem.get().setPaused(true);
-		    try{configManager.saveConfigurations();
+		    try{getConfigManager().saveConfigurations();
 		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"
-				    + e.getLocalizedMessage()+"\n");
+			            + e.getClass().getName()+"\n"
+				    + e.getMessage()+"\n");
 		    e.printStackTrace();
 		    }//end catch(Exception)
 		    System.err.println("Great work, Guys!");

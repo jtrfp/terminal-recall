@@ -37,14 +37,18 @@ import org.jtrfp.trcl.core.Features;
 public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_CLASS> {
     public static final String CONFIG_SAVE_URI = "configSaveURI";
     private TARGET_CLASS target;
+    private String configSaveURI = null;
+    
     @Override
     public void apply(TARGET_CLASS target){
 	setTarget(target);
     }
-    private String configSaveURI = null;
+    
     public void saveConfigurations() throws IOException{
 	//First save data from all local configurators
 	final FeatureTreeElement configurationTreeElement = new FeatureTreeElement.Default();
+	configurationTreeElement.setFeatureClassName(getTarget().getClass().getName());
+	configurationTreeElement.setPropertiesMap(null);
 	saveConfigurationsOfTargetRecursive(getTarget(), configurationTreeElement);
 	final File temp = File.createTempFile("org.jtrfp.trcl.", "config.xml");
 	//for(Configurator conf:configurators)
@@ -114,11 +118,13 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	final ArrayList<Feature> features = new ArrayList<Feature>();
 	Features.getAllFeaturesOf(target, features);
 	final ConfigRootFeature cmf = getConfigManagerFeature(features);
+	//This is a config root. Stop branching here.
 	if(target != getTarget() && cmf != null){
 	    FeatureTreeElement subElement = new FeatureTreeElement.Default();
 	    subElement.setFeatureClassName(cmf.getClass().getName());
 	    subElement.setPropertiesMap(new HashMap<String,Object>());
 	    cmf.notifyRecursiveSaveOperation(this,subElement.getPropertiesMap());
+	    element.getSubFeatures().put(cmf.getClass().getName(), subElement);
 	    return;
 	}
 	for(Feature feature:features){
@@ -140,6 +146,8 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     }
     
     public void notifyRecursiveLoadOperation(ConfigRootFeature<TARGET_CLASS> configManagerFeature, Map<String,Object> propertiesMap){
+	if(propertiesMap == null)
+	    throw new IllegalStateException("propertiesMap intolerably null.");
 	setConfigSaveURI((String)propertiesMap.get(CONFIG_SAVE_URI));
     }
 
@@ -163,7 +171,8 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		Map<String,Object> propertiesMap = subElement.getPropertiesMap();
 		if(feature instanceof ConfigRootFeature){
 		    ConfigRootFeature cmf = (ConfigRootFeature)feature;
-		    cmf.notifyRecursiveLoadOperation(this, propertiesMap);
+		    if(propertiesMap != null)
+		     cmf.notifyRecursiveLoadOperation(this, propertiesMap);
 		} else if(feature instanceof FeatureConfigurator){
 		    FeatureConfigurator configurator = (FeatureConfigurator)feature;
 		    //subElement.setPropertiesMap(new HashMap<String,Object>());

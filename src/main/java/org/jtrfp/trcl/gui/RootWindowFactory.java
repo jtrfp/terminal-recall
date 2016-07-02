@@ -33,9 +33,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
-    private static RootWindow shouldOnlyBeOne;//TODO: DEBUG
     static {GLProfile.initSingleton();}
-    public class RootWindow extends JFrame implements Feature<TR>, GLExecutor, CanvasProvider {
+    public static class RootWindow extends JFrame implements Feature<TR>, GLExecutor, CanvasProvider {
 	/**
 	 * 
 	 */
@@ -48,9 +47,6 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 
 	public RootWindow(){
 	    super();
-	    if(shouldOnlyBeOne != null)
-		throw new RuntimeException("Multiple rootwindows!");
-	    shouldOnlyBeOne = this;
 	    setSize(800,600);
 	    try {SwingUtilities.invokeLater(new Runnable() {
 		@Override

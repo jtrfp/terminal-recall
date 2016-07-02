@@ -17,24 +17,36 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jtrfp.trcl.conf.Configurator;
+import org.jtrfp.trcl.conf.FeatureConfigurator;
+import org.jtrfp.trcl.core.Feature;
+import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-//@Configuration
-public class RootWindowConfigurator extends Configurator<RootWindow> {
+@Component
+public class RootWindowConfiguratorFactory implements FeatureFactory<RootWindow>{
     private static final HashSet<String> PERSISTENT_PROPERTIES = 
-	    new HashSet<String>(Arrays.asList(
-		    "bounds"));
+		new HashSet<String>(Arrays.asList(
+			"bounds"));
+    public static class RootWindowConfigurator extends FeatureConfigurator<RootWindow> {
+	@Override
+	protected Set<String> getPersistentProperties() {
+	    return PERSISTENT_PROPERTIES;
+	}
+    }//end RootWindowConfigurator
 
     @Override
-    protected Set<String> getPersistentProperties() {
-	return PERSISTENT_PROPERTIES;
+    public Feature<RootWindow> newInstance(RootWindow target) {
+	return new RootWindowConfigurator();
     }
 
     @Override
-    public Class<RootWindow> getConfiguredClass() {
+    public Class<RootWindow> getTargetClass() {
 	return RootWindow.class;
     }
 
-}//end RootWindowConfigurator
+    @Override
+    public Class<? extends Feature> getFeatureClass() {
+	return RootWindowConfigurator.class;
+    }
+}//end RootWindowConfiguratorFactory

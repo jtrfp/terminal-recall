@@ -123,8 +123,11 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     @Override
     public boolean remove(Object o) {
 	final Pair<KEY,E> pair = pairs.get(o);
-	pair.getValue().removePropertyChangeListener(elementPCL);
-	pairs.remove(o);
+	assert pair != null;
+	final E value = pair.getValue();
+	assert value != null;
+	value   .removePropertyChangeListener(elementPCL);
+	pairs   .remove(o);
 	delegate.remove(pair);
 	return true;
     }//end remove(...)

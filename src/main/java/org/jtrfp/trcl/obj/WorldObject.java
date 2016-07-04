@@ -26,7 +26,6 @@ import org.jtrfp.trcl.PrimitiveList;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.WeakPropertyChangeSupport;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.CollisionBehavior;
@@ -593,7 +592,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void destroy() {
 	lock.lock();
 	try{
-	    final SpacePartitioningGrid grid = getContainingGrid();
+	    final SpacePartitioningGrid<PositionedRenderable> grid = getContainingGrid();
+	    if(grid != null)
+	     grid.remove(this);//TODO: This occasionally throws exceptions because the grid doesn't always contain it.
+	    /*
 	    if(grid !=null){
 		try{World.relevanceExecutor.submit(new Runnable(){
 		    @Override
@@ -601,6 +603,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 			grid.remove(WorldObject.this);
 		    }}).get();}catch(Exception e){throw new RuntimeException(e);}
 	    }//end if(NEW MODE and have grid)
+	    */
 	    setContainingGrid(null);
 	    // Send it to the land of wind and ghosts.
 	    setActive(false);

@@ -109,14 +109,14 @@ public class Model {
 	double maxX=0,maxY=0,maxZ = 0;
 	final TransparentTriangleList ttList = getTransparentTriangleList();
 	if(ttList != null){
-	    final Vector3D mV = ttList.getMaximumVertexDims();
+	    final Vector3D mV = ttList.getMinimumVertexDims();
 	    maxX = mV.getX();
 	    maxY = mV.getY();
 	    maxZ = mV.getZ();
 	    }
 	final TriangleList tList = getTriangleList();
 	if(tList != null){
-	    final Vector3D mV = tList.getMaximumVertexDims();
+	    final Vector3D mV = tList.getMinimumVertexDims();
 	    maxX = Math.min(mV.getX(),maxX);
 	    maxY = Math.min(mV.getY(),maxY);
 	    maxZ = Math.min(mV.getZ(),maxZ);

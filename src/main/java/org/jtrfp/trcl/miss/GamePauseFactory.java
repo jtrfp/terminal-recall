@@ -64,7 +64,6 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 
 	@Override
 	public void destruct(Mission target) {
-	    new Exception("destruct()").printStackTrace();
 	    getTr().removePropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	    getMenuSystem().removeMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
 	    getMenuSystem().removeMenuItem(PAUSE_MENU_PATH);

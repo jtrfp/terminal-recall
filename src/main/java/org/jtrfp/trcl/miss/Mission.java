@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.miss;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SkySystem;
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.MatchDirection;
@@ -91,6 +93,8 @@ public class Mission {
     private NAVObjective currentNavTarget;
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private GameShell gameShell;
+    private final RunStateListener runStateListener = new RunStateListener();
+    private WeakPropertyChangeListener weakRunStateListener;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -126,9 +130,21 @@ public class Mission {
 		 ((TVF3Game)game).levelLoadingScreen,
 		 ((TVF3Game)game).upfrontDisplay
 	    };
+	tr.addPropertyChangeListener(
+		TRFactory.RUN_STATE, 
+		weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr));
 	tr.setRunState(new ConstructedState(){});
 	Features.init(this);//TODO: Remove when Mission becomes a Feature
     }// end Mission
+    
+    private class RunStateListener implements PropertyChangeListener {
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final Object newState = evt.getNewValue();
+	    if(newState instanceof Game.GameDestructingMode)
+		abort();
+	}//end propertyChange(...)
+    }//end RunStateListener
     
     public Result go() {
 	tr.setRunState(new LoadingState(){});

@@ -429,7 +429,7 @@ public class TVF3Game implements Game {
 	    
 	    public void abort(){
 		tr.setRunState(new GameDestructingMode(){});
-		abortCurrentMission();
+		//abortCurrentMission();
 		Features.destruct(this);
 		try{setLevelIndex(-1);}
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
@@ -453,7 +453,7 @@ public class TVF3Game implements Game {
 		 tr.getDefaultGrid().remove(player);
 	    }
 
-	    public void abortCurrentMission(){//TODO: Replace with RunMode PCL
+	    public void abortCurrentMission(){
 		tr.getThreadManager().setPaused(true);
 		synchronized(startupTask){
 		    if(startupTask[0]!=null)

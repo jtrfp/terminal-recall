@@ -136,8 +136,8 @@ public class TVF3Game implements Game {
 	    private boolean inGameplay	=false;
 	    private DashboardLayout dashboardLayout;
 	    
-	    public TVF3Game(TR tr) {
-		this.tr = tr;
+	    public TVF3Game() {
+		this.tr = Features.get(Features.getSingleton(), TR.class);
 		tr.setRunState(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};

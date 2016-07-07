@@ -330,48 +330,56 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}// end for(triangles)
 	cachedMaximumVertexValue=result;
 	}
-	Vector3D result = new Vector3D(Double.POSITIVE_INFINITY,
-		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+	//reset
+	double mx=Double.POSITIVE_INFINITY,my=Double.POSITIVE_INFINITY,mz=Double.POSITIVE_INFINITY;
+	//max
 	for (Triangle[] frame : t) {
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
-		    double v;
+		    //double v;
 		    final Vector3D pos = tri.getVertices()[i].getPosition();
-		    v = pos.getX();
-		    result = result.getX() > v ? new Vector3D(v, result.getY(),
-			    result.getZ()) : result;
-		    v = pos.getY();
-		    result = result.getY() > v ? new Vector3D(result.getX(), v,
-			    result.getZ()) : result;
-		    v = pos.getZ();
-		    result = result.getZ() > v ? new Vector3D(result.getX(),
-			    result.getY(), v) : result;
+		    //v = pos.getX();
+		    mx = Math.min(mx, pos.getX());
+		    /*result = result.getX() > v ? new Vector3D(v, result.getY(),
+			    result.getZ()) : result;*/
+		    //v = pos.getY();
+		    my = Math.min(my, pos.getY());
+		    /*result = result.getY() > v ? new Vector3D(result.getX(), v,
+			    result.getZ()) : result;*/
+		    //v = pos.getZ();
+		    mz = Math.min(mz, pos.getZ());
+		    /*result = result.getZ() > v ? new Vector3D(result.getX(),
+			    result.getY(), v) : result;*/
 		}// end for(vertex)
 	    }// end for(triangle)
 	}// end for(triangles)
-	cachedMinimumVertexDims=result;
-	
-	result = Vector3D.ZERO;
+	cachedMinimumVertexDims=new Vector3D(mx,my,mz);
+	//reset
+	mx = 0; my = 0; mz = 0;
+	//max
 	for (int index=0; index<t.length; index++) {
 	    final Triangle []frame = t[index];
 	    assert (frame != null):"Frame intolerably null at index "+index+".";//Verify null frame is a race condition.
 	    for (Triangle tri : frame) {
 		for (int i = 0; i < 3; i++) {
-		    double v;
+		    //double v;
 		    final Vector3D pos = tri.getVertices()[i].getPosition();
-		    v = pos.getX();
-		    result = result.getX() < v ? new Vector3D(v, result.getY(),
-			    result.getZ()) : result;
-		    v = pos.getY();
-		    result = result.getY() < v ? new Vector3D(result.getX(), v,
-			    result.getZ()) : result;
-		    v = pos.getZ();
-		    result = result.getZ() < v ? new Vector3D(result.getX(),
-			    result.getY(), v) : result;
+		    //v = pos.getX();
+		    mx = Math.max(mx, pos.getX());
+		    /*result = result.getX() < v ? new Vector3D(v, result.getY(),
+			    result.getZ()) : result;*/
+		    //v = pos.getY();
+		    my = Math.max(my, pos.getY());
+		    /*result = result.getY() < v ? new Vector3D(result.getX(), v,
+			    result.getZ()) : result;*/
+		    //v = pos.getZ();
+		    mz = Math.max(mz, pos.getZ());
+		    /*result = result.getZ() < v ? new Vector3D(result.getX(),
+			    result.getY(), v) : result;*/
 		}// end for(vertex)
 	    }// end for(triangle)
 	}// end for(triangles)
-	cachedMaximumVertexDims=result;
+	cachedMaximumVertexDims=new Vector3D(mx,my,mz);
     }//calculateMaxDims()
 
     /**

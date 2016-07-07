@@ -92,20 +92,36 @@ public class CollisionManager {
     }//end newPerformCollisionTests()
     
     private void processNeighbors(Vector3D orig, Collection<Positionable> thisCube){
-	    Collection<Positionable> other;
-	    //X,Z+1
-	    other = pairBuffer.get(new Vector3D(orig.getX(),orig.getY(),incLoop(orig.getZ())));
-	    if(other != null)
-	     bidiProcessCubes(thisCube,other);
-	    //X+1,Z
-	    other = pairBuffer.get(new Vector3D(incLoop(orig.getX()),orig.getY(),orig.getZ()));
-	    if(other != null)
-	     bidiProcessCubes(thisCube,other);
-	    //X+1, Z+1
-	    other = pairBuffer.get(new Vector3D(incLoop(orig.getX()),orig.getY(),incLoop(orig.getZ())));
-	    if(other != null)
-	     bidiProcessCubes(thisCube,other);
-    }
+	double x=orig.getX(), y=orig.getY(), z=orig.getZ();
+	double x1=incLoop(x), y1=incLoop(y), z1=incLoop(z);
+	Collection<Positionable> other;
+	//X,Z+1
+	other = pairBuffer.get(new Vector3D(x,y,z1));
+	if(other != null)
+	    bidiProcessCubes(thisCube,other);
+	//X+1,Z
+	other = pairBuffer.get(new Vector3D(x1,y,z));
+	if(other != null)
+	    bidiProcessCubes(thisCube,other);
+	//X+1, Z+1
+	other = pairBuffer.get(new Vector3D(x1,y,z1));
+	if(other != null)
+	    bidiProcessCubes(thisCube,other);
+
+	//// Y+1
+	//X,Z+1
+	other = pairBuffer.get(new Vector3D(x,y1,z1));
+	if(other != null)
+	    bidiProcessCubes(thisCube,other);
+	//X+1,Z
+	other = pairBuffer.get(new Vector3D(x1,y1,z));
+	if(other != null)
+	    bidiProcessCubes(thisCube,other);
+	//X+1, Z+1
+	other = pairBuffer.get(new Vector3D(x1,y1,z1));
+	if(other != null)
+	    bidiProcessCubes(thisCube,other);
+    }//end processNeighbors
     
     private double incLoop(double coord){
 	coord++;

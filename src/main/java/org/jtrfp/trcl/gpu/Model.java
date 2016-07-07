@@ -106,22 +106,22 @@ public class Model {
     }//end getMaximumVertexValue()
     
     public Vector3D getMinimumVertexDims(){
-	double maxX=0,maxY=0,maxZ = 0;
+	double minX=0,minY=0,minZ=0;
 	final TransparentTriangleList ttList = getTransparentTriangleList();
 	if(ttList != null){
 	    final Vector3D mV = ttList.getMinimumVertexDims();
-	    maxX = mV.getX();
-	    maxY = mV.getY();
-	    maxZ = mV.getZ();
+	    minX = mV.getX();
+	    minY = mV.getY();
+	    minZ = mV.getZ();
 	    }
 	final TriangleList tList = getTriangleList();
 	if(tList != null){
 	    final Vector3D mV = tList.getMinimumVertexDims();
-	    maxX = Math.min(mV.getX(),maxX);
-	    maxY = Math.min(mV.getY(),maxY);
-	    maxZ = Math.min(mV.getZ(),maxZ);
+	    minX = Math.min(mV.getX(),minX);
+	    minY = Math.min(mV.getY(),minY);
+	    minZ = Math.min(mV.getZ(),minZ);
 	    }
-	return new Vector3D(maxX,maxY,maxZ);
+	return new Vector3D(minX,minY,minZ);
     }//end getMinimumVertexValue()
 
     /**

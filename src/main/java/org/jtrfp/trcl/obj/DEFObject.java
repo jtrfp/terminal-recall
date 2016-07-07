@@ -1095,9 +1095,19 @@ public void destroy(){
 	public void setVertexID(int vertexID) {
 	    this.vertexID = vertexID;
 	}
+	/**
+	 * 
+	 * @return size in modern units
+	 * @since Jul 6, 2016
+	 */
 	public double getSize() {
 	    return size;
 	}
+	/**
+	 * Size in modern units
+	 * @param size
+	 * @since Jul 6, 2016
+	 */
 	public void setSize(double size) {
 	    this.size = size;
 	}

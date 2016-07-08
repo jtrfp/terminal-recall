@@ -91,19 +91,24 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	@Override
 	public void apply(Mission target) {
 	    setTarget(target);
-	    final Game game = target.getGame();
-	    final ResourceManager rm = getTr().getResourceManager();
-
-	    tunnelMode = new Object[]{
-		    ((TVF3Game)game).upfrontDisplay,
-		    rm.getDebrisSystem(),
-		    rm.getPowerupSystem(),
-		    rm.getProjectileFactories(),
-		    rm.getExplosionFactory(),
-		    rm.getSmokeSystem(),
-		    tunnelGrid
-	    };
 	}//end apply()
+	
+	private Object [] getTunnelMode(){
+	    if(tunnelMode == null){
+		final ResourceManager rm = getTr().getResourceManager();
+		final Game game = getTarget().getGame();
+		tunnelMode = new Object[]{
+			((TVF3Game)game).upfrontDisplay,
+			rm.getDebrisSystem(),
+			rm.getPowerupSystem(),
+			rm.getProjectileFactories(),
+			rm.getExplosionFactory(),
+			rm.getSmokeSystem(),
+			tunnelGrid
+		};
+	    }//end if(null)
+		return tunnelMode;
+	}//end getTunnelMode()
 
 	@Override
 	public void destruct(Mission target) {
@@ -261,7 +266,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    getTr().setRunState(new TunnelState(){});
 	    setCurrentTunnel(tunnelToEnter);
 	    getTr().setRunState(new TunnelState(){});
-	    getTarget().setDisplayMode(tunnelMode);
+	    getTarget().setDisplayMode(getTunnelMode());
 	    player.setActive(true);
 	}//end enterTunnel()
 

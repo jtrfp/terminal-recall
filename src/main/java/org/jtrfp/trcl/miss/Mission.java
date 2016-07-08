@@ -74,14 +74,14 @@ public class Mission {
     					= new double[3];
     private List<NAVSubObject> 	navSubObjects;
     private ObjectDirection 	playerStartDirection;
-    private final Game 		game;
-    private final String 	levelName;
+    private Game 		game;
+    private String       	levelName;
     private OverworldSystem 	overworldSystem;
     private final Result[]	missionEnd = new Result[]{null};
     private int			groundTargetsDestroyed=0,
 	    			airTargetsDestroyed=0,
 	    			foliageDestroyed=0;
-    private final boolean	showIntro;
+    private boolean	        showIntro = true;
     private volatile MusicPlaybackEvent
     				bgMusic;
     private final Object	missionLock = new Object();
@@ -94,7 +94,7 @@ public class Mission {
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private GameShell gameShell;
     private final RunStateListener runStateListener = new RunStateListener();
-    private WeakPropertyChangeListener weakRunStateListener;
+    private WeakPropertyChangeListener weakRunStateListener; // HARD REFERENCE; DO NOT REMOVE.
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -118,18 +118,11 @@ public class Mission {
        public interface ChamberState    extends OverworldState{}
        public interface TunnelState     extends PlayerActivity{}
     
-    public Mission(TR tr, Game game, LVLFile lvl, String levelName, boolean showIntro) {
-	this.tr 	= tr;
+    public Mission(LVLFile lvl) {
+	this.tr 	= Features.get(Features.getSingleton(), TR.class);
 	this.lvl 	= lvl;
-	this.game 	= game;
-	this.levelName 	= levelName;
-	this.showIntro	= showIntro;
 	this.displayHandler = new DisplayModeHandler(this.getPartitioningGrid());
 	tr.setRunState(new ConstructingState(){});
-	levelLoadingMode = new Object[]{
-		 ((TVF3Game)game).levelLoadingScreen,
-		 ((TVF3Game)game).upfrontDisplay
-	    };
 	tr.addPropertyChangeListener(
 		TRFactory.RUN_STATE, 
 		weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr));
@@ -174,7 +167,7 @@ public class Mission {
 	camera.setHeading(Vector3D.PLUS_I);
 	camera.setTop(Vector3D.PLUS_J);
 	((TVF3Game)game).levelLoadingMode();
-	displayHandler.setDisplayMode(levelLoadingMode);
+	displayHandler.setDisplayMode(getLevelLoadingMode());
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
@@ -357,6 +350,19 @@ public class Mission {
 	return missionEnd[0];
 	}//end sync
     }// end go()
+    
+    private Object [] getLevelLoadingMode(){
+	if(levelLoadingMode == null){
+	    final Game game = getGame();
+	    if(game == null)
+		throw new IllegalStateException("game property intolerably null.");
+	    levelLoadingMode = new Object[]{
+		 ((TVF3Game)game).levelLoadingScreen,
+		 ((TVF3Game)game).upfrontDisplay
+	    };
+	    }
+	return levelLoadingMode;
+    }//end getLevelLoadingMode
 
     public NAVObjective currentNAVObjective() {
 	if (navs.isEmpty())
@@ -738,5 +744,21 @@ public class Mission {
     }
     public void setGameShell(GameShell gameShell) {
         this.gameShell = gameShell;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
+    public boolean isShowIntro() {
+        return showIntro;
+    }
+
+    public void setShowIntro(boolean showIntro) {
+        this.showIntro = showIntro;
     }
 }// end Mission

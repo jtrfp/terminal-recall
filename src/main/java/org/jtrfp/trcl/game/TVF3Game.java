@@ -40,6 +40,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
@@ -224,9 +225,14 @@ public class TVF3Game implements Game {
 	    
 	    public void setLevelDirect(String lvlFileName) throws FileNotFoundException, IllegalAccessException, IOException, FileLoadException{
 		setCurrentMission(null);
-		setCurrentMission(new Mission(tr, this, tr.getResourceManager()
-			.getLVL(lvlFileName), prepareLevelName(lvlFileName), getLevelIndex() % 3 == 0));
-	    }
+		final LVLFile lvl = tr.getResourceManager()
+			.getLVL(lvlFileName);
+		final Mission newMission = new Mission(lvl);
+		newMission.setGame(this);
+		newMission.setLevelName(prepareLevelName(lvlFileName));
+		newMission.setShowIntro(getLevelIndex() % 3 == 0);
+		setCurrentMission(newMission);
+	    }//end setLevelDirect()
 	    
 	    private String prepareLevelName(String rawName){
 		String result;

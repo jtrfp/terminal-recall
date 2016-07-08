@@ -64,8 +64,8 @@ public class CollisionManager {
 		    processCubes(thisCube,thisCube);
 		    Vector3D orig = cube.getKey();
 		    processNeighbors(orig,thisCube);
-		    orig = new Vector3D(orig.getX(),incLoop(orig.getY()),orig.getZ());
-		    processNeighbors(orig,thisCube);
+		    //orig = new Vector3D(orig.getX(),incLoop(orig.getY()),orig.getZ());
+		    //processNeighbors(orig,thisCube);
 		    }
 		else {//EVERYWHERE
 		    if(everywhere==null)

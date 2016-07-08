@@ -23,6 +23,8 @@ import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.DEFObject.HitBox;
+import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithDEFObjects extends Behavior implements CollisionBehavior {
@@ -39,7 +41,7 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 	    final HitBox [] hitBoxes = def.getHitBoxes();
 	    final WorldObject parent = getParent();
 	   
-	    final double [] defPos = def.getPosition();
+	    final double [] defPos = def.getPositionWithOffset();
 	    final double [] pPos   = parent.getPosition();
 	    
 	    otherDEF=new WeakReference<DEFObject>(def);
@@ -60,15 +62,21 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 		for(HitBox box:hitBoxes){
 		    final double limit = boundingRadius+box.getSize();
 		    final double [] vPos = Vect3D.add(mSource.getVertex(box.getVertexID()),defPos,workTriplet);
-		    Vect3D.subtract(workTriplet, pPos, vPos);
-		    Vect3D.abs(workTriplet, workTriplet);
+		    Vect3D.subtract(vPos, pPos, vPos);
+		    Vect3D.abs(vPos, vPos);
 		    boolean localDoCollision = true;
-		    for(int i=0; i<3; i++)
-		     localDoCollision &= TRFactory.rolloverDistance(workTriplet[i]) < limit;
+		    for(int i=0; i<3; i++){
+			final double dist = TRFactory.rolloverDistance(vPos[i]);
+			//if(((Projectile)getParent()).getObjectOfOrigin() instanceof Player)
+			 //System.out.println("hBox "+def.getModel().getDebugName()+" dist="+dist+" limit="+limit);
+			localDoCollision &= dist < limit;
+		    }
 		    doCollision |= localDoCollision;
 		}//end for(hitBoxes)
-		if(doCollision)
+		if(doCollision){
+		    //System.out.println("HBOX COLLISION "+other.getModel().getDebugName());
 		 parent.probeForBehaviors(sub, DEFObjectCollisionListener.class);
+		 }
 	    }//end if(custom hitboxes)
 	}//end if(DEFObject)
     }//end _proposeCollision()
@@ -100,7 +108,8 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 	@Override
 	public void submit(DEFObjectCollisionListener l){
 	    DEFObject other = otherDEF.get();
-	    if(other!=null)l.collidedWithDEFObject(other);
+	    if(other!=null)
+		l.collidedWithDEFObject(other);
 	}//end submit(...)
     };//end Submitter
 }

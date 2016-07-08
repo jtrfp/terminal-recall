@@ -64,7 +64,12 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class TVF3Game implements Game {
-    public static final String VOX = "vox";
+    //// PROPERTIES
+    public static final String VOX              = "vox",
+	                       GAME_VERSION     = "gameVersion",
+	                       PLAYER_NAME      = "playerName",
+	                       DIFFICULTY       = "difficulty",
+	                       MISSION          = "mission";
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private GameVersion gameVersion;
     private GameShell gameShell;

@@ -15,11 +15,13 @@ package org.jtrfp.trcl.miss;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.NAVSystem;
@@ -49,6 +51,7 @@ import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Projectile;
@@ -69,7 +72,7 @@ public class Mission {
     private final TR 		tr;
     private final List<NAVObjective> 
     				navs	= new LinkedList<NAVObjective>();
-    private final LVLFile 	lvl;
+    private LVLFile 	        lvl;
     private double[] 		playerStartPosition 
     					= new double[3];
     private List<NAVSubObject> 	navSubObjects;
@@ -95,6 +98,7 @@ public class Mission {
     private GameShell gameShell;
     private final RunStateListener runStateListener = new RunStateListener();
     private WeakPropertyChangeListener weakRunStateListener; // HARD REFERENCE; DO NOT REMOVE.
+    private String lvlFileName;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -118,9 +122,8 @@ public class Mission {
        public interface ChamberState    extends OverworldState{}
        public interface TunnelState     extends PlayerActivity{}
     
-    public Mission(LVLFile lvl) {
+    public Mission() {
 	this.tr 	= Features.get(Features.getSingleton(), TR.class);
-	this.lvl 	= lvl;
 	this.displayHandler = new DisplayModeHandler(this.getPartitioningGrid());
 	tr.setRunState(new ConstructingState(){});
 	tr.addPropertyChangeListener(
@@ -170,6 +173,7 @@ public class Mission {
 	displayHandler.setDisplayMode(getLevelLoadingMode());
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
+	    final LVLFile lvl = getLVLFile();
 	    final ResourceManager rm = tr.getResourceManager();
 	    final Player player      = ((TVF3Game)getGameShell().getGame()).getPlayer();
 	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
@@ -351,6 +355,12 @@ public class Mission {
 	}//end sync
     }// end go()
     
+    private LVLFile getLVLFile() throws FileLoadException, IOException, IllegalAccessException {
+	if(lvl == null)
+	    lvl = getTr().getResourceManager().getLVL(getLvlFileName());
+	return lvl;
+    }
+
     private Object [] getLevelLoadingMode(){
 	if(levelLoadingMode == null){
 	    final Game game = getGame();
@@ -760,5 +770,13 @@ public class Mission {
 
     public void setShowIntro(boolean showIntro) {
         this.showIntro = showIntro;
+    }
+
+    public String getLvlFileName() {
+        return lvlFileName;
+    }
+
+    public void setLvlFileName(String lvlFileName) {
+        this.lvlFileName = lvlFileName;
     }
 }// end Mission

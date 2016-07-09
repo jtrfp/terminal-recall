@@ -56,6 +56,7 @@ public class RunMe{
 		Features.setSingleton(features);
 		Features.init(features);
 		final TR tr = Features.get(Features.getSingleton(), TR.class);
+		tr.trInit();
 		Features.get(tr, GameShell.class).startShell();
 		context.close();
 		}//end main()

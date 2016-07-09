@@ -25,7 +25,7 @@ import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.ColorUtils;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
-import org.jtrfp.trcl.obj.CloudCeiling;
+import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 
@@ -111,14 +111,16 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		    double xPos = x * cloudTileSideSize;
 		    double zPos = z * cloudTileSideSize;
 		    
-		    final CloudCeiling rq = new CloudCeiling(m);//TODO: Refactor out-  the class does nothing special
+		    final WorldObject cloud = new WorldObject();
+		    m.setDebugName("SkySystem.CloudCeiling");
+		    cloud.setModel(m);
 		    
-		    final double[] rqPos = rq.getPosition();
+		    final double[] rqPos = cloud.getPosition();
 		    rqPos[0] = xPos;
 		    rqPos[1] = ceilingHeight;
 		    rqPos[2] = zPos;
-		    rq.notifyPositionChange();
-		    add(rq);
+		    cloud.notifyPositionChange();
+		    add(cloud);
 		}// end for(x)
 	    }// end for(z)
 	} catch (Exception e) {

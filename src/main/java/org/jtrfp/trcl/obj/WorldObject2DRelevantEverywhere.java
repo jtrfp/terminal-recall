@@ -12,18 +12,12 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
 
 public abstract class WorldObject2DRelevantEverywhere extends WorldObject2D implements
 	RelevantEverywhere {
 
-    public WorldObject2DRelevantEverywhere(TR tr) {
-	super(tr);
-    }
-
-    public WorldObject2DRelevantEverywhere(TR tr, Model model) {
-	super(tr,model);
+    public WorldObject2DRelevantEverywhere() {
+	super();
     }
     
 }//end WorldOBject2DVisibleEverywhere

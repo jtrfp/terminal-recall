@@ -25,16 +25,13 @@ import org.jtrfp.trcl.gpu.Model;
  */
 public class WorldObject2D extends WorldObject{
 
-    public WorldObject2D(TR tr){
-	super(tr);
+    public WorldObject2D(){
+	super();
 	setTop(Vector3D.PLUS_J);
 	setHeading(Vector3D.PLUS_K);
 	setRenderFlag(RenderFlags.IgnoreCamera);
-    }
-    public WorldObject2D(TR tr, Model m){
-	super(tr, m);
-	setRenderFlag(RenderFlags.IgnoreCamera);
-    }//end WorldObject2D
+    }//end constructor
+    
     @Override
     public boolean supportsLoop(){
 	return false;

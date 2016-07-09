@@ -46,8 +46,9 @@ private Rotation vectorHack = Rotation.IDENTITY;
 private VisibilitySwitchingBehavior visibilitySwitchingBehavior;
 private GameShell gameShell;
 
-    public NavArrow(TR tr, DashboardLayout layout, Point2D.Double size, String debugName) {//TODO: Accept outside width/height parms
-	super(tr);
+    public NavArrow(DashboardLayout layout, Point2D.Double size, String debugName) {//TODO: Accept outside width/height parms
+	super();
+	final TR tr = getTr();
 	final Model m = new Model(false, tr, debugName);
 	m.addTriangles(Triangle.quad2Triangles(size.getX(),size.getY(),0,0,0, true, getTexture(tr)));
 	//this.setRenderFlag(RenderFlags.IgnoreCamera);

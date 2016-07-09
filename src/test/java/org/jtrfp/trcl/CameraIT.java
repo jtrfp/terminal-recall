@@ -35,7 +35,7 @@ public class CameraIT {
 
     @Before
     public void setUp() throws Exception {
-	subject = new Camera(null);
+	subject = new Camera();
 	zeroPositionables = new Positionable[2];
 	for(int i=0; i<2; i++){
 	    Positionable pos = mock(Positionable.class);

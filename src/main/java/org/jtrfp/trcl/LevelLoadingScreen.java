@@ -33,7 +33,7 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
     public LevelLoadingScreen(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) throws IOException {
 	super();
 	InputStream is = null;
-	try{add(loadingMeterBar = new MeterBar(tr, 
+	try{add(loadingMeterBar = new MeterBar( 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/BlueWhiteGradient.png")),null,
 			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,

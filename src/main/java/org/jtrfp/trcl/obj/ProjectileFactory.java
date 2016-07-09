@@ -92,7 +92,10 @@ public class ProjectileFactory {
    	     }//end for(frames)
    	  Texture tex = new AnimatedTexture(new Sequencer(mt.getTimeInMillisPerFrame(),frames.length,false), frames);
 	     for(int i=0; i<projectiles.length; i++){
-	   	    projectiles[i]=new ProjectileBillboard(tr,weapon,tex,ExplosionType.Billow,debugName);}
+		    final ProjectileBillboard bb = new ProjectileBillboard(weapon,tex,ExplosionType.Billow);
+		    bb.setDebugName(debugName);
+	   	    projectiles[i]=bb; 
+	     }
    	 }//end (billboard)
    	 else if(modelingType instanceof ModelingType.BINModelingType){
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;

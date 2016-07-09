@@ -54,7 +54,7 @@ public class DebrisSystem extends RenderableSpacePartitioningGrid{
 	public Submitter<Debris> generateConsecutive(int numBlocks,
 		Submitter<Debris> populationTarget) {
 	    for(int i=0; i<numBlocks; i++){
-		populationTarget.submit(new Debris(tr));
+		populationTarget.submit(new Debris());
 	    }
 	    return populationTarget;
 	}//end generateConsective(...)

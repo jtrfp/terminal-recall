@@ -32,8 +32,9 @@ import org.jtrfp.trcl.snd.SoundTexture;
 
 public class ForceField extends WorldObject {
     private final CollidesWithPlayer cwp;
-    public ForceField(TR tr, int tunnelDia, int wallThickness) throws IOException, FileLoadException, IllegalAccessException {
-	super(tr);
+    public ForceField(int tunnelDia, int wallThickness) throws IOException, FileLoadException, IllegalAccessException {
+	super();
+	final TR tr = getTr();
 	final Texture eTex = new AnimatedTexture(new Sequencer(100, 4, false).setTimeOffset((long)(Math.random()*500)), 
 		    new VQTexture[]{
 		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(),null, false),

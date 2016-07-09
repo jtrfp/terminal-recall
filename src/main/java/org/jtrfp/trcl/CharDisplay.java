@@ -21,10 +21,10 @@ import org.jtrfp.trcl.obj.WorldObject2D;
 public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     private final SelectableTexture tex;
 
-    public CharDisplay(TR tr, RenderableSpacePartitioningGrid grid,
+    public CharDisplay(RenderableSpacePartitioningGrid grid,
 	    double glSize, GLFont font) {
-	super(tr);
-	final Model model = new Model(false, tr,"CharDisplay");
+	super();
+	final Model model = new Model(false, getTr(),"CharDisplay");
 	tex = new SelectableTexture(font.getTextures());
 	Triangle[] tris = Triangle.quad2Triangles(
 		new double[] { 0., glSize, glSize, 0. },// x

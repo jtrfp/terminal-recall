@@ -33,8 +33,9 @@ private GameShell gameShell;
 
 public interface FinishingRunState extends Mission.GameplayState{}
 
-    public Jumpzone(TR tr) {
-	super(tr);
+    public Jumpzone() {
+	super();
+	final TR tr = getTr();
 	try{setModel(tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));}
 	catch(Exception e){tr.showStopper(e);}
 	setVisible(false);

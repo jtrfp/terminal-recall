@@ -111,8 +111,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		    double xPos = x * cloudTileSideSize;
 		    double zPos = z * cloudTileSideSize;
 		    
-		    final CloudCeiling rq = new CloudCeiling(tr,
-			    m);
+		    final CloudCeiling rq = new CloudCeiling(m);//TODO: Refactor out-  the class does nothing special
 		    
 		    final double[] rqPos = rq.getPosition();
 		    rqPos[0] = xPos;

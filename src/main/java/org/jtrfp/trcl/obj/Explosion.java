@@ -24,8 +24,8 @@ import org.jtrfp.trcl.gpu.VQTexture;
 public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;
     private final ExplosionType type;
-    public Explosion(TR tr, ExplosionType type, String debugName) {
-	super(tr,type.getMillisPerFrame(),type.getAnimationFiles().length, debugName);
+    public Explosion(ExplosionType type, String debugName) {
+	super(type.getMillisPerFrame(),type.getAnimationFiles().length, debugName);
 	final Vector3D origin = type.getOrigin();
 	this.setModelOffset(
 		origin.getX()*type.getBillboardSize().getWidth()*-.5, 
@@ -37,7 +37,7 @@ public class Explosion extends OneShotBillboardEvent {
 	if(type.isRandomRotate())
 	    del.setRotationAngleRadians(2*Math.PI*Math.random());
 	else
-	    setRotationDelegate(new UpAlwaysCameraTopDelegate(tr.mainRenderer.getCamera()));
+	    setRotationDelegate(new UpAlwaysCameraTopDelegate(getTr().mainRenderer.getCamera()));
 	String [] aniFiles = type.getAnimationFiles();
 	VQTexture [] frames = new VQTexture[aniFiles.length];
 	try{for(int i=0; i<aniFiles.length;i++){

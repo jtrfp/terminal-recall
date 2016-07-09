@@ -239,7 +239,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 
 	public WorldObject getCockpit() {
 	    if(cockpit == null){
-		cockpit = new Cockpit(getTr());
+		cockpit = new Cockpit();
 		cockpit.setModel(getCockpitModel());
 		//cockpit.setModelOffset(0, -100, 0);
 		cockpit.addBehavior(new MatchPosition());
@@ -472,8 +472,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 
 	private class Cockpit extends WorldObject implements RelevantEverywhere{
 	    
-	    public Cockpit(TR tr) {
-		super(tr);
+	    public Cockpit() {
+		super();
 	    }
 	    
 	    @Override
@@ -565,7 +565,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	public NavArrow getNavArrow() {
 	    if(navArrow == null){
-		navArrow = new NavArrow(getTr(), null, new Point2D.Double(1000,1000), "ViewSelectFactory.Cockpit.NavArrow");
+		navArrow = new NavArrow(null, new Point2D.Double(1000,1000), "ViewSelectFactory.Cockpit.NavArrow");
 		navArrow.unsetRenderFlag(RenderFlags.IgnoreCamera);
 		navArrow.setVectorHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		navArrow.addBehavior(navArrowPositionMatch = new MatchPosition());
@@ -577,7 +577,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	public MiniMap getMiniMap() {
 	    if(miniMap == null){
-		miniMap = new MiniMap(getTr());
+		miniMap = new MiniMap();
 		miniMap.setImmuneToOpaqueDepthTest(true);
 		final CockpitLayout layout = getCockpitLayout();
 		final double mmSize = layout.getMiniMapRadius();

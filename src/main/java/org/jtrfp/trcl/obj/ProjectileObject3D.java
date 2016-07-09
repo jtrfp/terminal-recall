@@ -29,7 +29,8 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
     private WeakReference<WorldObject> objectOfOrigin = new WeakReference<WorldObject>(null);
     private Weapon weapon;
     public ProjectileObject3D(TR tr,Model m, Weapon w, ExplosionType explosionType){
-	super(tr,m);
+	super();
+	setModel(m);
 	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType,w.isHoning()));
 	addBehavior(new ReportsCollisionsToStdout().setEnable(false));
 	setWeapon(w);

@@ -88,7 +88,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	briefingScreen.setActive(true);
 	briefingScreen.setVisible(true);
 	
-	blackRectangle = new Sprite2D(tr,0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), false,"BriefingScreen.blackRectangle."+debugName);
+	blackRectangle = new Sprite2D(0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), false,"BriefingScreen.blackRectangle."+debugName);
 	add(blackRectangle);
 	blackRectangle.setImmuneToOpaqueDepthTest(true);
 	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);
@@ -151,7 +151,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		 rm.getRAWAsTexture(planetTextureFile, 
 			 getPalette(lvl), null, false, true),
 		 8,false,getPalette(lvl),null);
-	 planetObject = new WorldObject(tr,planetModel);
+	 planetObject = new WorldObject(planetModel);
 	 planetObject.setPosition(0, TRFactory.mapSquareSize*20, 0);
 	 add(planetObject);
 	 planetObject.setVisible(true);

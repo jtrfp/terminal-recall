@@ -310,7 +310,8 @@ public abstract class NAVObjective {
 		} else if(navSubObject instanceof CHK){///////////////////////////////////////////
 		    final CHK cp = (CHK)navSubObject;
 		    final Location3D loc3d = cp.getLocationOnMap();
-		    final Checkpoint chk = new Checkpoint(tr,"NAVObjective."+debugName);
+		    final Checkpoint chk = new Checkpoint();
+		    chk.setDebugName("NAVObjective."+debugName);
 		    final double [] chkPos = chk.getPosition();
 		    chkPos[0]=TRFactory.legacy2Modern(loc3d.getZ());
 		    chkPos[1]=TRFactory.legacy2Modern(loc3d.getY()+CHECKPOINT_HEIGHT_PADDING);
@@ -338,7 +339,7 @@ public abstract class NAVObjective {
 		} else if(navSubObject instanceof DUN){///////////////////////////////////////////
 		    final DUN xit = (DUN)navSubObject;
 		    final Location3D loc3d = xit.getLocationOnMap();
-		    final Jumpzone chk = new Jumpzone(tr);
+		    final Jumpzone chk = new Jumpzone();
 		    final double [] chkPos = chk.getPosition();
 		    chkPos[0]=TRFactory.legacy2Modern(loc3d.getZ());
 		    chkPos[1]=TRFactory.legacy2Modern(loc3d.getY());

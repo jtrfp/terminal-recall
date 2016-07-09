@@ -94,7 +94,7 @@ public class DEFObject extends WorldObject {
     //private WorldObject ruinObject;
     private ArrayList<WorldObject> subObjects = null;
     private final EnemyLogic logic;
-    private final EnemyDefinition def;
+    private final EnemyDefinition enemyDefinition;
     private boolean mobile,canTurn,foliage,boss,
     shieldGen,isRuin,spinCrash,ignoringProjectiles;
     private Anchoring anchoring;
@@ -103,11 +103,11 @@ public class DEFObject extends WorldObject {
     public static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
     private final ArrayList<Object> hardReferences = new ArrayList<Object>();
     private GameShell gameShell;
-    private TR tr;
 
-    public DEFObject(final TR tr, EnemyDefinition def, EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
-	super(tr);
-	this.def=def;
+    public DEFObject(EnemyDefinition def, EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
+	super();
+	this.enemyDefinition=def;
+	final TR tr = getTr();
 	if(def==null){
 	    logic = null;
 	    return;
@@ -588,13 +588,13 @@ public void destroy(){
 
     private void defaultModelAssignment() throws IllegalAccessException, FileLoadException, IOException{
 	setModel(getTr().getResourceManager().getBINModel(
-		def.getComplexModelFile(), 
+		enemyDefinition.getComplexModelFile(), 
 		getTr().getGlobalPaletteVL(), null, null));
     }
 
     private void alienModelAssignment() throws FileLoadException, IOException, IllegalAccessException{
 	setModel(getTr().getResourceManager().getBINModel(
-		def.getSimpleModel(), 
+		enemyDefinition.getSimpleModel(), 
 		getTr().getGlobalPaletteVL(), null, null));
     }
 
@@ -607,11 +607,11 @@ public void destroy(){
 	ed.setLogic(EnemyLogic.groundDumb);
 	ed.setDescription("auto-generated enemy rubble def");
 	ed.setPowerupProbability(0);
-	ed.setComplexModelFile(def.getSimpleModel());
+	ed.setComplexModelFile(enemyDefinition.getSimpleModel());
 	EnemyPlacement simplePlacement = pl.clone();
 
 	// if(ed.getComplexModelFile()!=null){
-	final DEFObject ruin = new DEFObject(getTr(),ed,simplePlacement);
+	final DEFObject ruin = new DEFObject(ed,simplePlacement);
 	ruin.setActive(false);
 	ruin.setVisible(false);
 	ruin.setRuin(true);
@@ -632,7 +632,7 @@ public void destroy(){
     }//end setRuinObject(...)
 
     private void proposeRandomYell(){
-	final String sfxFile = def.getBossYellSFXFile();
+	final String sfxFile = enemyDefinition.getBossYellSFXFile();
 	if(sfxFile != null && !sfxFile.toUpperCase().contentEquals("NULL")){
 	    final SoundTexture soundTexture = getTr().getResourceManager().soundTextures.get(sfxFile);
 	    final RandomSFXPlayback randomSFXPlayback = new RandomSFXPlayback()
@@ -645,13 +645,13 @@ public void destroy(){
 
     private void projectileFiringBehavior(){
 	ProjectileFiringBehavior pfb;
-	Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
+	Integer [] firingVertices = Arrays.copyOf(enemyDefinition.getFiringVertices(),enemyDefinition.getNumRandomFiringVertices());
 	addBehavior(pfb=new ProjectileFiringBehavior().
 		setProjectileFactory(getTr().getResourceManager().
-			getProjectileFactories()[def.getWeapon().ordinal()]).setFiringPositions(getModelSource(),firingVertices)
+			getProjectileFactories()[enemyDefinition.getWeapon().ordinal()]).setFiringPositions(getModelSource(),firingVertices)
 		);
 
-	final String fireSfxFile = def.getBossFireSFXFile();
+	final String fireSfxFile = enemyDefinition.getBossFireSFXFile();
 	if(!fireSfxFile.toUpperCase().contentEquals("NULL"))
 	    pfb.setFiringSFX(getTr().getResourceManager().soundTextures.get(fireSfxFile));
 	try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
@@ -823,7 +823,7 @@ public void destroy(){
 	projectileFiringBehavior();
 	setVisible(false);
 	final ResourceManager rm = getTr().getResourceManager();
-	setModel(rm.getBINModel(def.getSimpleModel(), getTr().getGlobalPaletteVL(), null, null));
+	setModel(rm.getBINModel(enemyDefinition.getSimpleModel(), getTr().getGlobalPaletteVL(), null, null));
 	final int towerShields = pl.getStrength();//Not sure exactly what should go here.
 	final int alienShields = pl.getStrength();
 	final int totalShields = towerShields + alienShields;
@@ -832,7 +832,7 @@ public void destroy(){
 	    @Override
 	    public void healthBelowThreshold() {
 		final Model oldModel = getModel();
-		try{setModel(rm.getBINModel(def.getComplexModelFile(), getTr().getGlobalPaletteVL(), null, null));}
+		try{setModel(rm.getBINModel(enemyDefinition.getComplexModelFile(), getTr().getGlobalPaletteVL(), null, null));}
 		catch(Exception e){e.printStackTrace();}
 		probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
 		probeForBehavior(HorizAimAtPlayerBehavior.class).setEnable(true);
@@ -1027,7 +1027,7 @@ public void destroy(){
 
     public BasicModelSource getModelSource(){
 	if(rotatedModelSource==null){//Assemble our decorator sandwich.
-	    final String complexModel = def.getComplexModelFile();
+	    final String complexModel = enemyDefinition.getComplexModelFile();
 	    if(complexModel==null)
 		return null;
 	    final ResourceManager rm = getTr().getResourceManager();
@@ -1035,9 +1035,9 @@ public void destroy(){
 	    final BINFileExtractor bfe   = new BINFileExtractor(rm);
 	    bfe.setDefaultTexture(getTr().gpu.get().textureManager.get().getFallbackTexture());
 	    try{bmt= new BufferedModelTarget();
-	    bfe.extract(rm.getBinFileModel(def.getComplexModelFile()), (BufferedModelTarget)bmt);}
+	    bfe.extract(rm.getBinFileModel(enemyDefinition.getComplexModelFile()), (BufferedModelTarget)bmt);}
 	    catch(UnrecognizedFormatException e){//Animated BIN
-		try{final AnimationControl ac = rm.getAnimationControlBIN(def.getComplexModelFile());
+		try{final AnimationControl ac = rm.getAnimationControlBIN(enemyDefinition.getComplexModelFile());
 		List<String> bins = ac.getBinFiles();
 		bmt = new InterpolatedAnimatedModelSource();
 		for(String name:bins){
@@ -1078,7 +1078,7 @@ public void destroy(){
 	if(model!=null)
 	    max = model.getMaximumVertexDims();
 	else{
-	    max = new Vector3D((def.getBoundingBoxRadius()/TRFactory.crossPlatformScalar),(def.getBoundingBoxRadius()/TRFactory.crossPlatformScalar),0)
+	    max = new Vector3D((enemyDefinition.getBoundingBoxRadius()/TRFactory.crossPlatformScalar),(enemyDefinition.getBoundingBoxRadius()/TRFactory.crossPlatformScalar),0)
 	    .scalarMultiply(1./1.5);
 	    //max = Vector3D.ZERO;
 	}
@@ -1161,9 +1161,7 @@ public void destroy(){
 	this.gameShell = gameShell;
     }
 
-    public TR getTr(){
-	if(tr == null)
-	    tr = Features.get(Features.getSingleton(),TR.class);
-	return tr;
+    public EnemyDefinition getEnemyDefinition() {
+        return enemyDefinition;
     }
 }//end DEFObject

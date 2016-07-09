@@ -32,7 +32,7 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
     public EarlyLoadingScreen(final TR tr, GLFont font) throws IOException {
 	super();
 	InputStream is = null;
-	try{startupLogo = new Sprite2D(tr, .000000001, 2, 2, 
+	try{startupLogo = new Sprite2D(.000000001, 2, 2, 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is=VQTexture.class
 			.getResourceAsStream("/TrclLogo.png")),null, "logoImage", false), true, "EarlyLoadingScreen");}
 	finally{if(is!=null)is.close();}

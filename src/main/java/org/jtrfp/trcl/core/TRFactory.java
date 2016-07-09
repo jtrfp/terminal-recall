@@ -206,8 +206,8 @@ public final class TRFactory implements FeatureFactory<Features>{
     }
 
     public static final class TR implements UncaughtExceptionHandler, Feature<Features>{
-	public final TRFutureTask<GPU> 		gpu;
-	public final TRFutureTask<SoundSystem>	soundSystem;
+	public TRFutureTask<GPU> 		gpu;
+	public TRFutureTask<SoundSystem>	soundSystem;
 	private Player 				player;
 	public  RootWindow 		        rootWindow;
 	private MenuSystem       		menuSystem;
@@ -217,12 +217,12 @@ public final class TRFactory implements FeatureFactory<Features>{
 	darkIsClearPaletteVL;
 	//private final KeyStatus 		keyStatus;
 	private ResourceManager 		resourceManager;
-	public final ThreadManager 		threadManager;
-	public final Renderer               	mainRenderer/*, secondaryRenderer*/;
+	public ThreadManager 		threadManager;
+	public Renderer               	mainRenderer/*, secondaryRenderer*/;
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	//private Reporter 			reporter;
 	//private Game 				game;
-	private final PropertyChangeSupport	pcSupport;
+	private final PropertyChangeSupport	pcSupport = new PropertyChangeSupport(this);
 
 	private World 				world;
 	private GameShell			gameShell;
@@ -239,33 +239,20 @@ public final class TRFactory implements FeatureFactory<Features>{
 	public TR(){
 	    threadManager = null;
 	    soundSystem   = null;
-	    pcSupport     = null;
 	    mainRenderer  = null;
 	    gpu           = null;
 	}//end TR()
-
-	public TR(boolean filler){
-	    //this.config       = configManager;
-	    //this.configWindow = configWindow;
-	    //this.rootWindow   = rootWindow;
-	    //this.configManager= configManager;
-
-	    //rootWindow.initialize();
-	    /*
-	    menuSystem = Features.get(rootWindow, MenuSystem.class);
-
-	    menuSystem.addMenuItem(CONFIG_MENU_PATH);
-	    menuSystem.setMenuItemEnabled(true, CONFIG_MENU_PATH);
-	    menuSystem.addMenuItemListener(configMenuItemListener, CONFIG_MENU_PATH);
-
-	    menuSystem.addMenuItem(EXIT_MENU_PATH);
-	    menuSystem.setMenuItemEnabled(true, EXIT_MENU_PATH);
-	    menuSystem.addMenuItemListener(exitMenuItemListener, EXIT_MENU_PATH);
-	     */
+	
+	/**
+	 * Temporary method until components are made into Features.
+	 * This method is called after the constructor to avoid recursive inits of TR
+	 * 
+	 * @since Jul 9, 2016
+	 */
+	public void trInit(){
 	    try{new OutputDump();}
 	    catch(Exception e){e.printStackTrace();}
 	    //AutoInitializable.Initializer.initialize(this);
-	    pcSupport = new PropertyChangeSupport(this);
 	    //keyStatus = new KeyStatus(rootWindow);
 	    threadManager = new ThreadManager(this);
 	    gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
@@ -331,7 +318,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    });
 	    //renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 	    renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
-	}//end constructor
+	}//end trInit()
 
 	private class ConfigMenuItemListener implements ActionListener{
 	    @Override
@@ -603,7 +590,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 
     @Override
     public Feature<Features> newInstance(Features target) {
-	return new TR(true);
+	return new TR();
     }
 
     @Override

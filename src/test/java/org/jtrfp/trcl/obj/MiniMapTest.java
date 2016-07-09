@@ -27,7 +27,7 @@ public class MiniMapTest {
     @Before
     public void setUp() throws Exception {
 	//final TR tr = Mockito.mock(TR.class);//TODO: Refactor WorldObject to take GPUResourceFinalizer
-	final MiniMap mm = new MiniMap(null);
+	final MiniMap mm = new MiniMap();
 	mm.setModelSize(new double[]{.1,.1});
 	mm.setDiameterInTiles(16);
 	setSubject(mm);

@@ -24,11 +24,12 @@ import org.jtrfp.trcl.obj.WorldObject2DRelevantEverywhere;
 public class Dashboard extends WorldObject2DRelevantEverywhere {
     private static final double Z = .5;
 
-    public Dashboard(TR tr, DashboardLayout layout) {
-	super(tr);
+    public Dashboard(DashboardLayout layout) {
+	super();
 	setImmuneToOpaqueDepthTest(true);
 	try{
 	// Dashboard
+	final TR tr = getTr();
 	Texture[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
 			tr.gpu.get().getGl(), 2,false);
@@ -48,6 +49,6 @@ public class Dashboard extends WorldObject2DRelevantEverywhere {
 	    dashModel.addTriangles(tris);
 	}// end for(segs)
 	setModel(dashModel);
-	}catch(Exception e){tr.showStopper(e);}
+	}catch(Exception e){getTr().showStopper(e);}
     }
 }// end Dashboard

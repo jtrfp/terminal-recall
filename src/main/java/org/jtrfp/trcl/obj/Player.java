@@ -85,8 +85,8 @@ public class Player extends WorldObject implements RelevantEverywhere{
     
     private static final double LEFT_X = -5000, RIGHT_X = 5000, TOP_Y = 2000, BOT_Y=-2000;
 
-    public Player(final TR tr, final Model model) {
-	super(tr, model);
+    public Player() {
+	super();
 	setVisible(false);
 	DamageableBehavior db = new DamageableBehavior();
 	addBehavior(db);
@@ -96,7 +96,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		db.setEnable(false);
 	    }
 	}
-	
+	final TR tr = getTr();
 	final ResourceManager rm = tr.getResourceManager();
 	final ObjectFactory<String,SoundTexture> soundTextures = rm.soundTextures;
 	

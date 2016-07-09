@@ -22,11 +22,12 @@ import org.jtrfp.trcl.gpu.Texture;
 
 public class MeterBar extends WorldObject2DRelevantEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
-    public MeterBar(TR tr, Texture tex, double height, double length, boolean horizontal, String debugName) {
-	super(tr);
+    public MeterBar(Texture tex, double height, double length, boolean horizontal, String debugName) {
+	super();
 	setImmuneToOpaqueDepthTest(true);
 	//height*=.5;
 	//length*=.5;
+	final TR tr = getTr();
 	Model m = new Model(true,tr,debugName);
 	Model m1 = new Model(true,tr,debugName);
 	Model m2 = new Model(true,tr,debugName);

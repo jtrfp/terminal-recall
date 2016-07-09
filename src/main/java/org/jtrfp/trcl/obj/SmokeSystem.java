@@ -25,14 +25,14 @@ public class SmokeSystem extends RenderableSpacePartitioningGrid{
     	private final int MAX_SMOKE_PER_POOL=80;
     	private final Smoke[][] allSmokes = new Smoke[SmokeType.values().length][];
     	private final int [] indices = new int[SmokeType.values().length];
-	public SmokeSystem(TR tr,String debugName){
+	public SmokeSystem(String debugName){
 	    super();
 	    int i;
 	    for(SmokeType t:SmokeType.values()){
 		final int ordinal = t.ordinal();
 		allSmokes[ordinal]=new Smoke[MAX_SMOKE_PER_POOL];
 		for(i=0; i<MAX_SMOKE_PER_POOL; i++){
-			allSmokes[ordinal][i]=new Smoke(tr,t,"SmokeSystem."+debugName);
+			allSmokes[ordinal][i]=new Smoke(t,"SmokeSystem."+debugName);
 		    }//end for(MAX_SMOKE_PER_POOL)
 	    }//end for(SmokeType s)
 	}//end constructor()

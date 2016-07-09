@@ -33,10 +33,11 @@ public class TunnelSegment extends WorldObject {
     private final double segmentLength;
     private final double endX, endY;
 
-    public TunnelSegment(TR tr, Segment s,
+    public TunnelSegment(Segment s,
 	    Texture[] tunnelTexturePalette, double segLen,
 	    double endX, double endY, String debugName) {
-	super(tr, createModel(s, segLen, tunnelTexturePalette, endX, endY, tr,debugName));
+	super();
+	setModel(createModel(s, segLen, tunnelTexturePalette, endX, endY, getTr(),debugName));
 	segmentLength = segLen;
 	this.endX = endX;
 	this.endY = endY;

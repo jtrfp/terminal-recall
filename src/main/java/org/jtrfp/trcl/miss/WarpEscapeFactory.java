@@ -127,7 +127,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    catch(InterruptedException e){e.printStackTrace();return;}
 	    // Lightning shell on
 	    final ResourceManager resourceManager = tr.getResourceManager();
-	    final WorldObject lightningShell = new WorldObject(tr);
+	    final WorldObject lightningShell = new WorldObject();
 	    lightningShell.addBehavior(new RotationalMomentumBehavior().setEquatorialMomentum(.053).setLateralMomentum(.04).setPolarMomentum(-.045));
 	    //ZAP!
 	    SoundTexture zapSound = resourceManager.soundTextures.get("ELECTRIC.WAV");

@@ -26,13 +26,12 @@ import org.jtrfp.trcl.gpu.Texture;
 
 public class BillboardSprite extends WorldObject{
 	private Dimension dim;
-	private final String debugName;
+	private String debugName;
 	private RotationDelegate rotationDelegate;
 	
-	public BillboardSprite(TR tr, String debugName){
-	    super(tr);
-	    this.debugName=debugName;
-	    rotationDelegate = new StaticRotationDelegate(tr);
+	public BillboardSprite(){
+	    super();
+	    rotationDelegate = new StaticRotationDelegate(getTr());
 	    }
 	@Override
 	protected void recalculateTransRotMBuffer(){
@@ -120,5 +119,8 @@ public class BillboardSprite extends WorldObject{
 	}
 	protected void setRotationDelegate(RotationDelegate rotationDelegate) {
 	    this.rotationDelegate = rotationDelegate;
+	}
+	public void setDebugName(String debugName) {
+	    this.debugName = debugName;
 	}
 }//end BillboardSprite

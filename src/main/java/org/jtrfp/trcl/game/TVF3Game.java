@@ -225,10 +225,11 @@ public class TVF3Game implements Game {
 	    
 	    public void setLevelDirect(String lvlFileName) throws FileNotFoundException, IllegalAccessException, IOException, FileLoadException{
 		setCurrentMission(null);
-		final LVLFile lvl = tr.getResourceManager()
-			.getLVL(lvlFileName);
-		final Mission newMission = new Mission(lvl);
+		//final LVLFile lvl = tr.getResourceManager()
+		//	.getLVL(lvlFileName);
+		final Mission newMission = new Mission();
 		newMission.setGame(this);
+		newMission.setLvlFileName(lvlFileName);
 		newMission.setLevelName(prepareLevelName(lvlFileName));
 		newMission.setShowIntro(getLevelIndex() % 3 == 0);
 		setCurrentMission(newMission);
@@ -336,7 +337,7 @@ public class TVF3Game implements Game {
 			    rm.setExplosionFactory(new ExplosionSystem(tr, "Game"));
 			    // SMOKE
 			    earlyLoadingScreen.setStatusText("Loading smoke assets...");
-			    rm.setSmokeSystem(new SmokeSystem(tr,"Game"));
+			    rm.setSmokeSystem(new SmokeSystem("Game"));
 			    // DEBRIS
 			    earlyLoadingScreen.setStatusText("Loading debris assets...");
 			    rm.setDebrisSystem(new DebrisSystem(tr));
@@ -348,8 +349,10 @@ public class TVF3Game implements Game {
 				pf[i] = new ProjectileFactory(tr, w[i], ExplosionType.Blast,"Game");
 			    }// end for(weapons)
 			    rm.setProjectileFactories(pf);
-			    setPlayer(new Player(tr, tr.getResourceManager().getBINModel(
-				    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl())));
+			    final Player player = new Player();
+			    player.setModel(tr.getResourceManager().getBINModel(
+				    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));
+			    setPlayer(player);
 			    final Camera camera = tr.mainRenderer.getCamera();
 			    camera.probeForBehavior(MatchPosition.class).setTarget(player);
 			    camera.probeForBehavior(MatchDirection.class).setTarget(player);

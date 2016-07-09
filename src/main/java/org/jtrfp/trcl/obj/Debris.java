@@ -49,26 +49,27 @@ private static final String [] TYPES = new String[]{
     "FRAG2.BIN",
     "FRAG3.BIN"
 };
-    public Debris(TR tr) {
-	super(tr);
+    public Debris() {
+	super();
+	final TR tr = getTr();
 	try{
-	Model m = tr.getResourceManager().getBINModel(TYPES[(int)(Math.random()*TYPES.length)], tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
-	setModel(m);
-	addBehavior(new MovesByVelocity());
-	addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));
-	addBehavior(new CollidesWithTerrain());
-	addBehavior(new CollidesWithTunnelWalls(false, false));
-	addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
-	addBehavior(new DeathBehavior());
-	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
-	addBehavior(new LimitedLifeSpan().reset(lifespan()));
-	addBehavior(new LoopingPositionBehavior());
-	addBehavior(new PulledDownByGravityBehavior());
-	addBehavior(new RotationalMomentumBehavior()
-		.setEquatorialMomentum(.2*Math.random())
-		.setLateralMomentum(.2*Math.random())
-		.setPolarMomentum(.2*Math.random()));
-	addBehavior(new RotationalDragBehavior().setDragCoefficient(.99));
+	    Model m = tr.getResourceManager().getBINModel(TYPES[(int)(Math.random()*TYPES.length)], tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
+	    setModel(m);
+	    addBehavior(new MovesByVelocity());
+	    addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));
+	    addBehavior(new CollidesWithTerrain());
+	    addBehavior(new CollidesWithTunnelWalls(false, false));
+	    addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
+	    addBehavior(new DeathBehavior());
+	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
+	    addBehavior(new LimitedLifeSpan().reset(lifespan()));
+	    addBehavior(new LoopingPositionBehavior());
+	    addBehavior(new PulledDownByGravityBehavior());
+	    addBehavior(new RotationalMomentumBehavior()
+	    .setEquatorialMomentum(.2*Math.random())
+	    .setLateralMomentum(.2*Math.random())
+	    .setPolarMomentum(.2*Math.random()));
+	    addBehavior(new RotationalDragBehavior().setDragCoefficient(.99));
 	}catch(Exception e){tr.showStopper(e);}
     }//end constructor
 

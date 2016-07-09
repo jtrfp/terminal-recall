@@ -32,7 +32,7 @@ public class CharLineDisplay {
 	displays = new CharDisplay[lengthInChars];
 	this.font = font;
 	for (int i = 0; i < lengthInChars; i++) {
-	    final CharDisplay charDisplay = new CharDisplay(tr, grid, glSize, font);
+	    final CharDisplay charDisplay = new CharDisplay(grid, glSize, font);
 	    content[i] = 'X';
 	    charDisplay.setVisible(false);
 	    charDisplay.setChar('X');

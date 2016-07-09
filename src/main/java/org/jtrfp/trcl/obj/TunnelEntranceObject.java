@@ -32,8 +32,9 @@ public class TunnelEntranceObject extends BillboardSprite {
     private final PortalEntrance portalEntrance;
     private GameShell gameShell;
     
-    public TunnelEntranceObject(TR tr, Tunnel tunnel, final PortalEntrance portalEntrance) {
-	super(tr,"TunnelEntranceObject."+tunnel.getDebugName());
+    public TunnelEntranceObject(Tunnel tunnel, final PortalEntrance portalEntrance) {
+	super();
+	setDebugName("TunnelEntranceObject."+tunnel.getDebugName());
 	if(portalEntrance == null)
 	    throw new IllegalArgumentException("PortalEntrance intolerably null.");
 	this.portalEntrance = portalEntrance;
@@ -61,6 +62,7 @@ public class TunnelEntranceObject extends BillboardSprite {
 	position[1]=height+GROUND_HEIGHT_PAD;
 	notifyPositionChange();
 	this.setBillboardSize(new Dimension(100,100));
+	final TR tr = getTr();
 	try {this.setTexture(
 		    tr.getResourceManager().getRAWAsTexture("TARG1.RAW",
 			    tr.getGlobalPaletteVL(),null,false), true);

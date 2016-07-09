@@ -89,7 +89,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     private class Blip extends Sprite2D{
 	private Positionable representativeObject;
 	public Blip(Texture tex, String debugName, boolean ignoreCamera, double diameter) {
-	    super(tr,0,diameter,diameter,tex,true,debugName);
+	    super(0,diameter,diameter,tex,true,debugName);
 	    setImmuneToOpaqueDepthTest(true);
 	    if(!ignoreCamera)
 	     unsetRenderFlag(RenderFlags.IgnoreCamera);

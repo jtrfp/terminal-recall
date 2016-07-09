@@ -54,21 +54,21 @@ public class PortalEntrance extends WorldObject {
     private TRFuture<Void> relevanceFuture;
     private boolean dotRelevant = false, rendering = false;
 
-    public PortalEntrance(TR tr, Model model, PortalExit exit, WorldObject approachingObject){
-	this(tr,exit,approachingObject);
+    public PortalEntrance(Model model, PortalExit exit, WorldObject approachingObject){
+	this(exit,approachingObject);
 	setModel(model);
     }
     
-    public PortalEntrance(TR tr, PortalExit exit, WorldObject approachingObject) {
-	this(tr);
+    public PortalEntrance(PortalExit exit, WorldObject approachingObject) {
+	this();
 	this.portalExit=exit;
 	addBehavior(new PortalEntranceBehavior());
 	setApproachingObject(approachingObject);
     }//end constructor
     
-    private PortalEntrance(TR tr) {
-	super(tr);
-	final ObjectTallyCollection<Positionable> allRelevant = tr.gpu.get().rendererFactory.get().getAllRelevant();
+    private PortalEntrance() {
+	super();
+	final ObjectTallyCollection<Positionable> allRelevant = getTr().gpu.get().rendererFactory.get().getAllRelevant();
 	//weakRelevanceTallyListener = new WeakPropertyChangeListener(relevanceTallyListener, allRelevant);
 	allRelevant.addObjectTallyListener(this, relevanceTallyListener);
     }

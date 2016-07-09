@@ -208,7 +208,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 
 	public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel, PortalEntrance entrance){
 	    TunnelEntranceObject teo;
-	    getTarget().getOverworldSystem().add(teo = new TunnelEntranceObject(getTr(),tunnel,entrance));
+	    getTarget().getOverworldSystem().add(teo = new TunnelEntranceObject(tunnel,entrance));
 	    final int key = pointToHash(mapSquareXZ);
 	    tunnelMap.put(key,teo);
 	}

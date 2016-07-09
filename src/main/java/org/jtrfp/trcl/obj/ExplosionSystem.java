@@ -36,7 +36,7 @@ public class ExplosionSystem extends RenderableSpacePartitioningGrid {
 		final int ordinal = t.ordinal();
 		allExplosions[ordinal]=new Explosion[MAX_EXPLOSIONS_PER_POOL];
 		for(i=0; i<MAX_EXPLOSIONS_PER_POOL; i++)
-			allExplosions[ordinal][i]=new Explosion(tr,t,"ExplosionSystem."+debugName);
+			allExplosions[ordinal][i]=new Explosion(t,"ExplosionSystem."+debugName);
 	    }//end for(explosionTypes)
 	}//end constructor()
 	

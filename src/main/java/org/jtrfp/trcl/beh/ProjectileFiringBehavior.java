@@ -356,4 +356,13 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     protected void setFiringRotation(Rotation firingRotation) {
         this.firingRotation = firingRotation;
     }
+
+    /**
+     * Sets ammo but bounds it to the current limit
+     * @param newAmmo
+     * @since Jul 5, 2016
+     */
+    public void setAmmo(int newAmmo) {
+	this.ammo = Math.min(newAmmo, getAmmoLimit());
+    }
 }//end ProjectileFiringBehavior

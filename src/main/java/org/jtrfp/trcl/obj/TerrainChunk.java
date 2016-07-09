@@ -24,13 +24,14 @@ import org.jtrfp.trcl.gpu.Model;
 public class TerrainChunk extends WorldObject{
     private boolean isCeiling=false;
 
-    public TerrainChunk(TR tr){
-	super(tr);
+    public TerrainChunk(){
+	super();
     }
 
-    public TerrainChunk(TR tr, Model m){
-	super(tr,m);
+    public TerrainChunk(Model m){
+	super();
 	m.setDebugName("TerrainChunk: "+m.getDebugName());
+	setModel(m);
     }
 
     public boolean isCeiling(){return isCeiling;}

@@ -207,7 +207,7 @@ public class CollidesWithTerrain extends Behavior {
     
     private static TerrainChunk getDummyTerrainChunk(TR tr){
 	if (dummyTerrainChunk==null)
-	    dummyTerrainChunk = new TerrainChunk(tr);
+	    dummyTerrainChunk = new TerrainChunk();
 	return dummyTerrainChunk;
     }
 

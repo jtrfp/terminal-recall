@@ -34,7 +34,7 @@ public class PUPObjectPlacer implements ObjectPlacer {
 	int pupIndex=0;
 	for (PowerupLocation loc : pupFile.getPowerupLocations()) {
 	    locationReporters[pupIndex++].complete();
-	    PowerupObject powerup = new PowerupObject(loc.getType(), tr);
+	    PowerupObject powerup = new PowerupObject(loc.getType());
 	    final double[] pupPos = powerup.getPosition();
 	    pupPos[0] = TRFactory.legacy2Modern(loc.getZ());
 	    pupPos[1] = (TRFactory.legacy2Modern(loc.getY()) / TRFactory.mapWidth) * 16.

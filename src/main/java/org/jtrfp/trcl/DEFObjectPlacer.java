@@ -78,7 +78,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 			if(model!=null){
 			    final EnemyDefinition def = defs.get(pl.getDefIndex());
 			    try{
-				final DEFObject obj =new DEFObject(tr,def,pl);
+				final DEFObject obj =new DEFObject(def,pl);
 				if(defList!=null)defList.add(obj);
 				if(def.isShowOnBriefing()&&!enemyPlacementMap.containsKey(def)){
 					enemyPlacementMap.put(def, obj);

@@ -53,7 +53,7 @@ public class RedFlash extends Sprite2D implements Feature<TVF3Game> {
     private static final long NUM_FRAMES=5;
     
     private RedFlash(TR tr){
-	super(tr, .000000001, 2, 2,getRedTexture(tr), true,"RedFlash");
+	super(.000000001, 2, 2,getRedTexture(tr), true,"RedFlash");
 	setVisible(false);
 	addBehavior(new RedFlashBehavior());
 	setImmuneToOpaqueDepthTest(true);

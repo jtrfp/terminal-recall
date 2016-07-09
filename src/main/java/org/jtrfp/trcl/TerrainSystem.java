@@ -221,10 +221,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 								new Vector3D[] { norm0, norm1,
 								norm2, norm3 }, cX + cZ % 4);
 					portalModel.addTriangles(tris);
-					final PortalExit exit = new PortalExit(tr);
+					final PortalExit exit = new PortalExit();
 					final PortalEntrance entrance;
 					final GameShell gameShell = Features.get(tr, GameShell.class);
-					entrance = new PortalEntrance(tr,portalModel,exit,gameShell.getGame().getPlayer());
+					entrance = new PortalEntrance(portalModel,exit,gameShell.getGame().getPlayer());
 					final TunnelSystem ts = Features.get(gameShell.getGame().getCurrentMission(),TunnelSystem.class);
 					ts.registerTunnelEntrancePortal(new Point(cX,cZ), entrance);
 					
@@ -272,7 +272,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-				final TerrainChunk chunkToAdd = new TerrainChunk(tr, m);
+				final TerrainChunk chunkToAdd = new TerrainChunk(m);
 				final double[] chunkPos = chunkToAdd.getPosition();
 				chunkPos[0] = objectX;
 				chunkPos[1] = objectY;
@@ -367,7 +367,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			    // Add to grid
-			    final TerrainChunk chunkToAdd = new TerrainChunk(tr, m);
+			    final TerrainChunk chunkToAdd = new TerrainChunk(m);
 			    final double[] chunkPos = chunkToAdd.getPosition();
 			    chunkPos[0] = objectX;
 			    chunkPos[1] = objectY;

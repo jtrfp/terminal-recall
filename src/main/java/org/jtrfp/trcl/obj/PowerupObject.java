@@ -38,9 +38,10 @@ public class PowerupObject extends WorldObject{
 	private final Powerup powerupType;
 	private final SoundTexture powerupSound;
 	private GameShell gameShell;
-	public PowerupObject(Powerup pt, TR tr){
-		super(tr);
+	public PowerupObject(Powerup pt){
+		super();
 		this.powerupType=pt;
+		final TR tr = getTr();
 		try{setModel(tr.getResourceManager().getBINModel(powerupType.getModel(), tr.getGlobalPaletteVL(), null, null));}
 		catch(Exception e){e.printStackTrace();}
 		

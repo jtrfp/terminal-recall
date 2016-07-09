@@ -44,8 +44,9 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     private Rotation mapHack = Rotation.IDENTITY;
     private GameShell gameShell;
     
-    public MiniMap(TR tr) {
-	super(tr);
+    public MiniMap() {
+	super();
+	final TR tr = getTr();
 	setTop(Vector3D.PLUS_J);
 	setHeading(Vector3D.MINUS_K);
 	configureCircle();

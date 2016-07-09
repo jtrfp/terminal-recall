@@ -45,15 +45,14 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 public class TunnelExitObject extends PortalEntrance {
     private 		Vector3D 	exitLocation, exitHeading, exitTop;
     private final 	Tunnel 		tun;
-    private final 	TR 		tr;
     private 		NAVObjective 	navObjectiveToRemove;
     private 		boolean 	mirrorTerrain = false;
     private		boolean		onlyRemoveIfTargeted=false;
     private static final int            NUDGE = 5000;
     private GameShell                   gameShell;
     
-    public TunnelExitObject(TR tr, Tunnel tun, String debugName, WorldObject approachingObject) {
-	super(tr,new PortalExit(tr),approachingObject);
+    public TunnelExitObject(Tunnel tun, String debugName, WorldObject approachingObject) {
+	super(new PortalExit(),approachingObject);
 	addBehavior(new TunnelExitBehavior());
 	final DirectionVector v = tun.getSourceTunnel().getExit();
 	final NormalMap map = 
@@ -81,7 +80,6 @@ public class TunnelExitObject extends PortalEntrance {
 	if(exitHeading.getY()<.99&&exitHeading.getNorm()>0)//If the ground is flat this doesn't work.
 		 exitTop = (Vector3D.PLUS_J.crossProduct(exitHeading).crossProduct(exitHeading)).negate();
 		else exitTop = (Vector3D.PLUS_I);// ... so we create a clause for that.
-	this.tr = tr;
 	final PortalExit pExit = getPortalExit();
 	pExit.setPosition(exitLocation.toArray());
 	pExit.setHeading(exitHeading);
@@ -93,7 +91,7 @@ public class TunnelExitObject extends PortalEntrance {
 	setVisible(true);
 	Triangle [] tris = Triangle.quad2Triangles(new double[]{-50000,50000,50000,-50000}, new double[]{50000,50000,-50000,-50000}, new double[]{0,0,0,0}, new double[]{0,1,1,0}, new double[]{1,1,0,0}, getPortalTexture(), RenderMode.STATIC, false, Vector3D.ZERO, "TunnelExitObject.portalModel");
 	//Model m = Model.buildCube(100000, 100000, 200, new PortalTexture(0), new double[]{50000,50000,100},false,tr);
-	Model m = new Model(false, tr,"TunnelExitObject."+debugName);
+	Model m = new Model(false, getTr(),"TunnelExitObject."+debugName);
 	m.addTriangles(tris);
 	setModel(m);
     }//end constructor
@@ -103,6 +101,7 @@ public class TunnelExitObject extends PortalEntrance {
 	private boolean navTargeted=false;
 	@Override
 	public void proposeCollision(WorldObject other) {
+	    final TR tr = getTr();
 	    if (other instanceof Player) {
 		if(getParent().getPosition()[0]<0)
 		    throw new RuntimeException("Negative X coord! "+getParent().getPosition()[0]);

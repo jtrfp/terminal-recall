@@ -42,9 +42,10 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 public class Crosshairs extends WorldObject implements RelevantEverywhere {
     private GameShell gameShell;
 
-    public Crosshairs(TR tr) {
-	super(tr);
+    public Crosshairs() {
+	super();
 	setImmuneToOpaqueDepthTest(true);
+	final TR tr = getTr();
 	// Crosshairs
 	Model crossModel = null;
 	final TextureManager tm = tr.gpu.get().textureManager.get();

@@ -94,8 +94,8 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private final CameraPositionHandler cameraPositionHandler;
 	private final Reporter reporter;
 
-    Camera(TR tr) {
-	super(tr);
+    Camera() {
+	super();
 	try{final Thread rt = World.relevanceThread.get();
 	    World.relevanceExecutor.submit(new Runnable(){
 	    @Override
@@ -114,7 +114,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	
 	addPropertyChangeListener(CENTER_CUBE, centerCubeHandler = new CenterCubeHandler());
 	addPropertyChangeListener(WorldObject.POSITION,cameraPositionHandler = new CameraPositionHandler());
-	reporter = Features.get(tr, Reporter.class);
+	reporter = Features.get(getTr(), Reporter.class);
     }//end constructor
     
     @Override

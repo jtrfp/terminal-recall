@@ -29,13 +29,14 @@ public class Checkpoint extends BillboardSprite {
 private NAVObjective objective;
 private boolean includeYAxisInCollision=true;
 private GameShell gameShell;
-    public Checkpoint(TR tr, String debugName) {
-	super(tr, "Checkpoint."+debugName);
+    public Checkpoint() {
+	super();
 	super.setModelOffset(0, 80000, 0);
 	addBehavior(new CheckpointBehavior());
 	addBehavior(new TerrainLocked());
 	setBillboardSize(new Dimension(80000,80000));
 	setVisible(true);
+	final TR tr = getTr();
 	try{setTexture(
 		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", 
 			    tr.getGlobalPaletteVL(),null,false),true);

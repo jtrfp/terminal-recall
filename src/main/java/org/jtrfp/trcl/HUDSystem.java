@@ -50,7 +50,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	final double FONT_SIZE = .04;
 	Point2D.Double pos;
 	
-	add(dashboard=new Dashboard(tr,layout));
+	add(dashboard=new Dashboard(layout));
 	
 	pos = layout.getObjectivePosition();
 	objective = new CharLineDisplay(tr, this, FONT_SIZE, 16, font);
@@ -77,8 +77,8 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	ammo.setContent("---");
 	ammo.setPosition(pos.getX(), pos.getY(), Z);
 	InputStream is = null;
-	add(crosshairs=new Crosshairs(tr));
-	try{add(healthMeterBar = new MeterBar(tr, 
+	add(crosshairs=new Crosshairs());
+	try{add(healthMeterBar = new MeterBar( 
 		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/OrangeOrangeGradient.png")),null,
 			"HealthBar orangeOrange",false), METER_WIDTH, layout.getShieldBarLength(),
@@ -89,7 +89,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	healthMeterBar.setPosition(new double[]{pos.getX(),pos.getY(),0});
 	healthMeter = healthMeterBar.getController();
 	
-	try{add(throttleMeterBar = new MeterBar(tr, 
+	try{add(throttleMeterBar = new MeterBar( 
 		tr.gpu.get().textureManager.get().newTexture(VQTexture.RGBA8FromPNG(is = VQTexture.class
 			.getResourceAsStream("/BlueBlackGradient.png")),null,
 			"ThrottleBar blackBlue",false), -METER_WIDTH, layout.getThrottleBarLength(),

@@ -24,8 +24,8 @@ public class PortalExit extends WorldObject {
     private Camera controlledCamera;
     private WeakReference<SpacePartitioningGrid> rootGrid;
 
-    public PortalExit(TR tr) {
-	super(tr);
+    public PortalExit() {
+	super();
     }
     
     public synchronized void updateObservationParams(double [] relativePosition, Rotation rotation, Vector3D controllingHeading, Vector3D controllingTop){

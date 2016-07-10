@@ -105,7 +105,7 @@ public class FeaturesImpl {
 	   final Feature result;
 	   final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
 	   if(ff == null)
-	       throw new RuntimeException("Could not find Feature of type "+featureClass.getName());
+	       throw new FeatureNotFoundException("Could not find Feature of type "+featureClass.getName());
 	   assert ff!=null:""+featureClass.getName();
 	   registerFeatureByClassRecursively(featureClass, result = ff.newInstance(target), featuresByClass);
 	   result.apply(target);
@@ -135,4 +135,10 @@ public class FeaturesImpl {
 	for(Entry<Class<? extends Feature>,Feature> entry:fMap.entrySet())
 	    dest.add(entry.getValue());
     }//end getAllFeaturesOf(...)
+    
+    public static class FeatureNotFoundException extends RuntimeException {
+	public FeatureNotFoundException(){super();}
+	public FeatureNotFoundException(String msg){super(msg);}
+	
+    }//end FeatureNotFoundException
 }//end FeaturesImpl

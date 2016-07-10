@@ -22,7 +22,7 @@ public class TRIT {
     
     @Before
     public void before(){
-	Features.resetImpl();
+	Features.resetForTesting();
     }
 
     @Test

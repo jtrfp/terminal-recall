@@ -36,11 +36,14 @@ public class Features {
     }
     
     public synchronized static Features getSingleton(){
+	if(singleton == null)
+	    setSingleton(new Features());
 	return singleton;
     }
     
-    public synchronized static void resetImpl(){
+    public synchronized static void resetForTesting(){
 	impl = new FeaturesImpl();
+	new Features();
     }
 
     public synchronized static void registerFeature(FeatureFactory<?> factory){

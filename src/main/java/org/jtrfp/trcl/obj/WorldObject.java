@@ -215,9 +215,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private final int [] emptyIntArray = new int[0];
     
     public void setModel(Model m) {
-	if (m == null)
-	    throw new RuntimeException("Passed model cannot be null.");
 	final TRFuture<Model> thisModelFuture = this.model;
+	if (m == null){
+	    if(thisModelFuture != null)
+	     releaseCurrentModel();
+	    return;
+	}
 	if(thisModelFuture != null)
 	    releaseCurrentModel();
 	try{this.model = m.finalizeModel();}catch(Exception e){throw new RuntimeException(e);}

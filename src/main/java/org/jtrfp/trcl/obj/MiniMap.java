@@ -20,6 +20,7 @@ import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.FeaturesImpl.FeatureNotFoundException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.Game;
@@ -46,7 +47,6 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     
     public MiniMap() {
 	super();
-	final TR tr = getTr();
 	setTop(Vector3D.PLUS_J);
 	setHeading(Vector3D.MINUS_K);
 	configureCircle();
@@ -116,7 +116,13 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     }//end diameterAtPctY()
     
     protected Model buildModel(){
-	final Model result = new Model(false, getTr(), "MiniMap "+hashCode());
+	TR tr;
+	
+	try {tr= getTr();}
+	catch(FeatureNotFoundException e){
+	    return null;}
+	
+	final Model result = new Model(false, tr, "MiniMap "+hashCode());
 	final int diameterInTiles = getDiameterInTiles();
 	final double halfwayPoint = getHalfwayPoint();
 	final double [] modelSize= getModelSize();

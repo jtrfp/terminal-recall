@@ -44,7 +44,7 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.snd.SoundEvent.Factory;
 
-public final class SoundSystem {
+public class SoundSystem {
     private final TR tr;
     private GLFrameBuffer playbackFrameBuffer;
     private GLTexture playbackTexture;

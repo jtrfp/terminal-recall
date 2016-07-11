@@ -14,7 +14,6 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 
@@ -26,7 +25,7 @@ public class DamagedByCollisionWithSurface extends Behavior implements SurfaceIm
     public void collidedWithSurface(WorldObject wo, double[] surfaceNormal) {
 	if(!isEnabled())return;
 	final WorldObject p = getParent();
-	if(wo instanceof TerrainChunk)
+	if(wo == null)//Terrain Chunk
 	 p.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 	    @Override
 	    public void submit(DamageableBehavior item) {

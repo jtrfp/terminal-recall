@@ -22,7 +22,6 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Positionable;
-import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class DestroysEverythingBehavior extends Behavior {
@@ -52,7 +51,7 @@ public class DestroysEverythingBehavior extends Behavior {
 	    //Destroy everything
 	    for(Positionable pos:positionables[0]){
 		final int distance = (int)Vect3D.distance(pos.getPosition(),parentPos);
-		if(pos instanceof DEFObject && !(pos instanceof TerrainChunk) && distance < destructionRadius){
+		if(pos instanceof DEFObject && distance < destructionRadius){
 		 final DEFObject dObj = (DEFObject)pos;
 		 final DamageableBehavior beh = dObj.probeForBehavior(DamageableBehavior.class);
 		 final DamageListener.ProjectileDamage dmg = 

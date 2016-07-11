@@ -28,7 +28,6 @@ import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelEntranceObject;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -43,7 +42,6 @@ public class CollidesWithTerrain extends Behavior {
     private boolean		tunnelEntryCapable	= false;
     private boolean		ignoreHeadingForImpact	= true;
     private boolean		ignoreCeiling           = false;
-    private static		TerrainChunk		dummyTerrainChunk;
     // WORK VARS
     private final double[]      groundNormal            = new double[3];
     private final double[]      ceilingNormal           = new double[3];
@@ -127,7 +125,7 @@ public class CollidesWithTerrain extends Behavior {
     private final Submitter<SurfaceImpactListener> sub = new Submitter<SurfaceImpactListener>() {
 	@Override
 	public void submit(SurfaceImpactListener item) {
-	    item.collidedWithSurface(getDummyTerrainChunk(getParent().getTr()), surfaceNormalVar);
+	    item.collidedWithSurface(null,surfaceNormalVar);
 	}
 
 	@Override
@@ -203,12 +201,6 @@ public class CollidesWithTerrain extends Behavior {
      */
     public boolean isIgnoreCeiling() {
         return ignoreCeiling;
-    }
-    
-    private static TerrainChunk getDummyTerrainChunk(TR tr){
-	if (dummyTerrainChunk==null)
-	    dummyTerrainChunk = new TerrainChunk();
-	return dummyTerrainChunk;
     }
 
     public GameShell getGameShell() {

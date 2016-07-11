@@ -38,12 +38,11 @@ import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
-import org.jtrfp.trcl.obj.TerrainChunk;
+import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
-	final ArrayList<TerrainChunk> renderingCubes = new ArrayList<TerrainChunk>();
 	private final TR tr;
 	private final ExecutorService executor;
 	public static final double Y_NUDGE = -10000;
@@ -272,7 +271,9 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			     // Add to grid
-				final TerrainChunk chunkToAdd = new TerrainChunk(m);
+				final WorldObject chunkToAdd = new WorldObject();
+				m.setDebugName("TerrainSystem.TerrainChunk");
+				chunkToAdd.setModel(m);
 				final double[] chunkPos = chunkToAdd.getPosition();
 				chunkPos[0] = objectX;
 				chunkPos[1] = objectY;
@@ -367,13 +368,15 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				}// end for(cX)
 			    }// end for(cZ)
 			    // Add to grid
-			    final TerrainChunk chunkToAdd = new TerrainChunk(m);
+			    final WorldObject chunkToAdd = new WorldObject();
+			    chunkToAdd.setModel(m);
+			    m.setDebugName("TerrainSystem.TerrainChunk.ceiling");
 			    final double[] chunkPos = chunkToAdd.getPosition();
 			    chunkPos[0] = objectX;
 			    chunkPos[1] = objectY;
 			    chunkPos[2] = objectZ;
 			    chunkToAdd.notifyPositionChange();
-			    chunkToAdd.setCeiling(true);
+			    //chunkToAdd.setCeiling(true);
 			    terrainMirror.add(chunkToAdd);
 			}// end scope(CEILING)
 		    }// end for(gX)
@@ -412,12 +415,6 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
      */
     public double getGridSquareSize(){
 	return gridSquareSize;
-    }
-    /**
-     * @return the renderingCubes
-     */
-    public ArrayList<TerrainChunk> getRenderingCubes(){
-	return renderingCubes;
     }
 
     @Override

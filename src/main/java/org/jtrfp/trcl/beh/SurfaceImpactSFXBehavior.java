@@ -18,7 +18,6 @@ package org.jtrfp.trcl.beh;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.obj.TerrainChunk;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -44,7 +43,7 @@ public class SurfaceImpactSFXBehavior extends Behavior implements
 	if(System.currentTimeMillis()<timeOfLastSFXMillis+500)
 	    return;
 	timeOfLastSFXMillis=System.currentTimeMillis();
-	if(src instanceof TerrainChunk){
+	if(src == null){//Terrain
 	    //Calculate if this impact is severe or glazing
 	    if(collDot<.6){
 		ss.enqueuePlaybackEvent(

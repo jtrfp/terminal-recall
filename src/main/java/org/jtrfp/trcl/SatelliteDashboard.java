@@ -15,11 +15,13 @@ package org.jtrfp.trcl;
 import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.obj.Sprite2D;
 
 public class SatelliteDashboard extends Sprite2D {
     public SatelliteDashboard(TR tr) throws IllegalAccessException, FileLoadException, IOException{
-	super(tr, .000000001, 2, 2, tr.getResourceManager().getSpecialRAWAsTextures("MAPBACK.RAW", tr.getGlobalPalette(), tr.gpu.get().getGl(), 0, false), true, "SatelliteDashboard");
+	super(tr, .000000001, 2, 2, tr.getResourceManager().getSpecialRAWAsTextures("MAPBACK.RAW", tr.getGlobalPalette(), Features.get(tr, GPUFeature.class).getGl(), 0, false), true, "SatelliteDashboard");
     }
 }//end MapDashboard

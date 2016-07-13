@@ -17,8 +17,11 @@ import java.io.IOException;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
@@ -31,13 +34,13 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
 	super();
 	add(new BackdropSprite(tr,backdropResource,musicResource,"IntroScreen."+debugName));
 	if(musicResource!=null)
-	 bgMusic = tr.soundSystem.get().
+	 bgMusic = Features.get(tr,SoundSystemFeature.class).
 	  getMusicFactory().
 	  create(tr.getResourceManager().gpuResidentMODs.get(musicResource), true);
 	else
 	 bgMusic = null;
 	if(bgMusic!=null){
-	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    final SoundSystem soundSystem = Features.get(tr,SoundSystemFeature.class);
 	    soundSystem.enqueuePlaybackEvent(bgMusic);
 	    soundSystem.setPaused(false);
 	    }
@@ -51,7 +54,7 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
     
     private static Texture [] genTexture(String resourceName, TR tr) throws IllegalAccessException, IOException, FileLoadException{
 	final ResourceManager rm = tr.getResourceManager();
-	return rm.getSpecialRAWAsTextures(resourceName, rm.getPalette("VGA.ACT"), tr.gpu.get().getGl(), 1, true);
+	return rm.getSpecialRAWAsTextures(resourceName, rm.getPalette("VGA.ACT"), Features.get(tr, GPUFeature.class).getGl(), 1, true);
     }//end genTexture
     
     public void startMusic(){

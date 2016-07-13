@@ -18,9 +18,11 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.DynamicTexture;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
@@ -41,7 +43,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
-	super(debugName, triangles, new TriangleVertexWindow(tr.gpu.get(),debugName), tr,m);
+	super(debugName, triangles, new TriangleVertexWindow(Features.get(tr, GPUFeature.class),debugName), tr,m);
 	this.timeBetweenFramesMsec 	= timeBetweenFramesMsec;
 	this.animateUV 			= animateUV;
 	this.controller 		= controller;

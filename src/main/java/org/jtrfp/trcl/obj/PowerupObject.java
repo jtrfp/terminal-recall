@@ -26,6 +26,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
@@ -94,9 +95,8 @@ public class PowerupObject extends WorldObject{
 					powerupType.getF3Description():
 					powerupType.getTvDescription());
 			//SOUND FX
-			tr.soundSystem.get()
-			 .enqueuePlaybackEvent(tr
-				 .soundSystem.get().getPlaybackFactory()
+			Features.get(tr,SoundSystemFeature.class)
+			 .enqueuePlaybackEvent(Features.get(tr,SoundSystemFeature.class).getPlaybackFactory()
 				 .create(powerupSound, new double []{.5*SoundSystem.DEFAULT_SFX_VOLUME*3,.5*SoundSystem.DEFAULT_SFX_VOLUME*3}));
 		}//end applyToPlayer()
 	}//end PowerupBehavior

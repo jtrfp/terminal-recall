@@ -13,7 +13,9 @@
 
 package org.jtrfp.trcl.beh;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SamplePlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -58,7 +60,7 @@ public class RandomSFXPlayback extends Behavior implements DeathListener {
     private void playSound(){
 	final WorldObject parent = getParent();
 	final TR tr = parent.getTr();
-	final SoundSystem soundSystem = tr.soundSystem.get();
+	final SoundSystem soundSystem = Features.get(tr,SoundSystemFeature.class);
 	final double playbackRatio = 1+(((Math.random()*2)-1)*getPlaybackSpeedVariation());
 	//Play the sound
 	SamplePlaybackEvent playbackEvent = soundSystem.

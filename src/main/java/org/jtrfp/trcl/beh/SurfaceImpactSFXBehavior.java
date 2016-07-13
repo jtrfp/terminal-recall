@@ -16,8 +16,10 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -32,7 +34,7 @@ public class SurfaceImpactSFXBehavior extends Behavior implements
     
     public SurfaceImpactSFXBehavior(TR tr){
 	this.rm=tr.getResourceManager();
-	this.ss=tr.soundSystem.get();
+	this.ss=Features.get(tr,SoundSystemFeature.class);
     }
 
     @Override

@@ -18,7 +18,9 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.obj.Sprite2D;
 
@@ -33,7 +35,7 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
 	super();
 	InputStream is = null;
 	try{startupLogo = new Sprite2D(.000000001, 2, 2, 
-		tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is=VQTexture.class
+		Features.get(tr, GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is=VQTexture.class
 			.getResourceAsStream("/TrclLogo.png")),null, "logoImage", false), true, "EarlyLoadingScreen");}
 	finally{if(is!=null)is.close();}
 	

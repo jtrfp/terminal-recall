@@ -28,6 +28,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.springframework.stereotype.Component;
@@ -121,7 +122,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 		else
 		    ((TVF3Game)mission.getGame()).getUpfrontDisplay().removePersistentMessage();
 	    getTr().getThreadManager().setPaused(paused);
-	    getTr().soundSystem.get() .setPaused(paused);
+	    Features.get(getTr(),SoundSystemFeature.class) .setPaused(paused);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {

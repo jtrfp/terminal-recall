@@ -16,6 +16,7 @@ import java.io.InputStream;
 
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.obj.Sprite2D;
@@ -49,7 +50,7 @@ public class EngineTests {
 	preClean(tr);
 	InputStream is = null;
 	try{
-	 final Texture test = tr.gpu.get().textureManager.get().newTexture(
+	 final Texture test = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(
 		    VQTexture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
 	 final int NUM_LAYERS=8;
 	 final double INCREMENT = .1;

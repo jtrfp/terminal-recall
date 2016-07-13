@@ -18,7 +18,9 @@ import org.jtrfp.trcl.SelectableTexture;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -34,7 +36,7 @@ public class RedFlashFactory implements FeatureFactory<TVF3Game>{
     
     private Texture getRedTexture(TR tr){
 	if(texture==null){
-	    final TextureManager tm = tr.gpu.get().textureManager.get();
+	    final TextureManager tm = Features.get(tr, GPUFeature.class).textureManager.get();
 	    return new SelectableTexture(
 		    new VQTexture[]{
 			    (VQTexture)tm.solidColor(new Color(255,0,0,255)),

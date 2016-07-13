@@ -29,6 +29,8 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
@@ -86,7 +88,7 @@ public class ProjectileFactory {
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
    	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
-   	     GL3 gl = tr.gpu.get().getGl();
+   	     GL3 gl = Features.get(tr, GPUFeature.class).getGl();
    	     for(int i=0; i<frames.length;i++){
    		 frames[i]=(VQTexture)mgr.getRAWAsTexture(fileNames[i], pal, null, false);
    	     }//end for(frames)
@@ -99,7 +101,7 @@ public class ProjectileFactory {
    	 }//end (billboard)
    	 else if(modelingType instanceof ModelingType.BINModelingType){
    	     final ModelingType.BINModelingType mt = (ModelingType.BINModelingType)modelingType;
-   	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
+   	     modelToUse = tr.getResourceManager().getBINModel(mt.getBinFileName(), tr.getGlobalPaletteVL(),null, Features.get(tr, GPUFeature.class).getGl());
    	     for(int i=0; i<projectiles.length; i++){
    		 projectiles[i]=new ProjectileObject3D(tr,modelToUse, weapon, explosionType);
    		 }
@@ -198,9 +200,8 @@ public class ProjectileFactory {
 	((WorldObject)result).setTop(objectOfOrigin.getTop());
 	tr.getDefaultGrid().add((WorldObject)result);
 	if(firingSFX!=null)
-	    tr.soundSystem.get().enqueuePlaybackEvent(
-		    tr.soundSystem
-			    .get()
+	    Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
+		    Features.get(tr,SoundSystemFeature.class)
 			    .getPlaybackFactory()
 			    .create(firingSFX,
 				     (WorldObject)result,

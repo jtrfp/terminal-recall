@@ -28,7 +28,9 @@ import javax.swing.border.Border;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.Renderer;
 
@@ -56,7 +58,7 @@ public class FramebufferStateWindow extends JFrame {
     private void initialize() {
 	initialized=true;
 	// Sound frameBuffer
-	final GLFrameBuffer sfb = tr.soundSystem.get()
+	final GLFrameBuffer sfb = Features.get(tr,SoundSystemFeature.class)
 		.getSoundOutputFrameBuffer();
 	if (sfb.getAttached2DDrawTextures().size() > 0) {
 	    final PropertyEditor pe = TRBeanUtils.getDefaultPropertyEditor(sfb);

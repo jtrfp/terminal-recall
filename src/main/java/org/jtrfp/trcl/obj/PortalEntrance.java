@@ -20,10 +20,11 @@ import java.util.concurrent.Callable;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.coll.ObjectTallyCollection;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.gpu.Renderer;
@@ -68,7 +69,7 @@ public class PortalEntrance extends WorldObject {
     
     private PortalEntrance() {
 	super();
-	final ObjectTallyCollection<Positionable> allRelevant = getTr().gpu.get().rendererFactory.get().getAllRelevant();
+	final ObjectTallyCollection<Positionable> allRelevant = Features.get(getTr(), GPUFeature.class).rendererFactory.get().getAllRelevant();
 	//weakRelevanceTallyListener = new WeakPropertyChangeListener(relevanceTallyListener, allRelevant);
 	allRelevant.addObjectTallyListener(this, relevanceTallyListener);
     }
@@ -306,7 +307,7 @@ public class PortalEntrance extends WorldObject {
 			if (getPortalRenderer() != null)
 			    throw new IllegalStateException(
 				    "portalRenderer is intolerably non-null.");
-			final Pair<Renderer, Integer> newRendererPair = getTr().gpu.get().rendererFactory
+			final Pair<Renderer, Integer> newRendererPair = Features.get(getTr(), GPUFeature.class).rendererFactory
 				.get().acquirePortalRenderer();
 			System.out.println("Activating portal entrance... "+PortalEntrance.this);
 			getPortalExit().setControlledCamera(
@@ -340,7 +341,7 @@ public class PortalEntrance extends WorldObject {
 			    throw new IllegalStateException("portalRenderer is intolerably null.");
 			System.out.println("De-activating portal entrance: "+PortalEntrance.this);
 			//Release the Camera
-			getTr().gpu.get().rendererFactory.get().releasePortalRenderer(portalRenderer);
+			Features.get(getTr(), GPUFeature.class).rendererFactory.get().releasePortalRenderer(portalRenderer);
 			portalExit.deactivate();
 			getPortalExit().setControlledCamera(null);
 			setPortalRenderer(null);

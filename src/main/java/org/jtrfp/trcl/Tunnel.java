@@ -38,6 +38,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
@@ -96,7 +97,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	reporters	  = rootReporter.generateSubReporters(2);
 	this.sourceTunnel = sourceTunnel;
 	this.tr           = tr;
-	gl 		  = tr.gpu.get().getGl();
+	gl 		  = Features.get(tr, GPUFeature.class).getGl();
 	tunnelAssemblyReporter 
 	  		  = reporters[0];
 	this.debugName    = debugName;

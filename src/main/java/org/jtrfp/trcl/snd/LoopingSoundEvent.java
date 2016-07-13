@@ -4,8 +4,10 @@ import java.util.Collection;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 
 public class LoopingSoundEvent extends AbstractSoundEvent implements RelevantEverywhere {
@@ -19,7 +21,7 @@ public class LoopingSoundEvent extends AbstractSoundEvent implements RelevantEve
 	    Factory origin, SoundTexture texture, double [] pan) {
 	super(0L, 0L, origin, null);
 	setSoundTexture(texture);
-	nextLoopTimeSeconds=getOrigin().getTR().soundSystem.get().getCurrentFrameBufferTimeCounter();
+	nextLoopTimeSeconds=Features.get(getOrigin().getTR(),SoundSystemFeature.class).getCurrentFrameBufferTimeCounter();
 	setPan(pan);
 	activate();
     }//end constructor
@@ -57,7 +59,7 @@ public class LoopingSoundEvent extends AbstractSoundEvent implements RelevantEve
 	    if(!lastApply.isDone())
 		return;
 	  final TR                   tr  = getOrigin().getTR();
-	  final SoundSystem soundSystem  = tr.soundSystem.get();
+	  final SoundSystem soundSystem  = Features.get(tr,SoundSystemFeature.class);
 	  final double bufferSizeSeconds = soundSystem.getBufferSizeSeconds();
 	  //Need to fill to twice the end because it cannot be guranteed that these changes will take effect immediately or on the next buffer.
 	  final double bufferEndTimeSecondsTwice = bufferStartTimeSeconds+bufferSizeSeconds*2;

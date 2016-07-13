@@ -19,7 +19,9 @@ package org.jtrfp.trcl.snd;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.instrument.Sample;
@@ -54,7 +56,7 @@ public class GPUResidentMOD {
 	for(int i=0; i<modSamples.length; i++){
 	    final Sample thisModSample = modSamples[i];
 	    if(thisModSample.sample!=null){
-		this.samples[i]=tr.soundSystem.get().newSoundTexture(IntBuffer.wrap(thisModSample.sample),thisModSample.baseFrequency);
+		this.samples[i]=Features.get(tr,SoundSystemFeature.class).newSoundTexture(IntBuffer.wrap(thisModSample.sample),thisModSample.baseFrequency);
 	    }//end if(!null)
 	}//end for(i)
 	calculateNoteLengths();
@@ -132,7 +134,7 @@ public class GPUResidentMOD {
 			  Double noteLengthRealtimeSeconds = texture.getLengthInRealtimeSeconds();
 			  if(noteLengthRows!=null)
 			      noteLengthRealtimeSeconds = Math.min(noteLengthRealtimeSeconds,noteLengthRows*realtimeSecondsPerRow);
-			  final SoundEvent evt = tr.soundSystem.get().
+			  final SoundEvent evt = Features.get(tr,SoundSystemFeature.class).
 				  getPlaybackFactory().
 				  create(texture,
 					  timeOffsetCounter+startOffsetInSeconds, 
@@ -140,7 +142,7 @@ public class GPUResidentMOD {
 					  parent,
 					  playbackRatio,
 					  noteLengthRealtimeSeconds);
-			  tr.soundSystem.get().enqueuePlaybackEvent(evt);
+			  Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(evt);
 			}//end if(null)
 		   }//end if(>-1)
 		}//end for(patternElements)

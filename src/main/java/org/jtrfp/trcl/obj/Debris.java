@@ -26,7 +26,9 @@ import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.beh.phy.VelocityDragBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
@@ -53,7 +55,7 @@ private static final String [] TYPES = new String[]{
 	super();
 	final TR tr = getTr();
 	try{
-	    Model m = tr.getResourceManager().getBINModel(TYPES[(int)(Math.random()*TYPES.length)], tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl());
+	    Model m = tr.getResourceManager().getBINModel(TYPES[(int)(Math.random()*TYPES.length)], tr.getGlobalPaletteVL(),null, Features.get(tr, GPUFeature.class).getGl());
 	    setModel(m);
 	    addBehavior(new MovesByVelocity());
 	    addBehavior(new VelocityDragBehavior().setDragCoefficient(.99));

@@ -39,6 +39,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
@@ -51,7 +52,6 @@ import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
-import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Projectile;
@@ -302,9 +302,9 @@ public class Mission {
 		return missionEnd[0];
 	}//end sync(missionEnd)
 	
-		final SoundSystem ss = Mission.this.tr.soundSystem.get();
+		final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
 		MusicPlaybackEvent evt;
-		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
+		Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
 			evt =ss
 				.getMusicFactory()
 				.create(new GPUResidentMOD(tr, tr
@@ -319,7 +319,7 @@ public class Mission {
 		 
 		 }//end sync(Mission.this)
 	((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
-	tr.soundSystem.get().setPaused(false);
+	Features.get(tr,SoundSystemFeature.class).setPaused(false);
 	tr.getThreadManager().setPaused(false);
 	if(showIntro){
 	    tr.setRunState(new EnemyBrief(){});
@@ -512,8 +512,8 @@ public class Mission {
 	    @Override
 	    public Void call() throws Exception {
 		MusicPlaybackEvent evt;
-		final SoundSystem ss = Mission.this.tr.soundSystem.get();
-		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
+		final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
+		Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
 			evt =ss
 				.getMusicFactory()
 				.create(tr.getResourceManager().gpuResidentMODs.get(bossMusicFile),
@@ -535,8 +535,8 @@ public class Mission {
 	    @Override
 	    public Void call() throws Exception {
 		MusicPlaybackEvent evt;
-		final SoundSystem ss = Mission.this.tr.soundSystem.get();
-		Mission.this.tr.soundSystem.get().enqueuePlaybackEvent(
+		final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
+		Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
 			evt =ss
 				.getMusicFactory()
 				.create(tr.getResourceManager().gpuResidentMODs.get(lvl.getBackgroundMusicFile()),

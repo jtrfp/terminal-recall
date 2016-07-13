@@ -22,10 +22,12 @@ import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.HasQuantifiableSupply;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.SatelliteViewFactory;
@@ -161,7 +163,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	if(ignitionSound != null){
 	    final WorldObject parent = getParent();
 	    final TR              tr = parent.getTr();
-	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    final SoundSystem soundSystem = Features.get(tr,SoundSystemFeature.class);
 	    final SamplePlaybackEvent playbackEvent 
 	        = soundSystem.getPlaybackFactory().
 	            create(ignitionSound, new double[]{
@@ -176,7 +178,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	if(extinguishSound != null){
 	    final WorldObject parent = getParent();
 	    final TR              tr = parent.getTr();
-	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    final SoundSystem soundSystem = Features.get(tr,SoundSystemFeature.class);
 	    final SamplePlaybackEvent playbackEvent 
 	        = soundSystem.getPlaybackFactory().
 	            create(extinguishSound, new double[]{
@@ -199,7 +201,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	    return;
 	final WorldObject parent = getParent();
 	    final TR              tr = parent.getTr();
-	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    final SoundSystem soundSystem = Features.get(tr,SoundSystemFeature.class);
 	    if(afterburnerLoop != null)
 		ensureLoopDestroyed();
 	    afterburnerLoop 

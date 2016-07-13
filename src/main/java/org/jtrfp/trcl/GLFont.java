@@ -21,7 +21,9 @@ import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.VQTexture;
 
 public class GLFont{
@@ -50,8 +52,8 @@ public class GLFont{
 	    sideLength = (int)Math.pow(2, Math.ceil(Math.log(maxDim)/Math.log(2)));
 	    maxAdvance=imgHeight;
 	    textures = new VQTexture[256];
-	VQTexture empty = (tr
-		.gpu.get()
+	VQTexture empty = (
+		Features.get(tr, GPUFeature.class)
 		.textureManager.get()
 		.newTexture(
 			ByteBuffer.allocateDirect(sideLength * sideLength * 4),null,
@@ -75,7 +77,7 @@ public class GLFont{
 		    texBuf.limit(texBuf.position()+sideLength*4);
 		    texBuf.put(rgba8888[i]);
 		}//end for(imgHeight)
-	    textures[i + asciiOffset] = tr.gpu.get().textureManager.get().newTexture(
+	    textures[i + asciiOffset] = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(
 		    texBuf, null,"GLFont rgba buf char=" + (char) i,false);
 	    }//end for(i:numChars)
 	    //Load empties to the right side of the ASCII textures.
@@ -115,7 +117,7 @@ public class GLFont{
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
 		g.dispose();
-		return tr.gpu.get().textureManager.get().newTexture(img,null,"GLFont "+(char)c,false);
+		return Features.get(tr, GPUFeature.class).textureManager.get().newTexture(img,null,"GLFont "+(char)c,false);
 		}//end renderToTexture(...)
 	
 	public double getTextureSideLength(){return sideLength;}

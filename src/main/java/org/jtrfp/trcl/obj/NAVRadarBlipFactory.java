@@ -24,6 +24,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -59,7 +60,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
 	    try{
-	     final VQTexture tex = tr.gpu.get().textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
+	     final VQTexture tex = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		final Blip blip = new Blip(tex,debugName, ignoreCamera, .04*(getRadarGUIRadius()/DEFAULT_RADAR_GUI_RADIUS));
     		blipPool[ti][pi]= blip;

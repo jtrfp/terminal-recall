@@ -15,7 +15,9 @@ package org.jtrfp.trcl.beh;
 
 import java.util.Collection;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.snd.SoundSystem;
 
 public class SFXOnDamage extends Behavior implements DamageListener {
@@ -25,7 +27,7 @@ public class SFXOnDamage extends Behavior implements DamageListener {
 	Collection<String> suggestedSoundEffects = ev.getSuggestedSFX();
 	for(String suggestedSoundEffect:suggestedSoundEffects){
 	    final TR tr = getParent().getTr();
-	    final SoundSystem ss = tr.soundSystem.get();
+	    final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
 	    ss.enqueuePlaybackEvent(
 		    ss.getPlaybackFactory().create(
 			    tr.getResourceManager().soundTextures.get(suggestedSoundEffect), 

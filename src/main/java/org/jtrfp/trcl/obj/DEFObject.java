@@ -70,6 +70,8 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.BINFile.AnimationControl;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
@@ -714,7 +716,7 @@ public void destroy(){
 			return;//No point; already dying.
 		    //Trigger small boom
 		    final TR tr = parent.getTr();
-		    tr.soundSystem.get().getPlaybackFactory().
+		    Features.get(tr,SoundSystemFeature.class).getPlaybackFactory().
 		    create(tr.getResourceManager().soundTextures.get("EXP2.WAV"), new double[]{.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2});
 
 		    addBehavior(new PulledDownByGravityBehavior().setEnable(true));
@@ -890,7 +892,7 @@ public void destroy(){
 	    public void propertyChange(PropertyChangeEvent evt) {
 		if(evt.getNewValue() == Boolean.TRUE){
 		    final TR tr = getTr();
-		    SoundSystem ss = getTr().soundSystem.get();
+		    SoundSystem ss = Features.get(getTr(),SoundSystemFeature.class);
 		    final SoundTexture st = tr.getResourceManager().soundTextures.get("WARNING.WAV");
 		    final SoundEvent se   = ss.getPlaybackFactory().create(st, new double[]{SoundSystem.DEFAULT_SFX_VOLUME,SoundSystem.DEFAULT_SFX_VOLUME});
 		    ss.enqueuePlaybackEvent(se);
@@ -1033,7 +1035,7 @@ public void destroy(){
 	    final ResourceManager rm = getTr().getResourceManager();
 	    BasicModelSource      bmt = null;
 	    final BINFileExtractor bfe   = new BINFileExtractor(rm);
-	    bfe.setDefaultTexture(getTr().gpu.get().textureManager.get().getFallbackTexture());
+	    bfe.setDefaultTexture(Features.get(getTr(), GPUFeature.class).textureManager.get().getFallbackTexture());
 	    try{bmt= new BufferedModelTarget();
 	    bfe.extract(rm.getBinFileModel(enemyDefinition.getComplexModelFile()), (BufferedModelTarget)bmt);}
 	    catch(UnrecognizedFormatException e){//Animated BIN

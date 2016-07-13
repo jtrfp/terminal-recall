@@ -23,7 +23,9 @@ import org.jtrfp.trcl.beh.CollidesWithPlayer;
 import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.PlayerCollisionListener;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -70,7 +72,7 @@ public class ForceField extends WorldObject {
 	    }else if(!isVisible() && tickTimeMillis>=FLASH_ON_THRESH){
 		setVisible(true);
 		cwp.setEnable(true);
-		final SoundSystem ss = getTr().soundSystem.get();
+		final SoundSystem ss = Features.get(getTr(),SoundSystemFeature.class);
 		ss.enqueuePlaybackEvent(
 		 ss.
 		 getPlaybackFactory().

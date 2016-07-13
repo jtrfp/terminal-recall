@@ -25,6 +25,7 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory.ViewSelect;
 import org.jtrfp.trcl.game.Game;
@@ -131,7 +132,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    lightningShell.addBehavior(new RotationalMomentumBehavior().setEquatorialMomentum(.053).setLateralMomentum(.04).setPolarMomentum(-.045));
 	    //ZAP!
 	    SoundTexture zapSound = resourceManager.soundTextures.get("ELECTRIC.WAV");
-	    final SoundSystem soundSystem = tr.soundSystem.get();
+	    final SoundSystem soundSystem = Features.get(tr,SoundSystemFeature.class);
 	    soundSystem.enqueuePlaybackEvent(soundSystem.getPlaybackFactory().create(zapSound, new double[]{SoundSystem.DEFAULT_SFX_VOLUME,SoundSystem.DEFAULT_SFX_VOLUME}));
 
 	    //Load and install lightning sphere model

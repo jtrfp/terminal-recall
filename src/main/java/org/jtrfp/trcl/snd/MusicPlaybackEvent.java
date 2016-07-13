@@ -26,6 +26,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 
 public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEverywhere {
@@ -50,7 +51,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	if(!isPlaying){
 	    activate();
 	    firstRun.set(true);
-	    nextLoopTimeSeconds=getOrigin().getTR().soundSystem.get().getCurrentFrameBufferTimeCounter();
+	    nextLoopTimeSeconds=Features.get(getOrigin().getTR(),SoundSystemFeature.class).getCurrentFrameBufferTimeCounter();
 	    isPlaying=true;}
     }
     

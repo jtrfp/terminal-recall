@@ -20,6 +20,7 @@ import org.jtrfp.trcl.beh.TerrainLocked;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
 import org.jtrfp.trcl.miss.WarpEscapeFactory.WarpEscape;
@@ -36,7 +37,7 @@ public interface FinishingRunState extends Mission.GameplayState{}
     public Jumpzone() {
 	super();
 	final TR tr = getTr();
-	try{setModel(tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));}
+	try{setModel(tr.getResourceManager().getBINModel("JUMP-PNT.BIN", tr.getGlobalPaletteVL(),null, Features.get(tr, GPUFeature.class).getGl()));}
 	catch(Exception e){tr.showStopper(e);}
 	setVisible(false);
     }//end constructor

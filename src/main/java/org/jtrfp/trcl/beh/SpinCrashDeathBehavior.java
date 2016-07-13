@@ -20,7 +20,9 @@ import org.jtrfp.trcl.beh.phy.PulledDownByGravityBehavior;
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Propelled;
@@ -50,7 +52,7 @@ public class SpinCrashDeathBehavior extends DamageTrigger {
 	    return;//No point; already dying.
 	//Trigger small boom
 	final TR tr = parent.getTr();
-	tr.soundSystem.get().getPlaybackFactory().
+	Features.get(tr,SoundSystemFeature.class).getPlaybackFactory().
 	create(
 		tr.getResourceManager().soundTextures.get("EXP2.WAV"), 
 		new double[] {.5*SoundSystem.DEFAULT_SFX_VOLUME*2,.5*SoundSystem.DEFAULT_SFX_VOLUME*2} );

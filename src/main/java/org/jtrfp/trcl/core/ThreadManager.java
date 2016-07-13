@@ -16,7 +16,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -30,11 +29,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.gpu.Renderer;
@@ -45,11 +46,11 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
-public final class ThreadManager implements GLExecutor{
+public class ThreadManager implements GLExecutor{
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= 60;
     public static final int RENDERLIST_REFRESH_FPS 	= 1;
-    private final TR 			tr;
+    private       TR 			tr;
     private final Timer 		lightweightTimer 	= new Timer("LightweightTimer");
     private final Timer 		gameplayTimer 		= new Timer("GameplayTimer");
     private long 			lastGameplayTickTime 		= 0;
@@ -57,6 +58,7 @@ public final class ThreadManager implements GLExecutor{
     private int 			counter 			= 0;
     private Thread 			renderingThread;
     private FPSAnimator			animator;
+    private GPUFeature                  gpuFeature;
     private boolean[] 			paused = new boolean[]{false};
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
@@ -94,28 +96,16 @@ public final class ThreadManager implements GLExecutor{
     	= new AtomicReference<Submitter<TRFutureTask<?>>>(activeGPUMemAccessTaskSubmitter);
     private final long startupTimeMillis = System.currentTimeMillis();
     
-    ThreadManager(final TR tr) {
-	this.tr = tr;
-	threadPool.setRejectedExecutionHandler(new RejectedExecutionHandler(){
-	    @Override
-	    public void rejectedExecution(Runnable r, ThreadPoolExecutor exec) {
-		try{Thread.sleep(150);
-		 exec.execute(r);
-		}//Wait 150ms
-		catch(InterruptedException e){e.printStackTrace();}
-	    }});
-	gpuMemAccessThreadPool.setRejectedExecutionHandler(new RejectedExecutionHandler(){
-	    @Override
-	    public void rejectedExecution(Runnable r, ThreadPoolExecutor exec) {
-		try{Thread.sleep(150);
-		 exec.execute(r);
-		}//Wait 150ms
-		catch(InterruptedException e){e.printStackTrace();}
-	    }});
-	threadPool.prestartAllCoreThreads();
-	gpuMemAccessThreadPool.prestartAllCoreThreads();
-	start();
+    public ThreadManager() {
     }// end constructor
+    
+    public TR getTr(){
+	return tr;
+    }
+    
+    public void setTr(TR tr){
+	this.tr=tr;
+    }
     
     private final ArrayList<PositionedRenderable> visibilityListBuffer = new ArrayList<PositionedRenderable>();
     
@@ -171,13 +161,14 @@ public final class ThreadManager implements GLExecutor{
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),c);
 	if(isGLThread())
-	    if(tr.gpu.get().getGl().getContext().isCurrent()){
+	    if(gpuFeature.getGl().getContext().isCurrent()){
 		result.run();
 		return result;
 	    }else{
-		tr.gpu.get().getGl().getContext().makeCurrent();
+		final GLContext context = gpuFeature.getGl().getContext();
+		context.makeCurrent();
 		result.run();
-		tr.gpu.get().getGl().getContext().release();
+		context.release();
 	    }
 	result.enqueue();
 	return result;
@@ -191,7 +182,26 @@ public final class ThreadManager implements GLExecutor{
 	return submitToThreadPool(true,c);
     }//end submitToThreadPool(...)
 
-    private void start() {
+    public void start() {
+	threadPool.setRejectedExecutionHandler(new RejectedExecutionHandler(){
+	    @Override
+	    public void rejectedExecution(Runnable r, ThreadPoolExecutor exec) {
+		try{Thread.sleep(150);
+		 exec.execute(r);
+		}//Wait 150ms
+		catch(InterruptedException e){e.printStackTrace();}
+	    }});
+	gpuMemAccessThreadPool.setRejectedExecutionHandler(new RejectedExecutionHandler(){
+	    @Override
+	    public void rejectedExecution(Runnable r, ThreadPoolExecutor exec) {
+		try{Thread.sleep(150);
+		 exec.execute(r);
+		}//Wait 150ms
+		catch(InterruptedException e){e.printStackTrace();}
+	    }});
+	threadPool.prestartAllCoreThreads();
+	gpuMemAccessThreadPool.prestartAllCoreThreads();
+	
 	gameplayTimer.schedule(new TimerTask(){
 	    @Override
 	    public void run() {
@@ -239,6 +249,7 @@ public final class ThreadManager implements GLExecutor{
 	    }
 	});
 	lastGameplayTickTime = System.currentTimeMillis();
+	gpuFeature = Features.get(tr, GPUFeature.class);//TODO: This probably should be somewhere else
     }// end start()
     
     private void attemptRender() {

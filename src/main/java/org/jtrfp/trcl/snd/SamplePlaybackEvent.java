@@ -26,8 +26,11 @@ import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.gpu.GLFragmentShader;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
@@ -83,7 +86,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     public void apply(GL3 gl, double bufferStartTimeSeconds) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
 	origin.getPanU().set((float)getPan()[0], (float)getPan()[1]);//Pan center
-	final SoundSystem ss           = this.getOrigin().getTR().soundSystem.get();
+	final SoundSystem ss           = Features.get(getOrigin().getTR(),SoundSystemFeature.class);
 	final double bufferSizeSeconds = ss.getBufferSizeSeconds(),
 	             startTimeInBuffers=((getStartRealtimeSeconds()-bufferStartTimeSeconds)/(double)bufferSizeSeconds)*2-1,
 	             lengthPerRow      = getSoundTexture().getLengthPerRowSeconds();
@@ -104,7 +107,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	
 	public Factory(final TR tr) {
 	    super(tr);
-	    final GPU gpu = tr.gpu.get();
+	    final GPU gpu = Features.get(tr, GPUFeature.class);
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {
 		    @Override
 		    public Void call() throws Exception {
@@ -167,7 +170,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    final double   pFactor  = (localDir.getX()+1)/2;
 	    assert !Vect3D.isAnyNaN(source);
 	    final double [] pan     = new double[]{vol*pFactor,vol*(1-pFactor)};
-	    final SoundSystem ss    = getTR().soundSystem.get();
+	    final SoundSystem ss    = Features.get(getTR(),SoundSystemFeature.class);
 	    // Temporal dither to avoid phasiness
 	    final double delay      = dist*.000001+Math.random()*.005;
 	    final double startTime  = ss.getCurrentFrameBufferTimeCounter()+delay;
@@ -179,7 +182,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	}
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] pan){
-	    final SoundSystem ss = getTR().soundSystem.get();
+	    final SoundSystem ss = Features.get(getTR(),SoundSystemFeature.class);
 	    return create(tex,(ss.getCurrentFrameBufferTimeCounter()),pan);
 	}
 	

@@ -13,7 +13,9 @@
 package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -40,8 +42,8 @@ private String explosionSound;
 	     triggerExplosion(loc,type);
 	    String explosionSound = this.explosionSound;
 	    if(explosionSound!=null)
-	     tr.soundSystem.get().
-	      enqueuePlaybackEvent(tr.soundSystem.get().getPlaybackFactory().
+	     Features.get(tr,SoundSystemFeature.class).
+	      enqueuePlaybackEvent(Features.get(tr,SoundSystemFeature.class).getPlaybackFactory().
 		    create(tr.getResourceManager().soundTextures.get(explosionSound),
 			    loc.toArray(),
 			    tr.mainRenderer.getCamera(),

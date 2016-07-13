@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -20,7 +20,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JOptionPane;
@@ -32,7 +31,8 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
-import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
@@ -42,7 +42,6 @@ import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
-import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.tools.Util;
 import org.springframework.stereotype.Component;
 
@@ -206,8 +205,6 @@ public final class TRFactory implements FeatureFactory<Features>{
     }
 
     public static final class TR implements UncaughtExceptionHandler, Feature<Features>{
-	public TRFutureTask<GPU> 		gpu;
-	public TRFutureTask<SoundSystem>	soundSystem;
 	private Player 				player;
 	public  RootWindow 		        rootWindow;
 	private MenuSystem       		menuSystem;
@@ -238,9 +235,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	
 	public TR(){
 	    threadManager = null;
-	    soundSystem   = null;
 	    mainRenderer  = null;
-	    gpu           = null;
 	}//end TR()
 	
 	/**
@@ -254,19 +249,18 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    catch(Exception e){e.printStackTrace();}
 	    //AutoInitializable.Initializer.initialize(this);
 	    //keyStatus = new KeyStatus(rootWindow);
-	    threadManager = new ThreadManager(this);
-	    gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
+	    /*gpu = new TRFutureTask<GPU>(new Callable<GPU>(){
 		@Override
 		public GPU call() throws Exception {
 		    return new GPU(threadManager.threadPool, threadManager, threadManager, TR.this, getRootWindow().getCanvas(),getWorld());
-		}},TR.this);
-	    soundSystem = new TRFutureTask<SoundSystem>(new Callable<SoundSystem>(){
+		}},TR.this);*/
+	    /*soundSystem = new TRFutureTask<SoundSystem>(new Callable<SoundSystem>(){
 		@Override
 		public SoundSystem call() throws Exception {
 		    return new SoundSystem(TR.this);
-		}},TR.this);
-	    threadManager.threadPool.submit(gpu);
-	    threadManager.threadPool.submit(soundSystem);//TODO: Use new methods
+		}},TR.this);*/
+	    //threadManager.threadPool.submit(gpu);
+	    //getThreadManager().threadPool.submit(soundSystem);//TODO: Use new methods
 	    System.out.println("Initializing graphics engine...");
 	    /*secondaryRenderer=new TRFutureTask<Renderer>(new Callable<Renderer>(){
 			@Override
@@ -282,8 +276,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 			}//end call()
 		    },TRFactory.this);threadManager.threadPool.submit(secondaryRenderer);
 	     */
-	    mainRenderer  = gpu.
-			    get().
+	    mainRenderer  = Features.get(this, GPUFeature.class).
 			    rendererFactory.
 			    get().
 			    newRenderer("mainRenderer");
@@ -292,7 +285,6 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    //},TR.this);
 	    //threadManager.threadPool.submit(mainRenderer);
 	    System.out.println("...Done");
-	    setResourceManager(new ResourceManager(this));
 
 	    final Renderer renderer = mainRenderer;
 	    renderer.getCamera().setRootGrid(getDefaultGrid());
@@ -305,7 +297,6 @@ public final class TRFactory implements FeatureFactory<Features>{
 
 	    Runtime.getRuntime().addShutdownHook(new Thread(){
 		public void run(){
-		    soundSystem.get().setPaused(true);
 		    try{getConfigManager().saveConfigurations();
 		    }catch(Exception e){System.err.println(
 			    "Failed to write the config file.\n"
@@ -343,6 +334,8 @@ public final class TRFactory implements FeatureFactory<Features>{
 	 * @return the resourceManager
 	 */
 	public ResourceManager getResourceManager() {
+	    if(resourceManager == null)
+		resourceManager = new ResourceManager(this);
 	    return resourceManager;
 	}
 
@@ -428,6 +421,8 @@ public final class TRFactory implements FeatureFactory<Features>{
 	}
 
 	public ThreadManager getThreadManager() {
+	    if(threadManager == null)
+                 threadManager = Features.get(this, ThreadManagerFeature.class);
 	    return threadManager;
 	}
 
@@ -436,7 +431,6 @@ public final class TRFactory implements FeatureFactory<Features>{
 	}
 
 	public void gatherSysInfo() {
-	    final GPU _gpu = gpu.get();
 	    /*
 	    final Reporter r = getReporter();
 	    getThreadManager().submitToGL(new Callable<Void>() {

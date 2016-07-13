@@ -25,9 +25,9 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
@@ -48,7 +48,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	final TR tr = getTr();
 	// Crosshairs
 	Model crossModel = null;
-	final TextureManager tm = tr.gpu.get().textureManager.get();
+	final TextureManager tm = Features.get(tr, GPUFeature.class).textureManager.get();
 	// Fallback
 	final int NUM_FRAMES = 16;
 	final double LUM_STEP = 200./NUM_FRAMES;

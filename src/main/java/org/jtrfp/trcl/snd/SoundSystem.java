@@ -36,6 +36,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
@@ -87,12 +88,11 @@ public class SoundSystem {
 	this.tr = tr;
 	System.out.println("Setting up sound system...");
 	loadConfigAndAttachListeners();
+	final GPU gpu = Features.get(tr, GPUFeature.class);
 	tr.getThreadManager().submitToGL(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
 		System.out.println("SoundSystem: setting up textures...");
-		final GPU gpu = tr.gpu.get();
-		
 		// TODO: Setup uniforms here.
 		System.out.println("...Done.");
 		gpu.defaultProgram();
@@ -134,7 +134,7 @@ public class SoundSystem {
 			    public Void call() throws Exception {
 				final ByteBuffer floatBytes = getGPUFloatBytes();
 				floatBytes.clear();
-				render(tr.gpu.get().getGl(), floatBytes);
+				render(Features.get(tr, GPUFeature.class).getGl(), floatBytes);
 				return null;
 			    }
 			}).get();
@@ -285,7 +285,7 @@ public class SoundSystem {
      * @since Oct 28, 2014
      */
     public SoundTexture newSoundTexture(final FloatBuffer samples, final int localSampleRate){
-	final GLTexture texture      = tr.gpu.get().newTexture();
+	final GLTexture texture      = Features.get(tr, GPUFeature.class).newTexture();
 	final int lengthInSamples    = samples.remaining();
 	final double lengthInSeconds = (double)lengthInSamples/(double)localSampleRate;
 	final int numRows            = (int)(Math.ceil((double)lengthInSamples / (double)SoundTexture.ROW_LENGTH_SAMPLES));
@@ -321,7 +321,7 @@ public class SoundSystem {
 			tr.getThreadManager().submitToGL(new Callable<Void>(){
 			    @Override
 			    public Void call() throws Exception {
-				tr.gpu.get().defaultTIU();
+				Features.get(tr, GPUFeature.class).defaultTIU();
 				texture
 				 .bind()
 				 .setMagFilter(getFilteringParm())
@@ -335,7 +335,7 @@ public class SoundSystem {
 					 GL3.GL_RED, 
 					 GL3.GL_FLOAT, 
 					 finalSamples);
-				tr.gpu.get().defaultTexture();
+				Features.get(tr, GPUFeature.class).defaultTexture();
 				return null;
 			    }}).get();
 		return null;
@@ -385,7 +385,7 @@ public class SoundSystem {
     private synchronized void render(GL3 gl, ByteBuffer audioByteBuffer) {
 	if (firstRun)
 	    firstRun();
-	final GPU gpu = tr.gpu.get();
+	final GPU gpu = Features.get(tr, GPUFeature.class);
 	
 	if(getTrConfiguration().isAudioBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
@@ -605,11 +605,11 @@ public class SoundSystem {
 	    playbackFrameBuffer = tr.getThreadManager().submitToGL(new Callable<GLFrameBuffer>(){
 		@Override
 		public GLFrameBuffer call() throws Exception {
-		    final GPU gpu = tr.gpu.get();
+		    final GPU gpu = Features.get(tr, GPUFeature.class);
 		    gpu.defaultTexture();
 		    gpu.defaultTIU();
 		    final GLTexture texture = getPlaybackTexture();
-		    return tr.gpu.get()
+		    return Features.get(tr, GPUFeature.class)
 				.newFrameBuffer()
 				.bindToDraw()
 				.attachDrawTexture(texture,
@@ -636,7 +636,7 @@ public class SoundSystem {
 	    tr.getThreadManager().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-		    final GPU gpu = tr.gpu.get();
+		    final GPU gpu = Features.get(tr, GPUFeature.class);
 		    gpu.defaultProgram();
 		    gpu.defaultTIU();
 		    gpu.defaultTexture();

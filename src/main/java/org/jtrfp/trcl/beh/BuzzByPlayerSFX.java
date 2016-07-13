@@ -13,9 +13,11 @@
 
 package org.jtrfp.trcl.beh;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -61,7 +63,7 @@ public class BuzzByPlayerSFX extends Behavior implements CollisionBehavior {
      final String sfxToUse = getBuzzSounds()[(int)(Math.random()*getBuzzSounds().length)];
      final WorldObject parent = getParent();
      final TR              tr = parent.getTr();
-     final SoundSystem     ss = tr.soundSystem.get();
+     final SoundSystem     ss = Features.get(tr,SoundSystemFeature.class);
      final ResourceManager rm = tr.getResourceManager();
      final SoundTexture texture = rm.soundTextures.get(sfxToUse);
      final SamplePlaybackEvent evt = ss.getPlaybackFactory().create(texture, parent, tr.mainRenderer.getCamera(), SoundSystem.DEFAULT_SFX_VOLUME);

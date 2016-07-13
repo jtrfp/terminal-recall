@@ -25,7 +25,9 @@ import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.VQCodebookManager;
 
@@ -35,7 +37,7 @@ private final TR tr;
     public GPUMemDump(TR tr) {
 	//Dump raw memory
 	this.tr=tr;
-	gpu = tr.gpu.get();
+	gpu = Features.get(tr, GPUFeature.class);
 	try{
 	System.out.println("Dumping root memory...");
 	dumpRootMemory();

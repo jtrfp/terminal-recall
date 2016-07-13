@@ -28,6 +28,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
@@ -119,7 +120,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final int numChunks = widthInChunks * heightInChunks;
 	//Bulk-allocate ahead of time
 	final ArrayList<Integer> matrixIDs = new ArrayList<Integer>(numChunks);
-	tr.gpu.get().matrixWindow.get().create(matrixIDs,numChunks);
+	Features.get(tr, GPUFeature.class).matrixWindow.get().create(matrixIDs,numChunks);
 	
 	// For each chunk
 	for (int gZ = 0; gZ < height; gZ += chunkSideLength) {

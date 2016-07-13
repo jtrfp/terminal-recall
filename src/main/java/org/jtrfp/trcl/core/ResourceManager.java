@@ -69,6 +69,8 @@ import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.BINFile;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.AnimatedTextureBlock;
 import org.jtrfp.trcl.file.BINFile.Model.DataBlock.BillboardTexCoords0x04;
@@ -179,7 +181,7 @@ public class ResourceManager{
 			    while((value=ais.read())!=-1){
 				fb.put(((float)(value-128))/128f);
 			    }fb.clear();
-			    return tr.soundSystem.get().newSoundTexture(fb, (int)ais.getFormat().getFrameRate());
+			    return Features.get(tr,SoundSystemFeature.class).newSoundTexture(fb, (int)ais.getFormat().getFrameRate());
 			}catch(Exception e){tr.showStopper(e);return null;}
 		    }//end adapt(...)
 
@@ -330,12 +332,12 @@ public class ResourceManager{
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=tr.gpu.get().textureManager.get().getFallbackTexture();
+				result=Features.get(tr, GPUFeature.class).textureManager.get().getFallbackTexture();
 				}
 			catch(NonPowerOfTwoException e){
 				System.err.println(e.getMessage());
 				System.err.println("Using fallback texture.");
-				result=tr.gpu.get().textureManager.get().getFallbackTexture();
+				result=Features.get(tr, GPUFeature.class).textureManager.get().getFallbackTexture();
 				}
 			catch(Exception e){e.printStackTrace();result=null;}
 		if(useCache)rawCache.put(name.hashCode()*paletteRGBA.hashCode(), result);
@@ -354,7 +356,7 @@ public class ResourceManager{
 		}//end rawExists
 	
 	public Model getBINModel(String name, ColorPaletteVectorList palette,ColorPaletteVectorList paletteESTuTv, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
-		return getBINModel(name,tr.gpu.get().textureManager.get().getFallbackTexture(),1,true,palette,paletteESTuTv);
+		return getBINModel(name,Features.get(tr, GPUFeature.class).textureManager.get().getFallbackTexture(),1,true,palette,paletteESTuTv);
 		}
 	
 	private static final double [] BOX_U = new double[]{0,1,1,0};
@@ -513,7 +515,7 @@ public class ResourceManager{
 									1.-(double)((FaceBlockVertexWithUV)vertIndices.get(vi)).getTextureCoordinateV()/(double)0xFF0000), vi);}
 							}//end for(vi)
 							if(currentTexture==null)
-								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=tr.gpu.get().textureManager.get().getFallbackTexture();}
+								{System.err.println("WARNING: Texture never set for "+name+". Using fallback.");currentTexture=Features.get(tr, GPUFeature.class).textureManager.get().getFallbackTexture();}
 							if(skipLighting)
 							    t.setCentroidNormal(Vector3D.ZERO);
 							result.addTriangle(t);
@@ -528,7 +530,7 @@ public class ResourceManager{
 					    
 					    final Color color = new Color((float)palette.componentAt(colorID, 0),(float)palette.componentAt(colorID, 1),(float)palette.componentAt(colorID, 2),.5f);
 					    System.out.println("Color block: "+color+" colorID="+colorID);
-					    currentTexture = tr.gpu.get().textureManager.get().solidColor(color);
+					    currentTexture = Features.get(tr, GPUFeature.class).textureManager.get().solidColor(color);
 					}
 					else if(b instanceof BillboardTexCoords0x04){
 					    hasAlpha=true;
@@ -540,7 +542,7 @@ public class ResourceManager{
 					    final VertexColorBlock vcb = (VertexColorBlock)b;
 					    List<Long> indices = vcb.getPaletteIndices();
 					    if(!indices.isEmpty())
-						currentTexture = tr.gpu.get().textureManager.get().solidColor(tr.getGlobalPalette()[indices.get(0).intValue()]);
+						currentTexture = Features.get(tr, GPUFeature.class).textureManager.get().solidColor(tr.getGlobalPalette()[indices.get(0).intValue()]);
 					}else if(b instanceof LineSegmentBlock){
 						LineSegmentBlock block = (LineSegmentBlock)b;
 						org.jtrfp.trcl.gpu.Vertex v1 = vertices.get(block.getVertexID1());
@@ -549,7 +551,7 @@ public class ResourceManager{
 						    Triangle [] newTris = new Triangle[6];
 						    
 						    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(), 
-							    tr.gpu.get().textureManager.get().getDefaultTriPipeTexture(), 
+							    Features.get(tr, GPUFeature.class).textureManager.get().getDefaultTriPipeTexture(), 
 							    200, newTris, 0);
 						    result.addTriangles(newTris);
 						    alreadyVisitedLineSegs.add(v1.hashCode()*v2.hashCode());
@@ -845,7 +847,7 @@ public class ResourceManager{
 	    if(testTexture!=null)
 		return testTexture;
 	    InputStream is = null;
-	    try{return testTexture = tr.gpu.get().textureManager.get().newTexture(
+	    try{return testTexture = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(
 		    VQTexture.RGBA8FromPNG(is = this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);}
 	    finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	}//end getTestTexture()
@@ -858,12 +860,12 @@ public class ResourceManager{
 	}
 
 	public Texture solidColor(Color color) {
-	    return tr.gpu.get().textureManager.get().solidColor(color);
+	    return Features.get(tr, GPUFeature.class).textureManager.get().solidColor(color);
 	}
 
 	public UncompressedVQTextureFactory getUncompressedVQTextureFactory() {
 	    if(uncompressedVQTextureFactory == null)
-		setUncompressedVQTextureFactory(new UncompressedVQTextureFactory(tr.gpu.get(), tr.threadManager, "ResourceManager"));
+		setUncompressedVQTextureFactory(new UncompressedVQTextureFactory(Features.get(tr, GPUFeature.class), tr.threadManager, "ResourceManager"));
 	    return uncompressedVQTextureFactory;
 	}
 

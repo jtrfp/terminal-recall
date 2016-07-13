@@ -46,6 +46,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
 import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -691,7 +692,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	public Model getCockpitModel() {
 	    if(cockpitModel==null){
-		final GPU gpu = getTr().gpu.get();
+		final GPU gpu = Features.get(getTr(), GPUFeature.class);
 		final GL3 gl = gpu.getGl();
 		final ColorPaletteVectorList cpvl = getTr().getGlobalPaletteVL();
 		try{

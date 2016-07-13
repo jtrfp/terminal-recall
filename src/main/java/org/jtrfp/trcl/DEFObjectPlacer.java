@@ -21,6 +21,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
@@ -63,7 +64,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		    	defReporters[i].complete();
 			final int index = i;//???
 					final EnemyDefinition def = defs.get(index);
-					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPaletteVL(),null,tr.gpu.get().getGl());}
+					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPaletteVL(),null,Features.get(tr, GPUFeature.class).getGl());}
 					catch(Exception e){e.printStackTrace();}
 					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
 			final Reporter reporter = Features.get(tr, Reporter.class);

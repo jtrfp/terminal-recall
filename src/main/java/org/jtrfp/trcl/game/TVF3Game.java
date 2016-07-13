@@ -40,7 +40,8 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
-import org.jtrfp.trcl.file.LVLFile;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
@@ -351,7 +352,7 @@ public class TVF3Game implements Game {
 			    rm.setProjectileFactories(pf);
 			    final Player player = new Player();
 			    player.setModel(tr.getResourceManager().getBINModel(
-				    "SHIP.BIN", tr.getGlobalPaletteVL(),null, tr.gpu.get().getGl()));
+				    "SHIP.BIN", tr.getGlobalPaletteVL(),null, Features.get(tr, GPUFeature.class).getGl()));
 			    setPlayer(player);
 			    final Camera camera = tr.mainRenderer.getCamera();
 			    camera.probeForBehavior(MatchPosition.class).setTarget(player);
@@ -525,7 +526,7 @@ public class TVF3Game implements Game {
 		    return this;//nothing to do.
 		pcSupport.firePropertyChange(PAUSED, this.paused, paused);
 	        this.paused = paused;
-	        final SoundSystem ss = getTr().soundSystem.get();
+	        final SoundSystem ss = Features.get(getTr(),SoundSystemFeature.class);
 		ss.setPaused(paused);
 		getTr().getThreadManager().setPaused(paused);
 		if(paused)

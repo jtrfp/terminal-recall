@@ -32,6 +32,7 @@ import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.game.Game;
@@ -75,7 +76,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	fireBarrier = new ControllerBarrier(tr.getControllerInputs().getControllerInput(UserInputWeaponSelectionBehavior.FIRE));
 	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
-		tr.gpu.get().getGl(), 0,false),true,"BriefingScreen."+debugName);
+		Features.get(tr, GPUFeature.class).getGl(), 0,false),true,"BriefingScreen."+debugName);
 	add(briefingScreen);
 	this.tr	      = tr;
 	briefingChars = new CharAreaDisplay(layout.getFontSizeGL(),layout.getNumCharsPerLine(),layout.getNumLines(),tr,font);
@@ -88,7 +89,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	briefingScreen.setActive(true);
 	briefingScreen.setVisible(true);
 	
-	blackRectangle = new Sprite2D(0, 2, .6, tr.gpu.get().textureManager.get().solidColor(Color.BLACK), false,"BriefingScreen.blackRectangle."+debugName);
+	blackRectangle = new Sprite2D(0, 2, .6, Features.get(tr,GPUFeature.class).textureManager.get().solidColor(Color.BLACK), false,"BriefingScreen.blackRectangle."+debugName);
 	add(blackRectangle);
 	blackRectangle.setImmuneToOpaqueDepthTest(true);
 	blackRectangle.setPosition(0, -.7, TEXT_BG_Z);

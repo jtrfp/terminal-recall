@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -123,7 +123,11 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
     @Override
     public boolean remove(Object o) {
 	final Pair<KEY,E> pair = pairs.get(o);
-	assert pair != null;
+	if(pair == null)
+	    if(!pairs.containsKey(o))
+		throw new ElementNotFoundException("Cannot remove `+o+`; was not present.");
+	    else
+		assert false:"pair for "+o+" unexpectedly null!";
 	final E value = pair.getValue();
 	assert value != null;
 	value   .removePropertyChangeListener(elementPCL);
@@ -201,5 +205,10 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 		else
 		    try{executor.submit(r);}catch(Exception e){throw new RuntimeException(e);}
 	    }};
+	    
+	    public static class ElementNotFoundException extends IllegalArgumentException {
+		public ElementNotFoundException(){super();}
+		public ElementNotFoundException(String msg){super(msg);};
+	    }
     
 }//end PropertyBasedTagger

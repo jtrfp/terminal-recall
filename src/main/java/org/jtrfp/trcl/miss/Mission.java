@@ -12,19 +12,26 @@
  ******************************************************************************/
 package org.jtrfp.trcl.miss;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
+
+import javax.swing.JTextField;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DisplayModeHandler;
-import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SkySystem;
@@ -63,20 +70,60 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.MusicPlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
+import org.jtrfp.trcl.tools.Util;
 
 public class Mission {
-    // PROPERTIES
-    public static final String SATELLITE_VIEW = "satelliteView";
-    public static final String CURRENT_NAV_TARGET = "currentNavTarget";
+ // PROPERTIES
+    public static final String LEVEL_NAME               = "levelName",
+	                       NAVS                     = "navs",
+	                       GROUND_TARGETS_DESTROYED = "groundTargetsDestroyed",
+	                       AIR_TARGETS_DESTROYED    = "airTargetsDestroyed",
+	                       FOLIAGE_DESTROYED        = "foliageDestroyed",
+	                       SHOW_INTRO               = "showIntro",
+	                       CURRENT_NAV_TARGET       = "currentNavTarget",
+	                       LVL_FILE_NAME            = "lvlFileName",
+	                       SATELLITE_VIEW           = "satelliteView",
+	                       PLAYER_START_POSITION    = "playerStartPosition",
+	                       PLAYER_START_HEADING     = "playerStartHeading",
+	                       PLAYER_START_TOP         = "playerStartTop";
+    //// INTROSPECTOR
+    static {
+	try{
+	final Set<String> persistentProperties = new HashSet<String>();
+	persistentProperties.addAll(Arrays.asList(
+		LEVEL_NAME,
+		NAVS,
+		GROUND_TARGETS_DESTROYED,
+		AIR_TARGETS_DESTROYED,
+		FOLIAGE_DESTROYED,
+		SHOW_INTRO,
+		CURRENT_NAV_TARGET,
+		LVL_FILE_NAME,
+		PLAYER_START_POSITION,
+		PLAYER_START_HEADING,
+		PLAYER_START_TOP
+		));
+	
+	BeanInfo info = Introspector.getBeanInfo(Mission.class);
+	PropertyDescriptor[] propertyDescriptors =
+	                             info.getPropertyDescriptors();
+	for (int i = 0; i < propertyDescriptors.length; ++i) {
+	    PropertyDescriptor pd = propertyDescriptors[i];
+	    if (!persistentProperties.contains(pd.getName())) {
+	        pd.setValue("transient", Boolean.TRUE);
+	    }
+	}
+	}catch(Exception e){e.printStackTrace();}
+    }//end static{}
     
     private final TR 		tr;
     private final List<NAVObjective> 
     				navs	= new LinkedList<NAVObjective>();
     private LVLFile 	        lvl;
-    private double[] 		playerStartPosition 
-    					= new double[3];
+    private double[] 		playerStartPosition;
     private List<NAVSubObject> 	navSubObjects;
-    private ObjectDirection 	playerStartDirection;
+    private double []           playerStartHeading,
+                                playerStartTop;
     private Game 		game;
     private String       	levelName;
     private OverworldSystem 	overworldSystem;
@@ -143,6 +190,9 @@ public class Mission {
     }//end RunStateListener
     
     public Result go() {
+	Util.assertPropertiesNotNull(this,
+		"tr",
+		"game");
 	tr.setRunState(new LoadingState(){});
 	synchronized(missionLock){
 	synchronized(missionEnd){
@@ -158,7 +208,7 @@ public class Mission {
 		.createRoot(new UpdateHandler() {
 		    @Override
 		    public void update(double unitProgress) {
-			((TVF3Game)game).getLevelLoadingScreen().setLoadingProgress(unitProgress);
+			((TVF3Game)getGame()).getLevelLoadingScreen().setLoadingProgress(unitProgress);
 		    }
 		});
 	final LoadingProgressReporter[] progressStages = rootProgress
@@ -209,25 +259,34 @@ public class Mission {
 	    getOverworldSystem().loadLevel(lvl, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
-	    final NAVSystem navSystem = ((TVF3Game)getGameShell().getGame()).getNavSystem();
-	    navSubObjects = rm.getNAVData(lvl.getNavigationFile())
-		    .getNavObjects();
-
-	    START s = (START) navSubObjects.get(0);
-	    Location3D l3d = s.getLocationOnMap();
-	    playerStartPosition[0] = TRFactory.legacy2Modern(l3d.getZ());
-	    playerStartPosition[2] = TRFactory.legacy2Modern(l3d.getX());
-	    final double HEIGHT_PADDING = 10000;
-	    playerStartPosition[1] = Math.max(HEIGHT_PADDING + getOverworldSystem().getAltitudeMap().heightAt(
-		    TRFactory.legacy2Modern(l3d.getZ()),
-		    TRFactory.legacy2Modern(l3d.getX())),TRFactory.legacy2Modern(l3d.getY()));
-	    playerStartDirection = new ObjectDirection(s.getRoll(),
-		    s.getPitch(), s.getYaw());
+	    setNavSubObjects(rm.getNAVData(lvl.getNavigationFile())
+		    .getNavObjects());
+	    
 	    // ////// INITIAL HEADING
-	    player.setPosition(getPlayerStartPosition());
-	    player.setDirection(getPlayerStartDirection());
-	    player.setHeading(player.getHeading().negate());// Kludge to fix
-							    // incorrect heading
+	    final double [] playerStartPos = getStoredPlayerStartPosition();
+	    final double [] playerStartHdg = getStoredPlayerStartHeading();
+	    final double [] playerStartTop = getStoredPlayerStartTop();
+	    
+	    if(playerStartPos == null || playerStartHdg == null || playerStartTop == null){
+		START startNav = (START) getNavSubObjects().get(0);
+		final ObjectDirection od = new ObjectDirection(startNav.getRoll(),
+			    startNav.getPitch(), startNav.getYaw());
+		Location3D l3d = startNav.getLocationOnMap();
+		final double HEIGHT_PADDING = 10000;
+		setPlayerStartHeading (od.getHeading().toArray());
+		setPlayerStartTop     (od.getTop().toArray());
+		setPlayerStartPosition(new double[]{
+			TRFactory.legacy2Modern(l3d.getZ()), //X (Z)
+			Math.max(HEIGHT_PADDING + getOverworldSystem().getAltitudeMap().heightAt(// Y
+				    TRFactory.legacy2Modern(l3d.getZ()),
+				    TRFactory.legacy2Modern(l3d.getX())),TRFactory.legacy2Modern(l3d.getY())),
+			TRFactory.legacy2Modern(l3d.getX()) //Z (X)
+		});
+	    }//end if(nulls)
+	    //////// PLAYER POSITIONS
+	    player.setPosition(getStoredPlayerStartPosition()                     );
+	    player.setHeading(new Vector3D(getStoredPlayerStartHeading()).negate());// Kludge to fix incorrect hdg
+	    player.setTop    (new Vector3D(getStoredPlayerStartTop())             );
 	    ///////// STATE
 	    final Propelled propelled = player.probeForBehavior(Propelled.class); 
 	    propelled.setPropulsion(propelled.getMinPropulsion());
@@ -249,7 +308,8 @@ public class Mission {
 		f.create(tr, obj, navs);
 		navProgress[i].complete();
 	    }// end for(navSubObjects)
-	    navSystem.updateNAVState();
+	    final TVF3Game game = (TVF3Game)getGame();
+	    game.getNavSystem().updateNAVState();
 	    player.resetVelocityRotMomentum();
 	    final String startX = System.getProperty("org.jtrfp.trcl.startX");
 	    final String startY = System.getProperty("org.jtrfp.trcl.startY");
@@ -438,19 +498,17 @@ public class Mission {
     }// end Result
 
     /**
-     * @return the playerStartPosition
+     * NOTE: This returns the current Game's Player position and does not directly reflect setter changes.
+     * @return
+     * @since Jul 15, 2016
      */
     public double[] getPlayerStartPosition() {
-	return playerStartPosition;
-    }
-
-    /**
-     * @return the playerStartDirection
-     */
-    public ObjectDirection getPlayerStartDirection() {
-	return playerStartDirection;
+	return getGame().getPlayer().getPosition();
     }
     
+    public double[] getStoredPlayerStartPosition(){
+	return playerStartPosition;
+    }
 
     public void playerDestroyed() {
 	new Thread() {
@@ -778,5 +836,46 @@ public class Mission {
 
     public void setLvlFileName(String lvlFileName) {
         this.lvlFileName = lvlFileName;
+    }
+
+    /**
+     * NOTE: This returns the current Game's Player position and does not directly reflect setter changes.
+     * @return
+     * @since Jul 15, 2016
+     */
+    public double[] getPlayerStartHeading() {
+        return getGame().getPlayer().getHeadingArray();
+    }
+    
+    public double[] getStoredPlayerStartHeading(){
+	return playerStartHeading;
+    }
+
+    public void setPlayerStartHeading(double[] playerStartHeading) {
+	this.playerStartHeading = new double[3];
+        System.arraycopy(playerStartHeading, 0, this.playerStartHeading, 0, 3);
+    }
+
+    /**
+     * NOTE: This returns the current Game's Player position and does not directly reflect setter changes.
+     * @return
+     * @since Jul 15, 2016
+     */
+    public double[] getPlayerStartTop() {
+        return getGame().getPlayer().getTopArray();
+    }
+    
+    public double [] getStoredPlayerStartTop(){
+	return playerStartTop;
+    }
+
+    public void setPlayerStartTop(double[] playerStartTop) {
+	this.playerStartTop = new double[3];
+	System.arraycopy(playerStartTop, 0, this.playerStartTop, 0, 3);
+    }
+
+    public void setPlayerStartPosition(double[] playerStartPosition) {
+	this.playerStartPosition = new double[3];
+	System.arraycopy(playerStartPosition, 0, this.playerStartPosition, 0, 3);
     }
 }// end Mission

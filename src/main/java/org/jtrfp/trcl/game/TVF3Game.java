@@ -229,7 +229,6 @@ public class TVF3Game implements Game {
 		//final LVLFile lvl = tr.getResourceManager()
 		//	.getLVL(lvlFileName);
 		final Mission newMission = new Mission();
-		newMission.setGame(this);
 		newMission.setLvlFileName(lvlFileName);
 		newMission.setLevelName(prepareLevelName(lvlFileName));
 		newMission.setShowIntro(getLevelIndex() % 3 == 0);
@@ -426,6 +425,10 @@ public class TVF3Game implements Game {
 		final Mission oldMission = this.currentMission;
 		if(newMission == oldMission)
 		    return;
+		if(newMission != null){
+		    newMission.setGame(this);
+		    newMission.setGameShell(getGameShell());
+		}
 		this.currentMission=newMission;
 		World.relevanceExecutor.submit(new Callable<Void>(){
 		    @Override

@@ -13,18 +13,12 @@
 
 package org.jtrfp.trcl.ext.tr;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.concurrent.ExecutorService;
-
-import javax.media.opengl.awt.GLCanvas;
-
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.gpu.GLExecutor;
+import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
@@ -33,37 +27,33 @@ import org.springframework.stereotype.Component;
 public class GPUFactory implements FeatureFactory<TR> {
  public static class GPUFeature extends GPU implements Feature<TR> {
 
-    public GPUFeature(ExecutorService executorService, GLExecutor glExecutor,
-	    ThreadManager threadManager,
-	    UncaughtExceptionHandler exceptionHandler, GLCanvas glCanvas,
-	    World world) {
-	super(executorService, glExecutor, threadManager, exceptionHandler, glCanvas,
-		world);
+    public GPUFeature() {
+	super();
     }
 
     @Override
     public void apply(TR target) {
-	// TODO Auto-generated method stub
-	
-    }
+	final RootWindow rootWindow = Features.get(target, RootWindow.class);
+	final ThreadManager threadManager = Features.get(target, ThreadManagerFeature.class);
+	setThreadManager(threadManager);
+	setGlExecutor(threadManager);
+	setCanvas(rootWindow.getCanvas());
+	setUncaughtExceptionHandler(target);
+	setWorld(target.getWorld());
+	setExecutorService(threadManager.threadPool);
+	initialize();
+    }//end apply(...)
 
     @Override
     public void destruct(TR target) {
 	// TODO Auto-generated method stub
 	
     }
-     
  }//end GPUFeature
 
 @Override
 public Feature<TR> newInstance(TR target) {
-    final RootWindow rootWindow = Features.get(target, RootWindow.class);
-    return new GPUFeature(
-	    target.getThreadManager().threadPool, 
-	    target.getThreadManager(), 
-	    target.getThreadManager(), 
-	    target, rootWindow.getCanvas(),
-	    target.getWorld());
+    return new GPUFeature();
 }//end newInstance(target)
 
 @Override

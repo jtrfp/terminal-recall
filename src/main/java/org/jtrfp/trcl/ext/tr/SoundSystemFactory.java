@@ -17,6 +17,7 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.springframework.stereotype.Component;
 
@@ -25,14 +26,15 @@ public class SoundSystemFactory implements FeatureFactory<TR> {
     
     public static class SoundSystemFeature extends SoundSystem implements Feature<TR> {
 
-	public SoundSystemFeature(TR tr) {
-	    super(tr);
+	public SoundSystemFeature() {
+	    super();
 	}
 
 	@Override
 	public void apply(TR target) {
-	    // TODO Auto-generated method stub
-	    
+	    setTr(target);
+	    setGpu(Features.get(target, GPUFeature.class));
+	    initialize();
 	}
 
 	@Override
@@ -44,14 +46,14 @@ public class SoundSystemFactory implements FeatureFactory<TR> {
 
     @Override
     public Feature<TR> newInstance(TR target) {
-	final SoundSystemFeature result = new SoundSystemFeature(target);
+	final SoundSystemFeature result = new SoundSystemFeature();
 	Runtime.getRuntime().addShutdownHook(new Thread(){
 	    @Override
 	    public void run(){
 		result.setPaused(true);
 	    }
 	});
-	return result;//TODO: Refactor as empty constructor and init in apply()
+	return result;
     }
 
     @Override

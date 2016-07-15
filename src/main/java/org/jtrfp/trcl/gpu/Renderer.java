@@ -27,6 +27,7 @@ import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -40,13 +41,13 @@ import com.ochafik.util.Adapter;
 import com.ochafik.util.listenable.AdaptedCollection;
 
 public final class Renderer {
-    private final	RendererFactory		factory;
+    private       	RendererFactory		rendererFactory;
     //private 		RenderableSpacePartitioningGrid rootGrid;
     private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private		GLFrameBuffer		renderingTarget;
     private 		boolean 		initialized = false;
-    private final 	GPU 			gpu;
-    public final 	TRFutureTask<RenderList> renderList;
+    private     	GPU 			gpu;
+    public      	TRFutureTask<RenderList> renderList;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
     private		double			meanFPS;
@@ -57,40 +58,13 @@ public final class Renderer {
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
     //private final	CollisionManager        collisionManager;
     private		Camera			camera = null;
-    private final	PredicatedCollection<Positionable> relevantPositioned;
+    private        	PredicatedCollection<Positionable> relevantPositioned;
     private      	Reporter		reporter;
-    private final	ThreadManager		threadManager;
-    private final       String                  debugName;
+    private     	ThreadManager		threadManager;
+    private             String                  debugName;
     private boolean                             enabled = false;
-    
-    public Renderer(final RendererFactory factory, World world, final ThreadManager threadManager /*, CollisionManager collisionManagerFuture*/, final ObjectListWindow objectListWindow, String debugName) {
-	this.factory         = factory;
-	this.gpu             = factory.getGPU();
-	this.threadManager   =threadManager;
-	this.debugName       =debugName;
-	//this.collisionManager=collisionManagerFuture;
-	//BUG: Circular dependency... setCamera needs relevantPositioned, relevantPostioned needs renderer, renderer needs camera
-	if(world==null)
-	    throw new NullPointerException("World intolerably null.");
-	Camera camera = world.newCamera();//TODO: Remove after redesign.
-	camera.setDebugName(getDebugName());
-	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
-	System.out.println("...Done.");
-	System.out.println("Initializing RenderList...");
-	renderList = new TRFutureTask<RenderList>(new Callable<RenderList>(){
-	    @Override
-	    public RenderList call() throws Exception {
-		return new RenderList(gpu, Renderer.this, objectListWindow, threadManager);
-	    }});threadManager.threadPool.submit(renderList);
-	
-	skyCube = new SkyCube(gpu);
-	relevantPositioned =
-		    PredicatedCollection.predicatedCollection(
-			    new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),Util.bidi2Backward(castingAdapter),Util.bidi2Forward(castingAdapter)),
-			    new InstanceofPredicate(PositionedRenderable.class));
-     assert camera!=null;
-	setCamera(camera);//TODO: Remove after redesign
-    }//end constructor
+    private             World                   world;
+    private             ObjectListWindow        objectListWindow;
     
     private static final Adapter<Positionable,PositionedRenderable> castingAdapter = new Adapter<Positionable,PositionedRenderable>(){
 	@Override
@@ -105,9 +79,33 @@ public final class Renderer {
 	}
     };//end castingAdapter
     
-    private void ensureInit() {
+    public void ensureInit() {
 	if (initialized)
 	    return;
+	Util.assertPropertiesNotNull(this, "gpu", "world", "threadManager");
+	final World world = getWorld();
+	final GPU gpu = getGpu();
+	final ThreadManager threadManager = getThreadManager();
+	Camera camera = world.newCamera();//TODO: Remove after redesign.
+	camera.setDebugName(getDebugName());
+	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
+	System.out.println("...Done.");
+	System.out.println("Initializing RenderList...");
+	renderList = new TRFutureTask<RenderList>(new Callable<RenderList>(){
+	    @Override
+	    public RenderList call() throws Exception {
+		return new RenderList(gpu, Renderer.this, getObjectListWindow(), getThreadManager());
+	    }});
+	threadManager.threadPool.submit(renderList);
+
+	if(getSkyCube() == null)
+	    setSkyCube(new SkyCube(gpu));
+	relevantPositioned =
+		PredicatedCollection.predicatedCollection(
+			new AdaptedCollection<PositionedRenderable,Positionable>(renderList.get().getVisibleWorldObjectList(),Util.bidi2Backward(castingAdapter),Util.bidi2Forward(castingAdapter)),
+			new InstanceofPredicate(PositionedRenderable.class));
+	setCamera(camera);
+	assert camera!=null;
 	gpu.memoryManager.get().map();
 	initialized = true;
     }// end ensureInit()
@@ -135,6 +133,7 @@ public final class Renderer {
     }//end fpsTracking()
     
     public void setCamera(Camera toUse){
+	final PredicatedCollection<Positionable> relevantPositioned = getRelevantPositioned();
 	if(this.camera!=null)
 	    this.camera.getFlatRelevanceCollection().removeTarget(relevantPositioned, true);
 	this.camera=toUse;
@@ -159,8 +158,8 @@ public final class Renderer {
 	}};
     
     public void setSunVector(Vector3D sv){
-	factory.getDeferredProgram().use();
-	factory.getSunVectorUniform().set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
+	rendererFactory.getDeferredProgram().use();
+	rendererFactory.getSunVectorUniform().set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
 	gpu.defaultProgram();
     }
 
@@ -217,8 +216,8 @@ public final class Renderer {
 	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		factory.getDeferredProgram().use();
-		factory.getDeferredProgram().getUniform("sunColor").set(color.getRed()/128f, color.getGreen()/128f, color.getBlue()/128f);
+		rendererFactory.getDeferredProgram().use();
+		rendererFactory.getDeferredProgram().getUniform("sunColor").set(color.getRed()/128f, color.getGreen()/128f, color.getBlue()/128f);
 		gpu.defaultProgram();
 		return null;
 	    }
@@ -230,8 +229,8 @@ public final class Renderer {
 	gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		factory.getDeferredProgram().use();
-		factory.getDeferredProgram().getUniform("ambientLight").set(color.getRed()/128f, color.getGreen()/128f, color.getBlue()/128f);
+		rendererFactory.getDeferredProgram().use();
+		rendererFactory.getDeferredProgram().getUniform("ambientLight").set(color.getRed()/128f, color.getGreen()/128f, color.getBlue()/128f);
 		gpu.defaultProgram();
 		return null;
 	    }
@@ -258,7 +257,7 @@ public final class Renderer {
     
 
     public RendererFactory getRendererFactory() {
-	return factory;
+	return rendererFactory;
     }
 
     public TRFutureTask<RenderList> getRenderList() {
@@ -299,5 +298,62 @@ public final class Renderer {
 
     public void setReporter(Reporter reporter) {
         this.reporter = reporter;
+    }
+
+    public World getWorld() {
+        return world;
+    }
+
+    public void setWorld(World world) {
+        this.world = world;
+    }
+
+    public RendererFactory getFactory() {
+        return rendererFactory;
+    }
+
+    public void setFactory(RendererFactory factory) {
+        this.rendererFactory = factory;
+    }
+
+    public PredicatedCollection<Positionable> getRelevantPositioned() {
+        return relevantPositioned;
+    }
+
+    public void setRelevantPositioned(
+    	PredicatedCollection<Positionable> relevantPositioned) {
+        this.relevantPositioned = relevantPositioned;
+    }
+
+    public ThreadManager getThreadManager() {
+        return threadManager;
+    }
+
+    public void setThreadManager(ThreadManager threadManager) {
+        this.threadManager = threadManager;
+    }
+
+    public ObjectListWindow getObjectListWindow() {
+        return objectListWindow;
+    }
+
+    public void setObjectListWindow(ObjectListWindow objectListWindow) {
+        this.objectListWindow = objectListWindow;
+    }
+
+    public void setRendererFactory(RendererFactory rendererFactory) {
+        this.rendererFactory = rendererFactory;
+    }
+
+    public void setDebugName(String debugName) {
+        this.debugName = debugName;
+    }
+
+    public GPU getGpu() {
+        return gpu;
+    }
+
+    public void setGpu(GPU gpu) {
+        this.gpu = gpu;
     }
 }//end Renderer

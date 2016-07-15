@@ -474,8 +474,16 @@ public class RendererFactory {
     }//end allocatePortals()
     
     public Renderer newRenderer(String debugName){
-	Renderer result = new Renderer(this,world,threadManager ,objectListWindow,debugName);
+	//Renderer result = new Renderer(this,world,threadManager ,objectListWindow,debugName);
+	Renderer result = new Renderer();
+	result.setRendererFactory(this);
+	result.setWorld(world);
+	result.setThreadManager(threadManager);
+	result.setObjectListWindow(objectListWindow);
+	result.setDebugName(debugName);
+	result.setGpu(getGPU());
 	result.setReporter(getReporter());
+	result.ensureInit();
 	//Need a buffer because else the unpacker will cause redundant adds!
 	final CollectionActionDispatcher<Positionable>
 	 buffer = new CollectionActionDispatcher<Positionable>(new ArrayList<Positionable>());

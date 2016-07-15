@@ -37,6 +37,7 @@ import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
+import org.jtrfp.trcl.tools.Util;
 
 public class GPU implements GLExecutor{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
@@ -46,28 +47,45 @@ public class GPU implements GLExecutor{
 	private ByteOrder 				byteOrder;
 	//private final TR 				tr;
 	private GL3 					gl;
-	public final TRFutureTask<MemoryManager> 	memoryManager;
-	public final TRFutureTask<TextureManager> 	textureManager;
+	public TRFutureTask<MemoryManager> 	        memoryManager;
+	public TRFutureTask<TextureManager>        	textureManager;
 	private GPUVendor				vendor=null;
-	public final TRFutureTask<RendererFactory> 	rendererFactory;
-	private final GLExecutor			glExecutor;
-	private final GLCanvas				canvas;
-	public final TRFutureTask<MatrixWindow> 	matrixWindow;
-	public final TRFutureTask<ObjectListWindow> 	objectListWindow;
-	public final TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
-	private final ThreadManager                     threadManager;
-	private final GPUResourceFinalizer              gpuResourceFinalizer;
-	private final ArrayList<TRFuture<? extends MemoryWindow>>		memoryWindows = new ArrayList<TRFuture<? extends MemoryWindow>>();
+	public TRFutureTask<RendererFactory>      	rendererFactory;
+	private GLExecutor		         	glExecutor;
+	private GLCanvas				canvas;
+	public         TRFutureTask<MatrixWindow> 	matrixWindow;
+	public    TRFutureTask<ObjectListWindow> 	objectListWindow;
+	public      TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
+	private       ThreadManager                     threadManager;
+	private GPUResourceFinalizer                    gpuResourceFinalizer;
+	private final ArrayList<TRFuture<? extends MemoryWindow>>
+	                                                memoryWindows = new ArrayList<TRFuture<? extends MemoryWindow>>();
+	private ExecutorService                         executorService;
+	private World                                   world;
+	private UncaughtExceptionHandler                uncaughtExceptionHandler;
+	private boolean                                 initialized = false;
 	
-	public GPU(ExecutorService executorService,
-		GLExecutor glExecutor, final ThreadManager threadManager, 
-		final UncaughtExceptionHandler exceptionHandler, final GLCanvas glCanvas,
-		final World world) {
-	    if(executorService==null)
-		executorService = Executors.newCachedThreadPool();
-	    this.glExecutor    = glExecutor;
-	    this.canvas        = glCanvas;
-	    this.threadManager = threadManager;
+	public GPU() {
+	}//end constructor
+	
+	public void initialize(){
+	    if(initialized)
+		throw new IllegalStateException("Called initialize() but already initialized.");
+	    Util.assertPropertiesNotNull(this, 
+		    "executorService",
+		    "glExecutor",
+		    "threadManager",
+		    "uncaughtExceptionHandler",
+		    "canvas",
+		    "world");
+	    
+	    final ExecutorService          executorService = getExecutorService();
+	    final GLExecutor               glExecutor = getGlExecutor();
+	    final ThreadManager            threadManager = getThreadManager();
+	    final UncaughtExceptionHandler exceptionHandler = getUncaughtExceptionHandler();
+	    final GLCanvas                 glCanvas = getCanvas();
+	    final World                    world = getWorld();
+	    
 	    memoryManager  = new TRFutureTask<MemoryManager>(new Callable<MemoryManager>(){
 		@Override
 		public MemoryManager call() throws Exception {
@@ -130,7 +148,8 @@ public class GPU implements GLExecutor{
 		    return null;
 		}});
 	    gpuResourceFinalizer = new GPUResourceFinalizer(this);
-	}//end constructor
+	    initialized = true;
+	}//end start()
 	
 	public void compactRootBuffer(){
 	    for(TRFuture<? extends MemoryWindow> mw:memoryWindows)
@@ -170,8 +189,11 @@ public class GPU implements GLExecutor{
 		if(gl==null)
 			{GL gl1;
 			//In case GL is not ready, wait and try again.
-			try{for(int i=0; i<10; i++){gl1=canvas.getGL();if(gl1!=null)
-				{gl=gl1.getGL3();
+			try{for(int i=0; i<10; i++){
+			    final GLCanvas canvas = getCanvas();
+			    gl1=canvas.getGL();
+			    if(gl1!=null){
+				gl=gl1.getGL3();
 				final String debug = System.getProperty("org.jtrfp.trcl.debugGL"); 
 				if(debug!=null&&debug.toUpperCase().contentEquals("FALSE"))
 				 {}//Do nothing
@@ -257,5 +279,52 @@ public class GPU implements GLExecutor{
 
 	public GPUResourceFinalizer getGPUResourceFinalizer() {
 	    return gpuResourceFinalizer;
+	}
+
+	public ExecutorService getExecutorService() {
+	    if(executorService==null)
+		executorService = Executors.newCachedThreadPool();
+	    return executorService;
+	}
+
+	public void setExecutorService(ExecutorService executorService) {
+	    this.executorService = executorService;
+	}
+
+	public GLExecutor getGlExecutor() {
+	    return glExecutor;
+	}
+
+	public void setGlExecutor(GLExecutor glExecutor) {
+	    this.glExecutor = glExecutor;
+	}
+
+	public GLCanvas getCanvas() {
+	    return canvas;
+	}
+
+	public void setCanvas(GLCanvas canvas) {
+	    this.canvas = canvas;
+	}
+
+	public World getWorld() {
+	    return world;
+	}
+
+	public void setWorld(World world) {
+	    this.world = world;
+	}
+
+	public UncaughtExceptionHandler getUncaughtExceptionHandler() {
+	    return uncaughtExceptionHandler;
+	}
+
+	public void setUncaughtExceptionHandler(
+		UncaughtExceptionHandler uncaughtExceptionHandler) {
+	    this.uncaughtExceptionHandler = uncaughtExceptionHandler;
+	}
+
+	public void setThreadManager(ThreadManager threadManager) {
+	    this.threadManager = threadManager;
 	}
 	}//end GPU

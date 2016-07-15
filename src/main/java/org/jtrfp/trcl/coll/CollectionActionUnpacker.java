@@ -21,6 +21,8 @@ public class CollectionActionUnpacker<E> implements Collection<CollectionActionD
     private final Collection<CollectionActionDispatcher<E>> collections = new ArrayList<CollectionActionDispatcher<E>>();
     
     public CollectionActionUnpacker(Collection<E> delegate){
+	if(delegate == null)
+	    throw new NullPointerException("Delegate intolerably null.");
 	this.delegate=delegate;
     }
     @Override

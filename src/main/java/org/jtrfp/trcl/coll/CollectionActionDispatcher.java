@@ -44,6 +44,8 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
      * @since Mar 20, 2015
      */
     public boolean addTarget(Collection<E> target, boolean prefill){
+	if(target == null)
+	    throw new NullPointerException("Target intolerably null.");
 	if(targets.contains(target))
 	    throw new RuntimeException("Redundant add: "+target);
 	if(prefill && !cache.isEmpty())
@@ -54,6 +56,8 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     }
     
     public boolean removeTarget(Collection<E> target, boolean unfill){
+	if(target == null)
+	    throw new NullPointerException("Target intolerably null.");
 	if(!targets.contains(target))
 	    throw new RuntimeException("Target not present: "+target);
 	if(unfill && targets.contains(target))

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.tools;
 
 import java.awt.Color;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -365,4 +366,19 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
    public static double quantize(double value, double interval){
         return Math.rint(value / interval)*interval;
    }
+   
+   public static void assertPropertiesNotNull(Object bean, String ... propertyNames){
+       final Class beanClass = bean.getClass();
+       for(String propertyName : propertyNames){
+	   try{
+	   final String camelCaseName = Character.toUpperCase(propertyName.charAt(0))+""+propertyName.substring(1);
+	   final Method method = beanClass.getMethod("get"+camelCaseName, null);
+	   final Object result = method.invoke(bean, null);
+	   if(result == null)
+	       throw new IllegalStateException("Property `"+propertyName+" is intolerably null. Did you forget to set it?");
+	   }catch(Exception e){
+	       throw new RuntimeException("Could not check property `"+propertyName+"`",e);
+	   }
+       }//end for(propertyNames)
+   }//end assertPropertiesNotNull
 }//end Util

@@ -12,12 +12,17 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -84,6 +89,7 @@ import org.jtrfp.trcl.gpu.BufferedModelTarget;
 import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundEvent;
@@ -91,6 +97,12 @@ import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
 public class DEFObject extends WorldObject {
+    //PROPERTIES
+    public static final String ENEMY_DEFINITION = "enemyDefinition",
+	                       POSITION         = "position",
+	                       HEADING          = "heading",
+	                       TOP              = "top";
+    
     private Double boundingHeight, boundingWidth;
     private HitBox [] hitBoxes;
     //private WorldObject ruinObject;
@@ -105,6 +117,29 @@ public class DEFObject extends WorldObject {
     public static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
     private final ArrayList<Object> hardReferences = new ArrayList<Object>();
     private GameShell gameShell;
+    
+    ////INTROSPECTOR
+    static {
+	try{
+	    final Set<String> persistentProperties = new HashSet<String>();
+	    persistentProperties.addAll(Arrays.asList(
+		    ENEMY_DEFINITION,
+		    POSITION,
+		    HEADING,
+		    TOP
+		    ));
+
+	    BeanInfo info = Introspector.getBeanInfo(DEFObject.class);
+	    PropertyDescriptor[] propertyDescriptors =
+		    info.getPropertyDescriptors();
+	    for (int i = 0; i < propertyDescriptors.length; ++i) {
+		PropertyDescriptor pd = propertyDescriptors[i];
+		if (!persistentProperties.contains(pd.getName())) {
+		    pd.setValue("transient", Boolean.TRUE);
+		}
+	    }
+	}catch(Exception e){e.printStackTrace();}
+    }//end static{}
 
     public DEFObject(EnemyDefinition def, EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
 	super();

@@ -29,6 +29,8 @@ public class DisplayModeHandler {
     }
     
     public synchronized void setDisplayMode(Object [] items){
+	if(items == null)
+	    throw new NullPointerException("Display mode array intolerably null.");
 	newMode.clear();
 	recursiveNewDisplayModeImpl(items);
 	System.out.println("DisplayModeHandler.setDisplayMode()");

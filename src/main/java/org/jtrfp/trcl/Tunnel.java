@@ -125,9 +125,13 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	add(exitObject);
 	// X is tunnel depth, Z is left-right
 	try {
-	    objectSystem = new ObjectSystem(tr, lvl, null, Vector3D.MINUS_I,
-		    TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET),
-		    reporters[1]);
+	    objectSystem = new ObjectSystem();
+	    objectSystem.setTr(tr);
+	    //lvl
+	    objectSystem.setHeadingOverride(Vector3D.MINUS_J);
+	    objectSystem.setPositionOffset(TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET));
+	    objectSystem.setProgressReporter(reporters[1]);
+	    objectSystem.populateFromLVL(lvl);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

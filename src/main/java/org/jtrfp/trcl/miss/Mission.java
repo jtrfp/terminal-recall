@@ -18,7 +18,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -26,10 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import javax.swing.JTextField;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.OverworldSystem;
@@ -59,7 +55,9 @@ import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
+import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
@@ -85,7 +83,8 @@ public class Mission {
 	                       SATELLITE_VIEW           = "satelliteView",
 	                       PLAYER_START_POSITION    = "playerStartPosition",
 	                       PLAYER_START_HEADING     = "playerStartHeading",
-	                       PLAYER_START_TOP         = "playerStartTop";
+	                       PLAYER_START_TOP         = "playerStartTop",
+	                       DEF_OBJECT_LIST          = "defObjectList";
     //// INTROSPECTOR
     static {
 	try{
@@ -101,7 +100,8 @@ public class Mission {
 		LVL_FILE_NAME,
 		PLAYER_START_POSITION,
 		PLAYER_START_HEADING,
-		PLAYER_START_TOP
+		PLAYER_START_TOP,
+		DEF_OBJECT_LIST
 		));
 	
 	BeanInfo info = Introspector.getBeanInfo(Mission.class);
@@ -146,6 +146,7 @@ public class Mission {
     private final RunStateListener runStateListener = new RunStateListener();
     private WeakPropertyChangeListener weakRunStateListener; // HARD REFERENCE; DO NOT REMOVE.
     private String lvlFileName;
+    private List<DEFObject> defObjectList;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -193,6 +194,7 @@ public class Mission {
 	Util.assertPropertiesNotNull(this,
 		"tr",
 		"game");
+	final TR tr = getTr();
 	tr.setRunState(new LoadingState(){});
 	synchronized(missionLock){
 	synchronized(missionEnd){
@@ -223,10 +225,10 @@ public class Mission {
 	displayHandler.setDisplayMode(getLevelLoadingMode());
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
-	    final LVLFile lvl = getLVLFile();
+	    final LVLFile lvlData = getLvl();
 	    final ResourceManager rm = tr.getResourceManager();
 	    final Player player      = ((TVF3Game)getGameShell().getGame()).getPlayer();
-	    final TDFFile tdf 	     = rm.getTDFData(lvl.getTunnelDefinitionFile());
+	    final TDFFile tdf 	     = rm.getTDFData(lvlData.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check
 	    synchronized(missionEnd){
@@ -234,8 +236,17 @@ public class Mission {
 		return missionEnd[0]; 
 	    }
 	    
+	    //TODO: Use a setter
 	    overworldSystem = new OverworldSystem(tr,
 		    progressStages[LoadingStages.overworld.ordinal()]);
+	    
+	    final List<DEFObject> defObjectList = getDefObjectList();
+	    final ObjectSystem objectSystem = overworldSystem.getObjectSystem();
+	    if(defObjectList != null)
+	        objectSystem.setDefList(defObjectList);
+	    else
+		objectSystem.populateFromLVL(lvlData);
+	    
 	    briefingMode = new Object[]{
 			 ((TVF3Game)game).briefingScreen,
 			 overworldSystem
@@ -256,10 +267,10 @@ public class Mission {
 		    ((TVF3Game)game).getBriefingScreen(),
 		    overworldSystem
 	    };
-	    getOverworldSystem().loadLevel(lvl, tdf);
+	    getOverworldSystem().loadLevel(lvlData, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
-	    setNavSubObjects(rm.getNAVData(lvl.getNavigationFile())
+	    setNavSubObjects(rm.getNAVData(lvlData.getNavigationFile())
 		    .getNavObjects());
 	    
 	    // ////// INITIAL HEADING
@@ -327,7 +338,7 @@ public class Mission {
 	    }// end if(user start point)
 	    System.out.println("Start position set to " + player.getPosition()[0]+" "+player.getPosition()[1]+" "+player.getPosition()[2]);
 	    System.out.println("Setting sun vector");
-	    final AbstractTriplet sunVector = lvl.getSunlightDirectionVector();
+	    final AbstractTriplet sunVector = lvlData.getSunlightDirectionVector();
 	    tr.getThreadManager().submitToGL(new Callable<Void>() {
 		@Override
 		public Void call() throws Exception {
@@ -415,9 +426,10 @@ public class Mission {
 	}//end sync
     }// end go()
     
-    private LVLFile getLVLFile() throws FileLoadException, IOException, IllegalAccessException {
+    private LVLFile getLvl() {
 	if(lvl == null)
-	    lvl = getTr().getResourceManager().getLVL(getLvlFileName());
+	    try{lvl = getTr().getResourceManager().getLVL(getLvlFileName());}
+	catch(Exception e){e.printStackTrace();}
 	return lvl;
     }
 
@@ -878,4 +890,12 @@ public class Mission {
 	this.playerStartPosition = new double[3];
 	System.arraycopy(playerStartPosition, 0, this.playerStartPosition, 0, 3);
     }
+
+    public List<DEFObject> getDefObjectList() {
+        return defObjectList;
+    }
+
+    public void setDefObjectList(List<DEFObject> defObjectList) {
+        this.defObjectList = defObjectList;
+    }//end setDefObjectList(...)
 }// end Mission

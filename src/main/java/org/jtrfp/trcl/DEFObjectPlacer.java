@@ -25,6 +25,7 @@ import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
@@ -35,39 +36,38 @@ import org.jtrfp.trcl.obj.ObjectPlacer;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DEFObjectPlacer implements ObjectPlacer{
-	private DEFFile def;
+	private DEFFile defData;
 	private List<DEFObject> defList;
 	private Vector3D headingOverride=null;
-	private final LoadingProgressReporter rootReporter;
+	private LoadingProgressReporter rootReporter;
 	private final ArrayList<EnemyIntro> enemyIntros = new ArrayList<EnemyIntro>();
 	private final HashMap<EnemyDefinition,WorldObject> enemyPlacementMap = new HashMap<EnemyDefinition,WorldObject>();
-	private final TR tr;
+	private TR tr;
+	private Vector3D positionOffset = Vector3D.ZERO;
+	private RenderableSpacePartitioningGrid targetGrid;
 	
-	public DEFObjectPlacer(DEFFile def, TR tr, LoadingProgressReporter reporter)
-		{this.def=def;this.tr=tr;this.rootReporter=reporter;}
-	public DEFObjectPlacer(DEFFile defFile, TR tr,
-		List<DEFObject> defList, LoadingProgressReporter defObjectReporter) {
-	    this(defFile,tr,defObjectReporter);
-	    this.defList=defList;
-	}//end constructor
 	@Override
-	public void placeObjects(RenderableSpacePartitioningGrid target, Vector3D positionOffset){
-		final List<EnemyDefinition> defs = def.getEnemyDefinitions();
-		final List<EnemyPlacement> places = def.getEnemyPlacements();
+	public void placeObjects(){
+	    final RenderableSpacePartitioningGrid target = getTargetGrid();
+	        final Vector3D positionOffset = getPositionOffset();
+	        final DEFFile defData = getDefData();
+		final List<EnemyDefinition> defs = defData.getEnemyDefinitions();
+		final List<EnemyPlacement> places = defData.getEnemyPlacements();
 		final Model [] models = new Model[defs.size()];
 		//final TR tr = world.getTr();
 		final LoadingProgressReporter[] defReporters = rootReporter
 			.generateSubReporters(defs.size());
 		final LoadingProgressReporter[] placementReporters = rootReporter
 			.generateSubReporters(places.size());
+		final GPU      gpu      = Features.get(tr, GPUFeature.class); 
+		final Reporter reporter = Features.get(tr, Reporter.class);
 		for(int i=0; i<defs.size(); i++){
 		    	defReporters[i].complete();
 			final int index = i;//???
-					final EnemyDefinition def = defs.get(index);
-					try{models[index]=tr.getResourceManager().getBINModel(def.getComplexModelFile(),tr.getGlobalPaletteVL(),null,Features.get(tr, GPUFeature.class).getGl());}
+					final EnemyDefinition enemyDef = defs.get(index);
+					try{models[index]=tr.getResourceManager().getBINModel(enemyDef.getComplexModelFile(),tr.getGlobalPaletteVL(),null,gpu.getGl());}
 					catch(Exception e){e.printStackTrace();}
-					if(models[index]==null)System.out.println("Failed to get a model from BIN "+def.getComplexModelFile()+" at index "+index);
-			final Reporter reporter = Features.get(tr, Reporter.class);
+					if(models[index]==null)System.out.println("Failed to get a model from BIN "+enemyDef.getComplexModelFile()+" at index "+index);
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".complexModelFile", defs.get(i).getComplexModelFile());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".logic", defs.get(i).getLogic().toString());
 			reporter.report("org.jtrfp.trcl.DEFObjectPlacer.def."+defs.get(i).getDescription().replace('.', ' ')+".simpleModelFile", defs.get(i).getSimpleModel());
@@ -100,7 +100,6 @@ public class DEFObjectPlacer implements ObjectPlacer{
 				    headingArray[1]=headingOverride.getY();
 				    headingArray[2]=headingOverride.getZ();
 				  }//end if(headingOverride)
-				addWithSubObjects(obj,target);
 				//target.add(obj);
 			    }catch(Exception e){e.printStackTrace();}
 				}//end if(model!=null)
@@ -111,18 +110,6 @@ public class DEFObjectPlacer implements ObjectPlacer{
 		}
 		}//end placeObjects
 	
-	/**
-	 * Yo dawg, we heard you like subObject objects, so we put subObject objects in your subObject objects
-	 * so you can have subObjects from your subObjects after they are subObjected.
-	 * @param object
-	 * @since Jan 28, 2016
-	 */
-	private void addWithSubObjects(WorldObject object, RenderableSpacePartitioningGrid target){
-	    target.add(object);
-	    if(object instanceof DEFObject)
-	     for(WorldObject subObject:((DEFObject)object).getSubObjects())
-	      addWithSubObjects(subObject, target);
-	}//end addWithRuins(...)
 	/**
 	 * @return the headingOverride
 	 */
@@ -138,5 +125,57 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	}
 	public List<EnemyIntro> getEnemyIntros() {
 	    return enemyIntros;
+	}
+	public DEFFile getDefData() {
+	    return defData;
+	}
+	public void setDefData(DEFFile defData) {
+	    this.defData = defData;
+	}
+
+	public TR getTr() {
+	    return tr;
+	}
+
+	public void setTr(TR tr) {
+	    this.tr = tr;
+	}
+
+	public List<DEFObject> getDefList() {
+	    if(defList == null)
+		defList = new ArrayList<DEFObject>();
+	    return defList;
+	}
+
+	public void setDefList(List<DEFObject> defList) {
+	    this.defList = defList;
+	}
+
+	public LoadingProgressReporter getRootReporter() {
+	    return rootReporter;
+	}
+
+	public void setRootReporter(LoadingProgressReporter rootReporter) {
+	    this.rootReporter = rootReporter;
+	}
+
+	public HashMap<EnemyDefinition, WorldObject> getEnemyPlacementMap() {
+	    return enemyPlacementMap;
+	}
+
+	public Vector3D getPositionOffset() {
+	    return positionOffset;
+	}
+
+	public void setPositionOffset(Vector3D positionOffset) {
+	    this.positionOffset = positionOffset;
+	}
+
+	public RenderableSpacePartitioningGrid getTargetGrid() {
+	    return targetGrid;
+	}
+
+	public void setTargetGrid(RenderableSpacePartitioningGrid targetGrid) {
+	    this.targetGrid = targetGrid;
 	}
 	}//end DEFObjectPlacer

@@ -21,18 +21,24 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.PUPFile;
 import org.jtrfp.trcl.file.PUPFile.PowerupLocation;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
+import org.jtrfp.trcl.tools.Util;
 
 public class PUPObjectPlacer implements ObjectPlacer {
     ArrayList<PowerupObject> objs = new ArrayList<PowerupObject>();
-    private final LoadingProgressReporter []placementReporters;
-
-    public PUPObjectPlacer(PUPFile pupFile, TR tr, LoadingProgressReporter pupObjectReporter) {
-	final LoadingProgressReporter[] locationReporters = pupObjectReporter
-		.generateSubReporters(pupFile.getPowerupLocations().length);
-	placementReporters = pupObjectReporter
-		.generateSubReporters(pupFile.getPowerupLocations().length);
+    private LoadingProgressReporter []placementReporters;
+    private Vector3D positionOffset = Vector3D.ZERO;
+    private RenderableSpacePartitioningGrid targetGrid;
+    private TR tr;
+    private PUPFile pupData;
+    private LoadingProgressReporter rootReporter;
+    
+    @Override
+    public void placeObjects() {
+	Util.assertPropertiesNotNull(this, "tr","rootReporter","targetGrid");
+	final PUPFile pupData = getPupData();
+	final LoadingProgressReporter [] locationReporters = getPlacementReporters();
 	int pupIndex=0;
-	for (PowerupLocation loc : pupFile.getPowerupLocations()) {
+	for (PowerupLocation loc : pupData.getPowerupLocations()) {
 	    locationReporters[pupIndex++].complete();
 	    PowerupObject powerup = new PowerupObject(loc.getType());
 	    final double[] pupPos = powerup.getPosition();
@@ -43,10 +49,8 @@ public class PUPObjectPlacer implements ObjectPlacer {
 	    powerup.notifyPositionChange();
 	    objs.add(powerup);
 	}// end for(locations)
-    }// end PUPObjectPlacer
-
-    @Override
-    public void placeObjects(RenderableSpacePartitioningGrid target, Vector3D positionOffset) {
+	final RenderableSpacePartitioningGrid target         = getTargetGrid();
+	final Vector3D                        positionOffset = getPositionOffset();
 	int objIndex=0;
 	for (PowerupObject obj : objs) {
 	    placementReporters[objIndex++].complete();
@@ -54,4 +58,56 @@ public class PUPObjectPlacer implements ObjectPlacer {
 	    target.add(obj);
 	}//end for(objs)
     }//end placeObjects()
+
+    @Override
+    public Vector3D getPositionOffset() {
+        return positionOffset;
+    }
+
+    @Override
+    public void setPositionOffset(Vector3D positionOffset) {
+        this.positionOffset = positionOffset;
+    }
+
+    @Override
+    public RenderableSpacePartitioningGrid getTargetGrid() {
+        return targetGrid;
+    }
+
+    @Override
+    public void setTargetGrid(RenderableSpacePartitioningGrid targetGrid) {
+        this.targetGrid = targetGrid;
+    }
+
+    public TR getTr() {
+        return tr;
+    }
+
+    public void setTr(TR tr) {
+        this.tr = tr;
+    }
+
+    public PUPFile getPupData() {
+        return pupData;
+    }
+
+    public void setPupData(PUPFile pupData) {
+        this.pupData = pupData;
+    }
+
+    public LoadingProgressReporter getRootReporter() {
+        return rootReporter;
+    }
+
+    public void setRootReporter(LoadingProgressReporter rootReporter) {
+        this.rootReporter = rootReporter;
+    }
+
+    public LoadingProgressReporter[] getPlacementReporters() {
+	if(placementReporters == null){
+	    placementReporters = getRootReporter()
+			.generateSubReporters(getPupData().getPowerupLocations().length);
+	}
+        return placementReporters;
+    }
 }// end PUPObjectPlacer

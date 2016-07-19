@@ -22,9 +22,12 @@ import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
+import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.FacingObject;
+import org.jtrfp.trcl.beh.HasDescription;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.beh.RequestsMentionOnBriefing;
 import org.jtrfp.trcl.beh.RotateAroundObject;
 import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
@@ -45,7 +48,6 @@ import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.Mission.Result;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.DEFObject;
-import org.jtrfp.trcl.obj.EnemyIntro;
 import org.jtrfp.trcl.obj.Sprite2D;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -231,59 +233,66 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
 	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
-	for(EnemyIntro intro:overworldSystem.getObjectSystem().getDefPlacer().getEnemyIntros()){
-	    final WorldObject wo = intro.getWorldObject();
-	    final boolean vis = wo.isVisible();
-	    final boolean act = wo.isActive();
-	    wo.setActive(true);
-	    wo.setVisible(true);
-	    camera.probeForBehavior(FacingObject.class).setTarget(wo);
-	    camera.probeForBehavior(FacingObject.class).setHeadingOffset(layout.cameraHeadingAdjust());
-	    camera.probeForBehavior(RotateAroundObject.class).setTarget(wo);
-	    camera.probeForBehavior(RotateAroundObject.class).setAngularVelocityRPS(.3);
-	    //Roughly center the object (ground objects have their bottom at Y=0)
-	    if(wo.getModel().getTriangleList()!=null){
-	     camera.probeForBehavior(RotateAroundObject.class).setOffset(
-		    new double []{
-			    0,
-			    wo.getModel().
-			     getTriangleList().
-			     getMaximumVertexDims().
-			     getY(),
-			    0});
-	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
-			    wo.getModel().getTriangleList().getMaximumVertexDims().getX()*3);}
-	    else if(wo.getModel().getTransparentTriangleList()!=null){
-	     camera.probeForBehavior(RotateAroundObject.class).setOffset(
-		    new double []{
-			 0,
-			 wo.getModel().
-			 getTransparentTriangleList().
-			 getMaximumVertexDims().
-			 getY(),
-			 0});
-	     camera.probeForBehavior(RotateAroundObject.class).setDistance(
-			    wo.getModel().getTransparentTriangleList().getMaximumVertexDims().getX()*6);}
-	    //If this intro takes place in the chamber, enter chamber mode.
-	    boolean chamberMode = false;
-	    if(wo instanceof DEFObject){
-		final DEFObject def = (DEFObject)wo;
+	final List<DEFObject> defObjects = overworldSystem.getDefList();
+	for(DEFObject def:defObjects){
+	    if(def.hasBehavior(RequestsMentionOnBriefing.class)){
+		String descriptionString;
+		try{descriptionString = def.probeForBehavior(HasDescription.class).getHumanReadableDescription();
+		}
+		catch(BehaviorNotFoundException e){
+		    descriptionString = null;
+		}
+		if(descriptionString == null)
+		    descriptionString = "[no description]";
+		final boolean vis = def.isVisible();
+		final boolean act = def.isActive();
+		def.setActive(true);
+		def.setVisible(true);
+		camera.probeForBehavior(FacingObject.class).setTarget(def);
+		camera.probeForBehavior(FacingObject.class).setHeadingOffset(layout.cameraHeadingAdjust());
+		camera.probeForBehavior(RotateAroundObject.class).setTarget(def);
+		camera.probeForBehavior(RotateAroundObject.class).setAngularVelocityRPS(.3);
+		//Roughly center the object (ground objects have their bottom at Y=0)
+		if(def.getModel().getTriangleList()!=null){
+		    camera.probeForBehavior(RotateAroundObject.class).setOffset(
+			    new double []{
+				    0,
+				    def.getModel().
+				    getTriangleList().
+				    getMaximumVertexDims().
+				    getY(),
+				    0});
+		    camera.probeForBehavior(RotateAroundObject.class).setDistance(
+			    def.getModel().getTriangleList().getMaximumVertexDims().getX()*3);}
+		else if(def.getModel().getTransparentTriangleList()!=null){
+		    camera.probeForBehavior(RotateAroundObject.class).setOffset(
+			    new double []{
+				    0,
+				    def.getModel().
+				    getTransparentTriangleList().
+				    getMaximumVertexDims().
+				    getY(),
+				    0});
+		    camera.probeForBehavior(RotateAroundObject.class).setDistance(
+			    def.getModel().getTransparentTriangleList().getMaximumVertexDims().getX()*6);}
+		//If this intro takes place in the chamber, enter chamber mode.
+		boolean chamberMode = false;
 		chamberMode = def.isShieldGen() || def.isBoss();
-	    }
-	    if(chamberMode)
-		overworldSystem.setChamberMode(true);
-	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
-	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
-	    wo.setRespondToTick(false);//freeze
-	    briefingChars.setScrollPosition(layout.getNumLines()-2);
-	    setContent(intro.getDescriptionString());
-	    fireBarrier.waitForEvent();
-	    //Restore previous state.
-	    wo.setVisible(vis);
-	    wo.setActive(act);
-	    wo.setRespondToTick(true);//unfreeze
-	    if(chamberMode)
-		overworldSystem.setChamberMode(false);
+		if(chamberMode)
+		    overworldSystem.setChamberMode(true);
+		def.tick(System.currentTimeMillis());//Make sure its position and state is sane.
+		camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
+		def.setRespondToTick(false);//freeze
+		briefingChars.setScrollPosition(layout.getNumLines()-2);
+		setContent(descriptionString);
+		fireBarrier.waitForEvent();
+		//Restore previous state.
+		def.setVisible(vis);
+		def.setActive(act);
+		def.setRespondToTick(true);//unfreeze
+		if(chamberMode)
+		    overworldSystem.setChamberMode(false);
+	    }//end if(requestsBehavior)
 	}//end for(enemyIntros)
 	camera.probeForBehavior(FacingObject.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);

@@ -18,6 +18,7 @@ import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
@@ -229,7 +230,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 	renderer.setSunColor(skySystem.getSuggestedSunColor());
-	for(EnemyIntro intro:game.getCurrentMission().getOverworldSystem().getObjectSystem().getDefPlacer().getEnemyIntros()){
+	final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
+	for(EnemyIntro intro:overworldSystem.getObjectSystem().getDefPlacer().getEnemyIntros()){
 	    final WorldObject wo = intro.getWorldObject();
 	    final boolean vis = wo.isVisible();
 	    final boolean act = wo.isActive();
@@ -269,7 +271,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 		chamberMode = def.isShieldGen() || def.isBoss();
 	    }
 	    if(chamberMode)
-		Features.get(tr,GameShell.class).getGame().getCurrentMission().getOverworldSystem().setChamberMode(true);
+		overworldSystem.setChamberMode(true);
 	    wo.tick(System.currentTimeMillis());//Make sure its position and state is sane.
 	    camera.tick(System.currentTimeMillis());//Make sure the camera knows what is going on.
 	    wo.setRespondToTick(false);//freeze
@@ -281,7 +283,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    wo.setActive(act);
 	    wo.setRespondToTick(true);//unfreeze
 	    if(chamberMode)
-		Features.get(tr,GameShell.class).getGame().getCurrentMission().getOverworldSystem().setChamberMode(false);
+		overworldSystem.setChamberMode(false);
 	}//end for(enemyIntros)
 	camera.probeForBehavior(FacingObject.class).setEnable(false);
 	camera.probeForBehavior(RotateAroundObject.class).setEnable(false);

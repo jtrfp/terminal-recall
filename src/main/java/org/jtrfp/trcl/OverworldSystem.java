@@ -36,7 +36,6 @@ import org.jtrfp.trcl.obj.PositionedRenderable;
 public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private SkySystem 	     skySystem;
     private AltitudeMap              altitudeMap, normalizedAltitudeMap;
-    private final List<DEFObject>    defList = new ArrayList<DEFObject>();
     private RenderableSpacePartitioningGrid 
     				     terrainMirror = 
     new RenderableSpacePartitioningGrid();
@@ -92,8 +91,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("...Done.");
 	    // Objects
 	    System.out.println("Setting up objects...");
-	    objectSystem = new ObjectSystem(tr, lvl, defList,
-		    null, Vector3D.ZERO, objectReporter);
+	    final ObjectSystem objectSystem = getObjectSystem();
+	    objectSystem.populateFromLVL(lvl);
+	    
 	    System.out.println("Adding terrain and object system to OverworldSystem...");
 	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
@@ -110,7 +110,7 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     }// end constructor
     
     public List<DEFObject> getDefList() {
-	return defList;
+	return getObjectSystem().getDefList();
     }
 
     public SpacePartitioningGrid<PositionedRenderable> getTerrainMirror() {
@@ -169,6 +169,11 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
      * @return the objectSystem
      */
     public ObjectSystem getObjectSystem() {
+	if(objectSystem == null){
+	    objectSystem = new ObjectSystem();
+	    objectSystem.setProgressReporter(objectReporter);
+	    objectSystem.setTr(tr);
+	}
         return objectSystem;
     }
     public AltitudeMap getAltitudeMap() {

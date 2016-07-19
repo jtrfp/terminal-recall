@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -15,7 +15,11 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 
+
 public interface ObjectPlacer {
-    public void placeObjects(RenderableSpacePartitioningGrid target,
-	    Vector3D positionOffset);
+    public void placeObjects();
+    public void setPositionOffset(Vector3D offset);
+    public Vector3D getPositionOffset();
+    public void setTargetGrid(RenderableSpacePartitioningGrid target);
+    public RenderableSpacePartitioningGrid getTargetGrid();
 }

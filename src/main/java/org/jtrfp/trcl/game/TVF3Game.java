@@ -18,11 +18,13 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.DEFObjectPlacer;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
@@ -42,6 +44,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
+import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
@@ -54,6 +57,7 @@ import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -230,8 +234,8 @@ public class TVF3Game implements Game {
 		//	.getLVL(lvlFileName);
 		final Mission newMission = new Mission();
 		newMission.setLvlFileName(lvlFileName);
-		newMission.setLevelName(prepareLevelName(lvlFileName));
-		newMission.setShowIntro(getLevelIndex() % 3 == 0);
+		newMission.setLevelName  (prepareLevelName(lvlFileName));
+		newMission.setShowIntro  (getLevelIndex() % 3 == 0);
 		setCurrentMission(newMission);
 	    }//end setLevelDirect()
 	    

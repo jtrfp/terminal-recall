@@ -42,6 +42,7 @@ public interface Game {
     public boolean isPaused();
     public Game    setPaused(boolean paused);
     public Mission getCurrentMission();
+    public void    setCurrentMission(Mission newMission);
     public Player  getPlayer();
     public String  getPlayerName();
     public void    abort();

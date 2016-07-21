@@ -73,7 +73,10 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	                                   //In case not boolean
 	    try{getMethod = targetClass.getMethod("get"+camelPropertyName, null);}
 	    catch(NoSuchMethodException e){//In case our property is boolean
-		getMethod = targetClass.getMethod("is"+camelPropertyName, null);
+		try{getMethod = targetClass.getMethod("is"+camelPropertyName, null);}
+		catch(NoSuchMethodException ex){
+		    throw new RuntimeException("Cannot find property of name `"+propertyName+"` in class "+targetClass.getName()+".",ex);
+		}
 	    }
 	    final Object value        = getMethod.invoke(target, null);
 	    final Object defaultValue = getMethod.invoke(defaultBean, null);
@@ -83,8 +86,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	    else performMap = value != defaultValue;
 	    if( performMap )
 		outputMap.put(propertyName, value);
-	    }catch(NoSuchMethodException e)   {e.printStackTrace();}
-	    catch(InvocationTargetException e){e.printStackTrace();}
+	    }catch(InvocationTargetException e){e.printStackTrace();}
 	    catch(IllegalAccessException e)   {e.printStackTrace();}
 	}//for(propertyNames)
 	//getConfigManager().setConfiguration(targetClass,outputMap);

@@ -218,6 +218,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    final TVF3Game newGame = new TVF3Game();
 	    newGame.setGameVersion(newGameVersion);
 	    newGame.setVox(vox);
+	    Features.init(newGame);
 	    setGame(newGame);
 	    try{game.boot();}
 	    catch(Exception e){

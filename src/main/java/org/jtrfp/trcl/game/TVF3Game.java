@@ -75,7 +75,7 @@ public class TVF3Game implements Game {
 	                       GAME_VERSION     = "gameVersion",
 	                       PLAYER_NAME      = "playerName",
 	                       DIFFICULTY       = "difficulty",
-	                       MISSION          = "mission";
+	                       CURRENT_MISSION  = "currentMission";
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private GameVersion gameVersion;
     private GameShell gameShell;
@@ -153,7 +153,6 @@ public class TVF3Game implements Game {
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};
 		tr.setRunState(new GameConstructedMode(){});
-		Features.init(this);//TODO: Remove after Featurization
 	    }// end constructor
 
 	    public void setupNameWithUser() throws CanceledException {

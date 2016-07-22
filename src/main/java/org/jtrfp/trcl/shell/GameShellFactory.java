@@ -68,7 +68,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GameShellFactory implements FeatureFactory<TR>{
-
     //// PROPERTIES ////
     public static final String	GAME				="game";
 
@@ -103,14 +102,6 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	public GameShell(TR tr){
 	    this.tr=tr;
 	    tr.setRunState(new GameShellConstructing(){});
-	    /*tr.addPropertyChangeListener(GAME, new PropertyChangeListener(){//TODO: Redesign then remove
-	    @Override
-	    public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getNewValue()==null){
-		    earlyLoadingScreen.setStatusText("No game loaded.");
-		    showGameshellScreen();
-		}else{hideGameshellScreen();}
-	    }});*/
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(START_GAME_MENU_PATH);
 	    menuSystem.addMenuItemListener(startGameMenuItemListener, START_GAME_MENU_PATH);
@@ -214,7 +205,6 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    vox = determineVOXFile();
 	    if(vox==null)
 		return this;//Abort
-	    //final Game game = tr.newGame(vox, newGameVersion);
 	    final TVF3Game newGame = new TVF3Game();
 	    newGame.setGameVersion(newGameVersion);
 	    newGame.setVox(vox);
@@ -345,9 +335,10 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    for(IPodData pod:tr.getResourceManager().getRegisteredPODs()){
 		final String podComment = pod.getComment();
 		System.out.println("POD comment="+podComment);
-		f3Hint     |= podComment.toUpperCase().startsWith("FURY3");
-		tvHint     |= podComment.toUpperCase().startsWith("TV");
-		furyseHint |= podComment.toUpperCase().startsWith("FURYSE");
+		final String podCommentUC = podComment.toUpperCase();
+		f3Hint     |= podCommentUC.startsWith("FURY3");
+		tvHint     |= podCommentUC.startsWith("TV");
+		furyseHint |= podCommentUC.startsWith("FURYSE");
 	    }//end for(pods)
 
 	    int numValidHints=0 + (f3Hint?1:0) + (tvHint?1:0) + (furyseHint?1:0);

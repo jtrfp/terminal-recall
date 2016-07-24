@@ -171,14 +171,12 @@ public class Mission {
        public interface TunnelState     extends PlayerActivity{}
     
     public Mission() {
-	this.tr 	= Features.get(Features.getSingleton(), TR.class);
+	this.tr 	    = Features.get(Features.getSingleton(), TR.class);
 	this.displayHandler = new DisplayModeHandler(this.getPartitioningGrid());
-	tr.setRunState(new ConstructingState(){});
+	
 	tr.addPropertyChangeListener(
 		TRFactory.RUN_STATE, 
 		weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr));
-	tr.setRunState(new ConstructedState(){});
-	Features.init(this);//TODO: Remove when Mission becomes a Feature
     }// end Mission
     
     private class RunStateListener implements PropertyChangeListener {
@@ -191,6 +189,10 @@ public class Mission {
     }//end RunStateListener
     
     public Result go() {
+	//Kludge to fulfill previous dependencies
+	tr.setRunState(new ConstructingState(){});
+	tr.setRunState(new ConstructedState(){});
+	
 	Util.assertPropertiesNotNull(this,
 		"tr",
 		"game");
@@ -515,7 +517,13 @@ public class Mission {
      * @since Jul 15, 2016
      */
     public double[] getPlayerStartPosition() {
-	return getGame().getPlayer().getPosition();
+	final Game game = getGame();
+	if(game == null)
+	    return null;
+	final Player player = game.getPlayer();
+	if(player == null)
+	    return null;
+	return player.getPosition();
     }
     
     public double[] getStoredPlayerStartPosition(){
@@ -856,7 +864,13 @@ public class Mission {
      * @since Jul 15, 2016
      */
     public double[] getPlayerStartHeading() {
-        return getGame().getPlayer().getHeadingArray();
+	final Game game = getGame();
+	if(game == null)
+	    return null;
+	final Player player = game.getPlayer();
+	if(player == null)
+	    return null;
+        return player.getHeadingArray();
     }
     
     public double[] getStoredPlayerStartHeading(){
@@ -874,7 +888,13 @@ public class Mission {
      * @since Jul 15, 2016
      */
     public double[] getPlayerStartTop() {
-        return getGame().getPlayer().getTopArray();
+	final Game game = getGame();
+	if(game == null)
+	    return null;
+	final Player player = game.getPlayer();
+	if(player == null)
+	    return null;
+        return player.getTopArray();
     }
     
     public double [] getStoredPlayerStartTop(){

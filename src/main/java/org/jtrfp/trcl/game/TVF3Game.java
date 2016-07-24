@@ -15,16 +15,13 @@ package org.jtrfp.trcl.game;
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.Camera;
-import org.jtrfp.trcl.DEFObjectPlacer;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.EarlyLoadingScreen;
 import org.jtrfp.trcl.GLFont;
@@ -44,7 +41,6 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
-import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
@@ -57,7 +53,6 @@ import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
-import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -139,11 +134,9 @@ public class TVF3Game implements Game {
 	    private final PropertyChangeSupport
 	    			pcSupport = new PropertyChangeSupport(this);
 	    private boolean paused=false;
-	    private volatile boolean aborting=false;
 	    private TRFutureTask<Void>[] startupTask = new TRFutureTask[]{null};
 	    
 	    private static final int UPFRONT_HEIGHT = 23;
-	    private final double 	FONT_SIZE=.07;
 	    private boolean inGameplay	=false;
 	    private DashboardLayout dashboardLayout;
 	    
@@ -164,12 +157,6 @@ public class TVF3Game implements Game {
 		setPlayerName(gsd.getCallSign());
 		setDifficulty(gsd.getDifficulty());
 	    }// end setupNameWithUser()
-	    
-	    public void save(File fileToSaveTo) {
-		// TODO
-	    }
-
-	   
 
 	    /**
 	     * @return the vox
@@ -196,11 +183,11 @@ public class TVF3Game implements Game {
 	    public synchronized int getLevelIndex() {
 		return levelIndex;
 	    }
-	    
+
 	    public boolean isInGameplay(){
 		return inGameplay;
 	    }
-	    
+
 	    private boolean setInGameplay(boolean newValue){
 		boolean old = inGameplay;
 		inGameplay=newValue;
@@ -229,8 +216,6 @@ public class TVF3Game implements Game {
 	    
 	    public void setLevelDirect(String lvlFileName) throws FileNotFoundException, IllegalAccessException, IOException, FileLoadException{
 		setCurrentMission(null);
-		//final LVLFile lvl = tr.getResourceManager()
-		//	.getLVL(lvlFileName);
 		final Mission newMission = new Mission();
 		newMission.setLvlFileName(lvlFileName);
 		newMission.setLevelName  (prepareLevelName(lvlFileName));
@@ -324,7 +309,6 @@ public class TVF3Game implements Game {
 			satDashboard.setVisible(false);
 			tr.getDefaultGrid().add(satDashboard);
 			
-			//hudSystem = new HUDSystem(tr,tr.getGameShell().getGreenFont(),layout);
 			final TRConfiguration trConfig = Features.get(tr,TRConfiguration.class);
 			System.out.println("GameVersion="+trConfig._getGameVersion());
 			    // Make color zero translucent.
@@ -450,7 +434,6 @@ public class TVF3Game implements Game {
 	    
 	    public void abort(){
 		tr.setRunState(new GameDestructingMode(){});
-		//abortCurrentMission();
 		Features.destruct(this);
 		try{setLevelIndex(-1);}
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
@@ -540,7 +523,7 @@ public class TVF3Game implements Game {
 		else
 		 upfrontDisplay.removePersistentMessage();
 	        return this;
-	    }
+	    }//end setPaused(...)
 	    
 	    public Game addPropertyChangeListener(String propertyName, PropertyChangeListener l){
 		pcSupport.addPropertyChangeListener(propertyName, l);

@@ -142,10 +142,8 @@ public class TVF3Game implements Game {
 	    
 	    public TVF3Game() {
 		this.tr = Features.get(Features.getSingleton(), TR.class);
-		tr.setRunState(new GameConstructingMode(){});
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};
-		tr.setRunState(new GameConstructedMode(){});
 	    }// end constructor
 
 	    public void setupNameWithUser() throws CanceledException {
@@ -250,7 +248,7 @@ public class TVF3Game implements Game {
 	    /**
 	     * @return the difficulty
 	     */
-	    public synchronized Difficulty getDifficulty() {
+	    public Difficulty getDifficulty() {
 		return difficulty;
 	    }
 
@@ -258,7 +256,7 @@ public class TVF3Game implements Game {
 	     * @param difficulty
 	     *            the difficulty to set
 	     */
-	    public synchronized void setDifficulty(Difficulty difficulty) {
+	    public void setDifficulty(Difficulty difficulty) {
 		this.difficulty = difficulty;
 	    }
 
@@ -289,6 +287,9 @@ public class TVF3Game implements Game {
 	    }
 
 	    public synchronized void boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+			//Kludge to fulfill previous dependency
+			tr.setRunState(new GameConstructingMode(){});
+			tr.setRunState(new GameConstructedMode(){});
 			// Set up player, HUD, fonts...
 			System.out.println("Booting...");
 			tr.getThreadManager().setPaused(true);
@@ -429,6 +430,8 @@ public class TVF3Game implements Game {
 		    }});
 		if(oldMission!=null)
 		 oldMission.destruct();
+		if(newMission != null)
+		    Features.init(newMission);
 		pcSupport.firePropertyChange("currentMission", oldMission, newMission);
 	    }//end setCurrentMission
 	    

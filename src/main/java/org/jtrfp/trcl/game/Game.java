@@ -52,6 +52,7 @@ public interface Game {
     public boolean hasListeners(String propertyName);
     public PropertyChangeListener[] getPropertyChangeListeners(
 	    String propertyName);
+    public void    abortCurrentMission();
     
     public class CanceledException extends Exception{
 	private static final long serialVersionUID = 1L;}

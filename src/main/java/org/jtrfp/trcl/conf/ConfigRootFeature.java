@@ -80,12 +80,14 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		    });
 	    xmlEnc.writeObject(configurationTreeElement);
 	    xmlEnc.close();
+	    System.out.println("Successfully wrote config to temp file "+temp.getAbsolutePath());
 	    
 	    FileChannel srcCh = null, dstCh = null;
 	    try {
 	        srcCh = new FileInputStream(temp).getChannel();
 	        dstCh = new FileOutputStream(getConfigSaveURI()).getChannel();
 	        dstCh.transferFrom(srcCh, 0, srcCh.size());
+	        System.out.println("Successfully wrote configuration to "+getConfigSaveURI());
 	       }catch(Exception e){e.printStackTrace();}
 	    	finally{
 	           srcCh.close();
@@ -99,6 +101,11 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    if(fp.exists()){
 		try{FileInputStream is = new FileInputStream(fp);
 		XMLDecoder xmlDec = new XMLDecoder(is);
+		xmlDec.setExceptionListener(new ExceptionListener(){
+		    @Override
+		    public void exceptionThrown(Exception ex) {
+			ex.printStackTrace();
+		    }});
 		final Object deserializedObject = xmlDec.readObject();
 		if(deserializedObject instanceof FeatureTreeElement)
 		    root = (FeatureTreeElement)deserializedObject;

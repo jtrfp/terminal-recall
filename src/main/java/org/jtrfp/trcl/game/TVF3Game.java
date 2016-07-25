@@ -109,7 +109,7 @@ public class TVF3Game implements Game {
 	private TR              tr;
 	private VOXFile 	vox;
 	    private int 	levelIndex = 0;
-	    private String 	playerName="DEBUG";
+	    private String 	playerName=null;
 	    private Difficulty 	difficulty;
 	    private Mission 	currentMission;
 	    public HUDSystem 	        hudSystem;
@@ -239,7 +239,7 @@ public class TVF3Game implements Game {
 	     * @param playerName
 	     *            the playerName to set
 	     */
-	    public synchronized void setPlayerName(String playerName) {
+	    public void setPlayerName(String playerName) {
 		this.playerName = playerName;
 	    }
 
@@ -371,7 +371,7 @@ public class TVF3Game implements Game {
 
 	    public synchronized void doGameplay() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException, CanceledException {
 		final TRConfiguration trConfig = Features.get(tr,TRConfiguration.class);
-		if (!trConfig.isDebugMode())
+		if (!trConfig.isDebugMode() && getPlayerName() == null)
 		    setupNameWithUser();
 		tr.setRunState(new Game.GameRunningMode(){});
 		setInGameplay(true);

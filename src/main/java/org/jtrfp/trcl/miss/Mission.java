@@ -167,7 +167,7 @@ public class Mission {
       public interface PlayerActivity  extends GameplayState{}
        public interface OverworldState  extends PlayerActivity{}
        public interface SatelliteState   extends OverworldState{}
-       public interface ChamberState    extends OverworldState{}
+       public interface ChamberState    extends PlayerActivity{}
        public interface TunnelState     extends PlayerActivity{}
     
     public Mission() {
@@ -198,6 +198,8 @@ public class Mission {
 		"game");
 	final TR tr = getTr();
 	tr.setRunState(new LoadingState(){});
+	final LVLFile lvlData = getLvl();
+	
 	synchronized(missionLock){
 	synchronized(missionEnd){
 	    if(missionEnd[0]!=null)
@@ -227,7 +229,6 @@ public class Mission {
 	displayHandler.setDisplayMode(getLevelLoadingMode());
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
-	    final LVLFile lvlData = getLvl();
 	    final ResourceManager rm = tr.getResourceManager();
 	    final Player player      = ((TVF3Game)getGameShell().getGame()).getPlayer();
 	    final TDFFile tdf 	     = rm.getTDFData(lvlData.getTunnelDefinitionFile());
@@ -286,7 +287,7 @@ public class Mission {
 			    startNav.getPitch(), startNav.getYaw());
 		Location3D l3d = startNav.getLocationOnMap();
 		final double HEIGHT_PADDING = 10000;
-		setPlayerStartHeading (od.getHeading().toArray());
+		setPlayerStartHeading (od.getHeading().negate().toArray());
 		setPlayerStartTop     (od.getTop().toArray());
 		setPlayerStartPosition(new double[]{
 			TRFactory.legacy2Modern(l3d.getZ()), //X (Z)
@@ -298,7 +299,7 @@ public class Mission {
 	    }//end if(nulls)
 	    //////// PLAYER POSITIONS
 	    player.setPosition(getStoredPlayerStartPosition()                     );
-	    player.setHeading(new Vector3D(getStoredPlayerStartHeading()).negate());// Kludge to fix incorrect hdg
+	    player.setHeading(new Vector3D(getStoredPlayerStartHeading())         );// Kludge to fix incorrect hdg
 	    player.setTop    (new Vector3D(getStoredPlayerStartTop())             );
 	    ///////// STATE
 	    final Propelled propelled = player.probeForBehavior(Propelled.class); 
@@ -382,7 +383,7 @@ public class Mission {
 				.getMusicFactory()
 				.create(new GPUResidentMOD(tr, tr
 					.getResourceManager().getMOD(
-						lvl.getBackgroundMusicFile())),
+						lvlData.getBackgroundMusicFile())),
 					 true));
 		synchronized(Mission.this){
 		 if(bgMusic==null){
@@ -394,10 +395,11 @@ public class Mission {
 	((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
 	Features.get(tr,SoundSystemFeature.class).setPaused(false);
 	tr.getThreadManager().setPaused(false);
-	if(showIntro){
+	if(isShowIntro()){
 	    tr.setRunState(new EnemyBrief(){});
 	    displayHandler.setDisplayMode(briefingMode);
 	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
+	    setShowIntro(false);
 	}
 	tr.setRunState(new OverworldState(){});
 	final SkySystem skySystem = getOverworldSystem().getSkySystem();
@@ -617,7 +619,7 @@ public class Mission {
 		Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
 			evt =ss
 				.getMusicFactory()
-				.create(tr.getResourceManager().gpuResidentMODs.get(lvl.getBackgroundMusicFile()),
+				.create(tr.getResourceManager().gpuResidentMODs.get(getLvl().getBackgroundMusicFile()),
 					 true));
 		synchronized(Mission.this){
 		 evt.play();

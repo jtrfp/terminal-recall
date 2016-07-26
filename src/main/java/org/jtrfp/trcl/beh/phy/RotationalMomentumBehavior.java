@@ -19,20 +19,24 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class RotationalMomentumBehavior extends Behavior {
     private double equatorialMomentum=0;//Axis is getTop()
-    private double polarMomentum=0;//Axis is getHeading().crossProduct(getTop())
-    private double lateralMomentum=0;//Axis is getHeading()
+    private double polarMomentum     =0;//Axis is getHeading().crossProduct(getTop())
+    private double lateralMomentum   =0;//Axis is getHeading()
     @Override
     public void tick(long tickTimeInMillis){
 	final WorldObject p = getParent();
-	Rotation rot;
-	try{
-	rot = new Rotation(p.getTop(),equatorialMomentum);
-	p.setHeading(rot.applyTo(p.getHeading()));
-	rot = new Rotation(p.getHeading().crossProduct(p.getTop()),polarMomentum);
-	p.setHeading(rot.applyTo(p.getHeading()));
-	p.setTop(rot.applyTo(p.getTop()));
-	rot = new Rotation(p.getHeading(),lateralMomentum);
-	p.setTop(rot.applyTo(p.getTop()));
+	
+	final double lateralMomentum    = getLateralMomentum();
+	final double equatorialMomentum = getEquatorialMomentum();
+	final double polarMomentum      = getPolarMomentum();
+	try{Rotation rot;
+	    rot = new Rotation(p.getHeading(),lateralMomentum);
+	    p.setTop(rot.applyTo(p.getTop()));
+	    rot = new Rotation(p.getHeading().crossProduct(p.getTop()),polarMomentum);
+	    p.setHeading(rot.applyTo(p.getHeading()));
+	    p.setTop(rot.applyTo(p.getTop()));
+	    rot = new Rotation(p.getTop(),equatorialMomentum);
+	    p.setHeading(rot.applyTo(p.getHeading()));
+	    p.setTop(rot.applyTo(p.getTop()));
 	}catch(MathIllegalArgumentException e){}
     }//end _tick(....)
     /**

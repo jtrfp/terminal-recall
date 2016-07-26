@@ -96,7 +96,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	    }
 	}//end RunStateListener
 	
-	private void proposePause(boolean newState){
+	public void proposePause(boolean newState){
 	    final Object runState = getTr().getRunState();
 	    if(runState instanceof Mission.PlayerActivity &&
 		    !(runState instanceof Mission.SatelliteState) &&
@@ -162,7 +162,11 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	}
 	
 	public TR getTr(){
-	    return mission.get().getTr();
+	    final Mission mission = this.mission.get();
+	    if(mission == null)
+		throw new IllegalStateException("Property `mission` intolerably null.");
+	    return mission.
+		    getTr();
 	}
 	
     }//end GamePause

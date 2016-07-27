@@ -243,13 +243,6 @@ public class Mission {
 	    overworldSystem = new OverworldSystem(tr,
 		    progressStages[LoadingStages.overworld.ordinal()]);
 	    
-	    final List<DEFObject> defObjectList = getDefObjectList();
-	    final ObjectSystem objectSystem = overworldSystem.getObjectSystem();
-	    if(defObjectList != null)
-	        objectSystem.setDefList(defObjectList);
-	    else
-		objectSystem.populateFromLVL(lvlData);
-	    
 	    briefingMode = new Object[]{
 			 ((TVF3Game)game).briefingScreen,
 			 overworldSystem
@@ -270,7 +263,21 @@ public class Mission {
 		    ((TVF3Game)game).getBriefingScreen(),
 		    overworldSystem
 	    };
-	    getOverworldSystem().loadLevel(lvlData, tdf);
+	    
+	    overworldSystem.loadLevel(lvlData, tdf);
+	    
+	    final List<DEFObject> defObjectList = getDefObjectList();
+	    final ObjectSystem objectSystem = overworldSystem.getObjectSystem();
+	    if(defObjectList != null)
+	        objectSystem.setDefList(defObjectList);
+	    else{
+		objectSystem.populateFromLVL(lvlData);
+		setDefObjectList(objectSystem.getDefList());
+		}
+	    
+	    assert getDefObjectList() != null;
+	    
+	    //overworldSystem.loadLevel(lvlData, tdf);
 	    System.out.println("\t...Done.");
 	    // Install NAVs
 	    setNavSubObjects(rm.getNAVData(lvlData.getNavigationFile())

@@ -50,9 +50,13 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	private WeakReference<Mission>      mission;
 	private final PropertyChangeSupport pcs                      = new PropertyChangeSupport(this);
 	private       ControllerInput       pause;
+	private       TR                    tr;
+	private       MenuSystem            menuSystem;
 
 	@Override
 	public void apply(Mission mission) {
+	    setTr(Features.get(Features.getSingleton(), TR.class));
+	    setMenuSystem(Features.get(getTr().getRootWindow(),MenuSystem.class));
 	    final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
 	    final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
 	    pause           = inputs.getControllerInput(PAUSE);
@@ -157,16 +161,19 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	}
 	
 	public MenuSystem getMenuSystem(){
-	    final Frame frame = getTr().getRootWindow();
-	    return Features.get(frame, MenuSystem.class);
+	    return menuSystem;
 	}
 	
 	public TR getTr(){
-	    final Mission mission = this.mission.get();
-	    if(mission == null)
-		throw new IllegalStateException("Property `mission` intolerably null.");
-	    return mission.
-		    getTr();
+	    return tr;
+	}
+
+	public void setTr(TR tr) {
+	    this.tr = tr;
+	}
+
+	public void setMenuSystem(MenuSystem menuSystem) {
+	    this.menuSystem = menuSystem;
 	}
 	
     }//end GamePause

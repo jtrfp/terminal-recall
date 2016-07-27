@@ -43,11 +43,10 @@ public class Smoke extends OneShotBillboardEvent {
 	    }//end constructor
 	    
 	    @Override
-	    public Smoke setPosition(double [] pos){
+	    public void setPosition(double [] pos){
 		final double [] superPos = super.getPosition();
 		Vect3D.subtract(pos,type.getOrigin().scalarMultiply(getBillboardSize().getHeight()/2.).toArray(),superPos);
 		super.notifyPositionChange();
-		return this;
 	    }
 	    
 	    public static enum SmokeType{

@@ -47,9 +47,14 @@ import org.jtrfp.trcl.math.Vect3D.ZeroNormException;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public class WorldObject implements PositionedRenderable, PropertyListenable, Rotatable {
-    public static final String HEADING  ="heading";
-    public static final String TOP      ="top";
-    public static final String ACTIVE   ="active";
+    public static final String HEADING       = "heading";
+    public static final String HEADING_ARRAY = "headingArray";
+    public static final String TOP           = "top";
+    public static final String TOP_ARRAY     = "topArray";
+    public static final String ACTIVE        = "active";
+    public static final String POSITION      = "position";
+    public static final String VISIBLE       = "visible";
+    public static final String IN_GRID       = "inGrid";
     
     private double[] 	heading = new double[] { 0, 0, 1 }, oldHeading= new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
     private double[] 	top 	= new double[] { 0, 1, 0 }, oldTop    = new double[] {Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
@@ -76,6 +81,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private byte 			renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;
     private boolean                     objectDefsInitialized = false;
+    private boolean                     inGrid = false;
 
     protected final double[] aX 	= new double[3];
     protected final double[] aY 	= new double[3];
@@ -506,12 +512,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      * @param position
      *            the position to set
      */
-    public WorldObject setPosition(double[] position) {
+    public void setPosition(double[] position) {
 	this.position[0]=position[0];
 	this.position[1]=position[1];
 	this.position[2]=position[2];
 	notifyPositionChange();
-	return this;
+	//return this;
     }// end setPosition()
     
     public WorldObject notifyPositionChange(){
@@ -624,6 +630,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     @Override
     public void setContainingGrid(SpacePartitioningGrid grid) {
 	containingGrid = new WeakReference<SpacePartitioningGrid>(grid);
+	setInGrid(grid != null);
 	notifyPositionChange();
     }
 
@@ -687,9 +694,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public double[] getHeadingArray() {
 	return heading;
     }
+    
+    public void setHeadingArray(double [] newHeading){
+	System.arraycopy(newHeading, 0, heading, 0, 3);
+    }
 
     public double[] getTopArray() {
 	return top;
+    }
+    
+    public void setTopArray(double [] newTop){
+	System.arraycopy(newTop, 0, top, 0, 3);
     }
 
     public void enableBehavior(Behavior behavior) {
@@ -937,5 +952,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public void setTr(TR tr) {
         this.tr = tr;
+    }
+    
+    public boolean isInGrid(){
+	return inGrid;
+    }
+    
+    public void setInGrid(boolean inGrid){
+	this.inGrid = inGrid; 
     }
 }// end WorldObject

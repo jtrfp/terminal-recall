@@ -449,6 +449,37 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    // TODO Auto-generated method stub
 
 	}
+
+	public void addPropertyChangeListener(PropertyChangeListener arg0) {
+	    pcs.addPropertyChangeListener(arg0);
+	}
+
+	public void addPropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(propertyName, listener);
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+	    return pcs.getPropertyChangeListeners();
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners(
+		String propertyName) {
+	    return pcs.getPropertyChangeListeners(propertyName);
+	}
+
+	public boolean hasListeners(String propertyName) {
+	    return pcs.hasListeners(propertyName);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener arg0) {
+	    pcs.removePropertyChangeListener(arg0);
+	}
+
+	public void removePropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
     }//end GameShell
 
     @Override

@@ -13,7 +13,6 @@
 package org.jtrfp.trcl.obj;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -24,6 +23,8 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.PUPFile;
+import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.game.TVF3Game.Difficulty;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.tools.Util;
@@ -57,7 +58,12 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
 	defPlacer.setTargetGrid(this);
 	defPlacer.setDefList(getDefList());
 	defPlacer.placeObjects();
-	setDefList(defPlacer.getDefList());
+	final List<DEFObject> defList = defPlacer.getDefList();
+	//Temporarily force these to be flagged on-grid so they don't get omitted. 
+	for(DEFObject def:defList)
+	    def.setInGrid(true);
+	setDefList(defList);
+	assert getDefList() != null;
 	PUPObjectPlacer pupPlacer = new PUPObjectPlacer();
 	pupPlacer.setPupData(pupFile);
 	pupPlacer.setRootReporter(getPupObjectReporter());
@@ -81,6 +87,11 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
     public DEFObjectPlacer getDefPlacer() {
 	if(defPlacer == null){
 	    final DEFObjectPlacer newResult = new DEFObjectPlacer();
+	    final TVF3Game game = (TVF3Game)getGameShell().getGame();
+	    final Difficulty difficulty = game.getDifficulty();
+	    newResult.setFiringRateScalar(difficulty.getFiringRateScalar());
+	    newResult.setShieldScalar    (difficulty.getShieldScalar());
+	    newResult.setThrustScalar    (difficulty.getDefSpeedScalar());
 	    newResult.setRootReporter(getDefObjectReporter());
 	    newResult.setTr(getTr());
 	    defPlacer = newResult;
@@ -100,7 +111,8 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
 	for(DEFObject defObject:defObjectList){
 	    defObject.setTr(getTr());
 	    defObject.setGameShell(getGameShell());
-	    addWithSubObjects(defObject,this);
+	    if(defObject.isInGrid())
+		addWithSubObjects(defObject,this);
 	}//end for(defObjects)
     }//setDefList(...)
     

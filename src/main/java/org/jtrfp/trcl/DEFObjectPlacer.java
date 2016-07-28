@@ -48,6 +48,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	private TR tr;
 	private Vector3D positionOffset = Vector3D.ZERO;
 	private RenderableSpacePartitioningGrid targetGrid;
+	private double firingRateScalar=1, shieldScalar=1, thrustScalar=1;
 	
 	@Override
 	public void placeObjects(){
@@ -56,6 +57,10 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    final DEFFile defData = getDefData();
 	    final List<EnemyDefinition> defs = defData.getEnemyDefinitions();
 	    final List<EnemyPlacement> places = defData.getEnemyPlacements();
+	    //Apply scalars
+	    final double shieldScalar     = getShieldScalar();
+	    final double thrustScalar     = getThrustScalar();
+	    final double firingRateScalar = getFiringRateScalar();
 	    final Model [] models = new Model[defs.size()];
 	    //final TR tr = world.getTr();
 	    final LoadingProgressReporter[] defReporters = rootReporter
@@ -77,14 +82,20 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    }//end for(i:defs)
 	    int placementReporterIndex=0;
 	    final Set<EnemyDefinition> definitionsToBeIntroduced = getDefinitionsToBeIntroduced();
+	    final List<DEFObject> defList = getDefList();
 	    for(EnemyPlacement pl:places){
 		placementReporters[placementReporterIndex++].complete();
+		pl.setStrength((int)(pl.getStrength() * shieldScalar));
 		Model model =models[pl.getDefIndex()];
 		if(model!=null){
 		    final EnemyDefinition def = defs.get(pl.getDefIndex());
+		    def.setFireSpeed(  (int)(def.getFireSpeed()   * firingRateScalar));
+		    def.setThrustSpeed((int)(def.getThrustSpeed() * thrustScalar));
 		    try{
-			final DEFObject obj =new DEFObject(def,pl);
-			if(defList!=null)defList.add(obj);
+			final DEFObject obj =new DEFObject();
+			obj.setEnemyDefinition(def);
+			obj.setEnemyPlacement(pl);
+			defList.add(obj);
 			obj.addBehavior(new HasDescription().setHumanReadableDescription(def.getDescription()));
 			if(def.isShowOnBriefing())
 			    if(definitionsToBeIntroduced.add(def)){
@@ -189,5 +200,29 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	public void setDefinitionsToBeIntroduced(
 		Set<EnemyDefinition> definitionsToBeIntroduced) {
 	    this.definitionsToBeIntroduced = definitionsToBeIntroduced;
+	}
+
+	public double getFiringRateScalar() {
+	    return firingRateScalar;
+	}
+
+	public void setFiringRateScalar(double firingRateSclar) {
+	    this.firingRateScalar = firingRateSclar;
+	}
+
+	public double getShieldScalar() {
+	    return shieldScalar;
+	}
+
+	public void setShieldScalar(double shieldScalar) {
+	    this.shieldScalar = shieldScalar;
+	}
+
+	public double getThrustScalar() {
+	    return thrustScalar;
+	}
+
+	public void setThrustScalar(double thrustScalar) {
+	    this.thrustScalar = thrustScalar;
 	}
 	}//end DEFObjectPlacer

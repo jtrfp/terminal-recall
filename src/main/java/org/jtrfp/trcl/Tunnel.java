@@ -51,6 +51,7 @@ import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.obj.BarrierCube;
+import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ForceField;
 import org.jtrfp.trcl.obj.ObjectDirection;
@@ -128,10 +129,13 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    objectSystem = new ObjectSystem();
 	    objectSystem.setTr(tr);
 	    //lvl
-	    objectSystem.setHeadingOverride(Vector3D.MINUS_J);
+	    //objectSystem.setHeadingOverride(Vector3D.MINUS_K);
 	    objectSystem.setPositionOffset(TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET));
 	    objectSystem.setProgressReporter(reporters[1]);
 	    objectSystem.populateFromLVL(lvl);
+	    //KLUDGE: Negate def headings because they are backwards.
+	    for(DEFObject def:objectSystem.getDefList())
+		def.setHeading(def.getHeading().negate());
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

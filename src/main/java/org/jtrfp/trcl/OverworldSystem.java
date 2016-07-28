@@ -92,12 +92,13 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    // Objects
 	    System.out.println("Setting up objects...");
 	    final ObjectSystem objectSystem = getObjectSystem();
-	    objectSystem.populateFromLVL(lvl);
+	    //objectSystem.populateFromLVL(lvl);
 	    
 	    System.out.println("Adding terrain and object system to OverworldSystem...");
 	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
+		    assert objectSystem != null;
 		    OverworldSystem.this.addBranch(objectSystem);
 		    try{OverworldSystem.this.addBranch(terrainSystem.get());}catch(Exception e){e.printStackTrace();}
 		}}).get();

@@ -89,26 +89,26 @@ import org.jtrfp.trcl.gpu.BufferedModelTarget;
 import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.Model;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
-import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
+import org.jtrfp.trcl.tools.Util;
 
 public class DEFObject extends WorldObject {
+    private static final boolean NEW_SMART_PLANE_BEHAVIOR = false;
     //PROPERTIES
     public static final String ENEMY_DEFINITION = "enemyDefinition",
-	                       POSITION         = "position",
-	                       HEADING          = "heading",
-	                       TOP              = "top";
+	    		       ENEMY_PLACEMENT  = "enemyPlacement";
     
     private Double boundingHeight, boundingWidth;
     private HitBox [] hitBoxes;
     //private WorldObject ruinObject;
     private ArrayList<WorldObject> subObjects = null;
-    private final EnemyLogic logic;
-    private final EnemyDefinition enemyDefinition;
+    private EnemyLogic logic;
+    private EnemyDefinition enemyDefinition;
+    private EnemyPlacement enemyPlacement;
     private boolean mobile,canTurn,foliage,boss,
     shieldGen,isRuin,spinCrash,ignoringProjectiles;
     private Anchoring anchoring;
@@ -117,6 +117,7 @@ public class DEFObject extends WorldObject {
     public static final String [] MED_EXP_SOUNDS = new String[]{"EXP1.WAV","EXP2.WAV"};
     private final ArrayList<Object> hardReferences = new ArrayList<Object>();
     private GameShell gameShell;
+    private boolean evaluated = false;
     
     ////INTROSPECTOR
     static {
@@ -124,9 +125,13 @@ public class DEFObject extends WorldObject {
 	    final Set<String> persistentProperties = new HashSet<String>();
 	    persistentProperties.addAll(Arrays.asList(
 		    ENEMY_DEFINITION,
+		    ENEMY_PLACEMENT,
 		    POSITION,
-		    HEADING,
-		    TOP
+		    HEADING_ARRAY,
+		    TOP_ARRAY,
+		    ACTIVE,
+		    VISIBLE,
+		    IN_GRID
 		    ));
 
 	    BeanInfo info = Introspector.getBeanInfo(DEFObject.class);
@@ -134,21 +139,27 @@ public class DEFObject extends WorldObject {
 		    info.getPropertyDescriptors();
 	    for (int i = 0; i < propertyDescriptors.length; ++i) {
 		PropertyDescriptor pd = propertyDescriptors[i];
-		if (!persistentProperties.contains(pd.getName())) {
-		    pd.setValue("transient", Boolean.TRUE);
-		}
+		System.out.println("DEFObject property descriptor: "+pd.getName());
+		if   (!persistentProperties.contains(pd.getName())) 
+		        pd.setValue("transient", persistentProperties.contains(pd.getName())?
+		        	Boolean.FALSE:Boolean.TRUE);
 	    }
 	}catch(Exception e){e.printStackTrace();}
     }//end static{}
-
-    public DEFObject(EnemyDefinition def, EnemyPlacement pl) throws FileLoadException, IllegalAccessException, IOException{
-	super();
-	this.enemyDefinition=def;
+    
+    public void proposeEvaluate(){
+	try{
+	if(!isEvaluated())
+	    setEvaluated(evaluate());}
+	catch(Exception e){e.printStackTrace();}//TODO: Handle this better?
+    }//end proposeEvaluate()
+    
+    protected boolean evaluate() throws Exception {
+	try{Util.assertPropertiesNotNull(this, ENEMY_DEFINITION, ENEMY_PLACEMENT);}
+	catch(RuntimeException e) {return false;}//TODO: More specific exception
 	final TR tr = getTr();
-	if(def==null){
-	    logic = null;
-	    return;
-	}
+	final EnemyDefinition def = getEnemyDefinition();
+	final EnemyPlacement   pl = getEnemyPlacement();
 	anchoring=Anchoring.floating;
 	logic  =def.getLogic();
 	mobile =true;
@@ -176,7 +187,7 @@ public class DEFObject extends WorldObject {
 		TRFactory.legacy2Modern(def.getPivotY()), 
 		TRFactory.legacy2Modern(def.getPivotZ()));
 	if(logic == null)
-	    return;
+	    return false;
 	switch(logic){
 	case groundDumb:
 	    mobile=false;
@@ -201,7 +212,7 @@ public class DEFObject extends WorldObject {
 		setMaxFiringDistance(TRFactory.mapSquareSize*3).
 		setSmartFiring(false).
 		setMaxFireVectorDeviation(.7).
-		setTimePerPatternEntry((int)(getFiringRateScalar()*(250*getFiringRateScalar()))));
+		setTimePerPatternEntry(def.getFireSpeed() / 66));
 	anchoring=Anchoring.terrain;
 	defaultModelAssignment();
 	break;}
@@ -215,7 +226,7 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    break;
 	case flyingSmart:
-	    smartPlaneBehavior(tr,def,false);
+	    newSmartPlaneBehavior(tr,def,false);
 	    defaultModelAssignment();
 	    break;
 	case bankSpinDrill:
@@ -229,12 +240,12 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    break;
 	case flyingAttackRetreatSmart:
-	    smartPlaneBehavior(tr,def,false);
+	    newSmartPlaneBehavior(tr,def,false);
 	    //addBehavior(new HorizAimAtPlayerBehavior(getGameShell().getGame().getPlayer()));
 	    defaultModelAssignment();
 	    break;
 	case splitShipSmart://TODO
-	    smartPlaneBehavior(tr,def,false);
+	    newSmartPlaneBehavior(tr,def,false);
 	    //addBehavior(new HorizAimAtPlayerBehavior(getGameShell().getGame().getPlayer()));
 	    defaultModelAssignment();
 	    break;
@@ -313,7 +324,7 @@ public class DEFObject extends WorldObject {
 		    setMaxFiringDistance(TRFactory.mapSquareSize*.2).
 		    setSmartFiring(false).
 		    setMaxFireVectorDeviation(.3).
-		    setTimePerPatternEntry((int)(500*getFiringRateScalar())));
+		    setTimePerPatternEntry((int)(def.getFireSpeed() / 66)));
 	    /*addBehavior(new Bobbing().
 		    setPhase(Math.random()).
 		    setBobPeriodMillis(10*1000+Math.random()*3000).setAmplitude(2000).
@@ -498,12 +509,12 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    break;
 	case attackRetreatBelowSky:
-	    smartPlaneBehavior(tr,def,false);
+	    newSmartPlaneBehavior(tr,def,false);
 	    anchoring=Anchoring.floating;
 	    defaultModelAssignment();
 	    break;
 	case attackRetreatAboveSky:
-	    smartPlaneBehavior(tr,def,true);
+	    newSmartPlaneBehavior(tr,def,true);
 	    anchoring=Anchoring.floating;
 	    defaultModelAssignment();
 	    break;
@@ -563,7 +574,7 @@ public class DEFObject extends WorldObject {
 	//Misc
 	addBehavior(new TunnelRailed(tr));//Centers in tunnel when appropriate
 	addBehavior(new DeathBehavior());
-	final int newHealth = (int)(getShieldScalar()*(pl.getStrength()+(spinCrash?16:0)));
+	final int newHealth = (int)((pl.getStrength()+(spinCrash?16:0)));
 	addBehavior(new DamageableBehavior().
 		setHealth(newHealth).
 		setMaxHealth(newHealth).
@@ -600,7 +611,7 @@ public class DEFObject extends WorldObject {
 	    }
 	    probeForBehavior(VelocityDragBehavior.class).setDragCoefficient(.86);
 	    probeForBehavior(Propelled.class).setMinPropulsion(0);
-	    probeForBehavior(Propelled.class).setPropulsion(getDEFSpeedScalar()*def.getThrustSpeed()/1.2);
+	    probeForBehavior(Propelled.class).setPropulsion(def.getThrustSpeed()/1.2);
 
 	    addBehavior(new LoopingPositionBehavior());
 	}//end if(mobile)
@@ -610,6 +621,12 @@ public class DEFObject extends WorldObject {
 	addBehavior(new DamagedByCollisionWithPlayer(8024,250));
 
 	proposeRandomYell();
+	
+	return true;
+    }//end evaluate()
+
+    public DEFObject() {
+	super();
     }//end DEFObject
     /*
 @Override
@@ -648,7 +665,9 @@ public void destroy(){
 	EnemyPlacement simplePlacement = pl.clone();
 
 	// if(ed.getComplexModelFile()!=null){
-	final DEFObject ruin = new DEFObject(ed,simplePlacement);
+	final DEFObject ruin = new DEFObject();
+	ruin.setEnemyDefinition(ed);
+	ruin.setEnemyPlacement(simplePlacement);
 	ruin.setActive(false);
 	ruin.setVisible(false);
 	ruin.setRuin(true);
@@ -699,8 +718,8 @@ public void destroy(){
 		setMaxFiringDistance(TRFactory.mapSquareSize*5).
 		setSmartFiring(true).
 		setMaxFireVectorDeviation(2.).
-		setTimePerPatternEntry((int)(getFiringRateScalar()*(!boss?500:350))));
-	if(boss)af.setFiringPattern(new boolean []{true,true,true,true,false,false,true,false}).setAimRandomness(.07);
+		setTimePerPatternEntry(getEnemyDefinition().getFireSpeed() / 66));
+	if(boss)af.setFiringPattern(new boolean []{true}).setAimRandomness(.07);
     }
 
     private void unhandled(EnemyDefinition def){
@@ -805,6 +824,54 @@ public void destroy(){
 		addBehavior(spinAndCrashAddendum);
 	}//end if(spinCrash)
     }//end possibleBobbingSpinAndCrashOnDeath
+    
+    private void newSmartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
+	if(!DEFObject.NEW_SMART_PLANE_BEHAVIOR){
+	    smartPlaneBehavior(tr,def,retreatAboveSky);
+	    return;
+	    }
+	/*
+	final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
+	try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
+	Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
+	pfb.setFiringPositions(getModelSource(),firingVertices);
+	addBehavior(pfb);
+
+	possibleSpinAndCrashOnDeath(.4,def);
+	if(spinCrash){
+	    final DamageTrigger spinAndCrashAddendum = new DamageTrigger(){
+		@Override
+		public void healthBelowThreshold(){
+		    final WorldObject 	parent 	= getParent();
+		    final HasPropulsion hp 	= probeForBehavior(HasPropulsion.class);
+		    hp.setPropulsion(hp.getPropulsion()/1);
+		    probeForBehavior(AutoLeveling.class).
+		    setLevelingAxis(LevelingAxis.HEADING).
+		    setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985,.985,.985);
+		}};
+		addBehavior(spinAndCrashAddendum);
+	}//end if(spinCrash)
+	
+	final AutoFiring afb = new AutoFiring();
+	afb.setMaxFireVectorDeviation(.7);
+	afb.setFiringPattern(new boolean [] {true});
+	afb.setTimePerPatternEntry((int)((def.getFireSpeed() / 66) * (.000001 + Math.random()*2)));
+	afb.setPatternOffsetMillis((int)(Math.random()*1000));
+	afb.setProjectileFiringBehavior(pfb);
+	try{
+	    final TVF3Game tvf3 = (TVF3Game)getGameShell().getGame();
+	    if(tvf3.getDifficulty() != Difficulty.EASY)
+		afb.setSmartFiring(true);
+	}catch(ClassCastException e){}//Not a TVF3 Game
+	addBehavior(afb);
+	
+	addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
+		"FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
+	
+	addBehavior(new RollBehavior().setDesiredRollTheta(.1));
+	addBehavior(new RollBasedTurnBehavior());
+	*/
+    }//end newSmartPlaneBehavior
 
     private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
 	final HorizAimAtPlayerBehavior haapb =new HorizAimAtPlayerBehavior(getGameShell().getGame().getPlayer()).setLeftHanded(Math.random()>=.5);
@@ -839,7 +906,7 @@ public void destroy(){
 	final AutoFiring afb = new AutoFiring();
 	afb.setMaxFireVectorDeviation(.7);
 	afb.setFiringPattern(new boolean [] {true,false,false,false,true,true,false});
-	afb.setTimePerPatternEntry((int)(getFiringRateScalar()*(200+Math.random()*200)));
+	afb.setTimePerPatternEntry((int)((200+Math.random()*200)));
 	afb.setPatternOffsetMillis((int)(Math.random()*1000));
 	afb.setProjectileFiringBehavior(pfb);
 	try{
@@ -1158,27 +1225,6 @@ public void destroy(){
 	this.hitBoxes = hitBoxes;
     }
 
-    private double getFiringRateScalar(){
-	try{
-	    final TVF3Game tvf3 = (TVF3Game)getGameShell().getGame();
-	    return tvf3.getDifficulty().getFiringRateScalar();
-	}catch(ClassCastException e){return 1;}
-    }
-
-    private double getShieldScalar(){
-	try{
-	    final TVF3Game tvf3 = (TVF3Game)getGameShell().getGame();
-	    return tvf3.getDifficulty().getShieldScalar();
-	}catch(ClassCastException e){return 1;}
-    }
-
-    private double getDEFSpeedScalar(){
-	try{
-	    final TVF3Game tvf3 = (TVF3Game)getGameShell().getGame();
-	    return tvf3.getDifficulty().getDefSpeedScalar();
-	}catch(ClassCastException e){return 1;}
-    }
-
     public ArrayList<WorldObject> getSubObjects() {
 	if(subObjects==null)
 	    subObjects = new ArrayList<WorldObject>();
@@ -1200,5 +1246,27 @@ public void destroy(){
 
     public EnemyDefinition getEnemyDefinition() {
         return enemyDefinition;
+    }
+
+    public EnemyPlacement getEnemyPlacement() {
+        return enemyPlacement;
+    }
+
+    public void setEnemyPlacement(EnemyPlacement enemyPlacement) {
+        this.enemyPlacement = enemyPlacement;
+        proposeEvaluate();
+    }
+
+    public void setEnemyDefinition(EnemyDefinition enemyDefinition) {
+        this.enemyDefinition = enemyDefinition;
+        proposeEvaluate();
+    }
+
+    public boolean isEvaluated() {
+        return evaluated;
+    }
+
+    public void setEvaluated(boolean evaluated) {
+        this.evaluated = evaluated;
     }
 }//end DEFObject

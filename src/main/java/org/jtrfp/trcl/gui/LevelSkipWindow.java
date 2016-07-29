@@ -16,6 +16,8 @@ package org.jtrfp.trcl.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
 
@@ -31,9 +33,11 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
+import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class LevelSkipWindow extends JFrame {
@@ -47,6 +51,8 @@ public class LevelSkipWindow extends JFrame {
     private final JList levelList;
     private final DefaultListModel levelLM = new DefaultListModel();
     private WeakReference<Game> game = null;
+    private GameShell gameShell;
+    private boolean setup = false;
     	
     	public LevelSkipWindow(){
     	    this(null);
@@ -78,24 +84,44 @@ public class LevelSkipWindow extends JFrame {
 		levelList.setToolTipText("Select a level");
 		levelList.setModel(levelLM);
 		levelListSP.setViewportView(levelList);
-		
-		if(tr.getRootWindow()!=null)
-		    setupListeners();
 	}//end constructor
+	
+	protected void proposeSetup(){
+	    if(!isSetup() && getGameShell() != null && tr.getRootWindow() != null){
+		setupListeners();
+		initialSetup();
+		setSetup(true);
+		}
+	}//end proposeSetup()
+	
+	protected void initialSetup(){
+	    final GameShell gameShell = getGameShell();
+	    final TVF3Game game = (TVF3Game)gameShell.getGame();
+	    if(game == null)
+		return;
+	    final VOXFile vox = game.getVox();
+	    if(vox == null)
+		return;
+	    refreshLevelLM(vox);
+	}//end initialSetup()
+
+	protected void refreshLevelLM(VOXFile vox ){
+	    levelLM.clear();
+	    for(MissionLevel ml:vox.getLevels()){
+		levelLM.addElement(ml.getLvlFile());
+	    }//end for(levels)
+	}//end refreshLevelLM(...)
 
 	private void setupListeners(){
-	    /*
+	    final GameShell gameShell = getGameShell();
 	    final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
-	    tr.addPropertyChangeListener("game", gameIP);
-	    gameIP.addTargetPropertyChangeListener("vox", new PropertyChangeListener(){
+	    gameShell.addPropertyChangeListener(GameShellFactory.GAME, gameIP);
+	    gameIP.addTargetPropertyChangeListener(TVF3Game.VOX, new PropertyChangeListener(){
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 		    if(evt.getNewValue()!=null){
-			levelLM.clear();
 			final VOXFile vox = (VOXFile)evt.getNewValue();
-			for(MissionLevel ml:vox.getLevels()){
-			    levelLM.addElement(ml.getLvlFile());
-			}//end for(levels)
+			refreshLevelLM(vox);
 		    }//end if(!null)
 		}});
 	    gameIP.addTargetPropertyChangeListener("currentMission", new PropertyChangeListener(){
@@ -103,7 +129,7 @@ public class LevelSkipWindow extends JFrame {
 		    public void propertyChange(PropertyChangeEvent evt) {
 			    levelList.setSelectedValue(evt.getNewValue(), true);
 		    }});
-	    */
+	    
 	    btnGo.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent evt) {
@@ -144,4 +170,21 @@ public class LevelSkipWindow extends JFrame {
 	    for(MissionLevel ml:vox.getLevels())
 		levelLM.addElement(ml.getLvlFile());
 	}//end setGame(...)
+
+	public GameShell getGameShell() {
+	    return gameShell;
+	}
+
+	public void setGameShell(GameShell gameShell) {
+	    this.gameShell = gameShell;
+	    proposeSetup();
+	}
+
+	public boolean isSetup() {
+	    return setup;
+	}
+
+	protected void setSetup(boolean setup) {
+	    this.setup = setup;
+	}
 }//end LevelSkipWindow

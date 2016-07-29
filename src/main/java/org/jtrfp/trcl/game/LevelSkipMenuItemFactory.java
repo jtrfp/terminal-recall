@@ -27,6 +27,7 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.LevelSkipWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -80,6 +81,7 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	private class MenuItemListener implements ActionListener{
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
+		//TODO: Use non-display() thread.
 		getLevelSkipWindow().setVisible(true);
 	    }
 	}//end MenuItemListener
@@ -109,8 +111,15 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	}
 
 	private LevelSkipWindow getLevelSkipWindow(){
-	    if(levelSkipWindow==null)
-		levelSkipWindow = new LevelSkipWindow(((TVF3Game)(target.get())).getTr());
+	    if(levelSkipWindow==null){
+		final TVF3Game game = ((TVF3Game)(target.get()));
+		final TR tr = game.getTr();
+		final LevelSkipWindow levelSkipWindow = new LevelSkipWindow(game.getTr());
+		final GameShell gameShell = Features.get(tr,GameShell.class);
+		assert gameShell != null;
+		levelSkipWindow.setGameShell(gameShell);
+		LevelSkipMenuItemFactory.this.levelSkipWindow = levelSkipWindow;
+		}
 	    return levelSkipWindow;
 	}//end getLevelSkipWindow()
     }//end LevelSkipMenuItem

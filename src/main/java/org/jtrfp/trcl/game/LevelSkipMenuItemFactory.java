@@ -65,8 +65,9 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	    menuSystem.addMenuItem(MENU_ITEM_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, MENU_ITEM_PATH);
 	    final TR tr = target.getTr();
-	    tr.addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
-	    target.addPropertyChangeListener(TVF3Game.VOX, voxListener);
+	    tr.addPropertyChangeListener    (TRFactory.RUN_STATE, runStateListener);
+	    target.addPropertyChangeListener(TVF3Game.VOX       , voxListener);
+	    this.getLevelSkipWindow();//This make sure the cache is set so that display() doesn't get stuck
 	}
 
 	@Override

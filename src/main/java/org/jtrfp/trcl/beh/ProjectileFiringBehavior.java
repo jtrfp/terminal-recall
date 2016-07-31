@@ -125,9 +125,15 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     }//end getNextFiringPosition()
     
     public Vector3D peekNextModelViewFiringPosition(){
-	if(isAbsoluteFiringPositions())
+	if(isAbsoluteFiringPositions()){
+	    final WorldObject parent = getParent();
+	    final Vector3D heading   = parent.getHeading(),
+		           top       = parent.getTop(),
+		           position  = peekNextAbsoluteModelViewFiringPosition();
 	 return new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
-	    		getParent().getHeading(),getParent().getTop()).applyTo(peekNextAbsoluteModelViewFiringPosition());
+	    		     heading        ,top).
+	    		            applyTo(position);
+	 }
 	else{
 	    final double [] vtx = modelSource.getVertex(peekNextFiringVertex());
 	    return new Vector3D(vtx[0],vtx[1],vtx[2]);

@@ -107,7 +107,11 @@ public class FeaturesImpl {
 	   if(ff == null)
 	       throw new FeatureNotFoundException("Could not find Feature of type "+featureClass.getName());
 	   assert ff!=null:""+featureClass.getName();
-	   registerFeatureByClassRecursively(featureClass, result = ff.newInstance(target), featuresByClass);
+	   try{result = ff.newInstance(target);}
+	   catch(ClassCastException e){
+	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName());
+	   }
+	   registerFeatureByClassRecursively(featureClass, result, featuresByClass);
 	   result.apply(target);
 	   init(result);
 	   return result;
@@ -139,6 +143,11 @@ public class FeaturesImpl {
     public static class FeatureNotFoundException extends RuntimeException {
 	public FeatureNotFoundException(){super();}
 	public FeatureNotFoundException(String msg){super(msg);}
-	
+    }//end FeatureNotFoundException
+    
+    public static class FeatureTargetMismatchException extends RuntimeException {
+	public FeatureTargetMismatchException(){super();}
+	public FeatureTargetMismatchException(String msg)             {super(msg);}
+	public FeatureTargetMismatchException(String msg, Throwable t){super(msg, t);}
     }//end FeatureNotFoundException
 }//end FeaturesImpl

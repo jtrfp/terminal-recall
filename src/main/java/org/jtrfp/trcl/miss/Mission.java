@@ -239,9 +239,8 @@ public class Mission {
 		return missionEnd[0]; 
 	    }
 	    
-	    //TODO: Use a setter
-	    overworldSystem = new OverworldSystem(tr,
-		    progressStages[LoadingStages.overworld.ordinal()]);
+	    setOverworldSystem(new OverworldSystem(tr,
+		    progressStages[LoadingStages.overworld.ordinal()]));
 	    
 	    briefingMode = new Object[]{
 			 ((TVF3Game)game).briefingScreen,
@@ -927,4 +926,8 @@ public class Mission {
     public void setDefObjectList(List<DEFObject> defObjectList) {
         this.defObjectList = defObjectList;
     }//end setDefObjectList(...)
+
+    public void setOverworldSystem(OverworldSystem overworldSystem) {
+        this.overworldSystem = overworldSystem;
+    }
 }// end Mission

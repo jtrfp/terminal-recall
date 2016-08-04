@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
-    private MenuSystem      menuSystem;
     private LevelSkipWindow levelSkipWindow;
     
     protected static final String [] MENU_ITEM_PATH = new String [] {"Game","Skip To Level"};

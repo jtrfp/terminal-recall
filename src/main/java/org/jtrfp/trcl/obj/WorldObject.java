@@ -887,7 +887,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
         	getObjectDefinitions(transparentTriangleObjectDefinitions, getModel().getTransparentTriangleList());
     }
     
-    protected int[] getObjectDefinitions(int [] originalObjectDefs, PrimitiveList pList){
+    protected int[] getObjectDefinitions(int [] originalObjectDefs, PrimitiveList<?> pList){
 	if(originalObjectDefs == null){
 	    int numObjDefs, sizeInVerts;
 	    if (pList == null)

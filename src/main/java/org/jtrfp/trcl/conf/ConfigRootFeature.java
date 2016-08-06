@@ -124,14 +124,14 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     protected void saveConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
 	final ArrayList<Feature> features = new ArrayList<Feature>();
 	Features.getAllFeaturesOf(target, features);
-	final ConfigRootFeature cmf = getConfigManagerFeature(features);
+	final ConfigRootFeature configRootFeature = getConfigRootFeature(features);
 	//This is a config root. Stop branching here.
-	if(target != getTarget() && cmf != null){
+	if(target != getTarget() && configRootFeature != null){
 	    FeatureTreeElement subElement = new FeatureTreeElement.Default();
-	    subElement.setFeatureClassName(cmf.getClass().getName());
+	    subElement.setFeatureClassName(configRootFeature.getClass().getName());
 	    subElement.setPropertiesMap(new HashMap<String,Object>());
-	    cmf.notifyRecursiveSaveOperation(this,subElement.getPropertiesMap());
-	    element.getSubFeatures().put(cmf.getClass().getName(), subElement);
+	    configRootFeature.notifyRecursiveSaveOperation(this,subElement.getPropertiesMap());
+	    element.getSubFeatures().put(configRootFeature.getClass().getName(), subElement);
 	    return;
 	}
 	for(Feature feature:features){
@@ -149,13 +149,17 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     
     public void notifyRecursiveSaveOperation(
 	    ConfigRootFeature<TARGET_CLASS> configManagerFeature, Map<String,Object> propertiesMap) {
-	propertiesMap.put(CONFIG_SAVE_URI, getConfigSaveURI());
+	final String newConfigSaveURI = getConfigSaveURI();
+	System.out.println("saving new config save URI "+newConfigSaveURI);
+	propertiesMap.put(CONFIG_SAVE_URI, newConfigSaveURI);
     }
     
     public void notifyRecursiveLoadOperation(ConfigRootFeature<TARGET_CLASS> configManagerFeature, Map<String,Object> propertiesMap){
 	if(propertiesMap == null)
 	    throw new IllegalStateException("propertiesMap intolerably null.");
-	setConfigSaveURI((String)propertiesMap.get(CONFIG_SAVE_URI));
+	final String newSaveURI = (String)propertiesMap.get(CONFIG_SAVE_URI);
+	System.out.println("loading new config save URI "+newSaveURI);
+	setConfigSaveURI(newSaveURI);
     }
 
     public void loadConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
@@ -177,9 +181,9 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    if(subElement != null){
 		Map<String,Object> propertiesMap = subElement.getPropertiesMap();
 		if(feature instanceof ConfigRootFeature){
-		    ConfigRootFeature cmf = (ConfigRootFeature)feature;
+		    ConfigRootFeature configRootFeature = (ConfigRootFeature)feature;
 		    if(propertiesMap != null)
-		     cmf.notifyRecursiveLoadOperation(this, propertiesMap);
+		     configRootFeature.notifyRecursiveLoadOperation(this, propertiesMap);
 		} else if(feature instanceof FeatureConfigurator){
 		    FeatureConfigurator configurator = (FeatureConfigurator)feature;
 		    //subElement.setPropertiesMap(new HashMap<String,Object>());
@@ -190,7 +194,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	}//end for(features)
     }//end loadConfigurationsOfTargetRecursive
     
-    protected ConfigRootFeature getConfigManagerFeature(Collection<Feature> features){
+    protected ConfigRootFeature getConfigRootFeature(Collection<Feature> features){
 	for(Feature feature:features){
 	    if(feature instanceof ConfigRootFeature)
 		return (ConfigRootFeature)feature;

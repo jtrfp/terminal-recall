@@ -65,7 +65,8 @@ public class GamestateSaveLoadDialogSystem {
 	System.out.println("Selected file is "+file);
 	if(file == null)
 	    return;
-	if(!file.getAbsolutePath().contentEquals(path))
+	final String fileAbsolutePath = file.getAbsolutePath();
+	if(!fileAbsolutePath.contentEquals(path))
 	    configRoot.setConfigSaveURI(file.getAbsolutePath());
 	final Game game = getGame();
 	System.out.println("State loader: Aborting current mission. Game hash="+game.hashCode());
@@ -79,7 +80,7 @@ public class GamestateSaveLoadDialogSystem {
     
     protected File doSaveDialog(String path){
 	final JFileChooser chooser = getChooser();
-	chooser.setSelectedFile(null);
+	chooser.setSelectedFile(new File(path));
 	final int           result = chooser.showSaveDialog(getRootFrame());
 	if(result == JFileChooser.APPROVE_OPTION)
 	    return chooser.getSelectedFile();
@@ -88,7 +89,7 @@ public class GamestateSaveLoadDialogSystem {
     
     protected File doLoadDialog(String path){
 	final JFileChooser chooser = getChooser();
-	chooser.setSelectedFile(null);
+	chooser.setSelectedFile(new File(path));
 	final int           result = chooser.showOpenDialog(getRootFrame());
 	if(result == JFileChooser.APPROVE_OPTION)
 	    return chooser.getSelectedFile();

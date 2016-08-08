@@ -16,6 +16,10 @@ package org.jtrfp.trcl.game;
 import org.jtrfp.trcl.conf.ConfigRootFeature;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.FeaturesImpl.FeatureNotFoundException;
+import org.jtrfp.trcl.core.SavestateSaveLoadConfigurationFactory.SavestateSaveLoadConfiguration;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,16 +28,59 @@ public class GameConfigRootFactory implements FeatureFactory<TVF3Game> {
     public static String DEFAULT_SAVE_URI = "game"+SAVE_URI_SUFFIX;
     
     public static class GameConfigRootFeature extends ConfigRootFeature<TVF3Game>{
+	private SavestateSaveLoadConfiguration savestateSaveLoadConf;
+	
+	@Override
+	public void apply(TVF3Game target){
+	    super.apply(target);
+	    getSavestateSaveLoadConf();//Kludge to ensure Feature is extracted in non-display() thread.
+	}
 
 	@Override
 	public void destruct(TVF3Game target) {
-	    // TODO Auto-generated method stub
-	    
 	}
 
 	@Override
 	protected String getDefaultSaveURI() {
-	    return DEFAULT_SAVE_URI;
+	    return null;
+	}
+	
+	@Override
+	public String getConfigSaveURI(){
+	    SavestateSaveLoadConfiguration conf = getSavestateSaveLoadConf();
+	    if(conf != null){
+		final String uri = conf.getDefaultSavestateURI();
+		System.out.println("getConfigSaveURI returning "+uri);
+		return uri;
+	    }
+	    return super.getConfigSaveURI();
+	}//end getConfigSaveURI()
+	
+	@Override
+	public void setConfigSaveURI(String uri){
+	    SavestateSaveLoadConfiguration conf = getSavestateSaveLoadConf();
+	    if(conf != null)
+		conf.setDefaultSavestateURI(uri);
+	    else
+		super.setConfigSaveURI(uri);
+	}
+
+	protected SavestateSaveLoadConfiguration getSavestateSaveLoadConf() {
+	    if(savestateSaveLoadConf == null){
+		final TR tr = getTarget().getTr();
+		try{
+		    final SavestateSaveLoadConfiguration conf = Features.get(tr, SavestateSaveLoadConfiguration.class);
+		    setSavestateSaveLoadConf(conf);
+		}catch(FeatureNotFoundException e){
+		    System.out.println("Warning: GameConfigRootFeature failed to find SavestateSaveLoadConfiguration feature in TR.");
+		}
+	    }//end if(null)
+	    return savestateSaveLoadConf;
+	}
+
+	protected void setSavestateSaveLoadConf(
+		SavestateSaveLoadConfiguration savestateSaveLoadConf) {
+	    this.savestateSaveLoadConf = savestateSaveLoadConf;
 	}
 	
     }//end GameConfigRootFeature

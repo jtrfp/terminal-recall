@@ -134,7 +134,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    element.getSubFeatures().put(configRootFeature.getClass().getName(), subElement);
 	    return;
 	}
-	for(Feature feature:features){
+	for(Feature<?> feature:features){
 	    FeatureTreeElement subElement = new FeatureTreeElement.Default();
 	    subElement.setFeatureClassName(feature.getClass().getName());
 	    if(feature instanceof FeatureConfigurator){
@@ -150,7 +150,6 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     public void notifyRecursiveSaveOperation(
 	    ConfigRootFeature<TARGET_CLASS> configManagerFeature, Map<String,Object> propertiesMap) {
 	final String newConfigSaveURI = getConfigSaveURI();
-	System.out.println("saving new config save URI "+newConfigSaveURI);
 	propertiesMap.put(CONFIG_SAVE_URI, newConfigSaveURI);
     }
     

@@ -56,12 +56,10 @@ public class SavestateSaveLoadConfigurationFactory implements
 	}
 
 	public String getDefaultSavestateURI() {
-	    new Throwable("getDefaultSavestateURI "+defaultSavestateURI+" hash="+hashCode()).printStackTrace();
 	    return defaultSavestateURI;
 	}
 
 	public void setDefaultSavestateURI(String defaultSavestateURI) {
-	    System.out.println("setDefaultSavestateURI "+defaultSavestateURI+" hash="+hashCode());
 	    this.defaultSavestateURI = defaultSavestateURI;
 	}
     }//end SavestateSaveLoadConfiguration

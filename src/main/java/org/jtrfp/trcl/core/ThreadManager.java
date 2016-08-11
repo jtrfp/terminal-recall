@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
@@ -46,7 +47,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
-public class ThreadManager implements GLExecutor{
+public class ThreadManager implements GLExecutor<GL3>{
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= 60;
     public static final int RENDERLIST_REFRESH_FPS 	= 1;
@@ -158,6 +159,7 @@ public class ThreadManager implements GLExecutor{
 	return result;
     }//end submitToGPUMemAccess(...)
     
+    @Override
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),c);
 	if(isGLThread())

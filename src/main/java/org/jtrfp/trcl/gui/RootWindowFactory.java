@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
     static {GLProfile.initSingleton();}
-    public static class RootWindow extends JFrame implements Feature<TR>, GLExecutor, CanvasProvider {
+    public static class RootWindow extends JFrame implements Feature<TR>, CanvasProvider {
 	/**
 	 * 
 	 */
@@ -81,7 +81,8 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	public GLCanvas getCanvas() {
 	    return canvas;
 	}
-
+/*
+	@Override
 	public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	    final GLCanvas canvas = getCanvas();
 	    final GLContext context = canvas.getContext();
@@ -98,7 +99,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	    result.enqueue();
 	    return result;
 	}//end submitToGL(...)
-
+*/
 	@Override
 	public void apply(TR target) {
 	    //target.setRootWindow(this);

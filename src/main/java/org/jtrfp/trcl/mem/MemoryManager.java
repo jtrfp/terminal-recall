@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFuture;
@@ -50,7 +51,7 @@ public final class MemoryManager {
      */
     public static final ByteBuffer		ZEROES = ByteBuffer.allocate(1024*1024*16);
     
-    public MemoryManager(GPU gpu, final GLExecutor glExecutor){
+    public MemoryManager(GPU gpu, final GLExecutor<? extends GL> glExecutor){
 	this.gpu=gpu;
 	this.glExecutor=glExecutor;
 	try{

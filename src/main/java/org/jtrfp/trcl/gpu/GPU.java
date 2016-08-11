@@ -39,7 +39,7 @@ import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.tools.Util;
 
-public class GPU implements GLExecutor{
+public class GPU implements GLExecutor<GL3>{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
     	private GLFutureTask<Integer>			defaultTIU;

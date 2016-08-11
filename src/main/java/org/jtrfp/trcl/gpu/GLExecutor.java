@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2016 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -15,8 +15,10 @@ package org.jtrfp.trcl.gpu;
 
 import java.util.concurrent.Callable;
 
+import javax.media.opengl.GL;
+
 import org.jtrfp.trcl.core.GLFutureTask;
 
-public interface GLExecutor {
+public interface GLExecutor<GL_TYPE extends GL> {
     public <T> GLFutureTask<T> submitToGL(Callable<T> c);
 }//end GLExecutor

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL 
- * Copyright (c) 2012-2014 Chuck Ritola.
+ * Copyright (c) 2012-2016 Chuck Ritola.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -14,37 +14,35 @@
  *      chuck - initial API and implementation
  ******************************************************************************/
 
-#version 330
+//Made fairly-convoluted w/ float ops to work with GL ES 2
+#version 100
 
-const int SAMPLES_PER_ROW		= 1024;
-const int  SAMPLES_PER_ROW_2	= SAMPLES_PER_ROW*2;
+const float SAMPLES_PER_ROW		= 1024.;
+const float  SAMPLES_PER_ROW_2	= SAMPLES_PER_ROW*2.;
 
 // INPUTS
 uniform vec2 pan;
 uniform float start;
 uniform float lengthPerRow;
-uniform uint numRows;
+uniform float numRows;
 
 // OUTPUTS
-noperspective out float fragTexPos;
-noperspective out float fragRow;
-flat out float vid;
-flat out vec2 panLR;
+varying float fragTexPos;
+varying float fragRow;
 
 //DUMMY
-layout (location = 0) in float dummy;
+//layout (location = 0) in float dummy;
 
 void main(){
  // U/V Zig-Zag pattern
- int glvid2=int((gl_VertexID+1) / 2);
- int sweep = glvid2 % 2;
- int row = gl_VertexID / 2;
+ float vid = float(gl_VertexID);
+ float glvid2=floor((vid+1.) / 2.);
+ float sweep = mod(glvid2,2.);
+ float row = floor(vid / 2.);
  fragTexPos = sweep;
- fragRow = ((float(row)+.5)/float(numRows));
- float rowsX = float(glvid2 + gl_VertexID/SAMPLES_PER_ROW_2);
- vid = gl_VertexID / 64;
+ fragRow = (row+.5)/numRows;
+ float rowsX = float(glvid2 + vid/SAMPLES_PER_ROW_2);
  
- panLR = pan;
- gl_Position.x= (dummy==1234?.0000000001:0) + start+rowsX*lengthPerRow;
+ gl_Position.x= start+rowsX*lengthPerRow;
  gl_Position.yzw=vec3(0,1,1);
 }

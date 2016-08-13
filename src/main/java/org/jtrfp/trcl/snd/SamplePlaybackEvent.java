@@ -91,7 +91,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	             startTimeInBuffers=((getStartRealtimeSeconds()-bufferStartTimeSeconds)/(double)bufferSizeSeconds)*2-1,
 	             lengthPerRow      = getSoundTexture().getLengthPerRowSeconds();
 	final int    lengthInSegments  = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
-	origin.getNumRowsU().setui(getSoundTexture().getNumRows());
+	origin.getNumRowsU().set((float)getSoundTexture().getNumRows());//Kludge to get around int limitations in ES 2
 	origin.getStartU().set((float)startTimeInBuffers);
 	origin.getLengthPerRowU()
 	 .set((float)((2/playbackRatio)*(lengthPerRow/bufferSizeSeconds)));

@@ -40,6 +40,7 @@ import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.gpu.Renderer;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
@@ -159,7 +160,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 	return result;
     }//end submitToGPUMemAccess(...)
     
-    @Override
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),c);
 	if(isGLThread())
@@ -353,4 +353,25 @@ public class ThreadManager implements GLExecutor<GL3>{
 	    throw new NullPointerException("Passed task intolerably null.");
 	repeatingGPUMemAccessTasks.remove(task);
     }//end removeRepeatingGPUMemTask(...)
+
+    @Override
+    public <T> GLFutureTask<T> submitToGL(GLExecutable<T, ? extends GL3> executable) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void executeOnEachRefresh(GLExecutable<?, ? extends GL3> executable,
+	    double orderPriority) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void executeOnResize(GLExecutable<?, ? extends GL3> executable) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void executeOnDispose(GLExecutable<?, ? extends GL3> executable) {
+	throw new UnsupportedOperationException();
+    }
 }// end ThreadManager

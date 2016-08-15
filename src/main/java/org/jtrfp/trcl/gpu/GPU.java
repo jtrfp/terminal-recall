@@ -35,6 +35,7 @@ import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.tools.Util;
@@ -326,5 +327,27 @@ public class GPU implements GLExecutor<GL3>{
 
 	public void setThreadManager(ThreadManager threadManager) {
 	    this.threadManager = threadManager;
+	}
+
+	@Override
+	public <T> GLFutureTask<T> submitToGL(
+		GLExecutable<T, ? extends GL3> executable) {
+	    throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void executeOnEachRefresh(
+		GLExecutable<?, ? extends GL3> executable, double orderPriority) {
+	    throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void executeOnResize(GLExecutable<?, ? extends GL3> executable) {
+	    throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void executeOnDispose(GLExecutable<?, ? extends GL3> executable) {
+	    throw new UnsupportedOperationException();
 	}
 	}//end GPU

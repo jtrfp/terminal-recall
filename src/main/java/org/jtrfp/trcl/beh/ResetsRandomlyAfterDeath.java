@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
 
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.obj.WorldObject;
 
 
@@ -29,12 +30,13 @@ public void notifyDeath() {
     final WorldObject thisObject = getParent();
     final Runnable _runOnReset = runOnReset;
     final long waitTime = (long)(minWaitMillis+Math.random()*(maxWaitMillis-minWaitMillis));
-    thisObject.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+    final ThreadManager threadManager = thisObject.getTr().getThreadManager();
+    threadManager.submitToThreadPool(new Callable<Void>(){
 	@Override
 	public Void call() throws Exception {
 	    try{Thread.currentThread().sleep(waitTime);}
 	    catch(InterruptedException e){e.printStackTrace();}
-	    getParent().getTr().getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
+	    threadManager.submitToGPUMemAccess(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    unDamage();

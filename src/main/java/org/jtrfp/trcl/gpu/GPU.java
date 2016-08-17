@@ -331,23 +331,23 @@ public class GPU implements GLExecutor<GL3>{
 
 	@Override
 	public <T> GLFutureTask<T> submitToGL(
-		GLExecutable<T, ? extends GL3> executable) {
+		GLExecutable<T, GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void executeOnEachRefresh(
-		GLExecutable<Void, ? extends GL3> executable, double orderPriority) {
+		GLExecutable<Void, GL3> executable, double orderPriority) {
 	    throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void executeOnResize(GLExecutable<Void, ? extends GL3> executable) {
+	public void executeOnResize(GLExecutable<Void,GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void executeOnDispose(GLExecutable<Void, ? extends GL3> executable) {
+	public void executeOnDispose(GLExecutable<Void,GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
 	}//end GPU

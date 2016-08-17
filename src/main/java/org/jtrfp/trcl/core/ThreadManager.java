@@ -360,18 +360,18 @@ public class ThreadManager implements GLExecutor<GL3>{
     }
 
     @Override
-    public void executeOnEachRefresh(GLExecutable<?, ? extends GL3> executable,
+    public void executeOnEachRefresh(GLExecutable<Void, ? extends GL3> executable,
 	    double orderPriority) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public void executeOnResize(GLExecutable<?, ? extends GL3> executable) {
+    public void executeOnResize(GLExecutable<Void, ? extends GL3> executable) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public void executeOnDispose(GLExecutable<?, ? extends GL3> executable) {
+    public void executeOnDispose(GLExecutable<Void, ? extends GL3> executable) {
 	throw new UnsupportedOperationException();
     }
 }// end ThreadManager

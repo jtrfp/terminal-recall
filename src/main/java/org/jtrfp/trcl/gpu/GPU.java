@@ -43,7 +43,7 @@ import org.jtrfp.trcl.tools.Util;
 public class GPU implements GLExecutor<GL3>{
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
-    	private GLFutureTask<Integer>			defaultTIU;
+    	private TRFutureTask<Integer>			defaultTIU;
 	
 	private ByteOrder 				byteOrder;
 	//private final TR 				tr;
@@ -267,7 +267,7 @@ public class GPU implements GLExecutor<GL3>{
 	    }//end GPUVendor
 
 	@Override
-	public <T> GLFutureTask<T> submitToGL(Callable<T> c) {
+	public <T> TRFutureTask<T> submitToGL(Callable<T> c) {
 	    return glExecutor.submitToGL(c);
 	}
 
@@ -337,17 +337,17 @@ public class GPU implements GLExecutor<GL3>{
 
 	@Override
 	public void executeOnEachRefresh(
-		GLExecutable<?, ? extends GL3> executable, double orderPriority) {
+		GLExecutable<Void, ? extends GL3> executable, double orderPriority) {
 	    throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void executeOnResize(GLExecutable<?, ? extends GL3> executable) {
+	public void executeOnResize(GLExecutable<Void, ? extends GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void executeOnDispose(GLExecutable<?, ? extends GL3> executable) {
+	public void executeOnDispose(GLExecutable<Void, ? extends GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
 	}//end GPU

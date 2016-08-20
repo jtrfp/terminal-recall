@@ -97,11 +97,12 @@ public class FeaturesImpl {
        Feature getFeature(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target){
 	Feature result = featuresByClass.get(featureClass);
 	if(result==null)
-	    result = newFeatureInstance(featuresByClass, featureClass, target);
+	    try{result = newFeatureInstance(featuresByClass, featureClass, target);}
+	catch(FeatureNotApplicableException e){}//Quiet skip.
 	return result;
     }//end getFeature()
 
-       private Feature newFeatureInstance(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target){
+       private Feature newFeatureInstance(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target) throws FeatureNotApplicableException{
 	   final Feature result;
 	   final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
 	   if(ff == null)

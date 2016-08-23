@@ -26,7 +26,7 @@ import org.jtrfp.trcl.beh.PlayerCollisionListener;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -44,7 +44,7 @@ public class ForceField extends WorldObject {
 		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(),null, false),
 		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(),null, false)}
 		    );
-	    setModel(Model.buildCube(tunnelDia, tunnelDia, wallThickness,
+	    setModel(GL33Model.buildCube(tunnelDia, tunnelDia, wallThickness,
 		    eTex,
 		    new double[] { tunnelDia / 4., tunnelDia / 4., 0 }, 0, 0,
 		    1, 1, true, false, tr));

@@ -20,7 +20,7 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 
 
@@ -53,7 +53,7 @@ public class BillboardSprite extends WorldObject{
 				new double[]{0,0,1,1}, 
 				desc, 
 				RenderMode.DYNAMIC,true,Vector3D.ZERO,"BillboardSprite");
-		Model m = new Model(false,getTr(), "BillboardSprite."+getDebugName());
+		GL33Model m = new GL33Model(false,getTr(), "BillboardSprite."+getDebugName());
 		m.addTriangles(tris);
 		setModel(m);
 		}

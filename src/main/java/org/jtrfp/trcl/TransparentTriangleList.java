@@ -13,12 +13,12 @@
 package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 
 public class TransparentTriangleList extends TriangleList {
     public TransparentTriangleList(Triangle[][] triangles,
 	    int timeBetweenFramesMsec, String debugName, boolean animateUV,
-	    Controller controller, TR tr, Model m) {
+	    Controller controller, TR tr, GL33Model m) {
 	super(triangles, timeBetweenFramesMsec, debugName, animateUV,
 		controller, tr, m);
     }

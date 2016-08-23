@@ -18,7 +18,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.obj.WorldObject2DRelevantEverywhere;
@@ -35,7 +35,7 @@ public class Dashboard extends WorldObject2DRelevantEverywhere {
 	Texture[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
 			Features.get(tr, GPUFeature.class).getGl(), 2,false);
-	Model dashModel = new Model(false, tr,"Dashboard");
+	GL33Model dashModel = new GL33Model(false, tr,"Dashboard");
 	for (int seg = 0; seg < 5; seg++) {
 	    final double segWidth = 2. / 5.;
 	    final double x = -1 + segWidth * seg;

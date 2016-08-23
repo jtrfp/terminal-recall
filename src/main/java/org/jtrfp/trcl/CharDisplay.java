@@ -14,7 +14,7 @@ package org.jtrfp.trcl;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject2D;
 
@@ -24,7 +24,7 @@ public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     public CharDisplay(RenderableSpacePartitioningGrid grid,
 	    double glSize, GLFont font) {
 	super();
-	final Model model = new Model(false, getTr(),"CharDisplay");
+	final GL33Model model = new GL33Model(false, getTr(),"CharDisplay");
 	tex = new SelectableTexture(font.getTextures());
 	Triangle[] tris = Triangle.quad2Triangles(
 		new double[] { 0., glSize, glSize, 0. },// x

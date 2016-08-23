@@ -22,7 +22,7 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.math.IntRandomTransferFunction;
 
@@ -77,10 +77,10 @@ public class TunnelSegment extends WorldObject {
 
     private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();
 
-    private static Model createModel(Segment s, double segLen,
+    private static GL33Model createModel(Segment s, double segLen,
 	    Texture[] tunnelTexturePalette, double endX,
 	    double endY, final TR tr, String debugName) {
-	Model mainModel = new Model(true, tr, debugName);
+	GL33Model mainModel = new GL33Model(true, tr, debugName);
 	mainModel.setDebugName("tunnelSegment main.");
 	final int numPolys = s.getNumPolygons();
 	double startWidth = getStartWidth(s);
@@ -173,7 +173,7 @@ public class TunnelSegment extends WorldObject {
 		:0;
 	//FRAME LOOP
 	for(int frameIndex=0; frameIndex<numAnimFrames; frameIndex++){
-	 final Model m = new Model(false,tr,debugName);
+	 final GL33Model m = new GL33Model(false,tr,debugName);
 	 m.setDebugName("TunnelSegment frame "+frameIndex+" of "+numAnimFrames);
 	 final double frameAngleDeltaRadians = animationDeltaRadians * (double)frameIndex;
 	 double frameStartAngle = startAngle + frameAngleDeltaRadians;

@@ -28,7 +28,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -47,7 +47,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	setImmuneToOpaqueDepthTest(true);
 	final TR tr = getTr();
 	// Crosshairs
-	Model crossModel = null;
+	GL33Model crossModel = null;
 	final TextureManager tm = Features.get(tr, GPUFeature.class).textureManager.get();
 	// Fallback
 	final int NUM_FRAMES = 16;

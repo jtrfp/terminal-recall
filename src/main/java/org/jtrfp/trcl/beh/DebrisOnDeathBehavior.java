@@ -14,7 +14,7 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
@@ -24,7 +24,7 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
     public void notifyDeath() {
 	WorldObject p = getParent();
 	final double maxVertexValue;
-	final Model model = p.getModel();
+	final GL33Model model = p.getModel();
 	if(model.getTriangleList()!=null)
 	    maxVertexValue=model.getTriangleList().getMaximumVertexValue();
 	else if(model.getTransparentTriangleList()!=null)

@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 
 public class BarrierCube extends WorldObject {
@@ -27,12 +27,12 @@ public class BarrierCube extends WorldObject {
     }
     public BarrierCube(double w, double h, double d, Texture tex, double [] origin, boolean hasAlpha) {
 	this(w,h,d,origin);
-	Model m = Model.buildCube(w, h, d, tex, origin,hasAlpha,getTr());
+	GL33Model m = GL33Model.buildCube(w, h, d, tex, origin,hasAlpha,getTr());
 	setModel(m);
     }// end constructor
     public BarrierCube(double w, double h, double d, Texture tex, double [] origin, double u0, double v0, double u1, double v1, boolean hasAlpha) {
 	this(w,h,d,origin);
-	Model m = Model.buildCube(w, h, d, tex, origin,u0,v0,u1,v1,hasAlpha,getTr());
+	GL33Model m = GL33Model.buildCube(w, h, d, tex, origin,u0,v0,u1,v1,hasAlpha,getTr());
 	setModel(m);
     }// end constructor
     /**

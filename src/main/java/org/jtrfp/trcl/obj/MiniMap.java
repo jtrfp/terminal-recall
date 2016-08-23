@@ -24,7 +24,7 @@ import org.jtrfp.trcl.core.FeaturesImpl.FeatureNotFoundException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.SettableTexture;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -115,14 +115,14 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	return (int)(Math.sin(Math.PI*percentY)*getDiameterInTiles());
     }//end diameterAtPctY()
     
-    protected Model buildModel(){
+    protected GL33Model buildModel(){
 	TR tr;
 	
 	try {tr= getTr();}
 	catch(FeatureNotFoundException e){
 	    return null;}
 	
-	final Model result = new Model(false, tr, "MiniMap "+hashCode());
+	final GL33Model result = new GL33Model(false, tr, "MiniMap "+hashCode());
 	final int diameterInTiles = getDiameterInTiles();
 	final double halfwayPoint = getHalfwayPoint();
 	final double [] modelSize= getModelSize();
@@ -137,7 +137,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	return result;
     }//end buildModel(...)
     
-    protected void setupTileAt(int x, int y, double percentY, double [] tileSize, double [] modelSize, Model model){
+    protected void setupTileAt(int x, int y, double percentY, double [] tileSize, double [] modelSize, GL33Model model){
 	final Texture texture = getGrid()[x][y];
 	if(texture!=null){
 	    final double percentX = 2*(x-getHalfwayPoint())/getDiameterInTiles();

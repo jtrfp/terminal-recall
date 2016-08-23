@@ -16,7 +16,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TRFactory;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -32,7 +32,7 @@ public class CollidesWithPlayer extends Behavior implements CollisionBehavior {
 	//    System.out.println("PO3D "+other);
 	if(other instanceof Player){
 	    final WorldObject parent = getParent();
-	    final Model parentModel  = parent.getModel();
+	    final GL33Model parentModel  = parent.getModel();
 	    if(other.getModel()==null)
 		return;
 	    if(parentModel==null)

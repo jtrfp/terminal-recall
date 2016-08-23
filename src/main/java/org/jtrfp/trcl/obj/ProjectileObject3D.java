@@ -20,7 +20,7 @@ import org.jtrfp.trcl.beh.ReportsCollisionsToStdout;
 import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Weapon;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 
@@ -28,7 +28,7 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
     public static final long LIFESPAN_MILLIS=4500;
     private WeakReference<WorldObject> objectOfOrigin = new WeakReference<WorldObject>(null);
     private Weapon weapon;
-    public ProjectileObject3D(TR tr,Model m, Weapon w, ExplosionType explosionType){
+    public ProjectileObject3D(TR tr,GL33Model m, Weapon w, ExplosionType explosionType){
 	super();
 	setModel(m);
 	addBehavior(new ProjectileBehavior(this,w.getDamage(),explosionType,w.isHoning()));

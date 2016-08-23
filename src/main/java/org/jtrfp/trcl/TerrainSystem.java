@@ -32,7 +32,7 @@ import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
@@ -141,7 +141,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			    /*final double objectY = Util.quantize(altitude
 				    .heightAt(gX*gridSquareSize, _gZ*gridSquareSize),128);*/
 			    final double objectY = 1024*16;//TODO: Remove debug code
-			    final Model m = new Model(false, tr,"Terrain Chunk");
+			    final GL33Model m = new GL33Model(false, tr,"Terrain Chunk");
 			    m.setDebugName(debugName);
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
@@ -173,7 +173,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 				    final Integer tpi = cX + cZ * 256;
 				    
 				    if(points.containsKey(tpi)){
-					final Model portalModel = new Model(false, tr,"PortalEntrance");
+					final GL33Model portalModel = new GL33Model(false, tr,"PortalEntrance");
 					//Place a PortalEntrance
 					final Vector3D centroid = tL.add(tR).add(bR).add(bL).scalarMultiply(1./4.);
 					final Vector3D ltR = tR.subtract(centroid),
@@ -293,7 +293,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 			    /*final double objectY = Math.round((2. - altitude.heightAt(
 				    gX* gridSquareSize, _gZ* gridSquareSize)) + Y_NUDGE);*/
 			    final double objectY = altitude.getHeight()/2;
-			    final Model m = new Model(false, tr,"CeilingChunk");
+			    final GL33Model m = new GL33Model(false, tr,"CeilingChunk");
 			    // for each square
 			    for (int cZ = _gZ; cZ < _gZ + chunkSideLength; cZ++) {
 				for (int cX = gX; cX < gX + chunkSideLength; cX++) {

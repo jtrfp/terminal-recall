@@ -17,7 +17,7 @@ import org.jtrfp.trcl.ManuallySetController;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 
 public class MeterBar extends WorldObject2DRelevantEverywhere {
@@ -28,9 +28,9 @@ public class MeterBar extends WorldObject2DRelevantEverywhere {
 	//height*=.5;
 	//length*=.5;
 	final TR tr = getTr();
-	Model m = new Model(true,tr,debugName);
-	Model m1 = new Model(true,tr,debugName);
-	Model m2 = new Model(true,tr,debugName);
+	GL33Model m = new GL33Model(true,tr,debugName);
+	GL33Model m1 = new GL33Model(true,tr,debugName);
+	GL33Model m2 = new GL33Model(true,tr,debugName);
 	Triangle [] tris;
 	if(horizontal){
 	tris = Triangle.quad2Triangles(
@@ -63,7 +63,7 @@ public class MeterBar extends WorldObject2DRelevantEverywhere {
 	    tris[1].setAlphaBlended(true);
 	    m1.addTriangles(tris);
 		
-	    m2 = new Model(true,tr,debugName);
+	    m2 = new GL33Model(true,tr,debugName);
 		tris = Triangle.quad2Triangles(
 		new double[]{height,-height,-height,height}, //X
 		new double []{-length,-length,-length,-length}, //Y

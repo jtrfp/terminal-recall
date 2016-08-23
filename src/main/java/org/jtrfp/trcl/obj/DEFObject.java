@@ -87,7 +87,7 @@ import org.jtrfp.trcl.gpu.BINFileExtractor;
 import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.gpu.BufferedModelTarget;
 import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -935,7 +935,7 @@ public void destroy(){
 	final DamageTrigger damageTrigger = new DamageTrigger(){
 	    @Override
 	    public void healthBelowThreshold() {
-		final Model oldModel = getModel();
+		final GL33Model oldModel = getModel();
 		try{setModel(rm.getBINModel(enemyDefinition.getComplexModelFile(), getTr().getGlobalPaletteVL(), null, null));}
 		catch(Exception e){e.printStackTrace();}
 		probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
@@ -1177,7 +1177,7 @@ public void destroy(){
     }//end getBoundingHeight()
 
     private void calcBoundingDims(){
-	final Model model = getModel();
+	final GL33Model model = getModel();
 	Vector3D max = Vector3D.ZERO;
 	if(model!=null)
 	    max = model.getMaximumVertexDims();

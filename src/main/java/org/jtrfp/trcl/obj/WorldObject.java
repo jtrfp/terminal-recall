@@ -38,7 +38,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.RenderList;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.math.Mat4x4;
@@ -69,7 +69,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean	needToRecalcMatrix=true;
     private TR  	tr;
     private boolean 	visible = true;
-    private TRFuture<Model>model;
+    private TRFuture<GL33Model>model;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected Integer 	matrixID;
@@ -122,7 +122,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	tMd[15] = 1;
     }
 
-    public WorldObject(Model m) {
+    public WorldObject(GL33Model m) {
 	this();
 	setModel(m);
     }// end constructor
@@ -221,8 +221,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     private final int [] emptyIntArray = new int[0];
     
-    public void setModel(Model m) {
-	final TRFuture<Model> thisModelFuture = this.model;
+    public void setModel(GL33Model m) {
+	final TRFuture<GL33Model> thisModelFuture = this.model;
 	if (m == null){
 	    if(thisModelFuture != null)
 	     releaseCurrentModel();
@@ -284,7 +284,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it? Object in question is: \n"+this.toString());
-	final Model model = getModelRealtime();
+	final GL33Model model = getModelRealtime();
 	final TR tr = getTr();
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
@@ -347,7 +347,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end processPrimitiveList(...)
     
     protected void updateAllRenderFlagStates(){
-	final Model model = getModel();
+	final GL33Model model = getModel();
 	if(model == null)
 	    return;
 	updateRenderFlagStatesPL(model.getTriangleList(),getTriangleObjectDefinitions());
@@ -639,13 +639,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	catch(NullPointerException e){return null;}
     }
 
-    public Model getModel() {
+    public GL33Model getModel() {
 	try{return model.get();}
 	catch(NullPointerException e){return null;}
 	catch(Exception e){throw new RuntimeException(e);}
     }
     
-    public Model getModelRealtime() throws NotReadyException{
+    public GL33Model getModelRealtime() throws NotReadyException{
 	return model.getRealtime();
     }
 

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public abstract class PrimitiveList<PRIMITIVE_TYPE> {
@@ -25,7 +25,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     //protected static final double coordDownScaler = 512;
     //protected static final double uvUpScaler = 4096;
     private final PRIMITIVE_TYPE[][] primitives;
-    private final Model model;
+    private final GL33Model model;
     private int cachedNumElements=-1;
     private boolean primitivesFinalized=false;
 
@@ -40,7 +40,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     protected final 	MemoryWindow	window;
 
     public PrimitiveList(String debugName, PRIMITIVE_TYPE[][] primitives,
-	    MemoryWindow window, TR tr, Model model) {
+	    MemoryWindow window, TR tr, GL33Model model) {
 	this.tr = tr;
 	this.window=window;
 	this.debugName = debugName;
@@ -129,7 +129,7 @@ public abstract class PrimitiveList<PRIMITIVE_TYPE> {
     /**
      * @return the model
      */
-    protected Model getModel() {
+    protected GL33Model getModel() {
         return model;
     }
     

@@ -29,7 +29,7 @@ import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 
-public class Model {
+public class GL33Model {
     // [FRAME][LIST]
     private ArrayList<ArrayList<Triangle>> tLists = new ArrayList<ArrayList<Triangle>>();
     private ArrayList<ArrayList<Triangle>> ttLists = new ArrayList<ArrayList<Triangle>>();
@@ -48,11 +48,11 @@ public class Model {
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
     private boolean modelFinalized = false;
-    private TRFuture<Model> finalizedModel;
+    private TRFuture<GL33Model> finalizedModel;
     //Keeps hard references to Textures to keep them from getting gobbled.
     private final HashSet<Texture> textures = new HashSet<Texture>();
 
-    public Model(boolean smoothAnimation, TR tr, String debugName) {
+    public GL33Model(boolean smoothAnimation, TR tr, String debugName) {
 	this.tr = tr;
 	this.smoothAnimation = smoothAnimation;
 	this.debugName = debugName;
@@ -129,17 +129,17 @@ public class Model {
      * 
      * @return
      */
-    public TRFuture<Model> finalizeModel() {
+    public TRFuture<GL33Model> finalizeModel() {
 	if(tr  == null)
 	    return null;//Mock tolerance.
 	if(finalizedModel != null)
 	    return finalizedModel;
-	return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<Model>(){
+	return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<GL33Model>(){
 	    @Override
-	    public Model call() throws Exception {
+	    public GL33Model call() throws Exception {
 		Future<Void> tpFuture=null, ttpFuture=null;
 		if(modelFinalized)
-		    return Model.this;
+		    return GL33Model.this;
 		modelFinalized = true;
 		if(animated)//Discard frame zero
 		    {tLists.remove(0);ttLists.remove(0);}
@@ -158,7 +158,7 @@ public class Model {
 		 }// Get all frames for each triangle
 		 if (tris[0].length != 0) {
 		    tpList = new TriangleList(tris, getFrameDelayInMillis(), "Model."+debugName,
-			    animateUV, getController(), tr, Model.this);
+			    animateUV, getController(), tr, GL33Model.this);
 		    tpFuture = tpList.uploadToGPU();
 		 }// end if(length!=0)
 		 else
@@ -174,7 +174,7 @@ public class Model {
 		 }// Get all frames for each triangle
 		 if (ttris[0].length != 0) {
 		    ttpList = new TransparentTriangleList(ttris,
-			    getFrameDelayInMillis(), debugName, animateUV, getController(), tr, Model.this);
+			    getFrameDelayInMillis(), debugName, animateUV, getController(), tr, GL33Model.this);
 		    ttpFuture = ttpList.uploadToGPU();
 		 }// end if(length!=0)
 		 else
@@ -183,11 +183,11 @@ public class Model {
 		 ttLists=null;
 		 lsLists=null;
 		}//end scope numframes
-		return Model.this;
+		return GL33Model.this;
 	    }});
     }// end finalizeModel()
 
-    public void addFrame(Model m) {
+    public void addFrame(GL33Model m) {
 	if(!animated)animated=true;
 	// Opaque Triangles
 	{
@@ -260,36 +260,36 @@ public class Model {
 	this.smoothAnimation = smoothAnimation;
     }
 
-    public static Model buildCube(double w, double h, double d,
+    public static GL33Model buildCube(double w, double h, double d,
 	    Texture tunnelTexturePalette, double[] origin,
 	    boolean hasAlpha, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1,
 		hasAlpha, tr);
     }
 
-    public static Model buildCube(double w, double h, double d,
+    public static GL33Model buildCube(double w, double h, double d,
 	    Texture tunnelTexturePalette, double[] origin,
 	    TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, 0, 0, 1, 1, tr);
     }
 
-    public static Model buildCube(double w, double h, double d,
+    public static GL33Model buildCube(double w, double h, double d,
 	    Texture tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, TR tr) {
 	return buildCube(w, h, d, tunnelTexturePalette, origin, u0, v0, u1, v1,
 		false, tr);
     }
     
-    public static Model buildCube(double w, double h, double d,
+    public static GL33Model buildCube(double w, double h, double d,
 	    Texture tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, TR tr) {
 	return buildCube(w,h,d,tunnelTexturePalette,origin,u0,v0,u1,v1,hasAlpha,true,tr);
     }
 
-    public static Model buildCube(double w, double h, double d,
+    public static GL33Model buildCube(double w, double h, double d,
 	    Texture tunnelTexturePalette, double[] origin,
 	    double u0, double v0, double u1, double v1, boolean hasAlpha, boolean hasNorm, TR tr) {
-	Model m = new Model(false, tr, "Model.buildCube");
+	GL33Model m = new GL33Model(false, tr, "Model.buildCube");
 	// Top
 	m.addTriangles(Triangle.quad2Triangles(
 		new double[] { 0 - origin[0], w - origin[0], w - origin[0], 0 - origin[0] }, 

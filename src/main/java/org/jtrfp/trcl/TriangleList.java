@@ -24,7 +24,7 @@ import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.DynamicTexture;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -42,7 +42,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
     private volatile	Double				cachedMaximumVertexValue;
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
-	    String debugName, boolean animateUV, Controller controller, TR tr, Model m) {
+	    String debugName, boolean animateUV, Controller controller, TR tr, GL33Model m) {
 	super(debugName, triangles, new TriangleVertexWindow(Features.get(tr, GPUFeature.class),debugName), tr,m);
 	this.timeBetweenFramesMsec 	= timeBetweenFramesMsec;
 	this.animateUV 			= animateUV;

@@ -100,7 +100,7 @@ import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.TV;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.UncompressedVQTextureFactory;
 import org.jtrfp.trcl.gpu.VQTexture;
@@ -134,8 +134,8 @@ public class ResourceManager{
 		= new SoftValueHashMap<String,BINFile.AnimationControl>();
 	private SoftValueHashMap<String, BINFile.Model> 	modBinNameMap 		
 		= new SoftValueHashMap<String,BINFile.Model>();
-	private SoftValueHashMap<String, Model> 		modelCache 		
-		= new SoftValueHashMap<String,Model>();
+	private SoftValueHashMap<String, GL33Model> 		modelCache 		
+		= new SoftValueHashMap<String,GL33Model>();
 	private SoftValueHashMap<String, Module> 		modCache 		
 		= new SoftValueHashMap<String,Module>();
 	private ExplosionSystem 				explosionFactory;
@@ -355,7 +355,7 @@ public class ResourceManager{
 		return false;
 		}//end rawExists
 	
-	public Model getBINModel(String name, ColorPaletteVectorList palette,ColorPaletteVectorList paletteESTuTv, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
+	public GL33Model getBINModel(String name, ColorPaletteVectorList palette,ColorPaletteVectorList paletteESTuTv, GL3 gl) throws FileLoadException, IOException, IllegalAccessException{
 		return getBINModel(name,Features.get(tr, GPUFeature.class).textureManager.get().getFallbackTexture(),1,true,palette,paletteESTuTv);
 		}
 	
@@ -386,7 +386,7 @@ public class ResourceManager{
 	    return result;
 	}//end getBinFileModel()
 	
-	public Model getBINModel(String name,Texture defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, ColorPaletteVectorList ESTuTvPalette) throws FileLoadException, IOException, IllegalAccessException{
+	public GL33Model getBINModel(String name,Texture defaultTexture,double scale,boolean cache, ColorPaletteVectorList palette, ColorPaletteVectorList ESTuTvPalette) throws FileLoadException, IOException, IllegalAccessException{
 	    	if(name==null)throw new NullPointerException("Name is intolerably null");
 		if(palette==null)throw new NullPointerException("Palette is intolerably null");
 		if(modelCache.containsKey(name)&& cache)return modelCache.get(name);
@@ -397,11 +397,11 @@ public class ResourceManager{
 		boolean skipLighting=false;
 		try {
 			BINFile.AnimationControl ac=null;
-			Model result = new Model(true,tr,"BINModel."+name);
+			GL33Model result = new GL33Model(true,tr,"BINModel."+name);
 			ac = getAnimationControlBIN(name);
 			System.out.println("Recognized as animation control file.");
 			//Build the Model from the BINFile.Model
-			Model [] frames = new Model[ac.getNumFrames()];
+			GL33Model [] frames = new GL33Model[ac.getNumFrames()];
 			for(int i=0; i<frames.length;i++)
 				{frames[i]=getBINModel(ac.getBinFiles().get(i),defaultTexture,scale,cache,palette, ESTuTvPalette);}
 			result.setDebugName(name+" triangles: "+frames[0].getRawTriangleLists().get(0).size());
@@ -415,7 +415,7 @@ public class ResourceManager{
 		catch(UnrecognizedFormatException e){//ok fail. Static model
 			try	{
 				BINFile.Model m=null;
-				Model result = new Model(false,tr,"StaticBinModel."+name);
+				GL33Model result = new GL33Model(false,tr,"StaticBinModel."+name);
 				result.setDebugName(name);
 				m = getBinFileModel(name);
 				

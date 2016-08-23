@@ -29,7 +29,7 @@ import org.jtrfp.trcl.file.DEFFile;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.LoadingProgressReporter;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -61,7 +61,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    final double shieldScalar     = getShieldScalar();
 	    final double thrustScalar     = getThrustScalar();
 	    final double firingRateScalar = getFiringRateScalar();
-	    final Model [] models = new Model[defs.size()];
+	    final GL33Model [] models = new GL33Model[defs.size()];
 	    //final TR tr = world.getTr();
 	    final LoadingProgressReporter[] defReporters = rootReporter
 		    .generateSubReporters(defs.size());
@@ -86,7 +86,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    for(EnemyPlacement pl:places){
 		placementReporters[placementReporterIndex++].complete();
 		pl.setStrength((int)(pl.getStrength() * shieldScalar));
-		Model model =models[pl.getDefIndex()];
+		GL33Model model =models[pl.getDefIndex()];
 		if(model!=null){
 		    final EnemyDefinition def = defs.get(pl.getDefIndex());
 		    def.setFireSpeed(  (int)(def.getFireSpeed()   * firingRateScalar));

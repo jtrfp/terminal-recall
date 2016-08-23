@@ -51,7 +51,7 @@ import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gui.CockpitLayout;
 import org.jtrfp.trcl.gui.CockpitLayoutF3;
 import org.jtrfp.trcl.gui.CockpitLayoutTV;
@@ -113,7 +113,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      
      private RenderableSpacePartitioningGrid grid;
      
-     private Model cockpitModel;
+     private GL33Model cockpitModel;
      
      public final InstrumentMode 
       FULL_COCKPIT    = new FullCockpitInstruments(),
@@ -690,7 +690,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    setOffsetRot(null);
 	}
 	
-	public Model getCockpitModel() {
+	public GL33Model getCockpitModel() {
 	    if(cockpitModel==null){
 		final GPU gpu = Features.get(getTr(), GPUFeature.class);
 		final GL3 gl = gpu.getGl();
@@ -703,7 +703,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	    return cockpitModel;
 	}//end getCockpitModel()
 
-	public void setCockpitModel(Model cockpitModel) {
+	public void setCockpitModel(GL33Model cockpitModel) {
 	    this.cockpitModel = cockpitModel;
 	}
 	

@@ -26,7 +26,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
@@ -49,7 +49,7 @@ private GameShell gameShell;
     public NavArrow(DashboardLayout layout, Point2D.Double size, String debugName) {//TODO: Accept outside width/height parms
 	super();
 	final TR tr = getTr();
-	final Model m = new Model(false, tr, debugName);
+	final GL33Model m = new GL33Model(false, tr, debugName);
 	m.addTriangles(Triangle.quad2Triangles(size.getX(),size.getY(),0,0,0, true, getTexture(tr)));
 	//this.setRenderFlag(RenderFlags.IgnoreCamera);
 	setImmuneToOpaqueDepthTest(true);

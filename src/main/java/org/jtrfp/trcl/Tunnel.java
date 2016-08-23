@@ -45,7 +45,7 @@ import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -235,12 +235,12 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	final double upScalar = 10 * tunnelDia / TRFactory.mapSquareSize;
 	final double jawScalar = 10 * tunnelDia / TRFactory.mapSquareSize;
 	WorldObject wo;
-	Model       m;
+	GL33Model       m;
 	switch (obs) {
 	case none0:
 	    break;
 	case doorway: {
-	    m = Model.buildCube(tunnelDia, tunnelDia, wallThickness,
+	    m = GL33Model.buildCube(tunnelDia, tunnelDia, wallThickness,
 		    tunnelTexturePalette[s.getObstacleTextureIndex()],
 		    new double[] { tunnelDia / 2., tunnelDia / 2., 0 }, .5, .5,
 		    1, 1, tr);
@@ -592,7 +592,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    "IRIS.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 4 * 256,
 		    false, palette, ESTuTvPalette));
-	    final Model mod = wo.getModel();
+	    final GL33Model mod = wo.getModel();
 	    wo.addBehavior(new IrisBehavior(new Sequencer(mod
 		    .getFrameDelayInMillis(), 2, true), width));
 	    wo.setPosition(wPos.toArray());

@@ -29,7 +29,7 @@ import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory.ViewSelect;
 import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.obj.Jumpzone.FinishingRunState;
 import org.jtrfp.trcl.obj.Player;
@@ -137,7 +137,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 
 	    //Load and install lightning sphere model
 	    try{final Texture shieldTexture = resourceManager.getRAWAsTexture("SHEILD0.RAW", tr.getDarkIsClearPaletteVL(), null, false, true);
-	    final Model shieldModel = resourceManager.getBINModel("GLOBE.BIN", shieldTexture, 5, false, tr.getDarkIsClearPaletteVL(), null);
+	    final GL33Model shieldModel = resourceManager.getBINModel("GLOBE.BIN", shieldTexture, 5, false, tr.getDarkIsClearPaletteVL(), null);
 	    final ArrayList<Triangle> ttris = shieldModel.getRawTransparentTriangleLists().get(0);
 	    for(ArrayList<Triangle> tris: shieldModel.getRawTriangleLists()){
 		for(Triangle tri:tris){

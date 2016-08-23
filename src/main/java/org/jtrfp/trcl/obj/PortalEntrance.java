@@ -25,7 +25,7 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gpu.RendererFactory.PortalNotAvailableException;
@@ -55,7 +55,7 @@ public class PortalEntrance extends WorldObject {
     private TRFuture<Void> relevanceFuture;
     private boolean dotRelevant = false, rendering = false;
 
-    public PortalEntrance(Model model, PortalExit exit, WorldObject approachingObject){
+    public PortalEntrance(GL33Model model, PortalExit exit, WorldObject approachingObject){
 	this(exit,approachingObject);
 	setModel(model);
     }

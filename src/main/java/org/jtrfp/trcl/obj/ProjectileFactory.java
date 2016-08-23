@@ -34,7 +34,7 @@ import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -54,12 +54,12 @@ public class ProjectileFactory {
     	this.tr=tr;
     	this.weapon=weapon;
     	this.projectileSpeed=weapon.getSpeed()/TRFactory.crossPlatformScalar;
-    	Model modelToUse;
+    	GL33Model modelToUse;
     	Texture t;
   	 Triangle [] tris;
   	 final int damageOnImpact=weapon.getDamage();
     	try{
-    	 modelToUse = new Model(false,tr,"ProjectileFactory."+debugName);
+    	 modelToUse = new GL33Model(false,tr,"ProjectileFactory."+debugName);
    	 final ModelingType modelingType = weapon.getModelingType();
    	 if(modelingType instanceof ModelingType.FlatModelingType){
    	 ModelingType.FlatModelingType mt = (ModelingType.FlatModelingType)modelingType;

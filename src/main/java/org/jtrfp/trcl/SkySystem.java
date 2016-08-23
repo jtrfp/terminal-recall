@@ -20,7 +20,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.LVLFile;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.img.ColorUtils;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -99,7 +99,7 @@ public class SkySystem extends RenderableSpacePartitioningGrid {
 		new double[] { 0, 1, 1, 0 },// u
 		new double[] { 1, 1, 0, 0 }, cloudTexture,
 		RenderMode.STATIC, Vector3D.ZERO,"CloudSystem");
-	final Model m = new Model(false, tr,"SkySystem.generateClouds()");
+	final GL33Model m = new GL33Model(false, tr,"SkySystem.generateClouds()");
 	m.setDebugName("CloudSystem.cloudQuad");
 	m.addTriangle(tris[0]);
 	m.addTriangle(tris[1]);

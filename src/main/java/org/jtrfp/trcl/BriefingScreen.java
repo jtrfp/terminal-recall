@@ -40,7 +40,7 @@ import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -151,7 +151,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    planetObject=null;
 	}
 	try{
-	 final Model planetModel = rm.getBINModel(planetModelFile,
+	 final GL33Model planetModel = rm.getBINModel(planetModelFile,
 		 rm.getRAWAsTexture(planetTextureFile, 
 			 getPalette(lvl), null, false, true),
 		 8,false,getPalette(lvl),null);

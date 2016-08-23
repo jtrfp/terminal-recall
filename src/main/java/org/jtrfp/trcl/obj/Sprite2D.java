@@ -16,7 +16,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.Model;
+import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
 
 public class Sprite2D extends WorldObject2DRelevantEverywhere {
@@ -27,7 +27,7 @@ public class Sprite2D extends WorldObject2DRelevantEverywhere {
 	if(tex==null)
 	    throw new NullPointerException("Supplied texture intolerably null.");
 	this.texture=tex;
-	final Model m = new Model(false,getTr(),debugName);
+	final GL33Model m = new GL33Model(false,getTr(),debugName);
 	Triangle [] tris = Triangle.quad2Triangles(width, height, 0, 0, z, useAlpha, tex);
 	/*Triangle [] tris = Triangle.quad2Triangles(
 		new double[]{-width/2,width/2,width/2,-width/2}, 
@@ -48,7 +48,7 @@ public class Sprite2D extends WorldObject2DRelevantEverywhere {
 	if(tex==null)
 	    throw new NullPointerException("Supplied texture intolerably null.");
 	this.texture=tex[0];
-	final Model m = new Model(false,tr,debugName);
+	final GL33Model m = new GL33Model(false,tr,debugName);
 	final int numSegs = tex.length;
 	for (int seg = 0; seg < numSegs; seg++) {
 	    final double segWidth = width / numSegs;

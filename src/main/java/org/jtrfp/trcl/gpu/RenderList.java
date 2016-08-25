@@ -206,6 +206,7 @@ public class RenderList {
 	final int primsPerBlock = GPU.GPU_VERTICES_PER_BLOCK/3;
 	final int numPrimitives = (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock;
 	saveWindowViewportState(gl);
+	gl.glEnableVertexAttribArray(0);
 	// OBJECT STAGE
 	
 	rFactory.getObjectProcessingStage().process(gl,renderer.getCameraMatrixAsFlatArray(),
@@ -374,6 +375,7 @@ public class RenderList {
 	gpu.defaultProgram();
 	gpu.defaultTIU();
 	gpu.defaultFrameBuffers();
+	gl.glDisableVertexAttribArray(0);
 	
 	//INTERMEDIATE ERASE
 	rFactory.getOpaqueFrameBuffer().bindToDraw();

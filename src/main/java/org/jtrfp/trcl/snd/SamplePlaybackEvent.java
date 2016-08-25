@@ -16,10 +16,15 @@
 
 package org.jtrfp.trcl.snd;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
@@ -41,6 +46,7 @@ import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class SamplePlaybackEvent extends AbstractSoundEvent {
+    protected static final int VERTEX_ID_BUFFER_SIZE = 512;
     private final SoundTexture soundTexture;
     private final double[] pan;
     private final double playbackRatio;
@@ -104,6 +110,9 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	private GLFragmentShader soundFragmentShader;//1 fragment = 1 frame
 	private GLProgram soundProgram;
 	private GLUniform panU,numRowsU,startU,lengthPerRowU,soundTextureU;
+	private int vertexIDAttribLocation = -1;
+	private int vertexBufferID = -1;
+	private FloatBuffer vertexIdBufferData;
 	
 	public Factory(final TR tr) {
 	    super(tr);
@@ -124,6 +133,23 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 			    startU       = soundProgram.getUniform("start");
 			    lengthPerRowU= soundProgram.getUniform("lengthPerRow");
 			    soundTextureU= soundProgram.getUniform("soundTexture");
+			    final GL2ES2 gl = gpu.getGl();
+			    
+			    //Set up the Vertex ID VBO
+			    soundProgram.use();
+			    {
+				final IntBuffer bufferIDs = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
+				gl.glGenBuffers(1, bufferIDs);
+				vertexBufferID         = bufferIDs.get(0);
+			    }
+			    System.out.println("Binding buffer "+vertexBufferID);
+			    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, vertexBufferID);
+			    final FloatBuffer vertexIDBufferData = getVertexIdBufferData();
+			    gl.glBufferData(GL2ES2.GL_ARRAY_BUFFER, vertexIDBufferData.capacity() * 4, vertexIDBufferData, GL2ES2.GL_STATIC_DRAW);
+			    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, 0);
+			    vertexIDAttribLocation = soundProgram.getAttribLocation("vertexID");
+			    assert vertexIDAttribLocation != -1;
+			    gpu.defaultProgram();
 			return null;
 		    }// end call()
 		}).get();
@@ -140,12 +166,19 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    gl.glDepthMask(false);
 	    gl.glBlendFunc(GL3.GL_ONE, GL3.GL_ONE);
 	    soundProgram.use();
+	    assert vertexIDAttribLocation != -1:"VertexIDAttribLocation failed to init!";
+	    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, vertexBufferID);
+	    gl.glEnableVertexAttribArray(vertexIDAttribLocation);
+	    gl.glVertexAttribPointer(vertexIDAttribLocation, 1, GL2ES2.GL_FLOAT, false, 0, 0);
 	    soundTextureU.set((int)0);
 	    for(SoundEvent ev:events)
 		ev.apply(gl, bufferStartTimeSeconds);
 	    //Cleanup
+	    gl.glDisableVertexAttribArray(vertexIDAttribLocation);
+	    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, 0);
 	    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	    gl.glDisable(GL3.GL_BLEND);
+	    gl.glUseProgram(0);
 	}//end apply(...)
 	
 	public SamplePlaybackEvent create(SoundTexture tex, double [] source, Camera dest, double volumeScalar){
@@ -237,6 +270,26 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	 */
 	GLProgram getSoundProgram() {
 	    return soundProgram;
+	}
+
+	/**
+	 * GL2ES's GLSL 1.00 doesn't support gl_VertexID so we have to manually feed it one
+	 * as a VBO/attribute array of floats. (ES doesn't like to do a lot of int work either)
+	 * @return
+	 * @since Aug 25, 2016
+	 */
+	protected FloatBuffer getVertexIdBufferData() {
+	    if(vertexIdBufferData == null){
+		vertexIdBufferData = ByteBuffer.allocateDirect(VERTEX_ID_BUFFER_SIZE*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+		for(int i=0; i<VERTEX_ID_BUFFER_SIZE; i++)
+		    vertexIdBufferData.put((float)i);//Just fill with incrementing values
+	    }
+	    vertexIdBufferData.clear();
+	    return vertexIdBufferData;
+	}
+
+	protected void setVertexIdBufferData(FloatBuffer vertexIdBufferData) {
+	    this.vertexIdBufferData = vertexIdBufferData;
 	}
     }//end Factory
 

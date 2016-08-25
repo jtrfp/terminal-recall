@@ -26,6 +26,8 @@ uniform float start;
 uniform float lengthPerRow;
 uniform float numRows;
 
+attribute float vertexID;
+
 // OUTPUTS
 varying float fragTexPos;
 varying float fragRow;
@@ -35,13 +37,13 @@ varying float fragRow;
 
 void main(){
  // U/V Zig-Zag pattern
- float vid = float(gl_VertexID);
- float glvid2=floor((vid+1.) / 2.);
- float sweep = mod(glvid2,2.);
- float row = floor(vid / 2.);
+ //float vertexID = float(gl_VertexID);
+ float glvertexID2=floor((vertexID+1.) / 2.);
+ float sweep = mod(glvertexID2,2.);
+ float row = floor(vertexID / 2.);
  fragTexPos = sweep;
  fragRow = (row+.5)/numRows;
- float rowsX = float(glvid2 + vid/SAMPLES_PER_ROW_2);
+ float rowsX = float(glvertexID2 + vertexID/SAMPLES_PER_ROW_2);
  
  gl_Position.x= start+rowsX*lengthPerRow;
  gl_Position.yzw=vec3(0,1,1);

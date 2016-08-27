@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections.primitives.adapters.IteratorShortIterator;
+
 /**
  * A  List delegate which tracks modifications for more efficient deferred updates based on
  * this List's contents. The 'modified' property starts out as true by default.
@@ -208,7 +211,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @see java.util.ArrayList#iterator()
      */
     public Iterator<E> iterator() {
-	throw new UnsupportedOperationException();
+	return IteratorUtils.unmodifiableIterator(getDelegate().iterator());
     }
 
     /**

@@ -15,11 +15,14 @@ package org.jtrfp.trcl.mem;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.jtrfp.trcl.coll.CollectionActionDispatcher;
+import org.apache.commons.collections.primitives.ByteList;
+import org.apache.commons.collections.primitives.FloatList;
+import org.apache.commons.collections.primitives.IntList;
+import org.apache.commons.collections.primitives.ShortList;
 import org.jtrfp.trcl.coll.ListActionDispatcher;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.gpu.GPU;
@@ -32,9 +35,10 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final       ListActionDispatcher<Integer>      pageTable = new ListActionDispatcher<Integer>(new ArrayList<Integer>());
     private final 	IndexPool 	pageIndexPool;
     private final 	String		debugName;
-    private final       CollectionActionDispatcher<Integer>stalePages = new CollectionActionDispatcher<Integer>(new HashSet<Integer>());
+    private final       BitSet          stalePages = new BitSet();
     private final	GPU		gpu;
     private final	WeakReference<PagedByteBuffer> weakThis;
+    private final       ByteBufferContextSupport contextSupport = new ByteBufferContextSupport();
     
     PagedByteBuffer(GPU gpu, ByteBuffer [] intrinsic, IndexPool pageIndexPool, int initialSizeInBytes, String debugName){
 	this.intrinsic=intrinsic;
@@ -67,7 +71,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private static int pageModulus(int indexInBytes){
 	return indexInBytes%PAGE_SIZE_BYTES;
     }
-    private int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
+    int logicalIndex2PhysicalIndex(int logicalIndexInBytes){
 	return (PAGE_SIZE_BYTES*pageTable.get(index2Page(logicalIndexInBytes)))+pageModulus(logicalIndexInBytes);
     }
     
@@ -114,10 +118,12 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	pageIndexPool.free(pageTable);
     }//end deallocate()
     
-    private void markPageStale(int indexInBytes){
+    void markPageStale(int indexInBytes){
 	synchronized(stalePages){
-	 stalePages.add(new Integer(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES));}
-    }
+	 stalePages.set(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES);
+	 //stalePages.add(new Integer(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES));
+	 }
+    }//end markPageStale(...)
     
     /**
      * Must notify the page IndexPool that this buffer is being forgotten such that its pages may be freed.
@@ -182,15 +188,21 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	return this;
     }//end put(...)
     
-    private final ArrayList<Integer> spBuffer = new ArrayList<Integer>(1024);
+    private BitSet spBuffer = new BitSet();
     
     void flushStalePages(){
+	spBuffer.clear();
 	synchronized(stalePages){
-	 spBuffer.addAll(stalePages);
+	 applyContextsToMemory();
+	 spBuffer.or(stalePages);
 	 stalePages.clear();
 	}//end sync()
-	 for(int value:spBuffer)
-	    gpu.memoryManager.get().flushRange(pageTable.get(value)*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
+	 int index = -1;
+	 while( (index = spBuffer.nextSetBit(index+1)) != -1)
+	     gpu.memoryManager.get().flushRange(pageTable.get(index)*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
+	 
+	 //for(int value:spBuffer)
+	 //   gpu.memoryManager.get().flushRange(pageTable.get(value)*PagedByteBuffer.PAGE_SIZE_BYTES, PagedByteBuffer.PAGE_SIZE_BYTES);
 	 spBuffer.clear();
     }//end flushStalePages()
 
@@ -246,5 +258,27 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 
     public String getDebugName() {
         return debugName;
+    }
+
+    void flush(
+	    FloatList floatsToSet, IntList floatIndices,
+	    ShortList shortsToSet, IntList shortIndices, 
+	    IntList intsToSet, IntList intIndices, 
+	    ByteList bytesToSet, IntList byteIndices,
+	    BitSet stalePages) {
+	contextSupport.submitFlush(
+		floatsToSet, 
+		floatIndices, 
+		shortsToSet, 
+		shortIndices, 
+		intsToSet, 
+		intIndices, 
+		bytesToSet, 
+		byteIndices,
+		stalePages);
+    }//end flush()
+    
+    private void applyContextsToMemory(){
+	stalePages.or(contextSupport.apply(intrinsic[0]));
     }
 }//end PageByteBuffer

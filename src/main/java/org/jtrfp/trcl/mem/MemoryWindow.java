@@ -28,7 +28,7 @@ import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 public abstract class MemoryWindow {
     private PagedByteBuffer buffer;
     private int objectSizeInBytes;
-    private final IndexPool indexPool = new IndexPool();
+    private IndexPool indexPool;
     private String debugName;
     private Reporter reporter;
     private static final MemoryWindowFreeingService freeingService = new MemoryWindowFreeingService();
@@ -70,7 +70,7 @@ public abstract class MemoryWindow {
 		loopTally++;
 		if(loopTally % 32 == 0)//Don't overload the console
 		 System.out.println("MemoryWindow.MemoryWindowFreeingService freeing "+freeLaterBuffer.size()+" elements.");
-		nextWindowToFree.indexPool.free(freeLaterBuffer);
+		nextWindowToFree.getIndexPool().free(freeLaterBuffer);
 		freeLaterBuffer.clear();
 	    }//end while(true)
 	}//end run()
@@ -85,8 +85,7 @@ public abstract class MemoryWindow {
 	}//end notifyStale()
     }//end MemoryWindowFreeingService
     
-    protected final void init(GPU gpu, String debugName) {
-	this.debugName = debugName;
+    protected final void initFields(){
 	int byteOffset = 0;
 	for (Field f : getClass().getFields()) {
 	    if (Variable.class.isAssignableFrom(f.getType())) {
@@ -101,11 +100,16 @@ public abstract class MemoryWindow {
 	    }// end if(Variable)
 	}// end for(fields)
 	objectSizeInBytes = byteOffset;
+    }//end initFields()
+    
+    protected final void init(GPU gpu, String debugName) {
+	this.debugName = debugName;
+	initFields();
 	setBuffer(gpu
 		.memoryManager.get()
 		.createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES,
 			"MemoryWindow " + this.getDebugName()));
-	indexPool.setGrowthBehavior(new GrowthBehavior() {
+	getIndexPool().setGrowthBehavior(new GrowthBehavior() {
 	    @Override
 	    public int grow(int previousMaxCapacity) {
 		// Grow by one page
@@ -136,12 +140,12 @@ public abstract class MemoryWindow {
 				+ MemoryWindow.this.debugName
 				+ ".sizeInObjects", newSizeInObjects+"");
 		return newSizeInObjects;
-	    }
+	    }//end grow()
 
 	    @Override
 	    public int shrink(int minDesiredCapacity) {
 		//Attempt to shrink by one page
-		final int previousMaxCapacity = indexPool.getMaxCapacity();
+		final int previousMaxCapacity = getIndexPool().getMaxCapacity();
 		final int objectsPerPage =  (int)Math.ceil((double)PagedByteBuffer.PAGE_SIZE_BYTES
 			/ (double)getObjectSizeInBytes());
 		final int proposedNewSizePages = (int)Math.ceil(((double)minDesiredCapacity)/((double)objectsPerPage));
@@ -161,20 +165,20 @@ public abstract class MemoryWindow {
 		    String.format("%08x",
 			    MemoryWindow.this.logicalPage2PhysicalPage(p)
 				    * PagedByteBuffer.PAGE_SIZE_BYTES));
-	}
+	}//end init()
 	
     }// end init()
     
     public final int create() {
-	return indexPool.pop();
+	return getIndexPool().pop();
     }//end create()
     
     public final void create(Collection<Integer> dest, int count){
-	indexPool.pop(dest, count);
+	getIndexPool().pop(dest, count);
     }//end create(...)
     
     public final int free(int objectIDToFree){
-	return indexPool.free(objectIDToFree);
+	return getIndexPool().free(objectIDToFree);
     }//end free(...)
     
     public final void freeLater(int objectIDToFree){
@@ -201,11 +205,11 @@ public abstract class MemoryWindow {
     }//end kickFreeLaterListForward()
     
     public final void free(Collection<Integer> objectIdsToFree){
-	indexPool.free(objectIdsToFree);
+	getIndexPool().free(objectIdsToFree);
     }
 
     public final int getNumObjects() {
-	return indexPool.getMaxCapacity();
+	return getIndexPool().getMaxCapacity();
     }//end getNumObjects()
 
     public static abstract class Variable<TYPE, THIS_CLASS extends Variable> {
@@ -580,7 +584,7 @@ public abstract class MemoryWindow {
     }
     
     public void compact(){
-	indexPool.compact();
+	getIndexPool().compact();
     }
 
     public String getDebugName() {
@@ -610,4 +614,26 @@ public abstract class MemoryWindow {
     public MemoryWindowFreeingService getFreeingService() {
         return freeingService;
     }
+
+    IndexPool getIndexPool() {
+	if(indexPool == null)
+	    indexPool = new IndexPool();
+        return indexPool;
+    }
+
+    void setIndexPool(IndexPool indexPool) {
+        this.indexPool = indexPool;
+    }
+    
+    public MemoryWindow newContextWindow(){
+	final Class<? extends MemoryWindow> thisClass = getClass();
+	try{
+	    final MemoryWindow result = (MemoryWindow)thisClass.newInstance();
+	    result.initFields();
+	    result.setIndexPool(getIndexPool());
+	    result.setBuffer(getBuffer());
+	    return result;
+	}catch(Exception e){e.printStackTrace();}
+	return null;
+    }//end getContextWindow()
 }// end ObjectWindow

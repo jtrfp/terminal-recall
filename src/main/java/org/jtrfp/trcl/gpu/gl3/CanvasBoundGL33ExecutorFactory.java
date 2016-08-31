@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProvider>{
     
-    public static class CanvasBoundGL33Executor extends CanvasBoundGLExecutor<GL3> implements Feature<CanvasProvider> {
+    public static class CanvasBoundGL33Executor extends CanvasBoundGLExecutor<GL3> implements GL33Executor, Feature<CanvasProvider> {
 
 	@Override
 	public void apply(CanvasProvider target) {

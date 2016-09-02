@@ -20,6 +20,8 @@ public class ObjectListWindow extends MemoryWindow {
     public ObjectListWindow(GPU gpu) {
 	init(gpu,"ObjectListWindow");
     }// end constructor
+    
+    public ObjectListWindow(){}
 
     public final IntArrayVariable opaqueIDs = new IntArrayVariable(
 	    RenderList.NUM_BLOCKS_PER_PASS);

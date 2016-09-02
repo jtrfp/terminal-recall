@@ -33,4 +33,6 @@ public class TextureTOCWindow extends MemoryWindow {
     public TextureTOCWindow(GPU gpu){
 	this.init(gpu, "TextureTOCWindow");
     }//end constructor
+    
+    public TextureTOCWindow(){}
 }//end TextureTOCWindow

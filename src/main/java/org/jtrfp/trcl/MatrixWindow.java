@@ -19,6 +19,8 @@ public final class MatrixWindow extends MemoryWindow {
     public static final int BYTES_PER_MATRIX = 4 * 16; // 16 floats
     public final Double2FloatArrayVariable matrix = new Double2FloatArrayVariable(
 	    16);
+    
+    public MatrixWindow(){}
 
     public MatrixWindow(GPU gpu) {
 	init(gpu, "MatrixWindow");

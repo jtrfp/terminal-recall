@@ -30,4 +30,6 @@ public final class ObjectDefinitionWindow extends MemoryWindow {
     public ObjectDefinitionWindow(GPU gpu) {
 	init(gpu, "ObjectDefinitionWindow");
     }//end constructor
+    
+    public ObjectDefinitionWindow(){}
 }// end ObjectBlock

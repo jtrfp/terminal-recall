@@ -30,4 +30,6 @@ public class SubTextureWindow extends MemoryWindow {
     public SubTextureWindow(GPU gpu){
 	this.init(gpu,"SubTextureWindow");
     }
+    
+    public SubTextureWindow(){}
 }//end SubTextureWindow

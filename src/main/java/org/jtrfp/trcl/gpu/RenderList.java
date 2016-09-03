@@ -17,12 +17,15 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.media.opengl.GL3;
 
+import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.VerboseExecutorService;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
@@ -32,7 +35,7 @@ import org.jtrfp.trcl.coll.DecoupledCollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ImplicitBiDiAdapter;
 import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
-import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.coll.RedundancyReportingCollection;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -81,6 +84,9 @@ public class RenderList {
     	transODAddrsColl     = new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL      = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
     	unoccludedODAddrsColl= new CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(unoccludedIL = new IndexList<VEC4Address>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),unoccludedODAddrAdapter);
 
+    
+    private             MatrixWindow            matrixWindowContext;
+    
     public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager) {
 	// Build VAO
 	final IntBuffer ib = IntBuffer.allocate(1);
@@ -96,6 +102,7 @@ public class RenderList {
 	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(transODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(unoccludedODAddrsColl, true);
+	relevantPositionedRenderables.addTarget(new RedundancyReportingCollection<PositionedRenderable>(), true);
 	
 	final TRFuture<Void> task0 = gpu.submitToGL(new Callable<Void>(){
 	    @Override
@@ -143,14 +150,21 @@ public class RenderList {
     private static int frameCounter = 0;
 
     private void updateStatesToGPU() {
+	//final MatrixWindow matrixWindow = (MatrixWindow)gpu.matrixWindow.get().newContextWindow();
+	final MatrixWindow matrixWindow = getMatrixWindowContext();
 	synchronized(threadManager.gameStateLock){
 	synchronized(relevantPositionedRenderables){
-	for (PositionedRenderable renderable:relevantPositionedRenderables) 
+	for (PositionedRenderable renderable:relevantPositionedRenderables) {
+	    if(renderable instanceof WorldObject)
+		((WorldObject)renderable).setMatrixWindow(matrixWindow);
 	    try{renderable.updateStateToGPU(renderer);}
 	     catch(NotReadyException e){}//Simply not ready
-	renderer.getCamera().getCompleteMatrixAsFlatArray(renderer.cameraMatrixAsFlatArray);//TODO
-	renderer.getCamera().getProjectionRotationMatrixAsFlatArray(renderer.camRotationProjectionMatrix);//TODO
+	}//end for(relevantPositionedRenderables)
+	final Camera camera = renderer.getCamera();
+	camera.getCompleteMatrixAsFlatArray(renderer.cameraMatrixAsFlatArray);
+	camera.getProjectionRotationMatrixAsFlatArray(renderer.camRotationProjectionMatrix);
 	}}
+	matrixWindow.flush();
     }//end updateStatesToGPU
     
     private void updateRenderListToGPU(){
@@ -167,6 +181,10 @@ public class RenderList {
 		    numTransparentBlocks= transIL     .delegateSize();
 		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
+		    final Set<VEC4Address> redundancyChecker = new HashSet<VEC4Address>();
+		    for(VEC4Address addr:renderListTelemetry)
+			if(!redundancyChecker.add(addr))
+			    new Exception("updateRenderList() found redundant item: "+addr).printStackTrace();
 		    renderListTelemetry.drainListStateTo(renderList);
 		    return null;
 		}}).get();
@@ -439,5 +457,15 @@ public class RenderList {
 
     public void setReporter(Reporter reporter) {
         this.reporter = reporter;
+    }
+
+    protected MatrixWindow getMatrixWindowContext() {
+	if(matrixWindowContext == null)
+	    matrixWindowContext = (MatrixWindow)gpu.matrixWindow.get().newContextWindow();
+        return matrixWindowContext;
+    }
+
+    protected void setMatrixWindowContext(MatrixWindow matrixWindowContext) {
+        this.matrixWindowContext = matrixWindowContext;
     }
 }// end RenderList

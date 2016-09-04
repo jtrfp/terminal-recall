@@ -26,7 +26,8 @@ import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
 
 public abstract class MemoryWindow {
-    private PagedByteBuffer buffer;
+    private PagedByteBuffer buffer;//May be null if this is a context window.
+    private IByteBuffer ioBuffer; //This buffer is for read/write only but may just be the buffer.
     private int objectSizeInBytes;
     private IndexPool indexPool;
     private String debugName;
@@ -105,7 +106,7 @@ public abstract class MemoryWindow {
     protected final void init(GPU gpu, String debugName) {
 	this.debugName = debugName;
 	initFields();
-	setBuffer(gpu
+	setNonContextualBuffer(gpu
 		.memoryManager.get()
 		.createPagedByteBuffer(PagedByteBuffer.PAGE_SIZE_BYTES,
 			"MemoryWindow " + this.getDebugName()));
@@ -116,7 +117,7 @@ public abstract class MemoryWindow {
 		final int newSizeInObjects = previousMaxCapacity
 			+ (int)Math.ceil((double)PagedByteBuffer.PAGE_SIZE_BYTES
 			/ (double)getObjectSizeInBytes());
-		getBuffer().resize(newSizeInObjects * getObjectSizeInBytes());
+		getNoncontextualBuffer().resize(newSizeInObjects * getObjectSizeInBytes());
 		if(MemoryWindow.this.reporter!=null)
 		 MemoryWindow.this.reporter.report(
 			"org.jtrfp.trcl.mem.MemoryWindow."
@@ -151,7 +152,7 @@ public abstract class MemoryWindow {
 		final int proposedNewSizePages = (int)Math.ceil(((double)minDesiredCapacity)/((double)objectsPerPage));
 		final int proposedNewSizeInObjects = proposedNewSizePages * objectsPerPage;
 		if(proposedNewSizeInObjects != previousMaxCapacity){
-		    getBuffer().resize(proposedNewSizeInObjects * getObjectSizeInBytes());
+		    getNoncontextualBuffer().resize(proposedNewSizeInObjects * getObjectSizeInBytes());
 		    return proposedNewSizeInObjects;
 		}else return previousMaxCapacity;//No change.
 	    }//end shrink(...)
@@ -248,7 +249,7 @@ public abstract class MemoryWindow {
 	    Variable<Integer, IntVariable> {
 	@Override
 	public IntVariable set(int objectIndex, Integer value) {
-	    getParent().getBuffer().putInt(
+	    getParent().getNoncontextualBuffer().putInt(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
@@ -256,7 +257,7 @@ public abstract class MemoryWindow {
 
 	@Override
 	public Integer get(int objectIndex) {
-	    return getParent().getBuffer().getInt(
+	    return getParent().getNoncontextualBuffer().getInt(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
@@ -271,14 +272,14 @@ public abstract class MemoryWindow {
 
 	@Override
 	public ByteVariable set(int objectIndex, Byte value) {
-	    getParent().getBuffer().put(
+	    getParent().getNoncontextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
 
 	public ByteVariable set(int objectIndex, byte value) {
-	    getParent().getBuffer().put(
+	    getParent().getNoncontextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
@@ -286,7 +287,7 @@ public abstract class MemoryWindow {
 
 	@Override
 	public Byte get(int objectIndex) {
-	    return getParent().getBuffer().get(
+	    return getParent().getNoncontextualBuffer().get(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
@@ -302,14 +303,14 @@ public abstract class MemoryWindow {
 
 	@Override
 	public ShortVariable set(int objectIndex, Short value) {
-	    getParent().getBuffer().putShort(
+	    getParent().getNoncontextualBuffer().putShort(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
 
 	public ShortVariable set(int objectIndex, short value) {
-	    getParent().getBuffer().putShort(
+	    getParent().getNoncontextualBuffer().putShort(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
@@ -317,7 +318,7 @@ public abstract class MemoryWindow {
 
 	@Override
 	public Short get(int objectIndex) {
-	    return getParent().getBuffer().getShort(
+	    return getParent().getNoncontextualBuffer().getShort(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
@@ -338,14 +339,14 @@ public abstract class MemoryWindow {
 	
 	@Override
 	public IntArrayVariable set(int objectIndex, int[] value) {
-	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject().intValue() + objectIndex
+	    getParent().getNoncontextualBuffer().putInts(logicalByteOffsetWithinObject().intValue() + objectIndex
 			* getParent().getObjectSizeInBytes(),value);
 	    return this;
 	}
 
 	public IntArrayVariable set(int objectIndex, int offsetInInts,
 		int[] value) {
-	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
+	    getParent().getNoncontextualBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
 			* getParent().getObjectSizeInBytes(),value);
 	    return this;
 	}// end set(...)
@@ -361,20 +362,20 @@ public abstract class MemoryWindow {
 	}
 
 	public void setAt(int objectIndex, int arrayIndex, int value) {
-	    getParent().getBuffer().putInt(
+	    getParent().getNoncontextualBuffer().putInt(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 4 + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
 
 	public int get(int objectIndex, int arrayIndex) {
-	    return getParent().getBuffer().getInt(
+	    return getParent().getNoncontextualBuffer().getInt(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 4 + objectIndex
 			    * getParent().getObjectSizeInBytes());
 	}
 
 	public IntArrayVariable setAt(int objectIndex, int offsetInInts,
 		Collection<? extends Number> c) {
-	    getParent().getBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
+	    getParent().getNoncontextualBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
 			* getParent().getObjectSizeInBytes(),c);
 	    return this;
 	}
@@ -391,7 +392,7 @@ public abstract class MemoryWindow {
 	@Override
 	public VEC4ArrayVariable set(int objectIndex, int[] value) {
 	    for (int i = 0; i < value.length; i++) {
-		getParent().getBuffer().putInt(
+		getParent().getNoncontextualBuffer().putInt(
 			logicalByteOffsetWithinObject().intValue() + objectIndex
 				* getParent().getObjectSizeInBytes(), value[i]);
 	    }// end for(i)
@@ -401,7 +402,7 @@ public abstract class MemoryWindow {
 	public VEC4ArrayVariable setAt(int objectIndex, int offsetInVEC4s,
 		int[] value) {
 	    for (int i = 0; i < value.length; i++) {
-		getParent().getBuffer().putInt(
+		getParent().getNoncontextualBuffer().putInt(
 			logicalByteOffsetWithinObject().intValue() + offsetInVEC4s * 16 + objectIndex
 				* getParent().getObjectSizeInBytes(), value[i]);
 	    }// end for(i)
@@ -429,7 +430,7 @@ public abstract class MemoryWindow {
 
 	@Override
 	public ByteArrayVariable set(int objectIndex, ByteBuffer value) {
-	    getParent().getBuffer().put(
+	    getParent().getNoncontextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
@@ -437,7 +438,7 @@ public abstract class MemoryWindow {
 
 	public ByteArrayVariable set(int objectIndex, int offsetInBytes,
 		ByteBuffer value) {
-	    getParent().getBuffer().put(
+	    getParent().getNoncontextualBuffer().put(
 		    offsetInBytes + logicalByteOffsetWithinObject().intValue() + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	    return this;
@@ -454,7 +455,7 @@ public abstract class MemoryWindow {
 	}
 
 	public void setAt(int objectIndex, int arrayIndex, byte value) {
-	    getParent().getBuffer().put(
+	    getParent().getNoncontextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
@@ -489,7 +490,7 @@ public abstract class MemoryWindow {
 	}
 
 	public void setAt(int objectIndex, int arrayIndex, short value) {
-	    getParent().getBuffer().putShort(
+	    getParent().getNoncontextualBuffer().putShort(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 2 + objectIndex
 			    * getParent().getObjectSizeInBytes(), value);
 	}
@@ -506,7 +507,7 @@ public abstract class MemoryWindow {
 	@Override
 	public Double2FloatArrayVariable set(int objectIndex, double[] value) {
 	    for (int i = 0; i < arrayLen; i++) {
-		getParent().getBuffer().putFloat(
+		getParent().getNoncontextualBuffer().putFloat(
 			i * 4 + logicalByteOffsetWithinObject().intValue() + objectIndex
 				* getParent().getObjectSizeInBytes(),
 			(float) value[i]);
@@ -518,7 +519,7 @@ public abstract class MemoryWindow {
 	public double[] get(int objectIndex) {
 	    final double[] result = new double[arrayLen];
 	    for (int i = 0; i < arrayLen; i++) {
-		result[i] = getParent().getBuffer().getFloat(
+		result[i] = getParent().getNoncontextualBuffer().getFloat(
 			i * 4 + logicalByteOffsetWithinObject().intValue() + objectIndex
 				* getParent().getObjectSizeInBytes());
 	    }
@@ -534,7 +535,7 @@ public abstract class MemoryWindow {
     /**
      * @return the buffer
      */
-    public final PagedByteBuffer getBuffer() {
+    public final PagedByteBuffer getNoncontextualBuffer() {
 	return buffer;
     }
 
@@ -542,7 +543,7 @@ public abstract class MemoryWindow {
      * @param buffer
      *            the buffer to set
      */
-    public final void setBuffer(PagedByteBuffer buffer) {
+    public final void setNonContextualBuffer(PagedByteBuffer buffer) {
 	this.buffer = buffer;
     }
 
@@ -630,10 +631,30 @@ public abstract class MemoryWindow {
 	try{
 	    final MemoryWindow result = (MemoryWindow)thisClass.newInstance();
 	    result.initFields();
+	    final PagedByteBufferContext newContext = new PagedByteBufferContext();
+	    newContext.setPagedByteBuffer(getNoncontextualBuffer());
+	    result.setContextualBuffer(newContext);
 	    result.setIndexPool(getIndexPool());
-	    result.setBuffer(getBuffer());
+	    result.setNonContextualBuffer(getNoncontextualBuffer());
 	    return result;
 	}catch(Exception e){e.printStackTrace();}
 	return null;
     }//end getContextWindow()
-}// end ObjectWindow
+
+    IByteBuffer getContextualBuffer() {
+	if(ioBuffer == null)
+	    ioBuffer = getNoncontextualBuffer();
+        return ioBuffer;
+    }
+
+    void setContextualBuffer(IByteBuffer ioBuffer) {
+        this.ioBuffer = ioBuffer;
+    }
+    
+    public void flush(){
+	final IByteBuffer buffer = getContextualBuffer();
+	if(buffer instanceof PagedByteBufferContext)
+	    try{((PagedByteBufferContext)buffer).flush();}
+	catch(Exception e){e.printStackTrace();}
+    }//end flush()
+}// end MemoryWindow

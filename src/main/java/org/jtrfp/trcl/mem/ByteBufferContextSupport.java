@@ -75,44 +75,52 @@ public class ByteBufferContextSupport {
 	 for(int flushIndex = 0; flushIndex < flushListSize; flushIndex++){
 	     FloatList floatData = floatsToSet .get(flushIndex);
 	     IntList   indexData = floatIndices.get(flushIndex);
-	     final int dataSize  = floatsToSet.size();
+	     final int dataSize  = floatData.size();
 	     for(int listIndex = 0; listIndex < dataSize; listIndex++)
 		 destination.putFloat(indexData.get(listIndex), floatData.get(listIndex));
 	 }//end for(flushIndex)
      }
+     floatsToSet .clear();
+     floatIndices.clear();
      
      {//INTS
 	 final int flushListSize = intsToSet.size();
 	 for(int flushIndex = 0; flushIndex < flushListSize; flushIndex++){
 	     IntList   intData   = intsToSet .get(flushIndex);
 	     IntList   indexData = intIndices.get(flushIndex);
-	     final int dataSize  = intsToSet.size();
+	     final int dataSize  = intData.size();
 	     for(int listIndex = 0; listIndex < dataSize; listIndex++)
 		 destination.putInt(indexData.get(listIndex), intData.get(listIndex));
 	 }//end for(flushIndex)
      }
+     intsToSet .clear();
+     intIndices.clear();
      
      {//SHORTS
 	 final int flushListSize = shortsToSet.size();
 	 for(int flushIndex = 0; flushIndex < flushListSize; flushIndex++){
 	     ShortList shortData = shortsToSet .get(flushIndex);
 	     IntList   indexData = shortIndices.get(flushIndex);
-	     final int dataSize  = shortsToSet.size();
+	     final int dataSize  = shortData   .size();
 	     for(int listIndex = 0; listIndex < dataSize; listIndex++)
 		 destination.putShort(indexData.get(listIndex), shortData.get(listIndex));
 	 }//end for(flushIndex)
      }
+     shortsToSet .clear();
+     shortIndices.clear();
      
      {//BYTES
 	 final int flushListSize = bytesToSet.size();
 	 for(int flushIndex = 0; flushIndex < flushListSize; flushIndex++){
 	     ByteList   byteData = bytesToSet .get(flushIndex);
 	     IntList   indexData = byteIndices.get(flushIndex);
-	     final int dataSize  = bytesToSet.size();
+	     final int dataSize  = byteData.size();
 	     for(int listIndex = 0; listIndex < dataSize; listIndex++)
 		 destination.put(indexData.get(listIndex), byteData.get(listIndex));
 	 }//end for(flushIndex)
      }
+     bytesToSet .clear();
+     byteIndices.clear();
      
      //STALE PAGES
      final BitSet stalePages = new BitSet();
@@ -121,6 +129,8 @@ public class ByteBufferContextSupport {
      
      for(int stalePageBlockIndex = 0; stalePageBlockIndex < stalePageBlockSize; stalePageBlockIndex++)
 	 stalePages.or(stalePageBlockList.get(stalePageBlockIndex));
+     
+     stalePageBlockList.clear();
      
      flushLock.unlock();
      return stalePages;

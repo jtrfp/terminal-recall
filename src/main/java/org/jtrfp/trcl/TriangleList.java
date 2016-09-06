@@ -106,12 +106,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	return getPrimitives()[frame][tIndex];
     }
 
-    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, Texture td)
+    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, Texture td, TriangleVertexWindow vw)
 	    throws ExecutionException, InterruptedException {
 	final int 	numFrames	= getPrimitives().length;
 	final Triangle 	t 		= triangleAt(0, triangleIndex);
 	final Vector3D 	pos 		= t.getVertices()[vIndex].getPosition();
-	final TriangleVertexWindow vw 	= (TriangleVertexWindow) getMemoryWindow();
+	//final TriangleVertexWindow vw 	= (TriangleVertexWindow) getMemoryWindow();
 	
 	////////////////////// V E R T E X //////////////////////////////
 	if (numFrames == 1) {
@@ -240,12 +240,12 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}//end if(animated texture)
     }// end setupVertex
 
-    private void setupTriangle(final int triangleIndex, final Texture textureDescription,final int [] vertexIndices) throws ExecutionException,
-	    InterruptedException {
+    private void setupTriangle(final int triangleIndex, final Texture textureDescription,final int [] vertexIndices,
+	                       TriangleVertexWindow window) throws ExecutionException,InterruptedException {
 		int tIndex = triangleIndex*3;
-		setupVertex(0, vertexIndices[tIndex], triangleIndex,textureDescription);
-		setupVertex(1, vertexIndices[tIndex+1], triangleIndex,textureDescription);
-		setupVertex(2, vertexIndices[tIndex+2], triangleIndex,textureDescription);
+		setupVertex(0, vertexIndices[tIndex], triangleIndex,textureDescription, window);
+		setupVertex(1, vertexIndices[tIndex+1], triangleIndex,textureDescription, window);
+		setupVertex(2, vertexIndices[tIndex+2], triangleIndex,textureDescription, window);
     }//setupTriangle
     /*
     @Override
@@ -266,17 +266,21 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
 	    textureDescriptions[tIndex] = triangleAt(0, tIndex).texture;
 	//calculateDims();
-	final Future<Void> result = tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
+	//TODO: Remove memory sandbox after converting to flushable, flush in GL
+	/*final Future<Void> result = tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>() {
 	    @Override
-	    public Void call() throws Exception {
-		for (int tIndex = 0; tIndex < nPrimitives; tIndex++) {
-		    setupTriangle(tIndex,textureDescriptions[tIndex],vertexIndices);}
+	    public Void call() throws Exception {*/
+	try{
+		final TriangleVertexWindow window = (TriangleVertexWindow)(getMemoryWindow().newContextWindow());
+		for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
+		    setupTriangle(tIndex,textureDescriptions[tIndex],vertexIndices,window);
+		window.flush();
 		finalizePrimitives();
-		return null;
-	    }//end Call()
-	});
+	}catch(Exception e){e.printStackTrace();}
+	//    }//end Call()
+	//});
 	triangleVertexIndices = vertexIndices;
-	return result;
+	return null;
     }// end uploadToGPU(...)
 
     @Override

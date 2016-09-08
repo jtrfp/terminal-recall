@@ -34,6 +34,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.Callable;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
@@ -210,7 +211,7 @@ public final class GLTexture {
 	return textureID.get();
     }
 
-    public static void specifyTextureUnit(GL3 gl, int unitNumber) {
+    public static void specifyTextureUnit(GL gl, int unitNumber) {
 	gl.glActiveTexture(GL3.GL_TEXTURE0 + unitNumber);
     }
     
@@ -218,12 +219,12 @@ public final class GLTexture {
 	return bind(gl);
     }
     
-    public GLTexture bind(GL3 gl) {
+    public GLTexture bind(GL gl) {
 	gl.glBindTexture(bindingTarget, getTextureID());
 	return this;
     }
     
-    public GLTexture bindToTextureUnit(int unitNumber, GL3 gl){
+    public GLTexture bindToTextureUnit(int unitNumber, GL gl){
 	GLTexture.specifyTextureUnit(gl, unitNumber);
 	bind(gl);
 	return this;

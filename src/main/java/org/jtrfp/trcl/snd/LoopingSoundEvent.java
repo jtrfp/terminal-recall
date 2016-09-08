@@ -2,7 +2,7 @@ package org.jtrfp.trcl.snd;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL3;
+import javax.media.opengl.GL2ES2;
 
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -54,7 +54,7 @@ public class LoopingSoundEvent extends AbstractSoundEvent implements RelevantEve
     }//end stop()
 */
     @Override
-    public void apply(GL3 gl, final double bufferStartTimeSeconds) {// Non-blocking.
+    public void apply(GL2ES2 gl, final double bufferStartTimeSeconds) {// Non-blocking.
 	if(lastApply!=null)
 	    if(!lastApply.isDone())
 		return;
@@ -91,7 +91,7 @@ public class LoopingSoundEvent extends AbstractSoundEvent implements RelevantEve
 	}
 
 	@Override
-	public void apply(GL3 gl, Collection<SoundEvent> events,
+	public void apply(GL2ES2 gl, Collection<SoundEvent> events,
 		double bufferStartTimeSeconds) {
 	    for(SoundEvent event:events)
 		event.apply(gl, bufferStartTimeSeconds);

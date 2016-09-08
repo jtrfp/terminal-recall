@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL3;
+import javax.media.opengl.GL2ES2;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -89,7 +89,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     }
 
     @Override
-    public void apply(GL3 gl, double bufferStartTimeSeconds) {
+    public void apply(GL2ES2 gl, double bufferStartTimeSeconds) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
 	origin.getPanU().set((float)getPan()[0], (float)getPan()[1]);//Pan center
 	final SoundSystem ss           = Features.get(getOrigin().getTR(),SoundSystemFeature.class);
@@ -102,7 +102,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	origin.getLengthPerRowU()
 	 .set((float)((2/playbackRatio)*(lengthPerRow/bufferSizeSeconds)));
 	getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
-	gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
+	gl.glDrawArrays(GL2ES2.GL_LINE_STRIP, 0, lengthInSegments+1);
     }//end apply(...)
     
     public static class Factory extends AbstractSoundEvent.Factory{
@@ -156,15 +156,15 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	}//end constructor
 
 	@Override
-	public void apply(GL3 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds) {
+	public void apply(GL2ES2 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds) {
 	    gl.glLineWidth(1);
-	    gl.glDisable(GL3.GL_LINE_SMOOTH);
-	    gl.glDisable(GL3.GL_CULL_FACE);
-	    gl.glEnable(GL3.GL_BLEND);
-	    gl.glDepthFunc(GL3.GL_ALWAYS);
-	    gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
+	    gl.glDisable(GL2ES2.GL_LINE_SMOOTH);
+	    gl.glDisable(GL2ES2.GL_CULL_FACE);
+	    gl.glEnable(GL2ES2.GL_BLEND);
+	    gl.glDepthFunc(GL2ES2.GL_ALWAYS);
+	    //gl.glProvokingVertex(GL2ES2.GL_FIRST_VERTEX_CONVENTION);
 	    gl.glDepthMask(false);
-	    gl.glBlendFunc(GL3.GL_ONE, GL3.GL_ONE);
+	    gl.glBlendFunc(GL2ES2.GL_ONE, GL2ES2.GL_ONE);
 	    soundProgram.use();
 	    assert vertexIDAttribLocation != -1:"VertexIDAttribLocation failed to init!";
 	    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, vertexBufferID);
@@ -177,7 +177,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	    gl.glDisableVertexAttribArray(vertexIDAttribLocation);
 	    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, 0);
 	    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-	    gl.glDisable(GL3.GL_BLEND);
+	    gl.glDisable(GL2ES2.GL_BLEND);
 	    gl.glUseProgram(0);
 	}//end apply(...)
 	

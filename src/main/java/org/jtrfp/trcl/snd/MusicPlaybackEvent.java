@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.media.opengl.GL3;
+import javax.media.opengl.GL2ES2;
 
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
@@ -61,7 +61,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
     }//end stop()
 
     @Override
-    public void apply(GL3 gl, final double bufferStartTimeSeconds) {// Non-blocking.
+    public void apply(GL2ES2 gl, final double bufferStartTimeSeconds) {// Non-blocking.
 	if(lastApply!=null)
 	    if(!lastApply.isDone())
 		return;
@@ -87,7 +87,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	}
 
 	@Override
-	public void apply(GL3 gl, Collection<SoundEvent> events,
+	public void apply(GL2ES2 gl, Collection<SoundEvent> events,
 		double bufferStartTimeSeconds) {
 	    for(SoundEvent event:events)
 		event.apply(gl, bufferStartTimeSeconds);

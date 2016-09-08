@@ -28,7 +28,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.media.opengl.GL3;
+import javax.media.opengl.GL2ES2;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 
@@ -336,14 +336,14 @@ public class SoundSystem {
 				 .bind()
 				 .setMagFilter(getFilteringParm())
 				 .setMinFilter(getFilteringParm())
-				 .setWrapS(GL3.GL_CLAMP_TO_EDGE)
-				 .setWrapT(GL3.GL_CLAMP_TO_EDGE)
+				 .setWrapS(GL2ES2.GL_CLAMP_TO_EDGE)
+				 .setWrapT(GL2ES2.GL_CLAMP_TO_EDGE)
 				 .setImage(
-					 GL3.GL_R32F, 
+					 GL2ES2.GL_R32F, 
 					 SoundTexture.ROW_LENGTH_SAMPLES, 
 					 numRows, 
-					 GL3.GL_RED, 
-					 GL3.GL_FLOAT, 
+					 GL2ES2.GL_RED, 
+					 GL2ES2.GL_FLOAT, 
 					 finalSamples);
 				getGpu().defaultTexture();
 				return null;
@@ -374,7 +374,7 @@ public class SoundSystem {
     }//end newSoundTexture
     
     private int getFilteringParm(){
-	return getTrConfiguration().isAudioLinearFiltering()?GL3.GL_LINEAR:GL3.GL_NEAREST;
+	return getTrConfiguration().isAudioLinearFiltering()?GL2ES2.GL_LINEAR:GL2ES2.GL_NEAREST;
     }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
@@ -392,7 +392,7 @@ public class SoundSystem {
 	pickupActiveEvents(getBufferSizeFrames()/getActiveFormat().getFrameRate());
     }
     
-    private synchronized void render(GL3 gl, ByteBuffer audioByteBuffer) {
+    private synchronized void render(GL2ES2 gl, ByteBuffer audioByteBuffer) {
 	if (firstRun)
 	    firstRun();
 	final GPU gpu = getGpu();
@@ -403,7 +403,7 @@ public class SoundSystem {
 	// Render
 	getPlaybackFrameBuffer().bindToDraw();
 	gl.glViewport(0, 0, getBufferSizeFrames(), 1);
-	gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
+	gl.glClear(GL2ES2.GL_COLOR_BUFFER_BIT);
 	for (SoundEvent ev : activeEvents) {// TODO: Replace with Factory calls
 	    if (ev.isActive()) {
 		final SoundEvent.Factory factory = ev.getOrigin();
@@ -436,7 +436,7 @@ public class SoundSystem {
 
     private void readGLAudioBuffer(GPU gpu, ByteBuffer audioByteBuffer){
 	// Read and export previous results to sound card.
-	final GL3 gl = gpu.getGl();
+	final GL2ES2 gl = gpu.getGl();
 	gpu.defaultFrameBuffers();
 	getPlaybackTexture().bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
 		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
@@ -623,7 +623,7 @@ public class SoundSystem {
 				.newFrameBuffer()
 				.bindToDraw()
 				.attachDrawTexture(texture,
-					GL3.GL_COLOR_ATTACHMENT0);
+					GL2ES2.GL_COLOR_ATTACHMENT0);
 		}}).get();
 	}//end if(playbackFrameBuffer==null)
 	return playbackFrameBuffer;
@@ -654,16 +654,16 @@ public class SoundSystem {
 		    playbackTexture = gpu
 			    .newTexture()
 			    .bind()
-			    .setMagFilter(GL3.GL_NEAREST)
-			    .setMinFilter(GL3.GL_NEAREST)
-			    .setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			    .setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			    .setMagFilter(GL2ES2.GL_NEAREST)
+			    .setMinFilter(GL2ES2.GL_NEAREST)
+			    .setWrapS(GL2ES2.GL_CLAMP_TO_EDGE)
+			    .setWrapT(GL2ES2.GL_CLAMP_TO_EDGE)
 			    .setDebugName("playbackTexture")
 			    .setExpectedMinValue(-1, -1, -1, -1)
 			    .setExpectedMaxValue(1, 1, 1, 1)
 			    .setPreferredUpdateIntervalMillis(100)
-			    .setImage(GL3.GL_RG32F, getBufferSizeFrames(),
-				    NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
+			    .setImage(GL2ES2.GL_RG32F, getBufferSizeFrames(),
+				    NUM_BUFFER_ROWS, GL2ES2.GL_RGBA, GL2ES2.GL_FLOAT,
 				    null);
 		    return null;
 		}}).get();

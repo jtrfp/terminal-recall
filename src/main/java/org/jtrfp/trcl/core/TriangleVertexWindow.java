@@ -12,14 +12,11 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public final class TriangleVertexWindow extends MemoryWindow {
     public static final int BYTES_PER_VERTEX = GPU.BYTES_PER_VEC4;
-    private final AtomicInteger numTriangles = new AtomicInteger();
 
     public final ShortVariable x    = new ShortVariable();
     public final ShortVariable y    = new ShortVariable();
@@ -41,7 +38,6 @@ public final class TriangleVertexWindow extends MemoryWindow {
     }//end constructor
 
     public synchronized final int createTriangle() {
-	numTriangles.addAndGet(3);
 	return create();
     }// end createTriangle
 }// end TriangleWindow

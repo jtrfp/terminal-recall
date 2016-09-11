@@ -53,8 +53,8 @@ public class UncompressedVQTextureFactory {
     public UncompressedVQTextureFactory(GPU gpu, ThreadManager threadManager, String debugName){
    	this.tm		  =gpu.textureManager.get();
    	this.cbm	  =tm.vqCodebookManager.get();
-   	this.tocWindow	  =tm.getTOCWindow();
-   	this.stw	  =tm.getSubTextureWindow();
+   	this.tocWindow	  =(TextureTOCWindow)tm.getTOCWindow()       .newContextWindow();
+   	this.stw	  =(SubTextureWindow)tm.getSubTextureWindow().newContextWindow();
    	this.debugName	  =debugName.replace('.', '_');
    	this.gpu          =gpu;
    	this.threadManager=threadManager;
@@ -154,6 +154,22 @@ public class UncompressedVQTextureFactory {
 	checkSideLengthSanity(vectorList.getNumVectors());
  }//end checksideLengthSanity(...)
  
+ //REQUIRES GPU MEM ACCESS
+private final void setCodes(int diameterInCodes, int diameterInSubtextures, VQTexture tex){
+	final int numCodes = diameterInCodes*diameterInCodes;
+	for(int i = 0; i < numCodes; i++){
+	 final int codeX			= i % diameterInCodes;
+	 final int codeY			= i / diameterInCodes;
+	 setCodeAt(codeX,codeY,tex);
+	 }//end for(numCodes)
+	}//end setCodes()
+//REQUIRES GPU MEM ACCESS
+private final void setCodeAt(int codeX, int codeY, VQTexture tex){
+	final int subtextureCodeX = codeX % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int subtextureCodeY = codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
+	tex.setCodeAt(codeX, codeY, (byte)(codeIdx%256));
+}//end setCodeAt()
  
  private final void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength, final VQTexture tex){
 	    tex.setSideLength(sideLength);
@@ -184,9 +200,9 @@ public class UncompressedVQTextureFactory {
 		@Override
 		public Void call() throws Exception {
 		
-		threadManager.submitToGPUMemAccess(new Callable<Void>() {
-		    @Override
-		    public final Void call() {
+		//threadManager.submitToGPUMemAccess(new Callable<Void>() {
+		    //@Override
+		    //public final Void call() {
 			tex.setSize(new Point2D.Double(sideLength,sideLength));
 			final List<Integer>  subTextureIDs = tex.getSubTextureIDs();
 			// Create subtextures
@@ -217,27 +233,13 @@ public class UncompressedVQTextureFactory {
 		// Set the TOC vars
 		tocWindow.height	 .set(tocIndex, sideLength);
 		tocWindow.width	         .set(tocIndex, sideLength);
-		setCodes(diameterInCodes, diameterInSubtextures);
-		return null;
-	    }// end call()
-	
-	    //REQUIRES GPU MEM ACCESS
-     private final void setCodes(int diameterInCodes, int diameterInSubtextures){
-		final int numCodes = diameterInCodes*diameterInCodes;
-		for(int i = 0; i < numCodes; i++){
-		 final int codeX			= i % diameterInCodes;
-		 final int codeY			= i / diameterInCodes;
-		 setCodeAt(codeX,codeY);
-		 }//end for(numCodes)
-		}//end setCodes()
-     //REQUIRES GPU MEM ACCESS
-     private final void setCodeAt(int codeX, int codeY){
-		final int subtextureCodeX = codeX % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int subtextureCodeY = codeY % SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
-		tex.setCodeAt(codeX, codeY, (byte)(codeIdx%256));
-          }//end setCodeAt()
-	 }).get();//end gpuMemThread
+		setCodes(diameterInCodes, diameterInSubtextures, tex);
+		//Finished. Flush.
+		tocWindow.flush();
+		stw.flush();
+		//return null;
+	    //}// end call()
+	 //}).get();//end gpuMemThread
 		
 	// Push texels to codebook
 	for(int codeY=0; codeY<diameterInCodes; codeY++){

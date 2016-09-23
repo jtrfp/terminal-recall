@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import org.apache.commons.collections.primitives.DoubleList;
+import org.apache.commons.collections.primitives.IntList;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Controller;
 import org.jtrfp.trcl.LineSegment;
@@ -29,7 +31,7 @@ import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 
-public class GL33Model {
+public class GL33Model implements Model {
     // [FRAME][LIST]
     private ArrayList<ArrayList<Triangle>> tLists = new ArrayList<ArrayList<Triangle>>();
     private ArrayList<ArrayList<Triangle>> ttLists = new ArrayList<ArrayList<Triangle>>();
@@ -440,5 +442,27 @@ public class GL33Model {
 	if(getDebugName()==null)
 	    return super.toString();
 	return "["+this.getClass().getName()+" debugName="+debugName+" hash="+hashCode()+"]";
+    }
+
+    @Override
+    public ModelModifierContext getModifierContext(
+	    Class<? extends ModelModifierContext>... classRequirements) {
+	throw new UnsupportedOperationException();//TODO
+    }
+
+    public void flushOpaqueTriangleModifications(
+	    DoubleList         vertexModifications, 
+	    DoubleList         normalModifications,
+	    IntList            textureModificationsIDs,
+	    ArrayList<Texture> textureModificationsTextures) {
+	throw new UnsupportedOperationException();//TODO
+    }
+
+    public void flushTransparentTriangleModifications(
+	    DoubleList         vertexModifications,
+	    DoubleList         normalModifications,
+	    IntList            textureModificationsIDs,
+	    ArrayList<Texture> textureModificationsTextures) {
+	throw new UnsupportedOperationException();//TODO
     }
 }// end Model

@@ -89,15 +89,15 @@ public class RenderList {
     
     public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager) {
 	// Build VAO
-	final IntBuffer ib = IntBuffer.allocate(1);
-	this.threadManager   = threadManager;
-	this.gpu             = gpu;
-	this.objectListWindow=objectListWindow;
-	this.renderer        = renderer;
-	this.rFactory        = renderer.getRendererFactory();
+	this.objectListWindow = (ObjectListWindow)objectListWindow.newContextWindow();
+	final IntBuffer ib    = IntBuffer.allocate(1);
+	this.threadManager    = threadManager;
+	this.gpu              = gpu;
+	this.renderer         = renderer;
+	this.rFactory         = renderer.getRendererFactory();
 	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
-	this.renderListIdx		=objectListWindow.create();
-	this.renderList                 = new IntArrayVariableList(objectListWindow.opaqueIDs,renderListIdx);
+	this.renderListIdx		=this.objectListWindow.create();
+	this.renderList                 = new IntArrayVariableList(this.objectListWindow.opaqueIDs,renderListIdx);
 	
 	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(transODAddrsColl, true);
@@ -186,6 +186,7 @@ public class RenderList {
 			if(!redundancyChecker.add(addr))
 			    new Exception("updateRenderList() found redundant item: "+addr).printStackTrace();
 		    renderListTelemetry.drainListStateTo(renderList);
+		    objectListWindow.flush();
 		    return null;
 		}}).get();
 	    }catch(Exception e){e.printStackTrace();}

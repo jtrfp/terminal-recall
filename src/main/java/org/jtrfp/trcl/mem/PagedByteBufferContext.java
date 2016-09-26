@@ -72,6 +72,26 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	stalePages   = new BitSet();
     }//end flush()
     
+    int getNumStalePages(){
+	return stalePages.cardinality();
+    }
+    
+    int getNumShortsToSet(){
+	return shortsToSet.size();
+    }
+    
+    int getNumIntsToSet(){
+	return intsToSet.size();
+    }
+    
+    int getBytesToSet(){
+	return bytesToSet.size();
+    }
+    
+    int getNumFloatsToSet(){
+	return floatsToSet.size();
+    }
+    
     @Override
     public IByteBuffer putInt(int indexInBytes, int val) {
 	markPageStale(indexInBytes);

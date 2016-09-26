@@ -70,4 +70,9 @@ public class TriangleVertex2FlatDoubleWindow implements FlatDoubleWindow {
 		break;
 	}//end switch(...)
     }//end set(...)
+
+    @Override
+    public void flush() {
+	parentWindow.flush();
+    }
 }//end Triangle...Window

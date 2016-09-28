@@ -43,7 +43,8 @@ public class TriangleList extends PrimitiveList<Triangle> {
 
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, GL33Model m) {
-	super(debugName, triangles, new TriangleVertexWindow(Features.get(tr, GPUFeature.class),debugName), tr,m);
+	super(debugName, triangles, 
+		new TriangleVertexWindow(Features.get(tr, GPUFeature.class),debugName).newContextWindow(), tr,m);
 	this.timeBetweenFramesMsec 	= timeBetweenFramesMsec;
 	this.animateUV 			= animateUV;
 	this.controller 		= controller;
@@ -271,7 +272,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    @Override
 	    public Void call() throws Exception {*/
 	try{
-		final TriangleVertexWindow window = (TriangleVertexWindow)(getMemoryWindow().newContextWindow());
+		final TriangleVertexWindow window = (TriangleVertexWindow)mw;
 		for (int tIndex = 0; tIndex < nPrimitives; tIndex++)
 		    setupTriangle(tIndex,textureDescriptions[tIndex],vertexIndices,window);
 		window.flush();

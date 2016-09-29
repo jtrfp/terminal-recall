@@ -72,6 +72,7 @@ public class WindowAnimator implements Tickable {
 	    w.set(indexXferFun.transfer(counter), val);
 	    indexOffset += nFrames;
 	}// end for(numElements)
+	w.flush();
     }// end tick()
 
     /**

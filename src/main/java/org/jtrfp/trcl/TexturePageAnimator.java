@@ -34,7 +34,7 @@ public class TexturePageAnimator implements Tickable{
     @Override
     public void tick() {
 	try{final int newTexturePage = dynamicTexture.getCurrentTexturePage();
-	if(currentTexturePage != newTexturePage){
+	if(currentTexturePage != newTexturePage){//TODO: Cache vertexWindow var
 	    vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(newTexturePage & 0xFF));
 	    vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((newTexturePage >> 8) & 0xFF));
 	    vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((newTexturePage >> 16) & 0xFF));
@@ -45,6 +45,7 @@ public class TexturePageAnimator implements Tickable{
 		if(v!=null)
 		    vertexWindow.v.set(gpuTVIndex, (short) Math.rint(size.getY() * v));
 	    currentTexturePage = newTexturePage;
+	    vertexWindow.flush();
 	}
 	}catch(Exception e){e.printStackTrace();}
     }//end tick()

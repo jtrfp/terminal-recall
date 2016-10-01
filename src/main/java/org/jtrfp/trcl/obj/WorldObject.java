@@ -297,21 +297,25 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		//tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		//    @Override
 		//    public Void call() throws Exception {
+		final ObjectDefinitionWindow objectDefContextWindow = (ObjectDefinitionWindow)getObjectDefinitionWindow().newContextWindow();
 			processPrimitiveList(model.getTriangleList(),
-				getTriangleObjectDefinitions(), getOpaqueObjectDefinitionAddressesInVEC4());
+				getTriangleObjectDefinitions(), getOpaqueObjectDefinitionAddressesInVEC4(), 
+				objectDefContextWindow);
 			processPrimitiveList(model.getTransparentTriangleList(),
-				getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4());
+				getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4(),
+				objectDefContextWindow);
 			//return null;
 		//   }}).get();
-		updateAllRenderFlagStates();
-		getObjectDefinitionWindow().flush();
+		updateAllRenderFlagStates(objectDefContextWindow);
+		objectDefContextWindow.flush();
 		objectDefsInitialized = true;
 		return null;
 	    }});
     }// end initializeObjectDefinitions()
 
     private void processPrimitiveList(PrimitiveList<?> primitiveList,
-	    int[] objectDefinitions, final CollectionActionDispatcher<VEC4Address> objectDefinitionAddressesInVEC4) {
+	    int[] objectDefinitions, final CollectionActionDispatcher<VEC4Address> objectDefinitionAddressesInVEC4,
+	    ObjectDefinitionWindow objectDefContextWindow) {
 	if (primitiveList == null)
 	    return; // Nothing to do, no primitives here
 	final GPU gpu = getGpu();
@@ -320,7 +324,6 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	int gpuVerticesRemaining        = primitiveList.getNumElements()*gpuVerticesPerElement;
 	
 	// For each of the allocated-but-not-yet-initialized object definitions.
-	final ObjectDefinitionWindow odw = getObjectDefinitionWindow();
 	int odCounter=0;
 	final int memoryWindowIndicesPerElement = primitiveList.getNumMemoryWindowIndicesPerElement();
 	final Integer matrixID = getMatrixID();
@@ -330,20 +333,20 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    final int vertexOffsetVec4s=new VEC4Address(primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)).intValue();
 	    final int matrixOffsetVec4s=new VEC4Address(gpu.matrixWindow.get()
 		    .getPhysicalAddressInBytes(matrixID)).intValue();
-	    odw.matrixOffset.set(index,matrixOffsetVec4s);
-	    odw.vertexOffset.set(index,vertexOffsetVec4s);
-	    odw.modelScale.set(index, (byte) primitiveList.getPackedScale());
+	    objectDefContextWindow.matrixOffset.set(index,matrixOffsetVec4s);
+	    objectDefContextWindow.vertexOffset.set(index,vertexOffsetVec4s);
+	    objectDefContextWindow.modelScale.set(index, (byte) primitiveList.getPackedScale());
 	    if (gpuVerticesRemaining >= GPU.GPU_VERTICES_PER_BLOCK) {
-		odw.numVertices.set(index,
+		objectDefContextWindow.numVertices.set(index,
 			(byte) GPU.GPU_VERTICES_PER_BLOCK);
 	    } else if (gpuVerticesRemaining > 0) {
-		odw.numVertices.set(index,
+		objectDefContextWindow.numVertices.set(index,
 			(byte) (gpuVerticesRemaining));
 	    } else {
 		throw new RuntimeException("Ran out of vec4s.");
 	    }
 	    gpuVerticesRemaining -= GPU.GPU_VERTICES_PER_BLOCK;
-	    addressesToAdd.add(new VEC4Address(odw.getPhysicalAddressInBytes(index)));
+	    addressesToAdd.add(new VEC4Address(objectDefContextWindow.getPhysicalAddressInBytes(index)));
 	    odCounter++;
 	}// end for(ObjectDefinition)
 	RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
@@ -353,18 +356,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    }});
     }// end processPrimitiveList(...)
     
-    protected void updateAllRenderFlagStates(){
+    protected void updateAllRenderFlagStates(ObjectDefinitionWindow objectDefinitionContext){
 	final GL33Model model = getModel();
 	if(model == null)
 	    return;
-	updateRenderFlagStatesPL(model.getTriangleList(),getTriangleObjectDefinitions());
-	updateRenderFlagStatesPL(model.getTransparentTriangleList(),getTransparentTriangleObjectDefinitions());
+	updateRenderFlagStatesPL(model.getTriangleList(),getTriangleObjectDefinitions(), objectDefinitionContext);
+	updateRenderFlagStatesPL(model.getTransparentTriangleList(),getTransparentTriangleObjectDefinitions(), objectDefinitionContext);
     }
     
-    protected void updateRenderFlagStatesPL(PrimitiveList<?> pl, int [] objectDefinitionIndices){
-	final ObjectDefinitionWindow odw = getObjectDefinitionWindow();
+    protected void updateRenderFlagStatesPL(PrimitiveList<?> pl, int [] objectDefinitionIndices, ObjectDefinitionWindow objectDefinitionContext){
 	for(int index : objectDefinitionIndices)
-	    odw.mode.set(index, (byte)(pl.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
+	    objectDefinitionContext.mode.set(index, (byte)(pl.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
     }//end updateRenderFlagStatesPL
 
     public final void updateStateToGPU(Renderer renderer) throws NotReadyException {
@@ -756,7 +758,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      */
     public void setRenderFlags(byte renderFlags) {
         this.renderFlags = renderFlags;
-        updateAllRenderFlagStates();
+        final ObjectDefinitionWindow objectDefinitionContext = (ObjectDefinitionWindow)getObjectDefinitionWindow().newContextWindow();
+        updateAllRenderFlagStates(objectDefinitionContext);
+        objectDefinitionContext.flush();
     }
 
     /**
@@ -906,8 +910,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		if (sizeInVerts % GPU.GPU_VERTICES_PER_BLOCK != 0)
 		    numObjDefs++;
 		originalObjectDefs = new int[numObjDefs];
+		final ObjectDefinitionWindow odw = getObjectDefinitionWindow();
 		for (int i = 0; i < numObjDefs; i++) {
-		    originalObjectDefs[i] = getObjectDefinitionWindow().create();
+		    originalObjectDefs[i] = odw.create();
 		}//end for(numObjDefs)
 	    }//end if(!null)
 	}//end if(null)
@@ -970,7 +975,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     GPU getGpu() {
 	if(gpu == null)
-	    gpu = Features.get(tr, GPUFeature.class);
+	    gpu = Features.get(getTr(), GPUFeature.class);
         return gpu;
     }
 
@@ -990,7 +995,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     ObjectDefinitionWindow getObjectDefinitionWindow() {
 	if(objectDefinitionWindow == null)
-	    objectDefinitionWindow = (ObjectDefinitionWindow)getGpu().objectDefinitionWindow.get().newContextWindow();
+	    objectDefinitionWindow = getGpu().objectDefinitionWindow.get();
         return objectDefinitionWindow;
     }
 

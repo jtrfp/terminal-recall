@@ -77,6 +77,7 @@ public class PortalTexture implements Texture {
     	    vw.textureIDMid.set(i, (byte)((textureID >> 8) & 0xFF));
     	    vw.textureIDHi .set(i, (byte)((textureID >> 16) & 0xFF));
         }//end for(relevantVertexIndices)
+        vw.flush();
     }//end setPortalFramebufferNumber(...)
 
     public TriangleVertexWindow getTriangleVertexWindow() {

@@ -22,7 +22,7 @@ public class TexturePageAnimator implements Tickable{
     private final int 			gpuTVIndex;
     private 	  String 		debugName = "[not set]";
     private final DynamicTexture        dynamicTexture;
-    private int                         currentTexturePage;
+    private Integer                     currentTexturePage;
     private Double                      u,v;
     
     public TexturePageAnimator(DynamicTexture at, TriangleVertexWindow vw, int gpuTVIndex) {
@@ -34,7 +34,9 @@ public class TexturePageAnimator implements Tickable{
     @Override
     public void tick() {
 	try{final int newTexturePage = dynamicTexture.getCurrentTexturePage();
-	if(currentTexturePage != newTexturePage){//TODO: Cache vertexWindow var
+	final Integer currentTexturePage = this.currentTexturePage;
+	if(currentTexturePage == null || currentTexturePage != newTexturePage){
+	    final TriangleVertexWindow vertexWindow = (TriangleVertexWindow)this.vertexWindow.newContextWindow();
 	    vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(newTexturePage & 0xFF));
 	    vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((newTexturePage >> 8) & 0xFF));
 	    vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((newTexturePage >> 16) & 0xFF));
@@ -44,7 +46,7 @@ public class TexturePageAnimator implements Tickable{
 		    vertexWindow.u.set(gpuTVIndex, (short) Math.rint(size.getX() * u));
 		if(v!=null)
 		    vertexWindow.v.set(gpuTVIndex, (short) Math.rint(size.getY() * v));
-	    currentTexturePage = newTexturePage;
+	    this.currentTexturePage = newTexturePage;
 	    vertexWindow.flush();
 	}
 	}catch(Exception e){e.printStackTrace();}

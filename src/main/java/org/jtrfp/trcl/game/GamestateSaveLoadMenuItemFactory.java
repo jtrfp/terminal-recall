@@ -49,6 +49,7 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
 	//HARD REFERENCES; DO NOT REMOVE
 	private RunStateListener           runStateListener;
 	private WeakPropertyChangeListener weakRunStateListener;
+	private boolean                    destructed = false;
 
 	@Override
 	public void apply(TVF3Game target) {
@@ -78,13 +79,14 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
 
 	@Override
 	public void destruct(TVF3Game target) {
+	    destructed = true;
 	    final TR tr = target.getGameShell().getTr();
 	    final RootWindow rootWindow = Features.get(tr,         RootWindow.class);
 	    final MenuSystem menuSystem = Features.get(rootWindow, MenuSystem.class);
-	    menuSystem.removeMenuItem(LOAD_GAME_PATH);
-	    menuSystem.removeMenuItem(SAVE_GAME_PATH);
 	    menuSystem.removeMenuItemListener(loadGameMenuItemListener, LOAD_GAME_PATH);
 	    menuSystem.removeMenuItemListener(saveGameMenuItemListener, SAVE_GAME_PATH);
+	    menuSystem.removeMenuItem(LOAD_GAME_PATH);
+	    menuSystem.removeMenuItem(SAVE_GAME_PATH);
 	}//end destruct()
 	
 	class LoadGameMenuItemListener implements ActionListener {
@@ -148,6 +150,8 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
 	private class RunStateListener implements PropertyChangeListener {
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
+		if(destructed)
+		    return;
 		final Object newValue = evt.getNewValue();
 		//Can't Save In Tunnel! (or in chamber)
 		final boolean loadEnabled = (newValue instanceof Game.GameLoadedMode);

@@ -49,6 +49,7 @@ public class SuspendScreenSaverFactory implements FeatureFactory<Mission> {
 	    @Override
 	    public void run(){
 		try{
+		    this.setName("SuspendScreenSaver");
 		  final Robot robot = new Robot();
 		  while (running) {
 		    Thread.sleep(60 * 1000);

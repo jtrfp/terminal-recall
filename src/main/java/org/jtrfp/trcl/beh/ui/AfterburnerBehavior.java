@@ -50,7 +50,6 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private LoopingSoundEvent afterburnerLoop;
     private final RunStateListener     runStateListener     = new RunStateListener();
     private final FiringVetoListener   firingVetoListener   = new FiringVetoListener();
-    private final ABControlListener    abControlListener    = new ABControlListener();
     private final ThrottleVetoListener throttleVetoListener = new ThrottleVetoListener();
     
     // HARD REFERENCES; DO NOT REMOVE
@@ -61,29 +60,8 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     
     public AfterburnerBehavior(ControllerInputs inputs){
 	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
-	afterburnerCtl.addPropertyChangeListener(weakAbControlListener = new WeakPropertyChangeListener(abControlListener,afterburnerCtl));
+	//afterburnerCtl.addPropertyChangeListener(weakAbControlListener = new WeakPropertyChangeListener(abControlListener,afterburnerCtl));
     }//end constructor
-    
-    private class ABControlListener implements PropertyChangeListener{
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-	    final Object runState = getParent().getTr().getRunState();
-	    if(!isEnabled() || 
-		    !(runState instanceof Mission.GameplayState) || 
-		    runState instanceof SatelliteViewFactory.SatelliteViewState ||
-		    runState instanceof Mission.SatelliteState ||//TODO: Supports old system, remove later
-		    runState instanceof Mission.Briefing)
-		{setAfterburning(false);return;}
-	    final double newValue = (Double)evt.getNewValue();
-	    final double oldValue = (Double)evt.getOldValue();
-	    if(newValue == oldValue)
-		return;
-	    if     (newValue >= .7 && oldValue < .7)
-		setAfterburning(true);
-	    else if(newValue <  .7 && oldValue >= .7)
-		setAfterburning(false);
-	}//end propertyChange(...)
-    }//end ABControlListener
     
     private class FiringVetoListener implements VetoableChangeListener{
 	@Override
@@ -126,11 +104,24 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     public void tick(long tickTimeMillis){
 	if(!installedVetoListeners)
 	    installVetoListeners();
+	updateAfterburningState();
 	final WorldObject p = getParent();
 	if(isAfterburning())
 	    fuelRemaining-=((double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/
 			(double)Powerup.AFTERBURNER_TIME_PER_UNIT_MILLIS);
     }//end tick
+    
+    private void updateAfterburningState(){
+	final double state = afterburnerCtl.getState();
+	final Object runState = getParent().getTr().getRunState();
+	    if(!isEnabled() || 
+		    !(runState instanceof Mission.GameplayState) || 
+		    runState instanceof SatelliteViewFactory.SatelliteViewState ||
+		    runState instanceof Mission.SatelliteState ||//TODO: Supports old system, remove later
+		    runState instanceof Mission.Briefing)
+		{setAfterburning(false);return;}
+	    setAfterburning(state >= .7);
+    }//end updateAfterburningState()
     
     private void installVetoListeners(){
 	probeForBehaviors(new ProjectileFiringBehaviorSubmitter(), ProjectileFiringBehavior.class);

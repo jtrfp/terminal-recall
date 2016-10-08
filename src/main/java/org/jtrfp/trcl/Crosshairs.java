@@ -41,6 +41,8 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class Crosshairs extends WorldObject implements RelevantEverywhere {
     private GameShell gameShell;
+    private PropertyChangeListener     crosshairsEnabledListener, gamePCL;
+    private WeakPropertyChangeListener weakCrosshairsEnabledListener, weakGamePCL;
 
     public Crosshairs() {
 	super();
@@ -89,7 +91,9 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	addBehavior(new MatchPosition());
 	addBehavior(new MatchDirection());
 	final IndirectProperty<Game> gameIP = new IndirectProperty<Game>();
-	tr.addPropertyChangeListener(GameShellFactory.GAME, gameIP);
+	gamePCL     = gameIP;
+	weakGamePCL = new WeakPropertyChangeListener(gameIP, tr);
+	tr.addPropertyChangeListener(GameShellFactory.GAME, weakGamePCL);
 	gameIP.addTargetPropertyChangeListener(Game.PLAYER, new PlayerListener());
 	gameIP.setTarget(getGameShell().getGame());
 	this.setRespondToTick(true);
@@ -117,13 +121,16 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
     
     private void installReactiveListeners(final TR tr){
 	final TRConfiguration trConfig = Features.get(tr,TRConfiguration.class);
-	trConfig.addPropertyChangeListener(TRConfigurationFactory.CROSSHAIRS_ENABLED,new PropertyChangeListener(){
+	crosshairsEnabledListener = new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		updateCrosshairsVisibilityState(
 			(Boolean)evt.getNewValue(),
 			getGameShell().getGame().getCurrentMission().isSatelliteView());
-	    }});
+	    }};
+	weakCrosshairsEnabledListener = 
+		new WeakPropertyChangeListener(crosshairsEnabledListener, trConfig);
+	trConfig.addPropertyChangeListener(TRConfigurationFactory.CROSSHAIRS_ENABLED,weakCrosshairsEnabledListener);
 	IndirectProperty<Mission> currentMission = new IndirectProperty<Mission>();
 	currentMission.addTargetPropertyChangeListener(Mission.SATELLITE_VIEW,new PropertyChangeListener(){
 	    @Override

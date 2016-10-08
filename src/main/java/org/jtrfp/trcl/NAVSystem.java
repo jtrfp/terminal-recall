@@ -41,6 +41,9 @@ private final TR tr;
 private NAVRadarBlipFactory blips;
 private final DashboardLayout layout;
 private GameShell gameShell;
+// HARD REFERENCE; DO NOT REMOVVE
+private final WeakPropertyChangeListener weakRunStateListener;
+private final RunStateListener runStateListener;
 
     public NAVSystem(TR tr, DashboardLayout layout) {
 	super();
@@ -54,7 +57,9 @@ private GameShell gameShell;
 	miniMap.setRenderFlag(RenderFlags.IgnoreCamera);
 	miniMap.setActive(true);
 	miniMap.setVisible(true);
-	tr.addPropertyChangeListener(TRFactory.RUN_STATE, new RunStateListener());
+	runStateListener = new RunStateListener();
+	weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr);
+	tr.addPropertyChangeListener(TRFactory.RUN_STATE, weakRunStateListener);
 	final double mmRadius = layout.getMiniMapRadius();
 	miniMap.setModelSize(new double[]{mmRadius,mmRadius});
 	final Point2D.Double pos = layout.getMiniMapPosition();

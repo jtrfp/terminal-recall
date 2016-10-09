@@ -104,10 +104,32 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    objectToAdd.setContainingGrid(this);
 	}
 	
+	public synchronized void addAll(Collection<? extends E> objectsToAdd){
+	    for( E objectToAdd : objectsToAdd ){
+		final SpacePartitioningGrid spg = objectToAdd.getContainingGrid();
+		if(spg!=null)
+		    throw new IllegalStateException("Passed element "+objectToAdd+" has non-null containing grid: "+spg+". Object should only be in one grid at a time.");
+		if(localTaggerSet.add(objectToAdd)){
+		    localTagger.add(objectToAdd);
+		    objectToAdd.setContainingGrid(this);
+		}
+	    }
+	}//end addAll(...)
+	
 	public synchronized void remove(E objectToRemove){
 	    if(!localTaggerSet.remove(objectToRemove))
 		return;
 	    localTagger.remove(objectToRemove);
+	    objectToRemove.setContainingGrid(null);
+	}
+	
+	public synchronized void removeAll(Collection<? extends E> objectsToRemove){
+	    for(E objectToRemove : objectsToRemove ){
+		 if(localTaggerSet.remove(objectToRemove)){
+		    localTagger.remove(objectToRemove);
+		    objectToRemove.setContainingGrid(null);
+		    }
+	    }//end for(objectsToRemove)
 	}
 	
 	public synchronized boolean containsBranch(SpacePartitioningGrid<E> toFind){

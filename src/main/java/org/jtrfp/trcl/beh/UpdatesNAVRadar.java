@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.util.ArrayList;
+
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -26,24 +28,31 @@ public class UpdatesNAVRadar extends Behavior implements CollisionBehavior {
     public static final int REFRESH_INTERVAL=5;
     private NAVRadarBlipFactory blips;
     private GameShell gameShell;
+    private ArrayList<WorldObject> newBlipList = new ArrayList<WorldObject>(128);
     @Override
     public void tick(long timeInMillis){
 	counter++;
-	if(counter%REFRESH_INTERVAL==0){
+	final int refreshSequence = counter % REFRESH_INTERVAL;
+	if(refreshSequence == 0){
 	    final Game game = getGameShell().getGame();
 	    blips = ((TVF3Game)game).
 		    getNavSystem().
 		    getBlips();
-	    blips.clearRadarBlips();
 	    performRefresh=!(getParent().getTr().getRunState() instanceof Mission.TunnelState);
+	}else if(refreshSequence == 1){
+	    final Game game = getGameShell().getGame();
+	    blips = ((TVF3Game)game).
+		    getNavSystem().
+		    getBlips();
+	    blips.refreshBlips(newBlipList);
+	    newBlipList.clear();
 	}else
 	    performRefresh=false;
     }//end _tick(...)
     @Override
     public void proposeCollision(WorldObject other){
-	if(performRefresh){
-	    blips.submitRadarBlip(other);
-	}
+	if(performRefresh)
+	    newBlipList.add(other);
     }//end _proposeCollision(...)
     
     public GameShell getGameShell() {

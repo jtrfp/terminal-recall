@@ -13,7 +13,8 @@
 
 package org.jtrfp.trcl.obj;
 
+import java.util.Collection;
+
 public interface NAVRadarBlipFactoryListener {
-	public void clearRadarBlips();
-	public void submitRadarBlip(Positionable positionable);
+	public void refreshBlips(Collection<WorldObject> newBlipObjects);
 }//end NAVRadarBlipFactory

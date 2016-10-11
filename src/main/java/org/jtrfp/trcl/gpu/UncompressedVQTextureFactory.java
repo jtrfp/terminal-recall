@@ -53,8 +53,8 @@ public class UncompressedVQTextureFactory {
     public UncompressedVQTextureFactory(GPU gpu, ThreadManager threadManager, String debugName){
    	this.tm		  =gpu.textureManager.get();
    	this.cbm	  =tm.vqCodebookManager.get();
-   	this.tocWindow	  =(TextureTOCWindow)tm.getTOCWindow()       .newContextWindow();
-   	this.stw	  =(SubTextureWindow)tm.getSubTextureWindow().newContextWindow();
+   	this.tocWindow	  =(TextureTOCWindow)tm.getTOCWindow();
+   	this.stw	  =(SubTextureWindow)tm.getSubTextureWindow();
    	this.debugName	  =debugName.replace('.', '_');
    	this.gpu          =gpu;
    	this.threadManager=threadManager;
@@ -212,7 +212,8 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 			    tex.newCodebook256(null,6);
 			}//end for(subTextureIDs)
 			
-			final TextureTOCWindow tocWindow = tex.getTocWindow();
+			final TextureTOCWindow tocWindow = (TextureTOCWindow)tex.getTocWindow().newContextWindow();
+			final SubTextureWindow stWindow = (SubTextureWindow)tex.getSubTextureWindow().newContextWindow();
 			final int tocIndex = tex.getTocIndex();
 			//Set magic
 			tocWindow.magic.set(tocIndex, 1337);
@@ -221,14 +222,14 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 			 //Convert subtexture index to index of TOC
 			 final int tocSubTexIndex = (i%diameterInSubtextures)+(i/diameterInSubtextures)*TextureTOCWindow.WIDTH_IN_SUBTEXTURES;
 			 //Load subtexture ID into TOC
-			 tocWindow.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,new VEC4Address(stw.getPhysicalAddressInBytes(id)).intValue());
+			 tocWindow.subtextureAddrsVec4.setAt(tocIndex, tocSubTexIndex,new VEC4Address(stWindow.getPhysicalAddressInBytes(id)).intValue());
 			 //Render Flags
 			 tocWindow.renderFlags.set(tocIndex, 
 				(tex.isUvWrapping()?0x1:0x0)
 				);
 			 //Fill the subtexture code start offsets
 			 for(int off=0; off<6; off++)
-			    stw.codeStartOffsetTable.setAt(id, off, tex.getCodebookStartOffsets256().get(i*6+off)*256);
+			     stWindow.codeStartOffsetTable.setAt(id, off, tex.getCodebookStartOffsets256().get(i*6+off)*256);
 		    }//end for(subTextureIDs)
 		// Set the TOC vars
 		tocWindow.height	 .set(tocIndex, sideLength);
@@ -236,7 +237,7 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 		setCodes(diameterInCodes, diameterInSubtextures, tex);
 		//Finished. Flush.
 		tocWindow.flush();
-		stw.flush();
+		stWindow.flush();
 		//return null;
 	    //}// end call()
 	 //}).get();//end gpuMemThread

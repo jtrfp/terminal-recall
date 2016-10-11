@@ -36,15 +36,12 @@ public void notifyDeath() {
 	public Void call() throws Exception {
 	    try{Thread.currentThread().sleep(waitTime);}
 	    catch(InterruptedException e){e.printStackTrace();}
-	    threadManager.submitToGPUMemAccess(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
 		    unDamage();
 		    reset();
 		    reIntroduce();
 		    runOnReset();
 		    return null;
-		}
+		}//end call()
 		private void unDamage(){
 		    try{thisObject.probeForBehavior(DamageableBehavior.class).unDamage();}
 		    catch(SupplyNotNeededException e){e.printStackTrace();}//?!?!
@@ -62,10 +59,8 @@ public void notifyDeath() {
 		}
 		private void runOnReset(){
 		    _runOnReset.run();
-		}
-	    }).get();
-	    return null;
-	}});
+		}}
+	);
  }//end notifyDeath
 
 /**

@@ -51,7 +51,7 @@ public void notifyDeath() {
 		    SpacePartitioningGrid grid = thisObject.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
 		    thisObject.probeForBehavior(DeathBehavior.class).reset();
 		    if(grid!=null)grid.add(thisObject);
-		    else throw new NullPointerException();
+		    //Sometimes the grid will be null if the game was aborted such that the grid is discarded. (weak reference)
 		}
 		private void reIntroduce(){
 		    thisObject.setActive(true);

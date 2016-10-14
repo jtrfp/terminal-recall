@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.gpu.Renderer;
@@ -22,5 +23,5 @@ public interface Renderable {
 
     CollectionActionDispatcher<VEC4Address> getTransparentObjectDefinitionAddresses();
 
-    void updateStateToGPU(Renderer renderer) throws NotReadyException;
+    void updateStateToGPU(Renderer renderer, MatrixWindow mwContext) throws NotReadyException;
 }

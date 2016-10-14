@@ -37,7 +37,9 @@ import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
+import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.game.RedFlashFactory.RedFlash;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.RenderList;
@@ -81,7 +83,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean 			active 		   = true;
     private byte 			renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;
-    private boolean                     objectDefsInitialized = false;
+    //private boolean                     objectDefsInitialized = false;
     private boolean                     inGrid = false;
 
     protected final double[] aX 	= new double[3];
@@ -95,6 +97,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean respondToTick	= true;
     private double scale                = 1.;
     private final ReentrantLock         lock = new ReentrantLock();
+    private String debugName            = "[unnamed]";
     
     //Cache
     private       GPU                    gpu;
@@ -106,6 +109,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(new PropertyChangeSupport(this));
 
+    private TRFutureTask<Void> objectDefinitionsFuture;
+    
     public enum RenderFlags{
 	IgnoreCamera((byte)0x1);
 	
@@ -236,7 +241,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	}
 	if(thisModelFuture != null)
 	    releaseCurrentModel();
-	try{this.model = m.finalizeModel();}catch(Exception e){throw new RuntimeException(e);}
+	try{this.model = m.finalizeModel();
+	    refreshObjectDefinitions();
+	}catch(Exception e){throw new RuntimeException(e);}
     }// end setModel(...)
     
     private void releaseCurrentModel(){
@@ -256,7 +263,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	transparentTriangleObjectDefinitions = null;
 	triangleObjectDefinitions            = null;
 	this.model            = null;
-	objectDefsInitialized = false;
+	//objectDefsInitialized = false;
     }//end releaseCurrentModel()
 
     public void setDirection(ObjectDirection dir) {
@@ -279,36 +286,37 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	final String modelDebugName;
 	if(model!=null)modelDebugName=getModel().getDebugName();
 	else modelDebugName="[null model]";
-	return "WorldObject Model=" + modelDebugName + " pos="
+	return "WorldObject("+getDebugName()+") Model=" + modelDebugName + " pos="
 		+ this.getPosition() + " class=" + getClass().getName()+" hash="+hashCode();
     }
 
-    public final void initializeObjectDefinitions() throws NotReadyException {
-	if(objectDefsInitialized)
-	    return;
+    public final void refreshObjectDefinitions() throws NotReadyException {
+	//if(objectDefsInitialized)
+	//    return;
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it? Object in question is: \n"+this.toString());
-	final GL33Model model = getModelRealtime();
 	final TR tr = getTr();
-	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	objectDefinitionsFuture = tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		//tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
-		//    @Override
-		//    public Void call() throws Exception {
-		final ObjectDefinitionWindow objectDefContextWindow = (ObjectDefinitionWindow)getObjectDefinitionWindow().newContextWindow();
-			processPrimitiveList(model.getTriangleList(),
-				getTriangleObjectDefinitions(), getOpaqueObjectDefinitionAddressesInVEC4(), 
-				objectDefContextWindow);
-			processPrimitiveList(model.getTransparentTriangleList(),
-				getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4(),
-				objectDefContextWindow);
-			//return null;
-		//   }}).get();
-		updateAllRenderFlagStates(objectDefContextWindow);
-		objectDefContextWindow.flush();
-		objectDefsInitialized = true;
+		try{
+		    //tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
+		    //    @Override
+		    //    public Void call() throws Exception {
+		    final GL33Model model = getModel();
+		    final ObjectDefinitionWindow objectDefContextWindow = (ObjectDefinitionWindow)getObjectDefinitionWindow().newContextWindow();
+		    processPrimitiveList(model.getTriangleList(),
+			    getTriangleObjectDefinitions(), getOpaqueObjectDefinitionAddressesInVEC4(), 
+			    objectDefContextWindow);
+		    processPrimitiveList(model.getTransparentTriangleList(),
+			    getTransparentTriangleObjectDefinitions(), getTransparentObjectDefinitionAddressesInVEC4(),
+			    objectDefContextWindow);
+		    //return null;
+		    //   }}).get();
+		    updateAllRenderFlagStates(objectDefContextWindow);
+		    objectDefContextWindow.flush();
+		}catch(Exception e){e.printStackTrace();}
 		return null;
 	    }});
     }// end initializeObjectDefinitions()
@@ -329,6 +337,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	final Integer matrixID = getMatrixID();
 	//Cache to hold new addresses for submission in bulk
 	final ArrayList<VEC4Address> addressesToAdd = new ArrayList<VEC4Address>(objectDefinitions.length);
+	if(objectDefinitions.length == 0)
+	    System.err.println("WARNING: objectDefAddresses array of zero length! "+this.getClass().getName());
 	for (final int index : objectDefinitions) {
 	    final int vertexOffsetVec4s=new VEC4Address(primitiveList.getMemoryWindow().getPhysicalAddressInBytes(odCounter*elementsPerBlock*memoryWindowIndicesPerElement)).intValue();
 	    final int matrixOffsetVec4s=new VEC4Address(gpu.matrixWindow.get()
@@ -369,18 +379,18 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    objectDefinitionContext.mode.set(index, (byte)(pl.getPrimitiveRenderMode() | (renderFlags << 4)&0xF0));
     }//end updateRenderFlagStatesPL
 
-    public final void updateStateToGPU(Renderer renderer) throws NotReadyException {
+    public final void updateStateToGPU(Renderer renderer, MatrixWindow mwContext) throws NotReadyException {
 	if(!lock.tryLock())
 	    throw new NotReadyException();
 	try{
-	    initializeObjectDefinitions();
+	    //initializeObjectDefinitions();
 	    System.arraycopy(position, 0, positionAfterLoop, 0, 3);
 	    attemptLoop(renderer);
 	    if(needToRecalcMatrix){
 		needToRecalcMatrix=recalcMatrixWithEachFrame();
-		recalculateTransRotMBuffer();
+		recalculateTransRotMBuffer(mwContext);
 	    }
-	    if(model!=null)getModel().proposeAnimationUpdate();
+	    if(model!=null)getModelRealtime().proposeAnimationUpdate();
 	}finally{lock.unlock();}
     }//end updateStateToGPU()
     
@@ -434,8 +444,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	}//end if(LOOP)
     }//end attemptLoop()
 
-    protected void recalculateTransRotMBuffer() {
+    protected void recalculateTransRotMBuffer(MatrixWindow matrixWindow) {
 	try {
+	    if(!isVisible() || !isActive()){
+		matrixWindow.matrix.set(getMatrixID(), invisibleMatrixArray);
+		return;
+	    }
 	    Vect3D.normalize(heading, aZ);
 	    Vect3D.normalize(top,aY);
 	    Vect3D.cross(top, aZ, aX);
@@ -447,10 +461,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    } else {
 		System.arraycopy(rMd, 0, rotTransM, 0, 16);
 	    }
-	    getMatrixWindow().
+	    matrixWindow.
 	     setTransposed(rotTransM, getMatrixID(), scratchMatrixArray);//New version
-	} catch (MathArithmeticException e) {}// Don't crash.
-	  catch (ZeroNormException e) {}
+	} catch (MathArithmeticException e) {e.printStackTrace();}// Don't crash.
+	  catch (ZeroNormException e) {e.printStackTrace();}
     }// end recalculateTransRotMBuffer()
     
     protected void recalculateRotBuffer(){
@@ -477,14 +491,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    tMd[3] = positionAfterLoop[0]+modelOffset[0];
 	    tMd[7] = positionAfterLoop[1]+modelOffset[1];
 	    tMd[11]= positionAfterLoop[2]+modelOffset[2];
-	}else{
-	    tMd[3] = Double.POSITIVE_INFINITY;
-	    tMd[7] = Double.POSITIVE_INFINITY;
-	    tMd[11]= Double.POSITIVE_INFINITY;
-	}//end (!visible)
+	}
     }//end recalculateTransBuffer()
     
     protected final double [] scratchMatrixArray = new double[16];
+    protected final double [] invisibleMatrixArray = new double[] {
+	    Double.NaN,Double.NaN,Double.NaN,Double.NaN,
+	    Double.NaN,Double.NaN,Double.NaN,Double.NaN,
+	    Double.NaN,Double.NaN,Double.NaN,Double.NaN,
+	    Double.NaN,Double.NaN,Double.NaN,Double.NaN
+    };
 
     protected boolean translate() {
 	return true;
@@ -505,9 +521,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(this.visible==visible)
 	    return;
 	needToRecalcMatrix=true;
-	if(!this.visible && visible){
-	    this.visible = true;
-	}else this.visible = visible;
+	final MatrixWindow matrixWindowContext = (MatrixWindow)getMatrixWindow().newContextWindow();
+	recalculateTransRotMBuffer(matrixWindowContext);
+	matrixWindowContext.flush();
+	this.visible = visible;
     }//end setvisible()
 
     /**
@@ -1001,5 +1018,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     void setObjectDefinitionWindow(ObjectDefinitionWindow objectDefinitionWindow) {
         this.objectDefinitionWindow = objectDefinitionWindow;
+    }
+
+    public String getDebugName() {
+        return debugName;
+    }
+
+    public void setDebugName(String debugName) {
+        this.debugName = debugName;
     }
 }// end WorldObject

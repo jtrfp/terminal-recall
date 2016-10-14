@@ -86,10 +86,12 @@ public class RenderList {
 
     
     private             MatrixWindow            matrixWindowContext;
+    private final       ObjectListWindow        objectListWindowContext;
     
     public RenderList(final GPU gpu, final Renderer renderer, final ObjectListWindow objectListWindow, ThreadManager threadManager) {
 	// Build VAO
-	this.objectListWindow = (ObjectListWindow)objectListWindow.newContextWindow();
+	this.objectListWindow = objectListWindow;
+	this.objectListWindowContext = (ObjectListWindow)objectListWindow.newContextWindow();
 	final IntBuffer ib    = IntBuffer.allocate(1);
 	this.threadManager    = threadManager;
 	this.gpu              = gpu;
@@ -155,9 +157,9 @@ public class RenderList {
 	synchronized(threadManager.gameStateLock){
 	synchronized(relevantPositionedRenderables){
 	for (PositionedRenderable renderable:relevantPositionedRenderables) {
-	    if(renderable instanceof WorldObject)
-		((WorldObject)renderable).setMatrixWindow(matrixWindow);
-	    try{renderable.updateStateToGPU(renderer);}
+	    //if(renderable instanceof WorldObject)
+	//	((WorldObject)renderable).setMatrixWindow(matrixWindow);
+	    try{renderable.updateStateToGPU(renderer, matrixWindow);}
 	     catch(NotReadyException e){}//Simply not ready
 	}//end for(relevantPositionedRenderables)
 	final Camera camera = renderer.getCamera();
@@ -174,6 +176,7 @@ public class RenderList {
 		@Override
 		public Void call() {
 		    //Defragment
+		    final ObjectListWindow objectListWindow = objectListWindowContext;
 		    opaqueIL    .defragment();
 		    transIL     .defragment();
 		    unoccludedIL.defragment();
@@ -181,10 +184,10 @@ public class RenderList {
 		    numTransparentBlocks= transIL     .delegateSize();
 		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
 		    renderList.rewind();
-		    final Set<VEC4Address> redundancyChecker = new HashSet<VEC4Address>();
-		    for(VEC4Address addr:renderListTelemetry)
-			if(!redundancyChecker.add(addr))
-			    new Exception("updateRenderList() found redundant item: "+addr).printStackTrace();
+		    //final Set<VEC4Address> redundancyChecker = new HashSet<VEC4Address>();
+		    //for(VEC4Address addr:renderListTelemetry)
+			//if(!redundancyChecker.add(addr))
+			//    new Exception("updateRenderList() found redundant item: "+addr).printStackTrace();
 		    renderListTelemetry.drainListStateTo(renderList);
 		    objectListWindow.flush();
 		    return null;
@@ -289,18 +292,29 @@ public class RenderList {
 	if(rFactory.isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);
 	
 	if (frameCounter == 0 && reporter != null) {
-	    reporter.report(
-		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numOpaqueBlocks",
-		    "" + opaqueIL.size());
-	    reporter.report(
-		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numTransparentBlocks",
-		    "" + transIL.size());
-	    reporter.report(
-		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numUnoccludedTransparentBlocks",
-		    "" + unoccludedIL.size());
-	    reporter.report(
-		    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.approxNumSceneTriangles",
-		    "" + ((opaqueIL.size()+transIL.size()+unoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
+	    threadManager.submitToThreadPool(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    reporter.report(
+			    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numOpaqueBlocks",
+			    "" + opaqueIL.size());
+		    reporter.report(
+			    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numTransparentBlocks",
+			    "" + transIL.size());
+		    reporter.report(
+			    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.numUnoccludedTransparentBlocks",
+			    "" + unoccludedIL.size());
+		    reporter.report(
+			    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.approxNumSceneTriangles",
+			    "" + ((opaqueIL.size()+transIL.size()+unoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
+		    
+		    int index = 0;
+		    for(PositionedRenderable pr : relevantPositionedRenderables)
+		     reporter.report(
+			    "org.jtrfp.trcl.core."+renderer.getDebugName()+".RenderList.relevantObjects."+(index++), 
+			    "" + pr);
+		    return null;
+		}});
 	}
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numOpaqueVertices);
 	

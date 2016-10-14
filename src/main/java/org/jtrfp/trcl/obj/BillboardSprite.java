@@ -17,6 +17,7 @@ import java.awt.Dimension;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
+import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -34,9 +35,9 @@ public class BillboardSprite extends WorldObject{
 	    rotationDelegate = new StaticRotationDelegate(getTr());
 	    }
 	@Override
-	protected void recalculateTransRotMBuffer(){
+	protected void recalculateTransRotMBuffer(MatrixWindow matrixWindow){
 	    	rotationDelegate.updateRotation(this);
-		super.recalculateTransRotMBuffer();
+		super.recalculateTransRotMBuffer(matrixWindow);
 		}//end recalculateTransRotMBuffer()
 	
 	public void setBillboardSize(Dimension dim)

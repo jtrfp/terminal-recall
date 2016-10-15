@@ -41,6 +41,7 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	private TVF3Game target;
 	private RunStateListener runStateListener = new RunStateListener();
 	private WeakPropertyChangeListener weakRunStateListener;
+	private volatile boolean destructed = false;
 
 	@Override
 	public void apply(TVF3Game target) {
@@ -54,6 +55,7 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	}
 
 	public void destruct(TVF3Game target) {
+	    destructed = true;
 	    final MenuSystem menuSystem = getMenuSystem();
 	    getTarget().getTr().removePropertyChangeListener(TRFactory.RUN_STATE, weakRunStateListener);
 	    menuSystem.removeMenuItem(CUSTOM_LVL_PATH);
@@ -86,6 +88,8 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	private class RunStateListener implements PropertyChangeListener{
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
+		if(destructed)
+		    return;
 		final Object newValue = evt.getNewValue();
 		getMenuSystem().setMenuItemEnabled(newValue instanceof Game.GameLoadedMode,CUSTOM_LVL_PATH);
 	    }//end propertyChange(...)

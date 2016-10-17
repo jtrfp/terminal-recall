@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -25,19 +26,22 @@ public class CharLineDisplay {
     private double 		glSize;
     private double 		totGlLen = 0;
     private boolean 		centered = false;
+    private final RenderableSpacePartitioningGrid grid;
 
     public CharLineDisplay(TR tr, RenderableSpacePartitioningGrid grid,
 	    double glSize, int lengthInChars, GLFont font) {
 	content = new char[lengthInChars];
 	displays = new CharDisplay[lengthInChars];
+	this.grid = grid;
 	this.font = font;
 	for (int i = 0; i < lengthInChars; i++) {
 	    final CharDisplay charDisplay = new CharDisplay(grid, glSize, font);
+	    charDisplay.setDebugName("Part of CharLineDisplay, position "+i);
 	    content[i] = 'X';
 	    charDisplay.setVisible(false);
 	    charDisplay.setChar('X');
 	    charDisplay.setImmuneToOpaqueDepthTest(true);
-	    grid.add(charDisplay);
+	    //grid.add(charDisplay);
 	    displays[i] = charDisplay;
 	}// end for(lengthInChars)
 
@@ -75,17 +79,24 @@ public class CharLineDisplay {
 	}// end for(displays)
 	if (centered)
 	    charPosition[0] -= totGlLen / 2.;
+	final ArrayList<CharDisplay> displaysToRemove = new ArrayList<CharDisplay>();
+	final ArrayList<CharDisplay> displaysToAdd    = new ArrayList<CharDisplay>();
 	for (int i = 0; i < displays.length; i++) {
-	    final double[] dispPos = displays[i].getPosition();
+	    final CharDisplay charDisplay = displays[i];
+	    final double[] dispPos = charDisplay.getPosition();
 	    if(content[i]!=0){
 		 dispPos[0] = charPosition[0];
 		 dispPos[1] = charPosition[1];
 		 dispPos[2] = charPosition[2];
+		 if(charDisplay.getContainingGrid() == null)
+		     displaysToAdd.add(charDisplay);
 	    }else{
-		displays[i].setVisible(false);
-		dispPos[0]= Math.random();
-		dispPos[1]= Math.random();
-		dispPos[2]= Math.random();
+		if(charDisplay.getContainingGrid() != null)
+		    displaysToRemove.add(charDisplay);
+		//charDisplay.setVisible(false);
+		//dispPos[0]= Math.random();
+		//dispPos[1]= Math.random();
+		//dispPos[2]= Math.random();
 	    }
 	    displays[i].notifyPositionChange();
 	    char _content = content[i];
@@ -94,6 +105,10 @@ public class CharLineDisplay {
 						     // space between letters
 	    charPosition[0] += progress;
 	}// end for(displays)
+	grid.removeAll(displaysToRemove);
+	displaysToRemove.clear();
+	grid.addAll(displaysToAdd);
+	displaysToAdd.clear();
     }// end updatePositions
 
     public void setPosition(double[] location) {

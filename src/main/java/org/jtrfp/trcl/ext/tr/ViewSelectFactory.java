@@ -108,6 +108,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private NAVRadarBlipFactory blipFactory;
      private WeakReference<Game> game;
      private CockpitLayout cockpitLayout;
+     private TR tr;
      
      private int viewModeItr = 0, instrumentModeItr = 1;
      
@@ -161,7 +162,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      }//end apply(...)
      
      protected TR getTr(){
-	 return ((TVF3Game)(game.get())).getTr();
+	 if(tr == null)
+	     tr = Features.get(Features.getSingleton(), TR.class);
+	 return tr;
      }
      
      private class GamePropertyChangeListener implements PropertyChangeListener {

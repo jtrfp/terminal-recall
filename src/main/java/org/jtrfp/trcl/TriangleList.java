@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.FlatDoubleWindow;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
@@ -44,13 +45,15 @@ public class TriangleList extends PrimitiveList<Triangle> {
     public TriangleList(Triangle[][] triangles, int timeBetweenFramesMsec,
 	    String debugName, boolean animateUV, Controller controller, TR tr, GL33Model m) {
 	super(debugName, triangles, 
-		new TriangleVertexWindow(Features.get(tr, GPUFeature.class),debugName).newContextWindow(), tr,m);
+		new TriangleVertexWindow(Features.get(tr, GPUFeature.class),debugName), tr,m);
 	this.timeBetweenFramesMsec 	= timeBetweenFramesMsec;
 	this.animateUV 			= animateUV;
 	this.controller 		= controller;
 	if (getPrimitives().length > 1) {
+	    final FlatDoubleWindow fdw = new TriangleVertex2FlatDoubleWindow(
+		    (TriangleVertexWindow) this.getMemoryWindow().newContextWindow());
 	    this.xyzAnimator = new WindowAnimator(
-		    getFlatTVWindow(),
+		    fdw,
 		    this.getNumElements() * 3 * XYZXferFunc.FRONT_STRIDE_LEN,
 		    				// 3 vertices per triangle,
 						// XYZ+NxNyNz per vertex
@@ -107,7 +110,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	return getPrimitives()[frame][tIndex];
     }
 
-    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, Texture td, TriangleVertexWindow vw)
+    private void setupVertex(int vIndex, int gpuTVIndex, int triangleIndex, Texture td, TriangleVertexWindow vwContext)
 	    throws ExecutionException, InterruptedException {
 	final int 	numFrames	= getPrimitives().length;
 	final Triangle 	t 		= triangleAt(0, triangleIndex);
@@ -116,13 +119,13 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	
 	////////////////////// V E R T E X //////////////////////////////
 	if (numFrames == 1) {
-	    vw.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
-	    vw.y.set(gpuTVIndex, (short) applyScale(pos.getY()));
-	    vw.z.set(gpuTVIndex, (short) applyScale(pos.getZ()));
+	    vwContext.x.set(gpuTVIndex, (short) applyScale(pos.getX()));
+	    vwContext.y.set(gpuTVIndex, (short) applyScale(pos.getY()));
+	    vwContext.z.set(gpuTVIndex, (short) applyScale(pos.getZ()));
 	    final Vector3D normal = t.getVertices()[vIndex].getNormal();
-	    vw.normX.set(gpuTVIndex, (byte)(normal.getX()*127));
-	    vw.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
-	    vw.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
+	    vwContext.normX.set(gpuTVIndex, (byte)(normal.getX()*127));
+	    vwContext.normY.set(gpuTVIndex, (byte)(normal.getY()*127));
+	    vwContext.normZ.set(gpuTVIndex, (byte)(normal.getZ()*127));
 	    if(debugName.contains("MiniMap"))
 		    if(pos.getZ() != 0)
 			new Exception().printStackTrace();
@@ -176,7 +179,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	else if (td instanceof PortalTexture){
 	    PortalTexture portalTexture = (PortalTexture)td;
 	    portalTexture.addRelevantVertexIndex(gpuTVIndex);
-	    portalTexture.setTriangleVertexWindow(vw);
+	    portalTexture.setTriangleVertexWindow(vwContext);
 	    //final int textureID = 65536-((PortalTexture)td).getPortalFramebufferNumber();
 	    //vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
 	    //vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
@@ -186,8 +189,11 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    if (animateUV && numFrames > 1) {// Animated UV
 		float[] uFrames = new float[numFrames];
 		float[] vFrames = new float[numFrames];
+		
+		final FlatDoubleWindow fdw = new TriangleVertex2FlatDoubleWindow(
+			    (TriangleVertexWindow) this.getMemoryWindow().newContextWindow());
 		final WindowAnimator uvAnimator = new WindowAnimator(
-			getFlatTVWindow(), 2,// UV per vertex
+			fdw, 2,// UV per vertex
 			numFrames, false, getVertexSequencer(
 				timeBetweenFramesMsec, numFrames),
 			new UVXferFunc(gpuTVIndex * UVXferFunc.BACK_STRIDE_LEN));
@@ -200,13 +206,13 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		uvAnimator.addFrames(uFrames);
 		uvAnimator.addFrames(vFrames);
 	    } else {// end if(animateUV)
-		vw.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
-		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
+		vwContext.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
+		vwContext.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
 	    final int textureID = ((VQTexture)td).getTexturePage();
-	    vw.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
-	    vw.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vw.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
+	    vwContext.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
+	    vwContext.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
+	    vwContext.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
 	}// end if(Texture)
 	if(td instanceof DynamicTexture){//Animated texture
 	    final DynamicTexture dt = (DynamicTexture)td;
@@ -230,10 +236,10 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	    } else if(dt instanceof AnimatedTexture) {// end if(animateUV)
 		final AnimatedTexture at = (AnimatedTexture)dt;
 		final int sideScalar = at.getFrames()[0].getSideLength()-1;
-		vw.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
-		vw.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
+		vwContext.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
+		vwContext.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
-	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(dt,vw,gpuTVIndex);
+	    final TexturePageAnimator texturePageAnimator = new TexturePageAnimator(dt,(TriangleVertexWindow)this.getMemoryWindow(),gpuTVIndex);
 	    texturePageAnimator.setU(t.getUV(vIndex).getX());
 	    texturePageAnimator.setV((1-t.getUV(vIndex).getY()));
 	    texturePageAnimator.setDebugName(debugName + ".texturePageAnimator");
@@ -261,7 +267,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	final int nPrimitives = getNumElements();
 	final int [] vertexIndices = new int[nPrimitives*3];
 	final Texture [] textureDescriptions = new Texture[nPrimitives];
-	final MemoryWindow mw = getMemoryWindow();
+	final MemoryWindow mw = getMemoryWindow().newContextWindow();
 	for (int vIndex = 0; vIndex < nPrimitives*3; vIndex++)
 	    vertexIndices[vIndex]=mw.create();
 	for (int tIndex = 0; tIndex < nPrimitives; tIndex++)

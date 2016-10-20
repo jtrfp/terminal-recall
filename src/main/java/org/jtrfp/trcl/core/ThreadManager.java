@@ -153,13 +153,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
     
-    public <T> TRFutureTask<T> submitToGPUMemAccess(Callable<T> c){
-	final TRFutureTask<T> result = new TRFutureTask<T>(c,tr);
-	synchronized(currentGPUMemAccessTaskSubmitter){
-	    currentGPUMemAccessTaskSubmitter.get().submit(result);}
-	return result;
-    }//end submitToGPUMemAccess(...)
-    
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),c);
 	if(isGLThread())
@@ -278,8 +271,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 	    while (!pendingGPUMemAccessTasks.isEmpty())
 		activeGPUMemAccessTaskSubmitter.submit(pendingGPUMemAccessTasks
 			.poll());
-	    for(Callable<?> c:repeatingGPUMemAccessTasks)
-		this.submitToGPUMemAccess(c);
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
@@ -340,20 +331,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 	repeatingGLTasks.remove(task);
     }//end removeRepeatingGLTask(...)
     
-    public void addRepeatingGPUMemTask(Callable<?> task){
-	if(task==null)
-	    throw new NullPointerException("Passed task intolerably null.");
-	if(repeatingGPUMemAccessTasks.contains(task))
-	    return;
-	repeatingGPUMemAccessTasks.add(task);
-    }//end addRepeatingGPUMemTask(...)
-    
-    public void removeRepeatingGPUMemTask(Callable<?> task){
-	if(task==null)
-	    throw new NullPointerException("Passed task intolerably null.");
-	repeatingGPUMemAccessTasks.remove(task);
-    }//end removeRepeatingGPUMemTask(...)
-
     @Override
     public <T> GLFutureTask<T> submitToGL(GLExecutable<T, GL3> executable) {
 	throw new UnsupportedOperationException();

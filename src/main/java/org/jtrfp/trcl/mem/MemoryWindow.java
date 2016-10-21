@@ -397,7 +397,7 @@ public abstract class MemoryWindow {
 	}
 
 	@Override
-	public VEC4ArrayVariable set(int objectIndex, int[] value) {
+	public VEC4ArrayVariable set(int objectIndex, int[] value) {//TODO: intra VEC4 offset? Optimize
 	    for (int i = 0; i < value.length; i++) {
 		getParent().getContextualBuffer().putInt(
 			logicalByteOffsetWithinObject().intValue() + objectIndex
@@ -407,7 +407,7 @@ public abstract class MemoryWindow {
 	}
 
 	public VEC4ArrayVariable setAt(int objectIndex, int offsetInVEC4s,
-		int[] value) {
+		int[] value) {//TODO: intra VEC4 offset? Optimize
 	    for (int i = 0; i < value.length; i++) {
 		getParent().getContextualBuffer().putInt(
 			logicalByteOffsetWithinObject().intValue() + offsetInVEC4s * 16 + objectIndex
@@ -513,11 +513,13 @@ public abstract class MemoryWindow {
 
 	@Override
 	public Double2FloatArrayVariable set(int objectIndex, double[] value) {
-	    for (int i = 0; i < arrayLen; i++) {//TODO: Cache these vars outside the loop to reduce indirection
-		getParent().getContextualBuffer().putFloat(
-			i * 4 + logicalByteOffsetWithinObject().intValue() + objectIndex
-				* getParent().getObjectSizeInBytes(),
-			(float) value[i]);
+	    final IByteBuffer contextualByteBuffer = getParent().getContextualBuffer();
+	    final int initialOffset = logicalByteOffsetWithinObject().intValue() + objectIndex
+			              * getParent().getObjectSizeInBytes();
+	    final int endIndex      = initialOffset + arrayLen * 4;
+	    int       index         = 0;
+	    for (int i = initialOffset; i < endIndex; i+= 4) {
+		contextualByteBuffer.putFloat(i,(float) value[index++]);
 	    }
 	    return this;
 	}

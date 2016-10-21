@@ -39,6 +39,7 @@ public abstract class MemoryWindow {
     private ArrayList<Integer> freeLater = new ArrayList<Integer>();
     private int minFreeDelayMillis = 100, maxFreeDelayMillis = 500;
     private volatile long bulkFreeDeadline;
+    private boolean isContext = false;
     
     static class MemoryWindowFreeingService extends Thread {
 	private final Queue<MemoryWindow> stale = new ArrayDeque<MemoryWindow>();
@@ -633,6 +634,8 @@ public abstract class MemoryWindow {
     }
     
     public MemoryWindow newContextWindow(){
+	if(isContext())
+	    throw new IllegalStateException("This memorywindow is already a context.");
 	final Class<? extends MemoryWindow> thisClass = getClass();
 	try{
 	    final MemoryWindow result = (MemoryWindow)thisClass.newInstance();
@@ -642,6 +645,7 @@ public abstract class MemoryWindow {
 	    result.setContextualBuffer(newContext);
 	    result.setIndexPool(getIndexPool());
 	    result.setNonContextualBuffer(getNoncontextualBuffer());
+	    result.setContext(true);
 	    return result;
 	}catch(Exception e){e.printStackTrace();}
 	return null;
@@ -663,6 +667,15 @@ public abstract class MemoryWindow {
 	    final PagedByteBufferContext pbb = (PagedByteBufferContext)buffer;
 	    try{pbb.flush();}
 	catch(Exception e){e.printStackTrace();}
-	}
+	} else
+	    throw new IllegalStateException("Tried to flush a non-contextual MemoryWindow.");
     }//end flush()
+
+    boolean isContext() {
+        return isContext;
+    }
+
+    void setContext(boolean isContext) {
+        this.isContext = isContext;
+    }
 }// end MemoryWindow

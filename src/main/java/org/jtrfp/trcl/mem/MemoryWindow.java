@@ -397,21 +397,21 @@ public abstract class MemoryWindow {
 	}
 
 	@Override
-	public VEC4ArrayVariable set(int objectIndex, int[] value) {//TODO: intra VEC4 offset? Optimize
+	public VEC4ArrayVariable set(int objectIndex, int[] value) {//TODO: Optimize
 	    for (int i = 0; i < value.length; i++) {
 		getParent().getContextualBuffer().putInt(
 			logicalByteOffsetWithinObject().intValue() + objectIndex
-				* getParent().getObjectSizeInBytes(), value[i]);
+				* getParent().getObjectSizeInBytes() + i * 4, value[i]);
 	    }// end for(i)
 	    return this;
 	}
 
 	public VEC4ArrayVariable setAt(int objectIndex, int offsetInVEC4s,
-		int[] value) {//TODO: intra VEC4 offset? Optimize
+		int[] value) {//TODO:  Optimize
 	    for (int i = 0; i < value.length; i++) {
 		getParent().getContextualBuffer().putInt(
 			logicalByteOffsetWithinObject().intValue() + offsetInVEC4s * 16 + objectIndex
-				* getParent().getObjectSizeInBytes(), value[i]);
+				* getParent().getObjectSizeInBytes() + i * 4, value[i]);
 	    }// end for(i)
 	    return this;
 	}// end set(...)

@@ -72,6 +72,21 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	stalePages   = new BitSet();
     }//end flush()
     
+    @Override
+    public void finalize() throws Throwable{
+	if(!floatsToSet.isEmpty())
+	    new RuntimeException("FloatsToSet unflushed following finalization!").printStackTrace();
+	if(!intsToSet.isEmpty())
+	    new RuntimeException("intsToSet unflushed following finalization!").printStackTrace();
+	if(!shortsToSet.isEmpty())
+	    new RuntimeException("ShortsToSet unflushed following finalization!").printStackTrace();
+	if(!bytesToSet.isEmpty())
+	    new RuntimeException("BytesToSet unflushed following finalization!").printStackTrace();
+	if(stalePages.cardinality() != 0)
+	    new RuntimeException("Stalepages unflushed following finalization!").printStackTrace();
+	super.finalize();
+    }
+    
     int getNumStalePages(){
 	return stalePages.cardinality();
     }

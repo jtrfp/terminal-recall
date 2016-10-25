@@ -42,11 +42,11 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
 	startupText = new CharLineDisplay(tr,this,FONT_SIZE, 32, font);
 	startupText.setCentered(true);
 	startupText.setPosition(0,0,Z);
-	World.relevanceExecutor.submit(new Runnable(){
-	    @Override
-	    public void run() {
+	//World.relevanceExecutor.submit(new Runnable(){
+	//    @Override
+	//    public void run() {
 		add(startupLogo);
-	    }});
+	//    }});
     }//end constructor
 
     public void setStatusText(String string) {

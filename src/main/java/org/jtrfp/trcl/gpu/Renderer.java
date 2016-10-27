@@ -94,7 +94,9 @@ public final class Renderer {
 	renderList = new TRFutureTask<RenderList>(new Callable<RenderList>(){
 	    @Override
 	    public RenderList call() throws Exception {
-		return new RenderList(gpu, Renderer.this, getObjectListWindow(), getThreadManager());
+		final RenderList rl = new RenderList(gpu, Renderer.this, getObjectListWindow(), getThreadManager());
+		rl.setReporter(getReporter());
+		return rl;
 	    }});
 	threadManager.threadPool.submit(renderList);
 

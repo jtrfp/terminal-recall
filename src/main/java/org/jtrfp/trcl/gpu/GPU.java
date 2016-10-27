@@ -29,13 +29,16 @@ import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.GLFutureTask;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.dbg.StateBeanBridgeGL3;
 import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gui.GLExecutable;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.tools.Util;
@@ -128,8 +131,11 @@ public class GPU implements GLExecutor<GL3>{
 	    memoryWindows.add(objectDefinitionWindow);
 	    rendererFactory = new TRFutureTask<RendererFactory>(new Callable<RendererFactory>(){
 		@Override
-		public RendererFactory call() throws Exception {//TODO: set Reporter in result in thread-agnostic way
-		    return new RendererFactory(GPU.this, threadManager, glCanvas, world, objectListWindow.get());
+		public RendererFactory call() throws Exception {
+		    final RendererFactory rf = new RendererFactory(GPU.this, threadManager, glCanvas, world, objectListWindow.get()); 
+		    final TR tr = Features.get(Features.getSingleton(), TR.class);
+		    rf.setReporter(Features.get(tr, Reporter.class));
+		    return rf;
 		}
 	    });executorService.submit(rendererFactory);
 	    

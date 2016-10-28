@@ -53,6 +53,7 @@ import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.NewSmartPlaneBehavior;
 import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RandomSFXPlayback;
@@ -86,8 +87,8 @@ import org.jtrfp.trcl.game.TVF3Game.Difficulty;
 import org.jtrfp.trcl.gpu.BINFileExtractor;
 import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.gpu.BufferedModelTarget;
-import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.GL33Model;
+import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -97,7 +98,7 @@ import org.jtrfp.trcl.snd.SoundTexture;
 import org.jtrfp.trcl.tools.Util;
 
 public class DEFObject extends WorldObject {
-    private static final boolean NEW_SMART_PLANE_BEHAVIOR = false;
+    private static final boolean NEW_SMART_PLANE_BEHAVIOR = true;
     //PROPERTIES
     public static final String ENEMY_DEFINITION = "enemyDefinition",
 	    		       ENEMY_PLACEMENT  = "enemyPlacement";
@@ -830,7 +831,7 @@ public void destroy(){
 	    smartPlaneBehavior(tr,def,retreatAboveSky);
 	    return;
 	    }
-	/*
+	
 	final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior().setProjectileFactory(tr.getResourceManager().getProjectileFactories()[def.getWeapon().ordinal()]);
 	try{pfb.addSupply(99999999);}catch(SupplyNotNeededException e){}
 	Integer [] firingVertices = Arrays.copyOf(def.getFiringVertices(),def.getNumRandomFiringVertices());
@@ -855,7 +856,7 @@ public void destroy(){
 	final AutoFiring afb = new AutoFiring();
 	afb.setMaxFireVectorDeviation(.7);
 	afb.setFiringPattern(new boolean [] {true});
-	afb.setTimePerPatternEntry((int)((def.getFireSpeed() / 66) * (.000001 + Math.random()*2)));
+	afb.setTimePerPatternEntry((int)(Math.max(def.getFireSpeed() / 66, 1) * (1 + Math.random()*2)));
 	afb.setPatternOffsetMillis((int)(Math.random()*1000));
 	afb.setProjectileFiringBehavior(pfb);
 	try{
@@ -868,9 +869,10 @@ public void destroy(){
 	addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
 		"FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
 	
-	addBehavior(new RollBehavior().setDesiredRollTheta(.1));
-	addBehavior(new RollBasedTurnBehavior());
-	*/
+	addBehavior(new RollPitchYawBehavior());
+	//addBehavior(new RollBasedTurnBehavior());
+	addBehavior(new NewSmartPlaneBehavior());
+	
     }//end newSmartPlaneBehavior
 
     private void smartPlaneBehavior(TR tr, EnemyDefinition def, boolean retreatAboveSky){
@@ -918,6 +920,7 @@ public void destroy(){
 	final SpinAccellerationBehavior sab = (SpinAccellerationBehavior)new SpinAccellerationBehavior().setEnable(false);
 	addBehavior(sab);
 	addBehavior(new SmartPlaneBehavior(haapb,afb,sab,aatpb,escapeProp,retreatAboveSky));
+	//addBehavior(new NewSmartPlaneBehavior());
 	addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
 		"FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
     }//end smartPlaneBehavior()

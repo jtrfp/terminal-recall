@@ -53,7 +53,7 @@ import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
-import org.jtrfp.trcl.beh.NewSmartPlaneBehavior;
+//import org.jtrfp.trcl.beh.NewSmartPlaneBehavior;
 import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RandomSFXPlayback;
@@ -869,9 +869,9 @@ public void destroy(){
 	addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
 		"FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
 	
-	addBehavior(new RollPitchYawBehavior());
+	//addBehavior(new RollPitchYawBehavior());
 	//addBehavior(new RollBasedTurnBehavior());
-	addBehavior(new NewSmartPlaneBehavior());
+	//addBehavior(new NewSmartPlaneBehavior());
 	
     }//end newSmartPlaneBehavior
 

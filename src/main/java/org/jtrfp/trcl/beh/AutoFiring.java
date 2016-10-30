@@ -166,7 +166,7 @@ public class AutoFiring extends Behavior {
      */
     public AutoFiring setTimePerPatternEntry(int timePerPatternEntry) {
 	if(!(timePerPatternEntry > 0))
-	    throw new IllegalArgumentException("timePerPatternEntry must be greater than zero.");
+	    throw new IllegalArgumentException("timePerPatternEntry must be greater than zero. Got "+timePerPatternEntry);
         this.timePerPatternEntry = timePerPatternEntry;
         totalFiringPatternTimeMillis=firingPattern.length*timePerPatternEntry;
         return this;

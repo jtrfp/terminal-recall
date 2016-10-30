@@ -397,22 +397,27 @@ public abstract class MemoryWindow {
 	}
 
 	@Override
-	public VEC4ArrayVariable set(int objectIndex, int[] value) {//TODO: Optimize
-	    for (int i = 0; i < value.length; i++) {
-		getParent().getContextualBuffer().putInt(
-			logicalByteOffsetWithinObject().intValue() + objectIndex
-				* getParent().getObjectSizeInBytes() + i * 4, value[i]);
-	    }// end for(i)
+	public VEC4ArrayVariable set(int objectIndex, int[] value) {
+	    int valueIndex = 0;
+	    final IByteBuffer contextualBuffer = getParent().getContextualBuffer();
+	    final int startIndexInBytes = logicalByteOffsetWithinObject().intValue() + objectIndex
+			* getParent().getObjectSizeInBytes();
+	    final int endIndexInBytes = startIndexInBytes + value.length * 4;
+	    for (int indexInBytes = startIndexInBytes; indexInBytes < endIndexInBytes; indexInBytes += 4)
+		contextualBuffer.putInt(indexInBytes, value[valueIndex++]);
 	    return this;
 	}
 
 	public VEC4ArrayVariable setAt(int objectIndex, int offsetInVEC4s,
-		int[] value) {//TODO:  Optimize
-	    for (int i = 0; i < value.length; i++) {
-		getParent().getContextualBuffer().putInt(
-			logicalByteOffsetWithinObject().intValue() + offsetInVEC4s * 16 + objectIndex
-				* getParent().getObjectSizeInBytes() + i * 4, value[i]);
-	    }// end for(i)
+		int[] value) {
+	    int valueIndex = 0;
+	    final IByteBuffer contextualBuffer = getParent().getContextualBuffer();
+	    final int startIndexInBytes = logicalByteOffsetWithinObject().intValue() + offsetInVEC4s * 16 + objectIndex
+			* getParent().getObjectSizeInBytes();
+	    final int endIndexInBytes = startIndexInBytes + value.length * 4;
+	    for (int indexInBytes = startIndexInBytes; indexInBytes < endIndexInBytes; indexInBytes+= 4)
+		contextualBuffer.putInt(
+			indexInBytes, value[valueIndex++]);
 	    return this;
 	}// end set(...)
 

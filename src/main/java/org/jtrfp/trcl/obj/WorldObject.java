@@ -81,7 +81,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
     private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
     private boolean 			active 		   = true;
-    private byte 			renderFlags=0;
+    private volatile byte 		renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;
     //private boolean                     objectDefsInitialized = false;
     private boolean                     inGrid = false;

@@ -20,6 +20,7 @@ import org.jtrfp.trcl.obj.WorldObject2D;
 
 public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     private final SelectableTexture tex;
+    private char currentChar = 0;
 
     public CharDisplay(RenderableSpacePartitioningGrid grid,
 	    double glSize, GLFont font) {
@@ -41,6 +42,7 @@ public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     }// end constructor()
 
     public void setChar(char c) {
+	currentChar = c;
 	tex.setFrame(c);
 	if(c==0)setVisible(false);
 	else setVisible(true);
@@ -53,5 +55,10 @@ public class CharDisplay extends WorldObject2D implements RelevantEverywhere {
     public void setFontSize(double glSize) {
 	// TODO Auto-generated method stub
 	throw new RuntimeException("Not implemented.");
+    }
+    
+    @Override
+    public String toString(){
+	return super.toString()+" Character value="+currentChar;
     }
 }// end CharDisplay

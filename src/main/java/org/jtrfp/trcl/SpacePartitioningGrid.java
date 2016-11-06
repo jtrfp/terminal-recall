@@ -98,8 +98,10 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    final SpacePartitioningGrid spg = objectToAdd.getContainingGrid();
 	    if(spg!=null)
 		throw new IllegalStateException("Passed element "+objectToAdd+" has non-null containing grid: "+spg+". Object should only be in one grid at a time.");
-	    if(!localTaggerSet.add(objectToAdd))
+	    if(!localTaggerSet.add(objectToAdd)){
+		System.err.println("err: SPG.add(E) Item already present. Abort...");
 		return;
+	    }
 	    localTagger.add(objectToAdd);
 	    objectToAdd.setContainingGrid(this);
 	}
@@ -247,14 +249,22 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    public void blockingRemoveAll(){
 		try{nonBlockingRemoveAll().get();}catch(Exception e){e.printStackTrace();}
 	    }
+	    
+	    public synchronized void removeAll(){
+		removeAllDirect();
+	    }
 	
-	public void removeAll(){
+	public void removeAllDirect(){
 		final ArrayList<SpacePartitioningGrid<E>> branches = new ArrayList<SpacePartitioningGrid<E>>();
 		for(SpacePartitioningGrid<E> g:branchGrids.keySet())
-		    branches.add(g);
+		    branches.remove(g);
 		for(SpacePartitioningGrid<E> g:branches)
 		    removeBranch(g);
-		localTagger.clear();
+		for(Positionable p:localTaggerSet){
+		    p.setContainingGrid(null);
+		    localTagger.remove(p);
+		}
+		localTaggerSet.clear();
 		return;
 	}//end removeAll()
 }//end SpacePartitionGrid

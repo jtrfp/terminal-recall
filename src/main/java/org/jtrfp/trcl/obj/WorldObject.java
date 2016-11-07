@@ -134,7 +134,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	
 	//Keep because of race condition of multiple threads grabbing multiple IDs; 
 	//object defs end up with different ID from matrix writes and things disappear from invalid matrices containing DEADBEEF
-	getMatrixID();//TODO: Some sort of refactor? matrix should init once and be left alone, no need to lazy-load.
+	//getMatrixID();//TODO: Some sort of refactor? matrix should init once and be left alone, no need to lazy-load.
     }
 
     public WorldObject(GL33Model m) {
@@ -954,6 +954,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     protected Integer getMatrixID() {
+	if(matrixID == null)
+	    return getMatrixSafe();
+        return matrixID;
+    }
+    
+    private synchronized Integer getMatrixSafe(){
 	if(matrixID == null)
 	    matrixID = getGpu().matrixWindow.get().create();
         return matrixID;

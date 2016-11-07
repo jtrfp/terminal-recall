@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.CharDisplay;
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
@@ -39,7 +40,6 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
-import org.jtrfp.trcl.game.RedFlashFactory.RedFlash;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.RenderList;
@@ -75,7 +75,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private TRFuture<GL33Model>model;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
-    protected Integer 	matrixID;
+    protected volatile Integer 	matrixID;
     private volatile WeakReference<SpacePartitioningGrid> containingGrid;
     private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
     private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
@@ -131,6 +131,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	tMd[5] = 1;
 	tMd[10] = 1;
 	tMd[15] = 1;
+	
+	//Keep because of race condition of multiple threads grabbing multiple IDs; 
+	//object defs end up with different ID from matrix writes and things disappear from invalid matrices containing DEADBEEF
+	getMatrixID();//TODO: Some sort of refactor? matrix should init once and be left alone, no need to lazy-load.
     }
 
     public WorldObject(GL33Model m) {
@@ -300,7 +304,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	objectDefinitionsFuture = tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		try{
+		try{Thread.currentThread().setName("WorldObject.objectDefinitionsFuture "+hashCode());
 		    //tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    //    @Override
 		    //    public Void call() throws Exception {
@@ -316,6 +320,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		    //   }}).get();
 		    updateAllRenderFlagStates(objectDefContextWindow);
 		    objectDefContextWindow.flush();
+		    Thread.currentThread().setName("Freed by "+hashCode());
 		}catch(Exception e){e.printStackTrace();}
 		return null;
 	    }});

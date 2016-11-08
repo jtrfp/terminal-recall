@@ -68,6 +68,7 @@ public class GPU implements GLExecutor<GL3>{
 	private World                                   world;
 	private UncaughtExceptionHandler                uncaughtExceptionHandler;
 	private boolean                                 initialized = false;
+	private Reporter                                reporter;
 	
 	public GPU() {
 	}//end constructor
@@ -111,21 +112,27 @@ public class GPU implements GLExecutor<GL3>{
 	    matrixWindow=new TRFutureTask<MatrixWindow>(new Callable<MatrixWindow>(){
 		@Override
 		public MatrixWindow call() throws Exception {
-		    return new MatrixWindow(GPU.this);
+		    final MatrixWindow result = new MatrixWindow(GPU.this);
+		    result.setReporter(getReporter());
+		    return result;
 		}//end call()
 	    });threadManager.threadPool.submit(matrixWindow);
 	    memoryWindows.add(matrixWindow);
 	    objectListWindow=new TRFutureTask<ObjectListWindow>(new Callable<ObjectListWindow>(){
 		@Override
 		public ObjectListWindow call() throws Exception {
-		    return new ObjectListWindow(GPU.this);
+		    final ObjectListWindow result = new ObjectListWindow(GPU.this);
+		    result.setReporter(getReporter());
+		    return result;
 		}//end call()
 	    });threadManager.threadPool.submit(objectListWindow);
 	    memoryWindows.add(objectListWindow);
 	    objectDefinitionWindow=new TRFutureTask<ObjectDefinitionWindow>(new Callable<ObjectDefinitionWindow>(){
 		@Override
 		public ObjectDefinitionWindow call() throws Exception {
-		    return new ObjectDefinitionWindow(GPU.this);
+		    final ObjectDefinitionWindow result = new ObjectDefinitionWindow(GPU.this);
+		    result.setReporter(getReporter());
+		    return result;
 		}//end call()
 	    });threadManager.threadPool.submit(objectDefinitionWindow);
 	    memoryWindows.add(objectDefinitionWindow);
@@ -133,8 +140,7 @@ public class GPU implements GLExecutor<GL3>{
 		@Override
 		public RendererFactory call() throws Exception {
 		    final RendererFactory rf = new RendererFactory(GPU.this, threadManager, glCanvas, world, objectListWindow.get()); 
-		    final TR tr = Features.get(Features.getSingleton(), TR.class);
-		    rf.setReporter(Features.get(tr, Reporter.class));
+		    rf.setReporter(getReporter());
 		    return rf;
 		}
 	    });executorService.submit(rendererFactory);
@@ -355,5 +361,13 @@ public class GPU implements GLExecutor<GL3>{
 	@Override
 	public void executeOnDispose(GLExecutable<Void,GL3> executable) {
 	    throw new UnsupportedOperationException();
+	}
+
+	public Reporter getReporter() {
+	    return reporter;
+	}
+
+	public void setReporter(Reporter reporter) {
+	    this.reporter = reporter;
 	}
 	}//end GPU

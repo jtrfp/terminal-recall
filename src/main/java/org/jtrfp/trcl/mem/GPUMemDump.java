@@ -43,6 +43,7 @@ private final TR tr;
 	dumpRootMemory();
 	//System.out.println("Dumping code pages...");
 	//dumpCodePages();
+	System.out.println("GPU memory dump complete.");
 	}
 	catch(Exception e){e.printStackTrace();}
     }//end constructor
@@ -95,6 +96,7 @@ private final TR tr;
 		return null;
 	    }});
 	raf.close();
+	System.out.println("Root memory dumped to "+outFile.getAbsolutePath());
     }//end dumpRootMemory
 
 }//end GPUMemDump

@@ -287,6 +287,11 @@ public class RenderList {
 	gl.glDepthFunc(GL3.GL_LESS);
 	gl.glEnable(GL3.GL_DEPTH_TEST);
 	gl.glEnable(GL3.GL_DEPTH_CLAMP);
+	final Byte stencilID = renderer.getStencilID();
+	if(stencilID != null){
+	    gl.glEnable(GL3.GL_STENCIL_TEST);
+	    gl.glStencilFunc(GL3.GL_EQUAL, stencilID, 0xFF);
+	}else gl.glDisable(GL3.GL_STENCIL_TEST);
 	//gl.glDepthRange((BriefingScreen.MAX_Z_DEPTH+1)/2, 1);
 	
 	if(rFactory.isBackfaceCulling())gl.glEnable(GL3.GL_CULL_FACE);

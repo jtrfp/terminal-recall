@@ -65,6 +65,7 @@ public final class Renderer {
     private boolean                             enabled = false;
     private             World                   world;
     private             ObjectListWindow        objectListWindow;
+    private             Byte                    stencilID = null;
     
     private static final Adapter<Positionable,PositionedRenderable> castingAdapter = new Adapter<Positionable,PositionedRenderable>(){
 	@Override
@@ -357,5 +358,13 @@ public final class Renderer {
 
     public void setGpu(GPU gpu) {
         this.gpu = gpu;
+    }
+
+    public Byte getStencilID() {
+	return stencilID;
+    }
+
+    public void setStencilID(Byte stencilID) {
+        this.stencilID = stencilID;
     }
 }//end Renderer

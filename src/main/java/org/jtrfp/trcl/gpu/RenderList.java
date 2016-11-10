@@ -99,7 +99,7 @@ public class RenderList {
 	this.rFactory         = renderer.getRendererFactory();
 	this.previousViewport		=ByteBuffer.allocateDirect(4*4).order(ByteOrder.nativeOrder()).asIntBuffer();
 	this.renderListIdx		=this.objectListWindow.create();
-	this.renderList                 = new IntArrayVariableList(this.objectListWindow.opaqueIDs,renderListIdx);
+	this.renderList                 = new IntArrayVariableList(this.objectListWindowContext.opaqueIDs,renderListIdx);
 	
 	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(transODAddrsColl, true);

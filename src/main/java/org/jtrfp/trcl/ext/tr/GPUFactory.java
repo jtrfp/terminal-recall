@@ -20,6 +20,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,7 @@ public class GPUFactory implements FeatureFactory<TR> {
     public void apply(TR target) {
 	final RootWindow rootWindow = Features.get(target, RootWindow.class);
 	final ThreadManager threadManager = Features.get(target, ThreadManagerFeature.class);
+	setReporter(Features.get(target, Reporter.class));
 	setThreadManager(threadManager);
 	setGlExecutor(threadManager);
 	setCanvas(rootWindow.getCanvas());

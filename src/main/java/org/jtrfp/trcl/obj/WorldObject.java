@@ -21,7 +21,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.CharDisplay;
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.PrimitiveList;
@@ -42,7 +41,6 @@ import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.GPU;
-import org.jtrfp.trcl.gpu.RenderList;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;

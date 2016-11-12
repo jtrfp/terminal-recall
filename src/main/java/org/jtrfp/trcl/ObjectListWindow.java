@@ -14,6 +14,7 @@ package org.jtrfp.trcl;
 
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.RenderList;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.mem.MemoryWindow;
 
 public class ObjectListWindow extends MemoryWindow {
@@ -24,9 +25,9 @@ public class ObjectListWindow extends MemoryWindow {
     public ObjectListWindow(){}
 
     public final IntArrayVariable opaqueIDs = new IntArrayVariable(
-	    RenderList.NUM_BLOCKS_PER_PASS);
+	    Renderer.NUM_BLOCKS_PER_PASS);
     
     public final ByteArrayVariable pageFiller = new ByteArrayVariable(2048);
 
-    public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = RenderList.NUM_BLOCKS_PER_PASS * 4;
+    public static final int OBJECT_LIST_SIZE_BYTES_PER_PASS = Renderer.NUM_BLOCKS_PER_PASS * 4;
 }// end GlobalObjectList

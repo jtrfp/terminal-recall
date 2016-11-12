@@ -116,7 +116,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
 	boolean alreadyVisitedPlayer=false;
 	Renderer [] renderers = new Renderer[]{tr.mainRenderer/* ,tr.secondaryRenderer*/ };//TODO: This is hacky.
-	try{// NotReadyException
 	visibilityListBuffer.clear();
 	synchronized(paused){
 	synchronized(gameStateLock){
@@ -124,8 +123,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 		if(renderer.isEnabled()){
 		    final Collection<PositionedRenderable> vl = 
 				renderer.
-				getRenderList().
-				getRealtime().
 				getVisibleWorldObjectList();
 		    synchronized(vl)
 			 {visibilityListBuffer.addAll(vl);}
@@ -149,7 +146,6 @@ public class ThreadManager implements GLExecutor<GL3>{
 	    //tr.getCollisionManager().performCollisionTests();
 	    tr.getCollisionManager().newPerformCollisionTests();
 	}// end sync(paused)
-	}catch(NotReadyException e){/*System.out.println("ThreadManager: Not ready");*/}
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
     

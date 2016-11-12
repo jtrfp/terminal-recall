@@ -257,7 +257,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if(triangleObjectDefinitions!=null)
 	    for(int def:triangleObjectDefinitions)
 		getObjectDefinitionWindow().freeLater(def);
-	RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
+	Renderer.RENDER_LIST_EXECUTOR.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		getOpaqueObjectDefinitionAddressesInVEC4()     .clear();
@@ -364,7 +364,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	    addressesToAdd.add(new VEC4Address(objectDefContextWindow.getPhysicalAddressInBytes(index)));
 	    odCounter++;
 	}// end for(ObjectDefinition)
-	RenderList.RENDER_LIST_EXECUTOR.submit(new Runnable(){
+	Renderer.RENDER_LIST_EXECUTOR.submit(new Runnable(){
 	    @Override
 	    public void run() {
 		objectDefinitionAddressesInVEC4.addAll(addressesToAdd);

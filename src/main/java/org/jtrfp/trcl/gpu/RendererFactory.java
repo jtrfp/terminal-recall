@@ -51,7 +51,7 @@ public class RendererFactory {
     public static final int			PRIMITIVE_BUFFER_HEIGHT = 512;
     public static final int			NUM_PORTALS = 4;
     public static final int			PRIMITIVE_BUFFER_OVERSAMPLING = 4;
-    public static final int			OBJECT_BUFFER_WIDTH = 4*RenderList.NUM_BLOCKS_PER_PASS*RenderList.NUM_RENDER_PASSES;
+    public static final int			OBJECT_BUFFER_WIDTH = 4*Renderer.NUM_BLOCKS_PER_PASS*Renderer.NUM_RENDER_PASSES;
     
     private final GPU gpu;
     private final World world;

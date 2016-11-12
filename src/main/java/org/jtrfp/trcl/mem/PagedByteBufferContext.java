@@ -112,7 +112,6 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	markPageStale(indexInBytes);
 	intIndices.add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
 	intsToSet.add(val);
-	//intrinsic[0].putInt(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes),val);
 	return this;
     }
 
@@ -133,7 +132,6 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	int index=getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes);
 	shortIndices.add(index);
 	shortsToSet.add(val);
-	//intrinsic[0].putShort(index, val);
 	return this;
     }
 
@@ -142,7 +140,6 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	markPageStale(indexInBytes);
 	byteIndices.add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
 	bytesToSet.add(val);
-	//intrinsic[0].put(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes), val);
 	return this;
     }
     
@@ -151,7 +148,6 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	markPageStale(indexInBytes);
 	floatIndices.add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
 	floatsToSet.add(val);
-	//intrinsic[0].putFloat(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes), val);
 	return this;
     }
     
@@ -172,11 +168,6 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 	    int index = getPagedByteBuffer().logicalIndex2PhysicalIndex(startIndexInBytes);
 	    while(src.hasRemaining())
 		put(index++,src.get());//TODO: Optimize with batch on flush
-	    /*
-	    final ByteBuffer bb = intrinsic[0].duplicate();
-	    bb.position(getPagedByteBuffer().logicalIndex2PhysicalIndex(startIndexInBytes));
-	    bb.put(src);
-	    */
 	}
 	return this;
     }//end put(...)

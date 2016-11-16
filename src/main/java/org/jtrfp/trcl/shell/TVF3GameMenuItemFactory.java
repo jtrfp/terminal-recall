@@ -39,7 +39,10 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
     
     @Override
     public Feature<GameShell> newInstance(GameShell target) {
-	return new TVF3GameMenuItem();
+	final TVF3GameMenuItem result = new TVF3GameMenuItem();
+	final Frame frame = target.getTr().getRootWindow();
+	result.setMenuSystem(Features.get(frame, MenuSystem.class));
+	return result;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
     
     public class TVF3GameMenuItem implements Feature<GameShell>{
 	private GameShell target;
+	private MenuSystem menuSystem;
 
 	@Override
 	public void apply(GameShell target) {
@@ -123,8 +127,11 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	    }
 	    
 	    public MenuSystem getMenuSystem() {
-		final Frame frame = getTr().getRootWindow();
-	        return Features.get(frame, MenuSystem.class);
+		return menuSystem;
+	    }
+
+	    public void setMenuSystem(MenuSystem menuSystem) {
+	        this.menuSystem = menuSystem;
 	    }
 	
     }//end TVF3GameMenuItem

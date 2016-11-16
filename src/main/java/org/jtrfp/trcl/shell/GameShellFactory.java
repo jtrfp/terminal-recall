@@ -101,16 +101,6 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	public GameShell(TR tr){
 	    this.tr=tr;
-	    tr.setRunState(new GameShellConstructing(){});
-	    final MenuSystem menuSystem = getMenuSystem();
-	    menuSystem.addMenuItem(START_GAME_MENU_PATH);
-	    menuSystem.addMenuItemListener(startGameMenuItemListener, START_GAME_MENU_PATH);
-
-	    menuSystem.addMenuItem(ABORT_GAME_MENU_PATH);
-	    menuSystem.addMenuItemListener(endGameMenuItemListener, ABORT_GAME_MENU_PATH);
-
-	    tr.addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
-	    tr.setRunState(new GameShellConstructed(){});
 	}//end constructor(TR)
 
 	private class EndGameMenuItemListener implements ActionListener{
@@ -420,8 +410,6 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	}
 
 	public TRConfiguration getTrConfiguration() {
-	    if(trConfiguration == null)
-		trConfiguration = Features.get(tr, TRConfiguration.class);
 	    return trConfiguration;
 	}
 
@@ -430,8 +418,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	}
 
 	public MenuSystem getMenuSystem() {
-	    final RootWindow rootWindow = Features.get(tr,RootWindow.class);
-	    return menuSystem = Features.get(rootWindow, MenuSystem.class);
+	    return menuSystem;
 	}
 
 	public void setMenuSystem(MenuSystem menuSystem) {
@@ -440,8 +427,16 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	@Override
 	public void apply(TR target) {
-	    // TODO Auto-generated method stub
+	    target.setRunState(new GameShellConstructing(){});
+	    final MenuSystem menuSystem = getMenuSystem();
+	    menuSystem.addMenuItem(START_GAME_MENU_PATH);
+	    menuSystem.addMenuItemListener(startGameMenuItemListener, START_GAME_MENU_PATH);
 
+	    menuSystem.addMenuItem(ABORT_GAME_MENU_PATH);
+	    menuSystem.addMenuItemListener(endGameMenuItemListener, ABORT_GAME_MENU_PATH);
+
+	    target.addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
+	    target.setRunState(new GameShellConstructed(){});
 	}
 
 	@Override
@@ -484,7 +479,11 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
     @Override
     public Feature<TR> newInstance(TR target) {
-	return new GameShell(target);
+	final GameShell result = new GameShell(target);
+	result.setTrConfiguration(Features.get(target, TRConfiguration.class));
+	final RootWindow rootWindow = Features.get(target,RootWindow.class);
+	result.setMenuSystem(Features.get(rootWindow, MenuSystem.class));
+	return result;
     }
 
     @Override

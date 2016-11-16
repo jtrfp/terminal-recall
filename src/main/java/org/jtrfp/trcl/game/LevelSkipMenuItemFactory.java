@@ -38,7 +38,10 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 
     @Override
     public Feature<TVF3Game> newInstance(TVF3Game target) {
-	return new LevelSkipMenuItem();
+	final LevelSkipMenuItem result = new LevelSkipMenuItem();
+	final Frame frame = (target).getTr().getRootWindow();
+	result.setMenuSystem(Features.get(frame, MenuSystem.class));
+	return result;
     }
 
     @Override
@@ -56,6 +59,7 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	private final RunStateListener runStateListener = new RunStateListener();
 	private final VoxListener      voxListener       = new VoxListener();
 	private WeakReference<Game> target;
+	private MenuSystem             menuSystem;
 
 	@Override
 	public void apply(TVF3Game target) {
@@ -106,8 +110,7 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	}//end VoxListener
 	
 	public MenuSystem getMenuSystem() {
-	    final Frame frame = ((TVF3Game)(target.get())).getTr().getRootWindow();
-	    return Features.get(frame, MenuSystem.class);
+	    return menuSystem;
 	}
 
 	private LevelSkipWindow getLevelSkipWindow(){
@@ -122,5 +125,9 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 		}
 	    return levelSkipWindow;
 	}//end getLevelSkipWindow()
+
+	public void setMenuSystem(MenuSystem menuSystem) {
+	    this.menuSystem = menuSystem;
+	}
     }//end LevelSkipMenuItem
 }//end LevelSkipMenuItemFactory

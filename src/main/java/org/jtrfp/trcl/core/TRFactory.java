@@ -41,6 +41,7 @@ import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.prop.ThreadSafePropertyChangeSupport;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.tools.Util;
 import org.springframework.stereotype.Component;
@@ -219,7 +220,8 @@ public final class TRFactory implements FeatureFactory<Features>{
 	private final CollisionManager 		collisionManager	= new CollisionManager(this);
 	//private Reporter 			reporter;
 	//private Game 				game;
-	private final PropertyChangeSupport	pcSupport = new PropertyChangeSupport(this);
+	private final ThreadSafePropertyChangeSupport
+	                                        pcSupport = new ThreadSafePropertyChangeSupport(this);
 
 	private World 				world;
 	private GameShell			gameShell;

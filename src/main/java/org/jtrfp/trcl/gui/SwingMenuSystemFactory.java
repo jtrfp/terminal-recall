@@ -330,6 +330,11 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 
     @Override
     public synchronized void removeMenuItem(String... path) throws IllegalArgumentException {
+	System.out.print("SwingMenuSystem.removeMenuItem   ");
+	for(String s:path)
+	    System.out.print(s+" ");
+	System.out.println();
+	new Throwable().printStackTrace();
 	rootNode.removeMenuItem(0, path);
     }
 

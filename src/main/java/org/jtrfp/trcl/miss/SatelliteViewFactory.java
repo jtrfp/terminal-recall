@@ -82,7 +82,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	    final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
 	    satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
 	    setMission(target);
-	    gamePause = Features.get(target, GamePause.class);
+	    setGamePause(Features.get(target, GamePause.class));
 	    gamePause.addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(VIEW_MENU_PATH);
@@ -137,7 +137,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	     enabled  = !(runState instanceof Mission.TunnelState);
 	     enabled &= !(runState instanceof Mission.ChamberState);
 	     enabled &= runState   instanceof Mission.PlayerActivity;
-	     enabled &= !Features.get(getMission(), GamePause.class).isPaused();
+	     enabled &= !getGamePause().isPaused();
 	    setEnabled(enabled);
 	}//end reEvaluateEnabledState()
 
@@ -207,6 +207,14 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 
 	    public TR getTr() {
 	        return getMission().getTr();
+	    }
+
+	    public GamePause getGamePause() {
+	        return gamePause;
+	    }
+
+	    public void setGamePause(GamePause gamePause) {
+	        this.gamePause = gamePause;
 	    }
     }//end SatelliteView
 

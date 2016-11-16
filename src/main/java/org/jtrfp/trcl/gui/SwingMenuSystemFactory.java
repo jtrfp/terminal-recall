@@ -15,9 +15,10 @@ package org.jtrfp.trcl.gui;
 
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -330,11 +331,6 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 
     @Override
     public synchronized void removeMenuItem(String... path) throws IllegalArgumentException {
-	System.out.print("SwingMenuSystem.removeMenuItem   ");
-	for(String s:path)
-	    System.out.print(s+" ");
-	System.out.println();
-	new Throwable().printStackTrace();
 	rootNode.removeMenuItem(0, path);
     }
 
@@ -378,6 +374,28 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	public abstract void destroy();
     }//end MenuNode
     
+    protected void addSubMenuLater(final JMenu itemToAdd, final JComponent parent){
+	final TreeSet<JMenu> items = new TreeSet<JMenu>(new JMenuComparator());
+	SwingUtilities.invokeLater(new Runnable(){
+	    public void run(){
+		if(itemToAdd!=null){
+		    for(java.awt.Component comp : parent.getComponents())
+			if(comp instanceof JMenu)
+			    items.add((JMenu)comp);
+		    for(JMenu jMenuItem : items)
+			parent.remove(jMenuItem);
+		    items.add(itemToAdd);
+		    for(JComponent jMenuItem : items)
+			parent.add(jMenuItem);
+		    
+		    parent.add(itemToAdd);
+		    }
+		rw.invalidate();
+		rw.validate();
+		//rw.revalidate();
+	    }});
+    }//end addSubMenuLater(...)
+    
     private class SubMenu extends MenuNode{
 	private final Map<String,MenuNode> nameMap = new HashMap<String,MenuNode>();
 	private final JComponent item;
@@ -390,16 +408,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	
 	public SubMenu(String name, final JComponent parent) {
 	    this(name);
-	    final JComponent it = item;
-	    SwingUtilities.invokeLater(new Runnable(){
-		@Override
-		public void run() {
-		    if(it!=null)
-		     parent.add(it);
-		    rw.invalidate();
-		    rw.validate();
-		    //rw.revalidate();
-		}});
+	    addSubMenuLater((JMenu)item, parent);
 	    this.parent = parent;
 	}
 
@@ -510,6 +519,45 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	}//end destroy()
     }//end SubMenu
     
+    protected static class JMenuItemComparator implements Comparator<JMenuItem> {
+	@Override
+	public int compare(JMenuItem l, JMenuItem r) {
+	    return l.getText().compareTo(r.getText());
+	}
+    }//end JMenuItemComparator
+    
+    protected static class JMenuComparator implements Comparator<JMenu> {
+	@Override
+	public int compare(JMenu l, JMenu r) {
+	    return l.getText().compareTo(r.getText());
+	}
+    }//end JMenuComparator
+    
+    protected void addMenuItemLater(final JMenuItem item,  final JMenu component){
+	final TreeSet<JMenuItem> items = new TreeSet<JMenuItem>(new JMenuItemComparator());
+	SwingUtilities.invokeLater(new Runnable(){
+	    @Override
+	    public void run() {
+		//TODO: NPE, item==null!
+		if(item!=null){
+		    //component.add(item);
+		    
+		    for(java.awt.Component comp : component.getMenuComponents())
+			if(comp instanceof JMenuItem)
+			    items.add((JMenuItem)comp);
+		    for(JMenuItem jMenuItem : items)
+			component.remove(jMenuItem);
+		    item.setEnabled(false);
+		    items.add(item);
+		    for(JMenuItem jMenuItem : items)
+			component.add(jMenuItem);
+		}
+		rw.invalidate();
+		rw.validate();
+		//rw.revalidate();
+	    }});
+    }//end addMenuItemLater(...)
+    
     private class MenuItem extends MenuNode{
 	private final JComponent parent;
 	private final JMenuItem item;
@@ -519,19 +567,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	    super(name);
 	    this.parent= parent;
 	    item  = new JMenuItem(name);
-	    final JComponent it = item;
-	    SwingUtilities.invokeLater(new Runnable(){
-		@Override
-		public void run() {
-		    //TODO: NPE, item==null!
-		    if(it!=null){
-		     it.setEnabled(false);
-		     parent.add(it);
-		     }
-		    rw.invalidate();
-		    rw.validate();
-		    //rw.revalidate();
-		}});
+	    addMenuItemLater(item, (JMenu)parent);
 	}//end constructor
 
 	@Override

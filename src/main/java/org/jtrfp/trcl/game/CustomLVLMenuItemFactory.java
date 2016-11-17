@@ -47,7 +47,7 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
 	public void apply(TVF3Game target) {
 	    setTarget(target);
 	    final MenuSystem menuSystem = getMenuSystem();
-	    menuSystem.addMenuItem(CUSTOM_LVL_PATH);
+	    menuSystem.addMenuItem(.5, CUSTOM_LVL_PATH);
 	    menuSystem.addMenuItemListener(customLVLListener, CUSTOM_LVL_PATH);
 	    final TR tr = target.getTr();
 	    weakRunStateListener = new WeakPropertyChangeListener(runStateListener,tr);

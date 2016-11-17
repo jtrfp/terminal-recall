@@ -37,9 +37,10 @@ public class DebugStatesMenuItemFactory implements FeatureFactory<MenuSystem> {
 	public void apply(MenuSystem target) {
 	    setMenuItemListener(new MenuItemListener());
 	    final MenuSystem ms = target;
-	    ms.addMenuItem(MENU_PATH);
+	    ms.addMenuItem(.5, MENU_PATH);
 	    ms.addMenuItemListener(getMenuItemListener(), MENU_PATH);
 	    ms.setMenuItemEnabled(true, MENU_PATH);
+	    ms.setMenuPosition(.6, "Debug");
 	}
 
 	@Override

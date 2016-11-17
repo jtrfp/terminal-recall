@@ -16,7 +16,8 @@ package org.jtrfp.trcl.gui;
 import java.awt.event.ActionListener;
 
 public interface MenuSystem {
- public void addMenuItem   (String ... path) throws IllegalArgumentException;
+ public void setMenuPosition(double position, String ... path);
+ public void addMenuItem   (double position, String ... path) throws IllegalArgumentException;
  public void removeMenuItem(String ... path) throws IllegalArgumentException;
  public void addMenuItemListener  (ActionListener l, String ... path) throws IllegalArgumentException;
  public void removeMenuItemListener(ActionListener l, String ... path) throws IllegalArgumentException;

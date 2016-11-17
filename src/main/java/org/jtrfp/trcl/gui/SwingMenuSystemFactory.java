@@ -26,6 +26,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.MenuElement;
 import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.Feature;
@@ -41,6 +42,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     public static class SwingMenuSystem implements Feature<RootWindow>, MenuSystem {
     private SubMenu rootNode;
     private JFrame rw;
+    private Map<JMenuItem, Double> positionMap = new HashMap<JMenuItem, Double>();
     
     //private final JFramebufferStateWindow fbsw;
     //private final LevelSkipWindow	levelSkipWindow;
@@ -325,8 +327,8 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     }*/
 
     @Override
-    public synchronized void addMenuItem(String... path) throws IllegalArgumentException {
-	rootNode.addMenuItem(0, path);
+    public synchronized void addMenuItem(double position, String... path) throws IllegalArgumentException {
+	rootNode.addMenuItem(position, 0, path);
     }
 
     @Override
@@ -365,7 +367,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	    return name;
 	}
 	
-	public abstract void addMenuItem   (int index, String ... path) throws IllegalArgumentException;
+	public abstract void addMenuItem   (double position, int index, String ... path) throws IllegalArgumentException;
 	public abstract void removeMenuItem(int index, String ... path) throws IllegalArgumentException;
 	public abstract void addMenuItemListener   (ActionListener l, int index, String ... path)    throws IllegalArgumentException;
 	public abstract void removeMenuItemListener(ActionListener l, int index, String ... path) throws IllegalArgumentException;
@@ -375,10 +377,11 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     }//end MenuNode
     
     protected void addSubMenuLater(final JMenu itemToAdd, final JComponent parent){
-	final TreeSet<JMenu> items = new TreeSet<JMenu>(new JMenuComparator());
+	//final TreeSet<JMenu> items = new TreeSet<JMenu>(new JMenuComparator());
 	SwingUtilities.invokeLater(new Runnable(){
 	    public void run(){
 		if(itemToAdd!=null){
+		    /*
 		    for(java.awt.Component comp : parent.getComponents())
 			if(comp instanceof JMenu)
 			    items.add((JMenu)comp);
@@ -387,8 +390,9 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		    items.add(itemToAdd);
 		    for(JComponent jMenuItem : items)
 			parent.add(jMenuItem);
-		    
+		    */
 		    parent.add(itemToAdd);
+		    refreshOrdering(parent);
 		    }
 		rw.invalidate();
 		rw.validate();
@@ -401,13 +405,14 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	private final JComponent item;
 	private JComponent parent;
 	
-	protected SubMenu(String name){
+	protected SubMenu(double position, String name){
 	    super(name);
 	    this.item = new JMenu(name);
+	    positionMap.put((JMenu)item, position);
 	}
 	
-	public SubMenu(String name, final JComponent parent) {
-	    this(name);
+	public SubMenu(double position, String name, final JComponent parent) {
+	    this(position, name);
 	    addSubMenuLater((JMenu)item, parent);
 	    this.parent = parent;
 	}
@@ -418,22 +423,22 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	}
 
 	@Override
-	public void addMenuItem(int index, String... path)
+	public void addMenuItem(double position, int index, String... path)
 		throws IllegalArgumentException {
 	    final String thisName = path[index];
 	    MenuNode node = nameMap.get(thisName);
 	    if(node==null){//No pre-existing node
 		if(index==path.length-1){//Leaf
-		    node = new MenuItem(thisName, this.item);
+		    node = new MenuItem(position, thisName, this.item);
 		}else{//Stem
-		    node = new SubMenu(thisName, this.item);
-		    node.addMenuItem(index+1, path);
+		    node = new SubMenu(.5, thisName, this.item);
+		    node.addMenuItem(position, index+1, path);
 		}
 		nameMap.put(thisName, node);
 	    }//end if(node==null)
 	    else{// !null
 		if(index!=path.length-1)
-		    node.addMenuItem(index+1, path);
+		    node.addMenuItem(position, index+1, path);
 		else
 		    throw new IllegalArgumentException("Cannot add item as there is a submenu already in its place. Path[index]="+path[index]+" index="+index+" this="+getName());
 	    }//end !null
@@ -517,31 +522,65 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		    }});
 	    }//end if(!null)
 	}//end destroy()
+
+	public void setPosition(double position, int index, String ... path) {
+	    final String thisName = path[index];
+	    MenuNode node = nameMap.get(thisName);
+	    if(node != null){
+		if(index == path.length - 1){//This is the node in question
+		    if(node instanceof MenuItem)
+			positionMap.put(((MenuItem)node).item, position);
+		    else if(node instanceof SubMenu)
+			positionMap.put((JMenuItem)((SubMenu)node).item, position);
+		}
+		else//We're not there yet.
+		    ((SubMenu)node).setPosition(position, index+1, path);
+	    }else throw new IllegalArgumentException("Node entry of name "+thisName+" not found.");
+	}
     }//end SubMenu
     
-    protected static class JMenuItemComparator implements Comparator<JMenuItem> {
+    protected double positionOf(JMenuItem item){
+	final Double pos = positionMap.get(item);
+	if( pos == null )
+	    return .5;
+	return pos;
+    }//end positionOf(...)
+    
+    protected class JMenuItemComparator implements Comparator<JMenuItem> {
 	@Override
 	public int compare(JMenuItem l, JMenuItem r) {
+	    final double leftPos  = positionOf(l);
+	    final double rightPos = positionOf(r);
+	    final double result   = leftPos - rightPos;
+	    System.out.println("LEFT="+l.getText()+" "+leftPos+" "+" RIGHT="+r.getText()+" "+rightPos);
+	    if(result != 0)
+		return (int)(result*10000);
 	    return l.getText().compareTo(r.getText());
 	}
     }//end JMenuItemComparator
     
-    protected static class JMenuComparator implements Comparator<JMenu> {
+    protected class JMenuComparator implements Comparator<JMenu> {
 	@Override
 	public int compare(JMenu l, JMenu r) {
+	    final double leftPos  = positionOf(l);
+	    final double rightPos = positionOf(r);
+	    final double result = leftPos - rightPos;
+	    System.out.println("LEFT="+l.getText()+" "+leftPos+" "+" RIGHT="+r.getText()+" "+rightPos);
+	    if(result != 0)
+		return (int)(result*10000);
 	    return l.getText().compareTo(r.getText());
 	}
     }//end JMenuComparator
     
     protected void addMenuItemLater(final JMenuItem item,  final JMenu component){
-	final TreeSet<JMenuItem> items = new TreeSet<JMenuItem>(new JMenuItemComparator());
 	SwingUtilities.invokeLater(new Runnable(){
 	    @Override
 	    public void run() {
 		//TODO: NPE, item==null!
 		if(item!=null){
-		    //component.add(item);
-		    
+		    component.add(item);
+		    refreshOrdering(component);
+		    /*
 		    for(java.awt.Component comp : component.getMenuComponents())
 			if(comp instanceof JMenuItem)
 			    items.add((JMenuItem)comp);
@@ -551,6 +590,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		    items.add(item);
 		    for(JMenuItem jMenuItem : items)
 			component.add(jMenuItem);
+		    */
 		}
 		rw.invalidate();
 		rw.validate();
@@ -558,20 +598,42 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	    }});
     }//end addMenuItemLater(...)
     
+    protected void refreshOrdering(final JComponent component){
+	final TreeSet<JMenuItem> items = new TreeSet<JMenuItem>(new JMenuItemComparator());
+	//TODO: NPE, item==null!
+
+	if(component instanceof JMenu){
+	 for(java.awt.Component comp : ((JMenu)component).getMenuComponents())
+	    if(comp instanceof JMenuItem)
+		items.add((JMenuItem)comp);
+	}else if(component instanceof JMenuBar)
+		for(MenuElement elm : ((JMenuBar)component).getSubElements())
+		    if(elm instanceof JMenuItem)
+			items.add((JMenuItem)elm);
+	for(JMenuItem jMenuItem : items)
+	    component.remove(jMenuItem);
+	for(JMenuItem jMenuItem : items)
+	    component.add(jMenuItem);
+	rw.invalidate();
+	rw.validate();
+	//rw.revalidate();
+    }//end refreshOrderingLater(...)
+    
     private class MenuItem extends MenuNode{
 	private final JComponent parent;
 	private final JMenuItem item;
 	//private final Collection<ActionListener> menuItemListeners = new HashSet<ActionListener>();
 	
-	public MenuItem(String name, final JComponent parent) {
+	public MenuItem(double position, String name, final JComponent parent) {
 	    super(name);
 	    this.parent= parent;
 	    item  = new JMenuItem(name);
+	    positionMap.put(item, position);
 	    addMenuItemLater(item, (JMenu)parent);
 	}//end constructor
 
 	@Override
-	public void addMenuItem(int index, String... path)
+	public void addMenuItem(double position, int index, String... path)
 		throws IllegalArgumentException {
 	    throw new UnsupportedOperationException("Cannot add item to Menu item. Path="+path+" index="+index);
 	}
@@ -684,6 +746,11 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     @Override
     public void destruct(RootWindow target) {
 	// TODO Auto-generated method stub
+    }
+
+    @Override
+    public void setMenuPosition(double position, String... path) {
+	rootNode.setPosition(position, 0, path);
     }
     }//end SwingMenuSystem
 

@@ -429,10 +429,10 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	public void apply(TR target) {
 	    target.setRunState(new GameShellConstructing(){});
 	    final MenuSystem menuSystem = getMenuSystem();
-	    menuSystem.addMenuItem(START_GAME_MENU_PATH);
+	    menuSystem.addMenuItem(.5, START_GAME_MENU_PATH);
 	    menuSystem.addMenuItemListener(startGameMenuItemListener, START_GAME_MENU_PATH);
 
-	    menuSystem.addMenuItem(ABORT_GAME_MENU_PATH);
+	    menuSystem.addMenuItem(.5, ABORT_GAME_MENU_PATH);
 	    menuSystem.addMenuItemListener(endGameMenuItemListener, ABORT_GAME_MENU_PATH);
 
 	    target.addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);

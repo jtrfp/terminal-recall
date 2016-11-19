@@ -16,10 +16,18 @@ package org.jtrfp.trcl.gui;
 import java.awt.event.ActionListener;
 
 public interface MenuSystem {
+ public static double BEGINNING = 0, END = 1, MIDDLE = Utils.between(BEGINNING,END);
+ 
  public void setMenuPosition(double position, String ... path);
  public void addMenuItem   (double position, String ... path) throws IllegalArgumentException;
  public void removeMenuItem(String ... path) throws IllegalArgumentException;
  public void addMenuItemListener  (ActionListener l, String ... path) throws IllegalArgumentException;
  public void removeMenuItemListener(ActionListener l, String ... path) throws IllegalArgumentException;
  public void setMenuItemEnabled(boolean enabled, String ... path)     throws IllegalArgumentException;
+ 
+ public abstract class Utils {
+     public static double between(double first, double second){
+	 return (first+second) / 2.;
+     }//end between(...)
+ }//end Utils
 }//end MenuSystem

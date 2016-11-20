@@ -66,8 +66,8 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
 	    final ThreadManager threadManager = Features.get(tr, ThreadManager.class);
 	    setMenuSystem(menuSystem);
 	    setExecutor  (threadManager.threadPool);
-	    menuSystem.addMenuItem(.5, LOAD_GAME_PATH);
-	    menuSystem.addMenuItem(.5, SAVE_GAME_PATH);
+	    menuSystem.addMenuItem(MenuSystem.MIDDLE, LOAD_GAME_PATH);
+	    menuSystem.addMenuItem(MenuSystem.MIDDLE, SAVE_GAME_PATH);
 	    menuSystem.addMenuItemListener(loadGameMenuItemListener = new LoadGameMenuItemListener(), LOAD_GAME_PATH);
 	    menuSystem.addMenuItemListener(saveGameMenuItemListener = new SaveGameMenuItemListener(), SAVE_GAME_PATH);
 	    

@@ -34,7 +34,7 @@ public class ConfigMenuItemFactory implements FeatureFactory<MenuSystem> {
 
 	@Override
 	public void apply(MenuSystem target) {
-	    target.addMenuItem(.5, CONFIG_MENU_PATH);
+	    target.addMenuItem(MenuSystem.MIDDLE, CONFIG_MENU_PATH);
 	    target.setMenuItemEnabled(true, CONFIG_MENU_PATH);
 	    target.addMenuItemListener(configMenuItemListener, CONFIG_MENU_PATH);
 	}

@@ -62,7 +62,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	    pause           = inputs.getControllerInput(PAUSE);
 	    this.mission = new WeakReference<Mission>(mission);
 	    pause.addPropertyChangeListener(controllerListener);
-	    getMenuSystem().addMenuItem(.5, PAUSE_MENU_PATH);
+	    getMenuSystem().addMenuItem(MenuSystem.MIDDLE, PAUSE_MENU_PATH);
 	    getMenuSystem().addMenuItemListener(menuSelectionListener, PAUSE_MENU_PATH);
 	    getTr().addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	}

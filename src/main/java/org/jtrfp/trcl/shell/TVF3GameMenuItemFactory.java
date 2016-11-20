@@ -110,7 +110,7 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	private final TRStateListener trStateListener  = new TRStateListener();
 	
 	    private void installMenuItems(){
-		getMenuSystem().addMenuItem(0, NEW_GAME_PATH);
+		getMenuSystem().addMenuItem(MenuSystem.BEGINNING, NEW_GAME_PATH);
 	    }
 	    
 	    private void installMenuItemListeners(){

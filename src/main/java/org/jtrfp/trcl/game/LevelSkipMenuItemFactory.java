@@ -65,7 +65,7 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 	public void apply(TVF3Game target) {
 	    this.target = new WeakReference<Game>(target);
 	    final MenuSystem menuSystem = getMenuSystem();
-	    menuSystem.addMenuItem(.5, MENU_ITEM_PATH);
+	    menuSystem.addMenuItem(MenuSystem.MIDDLE, MENU_ITEM_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, MENU_ITEM_PATH);
 	    final TR tr = target.getTr();
 	    tr.addPropertyChangeListener    (TRFactory.RUN_STATE, runStateListener);

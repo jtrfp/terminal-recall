@@ -29,10 +29,10 @@ public class ExitMenuItemFactory implements FeatureFactory<MenuSystem> {
 
 	@Override
 	public void apply(MenuSystem target) {
-	    target.addMenuItem(.5, EXIT_MENU_PATH);
+	    target.addMenuItem(MenuSystem.MIDDLE, EXIT_MENU_PATH);
 	    target.setMenuItemEnabled(true, EXIT_MENU_PATH);
 	    target.addMenuItemListener(exitMenuItemListener, EXIT_MENU_PATH);
-	    target.setMenuPosition(0, "File");
+	    target.setMenuPosition(MenuSystem.BEGINNING, "File");
 	}
 
 	@Override

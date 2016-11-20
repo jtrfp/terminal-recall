@@ -85,7 +85,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	    setGamePause(Features.get(target, GamePause.class));
 	    gamePause.addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    final MenuSystem menuSystem = getMenuSystem();
-	    menuSystem.addMenuItem(.5, VIEW_MENU_PATH);
+	    menuSystem.addMenuItem(MenuSystem.MIDDLE, VIEW_MENU_PATH);
 	    menuSystem.addMenuItemListener(menuItemListener, VIEW_MENU_PATH);
 	    getTr().addPropertyChangeListener(TRFactory.RUN_STATE, runStateListener);
 	    satelliteToggleInput.addPropertyChangeListener(satelliteControl);

@@ -150,7 +150,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	try{World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
-		toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input, true);
+		addGridUnsafe(toAdd);
 	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
     }
     public void removeGrid(final SpacePartitioningGrid<?> toRemove){
@@ -158,8 +158,16 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	try{World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
-		toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
+		removeGridUnsafe(toRemove);
 	    }}).get();}catch(Exception e){throw new RuntimeException(e);}
+    }
+    
+    public void addGridUnsafe(final SpacePartitioningGrid<?> toAdd){
+	toAdd.getPackedObjectsDispatcher().addTarget(visibilityFilter.input, true);
+    }
+    
+    public void removeGridUnsafe(final SpacePartitioningGrid<?> toRemove){
+	toRemove.getPackedObjectsDispatcher().removeTarget(visibilityFilter.input, true);
     }
     
     private final class CameraPositionHandler implements PropertyChangeListener{
@@ -371,14 +379,18 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	/**
 	 * @param rootGrid the rootGrid to set
 	 */
-	public void setRootGrid(SpacePartitioningGrid<PositionedRenderable> rootGrid) {
+	public void setRootGrid(final SpacePartitioningGrid<PositionedRenderable> rootGrid) {
 	    if(this.rootGrid==rootGrid)
 		return;
 	    final SpacePartitioningGrid<PositionedRenderable> oldGrid = this.rootGrid;
-	    if(this.rootGrid!=null)
-	     removeGrid(this.rootGrid);
-	    if(rootGrid!=null)
-	     addGrid(rootGrid);
+	    try{World.relevanceExecutor.submit(new Runnable(){
+		@Override
+		public void run() {
+		    if(oldGrid!=null)
+			removeGridUnsafe(oldGrid);
+		    if(rootGrid!=null)
+			addGridUnsafe(rootGrid);
+		}}).get();}catch(Exception e){throw new RuntimeException(e);}
 	    this.rootGrid = rootGrid;
 	    pcs.firePropertyChange(ROOT_GRID, oldGrid, rootGrid);
 	}

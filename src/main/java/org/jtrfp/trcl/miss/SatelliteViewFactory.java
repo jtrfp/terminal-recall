@@ -70,10 +70,10 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private final   PropertyChangeSupport         pcs = new PropertyChangeSupport(this);
 	private         ControllerInput               satelliteToggleInput;
 	private         GamePause                     gamePause;
+	private         MenuSystem                    menuSystem;
 	
 	public MenuSystem getMenuSystem() {
-	        final Frame frame = getTr().getRootWindow();
-	        return Features.get(frame, MenuSystem.class);
+	        return menuSystem;
 	    }
 	
 	@Override
@@ -83,6 +83,8 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	    satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
 	    setMission(target);
 	    setGamePause(Features.get(target, GamePause.class));
+	    final Frame frame = getTr().getRootWindow();
+	    setMenuSystem(Features.get(frame, MenuSystem.class));
 	    gamePause.addPropertyChangeListener(GamePauseFactory.PAUSE, pausePropertyChangeListener);
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(MenuSystem.MIDDLE, VIEW_MENU_PATH);
@@ -215,6 +217,10 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 
 	    public void setGamePause(GamePause gamePause) {
 	        this.gamePause = gamePause;
+	    }
+
+	    public void setMenuSystem(MenuSystem menuSystem) {
+	        this.menuSystem = menuSystem;
 	    }
     }//end SatelliteView
 

@@ -577,6 +577,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      *            the heading to set
      */
     public void setHeading(Vector3D nHeading) {
+	if(nHeading.getNorm() == 0)
+	    throw new IllegalArgumentException("Cannot apply zero-norm vector to heading.");
 	lock.lock();
 	try{
 	    System.arraycopy(heading, 0, oldHeading, 0, 3);
@@ -606,6 +608,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
      *            the top to set
      */
     public void setTop(Vector3D nTop) {
+	if(nTop.getNorm() == 0)
+	    throw new IllegalArgumentException("Cannot apply zero-norm vector to top.");
 	lock.lock();
 	try{
 	    System.arraycopy(top, 0, oldTop, 0, 3);

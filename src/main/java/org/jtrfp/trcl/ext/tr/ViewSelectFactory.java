@@ -560,7 +560,13 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 	
 	private boolean isAppropriateToDisplay(){
 	    if(getTr().getRunState() instanceof Mission.PlayerActivity){
-		if(ViewSelect.this.game.get().getCurrentMission().isSatelliteView())
+		final Game game = ViewSelect.this.game.get();
+		if(game == null)
+		    return false;
+		final Mission mission = game.getCurrentMission();
+		if(mission == null)
+		    return false;
+		if(mission.isSatelliteView())
 		    return false;
 		return true;
 	    }//end if(PlayerActivity)

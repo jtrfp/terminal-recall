@@ -73,6 +73,8 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
     public static final String [] ABORT_GAME_MENU_PATH   = new String [] {"Game","Abort Game"};
     public static final String [] START_GAME_MENU_PATH = new String [] {"Game","Start Game"};
+    public static final double    START_GAME_MENU_POS = MenuSystem.Utils.between(MenuSystem.BEGINNING,MenuSystem.MIDDLE);
+    public static final double    ABORT_GAME_MENU_POS = START_GAME_MENU_POS+.01;
     public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
 	    (Color.darkGray,Color.black);
 
@@ -126,13 +128,16 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 		final Object newValue = evt.getNewValue();
-		getMenuSystem().setMenuItemEnabled(
+		final MenuSystem menuSystem = getMenuSystem();
+		menuSystem.setMenuItemEnabled(
 			newValue instanceof Game.GameRunningMode,
 			ABORT_GAME_MENU_PATH);
-		getMenuSystem().setMenuItemEnabled(
+		menuSystem.setMenuItemEnabled(
 			(newValue instanceof Game.GameLoadedMode) &&
 			!(newValue instanceof Game.GameRunningMode), 
 			START_GAME_MENU_PATH);
+		menuSystem.setMenuPosition(START_GAME_MENU_POS, START_GAME_MENU_PATH);
+		menuSystem.setMenuPosition(ABORT_GAME_MENU_POS, ABORT_GAME_MENU_PATH);
 	    }//end RunStateListener
 	}//end RunStateListener
 

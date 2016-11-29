@@ -236,16 +236,21 @@ public final class Renderer {
 	toUse.getFlatRelevanceCollection().addTarget(relevantPositioned, true);
     }
     
+    private static final NotReadyException renderNRE = new NotReadyException();
+    
     public final Callable<?> render = new Callable<Void>(){
 	@Override
 	public Void call() throws Exception {
 	    final GL3 gl = gpu.getGl();
 	    try{ensureInit();
+	        if(!isEnabled())
+	            throw renderNRE;
 	        sendToGPU(gl);
 	        //Make sure memory on the GPU is up-to-date by flushing stale pages to GPU mem.
 	        gpu.memoryManager.getRealtime().flushStalePages();
 	        render(gl);
 	        // Update texture codepages
+	        //TODO: Isn't this getting redundantly called between Renderers?!
 	        gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
 	        fpsTracking();
 	    }catch(NotReadyException e){}

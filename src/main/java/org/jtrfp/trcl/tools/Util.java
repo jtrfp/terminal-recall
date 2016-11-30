@@ -370,15 +370,15 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
    public static void assertPropertiesNotNull(Object bean, String ... propertyNames){
        final Class beanClass = bean.getClass();
        for(String propertyName : propertyNames){
+	   Object result;
 	   try{
 	   final String camelCaseName = Character.toUpperCase(propertyName.charAt(0))+""+propertyName.substring(1);
 	   final Method method = beanClass.getMethod("get"+camelCaseName, null);
-	   final Object result = method.invoke(bean, null);
+	   result = method.invoke(bean, null);
+	   }catch(Exception e){
+	       throw new RuntimeException("Could not check property `"+propertyName+"`",e);}
 	   if(result == null)
 	       throw new IllegalStateException("Property `"+propertyName+" is intolerably null. Did you forget to set it?");
-	   }catch(Exception e){
-	       throw new RuntimeException("Could not check property `"+propertyName+"`",e);
-	   }
        }//end for(propertyNames)
    }//end assertPropertiesNotNull
 }//end Util

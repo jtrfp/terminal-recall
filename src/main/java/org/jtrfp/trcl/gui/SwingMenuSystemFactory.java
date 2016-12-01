@@ -326,6 +326,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		super(name);
 		this.parent= parent;
 		item  = new JMenuItem(name);
+		item.setEnabled(false);
 		positionMap.put(item, position);
 		addMenuItemLater(item, (JMenu)parent);
 	    }//end constructor

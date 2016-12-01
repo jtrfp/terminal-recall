@@ -90,16 +90,28 @@ public class RendererFactory {
     
     private class RendererPreparationMethod implements PreparationMethod<Renderer>{
 	@Override
-	public Renderer deactivate(Renderer obj) {
-	    obj.setEnabled(false);
-	    obj.setRenderingTarget(null);
-	    obj.getCamera().setRootGrid(null);
+	public Renderer deactivate(final Renderer obj) {
+	    final ThreadManager tm = threadManager;
+	    tm.submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    obj.setEnabled(false);
+		    obj.setRenderingTarget(null);
+		    obj.getCamera().setRootGrid(null);
+		    return null;
+		}}).get();
 	    return obj;
 	}
 
 	@Override
-	public Renderer reactivate(Renderer obj) {
-	    obj.setEnabled(true);
+	public Renderer reactivate(final Renderer obj) {
+	    final ThreadManager tm = threadManager;
+	    tm.submitToGL(new Callable<Void>(){
+		@Override
+		public Void call() throws Exception {
+		    obj.setEnabled(true);
+		    return null;
+		}}).get();
 	    return obj;
 	}
     }//end RendererPoolingMethod

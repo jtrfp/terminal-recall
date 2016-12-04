@@ -18,13 +18,13 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 public class RotationalDragBehavior extends Behavior {
     private double dragCoeff=.86;
+    private RotationalMomentumBehavior rotationalMomentumBehavior;
     @Override
     public void tick(long tickTimeInMillis){
 	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
     	if(timeProgressedInFrames<=0)return;
     	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);
-	final WorldObject p = getParent();
-	final RotationalMomentumBehavior rmb = (RotationalMomentumBehavior)p.probeForBehavior(RotationalMomentumBehavior.class);
+	final RotationalMomentumBehavior rmb = getRotationalMomentumBehavior();
 	rmb.setEquatorialMomentum(rmb.getEquatorialMomentum()*finalCoeff);
 	rmb.setLateralMomentum(rmb.getLateralMomentum()*finalCoeff);
 	rmb.setPolarMomentum(rmb.getPolarMomentum()*finalCoeff);
@@ -32,4 +32,15 @@ public class RotationalDragBehavior extends Behavior {
     
     public RotationalDragBehavior setDragCoefficient(double drag){dragCoeff=drag;return this;}
     public double getDragCoefficient(){return dragCoeff;}
-}
+
+    public RotationalMomentumBehavior getRotationalMomentumBehavior() {
+	if(rotationalMomentumBehavior == null)
+	    rotationalMomentumBehavior = getParent().probeForBehavior(RotationalMomentumBehavior.class);
+        return rotationalMomentumBehavior;
+    }
+
+    public void setRotationalMomentumBehavior(
+    	RotationalMomentumBehavior rotationalMomentumBehavior) {
+        this.rotationalMomentumBehavior = rotationalMomentumBehavior;
+    }
+}//end RotationalDragBehavior

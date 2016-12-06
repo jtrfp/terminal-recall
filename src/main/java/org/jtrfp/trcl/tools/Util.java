@@ -20,8 +20,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.math3.analysis.function.Sigmoid;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.coll.BulkRemovable;
 import org.jtrfp.trcl.coll.Repopulatable;
+import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.math.Vect3D;
 
 import com.ochafik.util.Adapter;
 
@@ -381,4 +386,27 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
 	       throw new IllegalStateException("Property `"+propertyName+" is intolerably null. Did you forget to set it?");
        }//end for(propertyNames)
    }//end assertPropertiesNotNull
+   
+   public static void relativeHeadingVector(
+	   double [] originPos,
+	   double [] originHdg,
+	   double [] targetPos,
+	   double [] dest
+	   ){
+       final double [] vectorToTargetVar = dest;
+       TRFactory.twosComplimentSubtract(targetPos, originPos,vectorToTargetVar);
+       
+       assert !Vect3D.isAnyNaN(vectorToTargetVar);
+       assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.POSITIVE_INFINITY);
+       assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.NEGATIVE_INFINITY);
+       
+       vectorToTargetVar[1]=0;
+       Vect3D.normalize(vectorToTargetVar,vectorToTargetVar);
+       
+       Rotation rot = new Rotation(new Vector3D(originHdg[0],0,originHdg[2]),new Vector3D(vectorToTargetVar));
+       final Vector3D deltaVector    = rot.applyTo(Vector3D.PLUS_K);
+       dest[0] = deltaVector.getX();
+       dest[1] = 0;
+       dest[2] = deltaVector.getZ();
+   }//end relativeHeadingVector()
 }//end Util

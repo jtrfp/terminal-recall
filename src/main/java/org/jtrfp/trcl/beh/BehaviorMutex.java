@@ -60,4 +60,8 @@ public class BehaviorMutex<KEY> extends Behavior {
  public void setEnabledGroup(KEY group){
      groupMutex.setEnabledGroup(group);
  }
+
+public KEY getEnabledGroup() {
+    return groupMutex.getEnabledGroup();
+}
 }//end BehaviorMutex

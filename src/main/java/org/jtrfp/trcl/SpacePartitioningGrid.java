@@ -256,8 +256,9 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	
 	public void removeAllDirect(){
 		final ArrayList<SpacePartitioningGrid<E>> branches = new ArrayList<SpacePartitioningGrid<E>>();
-		for(SpacePartitioningGrid<E> g:branchGrids.keySet())
-		    branches.remove(g);
+		//for(SpacePartitioningGrid<E> g:branchGrids.keySet())
+		//    branches.add(g);
+		branches.addAll(branchGrids.keySet());
 		for(SpacePartitioningGrid<E> g:branches)
 		    removeBranch(g);
 		for(Positionable p:localTaggerSet){

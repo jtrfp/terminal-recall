@@ -69,6 +69,8 @@ public KEY getEnabledGroup() {
 }
 
 public void setEnabledGroup(KEY enabledGroup) {
+    if(enabledGroup == this.enabledGroup)
+	return;
     this.enabledGroup = enabledGroup;
     enforce();
 }//end enforce()

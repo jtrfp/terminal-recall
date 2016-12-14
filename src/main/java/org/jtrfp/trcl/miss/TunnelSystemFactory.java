@@ -244,7 +244,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    player.setActive(false);
 	    player.resetVelocityRotMomentum();
 	    player.probeForBehavior(CollidesWithTunnelWalls.class).setEnable(true);
-	    player.probeForBehavior(MovesByVelocity.class)        .setVelocity(Vector3D.ZERO);
+	    player.probeForBehavior(MovesByVelocity.class)        .setVelocity(new double[3]);
 	    player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 	    player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
 	    tunnelToEnter.dispatchTunnelEntryNotifications();
@@ -280,12 +280,8 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	public Tunnel setCurrentTunnel(final Tunnel newTunnel){
 	    final Tunnel oldTunnel = getCurrentTunnel();
 	    this.currentTunnel = newTunnel;
-	    World.relevanceExecutor.submit(new Runnable(){
-		@Override
-		public void run() {
-		    tunnelGrid.removeAll();
-		    tunnelGrid.addBranch(newTunnel);
-		}});
+	    tunnelGrid.removeAll();
+	    tunnelGrid.addBranch(newTunnel);
 	    return oldTunnel;
 	}//end setCurrentTunnel
 

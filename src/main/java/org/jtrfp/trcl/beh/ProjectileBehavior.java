@@ -23,6 +23,7 @@ import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Player;
@@ -113,8 +114,11 @@ public class ProjectileBehavior extends Behavior implements
 	    honingTarget = new WeakReference<WorldObject>((WorldObject)closestObject);
 		probeForBehavior(AutoLeveling.class)
 		.setLevelingVector(heading);
-		movesByVelocity.setVelocity(getParent().getHeading()
-			.scalarMultiply(speed));
+		final double [] velocityDest = movesByVelocity.getVelocity();
+		Vect3D.scalarMultiply(getParent().getHeadingArray(), speed, velocityDest);
+		movesByVelocity.setVelocity(velocityDest);//Just to be sure.
+		//movesByVelocity.setVelocity(getParent().getHeading()
+		//	.scalarMultiply(speed));
 	}// end if(honingTarget)
 	probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	probeForBehavior(DeathBehavior.class).reset();
@@ -127,17 +131,19 @@ public class ProjectileBehavior extends Behavior implements
 	    if (honingAdjustmentUpdate++ % 5 == 0) {
 		if (!honingTarget.get().isVisible())
 		    return;// Dead or otherwise.
+		final WorldObject parent = getParent();
 		final Vector3D honingVector = new Vector3D(
 			honingTarget.get().getPositionWithOffset()).subtract(new Vector3D(
-			getParent().getPosition())).normalize();
+			parent.getPosition())).normalize();
 		//Sanity check
 		if(Double.isNaN(honingVector.getX()))return;
 		if(Double.isNaN(honingVector.getY()))return;
 		if(Double.isNaN(honingVector.getZ()))return;
 		probeForBehavior(AutoLeveling.class)
 			.setLevelingVector(honingVector);
-		movesByVelocity.setVelocity(getParent().getHeading()
-			.scalarMultiply(speed));
+		final double [] destVelocity = movesByVelocity.getVelocity();
+		Vect3D.scalarMultiply(parent.getHeadingArray(), speed, destVelocity);
+		movesByVelocity.setVelocity(destVelocity);//Just to be sure.
 	    }// end if(updateHoningVector)
 	}// end if(honingTarget)
     }//end _tick()

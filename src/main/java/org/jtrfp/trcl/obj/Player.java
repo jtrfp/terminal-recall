@@ -245,7 +245,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		setEquatorialMomentum(0).
 		setLateralMomentum(0).
 		setPolarMomentum(0);
-	probeForBehavior(MovesByVelocity.class).setVelocity(Vector3D.ZERO);
+	probeForBehavior(MovesByVelocity.class).setVelocity(new double[3]);
     }
     
     private class PlayerDeathListener extends Behavior implements DeathListener{

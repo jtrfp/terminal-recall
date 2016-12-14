@@ -12,32 +12,50 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.phy;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class MovesByVelocity extends Behavior implements Velocible {
-	private Vector3D velocity=Vector3D.ZERO;
+	private double [] velocity = new double[3];
+	private ThreadManager threadManager;
 	@Override
 	public void tick(long tickTimeMillis){
 		final WorldObject p = getParent();
-		double progressionInSeconds = (double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
+		double progressionInSeconds = (double)getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/1000.;
 		if(progressionInSeconds>.25)progressionInSeconds=.25;
 		assert !Vect3D.isAnyNaN(p.getPosition());
-		p.movePositionBy(getVelocity().scalarMultiply(progressionInSeconds));
+		final double [] position = p.getPosition();
+		final double [] velocity = getVelocity();
+		position[0] += velocity[0]*progressionInSeconds;
+		position[1] += velocity[1]*progressionInSeconds;
+		position[2] += velocity[2]*progressionInSeconds;
+		p.notifyPositionChange();
+		//p.movePositionBy(getVelocity().scalarMultiply(progressionInSeconds));
 		assert !Vect3D.isAnyNaN(p.getPosition());
 		}
 
 	@Override
-	public void setVelocity(Vector3D vel)
+	public void setVelocity(double [] vel)
 		{velocity=vel;}
 
 	@Override
-	public Vector3D getVelocity()
+	public double [] getVelocity()
 		{return velocity;}
 
 	@Override
-	public void accellerate(Vector3D accelVector)
-		{velocity=velocity.add(accelVector);}
+	public void accellerate(double [] accelVector){
+	    Vect3D.add(velocity, accelVector, velocity);
+	}
+
+	public ThreadManager getThreadManager() {
+	    if( threadManager == null )
+		threadManager = getParent().getTr().getThreadManager();
+	    return threadManager;
+	}
+
+	public void setThreadManager(ThreadManager threadManager) {
+	    this.threadManager = threadManager;
+	}
 	}//end MovesWithVelocity

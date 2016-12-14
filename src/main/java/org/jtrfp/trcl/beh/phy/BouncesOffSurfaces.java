@@ -41,10 +41,10 @@ public class BouncesOffSurfaces extends Behavior implements
 	}//end if(should reflect)
 	//if(parent instanceof Velocible){
 	    final Velocible velocible = (Velocible)parent.probeForBehavior(Velocible.class);
-	    Vector3D oldVelocity = velocible.getVelocity();
+	    Vector3D oldVelocity = new Vector3D(velocible.getVelocity());
 	    if(oldVelocity.getNorm()==0)oldVelocity=Vector3D.PLUS_I;
 	    if(new Rotation(oldVelocity.normalize(),_surfaceNormal).getAngle()>Math.PI/2.){
-		velocible.setVelocity((_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)).scalarMultiply(velocityRetainmentCoefficient));
+		velocible.setVelocity((_surfaceNormal.scalarMultiply(_surfaceNormal.dotProduct(oldVelocity)*-2).add(oldVelocity)).scalarMultiply(velocityRetainmentCoefficient).toArray());
 		//Nudge
 		parent.setPosition(new Vector3D(parent.getPosition()).add(_surfaceNormal.scalarMultiply(5.)).toArray());
 	    }//end if(should bounce)

@@ -20,8 +20,8 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class AdjustAltitudeToPlayerBehavior extends Behavior {
     private final Player 	player;
     private final Cloakable 	playerCloakability;
-    private Vector3D 		DOWN 	   = new Vector3D(0,-80000,0),
-	    			UP	   = new Vector3D(0,80000,0);
+    private double[] 		DOWN 	   = new double[]{0,-80000,0},
+	    			UP	   = new double[]{0,80000,0};
     private boolean 		reverse	   = false;
     private double 		hysteresis = 50000;
     
@@ -41,8 +41,8 @@ public class AdjustAltitudeToPlayerBehavior extends Behavior {
     }//end _tick(...)
 
     public AdjustAltitudeToPlayerBehavior setAccelleration(int accelleration) {
-	UP=new Vector3D(0,accelleration,0);
-	DOWN=new Vector3D(0,-accelleration,0);
+	UP=new double[]{0,accelleration,0};
+	DOWN=new double[]{0,-accelleration,0};
 	return this;
     }//end setAccelleration
 

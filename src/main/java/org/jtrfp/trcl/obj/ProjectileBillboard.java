@@ -43,7 +43,7 @@ public class ProjectileBillboard extends BillboardSprite implements Projectile {
 	setPosition(newPos[0],newPos[1],newPos[2]);
 	setVisible(true);
 	setActive(true);
-	probeForBehavior(Velocible.class).setVelocity(newVelocity);
+	probeForBehavior(Velocible.class).setVelocity(newVelocity.toArray());
 	probeForBehavior(ProjectileBehavior.class).reset(newVelocity.normalize(),newVelocity.getNorm());
     }//end reset()
     @Override

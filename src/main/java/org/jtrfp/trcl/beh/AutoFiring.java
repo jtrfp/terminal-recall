@@ -24,7 +24,7 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 public class AutoFiring extends Behavior {
     private double 	    maxFiringDistance	= TRFactory.mapSquareSize*10;
     private double 	    minFiringDistance	= TRFactory.mapSquareSize*0;
-    private int 	    lastIndexVisited	= 0;
+    private long 	    lastIndexVisited	= 0;
     private boolean 	    smartFiring	  	= false;
     private boolean []      firingPattern = new boolean []
 	    {true,true,false,false,false,true,false,false,true,false,false,false,false};
@@ -39,23 +39,27 @@ public class AutoFiring extends Behavior {
     private double 	    aimRandomness	= 0;
     private final double [] firingPos           = new double[3];
     private GameShell       gameShell;
+    private Cloakable       cloakable;
     @Override
     public void tick(long timeMillis){
 	final WorldObject thisObject = getParent();
 	final Player player = getGameShell().getGame().getPlayer();
-	if(player.probeForBehavior(Cloakable.class).isCloaked())return;
+	final Cloakable cloakable = getCloakable();
+	if(cloakable != null)
+	    if(cloakable.isCloaked())
+		return;
 	final double [] thisPos   = thisObject.getPositionWithOffset();
-	Vect3D.add(projectileFiringBehavior.peekNextModelViewFiringPosition().toArray(),thisPos, firingPos);
-	//final double [] firingPos = thisObject.getPositionWithOffset();
+	Vect3D.add(projectileFiringBehavior.peekNextModelViewFiringPosition(),thisPos, firingPos);
 	final double [] playerPos = player.getPositionWithOffset();
 	final double dist = Vect3D.distance(firingPos, playerPos);
-	if(dist<maxFiringDistance||dist>minFiringDistance){
-	    final int patIndex=(int)(((timeMillis+patternOffsetMillis)%totalFiringPatternTimeMillis)/timePerPatternEntry);
+	if(dist<maxFiringDistance && dist>minFiringDistance){
+	    final long patIndex   = (timeMillis + patternOffsetMillis) / timePerPatternEntry;
+	    final int patIndexMod = (int)(patIndex % firingPattern.length);
 	    if(patIndex!=lastIndexVisited){//end if(lastVisited)
-		if(firingPattern[patIndex]){
+		if(firingPattern[patIndexMod]){
 		    Vector3D result;
 		    if(smartFiring){
-			final Vector3D playerVelocity = player.probeForBehavior(Velocible.class).getVelocity();
+			final Vector3D playerVelocity = new Vector3D(player.probeForBehavior(Velocible.class).getVelocity());
 			final Vector3D playerPosV3D = new Vector3D(playerPos).add(playerVelocity.scalarMultiply(.5));//Look ahead one frame
 			final double projectileSpeed = projectileFiringBehavior.getProjectileFactory().getWeapon().getSpeed()/TRFactory.crossPlatformScalar; 
 			Vector3D virtualPlayerPos = interceptOf(playerPosV3D,playerVelocity,new Vector3D(firingPos),projectileSpeed);
@@ -253,5 +257,16 @@ public class AutoFiring extends Behavior {
 
     public void setGameShell(GameShell gameShell) {
         this.gameShell = gameShell;
+    }
+
+    public Cloakable getCloakable() {
+	if(cloakable == null)
+	    try{cloakable = getGameShell().getGame().getPlayer().probeForBehavior(Cloakable.class);}
+	    catch(BehaviorNotFoundException e){}//No problem.
+        return cloakable;
+    }
+
+    public void setCloakable(Cloakable cloakable) {
+        this.cloakable = cloakable;
     }
 }//end AutoFiring

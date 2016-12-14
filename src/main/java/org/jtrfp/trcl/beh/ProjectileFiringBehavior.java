@@ -47,6 +47,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private boolean             sumProjectorVelocity             = false;
     private SoundTexture        firingSFX;
     private final VetoableChangeSupport vcs = new VetoableChangeSupport(this);
+    private final double []     workVector = new double[3];
     
     @Override
     public void tick(long tickTimeMillis){
@@ -56,7 +57,7 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	final Rotation firingRot = getFiringRotation();
 	    	
 	    	for(int mi=0; mi<multiplexLevel;mi++){
-	    	    final Vector3D firingPosition     = getNextModelViewFiringPosition();
+	    	    final double [] firingPosition     = getNextModelViewFiringPosition();
 	    	    Vector3D rawFiringDirection = getFiringDirectionForPosition(getFiringPositionIndex());
 	    	    rawFiringDirection          = new Vector3D(-rawFiringDirection.getX(),rawFiringDirection.getY(), rawFiringDirection.getZ());
 	    	    final Vector3D firingDirection    = firingRot.applyTo(rawFiringDirection);
@@ -65,8 +66,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	     projectileFactory.
 	    	      fire(Vect3D.add(
 	    		      p.getPositionWithOffset(),
-	    		      firingPosition.toArray(),
-	    		      new double[3]), 
+	    		      firingPosition,
+	    		      workVector), 
 	    		      firingDirection, 
 	    		      getParent(),
 	    		      isSumProjectorVelocity());
@@ -74,8 +75,8 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 	    	     projectileFactory.
 		    	fire(Vect3D.add(
 		    	      p.getPositionWithOffset(),
-		    	      firingPosition.toArray(),
-		    	      new double[3]), 
+		    	      firingPosition,
+		    	      workVector), 
 		    	      firingDirection, 
 		    	      getParent(),
 		    	      isSumProjectorVelocity(),
@@ -114,17 +115,18 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
     private void resetFiringTimer(){
 	timeWhenNextFiringPermittedMillis = System.currentTimeMillis()+timeBetweenFiringsMillis;}
 
-    public Vector3D getNextModelViewFiringPosition(){
+    public double [] getNextModelViewFiringPosition(){
+	final WorldObject parent = getParent();
 	if(isAbsoluteFiringPositions())
 	 return new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
-	    		getParent().getHeading(),getParent().getTop()).applyTo(getNextAbsoluteModelViewFiringPosition());
+	    		parent.getHeading(),parent.getTop()).applyTo(getNextAbsoluteModelViewFiringPosition()).toArray();
 	else{
 	    final double [] vtx = modelSource.getVertex(getNextFiringVertex());
-	    return new Vector3D(vtx[0],vtx[1],vtx[2]);
+	    return vtx;
 	}
     }//end getNextFiringPosition()
     
-    public Vector3D peekNextModelViewFiringPosition(){
+    public double [] peekNextModelViewFiringPosition(){
 	if(isAbsoluteFiringPositions()){
 	    final WorldObject parent = getParent();
 	    final Vector3D heading   = parent.getHeading(),
@@ -132,11 +134,11 @@ public class ProjectileFiringBehavior extends Behavior implements HasQuantifiabl
 		           position  = peekNextAbsoluteModelViewFiringPosition();
 	 return new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,
 	    		     heading        ,top).
-	    		            applyTo(position);
+	    		            applyTo(position).toArray();
 	 }
 	else{
 	    final double [] vtx = modelSource.getVertex(peekNextFiringVertex());
-	    return new Vector3D(vtx[0],vtx[1],vtx[2]);
+	    return vtx;
 	}
     }//end peekNextFiringPosition()
     

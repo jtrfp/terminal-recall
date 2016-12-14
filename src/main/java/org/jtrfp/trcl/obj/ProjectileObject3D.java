@@ -43,7 +43,7 @@ public class ProjectileObject3D extends WorldObject implements Projectile {
 	else {setHeading(Vector3D.PLUS_I);newVelocity=Vector3D.PLUS_I;}//meh.
 	assert !Vect3D.isAnyNaN(newPos);
 	setPosition(newPos[0],newPos[1],newPos[2]);
-	probeForBehavior(Velocible.class).setVelocity(newVelocity);
+	probeForBehavior(Velocible.class).setVelocity(newVelocity.toArray());
 	probeForBehavior(ProjectileBehavior.class).reset(newVelocity.normalize(),newVelocity.getNorm());
 	setActive(true);
 	setVisible(true);

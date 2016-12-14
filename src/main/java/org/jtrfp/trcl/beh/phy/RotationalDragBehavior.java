@@ -19,9 +19,10 @@ import org.jtrfp.trcl.obj.WorldObject;
 public class RotationalDragBehavior extends Behavior {
     private double dragCoeff=.86;
     private RotationalMomentumBehavior rotationalMomentumBehavior;
+    private ThreadManager threadManager;
     @Override
     public void tick(long tickTimeInMillis){
-	final double timeProgressedInFrames=((double)getParent().getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
+	final double timeProgressedInFrames=((double)getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/(1000./ThreadManager.GAMEPLAY_FPS));
     	if(timeProgressedInFrames<=0)return;
     	final double finalCoeff=Math.pow(dragCoeff,timeProgressedInFrames);
 	final RotationalMomentumBehavior rmb = getRotationalMomentumBehavior();
@@ -42,5 +43,15 @@ public class RotationalDragBehavior extends Behavior {
     public void setRotationalMomentumBehavior(
     	RotationalMomentumBehavior rotationalMomentumBehavior) {
         this.rotationalMomentumBehavior = rotationalMomentumBehavior;
+    }
+
+    public ThreadManager getThreadManager() {
+	if( threadManager == null )
+	    threadManager = getParent().getTr().getThreadManager();
+        return threadManager;
+    }
+
+    public void setThreadManager(ThreadManager threadManager) {
+        this.threadManager = threadManager;
     }
 }//end RotationalDragBehavior

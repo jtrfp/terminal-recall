@@ -31,7 +31,7 @@ public class DebrisOnDeathBehavior extends Behavior implements DeathListener {
 	    maxVertexValue=model.getTransparentTriangleList().getMaximumVertexValue();
 	else return;//Give up
 	Vector3D velocity = Vector3D.ZERO;
-	try{velocity = p.probeForBehavior(MovesByVelocity.class).getVelocity().scalarMultiply(.75);}
+	try{velocity = new Vector3D(p.probeForBehavior(MovesByVelocity.class).getVelocity()).scalarMultiply(.75);}
 	catch(BehaviorNotFoundException e){}
 	for(int i=0; i<MIN_FRAGS+maxVertexValue/4000; i++){
 	    final Vector3D oldPos = p.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();

@@ -90,7 +90,9 @@ private static final String [] TYPES = new String[]{
 		.setEquatorialMomentum(.2*Math.random())
 		.setLateralMomentum(.2*Math.random())
 		.setPolarMomentum(.2*Math.random());
-	probeForBehavior(Velocible.class).setVelocity(newVelocity);
+	final double [] velocity = probeForBehavior(Velocible.class).getVelocity();
+	velocity[0]=newVelocity.getX(); velocity[1]=newVelocity.getY(); velocity[2]=newVelocity.getZ();
+	//probeForBehavior(Velocible.class).setVelocity(newVelocity);
 	probeForBehavior(DeathBehavior.class).reset();
     }//end reset()
 }//end Debris

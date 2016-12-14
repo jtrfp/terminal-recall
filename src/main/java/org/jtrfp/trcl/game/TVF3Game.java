@@ -75,7 +75,7 @@ public class TVF3Game implements Game {
     private GameVersion gameVersion;
     private GameShell gameShell;
     public enum Difficulty {
-	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1.5), FURIOUS(2,3,2);
+	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1), FURIOUS(3,3,1.25);
 	
 	private final double firingRateScalar;
 	private final double shieldScalar;

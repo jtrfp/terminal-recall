@@ -12,12 +12,11 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh.phy;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class PulledDownByGravityBehavior extends Behavior {
-    private static final Vector3D G = new Vector3D(0,-1400,0);
+    private static final double [] G = new double[]{0,-1400,0};
     @Override
     public void tick(long tickTimeMillis){
 	final WorldObject p = getParent();

@@ -191,7 +191,7 @@ public class ProjectileFactory {
 	if(weapon.isSumWithProjectorVel() && sumWithProjectorVel){
 	    Vector3D originVelocity = Vector3D.ZERO;
 	    try{final Velocible vel = objectOfOrigin.probeForBehavior(Velocible.class);
-	    originVelocity = vel.getVelocity();
+	    originVelocity = new Vector3D(vel.getVelocity());
 	    }catch(BehaviorNotFoundException e){}
 	    newVelocity = heading.scalarMultiply(projectileSpeed).add(originVelocity);
 	}else// !sumWithProjector

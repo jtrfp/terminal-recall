@@ -53,6 +53,7 @@ import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.NewSmartPlaneBehavior;
 import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.beh.RandomSFXPlayback;
@@ -98,7 +99,7 @@ import org.jtrfp.trcl.tools.Util;
 //import org.jtrfp.trcl.beh.NewSmartPlaneBehavior;
 
 public class DEFObject extends WorldObject {
-    private static final boolean NEW_SMART_PLANE_BEHAVIOR = false;
+    private static final boolean NEW_SMART_PLANE_BEHAVIOR = true;
     //PROPERTIES
     public static final String ENEMY_DEFINITION = "enemyDefinition",
 	    		       ENEMY_PLACEMENT  = "enemyPlacement";
@@ -732,7 +733,7 @@ public void destroy(){
 	mobile=false;//Technically wrong but propulsion is unneeded.
 	//addBehavior(new PulledDownByGravityBehavior());
 	final MovesByVelocity mbv = new MovesByVelocity();
-	mbv.setVelocity(new Vector3D(3500,-100000,5000));
+	mbv.setVelocity(new double []{3500,-100000,5000});
 	addBehavior(mbv);
 	//addBehavior(new VelocityDragBehavior().setDragCoefficient(.99)); // For some reason it falls like pine tar
 	addBehavior(new DamageableBehavior().setMaxHealth(10).setHealth(10));
@@ -750,7 +751,7 @@ public void destroy(){
 	    @Override
 	    public void run(){
 		final Vector3D centerPos = thisObject.probeForBehavior(DeathBehavior.class).getLocationOfLastDeath();
-		thisObject.probeForBehavior(MovesByVelocity.class).setVelocity(new Vector3D(7000,-200000,1000));
+		thisObject.probeForBehavior(MovesByVelocity.class).setVelocity(new double[]{7000,-200000,1000});
 		final double [] pos = thisObject.getPosition();
 		pos[0]=centerPos.getX()+Math.random()*TRFactory.mapSquareSize*3-TRFactory.mapSquareSize*1.5;
 		pos[1]=thisTr.getWorld().sizeY/2+thisTr.getWorld().sizeY*(Math.random())*.3;
@@ -849,14 +850,15 @@ public void destroy(){
 		    probeForBehavior(AutoLeveling.class).
 		    setLevelingAxis(LevelingAxis.HEADING).
 		    setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985,.985,.985);
+		    probeForBehavior(NewSmartPlaneBehavior.class).setEnable(false);
 		}};
 		addBehavior(spinAndCrashAddendum);
 	}//end if(spinCrash)
 	
 	final AutoFiring afb = new AutoFiring();
 	afb.setMaxFireVectorDeviation(.7);
-	afb.setFiringPattern(new boolean [] {true});
-	afb.setTimePerPatternEntry((int)(Math.max(def.getFireSpeed() / 66, 1) * (1 + Math.random()*2)));
+	afb.setFiringPattern(new boolean [] {true,false,false,false,true,true,false});
+	afb.setTimePerPatternEntry(getEnemyDefinition().getFireSpeed() / 66);
 	afb.setPatternOffsetMillis((int)(Math.random()*1000));
 	afb.setProjectileFiringBehavior(pfb);
 	try{
@@ -865,13 +867,16 @@ public void destroy(){
 		afb.setSmartFiring(true);
 	}catch(ClassCastException e){}//Not a TVF3 Game
 	addBehavior(afb);
-	
+	/*
 	addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
 		"FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
-	
+	*/
 	//addBehavior(new RollPitchYawBehavior());
 	//addBehavior(new RollBasedTurnBehavior());
-	//addBehavior(new NewSmartPlaneBehavior());
+	final NewSmartPlaneBehavior nspb = new NewSmartPlaneBehavior();
+	nspb.setRotationScalar(getEnemyDefinition().getThrustSpeed()/1000000);
+	System.out.println("THRUST "+getEnemyDefinition().getComplexModelFile()+" "+getEnemyDefinition().getThrustSpeed());
+	addBehavior(nspb);
 	
     }//end newSmartPlaneBehavior
 

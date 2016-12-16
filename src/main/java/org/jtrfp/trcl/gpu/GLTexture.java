@@ -154,21 +154,27 @@ public final class GLTexture {
     public GLTexture configure(int [] sideLengthsInTexels, int numLevels ){
 	switch(sideLengthsInTexels.length){
 	case 3:{
-	    for(int level = 0; level < numLevels; level++)
-	     gl.glTexImage3D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
-	   gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
+	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
+	    for(int level = 0; level < numLevels; level++){
+		final int xyDivisor = (int)Math.rint(Math.pow(2, level));
+		final int zDivisor  = bindingTarget == GL3.GL_TEXTURE_2D_ARRAY? 1 : xyDivisor;//Array vs true 3D
+	        gl.glTexImage3D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0]/xyDivisor, sideLengthsInTexels[1]/xyDivisor, sideLengthsInTexels[2]/zDivisor, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+	    }
 	 //gl.glTexStorage3D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2]);
 	    break;
 	}case 2:{
-	    for(int level = 0; level < numLevels; level++)
-		     gl.glTexImage2D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
+	    for(int level = 0; level < numLevels; level++){
+		final int xDivisor = (int)Math.rint(Math.pow(2, level));
+		final int yDivisor  = bindingTarget == GL3.GL_TEXTURE_1D_ARRAY? 1 : xDivisor;//Array vs true 2D
+		     gl.glTexImage2D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0]/xDivisor, sideLengthsInTexels[1]/yDivisor, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    //gl.glTexStorage2D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1]);
+	    }//end for(levels)
 	    break;
 	}case 1:{
-	    for(int level = 0; level < numLevels; level++)
-		     gl.glTexImage1D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0], 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
+	    for(int level = 0; level < numLevels; level++)
+		     gl.glTexImage1D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0]/(int)Math.rint(Math.pow(2, level)), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    //gl.glTexStorage1D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0]);
 	    break;
 	}

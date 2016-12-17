@@ -52,15 +52,15 @@ public class VQCodebookManager {
 	if(ib.get(0)<NUM_CODE_PAGES)
 	    throw new RuntimeException("Insufficient support for number of array texture layers: "+ib.get(0));
 	else System.out.println("GL implementation supports "+ib.get(0)+" array texture layers.");
-
+	
 	rgbaTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
 		setInternalColorFormat(GL3.GL_COMPRESSED_RGBA).
-		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, 1).
+		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, MIP_DEPTH).
 		setMagFilter(GL3.GL_LINEAR).
-		setMinFilter(GL3.GL_LINEAR).
+		setMinFilter(GL3.GL_LINEAR_MIPMAP_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE);
 	esTuTvTexture = gpu.
@@ -68,9 +68,9 @@ public class VQCodebookManager {
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
 		bind().
 		setInternalColorFormat(GL3.GL_COMPRESSED_RGBA).
-		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, 1).
+		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, MIP_DEPTH).
 		setMagFilter(GL3.GL_LINEAR).
-		setMinFilter(GL3.GL_LINEAR).
+		setMinFilter(GL3.GL_LINEAR_MIPMAP_LINEAR).
 		setWrapS(GL3.GL_CLAMP_TO_EDGE).
 		setWrapT(GL3.GL_CLAMP_TO_EDGE).
 		unbind();
@@ -152,11 +152,13 @@ public class VQCodebookManager {
 			    workTile.position(row * 4 * CODE_SIDE_LENGTH);
 			    rowWriters[0].applyRow(row, workTile);
 			}// end for(rows)
-			workTile.clear();
+			writeWithMip(texture, workTile, tu.getX(), tu.getY(), tu.getZ(), 
+				CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 0);
+			/*workTile.clear();
 			texture.subImage(
 				new int[]{tu.getX(),tu.getY(),tu.getZ()},
 				codeDims,
-				GL3.GL_RGBA, 0, workTile);
+				GL3.GL_RGBA, 0, workTile);*/
 		    }//end if(single code)
 		    else if(rowWriters.length==256){
 			for (int y = 0; y < CODE256_HEIGHT_CODES; y++) {
@@ -172,11 +174,13 @@ public class VQCodebookManager {
 				}//end if(!null)
 			    }// end for(x)
 			}// end for(y)
-			workTile256.clear();
+			writeWithMip(texture, workTile256, tu.getX(), tu.getY(), tu.getZ(), 
+				code256Dims[0], code256Dims[1], 0);
+			/*workTile256.clear();
 			texture.subImage(
 				new int[]{tu.getX(),tu.getY(),tu.getZ()},
 				code256Dims,
-				GL3.GL_RGBA, 0, workTile256);
+				GL3.GL_RGBA, 0, workTile256);*/
 		    }//end code256
 		    else throw new RuntimeException("Unrecognized rowWriter count: "+tu.getRowWriters().length);
 		}//end if(rw!=null)
@@ -184,6 +188,69 @@ public class VQCodebookManager {
 	}//end for(tileUpdates)
 	gpu.defaultTexture();
     }//end refreshStaleCodePages()
+    
+    private void writeWithMip(GLTexture texture, ByteBuffer workTile256, int updateX, int updateY, int layer, int updateWidth, int updateHeight, int level){
+	if(level >= MIP_DEPTH)
+	    return;
+	workTile256.clear();
+	texture.subImage(
+		new int[]{updateX,updateY,layer},
+		new int[]{updateWidth, updateHeight, 1},
+		GL3.GL_RGBA, level, workTile256);
+	//Scale down
+	final int newUpdateHeight = updateHeight / 2;
+	final int newUpdateWidth  = updateWidth  / 2;
+	for(int newY = 0; newY < newUpdateHeight; newY++){
+	    final int oldY = newY*2;
+	    for(int newX = 0; newX < newUpdateWidth; newX++){
+		final int oldX = newX*2;
+		int accumulatorR = 0, accumulatorG = 0, accumulatorB = 0, accumulatorA = 0;
+		//X,Y
+		int oldFlatIndex = (oldY * updateWidth + oldX) * 4;
+		workTile256.position(oldFlatIndex);
+		accumulatorR += workTile256.get() & 0xFF;
+		accumulatorG += workTile256.get() & 0xFF;
+		accumulatorB += workTile256.get() & 0xFF;
+		accumulatorA += workTile256.get() & 0xFF;
+		//X+1, Y
+		oldFlatIndex = (oldY * updateWidth + (oldX+1)) * 4;
+		workTile256.position(oldFlatIndex);
+		accumulatorR += workTile256.get() & 0xFF;
+		accumulatorG += workTile256.get() & 0xFF;
+		accumulatorB += workTile256.get() & 0xFF;
+		accumulatorA += workTile256.get() & 0xFF;
+		
+		//X+1, Y+1
+		oldFlatIndex = ((oldY+1) * updateWidth + (oldX+1)) * 4;
+		workTile256.position(oldFlatIndex);
+		accumulatorR += workTile256.get() & 0xFF;
+		accumulatorG += workTile256.get() & 0xFF;
+		accumulatorB += workTile256.get() & 0xFF;
+		accumulatorA += workTile256.get() & 0xFF;
+		
+		//X, Y+1
+		oldFlatIndex = ((oldY+1) * updateWidth + oldX) * 4;
+		workTile256.position(oldFlatIndex);
+		accumulatorR += workTile256.get() & 0xFF;
+		accumulatorG += workTile256.get() & 0xFF;
+		accumulatorB += workTile256.get() & 0xFF;
+		accumulatorA += workTile256.get() & 0xFF;
+		
+		accumulatorR /= 4;
+		accumulatorG /= 4;
+		accumulatorB /= 4;
+		accumulatorA /= 4;
+		
+		final int newFlatIndex = (newY * newUpdateWidth + newX) * 4;
+		workTile256.position(newFlatIndex);
+		workTile256.put((byte)(accumulatorR & 0xFF));
+		workTile256.put((byte)(accumulatorG & 0xFF));
+		workTile256.put((byte)(accumulatorB & 0xFF));
+		workTile256.put((byte)(accumulatorA & 0xFF));
+	    }//end for(x)
+	}//end for(y)
+	writeWithMip(texture, workTile256, updateX/2, updateY/2, layer, newUpdateWidth, newUpdateHeight, level+1);
+    }//end writeWithMip(...)
 
     public synchronized void newCodebook256(List<Integer> list, int count){
 	count=codebook256Indices.pop(list,count);

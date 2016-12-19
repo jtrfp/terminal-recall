@@ -649,7 +649,7 @@ public final class Renderer {
 	rFactory.getLayerAccumulatorTexture0().bindToTextureUnit(6,gl);
 	vps.getVertexTextureIDTexture   ().bindToTextureUnit(7,gl);
 	rFactory.getPrimitiveUVZWTexture().bindToTextureUnit(8,gl);
-	rFactory.getPrimitiveNormTexture().bindToTextureUnit(9, gl);
+	rFactory.getPrimitiveNormLODTexture().bindToTextureUnit(9, gl);
 	rFactory.getLayerAccumulatorTexture1().bindToTextureUnit(10,gl);
 	
 	deferredProgram.getUniform("bypassAlpha").setui(!getCamera().isFogEnabled()?1:0);

@@ -22,7 +22,7 @@
 uniform sampler2D 		primitiveIDTexture;
 uniform sampler2D		vertexTextureIDTexture;
 uniform sampler2D		primitiveUVZWTexture;
-uniform sampler2D		primitivenXnYnZTexture;
+uniform sampler2D		primitivenXnYnZLTexture;
 uniform sampler2DArray 	rgbaTiles;
 uniform sampler2DArray	ESTuTvTiles;
 uniform sampler2D		layerAccumulator0;
@@ -236,12 +236,23 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
  								=((clamp(-dot(sunVector,norm),0,1)*sunColor)+ambientLight) + cTexel.ESTuTv.x;
  return cTexel.rgba * illumination;
  }//end vqConstruct
+ 
+ float getTextureID(uint primitiveID, uint lod){
+ uint vertexID = primitiveID * 3u + lod;
+ return texelFetch(
+  vertexTextureIDTexture,
+  ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,
+  vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x
+   *(65536u*PAGE_SIZE_VEC4);
+}
 
 vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
- vec4	nXnYnZ		= textureProjLod(primitivenXnYnZTexture,pQuad,0);
+ vec4	nXnYnZL		= textureProjLod(primitivenXnYnZLTexture,pQuad,0);
  vec2	uv			= vUVZI.xy;
- vec3 	norm 		= nXnYnZ.xyz/w;
- vec4	texel		= vqConstruct(uint(vUVZI[3u]),norm,uv);
+ vec3 	norm 		= nXnYnZL.xyz/w;
+ uint   lod         = uint(nXnYnZL.w/w); //TODO: Trilinear filtering?
+ float  textureID   = getTextureID(uint(vUVZI[3u]), lod);
+ vec4	texel		= vqConstruct(uint(textureID),norm,uv);
  if(disableAlpha)	texel.a=1;
  if(bypassAlpha==0u)texel.rgb = mix(texel.rgb,fogCubeColor,warpFog(vUVZI.z));
  return texel;
@@ -268,15 +279,6 @@ uint depthOfFloatShiftQueue(vec4 fsq0){
 vec3 getPQuad(uint primitiveID){
  vec2	corner		= vec2(primitiveID%PRIMS_PER_ROW,primitiveID/PRIMS_PER_ROW);
  return				vec3(corner + halfScreenLocOffset,PQUAD_DENOM);
-}
-
-float getTextureID(uint primitiveID){
- uint vertexID = primitiveID * 3u;
- return texelFetch(
-  vertexTextureIDTexture,
-  ivec2(vertexID%VTX_TEXTURE_USABLE_WIDTH,
-  vertexID/VTX_TEXTURE_USABLE_WIDTH),0).x
-   *(65536u*PAGE_SIZE_VEC4);
 }
 
 ////////// STRUCT LAYOUT DOCUMENTATION ///////////////
@@ -324,7 +326,7 @@ if(populatedFSQ){
   vec3 pQuad = pQuads[i]= getPQuad(primitiveID);
   vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pQuad,0);
   _uvzw.xyz /= _uvzw.w;
-  vUVZI[i]   = vec4(_uvzw.xyz,getTextureID(primitiveID));
+  vUVZI[i]   = vec4(_uvzw.xyz,primitiveID);
   _w[i]		= _uvzw.w;
   ordering[i]=i;
   relevantSize++;
@@ -363,7 +365,7 @@ if(color.a > ALPHA_THRESHOLD){
   vec3 pq = getPQuad(opaquePrimID);
   vec4 _uvzw	= textureProjLod(primitiveUVZWTexture,pq,0);
   _uvzw.xyz /= _uvzw.w;
-  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,getTextureID(opaquePrimID)) ,true,_uvzw.w);
+  vec4 oColor = primitiveLayer(pq, vec4(_uvzw.xyz,opaquePrimID) ,true,_uvzw.w);
   if(bypassAlpha==0u){
    oColor = vec4(mix(texture(cubeTexture,norm).rgb,oColor.rgb,oColor.a),1);
    color.rgb = reverseBlend(oColor,color,oColor.a).rgb;}

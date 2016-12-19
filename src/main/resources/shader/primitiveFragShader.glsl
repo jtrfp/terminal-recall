@@ -20,7 +20,7 @@
 
 //INPUTS
 flat in mat4 uvzwQuad;
-flat in mat4 nXnYnZQuad;
+flat in mat4 nXnYnZLQuad;
 
 //OUTPUTS
 layout(location = 0) out vec4	uvzwBuffer;
@@ -45,8 +45,8 @@ void main(){
  				mix(uvzwQuad[2u],uvzwQuad[3u],coord.x),
  				coord.y);
  nXnYnZBuffer = mix(
- 				mix(nXnYnZQuad[0u],nXnYnZQuad[1u],coord.x),
- 				mix(nXnYnZQuad[2u],nXnYnZQuad[3u],coord.x),
+ 				mix(nXnYnZLQuad[0u],nXnYnZLQuad[1u],coord.x),
+ 				mix(nXnYnZLQuad[2u],nXnYnZLQuad[3u],coord.x),
  				coord.y);
  }
  

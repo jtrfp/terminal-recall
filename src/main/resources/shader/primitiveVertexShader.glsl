@@ -40,7 +40,7 @@ const float GL_POS_W				= .5/PRIM_TEX_WIDTH_SCALAR;
 
 //OUTPUTS
 flat out mat4 uvzwQuad;
-flat out mat4 nXnYnZQuad;// UNUSED: one float
+flat out mat4 nXnYnZLQuad;
 
 //IN
 uniform sampler2D		xyVBuffer;
@@ -136,13 +136,18 @@ void main(){
  uvzwQuad[2u]=vec4(vec2(tlUV),vec2(zwMatrix*topLeft));
  uvzwQuad[3u]=vec4(vec2(trUV),vec2(zwMatrix*topRight));
  
- nXnYnZQuad[0u].xy=(nXnYmatrix*bottomLeft).xy;
- nXnYnZQuad[1u].xy=(nXnYmatrix*bottomRight).xy;
- nXnYnZQuad[2u].xy=(nXnYmatrix*topLeft).xy;
- nXnYnZQuad[3u].xy=(nXnYmatrix*topRight).xy;
+ nXnYnZLQuad[0u].xy=(nXnYmatrix*bottomLeft).xy;
+ nXnYnZLQuad[1u].xy=(nXnYmatrix*bottomRight).xy;
+ nXnYnZLQuad[2u].xy=(nXnYmatrix*topLeft).xy;
+ nXnYnZLQuad[3u].xy=(nXnYmatrix*topRight).xy;
  
- nXnYnZQuad[0u].z=(nZmatrix*bottomLeft).x;
- nXnYnZQuad[1u].z=(nZmatrix*bottomRight).x;
- nXnYnZQuad[2u].z=(nZmatrix*topLeft).x;
- nXnYnZQuad[3u].z=(nZmatrix*topRight).x;
+ nXnYnZLQuad[0u].z=(nZmatrix*bottomLeft).x;
+ nXnYnZLQuad[1u].z=(nZmatrix*bottomRight).x;
+ nXnYnZLQuad[2u].z=(nZmatrix*topLeft).x;
+ nXnYnZLQuad[3u].z=(nZmatrix*topRight).x;
+ //LOD
+ nXnYnZLQuad[0u].w= 0;
+ nXnYnZLQuad[1u].w= 0;
+ nXnYnZLQuad[2u].w= 0;
+ nXnYnZLQuad[3u].w= 0;
  }//end main()

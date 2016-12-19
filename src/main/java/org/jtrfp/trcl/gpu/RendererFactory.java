@@ -63,7 +63,7 @@ public class RendererFactory {
     private 	 	GLUniform	    	sunVector;
     private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
-    /*					*/	primitiveUVZWTexture,primitiveNormTexture,
+    /*					*/	primitiveUVZWTexture,primitiveNormLODTexture,
     /*					*/	layerAccumulatorTexture0,
     /*					*/	layerAccumulatorTexture1,
     /*					*/	portalTexture;
@@ -232,7 +232,7 @@ public class RendererFactory {
 		deferredProgram.getUniform("layerAccumulator0").set((int)6);
 		deferredProgram.getUniform("vertexTextureIDTexture").set((int) 7);
 		deferredProgram.getUniform("primitiveUVZWTexture").set((int) 8);
-		deferredProgram.getUniform("primitivenXnYnZTexture").set((int) 9);
+		deferredProgram.getUniform("primitivenXnYnZLTexture").set((int) 9);
 		deferredProgram.getUniform("layerAccumulator1").set((int)10);
 		deferredProgram.getUniform("ambientLight").set(.4f, .5f, .7f);
 		sunVector.set(.5774f,-.5774f,.5774f);
@@ -242,10 +242,10 @@ public class RendererFactory {
 		gpu.defaultTIU();
 		
 		/////// PRIMITIVE
-		primitiveNormTexture = gpu  //Does not need to be in reshape() since it is off-screen.
+		primitiveNormLODTexture = gpu  //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
 			.bind()
-			.setImage(GL3.GL_RGBA32F,// A is unused. Intel driver doesn't like layering RGB and RGBA together. 
+			.setImage(GL3.GL_RGBA32F,
 				PRIMITIVE_BUFFER_WIDTH * PRIMITIVE_BUFFER_OVERSAMPLING, 
 				PRIMITIVE_BUFFER_HEIGHT * PRIMITIVE_BUFFER_OVERSAMPLING, 
 				GL3.GL_RGBA,
@@ -274,7 +274,7 @@ public class RendererFactory {
 			.bindToDraw()
 			.attachDrawTexture(primitiveUVZWTexture,
 				GL3.GL_COLOR_ATTACHMENT0)
-			.attachDrawTexture(primitiveNormTexture,
+			.attachDrawTexture(primitiveNormLODTexture,
 				GL3.GL_COLOR_ATTACHMENT1)
 			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0,GL3.GL_COLOR_ATTACHMENT1);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
@@ -561,8 +561,8 @@ public class RendererFactory {
     /**
      * @return the primitiveNormTexture
      */
-    public GLTexture getPrimitiveNormTexture() {
-        return primitiveNormTexture;
+    public GLTexture getPrimitiveNormLODTexture() {
+        return primitiveNormLODTexture;
     }
 
     /**

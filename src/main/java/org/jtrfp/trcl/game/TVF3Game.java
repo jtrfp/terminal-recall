@@ -75,14 +75,14 @@ public class TVF3Game implements Game {
     private GameVersion gameVersion;
     private GameShell gameShell;
     public enum Difficulty {
-	EASY(.5,.5,1), NORMAL(1,1,1), HARD(2,1.5,1), FURIOUS(3,3,1.25);
+	EASY(2,.5,1), NORMAL(1,1,1), HARD(1,1.5,1), FURIOUS(1,3,1.25);
 	
-	private final double firingRateScalar;
+	private final double timeBetweenFiringScalar;
 	private final double shieldScalar;
 	private final double defSpeedScalar;
 	
-	Difficulty(double firingRateScalar, double shieldScalar, double defSpeedScalar){
-	    this.firingRateScalar= firingRateScalar;
+	Difficulty(double timeBetweenFiringScalar, double shieldScalar, double defSpeedScalar){
+	    this.timeBetweenFiringScalar= timeBetweenFiringScalar;
 	    this.shieldScalar    = shieldScalar;
 	    this.defSpeedScalar  = defSpeedScalar;
 	}
@@ -94,7 +94,7 @@ public class TVF3Game implements Game {
 	}
 	
 	public double getFiringRateScalar(){
-	    return firingRateScalar;
+	    return timeBetweenFiringScalar;
 	}
 
 	public double getShieldScalar() {

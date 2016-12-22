@@ -48,7 +48,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	private TR tr;
 	private Vector3D positionOffset = Vector3D.ZERO;
 	private RenderableSpacePartitioningGrid targetGrid;
-	private double firingRateScalar=1, shieldScalar=1, thrustScalar=1;
+	private double firingIntervalScalar=1, shieldScalar=1, thrustScalar=1;
 	
 	@Override
 	public void placeObjects(){
@@ -60,7 +60,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    //Apply scalars
 	    final double shieldScalar     = getShieldScalar();
 	    final double thrustScalar     = getThrustScalar();
-	    final double firingRateScalar = getFiringRateScalar();
+	    final double firingRateScalar = getFiringIntervalScalar();
 	    final GL33Model [] models = new GL33Model[defs.size()];
 	    //final TR tr = world.getTr();
 	    final LoadingProgressReporter[] defReporters = rootReporter
@@ -202,12 +202,12 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	    this.definitionsToBeIntroduced = definitionsToBeIntroduced;
 	}
 
-	public double getFiringRateScalar() {
-	    return firingRateScalar;
+	public double getFiringIntervalScalar() {
+	    return firingIntervalScalar;
 	}
 
-	public void setFiringRateScalar(double firingRateSclar) {
-	    this.firingRateScalar = firingRateSclar;
+	public void setFiringIntervalScalar(double firingRateSclar) {
+	    this.firingIntervalScalar = firingRateSclar;
 	}
 
 	public double getShieldScalar() {

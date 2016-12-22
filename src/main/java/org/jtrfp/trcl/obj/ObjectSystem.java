@@ -89,7 +89,7 @@ public class ObjectSystem extends RenderableSpacePartitioningGrid {
 	    final DEFObjectPlacer newResult = new DEFObjectPlacer();
 	    final TVF3Game game = (TVF3Game)getGameShell().getGame();
 	    final Difficulty difficulty = game.getDifficulty();
-	    newResult.setFiringRateScalar(difficulty.getFiringRateScalar());
+	    newResult.setFiringIntervalScalar(difficulty.getFiringRateScalar());
 	    newResult.setShieldScalar    (difficulty.getShieldScalar());
 	    newResult.setThrustScalar    (difficulty.getDefSpeedScalar());
 	    newResult.setRootReporter(getDefObjectReporter());

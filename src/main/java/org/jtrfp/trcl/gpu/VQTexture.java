@@ -55,6 +55,7 @@ public class VQTexture implements Texture {
     private TextureBehavior.Support	tbs = new TextureBehavior.Support();
     private Point2D.Double              size;
     private final Collection<Runnable>  finalizationHooks = new ArrayList<Runnable>();
+    private List<VQTexture>             mipTextures;
     
     VQTexture(GPU gpu, String debugName){
    	this.tm		  =gpu.textureManager.get();
@@ -402,5 +403,13 @@ public class VQTexture implements Texture {
     
     public void addFinalizationHook(Runnable r){
 	finalizationHooks.add(r);
+    }
+
+    public List<VQTexture> getMipTextures() {
+        return mipTextures;
+    }
+
+    public void setMipTextures(List<VQTexture> mipTextures) {
+        this.mipTextures = mipTextures;
     }
 }// end Texture

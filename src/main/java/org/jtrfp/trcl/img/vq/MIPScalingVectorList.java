@@ -39,12 +39,24 @@ public class MIPScalingVectorList implements VectorList {
 	final int y = vectorIndex / newSideLength * 2;
 	final int newIndex = sideLength * y + x;
 	double accumulator = 0;
+	double weightAccum = 0, weight;
 	
-	accumulator += delegate.componentAt(newIndex, componentIndex);
-	accumulator += delegate.componentAt(newIndex+1, componentIndex);
-	accumulator += delegate.componentAt(newIndex+sideLength, componentIndex);
-	accumulator += delegate.componentAt(newIndex+sideLength+1, componentIndex);
-	accumulator /= 4;
+	weight = delegate.componentAt(newIndex, 3);//ALPHA
+	weightAccum += weight;
+	accumulator += delegate.componentAt(newIndex, componentIndex) * weight;
+	
+	weight = delegate.componentAt(newIndex+1, 3);//ALPHA
+	weightAccum += weight;
+	accumulator += delegate.componentAt(newIndex+1, componentIndex) * weight;
+	
+	weight = delegate.componentAt(newIndex+sideLength, 3);//ALPHA
+	weightAccum += weight;
+	accumulator += delegate.componentAt(newIndex+sideLength, componentIndex) * weight;
+	
+	weight = delegate.componentAt(newIndex+sideLength+1, 3);//ALPHA
+	weightAccum += weight;
+	accumulator += delegate.componentAt(newIndex+sideLength+1, componentIndex) * weight;
+	accumulator /= weightAccum;
 	return accumulator;
     }
 

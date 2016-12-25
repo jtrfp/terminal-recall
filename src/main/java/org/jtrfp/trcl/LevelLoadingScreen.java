@@ -38,7 +38,7 @@ public class LevelLoadingScreen extends RenderableSpacePartitioningGrid {
 	try{add(loadingMeterBar = new MeterBar( 
 		Features.get(tr, GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/BlueWhiteGradient.png")),null,
-			"LoadingBar blackBlue",false), LOADING_WIDTH, LOADING_LENGTH,
+			"LoadingBar blackBlue",false, false), LOADING_WIDTH, LOADING_LENGTH,
 		true, "LevelLoadingScreen"));}
 	finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	loadingMeterBar.setPosition(LOADING_POS);

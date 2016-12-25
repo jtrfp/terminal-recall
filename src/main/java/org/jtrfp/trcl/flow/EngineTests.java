@@ -51,7 +51,7 @@ public class EngineTests {
 	InputStream is = null;
 	try{
 	 final Texture test = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(
-		    VQTexture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true);
+		    VQTexture.RGBA8FromPNG(is = tr.getClass().getResourceAsStream("/dqTestTexture.png")),null, "dqTestTexture", true, true);
 	 final int NUM_LAYERS=8;
 	 final double INCREMENT = .1;
 	 final double OFF=-.5;

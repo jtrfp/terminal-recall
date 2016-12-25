@@ -54,7 +54,7 @@ public class IntroScreen extends RenderableSpacePartitioningGrid {
     
     private static Texture [] genTexture(String resourceName, TR tr) throws IllegalAccessException, IOException, FileLoadException{
 	final ResourceManager rm = tr.getResourceManager();
-	return rm.getSpecialRAWAsTextures(resourceName, rm.getPalette("VGA.ACT"), Features.get(tr, GPUFeature.class).getGl(), 1, true);
+	return rm.getSpecialRAWAsTextures(resourceName, rm.getPalette("VGA.ACT"), Features.get(tr, GPUFeature.class).getGl(), 1, true, true);
     }//end genTexture
     
     public void startMusic(){

@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 
 import org.jtrfp.trcl.gpu.DynamicTexture;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 
 public class AnimatedTexture extends DynamicTexture {
@@ -60,8 +61,8 @@ public class AnimatedTexture extends DynamicTexture {
 	return getFrames()[(int)getTextureSequencer().getCurrentFrame()];
     }
 
-    public int getCurrentTexturePage() {
-	return getCurrentFrame().getTexturePage();
+    public Texture getCurrentTexture() {
+	return getCurrentFrame();
     }
 
     @Override

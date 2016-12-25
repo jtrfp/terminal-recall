@@ -57,7 +57,7 @@ public class GLFont{
 		.textureManager.get()
 		.newTexture(
 			ByteBuffer.allocateDirect(sideLength * sideLength * 4),null,
-			"GLFont rgba buf empty",false));
+			"GLFont rgba buf empty",false, true));
 	    //Load the gl-specific widths
 	    for(int i=0; i<widths.size();i++){
 		glWidths[i+asciiOffset]=(double)widths.get(i)/((double)getTextureSideLength()*1.2);
@@ -78,7 +78,7 @@ public class GLFont{
 		    texBuf.put(rgba8888[i]);
 		}//end for(imgHeight)
 	    textures[i + asciiOffset] = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(
-		    texBuf, null,"GLFont rgba buf char=" + (char) i,false);
+		    texBuf, null,"GLFont rgba buf char=" + (char) i,false, true);//TODO: Optimize
 	    }//end for(i:numChars)
 	    //Load empties to the right side of the ASCII textures.
 	    for(int i=asciiOffset+numChars; i<256;i++){
@@ -117,7 +117,7 @@ public class GLFont{
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
 		g.dispose();
-		return Features.get(tr, GPUFeature.class).textureManager.get().newTexture(img,null,"GLFont "+(char)c,false);
+		return Features.get(tr, GPUFeature.class).textureManager.get().newTexture(img,null,"GLFont "+(char)c,false, true);
 		}//end renderToTexture(...)
 	
 	public double getTextureSideLength(){return sideLength;}

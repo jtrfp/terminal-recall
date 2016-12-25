@@ -12,14 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.concurrent.Callable;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.FlatDoubleWindow;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TriangleVertex2FlatDoubleWindow;
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.core.WindowAnimator;
@@ -209,10 +209,21 @@ public class TriangleList extends PrimitiveList<Triangle> {
 		vwContext.u.set(gpuTVIndex, (short) Math.rint(sideScalar * t.getUV(vIndex).getX()));
 		vwContext.v.set(gpuTVIndex, (short) Math.rint(sideScalar * (1-t.getUV(vIndex).getY())));
 	    }// end if(!animateUV)
-	    final int textureID = ((VQTexture)td).getTexturePage();
-	    vwContext.textureIDLo .set(gpuTVIndex, (byte)(textureID & 0xFF));
-	    vwContext.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8) & 0xFF));
-	    vwContext.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
+	    final VQTexture vq  = (VQTexture)td;
+	    final int textureID = vq.getTexturePage();
+	    final List<VQTexture> mipTextures = vq.getMipTextures();
+	    final int mipIndex = (vIndex % 3) - 1; // -1 means no mip
+	    if(mipTextures != null && mipIndex >= 0){
+		VQTexture mipTexture = mipTextures.get(mipIndex);
+		final int mipTextureID = mipTexture.getTexturePage();
+		vwContext.textureIDLo .set(gpuTVIndex, (byte)(mipTextureID         & 0xFF));
+		vwContext.textureIDMid.set(gpuTVIndex, (byte)((mipTextureID >> 8)  & 0xFF));
+		vwContext.textureIDHi .set(gpuTVIndex, (byte)((mipTextureID >> 16) & 0xFF));
+	    } else {
+		vwContext.textureIDLo .set(gpuTVIndex, (byte)(textureID         & 0xFF));
+		vwContext.textureIDMid.set(gpuTVIndex, (byte)((textureID >> 8)  & 0xFF));
+		vwContext.textureIDHi .set(gpuTVIndex, (byte)((textureID >> 16) & 0xFF));
+	    }
 	}// end if(Texture)
 	if(td instanceof DynamicTexture){//Animated texture
 	    final DynamicTexture dt = (DynamicTexture)td;

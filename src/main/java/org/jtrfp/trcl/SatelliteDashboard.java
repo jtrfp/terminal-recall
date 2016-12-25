@@ -22,6 +22,6 @@ import org.jtrfp.trcl.obj.Sprite2D;
 
 public class SatelliteDashboard extends Sprite2D {
     public SatelliteDashboard(TR tr) throws IllegalAccessException, FileLoadException, IOException{
-	super(tr, .000000001, 2, 2, tr.getResourceManager().getSpecialRAWAsTextures("MAPBACK.RAW", tr.getGlobalPalette(), Features.get(tr, GPUFeature.class).getGl(), 0, false), true, "SatelliteDashboard");
+	super(tr, .000000001, 2, 2, tr.getResourceManager().getSpecialRAWAsTextures("MAPBACK.RAW", tr.getGlobalPalette(), Features.get(tr, GPUFeature.class).getGl(), 0, false, false), true, "SatelliteDashboard");
     }
 }//end MapDashboard

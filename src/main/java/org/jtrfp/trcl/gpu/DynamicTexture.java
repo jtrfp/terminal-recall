@@ -55,6 +55,8 @@ public abstract class DynamicTexture implements Texture {
 	tbs.removeBehavior(beh);
     }
     
-    public abstract int getCurrentTexturePage();
+    //public abstract int getCurrentTexturePage();
+
+    public abstract Texture getCurrentTexture();
     
 }//end DynamicTexture

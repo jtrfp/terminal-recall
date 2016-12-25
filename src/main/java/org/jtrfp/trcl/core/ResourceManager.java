@@ -265,7 +265,7 @@ public class ResourceManager{
 		registerPOD(fileToRegister.getAbsolutePath(),new PodFile(fileToRegister));
 		}
 	
-	public Texture [] getTextures(String texFileName, ColorPaletteVectorList paletteRGBA, ColorPaletteVectorList paletteESTuTv,  boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+	public Texture [] getTextures(String texFileName, ColorPaletteVectorList paletteRGBA, ColorPaletteVectorList paletteESTuTv,  boolean uvWrapping, boolean generateMipMaps) throws IOException, FileLoadException, IllegalAccessException{
 		if(texFileName==null)
 		    throw new NullPointerException("texFileName is intolerably null");
 		if(paletteRGBA==null)
@@ -273,18 +273,18 @@ public class ResourceManager{
 	    	String [] files = getTEXListFile(texFileName);
 		Texture [] result = new Texture[files.length];
 		for(int i=0; i<files.length;i++)
-			{result[i]=getRAWAsTexture(files[i],paletteRGBA,paletteESTuTv,uvWrapping);}
+			{result[i]=getRAWAsTexture(files[i],paletteRGBA,paletteESTuTv,uvWrapping,generateMipMaps);}
 		return result;
 		}//end loadTextures(...)
 	
-	public Texture[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping) {
+	public Texture[] getSpecialRAWAsTextures(String name, Color [] palette, GL3 gl, int upScalePowerOfTwo, boolean uvWrapping, boolean generateMipMaps) {
 		try{
 	    	Texture [] result = specialTextureNameMap.get(name);
 		if(result==null){
 		    BufferedImage [] segs = getSpecialRAWImage(name, palette, upScalePowerOfTwo);
 			result=new Texture[segs.length];
 			for(int si=0; si<segs.length; si++)
-				{result[si] = getUncompressedVQTextureFactory().newUncompressedVQTexture(segs[si],null,"name",uvWrapping);}
+				{result[si] = getUncompressedVQTextureFactory().newUncompressedVQTexture(segs[si],null,"name",uvWrapping,generateMipMaps);}
 			specialTextureNameMap.put(name,result);
 			}//end if(result=null)
 		return result;
@@ -292,12 +292,12 @@ public class ResourceManager{
 		return null;//never happens.
 		}//end getSpecialRAWAsTextures
 	
-	public Texture getRAWAsTexture(String name, final ColorPaletteVectorList paletteRGBA, final ColorPaletteVectorList paletteESTuTv, boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
-	    return getRAWAsTexture(name,paletteRGBA,paletteESTuTv,true,uvWrapping);
+	public Texture getRAWAsTexture(String name, final ColorPaletteVectorList paletteRGBA, final ColorPaletteVectorList paletteESTuTv, boolean uvWrapping, boolean generateMipMaps) throws IOException, FileLoadException, IllegalAccessException{
+	    return getRAWAsTexture(name,paletteRGBA,paletteESTuTv,true,uvWrapping, generateMipMaps);
 	}
 	
 	public Texture getRAWAsTexture(final String name, final ColorPaletteVectorList paletteRGBA,
-			ColorPaletteVectorList paletteESTuTv, final boolean useCache, final boolean uvWrapping) throws IOException, FileLoadException, IllegalAccessException{
+			ColorPaletteVectorList paletteESTuTv, final boolean useCache, final boolean uvWrapping, final boolean generateMipMaps) throws IOException, FileLoadException, IllegalAccessException{
 	    if(name==null)
 		throw new NullPointerException("Name is intolerably null.");
 	    if(paletteRGBA==null)
@@ -322,12 +322,12 @@ public class ResourceManager{
 						for(int i=0; i<tFrames.length;i++){
 						    PalettedVectorList pvlRGBA  = getRAWVectorList(frames.get(i),paletteRGBA);
 						    PalettedVectorList pvlESTuTv= getRAWVectorList(frames.get(i),paletteESTuTv);
-						    tFrames[i]=getUncompressedVQTextureFactory().newUncompressedVQTexture(pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping);}
+						    tFrames[i]=getUncompressedVQTextureFactory().newUncompressedVQTexture(pvlRGBA,pvlESTuTv,""+frames.get(i),uvWrapping,generateMipMaps);}
 						AnimatedTexture aTex = new AnimatedTexture(new Sequencer(500,tFrames.length,false), tFrames);
 						return aTex;
 						}//end if(multi-frame)
 					}//end if(may be animated)
-				result = getUncompressedVQTextureFactory().newUncompressedVQTexture(getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping);
+				result = getUncompressedVQTextureFactory().newUncompressedVQTexture(getRAWVectorList(name,paletteRGBA),paletteESTuTv!=null?getRAWVectorList(name,paletteESTuTv):null,name,uvWrapping,generateMipMaps);
 				}
 			catch(NotSquareException e){
 				System.err.println(e.getMessage());
@@ -436,8 +436,8 @@ public class ResourceManager{
 					//Sort out types of block
 					if(b instanceof TextureBlock){
 						TextureBlock tb = (TextureBlock)b;
-						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, hasAlpha);
-						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, false);}
+						if(hasAlpha)currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, hasAlpha, true);
+						else{currentTexture = getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, false, true);}
 						System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName());
 						}//end if(TextureBlock)
 					else if(b instanceof FaceBlock){
@@ -569,8 +569,8 @@ public class ResourceManager{
 						double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 						VQTexture [] subTextures = new VQTexture[frames.size()];
 						for(int ti=0; ti<frames.size(); ti++){
-							if(!hasAlpha)subTextures[ti]=(VQTexture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
-							else subTextures[ti]=(VQTexture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);
+							if(!hasAlpha)subTextures[ti]=(VQTexture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false, true);
+							else subTextures[ti]=(VQTexture)getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true, true);
 							//subTextures[ti]=tex instanceof Texture?new DummyTRFutureTask<Texture>((Texture)tex):(Texture)Texture.getFallbackTexture();
 							}//end for(frames) //fDelay, nFrames,interp
 						currentTexture = new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures);
@@ -848,7 +848,7 @@ public class ResourceManager{
 		return testTexture;
 	    InputStream is = null;
 	    try{return testTexture = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(
-		    VQTexture.RGBA8FromPNG(is = this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true);}
+		    VQTexture.RGBA8FromPNG(is = this.getClass().getResourceAsStream("/testTexture.png")),null, "testTexture", true, true);}
 	    finally{if(is!=null)try{is.close();}catch(Exception e){e.printStackTrace();}}
 	}//end getTestTexture()
 	

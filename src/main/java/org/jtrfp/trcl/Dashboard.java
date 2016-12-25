@@ -34,7 +34,7 @@ public class Dashboard extends WorldObject2DRelevantEverywhere {
 	final TR tr = getTr();
 	Texture[] dashTexture = tr.getResourceManager()
 		.getSpecialRAWAsTextures("STATBAR.RAW", tr.getGlobalPalette(),
-			Features.get(tr, GPUFeature.class).getGl(), 2,false);
+			Features.get(tr, GPUFeature.class).getGl(), 2,false, true);
 	GL33Model dashModel = new GL33Model(false, tr,"Dashboard");
 	for (int seg = 0; seg < 5; seg++) {
 	    final double segWidth = 2. / 5.;

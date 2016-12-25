@@ -18,7 +18,7 @@ import java.awt.geom.Point2D;
 public class SettableTexture extends DynamicTexture {
     //private int currentTexturePage;
     private Texture currentTexture;
-
+/*
     @Override
     public int getCurrentTexturePage() {
 	final Texture texture = getCurrentTexture();
@@ -28,7 +28,7 @@ public class SettableTexture extends DynamicTexture {
 	}
 	throw new IllegalStateException("Texture for this settable texture must be a VQTexture for this method to work. Texture is  set to "+getCurrentTexture());
     }//end getcurrentTexturePage()
-
+*/
     /*public void setCurrentTexturePage(int currentTexturePage) {
         this.currentTexturePage = currentTexturePage;
     }*/

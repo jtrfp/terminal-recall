@@ -67,7 +67,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
 	    try{
-	     final VQTexture tex = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false);
+	     final VQTexture tex = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false, true);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		final Blip blip = new Blip(tex,debugName, ignoreCamera, .04*(getRadarGUIRadius()/DEFAULT_RADAR_GUI_RADIUS));
     		blip.setVisible(false);

@@ -49,6 +49,8 @@ uniform sampler2D		zVBuffer;
 uniform sampler2D		uvVBuffer;
 uniform sampler2D		nXnYnZVBuffer;//TODO: Rename to nXnYVBuffer
 uniform sampler2D		nZVBuffer;
+uniform float           screenWidth;
+uniform float           screenHeight;
 
 //DUMMY
 layout (location = 0) in float dummy;
@@ -61,6 +63,27 @@ mat3 affine(vec2 u, vec2 v, vec2 off){
  	v.x-off.x, 	v.y-off.y, 	0,
  	off.x, 		off.y, 		1);
  }//end affine()
+
+vec2 dudv(mat3 matrix, mat3 zwMatrix, vec2 uv, vec2 dxdy){
+ vec3 xyO     = vec3(uv,1);
+ vec3 xydx    = vec3(uv+dxdy*vec2(1,0),1);
+ vec3 xydy    = vec3(uv+dxdy*vec2(0,1),1);
+ float wOrigin= (zwMatrix * xyO).y;
+ vec3 origin  = matrix * xyO;
+ float wRight = (zwMatrix * xydx).y;
+ vec3 right   = matrix * xydx;
+ float wUp    = (zwMatrix * xydy).y;
+ vec3 up      = matrix * xydy;
+ origin /= wOrigin;
+ right  /= wRight;
+ up     /= wUp;
+ return vec2(length(right.xy-origin.xy),length(up.xy-origin.xy));
+}//end dudv(...)
+
+float lod(mat3 uvMatrix, mat3 zwMatrix, vec2 dxdy, vec3 pos){
+ vec2 work = dudv(uvMatrix, zwMatrix, pos.xy , dxdy);
+ return 1/(1+clamp(log2(max(work.x, work.y)),0,2));
+}
 
 void main(){
  gl_Position            = vec4(0,0,0,1);
@@ -146,8 +169,11 @@ void main(){
  nXnYnZLQuad[2u].z=(nZmatrix*topLeft).x;
  nXnYnZLQuad[3u].z=(nZmatrix*topRight).x;
  //LOD
- nXnYnZLQuad[0u].w= 0;
- nXnYnZLQuad[1u].w= 0;
- nXnYnZLQuad[2u].w= 0;
- nXnYnZLQuad[3u].w= 0;
+ 
+ vec2 dxdy = vec2(1)/vec2(screenWidth, screenHeight);
+ 
+ nXnYnZLQuad[0u].w = lod(uvMatrix, zwMatrix, dxdy, bottomLeft);
+ nXnYnZLQuad[1u].w = lod(uvMatrix, zwMatrix, dxdy, bottomRight);
+ nXnYnZLQuad[2u].w = lod(uvMatrix, zwMatrix, dxdy, topLeft);
+ nXnYnZLQuad[3u].w = lod(uvMatrix, zwMatrix, dxdy, topRight);
  }//end main()

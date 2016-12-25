@@ -39,10 +39,10 @@ public class ForceField extends WorldObject {
 	final TR tr = getTr();
 	final Texture eTex = new AnimatedTexture(new Sequencer(100, 4, false).setTimeOffset((long)(Math.random()*500)), 
 		    new VQTexture[]{
-		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(),null, false),
-		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI1.RAW", tr.getDarkIsClearPaletteVL(),null, false),
-		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(),null, false),
-		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(),null, false)}
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI0.RAW", tr.getDarkIsClearPaletteVL(),null, false, true),
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI1.RAW", tr.getDarkIsClearPaletteVL(),null, false, true),
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI2.RAW", tr.getDarkIsClearPaletteVL(),null, false, true),
+		    (VQTexture)tr.getResourceManager().getRAWAsTexture("ELECTRI3.RAW", tr.getDarkIsClearPaletteVL(),null, false, true)}
 		    );
 	    setModel(GL33Model.buildCube(tunnelDia, tunnelDia, wallThickness,
 		    eTex,

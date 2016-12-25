@@ -147,7 +147,7 @@ public class Explosion extends OneShotBillboardEvent {
 	    IOException, FileLoadException {
 	return (VQTexture) getTr().getResourceManager().getRAWAsTexture(name,
 		getTr().getDarkIsClearPaletteVL(),null,
-		false);
+		false,true);
     }
 
 }

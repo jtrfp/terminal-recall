@@ -89,5 +89,5 @@ public class Smoke extends OneShotBillboardEvent {
 	    }//end SmokeType
 	    
 	    private VQTexture frame(String name) throws IllegalAccessException, IOException, FileLoadException
-		{return (VQTexture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), null, false);}
+		{return (VQTexture)getTr().getResourceManager().getRAWAsTexture(name, getTr().getDarkIsClearPaletteVL(), null, false, true);}
 }//end Smoke

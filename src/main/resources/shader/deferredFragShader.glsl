@@ -248,9 +248,12 @@ CompositeTexel codeTexel(uvec2 texelXY, uint textureID, uint subTexV4Idx, uint s
 
 vec4 primitiveLayer(vec3 pQuad, vec4 vUVZI, bool disableAlpha, float w){
  vec4	nXnYnZL		= textureProjLod(primitivenXnYnZLTexture,pQuad,0);
- vec2	uv			= vUVZI.xy;
+ uint   lod         = uint((1/nXnYnZL.w)-.5); //TODO: Trilinear filtering? Optimize!
+ /*if(lod != 12345u){
+  return vec4(vec3(floor((1/nXnYnZL.w)-.5))/2,1);
+  }*/
+ vec2	uv			= vUVZI.xy / exp2(lod);
  vec3 	norm 		= nXnYnZL.xyz/w;
- uint   lod         = uint(nXnYnZL.w/w); //TODO: Trilinear filtering?
  float  textureID   = getTextureID(uint(vUVZI[3u]), lod);
  vec4	texel		= vqConstruct(uint(textureID),norm,uv);
  if(disableAlpha)	texel.a=1;

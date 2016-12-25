@@ -76,8 +76,8 @@ public class BINFileExtractor {
 			if(b instanceof TextureBlock){
 			        if(palette != null && ESTuTvPalette != null){
 			            TextureBlock tb = (TextureBlock)b;
-					if(hasAlpha)triangleData.setTexture(rm.getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, hasAlpha));
-					else{triangleData.setTexture(rm.getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, false));}
+					if(hasAlpha)triangleData.setTexture(rm.getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, hasAlpha,true));
+					else{triangleData.setTexture(rm.getRAWAsTexture(tb.getTextureFileName(), palette, ESTuTvPalette, false, true));}
 					System.out.println("ResourceManager: TextureBlock specifies texture: "+tb.getTextureFileName()); 
 			        }else{triangleData.setTexture(defaultTexture);}
 				}//end if(TextureBlock)
@@ -223,8 +223,8 @@ public class BINFileExtractor {
 					double timeBetweenFramesInMillis = ((double)block.getDelay()/65535.)*1000.;
 					VQTexture [] subTextures = new VQTexture[frames.size()];
 					for(int ti=0; ti<frames.size(); ti++){
-						try{if(!hasAlpha)subTextures[ti]=(VQTexture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false);
-						else subTextures[ti]=(VQTexture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true);}catch(Exception e){e.printStackTrace();}
+						try{if(!hasAlpha)subTextures[ti]=(VQTexture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, false, true);
+						else subTextures[ti]=(VQTexture)rm.getRAWAsTexture(frames.get(ti), palette,ESTuTvPalette, true, true);}catch(Exception e){e.printStackTrace();}
 						}//end for(frames) //fDelay, nFrames,interp
 					triangleData.setTexture(new AnimatedTexture(new Sequencer((int)timeBetweenFramesInMillis,subTextures.length,false),subTextures));
 				}else{triangleData.setTexture(defaultTexture);}

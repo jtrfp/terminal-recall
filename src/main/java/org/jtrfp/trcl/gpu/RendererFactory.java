@@ -382,6 +382,9 @@ public class RendererFactory {
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
 		    int width, int height) {
 		// SHAPE-DEPENDENT UNIFORMS
+		primitiveProgram.use();
+		primitiveProgram.getUniform("screenWidth" ).set((float)drawable.getWidth ());//TODO: replace with vec2
+		primitiveProgram.getUniform("screenHeight").set((float)drawable.getHeight());
 		deferredProgram.use();
 		deferredProgram.getUniform("screenDims").set(drawable.getWidth(), drawable.getHeight());
 		gpu.defaultProgram();

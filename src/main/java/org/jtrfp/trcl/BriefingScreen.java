@@ -79,7 +79,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	fireBarrier = new ControllerBarrier(tr.getControllerInputs().getControllerInput(UserInputWeaponSelectionBehavior.FIRE));
 	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
-		Features.get(tr, GPUFeature.class).getGl(), 0,false),true,"BriefingScreen."+debugName);
+		Features.get(tr, GPUFeature.class).getGl(), 0,false, true),true,"BriefingScreen."+debugName);
 	add(briefingScreen);
 	this.tr	      = tr;
 	briefingChars = new CharAreaDisplay(layout.getFontSizeGL(),layout.getNumCharsPerLine(),layout.getNumLines(),tr,font);

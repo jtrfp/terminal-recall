@@ -88,7 +88,7 @@ private GameShell gameShell;
     private static Texture getTexture(TR tr){
 	try{
 	    return tr.getResourceManager().getRAWAsTexture("NAVTAR01.RAW", 
-		tr.getGlobalPaletteVL(),null,false);}
+		tr.getGlobalPaletteVL(),null,false,true);}
 	catch(Exception e){e.printStackTrace();}
 	return null;
     }

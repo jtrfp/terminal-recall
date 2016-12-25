@@ -39,7 +39,7 @@ private GameShell gameShell;
 	final TR tr = getTr();
 	try{setTexture(
 		    tr.getResourceManager().getRAWAsTexture("CHECK1.RAW", 
-			    tr.getGlobalPaletteVL(),null,false),true);
+			    tr.getGlobalPaletteVL(),null,false,true),true);
 	}catch(Exception e){e.printStackTrace();}
     }//end constructor
 

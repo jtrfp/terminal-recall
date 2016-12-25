@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.jtrfp.trcl.gpu.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.ConstantVectorList;
+import org.jtrfp.trcl.img.vq.MIPScalingVectorList;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
@@ -69,9 +71,9 @@ public class UncompressedVQTextureFactory {
 	return new VQTexture(gpu, this.debugName+"."+debugName);
     }//end newUncompressedVQTexture()
     
- public VQTexture newUncompressedVQTexture(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength){
+ public VQTexture newUncompressedVQTexture(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength, boolean generateMipMaps){
      final VQTexture result = newUncompressedVQTexture();
-     assemble(rgba8888vl, esTuTv8888vl,sideLength, result);
+     assemble(rgba8888vl, esTuTv8888vl,sideLength, result, generateMipMaps);
      return result;
  }//end newUncompressedVQTexture
 
@@ -81,14 +83,14 @@ public class UncompressedVQTextureFactory {
      return result;
  }//end newUncompressedVQTexture(...)
  
- public VQTexture newUncompressedVQTexture(PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping){
+ public VQTexture newUncompressedVQTexture(PalettedVectorList vlRGBA, PalettedVectorList vlESTuTv, String debugName, boolean uvWrapping, boolean generateMipMaps){
 	final VQTexture result = newUncompressedVQTexture();
 	result.setUvWrapping(uvWrapping);
-	assemble(vlRGBA,vlESTuTv,result);
+	assemble(vlRGBA,vlESTuTv,result,generateMipMaps);
 	return result;
  }//end constructor
 
- VQTexture newUncompressedVQTexture(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, boolean uvWrapping) {
+ VQTexture newUncompressedVQTexture(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, String debugName, boolean uvWrapping, boolean generateMipMaps) {
 	final VQTexture result = newUncompressedVQTexture();
 	result.setUvWrapping(uvWrapping);
 	if (imageRGBA8888.capacity() == 0) {
@@ -96,17 +98,17 @@ public class UncompressedVQTextureFactory {
 		    "Cannot create texture of zero size.");
 	}//end if capacity==0
 	imageRGBA8888.clear();//Doesn't erase, just resets the tracking vars
-	assemble(imageRGBA8888,imageESTuTv8888,result);
+	assemble(imageRGBA8888,imageESTuTv8888,result, generateMipMaps);
 	return result;
  }// end constructor
  
 
- public VQTexture newUncompressedVQTexture(BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping) {
+ public VQTexture newUncompressedVQTexture(BufferedImage imgRGBA, BufferedImage imgESTuTv, String debugName, boolean uvWrapping, boolean generateMipMaps) {
         final VQTexture result = newUncompressedVQTexture(debugName,uvWrapping);
 	try{assemble(new BufferedImageRGBA8888VL(imgRGBA),
 		    imgESTuTv!=null?
 			    new BufferedImageRGBA8888VL(imgESTuTv):
-			    null,imgRGBA.getWidth(),result);
+			    null,imgRGBA.getWidth(),result,generateMipMaps);
 	    }catch(Exception e){e.printStackTrace();}
 	return result;
  }//end constructor
@@ -121,12 +123,12 @@ public class UncompressedVQTextureFactory {
 	    }return new Color(redA/10f,greenA/10f,blueA/10f);
  }//end calculateAverageColor(...)
  
- private void assemble(PalettedVectorList squareImageIndexedRGBA,PalettedVectorList squareImageIndexedESTuTv, VQTexture result){
+ private void assemble(PalettedVectorList squareImageIndexedRGBA,PalettedVectorList squareImageIndexedESTuTv, VQTexture result, boolean generateMipMaps){
 	checkSideLengthSanity(squareImageIndexedRGBA);
-	assemble(squareImageIndexedRGBA, squareImageIndexedESTuTv,(int)Math.sqrt(squareImageIndexedRGBA.getNumVectors()),result);
+	assemble(squareImageIndexedRGBA, squareImageIndexedESTuTv,(int)Math.sqrt(squareImageIndexedRGBA.getNumVectors()),result,generateMipMaps);
  }//end assemble(...)
  
- private void assemble(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, VQTexture result){
+ private void assemble(ByteBuffer imageRGBA8888, ByteBuffer imageESTuTv8888, VQTexture result, boolean generateMipMaps){
 	 checkSideLengthSanity(imageRGBA8888);
 	 // Break down into 4x4 blocks
 	 final ByteBufferVectorList 	bbvl 		= new ByteBufferVectorList(imageRGBA8888);
@@ -134,7 +136,7 @@ public class UncompressedVQTextureFactory {
 	 
 	 final VectorList	 	bbvlESTuTv 	= imageESTuTv8888!=null?new ByteBufferVectorList(imageESTuTv8888):new ConstantVectorList(0,bbvl);
 	 final RGBA8888VectorList 	esTuTv8888vl 	= bbvlESTuTv!=null?new RGBA8888VectorList(bbvlESTuTv):null;
-	 assemble(rgba8888vl,esTuTv8888vl,(int)Math.sqrt(imageRGBA8888.capacity() / 4), result);
+	 assemble(rgba8888vl,esTuTv8888vl,(int)Math.sqrt(imageRGBA8888.capacity() / 4), result, generateMipMaps);
 }//end assemble(...)
  
  private static void checkSideLengthSanity(int totalPixels){
@@ -171,7 +173,7 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 	tex.setCodeAt(codeX, codeY, (byte)(codeIdx%256));
 }//end setCodeAt()
  
- private final void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength, final VQTexture tex){
+ private final void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength, final VQTexture tex, boolean generateMipMaps){
 	    tex.setSideLength(sideLength);
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
@@ -374,5 +376,20 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 		}//end for(entries)
 	    }//end flushRGBACodeblock256()
 	}).get();// end pool thread
+	    if(generateMipMaps){
+		if(tex.getMipTextures() == null)
+		    tex.setMipTextures(new ArrayList<VQTexture>());
+		final List<VQTexture> mipTextures = tex.getMipTextures();
+		int newSideLength = sideLength;
+		VectorList rgba = rgba8888vl, esTuTv = esTuTv8888vl;
+		for(int mipIndex = 0; mipIndex < 2; mipIndex++){
+		    rgba   = new MIPScalingVectorList(rgba  ,newSideLength);
+		    if(esTuTv != null)
+		        esTuTv = new MIPScalingVectorList(esTuTv,newSideLength);
+		    newSideLength /= 2;
+		    final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, newSideLength, false);
+		    mipTextures.add(mipTexture);
+		}//end for(mipIndex)
+	    }//end if(generateMipMaps)
 }//end assemble()
 }//end UncompressedVQTextureFactory

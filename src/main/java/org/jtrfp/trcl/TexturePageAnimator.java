@@ -13,9 +13,11 @@
 package org.jtrfp.trcl;
 
 import java.awt.geom.Point2D;
+import java.util.List;
 
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.gpu.DynamicTexture;
+import org.jtrfp.trcl.gpu.VQTexture;
 
 public class TexturePageAnimator implements Tickable{
     private final TriangleVertexWindow 	vertexWindow;
@@ -33,13 +35,27 @@ public class TexturePageAnimator implements Tickable{
 
     @Override
     public void tick() {
-	try{final int newTexturePage = dynamicTexture.getCurrentTexturePage();
+	try{final VQTexture newTexture = (VQTexture)dynamicTexture.getCurrentTexture();//TODO: Type safety?
+	    final int newTexturePage = newTexture.getTexturePage();
 	final Integer currentTexturePage = this.currentTexturePage;
 	if(currentTexturePage == null || currentTexturePage != newTexturePage){
 	    final TriangleVertexWindow vertexWindow = (TriangleVertexWindow)this.vertexWindow.newContextWindow();
-	    vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(newTexturePage & 0xFF));
-	    vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((newTexturePage >> 8) & 0xFF));
-	    vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((newTexturePage >> 16) & 0xFF));
+	    final List<VQTexture> mipTextures = ((VQTexture)dynamicTexture.getCurrentTexture()).getMipTextures();
+	    final int mipIndex = (gpuTVIndex % 3) - 1; // -1 means no mip
+	    if(mipTextures != null && mipIndex >= 0){
+		VQTexture mipTexture = mipTextures.get(mipIndex);
+		final int mipTextureID = mipTexture.getTexturePage();
+		vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(mipTextureID         & 0xFF));
+		vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((mipTextureID >> 8)  & 0xFF));
+		vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((mipTextureID >> 16) & 0xFF));
+	    } else {
+		vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(newTexturePage         & 0xFF));
+		vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((newTexturePage >> 8)  & 0xFF));
+		vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((newTexturePage >> 16) & 0xFF));
+	    }
+	    //vertexWindow.textureIDLo .set(gpuTVIndex, (byte)(newTexturePage & 0xFF));
+	    //vertexWindow.textureIDMid.set(gpuTVIndex, (byte)((newTexturePage >> 8) & 0xFF));
+	    //vertexWindow.textureIDHi .set(gpuTVIndex, (byte)((newTexturePage >> 16) & 0xFF));
 	    //Update U,V coords if they are expected to change.
 	    final Point2D.Double size = dynamicTexture.getSize();
 		if(u!=null)

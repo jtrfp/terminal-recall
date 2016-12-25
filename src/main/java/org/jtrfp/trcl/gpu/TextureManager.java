@@ -58,11 +58,11 @@ public class TextureManager {
 	    }});
     }//end constructor
     
-    public VQTexture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping){
-	return getUncompressedVQTextureFactory().newUncompressedVQTexture(imageRGB8,imageESTuTv,debugName, uvWrapping);
+    public VQTexture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping, boolean generateMipMaps){
+	return getUncompressedVQTextureFactory().newUncompressedVQTexture(imageRGB8,imageESTuTv,debugName, uvWrapping, generateMipMaps);
     }
-    public VQTexture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping){
-	return getUncompressedVQTextureFactory().newUncompressedVQTexture(imgRGBA,imgESTuTv,debugName,uvWrapping);
+    public VQTexture newTexture(BufferedImage imgRGBA,BufferedImage imgESTuTv, String debugName, boolean uvWrapping, boolean generateMipMaps){
+	return getUncompressedVQTextureFactory().newUncompressedVQTexture(imgRGBA,imgESTuTv,debugName,uvWrapping, generateMipMaps);
     }
     public SubTextureWindow getSubTextureWindow(){
 	return subTextureWindow;
@@ -76,7 +76,7 @@ public class TextureManager {
 	 try{
 	  defaultTriPipeTexture = 
 		  newTexture(ImageIO.read(is = LineSegment.class.getResourceAsStream("/grayNoise32x32.png")),null,
-	    			"Default TriPipe Texture (grayNoise)",true);}
+	    			"Default TriPipe Texture (grayNoise)",true,true);}
 	 catch(IOException e){throw new RuntimeException("Failure to load default tripipe texture.",e);}
 	finally{if(is!=null)
 	    try{is.close();}catch(Exception e){e.printStackTrace();}}
@@ -92,7 +92,7 @@ public class TextureManager {
 	 t = newTexture(
 		ImageIO.read(is = VQTexture.class
 			.getResourceAsStream("/fallbackTexture.png")),null,
-		"Fallback",true);}
+		"Fallback",true,true);}
 	catch(IOException e){throw new RuntimeException("Failure to load fallback texture. Is everything right with the resources directory?",e);}
 	finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
 	fallbackTexture = t;

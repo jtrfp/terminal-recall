@@ -154,7 +154,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	LVLFile tlvl = rm.getLVL(_tun.getTunnelLVLFile());
 	final ColorPaletteVectorList tunnelColorPalette = new ColorPaletteVectorList(tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile()));
 	Texture[] tunnelTexturePalette = rm.getTextures(
-		tlvl.getLevelTextureListFile(), paletteVL, ESTuTvPalette, true);
+		tlvl.getLevelTextureListFile(), paletteVL, ESTuTvPalette, true, true);
 	TNLFile tun = tr.getResourceManager().getTNLData(
 		tlvl.getHeightMapOrTunnelFile());
 

@@ -247,8 +247,6 @@ public final class TRFactory implements FeatureFactory<Features>{
 	 * @since Jul 9, 2016
 	 */
 	public void trInit(){
-	    try{new OutputDump();}
-	    catch(Exception e){e.printStackTrace();}
 	    //AutoInitializable.Initializer.initialize(this);
 	    //keyStatus = new KeyStatus(rootWindow);
 	    /*gpu = new TRFutureTask<GPU>(new Callable<GPU>(){

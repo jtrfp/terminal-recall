@@ -106,12 +106,13 @@ public class BillboardSprite extends WorldObject{
 
 	    @Override
 	    public void updateRotation(WorldObject target) {
-	    	final Vector3D cLookAt = camera.getLookAtVector();
-		target.setHeading(cLookAt.negate());
 		final Vector3D cHeading = camera.getHeading();
+		
+		target.setHeading(cHeading.negate());
 		final Vector3D side = cHeading.crossProduct(Vector3D.PLUS_J);
 		final Vector3D newTop = side.crossProduct(cHeading);
-		target.setTop(newTop);
+		if(newTop.getNorm() != 0)
+		 target.setTop(newTop);
 	    }
 	}//end UpAlwaysCameraTopDelegate
 

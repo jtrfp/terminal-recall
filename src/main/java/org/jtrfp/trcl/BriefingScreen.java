@@ -18,6 +18,7 @@ import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -36,6 +37,7 @@ import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
@@ -53,6 +55,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class BriefingScreen extends RenderableSpacePartitioningGrid {
+    public static final String  NEXT_SCREEN_CTL = "Next Screen";
     private static final double Z_INCREMENT       = .00001;
     private static final double Z_START           = -.99999;
     private static final double BRIEFING_SPRITE_Z = Z_START;
@@ -76,7 +79,10 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     public BriefingScreen(final TR tr, GLFont font, BriefingLayout layout, String debugName) {
 	super();
 	this.layout=layout;
-	fireBarrier = new ControllerBarrier(tr.getControllerInputs().getControllerInput(UserInputWeaponSelectionBehavior.FIRE));
+	final ControllerInputs controllerInputs = tr.getControllerInputs();
+	fireBarrier = new ControllerBarrier(
+		controllerInputs.getControllerInput(UserInputWeaponSelectionBehavior.FIRE),
+		controllerInputs.getControllerInput(NEXT_SCREEN_CTL));
 	briefingScreen = new Sprite2D(tr,0, 2, 2,
 		tr.getResourceManager().getSpecialRAWAsTextures("BRIEF.RAW", tr.getGlobalPalette(),
 		Features.get(tr, GPUFeature.class).getGl(), 0,false, true),true,"BriefingScreen."+debugName);
@@ -310,17 +316,21 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     
     private class ControllerBarrier implements PropertyChangeListener{
 	private CountDownLatch        latch;
-	private final ControllerInput input;
-	private final PropertyChangeListener wpl;//Hard reference; do not remove!
+	private final Collection<ControllerInput>        inputs = new ArrayList<ControllerInput>();
+	private final Collection<PropertyChangeListener> weakPLs= new ArrayList<PropertyChangeListener>();//Hard reference; do not remove!
 	
-	public ControllerBarrier(ControllerInput input){
-	    this.input = input;
-	    wpl = new WeakPropertyChangeListener(this,input);
-	    input.addPropertyChangeListener(wpl);
+	public ControllerBarrier(ControllerInput ... inputs){
+	    for(ControllerInput in : inputs){
+		this.inputs.add(in);
+		final WeakPropertyChangeListener weakPL;
+		weakPLs.add(weakPL = new WeakPropertyChangeListener(this,in));
+		in.addPropertyChangeListener(weakPL);
+		}
 	}
 	
 	public void release(){
-	    input.removePropertyChangeListener(this);
+	    for(ControllerInput in : inputs)
+	     in.removePropertyChangeListener(this);
 	}
 	
 	@Override

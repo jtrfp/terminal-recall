@@ -248,21 +248,25 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    player.probeForBehavior(LoopingPositionBehavior.class).setEnable(false);
 	    player.probeForBehavior(CollidesWithTerrain.class)    .setEnable(false);
 	    tunnelToEnter.dispatchTunnelEntryNotifications();
-	    final Renderer portalRenderer = teo.getPortalEntrance().getPortalRenderer();
-	    final Camera secondaryCam = portalRenderer.getCamera();
-	    player.setPosition(secondaryCam.getPosition());
-	    player.setHeading (secondaryCam.getHeading());
-	    player.setTop     (secondaryCam.getTop());
+	    final PortalExit portalExit = teo.getPortalEntrance().getPortalExit();
+	    //final Camera secondaryCam = portalRenderer.getCamera();
+	    player.setPosition    (portalExit.getControlledPosition());
+	    player.setHeadingArray(portalExit.getControlledHeading());
+	    player.setTopArray    (portalExit.getControlledTop());
+	    //player.setPosition(secondaryPos.toArray());
+	    //player.setHeading (secondaryHdg);
+	    //player.setTop     (secondaryTop);
 	    player.notifyPositionChange();
 	    //Move the secondary cam to the overworld.
 	    overworldSystem.setChamberMode(tunnelToEnter.getExitObject().isMirrorTerrain());
+	    /*
 	    //Set the skycube appropriately
 	    portalRenderer.getSkyCube().setSkyCubeGen(((TVF3Game)getGameShell().getGame()).
 		    getCurrentMission().
 		    getOverworldSystem().
 		    getSkySystem().
 		    getBelowCloudsSkyCubeGen());
-
+*/
 	    getTr().setRunState(new TunnelState(){});
 	    setCurrentTunnel(tunnelToEnter);
 	    getTr().setRunState(new TunnelState(){});

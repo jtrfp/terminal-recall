@@ -22,22 +22,41 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 
 public class PortalExit extends WorldObject {
     private Camera controlledCamera;
+    private final double [] controlledPosition= new double[3];
+    private final double [] controlledHeading = new double[3];
+    private final double [] controlledTop     = new double[3];
     private WeakReference<SpacePartitioningGrid> rootGrid;
 
     public PortalExit() {
 	super();
     }
-    
+    //TODO: Optimize for less garbage
     public synchronized void updateObservationParams(double [] relativePosition, Rotation rotation, Vector3D controllingHeading, Vector3D controllingTop){
 	final Camera controlledCamera = getControlledCamera();
+	//Apply position
+	final Vector3D newPos = rotation.applyTo(new Vector3D(relativePosition)).add(new Vector3D(getPosition()));
+	controlledPosition[0] = newPos.getX();
+	controlledPosition[1] = newPos.getY();
+	controlledPosition[2] = newPos.getZ();
+	
+	//Apply vector
+	final Vector3D newHdg = rotation.applyTo(controllingHeading);
+	controlledHeading[0] = newHdg.getX();
+	controlledHeading[1] = newHdg.getY();
+	controlledHeading[2] = newHdg.getZ();
+	
+	final Vector3D newTop = rotation.applyTo(controllingTop);
+	controlledTop[0]    =  newTop.getX();
+	controlledTop[1]    =  newTop.getY();
+	controlledTop[2]    =  newTop.getZ();
+	
 	if(controlledCamera == null)
 	    return;
-	//Apply position
-	controlledCamera.setPosition(rotation.applyTo(new Vector3D(relativePosition)).add(new Vector3D(getPosition())));
-	//Apply vector
-	controlledCamera.setHeading(rotation.applyTo(controllingHeading));
-	controlledCamera.setTop    (rotation.applyTo(controllingTop));
+	
 	//Update
+	controlledCamera.setPosition(newPos);
+	controlledCamera.setHeading(newHdg);
+	controlledCamera.setTop    (newTop);
 	controlledCamera.notifyPositionChange();
     }//end updateObservationParams(...)
 
@@ -84,6 +103,15 @@ public class PortalExit extends WorldObject {
 
     public synchronized void setControlledCamera(Camera controlledCamera) {
         this.controlledCamera = controlledCamera;
+    }
+    public double[] getControlledPosition() {
+        return controlledPosition;
+    }
+    public double[] getControlledHeading() {
+        return controlledHeading;
+    }
+    public double[] getControlledTop() {
+        return controlledTop;
     }
 
 }//end PortalExit

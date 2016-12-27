@@ -39,7 +39,6 @@ import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
-import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class TunnelExitObject extends PortalEntrance {
@@ -121,14 +120,16 @@ public class TunnelExitObject extends PortalEntrance {
 		    
 		    tr.mainRenderer.getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
 		    final Renderer portalRenderer = TunnelExitObject.this.getPortalRenderer();
-		    if(portalRenderer == null)
-			throw new IllegalStateException("PortalRenderer intolerably null.");
-		    portalRenderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);
+		    //if(portalRenderer == null)
+			//throw new IllegalStateException("PortalRenderer intolerably null.");
+		    //portalRenderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);
 		    // Teleport
-		    final Camera secondaryCam = portalRenderer.getCamera();
-			other.setPosition(secondaryCam.getPosition());
-			other.setHeading (secondaryCam.getHeading());
-			other.setTop     (secondaryCam.getTop());
+		    //final Camera secondaryCam = portalRenderer.getCamera();
+		    final TunnelExitObject teo = (TunnelExitObject)this.getParent();
+		    
+			other.setPosition(teo.getPortalExit().getControlledPosition());
+			other.setHeadingArray(teo.getPortalExit().getControlledHeading());
+			other.setTopArray(teo.getPortalExit().getControlledTop());
 			other.notifyPositionChange();
 		    World.relevanceExecutor.submit(new Runnable(){
 			@Override

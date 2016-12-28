@@ -31,7 +31,7 @@ import org.jtrfp.trcl.gpu.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
 import org.jtrfp.trcl.img.vq.ConstantVectorList;
-import org.jtrfp.trcl.img.vq.MIPScalingVectorList;
+import org.jtrfp.trcl.img.vq.MIPScalingVectorListND;
 import org.jtrfp.trcl.img.vq.PalettedVectorList;
 import org.jtrfp.trcl.img.vq.RGBA8888VectorList;
 import org.jtrfp.trcl.img.vq.RasterizedBlockVectorList;
@@ -392,9 +392,9 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 		final List<VQTexture> mipTextures = tex.getMipTextures();
 		VectorListND rgba = rgbarvl, esTuTv = esTuTvrvl;
 		for(int mipIndex = 0; mipIndex < 2; mipIndex++){
-		    rgba   = new MIPScalingVectorList(rgba,rgba,esTuTv);
+		    rgba   = new MIPScalingVectorListND(rgba,rgba,esTuTv);
 		    if(esTuTv != null)
-		        esTuTv = new MIPScalingVectorList(esTuTv,rgba,esTuTv);
+		        esTuTv = new MIPScalingVectorListND(esTuTv,rgba,esTuTv);
 		    final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, false);
 		    mipTextures.add(mipTexture);
 		}//end for(mipIndex)

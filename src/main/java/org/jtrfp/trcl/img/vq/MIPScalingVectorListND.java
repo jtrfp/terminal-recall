@@ -15,12 +15,12 @@ package org.jtrfp.trcl.img.vq;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
 
-public class MIPScalingVectorList implements VectorListND {
+public class MIPScalingVectorListND implements VectorListND {
     private final VectorListND delegate, rgbaReference, esTuTvReference;
     private Sigmoid sigmoid = new Sigmoid();
     private final int numVectors;
     
-    public MIPScalingVectorList(
+    public MIPScalingVectorListND(
 	    VectorListND delegate, 
 	    VectorListND rgbaReference, 
 	    VectorListND esTuTvReference){

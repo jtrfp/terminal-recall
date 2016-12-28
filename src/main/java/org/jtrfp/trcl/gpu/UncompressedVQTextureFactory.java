@@ -113,6 +113,12 @@ public class UncompressedVQTextureFactory {
 	return result;
  }//end constructor
  
+ public VQTexture newUncompressedVQTexture(VectorListND rgba, VectorListND esTuTv, boolean generateMipMaps){
+     final VQTexture result = newUncompressedVQTexture();
+     assemble(rgba, esTuTv, result, generateMipMaps);
+     return result;
+ }
+ 
  private Color calulateAverageColor(RasterizedBlockVectorList rbvl) {
 	float redA=0,greenA=0,blueA=0;
 	    final int [] dims = rbvl.getDimensions();
@@ -173,17 +179,21 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 	tex.setCodeAt(codeX, codeY, (byte)(codeIdx%256));
 }//end setCodeAt()
  
- private final void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength, final VQTexture tex, boolean generateMipMaps){
-	    tex.setSideLength(sideLength);
+private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int sideLength, final VQTexture tex, boolean generateMipMaps){
+    assemble(new VectorListRasterizer(rgba8888vl,new int[]{sideLength,sideLength}), esTuTv8888vl != null? new VectorListRasterizer(esTuTv8888vl, new int[]{sideLength,sideLength}) : null,tex,generateMipMaps);
+}
+
+ private final void assemble(VectorListND rgbarvl, VectorListND esTuTvrvl, final VQTexture tex, boolean generateMipMaps){
+	    final int sideLength = rgbarvl.getDimensions()[0];
+     	    tex.setSideLength(sideLength);
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
 	    final RasterizedBlockVectorList 	rbvlRGBA 		= new RasterizedBlockVectorList(
-		    new VectorListRasterizer(rgba8888vl,new int[]{sideLength,sideLength}), 4);
+		    rgbarvl, 4);
 	    final VectorListND vlrRGBA = rbvlRGBA;
 	    final RasterizedBlockVectorList 	rbvlESTuTv 		= 
-		    esTuTv8888vl!=null?
-		    new RasterizedBlockVectorList(
-		    new VectorListRasterizer(esTuTv8888vl, new int[]{sideLength,sideLength}), 4):null;
+		    esTuTvrvl!=null?
+		    new RasterizedBlockVectorList(esTuTvrvl, diameterInSubtextures):null;
 	    final VectorListND vlrESTuTv = 
 		    rbvlESTuTv!=null?
 		    rbvlESTuTv:null;
@@ -380,14 +390,12 @@ private final void setCodeAt(int codeX, int codeY, VQTexture tex){
 		if(tex.getMipTextures() == null)
 		    tex.setMipTextures(new ArrayList<VQTexture>());
 		final List<VQTexture> mipTextures = tex.getMipTextures();
-		int newSideLength = sideLength;
-		VectorList rgba = rgba8888vl, esTuTv = esTuTv8888vl;
+		VectorListND rgba = rgbarvl, esTuTv = esTuTvrvl;
 		for(int mipIndex = 0; mipIndex < 2; mipIndex++){
-		    rgba   = new MIPScalingVectorList(rgba  ,newSideLength);
+		    rgba   = new MIPScalingVectorList(rgba,rgba,esTuTv);
 		    if(esTuTv != null)
-		        esTuTv = new MIPScalingVectorList(esTuTv,newSideLength);
-		    newSideLength /= 2;
-		    final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, newSideLength, false);
+		        esTuTv = new MIPScalingVectorList(esTuTv,rgba,esTuTv);
+		    final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, false);
 		    mipTextures.add(mipTexture);
 		}//end for(mipIndex)
 	    }//end if(generateMipMaps)

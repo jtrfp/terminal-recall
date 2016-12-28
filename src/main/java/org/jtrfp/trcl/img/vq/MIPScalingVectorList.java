@@ -13,18 +13,26 @@
 
 package org.jtrfp.trcl.img.vq;
 
-public class MIPScalingVectorList implements VectorList {
-    private final VectorList delegate;
-    private final int sideLength;
+import org.apache.commons.math3.analysis.function.Sigmoid;
+
+public class MIPScalingVectorList implements VectorListND {
+    private final VectorListND delegate, rgbaReference, esTuTvReference;
+    private Sigmoid sigmoid = new Sigmoid();
+    private final int numVectors;
     
-    public MIPScalingVectorList(VectorList delegate, int originalSideLength){
-	this.delegate   = delegate;
-	this.sideLength = originalSideLength;
+    public MIPScalingVectorList(
+	    VectorListND delegate, 
+	    VectorListND rgbaReference, 
+	    VectorListND esTuTvReference){
+	this.delegate        = delegate;
+	this.rgbaReference   = rgbaReference;
+	this.esTuTvReference = esTuTvReference;
+	numVectors           = delegate.getNumVectors() / (int)Math.pow(2, delegate.getDimensions().length);
     }
 
     @Override
     public int getNumVectors() {
-	return delegate.getNumVectors() / 4;
+	return numVectors;
     }
 
     @Override
@@ -33,36 +41,63 @@ public class MIPScalingVectorList implements VectorList {
     }
 
     @Override
-    public double componentAt(int vectorIndex, int componentIndex) {
-	final int newSideLength = sideLength / 2;
-	final int x = vectorIndex % newSideLength * 2;
-	final int y = vectorIndex / newSideLength * 2;
-	final int newIndex = sideLength * y + x;
-	double accumulator = 0;
-	double weightAccum = 0, weight;
+    public double componentAt(int [] coordinates, int componentIndex) {
+	final int dims = coordinates.length;
+	final int [] coordBuffer = new int[dims];
+	for( int i = 0; i < dims; i++)
+	    coordBuffer[i] = coordinates[i] * 2;
+	final ResultBuffer resultBuffer = new ResultBuffer();
+	recursiveComponentAt(resultBuffer, coordBuffer, 0, componentIndex);
+	return resultBuffer.accumulator / resultBuffer.weightAccumulator;
+    }
+    
+    private void recursiveComponentAt(ResultBuffer dest, int [] coordBuffer, int coordIndex, int componentIndex){
+	double weight;
+	if(coordIndex >= coordBuffer.length)
+	    return;
 	
-	weight = delegate.componentAt(newIndex, 3);//ALPHA
-	weightAccum += weight;
-	accumulator += delegate.componentAt(newIndex, componentIndex) * weight;
+	weight = weightAt(coordBuffer, componentIndex);
+	dest.accumulator       += delegate.componentAt(coordBuffer, componentIndex) * weight;
+	dest.weightAccumulator += weight;
+	final int nextCoord = coordIndex+1;
+	recursiveComponentAt(dest, coordBuffer, nextCoord, componentIndex);
 	
-	weight = delegate.componentAt(newIndex+1, 3);//ALPHA
-	weightAccum += weight;
-	accumulator += delegate.componentAt(newIndex+1, componentIndex) * weight;
-	
-	weight = delegate.componentAt(newIndex+sideLength, 3);//ALPHA
-	weightAccum += weight;
-	accumulator += delegate.componentAt(newIndex+sideLength, componentIndex) * weight;
-	
-	weight = delegate.componentAt(newIndex+sideLength+1, 3);//ALPHA
-	weightAccum += weight;
-	accumulator += delegate.componentAt(newIndex+sideLength+1, componentIndex) * weight;
-	accumulator /= weightAccum;
-	return accumulator;
+	coordBuffer[coordIndex]++;
+	weight = weightAt(coordBuffer, componentIndex);
+	dest.accumulator       += delegate.componentAt(coordBuffer, componentIndex) * weight;
+	dest.weightAccumulator += weight;
+	recursiveComponentAt(dest, coordBuffer, nextCoord, componentIndex);
+	coordBuffer[coordIndex]--;//Clean up after ourselves
+    }//end recursiveComponentAt(...)
+    
+    private double weightAt(int [] coordBuffer, int vectorIndex){
+	double result = 1;
+	if(rgbaReference != null)
+	    result *= sigmoid.value(rgbaReference  .componentAt(coordBuffer, 3));
+	//if(esTuTvReference != null)
+	//    result += esTuTvReference.componentAt(coordBuffer, 0);
+	return result;
+    }//end weightAt(...)
+
+    @Override
+    public int[] getDimensions() {
+	final int [] oldDims = delegate.getDimensions();
+	final int len = oldDims.length;
+	final int [] newDims = new int[len];
+	for(int i = 0; i < len; i++)
+	    newDims[i] = oldDims[i] / 2;
+	return newDims;
     }
 
     @Override
-    public void setComponentAt(int vectorIndex, int componentIndex, double value) {
+    public void setComponentAt(int[] coordinates, int componentIndex,
+	    double value) {
 	throw new UnsupportedOperationException("MIPScalingVectorList is read-only.");
+    }
+    
+    private static class ResultBuffer {
+	public double accumulator        =0;
+	public double weightAccumulator  =0;
     }
 
 }//end MIPScalingVectorList

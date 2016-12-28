@@ -50,7 +50,7 @@ public final class BufferedImageRGBA8888VL implements VectorList {
     public double componentAt(int vectorIndex, int componentIndex) {
 	int x = vectorIndex % width;
 	int y = vectorIndex / width;
-	return ((image.getRGB(x, y) & MASKS[componentIndex]) >> SHIFTS[componentIndex])/255.;
+	return ((image.getRGB(x, y) & MASKS[componentIndex]) >> SHIFTS[componentIndex] & 0xFF)/255.;
     }
 
     @Override

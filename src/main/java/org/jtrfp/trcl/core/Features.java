@@ -15,6 +15,7 @@ package org.jtrfp.trcl.core;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,7 +63,7 @@ public class Features {
      return impl.get(target, featureClass);
     }//end get(...)
     
-    public synchronized static void getAllFeaturesOf(Object target, Collection dest){
+    public synchronized static void getAllFeaturesOf(Object target, Set dest){
 	impl.getAllFeaturesOf(target,dest);
     }
 

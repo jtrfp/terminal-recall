@@ -24,10 +24,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.swing.DefaultListModel;
 
@@ -117,12 +119,13 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		is.close();
 		}catch(Exception e){e.printStackTrace();}
 	    }//end if(exists)
-	if(root != null)
-	 loadConfigurationsOfTargetRecursive(getTarget(), root);
+	if(root != null){
+	    System.out.println("loadConfigurations()");
+	 loadConfigurationsOfTargetRecursive(getTarget(), root);}
     }//end loadConfigurations()
     
     protected void saveConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
-	final ArrayList<Feature> features = new ArrayList<Feature>();
+	final Set<Feature> features = new HashSet<Feature>();
 	Features.getAllFeaturesOf(target, features);
 	final ConfigRootFeature configRootFeature = getConfigRootFeature(features);
 	//This is a config root. Stop branching here.
@@ -162,8 +165,9 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     }
 
     public void loadConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
-	final ArrayList<Feature> features = new ArrayList<Feature>();
+	final Set<Feature> features = new HashSet<Feature>();
 	Features.getAllFeaturesOf(target, features);
+	System.out.println("loadConfigurationsOfTargetRecursive "+target.getClass().getName());
 	/*
 	final ConfigManagerFeature cmf = getConfigManagerFeature(features);
 	if(target != getTarget() && cmf != null){
@@ -173,24 +177,33 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    cmf.notifyRecursiveSaveOperation(this,subElement.getPropertiesMap());
 	    return;
 	}*/
+	System.out.println("FEATURE LIST: ");
+	for(Feature feature:features)
+	    System.out.println("\t"+feature.getClass().getName()+" "+feature.hashCode());
 	for(Feature feature:features){
 	    final String featureClassName = feature.getClass().getName();
-	    FeatureTreeElement subElement = element.getSubFeatures().get(featureClassName);
+	    FeatureTreeElement subFeature = element.getSubFeatures().get(featureClassName);
+	    System.out.println("featureClassName="+featureClassName+" elementFeatureClassName="+element.getFeatureClassName());
 	    //subElement.setFeatureClassName(feature.getClass().getName());
-	    if(subElement != null){
-		Map<String,Object> propertiesMap = subElement.getPropertiesMap();
+	    if(subFeature != null){
+		Map<String,Object> propertiesMap = subFeature.getPropertiesMap();
 		if(feature instanceof ConfigRootFeature){
+		    System.out.println(".... is ConfigRootFeature.");
 		    ConfigRootFeature configRootFeature = (ConfigRootFeature)feature;
 		    if(propertiesMap != null)
 		     configRootFeature.notifyRecursiveLoadOperation(this, propertiesMap);
 		} else if(feature instanceof FeatureConfigurator){
 		    FeatureConfigurator configurator = (FeatureConfigurator)feature;
 		    //subElement.setPropertiesMap(new HashMap<String,Object>());
+		    System.out.println("Feature is a Configurator. Applying map:");
+		    for(Entry<String,Object> entry : propertiesMap.entrySet())
+			System.out.println("\t"+entry.getKey()+" "+entry.getValue());
 		    configurator.applyFromMap(propertiesMap);
 		}//end if(FeatureConfigurator)
-		loadConfigurationsOfTargetRecursive(feature, subElement);
+		loadConfigurationsOfTargetRecursive(feature, subFeature);
 	    }//end if(subElement!=null)
 	}//end for(features)
+	System.out.println("loadConfigOfTargetRecursive() traversing down from "+target.getClass().getName());
     }//end loadConfigurationsOfTargetRecursive
     
     protected ConfigRootFeature getConfigRootFeature(Collection<Feature> features){

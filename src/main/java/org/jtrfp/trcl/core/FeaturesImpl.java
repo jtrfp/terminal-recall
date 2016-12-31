@@ -135,7 +135,7 @@ public class FeaturesImpl {
      return (T)getFeature(fMap,(Class<Feature>)featureClass,target);
     }//end get(...)
 
-    public void getAllFeaturesOf(Object target, Collection dest) {
+    public void getAllFeaturesOf(Object target, Set dest) {
 	final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
 	for(Entry<Class<? extends Feature>,Feature> entry:fMap.entrySet())
 	    dest.add(entry.getValue());

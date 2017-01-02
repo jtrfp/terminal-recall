@@ -14,8 +14,8 @@
 package org.jtrfp.trcl.core;
 
 public interface LoadOrderAware {
-    public static final int FIRST   = 65535;
-    public static final int LAST    = 0;
+    public static final int FIRST   = 0;
+    public static final int LAST    = 65535;
     public static final int DEFAULT = (FIRST + LAST) / 2;
     public int getFeatureLoadPriority();
 }//end LoadOrderAware

@@ -52,7 +52,9 @@ public final class VectorListRasterizer implements VectorListND {
     private int coord1D(int[] coordinates){
 	int coord1D=0;
 	int infinity=1;
-	for(int d=0; d<dimensions.length; d++){
+	final int [] dimensions = this.dimensions;
+	final int numDims = dimensions.length;
+	for(int d=0; d<numDims; d++){
 	    coord1D+=coordinates[d]*infinity;
 	    infinity*=dimensions[d];
 	}

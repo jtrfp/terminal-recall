@@ -20,18 +20,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
-import org.jtrfp.trcl.core.DefaultPODRegistryFactory.DefaultPODRegistry;
 
 public class FeaturesImpl {
-    private static final FeatureLoadOrderComparator featureLoadOrderComparator = new FeatureLoadOrderComparator();
-    
  // Key represents target-class
        final Map<Object,Map<Class<? extends Feature>,Feature>> targetMap 
-           = new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
+    	= new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
        final HashMap<Class<?>,Collection<FeatureFactory>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory>>();
        final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
     
@@ -60,7 +56,7 @@ public class FeaturesImpl {
     
     public  void init(Object target){
 	//Traverse the type hierarchy
-	Class      tClass          = target.getClass();
+	Class tClass = target.getClass();
 	Set<Class> featureClassSet = new HashSet<Class>();
 	//For its interfaces
 	for(Class iFace:tClass.getInterfaces())
@@ -72,18 +68,13 @@ public class FeaturesImpl {
 		    featureClassSet.add(ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
-	final Set<FeatureFactory> sortedFactories = new TreeSet<FeatureFactory>(featureLoadOrderComparator);
+	
 	for(Class c:featureClassSet)
-	    sortedFactories.add(featureFactoriesByFeature.get(c));
-	System.out.println("features for "+target.getClass().getName());
-	for(FeatureFactory factory : sortedFactories)
-	    System.out.println("\t"+factory.getFeatureClass());
-	for(FeatureFactory factory : sortedFactories)
-	    get(target, factory.getFeatureClass());
+	    get(target,c);
     }//end init(...)
     
     public  void destruct(Object obj){
-	final Collection<Feature> rawFeatures = targetMap.get(obj ).values();
+	final Collection<Feature> rawFeatures = targetMap.get(obj).values();
 	final Set<Feature> featureSet = new HashSet<Feature>();
 	featureSet.addAll(rawFeatures);
 	for(Feature f:featureSet){
@@ -104,12 +95,7 @@ public class FeaturesImpl {
     }//end getFeatureMap()
     
        Feature getFeature(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target){
-	if(featureClass == DefaultPODRegistry.class){
-	    System.out.println("getFeature "+featureClass.getName()+" featuresByClass:");
-	    for(Entry<Class<? extends Feature>,Feature> ent:featuresByClass.entrySet())
-		System.out.println("\t"+ent.getKey()+" "+ent.getValue());
-	}
-	   Feature result = featuresByClass.get(featureClass);
+	Feature result = featuresByClass.get(featureClass);
 	if(result==null)
 	    try{result = newFeatureInstance(featuresByClass, featureClass, target);}
 	catch(FeatureNotApplicableException e){}//Quiet skip.
@@ -126,7 +112,6 @@ public class FeaturesImpl {
 	   catch(ClassCastException e){
 	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName());
 	   }
-	   new Throwable("New feature instance: "+result+" applied to "+target).printStackTrace();
 	   registerFeatureByClassRecursively(featureClass, result, featuresByClass);
 	   result.apply(target);
 	   init(result);

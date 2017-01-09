@@ -24,7 +24,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
-import org.jtrfp.trcl.core.DefaultPODRegistryFactory.DefaultPODRegistry;
 
 public class FeaturesImpl {
     private static final FeatureLoadOrderComparator featureLoadOrderComparator = new FeatureLoadOrderComparator();

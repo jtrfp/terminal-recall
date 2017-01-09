@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2017 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -20,14 +20,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
+import org.jtrfp.trcl.core.DefaultPODRegistryFactory.DefaultPODRegistry;
 
 public class FeaturesImpl {
+    private static final FeatureLoadOrderComparator featureLoadOrderComparator = new FeatureLoadOrderComparator();
+    
  // Key represents target-class
        final Map<Object,Map<Class<? extends Feature>,Feature>> targetMap 
-    	= new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
+           = new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
        final HashMap<Class<?>,Collection<FeatureFactory>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory>>();
        final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
     
@@ -56,7 +60,7 @@ public class FeaturesImpl {
     
     public  void init(Object target){
 	//Traverse the type hierarchy
-	Class tClass = target.getClass();
+	Class      tClass          = target.getClass();
 	Set<Class> featureClassSet = new HashSet<Class>();
 	//For its interfaces
 	for(Class iFace:tClass.getInterfaces())
@@ -68,13 +72,15 @@ public class FeaturesImpl {
 		    featureClassSet.add(ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
-	
+	final Set<FeatureFactory> sortedFactories = new TreeSet<FeatureFactory>(featureLoadOrderComparator);
 	for(Class c:featureClassSet)
-	    get(target,c);
+	    sortedFactories.add(featureFactoriesByFeature.get(c));
+	for(FeatureFactory factory : sortedFactories)
+	    get(target, factory.getFeatureClass());
     }//end init(...)
     
     public  void destruct(Object obj){
-	final Collection<Feature> rawFeatures = targetMap.get(obj).values();
+	final Collection<Feature> rawFeatures = targetMap.get(obj ).values();
 	final Set<Feature> featureSet = new HashSet<Feature>();
 	featureSet.addAll(rawFeatures);
 	for(Feature f:featureSet){
@@ -98,7 +104,7 @@ public class FeaturesImpl {
 	Feature result = featuresByClass.get(featureClass);
 	if(result==null)
 	    try{result = newFeatureInstance(featuresByClass, featureClass, target);}
-	catch(FeatureNotApplicableException e){}//Quiet skip.
+	    catch(FeatureNotApplicableException e){}//Quiet skip.
 	return result;
     }//end getFeature()
 
@@ -112,7 +118,7 @@ public class FeaturesImpl {
 	   catch(ClassCastException e){
 	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName());
 	   }
-	   registerFeatureByClassRecursively(featureClass, result, featuresByClass);
+	   registerFeatureByClassRecursively(result.getClass(), result, featuresByClass);
 	   result.apply(target);
 	   init(result);
 	   return result;

@@ -29,7 +29,7 @@ public class FeatureLoadOrderComparator implements Comparator<Object> {
 	
 	final int result = leftOrder - rightOrder;
 	if(result == 0)//Sets will mistake this as equivalence!
-	    return 1;//Arbitrary fallback value
+	    return left.hashCode() - right.hashCode();//Use hashcode instead to break the tie.
 	else return result;
     }//end compare(...)
  

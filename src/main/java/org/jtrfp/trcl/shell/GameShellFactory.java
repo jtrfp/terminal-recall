@@ -22,14 +22,13 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
@@ -37,7 +36,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.IPodData;
-import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DummyFuture;
 import org.jtrfp.trcl.EarlyLoadingScreen;
@@ -49,6 +47,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.PODRegistry;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
@@ -100,6 +99,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	runStateListener = new RunStateListener();
 	private TRConfiguration trConfiguration;
 	private MenuSystem menuSystem;
+	private PODRegistry podRegistry;
 
 	public GameShell(TR tr){
 	    this.tr=tr;
@@ -143,7 +143,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	public GameShell startShell(){
 	    tr.gatherSysInfo();
-	    registerPODs();
+	    //registerPODs();
 	    applyGFXState();
 	    initLoadingScreen();
 	    openInitializationFence();
@@ -326,8 +326,11 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	private GameVersion guessGameVersionFromPods(){
 	    boolean f3Hint=false,tvHint=false,furyseHint=false;
-	    System.out.println("Auto-determine active... pods:"+tr.getResourceManager().getRegisteredPODs().size());
-	    for(IPodData pod:tr.getResourceManager().getRegisteredPODs()){
+	    final PODRegistry podRegistry     = getPodRegistry();
+	    final Collection<String> podPaths = podRegistry.getPodCollection();
+	    System.out.println("Auto-determine active... pods:"+podPaths.size());
+	    for(String path : podPaths){
+		final IPodData pod      = podRegistry.getPodData(path);
 		final String podComment = pod.getComment();
 		System.out.println("POD comment="+podComment);
 		final String podCommentUC = podComment.toUpperCase();
@@ -345,7 +348,8 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	private VOXFile autoDetermineVOXFile(){
 	    String voxFileName=null;
-	    System.out.println("Auto-determine active... pods:"+tr.getResourceManager().getRegisteredPODs().size());
+	    final PODRegistry podRegistry     = getPodRegistry();
+	    System.out.println("Auto-determine active... pods:"+podRegistry.getPodCollection().size());
 	    GameVersion gameVersion = guessGameVersionFromPods();
 	    if (gameVersion != null) {
 		switch (gameVersion) {
@@ -373,7 +377,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    catch(IllegalAccessException e){JOptionPane.showMessageDialog(tr.getRootWindow(), "Could not access specified vox "+voxFileName,"Permission problem?", JOptionPane.ERROR_MESSAGE);}
 	    return null;
 	}//end attemptGetVOX()
-
+/*
 	private void registerPODs(){
 	    DefaultListModel podList = getTrConfiguration().getPodList();
 	    for(int i=0; i<podList.size(); i++){
@@ -392,6 +396,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 		}//end if(!null)
 	    }//end for(pods)
 	}//end registerPODs
+	*/
 	/**
 	 * @return the greenFont
 	 */
@@ -432,6 +437,10 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	@Override
 	public void apply(TR target) {
+	    setTrConfiguration(Features.get(target, TRConfiguration.class));
+	    final RootWindow rootWindow = Features.get(target,RootWindow.class);
+	    setMenuSystem(Features.get(rootWindow, MenuSystem.class));
+	    setPodRegistry(Features.get(target, PODRegistry.class));
 	    target.setRunState(new GameShellConstructing(){});
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(MenuSystem.MIDDLE, START_GAME_MENU_PATH);
@@ -480,14 +489,19 @@ public class GameShellFactory implements FeatureFactory<TR>{
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
 	}
+
+	public PODRegistry getPodRegistry() {
+	    return podRegistry;
+	}
+
+	public void setPodRegistry(PODRegistry podRegistry) {
+	    this.podRegistry = podRegistry;
+	}
     }//end GameShell
 
     @Override
     public Feature<TR> newInstance(TR target) {
 	final GameShell result = new GameShell(target);
-	result.setTrConfiguration(Features.get(target, TRConfiguration.class));
-	final RootWindow rootWindow = Features.get(target,RootWindow.class);
-	result.setMenuSystem(Features.get(rootWindow, MenuSystem.class));
 	return result;
     }
 

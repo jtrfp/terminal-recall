@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jtrfp.trcl.core.Feature;
-import org.jtrfp.trcl.core.Features;
 
 public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGET_CLASS>{
     protected abstract Set<String> getPersistentProperties();
@@ -28,7 +27,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 
     @Override
     public void apply(TARGET_CLASS target) {
-	this.target = target;
+	setTarget(target);
     }//end apply(...)
 
     @Override
@@ -96,7 +95,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
     public TARGET_CLASS applyFromMap(Map<String,Object> map){
 	final TARGET_CLASS target = getTarget();
 	if(target == null)
-	    throw new IllegalStateException("Configured object intolerably null.");
+	    throw new IllegalStateException("Configured object intolerably null. This FeatureConfigurator class: "+getClass().getName());
 	final Method [] methods = target.getClass().getMethods();
 	for(String propertyName:getPersistentProperties()){
 	    try{

@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ControllerMapperFactory implements FeatureFactory<Features> {
   public class ControllerMapper implements Feature<Features>{
-    private Collection<InputDevice> inputDevices = new ArrayList<InputDevice>();
+    private final Collection<InputDevice> inputDevices = new ArrayList<InputDevice>();
     private final Set<MappingListener<ControllerSource,ControllerMapping>> mappingListeners = new HashSet<MappingListener<ControllerSource,ControllerMapping>>();
     private final Map<ControllerSource,ControllerMapping> map = new HashMap<ControllerSource,ControllerMapping>();
     private final Map<String,ControllerConfiguration> recommendedDefaultConfigurations = new HashMap<String,ControllerConfiguration>();

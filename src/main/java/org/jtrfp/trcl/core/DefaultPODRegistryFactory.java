@@ -38,9 +38,9 @@ public class DefaultPODRegistryFactory implements FeatureFactory<TR> {
 	private final CachedAdapter<String,IPodData> podCache;
 	private RootWindow rootWindow;
 	private final CollectionActionPrinter<String> podCollectionPrinter = new CollectionActionPrinter<String>("podCollection "+hashCode()+" ", new ArrayList<String>());
+	private TR target;
 
 	public DefaultPODRegistry(){
-	    new Throwable("DefaultPODRegistry constructor "+hashCode()).printStackTrace();
 	    podCache = new CachedAdapter<String,IPodData>(new BidiReferenceMap<String,IPodData>(ReferenceStrength.SOFT,ReferenceStrength.SOFT, 64,.75f,true)){
 
 		@Override
@@ -88,18 +88,10 @@ public class DefaultPODRegistryFactory implements FeatureFactory<TR> {
 	}
 
 	public String [] getPodsAsArray(){
-	    System.out.println(hashCode()+" getPodsAsArray() contents: ");
-	    for(String s : podCollection.toArray( new String [podCollection.size()] ))
-		System.out.print("\t"+s);
-	    System.out.println();
 	    return podCollection.toArray( new String [podCollection.size()] );
 	}
 
 	public void setPodsAsArray(String [] newPodsAsArray){
-	    System.out.println(hashCode()+" setPodsAsArray() contents: ");
-	    for(String s : newPodsAsArray )
-		System.out.print("\t"+s);
-	    System.out.println();
 	    podCollection.clear();
 	    for(String newPod : newPodsAsArray)
 		podCollection.add(newPod);
@@ -111,6 +103,8 @@ public class DefaultPODRegistryFactory implements FeatureFactory<TR> {
 	}
 
 	public RootWindow getRootWindow() {
+	    if( rootWindow == null )
+		rootWindow = Features.get(getTarget(),RootWindow.class);
 	    return rootWindow;
 	}
 
@@ -118,13 +112,20 @@ public class DefaultPODRegistryFactory implements FeatureFactory<TR> {
 	    this.rootWindow = rootWindow;
 	}
 
+	public TR getTarget() {
+	    return target;
+	}
+
+	public void setTarget(TR target) {
+	    this.target = target;
+	}
+
     }//end PODRegistry
 
     @Override
     public Feature<TR> newInstance(TR target) throws FeatureNotApplicableException {
 	final DefaultPODRegistry result = new DefaultPODRegistry();
-	final RootWindow rootWindow = Features.get(target,RootWindow.class);
-	result.setRootWindow(rootWindow);
+	result.setTarget(target);
 	return result;
     }
 

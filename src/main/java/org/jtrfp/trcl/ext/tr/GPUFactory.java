@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.ext.tr;
 
+import javax.media.opengl.awt.GLCanvas;
+
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
@@ -35,14 +37,16 @@ public class GPUFactory implements FeatureFactory<TR> {
     @Override
     public void apply(TR target) {
 	final RootWindow rootWindow = Features.get(target, RootWindow.class);
+	final GLCanvas canvas = rootWindow.getCanvas();
+	assert canvas != null;
+	setCanvas(canvas);
 	final ThreadManager threadManager = Features.get(target, ThreadManagerFeature.class);
-	setReporter(Features.get(target, Reporter.class));
 	setThreadManager(threadManager);
 	setGlExecutor(threadManager);
-	setCanvas(rootWindow.getCanvas());
 	setUncaughtExceptionHandler(target);
 	setWorld(target.getWorld());
 	setExecutorService(threadManager.threadPool);
+	setReporter(Features.get(target, Reporter.class));
 	initialize();
     }//end apply(...)
 

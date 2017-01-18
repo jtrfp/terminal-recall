@@ -29,18 +29,14 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -54,7 +50,6 @@ import org.jtrfp.jtrfp.internal.act.ActDataLoader;
 import org.jtrfp.jtrfp.internal.tex.TexDataLoader;
 import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.IPodFileEntry;
-import org.jtrfp.jtrfp.pod.PodFile;
 import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.LineSegment;
@@ -66,7 +61,6 @@ import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.SoftValueHashMap;
 import org.jtrfp.trcl.TextureMesh;
 import org.jtrfp.trcl.Triangle;
-import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
@@ -123,7 +117,7 @@ import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
 
 public class ResourceManager{
-	private final Map<String,IPodData> pods = new HashMap<String,IPodData>();
+	//private final Map<String,IPodData> pods = new HashMap<String,IPodData>();
 	private SoftValueHashMap<Integer, Texture> 
 	/*						*/	 rawCache 
 		= new SoftValueHashMap<Integer,Texture>();
@@ -150,9 +144,11 @@ public class ResourceManager{
 	public final ObjectFactory<String,SoundTexture>	soundTextures;
 	private TRConfigRoot configManager;
 	private UncompressedVQTextureFactory uncompressedVQTextureFactory;
+	private final PODRegistry podRegistry;
 	
 	public ResourceManager(final TR tr){
 		this.tr=tr;
+		podRegistry = Features.get(tr, PODRegistry.class);
 		try{Class.forName("de.quippy.javamod.multimedia.mod.loader.tracker.ProTrackerMod");
 		    Class.forName("de.quippy.javamod.multimedia.mod.ModContainer"); // ModContainer uses the ModFactory!!
 		    }
@@ -191,9 +187,9 @@ public class ResourceManager{
 			return null;
 		    }});
 		    
-		setupPODListeners();
+		//setupPODListeners();
 	}//end ResourceManager
-	
+	/*
 	private void setupPODListeners(){
 	    //final TRConfiguration config = tr.config;
 	    final TRConfiguration trConfig = Features.get(tr, TRConfiguration.class);
@@ -216,7 +212,7 @@ public class ResourceManager{
 		     ResourceManager.this.deregisterPOD(item);
 		}});
 	}//end setupPODListeners
-	
+	*/
 	/**
 	 * @return the explosionFactory
 	 */
@@ -243,12 +239,13 @@ public class ResourceManager{
 		final File localPathAttempt = new File(localPath.toLowerCase());
 		if(localPathAttempt.exists())
 		    return new BufferedInputStream(new FileInputStream(localPathAttempt));
-		for(IPodData p:pods.values())
-			if((ent=p.findEntry(name))!=null)
+		final Collection<String> podPaths = podRegistry.getPodCollection();
+		for(String path : podPaths)
+			if((ent=podRegistry.getPodData(path).findEntry(name))!=null)
 				return new BufferedInputStream(ent.getInputStreamFromPod());
 		throw new FileNotFoundException(name);
 		}//end getInputStreamFromResource(...)
-	
+	/*
 	public void deregisterPOD(String podToDeregister){
 	    if(podToDeregister==null)throw new NullPointerException("fileToDeregister should not be null.");
 	    pods.remove(podToDeregister);
@@ -264,7 +261,7 @@ public class ResourceManager{
 		System.out.println("Register pod "+fileToRegister);
 		registerPOD(fileToRegister.getAbsolutePath(),new PodFile(fileToRegister));
 		}
-	
+	*/
 	public Texture [] getTextures(String texFileName, ColorPaletteVectorList paletteRGBA, ColorPaletteVectorList paletteESTuTv,  boolean uvWrapping, boolean generateMipMaps) throws IOException, FileLoadException, IllegalAccessException{
 		if(texFileName==null)
 		    throw new NullPointerException("texFileName is intolerably null");
@@ -345,8 +342,9 @@ public class ResourceManager{
 		}//end getRAWAsTexture(...)
 	
 	public boolean rawExists(String name){
-		for(IPodData p:pods.values()){
-			if((p.findEntry("ART\\"+name))!=null){
+	    final Collection<String> podCollection = podRegistry.getPodCollection();
+		for(String path : podCollection){
+			if((podRegistry.getPodData(path).findEntry("ART\\"+name))!=null){
 				System.out.println(name+" found to exist. Returning true...");
 				return true;
 				}
@@ -838,10 +836,6 @@ public class ResourceManager{
 	    }catch(Exception e){tr.showStopper(e);}
 	    return result;
 	}//end getMOD(...)
-
-	public Collection<IPodData> getRegisteredPODs() {
-	    return pods.values();
-	}
 	
 	public Texture getTestTexture(){
 	    if(testTexture!=null)

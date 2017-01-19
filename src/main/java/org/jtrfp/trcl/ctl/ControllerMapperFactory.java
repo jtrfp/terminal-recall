@@ -94,6 +94,8 @@ public class ControllerMapperFactory implements FeatureFactory<Features> {
     public ControllerConfiguration getRecommendedDefaultConfiguration(
 	    InputDevice inputDevice) {
 	ControllerConfiguration result = recommendedDefaultConfigurations.get(inputDevice.getName());
+	if(result==null)
+	    result = recommendedDefaultConfigurations.get("fallback "+inputDevice.getClass().getName());
 	if(result!=null){
 	    try{result = (ControllerConfiguration)BeanUtils.cloneBean(result);}
 	    catch(Exception e){e.printStackTrace();}

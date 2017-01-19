@@ -75,8 +75,8 @@ public class FeaturesImpl {
 	final Set<FeatureFactory> sortedFactories = new TreeSet<FeatureFactory>(featureLoadOrderComparator);
 	for(Class c:featureClassSet)
 	    sortedFactories.add(featureFactoriesByFeature.get(c));
-	for(FeatureFactory factory : sortedFactories){
-	    final Feature feature = get(target, factory.getFeatureClass());
+	for(FeatureFactory<? extends Feature<?>> factory : sortedFactories){
+	    final Feature<?> feature = get(target, factory.getFeatureClass());
 	    if( feature instanceof GraphStabilizationListener )
 		graphStabilizationListeners.add((GraphStabilizationListener)feature);
 	    }

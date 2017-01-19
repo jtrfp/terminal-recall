@@ -30,6 +30,9 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -61,11 +64,12 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.PodFile;
-import org.jtrfp.trcl.conf.ConfigManager;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.PODRegistry;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
@@ -102,7 +106,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
     */
 
     public class ConfigWindow extends JFrame implements Feature<TR>{
-	private TRConfiguration config;
+	//private TRConfiguration config;
 	private JCheckBox chckbxLinearInterpolation, chckbxBufferLag;
 	private JComboBox audioBufferSizeCB;
 	private JSlider modStereoWidthSlider;
@@ -112,8 +116,14 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	private final JFileChooser fileChooser = new JFileChooser();
 	private final SoundOutputSelectorGUI soundOutputSelectorGUI;
 	private final Collection<ConfigurationTab> tabs;
-	private final TRConfigRoot cMgr;
+	//private final TRConfigRoot cMgr;
 	private final JTabbedPane tabbedPane;
+	private       PODRegistry podRegistry;
+	private       PodCollectionListener podCollectionListener = new PodCollectionListener();
+	private TR              tr;
+	private TRConfigRoot    trConfigRoot;
+	private TRConfiguration trConfiguration;
+	private JLabel lblConfigpath = new JLabel("[config path not set]");
 
 	public ConfigWindow(){
 	    this(new ArrayList<ConfigurationTab>());
@@ -122,10 +132,10 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	public ConfigWindow(Collection<ConfigurationTab> tabs){
 	    setTitle("Settings");
 	    setSize(340,540);
-	    final TR tr = Features.get(Features.getSingleton(), TR.class);
-	    this.cMgr = Features.get(tr, TRConfigRoot.class);
+	    final TR tr = getTr();
+	    //this.cMgr = Features.get(tr, TRConfigRoot.class);
 	    this.tabs = tabs;
-	    config = Features.get(tr, TRConfiguration.class);
+	    //config = Features.get(tr, TRConfiguration.class);
 	    tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	    getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
@@ -420,7 +430,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    btnOk.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-		    applySettings();
+		    applySettingsEDT();
 		    ConfigWindow.this.setVisible(false);
 		}
 	    });
@@ -428,8 +438,9 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    JButton btnCancel = new JButton("Cancel");
 	    btnCancel.setToolTipText("Close the window without applying settings");
 	    okCancelPanel.add(btnCancel, BorderLayout.EAST);
-	    final String cFilePath = cMgr.getConfigSaveURI();
-	    JLabel lblConfigpath = new JLabel(cFilePath);
+	    //final TRConfigRoot cfgRoot = getTrConfigRoot();
+	    //final String cFilePath = cfgRoot.getConfigSaveURI();
+	    //JLabel lblConfigpath = new JLabel(cFilePath);
 	    lblConfigpath.setIcon(null);
 	    lblConfigpath.setToolTipText("Default config file path");
 	    lblConfigpath.setHorizontalAlignment(SwingConstants.CENTER);
@@ -441,13 +452,11 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 		    //dispatchComponentConfigs();//Revert to original
 		    ConfigWindow.this.setVisible(false);
 		}});
-
-	    //TODO: Might this need to be called during registration?
-	    if(config!=null)
-		readSettingsToPanel();
 	}//end constructor
 
-	private void applySettings(){
+	private void applySettingsEDT(){
+	    final TRConfigRoot      configRoot = getTrConfigRoot();
+	    final TRConfiguration   config     = getTrConfiguration();
 	    config.setVoxFile((String)missionList.getSelectedValue());
 	    config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
 	    config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
@@ -455,16 +464,18 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    {HashSet<String>pList=new HashSet<String>();
 	    for(int i=0; i<podLM.getSize();i++)
 		pList.add((String)podLM.getElementAt(i));
-	    config.getPodList().clear();
+	    podLM.clear();//Clear so we don't get a double-copy when the dispatcher populates it.
+	    final Collection<String> podCollection = getPodRegistry().getPodCollection();
+	    podCollection.clear();
 	    for(String pod:pList)
-		config.getPodList().addElement(pod);
+		podCollection.add(pod);
 
 	    HashSet<String>vxList=new HashSet<String>();
 	    for(int i=0; i<missionLM.getSize();i++)
 		vxList.add((String)missionLM.getElementAt(i));
 	    config.setMissionList(vxList);}
 	    soundOutputSelectorGUI.applySettings(config);
-	    try{cMgr.saveConfigurations();}
+	    try{configRoot.saveConfigurations();}
 	    catch(Exception e){e.printStackTrace();}
 	    //writeSettingsTo(cMgr.getConfigFilePath());
 	    if(needRestart)
@@ -495,6 +506,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	}//end dispatchComponentConfigs()
 */
 	private void readSettingsToPanel(){
+	    final TRConfiguration config = getTrConfiguration();
 	    modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
 	    chckbxLinearInterpolation.setSelected(config.isAudioLinearFiltering());
 	    chckbxBufferLag.setSelected(config.isAudioBufferLag());
@@ -513,14 +525,15 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    String missionSelection = config.getVoxFile();
 	    for(int i=0; i<missionLM.getSize(); i++){
 		if(((String)missionLM.get(i)).contentEquals(missionSelection))missionList.setSelectedIndex(i);}
-
+/*
 	    podLM.removeAllElements();
-	    final DefaultListModel podList = config.getPodList();
-	    for(int i=0; i<podList.size();i++){
-		final String pod = (String)podList.get(i);
-		if(pod!=null)
-		    if(checkPOD(new File(pod)))
-			podLM.addElement(pod);}
+	    final Collection<String> podRegistryCollection = getPodRegistry().getPodCollection();
+	    //final DefaultListModel podList = config.getPodList();
+	    for(String path : podRegistryCollection){
+		if(path!=null)
+		    if(checkPOD(new File(path)))
+			podLM.addElement(path);}
+	    */
 	    soundOutputSelectorGUI.readToPanel(config);
 	}//end readSettings()
 
@@ -576,8 +589,9 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	private boolean writeSettingsTo(File f){
 	    try{
 		//cMgr.saveConfigurations(f);
-		cMgr.setConfigSaveURI(f.getPath());
-		cMgr.saveConfigurations();
+		final TRConfigRoot configRoot = getTrConfigRoot();
+		configRoot.setConfigSaveURI(f.getPath());
+		configRoot.saveConfigurations();
 		return true;
 	    }catch(Exception e){JOptionPane.showMessageDialog(
 		    this,
@@ -630,9 +644,10 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 		}});
 	    TRConfiguration src =(TRConfiguration)xmlDec.readObject();
 	    xmlDec.close();
+	    TRConfiguration config = getTrConfiguration();
 	    if(config!=null)
 		BeanUtils.copyProperties(config, src);
-	    else config=src;
+	    else setTrConfiguration(config = src);
 	    }catch(Exception e){JOptionPane.showMessageDialog(
 		    this,
 		    "Failed to read the specified file:\n"
@@ -706,8 +721,15 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
 	@Override
 	public void apply(TR target) {
-	    // TODO Auto-generated method stub
-
+	    setPodRegistry(Features.get(target, PODRegistry.class));
+	    final TR tr;
+	    setTr             (tr = Features.get(Features.getSingleton(), TR.class));
+	    setTrConfigRoot   (Features.get(tr, TRConfigRoot.class   ));
+	    setTrConfiguration(Features.get(tr, TRConfiguration.class));
+	    if(getTrConfiguration() != null)
+		readSettingsToPanel();
+	    final CollectionActionDispatcher<String> podRegistryCollection = getPodRegistry().getPodCollection();
+	    podRegistryCollection.addTarget(podCollectionListener, true);
 	}
 
 	@Override
@@ -717,7 +739,6 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	}
 
 	public void registerConfigTab(final ControllerConfigTab tab) {
-	    System.out.println("Adding config tab: "+tab.getTabName());
 	    try{
 	    SwingUtilities.invokeAndWait(new Runnable(){
 		@Override
@@ -727,11 +748,213 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    }catch(Exception e){e.printStackTrace();}
 	    //dispatchComponentConfigs();
 	}//end registerConfigTab(...)
+
+	public PODRegistry getPodRegistry() {
+	    return podRegistry;
+	}
+
+	public void setPodRegistry(PODRegistry podRegistry) {
+	    this.podRegistry = podRegistry;
+	}
+	
+	private class PodCollectionListener implements List<String> {
+
+	    @Override
+	    public boolean add(final String element) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			podLM.addElement(element);
+		    }});
+		
+		return true;//Meh.
+	    }
+
+	    @Override
+	    public void add(final int index, final String element) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			podLM.add(index, element);
+		    }});
+	    }
+
+	    @Override
+	    public boolean addAll(final Collection<? extends String> arg0) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			for(String s : arg0 )
+		    podLM.addElement(s);
+		    }});
+		
+		return true;//Meh.
+	    }
+
+	    @Override
+	    public boolean addAll(int arg0, Collection<? extends String> arg1) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public void clear() {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			podLM.clear();
+		    }});
+	    }
+
+	    @Override
+	    public boolean contains(Object arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public boolean containsAll(Collection<?> arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public String get(int arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public int indexOf(Object arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public boolean isEmpty() {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public Iterator<String> iterator() {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public int lastIndexOf(Object arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public ListIterator<String> listIterator() {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public ListIterator<String> listIterator(int arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public boolean remove(final Object elementToRemove) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			podLM.removeElement(elementToRemove);
+		    }});
+		return true; //Meh.
+	    }
+
+	    @Override
+	    public String remove(final int indexOfElementToRemove) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			podLM.remove(indexOfElementToRemove);
+		    }});
+		return null;//Meh.
+	    }
+
+	    @Override
+	    public boolean removeAll(final Collection<?> elementsToRemove) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			boolean result = false;
+		for(Object o : elementsToRemove)
+		    result |= podLM.removeElement(o);
+		    }});
+		
+		return true;//Meh.
+	    }
+
+	    @Override
+	    public boolean retainAll(Collection<?> arg0) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public String set(final int index, final String element) {
+		SwingUtilities.invokeLater(new Runnable(){
+		    @Override
+		    public void run() {
+			podLM.set(index, element);
+		    }});
+		return null;//Meh.
+	    }
+
+	    @Override
+	    public int size() {
+		return podLM.size();
+	    }
+
+	    @Override
+	    public List<String> subList(int arg0, int arg1) {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public Object[] toArray() {
+		throw new UnsupportedOperationException();
+	    }
+
+	    @Override
+	    public <T> T[] toArray(T[] arg0) {
+		throw new UnsupportedOperationException();
+	    }
+	    
+	}//end PodCollectionListener
+
+	public TR getTr() {
+	    return tr;
+	}
+
+	public void setTr(TR tr) {
+	    this.tr = tr;
+	}
+
+	public TRConfigRoot getTrConfigRoot() {
+	    return trConfigRoot;
+	}
+
+	public void setTrConfigRoot(TRConfigRoot trConfigRoot) {
+	    this.trConfigRoot = trConfigRoot;
+	    final String cFilePath = trConfigRoot.getConfigSaveURI();
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    lblConfigpath.setText(cFilePath);
+		}});
+	}//end setTrConfigRoot(...)
+
+	public TRConfiguration getTrConfiguration() {
+	    return trConfiguration;
+	}
+
+	public void setTrConfiguration(TRConfiguration trConfiguration) {
+	    this.trConfiguration = trConfiguration;
+	}
     }//end ConfigWindow
 
 @Override
 public Feature<TR> newInstance(TR target) {
-    return new ConfigWindow();
+    final ConfigWindow result = new ConfigWindow();
+    return result;
 }
 
 @Override

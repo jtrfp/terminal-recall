@@ -34,7 +34,8 @@ import org.springframework.stereotype.Component;
  *
  */
 
-@Component
+//@Component
+@Deprecated
 public class XBox360PadDefaultConfFactory implements FeatureFactory<ControllerMapper> {
 public static class XBox360PadDefaultConf extends DefaultControllerConfiguration {
     public XBox360PadDefaultConf(){

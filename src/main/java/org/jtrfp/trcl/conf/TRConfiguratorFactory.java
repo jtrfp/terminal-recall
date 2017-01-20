@@ -48,7 +48,6 @@ public class TRConfiguratorFactory implements FeatureFactory<TRConfiguration> {
 	    "audioLinearFiltering",
 	    "missionList",
 	    "modStereoWidth",
-	    "podList",
 	    "fileDialogStartDir",
 	    //"componentConfigs"
     };

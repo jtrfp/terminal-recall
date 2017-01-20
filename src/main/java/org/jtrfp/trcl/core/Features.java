@@ -33,18 +33,18 @@ public class Features {
     public Features(Collection<FeatureFactory> features){
 	for(FeatureFactory ff:features)
 	    registerFeature(ff);
-	singleton = this;
+	setSingleton(this);
     }
     
     public synchronized static Features getSingleton(){
 	if(singleton == null)
-	    setSingleton(new Features());
+	    throw new IllegalStateException("Cannot call getSingleton() before Features constructor is called by Spring.");
 	return singleton;
     }
     
     public synchronized static void resetForTesting(){
 	impl = new FeaturesImpl();
-	new Features();
+	setSingleton(new Features());
     }
 
     public synchronized static void registerFeature(FeatureFactory<?> factory){

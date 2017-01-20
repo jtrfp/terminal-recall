@@ -15,6 +15,7 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 
+import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.gpu.SettableTexture;
 import org.junit.After;
 import org.junit.Assert;
@@ -27,6 +28,7 @@ public class MiniMapTest {
     @Before
     public void setUp() throws Exception {
 	//final TR tr = Mockito.mock(TR.class);//TODO: Refactor WorldObject to take GPUResourceFinalizer
+	Features.setSingleton(new Features());
 	final MiniMap mm = new MiniMap();
 	mm.setModelSize(new double[]{.1,.1});
 	mm.setDiameterInTiles(16);

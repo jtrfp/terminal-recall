@@ -18,12 +18,13 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.FeaturesImpl.FeatureNotFoundException;
+import org.jtrfp.trcl.core.LoadOrderAware;
 import org.jtrfp.trcl.core.SavestateSaveLoadConfigurationFactory.SavestateSaveLoadConfiguration;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GameConfigRootFactory implements FeatureFactory<TVF3Game> {
+public class GameConfigRootFactory implements FeatureFactory<TVF3Game>, LoadOrderAware{
     public static String SAVE_URI_SUFFIX = ".sav.trcl.xml";
     public static String DEFAULT_SAVE_URI = "game"+SAVE_URI_SUFFIX;
     
@@ -99,6 +100,11 @@ public class GameConfigRootFactory implements FeatureFactory<TVF3Game> {
     @Override
     public Class<? extends Feature> getFeatureClass() {
 	return GameConfigRootFeature.class;
+    }
+
+    @Override
+    public int getFeatureLoadPriority() {
+	return LoadOrderAware.LAST;
     }
 
 }//end GameConfigRoot

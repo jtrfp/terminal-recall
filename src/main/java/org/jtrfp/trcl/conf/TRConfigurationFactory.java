@@ -61,7 +61,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 		activeAudioOutput,
 		activeAudioFormat;
 	//private HashSet<String> podList     = new HashSet<String>();
-	private DefaultListModel podList=new DefaultListModel();
+	//private DefaultListModel podList=new DefaultListModel();
 	private double modStereoWidth=.3;
 	public static final String AUTO_DETECT = "Auto-detect";
 	private String fileDialogStartDir;
@@ -189,22 +189,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	public void setModStereoWidth(double modStereoWidth) {
 	    this.modStereoWidth = modStereoWidth;
 	}
-
-
-	/**
-	 * @return the podList
-	 */
-	public DefaultListModel getPodList() {
-	    return podList;
-	}
-
-	/**
-	 * @param podList the podList to set
-	 */
-	public void setPodList(DefaultListModel podList) {
-	    this.podList = podList;
-	}
-
+	
 	public String getFileDialogStartDir() {
 	    if(fileDialogStartDir!=null)
 		return fileDialogStartDir;

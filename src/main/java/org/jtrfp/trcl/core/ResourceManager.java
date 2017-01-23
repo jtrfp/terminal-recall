@@ -827,8 +827,9 @@ public class ResourceManager{
 	     final InputStream is= getInputStreamFromResource("MUSIC\\"+podPath);
 	     final File tempFile = File.createTempFile("org.jtrfp.trcl.mod", podPath);
 	     final FileOutputStream os = new FileOutputStream(tempFile);
+	     final byte [] buffer = new byte[4096];
 	     while(is.available()>0)
-		os.write(is.read());//Slow but it's a MOD so it won't matter much.
+		 os.write(buffer, 0, is.read(buffer));
 	     is.close();
 	     os.close();
 	     result = ModuleFactory.getInstance(tempFile);

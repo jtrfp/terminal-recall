@@ -192,7 +192,7 @@ public class TunnelExitObject extends PortalEntrance {
 		     tr.setRunState(new Mission.PlayerActivity(){});
 		    */
 		    ((TVF3Game)getGameShell().getGame()).getNavSystem().updateNAVState();
-		    mission.setDisplayMode(mission.overworldMode);
+		    mission.setDisplayMode(mission.getOverworldMode());
 		    overworldSystem.setTunnelMode(false);
 		    player.setActive(true);
 		}// end if(x past threshold)

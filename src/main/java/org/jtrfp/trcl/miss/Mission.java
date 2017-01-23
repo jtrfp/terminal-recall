@@ -139,7 +139,7 @@ public class Mission {
     //private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final DisplayModeHandler displayHandler;
-    public Object [] levelLoadingMode, overworldMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
+    private Object [] levelLoadingMode, overworldMode, gameplayMode, briefingMode, summaryMode, emptyMode=  new Object[]{};
     private NAVObjective currentNavTarget;
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private GameShell gameShell;
@@ -449,8 +449,8 @@ public class Mission {
 	    if(game == null)
 		throw new IllegalStateException("game property intolerably null.");
 	    levelLoadingMode = new Object[]{
-		 ((TVF3Game)game).levelLoadingScreen,
-		 ((TVF3Game)game).upfrontDisplay
+		 ((TVF3Game)game).getLevelLoadingScreen(),
+		 ((TVF3Game)game).getUpfrontDisplay()
 	    };
 	    }
 	return levelLoadingMode;
@@ -927,7 +927,11 @@ public class Mission {
         this.defObjectList = defObjectList;
     }//end setDefObjectList(...)
 
-    public void setOverworldSystem(OverworldSystem overworldSystem) {
+    void setOverworldSystem(OverworldSystem overworldSystem) {
         this.overworldSystem = overworldSystem;
+    }
+    
+    public Object [] getOverworldMode(){
+	return overworldMode;
     }
 }// end Mission

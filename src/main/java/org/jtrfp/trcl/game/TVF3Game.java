@@ -140,7 +140,7 @@ public class TVF3Game implements Game {
 	    private boolean inGameplay	=false;
 	    private DashboardLayout dashboardLayout;
 	    
-	    public TVF3Game() {
+	    public TVF3Game() {//TODO: These Features-dependent inits probably shouldn't be in the constructor
 		this.tr = Features.get(Features.getSingleton(), TR.class);
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};
@@ -346,7 +346,6 @@ public class TVF3Game implements Game {
 			    camera.probeForBehavior(MatchDirection.class).setTarget(player);
 			    tr.getDefaultGrid().add(player);
 			    System.out.println("\t...Done.");
-			    levelLoadingScreen	= new LevelLoadingScreen(tr.getDefaultGrid(),tr);
 			    final BriefingLayout briefingLayout = trConfig._getGameVersion()==GameVersion.TV?new TVBriefingLayout():new F3BriefingLayout(); 
 			    briefingScreen	= new BriefingScreen(tr,getGameShell().getGreenFont(), 
 				    briefingLayout,"TVF3Game");
@@ -388,8 +387,13 @@ public class TVF3Game implements Game {
 			    result = getCurrentMission().go();}
 			if (result.isAbort())
 			    break;
+			final int prevLevelIndex = getLevelIndex();
+			final int nextLevelIndex = prevLevelIndex+1;
+			// Check if we won the game
+			if(nextLevelIndex >= vox.getLevels().length)
+			    wonGame();
 			// Rube Goldberg style increment
-			setLevelIndex(getLevelIndex() + 1);
+			setLevelIndex(nextLevelIndex);
 		    }// end while(getLevelIndex<length)
 		    System.out.println("Escaping game loop.");
 		    tr.getThreadManager().setPaused(true);
@@ -408,6 +412,13 @@ public class TVF3Game implements Game {
 		    setInGameplay(false);
 		}//end finally{}
 	    }// end beginGameplay()
+	    
+	    protected void wonGame(){//TODO
+		System.out.println("!!!!!CONGRATULATIONS!!!!!!\n" +
+				"You've won the game!\n" +
+				"There's no code in place to handle this.\n" +
+				"Therefore, the program will now crash.");
+	    }
 
 	    public void setCurrentMission(final Mission newMission) {
 		final Mission oldMission = this.currentMission;
@@ -487,10 +498,15 @@ public class TVF3Game implements Game {
 	     * @return the upfrontDisplay
 	     */
 	    public UpfrontDisplay getUpfrontDisplay() {
+		if( upfrontDisplay == null )
+		    upfrontDisplay = new UpfrontDisplay(tr.getDefaultGrid(),tr); 
 	        return upfrontDisplay;
 	    }
 
 	    public LevelLoadingScreen getLevelLoadingScreen() {
+		if( levelLoadingScreen == null )
+		    try{levelLoadingScreen = new LevelLoadingScreen(tr.getDefaultGrid(),tr);}
+		catch(IOException e){throw new RuntimeException(e);}
 		return levelLoadingScreen;
 	    }
 

@@ -84,7 +84,8 @@ public class Mission {
 	                       PLAYER_START_POSITION    = "playerStartPosition",
 	                       PLAYER_START_HEADING     = "playerStartHeading",
 	                       PLAYER_START_TOP         = "playerStartTop",
-	                       DEF_OBJECT_LIST          = "defObjectList";
+	                       DEF_OBJECT_LIST          = "defObjectList",
+	                       BOSS_FIGHT               = "bossFight";
     //// INTROSPECTOR
     static {
 	try{

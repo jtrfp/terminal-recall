@@ -63,6 +63,7 @@ import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.SpawnsRandomExplosionsAndDebris;
+import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
@@ -85,7 +86,7 @@ public class Mission {
 	                       PLAYER_START_HEADING     = "playerStartHeading",
 	                       PLAYER_START_TOP         = "playerStartTop",
 	                       DEF_OBJECT_LIST          = "defObjectList",
-	                       BOSS_FIGHT               = "bossFight";
+	                       CURRENT_BOSS             = "currentBoss";
     //// INTROSPECTOR
     static {
 	try{
@@ -136,7 +137,8 @@ public class Mission {
     private volatile MusicPlaybackEvent
     				bgMusic;
     private final Object	missionLock = new Object();
-    private boolean 		bossFight = false, satelliteView = false;
+    private boolean 		satelliteView = false;
+    private WorldObject         currentBoss = null;
     //private MissionMode		missionMode = new Mission.LoadingMode();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final DisplayModeHandler displayHandler;
@@ -593,8 +595,8 @@ public class Mission {
 	return this;
     }
     
-    public void enterBossMode(final String bossMusicFile){
-	setBossFight(true);
+    public void enterBossMode(final String bossMusicFile, WorldObject boss){
+	setCurrentBoss(boss);
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -617,7 +619,7 @@ public class Mission {
     }//end enterBossMode()
     
     public void exitBossMode(){
-	setBossFight(false);
+	setCurrentBoss(null);
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
@@ -720,15 +722,14 @@ public class Mission {
     /**
      * @return the bossFight
      */
-    public boolean isBossFight() {
-        return bossFight;
+    public WorldObject getCurrentBoss() {
+        return currentBoss;
     }
-    /**
-     * @param bossFight the bossFight to set
-     */
-    public void setBossFight(boolean bossFight) {
-	pcs.firePropertyChange("bossFight", this.bossFight, bossFight);
-        this.bossFight = bossFight;
+    
+    public void setCurrentBoss(WorldObject boss) {
+	final WorldObject oldBoss = this.currentBoss;//Probably null.
+        this.currentBoss = boss;
+        pcs.firePropertyChange(CURRENT_BOSS, oldBoss, boss);
     }
     public void setSatelliteView(boolean satelliteView) {
 	if(!(tr.getRunState() instanceof OverworldState)&&satelliteView)

@@ -212,7 +212,7 @@ public abstract class NAVObjective {
 			    public void run(){
 				final Mission mission = weakMission.get();
 				if(mission!=null)
-				 mission.setBossFight(false);
+				 mission.exitBossMode();
 				teo.setActive(true);
 				teo.setVisible(true);
 			    }
@@ -247,7 +247,7 @@ public abstract class NAVObjective {
 			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
-				    wMission.get().enterBossMode(bos.getMusicFile());
+				    wMission.get().enterBossMode(bos.getMusicFile(), bossObject);
 				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()
@@ -270,7 +270,7 @@ public abstract class NAVObjective {
 			    bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
-				    wMission.get().enterBossMode(bos.getMusicFile());
+				    wMission.get().enterBossMode(bos.getMusicFile(),bossObject);
 				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");
 				}//end run()

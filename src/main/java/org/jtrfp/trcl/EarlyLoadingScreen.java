@@ -39,7 +39,7 @@ public class EarlyLoadingScreen extends RenderableSpacePartitioningGrid {
 			.getResourceAsStream("/TrclLogo.png")),null, "logoImage", false, true), true, "EarlyLoadingScreen");}
 	finally{if(is!=null)is.close();}
 	
-	startupText = new CharLineDisplay(tr,this,FONT_SIZE, 32, font);
+	startupText = new CharLineDisplay(this,FONT_SIZE, 32, font);
 	startupText.setCentered(true);
 	startupText.setPosition(0,0,Z);
 	//World.relevanceExecutor.submit(new Runnable(){

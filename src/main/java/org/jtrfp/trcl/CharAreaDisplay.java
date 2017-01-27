@@ -32,7 +32,7 @@ public class CharAreaDisplay extends RenderableSpacePartitioningGrid {
 	this.widthChars=widthChars;
 	lines = new CharLineDisplay[heightChars];
 	for(int i=0; i<heightChars; i++){
-	    lines[i]=new CharLineDisplay(tr, this, fontSize, widthChars, font);
+	    lines[i]=new CharLineDisplay(this, fontSize, widthChars, font);
 	}//end for(i)
 	this.fontSize=fontSize;
 	updatePositions();

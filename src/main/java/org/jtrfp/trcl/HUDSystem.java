@@ -55,27 +55,27 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	add(dashboard=new Dashboard(layout));
 	
 	pos = layout.getObjectivePosition();
-	objective = new CharLineDisplay(tr, this, FONT_SIZE, 16, font);
+	objective = new CharLineDisplay(this, FONT_SIZE, 16, font);
 	objective.setContent("LOADING...");
 	objective.setPosition(pos.getX(), pos.getY(), Z);
 
 	pos = layout.getDistancePosition();
-	distance = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
+	distance = new CharLineDisplay( this, FONT_SIZE, 5, font);
 	distance.setContent("---");
 	distance.setPosition(pos.getX(),pos.getY(), Z);
 
 	pos = layout.getWeaponNamePosition();
-	weapon = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
+	weapon = new CharLineDisplay( this, FONT_SIZE, 5, font);
 	weapon.setContent("---");
 	weapon.setPosition(pos.getX(),pos.getY(), Z);
 
 	pos = layout.getSectorPosition();
-	sector = new CharLineDisplay(tr, this, FONT_SIZE, 7, font);
+	sector = new CharLineDisplay( this, FONT_SIZE, 7, font);
 	sector.setContent("---");
 	sector.setPosition(pos.getX(),pos.getY(), Z);
 
 	pos = layout.getAmmoPosition();
-	ammo = new CharLineDisplay(tr, this, FONT_SIZE, 5, font);
+	ammo = new CharLineDisplay( this, FONT_SIZE, 5, font);
 	ammo.setContent("---");
 	ammo.setPosition(pos.getX(), pos.getY(), Z);
 	InputStream is = null;

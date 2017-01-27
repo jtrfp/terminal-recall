@@ -102,7 +102,7 @@ public class CollidesWithTerrain extends Behavior {
 		    TunnelEntranceObject teo = ts.getTunnelEntranceObject(new Point(
 				TRFactory.modernToMapSquare((thisPos[0])),
 				TRFactory.modernToMapSquare( thisPos[2])));
-		    if(teo!=null && !mission.isBossFight())
+		    if(teo!=null && mission.getCurrentBoss() == null)
 			{ts.enterTunnel(teo);return;}
 		}//end if(above ground)
 	}//end if(tunnelEntryCapable())

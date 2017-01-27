@@ -720,7 +720,7 @@ public void destroy(){
 		setMaxFiringDistance(TRFactory.mapSquareSize*5).
 		setSmartFiring(true).
 		setMaxFireVectorDeviation(2.).
-		setTimePerPatternEntry(getEnemyDefinition().getFireSpeed() / 66));
+		setTimePerPatternEntry(Math.max(1, getEnemyDefinition().getFireSpeed() / 66)));
 	if(boss)af.setFiringPattern(new boolean []{true}).setAimRandomness(.07);
     }
 
@@ -858,7 +858,7 @@ public void destroy(){
 	final AutoFiring afb = new AutoFiring();
 	afb.setMaxFireVectorDeviation(.7);
 	afb.setFiringPattern(new boolean [] {true,false,false,false,true,true,false});
-	afb.setTimePerPatternEntry(getEnemyDefinition().getFireSpeed() / 66);
+	afb.setTimePerPatternEntry(Math.max(1,getEnemyDefinition().getFireSpeed() / 66));
 	afb.setPatternOffsetMillis((int)(Math.random()*1000));
 	afb.setProjectileFiringBehavior(pfb);
 	try{

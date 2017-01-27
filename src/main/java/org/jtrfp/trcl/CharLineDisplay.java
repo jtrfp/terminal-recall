@@ -28,7 +28,7 @@ public class CharLineDisplay {
     private boolean 		centered = false;
     private final RenderableSpacePartitioningGrid grid;
 
-    public CharLineDisplay(TR tr, RenderableSpacePartitioningGrid grid,
+    public CharLineDisplay(RenderableSpacePartitioningGrid grid,
 	    double glSize, int lengthInChars, GLFont font) {
 	content = new char[lengthInChars];
 	displays = new CharDisplay[lengthInChars];

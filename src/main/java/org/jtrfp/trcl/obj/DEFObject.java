@@ -620,7 +620,8 @@ public class DEFObject extends WorldObject {
 	if(def.getPowerup()!=null && Math.random()*100. < def.getPowerupProbability()){
 	    addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));}
 	addBehavior(new CollidesWithPlayer());
-	addBehavior(new DamagedByCollisionWithPlayer(8024,250));
+	if(!boss)//Boss is too easy to beat by just colliding into it.
+	    addBehavior(new DamagedByCollisionWithPlayer(8024,250));
 
 	proposeRandomYell();
 	

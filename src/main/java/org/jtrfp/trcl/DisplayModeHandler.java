@@ -56,7 +56,8 @@ public class DisplayModeHandler {
     private void recursiveNewDisplayModeImpl(Object [] items){
 	if(items==null)return;//Empty.
 	for(Object o: items){
-	    if(o.getClass().isArray()){
+	    final Class oClass = o.getClass();
+	    if(oClass.isArray()){
 		//Recurse
 		recursiveNewDisplayModeImpl((Object[])o);
 	    }else if(o instanceof RenderableSpacePartitioningGrid){

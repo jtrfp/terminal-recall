@@ -209,9 +209,11 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 	    if(tex.getTocWindow().getPhysicalAddressInBytes(tex.getTocIndex()).intValue()%PagedByteBuffer.PAGE_SIZE_BYTES!=0)
 		throw new RuntimeException("Physical GPU address not perfectly aligned with page interval."); 		
 	    
-	    threadManager.submitToThreadPool(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
+	    final BlockRegistry blockRegistry = new BlockRegistry(cbm);
+	    
+	    //threadManager.submitToThreadPool(new Callable<Void>(){
+		//@Override
+		//public Void call() throws Exception {
 		
 		//threadManager.submitToGPUMemAccess(new Callable<Void>() {
 		    //@Override
@@ -266,93 +268,49 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 		final int codeIdx         = subtextureCodeX + subtextureCodeY * SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER;
 		final int globalCodeIndex = codeIdx%256
 			+ tex.getCodebookStartOffsets256().get(subTextureIdx*6+codeIdx/256)*256;
-		setRGBACodebookTexelsAt(vlrRGBA, codeX,codeY,diameterInCodes, globalCodeIndex);
+		blockRegistry.setRGBACodebookTexelsAt(vlrRGBA, codeX,codeY,diameterInCodes, globalCodeIndex,tex);
 		if(vlrESTuTv!=null)
-		 setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex);
+		    blockRegistry.setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex,tex);
 		else{
 		    final VectorListND blackVLR = generateBlackVectorList(sideLength);
-		 setESTuTvCodebookTexelsAt(blackVLR, codeX,codeY,diameterInCodes, globalCodeIndex);}
+		    blockRegistry.setESTuTvCodebookTexelsAt(blackVLR, codeX,codeY,diameterInCodes, globalCodeIndex,tex);}
 		}//end for(codeX)
 	}//end for(codeY)
-	flushRGBACodeblock256();
-	flushESTuTvCodeblock256();
-	return null;
-	}//end threadPool call()
-	    private VectorListND generateBlackVectorList(int sideLength) {
-		final VectorList blackVL = new ConstantVectorList(0, sideLength*sideLength, 4);
-		return new RasterizedBlockVectorList(
-		    new VectorListRasterizer(blackVL, new int[]{sideLength,sideLength}), 4);
-		}
-	    private void setRGBACodebookTexelsAt(final VectorListND vlrRGBA, int codeX, int codeY,
-		    int diameterInCodes, int globalCodeIndex) {
-		final int coord[] = new int[]{codeX,codeY};
-		final RasterRowWriter rw = new RowWriterImpl(vlrRGBA,coord);
-		try {
-		    registerRGBAToBlock256(globalCodeIndex, rw);
-		} catch (ArrayIndexOutOfBoundsException e) {
-		    throw new RuntimeException("this="
-			    + tex.toString(), e);
-		}//end catch(ArrayIndexOutOfBoundsException)
-	    }// end setCodebookTexelsAt
+	blockRegistry.flushRGBACodeblock256();
+	blockRegistry.flushESTuTvCodeblock256();
+	//return null;
+	//}//end threadPool call()
 	    
-	    private void setESTuTvCodebookTexelsAt(final VectorListND vlrESTuTv, int codeX, int codeY,
-		    int diameterInCodes, int globalCodeIndex) {
-		final int coord[] = new int[]{codeX,codeY};
-		final RasterRowWriter rw = new RowWriterImpl(vlrESTuTv,coord);
-		try {
-		    registerESTuTvToBlock256(globalCodeIndex, rw);
-		} catch (ArrayIndexOutOfBoundsException e) {
-		    throw new RuntimeException("this="
-			    + tex.toString(), e);
-		}//end catch(ArrayIndexOutOfBoundsException)
-	    }// end setCodebookTexelsAt
-	    
-	    final class RowWriterImpl implements RasterRowWriter{
-		private final VectorListND _vlr;
-		private final int [] coord;
-		public RowWriterImpl(VectorListND vlrRGBA, int [] coord){
-		    this._vlr=vlrRGBA;
-		    this.coord=coord;
-		}
-		@Override
-		    public void applyRow(int row, ByteBuffer dest) {
-			int position = row * 16;
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-			dest.put((byte) (_vlr
-				.componentAt(coord, position++) * 255.));
-		    }// end applyRow
-	    }//end RasterRowWriter
-	    
-	    private final Map<Integer,RasterRowWriter[]>rgbaBlock256Map = new HashMap<Integer,RasterRowWriter[]>();
+	//}).get();// end pool thread
+	    if(generateMipMaps){
+		if(tex.getMipTextures() == null)
+		    tex.setMipTextures(new ArrayList<VQTexture>());
+		final List<VQTexture> mipTextures = tex.getMipTextures();
+		VectorListND rgba = rgbarvl, esTuTv = esTuTvrvl;
+		for(int mipIndex = 0; mipIndex < 2; mipIndex++){
+		    rgba   = new CachingVectorListND(new MIPScalingVectorListND(rgba,rgba,esTuTv));
+		    if(esTuTv != null)
+		        esTuTv = new CachingVectorListND(new MIPScalingVectorListND(esTuTv,rgba,esTuTv));
+		    final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, false);
+		    mipTextures.add(mipTexture);
+		}//end for(mipIndex)
+	    }//end if(generateMipMaps)
+}//end assemble()
+ 
+ private VectorListND generateBlackVectorList(int sideLength) {
+	final VectorList blackVL = new ConstantVectorList(0, sideLength*sideLength, 4);
+	return new RasterizedBlockVectorList(
+	    new VectorListRasterizer(blackVL, new int[]{sideLength,sideLength}), 4);
+	}
+ 
+ private static class BlockRegistry {
+     private final VQCodebookManager cbm;
+     
+     public BlockRegistry(VQCodebookManager codebookManager){
+	 this.cbm = codebookManager;
+     }
+     
+     private final Map<Integer,RasterRowWriter[]>rgbaBlock256Map = new HashMap<Integer,RasterRowWriter[]>();
 	    private final Map<Integer,RasterRowWriter[]>ESTuTvBlock256Map = new HashMap<Integer,RasterRowWriter[]>();
 	    private final void registerRGBAToBlock256(int globalCodeIndex, RasterRowWriter rw){
 		RasterRowWriter[] writers = getRGBABlock256(globalCodeIndex);
@@ -376,6 +334,7 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 		   ESTuTvBlock256Map.put(key,writers = new RasterRowWriter[256]);
 		return writers;
 	    }//end getESTuTvBlock256(...)
+	    
 	    private final void flushRGBACodeblock256(){
 		for(Entry<Integer,RasterRowWriter[]> entry:rgbaBlock256Map.entrySet()){
 		    cbm.setRGBABlock256(entry.getKey(),entry.getValue());
@@ -386,19 +345,74 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 		    cbm.setESTuTvBlock256(entry.getKey(),entry.getValue());
 		}//end for(entries)
 	    }//end flushRGBACodeblock256()
-	}).get();// end pool thread
-	    if(generateMipMaps){
-		if(tex.getMipTextures() == null)
-		    tex.setMipTextures(new ArrayList<VQTexture>());
-		final List<VQTexture> mipTextures = tex.getMipTextures();
-		VectorListND rgba = rgbarvl, esTuTv = esTuTvrvl;
-		for(int mipIndex = 0; mipIndex < 2; mipIndex++){
-		    rgba   = new CachingVectorListND(new MIPScalingVectorListND(rgba,rgba,esTuTv));
-		    if(esTuTv != null)
-		        esTuTv = new CachingVectorListND(new MIPScalingVectorListND(esTuTv,rgba,esTuTv));
-		    final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, false);
-		    mipTextures.add(mipTexture);
-		}//end for(mipIndex)
-	    }//end if(generateMipMaps)
-}//end assemble()
+	    
+	    private void setRGBACodebookTexelsAt(final VectorListND vlrRGBA, int codeX, int codeY,
+		    int diameterInCodes, int globalCodeIndex, Texture tex) {
+		final int coord[] = new int[]{codeX,codeY};
+		final RasterRowWriter rw = new RowWriterImpl(vlrRGBA,coord);
+		try {
+		    registerRGBAToBlock256(globalCodeIndex, rw);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    throw new RuntimeException("this="
+			    + tex.toString(), e);
+		}//end catch(ArrayIndexOutOfBoundsException)
+	    }// end setCodebookTexelsAt
+	    
+	    private void setESTuTvCodebookTexelsAt(final VectorListND vlrESTuTv, int codeX, int codeY,
+		    int diameterInCodes, int globalCodeIndex, Texture tex) {
+		final int coord[] = new int[]{codeX,codeY};
+		final RasterRowWriter rw = new RowWriterImpl(vlrESTuTv,coord);
+		try {
+		    registerESTuTvToBlock256(globalCodeIndex, rw);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    throw new RuntimeException("this="
+			    + tex.toString(), e);
+		}//end catch(ArrayIndexOutOfBoundsException)
+	    }// end setCodebookTexelsAt
+ }//end BlockRegistry
+ 
+ static final class RowWriterImpl implements RasterRowWriter{
+	private final VectorListND _vlr;
+	private final int [] coord;
+	public RowWriterImpl(VectorListND vlrRGBA, int [] coord){
+	    this._vlr=vlrRGBA;
+	    this.coord=coord;
+	}
+	@Override
+	    public void applyRow(int row, ByteBuffer dest) {
+		int position = row * 16;
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+		dest.put((byte) (_vlr
+			.componentAt(coord, position++) * 255.));
+	    }// end applyRow
+}//end RasterRowWriter
 }//end UncompressedVQTextureFactory

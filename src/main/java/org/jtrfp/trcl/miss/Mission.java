@@ -52,6 +52,7 @@ import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.Renderer;
+import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
 import org.jtrfp.trcl.miss.NAVObjective.Factory;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
@@ -326,9 +327,10 @@ public class Mission {
 
 	    final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
 		    .ordinal()].generateSubReporters(navSubObjects.size());
+	    final Reporter reporter = Features.get(getTr(), Reporter.class);
 	    for (int i = 0; i < navSubObjects.size(); i++) {
 		final NAVSubObject obj = navSubObjects.get(i);
-		f.create(tr, obj, navs);
+		f.create(reporter, obj, navs);
 		navProgress[i].complete();
 	    }// end for(navSubObjects)
 	    final TVF3Game game = (TVF3Game)getGame();

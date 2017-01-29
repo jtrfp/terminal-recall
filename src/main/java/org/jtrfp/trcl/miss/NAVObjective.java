@@ -52,13 +52,11 @@ public abstract class NAVObjective {
     private static final double CHECKPOINT_HEIGHT_PADDING=70000;
     public abstract String getDescription();
     public abstract WorldObject getTarget();
-    protected NAVObjective(Factory f){
-	final TR tr = Features.get(Features.getSingleton(), TR.class);
-	final Reporter reporter = Features.get(tr,Reporter.class);
+    protected NAVObjective(Reporter reporter, Factory f){
 	if(f!=null)
 	 reporter.report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".desc", getDescription());
 	
-	if(getTarget()!=null && f!=null){
+	if(getTarget()!=null && f!=null && reporter != null){
 	    final double [] loc = getTarget().getPosition();
 	    reporter.report("org.jtrfp.trcl.flow.NAVObjective."+f.counter+".loc", "X="+loc[0]+" Y="+loc[1]+" Z="+loc[2]);
 	    f.counter++;}
@@ -74,7 +72,7 @@ public abstract class NAVObjective {
 	    this.debugName = debugName;
 	}//end constructor
 	
-	public void create(final TR tr, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
+	public void create(Reporter reporter, NAVSubObject navSubObject, List<NAVObjective>indexedNAVObjectiveList){
 	        final GameShell gameShell = Features.get(tr,GameShell.class);
 		final OverworldSystem overworld=((TVF3Game)gameShell.getGame()).getCurrentMission().getOverworldSystem();
 		final List<DEFObject> defs = overworld.getDefList();
@@ -83,7 +81,7 @@ public abstract class NAVObjective {
 		    int [] targs =  tgt.getTargets();
 		    for(int i=0; i<targs.length;i++){
 			final WorldObject targ = defs.get(targs[i]);
-			final NAVObjective objective = new NAVObjective(this){
+			final NAVObjective objective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Destroy Target";
@@ -133,7 +131,7 @@ public abstract class NAVObjective {
 				TRFactory.legacy2MapSquare(loc3d.getX()))*(tr.getWorld().sizeY/2)+TunnelEntranceObject.GROUND_HEIGHT_PAD;
 		    tunnelEntrance.notifyPositionChange();
 		    */
-		    final NAVObjective enterObjective = new NAVObjective(this){
+		    final NAVObjective enterObjective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Enter Tunnel";
@@ -155,7 +153,7 @@ public abstract class NAVObjective {
 			}});
 		    indexedNAVObjectiveList.add(enterObjective);
 		    final TunnelExitObject tunnelExit = currentTunnel.getExitObject();
-		    final NAVObjective exitObjective = new NAVObjective(this){
+		    final NAVObjective exitObjective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Exit Tunnel";
@@ -231,7 +229,7 @@ public abstract class NAVObjective {
 		    if(bossTargs!=null){
 		     for(final int target:bos.getTargets()){
 			final WorldObject shieldGen = defs.get(target);
-			final NAVObjective objective = new NAVObjective(this){
+			final NAVObjective objective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Destroy Shield";
@@ -277,7 +275,7 @@ public abstract class NAVObjective {
 			    }));
 		    }
 		    bossObject.setIgnoringProjectiles(true);
-		    final NAVObjective objective = new NAVObjective(this){
+		    final NAVObjective objective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Destroy Boss";
@@ -318,7 +316,7 @@ public abstract class NAVObjective {
 		    chkPos[2]=TRFactory.legacy2Modern(loc3d.getX());
 		    chk.notifyPositionChange();
 		    chk.setIncludeYAxisInCollision(false);
-		    final NAVObjective objective = new NAVObjective(this){
+		    final NAVObjective objective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Checkpoint";
@@ -351,7 +349,7 @@ public abstract class NAVObjective {
 		    //jumpZone.setPosition(chk.getPosition());
 		    //jumpZone.setVisible(true);
 		    //overworld.add(jumpZone);
-		    final NAVObjective objective = new NAVObjective(this){
+		    final NAVObjective objective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Fly To Jump Zone";

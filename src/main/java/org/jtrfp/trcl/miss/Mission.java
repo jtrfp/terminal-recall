@@ -18,10 +18,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -75,7 +78,8 @@ import org.jtrfp.trcl.tools.Util;
 public class Mission {
  // PROPERTIES
     public static final String LEVEL_NAME               = "levelName",
-	                       NAVS                     = "navs",
+	                       //NAVS                     = "navs",
+	                       NAV_SUB_OBJECTS          = "navSubObjects",
 	                       GROUND_TARGETS_DESTROYED = "groundTargetsDestroyed",
 	                       AIR_TARGETS_DESTROYED    = "airTargetsDestroyed",
 	                       FOLIAGE_DESTROYED        = "foliageDestroyed",
@@ -94,7 +98,8 @@ public class Mission {
 	final Set<String> persistentProperties = new HashSet<String>();
 	persistentProperties.addAll(Arrays.asList(
 		LEVEL_NAME,
-		NAVS,
+		//NAVS,
+		NAV_SUB_OBJECTS,
 		GROUND_TARGETS_DESTROYED,
 		AIR_TARGETS_DESTROYED,
 		FOLIAGE_DESTROYED,
@@ -151,6 +156,7 @@ public class Mission {
     private WeakPropertyChangeListener weakRunStateListener; // HARD REFERENCE; DO NOT REMOVE.
     private String lvlFileName;
     private List<DEFObject> defObjectList;
+    private Map<NAVObjective,NAVSubObject> navMap = new HashMap<>();
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -282,9 +288,28 @@ public class Mission {
 	    
 	    //overworldSystem.loadLevel(lvlData, tdf);
 	    System.out.println("\t...Done.");
-	    // Install NAVs
-	    setNavSubObjects(rm.getNAVData(lvlData.getNavigationFile())
-		    .getNavObjects());
+	    
+	    //TODO: TunnelSystem should be isolated from Mission
+	    final TunnelSystem ts = Features.get(this, TunnelSystem.class);
+	    ts.installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
+	    
+	    // Install NAVs if not already set
+	    if( getNavSubObjects() == null ){
+		setNavSubObjects(rm.getNAVData(lvlData.getNavigationFile())
+			.getNavObjects());
+		}
+	    if( navs.isEmpty() ){
+		Factory f = new NAVObjective.Factory(tr, getLevelName());
+
+		//final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
+		//                                                             .ordinal()].generateSubReporters(navSubObjects.size());
+		final Reporter reporter = Features.get(getTr(), Reporter.class);
+		for (int i = 0; i < navSubObjects.size(); i++) {
+		    final NAVSubObject obj = navSubObjects.get(i);
+		    f.create(reporter, obj, navs, navMap);
+		    //navProgress[i].complete();
+		}// end for(navSubObjects)
+	    }//end if( empty )
 	    
 	    // ////// INITIAL HEADING
 	    final double [] playerStartPos = getStoredPlayerStartPosition();
@@ -320,19 +345,7 @@ public class Mission {
 	    if(player.hasBehavior(SpawnsRandomExplosionsAndDebris.class))
 	     player.probeForBehavior(SpawnsRandomExplosionsAndDebris.class).setEnable(false);
 	    //player.probeForBehavior(SpinCrashDeathBehavior.class).setEnable(false);
-	    //TODO: TunnelSystem should be isolated from Mission
-	    final TunnelSystem ts = Features.get(this, TunnelSystem.class);
-	    ts.installTunnels(tdf,progressStages[LoadingStages.tunnels.ordinal()]);
-	    Factory f = new NAVObjective.Factory(tr, getLevelName());
-
-	    final LoadingProgressReporter[] navProgress = progressStages[LoadingStages.navs
-		    .ordinal()].generateSubReporters(navSubObjects.size());
-	    final Reporter reporter = Features.get(getTr(), Reporter.class);
-	    for (int i = 0; i < navSubObjects.size(); i++) {
-		final NAVSubObject obj = navSubObjects.get(i);
-		f.create(reporter, obj, navs);
-		navProgress[i].complete();
-	    }// end for(navSubObjects)
+	    
 	    final TVF3Game game = (TVF3Game)getGame();
 	    game.getNavSystem().updateNAVState();
 	    player.resetVelocityRotMomentum();
@@ -469,6 +482,7 @@ public class Mission {
 
     public void removeNAVObjective(NAVObjective o) {
 	navs.remove(o);
+	getNavSubObjects().remove(navMap.get(o));
 	updateNavState();
 	((TVF3Game)getGameShell().getGame()).getNavSystem().updateNAVState();
     }// end removeNAVObjective(...)
@@ -575,7 +589,8 @@ public class Mission {
      *            the navSubObjects to set
      */
     public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
-	this.navSubObjects = navSubObjects;
+	this.navSubObjects = new ArrayList<NAVSubObject>(navSubObjects);
+	navs.clear();//Ensure navs get repopulated.
     }
 
     public OverworldSystem getOverworldSystem() {

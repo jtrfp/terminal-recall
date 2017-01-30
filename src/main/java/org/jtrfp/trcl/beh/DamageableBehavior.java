@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.beh;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 
 import org.jtrfp.trcl.AbstractSubmitter;
@@ -19,6 +21,11 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.Player;
 
 public class DamageableBehavior extends Behavior {
+    //////////// PROPERTIES //////////////////////
+    public static final String HEALTH       = "health";
+    
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    
     	private int maxHealth=65535;
 	private int health=maxHealth;
 	private boolean acceptsProjectileDamage=true;
@@ -29,7 +36,7 @@ public class DamageableBehavior extends Behavior {
 		throw new NullPointerException("Passed damage event intolerably null.");
 	    if(!isEnabled())return;
 	    if(isInvincible())return;
-	    if(health<=0)return;
+	    if(getHealth()<=0)return;
 	    if(evt instanceof DamageListener.ProjectileDamage && !isAcceptsProjectileDamage())
 		return;
 		
@@ -38,8 +45,8 @@ public class DamageableBehavior extends Behavior {
 		public void submit(DamageListener item) {
 		    item.damageEvent(evt);
 		}}, DamageListener.class);
-	    health-=evt.getDamageAmount();
-		if(health<=0)
+	    setHealth(getHealth()-evt.getDamageAmount());
+		if(getHealth()<=0)
 		    die();
 		else if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
 	}//end generalDamage(...)
@@ -59,21 +66,26 @@ public class DamageableBehavior extends Behavior {
 
 	public void unDamage(int amt) throws SupplyNotNeededException{
 	    	if(!isEnabled())throw new SupplyNotNeededException();
-	    	if(amt==maxHealth){unDamage();return;}
-	    	if(health+amt>maxHealth){
+	    	if(amt==getMaxHealth()){unDamage();return;}
+	    	if(getHealth()+amt>getMaxHealth()){
 	    	    throw new SupplyNotNeededException();}
-		health+=amt;
+		setHealth(getHealth()+amt);
 		}
 
 	public void unDamage() throws SupplyNotNeededException{
 	    	if(!isEnabled())throw new SupplyNotNeededException();
 	    	//10% of hysteresis to avoid frivolous use of full shield restores.
-	    	if(health+maxHealth*.1>=maxHealth)throw new SupplyNotNeededException();
-		health=maxHealth;
+	    	final int maxHealth = getMaxHealth();
+	    	if(getHealth()+maxHealth*.1>=maxHealth)throw new SupplyNotNeededException();
+		setHealth(getMaxHealth());
 		}
+	
 	public DamageableBehavior setHealth(int val){
-	    health=val;return this;
-	}
+	    final int oldHealth = getHealth();
+	    health=val;
+	    pcs.firePropertyChange(HEALTH, oldHealth, val);
+	    return this;
+	}//end setHealth(...)
 	
 	private final Submitter<DeathListener> deathSub = new Submitter<DeathListener>(){
 
@@ -109,7 +121,7 @@ public class DamageableBehavior extends Behavior {
 	 */
 	public DamageableBehavior setMaxHealth(int maxHealth) {
 	    this.maxHealth = maxHealth;
-	    this.health = Math.min(health, maxHealth);
+	    setHealth(Math.min(getHealth(), maxHealth));
 	    return this;
 	}
 	
@@ -139,5 +151,36 @@ public class DamageableBehavior extends Behavior {
 	
 	public void proposeDamage(DamageListener.Event evt){
 	    generalDamage(evt);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(listener);
+	}
+
+	public void addPropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.addPropertyChangeListener(propertyName, listener);
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners() {
+	    return pcs.getPropertyChangeListeners();
+	}
+
+	public PropertyChangeListener[] getPropertyChangeListeners(
+		String propertyName) {
+	    return pcs.getPropertyChangeListeners(propertyName);
+	}
+
+	public boolean hasListeners(String propertyName) {
+	    return pcs.hasListeners(propertyName);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(String propertyName,
+		PropertyChangeListener listener) {
+	    pcs.removePropertyChangeListener(propertyName, listener);
 	}
     }//end DamageableBehavior

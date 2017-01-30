@@ -127,7 +127,7 @@ private GameShell gameShell;
 		    final double [] eoPos = eo.getPosition();
 		    navLocXY = new Vector3D(eoPos[0],eoPos[2],0);
 		    if(layout != null)
-		     hudSystem.getObjective().setContent(layout.getHumanReadableObjective(new NAVObjective(null){
+		     hudSystem.getObjective().setContent(layout.getHumanReadableObjective(new NAVObjective(null,null){
 
 			@Override
 			public String getDescription() {

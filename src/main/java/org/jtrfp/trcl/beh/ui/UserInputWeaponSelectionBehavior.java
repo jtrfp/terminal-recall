@@ -41,6 +41,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     public static final int AMMO_DISPLAY_UPDATE_INTERVAL_MS=80;
     private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
     private GameShell gameShell;
+    private int activeBehaviorIndex = 0;
     
     public UserInputWeaponSelectionBehavior(ControllerInputs controllerInputs){
 	fire = controllerInputs.getControllerInput(FIRE);
@@ -55,14 +56,8 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	    ((TVF3Game)getGameShell().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
-	    if(keyStatus.isPressed(KeyEvent.VK_1+k)){
-		final ProjectileFiringBehavior proposed = behaviors[k];
-		boolean force = false;
-		//if(proposed instanceof UpgradeableProjectileFiringBehavior)
-		//    force = ((UpgradeableProjectileFiringBehavior)proposed).isLimitlessBottomLevel() && proposed.canFire();
-		if(proposed!=null)
-		 setActiveBehavior(proposed,force);
-	    }//end if (selection key is pressed)
+	    if(keyStatus.isPressed(KeyEvent.VK_1+k))
+		setActiveBehaviorByIndex(k);
 	}//end for(keys)
 	if(fire.getState()>.75){
 	//if(keyStatus.isPressed(KeyEvent.VK_SPACE)){
@@ -148,5 +143,19 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     }
     public void setGameShell(GameShell gameShell) {
         this.gameShell = gameShell;
+    }
+
+    public int getActiveBehaviorByIndex() {
+	return activeBehaviorIndex;
+    }
+    
+    public void setActiveBehaviorByIndex(int index){
+	final ProjectileFiringBehavior proposed = behaviors[index];
+	boolean force = false;
+	//if(proposed instanceof UpgradeableProjectileFiringBehavior)
+	//    force = ((UpgradeableProjectileFiringBehavior)proposed).isLimitlessBottomLevel() && proposed.canFire();
+	if(proposed!=null)
+	 setActiveBehavior(proposed,force);
+	this.activeBehaviorIndex = index;
     }
 }//end WeaponSelectionBehavior

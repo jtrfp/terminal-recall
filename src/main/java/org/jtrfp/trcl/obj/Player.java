@@ -65,7 +65,6 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
@@ -292,6 +291,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    thisPlayer.setActive(true);
 		    
 		    try{game.setLevelIndex(game.getLevelIndex());
+		        game.getCurrentMission().setNavSubObjects(null);//Ensure they are repopulated
 		        game.getCurrentMission().go();
 		    }catch(Exception e){e.printStackTrace();}
 		}//end run()
@@ -335,4 +335,156 @@ public class Player extends WorldObject implements RelevantEverywhere{
     public void setGameShell(GameShell gameShell) {
 	this.gameShell = gameShell;
     }
+    
+    public PlayerSaveState getPlayerSaveState(){
+	final PlayerSaveState result = new PlayerSaveState();
+	result.readFrom(this);
+	return result;
+    }//end getPlayerSaveState()
+    
+    public void setPlayerSaveState(PlayerSaveState pss){
+	pss.writeTo(this);
+    }//end setPlayerSaveState()
+    
+    public static class PlayerSaveState {
+	private int [] ammoQuantities;
+	private int [] ammoCapabilityLevels;
+	private int health;
+	private double[] position, heading, top;
+	boolean invincible, cloaked;
+	private int selectedWeapon = 0;
+	//TODO: Turbo quantity
+	
+	public void readFrom(Player source){
+	    final ProjectileFiringBehavior [] weapons = source.getWeapons();
+	    final int numPFBs                  = weapons.length;
+	    final int [] ammoCapabilityLevels  = new int[numPFBs];
+	    final int [] ammoQuantities        = new int[numPFBs];
+	    
+	    for( int i = 0; i < numPFBs; i++ ){
+		ProjectileFiringBehavior pfb = weapons[i];
+		if( pfb instanceof UpgradeableProjectileFiringBehavior ) {
+		    final UpgradeableProjectileFiringBehavior upfb = (UpgradeableProjectileFiringBehavior)pfb;
+		       ammoCapabilityLevels [i]  = upfb.getCapabilityLevel();
+		} else ammoCapabilityLevels [i]  = -1;// -1 means 'ignore'
+		if(pfb != null)
+		    ammoQuantities      [i]  = pfb.getAmmo();
+	    }//end for(numPFBs)
+	    
+	    setAmmoCapabilityLevels(ammoCapabilityLevels);
+	    setAmmoQuantities     (ammoQuantities);
+	    
+	    final DamageableBehavior db = source.probeForBehavior(DamageableBehavior.class);
+	    
+	    setHealth    (db    .getHealth());
+	    setInvincible(db    .isInvincible());
+	    setCloaked   (source.probeForBehavior(Cloakable.class).isCloaked());
+	    setPosition  (source.getPosition());
+	    setHeading   (source.getHeading().toArray());
+	    setTop       (source.getTop().toArray());
+	    
+	    setSelectedWeapon(source.probeForBehavior(UserInputWeaponSelectionBehavior.class).getActiveBehaviorByIndex());
+	}//end readFrom(...)
+	
+	public void writeTo(Player target){
+	    final ProjectileFiringBehavior [] weapons = target.getWeapons();
+	    final int numPFBs                  = weapons.length;
+	    final int [] ammoCapabilityLevels  = getAmmoCapabilityLevels();
+	    final int [] ammoQuantities        = getAmmoQuantities();
+	    
+	    for( int i = 0; i < numPFBs; i++ ){
+		ProjectileFiringBehavior pfb = weapons[i];
+		if( pfb instanceof UpgradeableProjectileFiringBehavior ) {
+		    final UpgradeableProjectileFiringBehavior upfb = (UpgradeableProjectileFiringBehavior)pfb;
+		    upfb.setCapabilityLevel(ammoCapabilityLevels[i]);
+		}
+		if(pfb != null)
+		    pfb.setAmmo(ammoQuantities[i]);
+	    }//end for(numPFBs)
+	    
+	    final DamageableBehavior db = target.probeForBehavior(DamageableBehavior.class);
+	    
+	    db.setHealth       (getHealth());
+	    if(isInvincible())
+		db.addInvincibility(INVINCIBILITY_COUNTDOWN_START);
+	    if(isCloaked())
+	       try {target.probeForBehavior(Cloakable.class).addSupply(CLOAK_COUNTDOWN_START);}
+	       catch(SupplyNotNeededException e){}
+	    target.setPosition(getPosition());
+	    target.setHeadingArray(getHeading());
+	    target.setTopArray    (getTop());
+	    target.notifyPositionChange();
+	    
+	    target.probeForBehavior(UserInputWeaponSelectionBehavior.class).setActiveBehaviorByIndex(getSelectedWeapon());
+	}//end writeTo(...)
+	
+	public int[] getAmmoQuantities() {
+	    return ammoQuantities;
+	}
+	public void setAmmoQuantities(int[] ammoQuantities) {
+	    this.ammoQuantities = ammoQuantities;
+	}
+	public int[] getAmmoCapabilityLevels() {
+	    return ammoCapabilityLevels;
+	}
+	public void setAmmoCapabilityLevels(int[] ammoDegrees) {
+	    this.ammoCapabilityLevels = ammoDegrees;
+	}
+	public int getHealth() {
+	    return health;
+	}
+	public void setHealth(int health) {
+	    this.health = health;
+	}
+
+	public double [] getPosition() {
+	    return position;
+	}
+
+	public void setPosition(double [] position) {
+	    this.position = position;
+	}
+
+	public double [] getHeading() {
+	    return heading;
+	}
+
+	public void setHeading(double [] heading) {
+	    this.heading = heading;
+	}
+
+	public double [] getTop() {
+	    return top;
+	}
+
+	public void setTop(double [] top) {
+	    this.top = top;
+	}
+
+	public boolean isInvincible() {
+	    return invincible;
+	}
+
+	public void setInvincible(boolean remainingInvincibility) {
+	    this.invincible = remainingInvincibility;
+	}
+
+	public boolean isCloaked() {
+	    return cloaked;
+	}
+
+	public void setCloaked(boolean remainingCloak) {
+	    this.cloaked = remainingCloak;
+	}
+
+	public int getSelectedWeapon() {
+	    return selectedWeapon;
+	}
+
+	public void setSelectedWeapon(int selectedWeapon) {
+	    this.selectedWeapon = selectedWeapon;
+	}
+	
+    }//end DefaultPlayerSaveState
+    
 }// end Player

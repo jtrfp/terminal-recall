@@ -75,7 +75,7 @@ public class TVF3Game implements Game {
     private GameVersion gameVersion;
     private GameShell gameShell;
     public enum Difficulty {
-	EASY(2,.5,1), NORMAL(1,1,1), HARD(1,1.5,1), FURIOUS(1,3,1.25);
+	EASY(1.5,.5,1), NORMAL(1,1,1), HARD(.5,1.5,1), FURIOUS(.1,2,1.08);
 	
 	private final double timeBetweenFiringScalar;
 	private final double shieldScalar;
@@ -342,7 +342,7 @@ public class TVF3Game implements Game {
 				    "SHIP.BIN", tr.getGlobalPaletteVL(),null, Features.get(tr, GPUFeature.class).getGl()));
 			    setPlayer(player);
 			    final Camera camera = tr.mainRenderer.getCamera();
-			    camera.probeForBehavior(MatchPosition.class).setTarget(player);
+			    camera.probeForBehavior(MatchPosition.class) .setTarget(player);
 			    camera.probeForBehavior(MatchDirection.class).setTarget(player);
 			    tr.getDefaultGrid().add(player);
 			    System.out.println("\t...Done.");

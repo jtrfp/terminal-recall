@@ -68,6 +68,7 @@ import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.SpawnsRandomExplosionsAndDebris;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.obj.Player.PlayerSaveState;
 import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
@@ -91,7 +92,8 @@ public class Mission {
 	                       PLAYER_START_HEADING     = "playerStartHeading",
 	                       PLAYER_START_TOP         = "playerStartTop",
 	                       DEF_OBJECT_LIST          = "defObjectList",
-	                       CURRENT_BOSS             = "currentBoss";
+	                       CURRENT_BOSS             = "currentBoss",
+	                       PLAYER_SAVE_STATE        = "playerSaveState";
     //// INTROSPECTOR
     static {
 	try{
@@ -109,7 +111,8 @@ public class Mission {
 		PLAYER_START_POSITION,
 		PLAYER_START_HEADING,
 		PLAYER_START_TOP,
-		DEF_OBJECT_LIST
+		DEF_OBJECT_LIST,
+		PLAYER_SAVE_STATE
 		));
 	
 	BeanInfo info = Introspector.getBeanInfo(Mission.class);
@@ -157,6 +160,7 @@ public class Mission {
     private String lvlFileName;
     private List<DEFObject> defObjectList;
     private Map<NAVObjective,NAVSubObject> navMap = new HashMap<>();
+    private PlayerSaveState playerSaveState;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -312,30 +316,39 @@ public class Mission {
 	    }//end if( empty )
 	    
 	    // ////// INITIAL HEADING
-	    final double [] playerStartPos = getStoredPlayerStartPosition();
-	    final double [] playerStartHdg = getStoredPlayerStartHeading();
-	    final double [] playerStartTop = getStoredPlayerStartTop();
+	    PlayerSaveState playerSaveState = getStoredPlayerSaveState();
+	    //final double [] playerStartPos = getStoredPlayerStartPosition();
+	    //final double [] playerStartHdg = getStoredPlayerStartHeading();
+	    //final double [] playerStartTop = getStoredPlayerStartTop();
 	    
-	    if(playerStartPos == null || playerStartHdg == null || playerStartTop == null){
+	    if(playerSaveState == null){//No savestate data. Use the map
+		playerSaveState = new PlayerSaveState();
+		setPlayerSaveState(playerSaveState);
+		playerSaveState.readFrom(player);
+		
 		START startNav = (START) getNavSubObjects().get(0);
 		final ObjectDirection od = new ObjectDirection(startNav.getRoll(),
 			    startNav.getPitch(), startNav.getYaw());
 		Location3D l3d = startNav.getLocationOnMap();
 		final double HEIGHT_PADDING = 10000;
-		setPlayerStartHeading (od.getHeading().negate().toArray());
-		setPlayerStartTop     (od.getTop().toArray());
-		setPlayerStartPosition(new double[]{
+		playerSaveState.setHeading(od.getHeading().negate().toArray());
+		//setPlayerStartHeading (od.getHeading().negate().toArray());
+		playerSaveState.setTop(od.getTop().toArray());
+		//setPlayerStartTop     (od.getTop().toArray());
+		playerSaveState.setPosition(new Vector3D(
 			TRFactory.legacy2Modern(l3d.getZ()), //X (Z)
 			Math.max(HEIGHT_PADDING + getOverworldSystem().getAltitudeMap().heightAt(// Y
 				    TRFactory.legacy2Modern(l3d.getZ()),
 				    TRFactory.legacy2Modern(l3d.getX())),TRFactory.legacy2Modern(l3d.getY())),
 			TRFactory.legacy2Modern(l3d.getX()) //Z (X)
-		});
+			).toArray());
 	    }//end if(nulls)
+	    //APPLY STATE
+	    playerSaveState.writeTo(player);
 	    //////// PLAYER POSITIONS
-	    player.setPosition(getStoredPlayerStartPosition()                     );
-	    player.setHeading(new Vector3D(getStoredPlayerStartHeading())         );// Kludge to fix incorrect hdg
-	    player.setTop    (new Vector3D(getStoredPlayerStartTop())             );
+	    //player.setPosition(getStoredPlayerStartPosition()                     );
+	    //player.setHeading(new Vector3D(getStoredPlayerStartHeading())         );// Kludge to fix incorrect hdg
+	    //player.setTop    (new Vector3D(getStoredPlayerStartTop())             );
 	    ///////// STATE
 	    final Propelled propelled = player.probeForBehavior(Propelled.class); 
 	    propelled.setPropulsion(propelled.getMinPropulsion());
@@ -885,59 +898,6 @@ public class Mission {
         this.lvlFileName = lvlFileName;
     }
 
-    /**
-     * NOTE: This returns the current Game's Player position and does not directly reflect setter changes.
-     * @return
-     * @since Jul 15, 2016
-     */
-    public double[] getPlayerStartHeading() {
-	final Game game = getGame();
-	if(game == null)
-	    return null;
-	final Player player = game.getPlayer();
-	if(player == null)
-	    return null;
-        return player.getHeadingArray();
-    }
-    
-    public double[] getStoredPlayerStartHeading(){
-	return playerStartHeading;
-    }
-
-    public void setPlayerStartHeading(double[] playerStartHeading) {
-	this.playerStartHeading = new double[3];
-        System.arraycopy(playerStartHeading, 0, this.playerStartHeading, 0, 3);
-    }
-
-    /**
-     * NOTE: This returns the current Game's Player position and does not directly reflect setter changes.
-     * @return
-     * @since Jul 15, 2016
-     */
-    public double[] getPlayerStartTop() {
-	final Game game = getGame();
-	if(game == null)
-	    return null;
-	final Player player = game.getPlayer();
-	if(player == null)
-	    return null;
-        return player.getTopArray();
-    }
-    
-    public double [] getStoredPlayerStartTop(){
-	return playerStartTop;
-    }
-
-    public void setPlayerStartTop(double[] playerStartTop) {
-	this.playerStartTop = new double[3];
-	System.arraycopy(playerStartTop, 0, this.playerStartTop, 0, 3);
-    }
-
-    public void setPlayerStartPosition(double[] playerStartPosition) {
-	this.playerStartPosition = new double[3];
-	System.arraycopy(playerStartPosition, 0, this.playerStartPosition, 0, 3);
-    }
-
     public List<DEFObject> getDefObjectList() {
         return defObjectList;
     }
@@ -952,5 +912,24 @@ public class Mission {
     
     public Object [] getOverworldMode(){
 	return overworldMode;
+    }
+    
+    
+    public PlayerSaveState getPlayerSaveState(){
+	final Game game = getGame();
+	if(game == null)
+	    return null;
+	final Player player = game.getPlayer();
+	if(player == null)
+	    return null;
+	return player.getPlayerSaveState();
+    }
+    
+    protected PlayerSaveState getStoredPlayerSaveState(){
+	return playerSaveState;
+    }
+    
+    public void setPlayerSaveState(PlayerSaveState pss){
+	playerSaveState = pss;
     }
 }// end Mission

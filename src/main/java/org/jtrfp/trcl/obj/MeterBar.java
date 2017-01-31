@@ -24,6 +24,8 @@ public class MeterBar extends WorldObject2DRelevantEverywhere {
     private final ManuallySetController controller = new ManuallySetController();
     public MeterBar(Texture tex, double height, double length, boolean horizontal, String debugName) {
 	super();
+	if(tex == null)
+	    throw new NullPointerException("Passed Texture is intolerably null.");
 	setImmuneToOpaqueDepthTest(true);
 	//height*=.5;
 	//length*=.5;

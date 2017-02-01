@@ -15,7 +15,7 @@ This is a [cleanroom](https://en.wikipedia.org/wiki/Clean_room_design) re-implem
 
 ##Build Instructions
 You will need:
-* Java JDK 6 or later (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
+* Java JDK 7 or later (http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 * Git (http://git-scm.com/downloads)
 * Maven (https://maven.apache.org/download.cgi)
 * nVIDIA, Intel, or AMD video card with drivers capable of OpenGL 3.3.

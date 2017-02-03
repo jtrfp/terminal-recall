@@ -130,7 +130,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 		final Object newValue = evt.getNewValue();
 		final MenuSystem menuSystem = getMenuSystem();
 		menuSystem.setMenuItemEnabled(
-			newValue instanceof Game.GameRunningMode,
+			newValue instanceof Game.GameLoadedMode,
 			ABORT_GAME_MENU_PATH);
 		menuSystem.setMenuItemEnabled(
 			(newValue instanceof Game.GameLoadedMode) &&

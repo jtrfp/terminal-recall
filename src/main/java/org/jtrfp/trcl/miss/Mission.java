@@ -602,7 +602,10 @@ public class Mission {
      *            the navSubObjects to set
      */
     public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
-	this.navSubObjects = new ArrayList<NAVSubObject>(navSubObjects);
+	if( navSubObjects != null)
+	    this.navSubObjects = new ArrayList<NAVSubObject>(navSubObjects);
+	else
+	    navSubObjects = null;
 	navs.clear();//Ensure navs get repopulated.
     }
 

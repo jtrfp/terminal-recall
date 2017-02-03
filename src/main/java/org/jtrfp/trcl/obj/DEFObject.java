@@ -33,6 +33,7 @@ import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.Behavior;
+import org.jtrfp.trcl.beh.BehaviorNotFoundException;
 import org.jtrfp.trcl.beh.Bobbing;
 import org.jtrfp.trcl.beh.BuzzByPlayerSFX;
 import org.jtrfp.trcl.beh.CollidesWithPlayer;
@@ -847,11 +848,16 @@ public void destroy(){
 		public void healthBelowThreshold(){
 		    final WorldObject 	parent 	= getParent();
 		    final HasPropulsion hp 	= probeForBehavior(HasPropulsion.class);
+		    try{probeForBehavior(NewSmartPlaneBehavior.class).setEnable(false);}
+		    catch(BehaviorNotFoundException e){}
 		    hp.setPropulsion(hp.getPropulsion()/1);
+		    hp.setEnable(false);
 		    probeForBehavior(AutoLeveling.class).
 		    setLevelingAxis(LevelingAxis.HEADING).
-		    setLevelingVector(Vector3D.MINUS_J).setRetainmentCoeff(.985,.985,.985);
-		    probeForBehavior(NewSmartPlaneBehavior.class).setEnable(false);
+		    setLevelingVector(Vector3D.MINUS_J).
+		    setRetainmentCoeff(.987,.987,.987).
+		    setEnable(true);
+		    System.out.println("spinAndCrashAddendum()");
 		}};
 		addBehavior(spinAndCrashAddendum);
 	}//end if(spinCrash)

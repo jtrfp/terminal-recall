@@ -54,7 +54,8 @@ public class NewSmartPlaneBehavior extends Behavior {
 	UNFLIP_SPIN,
 	SPIN,
 	TURN_LEFT,
-	TURN_RIGHT
+	TURN_RIGHT,
+	FREEHWEEL//Everything off
     }
     
     public NewSmartPlaneBehavior(){
@@ -92,6 +93,14 @@ public class NewSmartPlaneBehavior extends Behavior {
     private void setCurrentMode(SmartPlaneMode mode){
 	timeOfCurrentMode = System.currentTimeMillis();
 	behaviorSelector.setEnabledGroup(mode);
+    }
+    
+    @Override
+    public Behavior setEnable(boolean enabled) {
+	if(!enabled)
+	    behaviorSelector.setEnabledGroup(SmartPlaneMode.FREEHWEEL);
+	behaviorSelector.setEnable(enabled);
+	return super.setEnable(enabled);
     }
     
     private SmartPlaneMode getCurrentMode(){

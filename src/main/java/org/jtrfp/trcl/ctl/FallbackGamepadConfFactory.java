@@ -63,7 +63,7 @@ public static class FallbackGamepadConf extends DefaultControllerConfiguration {
 	eMap .put(bStart ,new ConfEntry(GamePauseFactory.PAUSE                         ,bStart ,1,0 ));
 	eMap .put(analogX     ,new ConfEntry(UserInputRudderElevatorControlBehavior.RUDDER  ,analogX     ,-1,0));
 	eMap .put(analogY     ,new ConfEntry(UserInputRudderElevatorControlBehavior.ELEVATOR,analogY     ,-1,0));
-	eMap .put(analogZ     ,new ConfEntry(UserInputThrottleControlBehavior.THROTTLE      ,analogZ     ,-1,0));
+	eMap .put(analogZ     ,new ConfEntry(UserInputThrottleControlBehavior.THROTTLE      ,analogZ     ,-0.5,0.5));
 	eMap.put(bThumbL      , new ConfEntry(RollBehavior.ROLL                ,bThumbL  ,-1,0 ));
 	eMap.put(bThumbR      , new ConfEntry(RollBehavior.ROLL                ,bThumbR ,1,0 ));
     }//end constructor

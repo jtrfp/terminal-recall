@@ -43,9 +43,10 @@ import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
 public class ProjectileFactory {
+    protected static final int POOL_SIZE = 60;
     private int projectileIndex=0;
     private final TR tr;
-    private final Projectile [] projectiles = new Projectile[20];
+    private final Projectile [] projectiles = new Projectile[POOL_SIZE];
     private final double projectileSpeed;
     private final Weapon weapon;
     private final SoundTexture soundTexture;

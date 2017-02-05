@@ -292,6 +292,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		    
 		    try{game.setLevelIndex(game.getLevelIndex());
 		        game.getCurrentMission().setNavSubObjects(null);//Ensure they are repopulated
+		        game.getCurrentMission().setShowIntro(false);
 		        game.getCurrentMission().go();
 		    }catch(Exception e){e.printStackTrace();}
 		}//end run()

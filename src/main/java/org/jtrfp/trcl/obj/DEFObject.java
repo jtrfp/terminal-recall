@@ -780,8 +780,8 @@ public void destroy(){
 		    addBehavior(new PulledDownByGravityBehavior().setEnable(true));
 		    probeForBehavior(DamagedByCollisionWithSurface.class).setEnable(true);
 		    probeForBehavior(CollidesWithTerrain.class).setNudgePadding(0);
-		    probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
-		    probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.BigExplosion).setExplosionSound(BIG_EXP_SOUNDS[(int)(Math.random()*3)]);
+		    probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(true);
+		    probeForBehavior(ExplodesOnDeath.class).setExplosionType(ExplosionType.Blast).setExplosionSound(BIG_EXP_SOUNDS[(int)(Math.random()*3)]);
 		    if(def.getThrustSpeed()<800000){
 			probeForBehavior(HasPropulsion.class).setPropulsion(0);
 			probeForBehavior(VelocityDragBehavior.class).setEnable(false);

@@ -364,8 +364,9 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	 * @param crosshairsEnabled the crosshairsEnabled to set
 	 */
 	public void setCrosshairsEnabled(boolean crosshairsEnabled) {
-	    pcs.firePropertyChange(CROSSHAIRS_ENABLED,this.crosshairsEnabled,crosshairsEnabled);
+	    final boolean oldValue = this.crosshairsEnabled;
 	    this.crosshairsEnabled = crosshairsEnabled;
+	    pcs.firePropertyChange(CROSSHAIRS_ENABLED,oldValue,crosshairsEnabled);
 	}
 	/*
 	public Map<String, Object> getComponentConfigs() {

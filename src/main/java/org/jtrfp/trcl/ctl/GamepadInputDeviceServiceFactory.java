@@ -121,7 +121,10 @@ public class GamepadInputDeviceServiceFactory implements FeatureFactory<Controll
 		    while(true){
 			while(!eventQueue.getNextEvent(event))
 			    try{Thread.sleep(20);
-			    controller.poll();
+			    if(!controller.poll()){
+				System.err.println("WARNING: Lost contact with controller: "+controller.getName()+". Escaping poll loop...");
+				return;
+				}
 			    }catch(InterruptedException e){}
 			controllerSourceMap.get(event.getComponent()).notifyPropertyChange(event.getValue());
 		    }//end while(true)

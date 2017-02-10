@@ -25,6 +25,9 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
@@ -41,8 +44,12 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class Crosshairs extends WorldObject implements RelevantEverywhere {
     private GameShell gameShell;
-    private PropertyChangeListener     crosshairsEnabledListener, gamePCL;
-    private WeakPropertyChangeListener weakCrosshairsEnabledListener, weakGamePCL;
+    private PropertyChangeListener     crosshairsEnabledListener, gamePCL, controlPCL;
+    private WeakPropertyChangeListener weakCrosshairsEnabledListener, weakGamePCL, weakControlPCL;
+    private ControllerInput toggleCrosshairsControllerInput;
+    private TRConfiguration trConfiguration;
+    
+    public static String TOGGLE_CROSSHAIRS = "Crosshairs Toggle";
 
     public Crosshairs() {
 	super();
@@ -120,7 +127,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
     }//end PlayerListener
     
     private void installReactiveListeners(final TR tr){
-	final TRConfiguration trConfig = Features.get(tr,TRConfiguration.class);
+	final TRConfiguration trConfig = getTrConfiguration();
 	crosshairsEnabledListener = new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -142,7 +149,35 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 			newValue);
 	    }});
 	getGameShell().getGame().addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
+	
+	final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
+	final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
+	toggleCrosshairsControllerInput = inputs.getControllerInput(TOGGLE_CROSSHAIRS);
+	controlPCL     = new ControlPropertyChangeListener();
+	weakControlPCL = new WeakPropertyChangeListener(controlPCL, toggleCrosshairsControllerInput);
+	toggleCrosshairsControllerInput.addPropertyChangeListener(controlPCL);
     }//end installReactiveListeners
+    
+    private class ControlPropertyChangeListener implements PropertyChangeListener {
+	private boolean previouslyPressed = false;
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+	    final Object newValue = evt.getNewValue();
+	    if(newValue instanceof Double){
+		final double newDouble = (Double)newValue;
+		final boolean pressed = newDouble > .8 && newDouble < 1.1;
+		if(pressed != previouslyPressed && pressed){
+		    //Fresh press. Toggle.
+		    final TRConfiguration config = getTrConfiguration();
+		    final boolean oldValue = config.isCrosshairsEnabled();
+		    config.setCrosshairsEnabled(!oldValue);
+		}
+		previouslyPressed = pressed;
+	    }//end if(Double)
+	}//end propertyChange(...)
+	
+    }//end ControlPropertyChangeListener
     
     private void updateCrosshairsVisibilityState(
 	    boolean isUserSetActiveCrosshairs,
@@ -161,5 +196,15 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 
     public void setGameShell(GameShell gameShell) {
         this.gameShell = gameShell;
+    }
+
+    protected TRConfiguration getTrConfiguration() {
+	if( trConfiguration == null )
+	    trConfiguration = Features.get(getTr(),TRConfiguration.class);
+        return trConfiguration;
+    }
+
+    protected void setTrConfiguration(TRConfiguration trConfiguration) {
+        this.trConfiguration = trConfiguration;
     }
 }// end Crosshairs

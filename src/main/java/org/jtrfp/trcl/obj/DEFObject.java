@@ -54,6 +54,7 @@ import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
 import org.jtrfp.trcl.beh.LeavesPowerupOnDeathBehavior;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
+import org.jtrfp.trcl.beh.MissileSiloBehavior;
 import org.jtrfp.trcl.beh.NewSmartPlaneBehavior;
 import org.jtrfp.trcl.beh.PositionLimit;
 import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
@@ -91,6 +92,7 @@ import org.jtrfp.trcl.gpu.BufferedModelTarget;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundEvent;
@@ -169,6 +171,11 @@ public class DEFObject extends WorldObject {
 	canTurn=true;
 	foliage=false;
 	boss   =def.isObjectIsBoss();
+	
+	final GameShell gameShell = getGameShell();
+	final TVF3Game  game      = (TVF3Game)gameShell.getGame();
+	final Player    player    = game.getPlayer();
+	final Mission   mission   = game.getCurrentMission();
 
 	final int    numHitBoxes = def.getNumNewHBoxes();
 	final int [] rawHBoxData = def.getHboxVertices();
@@ -401,11 +408,16 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    defaultBossNAVTargetingResponse();
 	    break;
-	case missile://Silo?
-	    mobile=false;//TODO
-	    anchoring=Anchoring.terrain;
+	case missile:{//Silo
+	    mobile=true;
+	    anchoring=Anchoring.none;
 	    defaultModelAssignment();
+	    final MissileSiloBehavior silo = new MissileSiloBehavior();
+	    silo.setSequenceOffsetMillis((long)(Math.random() * 5000.));
+	    silo.setInitialRestTimeMillis(1000L+(long)(Math.random() * 3000));
+	    addBehavior(silo);
 	    break;
+	    }
 	case bob:
 	    addBehavior(new Bobbing().setAdditionalHeight(TRFactory.mapSquareSize*1));
 	    addBehavior(new SteadilyRotating());
@@ -609,6 +621,7 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new VelocityDragBehavior());
 
 	    if(anchoring==Anchoring.terrain){}
+	    else if(anchoring == Anchoring.none){}
 	    else 	{//addBehavior(new BouncesOffSurfaces().setReflectHeading(false));
 		addBehavior(new CollidesWithTerrain().setAutoNudge(true).setNudgePadding(40000));
 	    }
@@ -1133,7 +1146,8 @@ public void destroy(){
     enum Anchoring{
 	floating(false),
 	terrain(true),
-	ceiling(true);
+	ceiling(true),
+	none(false);
 
 	private final boolean locked;
 	private Anchoring(boolean locked){

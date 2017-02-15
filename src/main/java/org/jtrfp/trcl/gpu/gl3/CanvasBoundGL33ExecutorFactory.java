@@ -58,9 +58,10 @@ public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProv
 		versionString[0] = drawable.getGL().glGetString(GL.GL_VERSION);
 		return true;
 	    }});
-	final String [] parts = versionString[0].split("\\.");
-	final int major = Integer.parseInt(parts[0]);
-	final int minor = Integer.parseInt(parts[1]);
+	final String [] parts      = versionString[0].split("\\.");
+	final String [] minorParts = parts[1].split("\\s+");
+	final int major            = Integer.parseInt(parts[0]);
+	final int minor            = minorParts.length > 0?Integer.parseInt(minorParts[0]):0;
 	final int compositeVersion = major * 100 + minor;
 	if(compositeVersion < 303)
 	    throw new FeatureNotApplicableException("Must be GL 3.3. Got "+versionString);

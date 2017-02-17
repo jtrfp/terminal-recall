@@ -24,6 +24,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -178,80 +179,85 @@ public class ControllerInputDevicePanel extends JPanel {
 
 	@Override
 	public int size() {
-	    // TODO Auto-generated method stub
-	    return 0;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean isEmpty() {
-	    // TODO Auto-generated method stub
-	    return false;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean contains(Object o) {
-	    // TODO Auto-generated method stub
-	    return false;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Iterator<String> iterator() {
-	    // TODO Auto-generated method stub
-	    return null;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Object[] toArray() {
-	    // TODO Auto-generated method stub
-	    return null;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public <T> T[] toArray(T[] a) {
-	    // TODO Auto-generated method stub
-	    return null;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean add(String item) {
-		destBox.addItem(item);
+	public boolean add(final String item) {
+	    SwingUtilities.invokeLater(new Runnable(){
+
+		@Override
+		public void run() {
+		    destBox.addItem(item);
+		}});
 	    return true;
 	}//end add(...)
 
 	@Override
-	public boolean remove(Object item) {
-		destBox.removeItem(item);
+	public boolean remove(final Object item) {
+	    SwingUtilities.invokeLater(new Runnable(){
+
+		@Override
+		public void run() {
+		    destBox.removeItem(item);
+		}});
 	    return true;
 	}
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-	    // TODO Auto-generated method stub
-	    return false;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends String> c) {
-	    // TODO Auto-generated method stub
-	    return false;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-	    // TODO Auto-generated method stub
-	    return false;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-	    // TODO Auto-generated method stub
-	    return false;
+	    throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void clear() {
-		destBox.removeAllItems();
-		destBox.addItem(NONE);
+	    SwingUtilities.invokeLater(new Runnable(){
+
+		@Override
+		public void run() {
+		    destBox.removeAllItems();
+		    destBox.addItem(NONE);
+		}});
 	}//end clear()
     }//end MonitorCollection
     

@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gui;
 
+import java.util.HashMap;
+
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
@@ -20,13 +22,16 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ctl.InputDevice;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
+import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ControllerConfigTabFactory implements FeatureFactory<ConfigWindow>{
     public class ControllerConfigTab implements ConfigurationTab, Feature<ConfigWindow> {
 	private ControllerConfigPanel panel;
+	private ControllerConfigTabConf conf;
 	private ControllerMapper mapper;
 	
 	public ControllerConfigTab(){
@@ -47,12 +52,46 @@ public class ControllerConfigTabFactory implements FeatureFactory<ConfigWindow>{
 	    return new ImageIcon(ControllerConfigTab.class.getResource("/org/freedesktop/tango/22x22/devices/input-gaming.png"));
 	}
 	
+	private void readFromConfigBean(){
+	    if(conf==null)
+		conf = new ControllerConfigTabConf();
+	    final ControllerConfigTabConf config = getConfigBean();
+
+	    for(ControllerInputDevicePanel p: panel.getControllerInputDevicePanels()){
+		final InputDevice id = p.getInputDevice();
+		ControllerConfiguration controllerConfiguration = config.getControllerConfigurations().get(id.getName());
+		//No config present. Create a new one.
+		if(controllerConfiguration==null){
+		    controllerConfiguration = mapper.getRecommendedDefaultConfiguration(p.getInputDevice());
+		    if(controllerConfiguration==null){
+			controllerConfiguration = new ControllerConfiguration();
+			controllerConfiguration.setIntendedController(p.getInputDevice().getName());
+		    }
+		    //Add the new config
+		    config.getControllerConfigurations().put(id.getName(), controllerConfiguration);
+		}//end if(null)
+		p.setControllerConfiguration(controllerConfiguration);
+	    }//end for(ControllerInputDevicePanels)
+	}//end readFromConfigBean()
+
+	public void setConfigBean(ControllerConfigTabConf cfg) {
+	    conf=cfg;
+	    readFromConfigBean();
+	}
+	
+	public ControllerConfigTabConf getConfigBean() {
+	    if(conf==null)
+		setConfigBean(null);
+	    return conf;
+	}
+	
 	@Override
 	public void apply(ConfigWindow target) {
 	    mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
 	    final ControllerInputs cInputs = Features.get(mapper, ControllerInputs.class);
 	    panel = new ControllerConfigPanel(mapper,cInputs);
 	    target.registerConfigTab(this);
+	    readFromConfigBean();
 	}
 
 	@Override
@@ -76,4 +115,19 @@ public class ControllerConfigTabFactory implements FeatureFactory<ConfigWindow>{
     public Class<? extends Feature> getFeatureClass() {
 	return ControllerConfigTab.class;
     }//end ControllerConfigTab
+    
+    public static class ControllerConfigTabConf {
+	private HashMap<String, ControllerConfiguration> controllerConfigurations;
+
+	public HashMap<String, ControllerConfiguration> getControllerConfigurations() {
+	    if(controllerConfigurations == null)
+		controllerConfigurations = new HashMap<String, ControllerConfiguration>();
+	    return controllerConfigurations;
+	}
+
+	public void setControllerConfigurations(
+		HashMap<String, ControllerConfiguration> controllerConfigurations) {
+	    this.controllerConfigurations = controllerConfigurations;
+	}
+    }//end ControllerConfigTabConf
 }//end ControlleConfigTabFactory

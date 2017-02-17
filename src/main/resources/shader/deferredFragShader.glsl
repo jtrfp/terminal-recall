@@ -336,7 +336,7 @@ if(populatedFSQ){
   }//end for(DEPTH_QUEUE_SIZE)
  
  // D E P T H   S O R T
- if(relevantSize>0u){
+ if(relevantSize>1u){
  //Perform the not-so-quick sort
  int intermediary;
  for(uint i=0u; i<relevantSize-1u; i++){
@@ -349,7 +349,7 @@ if(populatedFSQ){
     }//end if(new deepest)
    }//end for(lower end)
   }//end for(relevantSize)
- }//end if(relevantSize>0)
+ }//end if(relevantSize>1)
   
   // D E P T H   A S S E M B L Y
   for(uint i=0u; i<relevantSize; i++){

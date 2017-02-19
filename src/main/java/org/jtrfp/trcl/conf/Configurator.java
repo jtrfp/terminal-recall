@@ -74,8 +74,8 @@ public abstract class Configurator<T> {
     }//end findMethodCompatibleWith(...)
     
     private boolean isCompatible(Class class1, Class class2){
-	class1 = objectify(class1);
-	class2 = objectify(class2);
+	class1 = boxedClassOf(class1);
+	class2 = boxedClassOf(class2);
 	if(class1 == class2)
 	    return true;
 	if(class1.isAssignableFrom(class2))
@@ -83,7 +83,7 @@ public abstract class Configurator<T> {
 	return false;
     }//end isCompatible(...)
     
-    private Class objectify(Class original){
+    private static Class boxedClassOf(Class original){
 	if(original == boolean.class)
 	    original = Boolean.class;
 	if(original == int.class)

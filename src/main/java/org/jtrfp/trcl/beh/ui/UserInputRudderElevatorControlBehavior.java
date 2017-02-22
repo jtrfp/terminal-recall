@@ -15,7 +15,7 @@ package org.jtrfp.trcl.beh.ui;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.obj.Player;
 
 public class UserInputRudderElevatorControlBehavior extends Behavior implements PlayerControlBehavior {
@@ -25,10 +25,10 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
     private final ControllerInput rudder, elevator;
     
     private  double accellerationFactor=.0005;
-    public UserInputRudderElevatorControlBehavior(ControllerInputs controllerInputs){
+    public UserInputRudderElevatorControlBehavior(ControllerSinks controllerInputs){
 	super();
-	rudder =   controllerInputs.getControllerInput(RUDDER);
-	elevator = controllerInputs.getControllerInput(ELEVATOR);
+	rudder =   controllerInputs.getSink(RUDDER);
+	elevator = controllerInputs.getSink(ELEVATOR);
     }
     @Override
     public void tick(long tickTimeMillis){

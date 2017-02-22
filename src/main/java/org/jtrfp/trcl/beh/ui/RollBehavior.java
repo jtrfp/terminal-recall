@@ -21,7 +21,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.miss.Mission;
 
 public class RollBehavior extends Behavior implements ControlBehavior {
@@ -33,8 +33,8 @@ public class RollBehavior extends Behavior implements ControlBehavior {
     // HARD REFERENCES; DO NOT REMIOVE
     private PropertyChangeListener weakRollInputChangeListener;
     
-    public RollBehavior(ControllerInputs inputs){
-	rollInput = inputs.getControllerInput(ROLL);
+    public RollBehavior(ControllerSinks inputs){
+	rollInput = inputs.getSink(ROLL);
 	rollInput.addPropertyChangeListener(weakRollInputChangeListener = new WeakPropertyChangeListener(rollInputChangeListener,rollInput));
     }
     

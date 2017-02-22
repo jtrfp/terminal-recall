@@ -22,7 +22,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.WorldObject;
@@ -43,8 +43,8 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     private GameShell gameShell;
     private int activeBehaviorIndex = 0;
     
-    public UserInputWeaponSelectionBehavior(ControllerInputs controllerInputs){
-	fire = controllerInputs.getControllerInput(FIRE);
+    public UserInputWeaponSelectionBehavior(ControllerSinks controllerInputs){
+	fire = controllerInputs.getSink(FIRE);
     }//end constuctor
     
     @Override

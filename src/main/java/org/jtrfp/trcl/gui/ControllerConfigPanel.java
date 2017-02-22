@@ -19,7 +19,7 @@ import java.util.Collection;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.InputDevice;
 
@@ -27,7 +27,7 @@ public class ControllerConfigPanel extends JPanel {
     private static final long serialVersionUID = -7100861763976731950L;
     private final Collection<ControllerInputDevicePanel> controllerInputDevicePanels = new ArrayList<ControllerInputDevicePanel>();
     
-    public ControllerConfigPanel(ControllerMapper mapper, ControllerInputs ci){
+    public ControllerConfigPanel(ControllerMapper mapper, ControllerSinks ci){
 	super();
 	setLayout(new BorderLayout(0, 0));
 	JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);

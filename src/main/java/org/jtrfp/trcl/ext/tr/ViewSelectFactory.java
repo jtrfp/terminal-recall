@@ -44,7 +44,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.GameVersion;
@@ -147,9 +147,9 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      @Override
      public void apply(Game game) {
 	 final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
-	 final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
-	 view    = inputs.getControllerInput(VIEW);
-	 iView   = inputs.getControllerInput(INSTRUMENTS_VIEW);
+	 final ControllerSinks inputs = Features.get(mapper, ControllerSinks.class);
+	 view    = inputs.getSink(VIEW);
+	 iView   = inputs.getSink(INSTRUMENTS_VIEW);
          view .addPropertyChangeListener(weakVSPCL  = new WeakPropertyChangeListener(viewSelectPropertyChangeListener,view));
          iView.addPropertyChangeListener(weakIVSPCL = new WeakPropertyChangeListener(instrumentViewSelectPropertyChangeListener,iView));
          this.game = new WeakReference<Game>(game);

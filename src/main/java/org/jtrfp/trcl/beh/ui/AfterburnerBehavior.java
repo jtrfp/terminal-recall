@@ -26,7 +26,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.miss.Mission;
@@ -58,8 +58,8 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private boolean afterburning = false;
     private boolean installedVetoListeners = false;
     
-    public AfterburnerBehavior(ControllerInputs inputs){
-	afterburnerCtl = inputs.getControllerInput(AFTERBURNER);
+    public AfterburnerBehavior(ControllerSinks inputs){
+	afterburnerCtl = inputs.getSink(AFTERBURNER);
 	//afterburnerCtl.addPropertyChangeListener(weakAbControlListener = new WeakPropertyChangeListener(abControlListener,afterburnerCtl));
     }//end constructor
     

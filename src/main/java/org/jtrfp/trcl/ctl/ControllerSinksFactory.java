@@ -27,32 +27,32 @@ import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ControllerInputsFactory implements FeatureFactory<ControllerMapper> {
-    public class ControllerInputs implements Feature<ControllerMapper> {
-	private final HashMap<String,ControllerInput>    inputs     = new HashMap<String,ControllerInput>(32);
-	private final CollectionActionDispatcher<String> inputNames = new CollectionActionDispatcher<String>(new HashSet<String>());
+public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> {
+    public class ControllerSinks implements Feature<ControllerMapper> {
+	private final HashMap<String,ControllerInput>    sinks     = new HashMap<String,ControllerInput>(32);
+	private final CollectionActionDispatcher<String> sinkNames = new CollectionActionDispatcher<String>(new HashSet<String>());
 	/**
-	 * Obtains an input of the specified name or creates and registers a new one if not available.
+	 * Obtains a control sink of the specified name or creates and registers a new one if not available.
 	 * @param name
 	 * @return
 	 * @since Nov 12, 2015
 	 */
-	public ControllerInput getControllerInput(final String name){
+	public ControllerInput getSink(final String name){
 	    ControllerInput result;
-	    if(!inputs.containsKey(name)){
-		result = new DefaultControllerInput(name);
-		inputs.put(name, result);
-		inputNames.add(name);
-	    }else result = inputs.get(name);
+	    if(!sinks.containsKey(name)){
+		result = new DefaultControllerSink(name);
+		sinks.put(name, result);
+		sinkNames.add(name);
+	    }else result = sinks.get(name);
 	    return result;
-	}//end declareInput(...)
+	}//end getSink(...)
 
-	public Set<Entry<String,ControllerInput>> getInputs(){
-	    return inputs.entrySet();
+	public Set<Entry<String,ControllerInput>> getSinks(){
+	    return sinks.entrySet();
 	}
 
-	public CollectionActionDispatcher<String> getInputNames(){
-	    return inputNames;
+	public CollectionActionDispatcher<String> getSinkNames(){
+	    return sinkNames;
 	}
 	
 	@Override
@@ -68,11 +68,11 @@ public class ControllerInputsFactory implements FeatureFactory<ControllerMapper>
 	}
     }//end ControllerInputs
     
-    private static class DefaultControllerInput implements ControllerInput{
+    private static class DefaultControllerSink implements ControllerInput{
 	    private final String controllerName;
 	    private       double state = 0;
 	    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	    public DefaultControllerInput(String controllerName){
+	    public DefaultControllerSink(String controllerName){
 		this.controllerName=controllerName;
 	    }//end constructor
 	    @Override
@@ -96,11 +96,11 @@ public class ControllerInputsFactory implements FeatureFactory<ControllerMapper>
 	    public void removePropertyChangeListener(PropertyChangeListener l) {
 		pcs.removePropertyChangeListener(l);
 	    }
-	}//end DefaultControllerInput
+	}//end DefaultControllerSink
 
     @Override
     public Feature<ControllerMapper> newInstance(ControllerMapper target) {
-	return new ControllerInputs();
+	return new ControllerSinks();
     }
 
     @Override
@@ -110,6 +110,6 @@ public class ControllerInputsFactory implements FeatureFactory<ControllerMapper>
 
     @Override
     public Class<? extends Feature> getFeatureClass() {
-	return ControllerInputs.class;
+	return ControllerSinks.class;
     }
-}//end ControllerInputsFactory
+}//end ControllerSinksFactory

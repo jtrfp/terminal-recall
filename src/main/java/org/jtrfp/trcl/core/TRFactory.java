@@ -29,7 +29,7 @@ import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
@@ -233,7 +233,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	//private final ConfigMenuItemListener	configMenuItemListener = new ConfigMenuItemListener();
 	private TRConfigRoot configManager;
 
-	private ControllerInputs controllerInputs;
+	private ControllerSinks controllerInputs;
 	
 	public TR(){
 	    threadManager = null;
@@ -516,10 +516,10 @@ public final class TRFactory implements FeatureFactory<Features>{
 	}
 
 	//TODO: Refactor out - TR should not be aware
-	public ControllerInputs getControllerInputs() {
+	public ControllerSinks getControllerInputs() {
 	    if(controllerInputs == null){
 		final ControllerMapper cm = Features.get(Features.getSingleton(), ControllerMapper.class);
-		controllerInputs = Features.get(cm, ControllerInputs.class);
+		controllerInputs = Features.get(cm, ControllerSinks.class);
 		}
 	    return controllerInputs;
 	}

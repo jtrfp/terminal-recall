@@ -26,7 +26,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.IndirectProperty;
@@ -151,8 +151,8 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
 	getGameShell().getGame().addPropertyChangeListener(Game.CURRENT_MISSION, currentMission);
 	
 	final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
-	final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
-	toggleCrosshairsControllerInput = inputs.getControllerInput(TOGGLE_CROSSHAIRS);
+	final ControllerSinks inputs = Features.get(mapper, ControllerSinks.class);
+	toggleCrosshairsControllerInput = inputs.getSink(TOGGLE_CROSSHAIRS);
 	controlPCL     = new ControlPropertyChangeListener();
 	weakControlPCL = new WeakPropertyChangeListener(controlPCL, toggleCrosshairsControllerInput);
 	toggleCrosshairsControllerInput.addPropertyChangeListener(controlPCL);

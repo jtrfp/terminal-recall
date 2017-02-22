@@ -32,7 +32,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerMapping;
 import org.jtrfp.trcl.ctl.ControllerSource;
@@ -47,7 +47,7 @@ public class ControllerInputDevicePanel extends JPanel {
     private static final long serialVersionUID = 4252247402423635792L;
     private final InputDevice                  inputDevice;
     private static final String                NONE = "[none]";
-    private final ControllerInputs controllerInputs;
+    private final ControllerSinks controllerInputs;
     private JComboBox              destBox;
     private JTable table;
     private ControllerMapper       controllerMapper;
@@ -57,7 +57,7 @@ public class ControllerInputDevicePanel extends JPanel {
     private final Collection<String> monitoringCollection = new MonitorCollection();
     private final InputStateFeedbackMonitor inputStateFeedbackMonitor = new InputStateFeedbackMonitor();
 
-    public ControllerInputDevicePanel(InputDevice id, ControllerInputs ci, ControllerMapper mapper) {
+    public ControllerInputDevicePanel(InputDevice id, ControllerSinks ci, ControllerMapper mapper) {
 	if(id     == null)
 	    throw new NullPointerException("Passed InputDevice intolerably null.");
 	if(ci     == null)
@@ -87,7 +87,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	JScrollPane tableScrollPane = new JScrollPane(table);
 	table.setFillsViewportHeight(true);
 	this.add(tableScrollPane);
-	ci.getInputNames().addTarget(monitoringCollection, true);
+	ci.getSinkNames().addTarget(monitoringCollection, true);
     }//end ControllerInputDevicePanel
     
     private enum Columns{
@@ -283,7 +283,7 @@ public class ControllerInputDevicePanel extends JPanel {
 		    if(!inputString.contentEquals(NONE)){
 			entry.setDest  (inputString);
 			//Update the actual settings
-			final ControllerInput  controllerInput  = controllerInputs.getControllerInput(inputString);
+			final ControllerInput  controllerInput  = controllerInputs.getSink(inputString);
 			controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);
 		    }//end if(!NONE)
 		    else config.getEntryMap().remove(srcString);//Remove if routed to NONE

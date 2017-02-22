@@ -20,7 +20,7 @@ import javax.swing.JComponent;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.InputDevice;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
@@ -88,7 +88,7 @@ public class ControllerConfigTabFactory implements FeatureFactory<ConfigWindow>{
 	@Override
 	public void apply(ConfigWindow target) {
 	    mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
-	    final ControllerInputs cInputs = Features.get(mapper, ControllerInputs.class);
+	    final ControllerSinks cInputs = Features.get(mapper, ControllerSinks.class);
 	    panel = new ControllerConfigPanel(mapper,cInputs);
 	    target.registerConfigTab(this);
 	    readFromConfigBean();

@@ -27,7 +27,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerInput;
-import org.jtrfp.trcl.ctl.ControllerInputsFactory.ControllerInputs;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
@@ -79,8 +79,8 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	@Override
 	public void apply(Mission target) {
 	    final ControllerMapper mapper = Features.get(Features.getSingleton(), ControllerMapper.class);
-	    final ControllerInputs inputs = Features.get(mapper, ControllerInputs.class);
-	    satelliteToggleInput = inputs.getControllerInput(SATELLITE_TOGGLE);
+	    final ControllerSinks inputs = Features.get(mapper, ControllerSinks.class);
+	    satelliteToggleInput = inputs.getSink(SATELLITE_TOGGLE);
 	    setMission(target);
 	    setGamePause(Features.get(target, GamePause.class));
 	    final Frame frame = getTr().getRootWindow();

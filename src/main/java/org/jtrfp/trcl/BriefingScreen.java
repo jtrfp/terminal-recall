@@ -36,7 +36,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
@@ -316,11 +316,11 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     
     private class ControllerBarrier implements PropertyChangeListener{
 	private CountDownLatch        latch;
-	private final Collection<ControllerInput>        inputs = new ArrayList<ControllerInput>();
+	private final Collection<ControllerSink>        inputs = new ArrayList<ControllerSink>();
 	private final Collection<PropertyChangeListener> weakPLs= new ArrayList<PropertyChangeListener>();//Hard reference; do not remove!
 	
-	public ControllerBarrier(ControllerInput ... inputs){
-	    for(ControllerInput in : inputs){
+	public ControllerBarrier(ControllerSink ... inputs){
+	    for(ControllerSink in : inputs){
 		this.inputs.add(in);
 		final WeakPropertyChangeListener weakPL;
 		weakPLs.add(weakPL = new WeakPropertyChangeListener(this,in));
@@ -329,7 +329,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	}
 	
 	public void release(){
-	    for(ControllerInput in : inputs)
+	    for(ControllerSink in : inputs)
 	     in.removePropertyChangeListener(this);
 	}
 	

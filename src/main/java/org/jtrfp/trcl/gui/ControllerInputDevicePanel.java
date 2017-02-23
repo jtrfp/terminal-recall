@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerMapping;
@@ -283,7 +283,7 @@ public class ControllerInputDevicePanel extends JPanel {
 		    if(!inputString.contentEquals(NONE)){
 			entry.setDest  (inputString);
 			//Update the actual settings
-			final ControllerInput  controllerInput  = controllerInputs.getSink(inputString);
+			final ControllerSink  controllerInput  = controllerInputs.getSink(inputString);
 			controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);
 		    }//end if(!NONE)
 		    else config.getEntryMap().remove(srcString);//Remove if routed to NONE
@@ -347,7 +347,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	    return;//Ignore
 	final TableModel model = table.getModel();
 	//Set destination
-	model.setValueAt(value.getControllerInput().getName(), row, Columns.DEST.ordinal());
+	model.setValueAt(value.getControllerSink().getName(), row, Columns.DEST.ordinal());
 	//Set scalar
 	model.setValueAt(value.getScale()+"", row, Columns.SCALAR.ordinal());
 	//Set offset

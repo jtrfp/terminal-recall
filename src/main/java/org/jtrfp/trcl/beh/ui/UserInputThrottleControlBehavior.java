@@ -20,7 +20,7 @@ import java.beans.VetoableChangeSupport;
 
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.prop.VetoableChangeListenable;
@@ -34,7 +34,7 @@ public class UserInputThrottleControlBehavior extends Behavior implements Player
     //PROPERTIES
     public static final String THROTTLE_CTL_STATE = "throttleCtlState";
     
-    private final ControllerInput throttleDelta,throttleCtl;
+    private final ControllerSink throttleDelta,throttleCtl;
     private final VetoableChangeSupport vcs = new VetoableChangeSupport(this);
     private double throttleCtlState;
     private ThrottleControlListener throttleControlListener = new ThrottleControlListener();

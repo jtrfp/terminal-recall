@@ -21,7 +21,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -31,7 +31,7 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
     public static final String FIRE = "Fire";
     
-    private final ControllerInput fire;
+    private final ControllerSink fire;
     private       KeyStatus       keyStatus;
     
     private ProjectileFiringBehavior [] behaviors;

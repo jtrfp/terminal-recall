@@ -15,7 +15,7 @@ package org.jtrfp.trcl.ctl;
 import java.beans.PropertyChangeListener;
 
 
-public interface ControllerInput {
+public interface ControllerSink {
     public static String STATE = "State";
     /**
      * One-dimensional value. Buttons are 0 or 1. A joystick axis is [-1,1] where zero is center.

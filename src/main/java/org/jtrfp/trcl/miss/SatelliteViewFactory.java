@@ -26,7 +26,7 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.gui.MenuSystem;
@@ -68,7 +68,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
 	private boolean                               satelliteView    = false;
 	private boolean                               enabled          = false;
 	private final   PropertyChangeSupport         pcs = new PropertyChangeSupport(this);
-	private         ControllerInput               satelliteToggleInput;
+	private         ControllerSink               satelliteToggleInput;
 	private         GamePause                     gamePause;
 	private         MenuSystem                    menuSystem;
 	

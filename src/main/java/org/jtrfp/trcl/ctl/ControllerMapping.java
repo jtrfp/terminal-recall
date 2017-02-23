@@ -17,26 +17,26 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class ControllerMapping implements PropertyChangeListener{
-    private ControllerInput controllerInput;
+    private ControllerSink controllerSink;
     private ControllerSource controllerSource;
     private double scale, offset;
 
     public ControllerMapping(){super();}
 
-    public ControllerMapping(ControllerSource controllerSource, ControllerInput controllerInput, double scale, double offset){
-	this.controllerInput = controllerInput;
+    public ControllerMapping(ControllerSource controllerSource, ControllerSink controllerSink, double scale, double offset){
+	this.controllerSink   = controllerSink;
 	this.controllerSource = controllerSource;
-	this.scale           = scale;
-	this.offset          = offset;
+	this.scale            = scale;
+	this.offset           = offset;
     }
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		controllerInput.setState((Double)evt.getNewValue()*scale+offset);
+		controllerSink.setState((Double)evt.getNewValue()*scale+offset);
 	}
     
-    public ControllerInput getControllerInput() {
-	return controllerInput;
+    public ControllerSink getControllerSink() {
+	return controllerSink;
     }
     public double getScale() {
 	return scale;
@@ -44,8 +44,8 @@ public class ControllerMapping implements PropertyChangeListener{
     public double getOffset() {
 	return offset;
     }
-    public void setControllerInput(ControllerInput controllerInput) {
-	this.controllerInput = controllerInput;
+    public void setControllerInput(ControllerSink controllerInput) {
+	this.controllerSink = controllerInput;
     }
     public void setScale(double scale) {
 	this.scale = scale;

@@ -67,14 +67,14 @@ public class CollidesWithDEFObjects extends Behavior implements CollisionBehavio
 		    boolean localDoCollision = true;
 		    for(int i=0; i<3; i++){
 			final double dist = TRFactory.rolloverDistance(vPos[i]);
-			if(((Projectile)getParent()).getObjectOfOrigin() instanceof Player)
-			 System.out.println("hBox "+def.getModel().getDebugName()+" dist="+dist+" limit="+limit);
+			//if(((Projectile)getParent()).getObjectOfOrigin() instanceof Player)
+			 //System.out.println("hBox "+def.getModel().getDebugName()+" dist="+dist+" limit="+limit);
 			localDoCollision &= dist < limit;
 		    }
 		    doCollision |= localDoCollision;
 		}//end for(hitBoxes)
 		if(doCollision){
-		    System.out.println("HBOX COLLISION "+other.getModel().getDebugName());
+		    //System.out.println("HBOX COLLISION "+other.getModel().getDebugName());
 		 parent.probeForBehaviors(sub, DEFObjectCollisionListener.class);
 		 }
 	    }//end if(custom hitboxes)

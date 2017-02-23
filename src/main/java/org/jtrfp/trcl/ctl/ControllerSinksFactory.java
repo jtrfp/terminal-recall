@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> {
     public class ControllerSinks implements Feature<ControllerMapper> {
-	private final HashMap<String,ControllerInput>    sinks     = new HashMap<String,ControllerInput>(32);
+	private final HashMap<String,ControllerSink>    sinks     = new HashMap<String,ControllerSink>(32);
 	private final CollectionActionDispatcher<String> sinkNames = new CollectionActionDispatcher<String>(new HashSet<String>());
 	/**
 	 * Obtains a control sink of the specified name or creates and registers a new one if not available.
@@ -37,8 +37,8 @@ public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> 
 	 * @return
 	 * @since Nov 12, 2015
 	 */
-	public ControllerInput getSink(final String name){
-	    ControllerInput result;
+	public ControllerSink getSink(final String name){
+	    ControllerSink result;
 	    if(!sinks.containsKey(name)){
 		result = new DefaultControllerSink(name);
 		sinks.put(name, result);
@@ -47,7 +47,7 @@ public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> 
 	    return result;
 	}//end getSink(...)
 
-	public Set<Entry<String,ControllerInput>> getSinks(){
+	public Set<Entry<String,ControllerSink>> getSinks(){
 	    return sinks.entrySet();
 	}
 
@@ -68,7 +68,7 @@ public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> 
 	}
     }//end ControllerInputs
     
-    private static class DefaultControllerSink implements ControllerInput{
+    private static class DefaultControllerSink implements ControllerSink{
 	    private final String controllerName;
 	    private       double state = 0;
 	    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -85,7 +85,7 @@ public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> 
 	    }//end getName()
 	    @Override
 	    public void setState(double newState) {
-		pcs.firePropertyChange(ControllerInput.STATE, this.state, newState);
+		pcs.firePropertyChange(ControllerSink.STATE, this.state, newState);
 		this.state = newState;
 	    }//end setState(...)
 	    @Override

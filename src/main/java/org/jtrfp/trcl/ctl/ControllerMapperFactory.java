@@ -51,11 +51,11 @@ public class ControllerMapperFactory implements FeatureFactory<Features> {
      * Multiple sources may feed the same input, though their behavior is undefined if they are of different types
      * i.e. button vs trigger vs axis
      * @param controllerSource
-     * @param controllerInput
+     * @param controllerSink
      * @since Nov 12, 2015
      */
-    public void mapControllerSourceToInput(ControllerSource controllerSource, ControllerInput controllerInput, double scale, double offset){
-	final ControllerMapping mapping = new ControllerMapping(controllerSource,controllerInput,scale,offset);
+    public void mapControllerSourceToInput(ControllerSource controllerSource, ControllerSink controllerSink, double scale, double offset){
+	final ControllerMapping mapping = new ControllerMapping(controllerSource,controllerSink,scale,offset);
 	map.put(controllerSource, mapping);
 	controllerSource.addPropertyChangeListener(mapping);
 	fireMappedEvent(controllerSource, mapping);

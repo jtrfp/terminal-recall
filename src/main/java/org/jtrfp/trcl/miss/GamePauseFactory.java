@@ -25,7 +25,7 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
@@ -49,7 +49,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
 	private final RunStateListener      runStateListener         = new RunStateListener();
 	private WeakReference<Mission>      mission;
 	private final PropertyChangeSupport pcs                      = new PropertyChangeSupport(this);
-	private       ControllerInput       pause;
+	private       ControllerSink       pause;
 	private       TR                    tr;
 	private       MenuSystem            menuSystem;
 

@@ -25,7 +25,7 @@ import org.jtrfp.trcl.beh.ProjectileFiringBehavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.Powerup;
@@ -44,7 +44,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     public static final String LOOP_SOUND       = "ENGINE4.WAV";
     private double fuelRemaining=0;
     private double formerMax,formerProp,newMax;
-    private final ControllerInput afterburnerCtl;
+    private final ControllerSink afterburnerCtl;
     public static final String AFTERBURNER = "Afterburner";
     private SoundTexture ignitionSound, extinguishSound, loopSound;
     private LoopingSoundEvent afterburnerLoop;

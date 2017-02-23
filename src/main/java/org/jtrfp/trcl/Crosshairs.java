@@ -25,7 +25,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
@@ -46,7 +46,7 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
     private GameShell gameShell;
     private PropertyChangeListener     crosshairsEnabledListener, gamePCL, controlPCL;
     private WeakPropertyChangeListener weakCrosshairsEnabledListener, weakGamePCL, weakControlPCL;
-    private ControllerInput toggleCrosshairsControllerInput;
+    private ControllerSink toggleCrosshairsControllerInput;
     private TRConfiguration trConfiguration;
     
     public static String TOGGLE_CROSSHAIRS = "Crosshairs Toggle";

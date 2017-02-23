@@ -43,7 +43,7 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
@@ -142,7 +142,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private final PropertyChangeListener runStateListener                          = new RunStatePropertyChangeListener();
      private final PropertyChangeListener playerPCL                                 = new PlayerPropertyChangeListener();
      private PropertyChangeListener weakVSPCL, weakIVSPCL, weakRSPCL, weakPlayerPCL;//HARD REFERENCES. DO NOT REMOVE
-     private ControllerInput view, iView;
+     private ControllerSink view, iView;
      
      @Override
      public void apply(Game game) {

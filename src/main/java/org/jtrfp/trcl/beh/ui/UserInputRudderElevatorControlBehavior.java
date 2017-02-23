@@ -14,7 +14,7 @@ package org.jtrfp.trcl.beh.ui;
 
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
-import org.jtrfp.trcl.ctl.ControllerInput;
+import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.obj.Player;
 
@@ -22,7 +22,7 @@ public class UserInputRudderElevatorControlBehavior extends Behavior implements 
     public static final String RUDDER   = "Rudder";
     public static final String ELEVATOR = "Elevator";
     
-    private final ControllerInput rudder, elevator;
+    private final ControllerSink rudder, elevator;
     
     private  double accellerationFactor=.0005;
     public UserInputRudderElevatorControlBehavior(ControllerSinks controllerInputs){

@@ -13,8 +13,8 @@
 
 package org.jtrfp.trcl.ctl;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,22 +31,31 @@ import org.springframework.stereotype.Component;
 @Component
 public class ControllerMapperFactory implements FeatureFactory<Features> {
   public class ControllerMapper implements Feature<Features>{
-    private final Collection<InputDevice> inputDevices = new ArrayList<InputDevice>();
+    private final Map<String,InputDevice> inputDevices = new HashMap<>();
     private final Set<MappingListener<ControllerSource,ControllerMapping>> mappingListeners = new HashSet<MappingListener<ControllerSource,ControllerMapping>>();
     private final Map<ControllerSource,ControllerMapping> map = new HashMap<ControllerSource,ControllerMapping>();
     private final Map<String,ControllerConfiguration> recommendedDefaultConfigurations = new HashMap<String,ControllerConfiguration>();
     
     public void registerInputDevice(InputDevice dev){
-	inputDevices.add(dev);
+	inputDevices.put(dev.getName(),dev);
     }
     
-    public void registerInputDevices(Collection<InputDevice> dev){
-	inputDevices.addAll(dev);
+    public void registerInputDevices(Collection<InputDevice> devs){
+	for(InputDevice dev:devs)
+	 registerInputDevice(dev);
+    }
+    
+    public InputDevice getInputDeviceByName(String name){
+	return inputDevices.get(name);
     }
     
     public Collection<InputDevice> getInputDevices(){
-	return inputDevices;
+	return inputDevices.values();
     }//end getInputDevices()
+    
+    public Map<ControllerSource,ControllerMapping> getRoutingMap(){
+	return Collections.unmodifiableMap(map);
+    }
     /**
      * Multiple sources may feed the same input, though their behavior is undefined if they are of different types
      * i.e. button vs trigger vs axis

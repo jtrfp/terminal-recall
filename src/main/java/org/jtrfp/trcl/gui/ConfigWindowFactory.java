@@ -430,6 +430,9 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    btnOk.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+		    //Keep settings, save to disk
+		    try               {getTrConfigRoot().saveConfigurations();}
+		    catch(Exception e){e.printStackTrace();}
 		    applySettingsEDT();
 		    ConfigWindow.this.setVisible(false);
 		}
@@ -449,10 +452,20 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    btnCancel.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-		    //dispatchComponentConfigs();//Revert to original
+		    //dispatchComponentConfigs();
+		    //Revert to original
+		    getTrConfigRoot().loadConfigurations();
 		    ConfigWindow.this.setVisible(false);
 		}});
 	}//end constructor
+	
+	@Override
+	public void setVisible(boolean isVisible){
+	    if(isVisible)
+		try               {getTrConfigRoot().saveConfigurations();}
+	        catch(Exception e){e.printStackTrace();}
+	    super.setVisible(isVisible);
+	}//end setVisible(...)
 
 	private void applySettingsEDT(){
 	    final TRConfigRoot      configRoot = getTrConfigRoot();

@@ -106,9 +106,13 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		xmlDec.setExceptionListener(new ExceptionListener(){
 		    @Override
 		    public void exceptionThrown(Exception ex) {
+			System.err.println("MOO");
 			ex.printStackTrace();
 		    }});
-		final Object deserializedObject = xmlDec.readObject();
+		Object deserializedObject;
+		try{deserializedObject = xmlDec.readObject();}
+		catch(Exception e){deserializedObject = new FileEmptyOrMalformed();}
+		System.out.println("deserializedObject="+deserializedObject);
 		if(deserializedObject instanceof FeatureTreeElement)
 		    root = (FeatureTreeElement)deserializedObject;
 		else {
@@ -123,6 +127,8 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    System.out.println("loadConfigurations()");
 	 loadConfigurationsOfTargetRecursive(getTarget(), root);}
     }//end loadConfigurations()
+    
+    private static class FileEmptyOrMalformed{}
     
     protected void saveConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
 	final Set<Feature> features = new HashSet<Feature>();

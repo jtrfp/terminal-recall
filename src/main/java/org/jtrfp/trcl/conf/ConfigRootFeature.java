@@ -106,7 +106,6 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		xmlDec.setExceptionListener(new ExceptionListener(){
 		    @Override
 		    public void exceptionThrown(Exception ex) {
-			System.err.println("MOO");
 			ex.printStackTrace();
 		    }});
 		Object deserializedObject;

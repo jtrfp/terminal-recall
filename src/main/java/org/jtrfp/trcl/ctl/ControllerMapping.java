@@ -17,17 +17,22 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class ControllerMapping implements PropertyChangeListener{
+    public static final double 
+            PRIORITY_USER     = 10,
+            PRIORITY_DEFAULT  = 20,
+            PRIORITY_FALLBACK = 30;
     private ControllerSink controllerSink;
     private ControllerSource controllerSource;
-    private double scale, offset;
+    private double scale, offset, priority;
 
     public ControllerMapping(){super();}
 
-    public ControllerMapping(ControllerSource controllerSource, ControllerSink controllerSink, double scale, double offset){
+    public ControllerMapping(ControllerSource controllerSource, ControllerSink controllerSink, double priority, double scale, double offset){
 	this.controllerSink   = controllerSink;
 	this.controllerSource = controllerSource;
 	this.scale            = scale;
 	this.offset           = offset;
+	this.priority         = priority;
     }
 
 	@Override
@@ -60,5 +65,13 @@ public class ControllerMapping implements PropertyChangeListener{
 
     public void setControllerSource(ControllerSource controllerSource) {
         this.controllerSource = controllerSource;
+    }
+
+    public double getPriority() {
+        return priority;
+    }
+
+    public void setPriority(double priority) {
+        this.priority = priority;
     }
 }//end ControllerMapping

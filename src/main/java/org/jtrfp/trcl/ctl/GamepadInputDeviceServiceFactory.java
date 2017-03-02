@@ -24,15 +24,15 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import net.java.games.input.Controller;
-import net.java.games.input.ControllerEnvironment;
-import net.java.games.input.Event;
-
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.flow.JVM;
 import org.springframework.stereotype.Component;
+
+import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
+import net.java.games.input.Event;
 
 @Component
 public class GamepadInputDeviceServiceFactory implements FeatureFactory<ControllerMapper> {

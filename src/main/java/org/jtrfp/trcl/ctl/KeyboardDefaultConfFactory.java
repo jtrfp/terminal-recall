@@ -22,6 +22,7 @@ import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ctl.KeyboardInputDeviceServiceFactory.KeyboardInputDeviceService;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.gui.DefaultControllerConfiguration;
 import org.jtrfp.trcl.miss.GamePauseFactory;
@@ -37,8 +38,8 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class KeyboardDefaultConfFactory implements FeatureFactory<ControllerMapper> {
-    public static class KeyboardDefaultConf extends DefaultControllerConfiguration {
+public class KeyboardDefaultConfFactory implements FeatureFactory<KeyboardInputDeviceService> {
+    public static class KeyboardDefaultConf extends DefaultControllerConfiguration<KeyboardInputDeviceService> {
 
 	public KeyboardDefaultConf(){
 	    super();
@@ -63,20 +64,20 @@ public class KeyboardDefaultConfFactory implements FeatureFactory<ControllerMapp
 	}//end constructor
 
 	@Override
-	public void destruct(ControllerMapper target) {
+	public void destruct(KeyboardInputDeviceService target) {
 	    // TODO Auto-generated method stub
 
 	}
     }//end KeyboardDefaultConf
 
     @Override
-    public Feature<ControllerMapper> newInstance(ControllerMapper target) {
+    public Feature<KeyboardInputDeviceService> newInstance(KeyboardInputDeviceService target) {
 	return new KeyboardDefaultConf();
     }
 
     @Override
-    public Class<ControllerMapper> getTargetClass() {
-	return ControllerMapper.class;
+    public Class<KeyboardInputDeviceService> getTargetClass() {
+	return KeyboardInputDeviceService.class;
     }
 
     @Override

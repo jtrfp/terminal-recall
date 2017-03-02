@@ -14,6 +14,7 @@ package org.jtrfp.trcl.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,14 +32,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jtrfp.trcl.ctl.ControllerSink;
-import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerMapping;
+import org.jtrfp.trcl.ctl.ControllerSink;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ctl.ControllerSource;
 import org.jtrfp.trcl.ctl.InputDevice;
 import org.jtrfp.trcl.ctl.MappingListener;
-import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration.ConfEntry;
 
 public class ControllerInputDevicePanel extends JPanel {
     /**
@@ -52,20 +52,20 @@ public class ControllerInputDevicePanel extends JPanel {
     private JTable table;
     private ControllerMapper       controllerMapper;
     private volatile boolean dispatching = false;
-    private ControllerConfiguration controllerConfiguration;
+    //private ControllerConfiguration controllerConfiguration;
     
-    private final Collection<String> monitoringCollection = new MonitorCollection();
+    private final Collection<String> sinkNameMonitoringCollection = new MonitorCollection();
     private final InputStateFeedbackMonitor inputStateFeedbackMonitor = new InputStateFeedbackMonitor();
 
-    public ControllerInputDevicePanel(InputDevice id, ControllerSinks ci, ControllerMapper mapper) {
+    public ControllerInputDevicePanel(InputDevice id, ControllerSinks controllerSinks, ControllerMapper mapper) {
 	if(id     == null)
 	    throw new NullPointerException("Passed InputDevice intolerably null.");
-	if(ci     == null)
+	if(controllerSinks     == null)
 	    throw new NullPointerException("Passed ControllerInputs intolerably null.");
 	if(mapper == null)
 	    throw new NullPointerException("Passed ControllerMapper intolerably null.");
 	this.inputDevice = id;
-	this.controllerInputs = ci;
+	this.controllerInputs = controllerSinks;
 	this.controllerMapper = mapper;
 	this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 	table   = new JTable();
@@ -81,13 +81,17 @@ public class ControllerInputDevicePanel extends JPanel {
 	cModel.getColumn(Columns.SCALAR.ordinal()).setPreferredWidth(20);
 	cModel.getColumn(Columns.OFFSET.ordinal()).setPreferredWidth(20);
 	
+	//Populate the table
+	for( ControllerSource source : id.getControllerSources() )
+	    ((DefaultTableModel)table.getModel()).addRow(new String[]{source.getName(),"?",NONE,"1.0","0.0"});
+	
 	table.getModel().addTableModelListener(new ControllerTableModelListener());
 	
 	mapper.addMappingListener(new ControllerMappingListener(), true);
 	JScrollPane tableScrollPane = new JScrollPane(table);
 	table.setFillsViewportHeight(true);
 	this.add(tableScrollPane);
-	ci.getSinkNames().addTarget(monitoringCollection, true);
+	controllerSinks.getSinkNames().addTarget(sinkNameMonitoringCollection, true);
     }//end ControllerInputDevicePanel
     
     private enum Columns{
@@ -236,12 +240,29 @@ public class ControllerInputDevicePanel extends JPanel {
 
 	@Override
 	public boolean addAll(Collection<? extends String> c) {
-	    throw new UnsupportedOperationException();
-	}
+	    final Collection<String> buffer = new ArrayList<>(c);
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    for(String s:buffer)
+		        destBox.addItem(s);
+		}});
+	    return true;
+	}//end addAll()
 
+	/**
+	 * Not guaranteed to remove every instance!
+	 */
 	@Override
 	public boolean removeAll(Collection<?> c) {
-	    throw new UnsupportedOperationException();
+	    final Collection<?> buffer = new ArrayList<>(c);
+	    SwingUtilities.invokeLater(new Runnable(){
+		@Override
+		public void run() {
+		    for(Object s:buffer)
+		        destBox.removeItem(s);
+		}});
+	    return true;
 	}
 
 	@Override
@@ -265,35 +286,34 @@ public class ControllerInputDevicePanel extends JPanel {
 	@Override
 	public void tableChanged(TableModelEvent e) {
 	    if(isDispatching())
-		return;
+		return;//Stops infinite recursion
 	    final int row = e.getFirstRow();
 	    if((e.getType()==TableModelEvent.UPDATE || e.getType()==TableModelEvent.INSERT) /*&& e.getSource() != ControllerInputDevicePanel.this */&& e.getColumn() != Columns.VALUE.ordinal()){
 		final TableModel model = table.getModel();
-		final String inputString = (String)model.getValueAt(row,Columns.DEST.ordinal());
+		final String inputString = (String)model.getValueAt(row,Columns.DEST  .ordinal());
 		final String srcString   = (String)model.getValueAt(row,Columns.SOURCE.ordinal());
 		final double scale  = Double.parseDouble((String)model.getValueAt(row, Columns.SCALAR.ordinal()));
 		final double offset = Double.parseDouble((String)model.getValueAt(row, Columns.OFFSET.ordinal()));
 		//Update config
-		final ControllerConfiguration config = getControllerConfiguration();
-		final ConfEntry entry = config.getEntry(srcString);
+		//final ControllerConfiguration config = getControllerConfiguration();
+		//final ConfEntry entry = config.getEntry(srcString);
 		final ControllerSource controllerSource = inputDevice.getSourceByName(srcString);
 		setDispatching(true);
-		if(e.getColumn() == Columns.DEST.ordinal() || e.getType() == TableModelEvent.INSERT){
+		//if(e.getColumn() == Columns.DEST.ordinal() || e.getType() == TableModelEvent.INSERT){
 		    controllerMapper.unmapControllerSource(controllerSource);
 		    if(!inputString.contentEquals(NONE)){
-			entry.setDest  (inputString);
+			//entry.setDest  (inputString);
 			//Update the actual settings
-			final ControllerSink  controllerInput  = controllerInputs.getSink(inputString);
-			controllerMapper.mapControllerSourceToInput(controllerSource, controllerInput, scale, offset);
+			final ControllerSink  controllerSink  = controllerInputs.getSink(inputString);
+			controllerMapper.mapControllerSourceToInput(controllerSource, controllerSink, scale, offset);
 		    }//end if(!NONE)
-		    else config.getEntryMap().remove(srcString);//Remove if routed to NONE
-		}//end if(DEST||INSERT)
-		if(e.getColumn() == Columns.SCALAR.ordinal() || e.getType() == TableModelEvent.INSERT){
+		//}//end if(DEST||INSERT)
+		/*if(e.getColumn() == Columns.SCALAR.ordinal() || e.getType() == TableModelEvent.INSERT){
 		    entry.setScale (scale);
 		}
 		if(e.getColumn() == Columns.OFFSET.ordinal() || e.getType() == TableModelEvent.INSERT){
 		    entry.setOffset(offset);
-		}
+		}*/
 		setDispatching(false);
 	    } else if(e.getType()==TableModelEvent.DELETE){
 		/*
@@ -326,12 +346,13 @@ public class ControllerInputDevicePanel extends JPanel {
 	final TableModel model = table.getModel();
 	
 	//Update config
+	/*
 	final ControllerConfiguration config = getControllerConfiguration();
 	final ConfEntry entry = config.getEntry(cSource.getName());
 	entry.setDest  (NONE);
 	entry.setOffset(0);
 	entry.setScale (1.0);
-	
+	*/
 	//Set actual settings
 	model.setValueAt(NONE, row, Columns.DEST.ordinal());
 	//Set scalar
@@ -340,19 +361,48 @@ public class ControllerInputDevicePanel extends JPanel {
 	model.setValueAt("0.0", row, Columns.OFFSET.ordinal());
     }//end fireControllerSourceUnmapped()
     
+    private int addTableRow(ControllerSource cSource, ControllerMapping mapping){
+	final DefaultTableModel model = (DefaultTableModel)(table.getModel());
+	final String name     = cSource.getName();
+	//final ConfEntry entry = getControllerConfiguration().getEntry(name);
+	final double scale    = mapping.getScale();
+	final double offset   = mapping.getOffset();
+	final String dest     = mapping.getControllerSink()==null?NONE:mapping.getControllerSink().getName();
+	
+	try{SwingUtilities.invokeAndWait(new Runnable(){
+	    @Override
+	    public void run() {
+		setDispatching(true);
+		model.addRow(new String[]{name,"?",dest+"",scale+"",offset+""});
+		setDispatching(false);
+	    }});}catch(Exception e){e.printStackTrace();}
+	
+	return model.getRowCount()-1;
+    }//end addTableRow
+    
     private void fireControllerSourceMapped(ControllerSource cSource, ControllerMapping value){
 	//Check for relevance to this panel
-	final int row = getRowFor(cSource);
-	if(row==-1)
-	    return;//Ignore
+	if(cSource.getInputDevice() != getInputDevice())
+	    return; //Nope.
+	final int row = getRowFor(cSource);//TODO: This is keeping us from having multiple mappings from a source
+	if(row==-1){//This is a new one! Add it.
+	    addTableRow(cSource, value);
+	    return;
+	    }
+	updateTableRow(row, value.getControllerSink()==null?NONE:value.getControllerSink().getName(), value.getScale(), value.getOffset());
+    }//end fireControllerSourceMapped(...)
+    
+    private void updateTableRow(int row, String controllerSinkName, double scale, double offset){
+	setDispatching(true);
 	final TableModel model = table.getModel();
 	//Set destination
-	model.setValueAt(value.getControllerSink().getName(), row, Columns.DEST.ordinal());
+	model.setValueAt(controllerSinkName, row, Columns.DEST.ordinal());
 	//Set scalar
-	model.setValueAt(value.getScale()+"", row, Columns.SCALAR.ordinal());
+	model.setValueAt(scale+"" , row, Columns.SCALAR.ordinal());
 	//Set offset
-	model.setValueAt(value.getOffset()+"", row, Columns.OFFSET.ordinal());
-    }//end fireControllerSourceMapped(...)
+	model.setValueAt(offset+"", row, Columns.OFFSET.ordinal());
+	setDispatching(false);
+    }//end updateTableRow(...)
     
     private int getRowFor(ControllerSource cSource){
 	//Check for relevance to this panel
@@ -394,10 +444,10 @@ public class ControllerInputDevicePanel extends JPanel {
         return inputDevice;
     }
 
-    public ControllerConfiguration getControllerConfiguration() {
+    /*public ControllerConfiguration getControllerConfiguration() {
         return controllerConfiguration;
-    }
-
+    }*/
+/*
     public void setControllerConfiguration(
     	ControllerConfiguration controllerConfiguration) {
 	if(controllerConfiguration==null)
@@ -406,7 +456,7 @@ public class ControllerInputDevicePanel extends JPanel {
         clearControllerConfiguration();
         applyControllerConfiguration();
     }
-    
+    */
     private void clearControllerConfiguration(){
 	final TableModel model = table.getModel();
 	for(int ri=0; ri<model.getRowCount(); ri++){
@@ -416,7 +466,7 @@ public class ControllerInputDevicePanel extends JPanel {
 	}//end for(rows)
 	((DefaultTableModel)table.getModel()).setRowCount(0);
     }
-    
+    /*
     private void applyControllerConfiguration(){
 	for(ControllerSource cs: inputDevice.getControllerSources()){
 	    final String name = cs.getName();
@@ -427,5 +477,5 @@ public class ControllerInputDevicePanel extends JPanel {
 	    ((DefaultTableModel)table.getModel()).addRow(new String[]{name,"?",dest+"",scale+"",offset+""});
 	}//end for(ControllerSources)
     }//end applyControllerConfiguration()
-    
+    */
 }//end ControllerInputDevicePanel

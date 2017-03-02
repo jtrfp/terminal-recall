@@ -20,12 +20,13 @@ import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.FeatureNotApplicableException;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ctl.GamepadInputDeviceServiceFactory.GamepadInputDeviceService;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.gui.DefaultControllerConfiguration;
 import org.jtrfp.trcl.miss.GamePauseFactory;
 import org.jtrfp.trcl.miss.SatelliteViewFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Default (initial config) for XBox 360 pad (controller)
@@ -36,8 +37,8 @@ import org.springframework.stereotype.Component;
 
 //@Component
 @Deprecated
-public class XBox360PadDefaultConfFactory implements FeatureFactory<ControllerMapper> {
-public static class XBox360PadDefaultConf extends DefaultControllerConfiguration {
+public class XBox360PadDefaultConfFactory implements FeatureFactory<GamepadInputDeviceService> {
+public static class XBox360PadDefaultConf extends DefaultControllerConfiguration<GamepadInputDeviceService> {
     public XBox360PadDefaultConf(){
 	super();
 	this.setIntendedController("Microsoft X-Box 360 pad");
@@ -55,20 +56,20 @@ public static class XBox360PadDefaultConf extends DefaultControllerConfiguration
     }//end constructor
 
     @Override
-    public void destruct(ControllerMapper target) {
+    public void destruct(GamepadInputDeviceService target) {
 	// TODO Auto-generated method stub
 	
     }
 }//end XBox360PadDefaultConf
 
 @Override
-public Feature<ControllerMapper> newInstance(ControllerMapper target) {
+public Feature<GamepadInputDeviceService> newInstance(GamepadInputDeviceService target) {
     return new XBox360PadDefaultConf();
 }
 
 @Override
-public Class<ControllerMapper> getTargetClass() {
-    return ControllerMapper.class;
+public Class<GamepadInputDeviceService> getTargetClass() {
+    return GamepadInputDeviceService.class;
 }
 
 @Override

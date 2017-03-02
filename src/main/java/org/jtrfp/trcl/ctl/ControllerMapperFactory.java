@@ -56,6 +56,25 @@ public class ControllerMapperFactory implements FeatureFactory<Features> {
     public Map<ControllerSource,ControllerMapping> getRoutingMap(){
 	return Collections.unmodifiableMap(map);
     }
+    
+    public void mapControllerSourceToInput(ControllerSource controllerSource, ControllerSink controllerSink, double priority, double scale, double offset){
+	final ControllerMapping mapping = getRoutingMap().get(controllerSource);
+	boolean passedPriority = true;
+	boolean unmapOld = false;
+	if( mapping != null ){
+	    passedPriority = ( priority <= mapping.getPriority() );
+	    unmapOld = true;
+	    }
+	if(passedPriority){
+	    if(unmapOld)
+		unmapControllerSource(controllerSource);
+	    final ControllerMapping newMapping = new ControllerMapping(controllerSource,controllerSink, ControllerMapping.PRIORITY_USER,scale,offset);
+	    map.put(controllerSource, newMapping);
+	    controllerSource.addPropertyChangeListener(newMapping);
+	    fireMappedEvent(controllerSource, newMapping);
+	    }//end if(passedPriority)
+    }//end mapControllerSourceToInput(...)
+    
     /**
      * Multiple sources may feed the same input, though their behavior is undefined if they are of different types
      * i.e. button vs trigger vs axis
@@ -64,10 +83,7 @@ public class ControllerMapperFactory implements FeatureFactory<Features> {
      * @since Nov 12, 2015
      */
     public void mapControllerSourceToInput(ControllerSource controllerSource, ControllerSink controllerSink, double scale, double offset){
-	final ControllerMapping mapping = new ControllerMapping(controllerSource,controllerSink,scale,offset);
-	map.put(controllerSource, mapping);
-	controllerSource.addPropertyChangeListener(mapping);
-	fireMappedEvent(controllerSource, mapping);
+	mapControllerSourceToInput(controllerSource, controllerSink, ControllerMapping.PRIORITY_USER, scale, offset);
     }//end mapControllerSourceToInput
     
     public boolean unmapControllerSource(ControllerSource controllerSource){

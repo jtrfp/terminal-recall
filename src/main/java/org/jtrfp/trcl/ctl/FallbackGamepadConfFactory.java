@@ -22,8 +22,7 @@ import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
-import org.jtrfp.trcl.ctl.XBox360PadDefaultConfFactory.XBox360PadDefaultConf;
+import org.jtrfp.trcl.ctl.GamepadInputDeviceServiceFactory.GamepadInputDeviceService;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.gui.DefaultControllerConfiguration;
 import org.jtrfp.trcl.miss.GamePauseFactory;
@@ -38,8 +37,8 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class FallbackGamepadConfFactory implements FeatureFactory<ControllerMapper> {
-public static class FallbackGamepadConf extends DefaultControllerConfiguration {
+public class FallbackGamepadConfFactory implements FeatureFactory<GamepadInputDeviceService> {
+public static class FallbackGamepadConf extends DefaultControllerConfiguration<GamepadInputDeviceService> {
     public FallbackGamepadConf(){
 	super();
 	this.setIntendedController("fallback GamepadInputDevice");
@@ -69,24 +68,24 @@ public static class FallbackGamepadConf extends DefaultControllerConfiguration {
     }//end constructor
 
     @Override
-    public void destruct(ControllerMapper target) {
+    public void destruct(GamepadInputDeviceService target) {
 	// TODO Auto-generated method stub
 	
     }
-}//end XBox360PadDefaultConf
+}//end FallbackGamepadConf
 
 @Override
-public Feature<ControllerMapper> newInstance(ControllerMapper target) {
-    return new XBox360PadDefaultConf();
+public Feature<GamepadInputDeviceService> newInstance(GamepadInputDeviceService target) {
+    return new FallbackGamepadConf();
 }
 
 @Override
-public Class<ControllerMapper> getTargetClass() {
-    return ControllerMapper.class;
+public Class<GamepadInputDeviceService> getTargetClass() {
+    return GamepadInputDeviceService.class;
 }
 
 @Override
 public Class<? extends Feature> getFeatureClass() {
-    return XBox360PadDefaultConf.class;
+    return FallbackGamepadConf.class;
 }
 }//end XBox360PadDefaultConfFactory

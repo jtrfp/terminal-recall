@@ -14,22 +14,17 @@
 package org.jtrfp.trcl.gui;
 
 import org.jtrfp.trcl.core.Feature;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ctl.InputDeviceService;
 import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
 
-public abstract class DefaultControllerConfiguration extends
-	ControllerConfiguration implements Feature<ControllerMapper>{
+public abstract class DefaultControllerConfiguration<SERVICE_TYPE extends InputDeviceService> extends
+	ControllerConfiguration implements Feature<SERVICE_TYPE>{
  public DefaultControllerConfiguration(){
      super();
-     registerWithMapper();
  }//end constructor
  
- private void registerWithMapper(){
-     
- }//end registerWithMapper()
- 
  @Override
- public void apply(ControllerMapper target){
-     target.registerDefaultConfiguration(this);
+ public void apply(InputDeviceService target){
+     target.registerFallbackConfiguration(this);
  }//end apply()
 }//end DefaultControllerConfiguration

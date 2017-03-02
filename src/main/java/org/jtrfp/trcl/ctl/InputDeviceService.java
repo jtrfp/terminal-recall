@@ -15,8 +15,13 @@ package org.jtrfp.trcl.ctl;
 
 import java.util.Collection;
 
+import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
+import org.jtrfp.trcl.gui.DefaultControllerConfiguration;
+
 public interface InputDeviceService {
     public String getAuthor();
     public String getDescription();
     public Collection<InputDevice> getInputDevices();
+    public void registerFallbackConfiguration(ControllerConfiguration conf);
+    public void registerDefaultConfiguration (DefaultControllerConfiguration<?> conf);
 }//end InputDeviceService()

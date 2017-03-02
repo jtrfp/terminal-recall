@@ -573,7 +573,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 
 	public TRConfigRoot getConfigManager() {
 	    if(configManager == null)
-		configManager = Features.get(this,TRConfigRoot.class);
+		configManager = Features.get(Features.getSingleton(),TRConfigRoot.class);
 	    return configManager;
 	}
 

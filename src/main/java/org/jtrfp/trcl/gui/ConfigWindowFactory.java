@@ -737,8 +737,8 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    setPodRegistry(Features.get(target, PODRegistry.class));
 	    final TR tr;
 	    setTr             (tr = Features.get(Features.getSingleton(), TR.class));
-	    setTrConfigRoot   (Features.get(tr, TRConfigRoot.class   ));
-	    setTrConfiguration(Features.get(tr, TRConfiguration.class));
+	    setTrConfigRoot   (Features.get(Features.getSingleton(), TRConfigRoot.class   ));
+	    setTrConfiguration(Features.get(tr,                      TRConfiguration.class));
 	    if(getTrConfiguration() != null)
 		readSettingsToPanel();
 	    final CollectionActionDispatcher<String> podRegistryCollection = getPodRegistry().getPodCollection();

@@ -22,18 +22,18 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TRConfigRootFactory implements FeatureFactory<TR>, LoadOrderAware{
-    public class TRConfigRoot extends ConfigRootFeature<TR> implements GraphStabilizationListener{
+public class TRConfigRootFactory implements FeatureFactory<Features>, LoadOrderAware{
+    public class TRConfigRoot extends ConfigRootFeature<Features> implements GraphStabilizationListener{
 	//private final Map<Class,Map<String,Object>> configurations = new HashMap<Class,Map<String,Object>>();
 
 	@Override
-	public void destruct(TR target) {
+	public void destruct(Features target) {
 	    // TODO Auto-generated method stub
 
 	}
 	
 	@Override
-	public void apply(TR target){
+	public void apply(Features target){
 	    super.apply(target);
 	}
 
@@ -51,13 +51,13 @@ public class TRConfigRootFactory implements FeatureFactory<TR>, LoadOrderAware{
     }//end TRConfigRoot
 
     @Override
-    public Feature<TR> newInstance(TR target) {
+    public Feature<Features> newInstance(Features target) {
 	return new TRConfigRoot();
     }
 
     @Override
-    public Class<TR> getTargetClass() {
-	return TR.class;
+    public Class<Features> getTargetClass() {
+	return Features.class;
     }
 
     @Override

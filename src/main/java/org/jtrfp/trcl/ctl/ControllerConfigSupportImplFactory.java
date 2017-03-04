@@ -86,28 +86,23 @@ public class ControllerConfigSupportImplFactory
 	}//end getConfigBeans()
 	
 	public void setConfigBeans(Collection<ControllerMapBean> beans){
-	    removeAllMappings();
+	    //removeAllMappings();
 	    final ControllerMapper                target = getTarget(); //Cache
 	    final ControllerSinks        controllerSinks = getControllerSinks();
-	    final Collection<String> registeredSinkNames = controllerSinks.getSinkNames();
 	    final Collection<InputDevice>      inputDevs = target.getInputDevices();
 	    final Set<String>          beanSourceDevices = new HashSet<String>();
 	    for(ControllerMapBean bean:beans)
 		beanSourceDevices.add(bean.getSourceDevice());
-	    System.out.println("setConfigBeans "+beans.size()+" beanSourceDevices="+beanSourceDevices.size()+" inputDevs="+inputDevs.size());
 	    //Apply saved conf, default confs or fallback if not available
 	    for( InputDevice inputDev : inputDevs ){
-		final ControllerConfiguration defaultConfig = target.getRecommendedDefaultConfiguration(inputDev);
 		for( ControllerSource controllerSource : inputDev.getControllerSources() ){
 		    //Check for an entry in the bean
 		    final ControllerMapBean mapBean = getMapBeanForSource(controllerSource, beans);
-		    System.out.println("mapBean for "+controllerSource.getName()+" "+mapBean+" defaultConfig="+defaultConfig);
-		    if(mapBean == null){
-			//Skip
-		    } else{ //mapBean != null  (we have a saved config)
+		    if(mapBean != null){ //mapBean != null  (we have a saved config)
 			target.mapControllerSourceToInput(
 				    controllerSource, 
 				    controllerSinks.getSink(mapBean.getSinkName()), 
+				    ControllerMapping.PRIORITY_USER,
 				    mapBean.getScalar(),
 				    mapBean.getOffset());
 			}//end saved-config mapping

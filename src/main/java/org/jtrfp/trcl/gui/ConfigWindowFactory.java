@@ -598,13 +598,31 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    if(file!=null)
 		missionLM.addElement(file.getAbsolutePath());
 	}//end addVOX()
+	
+	private boolean writeSettingsToNormalConf(){
+	    try{
+		//cMgr.saveConfigurations(f);
+		final TRConfigRoot configRoot = getTrConfigRoot();
+		//configRoot.setConfigSaveURI(f.getPath());
+		configRoot.saveConfigurations();
+		
+		return true;
+	    }catch(Exception e){JOptionPane.showMessageDialog(
+		    this,
+		    "Failed to write the config file.\n"
+			    + e.getLocalizedMessage()+"\n"+e.getClass().getName(),
+			    "File write failure", JOptionPane.ERROR_MESSAGE);
+	    return false;}
+	}//end writeSettings()
 
 	private boolean writeSettingsTo(File f){
-	    try{
+	    try{/*
 		//cMgr.saveConfigurations(f);
 		final TRConfigRoot configRoot = getTrConfigRoot();
 		configRoot.setConfigSaveURI(f.getPath());
 		configRoot.saveConfigurations();
+		*/
+		getTrConfigRoot().saveConfigurations(f);
 		return true;
 	    }catch(Exception e){JOptionPane.showMessageDialog(
 		    this,
@@ -648,7 +666,8 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	}//end editPODPath()
 
 	private boolean readSettingsFromFile(File f){
-	    try{FileInputStream is = new FileInputStream(f);
+	    try{/*
+		FileInputStream is = new FileInputStream(f);
 	    XMLDecoder xmlDec = new XMLDecoder(is);
 	    xmlDec.setExceptionListener(new ExceptionListener(){
 		@Override
@@ -658,9 +677,11 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    TRConfiguration src =(TRConfiguration)xmlDec.readObject();
 	    xmlDec.close();
 	    TRConfiguration config = getTrConfiguration();
-	    if(config!=null)
+	    */
+	    this.getTrConfigRoot().loadConfigurations(f);
+	    /*if(config!=null)
 		BeanUtils.copyProperties(config, src);
-	    else setTrConfiguration(config = src);
+	    else setTrConfiguration(config = src);*/
 	    }catch(Exception e){JOptionPane.showMessageDialog(
 		    this,
 		    "Failed to read the specified file:\n"

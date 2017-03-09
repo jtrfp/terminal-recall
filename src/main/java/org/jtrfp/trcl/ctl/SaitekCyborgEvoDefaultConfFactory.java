@@ -20,16 +20,16 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.ctl.GamepadInputDeviceServiceFactory.GamepadInputDeviceService;
 import org.jtrfp.trcl.gui.DefaultControllerConfiguration;
+import org.springframework.stereotype.Component;
 
 /**
- * Default (initial config) for XBox 360 pad (controller)
+ * Default (initial config) for Saitek Cyborg Evo (controller)
  * control mapping for Terminal Velocity / Fury3
  * @author Chuck Ritola
  *
  */
 
-//@Component
-@Deprecated
+@Component
 public class SaitekCyborgEvoDefaultConfFactory implements FeatureFactory<GamepadInputDeviceService> {
 public static class SaitekCyborgEvo extends DefaultControllerConfiguration<GamepadInputDeviceService> {
     public SaitekCyborgEvo(){
@@ -69,4 +69,4 @@ public Class<GamepadInputDeviceService> getTargetClass() {
 public Class<? extends Feature> getFeatureClass() {
     return SaitekCyborgEvo.class;
 }
-}//end SaitekCyborgEvoFactory
+}//end SaitekCyborgEvoDefaultConfFactory

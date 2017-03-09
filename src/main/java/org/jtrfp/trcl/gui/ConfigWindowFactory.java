@@ -709,6 +709,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	}//end exportSettings()
 
 	private void defaultSettings(){
+	    JOptionPane.showMessageDialog(this, "Not yet implemented.");
 	    /*
 	    try{BeanUtils.copyProperties(config, new TRConfiguration());}
 	    catch(Exception e){e.printStackTrace();}

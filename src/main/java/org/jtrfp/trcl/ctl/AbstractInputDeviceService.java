@@ -50,12 +50,15 @@ public abstract class AbstractInputDeviceService implements InputDeviceService, 
 	final ControllerMapper mapper = getTarget();
 	for( InputDevice inputDevice : getInputDevices() ){
 	    final Collection<ConfEntry> confs = fallbackConfigToRegister.getEntryMap().values();
-	    for( ConfEntry conf : confs )
-	        mapper.mapControllerSourceToInput(
-	        	inputDevice.getSourceByName(conf.getName()), 
+	    for( ConfEntry conf : confs ){
+		final ControllerSource controllerSource = inputDevice.getSourceByName(conf.getName());
+		if(controllerSource != null ) //It might not exist on this machine.
+	            mapper.mapControllerSourceToInput(
+	        	controllerSource, 
 	        	sinks.getSink(conf.getDest()), 
 	        	ControllerMapping.PRIORITY_FALLBACK, 
 	        	conf.getScale(), conf.getOffset());
+	        }//end for( confs )
 	}//end for(input devices)
     }//end registerFallbackConfiguration
     

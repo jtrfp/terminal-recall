@@ -309,6 +309,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    removeVOXButton.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+		    //TODO:
 		    missionLM.remove(missionList.getSelectedIndex());
 		}});
 
@@ -361,12 +362,19 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    chckbxLinearInterpolation.addItemListener(new ItemListener(){
 		@Override
 		public void itemStateChanged(ItemEvent e) {
+		    ConfigWindow.this.getTrConfiguration().setAudioLinearFiltering(e.getStateChange()==ItemEvent.SELECTED);
 		    needRestart=true;
 		}});
 
 	    chckbxBufferLag = new JCheckBox("Buffer Lag");
 	    chckbxBufferLag.setToolTipText("Improves efficiency, doubles latency.");
 	    checkboxPanel.add(chckbxBufferLag);
+	    
+	    chckbxBufferLag.addItemListener(new ItemListener(){
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+		    ConfigWindow.this.getTrConfiguration().setAudioBufferLag(chckbxBufferLag.isSelected());
+		}});
 
 	    JPanel modStereoWidthPanel = new JPanel();
 	    FlowLayout flowLayout_2 = (FlowLayout) modStereoWidthPanel.getLayout();
@@ -418,6 +426,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 		@Override
 		public void stateChanged(ChangeEvent arg0) {
 		    modStereoWidthLbl.setText(modStereoWidthSlider.getValue()+"%");
+		    ConfigWindow.this.getTrConfiguration().setModStereoWidth(modStereoWidthSlider.getValue());
 		    needRestart=true;
 		}});
 
@@ -472,9 +481,9 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    final TRConfigRoot      configRoot = getTrConfigRoot();
 	    final TRConfiguration   config     = getTrConfiguration();
 	    config.setVoxFile((String)missionList.getSelectedValue());
-	    config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
-	    config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
-	    config.setAudioBufferLag(chckbxBufferLag.isSelected());
+	    //config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
+	    //config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
+	    //config.setAudioBufferLag(chckbxBufferLag.isSelected());
 	    {HashSet<String>pList=new HashSet<String>();
 	    //for(int i=0; i<podLM.getSize();i++)
 	//	pList.add((String)podLM.getElementAt(i));
@@ -521,6 +530,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 */
 	private void readSettingsToPanel(){
 	    final TRConfiguration config = getTrConfiguration();
+	    //Initial settings - These do not listen to the config states!
 	    modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
 	    chckbxLinearInterpolation.setSelected(config.isAudioLinearFiltering());
 	    chckbxBufferLag.setSelected(config.isAudioBufferLag());
@@ -549,6 +559,8 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 			podLM.addElement(path);}
 	    */
 	    soundOutputSelectorGUI.readToPanel(config);
+	    //Undo any flags set by the listeners.
+	    needRestart=false;
 	}//end readSettings()
 
 	private boolean isBuiltinVOX(String vox){

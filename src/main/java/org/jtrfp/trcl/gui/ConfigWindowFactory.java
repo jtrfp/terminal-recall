@@ -650,19 +650,27 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	}//end exportSettings()
 
 	private void editVOXPath(){
+	    JOptionPane.showMessageDialog(this, "Not yet implemented.");
+	    //TODO
+	    /*
 	    final String result = JOptionPane.showInputDialog(this, "Edit VOX Path", missionLM.get(missionList.getSelectedIndex()));
 	    if(result==null)// Clicked Cancel
 		return;// Do nothing
 	    if(checkVOX(new File(result)))
 		missionLM.set(missionList.getSelectedIndex(), result);
+	    */
 	}//end editVOXPath()
 
 	private void editPODPath(){
+	    JOptionPane.showMessageDialog(this, "Not yet implemented.");
+	    //TODO
+	    /*
 	    final String result = JOptionPane.showInputDialog(this, "Edit POD Path", podLM.get(missionList.getSelectedIndex()));
 	    if(result==null)// Clicked Cancel
 		return;// Do nothing
 	    if(checkPOD(new File(result)))
 		podLM.set(podList.getSelectedIndex(), result);
+	    */
 	}//end editPODPath()
 
 	private boolean readSettingsFromFile(File f){
@@ -710,6 +718,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
 	private void defaultSettings(){
 	    JOptionPane.showMessageDialog(this, "Not yet implemented.");
+	    //TODO
 	    /*
 	    try{BeanUtils.copyProperties(config, new TRConfiguration());}
 	    catch(Exception e){e.printStackTrace();}

@@ -244,7 +244,8 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    removePodButton.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-		    podLM.removeElement(podList.getSelectedValue());
+		    //podLM.removeElement(podList.getSelectedValue());
+		    getPodRegistry().getPodCollection().remove(podList.getSelectedValue());
 		}});
 
 
@@ -475,13 +476,13 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
 	    config.setAudioBufferLag(chckbxBufferLag.isSelected());
 	    {HashSet<String>pList=new HashSet<String>();
-	    for(int i=0; i<podLM.getSize();i++)
-		pList.add((String)podLM.getElementAt(i));
-	    podLM.clear();//Clear so we don't get a double-copy when the dispatcher populates it.
-	    final Collection<String> podCollection = getPodRegistry().getPodCollection();
-	    podCollection.clear();
-	    for(String pod:pList)
-		podCollection.add(pod);
+	    //for(int i=0; i<podLM.getSize();i++)
+	//	pList.add((String)podLM.getElementAt(i));
+	    //podLM.clear();//Clear so we don't get a double-copy when the dispatcher populates it.
+	    //final Collection<String> podCollection = getPodRegistry().getPodCollection();
+	    //podCollection.clear();
+	    //for(String pod:pList)
+		//podCollection.add(pod);
 
 	    HashSet<String>vxList=new HashSet<String>();
 	    for(int i=0; i<missionLM.getSize();i++)
@@ -577,7 +578,8 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    final File file = fileChooser.getSelectedFile();
 	    if(!checkPOD(file))
 		return;
-	    podLM.addElement(file.getAbsolutePath());
+	    //podLM.addElement(file.getAbsolutePath());
+	    getPodRegistry().getPodCollection().add(file.getAbsolutePath());
 	}//end addPOD()
 
 	private void addVOX() {

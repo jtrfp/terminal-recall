@@ -46,7 +46,11 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	setTarget(target);
     }
     
-    public void saveConfigurations() throws IOException{
+    public void saveConfigurations() throws IOException {
+	saveConfigurations(new File(getConfigSaveURI()));
+    }
+    
+    public void saveConfigurations(File destFile) throws IOException{
 	//First save data from all local configurators
 	final FeatureTreeElement configurationTreeElement = new FeatureTreeElement.Default();
 	configurationTreeElement.setFeatureClassName(getTarget().getClass().getName());
@@ -87,7 +91,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    FileChannel srcCh = null, dstCh = null;
 	    try {
 	        srcCh = new FileInputStream(temp).getChannel();
-	        dstCh = new FileOutputStream(getConfigSaveURI()).getChannel();
+	        dstCh = new FileOutputStream(destFile).getChannel();
 	        dstCh.transferFrom(srcCh, 0, srcCh.size());
 	        System.out.println("Successfully wrote configuration to "+getConfigSaveURI());
 	       }catch(Exception e){e.printStackTrace();}
@@ -98,8 +102,11 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     }//end saveConfigurations()
     
     public void loadConfigurations(){
+	loadConfigurations(new File(getConfigSaveURI()));
+    }
+    
+    public void loadConfigurations(final File fp){
 	FeatureTreeElement root = null;
-	File fp = new File(getConfigSaveURI());
 	    if(fp.exists()){
 		try{FileInputStream is = new FileInputStream(fp);
 		XMLDecoder xmlDec = new XMLDecoder(is);

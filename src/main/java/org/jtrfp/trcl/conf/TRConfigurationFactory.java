@@ -39,10 +39,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	ACTIVE_AUDIO_DEVICE = "activeAudioDevice",
 	ACTIVE_AUDIO_OUTPUT = "activeAudioOutput",
 	ACTIVE_AUDIO_FORMAT = "activeAudioFormat",
-
-	AUDIO_BUFFER_LAG    = "audioBufferLag",
 	AUDIO_BUFFER_SIZE   = "audioBufferSize",
-
 	CROSSHAIRS_ENABLED  = "crosshairsEnabled";
     
     public static class TRConfiguration implements Feature<TR>{
@@ -54,7 +51,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	private int targetFPS =60, audioBufferSize = 4096;
 	private String skipToLevel;
 	private String voxFile;
-	private boolean audioLinearFiltering=false, audioBufferLag=true, crosshairsEnabled = true;
+	private boolean /*audioLinearFiltering=false, audioBufferLag=true, */crosshairsEnabled = true;
 	private HashSet<String> missionList = new HashSet<String>();
 	private String activeAudioDriver = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput",
 		activeAudioDevice,
@@ -146,20 +143,6 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	    }//end if(contains key)
 	    waitForProfiler=result;
 	    return result;
-	}
-
-	/**
-	 * @return the audioLinearFiltering
-	 */
-	public boolean isAudioLinearFiltering() {
-	    return audioLinearFiltering;
-	}
-
-	/**
-	 * @param audioLinearFiltering the audioLinearFiltering to set
-	 */
-	public void setAudioLinearFiltering(boolean audioLinearFiltering) {
-	    this.audioLinearFiltering = audioLinearFiltering;
 	}
 
 	/**
@@ -324,21 +307,6 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	public void removePropertyChangeListener(String propertyName,
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
-	}
-
-	/**
-	 * @return the audioBufferLag
-	 */
-	public boolean isAudioBufferLag() {
-	    return audioBufferLag;
-	}
-
-	/**
-	 * @param audioBufferLag the audioBufferLag to set
-	 */
-	public void setAudioBufferLag(boolean audioBufferLag) {
-	    pcs.firePropertyChange(AUDIO_BUFFER_LAG, this.audioBufferLag, audioBufferLag);
-	    this.audioBufferLag = audioBufferLag;
 	}
 
 	/**

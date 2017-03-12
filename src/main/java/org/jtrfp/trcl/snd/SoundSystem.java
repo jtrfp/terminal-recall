@@ -15,6 +15,7 @@ package org.jtrfp.trcl.snd;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -36,7 +37,6 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
@@ -47,9 +47,15 @@ import org.jtrfp.trcl.snd.SoundEvent.Factory;
 import org.jtrfp.trcl.tools.Util;
 
 public class SoundSystem {
+    //// PROPERTIES
+    public static final String
+           LINEAR_FILTERING = "linearFiltering",
+           BUFFER_LAG       = "bufferLag";
+    
     private TR tr;
     private GLFrameBuffer playbackFrameBuffer;
     private GLTexture playbackTexture;
+    protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final HashMap<SoundEvent.Factory,ArrayList<SoundEvent>> eventMap 
      = new HashMap<SoundEvent.Factory,ArrayList<SoundEvent>>();
     private SamplePlaybackEvent.Factory playbackFactory;
@@ -63,6 +69,7 @@ public class SoundSystem {
     private TRConfiguration trConfiguration;
     private boolean         initialized = false;
     private GPU             gpu;
+    private boolean         bufferLag=true, linearFiltering=false;
     
    ////VARS
    private AudioDriver          activeDriver;
@@ -374,7 +381,7 @@ public class SoundSystem {
     }//end newSoundTexture
     
     private int getFilteringParm(){
-	return getTrConfiguration().isAudioLinearFiltering()?GL2ES2.GL_LINEAR:GL2ES2.GL_NEAREST;
+	return isLinearFiltering()?GL2ES2.GL_LINEAR:GL2ES2.GL_NEAREST;
     }
     
     public synchronized void enqueuePlaybackEvent(SoundEvent evt){
@@ -397,7 +404,7 @@ public class SoundSystem {
 	    firstRun();
 	final GPU gpu = getGpu();
 	
-	if(getTrConfiguration().isAudioBufferLag())
+	if(isBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	// Render
@@ -418,7 +425,7 @@ public class SoundSystem {
 	    events.clear();
 	}//end for(keySet)
 	
-	if(!getTrConfiguration().isAudioBufferLag())
+	if(!isBufferLag())
 	    readGLAudioBuffer(gpu,audioByteBuffer);
 	
 	bufferTimeCounter += getBufferSizeSeconds();
@@ -729,5 +736,53 @@ public class SoundSystem {
 
     public void setGpu(GPU gpu) {
         this.gpu = gpu;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener arg0) {
+	pcs.addPropertyChangeListener(arg0);
+    }
+
+    public void addPropertyChangeListener(String arg0,
+	    PropertyChangeListener arg1) {
+	pcs.addPropertyChangeListener(arg0, arg1);
+    }
+
+    public PropertyChangeListener[] getPropertyChangeListeners() {
+	return pcs.getPropertyChangeListeners();
+    }
+
+    public PropertyChangeListener[] getPropertyChangeListeners(String arg0) {
+	return pcs.getPropertyChangeListeners(arg0);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener arg0) {
+	pcs.removePropertyChangeListener(arg0);
+    }
+
+    public void removePropertyChangeListener(String arg0,
+	    PropertyChangeListener arg1) {
+	pcs.removePropertyChangeListener(arg0, arg1);
+    }
+
+    public boolean isBufferLag() {
+        return bufferLag;
+    }
+
+    public void setBufferLag(boolean bufferLag) {
+	System.out.println("setBufferLag "+bufferLag);
+	final boolean oldValue = this.bufferLag;
+        this.bufferLag = bufferLag;
+        pcs.firePropertyChange(BUFFER_LAG, oldValue, bufferLag);
+    }
+
+    public boolean isLinearFiltering() {
+        return linearFiltering;
+    }
+
+    public void setLinearFiltering(boolean linearFiltering) {
+	System.out.println("setLinearFiltering "+linearFiltering);
+	final boolean oldValue = this.linearFiltering;
+        this.linearFiltering = linearFiltering;
+        pcs.firePropertyChange(LINEAR_FILTERING, oldValue, linearFiltering);
     }
 }//end SoundSystem

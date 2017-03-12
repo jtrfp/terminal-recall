@@ -23,8 +23,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.ExceptionListener;
-import java.beans.XMLDecoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -60,7 +58,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.pod.PodFile;
@@ -73,7 +70,9 @@ import org.jtrfp.trcl.core.PODRegistry;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
+import org.jtrfp.trcl.flow.CheckboxPropertyBinding;
 import org.jtrfp.trcl.gui.ControllerConfigTabFactory.ControllerConfigTab;
+import org.jtrfp.trcl.snd.SoundSystem;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -362,10 +361,9 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    chckbxLinearInterpolation.addItemListener(new ItemListener(){
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-		    ConfigWindow.this.getTrConfiguration().setAudioLinearFiltering(e.getStateChange()==ItemEvent.SELECTED);
+		    //ConfigWindow.this.getTrConfiguration().setAudioLinearFiltering(e.getStateChange()==ItemEvent.SELECTED);
 		    needRestart=true;
 		}});
-
 	    chckbxBufferLag = new JCheckBox("Buffer Lag");
 	    chckbxBufferLag.setToolTipText("Improves efficiency, doubles latency.");
 	    checkboxPanel.add(chckbxBufferLag);
@@ -373,7 +371,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    chckbxBufferLag.addItemListener(new ItemListener(){
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-		    ConfigWindow.this.getTrConfiguration().setAudioBufferLag(chckbxBufferLag.isSelected());
+		    //ConfigWindow.this.getTrConfiguration().setAudioBufferLag(chckbxBufferLag.isSelected());
 		}});
 
 	    JPanel modStereoWidthPanel = new JPanel();
@@ -426,7 +424,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 		@Override
 		public void stateChanged(ChangeEvent arg0) {
 		    modStereoWidthLbl.setText(modStereoWidthSlider.getValue()+"%");
-		    ConfigWindow.this.getTrConfiguration().setModStereoWidth(modStereoWidthSlider.getValue());
+		    ConfigWindow.this.getTrConfiguration().setModStereoWidth(((double)modStereoWidthSlider.getValue())/100.);
 		    needRestart=true;
 		}});
 
@@ -481,7 +479,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    final TRConfigRoot      configRoot = getTrConfigRoot();
 	    final TRConfiguration   config     = getTrConfiguration();
 	    config.setVoxFile((String)missionList.getSelectedValue());
-	    //config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
+	    config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
 	    //config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
 	    //config.setAudioBufferLag(chckbxBufferLag.isSelected());
 	    {HashSet<String>pList=new HashSet<String>();
@@ -531,9 +529,10 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	private void readSettingsToPanel(){
 	    final TRConfiguration config = getTrConfiguration();
 	    //Initial settings - These do not listen to the config states!
+	    final SoundSystem soundSystem = Features.get(getTr(), SoundSystem.class);
 	    modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
-	    chckbxLinearInterpolation.setSelected(config.isAudioLinearFiltering());
-	    chckbxBufferLag.setSelected(config.isAudioBufferLag());
+	    //chckbxLinearInterpolation.setSelected(soundSystem.isLinearFiltering());
+	    //chckbxBufferLag.setSelected(soundSystem.isBufferLag());
 	    final int bSize = config.getAudioBufferSize();
 	    for(AudioBufferSize abs:AudioBufferSize.values())
 		if(abs.getSizeInFrames()==bSize)
@@ -984,6 +983,9 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
 	public void setTr(TR tr) {
 	    this.tr = tr;
+	    final SoundSystem soundSystem = Features.get(tr, SoundSystem.class);
+	    new CheckboxPropertyBinding(chckbxBufferLag, soundSystem, SoundSystem.BUFFER_LAG);
+	    new CheckboxPropertyBinding(chckbxLinearInterpolation, soundSystem, SoundSystem.LINEAR_FILTERING);
 	}
 
 	public TRConfigRoot getTrConfigRoot() {

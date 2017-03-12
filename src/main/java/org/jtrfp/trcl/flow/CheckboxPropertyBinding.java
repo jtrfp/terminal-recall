@@ -20,7 +20,13 @@ import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 
 import javax.swing.AbstractButton;
-
+import javax.swing.SwingUtilities;
+/**
+ * A bidirectional binding between an AbstractButton (JCheckbox, JRadioButton, etc) and 
+ * a bean property.
+ * @author Chuck Ritola
+ *
+ */
 public class CheckboxPropertyBinding implements ItemListener, PropertyChangeListener {
     private final Method setterMethod;
     private final String propertyName;
@@ -33,10 +39,30 @@ public class CheckboxPropertyBinding implements ItemListener, PropertyChangeList
 	this.propertyName = propertyName;
 	this.button       = button;
 	this.bindingBean  = bindingBean;
-	try{this.setterMethod = bindingBean.getClass().getMethod("set"+camelPropertyName, boolean.class);}
-	catch(Exception e){throw new RuntimeException(e);}
-	
+	try{
+	    final Class beanClass = bindingBean.getClass();
+	    final Method getterMethod = beanClass.getMethod("is"+camelPropertyName);
+	    this.setterMethod = beanClass.getMethod("set"+camelPropertyName, boolean.class);
+	    bindingBean.getClass().
+	        getMethod("addPropertyChangeListener", String.class, PropertyChangeListener.class).
+	        invoke(bindingBean, propertyName, this);
+	    button.addItemListener(this);
+	    //Initial setting for the button
+	    final Object initialValue = getterMethod.invoke(bindingBean, null);
+	    if( initialValue instanceof Boolean )
+	        setSelected((boolean)initialValue);
+	    }
+	catch(Exception e){e.printStackTrace();throw new RuntimeException(e);}
     }//end constructor
+    
+    private void setSelected(final boolean newValue){
+	SwingUtilities.invokeLater(new Runnable(){
+
+	    @Override
+	    public void run() {
+		getButton().setSelected(newValue);
+	    }});
+    }//end setSelected()
 
     @Override
     public void itemStateChanged(ItemEvent evt) {
@@ -57,7 +83,8 @@ public class CheckboxPropertyBinding implements ItemListener, PropertyChangeList
     public void propertyChange(PropertyChangeEvent evt) {
 	final String evtPropertyName = evt.getPropertyName();
 	if( evtPropertyName.equals(getPropertyName()) )
-	    getButton().setSelected(evt.getNewValue() == Boolean.TRUE);
+	    if( evt.getNewValue() instanceof Boolean )
+	        setSelected((boolean)evt.getNewValue());
     }
 
     public String getPropertyName() {

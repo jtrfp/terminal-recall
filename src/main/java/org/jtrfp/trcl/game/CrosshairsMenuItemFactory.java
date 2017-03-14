@@ -58,6 +58,7 @@ public class CrosshairsMenuItemFactory implements FeatureFactory<TVF3Game> {
 	private WeakPropertyChangeListener weakStatePCL;
 	private TVF3Game target;
 	private MenuSystem menuSystem;
+	private volatile boolean destructed = false;
 
 	@Override
 	public void apply(TVF3Game target) {
@@ -74,6 +75,7 @@ public class CrosshairsMenuItemFactory implements FeatureFactory<TVF3Game> {
 
 	@Override
 	public void destruct(TVF3Game target) {
+	    destructed = true;
 	    target.getTr().removePropertyChangeListener(weakStatePCL);
 	    menuSystem.removeMenuItem(CROSSHAIRS_MENU_ITEM_PATH);
 	}
@@ -102,6 +104,8 @@ public class CrosshairsMenuItemFactory implements FeatureFactory<TVF3Game> {
 
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
+		if(destructed)
+		    return;
 		final Object newValue = evt.getNewValue();
 		final boolean enable = newValue instanceof Mission.ActiveMissionState;
 		menuSystem.setMenuItemEnabled(enable, CROSSHAIRS_MENU_ITEM_PATH);

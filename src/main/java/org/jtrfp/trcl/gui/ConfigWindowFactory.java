@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2017 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -71,33 +71,12 @@ import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.flow.CheckboxPropertyBinding;
-import org.jtrfp.trcl.gui.ControllerConfigTabFactory.ControllerConfigTab;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ConfigWindowFactory implements FeatureFactory<TR>{
-    enum AudioBufferSize{
-	SAMPLES_8192(8192),
-	SAMPLES_4096(4096),
-	SAMPLES_2048(2048),
-	SAMPLES_1024(1024),
-	SAMPLES_512(512),
-	SAMPLES_256(256);
-
-	private final int sizeInFrames;
-	AudioBufferSize(int sizeInFrames){
-	    this.sizeInFrames=sizeInFrames;
-	}
-	@Override
-	public String toString(){
-	    return sizeInFrames+" frames";
-	}
-
-	public int getSizeInFrames(){
-	    return sizeInFrames;
-	}
-    }//end AudioBufferSize
+    
 /*
     public static void main(String [] args){
 	new ConfigWindow().setVisible(true);
@@ -106,14 +85,13 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
     public class ConfigWindow extends JFrame implements Feature<TR>{
 	//private TRConfiguration config;
-	private JCheckBox chckbxLinearInterpolation, chckbxBufferLag;
-	private JComboBox audioBufferSizeCB;
-	private JSlider modStereoWidthSlider;
+	//private JComboBox audioBufferSizeCB;
+	//private JSlider modStereoWidthSlider;
 	private JList podList,missionList;
 	private DefaultListModel podLM=new DefaultListModel(), missionLM=new DefaultListModel();
 	private boolean needRestart=false;
 	private final JFileChooser fileChooser = new JFileChooser();
-	private final SoundOutputSelectorGUI soundOutputSelectorGUI;
+	
 	private final Collection<ConfigurationTab> tabs;
 	//private final TRConfigRoot cMgr;
 	private final JTabbedPane tabbedPane;
@@ -335,99 +313,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 			editVOXButton.setEnabled(true);
 		    }
 		}});
-
-	    JPanel soundTab = new JPanel();
-	    tabbedPane.addTab("Sound", new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png")), soundTab, null);
-	    GridBagLayout gbl_soundTab = new GridBagLayout();
-	    gbl_soundTab.columnWidths = new int[]{0, 0};
-	    gbl_soundTab.rowHeights = new int[]{65, 51, 70, 132, 0, 0, 0};
-	    gbl_soundTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-	    gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-	    soundTab.setLayout(gbl_soundTab);
-
-	    JPanel checkboxPanel = new JPanel();
-	    GridBagConstraints gbc_checkboxPanel = new GridBagConstraints();
-	    gbc_checkboxPanel.insets = new Insets(0, 0, 5, 0);
-	    gbc_checkboxPanel.fill = GridBagConstraints.BOTH;
-	    gbc_checkboxPanel.gridx = 0;
-	    gbc_checkboxPanel.gridy = 0;
-	    soundTab.add(checkboxPanel, gbc_checkboxPanel);
-
-	    chckbxLinearInterpolation = new JCheckBox("Linear Filtering");
-	    chckbxLinearInterpolation.setToolTipText("Use the GPU's TMU to smooth playback of low-rate samples.");
-	    chckbxLinearInterpolation.setHorizontalAlignment(SwingConstants.LEFT);
-	    checkboxPanel.add(chckbxLinearInterpolation);
-
-	    chckbxLinearInterpolation.addItemListener(new ItemListener(){
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-		    //ConfigWindow.this.getTrConfiguration().setAudioLinearFiltering(e.getStateChange()==ItemEvent.SELECTED);
-		    needRestart=true;
-		}});
-	    chckbxBufferLag = new JCheckBox("Buffer Lag");
-	    chckbxBufferLag.setToolTipText("Improves efficiency, doubles latency.");
-	    checkboxPanel.add(chckbxBufferLag);
 	    
-	    chckbxBufferLag.addItemListener(new ItemListener(){
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-		    //ConfigWindow.this.getTrConfiguration().setAudioBufferLag(chckbxBufferLag.isSelected());
-		}});
-
-	    JPanel modStereoWidthPanel = new JPanel();
-	    FlowLayout flowLayout_2 = (FlowLayout) modStereoWidthPanel.getLayout();
-	    flowLayout_2.setAlignment(FlowLayout.LEFT);
-	    modStereoWidthPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "MOD Stereo Width", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-	    GridBagConstraints gbc_modStereoWidthPanel = new GridBagConstraints();
-	    gbc_modStereoWidthPanel.anchor = GridBagConstraints.NORTH;
-	    gbc_modStereoWidthPanel.insets = new Insets(0, 0, 5, 0);
-	    gbc_modStereoWidthPanel.fill = GridBagConstraints.HORIZONTAL;
-	    gbc_modStereoWidthPanel.gridx = 0;
-	    gbc_modStereoWidthPanel.gridy = 1;
-	    soundTab.add(modStereoWidthPanel, gbc_modStereoWidthPanel);
-
-	    modStereoWidthSlider = new JSlider();
-	    modStereoWidthSlider.setPaintTicks(true);
-	    modStereoWidthSlider.setMinorTickSpacing(25);
-	    modStereoWidthPanel.add(modStereoWidthSlider);
-
-	    final JLabel modStereoWidthLbl = new JLabel("NN%");
-	    modStereoWidthPanel.add(modStereoWidthLbl);
-
-	    JPanel bufferSizePanel = new JPanel();
-	    FlowLayout flowLayout_3 = (FlowLayout) bufferSizePanel.getLayout();
-	    flowLayout_3.setAlignment(FlowLayout.LEFT);
-	    bufferSizePanel.setBorder(new TitledBorder(null, "Buffer Size", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-	    GridBagConstraints gbc_bufferSizePanel = new GridBagConstraints();
-	    gbc_bufferSizePanel.anchor = GridBagConstraints.NORTH;
-	    gbc_bufferSizePanel.insets = new Insets(0, 0, 5, 0);
-	    gbc_bufferSizePanel.fill = GridBagConstraints.HORIZONTAL;
-	    gbc_bufferSizePanel.gridx = 0;
-	    gbc_bufferSizePanel.gridy = 2;
-	    soundTab.add(bufferSizePanel, gbc_bufferSizePanel);
-
-	    audioBufferSizeCB = new JComboBox();
-	    audioBufferSizeCB.setModel(new DefaultComboBoxModel(AudioBufferSize.values()));
-	    bufferSizePanel.add(audioBufferSizeCB);
-
-	    soundOutputSelectorGUI = new SoundOutputSelectorGUI();
-	    soundOutputSelectorGUI.setBorder(new TitledBorder(null, "Output Driver", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-	    GridBagConstraints gbc_soundOutputSelectorGUI = new GridBagConstraints();
-	    gbc_soundOutputSelectorGUI.anchor = GridBagConstraints.NORTH;
-	    gbc_soundOutputSelectorGUI.insets = new Insets(0, 0, 5, 0);
-	    gbc_soundOutputSelectorGUI.fill = GridBagConstraints.HORIZONTAL;
-	    gbc_soundOutputSelectorGUI.gridx = 0;
-	    gbc_soundOutputSelectorGUI.gridy = 3;
-	    soundTab.add(soundOutputSelectorGUI, gbc_soundOutputSelectorGUI);
-
-	    modStereoWidthSlider.addChangeListener(new ChangeListener(){
-		@Override
-		public void stateChanged(ChangeEvent arg0) {
-		    modStereoWidthLbl.setText(modStereoWidthSlider.getValue()+"%");
-		    ConfigWindow.this.getTrConfiguration().setModStereoWidth(((double)modStereoWidthSlider.getValue())/100.);
-		    needRestart=true;
-		}});
-
 	    JPanel okCancelPanel = new JPanel();
 	    getContentPane().add(okCancelPanel, BorderLayout.SOUTH);
 	    okCancelPanel.setLayout(new BorderLayout(0, 0));
@@ -479,7 +365,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    final TRConfigRoot      configRoot = getTrConfigRoot();
 	    final TRConfiguration   config     = getTrConfiguration();
 	    config.setVoxFile((String)missionList.getSelectedValue());
-	    config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
+	    //config.setModStereoWidth((double)modStereoWidthSlider.getValue()/100.);
 	    //config.setAudioLinearFiltering(chckbxLinearInterpolation.isSelected());
 	    //config.setAudioBufferLag(chckbxBufferLag.isSelected());
 	    {HashSet<String>pList=new HashSet<String>();
@@ -495,14 +381,14 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    for(int i=0; i<missionLM.getSize();i++)
 		vxList.add((String)missionLM.getElementAt(i));
 	    config.setMissionList(vxList);}
-	    soundOutputSelectorGUI.applySettings(config);
+	    //soundOutputSelectorGUI.applySettings(config);
 	    try{configRoot.saveConfigurations();}
 	    catch(Exception e){e.printStackTrace();}
 	    //writeSettingsTo(cMgr.getConfigFilePath());
 	    if(needRestart)
 		notifyOfRestart();
-	    final AudioBufferSize abs = (AudioBufferSize)audioBufferSizeCB.getSelectedItem();
-	    config.setAudioBufferSize(abs.getSizeInFrames());
+	    //final AudioBufferSize abs = (AudioBufferSize)audioBufferSizeCB.getSelectedItem();
+	    //config.setAudioBufferSize(abs.getSizeInFrames());
 	    //Apply the component configs
 	    //gatherComponentConfigs();
 	}//end applySettings()
@@ -530,14 +416,14 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    final TRConfiguration config = getTrConfiguration();
 	    //Initial settings - These do not listen to the config states!
 	    final SoundSystem soundSystem = Features.get(getTr(), SoundSystem.class);
-	    modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
+	    //modStereoWidthSlider.setValue((int)(config.getModStereoWidth()*100.));
 	    //chckbxLinearInterpolation.setSelected(soundSystem.isLinearFiltering());
 	    //chckbxBufferLag.setSelected(soundSystem.isBufferLag());
-	    final int bSize = config.getAudioBufferSize();
+	    /*final int bSize = config.getAudioBufferSize();
 	    for(AudioBufferSize abs:AudioBufferSize.values())
 		if(abs.getSizeInFrames()==bSize)
 		    audioBufferSizeCB.setSelectedItem(abs);
-
+*/
 	    missionLM.removeAllElements();
 	    for(String vox:config.getMissionList()){
 		if(isBuiltinVOX(vox))
@@ -557,7 +443,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 		    if(checkPOD(new File(path)))
 			podLM.addElement(path);}
 	    */
-	    soundOutputSelectorGUI.readToPanel(config);
+	    //soundOutputSelectorGUI.readToPanel(config);
 	    //Undo any flags set by the listeners.
 	    needRestart=false;
 	}//end readSettings()
@@ -795,12 +681,12 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
 	}
 
-	public void registerConfigTab(final ControllerConfigTab tab) {
+	public void registerConfigTab(final ConfigurationTab configTab) {
 	    try{
 	    SwingUtilities.invokeAndWait(new Runnable(){
 		@Override
 		public void run() {
-		    tabbedPane.addTab(tab.getTabName(),tab.getTabIcon(),tab.getContent());
+		    tabbedPane.addTab(configTab.getTabName(),configTab.getTabIcon(),configTab.getContent());
 		}});
 	    }catch(Exception e){e.printStackTrace();}
 	    //dispatchComponentConfigs();
@@ -983,9 +869,6 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
 	public void setTr(TR tr) {
 	    this.tr = tr;
-	    final SoundSystem soundSystem = Features.get(tr, SoundSystem.class);
-	    new CheckboxPropertyBinding(chckbxBufferLag, soundSystem, SoundSystem.BUFFER_LAG);
-	    new CheckboxPropertyBinding(chckbxLinearInterpolation, soundSystem, SoundSystem.LINEAR_FILTERING);
 	}
 
 	public TRConfigRoot getTrConfigRoot() {
@@ -1008,6 +891,10 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 
 	public void setTrConfiguration(TRConfiguration trConfiguration) {
 	    this.trConfiguration = trConfiguration;
+	}
+	
+	public void notifyNeedRestart(){
+	    needRestart = true;
 	}
     }//end ConfigWindow
 

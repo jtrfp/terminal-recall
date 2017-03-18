@@ -72,7 +72,7 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	     public Void call() throws Exception {
 		// Set the song up
 		mod.apply(MusicPlaybackEvent.this.nextLoopTimeSeconds,MusicPlaybackEvent.this,
-			Features.get(getOrigin().getTR(),TRConfiguration.class).getModStereoWidth());
+			((Factory)getOrigin()).getModStereoWidth());
 		MusicPlaybackEvent.this.nextLoopTimeSeconds+=mod.getSongLengthInRealtimeSeconds();
 		firstRun.set(false);
 		return null;
@@ -81,9 +81,11 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
     }//end apply()
     
     public static class Factory extends AbstractSoundEvent.Factory{
+	private double modStereoWidth;
 
-	protected Factory(TR tr) {
+	protected Factory(TR tr, double modStereoWidth) {
 	    super(tr);
+	    setModStereoWidth(modStereoWidth);
 	}
 
 	@Override
@@ -101,6 +103,14 @@ public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEv
 	protected MusicPlaybackEvent create(GPUResidentMOD mod,boolean loop, MusicPlaybackEvent parent){
 	    return new MusicPlaybackEvent(this,mod,loop,parent);
 	}//end create(...)
+
+	public double getModStereoWidth() {
+	    return modStereoWidth;
+	}
+
+	public void setModStereoWidth(double modStereoWidth) {
+	    this.modStereoWidth = modStereoWidth;
+	}
     }//end Factory
 
 }//end MusicPlaybackEvent

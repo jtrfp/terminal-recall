@@ -25,7 +25,7 @@ import org.jtrfp.trcl.flow.GameVersion;
 import org.springframework.stereotype.Component;
 
 /**
- * This is a temporary stand-in for TRConfiguration to provide backwards compatability with pre-Feature configs.
+ * This is a temporary stand-in for TRConfiguration to provide backwards compatibility with pre-Feature configs.
  * @author Chuck Ritola
  *
  */
@@ -35,11 +35,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class TRConfigurationFactory implements FeatureFactory<TR>{
     public static final String
-	ACTIVE_AUDIO_DRIVER = "activeAudioDriver",
-	ACTIVE_AUDIO_DEVICE = "activeAudioDevice",
-	ACTIVE_AUDIO_OUTPUT = "activeAudioOutput",
-	ACTIVE_AUDIO_FORMAT = "activeAudioFormat",
-	AUDIO_BUFFER_SIZE   = "audioBufferSize",
+	//ACTIVE_AUDIO_DRIVER = "activeAudioDriver",
+	//ACTIVE_AUDIO_DEVICE = "activeAudioDevice",
+	//ACTIVE_AUDIO_OUTPUT = "activeAudioOutput",
+	//ACTIVE_AUDIO_FORMAT = "activeAudioFormat",
+	//AUDIO_BUFFER_SIZE   = "audioBufferSize",
 	CROSSHAIRS_ENABLED  = "crosshairsEnabled";
     
     public static class TRConfiguration implements Feature<TR>{
@@ -48,15 +48,15 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	private Boolean usingTextureBufferUnmap,
 	debugMode,
 	waitForProfiler;
-	private int targetFPS =60, audioBufferSize = 4096;
+	private int targetFPS =60;
 	private String skipToLevel;
 	private String voxFile;
 	private boolean /*audioLinearFiltering=false, audioBufferLag=true, */crosshairsEnabled = true;
 	private HashSet<String> missionList = new HashSet<String>();
-	private String activeAudioDriver = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput",
+	/*private String activeAudioDriver = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput",
 		activeAudioDevice,
 		activeAudioOutput,
-		activeAudioFormat;
+		activeAudioFormat;*/
 	//private HashSet<String> podList     = new HashSet<String>();
 	//private DefaultListModel podList=new DefaultListModel();
 	private double modStereoWidth=.3;
@@ -158,20 +158,6 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	public void setMissionList(HashSet<String> missionList) {
 	    this.missionList = missionList;
 	}
-
-	/**
-	 * @return the modStereoWidth
-	 */
-	public double getModStereoWidth() {
-	    return modStereoWidth;
-	}
-
-	/**
-	 * @param modStereoWidth the modStereoWidth to set
-	 */
-	public void setModStereoWidth(double modStereoWidth) {
-	    this.modStereoWidth = modStereoWidth;
-	}
 	
 	public String getFileDialogStartDir() {
 	    if(fileDialogStartDir!=null)
@@ -184,66 +170,6 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	 */
 	public void setFileDialogStartDir(String fileDialogStartDir) {
 	    this.fileDialogStartDir = fileDialogStartDir;
-	}
-
-	/**
-	 * @return the soundDriver
-	 */
-	public String getActiveAudioDriver() {
-	    return activeAudioDriver;
-	}
-
-	/**
-	 * @param soundDriver the soundDriver to set
-	 */
-	public void setActiveSoundDriver(String soundDriver) {
-	    pcs.firePropertyChange(ACTIVE_AUDIO_DRIVER,this.activeAudioDriver,soundDriver);
-	    this.activeAudioDriver = soundDriver;
-	}
-
-	/**
-	 * @return the audioOutput
-	 */
-	public String getActiveAudioOutput() {
-	    return activeAudioOutput;
-	}
-
-	/**
-	 * @param audioOutput the audioOutput to set
-	 */
-	public void setActiveAudioOutput(String audioOutput) {
-	    pcs.firePropertyChange(ACTIVE_AUDIO_OUTPUT,this.activeAudioOutput,audioOutput);
-	    this.activeAudioOutput = audioOutput;
-	}
-
-	/**
-	 * @return the activeAudioDevice
-	 */
-	public String getActiveAudioDevice() {
-	    return activeAudioDevice;
-	}
-
-	/**
-	 * @param activeAudioDevice the activeAudioDevice to set
-	 */
-	public void setActiveAudioDevice(String activeAudioDevice) {
-	    pcs.firePropertyChange(ACTIVE_AUDIO_DEVICE,this.activeAudioDevice,activeAudioDevice);
-	    this.activeAudioDevice = activeAudioDevice;
-	}
-
-	/**
-	 * @return the activeAudioFormat
-	 */
-	public String getActiveAudioFormat() {
-	    return activeAudioFormat;
-	}
-
-	/**
-	 * @param activeAudioFormat the activeAudioFormat to set
-	 */
-	public void setActiveAudioFormat(String activeAudioFormat) {
-	    pcs.firePropertyChange(ACTIVE_AUDIO_FORMAT,this.activeAudioFormat,activeAudioFormat);
-	    this.activeAudioFormat = activeAudioFormat;
 	}
 
 	/**
@@ -307,21 +233,6 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 	public void removePropertyChangeListener(String propertyName,
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
-	}
-
-	/**
-	 * @return the audioBufferSize
-	 */
-	public int getAudioBufferSize() {
-	    return audioBufferSize;
-	}
-
-	/**
-	 * @param audioBufferSize the audioBufferSize to set
-	 */
-	public void setAudioBufferSize(int audioBufferSize) {
-	    pcs.firePropertyChange(AUDIO_BUFFER_SIZE, this.audioBufferSize, audioBufferSize);
-	    this.audioBufferSize = audioBufferSize;
 	}
 
 	public boolean isCrosshairsEnabled() {

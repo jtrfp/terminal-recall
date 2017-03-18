@@ -33,11 +33,11 @@ import org.springframework.stereotype.Component;
 public class TRConfiguratorFactory implements FeatureFactory<TRConfiguration> {
     private static final String [] PERSISTENT_PROPERTIES = 
 	    new String [] {
-	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DRIVER,
-	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DEVICE,
-	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_OUTPUT,
-	    org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_FORMAT,
-	    org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_SIZE,
+	    //org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DRIVER,
+	    //org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_DEVICE,
+	    //org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_OUTPUT,
+	    //org.jtrfp.trcl.conf.TRConfigurationFactory.ACTIVE_AUDIO_FORMAT,
+	    //org.jtrfp.trcl.conf.TRConfigurationFactory.AUDIO_BUFFER_SIZE,
 	    org.jtrfp.trcl.conf.TRConfigurationFactory.CROSSHAIRS_ENABLED,
 	    "usingTextureBufferUnmap",
 	    "debugMode",
@@ -45,7 +45,7 @@ public class TRConfiguratorFactory implements FeatureFactory<TRConfiguration> {
 	    "voxFile",
 	    "waitForProfiler",
 	    "missionList",
-	    "modStereoWidth",
+	    //"modStereoWidth",
 	    "fileDialogStartDir",
 	    //"componentConfigs"
     };

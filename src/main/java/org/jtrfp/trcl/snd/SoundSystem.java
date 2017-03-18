@@ -13,7 +13,6 @@
 
 package org.jtrfp.trcl.snd;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.nio.BufferUnderflowException;
@@ -24,16 +23,19 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL2ES2;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.AudioSystem;
 
-import org.jtrfp.trcl.conf.TRConfigurationFactory;
+import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -49,8 +51,19 @@ import org.jtrfp.trcl.tools.Util;
 public class SoundSystem {
     //// PROPERTIES
     public static final String
-           LINEAR_FILTERING = "linearFiltering",
-           BUFFER_LAG       = "bufferLag";
+           LINEAR_FILTERING   = "linearFiltering",
+           BUFFER_LAG         = "bufferLag",
+           MOD_STEREO_WIDTH   = "modStereoWidth",
+           FORMAT_BY_NAME     = "formatByName",
+           OUTPUT_BY_NAME     = "outputByName",
+           DRIVER_BY_NAME     = "driverByName",
+           DEVICE_BY_NAME     = "deviceByName",
+           ACTIVE_DRIVER      = "activeDriver",
+           ACTIVE_DEVICE      = "activeDevice",
+           ACTIVE_OUTPUT      = "activeOutput",
+           ACTIVE_FORMAT      = "activeFormat",
+           BUFFER_SIZE_FRAMES = "bufferSizeFrames",
+           BUFFER_SIZE_FRAMES_STRING = "bufferSizeFramesString";
     
     private TR tr;
     private GLFrameBuffer playbackFrameBuffer;
@@ -70,12 +83,20 @@ public class SoundSystem {
     private boolean         initialized = false;
     private GPU             gpu;
     private boolean         bufferLag=true, linearFiltering=false;
+    private double          modStereoWidth = .3;
+    private final CollectionActionDispatcher<String> audioDriverNames = new CollectionActionDispatcher<String>(new HashSet<String>());
+    private final ReentrantLock lock = new ReentrantLock();
     
    ////VARS
    private AudioDriver          activeDriver;
    private AudioDevice		activeDevice;
    private AudioOutput		activeOutput;
    private AudioFormat		activeFormat;
+   
+   private String               driverByName,
+                                deviceByName,
+                                outputByName,
+                                formatByName;
     
     private boolean firstRun=true;
     private final TreeSet<SoundEvent> pendingEvents = new TreeSet<SoundEvent>(new Comparator<SoundEvent>(){
@@ -95,6 +116,7 @@ public class SoundSystem {
     private static final int NUM_BUFFER_ROWS=1;
     
     public SoundSystem() {
+	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");//TODO: Implement a registry.
     }// end constructor
     
     public void initialize(){
@@ -120,7 +142,7 @@ public class SoundSystem {
 	}).get();
 	
 	playbackFactory= new SamplePlaybackEvent.Factory(tr);
-	musicFactory   = new MusicPlaybackEvent.Factory(tr);
+	musicFactory   = new MusicPlaybackEvent.Factory(tr, getModStereoWidth());
 	loopFactory    = new LoopingSoundEvent.Factory(tr);
 	
 	new Thread() {
@@ -144,25 +166,25 @@ public class SoundSystem {
 			while(getActiveFormat() == null || getActiveOutput() == null || getActiveDevice() == null)
 			    Thread.sleep(100);//Rolling loop waiting for valid state.
 			
-			renderPrep();
-			tr.getThreadManager().submitToGL(new Callable<Void>() {
-			    @Override
-			    public Void call() throws Exception {
-				final ByteBuffer floatBytes = getGPUFloatBytes();
-				floatBytes.clear();
-				render(getGpu().getGl(), floatBytes);
-				return null;
-			    }
-			}).get();
-			//sBuf.clear();
-			final FloatBuffer fBuf = getGPUFloatBytes().asFloatBuffer();
-			fBuf.clear();
-			compressor.setSource(fBuf);
-			final AudioDriver driver = getActiveDriver();
-			if(driver!=null){
-			    driver.setSource(compressor);
-			    driver.flush();
-			}//end driver!=null
+			    renderPrep();
+			    tr.getThreadManager().submitToGL(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+				    final ByteBuffer floatBytes = getGPUFloatBytes();
+				    floatBytes.clear();
+				    render(getGpu().getGl(), floatBytes);
+				    return null;
+				}
+			    }).get();
+			    //sBuf.clear();
+			    final FloatBuffer fBuf = getGPUFloatBytes().asFloatBuffer();
+			    fBuf.clear();
+			    compressor.setSource(fBuf);
+			    final AudioDriver driver = getActiveDriver();
+			    if(driver!=null){
+				driver.setSource(compressor);
+				driver.flush();
+			    }//end driver!=null
 		    }// end while(true)
 		} catch (Exception e) {
 		    tr.showStopper(e);
@@ -174,6 +196,7 @@ public class SoundSystem {
     
     private void loadConfigAndAttachListeners() {
 	final TRConfiguration config = getTrConfiguration();
+	/*
 	config.addPropertyChangeListener(TRConfigurationFactory.ACTIVE_AUDIO_DRIVER,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -209,14 +232,16 @@ public class SoundSystem {
 		if(evt.getNewValue()!=null)
 		 setBufferSizeFrames((Integer)evt.getNewValue());
 	    }});
-	setDriverByName(config.getActiveAudioDriver());
-	setDeviceByName(config.getActiveAudioDevice());
-	setOutputByName(config.getActiveAudioOutput());
-	setFormatByName(config.getActiveAudioFormat());
-	setBufferSizeFrames(config.getAudioBufferSize());
+	*/
+	//Set the defaults in case they aren't written by a configurator
+	setDriverByName("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
+	//setDeviceByName(config.getActiveAudioDevice());
+	//setOutputByName(config.getActiveAudioOutput());
+	//setFormatByName(config.getActiveAudioFormat());
+	setBufferSizeFrames(4096);
     }//end loadConfigAndAttachListeners
 
-    protected void setFormatByName(String format) {
+    public void setFormatByName(String format) {
 	final AudioOutput activeOutput = getActiveOutput();
 	if(activeOutput==null)
 	    return;
@@ -226,9 +251,12 @@ public class SoundSystem {
 		setActiveFormat(fmt);
 	    }
 	}else{setActiveFormat(null);}
+	final String oldValue = this.formatByName;
+	this.formatByName = format;
+	pcs.firePropertyChange(FORMAT_BY_NAME, oldValue, format);
     }//end setFormatByName(...)
 
-    protected void setOutputByName(String output) {
+    public void setOutputByName(String output) {
 	System.out.println("setOutputByName "+output);
 	if(output!=null){
 	    final AudioOutput ao = getActiveDevice().getOutputByName(output);
@@ -236,18 +264,24 @@ public class SoundSystem {
 	    if(ao!=null)
 		setActiveOutput(ao);
 	}else{setActiveOutput(null);}
+	final String oldValue = this.outputByName;
+	this.outputByName = output;
+	pcs.firePropertyChange(OUTPUT_BY_NAME, oldValue, output);
     }//end setOutputByName(...)
 
-    protected void setDeviceByName(String device) {
-	if(device!=null){
-	    final AudioDevice audioDevice = getActiveDriver().getDeviceByName(device);
+    public void setDeviceByName(String newDeviceByName) {
+	if(newDeviceByName!=null){
+	    final AudioDevice audioDevice = getActiveDriver().getDeviceByName(newDeviceByName);
 	    if(audioDevice!=null)
 		setActiveDevice(audioDevice);
 	}else{setActiveDevice(null);}
+	final String oldDeviceByName = this.deviceByName;
+	this.deviceByName = newDeviceByName;
+	pcs.firePropertyChange(DEVICE_BY_NAME, oldDeviceByName, newDeviceByName);
 	//setOutputByName(null);
     }//end setDeviceByName(...)
 
-    protected void setDriverByName(String driver) {
+    public void setDriverByName(String driver) {
 	if(driver!=null){
 	    if(activeDriver!=null)
 		activeDriver.release();
@@ -260,6 +294,9 @@ public class SoundSystem {
 	    try{setActiveDriver((AudioDriver)driverClass.newInstance());}
 	     catch(Exception e){e.printStackTrace();return;}
 	}else{}
+	final String oldValue = this.driverByName;
+	this.driverByName = driver;
+	pcs.firePropertyChange(DRIVER_BY_NAME, oldValue, driver);
 	//setDeviceByName(null);
     }//end setDriverByName(...)
 
@@ -384,61 +421,71 @@ public class SoundSystem {
 	return isLinearFiltering()?GL2ES2.GL_LINEAR:GL2ES2.GL_NEAREST;
     }
     
-    public synchronized void enqueuePlaybackEvent(SoundEvent evt){
-	if(evt instanceof RelevantEverywhere)
-	    activeEvents.add(evt);
-	else pendingEvents.add(evt);
+    public void enqueuePlaybackEvent(SoundEvent evt){
+	lock.lock();try{
+	    if(evt instanceof RelevantEverywhere)
+		activeEvents.add(evt);
+	    else pendingEvents.add(evt);
+	}finally{lock.unlock();}
     }
     
     private void firstRun(){
 	firstRun=false;
     }
-    
-    private synchronized void renderPrep(){
-	cleanActiveEvents();
-	pickupActiveEvents(getBufferSizeFrames()/getActiveFormat().getFrameRate());
+
+    private void renderPrep(){
+	lock.lock();
+	try{
+	    cleanActiveEvents();
+	    pickupActiveEvents(getBufferSizeFrames()/getActiveFormat().getFrameRate());
+	}finally{lock.unlock();}
     }
     
-    private synchronized void render(GL2ES2 gl, ByteBuffer audioByteBuffer) {
-	if (firstRun)
-	    firstRun();
-	final GPU gpu = getGpu();
-	
-	if(isBufferLag())
-	    readGLAudioBuffer(gpu,audioByteBuffer);
-	
-	// Render
-	getPlaybackFrameBuffer().bindToDraw();
-	gl.glViewport(0, 0, getBufferSizeFrames(), 1);
-	gl.glClear(GL2ES2.GL_COLOR_BUFFER_BIT);
-	for (SoundEvent ev : activeEvents) {// TODO: Replace with Factory calls
-	    if (ev.isActive()) {
-		final SoundEvent.Factory factory = ev.getOrigin();
-		if (!eventMap.containsKey(factory))
-		    eventMap.put(factory, new ArrayList<SoundEvent>());
-		eventMap.get(factory).add(ev);
-	    }// end if(active)
-	}// end for(events)
-	for(Factory factory:eventMap.keySet()){
-	    final ArrayList<SoundEvent> events = eventMap.get(factory);
-	    factory.apply(gl, events, bufferTimeCounter);
-	    events.clear();
-	}//end for(keySet)
-	
-	if(!isBufferLag())
-	    readGLAudioBuffer(gpu,audioByteBuffer);
-	
-	bufferTimeCounter += getBufferSizeSeconds();
-	// Cleanup
-	gpu.defaultFrameBuffers();
-	gpu.defaultProgram();
-	gpu.defaultTIU();
-	gpu.defaultTexture();
-	gpu.defaultViewport();
-    }// end process()
+    private void render(GL2ES2 gl, ByteBuffer audioByteBuffer) {
+	if( lock.tryLock() )try{
+	    if (firstRun)
+		firstRun();
+	    final GPU gpu = getGpu();
+
+	    if(isBufferLag())
+		readGLAudioBuffer(gpu,audioByteBuffer);
+
+	    // Render
+	    getPlaybackFrameBuffer().bindToDraw();
+	    gl.glViewport(0, 0, getBufferSizeFrames(), 1);
+	    gl.glClear(GL2ES2.GL_COLOR_BUFFER_BIT);
+	    for (SoundEvent ev : activeEvents) {// TODO: Replace with Factory calls
+		if (ev.isActive()) {
+		    final SoundEvent.Factory factory = ev.getOrigin();
+		    if (!eventMap.containsKey(factory))
+			eventMap.put(factory, new ArrayList<SoundEvent>());
+		    eventMap.get(factory).add(ev);
+		}// end if(active)
+	    }// end for(events)
+	    for(Factory factory:eventMap.keySet()){
+		final ArrayList<SoundEvent> events = eventMap.get(factory);
+		factory.apply(gl, events, bufferTimeCounter);
+		events.clear();
+	    }//end for(keySet)
+
+	    if(!isBufferLag())
+		readGLAudioBuffer(gpu,audioByteBuffer);
+
+	    bufferTimeCounter += getBufferSizeSeconds();
+	    // Cleanup
+	    gpu.defaultFrameBuffers();
+	    gpu.defaultProgram();
+	    gpu.defaultTIU();
+	    gpu.defaultTexture();
+	    gpu.defaultViewport();
+	}finally{lock.unlock();}
+    }// end render()
     
     public double getBufferSizeSeconds() {
-	return (double)getBufferSizeFrames() / (double)getActiveFormat().getFrameRate();
+	final AudioFormat activeFormat = getActiveFormat();
+	if( activeFormat != null )
+	    return (double)getBufferSizeFrames() / (double)getActiveFormat().getFrameRate();
+	return 0;
     }
 
     private void readGLAudioBuffer(GPU gpu, ByteBuffer audioByteBuffer){
@@ -496,9 +543,11 @@ public class SoundSystem {
 	return bufferTimeCounter;
     }
 
-    public synchronized void dequeueSoundEvent(SoundEvent event) {
-	pendingEvents.remove(event);
-	activeEvents.remove(event);
+    public void dequeueSoundEvent(SoundEvent event) {
+	lock.lock();try{
+	    pendingEvents.remove(event);
+	    activeEvents.remove(event);
+	}finally{lock.unlock();}
     }//end dequeneSoundEvent(...)
 
     public GLFrameBuffer getSoundOutputFrameBuffer() {
@@ -526,8 +575,12 @@ public class SoundSystem {
     private void setActiveDriver(AudioDriver activeDriver) {
 	if(this.activeDriver!=null)
 	    activeDriver.release();
+	final AudioDriver oldActiveDriver = this.activeDriver;
         this.activeDriver = activeDriver;
+        activeDriver.setBufferSizeFrames(getBufferSizeFrames());
+        setActiveDevice(activeDriver.getDefaultDevice());
         System.out.println("SoundSystem: Active Driver Set To "+activeDriver);
+        pcs.firePropertyChange(ACTIVE_DRIVER, oldActiveDriver, activeDriver);
     }
 
     /**
@@ -545,7 +598,10 @@ public class SoundSystem {
      * @param activeDevice the activeDevice to set
      */
     private void setActiveDevice(AudioDevice activeDevice) {
+	final AudioDevice oldDevice = this.activeDevice;
         this.activeDevice = activeDevice;
+        pcs.firePropertyChange(ACTIVE_DEVICE, oldDevice, activeDevice);
+        setActiveOutput(activeDevice.getDefaultOutput());
         System.out.println("SoundSystem: Active Device Set To "+activeDevice);
     }
 
@@ -559,43 +615,54 @@ public class SoundSystem {
     }
 
     /**
-     * @param activeOutput the activeOutput to set
+     * @param newActiveOutput the activeOutput to set
      */
-    private void setActiveOutput(AudioOutput activeOutput) {
-        this.activeOutput = activeOutput;
-        System.out.println("SoundSystem: Active Output Set To "+activeOutput);
-	getActiveDriver().setOutput(activeOutput);
+    private void setActiveOutput(AudioOutput newActiveOutput) {
+	final AudioOutput oldOutput = this.activeOutput;
+        this.activeOutput = newActiveOutput;
+        System.out.println("SoundSystem: Active Output Set To "+newActiveOutput);
+	getActiveDriver().setOutput(newActiveOutput);
+	if( newActiveOutput != null )
+	    setActiveFormat(newActiveOutput.getDefaultFormat());
+	else
+	    setActiveFormat(null);
+	pcs.firePropertyChange(ACTIVE_OUTPUT, oldOutput, newActiveOutput);
     }
 
     /**
      * @return the activeFormat
      */
     public AudioFormat getActiveFormat() {
-	if(activeFormat==null)
-	    getActiveOutput().getDefaultFormat();
+	if(activeFormat==null){
+	    final AudioOutput activeOutput = getActiveOutput();
+	    if(activeOutput != null)
+	        return activeOutput.getDefaultFormat();
+	    }
         return activeFormat;
     }
 
     /**
-     * @param activeFormat the activeFormat to set
+     * @param newFormat the activeFormat to set
      */
-    private void setActiveFormat(AudioFormat activeFormat) {
+    private void setActiveFormat(AudioFormat newFormat) {
+	final AudioFormat oldFormat = this.activeFormat;
 	//If unspecified, default to 44100
-	if(activeFormat!=null)
-	 if(activeFormat.getSampleRate()==AudioSystem.NOT_SPECIFIED)
-	    activeFormat = new AudioFormat(
-		    activeFormat.getEncoding(), 
+	if(newFormat!=null)
+	 if(newFormat.getSampleRate()==AudioSystem.NOT_SPECIFIED)
+	    newFormat = new AudioFormat(
+		    newFormat.getEncoding(), 
 		    44100, 
-		    activeFormat.getSampleSizeInBits(), 
-		    activeFormat.getChannels(), 
-		    activeFormat.getFrameSize(), 
+		    newFormat.getSampleSizeInBits(), 
+		    newFormat.getChannels(), 
+		    newFormat.getFrameSize(), 
 		    44100, 
-		    activeFormat.isBigEndian());
+		    newFormat.isBigEndian());
 	
-        this.activeFormat = activeFormat;
-        System.out.println("SoundSystem: Active Format Set To "+activeFormat);
+        this.activeFormat = newFormat;
+        System.out.println("SoundSystem: Active Format Set To "+newFormat+" for driver "+activeDriver);
         if(activeDriver!=null)
-	    activeDriver.setFormat(activeFormat);
+	    activeDriver.setFormat(newFormat);
+        pcs.firePropertyChange(ACTIVE_FORMAT, oldFormat, newFormat);
     }
 
     /**
@@ -608,77 +675,95 @@ public class SoundSystem {
     /**
      * @param bufferSizeFrames the bufferSizeFrames to set
      */
-    private synchronized void setBufferSizeFrames(int bufferSizeFrames) {
-	if(bufferSizeFrames<=0)
-	    throw new RuntimeException("Invalid buffer size: "+bufferSizeFrames+". Must be greater than zero.");
-        this.bufferSizeFrames = bufferSizeFrames;
-        getActiveDriver().setBufferSizeFrames(bufferSizeFrames);
-        stalePlaybackTexture();
-        staleFloatBytes();
+    public void setBufferSizeFrames(int bufferSizeFrames) {
+	lock.lock();try{
+	    System.out.println("setBufferSizeFrames "+bufferSizeFrames);
+	    if(bufferSizeFrames<=0)
+		throw new RuntimeException("Invalid buffer size: "+bufferSizeFrames+". Must be greater than zero.");
+	    this.bufferSizeFrames = bufferSizeFrames;
+	    getActiveDriver().setBufferSizeFrames(bufferSizeFrames);
+	    stalePlaybackTexture();
+	    staleFloatBytes();
+	}finally{lock.unlock();}
     }
     
-    private synchronized GLFrameBuffer getPlaybackFrameBuffer(){
-	if(playbackFrameBuffer==null){
-	    playbackFrameBuffer = tr.getThreadManager().submitToGL(new Callable<GLFrameBuffer>(){
-		@Override
-		public GLFrameBuffer call() throws Exception {
-		    final GPU gpu = getGpu();
-		    gpu.defaultTexture();
-		    gpu.defaultTIU();
-		    final GLTexture texture = getPlaybackTexture();
-		    return getGpu()
+    public void setBufferSizeFramesString(String newValue){
+	setBufferSizeFrames(Integer.parseInt(newValue));
+    }
+    
+    public String getBufferSizeFramesString(){
+	return ""+getBufferSizeFrames();
+    }
+    
+    private GLFrameBuffer getPlaybackFrameBuffer(){
+	lock.lock(); try{
+	    if(playbackFrameBuffer==null){
+		playbackFrameBuffer = tr.getThreadManager().submitToGL(new Callable<GLFrameBuffer>(){
+		    @Override
+		    public GLFrameBuffer call() throws Exception {
+			final GPU gpu = getGpu();
+			gpu.defaultTexture();
+			gpu.defaultTIU();
+			final GLTexture texture = getPlaybackTexture();
+			return getGpu()
 				.newFrameBuffer()
 				.bindToDraw()
 				.attachDrawTexture(texture,
 					GL2ES2.GL_COLOR_ATTACHMENT0);
-		}}).get();
-	}//end if(playbackFrameBuffer==null)
-	return playbackFrameBuffer;
+		    }}).get();
+	    }//end if(playbackFrameBuffer==null)
+	    return playbackFrameBuffer;
+	}finally{lock.unlock();}
     }//end getPlaybackFrameBuffer()
-    
-    private synchronized void stalePlaybackFrameBuffer(){
-	if(playbackFrameBuffer!=null){
-	    tr.getThreadManager().submitToGL(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    playbackFrameBuffer.destroy();
-		    return null;
-		}}).get();
-	}//end playbackFrameBuffer!=null
-	playbackFrameBuffer=null;
+
+    private void stalePlaybackFrameBuffer(){
+	lock.lock();try{
+	    if(playbackFrameBuffer!=null){
+		tr.getThreadManager().submitToGL(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			playbackFrameBuffer.destroy();
+			return null;
+		    }}).get();
+	    }//end playbackFrameBuffer!=null
+	    playbackFrameBuffer=null;
+	}finally{lock.unlock();}
     }//end stalePlaybackFrameBuffer()
     
-    private synchronized GLTexture getPlaybackTexture(){
-	if(playbackTexture==null){
-	    tr.getThreadManager().submitToGL(new Callable<Void>(){
-		@Override
-		public Void call() throws Exception {
-		    final GPU gpu = getGpu();
-		    gpu.defaultProgram();
-		    gpu.defaultTIU();
-		    gpu.defaultTexture();
-		    gpu.defaultFrameBuffers();
-		    playbackTexture = gpu
-			    .newTexture()
-			    .bind()
-			    .setMagFilter(GL2ES2.GL_NEAREST)
-			    .setMinFilter(GL2ES2.GL_NEAREST)
-			    .setWrapS(GL2ES2.GL_CLAMP_TO_EDGE)
-			    .setWrapT(GL2ES2.GL_CLAMP_TO_EDGE)
-			    .setDebugName("playbackTexture")
-			    .setExpectedMinValue(-1, -1, -1, -1)
-			    .setExpectedMaxValue(1, 1, 1, 1)
-			    .setPreferredUpdateIntervalMillis(100)
-			    .setImage(GL2ES2.GL_RG32F, getBufferSizeFrames(),
-				    NUM_BUFFER_ROWS, GL2ES2.GL_RGBA, GL2ES2.GL_FLOAT,
-				    null);
-		    return null;
-		}}).get();
-	}
-	return playbackTexture;
+    private GLTexture getPlaybackTexture(){
+	lock.lock();try{
+	    if(playbackTexture==null){
+		tr.getThreadManager().submitToGL(new Callable<Void>(){
+		    @Override
+		    public Void call() throws Exception {
+			final GPU gpu = getGpu();
+			gpu.defaultProgram();
+			gpu.defaultTIU();
+			gpu.defaultTexture();
+			gpu.defaultFrameBuffers();
+			playbackTexture = gpu
+				.newTexture()
+				.bind()
+				.setMagFilter(GL2ES2.GL_NEAREST)
+				.setMinFilter(GL2ES2.GL_NEAREST)
+				.setWrapS(GL2ES2.GL_CLAMP_TO_EDGE)
+				.setWrapT(GL2ES2.GL_CLAMP_TO_EDGE)
+				.setDebugName("playbackTexture")
+				.setExpectedMinValue(-1, -1, -1, -1)
+				.setExpectedMaxValue(1, 1, 1, 1)
+				.setPreferredUpdateIntervalMillis(100)
+				.setImage(GL2ES2.GL_RG32F, getBufferSizeFrames(),
+					NUM_BUFFER_ROWS, GL2ES2.GL_RGBA, GL2ES2.GL_FLOAT,
+					null);
+			return null;
+		    }}).get();
+	    }
+	    return playbackTexture;
+	}finally{lock.unlock();}
     }//end getPlaybackTexture()
     
-    private synchronized void stalePlaybackTexture(){
+    private void stalePlaybackTexture(){
+	lock.lock();try{
 	if(playbackTexture!=null){
 	    tr.getThreadManager().submitToGL(new Callable<Void>(){
 		@Override
@@ -689,6 +774,7 @@ public class SoundSystem {
 	}//end playbackTexture!=null
         stalePlaybackFrameBuffer();
 	playbackTexture=null;
+	}finally{lock.unlock();}
     }//end stalePlaybackTexture()
 
     private ByteBuffer getGPUFloatBytes() {
@@ -764,25 +850,60 @@ public class SoundSystem {
 	pcs.removePropertyChangeListener(arg0, arg1);
     }
 
-    public boolean isBufferLag() {
+    public Boolean isBufferLag() {
         return bufferLag;
     }
 
-    public void setBufferLag(boolean bufferLag) {
+    public void setBufferLag(Boolean bufferLag) {
 	System.out.println("setBufferLag "+bufferLag);
-	final boolean oldValue = this.bufferLag;
+	final Boolean oldValue = this.bufferLag;
         this.bufferLag = bufferLag;
         pcs.firePropertyChange(BUFFER_LAG, oldValue, bufferLag);
     }
 
-    public boolean isLinearFiltering() {
+    public Boolean isLinearFiltering() {
         return linearFiltering;
     }
 
-    public void setLinearFiltering(boolean linearFiltering) {
-	System.out.println("setLinearFiltering "+linearFiltering);
-	final boolean oldValue = this.linearFiltering;
+    public void setLinearFiltering(Boolean linearFiltering) {
+	final Boolean oldValue = this.linearFiltering;
         this.linearFiltering = linearFiltering;
         pcs.firePropertyChange(LINEAR_FILTERING, oldValue, linearFiltering);
+    }
+
+    public double getModStereoWidth() {
+        return modStereoWidth;
+    }
+
+    public void setModStereoWidth(double modStereoWidth) {
+	final double oldValue = this.modStereoWidth;
+        this.modStereoWidth = modStereoWidth;
+        pcs.firePropertyChange(MOD_STEREO_WIDTH, oldValue, modStereoWidth);
+    }
+
+    public String getDriverByName() {
+        return driverByName;
+    }
+
+    public String getDeviceByName() {
+        return deviceByName;
+    }
+
+    public String getOutputByName() {
+        return outputByName;
+    }
+
+    public String getFormatByName() {
+        return formatByName;
+    }
+
+    public CollectionActionDispatcher<String> getAudioDriverNames() {
+        return audioDriverNames;
+    }
+    
+    public static boolean isAcceptableFormat(AudioFormat f){
+	return  f.getChannels()==2 &&
+		f.getEncoding()==Encoding.PCM_SIGNED &&
+		f.getSampleSizeInBits() % 8 == 0;
     }
 }//end SoundSystem

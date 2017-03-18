@@ -31,6 +31,7 @@ import org.jtrfp.trcl.flow.JVM;
 import org.springframework.stereotype.Component;
 
 import net.java.games.input.Controller;
+import net.java.games.input.Controller.Type;
 import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 
@@ -62,7 +63,10 @@ public class GamepadInputDeviceServiceFactory implements FeatureFactory<Controll
 	    this.controllerEnvironment = ControllerEnvironment.getDefaultEnvironment();
 	    //Filter out the keyboards in favor of AWT's event-based tracking
 	    for(Controller controller:controllerEnvironment.getControllers()){
-		if(controller.getType()!=Controller.Type.KEYBOARD)
+		final Type type = controller.getType();
+		if(     type != Controller.Type.KEYBOARD && 
+			type != Controller.Type.MOUSE    &&
+			type != Controller.Type.TRACKBALL)
 		    inputDevices.add(new GamepadInputDevice(controller));
 	    }//end for(controller types)
 	}//end constructor

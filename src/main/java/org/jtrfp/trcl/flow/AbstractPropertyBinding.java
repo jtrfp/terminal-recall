@@ -40,8 +40,9 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 	        invoke(bindingBean, propertyName, this);
 	    //Initial setting for the button
 	    final Object initialValue = getterMethod.invoke(bindingBean, null);
-	    if( propertyType.isAssignableFrom(initialValue.getClass()) )
-	        setUIValue(getPropertyValue());
+	    if( initialValue != null)
+	        if( propertyType.isAssignableFrom(initialValue.getClass()) )
+	            setUIValue(getPropertyValue());
 	    }//end try{}
 	catch(Exception e){e.printStackTrace();throw new RuntimeException(e);}
     }//end constructor

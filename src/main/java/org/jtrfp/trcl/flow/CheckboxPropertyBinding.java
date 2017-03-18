@@ -15,9 +15,6 @@ package org.jtrfp.trcl.flow;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.lang.reflect.Method;
 
 import javax.swing.AbstractButton;
 import javax.swing.SwingUtilities;
@@ -27,52 +24,24 @@ import javax.swing.SwingUtilities;
  * @author Chuck Ritola
  *
  */
-public class CheckboxPropertyBinding implements ItemListener, PropertyChangeListener {
-    private final Method setterMethod;
-    private final String propertyName;
+public class CheckboxPropertyBinding extends AbstractPropertyBinding<Boolean> implements ItemListener {
     private final AbstractButton button;
-    private final Object bindingBean;
     
     public CheckboxPropertyBinding(AbstractButton button, Object bindingBean, String propertyName){
-	final char firstChar = propertyName.charAt(0);
-	final String camelPropertyName = Character.toUpperCase(firstChar)+propertyName.substring(1);
-	this.propertyName = propertyName;
-	this.button       = button;
-	this.bindingBean  = bindingBean;
-	try{
-	    final Class beanClass = bindingBean.getClass();
-	    final Method getterMethod = beanClass.getMethod("is"+camelPropertyName);
-	    this.setterMethod = beanClass.getMethod("set"+camelPropertyName, boolean.class);
-	    bindingBean.getClass().
-	        getMethod("addPropertyChangeListener", String.class, PropertyChangeListener.class).
-	        invoke(bindingBean, propertyName, this);
-	    button.addItemListener(this);
-	    //Initial setting for the button
-	    final Object initialValue = getterMethod.invoke(bindingBean, null);
-	    if( initialValue instanceof Boolean )
-	        setSelected((boolean)initialValue);
-	    }
-	catch(Exception e){e.printStackTrace();throw new RuntimeException(e);}
+	super(propertyName, bindingBean, Boolean.class);
+	this.button = button;
+	button.addItemListener(this);
     }//end constructor
-    
-    private void setSelected(final boolean newValue){
-	SwingUtilities.invokeLater(new Runnable(){
-
-	    @Override
-	    public void run() {
-		getButton().setSelected(newValue);
-	    }});
-    }//end setSelected()
 
     @Override
     public void itemStateChanged(ItemEvent evt) {
 	final int stateChange = evt.getStateChange();
 	try{switch(stateChange){
 	    case ItemEvent.SELECTED:
-		getSetterMethod().invoke(getBindingBean(), true);
+		setPropertyValue(Boolean.TRUE);
 		break;
 	    case ItemEvent.DESELECTED:
-		getSetterMethod().invoke(getBindingBean(), false);
+		setPropertyValue(Boolean.FALSE);
 		break;
 	    default://Do nothing
 	    }
@@ -80,27 +49,17 @@ public class CheckboxPropertyBinding implements ItemListener, PropertyChangeList
     }//end itemStateChanged(...)
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-	final String evtPropertyName = evt.getPropertyName();
-	if( evtPropertyName.equals(getPropertyName()) )
-	    if( evt.getNewValue() instanceof Boolean )
-	        setSelected((boolean)evt.getNewValue());
-    }
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    protected Method getSetterMethod() {
-        return setterMethod;
+    protected void setUIValue(final Boolean newValue) {
+	SwingUtilities.invokeLater(new Runnable(){
+	    @Override
+	    public void run() {
+		System.out.println(getPropertyName()+" setUIValue: "+newValue);
+		getButton().setSelected(newValue);
+	    }});
     }
 
     public AbstractButton getButton() {
         return button;
-    }
-
-    public Object getBindingBean() {
-        return bindingBean;
     }
 
 }//end CheckboxPropertyBinding

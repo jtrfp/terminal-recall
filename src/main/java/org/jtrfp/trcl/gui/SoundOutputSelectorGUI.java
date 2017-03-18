@@ -13,27 +13,32 @@
 
 package org.jtrfp.trcl.gui;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFormat.Encoding;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import org.jtrfp.trcl.flow.ComboBoxPropertyBinding;
 import org.jtrfp.trcl.snd.AudioDevice;
 import org.jtrfp.trcl.snd.AudioDriver;
 import org.jtrfp.trcl.snd.AudioOutput;
+import org.jtrfp.trcl.snd.SoundSystem;
 
-import com.ochafik.util.listenable.CollectionEvent;
-import com.ochafik.util.listenable.CollectionListener;
-
-public class SoundOutputSelectorGUI extends SoundOutputSelector {
+public class SoundOutputSelectorGUI extends JPanel {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6539874860140467626L;
+    private JComboBox<String> driverSelectCB, deviceSelectCB, audioOutputCB, audioFormatCB;
 
     /**
      * Create the panel.
@@ -43,46 +48,26 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
     	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     	
     	final DefaultComboBoxModel driverSelectCBM = new DefaultComboBoxModel();
-    	final JComboBox driverSelectCB = new JComboBox(driverSelectCBM);
+    	driverSelectCB = new JComboBox(driverSelectCBM);
     	add(driverSelectCB);
     	
     	final DefaultComboBoxModel deviceSelectCBM = new DefaultComboBoxModel();
-    	final JComboBox deviceSelectCB = new JComboBox(deviceSelectCBM);
+    	deviceSelectCB = new JComboBox(deviceSelectCBM);
     	add(deviceSelectCB);
     	
     	final DefaultComboBoxModel audioOutputCBM = new DefaultComboBoxModel();
-    	final JComboBox audioOutputCB = new JComboBox(audioOutputCBM);
+    	audioOutputCB = new JComboBox(audioOutputCBM);
     	add(audioOutputCB);
     	
     	final DefaultComboBoxModel audioFormatCBM = new DefaultComboBoxModel();
-    	final JComboBox audioFormatCB = new JComboBox(audioFormatCBM);
+    	audioFormatCB = new JComboBox(audioFormatCBM);
     	add(audioFormatCB);
     	
     	JButton testButton = new JButton("Test");
     	testButton.setHorizontalAlignment(SwingConstants.LEFT);
     	testButton.setIcon(new ImageIcon(SoundOutputSelectorGUI.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png")));
     	//add(testButton);//TODO: Implement
-    	
-    	for(AudioDriver ao:SoundOutputSelector.outputDrivers)
-    	    ((DefaultComboBoxModel)(driverSelectCB.getModel())).addElement(ao);
-    	SoundOutputSelector.outputDrivers.addCollectionListener(new CollectionListener<AudioDriver>(){
-	    @Override
-	    public void collectionChanged(CollectionEvent<AudioDriver> evt) {
-		switch(evt.getType()){
-		case ADDED:
-		    for(AudioDriver ao:evt.getElements())
-			driverSelectCBM.addElement(ao);
-		    break;
-		case REMOVED:
-		    for(AudioDriver ao:evt.getElements())
-			driverSelectCBM.removeElement(ao);
-		    break;
-		case UPDATED:
-		    break;//???
-		default:
-		    break;
-		}
-	    }});
+    	/*
     	final Object driverSelection = driverSelectCB.getSelectedItem();
     	if(driverSelection != null)
     	    setActiveDriver((AudioDriver)driverSelection);
@@ -122,12 +107,14 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 		if(ie.getStateChange()==ItemEvent.SELECTED)
 		    SoundOutputSelectorGUI.this.setActiveFormat((AudioFormat)ie.getItem());
 	    }});
-	
+	*/
+    	/*
 	// Init
 	for(AudioDevice o:deviceList)
 		if(o.getOutputs().size()>0)
 		    deviceSelectCBM.addElement(o);
-	
+	*/
+    	/*
 	deviceList.addCollectionListener(new CollectionListener<AudioDevice>(){
 	    @Override
 	    public void collectionChanged(CollectionEvent<AudioDevice> evt) {
@@ -152,11 +139,13 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 		    break;
 		}
 	    }});
-	
+	*/
 	// Init
+    	/*
 	for (AudioOutput o : outputList)
 	    audioOutputCBM.addElement(o);
-	
+	*/
+    	/*
 	outputList.addCollectionListener(new CollectionListener<AudioOutput>(){
 	    @Override
 	    public void collectionChanged(CollectionEvent<AudioOutput> evt) {
@@ -180,8 +169,9 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 		    break;
 		}
 	    }});
-	
+	*/
 	// Init
+    	/*
 	for (AudioFormat o : formatList)
 	    audioFormatCBM.addElement(o);
 
@@ -231,5 +221,76 @@ public class SoundOutputSelectorGUI extends SoundOutputSelector {
 	    public void propertyChange(PropertyChangeEvent evt) {
 		audioFormatCBM.setSelectedItem(evt.getNewValue());
 	    }});
+	*/
     }//end SoundInputSelectorGUI()
+
+    public void init(SoundSystem soundSystem) {
+	soundSystem.getAudioDriverNames().addTarget(
+		new ComboBoxPropertyBinding(driverSelectCB, soundSystem, SoundSystem.DRIVER_BY_NAME).getComboBoxContents(),
+		true);
+	final ComboBoxPropertyBinding deviceBinding = new ComboBoxPropertyBinding(deviceSelectCB,soundSystem,  SoundSystem.DEVICE_BY_NAME);
+	final ComboBoxPropertyBinding outputBinding = new ComboBoxPropertyBinding(audioOutputCB ,soundSystem,  SoundSystem.OUTPUT_BY_NAME);
+	final ComboBoxPropertyBinding formatBinding = new ComboBoxPropertyBinding(audioFormatCB ,soundSystem,  SoundSystem.FORMAT_BY_NAME);
+	
+	soundSystem.addPropertyChangeListener(SoundSystem.ACTIVE_DEVICE, new PropertyChangeListener (){
+
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final Collection<String> coll = outputBinding.getComboBoxContents();
+		final Object newValue = evt.getNewValue();
+		if( newValue instanceof AudioDevice ){
+		    AudioDevice dev = (AudioDevice)newValue;
+		    coll.clear();
+		    for(AudioOutput output : dev.getOutputs())
+			coll.add(output.getUniqueName());
+		    }
+	    }});
+	soundSystem.addPropertyChangeListener(SoundSystem.ACTIVE_OUTPUT, new PropertyChangeListener (){
+
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final Collection<String> coll = formatBinding.getComboBoxContents();
+		final Object newValue = evt.getNewValue();
+		if( newValue instanceof AudioOutput ){
+		    AudioOutput output = (AudioOutput)newValue;
+		    coll.clear();
+		    for(AudioFormat fmt : output.getFormats())
+			if(SoundSystem.isAcceptableFormat(fmt))
+			    coll.add(fmt.toString());
+		    }//end for(formats)
+	    }});
+	soundSystem.addPropertyChangeListener(SoundSystem.ACTIVE_DRIVER, new PropertyChangeListener (){
+
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		final Collection<String> coll = deviceBinding.getComboBoxContents();
+		final Object newValue = evt.getNewValue();
+		if( newValue instanceof AudioDriver ){
+		    AudioDriver driver = (AudioDriver)newValue;
+		    coll.clear();
+		    for(AudioDevice dev : driver.getDevices())
+			coll.add(dev.getUniqueName());
+		    }
+	    }});
+	/*
+	soundSystem.getAudioDriverNames().addTarget(new CollectionListener<AudioDriver>(){
+	    @Override
+	    public void collectionChanged(CollectionEvent<AudioDriver> evt) {
+		switch(evt.getType()){
+		case ADDED:
+		    for(AudioDriver ao:evt.getElements())
+			driverSelectCBM.addElement(ao);
+		    break;
+		case REMOVED:
+		    for(AudioDriver ao:evt.getElements())
+			driverSelectCBM.removeElement(ao);
+		    break;
+		case UPDATED:
+		    break;//???
+		default:
+		    break;
+		}
+	    }});
+	*/
+    }
 }//end SoundOutputSelector

@@ -41,9 +41,7 @@ public class SoundOutputSelector extends JPanel{
 	    			ACTIVE_DEVICE=	"activeDevice",
 	    			ACTIVE_OUTPUT=	"activeOutput",
 	    			ACTIVE_FORMAT=  "activeFormat";
-    //// STATIC
-    public static ListenableCollection<AudioDriver> outputDrivers 
-    	= new DefaultListenableCollection<AudioDriver>(new HashSet<AudioDriver>());
+    
     //// VARS
     private AudioDriver         activeDriver;
     private AudioDevice		activeDevice;
@@ -83,13 +81,13 @@ public class SoundOutputSelector extends JPanel{
 	    }});
     }//end constructor
     
-    public void applySettings(TRConfiguration config){
+    /*public void applySettings(TRConfiguration config){
 	config.setActiveSoundDriver(activeDriver.getClass().getName());
 	config.setActiveAudioDevice(activeDevice.getUniqueName());
 	config.setActiveAudioOutput(activeOutput.getUniqueName());
 	config.setActiveAudioFormat(activeFormat.toString());
-    }
-    
+    }*/
+    /*
     public void readToPanel(TRConfiguration config){
 	String driverClassName = config.getActiveAudioDriver();
 	if(driverClassName==null) driverClassName = "org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput";
@@ -128,7 +126,7 @@ public class SoundOutputSelector extends JPanel{
 	  }//end if(ao!=null)
 	 }//end if(activeDevice!=null)
     }//end loadFromTRConfig
-
+*/
     /**
      * @return the activeDriver
      */
@@ -228,7 +226,7 @@ public class SoundOutputSelector extends JPanel{
         this.activeOutput = activeOutput;
     }
     
-    private boolean isAcceptableFormat(AudioFormat f){
+    protected boolean isAcceptableFormat(AudioFormat f){
 	return  f.getChannels()==2 &&
 		f.getEncoding()==Encoding.PCM_SIGNED &&
 		f.getSampleSizeInBits() % 8 == 0;

@@ -33,10 +33,6 @@ import org.jtrfp.trcl.gui.SoundOutputSelector;
 
 public class JavaSoundSystemAudioOutput implements AudioDriver {
     private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
-    
-    static{SoundOutputSelector.outputDrivers.add(new JavaSoundSystemAudioOutput());
-    }
-    
     private AudioProcessor source;
     private AudioFormat format = new AudioFormat(
 	    encoding,
@@ -48,7 +44,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    ByteOrder.nativeOrder()==ByteOrder.BIG_ENDIAN,
 	    new HashMap<String,Object>());//Default
     private ByteBuffer     buffer;
-    private int            bufferSizeFrames = 4096 * 2;
+    private int            bufferSizeFrames;
     private SourceDataLine sourceDataLine;
     private JavaSoundOutput        output;
     private Collection<AudioDevice>devices;
@@ -249,7 +245,10 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    final AudioFormat []formats = getFormats();
 	    if(formats.length==0)
 		return null;
-	    return getFormats()[0];
+	    for( AudioFormat fmt : formats )
+		if(SoundSystem.isAcceptableFormat(fmt))
+		    return fmt;
+	    return null;//Give up
 	}
     }//end JavaSoundOutput
     

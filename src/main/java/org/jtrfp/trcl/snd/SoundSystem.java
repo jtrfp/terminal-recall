@@ -871,13 +871,14 @@ public class SoundSystem {
         pcs.firePropertyChange(LINEAR_FILTERING, oldValue, linearFiltering);
     }
 
-    public double getModStereoWidth() {
+    public Double getModStereoWidth() {
         return modStereoWidth;
     }
 
-    public void setModStereoWidth(double modStereoWidth) {
+    public void setModStereoWidth(Double modStereoWidth) {
 	final double oldValue = this.modStereoWidth;
         this.modStereoWidth = modStereoWidth;
+        getMusicFactory().setModStereoWidth(modStereoWidth);
         pcs.firePropertyChange(MOD_STEREO_WIDTH, oldValue, modStereoWidth);
     }
 

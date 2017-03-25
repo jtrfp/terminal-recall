@@ -16,6 +16,7 @@ package org.jtrfp.trcl.flow;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
 
 public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements PropertyChangeListener {
     private final Method setterMethod, getterMethod;
@@ -23,6 +24,7 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
     private final Object bindingBean;
     private final Class<? extends PROPERTY_TYPE> propertyType;
     private volatile boolean isModifying = false;
+    private Executor executor;
     
     protected AbstractPropertyBinding(String propertyName, Object bindingBean, Class<PROPERTY_TYPE> propertyType) {
 	this.propertyName = propertyName;
@@ -66,14 +68,27 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 	catch(Exception e) {e.printStackTrace();return null;}
     }
     
-    protected void setPropertyValue(PROPERTY_TYPE newValue){
+    protected void setPropertyValue(final PROPERTY_TYPE newValue){
 	if(isModifying)
 	    return;
 	isModifying = true;
-	try{getSetterMethod().invoke(getBindingBean(), newValue);}
-	catch(Exception e){e.printStackTrace();}
+	final Executor executor = getExecutor();
+	if(executor != null){
+	    executor.execute(new Runnable(){
+		@Override
+		public void run() {
+		    setPropertyValueUnsafe(newValue);
+		}});
+	}else
+	    setPropertyValueUnsafe(newValue);
 	isModifying = false;
     }//end setPropertyValue(...)
+
+    private void setPropertyValueUnsafe(PROPERTY_TYPE newValue){
+	if( executor != null )
+	    try{getSetterMethod().invoke(getBindingBean(), newValue);}
+	catch(Exception e){e.printStackTrace();}
+    }
     
     protected void notifyUIValueChange(PROPERTY_TYPE newValue){
 	setPropertyValue(newValue);
@@ -99,6 +114,14 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 
     public Method getGetterMethod() {
         return getterMethod;
+    }
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
     }
 
 }//end AbstractPropertyBinding

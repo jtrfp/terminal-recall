@@ -10,10 +10,10 @@ Terminal Recall (TRCL) is part of the Java Terminal Reality File Parsers project
 
 TRCL is currently in a playable development phase. Because it is not yet close to being released (it changes too much), it must be built from source.
 
-##Not A Source-Port
+### Not A Source-Port
 This is a [cleanroom](https://en.wikipedia.org/wiki/Clean_room_design) re-implementation of the engine based on reverse-engineering specs.
 
-##Build Instructions
+### Build Instructions
 You will need:
 * Java JDK 7 or later (http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 * Git (http://git-scm.com/downloads)
@@ -55,10 +55,10 @@ If the dash in the terminal-recall directory name is an inconvenience in Windows
 If moving the RunMe.jar file to another location, be sure to also move the 'lib' directory. All other files are unneeded for running.
 
 
-##Disclaimer
+### Disclaimer
 
 This project and its contributors are not affiliated with nor represent Microsoft, Apogee Software Ltd. (3DRealms) or Terminal Reality Inc. Terminal Recall is not supported by any of the aforementioned. Terminal Velocity, and their original content are property of Terminal Reality Inc. Always support the original content creators when possible.
 
-##Trademarks
+### Trademarks
 
 Microsoft is a registered trademark of the Microsoft Corporation. Fury3 was a registered trademark of the Microsoft Corporation, canceled in 2003. Terminal Reality and Terminal Velocity are registered trademarks of Terminal Reality Inc. 3DRealms is a registered trademark of Apogee Software Ltd.

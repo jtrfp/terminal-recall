@@ -19,6 +19,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.concurrent.Executor;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
@@ -35,6 +38,7 @@ import javax.swing.event.ChangeListener;
 import org.jtrfp.trcl.flow.CheckboxPropertyBinding;
 import org.jtrfp.trcl.flow.ComboBoxPropertyBinding;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
+import org.jtrfp.trcl.gui.LabelPropertyBinding;
 import org.jtrfp.trcl.gui.SoundOutputSelectorGUI;
 import org.jtrfp.trcl.tools.Util;
 
@@ -46,6 +50,9 @@ public class GL33SoundSystemConfigPanel extends JPanel {
     private ConfigWindow configWindow;
     private SoundSystem soundSystem;
     private boolean initialized = false;
+    private volatile boolean isModifying = false;
+    private Executor executor;
+    final JLabel modStereoWidthLbl = new JLabel("NN%");
     protected static final String [] BUFFER_SIZES = {
 	    "8192","4096","2048","1024","512","256"
     };
@@ -121,16 +128,13 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	    modStereoWidthSlider.setPaintTicks(true);
 	    modStereoWidthSlider.setMinorTickSpacing(25);
 	    modStereoWidthPanel.add(modStereoWidthSlider);
-
-	    final JLabel modStereoWidthLbl = new JLabel("NN%");
+	    
 	    modStereoWidthPanel.add(modStereoWidthLbl);
 	    
 	    modStereoWidthSlider.addChangeListener(new ChangeListener(){
 		@Override
 		public void stateChanged(ChangeEvent arg0) {
-		    modStereoWidthLbl.setText(modStereoWidthSlider.getValue()+"%");
-		    //ConfigWindow.this.getTrConfiguration().setModStereoWidth(((double)modStereoWidthSlider.getValue())/100.);
-		    getConfigWindow().notifyNeedRestart();
+		    updateModStereoWidthProperty();
 		}});
 	    
 	    //TODO:
@@ -172,10 +176,39 @@ public class GL33SoundSystemConfigPanel extends JPanel {
     protected void init(){
 	System.out.println("init called");
 	final SoundSystem soundSystem = getSoundSystem();
-	new CheckboxPropertyBinding(chckbxBufferLag          , soundSystem, SoundSystem.BUFFER_LAG               );
-	new CheckboxPropertyBinding(chckbxLinearInterpolation, soundSystem, SoundSystem.LINEAR_FILTERING         );
-	new ComboBoxPropertyBinding(audioBufferSizeCB        , soundSystem, SoundSystem.BUFFER_SIZE_FRAMES_STRING);
+	new CheckboxPropertyBinding(chckbxBufferLag          , soundSystem, SoundSystem.BUFFER_LAG                 ).setExecutor(getExecutor());
+	new CheckboxPropertyBinding(chckbxLinearInterpolation, soundSystem, SoundSystem.LINEAR_FILTERING           ).setExecutor(getExecutor());
+	new ComboBoxPropertyBinding(audioBufferSizeCB        , soundSystem, SoundSystem.BUFFER_SIZE_FRAMES_STRING  ).setExecutor(getExecutor());
+	new LabelPropertyBinding<Double>(SoundSystem.MOD_STEREO_WIDTH, soundSystem, modStereoWidthLbl, Double.class).setExecutor(getExecutor());
 	soundOutputSelectorGUI.init(soundSystem);
+	soundSystem.addPropertyChangeListener(SoundSystem.MOD_STEREO_WIDTH, new PropertyChangeListener(){
+	    @Override
+	    public void propertyChange(PropertyChangeEvent evt) {
+		updateModStereoWidthSlider();
+	    }});
+	updateModStereoWidthSlider();
+    }//end init()
+    
+    private void updateModStereoWidthSlider(){
+	if(isModifying)
+	    return;
+	isModifying = true;
+	final int newValue = (int)Math.rint(((Double)getSoundSystem().getModStereoWidth())*100.);
+	//modStereoWidthLbl.setText(newValue+"%");
+	modStereoWidthSlider.setValue(newValue);
+	isModifying = false;
+    }
+    
+    private void updateModStereoWidthProperty(){
+	if(isModifying)
+	    return;
+	isModifying = true;
+	final int newValue = modStereoWidthSlider.getValue();
+	getSoundSystem().setModStereoWidth((double)newValue / 100.);
+	//modStereoWidthLbl.setText(newValue+"%");
+	//ConfigWindow.this.getTrConfiguration().setModStereoWidth(((double)modStereoWidthSlider.getValue())/100.);
+	getConfigWindow().notifyNeedRestart();
+	isModifying = false;
     }
 
     public ConfigWindow getConfigWindow() {
@@ -194,6 +227,14 @@ public class GL33SoundSystemConfigPanel extends JPanel {
     public void setSoundSystem(SoundSystem soundSystem) {
         this.soundSystem = soundSystem;
         proposeInit();
+    }
+
+    protected Executor getExecutor() {
+        return executor;
+    }
+
+    protected void setExecutor(Executor transientExecutor) {
+        this.executor = transientExecutor;
     }
 
 }//end GL33SoundSystemConfigPanel

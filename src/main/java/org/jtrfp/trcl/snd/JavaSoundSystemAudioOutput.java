@@ -324,8 +324,11 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     
     private void ensureSourceDataLineIsReleased(){
 	if(sourceDataLine!=null)
-	    if(sourceDataLine.isOpen())
+	    if(sourceDataLine.isOpen()){
+		if(sourceDataLine.isRunning() || sourceDataLine.isActive())
+		    sourceDataLine.stop();
 		sourceDataLine.close();
+		}
 	sourceDataLine=null;
     }//end ensureSourceDataLineIsReleased()
 

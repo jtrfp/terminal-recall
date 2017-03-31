@@ -54,8 +54,8 @@ public class WindowAnimator implements Tickable {
 	    return;
 	
 	final double frame = controller.getCurrentFrame();
-	final int fL       = (int)Math.floor(frame);
-	final int fH       = (int)Math.ceil(frame) % numFrames;
+	final int fL       = Math.max(0,(int)Math.floor(frame));
+	final int fH       = Math.max(0,(int)Math.ceil(frame) % numFrames);
 	final int dF	   = fH-fL;
 	final double xFade = frame%1.;
 	

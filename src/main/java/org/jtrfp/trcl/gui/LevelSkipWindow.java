@@ -142,7 +142,8 @@ public class LevelSkipWindow extends JFrame {
 		            final GameShell gameShell = Features.get(tr,GameShell.class);
 		            final TVF3Game game = (TVF3Game)gameShell.getGame();
 			    game.abortCurrentMission();
-			    game.setLevelIndex(levelList.getSelectedIndex());
+			    game.setLevel(levelList.getSelectedValue().toString());
+			    //game.setLevelIndex(levelList.getSelectedIndex());
 			    game.doGameplay();
 			    }catch(CanceledException e){}//Do nothing.
 			    return null;

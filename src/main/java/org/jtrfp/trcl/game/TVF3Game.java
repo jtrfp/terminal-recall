@@ -108,7 +108,7 @@ public class TVF3Game implements Game {
     
 	private TR              tr;
 	private VOXFile 	vox;
-	    private int 	levelIndex = 0;
+	    //private int 	levelIndex = 0;
 	    private String 	playerName=null;
 	    private Difficulty 	difficulty;
 	    private Mission 	currentMission;
@@ -178,9 +178,9 @@ public class TVF3Game implements Game {
 	    /**
 	     * @return the levelIndex
 	     */
-	    public synchronized int getLevelIndex() {
-		return levelIndex;
-	    }
+	    //public synchronized int getLevelIndex() {
+	//	return levelIndex;
+	   // }
 
 	    public boolean isInGameplay(){
 		return inGameplay;
@@ -201,7 +201,7 @@ public class TVF3Game implements Game {
 	     * @throws IOException 
 	     * @throws IllegalAccessException 
 	     */
-	    public void setLevelIndex(int levelIndex) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+	    /*public void setLevelIndex(int levelIndex) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
 		this.levelIndex = levelIndex;
 		if (levelIndex != -1) {// -1 means 'abort'
 		    MissionLevel lvl = vox.getLevels()[getLevelIndex()];
@@ -211,13 +211,14 @@ public class TVF3Game implements Game {
 		else // Make sure the Mission is destroyed
 		    setCurrentMission(null);
 	    }// end setLevelIndex(...)
-	    
+	    */
 	    public void setLevelDirect(String lvlFileName) throws FileNotFoundException, IllegalAccessException, IOException, FileLoadException{
 		setCurrentMission(null);
+		final int indexInMissionSequence = indexOfLevelInMissionSequence(lvlFileName);
 		final Mission newMission = new Mission();
 		newMission.setLvlFileName(lvlFileName);
 		newMission.setLevelName  (prepareLevelName(lvlFileName));
-		newMission.setShowIntro  (getLevelIndex() % 3 == 0);
+		newMission.setShowIntro  (indexInMissionSequence % 3 == 0);
 		setCurrentMission(newMission);
 	    }//end setLevelDirect()
 	    
@@ -270,14 +271,23 @@ public class TVF3Game implements Game {
 		return new NAVSystem(tr,getDashboardLayout());
 	    }
 	    
-	    public synchronized void setLevel(String skipToLevel) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+	    public synchronized void setLevel(String levelName) throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
+		setLevelDirect(levelName);
+	    }// end setLevel()
+	    
+	    public int indexOfLevelInMissionSequence(String levelName) {
 		final MissionLevel[] levs = vox.getLevels();
 		for (int index = 0; index < levs.length; index++) {
 		    if (levs[index].getLvlFile().toUpperCase()
-			    .contentEquals(skipToLevel.toUpperCase()))
-			setLevelIndex(index);
+			    .contentEquals(levelName.toUpperCase()))
+			return index;
 		}// end for(levs)
-	    }// end setLevel()
+		return -1;
+	    }//end indexOfLevelInMissionSequence(...)
+	    
+	    public String getLevelInMissionSequence(int index) {
+		return vox.getLevels()[index].getLvlFile();
+	    }
 	    
 	    public HUDSystem getHUDSystem(){
 		if(hudSystem==null)
@@ -358,7 +368,7 @@ public class TVF3Game implements Game {
 			    };
 			    displayModes.setDisplayMode(titleScreenMode);
 			    introScreen.startMusic();
-			    setLevelIndex(0);
+			    setLevel(getLevelInMissionSequence(0));
 			    tr.setRunState(new Game.GameLoadedMode(){});
 	    }// end boot()
 	    
@@ -377,7 +387,8 @@ public class TVF3Game implements Game {
 		try {
 		    MissionLevel[] levels = vox.getLevels();
 		    tr.getThreadManager().setPaused(false);
-		    while (getLevelIndex() < levels.length && getLevelIndex() != -1) {
+		    int levelIndex = 0;
+		    while (levelIndex < levels.length && levelIndex != -1) {
 			Mission.Result result = null;
 			final Mission mission = getCurrentMission();
 			if (mission == null)
@@ -387,13 +398,12 @@ public class TVF3Game implements Game {
 			    result = getCurrentMission().go();}
 			if (result.isAbort())
 			    break;
-			final int prevLevelIndex = getLevelIndex();
-			final int nextLevelIndex = prevLevelIndex+1;
+			levelIndex = indexOfLevelInMissionSequence(mission.getLvlFileName())+1;
 			// Check if we won the game
-			if(nextLevelIndex >= vox.getLevels().length)
+			if(levelIndex >= vox.getLevels().length)
 			    wonGame();
-			// Rube Goldberg style increment
-			setLevelIndex(nextLevelIndex);
+			setLevel(getLevelInMissionSequence(levelIndex));
+			//setLevelIndex(nextLevelIndex);
 		    }// end while(getLevelIndex<length)
 		    System.out.println("Escaping game loop.");
 		    tr.getThreadManager().setPaused(true);
@@ -449,7 +459,7 @@ public class TVF3Game implements Game {
 	    public void abort(){
 		tr.setRunState(new GameDestructingMode(){});
 		Features.destruct(this);
-		try{setLevelIndex(-1);}
+		try{abortCurrentMission();}
 		catch(Exception e){tr.showStopper(e);}//Shouldn't happen.
 		cleanup();
 		displayModes.setDisplayMode(emptyMode);
@@ -625,5 +635,12 @@ public class TVF3Game implements Game {
 
     public void setGameVersion(GameVersion gameVersion) {
         this.gameVersion = gameVersion;
+    }
+
+    public void resetCurrentMission() {
+	try{setLevel(getCurrentMission().getLevelName());}
+	catch(FileLoadException e)     {e.printStackTrace();}//Shouldn't happen.
+	catch(IOException e)           {e.printStackTrace();}//Shouldn't happen.
+	catch(IllegalAccessException e){e.printStackTrace();}//Shouldn't happen.
     }
 }// end Game

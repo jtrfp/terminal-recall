@@ -202,6 +202,10 @@ public class DEFObject extends WorldObject {
 	this.setModelOffset(TRFactory.legacy2Modern(def.getPivotX()),
 		TRFactory.legacy2Modern(def.getPivotY()),
 		TRFactory.legacy2Modern(def.getPivotZ()));
+	
+	// UNIVERSAL
+	final DamageableBehavior damageableBehavior = new DamageableBehavior();
+	// LOGIC
 	if (logic == null)
 	    return false;
 	switch (logic) {
@@ -258,11 +262,47 @@ public class DEFObject extends WorldObject {
 	    unhandled(def);
 	    defaultModelAssignment();
 	    break;
-	case sphereBoss:
+	case sphereBoss:{
 	    projectileFiringBehavior();
-	    mobile = true;
+	    mobile = false;
+	    //TODO: Simple model likely the secondary mode model
+	    final EnemyDefinition ed = getEnemyDefinition();
+	    final String secondaryModelName = ed.getSimpleModel();
+	    final GL33Model  secondaryModel = getTr().getResourceManager().getBINModel(
+			secondaryModelName,
+			getTr().getGlobalPaletteVL(), null, null);
+	    //Speculative: Secondary mode doubles the shield?
+	    final EnemyPlacement ep = getEnemyPlacement();
+	    final int secondaryModeShield = ep.getStrength() * 2;
+	    //KLUDGE: Force boss mode on
+	    //TODO: Boss mode should only involve NAV targeting
+	    boss = true;
+	    damageableBehavior.setDieOnZeroHealth(false);
+	    final DamageTrigger newSphereMode = new DamageTrigger(){
+
+		@Override
+		public void healthBelowThreshold() {
+		    final WorldObject parent = getParent();
+		    //Set the new health
+		    final DamageableBehavior db = parent.probeForBehavior(DamageableBehavior.class);
+		    db.setMaxHealth(secondaryModeShield);
+		    db.setHealth   (secondaryModeShield);
+		    //Set the new model
+		    parent.setModel(secondaryModel);
+		    //Start the spinny action.
+		    final RotationalMomentumBehavior rmb = parent.probeForBehavior(RotationalMomentumBehavior.class);
+		    rmb.setLateralMomentum   (.05);
+		    rmb.setEquatorialMomentum(.05);
+		    rmb.setPolarMomentum     (.05);
+		    parent.probeForBehavior(RotationalDragBehavior.class).setEnable(false);
+		    damageableBehavior.setDieOnZeroHealth(true);
+		}}.setThreshold(65537);
+	    addBehavior(newSphereMode);
+	    /*setModel(getTr().getResourceManager().getBINModel(
+			enemyDefinition.getSimpleModel(),
+			getTr().getGlobalPaletteVL(), null, null));*/
 	    defaultModelAssignment();
-	    break;
+	    break;}
 	case flyingAttackRetreatSmart:
 	    newSmartPlaneBehavior(tr, def, false);
 	    // addBehavior(new
@@ -640,12 +680,12 @@ public class DEFObject extends WorldObject {
 		}// end run()
 	    }));
 	// Misc
-	if (def.isObjectIsBoss())
+	if (isBoss())
 	    defaultBossNAVTargetingResponse();
 	addBehavior(new TunnelRailed(tr));// Centers in tunnel when appropriate
 	addBehavior(new DeathBehavior());
 	final int newHealth = (int) ((pl.getStrength() + (spinCrash ? 16 : 0)));
-	addBehavior(new DamageableBehavior().setHealth(newHealth)
+	addBehavior(damageableBehavior.setHealth(newHealth)
 		.setMaxHealth(newHealth).setEnable(!boss));
 	setActive(!boss);
 	addBehavior(new DamagedByCollisionWithDEFObject());

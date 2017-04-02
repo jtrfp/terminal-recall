@@ -29,6 +29,7 @@ public class DamageableBehavior extends Behavior {
     	private int maxHealth=65535;
 	private int health=maxHealth;
 	private boolean acceptsProjectileDamage=true;
+	private boolean dieOnZeroHealth=true;//TODO: Redesign such that there's a DieOnZeroHealth behavior?
 	private long invincibilityExpirationTime=System.currentTimeMillis()+100;//Safety time in case init causes damage
 	
 	protected void generalDamage(final DamageListener.Event evt){
@@ -39,14 +40,14 @@ public class DamageableBehavior extends Behavior {
 	    if(getHealth()<=0)return;
 	    if(evt instanceof DamageListener.ProjectileDamage && !isAcceptsProjectileDamage())
 		return;
-		
+	    
+	    setHealth(getHealth()-evt.getDamageAmount());
 	    probeForBehaviors(new AbstractSubmitter<DamageListener>(){
 		@Override
 		public void submit(DamageListener item) {
 		    item.damageEvent(evt);
 		}}, DamageListener.class);
-	    setHealth(getHealth()-evt.getDamageAmount());
-		if(getHealth()<=0)
+		if(getHealth()<=0 && isDieOnZeroHealth())
 		    die();
 		else if(getParent() instanceof Player)addInvincibility(2500);//Safety/Escape
 	}//end generalDamage(...)
@@ -182,5 +183,14 @@ public class DamageableBehavior extends Behavior {
 	public void removePropertyChangeListener(String propertyName,
 		PropertyChangeListener listener) {
 	    pcs.removePropertyChangeListener(propertyName, listener);
+	}
+
+	public boolean isDieOnZeroHealth() {
+	    return dieOnZeroHealth;
+	}
+
+	public DamageableBehavior setDieOnZeroHealth(boolean dieOnZeroHealth) {
+	    this.dieOnZeroHealth = dieOnZeroHealth;
+	    return this;
 	}
     }//end DamageableBehavior

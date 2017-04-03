@@ -214,7 +214,11 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
     
     public void refreshBlips(Collection<WorldObject> newBlipObjects){
 	resetBlipCounters();
-	final Collection<Blip> oldActiveBlips = activeBlipBuffer;
+	final Collection<Blip> oldActiveBlips    = activeBlipBuffer;
+	final Collection<Blip> activeBlipBuffer  = this.activeBlipBuffer;
+	final Collection<Blip> newActiveBlips    = this.newActiveBlips;
+	final Collection<Blip> activeBlips       = this.activeBlips;
+	final Collection<Blip> newlyEnabledBlips = this.newlyEnabledBlips;
 	synchronized(activeBlips){
 	    	 activeBlipBuffer.clear();
 		 activeBlipBuffer.addAll(activeBlips);

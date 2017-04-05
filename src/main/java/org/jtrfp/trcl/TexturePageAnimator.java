@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.jtrfp.trcl.core.TriangleVertexWindow;
 import org.jtrfp.trcl.gpu.DynamicTexture;
+import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
 
 public class TexturePageAnimator implements Tickable{
@@ -35,7 +36,12 @@ public class TexturePageAnimator implements Tickable{
 
     @Override
     public void tick() {
-	try{final VQTexture newTexture = (VQTexture)dynamicTexture.getCurrentTexture();//TODO: Type safety?
+	try{final Texture newTextureObject = dynamicTexture.getCurrentTexture();
+	if( newTextureObject == null)
+	    return;//Unset.
+	if(! (newTextureObject instanceof VQTexture) )
+	    throw new IllegalStateException("Only can accept VQTextures. Got "+newTextureObject);
+	final VQTexture newTexture = (VQTexture)newTextureObject;
 	    final int newTexturePage = newTexture.getTexturePage();
 	final Integer currentTexturePage = this.currentTexturePage;
 	if(currentTexturePage == null || currentTexturePage != newTexturePage){

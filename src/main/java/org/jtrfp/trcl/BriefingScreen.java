@@ -157,8 +157,9 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	    planetObject=null;
 	}
 	try{
+	 final boolean isPlanetTextureNull = planetTextureFile.toLowerCase().contentEquals("null.raw");
 	 final GL33Model planetModel = rm.getBINModel(planetModelFile,
-		 rm.getRAWAsTexture(planetTextureFile, 
+		 isPlanetTextureNull? null : rm.getRAWAsTexture(planetTextureFile, 
 			 getPalette(lvl), null, false, true),
 		 8,false,getPalette(lvl),null);
 	 planetObject = new WorldObject(planetModel);

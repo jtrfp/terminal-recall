@@ -122,11 +122,13 @@ public class UncompressedVQTextureFactory {
  
  private Color calulateAverageColor(RasterizedBlockVectorList rbvl) {
 	float redA=0,greenA=0,blueA=0;
+	final int ITERATIONS = 10;
 	    final int [] dims = rbvl.getDimensions();
-	    for(int i=0; i<10; i++){
-		redA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,0);
-		greenA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,1);
-		blueA+=rbvl.componentAt(new int[]{(int)(Math.random()*dims[0]),(int)(Math.random()*dims[1])} ,2);
+	    final int width = dims[0], height = dims[1];
+	    for(int i=ITERATIONS; i>0; i--){
+		redA+=rbvl.componentAt(new int[]{(int)(Math.random()*width),(int)(Math.random()*height)} ,0);
+		greenA+=rbvl.componentAt(new int[]{(int)(Math.random()*width),(int)(Math.random()*height)} ,1);
+		blueA+=rbvl.componentAt(new int[]{(int)(Math.random()*width),(int)(Math.random()*height)} ,2);
 	    }return new Color(redA/10f,greenA/10f,blueA/10f);
  }//end calculateAverageColor(...)
  

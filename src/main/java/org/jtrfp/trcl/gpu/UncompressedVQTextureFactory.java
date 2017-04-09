@@ -187,7 +187,7 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 }
 
  private final void assemble(VectorListND rgbarvl, VectorListND esTuTvrvl, final VQTexture tex, boolean generateMipMaps){
-	    final int sideLength = rgbarvl.getDimensions()[0];
+     final int sideLength = rgbarvl.getDimensions()[0];
      	    tex.setSideLength(sideLength);
 	    final int diameterInCodes 		= (int)Misc.clamp((double)sideLength/(double)VQCodebookManager.CODE_SIDE_LENGTH, 1, Integer.MAX_VALUE);
 	    final int diameterInSubtextures 	= (int)Math.ceil((double)diameterInCodes/(double)SubTextureWindow.SIDE_LENGTH_CODES_WITH_BORDER);
@@ -197,9 +197,9 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 	    final RasterizedBlockVectorList 	rbvlESTuTv 		= 
 		    esTuTvrvl!=null?
 		    new RasterizedBlockVectorList(esTuTvrvl, diameterInSubtextures):null;
-	    final VectorListND vlrESTuTv = 
-		    rbvlESTuTv!=null?
-		    rbvlESTuTv:null;
+	    //final VectorListND vlrESTuTv = 
+		//    rbvlESTuTv!=null?
+		//    rbvlESTuTv:null;
 	    // Calculate a rough average color by averaging random samples.
 	    tex.setAverageColor(calulateAverageColor(rbvlRGBA));
 	    // Get a TOC
@@ -271,8 +271,8 @@ private void assemble(VectorList rgba8888vl, VectorList esTuTv8888vl, final int 
 		final int globalCodeIndex = codeIdx%256
 			+ tex.getCodebookStartOffsets256().get(subTextureIdx*6+codeIdx/256)*256;
 		blockRegistry.setRGBACodebookTexelsAt(vlrRGBA, codeX,codeY,diameterInCodes, globalCodeIndex,tex);
-		if(vlrESTuTv!=null)
-		    blockRegistry.setESTuTvCodebookTexelsAt(vlrESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex,tex);
+		if(rbvlESTuTv!=null)
+		    blockRegistry.setESTuTvCodebookTexelsAt(rbvlESTuTv, codeX,codeY,diameterInCodes, globalCodeIndex,tex);
 		else{
 		    final VectorListND blackVLR = generateBlackVectorList(sideLength);
 		    blockRegistry.setESTuTvCodebookTexelsAt(blackVLR, codeX,codeY,diameterInCodes, globalCodeIndex,tex);}

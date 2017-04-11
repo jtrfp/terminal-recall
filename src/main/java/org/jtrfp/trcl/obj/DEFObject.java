@@ -209,7 +209,7 @@ public class DEFObject extends WorldObject {
 	if (logic == null)
 	    return false;
 	switch (logic) {
-	case groundDumb:
+	case groundStatic:
 	    mobile = false;
 	    canTurn = false;
 	    anchoring = Anchoring.terrain;
@@ -783,7 +783,7 @@ public class DEFObject extends WorldObject {
 	// tr.getResourceManager().getBINModel(def.getSimpleModel(),tr.getGlobalPaletteVL(),null,tr.gpu.get().getGl());}
 	// catch(Exception e){e.printStackTrace();}
 	EnemyDefinition ed = new EnemyDefinition();
-	ed.setLogic(EnemyLogic.groundDumb);
+	ed.setLogic(EnemyLogic.groundStatic);
 	ed.setDescription("auto-generated enemy rubble def");
 	ed.setPowerupProbability(0);
 	ed.setComplexModelFile(enemyDefinition.getSimpleModel());

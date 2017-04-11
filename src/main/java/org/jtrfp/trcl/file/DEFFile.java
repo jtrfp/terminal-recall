@@ -181,7 +181,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	}
 
 	public static enum EnemyLogic {
-	    groundDumb, groundTargeting, flyingDumb, groundTargetingDumb, flyingSmart, bankSpinDrill, sphereBoss, flyingAttackRetreatSmart, splitShipSmart, groundStaticRuin, targetHeadingSmart, targetPitchSmart, coreBossSmart, cityBossSmart, staticFiringSmart, sittingDuck, tunnelAttack, takeoffAndEscape, fallingAsteroid, cNome, cNomeLegs, cNomeFactory, geigerBoss, volcanoBoss, volcano, missile, bob, alienBoss, canyonBoss1, canyonBoss2, lavaMan, arcticBoss, helicopter, tree, ceilingStatic, bobAndAttack, forwardDrive, fallingStalag, attackRetreatBelowSky, attackRetreatAboveSky, bobAboveSky, factory, shootOnThrustFrame;// Shoot
+	    groundStatic, groundTargeting, flyingDumb, groundTargetingDumb, flyingSmart, bankSpinDrill, sphereBoss, flyingAttackRetreatSmart, splitShipSmart, groundStaticRuin, targetHeadingSmart, targetPitchSmart, coreBossSmart, cityBossSmart, staticFiringSmart, sittingDuck, tunnelAttack, takeoffAndEscape, fallingAsteroid, cNome, cNomeLegs, cNomeFactory, geigerBoss, volcanoBoss, volcano, missile, bob, alienBoss, canyonBoss1, canyonBoss2, lavaMan, arcticBoss, helicopter, tree, ceilingStatic, bobAndAttack, forwardDrive, fallingStalag, attackRetreatBelowSky, attackRetreatAboveSky, bobAboveSky, factory, shootOnThrustFrame;// Shoot
 																																																																														// on
 																																																																														// frame
 																																																																														// defined

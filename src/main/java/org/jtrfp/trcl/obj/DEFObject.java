@@ -510,7 +510,7 @@ public class DEFObject extends WorldObject {
 	    mobile = false;
 	    alienModelAssignment();
 	    alienBoss(pl);
-	    bossWarningSiren();
+	    //bossWarningSiren();
 	    break;
 	case canyonBoss1:
 	    addBehavior(new HorizAimAtPlayerBehavior(
@@ -1241,7 +1241,7 @@ public class DEFObject extends WorldObject {
 
 	hardReferences.add(alienPCL);
     }// end alienBoss(...)
-
+/*
     private void bossWarningSiren() {
 	final PropertyChangeListener alienPCL;
 	addPropertyChangeListener(ACTIVE,
@@ -1265,7 +1265,7 @@ public class DEFObject extends WorldObject {
 		});
 	hardReferences.add(alienPCL);
     }// end bossWarningSiren()
-
+*/
     private void defaultBossNAVTargetingResponse() {
 	addBehavior(new CustomNAVTargetableBehavior(new Runnable() {
 	    @Override
@@ -1274,7 +1274,7 @@ public class DEFObject extends WorldObject {
 		setIgnoringProjectiles(false);
 	    }
 	}));
-	bossWarningSiren();
+	//bossWarningSiren();
     }// end defaultBossNAVTargetingResponse()
 
     @Override

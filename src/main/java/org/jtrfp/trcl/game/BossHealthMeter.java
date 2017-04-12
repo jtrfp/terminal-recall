@@ -16,22 +16,27 @@ package org.jtrfp.trcl.game;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.CharLineDisplay;
 import org.jtrfp.trcl.GLFont;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.DamageableBehavior;
+import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.MeterBar;
 import org.jtrfp.trcl.obj.WorldObject;
+import org.jtrfp.trcl.snd.SoundEvent;
+import org.jtrfp.trcl.snd.SoundSystem;
+import org.jtrfp.trcl.snd.SoundTexture;
 
 public class BossHealthMeter {
     private final RenderableSpacePartitioningGrid spg = new RenderableSpacePartitioningGrid();
     private RenderableSpacePartitioningGrid targetSPG;
+    private SoundSystem     soundSystem;
+    private ResourceManager resourceManager;
     private TVF3Game game;
     private boolean  initialized = false;
     private CharLineDisplay charLineDisplay;
@@ -115,8 +120,10 @@ public class BossHealthMeter {
 	System.out.println("BossHealthMeter.setActive TRANSIENT "+isActive);
 	active = isActive;
 	final RenderableSpacePartitioningGrid targetSPG = getTargetSPG();
-	if(isActive)
+	if(isActive){
 	    attachToBoss(getGame().getCurrentMission().getCurrentBoss());
+	    fireBossSound();
+	    }
 	World.relevanceExecutor.submit(new Runnable(){
 	    @Override
 	    public void run() {
@@ -126,6 +133,19 @@ public class BossHealthMeter {
 		    targetSPG.removeBranch(spg);
 	    }});
     }//end setActive(...)
+    
+    protected void fireBossSound(){
+	SoundSystem ss = getSoundSystem();
+	ResourceManager resourceManager = getResourceManager();
+	final SoundTexture st =
+		resourceManager.soundTextures
+		.get("WARNING.WAV");
+	final SoundEvent se = ss.getPlaybackFactory()
+		.create(st, new double[] {
+			SoundSystem.DEFAULT_SFX_VOLUME,
+			SoundSystem.DEFAULT_SFX_VOLUME });
+	ss.enqueuePlaybackEvent(se);
+    }//end fireBossSound()
     
     protected void attachToBoss(WorldObject boss){
 	final DamageableBehavior db = boss.probeForBehavior(DamageableBehavior.class);
@@ -178,5 +198,21 @@ public class BossHealthMeter {
     public void setTargetSPG(RenderableSpacePartitioningGrid targetSPG) {
         this.targetSPG = targetSPG;
         proposeLazyInit();
+    }
+
+    public SoundSystem getSoundSystem() {
+        return soundSystem;
+    }
+
+    public void setSoundSystem(SoundSystem soundSystem) {
+        this.soundSystem = soundSystem;
+    }
+
+    public ResourceManager getResourceManager() {
+        return resourceManager;
+    }
+
+    public void setResourceManager(ResourceManager resourceManager) {
+        this.resourceManager = resourceManager;
     }
 }//end BossHealthMeter

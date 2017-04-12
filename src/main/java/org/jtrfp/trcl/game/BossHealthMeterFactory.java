@@ -22,9 +22,11 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.FeatureNotApplicableException;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gpu.VQTexture;
+import org.jtrfp.trcl.snd.SoundSystem;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -53,6 +55,9 @@ public class BossHealthMeterFactory implements FeatureFactory<TVF3Game> {
 	    target.getBriefingScreen();
 	    this.setFont(target.getGameShell().getGreenFont());
 	    this.setGame(target);
+	    final TR tr = target.getTr();
+	    this.setResourceManager(tr.getResourceManager());
+	    this.setSoundSystem(Features.get(tr, SoundSystem.class));
 	    InputStream is;
 	    try{final Texture meterTexture = 
 			Features.get(target.getTr(), GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is = VQTexture.class

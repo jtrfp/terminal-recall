@@ -195,7 +195,7 @@ public class UncompressedVQTextureFactory {
 	final VectorListND vlrRGBA = rbvlRGBA;
 	final RasterizedBlockVectorList 	rbvlESTuTv 		= 
 		esTuTvrvl!=null?
-			new RasterizedBlockVectorList(esTuTvrvl, diameterInSubtextures):null;
+			new RasterizedBlockVectorList(esTuTvrvl, 4):null;
 			// Calculate a rough average color by averaging random samples.
 			tex.setAverageColor(calulateAverageColor(rbvlRGBA));
 			// Get a TOC
@@ -272,9 +272,10 @@ public class UncompressedVQTextureFactory {
 			    final List<VQTexture> mipTextures = tex.getMipTextures();
 			    VectorListND rgba = rgbarvl, esTuTv = esTuTvrvl;
 			    for(int mipIndex = 0; mipIndex < 2; mipIndex++){
-				rgba   = new CachingVectorListND(new MIPScalingVectorListND(rgba,rgba,esTuTv));
+				final VectorListND oldRGBA = rgba, oldEsTuTv = esTuTv;
+				rgba   = new CachingVectorListND(new MIPScalingVectorListND(oldRGBA,oldRGBA,oldEsTuTv));
 				if(esTuTv != null)
-				    esTuTv = new CachingVectorListND(new MIPScalingVectorListND(esTuTv,rgba,esTuTv));
+				    esTuTv = new CachingVectorListND(new MIPScalingVectorListND(oldEsTuTv,oldRGBA,oldEsTuTv));
 				final VQTexture mipTexture = this.newUncompressedVQTexture(rgba, esTuTv, false);
 				mipTextures.add(mipTexture);
 			    }//end for(mipIndex)

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2017 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -47,7 +47,7 @@ public class MIPScalingVectorListND implements VectorListND {
 	for( int i = 0; i < dims; i++)
 	    coordBuffer[i] = coordinates[i] * 2;
 	final ResultBuffer resultBuffer = new ResultBuffer();
-	recursiveComponentAt(resultBuffer, coordBuffer, 0, componentIndex);
+	recursiveComponentAt(resultBuffer, coordBuffer, 0, componentIndex); 
 	return resultBuffer.accumulator / resultBuffer.weightAccumulator;
     }
     
@@ -74,8 +74,8 @@ public class MIPScalingVectorListND implements VectorListND {
 	double result = 1;
 	if(rgbaReference != null)
 	    result *= sigmoid.value(rgbaReference  .componentAt(coordBuffer, 3));
-	//if(esTuTvReference != null)
-	//    result += esTuTvReference.componentAt(coordBuffer, 0);
+	if(esTuTvReference != null)
+	    result += esTuTvReference.componentAt(coordBuffer, 0);
 	return result;
     }//end weightAt(...)
 

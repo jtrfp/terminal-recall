@@ -454,6 +454,7 @@ public class DEFObject extends WorldObject {
 	    break;
 	case cNomeFactory:
 	    mobile = false;
+	    boss = true;//This is because NAVObjective sets ignoringProjecitles to true
 	    defaultModelAssignment();
 	    break;
 	case geigerBoss:
@@ -875,7 +876,7 @@ public class DEFObject extends WorldObject {
 	addBehavior(mbv);
 	// addBehavior(new VelocityDragBehavior().setDragCoefficient(.99)); //
 	// For some reason it falls like pine tar
-	addBehavior(new DamageableBehavior().setMaxHealth(10).setHealth(10));
+	probeForBehavior(DamageableBehavior.class).setMaxHealth(10).setHealth(10);
 	addBehavior(new DeathBehavior());
 	addBehavior(new CollidesWithTerrain().setIgnoreCeiling(true));
 	addBehavior(new DamagedByCollisionWithSurface());

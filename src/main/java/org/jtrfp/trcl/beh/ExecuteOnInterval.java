@@ -14,15 +14,36 @@
 package org.jtrfp.trcl.beh;
 
 public class ExecuteOnInterval extends Behavior {
-    
+    private IntervalLogic intervalLogic;
+    private Runnable      taskToExecute;
+
+    public ExecuteOnInterval(){}
+    public ExecuteOnInterval(long intervalTimeMillis, Runnable taskToExecute){
+	final RegularIntervalLogic logic = (RegularIntervalLogic)getIntervalLogic();
+	logic.setIntervalTimeMillis(intervalTimeMillis);
+	setTaskToExecute(taskToExecute);
+    }//end constructor
+
     @Override
     public void tick(long tickTimeInMillis){
-	
+	final IntervalLogic intervalLogic = getIntervalLogic();
+	if(intervalLogic != null){
+	    if( intervalLogic.proposeTime(tickTimeInMillis) ){
+		final Runnable taskToExecute = getTaskToExecute();
+		taskToExecute.run();
+	    }
+	}//end if(!null)
     }//end tick(...)
-    
+
     public static class RegularIntervalLogic implements IntervalLogic {
 	private long nextCompletionMillis;
 	private long intervalTimeMillis;
+
+	public RegularIntervalLogic(){}
+
+	public RegularIntervalLogic(long intervalTimeMillis){
+	    setIntervalTimeMillis(intervalTimeMillis);
+	}
 
 	@Override
 	public boolean proposeTime(final long tickTimeInMillis) {
@@ -33,7 +54,7 @@ public class ExecuteOnInterval extends Behavior {
 	    }
 	    return false;
 	}//end proposeTime(...)
-	
+
 	public long getIntervalTimeMillis() {
 	    return intervalTimeMillis;
 	}
@@ -49,9 +70,30 @@ public class ExecuteOnInterval extends Behavior {
 	public void setNextCompletionMillis(long nextCompletionMillis) {
 	    this.nextCompletionMillis = nextCompletionMillis;
 	}
-	
+
+    }//end RegularIntervalLogic
+
+    public static interface IntervalLogic {
+	public boolean proposeTime(long tickTimeInMillis);
+    }//end IntervalLogic
+
+    public IntervalLogic getIntervalLogic() {
+	if( intervalLogic == null )
+	    intervalLogic = new RegularIntervalLogic();
+	return intervalLogic;
     }
- public static interface IntervalLogic {
-     public boolean proposeTime(long tickTimeInMillis);
- }
+
+    public ExecuteOnInterval setIntervalLogic(IntervalLogic intervalLogic) {
+	this.intervalLogic = intervalLogic;
+	return this;
+    }
+
+    public Runnable getTaskToExecute() {
+	return taskToExecute;
+    }
+
+    public ExecuteOnInterval setTaskToExecute(Runnable taskToExecute) {
+	this.taskToExecute = taskToExecute;
+	return this;
+    }
 }//end ExecuteOnInterval

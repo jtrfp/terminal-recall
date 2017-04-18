@@ -49,6 +49,7 @@ import org.jtrfp.trcl.beh.DamagedByCollisionWithPlayer;
 import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
+import org.jtrfp.trcl.beh.ExecuteOnInterval;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
@@ -95,7 +96,6 @@ import org.jtrfp.trcl.gpu.RotatedModelSource;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
-import org.jtrfp.trcl.snd.SoundEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 import org.jtrfp.trcl.tools.Util;
@@ -456,6 +456,33 @@ public class DEFObject extends WorldObject {
 	    mobile = false;
 	    boss = true;//This is because NAVObjective sets ignoringProjecitles to true
 	    defaultModelAssignment();
+	    final Runnable cNomeSpawnTask = new Runnable(){
+		@Override
+		public void run() {
+		    final DEFObject cNome = new DEFObject();
+		    EnemyDefinition ed = new EnemyDefinition();
+		    ed.setLogic(EnemyLogic.cNome);
+		    ed.setDescription("auto-generated enemy rubble def");
+		    ed.setPowerupProbability(0);
+		    ed.setComplexModelFile("CNOME.BIN");//Is this hard-coded in the original?
+		    ed.setThrustSpeed(250000);
+		    EnemyPlacement simplePlacement = pl.clone();
+		    simplePlacement.setStrength(4096);
+		    simplePlacement.setYaw((int)(Math.random() * 65535.));
+		    cNome.setEnemyDefinition(ed);
+		    cNome.setEnemyPlacement(simplePlacement);
+		    cNome.setActive(true);
+		    cNome.setVisible(true);
+		    cNome.setRuin(false);
+		    final double [] parentPos = getPosition();
+		    cNome.setPosition(new double[] { parentPos[0],
+			    0, parentPos[2] });
+		    cNome.notifyPositionChange();
+		    cNome.addBehavior(new HorizAimAtPlayerBehavior(
+			    getGameShell().getGame().getPlayer()));
+		    getContainingGrid().add(cNome);
+		}};
+	    addBehavior(new ExecuteOnInterval(5000, cNomeSpawnTask));
 	    break;
 	case geigerBoss:
 	    addBehavior(new HorizAimAtPlayerBehavior(

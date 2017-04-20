@@ -91,7 +91,8 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     @Override
     public void apply(GL2ES2 gl, double bufferStartTimeSeconds) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
-	origin.getPanU().set((float)getPan()[0], (float)getPan()[1]);//Pan center
+	final float factoryVolume = (float)origin.getVolume();
+	origin.getPanU().set((float)getPan()[0]*factoryVolume, (float)getPan()[1]*factoryVolume);
 	final SoundSystem ss           = Features.get(getOrigin().getTR(),SoundSystemFeature.class);
 	final double bufferSizeSeconds = ss.getBufferSizeSeconds(),
 	             startTimeInBuffers=((getStartRealtimeSeconds()-bufferStartTimeSeconds)/(double)bufferSizeSeconds)*2-1,
@@ -113,6 +114,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	private int vertexIDAttribLocation = -1;
 	private int vertexBufferID = -1;
 	private FloatBuffer vertexIdBufferData;
+	private double volume = 1;
 	
 	public Factory(final TR tr) {
 	    super(tr);
@@ -290,6 +292,14 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 
 	protected void setVertexIdBufferData(FloatBuffer vertexIdBufferData) {
 	    this.vertexIdBufferData = vertexIdBufferData;
+	}
+
+	public double getVolume() {
+	    return volume;
+	}
+
+	public void setVolume(double volume) {
+	    this.volume = volume;
 	}
     }//end Factory
 

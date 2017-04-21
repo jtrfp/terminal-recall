@@ -34,6 +34,43 @@ public class ExecuteOnInterval extends Behavior {
 	    }
 	}//end if(!null)
     }//end tick(...)
+    
+    public static class OneShotIntervalLogic implements IntervalLogic {
+	private long    triggerTimeMillis;
+	private boolean triggered = false;
+	
+	public OneShotIntervalLogic(long triggerTimeMillis){
+	    this.triggerTimeMillis = triggerTimeMillis;
+	}
+
+	@Override
+	public boolean proposeTime(long tickTimeInMillis) {
+	    if( ! isTriggered() ) {
+		if( tickTimeInMillis >= getTriggerTimeMillis() ){
+		    setTriggered(true);
+		    return true;
+		}//end if( timeout )
+	    }//end if( ! triggered )
+	    return false;
+	}//end proposeTime(...)
+
+	public long getTriggerTimeMillis() {
+	    return triggerTimeMillis;
+	}
+
+	public void setTriggerTimeMillis(long triggerTimeMillis) {
+	    this.triggerTimeMillis = triggerTimeMillis;
+	}
+
+	public boolean isTriggered() {
+	    return triggered;
+	}
+
+	public void setTriggered(boolean triggered) {
+	    this.triggered = triggered;
+	}
+	
+    }//end OneShotIntervalLogic
 
     public static class RegularIntervalLogic implements IntervalLogic {
 	private long nextCompletionMillis;

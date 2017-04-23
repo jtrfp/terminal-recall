@@ -50,6 +50,7 @@ import org.jtrfp.trcl.beh.DamagedByCollisionWithSurface;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.DebrisOnDeathBehavior;
 import org.jtrfp.trcl.beh.ExecuteOnInterval;
+import org.jtrfp.trcl.beh.ExecuteOnInterval.OneShotIntervalLogic;
 import org.jtrfp.trcl.beh.ExplodesOnDeath;
 import org.jtrfp.trcl.beh.FireOnFrame;
 import org.jtrfp.trcl.beh.HorizAimAtPlayerBehavior;
@@ -541,14 +542,41 @@ public class DEFObject extends WorldObject {
 	    //bossWarningSiren();
 	    break;
 	case canyonBoss1:
-	    addBehavior(new HorizAimAtPlayerBehavior(
-		    getGameShell().getGame().getPlayer()));
-	    projectileFiringBehavior();
-	    mobile = false;
+	    newSmartPlaneBehavior(tr, def, false);
+	    probeForBehavior(NewSmartPlaneBehavior.class).setEnable(false);
+	    final SteadilyRotating rotating   = new SteadilyRotating().setRotationPeriodMillis(12000);
+	    rotating.setEnable(false);
+	    addBehavior(rotating);
+	    final ExecuteOnInterval eoiRise   = new ExecuteOnInterval();
+	    eoiRise.setEnable(false);
+	    addBehavior(eoiRise);
+	    final MovesByVelocity velocible = new MovesByVelocity();
+	    velocible.setEnable(false);
+	    addBehavior(velocible);
+	    eoiRise.setTaskToExecute(new Runnable(){
+		@Override
+		public void run() {//ATTACK
+		    DEFObject.this.probeForBehavior(AccelleratedByPropulsion.class).setEnable(true);
+		    DEFObject.this.probeForBehavior(VelocityDragBehavior.class)    .setEnable(true);
+		    rotating.setEnable(false);
+		    DEFObject.this.probeForBehavior(NewSmartPlaneBehavior.class).setEnable(true);
+		}});
+	    final CustomNAVTargetableBehavior navTargBehavior = new CustomNAVTargetableBehavior(new Runnable(){
+		@Override
+		public void run() {//RISE
+		    DEFObject.this.probeForBehavior(AccelleratedByPropulsion.class).setEnable(false);
+		    DEFObject.this.probeForBehavior(VelocityDragBehavior.class)    .setEnable(false);
+		    velocible.setEnable(true);
+		    velocible.setVelocity(new double [] {0,10240,0});
+		    rotating.setEnable(true);
+		    eoiRise.setIntervalLogic(new OneShotIntervalLogic(System.currentTimeMillis()+10000));
+		    eoiRise.setEnable(true);
+		}});
+	    addBehavior(navTargBehavior);
 	    defaultModelAssignment();
 	    //defaultBossNAVTargetingResponse();
 	    break;
-	case canyonBoss2:
+	case canyonBoss2://???
 	    addBehavior(new HorizAimAtPlayerBehavior(
 		    getGameShell().getGame().getPlayer()));
 	    projectileFiringBehavior();

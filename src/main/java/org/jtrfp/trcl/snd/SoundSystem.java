@@ -62,6 +62,8 @@ public class SoundSystem {
            ACTIVE_DEVICE      = "activeDevice",
            ACTIVE_OUTPUT      = "activeOutput",
            ACTIVE_FORMAT      = "activeFormat",
+           MUSIC_VOLUME       = "musicVolume",
+           SFX_VOLUME         = "sfxVolume",
            BUFFER_SIZE_FRAMES = "bufferSizeFrames",
            BUFFER_SIZE_FRAMES_STRING = "bufferSizeFramesString";
     
@@ -71,7 +73,7 @@ public class SoundSystem {
     protected final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final HashMap<SoundEvent.Factory,ArrayList<SoundEvent>> eventMap 
      = new HashMap<SoundEvent.Factory,ArrayList<SoundEvent>>();
-    private SamplePlaybackEvent.Factory playbackFactory;
+    private SamplePlaybackEvent.Factory playbackFactory, musicPlaybackFactory;
     private MusicPlaybackEvent.Factory musicFactory;
     private LoopingSoundEvent.Factory loopFactory;
     private long soundRenderingFinishedSync;
@@ -141,6 +143,7 @@ public class SoundSystem {
 	    }// end call()
 	}).get();
 	
+	musicPlaybackFactory = new SamplePlaybackEvent.Factory(tr);
 	playbackFactory= new SamplePlaybackEvent.Factory(tr);
 	musicFactory   = new MusicPlaybackEvent.Factory(tr, getModStereoWidth());
 	loopFactory    = new LoopingSoundEvent.Factory(tr);
@@ -907,4 +910,37 @@ public class SoundSystem {
 		f.getEncoding()==Encoding.PCM_SIGNED &&
 		f.getSampleSizeInBits() % 8 == 0;
     }
+    
+    public SamplePlaybackEvent.Factory getMusicPlaybackFactory() {
+        return musicPlaybackFactory;
+    }
+
+    public Double getMusicVolume() {
+	final SamplePlaybackEvent.Factory factory = getMusicPlaybackFactory();
+	if( factory != null )
+            return factory.getVolume();
+	else
+	    return 1.;
+    }
+
+    public void setMusicVolume(Double musicVolume) {
+	final double oldValue = getMusicVolume();
+        getMusicPlaybackFactory().setVolume(musicVolume);
+        pcs.firePropertyChange(MUSIC_VOLUME, oldValue, musicVolume);
+    }
+
+    public Double getSfxVolume() {
+	final SamplePlaybackEvent.Factory factory = getPlaybackFactory();
+	if( factory != null )
+            return factory.getVolume();
+	else
+	    return 1.;
+    }
+
+    public void setSfxVolume(Double sfxVolume) {
+	final double oldValue = getSfxVolume();
+        getPlaybackFactory().setVolume(sfxVolume);
+        pcs.firePropertyChange(SFX_VOLUME, oldValue, sfxVolume);
+    }
+    
 }//end SoundSystem

@@ -38,7 +38,9 @@ public class SoundSystemConfiguratorFactory
 	    SoundSystem.FORMAT_BY_NAME,
 	    SoundSystem.OUTPUT_BY_NAME,
 	    SoundSystem.MOD_STEREO_WIDTH,
-	    SoundSystem.BUFFER_SIZE_FRAMES_STRING
+	    SoundSystem.BUFFER_SIZE_FRAMES_STRING,
+	    SoundSystem.MUSIC_VOLUME,
+	    SoundSystem.SFX_VOLUME
 	    //"componentConfigs"
     };
     private static final Set<String> PERSISTENT_PROPERTIES_SET = 

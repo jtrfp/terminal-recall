@@ -30,7 +30,7 @@ import de.quippy.javamod.multimedia.mod.loader.pattern.PatternElement;
 import de.quippy.javamod.multimedia.mod.loader.pattern.PatternRow;
 import de.quippy.javamod.system.Helpers;
 
-public class GPUResidentMOD {
+public class GPUResidentMOD {//TODO: This class needs optimizing
     private final TR tr;
     private final Module module;
     private SoundTexture [] samples;
@@ -135,7 +135,7 @@ public class GPUResidentMOD {
 			  if(noteLengthRows!=null)
 			      noteLengthRealtimeSeconds = Math.min(noteLengthRealtimeSeconds,noteLengthRows*realtimeSecondsPerRow);
 			  final SoundEvent evt = Features.get(tr,SoundSystemFeature.class).
-				  getPlaybackFactory().
+				  getMusicPlaybackFactory().
 				  create(texture,
 					  timeOffsetCounter+startOffsetInSeconds, 
 					  panState,

@@ -447,6 +447,8 @@ public class DEFObject extends WorldObject {
 	    break;
 	case cNome:// Walky bot?
 	    anchoring = Anchoring.terrain;
+	    addBehavior(new HorizAimAtPlayerBehavior(
+		    getGameShell().getGame().getPlayer()));
 	    defaultModelAssignment();
 	    break;
 	case cNomeLegs:// Walky bot?
@@ -463,24 +465,24 @@ public class DEFObject extends WorldObject {
 		    final DEFObject cNome = new DEFObject();
 		    EnemyDefinition ed = new EnemyDefinition();
 		    ed.setLogic(EnemyLogic.cNome);
-		    ed.setDescription("auto-generated enemy rubble def");
+		    ed.setDescription("auto-generated c-Nome");
 		    ed.setPowerupProbability(0);
 		    ed.setComplexModelFile("CNOME.BIN");//Is this hard-coded in the original?
 		    ed.setThrustSpeed(250000);
 		    EnemyPlacement simplePlacement = pl.clone();
 		    simplePlacement.setStrength(4096);
 		    simplePlacement.setYaw((int)(Math.random() * 65535.));
+		    cNome.setRuin(false);
 		    cNome.setEnemyDefinition(ed);
 		    cNome.setEnemyPlacement(simplePlacement);
 		    cNome.setActive(true);
 		    cNome.setVisible(true);
-		    cNome.setRuin(false);
 		    final double [] parentPos = getPosition();
 		    cNome.setPosition(new double[] { parentPos[0],
 			    0, parentPos[2] });
 		    cNome.notifyPositionChange();
-		    cNome.addBehavior(new HorizAimAtPlayerBehavior(
-			    getGameShell().getGame().getPlayer()));
+		    //cNome.addBehavior(new HorizAimAtPlayerBehavior(
+			//    getGameShell().getGame().getPlayer()));
 		    getContainingGrid().add(cNome);
 		}};
 	    addBehavior(new ExecuteOnInterval(5000, cNomeSpawnTask));

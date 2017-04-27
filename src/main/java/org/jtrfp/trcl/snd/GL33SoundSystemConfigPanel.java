@@ -37,25 +37,29 @@ import javax.swing.event.ChangeListener;
 
 import org.jtrfp.trcl.flow.CheckboxPropertyBinding;
 import org.jtrfp.trcl.flow.ComboBoxPropertyBinding;
+import org.jtrfp.trcl.flow.JSliderPropertyBinding;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
 import org.jtrfp.trcl.gui.LabelPropertyBinding;
 import org.jtrfp.trcl.gui.SoundOutputSelectorGUI;
 import org.jtrfp.trcl.tools.Util;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 
 public class GL33SoundSystemConfigPanel extends JPanel {
     private JCheckBox chckbxLinearInterpolation, chckbxBufferLag;
     private final SoundOutputSelectorGUI soundOutputSelectorGUI;
     private JComboBox<String> audioBufferSizeCB;
-	private JSlider modStereoWidthSlider;
+	private JSlider modStereoWidthSlider, musicVolumeSlider, sfxVolumeSlider;
     private ConfigWindow configWindow;
     private SoundSystem soundSystem;
     private boolean initialized = false;
     private volatile boolean isModifying = false;
     private Executor executor;
-    final JLabel modStereoWidthLbl = new JLabel("NN%");
+    final JLabel modStereoWidthLbl = new JLabel("NN%"), musicVolumeLbl = new JLabel("NN%"), sfxVolumeLbl = new JLabel("NN%");
     protected static final String [] BUFFER_SIZES = {
 	    "8192","4096","2048","1024","512","256"
     };
+    private JPanel musicVolumePanel, sfxVolumePanel;
     /*
     enum AudioBufferSize{
 	SAMPLES_8192(8192),
@@ -85,14 +89,14 @@ public class GL33SoundSystemConfigPanel extends JPanel {
     public GL33SoundSystemConfigPanel() {
 	GridBagLayout gbl_soundTab = new GridBagLayout();
 	    gbl_soundTab.columnWidths = new int[]{0, 0};
-	    gbl_soundTab.rowHeights = new int[]{65, 51, 70, 132, 0, 0, 0};
+	    gbl_soundTab.rowHeights = new int[]{65, 51, 0, 0, 70, 132, 0, 0, 0};
 	    gbl_soundTab.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-	    gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+	    gbl_soundTab.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 	    setLayout(gbl_soundTab);
 
 	    JPanel checkboxPanel = new JPanel();
 	    GridBagConstraints gbc_checkboxPanel = new GridBagConstraints();
-	    gbc_checkboxPanel.insets = new Insets(0, 0, 5, 0);
+	    gbc_checkboxPanel.insets = new Insets(0, 0, 5, 5);
 	    gbc_checkboxPanel.fill = GridBagConstraints.BOTH;
 	    gbc_checkboxPanel.gridx = 0;
 	    gbc_checkboxPanel.gridy = 0;
@@ -118,7 +122,7 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	    modStereoWidthPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "MOD Stereo Width", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 	    GridBagConstraints gbc_modStereoWidthPanel = new GridBagConstraints();
 	    gbc_modStereoWidthPanel.anchor = GridBagConstraints.NORTH;
-	    gbc_modStereoWidthPanel.insets = new Insets(0, 0, 5, 0);
+	    gbc_modStereoWidthPanel.insets = new Insets(0, 0, 5, 5);
 	    gbc_modStereoWidthPanel.fill = GridBagConstraints.HORIZONTAL;
 	    gbc_modStereoWidthPanel.gridx = 0;
 	    gbc_modStereoWidthPanel.gridy = 1;
@@ -137,6 +141,43 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 		    updateModStereoWidthProperty();
 		}});
 	    
+	    //MUSIC
+	    musicVolumePanel = new JPanel();
+	    musicVolumePanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Music Volume", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
+	    GridBagConstraints gbc_musicVolumePanel = new GridBagConstraints();
+	    gbc_musicVolumePanel.gridwidth = 0;
+	    gbc_musicVolumePanel.anchor = GridBagConstraints.NORTH;
+	    gbc_musicVolumePanel.insets = new Insets(0, 0, 5, 0);
+	    gbc_musicVolumePanel.fill = GridBagConstraints.HORIZONTAL;
+	    gbc_musicVolumePanel.gridx = 0;
+	    gbc_musicVolumePanel.gridy = 2;
+	    add(musicVolumePanel, gbc_musicVolumePanel);
+	    musicVolumePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+	    
+	    musicVolumeSlider = new JSlider();
+	    musicVolumeSlider.setPaintTicks(true);
+	    musicVolumeSlider.setMinorTickSpacing(25);
+	    musicVolumePanel.add(musicVolumeSlider);
+	    musicVolumePanel.add(musicVolumeLbl);
+	    
+	    //SFX
+	    sfxVolumePanel = new JPanel();
+	    sfxVolumePanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "SFX Volume", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
+	    GridBagConstraints gbc_sfxVolumePanel = new GridBagConstraints();
+	    gbc_sfxVolumePanel.anchor = GridBagConstraints.NORTH;
+	    gbc_sfxVolumePanel.fill = GridBagConstraints.HORIZONTAL;
+	    gbc_sfxVolumePanel.insets = new Insets(0, 0, 5, 5);
+	    gbc_sfxVolumePanel.gridx = 0;
+	    gbc_sfxVolumePanel.gridy = 3;
+	    add(sfxVolumePanel, gbc_sfxVolumePanel);
+	    sfxVolumePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+	    
+	    sfxVolumeSlider = new JSlider();
+	    sfxVolumeSlider.setPaintTicks(true);
+	    sfxVolumeSlider.setMinorTickSpacing(25);
+	    sfxVolumePanel.add(sfxVolumeSlider);
+	    sfxVolumePanel.add(sfxVolumeLbl);
+	    
 	    //TODO:
 	    JPanel bufferSizePanel = new JPanel();
 	    FlowLayout flowLayout_3 = (FlowLayout) bufferSizePanel.getLayout();
@@ -144,10 +185,10 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	    bufferSizePanel.setBorder(new TitledBorder(null, "Buffer Size", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 	    GridBagConstraints gbc_bufferSizePanel = new GridBagConstraints();
 	    gbc_bufferSizePanel.anchor = GridBagConstraints.NORTH;
-	    gbc_bufferSizePanel.insets = new Insets(0, 0, 5, 0);
+	    gbc_bufferSizePanel.insets = new Insets(0, 0, 5, 5);
 	    gbc_bufferSizePanel.fill = GridBagConstraints.HORIZONTAL;
 	    gbc_bufferSizePanel.gridx = 0;
-	    gbc_bufferSizePanel.gridy = 2;
+	    gbc_bufferSizePanel.gridy = 4;
 	    add(bufferSizePanel, gbc_bufferSizePanel);
 	    audioBufferSizeCB = new JComboBox();
 	    audioBufferSizeCB.setModel(new DefaultComboBoxModel<String>(BUFFER_SIZES));
@@ -157,10 +198,10 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	    soundOutputSelectorGUI.setBorder(new TitledBorder(null, "Output Driver", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 	    GridBagConstraints gbc_soundOutputSelectorGUI = new GridBagConstraints();
 	    gbc_soundOutputSelectorGUI.anchor = GridBagConstraints.NORTH;
-	    gbc_soundOutputSelectorGUI.insets = new Insets(0, 0, 5, 0);
+	    gbc_soundOutputSelectorGUI.insets = new Insets(0, 0, 5, 5);
 	    gbc_soundOutputSelectorGUI.fill = GridBagConstraints.HORIZONTAL;
 	    gbc_soundOutputSelectorGUI.gridx = 0;
-	    gbc_soundOutputSelectorGUI.gridy = 3;
+	    gbc_soundOutputSelectorGUI.gridy = 5;
 	    add(soundOutputSelectorGUI, gbc_soundOutputSelectorGUI);
     }//end constructor
     
@@ -180,6 +221,10 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	new CheckboxPropertyBinding(chckbxLinearInterpolation, soundSystem, SoundSystem.LINEAR_FILTERING           ).setExecutor(getExecutor());
 	new ComboBoxPropertyBinding(audioBufferSizeCB        , soundSystem, SoundSystem.BUFFER_SIZE_FRAMES_STRING  ).setExecutor(getExecutor());
 	new LabelPropertyBinding<Double>(SoundSystem.MOD_STEREO_WIDTH, soundSystem, modStereoWidthLbl, Double.class).setExecutor(getExecutor());
+	new LabelPropertyBinding<Double>(SoundSystem.MUSIC_VOLUME, soundSystem, musicVolumeLbl, Double.class       ).setExecutor(getExecutor());
+	new LabelPropertyBinding<Double>(SoundSystem.SFX_VOLUME,   soundSystem,   sfxVolumeLbl, Double.class       ).setExecutor(getExecutor());
+	new JSliderPropertyBinding(musicVolumeSlider, .01, soundSystem, SoundSystem.MUSIC_VOLUME, Double.class     ).setExecutor(executor);
+	new JSliderPropertyBinding(sfxVolumeSlider,   .01, soundSystem, SoundSystem.SFX_VOLUME,   Double.class     ).setExecutor(executor);
 	soundOutputSelectorGUI.init(soundSystem);
 	soundSystem.addPropertyChangeListener(SoundSystem.MOD_STEREO_WIDTH, new PropertyChangeListener(){
 	    @Override

@@ -86,6 +86,7 @@ import org.jtrfp.trcl.file.BINFile.AnimationControl;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.game.TVF3Game.Difficulty;
 import org.jtrfp.trcl.gpu.BINFileExtractor;
@@ -177,7 +178,16 @@ public class DEFObject extends WorldObject {
 	canTurn = true;
 	foliage = false;
 	boss = def.isObjectIsBoss();
-
+	
+	// KLUDGE: GEIGER.DEF specifies an out-of-range firing vertex and it crashes the engine. Sanitize this data.
+	{final BasicModelSource modelSource = getModelSource();
+	    Integer[] firingVertices = def.getFiringVertices();
+            int numVerts = def.getNumRandomFiringVertices();
+		    
+	    for(int index = 0; index < numVerts; index++)
+		try{modelSource.getVertex(firingVertices[index]);}
+		    catch(IndexOutOfBoundsException e){firingVertices[index]=0;}
+	}
 	final GameShell gameShell = getGameShell();
 	final TVF3Game game = (TVF3Game) gameShell.getGame();
 	final Player player = game.getPlayer();
@@ -206,6 +216,7 @@ public class DEFObject extends WorldObject {
 	
 	// UNIVERSAL
 	final DamageableBehavior damageableBehavior = new DamageableBehavior();
+	addBehavior(damageableBehavior);
 	// LOGIC
 	if (logic == null)
 	    return false;
@@ -450,9 +461,47 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new HorizAimAtPlayerBehavior(
 		    getGameShell().getGame().getPlayer()));
 	    defaultModelAssignment();
+	    // In TV, C-NOMEs spawn legs on death. In F3, this doesn't appear to happen
+	    if(game.getGameVersion() == GameVersion.TV){
+		final DEFObject cNomeLegs = new DEFObject();
+		EnemyDefinition ed = new EnemyDefinition();
+		ed.setLogic(EnemyLogic.cNomeLegs);
+		ed.setDescription("auto-generated c-Nome legs");
+		ed.setPowerupProbability(0);
+		ed.setComplexModelFile("LEGS.BIN");
+		ed.setThrustSpeed(0);
+		EnemyPlacement simplePlacement = pl.clone();
+		simplePlacement.setStrength(1024 * 32);
+		simplePlacement.setYaw(DEFObject.this.getEnemyPlacement().getYaw());
+		cNomeLegs.setRuin(true);
+		cNomeLegs.setEnemyDefinition(ed);
+		cNomeLegs.setEnemyPlacement(simplePlacement);
+		cNomeLegs.setActive(false);
+		cNomeLegs.setVisible(false);
+		cNomeLegs.setPosition(new double[] { -999999999999999999.,
+			-9999999999999999999., -999999999999999999. });// Relevant
+								       // nowhere
+		cNomeLegs.notifyPositionChange();
+		
+		getSubObjects().add(cNomeLegs);
+		//cNome.addBehavior(new HorizAimAtPlayerBehavior(
+		//    getGameShell().getGame().getPlayer()));
+		final Runnable cNomeDeathTask = new Runnable(){
+		    @Override
+		    public void run() {
+			cNomeLegs.setActive(true);
+			cNomeLegs.setVisible(true);
+			final double [] parentPos = getPosition();
+			cNomeLegs.setPosition(new double[] { parentPos[0],
+				0, parentPos[2] });
+			cNomeLegs.notifyPositionChange();
+		    }};
+		    addBehavior(new CustomDeathBehavior(cNomeDeathTask));
+	    }//end if(TV)
 	    break;
 	case cNomeLegs:// Walky bot?
 	    anchoring = Anchoring.terrain;
+	    mobile = false;
 	    defaultModelAssignment();
 	    break;
 	case cNomeFactory:
@@ -743,8 +792,8 @@ public class DEFObject extends WorldObject {
 	addBehavior(new TunnelRailed(tr));// Centers in tunnel when appropriate
 	addBehavior(new DeathBehavior());
 	final int newHealth = (int) ((pl.getStrength() + (spinCrash ? 16 : 0)));
-	addBehavior(damageableBehavior.setHealth(newHealth)
-		.setMaxHealth(newHealth).setEnable(!boss));
+	damageableBehavior.setHealth(newHealth)
+		.setMaxHealth(newHealth).setEnable(!boss);
 	setActive(!boss);
 	addBehavior(new DamagedByCollisionWithDEFObject());
 	if (!foliage)
@@ -802,7 +851,7 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new DamagedByCollisionWithPlayer(8024, 250));
 
 	proposeRandomYell();
-
+	
 	return true;
     }// end evaluate()
 

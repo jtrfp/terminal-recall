@@ -51,6 +51,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final double[] pan;
     private final double playbackRatio;
     private Double lengthInSeconds = null;
+    private double lowVolumeThreshold = .01;
     
     private SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
 		double[] pan, Factory origin, SoundEvent parent) {
@@ -92,6 +93,8 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     public void apply(GL2ES2 gl, double bufferStartTimeSeconds) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
 	final float factoryVolume = (float)origin.getVolume();
+	if( factoryVolume < getLowVolumeThreshold() )
+	    return;
 	origin.getPanU().set((float)getPan()[0]*factoryVolume, (float)getPan()[1]*factoryVolume);
 	final SoundSystem ss           = Features.get(getOrigin().getTR(),SoundSystemFeature.class);
 	final double bufferSizeSeconds = ss.getBufferSizeSeconds(),
@@ -308,5 +311,13 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
      */
     public double getPlaybackRatio() {
         return playbackRatio;
+    }
+
+    public double getLowVolumeThreshold() {
+        return lowVolumeThreshold;
+    }
+
+    public void setLowVolumeThreshold(double lowVolumeThreshold) {
+        this.lowVolumeThreshold = lowVolumeThreshold;
     }
 }//end SamplePlaybackEvent

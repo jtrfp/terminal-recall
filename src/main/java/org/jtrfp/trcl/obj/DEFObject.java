@@ -540,6 +540,7 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new HorizAimAtPlayerBehavior(
 		    getGameShell().getGame().getPlayer()));
 	    projectileFiringBehavior();
+	    boss = true;
 	    anchoring = Anchoring.terrain;
 	    mobile = false;
 	    defaultModelAssignment();

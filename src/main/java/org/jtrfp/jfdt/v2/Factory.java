@@ -18,7 +18,7 @@
  *     along with jTRFP.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package org.jtrfp.jfdt;
+package org.jtrfp.jfdt.v2;
 
 /**
  * Provides support for creating new objects programmatically. This is typically used by the parser

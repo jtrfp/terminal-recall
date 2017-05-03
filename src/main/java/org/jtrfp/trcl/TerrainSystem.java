@@ -98,15 +98,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	if (tunnels != null) {// Null means no tunnels
 	    for (int i = 0; i < tunnels.length; i++) {
 		final TDFFile.Tunnel tun = tunnels[i];
-		if (tun.getEntranceLogic() != TunnelLogic.invisible) {
-		    final TunnelPoint tp = new TunnelPoint(tun, true);
-		    points.put(tp.hashCode(), tp);
-		}
-		if (tun.getExitLogic() != TunnelLogic.invisible) {
-		    final TunnelPoint tp = new TunnelPoint(tun, false);
-		    points.put(tp.hashCode(), tp);
+		    final TunnelPoint tpEntrance = new TunnelPoint(tun, true);
+		    points.put(tpEntrance.hashCode(), tpEntrance);
+		    final TunnelPoint tpExit = new TunnelPoint(tun, false);
+		    points.put(tpExit.hashCode(), tpExit);
 		    tunnelsByName.put(tun.getTunnelLVLFile(), tunnels[i]);
-		}//end if(invisible)
 	    }// end for(tunnels)
 	}// end if(tunnels)
 	
@@ -172,7 +168,10 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 
 				    final Integer tpi = cX + cZ * 256;
 				    
-				    if(points.containsKey(tpi)){
+				    final TunnelPoint tunnelPoint = points.get(tpi);
+				    Texture td = null;
+				    
+				    if( tunnelPoint != null ){
 					final GL33Model portalModel = new GL33Model(false, tr,"PortalEntrance");
 					//Place a PortalEntrance
 					final Vector3D centroid = tL.add(tR).add(bR).add(bL).scalarMultiply(1./4.);
@@ -235,12 +234,19 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 					entrance.setPosition(centroid.add(heading.scalarMultiply(2000)).toArray());
 					entrance.notifyPositionChange();
 					add(entrance);
+					
+					if( tunnelPoint.isVisible() )
+					    td = tunnelPoint.getTexture();
 				    }//end if(tunnel)
 				    
+				    if( td == null )
+					td = textureMesh.textureAt(cX,cZ);
+				    /*
 				    Texture td = (Texture) (points
 					    .containsKey(tpi) ? points.get(tpi)
 					    .getTexture() : textureMesh.textureAt(cX,
 					    cZ));
+				    */
 				    Triangle[] tris = Triangle
 					    .quad2Triangles(
 						    // COUNTER-CLOCKWISE
@@ -390,6 +396,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 
     private class TunnelPoint{
 	final int x,z;
+	final boolean visible;
 	Texture textureToInsert;
 
 	public TunnelPoint(TDFFile.Tunnel tun, boolean entrance){
@@ -399,8 +406,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	    DirectionVector v = entrance?tun.getEntrance():tun.getExit();
 	    x = (int)TRFactory.legacy2MapSquare(v.getZ());
 	    z = (int)TRFactory.legacy2MapSquare(v.getX());
+	    //Both the entrance and exit must be invisible for it to be rendered invisible.
+	    visible = tun.getEntranceLogic() != TunnelLogic.invisible && tun.getExitLogic() != TunnelLogic.invisible;
 	}
 	public Texture getTexture(){return textureToInsert;}
+	public boolean isVisible(){return visible;}
 
 	@Override
 	public boolean equals(Object other){

@@ -435,7 +435,9 @@ public class Mission {
 	if(isShowIntro()){
 	    tr.setRunState(new EnemyBrief(){});
 	    displayHandler.setDisplayMode(briefingMode);
-	    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
+	    //Make sure there is actually something to show, skip if not.
+	    if(! lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt") )
+	        ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
 	    setShowIntro(false);
 	}
 	tr.setRunState(new OverworldState(){});
@@ -459,7 +461,10 @@ public class Mission {
 	    if(!missionEnd[0].isAbort()){
 		displayHandler.setDisplayMode(summaryMode);
 		tr.setRunState(new MissionSummary(){});
-		((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+		final boolean showEndBriefing = !lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt");
+		if( showEndBriefing )
+		    ((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
+		//TODO: Level end video
 	    }//end if(proper ending)
 	bgMusic.stop();
 	cleanup();

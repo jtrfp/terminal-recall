@@ -276,6 +276,7 @@ public abstract class NAVObjective {
 			    bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
+				    bossObject.setIgnoringProjectiles(false);
 				    wMission.get().enterBossMode(bos.getMusicFile(),bossObject);
 				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
 					.submitMomentaryUpfrontMessage("Mission Objective");

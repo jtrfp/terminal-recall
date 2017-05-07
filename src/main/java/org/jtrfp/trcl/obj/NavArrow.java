@@ -164,7 +164,7 @@ private GameShell gameShell;
 		return;
 	    final Vector3D normPlayer2NavVector = player2NavVectorXY.normalize();
 	    
-	    //Kludge to correct negative X bug in engine. (mirrored world)
+	    //XXX Kludge to correct negative X bug in engine. (mirrored world)
 	    final Vector3D correctedNormPlayer2NavVector = new Vector3D(-normPlayer2NavVector.getX(),normPlayer2NavVector.getY(),0);
 	    final Rotation camRot    = new Rotation(Vector3D.PLUS_J,playerHeadingXY);
 	    final Rotation renderRot = new Rotation(Vector3D.PLUS_K, Vector3D.PLUS_J,getHeading(),getTopOrigin());

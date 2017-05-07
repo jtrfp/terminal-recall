@@ -203,7 +203,7 @@ public class Mission {
     }//end RunStateListener
     
     public Result go() {
-	//Kludge to fulfill previous dependencies
+	//XXX Kludge to fulfill previous dependencies
 	tr.setRunState(new ConstructingState(){});
 	tr.setRunState(new ConstructedState(){});
 	
@@ -347,7 +347,7 @@ public class Mission {
 	    playerSaveState.writeTo(player);
 	    //////// PLAYER POSITIONS
 	    //player.setPosition(getStoredPlayerStartPosition()                     );
-	    //player.setHeading(new Vector3D(getStoredPlayerStartHeading())         );// Kludge to fix incorrect hdg
+	    //player.setHeading(new Vector3D(getStoredPlayerStartHeading())         );// XXX Kludge to fix incorrect hdg
 	    //player.setTop    (new Vector3D(getStoredPlayerStartTop())             );
 	    ///////// STATE
 	    final Propelled propelled = player.probeForBehavior(Propelled.class); 

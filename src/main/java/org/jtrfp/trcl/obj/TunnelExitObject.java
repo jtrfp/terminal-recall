@@ -152,7 +152,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    player.probeForBehavior(CollidesWithTunnelWalls.class)
 		    	    .setEnable(false);
 		    player.probeForBehavior(DamageableBehavior.class)
-			    .addInvincibility(250);// Safety kludge when near
+			    .addInvincibility(250);// XXX Safety kludge when near
 						   // walls.
 		    player.probeForBehavior(CollidesWithTerrain.class)
 			    .setEnable(true);

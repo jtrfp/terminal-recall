@@ -108,7 +108,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 		    .getLVL(sourceTunnel.getTunnelLVLFile());
 	    final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
 	    palette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
-	    palette[0] = new Color(0,0,0,0);//KLUDGE: Color zero must be transparent.
+	    palette[0] = new Color(0,0,0,0);//XXX KLUDGE: Color zero must be transparent.
 	    paletteVL = new ColorPaletteVectorList(palette);
 	    ESTuTvPalette = new ColorPaletteVectorList(tr.getResourceManager().getLTE("FOG\\"+lvl.getLuminanceMapFile()).toColors(palette));
 	    tunnelEnd = buildTunnel(sourceTunnel, entranceVector, false);
@@ -133,7 +133,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    objectSystem.setPositionOffset(TUNNEL_START_POS.add(TUNNEL_OBJECT_POS_OFFSET));
 	    objectSystem.setProgressReporter(reporters[1]);
 	    objectSystem.populateFromLVL(lvl);
-	    //KLUDGE: Negate def headings because they are backwards.
+	    //XXX KLUDGE: Negate def headings because they are backwards.
 	    for(DEFObject def:objectSystem.getDefList())
 		def.setHeading(def.getHeading().negate());
 	} catch (Exception e) {

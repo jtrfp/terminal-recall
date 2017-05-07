@@ -297,7 +297,7 @@ public class TVF3Game implements Game {
 	    }
 
 	    public synchronized void boot() throws IllegalAccessException, FileNotFoundException, IOException, FileLoadException {
-			//Kludge to fulfill previous dependency
+			//XXX Kludge to fulfill previous dependency
 			tr.setRunState(new GameConstructingMode(){});
 			tr.setRunState(new GameConstructedMode(){});
 			// Set up player, HUD, fonts...

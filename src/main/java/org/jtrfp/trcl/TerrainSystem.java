@@ -58,7 +58,7 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 		return result;
 	    }
 	}//end TSThreadFactory
-	
+	//XXX
 	    /*
 	     * Y_NUDGE is a kludge. There is a tiny sliver of space
 	     * between the ceiling and ground, likely caused by model

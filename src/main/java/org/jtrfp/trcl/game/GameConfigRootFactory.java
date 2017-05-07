@@ -34,7 +34,7 @@ public class GameConfigRootFactory implements FeatureFactory<TVF3Game>, LoadOrde
 	@Override
 	public void apply(TVF3Game target){
 	    super.apply(target);
-	    getSavestateSaveLoadConf();//Kludge to ensure Feature is extracted in non-display() thread.
+	    getSavestateSaveLoadConf();//XXX to ensure Feature is extracted in non-display() thread.
 	}
 
 	@Override

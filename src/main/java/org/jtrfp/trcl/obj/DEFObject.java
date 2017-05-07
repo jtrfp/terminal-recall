@@ -179,7 +179,7 @@ public class DEFObject extends WorldObject {
 	foliage = false;
 	boss = def.isObjectIsBoss();
 	
-	// KLUDGE: GEIGER.DEF specifies an out-of-range firing vertex and it crashes the engine. Sanitize this data.
+	// XXX KLUDGE: GEIGER.DEF specifies an out-of-range firing vertex and it crashes the engine. Sanitize this data.
 	{final BasicModelSource modelSource = getModelSource();
 	    Integer[] firingVertices = def.getFiringVertices();
             int numVerts = def.getNumRandomFiringVertices();
@@ -286,7 +286,7 @@ public class DEFObject extends WorldObject {
 	    //Speculative: Secondary mode doubles the shield?
 	    final EnemyPlacement ep = getEnemyPlacement();
 	    final int secondaryModeShield = ep.getStrength() * 2;
-	    //KLUDGE: Force boss mode on
+	    //XXX KLUDGE: Force boss mode on
 	    //TODO: Boss mode should only involve NAV targeting
 	    boss = true;
 	    damageableBehavior.setDieOnZeroHealth(false);

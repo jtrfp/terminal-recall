@@ -13,9 +13,9 @@
 
 package org.jtrfp.trcl.snd;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,13 +23,10 @@ import java.util.HashMap;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
-
-import org.jtrfp.trcl.gui.SoundOutputSelector;
 
 public class JavaSoundSystemAudioOutput implements AudioDriver {
     private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
@@ -82,7 +79,9 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    return;
 	ByteBuffer scratch = getBuffer();
 	
-	final int numIterations = getBufferSizeFrames() * format.getChannels();
+	final int bufferSizeFrames = getBufferSizeFrames();
+	final int numChannels = format.getChannels();
+	final int numIterations = bufferSizeFrames * numChannels;
 	for (int i = numIterations; i > 0; i--)
 	    putter.submit(scratch,source.get());
 	scratch.clear();
@@ -199,7 +198,8 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	if(devices==null){
 	    devices = new ArrayList<AudioDevice>();
 	    for(Mixer.Info i:AudioSystem.getMixerInfo())
-	     devices.add(new JavaSoundDevice(i,this));
+		 if(!i.toString().toLowerCase().contains("pulseaudio"))//XXX Blacklist the Pulseaudio device
+	             devices.add(new JavaSoundDevice(i,this));
 	}
 	return devices;
     }//end getDevices()

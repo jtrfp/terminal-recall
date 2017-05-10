@@ -144,10 +144,13 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
     @Override
     protected void setUIValue(final String newValue) {
+	final JComboBox comboBox = getComboBox();
+	if(comboBox == null)
+	    return;//Not ready
 	SwingUtilities.invokeLater(new Runnable(){
 	    @Override
 	    public void run() {
-		getComboBox().setSelectedItem(newValue);
+		comboBox.setSelectedItem(newValue);
 	    }});
     }
 

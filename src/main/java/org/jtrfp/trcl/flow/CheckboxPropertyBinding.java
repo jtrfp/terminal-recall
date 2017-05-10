@@ -50,11 +50,14 @@ public class CheckboxPropertyBinding extends AbstractPropertyBinding<Boolean> im
 
     @Override
     protected void setUIValue(final Boolean newValue) {
+	final AbstractButton button = getButton();
+	if( button == null )
+	    return;// Not ready.
 	SwingUtilities.invokeLater(new Runnable(){
 	    @Override
 	    public void run() {
 		System.out.println(getPropertyName()+" setUIValue: "+newValue);
-		getButton().setSelected(newValue);
+		button.setSelected(newValue);
 	    }});
     }
 

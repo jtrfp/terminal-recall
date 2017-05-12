@@ -21,8 +21,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -32,12 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -45,15 +41,12 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -66,11 +59,11 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.GraphStabilizationListener;
 import org.jtrfp.trcl.core.PODRegistry;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
-import org.jtrfp.trcl.flow.CheckboxPropertyBinding;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +76,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
     }//end main()
     */
 
-    public class ConfigWindow extends JFrame implements Feature<TR>{
+    public class ConfigWindow extends JFrame implements GraphStabilizationListener, Feature<TR>{
 	//private TRConfiguration config;
 	//private JComboBox audioBufferSizeCB;
 	//private JSlider modStereoWidthSlider;
@@ -669,8 +662,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    setTr             (tr = Features.get(Features.getSingleton(), TR.class));
 	    setTrConfigRoot   (Features.get(Features.getSingleton(), TRConfigRoot.class   ));
 	    setTrConfiguration(Features.get(tr,                      TRConfiguration.class));
-	    if(getTrConfiguration() != null)
-		readSettingsToPanel();
+	    
 	    final CollectionActionDispatcher<String> podRegistryCollection = getPodRegistry().getPodCollection();
 	    podRegistryCollection.addTarget(podCollectionListener, true);
 	}
@@ -682,11 +674,14 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	}
 
 	public void registerConfigTab(final ConfigurationTab configTab) {
+	    final String     name    = configTab.getTabName();
+	    final ImageIcon  icon    = configTab.getTabIcon();
+	    final JComponent content = configTab.getContent();
 	    try{
-	    SwingUtilities.invokeAndWait(new Runnable(){
+	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-		    tabbedPane.addTab(configTab.getTabName(),configTab.getTabIcon(),configTab.getContent());
+		    tabbedPane.addTab(name,icon,content);
 		}});
 	    }catch(Exception e){e.printStackTrace();}
 	    //dispatchComponentConfigs();
@@ -895,6 +890,12 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	
 	public void notifyNeedRestart(){
 	    needRestart = true;
+	}
+
+	@Override
+	public void graphStabilized(Object target) {
+	    if(getTrConfiguration() != null)
+		readSettingsToPanel();
 	}
     }//end ConfigWindow
 

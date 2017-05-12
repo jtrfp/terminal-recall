@@ -82,8 +82,9 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	final int bufferSizeFrames = getBufferSizeFrames();
 	final int numChannels = format.getChannels();
 	final int numIterations = bufferSizeFrames * numChannels;
-	for (int i = numIterations; i > 0; i--)
+	try{for (int i = numIterations; i > 0; i--)
 	    putter.submit(scratch,source.get());
+	}catch(BufferUnderflowException e){System.out.println("javaSoundSystem bufferSizeFrames="+bufferSizeFrames+" numChannels="+numChannels); throw e;}
 	scratch.clear();
 	try{
 	    final SourceDataLine sourceDataLine = getSourceDataLine();
@@ -156,6 +157,8 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
      * @param bufferSizeFrames the bufferSizeFrames to set
      */
     public synchronized void setBufferSizeFrames(int bufferSizeFrames) {
+	if( this.bufferSizeFrames == bufferSizeFrames )
+	    return;//No change.
         this.bufferSizeFrames = bufferSizeFrames;
         staleBuffer();
     }

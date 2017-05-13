@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2017 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -148,7 +148,7 @@ public class SoundSystem {
 	musicFactory   = new MusicPlaybackEvent.Factory(tr, getModStereoWidth());
 	loopFactory    = new LoopingSoundEvent.Factory(tr);
 	
-	new Thread() {
+	new Thread() {//TODO: This is not thread-safe with sound config changes!
 	    private final DynamicCompressor compressor = new DynamicCompressor();
 	    @Override
 	    public void run() {
@@ -722,12 +722,13 @@ public class SoundSystem {
     private void stalePlaybackFrameBuffer(){
 	lock.lock();try{
 	    if(playbackFrameBuffer!=null){
+		final GLFrameBuffer toDelete = playbackFrameBuffer;
 		tr.getThreadManager().submitToGL(new Callable<Void>(){
 		    @Override
 		    public Void call() throws Exception {
-			playbackFrameBuffer.destroy();
+			toDelete.destroy();
 			return null;
-		    }}).get();
+		    }});
 	    }//end playbackFrameBuffer!=null
 	    playbackFrameBuffer=null;
 	}finally{lock.unlock();}
@@ -768,12 +769,13 @@ public class SoundSystem {
     private void stalePlaybackTexture(){
 	lock.lock();try{
 	if(playbackTexture!=null){
+	    final GLTexture toDelete = playbackTexture;
 	    tr.getThreadManager().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
-		    playbackTexture.delete();//This fails with no-GL exception?!
+		    toDelete.delete();//This fails with no-GL exception?!
 		    return null;
-		}}).get();
+		}});
 	}//end playbackTexture!=null
         stalePlaybackFrameBuffer();
 	playbackTexture=null;

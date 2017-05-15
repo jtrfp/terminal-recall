@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2017 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -16,9 +16,9 @@ package org.jtrfp.trcl.gui;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
+import java.util.concurrent.Executor;
 
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioFormat.Encoding;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -39,12 +39,14 @@ public class SoundOutputSelectorGUI extends JPanel {
      */
     private static final long serialVersionUID = -6539874860140467626L;
     private JComboBox<String> driverSelectCB, deviceSelectCB, audioOutputCB, audioFormatCB;
+    private Executor executor;
 
     /**
      * Create the panel.
      */
     public SoundOutputSelectorGUI() {
 	super();
+	
     	setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     	
     	final DefaultComboBoxModel driverSelectCBM = new DefaultComboBoxModel();
@@ -232,6 +234,10 @@ public class SoundOutputSelectorGUI extends JPanel {
 	final ComboBoxPropertyBinding outputBinding = new ComboBoxPropertyBinding(audioOutputCB ,soundSystem,  SoundSystem.OUTPUT_BY_NAME);
 	final ComboBoxPropertyBinding formatBinding = new ComboBoxPropertyBinding(audioFormatCB ,soundSystem,  SoundSystem.FORMAT_BY_NAME);
 	
+	deviceBinding.setExecutor(getExecutor());
+	outputBinding.setExecutor(getExecutor());
+	formatBinding.setExecutor(getExecutor());
+	
 	soundSystem.addPropertyChangeListener(SoundSystem.ACTIVE_DEVICE, new PropertyChangeListener (){
 
 	    @Override
@@ -292,5 +298,13 @@ public class SoundOutputSelectorGUI extends JPanel {
 		}
 	    }});
 	*/
+    }
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
     }
 }//end SoundOutputSelector

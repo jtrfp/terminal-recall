@@ -225,6 +225,7 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	new LabelPropertyBinding<Double>(SoundSystem.SFX_VOLUME,   soundSystem,   sfxVolumeLbl, Double.class       ).setExecutor(getExecutor());
 	new JSliderPropertyBinding(musicVolumeSlider, .01, soundSystem, SoundSystem.MUSIC_VOLUME, Double.class     ).setExecutor(executor);
 	new JSliderPropertyBinding(sfxVolumeSlider,   .01, soundSystem, SoundSystem.SFX_VOLUME,   Double.class     ).setExecutor(executor);
+	soundOutputSelectorGUI.setExecutor(getExecutor());
 	soundOutputSelectorGUI.init(soundSystem);
 	soundSystem.addPropertyChangeListener(SoundSystem.MOD_STEREO_WIDTH, new PropertyChangeListener(){
 	    @Override

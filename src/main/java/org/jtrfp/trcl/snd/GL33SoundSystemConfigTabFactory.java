@@ -30,10 +30,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GL33SoundSystemConfigTabFactory
-	implements FeatureFactory<ConfigWindow> {
+	implements FeatureFactory<SoundSystem> {
 
-    @Override
-    public Feature<ConfigWindow> newInstance(ConfigWindow target)
+    @Override//XXX This must not be made a Feature for ConfigWindow because it will cause a dependency loop!
+    public Feature<SoundSystem> newInstance(SoundSystem target)
 	    throws FeatureNotApplicableException {
 	final GL33SoundSystemConfigTab result      = new GL33SoundSystemConfigTab();
 	final TR                       tr          = Features.get(Features.getSingleton(), TR.class);
@@ -47,8 +47,8 @@ public class GL33SoundSystemConfigTabFactory
     }
 
     @Override
-    public Class<ConfigWindow> getTargetClass() {
-	return ConfigWindow.class;
+    public Class<SoundSystem> getTargetClass() {
+	return SoundSystem.class;
     }
 
     @Override
@@ -56,20 +56,23 @@ public class GL33SoundSystemConfigTabFactory
 	return GL33SoundSystemConfigTab.class;
     }
     
-    public static class GL33SoundSystemConfigTab implements ConfigurationTab, Feature<ConfigWindow> {
+    public static class GL33SoundSystemConfigTab implements ConfigurationTab, Feature<SoundSystem> {
 	private GL33SoundSystemConfigPanel configPanel;
 	private SoundSystem soundSystem;
 	private ConfigWindow configWindow;
 	private Executor executor;
 
 	@Override
-	public void apply(ConfigWindow target) {
-	    setConfigWindow(target);
-	    target.registerConfigTab(this);
+	public void apply(SoundSystem target) {
+	    setSoundSystem(target);
+	    final TR tr = target.getTr();
+	    final ConfigWindow configWindow = Features.get(tr, ConfigWindow.class);
+	    setConfigWindow(configWindow);
+	    configWindow.registerConfigTab(this);
 	}
 
 	@Override
-	public void destruct(ConfigWindow target) {
+	public void destruct(SoundSystem target) {
 	    // TODO Auto-generated method stub
 	    
 	}
@@ -85,22 +88,13 @@ public class GL33SoundSystemConfigTabFactory
 		configPanel = new GL33SoundSystemConfigPanel();
 		configPanel.setExecutor(getExecutor());
 		configPanel.setSoundSystem (getSoundSystem ());
-		configPanel.setConfigWindow(getConfigWindow());
 		}
 	    return configPanel;
 	}
 
 	@Override
 	public ImageIcon getTabIcon() {
-	    return new ImageIcon(ConfigWindow.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png"));
-	}
-
-	public SoundSystem getSoundSystem() {
-	    return soundSystem;
-	}
-
-	public void setSoundSystem(SoundSystem soundSystem) {
-	    this.soundSystem = soundSystem;
+	    return new ImageIcon(SoundSystem.class.getResource("/org/freedesktop/tango/22x22/devices/audio-card.png"));
 	}
 
 	public ConfigWindow getConfigWindow() {
@@ -109,6 +103,14 @@ public class GL33SoundSystemConfigTabFactory
 
 	public void setConfigWindow(ConfigWindow configWindow) {
 	    this.configWindow = configWindow;
+	}
+
+	public SoundSystem getSoundSystem() {
+	    return soundSystem;
+	}
+
+	public void setSoundSystem(SoundSystem soundSystem) {
+	    this.soundSystem = soundSystem;
 	}
 
 	protected Executor getExecutor() {

@@ -58,7 +58,7 @@ public class FramebufferStateWindow extends JFrame {
     private void initialize() {
 	initialized=true;
 	// Sound frameBuffer
-	final GLFrameBuffer sfb = Features.get(tr,SoundSystemFeature.class)
+	/*final GLFrameBuffer sfb = Features.get(tr,SoundSystemFeature.class)
 		.getSoundOutputFrameBuffer();
 	if (sfb.getAttached2DDrawTextures().size() > 0) {
 	    final PropertyEditor pe = TRBeanUtils.getDefaultPropertyEditor(sfb);
@@ -70,6 +70,7 @@ public class FramebufferStateWindow extends JFrame {
 	    subPanel.setBorder(border);
 	    rootPanel.add(subPanel);
 	}// end if(size>0)
+	*/
 	final Renderer renderer = tr.mainRenderer;
 	BeanInfo rendererBeanInfo = null;
 	try {

@@ -69,6 +69,7 @@ public abstract class NAVObjective {
 	int counter;
 	private WorldObject worldBossObject,bossChamberExitShutoffTrigger;
 	private final String debugName;
+	private NAVObjective mostRecentExitObjective;
 	public Factory(TR tr, String debugName){
 	    this.tr=tr;
 	    this.debugName = debugName;
@@ -159,7 +160,7 @@ public abstract class NAVObjective {
 			}});
 		    indexedNAVObjectiveList.add(enterObjective);
 		    final TunnelExitObject tunnelExit = currentTunnel.getExitObject();
-		    final NAVObjective exitObjective = new NAVObjective(reporter, this){
+		    mostRecentExitObjective = new NAVObjective(reporter, this){
 			    @Override
 			    public String getDescription() {
 				return "Exit Tunnel";
@@ -169,7 +170,6 @@ public abstract class NAVObjective {
 				return tunnelExit;
 			    }
 		    };//end new NAVObjective tunnelExit
-		    navMap.put(enterObjective, navSubObject);
 		    final Point tunnelPoint = new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX()));
 		    /*
 		    //if(mission.getTunnelEntrancePortal(new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX())))==null){
@@ -197,8 +197,8 @@ public abstract class NAVObjective {
 			//mission.registerTunnelEntrancePortal(tunnelPoint, exit);
 		    //}
 			*/
-		    indexedNAVObjectiveList.add(exitObjective);
-		    tunnelExit.setNavObjectiveToRemove(exitObjective,true);
+		    indexedNAVObjectiveList.add(mostRecentExitObjective);
+		    tunnelExit.setNavObjectiveToRemove(mostRecentExitObjective,true);
 		    
 		    tunnelExit.setMirrorTerrain(currentTunnel.getSourceTunnel().getExitMode()==ExitMode.exitToChamber);
 		    
@@ -343,7 +343,10 @@ public abstract class NAVObjective {
 		} else if(navSubObject instanceof XIT){///////////////////////////////////////////
 		    XIT xit = (XIT)navSubObject;
 		    Location3D loc3d = xit.getLocationOnMap();
-		    currentTunnel.getExitObject().setExitLocation(
+		    navMap.put(mostRecentExitObjective, xit);
+		    currentTunnel.//XXX Site of race-condition NPE when loading from state.
+		     getExitObject().//TODO NPE on this line
+		     setExitLocation(
 			    new Vector3D(TRFactory.legacy2Modern(loc3d.getZ()),TRFactory.legacy2Modern(loc3d.getY()),TRFactory.legacy2Modern(loc3d.getX())));
 		} else if(navSubObject instanceof DUN){///////////////////////////////////////////
 		    final DUN xit = (DUN)navSubObject;

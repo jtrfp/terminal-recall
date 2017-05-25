@@ -341,11 +341,15 @@ public abstract class NAVObjective {
 		    overworld.add(chk);
 		    indexedNAVObjectiveList.add(objective);
 		} else if(navSubObject instanceof XIT){///////////////////////////////////////////
+		    if( currentTunnel == null ) {
+			System.err.println("XIT found without preceeding tunnel. Ignoring...");
+			return;
+		    }
 		    XIT xit = (XIT)navSubObject;
 		    Location3D loc3d = xit.getLocationOnMap();
 		    navMap.put(mostRecentExitObjective, xit);
-		    currentTunnel.//XXX Site of race-condition NPE when loading from state.
-		     getExitObject().//TODO NPE on this line
+		    currentTunnel.
+		     getExitObject().
 		     setExitLocation(
 			    new Vector3D(TRFactory.legacy2Modern(loc3d.getZ()),TRFactory.legacy2Modern(loc3d.getY()),TRFactory.legacy2Modern(loc3d.getX())));
 		} else if(navSubObject instanceof DUN){///////////////////////////////////////////

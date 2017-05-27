@@ -148,19 +148,18 @@ public class SoundSystem {
 		    Thread.currentThread().setName("SoundSystem");
 		    
 		    while (true) {
-			synchronized(paused){
-			    if(paused.get()){
+			//synchronized(paused){
+			    while(paused.get()){
 				final AudioDriver driver = getActiveDriver();
 				driver.setSource(SILENCE);
 				driver.flush();
-			    }while(paused.get())
-				paused.wait();
-			}//end sync()
+			    }//while(paused.get())
+				//paused.wait();
+			//}//end sync()
 			
 			while(getActiveFormat() == null || getActiveOutput() == null || getActiveDevice() == null)
 			    Thread.sleep(100);//Rolling loop waiting for valid state.
 			
-			  //TODO: Kernel call
 			soundSystemKernel.execute(bufferTimeCounter);
 			bufferTimeCounter += getBufferSizeSeconds();
 		    }// end while(true)

@@ -58,7 +58,7 @@ public class ReporterFactory implements FeatureFactory<TR>{
 	private JPanel infoBackdropPanel;
 	private JLabel lblStringValue;
 	private JLabel lblvalueHere;
-	private Executor reportExecutor = Executors.newSingleThreadExecutor();
+	//private Executor reportExecutor = Executors.newSingleThreadExecutor();
 	private Executor updateExecutor = Executors.newSingleThreadExecutor();
 	private final AtomicBoolean needsUpdating = new AtomicBoolean();
 
@@ -148,7 +148,7 @@ public class ReporterFactory implements FeatureFactory<TR>{
 	}//end refreshModeDetails()
 
 	public Reporter report(final String path, final String item){
-	    reportExecutor.execute(new Runnable(){
+	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
 		    Scanner dotScanner = new Scanner(path);

@@ -88,6 +88,7 @@ public class GL33SoundSystemConfigTabFactory
 		configPanel = new GL33SoundSystemConfigPanel();
 		configPanel.setExecutor(getExecutor());
 		configPanel.setSoundSystem (getSoundSystem ());
+		configPanel.setConfigWindow(configWindow);
 		}
 	    return configPanel;
 	}

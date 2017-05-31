@@ -107,7 +107,10 @@ public class GL33SoundSystemConfigPanel extends JPanel {
 	    chckbxLinearInterpolation.addItemListener(new ItemListener(){
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-		    getConfigWindow().notifyNeedRestart();
+		    final ConfigWindow configWindow = getConfigWindow();
+		    System.out.println("configWindow="+configWindow);
+		    if( configWindow != null )
+		        configWindow.notifyNeedRestart();
 		}});
 	    chckbxBufferLag = new JCheckBox("Buffer Lag");
 	    chckbxBufferLag.setToolTipText("Improves efficiency, doubles latency.");

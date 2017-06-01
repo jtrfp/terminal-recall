@@ -1127,18 +1127,22 @@ public class DEFObject extends WorldObject {
 	    smartPlaneBehavior(tr, def, retreatAboveSky);
 	    return;
 	}
-
 	final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior()
 		.setProjectileFactory(tr.getResourceManager()
 			.getProjectileFactories()[def.getWeapon().ordinal()]);
+	final ProjectileFiringBehavior secondaryPFB = new ProjectileFiringBehavior()
+		.setProjectileFactory(tr.getResourceManager()
+			.getProjectileFactories()[def.getSecondaryWeapon().ordinal()]);
 	try {
 	    pfb.addSupply(99999999);
+	    secondaryPFB.addSupply(99999999);
 	} catch (SupplyNotNeededException e) {
 	}
 	Integer[] firingVertices = Arrays.copyOf(def.getFiringVertices(),
 		def.getNumRandomFiringVertices());
 	pfb.setFiringPositions(getModelSource(), firingVertices);
 	addBehavior(pfb);
+	addBehavior(secondaryPFB);
 
 	possibleSpinAndCrashOnDeath(.4, def);
 	if (spinCrash) {
@@ -1167,13 +1171,27 @@ public class DEFObject extends WorldObject {
 	} // end if(spinCrash)
 
 	final AutoFiring afb = new AutoFiring();
+	final AutoFiring secondaryAFB = new AutoFiring();
+	final double secondWeaponDistance = TRFactory.legacy2Modern(def.getSecondWeaponDistance()) * TRFactory.mapSquareSize;
+	afb.setMaxFiringDistance(TRFactory.legacy2Modern(def.getAttackDistance()) * TRFactory.mapSquareSize);
+	afb.setMinFiringDistance(secondWeaponDistance);
+	secondaryAFB.setMaxFiringDistance(secondWeaponDistance);
 	afb.setMaxFireVectorDeviation(.7);
+	secondaryAFB.setMaxFireVectorDeviation(2);
+	//Fires 3 out of 7 times
 	afb.setFiringPattern(
 		new boolean[] { true, false, false, false, true, true, false });
+	secondaryAFB.setFiringPattern(
+		new boolean[] { true, false, false, false, true, true, false });
+	//Use the 3/7 ratio to compensate for the staggered shooting pattern in TRCL
 	afb.setTimePerPatternEntry(
-		Math.max(1, getEnemyDefinition().getFireSpeed() / 66));
+		Math.max(1, (int) (getEnemyDefinition().getFireSpeed() / 66 * (3./7.))));
+	secondaryAFB.setTimePerPatternEntry(
+		Math.max(1, (int) (getEnemyDefinition().getFireSpeed() / 66 * (3./7.))));
 	afb.setPatternOffsetMillis((int) (Math.random() * 1000));
+	secondaryAFB.setPatternOffsetMillis((int) (Math.random() * 1000));
 	afb.setProjectileFiringBehavior(pfb);
+	secondaryAFB.setProjectileFiringBehavior(secondaryPFB);
 	try {
 	    final TVF3Game tvf3 = (TVF3Game) getGameShell().getGame();
 	    if (tvf3.getDifficulty() != Difficulty.EASY)
@@ -1181,6 +1199,7 @@ public class DEFObject extends WorldObject {
 	} catch (ClassCastException e) {
 	} // Not a TVF3 Game
 	addBehavior(afb);
+	addBehavior(secondaryAFB);
 	/*
 	 * addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
 	 * "FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));
@@ -1205,17 +1224,23 @@ public class DEFObject extends WorldObject {
 	final AdjustAltitudeToPlayerBehavior aatpb = new AdjustAltitudeToPlayerBehavior(
 		getGameShell().getGame().getPlayer()).setAccelleration(1000);
 	addBehavior(aatpb);
+	final ResourceManager resourceManager = tr.getResourceManager();
 	final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior()
-		.setProjectileFactory(tr.getResourceManager()
+		.setProjectileFactory(resourceManager
 			.getProjectileFactories()[def.getWeapon().ordinal()]);
+	final ProjectileFiringBehavior secondaryPFB = new ProjectileFiringBehavior()
+	.setProjectileFactory(resourceManager
+		.getProjectileFactories()[def.getSecondaryWeapon().ordinal()]);
 	try {
 	    pfb.addSupply(99999999);
+	    secondaryPFB.addSupply(99999999);
 	} catch (SupplyNotNeededException e) {
 	}
 	Integer[] firingVertices = Arrays.copyOf(def.getFiringVertices(),
 		def.getNumRandomFiringVertices());
 	pfb.setFiringPositions(getModelSource(), firingVertices);
 	addBehavior(pfb);
+	addBehavior(secondaryPFB);
 
 	possibleSpinAndCrashOnDeath(.4, def);
 	if (spinCrash) {
@@ -1240,20 +1265,31 @@ public class DEFObject extends WorldObject {
 	    escapeProp.setThrustVector(new Vector3D(0, .1, 0)).setEnable(false);
 	    addBehavior(escapeProp);
 	}
+	final AutoFiring secondaryAFB = new AutoFiring();
 	final AutoFiring afb = new AutoFiring();
-	afb.setMaxFireVectorDeviation(.7);
+	afb         .setMaxFireVectorDeviation(.7);
+	secondaryAFB.setMaxFireVectorDeviation(2);
 	afb.setFiringPattern(
 		new boolean[] { true, false, false, false, true, true, false });
-	afb.setTimePerPatternEntry((int) ((200 + Math.random() * 200)));
+	secondaryAFB.setFiringPattern(
+		new boolean[] { true, false, true, false, false, false, false });
+	afb.setTimePerPatternEntry((int) ((200 + Math.random() * 200)));//TODO: Use firing rate!
+	secondaryAFB.setTimePerPatternEntry((int) ((200 + Math.random() * 200)));//TODO: Use firing rate!
 	afb.setPatternOffsetMillis((int) (Math.random() * 1000));
+	secondaryAFB.setPatternOffsetMillis((int) (Math.random() * 1000));
 	afb.setProjectileFiringBehavior(pfb);
+	secondaryAFB.setProjectileFiringBehavior(pfb);
 	try {
 	    final TVF3Game tvf3 = (TVF3Game) getGameShell().getGame();
-	    if (tvf3.getDifficulty() != Difficulty.EASY)
+	    Difficulty difficulty = tvf3.getDifficulty();
+	    if (difficulty != Difficulty.EASY)
 		afb.setSmartFiring(true);
+	    if (difficulty == Difficulty.HARD || difficulty == Difficulty.FURIOUS)
+		secondaryAFB.setSmartFiring(true);
 	} catch (ClassCastException e) {
 	} // Not a TVF3 Game
 	addBehavior(afb);
+	addBehavior(secondaryAFB);
 	final SpinAccellerationBehavior sab = (SpinAccellerationBehavior) new SpinAccellerationBehavior()
 		.setEnable(false);
 	addBehavior(sab);

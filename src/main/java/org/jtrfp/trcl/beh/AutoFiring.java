@@ -125,8 +125,8 @@ public class AutoFiring extends Behavior {
      * @param maxFiringDistance the maxFiringDistance to set
      */
     public AutoFiring setMaxFiringDistance(double maxFiringDistance) {
-	if(!(maxFiringDistance > 0))
-	    throw new IllegalArgumentException("maxFiringDistance must be greater than zero.");
+	if(maxFiringDistance < 0)
+	    throw new IllegalArgumentException("maxFiringDistance must be zero or greater");
         this.maxFiringDistance = maxFiringDistance;
         return this;
     }
@@ -140,8 +140,8 @@ public class AutoFiring extends Behavior {
      * @param minFiringDistance the minFiringDistance to set
      */
     public AutoFiring setMinFiringDistance(double minFiringDistance) {
-	if(!(minFiringDistance > 0))
-	    throw new IllegalArgumentException("minFiringDistance must be greater than zero.");
+	if(minFiringDistance < 0)
+	    throw new IllegalArgumentException("minFiringDistance must zero or greater.");
         this.minFiringDistance = minFiringDistance;
         return this;
     }

@@ -123,6 +123,7 @@ public class FeaturesImpl {
 	   catch(ClassCastException e){
 	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName());
 	   }
+	   System.out.println(result);
 	   registerFeatureByClassRecursively(result.getClass(), result, featuresByClass);
 	   result.apply(target);
 	   init(result);
@@ -145,6 +146,13 @@ public class FeaturesImpl {
      final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
      return (T)getFeature(fMap,(Class<Feature>)featureClass,target);
     }//end get(...)
+    
+    public <T> T getByPath(Object target, Class<T> lastClass, Class<?> ... featurePathNotIncludingLastClass){
+	Object node = target;
+	for(Class<?> clazz : featurePathNotIncludingLastClass)
+	    node = get(node, clazz);
+	return get(node, lastClass);
+    }//end getByPath(...)
 
     public void getAllFeaturesOf(Object target, Set dest) {
 	final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);

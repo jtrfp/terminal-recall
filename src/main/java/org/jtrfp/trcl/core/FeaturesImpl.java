@@ -123,7 +123,6 @@ public class FeaturesImpl {
 	   catch(ClassCastException e){
 	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName());
 	   }
-	   System.out.println(result);
 	   registerFeatureByClassRecursively(result.getClass(), result, featuresByClass);
 	   result.apply(target);
 	   init(result);

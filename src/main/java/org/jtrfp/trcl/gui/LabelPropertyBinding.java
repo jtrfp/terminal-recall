@@ -31,7 +31,8 @@ extends AbstractPropertyBinding<PROPERTY_TYPE> {
 	SwingUtilities.invokeLater(new Runnable(){
 	    @Override
 	    public void run() {
-		label.setText(newValue.toString());
+		if(label != null)
+		    label.setText(newValue.toString());
 	    }});
     }//end setUIValue
 }//end LabelPropertyBinding

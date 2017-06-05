@@ -70,7 +70,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private boolean	needToRecalcMatrix=true;
     private TR  	tr;
     private boolean 	visible = true;
-    private TRFuture<GL33Model>model;
+    private GL33Model   model;
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected volatile Integer 	matrixID;
@@ -235,14 +235,11 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private final int [] emptyIntArray = new int[0];
     
     public void setModel(GL33Model m) {
-	final TRFuture<GL33Model> thisModelFuture = this.model;
-	if (m == null){
-	    if(thisModelFuture != null)
-	     releaseCurrentModel();
-	    return;
-	}
-	if(thisModelFuture != null)
+	final GL33Model previousModel = this.model;
+	if(previousModel != null)
 	    releaseCurrentModel();
+	if( m == null )
+	    return;
 	try{this.model = m.finalizeModel();
 	    refreshObjectDefinitions();
 	}catch(Exception e){throw new RuntimeException(e);}
@@ -292,17 +289,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		+ this.getPosition() + " class=" + getClass().getName()+" hash="+hashCode();
     }
 
-    public final void refreshObjectDefinitions() throws NotReadyException {
+    public final void refreshObjectDefinitions() {
 	//if(objectDefsInitialized)
 	//    return;
 	if (model == null)
 	    throw new NullPointerException(
 		    "Model is null. Did you forget to set it? Object in question is: \n"+this.toString());
-	final TR tr = getTr();
-	objectDefinitionsFuture = tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-	    @Override
-	    public Void call() throws Exception {
-		try{Thread.currentThread().setName("WorldObject.objectDefinitionsFuture "+hashCode());
+	//final TR tr = getTr();
+	//objectDefinitionsFuture = tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    //@Override
+	    //public Void call() throws Exception {
+		try{//Thread.currentThread().setName("WorldObject.objectDefinitionsFuture "+hashCode());
 		    //tr.getThreadManager().submitToGPUMemAccess(new Callable<Void>(){
 		    //    @Override
 		    //    public Void call() throws Exception {
@@ -318,10 +315,10 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		    //   }}).get();
 		    updateAllRenderFlagStates(objectDefContextWindow);
 		    objectDefContextWindow.flush();
-		    Thread.currentThread().setName("Freed by "+hashCode());
+		    //Thread.currentThread().setName("Freed by "+hashCode());
 		}catch(Exception e){e.printStackTrace();}
-		return null;
-	    }});
+		//return null;
+	    //}});
     }// end initializeObjectDefinitions()
 
     private void processPrimitiveList(PrimitiveList<?> primitiveList,
@@ -673,13 +670,14 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     public GL33Model getModel() {
-	try{return model.get();}
-	catch(NullPointerException e){return null;}
-	catch(Exception e){throw new RuntimeException(e);}
+	//try{return model.get();}
+	//catch(NullPointerException e){return null;}
+	//catch(Exception e){throw new RuntimeException(e);}
+	return model;
     }
     
     public GL33Model getModelRealtime() throws NotReadyException{
-	return model.getRealtime();
+	return model;
     }
 
     /**

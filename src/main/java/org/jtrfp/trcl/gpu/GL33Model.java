@@ -50,7 +50,7 @@ public class GL33Model implements Model {
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
     private boolean modelFinalized = false;
-    private TRFuture<GL33Model> finalizedModel;
+    private GL33Model finalizedModel;
     //Keeps hard references to Textures to keep them from getting gobbled.
     private final HashSet<Texture> textures = new HashSet<Texture>();
 
@@ -65,14 +65,14 @@ public class GL33Model implements Model {
     }
 
     public TriangleList getTriangleList() {
-	try{finalizedModel.get();}
-	catch(Exception e){throw new RuntimeException(e);}
+	//try{finalizedModel.get();}
+	//catch(Exception e){throw new RuntimeException(e);}
 	return tpList;
     }
 
     public TransparentTriangleList getTransparentTriangleList() {
-	try{finalizedModel.get();}
-	catch(Exception e){throw new RuntimeException(e);}
+	//try{finalizedModel.get();}
+	//catch(Exception e){throw new RuntimeException(e);}
 	return ttpList;
     }
 
@@ -131,17 +131,17 @@ public class GL33Model implements Model {
      * 
      * @return
      */
-    public TRFuture<GL33Model> finalizeModel() {
+    public GL33Model finalizeModel() {
 	if(tr  == null)
 	    return null;//Mock tolerance.
 	if(finalizedModel != null)
 	    return finalizedModel;
-	return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<GL33Model>(){
-	    @Override
-	    public GL33Model call() throws Exception {
+	//return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<GL33Model>(){
+	    //@Override
+	    //public GL33Model call() throws Exception {
 		Future<Void> tpFuture=null, ttpFuture=null;
-		if(modelFinalized)
-		    return GL33Model.this;
+		//if(modelFinalized)
+		//    return GL33Model.this;
 		modelFinalized = true;
 		if(animated)//Discard frame zero
 		    {tLists.remove(0);ttLists.remove(0);}
@@ -185,8 +185,10 @@ public class GL33Model implements Model {
 		 ttLists=null;
 		 lsLists=null;
 		}//end scope numframes
-		return GL33Model.this;
-	    }});
+		//return GL33Model.this;
+	    //}});
+		finalizedModel = this;
+		return this;
     }// end finalizeModel()
 
     public void addFrame(GL33Model m) {

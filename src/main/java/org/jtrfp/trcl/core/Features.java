@@ -63,6 +63,12 @@ public class Features {
      return impl.get(target, featureClass);
     }//end get(...)
     
+    public synchronized static <T> T getByPath(Object target, Class<T>lastClassInPath, Class<?> ... featurePathNotIncludingLastClass){
+	if(target == null)
+	    target = getSingleton();
+	return impl.getByPath(target, lastClassInPath, featurePathNotIncludingLastClass);
+    }//end getByPath(...)
+    
     public synchronized static void getAllFeaturesOf(Object target, Set dest){
 	impl.getAllFeaturesOf(target,dest);
     }

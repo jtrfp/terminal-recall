@@ -80,6 +80,7 @@ public class ThreadManager implements GLExecutor<GL3>{
     public final Queue<TRFutureTask<?>>    activeGPUMemAccessTasks = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
     public final ArrayList<Callable<?>>repeatingGPUMemAccessTasks  = new ArrayList<Callable<?>>();
     public final List<Callable<?>>repeatingGLTasks	           = new CopyOnWriteArrayList<Callable<?>>();
+    private long timeElapsedInMillisSinceLastGameTickAfterLastPause = 0L;
     
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
 	@Override
@@ -113,7 +114,10 @@ public class ThreadManager implements GLExecutor<GL3>{
     
     private void gameplay() {
 	final long tickTimeInMillis = System.currentTimeMillis();
-	timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
+	if(lastGameplayTickTime != 0)
+	    timeInMillisSinceLastGameTick = tickTimeInMillis - lastGameplayTickTime;
+	else
+	    timeInMillisSinceLastGameTick = 0;
 	boolean alreadyVisitedPlayer=false;
 	Renderer [] renderers = new Renderer[]{tr.mainRenderer/* ,tr.secondaryRenderer*/ };//TODO: This is hacky.
 	visibilityListBuffer.clear();
@@ -302,9 +306,15 @@ public class ThreadManager implements GLExecutor<GL3>{
     }
 
     public void setPaused(boolean paused) {
-	synchronized(this.paused)
-	 {this.paused[0]=paused;}
-    }
+	synchronized(this.paused){
+	    this.paused[0] = paused;
+	    //Retain the tick-time-passed between pause-ings so we don't get a sudden jerk when un-pausing
+	    if(paused)
+		timeElapsedInMillisSinceLastGameTickAfterLastPause = this.getElapsedTimeInMillisSinceLastGameTick();
+	    if(!paused)
+		lastGameplayTickTime=System.currentTimeMillis() - timeElapsedInMillisSinceLastGameTickAfterLastPause;
+	    }//end sync
+    }//end setPaused(...)
 
     public <T>TRFutureTask<T> submitToThreadPool(boolean handleException,
 	    Callable<T> callable) {

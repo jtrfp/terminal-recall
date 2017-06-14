@@ -63,12 +63,12 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectDirection;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Player.PlayerSaveState;
 import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.Propelled;
 import org.jtrfp.trcl.obj.SpawnsRandomExplosionsAndDebris;
 import org.jtrfp.trcl.obj.WorldObject;
-import org.jtrfp.trcl.obj.Player.PlayerSaveState;
 import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
@@ -138,7 +138,7 @@ public class Mission {
     private Game 		game;
     private String       	levelName;
     private OverworldSystem 	overworldSystem;
-    private final Result[]	missionEnd = new Result[]{null};
+    //private final Result[]	missionEnd = new Result[]{null};
     private int			groundTargetsDestroyed=0,
 	    			airTargetsDestroyed=0,
 	    			foliageDestroyed=0;
@@ -173,16 +173,21 @@ public class Mission {
     public interface ActiveMissionState extends ConstructedState{}
     
      public interface LoadingState      extends ActiveMissionState{}
+      public interface LoadingComplete   extends LoadingState{}
      public interface GameplayState     extends ActiveMissionState{}
       public interface Briefing        extends GameplayState{}
        public interface PlanetBrief     extends Briefing{}
        public interface EnemyBrief      extends Briefing{}
-       public interface MissionSummary  extends Briefing{}
+      // public interface MissionSummary  extends Briefing{}// Declared below
       public interface PlayerActivity  extends GameplayState{}
        public interface OverworldState  extends PlayerActivity{}
        public interface SatelliteState   extends OverworldState{}
        public interface ChamberState    extends PlayerActivity{}
        public interface TunnelState     extends PlayerActivity{}
+      public interface MissionEnd extends GameplayState{}
+       public interface MissionAbort extends MissionEnd{}
+       public interface MissionComplete extends MissionEnd{}
+       public interface PlayerDied extends MissionEnd{}
     
     public Mission() {
 	this.tr 	    = Features.get(Features.getSingleton(), TR.class);
@@ -197,14 +202,86 @@ public class Mission {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 	    final Object newState = evt.getNewValue();
-	    if(newState instanceof Game.GameDestructingMode)
+	    final Object oldState = evt.getOldValue();
+	    //TODO: Add listener removal code here like with MissionStartRunStateListener
+	    if(newState instanceof Game.GameDestructingMode && !(oldState instanceof Game.GameDestructingMode))
 		abort();
+	    if(! (newState instanceof MissionState) && oldState instanceof MissionState)//Cleanup
+		tr.removePropertyChangeListener(TRFactory.RUN_STATE, this);
 	}//end propertyChange(...)
     }//end RunStateListener
-    
-    public Result go() {
+	
+	public void notifyMissionComplete(){
+	    MissionSummary summary;
+	    tr.setRunState(summary = new Mission.MissionSummary(
+		    getAirTargetsDestroyed(),
+		    getGroundTargetsDestroyed(),
+		    getFoliageDestroyed()/*,
+		    1.-(double)mission.getTunnelsRemaining().size()/(double)mission.getTotalNumTunnels()*/
+		    ));
+		displayHandler.setDisplayMode(summaryMode);
+		final boolean showEndBriefing = !lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt");
+		if( showEndBriefing )
+		    ((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,summary);
+		bgMusic.stop();
+		cleanup();
+		((TVF3Game)game).notifyMissionComplete();
+		//TODO: Level end video
+	}//End missionSummaryMode()
+
+	private void startGameplay(){
+	    final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
+	    MusicPlaybackEvent mpe;
+
+	    Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
+		    mpe =ss
+		    .getMusicFactory()
+		    .create(new GPUResidentMOD(tr, tr
+			    .getResourceManager().getMOD(
+				    lvl.getBackgroundMusicFile())),
+			    true));
+
+	    //synchronized(Mission.this){
+	    if(bgMusic==null){
+		bgMusic=mpe;
+		bgMusic.play();
+	    }
+
+	    //}//end sync(Mission.this)
+	    ((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
+	    Features.get(tr,SoundSystemFeature.class).setPaused(false);
+	    tr.getThreadManager().setPaused(false);
+
+	    if(isShowIntro()){//TODO: Does this need to be refactored?
+		tr.setRunState(new EnemyBrief(){});
+		displayHandler.setDisplayMode(briefingMode);
+
+		//Make sure there is actually something to show, skip if not.
+		if(! lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt") )
+		    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
+		setShowIntro(false);
+
+	    }//end if(isShowIntro)
+	    tr.setRunState(new OverworldState(){});
+	    final SkySystem skySystem = getOverworldSystem().getSkySystem();
+	    final Renderer renderer = tr.mainRenderer;
+	    renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+	    renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
+	    renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
+	    renderer.setSunColor(skySystem.getSuggestedSunColor());
+	    ((TVF3Game)game).getNavSystem() .activate();
+	    displayHandler.setDisplayMode(overworldMode);
+
+	    ((TVF3Game)game).getPlayer()	.setActive(true);
+	    ((TVF3Game)getGameShell().getGame()).setPaused(false);
+	    //tr.setRunState(new PlayerActivity(){});
+	}//end startGameplay()
+
+    public void go() {
 	//XXX Kludge to fulfill previous dependencies
 	tr.setRunState(new ConstructingState(){});
+	//TODO Install runstate loader hooks
+	//tr.addPropertyChangeListener(TRFactory.RUN_STATE, missionStartListener);
 	tr.setRunState(new ConstructedState(){});
 	
 	Util.assertPropertiesNotNull(this,
@@ -214,11 +291,11 @@ public class Mission {
 	tr.setRunState(new LoadingState(){});
 	final LVLFile lvlData = getLvl();
 	
-	synchronized(missionLock){
-	synchronized(missionEnd){
-	    if(missionEnd[0]!=null)
-		return missionEnd[0]; 
-	}
+	//synchronized(missionLock){
+	//synchronized(missionEnd){
+	//    if(missionEnd[0]!=null)
+	//	return missionEnd[0]; 
+	//}
 	tr.getThreadManager().setPaused(true);
 	for(ProjectileFactory pf:tr.getResourceManager().getProjectileFactories())
 	    for(Projectile proj:pf.getProjectiles())
@@ -248,10 +325,10 @@ public class Mission {
 	    final TDFFile tdf 	     = rm.getTDFData(lvlData.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check
-	    synchronized(missionEnd){
-		if(missionEnd[0]!=null)
-		return missionEnd[0]; 
-	    }
+	    //synchronized(missionEnd){
+		//if(missionEnd[0]!=null)
+		//return missionEnd[0]; 
+	    //}
 	    
 	    setOverworldSystem(new OverworldSystem(tr,
 		    progressStages[LoadingStages.overworld.ordinal()]));
@@ -310,6 +387,7 @@ public class Mission {
 		final Reporter reporter = Features.get(getTr(), Reporter.class);
 		for (int i = 0; i < navSubObjects.size(); i++) {
 		    final NAVSubObject obj = navSubObjects.get(i);
+		    System.out.println("Parsing NAV Sub-Object "+obj);
 		    f.create(reporter, obj, navs, navMap);
 		    //navProgress[i].complete();
 		}// end for(navSubObjects)
@@ -407,69 +485,22 @@ public class Mission {
 	    }
 	}// end if(containsKey)
 	// Transition to gameplay mode.
+	tr.setRunState(new LoadingComplete(){});
+	startGameplay();
 	// Abort check
-	synchronized (missionEnd) {
-	    if (missionEnd[0] != null)
-		return missionEnd[0];
-	}//end sync(missionEnd)
+	//synchronized (missionEnd) {
+	//    if (missionEnd[0] != null)
+	//	return missionEnd[0];
+	//}//end sync(missionEnd)
 	
-		final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
-		MusicPlaybackEvent evt;
-		Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
-			evt =ss
-				.getMusicFactory()
-				.create(new GPUResidentMOD(tr, tr
-					.getResourceManager().getMOD(
-						lvlData.getBackgroundMusicFile())),
-					 true));
-		synchronized(Mission.this){
-		 if(bgMusic==null){
-		  bgMusic=evt;
-		  bgMusic.play();   
-		 }
-		 
-		 }//end sync(Mission.this)
-	((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
-	Features.get(tr,SoundSystemFeature.class).setPaused(false);
-	tr.getThreadManager().setPaused(false);
-	if(isShowIntro()){
-	    tr.setRunState(new EnemyBrief(){});
-	    displayHandler.setDisplayMode(briefingMode);
-	    //Make sure there is actually something to show, skip if not.
-	    if(! lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt") )
-	        ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
-	    setShowIntro(false);
-	}
-	tr.setRunState(new OverworldState(){});
-	final SkySystem skySystem = getOverworldSystem().getSkySystem();
-	tr.mainRenderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
-	renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
-	renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
-	renderer.setSunColor(skySystem.getSuggestedSunColor());
-	((TVF3Game)game).getNavSystem() .activate();
-	displayHandler.setDisplayMode(overworldMode);
-	
-	((TVF3Game)game).getPlayer()	.setActive(true);
-	((TVF3Game)getGameShell().getGame()).setPaused(false);
-	//tr.setRunState(new PlayerActivity(){});
 	//Wait for mission end
-	synchronized(missionEnd){
+	//TODO: Make this non-blocking, use listener to complete.
+	/*synchronized(missionEnd){
 	 while(missionEnd[0]==null){try{missionEnd.wait();}
 		catch(InterruptedException e){break;}}}
-	//Completion summary
-	if(missionEnd[0]!=null)
-	    if(!missionEnd[0].isAbort()){
-		displayHandler.setDisplayMode(summaryMode);
-		tr.setRunState(new MissionSummary(){});
-		final boolean showEndBriefing = !lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt");
-		if( showEndBriefing )
-		    ((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,missionEnd[0]);
-		//TODO: Level end video
-	    }//end if(proper ending)
-	bgMusic.stop();
-	cleanup();
-	return missionEnd[0];
+		
 	}//end sync
+	*/
     }// end go()
     
     private LVLFile getLvl() {
@@ -510,11 +541,11 @@ public class Mission {
 	catch(IndexOutOfBoundsException e){setCurrentNavTarget(null);}
     }
 
-    public static class Result {
+    public static class MissionSummary implements Briefing {
 	private final int airTargetsDestroyed, groundTargetsDestroyed,foliageDestroyed;
 	private boolean abort=false;
 
-	public Result(int airTargetsDestroyed, int groundTargetsDestroyed, int foliageDestroyed) {
+	public MissionSummary(int airTargetsDestroyed, int groundTargetsDestroyed, int foliageDestroyed) {
 	    this.airTargetsDestroyed	=airTargetsDestroyed;
 	    this.groundTargetsDestroyed	=groundTargetsDestroyed;
 	    this.foliageDestroyed	=foliageDestroyed;
@@ -575,22 +606,24 @@ public class Mission {
 	return playerStartPosition;
     }
 
-    public void playerDestroyed() {
-	new Thread() {
-	    @Override
-	    public void run() {
+    public void notifyPlayerDestroyed() {
+	//new Thread() {
+	//    @Override
+	//    public void run() {
 		System.out.println("MISSION FAILED.");
-		notifyMissionEnd(null);
-	    }// end run()
-	}.start();
+		//notifyMissionEnd(null);
+		tr.setRunState(new PlayerDied(){});
+		((TVF3Game)game).notifyPlayerDied();
+	   // }// end run()
+	//}.start();
     }// end playerDestroyed()
-    
+    /*
     public void notifyMissionEnd(Result r){
 	synchronized(missionEnd){
 	 missionEnd[0]=r;
 	 missionEnd.notifyAll();}
     }//end notifyMissionEnd()
-
+*/
     public List<NAVObjective> getRemainingNAVObjectives() {
 	return navs;
     }
@@ -678,17 +711,10 @@ public class Mission {
     }//end exitBossMode()
 
     public void abort() {
-	final Result result = new Result(
-		airTargetsDestroyed,
-		groundTargetsDestroyed,
-		foliageDestroyed/*,
-		1.-(double)tunnelsRemaining.size()/(double)totalNumTunnels*/);
-	result.setAbort(true);
-	notifyMissionEnd(result);
-	//Wait for mission to end
-	synchronized(missionLock){//Don't execute while mission is in progress.
-	    cleanup();
-	}//end sync{}
+	tr.setRunState(new MissionAbort(){});
+	if(bgMusic!=null)
+	    bgMusic.stop();
+	cleanup();
     }//end abort()
 
     private void cleanup() {

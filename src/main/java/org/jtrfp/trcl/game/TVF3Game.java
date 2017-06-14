@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.game;
 
 import java.awt.Color;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.FileNotFoundException;
@@ -30,13 +31,17 @@ import org.jtrfp.trcl.LevelLoadingScreen;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SatelliteDashboard;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.UpfrontDisplay;
+import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
@@ -53,6 +58,7 @@ import org.jtrfp.trcl.gui.F3DashboardLayout;
 import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
 import org.jtrfp.trcl.miss.Mission;
+import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -145,6 +151,44 @@ public class TVF3Game implements Game {
 		displayModes = new DisplayModeHandler(this.getPartitioningGrid());
 		emptyMode = missionMode = new Object[]{};
 	    }// end constructor
+	    
+	    public void notifyAbortedLevel(){
+		tr.getThreadManager().setPaused(true);
+		tr.setRunState(new Game.GameLoadedMode() {});
+		setInGameplay(false);
+	    }//end abortedLevel()
+	    
+	    public void notifyPlayerDied(){
+		//TODO: Set a run state
+		//Reset game
+		final Player thisPlayer = getPlayer();
+		final Mission mission   = getCurrentMission();
+		Features.get(mission, GamePause.class).setPaused(true);
+		final SpacePartitioningGrid grid = thisPlayer.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
+		grid.add(thisPlayer);
+		thisPlayer.setActive(true);
+
+		try{
+		    resetCurrentMission();
+		    //mission.setNavSubObjects(null);//Ensure they are repopulated
+		    getCurrentMission().setShowIntro(false);
+		    displayModes.setDisplayMode(missionMode);
+		    doGameplay();
+		}catch(Exception e){e.printStackTrace();}
+	    }//end playerDied()
+	    
+	    public void notifyMissionComplete(){
+		final Mission mission = getCurrentMission();
+		final int nextLevelIndex = indexOfLevelInMissionSequence(mission.getLvlFileName())+1;
+		// Check if we won the game
+		if(nextLevelIndex >= vox.getLevels().length)
+		    endOfCampaign();
+		try{
+		    setLevel(getLevelInMissionSequence(nextLevelIndex));
+		    getCurrentMission().go();
+		    }
+		catch(Exception e)     {e.printStackTrace();}
+	    }//end levelComplete()
 
 	    public void setupNameWithUser() throws CanceledException {
 		GameSetupDialog gsd = new GameSetupDialog();
@@ -384,46 +428,17 @@ public class TVF3Game implements Game {
 		    setupNameWithUser();
 		tr.setRunState(new Game.GameRunningMode(){});
 		setInGameplay(true);
-		try {
-		    MissionLevel[] levels = vox.getLevels();
-		    tr.getThreadManager().setPaused(false);
-		    int levelIndex = 0;
-		    while (levelIndex < levels.length && levelIndex != -1) {
-			Mission.Result result = null;
-			final Mission mission = getCurrentMission();
-			if (mission == null)
-			    break;
-			while (result == null){
-			    displayModes.setDisplayMode(missionMode);
-			    result = getCurrentMission().go();}
-			if (result.isAbort())
-			    break;
-			levelIndex = indexOfLevelInMissionSequence(mission.getLvlFileName())+1;
-			// Check if we won the game
-			if(levelIndex >= vox.getLevels().length)
-			    wonGame();
-			setLevel(getLevelInMissionSequence(levelIndex));
-			//setLevelIndex(nextLevelIndex);
-		    }// end while(getLevelIndex<length)
-		    System.out.println("Escaping game loop.");
-		    tr.getThreadManager().setPaused(true);
-		    setInGameplay(false);
-		} catch (IllegalAccessException e) {
-		    throw e;
-		} catch (FileNotFoundException e) {
-		    throw e;
-		} catch (IOException e) {
-		    throw e;
-		} catch (FileLoadException e) {
-		    throw e;
-		} finally {
-		    tr.getThreadManager().setPaused(true);
-		    tr.setRunState(new Game.GameLoadedMode() {});
-		    setInGameplay(false);
-		}//end finally{}
+		MissionLevel[] levels = vox.getLevels();
+		tr.getThreadManager().setPaused(false);
+		int levelIndex = 0;
+		System.out.println("Escaping game loop.");
+		tr.getThreadManager().setPaused(true);
+		setInGameplay(false);
+		displayModes.setDisplayMode(missionMode);
+		getCurrentMission().go();//TODO: Use a mission completion hook
 	    }// end beginGameplay()
 	    
-	    protected void wonGame(){//TODO
+	    protected void endOfCampaign(){//TODO
 		System.out.println("!!!!!CONGRATULATIONS!!!!!!\n" +
 				"You've won the game!\n" +
 				"There's no code in place to handle this.\n" +
@@ -638,7 +653,10 @@ public class TVF3Game implements Game {
     }
 
     public void resetCurrentMission() {
-	try{setLevel(getCurrentMission().getLevelName());}
+	try{final String levelName = getCurrentMission().getLevelName()+".LVL"; 
+	    abortCurrentMission();
+	    setLevel(levelName);
+	    }
 	catch(FileLoadException e)     {e.printStackTrace();}//Shouldn't happen.
 	catch(IOException e)           {e.printStackTrace();}//Shouldn't happen.
 	catch(IllegalAccessException e){e.printStackTrace();}//Shouldn't happen.

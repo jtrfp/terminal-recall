@@ -281,20 +281,10 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		     setEnable(false);
 		    camera.probeForBehavior(FacingObject.class).
 		     setEnable(false);
-		    //Reset game
-	            final TVF3Game game = (TVF3Game)Player.this.getGameShell().getGame();
-	            final Mission mission = game.getCurrentMission();
-	            Features.get(mission, GamePause.class).setPaused(true);
-		    mission.abort();
-		    final SpacePartitioningGrid grid = thisPlayer.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
-		    grid.add(thisPlayer);
-		    thisPlayer.setActive(true);
 		    
-		    try{game.resetCurrentMission();
-		        game.getCurrentMission().setNavSubObjects(null);//Ensure they are repopulated
-		        game.getCurrentMission().setShowIntro(false);
-		        game.getCurrentMission().go();
-		    }catch(Exception e){e.printStackTrace();}
+		    final TVF3Game game = (TVF3Game)Player.this.getGameShell().getGame();
+		    final Mission mission = game.getCurrentMission();
+		    game.notifyPlayerDied();
 		}//end run()
 	    }.start();
 	}//end notifyDeath()

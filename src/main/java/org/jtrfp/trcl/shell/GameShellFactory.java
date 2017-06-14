@@ -55,6 +55,7 @@ import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.flow.TV;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -115,12 +116,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	private class StartGameMenuItemListener implements ActionListener{
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-		    @Override
-		    public Void call() throws Exception {
 			startGame();
-			return null;
-		    }});
 	    }//end actionPerformed(...)
 	}//end StartGameMenuItmListener
 

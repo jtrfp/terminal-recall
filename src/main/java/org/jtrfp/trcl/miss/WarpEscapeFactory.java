@@ -195,14 +195,11 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    player.setVisible(false);//Avoid the flicker
 	    viewSelect.setViewMode(currentViewMode);
 	    player.probeForBehavior(Cloakable.class).setEnable(false);
-
+	    
+	    
 	    final Mission mission = getMission();
-	    mission.notifyMissionEnd(
-		    new Mission.Result(
-			    mission.getAirTargetsDestroyed(),
-			    mission.getGroundTargetsDestroyed(),
-			    mission.getFoliageDestroyed()/*,
-			    1.-(double)mission.getTunnelsRemaining().size()/(double)mission.getTotalNumTunnels()*/));
+	    
+	    mission.notifyMissionComplete();
 	}//end warpEscapeSequence()
 
 	public Mission getMission() {

@@ -83,12 +83,7 @@ public class TVF3GameMenuItemFactory implements FeatureFactory<GameShell> {
 	private class NewGameListener implements ActionListener {
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
-		    @Override
-		    public Void call() throws Exception {
-			TVF3GameMenuItem.this.getTarget().newGame(null);
-			return null;
-		    }});
+		getTarget().newGame(null);
 	    }//end actionPerforment(...)
 	}//end NewGameListener
 	

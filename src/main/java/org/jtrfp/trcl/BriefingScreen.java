@@ -42,12 +42,13 @@ import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TXTMissionBriefFile;
 import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.miss.Mission;
-import org.jtrfp.trcl.miss.Mission.Result;
+import org.jtrfp.trcl.miss.Mission.MissionSummary;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.Sprite2D;
@@ -189,15 +190,15 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 	renderer.setSunColor(SkySystem.SPACE_SUN_COLOR);
     }//end planetDisplayMode()
     
-    public void missionCompleteSummary(LVLFile lvl, Result r){
+    public void missionCompleteSummary(LVLFile lvl, MissionSummary summary){
 	final Game   game 	 = Features.get(tr,GameShell.class).getGame();
 	final Mission mission    = game.getCurrentMission();
 	final TunnelSystem ts    = Features.get(mission, TunnelSystem.class);
 	game.getPlayer().setActive(false);
 	briefingChars.setScrollPosition(layout.getNumLines()-2);
-	setContent("Air targets destroyed: "+r.getAirTargetsDestroyed()+
-		"\nGround targets destroyed: "+r.getGroundTargetsDestroyed()+
-		"\nVegetation destroyed: "+r.getFoliageDestroyed()+
+	setContent("Air targets destroyed: "+summary.getAirTargetsDestroyed()+
+		"\nGround targets destroyed: "+summary.getGroundTargetsDestroyed()+
+		"\nVegetation destroyed: "+summary.getFoliageDestroyed()+
 		"\nTunnels found: "+(int)((1.-(double)ts.getTunnelsRemaining().size()/(double)ts.getTotalNumTunnels())*100.)+"%");
 	final TXTMissionBriefFile txtMBF = tr.getResourceManager().getMissionText(lvl.getBriefingTextFile());
 	

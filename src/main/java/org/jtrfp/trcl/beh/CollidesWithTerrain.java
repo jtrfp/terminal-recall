@@ -58,6 +58,8 @@ public class CollidesWithTerrain extends Behavior {
 	final World world = tr.getWorld();
 	final Mission mission = getGameShell().getGame().getCurrentMission();
 	OverworldSystem ows = lastOWS!=null?lastOWS.get():null;
+	if(mission == null)
+	    return;//Not ready.
 	if(mission.getOverworldSystem()!=ows){
 	    normalMap=null;
 	    lastOWS=new WeakReference<OverworldSystem>(mission.getOverworldSystem());

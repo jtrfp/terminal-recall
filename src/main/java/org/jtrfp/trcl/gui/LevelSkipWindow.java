@@ -19,7 +19,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -34,8 +34,8 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.flow.IndirectProperty;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.Game;
-import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -134,20 +134,22 @@ public class LevelSkipWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 		    LevelSkipWindow.this.setVisible(false);
-		    tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-			@Override
-			public Void call() throws Exception {
-			    try{
-		            final TR tr = Features.get(Features.getSingleton(), TR.class);
-		            final GameShell gameShell = Features.get(tr,GameShell.class);
-		            final TVF3Game game = (TVF3Game)gameShell.getGame();
-			    game.abortCurrentMission();
-			    game.setLevel(levelList.getSelectedValue().toString());
-			    //game.setLevelIndex(levelList.getSelectedIndex());
-			    game.doGameplay();
-			    }catch(CanceledException e){}//Do nothing.
-			    return null;
-			}});
+		    final Executor executor = TransientExecutor.getSingleton();
+		    synchronized(executor) {
+			TransientExecutor.getSingleton().execute(new Runnable(){
+			    @Override
+			    public void run() {
+				try{
+				    final TR tr = Features.get(Features.getSingleton(), TR.class);
+				    final GameShell gameShell = Features.get(tr,GameShell.class);
+				    final TVF3Game game = (TVF3Game)gameShell.getGame();
+				    game.abortCurrentMission();
+				    game.setLevel(levelList.getSelectedValue().toString());
+				    //game.setLevelIndex(levelList.getSelectedIndex());
+				    game.doGameplay();
+				}catch(Exception e){e.printStackTrace();}//Do nothing.
+			    }});
+		    }//end sync(executor)
 		}});
 	    
 	    btnCancel.addActionListener(new ActionListener(){

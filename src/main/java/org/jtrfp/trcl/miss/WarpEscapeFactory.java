@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -28,6 +29,7 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory.ViewSelect;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
@@ -80,14 +82,18 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	private class NavTargetListener implements PropertyChangeListener{
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getNewValue()==null)
-		  new Thread() {
-		    @Override
-		    public void run() {
-			Features.get(getGameShell().getGame().getCurrentMission(), WarpEscape.class).
-			    missionComplete(null);
-		    }// end run()
-		  }.start();
+		if(evt.getNewValue()==null){
+		    final Executor executor = TransientExecutor.getSingleton();
+		    final WarpEscape warpEscape = WarpEscape.this;
+		    synchronized(executor){
+			executor.execute(new Runnable(){
+			    @Override
+			    public void run() {
+				warpEscape.
+				    missionComplete(null);
+			    }});
+		    }//end sync(executor)
+		}//end if(null)
 	    }//end propertyChange(...)
 	}//end NavTargetListener
 	

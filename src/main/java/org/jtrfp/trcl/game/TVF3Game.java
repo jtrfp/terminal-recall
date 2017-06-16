@@ -159,7 +159,6 @@ public class TVF3Game implements Game {
 	    }//end abortedLevel()
 	    
 	    public void notifyPlayerDied(){
-		//TODO: Set a run state
 		//Reset game
 		final Player thisPlayer = getPlayer();
 		final Mission mission   = getCurrentMission();

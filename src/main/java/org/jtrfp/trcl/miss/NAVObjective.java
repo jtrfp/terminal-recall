@@ -356,6 +356,7 @@ public abstract class NAVObjective {
 		    final DUN xit = (DUN)navSubObject;
 		    final Location3D loc3d = xit.getLocationOnMap();
 		    final Jumpzone chk = new Jumpzone();
+		    chk.setMission(((TVF3Game)gameShell.getGame()).getCurrentMission());
 		    final double [] chkPos = chk.getPosition();
 		    chkPos[0]=TRFactory.legacy2Modern(loc3d.getZ());
 		    chkPos[1]=TRFactory.legacy2Modern(loc3d.getY());
@@ -378,7 +379,7 @@ public abstract class NAVObjective {
 			    }
 		    };//end new NAVObjective
 		    navMap.put(objective, navSubObject);
-		    chk.setObjectiveToRemove(objective,((TVF3Game)gameShell.getGame()).getCurrentMission());
+		    chk.setObjectiveToRemove(objective);
 		    chk.setIncludeYAxisInCollision(false);
 		    overworld.add(chk);
 		    indexedNAVObjectiveList.add(objective);

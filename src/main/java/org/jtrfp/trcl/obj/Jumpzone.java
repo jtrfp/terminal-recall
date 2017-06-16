@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.obj;
 
+import java.util.concurrent.Executor;
+
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.NAVTargetableBehavior;
@@ -21,6 +23,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
 import org.jtrfp.trcl.miss.WarpEscapeFactory.WarpEscape;
@@ -31,6 +34,8 @@ public class Jumpzone extends WorldObject {
 private NAVObjective objective;
 private boolean includeYAxisInCollision=true;
 private GameShell gameShell;
+private WarpEscape warpEscape;
+private Mission mission;
 
 public interface FinishingRunState extends Mission.GameplayState{}
 
@@ -42,7 +47,7 @@ public interface FinishingRunState extends Mission.GameplayState{}
 	setVisible(false);
     }//end constructor
     
-    public void setObjectiveToRemove(NAVObjective objective, Mission m) {
+    public void setObjectiveToRemove(NAVObjective objective) {
 	this.objective=objective;
 	addBehavior(new JumpzoneBehavior());
 	addBehavior(new TerrainLocked());
@@ -72,13 +77,19 @@ public interface FinishingRunState extends Mission.GameplayState{}
     }//end CheckpointBehavior
     
     private void handlePlayerCollision(){
-	new Thread() {
-	    @Override
-	    public void run() {
-		Features.get(getGameShell().getGame().getCurrentMission(), WarpEscape.class).
-		    missionComplete(Jumpzone.this);
-	    }// end run()
-	}.start();
+	final Executor executor = TransientExecutor.getSingleton();
+	final WarpEscape warpEscape = getWarpEscape();
+	if(warpEscape != null)
+	 synchronized(executor) {
+	    executor.execute(new Runnable(){
+		@Override
+		public void run() {
+		    warpEscape.
+		        missionComplete(Jumpzone.this);
+		}});
+	}//end sync(executor)
+	else
+	    getMission().notifyMissionComplete();
     }//end handlePlayerCollision
 
     /**
@@ -103,6 +114,24 @@ public interface FinishingRunState extends Mission.GameplayState{}
     }
     public void setGameShell(GameShell gameShell) {
 	this.gameShell = gameShell;
+    }
+
+    public WarpEscape getWarpEscape() {
+        return warpEscape;
+    }
+
+    public void setWarpEscape(WarpEscape warpEscape) {
+        this.warpEscape = warpEscape;
+    }
+
+    public Mission getMission() {
+        return mission;
+    }
+
+    public void setMission(Mission mission) {
+        this.mission = mission;
+        if(getWarpEscape() == null)
+            setWarpEscape(Features.get(mission, WarpEscape.class));
     }
 
 }//end Jumpzone

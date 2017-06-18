@@ -14,11 +14,11 @@ package org.jtrfp.trcl.obj;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Camera;
-import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
@@ -64,8 +64,8 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.pool.ObjectFactory;
@@ -246,47 +246,48 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		setPolarMomentum(0);
 	probeForBehavior(MovesByVelocity.class).setVelocity(new double[3]);
     }
-    
+
     private class PlayerDeathListener extends Behavior implements DeathListener{
 	@Override
 	public void notifyDeath() {
-	    new Thread(){
-		@Override
-		public void run(){
-		    final Player thisPlayer = Player.this;
-		    setName("Player Death Sequence Thread");
-		    System.out.println("Player has died.");
-		    try{Thread.sleep(3000);}
-		    catch(InterruptedException e){}
-		    //Reset player
-		    final DamageableBehavior db = Player.this.probeForBehavior(DamageableBehavior.class);
-		    db.setHealth(db.getMaxHealth());
-		    Player.this.defaultConfiguration();
-		    thisPlayer.probeForBehavior(SpinCrashDeathBehavior.class).
-		      reset().
-		      setEnable(true);
-		    probeForBehaviors(new AbstractSubmitter<ProjectileFiringBehavior>(){
-			@Override
-			public void submit(ProjectileFiringBehavior item) {
-			    item.setEnable(true);
-			}}, ProjectileFiringBehavior.class);
-		    probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
-		    thisPlayer.probeForBehavior(DeathBehavior.class).reset();
-		    //Reset camera
-		    final Camera camera = Player.this.getTr().mainRenderer.getCamera(); 
-		    Player.this.setVisible(false);
-		    camera.probeForBehavior(MatchPosition.class) .setEnable(true);
-		    camera.probeForBehavior(MatchDirection.class).setEnable(true);
-		    camera.probeForBehavior(RotateAroundObject.class).
-		     setEnable(false);
-		    camera.probeForBehavior(FacingObject.class).
-		     setEnable(false);
-		    
-		    final TVF3Game game = (TVF3Game)Player.this.getGameShell().getGame();
-		    final Mission mission = game.getCurrentMission();
-		    game.notifyPlayerDied();
-		}//end run()
-	    }.start();
+	    final Executor executor = TransientExecutor.getSingleton();
+	    synchronized(executor) {
+		executor.execute(new Runnable(){
+		    @Override
+		    public void run(){
+			final Player thisPlayer = Player.this;
+			System.out.println("Player has died.");
+			try{Thread.sleep(3000);}
+			catch(InterruptedException e){}
+			//Reset player
+			final DamageableBehavior db = Player.this.probeForBehavior(DamageableBehavior.class);
+			db.setHealth(db.getMaxHealth());
+			Player.this.defaultConfiguration();
+			thisPlayer.probeForBehavior(SpinCrashDeathBehavior.class).
+			reset().
+			setEnable(true);
+			Player.this.probeForBehaviors(new AbstractSubmitter<ProjectileFiringBehavior>(){
+			    @Override
+			    public void submit(ProjectileFiringBehavior item) {
+				item.setEnable(true);
+			    }}, ProjectileFiringBehavior.class);
+			probeForBehavior(ProjectileFiringBehavior.class).setEnable(true);
+			thisPlayer.probeForBehavior(DeathBehavior.class).reset();
+			//Reset camera
+			final Camera camera = Player.this.getTr().mainRenderer.getCamera(); 
+			Player.this.setVisible(false);
+			camera.probeForBehavior(MatchPosition.class) .setEnable(true);
+			camera.probeForBehavior(MatchDirection.class).setEnable(true);
+			camera.probeForBehavior(RotateAroundObject.class).
+			setEnable(false);
+			camera.probeForBehavior(FacingObject.class).
+			setEnable(false);
+
+			final TVF3Game game = (TVF3Game)thisPlayer.getGameShell().getGame();
+			game.notifyPlayerDied();
+		    }//end run()
+		});//end Runnable
+	    }//end sync(executor)
 	}//end notifyDeath()
     }//end PlayerDeathListener
 

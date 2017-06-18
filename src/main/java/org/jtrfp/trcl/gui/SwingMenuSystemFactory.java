@@ -13,12 +13,14 @@
 
 package org.jtrfp.trcl.gui;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.Executor;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -30,6 +32,7 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +43,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 	private SubMenu rootNode;
 	private JFrame rw;
 	private Map<JMenuItem, Double> positionMap = new HashMap<JMenuItem, Double>();
+	private Map<ActionListener,TransientThreadActionListener> proxyMap = new HashMap<ActionListener,TransientThreadActionListener>();
 
 	final JMenu file = new JMenu("File"), 
 		gameMenu = new JMenu("Game"),
@@ -267,7 +271,6 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		final double leftPos  = positionOf(l);
 		final double rightPos = positionOf(r);
 		final double result   = leftPos - rightPos;
-		System.out.println("LEFT="+l.getText()+" "+leftPos+" "+" RIGHT="+r.getText()+" "+rightPos);
 		if(result != 0)
 		    return (int)(result*10000);
 		return l.getText().compareTo(r.getText());
@@ -280,7 +283,6 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		final double leftPos  = positionOf(l);
 		final double rightPos = positionOf(r);
 		final double result = leftPos - rightPos;
-		System.out.println("LEFT="+l.getText()+" "+leftPos+" "+" RIGHT="+r.getText()+" "+rightPos);
 		if(result != 0)
 		    return (int)(result*10000);
 		return l.getText().compareTo(r.getText());
@@ -358,26 +360,32 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		    String... path) throws IllegalArgumentException {
 		checkLeafRequest(index, path);
 		final JMenuItem it = item;
-		SwingUtilities.invokeLater(new Runnable(){
-		    @Override
-		    public void run() {
-			if(it!=null)
-			    it.addActionListener(l);
-		    }});
-	    }
+		if(it!=null){
+		    final TransientThreadActionListener proxy = new TransientThreadActionListener(l);
+		    proxyMap.put(l, proxy);
+		    SwingUtilities.invokeLater(new Runnable(){
+			@Override
+			public void run() {
+				it.addActionListener(proxy);
+			}});
+		}//end if(!null)
+	    }//end addMenuItemListener
 
 	    @Override
 	    public void removeMenuItemListener(final ActionListener l, int index,
 		    String... path) throws IllegalArgumentException {
 		checkLeafRequest(index, path);
 		final JMenuItem it = item;
-		SwingUtilities.invokeLater(new Runnable(){
-		    @Override
-		    public void run() {
-			if(it!=null)
-			    item.removeActionListener(l);
-		    }});
-	    }
+		if(it != null){
+		    final ActionListener proxy = proxyMap.remove(l);
+		    if(proxy != null)
+			SwingUtilities.invokeLater(new Runnable(){
+			    @Override
+			    public void run() {
+				it.removeActionListener(proxy);
+			    }});
+		}//end if(!null)
+	    }//end removeMenuItemListener(...)
 
 	    @Override
 	    public void setMenuItemEnabled(final boolean enabled, int index,
@@ -465,4 +473,24 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     public Class<? extends Feature> getFeatureClass() {
 	return SwingMenuSystem.class;
     }
+    
+    private static class TransientThreadActionListener implements ActionListener {
+	private final ActionListener transientActionListener;
+	
+	public TransientThreadActionListener(ActionListener transientActionListener){
+	    this.transientActionListener = transientActionListener;
+	}
+
+	@Override
+	public void actionPerformed(final ActionEvent e) {
+	    final Executor executor = TransientExecutor.getSingleton();
+	    synchronized(executor){
+	    executor.execute(new Runnable(){
+		@Override
+		public void run() {
+		    transientActionListener.actionPerformed(e);
+		}});
+	    }//end sync
+	}//end actionPerformed(...)
+    }//end TransientThreadActionListener
 }//end SwingMenuSystemFactory

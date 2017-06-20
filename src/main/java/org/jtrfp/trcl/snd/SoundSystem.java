@@ -18,10 +18,8 @@ import java.beans.PropertyChangeSupport;
 import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,7 +30,9 @@ import javax.sound.sampled.AudioSystem;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
+import org.jtrfp.trcl.core.DefaultKeyedExecutor;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.KeyedExecutor;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
@@ -85,7 +85,8 @@ public class SoundSystem {
     private double          modStereoWidth = .3;
     private final CollectionActionDispatcher<String> audioDriverNames = new CollectionActionDispatcher<String>(new HashSet<String>());
     private final SoundSystemKernel soundSystemKernel = new SoundSystemKernel();
-    private final Queue<Runnable> runnableQueue = new ArrayDeque<>(512);
+    //private final Queue<Runnable> soundThreadExecutor = new ArrayDeque<>(512);
+    private final KeyedExecutor<Object> soundThreadExecutor = new DefaultKeyedExecutor<Object>();
     
    ////VARS
    private AudioDriver          activeDriver;
@@ -106,7 +107,7 @@ public class SoundSystem {
     
     public SoundSystem() {
 	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");//TODO: Implement a registry.
-	soundSystemKernel.setRunnableQueue(runnableQueue);
+	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
     }// end constructor
     
     public void initialize(){
@@ -160,8 +161,10 @@ public class SoundSystem {
 			while(getActiveFormat() == null || getActiveOutput() == null || getActiveDevice() == null)
 			    Thread.sleep(100);//Rolling loop waiting for valid state.
 			
-			soundSystemKernel.execute(bufferTimeCounter);
+			final double currentBufferTimeCounter = bufferTimeCounter;
 			bufferTimeCounter += getBufferSizeSeconds();
+			soundSystemKernel.execute(currentBufferTimeCounter);
+			
 		    }// end while(true)
 		} catch (Exception e) {
 		    tr.showStopper(e);
@@ -400,11 +403,11 @@ public class SoundSystem {
     
     public void enqueuePlaybackEvent(SoundEvent evt){
 	    if(evt instanceof RelevantEverywhere)
-		synchronized(runnableQueue){
-		   runnableQueue.add(new AddToActiveEvents(Collections.singleton(evt), soundSystemKernel));
+		synchronized(soundThreadExecutor){
+		    soundThreadExecutor.execute(new AddToActiveEvents(Collections.singleton(evt), soundSystemKernel));
 		}//end sync(queue)
-	    else synchronized(runnableQueue){
-		   runnableQueue.add(new AddToPendingEvents(Collections.singleton(evt), soundSystemKernel));
+	    else synchronized(soundThreadExecutor){
+		soundThreadExecutor.execute(new AddToPendingEvents(Collections.singleton(evt), soundSystemKernel));
 		}//end sync(queue)
     }//end enqueuePlaybackEvent
     
@@ -434,8 +437,8 @@ public class SoundSystem {
     }
 
     public void dequeueSoundEvent(SoundEvent event) {
-	synchronized(runnableQueue){
-	    runnableQueue.add(new RemoveFromEvents(Collections.singleton(event), soundSystemKernel));
+	synchronized(soundThreadExecutor){
+	    soundThreadExecutor.execute(new RemoveFromEvents(Collections.singleton(event), soundSystemKernel));
 	}//end sync()
     }//end dequeueSoundEvent(...)
 
@@ -463,8 +466,8 @@ public class SoundSystem {
 	final AudioDriver oldActiveDriver = this.activeDriver;
 	this.activeDriver = activeDriver;
 	
-	synchronized(runnableQueue){
-	    runnableQueue.add(new SetActiveDriver(activeDriver, soundSystemKernel));
+	synchronized(soundThreadExecutor){
+	    soundThreadExecutor.execute(new SetActiveDriver(activeDriver, soundSystemKernel), SoundSystem.ACTIVE_DRIVER);
 	    setBufferSizeFrames(getBufferSizeFrames());//Reset
 	    setActiveDevice(activeDriver.getDefaultDevice());
 	}
@@ -490,8 +493,8 @@ public class SoundSystem {
 	final AudioDevice oldDevice = this.activeDevice;
         this.activeDevice = activeDevice;
         
-        synchronized( runnableQueue ) {
-            runnableQueue.add(new SetActiveDevice(activeDevice, soundSystemKernel));
+        synchronized( soundThreadExecutor ) {
+            soundThreadExecutor.execute(new SetActiveDevice(activeDevice, soundSystemKernel), SoundSystem.ACTIVE_DEVICE);
             setActiveOutput(activeDevice.getDefaultOutput());
         }//end sync
         
@@ -515,8 +518,8 @@ public class SoundSystem {
 	final AudioOutput oldOutput = this.activeOutput;
         this.activeOutput = newActiveOutput;
         
-        synchronized( runnableQueue ){
-            runnableQueue.add(new SetActiveOutput(newActiveOutput, soundSystemKernel));
+        synchronized( soundThreadExecutor ){
+            soundThreadExecutor.execute(new SetActiveOutput(newActiveOutput, soundSystemKernel), SoundSystem.ACTIVE_OUTPUT);
             if( newActiveOutput != null )
         	setActiveFormat(newActiveOutput.getDefaultFormat());
             else
@@ -559,9 +562,9 @@ public class SoundSystem {
 	
         this.activeFormat = newFormat;
         
-        synchronized( runnableQueue ) {
+        synchronized( soundThreadExecutor ) {
             if( activeDriver != null )
-                runnableQueue.add(new SetFormat(newFormat, soundSystemKernel));
+                soundThreadExecutor.execute(new SetFormat(newFormat, soundSystemKernel), SoundSystem.ACTIVE_FORMAT);
         }//end sync()
         
         System.out.println("SoundSystem: Active Format Set To "+newFormat+" for driver "+activeDriver);
@@ -584,8 +587,8 @@ public class SoundSystem {
 		throw new RuntimeException("Invalid buffer size: "+bufferSizeFrames+". Must be greater than zero.");
 	    final int oldValue = this.bufferSizeFrames;
 	    this.bufferSizeFrames = bufferSizeFrames;
-	    synchronized( runnableQueue ) {
-		runnableQueue.add(new SetBufferSizeFrames(bufferSizeFrames, soundSystemKernel));
+	    synchronized( soundThreadExecutor ) {
+		soundThreadExecutor.execute(new SetBufferSizeFrames(bufferSizeFrames, soundSystemKernel), SoundSystem.BUFFER_SIZE_FRAMES);
 	    }//end sync()
 	    pcs.firePropertyChange(BUFFER_SIZE_FRAMES, oldValue, bufferSizeFrames);
     }
@@ -662,8 +665,8 @@ public class SoundSystem {
 	System.out.println("setBufferLag "+bufferLag);
 	final Boolean oldValue = this.bufferLag;
         this.bufferLag = bufferLag;
-        synchronized( runnableQueue ) {
-            runnableQueue.add(new SetBufferLag(bufferLag,soundSystemKernel));
+        synchronized( soundThreadExecutor ) {
+            soundThreadExecutor.execute(new SetBufferLag(bufferLag,soundSystemKernel), SoundSystem.BUFFER_LAG);
         }
         pcs.firePropertyChange(BUFFER_LAG, oldValue, bufferLag);
     }

@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import javax.media.opengl.GL2ES2;
 import javax.sound.sampled.AudioFormat;
 
+import org.jtrfp.trcl.core.KeyedExecutor;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.GLTexture;
@@ -53,7 +54,7 @@ public class SoundSystemKernel {
     
     private final HashMap<SoundEvent.Factory,ArrayList<SoundEvent>> eventMap 
         = new HashMap<SoundEvent.Factory,ArrayList<SoundEvent>>();
-    private Queue<Runnable> inThreadActionQueue;
+    private KeyedExecutor<Object> keyedExecutor;
     private final ArrayList<SoundEvent> activeEvents = new ArrayList<SoundEvent>();
     private final TreeSet<SoundEvent> pendingEvents = new TreeSet<SoundEvent>(new Comparator<SoundEvent>(){
 	@Override
@@ -211,11 +212,9 @@ public class SoundSystemKernel {
 	return 0;
     }
     
-    public void execute(final double bufferTimeCounter) {
-	synchronized(inThreadActionQueue){
-	    for(Runnable r : inThreadActionQueue)
-		r.run();
-	    inThreadActionQueue.clear();
+    public double execute(final double bufferTimeCounter) {
+	synchronized(keyedExecutor){
+	    keyedExecutor.executeAllFromThisThread();
 	}
 	renderPrep(bufferTimeCounter);
 	final ByteBuffer renderFloatBytes     = getRenderFloatBytes();
@@ -236,10 +235,13 @@ public class SoundSystemKernel {
 	fBuf.clear();
 	compressor.setSource(fBuf);
 	final AudioDriver driver = getActiveDriver();
+	double bufferTimePassedSeconds = 0;
 	if(driver!=null){
 	    driver.setSource(compressor);
 	    driver.flush();
 	}//end driver!=null
+	
+	return bufferTimePassedSeconds;
     }//end execute
 
     private void renderPrep(double bufferTimeCounter){
@@ -517,8 +519,8 @@ public class SoundSystemKernel {
         this.activeDriver = activeDriver;
     }
 
-    void setRunnableQueue(Queue<Runnable> runnableQueue) {
-	inThreadActionQueue = runnableQueue;
+    void setKeyedExecutor(KeyedExecutor<Object> runnableQueue) {
+	keyedExecutor = runnableQueue;
     }
 
     protected AudioDevice getActiveDevice() {

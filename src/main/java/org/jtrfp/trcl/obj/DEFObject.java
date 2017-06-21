@@ -577,7 +577,7 @@ public class DEFObject extends WorldObject {
 	case bob:
 	    addBehavior(new Bobbing()
 		    .setAdditionalHeight(TRFactory.mapSquareSize * 1));
-	    addBehavior(new SteadilyRotating());
+	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(1000. * (def.getRotationSpeed() / 65535.)));
 	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,
 		    MED_EXP_SOUNDS[(int) (Math.random() * 2)]));
 	    possibleBobbingSpinAndCrashOnDeath(.5, def);

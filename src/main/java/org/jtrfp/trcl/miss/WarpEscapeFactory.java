@@ -17,6 +17,7 @@ import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.Cloakable;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.MatchPosition;
+import org.jtrfp.trcl.beh.RollLevelingBehavior;
 import org.jtrfp.trcl.beh.phy.HasPropulsion;
 import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
@@ -124,6 +125,9 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    final HasPropulsion hp = player.probeForBehavior(HasPropulsion.class);
 	    hp.setPropulsion(hp.getMaxPropulsion());
 	    //Tilt up
+	    //Disable existing auto-leveling
+	    final RollLevelingBehavior oldRollLevelingBehavior = player.probeForBehavior(RollLevelingBehavior.class);
+	    oldRollLevelingBehavior.setEnable(false);
 	    final AutoLeveling autoLeveling = new AutoLeveling().setLevelingAxis(LevelingAxis.HEADING).setLevelingVector(Vector3D.PLUS_J).setRetainmentCoeff(.99, .99, .99);
 	    player.addBehavior(autoLeveling);
 	    //Spin
@@ -191,6 +195,7 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 
 	    System.out.println("MISSION COMPLETE.");
 	    //Cleanup
+	    oldRollLevelingBehavior.setEnable(true);
 	    player.removeBehavior(autoLeveling);
 	    tr.mainRenderer.getCamera().probeForBehavior(MatchPosition.class).setEnable(true);
 	    player.probeForBehaviors(enablePlayerControlSubmitter, PlayerControlBehavior.class);

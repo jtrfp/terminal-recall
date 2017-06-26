@@ -16,6 +16,7 @@ import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.OverworldSystem;
@@ -38,6 +39,7 @@ import org.jtrfp.trcl.file.NAVFile.TUN;
 import org.jtrfp.trcl.file.NAVFile.XIT;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
 import org.jtrfp.trcl.file.TDFFile.TunnelLogic;
+import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
@@ -253,13 +255,20 @@ public abstract class NAVObjective {
 			    shieldGen.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
-				    wMission.get().enterBossMode(bos.getMusicFile(), bossObject);
-				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
-					.submitMomentaryUpfrontMessage("Mission Objective");
+				    final Executor executor = TransientExecutor.getSingleton();
+				    synchronized(executor){
+					executor.execute(new Runnable(){
+					    @Override
+					    public void run() {
+						wMission.get().enterBossMode(bos.getMusicFile(), bossObject);
+						((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
+						.submitMomentaryUpfrontMessage("Mission Objective");
+					    }});
+				    }//end sync
 				}//end run()
 			    }));
 			    first=false;
-			 }//end if(first)
+			}//end if(first)
 			shieldGen.addBehavior(new RemovesNAVObjectiveOnDeath(objective,mission));
 			bossChamberExitShutoffTrigger.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 			    @Override
@@ -276,10 +285,17 @@ public abstract class NAVObjective {
 			    bossObject.addBehavior(new CustomNAVTargetableBehavior(new Runnable(){
 				@Override
 				public void run(){
-				    bossObject.setIgnoringProjectiles(false);
-				    wMission.get().enterBossMode(bos.getMusicFile(),bossObject);
-				    ((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
-					.submitMomentaryUpfrontMessage("Mission Objective");
+				    final Executor executor = TransientExecutor.getSingleton();
+				    synchronized(executor){
+					executor.execute(new Runnable(){
+					    @Override
+					    public void run() {
+						bossObject.setIgnoringProjectiles(false);
+						wMission.get().enterBossMode(bos.getMusicFile(),bossObject);
+						((TVF3Game)gameShell.getGame()).getUpfrontDisplay()
+						    .submitMomentaryUpfrontMessage("Mission Objective");
+					    }});
+				    }//end sync
 				}//end run()
 			    }));
 		    }

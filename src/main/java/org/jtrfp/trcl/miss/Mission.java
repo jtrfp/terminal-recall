@@ -668,9 +668,9 @@ public class Mission {
     
     public void enterBossMode(final String bossMusicFile, WorldObject boss){
 	setCurrentBoss(boss);
-	tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
-	    @Override
-	    public Void call() throws Exception {
+	//tr.getThreadManager().submitToThreadPool(new Callable<Void>() {
+	//    @Override
+	//    public Void call() throws Exception {
 		MusicPlaybackEvent evt;
 		final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
 		Features.get(tr,SoundSystemFeature.class).enqueuePlaybackEvent(
@@ -684,9 +684,9 @@ public class Mission {
 		  bgMusic.stop();
 		 bgMusic=evt;
 		}
-		return null;
-	    }// end call()
-	});
+		//return null;
+	   // }// end call()
+	//});
     }//end enterBossMode()
     
     public void exitBossMode(){

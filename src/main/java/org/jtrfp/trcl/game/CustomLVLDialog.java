@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,6 +13,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+import org.jtrfp.trcl.flow.TransientExecutor;
 
 public class CustomLVLDialog extends JFrame {
 	private JTextField lvlEntryField;
@@ -75,18 +78,24 @@ public class CustomLVLDialog extends JFrame {
 			setVisible(false);
 			dispose();
 			if(result.length()>0){
-			    try{final TVF3Game game = getTvF3Game();
-			    game.getTr().getThreadManager().submitToThreadPool(new Callable<Void>(){
+			    final TVF3Game game = getTvF3Game();
+			    final Executor executor = TransientExecutor.getSingleton();
+			    synchronized(executor){
+			    executor.execute(new Runnable(){
 				@Override
-				public Void call() throws Exception {
+				public void run() {
+				    try{
 				    game.abortCurrentMission();
 			            game.setLevelDirect(result);
 				    game.doGameplay();
-				    return null;
+				    } catch(final Exception e){
+					SwingUtilities.invokeLater(new Runnable(){
+					    @Override
+					    public void run() {
+						JOptionPane.showMessageDialog(null, e.getMessage());
+					    }});
+				    }//end Exception()
 				}});
-				}
-			    catch(Exception e){
-				JOptionPane.showMessageDialog(null, e.getMessage());
 			    }
 			}//end if(actual result
 		    }});

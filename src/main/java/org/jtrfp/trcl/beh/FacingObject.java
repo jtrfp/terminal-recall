@@ -46,6 +46,8 @@ public class FacingObject extends Behavior {
 	    
 	    Vect3D.cross(work, UP, perp);
 	    Vect3D.cross(perp, work, newTop);
+	    if(Vect3D.norm(newTop) == 0 || Vect3D.norm(perp) == 0)
+		return;//Catch invalid state and abort
 	    final Rotation facingRot = 
 		    new Rotation(DEFAULT_HEADING,DEFAULT_TOP,newHeading,new Vector3D(newTop));
 	    

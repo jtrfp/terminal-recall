@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.imageio.ImageIO;
@@ -26,10 +25,12 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.gpu.Texture;
+import org.jtrfp.trcl.gpu.TextureManager;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -64,10 +65,11 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	this.grid  =g;
 	setRadarGUIRadius(radarGUIRadius);
 	final BlipType [] types = BlipType.values();
+	final TextureManager textureManager = Features.get(tr, GPUFeature.class).textureManager.get();
 	for(int ti=0; ti<types.length; ti++){
 	    InputStream is = null;
 	    try{
-	     final VQTexture tex = Features.get(tr, GPUFeature.class).textureManager.get().newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false, true);
+	     final VQTexture tex = textureManager.newTexture(ImageIO.read(is = this.getClass().getResourceAsStream("/"+types[ti].getSprite())),null,"",false, true);
     	     for(int pi=0; pi<POOL_SIZE; pi++){
     		final Blip blip = new Blip(tex,debugName, ignoreCamera, .04*(getRadarGUIRadius()/DEFAULT_RADAR_GUI_RADIUS));
     		blip.setVisible(false);
@@ -115,7 +117,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    final double []blipPos = getPosition();
 	    final Game game = getGameShell().getGame();
 	    final double [] playerPos=game.getPlayer().getPosition();
-	    Vect3D.subtract(representativeObject.getPosition(), playerPos, blipPos);
+	    TRFactory.twosComplimentSubtract(representativeObject.getPosition(), playerPos, blipPos);
 	    Vect3D.scalarMultiply(blipPos, getRadarScalar(), blipPos);
 	    final double [] heading = game.getPlayer().getHeadingArray();
 	    double hX=heading[0];
@@ -168,7 +170,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	final double [] otherPos = positionable.getPosition();
 	final double [] playerPos=getGameShell().getGame().getPlayer().getPosition();
 	BlipType type=null;
-	if(Vect3D.distance(playerPos, otherPos)<RADAR_RANGE){
+	if(TRFactory.twosComplimentDistance(playerPos, otherPos)<RADAR_RANGE){
 	    if(positionable instanceof TunnelEntranceObject){
 		if(!((TunnelEntranceObject)positionable).isVisible())
 		    return null;//Invisible entrances are no-go.

@@ -62,6 +62,8 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
+import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.TransientExecutor;
@@ -103,14 +105,16 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new MovesByVelocity());
 	addBehavior(new HasPropulsion());
 	addBehavior(new CollidesWithTunnelWalls(true, true));
-	addBehavior(new UserInputThrottleControlBehavior(tr.getControllerInputs()));
+	final ControllerMapper cm = Features.get(Features.getSingleton(), ControllerMapper.class);
+	final ControllerSinks controllerInputs = Features.get(cm, ControllerSinks.class);
+	addBehavior(new UserInputThrottleControlBehavior(controllerInputs));
 	addBehavior(new VelocityDragBehavior());
 	addBehavior(new RollLevelingBehavior());
-	addBehavior(new UserInputRudderElevatorControlBehavior(tr.getControllerInputs()));
+	addBehavior(new UserInputRudderElevatorControlBehavior(controllerInputs));
 	addBehavior(new RotationalMomentumBehavior());
 	addBehavior(new RotationalDragBehavior());
 	addBehavior(new CollidesWithTerrain().setTunnelEntryCapable(true).setIgnoreHeadingForImpact(false));
-	addBehavior(new AfterburnerBehavior(tr.getControllerInputs()).
+	addBehavior(new AfterburnerBehavior(controllerInputs).
 		setIgnitionSound  (soundTextures.get(AfterburnerBehavior.IGNITION_SOUND)).
 		setExtinguishSound(soundTextures.get(AfterburnerBehavior.EXTINGUISH_SOUND)).
 		setLoopSound      (soundTextures.get(AfterburnerBehavior.LOOP_SOUND)));
@@ -135,7 +139,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 	addBehavior(new ExplodesOnDeath(ExplosionType.Blast));
 	addBehavior(new PlayerDeathListener());
 	addBehavior(new SFXOnDamage());
-	addBehavior(new RollBehavior(tr.getControllerInputs()));
+	addBehavior(new RollBehavior(controllerInputs));
 	
 	final Weapon[] allWeapons = Weapon.values();
 	
@@ -211,7 +215,7 @@ public class Player extends WorldObject implements RelevantEverywhere{
 		}//end if(allAmmo)
 	    }// end if(hasButton)
 	}//end for(Weapons)
-	addBehavior(new UserInputWeaponSelectionBehavior(tr.getControllerInputs()).setBehaviors(weapons));
+	addBehavior(new UserInputWeaponSelectionBehavior(controllerInputs).setBehaviors(weapons));
 	
 	defaultConfiguration();
     }//end constructor

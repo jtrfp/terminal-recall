@@ -515,15 +515,6 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    showStopper(e);
 	}
 
-	//TODO: Refactor out - TR should not be aware
-	public ControllerSinks getControllerInputs() {
-	    if(controllerInputs == null){
-		final ControllerMapper cm = Features.get(Features.getSingleton(), ControllerMapper.class);
-		controllerInputs = Features.get(cm, ControllerSinks.class);
-		}
-	    return controllerInputs;
-	}
-
 	public ConfigWindow getConfigWindow() {
 	    if(configWindow == null)
 		configWindow = Features.get(this, ConfigWindow.class);

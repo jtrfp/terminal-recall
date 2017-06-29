@@ -37,6 +37,7 @@ import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ctl.ControllerSink;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
@@ -80,7 +81,8 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     public BriefingScreen(final TR tr, GLFont font, BriefingLayout layout, String debugName) {
 	super();
 	this.layout=layout;
-	final ControllerSinks controllerInputs = tr.getControllerInputs();
+	final ControllerMapper cm = Features.get(Features.getSingleton(), ControllerMapper.class);
+	final ControllerSinks controllerInputs = Features.get(cm, ControllerSinks.class);
 	fireBarrier = new ControllerBarrier(
 		controllerInputs.getSink(UserInputWeaponSelectionBehavior.FIRE),
 		controllerInputs.getSink(NEXT_SCREEN_CTL));

@@ -34,6 +34,8 @@ public class ConfigMenuItemFactory implements FeatureFactory<MenuSystem> {
 
 	@Override
 	public void apply(MenuSystem target) {
+	    tr           = Features.get(Features.getSingleton(), TR.class);
+	    configWindow = Features.get(getTr(), ConfigWindow.class);
 	    target.addMenuItem(MenuSystem.MIDDLE, CONFIG_MENU_PATH);
 	    target.setMenuItemEnabled(true, CONFIG_MENU_PATH);
 	    target.addMenuItemListener(configMenuItemListener, CONFIG_MENU_PATH);
@@ -53,14 +55,10 @@ public class ConfigMenuItemFactory implements FeatureFactory<MenuSystem> {
 	}//end ConfigMenuItemListener
 	
 	private ConfigWindow getConfigWindow(){
-	    if(configWindow == null)
-	     configWindow = Features.get(getTr(), ConfigWindow.class);
 	    return configWindow;
 	}
 	
 	private TR getTr(){
-	    if(tr == null)
-	     tr = Features.get(Features.getSingleton(), TR.class);
 	    return tr;
 	}
 

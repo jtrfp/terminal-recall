@@ -311,17 +311,20 @@ public class Mission {
 	final LoadingProgressReporter[] progressStages = rootProgress
 		.generateSubReporters(LoadingStages.values().length);
 	final Renderer renderer = tr.mainRenderer;
-	renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
-	renderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);
 	final Camera camera = renderer.getCamera();
-	camera.setHeading(Vector3D.PLUS_I);
-	camera.setTop(Vector3D.PLUS_J);
+	final Player player      = ((TVF3Game)getGameShell().getGame()).getPlayer();
+	//Set up the gray gradient
+	camera.probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(false);
+	player.setHeading(Vector3D.PLUS_I);
+	player.setTop(Vector3D.PLUS_J);
+	player.notifyPositionChange();
+	renderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);
+	
 	((TVF3Game)game).levelLoadingMode();
 	displayHandler.setDisplayMode(getLevelLoadingMode());
 	((TVF3Game)game).getUpfrontDisplay().submitPersistentMessage(levelName);
 	try {
 	    final ResourceManager rm = tr.getResourceManager();
-	    final Player player      = ((TVF3Game)getGameShell().getGame()).getPlayer();
 	    final TDFFile tdf 	     = rm.getTDFData(lvlData.getTunnelDefinitionFile());
 	    player.setActive(false);
 	    // Abort check

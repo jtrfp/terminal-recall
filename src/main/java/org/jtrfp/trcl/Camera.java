@@ -53,7 +53,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  double viewDepth;
 	private volatile  RealMatrix projectionMatrix;
 	private volatile  int updateDebugStateCounter;
-	private 	  RealMatrix rotationMatrix;
+	private 	  RealMatrix rotationMatrix = new Array2DRowRealMatrix(4,4);
 	private String debugName;
 	private boolean	  fogEnabled = true;
 	private float horizontalFOVDegrees = 100f;// In degrees
@@ -96,6 +96,10 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 
     Camera() {
 	super();
+	//Setup matrix static values
+	rotationMatrix.setRow(3, new double[]{0,0,0,1});
+	rotationMatrix.setColumn(3, new double[]{0,0,0,1});//Some overlap but whatever.
+	
 	try{final Thread rt = World.relevanceThread.get();
 	    World.relevanceExecutor.submit(new Runnable(){
 	    @Override
@@ -275,19 +279,37 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	//cameraMatrix = null;
     }
 	
-	private RealMatrix applyMatrix(){
+	private RealMatrix applyMatrix(){//TODO: Optimize. This gets called a lot!
 	        try{
 		 Vector3D eyeLoc = getCameraPosition();
 		 Vector3D aZ = getLookAtVector().negate();
 		 Vector3D aX = getUpVector().crossProduct(aZ).normalize();
 		 Vector3D aY = getUpVector();
+		 
+		 //Cache to remove indirection
+		 final RealMatrix rotationMatrix = this.rotationMatrix;
 
+		 //ROW 0
+		 rotationMatrix.setEntry(0, 0, aX.getX());
+		 rotationMatrix.setEntry(0, 1, aX.getY());
+		 rotationMatrix.setEntry(0, 2, aX.getZ());
+		 //ROW 1
+		 rotationMatrix.setEntry(1, 0, aY.getX());
+		 rotationMatrix.setEntry(1, 1, aY.getY());
+		 rotationMatrix.setEntry(1, 2, aY.getZ());
+		 //ROW 2
+		 rotationMatrix.setEntry(2, 0, aZ.getX());
+		 rotationMatrix.setEntry(2, 1, aZ.getY());
+		 rotationMatrix.setEntry(2, 2, aZ.getZ());
+		 
+		 /*
 		 rotationMatrix = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
 				{ aX.getX(), aX.getY(), aX.getZ(), 0 }, new double[]
 				{ aY.getX(), aY.getY(), aY.getZ(), 0 }, new double[]
 				{ aZ.getX(), aZ.getY(), aZ.getZ(), 0 }, new double[]
 				{ 0, 0, 0, 1 } });
+		 */
 
 		 RealMatrix tM = new Array2DRowRealMatrix(new double[][]
 			{ new double[]

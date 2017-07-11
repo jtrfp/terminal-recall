@@ -54,6 +54,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private volatile  RealMatrix projectionMatrix;
 	private volatile  int updateDebugStateCounter;
 	private 	  RealMatrix rotationMatrix = new Array2DRowRealMatrix(4,4);
+	private final     RealMatrix translationMatrix = new Array2DRowRealMatrix(4,4);
 	private String debugName;
 	private boolean	  fogEnabled = true;
 	private float horizontalFOVDegrees = 100f;// In degrees
@@ -99,6 +100,11 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	//Setup matrix static values
 	rotationMatrix.setRow(3, new double[]{0,0,0,1});
 	rotationMatrix.setColumn(3, new double[]{0,0,0,1});//Some overlap but whatever.
+	
+	translationMatrix.setColumn(0, new double[]{1,0,0,0});
+	translationMatrix.setColumn(1, new double[]{0,1,0,0});
+	translationMatrix.setColumn(2, new double[]{0,0,1,0});
+	translationMatrix.setColumn(3, new double[]{0,0,0,1});
 	
 	try{final Thread rt = World.relevanceThread.get();
 	    World.relevanceExecutor.submit(new Runnable(){
@@ -311,14 +317,18 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 				{ 0, 0, 0, 1 } });
 		 */
 
+		 translationMatrix.setEntry(0, 3, -eyeLoc.getX());
+		 translationMatrix.setEntry(1, 3, -eyeLoc.getY());
+		 translationMatrix.setEntry(2, 3, -eyeLoc.getZ());
+		 /*
 		 RealMatrix tM = new Array2DRowRealMatrix(new double[][]
 			{ new double[]
 				{ 1, 0, 0, -eyeLoc.getX() }, new double[]
 				{ 0, 1, 0, -eyeLoc.getY() }, new double[]
 				{ 0, 0, 1, -eyeLoc.getZ() }, new double[]
 				{ 0, 0, 0, 1 } });
-		
-		 return completeMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(tM));
+		*/
+		 return completeMatrix = getProjectionMatrix().multiply(rotationMatrix.multiply(translationMatrix));
 	         }catch(MathArithmeticException e){}//Don't crash.
 	        return completeMatrix;
 		}//end applyMatrix()

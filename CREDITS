@@ -1,5 +1,5 @@
 TERMINAL RECALL
-Copyright (c) 2012-2015 Chuck Ritola (cjritola@gmail.com) and contributors. 
+Copyright (c) 2012-2017 Chuck Ritola (cjritola@gmail.com) and contributors. 
 See commit log on the Terminal Recall site for details.
 
 THIS PROGRAM IS NOT SUPPORTED BY OR AFFILIATED WITH MICROSOFT OR TERMINAL REALITY INC.
@@ -15,9 +15,9 @@ Sven Gothel et. al.
 Stefan Teitge
     Java Terminal Reality File Parsers (jTRFP)
     License: GPL v3
-    http://code.google.com/p/jtrfp/
+    https://github.com/jtrfp/jtrfp
     See also: mtmX (Monster Truck Madness remake)
-    http://code.google.com/p/mtmx/
+    https://github.com/jtrfp/mtmx
     
 Daniel Becker
 	JavaMOD
@@ -34,7 +34,7 @@ Apache Commons
 	   
 Java Format Description Toolkit (jFDT)
     License: GPL v3
-    http://code.google.com/p/jfdt/
+    https://github.com/jtrfp/jfdt
     
 Reverse-Engineering Wiki feat. Terminal Velocity / Fury3 file format documentation
     REWiki (http://rewiki.regengedanken.de/wiki/Main_Page) 

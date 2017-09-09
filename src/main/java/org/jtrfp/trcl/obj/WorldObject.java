@@ -520,11 +520,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void setVisible(boolean visible) {
 	if(this.visible==visible)
 	    return;
-	needToRecalcMatrix=true;
-	final MatrixWindow matrixWindowContext = (MatrixWindow)getMatrixWindow().newContextWindow();
-	recalculateTransRotMBuffer(matrixWindowContext);
-	matrixWindowContext.flush();
+	
+	//final MatrixWindow matrixWindowContext = (MatrixWindow)getMatrixWindow().newContextWindow();
+	//recalculateTransRotMBuffer(matrixWindowContext);
+	//matrixWindowContext.flush();
 	this.visible = visible;
+	needToRecalcMatrix=true;
     }//end setvisible()
 
     /**

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.Line;
@@ -52,12 +53,13 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	if(this.format!=format){
 		this.format=format;
 		if(format!=null){
+		    final boolean signed = format.getEncoding() == Encoding.PCM_SIGNED;
 		    if(format.getSampleSizeInBits()==8)
-			activePutter=new BytePutter();
+			activePutter=signed?new BytePutter():new UnsignedBytePutter();
 		    else if(format.getSampleSizeInBits()==16)
-			activePutter=new ShortPutter();
+			activePutter=signed?new ShortPutter():new UnsignedShortPutter();
 		    else if(format.getSampleSizeInBits()==32)
-			activePutter=new IntPutter();
+			activePutter=signed?new IntPutter():new UnsignedIntPutter();
 		    else activePutter=null;
 		}
 		ensureSourceDataLineIsReleased();
@@ -74,6 +76,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     public synchronized void flush() {
 	if(format==null||source==null)
 	    return;
+	
 	final SampleSubmitter putter = getPutter();
 	if(putter==null)
 	    return;
@@ -84,7 +87,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	final int numIterations = bufferSizeFrames * numChannels;
 	try{for (int i = numIterations; i > 0; i--)
 	    putter.submit(scratch,source.get());
-	}catch(BufferUnderflowException e){System.out.println("javaSoundSystem bufferSizeFrames="+bufferSizeFrames+" numChannels="+numChannels); throw e;}
+	}catch(BufferUnderflowException e){System.out.println("UNDERFLOW: javaSoundSystem bufferSizeFrames="+bufferSizeFrames+" numChannels="+numChannels); throw e;}
 	scratch.clear();
 	try{
 	    final SourceDataLine sourceDataLine = getSourceDataLine();
@@ -117,10 +120,24 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	}
     }//end BytePutter
     
+    private final class UnsignedBytePutter implements SampleSubmitter{
+	@Override
+	public synchronized void submit(ByteBuffer bb, float source) {
+	    bb.put((byte)((source * (float) Byte.MAX_VALUE) - Byte.MIN_VALUE));
+	}
+    }//end UnsignedBytePutter
+    
     private final class ShortPutter implements SampleSubmitter{
 	@Override
 	public synchronized void submit(ByteBuffer bb, float source) {
 	    bb.putShort((short) (source * (float) Short.MAX_VALUE));
+	}
+    }//end ShortPutter
+    
+    private final class UnsignedShortPutter implements SampleSubmitter{
+	@Override
+	public synchronized void submit(ByteBuffer bb, float source) {
+	    bb.putShort((short) ((source * (float) Short.MAX_VALUE) - Short.MIN_VALUE));
 	}
     }//end ShortPutter
     
@@ -130,6 +147,13 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    bb.putInt((int) (source * (float) Integer.MAX_VALUE));
 	}
     }//end IntPutter
+    
+    private final class UnsignedIntPutter implements SampleSubmitter{
+	@Override
+	public synchronized void submit(ByteBuffer bb, float source) {
+	    bb.putInt((int) ((source * (float) Integer.MAX_VALUE) - Integer.MIN_VALUE));
+	}
+    }//end UnsignedIntPutter
 
     /**
      * @return the sourceDataLine
@@ -141,7 +165,6 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	        setSourceDataLine((SourceDataLine) AudioSystem.getLine(output.info));
 	        sourceDataLine.open(format);
 	        sourceDataLine.start();
-	        System.out.println("SourceDataLine. Device="+output.getDevice()+" out="+output+" format="+format);
 	}//end if(sourceDataLine==null)
         return sourceDataLine;
     }//end getSourceDataLine()
@@ -214,11 +237,44 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	public JavaSoundOutput(SourceDataLine.Info info, AudioDevice dev){
 	    this.info=info;this.dev=dev;
 	    for(AudioFormat f:info.getFormats()){
-		final int sampleSizeBits = f.getSampleSizeInBits();
-		if(sampleSizeBits == 8 || sampleSizeBits == 16 || sampleSizeBits == 32)
-		    formats.add(f);
+		if(isFormatValid(f))
+		    formats.add(sanitizeFormat(f));
 	    }//end for(format)
 	}
+	
+	AudioFormat sanitizeFormat(AudioFormat format) {
+	    AudioFormat result = format;
+	    /*With Java sound PCM, frame rate and sample rates are identical.
+	     * In TRCL, the frame rate is the traditional "sample rate" whereas a sampling rate is frame rate * channel count
+	     * for use in calculating buffer sizes. 
+	     * */
+	    if(result.getFrameRate() <= 0)
+		result = new AudioFormat(
+			result.getEncoding(), 
+			44100, 
+			result.getSampleSizeInBits(), 
+			result.getChannels(), 
+			result.getFrameSize(), 
+			44100, 
+			result.isBigEndian());
+	    return result;
+	}
+	
+	private boolean isFormatValid(AudioFormat format) {
+	    final int sampleSizeBits = format.getSampleSizeInBits();
+	    final int numChannels = format.getChannels();
+	    if(numChannels != 2)
+		return false;
+	    if(sampleSizeBits != 8 && sampleSizeBits != 16 && sampleSizeBits != 32)
+		return false;
+	    //if(format.getFrameRate() <= 0)
+		//return false;
+	    final Encoding encoding = format.getEncoding();
+	    if(encoding == Encoding.ALAW || encoding == Encoding.ULAW)
+		return false;
+	    return true;
+	}
+	
 	@Override
 	public synchronized String getUniqueName() {
 	    return info.toString();

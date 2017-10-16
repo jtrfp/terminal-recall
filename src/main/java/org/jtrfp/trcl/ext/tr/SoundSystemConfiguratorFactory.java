@@ -33,14 +33,15 @@ public class SoundSystemConfiguratorFactory
 	    new String [] {
 	    SoundSystem.LINEAR_FILTERING,
 	    SoundSystem.BUFFER_LAG,
-	    SoundSystem.DEVICE_BY_NAME,
-	    SoundSystem.DRIVER_BY_NAME,
-	    SoundSystem.FORMAT_BY_NAME,
-	    SoundSystem.OUTPUT_BY_NAME,
+	    //SoundSystem.DEVICE_BY_NAME,
+	    //SoundSystem.DRIVER_BY_NAME,
+	    //SoundSystem.FORMAT_BY_NAME,
+	    //SoundSystem.OUTPUT_BY_NAME,
 	    SoundSystem.MOD_STEREO_WIDTH,
 	    SoundSystem.BUFFER_SIZE_FRAMES_STRING,
 	    SoundSystem.MUSIC_VOLUME,
-	    SoundSystem.SFX_VOLUME
+	    SoundSystem.SFX_VOLUME,
+	    SoundSystem.OUTPUT_CONFIG
 	    //"componentConfigs"
     };
     private static final Set<String> PERSISTENT_PROPERTIES_SET = 

@@ -203,6 +203,36 @@ public class SoundSystemKernel {
 	}
     }//end SetActiveDevice
     
+    public static class SetAudioOutputConfig implements Runnable {
+	private final AudioDriver       driver;
+	private final AudioDevice       device;
+	private final AudioOutput       output;
+	private final AudioFormat       format;
+	private final SoundSystemKernel kernel;
+	
+	public SetAudioOutputConfig(AudioDriver driver,
+		                    AudioDevice device,
+		                    AudioOutput output,
+		                    AudioFormat format,
+		                    SoundSystemKernel kernel) {
+	    this.driver = driver;
+	    this.device = device;
+	    this.output = output;
+	    this.format = format;
+	    this.kernel = kernel;
+	}//end constructor
+	
+	@Override
+	public void run() { 
+	    kernel.setActiveDriver(driver);
+	    kernel.setActiveDevice(device);
+	    kernel.setActiveOutput(output);
+	    kernel.setFormat(format);
+	    
+	    kernel.regenerateRenderFloatBytes();
+	}//end run()
+    }//end SetAudioOutputConfig
+    
     private static final int NUM_BUFFER_ROWS=1;
     
     public double getBufferSizeSeconds() {
@@ -224,9 +254,8 @@ public class SoundSystemKernel {
 	getThreadManager().submitToGL(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
-		final ByteBuffer floatBytes = renderFloatBytes;
-		floatBytes.clear();
-		render(getGpu(), getGpu().getGl(), floatBytes, renderFrameBuffer, renderTexture, bufferTimeCounter);
+		renderFloatBytes.clear();
+		render(getGpu(), getGpu().getGl(), renderFloatBytes, renderFrameBuffer, renderTexture, bufferTimeCounter);
 		return null;
 	    }
 	}).get();
@@ -251,6 +280,9 @@ public class SoundSystemKernel {
     
     private void render(GPU gpu, GL2ES2 gl, ByteBuffer audioByteBuffer, GLFrameBuffer renderFrameBuffer, GLTexture renderTexture, double bufferTimeCounter) {
 	    //final GPU gpu = getGpu();
+	
+	    ensureRenderFloatBytesAreValid();//TODO: Remove after debugged
+	    ensureRenderTargetIsValid();//TODO: Remove after debugged
 
 	    if(isBufferLag())
 		readGLAudioBuffer(gpu,audioByteBuffer,renderTexture);
@@ -392,7 +424,7 @@ public class SoundSystemKernel {
 	final AudioFormat format         = getFormat();
 	final int expectedNumberOfFrames = getBufferSizeFrames();
 	final int sampleSizeInBytes      = 4;//Float32 for GPU
-	final int numChannels            = format.getChannels();
+	final int numChannels            = format.getChannels();//XXX: Only supports 2 channels!!!
 	final int bytesPerFrame          = sampleSizeInBytes * numChannels;
 	final int expectedNumberOfBytes  = expectedNumberOfFrames * bytesPerFrame;
 	renderFloatBytes = ByteBuffer.allocateDirect(expectedNumberOfBytes).order(ByteOrder.nativeOrder());
@@ -461,7 +493,7 @@ public class SoundSystemKernel {
     }
     
     private void ensureRenderTargetIsValid() {
-	if(! isPlaybackRenderTargetValid())
+	if(! isPlaybackRenderTargetValid()) //TODO: Find out why this isn't catching the mismatch.
 	    regenerateRenderTarget();
     }
     
@@ -491,6 +523,7 @@ public class SoundSystemKernel {
 
     protected void setBufferSizeFrames(int bufferSizeFrames) {
         this.bufferSizeFrames = bufferSizeFrames;
+        regenerateRenderFloatBytes();
     }
 
     protected boolean isBufferLag() {
@@ -507,6 +540,8 @@ public class SoundSystemKernel {
 
     protected void setFormat(AudioFormat format) {
         this.format = format;
+        if( activeDriver != null && format != null )
+            activeDriver.setFormat(format);
     }
 
     protected AudioDriver getActiveDriver() {

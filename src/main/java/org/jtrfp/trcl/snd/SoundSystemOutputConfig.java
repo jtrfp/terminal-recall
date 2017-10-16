@@ -47,4 +47,16 @@ public class SoundSystemOutputConfig {
     public void setFormatByName(String formatByName) {
 	this.formatByName = formatByName;
     }
+    
+    @Override
+    public boolean equals(Object other){
+	if( other instanceof SoundSystemOutputConfig ) {
+	    final SoundSystemOutputConfig otherConf =  (SoundSystemOutputConfig)other;
+	    return  getDriverByName().equals(otherConf.getDriverByName()) &&
+		    getDeviceByName().equals(otherConf.getDeviceByName()) &&
+		    getPortByName()  .equals(otherConf.getPortByName())   &&
+		    getFormatByName().equals(otherConf.getFormatByName());
+	}//end if(instanceof)
+	return false;
+    }//end equals()
 }//end SoundSystemOutputConfig

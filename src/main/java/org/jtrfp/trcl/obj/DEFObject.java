@@ -575,9 +575,13 @@ public class DEFObject extends WorldObject {
 	    break;
 	}
 	case bob:
+	    
 	    addBehavior(new Bobbing()
 		    .setAdditionalHeight(TRFactory.mapSquareSize * 1));
-	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(1000. * (def.getRotationSpeed() / 65535.)));
+	    int rotationSpeed = def.getRotationSpeed();
+	    if(rotationSpeed <= 0)
+		rotationSpeed = 65535 * 5;
+	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(1000. * (rotationSpeed / 65535.)));
 	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,
 		    MED_EXP_SOUNDS[(int) (Math.random() * 2)]));
 	    possibleBobbingSpinAndCrashOnDeath(.5, def);
@@ -585,6 +589,7 @@ public class DEFObject extends WorldObject {
 	    anchoring = Anchoring.floating;
 	    mobile = false;
 	    canTurn = false;// ironic?
+	    
 	    defaultModelAssignment();
 	    break;
 	case alienBoss:

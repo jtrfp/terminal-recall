@@ -37,6 +37,8 @@ public class SteadilyRotating extends Behavior {
      * @param rotationPeriodMillis the rotationPeriodMillis to set
      */
     public SteadilyRotating setRotationPeriodMillis(double rotationPeriodMillis) {
+	if(rotationPeriodMillis <= 0)
+	    throw new IllegalArgumentException("Rotation period must be greater than zero.");
         this.rotationPeriodMillis = rotationPeriodMillis;
         return this;
     }

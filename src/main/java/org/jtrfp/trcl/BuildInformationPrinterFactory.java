@@ -17,7 +17,9 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.FeatureNotApplicableException;
 import org.jtrfp.trcl.core.Features;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BuildInformationPrinterFactory
 implements FeatureFactory<Features> {
     
@@ -25,8 +27,8 @@ implements FeatureFactory<Features> {
 	private BuildInformation buildInformation;
 	
 	public void printBuildInformation() {
-	    System.out.println("Build ID:\t"+buildInformation.getUniqueBuildId());
-	    System.out.println("Branch:\t"+buildInformation.getBranch());
+	    System.out.println("Build ID: "+buildInformation.getUniqueBuildId());
+	    System.out.println("Branch: "+buildInformation.getBranch());
 	}
 
 	@Override

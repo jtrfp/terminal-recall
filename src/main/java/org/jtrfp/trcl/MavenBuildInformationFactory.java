@@ -17,7 +17,9 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.FeatureNotApplicableException;
 import org.jtrfp.trcl.core.Features;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MavenBuildInformationFactory
 	implements FeatureFactory<Features> {
     

@@ -45,9 +45,18 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<org.jtrfp.trcl.gitSCMBranch>${scmBranch}</org.jtrfp.trcl.gitSCMBranch>
-		<org.jtrfp.trcl.gitBuildNumber>${buildNumber}</org.jtrfp.trcl.gitBuildNumber>
+		<skipTests>false</skipTests>
 	</properties>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.20.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<dependencies>
 		<dependency>
@@ -202,6 +211,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.10</version>
+				<configuration>
+					<skipTests>${skipTests}</skipTests>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -218,6 +230,23 @@
 				<configuration>
 					<doCheck>false</doCheck>
 					<doUpdate>false</doUpdate>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.20.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<skipTests>true</skipTests>
+					<showSuccess>false</showSuccess>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -248,19 +277,6 @@
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.18.1</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>integration-test</goal>
-								<goal>verify</goal>
-							</goals>
-						</execution>
-					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

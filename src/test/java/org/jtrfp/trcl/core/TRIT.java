@@ -25,10 +25,22 @@ public class TRIT {
 	Features.resetForTesting();
     }
 
-    @Test
+    //@Test
     public void testRegisterFeature() {
 	Features.registerFeature(new SwingMenuSystemFactory());
 	Features.get(Features.getSingleton(), MenuSystem.class);
     }
+    
+    @Test
+    public void testCompleteStartup() {
+        //TODO: Many items:
+        //Start the boot sequence
+        //Wait for boot to complete
+        //Get a screenshot
+        //Save screenshot
+        //Compare screenshot to reference
+        //Send shutdown signal
+        //Await shutdown with 30s timeout
+    }//end testCompleteStartup()
 
 }//end TRIT

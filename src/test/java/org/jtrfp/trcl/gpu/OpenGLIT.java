@@ -71,7 +71,7 @@ public class OpenGLIT {
     }//end tearDown()
 
     @Test
-    public void test() throws Exception {
+    public void testGL33() throws Exception {
 	if(getCanvas()==null)
 	    return;//Headless
 	GLTestUtils.runAttributelessShader(getCanvas(), VERTEX_SOURCE, FRAG_SOURCE, GL3.GL_TRIANGLES, 3);

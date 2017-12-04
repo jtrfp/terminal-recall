@@ -250,6 +250,7 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
+			<!--  ////// This plugin breaks the nightly builds ///////
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
@@ -293,6 +294,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>

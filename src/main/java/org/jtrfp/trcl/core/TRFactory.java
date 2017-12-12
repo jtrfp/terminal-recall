@@ -327,7 +327,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    throwable.printStackTrace();
 	    System.err.println("======================");
 	    System.err.println("\nIrrecoverable. Exiting...\n\n");
-	    System.exit(-1);
+	    System.exit(1);
 	}
 
 	/**

@@ -309,6 +309,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<argLine>-Xms1024m -Xmx1024m</argLine>
 					<skipITs>${skipITs}</skipITs>
 					<showSuccess>false</showSuccess>
 				</configuration>

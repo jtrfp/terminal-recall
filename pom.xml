@@ -199,6 +199,7 @@
 						</goals>
 						<phase>validate</phase>
 						<configuration>
+						    <locale>UTC</locale>
 							<name>currentYear</name>
 							<pattern>yyyy</pattern>
 						</configuration>

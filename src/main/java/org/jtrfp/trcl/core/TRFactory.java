@@ -68,6 +68,21 @@ public final class TRFactory implements FeatureFactory<Features>{
     public interface TRConstructed  extends TRRunState{}
     public interface TRDestructing  extends TRRunState{}
     public interface TRDestructed   extends TRRunState{}
+    
+    public interface    Shutdown       extends    TRRunState{}
+    public static class NormalShutdown implements Shutdown{}
+    
+    public static class FailureShutdown implements Shutdown {
+	private final Throwable cause;
+	
+	public FailureShutdown(Throwable cause) {
+	    this.cause = cause;
+	}//end constructor
+
+	public Throwable getCause() {
+	    return cause;
+	}
+    }//end FailureShutdown
 
     public static double legacy2MapSquare(double z) {
 	return ((legacy2Modern(z)/TRFactory.mapSquareSize)+256)%256;
@@ -322,12 +337,8 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);
 	}
 
-	public void showStopper(final Throwable throwable) {
-	    System.err.println("==== SHOWSTOPPER ====");
-	    throwable.printStackTrace();
-	    System.err.println("======================");
-	    System.err.println("\nIrrecoverable. Exiting...\n\n");
-	    System.exit(1);
+	public void showStopper(final Throwable cause) {
+	    setRunState(new FailureShutdown(cause));
 	}
 
 	/**

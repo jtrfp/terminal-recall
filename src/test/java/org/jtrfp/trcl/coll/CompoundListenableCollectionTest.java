@@ -107,6 +107,7 @@ public class CompoundListenableCollectionTest extends TestCase {
 	assertEquals(0, compoundListenableCollection.size());
     }
 
+    @SuppressWarnings("deprecation") //Deliberately invoking a deprecated API
     public void testAdd() {
 	try{compoundListenableCollection.add(new Integer(12345));}
 	catch(UnsupportedOperationException e)

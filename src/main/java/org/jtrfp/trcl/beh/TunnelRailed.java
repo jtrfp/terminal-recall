@@ -51,7 +51,7 @@ public class TunnelRailed extends Behavior implements CollisionBehavior {
 		final double[] start = segPos;
 		final double[] end = Vect3D.add(start, segLen, seg.getEndY(),
 			-seg.getEndX(), new double[3]);// ZYX
-		final double[] tunnelSpineNoNorm = TRFactory.twosComplimentSubtract(
+		final double[] tunnelSpineNoNorm = TRFactory.twosComplementSubtract(
 			end, start, new double[3]);
 		final double[] tunnelSpineNorm = Vect3D
 			.normalize(tunnelSpineNoNorm);

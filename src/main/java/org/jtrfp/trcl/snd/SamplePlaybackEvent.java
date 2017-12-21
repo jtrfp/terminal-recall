@@ -198,7 +198,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 		    0,1)*volumeScalar;
 	    final double [] work     = new double[3];
 	    final double [] destPos  = dest.getPosition();
-	    TRFactory.twosComplimentSubtract(source, destPos, work);
+	    TRFactory.twosComplementSubtract(source, destPos, work);
 	    Rotation rot;
 	    try{rot = new Rotation(dest.getHeading(), dest.getTop(),Vector3D.PLUS_K, Vector3D.PLUS_J);}
 	    catch(MathArithmeticException e){rot = new Rotation(Vector3D.PLUS_K, 0);}//Default if given weird top/heading.

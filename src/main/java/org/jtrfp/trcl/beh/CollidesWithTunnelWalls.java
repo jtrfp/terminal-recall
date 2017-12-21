@@ -70,7 +70,7 @@ public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavi
 				    	Vect3D.scalarMultiply(circleCenter, .01, pPos);
 				    	Vect3D.add(pPos, Vect3D.scalarMultiply(oldPosition, .99, new double[3]), pPos);
 				    	//parent.setPosition(circleCenter.scalarMultiply(.01).add(oldPosition.scalarMultiply(.99)));
-				    	final double[]delta = TRFactory.twosComplimentSubtract(circleCenter, oldPosition, new double[3]);
+				    	final double[]delta = TRFactory.twosComplementSubtract(circleCenter, oldPosition, new double[3]);
 				    	if(delta[0]==0 && delta[1]==0 && delta[2]==0)
 				    	    return;
 				    	final double[]inwardNormal = Vect3D.normalize(delta);

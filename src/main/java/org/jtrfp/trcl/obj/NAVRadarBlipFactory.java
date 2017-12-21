@@ -117,7 +117,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    final double []blipPos = getPosition();
 	    final Game game = getGameShell().getGame();
 	    final double [] playerPos=game.getPlayer().getPosition();
-	    TRFactory.twosComplimentSubtract(representativeObject.getPosition(), playerPos, blipPos);
+	    TRFactory.twosComplementSubtract(representativeObject.getPosition(), playerPos, blipPos);
 	    Vect3D.scalarMultiply(blipPos, getRadarScalar(), blipPos);
 	    final double [] heading = game.getPlayer().getHeadingArray();
 	    double hX=heading[0];
@@ -170,7 +170,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	final double [] otherPos = positionable.getPosition();
 	final double [] playerPos=getGameShell().getGame().getPlayer().getPosition();
 	BlipType type=null;
-	if(TRFactory.twosComplimentDistance(playerPos, otherPos)<RADAR_RANGE){
+	if(TRFactory.twosComplementDistance(playerPos, otherPos)<RADAR_RANGE){
 	    if(positionable instanceof TunnelEntranceObject){
 		if(!((TunnelEntranceObject)positionable).isVisible())
 		    return null;//Invisible entrances are no-go.
@@ -192,8 +192,8 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	    }else{
 		//Lower
 		if(positionable instanceof DEFObject){
-		final DEFObject def = (DEFObject)positionable;
-		if(!def.isFoliage() && (!def.isMobile())||(def.isGroundLocked())){
+		 final DEFObject def = (DEFObject)positionable;
+		 if(!def.isFoliage() && (!def.isMobile())||(def.isGroundLocked())){
 		  type=BlipType.GRND_BELOW;
 		}else if(def.isMobile()&&!def.isGroundLocked()){
 		 type=BlipType.AIR_BELOW;
@@ -242,7 +242,6 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	newlyEnabledBlips.clear();
 	newlyEnabledBlips.addAll(newActiveBlips);
 	newlyEnabledBlips.removeAll(oldActiveBlips);
-	//final Collection<Blip> enabledBlips  = CollectionUtils.subtract(newActiveBlips, oldActiveBlips);
 	final Collection<Blip> disabledBlips = CollectionUtils.subtract(oldActiveBlips, newActiveBlips);
 	if(CollectionUtils.containsAny(newlyEnabledBlips, disabledBlips))
 	    throw new RuntimeException("Enabled and disabled contain same");
@@ -272,23 +271,6 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	for( int i = 0; i < poolIndices.length; i++ )
 	    poolIndices[i]=0;//reset index
     }//end resetBlipCounters()
-    
-    protected void clearUnusedRadarBlips(Collection<Blip> previouslyActiveBlips){
-	final ArrayList<Blip> blipsToRemove = new ArrayList<Blip>();
-	final int numPools = blipPool.length;
-	for(int poolTypeIndex = 0; poolTypeIndex < numPools; poolTypeIndex++){
-	    final Blip [] pool = blipPool[poolTypeIndex];
-	    int blipStartIndex = poolIndices[poolTypeIndex];
-	    for(int blipIndex = blipStartIndex; blipIndex < POOL_SIZE; blipIndex++){
-		final Blip blip = pool[blipIndex];
-		if(previouslyActiveBlips.contains(blip)){//Off transient
-		    blipsToRemove.add(blip);
-		}//end (off transient)
-	    }//end for(blips)
-	}//end for(pools)
-	for(Blip blip : blipsToRemove)
-	    blip.setVisible(false);//TODO: Remove from grid
-    }//end clearUnusedRadarBlips()
     
     public void clearRadarBlips(){
 	final Collection<Blip> activeBlips = getActiveBlips();

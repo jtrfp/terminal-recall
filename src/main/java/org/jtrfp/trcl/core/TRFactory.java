@@ -180,14 +180,14 @@ public final class TRFactory implements FeatureFactory<Features>{
 	v *= crossPlatformScalar;
 	return v > 134217727 ? v - 268435456 : v;
     }
-    public static Vector3D twosComplimentSubtract(Vector3D l, Vector3D r){
+    public static Vector3D twosComplementSubtract(Vector3D l, Vector3D r){
 	return new Vector3D(
 		deltaRollover(l.getX()-r.getX()),
 		deltaRollover(l.getY()-r.getY()),
 		deltaRollover(l.getZ()-r.getZ()));
     }
-    public static double twosComplimentDistance(Vector3D l, Vector3D r){
-	return twosComplimentSubtract(l,r).getNorm();
+    public static double twosComplementDistance(Vector3D l, Vector3D r){
+	return twosComplementSubtract(l,r).getNorm();
     }
     public static double deltaRollover(double v){
 	if(v>mapCartOffset)return v-mapWidth;
@@ -195,12 +195,12 @@ public final class TRFactory implements FeatureFactory<Features>{
 	return v;
     }
 
-    public static double sloppyTwosComplimentTaxicabDistanceXZ(double[] l,
+    public static double sloppyTwosComplementTaxicabDistanceXZ(double[] l,
 	    double[] r) {
 	return deltaRollover(Math.abs(l[0] - r[0]) + Math.abs(l[2] - r[2]));
     }
 
-    public static double twosComplimentDistance(double[] l, double[] r) {
+    public static double twosComplementDistance(double[] l, double[] r) {
 	final double dx = deltaRollover(l[0] - r[0]);
 	final double dy = deltaRollover(l[1] - r[1]);
 	final double dz = deltaRollover(l[2] - r[2]);
@@ -209,7 +209,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	return Math.sqrt((dx) * (dx) + (dy) * (dy) + (dz) * (dz));
     }
 
-    public static double[] twosComplimentSubtract(double[] l, double[] r,
+    public static double[] twosComplementSubtract(double[] l, double[] r,
 	    double[] dest) {
 	assert !Vect3D.isAnyNaN(l);
 	assert !Vect3D.isAnyNaN(r);

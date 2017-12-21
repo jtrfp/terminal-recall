@@ -55,7 +55,7 @@ private GameShell gameShell;
 		final WorldObject parent = getParent();
 		double [] playerPos = includeYAxisInCollision?player.getPosition():new double []{player.getPosition()[0],0,player.getPosition()[2]};
 		double [] parentPos = includeYAxisInCollision?parent.getPosition():new double []{parent.getPosition()[0],0,parent.getPosition()[2]};
-		if(TRFactory.twosComplimentDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
+		if(TRFactory.twosComplementDistance(playerPos,parentPos)<CollisionManager.SHIP_COLLISION_DISTANCE*4){
 		    destroy();
 		    getGameShell().getGame().getCurrentMission().removeNAVObjective(objective);
 		}//end if(collided)

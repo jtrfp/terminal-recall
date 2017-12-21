@@ -44,11 +44,11 @@ private Class<? extends DamageListener.Event> damageEventClass = DamageListener.
 	public void proposeCollision(WorldObject obj){
 	    if(obj instanceof Player){
 		final WorldObject p = getParent();
-		final double [] relPos=TRFactory.twosComplimentSubtract(obj.getPosition(), p.getPosition(), new double[3]);
+		final double [] relPos=TRFactory.twosComplementSubtract(obj.getPosition(), p.getPosition(), new double[3]);
 		final Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J,p.getHeading(),p.getTop());
 		final double[] rotPos=rot.applyInverseTo(new Vector3D(relPos)).toArray();
 		final double [] rotTransPos=Vect3D.add(rotPos,origin,rotTransPosVar);
-		if(TRFactory.twosComplimentDistance(obj.getPosition(), p.getPosition())<80000)
+		if(TRFactory.twosComplementDistance(obj.getPosition(), p.getPosition())<80000)
 		if(	rotTransPos[0]>0 && rotTransPos[0]<dims[0] &&
 			rotTransPos[1]>0 && rotTransPos[1]<dims[1] &&
 			rotTransPos[2]>0 && rotTransPos[2]<dims[2]){

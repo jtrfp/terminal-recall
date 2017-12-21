@@ -394,7 +394,7 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
 	   double [] dest
 	   ){
        final double [] vectorToTargetVar = dest;
-       TRFactory.twosComplimentSubtract(targetPos, originPos,vectorToTargetVar);
+       TRFactory.twosComplementSubtract(targetPos, originPos,vectorToTargetVar);
        
        assert !Vect3D.isAnyNaN(vectorToTargetVar);
        assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.POSITIVE_INFINITY);

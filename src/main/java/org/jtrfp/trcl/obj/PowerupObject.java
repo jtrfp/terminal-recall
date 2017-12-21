@@ -56,7 +56,7 @@ public class PowerupObject extends WorldObject{
 	private class PowerupBehavior extends Behavior implements CollisionBehavior{
 		@Override
 		public void proposeCollision(WorldObject other){
-			if(TRFactory.twosComplimentDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
+			if(TRFactory.twosComplementDistance(other.getPosition(), getPosition())<CollisionManager.SHIP_COLLISION_DISTANCE)
 				{if(other instanceof Player){
 				    	Player p=(Player)other;
 					try{applyToPlayer(p);

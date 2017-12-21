@@ -38,7 +38,7 @@ public class FacingObject extends Behavior {
 	    final double [] tPos = target.get().getPosition();
 	    final double [] pPos = parent.getPosition();
 	    
-	    TRFactory.twosComplimentSubtract(tPos, pPos, work);
+	    TRFactory.twosComplementSubtract(tPos, pPos, work);
 	    
 	    Vector3D newHeading;
 	    try{newHeading = new Vector3D(Vect3D.normalize(work,work));}

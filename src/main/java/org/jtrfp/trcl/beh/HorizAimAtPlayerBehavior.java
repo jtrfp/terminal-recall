@@ -42,7 +42,7 @@ public class HorizAimAtPlayerBehavior extends Behavior {
 
 	    assert !Vect3D.isAnyEqual(chaseTarget.getPosition(), Double.POSITIVE_INFINITY);
 	    assert !Vect3D.isAnyEqual(thisObject.getPosition(), Double.NEGATIVE_INFINITY);
-	    TRFactory.twosComplimentSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar);
+	    TRFactory.twosComplementSubtract(chaseTarget.getPosition(), thisObject.getPosition(),vectorToTargetVar);
 	    assert !Vect3D.isAnyNaN(vectorToTargetVar);
 	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.POSITIVE_INFINITY);
 	    assert !Vect3D.isAnyEqual(vectorToTargetVar, Double.NEGATIVE_INFINITY);

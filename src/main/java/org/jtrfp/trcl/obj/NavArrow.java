@@ -148,7 +148,7 @@ private GameShell gameShell;
 	    }//end no tunnel
 
 	    final Vector3D playerPosXY = new Vector3D(playerPos[0],playerPos[2],0);
-	    Vector3D player2NavVectorXY = TRFactory.twosComplimentSubtract(navLocXY, playerPosXY);
+	    Vector3D player2NavVectorXY = TRFactory.twosComplementSubtract(navLocXY, playerPosXY);
 	    if(player2NavVectorXY.getNorm()==0)
 		player2NavVectorXY=Vector3D.PLUS_I;
 	    final double modernDistance = player2NavVectorXY.getNorm();

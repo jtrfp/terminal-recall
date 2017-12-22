@@ -86,14 +86,14 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		    });
 	    xmlEnc.writeObject(configurationTreeElement);
 	    xmlEnc.close();
-	    System.out.println("Successfully wrote config to temp file "+temp.getAbsolutePath());
+	    //System.out.println("Successfully wrote config to temp file "+temp.getAbsolutePath());
 	    
 	    FileChannel srcCh = null, dstCh = null;
 	    try {
 	        srcCh = new FileInputStream(temp).getChannel();
 	        dstCh = new FileOutputStream(destFile).getChannel();
 	        dstCh.transferFrom(srcCh, 0, srcCh.size());
-	        System.out.println("Successfully wrote configuration to "+getConfigSaveURI());
+	        //System.out.println("Successfully wrote configuration to "+getConfigSaveURI());
 	       }catch(Exception e){e.printStackTrace();}
 	    	finally{
 	           srcCh.close();
@@ -118,7 +118,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		Object deserializedObject;
 		try{deserializedObject = xmlDec.readObject();}
 		catch(Exception e){deserializedObject = new FileEmptyOrMalformed();}
-		System.out.println("deserializedObject="+deserializedObject);
+		//System.out.println("deserializedObject="+deserializedObject);
 		if(deserializedObject instanceof FeatureTreeElement)
 		    root = (FeatureTreeElement)deserializedObject;
 		else {
@@ -130,7 +130,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		}catch(Exception e){e.printStackTrace();}
 	    }//end if(exists)
 	if(root != null){
-	    System.out.println("loadConfigurations()");
+	    //System.out.println("loadConfigurations()");
 	 loadConfigurationsOfTargetRecursive(getTarget(), root);}
     }//end loadConfigurations()
     
@@ -179,7 +179,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     public void loadConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
 	final Set<Feature> features = new HashSet<Feature>();
 	Features.getAllFeaturesOf(target, features);
-	System.out.println("loadConfigurationsOfTargetRecursive "+target.getClass().getName());
+	//System.out.println("loadConfigurationsOfTargetRecursive "+target.getClass().getName());
 	/*
 	final ConfigManagerFeature cmf = getConfigManagerFeature(features);
 	if(target != getTarget() && cmf != null){
@@ -189,33 +189,33 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    cmf.notifyRecursiveSaveOperation(this,subElement.getPropertiesMap());
 	    return;
 	}*/
-	System.out.println("FEATURE LIST: ");
-	for(Feature feature:features)
-	    System.out.println("\t"+feature.getClass().getName()+" "+feature.hashCode());
+	//System.out.println("FEATURE LIST: ");
+	//for(Feature feature:features)
+	//    System.out.println("\t"+feature.getClass().getName()+" "+feature.hashCode());
 	for(Feature feature:features){
 	    final String featureClassName = feature.getClass().getName();
 	    FeatureTreeElement subFeature = element.getSubFeatures().get(featureClassName);
-	    System.out.println("featureClassName="+featureClassName+" elementFeatureClassName="+element.getFeatureClassName());
+	    //System.out.println("featureClassName="+featureClassName+" elementFeatureClassName="+element.getFeatureClassName());
 	    //subElement.setFeatureClassName(feature.getClass().getName());
 	    if(subFeature != null){
 		Map<String,Object> propertiesMap = subFeature.getPropertiesMap();
 		if(feature instanceof ConfigRootFeature){
-		    System.out.println(".... is ConfigRootFeature.");
+		    //System.out.println(".... is ConfigRootFeature.");
 		    ConfigRootFeature configRootFeature = (ConfigRootFeature)feature;
 		    if(propertiesMap != null)
 		     configRootFeature.notifyRecursiveLoadOperation(this, propertiesMap);
 		} else if(feature instanceof FeatureConfigurator){
 		    FeatureConfigurator configurator = (FeatureConfigurator)feature;
 		    //subElement.setPropertiesMap(new HashMap<String,Object>());
-		    System.out.println("Feature is a Configurator. Applying map:");
-		    for(Entry<String,Object> entry : propertiesMap.entrySet())
-			System.out.println("\t"+entry.getKey()+" "+entry.getValue());
+		    //System.out.println("Feature is a Configurator. Applying map:");
+		    //for(Entry<String,Object> entry : propertiesMap.entrySet())
+			//System.out.println("\t"+entry.getKey()+" "+entry.getValue());
 		    configurator.applyFromMap(propertiesMap);
 		}//end if(FeatureConfigurator)
 		loadConfigurationsOfTargetRecursive(feature, subFeature);
 	    }//end if(subElement!=null)
 	}//end for(features)
-	System.out.println("loadConfigOfTargetRecursive() traversing down from "+target.getClass().getName());
+	//System.out.println("loadConfigOfTargetRecursive() traversing down from "+target.getClass().getName());
     }//end loadConfigurationsOfTargetRecursive
     
     protected ConfigRootFeature getConfigRootFeature(Collection<Feature> features){

@@ -33,21 +33,34 @@ public class FeaturesImpl {
            = new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
        final HashMap<Class<?>,Collection<FeatureFactory>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory>>();
        final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
-    
-      void registerFeature(FeatureFactory<?> factory){
+       
+       
+       void registerFeature(FeatureFactory<?> factory){
+	   registerFeature(factory,true);
+       }//end registerFeature
+       
+       void deRegisterFeature(FeatureFactory<?> factory){
+	   registerFeature(factory,false);
+       }//end deRegisterFeature
+       
+      private void registerFeature(FeatureFactory<?> factory, boolean add){
 	Collection<FeatureFactory> factoryCollection = getFactoryCollection(factory.getTargetClass());
-	factoryCollection.add(factory);
-	registerFeatureRecursive(factory.getFeatureClass(),factory);
+	if(add) factoryCollection.add(factory);
+	else    factoryCollection.remove(factory);
+	
+	registerFeatureRecursive(factory.getFeatureClass(),factory,add);
 	//featureFactoriesByFeature.put(factory.getFeatureClass(),factory);
     }
     
-       void registerFeatureRecursive(Class featureClass, FeatureFactory factory){
+       void registerFeatureRecursive(Class featureClass, FeatureFactory factory, boolean add){
 	if(featureClass == Object.class || featureClass == null)
 	    return;
-	featureFactoriesByFeature.put(featureClass,factory);
+	if(add) featureFactoriesByFeature.put(featureClass,factory);
+	else    featureFactoriesByFeature.remove(featureClass,factory);
+	
 	for(Class iface:featureClass.getInterfaces())
-	    registerFeatureRecursive(iface,factory);
-	registerFeatureRecursive(featureClass.getSuperclass(), factory);
+	    registerFeatureRecursive(iface,factory,add);
+	registerFeatureRecursive(featureClass.getSuperclass(), factory,add);
     }
     
        Collection<FeatureFactory> getFactoryCollection(Class targetClass){

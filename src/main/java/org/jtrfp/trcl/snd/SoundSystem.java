@@ -125,6 +125,9 @@ public class SoundSystem {
 
     public static final double DEFAULT_SFX_VOLUME = .3;
     
+    //If no valid audio devices are available, provide a dummy driver
+    private static final AudioDriver DUMMY_DRIVER = new DummyAudioDriver();
+    
     public SoundSystem() {
 	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");//TODO: Implement a registry.
 	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
@@ -486,6 +489,10 @@ public class SoundSystem {
      * @param activeDriver the activeDriver to set
      */
     private void setActiveDriver(AudioDriver activeDriver) {
+	//If the default device is null then switch to the dummy driver.
+	if( activeDriver.getDefaultDevice() == null )
+	    activeDriver = DUMMY_DRIVER;
+	
 	//if(this.activeDriver!=null)
 	//    activeDriver.release();
 	final AudioDriver oldActiveDriver = this.activeDriver;

@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NotifyAndExitShowstopperHandlerFactory
-implements FeatureFactory<TR>, LoadOrderAware {
+implements FeatureFactory<TR>, LoadOrderAware, ShowstopperHandler {
     //Should load after configurator, but still early
     public static final int LOAD_PRIORITY = (int) (LoadOrderAware.FIRST*.9 + LoadOrderAware.LAST*.1);
 

@@ -184,30 +184,33 @@ public class GLTestUtils {
 	parent.setSize((int)(oldSize.getWidth()+dw), (int)(oldSize.getHeight()+dh));
     }//end resizeChildWithParent(...)
     
-    public static boolean compareImage(BufferedImage reference,
-	    BufferedImage test) throws ImageSizeMismatchException {
-	final int    DEV_THRESHOLD     = 10;
-	final double TOT_DEV_THRESHOLD = .01;
+    public static double compareImage(BufferedImage reference,
+	    BufferedImage test, int threshold) throws ImageSizeMismatchException {
+	final int    DEV_THRESHOLD     = threshold;
+	final double TOT_DEV_THRESHOLD = .0001;
 	final int    rWidth          = reference.getWidth(), 
 		     rHeight         = reference.getHeight(),
 		     tWidth          = test.getWidth(), 
 		     tHeight         = test.getHeight();
 	if( rWidth != tWidth || rHeight != tHeight )
 	    throw new ImageSizeMismatchException("ref="+rWidth+"x"+rHeight+" test="+tWidth+"x"+tHeight);
-	double       deviationTally = 0;
-	final double deviationRate  = 1./(rWidth*rHeight);
+	double       deviationTally    = 0;
+	final double deviationDivisor  = rWidth*rHeight;
 	
 	for( int y = 0; y <  rHeight; y++ )
 	    for( int x = 0; x < rWidth; x++ ){
-		final int rgbR      = reference.getRGB(x, y);
-		final int rR        = rgbR & 0xFF, gR = ( rgbR >> 8 ) & 0xFF, bR = ( rgbR >> 16 ) & 0xFF;
-		final int rgbT      = test.getRGB(x, y);
-		final int rT        = rgbT & 0xFF, gT = ( rgbT >> 8 ) & 0xFF, bT = ( rgbT >> 16 ) & 0xFF;
+		final Color rColor  = new Color(reference.getRGB(x, y));
+		//final int rgbR      = reference.getRGB(x, y);
+		final int rR        = rColor.getRed(), gR = rColor.getGreen(), bR = rColor.getBlue();
+		final Color tColor  = new Color(test.getRGB(x, y));
+		//final int rgbT      = test.getRGB(x, y);
+		final int rT        = tColor.getRed(), gT = tColor.getGreen(), bT = tColor.getBlue();
+		//final int rT        = rgbT & 0xFF, gT = ( rgbT >> 8 ) & 0xFF, bT = ( rgbT >> 16 ) & 0xFF;
 		final int dR        = rR - rT, dG = gR - gT, dB = bR - bT;
 		final int deviation = Math.abs(dR)+Math.abs(dG)+Math.abs(dB);
 		if( deviation > DEV_THRESHOLD )
-		    deviationTally += deviationRate;
+		    deviationTally++;
 	    }//end for(x) for(y)
-	return deviationTally <= TOT_DEV_THRESHOLD;
+	return deviationTally / deviationDivisor;
     }//end compareImage(...)
 }//end GLTestUtils

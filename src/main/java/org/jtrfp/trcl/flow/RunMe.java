@@ -14,6 +14,7 @@ package org.jtrfp.trcl.flow;
 
 import java.util.concurrent.Executor;
 
+import org.jtrfp.trcl.MavenBuildInformation;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -35,7 +36,7 @@ public class RunMe{
 	    System.out.println(
 		    "\t\t\t***TERMINAL RECALL***\n"+
 			    "	An unofficial enhancement engine for Terminal Velocity and Fury3.\n"+
-			    "	Copyright (c) 2012-2017 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
+			    "	Copyright (c) 2012-2018 Chuck Ritola and contributors. See enclosed CREDITS file for details.\n"+
 			    "	Part of the Java Terminal Reality File Parsers Project.\n\n"+
 			    "		This program is free software; you can redistribute it and/or modify\n"+
 			    "	it under the terms of the GNU General Public License as published by\n"+
@@ -52,14 +53,14 @@ public class RunMe{
 			    "	Bring any issues to the Terminal Recall GitHub page.\n" +
 			    "	www.jtrfp.org\n"
 		    );
-
+	    
 	    Executor transientExecutor = TransientExecutor.getSingleton();
 	    synchronized(transientExecutor){
 	        TransientExecutor.getSingleton().execute(BOOTSTRAP);
 	    }//end sync
 	}//end main()
 
-	private static final Runnable BOOTSTRAP = new Runnable(){
+	public static final Runnable BOOTSTRAP = new Runnable(){
 	    @Override
 	    public void run() {
 		AbstractApplicationContext context = 

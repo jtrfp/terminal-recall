@@ -100,21 +100,23 @@ public final class Renderer {
     private 	 	int 			dummyBufferID;
     private 		int 			numOpaqueBlocks,
     						numTransparentBlocks,
-    						numUnoccludedTBlocks;
+    						numOpaqueUnoccludedTBlocks,
+    						numTransUnoccludedTBlocks;
     private        	int			renderListIdx;
     private     	IntBuffer 		previousViewport;
     private final	ListActionTelemetry<VEC4Address> objectListTelemetry 
     						= new ListActionTelemetry<>();
     public static final ExecutorService         RENDER_LIST_EXECUTOR = new VerboseExecutorService(Executors.newSingleThreadExecutor());
-    private final	IndexList<VEC4Address>	opaqueIL, transIL, unoccludedIL;
+    private final	IndexList<VEC4Address>	opaqueIL, transIL, opaqueUnoccludedIL, transUnoccludedIL;
     private final	DecoupledCollectionActionDispatcher<PositionedRenderable>
     						relevantPositionedRenderables = new DecoupledCollectionActionDispatcher<>(new HashSet<PositionedRenderable>(), RENDER_LIST_EXECUTOR);
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<>(objectListTelemetry);
     private final	CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>
-    	opaqueODAddrsColl    = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL     = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
-    	transODAddrsColl     = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL      = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
-    	unoccludedODAddrsColl= new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(unoccludedIL = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),unoccludedODAddrAdapter);
+    	opaqueODAddrsColl    = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL                 = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
+    	opaqueUnoccludedODAddrsColl= new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueUnoccludedIL = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueUnoccludedODAddrAdapter),
+    		transODAddrsColl     = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL          = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
+        transUnoccludedODAddrsColl = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transUnoccludedIL  = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transUnoccludedODAddrAdapter);
 
     
     private             MatrixWindow            matrixWindowContext;
@@ -178,7 +180,8 @@ public final class Renderer {
 
 	relevantPositionedRenderables.addTarget(opaqueODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(transODAddrsColl, true);
-	relevantPositionedRenderables.addTarget(unoccludedODAddrsColl, true);
+	relevantPositionedRenderables.addTarget(opaqueUnoccludedODAddrsColl, true);
+	relevantPositionedRenderables.addTarget(transUnoccludedODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(new RedundancyReportingCollection<PositionedRenderable>(), true);
 
 	final TRFuture<Void> task0 = gpu.submitToGL(new Callable<Void>(){
@@ -430,10 +433,12 @@ public final class Renderer {
 		    final ObjectListWindow objectListWindow = objectListWindowContext;
 		    opaqueIL    .defragment();
 		    transIL     .defragment();
-		    unoccludedIL.defragment();
+		    opaqueUnoccludedIL.defragment();
+		    transUnoccludedIL .defragment();
 		    numOpaqueBlocks     = opaqueIL    .delegateSize();
 		    numTransparentBlocks= transIL     .delegateSize();
-		    numUnoccludedTBlocks= unoccludedIL.delegateSize();
+		    numOpaqueUnoccludedTBlocks= opaqueUnoccludedIL.delegateSize();
+		    numTransUnoccludedTBlocks = transUnoccludedIL .delegateSize();
 		    indexList.rewind();
 		    //final Set<VEC4Address> redundancyChecker = new HashSet<VEC4Address>();
 		    //for(VEC4Address addr:renderListTelemetry)
@@ -481,14 +486,15 @@ public final class Renderer {
 	final int numPrimitives = (
 		numTransparentBlocks+
 		numOpaqueBlocks+
-		numUnoccludedTBlocks
+		numOpaqueUnoccludedTBlocks+
+		numTransUnoccludedTBlocks
 		                  )*primsPerBlock;
 	saveWindowViewportState(gl);
 	gl.glEnableVertexAttribArray(0);
 	// OBJECT STAGE
 	
 	rFactory.getObjectProcessingStage().process(gl,getCameraMatrixAsFlatArray(),
-		renderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numUnoccludedTBlocks);
+		renderListLogicalVec4Offset, numTransparentBlocks, numOpaqueBlocks, numOpaqueUnoccludedTBlocks, numTransUnoccludedTBlocks);
 	//// VERTEX STAGE
 	VertexProcessingStage vps = rFactory.getVertexProcessingStage();
 	vps.process(gl, renderListLogicalVec4Offset, numPrimitives);
@@ -514,7 +520,7 @@ public final class Renderer {
 	gl.glDisable(GL3.GL_CULL_FACE);
 	
 	//Everything
-	gl.glDrawArrays(GL3.GL_POINTS, 0, (numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks)*primsPerBlock);
+	gl.glDrawArrays(GL3.GL_POINTS, 0, (numTransparentBlocks+numOpaqueBlocks+numOpaqueUnoccludedTBlocks+numTransUnoccludedTBlocks)*primsPerBlock);
 	//Cleanup
 	gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 	gl.glPointSize(1);
@@ -536,7 +542,9 @@ public final class Renderer {
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	final int numTransparentVertices = numTransparentBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
-	final int numUnoccludedVertices = numUnoccludedTBlocks
+	final int numOpaqueUnoccludedVertices = numOpaqueUnoccludedTBlocks
+		* GPU.GPU_VERTICES_PER_BLOCK;
+	final int numTransUnoccludedVertices = numTransUnoccludedTBlocks
 		* GPU.GPU_VERTICES_PER_BLOCK;
 	// Turn on depth write, turn off transparency
 	gl.glDisable(GL3.GL_BLEND);
@@ -564,10 +572,13 @@ public final class Renderer {
 			    "" + transIL.size());
 		    reporter.report(
 			    "org.jtrfp.trcl.core."+getDebugName()+".Renderer.numUnoccludedTransparentBlocks",
-			    "" + unoccludedIL.size());
+			    "" + transUnoccludedIL.size());
+		    reporter.report(
+			    "org.jtrfp.trcl.core."+getDebugName()+".Renderer.numUnoccludedOpaqueBlocks",
+			    "" + opaqueUnoccludedIL.size());
 		    reporter.report(
 			    "org.jtrfp.trcl.core."+getDebugName()+".Renderer.approxNumSceneTriangles",
-			    "" + ((opaqueIL.size()+transIL.size()+unoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
+			    "" + ((opaqueIL.size()+transIL.size()+opaqueUnoccludedIL.size()+transUnoccludedIL.size())*GPU.GPU_VERTICES_PER_BLOCK)/3);
 		    
 		    int index = 0;
 		    for(PositionedRenderable pr : relevantPositionedRenderables)
@@ -578,6 +589,12 @@ public final class Renderer {
 		}});
 	}
 	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, numOpaqueVertices);
+	//OPAQUE UNOCCLUDED
+	gl.glDisable(GL3.GL_DEPTH_TEST);
+	gl.glDisable(GL3.GL_DEPTH_CLAMP);
+	gl.glDepthRange(0, 1);
+	gl.glDepthFunc(GL3.GL_LEQUAL);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices, numOpaqueUnoccludedVertices);
 	
 	// Cleanup
 	gpu.defaultProgram();
@@ -614,10 +631,10 @@ public final class Renderer {
 	vps.getVertexNormXYTexture().bindToTextureUnit(7, gl);
 	vps.getVertexNormZTexture().bindToTextureUnit(8, gl);
 	
-	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices, numTransparentVertices);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices+numOpaqueUnoccludedVertices, numTransparentVertices);
 	//UNOCCLUDED TRANSPARENT
 	gl.glDisable(GL3.GL_DEPTH_TEST);
-	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices+numTransparentVertices, numUnoccludedVertices);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices+numOpaqueUnoccludedVertices+numTransparentVertices, numTransUnoccludedVertices);
 	
 	//Cleanup
 	gl.glDisable(GL3.GL_BLEND);
@@ -805,7 +822,21 @@ public final class Renderer {
 		    else {return value.getTransparentObjectDefinitionAddresses();}
 		}
 	    });
-    static final Adapter<CollectionActionDispatcher<VEC4Address>, PositionedRenderable> unoccludedODAddrAdapter =
+    static final Adapter<CollectionActionDispatcher<VEC4Address>, PositionedRenderable> transUnoccludedODAddrAdapter =
+	    new ImplicitBiDiAdapter<>(null,new com.ochafik.util.listenable.Adapter<PositionedRenderable,CollectionActionDispatcher<VEC4Address>>(){
+
+		@Override
+		public CollectionActionDispatcher<VEC4Address> adapt(
+			PositionedRenderable value) {
+		    final CollectionActionDispatcher<VEC4Address> result = new CollectionActionDispatcher<>(new HashSet<VEC4Address>());
+		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest()){
+			//value.getOpaqueObjectDefinitionAddresses().addTarget(result, true);
+			value.getTransparentObjectDefinitionAddresses().addTarget(result, true);
+			}//end if(unoccluded)
+		    return result;
+		}
+	    });
+    static final Adapter<CollectionActionDispatcher<VEC4Address>, PositionedRenderable> opaqueUnoccludedODAddrAdapter =
 	    new ImplicitBiDiAdapter<>(null,new com.ochafik.util.listenable.Adapter<PositionedRenderable,CollectionActionDispatcher<VEC4Address>>(){
 
 		@Override
@@ -814,7 +845,7 @@ public final class Renderer {
 		    final CollectionActionDispatcher<VEC4Address> result = new CollectionActionDispatcher<>(new HashSet<VEC4Address>());
 		    if(value instanceof WorldObject && ((WorldObject)value).isImmuneToOpaqueDepthTest()){
 			value.getOpaqueObjectDefinitionAddresses().addTarget(result, true);
-			value.getTransparentObjectDefinitionAddresses().addTarget(result, true);
+			//value.getTransparentObjectDefinitionAddresses().addTarget(result, true);
 			}//end if(unoccluded)
 		    return result;
 		}

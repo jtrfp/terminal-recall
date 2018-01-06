@@ -81,7 +81,7 @@ public class ObjectProcessingStage {
     }//end constructor
 
     public void process(GL3 gl, float [] cameraMatrixAsFlatArray,int opaqueRenderListLogicalVec4Offset,
-	    int numTransparentBlocks, int numOpaqueBlocks, int numUnoccludedTBlocks){
+	    int numTransparentBlocks, int numOpaqueBlocks, int numOpaqueUnoccludedTBlocks, int numTransUnoccludedTBlocks){
 	//final GLProgram objectProgram = rFactory.getObjectProgram();
 	objectProgram.use();
 	objectProgram.getUniform("logicalVec4Offset").setui(opaqueRenderListLogicalVec4Offset);
@@ -103,7 +103,7 @@ public class ObjectProcessingStage {
 	gl.glLineWidth(1);
 	{//Start variable scope
 	    final int blocksPerRow = OBJECT_TEXTURE_SIDE_LEN / 4;
-	    int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numUnoccludedTBlocks;
+	    int remainingBlocks = numTransparentBlocks+numOpaqueBlocks+numOpaqueUnoccludedTBlocks+numTransUnoccludedTBlocks;
 	    int numRows = (int)Math.ceil(remainingBlocks/(double)blocksPerRow);
 	    for(int i=0; i<numRows; i++){
 		gl.glDrawArrays(GL3.GL_LINE_STRIP, i*(blocksPerRow+1), (remainingBlocks<=blocksPerRow?remainingBlocks:blocksPerRow)+1);

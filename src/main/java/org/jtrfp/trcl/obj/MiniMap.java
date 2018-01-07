@@ -48,7 +48,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
     public MiniMap() {
 	super();
 	setTop(Vector3D.PLUS_J);
-	setHeading(Vector3D.MINUS_K);
+	setHeading(Vector3D.PLUS_K);
 	configureCircle();
 	addBehavior(new MiniMapBehavior());
     }//end constructor
@@ -68,8 +68,10 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	private void updateHeading(Player player){
 	    final Vector3D playerHdg = player.getHeading();
 	    final Vector3D topDir = new Vector3D(playerHdg.getX(),playerHdg.getZ(),0).normalize();
-	    final Rotation rot = new Rotation(Vector3D.MINUS_K,Vector3D.PLUS_J, getHeading(), getTopOrigin());
-	    setTop(rot.applyTo(getMapHack().applyTo(topDir)));
+	    final Rotation rot = new Rotation(Vector3D.PLUS_K,Vector3D.PLUS_J, getHeading(), getTopOrigin());
+	    final Vector3D turnDir = topDir.negate();
+	    //setTop(rot.applyTo(getMapHack().applyTo(topDir)));
+	    setTop(rot.applyTo(getMapHack().applyTo(turnDir)));
 	}
     }//end MiniMapBehavior
     
@@ -212,7 +214,7 @@ public class MiniMap extends WorldObject implements RelevantEverywhere {
 	    for(int x=0; x < getDiameterInTiles(); x++){
 		final SettableTexture tex = getGrid()[x][y];
 		if(tex != null){
-		    final Vector3D meshXYz = mapHack.applyTo(new Vector3D(x-hwp,y-hwp,0));
+		    final Vector3D meshXYz = mapHack.applyTo(new Vector3D(x-hwp,hwp-y,0));
 		    final Texture meshTex = mesh.textureAt(tileX+meshXYz.getX(), tileY+meshXYz.getY());
 		    if(meshTex instanceof VQTexture)
 			tex.setCurrentTexture(((VQTexture)meshTex));

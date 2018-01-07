@@ -596,7 +596,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		final WorldObject cockpit = getCockpit();
 		//miniMap.addBehavior(new MiniMapCockpitBehavior());
 		//Sorry, I'm just not smart enough to fix it the right way at this moment. - Chuck
-		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
+		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.MINUS_J));
 		//miniMapPositionMatch.setTarget(cockpit);//TODO: Refactor to cam mode
 		miniMapPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(layout.getMiniMapPosition(), Vector3D.ZERO));
 	    }//end if(null)

@@ -22,10 +22,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
 
-public class FeaturesImpl {
+public class FeaturesImpl implements Cloneable {
     private static final FeatureLoadOrderComparator featureLoadOrderComparator = new FeatureLoadOrderComparator();
     
  // Key represents target-class
@@ -42,6 +43,18 @@ public class FeaturesImpl {
        void deRegisterFeature(FeatureFactory<?> factory){
 	   registerFeature(factory,false);
        }//end deRegisterFeature
+       
+       /**
+        * Returns immutable snapsthot of all registered FeatureFactories for this FeaturesImpl at time of invocation.
+        * @return Collection containing one instance of each registered FeatureFactory at the time of invocation.
+        * @since Dec 23, 2017
+        */
+       public Collection<FeatureFactory> getAllRegisteredFactories(){
+	   Collection<FeatureFactory> resultOrig = featureFactoriesByFeature.values();
+	   Collection<FeatureFactory> resultClone = new HashSet<FeatureFactory>();
+	   resultClone.addAll(resultOrig);
+	   return CollectionUtils.unmodifiableCollection(resultClone);
+       }
        
       private void registerFeature(FeatureFactory<?> factory, boolean add){
 	Collection<FeatureFactory> factoryCollection = getFactoryCollection(factory.getTargetClass());
@@ -182,4 +195,13 @@ public class FeaturesImpl {
 	public FeatureTargetMismatchException(String msg)             {super(msg);}
 	public FeatureTargetMismatchException(String msg, Throwable t){super(msg, t);}
     }//end FeatureNotFoundException
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+	final FeaturesImpl result = new FeaturesImpl();
+	final Collection<FeatureFactory> factories = this.getAllRegisteredFactories();
+	for( FeatureFactory ff : factories )
+	    result.registerFeature(ff);
+	return result;
+    }//end clone()
 }//end FeaturesImpl

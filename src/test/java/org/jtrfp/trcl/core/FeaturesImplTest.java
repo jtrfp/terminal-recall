@@ -27,6 +27,15 @@ public class FeaturesImplTest {
     }
     
     @Test
+    public void testDeRegisterFeature() {
+	final FeatureFactory factory = Mockito.mock(FeatureFactory.class);
+	when(factory.getFeatureClass()).thenReturn (DummyF1.class);
+	when(factory.getTargetClass()) .thenReturn (DummyType1.class);
+	final FeaturesImpl subject = getSubject();
+	subject.deRegisterFeature(factory);
+    }
+    
+    @Test
     public void testGetFeatureMultiIdenticalGets() throws Throwable{
 	final FeaturesImpl subject = getSubject();
 	final FeatureFactory factory = Mockito.mock(FeatureFactory.class);

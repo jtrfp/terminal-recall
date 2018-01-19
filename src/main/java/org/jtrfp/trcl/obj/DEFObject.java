@@ -578,10 +578,12 @@ public class DEFObject extends WorldObject {
 	    
 	    addBehavior(new Bobbing()
 		    .setAdditionalHeight(TRFactory.mapSquareSize * 1));
-	    int rotationSpeed = def.getRotationSpeed();
-	    if(rotationSpeed <= 0)
-		rotationSpeed = 65535 * 5;
-	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(1000. * (rotationSpeed / 65535.)));
+	    // Apparently the rotation rates are only for manuevering and not for rotation rate of bobbing.
+	    //int rotationSpeed = def.getRotationSpeed();
+	    //if(rotationSpeed <= 0)
+		//rotationSpeed = 65535 * 5;
+	    //XXX 7-second rotation period looks about right.
+	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(7. * 1000));
 	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,
 		    MED_EXP_SOUNDS[(int) (Math.random() * 2)]));
 	    possibleBobbingSpinAndCrashOnDeath(.5, def);

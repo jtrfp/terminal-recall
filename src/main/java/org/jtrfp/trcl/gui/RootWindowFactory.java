@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2018 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -13,11 +13,11 @@
 package org.jtrfp.trcl.gui;
 
 import java.awt.Dimension;
-import java.util.concurrent.Callable;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
@@ -25,10 +25,8 @@ import javax.swing.SwingUtilities;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.CanvasProvider;
-import org.jtrfp.trcl.gpu.GLExecutor;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -53,7 +51,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 		public void run() {
 		    canvas.setFocusTraversalKeysEnabled(false);
 		    getContentPane().add(canvas);
-		    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		    //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    setFocusTraversalKeysEnabled(false);
 		    setTitle("Terminal Recall");
 		    try{RootWindow.this.setIconImage(ImageIO.read(this.getClass().getResource(ICON_PATH)));}
@@ -109,6 +107,52 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	public void destruct(TR target) {
 	    // TODO Auto-generated method stub
 	}
+	
+	private class RootWindowCloseListener implements WindowListener {
+
+	    @Override
+	    public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	    }
+	    
+	}//end RootWindowCloseListener
     }// end RootWindow
 
     @Override

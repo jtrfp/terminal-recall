@@ -309,19 +309,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    //secondaryRenderer.get().getCamera().setRootGrid(getDefaultGrid());//TODO: Stub
 	    //secondaryRenderer.get().getCamera().setPosition(0, TRFactory.mapSquareSize*5, 0);//TODO: Stub
 	    //secondaryRenderer.get().setRenderingTarget(gpu.get().rendererFactory.get().getPortalFrameBuffers()[0]);
-
-	    Runtime.getRuntime().addShutdownHook(new Thread(){
-		public void run(){
-		    try{getConfigManager().saveConfigurations();
-		    }catch(Exception e){System.err.println(
-			    "Failed to write the config file.\n"
-			            + e.getClass().getName()+"\n"
-				    + e.getMessage()+"\n");
-		    e.printStackTrace();
-		    }//end catch(Exception)
-		    System.err.println("Great work, Guys!");
-		}//end run()
-	    });
+	    
 	    //renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 	    renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 	}//end trInit()
@@ -581,6 +569,20 @@ public final class TRFactory implements FeatureFactory<Features>{
 
 	public void setConfigManager(TRConfigRoot configManager) {
 	    this.configManager = configManager;
+	}
+
+	public void shutdown() {
+	    final NormalShutdown shutdown = new NormalShutdown();
+	    setRunState(shutdown);
+	    try{getConfigManager().saveConfigurations();
+	    }catch(Exception e){System.err.println(
+		    "Failed to write the config file.\n"
+		            + e.getClass().getName()+"\n"
+			    + e.getMessage()+"\n");
+	    e.printStackTrace();
+	    }//end catch(Exception)
+	    System.err.println("Great work, Guys!");
+	    System.exit(0);
 	}
     }//end TR
 

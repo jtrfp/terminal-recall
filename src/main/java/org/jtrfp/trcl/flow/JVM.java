@@ -18,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class JVM {
@@ -40,7 +42,9 @@ public class JVM {
     }
     
     public JVM ensureProperlyConfigured() {//Skip if using 32-bit.
-	if (!isAlreadyConfigured()&& System.getProperty("os.arch").toUpperCase().contains("64")) {
+	final boolean is64Bit = System.getProperty("os.arch").contains("64");
+	final boolean isServerVM = System.getProperty("java.vm.name").toLowerCase().contains("server");
+	if (!isAlreadyConfigured()) {
 	    //http://stackoverflow.com/questions/13029915/how-to-programmatically-test-if-assertions-are-enabled
 	    //Seems to work better than the official way of querying assertion ability.
 	    boolean useAssertions = false;
@@ -50,24 +54,49 @@ public class JVM {
 	    String executable = isRunningFromJar() ? "-jar RunMe.jar"
 		    : "-cp " + System.getProperty("java.class.path")
 			    + " org.jtrfp.trcl.flow.RunMe";
-	    String cmd = "java -server -Dorg.jtrfp.trcl.bypassConfigure=true -Dcom.sun.management.jmxremote "
-		    + "-XX:+UnlockExperimentalVMOptions -XX:+DoEscapeAnalysis -XX:+UseFastAccessorMethods "
-		    + "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=5 -XX:+AggressiveOpts "
-		    + "-XX:+UseBiasedLocking -XX:+AlwaysPreTouch -XX:ParallelGCThreads=4 -Xms512m -Xmx512m "
-		    + "-XX:+UseCompressedOops "
-		    + "-XX:MaxDirectMemorySize=32m "
-		    /*+ "-XX:+UseLargePages"*/+" ";
+	    StringBuilder commandBuilder = new StringBuilder();
+	    
+	    commandBuilder.append("java ");
+	    
+	    commandBuilder.append(isServerVM?"-server ":"-client ");
+	    commandBuilder.append("-Dorg.jtrfp.trcl.bypassConfigure=true ");
+	    commandBuilder.append("-Dcom.sun.management.jmxremote ");
+	    
+	    if( is64Bit && isServerVM) {
+		commandBuilder.append("-XX:+UnlockExperimentalVMOptions ");
+		commandBuilder.append("-XX:+DoEscapeAnalysis ");
+		commandBuilder.append("-XX:+UseFastAccessorMethods ");
+		commandBuilder.append("-XX:+UseParNewGC ");
+
+		commandBuilder.append("-XX:+UseConcMarkSweepGC ");
+		commandBuilder.append("-XX:MaxGCPauseMillis=5 ");
+		commandBuilder.append("-XX:+AggressiveOpts ");
+		//commandBuilder.append("");
+
+		commandBuilder.append("-XX:+UseBiasedLocking ");
+		commandBuilder.append("-XX:+AlwaysPreTouch ");
+		commandBuilder.append("-XX:ParallelGCThreads=4 ");
+		commandBuilder.append("-XX:+UseCompressedOops ");
+		
+		commandBuilder.append("-XX:MaxDirectMemorySize=32m ");
+	    }//end if( 64 & server)
+	    
+	    //UNIVERSAL OPTS
+	    commandBuilder.append("-Xms512m ");
+	    commandBuilder.append("-Xmx512m ");
+
 	    if(useAssertions)
-		cmd+="-ea ";
+		commandBuilder.append("-ea ");
 	    for (Entry<Object,Object> property:System.getProperties().entrySet()){
 		if(property.getKey().toString().startsWith("org.jtrfp")&&!property.getKey().toString().toLowerCase().contains("org.jtrfp.trcl.bypassconfigure"))
-		    cmd += " -D"+property.getKey()+"="+property.getValue()+" ";
+		    commandBuilder.append(" -D"+property.getKey()+"="+property.getValue()+" ");
 	    }//end for(properties)
-	    cmd		+= executable;
+	    commandBuilder.append(executable);
 	    for (String arg : args) {
-		cmd += " " + arg;
+		commandBuilder.append(" " + arg);
 	    }
 	    try {
+		final String cmd = commandBuilder.toString();
 		System.out.println("Restarting JVM with: \n\t" + cmd);
 		final Process proc = Runtime.getRuntime().exec(cmd);
 		Thread tOut = new Thread() {

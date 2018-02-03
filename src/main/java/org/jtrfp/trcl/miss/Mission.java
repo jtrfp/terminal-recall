@@ -176,8 +176,6 @@ public class Mission {
       public interface LoadingComplete   extends LoadingState{}
      public interface GameplayState     extends ActiveMissionState{}
       public interface Briefing        extends GameplayState{}
-       public interface PlanetBrief     extends Briefing{}
-       public interface EnemyBrief      extends Briefing{}
       // public interface MissionSummary  extends Briefing{}// Declared below
       public interface PlayerActivity  extends GameplayState{}
        public interface OverworldState  extends PlayerActivity{}
@@ -211,7 +209,7 @@ public class Mission {
 	}//end propertyChange(...)
     }//end RunStateListener
 	
-	public void notifyMissionComplete(){
+	public void notifyMissionComplete(){//TODO: nonblocking
 	    MissionSummary summary;
 	    tr.setRunState(summary = new Mission.MissionSummary(
 		    getAirTargetsDestroyed(),
@@ -223,11 +221,15 @@ public class Mission {
 		final boolean showEndBriefing = !lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt");
 		if( showEndBriefing )
 		    ((TVF3Game)game).getBriefingScreen().missionCompleteSummary(lvl,summary);
-		bgMusic.stop();
-		cleanup();
-		((TVF3Game)game).notifyMissionComplete();
-		//TODO: Level end video
+		else missionComplete();
 	}//End missionSummaryMode()
+	
+	public void missionComplete() {
+	    bgMusic.stop();
+	    cleanup();
+	    ((TVF3Game)game).notifyMissionComplete();
+	    //TODO: Level end video
+	}//end missionComplete()
 
 	private void startGameplay(){
 	    final SoundSystem ss = Features.get(tr,SoundSystemFeature.class);
@@ -253,15 +255,19 @@ public class Mission {
 	    tr.getThreadManager().setPaused(false);
 
 	    if(isShowIntro()){//TODO: Does this need to be refactored?
-		tr.setRunState(new EnemyBrief(){});
+		//tr.setRunState(new EnemyBrief(){});
 		displayHandler.setDisplayMode(briefingMode);
 
 		//Make sure there is actually something to show, skip if not.
 		if(! lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt") )
 		    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
 		setShowIntro(false);
-
 	    }//end if(isShowIntro)
+	    else
+		switchToOverworldState();
+	}//end startGameplay()
+	
+	public void switchToOverworldState() {
 	    tr.setRunState(new OverworldState(){});
 	    final SkySystem skySystem = getOverworldSystem().getSkySystem();
 	    final Renderer renderer = tr.mainRenderer;
@@ -275,7 +281,7 @@ public class Mission {
 	    ((TVF3Game)game).getPlayer()	.setActive(true);
 	    ((TVF3Game)getGameShell().getGame()).setPaused(false);
 	    //tr.setRunState(new PlayerActivity(){});
-	}//end startGameplay()
+	}
 
     public void go() {
 	//XXX Kludge to fulfill previous dependencies

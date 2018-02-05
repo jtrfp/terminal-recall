@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2015 Chuck Ritola
+ * Copyright (c) 2015-2018 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -54,49 +54,47 @@ public class JVM {
 	    String executable = isRunningFromJar() ? "-jar RunMe.jar"
 		    : "-cp " + System.getProperty("java.class.path")
 			    + " org.jtrfp.trcl.flow.RunMe";
-	    StringBuilder commandBuilder = new StringBuilder();
+	    String cmd = "";
 	    
-	    commandBuilder.append("java ");
+	    cmd+="java ";
 	    
-	    commandBuilder.append(isServerVM?"-server ":"-client ");
-	    commandBuilder.append("-Dorg.jtrfp.trcl.bypassConfigure=true ");
-	    commandBuilder.append("-Dcom.sun.management.jmxremote ");
+	    cmd+=isServerVM?"-server ":"-client ";
+	    cmd+="-Dorg.jtrfp.trcl.bypassConfigure=true ";
+	    cmd+="-Dcom.sun.management.jmxremote ";
 	    
 	    if( is64Bit && isServerVM) {
-		commandBuilder.append("-XX:+UnlockExperimentalVMOptions ");
-		commandBuilder.append("-XX:+DoEscapeAnalysis ");
-		commandBuilder.append("-XX:+UseFastAccessorMethods ");
-		commandBuilder.append("-XX:+UseParNewGC ");
+		cmd+="-XX:+UnlockExperimentalVMOptions ";
+		cmd+="-XX:+DoEscapeAnalysis ";
+		cmd+="-XX:+UseFastAccessorMethods ";
+		cmd+="-XX:+UseParNewGC ";
 
-		commandBuilder.append("-XX:+UseConcMarkSweepGC ");
-		commandBuilder.append("-XX:MaxGCPauseMillis=5 ");
-		commandBuilder.append("-XX:+AggressiveOpts ");
-		//commandBuilder.append("");
+		cmd+="-XX:+UseConcMarkSweepGC ";
+		cmd+="-XX:MaxGCPauseMillis=5 ";
+		cmd+="-XX:+AggressiveOpts ";
 
-		commandBuilder.append("-XX:+UseBiasedLocking ");
-		commandBuilder.append("-XX:+AlwaysPreTouch ");
-		commandBuilder.append("-XX:ParallelGCThreads=4 ");
-		commandBuilder.append("-XX:+UseCompressedOops ");
+		cmd+="-XX:+UseBiasedLocking ";
+		cmd+="-XX:+AlwaysPreTouch ";
+		cmd+="-XX:ParallelGCThreads=4 ";
+		cmd+="-XX:+UseCompressedOops ";
 		
-		commandBuilder.append("-XX:MaxDirectMemorySize=32m ");
+		cmd+="-XX:MaxDirectMemorySize=32m ";
 	    }//end if( 64 & server)
 	    
 	    //UNIVERSAL OPTS
-	    commandBuilder.append("-Xms512m ");
-	    commandBuilder.append("-Xmx512m ");
+	    cmd+="-Xms512m ";
+	    cmd+="-Xmx512m ";
 
 	    if(useAssertions)
-		commandBuilder.append("-ea ");
+		cmd+="-ea ";
 	    for (Entry<Object,Object> property:System.getProperties().entrySet()){
 		if(property.getKey().toString().startsWith("org.jtrfp")&&!property.getKey().toString().toLowerCase().contains("org.jtrfp.trcl.bypassconfigure"))
-		    commandBuilder.append(" -D"+property.getKey()+"="+property.getValue()+" ");
+		    cmd+=" -D"+property.getKey()+"="+property.getValue()+" ";
 	    }//end for(properties)
-	    commandBuilder.append(executable);
+	    cmd+=executable;
 	    for (String arg : args) {
-		commandBuilder.append(" " + arg);
+		cmd+=" " + arg;
 	    }
 	    try {
-		final String cmd = commandBuilder.toString();
 		System.out.println("Restarting JVM with: \n\t" + cmd);
 		final Process proc = Runtime.getRuntime().exec(cmd);
 		Thread tOut = new Thread() {

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2017 Chuck Ritola
+ * Copyright (c) 2018 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 
 public abstract class RunStateHandler implements PropertyChangeListener {
     private boolean isInState = false;
+    
     public abstract boolean isValidRunState( Object oldRunSatte, Object newRunState);
 
     public abstract void enteredRunState(Object oldState, Object newState);

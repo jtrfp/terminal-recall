@@ -24,8 +24,8 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
+import javax.media.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -90,7 +90,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     }
 
     @Override
-    public void apply(GL2ES2 gl, double bufferStartTimeSeconds) {
+    public void apply(GL3 gl, double bufferStartTimeSeconds) {
 	SamplePlaybackEvent.Factory origin = (SamplePlaybackEvent.Factory)getOrigin();
 	final float factoryVolume = (float)origin.getVolume();
 	if( factoryVolume < getLowVolumeThreshold() )
@@ -101,12 +101,13 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	             startTimeInBuffers=((getStartRealtimeSeconds()-bufferStartTimeSeconds)/(double)bufferSizeSeconds)*2-1,
 	             lengthPerRow      = getSoundTexture().getLengthPerRowSeconds();
 	final int    lengthInSegments  = (int)(getSoundTexture().getNumRows()) * 2; //Times two because of the turn
-	origin.getNumRowsU().set((float)getSoundTexture().getNumRows());//XXX Kludge to get around int limitations in ES 2
+	//origin.getNumRowsU().set((float)getSoundTexture().getNumRows());//XXX Kludge to get around int limitations in ES 2
+	origin.getNumRowsU().setui(getSoundTexture().getNumRows());
 	origin.getStartU().set((float)startTimeInBuffers);
 	origin.getLengthPerRowU()
 	 .set((float)((2/playbackRatio)*(lengthPerRow/bufferSizeSeconds)));
 	getSoundTexture().getGLTexture().bindToTextureUnit(0, gl);
-	gl.glDrawArrays(GL2ES2.GL_LINE_STRIP, 0, lengthInSegments+1);
+	gl.glDrawArrays(GL3.GL_LINE_STRIP, 0, lengthInSegments+1);
     }//end apply(...)
     
     public static class Factory extends AbstractSoundEvent.Factory{
@@ -114,8 +115,8 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	private GLFragmentShader soundFragmentShader;//1 fragment = 1 frame
 	private GLProgram soundProgram;
 	private GLUniform panU,numRowsU,startU,lengthPerRowU,soundTextureU;
-	private int vertexIDAttribLocation = -1;
-	private int vertexBufferID = -1;
+	//private int vertexIDAttribLocation = -1;
+	//private int vertexBufferID = -1;
 	private FloatBuffer vertexIdBufferData;
 	private double volume = 1;
 	
@@ -138,7 +139,10 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 			    startU       = soundProgram.getUniform("start");
 			    lengthPerRowU= soundProgram.getUniform("lengthPerRow");
 			    soundTextureU= soundProgram.getUniform("soundTexture");
-			    final GL2ES2 gl = gpu.getGl();
+			    
+			    
+			    /*
+			    final GL3 gl = gpu.getGl();
 			    
 			    //Set up the Vertex ID VBO
 			    soundProgram.use();
@@ -148,12 +152,13 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 				vertexBufferID         = bufferIDs.get(0);
 			    }
 			    System.out.println("Binding buffer "+vertexBufferID);
-			    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, vertexBufferID);
+			    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vertexBufferID);
 			    final FloatBuffer vertexIDBufferData = getVertexIdBufferData();
-			    gl.glBufferData(GL2ES2.GL_ARRAY_BUFFER, vertexIDBufferData.capacity() * 4, vertexIDBufferData, GL2ES2.GL_STATIC_DRAW);
-			    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, 0);
+			    gl.glBufferData(GL3.GL_ARRAY_BUFFER, vertexIDBufferData.capacity() * 4, vertexIDBufferData, GL3.GL_STATIC_DRAW);
+			    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, 0);
 			    vertexIDAttribLocation = soundProgram.getAttribLocation("vertexID");
 			    assert vertexIDAttribLocation != -1;
+			    */
 			    gpu.defaultProgram();
 			return null;
 		    }// end call()
@@ -161,28 +166,28 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	}//end constructor
 
 	@Override
-	public void apply(GL2ES2 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds) {
+	public void apply(GL3 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds) {
 	    gl.glLineWidth(1);
-	    gl.glDisable(GL2ES2.GL_LINE_SMOOTH);
-	    gl.glDisable(GL2ES2.GL_CULL_FACE);
-	    gl.glEnable(GL2ES2.GL_BLEND);
-	    gl.glDepthFunc(GL2ES2.GL_ALWAYS);
-	    //gl.glProvokingVertex(GL2ES2.GL_FIRST_VERTEX_CONVENTION);
+	    gl.glDisable(GL3.GL_LINE_SMOOTH);
+	    gl.glDisable(GL3.GL_CULL_FACE);
+	    gl.glEnable(GL3.GL_BLEND);
+	    gl.glDepthFunc(GL3.GL_ALWAYS);
+	    //gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION);
 	    gl.glDepthMask(false);
-	    gl.glBlendFunc(GL2ES2.GL_ONE, GL2ES2.GL_ONE);
+	    gl.glBlendFunc(GL3.GL_ONE, GL3.GL_ONE);
 	    soundProgram.use();
-	    assert vertexIDAttribLocation != -1:"VertexIDAttribLocation failed to init!";
-	    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, vertexBufferID);
-	    gl.glEnableVertexAttribArray(vertexIDAttribLocation);
-	    gl.glVertexAttribPointer(vertexIDAttribLocation, 1, GL2ES2.GL_FLOAT, false, 0, 0);
+	    //assert vertexIDAttribLocation != -1:"VertexIDAttribLocation failed to init!";
+	    //gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, vertexBufferID);
+	   // gl.glEnableVertexAttribArray(vertexIDAttribLocation);
+	    //gl.glVertexAttribPointer(vertexIDAttribLocation, 1, GL3.GL_FLOAT, false, 0, 0);
 	    soundTextureU.set((int)0);
 	    for(SoundEvent ev:events)
 		ev.apply(gl, bufferStartTimeSeconds);
 	    //Cleanup
-	    gl.glDisableVertexAttribArray(vertexIDAttribLocation);
-	    gl.glBindBuffer(GL2ES2.GL_ARRAY_BUFFER, 0);
+	    //gl.glDisableVertexAttribArray(vertexIDAttribLocation);
+	    gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, 0);
 	    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-	    gl.glDisable(GL2ES2.GL_BLEND);
+	    gl.glDisable(GL3.GL_BLEND);
 	    gl.glUseProgram(0);
 	}//end apply(...)
 	

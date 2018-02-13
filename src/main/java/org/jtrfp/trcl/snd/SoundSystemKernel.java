@@ -25,7 +25,7 @@ import java.util.Queue;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
 
 import org.jtrfp.trcl.core.KeyedExecutor;
@@ -278,7 +278,7 @@ public class SoundSystemKernel {
 	pickupActiveEvents(bufferTimeCounter, getBufferSizeFrames()/getFormat().getFrameRate());
     }//end renderPrep()
     
-    private void render(GPU gpu, GL2ES2 gl, ByteBuffer audioByteBuffer, GLFrameBuffer renderFrameBuffer, GLTexture renderTexture, double bufferTimeCounter) {
+    private void render(GPU gpu, GL3 gl, ByteBuffer audioByteBuffer, GLFrameBuffer renderFrameBuffer, GLTexture renderTexture, double bufferTimeCounter) {
 	    //final GPU gpu = getGpu();
 	
 	    ensureRenderFloatBytesAreValid();//TODO: Remove after debugged
@@ -290,7 +290,7 @@ public class SoundSystemKernel {
 	    // Render
 	    renderFrameBuffer.bindToDraw();
 	    gl.glViewport(0, 0, getBufferSizeFrames(), 1);
-	    gl.glClear(GL2ES2.GL_COLOR_BUFFER_BIT);
+	    gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 	    for (SoundEvent ev : activeEvents) {// TODO: Replace with Factory calls
 		if (ev.isActive()) {
 		    final SoundEvent.Factory factory = ev.getOrigin();
@@ -318,7 +318,7 @@ public class SoundSystemKernel {
     
     private void readGLAudioBuffer(GPU gpu, ByteBuffer audioByteBuffer, GLTexture renderTexture){
 	// Read and export previous results to sound card.
-	final GL2ES2 gl = gpu.getGl();
+	final GL3 gl = gpu.getGl();
 	gpu.defaultFrameBuffers();
 	renderTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
 		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
@@ -384,7 +384,7 @@ public class SoundSystemKernel {
 				.newFrameBuffer()
 				.bindToDraw()
 				.attachDrawTexture(texture,
-					GL2ES2.GL_COLOR_ATTACHMENT0);
+					GL3.GL_COLOR_ATTACHMENT0);
 		    }}).get();
 	    }//end if(playbackFrameBuffer==null)
 	    return playbackFrameBuffer;
@@ -444,16 +444,16 @@ public class SoundSystemKernel {
 		final GLTexture newTexture = playbackTexture = gpu
 			.newTexture()
 			.bind()
-			.setMagFilter(GL2ES2.GL_NEAREST)
-			.setMinFilter(GL2ES2.GL_NEAREST)
-			.setWrapS(GL2ES2.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL2ES2.GL_CLAMP_TO_EDGE)
+			.setMagFilter(GL3.GL_NEAREST)
+			.setMinFilter(GL3.GL_NEAREST)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
 			.setDebugName("playbackTexture")
 			.setExpectedMinValue(-1, -1, -1, -1)
 			.setExpectedMaxValue(1, 1, 1, 1)
 			.setPreferredUpdateIntervalMillis(100)
-			.setImage(GL2ES2.GL_RG32F, getBufferSizeFrames(),
-				NUM_BUFFER_ROWS, GL2ES2.GL_RGBA, GL2ES2.GL_FLOAT,
+			.setImage(GL3.GL_RG32F, getBufferSizeFrames(),
+				NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
 				null);
 		//// Generate Framebuffer
 		gpu.defaultTexture();
@@ -462,7 +462,7 @@ public class SoundSystemKernel {
 			.newFrameBuffer()
 			.bindToDraw()
 			.attachDrawTexture(newTexture,
-				GL2ES2.GL_COLOR_ATTACHMENT0);
+				GL3.GL_COLOR_ATTACHMENT0);
 		return null;//FIXME: Should this reset to default texture/TIU afterward to improve performance?
 	    }}).get();
     }//end generateRenderTarget(...)

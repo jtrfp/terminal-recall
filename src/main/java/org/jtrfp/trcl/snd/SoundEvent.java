@@ -18,7 +18,7 @@ package org.jtrfp.trcl.snd;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -27,7 +27,7 @@ public interface SoundEvent {
     public double getStartRealtimeSeconds();
     public double getEndRealtimeSeconds();
     public double getDurationRealtimeSeconds();
-    public void apply(GL2ES2 gl, double bufferStartTimeSeconds);
+    public void apply(GL3 gl, double bufferStartTimeSeconds);
     public Factory getOrigin();
     public boolean isActive();
     public void activate();
@@ -37,7 +37,7 @@ public interface SoundEvent {
     public boolean isDestroyed();
     
     public interface Factory{
-	public void apply(GL2ES2 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds);
+	public void apply(GL3 gl, Collection<SoundEvent> events, double bufferStartTimeSeconds);
 	public TR getTR();
     }//end Factory
 }//end PlaybackEvent

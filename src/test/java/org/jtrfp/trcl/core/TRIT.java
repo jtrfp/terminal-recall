@@ -77,7 +77,6 @@ public class TRIT {
 		}});
 	}//end sync(transientExecutor)
 	loadCompletionListener.awaitLoadCompletion();
-	Thread.sleep(4 * SECONDS); //XXX Padding to let things settle.
 	final BufferedImage [] result = new BufferedImage[1];
 	synchronized(transientExecutor){
 	    transientExecutor.execute(new Runnable(){
@@ -90,11 +89,22 @@ public class TRIT {
 		    try{SwingUtilities.invokeAndWait(new Runnable(){
 			@Override
 			public void run() {
-			    //rootWindow.setSize(512, 512);
 			    GLTestUtils.resizeChildWithParent(rootWindow, rootWindow.getCanvas(), new Dimension(504,464));
 			}});}
 		    catch(Exception e){throw new RuntimeException(e);}
-		    //Get a screenshot
+		    
+		}}); 
+	}//end sync(transientExecutor)
+	Thread.sleep(2 * SECONDS); //XXX Padding to let things settle.
+	
+	synchronized(transientExecutor){
+	    transientExecutor.execute(new Runnable(){
+		@Override
+		public void run() {
+		  //Get a screenshot
+		    final Features features     = Features.getSingleton();
+		    final TR tr = Features.get(features, TR.class);
+		    final RootWindow rootWindow = Features.get(tr, RootWindow.class);
 		    final Renderer renderer = tr.mainRenderer;
 
 		    final TRFutureTask<BufferedImage> screenshotTask = renderer.getGpu().getGlExecutor().submitToGL(new Callable<BufferedImage>(){
@@ -105,8 +115,10 @@ public class TRIT {
 		    result[0] = screenshotTask.get();
 		    synchronized(result) {
 			result.notifyAll();}
-		}}); 
+		}//end run()
+	    });//end Runnable
 	}//end sync(transientExecutor)
+	
 	synchronized(result) {
 	    while( result[0] == null )
 		result.wait();

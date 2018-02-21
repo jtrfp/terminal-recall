@@ -261,7 +261,7 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
-			<!-- ////// This plugin breaks the nightly builds /////// <plugin> <groupId>com.akathist.maven.plugins.launch4j</groupId> 
+			<plugin> <groupId>com.akathist.maven.plugins.launch4j</groupId> 
 				<artifactId>launch4j-maven-plugin</artifactId> <version>1.7.21</version> 
 				<executions> <execution> <id>l4j-clui</id> <phase>package</phase> <goals> 
 				<goal>launch4j</goal> </goals> <configuration> <headerType>gui</headerType> 
@@ -274,7 +274,7 @@
 				<copyright>${project.inceptionDate}-${currentYear}</copyright> <productVersion>1.0.0.0</productVersion> 
 				<txtProductVersion>Version 1</txtProductVersion> <productName>Terminal Recall</productName> 
 				<internalName>TerminalRecall</internalName> <originalFilename>RunMe.exe</originalFilename> 
-				</versionInfo> </configuration> </execution> </executions> </plugin> -->
+				</versionInfo> </configuration> </execution> </executions> </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>

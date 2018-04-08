@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;

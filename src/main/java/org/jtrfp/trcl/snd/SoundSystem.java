@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.AudioSystem;

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;

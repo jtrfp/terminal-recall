@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLCanvas;
 
 public interface CanvasProvider {
  public GLCanvas getCanvas();

@@ -15,10 +15,10 @@ package org.jtrfp.trcl.gpu;
 
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL;
-
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.gui.GLExecutable;
+
+import com.jogamp.opengl.GL;
 
 public interface GLExecutor<GL_TYPE extends GL> {
     public <T> TRFutureTask<T> submitToGL(Callable<T> c);

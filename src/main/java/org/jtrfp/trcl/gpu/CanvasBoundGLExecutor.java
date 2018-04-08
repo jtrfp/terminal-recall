@@ -18,11 +18,11 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLRunnable;
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLRunnable;
+import com.jogamp.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.TRFutureTask;

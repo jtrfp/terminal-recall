@@ -18,7 +18,7 @@ import java.beans.PropertyEditorSupport;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComponent;

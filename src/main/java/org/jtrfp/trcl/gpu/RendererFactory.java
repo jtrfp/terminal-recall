@@ -21,12 +21,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.awt.GLCanvas;
-
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.World;
@@ -44,6 +38,11 @@ import org.jtrfp.trcl.pool.ObjectPool;
 import org.jtrfp.trcl.pool.ObjectPool.GenerativeMethod;
 import org.jtrfp.trcl.pool.ObjectPool.PreparationMethod;
 
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.awt.GLCanvas;
 import com.ochafik.util.listenable.Pair;
 
 public class RendererFactory {
@@ -383,10 +382,10 @@ public class RendererFactory {
 		    int width, int height) {
 		// SHAPE-DEPENDENT UNIFORMS
 		primitiveProgram.use();
-		primitiveProgram.getUniform("screenWidth" ).set((float)drawable.getWidth ());//TODO: replace with vec2
-		primitiveProgram.getUniform("screenHeight").set((float)drawable.getHeight());
+		primitiveProgram.getUniform("screenWidth" ).set((float)width);//TODO: replace with vec2
+		primitiveProgram.getUniform("screenHeight").set((float)height);
 		deferredProgram.use();
-		deferredProgram.getUniform("screenDims").set(drawable.getWidth(), drawable.getHeight());
+		deferredProgram.getUniform("screenDims").set(width, height);
 		gpu.defaultProgram();
 		gpu.defaultFrameBuffers();
 		gpu.defaultTIU();

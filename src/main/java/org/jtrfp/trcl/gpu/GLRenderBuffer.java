@@ -14,7 +14,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 public class GLRenderBuffer {
     private GL3 gl;

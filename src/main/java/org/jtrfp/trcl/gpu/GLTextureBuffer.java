@@ -14,8 +14,8 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
 
 
 /**

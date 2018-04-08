@@ -17,10 +17,10 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
 
 import org.junit.After;
 import org.junit.Before;

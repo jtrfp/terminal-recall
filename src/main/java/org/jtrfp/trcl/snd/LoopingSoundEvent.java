@@ -2,7 +2,7 @@ package org.jtrfp.trcl.snd;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;

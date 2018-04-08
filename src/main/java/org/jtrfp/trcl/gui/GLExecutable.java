@@ -13,7 +13,7 @@
 
 package org.jtrfp.trcl.gui;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 public interface GLExecutable<RETURN_TYPE, GL_TYPE extends GL> {
     public RETURN_TYPE execute(GL_TYPE gl);

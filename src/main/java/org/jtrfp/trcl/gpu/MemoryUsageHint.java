@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 public enum MemoryUsageHint {
     DymamicDraw(GL3.GL_DYNAMIC_DRAW), StaticDraw(GL3.GL_STATIC_DRAW), StreamDraw(

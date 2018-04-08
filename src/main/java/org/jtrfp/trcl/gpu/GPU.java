@@ -20,18 +20,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.media.opengl.DebugGL3;
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.awt.GLCanvas;
-
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.GLFutureTask;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -43,7 +36,12 @@ import org.jtrfp.trcl.mem.MemoryManager;
 import org.jtrfp.trcl.mem.MemoryWindow;
 import org.jtrfp.trcl.tools.Util;
 
-public class GPU implements GLExecutor<GL3>{
+import com.jogamp.opengl.DebugGL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.awt.GLCanvas;
+
+public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? submitToGL returns GL Task whree executor returns TRFutureTask
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
     	private TRFutureTask<Integer>			defaultTIU;

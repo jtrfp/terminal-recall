@@ -14,7 +14,7 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AnimatedTexture;

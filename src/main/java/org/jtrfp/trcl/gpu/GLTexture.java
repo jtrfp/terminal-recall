@@ -34,8 +34,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;

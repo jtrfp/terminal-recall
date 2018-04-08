@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;

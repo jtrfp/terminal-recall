@@ -15,7 +15,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
 import org.jtrfp.trcl.gpu.GPU.GPUVendor;

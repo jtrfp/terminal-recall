@@ -16,9 +16,9 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL4;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL4;
 
 public class GLProgram {
     private 		GPU 	gpu;

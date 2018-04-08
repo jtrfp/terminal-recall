@@ -13,7 +13,7 @@
 
 package org.jtrfp.trcl.ext.tr;
 
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLCanvas;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;

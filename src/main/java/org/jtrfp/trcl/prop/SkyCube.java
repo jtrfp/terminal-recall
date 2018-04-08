@@ -19,7 +19,7 @@ import java.awt.Color;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;

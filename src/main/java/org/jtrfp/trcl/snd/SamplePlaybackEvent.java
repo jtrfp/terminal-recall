@@ -23,9 +23,9 @@ import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;

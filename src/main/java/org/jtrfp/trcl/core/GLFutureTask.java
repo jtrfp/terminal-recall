@@ -14,9 +14,9 @@ package org.jtrfp.trcl.core;
 
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLRunnable;
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLRunnable;
+import com.jogamp.opengl.awt.GLCanvas;
 
 public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
     private final GLCanvas      canvas;

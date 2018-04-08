@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.gpu.GLExecutor;

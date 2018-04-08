@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.apache.commons.collections4.collection.PredicatedCollection;
 import org.apache.commons.collections4.functors.InstanceofPredicate;

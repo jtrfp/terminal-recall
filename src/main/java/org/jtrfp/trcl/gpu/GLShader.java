@@ -18,8 +18,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL4;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL4;
 
 import org.apache.commons.io.IOUtils;
 

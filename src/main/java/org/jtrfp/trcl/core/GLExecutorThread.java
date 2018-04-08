@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.core;
 
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLContext;
 
 public class GLExecutorThread extends Thread {
     private final GLContext context;

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.pool.IndexPool;

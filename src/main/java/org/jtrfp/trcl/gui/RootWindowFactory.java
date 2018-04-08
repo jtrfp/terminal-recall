@@ -17,9 +17,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -28,6 +25,10 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.CanvasProvider;
 import org.springframework.stereotype.Component;
+
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
@@ -38,7 +39,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	 */
 	private static final long serialVersionUID = -2412572500302248185L;
 	
-	private final GLProfile 		glProfile 	= GLProfile.get(GLProfile.GL2GL3);
+	private final GLProfile 	glProfile       = GLProfile.getMaxProgrammable(true);
 	private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
 	private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
 	private static final String         ICON_PATH       = "/ProgramIcon.png";
@@ -51,7 +52,6 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 		public void run() {
 		    canvas.setFocusTraversalKeysEnabled(false);
 		    getContentPane().add(canvas);
-		    //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    setFocusTraversalKeysEnabled(false);
 		    setTitle("Terminal Recall");
 		    try{RootWindow.this.setIconImage(ImageIO.read(this.getClass().getResource(ICON_PATH)));}

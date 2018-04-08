@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 
 import org.jtrfp.trcl.core.TRFactory.TR;
 

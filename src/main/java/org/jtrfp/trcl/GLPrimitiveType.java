@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 public abstract class GLPrimitiveType {
     public static final class GL_FLOAT extends GLPrimitiveType {

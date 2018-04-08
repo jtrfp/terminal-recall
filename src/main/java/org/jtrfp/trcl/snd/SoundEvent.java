@@ -18,8 +18,8 @@ package org.jtrfp.trcl.snd;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.core.TRFactory.TR;
 

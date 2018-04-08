@@ -15,7 +15,7 @@ package org.jtrfp.trcl.gpu;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 public class RawGLBuffer {
     private int bufferID;

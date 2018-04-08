@@ -13,7 +13,7 @@
 
 package org.jtrfp.trcl.gpu.gl3;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.GLExecutor;
 

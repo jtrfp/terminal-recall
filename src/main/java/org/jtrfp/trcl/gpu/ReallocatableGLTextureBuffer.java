@@ -14,7 +14,7 @@ package org.jtrfp.trcl.gpu;
 
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import org.jtrfp.trcl.gpu.RawGLBuffer.MapMode;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;

@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.media.opengl.GL3;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
@@ -48,7 +47,6 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.jtrfp.act.ActColor;
 import org.jtrfp.jtrfp.internal.act.ActDataLoader;
 import org.jtrfp.jtrfp.internal.tex.TexDataLoader;
-import org.jtrfp.jtrfp.pod.IPodData;
 import org.jtrfp.jtrfp.pod.IPodFileEntry;
 import org.jtrfp.trcl.AltitudeMap;
 import org.jtrfp.trcl.AnimatedTexture;
@@ -111,6 +109,7 @@ import org.jtrfp.trcl.pool.ObjectFactory;
 import org.jtrfp.trcl.snd.GPUResidentMOD;
 import org.jtrfp.trcl.snd.SoundTexture;
 
+import com.jogamp.opengl.GL3;
 import com.ochafik.util.Adapter;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;

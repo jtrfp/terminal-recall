@@ -25,7 +25,7 @@ import java.util.Queue;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
 
 import org.jtrfp.trcl.core.KeyedExecutor;

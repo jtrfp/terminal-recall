@@ -1119,6 +1119,7 @@ public class DEFObject extends WorldObject {
 		    parent.probeForBehavior(SteadilyRotating.class)
 			    .setEnable(false);
 		    parent.probeForBehavior(Bobbing.class).setEnable(false);
+		    parent.probeForBehavior(DamageableBehavior.class).setAcceptsProjectileDamage(false);
 		    // parent.getBehavior().probeForBehavior(AutoFiring.class).setBerzerk(true)
 		    // .setFiringPattern(new
 		    // boolean[]{true}).setTimePerPatternEntry(100);

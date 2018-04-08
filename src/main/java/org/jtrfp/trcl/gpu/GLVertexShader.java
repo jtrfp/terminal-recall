@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 public class GLVertexShader extends GLShader {
     public GLVertexShader(GPU gpu) {

@@ -33,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.jtrfp.trcl.core.Feature;
@@ -156,10 +157,10 @@ public class ReporterFactory implements FeatureFactory<TR>{
 		    dotScanner.useDelimiter("\\.");
 		    while(dotScanner.hasNext()){
 			final String treeItem = dotScanner.next();
-			Enumeration<DefaultMutableTreeNode> en = workNode.children();
+			final Enumeration<TreeNode> en = workNode.children();
 			DefaultMutableTreeNode matchingNode=null;
 			while(en.hasMoreElements()){
-			    DefaultMutableTreeNode testNode = en.nextElement();
+			    DefaultMutableTreeNode testNode = (DefaultMutableTreeNode)en.nextElement();
 			    if(((TreeEntry)testNode.getUserObject()).getLabel().contentEquals(treeItem)){
 				matchingNode=testNode;
 			    }//end if(label matches)

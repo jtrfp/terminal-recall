@@ -834,10 +834,12 @@ public class SoundSystem {
         final String formatByName = outputConfig.getFormatByName();
         AudioFormat format = null;
 	if(formatByName!=null){
-	    final AudioFormat fmt = getActiveOutput().getFormatFromUniqueName(formatByName);
-	    if(fmt!=null){
-		format = fmt;
-	    }
+	    final AudioOutput ao = getActiveOutput();
+	    if( ao != null ){
+		final AudioFormat fmt = getActiveOutput().getFormatFromUniqueName(formatByName);
+		if( fmt != null )
+		    format = fmt;
+	    }//end if(null)
 	}//end if(!null)
         
         synchronized( soundThreadExecutor ) {

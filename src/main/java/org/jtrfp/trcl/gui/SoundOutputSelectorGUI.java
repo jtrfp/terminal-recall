@@ -296,22 +296,28 @@ public class SoundOutputSelectorGUI extends JPanel {
 			//Select the output port
 			final String portByName = conf.getPortByName();
 			audioOutputCB.setSelectedItem(portByName);
-			final AudioOutput selectedOutput = selectedDevice.getOutputByName(portByName);
-
+			AudioOutput selectedOutput = selectedDevice.getOutputByName(portByName);
+			
+			//if(selectedOutput == null)
+			//    selectedOutput = selectedDevice.getDefaultOutput();
+			
 			//Repopulate format list
-			final AudioFormat [] formats = selectedOutput.getFormats();//TODO: Should return Collection
+			
 			final DefaultComboBoxModel formatLM = (DefaultComboBoxModel)audioFormatCB.getModel();
 			formatLM.removeAllElements();
-			for( AudioFormat format : formats )
-			    formatLM.addElement(format.toString());
-			
-			//Prepare to fire a propagating event
-			eventInProgress = false;
-			
-			//Select the output port
-			final String formatByName = conf.getFormatByName();
-			audioFormatCB.setSelectedItem(formatByName);
-			//final AudioFormat selectedFormat = selectedOutput.getFormatFromUniqueName(formatByName);
+			if(selectedOutput != null) {
+			    final AudioFormat [] formats = selectedOutput.getFormats();//TODO: Should return Collection
+			    for( AudioFormat format : formats )
+				formatLM.addElement(format.toString());
+
+			    //Prepare to fire a propagating event
+			    eventInProgress = false;
+
+			    //Select the output port
+			    final String formatByName = conf.getFormatByName();
+			    audioFormatCB.setSelectedItem(formatByName);
+			    //final AudioFormat selectedFormat = selectedOutput.getFormatFromUniqueName(formatByName);
+			}//end if(!null)
 		    }
 		    catch(Exception e){e.printStackTrace();}
 		}//end if( OUTPUT_CONFIG )
@@ -324,6 +330,7 @@ public class SoundOutputSelectorGUI extends JPanel {
 	    public void itemStateChanged(ItemEvent e) {
 		if(e.getStateChange() != ItemEvent.SELECTED)
 		    return;
+		System.out.println("driverSelectCB itemStateChanged()");
 		try{
 		    //Repopulate the device list
 		    final AudioDriver driver = getSelectedDriver();
@@ -344,6 +351,7 @@ public class SoundOutputSelectorGUI extends JPanel {
 	    public void itemStateChanged(ItemEvent e) {
 		if(e.getStateChange() != ItemEvent.SELECTED)
 		    return;
+		System.out.println("deviceSelectCB itemStateChanged()");
 		try{
 		    //Repopulate the port list
 		    final AudioDevice selectedDevice = getSelectedDevice();
@@ -364,6 +372,7 @@ public class SoundOutputSelectorGUI extends JPanel {
 	    public void itemStateChanged(ItemEvent e) {
 		if(e.getStateChange() != ItemEvent.SELECTED)
 		    return;
+		System.out.println("audioFormatCB itemStateChanged()");
 		try{
 		    //Repopulate format list
 		    final AudioOutput selectedPort = getSelectedPort();
@@ -380,6 +389,7 @@ public class SoundOutputSelectorGUI extends JPanel {
 	    public void itemStateChanged(ItemEvent e) {
 		if(eventInProgress || e.getStateChange() != ItemEvent.SELECTED)
 		    return;
+		System.out.println("audioFormatCB itemStateChanged()");
 		eventInProgress = true;
 		final SoundSystemOutputConfig config = new SoundSystemOutputConfig();
 		config.setDriverByName(driverSelectCB.getSelectedItem().toString());

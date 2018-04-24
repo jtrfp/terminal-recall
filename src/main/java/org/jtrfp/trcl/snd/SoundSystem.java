@@ -94,6 +94,7 @@ public class SoundSystem {
     //private final Queue<Runnable> soundThreadExecutor = new ArrayDeque<>(512);
     private final KeyedExecutor<Object> soundThreadExecutor = new DefaultKeyedExecutor<Object>();
     private SoundSystemOutputConfig outputConfig;
+    private long timeOfLastBarrier;
     private final ObjectFactory<Class<? extends AudioDriver>,AudioDriver> driverFactory = 
 	    new ObjectFactory<>(new HashMap<Class<? extends AudioDriver>,AudioDriver>(), new Adapter<Class<? extends AudioDriver>,AudioDriver>(){
 
@@ -108,17 +109,6 @@ public class SoundSystem {
 		    return value.getClass();
 		}});
     
-   ////VARS
-   private AudioDriver          activeDriver;
-   private AudioDevice		activeDevice;
-   private AudioOutput		activeOutput;
-   private AudioFormat		activeFormat;
-   
-   private String               driverByName,
-                                deviceByName,
-                                outputByName,
-                                formatByName;
-    
     
     private double bufferTimeCounter;
     
@@ -128,8 +118,8 @@ public class SoundSystem {
     //If no valid audio devices are available, provide a dummy driver
     private static final AudioDriver DUMMY_DRIVER = new DummyAudioDriver();
     
-    public SoundSystem() {
-	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");//TODO: Implement a registry.
+    public SoundSystem() {//TODO: Use Features to update this.
+	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
 	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
     }// end constructor
     
@@ -164,7 +154,7 @@ public class SoundSystem {
 	musicFactory   = new MusicPlaybackEvent.Factory(tr, getModStereoWidth());
 	loopFactory    = new LoopingSoundEvent.Factory(tr);
 	
-	new Thread() {//TODO: This is not thread-safe with sound config changes!
+	new Thread() {
 	    @Override
 	    public void run() {
 		try {
@@ -178,15 +168,18 @@ public class SoundSystem {
 				driver.setSource(SILENCE);
 				driver.flush();
 			    }//while(paused.get())
+			    
 				//paused.wait();
 			//}//end sync()
 			
-			while(getActiveFormat() == null || getActiveOutput() == null || getActiveDevice() == null)
-			    Thread.sleep(100);//Rolling loop waiting for valid state.
+			//while(getActiveFormat() == null || getActiveOutput() == null || getActiveDevice() == null)
+			//    Thread.sleep(100);//Rolling loop waiting for valid state.
 			
 			final double currentBufferTimeCounter = bufferTimeCounter;
 			bufferTimeCounter += getBufferSizeSeconds();
 			soundSystemKernel.execute(currentBufferTimeCounter);
+			
+			timeLimitedBarrier(50);//Limit. If the state is invalid, this loop will roll rapidly.
 			
 		    }// end while(true)
 		} catch (Exception e) {
@@ -196,6 +189,14 @@ public class SoundSystem {
 	}.start();
 	initialized = true;
     }// end initialize()
+    
+    private void timeLimitedBarrier(int maxTimeInMillis) throws InterruptedException {
+	final long currentTimeMillis = System.currentTimeMillis();
+	final long timeRemaining = (timeOfLastBarrier-currentTimeMillis)+maxTimeInMillis;
+	if(timeRemaining > 0 )
+	    Thread.sleep(timeRemaining);
+	timeOfLastBarrier = currentTimeMillis+timeRemaining;
+    }//end timeLimitedBarrier
     
     private void loadConfigAndAttachListeners() {
 	final TRConfiguration config = getTrConfiguration();
@@ -478,16 +479,16 @@ public class SoundSystem {
      * @return the activeDriver
      */
     AudioDriver getActiveDriver() {
+	/*
 	if(activeDriver==null){
             System.out.println("Overriding null driver to default...");
             setActiveDriver(new JavaSoundSystemAudioOutput());
         }//end if(null)
         return activeDriver;
+        */
+	return soundSystemKernel.getActiveDriver();
     }
-
-    /**
-     * @param activeDriver the activeDriver to set
-     */
+/*
     private void setActiveDriver(AudioDriver activeDriver) {
 	//If the default device is null then switch to the dummy driver.
 	if( activeDriver.getDefaultDevice() == null )
@@ -506,21 +507,19 @@ public class SoundSystem {
         System.out.println("SoundSystem: Active Driver Set To "+activeDriver);
         pcs.firePropertyChange(ACTIVE_DRIVER, oldActiveDriver, activeDriver);
     }//end setActiveDriver(...)
-
-    /**
-     * @return the activeDevice
-     */
+*/
     private AudioDevice getActiveDevice() {
+	/*
 	if(activeDevice==null){
             System.out.println("Overriding null device to default...");
             setActiveDevice(getActiveDriver().getDefaultDevice());
         }//end if(null)
         return activeDevice;
+        */
+	return soundSystemKernel.getActiveDevice();
     }
 
-    /**
-     * @param activeDevice the activeDevice to set
-     */
+    /*
     private void setActiveDevice(AudioDevice activeDevice) {
 	final AudioDevice oldDevice = this.activeDevice;
         this.activeDevice = activeDevice;
@@ -533,19 +532,17 @@ public class SoundSystem {
         System.out.println("SoundSystem: Active Device Set To "+activeDevice);
         pcs.firePropertyChange(ACTIVE_DEVICE, oldDevice, activeDevice);
     }
-
-    /**
-     * @return the activeOutput
-     */
+*/
     private AudioOutput getActiveOutput() {
+	/*
 	if(activeOutput==null)
 	    activeOutput = getActiveDevice().getDefaultOutput();
         return activeOutput;
+        */
+	return soundSystemKernel.getActiveOutput();
     }
 
-    /**
-     * @param newActiveOutput the activeOutput to set
-     */
+    /*
     private void setActiveOutput(AudioOutput newActiveOutput) {
 	final AudioOutput oldOutput = this.activeOutput;
         this.activeOutput = newActiveOutput;
@@ -561,23 +558,21 @@ public class SoundSystem {
         System.out.println("SoundSystem: Active Output Set To "+newActiveOutput);
 	//getActiveDriver().setOutput(newActiveOutput);
 	pcs.firePropertyChange(ACTIVE_OUTPUT, oldOutput, newActiveOutput);
-    }
-
-    /**
-     * @return the activeFormat
-     */
+    }*/
+    
     public AudioFormat getActiveFormat() {
+	/*
 	if(activeFormat==null){
 	    final AudioOutput activeOutput = getActiveOutput();
 	    if(activeOutput != null)
 	        return activeOutput.getDefaultFormat();
 	    }
         return activeFormat;
+        */
+	return soundSystemKernel.getFormat();
     }
 
-    /**
-     * @param newFormat the activeFormat to set
-     */
+    /*
     private void setActiveFormat(AudioFormat newFormat) {
 	final AudioFormat oldFormat = this.activeFormat;
 	//If unspecified, default to 44100
@@ -604,10 +599,8 @@ public class SoundSystem {
         System.out.println("SoundSystem: Active Format Set To "+newFormat+" for driver "+activeDriver);
         pcs.firePropertyChange(ACTIVE_FORMAT, oldFormat, newFormat);
     }
-
-    /**
-     * @return the bufferSizeFrames
-     */
+*/
+    
     int getBufferSizeFrames() {
         return bufferSizeFrames;
     }
@@ -616,7 +609,6 @@ public class SoundSystem {
      * @param bufferSizeFrames the bufferSizeFrames to set
      */
     public void setBufferSizeFrames(int bufferSizeFrames) {
-	    System.out.println("setBufferSizeFrames "+bufferSizeFrames);
 	    if(bufferSizeFrames<=0)
 		throw new RuntimeException("Invalid buffer size: "+bufferSizeFrames+". Must be greater than zero.");
 	    final int oldValue = this.bufferSizeFrames;
@@ -627,7 +619,7 @@ public class SoundSystem {
 	    pcs.firePropertyChange(BUFFER_SIZE_FRAMES, oldValue, bufferSizeFrames);
     }
     
-    public void setBufferSizeFramesString(String newValue){
+    public void setBufferSizeFramesString(String newValue){//TODO: Catch parsing error, throw IllegalArgumentException
 	setBufferSizeFrames(Integer.parseInt(newValue));
     }
     
@@ -696,7 +688,6 @@ public class SoundSystem {
     }
 
     public void setBufferLag(Boolean bufferLag) {
-	System.out.println("setBufferLag "+bufferLag);
 	final Boolean oldValue = this.bufferLag;
         this.bufferLag = bufferLag;
         synchronized( soundThreadExecutor ) {
@@ -797,9 +788,10 @@ public class SoundSystem {
         //// DRIVER
         final String driverName = outputConfig.getDriverByName();
         AudioDriver driver = null;
+        final AudioDriver oldDriver = getActiveDriver();
         if(driverName!=null){
-	    if(activeDriver!=null)
-		activeDriver.release();
+	    if(oldDriver!=null)
+		oldDriver.release();
 	    Class driverClass;
 	    try{driverClass = Class.forName(driverName);}
 		catch(ClassNotFoundException e){
@@ -814,8 +806,7 @@ public class SoundSystem {
         final String newDeviceByName = outputConfig.getDeviceByName();
         AudioDevice device = null;
         if(newDeviceByName!=null){
-	    final AudioDevice audioDevice = getActiveDriver().getDeviceByName(newDeviceByName);
-	    System.out.println("Resulting audio device: "+audioDevice);
+	    final AudioDevice audioDevice = driver.getDeviceByName(newDeviceByName);
 	    if(audioDevice!=null)
 		device = audioDevice;
 	}//end if(!null)
@@ -824,8 +815,7 @@ public class SoundSystem {
         final String outputByName = outputConfig.getPortByName();
         AudioOutput output = null;
         if(outputByName!=null){
-	    final AudioOutput ao = getActiveDevice().getOutputByName(outputByName);
-	    System.out.println("ao="+ao);
+	    final AudioOutput ao = device.getOutputByName(outputByName);
 	    if(ao!=null)
 		output = ao;
 	}//end if(!null)
@@ -834,9 +824,9 @@ public class SoundSystem {
         final String formatByName = outputConfig.getFormatByName();
         AudioFormat format = null;
 	if(formatByName!=null){
-	    final AudioOutput ao = getActiveOutput();
-	    if( ao != null ){
-		final AudioFormat fmt = getActiveOutput().getFormatFromUniqueName(formatByName);
+	    //final AudioOutput ao = getActiveOutput();
+	    if( output != null ){
+		final AudioFormat fmt = output.getFormatFromUniqueName(formatByName);
 		if( fmt != null )
 		    format = fmt;
 	    }//end if(null)

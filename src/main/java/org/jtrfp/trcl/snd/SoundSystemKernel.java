@@ -124,7 +124,9 @@ public class SoundSystemKernel {
 	@Override
 	public void run() {
 	    target.setBufferSizeFrames(newValue);
-	    target.getActiveDriver().setBufferSizeFrames(newValue);
+	    final AudioDriver driver = target.getActiveDriver();
+	    if( driver != null )
+	      target.getActiveDriver().setBufferSizeFrames(newValue);
 	}
     }//end SetBufferSizeFrames
     
@@ -246,6 +248,15 @@ public class SoundSystemKernel {
 	synchronized(keyedExecutor){
 	    keyedExecutor.executeAllFromThisThread();
 	}
+	//Get state
+	final AudioDriver driver = getActiveDriver();
+	final AudioFormat format = getFormat();
+	final AudioOutput output = getActiveOutput();
+	final AudioDevice device = getActiveDevice();
+	//If invalid state, abort
+	if( driver == null || format == null || output == null || device == null )
+	    return 0;
+	
 	renderPrep(bufferTimeCounter);
 	final ByteBuffer renderFloatBytes     = getRenderFloatBytes();
 	final GLFrameBuffer renderFrameBuffer = getPlaybackFrameBuffer();
@@ -263,7 +274,6 @@ public class SoundSystemKernel {
 	final FloatBuffer fBuf = renderFloatBytes.asFloatBuffer();
 	fBuf.clear();
 	compressor.setSource(fBuf);
-	final AudioDriver driver = getActiveDriver();
 	double bufferTimePassedSeconds = 0;
 	if(driver!=null){
 	    driver.setSource(compressor);
@@ -523,7 +533,8 @@ public class SoundSystemKernel {
 
     protected void setBufferSizeFrames(int bufferSizeFrames) {
         this.bufferSizeFrames = bufferSizeFrames;
-        regenerateRenderFloatBytes();
+        releaseRenderFloatBytes();
+        //regenerateRenderFloatBytes();
     }
 
     protected boolean isBufferLag() {
@@ -552,6 +563,7 @@ public class SoundSystemKernel {
 	if(this.activeDriver!=null)
 	    activeDriver.release();
         this.activeDriver = activeDriver;
+        activeDriver.setBufferSizeFrames(getBufferSizeFrames());
     }
 
     void setKeyedExecutor(KeyedExecutor<Object> runnableQueue) {

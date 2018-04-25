@@ -16,6 +16,7 @@
 
 package org.jtrfp.trcl.snd;
 
+import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 
 import org.jtrfp.trcl.math.Misc;
@@ -29,11 +30,12 @@ private double scalar = 1f;
 public float get(){
   scalar += release;
   scalar = Misc.clamp(scalar, 0, 1);
-  double val = source.get();
+  try{double val = source.get();
   final double aVal = Math.abs(val*scalar);
   if(aVal>1)
       scalar /=aVal;
-  return (float)(val*scalar);
+  return (float)(val*scalar);}
+  catch(BufferUnderflowException e){System.out.println("DynamicCompressor cap="+source.capacity()+" lim="+source.limit());throw e;}
  }//end get()
 
 /**

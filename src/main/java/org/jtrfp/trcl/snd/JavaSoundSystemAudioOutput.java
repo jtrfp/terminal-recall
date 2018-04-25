@@ -32,15 +32,7 @@ import javax.sound.sampled.SourceDataLine;
 public class JavaSoundSystemAudioOutput implements AudioDriver {
     private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
     private AudioProcessor source;
-    private AudioFormat format = new AudioFormat(
-	    encoding,
-	    (float)44100,
-	    16,
-	    2,
-	    4,
-	    44100,
-	    ByteOrder.nativeOrder()==ByteOrder.BIG_ENDIAN,
-	    new HashMap<String,Object>());//Default
+    private AudioFormat format;
     private ByteBuffer     buffer;
     private int            bufferSizeFrames;
     private SourceDataLine sourceDataLine;
@@ -48,8 +40,22 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     private Collection<AudioDevice>devices;
     private SampleSubmitter		   activePutter;
     
+    public JavaSoundSystemAudioOutput() {
+	setFormat(new AudioFormat(
+		    encoding,
+		    (float)44100,
+		    16,
+		    2,
+		    4,
+		    44100,
+		    ByteOrder.nativeOrder()==ByteOrder.BIG_ENDIAN,
+		    new HashMap<String,Object>()));//Default
+    }//end constructor
+    
     @Override
     public synchronized void setFormat(AudioFormat format) {
+	if(format == null)
+	    throw new IllegalArgumentException();
 	if(this.format!=format){
 		this.format=format;
 		if(format!=null){
@@ -93,7 +99,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    final SourceDataLine sourceDataLine = getSourceDataLine();
 	    final AudioFormat fmt = sourceDataLine.getFormat();
 	    sourceDataLine.write(scratch.array(), 0, scratch.remaining());}
-	catch(LineUnavailableException e){}//TODO: Manage this better.
+	catch(LineUnavailableException e){e.printStackTrace();}//TODO: Manage this better.
     }//end flush()
     
     private ByteBuffer getBuffer(){
@@ -321,11 +327,12 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	public synchronized Collection<? extends AudioOutput> getOutputs() {
 	    final Line.Info [] lines = AudioSystem.getMixer(info).getSourceLineInfo();
 	    final Collection<AudioOutput> result = new ArrayList<AudioOutput>();
-	    for(Line.Info info:lines)
+	    for(Line.Info info:lines){
 		if(info instanceof SourceDataLine.Info && info.getLineClass() != Clip.class){
 		    final SourceDataLine.Info sdlInfo = (SourceDataLine.Info)info;
 		    result.add(new JavaSoundOutput(sdlInfo, this));
 		}
+	    }//end for(lines)
 	    return result;
 	}
 	@Override
@@ -338,9 +345,11 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	}
 	@Override
 	public synchronized AudioOutput getOutputByName(String uniqueName) {
-	    for(AudioOutput ao:getOutputs())
+	    Collection<? extends AudioOutput> outputs = getOutputs();
+	    for(AudioOutput ao:outputs){
 		if(ao.getUniqueName().contentEquals(uniqueName))
 		    return ao;
+	    }
 	    System.err.println("Failed to find matching output for "+uniqueName);
 	    return null;
 	}

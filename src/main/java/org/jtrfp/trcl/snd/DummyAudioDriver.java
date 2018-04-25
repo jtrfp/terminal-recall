@@ -19,7 +19,7 @@ import java.util.Collection;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
 
-public class DummyAudioDriver implements AudioDriver{ 
+public class DummyAudioDriver implements AudioDriver{
     private final AudioDevice [] devices = new AudioDevice[]{
 	    new DummyAudioDevice(this)
     };

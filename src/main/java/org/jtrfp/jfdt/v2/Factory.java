@@ -38,4 +38,4 @@ public interface Factory {
      * @since May 1, 2017
      */
  public <T> T newObject(Class<T> objectClass) throws ClassNotFoundException;
-}
+}//end Factory

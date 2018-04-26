@@ -63,10 +63,12 @@ public class JVM {
 	    cmd+="-Dcom.sun.management.jmxremote ";
 	    
 	    if( is64Bit && isServerVM) {
-		cmd+="-XX:+UnlockExperimentalVMOptions ";
+		//Commented out because some VMs either don't support them or are implicit features today.
+		
+		//cmd+="-XX:+UnlockExperimentalVMOptions ";
 		cmd+="-XX:+DoEscapeAnalysis ";
-		cmd+="-XX:+UseFastAccessorMethods ";
-		cmd+="-XX:+UseParNewGC ";
+		//cmd+="-XX:+UseFastAccessorMethods ";
+		//cmd+="-XX:+UseParNewGC ";
 
 		cmd+="-XX:+UseConcMarkSweepGC ";
 		cmd+="-XX:MaxGCPauseMillis=5 ";

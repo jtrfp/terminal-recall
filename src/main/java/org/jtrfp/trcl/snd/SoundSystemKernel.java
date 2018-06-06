@@ -432,6 +432,8 @@ public class SoundSystemKernel {
     
     private void generateRenderFloatBytes( ) {
 	final AudioFormat format         = getFormat();
+	if( format == null)
+	    return;
 	final int expectedNumberOfFrames = getBufferSizeFrames();
 	final int sampleSizeInBytes      = 4;//Float32 for GPU
 	final int numChannels            = format.getChannels();//XXX: Only supports 2 channels!!!

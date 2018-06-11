@@ -30,6 +30,7 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
 public class JavaSoundSystemAudioOutput implements AudioDriver {
+    private static final DummyAudioDriver DUMMY_DRIVER = new DummyAudioDriver();
     private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
     private AudioProcessor source;
     private AudioFormat format;
@@ -415,7 +416,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     public AudioDevice getDefaultDevice() {
 	final Collection<? extends AudioDevice> devices = getDevices();
 	if(devices.size()<=0)
-	    return null;
+	    return DUMMY_DRIVER.getDefaultDevice();
 	return devices.iterator().next();
     }
 }//end JavaSoundSystemAudioOutput

@@ -592,6 +592,7 @@ public final class Renderer {
 	//OPAQUE UNOCCLUDED
 	gl.glDisable(GL3.GL_DEPTH_TEST);
 	gl.glDisable(GL3.GL_DEPTH_CLAMP);
+	gl.glDisable(GL3.GL_CULL_FACE);
 	gl.glDepthRange(0, 1);
 	gl.glDepthFunc(GL3.GL_LEQUAL);
 	gl.glDrawArrays(GL3.GL_TRIANGLES, numOpaqueVertices, numOpaqueUnoccludedVertices);

@@ -14,6 +14,7 @@
 package org.jtrfp.trcl.ctl;
 
 import org.jtrfp.trcl.BriefingScreen;
+import org.jtrfp.trcl.Crosshairs;
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
 import org.jtrfp.trcl.beh.ui.RollBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputRudderElevatorControlBehavior;
@@ -60,7 +61,8 @@ public class KeyboardDefaultConfFactory implements FeatureFactory<KeyboardInputD
 	    this.getEntryMap().put("F"    , new ConfEntry(AfterburnerBehavior.AFTERBURNER                ,"F"    ,1,0 ));
 	    this.getEntryMap().put("HOME"    , new ConfEntry(RollBehavior.ROLL                ,"HOME"    ,-1,0 ));
 	    this.getEntryMap().put("PAGE_UP" , new ConfEntry(RollBehavior.ROLL                ,"PAGE_UP"    ,1,0 ));
-	    this.getEntryMap().put("ENTER" , new ConfEntry(BriefingScreen.NEXT_SCREEN_CTL     ,"ENTER"    ,1,0 ));
+	    this.getEntryMap().put("ENTER", new ConfEntry(BriefingScreen.NEXT_SCREEN_CTL      ,"ENTER"    ,1,0 ));
+	    this.getEntryMap().put("X"    , new ConfEntry(Crosshairs.TOGGLE_CROSSHAIRS        ,"X"    ,1,0 ));
 	}//end constructor
 
 	@Override

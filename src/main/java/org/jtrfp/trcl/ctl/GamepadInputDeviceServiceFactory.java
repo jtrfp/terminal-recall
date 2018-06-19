@@ -61,14 +61,17 @@ public class GamepadInputDeviceServiceFactory implements FeatureFactory<Controll
 	    System.setProperty("net.java.games.input.librarypath", new File("DeleteMe").getAbsolutePath());
 	    }catch(Exception e){e.printStackTrace();}
 	    this.controllerEnvironment = ControllerEnvironment.getDefaultEnvironment();
-	    //Filter out the keyboards in favor of AWT's event-based tracking
-	    for(Controller controller:controllerEnvironment.getControllers()){
-		final Type type = controller.getType();
-		if(     type != Controller.Type.KEYBOARD && 
-			type != Controller.Type.MOUSE    &&
-			type != Controller.Type.TRACKBALL)
-		    inputDevices.add(new GamepadInputDevice(controller));
-	    }//end for(controller types)
+	    if(controllerEnvironment.isSupported()){
+		//Filter out the keyboards in favor of AWT's event-based tracking
+		for(Controller controller:controllerEnvironment.getControllers()){
+		    final Type type = controller.getType();
+		    if(     type != Controller.Type.KEYBOARD && 
+			    type != Controller.Type.MOUSE    &&
+			    type != Controller.Type.TRACKBALL)
+			inputDevices.add(new GamepadInputDevice(controller));
+		}//end for(controller types)
+	    }//end if(controllerEnvironment.isSupported())
+	    else System.err.println("GamepadInputDeviceServiceFactory() WARNING: jInput indicates environment not supported. There will be no Gamepad controller support by this Feature.");
 	}//end constructor
 
 	private class GamepadInputDevice implements InputDevice{

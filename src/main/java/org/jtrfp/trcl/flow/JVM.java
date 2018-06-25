@@ -190,6 +190,8 @@ public class JVM {
 	final int bufferSize = 4096;
 	final byte [] buffer = new byte[bufferSize];
 	final InputStream inputStream = JVM.class.getResourceAsStream(resourcePath);
+	if( inputStream == null)
+	    throw new IOException("Could not open inputstream for "+resourcePath+". Not found.");
 	final OutputStream outputStream = new FileOutputStream(temporary);
 	int bytesRead;
 	try{

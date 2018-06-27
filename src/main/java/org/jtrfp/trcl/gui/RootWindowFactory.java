@@ -26,7 +26,9 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.CanvasProvider;
 import org.springframework.stereotype.Component;
 
+import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
@@ -43,6 +45,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
 	private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
 	private static final String         ICON_PATH       = "/ProgramIcon.png";
+	private final GLEventListener   glEventListener = new RootWindowGLEventListener();
 
 	public RootWindow(){
 	    super();
@@ -51,6 +54,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 		@Override
 		public void run() {
 		    canvas.setFocusTraversalKeysEnabled(false);
+		    canvas.addGLEventListener(glEventListener);
 		    getContentPane().add(canvas);
 		    setFocusTraversalKeysEnabled(false);
 		    setTitle("Terminal Recall");
@@ -79,6 +83,34 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	public GLCanvas getCanvas() {
 	    return canvas;
 	}
+	
+	private class RootWindowGLEventListener implements GLEventListener {
+
+	    @Override
+	    public void init(GLAutoDrawable drawable) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void dispose(GLAutoDrawable drawable) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void display(GLAutoDrawable drawable) {
+		// TODO Auto-generated method stub
+		
+	    }
+
+	    @Override
+	    public void reshape(GLAutoDrawable drawable, int x, int y,
+		    int width, int height) {
+		drawable.getGL().glViewport(0, 0, width, height);
+	    }//end reshape()
+	    
+	}//end DefaultEventListener	
 /*
 	@Override
 	public <T> GLFutureTask<T> submitToGL(Callable<T> c){

@@ -47,13 +47,13 @@ public class GamepadInputDeviceServiceFactory implements FeatureFactory<Controll
 	    try{final JVM jvm = new JVM();
 	    if(operatingSystem.contains("win")){
 		jvm.loadFromJarToFile("/jinput-dx8_64.dll");
-		jvm.loadFromJarToFile("/jinput-dx8.dll");
+		//jvm.loadFromJarToFile("/jinput-dx8.dll");
 		jvm.loadFromJarToFile("/jinput-raw_64.dll");
-		jvm.loadFromJarToFile("/jinput-raw.dll");
+		//jvm.loadFromJarToFile("/jinput-raw.dll");
 		jvm.loadFromJarToFile("/jinput-wintab.dll");
 	    } else if(operatingSystem.contains("linux")){
 		jvm.loadFromJarToFile("/libjinput-linux64.so");
-		jvm.loadFromJarToFile("/libjinput-linux.so");
+		//jvm.loadFromJarToFile("/libjinput-linux.so");
 	    } else if(operatingSystem.contains("mac")){
 		jvm.loadFromJarToFile("/libjinput-osx.jnilib");
 	    } else

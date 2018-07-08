@@ -10,7 +10,7 @@ Terminal Recall (TRCL) is part of the Java Terminal Reality File Parsers project
 
 ### Nightly Builds
 TRCL is currently in a playable development phase. Automated nightly builds are available at the SourceForge page:
- (https://sourceforge.net/projects/terminal-recall/files/?source=navbar) without need for the build environment listed below.
+ (https://sourceforge.net/projects/terminal-recall/files/) without need for the build environment listed below.
 
 ### Not A Source-Port
 This is a [cleanroom](https://en.wikipedia.org/wiki/Clean_room_design) re-implementation of the engine based on reverse-engineering specs.

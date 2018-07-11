@@ -24,10 +24,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.jtrfp.FileLoadException;
+import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.beh.AdjustAltitudeToPlayerBehavior;
 import org.jtrfp.trcl.beh.AutoFiring;
 import org.jtrfp.trcl.beh.AutoLeveling;
@@ -41,6 +43,7 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
 import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
+import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
@@ -323,8 +326,65 @@ public class DEFObject extends WorldObject {
 	    break;
 	case splitShipSmart:// TODO
 	    newSmartPlaneBehavior(tr, def, false);
-	    // addBehavior(new
-	    // HorizAimAtPlayerBehavior(getGameShell().getGame().getPlayer()));
+	    final DamageableBehavior dmgBehavior = probeForBehavior(DamageableBehavior.class);
+	    
+	    dmgBehavior.addPropertyChangeListener(DamageableBehavior.HEALTH, new PropertyChangeListener(){
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+		    final Object oldVal = evt.getOldValue();
+		    final Object newVal = evt.getNewValue();
+		    
+		    if( oldVal instanceof Integer && newVal instanceof Integer ) {
+			final int oldHealth = (Integer)oldVal;
+			final int newHealth = (Integer)newVal;
+			
+			if( newHealth < oldHealth ) { //Split on the first hit.
+			    try {
+				dmgBehavior.removePropertyChangeListener(this); //Cleanup
+				final SpacePartitioningGrid<PositionedRenderable> containingGrid = getContainingGrid();
+				if( containingGrid != null) {
+				    //Spawn 2 split ships
+				    final DEFObject mainSplit = new DEFObject(), mirrorSplit = new DEFObject();
+				    final EnemyDefinition def = (EnemyDefinition)BeanUtils.cloneBean(getEnemyDefinition());
+				    def.setLogic(EnemyLogic.flyingSmart);
+				    def.setComplexModelFile("HALF.BIN");
+				    final EnemyPlacement plc = getEnemyPlacement().clone();
+				    mainSplit.setEnemyDefinition(def);
+				    mirrorSplit.setEnemyDefinition(def);
+				    mainSplit.setEnemyPlacement(plc);
+				    mirrorSplit.setEnemyPlacement(plc);
+				    //Position info
+				    final double [] pos = getPosition();
+				    final Vector3D hdg  = getHeading();
+				    final Vector3D top  = getTop();
+				    mainSplit.setPosition(pos);
+				    mirrorSplit.setPosition(pos);
+				    mainSplit.setHeading(hdg);
+				    mirrorSplit.setHeading(hdg.negate());
+				    mainSplit.setTop(top);
+				    mirrorSplit.setTop(top);
+				    
+				    //Play a sound
+				    final String splitSound = "SHUT-DN7.WAV";
+				    Features.get(getTr(),SoundSystemFeature.class).
+				      enqueuePlaybackEvent(Features.get(tr,SoundSystemFeature.class).getPlaybackFactory().
+					    create(tr.getResourceManager().soundTextures.get(splitSound),
+						    new double[]{pos[0],pos[1],pos[2]},
+						    tr.mainRenderer.getCamera(),
+						    SoundSystem.DEFAULT_SFX_VOLUME*1.5));
+				    //The second is mirrored.
+				    mirrorSplit.setMirroredX(true);
+				    mainSplit.probeForBehavior(DamageableBehavior.class).addInvincibility(500);
+				    mirrorSplit.probeForBehavior(DamageableBehavior.class).addInvincibility(500);
+				    
+				    containingGrid.add(mainSplit);
+				    containingGrid.add(mirrorSplit);
+				    destroy();
+				}//end if(null)
+			    } catch(Exception e){e.printStackTrace();}
+			}//end if( hit )
+		    }//end if(valid data)
+		}});
 	    defaultModelAssignment();
 	    break;
 	case groundStaticRuin:// Destroyed object is replaced with another using

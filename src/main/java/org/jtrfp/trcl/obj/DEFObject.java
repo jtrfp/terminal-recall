@@ -372,8 +372,6 @@ public class DEFObject extends WorldObject {
 						    new double[]{pos[0],pos[1],pos[2]},
 						    tr.mainRenderer.getCamera(),
 						    SoundSystem.DEFAULT_SFX_VOLUME*1.5));
-				    //The second is mirrored.
-				    mirrorSplit.setMirroredX(true);
 				    mainSplit.probeForBehavior(DamageableBehavior.class).addInvincibility(500);
 				    mirrorSplit.probeForBehavior(DamageableBehavior.class).addInvincibility(500);
 				    

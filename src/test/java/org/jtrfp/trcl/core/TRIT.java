@@ -62,7 +62,7 @@ public class TRIT {
     public void testLoadToBootScreen() throws Throwable {
 	exit.expectSystemExitWithStatus(0);
 	final String SCREENSHOT_PATH = "org.jtrfp.trcl.core.TRIT.TestTRCL.FAIL_SCREENSHOT.png";
-	final String SCREENSHOT_REF  = "/org.jtrfp.trcl.core.TRIT.TestTRCL.SCREENSHOT_REF.png";
+	final String SCREENSHOT_REF  = "/org.jtrfp.trcl.core.TRIT.TestTRCL.TITLE_SCREENSHOT_REF.png";
 	Executor transientExecutor   = TransientExecutor.getSingleton();
 	final LoadCompletionListener loadCompletionListener = new LoadCompletionListener();
 	

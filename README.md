@@ -41,7 +41,7 @@ Example:
     cd target
     java -jar RunMe.jar
 ```
-The POD files should be registered via File->Configure menu such that the game can find them. This only needs to be done once so long as the config file isn't corrupted or lost. Note that the original games need at least STARTUP.POD and the specific POD for the game, such as FURY3.POD or TV.POD.
+The POD files should be registered via File->Configure menu such that the game can find them. This only needs to be done once so long as the config file isn't corrupted or lost. Note that the original games need at least STARTUP.POD and the specific POD for the game, such as FURY3.POD or TV.POD. The STARTUP.POD file is different between Fury3 and TV. Either will work with the other but your ship, dashboard, etc will be messed up. To clear this up, use the correct STARTUP.POD and restart the program to clear the cache.
 
 If its been a few weeks since first downloading and you wish to update to the newest version, cd into the  terminal-recall directory and run:
 

@@ -43,7 +43,7 @@ public class HorizGradientCubeGen implements SkyCubeGen {
 	 bb = resourceMap.get(resourceName).get();
 	if(bb==null){
 	    InputStream is = null;
-	    try    {bb = VQTexture.RGBA8FromPNG(is = Class.class.getResourceAsStream(resourceName));}
+	    try    {bb = VQTexture.RGBA8FromPNG(is = HorizGradientCubeGen.class.getResourceAsStream(resourceName));}
 	    finally{try{if(is!=null)is.close();}catch(Exception e){e.printStackTrace();}}
 	    if(bb==null) throw new NullPointerException("Failed to get resource "+resourceName);
 	    resourceMap.put(resourceName, new WeakReference<ByteBuffer>(bb));

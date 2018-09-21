@@ -95,7 +95,7 @@ public class TRIT {
 		    
 		}}); 
 	}//end sync(transientExecutor)
-	Thread.sleep(2 * SECONDS); //XXX Padding to let things settle.
+	Thread.sleep(10 * SECONDS); //XXX Padding to let things settle.
 	
 	synchronized(transientExecutor){
 	    transientExecutor.execute(new Runnable(){

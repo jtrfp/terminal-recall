@@ -19,6 +19,7 @@ import java.awt.event.WindowListener;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
@@ -26,6 +27,8 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.CanvasProvider;
 import org.springframework.stereotype.Component;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
@@ -57,6 +60,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 		    canvas.addGLEventListener(glEventListener);
 		    getContentPane().add(canvas);
 		    setFocusTraversalKeysEnabled(false);
+		    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);//We'll handle the closing process so we don't lose context during a pending shutdown.
 		    setTitle("Terminal Recall");
 		    try{RootWindow.this.setIconImage(ImageIO.read(this.getClass().getResource(ICON_PATH)));}
 		    catch(Exception e){e.printStackTrace();}
@@ -88,14 +92,21 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 
 	    @Override
 	    public void init(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
+		final GL gl = drawable.getGL();
+		gl.glDisable(GL3.GL_DITHER);
+		////gl.glDisable(GL3.GL_POINT_SMOOTH);
+		gl.glDisable(GL3.GL_LINE_SMOOTH);
+		gl.glDisable(GL3.GL_POLYGON_SMOOTH);
+		//gl.glHint(GL3.GL_LINE_SMOOTH, GL3.GL_DONT_CARE);
+		//gl.glHint(GL3.GL_POLYGON_SMOOTH_HINT, GL3.GL_DONT_CARE);
 		
+		////final int GL_MULTISAMPLE_ARB = 0x809D;
+		////gl.glDisable( GL_MULTISAMPLE_ARB);
 	    }
 
 	    @Override
 	    public void dispose(GLAutoDrawable drawable) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("RootWindowFactory.RootWindowGLEventListener.dispose()");
 	    }
 
 	    @Override

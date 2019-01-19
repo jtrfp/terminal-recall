@@ -32,7 +32,7 @@ public class TRRootWindowShutdownFactory implements FeatureFactory<RootWindow> {
     @Override
     public Feature<RootWindow> newInstance(RootWindow target)
 	    throws FeatureNotApplicableException {
-	final TRRootWindowShutdownFeature result = new TRRootWindowShutdownFeature();
+	final TRRootWindowShutdownFeature result = new TRRootWindowShutdownFeature(target);
 	result.setTr(Features.get(Features.getSingleton(), TR.class));
 	return result;
     }
@@ -49,7 +49,12 @@ public class TRRootWindowShutdownFactory implements FeatureFactory<RootWindow> {
     
     public static class TRRootWindowShutdownFeature implements Feature<RootWindow> {
 	private final CloseListener closeListener = new CloseListener();
+	private final RootWindow target;
 	private TR tr;
+	
+	public TRRootWindowShutdownFeature(RootWindow target) {
+	    this.target = target;
+	}
 
 	@Override
 	public void apply(RootWindow target) {
@@ -68,6 +73,9 @@ public class TRRootWindowShutdownFactory implements FeatureFactory<RootWindow> {
 
 	    @Override
 	    public void windowClosing(WindowEvent e) {
+		target.setTitle("Closing...");//Let the user know, since there could be a long delay.
+		target.invalidate();
+		
 		//Isolate the EDT from the Transient thread.
 		final KeyedExecutor<?> executor = TransientExecutor.getSingleton();
 		synchronized(executor) {
@@ -78,6 +86,7 @@ public class TRRootWindowShutdownFactory implements FeatureFactory<RootWindow> {
 			    tr.shutdown();
 			}});
 		}//end sync(executor)
+		
 	    }//end windowClosing(...)
 
 	    @Override

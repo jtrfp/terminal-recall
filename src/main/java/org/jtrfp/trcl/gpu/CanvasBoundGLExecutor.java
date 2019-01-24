@@ -43,7 +43,8 @@ public abstract class CanvasBoundGLExecutor<GL_TYPE extends GL> implements GLExe
     @Override
     public <T> TRFutureTask<T> submitToGL(Callable<T> c) {
 	final GLFutureTask<T> task  = new GLFutureTask<T>(getCanvas(), c);
-	task.enqueue();
+	if(!task.enqueue())
+	    throw new RuntimeException("GLFutureTask.enqueue() returned false.");
 	return task;
     }//end submitToGL()
 

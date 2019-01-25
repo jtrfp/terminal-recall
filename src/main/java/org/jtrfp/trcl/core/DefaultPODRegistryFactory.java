@@ -93,8 +93,9 @@ public class DefaultPODRegistryFactory implements FeatureFactory<TR> {
 
 	public void setPodsAsArray(String [] newPodsAsArray){
 	    podCollection.clear();
-	    for(String newPod : newPodsAsArray)
+	    for(String newPod : newPodsAsArray){
 		podCollection.add(newPod);
+		}
 	}//end setPodsAsArray
 
 	@Override

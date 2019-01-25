@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.conf.TRConfigurationFactory;
@@ -25,9 +26,9 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.game.Game;
@@ -114,7 +115,15 @@ public class Crosshairs extends WorldObject implements RelevantEverywhere {
     private void registerPlayer(Player player){
 	System.out.println("Found player: "+player);
 	Crosshairs.this.probeForBehavior(MatchPosition.class) .setTarget(player);
-	Crosshairs.this.probeForBehavior(MatchDirection.class).setTarget(player);
+	Crosshairs.this.probeForBehavior(MatchDirection.class).
+	/*
+	    setLookAtMatrix4x4(new Array2DRowRealMatrix(new double[][] {
+		new double[]{-1,0,0,0}, 
+		new double[] {0,-1,0,0}, 
+		new double[] {0,0,-1,0}, 
+		new double[] {0,0,0,1}})).
+	    */
+	    setTarget(player);
     }//end registerPlayer()
     
     private class PlayerListener implements PropertyChangeListener{

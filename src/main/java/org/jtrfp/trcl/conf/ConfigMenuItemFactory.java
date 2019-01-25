@@ -19,6 +19,7 @@ import java.awt.event.ActionListener;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;

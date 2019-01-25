@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Features {
+    
     private static FeaturesImpl impl = new FeaturesImpl();
     private static Features singleton;
     

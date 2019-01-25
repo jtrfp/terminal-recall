@@ -407,7 +407,7 @@ public class GL33Model implements Model {
 	    for (int i = 0; i < size; i++){
 		final Tickable t = tickableAnimators.get(i);
 		if(t!=null)
-		 tickableAnimators.get(i).tick();
+		 t.tick();
 	    }//end for(animators)
 	    animationUpdateThresholdMillis = currentTimeMillis
 		    + ANIMATION_UPDATE_INTERVAL;

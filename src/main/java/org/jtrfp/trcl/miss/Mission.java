@@ -54,6 +54,8 @@ import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.gpu.CanvasProvider;
+import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
@@ -161,6 +163,7 @@ public class Mission {
     private List<DEFObject> defObjectList;
     private Map<NAVObjective,NAVSubObject> navMap = new HashMap<>();
     private PlayerSaveState playerSaveState;
+    private GLExecutor<?> glExecutor;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -466,7 +469,8 @@ public class Mission {
 	    System.out.println("Start position set to " + player.getPosition()[0]+" "+player.getPosition()[1]+" "+player.getPosition()[2]);
 	    System.out.println("Setting sun vector");
 	    final AbstractTriplet sunVector = lvlData.getSunlightDirectionVector();
-	    tr.getThreadManager().submitToGL(new Callable<Void>() {
+	    final GLExecutor<?> glExecutor = getGlExecutor();
+	    glExecutor.submitToGL(new Callable<Void>() {
 		@Override
 		public Void call() throws Exception {
 		    tr.mainRenderer.setSunVector(
@@ -512,6 +516,12 @@ public class Mission {
 	*/
     }// end go()
     
+    private GLExecutor<?> getGlExecutor() {
+	if( glExecutor == null )
+	    glExecutor = Features.get(Features.get(getTr(), CanvasProvider.class),GLExecutor.class);
+	return glExecutor;
+    }
+
     private LVLFile getLvl() {
 	if(lvl == null)
 	    try{lvl = getTr().getResourceManager().getLVL(getLvlFileName());}

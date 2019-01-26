@@ -465,7 +465,7 @@ public final class Renderer {
 	gl.glGetIntegerv(GL3.GL_VIEWPORT, previousViewport);
     }
     
-    private void revertViewportToWindow(GL3 gl){
+    private void revertViewportState(GL3 gl){
 	gl.glViewport(
 	 previousViewport.get(0), 
 	 previousViewport.get(1), 
@@ -524,7 +524,8 @@ public final class Renderer {
 	//Cleanup
 	gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 	gl.glPointSize(1);
-	revertViewportToWindow(gl);
+	revertViewportState(gl);
+	//gpu.defaultViewport();
 	
 	gl.glDepthMask(true);
 	// OPAQUE.DRAW STAGE

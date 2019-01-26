@@ -86,12 +86,13 @@ public class RendererFactory {
     private final IndexPool                     portalFrameBufferIndexPool = new IndexPool().setHardLimit(NUM_PORTALS);
     private final HashMap<Renderer,Integer>     rendererPortalIndexMap = new HashMap<Renderer,Integer>();
     private final ObjectListWindow              objectListWindow;
+    private final GLExecutor			glExecutor;
     
     private class RendererPreparationMethod implements PreparationMethod<Renderer>{
 	@Override
 	public Renderer deactivate(final Renderer obj) {
 	    final ThreadManager tm = threadManager;
-	    tm.submitToGL(new Callable<Void>(){
+	    getGlExecutor().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    obj.setEnabled(false);
@@ -105,7 +106,7 @@ public class RendererFactory {
 	@Override
 	public Renderer reactivate(final Renderer obj) {
 	    final ThreadManager tm = threadManager;
-	    tm.submitToGL(new Callable<Void>(){
+	    getGlExecutor().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    obj.setEnabled(true);
@@ -139,12 +140,13 @@ public class RendererFactory {
 	this.threadManager = threadManager;
 	this.world=world;
 	this.objectListWindow = objectListWindow;
+	this.glExecutor = gpu.getGlExecutor();
 	//this.collisionManager=collisionManager;
 	if(world == null)
 	    throw new NullPointerException("World intolerably null.");
 	final GL3 gl = gpu.getGl();
 	
-	threadManager.submitToGL(new Callable<Void>(){
+	getGlExecutor().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		// Fixed pipeline behavior
@@ -724,5 +726,9 @@ public class RendererFactory {
 
     public void setReporter(Reporter reporter) {
         this.reporter = reporter;
+    }
+
+    public GLExecutor getGlExecutor() {
+        return glExecutor;
     }
 }//end RendererFactory

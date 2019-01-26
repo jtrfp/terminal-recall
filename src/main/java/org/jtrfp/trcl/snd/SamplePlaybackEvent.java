@@ -123,7 +123,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	public Factory(final TR tr) {
 	    super(tr);
 	    final GPU gpu = Features.get(tr, GPUFeature.class);
-	    tr.getThreadManager().submitToGL(new Callable<Void>() {
+	    gpu.getGlExecutor().submitToGL(new Callable<Void>() {
 		    @Override
 		    public Void call() throws Exception {
 			soundVertexShader      = gpu.newVertexShader();

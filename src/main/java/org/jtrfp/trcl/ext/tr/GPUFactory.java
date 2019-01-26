@@ -21,6 +21,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
+import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
@@ -37,12 +38,13 @@ public class GPUFactory implements FeatureFactory<TR> {
     @Override
     public void apply(TR target) {
 	final RootWindow rootWindow = Features.get(target, RootWindow.class);
+	final GLExecutor<?> glExecutor = Features.get(rootWindow, GLExecutor.class);
 	final GLCanvas canvas = rootWindow.getCanvas();
 	assert canvas != null;
 	setCanvas(canvas);
 	final ThreadManager threadManager = Features.get(target, ThreadManagerFeature.class);
 	setThreadManager(threadManager);
-	setGlExecutor(threadManager);
+	setGlExecutor(glExecutor);
 	setUncaughtExceptionHandler(target);
 	setWorld(target.getWorld());
 	setExecutorService(threadManager.threadPool);

@@ -262,7 +262,7 @@ public class SoundSystemKernel {
 	final GLFrameBuffer renderFrameBuffer = getPlaybackFrameBuffer();
 	final GLTexture renderTexture         = getPlaybackTexture();
 	
-	getThreadManager().submitToGL(new Callable<Void>() {
+	gpu.getGlExecutor().submitToGL(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
 		renderFloatBytes.clear();
@@ -444,7 +444,7 @@ public class SoundSystemKernel {
     
     private void generateRenderTarget( ) {
 	//Playback texture
-	getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.getGlExecutor().submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		final GPU gpu = getGpu();
@@ -483,7 +483,7 @@ public class SoundSystemKernel {
 	if( playbackFrameBuffer != null || playbackTexture != null ) {
 	    final GLFrameBuffer frameBufferToDelete = playbackFrameBuffer;
 	    final GLTexture     textureToDelete     = playbackTexture;
-	    getThreadManager().submitToGL(new Callable<Void>(){
+	    gpu.getGlExecutor().submitToGL(new Callable<Void>(){
 		@Override
 		public Void call() throws Exception {
 		    if( frameBufferToDelete != null )

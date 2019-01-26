@@ -48,7 +48,7 @@ import org.jtrfp.trcl.obj.WorldObject;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
-public class ThreadManager implements GLExecutor<GL3>{
+public class ThreadManager {
     public static final int RENDER_FPS 			= 60;
     public static final int GAMEPLAY_FPS 		= 60;
     public static final int RENDERLIST_REFRESH_FPS 	= 1;
@@ -152,7 +152,7 @@ public class ThreadManager implements GLExecutor<GL3>{
 	}// end sync(paused)
 	lastGameplayTickTime = tickTimeInMillis;
     }// end gameplay()
-    
+    /*
     public <T> GLFutureTask<T> submitToGL(Callable<T> c){
 	final GLFutureTask<T> result = new GLFutureTask<T>(tr.getRootWindow().getCanvas(),c);
 	if(isGLThread())
@@ -165,9 +165,12 @@ public class ThreadManager implements GLExecutor<GL3>{
 		result.run();
 		context.release();
 	    }
-	result.enqueue();
+	if(!result.enqueue())
+	    throw new RuntimeException("Canvas.invoke() threw false - will not execute.");
 	return result;
     }//end submitToGL(...)
+    
+    */
     
     public boolean isGLThread(){
 	return Thread.currentThread()==renderingThread;
@@ -207,33 +210,34 @@ public class ThreadManager implements GLExecutor<GL3>{
 	    }}, 0, 1000/GAMEPLAY_FPS);
 	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);
 	animator.start();
-	tr.getRootWindow().addWindowListener(new WindowAdapter(){
+	tr.getRootWindow().addWindowListener(new WindowAdapter(){//TODO: This should be somewhere else
 	    @Override
 	    public void windowClosing(WindowEvent e){
 		System.out.println("WindowClosing...");
 		gameplayTimer.cancel();
 		animator.stop();
-		System.out.println("glExecutorThread.join()...");
-		System.out.println("ThreadManager: WindowClosing Done.");
+		//System.out.println("glExecutorThread.join()...");
+		//System.out.println("ThreadManager: WindowClosing Done.");
 	    }
 	});
 	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
 	    @Override
 	    @ProvidesGLThread
 	    public void init(final GLAutoDrawable drawable) {
-		System.out.println("GLEventListener.init()");
+		System.out.println("ThreadManager.GLEventListener.init()");
 	    }//end init()
 
 	    @Override
 	    @ProvidesGLThread
 	    public void dispose(GLAutoDrawable drawable) {
+		System.out.println("ThreadManager.GLEventListener.dispose()");
 	    }
 	    
 	    @Override
 	    @ProvidesGLThread
 	    public void display(GLAutoDrawable drawable) {
 		renderingThread=Thread.currentThread();
-		renderingThread.setName("display()");
+		renderingThread.setName("ThreadManager.display()");
 		attemptRender();
 	    }//end display()
 
@@ -337,24 +341,4 @@ public class ThreadManager implements GLExecutor<GL3>{
 	repeatingGLTasks.remove(task);
     }//end removeRepeatingGLTask(...)
     
-    @Override
-    public <T> GLFutureTask<T> submitToGL(GLExecutable<T, GL3> executable) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void executeOnEachRefresh(GLExecutable<Void, GL3> executable,
-	    double orderPriority) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void executeOnResize(GLExecutable<Void, GL3> executable) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void executeOnDispose(GLExecutable<Void, GL3> executable) {
-	throw new UnsupportedOperationException();
-    }
 }// end ThreadManager

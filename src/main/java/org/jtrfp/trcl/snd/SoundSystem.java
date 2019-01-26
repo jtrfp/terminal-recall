@@ -135,7 +135,7 @@ public class SoundSystem {
 	soundSystemKernel.setGpu(gpu);
 	soundSystemKernel.setThreadManager(tr.getThreadManager());
 	
-	tr.getThreadManager().submitToGL(new Callable<Void>() {
+	gpu.getGlExecutor().submitToGL(new Callable<Void>() {
 	    @Override
 	    public Void call() throws Exception {
 		System.out.println("SoundSystem: setting up textures...");
@@ -165,6 +165,8 @@ public class SoundSystem {
 			//synchronized(paused){
 			    while(paused.get()){
 				final AudioDriver driver = getActiveDriver();
+				if( driver == null )
+				    break;
 				driver.setSource(SILENCE);
 				driver.flush();
 			    }//while(paused.get())
@@ -381,7 +383,7 @@ public class SoundSystem {
 			    fb.clear();
 			
 			final FloatBuffer finalSamples = fb;
-			tr.getThreadManager().submitToGL(new Callable<Void>(){
+			gpu.getGlExecutor().submitToGL(new Callable<Void>(){
 			    @Override
 			    public Void call() throws Exception {
 				getGpu().defaultTIU();

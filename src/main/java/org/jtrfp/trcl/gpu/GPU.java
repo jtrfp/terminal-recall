@@ -92,7 +92,7 @@ public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? su
 	    memoryManager  = new TRFutureTask<MemoryManager>(new Callable<MemoryManager>(){
 		@Override
 		public MemoryManager call() throws Exception {
-		    return new MemoryManager(GPU.this, threadManager);
+		    return new MemoryManager(GPU.this, glExecutor);
 		}
 	    });
 	    executorService.submit(memoryManager);
@@ -248,6 +248,7 @@ public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? su
 	}
 
 	public void defaultViewport() {
+	    final GLCanvas canvas = this.canvas;
 	    getGl().glViewport(0, 0, 
 		    canvas.getWidth(), 
 		    canvas.getHeight());

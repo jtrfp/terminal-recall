@@ -52,7 +52,7 @@ private final TR tr;
 	final VQCodebookManager vq = gpu.textureManager.get().vqCodebookManager
 		.get();
 	
-	final ByteBuffer[] pagesRGBA8888 = tr.getThreadManager().submitToGL(new Callable<ByteBuffer[]>(){
+	final ByteBuffer[] pagesRGBA8888 = (ByteBuffer[])gpu.getGlExecutor().submitToGL(new Callable<ByteBuffer[]>(){
 	    @Override
 	    public ByteBuffer[] call() throws Exception {
 		return vq.dumpPagesToBuffer();
@@ -88,7 +88,7 @@ private final TR tr;
 	raf.setLength(gpuMemSize);
 	FileChannel channel = raf.getChannel();
 	final MappedByteBuffer bb = channel.map(MapMode.READ_WRITE, 0, gpuMemSize);
-	tr.getThreadManager().submitToGL(new Callable<Void>(){
+	gpu.getGlExecutor().submitToGL(new Callable<Void>(){
 
 	    @Override
 	    public Void call() throws Exception {

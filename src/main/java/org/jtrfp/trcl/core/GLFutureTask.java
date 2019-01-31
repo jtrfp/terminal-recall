@@ -15,6 +15,7 @@ package org.jtrfp.trcl.core;
 import java.util.concurrent.Callable;
 
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLRunnable;
 import com.jogamp.opengl.awt.GLCanvas;
 
@@ -29,8 +30,8 @@ public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
     public void run(){
 	super.run();}
     
-    public void enqueue(){
-	canvas.invoke(false, this);
+    public boolean enqueue(){
+	return canvas.invoke(false, this);
     }
 
     @Override
@@ -41,9 +42,12 @@ public class GLFutureTask<V> extends TRFutureTask<V> implements GLRunnable {
     
     @Override
     public V get(){
+	final GLContext context = canvas.getContext();
 	if(!super.isDone())
-	    if(canvas.getContext().isCurrent())
-	     run();
+	    if( context != null ) {
+	     if(context.isCurrent())
+	      run();
+	    } else throw new IllegalStateException("GL Context is closed.");
 	return super.get();
     }
 }//end GLFutureTask

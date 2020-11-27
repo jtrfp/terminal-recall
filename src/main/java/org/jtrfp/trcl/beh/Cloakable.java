@@ -28,6 +28,17 @@ public class Cloakable extends Behavior implements HasQuantifiableSupply {
 		}
 	}//end if(update?)
     }//end _tick(...)
+    
+    public void setSupply(double amount) {
+	if(Double.isFinite(amount)) {
+	    cloakExpirationTimeMillis = System.currentTimeMillis()+(long)amount;
+	    cloaked = amount > 0;
+	}
+	else if(Double.isInfinite(amount)) {
+	    cloakExpirationTimeMillis = Long.MAX_VALUE;
+	    cloaked = true;
+	}
+    }//end setSupply()
 
     @Override
     public void addSupply(double amount) throws SupplyNotNeededException {

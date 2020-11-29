@@ -37,7 +37,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
-    static {GLProfile.initSingleton();}
+    static {System.setProperty("jogl.disable.openglcore", "false");GLProfile.initSingleton();}
     public static class RootWindow extends JFrame implements Feature<TR>, CanvasProvider {
 	/**
 	 * 

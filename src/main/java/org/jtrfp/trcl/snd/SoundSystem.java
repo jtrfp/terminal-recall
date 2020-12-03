@@ -114,6 +114,7 @@ public class SoundSystem {
     
 
     public static final double DEFAULT_SFX_VOLUME = .3;
+    public static final double [] DEFAULT_SFX_VOLUME_STEREO = new double [] {DEFAULT_SFX_VOLUME, DEFAULT_SFX_VOLUME};
     
     //If no valid audio devices are available, provide a dummy driver
     private static final AudioDriver DUMMY_DRIVER = new DummyAudioDriver();

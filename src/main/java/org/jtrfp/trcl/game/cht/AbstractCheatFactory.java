@@ -19,7 +19,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jtrfp.trcl.core.Feature;
@@ -76,6 +75,7 @@ public abstract class AbstractCheatFactory implements FeatureFactory<TVF3Game> {
 	    final MenuSystem menuSystem = getMenuSystem();
 	    menuSystem.addMenuItem(MenuSystem.MIDDLE, menuItemPath);
 	    menuSystem.addMenuItemListener(menuItemListener, menuItemPath);
+	    menuSystem.setMenuPosition(MenuSystem.END*.9, "Cheat");
 	    final TR tr = target.getTr();
 	    tr.addPropertyChangeListener    (TRFactory.RUN_STATE, runStateListener);
 	    //target.addPropertyChangeListener(TVF3Game.VOX       , voxListener);

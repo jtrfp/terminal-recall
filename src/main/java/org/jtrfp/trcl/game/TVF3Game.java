@@ -13,7 +13,7 @@
 package org.jtrfp.trcl.game;
 
 import java.awt.Color;
-import java.beans.PropertyChangeEvent;
+import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.FileNotFoundException;
@@ -33,7 +33,6 @@ import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SatelliteDashboard;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.UpfrontDisplay;
-import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.DeathBehavior;
 import org.jtrfp.trcl.beh.MatchDirection;
@@ -41,7 +40,6 @@ import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
-import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
@@ -55,10 +53,11 @@ import org.jtrfp.trcl.gui.BriefingLayout;
 import org.jtrfp.trcl.gui.DashboardLayout;
 import org.jtrfp.trcl.gui.F3BriefingLayout;
 import org.jtrfp.trcl.gui.F3DashboardLayout;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.jtrfp.trcl.gui.TVBriefingLayout;
 import org.jtrfp.trcl.gui.TVDashboardLayout;
-import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
+import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
@@ -191,6 +190,9 @@ public class TVF3Game implements Game {
 
 	    public void setupNameWithUser() throws CanceledException {
 		GameSetupDialog gsd = new GameSetupDialog();
+		final RootWindow rw = Features.get(tr, RootWindow.class);
+		final Point rwLocation = rw.getLocationOnScreen();
+		gsd.setLocation((int)rwLocation.getX(), (int)rwLocation.getY());
 		gsd.setModal(true);
 		gsd.setVisible(true);
 		if(!gsd.isBeginMission())

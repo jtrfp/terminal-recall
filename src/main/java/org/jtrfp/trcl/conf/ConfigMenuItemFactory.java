@@ -13,16 +13,17 @@
 
 package org.jtrfp.trcl.conf;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -51,6 +52,11 @@ public class ConfigMenuItemFactory implements FeatureFactory<MenuSystem> {
 	private class ConfigMenuItemListener implements ActionListener{
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
+		final Point oldPos = configWindow.getLocation();
+		if(oldPos.getX() == 0 && oldPos.getY() == 0) {
+		    final Point screenXY = Features.get(getTr(), RootWindow.class).getLocationOnScreen();
+		    configWindow.setLocation(screenXY);
+		}
 		getConfigWindow().setVisible(true);
 	    }
 	}//end ConfigMenuItemListener

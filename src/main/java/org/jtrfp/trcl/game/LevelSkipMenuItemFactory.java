@@ -14,6 +14,7 @@
 package org.jtrfp.trcl.game;
 
 import java.awt.Frame;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -27,6 +28,7 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.LevelSkipWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.stereotype.Component;
 
@@ -118,6 +120,8 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
 		final TVF3Game game = ((TVF3Game)(target.get()));
 		final TR tr = game.getTr();
 		final LevelSkipWindow levelSkipWindow = new LevelSkipWindow(game.getTr());
+		final Point screenXY = Features.get(game.getTr(), RootWindow.class).getLocationOnScreen();
+		levelSkipWindow.setLocation(screenXY);
 		final GameShell gameShell = Features.get(tr,GameShell.class);
 		assert gameShell != null;
 		levelSkipWindow.setGameShell(gameShell);

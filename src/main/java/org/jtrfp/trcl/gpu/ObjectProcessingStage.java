@@ -110,6 +110,7 @@ public class ObjectProcessingStage {
 		remainingBlocks -= blocksPerRow;
 	    }
 	}//end variable scope
+	gl.glFinish();//XXX Intel GPU flickers if this is not here. Issue #246
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();
 	gpu.defaultTIU();

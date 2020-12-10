@@ -25,6 +25,7 @@ import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
+import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
@@ -42,6 +43,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     private static final int AMMO_DISPLAY_COUNTER_INTERVAL=(int)Math.ceil(AMMO_DISPLAY_UPDATE_INTERVAL_MS/ (1000./ThreadManager.GAMEPLAY_FPS));
     private GameShell gameShell;
     private int activeBehaviorIndex = 0;
+    private boolean afterburning = false;
     
     public UserInputWeaponSelectionBehavior(ControllerSinks controllerInputs){
 	fire = controllerInputs.getSink(FIRE);
@@ -52,8 +54,18 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	final WorldObject parent = getParent();
 	final KeyStatus keyStatus = getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
-	    final int ammo = getActiveBehavior().getAmmo();
-	    ((TVF3Game)getGameShell().getGame()).getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
+	    final TVF3Game game =  (TVF3Game)getGameShell().getGame();
+	    final Player player = game.getPlayer();
+	    final AfterburnerBehavior ab = player.probeForBehavior(AfterburnerBehavior.class);
+	    if(isAfterburning()) {
+		final int supply = (int)ab.getSupply();
+		game.getHUDSystem().getAmmo().setContent(""+(supply!=-1?supply:"INF"));
+		game.getHUDSystem().getWeapon().setContent("FLY");
+	    } else {
+		final int ammo = getActiveBehavior().getAmmo();
+		game.getHUDSystem().getAmmo().setContent(""+(ammo!=-1?ammo:"INF"));
+	    }//end if(!afterburning)
+	    
 	}//end if(update ammo display)
 	for(int k=0; k<7;k++){
 	    if(keyStatus.isPressed(KeyEvent.VK_1+k))
@@ -157,5 +169,16 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
 	if(proposed!=null)
 	 setActiveBehavior(proposed,force);
 	this.activeBehaviorIndex = index;
+    }
+
+    public boolean isAfterburning() {
+        return afterburning;
+    }
+
+    public void setAfterburning(boolean afterburning) {
+	if(this.afterburning != afterburning && !afterburning) {
+	    setActiveBehavior(getActiveBehavior(),true);//Refresh to weapon
+	}
+        this.afterburning = afterburning;
     }
 }//end WeaponSelectionBehavior

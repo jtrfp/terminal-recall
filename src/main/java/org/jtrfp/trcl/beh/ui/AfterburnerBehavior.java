@@ -48,6 +48,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     public static final String AFTERBURNER = "Afterburner";
     private SoundTexture ignitionSound, extinguishSound, loopSound;
     private LoopingSoundEvent afterburnerLoop;
+    private boolean infiniteFuel = false;
     private final RunStateListener     runStateListener     = new RunStateListener();
     private final FiringVetoListener   firingVetoListener   = new FiringVetoListener();
     private final ThrottleVetoListener throttleVetoListener = new ThrottleVetoListener();
@@ -60,6 +61,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     
     public AfterburnerBehavior(ControllerSinks inputs){
 	afterburnerCtl = inputs.getSink(AFTERBURNER);
+	infiniteFuel = System.getProperty("org.jtrfp.trcl.allAfterburner") != null;
 	//afterburnerCtl.addPropertyChangeListener(weakAbControlListener = new WeakPropertyChangeListener(abControlListener,afterburnerCtl));
     }//end constructor
     
@@ -106,7 +108,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	    installVetoListeners();
 	updateAfterburningState();
 	final WorldObject p = getParent();
-	if(isAfterburning())
+	if(isAfterburning() && !infiniteFuel)
 	    fuelRemaining-=((double)p.getTr().getThreadManager().getElapsedTimeInMillisSinceLastGameTick()/
 			(double)Powerup.AFTERBURNER_TIME_PER_UNIT_MILLIS);
     }//end tick
@@ -114,13 +116,13 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private void updateAfterburningState(){
 	final double state = afterburnerCtl.getState();
 	final Object runState = getParent().getTr().getRunState();
-	    if(!isEnabled() || 
-		    !(runState instanceof Mission.GameplayState) || 
-		    runState instanceof SatelliteViewFactory.SatelliteViewState ||
-		    runState instanceof Mission.SatelliteState ||//TODO: Supports old system, remove later
-		    runState instanceof Mission.Briefing)
+	if(!isEnabled() || 
+		!(runState instanceof Mission.GameplayState) || 
+		runState instanceof SatelliteViewFactory.SatelliteViewState ||
+		runState instanceof Mission.SatelliteState ||//TODO: Supports old system, remove later
+		runState instanceof Mission.Briefing)
 		{setAfterburning(false);return;}
-	    setAfterburning(state >= .7);
+	setAfterburning(state >= .7 && (fuelRemaining > 0 || infiniteFuel));
     }//end updateAfterburningState()
     
     private void installVetoListeners(){
@@ -144,6 +146,9 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	formerMax=prop.getMaxPropulsion();
 	formerProp=prop.getPropulsion();
 	newMax=formerMax*3;
+	UserInputWeaponSelectionBehavior wsb = p.probeForBehavior(UserInputWeaponSelectionBehavior.class);
+	if(wsb != null)
+	    wsb.setAfterburning(true);
 	p.probeForBehavior(Propelled.class).
 	 setMaxPropulsion(newMax).
 	 setPropulsion(newMax);
@@ -185,6 +190,9 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	Propelled prop = p.probeForBehavior(Propelled.class);
 	prop.setMaxPropulsion(formerMax);
 	prop.setPropulsion(formerProp);
+	UserInputWeaponSelectionBehavior wsb = p.probeForBehavior(UserInputWeaponSelectionBehavior.class);
+	if(wsb != null)
+	    wsb.setAfterburning(false);
     }//end afterburnerOffTransient(...)
     
     private void startLoop(){
@@ -269,5 +277,13 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	    setAfterburning(false);
 	super.setEnable(enable);
 	return this;
+    }
+
+    public boolean isInfiniteFuel() {
+        return infiniteFuel;
+    }
+
+    public void setInfiniteFuel(boolean infiniteFuel) {
+        this.infiniteFuel = infiniteFuel;
     }
 }//end AfterburnerBehavior

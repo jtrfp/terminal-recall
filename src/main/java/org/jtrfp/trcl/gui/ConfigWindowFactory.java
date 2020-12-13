@@ -204,6 +204,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    addPodButton.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+		    notifyNeedRestart();
 		    addPOD();
 		}});
 
@@ -215,6 +216,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 		    //podLM.removeElement(podList.getSelectedValue());
+		    notifyNeedRestart();
 		    getPodRegistry().getPodCollection().remove(podList.getSelectedValue());
 		}});
 
@@ -226,6 +228,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    podEditButton.addActionListener(new ActionListener(){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+		    notifyNeedRestart();
 		    editPODPath();
 		}});
 

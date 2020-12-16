@@ -53,7 +53,9 @@ public class PortalEntrance extends WorldObject {
     private SkyCubeGen skyCubeGen = GameShellFactory.DEFAULT_GRADIENT;
     private boolean    portalUnavailable = false;
     private TRFuture<Void> relevanceFuture;
-    private boolean dotRelevant = false, rendering = false;
+    private boolean dotRelevant = false, rendering = false, nearRelevant=false;
+    private double maxDistance = TRFactory.mapSquareSize * 4;
+    private boolean portalStateStale = true;
 
     public PortalEntrance(GL33Model model, PortalExit exit, WorldObject approachingObject){
 	this(exit,approachingObject);
@@ -100,10 +102,11 @@ public class PortalEntrance extends WorldObject {
     }// end becameRelevant()
     
     private void reEvaluatePortalState(){
-	if(isRelevant() && isDotRelevant())
+	if(isRelevant() && isDotRelevant() && isNearRelevant())
 	    setRendering(true);
 	else
 	    setRendering(false);
+	setPortalStateStale(false);
     }
 
     public double[] getRelativePosition(double [] dest){
@@ -136,10 +139,17 @@ public class PortalEntrance extends WorldObject {
 		final double dot = PortalEntrance.this.getHeading().dotProduct(approachingObject.getHeading());
 		updateDotState(dot);
 		getRelativePosition(relativePosition);
+		updateNearState(relativePosition);
 		portalExit.updateObservationParams(relativePosition, getRelativeHeadingTop(),approachingObject.getHeading(),approachingObject.getTop());
 	    }//end if(isWithinRange)
+	    if(isPortalStateStale())
+		    reEvaluatePortalState();
 	}//end _tick(...)
     }//end PortalEntranceBehavior
+    
+    private void updateNearState(double [] relativePos) {
+	setNearRelevant(Vect3D.norm(relativePos) < getMaxDistance());
+    }
 
     /**
      * @param listener
@@ -222,7 +232,8 @@ public class PortalEntrance extends WorldObject {
 	final boolean oldValue = this.relevant;
         this.relevant = relevant;
         pcs.firePropertyChange(RELEVANT, relevant, oldValue);
-        reEvaluatePortalState();
+        //reEvaluatePortalState();
+        setPortalStateStale(true);
     }
 
     public Renderer getPortalRenderer() {
@@ -284,7 +295,8 @@ public class PortalEntrance extends WorldObject {
 	if(this.dotRelevant == dotRelevant)
 	    return;
         this.dotRelevant = dotRelevant;
-        reEvaluatePortalState();
+        //reEvaluatePortalState();
+        setPortalStateStale(true);
     }
 
     protected boolean isRendering() {
@@ -352,4 +364,30 @@ public class PortalEntrance extends WorldObject {
 		}});
 	}//end if(!rendering)
     }//end setRendering(...)
+
+    public double getMaxDistance() {
+        return maxDistance;
+    }
+
+    public void setMaxDistance(double maxDistance) {
+        this.maxDistance = maxDistance;
+    }
+
+    public boolean isNearRelevant() {
+        return nearRelevant;
+    }
+
+    public void setNearRelevant(boolean nearRelevant) {
+        this.nearRelevant = nearRelevant;
+        setPortalStateStale(true);
+        //reEvaluatePortalState();
+    }
+
+    public boolean isPortalStateStale() {
+        return portalStateStale;
+    }
+
+    public void setPortalStateStale(boolean portalStateStale) {
+        this.portalStateStale = portalStateStale;
+    }
 }//end PortalEntrance

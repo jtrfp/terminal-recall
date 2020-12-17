@@ -275,7 +275,7 @@
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
-				<version>1.7.21</version>
+				<version>1.7.25</version>
 				<executions>
 					<execution>
 						<id>l4j-clui</id>
@@ -286,6 +286,7 @@
 						<configuration>
 							<headerType>gui</headerType>
 							<outfile>target/RunMe.exe</outfile>
+							<downloadUrl>https://adoptopenjdk.net/</downloadUrl>
 							<jar>target/RunMe.jar</jar>
 							<errTitle>Terminal
 								Recall</errTitle>
@@ -295,7 +296,7 @@
 								<preCp>anything</preCp>
 							</classPath>
 							<jre>
-								<minVersion>11</minVersion>
+								<minVersion>11.0.1</minVersion>
 								<opts>
 									<opt>-Djava.endorsed.dirs=./endorsed</opt>
 								</opts>

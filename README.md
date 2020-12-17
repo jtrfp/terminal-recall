@@ -4,6 +4,12 @@ terminal-recall
 
 An unofficial engine remake for Terminal Velocity and Fury3 written in Java. It aims to accept POD files for the original games or third-party creations and play them with updated graphics and sound, similar to the way Spring RTS enhances the Total Annihilation game.
 
+### User Requirements
+* java 11 or later
+* Windows or Linux
+* Legally-obtained .POD files from the original game(s): STARTUP.POD, plus CDROM.POD for Terminal Velocity, FURY3.POD for Fury3, FURYSE.POD for F!Zone, or a custom POD. Note that STARTUP.POD are somewhat interchangeable between TV and Fury3 but they will adversely affect the SFX and dashboard if mixed.
+* nVIDIA, Intel, or AMD (fglrx in linux) GPU capable of OpenGL 3.3 or later.
+
 See files also: CREDITS, COPYING, LICENSE*
 
 Terminal Recall (TRCL) is part of the Java Terminal Reality File Parsers project (jTRFP.org).
@@ -20,8 +26,7 @@ You will need:
 * Java JDK 11 or later (http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 * Git (http://git-scm.com/downloads)
 * Maven (https://maven.apache.org/download.cgi)
-* nVIDIA, Intel, or AMD (fglrx if using linux) video card with drivers capable of OpenGL 3.3.
-* Windows or Linux.
+* Windows or Linux. Linux is much easier.
 
 In a folder/directory of your choice run:
 ```

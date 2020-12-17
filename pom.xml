@@ -295,7 +295,7 @@
 								<preCp>anything</preCp>
 							</classPath>
 							<jre>
-								<minVersion>1.7.0</minVersion>
+								<minVersion>11</minVersion>
 								<opts>
 									<opt>-Djava.endorsed.dirs=./endorsed</opt>
 								</opts>

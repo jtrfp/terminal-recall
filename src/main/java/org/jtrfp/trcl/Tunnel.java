@@ -116,7 +116,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    e.printStackTrace();
 	}
 	final GameShell gameShell = Features.get(tr, GameShell.class);
-	exitObject = new TunnelExitObject(this,"Tunnel."+debugName,gameShell.getGame().getPlayer());
+	final Camera mainCamera = tr.mainRenderer.getCamera();
+	exitObject = new TunnelExitObject(this,"Tunnel."+debugName,mainCamera);
 	exitObject.setSkyCubeGen(gameShell.getGame().getCurrentMission().getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);

@@ -168,8 +168,13 @@ public class SoundSystem {
 				final AudioDriver driver = getActiveDriver();
 				if( driver == null )
 				    break;
+				try {
 				driver.setSource(SILENCE);
 				driver.flush();
+				} catch(RuntimeException e) {
+				    e.printStackTrace();
+				    soundSystemKernel.setActiveDriver(SoundSystem.DUMMY_DRIVER);
+				}
 			    }//while(paused.get())
 			    
 				//paused.wait();

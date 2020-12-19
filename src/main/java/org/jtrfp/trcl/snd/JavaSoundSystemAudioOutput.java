@@ -100,7 +100,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	    final SourceDataLine sourceDataLine = getSourceDataLine();
 	    final AudioFormat fmt = sourceDataLine.getFormat();
 	    sourceDataLine.write(scratch.array(), 0, scratch.remaining());}
-	catch(LineUnavailableException e){e.printStackTrace();}//TODO: Manage this better.
+	catch(LineUnavailableException e){throw new RuntimeException(e);}//TODO: Manage this better.
     }//end flush()
     
     private ByteBuffer getBuffer(){

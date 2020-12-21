@@ -95,6 +95,7 @@ public class PortalEntrance extends WorldObject {
     
     private void becameIrrelevant(){
 	setRelevant(false);
+	reEvaluatePortalState();
     }
 
     private void becameRelevant() {

@@ -28,6 +28,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -53,6 +55,7 @@ public class LevelSkipWindow extends JFrame {
     private WeakReference<Game> game = null;
     private GameShell gameShell;
     private boolean setup = false;
+    private int levelSelectionIdx = -1;//XXX: Bug 259. getSelectedValue() sometimes returns null even if selected.
     	
     	public LevelSkipWindow(){
     	    this(null);
@@ -84,6 +87,13 @@ public class LevelSkipWindow extends JFrame {
 		levelList.setToolTipText("Select a level");
 		levelList.setModel(levelLM);
 		levelListSP.setViewportView(levelList);
+		
+		levelList.addListSelectionListener(new ListSelectionListener() {
+
+		    @Override
+		    public void valueChanged(ListSelectionEvent e) {
+			levelSelectionIdx = e.getFirstIndex();
+		    }});
 	}//end constructor
 	
 	protected void proposeSetup(){
@@ -144,8 +154,10 @@ public class LevelSkipWindow extends JFrame {
 				    final GameShell gameShell = Features.get(tr,GameShell.class);
 				    final TVF3Game game = (TVF3Game)gameShell.getGame();
 				    game.abortCurrentMission();
-				    game.setLevel(levelList.getSelectedValue().toString());
-				    //game.setLevelIndex(levelList.getSelectedIndex());
+				    
+				    //game.setLevel(levelList.getSelectedValue().toString());
+				    game.setLevel(levelLM.get(levelSelectionIdx).toString());
+				    
 				    game.doGameplay();
 				}catch(Exception e){e.printStackTrace();}//Do nothing.
 			    }});

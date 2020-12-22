@@ -373,6 +373,7 @@ public class Mission {
 	    if(defObjectList != null)
 	        objectSystem.setDefList(defObjectList);
 	    else{
+		objectSystem.setPositionOffset(new Vector3D(0,1024 * 16, 0));
 		objectSystem.populateFromLVL(lvlData);
 		setDefObjectList(objectSystem.getDefList());
 		}

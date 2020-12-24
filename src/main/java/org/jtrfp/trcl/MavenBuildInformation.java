@@ -49,8 +49,9 @@ public class MavenBuildInformation implements BuildInformation {
     }//end getBranch()
     
     protected Properties getProperties() {
+	java.io.InputStream inputStream = null;
 	if( properties == null ) {
-	    java.io.InputStream inputStream = 
+	    inputStream = 
 		    Thread.currentThread().
 		    getContextClassLoader().
 		    getResourceAsStream(PROPERTIES_RESOURCE_PATH);
@@ -60,6 +61,7 @@ public class MavenBuildInformation implements BuildInformation {
 		properties = new Properties();
 		properties.load(inputStream);
 	    } catch(Exception e){e.printStackTrace();}
+	    if(inputStream != null) try{inputStream.close();}catch(Exception e){e.printStackTrace();}
 	}//end if(null)
 	return properties;
     }//end Properties

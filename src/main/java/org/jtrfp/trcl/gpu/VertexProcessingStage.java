@@ -163,7 +163,7 @@ public class VertexProcessingStage {
 	gl.glViewport(0, 0, 
 		relevantVertexBufferWidth, 
 		(int)Math.ceil((double)(numPrimitives*3)/(double)relevantVertexBufferWidth));//256*256 = 65536, max we can handle.
-	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);
+	gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3);//XXX need to glFinish before this for some reason
 	//Cleanup
 	gpu.defaultFrameBuffers();
 	gpu.defaultProgram();

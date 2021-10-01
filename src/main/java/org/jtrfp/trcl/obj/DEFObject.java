@@ -43,7 +43,6 @@ import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CustomDeathBehavior;
 import org.jtrfp.trcl.beh.CustomNAVTargetableBehavior;
 import org.jtrfp.trcl.beh.CustomPlayerWithinRangeBehavior;
-import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.beh.DamageTrigger;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
@@ -89,6 +88,7 @@ import org.jtrfp.trcl.file.BINFile.AnimationControl;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.game.TVF3Game.Difficulty;
@@ -1196,19 +1196,24 @@ public class DEFObject extends WorldObject {
 	final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior()
 		.setProjectileFactory(tr.getResourceManager()
 			.getProjectileFactories()[def.getWeapon().ordinal()]);
-	final ProjectileFiringBehavior secondaryPFB = new ProjectileFiringBehavior()
+	final Weapon secondaryWeapon = def.getSecondaryWeapon();
+	ProjectileFiringBehavior secondaryPFB = null;
+	if(secondaryWeapon != null)
+	    secondaryPFB = new ProjectileFiringBehavior()
 		.setProjectileFactory(tr.getResourceManager()
 			.getProjectileFactories()[def.getSecondaryWeapon().ordinal()]);
 	try {
 	    pfb.addSupply(99999999);
-	    secondaryPFB.addSupply(99999999);
+	    if(secondaryPFB != null)
+		secondaryPFB.addSupply(99999999);
 	} catch (SupplyNotNeededException e) {
 	}
 	Integer[] firingVertices = Arrays.copyOf(def.getFiringVertices(),
 		def.getNumRandomFiringVertices());
 	pfb.setFiringPositions(getModelSource(), firingVertices);
 	addBehavior(pfb);
-	addBehavior(secondaryPFB);
+	if(secondaryWeapon != null)
+	    addBehavior(secondaryPFB);
 
 	possibleSpinAndCrashOnDeath(.4, def);
 	if (spinCrash) {
@@ -1221,8 +1226,7 @@ public class DEFObject extends WorldObject {
 		    try {
 			probeForBehavior(NewSmartPlaneBehavior.class)
 				.setEnable(false);
-		    } catch (BehaviorNotFoundException e) {
-		    }
+		    } catch (BehaviorNotFoundException e) {}
 		    hp.setPropulsion(hp.getPropulsion() / 1);
 		    hp.setEnable(false);
 		    probeForBehavior(AutoLeveling.class)
@@ -1237,27 +1241,20 @@ public class DEFObject extends WorldObject {
 	} // end if(spinCrash)
 
 	final AutoFiring afb = new AutoFiring();
-	final AutoFiring secondaryAFB = new AutoFiring();
-	final double secondWeaponDistance = TRFactory.legacy2Modern(def.getSecondWeaponDistance()) * TRFactory.mapSquareSize;
+	
 	afb.setMaxFiringDistance(TRFactory.legacy2Modern(def.getAttackDistance()) * TRFactory.mapSquareSize);
-	afb.setMinFiringDistance(secondWeaponDistance);
-	secondaryAFB.setMaxFiringDistance(secondWeaponDistance);
 	afb.setMaxFireVectorDeviation(.7);
-	secondaryAFB.setMaxFireVectorDeviation(2);
+	
 	//Fires 3 out of 7 times
 	afb.setFiringPattern(
 		new boolean[] { true, false, false, false, true, true, false });
-	secondaryAFB.setFiringPattern(
-		new boolean[] { true, false, false, false, true, true, false });
+	
 	//Use the 3/7 ratio to compensate for the staggered shooting pattern in TRCL
 	afb.setTimePerPatternEntry(
 		Math.max(1, (int) (getEnemyDefinition().getFireSpeed() / 66 * (3./7.))));
-	secondaryAFB.setTimePerPatternEntry(
-		Math.max(1, (int) (getEnemyDefinition().getFireSpeed() / 66 * (3./7.))));
 	afb.setPatternOffsetMillis((int) (Math.random() * 1000));
-	secondaryAFB.setPatternOffsetMillis((int) (Math.random() * 1000));
 	afb.setProjectileFiringBehavior(pfb);
-	secondaryAFB.setProjectileFiringBehavior(secondaryPFB);
+	
 	try {
 	    final TVF3Game tvf3 = (TVF3Game) getGameShell().getGame();
 	    if (tvf3.getDifficulty() != Difficulty.EASY)
@@ -1265,7 +1262,21 @@ public class DEFObject extends WorldObject {
 	} catch (ClassCastException e) {
 	} // Not a TVF3 Game
 	addBehavior(afb);
-	addBehavior(secondaryAFB);
+	
+	if(secondaryWeapon != null) {
+	    final AutoFiring secondaryAFB = new AutoFiring();
+	    final double secondWeaponDistance = TRFactory.legacy2Modern(def.getSecondWeaponDistance()) * TRFactory.mapSquareSize;
+	    secondaryAFB.setMaxFiringDistance(secondWeaponDistance);
+	    afb.setMinFiringDistance(secondWeaponDistance);
+	    secondaryAFB.setMaxFireVectorDeviation(2);
+	    secondaryAFB.setFiringPattern(
+			new boolean[] { true, false, false, false, true, true, false });
+	    secondaryAFB.setTimePerPatternEntry(
+			Math.max(1, (int) (getEnemyDefinition().getFireSpeed() / 66 * (3./7.))));
+	    secondaryAFB.setPatternOffsetMillis((int) (Math.random() * 1000));
+	    secondaryAFB.setProjectileFiringBehavior(secondaryPFB);
+	    addBehavior(secondaryAFB);
+	}
 	/*
 	 * addBehavior(new BuzzByPlayerSFX().setBuzzSounds(new String[]{
 	 * "FLYBY56.WAV","FLYBY60.WAV","FLYBY80.WAV","FLYBY81.WAV"}));

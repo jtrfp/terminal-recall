@@ -256,14 +256,15 @@ public class Mission {
 	    ((TVF3Game)game).getUpfrontDisplay().removePersistentMessage();
 	    Features.get(tr,SoundSystemFeature.class).setPaused(false);
 	    tr.getThreadManager().setPaused(false);
-
-	    if(isShowIntro()){//TODO: Does this need to be refactored?
+	    
+	    //Make sure there is actually something to show, skip if not.
+	    if(lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt"))
+		setShowIntro(false);
+	    
+	    if(isShowIntro()){
 		//tr.setRunState(new EnemyBrief(){});
 		displayHandler.setDisplayMode(briefingMode);
-
-		//Make sure there is actually something to show, skip if not.
-		if(! lvl.getBriefingTextFile().toLowerCase().contentEquals("null.txt") )
-		    ((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
+		((TVF3Game)game).getBriefingScreen().briefingSequence(lvl);//TODO: Convert to feature
 		setShowIntro(false);
 	    }//end if(isShowIntro)
 	    else
@@ -280,7 +281,7 @@ public class Mission {
 	    renderer.setSunColor(skySystem.getSuggestedSunColor());
 	    ((TVF3Game)game).getNavSystem() .activate();
 	    displayHandler.setDisplayMode(overworldMode);
-
+	    
 	    ((TVF3Game)game).getPlayer()	.setActive(true);
 	    ((TVF3Game)getGameShell().getGame()).setPaused(false);
 	    //tr.setRunState(new PlayerActivity(){});

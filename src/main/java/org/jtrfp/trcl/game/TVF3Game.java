@@ -20,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import javax.swing.JOptionPane;
+
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.BriefingScreen;
 import org.jtrfp.trcl.Camera;
@@ -179,9 +181,9 @@ public class TVF3Game implements Game {
 		final Mission mission = getCurrentMission();
 		final int nextLevelIndex = indexOfLevelInMissionSequence(mission.getLvlFileName())+1;
 		// Check if we won the game
-		if(nextLevelIndex >= vox.getLevels().length)
+		if(nextLevelIndex >= vox.getLevels().length || (getGameVersion() == GameVersion.TV && nextLevelIndex >= 26))
 		    endOfCampaign();
-		try{
+		else try{
 		    setLevel(getLevelInMissionSequence(nextLevelIndex));
 		    getCurrentMission().go();
 		    }
@@ -439,11 +441,14 @@ public class TVF3Game implements Game {
 		getCurrentMission().go();//TODO: Use a mission completion hook
 	    }// end beginGameplay()
 	    
-	    protected void endOfCampaign(){//TODO
-		System.out.println("!!!!!CONGRATULATIONS!!!!!!\n" +
-				"You've won the game!\n" +
-				"There's no code in place to handle this.\n" +
-				"Therefore, the program will now crash.");
+	    protected void endOfCampaign(){
+		final RootWindow rw = Features.get(tr, RootWindow.class);
+		
+		JOptionPane.showMessageDialog(rw, "!!!!!CONGRATULATIONS!!!!!!\n" +
+			"You've won the game!\n" +
+			"The game will now abort.\n" +
+			"TIP: Check the `Game->Skip To Level` feature to see if there are any hidden levels to play.");
+		getGameShell().abortCurrentGame();
 	    }
 
 	    public void setCurrentMission(final Mission newMission) {

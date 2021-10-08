@@ -472,8 +472,8 @@ public class TVF3Game implements Game {
 		    }});
 		if(oldMission!=null)
 		 oldMission.destruct();
-		if(newMission != null)
-		    Features.init(newMission);
+		//if(newMission != null)
+		    //Features.init(newMission);
 		pcSupport.firePropertyChange("currentMission", oldMission, newMission);
 	    }//end setCurrentMission
 	    

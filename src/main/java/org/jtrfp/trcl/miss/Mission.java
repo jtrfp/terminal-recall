@@ -197,6 +197,7 @@ public class Mission {
 	tr.addPropertyChangeListener(
 		TRFactory.RUN_STATE, 
 		weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr));
+	Features.init(this);
     }// end Mission
     
     private class RunStateListener implements PropertyChangeListener {
@@ -272,7 +273,6 @@ public class Mission {
 	}//end startGameplay()
 	
 	public void switchToOverworldState() {
-	    tr.setRunState(new OverworldState(){});
 	    final SkySystem skySystem = getOverworldSystem().getSkySystem();
 	    final Renderer renderer = tr.mainRenderer;
 	    renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
@@ -284,6 +284,7 @@ public class Mission {
 	    
 	    ((TVF3Game)game).getPlayer()	.setActive(true);
 	    ((TVF3Game)getGameShell().getGame()).setPaused(false);
+	    tr.setRunState(new OverworldState(){});
 	    //tr.setRunState(new PlayerActivity(){});
 	}
 

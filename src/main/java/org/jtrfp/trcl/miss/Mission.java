@@ -197,7 +197,7 @@ public class Mission {
 	tr.addPropertyChangeListener(
 		TRFactory.RUN_STATE, 
 		weakRunStateListener = new WeakPropertyChangeListener(runStateListener, tr));
-	Features.init(this);
+	//Features.init(this); //Cannot do this because it triggers when beans are (de)serialized!
     }// end Mission
     
     private class RunStateListener implements PropertyChangeListener {

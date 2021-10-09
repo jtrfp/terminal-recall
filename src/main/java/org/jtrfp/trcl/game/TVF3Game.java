@@ -472,8 +472,8 @@ public class TVF3Game implements Game {
 		    }});
 		if(oldMission!=null)
 		 oldMission.destruct();
-		//if(newMission != null)
-		    //Features.init(newMission);
+		if(newMission != null)//DO NOT REMOVE. If done from constructor it triggers with (de)serialization!
+		    Features.init(newMission);
 		pcSupport.firePropertyChange("currentMission", oldMission, newMission);
 	    }//end setCurrentMission
 	    

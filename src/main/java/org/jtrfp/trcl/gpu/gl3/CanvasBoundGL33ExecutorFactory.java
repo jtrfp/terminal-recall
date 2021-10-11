@@ -60,11 +60,15 @@ public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProv
 	    }});
 	final String [] parts      = versionString[0].split("\\.");
 	final String [] minorParts = parts[1].split("\\s+");
+	try {
 	final int major            = Integer.parseInt(parts[0]);
 	final int minor            = minorParts.length > 0?Integer.parseInt(minorParts[0]):0;
 	final int compositeVersion = major * 100 + minor;
 	if(compositeVersion < 303)
-	    throw new FeatureNotApplicableException("Must be GL 3.3. Got "+versionString);
+	    throw new FeatureNotApplicableException("Must be GL (not ES) 3.3. Got "+versionString);
+	} catch(NumberFormatException e){
+	    throw new FeatureNotApplicableException("Must be GL (not ES) 3.3, with major formatted as a number. Got "+versionString);
+	    }
 	return new CanvasBoundGL33Executor();
     }//end newInstance
 

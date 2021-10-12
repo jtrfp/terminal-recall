@@ -39,6 +39,9 @@ public class GPUFactory implements FeatureFactory<TR> {
     public void apply(TR target) {
 	final RootWindow rootWindow = Features.get(target, RootWindow.class);
 	final GLExecutor<?> glExecutor = Features.get(rootWindow, GLExecutor.class);
+	if(glExecutor == null)
+	    throw new RuntimeException("GLExecutor feature is null. This may mean a suitable GL driver could not be found. Cannot continue.\n"
+	    	+ "Is your OpenGL driver working properly and GPU up to spec?");
 	final GLCanvas canvas = rootWindow.getCanvas();
 	assert canvas != null;
 	setCanvas(canvas);

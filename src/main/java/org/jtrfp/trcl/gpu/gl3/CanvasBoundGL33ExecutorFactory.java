@@ -58,15 +58,19 @@ public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProv
 		versionString[0] = drawable.getGL().glGetString(GL.GL_VERSION);
 		return true;
 	    }});
+	System.out.println("CanvaseBoundGL33Executor: Evaluating GL version string `"+versionString[0]+"`");
 	final String [] parts      = versionString[0].split("\\.");
 	final String [] minorParts = parts[1].split("\\s+");
 	try {
 	final int major            = Integer.parseInt(parts[0]);
 	final int minor            = minorParts.length > 0?Integer.parseInt(minorParts[0]):0;
 	final int compositeVersion = major * 100 + minor;
-	if(compositeVersion < 303)
+	if(compositeVersion < 303) {
+	    System.out.println("\t... parsed composite version number: "+compositeVersion);
 	    throw new FeatureNotApplicableException("Must be GL (not ES) 3.3. Got "+versionString);
+	}
 	} catch(NumberFormatException e){
+	    System.out.println("\t... failed to parse the version number.");
 	    throw new FeatureNotApplicableException("Must be GL (not ES) 3.3, with major formatted as a number. Got "+versionString);
 	    }
 	return new CanvasBoundGL33Executor();

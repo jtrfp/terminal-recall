@@ -41,7 +41,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.awt.GLCanvas;
 
-public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? submitToGL returns GL Task whree executor returns TRFutureTask
+public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task whree executor returns TRFutureTask
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
     	private TRFutureTask<Integer>			defaultTIU;
@@ -277,7 +277,7 @@ public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? su
 	    Unknown
 	    }//end GPUVendor
 
-	@Override
+	//@Override
 	public <T> TRFutureTask<T> submitToGL(Callable<T> c) {
 	    return glExecutor.submitToGL(c);
 	}
@@ -340,12 +340,12 @@ public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? su
 	    this.threadManager = threadManager;
 	}
 
-	@Override
+	//@Override
 	public <T> GLFutureTask<T> submitToGL(
 		GLExecutable<T, GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
-
+/*
 	@Override
 	public void executeOnEachRefresh(
 		GLExecutable<Void, GL3> executable, double orderPriority) {
@@ -361,7 +361,7 @@ public class GPU implements GLExecutor<GL3>{//TODO: Can we remove GLExecutor? su
 	public void executeOnDispose(GLExecutable<Void,GL3> executable) {
 	    throw new UnsupportedOperationException();
 	}
-
+*/
 	public Reporter getReporter() {
 	    return reporter;
 	}

@@ -147,7 +147,8 @@ public class FeaturesImpl implements Cloneable {
 	   assert ff!=null:""+featureClass.getName();
 	   try{result = ff.newInstance(target);}
 	   catch(ClassCastException e){
-	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName());
+	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName()+".\n"
+	       	+ "Feature expected target of (super)type "+ff.getTargetClass().getName()+" but target was "+target.getClass().getName());
 	   }
 	   registerFeatureByClassRecursively(result.getClass(), result, featuresByClass);
 	   result.apply(target);

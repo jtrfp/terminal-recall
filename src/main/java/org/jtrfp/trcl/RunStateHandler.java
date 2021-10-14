@@ -19,7 +19,7 @@ import java.beans.PropertyChangeListener;
 public abstract class RunStateHandler implements PropertyChangeListener {
     private boolean isInState = false;
     
-    public abstract boolean isValidRunState( Object oldRunSatte, Object newRunState);
+    public abstract boolean isValidRunState( Object oldRunState, Object newRunState);
 
     public abstract void enteredRunState(Object oldState, Object newState);
     public abstract void exitedRunState (Object oldState, Object newState);

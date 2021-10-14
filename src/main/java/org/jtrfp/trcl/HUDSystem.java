@@ -56,7 +56,7 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
 	
 	pos = layout.getObjectivePosition();
 	objective = new CharLineDisplay(this, FONT_SIZE, 16, font);
-	objective.setContent("LOADING...");
+	objective.setContent("?");
 	objective.setPosition(pos.getX(), pos.getY(), Z);
 
 	pos = layout.getDistancePosition();

@@ -37,6 +37,7 @@ uniform vec3			sunColor;
 uniform vec3 			sunVector;
 uniform uint			bypassAlpha;
 uniform vec2			screenDims;
+uniform float			fogScalar;
 
 struct CompositeTexel {
  vec4 rgba;
@@ -99,9 +100,9 @@ vec2	halfScreenLocOffset = (screenLoc / 2) + (1/(float(OVERSAMPLING*4u)));
 vec3	fogCubeColor;
 
 float warpFog(float z){
- const float ZNEAR = 6554 * 32;
+ const float ZNEAR = 6554 * 8;
  const float ZFAR = 65536 * 16;
- return clamp((z-ZNEAR)/(ZFAR-ZNEAR),0,1);
+ return clamp((fogScalar*(z-ZNEAR))/(ZFAR-ZNEAR),0,1);
 }
 
 uint UByte(uint _input, uint index)

@@ -60,6 +60,7 @@ public class RendererFactory {
     //private final CollisionManager              collisionManager;
     private final	boolean			backfaceCulling;
     private 	 	GLUniform	    	sunVector;
+    private 	 	GLUniform	    	fogScalar;
     private 		GLTexture 		opaqueDepthTexture,
     /*					*/	opaquePrimitiveIDTexture,
     /*					*/	primitiveUVZWTexture,primitiveNormLODTexture,
@@ -224,6 +225,7 @@ public class RendererFactory {
 		depthQueueProgram.getUniform("wBuffer").set((int)6);
 		deferredProgram.use();
 		sunVector 	= deferredProgram	.getUniform("sunVector");
+		fogScalar	= deferredProgram	.getUniform("fogScalar");
 		deferredProgram.getUniform("rootBuffer").set((int) 0);
 		deferredProgram.getUniform("cubeTexture").set((int)1);
 		deferredProgram.getUniform("portalTexture").set((int)2);
@@ -237,6 +239,7 @@ public class RendererFactory {
 		deferredProgram.getUniform("layerAccumulator1").set((int)10);
 		deferredProgram.getUniform("ambientLight").set(.4f, .5f, .7f);
 		sunVector.set(.5774f,-.5774f,.5774f);
+		fogScalar.set(1f);
 		final int width  = canvas.getWidth();
 		final int height = canvas.getHeight();
 		gpu.defaultProgram();
@@ -578,6 +581,10 @@ public class RendererFactory {
 
     public GLUniform getSunVectorUniform() {
 	return sunVector;
+    }
+    
+    public GLUniform getFogScalarUniform() {
+	return fogScalar;
     }
 
     /**

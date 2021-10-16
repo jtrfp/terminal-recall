@@ -309,8 +309,8 @@ public final class Renderer {
         this.skyCube = skyCube;
     }
 
-    public Renderer setSunColor(final Color color) {
-	gpu.submitToGL(new Callable<Void>(){
+    public TRFutureTask<Void> setSunColor(final Color color) {
+	return gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		rendererFactory.getDeferredProgram().use();
@@ -318,8 +318,7 @@ public final class Renderer {
 		gpu.defaultProgram();
 		return null;
 	    }
-	}).get();
-	return this;
+	});
     }
 
     public TRFutureTask<Void> setAmbientLight(final Color color) {

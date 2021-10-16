@@ -259,12 +259,6 @@ public final class Renderer {
 	    }catch(NotReadyException e){}
 	    return null;
 	}};
-    
-    public void setSunVector(Vector3D sv){
-	rendererFactory.getDeferredProgram().use();
-	rendererFactory.getSunVectorUniform().set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
-	gpu.defaultProgram();
-    }
 
     /**
      * @return the rootGrid
@@ -328,8 +322,8 @@ public final class Renderer {
 	return this;
     }
 
-    public Renderer setAmbientLight(final Color color) {
-	gpu.submitToGL(new Callable<Void>(){
+    public TRFutureTask<Void> setAmbientLight(final Color color) {
+	return gpu.submitToGL(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
 		rendererFactory.getDeferredProgram().use();
@@ -337,9 +331,32 @@ public final class Renderer {
 		gpu.defaultProgram();
 		return null;
 	    }
-	}).get();
-	return this;
+	});
     }//end setAmbientLight
+    
+    public TRFutureTask<Void> setSunVector(Vector3D sv){
+	return gpu.submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		rendererFactory.getDeferredProgram().use();
+		rendererFactory.getSunVectorUniform().set((float)sv.getX(),(float)sv.getY(),(float)sv.getZ());
+		gpu.defaultProgram();
+		return null;
+	    }
+	});
+    }
+    
+    public TRFutureTask<Void> setFogScalar(float fogScalar) {
+	return gpu.submitToGL(new Callable<Void>(){
+	    @Override
+	    public Void call() throws Exception {
+		rendererFactory.getDeferredProgram().use();
+		rendererFactory.getFogScalarUniform().set((float)fogScalar);
+		gpu.defaultProgram();
+		return null;
+	    }
+	});
+    }
 
     /**
      * @return the renderingTarget

@@ -38,6 +38,7 @@ import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.flow.IndirectProperty;
 import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.Game;
+import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.shell.GameShellFactory;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
@@ -159,7 +160,8 @@ public class LevelSkipWindow extends JFrame {
 				    game.setLevel(levelLM.get(levelSelectionIdx).toString());
 				    
 				    game.doGameplay();
-				}catch(Exception e){e.printStackTrace();}//Do nothing.
+				} catch(CanceledException e) {}//No need to complain, just return.
+				  catch(Exception e){e.printStackTrace();}//Do nothing.
 			    }});
 		    }//end sync(executor)
 		}});

@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.ConsolidatingCollectionActionPacker;
+import org.jtrfp.trcl.core.CubeCoordinate;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 
@@ -33,10 +33,10 @@ public class CollisionManager {
     public static final int    SHIP_COLLISION_DISTANCE    = 15000;
     private static final double ROLLOVER_POINT            = World.WORLD_WIDTH_CUBES/2.;
     private final TR tr;
-    private final ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>relevancePairs = new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>();
-    private final ConsolidatingCollectionActionPacker<Positionable, Vector3D>       inputRelevancePairCollection = 
-	     new ConsolidatingCollectionActionPacker<Positionable, Vector3D>(relevancePairs);
-    private final HashMap<Vector3D,Collection<Positionable>>                        pairBuffer     = new HashMap<Vector3D,Collection<Positionable>>();
+    private final ArrayList<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>relevancePairs = new ArrayList<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>();
+    private final ConsolidatingCollectionActionPacker<Positionable, CubeCoordinate>       inputRelevancePairCollection = 
+	     new ConsolidatingCollectionActionPacker<Positionable, CubeCoordinate>(relevancePairs);
+    private final HashMap<CubeCoordinate,Collection<Positionable>>                        pairBuffer     = new HashMap<CubeCoordinate,Collection<Positionable>>();
     private final ArrayDeque<Collection<Positionable>>                              collectionPool = new ArrayDeque<Collection<Positionable>>();
     
     public CollisionManager(TR tr) {
@@ -48,23 +48,23 @@ public class CollisionManager {
 	try{World.relevanceExecutor.submit(new Callable<Void>(){
 	    @Override
 	    public Void call() throws Exception {
-		for(Pair<Vector3D,CollectionActionDispatcher<Positionable>> relevancePair:relevancePairs){
+		for(Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>> relevancePair:relevancePairs){
 		    Collection<Positionable> newCube = newCube(); newCube.addAll(relevancePair.getValue());
 		    pairBuffer.put(relevancePair.getKey(),newCube);
 		}//end for(relevanceCubes)
 		return null;
 	    }}).get();}catch(Exception e){e.printStackTrace();}
 	//Process non-everywhere cubes
-	Entry<Vector3D,Collection<Positionable>> everywhere=null;
+	Entry<CubeCoordinate,Collection<Positionable>> everywhere=null;
 	synchronized(tr.getThreadManager().gameStateLock){//Process cubes
-	    for(Entry<Vector3D,Collection<Positionable>> cube:pairBuffer.entrySet()){
+	    for(Entry<CubeCoordinate,Collection<Positionable>> cube:pairBuffer.entrySet()){
 		if(!cube.getKey().equals(World.RELEVANT_EVERYWHERE)){
 		    final Collection<Positionable> thisCube = cube.getValue();
 		    //Intra-cube
 		    processCubes(thisCube,thisCube);
-		    Vector3D orig = cube.getKey();
+		    CubeCoordinate orig = cube.getKey();
 		    processNeighbors(orig,thisCube);
-		    //orig = new Vector3D(orig.getX(),incLoop(orig.getY()),orig.getZ());
+		    //orig = new CubeCoordinate(orig.getX(),incLoop(orig.getY()),orig.getZ());
 		    //processNeighbors(orig,thisCube);
 		    }
 		else {//EVERYWHERE
@@ -79,55 +79,55 @@ public class CollisionManager {
 	    assert wasPresent;
 	    assert !pairBuffer.containsKey(everywhere.getKey());
 	    processCubes(everywhere.getValue(),everywhere.getValue());
-	    for(Entry<Vector3D,Collection<Positionable>> cube:pairBuffer.entrySet()){
+	    for(Entry<CubeCoordinate,Collection<Positionable>> cube:pairBuffer.entrySet()){
 		processCubes(everywhere.getValue(),cube.getValue());
 		processCubes(cube.getValue(),everywhere.getValue());
 	    }//end for(relevanceCubes) (relevant everywhere)
 	}}//end sync(gameStateLock)
-	for(Entry<Vector3D,Collection<Positionable>> cube:pairBuffer.entrySet()){
+	for(Entry<CubeCoordinate,Collection<Positionable>> cube:pairBuffer.entrySet()){
 	    Collection<Positionable> col = cube.getValue();
 	    col.clear();
 	    collectionPool.add(col);
 	}pairBuffer.clear();
     }//end newPerformCollisionTests()
     
-    private void processNeighbors(Vector3D orig, Collection<Positionable> thisCube){
-	double x=orig.getX(), y=orig.getY(), z=orig.getZ();
-	double x1=incLoop(x), y1=incLoop(y), z1=incLoop(z);
+    private void processNeighbors(CubeCoordinate orig, Collection<Positionable> thisCube){
+	int x=orig.getX(), y=orig.getY(), z=orig.getZ();
+	int x1=incLoop(x), y1=incLoop(y), z1=incLoop(z);
 	Collection<Positionable> other;
 	//X,Z+1
-	other = pairBuffer.get(new Vector3D(x,y,z1));
+	other = pairBuffer.get(new CubeCoordinate(x,y,z1));
 	if(other != null)
 	    bidiProcessCubes(thisCube,other);
 	//X+1,Z
-	other = pairBuffer.get(new Vector3D(x1,y,z));
+	other = pairBuffer.get(new CubeCoordinate(x1,y,z));
 	if(other != null)
 	    bidiProcessCubes(thisCube,other);
 	//X+1, Z+1
-	other = pairBuffer.get(new Vector3D(x1,y,z1));
+	other = pairBuffer.get(new CubeCoordinate(x1,y,z1));
 	if(other != null)
 	    bidiProcessCubes(thisCube,other);
 
 	//// Y+1
 	//X,Z+1
-	other = pairBuffer.get(new Vector3D(x,y1,z1));
+	other = pairBuffer.get(new CubeCoordinate(x,y1,z1));
 	if(other != null)
 	    bidiProcessCubes(thisCube,other);
 	//X+1,Z
-	other = pairBuffer.get(new Vector3D(x1,y1,z));
+	other = pairBuffer.get(new CubeCoordinate(x1,y1,z));
 	if(other != null)
 	    bidiProcessCubes(thisCube,other);
 	//X+1, Z+1
-	other = pairBuffer.get(new Vector3D(x1,y1,z1));
+	other = pairBuffer.get(new CubeCoordinate(x1,y1,z1));
 	if(other != null)
 	    bidiProcessCubes(thisCube,other);
     }//end processNeighbors
     
-    private double incLoop(double coord){
+    private int incLoop(int coord){
 	coord++;
 	while(coord >= ROLLOVER_POINT)
 	    coord -= World.WORLD_WIDTH_CUBES;
-	return Math.rint(coord);
+	return coord;
     }//end incLoop(...)
     
     private Collection<Positionable> newCube(){
@@ -157,7 +157,7 @@ public class CollisionManager {
     /**
      * @return the inputRelevanceCubeCollection
      */
-    public Collection<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> getInputRelevancePairCollection() {
+    public Collection<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> getInputRelevancePairCollection() {
         return inputRelevancePairCollection;
     }
 }// end CollisionManager

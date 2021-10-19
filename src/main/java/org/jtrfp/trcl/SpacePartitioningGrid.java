@@ -27,6 +27,7 @@ import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionPacker;
 import org.jtrfp.trcl.coll.CollectionThreadDecoupler;
 import org.jtrfp.trcl.coll.PropertyBasedTagger;
+import org.jtrfp.trcl.core.CubeCoordinate;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 
@@ -39,27 +40,27 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	private Map<SpacePartitioningGrid<E>,String>
 						branchGrids = 
 	   Collections.synchronizedMap(new WeakHashMap<SpacePartitioningGrid<E>,String>());
-	private static final com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<PropertyChangeEvent,Vector3D>(){
+	private static final com.ochafik.util.listenable.Adapter<PropertyChangeEvent,CubeCoordinate>cubeSpaceQuantizingAdapter = new com.ochafik.util.listenable.Adapter<PropertyChangeEvent,CubeCoordinate>(){
 	    @Override
-	    public Vector3D adapt(PropertyChangeEvent evt) {
+	    public CubeCoordinate adapt(PropertyChangeEvent evt) {
 		final int granularity = World.CUBE_GRANULARITY;
 		if(evt.getSource() instanceof RelevantEverywhere)
 		    return World.RELEVANT_EVERYWHERE;
 		final double[] newPos = (double[])evt.getNewValue();
-		final Vector3D newCenterCube = new Vector3D(
-			Camera.posZero(Math.rint(newPos[0]/granularity)),
-			Camera.posZero(Math.rint(newPos[1]/granularity)),
-			Camera.posZero(Math.rint(newPos[2]/granularity)));
+		final CubeCoordinate newCenterCube = new CubeCoordinate(
+			(int)(Math.rint(newPos[0]/granularity)),
+			(int)(Math.rint(newPos[1]/granularity)),
+			(int)(Math.rint(newPos[2]/granularity)));
 		return newCenterCube;
 	    }
 	};
-	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher =
-		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
+	private final CollectionActionDispatcher<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> packedObjectsDispatcher =
+		new CollectionActionDispatcher<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>(new ArrayList<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>());
 	/*private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> packedObjectValve =
 		new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(packedObjectsDispatcher);*/
-	private final CollectionActionPacker<Positionable,Vector3D> objectPacker = new CollectionActionPacker<Positionable,Vector3D>(packedObjectsDispatcher);
+	private final CollectionActionPacker<Positionable,CubeCoordinate> objectPacker = new CollectionActionPacker<Positionable,CubeCoordinate>(packedObjectsDispatcher);
 	private final Collection<Positionable> localTagger
-	 = new CollectionThreadDecoupler<Positionable>(new PropertyBasedTagger<Positionable, Vector3D, Vector3D>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITION,World.relevanceExecutor),World.relevanceExecutor);
+	 = new CollectionThreadDecoupler<Positionable>(new PropertyBasedTagger<Positionable, CubeCoordinate, CubeCoordinate>(objectPacker, cubeSpaceQuantizingAdapter, Positionable.POSITION,World.relevanceExecutor),World.relevanceExecutor);
 	
 	private  List<E> []     elements;
 		
@@ -148,7 +149,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	    branchGrids.remove(toRemove);
 	}
 	
-	public CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> getPackedObjectsDispatcher(){
+	public CollectionActionDispatcher<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> getPackedObjectsDispatcher(){
 	    return packedObjectsDispatcher;
 	}
 	

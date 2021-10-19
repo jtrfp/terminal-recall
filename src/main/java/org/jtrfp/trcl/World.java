@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.jtrfp.trcl.core.CubeCoordinate;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 
@@ -33,7 +34,7 @@ public final class World {
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove
     public static final int CUBE_GRANULARITY        = (int)(TRFactory.mapSquareSize*8);
     public static final int WORLD_WIDTH_CUBES       = (int)Math.round(TRFactory.mapWidth / CUBE_GRANULARITY);
-    public static final Vector3D RELEVANT_EVERYWHERE= Vector3D.NaN;
+    public static final CubeCoordinate RELEVANT_EVERYWHERE= CubeCoordinate.RELEVANT_EVERYWHERE;
 
     public World(double sizeX, double sizeY, double sizeZ,
 	    double cameraViewDepth, TR tr) {

@@ -31,9 +31,9 @@ import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.coll.CollectionActionUnpacker;
 import org.jtrfp.trcl.coll.PredicatedORCollectionActionFilter;
 import org.jtrfp.trcl.coll.ThreadEnforcementCollection;
+import org.jtrfp.trcl.core.CubeCoordinate;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PositionedRenderable;
@@ -60,34 +60,34 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	private float horizontalFOVDegrees = 100f;// In degrees
 	private float verticalFOVDegrees   = 100f;
 	private double relevanceRadius = TRFactory.visibilityDiameterInMapSquares*TRFactory.mapSquareSize;
-	private CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
-		new CachedAdapter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
+	private CachedAdapter<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>> strippingAdapter = 
+		new CachedAdapter<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>,CollectionActionDispatcher<Positionable>>(){
 		    @Override
 		    protected CollectionActionDispatcher<Positionable> _adapt(
-			    Pair<Vector3D, CollectionActionDispatcher<Positionable>> value)
+			    Pair<CubeCoordinate, CollectionActionDispatcher<Positionable>> value)
 			    throws UnsupportedOperationException {
 			return value.getValue();
 		    }
 
 		    @Override
-		    protected Pair<Vector3D, CollectionActionDispatcher<Positionable>> _reAdapt(
+		    protected Pair<CubeCoordinate, CollectionActionDispatcher<Positionable>> _reAdapt(
 			    CollectionActionDispatcher<Positionable> value)
 			    throws UnsupportedOperationException {
 			throw new UnsupportedOperationException();
 		    }};
 	private final CollectionActionDispatcher<CollectionActionDispatcher<Positionable>> relevanceCollections =
 		new CollectionActionDispatcher<CollectionActionDispatcher<Positionable>>(new HashSet<CollectionActionDispatcher<Positionable>>());
-	private final CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> relevancePairs = 
-		new CollectionActionDispatcher<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(new HashSet<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>());
-	private final PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> 
-	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevancePairs);
-	private final CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>> pairStripper = 
-		new CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<Vector3D,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.inverse());
+	private final CollectionActionDispatcher<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> relevancePairs = 
+		new CollectionActionDispatcher<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>(new HashSet<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>());
+	private final PredicatedORCollectionActionFilter<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> 
+	 visibilityFilter = new PredicatedORCollectionActionFilter<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>(relevancePairs);
+	private final CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> pairStripper = 
+		new CollectionAdapter<CollectionActionDispatcher<Positionable>,Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>(relevanceCollections, strippingAdapter.inverse());
 	private final CollectionActionDispatcher<Positionable> flatRelevanceCollection = new CollectionActionDispatcher<Positionable>(new HashSet<Positionable>());
 	//private static double relevanceRadius = TR.visibilityDiameterInMapSquares*TR.mapSquareSize;
 	private int relevanceRadiusCubes = (int)(relevanceRadius/World.CUBE_GRANULARITY);
 	private SpacePartitioningGrid<PositionedRenderable> rootGrid;
-	private volatile Vector3D centerCube = Vector3D.NEGATIVE_INFINITY;
+	private volatile CubeCoordinate centerCube = CubeCoordinate.CENTER_CUBE;
 	// HARD REFERENCES - DO NOT REMOVE
 	@SuppressWarnings("unused")
 	private final CenterCubeHandler     centerCubeHandler;
@@ -132,11 +132,11 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	return false;
     }
     
-    private final class VisibilityPredicate implements Predicate<Pair<Vector3D,CollectionActionDispatcher<Positionable>>>{
+    private final class VisibilityPredicate implements Predicate<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>>{
 	@Override
 	public boolean evaluate(
-		Pair<Vector3D, CollectionActionDispatcher<Positionable>> object) {
-	    final Vector3D cubePosition = object.getKey();
+		Pair<CubeCoordinate, CollectionActionDispatcher<Positionable>> object) {
+	    final CubeCoordinate cubePosition = object.getKey();
 	    if(cubePosition.equals(World.RELEVANT_EVERYWHERE))
 		return true;
 	    //Rollover distance
@@ -192,11 +192,11 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 		final Vector3D pHeading = wo.getHeading().scalarMultiply(TRFactory.visibilityDiameterInMapSquares*TRFactory.mapSquareSize/5);
 		final double [] newValue = ((double [])evt.getNewValue());
 		final int granularity = World.CUBE_GRANULARITY;
-		final Vector3D newCenterCube = new Vector3D(
-			posZero(Math.rint((newValue[0]+pHeading.getX())/granularity)),
-			posZero(Math.rint((newValue[1]+pHeading.getY())/granularity)),
-			posZero(Math.rint((newValue[2]+pHeading.getZ())/granularity)));
-		final Vector3D oldCenterCube = centerCube;
+		final CubeCoordinate newCenterCube = new CubeCoordinate(
+			(int)posZero(Math.rint((newValue[0]+pHeading.getX())/granularity)),
+			(int)posZero(Math.rint((newValue[1]+pHeading.getY())/granularity)),
+			(int)posZero(Math.rint((newValue[2]+pHeading.getZ())/granularity)));
+		final CubeCoordinate oldCenterCube = centerCube;
 		pcs.firePropertyChange(CENTER_CUBE, oldCenterCube, newCenterCube);
 	    }//end if(POSITION)
 	}//end if propertyChange()
@@ -219,7 +219,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	    World.relevanceExecutor.submit(new Runnable(){
 		@Override
 		public void run() {
-		    centerCube=(Vector3D)evt.getNewValue();
+		    centerCube=(CubeCoordinate)evt.getNewValue();
 		    visibilityFilter.reEvaluatePredicates();
 		}});
 	}//end propertyChange(...)
@@ -429,7 +429,7 @@ public class Camera extends WorldObject implements RelevantEverywhere{
 	/**
 	 * @return the relevancePairs
 	 */
-	public CollectionActionDispatcher<Pair<Vector3D, CollectionActionDispatcher<Positionable>>> getRelevancePairs() {
+	public CollectionActionDispatcher<Pair<CubeCoordinate, CollectionActionDispatcher<Positionable>>> getRelevancePairs() {
 	    return relevancePairs;
 	}
 	/**

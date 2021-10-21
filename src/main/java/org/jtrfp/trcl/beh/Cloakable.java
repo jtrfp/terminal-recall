@@ -27,6 +27,8 @@ public class Cloakable extends Behavior implements HasQuantifiableSupply {
 		if(System.currentTimeMillis()>cloakExpirationTimeMillis)cloaked=false;
 		}
 	}//end if(update?)
+	
+	updateCounter %= 1000;
     }//end _tick(...)
     
     public void setSupply(double amount) {

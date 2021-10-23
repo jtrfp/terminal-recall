@@ -16,7 +16,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
@@ -36,7 +37,6 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GL33Model;
@@ -75,9 +75,12 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private int[] 	transparentTriangleObjectDefinitions;
     protected volatile Integer 	matrixID;
     private volatile WeakReference<SpacePartitioningGrid> containingGrid;
-    private ArrayList<Behavior> 	inactiveBehaviors  = new ArrayList<Behavior>();
-    private ArrayList<CollisionBehavior>collisionBehaviors = new ArrayList<CollisionBehavior>();
-    private ArrayList<Behavior> 	tickBehaviors 	   = new ArrayList<Behavior>();
+    //private List<Behavior> 		inactiveBehaviors  = new CopyOnWriteArrayList<Behavior>();
+    //private List<CollisionBehavior>	collisionBehaviors = new CopyOnWriteArrayList<CollisionBehavior>();
+    //private List<Behavior> 		tickBehaviors 	   = new CopyOnWriteArrayList<Behavior>();
+    private Behavior[]			inactiveBehaviors = new Behavior[0];
+    private CollisionBehavior[]		collisionBehaviors = new CollisionBehavior[0];
+    private Behavior[]			tickBehaviors = new Behavior[0];
     private boolean 			active 		   = true;
     private volatile byte 		renderFlags=0;
     private boolean			immuneToOpaqueDepthTest  = false;
@@ -141,36 +144,52 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end constructor
 
     void proposeCollision(WorldObject other) {
-	for (int i = 0; i < collisionBehaviors.size(); i++) {
-	    collisionBehaviors.get(i).proposeCollision(other);
-	}// end for(collisionBehaviors)
+	final CollisionBehavior[] collisionBehaviors = this.collisionBehaviors;
+	for (int i = 0; i < collisionBehaviors.length; i++)
+	    collisionBehaviors[i].proposeCollision(other);
     }// end proposeCollision(...)
 
     
     public boolean isCollideable(){
-	return !collisionBehaviors.isEmpty();
+	return collisionBehaviors.length!=0;
     }
     
     public <T extends Behavior> T addBehavior(T ob) {
-	if (ob.isEnabled()) {
-	    if (ob instanceof CollisionBehavior)
-		collisionBehaviors.add((CollisionBehavior) ob);
-	    tickBehaviors.add(ob);
-	} else {
-	    inactiveBehaviors.add(ob);
-	}
 	ob.setParent(this);
+	if (ob.isEnabled()) {
+	    if (ob instanceof CollisionBehavior) {
+		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		colls.add(ob);
+		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
+		}
+	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    ticks.add(ob);
+	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
+	} else {
+	    final HashSet<Behavior> inactive = new HashSet(Arrays.asList(inactiveBehaviors));
+	    inactive.add(ob);
+	    inactiveBehaviors = inactive.toArray(new Behavior[inactive.size()]);
+	}
 	return ob;
-    }
+    }//end addBehavior(...)
     
-    public <T extends Behavior> T removeBehavior(T beh) {
-	if (beh.isEnabled()) {
-	    if (beh instanceof CollisionBehavior)
-		collisionBehaviors.remove((CollisionBehavior) beh);
-	    tickBehaviors.remove(beh);
-	} else 
-	    inactiveBehaviors.remove(beh);
-	return beh;
+    public <T extends Behavior> T removeBehavior(T toRemove) {
+	toRemove.setParent(this);
+	if (toRemove.isEnabled()) {
+	    if (toRemove instanceof CollisionBehavior) {
+		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		colls.remove(toRemove);
+		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
+		}
+	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    ticks.remove(toRemove);
+	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
+	} else {
+	    final HashSet<Behavior> inactive = new HashSet(Arrays.asList(inactiveBehaviors));
+	    inactive.remove(toRemove);
+	    inactiveBehaviors = inactive.toArray(new Behavior[inactive.size()]);
+	}
+	return toRemove;
     }//end removeBehavior()
     
     protected boolean recalcMatrixWithEachFrame(){
@@ -179,20 +198,23 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public <T> T probeForBehavior(Class<T> bC) {
 	if (bC.isAssignableFrom(CollisionBehavior.class)) {
-	    for (int i = 0; i < collisionBehaviors.size(); i++) {
-		if (bC.isAssignableFrom(collisionBehaviors.get(i).getClass())) {
-		    return (T) collisionBehaviors.get(i);
+	    final CollisionBehavior [] collisionBehaviors = this.collisionBehaviors;
+	    for (int i = 0; i < collisionBehaviors.length; i++) {
+		if (bC.isAssignableFrom(collisionBehaviors[i].getClass())) {
+		    return (T) collisionBehaviors[i];
 		}
 	    }// end if(instanceof)
 	}// emd if(isAssignableFrom(CollisionBehavior.class))
-	for (int i = 0; i < inactiveBehaviors.size(); i++) {
-	    if (bC.isAssignableFrom(inactiveBehaviors.get(i).getClass())) {
-		return (T) inactiveBehaviors.get(i);
+	final Behavior [] inactiveBehaviors = this.inactiveBehaviors;
+	for (int i = 0; i < inactiveBehaviors.length; i++) {
+	    if (bC.isAssignableFrom(inactiveBehaviors[i].getClass())) {
+		return (T) inactiveBehaviors[i];
 	    }
 	}// end if(instanceof)
-	for (int i = 0; i < tickBehaviors.size(); i++) {
-	    if (bC.isAssignableFrom(tickBehaviors.get(i).getClass())) {
-		return (T) tickBehaviors.get(i);
+	final Behavior [] tickBehaviors = this.tickBehaviors;
+	for (int i = 0; i < tickBehaviors.length; i++) {
+	    if (bC.isAssignableFrom(tickBehaviors[i].getClass())) {
+		return (T) tickBehaviors[i];
 	    }
 	}// end if(instanceof)
 	throw new BehaviorNotFoundException("Cannot find behavior of type "
@@ -202,34 +224,37 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
 	final ArrayList<T> result = new ArrayList<T>();
-	synchronized(collisionBehaviors){
+	
+	
 	if (type.isAssignableFrom(CollisionBehavior.class)) {
-	    for (int i = 0; i < collisionBehaviors.size(); i++) {
-		if (type.isAssignableFrom(collisionBehaviors.get(i).getClass())) {
-		    result.add((T) collisionBehaviors.get(i));
+	    final CollisionBehavior [] collisionBehaviors = this.collisionBehaviors;
+	    for (int i = 0; i < collisionBehaviors.length; i++) {
+		if (type.isAssignableFrom(collisionBehaviors[i].getClass())) {
+		    result.add( (T) collisionBehaviors[i]);
 		}
 	    }// end if(instanceof)
-	}// end isAssignableFrom(CollisionBehavior.class)
-	}synchronized(inactiveBehaviors){
-	for (int i = 0; i < inactiveBehaviors.size(); i++) {
-	    if (type.isAssignableFrom(inactiveBehaviors.get(i).getClass()))
-		result.add((T) inactiveBehaviors.get(i));
+	}// emd if(isAssignableFrom(CollisionBehavior.class))
+	final Behavior [] inactiveBehaviors = this.inactiveBehaviors;
+	for (int i = 0; i < inactiveBehaviors.length; i++) {
+	    if (type.isAssignableFrom(inactiveBehaviors[i].getClass()))
+		result.add( (T) inactiveBehaviors[i]);
 	}// end if(instanceof)
-	}synchronized(tickBehaviors){
-	for (int i = 0; i < tickBehaviors.size(); i++) {
-	    if (type.isAssignableFrom(tickBehaviors.get(i).getClass()))
-		result.add((T) tickBehaviors.get(i));
-	}// end for (tickBehaviors)
-     }//end sync(tickBehaviors)
+	final Behavior [] tickBehaviors = this.tickBehaviors;
+	for (int i = 0; i < tickBehaviors.length; i++) {
+	    if (type.isAssignableFrom(tickBehaviors[i].getClass()))
+		result.add( (T) tickBehaviors[i]);
+	}// end if(instanceof)
+	
      sub.submit(result);
     }// end probeForBehaviors(...)
 
     public void tick(long time) {
 	if(!respondToTick)return;
-	synchronized(tickBehaviors){
-	for (int i = 0; i < tickBehaviors.size() && isActive(); i++)
-	    tickBehaviors.get(i).proposeTick(time);
-	}//end sync(tickBehaviors)
+	//synchronized(tickBehaviors){
+	final Behavior [] tickBehaviors = this.tickBehaviors;
+	for (int i = 0; i < tickBehaviors.length && isActive(); i++)
+	    tickBehaviors[i].proposeTick(time);
+	//}//end sync(tickBehaviors)
     }// end tick(...)
     
     private final int [] emptyIntArray = new int[0];
@@ -740,33 +765,67 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     public void enableBehavior(Behavior behavior) {
-	if (!inactiveBehaviors.contains(behavior)) {
+	if (!arrayContains(inactiveBehaviors,behavior)) {
 	    throw new RuntimeException(
-		    "Tried to enabled an unregistered behavior.");
+		    "Tried to enable an unregistered behavior.");
 	}
 	if (behavior instanceof CollisionBehavior) {
-	    if (!collisionBehaviors.contains(behavior)
+	    if (!arrayContains(collisionBehaviors,behavior)
 		    && behavior instanceof CollisionBehavior) {
-		collisionBehaviors.add((CollisionBehavior) behavior);
+		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		colls.add(behavior);
+		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
 	    }
 	}
-	if (!tickBehaviors.contains(behavior)) {
-	    tickBehaviors.add(behavior);
+	if (!arrayContains(tickBehaviors,behavior)) {
+	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    ticks.add(behavior);
+	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
 	}
     }// end enableBehavior(...)
+    
+    private static boolean arrayContains(Object [] array, Object o) {
+	final int len = array.length;
+	for(int i = 0 ; i < len; i++)
+	    if(array[i] == o)
+		return true;
+	return false;
+    }
 
     public void disableBehavior(Behavior behavior) {
-	if (!inactiveBehaviors.contains(behavior))
-	    synchronized(inactiveBehaviors){
-		inactiveBehaviors.add(behavior);
-	    }
-	if (behavior instanceof CollisionBehavior)
-	    synchronized(collisionBehaviors){
-		collisionBehaviors.remove(behavior);
-	    }
-	synchronized(tickBehaviors){
-	    tickBehaviors.remove(behavior);
+	//if (!arrayContains(inactiveBehaviors,behavior)) {
+	    final HashSet<Behavior> inactive = new HashSet(Arrays.asList(inactiveBehaviors));
+	    inactive.add(behavior);
+	    inactiveBehaviors = inactive.toArray(new Behavior[inactive.size()]);
+	//}
+	if (behavior instanceof CollisionBehavior) {
+	    //if (!arrayContains(collisionBehaviors,behavior)
+		    //&& behavior instanceof CollisionBehavior) {
+		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		colls.remove(behavior);
+		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
+	    //}
 	}
+	//if (!arrayContains(tickBehaviors,behavior)) {
+	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    ticks.remove(behavior);
+	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
+	//}
+	
+	
+	/*
+	if (!inactiveBehaviors.contains(behavior))
+	    //synchronized(inactiveBehaviors){
+		inactiveBehaviors.add(behavior);
+	    //}
+	if (behavior instanceof CollisionBehavior)
+	    //synchronized(collisionBehaviors){
+		collisionBehaviors.remove(behavior);
+	    //}
+	//synchronized(tickBehaviors){
+	    tickBehaviors.remove(behavior);
+	//}
+	    */
     }//end disableBehavior(...)
 
     /**

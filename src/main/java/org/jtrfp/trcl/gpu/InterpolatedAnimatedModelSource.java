@@ -39,12 +39,13 @@ public class InterpolatedAnimatedModelSource implements BasicModelSource {
     public double[] getVertex(int index) {
 	final double [] result = new double[8];
 	final int nFrames   = frames.size();
-	final int    rFrame = (int)getCurrentFrame();
-	final int    lFrame = rFrame==0?nFrames-1:rFrame-1;
-	final double mFrame = getCurrentFrame()%1.;
+	final double frame = getCurrentFrame();
+	int lowFrame = (int) frame;
+	int hiFrame = (int)(Math.ceil(frame) % nFrames);
+	final double mFrame = frame%1.;
 	final double imFrame= 1-mFrame;
-	final double [] dR     = frames.get(rFrame).getVertex(index);
-	final double [] dL     = frames.get(lFrame).getVertex(index);
+	final double [] dR     = frames.get(hiFrame).getVertex(index);
+	final double [] dL     = frames.get(lowFrame).getVertex(index);
 	final int n = Math.min(dR.length,dL.length);
 	for(int i=0; i<n; i++)
 	    result[i]=mFrame*dR[i]+imFrame*dL[i];

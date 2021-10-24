@@ -38,8 +38,8 @@ public final class AttribAnimator implements Tickable {
     public void updateAnimation() {
 	double frame = controller.getCurrentFrame();
 	int lowFrame = (int) frame;
-	int hiFrame = (lowFrame + 1) % frames.length;
-	double interpolation = frame - (double) lowFrame;
+	int hiFrame = (int)(Math.ceil(frame) % frames.length);
+	double interpolation = frame % 1.;
 	if (hiFrame == 0 && !loopInterpolate) {
 	    lowFrame = 0;
 	    hiFrame = 1;

@@ -102,7 +102,7 @@ vec3	fogCubeColor;
 float warpFog(float z){
  const float ZNEAR = 6554 * 8;
  const float ZFAR = 65536 * 16;
- return clamp((fogScalar*(z-ZNEAR))/(ZFAR-ZNEAR),0,1);
+ return clamp((((z*fogScalar)-ZNEAR))/(ZFAR-ZNEAR),0,1);
 }
 
 uint UByte(uint _input, uint index)

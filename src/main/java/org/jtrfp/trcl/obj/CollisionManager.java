@@ -58,12 +58,13 @@ public class CollisionManager {
 	Entry<CubeCoordinate,Collection<Positionable>> everywhere=null;
 	synchronized(tr.getThreadManager().gameStateLock){//Process cubes
 	    for(Entry<CubeCoordinate,Collection<Positionable>> cube:pairBuffer.entrySet()){
-		if(!cube.getKey().equals(World.RELEVANT_EVERYWHERE)){
+		 CubeCoordinate orig = cube.getKey();
+		if(!World.RELEVANT_EVERYWHERE.equals(orig)){
 		    final Collection<Positionable> thisCube = cube.getValue();
 		    //Intra-cube
 		    processCubes(thisCube,thisCube);
-		    CubeCoordinate orig = cube.getKey();
 		    processNeighbors(orig,thisCube);
+		    
 		    //orig = new CubeCoordinate(orig.getX(),incLoop(orig.getY()),orig.getZ());
 		    //processNeighbors(orig,thisCube);
 		    }
@@ -71,7 +72,9 @@ public class CollisionManager {
 		    if(everywhere==null)
 		     everywhere = cube;
 		    else
-			throw new RuntimeException("Intolerable multiple 'everywhere' cubes.");
+			throw new RuntimeException("Intolerable multiple 'everywhere' cubes. Found "+
+				cube.getKey()+" but already had "+
+				everywhere.getKey());
 		    }//end EVERYWHERE
 	    }//end for(relevanceCubes)
 	}if(everywhere!=null){synchronized(tr.getThreadManager().gameStateLock){//Process "everywhere" items.

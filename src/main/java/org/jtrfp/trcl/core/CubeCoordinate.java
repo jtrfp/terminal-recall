@@ -16,17 +16,16 @@ package org.jtrfp.trcl.core;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 
 @AllArgsConstructor
 @EqualsAndHashCode
 public class CubeCoordinate {
     public static final CubeCoordinate RELEVANT_EVERYWHERE = new RelevantEverywhere();
     public static final CubeCoordinate CENTER_CUBE = new CenterCube();
-    @Getter @Setter
-    private int x,y,z;
+    @Getter
+    private final int x,y,z;
 
-    private static class RelevantEverywhere extends CubeCoordinate {
+    private static final class RelevantEverywhere extends CubeCoordinate {
 	private static int HASH = "RelevantEverywhere".hashCode();
 	public RelevantEverywhere() {
 	    super(0,0,0);
@@ -43,8 +42,8 @@ public class CubeCoordinate {
 	}
     }//end RelevantEverywhere
     
-    private static class CenterCube extends CubeCoordinate {
-	private static int HASH = "CenterCube".hashCode();
+    private static final class CenterCube extends CubeCoordinate {
+	private static final int HASH = "CenterCube".hashCode();
 	public CenterCube() {
 	    super(0,0,0);
 	}

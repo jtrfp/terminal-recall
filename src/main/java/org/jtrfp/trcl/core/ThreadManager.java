@@ -265,9 +265,9 @@ public class ThreadManager {
 	     ///////// activeGPUMemAccessTasks should be empty beyond this
 	    assert activeGPUMemAccessTasks.isEmpty() : "ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
 	    //// GL ONLY
-	    synchronized(repeatingGLTasks){
+	    //synchronized(repeatingGLTasks){
 	     for(Callable<?> c:repeatingGLTasks)
-		c.call();}
+		c.call();//}
 	    synchronized (currentGPUMemAccessTaskSubmitter) {
 		currentGPUMemAccessTaskSubmitter
 			.set(activeGPUMemAccessTaskSubmitter);

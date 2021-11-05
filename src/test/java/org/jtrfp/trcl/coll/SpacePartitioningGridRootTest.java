@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.World;
+import org.jtrfp.trcl.core.CubeCoordinate;
 import org.jtrfp.trcl.obj.Positionable;
 import org.junit.After;
 import org.junit.Assert;
@@ -45,7 +46,7 @@ import com.ochafik.util.listenable.Pair;
 public class SpacePartitioningGridRootTest {
     protected SpacePartitioningGrid<Positionable> subject;
     protected Positionable [] mockedPositionables;
-    protected Collection<Pair<Vector3D,CollectionActionDispatcher<Positionable>>> mockedTarget;
+    protected Collection<Pair<CubeCoordinate,CollectionActionDispatcher<Positionable>>> mockedTarget;
 
     @SuppressWarnings("unchecked")
     @Before

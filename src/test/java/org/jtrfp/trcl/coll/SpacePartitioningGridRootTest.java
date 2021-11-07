@@ -161,7 +161,7 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,times(1)).remove(argument.capture());
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	 assertNotNull(pair);
-	 assertEquals(new Vector3D(0,0,0),pair.getFirst());
+	 assertEquals(new CubeCoordinate(0,0,0),pair.getFirst());
 	 CollectionActionDispatcher<Positionable> dispatcher = pair.getSecond();
 	 assertEquals(0,dispatcher.size());
 	 assertTrue(subject.getPackedObjectsDispatcher().isEmpty());
@@ -180,7 +180,7 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,times(1)).add(argument.capture());
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	 assertNotNull(pair);
-	 assertEquals(new Vector3D(0,0,0),pair.getFirst());
+	 assertEquals(new CubeCoordinate(0,0,0),pair.getFirst());
 	 CollectionActionDispatcher<Positionable> dispatcher = pair.getSecond();
 	 assertEquals(2,dispatcher.size());
 	 assertTrue(dispatcher.contains(mockedPositionables[0]));
@@ -226,7 +226,7 @@ public class SpacePartitioningGridRootTest {
 	verify(mockedTarget,times(2)).add(argument.capture());
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	 assertNotNull(pair);
-	 assertEquals(new Vector3D(0,0,0),pair.getFirst());
+	 assertEquals(new CubeCoordinate(0,0,0),pair.getFirst());
 	 CollectionActionDispatcher<Positionable> dispatcher = pair.getSecond();
 	 assertEquals(2,dispatcher.size());
 	 assertTrue(dispatcher.contains(mockedPositionables[0]));

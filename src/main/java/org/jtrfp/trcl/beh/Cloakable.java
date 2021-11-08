@@ -16,16 +16,13 @@ import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 
 public class Cloakable extends Behavior implements HasQuantifiableSupply {
     private long cloakExpirationTimeMillis=0;
-    private boolean cloaked=false;
     private byte updateCounter=0;
     
     @Override
     public void tick(long tickTimeMillis){
 	if(updateCounter++==0){
-	    if(isCloaked()){
+	    if(isCloaked())
 		System.out.println("Cloak time left: "+(cloakExpirationTimeMillis-System.currentTimeMillis())/1000+"s");
-		if(System.currentTimeMillis()>cloakExpirationTimeMillis)cloaked=false;
-		}
 	}//end if(update?)
 	
 	updateCounter %= 1000;
@@ -34,18 +31,16 @@ public class Cloakable extends Behavior implements HasQuantifiableSupply {
     public void setSupply(double amount) {
 	if(Double.isFinite(amount)) {
 	    cloakExpirationTimeMillis = System.currentTimeMillis()+(long)amount;
-	    cloaked = amount > 0;
 	}
 	else if(Double.isInfinite(amount)) {
 	    cloakExpirationTimeMillis = Long.MAX_VALUE;
-	    cloaked = true;
 	}
     }//end setSupply()
 
     @Override
     public void addSupply(double amount) throws SupplyNotNeededException {
 	if(isCloaked())cloakExpirationTimeMillis+=amount;
-	else{cloakExpirationTimeMillis=(long)amount+System.currentTimeMillis();cloaked=true;}
+	else{cloakExpirationTimeMillis=(long)amount+System.currentTimeMillis();}
     }
 
     @Override
@@ -54,7 +49,7 @@ public class Cloakable extends Behavior implements HasQuantifiableSupply {
     }
     
     public boolean isCloaked(){
-	return cloaked;
+	return (System.currentTimeMillis()<cloakExpirationTimeMillis);
     }
     
 }//end Cloakable

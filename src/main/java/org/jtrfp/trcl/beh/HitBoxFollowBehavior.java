@@ -31,6 +31,10 @@ public class HitBoxFollowBehavior extends Behavior {
     
     @Override
     protected void tick(long tickTimeMillis) {
+	final boolean targetActive = target.isActive();
+	getParent().setVisible(targetActive);
+	if(!targetActive)
+	    return;
 	final double [] tPos = target.getPositionWithOffset();
 	final double [] vPos = modelSource.getVertex(hitBox.getVertexID());
 	final Vector3D globalPos = new Vector3D(tPos[0], tPos[1], tPos[2]).add(new Vector3D(vPos[0],vPos[1],vPos[2]));

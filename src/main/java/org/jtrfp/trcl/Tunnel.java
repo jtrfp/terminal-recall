@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
-import com.jogamp.opengl.GL3;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
@@ -38,6 +36,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
@@ -46,6 +45,7 @@ import org.jtrfp.trcl.file.TNLFile;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.Obstacle;
 import org.jtrfp.trcl.gpu.GL33Model;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -63,8 +63,12 @@ import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
-public class Tunnel extends RenderableSpacePartitioningGrid {
-    private LVLFile 	lvl;
+import com.jogamp.opengl.GL3;
+
+import lombok.Getter;
+
+public class Tunnel extends RenderableSpacePartitioningGrid implements RendererConfigurator {
+    private LVLFile	lvl;
     private final TR 	tr;
     private final GL3 	gl;
     final double 	tunnelDia = 150000;
@@ -83,6 +87,8 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
     public static final SkyCubeGen	   TUNNEL_SKYCUBE_GEN = new HorizGradientCubeGen
 		(Color.darkGray,Color.black);
     private String                         debugName;
+    @Getter
+    private String			   lvlFileName;
 
     public static final Vector3D TUNNEL_START_POS = new Vector3D(0,
 	    TRFactory.mapSquareSize * 5, TRFactory.mapSquareSize*15);
@@ -106,6 +112,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	try {
 	    lvl = tr.getResourceManager()
 		    .getLVL(sourceTunnel.getTunnelLVLFile());
+	    lvlFileName = sourceTunnel.getTunnelLVLFile();
 	    final Vector3D entranceVector = TUNNEL_START_DIRECTION.getHeading();
 	    palette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 	    palette[0] = new Color(0,0,0,0);//XXX KLUDGE: Color zero must be transparent.
@@ -117,8 +124,10 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	}
 	final GameShell gameShell = Features.get(tr, GameShell.class);
 	final Camera mainCamera = tr.mainRenderer.getCamera();
+	final OverworldSystem overworldSystem = gameShell.getGame().getCurrentMission().getOverworldSystem();
 	exitObject = new TunnelExitObject(this,"Tunnel."+debugName,mainCamera);
-	exitObject.setSkyCubeGen(gameShell.getGame().getCurrentMission().getOverworldSystem().getSkySystem().getBelowCloudsSkyCubeGen());
+	exitObject.setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
+	exitObject.setRendererConfigurator(overworldSystem);
 	exitObject
 		.setMirrorTerrain(sourceTunnel.getExitMode() == ExitMode.exitToChamber);
 	exitObject.setPosition(tunnelEnd.add(new Vector3D(10000,0,0)).toArray());
@@ -435,6 +444,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;}
 	case fan:
 	    wo = new WorldObject();
+	    wo.setDebugName("Fan");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "BLADE.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 28,
@@ -460,6 +470,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	case jawsVertical:
 	    // Up jaw
 	    wo = new WorldObject();
+	    wo.setDebugName("Top Jaw");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
@@ -473,6 +484,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(wo);
 	    // Down jaw
 	    wo = new WorldObject();
+	    wo.setDebugName("Bottom Jaw");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
@@ -488,6 +500,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	case jawsHorizontal:
 	    // Left jaw
 	    wo = new WorldObject();
+	    wo.setDebugName("Left Jaw");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "JAW2.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
@@ -502,6 +515,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    add(wo);
 	    // Right jaw
 	    wo = new WorldObject();
+	    wo.setDebugName("Right Jaw");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "JAW1.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], jawScalar,
@@ -517,6 +531,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;
 	case metalBeamUp:
 	    wo = new WorldObject();
+	    wo.setDebugName("Metal Beam (up)");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
@@ -530,6 +545,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;
 	case metalBeamDown:
 	    wo = new WorldObject();
+	    wo.setDebugName("Metal Beam (down)");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
@@ -543,6 +559,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;
 	case metalBeamLeft:
 	    wo = new WorldObject();
+	    wo.setDebugName("Metal Beam (left)");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
@@ -556,6 +573,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;
 	case metalBeamRight:
 	    wo = new WorldObject();
+	    wo.setDebugName("Metal Beam (right)");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "BEAM.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], upScalar,
@@ -569,11 +587,12 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;
 	case forceField: {
 	    //ELECTRI[0-3].RAW 
-	    final ForceField ff = new ForceField((int)tunnelDia,(int)wallThickness);
-	    ff.setPosition(wPos.toArray());
-	    ff.setHeading(heading);
-	    ff.setTop(top);
-	    add(ff);
+	    wo = new ForceField((int)tunnelDia,(int)wallThickness);
+	    wo.setDebugName("Force Field");
+	    wo.setPosition(wPos.toArray());
+	    wo.setHeading(heading);
+	    wo.setTop(top);
+	    add(wo);
 	    break;
 	}
 	// Invisible walls, as far as I know, are never used.
@@ -589,6 +608,7 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    break;
 	case iris: {
 	    wo = new WorldObject();
+	    wo.setDebugName("Iris");
 	    wo.setModel(tr.getResourceManager().getBINModel(
 		    "IRIS.BIN",
 		    tunnelTexturePalette[s.getObstacleTextureIndex()], 4 * 256,
@@ -599,7 +619,6 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 	    wo.setPosition(wPos.toArray());
 	    wo.setHeading(heading);
 	    wo.setTop(top);
-	    wo.addBehavior(new CubeCollisionBehavior(wo));
 	    add(wo);
 	    break;
 	}
@@ -643,5 +662,16 @@ public class Tunnel extends RenderableSpacePartitioningGrid {
 
     public String getDebugName() {
 	return debugName;
+    }
+
+    @Override
+    public void applyToRenderer(Renderer target) {
+	final LVLFileEnhancements enh = Features.get(tr, LVLFileEnhancements.class);
+	if(!enh.applyToRenderer(lvlFileName, target)) {
+	    target.getSkyCube().setSkyCubeGen(TUNNEL_SKYCUBE_GEN);
+	    target.setAmbientLight(new Color(10,10,10));
+	    target.setSunColor(new Color(140,140,140));
+	    target.setSunVector(Vector3D.MINUS_J);
+	}//end (default effects)
     }
 }// end Tunnel

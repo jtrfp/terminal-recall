@@ -33,7 +33,6 @@ import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.DisplayModeHandler;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
-import org.jtrfp.trcl.SkySystem;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
@@ -45,6 +44,7 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
@@ -164,6 +164,7 @@ public class Mission {
     private Map<NAVObjective,NAVSubObject> navMap = new HashMap<>();
     private PlayerSaveState playerSaveState;
     private GLExecutor<?> glExecutor;
+    private Vector3D sunVector;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -272,13 +273,18 @@ public class Mission {
 		switchToOverworldState();
 	}//end startGameplay()
 	
+	
+	
 	public void switchToOverworldState() {
-	    final SkySystem skySystem = getOverworldSystem().getSkySystem();
+	    
 	    final Renderer renderer = tr.mainRenderer;
 	    renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
-	    renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
-	    renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
-	    renderer.setSunColor(skySystem.getSuggestedSunColor());
+	    
+	    //New LVL override stuff
+	    
+	    System.out.println("Mission searching for override of `"+lvlFileName+"` ...");
+	    overworldSystem.applyToRenderer(renderer);
+	    
 	    ((TVF3Game)game).getNavSystem() .activate();
 	    displayHandler.setDisplayMode(overworldMode);
 	    
@@ -368,7 +374,11 @@ public class Mission {
 		    overworldSystem
 	    };
 	    
-	    overworldSystem.loadLevel(lvlData, tdf);
+	  //New LVL override stuff
+	    boolean enhanced = false;
+	    LVLFileEnhancements enhancements = Features.get(tr, LVLFileEnhancements.class);
+	    
+	    overworldSystem.loadLevel(lvlData, tdf, enhancements!=null?enhancements.findByHook(levelName):null);
 	    
 	    final List<DEFObject> defObjectList = getDefObjectList();
 	    final ObjectSystem objectSystem = overworldSystem.getObjectSystem();
@@ -471,17 +481,11 @@ public class Mission {
 	    }// end if(user start point)
 	    System.out.println("Start position set to " + player.getPosition()[0]+" "+player.getPosition()[1]+" "+player.getPosition()[2]);
 	    System.out.println("Setting sun vector");
-	    final AbstractTriplet sunVector = lvlData.getSunlightDirectionVector();
+	    final AbstractTriplet sunVectorTriplet = lvlData.getSunlightDirectionVector();
+	    sunVector = new Vector3D(sunVectorTriplet.getX(), sunVectorTriplet.getY(),
+		    sunVectorTriplet.getZ()).normalize();
 	    final GLExecutor<?> glExecutor = getGlExecutor();
-	    glExecutor.submitToGL(new Callable<Void>() {
-		@Override
-		public Void call() throws Exception {
-		    tr.mainRenderer.setSunVector(
-			    new Vector3D(sunVector.getX(), sunVector.getY(),
-				    sunVector.getZ()).normalize());
-		    return null;
-		}
-	    }).get();
+	    
 	    System.out.println("\t...Done.");
 	} catch (Exception e) {
 	    e.printStackTrace();

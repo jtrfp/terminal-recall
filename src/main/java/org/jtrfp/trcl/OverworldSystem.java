@@ -13,7 +13,6 @@
 package org.jtrfp.trcl;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -23,8 +22,11 @@ import org.jtrfp.trcl.beh.SkyCubeCloudModeUpdateBehavior;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.lvl.LVLFileEnhancement;
+import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
+import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gpu.Texture;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -33,7 +35,10 @@ import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.ObjectSystem;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 
-public class OverworldSystem extends RenderableSpacePartitioningGrid {
+import lombok.Getter;
+import lombok.Setter;
+
+public class OverworldSystem extends RenderableSpacePartitioningGrid implements RendererConfigurator {
     private SkySystem 	     skySystem;
     private AltitudeMap              altitudeMap, normalizedAltitudeMap;
     private RenderableSpacePartitioningGrid 
@@ -49,6 +54,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     private		ObjectSystem objectSystem;
     private Future<TerrainSystem>    terrainSystem;
     private TextureMesh              textureMesh;
+    private LVLFileEnhancement	     enhancement;
+    @Getter @Setter
+    private Vector3D		     sunVector;
 
     public OverworldSystem(TR tr, final LoadingProgressReporter progressReporter) {
 	super();
@@ -58,9 +66,10 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	cloudReporter 	= reporters[1];
 	objectReporter 	= reporters[2];
     }
-    public void loadLevel(final LVLFile lvl, final TDFFile tdf){
+    public void loadLevel(final LVLFile lvl, final TDFFile tdf, LVLFileEnhancement enhancement){
 	try {
 	    final World w = tr.getWorld();
+	    this.enhancement = enhancement;
 	    Color[] globalPalette = tr.getResourceManager().getPalette(lvl.getGlobalPaletteFile());
 	    Texture[] texturePalette = tr
 		    .getResourceManager().getTextures(
@@ -71,6 +80,9 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
 	    System.out.println("... Done");
 	    textureMesh = tr.getResourceManager().getTerrainTextureMesh(
 		    lvl.getTexturePlacementFile(), texturePalette);
+	    final AbstractTriplet sunVectorTriplet = lvl.getSunlightDirectionVector();
+	    setSunVector(new Vector3D(sunVectorTriplet.getX(), sunVectorTriplet.getY(),
+		    sunVectorTriplet.getZ()).normalize());
 	    // Terrain
 	    System.out.println("Building terrain...");
 	    final boolean flatShadedTerrain = lvl.getHeightMapOrTunnelFile()
@@ -194,5 +206,22 @@ public class OverworldSystem extends RenderableSpacePartitioningGrid {
     }
     public TextureMesh getTextureMesh() {
 	return textureMesh;
+    }
+    @Override
+    public void applyToRenderer(Renderer renderer) {
+	final SkySystem skySystem = getSkySystem();
+	System.out.println("OverworldSystem.applyToRenderer enhancement = "+enhancement);
+	    //LVLFileEnhancements enhancements = Features.get(tr, LVLFileEnhancements.class);
+	    if(enhancement != null)
+		enhancement.applyToRenderer(renderer);
+	    
+	    if(enhancement == null) {
+		System.out.println("...not found");
+		renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
+		renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
+		renderer.setSunColor(skySystem.getSuggestedSunColor());
+		renderer.setSunVector(getSunVector());
+		renderer.setFogScalar(1);
+	    }
     }
 }// end OverworldSystem

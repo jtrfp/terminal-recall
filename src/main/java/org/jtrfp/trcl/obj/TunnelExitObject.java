@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2021 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -109,7 +109,7 @@ public class TunnelExitObject extends PortalEntrance {
 		final Camera camera = tr.mainRenderer.getCamera();
 		//System.out.println("hash: "+super.hashCode()+" Cam pos = "+camera.getPosition()[0]+" thisPos="+TunnelExitObject.this.getPosition()[0]);
 		if (camera.getPosition()[0] > TunnelExitObject.this
-			.getPosition()[0]) {
+			.getPosition()[0]) {//FIXME: Verify in tunnel mode, else this may activate.
 		    System.out.println("Escaping tunnel at exit.X="+getPosition()[0]+" camera.X="+camera.getPosition()[0]);
 		    final Game game = ((TVF3Game)getGameShell().getGame());
 		    final Mission mission = game.getCurrentMission();
@@ -117,7 +117,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    System.out.println("TunnelExitObject leaving tunnel "+tun);
 		    //tr.getDefaultGrid().nonBlockingAddBranch(overworldSystem);
 		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)
-		    
+		    //TODO: Use exit configurator?
 		    tr.mainRenderer.getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
 		    final Renderer portalRenderer = TunnelExitObject.this.getPortalRenderer();
 		    //if(portalRenderer == null)
@@ -185,6 +185,7 @@ public class TunnelExitObject extends PortalEntrance {
 			tr.setRunState(new Mission.ChamberState(){});
 		    }else tr.setRunState(new Mission.OverworldState(){});
 		    overworldSystem.setChamberMode(mirrorTerrain);//TODO: Use PCL to set this automatically in Mission
+		    overworldSystem.applyToRenderer(tr.mainRenderer);
 		   /*
 		    if(mirrorTerrain)
 		     tr.setRunState(new Mission.ChamberState(){});

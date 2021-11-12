@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2021 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -18,6 +18,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.jtrfp.trcl.RendererConfigurator;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.coll.ObjectTallyCollection;
 import org.jtrfp.trcl.core.Features;
@@ -34,6 +35,9 @@ import org.jtrfp.trcl.prop.SkyCubeGen;
 import org.jtrfp.trcl.shell.GameShellFactory;
 
 import com.ochafik.util.listenable.Pair;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class PortalEntrance extends WorldObject {
     //// PROPERTIES
@@ -56,6 +60,8 @@ public class PortalEntrance extends WorldObject {
     private boolean dotRelevant = false, rendering = false, nearRelevant=false;
     private double maxDistance = TRFactory.mapSquareSize * 4;
     private boolean portalStateStale = true;
+    @Getter @Setter
+    private RendererConfigurator rendererConfigurator;
 
     public PortalEntrance(GL33Model model, PortalExit exit, WorldObject approachingObject){
 	this(exit,approachingObject);
@@ -322,11 +328,16 @@ public class PortalEntrance extends WorldObject {
 				    "portalRenderer is intolerably non-null.");
 			final Pair<Renderer, Integer> newRendererPair = Features.get(getTr(), GPUFeature.class).rendererFactory
 				.get().acquirePortalRenderer();
+			final Renderer newRenderer = newRendererPair.getFirst();
 			System.out.println("Activating portal entrance... "+PortalEntrance.this);
 			getPortalExit().setControlledCamera(
-				newRendererPair.getFirst().getCamera());
-			newRendererPair.getFirst().getSkyCube().setSkyCubeGen(skyCubeGen);
-			setPortalRenderer(newRendererPair.getFirst());
+				newRenderer.getCamera());
+			assert newRenderer != getTr().mainRenderer;
+			if(rendererConfigurator != null)
+			    rendererConfigurator.applyToRenderer(newRenderer);
+			else
+			    newRenderer.getSkyCube().setSkyCubeGen(skyCubeGen);
+			setPortalRenderer(newRenderer);
 			setPortalTextureID(newRendererPair.getSecond());
 			portalExit.activate();
 			setPortalUnavailable(false);
@@ -336,6 +347,7 @@ public class PortalEntrance extends WorldObject {
 			setPortalUnavailable(true);
 		    }// end catch(PortalNotAvailableException)
 		    catch(Exception e){e.printStackTrace();}
+		    
 		    return null;
 		}});
 	}else{//Not rendering

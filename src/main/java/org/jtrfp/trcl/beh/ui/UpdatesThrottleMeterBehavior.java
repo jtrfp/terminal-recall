@@ -21,7 +21,9 @@ public class UpdatesThrottleMeterBehavior extends Behavior implements GUIUpdateB
     @Override
     public void tick(long tickTimeMillis){
 	    Propelled prop = getParent().probeForBehavior(Propelled.class);
-	    controller.setFrame(1.-((prop.getPropulsion()-prop.getMinPropulsion())/prop.getMaxPropulsion()));
+	    final double minPropulsion = prop.getMinPropulsion();
+	    final double range = prop.getMaxPropulsion() - minPropulsion;
+	    controller.setFrame(1.-((prop.getPropulsion()-minPropulsion)/range));
     }
     /**
      * @return the controller

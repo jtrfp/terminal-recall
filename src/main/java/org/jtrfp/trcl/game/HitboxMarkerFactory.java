@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2017 Chuck Ritola
+ * Copyright (c) 2021 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -23,6 +23,7 @@ import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.TypeRunStateHandler;
+import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.HitBoxFollowBehavior;
@@ -118,6 +119,8 @@ public class HitboxMarkerFactory implements FeatureFactory<TVF3Game> {
 	    if( newState == this.hitboxVisibilityEnabled)
 		return;
 	    this.hitboxVisibilityEnabled = newState;
+	    final UpfrontDisplay disp = getTarget().getUpfrontDisplay();
+	    disp.submitMomentaryUpfrontMessage("Hitbox Markers "+(newState?"On":"Off"));
 	    updateHitboxVisibilityStates();
 	}//end setHitboxVisibilityEnabled(...)
 

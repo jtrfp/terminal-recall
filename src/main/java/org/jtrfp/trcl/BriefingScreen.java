@@ -232,12 +232,15 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			final Game   game 	 = Features.get(tr,GameShell.class).getGame();
 			final Renderer renderer  = tr.mainRenderer;
 			final BriefingStage newStage = (BriefingStage)newState;
-			final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
+			//final SkySystem skySystem = game.getCurrentMission().getOverworldSystem().getSkySystem();
 			renderer.getCamera().probeForBehavior(SkyCubeCloudModeUpdateBehavior.class).setEnable(true);
+			/*
 			renderer.getSkyCube().setSkyCubeGen(skySystem.getBelowCloudsSkyCubeGen());
 			renderer.setAmbientLight(skySystem.getSuggestedAmbientLight());
 			renderer.setSunColor(skySystem.getSuggestedSunColor());
+			*/
 			final OverworldSystem overworldSystem = game.getCurrentMission().getOverworldSystem();
+			overworldSystem.applyToRenderer(renderer);
 			final List<DEFObject> defObjects = overworldSystem.getDefList();
 			final ArrayDeque<DEFObject> defs = new ArrayDeque<>();
 			for(DEFObject obj:defObjects)

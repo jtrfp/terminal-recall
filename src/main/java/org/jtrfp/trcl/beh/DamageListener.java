@@ -15,12 +15,17 @@ package org.jtrfp.trcl.beh;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import lombok.Getter;
+import lombok.Setter;
+
 
 public interface DamageListener {
     public void damageEvent(Event ev);
     
     public static abstract class Event{
 	private int damageAmount;
+	@Getter @Setter
+	private Object source;
 	private ArrayList<String> suggestedSFX = new ArrayList<String>();
 	public Event(){
 	}

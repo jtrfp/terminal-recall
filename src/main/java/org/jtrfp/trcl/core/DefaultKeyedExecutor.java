@@ -28,7 +28,7 @@ public class DefaultKeyedExecutor<K> implements KeyedExecutor<K> {
     private Map<K,Runnable> keyedRunnablesSwap = new HashMap<K,Runnable>();
 
     @Override
-    public void execute(Runnable r, K key) {
+    public synchronized void execute(Runnable r, K key) {
 	if( key != null )
 	    keyedRunnables.put(key, r);
 	else

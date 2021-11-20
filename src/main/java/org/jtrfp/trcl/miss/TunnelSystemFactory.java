@@ -21,11 +21,9 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.OverworldSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Tunnel;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.CollidesWithTerrain;
 import org.jtrfp.trcl.beh.CollidesWithTunnelWalls;
 import org.jtrfp.trcl.beh.LoopingPositionBehavior;
@@ -36,6 +34,8 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ext.lvl.LVLFileEnhancement;
+import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
@@ -87,10 +87,13 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	private Tunnel		currentTunnel;
 	private Mission target;
 	private Object [] tunnelMode;
+	private LVLFileEnhancements enhancements;
 
 	@Override
 	public void apply(Mission target) {
 	    setTarget(target);
+	    enhancements = Features.get(target.getTr(), LVLFileEnhancements.class);
+	    
 	}//end apply()
 	
 	private Object [] getTunnelMode(){
@@ -145,6 +148,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		    (int)(TRFactory.legacy2MapSquare(tunnelEntranceLegacyPos.getX())));
 	    final PortalEntrance portalEntrance = getTunnelEntrancePortal(tunnelEntranceMapSquarePos);
 	    final PortalExit portalExit = portalEntrance.getPortalExit();
+	    
 	    addTunnelEntrance(tunnelEntranceMapSquarePos,tunnel,portalEntrance);
 	    if(portalExit!=null){
 		portalExit.setHeading(Tunnel.TUNNEL_START_DIRECTION.getHeading());
@@ -159,6 +163,9 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		    (int)(TRFactory.legacy2MapSquare(tunnelExitLegacyPos.getX())));
 	    assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
 	    tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
+	    
+	    portalEntrance.setRendererConfigurator(tunnel);
+	    
 	    return tunnel;
 	}
 
@@ -208,7 +215,8 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 
 	public void addTunnelEntrance(Point mapSquareXZ, Tunnel tunnel, PortalEntrance entrance){
 	    TunnelEntranceObject teo;
-	    getTarget().getOverworldSystem().add(teo = new TunnelEntranceObject(tunnel,entrance));
+	    final OverworldSystem ows = getTarget().getOverworldSystem();
+	    ows.add(teo = new TunnelEntranceObject(tunnel,entrance));
 	    final int key = pointToHash(mapSquareXZ);
 	    tunnelMap.put(key,teo);
 	}
@@ -223,7 +231,20 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	    notifyTunnelFound(tunnelToEnter);
 
 	    //Move player to tunnel
-	    getTr().mainRenderer.getSkyCube().setSkyCubeGen(Tunnel.TUNNEL_SKYCUBE_GEN);
+	    final Renderer mainRenderer = getTr().mainRenderer;
+	    /*
+	    final String lvlFileName = tunnelToEnter.getLvlFileName();
+	    boolean enhanced = false;
+	    
+	    System.out.println("TunnelSystem searching for override of `"+lvlFileName+"` ...");
+	    
+	    
+	    if(enhancements != null)
+		enhanced = enhancements.applyToRenderer(lvlFileName, mainRenderer);
+	    */
+	    //if(!enhanced)
+		tunnelToEnter.applyToRenderer(mainRenderer);
+	    
 	    //Ensure chamber mode is off
 	    overworldSystem.setChamberMode(false);
 	    overworldSystem.setTunnelMode(true);

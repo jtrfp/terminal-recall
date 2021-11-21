@@ -33,12 +33,12 @@ public class AllAfterburnerCheatFactory extends AbstractCheatFactory {
 
     @Override
     public Class<? extends Feature<?>> getFeatureClass() {
-	return GodModeCheat.class;
+	return AllAfterburnerCheat.class;
     }
     
-    public class GodModeCheat extends AbstractCheatItem {
+    public class AllAfterburnerCheat extends AbstractCheatItem {
 	
-	public GodModeCheat() {super();}
+	public AllAfterburnerCheat() {super();}
 
 	@Override
 	protected void invokeCheat() {
@@ -59,6 +59,6 @@ public class AllAfterburnerCheatFactory extends AbstractCheatFactory {
 	    disp.submitMomentaryUpfrontMessage("Afterburner "+(ab.isInfiniteFuel()?"Infinite":"Normal"));
 	}//end invokeCheat()
 	
-    }//end AllAmmoCheat
+    }//end AllAfterburnerCheat
 
-}//end AllAmmoCheatFactory
+}//end AllAfterburnerFactory

@@ -38,10 +38,15 @@ import org.jtrfp.trcl.snd.SamplePlaybackEvent;
 import org.jtrfp.trcl.snd.SoundSystem;
 import org.jtrfp.trcl.snd.SoundTexture;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupply, PlayerControlBehavior {
     public static final String IGNITION_SOUND   = "BLAST7.WAV";
     public static final String EXTINGUISH_SOUND = "SHUT-DN7.WAV";
     public static final String LOOP_SOUND       = "ENGINE4.WAV";
+    @Getter @Setter
+    private double afterburnerMultiplier = 3;
     private double fuelRemaining=0;
     private double formerMax,formerProp,newMax;
     private final ControllerSink afterburnerCtl;
@@ -145,7 +150,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
 	Propelled prop = p.probeForBehavior(Propelled.class);
 	formerMax=prop.getMaxPropulsion();
 	formerProp=prop.getPropulsion();
-	newMax=formerMax*3;
+	newMax=formerMax*getAfterburnerMultiplier();
 	UserInputWeaponSelectionBehavior wsb = p.probeForBehavior(UserInputWeaponSelectionBehavior.class);
 	if(wsb != null)
 	    wsb.setAfterburning(true);

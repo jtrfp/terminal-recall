@@ -310,8 +310,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	final String modelDebugName;
 	if(model!=null)modelDebugName=getModel().getDebugName();
 	else modelDebugName="[null model]";
-	return "WorldObject("+getDebugName()+") Model=" + modelDebugName + " pos="
-		+ this.getPosition() + " class=" + getClass().getName()+" hash="+hashCode();
+	final double [] pos = getPosition();
+	return "WorldObject("+getDebugName()+") Model=" + modelDebugName + " pos=("
+		+ pos[0]+","+pos[1]+","+pos[2] + ") class=" + getClass().getName()+" hash="+hashCode();
     }
 
     public final void refreshObjectDefinitions() {

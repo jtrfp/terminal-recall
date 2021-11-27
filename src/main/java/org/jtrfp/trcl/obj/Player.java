@@ -235,9 +235,9 @@ public class Player extends WorldObject implements RelevantEverywhere{
     private void defaultConfiguration(){
 		probeForBehavior(VelocityDragBehavior.class)
 			.setDragCoefficient(.86);
-		probeForBehavior(Propelled.class).setMinPropulsion(0);
-		probeForBehavior(Propelled.class)
-			.setMaxPropulsion(900000);
+		final Propelled prop = probeForBehavior(Propelled.class);
+			prop.setMinPropulsion(200000);
+			prop.setMaxPropulsion(900000);
 		probeForBehavior(RotationalDragBehavior.class)
 			.setDragCoefficient(.86);
 		setActive(false);

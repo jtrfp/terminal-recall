@@ -69,7 +69,7 @@ public class LTEFile implements ThirdPartyParseable {
 	    final float []hsbVals = new float[3];
 	    Color.RGBtoHSB(rColor.getRed(), rColor.getGreen(), rColor.getBlue(), hsbVals);
 	    final double saturation = hsbVals[1];
-	    double dI = Math.pow(1-(Math.abs(hiIntensity-loIntensity)/442.),1);
+	    double dI = Math.pow(1-(Math.abs(hiIntensity-loIntensity)/221.),1);
 	    //dI = nSaturation*128;
 	    if(dI>255)dI=255;
 	    else if(dI<0)dI=0;

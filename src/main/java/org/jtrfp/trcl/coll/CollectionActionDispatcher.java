@@ -159,7 +159,10 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     public boolean equals(Object o){
 	if(o instanceof CollectionActionDispatcher)
 	    o=((CollectionActionDispatcher) o).cache;
-	return cache==o;
+	if(o instanceof Collection)
+	    return cache.containsAll((Collection)o);
+	else
+	    return cache.equals(o);
     }
 
     @Override

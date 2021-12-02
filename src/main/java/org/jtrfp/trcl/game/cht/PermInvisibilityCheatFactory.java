@@ -32,12 +32,12 @@ public class PermInvisibilityCheatFactory extends AbstractCheatFactory {
 
     @Override
     public Class<? extends Feature<?>> getFeatureClass() {
-	return AllAmmoCheat.class;
+	return PermInvisibilityCheat.class;
     }
 
-    public class AllAmmoCheat extends AbstractCheatItem {
+    public class PermInvisibilityCheat extends AbstractCheatItem {
 
-	public AllAmmoCheat() {super();}
+	public PermInvisibilityCheat() {super();}
 
 	@Override
 	protected void invokeCheat() {

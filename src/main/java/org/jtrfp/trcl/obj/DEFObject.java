@@ -203,12 +203,13 @@ public class DEFObject extends WorldObject {
 	    for (int i = 0; i < numHitBoxes; i++) {
 		final HitBox hb = new HitBox();
 		hb.setVertexID(rawHBoxData[i * 2]);
-		hb.setSize(
-			rawHBoxData[i * 2 + 1] / TRFactory.crossPlatformScalar);
+		double size = rawHBoxData[i * 2 + 1] / TRFactory.crossPlatformScalar;
+		hb.setSize(size);
 		boxes[i] = hb;
 	    } // end for(boxes)
 	    setHitBoxes(boxes);
 	} // end if(hitboxes)
+	
 	  // Default Direction
 	setDirection(new ObjectDirection(pl.getRoll(), pl.getPitch(),
 		pl.getYaw() + 65536));
@@ -292,7 +293,7 @@ public class DEFObject extends WorldObject {
 	    //XXX KLUDGE: Force boss mode on
 	    //TODO: Boss mode should only involve NAV targeting
 	    boss = true;
-	    damageableBehavior.setDieOnZeroHealth(false);
+	    damageableBehavior.setDieOnNegativeHealth(false);
 	    final DamageTrigger newSphereMode = new DamageTrigger(){
 
 		@Override
@@ -310,7 +311,7 @@ public class DEFObject extends WorldObject {
 		    rmb.setEquatorialMomentum(.05);
 		    rmb.setPolarMomentum     (.05);
 		    parent.probeForBehavior(RotationalDragBehavior.class).setEnable(false);
-		    damageableBehavior.setDieOnZeroHealth(true);
+		    damageableBehavior.setDieOnNegativeHealth(true);
 		}}.setThreshold(65537);
 	    addBehavior(newSphereMode);
 	    /*setModel(getTr().getResourceManager().getBINModel(
@@ -1649,7 +1650,7 @@ public class DEFObject extends WorldObject {
 				.addModelFrame(bufferedTarget);
 		    }
 		    ((InterpolatedAnimatedModelSource) bmt)
-			    .setDelayBetweenFramesMillis(ac.getDelay());
+			    .setDelayBetweenFramesMillis((int)(((double)ac.getDelay()/65535.)*1000.));//XX: Fudged using ResourceManager.getBINModel(...)
 		} catch (Exception ee) {
 		    ee.printStackTrace();
 		}

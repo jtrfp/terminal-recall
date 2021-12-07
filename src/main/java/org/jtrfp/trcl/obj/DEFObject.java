@@ -269,7 +269,7 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    break;
 	case flyingSmart:
-	    newSmartPlaneBehavior(tr, def, false);
+	    newSmartPlaneBehavior(tr, def, false, pl.getStrength());
 	    defaultModelAssignment();
 	    break;
 	case bankSpinDrill:
@@ -320,13 +320,13 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    break;}
 	case flyingAttackRetreatSmart:
-	    newSmartPlaneBehavior(tr, def, false);
+	    newSmartPlaneBehavior(tr, def, false, pl.getStrength());
 	    // addBehavior(new
 	    // HorizAimAtPlayerBehavior(getGameShell().getGame().getPlayer()));
 	    defaultModelAssignment();
 	    break;
 	case splitShipSmart:// TODO
-	    newSmartPlaneBehavior(tr, def, false);
+	    newSmartPlaneBehavior(tr, def, false, pl.getStrength());
 	    final DamageableBehavior dmgBehavior = probeForBehavior(DamageableBehavior.class);
 	    
 	    dmgBehavior.addPropertyChangeListener(DamageableBehavior.HEALTH, new PropertyChangeListener(){
@@ -645,7 +645,7 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new SteadilyRotating().setRotationPeriodMillis(7. * 1000));
 	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,
 		    MED_EXP_SOUNDS[(int) (Math.random() * 2)]));
-	    possibleBobbingSpinAndCrashOnDeath(.5, def);
+	    possibleBobbingSpinAndCrashOnDeath(.5, def, pl.getStrength());
 	    customExplosion = true;
 	    anchoring = Anchoring.floating;
 	    mobile = false;
@@ -660,7 +660,7 @@ public class DEFObject extends WorldObject {
 	    //bossWarningSiren();
 	    break;
 	case canyonBoss1:
-	    newSmartPlaneBehavior(tr, def, false);
+	    newSmartPlaneBehavior(tr, def, false, pl.getStrength());
 	    probeForBehavior(NewSmartPlaneBehavior.class).setEnable(false);
 	    final SteadilyRotating rotating   = new SteadilyRotating().setRotationPeriodMillis(12000);
 	    rotating.setEnable(false);
@@ -761,7 +761,7 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new ExplodesOnDeath(ExplosionType.Blast,
 		    BIG_EXP_SOUNDS[(int) (Math.random() * 3)]));
 
-	    possibleBobbingSpinAndCrashOnDeath(.5, def);
+	    possibleBobbingSpinAndCrashOnDeath(.5, def, pl.getStrength());
 	    //if (isBoss())
 	//	defaultBossNAVTargetingResponse();
 	    customExplosion = true;
@@ -787,12 +787,12 @@ public class DEFObject extends WorldObject {
 	    defaultModelAssignment();
 	    break;
 	case attackRetreatBelowSky:
-	    newSmartPlaneBehavior(tr, def, false);
+	    newSmartPlaneBehavior(tr, def, false, pl.getStrength());
 	    anchoring = Anchoring.floating;
 	    defaultModelAssignment();
 	    break;
 	case attackRetreatAboveSky:
-	    newSmartPlaneBehavior(tr, def, true);
+	    newSmartPlaneBehavior(tr, def, true, pl.getStrength());
 	    anchoring = Anchoring.floating;
 	    defaultModelAssignment();
 	    break;
@@ -800,7 +800,7 @@ public class DEFObject extends WorldObject {
 	    addBehavior(new Bobbing()
 		    .setAdditionalHeight(TRFactory.mapSquareSize * 5));
 	    addBehavior(new SteadilyRotating());
-	    possibleBobbingSpinAndCrashOnDeath(.5, def);
+	    possibleBobbingSpinAndCrashOnDeath(.5, def, pl.getStrength());
 	    mobile = false;
 	    canTurn = false;
 	    anchoring = Anchoring.floating;
@@ -1085,7 +1085,8 @@ public class DEFObject extends WorldObject {
     }
 
     private void possibleSpinAndCrashOnDeath(double probability,
-	    final EnemyDefinition def) {
+	    final EnemyDefinition def,
+	    final int initialStrength) {
 	spinCrash = Math.random() < probability;
 	if (spinCrash) {
 	    final DamageTrigger spinAndCrash = new DamageTrigger() {
@@ -1142,7 +1143,7 @@ public class DEFObject extends WorldObject {
 			    parent.getTr()));
 		    addBehavior(new SpawnsRandomSmoke(parent.getTr()));
 		}// end healthBelowThreshold
-	    }.setThreshold(2048);
+	    }.setThreshold(Math.min(initialStrength-1,2048));
 	    addBehavior(new DamagedByCollisionWithSurface()
 		    .setCollisionDamage(65535).setEnable(false));
 	    addBehavior(spinAndCrash);
@@ -1150,8 +1151,9 @@ public class DEFObject extends WorldObject {
     }
 
     private void possibleBobbingSpinAndCrashOnDeath(double probability,
-	    EnemyDefinition def) {
-	possibleSpinAndCrashOnDeath(probability, def);
+	    EnemyDefinition def,
+	    final int initialStrength) {
+	possibleSpinAndCrashOnDeath(probability, def, initialStrength);
 	if (spinCrash) {
 	    addBehavior(new CollidesWithTerrain());
 	    addBehavior(new MovesByVelocity()).setEnable(false);
@@ -1183,15 +1185,16 @@ public class DEFObject extends WorldObject {
 		    // .setFiringPattern(new
 		    // boolean[]{true}).setTimePerPatternEntry(100);
 		}
-	    };
+	    }.setThreshold(Math.min(2048,  initialStrength-1));
 	    addBehavior(spinAndCrashAddendum);
 	} // end if(spinCrash)
     }// end possibleBobbingSpinAndCrashOnDeath
 
     private void newSmartPlaneBehavior(TR tr, EnemyDefinition def,
-	    boolean retreatAboveSky) {
+	    boolean retreatAboveSky,
+	    final int initialStrength) {
 	if (!DEFObject.NEW_SMART_PLANE_BEHAVIOR) {
-	    smartPlaneBehavior(tr, def, retreatAboveSky);
+	    smartPlaneBehavior(tr, def, retreatAboveSky, initialStrength);
 	    return;
 	}
 	final ProjectileFiringBehavior pfb = new ProjectileFiringBehavior()
@@ -1216,7 +1219,7 @@ public class DEFObject extends WorldObject {
 	if(secondaryWeapon != null)
 	    addBehavior(secondaryPFB);
 
-	possibleSpinAndCrashOnDeath(.4, def);
+	possibleSpinAndCrashOnDeath(.4, def, initialStrength);
 	if (spinCrash) {
 	    final DamageTrigger spinAndCrashAddendum = new DamageTrigger() {
 		@Override
@@ -1294,7 +1297,8 @@ public class DEFObject extends WorldObject {
     }// end newSmartPlaneBehavior
 
     private void smartPlaneBehavior(TR tr, EnemyDefinition def,
-	    boolean retreatAboveSky) {
+	    boolean retreatAboveSky,
+	    final int initialStrength) {
 	final HorizAimAtPlayerBehavior haapb = new HorizAimAtPlayerBehavior(
 		getGameShell().getGame().getPlayer())
 			.setLeftHanded(Math.random() >= .5);
@@ -1320,7 +1324,7 @@ public class DEFObject extends WorldObject {
 	addBehavior(pfb);
 	addBehavior(secondaryPFB);
 
-	possibleSpinAndCrashOnDeath(.4, def);
+	possibleSpinAndCrashOnDeath(.4, def, initialStrength);
 	if (spinCrash) {
 	    final DamageTrigger spinAndCrashAddendum = new DamageTrigger() {
 		@Override

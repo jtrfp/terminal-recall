@@ -119,7 +119,7 @@ public class CompositeVectorListNDTest {
     
     @Test
     public void testComponentAt_149_0_Component0() {
-	System.out.println("go");
+	//System.out.println("go");
 	assertEquals(n149_ZERO,getSubject().componentAt(new int[]{149,0}, 0),.001);
     }
     //TODO; setComponentAt(...)

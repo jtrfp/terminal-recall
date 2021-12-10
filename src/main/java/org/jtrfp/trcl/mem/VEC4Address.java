@@ -58,5 +58,18 @@ public class VEC4Address extends ModulusAddress {
     public ByteAddress asByteAddress() {
 	return new ByteAddress(addressInVEC4s * GPU.BYTES_PER_VEC4 + getModulus());
     }
+    
+    @Override
+    public int hashCode() {
+	return (int)addressInVEC4s;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+	if( o instanceof VEC4Address ) {
+	    final VEC4Address peer = (VEC4Address)o;
+	    return peer.addressInVEC4s == addressInVEC4s;
+	} else return o == this;
+    }//end equals()
 
 }//end VEC4Address

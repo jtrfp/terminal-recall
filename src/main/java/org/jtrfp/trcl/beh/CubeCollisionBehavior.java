@@ -57,6 +57,7 @@ private Class<? extends DamageListener.Event> damageEventClass = DamageListener.
 		    damageEvent = (DamageListener.Event)(this.damageEventClass.newInstance());}
 		    catch(Exception e){e.printStackTrace();}
 		    damageEvent.setDamageAmount(damageOnImpact);
+		    damageEvent.setSource(getParent());
 		    final DamageListener.Event finalDamageEvent = damageEvent;
 		    obj.probeForBehaviors(new AbstractSubmitter<DamageableBehavior>(){
 			@Override

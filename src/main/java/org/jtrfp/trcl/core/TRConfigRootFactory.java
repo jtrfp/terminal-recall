@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2021 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -14,23 +14,19 @@
 package org.jtrfp.trcl.core;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.jtrfp.trcl.conf.ConfigRootFeature;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TRConfigRootFactory implements FeatureFactory<Features>, LoadOrderAware{
+    public static final int FEATURE_LOAD_PRIORITY = LoadOrderAware.LAST;
+    
     public class TRConfigRoot extends ConfigRootFeature<Features> implements GraphStabilizationListener{
-	//private final Map<Class,Map<String,Object>> configurations = new HashMap<Class,Map<String,Object>>();
+	public static final String PROP_USER_SETTINGS_PATH = "org.jtrfp.trcl.userSettingsPath";
 
 	@Override
-	public void destruct(Features target) {
-	    // TODO Auto-generated method stub
-
-	}
+	public void destruct(Features target) {}
 	
 	@Override
 	public void apply(Features target){
@@ -39,9 +35,8 @@ public class TRConfigRootFactory implements FeatureFactory<Features>, LoadOrderA
 
 	@Override
 	protected String getDefaultSaveURI() {
-	    String homeProperty = System.getProperty("user.home");
-		if(homeProperty==null)homeProperty="";
-	    return homeProperty+File.separator+"settings.config.trcl.xml";
+	    return  System.getProperty(PROP_USER_SETTINGS_PATH, 
+		     System.getProperty("user.home", "")+File.separator+"settings.config.trcl.xml");
 	}//end getDefaultSaveURI
 	
 	@Override
@@ -61,12 +56,12 @@ public class TRConfigRootFactory implements FeatureFactory<Features>, LoadOrderA
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return TRConfigRoot.class;
     }
 
     @Override
     public int getFeatureLoadPriority() {
-	return LoadOrderAware.LAST;
+	return FEATURE_LOAD_PRIORITY;
     }
 }//end TRConfigRootFactory

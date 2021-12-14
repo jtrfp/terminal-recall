@@ -306,7 +306,7 @@
 						<configuration>
 							<headerType>gui</headerType>
 							<outfile>target/RunMe.exe</outfile>
-							<downloadUrl>https://adoptopenjdk.net/</downloadUrl>
+							<downloadUrl>https://adoptium.net/?variant=openjdk11</downloadUrl>
 							<jar>target/RunMe.jar</jar>
 							<errTitle>Terminal
 								Recall</errTitle>

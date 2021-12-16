@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2021 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -25,21 +25,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
 
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.FeatureConfigurationPrivilegeData;
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.FeatureConfigurationPrivileges;
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.PropertyKey;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.Features;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_CLASS> {
     public static final String CONFIG_SAVE_URI = "configSaveURI";
     private TARGET_CLASS target;
     private String configSaveURI = null;
+    @Getter @Setter
+    private int privilegeLevel = 0;
     
     @Override
     public void apply(TARGET_CLASS target){
@@ -55,7 +63,13 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	final FeatureTreeElement configurationTreeElement = new FeatureTreeElement.Default();
 	configurationTreeElement.setFeatureClassName(getTarget().getClass().getName());
 	configurationTreeElement.setPropertiesMap(null);
-	saveConfigurationsOfTargetRecursive(getTarget(), configurationTreeElement);
+	final TARGET_CLASS target = getTarget();
+	    @SuppressWarnings("unchecked")
+	    Map<PropertyKey, FeatureConfigurationPrivilegeData> privMap = Collections.EMPTY_MAP;
+	    final FeatureConfigurationPrivileges fcp = Features.get(target, FeatureConfigurationPrivileges.class);
+	    if( fcp != null )
+		privMap = fcp.getPrivilegeData();
+	saveConfigurationsOfTargetRecursive(getTarget(), configurationTreeElement, privMap, getPrivilegeLevel());
 	final File temp = File.createTempFile("org.jtrfp.trcl.", "config.xml");
 	//for(Configurator conf:configurators)
 	    //configurations.put(conf.getConfiguredClass(),conf.storeToMap(new HashMap<String,Object>()));
@@ -102,10 +116,10 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
     }//end saveConfigurations()
     
     public void loadConfigurations(){
-	loadConfigurations(new File(getConfigSaveURI()));
+	loadConfigurations(new File(getConfigSaveURI()),getPrivilegeLevel());
     }
     
-    public void loadConfigurations(final File fp){
+    public void loadConfigurations(final File fp, int privilegeLevel){
 	FeatureTreeElement root = null;
 	    if(fp.exists()){
 		try{FileInputStream is = new FileInputStream(fp);
@@ -131,12 +145,19 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    }//end if(exists)
 	if(root != null){
 	    //System.out.println("loadConfigurations()");
-	 loadConfigurationsOfTargetRecursive(getTarget(), root);}
+	    final TARGET_CLASS target = getTarget();
+	    @SuppressWarnings("unchecked")
+	    Map<PropertyKey, FeatureConfigurationPrivilegeData> privMap = Collections.EMPTY_MAP;
+	    final FeatureConfigurationPrivileges fcp = Features.get(target, FeatureConfigurationPrivileges.class);
+	    if( fcp != null )
+		privMap = fcp.getPrivilegeData();
+	 loadConfigurationsOfTargetRecursive(getTarget(), root, privMap, privilegeLevel);
+	 }
     }//end loadConfigurations()
     
     private static class FileEmptyOrMalformed{}
     
-    protected void saveConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
+    protected void saveConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element, Map<PropertyKey, FeatureConfigurationPrivilegeData> privMap, int privilegeLevel){
 	final Set<Feature> features = new HashSet<Feature>();
 	Features.getAllFeaturesOf(target, features);
 	final ConfigRootFeature configRootFeature = getConfigRootFeature(features);
@@ -155,10 +176,10 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	    if(feature instanceof FeatureConfigurator){
 		FeatureConfigurator configurator = (FeatureConfigurator)feature;
 		subElement.setPropertiesMap(new HashMap<String,Object>());
-		configurator.storeToMap(subElement.getPropertiesMap());
+		configurator.storeToMap(subElement.getPropertiesMap(), privMap, privilegeLevel);
 	    }//end if(FeatureConfigurator)
 	    element.getSubFeatures().put(feature.getClass().getName(),subElement);
-	    saveConfigurationsOfTargetRecursive(feature, subElement);
+	    saveConfigurationsOfTargetRecursive(feature, subElement, privMap, privilegeLevel);
 	}//end for(features)
     }//end saveConfigurationsOfTargetRecursive()
     
@@ -176,7 +197,7 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 	setConfigSaveURI(newSaveURI);
     }
 
-    public void loadConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element){
+    public void loadConfigurationsOfTargetRecursive(Object target, FeatureTreeElement element, Map<PropertyKey, FeatureConfigurationPrivilegeData> privMap, int privilegeLevel){
 	final Set<Feature> features = new HashSet<Feature>();
 	Features.getAllFeaturesOf(target, features);
 	//System.out.println("loadConfigurationsOfTargetRecursive "+target.getClass().getName());
@@ -210,9 +231,9 @@ public abstract class ConfigRootFeature<TARGET_CLASS> implements Feature<TARGET_
 		    //System.out.println("Feature is a Configurator. Applying map:");
 		    //for(Entry<String,Object> entry : propertiesMap.entrySet())
 			//System.out.println("\t"+entry.getKey()+" "+entry.getValue());
-		    configurator.applyFromMap(propertiesMap);
+		    configurator.applyFromMap(propertiesMap, privMap, privilegeLevel);
 		}//end if(FeatureConfigurator)
-		loadConfigurationsOfTargetRecursive(feature, subFeature);
+		loadConfigurationsOfTargetRecursive(feature, subFeature, privMap, privilegeLevel);
 	    }//end if(subElement!=null)
 	}//end for(features)
 	//System.out.println("loadConfigOfTargetRecursive() traversing down from "+target.getClass().getName());

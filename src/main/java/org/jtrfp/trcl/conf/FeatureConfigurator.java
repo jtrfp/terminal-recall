@@ -18,6 +18,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.FeatureConfigurationPrivilegeData;
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.PropertyKey;
 import org.jtrfp.trcl.core.Feature;
 
 public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGET_CLASS>{
@@ -46,7 +48,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
         this.configManager = configManager;
     }//end destruct(...)
     */
-    public Map<String,Object> storeToMap(final Map<String,Object> propertiesToStore){
+    public Map<String,Object> storeToMap(final Map<String,Object> propertiesToStore, Map<PropertyKey, FeatureConfigurationPrivilegeData> privMap, int privilegeLevel){
 	final TARGET_CLASS target = getTarget();
 	if(target == null)
 	    throw new IllegalStateException("Configured object intolerably null.");
@@ -66,50 +68,62 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	final Map<String,Object> outputMap  = propertiesToStore;
 	
 	for(String propertyName:props){
-	    try{
-	    final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
-	    Method getMethod;
-	                                   //In case not boolean
-	    try{getMethod = targetClass.getMethod("get"+camelPropertyName, null);}
-	    catch(NoSuchMethodException e){//In case our property is boolean
-		try{getMethod = targetClass.getMethod("is"+camelPropertyName, null);}
-		catch(NoSuchMethodException ex){
-		    throw new RuntimeException("Cannot find property of name `"+propertyName+"` in class "+targetClass.getName()+".",ex);
-		}
-	    }
-	    final Object value        = getMethod.invoke(target, null);
-	    final Object defaultValue = getMethod.invoke(defaultBean, null);
-	    boolean performMap = false;
-	    if( value != null )
-		performMap = !value.equals(defaultValue);
-	    else performMap = value != defaultValue;
-	    if( performMap )
-		outputMap.put(propertyName, value);
-	    }catch(InvocationTargetException e){e.printStackTrace();}
-	    catch(IllegalAccessException e)   {e.printStackTrace();}
+	    boolean allowSave = true;
+	    final FeatureConfigurationPrivilegeData fcpData = privMap.get(new PropertyKey((Class<? extends Feature>)target.getClass(), propertyName));
+	    if( fcpData != null )
+		allowSave &= fcpData.getPrivilegeLevel() <= privilegeLevel;
+	    if(allowSave) {
+		try{
+		    final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
+		    Method getMethod;
+		    //In case not boolean
+		    try{getMethod = targetClass.getMethod("get"+camelPropertyName, null);}
+		    catch(NoSuchMethodException e){//In case our property is boolean
+			try{getMethod = targetClass.getMethod("is"+camelPropertyName, null);}
+			catch(NoSuchMethodException ex){
+			    throw new RuntimeException("Cannot find property of name `"+propertyName+"` in class "+targetClass.getName()+".",ex);
+			}
+		    }
+		    final Object value        = getMethod.invoke(target, null);
+		    final Object defaultValue = getMethod.invoke(defaultBean, null);
+		    boolean performMap = false;
+		    if( value != null )
+			performMap = !value.equals(defaultValue);
+		    else performMap = value != defaultValue;
+		    if( performMap )
+			outputMap.put(propertyName, value);
+		}catch(InvocationTargetException e){e.printStackTrace();}
+		catch(IllegalAccessException e)   {e.printStackTrace();}
+	    }//end if(allSave)
 	}//for(propertyNames)
 	//getConfigManager().setConfiguration(targetClass,outputMap);
 	return propertiesToStore;
     }//end store()
-    
-    public TARGET_CLASS applyFromMap(Map<String,Object> map){
+
+    public TARGET_CLASS applyFromMap(Map<String,Object> map, Map<PropertyKey, FeatureConfigurationPrivilegeData> privMap, int privilegeLevel){
 	final TARGET_CLASS target = getTarget();
 	if(target == null)
 	    throw new IllegalStateException("Configured object intolerably null. This FeatureConfigurator class: "+getClass().getName());
 	final Method [] methods = target.getClass().getMethods();
 	for(String propertyName:getPersistentProperties()){
-	    try{
-	    final Object value = map.get(propertyName);
-	    if(value != null){
-		final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
-		final Method setMethod         = findMethodCompatibleWith(methods,"set"+camelPropertyName, value);
-		if(setMethod != null)
-		 setMethod.invoke(target, value);
-		else
-		 System.err.println("Warning: Could not find a method matching set"+camelPropertyName+" with value "+value);
-	    }//end if(!null)
-	    }catch(InvocationTargetException e){e.printStackTrace();}
-	    catch(IllegalAccessException e)   {e.printStackTrace();}
+	    boolean allowApply = true;
+	    final FeatureConfigurationPrivilegeData fcpData = privMap.get(new PropertyKey((Class<? extends Feature>)target.getClass(), propertyName));
+	    if( fcpData != null )
+		allowApply &= fcpData.getPrivilegeLevel() <= privilegeLevel;
+	    if(allowApply) {
+		try{
+		    final Object value = map.get(propertyName);
+		    if(value != null){
+			final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
+			final Method setMethod         = findMethodCompatibleWith(methods,"set"+camelPropertyName, value);
+			if(setMethod != null)
+			    setMethod.invoke(target, value);
+			else
+			    System.err.println("Warning: Could not find a method matching set"+camelPropertyName+" with value "+value);
+		    }//end if(!null)
+		}catch(InvocationTargetException e){e.printStackTrace();}
+		catch(IllegalAccessException e)   {e.printStackTrace();}
+	    }//end if(allowApply)
 	}//end for(propertyNames)
 	return getTarget();
     }//end applyFromMap()

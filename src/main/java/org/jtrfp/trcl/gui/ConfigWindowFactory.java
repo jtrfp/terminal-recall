@@ -581,7 +581,7 @@ public class ConfigWindowFactory implements FeatureFactory<TR>{
 	    xmlDec.close();
 	    TRConfiguration config = getTrConfiguration();
 	    */
-	    this.getTrConfigRoot().loadConfigurations(f);
+	    this.getTrConfigRoot().loadConfigurations(f,0);
 	    /*if(config!=null)
 		BeanUtils.copyProperties(config, src);
 	    else setTrConfiguration(config = src);*/

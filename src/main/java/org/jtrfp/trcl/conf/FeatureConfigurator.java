@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -13,8 +13,10 @@
 
 package org.jtrfp.trcl.conf;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +26,7 @@ import org.jtrfp.trcl.core.Feature;
 
 public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGET_CLASS>{
     protected abstract Set<String> getPersistentProperties();
-    protected ConfigManager configManager;
+    //protected ConfigManager configManager;
     protected TARGET_CLASS target;
 
     @Override
@@ -52,17 +54,21 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	final TARGET_CLASS target = getTarget();
 	if(target == null)
 	    throw new IllegalStateException("Configured object intolerably null.");
+	@SuppressWarnings("unchecked")
 	final Class<TARGET_CLASS> targetClass = (Class<TARGET_CLASS>)target.getClass();
 	TARGET_CLASS defaultBean;
+	Constructor<TARGET_CLASS> constructor = null;
 	try {
-	    defaultBean = targetClass.newInstance();
-	} catch (InstantiationException e) {
-	    e.printStackTrace();
-	    return propertiesToStore;
-	} catch (IllegalAccessException e) {
+	    constructor = targetClass.getConstructor();
+	    defaultBean = constructor.newInstance();
+	} catch (NoSuchMethodException e) {
+	    throw new RuntimeException("Could not find usable constructor method for "+targetClass.getName()+". Was a no-args constructor declared and made static?");
+	} catch (IllegalArgumentException | InvocationTargetException
+		 | SecurityException | IllegalAccessException | InstantiationException e) {
 	    e.printStackTrace();
 	    return propertiesToStore;
 	}
+
 	final Set<String> props = getPersistentProperties();
 	assert props !=null:"Bad implementation: getPersistentProperties() must never be null.";
 	final Map<String,Object> outputMap  = propertiesToStore;

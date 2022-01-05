@@ -45,7 +45,10 @@ public class TRBeanUtils {
 		addSpace = false;
 	    if(addSpace)
 		sentence += " ";
-	    sentence += camelChars[i];
+	    if( i == 0 )
+		sentence += Character.toUpperCase(camelChars[i]);
+	    else
+		sentence += camelChars[i];
 	}//end for(chars)
 	return sentence;
     }//end camelCaseToSentence()

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2018 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -37,7 +37,11 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
-    static {System.setProperty("jogl.disable.openglcore", "false");GLProfile.initSingleton();}
+    static {
+	System.setProperty("jogl.disable.openglcore", "false");GLProfile.initSingleton();
+	System.setProperty("awt.useSystemAAFontSettings","lcd");
+	System.setProperty("swing.aatext", "true");
+	}
     public static class RootWindow extends JFrame implements Feature<TR>, CanvasProvider {
 	/**
 	 * 

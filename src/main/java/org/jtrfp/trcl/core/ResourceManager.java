@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -114,6 +114,7 @@ import com.ochafik.util.Adapter;
 
 import de.quippy.javamod.multimedia.mod.loader.Module;
 import de.quippy.javamod.multimedia.mod.loader.ModuleFactory;
+import lombok.Setter;
 
 public class ResourceManager{
 	//private final Map<String,IPodData> pods = new HashMap<String,IPodData>();
@@ -143,7 +144,8 @@ public class ResourceManager{
 	public final ObjectFactory<String,SoundTexture>	soundTextures;
 	private TRConfigRoot configManager;
 	private UncompressedVQTextureFactory uncompressedVQTextureFactory;
-	private final PODRegistry podRegistry;
+	@Setter
+	private PODRegistry podRegistry;
 	
 	public ResourceManager(final TR tr){
 		this.tr=tr;
@@ -188,6 +190,18 @@ public class ResourceManager{
 		    
 		//setupPODListeners();
 	}//end ResourceManager
+	
+	public void clearCaches() {
+	    rawCache.clear();
+	    specialTextureNameMap.clear();
+	    modBinNameMap.clear();
+	    aniBinNameMap.clear();
+	    modelCache.clear();
+	    modCache.clear();
+	    gpuResidentMODs.getMap().clear();
+	    soundTextures.getMap().clear();
+	    //TODO: Clear cache for systems
+	}//end clearCaches()
 	/*
 	private void setupPODListeners(){
 	    //final TRConfiguration config = tr.config;

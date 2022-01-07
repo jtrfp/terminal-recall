@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL 
- * Copyright (c) 2012-2014 Chuck Ritola.
+ * Copyright (c) 2012-2022 Chuck Ritola.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,6 @@ import org.jtrfp.trcl.flow.FZone;
 import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.flow.TV;
-import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -188,14 +187,21 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    camera.setHeading(Vector3D.PLUS_I);
 	    camera.setTop(Vector3D.PLUS_J);
 	}
-
+	
 	public GameShell newGame(VOXFile vox){
 	    initializationFence();
-	    GameVersion newGameVersion = determineGameVersion();
+	    newGame(vox, determineGameVersion());
+	    return this;
+	}//end newGame()
+
+	public GameShell newGame(VOXFile vox, GameVersion newGameVersion){
+	    initializationFence();
 	    getTrConfiguration()._setGameVersion(newGameVersion!=null?newGameVersion:GameVersion.TV);
-	    vox = determineVOXFile();
+	    if( vox == null )
+		vox = autoDetermineVOXFile2(newGameVersion);
 	    if(vox==null)
 		return this;//Abort
+	    System.out.println("newGame() "+newGameVersion+" "+vox.getMissionName());
 	    final TVF3Game newGame = new TVF3Game();
 	    newGame.setGameVersion(newGameVersion);
 	    newGame.setVox(vox);
@@ -206,7 +212,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 		gameFailure(e);}
 	    return this;
 	}//end newGame()
-
+	
 	private Future<Game> setGame(final Game newGame) {
 	    if(newGame==game)
 		return new DummyFuture<Game>(game);
@@ -341,6 +347,28 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    }//end if(hints==1)
 	    return null;
 	}
+	
+	private VOXFile autoDetermineVOXFile2(GameVersion gameVersion) {
+	    String voxFileName=null;
+	    final PODRegistry podRegistry     = getPodRegistry();
+	    System.out.println("Auto-determine2 active... pods:"+podRegistry.getPodCollection().size());
+	    if (gameVersion != null) {
+		switch (gameVersion) {
+		case TV:    voxFileName = "TV";
+		break;
+		case F3:    voxFileName = "Fury3";
+		break;
+		case FURYSE:voxFileName = "FurySE";
+		break;
+		}//end switch(...)
+	    }// end if(!null)
+
+	    if(voxFileName==null){
+		JOptionPane.showMessageDialog(tr.getRootWindow(), "Could not auto-detect the default mission.\nEnsure all necessary PODs are registered in the File->Configure window or specify a VOX file if it is a custom game.","Auto-Detect Failure", JOptionPane.ERROR_MESSAGE);
+		return null;
+	    }
+	    return attemptGetVOX(voxFileName);
+	}//end autoDetermineVOXFile2
 
 	private VOXFile autoDetermineVOXFile(){
 	    String voxFileName=null;

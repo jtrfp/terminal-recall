@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2022 Chuck Ritola
  * Part of the jMenuSystemFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -29,7 +29,7 @@ public class ExitMenuItemFactory implements FeatureFactory<MenuSystem> {
 
 	@Override
 	public void apply(MenuSystem target) {
-	    target.addMenuItem(MenuSystem.MIDDLE, EXIT_MENU_PATH);
+	    target.addMenuItem(MenuSystem.END, EXIT_MENU_PATH);
 	    target.setMenuItemEnabled(true, EXIT_MENU_PATH);
 	    target.addMenuItemListener(exitMenuItemListener, EXIT_MENU_PATH);
 	    target.setMenuPosition(MenuSystem.BEGINNING, "File");

@@ -15,10 +15,13 @@ package org.jtrfp.trcl.gui;
 import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.jtrfp.trcl.core.Feature;
@@ -34,6 +37,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
+import com.jtattoo.plaf.noire.NoireLookAndFeel;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
@@ -53,9 +57,10 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
 	private static final String         ICON_PATH       = "/ProgramIcon.png";
 	private final GLEventListener   glEventListener = new RootWindowGLEventListener();
-
+	
 	public RootWindow(){
 	    super();
+	    affirmLookAndFeel();
 	    setSize(800,600);
 	    try {SwingUtilities.invokeLater(new Runnable() {
 		@Override
@@ -74,7 +79,21 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	    } catch (Exception e) {
 		e.printStackTrace();
 	    }//end try/catch Exception
-	}
+	}//end constructor
+	
+	protected void affirmLookAndFeel() {
+	    try {
+		Properties props = new Properties();
+		props.put("logoString", "Terminal Recall");
+		try {
+		    NoireLookAndFeel.setCurrentTheme(props);
+		} catch(Exception e) {e.printStackTrace();}
+		UIManager.setLookAndFeel(NoireLookAndFeel.class.getName());
+		SwingUtilities.updateComponentTreeUI(this);
+		pack();
+	    } catch(UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException e) 
+	    	{e.printStackTrace();}
+	}//end affirmLookAndFeel()
 
 	public void initialize(){
 	    try {SwingUtilities.invokeAndWait(new Runnable() {

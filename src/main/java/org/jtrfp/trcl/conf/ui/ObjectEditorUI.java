@@ -22,5 +22,5 @@ public interface ObjectEditorUI<T> extends UIProvider {
     public boolean isNeedingRestart();
     public void proposeApplySettings();
     public void proposeRevertSettings(long revertTimeMillis);
-    public void configure(Consumer<T> propertySetter, Supplier<T> propertyGetter, Set<Annotation> annotations);
+    public void configure(Consumer<T> propertySetter, Supplier<T> propertyGetter, Set<Annotation> annotations, String humanReadablePropertyName);
 }//end ObjectEditor<T>

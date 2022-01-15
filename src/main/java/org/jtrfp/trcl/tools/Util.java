@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2016 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -15,12 +15,16 @@ package org.jtrfp.trcl.tools;
 import java.awt.Color;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 
-import org.apache.commons.math3.analysis.function.Sigmoid;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.coll.BulkRemovable;
@@ -409,4 +413,36 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        dest[1] = 0;
        dest[2] = deltaVector.getZ();
    }//end relativeHeadingVector()
+   
+   public static List<DefaultMutableTreeNode> getLeaves(DefaultMutableTreeNode root) {
+	final ArrayList<DefaultMutableTreeNode> result = new ArrayList<>();
+	
+	final Iterator<TreeNode> it = root.depthFirstEnumeration().asIterator();
+	while(it.hasNext()) {
+	    final TreeNode node = it.next();
+	    if(node.isLeaf())
+		result.add((DefaultMutableTreeNode)node);
+	}//end while(hasNext)
+	return result;
+   }//end getLeaves(...)
+
+   public static List<DefaultMutableTreeNode> nodePathFromUserObjectPath(
+	   DefaultMutableTreeNode root, Object ... _objectPath) {
+       final List<Object> objectPath = Arrays.asList(_objectPath);
+       final List<DefaultMutableTreeNode> result = new ArrayList<>();
+       DefaultMutableTreeNode node = root;
+       for(Object obj : objectPath) {
+	   final Iterator<TreeNode> children = node.children().asIterator();
+	   boolean found = false;
+	   while(children.hasNext() && !found) {
+	       final DefaultMutableTreeNode childNode = (DefaultMutableTreeNode)children.next();
+	       if(Objects.equals(childNode.getUserObject(), obj)) {
+		   node = childNode;
+		   result.add(childNode);
+		   found = true;
+	       }//end if(matches)
+	   }//end while(hasNext)
+       }//end for(objectPath)
+       return result;
+   }//end nodePathFromUserObjectPath
 }//end Util

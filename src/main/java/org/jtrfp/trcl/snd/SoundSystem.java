@@ -24,10 +24,9 @@ import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.jogamp.opengl.GL2ES2;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
-import javax.sound.sampled.AudioSystem;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
@@ -42,16 +41,15 @@ import org.jtrfp.trcl.pool.ObjectFactory;
 import org.jtrfp.trcl.snd.SoundSystemKernel.AddToActiveEvents;
 import org.jtrfp.trcl.snd.SoundSystemKernel.AddToPendingEvents;
 import org.jtrfp.trcl.snd.SoundSystemKernel.RemoveFromEvents;
-import org.jtrfp.trcl.snd.SoundSystemKernel.SetActiveDevice;
-import org.jtrfp.trcl.snd.SoundSystemKernel.SetActiveDriver;
-import org.jtrfp.trcl.snd.SoundSystemKernel.SetActiveOutput;
 import org.jtrfp.trcl.snd.SoundSystemKernel.SetAudioOutputConfig;
 import org.jtrfp.trcl.snd.SoundSystemKernel.SetBufferLag;
 import org.jtrfp.trcl.snd.SoundSystemKernel.SetBufferSizeFrames;
-import org.jtrfp.trcl.snd.SoundSystemKernel.SetFormat;
 import org.jtrfp.trcl.tools.Util;
 
+import com.jogamp.opengl.GL2ES2;
 import com.ochafik.util.Adapter;
+
+import lombok.Getter;
 
 public class SoundSystem {
     //// PROPERTIES
@@ -119,6 +117,9 @@ public class SoundSystem {
     //If no valid audio devices are available, provide a dummy driver
     private static final AudioDriver DUMMY_DRIVER = new DummyAudioDriver();
     
+    @Getter(lazy=true)
+    private final DefaultMutableTreeNode outputConfigTree = generateOutputConfigTree();
+    
     public SoundSystem() {//TODO: Use Features to update this.
 	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
 	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
@@ -171,7 +172,7 @@ public class SoundSystem {
 				try {
 				driver.setSource(SILENCE);
 				driver.flush();
-				} catch(RuntimeException e) {
+				} catch(Exception e) {//Keep going
 				    e.printStackTrace();
 				    soundSystemKernel.setActiveDriver(SoundSystem.DUMMY_DRIVER);
 				}
@@ -197,7 +198,36 @@ public class SoundSystem {
 	}.start();
 	initialized = true;
     }// end initialize()
-    
+
+    private DefaultMutableTreeNode generateOutputConfigTree() {
+	final DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+	getAudioDriverNames().stream().forEach(x->{
+	    final DefaultMutableTreeNode driverNode = new DefaultMutableTreeNode();
+	    driverNode.setUserObject(x);
+	    root.add(driverNode);
+	    try {
+		final AudioDriver driver = driverFactory.get((Class<? extends AudioDriver>)Class.forName(x));
+		for(AudioDevice dev : driver.getDevices()) {
+		    final DefaultMutableTreeNode deviceNode = new DefaultMutableTreeNode();
+		    deviceNode.setUserObject(dev.getUniqueName());
+		    driverNode.add(deviceNode);
+		    for(AudioOutput output : dev.getOutputs()) {
+			final DefaultMutableTreeNode outputNode = new DefaultMutableTreeNode();
+			outputNode.setUserObject(output.getUniqueName());
+			deviceNode.add(outputNode);
+			for( AudioFormat format : output.getFormats()) {
+			    final DefaultMutableTreeNode formatNode = new DefaultMutableTreeNode();
+			    formatNode.setUserObject(format.toString());
+			    outputNode.add(formatNode);
+			}//end for(format)
+		    }//end for(output)
+		}//end for(devices)
+	    } catch (ClassNotFoundException e) {e.printStackTrace();}
+	});
+	
+	return root;
+    }//end generateOutputConfigTree()
+
     private void timeLimitedBarrier(int maxTimeInMillis) throws InterruptedException {
 	final long currentTimeMillis = System.currentTimeMillis();
 	final long timeRemaining = (timeOfLastBarrier-currentTimeMillis)+maxTimeInMillis;

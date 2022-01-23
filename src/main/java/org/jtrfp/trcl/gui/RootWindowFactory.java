@@ -60,11 +60,11 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	
 	public RootWindow(){
 	    super();
-	    affirmLookAndFeel();
-	    setSize(800,600);
-	    try {SwingUtilities.invokeLater(new Runnable() {
+	    SwingUtilities.invokeLater(new Runnable() {
 		@Override
 		public void run() {
+		    affirmLookAndFeel();
+		    setSize(800,600);
 		    canvas.setFocusTraversalKeysEnabled(false);
 		    canvas.addGLEventListener(glEventListener);
 		    getContentPane().add(canvas);
@@ -76,9 +76,6 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 		    RootWindow.this.setMinimumSize(new Dimension(100,100));
 		}
 	    });
-	    } catch (Exception e) {
-		e.printStackTrace();
-	    }//end try/catch Exception
 	}//end constructor
 	
 	protected void affirmLookAndFeel() {

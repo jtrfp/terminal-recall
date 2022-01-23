@@ -37,7 +37,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
-import com.jtattoo.plaf.noire.NoireLookAndFeel;
+import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
@@ -86,9 +86,9 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 		Properties props = new Properties();
 		props.put("logoString", "Terminal Recall");
 		try {
-		    NoireLookAndFeel.setCurrentTheme(props);
+		    HiFiLookAndFeel.setCurrentTheme(props);
 		} catch(Exception e) {e.printStackTrace();}
-		UIManager.setLookAndFeel(NoireLookAndFeel.class.getName());
+		UIManager.setLookAndFeel(HiFiLookAndFeel.class.getName());
 		SwingUtilities.updateComponentTreeUI(this);
 		pack();
 	    } catch(UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException e) 

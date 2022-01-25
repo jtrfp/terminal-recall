@@ -14,13 +14,18 @@ package org.jtrfp.trcl.tools;
 
 import java.awt.Color;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -33,6 +38,8 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 
 import com.ochafik.util.Adapter;
+
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 public class Util {
 public static final Color [] DEFAULT_PALETTE = new Color []{
@@ -426,12 +433,20 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
 	return result;
    }//end getLeaves(...)
 
+   /**
+    * Root node is not included when searching for object path, but is included in result
+    * @param root
+    * @param objectPath
+    * @return
+    * @since Jan 22, 2022
+    */
    public static List<DefaultMutableTreeNode> nodePathFromUserObjectPath(
-	   DefaultMutableTreeNode root, Object ... _objectPath) {
-       final List<Object> objectPath = Arrays.asList(_objectPath);
-       final List<DefaultMutableTreeNode> result = new ArrayList<>();
+	   DefaultMutableTreeNode root, Object ... objectPath) {
+       final List<Object> objectPathList = Arrays.asList(objectPath);
+       final List<DefaultMutableTreeNode> result = new ArrayList<>(objectPath.length);
+       result.add(root);
        DefaultMutableTreeNode node = root;
-       for(Object obj : objectPath) {
+       for(Object obj : objectPathList) {
 	   final Iterator<TreeNode> children = node.children().asIterator();
 	   boolean found = false;
 	   while(children.hasNext() && !found) {
@@ -445,4 +460,54 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        }//end for(objectPath)
        return result;
    }//end nodePathFromUserObjectPath
+   
+   public static List<DefaultMutableTreeNode> nodePathFromUserObjectPath(Object ...objects) {
+       final ArrayList<DefaultMutableTreeNode> result = new ArrayList<>();
+       DefaultMutableTreeNode node = null;
+       for(Object obj : objects) {
+	   final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(obj);
+	   if(node != null)
+	       node.add(newNode);
+	   node = newNode;
+	   result.add(newNode);
+       }
+       return result;
+   }//end nodePathFromUserObjectPath
+
+   public static DefaultMutableTreeNode getComparatorApproximation(
+	   DefaultMutableTreeNode external,
+	   DefaultMutableTreeNode reference,
+	   Comparator<DefaultMutableTreeNode> comparator) {
+       
+       final ArrayDeque<TreeNode> externalPath = Stream.of(external.getPath()).collect(Collectors.toCollection(()->new ArrayDeque<TreeNode>()));
+       externalPath.poll();//Skip root since that's implied and this node will be compared to reference root's children anyway.
+       return getComparatorApproximationFromRoot(externalPath, (DefaultMutableTreeNode)(reference.getRoot()), comparator);
+   }//end getToStringApproximation()
+   
+   private static DefaultMutableTreeNode getComparatorApproximationFromRoot(ArrayDeque<TreeNode> externalPath, DefaultMutableTreeNode reference, Comparator<DefaultMutableTreeNode> comparator) {
+       final Iterator<TreeNode> it = reference.children().asIterator();
+       
+       if(!it.hasNext() || externalPath.isEmpty())
+	   return reference;
+       
+       DefaultMutableTreeNode best = null;
+       int bestScore = Integer.MAX_VALUE;
+       final DefaultMutableTreeNode externalNode = (DefaultMutableTreeNode)externalPath.poll();
+       
+       while(it.hasNext()) {
+	   final DefaultMutableTreeNode node = (DefaultMutableTreeNode)it.next();
+	   System.out.println("compare "+node+" to "+externalNode);
+	   Objects.requireNonNull(node);
+	   Objects.requireNonNull(externalNode);
+	   final int thisScore = Math.abs(comparator.compare(node, externalNode));
+	   if( thisScore < bestScore ) {
+	       bestScore = thisScore;
+	       best = node;
+	   }//end if(best)
+       }//end while(hasNext)
+       if(best.isLeaf())
+	   return best;
+       else
+	   return getComparatorApproximationFromRoot(externalPath, best, comparator);
+   }//end getToStringApproximationFromRoot(...)
 }//end Util

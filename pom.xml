@@ -123,11 +123,6 @@
 			<version>0.12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.freedesktop.tango</groupId>
-			<artifactId>tango-icon-theme</artifactId>
-			<version>0.8.90</version>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>

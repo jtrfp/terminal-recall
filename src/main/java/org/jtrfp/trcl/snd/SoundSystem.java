@@ -21,12 +21,16 @@ import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
@@ -50,6 +54,7 @@ import com.jogamp.opengl.GL2ES2;
 import com.ochafik.util.Adapter;
 
 import lombok.Getter;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 public class SoundSystem {
     //// PROPERTIES
@@ -91,7 +96,7 @@ public class SoundSystem {
     private final SoundSystemKernel soundSystemKernel = new SoundSystemKernel();
     //private final Queue<Runnable> soundThreadExecutor = new ArrayDeque<>(512);
     private final KeyedExecutor<Object> soundThreadExecutor = new DefaultKeyedExecutor<Object>();
-    private SoundSystemOutputConfig outputConfig;
+    private DefaultMutableTreeNode outputConfig;
     private long timeOfLastBarrier;
     private final ObjectFactory<Class<? extends AudioDriver>,AudioDriver> driverFactory = 
 	    new ObjectFactory<>(new HashMap<Class<? extends AudioDriver>,AudioDriver>(), new Adapter<Class<? extends AudioDriver>,AudioDriver>(){
@@ -813,18 +818,60 @@ public class SoundSystem {
         pcs.firePropertyChange(SFX_VOLUME, oldValue, sfxVolume);
     }
 
-    public SoundSystemOutputConfig getOutputConfig() {
-        return outputConfig;
-    }
+    public DefaultMutableTreeNode getOutputConfigNode() {
+	if(outputConfig == null)
+	    outputConfig = getDefaultConfigNode();
 
-    public void setOutputConfig(SoundSystemOutputConfig outputConfig) {
-	final Object oldValue = this.outputConfig;
-	if( outputConfig == oldValue )
+	return outputConfig;
+    }//end getOutputConfig()
+    
+    public SoundSystemOutputConfig getOutputConfig() {
+	final Object [] oPath = getOutputConfigNode().getUserObjectPath();
+	final SoundSystemOutputConfig result = new SoundSystemOutputConfig();
+	result.setDriverByName(oPath[1].getClass().getName());
+	result.setDeviceByName(oPath[2].toString());
+	result.setPortByName(oPath[3].toString());
+	result.setFormatByName(oPath[4].toString());
+	return result;
+    }//end getOutputConfig()
+    
+    public void setOutputConfig(SoundSystemOutputConfig config) {
+	    final DefaultMutableTreeNode root = new DefaultMutableTreeNode(null);
+	    List<DefaultMutableTreeNode> path = Util.nodePathFromUserObjectPath(config.getDriverByName(), config.getDeviceByName(), config.getPortByName(), config.getFormatByName());
+	    path.add(0,root);
+	    root.add(path.get(1));
+	    setOutputConfigNode(path.get(path.size()-1));
+    }//end setOutputConfig()
+    
+    private DefaultMutableTreeNode getDefaultConfigNode() {
+	final Iterator<TreeNode> it = getOutputConfigTree().depthFirstEnumeration().asIterator();
+	while(it.hasNext()) {
+	    final DefaultMutableTreeNode n = (DefaultMutableTreeNode)it.next();
+	    //if(n.isLeaf())System.out.println("SS depth="+n.getLevel()+" NODE="+n);
+	    if(n.isLeaf() && n.getLevel() == 4)
+		return n;
+	}
+	System.err.println("SoundSystem.getDefaultConfig failed to find a default node.");
+	return null;
+    }//end getDefaultConfig()
+    
+    public void setOutputConfigNode(DefaultMutableTreeNode outputConfig) {
+	if( outputConfig == null )
 	    return;
-        this.outputConfig = outputConfig;
+	final Object oldValue = this.outputConfig;
+	if( Objects.equals(outputConfig,oldValue) )
+	    return;
+        
+        this.outputConfig = Util.getComparatorApproximation(outputConfig, getOutputConfigTree(), 
+        	(x,y)->100-FuzzySearch.ratio(x.toString(),y.toString()));
+        
+        final TreeNode [] configPath = this.outputConfig.getPath();
+        
+        if(configPath.length != 5)
+            System.err.println("config path must be of level 4. Got level "+(configPath.length-1)+". Contents were: "+outputConfig);
         
         //// DRIVER
-        final String driverName = outputConfig.getDriverByName();
+        final String driverName = configPath[1].toString();
         AudioDriver driver = null;
         final AudioDriver oldDriver = getActiveDriver();
         if(driverName!=null){
@@ -841,7 +888,7 @@ public class SoundSystem {
 	}//end if(!null)
         
         //// DEVICE
-        final String newDeviceByName = outputConfig.getDeviceByName();
+        final String newDeviceByName = configPath[2].toString();
         AudioDevice device = null;
         if(newDeviceByName!=null){
 	    final AudioDevice audioDevice = driver.getDeviceByName(newDeviceByName);
@@ -850,7 +897,7 @@ public class SoundSystem {
 	}//end if(!null)
         
         //// OUTPUT
-        final String outputByName = outputConfig.getPortByName();
+        final String outputByName = configPath[3].toString();
         AudioOutput output = null;
         if(outputByName!=null){
 	    final AudioOutput ao = device.getOutputByName(outputByName);
@@ -859,7 +906,7 @@ public class SoundSystem {
 	}//end if(!null)
         
         //// FORMAT
-        final String formatByName = outputConfig.getFormatByName();
+        final String formatByName = configPath[4].toString();
         AudioFormat format = null;
 	if(formatByName!=null){
 	    //final AudioOutput ao = getActiveOutput();

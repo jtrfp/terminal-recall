@@ -109,16 +109,22 @@ public class SoundSystemFactory implements FeatureFactory<TR> {
 	@ConfigByUI(editorClass = TreeSelectionUI.class)
 	@ToolTip(text="Method by which to send audio output, ordered by driver, port, and format.")
 	public DefaultMutableTreeNode getSelectedOutput() {
+	    return super.getOutputConfigNode();
+	    /*
 	    final DefaultMutableTreeNode root = super.getOutputConfigTree();
 	    final SoundSystemOutputConfig config = super.getOutputConfig();
 	    
 	    List<DefaultMutableTreeNode> path = Util.nodePathFromUserObjectPath(root, config.getDriverByName(), config.getDeviceByName(), config.getPortByName(), config.getFormatByName());
 	    return path.get(path.size()-1);
+	    */
 	}//end getConfiguration
 	
 	public void setSelectedOutput(DefaultMutableTreeNode configuration) {
+	    super.setOutputConfigNode(configuration);
+	    /*
 	    if(configuration == null)
 		return;
+	    configuration = Util.getToStringApproximation(configuration, super.getOutputConfigTree(),x->x.toString());
 	    final SoundSystemOutputConfig newConfig = new SoundSystemOutputConfig();
 	    newConfig.setFormatByName((String)(configuration.getUserObject()));
 	    configuration = (DefaultMutableTreeNode)configuration.getParent();
@@ -127,7 +133,10 @@ public class SoundSystemFactory implements FeatureFactory<TR> {
 	    newConfig.setDeviceByName((String)(configuration.getUserObject()));
 	    configuration = (DefaultMutableTreeNode)configuration.getParent();
 	    newConfig.setDriverByName((String)(configuration.getUserObject()));
+	    System.out.println("Setting output config to "+newConfig);
 	    super.setOutputConfig(newConfig);
+	    System.out.println("Finished setting output config.");
+	    */
 	}//end setConfiguration
     }//end SoundSystemFeature
 

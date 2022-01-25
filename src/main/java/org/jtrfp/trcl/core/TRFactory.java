@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2016 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -14,10 +14,7 @@ package org.jtrfp.trcl.core;
 
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,16 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.OutputDump;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
 import org.jtrfp.trcl.gpu.Renderer;
-import org.jtrfp.trcl.gui.ConfigWindowFactory.ConfigWindow;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
@@ -242,7 +236,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	private GameShell			gameShell;
 	private RenderableSpacePartitioningGrid	defaultGrid;
 
-	private ConfigWindow                    configWindow;
+	//private ConfigWindow                    configWindow;
 	private TRRunState                      runState;
 
 	//private final ConfigMenuItemListener	configMenuItemListener = new ConfigMenuItemListener();
@@ -313,14 +307,14 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    //renderer.getCamera().getFlatRelevanceCollection().addTarget(collisionManager.getInputRelevanceCollection(), true);
 	    renderer.getCamera().getRelevancePairs().addTarget(collisionManager.getInputRelevancePairCollection(), true);
 	}//end trInit()
-
+/*
 	private class ConfigMenuItemListener implements ActionListener{
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
 		getConfigWindow().setVisible(true);
 	    }
 	}//end ConfigMenuItemListener
-
+*/
 	private void waitForProfiler() {
 	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);
 	}
@@ -513,13 +507,13 @@ public final class TRFactory implements FeatureFactory<Features>{
 	public void uncaughtException(Thread t, Throwable e) {
 	    showStopper(e);
 	}
-
+/*
 	public ConfigWindow getConfigWindow() {
 	    if(configWindow == null)
 		configWindow = Features.get(this, ConfigWindow.class);
 	    return configWindow;
 	}
-
+*/
 	public TRRunState getRunState() {
 	    return runState;
 	}

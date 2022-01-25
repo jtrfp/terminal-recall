@@ -14,7 +14,6 @@
 package org.jtrfp.trcl.shell;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.jtrfp.trcl.coll.CollectionActionDispatcher;
@@ -26,26 +25,36 @@ import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.stereotype.Component;
 
-import lombok.Getter;
-
 @Component
-public class GameCampaignRegistryFactory implements FeatureFactory<GameShell> { 
+public class GameCampaignRegistryFactory implements FeatureFactory<GameShell> {
     
     public static class GameCampaignRegistry implements Feature<GameShell> {
-	@Getter(onMethod=@__({@ConfigByUI(editorClass=GameCampaignListUI.class)}))
+	
 	private final CollectionActionDispatcher<GameCampaignData> campaigns = new CollectionActionDispatcher<>(new ArrayList<>());
 	
-	public GameCampaignRegistry() {
-	    final GameCampaignData f3 = new GameCampaignData();
-	    f3.setGameVersion(GameVersion.F3);
-	    f3.setName("Fury3");
-	    final GameCampaignData fZone = new GameCampaignData();
-	    fZone.setGameVersion(GameVersion.FURYSE);
-	    fZone.setName("F!Zone");
-	    final GameCampaignData tv = new GameCampaignData();
-	    tv.setGameVersion(GameVersion.TV);
-	    tv.setName("Terminal Velocity");
-	    setCampaignEntriesCollection(Arrays.asList(f3,fZone,tv));
+	public GameCampaignRegistry() {}
+
+	private void ensureCampaignDataIsPopulated() { //Fill with default if empty
+	    if(campaigns.isEmpty()) {
+		final GameCampaignData f3 = new GameCampaignData();
+		f3.setGameVersion(GameVersion.F3);
+		f3.setName("Microsoft Fury3");
+		final GameCampaignData fZone = new GameCampaignData();
+		fZone.setGameVersion(GameVersion.FURYSE);
+		fZone.setName("F!Zone");
+		final GameCampaignData tv = new GameCampaignData();
+		tv.setGameVersion(GameVersion.TV);
+		tv.setName("Terminal Velocity");
+		campaigns.add(f3);
+		campaigns.add(fZone);
+		campaigns.add(tv);
+	    }
+	}//end ensureCampaignDataIsPopulated
+	
+	@ConfigByUI(editorClass=GameCampaignListUI.class)
+	public CollectionActionDispatcher<GameCampaignData> getCampaigns() {
+	    ensureCampaignDataIsPopulated();
+	    return campaigns;
 	}
 
 	@Override

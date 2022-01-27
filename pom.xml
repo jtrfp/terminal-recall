@@ -161,11 +161,6 @@
 			<classifier>natives-all</classifier>
 		</dependency>
 		<dependency>
-			<groupId>janino</groupId>
-			<artifactId>janino</artifactId>
-			<version>2.5.10</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-primitives</groupId>
 			<artifactId>commons-primitives</artifactId>
 			<version>1.0</version>

@@ -36,7 +36,7 @@ public class CheckboxUI extends AbstractObjectEditorUI<Boolean> {
 	rootPanel.add(label);
 	rootPanel.add(checkBox);
 	rootPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE,50));
-	rootPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,10));
+	rootPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
     }//end constructor
 
     @Override

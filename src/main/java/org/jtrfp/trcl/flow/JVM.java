@@ -72,7 +72,7 @@ public class JVM {
 
 		//cmd+="-XX:+UseConcMarkSweepGC ";
 		cmd+="-XX:MaxGCPauseMillis=5 ";
-		cmd+="-XX:+AggressiveOpts ";
+		//cmd+="-XX:+AggressiveOpts ";
 
 		cmd+="-XX:+UseBiasedLocking ";
 		cmd+="-XX:+AlwaysPreTouch ";

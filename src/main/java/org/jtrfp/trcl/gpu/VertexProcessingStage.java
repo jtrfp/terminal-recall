@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -32,7 +32,7 @@ public class VertexProcessingStage {
                             vertexZTexture,vertexTextureIDTexture,
                             vertexNormXYTexture,vertexNormZTexture;
     
-    public VertexProcessingStage(GPU gpu, ObjectProcessingStage ops, ValidationHandler vh) throws IOException{
+    public VertexProcessingStage(GPU gpu, ObjectProcessingStage ops, ValidationHandler vh, GL3 gl) throws IOException{
 	this.gpu=gpu;
 	this.objectProcessingStage=ops;
 
@@ -52,76 +52,76 @@ public class VertexProcessingStage {
 	/////// VERTEX
 	vertexXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_RG32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RG, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RG, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("vertexXYTexture");
 	vertexNormXYTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RG, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RG, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("vertexNormXYTexture");
 	vertexNormZTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RED, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("vertexNormZTexture");
 	vertexUVTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_RG16F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RG, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RG, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("vertexUVTexture");
 	vertexZTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RED, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("vertexZTexture");
 	vertexWTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()//// This is actually W-reciprocal.
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RED, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("vertexWTexture");
 	vertexTextureIDTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_R32F, VERTEX_BUFFER_WIDTH, VERTEX_BUFFER_HEIGHT, 
-			GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RED, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setExpectedMaxValue(.001, .001, .001, .001)
 			.setDebugName("vertexTextureIDTexture")
-			.unbind();
+			.unbind(gl);
 	vertexFrameBuffer = gpu
 		.newFrameBuffer()
 		.bindToDraw()

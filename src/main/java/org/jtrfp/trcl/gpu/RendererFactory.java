@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 import org.jtrfp.trcl.ObjectListWindow;
@@ -31,6 +30,7 @@ import org.jtrfp.trcl.coll.ObjectTallyCollection;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gpu.GLProgram.ValidationHandler;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.pool.IndexPool;
@@ -38,11 +38,11 @@ import org.jtrfp.trcl.pool.ObjectPool;
 import org.jtrfp.trcl.pool.ObjectPool.GenerativeMethod;
 import org.jtrfp.trcl.pool.ObjectPool.PreparationMethod;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.awt.GLCanvas;
 import com.ochafik.util.listenable.Pair;
 
 public class RendererFactory {
@@ -87,32 +87,34 @@ public class RendererFactory {
     private final IndexPool                     portalFrameBufferIndexPool = new IndexPool().setHardLimit(NUM_PORTALS);
     private final HashMap<Renderer,Integer>     rendererPortalIndexMap = new HashMap<Renderer,Integer>();
     private final ObjectListWindow              objectListWindow;
-    private final GLExecutor			glExecutor;
+    private final GLExecutor<GL3>		glExecutor;
     
     private class RendererPreparationMethod implements PreparationMethod<Renderer>{
 	@Override
 	public Renderer deactivate(final Renderer obj) {
 	    final ThreadManager tm = threadManager;
-	    getGlExecutor().submitToGL(new Callable<Void>(){
+	    try {getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 		@Override
-		public Void call() throws Exception {
+		public Void execute(GL3 gl) throws Exception {
 		    obj.setEnabled(false);
 		    obj.setRenderingTarget(null);
 		    obj.getCamera().setRootGrid(null);
 		    return null;
-		}}).get();
+		}}).get();}
+	    catch(Exception e) {e.printStackTrace();}
 	    return obj;
 	}
 
 	@Override
 	public Renderer reactivate(final Renderer obj) {
 	    final ThreadManager tm = threadManager;
-	    getGlExecutor().submitToGL(new Callable<Void>(){
+	    try {getGlExecutor().submitToGL(new GLExecutable<Void, GL>(){
 		@Override
-		public Void call() throws Exception {
+		public Void execute(GL gl) throws Exception {
 		    obj.setEnabled(true);
 		    return null;
-		}}).get();
+		}}).get();}
+	    catch(Exception e) {e.printStackTrace();}
 	    return obj;
 	}
     }//end RendererPoolingMethod
@@ -135,7 +137,7 @@ public class RendererFactory {
     }// end RendererGenerativeMethod
     
     public RendererFactory(final GPU gpu, final ThreadManager threadManager, 
-	    final GLCanvas canvas, final World world, 
+	    final GLAutoDrawable autoDrawable, final World world, 
 	    /*CollisionManager collisionManager, */ObjectListWindow objectListWindow){
 	this.gpu=gpu;
 	this.threadManager = threadManager;
@@ -145,11 +147,11 @@ public class RendererFactory {
 	//this.collisionManager=collisionManager;
 	if(world == null)
 	    throw new NullPointerException("World intolerably null.");
-	final GL3 gl = gpu.getGl();
-	
-	getGlExecutor().submitToGL(new Callable<Void>(){
+	//final GL3 gl = gpu.getGl();
+	try {
+	getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 	    @Override
-	    public Void call() throws Exception {
+	    public Void execute(GL3 gl) throws Exception {
 		// Fixed pipeline behavior
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL2.GL_LESS);
@@ -159,8 +161,8 @@ public class RendererFactory {
 		gl.glEnable(GL3.GL_DEPTH_CLAMP);
 		
 		final ValidationHandler vh = new RFValidationHandler();
-		objectProcessingStage      = new ObjectProcessingStage(gpu,vh);
-		vertexProcessingStage      = new VertexProcessingStage(gpu,objectProcessingStage,vh);
+		objectProcessingStage      = new ObjectProcessingStage(gpu,vh, gl);
+		vertexProcessingStage      = new VertexProcessingStage(gpu,objectProcessingStage,vh,gl);
 		
 		// VERTEX SHADERS
 		GLVertexShader		
@@ -240,38 +242,38 @@ public class RendererFactory {
 		deferredProgram.getUniform("ambientLight").set(.4f, .5f, .7f);
 		sunVector.set(.5774f,-.5774f,.5774f);
 		fogScalar.set(1f);
-		final int width  = canvas.getWidth();
-		final int height = canvas.getHeight();
+		final int width  = autoDrawable.getSurfaceWidth();
+		final int height = autoDrawable.getSurfaceHeight();
 		gpu.defaultProgram();
 		gpu.defaultTIU();
 		
 		/////// PRIMITIVE
 		primitiveNormLODTexture = gpu  //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
-			.bind()
+			.bind(gl)
 			.setImage(GL3.GL_RGBA32F,
 				PRIMITIVE_BUFFER_WIDTH * PRIMITIVE_BUFFER_OVERSAMPLING, 
 				PRIMITIVE_BUFFER_HEIGHT * PRIMITIVE_BUFFER_OVERSAMPLING, 
 				GL3.GL_RGBA,
-				GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_LINEAR)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+				GL3.GL_FLOAT, null, gl)
+			.setMagFilter(GL3.GL_LINEAR, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setDebugName("primitiveNormTexture")
-			.unbind();
+			.unbind(gl);
 		primitiveUVZWTexture = gpu  //Does not need to be in reshape() since it is off-screen.
 			.newTexture()
-			.bind()
+			.bind(gl)
 			.setImage(GL3.GL_RGBA32F, 
 				PRIMITIVE_BUFFER_WIDTH * PRIMITIVE_BUFFER_OVERSAMPLING, 
 				PRIMITIVE_BUFFER_HEIGHT * PRIMITIVE_BUFFER_OVERSAMPLING, 
 				GL3.GL_RGBA,
-				GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_LINEAR)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+				GL3.GL_FLOAT, null, gl)
+			.setMagFilter(GL3.GL_LINEAR, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setDebugName("primitiveUVZWTexture");
 		primitiveFrameBuffer = gpu
 			.newFrameBuffer()
@@ -285,30 +287,30 @@ public class RendererFactory {
 		    throw new RuntimeException("Primitive framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}
 		/////// PORTALS
-		allocatePortals(width,height);
+		allocatePortals(width,height,gl);
 		/////// INTERMEDIATE
 		opaqueDepthTexture = gpu
 			.newTexture()
-			.bind()
+			.bind(gl)
 			.setImage(GL3.GL_DEPTH_COMPONENT16, width, height, 
-				GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+				GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null, gl)
+			.setMagFilter(GL3.GL_NEAREST, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setDebugName("opaqueDepthTexture");
 		opaquePrimitiveIDTexture = gpu
 			.newTexture()
-			.bind()
+			.bind(gl)
 			.setImage(GL3.GL_R32F, width, height, 
-				GL3.GL_RED, GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+				GL3.GL_RED, GL3.GL_FLOAT, null, gl)
+			.setMagFilter(GL3.GL_NEAREST, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setExpectedMaxValue(.1, .1, .1, .1)
 			.setDebugName("opaquePrimitiveIDTexture")
-			.unbind();
+			.unbind(gl);
 		opaqueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -324,26 +326,26 @@ public class RendererFactory {
 		/////// LAYER ACCUMULATOR
 		layerAccumulatorTexture0 = gpu
 			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.bind(gl)
+			.setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null, gl)
+			.setMagFilter(GL3.GL_NEAREST, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setExpectedMaxValue(65536, 65536, 65536, 65536)
 			.setDebugName("layerAccumulatorTexture0")
-			.unbind();
+			.unbind(gl);
 		layerAccumulatorTexture1 = gpu
 			.newTexture()
-			.bind()
-			.setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.bind(gl)
+			.setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null, gl)
+			.setMagFilter(GL3.GL_NEAREST, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setExpectedMaxValue(65536, 65536, 65536, 65536)
 			.setDebugName("layerAccumulatorTexture1")
-			.unbind();
+			.unbind(gl);
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -366,9 +368,9 @@ public class RendererFactory {
 		gpu.defaultFrameBuffers();
 		return null;
 	    }
-	}).get();
+	}).get();} catch(Exception e) {e.printStackTrace();}
 	
-	canvas.addGLEventListener(new GLEventListener() {
+	autoDrawable.addGLEventListener(new GLEventListener() {
 	    @Override
 	    public void init(GLAutoDrawable drawable) {
 		drawable.getGL().setSwapInterval(0);
@@ -386,6 +388,7 @@ public class RendererFactory {
 	    public void reshape(GLAutoDrawable drawable, int x, int y,
 		    int width, int height) {
 		// SHAPE-DEPENDENT UNIFORMS
+		final GL3 gl = (GL3)(drawable.getContext().getGL());
 		primitiveProgram.use();
 		primitiveProgram.getUniform("screenWidth" ).set((float)width);//TODO: replace with vec2
 		primitiveProgram.getUniform("screenHeight").set((float)height);
@@ -399,13 +402,13 @@ public class RendererFactory {
 		gpu.defaultFrameBuffers();
 		
 		opaqueDepthTexture.
-		        bind().
-		        setImage(GL3.GL_DEPTH_COMPONENT16, width, height,GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null).
-			unbind();
+		        bind(gl).
+		        setImage(GL3.GL_DEPTH_COMPONENT16, width, height,GL3.GL_DEPTH_COMPONENT, GL3.GL_FLOAT, null, gl).
+			unbind(gl);
 		opaquePrimitiveIDTexture.
-		    bind().
-		    setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null).
-		    unbind();
+		    bind(gl).
+		    setImage(GL3.GL_R32F, width, height, GL3.GL_RED, GL3.GL_FLOAT, null, gl).
+		    unbind(gl);
 		opaqueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -420,13 +423,13 @@ public class RendererFactory {
 		}
 		
 		layerAccumulatorTexture0.
-		 bind().
-		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null).
-		 unbind();
+		 bind(gl).
+		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null, gl).
+		 unbind(gl);
 		layerAccumulatorTexture1.
-		 bind().
-		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null).
-		 unbind();
+		 bind(gl).
+		 setImage(GL3.GL_RGBA32F, width, height, GL3.GL_RGBA, GL3.GL_FLOAT, null, gl).
+		 unbind(gl);
 		depthQueueFrameBuffer = gpu
 			.newFrameBuffer()
 			.bindToDraw()
@@ -445,10 +448,10 @@ public class RendererFactory {
 		    setDrawBufferList()//Empty
 		    //portalFrameBuffers[i].destroy();
 		    .unbindFromDraw();}
-		portalTexture.delete();
+		portalTexture.delete(gl);
 		portalTexture = null;
 		gpu.defaultTexture();
-		allocatePortals(width,height);
+		allocatePortals(width,height,gl);
 		gpu.defaultFrameBuffers();
 		gpu.defaultTexture();
 	    }//end reshape(...)
@@ -462,20 +465,20 @@ public class RendererFactory {
                 new ObjectPool.LazyAllocate<Renderer>().setMaxSize(NUM_PORTALS), new RendererPreparationMethod(), new RendererGenerativeMethod());
     }//end constructor
     
-    private void allocatePortals(int width, int height){
+    private void allocatePortals(int width, int height, GL3 gl){
 	if(portalTexture == null)
 	 portalTexture = gpu.
 		newTexture().
 		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY);
 	portalTexture.
-		bind().
+		bind(gl).
 		setInternalColorFormat(GL3.GL_RGB565).
-		configure(new int[]{width,height,NUM_PORTALS}, 1).
-		setMagFilter(GL3.GL_NEAREST).
-		setMinFilter(GL3.GL_NEAREST).
-		setWrapS(GL3.GL_CLAMP_TO_EDGE).
-		setWrapT(GL3.GL_CLAMP_TO_EDGE).
-		unbind();
+		configure(new int[]{width,height,NUM_PORTALS}, 1, gl).
+		setMagFilter(GL3.GL_NEAREST, gl).
+		setMinFilter(GL3.GL_NEAREST, gl).
+		setWrapS(GL3.GL_CLAMP_TO_EDGE, gl).
+		setWrapT(GL3.GL_CLAMP_TO_EDGE, gl).
+		unbind(gl);
 	for(int i=0; i<NUM_PORTALS; i++){
 	    if(portalFrameBuffers[i]==null)
 	      portalFrameBuffers[i]=gpu.
@@ -484,7 +487,7 @@ public class RendererFactory {
 	      bindToDraw().
 	      attachDrawTexture(portalTexture, i, GL3.GL_COLOR_ATTACHMENT0).
 	      setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0);
-	    final GL3 gl = gpu.getGl();
+	    
 	    if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Portal framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));
 		}

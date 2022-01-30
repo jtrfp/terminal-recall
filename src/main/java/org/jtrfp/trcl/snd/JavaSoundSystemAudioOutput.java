@@ -352,6 +352,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 		    return ao;
 	    }
 	    System.err.println("Failed to find matching output for "+uniqueName);
+	    new Throwable().printStackTrace();;
 	    return null;
 	}
 	@Override

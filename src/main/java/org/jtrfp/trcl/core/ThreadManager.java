@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -28,24 +28,19 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLEventListener;
-
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
-import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.gpu.Renderer;
-import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.FPSAnimator;
 
 public class ThreadManager {
@@ -208,7 +203,7 @@ public class ThreadManager {
 		try{gameplay();
 		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
-	animator = new FPSAnimator(tr.getRootWindow().getCanvas(),RENDER_FPS);
+	animator = new FPSAnimator(tr.getRootWindow().getAutoDrawable(),RENDER_FPS);
 	animator.start();
 	tr.getRootWindow().addWindowListener(new WindowAdapter(){//TODO: This should be somewhere else
 	    @Override
@@ -216,11 +211,9 @@ public class ThreadManager {
 		System.out.println("WindowClosing...");
 		gameplayTimer.cancel();
 		animator.stop();
-		//System.out.println("glExecutorThread.join()...");
-		//System.out.println("ThreadManager: WindowClosing Done.");
 	    }
 	});
-	tr.getRootWindow().getCanvas().addGLEventListener(new GLEventListener() {
+	tr.getRootWindow().getAutoDrawable().addGLEventListener(new GLEventListener() {
 	    @Override
 	    @ProvidesGLThread
 	    public void init(final GLAutoDrawable drawable) {

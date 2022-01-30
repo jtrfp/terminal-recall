@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectDefinitionWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.World;
-import org.jtrfp.trcl.core.GLFutureTask;
 import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
@@ -39,12 +39,16 @@ import org.jtrfp.trcl.tools.Util;
 import com.jogamp.opengl.DebugGL3;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLAutoDrawable;
+
+import lombok.Getter;
 
 public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task whree executor returns TRFutureTask
     	public static final int 			GPU_VERTICES_PER_BLOCK = 96;
     	public static final int 			BYTES_PER_VEC4 = 16;
-    	private TRFutureTask<Integer>			defaultTIU;
+    	private Future<Integer>				defaultTIUFuture;
+    	@Getter(lazy=true)
+    	private final int				defaultTIU = generateDefaultTIU();
 	
 	private ByteOrder 				byteOrder;
 	//private final TR 				tr;
@@ -54,7 +58,7 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	private GPUVendor				vendor=null;
 	public TRFutureTask<RendererFactory>      	rendererFactory;
 	private GLExecutor		         	glExecutor;
-	private GLCanvas				canvas;
+	private GLAutoDrawable				autoDrawable;
 	public         TRFutureTask<MatrixWindow> 	matrixWindow;
 	public    TRFutureTask<ObjectListWindow> 	objectListWindow;
 	public      TRFutureTask<ObjectDefinitionWindow>objectDefinitionWindow;
@@ -79,14 +83,14 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 		    "glExecutor",
 		    "threadManager",
 		    "uncaughtExceptionHandler",
-		    "canvas",
+		    "autoDrawable",
 		    "world");
 	    
 	    final ExecutorService          executorService = getExecutorService();
 	    final GLExecutor               glExecutor = getGlExecutor();
 	    final ThreadManager            threadManager = getThreadManager();
 	    final UncaughtExceptionHandler exceptionHandler = getUncaughtExceptionHandler();
-	    final GLCanvas                 glCanvas = getCanvas();
+	    final GLAutoDrawable           autoDrawable = getAutoDrawable();
 	    final World                    world = getWorld();
 	    
 	    memoryManager  = new TRFutureTask<MemoryManager>(new Callable<MemoryManager>(){
@@ -102,10 +106,10 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 		    return new TextureManager(GPU.this, threadManager, exceptionHandler);
 		}
 	    });executorService.submit(textureManager);
-	    defaultTIU = glExecutor.submitToGL(new Callable<Integer>(){
+	    defaultTIUFuture = glExecutor.submitToGL(new GLExecutable<Integer, GL3>(){
 		@Override
-		public Integer call() throws Exception {
-		    return glGet(GL3.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) - 1;
+		public Integer execute(GL3 gl) {
+		    return glGet(GL3.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, gl) - 1;
 		}});
 	    matrixWindow=new TRFutureTask<MatrixWindow>(new Callable<MatrixWindow>(){
 		@Override
@@ -137,15 +141,15 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	    rendererFactory = new TRFutureTask<RendererFactory>(new Callable<RendererFactory>(){
 		@Override
 		public RendererFactory call() throws Exception {
-		    final RendererFactory rf = new RendererFactory(GPU.this, threadManager, glCanvas, world, objectListWindow.get()); 
+		    final RendererFactory rf = new RendererFactory(GPU.this, threadManager, autoDrawable, world, objectListWindow.get()); 
 		    rf.setReporter(getReporter());
 		    return rf;
 		}
 	    });executorService.submit(rendererFactory);
 	    
-	    glExecutor.submitToGL(new Callable<Void>(){
+	    glExecutor.submitToGL(new GLExecutable<Void,GL3>(){
 		@Override
-		public Void call() throws Exception {
+		public Void execute(GL3 gl) {
 		    System.out.println("GPU info:");
 		    System.out.println("\tVendor: "+gl.glGetString(GL3.GL_VENDOR));
 		    System.out.println("\tRenderer: "+gl.glGetString(GL3.GL_RENDERER));
@@ -168,25 +172,23 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	    memoryManager.get().compactRootBuffer();
 	}
 	
-	public int glGet(int key){
+	public static int glGet(int key, GL3 gl){
 		IntBuffer buf = IntBuffer.wrap(new int[1]);
-		getGl().glGetIntegerv(key, buf);
+		gl.glGetIntegerv(key, buf);
 		return buf.get(0);
 		}
 	
-	public String glGetString(int key)
-		{return getGl().glGetString(key);}
+	public static String glGetString(int key, GL3 gl)
+		{return gl.glGetString(key);}
 	
-	public ByteOrder getByteOrder(){
-		if(byteOrder==null)
-			{byteOrder = System.getProperty("sun.cpu.endian").contentEquals("little")?ByteOrder.LITTLE_ENDIAN:ByteOrder.BIG_ENDIAN;}
-		return byteOrder;
+	public static ByteOrder getByteOrder(){
+		return System.getProperty("sun.cpu.endian").contentEquals("little")?ByteOrder.LITTLE_ENDIAN:ByteOrder.BIG_ENDIAN;
 		}
 	public GLTexture newTexture()
 		{return new GLTexture(this);}
-	public int newTextureID(){
+	public static int newTextureID(GL3 gl){
 		IntBuffer ib= IntBuffer.allocate(1);
-		getGl().glGenTextures(1, ib);
+		gl.glGenTextures(1, ib);
 		ib.clear();
 		return ib.get();
 		}
@@ -201,15 +203,15 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 			{GL gl1;
 			//In case GL is not ready, wait and try again.
 			try{for(int i=0; i<10; i++){
-			    final GLCanvas canvas = getCanvas();
-			    gl1=canvas.getGL();
+			    final GLAutoDrawable autoDrawable = getAutoDrawable();
+			    gl1=autoDrawable.getGL();
 			    if(gl1!=null){
 				gl=gl1.getGL3();
 				final String debug = System.getProperty("org.jtrfp.trcl.debugGL"); 
 				if(debug!=null&&debug.toUpperCase().contentEquals("FALSE"))
 				 {}//Do nothing
 				else
-				 canvas.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
+				 autoDrawable.setGL(gl=new StateBeanBridgeGL3(new DebugGL3(gl)));
 				break;
 				} Thread.sleep(2000);}}
 			catch(InterruptedException e){e.printStackTrace();}
@@ -232,7 +234,15 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	}
 
 	public void defaultTIU() {
-	    getGl().glActiveTexture(GL3.GL_TEXTURE0+defaultTIU.get());
+	    getGl().glActiveTexture(GL3.GL_TEXTURE0+getDefaultTIU());
+	}
+	
+	private int generateDefaultTIU() {
+	    int result = -1;
+	    try {
+		result = defaultTIUFuture.get();
+	    } catch(Exception e) {e.printStackTrace();}//ugh.
+	    return result;
 	}
 
 	public void defaultFrameBuffers() {
@@ -248,10 +258,10 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	}
 
 	public void defaultViewport() {
-	    final GLCanvas canvas = this.canvas;
+	    final GLAutoDrawable canvas = this.autoDrawable;
 	    getGl().glViewport(0, 0, 
-		    canvas.getWidth(), 
-		    canvas.getHeight());
+		    canvas.getSurfaceWidth(), 
+		    canvas.getSurfaceHeight());
 	}
 	
 	public GPUVendor getGPUVendor(){
@@ -278,9 +288,9 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	    }//end GPUVendor
 
 	//@Override
-	public <T> TRFutureTask<T> submitToGL(Callable<T> c) {
-	    return glExecutor.submitToGL(c);
-	}
+	//public <T> TRFutureTask<T> submitToGL(Callable<T> c) {
+	 //   return glExecutor.submitToGL(c);
+	//}
 
 	/**
 	 * @return the threadManager
@@ -311,12 +321,12 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	    this.glExecutor = glExecutor;
 	}
 
-	public GLCanvas getCanvas() {
-	    return canvas;
+	public GLAutoDrawable getAutoDrawable() {
+	    return autoDrawable;
 	}
 
-	public void setCanvas(GLCanvas canvas) {
-	    this.canvas = canvas;
+	public void setAutoDrawable(GLAutoDrawable autoDrawable) {
+	    this.autoDrawable = autoDrawable;
 	}
 
 	public World getWorld() {
@@ -341,11 +351,12 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	}
 
 	//@Override
-	public <T> GLFutureTask<T> submitToGL(
+	/*
+	public <T> Future<T> submitToGL(
 		GLExecutable<T, GL3> executable) {
-	    throw new UnsupportedOperationException();
+	    return glExecutor.submitToGL(executable); //TODO: 
 	}
-/*
+
 	@Override
 	public void executeOnEachRefresh(
 		GLExecutable<Void, GL3> executable, double orderPriority) {

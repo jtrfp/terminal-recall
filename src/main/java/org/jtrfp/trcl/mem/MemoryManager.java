@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -19,20 +19,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
-
-import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.MemoryUsageHint;
 import org.jtrfp.trcl.gpu.ReallocatableGLTextureBuffer;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.GrowthBehavior;
+
+import com.jogamp.opengl.GL3;
 
 public final class MemoryManager {
     private final IndexPool 			pageIndexPool 	= new IndexPool();
@@ -51,13 +50,13 @@ public final class MemoryManager {
      */
     public static final ByteBuffer		ZEROES = ByteBuffer.allocate(1024*1024*16);
     
-    public MemoryManager(GPU gpu, final GLExecutor<? extends GL> glExecutor){
+    public MemoryManager(GPU gpu, final GLExecutor<GL3> glExecutor){
 	this.gpu=gpu;
 	this.glExecutor=glExecutor;
 	try{
-	glPhysicalMemory = glExecutor.submitToGL(new Callable<ReallocatableGLTextureBuffer>(){
+	glPhysicalMemory = glExecutor.submitToGL(new GLExecutable<ReallocatableGLTextureBuffer,GL3>(){
 	    @Override
-	    public ReallocatableGLTextureBuffer call() throws Exception {
+	    public ReallocatableGLTextureBuffer execute(GL3 gl) throws Exception {
 		ReallocatableGLTextureBuffer tb;
 		//TODO: Set reporter in thread agnostic manner
 		tb=new ReallocatableGLTextureBuffer(MemoryManager.this.gpu);
@@ -74,9 +73,9 @@ public final class MemoryManager {
 	    @Override
 	    public int grow(final int previousMaxCapacity) {
 		final int newMaxCapacity = previousMaxCapacity!=0?previousMaxCapacity*2:1;
-		final TRFuture<Integer> ft = glExecutor.submitToGL(new Callable<Integer>(){
+		final Future<Integer> ft = glExecutor.submitToGL(new GLExecutable<Integer,GL3>(){
 		    @Override
-		    public Integer call(){
+		    public Integer execute(GL3 gl){
 			glPhysicalMemory.reallocate(newMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES);
 			physicalMemory[0] = glPhysicalMemory.map();
 			return newMaxCapacity;
@@ -90,9 +89,9 @@ public final class MemoryManager {
 		final int currentMaxCapacity = pageIndexPool.getMaxCapacity();
 		final int proposedMaxCapacity = currentMaxCapacity/2;//TODO: This adjusts by a single power of 2, take arbitrary power of 2 instead
 		if(proposedMaxCapacity >= minDesiredMaxCapacity){
-		    final TRFuture<Integer> ft = glExecutor.submitToGL(new Callable<Integer>(){
+		    final Future<Integer> ft = glExecutor.submitToGL(new GLExecutable<Integer, GL3>(){
 			@Override
-			public Integer call(){
+			public Integer execute(GL3 gl){
 			    glPhysicalMemory.reallocate(proposedMaxCapacity*PagedByteBuffer.PAGE_SIZE_BYTES);
 			    physicalMemory[0] = glPhysicalMemory.map();
 			    return proposedMaxCapacity;
@@ -164,10 +163,9 @@ public final class MemoryManager {
     public void dumpAllGPUMemTo(final ByteBuffer dest) {
 	if(dest==null)
 	    throw new NullPointerException("Destination intolerably null.");
-	glExecutor.submitToGL(new Callable<Void>(){
+	try {glExecutor.submitToGL(new GLExecutable<Void, GL3>(){
 	    @Override
-	    public Void call() throws Exception {
-		final GL3 gl = gpu.getGl();
+	    public Void execute(GL3 gl) throws Exception {
 		unmap();
 		glPhysicalMemory.bind();
 		ByteBuffer bb = gl.glMapBuffer(GL3.GL_TEXTURE_BUFFER, GL3.GL_READ_ONLY);
@@ -180,6 +178,7 @@ public final class MemoryManager {
 		glPhysicalMemory.unbind();
 		return null;
 	    }}).get();
+	} catch(Exception e) {e.printStackTrace();}
 	dest.clear();
     }//end dumpAllGPUMemTo(...)
 

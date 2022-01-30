@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.jogamp.opengl.GL3;
 
 import org.apache.commons.collections4.collection.PredicatedCollection;
 import org.apache.commons.collections4.functors.InstanceofPredicate;
@@ -45,9 +44,9 @@ import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.coll.RedundancyReportingCollection;
 import org.jtrfp.trcl.core.NotReadyException;
-import org.jtrfp.trcl.core.TRFuture;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.mem.IntArrayVariableList;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
@@ -59,6 +58,7 @@ import org.jtrfp.trcl.pool.IndexList;
 import org.jtrfp.trcl.prop.SkyCube;
 import org.jtrfp.trcl.tools.Util;
 
+import com.jogamp.opengl.GL3;
 import com.ochafik.util.Adapter;
 import com.ochafik.util.CollectionAdapter;
 import com.ochafik.util.listenable.AdaptedCollection;
@@ -113,9 +113,9 @@ public final class Renderer {
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<>(objectListTelemetry);
     private final	CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>
-    	opaqueODAddrsColl    = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL                 = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
+    	opaqueODAddrsColl    	   = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL                 = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
     	opaqueUnoccludedODAddrsColl= new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueUnoccludedIL = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueUnoccludedODAddrAdapter),
-    		transODAddrsColl     = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL          = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
+    	transODAddrsColl     	   = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL          = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
         transUnoccludedODAddrsColl = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transUnoccludedIL  = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transUnoccludedODAddrAdapter);
 
     
@@ -188,10 +188,10 @@ public final class Renderer {
 	relevantPositionedRenderables.addTarget(transUnoccludedODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(new RedundancyReportingCollection<PositionedRenderable>(), true);
 
-	final TRFuture<Void> task0 = gpu.submitToGL(new Callable<Void>(){
+	final Future<Void> task0 = gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 	    @Override
-	    public Void call() throws Exception {
-		final GL3 gl = gpu.getGl();
+	    public Void execute(GL3 gl) throws Exception {
+		//final GL3 gl = gpu.getGl();
 		gl.glGenBuffers(1, ib);
 		ib.clear();
 		dummyBufferID = ib.get();
@@ -208,7 +208,8 @@ public final class Renderer {
 		* Renderer.NUM_RENDER_PASSES)
 		/ PagedByteBuffer.PAGE_SIZE_BYTES)*3];
 
-	task0.get();
+	try {task0.get();}
+	catch(Exception e) {e.printStackTrace();}
 
 	initialized = true;
     }// end ensureInit()
@@ -258,7 +259,7 @@ public final class Renderer {
 	        render(gl);
 	        // Update texture codepages
 	        //TODO: Isn't this getting redundantly called between Renderers?!
-	        gpu.textureManager.getRealtime().vqCodebookManager.getRealtime().refreshStaleCodePages();
+	        gpu.textureManager.getRealtime().vqCodebookManager.refreshStaleCodePages(gl);
 	        fpsTracking();
 	    }catch(NotReadyException e){}
 	    return null;
@@ -660,10 +661,10 @@ public final class Renderer {
 	
 	gpu.memoryManager.get().bindToUniform(0, deferredProgram,
 		    deferredProgram.getUniform("rootBuffer"));
-	getSkyCube().getSkyCubeTexture().bindToTextureUnit(1,gl);
+	getSkyCube().getSkyCubeTexture(gl).bindToTextureUnit(1,gl);
 	getRendererFactory().getPortalTexture().bindToTextureUnit(2,gl);
-	gpu.textureManager.get().vqCodebookManager.get().getESTuTvTexture().bindToTextureUnit(3,gl);
-	gpu.textureManager.get().vqCodebookManager.get().getRGBATexture().bindToTextureUnit(4,gl);
+	gpu.textureManager.get().vqCodebookManager.getESTuTvTexture().bindToTextureUnit(3,gl);
+	gpu.textureManager.get().vqCodebookManager.getRGBATexture().bindToTextureUnit(4,gl);
 	rFactory.getOpaquePrimitiveIDTexture().bindToTextureUnit(5,gl);
 	rFactory.getLayerAccumulatorTexture0().bindToTextureUnit(6,gl);
 	vps.getVertexTextureIDTexture   ().bindToTextureUnit(7,gl);

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL 
- * Copyright (c) 2012-2014 Chuck Ritola.
+ * Copyright (c) 2012-2022 Chuck Ritola.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
@@ -19,13 +19,7 @@ package org.jtrfp.trcl.snd;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Collection;
-import java.util.concurrent.Callable;
-
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
@@ -41,9 +35,13 @@ import org.jtrfp.trcl.gpu.GLProgram;
 import org.jtrfp.trcl.gpu.GLUniform;
 import org.jtrfp.trcl.gpu.GLVertexShader;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
+
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
 
 public class SamplePlaybackEvent extends AbstractSoundEvent {
     protected static final int VERTEX_ID_BUFFER_SIZE = 512;
@@ -123,9 +121,9 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	public Factory(final TR tr) {
 	    super(tr);
 	    final GPU gpu = Features.get(tr, GPUFeature.class);
-	    gpu.getGlExecutor().submitToGL(new Callable<Void>() {
+	    try {gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>() {
 		    @Override
-		    public Void call() throws Exception {
+		    public Void execute(GL3 gl) throws Exception {
 			soundVertexShader      = gpu.newVertexShader();
 			    soundFragmentShader= gpu.newFragmentShader();
 			    soundVertexShader
@@ -163,6 +161,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 			return null;
 		    }// end call()
 		}).get();
+	    } catch(Exception e) {e.printStackTrace();}//ugh.
 	}//end constructor
 
 	@Override

@@ -13,8 +13,6 @@
 
 package org.jtrfp.trcl.ext.tr;
 
-import com.jogamp.opengl.awt.GLCanvas;
-
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
@@ -26,6 +24,8 @@ import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
+
+import com.jogamp.opengl.GLAutoDrawable;
 
 @Component
 public class GPUFactory implements FeatureFactory<TR> {
@@ -42,9 +42,9 @@ public class GPUFactory implements FeatureFactory<TR> {
 	if(glExecutor == null)
 	    throw new RuntimeException("GLExecutor feature is null. This may mean a suitable GL driver could not be found. Cannot continue.\n"
 	    	+ "Is your OpenGL driver working properly and GPU up to spec?");
-	final GLCanvas canvas = rootWindow.getCanvas();
-	assert canvas != null;
-	setCanvas(canvas);
+	final GLAutoDrawable autoDrawable = rootWindow.getAutoDrawable();
+	assert autoDrawable != null;
+	setAutoDrawable(autoDrawable);
 	final ThreadManager threadManager = Features.get(target, ThreadManagerFeature.class);
 	setThreadManager(threadManager);
 	setGlExecutor(glExecutor);

@@ -47,7 +47,7 @@ public class SolidColorTextureFactory {
      stw.codeStartOffsetTable.setAt(stid, 0, codebookID);
      //Write the color to the codebook
      final SolidColorRowWriter rw = new SolidColorRowWriter(c);
-     gpu.textureManager.get().vqCodebookManager.get().setRGBA(codebookID, new RasterRowWriter[]{rw});
+     gpu.textureManager.get().vqCodebookManager.setRGBA(codebookID, new RasterRowWriter[]{rw});
      final byte codeID = 0x0;
      result.setCodeAt(0,0,codeID);
      result.addFinalizationHook(new Runnable(){
@@ -90,7 +90,7 @@ public class SolidColorTextureFactory {
     public Submitter<Integer> generateConsecutive(int numBlocks,
 	    Submitter<Integer> populationTarget) {
 	for(int i=0; i<numBlocks; i++){
-	    int startID = gpu.textureManager.get().vqCodebookManager.get().newCodebook256()*256;
+	    int startID = gpu.textureManager.get().vqCodebookManager.newCodebook256()*256;
 	    for(int j=0; j<256; j++)
 		populationTarget.submit(startID+j);
 	}//end for(blockID)

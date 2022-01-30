@@ -30,7 +30,7 @@ public class ObjectProcessingStage {
     private final GLVertexShader   objectVertexShader;
     private final GLFragmentShader objectFragShader;
 
-    public ObjectProcessingStage(GPU gpu, ValidationHandler vh){
+    public ObjectProcessingStage(GPU gpu, ValidationHandler vh, GL3 gl){
 	this.gpu=gpu;
 
 	objectVertexShader   = gpu.newVertexShader();
@@ -44,23 +44,23 @@ public class ObjectProcessingStage {
 	
 	camMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_SIDE_LEN, OBJECT_TEXTURE_SIDE_LEN, 
-			GL3.GL_RGBA, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RGBA, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("camMatrixTexture");
 	noCamMatrixTexture = gpu //Does not need to be in reshape() since it is off-screen.
 		.newTexture()
-		.bind()
+		.bind(gl)
 		.setImage(GL3.GL_RGBA32F, OBJECT_TEXTURE_SIDE_LEN, OBJECT_TEXTURE_SIDE_LEN, 
-			GL3.GL_RGBA, GL3.GL_FLOAT, null)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setMagFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			GL3.GL_RGBA, GL3.GL_FLOAT, null, gl)
+			.setMinFilter(GL3.GL_NEAREST,gl)
+			.setMagFilter(GL3.GL_NEAREST,gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE,gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE,gl)
 			.setDebugName("noCamMatrixTexture");
 
 	objectProcessingFrameBuffer = gpu.newFrameBuffer()

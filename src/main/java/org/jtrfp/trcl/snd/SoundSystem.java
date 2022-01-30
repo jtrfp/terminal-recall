@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2017 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -40,6 +40,7 @@ import org.jtrfp.trcl.core.KeyedExecutor;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.pool.ObjectFactory;
 import org.jtrfp.trcl.snd.SoundSystemKernel.AddToActiveEvents;
@@ -51,6 +52,7 @@ import org.jtrfp.trcl.snd.SoundSystemKernel.SetBufferSizeFrames;
 import org.jtrfp.trcl.tools.Util;
 
 import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL3;
 import com.ochafik.util.Adapter;
 
 import lombok.Getter;
@@ -142,9 +144,9 @@ public class SoundSystem {
 	soundSystemKernel.setGpu(gpu);
 	soundSystemKernel.setThreadManager(tr.getThreadManager());
 	
-	gpu.getGlExecutor().submitToGL(new Callable<Void>() {
+	try {gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>() {
 	    @Override
-	    public Void call() throws Exception {
+	    public Void execute(GL3 gl) throws Exception {
 		System.out.println("SoundSystem: setting up textures...");
 		// TODO: Setup uniforms here.
 		System.out.println("...Done.");
@@ -154,7 +156,8 @@ public class SoundSystem {
 		gpu.defaultFrameBuffers();
 		return null;
 	    }// end call()
-	}).get();
+	}).get(); }
+	catch(Exception e) {e.printStackTrace();}
 	
 	musicPlaybackFactory = new SamplePlaybackEvent.Factory(tr);
 	playbackFactory= new SamplePlaybackEvent.Factory(tr);
@@ -424,23 +427,23 @@ public class SoundSystem {
 			    fb.clear();
 			
 			final FloatBuffer finalSamples = fb;
-			gpu.getGlExecutor().submitToGL(new Callable<Void>(){
+			gpu.getGlExecutor().submitToGL(new GLExecutable<Void,GL3>(){
 			    @Override
-			    public Void call() throws Exception {
+			    public Void execute(GL3 gl) throws Exception {
 				getGpu().defaultTIU();
 				texture
-				 .bind()
-				 .setMagFilter(getFilteringParm())
-				 .setMinFilter(getFilteringParm())
-				 .setWrapS(GL2ES2.GL_CLAMP_TO_EDGE)
-				 .setWrapT(GL2ES2.GL_CLAMP_TO_EDGE)
+				 .bind(gl)
+				 .setMagFilter(getFilteringParm(), gl)
+				 .setMinFilter(getFilteringParm(), gl)
+				 .setWrapS(GL2ES2.GL_CLAMP_TO_EDGE, gl)
+				 .setWrapT(GL2ES2.GL_CLAMP_TO_EDGE, gl)
 				 .setImage(
 					 GL2ES2.GL_R32F, 
 					 SoundTexture.ROW_LENGTH_SAMPLES, 
 					 numRows, 
 					 GL2ES2.GL_RED, 
 					 GL2ES2.GL_FLOAT, 
-					 finalSamples);
+					 finalSamples, gl);
 				getGpu().defaultTexture();
 				return null;
 			    }}).get();

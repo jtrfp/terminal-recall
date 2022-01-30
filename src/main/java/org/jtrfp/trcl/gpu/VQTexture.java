@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -13,7 +13,6 @@
 package org.jtrfp.trcl.gpu;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
@@ -24,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.TextureBehavior;
@@ -38,6 +36,8 @@ import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
+
+import com.jogamp.opengl.GL3;
 
 public class VQTexture implements Texture {
     private final TextureManager 	tm ;
@@ -59,7 +59,7 @@ public class VQTexture implements Texture {
     
     VQTexture(GPU gpu, String debugName){
    	this.tm		  =gpu.textureManager.get();
-   	this.cbm	  =tm.vqCodebookManager.get();
+   	this.cbm	  =tm.vqCodebookManager;
    	this.tocWindow	  =tm.getTOCWindow();
    	this.stw	  =tm.getSubTextureWindow();
    	this.debugName	  =debugName.replace('.', '_');
@@ -74,7 +74,7 @@ public class VQTexture implements Texture {
 	    tocWindow.freeLater(tocIndex);
 	stw.freeLater(subTextureIDs);
 	//Codebook entries
-	tm.vqCodebookManager.get().freeCodebook256(codebookStartOffsets256);
+	cbm.freeCodebook256(codebookStartOffsets256);
 	for(Runnable h:finalizationHooks)
 	    h.run();
 	super.finalize();
@@ -342,7 +342,7 @@ public class VQTexture implements Texture {
     }
 
     int newCodebook256() {
-	final int codebook256 = tm.vqCodebookManager.get().newCodebook256();
+	final int codebook256 = cbm.newCodebook256();
 	getCodebookStartOffsets256().add(codebook256);
 	return codebook256;
     }
@@ -381,14 +381,14 @@ public class VQTexture implements Texture {
     
     void newCodebook256(Collection<Integer> dest, int numberOfCodeblocksToCreate){
 	final List<Integer> result = new ArrayList<Integer>(numberOfCodeblocksToCreate);
-	tm.vqCodebookManager.get().newCodebook256(result, numberOfCodeblocksToCreate);
+	cbm.newCodebook256(result, numberOfCodeblocksToCreate);
 	getCodebookStartOffsets256().addAll(result);
 	if(dest!=null)
 	    dest.addAll(result);
     }//end newCodebook256
     
     void freeCodebook256(int codebook256){
-	tm.vqCodebookManager.get().freeCodebook256(codebook256);
+	cbm.freeCodebook256(codebook256);
 	if(!getCodebookStartOffsets256().remove(new Integer(codebook256)))
 	    throw new IllegalStateException("Specified codebook256 index was not found: "+codebook256);
     }

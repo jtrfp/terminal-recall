@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -20,15 +20,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.jogamp.opengl.GL3;
-
 import org.jtrfp.trcl.core.TRFactory;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
 
+import com.jogamp.opengl.GL3;
+
 public class VQCodebookManager {
     private final 	IndexPool 	codebook256Indices = new IndexPool().setHardLimit(CODE256_PER_PAGE*NUM_CODE_PAGES);
-    private final 	GLTexture 	rgbaTexture,
+    private GLTexture 			rgbaTexture,
     					esTuTvTexture;
     private final	Collection<TileUpdate>tileUpdates	       = new ArrayList<TileUpdate>(1024);
     private final	GPU		gpu;
@@ -48,32 +49,37 @@ public class VQCodebookManager {
 
 	//Check if we can make enough codepages
 	final IntBuffer ib = ByteBuffer.allocateDirect(4).asIntBuffer();
-	gpu.getGl().glGetIntegerv(GL3.GL_MAX_ARRAY_TEXTURE_LAYERS, ib);
-	if(ib.get(0)<NUM_CODE_PAGES)
-	    throw new RuntimeException("Insufficient support for number of array texture layers: "+ib.get(0));
-	else System.out.println("GL implementation supports "+ib.get(0)+" array texture layers.");
 	
-	rgbaTexture = gpu.
-		newTexture().
-		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
-		bind().
-		setInternalColorFormat(GL3.GL_COMPRESSED_RGBA).
-		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, MIP_DEPTH).
-		setMagFilter(GL3.GL_LINEAR).
-		setMinFilter(GL3.GL_LINEAR_MIPMAP_LINEAR).
-		setWrapS(GL3.GL_CLAMP_TO_EDGE).
-		setWrapT(GL3.GL_CLAMP_TO_EDGE);
-	esTuTvTexture = gpu.
-		newTexture().
-		setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
-		bind().
-		setInternalColorFormat(GL3.GL_COMPRESSED_RGBA).
-		configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, MIP_DEPTH).
-		setMagFilter(GL3.GL_LINEAR).
-		setMinFilter(GL3.GL_LINEAR_MIPMAP_LINEAR).
-		setWrapS(GL3.GL_CLAMP_TO_EDGE).
-		setWrapT(GL3.GL_CLAMP_TO_EDGE).
-		unbind();
+	gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>() {
+	    public Void execute(GL3 gl) {
+		gpu.getGl().glGetIntegerv(GL3.GL_MAX_ARRAY_TEXTURE_LAYERS, ib);
+		if(ib.get(0)<NUM_CODE_PAGES)
+		    throw new RuntimeException("Insufficient support for number of array texture layers: "+ib.get(0));
+		else System.out.println("GL implementation supports "+ib.get(0)+" array texture layers.");
+		rgbaTexture = gpu.
+			newTexture().
+			setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
+			bind(gl).
+			setInternalColorFormat(GL3.GL_COMPRESSED_RGBA).
+			configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, MIP_DEPTH, gl).
+			setMagFilter(GL3.GL_LINEAR, gl).
+			setMinFilter(GL3.GL_LINEAR_MIPMAP_LINEAR, gl).
+			setWrapS(GL3.GL_CLAMP_TO_EDGE, gl).
+			setWrapT(GL3.GL_CLAMP_TO_EDGE, gl);
+		esTuTvTexture = gpu.
+			newTexture().
+			setBindingTarget(GL3.GL_TEXTURE_2D_ARRAY).
+			bind(gl).
+			setInternalColorFormat(GL3.GL_COMPRESSED_RGBA).
+			configure(new int[]{CODE_PAGE_SIDE_LENGTH_TEXELS,CODE_PAGE_SIDE_LENGTH_TEXELS,NUM_CODE_PAGES}, MIP_DEPTH, gl).
+			setMagFilter(GL3.GL_LINEAR, gl).
+			setMinFilter(GL3.GL_LINEAR_MIPMAP_LINEAR, gl).
+			setWrapS(GL3.GL_CLAMP_TO_EDGE, gl).
+			setWrapT(GL3.GL_CLAMP_TO_EDGE, gl).
+			unbind(gl);
+		return null;
+	    }
+	});
     }//end constructor
 
     public VQCodebookManager setRGBA(int codeID, RasterRowWriter []rowWriter) {
@@ -133,15 +139,15 @@ public class VQCodebookManager {
     private final ByteBuffer workTile = ByteBuffer.allocateDirect(4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
     private final ByteBuffer workTile256=ByteBuffer.allocateDirect(256*4*CODE_SIDE_LENGTH*CODE_SIDE_LENGTH);
 
-    public void refreshStaleCodePages(){
+    public void refreshStaleCodePages(GL3 gl){
 	synchronized(tileUpdates){
-	    refreshStaleCodePages(rgbaTexture,0);
-	    refreshStaleCodePages(esTuTvTexture,1);
+	    refreshStaleCodePages(rgbaTexture,0,gl);
+	    refreshStaleCodePages(esTuTvTexture,1,gl);
 	    tileUpdates.clear();}
     }
 
-    private void refreshStaleCodePages(GLTexture texture, int channelArrayIndex){
-	texture.bind();
+    private void refreshStaleCodePages(GLTexture texture, int channelArrayIndex, GL3 gl){
+	texture.bind(gl);
 	for(TileUpdate tu:tileUpdates){
 	    final RasterRowWriter [][]rw2 = tu.getRowWriters();
 	    if(rw2.length>channelArrayIndex){
@@ -153,7 +159,7 @@ public class VQCodebookManager {
 			    rowWriters[0].applyRow(row, workTile);
 			}// end for(rows)
 			writeWithMip(texture, workTile, tu.getX(), tu.getY(), tu.getZ(), 
-				CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 0);
+				CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 0, gl);
 			/*workTile.clear();
 			texture.subImage(
 				new int[]{tu.getX(),tu.getY(),tu.getZ()},
@@ -175,7 +181,7 @@ public class VQCodebookManager {
 			    }// end for(x)
 			}// end for(y)
 			writeWithMip(texture, workTile256, tu.getX(), tu.getY(), tu.getZ(), 
-				code256Dims[0], code256Dims[1], 0);
+				code256Dims[0], code256Dims[1], 0, gl);
 			/*workTile256.clear();
 			texture.subImage(
 				new int[]{tu.getX(),tu.getY(),tu.getZ()},
@@ -189,14 +195,14 @@ public class VQCodebookManager {
 	gpu.defaultTexture();
     }//end refreshStaleCodePages()
     
-    private void writeWithMip(GLTexture texture, ByteBuffer workTile256, int updateX, int updateY, int layer, int updateWidth, int updateHeight, int level){
+    private void writeWithMip(GLTexture texture, ByteBuffer workTile256, int updateX, int updateY, int layer, int updateWidth, int updateHeight, int level, GL3 gl){
 	if(level >= MIP_DEPTH)
 	    return;
 	workTile256.clear();
 	texture.subImage(
 		new int[]{updateX,updateY,layer},
 		new int[]{updateWidth, updateHeight, 1},
-		GL3.GL_RGBA, level, workTile256);
+		GL3.GL_RGBA, level, workTile256, gl);
 	//Scale down
 	final int newUpdateHeight = updateHeight / 2;
 	final int newUpdateWidth  = updateWidth  / 2;
@@ -249,7 +255,7 @@ public class VQCodebookManager {
 		workTile256.put((byte)(accumulatorA & 0xFF));
 	    }//end for(x)
 	}//end for(y)
-	writeWithMip(texture, workTile256, updateX/2, updateY/2, layer, newUpdateWidth, newUpdateHeight, level+1);
+	writeWithMip(texture, workTile256, updateX/2, updateY/2, layer, newUpdateWidth, newUpdateHeight, level+1, gl);
     }//end writeWithMip(...)
 
     public synchronized void newCodebook256(List<Integer> list, int count){

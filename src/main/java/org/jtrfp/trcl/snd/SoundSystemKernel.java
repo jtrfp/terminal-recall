@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2017 Chuck Ritola
+ * Copyright (c) 2017-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -21,11 +21,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Queue;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
 
-import com.jogamp.opengl.GL3;
 import javax.sound.sampled.AudioFormat;
 
 import org.jtrfp.trcl.core.KeyedExecutor;
@@ -35,8 +32,11 @@ import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadDataType;
 import org.jtrfp.trcl.gpu.GLTexture.PixelReadOrder;
 import org.jtrfp.trcl.gpu.GPU;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.snd.SoundEvent.Factory;
+
+import com.jogamp.opengl.GL3;
 
 public class SoundSystemKernel {
     private GPU gpu;
@@ -262,14 +262,15 @@ public class SoundSystemKernel {
 	final GLFrameBuffer renderFrameBuffer = getPlaybackFrameBuffer();
 	final GLTexture renderTexture         = getPlaybackTexture();
 	
-	gpu.getGlExecutor().submitToGL(new Callable<Void>() {
+	try {gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>() {
 	    @Override
-	    public Void call() throws Exception {
+	    public Void execute(GL3 gl) throws Exception {
 		renderFloatBytes.clear();
-		render(getGpu(), getGpu().getGl(), renderFloatBytes, renderFrameBuffer, renderTexture, bufferTimeCounter);
+		render(getGpu(), gl, renderFloatBytes, renderFrameBuffer, renderTexture, bufferTimeCounter);
 		return null;
 	    }
-	}).get();
+	}).get(); }
+	catch(Exception e) {e.printStackTrace();}
 	//sBuf.clear();
 	final FloatBuffer fBuf = renderFloatBytes.asFloatBuffer();
 	fBuf.clear();
@@ -330,8 +331,8 @@ public class SoundSystemKernel {
 	// Read and export previous results to sound card.
 	final GL3 gl = gpu.getGl();
 	gpu.defaultFrameBuffers();
-	renderTexture.bind().readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
-		audioByteBuffer).unbind();// RG_INTEGER throws INVALID_OPERATION!?
+	renderTexture.bind(gl).readPixels(PixelReadOrder.RG, PixelReadDataType.FLOAT,
+		audioByteBuffer, gl).unbind(gl);// RG_INTEGER throws INVALID_OPERATION!?
     }//end readGLAudioBuffer(...)
     
 
@@ -444,9 +445,9 @@ public class SoundSystemKernel {
     
     private void generateRenderTarget( ) {
 	//Playback texture
-	gpu.getGlExecutor().submitToGL(new Callable<Void>(){
+	try {gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 	    @Override
-	    public Void call() throws Exception {
+	    public Void execute(GL3 gl) throws Exception {
 		final GPU gpu = getGpu();
 		//// Generate Texture
 		gpu.defaultProgram();
@@ -455,18 +456,18 @@ public class SoundSystemKernel {
 		gpu.defaultFrameBuffers();
 		final GLTexture newTexture = playbackTexture = gpu
 			.newTexture()
-			.bind()
-			.setMagFilter(GL3.GL_NEAREST)
-			.setMinFilter(GL3.GL_NEAREST)
-			.setWrapS(GL3.GL_CLAMP_TO_EDGE)
-			.setWrapT(GL3.GL_CLAMP_TO_EDGE)
+			.bind(gl)
+			.setMagFilter(GL3.GL_NEAREST, gl)
+			.setMinFilter(GL3.GL_NEAREST, gl)
+			.setWrapS(GL3.GL_CLAMP_TO_EDGE, gl)
+			.setWrapT(GL3.GL_CLAMP_TO_EDGE, gl)
 			.setDebugName("playbackTexture")
 			.setExpectedMinValue(-1, -1, -1, -1)
 			.setExpectedMaxValue(1, 1, 1, 1)
 			.setPreferredUpdateIntervalMillis(100)
 			.setImage(GL3.GL_RG32F, getBufferSizeFrames(),
 				NUM_BUFFER_ROWS, GL3.GL_RGBA, GL3.GL_FLOAT,
-				null);
+				null, gl);
 		//// Generate Framebuffer
 		gpu.defaultTexture();
 		gpu.defaultTIU();
@@ -476,20 +477,21 @@ public class SoundSystemKernel {
 			.attachDrawTexture(newTexture,
 				GL3.GL_COLOR_ATTACHMENT0);
 		return null;//FIXME: Should this reset to default texture/TIU afterward to improve performance?
-	    }}).get();
+	    }}).get();}
+	catch(Exception e) {e.printStackTrace();}
     }//end generateRenderTarget(...)
     
     private void releaseRenderTarget( GLFrameBuffer playbackFrameBuffer, GLTexture playbackTexture ) {
 	if( playbackFrameBuffer != null || playbackTexture != null ) {
 	    final GLFrameBuffer frameBufferToDelete = playbackFrameBuffer;
 	    final GLTexture     textureToDelete     = playbackTexture;
-	    gpu.getGlExecutor().submitToGL(new Callable<Void>(){
+	    gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 		@Override
-		public Void call() throws Exception {
+		public Void execute(GL3 gl) throws Exception {
 		    if( frameBufferToDelete != null )
 		        frameBufferToDelete.destroy();
 		    if( textureToDelete != null )
-			textureToDelete.delete();
+			textureToDelete.delete(gl);
 		    return null;
 		}});
 	}//end if( !null )

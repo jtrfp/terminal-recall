@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -54,7 +54,7 @@ public class UncompressedVQTextureFactory {
 
     public UncompressedVQTextureFactory(GPU gpu, ThreadManager threadManager, String debugName){
 	this.tm		  =gpu.textureManager.get();
-	this.cbm	  =tm.vqCodebookManager.get();
+	this.cbm	  =tm.vqCodebookManager;
 	this.tocWindow	  =(TextureTOCWindow)tm.getTOCWindow();
 	this.stw	  =(SubTextureWindow)tm.getSubTextureWindow();
 	this.debugName	  =debugName.replace('.', '_');

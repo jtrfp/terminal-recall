@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -18,14 +18,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.LineSegment;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.gui.GLExecutable;
+
+import com.jogamp.opengl.GL3;
+
+import lombok.Getter;
 
 
 /**
@@ -39,7 +43,8 @@ public class TextureManager {
     private final ThreadManager			threadManager;
     private final SubTextureWindow 		subTextureWindow;
     private final TextureTOCWindow 		tocWindow;
-    public final TRFutureTask<VQCodebookManager>vqCodebookManager;
+    //public final Future<VQCodebookManager>vqCodebookManager;
+    public final VQCodebookManager vqCodebookManager;
     private Texture			fallbackTexture;
     private final ConcurrentHashMap<Integer,VQTexture>
     						colorCache = new ConcurrentHashMap<Integer,VQTexture>();
@@ -51,11 +56,13 @@ public class TextureManager {
 	this.threadManager      = threadManager;
 	subTextureWindow 	= new SubTextureWindow(gpu);
 	tocWindow 		= new TextureTOCWindow(gpu);
-	vqCodebookManager=gpu.submitToGL(new Callable<VQCodebookManager>(){
+	/*
+	vqCodebookManager=gpu.getGlExecutor().submitToGL(new GLExecutable<VQCodebookManager,GL3>(){
 	    @Override
-	    public VQCodebookManager call() throws Exception {
-		return new VQCodebookManager(gpu, exceptionHandler);
-	    }});
+	    public VQCodebookManager execute(GL3 gl) throws Exception {
+		return new VQCodebookManager(gpu, exceptionHandler, gl);
+	    }});*/
+	vqCodebookManager = new VQCodebookManager(gpu, exceptionHandler);
     }//end constructor
     
     public VQTexture newTexture(ByteBuffer imageRGB8, ByteBuffer imageESTuTv, String debugName, boolean uvWrapping, boolean generateMipMaps){

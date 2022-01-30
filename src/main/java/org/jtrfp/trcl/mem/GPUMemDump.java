@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 
@@ -30,6 +29,9 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.VQCodebookManager;
+import org.jtrfp.trcl.gui.GLExecutable;
+
+import com.jogamp.opengl.GL3;
 
 public class GPUMemDump {
 private final GPU gpu;
@@ -49,12 +51,11 @@ private final TR tr;
     }//end constructor
     
     public void dumpCodePages() throws Exception {
-	final VQCodebookManager vq = gpu.textureManager.get().vqCodebookManager
-		.get();
+	final VQCodebookManager vq = gpu.textureManager.get().vqCodebookManager;
 	
-	final ByteBuffer[] pagesRGBA8888 = (ByteBuffer[])gpu.getGlExecutor().submitToGL(new Callable<ByteBuffer[]>(){
+	final ByteBuffer[] pagesRGBA8888 = (ByteBuffer[])gpu.getGlExecutor().submitToGL(new GLExecutable<ByteBuffer[], GL3>(){
 	    @Override
-	    public ByteBuffer[] call() throws Exception {
+	    public ByteBuffer[] execute(GL3 gl) throws Exception {
 		return vq.dumpPagesToBuffer();
 	    }}).get();
 	for (int pageIndex = 0; pageIndex < VQCodebookManager.NUM_CODE_PAGES; pageIndex++) {
@@ -88,10 +89,10 @@ private final TR tr;
 	raf.setLength(gpuMemSize);
 	FileChannel channel = raf.getChannel();
 	final MappedByteBuffer bb = channel.map(MapMode.READ_WRITE, 0, gpuMemSize);
-	gpu.getGlExecutor().submitToGL(new Callable<Void>(){
+	gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 
 	    @Override
-	    public Void call() throws Exception {
+	    public Void execute(GL3 gl) throws Exception {
 		memMgr.dumpAllGPUMemTo(bb);
 		return null;
 	    }});

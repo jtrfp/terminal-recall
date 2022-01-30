@@ -54,7 +54,7 @@ import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.gpu.CanvasProvider;
+import org.jtrfp.trcl.gpu.GLAutoDrawableProvider;
 import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
@@ -525,7 +525,7 @@ public class Mission {
     
     private GLExecutor<?> getGlExecutor() {
 	if( glExecutor == null )
-	    glExecutor = Features.get(Features.get(getTr(), CanvasProvider.class),GLExecutor.class);
+	    glExecutor = Features.get(Features.get(getTr(), GLAutoDrawableProvider.class),GLExecutor.class);
 	return glExecutor;
     }
 

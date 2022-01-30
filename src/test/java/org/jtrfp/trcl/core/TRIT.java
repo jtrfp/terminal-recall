@@ -18,8 +18,8 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
@@ -30,6 +30,7 @@ import org.jtrfp.trcl.flow.RunMe;
 import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.gpu.GLTestUtils;
 import org.jtrfp.trcl.gpu.Renderer;
+import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.jtrfp.trcl.gui.SwingMenuSystemFactory;
@@ -39,6 +40,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+
+import com.jogamp.opengl.GL3;
 
 public class TRIT {
     private static final Integer [] COMPLETION_BARRIER = new Integer[1];
@@ -107,12 +110,13 @@ public class TRIT {
 		    final RootWindow rootWindow = Features.get(tr, RootWindow.class);
 		    final Renderer renderer = tr.mainRenderer;
 
-		    final TRFutureTask<BufferedImage> screenshotTask = renderer.getGpu().getGlExecutor().submitToGL(new Callable<BufferedImage>(){
+		    final Future<BufferedImage> screenshotTask = renderer.getGpu().getGlExecutor().submitToGL(new GLExecutable<BufferedImage, GL3>(){
 			@Override
-			public BufferedImage call() {
+			public BufferedImage execute(GL3 gl) {
 			    return GLTestUtils.screenshot(renderer.getGpu().getGl(), rootWindow.getCanvas());
 			}});
-		    result[0] = screenshotTask.get();
+		    try {result[0] = screenshotTask.get();}
+		    catch(Exception e) {e.printStackTrace();}
 		    synchronized(result) {
 			result.notifyAll();}
 		}//end run()

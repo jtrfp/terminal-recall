@@ -13,31 +13,33 @@
 
 package org.jtrfp.trcl.gpu.gl3;
 
+import java.util.concurrent.Executors;
+
+import org.jtrfp.trcl.core.Feature;
+import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.FeatureNotApplicableException;
+import org.jtrfp.trcl.gpu.GLAutoDrawableProvider;
+import org.jtrfp.trcl.gpu.QueuedGLExecutor;
+import org.springframework.stereotype.Component;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
 
-import org.jtrfp.trcl.core.Feature;
-import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.core.FeatureNotApplicableException;
-import org.jtrfp.trcl.gpu.CanvasBoundGLExecutor;
-import org.jtrfp.trcl.gpu.CanvasProvider;
-import org.springframework.stereotype.Component;
-
 @Component
-public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProvider>{
+public class QueuedGL33ExecutorFactory implements FeatureFactory<GLAutoDrawableProvider>{
     
-    public static class CanvasBoundGL33Executor extends CanvasBoundGLExecutor<GL3> implements GL33Executor, Feature<CanvasProvider> {
-
+    public static class QueuedGL33Executor extends QueuedGLExecutor<GL3> implements GL33Executor, Feature<GLAutoDrawableProvider> {
+	
 	@Override
-	public void apply(CanvasProvider target) {
-	    setCanvasProvider(target);
+	public void apply(GLAutoDrawableProvider target) {
+	    setGLAutoDrawableProvider(target);
 	}
 
 	@Override
-	public void destruct(CanvasProvider target) {
-	    setCanvasProvider(null);
+	public void destruct(GLAutoDrawableProvider target) {
+	    setGLAutoDrawableProvider(null);
 	}
 
 	@Override
@@ -48,17 +50,17 @@ public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProv
     }//end CanvasBoundGL33Executor
 
     @Override
-    public Feature<CanvasProvider> newInstance(CanvasProvider target)
+    public Feature<GLAutoDrawableProvider> newInstance(GLAutoDrawableProvider target)
 	    throws FeatureNotApplicableException {
 	final String [] versionString = new String[1];
-	target.getCanvas().invoke(true, new GLRunnable(){
+	target.getAutoDrawable().invoke(true, new GLRunnable(){
 
 	    @Override
 	    public boolean run(GLAutoDrawable drawable) {
 		versionString[0] = drawable.getGL().glGetString(GL.GL_VERSION);
 		return true;
 	    }});
-	System.out.println("CanvaseBoundGL33Executor: Evaluating GL version string `"+versionString[0]+"`");
+	System.out.println("QueuedGL33Executor: Evaluating GL version string `"+versionString[0]+"`");
 	final String [] parts      = versionString[0].split("\\.");
 	final String [] minorParts = parts[1].split("\\s+");
 	try {
@@ -73,16 +75,16 @@ public class CanvasBoundGL33ExecutorFactory implements FeatureFactory<CanvasProv
 	    System.out.println("\t... failed to parse the version number.");
 	    throw new FeatureNotApplicableException("Must be GL (not ES) 3.3, with major formatted as a number. Got "+versionString);
 	    }
-	return new CanvasBoundGL33Executor();
+	return new QueuedGL33Executor();
     }//end newInstance
 
     @Override
-    public Class<CanvasProvider> getTargetClass() {
-	return CanvasProvider.class;
+    public Class<GLAutoDrawableProvider> getTargetClass() {
+	return GLAutoDrawableProvider.class;
     }
 
     @Override
     public Class<? extends Feature> getFeatureClass() {
-	return CanvasBoundGL33Executor.class;
+	return QueuedGL33Executor.class;
     }
 }//end CanvasBoundGL33ExecutorFactory

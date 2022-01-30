@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.gpu;
 
-import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLAutoDrawable;
 
-public interface CanvasProvider {
- public GLCanvas getCanvas();
+public interface GLAutoDrawableProvider {
+ public GLAutoDrawable getAutoDrawable();
 }//end CanvasProvider

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -16,5 +16,5 @@ package org.jtrfp.trcl.gui;
 import com.jogamp.opengl.GL;
 
 public interface GLExecutable<RETURN_TYPE, GL_TYPE extends GL> {
-    public RETURN_TYPE execute(GL_TYPE gl);
+    public RETURN_TYPE execute(GL_TYPE gl) throws Exception;
 }//end GLExecutable

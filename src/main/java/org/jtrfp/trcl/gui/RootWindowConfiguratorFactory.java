@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016 Chuck Ritola
+ * Copyright (c) 2016-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -27,7 +27,8 @@ import org.springframework.stereotype.Component;
 public class RootWindowConfiguratorFactory implements FeatureFactory<RootWindow>{
     private static final HashSet<String> PERSISTENT_PROPERTIES = 
 		new HashSet<String>(Arrays.asList(
-			"bounds"));
+			"bounds",
+			"fullScreen"));
     public static class RootWindowConfigurator extends FeatureConfigurator<RootWindow> {
 	@Override
 	protected Set<String> getPersistentProperties() {

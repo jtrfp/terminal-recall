@@ -15,9 +15,13 @@ package org.jtrfp.trcl.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
+import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,15 +40,13 @@ public class ExitMenuItemFactory implements FeatureFactory<MenuSystem> {
 	}
 
 	@Override
-	public void destruct(MenuSystem target) {
-	    // TODO Auto-generated method stub
-	    
-	}
+	public void destruct(MenuSystem target) {}
 	
 	private class ExitMenuItemListener implements ActionListener{
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		System.exit(0);
+		final RootWindow rw = Features.getByPath(Features.getSingleton(), RootWindow.class, TR.class);
+		rw.dispatchEvent(new WindowEvent(rw, WindowEvent.WINDOW_CLOSING));
 	    }
 	}//end ExitMenuItemListener
 	

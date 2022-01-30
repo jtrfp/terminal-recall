@@ -13,6 +13,10 @@
 package org.jtrfp.trcl.gui;
 
 import java.awt.Dimension;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Properties;
@@ -24,20 +28,26 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
+import org.jtrfp.trcl.conf.ui.CheckboxUI;
+import org.jtrfp.trcl.conf.ui.ConfigByUI;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.CanvasProvider;
+import org.jtrfp.trcl.ctl.Newt2AWTKeyListener;
+import org.jtrfp.trcl.gpu.GLAutoDrawableProvider;
 import org.springframework.stereotype.Component;
 
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.awt.GLCanvas;
 import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
+
+import lombok.Getter;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
@@ -46,38 +56,129 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	System.setProperty("awt.useSystemAAFontSettings","lcd");
 	System.setProperty("swing.aatext", "true");
 	}
-    public static class RootWindow extends JFrame implements Feature<TR>, CanvasProvider {
+    public static class RootWindow extends JFrame implements Feature<TR>, GLAutoDrawableProvider {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -2412572500302248185L;
 	
-	private final GLProfile 	glProfile       = GLProfile.getMaxProgrammable(true);
-	private final GLCapabilities 	capabilities 	= new GLCapabilities(glProfile);
-	private final GLCanvas 		canvas 		= new GLCanvas(capabilities);
+	@Getter(lazy=true)
+	private final GLProfile 	glProfile       = createGLProfile();
+	@Getter(lazy=true)
+	private final GLCapabilities 	glCapabilities 	= createGLCapabilities();
+	@Getter(lazy=true)
+	private final GLWindow glWindow = createGLWindow();
+	@Getter(lazy=true)
+	private final NewtCanvasAWT 		canvas 		= createCanvas();
 	private static final String         ICON_PATH       = "/ProgramIcon.png";
+	
 	private final GLEventListener   glEventListener = new RootWindowGLEventListener();
+	private boolean fullScreen = false;
+	private Rectangle normalBounds = null;
 	
 	public RootWindow(){
 	    super();
-	    SwingUtilities.invokeLater(new Runnable() {
-		@Override
-		public void run() {
-		    affirmLookAndFeel();
-		    setSize(800,600);
-		    canvas.setFocusTraversalKeysEnabled(false);
-		    canvas.addGLEventListener(glEventListener);
-		    getContentPane().add(canvas);
-		    setFocusTraversalKeysEnabled(false);
-		    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);//We'll handle the closing process so we don't lose context during a pending shutdown.
-		    setTitle("Terminal Recall");
-		    try{RootWindow.this.setIconImage(ImageIO.read(this.getClass().getResource(ICON_PATH)));}
-		    catch(Exception e){e.printStackTrace();}
-		    RootWindow.this.setMinimumSize(new Dimension(100,100));
-		}
-	    });
+	    final GLWindow w = getGlWindow();
+	    w.addKeyListener(new Newt2AWTKeyListener(RootWindow.this));
+	    
+	    try {
+		SwingUtilities.invokeLater(new Runnable() {
+		    @Override
+		    public void run() {
+			affirmLookAndFeel();
+			setSize(800,600);
+			getGlWindow().addGLEventListener(glEventListener);
+			NewtCanvasAWT canvas = getCanvas();
+			getContentPane().add(canvas);
+			setFocusTraversalKeysEnabled(false);
+			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);//We'll handle the closing process so we don't lose context during a pending shutdown.
+			setTitle("Terminal Recall");
+			try{RootWindow.this.setIconImage(ImageIO.read(this.getClass().getResource(ICON_PATH)));}
+			catch(Exception e){e.printStackTrace();}
+			RootWindow.this.setMinimumSize(new Dimension(100,100));
+		    }
+		});
+	    } catch(Exception e) {e.printStackTrace();}
 	}//end constructor
 	
+	private GLWindow createGLWindow() {
+	    final GLWindow result = GLWindow.create(getGlCapabilities());
+	    return result;
+	}
+	
+	private GLCapabilities createGLCapabilities() {
+	    final GLCapabilities result = new GLCapabilities(getGlProfile());
+	    return result;
+	}
+	
+	private GLProfile createGLProfile() {
+	    final GLProfile result = GLProfile.getMaxProgrammable(true);
+	    return result;
+	}
+	
+	private NewtCanvasAWT createCanvas() {
+	    final NewtCanvasAWT result = new NewtCanvasAWT(getGlWindow());
+	    result.setFocusTraversalKeysEnabled(false);
+	    return result;
+	}
+
+	@ConfigByUI(editorClass=CheckboxUI.class)
+	public void setFullScreen(boolean newState) {
+	    if(newState == fullScreen)
+		return;
+	    fullScreen = newState;
+	    SwingUtilities.invokeLater(()->{
+		GraphicsEnvironment graphics =
+			GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice device = graphics.getDefaultScreenDevice();
+		final DisplayMode mode = device.getDisplayMode();
+		setVisible(false);
+		dispose();
+		setUndecorated(newState);
+		
+		if(newState) {
+		    setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		    normalBounds = getBounds();
+		    setBounds(new Rectangle(0,0,mode.getWidth(), mode.getHeight()));
+		} else {
+		    setExtendedState(this.getExtendedState() ^ JFrame.MAXIMIZED_BOTH);
+		    if(normalBounds != null)
+			setBounds(normalBounds);
+		}
+		setVisible(true);
+	    });//end invokeLater()
+	}//end setFullScreen(...)
+
+	public boolean isFullScreen() {
+	    return fullScreen;
+	}
+	
+	@Override
+	public void setBounds(Rectangle newBounds) {
+	    super.setBounds(newBounds);
+	}
+	
+	@Override
+	public Rectangle getBounds() {
+	    if(isFullScreen() && normalBounds != null)
+		return normalBounds;
+	    else
+		return super.getBounds();
+	}
+/*
+	@ConfigByUI(editorClass=CheckboxUI.class)
+	public void setMaximized(boolean maximized) {
+	    setResizable(true);
+	    if(maximized)
+		setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+	    else
+		setExtendedState(this.getExtendedState() ^ JFrame.MAXIMIZED_BOTH);
+	}
+	
+	public boolean isMaximized() {
+	    return ((this.getExtendedState() & JFrame.MAXIMIZED_BOTH) != 0);
+	}
+	*/
 	protected void affirmLookAndFeel() {
 	    try {
 		Properties props = new Properties();
@@ -104,8 +205,8 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	    }//end try/catch Exception
 	}
 
-	public GLCanvas getCanvas() {
-	    return canvas;
+	public GLAutoDrawable getAutoDrawable() {
+	    return getGlWindow();
 	}
 	
 	private class RootWindowGLEventListener implements GLEventListener {

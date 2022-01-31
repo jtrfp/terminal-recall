@@ -71,6 +71,8 @@ public class BeanEditor implements ObjectEditorUI<Object> {
 			@SuppressWarnings("rawtypes")
 			final Supplier pGet = ()->{
 			    try {
+				if(readMethod == null)
+				    throw new IllegalAccessException("No read method found for "+pd.getDisplayName());
 				return readMethod.invoke(targetGetter.get());
 			    } catch (IllegalAccessException | IllegalArgumentException
 				    | InvocationTargetException e1) {
@@ -81,6 +83,8 @@ public class BeanEditor implements ObjectEditorUI<Object> {
 			@SuppressWarnings("rawtypes")
 			final Consumer pSet = (x)->{
 			    try {
+				if(writeMethod == null)
+				    throw new IllegalAccessException("No write method found for "+pd.getDisplayName());
 				writeMethod.invoke(targetGetter.get(),x);
 			    } catch (IllegalAccessException | IllegalArgumentException
 				    | InvocationTargetException e) {

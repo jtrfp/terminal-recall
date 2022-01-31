@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2017 Chuck Ritola
+ * Copyright (c) 2017-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -20,8 +20,8 @@ public class MavenBuildInformation implements BuildInformation {
     private static final String NOT_AVAILABLE_BRANCH_NAME   = "${scmBranch}";
     private static final String PROPERTIES_RESOURCE_PATH    = "buildNumber.properties";
     
-    private String     uniqueBuildId = null;
-    private String     branch        = null;
+    private String     uniqueBuildId = "[build ID not available]";
+    private String     branch        = "[branch ID not available]";
     private Properties properties;
 
     @Override

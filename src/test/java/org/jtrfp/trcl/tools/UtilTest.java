@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2015 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -12,12 +12,16 @@
  ******************************************************************************/
 package org.jtrfp.trcl.tools;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,6 +88,36 @@ public class UtilTest {
 	assertEquals(destColl.size(),srcColl.size());
 	assertTrue(destColl.containsAll(srcColl));
 	assertTrue(srcColl.containsAll(destColl));
+    }
+    
+    @Test
+    public void testNodePathFromUserObjectPathWithRoot() {
+	DefaultMutableTreeNode root = new DefaultMutableTreeNode("first");
+	DefaultMutableTreeNode child0 = new DefaultMutableTreeNode("second");
+	DefaultMutableTreeNode child1 = new DefaultMutableTreeNode("third");
+	root.add(child0);
+	child0.add(child1);
+	final List<DefaultMutableTreeNode> result = Util.nodePathFromUserObjectPath(root, "first", "second", "third");
+	assertArrayEquals(result.toArray(), new Object[] {root, child0, child1});
+    }
+    
+    @Test
+    public void testNodePathFromUserObjectPathWithRootDistractor() {
+	DefaultMutableTreeNode root = new DefaultMutableTreeNode("first");
+	DefaultMutableTreeNode child0 = new DefaultMutableTreeNode("second");
+	DefaultMutableTreeNode child1 = new DefaultMutableTreeNode("third");
+	
+	DefaultMutableTreeNode distractor0 = new DefaultMutableTreeNode("distractor0");
+	DefaultMutableTreeNode distractor1 = new DefaultMutableTreeNode("distractor1");
+	
+	root.add(child0);
+	root.add(distractor0);
+	child0.add(child1);
+	distractor0.add(distractor1);
+	final List<DefaultMutableTreeNode> result = Util.nodePathFromUserObjectPath(root, "first", "second", "third");
+	assertArrayEquals(result.toArray(), new Object[] {root, child0, child1});
+	final List<DefaultMutableTreeNode> distractorResult = Util.nodePathFromUserObjectPath(root, "first", "distractor0", "distractor1");
+	assertArrayEquals(distractorResult.toArray(), new Object[] {root, distractor0, distractor1});
     }
     
     @Test

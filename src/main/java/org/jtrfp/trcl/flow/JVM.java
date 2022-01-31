@@ -41,9 +41,15 @@ public class JVM {
         return this;
     }
     
+    public String getVMName() {
+	return System.getProperty("java.vm.name");
+    }
+    
     public JVM ensureProperlyConfigured() {//Skip if using 32-bit.
+	final String vmName = getVMName();
 	final boolean is64Bit = System.getProperty("os.arch").contains("64");
-	final boolean isServerVM = System.getProperty("java.vm.name").toLowerCase().contains("server");
+	final boolean isServerVM = vmName.toLowerCase().contains("server");
+	
 	if (!isAlreadyConfigured()) {
 	    //http://stackoverflow.com/questions/13029915/how-to-programmatically-test-if-assertions-are-enabled
 	    //Seems to work better than the official way of querying assertion ability.
@@ -69,6 +75,7 @@ public class JVM {
 		cmd+="-XX:+DoEscapeAnalysis ";
 		//cmd+="-XX:+UseFastAccessorMethods ";
 		//cmd+="-XX:+UseParNewGC ";
+		cmd+="--illegal-access=permit ";
 
 		//cmd+="-XX:+UseConcMarkSweepGC ";
 		cmd+="-XX:MaxGCPauseMillis=5 ";
@@ -139,7 +146,7 @@ public class JVM {
 	}//end if(already configured)
 	return this;
     }// end Ensure...Configured(...)
-
+    
     public static void printStartupMode(){
 	if(JVM.isRunningFromJar())
 	    System.out.println("Running in JAR mode.");

@@ -124,6 +124,9 @@ public final class TRFactory implements FeatureFactory<Features>{
      * @since Sep 15, 2014
      */
     public static void nuclearGC(){
+	System.gc();
+	System.runFinalization();
+	/*
 	try{
 	    synchronized(isInNuclearGC){
 		if(isInNuclearGC.get())
@@ -142,6 +145,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    isInNuclearGC.set(false);
 	    isInNuclearGC.notifyAll();
 	}
+	*/
     }//end nuclearGC()
 
     private static AtomicBoolean isInNuclearGC = new AtomicBoolean(false);

@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,8 +37,6 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 
 import com.ochafik.util.Adapter;
-
-import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 public class Util {
 public static final Color [] DEFAULT_PALETTE = new Color []{
@@ -421,14 +418,14 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        dest[2] = deltaVector.getZ();
    }//end relativeHeadingVector()
    
-   public static List<DefaultMutableTreeNode> getLeaves(DefaultMutableTreeNode root) {
-	final ArrayList<DefaultMutableTreeNode> result = new ArrayList<>();
+   public static <T extends DefaultMutableTreeNode> List<T> getLeaves(T root) {
+	final ArrayList<T> result = new ArrayList<>();
 	
 	final Iterator<TreeNode> it = root.depthFirstEnumeration().asIterator();
 	while(it.hasNext()) {
 	    final TreeNode node = it.next();
 	    if(node.isLeaf())
-		result.add((DefaultMutableTreeNode)node);
+		result.add((T)node);
 	}//end while(hasNext)
 	return result;
    }//end getLeaves(...)
@@ -440,17 +437,17 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
     * @return
     * @since Jan 22, 2022
     */
-   public static List<DefaultMutableTreeNode> nodePathFromUserObjectPath(
-	   DefaultMutableTreeNode root, Object ... objectPath) {
+   public static <T extends DefaultMutableTreeNode> List<T> nodePathFromUserObjectPath(
+	   T root, Object ... objectPath) {
        final List<Object> objectPathList = Arrays.asList(objectPath);
-       final List<DefaultMutableTreeNode> result = new ArrayList<>(objectPath.length);
+       final List<T> result = new ArrayList<>(objectPath.length);
        result.add(root);
-       DefaultMutableTreeNode node = root;
+       T node = root;
        for(Object obj : objectPathList) {
 	   final Iterator<TreeNode> children = node.children().asIterator();
 	   boolean found = false;
 	   while(children.hasNext() && !found) {
-	       final DefaultMutableTreeNode childNode = (DefaultMutableTreeNode)children.next();
+	       final T childNode = (T)children.next();
 	       if(Objects.equals(childNode.getUserObject(), obj)) {
 		   node = childNode;
 		   result.add(childNode);
@@ -474,28 +471,28 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        return result;
    }//end nodePathFromUserObjectPath
 
-   public static DefaultMutableTreeNode getComparatorApproximation(
+   public static <T extends TreeNode> T getComparatorApproximation(
 	   DefaultMutableTreeNode external,
 	   DefaultMutableTreeNode reference,
-	   Comparator<DefaultMutableTreeNode> comparator) {
+	   Comparator<T> comparator) {
        
        final ArrayDeque<TreeNode> externalPath = Stream.of(external.getPath()).collect(Collectors.toCollection(()->new ArrayDeque<TreeNode>()));
        externalPath.poll();//Skip root since that's implied and this node will be compared to reference root's children anyway.
-       return getComparatorApproximationFromRoot(externalPath, (DefaultMutableTreeNode)(reference.getRoot()), comparator);
+       return getComparatorApproximationFromRoot(externalPath, (T)(reference.getRoot()), comparator);
    }//end getToStringApproximation()
    
-   private static DefaultMutableTreeNode getComparatorApproximationFromRoot(ArrayDeque<TreeNode> externalPath, DefaultMutableTreeNode reference, Comparator<DefaultMutableTreeNode> comparator) {
-       final Iterator<TreeNode> it = reference.children().asIterator();
+   private static <T extends TreeNode> T getComparatorApproximationFromRoot(ArrayDeque<TreeNode> externalPath, T reference, Comparator<T> comparator) {
+       final Iterator<TreeNode> it = (Iterator<TreeNode>) reference.children().asIterator();
        
        if(!it.hasNext() || externalPath.isEmpty())
 	   return reference;
        
-       DefaultMutableTreeNode best = null;
+       T best = null;
        int bestScore = Integer.MAX_VALUE;
-       final DefaultMutableTreeNode externalNode = (DefaultMutableTreeNode)externalPath.poll();
+       final T externalNode = (T)externalPath.poll();
        
        while(it.hasNext()) {
-	   final DefaultMutableTreeNode node = (DefaultMutableTreeNode)it.next();
+	   final T node = (T)it.next();
 	   System.out.println("compare "+node+" to "+externalNode);
 	   Objects.requireNonNull(node);
 	   Objects.requireNonNull(externalNode);

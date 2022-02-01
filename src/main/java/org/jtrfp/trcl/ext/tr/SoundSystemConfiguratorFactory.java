@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2017 Chuck Ritola
+ * Copyright (c) 2017-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -41,7 +41,8 @@ public class SoundSystemConfiguratorFactory
 	    SoundSystem.BUFFER_SIZE_FRAMES_STRING,
 	    SoundSystem.MUSIC_VOLUME,
 	    SoundSystem.SFX_VOLUME,
-	    SoundSystem.OUTPUT_CONFIG
+	    //SoundSystem.OUTPUT_CONFIG
+	    SoundSystem.PACKED_OUTPUT_CONFIG_NODE
 	    //"componentConfigs"
     };
     private static final Set<String> PERSISTENT_PROPERTIES_SET = 

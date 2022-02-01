@@ -37,6 +37,7 @@ import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.DefaultKeyedExecutor;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.KeyedExecutor;
+import org.jtrfp.trcl.core.PackedTreeNode;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
@@ -76,6 +77,7 @@ public class SoundSystem {
            SFX_VOLUME         = "sfxVolume",
            BUFFER_SIZE_FRAMES = "bufferSizeFrames",
            OUTPUT_CONFIG      = "outputConfig",
+           PACKED_OUTPUT_CONFIG_NODE = "packedOutputConfigNode",
            BUFFER_SIZE_FRAMES_STRING = "bufferSizeFramesString";
     
     private TR tr;
@@ -819,6 +821,14 @@ public class SoundSystem {
 	final double oldValue = getSfxVolume();
         getPlaybackFactory().setVolume(sfxVolume);
         pcs.firePropertyChange(SFX_VOLUME, oldValue, sfxVolume);
+    }
+    
+    public PackedTreeNode getPackedOutputConfigNode() {
+	return new PackedTreeNode(getOutputConfigNode());
+    }
+    
+    public void setPackedOutputConfigNode(PackedTreeNode node) {
+	setOutputConfigNode(node.getNode());
     }
 
     public DefaultMutableTreeNode getOutputConfigNode() {

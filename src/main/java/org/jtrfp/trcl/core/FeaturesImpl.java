@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2016-2017 Chuck Ritola
+ * Copyright (c) 2016-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,10 +31,10 @@ public class FeaturesImpl implements Cloneable {
     private static final FeatureLoadOrderComparator featureLoadOrderComparator = new FeatureLoadOrderComparator();
     
  // Key represents target-class
-       final Map<Object,Map<Class<? extends Feature>,Feature>> targetMap 
-           = new ReferenceMap<Object,Map<Class<? extends Feature>,Feature>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
-       final HashMap<Class<?>,Collection<FeatureFactory>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory>>();
-       final HashMap<Class<?>,FeatureFactory> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory>();
+       final Map<Object,Map<Class<? extends Feature<?>>,Feature<?>>> targetMap 
+           = new ReferenceMap<Object,Map<Class<? extends Feature<?>>,Feature<?>>>(ReferenceStrength.WEAK, ReferenceStrength.HARD, true);
+       final HashMap<Class<?>,Collection<FeatureFactory<?>>> featureFactoriesByTargetClass          = new HashMap<Class<?>,Collection<FeatureFactory<?>>>();
+       final HashMap<Class<?>,FeatureFactory<?>> featureFactoriesByFeature = new HashMap<Class<?>,FeatureFactory<?>>();
        
        
        void registerFeature(FeatureFactory<?> factory){
@@ -45,19 +46,20 @@ public class FeaturesImpl implements Cloneable {
        }//end deRegisterFeature
        
        /**
-        * Returns immutable snapsthot of all registered FeatureFactories for this FeaturesImpl at time of invocation.
+        * Returns immutable snapshot of all registered FeatureFactories for this FeaturesImpl at time of invocation.
         * @return Collection containing one instance of each registered FeatureFactory at the time of invocation.
         * @since Dec 23, 2017
         */
-       public Collection<FeatureFactory> getAllRegisteredFactories(){
-	   Collection<FeatureFactory> resultOrig = featureFactoriesByFeature.values();
-	   Collection<FeatureFactory> resultClone = new HashSet<FeatureFactory>();
+       @SuppressWarnings("unchecked")
+    public Collection<FeatureFactory<?>> getAllRegisteredFactories(){
+	   Collection<FeatureFactory<?>> resultOrig = featureFactoriesByFeature.values();
+	   Collection<FeatureFactory<?>> resultClone = new HashSet<FeatureFactory<?>>();
 	   resultClone.addAll(resultOrig);
 	   return CollectionUtils.unmodifiableCollection(resultClone);
        }
        
       private void registerFeature(FeatureFactory<?> factory, boolean add){
-	Collection<FeatureFactory> factoryCollection = getFactoryCollection(factory.getTargetClass());
+	Collection<FeatureFactory<?>> factoryCollection = getFactoryCollection(factory.getTargetClass());
 	if(add) factoryCollection.add(factory);
 	else    factoryCollection.remove(factory);
 	
@@ -65,31 +67,31 @@ public class FeaturesImpl implements Cloneable {
 	//featureFactoriesByFeature.put(factory.getFeatureClass(),factory);
     }
     
-       void registerFeatureRecursive(Class featureClass, FeatureFactory factory, boolean add){
+       void registerFeatureRecursive(Class<?> featureClass, FeatureFactory<?> factory, boolean add){
 	if(featureClass == Object.class || featureClass == null)
 	    return;
 	if(add) featureFactoriesByFeature.put(featureClass,factory);
 	else    featureFactoriesByFeature.remove(featureClass,factory);
 	
-	for(Class iface:featureClass.getInterfaces())
+	for(Class<?> iface:featureClass.getInterfaces())
 	    registerFeatureRecursive(iface,factory,add);
 	registerFeatureRecursive(featureClass.getSuperclass(), factory,add);
     }
     
-       Collection<FeatureFactory> getFactoryCollection(Class targetClass){
-	Collection<FeatureFactory> result = featureFactoriesByTargetClass.get(targetClass);
+       Collection<FeatureFactory<?>> getFactoryCollection(Class<?> targetClass){
+	Collection<FeatureFactory<?>> result = featureFactoriesByTargetClass.get(targetClass);
 	if(result==null)
-	    featureFactoriesByTargetClass.put(targetClass, result = new ArrayList<FeatureFactory>());
+	    featureFactoriesByTargetClass.put(targetClass, result = new ArrayList<FeatureFactory<?>>());
 	return result;
     }
     
-    public  void init(Object target){
+    public void init(Object target){
 	//Traverse the type hierarchy
-	Class      tClass          = target.getClass();
-	Set<Class> featureClassSet = new HashSet<Class>();
+	Class<?>   tClass             = target.getClass();
+	Set<Class<?>> featureClassSet = new HashSet<Class<?>>();
 	//For its interfaces
 	for(Class iFace:tClass.getInterfaces())
-	    for(FeatureFactory ff:getFactoryCollection(iFace))
+	    for(FeatureFactory<?> ff:getFactoryCollection(iFace))
 		featureClassSet.add(ff.getFeatureClass());
 	while(tClass!=Object.class){
 	    //First for the class itself
@@ -97,11 +99,11 @@ public class FeaturesImpl implements Cloneable {
 		    featureClassSet.add(ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
-	final Set<GraphStabilizationListener> graphStabilizationListeners = new HashSet<GraphStabilizationListener>();
-	final Set<FeatureFactory> sortedFactories = new TreeSet<FeatureFactory>(featureLoadOrderComparator);
+	final List<GraphStabilizationListener> graphStabilizationListeners = new ArrayList<GraphStabilizationListener>();
+	final Set<FeatureFactory<?>> sortedFactories = new TreeSet<FeatureFactory<?>>(featureLoadOrderComparator);
 	for(Class c:featureClassSet)
 	    sortedFactories.add(featureFactoriesByFeature.get(c));
-	for(FeatureFactory<? extends Feature<?>> factory : sortedFactories){
+	for(FeatureFactory<?> factory : sortedFactories){
 	    final Feature<?> feature = get(target, factory.getFeatureClass());
 	    if( feature instanceof GraphStabilizationListener )
 		graphStabilizationListeners.add((GraphStabilizationListener)feature);
@@ -110,9 +112,10 @@ public class FeaturesImpl implements Cloneable {
 	    graphStabilizationListener.graphStabilized(target);
     }//end init(...)
     
-    public  void destruct(Object obj){
-	final Collection<Feature> rawFeatures = targetMap.get(obj ).values();
-	final Set<Feature> featureSet = new HashSet<Feature>();
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void destruct(Object obj){
+	final Collection<Feature<?>> rawFeatures = targetMap.get(obj).values();
+	final Set<Feature<?>> featureSet = new HashSet<Feature<?>>();
 	featureSet.addAll(rawFeatures);
 	for(Feature f:featureSet){
 	    if(f!=null)
@@ -121,26 +124,27 @@ public class FeaturesImpl implements Cloneable {
 	}//end for(entries)
     }//end destruct()
     
-       Map<Class<? extends Feature>,Feature> getFeatureMap(Object targ){
+       Map<Class<? extends Feature<?>>,Feature<?>> getFeatureMap(Object targ){
 	if(targ == null)
 	    throw new NullPointerException("Target intolerably null.");
-	Map<Class<? extends Feature>,Feature> result = targetMap.get(targ);
+	Map<Class<? extends Feature<?>>,Feature<?>> result = targetMap.get(targ);
 	if(result==null)
-	    targetMap.put(targ, result = new HashMap<Class<? extends Feature>,Feature>());
+	    targetMap.put(targ, result = new HashMap<Class<? extends Feature<?>>,Feature<?>>());
 	assert result!=null;
 	return result;
     }//end getFeatureMap()
     
-       Feature getFeature(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target){
-	Feature result = featuresByClass.get(featureClass);
+       <TARGET> Feature<TARGET> getFeature(Map<Class<? extends Feature<?>>, Feature<?>> fMap, Class<? extends Feature<?>> featureClass, TARGET target){
+	@SuppressWarnings("unchecked")
+	Feature<TARGET> result = (Feature<TARGET>)fMap.get(featureClass);
 	if(result==null)
-	    try{result = newFeatureInstance(featuresByClass, featureClass, target);}
+	    try{result = newFeatureInstance(fMap, featureClass, target);}
 	    catch(FeatureNotApplicableException e){}//Quiet skip.
 	return result;
     }//end getFeature()
 
-       private Feature newFeatureInstance(Map<Class<? extends Feature>,Feature> featuresByClass, Class<? extends Feature> featureClass, Object target) throws FeatureNotApplicableException{
-	   final Feature result;
+       private <TARGET> Feature<TARGET> newFeatureInstance(Map<Class<? extends Feature<?>>, Feature<?>> fMap, Class<? extends Feature> featureClass, TARGET target) throws FeatureNotApplicableException{
+	   final Feature<TARGET> result;
 	   final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
 	   if(ff == null)
 	       throw new FeatureNotFoundException("Could not find Feature of type "+featureClass.getName());
@@ -150,27 +154,27 @@ public class FeaturesImpl implements Cloneable {
 	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName()+".\n"
 	       	+ "Feature expected target of (super)type "+ff.getTargetClass().getName()+" but target was "+target.getClass().getName());
 	   }
-	   registerFeatureByClassRecursively(result.getClass(), result, featuresByClass);
-	   result.apply(target);
+	   registerFeatureByClassRecursively(result.getClass(), result, fMap);
+	   result.apply((TARGET)target);
 	   init(result);
 	   return result;
        }//end newFeatureInstance()
 
-       private void registerFeatureByClassRecursively(Class featureClass, Feature toRegister, Map<Class<? extends Feature>,Feature> featuresByClass){
-	   featuresByClass.put(featureClass, toRegister);
+       private void registerFeatureByClassRecursively(Class featureClass, Feature toRegister, Map<Class<? extends Feature<?>>, Feature<?>> fMap){
+	   fMap.put(featureClass, toRegister);
 	   for(Class iFace:featureClass.getInterfaces())
-	       registerFeatureByClassRecursively(iFace, toRegister, featuresByClass);
-	   Class fc = featureClass.getSuperclass();
+	       registerFeatureByClassRecursively(iFace, toRegister, fMap);
+	   Class<?> fc = featureClass.getSuperclass();
 	   if(fc != null)
 	    while(fc != Object.class){
-	       registerFeatureByClassRecursively(fc, toRegister, featuresByClass);
+	       registerFeatureByClassRecursively(fc, toRegister, fMap);
 	       fc = fc.getSuperclass();
 	    }//end while(!Object.class)
        }//end registerFeatureByClassRecursively()
 
     public  <T> T get(Object target, Class<T> featureClass){
-     final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
-     return (T)getFeature(fMap,(Class<Feature>)featureClass,target);
+     final Map<Class<? extends Feature<?>>,Feature<?>> fMap = getFeatureMap(target);
+     return (T)getFeature(fMap,(Class<Feature<?>>)featureClass,target);
     }//end get(...)
     
     public <T> T getByPath(Object target, Class<T> lastClass, Class<?> ... featurePathNotIncludingLastClass){
@@ -181,8 +185,8 @@ public class FeaturesImpl implements Cloneable {
     }//end getByPath(...)
 
     public void getAllFeaturesOf(Object target, Set dest) {
-	final Map<Class<? extends Feature>,Feature> fMap = getFeatureMap(target);
-	for(Entry<Class<? extends Feature>,Feature> entry:fMap.entrySet())
+	final Map<Class<? extends Feature<?>>,Feature<?>> fMap = getFeatureMap(target);
+	for(Entry<Class<? extends Feature<?>>,Feature<?>> entry:fMap.entrySet())
 	    dest.add(entry.getValue());
     }//end getAllFeaturesOf(...)
     
@@ -200,8 +204,8 @@ public class FeaturesImpl implements Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
 	final FeaturesImpl result = new FeaturesImpl();
-	final Collection<FeatureFactory> factories = this.getAllRegisteredFactories();
-	for( FeatureFactory ff : factories )
+	final Collection<FeatureFactory<?>> factories = this.getAllRegisteredFactories();
+	for( FeatureFactory<?> ff : factories )
 	    result.registerFeature(ff);
 	return result;
     }//end clone()

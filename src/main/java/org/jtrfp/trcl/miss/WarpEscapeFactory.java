@@ -119,9 +119,9 @@ public class WarpEscapeFactory implements FeatureFactory<Mission> {
 	    if(optionalJumpzone != null){
 		final double [] dunPos = optionalJumpzone.getPositionWithOffset();
 		player.setHeading(new Vector3D(playerPos[0]-dunPos[0],0,playerPos[2]-dunPos[2]).normalize());
-	    }
-
-	    player.setTop(Vector3D.PLUS_J);
+		player.setTop(Vector3D.PLUS_J);
+	    } //If leaving a tunnel, there is no DUN and the exit generally faces up.
+	    
 	    final HasPropulsion hp = player.probeForBehavior(HasPropulsion.class);
 	    hp.setPropulsion(hp.getMaxPropulsion());
 	    //Tilt up

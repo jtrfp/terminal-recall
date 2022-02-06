@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -21,10 +21,11 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
-import org.jtrfp.trcl.beh.DamageListener.ProjectileDamage;
 import org.jtrfp.trcl.beh.phy.MovesByVelocity;
+import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
+import org.jtrfp.trcl.obj.DEFObject.HitBox;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.Positionable;
@@ -89,8 +90,7 @@ public class ProjectileBehavior extends Behavior implements
 		if (possibleTarget instanceof DEFObject) {
 		    DEFObject possibleDEFTarget = (DEFObject)possibleTarget;
 		    if (!possibleDEFTarget.isIgnoringProjectiles() && !possibleDEFTarget.isRuin()) {
-			final Vector3D targetPos = new Vector3D(
-				((WorldObject)possibleTarget).getPositionWithOffset());
+			final Vector3D targetPos = new Vector3D(getNearestTarget(possibleDEFTarget, new double[3]));//TODO: Optimize array
 			final Vector3D delta = targetPos.subtract(new Vector3D(
 				getParent().getPosition()));
 			final double dist = delta.getNorm();
@@ -123,18 +123,48 @@ public class ProjectileBehavior extends Behavior implements
 	probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	probeForBehavior(DeathBehavior.class).reset();
     }// end reset()
+    
+    private final double [] nearestTargetWorkTriplet = new double[3];
+    
+    private double [] getNearestTarget(WorldObject target, double [] dest) {
+	final WorldObject parent  = getParent();
+	final double [] tgtPos    = target.getPositionWithOffset();
+	final double [] parentPos = getParent().getPosition();
+	double closest = Double.POSITIVE_INFINITY;
+	if(target instanceof DEFObject) {
+	    final DEFObject targetDEF = (DEFObject)target;
+	    final HitBox [] hitBoxes  = targetDEF.getHitBoxes();
+	    if(hitBoxes != null) {
+		final double [] pPosWO = parent.getPositionWithOffset();
+		final BasicModelSource src = targetDEF.getModelSource();
+		for(HitBox box : hitBoxes) {
+		    Vect3D.add(src.getVertex(box.getVertexID()), tgtPos, nearestTargetWorkTriplet);
+		    final double dist = Vect3D.distance(pPosWO, nearestTargetWorkTriplet);
+		    if(dist < closest) {
+			closest = dist;
+			System.arraycopy(nearestTargetWorkTriplet, 0, dest, 0, 3);
+		    }
+		}//end for(hitBoxes)
+	    }//end if(hitBoxes)
+	}//end if(DEFObject)
+	final double defDist = Vect3D.distance(parentPos, tgtPos);
+	if(defDist < closest)
+	    System.arraycopy(target.getPosition(), 0, dest, 0, 3);
+	return dest;
+    }//end getNearestTarget()
 
     @Override
-    public void tick(long tickTimeMillis) {
+    public void tick(long tickTimeMillis) {//TODO: Optimize weak ref
 	if (honingTarget != null) {
 	    if(honingTarget.get()==null)return;
 	    if (honingAdjustmentUpdate++ % 5 == 0) {
 		if (!honingTarget.get().isVisible())
 		    return;// Dead or otherwise.
 		final WorldObject parent = getParent();
+		final double [] targetPositionWithOffset = getNearestTarget(honingTarget.get(), new double[3]);//TODO: Optimize array
 		final Vector3D honingVector = new Vector3D(
-			honingTarget.get().getPositionWithOffset()).subtract(new Vector3D(
-			parent.getPosition())).normalize();
+			targetPositionWithOffset).subtract(new Vector3D(
+			parent.getPosition())).normalize();//TODO: Optimize to arrays
 		//Sanity check
 		if(Double.isNaN(honingVector.getX()))return;
 		if(Double.isNaN(honingVector.getY()))return;

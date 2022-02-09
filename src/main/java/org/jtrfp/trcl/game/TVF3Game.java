@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.game;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -46,7 +47,6 @@ import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
-import org.jtrfp.trcl.file.NDXFile;
 import org.jtrfp.trcl.file.VOXFile;
 import org.jtrfp.trcl.file.VOXFile.MissionLevel;
 import org.jtrfp.trcl.file.Weapon;
@@ -350,9 +350,14 @@ public class TVF3Game implements Game {
 			// Set up player, HUD, fonts...
 			System.out.println("Booting...");
 			tr.getThreadManager().setPaused(true);
+			/*
 			NDXFile ndx = tr.getResourceManager().getNDXFile("STARTUP\\FONT.NDX");
 			upfrontFont = new GLFont(tr.getResourceManager().getFontBIN("STARTUP\\FONT.BIN", ndx),
 				    UPFRONT_HEIGHT, ndx.getWidths(), 32,tr);
+			*/
+			final Font upfrontFontRaw = tr.getResourceManager().getFont("crillee.zip", "Crillee.ttf");
+			
+			upfrontFont = new GLFont(upfrontFontRaw, Color.WHITE, tr);
 			
 			final EarlyLoadingScreen earlyLoadingScreen = getGameShell().getEarlyLoadingScreen();
 			earlyLoadingScreen.setStatusText("Reticulating Splines...");

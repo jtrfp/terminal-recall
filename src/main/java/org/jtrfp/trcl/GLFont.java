@@ -32,7 +32,6 @@ public class GLFont{
 	private final int [] 	widths = new int[256];
 	private final double [] glWidths=new double[256];
 	private final int 	sideLength;
-	private static final Color TEXT_COLOR=new Color(80,200,180);
 	private final TR	tr;
 	
 	public GLFont(ByteBuffer []indexedPixels, Color [] palette, int imgHeight, List<Integer> widths, int asciiOffset, TR tr){
@@ -86,20 +85,24 @@ public class GLFont{
 	    }//end for(i:asciiOffset)
 	}//end GLFont
 	
-	public GLFont(Font realFont, TR tr){
+	public GLFont(Font realFont, Color color, TR tr) {
+	    this(realFont, 64, color, tr);
+	}
+	
+	public GLFont(Font realFont, int sideLength, Color color,  TR tr){
 	    	this.tr=tr;
-	    	sideLength=64;
+	    	this.sideLength=sideLength;
 		final Font font=realFont.deriveFont((float)sideLength)/*.deriveFont(Font.BOLD)*/;
 		//Generate the textures
 		textures = new VQTexture[256];
-		VQTexture empty=renderToTexture(' ',realFont);
+		VQTexture empty=renderToTexture(' ', color, realFont);
 		for(int c=0; c<256; c++)
-			{textures[c]=realFont.canDisplay(c)?renderToTexture(c,font):empty;}
+			{textures[c]=realFont.canDisplay(c)?renderToTexture(c, color, font):empty;}
 		}//end constructor
 	public VQTexture[] getTextures()
 		{return textures;}
 	
-	private VQTexture renderToTexture(int c, Font font){
+	private VQTexture renderToTexture(int c, Color color, Font font){
 		BufferedImage img = new BufferedImage(sideLength, sideLength, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g=img.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
@@ -112,7 +115,7 @@ public class GLFont{
 			g.setFont(font.deriveFont((float)(size*size)/(float)metrics.charWidth(c)*.9f));
 			metrics=g.getFontMetrics();
 			}//end if(too big to fit)
-		g.setColor(TEXT_COLOR);
+		g.setColor(color);
 		g.drawChars(new char [] {(char)c}, 0, 1, (int)((double)getTextureSideLength()*.05), (int)((double)getTextureSideLength()*.95));
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();

@@ -76,6 +76,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
     public static final double    ABORT_GAME_MENU_POS = START_GAME_MENU_POS+.01;
     public static final SkyCubeGen DEFAULT_GRADIENT = new HorizGradientCubeGen
 	    (Color.darkGray,Color.black);
+    private static final Color TEXT_COLOR=new Color(80,200,180);
 
     public interface GameShellRunState     extends TRFactory.TRConstructed{}
     public interface GameShellConstructing extends GameShellRunState{}
@@ -172,7 +173,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 
 	private void initLoadingScreen(){
 	    System.out.println("Initializing general resources...");
-	    try{greenFont          = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"),tr);
+	    try{greenFont          = new GLFont(tr.getResourceManager().getFont("OCRA.zip", "OCRA.ttf"), TEXT_COLOR, tr);
 	    earlyLoadingScreen = new EarlyLoadingScreen(tr, greenFont);
 	    earlyLoadingScreen.setStatusText("No game loaded.");
 	    tr.getDefaultGrid().nonBlockingAddBranch(earlyLoadingScreen);

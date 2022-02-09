@@ -27,7 +27,7 @@ public class UpfrontDisplay extends RenderableSpacePartitioningGrid {
     private int upfrontDisplayCountdown = 0;
     public UpfrontDisplay(SpacePartitioningGrid<PositionedRenderable> parent, TR tr) {
 	super();
-	upfrontBillboard = new CharLineDisplay(this, .2, 35, ((TVF3Game)Features.get(tr, GameShell.class).getGame()).getUpfrontFont());
+	upfrontBillboard = new CharLineDisplay(this, .1, 35, ((TVF3Game)Features.get(tr, GameShell.class).getGame()).getUpfrontFont());
 	upfrontBillboard.setPosition(0, .2, Z);
 	upfrontBillboard.setVisible(false);
 	upfrontBillboard.setCentered(true);

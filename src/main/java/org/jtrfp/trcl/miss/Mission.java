@@ -740,6 +740,8 @@ public class Mission {
 	tr.setRunState(new MissionAbort(){});
 	if(bgMusic!=null)
 	    bgMusic.stop();
+	if(isSatelliteView())
+	    setSatelliteView(false);
 	cleanup();
     }//end abort()
 

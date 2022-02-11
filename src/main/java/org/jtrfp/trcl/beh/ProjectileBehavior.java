@@ -66,6 +66,8 @@ public class ProjectileBehavior extends Behavior implements
 		    .88).setLevelingAxis(LevelingAxis.HEADING));
 	}// end if(honingTarget)
     }// end constructor
+    
+    private final double [] targetPosWorkTriplet = new double[3];
 
     public void reset(Vector3D heading, double speed) {
 	this.speed = speed;
@@ -90,18 +92,13 @@ public class ProjectileBehavior extends Behavior implements
 		if (possibleTarget instanceof DEFObject) {
 		    DEFObject possibleDEFTarget = (DEFObject)possibleTarget;
 		    if (!possibleDEFTarget.isIgnoringProjectiles() && !possibleDEFTarget.isRuin()) {
-			final Vector3D targetPos = new Vector3D(getNearestTarget(possibleDEFTarget, new double[3]));//TODO: Optimize array
-			final Vector3D delta = targetPos.subtract(new Vector3D(
-				getParent().getPosition()));
-			final double dist = delta.getNorm();
-			final Vector3D proposedHeading = delta.normalize();
-			final Vector3D headingDelta = getParent().getHeading()
-				.subtract(proposedHeading);
-			final double compositeHeadingDelta = headingDelta.getNorm();
-			if (compositeHeadingDelta < .5) {
-			final double compositeDistance = dist; 
-			    if (compositeDistance < closestDistance) {
-				closestDistance = dist;
+			final Vector3D targetPos = new Vector3D(getNearestTarget(possibleDEFTarget, targetPosWorkTriplet));
+			final Vector3D proposedHeading = targetPos.subtract(new Vector3D(
+				getParent().getPosition())).normalize();
+			final double headingDelta = getParent().getHeading().distance(proposedHeading);
+			if (headingDelta < .5) {
+			    if (headingDelta < closestDistance) {
+				closestDistance = headingDelta;
 				closestObject = possibleTarget;
 				parent.setHeading(proposedHeading);
 				probeForBehavior(AutoLeveling.class)
@@ -119,40 +116,49 @@ public class ProjectileBehavior extends Behavior implements
 		movesByVelocity.setVelocity(velocityDest);//Just to be sure.
 		//movesByVelocity.setVelocity(getParent().getHeading()
 		//	.scalarMultiply(speed));
-	}// end if(honingTarget)
+	}// end if(honing)
 	probeForBehavior(LimitedLifeSpan.class).reset(LIFESPAN_MILLIS);
 	probeForBehavior(DeathBehavior.class).reset();
     }// end reset()
     
-    private final double [] nearestTargetWorkTriplet = new double[3];
+    private final double [] nearestTargetPosWithOff  = new double[3];
+    private final double [] nearestTargetHoningVector = new double[3];
     
     private double [] getNearestTarget(WorldObject target, double [] dest) {
 	final WorldObject parent  = getParent();
+	final double [] pHeading = parent.getHeadingArray();
 	final double [] tgtPos    = target.getPositionWithOffset();
-	final double [] parentPos = getParent().getPosition();
+	final double [] pPosWO = parent.getPositionWithOffset();
 	double closest = Double.POSITIVE_INFINITY;
 	if(target instanceof DEFObject) {
 	    final DEFObject targetDEF = (DEFObject)target;
 	    final HitBox [] hitBoxes  = targetDEF.getHitBoxes();
 	    if(hitBoxes != null) {
-		final double [] pPosWO = parent.getPositionWithOffset();
 		final BasicModelSource src = targetDEF.getModelSource();
 		for(HitBox box : hitBoxes) {
-		    Vect3D.add(src.getVertex(box.getVertexID()), tgtPos, nearestTargetWorkTriplet);
-		    final double dist = Vect3D.distance(pPosWO, nearestTargetWorkTriplet);
+		    Vect3D.add(src.getVertex(box.getVertexID()), tgtPos, nearestTargetPosWithOff);
+		    Vect3D.subtract(nearestTargetPosWithOff, pPosWO, nearestTargetHoningVector);
+		    Vect3D.normalize(nearestTargetHoningVector);
+		    final double dist = Vect3D.distance(nearestTargetHoningVector, pHeading);
 		    if(dist < closest) {
 			closest = dist;
-			System.arraycopy(nearestTargetWorkTriplet, 0, dest, 0, 3);
+			System.arraycopy(nearestTargetPosWithOff, 0, dest, 0, 3);
 		    }
 		}//end for(hitBoxes)
 	    }//end if(hitBoxes)
 	}//end if(DEFObject)
-	final double defDist = Vect3D.distance(parentPos, tgtPos);
+	Vect3D.subtract(tgtPos, pPosWO, nearestTargetHoningVector);
+	Vect3D.normalize(nearestTargetHoningVector);
+	final double defDist = Vect3D.distance(nearestTargetHoningVector, pHeading);
+	//final double defDist = Vect3D.distance(parentPos, tgtPos);//TODO
 	if(defDist < closest)
 	    System.arraycopy(target.getPosition(), 0, dest, 0, 3);
 	return dest;
     }//end getNearestTarget()
 
+    private final double [] tickNearestTargetWorkTriplet = new double[3];
+    private final double [] tickHoningVector = new double[3];
+    
     @Override
     public void tick(long tickTimeMillis) {//TODO: Optimize weak ref
 	if (honingTarget != null) {
@@ -161,16 +167,20 @@ public class ProjectileBehavior extends Behavior implements
 		if (!honingTarget.get().isVisible())
 		    return;// Dead or otherwise.
 		final WorldObject parent = getParent();
-		final double [] targetPositionWithOffset = getNearestTarget(honingTarget.get(), new double[3]);//TODO: Optimize array
+		getNearestTarget(honingTarget.get(), tickNearestTargetWorkTriplet);
+		Vect3D.subtract(tickNearestTargetWorkTriplet, parent.getPositionWithOffset(), tickHoningVector);
+		Vect3D.normalize(tickHoningVector);
+		/*
 		final Vector3D honingVector = new Vector3D(
 			targetPositionWithOffset).subtract(new Vector3D(
 			parent.getPosition())).normalize();//TODO: Optimize to arrays
+		*/
 		//Sanity check
-		if(Double.isNaN(honingVector.getX()))return;
-		if(Double.isNaN(honingVector.getY()))return;
-		if(Double.isNaN(honingVector.getZ()))return;
+		if(Double.isNaN(tickHoningVector[0]))return;
+		if(Double.isNaN(tickHoningVector[1]))return;
+		if(Double.isNaN(tickHoningVector[2]))return;
 		probeForBehavior(AutoLeveling.class)
-			.setLevelingVector(honingVector);
+			.setLevelingVector(new Vector3D(tickHoningVector));
 		final double [] destVelocity = movesByVelocity.getVelocity();
 		Vect3D.scalarMultiply(parent.getHeadingArray(), speed, destVelocity);
 		movesByVelocity.setVelocity(destVelocity);//Just to be sure.

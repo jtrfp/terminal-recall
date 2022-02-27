@@ -11,35 +11,33 @@
  *     chuck - initial API and implementation
  ******************************************************************************/
 
-package org.jtrfp.trcl.miss;
+package org.jtrfp.trcl.core;
 
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 
-import org.jtrfp.trcl.core.Feature;
-import org.jtrfp.trcl.core.FeatureFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SuspendScreenSaverFactory implements FeatureFactory<Mission> {
+public class ScreenSaverDisablerFactory implements FeatureFactory<Features> {
 
     @Override
-    public Feature<Mission> newInstance(Mission target) {
-	return new SuspendScreenSaver();
+    public Feature<Features> newInstance(Features target) {
+	return new ScreenSaverDisabler();
     }
 
     @Override
-    public Class<Mission> getTargetClass() {
-	return Mission.class;
+    public Class<Features> getTargetClass() {
+	return Features.class;
     }
 
     @Override
     public Class<? extends Feature> getFeatureClass() {
-	return SuspendScreenSaver.class;
+	return ScreenSaverDisabler.class;
     }
     
-    private class SuspendScreenSaver implements Feature<Mission>{
+    private class ScreenSaverDisabler implements Feature<Features>{
 	private volatile boolean running = true;
 	
 	/**
@@ -65,16 +63,16 @@ public class SuspendScreenSaverFactory implements FeatureFactory<Mission> {
 	private RobotThread robotThread;
 
 	@Override
-	public void apply(Mission target) {
+	public void apply(Features target) {
 	    running = true;
 	    robotThread = new RobotThread();
 	    robotThread.start();
 	}
 
 	@Override
-	public void destruct(Mission target) {
+	public void destruct(Features target) {
 	    running = false;
 	    robotThread.interrupt();
 	}
-    }//SuspendScreenSaver
-}//end SuspendScreenSaverFactory
+    }//ScreenSaverDisabler
+}//end ScreenSaverDisablerFactory

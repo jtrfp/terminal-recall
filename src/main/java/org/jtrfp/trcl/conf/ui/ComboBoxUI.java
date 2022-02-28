@@ -13,6 +13,8 @@
 
 package org.jtrfp.trcl.conf.ui;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -29,7 +31,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.jtrfp.trcl.tools.Util;
 
 public class ComboBoxUI extends AbstractObjectEditorUI<DefaultMutableTreeNode> {
-    private JPanel rootPanel = new JPanel();
+    private JPanel rootPanel = new JPanel(), centerPanel = new JPanel();
     private JLabel label = new JLabel();
     private final JComboBox<DefaultMutableTreeNode> comboBox = new JComboBox<>();
     private DefaultComboBoxModel<DefaultMutableTreeNode> model;
@@ -38,7 +40,9 @@ public class ComboBoxUI extends AbstractObjectEditorUI<DefaultMutableTreeNode> {
     public ComboBoxUI() {
 	rootPanel.setLayout(new GridLayout(1,2));
 	rootPanel.add(label);
-	rootPanel.add(comboBox);
+	centerPanel.setLayout(new GridBagLayout());
+	centerPanel.add(comboBox, new GridBagConstraints());
+	rootPanel.add(centerPanel);
 	model = (DefaultComboBoxModel<DefaultMutableTreeNode>)comboBox.getModel();
 	model.removeAllElements();
     }//end constructor

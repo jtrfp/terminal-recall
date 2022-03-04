@@ -81,6 +81,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
     public interface GameShellRunState     extends TRFactory.TRConstructed{}
     public interface GameShellConstructing extends GameShellRunState{}
     public interface GameShellConstructed  extends GameShellRunState{}
+    public interface GameShellReady        extends GameShellConstructed{}
     public interface GameShellDestructing  extends GameShellRunState{}
     public interface GameShellDestructed   extends GameShellRunState{}
 
@@ -143,6 +144,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    applyGFXState();
 	    initLoadingScreen();
 	    openInitializationFence();
+	    tr.setRunState(new GameShellReady() {});
 	    return this;
 	}//end startShell()
 
@@ -263,7 +265,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    if (game != null)
 		game.abort();
 	    setGame(null);
-	    tr.setRunState(new GameShellFactory.GameShellConstructed(){});
+	    tr.setRunState(new GameShellFactory.GameShellReady(){});
 	}// end abortCurrentGame()
 
 	private void handleLoadFailureException(Throwable th){

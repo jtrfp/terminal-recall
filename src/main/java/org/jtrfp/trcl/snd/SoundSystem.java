@@ -869,8 +869,19 @@ public class SoundSystem {
     }//end getDefaultConfig()
     
     public void setOutputConfigNode(DefaultMutableTreeNode outputConfig) {
-	if( outputConfig == null )
-	    return;
+	if( outputConfig == null ) {
+	    final DefaultMutableTreeNode fakeRoot = new DefaultMutableTreeNode("");
+	    final DefaultMutableTreeNode fakeDriver = new DefaultMutableTreeNode("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
+	    final DefaultMutableTreeNode fakeDevice = new DefaultMutableTreeNode("default");
+	    final DefaultMutableTreeNode fakeOutput = new DefaultMutableTreeNode("SourceDataLine");
+	    final DefaultMutableTreeNode fakeFormat = new DefaultMutableTreeNode("PCM_SIGNED 44100.0Hz, 16bit, stereo, 4 bytes/frame, big-endian");
+	    fakeRoot.add(fakeDriver);
+	    fakeDriver.add(fakeDevice);
+	    fakeDevice.add(fakeOutput);
+	    fakeOutput.add(fakeFormat);
+	    
+	    outputConfig = fakeFormat;
+	}
 	final Object oldValue = this.outputConfig;
 	if( Objects.equals(outputConfig,oldValue) )
 	    return;

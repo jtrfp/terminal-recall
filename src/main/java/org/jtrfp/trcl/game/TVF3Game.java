@@ -357,7 +357,7 @@ public class TVF3Game implements Game {
 			*/
 			final Font upfrontFontRaw = tr.getResourceManager().getFont("crillee.zip", "Crillee.ttf");
 			
-			upfrontFont = new GLFont(upfrontFontRaw, Color.WHITE, tr);
+			upfrontFont = new GLFont(upfrontFontRaw, Color.WHITE, Color.BLACK, tr);
 			
 			final EarlyLoadingScreen earlyLoadingScreen = getGameShell().getEarlyLoadingScreen();
 			earlyLoadingScreen.setStatusText("Reticulating Splines...");

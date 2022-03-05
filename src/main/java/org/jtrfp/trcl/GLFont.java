@@ -12,11 +12,14 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -86,27 +89,33 @@ public class GLFont{
 	}//end GLFont
 	
 	public GLFont(Font realFont, Color color, TR tr) {
-	    this(realFont, 64, color, tr);
+	    this(realFont, color, null, tr);
 	}
 	
-	public GLFont(Font realFont, int sideLength, Color color,  TR tr){
+	public GLFont(Font realFont, Color color, Color outlineColor, TR tr) {
+	    this(realFont, 64, color, outlineColor, tr);
+	}
+	
+	public GLFont(Font realFont, int sideLength, Color color, Color outlineColor,  TR tr){
 	    	this.tr=tr;
 	    	this.sideLength=sideLength;
 		final Font font=realFont.deriveFont((float)sideLength)/*.deriveFont(Font.BOLD)*/;
+		
 		//Generate the textures
 		textures = new VQTexture[256];
-		VQTexture empty=renderToTexture(' ', color, realFont);
+		VQTexture empty=renderToTexture(' ', color, outlineColor, realFont);
 		for(int c=0; c<256; c++)
-			{textures[c]=realFont.canDisplay(c)?renderToTexture(c, color, font):empty;}
+			{textures[c]=realFont.canDisplay(c)?renderToTexture(c, color, outlineColor, font):empty;}
 		}//end constructor
 	public VQTexture[] getTextures()
 		{return textures;}
 	
-	private VQTexture renderToTexture(int c, Color color, Font font){
+	private VQTexture renderToTexture(int c, Color color, Color outlineColor, Font font){
 		BufferedImage img = new BufferedImage(sideLength, sideLength, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g=img.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setFont(font);
 		FontMetrics metrics=g.getFontMetrics();
 		maxAdvance=metrics.getMaxAdvance();
@@ -119,6 +128,15 @@ public class GLFont{
 		g.drawChars(new char [] {(char)c}, 0, 1, (int)((double)getTextureSideLength()*.05), (int)((double)getTextureSideLength()*.95));
 		widths[c]=metrics.charWidth(c);
 		glWidths[c]=(double)widths[c]/(double)getTextureSideLength();
+		//OUTLINE
+		if(outlineColor != null) {
+		    FontRenderContext frc = g.getFontRenderContext();
+		    GlyphVector gv = font.createGlyphVector(frc, ""+(char)c);
+		    g.translate((int)((double)getTextureSideLength()*.05), (int)((double)getTextureSideLength()*.95));
+		    g.setColor(outlineColor);
+		    g.setStroke(new BasicStroke(3f));
+		    g.draw(gv.getOutline());
+		}
 		g.dispose();
 		return Features.get(tr, GPUFeature.class).textureManager.get().newTexture(img,null,"GLFont "+(char)c,false, true);
 		}//end renderToTexture(...)

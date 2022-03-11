@@ -56,6 +56,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	}
 	
 	private boolean enabled = false;
+	private boolean alreadyAutoStarted = false;
 	private final DefaultMutableTreeNode campaignRoot = new DefaultMutableTreeNode(DEFAULT_GAME_CAMPAIGN_DATA);
 	private final GameCampaignCollectionSink campaignCollectionSink = new GameCampaignCollectionSink();
 	private DefaultMutableTreeNode selectedCampaign = campaignRoot;
@@ -96,8 +97,13 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	}//end getGameCampaignToLoad()
 	
 	public void setSelectedCampaign(DefaultMutableTreeNode node) {
+	    System.out.println("setSelectedCampaign "+node);
+	    if( Objects.equals(node, this.selectedCampaign))
+		return;
 	    this.selectedCampaign = node;
-	}
+	    
+	    proposeAutoStart();
+	}//end setSelectedCampaign()
 	
 	public PackedTreeNode getPackedSelectedCampaign() {
 	    final PackedTreeNode result = new PackedTreeNode();
@@ -106,18 +112,69 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	    return result;
 	}
 	
-	public void setPackedSelectedCampaign(PackedTreeNode node) {
-	    System.out.println("setSelectedCampaign "+node);
+	private void proposeAutoStart() {
+	    if( alreadyAutoStarted )
+		return;
+	    if( selectedCampaign != null && !alreadyAutoStarted && tr.getRunState() instanceof GameShellReady)
+		performAutoStart();
+	}//end reEvaluateAutoStartState()
+	
+	private void performAutoStart() {
+	    alreadyAutoStarted = true;
+	    SwingUtilities.invokeLater(()-> {
+		if( !isEnabled() )
+		    return;
+		final GameCampaignData selectedCampaignData = (GameCampaignData)(getSelectedCampaign().getUserObject());
+
+		if( selectedCampaignData == null || getSelectedCampaign() == campaignRoot )
+		    return;
+
+		if(selectedCampaignData.getPodURIs().isEmpty()) {
+		    JOptionPane.showMessageDialog(rw, "This game campaign's resource data specifies no POD sources.\n"
+			    + "To specify POD sources, navigate to File->Features->GameCampaignRegistry\n...and add POD URIs by editing the item `"+selectedCampaignData.getName()+"`", 
+			    "No PODs Specified",
+			    JOptionPane.WARNING_MESSAGE);
+		    return;
+		}
+
+		GameAutoLoader.this.rw = Features.get(tr, RootWindow.class);
+		final ResourceManager rm = tr.getResourceManager();
+		System.out.println("entered run state. Selected campaign: "+selectedCampaignData);
+
+		rm.clearCaches();
+		rm.setPodRegistry(new GameResourcePODRegistry(selectedCampaignData));
+		TRFactory.nuclearGC();
+		final String voxURI = selectedCampaignData.getVoxURI();
+		VOXFile vox = null;
+		if(voxURI != null) {
+		    if(voxURI.length() > 0)
+			try {vox = rm.getVOXFile(voxURI);}
+		    catch(FileLoadException | IOException | IllegalAccessException ex) {
+			JOptionPane.showMessageDialog(rw, 
+				"Could not load custom VOX URI; attempting to to use a default VOX.\n"+voxURI+"\nMessage was: "+ex.getLocalizedMessage(), 
+				"VOX Load Error", 
+				JOptionPane.WARNING_MESSAGE);
+		    }
+		}//end if(!null)
+		GameAutoLoader.this.target.newGame(vox, selectedCampaignData.getGameVersion());
+	    });
+	}
+	
+	public void setPackedSelectedCampaign(PackedTreeNode node) {//TODO: This has to be re-parsed each time.
 	    final DefaultMutableTreeNode newNode = node.getNode();
-	    final Object toFind = newNode.getUserObject();
-	    final Iterator<TreeNode> it = campaignRoot.children().asIterator();
+	    //final Object toFind = newNode.getUserObject();
+	    //final Iterator<TreeNode> it = campaignRoot.children().asIterator();
+	    setSelectedCampaign(newNode);
+	    /*
+	    System.out.println("Searching for a node with user object matching "+toFind);
 	    while(it.hasNext()) {
 		final DefaultMutableTreeNode thisNode = (DefaultMutableTreeNode)(it.next());
 		if( Objects.equals(thisNode.getUserObject(), toFind) ) {
-		    selectedCampaign = thisNode;
 		    System.out.println("setting selectedCampaign to "+thisNode);
+		    setSelectedCampaign(thisNode);
 		}
 	    }//end while(hasNext)
+	    */
 	}//end setPackedSelectedCampaign(...)
 
 	private class GameCampaignCollectionSink implements Collection<GameCampaignData> {
@@ -163,6 +220,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	    @Override
 	    public boolean add(GameCampaignData e) {
 		campaignRoot.add(new DefaultMutableTreeNode(e));
+		proposeAutoStart();
 		return true;
 	    }
 
@@ -226,43 +284,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 
 		@Override
 		public void enteredRunState(Object oldState, Object newState) {
-		    SwingUtilities.invokeLater(()-> {
-			if( !isEnabled() )
-			    return;
-			final GameCampaignData selectedCampaignData = (GameCampaignData)(getSelectedCampaign().getUserObject());
-
-			if( selectedCampaignData == null || getSelectedCampaign() == campaignRoot )
-			    return;
-
-			if(selectedCampaignData.getPodURIs().isEmpty()) {
-			    JOptionPane.showMessageDialog(rw, "This game campaign's resource data specifies no POD sources.\n"
-				    + "To specify POD sources, navigate to File->Features->GameCampaignRegistry\n...and add POD URIs by editing the item `"+selectedCampaignData.getName()+"`", 
-				    "No PODs Specified",
-				    JOptionPane.WARNING_MESSAGE);
-			    return;
-			}
-
-			GameAutoLoader.this.rw = Features.get(tr, RootWindow.class);
-			final ResourceManager rm = tr.getResourceManager();
-			System.out.println("entered run state. Selected campaign: "+selectedCampaignData);
-
-			rm.clearCaches();
-			rm.setPodRegistry(new GameResourcePODRegistry(selectedCampaignData));
-			TRFactory.nuclearGC();
-			final String voxURI = selectedCampaignData.getVoxURI();
-			VOXFile vox = null;
-			if(voxURI != null) {
-			    if(voxURI.length() > 0)
-				try {vox = rm.getVOXFile(voxURI);}
-			    catch(FileLoadException | IOException | IllegalAccessException ex) {
-				JOptionPane.showMessageDialog(rw, 
-					"Could not load custom VOX URI; attempting to to use a default VOX.\n"+voxURI+"\nMessage was: "+ex.getLocalizedMessage(), 
-					"VOX Load Error", 
-					JOptionPane.WARNING_MESSAGE);
-			    }
-			}//end if(!null)
-			GameAutoLoader.this.target.newGame(vox, selectedCampaignData.getGameVersion());
-		    });
+		    performAutoStart();
 		}//end enteredRunState()
 
 		@Override

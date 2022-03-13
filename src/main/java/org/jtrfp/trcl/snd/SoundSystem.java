@@ -291,6 +291,7 @@ public class SoundSystem {
 	//setOutputByName(config.getActiveAudioOutput());
 	//setFormatByName(config.getActiveAudioFormat());
 	setBufferSizeFrames(4096);
+	getOutputConfigNode();//Sets up the default, at least until the specified one is loaded if there is one.
     }//end loadConfigAndAttachListeners
 
     /*
@@ -833,7 +834,7 @@ public class SoundSystem {
 
     public DefaultMutableTreeNode getOutputConfigNode() {
 	if(outputConfig == null)
-	    outputConfig = getDefaultConfigNode();
+	    setOutputConfigNode(getDefaultConfigNode());
 
 	return outputConfig;
     }//end getOutputConfig()
@@ -855,33 +856,27 @@ public class SoundSystem {
 	    root.add(path.get(1));
 	    setOutputConfigNode(path.get(path.size()-1));
     }//end setOutputConfig()
-    
+
     private DefaultMutableTreeNode getDefaultConfigNode() {
-	final Iterator<TreeNode> it = getOutputConfigTree().depthFirstEnumeration().asIterator();
-	while(it.hasNext()) {
-	    final DefaultMutableTreeNode n = (DefaultMutableTreeNode)it.next();
-	    //if(n.isLeaf())System.out.println("SS depth="+n.getLevel()+" NODE="+n);
-	    if(n.isLeaf() && n.getLevel() == 4)
-		return n;
-	}
-	System.err.println("SoundSystem.getDefaultConfig failed to find a default node.");
-	return null;
+	final DefaultMutableTreeNode fakeRoot = new DefaultMutableTreeNode("");
+	final DefaultMutableTreeNode fakeDriver = new DefaultMutableTreeNode("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
+	final DefaultMutableTreeNode fakeDevice = new DefaultMutableTreeNode("default");
+	final DefaultMutableTreeNode fakeOutput = new DefaultMutableTreeNode("SourceDataLine");
+	final DefaultMutableTreeNode fakeFormat = new DefaultMutableTreeNode("PCM_SIGNED 44100.0Hz, 16bit, stereo, 4 bytes/frame, big-endian");
+	fakeRoot.add(fakeDriver);
+	fakeDriver.add(fakeDevice);
+	fakeDevice.add(fakeOutput);
+	fakeOutput.add(fakeFormat);
+
+	DefaultMutableTreeNode outputConfig = fakeFormat;
+	
+	return Util.getComparatorApproximation(outputConfig, getOutputConfigTree(), 
+        	(x,y)->100-FuzzySearch.ratio(x.toString(),y.toString()));
     }//end getDefaultConfig()
     
     public void setOutputConfigNode(DefaultMutableTreeNode outputConfig) {
-	if( outputConfig == null ) {
-	    final DefaultMutableTreeNode fakeRoot = new DefaultMutableTreeNode("");
-	    final DefaultMutableTreeNode fakeDriver = new DefaultMutableTreeNode("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
-	    final DefaultMutableTreeNode fakeDevice = new DefaultMutableTreeNode("default");
-	    final DefaultMutableTreeNode fakeOutput = new DefaultMutableTreeNode("SourceDataLine");
-	    final DefaultMutableTreeNode fakeFormat = new DefaultMutableTreeNode("PCM_SIGNED 44100.0Hz, 16bit, stereo, 4 bytes/frame, big-endian");
-	    fakeRoot.add(fakeDriver);
-	    fakeDriver.add(fakeDevice);
-	    fakeDevice.add(fakeOutput);
-	    fakeOutput.add(fakeFormat);
-	    
-	    outputConfig = fakeFormat;
-	}
+	if( outputConfig == null )
+	    outputConfig = getDefaultConfigNode();
 	final Object oldValue = this.outputConfig;
 	if( Objects.equals(outputConfig,oldValue) )
 	    return;

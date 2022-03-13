@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
@@ -51,6 +52,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.FeatureConfigurationPrivileges;
 import org.jtrfp.trcl.conf.ui.BasicSettingsPanel;
 import org.jtrfp.trcl.conf.ui.BeanEditor;
 import org.jtrfp.trcl.conf.ui.FeatureConfigurationUI;
@@ -84,6 +86,8 @@ public class FeatureConfigFrame {
     private final Collection<ObjectEditorUI<?>> userInterfaces = new ArrayList<>(128);
     @Getter(lazy=true)
     private final FeaturesSettingsInstructionsPanel instructionsPanel = new FeaturesSettingsInstructionsPanel();
+    @Getter(lazy=true)
+    private final FeatureConfigurationPrivileges privileges = Features.get(Features.getSingleton(), FeatureConfigurationPrivileges.class);
     
     @Getter(lazy=true)
     private final JTree tree = new JTree(getRootNode()) {
@@ -244,6 +248,8 @@ public class FeatureConfigFrame {
 	    } catch( FeatureNotFoundException | FeatureTargetMismatchException e) {
 		 try {//Try to use a BeanEditor
 		    final BeanEditor beanEditor = new BeanEditor();
+		    FeatureConfigurationPrivileges privileges = getPrivileges();
+		    beanEditor.setPrivilegeMap(privileges.getPrivilegeData());
 		    beanEditor.configure(null, ()->feature, (Set<Annotation>)Collections.EMPTY_SET, null);
 		    this.beanEditor = beanEditor;
 		    return beanEditor;

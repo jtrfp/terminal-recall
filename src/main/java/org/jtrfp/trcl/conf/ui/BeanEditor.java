@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -32,6 +33,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.FeatureConfigurationPrivilegeData;
+import org.jtrfp.trcl.conf.FeatureConfigurationPrivilegesFactory.PropertyKey;
 import org.jtrfp.trcl.gui.TRBeanUtils;
 
 public class BeanEditor implements ObjectEditorUI<Object> {
@@ -39,6 +42,7 @@ public class BeanEditor implements ObjectEditorUI<Object> {
     private final JPanel rootPanel = new JPanel();
     private Supplier<Object> targetGetter;
     private Set<Annotation> inheritedAnnotations;
+    private Map<PropertyKey, FeatureConfigurationPrivilegeData> privilegeMap;
     
     public BeanEditor() {}
 
@@ -63,7 +67,14 @@ public class BeanEditor implements ObjectEditorUI<Object> {
 		    for(Annotation ann : writeMethod.getAnnotations())
 			if(ann instanceof ConfigByUI)
 			    conf = (ConfigByUI)ann;
-		if(conf != null) {
+		
+		int privilegeLevel = 0;
+		if( privilegeMap != null ) {
+		    final FeatureConfigurationPrivilegeData pDat = privilegeMap.get(new PropertyKey(target.getClass(), pd.getName()));
+		    if( pDat != null )
+			privilegeLevel = pDat.getPrivilegeLevel();
+		}
+		if(conf != null && privilegeLevel <= 0) {
 		    final Object unidentifiedEditor = conf.editorClass().getConstructor().newInstance();
 		    if( unidentifiedEditor instanceof ObjectEditorUI) {
 			final ObjectEditorUI<?> objectEditor = (ObjectEditorUI<?>)unidentifiedEditor;
@@ -146,6 +157,11 @@ public class BeanEditor implements ObjectEditorUI<Object> {
 	targetGetter = getter;
 	this.inheritedAnnotations = annotations;
 	initialize();
+    }
+
+    public void setPrivilegeMap(
+	    Map<PropertyKey, FeatureConfigurationPrivilegeData> privilegeDataSupplier) {
+	this.privilegeMap = privilegeDataSupplier;
     }
 
 }//end BeanEditor

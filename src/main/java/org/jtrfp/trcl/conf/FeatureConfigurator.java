@@ -16,7 +16,6 @@ package org.jtrfp.trcl.conf;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Set;
 
@@ -113,7 +112,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	final Method [] methods = target.getClass().getMethods();
 	for(String propertyName:getPersistentProperties()){
 	    boolean allowApply = true;
-	    final FeatureConfigurationPrivilegeData fcpData = privMap.get(new PropertyKey((Class<? extends Feature>)target.getClass(), propertyName));
+	    final FeatureConfigurationPrivilegeData fcpData = privMap.get(new PropertyKey(target.getClass(), propertyName));
 	    if( fcpData != null )
 		allowApply &= fcpData.getPrivilegeLevel() <= privilegeLevel;
 	    if(allowApply) {
@@ -122,6 +121,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 		    if(value != null){
 			final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
 			final Method setMethod         = findMethodCompatibleWith(methods,"set"+camelPropertyName, value);
+			
 			if(setMethod != null)
 			    setMethod.invoke(target, value);
 			else

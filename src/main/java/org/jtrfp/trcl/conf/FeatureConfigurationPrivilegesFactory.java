@@ -27,24 +27,26 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Component
 public class FeatureConfigurationPrivilegesFactory implements FeatureFactory<Features> {
     
-    @Getter @Setter @AllArgsConstructor @NoArgsConstructor @EqualsAndHashCode
+    @Getter @Setter @AllArgsConstructor @NoArgsConstructor @EqualsAndHashCode @ToString
     public static final class PropertyKey {
-	private Class<? extends Feature> featureClass;
+	private Class<?> featureClass;
 	private String propertyName;
     }
 
+    @ToString
     public static class FeatureConfigurationPrivilegeData {
 	@Getter @Setter
 	int privilegeLevel = 0;
     }//end FeatureConfigurationPrivilegeData
 
     public static class FeatureConfigurationPrivileges implements Feature<Features> {
-	@Getter @Setter
-	public Map<PropertyKey,FeatureConfigurationPrivilegeData> privilegeData = new HashMap<>();
+	@Getter@Setter
+	private Map<PropertyKey,FeatureConfigurationPrivilegeData> privilegeData = new HashMap<>();
 	
 	public FeatureConfigurationPrivileges() {
 	    super();

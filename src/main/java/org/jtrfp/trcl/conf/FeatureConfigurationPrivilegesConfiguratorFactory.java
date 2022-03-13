@@ -13,6 +13,7 @@
 
 package org.jtrfp.trcl.conf;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public class FeatureConfigurationPrivilegesConfiguratorFactory implements Featur
 
 	@Override
 	protected Set<String> getPersistentProperties() {
-	    return PERSISTENT_PROPERTIES;
+	    return Collections.unmodifiableSet(PERSISTENT_PROPERTIES);
 	}
 	
     }//end FeatureConfigurationPrivilegesConfigurator

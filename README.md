@@ -5,7 +5,7 @@ terminal-recall
 An unofficial engine remake for Terminal Velocity and Fury3 written in Java. It aims to accept POD files for the original games or third-party creations and play them with updated graphics and sound, similar to the way Spring RTS enhances the Total Annihilation game.
 
 ### User Requirements
-* Temurin 11 JVM  (https://adoptium.net/), use the amd64 Hotspot variant and avoid openj9 if possible.
+* Temurin 11 JDK  (https://adoptium.net/), use the amd64 Hotspot variant and avoid openj9 if possible.
 * Windows or Linux
 * Legally-obtained .POD files from the original game(s): STARTUP.POD, plus CDROM.POD for Terminal Velocity, FURY3.POD for Fury3, FURYSE.POD for F!Zone, or a custom POD. Note that STARTUP.POD are somewhat interchangeable between TV and Fury3 but they will adversely affect the SFX and dashboard if mixed.
 * nVIDIA, Intel, or AMD (fglrx in linux) GPU capable of OpenGL 3.3 or later.
@@ -23,7 +23,7 @@ This is a [cleanroom](https://en.wikipedia.org/wiki/Clean_room_design) re-implem
 
 ### Build Instructions
 You will need:
-* Temurin 11 JVM (https://adoptium.net/)
+* Temurin 11 JDK (https://adoptium.net/)
 * Git (http://git-scm.com/downloads)
 * Maven (https://maven.apache.org/download.cgi)
 * Windows or Linux. Linux is much easier.

@@ -18,10 +18,11 @@ import java.beans.PropertyChangeSupport;
 import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -208,8 +209,9 @@ public class SoundSystem {
 	}.start();
 	initialized = true;
     }// end initialize()
-
+    
     private DefaultMutableTreeNode generateOutputConfigTree() {
+	// Generate initial tree
 	final DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 	getAudioDriverNames().stream().forEach(x->{
 	    final DefaultMutableTreeNode driverNode = new DefaultMutableTreeNode();
@@ -235,6 +237,25 @@ public class SoundSystem {
 	    } catch (ClassNotFoundException e) {e.printStackTrace();}
 	});
 	
+	// Prune leaves where path length != 5
+	final Collection<DefaultMutableTreeNode> toRemove = new ArrayList<>(16);
+	boolean done;
+	do {
+	    done = true;
+	    for(DefaultMutableTreeNode node : Util.getLeaves(root)) {
+		final int nodeDepth = node.getPath().length-1;
+		System.out.print("Node `"+node+"` has path depth of "+nodeDepth+". ");
+		if(nodeDepth != 4 && node.getParent() != null) {
+		    System.out.println("Discarding...");
+		    toRemove.add(node);
+		    done = false;
+		} else
+		    System.out.println("Retaining...");
+	    }//end for(leaves)
+	    
+	    toRemove.stream().forEach(x->x.removeFromParent());
+	    toRemove.clear();
+	} while (!done);
 	return root;
     }//end generateOutputConfigTree()
 
@@ -887,7 +908,7 @@ public class SoundSystem {
         final TreeNode [] configPath = this.outputConfig.getPath();
         
         if(configPath.length != 5)
-            System.err.println("config path must be of level 4. Got level "+(configPath.length-1)+". Contents were: "+outputConfig);
+            System.err.println("config path must be of level 4. Got level "+(configPath.length-1)+". Contents were: `"+outputConfig+"`. Retrived config was `"+this.outputConfig+"`");
         
         //// DRIVER
         final String driverName = configPath[1].toString();

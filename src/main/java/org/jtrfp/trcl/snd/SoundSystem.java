@@ -896,8 +896,12 @@ public class SoundSystem {
     }//end getDefaultConfig()
     
     public void setOutputConfigNode(DefaultMutableTreeNode outputConfig) {
-	if( outputConfig == null )
+	if( outputConfig == null)
 	    outputConfig = getDefaultConfigNode();
+	else if( outputConfig.getPath().length != 5) {
+	    System.err.println("Invalid audio output config node depth of "+(outputConfig.getPath().length-1)+". Expected depth 4. Path leaf was `"+outputConfig+"`. Using default instead.");
+	    outputConfig = getDefaultConfigNode();
+	}
 	final Object oldValue = this.outputConfig;
 	if( Objects.equals(outputConfig,oldValue) )
 	    return;

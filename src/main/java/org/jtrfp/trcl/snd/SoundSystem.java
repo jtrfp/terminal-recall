@@ -132,6 +132,7 @@ public class SoundSystem {
     
     public SoundSystem() {//TODO: Use Features to update this.
 	audioDriverNames.add("org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput");
+	audioDriverNames.add("org.jtrfp.trcl.snd.DummyAudioDriver");
 	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
     }// end constructor
     

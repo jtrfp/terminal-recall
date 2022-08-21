@@ -19,6 +19,7 @@ import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.FeatureNotApplicableException;
 import org.jtrfp.trcl.core.Features;
+import org.jtrfp.trcl.core.LoadOrderAware;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +42,7 @@ public class OutputDumpFactory implements FeatureFactory<Features> {
 	return OutputDumpFeature.class;
     }
     
-    private static class OutputDumpFeature extends OutputDump implements Feature<Features> {
+    private static class OutputDumpFeature extends OutputDump implements Feature<Features>, LoadOrderAware {
 
 	public OutputDumpFeature() throws FileNotFoundException {
 	    super();
@@ -55,6 +56,11 @@ public class OutputDumpFactory implements FeatureFactory<Features> {
 	@Override
 	public void destruct(Features target) {
 	    // TODO Auto-generated method stub
+	}
+
+	@Override
+	public int getFeatureLoadPriority() {
+	    return LoadOrderAware.FIRST;
 	}
 	
     }//end OutputDumpFeature

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -151,15 +151,15 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 		@Override
 		public Void execute(GL3 gl) {
 		    System.out.println("GPU info:");
-		    System.out.println("\tVendor: "+gl.glGetString(GL3.GL_VENDOR));
-		    System.out.println("\tRenderer: "+gl.glGetString(GL3.GL_RENDERER));
-		    System.out.println("\tVer: "+gl.glGetString(GL3.GL_VERSION));
+		    System.out.println("\tGL Vendor: "+gl.glGetString(GL3.GL_VENDOR));
+		    System.out.println("\tGL Renderer: "+gl.glGetString(GL3.GL_RENDERER));
+		    System.out.println("\tGL Ver: "+gl.glGetString(GL3.GL_VERSION));
 		    System.out.println("\tGLSL: "+gl.glGetString(GL3.GL_SHADING_LANGUAGE_VERSION));
 		    System.out.println("System info:");
-		    System.out.println("\tVendor: "+System.getProperty("java.vendor"));
-		    System.out.println("\tArch: "+System.getProperty("os.arch"));
-		    System.out.println("\tOS: "+System.getProperty("os.name"));
-		    System.out.println("\tVer:"+System.getProperty("os.version"));
+		    System.out.println("\tJava Vendor: "+System.getProperty("java.vendor"));
+		    System.out.println("\tOS Arch: "+System.getProperty("os.arch"));
+		    System.out.println("\tOS Name: "+System.getProperty("os.name"));
+		    System.out.println("\tOS Ver:"+System.getProperty("os.version"));
 		    return null;
 		}});
 	    gpuResourceFinalizer = new GPUResourceFinalizer(this);

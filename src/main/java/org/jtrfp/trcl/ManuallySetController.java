@@ -14,7 +14,7 @@ package org.jtrfp.trcl;
 
 public class ManuallySetController implements Controller {
     private double frame=0;
-    private boolean stale=true;
+    //private boolean stale=true;
     private boolean debug=false;
     @Override
     public double getCurrentFrame() {
@@ -22,7 +22,7 @@ public class ManuallySetController implements Controller {
 	return frame;
     }
     
-    public void setFrame(double f){frame=f;stale=true;}
+    public void setFrame(double f){frame=f;}
 /*
     @Override
     public void unstale() {

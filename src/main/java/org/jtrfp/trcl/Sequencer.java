@@ -43,6 +43,8 @@ public final class Sequencer implements Controller{
 		double result = (((double)time/(double)frameDelayMsec))%(double)numFrames;
 		double frame= interpolate?result:(int)result;
 		assert frame>=0&&!Double.isInfinite(frame)&&!Double.isNaN(frame);
+		if(debug)
+		    System.out.println("Sequencer frame result = "+frame);
 		return frame;
 	}//end getCurentFrame()
 

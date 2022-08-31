@@ -34,7 +34,8 @@ public class TracingExecutor implements Executor, Decorator<Executor> {
 	delegate.execute(new TracingRunnable(command,new PreemptiveException()));
     }
     
-    private class PreemptiveException extends RuntimeException {}
+    private class PreemptiveException extends RuntimeException {
+	private static final long serialVersionUID = -8014686643494726126L;}
     
     private class TracingRunnable implements Runnable, Decorator<Runnable> {
 	private final Runnable delegate;

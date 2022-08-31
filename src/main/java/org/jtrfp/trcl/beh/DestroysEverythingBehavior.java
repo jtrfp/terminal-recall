@@ -29,6 +29,7 @@ public class DestroysEverythingBehavior extends Behavior {
     private volatile boolean       replenishingPlayerHealth=true;
     private volatile Future<?>     future;
     private volatile int           destructionRadius = (int)TRFactory.mapSquareSize*15;
+    @SuppressWarnings("unchecked")
     final ArrayList<Positionable>[]positionables = new ArrayList[]{new ArrayList<Positionable>(100)};
     private GameShell              gameShell;
     

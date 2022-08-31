@@ -25,7 +25,6 @@ import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.TypeRunStateHandler;
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.beh.HitBoxFollowBehavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
@@ -39,6 +38,7 @@ import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.BillboardSprite;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.DEFObject.HitBox;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +58,7 @@ public class HitboxMarkerFactory implements FeatureFactory<TVF3Game> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return HitboxMarkerFeature.class;
     }
 
@@ -86,8 +86,9 @@ public class HitboxMarkerFactory implements FeatureFactory<TVF3Game> {
 
 	@Override
 	public void destruct(TVF3Game target) {
+	    if(!destructed)
+		target.getTr().removePropertyChangeListener(weakStatePCL);
 	    destructed = true;
-	    target.getTr().removePropertyChangeListener(weakStatePCL);
 	}
 
 	protected TVF3Game getTarget() {
@@ -140,7 +141,8 @@ public class HitboxMarkerFactory implements FeatureFactory<TVF3Game> {
 				System.out.println("Found hitboxes for "+def);
 				final ResourceManager rm = tr.getResourceManager();
 				final Texture hitBoxTexture = rm.getRAWAsTexture("TARG1.RAW", tr.getDarkIsClearPaletteVL(), null, true, false, true);
-				final SpacePartitioningGrid spg = def.getContainingGrid();
+				@SuppressWarnings("unchecked")
+				final SpacePartitioningGrid<Positionable> spg = (SpacePartitioningGrid<Positionable>)def.getContainingGrid();
 				final ArrayList<BillboardSprite> toAdd = new ArrayList<>();
 				for (HitBox hitBox : hitBoxes) {
 				    final HitBoxFollowBehavior beh = new HitBoxFollowBehavior(def, hitBox);

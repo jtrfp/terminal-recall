@@ -14,8 +14,6 @@ package org.jtrfp.trcl.obj;
 
 import java.awt.Dimension;
 
-import com.jogamp.opengl.GL3;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.RenderMode;
@@ -58,7 +56,7 @@ public class ProjectileFactory {
     	GL33Model modelToUse;
     	Texture t;
   	 Triangle [] tris;
-  	 final int damageOnImpact=weapon.getDamage();
+  	 //final int damageOnImpact=weapon.getDamage();
     	try{
     	 modelToUse = new GL33Model(false,tr,"ProjectileFactory."+debugName);
    	 final ModelingType modelingType = weapon.getModelingType();
@@ -89,7 +87,7 @@ public class ProjectileFactory {
    	     final String [] fileNames = mt.getRawFileNames();
    	     final ResourceManager mgr = tr.getResourceManager();
    	     final ColorPaletteVectorList pal = tr.getGlobalPaletteVL();
-   	     GL3 gl = Features.get(tr, GPUFeature.class).getGl();
+   	     //GL3 gl = Features.get(tr, GPUFeature.class).getGl();
    	     for(int i=0; i<frames.length;i++){
    		 frames[i]=(VQTexture)mgr.getRAWAsTexture(fileNames[i], pal, null, false, true);
    	     }//end for(frames)

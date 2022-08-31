@@ -34,7 +34,7 @@ import org.jtrfp.trcl.mem.MemoryWindow;
 public class TriangleList extends PrimitiveList<Triangle> {
     private 		Controller 			controller;
     private 		int 				timeBetweenFramesMsec;
-    private 		int [] 				triangleVertexIndices;
+    //private 		int [] 				triangleVertexIndices;
     private final 	boolean 			animateUV;
     private final 	WindowAnimator 			xyzAnimator;
     private 		TriangleVertex2FlatDoubleWindow flatTVWindow;
@@ -297,7 +297,7 @@ public class TriangleList extends PrimitiveList<Triangle> {
 	}catch(Exception e){e.printStackTrace();}
 	//    }//end Call()
 	//});
-	triangleVertexIndices = vertexIndices;
+	//triangleVertexIndices = vertexIndices;
 	return null;
     }// end uploadToGPU(...)
 

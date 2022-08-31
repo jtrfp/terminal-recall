@@ -19,13 +19,12 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
 import org.jtrfp.trcl.Sequencer;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
 import org.jtrfp.trcl.math.Vect3D;
 
 public class Smoke extends OneShotBillboardEvent {
-	    private final Sequencer sequencer;
-	    private static final int NUM_FRAMES=4;
+	    //private final Sequencer sequencer;
+	    //private static final int NUM_FRAMES=4;
 	    private final SmokeType type;
 	    public Smoke(SmokeType type, String debugName) {
 		super(type.getMillisPerFrame(),type.getAnimationFiles().length,debugName);
@@ -39,7 +38,7 @@ public class Smoke extends OneShotBillboardEvent {
 		try{for(int i=0; i<aniFiles.length;i++)
 		        frames[i]=frame(aniFiles[i]);
 		}catch(Exception e){e.printStackTrace();}
-		setTexture(new AnimatedTexture(sequencer=new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
+		setTexture(new AnimatedTexture(/*sequencer=*/new Sequencer(type.getMillisPerFrame(), frames.length, false,false),frames),true);
 	    }//end constructor
 	    
 	    @Override

@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import org.jtrfp.trcl.SpacePartitioningGrid;
 
 public interface PositionedRenderable extends Renderable, Positionable {
 }

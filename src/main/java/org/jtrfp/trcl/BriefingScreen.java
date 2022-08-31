@@ -201,7 +201,7 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
 			public void run() {
 			    tr.setRunState(new EnemyBriefings(pd.getLvl()));
 			}});
-		    final boolean [] mWait = new boolean[]{false};
+		    //final boolean [] mWait = new boolean[]{false};
 		    addScrollFinishCallback(scrollFinishCallback = new Runnable(){
 			@Override
 			public void run() {

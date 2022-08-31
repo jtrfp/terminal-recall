@@ -13,7 +13,6 @@
 package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
-import org.jtrfp.trcl.obj.WorldObject;
 
 public class SpinAccellerationBehavior extends Behavior {
     private double spinAccelleration=.004;

@@ -52,7 +52,7 @@ public class LevelSkipMenuItemFactory implements FeatureFactory<TVF3Game> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return LevelSkipMenuItem.class;
     }
     

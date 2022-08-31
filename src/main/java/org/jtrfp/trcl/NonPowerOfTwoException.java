@@ -13,6 +13,8 @@
 package org.jtrfp.trcl;
 
 public class NonPowerOfTwoException extends Exception {
+    private static final long serialVersionUID = -3279647254036178260L;
+
     public NonPowerOfTwoException(String name) {
 	super("Entity of name `" + name
 		+ " has a non-power of two side length.");

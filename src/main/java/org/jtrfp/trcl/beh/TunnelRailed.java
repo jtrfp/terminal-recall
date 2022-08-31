@@ -14,7 +14,6 @@ package org.jtrfp.trcl.beh;
 
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
@@ -25,11 +24,11 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 public class TunnelRailed extends Behavior implements CollisionBehavior {
     private final double[] circleCenter = new double[3];
     private final double[] pprtt = new double[3];
-    private TR tr;
+    //private TR tr;
     private GameShell gameShell;
 
-    public TunnelRailed(TR tr) {
-	this.tr = tr;
+    public TunnelRailed() {
+	//this.tr = tr;
     }
 
     @Override

@@ -70,10 +70,10 @@ import lombok.Getter;
 public class Tunnel extends RenderableSpacePartitioningGrid implements RendererConfigurator {
     private LVLFile	lvl;
     private final TR 	tr;
-    private final GL3 	gl;
+    //private final GL3 	gl;
     final double 	tunnelDia = 150000;
     final double 	wallThickness = 5000;
-    private final World world;
+    //private final World world;
     private 	  Color []		   palette;
     private 	  ColorPaletteVectorList   paletteVL;
     private	  ColorPaletteVectorList   ESTuTvPalette;
@@ -100,11 +100,11 @@ public class Tunnel extends RenderableSpacePartitioningGrid implements RendererC
     public Tunnel(TR tr, TDFFile.Tunnel sourceTunnel,
 	    LoadingProgressReporter rootReporter, String debugName) {
 	super();
-	this.world	  = tr.getWorld();
+	//this.world	  = tr.getWorld();
 	reporters	  = rootReporter.generateSubReporters(2);
 	this.sourceTunnel = sourceTunnel;
 	this.tr           = tr;
-	gl 		  = Features.get(tr, GPUFeature.class).getGl();
+	//gl 		  = Features.get(tr, GPUFeature.class).getGl();
 	tunnelAssemblyReporter 
 	  		  = reporters[0];
 	this.debugName    = debugName;

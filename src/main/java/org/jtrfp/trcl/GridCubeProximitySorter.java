@@ -20,7 +20,6 @@ import java.util.TreeSet;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
-import org.jtrfp.trcl.obj.WorldObject;
 
 public class GridCubeProximitySorter extends AbstractSubmitter<List<PositionedRenderable>> {
     private double [] center = new double[]{0,0,0};

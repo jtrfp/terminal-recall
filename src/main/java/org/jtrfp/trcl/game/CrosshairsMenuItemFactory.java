@@ -18,7 +18,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import org.jtrfp.trcl.Crosshairs;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
 import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Feature;
@@ -48,7 +47,7 @@ public class CrosshairsMenuItemFactory implements FeatureFactory<TVF3Game> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return CrosshairsMenuItemFeature.class;
     }
     

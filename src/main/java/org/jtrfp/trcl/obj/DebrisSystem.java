@@ -15,16 +15,15 @@ package org.jtrfp.trcl.obj;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.pool.ObjectPool;
 
 public class DebrisSystem extends RenderableSpacePartitioningGrid{
     private final int DEBRIS_POOL_SIZE=80;
-    private final TR tr;
+    //private final TR tr;
     private final ObjectPool<Debris> pool;
-    public DebrisSystem(TR tr){
+    public DebrisSystem(){
 	super();
-	this.tr=tr;
+	//this.tr=tr;
 	this.pool=new ObjectPool<Debris>(
 		new ObjectPool.RoundRobin<Debris>(DEBRIS_POOL_SIZE), 
 		preparationMethod, 

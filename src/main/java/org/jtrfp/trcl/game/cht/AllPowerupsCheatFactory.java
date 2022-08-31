@@ -21,7 +21,6 @@ import org.jtrfp.trcl.flow.TransientExecutor;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.game.cht.AllAfterburnerCheatFactory.AllAfterburnerCheat;
 import org.jtrfp.trcl.game.cht.AllAmmoCheatFactory.AllAmmoCheat;
-import org.jtrfp.trcl.game.cht.FastAfterburnerCheatFactory.FastAfterburnerCheat;
 import org.jtrfp.trcl.game.cht.InvincibilityCheatFactory.InvincibilityCheat;
 import org.jtrfp.trcl.game.cht.InvisibilityCheatFactory.InvisibilityCheat;
 import org.jtrfp.trcl.game.cht.ShieldRestoreCheatFactory.ShieldRestoreCheat;
@@ -50,7 +49,7 @@ public class AllPowerupsCheatFactory extends AbstractCheatFactory {
 	    final TVF3Game game = this.getTarget();
 	    new Thread(()->{
 		try {
-		    KeyedExecutor ex = TransientExecutor.getSingleton();
+		    KeyedExecutor<?> ex = TransientExecutor.getSingleton();
 		    ex.execute(()->{Features.get(game, AllAfterburnerCheat.class).invokeCheat();});
 		    Thread.sleep(250);
 		    ex.execute(()->{Features.get(game, AllAmmoCheat.class).invokeCheat();});

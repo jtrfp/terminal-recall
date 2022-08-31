@@ -35,7 +35,6 @@ import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.PortalTexture;
-import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.miss.NAVObjective;
@@ -119,7 +118,7 @@ public class TunnelExitObject extends PortalEntrance {
 		    //tr.getDefaultGrid().nonBlockingRemoveBranch(branchToRemove)
 		    //TODO: Use exit configurator?
 		    tr.mainRenderer.getSkyCube().setSkyCubeGen(overworldSystem.getSkySystem().getBelowCloudsSkyCubeGen());
-		    final Renderer portalRenderer = TunnelExitObject.this.getPortalRenderer();
+		    //final Renderer portalRenderer = TunnelExitObject.this.getPortalRenderer();
 		    //if(portalRenderer == null)
 			//throw new IllegalStateException("PortalRenderer intolerably null.");
 		    //portalRenderer.getSkyCube().setSkyCubeGen(GameShellFactory.DEFAULT_GRADIENT);

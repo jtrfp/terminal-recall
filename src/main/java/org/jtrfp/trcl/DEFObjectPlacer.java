@@ -52,7 +52,7 @@ public class DEFObjectPlacer implements ObjectPlacer{
 	
 	@Override
 	public void placeObjects(){
-	    final RenderableSpacePartitioningGrid target = getTargetGrid();
+	    //final RenderableSpacePartitioningGrid target = getTargetGrid();
 	    final Vector3D positionOffset = getPositionOffset();
 	    final DEFFile defData = getDefData();
 	    final List<EnemyDefinition> defs = defData.getEnemyDefinitions();

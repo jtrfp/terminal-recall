@@ -16,10 +16,7 @@ package org.jtrfp.trcl.beh;
 import java.lang.ref.WeakReference;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
-import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.tools.Util;

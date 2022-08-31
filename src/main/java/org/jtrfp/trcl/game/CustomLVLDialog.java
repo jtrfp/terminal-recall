@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 import org.jtrfp.trcl.flow.TransientExecutor;
 
 public class CustomLVLDialog extends JFrame {
+    	private static final long serialVersionUID = -6829682448983154675L;
 	private JTextField lvlEntryField;
 	private String [] lvlData = new String[1];
 	private TVF3Game tvF3Game;

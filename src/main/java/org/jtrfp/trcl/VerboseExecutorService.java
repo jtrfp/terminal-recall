@@ -160,6 +160,7 @@ public class VerboseExecutorService implements ExecutorService {
 	}
     }//end VerboseRunnable
     
+    /*
     private static final class VerboseCallable<T> implements Callable<T>{
 	private final Callable<T> delegate;
 	
@@ -172,6 +173,7 @@ public class VerboseExecutorService implements ExecutorService {
 	    try{return delegate.call();}catch(Exception e){e.printStackTrace();}
 	    return null;
 	}
-    }//end VerboseRunnable
+    }//end VerboseCallable
+    */
 
 }//end VerboseExecutorService

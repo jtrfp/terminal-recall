@@ -18,20 +18,20 @@ import java.util.Collection;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.obj.PositionedRenderable;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DeathBehavior extends Behavior {
     private volatile boolean dead=false;
     private Vector3D locationOfDeath;
-    private WeakReference<SpacePartitioningGrid<PositionedRenderable>> spgOfLastDeath =
-	     new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(null);
+    private WeakReference<SpacePartitioningGrid<? extends Positionable>> spgOfLastDeath =
+	     new WeakReference<SpacePartitioningGrid<? extends Positionable>>(null);
     public synchronized void die(){
 	if(dead)return;
 	dead=true;//Only die once until reset
 	WorldObject wo = getParent();
 	locationOfDeath= new Vector3D(wo.getPositionWithOffset());
-	spgOfLastDeath = new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(wo.getContainingGrid());
+	spgOfLastDeath = new WeakReference<SpacePartitioningGrid<? extends Positionable>>(wo.getContainingGrid());
 	wo.destroy();
 	wo.probeForBehaviors(sub,DeathListener.class);
     }
@@ -62,7 +62,7 @@ public class DeathBehavior extends Behavior {
     /**
      * @return the spgOfLastDeath
      */
-    public SpacePartitioningGrid<PositionedRenderable> getGridOfLastDeath() {
+    public SpacePartitioningGrid<? extends Positionable> getGridOfLastDeath() {
         return spgOfLastDeath.get();
     }
 }//end DeathBehavior

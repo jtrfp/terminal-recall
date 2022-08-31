@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.jtrfp.trcl.Submitter;
-import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.math.Vect3D;
@@ -25,19 +24,19 @@ import org.jtrfp.trcl.obj.TunnelSegment;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithTunnelWalls extends Behavior implements CollisionBehavior{//TODO: Cleanup
-    private final boolean changeHeadingAndTop, alwaysTopUp;
+    //private final boolean changeHeadingAndTop, alwaysTopUp;
     
     private WeakReference<TunnelSegment> segmt;
     private double [] surfaceNormalVar;
     private final double [] pprtt = new double[]{0,0,0}, circleCenter = new double []{0,0,0};
-    private final double [] protrusionVector = new double[]{0,0,0};
+    //private final double [] protrusionVector = new double[]{0,0,0};
     
     public CollidesWithTunnelWalls(boolean changeHeadingAndTop, boolean alwaysTopUp){
-	super();this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;
+	super();/*this.changeHeadingAndTop=changeHeadingAndTop;this.alwaysTopUp=alwaysTopUp;*/
     }
 	public void proposeCollision(WorldObject other){
 		final WorldObject parent = getParent();
-		final Velocible velocible = getParent().probeForBehavior(Velocible.class);
+		//final Velocible velocible = getParent().probeForBehavior(Velocible.class);
 		if(other instanceof TunnelSegment){
 		    	final TunnelSegment seg = (TunnelSegment)other;
 		    	segmt = new WeakReference<TunnelSegment>((TunnelSegment)other);

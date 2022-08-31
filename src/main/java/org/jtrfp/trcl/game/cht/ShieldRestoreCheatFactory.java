@@ -32,7 +32,7 @@ public class ShieldRestoreCheatFactory extends AbstractCheatFactory {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return ShieldRestoreCheat.class;
     }
     

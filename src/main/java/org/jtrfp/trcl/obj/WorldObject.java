@@ -37,7 +37,6 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.NotReadyException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.GPU;
@@ -74,7 +73,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private int[] 	triangleObjectDefinitions;
     private int[] 	transparentTriangleObjectDefinitions;
     protected volatile Integer 	matrixID;
-    private volatile WeakReference<SpacePartitioningGrid> containingGrid;
+    private volatile WeakReference<SpacePartitioningGrid<? extends Positionable>> containingGrid;
     //private List<Behavior> 		inactiveBehaviors  = new CopyOnWriteArrayList<Behavior>();
     //private List<CollisionBehavior>	collisionBehaviors = new CopyOnWriteArrayList<CollisionBehavior>();
     //private List<Behavior> 		tickBehaviors 	   = new CopyOnWriteArrayList<Behavior>();
@@ -110,7 +109,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(new PropertyChangeSupport(this));
 
-    private TRFutureTask<Void> objectDefinitionsFuture;
+    //private TRFutureTask<Void> objectDefinitionsFuture;
     
     public enum RenderFlags{
 	IgnoreCamera((byte)0x1);
@@ -158,15 +157,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	ob.setParent(this);
 	if (ob.isEnabled()) {
 	    if (ob instanceof CollisionBehavior) {
-		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		final HashSet<Behavior> colls = new HashSet<>();
+		for(CollisionBehavior beh : collisionBehaviors)
+		    colls.add((Behavior)beh);
 		colls.add(ob);
 		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
 		}
-	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    final HashSet<Behavior> ticks = new HashSet<>(Arrays.asList(tickBehaviors));
 	    ticks.add(ob);
 	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
 	} else {
-	    final HashSet<Behavior> inactive = new HashSet(Arrays.asList(inactiveBehaviors));
+	    final HashSet<Behavior> inactive = new HashSet<>(Arrays.asList(inactiveBehaviors));
 	    inactive.add(ob);
 	    inactiveBehaviors = inactive.toArray(new Behavior[inactive.size()]);
 	}
@@ -177,15 +178,17 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	toRemove.setParent(this);
 	if (toRemove.isEnabled()) {
 	    if (toRemove instanceof CollisionBehavior) {
-		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		final HashSet<Behavior> colls = new HashSet<>();
+		for(CollisionBehavior beh : collisionBehaviors)
+		    colls.add((Behavior)beh);
 		colls.remove(toRemove);
 		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
 		}
-	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    final HashSet<Behavior> ticks = new HashSet<>(Arrays.asList(tickBehaviors));
 	    ticks.remove(toRemove);
 	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
 	} else {
-	    final HashSet<Behavior> inactive = new HashSet(Arrays.asList(inactiveBehaviors));
+	    final HashSet<Behavior> inactive = new HashSet<>(Arrays.asList(inactiveBehaviors));
 	    inactive.remove(toRemove);
 	    inactiveBehaviors = inactive.toArray(new Behavior[inactive.size()]);
 	}
@@ -196,6 +199,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	return false;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T probeForBehavior(Class<T> bC) {
 	if (bC.isAssignableFrom(CollisionBehavior.class)) {
 	    final CollisionBehavior [] collisionBehaviors = this.collisionBehaviors;
@@ -222,6 +226,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		+ this.toString());
     }// end probeForBehavior
 
+    @SuppressWarnings("unchecked")
     public <T> void probeForBehaviors(Submitter<T> sub, Class<T> type) {
 	final ArrayList<T> result = new ArrayList<T>();
 	
@@ -665,7 +670,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void destroy() {
 	lock.lock();
 	try{
-	    final SpacePartitioningGrid<PositionedRenderable> grid = getContainingGrid();
+	    @SuppressWarnings("unchecked")
+	    final SpacePartitioningGrid<Positionable> grid = (SpacePartitioningGrid<Positionable>)getContainingGrid();
 	    if(grid != null)
 	     grid.remove(this);//TODO: This occasionally throws exceptions because the grid doesn't always contain it.
 	    /*
@@ -685,13 +691,14 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }//end destroy()
 
     @Override
-    public void setContainingGrid(SpacePartitioningGrid grid) {
-	containingGrid = new WeakReference<SpacePartitioningGrid>(grid);
+    public void setContainingGrid(SpacePartitioningGrid<? extends Positionable> grid) {
+	containingGrid = new WeakReference<SpacePartitioningGrid<? extends Positionable>>(grid);
 	setInGrid(grid != null);
 	notifyPositionChange();
     }
 
-    public SpacePartitioningGrid<PositionedRenderable> getContainingGrid() {
+    @Override
+    public SpacePartitioningGrid<? extends Positionable> getContainingGrid() {
 	try{return containingGrid.get();}
 	catch(NullPointerException e){return null;}
     }
@@ -773,13 +780,16 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	if (behavior instanceof CollisionBehavior) {
 	    if (!arrayContains(collisionBehaviors,behavior)
 		    && behavior instanceof CollisionBehavior) {
-		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		Arrays.asList(collisionBehaviors);
+		final HashSet<Behavior> colls = new HashSet<>();
+		for(CollisionBehavior beh : collisionBehaviors)
+		    colls.add((Behavior)beh);
 		colls.add(behavior);
 		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
 	    }
 	}
 	if (!arrayContains(tickBehaviors,behavior)) {
-	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    final HashSet<Behavior> ticks = new HashSet<>(Arrays.asList(tickBehaviors));
 	    ticks.add(behavior);
 	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
 	}
@@ -795,20 +805,22 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
     public void disableBehavior(Behavior behavior) {
 	//if (!arrayContains(inactiveBehaviors,behavior)) {
-	    final HashSet<Behavior> inactive = new HashSet(Arrays.asList(inactiveBehaviors));
+	    final HashSet<Behavior> inactive = new HashSet<>(Arrays.asList(inactiveBehaviors));
 	    inactive.add(behavior);
 	    inactiveBehaviors = inactive.toArray(new Behavior[inactive.size()]);
 	//}
 	if (behavior instanceof CollisionBehavior) {
 	    //if (!arrayContains(collisionBehaviors,behavior)
 		    //&& behavior instanceof CollisionBehavior) {
-		final HashSet<Behavior> colls = new HashSet(Arrays.asList(collisionBehaviors));
+		final HashSet<Behavior> colls = new HashSet<>();
+		for(CollisionBehavior beh : collisionBehaviors)
+		    colls.add((Behavior)beh);
 		colls.remove(behavior);
 		collisionBehaviors = colls.toArray(new CollisionBehavior[colls.size()]);
 	    //}
 	}
 	//if (!arrayContains(tickBehaviors,behavior)) {
-	    final HashSet<Behavior> ticks = new HashSet(Arrays.asList(tickBehaviors));
+	    final HashSet<Behavior> ticks = new HashSet<>(Arrays.asList(tickBehaviors));
 	    ticks.remove(behavior);
 	    tickBehaviors = ticks.toArray(new Behavior[ticks.size()]);
 	//}
@@ -862,7 +874,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     
     @Override
     public void finalize() throws Throwable{
-	final TR tr = getTr();
+	//final TR tr = getTr();
 	if(matrixID!=null)
 	    getGpu().matrixWindow.get().freeLater(matrixID);
 	if(transparentTriangleObjectDefinitions!=null)

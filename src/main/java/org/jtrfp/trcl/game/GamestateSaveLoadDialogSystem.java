@@ -26,8 +26,8 @@ import org.jtrfp.trcl.game.GameConfigRootFactory.GameConfigRootFeature;
 import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
 
 public class GamestateSaveLoadDialogSystem {
-    private static final String SAVE_PATH_PROPERTY 
-        = "org.jtrfp.trcl.game.GamestateSaveLoad.defaultSavePath";
+    /*private static final String SAVE_PATH_PROPERTY 
+        = "org.jtrfp.trcl.game.GamestateSaveLoad.defaultSavePath";*/
     private JFileChooser   chooser;
     private JFrame         rootFrame;
     private Game           game;

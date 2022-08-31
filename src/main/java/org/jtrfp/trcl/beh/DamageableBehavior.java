@@ -14,10 +14,8 @@ package org.jtrfp.trcl.beh;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Collection;
 
 import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.obj.Player;
 
 public class DamageableBehavior extends Behavior {
@@ -87,7 +85,7 @@ public class DamageableBehavior extends Behavior {
 	    pcs.firePropertyChange(HEALTH, oldHealth, val);
 	    return this;
 	}//end setHealth(...)
-	
+	/*
 	private final Submitter<DeathListener> deathSub = new Submitter<DeathListener>(){
 
 	    @Override
@@ -100,7 +98,7 @@ public class DamageableBehavior extends Behavior {
 		for(DeathListener l:items){submit(l);}
 	    }
 	};
-
+*/
 	public void addInvincibility(int invincibilityTimeDeltaMillis) {
 	    ensureIsInvincible();
 	    invincibilityExpirationTime+=invincibilityTimeDeltaMillis;
@@ -128,7 +126,8 @@ public class DamageableBehavior extends Behavior {
 	
 	
 	public static class SupplyNotNeededException extends Exception{
-	    
+	    private static final long serialVersionUID = -7459012250699964675L;
+
 	}
 
 

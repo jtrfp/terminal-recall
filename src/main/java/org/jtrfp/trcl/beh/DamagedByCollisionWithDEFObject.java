@@ -14,10 +14,7 @@ package org.jtrfp.trcl.beh;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.AbstractSubmitter;
-import org.jtrfp.trcl.math.Vect3D;
-import org.jtrfp.trcl.obj.CollisionManager;
 import org.jtrfp.trcl.obj.DEFObject;
-import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class DamagedByCollisionWithDEFObject extends Behavior implements

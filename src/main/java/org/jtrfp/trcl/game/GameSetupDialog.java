@@ -24,9 +24,9 @@ import org.jtrfp.trcl.game.TVF3Game.Difficulty;
 
 
 public class GameSetupDialog extends JDialog {
-
+    private static final long serialVersionUID = 332989256385499073L;
     private final JPanel contentPanel = new JPanel();
-    JComboBox cbDifficulty = new JComboBox();
+    JComboBox<Object> cbDifficulty = new JComboBox<>();
     private JTextField txtCallsign;
     private Difficulty difficulty;
     private String     callSign;
@@ -146,7 +146,7 @@ public class GameSetupDialog extends JDialog {
 			idPanel.add(lblDifficulty, gbc_lblDifficulty);
 		}
 		{
-			cbDifficulty.setModel(new DefaultComboBoxModel(Difficulty.values()));
+			cbDifficulty.setModel(new DefaultComboBoxModel<Object>(Difficulty.values()));
 			cbDifficulty.setSelectedIndex(1);
 			GridBagConstraints gbc_comboBox = new GridBagConstraints();
 			gbc_comboBox.insets = new Insets(0, 0, 0, 5);

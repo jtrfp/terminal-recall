@@ -23,8 +23,6 @@ import org.jtrfp.trcl.gpu.BasicModelSource;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.DEFObject;
 import org.jtrfp.trcl.obj.DEFObject.HitBox;
-import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.Projectile;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class CollidesWithDEFObjects extends Behavior implements CollisionBehavior {

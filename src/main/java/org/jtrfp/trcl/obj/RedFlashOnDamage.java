@@ -15,7 +15,6 @@ package org.jtrfp.trcl.obj;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.DamageListener;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.game.RedFlashFactory.RedFlash;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;

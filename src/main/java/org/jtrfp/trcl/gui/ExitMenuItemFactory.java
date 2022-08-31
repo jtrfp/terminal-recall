@@ -63,7 +63,7 @@ public class ExitMenuItemFactory implements FeatureFactory<MenuSystem> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return ExitMenuItem.class;
     }
 

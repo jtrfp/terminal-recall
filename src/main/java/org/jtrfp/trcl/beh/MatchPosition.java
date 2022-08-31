@@ -18,14 +18,13 @@ import java.beans.PropertyChangeListener;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.WorldObject;
 
 public class MatchPosition extends Behavior {
     private WorldObject target;
     private OffsetMode  offsetMode = new NullOffsetMode();
     private final PositionListener positionListener = new PositionListener();
-    private Vector3D position = Vector3D.ZERO;
+    //private Vector3D position = Vector3D.ZERO;
     
     public static final NullOffsetMode NULL = new NullOffsetMode();
     @Override
@@ -85,7 +84,7 @@ public class MatchPosition extends Behavior {
     }//end NullOffsetMode
     
     public static class TailOffsetMode implements OffsetMode {
-	private double [] workArray = new double[3];
+	//private double [] workArray = new double[3];
 	private Vector3D tailVector, offsetVector;
 	
 	public TailOffsetMode(Vector3D tailVector, Vector3D offsetVector){

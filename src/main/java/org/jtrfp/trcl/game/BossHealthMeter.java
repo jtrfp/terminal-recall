@@ -49,6 +49,7 @@ public class BossHealthMeter {
     protected static final double [] HEALTH_BAR_POS = new double []{.1,-.9,.0001};
     protected static final double [] CHAR_LINE_POS  = new double []{-1,-.93,.0001};
     
+    @SuppressWarnings("unused")
     private IndirectProperty<Game> gameIP; //HARD REFERENCE; DO NOT REMOVE
     private BossFightListener bossFightListener = new BossFightListener();
     private HealthListener    healthListener    = new HealthListener();

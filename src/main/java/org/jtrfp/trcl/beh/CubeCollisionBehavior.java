@@ -54,7 +54,7 @@ private Class<? extends DamageListener.Event> damageEventClass = DamageListener.
 			rotTransPos[2]>0 && rotTransPos[2]<dims[2]){
 		    DamageListener.Event damageEvent = null;
 		    try{
-		    damageEvent = (DamageListener.Event)(this.damageEventClass.newInstance());}
+		    damageEvent = (DamageListener.Event)(this.damageEventClass.getDeclaredConstructor().newInstance());}
 		    catch(Exception e){e.printStackTrace();}
 		    damageEvent.setDamageAmount(damageOnImpact);
 		    damageEvent.setSource(getParent());

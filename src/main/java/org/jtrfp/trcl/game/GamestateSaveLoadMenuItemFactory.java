@@ -29,7 +29,6 @@ import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.game.GameConfigRootFactory.GameConfigRootFeature;
 import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
-import org.jtrfp.trcl.miss.GamePauseFactory.GamePause;
 import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.springframework.stereotype.Component;
@@ -47,7 +46,9 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
 	private GameShell                  gameShell;
 	private MenuSystem                 menuSystem;
 	//HARD REFERENCES; DO NOT REMOVE
+	@SuppressWarnings("unused")
 	private RunStateListener           runStateListener;
+	@SuppressWarnings("unused")
 	private WeakPropertyChangeListener weakRunStateListener;
 	private boolean                    destructed = false;
 
@@ -183,7 +184,7 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return GameSaveLoadMenuItemFeature.class;
     }
 

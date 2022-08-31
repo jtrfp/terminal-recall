@@ -47,7 +47,7 @@ public class PowerupObject extends WorldObject{
 		catch(Exception e){e.printStackTrace();}
 		
 		addBehavior(new PowerupBehavior());
-		addBehavior(new TunnelRailed(getTr()));
+		addBehavior(new TunnelRailed());
 		addBehavior(new FacingObject().setTarget(getTr().mainRenderer.getCamera()));
 		
 		powerupSound=tr.getResourceManager().soundTextures.get("POWER-1.WAV");

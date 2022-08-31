@@ -20,7 +20,6 @@ import org.jtrfp.trcl.beh.LimitedLifeSpan;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
 import org.jtrfp.trcl.beh.phy.Velocible;
 import org.jtrfp.trcl.core.TRFactory;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.ModelingType;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.gpu.Texture;

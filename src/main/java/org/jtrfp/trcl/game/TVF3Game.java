@@ -64,6 +64,7 @@ import org.jtrfp.trcl.obj.DebrisSystem;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.obj.ExplosionSystem;
 import org.jtrfp.trcl.obj.Player;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.PowerupSystem;
 import org.jtrfp.trcl.obj.ProjectileFactory;
 import org.jtrfp.trcl.obj.SmokeSystem;
@@ -141,9 +142,10 @@ public class TVF3Game implements Game {
 	    private final PropertyChangeSupport
 	    			pcSupport = new PropertyChangeSupport(this);
 	    private boolean paused=false;
+	    @SuppressWarnings("unchecked")
 	    private TRFutureTask<Void>[] startupTask = new TRFutureTask[]{null};
 	    
-	    private static final int UPFRONT_HEIGHT = 23;
+	    //private static final int UPFRONT_HEIGHT = 23;
 	    private boolean inGameplay	=false;
 	    private DashboardLayout dashboardLayout;
 	    
@@ -164,7 +166,8 @@ public class TVF3Game implements Game {
 		final Player thisPlayer = getPlayer();
 		final Mission mission   = getCurrentMission();
 		Features.get(mission, GamePause.class).setPaused(true);
-		final SpacePartitioningGrid grid = thisPlayer.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
+		@SuppressWarnings("unchecked")
+		final SpacePartitioningGrid<Positionable> grid = (SpacePartitioningGrid<Positionable>)thisPlayer.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
 		grid.add(thisPlayer);
 		thisPlayer.setActive(true);
 
@@ -390,7 +393,7 @@ public class TVF3Game implements Game {
 			    rm.setSmokeSystem(new SmokeSystem("Game"));
 			    // DEBRIS
 			    earlyLoadingScreen.setStatusText("Loading debris assets...");
-			    rm.setDebrisSystem(new DebrisSystem(tr));
+			    rm.setDebrisSystem(new DebrisSystem());
 			    // SETUP PROJECTILE FACTORIES
 			    earlyLoadingScreen.setStatusText("Setting up projectile factories...");
 			    Weapon[] w = Weapon.values();
@@ -436,9 +439,9 @@ public class TVF3Game implements Game {
 		    setupNameWithUser();
 		tr.setRunState(new Game.GameRunningMode(){});
 		setInGameplay(true);
-		MissionLevel[] levels = vox.getLevels();
+		//MissionLevel[] levels = vox.getLevels();
 		tr.getThreadManager().setPaused(false);
-		int levelIndex = 0;
+		//int levelIndex = 0;
 		System.out.println("Escaping game loop.");
 		tr.getThreadManager().setPaused(true);
 		setInGameplay(false);

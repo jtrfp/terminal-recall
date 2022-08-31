@@ -23,10 +23,6 @@ import java.util.Set;
 
 public final class SoftValueHashMap<K, V> implements Map<K,V> {
     private final HashMap<K,SoftReference<V>> intrinsic = new HashMap<K,SoftReference<V>>();
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 7771262878695937148L;
 
     public V put(K key, V value){
 	intrinsic.put(key, new SoftReference<V>(value));

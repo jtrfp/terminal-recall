@@ -45,7 +45,7 @@ public class HitboxMarkerToggleMenuItemFactory implements FeatureFactory<GameShe
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return HitboxMarkerToggleMenuItemFeature.class;
     }
     
@@ -71,6 +71,8 @@ public class HitboxMarkerToggleMenuItemFactory implements FeatureFactory<GameShe
 
 	@Override
 	public void destruct(GameShell target) {
+	    if(destructed)
+		return;
 	    destructed = true;
 	    target.getTr().removePropertyChangeListener(weakStatePCL);
 	    menuSystem.removeMenuItem(HITBOX_MARKER_TOGGLE_MENU_ITEM_PATH);

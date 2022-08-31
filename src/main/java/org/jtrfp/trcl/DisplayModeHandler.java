@@ -16,15 +16,17 @@ package org.jtrfp.trcl;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jtrfp.trcl.obj.PositionedRenderable;
+
 public class DisplayModeHandler {
     private Set<RenderableSpacePartitioningGrid> currentMode 
     	= new HashSet<RenderableSpacePartitioningGrid>();
     private Set<RenderableSpacePartitioningGrid> newMode
     	= new HashSet<RenderableSpacePartitioningGrid>();
     
-    private final SpacePartitioningGrid defaultGrid;
+    private final SpacePartitioningGrid<PositionedRenderable> defaultGrid;
     
-    public DisplayModeHandler(SpacePartitioningGrid defaultGrid){
+    public DisplayModeHandler(SpacePartitioningGrid<PositionedRenderable> defaultGrid){
 	this.defaultGrid=defaultGrid;
     }
     
@@ -56,7 +58,7 @@ public class DisplayModeHandler {
     private void recursiveNewDisplayModeImpl(Object [] items){
 	if(items==null)return;//Empty.
 	for(Object o: items){
-	    final Class oClass = o.getClass();
+	    final Class<?> oClass = o.getClass();
 	    if(oClass.isArray()){
 		//Recurse
 		recursiveNewDisplayModeImpl((Object[])o);

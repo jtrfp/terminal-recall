@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl;
 
-import java.util.Collection;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.trcl.gpu.BasicModelTarget;

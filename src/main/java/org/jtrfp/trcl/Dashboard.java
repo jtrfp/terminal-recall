@@ -150,7 +150,7 @@ public class Dashboard extends WorldObject2DRelevantEverywhere {
     
     private void buildSegment(Point2D.Double [] coords, int segIdx, Texture tex, GL33Model destModel, Point2D.Double onscreenSize) {
 	Point2D.Double prevCoord = null, prevScreenCoord = null;
-	final double segWidth = onscreenSize.getX() / 5;
+	//final double segWidth = onscreenSize.getX() / 5;
 	for(Point2D.Double coordNT:coords) {
 	    final double xOffset             = segIdx * 64;
 	    final Point2D.Double coord       = new Point2D.Double((coordNT.getX()-xOffset) / 64., (coordNT.getY()) / 64.);

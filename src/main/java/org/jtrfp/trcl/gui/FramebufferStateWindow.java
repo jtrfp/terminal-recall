@@ -28,9 +28,7 @@ import javax.swing.border.Border;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 
-import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.gpu.GLFrameBuffer;
 import org.jtrfp.trcl.gpu.Renderer;
 

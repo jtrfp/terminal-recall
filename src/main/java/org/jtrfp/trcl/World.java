@@ -30,7 +30,7 @@ public final class World {
 	    return Thread.currentThread();
 	}});
     public double sizeX, sizeY, sizeZ, viewDepth, gridBlockSize, cameraViewDepth;
-    private final TR tr;
+    //private final TR tr;
     private static final int blockGranularity       = 8;//Dim segs / diameter //TODO: Remove
     public static final int CUBE_GRANULARITY        = (int)(TRFactory.mapSquareSize*8);
     public static final int WORLD_WIDTH_CUBES       = (int)Math.round(TRFactory.mapWidth / CUBE_GRANULARITY);
@@ -41,7 +41,7 @@ public final class World {
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 	this.sizeZ = sizeZ;
-	this.tr    = tr;
+	//this.tr    = tr;
 	this.cameraViewDepth = cameraViewDepth;
 	this.gridBlockSize   = cameraViewDepth / (double) blockGranularity;
 	this.viewDepth       = cameraViewDepth;

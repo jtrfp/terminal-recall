@@ -38,7 +38,7 @@ public class OutputDumpFactory implements FeatureFactory<Features> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return OutputDumpFeature.class;
     }
     

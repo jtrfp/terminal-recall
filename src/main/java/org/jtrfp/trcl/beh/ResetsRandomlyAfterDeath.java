@@ -17,6 +17,7 @@ import java.util.concurrent.Callable;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.beh.DamageableBehavior.SupplyNotNeededException;
 import org.jtrfp.trcl.core.ThreadManager;
+import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.obj.WorldObject;
 
 
@@ -34,7 +35,7 @@ public void notifyDeath() {
     threadManager.submitToThreadPool(new Callable<Void>(){
 	@Override
 	public Void call() throws Exception {
-	    try{Thread.currentThread().sleep(waitTime);}
+	    try{Thread.sleep(waitTime);}
 	    catch(InterruptedException e){e.printStackTrace();}
 		    unDamage();
 		    reset();
@@ -48,7 +49,8 @@ public void notifyDeath() {
 		}
 		
 		private void reset(){
-		    SpacePartitioningGrid grid = thisObject.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
+		    @SuppressWarnings("unchecked")
+		    SpacePartitioningGrid<Positionable> grid = (SpacePartitioningGrid<Positionable>)thisObject.probeForBehavior(DeathBehavior.class).getGridOfLastDeath();
 		    thisObject.probeForBehavior(DeathBehavior.class).reset();
 		    if(grid!=null)grid.add(thisObject);
 		    //Sometimes the grid will be null if the game was aborted such that the grid is discarded. (weak reference)

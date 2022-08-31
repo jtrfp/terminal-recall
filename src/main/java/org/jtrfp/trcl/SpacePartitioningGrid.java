@@ -96,7 +96,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	}//end constructor
 	
 	public synchronized void add(E objectToAdd){//TODO: Enforce set instead?
-	    final SpacePartitioningGrid spg = objectToAdd.getContainingGrid();
+	    final SpacePartitioningGrid<?> spg = objectToAdd.getContainingGrid();
 	    if(spg!=null)
 		throw new IllegalStateException("Passed element "+objectToAdd+" has non-null containing grid: "+spg+". Object should only be in one grid at a time.");
 	    if(!localTaggerSet.add(objectToAdd)){
@@ -109,7 +109,7 @@ public class SpacePartitioningGrid<E extends Positionable>{
 	
 	public synchronized void addAll(Collection<? extends E> objectsToAdd){
 	    for( E objectToAdd : objectsToAdd ){
-		final SpacePartitioningGrid spg = objectToAdd.getContainingGrid();
+		final SpacePartitioningGrid<?> spg = objectToAdd.getContainingGrid();
 		if(spg!=null)
 		    throw new IllegalStateException("Passed element "+objectToAdd+" has non-null containing grid: "+spg+". Object should only be in one grid at a time.");
 		if(localTaggerSet.add(objectToAdd)){

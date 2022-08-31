@@ -40,7 +40,7 @@ public class CollidesWithTerrain extends Behavior {
     private double 		nudgePadding 		= 5000;
     private boolean		recentlyCollided	= false;
     private boolean		tunnelEntryCapable	= false;
-    private boolean		ignoreHeadingForImpact	= true;
+    //private boolean		ignoreHeadingForImpact	= true;
     private boolean		ignoreCeiling           = false;
     // WORK VARS
     private final double[]      groundNormal            = new double[3];
@@ -55,7 +55,7 @@ public class CollidesWithTerrain extends Behavior {
 	recentlyCollided=false;
 	final WorldObject p = getParent();
 	final TR tr = p.getTr();
-	final World world = tr.getWorld();
+	//final World world = tr.getWorld();
 	final Mission mission = getGameShell().getGame().getCurrentMission();
 	OverworldSystem ows = lastOWS!=null?lastOWS.get():null;
 	if(mission == null)
@@ -189,7 +189,7 @@ public class CollidesWithTerrain extends Behavior {
      * @param ignoreHeadingForImpact the ignoreHeadingForImpact to set
      */
     public CollidesWithTerrain setIgnoreHeadingForImpact(boolean ignoreHeadingForImpact) {
-        this.ignoreHeadingForImpact = ignoreHeadingForImpact;
+        //this.ignoreHeadingForImpact = ignoreHeadingForImpact;
         return this;
     }
 

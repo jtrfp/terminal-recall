@@ -170,7 +170,7 @@ public class EntryBasedIndexPoolTest {
     private int populate(){
 	final int size = (int)(Math.random() * 250);
 	for(int i=0; i<size; i++)
-	    subject.popEntry(new Integer((int)(Math.random()*10000)));
+	    subject.popEntry(Integer.valueOf((int)(Math.random()*10000)));
 	return size;
     }//end populate()
     

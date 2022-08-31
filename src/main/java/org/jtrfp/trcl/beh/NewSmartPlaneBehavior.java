@@ -18,7 +18,6 @@ import org.jtrfp.trcl.beh.AutoLeveling.LevelingAxis;
 import org.jtrfp.trcl.beh.phy.RotationalDragBehavior;
 import org.jtrfp.trcl.beh.phy.RotationalMomentumBehavior;
 import org.jtrfp.trcl.core.Features;
-import org.jtrfp.trcl.core.FeaturesImpl.FeatureNotFoundException;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.Player;
@@ -102,11 +101,11 @@ public class NewSmartPlaneBehavior extends Behavior {
 	behaviorSelector.setEnable(enabled);
 	return super.setEnable(enabled);
     }
-    
+    /*
     private SmartPlaneMode getCurrentMode(){
 	return behaviorSelector.getEnabledGroup();
     }
-    
+    */
     private void initTurnLeft(){
 	final WorldObject parent = getParent();
 	final AutoLeveling al = new AutoLeveling();
@@ -363,14 +362,14 @@ public class NewSmartPlaneBehavior extends Behavior {
 	parent.addBehavior(ttre);
 	behaviorSelector.addToMutexGroup(SmartPlaneMode.TURN_TOWARD_PLAYER, ttre);
     }//end initTurnTowardPlayer
-    
+    /*
     private class AlwaysReEvaluate extends Behavior {
 	@Override
 	public void tick(long tickTimeMillis){
 	    reEvaluateState();
 	}
     }//end AlwaysReEvaluate
-    
+    */
     private class TimeoutThenReEvaluate extends Behavior {
 	private final long timeout;
 	private SmartPlaneMode nextMode;

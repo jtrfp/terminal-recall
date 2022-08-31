@@ -20,12 +20,14 @@ public class ChangesBehaviorWhenTargeted extends Behavior implements
     private final boolean enabled;
     private final Class<? extends Behavior>[]behaviorsToChange;
     
+    @SafeVarargs
     public ChangesBehaviorWhenTargeted(final boolean enabled, final Class<? extends Behavior> ... behaviorsToChange){
 	super();
 	this.enabled=enabled;
 	this.behaviorsToChange=behaviorsToChange;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void notifyBecomingCurrentTarget() {
 	for(Class<? extends Behavior> c:behaviorsToChange){

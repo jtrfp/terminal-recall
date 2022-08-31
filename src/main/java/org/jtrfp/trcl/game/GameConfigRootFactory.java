@@ -98,7 +98,7 @@ public class GameConfigRootFactory implements FeatureFactory<TVF3Game>, LoadOrde
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<?>> getFeatureClass() {
 	return GameConfigRootFeature.class;
     }
 

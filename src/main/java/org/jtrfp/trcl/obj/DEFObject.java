@@ -98,7 +98,6 @@ import org.jtrfp.trcl.gpu.BufferedModelTarget;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.InterpolatedAnimatedModelSource;
 import org.jtrfp.trcl.gpu.RotatedModelSource;
-import org.jtrfp.trcl.miss.Mission;
 import org.jtrfp.trcl.obj.Explosion.ExplosionType;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.snd.SoundSystem;
@@ -193,8 +192,8 @@ public class DEFObject extends WorldObject {
 	}
 	final GameShell gameShell = getGameShell();
 	final TVF3Game game = (TVF3Game) gameShell.getGame();
-	final Player player = game.getPlayer();
-	final Mission mission = game.getCurrentMission();
+	//final Player player = game.getPlayer();
+	//final Mission mission = game.getCurrentMission();
 
 	final int numHitBoxes = def.getNumNewHBoxes();
 	final int[] rawHBoxData = def.getHboxVertices();
@@ -342,7 +341,8 @@ public class DEFObject extends WorldObject {
 			if( newHealth < oldHealth ) { //Split on the first hit.
 			    try {
 				dmgBehavior.removePropertyChangeListener(this); //Cleanup
-				final SpacePartitioningGrid<PositionedRenderable> containingGrid = getContainingGrid();
+				@SuppressWarnings("unchecked")
+				final SpacePartitioningGrid<Positionable> containingGrid = (SpacePartitioningGrid<Positionable>)getContainingGrid();
 				if( containingGrid != null) {
 				    //Spawn 2 split ships
 				    final DEFObject mainSplit = new DEFObject(), mirrorSplit = new DEFObject();
@@ -568,6 +568,7 @@ public class DEFObject extends WorldObject {
 	    boss = true;//This is because NAVObjective sets ignoringProjecitles to true
 	    defaultModelAssignment();
 	    final Runnable cNomeSpawnTask = new Runnable(){
+		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
 		    final DEFObject cNome = new DEFObject();
@@ -591,7 +592,7 @@ public class DEFObject extends WorldObject {
 		    cNome.notifyPositionChange();
 		    //cNome.addBehavior(new HorizAimAtPlayerBehavior(
 			//    getGameShell().getGame().getPlayer()));
-		    getContainingGrid().add(cNome);
+		    ((SpacePartitioningGrid<Positionable>)getContainingGrid()).add(cNome);
 		}};
 	    addBehavior(new ExecuteOnInterval(5000, cNomeSpawnTask));
 	    break;
@@ -856,7 +857,7 @@ public class DEFObject extends WorldObject {
 	// Misc
 	if (isBoss())
 	    defaultBossNAVTargetingResponse();
-	addBehavior(new TunnelRailed(tr));// Centers in tunnel when appropriate
+	addBehavior(new TunnelRailed());// Centers in tunnel when appropriate
 	addBehavior(new DeathBehavior());
 	final int newHealth = (int) ((pl.getStrength() + (spinCrash ? 16 : 0)));
 	damageableBehavior.setHealth(newHealth)
@@ -1224,7 +1225,7 @@ public class DEFObject extends WorldObject {
 	    final DamageTrigger spinAndCrashAddendum = new DamageTrigger() {
 		@Override
 		public void healthBelowThreshold() {
-		    final WorldObject parent = getParent();
+		    //final WorldObject parent = getParent();
 		    final HasPropulsion hp = probeForBehavior(
 			    HasPropulsion.class);
 		    try {
@@ -1329,7 +1330,7 @@ public class DEFObject extends WorldObject {
 	    final DamageTrigger spinAndCrashAddendum = new DamageTrigger() {
 		@Override
 		public void healthBelowThreshold() {
-		    final WorldObject parent = getParent();
+		    //final WorldObject parent = getParent();
 		    final HasPropulsion hp = probeForBehavior(
 			    HasPropulsion.class);
 		    hp.setPropulsion(hp.getPropulsion() / 1);

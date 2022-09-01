@@ -108,7 +108,7 @@ public class SoundSystem {
 
 		@Override
 		public AudioDriver adapt(Class<? extends AudioDriver> value) {
-		    try{return value.newInstance();}
+		    try{return value.getConstructor().newInstance();}
 		    catch(Exception e){e.printStackTrace();return null;}
 		}
 

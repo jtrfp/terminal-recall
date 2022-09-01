@@ -664,7 +664,7 @@ public abstract class MemoryWindow {
 	    throw new IllegalStateException("This memorywindow is already a context.");
 	final Class<? extends MemoryWindow> thisClass = getClass();
 	try{
-	    final MemoryWindow result = (MemoryWindow)thisClass.newInstance();
+	    final MemoryWindow result = (MemoryWindow)thisClass.getConstructor().newInstance();
 	    result.initFields();
 	    final PagedByteBufferContext newContext = new PagedByteBufferContext();
 	    newContext.setPagedByteBuffer(getNoncontextualBuffer());

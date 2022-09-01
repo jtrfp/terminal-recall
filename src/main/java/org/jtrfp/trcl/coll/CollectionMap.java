@@ -31,8 +31,9 @@ public class CollectionMap<K, V> implements Map<K,Collection<V>> {
 	this.collectionClass = collectionClass;
     }
     
+    @SuppressWarnings("unchecked")
     protected Collection<V> newCollection(){
-	try{return collectionClass.newInstance();}
+	try{return collectionClass.getConstructor().newInstance();}
 	catch(Exception e){throw new RuntimeException(e);}
     }
     

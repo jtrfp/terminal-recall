@@ -24,7 +24,6 @@ import org.jtrfp.trcl.file.TNLFile.Segment;
 import org.jtrfp.trcl.file.TNLFile.Segment.FlickerLightType;
 import org.jtrfp.trcl.gpu.GL33Model;
 import org.jtrfp.trcl.gpu.Texture;
-import org.jtrfp.trcl.math.IntRandomTransferFunction;
 
 public class TunnelSegment extends WorldObject {
     public static final int TUNNEL_DIA_SCALAR = 128;
@@ -75,7 +74,7 @@ public class TunnelSegment extends WorldObject {
 	return TRFactory.legacy2Modern(s.getEndHeight() * TUNNEL_DIA_SCALAR * 3);
     }
 
-    private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();
+    //private static final IntRandomTransferFunction flickerRandom = new IntRandomTransferFunction();
 
     private static GL33Model createModel(Segment s, double segLen,
 	    Texture[] tunnelTexturePalette, double endX,
@@ -179,7 +178,7 @@ public class TunnelSegment extends WorldObject {
 	 double frameStartAngle = startAngle + frameAngleDeltaRadians;
 	 double frameEndAngle = endAngle + frameAngleDeltaRadians;
 	 final double frameStartAngle1 = startAngle1 + frameAngleDeltaRadians;
-	 final double frameStartAngle2 = startAngle2 + frameAngleDeltaRadians;
+	 //final double frameStartAngle2 = startAngle2 + frameAngleDeltaRadians;
 	 final double frameEndAngle1 = endAngle + frameAngleDeltaRadians;
 	 double []thisU=noLightU,thisV=noLightV;//Changeable u/v references, default to noLight
 	 // Poly quads

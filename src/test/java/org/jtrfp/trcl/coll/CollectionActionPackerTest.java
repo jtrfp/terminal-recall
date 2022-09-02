@@ -157,6 +157,7 @@ public class CollectionActionPackerTest {
 	assertFalse(contains);
     }
     
+    @SuppressWarnings("unlikely-arg-type")
     @Test
     public void testFlatCollectionRemove() {
 	assertTrue(subject.contains(zero));//Control var
@@ -172,6 +173,7 @@ public class CollectionActionPackerTest {
 	assertEquals(4,subject.size());
     }
     
+    @SuppressWarnings("unlikely-arg-type")
     @Test
     public void testFlatCollectionRemoveAll() {
 	assertTrue(subject.removeAll(Arrays.asList(one,two)));
@@ -199,7 +201,7 @@ public class CollectionActionPackerTest {
     @Test
     public void testToArray() {
 	Object [] array = subject.toArray();
-	Collection c = Arrays.asList(array);
+	Collection<Object> c = Arrays.asList(array);
 	assertEquals(6,c.size());
 	assertTrue(c.contains(zero));
 	assertTrue(c.contains(one));
@@ -212,27 +214,25 @@ public class CollectionActionPackerTest {
 
     @Test
     public void testAddAll() {
-	Pair<Integer,String> three, D;
 	Collection<Pair<Integer,String>> temp = new ArrayList<Pair<Integer,String>>();
-	temp.add(three=new Pair<Integer,String>(0,"three"));
-	temp.add(D    =new Pair<Integer,String>(1,"D"));
+	temp.add(new Pair<Integer,String>(0,"three"));
+	temp.add(new Pair<Integer,String>(1,"D"));
 	subject.addAll(temp);
 	assertTrue(subject.containsAll(temp));
     }//end testAddAll()
     
     @Test
     public void testFlatCollectionAddAll() {
-	Pair<Integer,String> three, D;
 	Collection<Pair<Integer,String>> temp = new ArrayList<Pair<Integer,String>>();
-	temp.add(three=new Pair<Integer,String>(0,"three"));
-	temp.add(D    =new Pair<Integer,String>(1,"D"));
+	temp.add(new Pair<Integer,String>(0,"three"));
+	temp.add(new Pair<Integer,String>(1,"D"));
 	subject.addAll(temp);
 	assertTrue(flatCollection.containsAll(Arrays.asList("three","D")));
     }//end testFlatCollectionAddAll()
 
     @Test
     public void testIterator() {
-	Iterator it = subject.iterator();
+	Iterator<?> it = subject.iterator();
 	assertNotNull(it);
 	for(int i = 0; i<6; i++){
 	    assertTrue(it.hasNext());

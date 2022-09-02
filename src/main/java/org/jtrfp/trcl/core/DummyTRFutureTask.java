@@ -18,18 +18,20 @@ import java.util.concurrent.Callable;
 
 public class DummyTRFutureTask<T> extends TRFutureTask<T> {
     private final T valueToReturn;
-    private static final Callable CALLABLE = new Callable(){
+    private static final Callable<?> CALLABLE = new Callable<>(){
 	@Override
 	public Object call() throws Exception {
 	    return null;
 	}
     };
+    @SuppressWarnings("unchecked")
     public DummyTRFutureTask(T valueToReturn) {
-	super(CALLABLE);
+	super((Callable<T>)CALLABLE);
 	this.valueToReturn=valueToReturn;
     }
+    @SuppressWarnings("unchecked")
     public DummyTRFutureTask(T valueToReturn, UncaughtExceptionHandler handler) {
-	super(CALLABLE,handler);
+	super((Callable<T>)CALLABLE,handler);
 	this.valueToReturn=valueToReturn;
     }
 

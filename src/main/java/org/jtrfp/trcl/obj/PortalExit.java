@@ -18,14 +18,13 @@ import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.SpacePartitioningGrid;
-import org.jtrfp.trcl.core.TRFactory.TR;
 
 public class PortalExit extends WorldObject {
     private Camera controlledCamera;
     private final double [] controlledPosition= new double[3];
     private final double [] controlledHeading = new double[3];
     private final double [] controlledTop     = new double[3];
-    private WeakReference<SpacePartitioningGrid> rootGrid;
+    private WeakReference<SpacePartitioningGrid<PositionedRenderable>> rootGrid;
 
     public PortalExit() {
 	super();
@@ -70,7 +69,7 @@ public class PortalExit extends WorldObject {
     public synchronized void activate() {
 	if(rootGrid==null)
 	    return;
-	SpacePartitioningGrid grid = rootGrid.get();
+	SpacePartitioningGrid<PositionedRenderable> grid = rootGrid.get();
 	if(grid!=null)
 	 controlledCamera.setRootGrid(grid);
 	else
@@ -80,15 +79,15 @@ public class PortalExit extends WorldObject {
     /**
      * @return the rootGrid
      */
-    public SpacePartitioningGrid getRootGrid() {
+    public SpacePartitioningGrid<PositionedRenderable> getRootGrid() {
         return rootGrid.get();
     }
 
     /**
      * @param rootGrid the rootGrid to set
      */
-    public synchronized void setRootGrid(SpacePartitioningGrid rootGrid) {
-        this.rootGrid = new WeakReference<SpacePartitioningGrid>(rootGrid);
+    public synchronized void setRootGrid(SpacePartitioningGrid<PositionedRenderable> rootGrid) {
+        this.rootGrid = new WeakReference<SpacePartitioningGrid<PositionedRenderable>>(rootGrid);
     }
 
     public synchronized void deactivate() {

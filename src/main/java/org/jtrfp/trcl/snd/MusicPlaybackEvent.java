@@ -20,14 +20,13 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.jogamp.opengl.GL3;
-
-import org.jtrfp.trcl.conf.TRConfigurationFactory.TRConfiguration;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
+
+import com.jogamp.opengl.GL3;
 
 public class MusicPlaybackEvent extends AbstractSoundEvent implements RelevantEverywhere {
     private final GPUResidentMOD mod;

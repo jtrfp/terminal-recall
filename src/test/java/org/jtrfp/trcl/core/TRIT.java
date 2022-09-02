@@ -44,7 +44,7 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import com.jogamp.opengl.GL3;
 
 public class TRIT {
-    private static final Integer [] COMPLETION_BARRIER = new Integer[1];
+    //private static final Integer [] COMPLETION_BARRIER = new Integer[1];
     private static final int        SECONDS            = 1000;
     
     @Rule
@@ -110,6 +110,7 @@ public class TRIT {
 		    final RootWindow rootWindow = Features.get(tr, RootWindow.class);
 		    final Renderer renderer = tr.mainRenderer;
 
+		    @SuppressWarnings("unchecked")
 		    final Future<BufferedImage> screenshotTask = renderer.getGpu().getGlExecutor().submitToGL(new GLExecutable<BufferedImage, GL3>(){
 			@Override
 			public BufferedImage execute(GL3 gl) {

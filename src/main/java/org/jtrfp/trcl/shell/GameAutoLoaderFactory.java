@@ -202,7 +202,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	    }
 
 	    @Override
-	    public Iterator iterator() {
+	    public Iterator<GameCampaignData> iterator() {
 		throw new UnsupportedOperationException();
 	    }
 
@@ -212,6 +212,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 		throw new UnsupportedOperationException();
 	    }
 
+	    @SuppressWarnings("unchecked")
 	    @Override
 	    public Object[] toArray(Object[] a) {
 		throw new UnsupportedOperationException();
@@ -244,7 +245,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	    }//end remove(...)
 
 	    @Override
-	    public boolean containsAll(Collection c) {
+	    public boolean containsAll(Collection<?> c) {
 		for(Object o : c) {
 		    if( !contains(o) )
 			return false;
@@ -253,7 +254,7 @@ public class GameAutoLoaderFactory implements FeatureFactory<GameShell> {
 	    }
 
 	    @Override
-	    public boolean addAll(Collection c) {
+	    public boolean addAll(@SuppressWarnings("rawtypes") Collection c) {
 		for( Object o : c)
 		    add((GameCampaignData)o);
 		return true;

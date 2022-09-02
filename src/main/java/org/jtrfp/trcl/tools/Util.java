@@ -298,7 +298,8 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
     new Color(0,0,0)
     };
 
-   public static <T>void repopulate(Collection<T> dest, Collection<T> src){
+@SuppressWarnings("unchecked")
+public static <T>void repopulate(Collection<T> dest, Collection<T> src){
        if(dest instanceof Repopulatable)
 	    ((Repopulatable<T>)dest).repopulate(src);
        else if(dest instanceof List){
@@ -368,9 +369,10 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
     * @param toRemove
     * @since Jan 11, 2016
     */
-   public static <E> void bulkRemove(Collection<E> toRemove, Collection<E> target){
+   @SuppressWarnings("unchecked")
+public static <E> void bulkRemove(Collection<E> toRemove, Collection<E> target){
        if(target instanceof BulkRemovable)
-	   ((BulkRemovable)target).bulkRemove(toRemove);
+	   ((BulkRemovable<E>)target).bulkRemove(toRemove);
        else
         for(E e:toRemove)
 	   target.remove(e);
@@ -381,13 +383,13 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
    }
    
    public static void assertPropertiesNotNull(Object bean, String ... propertyNames){
-       final Class beanClass = bean.getClass();
+       final Class<?> beanClass = bean.getClass();
        for(String propertyName : propertyNames){
 	   Object result;
 	   try{
 	   final String camelCaseName = Character.toUpperCase(propertyName.charAt(0))+""+propertyName.substring(1);
-	   final Method method = beanClass.getMethod("get"+camelCaseName, null);
-	   result = method.invoke(bean, null);
+	   final Method method = beanClass.getMethod("get"+camelCaseName);
+	   result = method.invoke(bean);
 	   }catch(Exception e){
 	       throw new RuntimeException("Could not check property `"+propertyName+"`",e);}
 	   if(result == null)
@@ -418,7 +420,8 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        dest[2] = deltaVector.getZ();
    }//end relativeHeadingVector()
    
-   public static <T extends DefaultMutableTreeNode> List<T> getLeaves(T root) {
+   @SuppressWarnings("unchecked")
+public static <T extends DefaultMutableTreeNode> List<T> getLeaves(T root) {
 	final ArrayList<T> result = new ArrayList<>();
 	
 	final Iterator<TreeNode> it = root.depthFirstEnumeration().asIterator();
@@ -447,6 +450,7 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
 	   final Iterator<TreeNode> children = node.children().asIterator();
 	   boolean found = false;
 	   while(children.hasNext() && !found) {
+	       @SuppressWarnings("unchecked")
 	       final T childNode = (T)children.next();
 	       if(Objects.equals(childNode.getUserObject(), obj)) {
 		   node = childNode;
@@ -471,7 +475,8 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        return result;
    }//end nodePathFromUserObjectPath
 
-   public static <T extends TreeNode> T getComparatorApproximation(
+   @SuppressWarnings("unchecked")
+public static <T extends TreeNode> T getComparatorApproximation(
 	   DefaultMutableTreeNode external,
 	   DefaultMutableTreeNode reference,
 	   Comparator<T> comparator) {
@@ -480,18 +485,21 @@ public static final Color [] DEFAULT_PALETTE = new Color []{
        externalPath.poll();//Skip root since that's implied and this node will be compared to reference root's children anyway.
        return getComparatorApproximationFromRoot(externalPath, (T)(reference.getRoot()), comparator);
    }//end getToStringApproximation()
-   
+
    private static <T extends TreeNode> T getComparatorApproximationFromRoot(ArrayDeque<TreeNode> externalPath, T reference, Comparator<T> comparator) {
-       final Iterator<TreeNode> it = (Iterator<TreeNode>) reference.children().asIterator();
-       
+       @SuppressWarnings("unchecked")
+    final Iterator<TreeNode> it = (Iterator<TreeNode>) reference.children().asIterator();
+
        if(!it.hasNext() || externalPath.isEmpty())
 	   return reference;
-       
+
        T best = null;
        int bestScore = Integer.MAX_VALUE;
+       @SuppressWarnings("unchecked")
        final T externalNode = (T)externalPath.poll();
-       
+
        while(it.hasNext()) {
+	   @SuppressWarnings("unchecked")
 	   final T node = (T)it.next();
 	   System.out.println("compare "+node+" to "+externalNode);
 	   Objects.requireNonNull(node);

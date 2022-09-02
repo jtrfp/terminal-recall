@@ -34,12 +34,12 @@ public class GroupMutexTest {
 
     @Test
     public void testAddToGroup() {
-	new GroupMutex().addToGroup(GROUPS[0], VALUES[0]);
+	getSubject().addToGroup(GROUPS[0], VALUES[0]);
     }
 
     @Test
     public void testRemoveFromGroup() {
-	new GroupMutex().removeFromGroup(GROUPS[1], VALUES[1]);
+	getSubject().removeFromGroup(GROUPS[1], VALUES[1]);
     }
 
     @Test
@@ -47,20 +47,22 @@ public class GroupMutexTest {
 	getSubject().enforce();
     }
     
+    @SuppressWarnings("unchecked")
     @Test
     public void testEnforceEmptyWithResults(){
 	final GroupMutex<String,String> subject = getSubject();
-	final EnablementEnforcer enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
+	final EnablementEnforcer<String> enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
 	subject.setEnablementEnforcer(enablementEnforcer);
 	subject.enforce();
 	for(int i = 0; i < VALUES.length; i++)
 	 Mockito.verify(enablementEnforcer).enforceEnableOrDisable(VALUES[i],false);
     }
     
+    @SuppressWarnings({ "unchecked"})
     @Test
     public void testEnforceGroupWithResults(){
 	final GroupMutex<String,String> subject = getSubject();
-	final EnablementEnforcer enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
+	final EnablementEnforcer<String> enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
 	subject.setEnablementEnforcer(enablementEnforcer);
 	subject.setEnabledGroup(GROUPS[0]);
 	Mockito.verify(enablementEnforcer).enforceEnableOrDisable(VALUES[0],true);
@@ -69,10 +71,11 @@ public class GroupMutexTest {
 	Mockito.verify(enablementEnforcer).enforceEnableOrDisable(VALUES[3],false);
     }
     
+    @SuppressWarnings("unchecked")
     @Test
     public void testEnforceNewGroupWithResults(){
 	final GroupMutex<String,String> subject = getSubject();
-	final EnablementEnforcer enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
+	final EnablementEnforcer<String> enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
 	subject.setEnablementEnforcer(enablementEnforcer);
 	subject.setEnabledGroup(GROUPS[0]);
 	Mockito.verify(enablementEnforcer,Mockito.times(1)).enforceEnableOrDisable(VALUES[0],true);
@@ -103,10 +106,11 @@ public class GroupMutexTest {
 	Mockito.verify(enablementEnforcer,Mockito.times(2)).enforceEnableOrDisable(VALUES[3],true);
     }
     
+    @SuppressWarnings("unchecked")
     @Test
     public void testEnforcementOffGroupWithResults(){
 	final GroupMutex<String,String> subject = getSubject();
-	final EnablementEnforcer enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
+	final EnablementEnforcer<String> enablementEnforcer = Mockito.mock(EnablementEnforcer.class);
 	subject.setEnablementEnforcer(enablementEnforcer);
 	subject.setEnforcementEnabled(false);
 	subject.setEnabledGroup(GROUPS[0]);
@@ -136,6 +140,7 @@ public class GroupMutexTest {
 	assertNull(getSubject().getEnablementEnforcer());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testSetEnablementEnforcer() {
 	getSubject().setEnablementEnforcer(Mockito.mock(EnablementEnforcer.class));
@@ -152,7 +157,7 @@ public class GroupMutexTest {
 	assertFalse(getSubject().isEnforcementEnabled());
     }
 
-    public GroupMutex getSubject() {
+    public GroupMutex<String,String> getSubject() {
 	if(subject == null){
 	    final GroupMutex<String,String> groupMutex;
 	    setSubject(groupMutex = new GroupMutex<String, String>());
@@ -170,7 +175,7 @@ public class GroupMutexTest {
 	return subject;
     }
 
-    public void setSubject(GroupMutex subject) {
+    public void setSubject(GroupMutex<String,String> subject) {
         this.subject = subject;
     }
 

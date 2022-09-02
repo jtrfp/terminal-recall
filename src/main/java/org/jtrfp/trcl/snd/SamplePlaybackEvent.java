@@ -48,7 +48,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
     private final SoundTexture soundTexture;
     private final double[] pan;
     private final double playbackRatio;
-    private Double lengthInSeconds = null;
+    //private Double lengthInSeconds = null;
     private double lowVolumeThreshold = .01;
     
     private SamplePlaybackEvent(SoundTexture tex, double startTimeSeconds,
@@ -70,7 +70,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	soundTexture = tex;
 	this.pan = pan;
 	this.playbackRatio = playbackRatio;
-	this.lengthInSeconds = lengthInSeconds;
+	//this.lengthInSeconds = lengthInSeconds;
     }
 
     /**
@@ -118,6 +118,7 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	private FloatBuffer vertexIdBufferData;
 	private double volume = 1;
 	
+	@SuppressWarnings("unchecked")
 	public Factory(final TR tr) {
 	    super(tr);
 	    final GPU gpu = Features.get(tr, GPUFeature.class);

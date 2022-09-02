@@ -213,17 +213,17 @@ public class IndexList<E> implements Collection<E> {
      */
     public int compact() {
 	final int result = indexPool.compact();
-	final int newSize = indexPool.getMaxCapacity();
+	//final int newSize = indexPool.getMaxCapacity();
 	//truncate(newSize);
 	return result;
     }
-    
+    /*
     private void truncate(int newSize){
 	while(delegate.size()>newSize)
 	    delegate.remove(newSize);
 	assert delegate.size()==newSize;
     }//end truncate(...)
-
+*/
     /**
      * @return
      * @see org.jtrfp.trcl.pool.IndexPool#getFreeIndices()

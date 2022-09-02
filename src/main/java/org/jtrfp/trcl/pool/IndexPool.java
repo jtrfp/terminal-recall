@@ -311,7 +311,8 @@ public class IndexPool{
 	    return maxCapacity;
 	}
 	
-	public static class OutOfIndicesException extends Exception {}
+	public static class OutOfIndicesException extends Exception {
+	private static final long serialVersionUID = -5125479538615774587L;}
 	/**
 	 * @return the hardLimit
 	 */

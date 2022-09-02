@@ -35,8 +35,8 @@ import org.jtrfp.trcl.miss.TunnelSystemFactory.TunnelSystem;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class NavArrow extends WorldObject implements RelevantEverywhere {
-private static final double WIDTH=.16;
-private static final double HEIGHT=.16;
+//private static final double WIDTH=.16;
+//private static final double HEIGHT=.16;
 private static final int TEXT_UPDATE_INTERVAL_MS=150;
 private final DashboardLayout layout;
 private Color backgroundColor;

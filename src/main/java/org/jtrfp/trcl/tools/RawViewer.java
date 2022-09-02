@@ -27,10 +27,10 @@ import org.jtrfp.jtrfp.act.ActFile;
 import org.jtrfp.trcl.SpecialRAWDimensions;
 import org.jtrfp.trcl.file.RAWFile;
 
-public class RawViewer extends JFrame
-	{
+public class RawViewer extends JFrame {
+    	private static final long serialVersionUID = 2084808906340486912L;
 	private static final int PIXEL_SIZE=4;
-	ArrayList<Color>palette = new ArrayList();
+	ArrayList<Color>palette = new ArrayList<>();
 	RAWFile raw;
 	int xLen,yLen;
 	public RawViewer(File RAWFile, File ACTFile)
@@ -117,8 +117,9 @@ public class RawViewer extends JFrame
 		System.exit(1);
 		}
 	
-	private class ImgPanel extends JPanel
-		{
+	private class ImgPanel extends JPanel {
+	    private static final long serialVersionUID = 3836557474698674471L;
+
 		@Override
 		public void paint(Graphics g)
 			{

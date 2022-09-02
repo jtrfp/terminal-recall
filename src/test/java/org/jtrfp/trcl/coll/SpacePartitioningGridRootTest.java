@@ -187,7 +187,7 @@ public class SpacePartitioningGridRootTest {
 	 assertTrue(dispatcher.contains(mockedPositionables[1]));
     }//end testEmptyAddNonEmptyBranch()
     
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes", "unlikely-arg-type" })
     @Test
     public void testEmptyDeactivateNonEmptyBranchThenActivate() {//Relevance executor breaks this test.
 	when(mockedTarget.remove(any(Collection.class))).thenReturn(true);

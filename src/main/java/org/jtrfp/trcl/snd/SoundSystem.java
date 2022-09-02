@@ -87,7 +87,7 @@ public class SoundSystem {
     private SamplePlaybackEvent.Factory playbackFactory, musicPlaybackFactory;
     private MusicPlaybackEvent.Factory musicFactory;
     private LoopingSoundEvent.Factory loopFactory;
-    private long soundRenderingFinishedSync;
+    //private long soundRenderingFinishedSync;
     private AtomicBoolean paused = new AtomicBoolean(false);
     private int bufferSizeFrames = 4096;
     
@@ -136,6 +136,7 @@ public class SoundSystem {
 	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
     }// end constructor
     
+    @SuppressWarnings("unchecked")
     public void initialize(){
 	if(initialized)
 	    throw new IllegalStateException("initialize() was already called. Can only be called once.");
@@ -219,6 +220,7 @@ public class SoundSystem {
 	    driverNode.setUserObject(x);
 	    root.add(driverNode);
 	    try {
+		@SuppressWarnings("unchecked")
 		final AudioDriver driver = driverFactory.get((Class<? extends AudioDriver>)Class.forName(x));
 		for(AudioDevice dev : driver.getDevices()) {
 		    final DefaultMutableTreeNode deviceNode = new DefaultMutableTreeNode();
@@ -269,8 +271,9 @@ public class SoundSystem {
     }//end timeLimitedBarrier
     
     private void loadConfigAndAttachListeners() {
-	final TRConfiguration config = getTrConfiguration();
 	/*
+	final TRConfiguration config = getTrConfiguration();
+	
 	config.addPropertyChangeListener(TRConfigurationFactory.ACTIVE_AUDIO_DRIVER,new PropertyChangeListener(){
 	    @Override
 	    public void propertyChange(PropertyChangeEvent evt) {
@@ -428,6 +431,7 @@ public class SoundSystem {
 	final double lengthPerRowSeconds
 	     = quantizedSizeSeconds / (double)numRows;
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
+	    @SuppressWarnings("unchecked")
 	    @Override
 	    public Void call() throws Exception {
 		    final FloatBuffer fb = FloatBuffer.allocate(quantizedSize);
@@ -579,17 +583,12 @@ public class SoundSystem {
         pcs.firePropertyChange(ACTIVE_DRIVER, oldActiveDriver, activeDriver);
     }//end setActiveDriver(...)
 */
+  /*  
     private AudioDevice getActiveDevice() {
-	/*
-	if(activeDevice==null){
-            System.out.println("Overriding null device to default...");
-            setActiveDevice(getActiveDriver().getDefaultDevice());
-        }//end if(null)
-        return activeDevice;
-        */
+	
 	return soundSystemKernel.getActiveDevice();
     }
-
+*/
     /*
     private void setActiveDevice(AudioDevice activeDevice) {
 	final AudioDevice oldDevice = this.activeDevice;
@@ -604,14 +603,10 @@ public class SoundSystem {
         pcs.firePropertyChange(ACTIVE_DEVICE, oldDevice, activeDevice);
     }
 */
+    /*
     private AudioOutput getActiveOutput() {
-	/*
-	if(activeOutput==null)
-	    activeOutput = getActiveDevice().getDefaultOutput();
-        return activeOutput;
-        */
 	return soundSystemKernel.getActiveOutput();
-    }
+    }*/
 
     /*
     private void setActiveOutput(AudioOutput newActiveOutput) {
@@ -896,6 +891,7 @@ public class SoundSystem {
         	(x,y)->100-FuzzySearch.ratio(x.toString(),y.toString()));
     }//end getDefaultConfig()
     
+    @SuppressWarnings("unchecked")
     public void setOutputConfigNode(DefaultMutableTreeNode outputConfig) {
 	if( outputConfig == null)
 	    outputConfig = getDefaultConfigNode();
@@ -922,13 +918,13 @@ public class SoundSystem {
         if(driverName!=null){
 	    if(oldDriver!=null)
 		oldDriver.release();
-	    Class driverClass;
+	    Class<?> driverClass;
 	    try{driverClass = Class.forName(driverName);}
 		catch(ClassNotFoundException e){
 	    driverClass = org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput.class;}
 	    if(!AudioDriver.class.isAssignableFrom(driverClass))
 	      driverClass = org.jtrfp.trcl.snd.JavaSoundSystemAudioOutput.class;
-	    try{driver = (AudioDriver)driverFactory.get(driverClass);}
+	    try{driver = (AudioDriver)driverFactory.get((Class<? extends AudioDriver>)driverClass);}
 	     catch(Exception e){e.printStackTrace();return;}
 	}//end if(!null)
         

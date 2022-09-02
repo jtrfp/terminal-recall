@@ -27,7 +27,6 @@ import org.jtrfp.trcl.obj.Positionable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 public class CameraIT {
     protected Camera subject;

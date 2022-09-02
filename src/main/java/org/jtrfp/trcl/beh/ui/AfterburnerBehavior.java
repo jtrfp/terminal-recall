@@ -59,6 +59,7 @@ public class AfterburnerBehavior extends Behavior implements HasQuantifiableSupp
     private final ThrottleVetoListener throttleVetoListener = new ThrottleVetoListener();
     
     // HARD REFERENCES; DO NOT REMOVE
+    @SuppressWarnings("unused")
     private PropertyChangeListener weakRunStateListener, weakAbControlListener, weakThrottleVetoListener;
     
     private boolean afterburning = false;

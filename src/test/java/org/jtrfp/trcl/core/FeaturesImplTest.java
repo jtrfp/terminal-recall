@@ -20,6 +20,7 @@ public class FeaturesImplTest {
 
     @Test
     public void testRegisterFeature() {
+	@SuppressWarnings("rawtypes")
 	final FeatureFactory factory = Mockito.mock(FeatureFactory.class);
 	when(factory.getFeatureClass()).thenReturn (DummyF1.class);
 	when(factory.getTargetClass()) .thenReturn (DummyType1.class);
@@ -28,6 +29,7 @@ public class FeaturesImplTest {
     
     @Test
     public void testDeRegisterFeature() {
+	@SuppressWarnings("rawtypes")
 	final FeatureFactory factory = Mockito.mock(FeatureFactory.class);
 	when(factory.getFeatureClass()).thenReturn (DummyF1.class);
 	when(factory.getTargetClass()) .thenReturn (DummyType1.class);
@@ -36,6 +38,7 @@ public class FeaturesImplTest {
     }
     
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testGetFeatureMultiIdenticalGets() throws Throwable{
 	final FeaturesImpl subject = getSubject();
 	final FeatureFactory factory = Mockito.mock(FeatureFactory.class);
@@ -57,6 +60,7 @@ public class FeaturesImplTest {
     }//end testGetFeature()
     
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testGetFeatureMultiInterfaceSameFeatureGets() throws Throwable{
 	final FeaturesImpl subject = getSubject();
 	final FeatureFactory factory = Mockito.mock(FeatureFactory.class);
@@ -77,6 +81,7 @@ public class FeaturesImplTest {
     }
     
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testGetFeatureMultiInterfaceSameFeatureGetsWithImposter() throws Throwable{
 	final FeaturesImpl subject = getSubject();
 	final DummyType1 dummyTarget1 = mock(DummyType1.class);
@@ -106,6 +111,7 @@ public class FeaturesImplTest {
     }
     
     @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testGetFeatureByPath() throws Throwable {
 	final FeaturesImpl subject = getSubject();
 	final DummyType1 dummyTarget0 = mock(DummyType1.class);

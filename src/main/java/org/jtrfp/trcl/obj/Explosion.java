@@ -18,12 +18,11 @@ import java.io.IOException;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jtrfp.FileLoadException;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.VQTexture;
 
 public class Explosion extends OneShotBillboardEvent {
     public static final int NUM_FRAMES=16;
-    private final ExplosionType type;
+    //private final ExplosionType type;
     public Explosion(ExplosionType type, String debugName) {
 	super(type.getMillisPerFrame(),type.getAnimationFiles().length, debugName);
 	final Vector3D origin = type.getOrigin();
@@ -31,7 +30,7 @@ public class Explosion extends OneShotBillboardEvent {
 		origin.getX()*type.getBillboardSize().getWidth()*-.5, 
 		origin.getY()*type.getBillboardSize().getHeight()*-.5, 
 		origin.getZ());
-	this.type=type;
+	//this.type=type;
 	setBillboardSize(type.getBillboardSize());
 	StaticRotationDelegate del = (StaticRotationDelegate)getRotationDelegate();
 	if(type.isRandomRotate())

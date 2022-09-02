@@ -21,17 +21,17 @@ import java.util.Set;
 
 public class CollectionMap<K, V> implements Map<K,Collection<V>> {
     private final Map<K, Collection<V>> collectionMap = new HashMap<K, Collection<V>>();
-    private final Class<? extends Collection> collectionClass;
+    private final Class<? extends Collection<V>> collectionClass;
     
     public CollectionMap(){
 	this(ArrayList.class);
     }
     
-    public CollectionMap(Class<? extends Collection> collectionClass){
-	this.collectionClass = collectionClass;
+    @SuppressWarnings("unchecked")
+    public CollectionMap(@SuppressWarnings("rawtypes") Class<? extends Collection> collectionClass){
+	this.collectionClass = (Class<? extends Collection<V>>)collectionClass;
     }
     
-    @SuppressWarnings("unchecked")
     protected Collection<V> newCollection(){
 	try{return collectionClass.getConstructor().newInstance();}
 	catch(Exception e){throw new RuntimeException(e);}
@@ -62,6 +62,7 @@ public class CollectionMap<K, V> implements Map<K,Collection<V>> {
 	return collectionMap.equals(o);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<V> get(Object key) {//TODO: Safety
 	Collection<V> result = collectionMap.get(key);

@@ -33,7 +33,7 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 	try{
 	    final char firstChar = propertyName.charAt(0);
 	    final String camelPropertyName = Character.toUpperCase(firstChar)+propertyName.substring(1);
-	    final Class beanClass = bindingBean.getClass();
+	    final Class<?>beanClass = bindingBean.getClass();
 	    final String prefix = (propertyType == Boolean.class || propertyType == boolean.class)?"is":"get";
 	    this.getterMethod = beanClass.getMethod(prefix+""+camelPropertyName);
 	    this.setterMethod = beanClass.getMethod("set"+camelPropertyName, propertyType);
@@ -41,7 +41,7 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 	        getMethod("addPropertyChangeListener", String.class, PropertyChangeListener.class).
 	        invoke(bindingBean, propertyName, this);
 	    //Initial setting for the button
-	    final Object initialValue = getterMethod.invoke(bindingBean, null);
+	    final Object initialValue = getterMethod.invoke(bindingBean);
 	    if( initialValue != null)
 	        if( propertyType.isAssignableFrom(initialValue.getClass()) )
 	            setUIValue(getPropertyValue());
@@ -54,6 +54,7 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 	final Class<? extends PROPERTY_TYPE> type = getPropertyType();
 	final Object newValue = event.getNewValue();
 	if( type.isAssignableFrom(newValue.getClass()) ){
+	    @SuppressWarnings("unchecked")
 	    final PROPERTY_TYPE newValuePT = (PROPERTY_TYPE)newValue;
 	    if(!isModifying){
 		isModifying = true;
@@ -63,8 +64,9 @@ public abstract class AbstractPropertyBinding<PROPERTY_TYPE> implements Property
 	}//end if(correct class)
     }//end propertyChanged(...)
     
+    @SuppressWarnings("unchecked")
     protected PROPERTY_TYPE getPropertyValue(){
-	try{return (PROPERTY_TYPE)getGetterMethod().invoke(getBindingBean(), null);}
+	try{return (PROPERTY_TYPE)getGetterMethod().invoke(getBindingBean());}
 	catch(Exception e) {e.printStackTrace();return null;}
     }
     

@@ -74,7 +74,8 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	
 	for(String propertyName:props){
 	    boolean allowSave = true;
-	    final FeatureConfigurationPrivilegeData fcpData = privMap.get(new PropertyKey((Class<? extends Feature>)target.getClass(), propertyName));
+	    @SuppressWarnings("unchecked")
+	    final FeatureConfigurationPrivilegeData fcpData = privMap.get(new PropertyKey((Class<? extends Feature<?>>)target.getClass(), propertyName));
 	    if( fcpData != null )
 		allowSave &= fcpData.getPrivilegeLevel() <= privilegeLevel;
 	    if(allowSave) {
@@ -82,15 +83,15 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 		    final String camelPropertyName = propertyName.toUpperCase().substring(0, 1)+""+propertyName.substring(1);
 		    Method getMethod;
 		    //In case not boolean
-		    try{getMethod = targetClass.getMethod("get"+camelPropertyName, null);}
+		    try{getMethod = targetClass.getMethod("get"+camelPropertyName);}
 		    catch(NoSuchMethodException e){//In case our property is boolean
-			try{getMethod = targetClass.getMethod("is"+camelPropertyName, null);}
+			try{getMethod = targetClass.getMethod("is"+camelPropertyName);}
 			catch(NoSuchMethodException ex){
 			    throw new RuntimeException("Cannot find property of name `"+propertyName+"` in class "+targetClass.getName()+".",ex);
 			}
 		    }
-		    final Object value        = getMethod.invoke(target, null);
-		    final Object defaultValue = getMethod.invoke(defaultBean, null);
+		    final Object value        = getMethod.invoke(target);
+		    final Object defaultValue = getMethod.invoke(defaultBean);
 		    boolean performMap = false;
 		    if( value != null )
 			performMap = !value.equals(defaultValue);
@@ -148,7 +149,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	return null;
     }//end findMethodCompatibleWith(...)
     
-    private boolean isCompatible(Class class1, Class class2){
+    private boolean isCompatible(Class<?> class1, Class<?> class2){
 	class1 = objectify(class1);
 	class2 = objectify(class2);
 	if(class1 == class2)
@@ -158,7 +159,7 @@ public abstract class FeatureConfigurator<TARGET_CLASS> implements Feature<TARGE
 	return false;
     }//end isCompatible(...)
     
-    private Class objectify(Class original){
+    private Class<?> objectify(Class<?> original){
 	if(original == boolean.class)
 	    original = Boolean.class;
 	if(original == int.class)

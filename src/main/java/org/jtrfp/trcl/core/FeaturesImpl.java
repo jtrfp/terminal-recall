@@ -90,18 +90,18 @@ public class FeaturesImpl implements Cloneable {
 	Class<?>   tClass             = target.getClass();
 	Set<Class<?>> featureClassSet = new HashSet<Class<?>>();
 	//For its interfaces
-	for(Class iFace:tClass.getInterfaces())
+	for(Class<?> iFace:tClass.getInterfaces())
 	    for(FeatureFactory<?> ff:getFactoryCollection(iFace))
 		featureClassSet.add(ff.getFeatureClass());
 	while(tClass!=Object.class){
 	    //First for the class itself
-	    for(FeatureFactory ff:getFactoryCollection(tClass))
+	    for(FeatureFactory<?> ff:getFactoryCollection(tClass))
 		    featureClassSet.add(ff.getFeatureClass());
 	    tClass=tClass.getSuperclass();
 	}//end while(hierarchy)
 	final List<GraphStabilizationListener> graphStabilizationListeners = new ArrayList<GraphStabilizationListener>();
 	final Set<FeatureFactory<?>> sortedFactories = new TreeSet<FeatureFactory<?>>(featureLoadOrderComparator);
-	for(Class c:featureClassSet)
+	for(Class<?> c:featureClassSet)
 	    sortedFactories.add(featureFactoriesByFeature.get(c));
 	for(FeatureFactory<?> factory : sortedFactories){
 	    final Feature<?> feature = get(target, factory.getFeatureClass());
@@ -143,9 +143,10 @@ public class FeaturesImpl implements Cloneable {
 	return result;
     }//end getFeature()
 
-       private <TARGET> Feature<TARGET> newFeatureInstance(Map<Class<? extends Feature<?>>, Feature<?>> fMap, Class<? extends Feature> featureClass, TARGET target) throws FeatureNotApplicableException{
+    private <TARGET> Feature<TARGET> newFeatureInstance(Map<Class<? extends Feature<?>>, Feature<?>> fMap, Class<? extends Feature<?>> featureClass, TARGET target) throws FeatureNotApplicableException{
 	   final Feature<TARGET> result;
-	   final FeatureFactory ff = featureFactoriesByFeature.get(featureClass);
+	   @SuppressWarnings("unchecked")
+	   final FeatureFactory<TARGET> ff = (FeatureFactory<TARGET>)featureFactoriesByFeature.get(featureClass);
 	   if(ff == null)
 	       throw new FeatureNotFoundException("Could not find Feature of type "+featureClass.getName());
 	   assert ff!=null:""+featureClass.getName();
@@ -154,24 +155,28 @@ public class FeaturesImpl implements Cloneable {
 	       throw new FeatureTargetMismatchException("Feature `"+ff.getFeatureClass()+"` cannot be applied to class ` "+target.getClass().getName()+".\n"
 	       	+ "Feature expected target of (super)type "+ff.getTargetClass().getName()+" but target was "+target.getClass().getName());
 	   }
-	   registerFeatureByClassRecursively(result.getClass(), result, fMap);
+	   @SuppressWarnings("unchecked")
+	   final Class<? extends Feature<?>> resultClass = (Class<? extends Feature<?>>)result.getClass();
+	   registerFeatureByClassRecursively(resultClass, result, fMap);
 	   result.apply((TARGET)target);
 	   init(result);
 	   return result;
        }//end newFeatureInstance()
 
-       private void registerFeatureByClassRecursively(Class featureClass, Feature toRegister, Map<Class<? extends Feature<?>>, Feature<?>> fMap){
+       @SuppressWarnings("unchecked")
+    private void registerFeatureByClassRecursively(Class<? extends Feature<?>> featureClass, Feature<?> toRegister, Map<Class<? extends Feature<?>>, Feature<?>> fMap){
 	   fMap.put(featureClass, toRegister);
-	   for(Class iFace:featureClass.getInterfaces())
-	       registerFeatureByClassRecursively(iFace, toRegister, fMap);
+	   for(Class<?> iFace:featureClass.getInterfaces())
+	       registerFeatureByClassRecursively((Class<? extends Feature<?>>)iFace, toRegister, fMap);
 	   Class<?> fc = featureClass.getSuperclass();
 	   if(fc != null)
 	    while(fc != Object.class){
-	       registerFeatureByClassRecursively(fc, toRegister, fMap);
+	       registerFeatureByClassRecursively((Class<? extends Feature<?>>)fc, toRegister, fMap);
 	       fc = fc.getSuperclass();
 	    }//end while(!Object.class)
        }//end registerFeatureByClassRecursively()
 
+    @SuppressWarnings("unchecked")
     public  <T> T get(Object target, Class<T> featureClass){
      final Map<Class<? extends Feature<?>>,Feature<?>> fMap = getFeatureMap(target);
      return (T)getFeature(fMap,(Class<Feature<?>>)featureClass,target);
@@ -184,18 +189,20 @@ public class FeaturesImpl implements Cloneable {
 	return get(node, lastClass);
     }//end getByPath(...)
 
-    public void getAllFeaturesOf(Object target, Set dest) {
+    public void getAllFeaturesOf(Object target, Set<Feature<?>> dest) {
 	final Map<Class<? extends Feature<?>>,Feature<?>> fMap = getFeatureMap(target);
 	for(Entry<Class<? extends Feature<?>>,Feature<?>> entry:fMap.entrySet())
 	    dest.add(entry.getValue());
     }//end getAllFeaturesOf(...)
     
     public static class FeatureNotFoundException extends RuntimeException {
+	private static final long serialVersionUID = -1857000733496915421L;
 	public FeatureNotFoundException(){super();}
 	public FeatureNotFoundException(String msg){super(msg);}
     }//end FeatureNotFoundException
     
     public static class FeatureTargetMismatchException extends RuntimeException {
+	private static final long serialVersionUID = 6406208081503069668L;
 	public FeatureTargetMismatchException(){super();}
 	public FeatureTargetMismatchException(String msg)             {super(msg);}
 	public FeatureTargetMismatchException(String msg, Throwable t){super(msg, t);}

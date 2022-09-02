@@ -174,6 +174,7 @@ public class GLTestUtils {
     
     
     public static class ImageSizeMismatchException extends Exception {
+	private static final long serialVersionUID = -3356941712113763184L;
 	public ImageSizeMismatchException()          {super();}
 	public ImageSizeMismatchException(String msg){super(msg);}
     }
@@ -187,7 +188,7 @@ public class GLTestUtils {
     public static double compareImage(BufferedImage reference,
 	    BufferedImage test, int threshold) throws ImageSizeMismatchException {
 	final int    DEV_THRESHOLD     = threshold;
-	final double TOT_DEV_THRESHOLD = .0001;
+	//final double TOT_DEV_THRESHOLD = .0001;
 	final int    rWidth          = reference.getWidth(), 
 		     rHeight         = reference.getHeight(),
 		     tWidth          = test.getWidth(), 

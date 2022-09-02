@@ -35,11 +35,11 @@ import org.jtrfp.trcl.Submitter;
 public class ObjectPool<TYPE> {
     private final PoolingMethod<TYPE> poolingMethod;
     private final PreparationMethod<TYPE> preparationMethod;
-    private final GenerativeMethod<TYPE> generativeMethod;
+    //private final GenerativeMethod<TYPE> generativeMethod;
     public ObjectPool(PoolingMethod<TYPE> poolingMethod, PreparationMethod<TYPE> preparationMethod, GenerativeMethod<TYPE> generativeMethod){
 	this.poolingMethod=poolingMethod;
 	this.preparationMethod=preparationMethod;
-	this.generativeMethod=generativeMethod;
+	//this.generativeMethod=generativeMethod;
 	this.poolingMethod.initialize(this,preparationMethod,generativeMethod);
     }//end constructor
     
@@ -201,7 +201,7 @@ public class ObjectPool<TYPE> {
 	    return maxSize;
 	}
 
-	public LazyAllocate setMaxSize(int maxSize) {
+	public LazyAllocate<TYPE> setMaxSize(int maxSize) {
 	    this.maxSize = maxSize;
 	    return this;
 	}
@@ -213,7 +213,7 @@ public class ObjectPool<TYPE> {
 	private int counter=0;
 	private final int initialSizeInElements;
 	private PreparationMethod<TYPE> preparationMethod;
-	private GenerativeMethod<TYPE> generativeMethod;
+	//private GenerativeMethod<TYPE> generativeMethod;
 	
 	public FillThenDrain(int initialSize){
 	    this.initialSizeInElements=initialSize;
@@ -223,7 +223,7 @@ public class ObjectPool<TYPE> {
 		PreparationMethod<TYPE> preparationMethod,
 		GenerativeMethod<TYPE> generativeMethod) {
 	    this.preparationMethod=preparationMethod;
-	    this.generativeMethod=generativeMethod;
+	    //this.generativeMethod=generativeMethod;
 	    generativeMethod.generateConsecutive(initialSizeInElements, populationTarget);
 	    return this;
 	}//end initialize()

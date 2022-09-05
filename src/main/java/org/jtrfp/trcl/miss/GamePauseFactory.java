@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.miss;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -25,9 +24,9 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.gui.MenuSystem;
@@ -189,7 +188,7 @@ public class GamePauseFactory implements FeatureFactory<Mission>  {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<GamePause> getFeatureClass() {
 	return GamePause.class;
     }
 }//end GamePause

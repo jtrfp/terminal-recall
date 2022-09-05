@@ -15,7 +15,6 @@ package org.jtrfp.trcl.mem;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
@@ -41,18 +40,18 @@ public class GPUMemDumpMenuItemFactory implements FeatureFactory<MenuSystem> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<GPUMemDumpMenuItemFeature> getFeatureClass() {
 	return GPUMemDumpMenuItemFeature.class;
     }
     
     public static class GPUMemDumpMenuItemFeature implements Feature<MenuSystem>{
-	private WeakReference<MenuSystem> target;
+	//private WeakReference<MenuSystem> target;
 	private MenuItemListener menuItemListener;
 	private TR tr;
 	
 	@Override
 	public void apply(MenuSystem target) {
-	    this.target = new WeakReference<MenuSystem>(target);
+	    //this.target = new WeakReference<MenuSystem>(target);
 	    setTr(Features.get(Features.getSingleton(), TR.class));
 	    target.addMenuItem(MenuSystem.MIDDLE, MEM_DUMP_MENU_ITEM_PATH);
 	    target.setMenuItemEnabled(true, MEM_DUMP_MENU_ITEM_PATH);

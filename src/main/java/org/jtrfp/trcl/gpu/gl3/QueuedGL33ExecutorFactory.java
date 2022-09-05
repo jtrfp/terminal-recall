@@ -13,8 +13,6 @@
 
 package org.jtrfp.trcl.gpu.gl3;
 
-import java.util.concurrent.Executors;
-
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.FeatureNotApplicableException;
@@ -84,7 +82,7 @@ public class QueuedGL33ExecutorFactory implements FeatureFactory<GLAutoDrawableP
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<QueuedGL33Executor> getFeatureClass() {
 	return QueuedGL33Executor.class;
     }
 }//end CanvasBoundGL33ExecutorFactory

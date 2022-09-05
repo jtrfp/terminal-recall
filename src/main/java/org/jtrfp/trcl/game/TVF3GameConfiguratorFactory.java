@@ -56,7 +56,7 @@ public final class TVF3GameConfiguratorFactory implements FeatureFactory<TVF3Gam
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<TVF3GameConfigurator> getFeatureClass() {
 	return TVF3GameConfigurator.class;
     }
 

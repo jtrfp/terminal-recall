@@ -370,7 +370,7 @@ public class GLStateBean {
 
     public void setTextureCubeMapBinding(int textureCubeMapBinding) {
 	pcSupport.firePropertyChange("textureCubeMapBinding", this.textureCubeMapBinding, textureCubeMapBinding);
-        this.drawRenderBufferBinding = drawRenderBufferBinding;
+        //this.drawRenderBufferBinding = drawRenderBufferBinding;
     }
 
 }//end GLStateBean

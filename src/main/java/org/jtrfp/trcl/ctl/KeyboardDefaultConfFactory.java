@@ -22,7 +22,6 @@ import org.jtrfp.trcl.beh.ui.UserInputThrottleControlBehavior;
 import org.jtrfp.trcl.beh.ui.UserInputWeaponSelectionBehavior;
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.KeyboardInputDeviceServiceFactory.KeyboardInputDeviceService;
 import org.jtrfp.trcl.ext.tr.ViewSelectFactory;
 import org.jtrfp.trcl.gui.DefaultControllerConfiguration;
@@ -83,7 +82,7 @@ public class KeyboardDefaultConfFactory implements FeatureFactory<KeyboardInputD
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<KeyboardDefaultConf> getFeatureClass() {
 	return KeyboardDefaultConf.class;
     }
 }//end KeyboardDefaultConfFactory

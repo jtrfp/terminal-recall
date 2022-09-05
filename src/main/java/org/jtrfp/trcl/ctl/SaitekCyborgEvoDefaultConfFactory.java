@@ -66,7 +66,7 @@ public Class<GamepadInputDeviceService> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature> getFeatureClass() {
+public Class<SaitekCyborgEvo> getFeatureClass() {
     return SaitekCyborgEvo.class;
 }
 }//end SaitekCyborgEvoDefaultConfFactory

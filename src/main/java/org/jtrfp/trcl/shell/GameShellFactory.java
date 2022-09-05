@@ -51,10 +51,7 @@ import org.jtrfp.trcl.core.PODRegistry;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.VOXFile;
-import org.jtrfp.trcl.flow.FZone;
-import org.jtrfp.trcl.flow.Fury3;
 import org.jtrfp.trcl.flow.GameVersion;
-import org.jtrfp.trcl.flow.TV;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.Game.CanceledException;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -298,7 +295,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    for(StackTraceElement ste:stackTraceElements)
 		sb.append("\tat "+ste.getClassName()+"."+ste.getMethodName()+"("+ste.getFileName()+":"+ste.getLineNumber()+")\n");
 	}
-
+/*
 	private VOXFile determineVOXFile() {
 	    String voxName = getTrConfiguration().getVoxFile();
 	    if(voxName==null)
@@ -313,7 +310,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 		return FZone.getDefaultMission();
 	    else return attemptGetVOX(voxName);
 	}//end determineVOXFile()
-
+*/
 	private GameVersion determineGameVersion(){
 	    String voxName = getTrConfiguration().getVoxFile();
 	    if(voxName==null)
@@ -372,7 +369,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    }
 	    return attemptGetVOX(voxFileName);
 	}//end autoDetermineVOXFile2
-
+/*
 	private VOXFile autoDetermineVOXFile(){
 	    String voxFileName=null;
 	    final PODRegistry podRegistry     = getPodRegistry();
@@ -395,7 +392,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
 	    }
 	    return attemptGetVOX(voxFileName);
 	}//end autoDetermineVOXFile
-
+*/
 	private VOXFile attemptGetVOX(String voxFileName){
 	    try{final VOXFile result = tr.getResourceManager().getVOXFile(voxFileName);
 	    return result;
@@ -538,7 +535,7 @@ public class GameShellFactory implements FeatureFactory<TR>{
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<GameShell> getFeatureClass() {
 	return GameShell.class;
     }
 }//end GameShellFactory

@@ -109,7 +109,7 @@ public class ControllerSinksFactory implements FeatureFactory<ControllerMapper> 
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<ControllerSinks> getFeatureClass() {
 	return ControllerSinks.class;
     }
 }//end ControllerSinksFactory

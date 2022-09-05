@@ -47,7 +47,7 @@ public class RootWindowConfiguratorFactory implements FeatureFactory<RootWindow>
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<RootWindowConfigurator> getFeatureClass() {
 	return RootWindowConfigurator.class;
     }
 }//end RootWindowConfiguratorFactory

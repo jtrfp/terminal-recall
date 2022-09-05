@@ -37,7 +37,7 @@ public class InformationAboutThisBuildFactory
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<InformationAboutThisBuild> getFeatureClass() {
 	return InformationAboutThisBuild.class;
     }
     

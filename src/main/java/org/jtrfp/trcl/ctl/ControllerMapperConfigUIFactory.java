@@ -118,7 +118,7 @@ public class ControllerMapperConfigUIFactory implements FeatureFactory<Controlle
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<ControllerMapperConfigUI> getFeatureClass() {
 	return ControllerMapperConfigUI.class;
     }
 }//end ControllerMapperConfigUIFactory

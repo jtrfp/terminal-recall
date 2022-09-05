@@ -62,7 +62,7 @@ public class SavestateSaveLoadConfiguratorFactory implements
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<SavestateSaveLoadConfigurator> getFeatureClass() {
 	return SavestateSaveLoadConfigurator.class;
     }
 

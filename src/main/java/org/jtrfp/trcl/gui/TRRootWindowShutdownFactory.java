@@ -43,7 +43,7 @@ public class TRRootWindowShutdownFactory implements FeatureFactory<RootWindow> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<TRRootWindowShutdownFeature> getFeatureClass() {
 	return TRRootWindowShutdownFeature.class;
     }
     

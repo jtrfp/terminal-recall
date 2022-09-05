@@ -26,13 +26,14 @@ public class Features {
     private static FeaturesImpl impl = new FeaturesImpl();
     private static Features singleton;
     
+    @SuppressWarnings("unchecked")
     public Features(){
 	this(Collections.EMPTY_LIST);
     }
     
     @Autowired(required=true)
-    public Features(Collection<FeatureFactory> features){
-	for(FeatureFactory ff:features)
+    public Features(@SuppressWarnings("rawtypes") Collection<FeatureFactory> features){
+	for(@SuppressWarnings("rawtypes") FeatureFactory ff:features)
 	    registerFeature(ff);
 	setSingleton(this);
     }
@@ -70,6 +71,7 @@ public class Features {
 	return impl.getByPath(target, lastClassInPath, featurePathNotIncludingLastClass);
     }//end getByPath(...)
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized static void getAllFeaturesOf(Object target, Set dest){
 	impl.getAllFeaturesOf(target,dest);
     }

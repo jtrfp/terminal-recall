@@ -70,7 +70,7 @@ public class TRConfiguratorFactory implements FeatureFactory<TRConfiguration> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<TRConfigurator> getFeatureClass() {
 	return TRConfigurator.class;
     }
 }//end TRConfigurationConfigurator

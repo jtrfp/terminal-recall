@@ -71,7 +71,7 @@ public Class<GamepadInputDeviceService> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature> getFeatureClass() {
+public Class<XBox360PadDefaultConf> getFeatureClass() {
     return XBox360PadDefaultConf.class;
 }
 }//end XBox360PadDefaultConfFactory

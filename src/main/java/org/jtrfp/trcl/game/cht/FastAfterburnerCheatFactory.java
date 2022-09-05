@@ -15,7 +15,6 @@ package org.jtrfp.trcl.game.cht;
 
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.ui.AfterburnerBehavior;
-import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
@@ -32,7 +31,7 @@ public class FastAfterburnerCheatFactory extends AbstractCheatFactory {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<FastAfterburnerCheat> getFeatureClass() {
 	return FastAfterburnerCheat.class;
     }
     

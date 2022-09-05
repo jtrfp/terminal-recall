@@ -99,7 +99,7 @@ public Class<TVF3Game> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature<?>> getFeatureClass() {
+public Class<RedFlash> getFeatureClass() {
     return RedFlash.class;
 }
 }//end RedFlashFactory

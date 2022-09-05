@@ -17,8 +17,6 @@ import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -271,7 +269,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	public void destruct(TR target) {
 	    // TODO Auto-generated method stub
 	}
-	
+	/*
 	private class RootWindowCloseListener implements WindowListener {
 
 	    @Override
@@ -317,6 +315,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	    }
 	    
 	}//end RootWindowCloseListener
+	*/
     }// end RootWindow
 
     @Override
@@ -332,7 +331,7 @@ public class RootWindowFactory implements FeatureFactory<TR> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<RootWindow> getFeatureClass() {
 	return RootWindow.class;
     }
 }// end RootWindowFactory

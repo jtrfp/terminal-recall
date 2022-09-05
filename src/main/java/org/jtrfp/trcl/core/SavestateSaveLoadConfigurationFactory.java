@@ -40,7 +40,7 @@ public class SavestateSaveLoadConfigurationFactory implements
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<SavestateSaveLoadConfiguration> getFeatureClass() {
 	return SavestateSaveLoadConfiguration.class;
     }
     

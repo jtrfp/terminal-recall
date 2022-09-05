@@ -58,7 +58,7 @@ public class ControllerConfigSupportConfiguratorFactory
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<ControllerConfigSupportConfigurator> getFeatureClass() {
 	return ControllerConfigSupportConfigurator.class;
     }
 

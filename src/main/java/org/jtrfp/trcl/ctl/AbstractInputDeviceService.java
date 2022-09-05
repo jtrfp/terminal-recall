@@ -28,7 +28,7 @@ public abstract class AbstractInputDeviceService implements InputDeviceService, 
     private ControllerSinks sinks;
     
     @Override
-    public void registerDefaultConfiguration(DefaultControllerConfiguration defaultConfigToRegister){
+    public void registerDefaultConfiguration(DefaultControllerConfiguration<?> defaultConfigToRegister){
 	final String intendedControllerName   = defaultConfigToRegister.getIntendedController();
 	final ControllerSinks sinks = getSinks();
 	final InputDevice inputDevice = getTarget().getInputDeviceByName(intendedControllerName);

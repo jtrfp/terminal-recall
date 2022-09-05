@@ -39,7 +39,7 @@ implements FeatureFactory<TR>, LoadOrderAware, ShowstopperHandler {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<NotifyAndExitShowstopperHandlerFeature> getFeatureClass() {
 	return NotifyAndExitShowstopperHandlerFeature.class;
     }
 

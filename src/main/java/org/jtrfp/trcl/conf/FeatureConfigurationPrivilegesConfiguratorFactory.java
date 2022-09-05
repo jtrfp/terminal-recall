@@ -52,7 +52,7 @@ public class FeatureConfigurationPrivilegesConfiguratorFactory implements Featur
 	return FeatureConfigurationPrivileges.class;
     }
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<FeatureConfigurationPrivilegesConfigurator> getFeatureClass() {
 	return FeatureConfigurationPrivilegesConfigurator.class;
     }
 }//end FeatureConfigurationPrivilegesConfiguratorFactory

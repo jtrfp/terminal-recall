@@ -81,7 +81,7 @@ public class SettingsMenuItemFactory implements FeatureFactory<MenuSystem> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<ConfigMenu> getFeatureClass() {
 	return ConfigMenu.class;
     }
 }//end ConfigMenuItemFactory

@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 public class ReporterFactory implements FeatureFactory<TR>{
 
     public class Reporter extends JFrame implements Feature<TR> {
-
+	private static final long serialVersionUID = 9001375461885870935L;
 	/**
 	 * <i>"Statistics are just a bunch of numbers looking for a fight."</i> - Kyle Richards
 	 */
@@ -152,7 +152,9 @@ public class ReporterFactory implements FeatureFactory<TR>{
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-		    Scanner dotScanner = new Scanner(path);
+		    Scanner dotScanner = null;
+		    try {
+		    dotScanner = new Scanner(path);
 		    DefaultMutableTreeNode workNode = top;
 		    dotScanner.useDelimiter("\\.");
 		    while(dotScanner.hasNext()){
@@ -189,6 +191,7 @@ public class ReporterFactory implements FeatureFactory<TR>{
 			    refreshNodeDetails();
 			}//end if(selected)
 		    }//end if(path1=null)
+		    } finally {if(dotScanner != null) dotScanner.close();}
 		}});
 	    return this;
 	}//end report(...)
@@ -200,7 +203,7 @@ public class ReporterFactory implements FeatureFactory<TR>{
 		    @Override
 		    public void run() {
 			Thread.currentThread().setName("Reporter tree UI update thread.");
-			try{Thread.currentThread().sleep(2000);}catch(Exception e){e.printStackTrace();}
+			try{Thread.sleep(2000);}catch(Exception e){e.printStackTrace();}
 			SwingUtilities.invokeLater(new Runnable(){
 			    @Override
 			    public void run() {
@@ -252,7 +255,7 @@ public class ReporterFactory implements FeatureFactory<TR>{
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<Reporter> getFeatureClass() {
 	return Reporter.class;
     }
 }//end ReporterFactory

@@ -203,7 +203,7 @@ public class KeyboardInputDeviceServiceFactory implements FeatureFactory<Control
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<KeyboardInputDeviceService> getFeatureClass() {
 	return KeyboardInputDeviceService.class;
     }
 }//end KeyboardInputDeviceServiceFactory

@@ -217,7 +217,7 @@ public class GamepadInputDeviceServiceFactory implements FeatureFactory<Controll
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<GamepadInputDeviceService> getFeatureClass() {
 	return GamepadInputDeviceService.class;
     }
 }//end GamepadInputDeviceServiceFactory

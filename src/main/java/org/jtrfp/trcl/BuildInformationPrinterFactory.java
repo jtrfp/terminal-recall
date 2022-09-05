@@ -54,7 +54,7 @@ implements FeatureFactory<Features> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<BuildInformationPrinter> getFeatureClass() {
 	return BuildInformationPrinter.class;
     }
 }//end BuildInformationPrinterFactory

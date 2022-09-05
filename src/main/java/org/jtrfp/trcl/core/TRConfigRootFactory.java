@@ -56,7 +56,7 @@ public class TRConfigRootFactory implements FeatureFactory<Features>, LoadOrderA
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<TRConfigRoot> getFeatureClass() {
 	return TRConfigRoot.class;
     }
 

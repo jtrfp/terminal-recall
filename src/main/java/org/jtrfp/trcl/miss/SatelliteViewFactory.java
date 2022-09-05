@@ -53,7 +53,7 @@ public class SatelliteViewFactory implements FeatureFactory<Mission> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<SatelliteView> getFeatureClass() {
 	return SatelliteView.class;
     }
     

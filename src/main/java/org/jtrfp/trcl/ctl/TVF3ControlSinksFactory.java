@@ -64,7 +64,7 @@ public class TVF3ControlSinksFactory
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<TVF3ControlSinks> getFeatureClass() {
 	return TVF3ControlSinks.class;
     }
 

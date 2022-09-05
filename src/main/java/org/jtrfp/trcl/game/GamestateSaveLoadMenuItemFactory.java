@@ -184,7 +184,7 @@ public class GamestateSaveLoadMenuItemFactory implements FeatureFactory<TVF3Game
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<GameSaveLoadMenuItemFeature> getFeatureClass() {
 	return GameSaveLoadMenuItemFeature.class;
     }
 

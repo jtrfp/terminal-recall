@@ -45,7 +45,7 @@ public class HitboxMarkerToggleMenuItemFactory implements FeatureFactory<GameShe
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<HitboxMarkerToggleMenuItemFeature> getFeatureClass() {
 	return HitboxMarkerToggleMenuItemFeature.class;
     }
     

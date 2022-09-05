@@ -207,7 +207,7 @@ public class AmmoFillCheatFactory implements FeatureFactory<TVF3Game> {
     }//end LevelSkipMenuItem
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<AmmoFillCheatGroup> getFeatureClass() {
 	return AmmoFillCheatGroup.class;
     }
 }//end LevelSkipMenuItemFactory

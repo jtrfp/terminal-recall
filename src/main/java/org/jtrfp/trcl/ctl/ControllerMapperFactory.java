@@ -158,7 +158,7 @@ public Class<Features> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature> getFeatureClass() {
+public Class<ControllerMapper> getFeatureClass() {
     return ControllerMapper.class;
 }
 }//end ControllerMapperFactory

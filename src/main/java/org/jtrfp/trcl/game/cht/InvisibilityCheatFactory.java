@@ -15,7 +15,6 @@ package org.jtrfp.trcl.game.cht;
 
 import org.jtrfp.trcl.UpfrontDisplay;
 import org.jtrfp.trcl.beh.Cloakable;
-import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
@@ -31,7 +30,7 @@ public class InvisibilityCheatFactory extends AbstractCheatFactory {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<InvisibilityCheat> getFeatureClass() {
 	return InvisibilityCheat.class;
     }
 

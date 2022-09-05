@@ -60,7 +60,7 @@ public class SoundSystemConfiguratorFactory
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<SoundSystemConfigurator> getFeatureClass() {
 	return SoundSystemConfigurator.class;
     }
     

@@ -88,7 +88,7 @@ public class DebugStatesMenuItemFactory implements FeatureFactory<MenuSystem> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<DebugStatesMenuItemFeature> getFeatureClass() {
 	return DebugStatesMenuItemFeature.class;
     }
 }//end DebugStatesMenuItemFactory

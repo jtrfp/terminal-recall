@@ -13,7 +13,6 @@
 
 package org.jtrfp.trcl.ext.tr;
 
-import java.util.List;
 import java.util.Objects;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -30,7 +29,6 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.snd.SoundSystem;
-import org.jtrfp.trcl.snd.SoundSystemOutputConfig;
 import org.jtrfp.trcl.tools.Util;
 import org.springframework.stereotype.Component;
 
@@ -158,7 +156,7 @@ public class SoundSystemFactory implements FeatureFactory<TR> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<SoundSystemFeature> getFeatureClass() {
 	return SoundSystemFeature.class;
     }
 

@@ -16,8 +16,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.HashSet;
 
-import javax.swing.DefaultListModel;
-
 import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
@@ -59,7 +57,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
 		activeAudioFormat;*/
 	//private HashSet<String> podList     = new HashSet<String>();
 	//private DefaultListModel podList=new DefaultListModel();
-	private double modStereoWidth=.3;
+	//private double modStereoWidth=.3;
 	public static final String AUTO_DETECT = "Auto-detect";
 	private String fileDialogStartDir;
 	//private Map<String,Object> componentConfigs;
@@ -291,7 +289,7 @@ public class TRConfigurationFactory implements FeatureFactory<TR>{
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<TRConfiguration> getFeatureClass() {
 	return TRConfiguration.class;
     }
 }//end TRConfiguration

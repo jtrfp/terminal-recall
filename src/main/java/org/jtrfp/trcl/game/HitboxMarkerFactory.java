@@ -58,7 +58,7 @@ public class HitboxMarkerFactory implements FeatureFactory<TVF3Game> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<HitboxMarkerFeature> getFeatureClass() {
 	return HitboxMarkerFeature.class;
     }
 

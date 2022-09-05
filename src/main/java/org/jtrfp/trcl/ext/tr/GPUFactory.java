@@ -73,7 +73,7 @@ public Class<TR> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature> getFeatureClass() {
+public Class<GPUFeature> getFeatureClass() {
     return GPUFeature.class;
 }
 }//end GPUFactory

@@ -77,7 +77,7 @@ public class CreditsMenuItemFactory implements FeatureFactory<MenuSystem> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<? extends Feature<MenuSystem>> getFeatureClass() {
 	return CreditsMenuItem.class;
     }
 }//end CreditsMenuItemFactory

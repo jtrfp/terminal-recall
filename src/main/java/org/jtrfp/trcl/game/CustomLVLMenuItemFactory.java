@@ -31,7 +31,7 @@ public class CustomLVLMenuItemFactory implements FeatureFactory<TVF3Game> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<CustomLVLMenuItem> getFeatureClass() {
 	return CustomLVLMenuItem.class;
     }
     

@@ -44,7 +44,7 @@ public class DefaultPODRegistryConfiguratorFactory implements FeatureFactory<Def
 	return DefaultPODRegistry.class;
     }
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<DefaultPODRegistryConfigurator> getFeatureClass() {
 	return DefaultPODRegistryConfigurator.class;
     }
 }//end PODRegistryConfiguratorFactory

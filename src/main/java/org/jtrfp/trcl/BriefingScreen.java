@@ -544,9 +544,9 @@ public class BriefingScreen extends RenderableSpacePartitioningGrid {
     }//end planetDisplayMode()
     
     public void missionCompleteSummary(LVLFile lvl, MissionSummary summary){
-	final Game   game 	 = Features.get(tr,GameShell.class).getGame();
-	final Mission mission    = game.getCurrentMission();
-	final TunnelSystem ts    = Features.get(mission, TunnelSystem.class);
+	//final Game   game 	 = Features.get(tr,GameShell.class).getGame();
+	//final Mission mission    = game.getCurrentMission();
+	//final TunnelSystem ts    = Features.get(mission, TunnelSystem.class);
 	
 	tr.setRunState(new MissionSummaryState(summary,lvl));
     }//end missionCompleteSummary()

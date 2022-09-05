@@ -42,7 +42,7 @@ public class LVLFileEnhancementsFactory implements FeatureFactory<TR> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<LVLFileEnhancements> getFeatureClass() {
 	return LVLFileEnhancements.class;
     }
     

@@ -49,7 +49,7 @@ public class JVMPropertiesReporterFactory implements FeatureFactory<Reporter> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<JVMPropertiesReporter> getFeatureClass() {
 	return JVMPropertiesReporter.class;
     }
 }//end JVMPropertiesReporterFactory

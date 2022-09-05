@@ -16,5 +16,5 @@ package org.jtrfp.trcl.core;
 public interface FeatureFactory<T> {
  public Feature<T>               newInstance(T target) throws FeatureNotApplicableException;
  public Class<T>                 getTargetClass();
- public Class<? extends Feature> getFeatureClass();
+ public Class<? extends Feature<T>> getFeatureClass();
 }//end FeatureFactory

@@ -13,14 +13,11 @@
 
 package org.jtrfp.trcl.ext.tr;
 
-import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.lang.ref.WeakReference;
-
-import com.jogamp.opengl.GL3;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -28,12 +25,10 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.jtrfp.trcl.Camera;
 import org.jtrfp.trcl.HUDSystem;
-import org.jtrfp.trcl.KeyStatusFactory.KeyStatus;
 import org.jtrfp.trcl.NAVSystem;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.SpacePartitioningGrid;
 import org.jtrfp.trcl.WeakPropertyChangeListener;
-import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.beh.MatchPosition.OffsetMode;
@@ -43,15 +38,15 @@ import org.jtrfp.trcl.core.FeatureFactory;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
+import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerSink;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
-import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gpu.GL33Model;
+import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.CockpitLayout;
 import org.jtrfp.trcl.gui.CockpitLayoutF3;
 import org.jtrfp.trcl.gui.CockpitLayoutTV;
@@ -67,6 +62,8 @@ import org.jtrfp.trcl.obj.RelevantEverywhere;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.obj.WorldObject.RenderFlags;
 import org.springframework.stereotype.Component;
+
+import com.jogamp.opengl.GL3;
 
 @Component
 public class ViewSelectFactory implements FeatureFactory<Game> {
@@ -94,14 +91,14 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
  }//end constructor
  
  public class ViewSelect implements Feature<Game>{
-     private boolean hudVisible = false;
+     //private boolean hudVisible = false;
      private WorldObject cockpit;
      private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
      private ViewMode viewMode;
      private InstrumentMode instrumentMode;
      private boolean hudVisibility = false;
      private MiniMap miniMap;
-     private MatchPosition.TailOffsetMode tailOffsetMode;
+     //private MatchPosition.TailOffsetMode tailOffsetMode;
      private MatchPosition miniMapPositionMatch, navArrowPositionMatch;
      private Rotation offsetRot;
      private NavArrow navArrow;
@@ -141,7 +138,8 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
      private final PropertyChangeListener instrumentViewSelectPropertyChangeListener= new InstrumentViewSelectPropertyChangeListener();
      private final PropertyChangeListener runStateListener                          = new RunStatePropertyChangeListener();
      private final PropertyChangeListener playerPCL                                 = new PlayerPropertyChangeListener();
-     private PropertyChangeListener weakVSPCL, weakIVSPCL, weakRSPCL, weakPlayerPCL;//HARD REFERENCES. DO NOT REMOVE
+     @SuppressWarnings("unused")
+    private PropertyChangeListener weakVSPCL, weakIVSPCL, weakRSPCL, weakPlayerPCL;//HARD REFERENCES. DO NOT REMOVE
      private ControllerSink view, iView;
      
      @Override
@@ -579,7 +577,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		navArrow.unsetRenderFlag(RenderFlags.IgnoreCamera);
 		navArrow.setVectorHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.PLUS_J));
 		navArrow.addBehavior(navArrowPositionMatch = new MatchPosition());
-		navArrowPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8454), Vector3D.ZERO));
+		navArrowPositionMatch.setOffsetMode(/*tailOffsetMode = */new MatchPosition.TailOffsetMode(new Vector3D(0, -1450, 8454), Vector3D.ZERO));
 		navArrow.setAutoVisibilityBehavior(false);
 	    }
 	    return navArrow;
@@ -593,16 +591,16 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		final double mmSize = layout.getMiniMapRadius();
 		miniMap.setModelSize(new double[]{mmSize,mmSize});
 		miniMap.addBehavior(miniMapPositionMatch = new MatchPosition());
-		final WorldObject cockpit = getCockpit();
+		//final WorldObject cockpit = getCockpit();
 		//miniMap.addBehavior(new MiniMapCockpitBehavior());
 		//Sorry, I'm just not smart enough to fix it the right way at this moment. - Chuck
 		miniMap.setMapHack(new Rotation(Vector3D.PLUS_I, Vector3D.PLUS_J,Vector3D.MINUS_I, Vector3D.MINUS_J));
 		//miniMapPositionMatch.setTarget(cockpit);//TODO: Refactor to cam mode
-		miniMapPositionMatch.setOffsetMode(tailOffsetMode = new MatchPosition.TailOffsetMode(layout.getMiniMapPosition(), Vector3D.ZERO));
+		miniMapPositionMatch.setOffsetMode(/*tailOffsetMode = */new MatchPosition.TailOffsetMode(layout.getMiniMapPosition(), Vector3D.ZERO));
 	    }//end if(null)
 	    return miniMap;
 	}//end getMiniMap()
-	
+	/*
 	private class MiniMapCockpitBehavior extends Behavior {
 	    private KeyStatus keyStatus;
 	    private static final double INCREMENT = 50;
@@ -652,7 +650,7 @@ public class ViewSelectFactory implements FeatureFactory<Game> {
 		    parent.setTopOrigin(rot.applyTo(parent.getTopOrigin()));
 		}
 	}//end MiniMapCockpitBehavior
-
+*/
 	public NAVRadarBlipFactory getBlipFactory() {
 	    if(blipFactory == null){
 		final double radius = getCockpitLayout().getMiniMapRadius();
@@ -740,7 +738,7 @@ public Class<Game> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature> getFeatureClass() {
+public Class<ViewSelect> getFeatureClass() {
     return ViewSelect.class;
 }
 

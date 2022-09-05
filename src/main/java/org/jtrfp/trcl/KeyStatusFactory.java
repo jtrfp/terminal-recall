@@ -97,7 +97,7 @@ public class KeyStatusFactory implements FeatureFactory<TR> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<KeyStatus> getFeatureClass() {
 	return KeyStatus.class;
     }
 }//end KeyStatusFactory

@@ -16,27 +16,19 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.JOptionPane;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.core.TRConfigRootFactory.TRConfigRoot;
-import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.ext.tr.ThreadManagerFactory.ThreadManagerFeature;
 import org.jtrfp.trcl.gpu.Renderer;
-import org.jtrfp.trcl.gui.MenuSystem;
 import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.jtrfp.trcl.img.vq.ColorPaletteVectorList;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.obj.CollisionManager;
-import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.prop.ThreadSafePropertyChangeSupport;
-import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 import org.jtrfp.trcl.tools.Util;
 import org.springframework.stereotype.Component;
 
@@ -148,7 +140,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	*/
     }//end nuclearGC()
 
-    private static AtomicBoolean isInNuclearGC = new AtomicBoolean(false);
+    //private static AtomicBoolean isInNuclearGC = new AtomicBoolean(false);
 
     public static double rolloverDistance(double distance) {
 	if(distance > TRFactory.mapWidth/2)
@@ -219,9 +211,9 @@ public final class TRFactory implements FeatureFactory<Features>{
     }
 
     public static final class TR implements UncaughtExceptionHandler, Feature<Features>{
-	private Player 				player;
+	//private Player 				player;
 	public  RootWindow 		        rootWindow;
-	private MenuSystem       		menuSystem;
+	//private MenuSystem       		menuSystem;
 	private Color [] 			globalPalette, 
 	darkIsClearPalette;
 	private ColorPaletteVectorList		globalPaletteVL,
@@ -237,7 +229,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	                                        pcSupport = new ThreadSafePropertyChangeSupport(this);
 
 	private World 				world;
-	private GameShell			gameShell;
+	//private GameShell			gameShell;
 	private RenderableSpacePartitioningGrid	defaultGrid;
 
 	//private ConfigWindow                    configWindow;
@@ -246,7 +238,7 @@ public final class TRFactory implements FeatureFactory<Features>{
 	//private final ConfigMenuItemListener	configMenuItemListener = new ConfigMenuItemListener();
 	private TRConfigRoot configManager;
 
-	private ControllerSinks controllerInputs;
+	//private ControllerSinks controllerInputs;
 	
 	public TR(){
 	    threadManager = null;
@@ -319,10 +311,11 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    }
 	}//end ConfigMenuItemListener
 */
+	/*
 	private void waitForProfiler() {
 	    JOptionPane.showMessageDialog(rootWindow, "Connect profiler and click OK to continue.","Connect profiler",JOptionPane.OK_OPTION);
 	}
-
+*/
 	public void showStopper(final Throwable cause) {
 	    setRunState(new FailureShutdown(cause));
 	}
@@ -595,7 +588,7 @@ public final class TRFactory implements FeatureFactory<Features>{
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<TR> getFeatureClass() {
 	return TR.class;
     }
 }//end TRFactory

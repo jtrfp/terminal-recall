@@ -39,7 +39,7 @@ public Class<TR> getTargetClass() {
 }
 
 @Override
-public Class<? extends Feature> getFeatureClass() {
+public Class<ThreadManagerFeature> getFeatureClass() {
     return ThreadManagerFeature.class;
 }
 }//end ThreadManagerFactory

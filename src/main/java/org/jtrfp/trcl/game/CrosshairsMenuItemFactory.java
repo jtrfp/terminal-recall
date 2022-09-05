@@ -47,7 +47,7 @@ public class CrosshairsMenuItemFactory implements FeatureFactory<TVF3Game> {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<CrosshairsMenuItemFeature> getFeatureClass() {
 	return CrosshairsMenuItemFeature.class;
     }
     

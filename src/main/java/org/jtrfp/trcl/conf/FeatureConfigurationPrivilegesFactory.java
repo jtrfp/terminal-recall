@@ -74,7 +74,7 @@ public class FeatureConfigurationPrivilegesFactory implements FeatureFactory<Fea
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<FeatureConfigurationPrivileges> getFeatureClass() {
 	return FeatureConfigurationPrivileges.class;
     }
 }//end FeatureConfigurationPrivileges

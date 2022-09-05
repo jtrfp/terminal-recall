@@ -84,11 +84,11 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		throws IllegalArgumentException {
 	    rootNode.setMenuItemEnabled(enabled, 0, path);
 	}
-
+/*
 	private MenuNode getRootNode(){
 	    return rootNode;
 	}
-
+*/
 	private abstract class MenuNode{
 	    private final String name;
 	    public MenuNode(String name){
@@ -214,12 +214,14 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
 		    throw new IllegalArgumentException("Cannot find subnode "+path[index]+" inside of submenu "+getName());
 	    }
 
+	    /*
 	    private void checkNonLeafRequest(int index, String ... path){
 		if(!path[index].contentEquals(getName()))
 		    throw new IllegalArgumentException("Supplied path non-leaf name `"+path[index]+"` doesn't match name of this non-leaf `"+getName()+"`");
 		if(index>=path.length-1)
 		    throw new IllegalArgumentException("Requested a leaf but this is not a leaf. Index="+index+" path="+path[index]);
 	    }
+	    */
 
 	    @Override
 	    public boolean isEmpty() {
@@ -470,7 +472,7 @@ public class SwingMenuSystemFactory implements FeatureFactory<RootWindow> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<SwingMenuSystem> getFeatureClass() {
 	return SwingMenuSystem.class;
     }
     

@@ -34,8 +34,6 @@ import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ext.lvl.LVLFileEnhancement;
-import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
 import org.jtrfp.trcl.file.DirectionVector;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
@@ -68,7 +66,7 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<TunnelSystem> getFeatureClass() {
 	return TunnelSystem.class;
     }
 
@@ -87,12 +85,12 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 	private Tunnel		currentTunnel;
 	private Mission target;
 	private Object [] tunnelMode;
-	private LVLFileEnhancements enhancements;
+	//private LVLFileEnhancements enhancements;
 
 	@Override
 	public void apply(Mission target) {
 	    setTarget(target);
-	    enhancements = Features.get(target.getTr(), LVLFileEnhancements.class);
+	    //enhancements = Features.get(target.getTr(), LVLFileEnhancements.class);
 	    
 	}//end apply()
 	
@@ -157,10 +155,13 @@ public class TunnelSystemFactory implements FeatureFactory<Mission> {
 		portalExit.notifyPositionChange();
 		portalExit.setRootGrid(tunnel);
 	    }else throw new NullPointerException("Null portal exit! "+tunnelEntranceMapSquarePos);
+	    /*
 	    DirectionVector tunnelExitLegacyPos = tdfTun.getExit();
+	    
 	    final Point tunnelExitMapSquarePos = new Point(
 		    (int)(TRFactory.legacy2MapSquare(tunnelExitLegacyPos.getZ())),
 		    (int)(TRFactory.legacy2MapSquare(tunnelExitLegacyPos.getX())));
+	    */
 	    assert tunnel.getExitObject().getPosition()[0]>0;//TODO: Remove
 	    tunnels.put(tdfTun.getTunnelLVLFile().toUpperCase(), tunnel);
 	    

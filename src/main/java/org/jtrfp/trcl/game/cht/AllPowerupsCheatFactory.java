@@ -14,7 +14,6 @@
 package org.jtrfp.trcl.game.cht;
 
 import org.jtrfp.trcl.UpfrontDisplay;
-import org.jtrfp.trcl.core.Feature;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.KeyedExecutor;
 import org.jtrfp.trcl.flow.TransientExecutor;
@@ -36,7 +35,7 @@ public class AllPowerupsCheatFactory extends AbstractCheatFactory {
     }
 
     @Override
-    public Class<? extends Feature<?>> getFeatureClass() {
+    public Class<AllPowerupsCheat> getFeatureClass() {
 	return AllPowerupsCheat.class;
     }
     

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jtrfp.trcl.core.Feature;
@@ -26,8 +25,6 @@ import org.jtrfp.trcl.core.FeatureNotApplicableException;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.ctl.ControllerMapperFactory.ControllerMapper;
 import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
-import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration;
-import org.jtrfp.trcl.gui.ControllerInputDevicePanel.ControllerConfiguration.ConfEntry;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,7 +43,7 @@ public class ControllerConfigSupportImplFactory
     }
 
     @Override
-    public Class<? extends Feature> getFeatureClass() {
+    public Class<ControllerConfigSupportImpl> getFeatureClass() {
 	return ControllerConfigSupportImpl.class;
     }
     
@@ -124,7 +121,7 @@ public class ControllerConfigSupportImplFactory
 	private ControllerSinks getControllerSinks(){
 	    return Features.get(target, ControllerSinks.class);
 	}//end getControllerSinks()
-	
+	/*
 	private void removeAllMappings(){
 	    final ControllerMapper         target = getTarget(); //Cache
 	    final Set<Entry<ControllerSource,ControllerMapping>> entrySet = target.getRoutingMap().entrySet();
@@ -132,7 +129,7 @@ public class ControllerConfigSupportImplFactory
 	    for(Entry<ControllerSource,ControllerMapping> entry : entryList)
 		target.unmapControllerSource(entry.getKey());
 	}//end removeAllMappings()
-	
+	*/
 	public static class ControllerMapBean {
 	    private String  sourceDevice, sourceName, sinkName;
 	    private double  scalar, offset;

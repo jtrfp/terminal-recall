@@ -22,11 +22,11 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 public class ListModelSetBridge<E> {
-    private final ListModel listModel;
+    private final ListModel<E> listModel;
     private final Set<E> checkerSet = new HashSet<E>();
     private final SetModelListener<E> setML;
     private final ArrayList<E> list = new ArrayList<E>();
-    public ListModelSetBridge(ListModel _listModel, SetModelListener<E> _set){
+    public ListModelSetBridge(ListModel<E> _listModel, SetModelListener<E> _set){
 	this.listModel=_listModel;
 	this.setML=_set;
 	//Initial setup

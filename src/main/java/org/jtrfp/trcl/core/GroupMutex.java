@@ -38,7 +38,8 @@ public class GroupMutex<KEY, VAL> {
 	  enforce();
   }
   
-  protected Collection<VAL> getGroupCollection(KEY group){
+  @SuppressWarnings("unchecked")
+protected Collection<VAL> getGroupCollection(KEY group){
       if(group == null)
 	  return (Collection<VAL>)Collections.EMPTY_SET;
       if(!groupMap.containsKey(group))

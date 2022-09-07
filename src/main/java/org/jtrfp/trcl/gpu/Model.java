@@ -20,5 +20,5 @@ public interface Model {
      * @return null if context not found matching the requirements, else a compatible context.
      * @since Aug 23, 2016
      */
- public ModelModifierContext getModifierContext(Class<? extends ModelModifierContext> ... classRequirements);
+ public ModelModifierContext getModifierContext(@SuppressWarnings("unchecked") Class<? extends ModelModifierContext> ... classRequirements);
 }

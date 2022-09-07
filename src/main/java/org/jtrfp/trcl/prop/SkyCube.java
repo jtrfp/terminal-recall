@@ -79,7 +79,6 @@ public class SkyCube {
         skyCubeGenStale.set(true);
     }//end setSkyCubeGen(...)
     
-    @SuppressWarnings("unchecked")
     @Override
     public void finalize() throws Throwable{
 	if(skyCubeTexture!=null)

@@ -11,7 +11,6 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 import org.jtrfp.trcl.AnimatedTexture;
-import org.jtrfp.trcl.LineSegment;
 import org.jtrfp.trcl.RenderMode;
 import org.jtrfp.trcl.Sequencer;
 import org.jtrfp.trcl.Triangle;
@@ -204,9 +203,11 @@ public class BINFileExtractor {
 				org.jtrfp.trcl.gpu.Vertex v1 = vertices.get(block.getVertexID1());
 				org.jtrfp.trcl.gpu.Vertex v2 = vertices.get(block.getVertexID2());
 				if(!alreadyVisitedLineSegs.contains(v1.hashCode()*v2.hashCode())){
+				    /*
 				    Triangle [] newTris = new Triangle[6];
 				    LineSegment.buildTriPipe(v1.getPosition(), v2.getPosition(),
 					    200, 0, to,triangleData);
+				    */
 				    alreadyVisitedLineSegs.add(v1.hashCode()*v2.hashCode());
 				}//end if(not already visited)
 			}//end if(LineSegmentBlock)

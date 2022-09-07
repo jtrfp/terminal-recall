@@ -33,6 +33,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class BeanEditorDialog extends JDialog {
+    private static final long serialVersionUID = -242311278263112643L;
     private final JPanel rootPanel = new JPanel(), bottomButtonPanel = new JPanel();
     private final JButton applyButton = new JButton("Apply And Close"), revertButton = new JButton("Revert"), cancelButton = new JButton("Cancel");
     private BeanEditor beanEditor = new BeanEditor();
@@ -45,7 +46,7 @@ public class BeanEditorDialog extends JDialog {
 	    public void run() {
 		try {
 		    JFrame testFrame = new JFrame();
-		    BeanEditorDialog prototype = new BeanEditorDialog(testFrame, new TestBean(), Collections.EMPTY_SET);
+		    BeanEditorDialog prototype = new BeanEditorDialog(testFrame, new TestBean(), Collections.emptySet());
 		    testFrame.setVisible(true);
 		    prototype.setVisible(true);
 		} catch (Exception e) {

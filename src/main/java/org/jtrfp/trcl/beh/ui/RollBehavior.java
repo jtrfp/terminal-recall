@@ -31,6 +31,7 @@ public class RollBehavior extends Behavior implements ControlBehavior {
     private final ControllerSink rollInput;
     private final RollInputChangeListener rollInputChangeListener = new RollInputChangeListener();
     // HARD REFERENCES; DO NOT REMIOVE
+    @SuppressWarnings("unused")
     private PropertyChangeListener weakRollInputChangeListener;
     
     public RollBehavior(ControllerSinks inputs){

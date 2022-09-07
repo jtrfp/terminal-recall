@@ -36,7 +36,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
 	@Override
 	public boolean add(final String element) {
-	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel)comboBox.getModel();
+	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -59,7 +59,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
 	@Override
 	public void clear() {
-	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel)comboBox.getModel();
+	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -79,7 +79,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
 	@Override
 	public boolean isEmpty() {
-	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel)comboBox.getModel();
+	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
 	    return model.getSize() == 0;
 	}
 
@@ -90,7 +90,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
 	@Override
 	public boolean remove(final Object element) {
-	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel)comboBox.getModel();
+	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -101,7 +101,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
 	@Override
 	public boolean removeAll(final Collection<?> elements) {
-	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel)comboBox.getModel();
+	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
@@ -118,7 +118,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
 	@Override
 	public int size() {
-	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel)comboBox.getModel();
+	    final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
 	    return model.getSize();
 	}
 
@@ -144,7 +144,7 @@ public class ComboBoxPropertyBinding extends AbstractPropertyBinding<String> imp
 
     @Override
     protected void setUIValue(final String newValue) {
-	final JComboBox comboBox = getComboBox();
+	final JComboBox<String> comboBox = getComboBox();
 	if(comboBox == null)
 	    return;//Not ready
 	SwingUtilities.invokeLater(new Runnable(){

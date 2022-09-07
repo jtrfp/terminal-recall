@@ -136,7 +136,6 @@ public class SoundSystem {
 	soundSystemKernel.setKeyedExecutor(soundThreadExecutor);
     }// end constructor
     
-    @SuppressWarnings("unchecked")
     public void initialize(){
 	if(initialized)
 	    throw new IllegalStateException("initialize() was already called. Can only be called once.");
@@ -431,7 +430,6 @@ public class SoundSystem {
 	final double lengthPerRowSeconds
 	     = quantizedSizeSeconds / (double)numRows;
 	tr.getThreadManager().submitToThreadPool(new Callable<Void>(){
-	    @SuppressWarnings("unchecked")
 	    @Override
 	    public Void call() throws Exception {
 		    final FloatBuffer fb = FloatBuffer.allocate(quantizedSize);

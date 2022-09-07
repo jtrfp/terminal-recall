@@ -20,7 +20,7 @@ import org.jtrfp.trcl.miss.NAVObjective;
 public class TVDashboardLayout implements DashboardLayout {
     private static final double TOP_LINE_Y    = .9;
     private static final double BOTTOM_LINE_Y = .81;
-    private static final double FONT_SIZE     = .04;
+    //private static final double FONT_SIZE     = .04;
     private static final double LEFT_MARGIN   = -.73;
     private static final double AMMO_MARGIN   = -.25;
     private static final double WEPN_MARGIN   = -.14;

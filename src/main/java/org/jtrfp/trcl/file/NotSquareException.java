@@ -13,6 +13,8 @@
 package org.jtrfp.trcl.file;
 
 public class NotSquareException extends Exception {
+    private static final long serialVersionUID = 1368071971974407211L;
+
     public NotSquareException(String imageName) {
 	super("Image not square: " + imageName);
     }

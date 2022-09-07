@@ -397,7 +397,7 @@ public final class GLTexture {
 		@Override
 		public void run(){
 		    while(true){
-			try{Thread.currentThread().sleep(parent.getPreferredUpdateIntervalMillis());}
+			try{Thread.sleep(parent.getPreferredUpdateIntervalMillis());}
 			catch(InterruptedException e){e.printStackTrace();}
 			Window ancestor = SwingUtilities.getWindowAncestor(TextureViewingPanel.this);
 			if(ancestor!=null)

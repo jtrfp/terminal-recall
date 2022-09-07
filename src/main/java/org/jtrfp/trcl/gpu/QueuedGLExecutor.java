@@ -137,6 +137,7 @@ public abstract class QueuedGLExecutor<GL_TYPE extends GL> implements GLExecutor
 		executeBuffer.addAll(executeOnDispose);
 		executeOnDispose.clear();
 	    }//end sync(executeOnDispose)
+	    @SuppressWarnings("unchecked")
 	    final GL_TYPE gl = (GL_TYPE)drawable.getGL();
 	    for(GLExecutable<?, GL_TYPE> executable:executeBuffer)
 		try {executable.execute(gl);} catch(Exception e) {e.printStackTrace();}
@@ -149,6 +150,7 @@ public abstract class QueuedGLExecutor<GL_TYPE extends GL> implements GLExecutor
 		for(Pair<Double,GLExecutable<?,GL_TYPE>> pair:repeatingTasks)
 		    executeBuffer.add(pair.getSecond());
 	    }//end sync(executeOnDispose)
+	    @SuppressWarnings("unchecked")
 	    final GL_TYPE gl = (GL_TYPE)drawable.getGL();
 	    for(GLExecutable<?, GL_TYPE> executable:executeBuffer)
 		try {executable.execute(gl);} catch(Exception e) {e.printStackTrace();}
@@ -161,6 +163,7 @@ public abstract class QueuedGLExecutor<GL_TYPE extends GL> implements GLExecutor
 	    synchronized(executeOnResize){
 		executeBuffer.addAll(executeOnResize);
 	    }//end sync(executeOnReshape)
+	    @SuppressWarnings("unchecked")
 	    final GL_TYPE gl = (GL_TYPE)drawable.getGL();
 	    for(GLExecutable<?, GL_TYPE> executable:executeBuffer)
 		try {executable.execute(gl);} catch(Exception e) {e.printStackTrace();}
@@ -216,6 +219,7 @@ public abstract class QueuedGLExecutor<GL_TYPE extends GL> implements GLExecutor
 	    this.executable = executable;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public RETURN_TYPE call() throws Exception {
 	    return executable.execute((GL_TYPE)getAutoDrawable().getGL());

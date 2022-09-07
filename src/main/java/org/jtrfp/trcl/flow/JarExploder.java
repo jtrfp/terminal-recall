@@ -51,34 +51,36 @@ public class JarExploder {
     }
     
     public static void deployNativeFilesFromJar(File jar){
+	JarFile jf = null;
 	try{
-	JarFile jf = new JarFile(jar);
-	byte [] buffer = new byte[1024];
-	int read=0;
-	Enumeration<JarEntry> entries = jf.entries();
-	JarEntry entry;
-	while(entries.hasMoreElements()){
-	    entry = entries.nextElement();
-	    final String rawName = entry.getName();
-	    final String name = rawName.toLowerCase();
-	    if(name.endsWith(".so")||name.endsWith(".dll")){
-		System.out.println("entry="+entry.getName());
-		int delimiterIndex=rawName.lastIndexOf("\\");
-		delimiterIndex=delimiterIndex!=-1?delimiterIndex:0;
-		delimiterIndex=Math.max(delimiterIndex, rawName.lastIndexOf("/"));
-		String outFileName = entry.getName().substring(delimiterIndex);
-		File f = new File(getCWD().getAbsolutePath()+System.getProperty("file.separator")+outFileName);
-		System.out.println(""+f.getAbsolutePath());
-		if(!f.exists()){f.createNewFile();f.deleteOnExit();}
-		InputStream is = jf.getInputStream(entry);
-		FileOutputStream os = new FileOutputStream(f);
-		while((read=is.read(buffer))!=-1){
-		    os.write(buffer, 0, read);
-		}//end while(...)
-		os.close();
-	    }//end if(endsWith)
-	}//end while(entries)
+	    jf = new JarFile(jar);
+	    byte [] buffer = new byte[1024];
+	    int read=0;
+	    Enumeration<JarEntry> entries = jf.entries();
+	    JarEntry entry;
+	    while(entries.hasMoreElements()){
+		entry = entries.nextElement();
+		final String rawName = entry.getName();
+		final String name = rawName.toLowerCase();
+		if(name.endsWith(".so")||name.endsWith(".dll")){
+		    System.out.println("entry="+entry.getName());
+		    int delimiterIndex=rawName.lastIndexOf("\\");
+		    delimiterIndex=delimiterIndex!=-1?delimiterIndex:0;
+		    delimiterIndex=Math.max(delimiterIndex, rawName.lastIndexOf("/"));
+		    String outFileName = entry.getName().substring(delimiterIndex);
+		    File f = new File(getCWD().getAbsolutePath()+System.getProperty("file.separator")+outFileName);
+		    System.out.println(""+f.getAbsolutePath());
+		    if(!f.exists()){f.createNewFile();f.deleteOnExit();}
+		    InputStream is = jf.getInputStream(entry);
+		    FileOutputStream os = new FileOutputStream(f);
+		    while((read=is.read(buffer))!=-1){
+			os.write(buffer, 0, read);
+		    }//end while(...)
+		    os.close();
+		}//end if(endsWith)
+	    }//end while(entries)
 	}catch(Exception e){e.printStackTrace();}
+	finally {if(jf != null) try {jf.close();} catch(Throwable t) {t.printStackTrace();}}
     }//end getNativeFilesFromJar(...)
 
     public static void main(String[] args) {

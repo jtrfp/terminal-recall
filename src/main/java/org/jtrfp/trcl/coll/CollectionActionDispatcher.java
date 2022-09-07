@@ -155,6 +155,7 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
 	return cache.toArray(a);
     }
     
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o){
 	if(o instanceof CollectionActionDispatcher)
@@ -170,9 +171,11 @@ public class CollectionActionDispatcher<E> implements Collection<E>, Repopulatab
     }
     
 
-    public static final CollectionActionDispatcher<?> EMPTY = new CollectionActionDispatcher(){
+    public static final CollectionActionDispatcher<?> EMPTY = new CollectionActionDispatcher<>(){
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean addTarget(Collection c, boolean populate){return false;}
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean removeTarget(Collection c, boolean populate){return false;}
     };

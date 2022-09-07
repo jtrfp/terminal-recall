@@ -26,7 +26,6 @@ import org.jtrfp.trcl.ctl.ControllerSinksFactory.ControllerSinks;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.game.TVF3Game;
 import org.jtrfp.trcl.obj.Player;
-import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class UserInputWeaponSelectionBehavior extends Behavior implements PlayerControlBehavior{
@@ -51,7 +50,7 @@ public class UserInputWeaponSelectionBehavior extends Behavior implements Player
     
     @Override
     public void tick(long tickTimeMillis){
-	final WorldObject parent = getParent();
+	//final WorldObject parent = getParent();
 	final KeyStatus keyStatus = getKeyStatus();
 	if(++ammoDisplayUpdateCounter%AMMO_DISPLAY_COUNTER_INTERVAL==0){
 	    final TVF3Game game =  (TVF3Game)getGameShell().getGame();

@@ -203,6 +203,7 @@ public class RAWFile extends SelfParsingFile {
 	Color br = getPixelAt(x + 1, y);
 
 	// Some experimental attempts at selective blurring/sharpening
+	/*
 	double sharpU = Math.pow(
 		Math.pow(
 			(tl.getRed() + bl.getRed())
@@ -231,6 +232,7 @@ public class RAWFile extends SelfParsingFile {
 				(tl.getAlpha() + tr.getAlpha())
 					- (bl.getAlpha() + br.getAlpha()), 2.),
 		2);
+	*/
 	double uRatio = (u - x);
 	double vRatio = (v - y);
 	// uRatio=sharp(uRatio,sharpU);

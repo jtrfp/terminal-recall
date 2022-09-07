@@ -3,7 +3,6 @@ package org.jtrfp.trcl.gpu;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jtrfp.trcl.coll.Decorator;
 import org.jtrfp.trcl.gpu.BasicModelTarget.PrimitiveType;
 
 public class InterpolatedAnimatedModelSource implements BasicModelSource {

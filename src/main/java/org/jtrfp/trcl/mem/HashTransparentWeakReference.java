@@ -14,13 +14,12 @@
 package org.jtrfp.trcl.mem;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 
 public class HashTransparentWeakReference<T> extends WeakReference<T> {
     public HashTransparentWeakReference(T val){
 	super(val);
     }
-    
+    /*
     public static void main(String [] args){
 	final String string = "content";
 	final WeakReference<String> ref = new WeakReference<String>(string);
@@ -30,7 +29,7 @@ public class HashTransparentWeakReference<T> extends WeakReference<T> {
 	map.put(string, new Object());
 	System.out.println("Contains string? "+map.containsKey(string));
 	System.out.println("Contains ref? "+map.containsKey(ref));
-    }
+    }*/
     
     @Override
     public int hashCode(){

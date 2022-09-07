@@ -47,9 +47,11 @@ public class TRParsers {
 	for (File classFile : new File(packagePath).listFiles()) {
 	    try {
 		final Parser p = new Parser();
+		@SuppressWarnings("rawtypes")
 		Class classToTry = Class.forName("com.ritolaaudio.trcl.file."
 			+ classFile.getName().substring(0,
 				classFile.getName().length() - 6));
+		@SuppressWarnings("unchecked")
 		ThirdPartyParseable result = p.readToNewBean(
 			new EndianAwareDataInputStream(new DataInputStream(
 				new BufferedInputStream(is))), classToTry);

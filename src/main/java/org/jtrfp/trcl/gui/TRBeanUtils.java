@@ -17,8 +17,6 @@ import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
 
-import org.jtrfp.trcl.gpu.GLFrameBuffer;
-
 public class TRBeanUtils {
     public static PropertyEditor getDefaultPropertyEditor(Object o){
 	try{final PropertyEditorSupport pe = (PropertyEditorSupport)PropertyEditorManager.findEditor(o.getClass());

@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 
 import org.jtrfp.trcl.SpecialRAWDimensions;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.ext.tr.GPUResourceFinalizer;
 import org.jtrfp.trcl.gpu.VQCodebookManager.RasterRowWriter;
 import org.jtrfp.trcl.img.vq.BufferedImageRGBA8888VL;
 import org.jtrfp.trcl.img.vq.ByteBufferVectorList;
@@ -43,24 +42,24 @@ import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
 
 public class UncompressedVQTextureFactory {
-    private final ThreadManager threadManager;
+    //private final ThreadManager threadManager;
     private final TextureManager tm;
     private final VQCodebookManager cbm;
-    private final TextureTOCWindow tocWindow;
-    private final SubTextureWindow stw;
+    //private final TextureTOCWindow tocWindow;
+    //private final SubTextureWindow stw;
     private final String debugName;
     private final GPU gpu;
-    private final GPUResourceFinalizer gpuResourceFinalizer;
+    //private final GPUResourceFinalizer gpuResourceFinalizer;
 
     public UncompressedVQTextureFactory(GPU gpu, ThreadManager threadManager, String debugName){
 	this.tm		  =gpu.textureManager.get();
 	this.cbm	  =tm.vqCodebookManager;
-	this.tocWindow	  =(TextureTOCWindow)tm.getTOCWindow();
-	this.stw	  =(SubTextureWindow)tm.getSubTextureWindow();
+	//this.tocWindow  =(TextureTOCWindow)tm.getTOCWindow();
+	//this.stw	  =(SubTextureWindow)tm.getSubTextureWindow();
 	this.debugName	  =debugName.replace('.', '_');
 	this.gpu          =gpu;
-	this.threadManager=threadManager;
-	this.gpuResourceFinalizer = gpu.getGPUResourceFinalizer();
+	//this.threadManager=threadManager;
+	//this.gpuResourceFinalizer = gpu.getGPUResourceFinalizer();
     }//end constructor
 
     VQTexture newUncompressedVQTexture(){

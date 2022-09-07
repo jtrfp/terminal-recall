@@ -42,7 +42,7 @@ public abstract class GLShader {
     public GLShader setSourceFromResource(String resourceURI)
 	    throws IOException {
 	InputStream is = null;
-	try    {setSource(IOUtils.toString(is = getClass().getResourceAsStream(resourceURI)));}
+	try    {setSource(IOUtils.toString(is = getClass().getResourceAsStream(resourceURI),Charset.defaultCharset()));}
 	finally{if(is!=null)is.close();}
 	return this;
     }// end setSourceFromResource(...)

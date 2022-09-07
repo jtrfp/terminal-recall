@@ -14,7 +14,6 @@ package org.jtrfp.trcl.flow;
 
 import java.util.concurrent.Executor;
 
-import org.jtrfp.trcl.MavenBuildInformation;
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;

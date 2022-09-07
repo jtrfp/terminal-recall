@@ -306,6 +306,7 @@ public class ResourceManager{
 	    return getRAWAsTexture(name,paletteRGBA,paletteESTuTv,true,uvWrapping, generateMipMaps);
 	}
 	
+	@SuppressWarnings("unused")
 	public Texture getRAWAsTexture(final String name, final ColorPaletteVectorList paletteRGBA,
 			ColorPaletteVectorList paletteESTuTv, final boolean useCache, final boolean uvWrapping, final boolean generateMipMaps) throws IOException, FileLoadException, IllegalAccessException{
 	    if(name==null)

@@ -99,10 +99,6 @@ public IndirectProperty<PROPERTY_TYPE> removeTargetPropertyChangeListener(Proper
 	return this;
 }
 
-private void fireAllNullProperties(){
-    
-}
-
 private void fireAllPropertiesChanged(){
     PROPERTY_TYPE target = this.target.get();
     HashSet<String> propertiesToFireChanged = new HashSet<String>();
@@ -120,6 +116,7 @@ private void fireAllPropertiesChanged(){
 	catch(IllegalAccessException e){e.printStackTrace();}
     }//end for(propertyNames)
  }//end fireAllPropertiesChanged()
+@SuppressWarnings("unchecked")
 @Override
 public void propertyChange(PropertyChangeEvent evt) {
     final Object newVal = evt.getNewValue();

@@ -185,8 +185,7 @@ public final class Renderer {
 	relevantPositionedRenderables.addTarget(opaqueUnoccludedODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(transUnoccludedODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(new RedundancyReportingCollection<PositionedRenderable>(), true);
-
-	@SuppressWarnings("unchecked")
+	
 	final Future<Void> task0 = gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 	    @Override
 	    public Void execute(GL3 gl) throws Exception {

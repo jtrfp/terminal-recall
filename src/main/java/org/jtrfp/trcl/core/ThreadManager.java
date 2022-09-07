@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.obj.Player;
@@ -52,10 +51,10 @@ public class ThreadManager {
     private final Timer 		gameplayTimer 		= new Timer("GameplayTimer");
     private long 			lastGameplayTickTime 		= 0;
     private long 			timeInMillisSinceLastGameTick 	= 0L;
-    private int 			counter 			= 0;
+    //private int 			counter 			= 0;
     private Thread 			renderingThread;
     private FPSAnimator			animator;
-    private GPUFeature                  gpuFeature;
+    //private GPUFeature                  gpuFeature;
     private boolean[] 			paused = new boolean[]{false};
     public final ThreadPoolExecutor	threadPool 			= 
 	    new ThreadPoolExecutor(
@@ -241,7 +240,7 @@ public class ThreadManager {
 	    }
 	});
 	lastGameplayTickTime = System.currentTimeMillis();
-	gpuFeature = Features.get(tr, GPUFeature.class);//TODO: This probably should be somewhere else
+	//gpuFeature = Features.get(tr, GPUFeature.class);//TODO: This probably should be somewhere else
     }// end start()
     
     private void attemptRender() {

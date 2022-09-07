@@ -40,6 +40,7 @@ public class UserInputThrottleControlBehavior extends Behavior implements Player
     private ThrottleControlListener throttleControlListener = new ThrottleControlListener();
     
     //HARD REFERENCE; DO NOT REMOVE
+    @SuppressWarnings("unused")
     private final PropertyChangeListener weakThrottleControlListener;
     
     public UserInputThrottleControlBehavior(ControllerSinks controllerInputs){

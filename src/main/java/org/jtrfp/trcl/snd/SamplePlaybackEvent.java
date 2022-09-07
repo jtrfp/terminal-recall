@@ -118,7 +118,6 @@ public class SamplePlaybackEvent extends AbstractSoundEvent {
 	private FloatBuffer vertexIdBufferData;
 	private double volume = 1;
 	
-	@SuppressWarnings("unchecked")
 	public Factory(final TR tr) {
 	    super(tr);
 	    final GPU gpu = Features.get(tr, GPUFeature.class);

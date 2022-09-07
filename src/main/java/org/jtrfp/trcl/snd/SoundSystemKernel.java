@@ -244,7 +244,6 @@ public class SoundSystemKernel {
 	return 0;
     }
     
-    @SuppressWarnings("unchecked")
     public double execute(final double bufferTimeCounter) {
 	synchronized(keyedExecutor){
 	    keyedExecutor.executeAllFromThisThread();
@@ -444,7 +443,6 @@ public class SoundSystemKernel {
 	renderFloatBytes = ByteBuffer.allocateDirect(expectedNumberOfBytes).order(ByteOrder.nativeOrder());
     }//end generateRenderFloatBytes(...)
     
-    @SuppressWarnings("unchecked")
     private void generateRenderTarget( ) {
 	//Playback texture
 	try {gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
@@ -483,7 +481,6 @@ public class SoundSystemKernel {
 	catch(Exception e) {e.printStackTrace();}
     }//end generateRenderTarget(...)
     
-    @SuppressWarnings("unchecked")
     private void releaseRenderTarget( GLFrameBuffer playbackFrameBuffer, GLTexture playbackTexture ) {
 	if( playbackFrameBuffer != null || playbackTexture != null ) {
 	    final GLFrameBuffer frameBufferToDelete = playbackFrameBuffer;

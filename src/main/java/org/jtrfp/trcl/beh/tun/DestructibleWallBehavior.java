@@ -16,7 +16,6 @@ import org.jtrfp.trcl.AbstractSubmitter;
 import org.jtrfp.trcl.beh.Behavior;
 import org.jtrfp.trcl.beh.CollisionBehavior;
 import org.jtrfp.trcl.beh.DamageListener;
-import org.jtrfp.trcl.beh.DamageListener.CollisionDamage;
 import org.jtrfp.trcl.beh.DamageableBehavior;
 import org.jtrfp.trcl.beh.ProjectileBehavior;
 import org.jtrfp.trcl.obj.Player;
